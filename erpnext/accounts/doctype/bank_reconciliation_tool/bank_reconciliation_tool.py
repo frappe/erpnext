@@ -21,6 +21,26 @@ from erpnext.accounts.utils import get_account_currency, get_balance_on
 
 
 class BankReconciliationTool(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		account_currency: DF.Link | None
+		account_opening_balance: DF.Currency
+		bank_account: DF.Link | None
+		bank_statement_closing_balance: DF.Currency
+		bank_statement_from_date: DF.Date | None
+		bank_statement_to_date: DF.Date | None
+		company: DF.Link | None
+		filter_by_reference_date: DF.Check
+		from_reference_date: DF.Date | None
+		to_reference_date: DF.Date | None
+	# end: auto-generated types
+
 	pass
 
 
@@ -355,7 +375,9 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	transaction.add_payment_entries(vouchers)
-	return frappe.get_doc("Bank Transaction", bank_transaction_name)
+	transaction.save()
+
+	return transaction
 
 
 @frappe.whitelist()

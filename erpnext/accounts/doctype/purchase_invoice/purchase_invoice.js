@@ -35,7 +35,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		super.onload();
 
 		// Ignore linked advances
-		this.frm.ignore_doctypes_on_cancel_all = ['Journal Entry', 'Payment Entry', 'Purchase Invoice', "Repost Payment Ledger", "Repost Accounting Ledger"];
+		this.frm.ignore_doctypes_on_cancel_all = ['Journal Entry', 'Payment Entry', 'Purchase Invoice', "Repost Payment Ledger", "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries"];
 
 		if(!this.frm.doc.__islocal) {
 			// show credit_to in print format
@@ -180,7 +180,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 
 		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
-		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(me.frm);
+		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
 	}
 
 	unblock_invoice() {

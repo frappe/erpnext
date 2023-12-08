@@ -7,6 +7,22 @@ from frappe.model.document import Document
 
 
 class QualityInspectionTemplate(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.item_quality_inspection_parameter.item_quality_inspection_parameter import (
+			ItemQualityInspectionParameter,
+		)
+
+		item_quality_inspection_parameter: DF.Table[ItemQualityInspectionParameter]
+		quality_inspection_template_name: DF.Data
+	# end: auto-generated types
+
 	pass
 
 

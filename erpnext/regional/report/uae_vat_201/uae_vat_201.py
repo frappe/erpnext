@@ -141,7 +141,7 @@ def get_total_emiratewise(filters):
 		return frappe.db.sql(
 			"""
 			select
-				s.vat_emirate as emirate, sum(i.base_amount) as total, sum(i.tax_amount)
+				s.vat_emirate as emirate, sum(i.base_net_amount) as total, sum(i.tax_amount)
 			from
 				`tabSales Invoice Item` i inner join `tabSales Invoice` s
 			on
@@ -356,7 +356,7 @@ def get_zero_rated_total(filters):
 			frappe.db.sql(
 				"""
 			select
-				sum(i.base_amount) as total
+				sum(i.base_net_amount) as total
 			from
 				`tabSales Invoice Item` i inner join `tabSales Invoice` s
 			on
@@ -383,7 +383,7 @@ def get_exempt_total(filters):
 			frappe.db.sql(
 				"""
 			select
-				sum(i.base_amount) as total
+				sum(i.base_net_amount) as total
 			from
 				`tabSales Invoice Item` i inner join `tabSales Invoice` s
 			on

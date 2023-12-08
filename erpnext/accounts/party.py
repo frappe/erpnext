@@ -31,7 +31,12 @@ from erpnext.accounts.utils import get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency, PartyDisabled, PartyFrozen
 from erpnext.utilities.regional import temporary_flag
 
-PURCHASE_TRANSACTION_TYPES = {"Purchase Order", "Purchase Receipt", "Purchase Invoice"}
+PURCHASE_TRANSACTION_TYPES = {
+	"Supplier Quotation",
+	"Purchase Order",
+	"Purchase Receipt",
+	"Purchase Invoice",
+}
 SALES_TRANSACTION_TYPES = {
 	"Quotation",
 	"Sales Order",
@@ -190,7 +195,7 @@ def set_address_details(
 	company_address=None,
 	shipping_address=None,
 	*,
-	ignore_permissions=False
+	ignore_permissions=False,
 ):
 	billing_address_field = (
 		"customer_address" if party_type == "Lead" else party_type.lower() + "_address"
@@ -231,8 +236,10 @@ def set_address_details(
 		if shipping_address:
 			party_details.update(
 				shipping_address=shipping_address,
-				shipping_address_display=render_address(shipping_address),
-				**get_fetch_values(doctype, "shipping_address", shipping_address)
+				shipping_address_display=render_address(
+					shipping_address, check_permissions=not ignore_permissions
+				),
+				**get_fetch_values(doctype, "shipping_address", shipping_address),
 			)
 
 		if party_details.company_address:
@@ -243,7 +250,7 @@ def set_address_details(
 					party_details.company_address_display
 					or render_address(party_details.company_address, check_permissions=False)
 				),
-				**get_fetch_values(doctype, "billing_address", party_details.company_address)
+				**get_fetch_values(doctype, "billing_address", party_details.company_address),
 			)
 
 			# shipping address - if not already set
@@ -251,7 +258,7 @@ def set_address_details(
 				party_details.update(
 					shipping_address=party_details.billing_address,
 					shipping_address_display=party_details.billing_address_display,
-					**get_fetch_values(doctype, "shipping_address", party_details.billing_address)
+					**get_fetch_values(doctype, "shipping_address", party_details.billing_address),
 				)
 
 	party_address, shipping_address = (
@@ -973,6 +980,9 @@ def get_partywise_advanced_payment_amount(
 
 	if party:
 		query = query.where(ple.party == party)
+
+	if invoice_doctypes := frappe.get_hooks("invoice_doctypes"):
+		query = query.where(ple.voucher_type.notin(invoice_doctypes))
 
 	data = query.run()
 	if data:

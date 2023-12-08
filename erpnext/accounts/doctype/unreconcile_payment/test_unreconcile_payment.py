@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 
 
-class TestUnreconcilePayments(AccountsTestMixin, FrappeTestCase):
+class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 	def setUp(self):
 		self.create_company()
 		self.create_customer()
@@ -73,7 +73,7 @@ class TestUnreconcilePayments(AccountsTestMixin, FrappeTestCase):
 
 		unreconcile = frappe.get_doc(
 			{
-				"doctype": "Unreconcile Payments",
+				"doctype": "Unreconcile Payment",
 				"company": self.company,
 				"voucher_type": pe.doctype,
 				"voucher_no": pe.name,
@@ -138,7 +138,7 @@ class TestUnreconcilePayments(AccountsTestMixin, FrappeTestCase):
 
 		unreconcile = frappe.get_doc(
 			{
-				"doctype": "Unreconcile Payments",
+				"doctype": "Unreconcile Payment",
 				"company": self.company,
 				"voucher_type": pe2.doctype,
 				"voucher_no": pe2.name,
@@ -196,7 +196,7 @@ class TestUnreconcilePayments(AccountsTestMixin, FrappeTestCase):
 
 		unreconcile = frappe.get_doc(
 			{
-				"doctype": "Unreconcile Payments",
+				"doctype": "Unreconcile Payment",
 				"company": self.company,
 				"voucher_type": pe.doctype,
 				"voucher_no": pe.name,
@@ -281,7 +281,7 @@ class TestUnreconcilePayments(AccountsTestMixin, FrappeTestCase):
 
 		unreconcile = frappe.get_doc(
 			{
-				"doctype": "Unreconcile Payments",
+				"doctype": "Unreconcile Payment",
 				"company": self.company,
 				"voucher_type": pe2.doctype,
 				"voucher_no": pe2.name,

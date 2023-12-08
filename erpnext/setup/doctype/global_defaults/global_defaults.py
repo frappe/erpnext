@@ -23,6 +23,24 @@ from frappe.model.document import Document
 
 
 class GlobalDefaults(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		country: DF.Link | None
+		default_company: DF.Link | None
+		default_currency: DF.Link
+		default_distance_unit: DF.Link | None
+		demo_company: DF.Link | None
+		disable_in_words: DF.Check
+		disable_rounded_total: DF.Check
+		hide_currency_symbol: DF.Literal["", "No", "Yes"]
+	# end: auto-generated types
+
 	def on_update(self):
 		"""update defaults"""
 		for key in keydict:

@@ -24,6 +24,70 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class Customer(TransactionBase):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.allowed_to_transact_with.allowed_to_transact_with import (
+			AllowedToTransactWith,
+		)
+		from erpnext.accounts.doctype.party_account.party_account import PartyAccount
+		from erpnext.selling.doctype.customer_credit_limit.customer_credit_limit import (
+			CustomerCreditLimit,
+		)
+		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
+		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
+
+		account_manager: DF.Link | None
+		accounts: DF.Table[PartyAccount]
+		companies: DF.Table[AllowedToTransactWith]
+		credit_limits: DF.Table[CustomerCreditLimit]
+		customer_details: DF.Text | None
+		customer_group: DF.Link | None
+		customer_name: DF.Data
+		customer_pos_id: DF.Data | None
+		customer_primary_address: DF.Link | None
+		customer_primary_contact: DF.Link | None
+		customer_type: DF.Literal["Company", "Individual", "Proprietorship", "Partnership"]
+		default_bank_account: DF.Link | None
+		default_commission_rate: DF.Float
+		default_currency: DF.Link | None
+		default_price_list: DF.Link | None
+		default_sales_partner: DF.Link | None
+		disabled: DF.Check
+		dn_required: DF.Check
+		email_id: DF.ReadOnly | None
+		gender: DF.Link | None
+		image: DF.AttachImage | None
+		industry: DF.Link | None
+		is_frozen: DF.Check
+		is_internal_customer: DF.Check
+		language: DF.Link | None
+		lead_name: DF.Link | None
+		loyalty_program: DF.Link | None
+		loyalty_program_tier: DF.Data | None
+		market_segment: DF.Link | None
+		mobile_no: DF.ReadOnly | None
+		naming_series: DF.Literal["CUST-.YYYY.-"]
+		opportunity_name: DF.Link | None
+		payment_terms: DF.Link | None
+		portal_users: DF.Table[PortalUser]
+		primary_address: DF.Text | None
+		represents_company: DF.Link | None
+		sales_team: DF.Table[SalesTeam]
+		salutation: DF.Link | None
+		so_required: DF.Check
+		tax_category: DF.Link | None
+		tax_id: DF.Data | None
+		tax_withholding_category: DF.Link | None
+		territory: DF.Link | None
+		website: DF.Data | None
+	# end: auto-generated types
+
 	def onload(self):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
@@ -538,7 +602,8 @@ def get_customer_outstanding(
 		"""
 		select sum(debit) - sum(credit)
 		from `tabGL Entry` where party_type = 'Customer'
-		and party = %s and company=%s {0}""".format(
+		and is_cancelled = 0 and party = %s
+		and company=%s {0}""".format(
 			cond
 		),
 		(customer, company),
@@ -644,8 +709,12 @@ def make_contact(args, is_primary_contact=1):
 		"is_primary_contact": is_primary_contact,
 		"links": [{"link_doctype": args.get("doctype"), "link_name": args.get("name")}],
 	}
-	if args.customer_type == "Individual":
-		first, middle, last = parse_full_name(args.get("customer_name"))
+
+	party_type = args.customer_type if args.doctype == "Customer" else args.supplier_type
+	party_name_key = "customer_name" if args.doctype == "Customer" else "supplier_name"
+
+	if party_type == "Individual":
+		first, middle, last = parse_full_name(args.get(party_name_key))
 		values.update(
 			{
 				"first_name": first,
@@ -656,9 +725,10 @@ def make_contact(args, is_primary_contact=1):
 	else:
 		values.update(
 			{
-				"company_name": args.get("customer_name"),
+				"company_name": args.get(party_name_key),
 			}
 		)
+
 	contact = frappe.get_doc(values)
 
 	if args.get("email_id"):
@@ -687,10 +757,12 @@ def make_address(args, is_primary_address=1, is_shipping_address=1):
 			title=_("Missing Values Required"),
 		)
 
+	party_name_key = "customer_name" if args.doctype == "Customer" else "supplier_name"
+
 	address = frappe.get_doc(
 		{
 			"doctype": "Address",
-			"address_title": args.get("customer_name"),
+			"address_title": args.get(party_name_key),
 			"address_line1": args.get("address_line1"),
 			"address_line2": args.get("address_line2"),
 			"city": args.get("city"),

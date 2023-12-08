@@ -1247,6 +1247,25 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.reload()
 		self.assertFalse(dn.items[0].target_warehouse)
 
+	def test_serial_no_status(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(
+			"Test Serial Item For Status",
+			{"has_serial_no": 1, "is_stock_item": 1, "serial_no_series": "TESTSERIAL.#####"},
+		)
+
+		item_code = item.name
+		pi = make_purchase_receipt(qty=1, item_code=item.name)
+		pi.reload()
+		serial_no = get_serial_nos_from_bundle(pi.items[0].serial_and_batch_bundle)
+
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Active")
+
+		dn = create_delivery_note(qty=1, item_code=item_code, serial_no=serial_no)
+		dn.reload()
+		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Delivered")
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
