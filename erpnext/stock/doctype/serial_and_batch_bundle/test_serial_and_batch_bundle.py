@@ -368,6 +368,58 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		# Batch does not belong to serial no
 		self.assertRaises(frappe.exceptions.ValidationError, doc.save)
 
+	def test_auto_delete_draft_serial_and_batch_bundle(self):
+		serial_and_batch_code = "New Serial No Auto Delete 1"
+		make_item(
+			serial_and_batch_code,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "TEST-SER-VALL-.#####",
+				"is_stock_item": 1,
+			},
+		)
+
+		ste = make_stock_entry(
+			item_code=serial_and_batch_code,
+			target="_Test Warehouse - _TC",
+			qty=1,
+			rate=500,
+			do_not_submit=True,
+		)
+
+		serial_no = "SN-TEST-AUTO-DEL"
+		if not frappe.db.exists("Serial No", serial_no):
+			frappe.get_doc(
+				{
+					"doctype": "Serial No",
+					"serial_no": serial_no,
+					"item_code": serial_and_batch_code,
+					"company": "_Test Company",
+				}
+			).insert(ignore_permissions=True)
+
+		bundle_doc = make_serial_batch_bundle(
+			{
+				"item_code": serial_and_batch_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"voucher_type": "Stock Entry",
+				"posting_date": ste.posting_date,
+				"posting_time": ste.posting_time,
+				"qty": 1,
+				"serial_nos": [serial_no],
+				"type_of_transaction": "Inward",
+				"do_not_submit": True,
+			}
+		)
+
+		bundle_doc.reload()
+		ste.items[0].serial_and_batch_bundle = bundle_doc.name
+		ste.save()
+		ste.reload()
+
+		ste.delete()
+		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", bundle_doc.name))
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
