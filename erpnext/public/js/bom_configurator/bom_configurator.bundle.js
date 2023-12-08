@@ -249,6 +249,7 @@ class BOMConfigurator {
 					fg_item: node.data.value,
 					fg_reference_id: node.data.name || this.frm.doc.name,
 					bom_item: bom_item,
+					idx: node.data.idx,
 				},
 				callback: (r) => {
 					view.events.load_tree(r, node);
@@ -350,6 +351,7 @@ class BOMConfigurator {
 					bom_item: bom_item,
 					fg_reference_id: node.data.name || this.frm.doc.name,
 					convert_to_sub_assembly: true,
+					idx: node.data.idx,
 				},
 				callback: (r) => {
 					node.expandable = true;
@@ -406,6 +408,7 @@ class BOMConfigurator {
 					qty: data.qty,
 					parent: node.data.parent_id || this.frm.doc.name,
 					fg_item: node.data.value,
+					parent_row_no: node.data.idx,
 				},
 				callback: (r) => {
 					if (node.is_root) {

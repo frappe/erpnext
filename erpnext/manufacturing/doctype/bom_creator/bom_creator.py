@@ -347,12 +347,20 @@ def get_children(doctype=None, parent=None, **kwargs):
 		"amount",
 		"fetched_from_bom",
 		"bom_created",
+		"parent_row_no"
 	]
 
 	query_filters = {
 		"fg_item": parent,
 		"parent": kwargs.parent_id,
 	}
+	
+	if(kwargs.parent_row_no):
+		query_filters.update(
+			{
+				"parent_row_no": kwargs.parent_row_no
+			}
+		)
 
 	if kwargs.name:
 		query_filters["name"] = kwargs.name
@@ -394,10 +402,9 @@ def add_sub_assembly(**kwargs):
 
 	doc = frappe.get_doc("BOM Creator", kwargs.parent)
 	bom_item = frappe.parse_json(kwargs.bom_item)
-	print(bom_item)
 
 	name = kwargs.fg_reference_id
-	parent_row_no = ""
+	parent_row_no = kwargs.idx
 	if not kwargs.convert_to_sub_assembly:
 		item_info = get_item_details(bom_item.item_code)
 		item_row = doc.append(
@@ -408,9 +415,9 @@ def add_sub_assembly(**kwargs):
 				"uom": item_info.stock_uom,
 				"fg_item": kwargs.fg_item,
 				"conversion_factor": 1,
-				"fg_reference_id": name,
 				"stock_qty": bom_item.qty,
 				"fg_reference_id": name,
+				"parent_row_no": parent_row_no,
 				"do_not_explode": 0 if bom_item.bom_no else 1,
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,
@@ -421,9 +428,8 @@ def add_sub_assembly(**kwargs):
 
 		parent_row_no = item_row.idx
 		name = ""
-	bom_items = bom_item.get("items")
 
-	for row in bom_items:
+	for row in bom_item.get("items"):
 		row = frappe._dict(row)
 		item_info = get_item_details(row.item_code)
 		doc.append(
@@ -491,20 +497,20 @@ def delete_node(**kwargs):
 	return doc
 
 
-def _set_qty(doctype, name, parent, fg_item, conv):
+def _set_qty(doctype, name, parent, fg_item, parent_row_no, conv):
 	# there has to be a better way to do this
 	_qty = frappe.db.get_value(doctype, name, "qty")
 	frappe.db.set_value(doctype, name, "qty", _qty * conv)
-	items = get_children(parent=fg_item, parent_id=parent)
+	items = get_children(parent=fg_item, parent_id=parent, parent_row_no=parent_row_no)
 	for item in items:
 		if item.fetched_from_bom:
-			_set_qty(item.doctype, item.name, parent, item.value, conv)
+			_set_qty(item.doctype, item.name, parent, item.value, item.idx, conv)
 
 
 @frappe.whitelist()
-def edit_qty(doctype, docname, qty, parent, fg_item):
+def edit_qty(doctype, docname, qty, parent, fg_item, parent_row_no):
 	conv = flt(qty) / frappe.db.get_value(doctype, docname, "qty")
-	_set_qty(doctype, docname, parent, fg_item, conv)
+	_set_qty(doctype, docname, parent, fg_item, parent_row_no, conv)
 	frappe.db.set_value(doctype, docname, "qty", qty)
 	doc = frappe.get_doc("BOM Creator", parent)
 	doc.set_rate_for_items()
