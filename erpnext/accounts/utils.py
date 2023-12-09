@@ -285,7 +285,7 @@ def get_balance_on(
 		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
 	if account or (party_type and party) or account_type:
-		precision = frappe.db.escape(get_currency_precision())
+		precision = get_currency_precision()
 		if in_account_currency:
 			select_field = (
 				"sum(round(debit_in_account_currency, %s)) - sum(round(credit_in_account_currency, %s))"
