@@ -119,6 +119,21 @@ frappe.ui.form.on("BOM Creator", {
 		frm.trigger("setup_bom_creator");
 		frm.trigger("set_root_item");
 		frm.trigger("add_custom_buttons");
+
+		frm.set_df_property('items', 'cannot_add_rows', true);
+		frm.set_df_property('items', 'cannot_delete_rows', true);
+		frm.get_field('items').grid.grid_sortable.option("disabled", true);
+		frm.fields_dict.items.grid.grid_rows.forEach((row, idx) => {
+			if (locals['BOM Creator Item'][row.doc.name].fetched_from_bom) {
+				row.activate();
+				for (var field of ["item_code", "fg_item", "qty"]) {
+					row.toggle_editable(field, false);
+					var cell = 'div[data-fieldname="items"] > div.grid-row[data-idx="' + idx + '"]';
+					$(cell).css('background_colour', '#ff5858');
+				}
+			}
+		});
+		frm.get_field('items').grid.refresh();
 	},
 
 	set_root_item(frm) {
