@@ -347,20 +347,16 @@ def get_children(doctype=None, parent=None, **kwargs):
 		"amount",
 		"fetched_from_bom",
 		"bom_created",
-		"parent_row_no"
+		"parent_row_no",
 	]
 
 	query_filters = {
 		"fg_item": parent,
 		"parent": kwargs.parent_id,
 	}
-	
-	if(kwargs.parent_row_no):
-		query_filters.update(
-			{
-				"parent_row_no": kwargs.parent_row_no
-			}
-		)
+
+	if kwargs.parent_row_no:
+		query_filters.update({"parent_row_no": kwargs.parent_row_no})
 
 	if kwargs.name:
 		query_filters["name"] = kwargs.name
@@ -466,8 +462,8 @@ def get_items_from_bom(bom, qty):
 	for i, item in enumerate(frappe.get_doc("BOM", bom).items):
 		items.append(
 			{
-				'item_code': item.item_code,
-				'qty': item.qty * flt(qty),
+				"item_code": item.item_code,
+				"qty": item.qty * flt(qty),
 			}
 		)
 	return items
