@@ -623,6 +623,29 @@ erpnext.utils.update_child_items = function(opts) {
 				query: "erpnext.controllers.queries.item_query",
 				filters: filters
 			};
+		},
+		onchange: function () {
+			const me = this;
+			if (!me.value) return;
+
+			frappe.call({
+				type: "GET",
+				method: "erpnext.stock.get_item_details.get_price_list_rate_for",
+				args: {
+					args: {
+						customer: frm.doc.customer,
+						supplier: frm.doc.supplier,
+						transaction_date: frm.doc.transaction_date,
+						selling_price_list: frm.doc.selling_price_list,
+						buying_price_list: frm.doc.buying_price_list,
+					},
+					item_code: me.value,
+				},
+				callback({message}) {
+					if (!message) return;
+					me.grid_row.on_grid_fields_dict.rate.set_value(message, true);
+				},
+			});
 		}
 	}, {
 		fieldtype:'Link',

@@ -921,6 +921,7 @@ def get_item_price(args, item_code, ignore_party=False):
 	return query.run()
 
 
+@frappe.whitelist(methods=["GET"])
 def get_price_list_rate_for(args, item_code):
 	"""
 	:param customer: link to Customer DocType
@@ -930,6 +931,8 @@ def get_price_list_rate_for(args, item_code):
 	:param qty: Desired Qty
 	:param transaction_date: Date of the price
 	"""
+	args = process_args(args)
+
 	item_price_args = {
 		"item_code": item_code,
 		"price_list": args.get("price_list"),
