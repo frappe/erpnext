@@ -161,7 +161,11 @@ class PaymentRequest(Document):
 		elif not shopping_cart_flow:
 			self.set_payment_request_url()
 
-		if self.get("payment_channel", default="Email") == "Email" and not self.flags.mute_email and not shopping_cart_flow:
+		if (
+			self.get("payment_channel", default="Email") == "Email"
+			and not self.flags.mute_email
+			and not shopping_cart_flow
+		):
 			self.send_email()
 			self.make_communication_entry()
 
