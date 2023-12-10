@@ -170,6 +170,8 @@ class JournalEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
@@ -629,7 +631,7 @@ class JournalEntry(AccountsController):
 					)
 
 				# set totals
-				if not d.reference_name in self.reference_totals:
+				if d.reference_name not in self.reference_totals:
 					self.reference_totals[d.reference_name] = 0.0
 
 				if self.voucher_type not in ("Deferred Revenue", "Deferred Expense"):

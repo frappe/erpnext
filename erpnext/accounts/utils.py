@@ -1062,11 +1062,11 @@ def get_outstanding_invoices(
 			if (
 				min_outstanding
 				and max_outstanding
-				and not (outstanding_amount >= min_outstanding and outstanding_amount <= max_outstanding)
+				and (outstanding_amount < min_outstanding or outstanding_amount > max_outstanding)
 			):
 				continue
 
-			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
+			if d.voucher_type != "Purchase Invoice" or d.voucher_no not in held_invoices:
 				outstanding_invoices.append(
 					frappe._dict(
 						{

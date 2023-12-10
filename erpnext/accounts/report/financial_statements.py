@@ -8,7 +8,17 @@ import re
 
 import frappe
 from frappe import _
-from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
+from frappe.utils import (
+	add_days,
+	add_months,
+	cint,
+	cstr,
+	flt,
+	formatdate,
+	get_first_day,
+	getdate,
+	today,
+)
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -42,6 +52,8 @@ def get_period_list(
 		validate_dates(period_start_date, period_end_date)
 		year_start_date = getdate(period_start_date)
 		year_end_date = getdate(period_end_date)
+
+	year_end_date = getdate(today()) if year_end_date > getdate(today()) else year_end_date
 
 	months_to_add = {"Yearly": 12, "Half-Yearly": 6, "Quarterly": 3, "Monthly": 1}[periodicity]
 

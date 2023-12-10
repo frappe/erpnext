@@ -44,7 +44,7 @@ class Department(NestedSet):
 
 	def before_rename(self, old, new, merge=False):
 		# renaming consistency with abbreviation
-		if not frappe.get_cached_value("Company", self.company, "abbr") in new:
+		if frappe.get_cached_value("Company", self.company, "abbr") not in new:
 			new = get_abbreviated_name(new, self.company)
 
 		return new
