@@ -91,45 +91,46 @@ def get_all_customers(date_range, company, field, limit=None):
 def get_all_items(date_range, company, field, limit=None):
 	if field in ("available_stock_qty", "available_stock_value"):
 		select_field = "sum(actual_qty)" if field == "available_stock_qty" else "sum(stock_value)"
-		return frappe.db.get_all(
+		results = frappe.db.get_all(
 			"Bin",
 			fields=["item_code as name", "{0} as value".format(select_field)],
 			group_by="item_code",
 			order_by="value desc",
 			limit=limit,
 		)
+		readable_active_items = set(frappe.get_list("Item", filters={"disabled": 0}, pluck="name"))
+		return [item for item in results if item["name"] in readable_active_items]
 	else:
 		if field == "total_sales_amount":
-			select_field = "sum(order_item.base_net_amount)"
+			select_field = "base_net_amount"
 			select_doctype = "Sales Order"
 		elif field == "total_purchase_amount":
-			select_field = "sum(order_item.base_net_amount)"
+			select_field = "base_net_amount"
 			select_doctype = "Purchase Order"
 		elif field == "total_qty_sold":
-			select_field = "sum(order_item.stock_qty)"
+			select_field = "stock_qty"
 			select_doctype = "Sales Order"
 		elif field == "total_qty_purchased":
-			select_field = "sum(order_item.stock_qty)"
+			select_field = "stock_qty"
 			select_doctype = "Purchase Order"
 
-		date_condition = get_date_condition(date_range, "sales_order.transaction_date")
+		filters = [["docstatus", "=", "1"], ["company", "=", company]]
+		from_date, to_date = parse_date_range(date_range)
+		if from_date and to_date:
+			filters.append(["transaction_date", "between", [from_date, to_date]])
 
-		return frappe.db.sql(
-			"""
-			select order_item.item_code as name, {0} as value
-			from `tab{1}` sales_order join `tab{1} Item` as order_item
-				on sales_order.name = order_item.parent
-			where sales_order.docstatus = 1
-				and sales_order.company = %s {2}
-			group by order_item.item_code
-			order by value desc
-			limit %s
-		""".format(
-				select_field, select_doctype, date_condition
-			),
-			(company, cint(limit)),
-			as_dict=1,
-		)  # nosec
+		child_doctype = f"{select_doctype} Item"
+		return frappe.get_list(
+			select_doctype,
+			fields=[
+				f"`tab{child_doctype}`.item_code as name",
+				f"sum(`tab{child_doctype}`.{select_field}) as value",
+			],
+			filters=filters,
+			order_by="value desc",
+			group_by=f"`tab{child_doctype}`.item_code",
+			limit=limit,
+		)
 
 
 @frappe.whitelist()
