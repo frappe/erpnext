@@ -135,12 +135,14 @@ def get_all_items(date_range, company, field, limit=None):
 
 @frappe.whitelist()
 def get_all_suppliers(date_range, company, field, limit=None):
+	filters = [["docstatus", "=", "1"], ["company", "=", company]]
+	from_date, to_date = parse_date_range(date_range)
+
 	if field == "outstanding_amount":
-		filters = [["docstatus", "=", "1"], ["company", "=", company]]
-		if date_range:
-			date_range = frappe.parse_json(date_range)
-			filters.append(["posting_date", "between", [date_range[0], date_range[1]]])
-		return frappe.db.get_all(
+		if from_date and to_date:
+			filters.append(["posting_date", "between", [from_date, to_date]])
+
+		return frappe.get_list(
 			"Purchase Invoice",
 			fields=["supplier as name", "sum(outstanding_amount) as value"],
 			filters=filters,
@@ -150,29 +152,21 @@ def get_all_suppliers(date_range, company, field, limit=None):
 		)
 	else:
 		if field == "total_purchase_amount":
-			select_field = "sum(purchase_order_item.base_net_amount)"
+			select_field = "base_net_total"
 		elif field == "total_qty_purchased":
-			select_field = "sum(purchase_order_item.stock_qty)"
+			select_field = "total_qty"
 
-		date_condition = get_date_condition(date_range, "purchase_order.modified")
+		if from_date and to_date:
+			filters.append(["transaction_date", "between", [from_date, to_date]])
 
-		return frappe.db.sql(
-			"""
-			select purchase_order.supplier as name, {0} as value
-			FROM `tabPurchase Order` as purchase_order LEFT JOIN `tabPurchase Order Item`
-				as purchase_order_item ON purchase_order.name = purchase_order_item.parent
-			where
-				purchase_order.docstatus = 1
-				{1}
-				and  purchase_order.company = %s
-			group by purchase_order.supplier
-			order by value DESC
-			limit %s""".format(
-				select_field, date_condition
-			),
-			(company, cint(limit)),
-			as_dict=1,
-		)  # nosec
+		return frappe.get_list(
+			"Purchase Order",
+			fields=["supplier as name", f"sum({select_field}) as value"],
+			filters=filters,
+			group_by="supplier",
+			order_by="value desc",
+			limit=limit,
+		)
 
 
 @frappe.whitelist()
