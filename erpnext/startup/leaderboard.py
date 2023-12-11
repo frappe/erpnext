@@ -1,5 +1,4 @@
 import frappe
-from frappe.utils import cint
 
 
 def get_leaderboards():
@@ -196,24 +195,25 @@ def get_all_sales_partner(date_range, company, field, limit=None):
 
 @frappe.whitelist()
 def get_all_sales_person(date_range, company, field=None, limit=0):
-	date_condition = get_date_condition(date_range, "sales_order.transaction_date")
+	filters = [
+		["docstatus", "=", "1"],
+		["company", "=", company],
+		["Sales Team", "sales_person", "is", "set"],
+	]
+	from_date, to_date = parse_date_range(date_range)
+	if from_date and to_date:
+		filters.append(["transaction_date", "between", [from_date, to_date]])
 
-	return frappe.db.sql(
-		"""
-		select sales_team.sales_person as name, sum(sales_order.base_net_total) as value
-		from `tabSales Order` as sales_order join `tabSales Team` as sales_team
-			on sales_order.name = sales_team.parent and sales_team.parenttype = 'Sales Order'
-		where sales_order.docstatus = 1
-			and sales_order.company = %s
-			{date_condition}
-		group by sales_team.sales_person
-		order by value DESC
-		limit %s
-	""".format(
-			date_condition=date_condition
-		),
-		(company, cint(limit)),
-		as_dict=1,
+	return frappe.get_list(
+		"Sales Order",
+		fields=[
+			"`tabSales Team`.sales_person as name",
+			"sum(`tabSales Team`.allocated_amount) as value",
+		],
+		filters=filters,
+		group_by="`tabSales Team`.sales_person",
+		order_by="value desc",
+		limit=limit,
 	)
 
 
