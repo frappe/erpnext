@@ -11,6 +11,26 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 class LowerDeductionCertificate(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		certificate_limit: DF.Currency
+		certificate_no: DF.Data
+		company: DF.Link
+		fiscal_year: DF.Link
+		pan_no: DF.Data
+		rate: DF.Percent
+		supplier: DF.Link
+		tax_withholding_category: DF.Link
+		valid_from: DF.Date
+		valid_upto: DF.Date
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_dates()
 		self.validate_supplier_against_tax_category()

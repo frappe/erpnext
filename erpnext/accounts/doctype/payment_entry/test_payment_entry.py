@@ -8,6 +8,7 @@ from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, nowdate
 
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	InvalidPaymentEntry,
 	get_outstanding_reference_documents,
@@ -1357,6 +1358,142 @@ class TestPaymentEntry(FrappeTestCase):
 			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
 		]
 		self.check_gl_entries()
+
+	def test_ledger_entries_for_advance_as_liability(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		company = "_Test Company"
+
+		advance_account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Advances Received",
+			company=company,
+			account_type="Receivable",
+		)
+
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": advance_account,
+			},
+		)
+		# Advance Payment
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+		)
+		pe.save()  # use save() to trigger set_liability_account()
+		pe.submit()
+
+		# Normal Invoice
+		si = create_sales_invoice(qty=10, rate=100, customer="_Test Customer")
+
+		pre_reconciliation_gle = [
+			{"account": advance_account, "debit": 0.0, "credit": 1000.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+		]
+		pre_reconciliation_ple = [
+			{
+				"account": advance_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": -1000.0,
+			}
+		]
+
+		self.voucher_no = pe.name
+		self.expected_gle = pre_reconciliation_gle
+		self.expected_ple = pre_reconciliation_ple
+		self.check_gl_entries()
+		self.check_pl_entries()
+
+		# Partially reconcile advance against invoice
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = company
+		pr.party_type = "Customer"
+		pr.party = "_Test Customer"
+		pr.receivable_payable_account = si.debit_to
+		pr.default_advance_account = advance_account
+		pr.payment_name = pe.name
+		pr.invoice_name = si.name
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		invoices = [x.as_dict() for x in pr.get("invoices")]
+		payments = [x.as_dict() for x in pr.get("payments")]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.allocation[0].allocated_amount = 400
+		pr.reconcile()
+
+		# assert General and Payment Ledger entries post partial reconciliation
+		self.expected_gle = [
+			{"account": si.debit_to, "debit": 0.0, "credit": 400.0},
+			{"account": advance_account, "debit": 400.0, "credit": 0.0},
+			{"account": advance_account, "debit": 0.0, "credit": 1000.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+		]
+		self.expected_ple = [
+			{
+				"account": advance_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": -1000.0,
+			},
+			{
+				"account": si.debit_to,
+				"voucher_no": pe.name,
+				"against_voucher_no": si.name,
+				"amount": -400.0,
+			},
+			{
+				"account": advance_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": 400.0,
+			},
+		]
+		self.check_gl_entries()
+		self.check_pl_entries()
+
+		# Unreconcile
+		unrecon = (
+			frappe.get_doc(
+				{
+					"doctype": "Unreconcile Payment",
+					"company": company,
+					"voucher_type": pe.doctype,
+					"voucher_no": pe.name,
+					"allocations": [{"reference_doctype": si.doctype, "reference_name": si.name}],
+				}
+			)
+			.save()
+			.submit()
+		)
+
+		self.voucher_no = pe.name
+		self.expected_gle = pre_reconciliation_gle
+		self.expected_ple = pre_reconciliation_ple
+		self.check_gl_entries()
+		self.check_pl_entries()
+
+	def check_pl_entries(self):
+		ple = frappe.qb.DocType("Payment Ledger Entry")
+		pl_entries = (
+			frappe.qb.from_(ple)
+			.select(ple.account, ple.voucher_no, ple.against_voucher_no, ple.amount)
+			.where((ple.voucher_no == self.voucher_no) & (ple.delinked == 0))
+			.orderby(ple.creation)
+		).run(as_dict=True)
+		for row in range(len(self.expected_ple)):
+			for field in ["account", "voucher_no", "against_voucher_no", "amount"]:
+				self.assertEqual(self.expected_ple[row][field], pl_entries[row][field])
 
 	def check_gl_entries(self):
 		gle = frappe.qb.DocType("GL Entry")

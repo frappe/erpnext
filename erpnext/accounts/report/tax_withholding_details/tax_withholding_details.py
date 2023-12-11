@@ -154,7 +154,7 @@ def get_gle_map(documents):
 	)
 
 	for d in gle:
-		if not d.voucher_no in gle_map:
+		if d.voucher_no not in gle_map:
 			gle_map[d.voucher_no] = [d]
 		else:
 			gle_map[d.voucher_no].append(d)

@@ -13,6 +13,43 @@ from erpnext.stock.utils import get_or_make_bin
 
 
 class StockReservationEntry(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.serial_and_batch_entry.serial_and_batch_entry import (
+			SerialandBatchEntry,
+		)
+
+		amended_from: DF.Link | None
+		available_qty: DF.Float
+		company: DF.Link | None
+		delivered_qty: DF.Float
+		from_voucher_detail_no: DF.Data | None
+		from_voucher_no: DF.DynamicLink | None
+		from_voucher_type: DF.Literal["", "Pick List", "Purchase Receipt"]
+		has_batch_no: DF.Check
+		has_serial_no: DF.Check
+		item_code: DF.Link | None
+		project: DF.Link | None
+		reservation_based_on: DF.Literal["Qty", "Serial and Batch"]
+		reserved_qty: DF.Float
+		sb_entries: DF.Table[SerialandBatchEntry]
+		status: DF.Literal[
+			"Draft", "Partially Reserved", "Reserved", "Partially Delivered", "Delivered", "Cancelled"
+		]
+		stock_uom: DF.Link | None
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_qty: DF.Float
+		voucher_type: DF.Literal["", "Sales Order"]
+		warehouse: DF.Link | None
+	# end: auto-generated types
+
 	def validate(self) -> None:
 		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
@@ -869,7 +906,7 @@ def create_stock_reservation_entries_for_so_items(
 	items = []
 	if items_details:
 		for item in items_details:
-			so_item = frappe.get_doc("Sales Order Item", item.get("name"))
+			so_item = frappe.get_doc("Sales Order Item", item.get("sales_order_item"))
 			so_item.warehouse = item.get("warehouse")
 			so_item.qty_to_reserve = (
 				flt(item.get("qty_to_reserve"))
@@ -894,7 +931,7 @@ def create_stock_reservation_entries_for_so_items(
 			continue
 
 		# Stock should be reserved from the Pick List if has Picked Qty.
-		if not from_voucher_type == "Pick List" and flt(item.picked_qty) > 0:
+		if from_voucher_type != "Pick List" and flt(item.picked_qty) > 0:
 			frappe.throw(
 				_("Row #{0}: Item {1} has been picked, please reserve stock from the Pick List.").format(
 					item.idx, frappe.bold(item.item_code)
@@ -1053,12 +1090,14 @@ def cancel_stock_reservation_entries(
 	from_voucher_type: Literal["Pick List", "Purchase Receipt"] = None,
 	from_voucher_no: str = None,
 	from_voucher_detail_no: str = None,
-	sre_list: list[dict] = None,
+	sre_list: list = None,
 	notify: bool = True,
 ) -> None:
 	"""Cancel Stock Reservation Entries."""
 
 	if not sre_list:
+		sre_list = {}
+
 		if voucher_type and voucher_no:
 			sre_list = get_stock_reservation_entries_for_voucher(
 				voucher_type, voucher_no, voucher_detail_no, fields=["name"]
@@ -1082,9 +1121,11 @@ def cancel_stock_reservation_entries(
 
 			sre_list = query.run(as_dict=True)
 
+		sre_list = [d.name for d in sre_list]
+
 	if sre_list:
 		for sre in sre_list:
-			frappe.get_doc("Stock Reservation Entry", sre["name"]).cancel()
+			frappe.get_doc("Stock Reservation Entry", sre).cancel()
 
 		if notify:
 			msg = _("Stock Reservation Entries Cancelled")

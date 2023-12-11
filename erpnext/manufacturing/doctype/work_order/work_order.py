@@ -64,6 +64,80 @@ class SerialNoQtyError(frappe.ValidationError):
 
 
 class WorkOrder(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.manufacturing.doctype.work_order_item.work_order_item import WorkOrderItem
+		from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import (
+			WorkOrderOperation,
+		)
+
+		actual_end_date: DF.Datetime | None
+		actual_operating_cost: DF.Currency
+		actual_start_date: DF.Datetime | None
+		additional_operating_cost: DF.Currency
+		allow_alternative_item: DF.Check
+		amended_from: DF.Link | None
+		batch_size: DF.Float
+		bom_no: DF.Link
+		company: DF.Link
+		corrective_operation_cost: DF.Currency
+		description: DF.SmallText | None
+		expected_delivery_date: DF.Date | None
+		fg_warehouse: DF.Link
+		from_wip_warehouse: DF.Check
+		has_batch_no: DF.Check
+		has_serial_no: DF.Check
+		image: DF.AttachImage | None
+		item_name: DF.Data | None
+		lead_time: DF.Float
+		material_request: DF.Link | None
+		material_request_item: DF.Data | None
+		material_transferred_for_manufacturing: DF.Float
+		naming_series: DF.Literal["MFG-WO-.YYYY.-"]
+		operations: DF.Table[WorkOrderOperation]
+		planned_end_date: DF.Datetime | None
+		planned_operating_cost: DF.Currency
+		planned_start_date: DF.Datetime
+		process_loss_qty: DF.Float
+		produced_qty: DF.Float
+		product_bundle_item: DF.Link | None
+		production_item: DF.Link
+		production_plan: DF.Link | None
+		production_plan_item: DF.Data | None
+		production_plan_sub_assembly_item: DF.Data | None
+		project: DF.Link | None
+		qty: DF.Float
+		required_items: DF.Table[WorkOrderItem]
+		sales_order: DF.Link | None
+		sales_order_item: DF.Data | None
+		scrap_warehouse: DF.Link | None
+		skip_transfer: DF.Check
+		source_warehouse: DF.Link | None
+		status: DF.Literal[
+			"",
+			"Draft",
+			"Submitted",
+			"Not Started",
+			"In Process",
+			"Completed",
+			"Stopped",
+			"Closed",
+			"Cancelled",
+		]
+		stock_uom: DF.Link | None
+		total_operating_cost: DF.Currency
+		transfer_material_against: DF.Literal["", "Work Order", "Job Card"]
+		update_consumed_material_cost_in_project: DF.Check
+		use_multi_level_bom: DF.Check
+		wip_warehouse: DF.Link | None
+	# end: auto-generated types
+
 	def onload(self):
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("material_consumption", ms.material_consumption)
@@ -856,7 +930,7 @@ class WorkOrder(Document):
 			validate_end_of_life(self.production_item)
 
 	def validate_qty(self):
-		if not self.qty > 0:
+		if self.qty <= 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
 
 		if (
@@ -883,7 +957,7 @@ class WorkOrder(Document):
 
 			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
 
-			if not max_qty > 0:
+			if max_qty <= 0:
 				frappe.throw(
 					_("Cannot produce more item for {0}").format(self.production_item), OverProductionError
 				)
@@ -894,7 +968,7 @@ class WorkOrder(Document):
 				)
 
 	def validate_transfer_against(self):
-		if not self.docstatus == 1:
+		if self.docstatus != 1:
 			# let user configure operations until they're ready to submit
 			return
 		if not self.operations:
@@ -907,7 +981,7 @@ class WorkOrder(Document):
 
 	def validate_operation_time(self):
 		for d in self.operations:
-			if not d.time_in_mins > 0:
+			if d.time_in_mins <= 0:
 				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
 
 	def update_required_items(self):

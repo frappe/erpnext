@@ -11,6 +11,10 @@ frappe.ui.form.on('Subcontracting Receipt', {
 		frm.get_field('supplied_items').grid.cannot_add_rows = true;
 		frm.get_field('supplied_items').grid.only_sortable();
 		frm.trigger('set_queries');
+
+		frm.custom_make_buttons = {
+			'Purchase Receipt': 'Purchase Receipt',
+		}
 	},
 
 	on_submit(frm) {
@@ -24,64 +28,75 @@ frappe.ui.form.on('Subcontracting Receipt', {
 	},
 
 	refresh: (frm) => {
-		if (frm.doc.docstatus > 0) {
+		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(__('Stock Ledger'), () => {
-					frappe.route_options = {
-						voucher_no: frm.doc.name,
-						from_date: frm.doc.posting_date,
-						to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
-						company: frm.doc.company,
-						show_cancelled_entries: frm.doc.docstatus === 2
-					}
-					frappe.set_route('query-report', 'Stock Ledger');
-				}, __('View'));
+				frappe.route_options = {
+					voucher_no: frm.doc.name,
+					from_date: frm.doc.posting_date,
+					to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
+					company: frm.doc.company,
+					show_cancelled_entries: frm.doc.docstatus === 2
+				}
+				frappe.set_route('query-report', 'Stock Ledger');
+			}, __('View'));
 
 			frm.add_custom_button(__('Accounting Ledger'), () => {
-					frappe.route_options = {
-						voucher_no: frm.doc.name,
-						from_date: frm.doc.posting_date,
-						to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
-						company: frm.doc.company,
-						group_by: 'Group by Voucher (Consolidated)',
-						show_cancelled_entries: frm.doc.docstatus === 2
-					}
-					frappe.set_route('query-report', 'General Ledger');
-				}, __('View'));
+				frappe.route_options = {
+					voucher_no: frm.doc.name,
+					from_date: frm.doc.posting_date,
+					to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
+					company: frm.doc.company,
+					group_by: 'Group by Voucher (Consolidated)',
+					show_cancelled_entries: frm.doc.docstatus === 2
+				}
+				frappe.set_route('query-report', 'General Ledger');
+			}, __('View'));
+
+			if (frm.doc.is_return === 0) {
+				frm.add_custom_button(__('Purchase Receipt'), () => {
+					frappe.model.open_mapped_doc({
+						method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_purchase_receipt',
+						frm: frm,
+						freeze: true,
+						freeze_message: __('Creating Purchase Receipt ...')
+					});
+				}, __('Create'));
+			}
 		}
 
 		if (!frm.doc.is_return && frm.doc.docstatus === 1 && frm.doc.per_returned < 100) {
 			frm.add_custom_button(__('Subcontract Return'), () => {
-					frappe.model.open_mapped_doc({
-						method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return',
-						frm: frm
-					});
-				}, __('Create'));
+				frappe.model.open_mapped_doc({
+					method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_subcontract_return',
+					frm: frm
+				});
+			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__('Subcontracting Order'), () => {
-					if (!frm.doc.supplier) {
-						frappe.throw({
-							title: __('Mandatory'),
-							message: __('Please Select a Supplier')
-						});
-					}
-
-					erpnext.utils.map_current_doc({
-						method: 'erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt',
-						source_doctype: 'Subcontracting Order',
-						target: frm,
-						setters: {
-							supplier: frm.doc.supplier,
-						},
-						get_query_filters: {
-							docstatus: 1,
-							per_received: ['<', 100],
-							company: frm.doc.company
-						}
+				if (!frm.doc.supplier) {
+					frappe.throw({
+						title: __('Mandatory'),
+						message: __('Please Select a Supplier')
 					});
-				}, __('Get Items From'));
+				}
+
+				erpnext.utils.map_current_doc({
+					method: 'erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt',
+					source_doctype: 'Subcontracting Order',
+					target: frm,
+					setters: {
+						supplier: frm.doc.supplier,
+					},
+					get_query_filters: {
+						docstatus: 1,
+						per_received: ['<', 100],
+						company: frm.doc.company
+					}
+				});
+			}, __('Get Items From'));
 
 			frm.fields_dict.supplied_items.grid.update_docfield_property('consumed_qty', 'read_only', frm.doc.__onload && frm.doc.__onload.backflush_based_on === 'BOM');
 		}

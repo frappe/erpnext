@@ -187,7 +187,7 @@ class Employee(NestedSet):
 				throw(_("Please enter relieving date."))
 
 	def validate_for_enabled_user_id(self, enabled):
-		if not self.status == "Active":
+		if self.status != "Active":
 			return
 
 		if enabled is None:

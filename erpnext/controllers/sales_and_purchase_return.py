@@ -391,7 +391,10 @@ def make_return_doc(
 		if doc.get("discount_amount"):
 			doc.discount_amount = -1 * source.discount_amount
 
-		if doctype != "Subcontracting Receipt":
+		if doctype == "Subcontracting Receipt":
+			doc.set_warehouse = source.set_warehouse
+			doc.supplier_warehouse = source.supplier_warehouse
+		else:
 			doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
@@ -582,8 +585,6 @@ def make_return_doc(
 		target_doc,
 		set_missing_values,
 	)
-
-	doclist.set_onload("ignore_price_list", True)
 
 	return doclist
 

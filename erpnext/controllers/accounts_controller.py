@@ -71,6 +71,10 @@ class AccountMissingError(frappe.ValidationError):
 	pass
 
 
+class InvalidQtyError(frappe.ValidationError):
+	pass
+
+
 force_item_fields = (
 	"item_group",
 	"brand",
@@ -288,6 +292,7 @@ class AccountsController(TransactionBase):
 	def on_trash(self):
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
+		self.remove_serial_and_batch_bundle()
 
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
@@ -302,6 +307,15 @@ class AccountsController(TransactionBase):
 				"delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s",
 				(self.doctype, self.name),
 			)
+
+	def remove_serial_and_batch_bundle(self):
+		bundles = frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": ("!=", 1)},
+		)
+
+		for bundle in bundles:
+			frappe.delete_doc("Serial and Batch Bundle", bundle.name)
 
 	def validate_deferred_income_expense_account(self):
 		field_map = {
@@ -625,6 +639,7 @@ class AccountsController(TransactionBase):
 
 					args["doctype"] = self.doctype
 					args["name"] = self.name
+					args["child_doctype"] = item.doctype
 					args["child_docname"] = item.name
 					args["ignore_pricing_rule"] = (
 						self.ignore_pricing_rule if hasattr(self, "ignore_pricing_rule") else 0
@@ -910,10 +925,16 @@ class AccountsController(TransactionBase):
 			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
 
 	def validate_qty_is_not_zero(self):
-		if self.doctype != "Purchase Receipt":
-			for item in self.items:
-				if not item.qty:
-					frappe.throw(_("Item quantity can not be zero"))
+		if self.doctype == "Purchase Receipt":
+			return
+
+		for item in self.items:
+			if not flt(item.qty):
+				frappe.throw(
+					msg=_("Row #{0}: Item quantity cannot be zero").format(item.idx),
+					title=_("Invalid Quantity"),
+					exc=InvalidQtyError,
+				)
 
 	def validate_account_currency(self, account, account_currency=None):
 		valid_currency = [self.company_currency]
@@ -2947,6 +2968,9 @@ def validate_and_delete_children(parent, data) -> bool:
 		d.cancel()
 		d.delete()
 
+	if parent.doctype == "Purchase Order":
+		parent.update_ordered_qty_in_so_for_removed_items(deleted_children)
+
 	# need to update ordered qty in Material Request first
 	# bin uses Material Request Items to recalculate & update
 	parent.update_prevdoc_status()
@@ -3141,16 +3165,19 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		conv_fac_precision = child_item.precision("conversion_factor") or 2
 		qty_precision = child_item.precision("qty") or 2
 
-		if flt(child_item.billed_amt, rate_precision) > flt(
-			flt(d.get("rate"), rate_precision) * flt(d.get("qty"), qty_precision), rate_precision
-		):
+		# Amount cannot be lesser than billed amount, except for negative amounts
+		row_rate = flt(d.get("rate"), rate_precision)
+		amount_below_billed_amt = flt(child_item.billed_amt, rate_precision) > flt(
+			row_rate * flt(d.get("qty"), qty_precision), rate_precision
+		)
+		if amount_below_billed_amt and row_rate > 0.0:
 			frappe.throw(
 				_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.").format(
 					child_item.idx, child_item.item_code
 				)
 			)
 		else:
-			child_item.rate = flt(d.get("rate"), rate_precision)
+			child_item.rate = row_rate
 
 		if d.get("conversion_factor"):
 			if child_item.stock_uom == child_item.uom:
@@ -3234,7 +3261,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 	if parent_doctype == "Purchase Order":
 		update_last_purchase_rate(parent, is_submit=1)
-		parent.update_prevdoc_status()
+
+		if any_qty_changed or items_added_or_removed or any_conversion_factor_changed:
+			parent.update_prevdoc_status()
+
 		parent.update_requested_qty()
 		parent.update_ordered_qty()
 		parent.update_ordered_and_reserved_qty()

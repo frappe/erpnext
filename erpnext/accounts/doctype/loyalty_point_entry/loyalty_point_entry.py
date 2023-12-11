@@ -10,6 +10,27 @@ exclude_from_linked_with = True
 
 
 class LoyaltyPointEntry(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		company: DF.Link | None
+		customer: DF.Link | None
+		expiry_date: DF.Date | None
+		invoice: DF.DynamicLink | None
+		invoice_type: DF.Link | None
+		loyalty_points: DF.Int
+		loyalty_program: DF.Link | None
+		loyalty_program_tier: DF.Data | None
+		posting_date: DF.Date | None
+		purchase_amount: DF.Currency
+		redeem_against: DF.Link | None
+	# end: auto-generated types
+
 	pass
 
 

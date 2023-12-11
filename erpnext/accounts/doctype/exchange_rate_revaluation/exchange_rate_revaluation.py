@@ -17,12 +17,34 @@ from erpnext.setup.utils import get_exchange_rate
 
 
 class ExchangeRateRevaluation(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.exchange_rate_revaluation_account.exchange_rate_revaluation_account import (
+			ExchangeRateRevaluationAccount,
+		)
+
+		accounts: DF.Table[ExchangeRateRevaluationAccount]
+		amended_from: DF.Link | None
+		company: DF.Link
+		gain_loss_booked: DF.Currency
+		gain_loss_unbooked: DF.Currency
+		posting_date: DF.Date
+		rounding_loss_allowance: DF.Float
+		total_gain_loss: DF.Currency
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_rounding_loss_allowance()
 		self.set_total_gain_loss()
 
 	def validate_rounding_loss_allowance(self):
-		if not (self.rounding_loss_allowance >= 0 and self.rounding_loss_allowance < 1):
+		if self.rounding_loss_allowance < 0 or self.rounding_loss_allowance >= 1:
 			frappe.throw(_("Rounding Loss Allowance should be between 0 and 1"))
 
 	def set_total_gain_loss(self):
@@ -192,7 +214,7 @@ class ExchangeRateRevaluation(Document):
 				# round off balance based on currency precision
 				# and consider debit-credit difference allowance
 				currency_precision = get_currency_precision()
-				rounding_loss_allowance = float(rounding_loss_allowance) or 0.05
+				rounding_loss_allowance = float(rounding_loss_allowance)
 				for acc in account_details:
 					acc.balance_in_account_currency = flt(acc.balance_in_account_currency, currency_precision)
 					if abs(acc.balance_in_account_currency) <= rounding_loss_allowance:
