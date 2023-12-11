@@ -424,10 +424,10 @@
   },
   {
    "default": "0",
-   "description": "Allows duplicacy across separate items. Maintains uniqeness within an item.",
+   "description": "Allow duplicate serial numbers across different Items. Maintain uniqueness per Item.",
    "fieldname": "allow_duplicate_serial_nos",
    "fieldtype": "Check",
-   "label": "Allow Duplicate Serial Nos Between Items"
+   "label": "Allow Duplicate Serial Nos Across Items"
   }
  ],
  "icon": "icon-cog",
@@ -435,7 +435,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-18 12:35:30.068799",
+ "modified": "2023-12-11 17:35:30.068799",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
