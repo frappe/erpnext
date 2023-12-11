@@ -171,20 +171,20 @@ def get_all_suppliers(date_range, company, field, limit=None):
 @frappe.whitelist()
 def get_all_sales_partner(date_range, company, field, limit=None):
 	if field == "total_sales_amount":
-		select_field = "sum(`base_net_total`)"
+		select_field = "base_net_total"
 	elif field == "total_commission":
-		select_field = "sum(`total_commission`)"
+		select_field = "total_commission"
 
-	filters = {"sales_partner": ["!=", ""], "docstatus": 1, "company": company}
-	if date_range:
-		date_range = frappe.parse_json(date_range)
-		filters["transaction_date"] = ["between", [date_range[0], date_range[1]]]
+	filters = [["docstatus", "=", "1"], ["company", "=", company], ["sales_partner", "is", "set"]]
+	from_date, to_date = parse_date_range(date_range)
+	if from_date and to_date:
+		filters.append(["transaction_date", "between", [from_date, to_date]])
 
 	return frappe.get_list(
 		"Sales Order",
 		fields=[
-			"`sales_partner` as name",
-			"{} as value".format(select_field),
+			"sales_partner as name",
+			f"sum({select_field}) as value",
 		],
 		filters=filters,
 		group_by="sales_partner",
