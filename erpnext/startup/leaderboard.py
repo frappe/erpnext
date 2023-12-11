@@ -54,12 +54,13 @@ def get_leaderboards():
 
 @frappe.whitelist()
 def get_all_customers(date_range, company, field, limit=None):
+	filters = [["docstatus", "=", "1"], ["company", "=", company]]
+	from_date, to_date = parse_date_range(date_range)
 	if field == "outstanding_amount":
-		filters = [["docstatus", "=", "1"], ["company", "=", company]]
-		if date_range:
-			date_range = frappe.parse_json(date_range)
-			filters.append(["posting_date", ">=", "between", [date_range[0], date_range[1]]])
-		return frappe.db.get_all(
+		if from_date and to_date:
+			filters.append(["posting_date", "between", [from_date, to_date]])
+
+		return frappe.get_list(
 			"Sales Invoice",
 			fields=["customer as name", "sum(outstanding_amount) as value"],
 			filters=filters,
@@ -69,26 +70,20 @@ def get_all_customers(date_range, company, field, limit=None):
 		)
 	else:
 		if field == "total_sales_amount":
-			select_field = "sum(so_item.base_net_amount)"
+			select_field = "base_net_total"
 		elif field == "total_qty_sold":
-			select_field = "sum(so_item.stock_qty)"
+			select_field = "total_qty"
 
-		date_condition = get_date_condition(date_range, "so.transaction_date")
+		if from_date and to_date:
+			filters.append(["transaction_date", "between", [from_date, to_date]])
 
-		return frappe.db.sql(
-			"""
-			select so.customer as name, {0} as value
-			FROM `tabSales Order` as so JOIN `tabSales Order Item` as so_item
-				ON so.name = so_item.parent
-			where so.docstatus = 1 {1} and so.company = %s
-			group by so.customer
-			order by value DESC
-			limit %s
-		""".format(
-				select_field, date_condition
-			),
-			(company, cint(limit)),
-			as_dict=1,
+		return frappe.get_list(
+			"Sales Order",
+			fields=["customer as name", f"sum({select_field}) as value"],
+			filters=filters,
+			group_by="customer",
+			order_by="value desc",
+			limit=limit,
 		)
 
 
@@ -236,3 +231,11 @@ def get_date_condition(date_range, field):
 			field, frappe.db.escape(from_date), frappe.db.escape(to_date)
 		)
 	return date_condition
+
+
+def parse_date_range(date_range):
+	if date_range:
+		date_range = frappe.parse_json(date_range)
+		return date_range[0], date_range[1]
+
+	return None, None
