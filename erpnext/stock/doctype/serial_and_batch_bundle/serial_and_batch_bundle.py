@@ -709,6 +709,7 @@ class SerialandBatchBundle(Document):
 					"item_code": self.item_code,
 					"warehouse": self.warehouse,
 					"batch_no": batches,
+					"consider_negative_batches": True,
 				}
 			)
 		)
@@ -719,6 +720,9 @@ class SerialandBatchBundle(Document):
 		available_batches = get_available_batches_qty(available_batches)
 		for batch_no in batches:
 			if batch_no not in available_batches or available_batches[batch_no] < 0:
+				if flt(available_batches.get(batch_no)) < 0:
+					self.validate_negative_batch(batch_no, available_batches[batch_no])
+
 				self.throw_error_message(
 					f"Batch {bold(batch_no)} is not available in the selected warehouse {self.warehouse}"
 				)
@@ -1491,7 +1495,8 @@ def get_auto_batch_nos(kwargs):
 			available_batches, stock_ledgers_batches, pos_invoice_batches, sre_reserved_batches
 		)
 
-	available_batches = list(filter(lambda x: x.qty > 0, available_batches))
+	if not kwargs.consider_negative_batches:
+		available_batches = list(filter(lambda x: x.qty > 0, available_batches))
 
 	if not qty:
 		return available_batches
