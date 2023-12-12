@@ -22,7 +22,7 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		self.create_item()
 		self.update_repost_settings()
 
-	def teadDown(self):
+	def tearDown(self):
 		frappe.db.rollback()
 
 	def update_repost_settings(self):
