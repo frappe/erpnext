@@ -34,4 +34,6 @@ class PaymentReconciliationAllocation(Document):
 		unreconciled_amount: DF.Currency
 	# end: auto-generated types
 
-	pass
+	@staticmethod
+	def get_list(args):
+		pass
