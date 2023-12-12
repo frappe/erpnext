@@ -30,4 +30,6 @@ class PaymentReconciliationPayment(Document):
 		remark: DF.SmallText | None
 	# end: auto-generated types
 
-	pass
+	@staticmethod
+	def get_list(args):
+		pass
