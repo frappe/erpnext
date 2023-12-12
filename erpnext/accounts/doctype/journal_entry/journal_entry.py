@@ -98,6 +98,8 @@ class JournalEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
@@ -496,7 +498,7 @@ class JournalEntry(AccountsController):
 							).format(d.reference_name, d.account)
 						)
 				else:
-					dr_or_cr = "debit" if d.credit > 0 else "credit"
+					dr_or_cr = "debit" if flt(d.credit) > 0 else "credit"
 					valid = False
 					for jvd in against_entries:
 						if flt(jvd[dr_or_cr]) > 0:

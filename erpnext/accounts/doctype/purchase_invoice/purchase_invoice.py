@@ -13,6 +13,7 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
+	validate_docs_for_voucher_types,
 )
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	check_if_return_invoice_linked_with_payment_entry,
@@ -494,6 +495,7 @@ class PurchaseInvoice(BuyingController):
 	def validate_for_repost(self):
 		self.validate_write_off_account()
 		self.validate_expense_account()
+		validate_docs_for_voucher_types(["Purchase Invoice"])
 		validate_docs_for_deferred_accounting([], [self.name])
 
 	def on_submit(self):
@@ -1288,6 +1290,8 @@ class PurchaseInvoice(BuyingController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 		)
@@ -1700,7 +1704,5 @@ def make_purchase_receipt(source_name, target_doc=None):
 		},
 		target_doc,
 	)
-
-	doc.set_onload("ignore_price_list", True)
 
 	return doc

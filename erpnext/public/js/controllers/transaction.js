@@ -328,7 +328,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	onload_post_render() {
 		if(this.frm.doc.__islocal && !(this.frm.doc.taxes || []).length
-			&& !(this.frm.doc.__onload ? this.frm.doc.__onload.load_after_mapping : false)) {
+			&& !this.frm.doc.__onload?.load_after_mapping) {
 			frappe.after_ajax(() => this.apply_default_taxes());
 		} else if(this.frm.doc.__islocal && this.frm.doc.company && this.frm.doc["items"]
 			&& !this.frm.doc.is_pos) {
@@ -441,7 +441,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				item.pricing_rules = ''
 				return this.frm.call({
 					method: "erpnext.stock.get_item_details.get_item_details",
-					child: item,
 					args: {
 						doc: me.frm.doc,
 						args: {
@@ -490,6 +489,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					callback: function(r) {
 						if(!r.exc) {
 							frappe.run_serially([
+								() => {
+									var child = locals[cdt][cdn];
+									var std_field_list = ["doctype"]
+										.concat(frappe.model.std_fields_list)
+										.concat(frappe.model.child_table_field_list);
+
+									for (var key in r.message) {
+										if (std_field_list.indexOf(key) === -1) {
+											if (key === "qty" && child[key]) continue;
+											child[key] = r.message[key];
+										}
+									}
+								},
 								() => {
 									var d = locals[cdt][cdn];
 									me.add_taxes_from_item_tax_template(d.item_tax_rate);
@@ -918,9 +930,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let me = this;
 		this.set_dynamic_labels();
 		let company_currency = this.get_company_currency();
-		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
+		// Added `load_after_mapping` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
-				&& !(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
+				&& !this.frm.doc.__onload?.load_after_mapping) {
 
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
@@ -952,7 +964,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if(flt(this.frm.doc.conversion_rate)>0.0) {
-			if(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list) {
+			if(this.frm.doc.__onload?.load_after_mapping) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list){
 				this.apply_price_list();
@@ -1039,9 +1051,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.set_dynamic_labels();
 
 		var company_currency = this.get_company_currency();
-		// Added `ignore_price_list` to determine if document is loading after mapping from another doc
+		// Added `load_after_mapping` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.price_list_currency !== company_currency  &&
-				!(this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list)) {
+				!this.frm.doc.__onload?.load_after_mapping) {
 			this.get_exchange_rate(this.frm.doc.posting_date, this.frm.doc.price_list_currency, company_currency,
 				function(exchange_rate) {
 					me.frm.set_value("plc_conversion_rate", exchange_rate);
@@ -1420,7 +1432,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		// Target doc created from a mapped doc
-		if (this.frm.doc.__onload && this.frm.doc.__onload.ignore_price_list) {
+		if (this.frm.doc.__onload?.load_after_mapping) {
 			// Calculate totals even though pricing rule is not applied.
 			// `apply_pricing_rule` is triggered due to change in data which most likely contributes to Total.
 			if (calculate_taxes_and_totals) me.calculate_taxes_and_totals();

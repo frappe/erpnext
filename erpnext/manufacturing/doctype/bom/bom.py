@@ -1306,7 +1306,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 	order_by = "idx desc, name, item_name"
 
-	fields = ["name", "item_group", "item_name", "description"]
+	fields = ["name", "item_name", "item_group", "description"]
 	fields.extend(
 		[field for field in searchfields if not field in ["name", "item_group", "description"]]
 	)

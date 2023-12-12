@@ -17,6 +17,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 )
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
+	validate_docs_for_voucher_types,
 )
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
@@ -180,6 +181,7 @@ class SalesInvoice(SellingController):
 		self.validate_write_off_account()
 		self.validate_account_for_change_amount()
 		self.validate_income_account()
+		validate_docs_for_voucher_types(["Sales Invoice"])
 		validate_docs_for_deferred_accounting([self.name], [])
 
 	def validate_fixed_asset(self):
@@ -1932,7 +1934,6 @@ def make_delivery_note(source_name, target_doc=None):
 		set_missing_values,
 	)
 
-	doclist.set_onload("ignore_price_list", True)
 	return doclist
 
 

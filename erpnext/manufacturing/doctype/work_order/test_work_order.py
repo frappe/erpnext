@@ -901,6 +901,20 @@ class TestWorkOrder(FrappeTestCase):
 			"Test RM Item 2 for Scrap Item Test",
 		]
 
+		from_time = add_days(now(), -1)
+		job_cards = frappe.get_all(
+			"Job Card Time Log",
+			fields=["distinct parent as name", "docstatus"],
+			filters={"from_time": (">", from_time)},
+			order_by="creation asc",
+		)
+
+		for job_card in job_cards:
+			if job_card.docstatus == 1:
+				frappe.get_doc("Job Card", job_card.name).cancel()
+
+			frappe.delete_doc("Job Card Time Log", job_card.name)
+
 		company = "_Test Company with perpetual inventory"
 		for item_code in items:
 			create_item(

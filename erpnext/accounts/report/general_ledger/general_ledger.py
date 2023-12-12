@@ -282,7 +282,8 @@ def get_conditions(filters):
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if not dimension.disabled:
+			# Ignore 'Finance Book' set up as dimension in below logic, as it is already handled in above section
+			if not dimension.disabled and dimension.document_type != "Finance Book":
 				if filters.get(dimension.fieldname):
 					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
 						filters[dimension.fieldname] = get_dimension_with_children(
