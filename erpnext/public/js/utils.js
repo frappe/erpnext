@@ -8,7 +8,7 @@ $.extend(erpnext, {
 		if(!company && cur_frm)
 			company = cur_frm.doc.company;
 		if(company)
-			return frappe.get_doc(":Company", company).default_currency || frappe.boot.sysdefaults.currency;
+			return frappe.get_doc(":Company", company)?.default_currency || frappe.boot.sysdefaults.currency;
 		else
 			return frappe.boot.sysdefaults.currency;
 	},
