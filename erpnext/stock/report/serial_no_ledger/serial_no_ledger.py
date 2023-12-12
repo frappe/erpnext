@@ -1,9 +1,12 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import copy
+
 import frappe
 from frappe import _
 
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_serial_nos_from_sle
 from erpnext.stock.stock_ledger import get_stock_ledger_entries
 
 
@@ -15,8 +18,8 @@ def execute(filters=None):
 
 def get_columns(filters):
 	columns = [
-		{"label": _("Posting Date"), "fieldtype": "Date", "fieldname": "posting_date"},
-		{"label": _("Posting Time"), "fieldtype": "Time", "fieldname": "posting_time"},
+		{"label": _("Posting Date"), "fieldtype": "Date", "fieldname": "posting_date", "width": 120},
+		{"label": _("Posting Time"), "fieldtype": "Time", "fieldname": "posting_time", "width": 90},
 		{
 			"label": _("Voucher Type"),
 			"fieldtype": "Link",
@@ -29,7 +32,7 @@ def get_columns(filters):
 			"fieldtype": "Dynamic Link",
 			"fieldname": "voucher_no",
 			"options": "voucher_type",
-			"width": 180,
+			"width": 230,
 		},
 		{
 			"label": _("Company"),
@@ -49,7 +52,7 @@ def get_columns(filters):
 			"label": _("Status"),
 			"fieldtype": "Data",
 			"fieldname": "status",
-			"width": 120,
+			"width": 90,
 		},
 		{
 			"label": _("Serial No"),
@@ -62,7 +65,7 @@ def get_columns(filters):
 			"label": _("Valuation Rate"),
 			"fieldtype": "Float",
 			"fieldname": "valuation_rate",
-			"width": 150,
+			"width": 130,
 		},
 		{
 			"label": _("Qty"),
@@ -102,15 +105,29 @@ def get_data(filters):
 			}
 		)
 
-		serial_nos = [{"serial_no": row.serial_no, "valuation_rate": row.valuation_rate}]
+		serial_nos = []
+		if row.serial_no:
+			parsed_serial_nos = get_serial_nos_from_sle(row.serial_no)
+			for serial_no in parsed_serial_nos:
+				if filters.get("serial_no") and filters.get("serial_no") != serial_no:
+					continue
+
+				serial_nos.append(
+					{
+						"serial_no": serial_no,
+						"valuation_rate": abs(row.stock_value_difference / row.actual_qty),
+					}
+				)
+
 		if row.serial_and_batch_bundle:
-			serial_nos = bundle_wise_serial_nos.get(row.serial_and_batch_bundle, [])
+			serial_nos.extend(bundle_wise_serial_nos.get(row.serial_and_batch_bundle, []))
 
 		for index, bundle_data in enumerate(serial_nos):
 			if index == 0:
-				args.serial_no = bundle_data.get("serial_no")
-				args.valuation_rate = bundle_data.get("valuation_rate")
-				data.append(args)
+				new_args = copy.deepcopy(args)
+				new_args.serial_no = bundle_data.get("serial_no")
+				new_args.valuation_rate = bundle_data.get("valuation_rate")
+				data.append(new_args)
 			else:
 				data.append(
 					{
