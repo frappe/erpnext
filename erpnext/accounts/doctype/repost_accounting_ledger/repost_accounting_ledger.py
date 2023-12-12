@@ -152,8 +152,6 @@ def start_repost(account_repost_doc=str) -> None:
 						doc.make_gl_entries(1)
 					doc.make_gl_entries()
 
-				frappe.db.commit()
-
 
 def get_allowed_types_from_settings():
 	return [
