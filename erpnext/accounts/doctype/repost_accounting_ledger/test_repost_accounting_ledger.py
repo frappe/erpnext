@@ -20,17 +20,10 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		self.create_company()
 		self.create_customer()
 		self.create_item()
-		self.update_repost_settings()
+		update_repost_settings()
 
 	def teadDown(self):
 		frappe.db.rollback()
-
-	def update_repost_settings(self):
-		allowed_types = ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]
-		repost_settings = frappe.get_doc("Repost Accounting Ledger Settings")
-		for x in allowed_types:
-			repost_settings.append("allowed_types", {"document_type": x, "allowed": True})
-			repost_settings.save()
 
 	def test_01_basic_functions(self):
 		si = create_sales_invoice(
@@ -209,3 +202,11 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
+
+
+def update_repost_settings():
+	allowed_types = ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]
+	repost_settings = frappe.get_doc("Repost Accounting Ledger Settings")
+	for x in allowed_types:
+		repost_settings.append("allowed_types", {"document_type": x, "allowed": True})
+		repost_settings.save()
