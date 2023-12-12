@@ -638,4 +638,5 @@ additional_timeline_content = {
 
 extend_bootinfo = [
 	"erpnext.support.doctype.service_level_agreement.service_level_agreement.add_sla_doctypes",
+	"erpnext.startup.boot.bootinfo",
 ]

@@ -423,9 +423,7 @@ def reconcile_vouchers(bank_transaction_name, vouchers):
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	transaction.add_payment_entries(vouchers)
-	transaction.save()
-
-	return transaction
+	return frappe.get_doc("Bank Transaction", bank_transaction_name)
 
 
 @frappe.whitelist()
