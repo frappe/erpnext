@@ -90,9 +90,6 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		# Submit repost document
 		ral.save().submit()
 
-		# background jobs don't run on test cases. Manually triggering repost function.
-		start_repost(ral.name)
-
 		res = (
 			qb.from_(gl)
 			.select(gl.voucher_no, Sum(gl.debit).as_("debit"), Sum(gl.credit).as_("credit"))
@@ -185,7 +182,6 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
 		ral.save().submit()
 
-		start_repost(ral.name)
 		self.assertIsNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
 		self.assertIsNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))
 
@@ -211,6 +207,5 @@ class TestRepostAccountingLedger(AccountsTestMixin, FrappeTestCase):
 		ral.append("vouchers", {"voucher_type": pe.doctype, "voucher_no": pe.name})
 		ral.save().submit()
 
-		start_repost(ral.name)
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": si.name, "is_cancelled": 1}))
 		self.assertIsNotNone(frappe.db.exists("GL Entry", {"voucher_no": pe.name, "is_cancelled": 1}))

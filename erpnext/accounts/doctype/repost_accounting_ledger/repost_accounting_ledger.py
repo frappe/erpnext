@@ -108,7 +108,7 @@ class RepostAccountingLedger(Document):
 		return rendered_page
 
 	def on_submit(self):
-		if len(self.vouchers) > 1:
+		if len(self.vouchers) > 5:
 			job_name = "repost_accounting_ledger_" + self.name
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
