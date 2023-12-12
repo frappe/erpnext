@@ -31,7 +31,8 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			secondary_action: () => this.edit_full_form(),
 		});
 
-		this.dialog.set_value("qty", this.item.qty).then(() => {
+		let qty = this.item.stock_qty || this.item.transfer_qty || this.item.qty;
+		this.dialog.set_value("qty", qty).then(() => {
 			if (this.item.serial_no) {
 				this.dialog.set_value("scan_serial_no", this.item.serial_no);
 				frappe.model.set_value(this.item.doctype, this.item.name, 'serial_no', '');
