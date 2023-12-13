@@ -539,6 +539,27 @@ class PaymentReconciliation(Document):
 
 			invoice_exchange_map.update(purchase_invoice_map)
 
+		journals = [
+			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Journal Entry"
+		]
+		journals.extend(
+			[d.get("reference_name") for d in payments if d.get("reference_type") == "Journal Entry"]
+		)
+		if journals:
+			journals = list(set(journals))
+			journals_map = frappe._dict(
+				frappe.db.get_all(
+					"Journal Entry Account",
+					filters={"parent": ("in", journals), "account": ("in", [self.receivable_payable_account])},
+					fields=[
+						"parent as `name`",
+						"exchange_rate",
+					],
+					as_list=1,
+				)
+			)
+			invoice_exchange_map.update(journals_map)
+
 		return invoice_exchange_map
 
 	def validate_allocation(self):
