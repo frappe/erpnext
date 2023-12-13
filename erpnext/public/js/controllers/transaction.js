@@ -380,6 +380,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	scan_barcode() {
+		frappe.flags.dialog_set = false;
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
 		barcode_scanner.process_scan();
 	}
