@@ -59,8 +59,6 @@ class PaymentReconciliation(Document):
 	def get_payment_entries(self):
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
 		condition = self.get_conditions(get_payments=True)
-		if self.payment_name:
-			condition += "name like '%%{0}%%'".format(self.payment_name)
 
 		payment_entries = get_advance_payment_entries_for_regional(
 			self.party_type,
@@ -70,6 +68,7 @@ class PaymentReconciliation(Document):
 			against_all_orders=True,
 			limit=self.payment_limit,
 			condition=condition,
+			payment_name=self.payment_name,
 		)
 
 		return payment_entries
