@@ -48,6 +48,7 @@ def _execute(filters=None, additional_table_columns=None):
 		purchase_receipt = list(set(invoice_po_pr_map.get(inv.name, {}).get("purchase_receipt", [])))
 		project = list(set(invoice_po_pr_map.get(inv.name, {}).get("project", [])))
 
+<<<<<<< HEAD
 		row = [
 			inv.name,
 			inv.posting_date,
@@ -66,6 +67,27 @@ def _execute(filters=None, additional_table_columns=None):
 			", ".join(purchase_receipt),
 			company_currency,
 		]
+=======
+		row = {
+			"voucher_type": inv.doctype,
+			"voucher_no": inv.name,
+			"posting_date": inv.posting_date,
+			"supplier_id": inv.supplier,
+			"supplier_name": inv.supplier_name,
+			**get_values_for_columns(additional_table_columns, inv),
+			"supplier_group": supplier_details.get(inv.supplier).get("supplier_group"),
+			"tax_id": supplier_details.get(inv.supplier).get("tax_id"),
+			"payable_account": inv.credit_to,
+			"mode_of_payment": inv.mode_of_payment,
+			"project": ", ".join(project) if inv.doctype == "Purchase Invoice" else inv.project,
+			"bill_no": inv.bill_no,
+			"bill_date": inv.bill_date,
+			"remarks": inv.remarks,
+			"purchase_order": ", ".join(purchase_order),
+			"purchase_receipt": ", ".join(purchase_receipt),
+			"currency": company_currency,
+		}
+>>>>>>> f53ba178a8 (fix: show bill_date and bill_no in Purchase Register)
 
 		# map expense values
 		base_net_total = 0
