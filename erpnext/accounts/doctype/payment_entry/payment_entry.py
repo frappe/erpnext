@@ -1052,30 +1052,19 @@ class PaymentEntry(AccountsController):
 				item=self,
 			)
 
-			dr_or_cr = (
-				"credit" if erpnext.get_party_account_type(self.party_type) == "Receivable" else "debit"
-			)
-
 			for d in self.get("references"):
+				dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
 				cost_center = self.cost_center
 				if d.reference_doctype == "Sales Invoice" and not cost_center:
 					cost_center = frappe.db.get_value(d.reference_doctype, d.reference_name, "cost_center")
+
 				gle = party_gl_dict.copy()
-				gle.update(
-					{
-						"against_voucher_type": d.reference_doctype,
-						"against_voucher": d.reference_name,
-						"cost_center": cost_center,
-					}
-				)
 
 				allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
+				reverse_dr_or_cr = 0
 
-				reverse_dr_or_cr = standalone_note = 0
 				if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
-					is_return, return_against = frappe.db.get_value(
-						d.reference_doctype, d.reference_name, ["is_return", "return_against"]
-					)
+					is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
 					payable_party_types = get_party_types_from_account_type("Payable")
 					receivable_party_types = get_party_types_from_account_type("Receivable")
 					if is_return and self.party_type in receivable_party_types and (self.payment_type == "Pay"):
@@ -1085,13 +1074,16 @@ class PaymentEntry(AccountsController):
 					):
 						reverse_dr_or_cr = 1
 
-					if is_return and not return_against and not reverse_dr_or_cr:
+					if is_return and not reverse_dr_or_cr:
 						dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 				gle.update(
 					{
 						dr_or_cr: abs(allocated_amount_in_company_currency),
 						dr_or_cr + "_in_account_currency": abs(d.allocated_amount),
+						"against_voucher_type": d.reference_doctype,
+						"against_voucher": d.reference_name,
+						"cost_center": cost_center,
 					}
 				)
 
