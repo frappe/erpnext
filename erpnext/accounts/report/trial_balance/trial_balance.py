@@ -62,7 +62,7 @@ def validate_filters(filters):
 
 def get_data(filters):
 
-	accounts = frappe.db.sql("""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
+	accounts = frappe.db.sql("""select name,is_group,account_number, parent_account, account_name, root_type, report_type, lft, rgt
 
 		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
 	company_currency = filters.presentation_currency or erpnext.get_company_currency(filters.company)
@@ -109,7 +109,8 @@ def get_rootwise_opening_balances(filters, report_type):
 			if report_type == "Profit and Loss" else ""
 
 	if not flt(filters.with_period_closing_entry):
-		additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
+		# additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
+		additional_conditions += " and ifnull(voucher_type, '') not in ('Period Closing Voucher','Branch Period Closing Voucher')"
 
 	if filters.cost_center:
 		lft, rgt = frappe.db.get_value('Cost Center', filters.cost_center, ['lft', 'rgt'])
@@ -241,7 +242,8 @@ def prepare_data(accounts, filters, total_row, parent_children_map, company_curr
 			"to_date": filters.to_date,
 			"currency": company_currency,
 			"account_name": ('{} - {}'.format(d.account_number, d.account_name)
-				if d.account_number else d.account_name)
+				if d.account_number else d.account_name),
+			"is_group":d.is_group
 		}
 
 		for key in value_fields:
@@ -266,6 +268,12 @@ def get_columns():
 			"fieldtype": "Link",
 			"options": "Account",
 			"width": 300
+		},
+		{
+			"fieldname": "is_group",
+			"label": _("Is Group"),
+			"fieldtype": "Data",
+			"width": 120,
 		},
 		{
 			"fieldname": "currency",
