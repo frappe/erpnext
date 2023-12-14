@@ -24,7 +24,8 @@
   "exchange_rate",
   "currency",
   "accounting_dimensions_section",
-  "cost_center"
+  "cost_center",
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -164,13 +165,20 @@
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
+<<<<<<< HEAD
 >>>>>>> 1cde804c77 (refactor: dimensions section in allocation table in reconciliation)
+=======
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+>>>>>>> 20576e0f47 (refactor: column break in dimension section)
   }
  ],
  "is_virtual": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-12-14 12:32:45.554730",
+ "modified": "2023-12-14 13:38:26.104150",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",

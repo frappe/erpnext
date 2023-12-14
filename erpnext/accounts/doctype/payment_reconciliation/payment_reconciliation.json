@@ -27,6 +27,7 @@
   "bank_cash_account",
   "accounting_dimensions_section",
   "cost_center",
+  "dimension_col_break",
   "sec_break1",
   "invoice_name",
   "invoices",
@@ -217,6 +218,10 @@
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions Filter"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
@@ -224,7 +229,7 @@
  "is_virtual": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-12-14 12:38:44.910625",
+ "modified": "2023-12-14 13:38:16.264013",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
