@@ -69,8 +69,6 @@ def validate_return_against(doc):
 
 
 def validate_returned_items(doc):
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
 	valid_items = frappe._dict()
 
 	select_fields = "item_code, qty, stock_qty, rate, parenttype, conversion_factor"
@@ -122,26 +120,6 @@ def validate_returned_items(doc):
 							d.idx, doc.doctype, doc.return_against
 						)
 					)
-
-				elif ref.batch_no and d.batch_no not in ref.batch_no:
-					frappe.throw(
-						_("Row # {0}: Batch No must be same as {1} {2}").format(
-							d.idx, doc.doctype, doc.return_against
-						)
-					)
-
-				elif ref.serial_no:
-					if d.qty and not d.serial_no:
-						frappe.throw(_("Row # {0}: Serial No is mandatory").format(d.idx))
-					else:
-						serial_nos = get_serial_nos(d.serial_no)
-						for s in serial_nos:
-							if s not in ref.serial_no:
-								frappe.throw(
-									_("Row # {0}: Serial No {1} does not match with {2} {3}").format(
-										d.idx, s, doc.doctype, doc.return_against
-									)
-								)
 
 				if (
 					warehouse_mandatory
@@ -397,26 +375,36 @@ def make_return_doc(
 		else:
 			doc.run_method("calculate_taxes_and_totals")
 
-	def update_item(source_doc, target_doc, source_parent):
+	def update_serial_batch_no(source_doc, target_doc, source_parent):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
-		target_doc.qty = -1 * source_doc.qty
 		item_details = frappe.get_cached_value(
 			"Item", source_doc.item_code, ["has_batch_no", "has_serial_no"], as_dict=1
 		)
 
 		returned_serial_nos = []
-		if source_doc.get("serial_and_batch_bundle"):
+		if (
+			source_doc.get("serial_and_batch_bundle")
+			or source_doc.get("serial_no")
+			or source_doc.get("batch_no")
+		):
 			if item_details.has_serial_no:
 				returned_serial_nos = get_returned_serial_nos(source_doc, source_parent)
 
 			type_of_transaction = "Inward"
-			if (
+			if source_doc.serial_and_batch_bundle and (
 				frappe.db.get_value(
 					"Serial and Batch Bundle", source_doc.serial_and_batch_bundle, "type_of_transaction"
 				)
 				== "Inward"
 			):
+				type_of_transaction = "Outward"
+			elif source_parent.doctype in [
+				"Purchase Invoice",
+				"Purchase Receipt",
+				"Subcontracting Receipt",
+			]:
 				type_of_transaction = "Outward"
 
 			cls_obj = SerialBatchCreation(
@@ -426,26 +414,44 @@ def make_return_doc(
 					"returned_against": source_doc.name,
 					"item_code": source_doc.item_code,
 					"returned_serial_nos": returned_serial_nos,
+					"voucher_type": source_parent.doctype,
+					"do_not_submit": True,
+					"warehouse": source_doc.warehouse,
 				}
 			)
 
-			cls_obj.duplicate_package()
-			if cls_obj.serial_and_batch_bundle:
-				target_doc.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
+			if source_doc.get("serial_and_batch_bundle"):
+				cls_obj.duplicate_package()
+				if cls_obj.serial_and_batch_bundle:
+					target_doc.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
+			else:
+				if source_doc.get("batch_no"):
+					cls_obj.batches = frappe._dict({source_doc.batch_no: source_doc.qty})
+				elif source_doc.get("serial_no"):
+					serial_nos = get_serial_nos(source_doc.get("serial_no"))
+					cls_obj.serial_nos = list(set(serial_nos) - set(returned_serial_nos))
 
-		if source_doc.get("rejected_serial_and_batch_bundle"):
+				target_doc.serial_and_batch_bundle = cls_obj.make_serial_and_batch_bundle().name
+
+		if source_doc.get("rejected_serial_and_batch_bundle") or source_doc.get("rejected_serial_no"):
 			if item_details.has_serial_no:
 				returned_serial_nos = get_returned_serial_nos(
 					source_doc, source_parent, serial_no_field="rejected_serial_and_batch_bundle"
 				)
 
 			type_of_transaction = "Inward"
-			if (
+			if source_doc.rejected_serial_and_batch_bundle and (
 				frappe.db.get_value(
 					"Serial and Batch Bundle", source_doc.rejected_serial_and_batch_bundle, "type_of_transaction"
 				)
 				== "Inward"
 			):
+				type_of_transaction = "Outward"
+			elif source_parent.doctype in [
+				"Purchase Invoice",
+				"Purchase Receipt",
+				"Subcontracting Receipt",
+			]:
 				type_of_transaction = "Outward"
 
 			cls_obj = SerialBatchCreation(
@@ -455,12 +461,31 @@ def make_return_doc(
 					"returned_against": source_doc.name,
 					"item_code": source_doc.item_code,
 					"returned_serial_nos": returned_serial_nos,
+					"voucher_type": source_parent.doctype,
+					"do_not_submit": True,
+					"warehouse": source_doc.rejected_warehouse,
+					"is_rejected": True,
 				}
 			)
 
-			cls_obj.duplicate_package()
+			if source_doc.get("rejected_serial_and_batch_bundle"):
+				cls_obj.duplicate_package()
+			else:
+				if source_doc.get("batch_no"):
+					cls_obj.batches = frappe._dict({source_doc.batch_no: source_doc.rejected_qty})
+				elif source_doc.get("rejected_serial_no"):
+					serial_nos = get_serial_nos(source_doc.get("rejected_serial_no"))
+					cls_obj.serial_nos = list(set(serial_nos) - set(returned_serial_nos))
+
+				target_doc.rejected_serial_and_batch_bundle = cls_obj.make_serial_and_batch_bundle().name
+
 			if cls_obj.serial_and_batch_bundle:
-				target_doc.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
+				target_doc.rejected_serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
+
+	def update_item(source_doc, target_doc, source_parent):
+		target_doc.qty = -1 * source_doc.qty
+
+		update_serial_batch_no(source_doc, target_doc, source_parent)
 
 		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
 			returned_qty_map = get_returned_qty_map_for_row(

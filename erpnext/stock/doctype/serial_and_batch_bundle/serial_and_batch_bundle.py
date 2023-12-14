@@ -82,6 +82,7 @@ class SerialandBatchBundle(Document):
 
 	def validate(self):
 		self.validate_serial_and_batch_no()
+		self.validate_serial_and_batch_no_for_returned()
 		self.validate_duplicate_serial_and_batch_no()
 		self.validate_voucher_no()
 		if self.type_of_transaction == "Maintenance":
@@ -123,6 +124,9 @@ class SerialandBatchBundle(Document):
 				)
 
 	def validate_serial_nos_duplicate(self):
+		if not self.warehouse:
+			return
+
 		if self.voucher_type in ["Stock Reconciliation", "Stock Entry"] and self.docstatus != 1:
 			return
 
@@ -146,7 +150,6 @@ class SerialandBatchBundle(Document):
 			kwargs["voucher_no"] = self.voucher_no
 
 		available_serial_nos = get_available_serial_nos(kwargs)
-
 		for data in available_serial_nos:
 			if data.serial_no in serial_nos:
 				self.throw_error_message(
@@ -509,7 +512,6 @@ class SerialandBatchBundle(Document):
 		batch_nos = []
 
 		serial_batches = {}
-
 		for row in self.entries:
 			if self.has_serial_no and not row.serial_no:
 				frappe.throw(
@@ -589,6 +591,18 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(
 				f"Batch Nos {bold(incorrect_batch_nos)} does not belong to Item {bold(self.item_code)}"
 			)
+
+	def validate_serial_and_batch_no_for_returned(self):
+		if self.voucher_type not in [
+			"Purchase Receipt",
+			"Purchase Invoice",
+			"Sales Invoice",
+			"Delivery Note",
+		]:
+			return
+
+		if self.returned_against:
+			pass
 
 	def validate_duplicate_serial_and_batch_no(self):
 		serial_nos = []
