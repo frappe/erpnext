@@ -19,7 +19,7 @@ from erpnext.stock.utils import (
 
 def execute(filters=None):
 	is_reposting_item_valuation_in_progress()
-	if filters.get("include_uom") and (filters.get("select_uom")) != "Default UOM":
+	if filters.get("include_uom") and (filters.get("select_uom")) != "Stock UOM":
 		frappe.throw(
 			_("Cannot select filters {0} and {1} together!").format(
 				frappe.bold("Include UOM"), frappe.bold("Select UOM")
