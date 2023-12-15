@@ -411,10 +411,13 @@ def validate_disabled_warehouse(warehouse):
 
 
 def update_included_uom_in_report(
-	columns, result, include_uom, conversion_factors, type_conversion_factors
+	columns, result, include_uom, conversion_factors, transaction_cf=None, transaction_uom="Stock UOM"
 ):
-	if not include_uom and not conversion_factors and not type_conversion_factors:
+	if (not include_uom and not conversion_factors) and (
+		not transaction_cf or transaction_uom == "Stock UOM"
+	):
 		return
+
 	is_dict_obj = False
 	if isinstance(result[0], dict):
 		is_dict_obj = True
@@ -434,14 +437,12 @@ def update_included_uom_in_report(
 						"fieldtype": "Currency" if d.get("convertible") == "rate" else "Float",
 					},
 				)
-			elif type_conversion_factors:
+			elif transaction_cf:
 				columns.insert(
 					idx + 1,
 					{
-						"label": "{0} ({1})".format(d.get("label"), type_conversion_factors[0][3]),
-						"fieldname": "{0}_{1}_qty".format(
-							d.get("fieldname"), frappe.scrub(type_conversion_factors[0][3])
-						),
+						"label": "{0} ({1})".format(d.get("label"), transaction_uom),
+						"fieldname": "{0}_{1}_qty".format(d.get("fieldname"), frappe.scrub(transaction_uom)),
 						"fieldtype": "Currency" if d.get("convertible") == "rate" else "Float",
 						"width": 120,
 					},
@@ -460,7 +461,7 @@ def update_included_uom_in_report(
 			if key not in convertible_columns:
 				continue
 			# If no conversion factor for the UOM, defaults to 1
-			if conversion_factors:
+			if include_uom and conversion_factors:
 				if not conversion_factors[row_idx]:
 					conversion_factors[row_idx] = 1
 
@@ -468,18 +469,18 @@ def update_included_uom_in_report(
 					new_value = flt(value) * conversion_factors[row_idx]
 				else:
 					new_value = flt(value) / conversion_factors[row_idx]
-			if type_conversion_factors:
-				new_value = flt(value) / (
-					type_conversion_factors[0][0][row_idx] if type_conversion_factors[0][0][row_idx] else 1
-				)
+			else:
+				new_value = flt(value) / (transaction_cf[row_idx] if transaction_cf[row_idx] else 1)
+
 			if not is_dict_obj:
 				row.insert(key + 1, new_value)
 			elif include_uom:
 				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom))
 				update_dict_values.append([row, new_key, new_value])
-			else:
-				new_key1 = "{0}_{1}_qty".format(key, frappe.scrub(type_conversion_factors[0][3]))
+			elif transaction_uom:
+				new_key1 = "{0}_{1}_qty".format(key, frappe.scrub(transaction_uom))
 				type_update_dict_values.append([row, new_key1, new_value])
+
 	if include_uom:
 		for data in update_dict_values:
 			row, key, value = data

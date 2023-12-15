@@ -35,10 +35,11 @@ def execute(filters=None):
 
 	data = []
 	conversion_factors = []
-	type_conversion_factors = []
+	transaction_cf = []
 	if opening_row:
 		data.append(opening_row)
 		conversion_factors.append(0)
+		transaction_cf.append(0)
 
 	actual_qty = stock_value = 0
 	if opening_row:
@@ -77,13 +78,11 @@ def execute(filters=None):
 
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
-		if filters.get("select_uom") in ["Sales UOM", "Purchase UOM"]:
-			conversion_factors.append(item_detail.conversion_factor)
-			type_conversion_factors.append(
-				(conversion_factors, item_detail.conversion_factor, item_detail.uom, filters.get("select_uom"))
-			)
+		else:
+			transaction_cf.append(item_detail.conversion_factor)
+
 	update_included_uom_in_report(
-		columns, data, include_uom, conversion_factors, type_conversion_factors
+		columns, data, include_uom, conversion_factors, transaction_cf, filters.get("select_uom")
 	)
 	return columns, data
 
