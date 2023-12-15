@@ -10,6 +10,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, fmt_money, get_link_to_form, getdate, nowdate, today
 
 import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
 	is_any_doc_running,
 )
@@ -592,6 +593,14 @@ class PaymentReconciliation(Document):
 		if not invoices_to_reconcile:
 			frappe.throw(_("No records found in Allocation table"))
 
+	def build_dimensions_filter_conditions(self):
+		ple = qb.DocType("Payment Ledger Entry")
+		dimensions_and_defaults = get_dimensions()
+		for x in dimensions_and_defaults[0]:
+			dimension = x.fieldname
+			if self.get(dimension):
+				self.accounting_dimension_filter_conditions.append(ple[dimension] == self.get(dimension))
+
 	def build_qb_filter_conditions(self, get_invoices=False, get_return_invoices=False):
 		self.common_filter_conditions.clear()
 		self.accounting_dimension_filter_conditions.clear()
@@ -614,6 +623,8 @@ class PaymentReconciliation(Document):
 				self.ple_posting_date_filter.append(ple.posting_date.gte(self.from_payment_date))
 			if self.to_payment_date:
 				self.ple_posting_date_filter.append(ple.posting_date.lte(self.to_payment_date))
+
+		self.build_dimensions_filter_conditions()
 
 	def get_conditions(self, get_payments=False):
 		condition = " and company = '{0}' ".format(self.company)
