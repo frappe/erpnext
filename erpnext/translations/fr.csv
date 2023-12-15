@@ -9109,9 +9109,6 @@ Receivable Accounts,Compte de débit
 Mention if a non-standard receivable account,Veuillez mentionner s'il s'agit d'un compte débiteur non standard
 Allow Purchase,Autoriser à l'achat
 Inventory Settings,Paramétrage de l'inventaire
-<<<<<<< HEAD
-Component Type,Type de composant,
-=======
 Add Comment,Ajouter un Commentaire,
 More...,Plus...,
 Notes,Remarques,
@@ -9229,4 +9226,3 @@ Sales Update Frequency in Company and Project,Fréquence de mise à jour des ven
 Transaction Settings,Paramètres des transactions,
 Subcontracting Settings,Paramètres de sous-traitance,
 Users with this role are allowed to over bill above the allowance percentage,Les utilisateurs avec ce rôle sont autorisés à sur-facturer au delà du pourcentage de tolérance,
->>>>>>> a1e0197a8b (fix: Add missing french translations (#38368))
