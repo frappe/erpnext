@@ -306,7 +306,7 @@ def get_last_accrual_date(loan, posting_date):
 def get_last_disbursement_date(loan, posting_date):
 	last_disbursement_date = frappe.db.get_value(
 		"Loan Disbursement",
-		{"docstatus": 1, "against_loan": loan, "posting_date": ("<", posting_date)},
+		{"docstatus": 1, "against_loan": loan, "posting_date": ("<=", posting_date)},
 		"MAX(posting_date)",
 	)
 
