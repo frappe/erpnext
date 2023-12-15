@@ -107,6 +107,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		frappe.ui.form.on(this.frm.doctype + " Item", {
 			items_add: function(frm, cdt, cdn) {
 				var item = frappe.get_doc(cdt, cdn);
+
+				if (!item.qty) item.qty = 1;
+
 				if (!item.warehouse && frm.doc.set_warehouse) {
 					item.warehouse = frm.doc.set_warehouse;
 				}
