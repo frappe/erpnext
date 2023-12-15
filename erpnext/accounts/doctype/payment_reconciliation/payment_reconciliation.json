@@ -203,9 +203,10 @@
  ],
  "hide_toolbar": 1,
  "icon": "icon-resize-horizontal",
+ "is_virtual": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-08-15 05:35:50.109290",
+ "modified": "2023-11-17 17:33:55.701726",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
@@ -230,6 +231,5 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
- "track_changes": 1
+ "states": []
 }

@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import cint
+from frappe.utils.deprecations import deprecated
 
 
 def get_leaderboards():
@@ -54,12 +54,13 @@ def get_leaderboards():
 
 @frappe.whitelist()
 def get_all_customers(date_range, company, field, limit=None):
+	filters = [["docstatus", "=", "1"], ["company", "=", company]]
+	from_date, to_date = parse_date_range(date_range)
 	if field == "outstanding_amount":
-		filters = [["docstatus", "=", "1"], ["company", "=", company]]
-		if date_range:
-			date_range = frappe.parse_json(date_range)
-			filters.append(["posting_date", ">=", "between", [date_range[0], date_range[1]]])
-		return frappe.db.get_all(
+		if from_date and to_date:
+			filters.append(["posting_date", "between", [from_date, to_date]])
+
+		return frappe.get_list(
 			"Sales Invoice",
 			fields=["customer as name", "sum(outstanding_amount) as value"],
 			filters=filters,
@@ -69,26 +70,20 @@ def get_all_customers(date_range, company, field, limit=None):
 		)
 	else:
 		if field == "total_sales_amount":
-			select_field = "sum(so_item.base_net_amount)"
+			select_field = "base_net_total"
 		elif field == "total_qty_sold":
-			select_field = "sum(so_item.stock_qty)"
+			select_field = "total_qty"
 
-		date_condition = get_date_condition(date_range, "so.transaction_date")
+		if from_date and to_date:
+			filters.append(["transaction_date", "between", [from_date, to_date]])
 
-		return frappe.db.sql(
-			"""
-			select so.customer as name, {0} as value
-			FROM `tabSales Order` as so JOIN `tabSales Order Item` as so_item
-				ON so.name = so_item.parent
-			where so.docstatus = 1 {1} and so.company = %s
-			group by so.customer
-			order by value DESC
-			limit %s
-		""".format(
-				select_field, date_condition
-			),
-			(company, cint(limit)),
-			as_dict=1,
+		return frappe.get_list(
+			"Sales Order",
+			fields=["customer as name", f"sum({select_field}) as value"],
+			filters=filters,
+			group_by="customer",
+			order_by="value desc",
+			limit=limit,
 		)
 
 
@@ -96,55 +91,58 @@ def get_all_customers(date_range, company, field, limit=None):
 def get_all_items(date_range, company, field, limit=None):
 	if field in ("available_stock_qty", "available_stock_value"):
 		select_field = "sum(actual_qty)" if field == "available_stock_qty" else "sum(stock_value)"
-		return frappe.db.get_all(
+		results = frappe.db.get_all(
 			"Bin",
 			fields=["item_code as name", "{0} as value".format(select_field)],
 			group_by="item_code",
 			order_by="value desc",
 			limit=limit,
 		)
+		readable_active_items = set(frappe.get_list("Item", filters={"disabled": 0}, pluck="name"))
+		return [item for item in results if item["name"] in readable_active_items]
 	else:
 		if field == "total_sales_amount":
-			select_field = "sum(order_item.base_net_amount)"
+			select_field = "base_net_amount"
 			select_doctype = "Sales Order"
 		elif field == "total_purchase_amount":
-			select_field = "sum(order_item.base_net_amount)"
+			select_field = "base_net_amount"
 			select_doctype = "Purchase Order"
 		elif field == "total_qty_sold":
-			select_field = "sum(order_item.stock_qty)"
+			select_field = "stock_qty"
 			select_doctype = "Sales Order"
 		elif field == "total_qty_purchased":
-			select_field = "sum(order_item.stock_qty)"
+			select_field = "stock_qty"
 			select_doctype = "Purchase Order"
 
-		date_condition = get_date_condition(date_range, "sales_order.transaction_date")
+		filters = [["docstatus", "=", "1"], ["company", "=", company]]
+		from_date, to_date = parse_date_range(date_range)
+		if from_date and to_date:
+			filters.append(["transaction_date", "between", [from_date, to_date]])
 
-		return frappe.db.sql(
-			"""
-			select order_item.item_code as name, {0} as value
-			from `tab{1}` sales_order join `tab{1} Item` as order_item
-				on sales_order.name = order_item.parent
-			where sales_order.docstatus = 1
-				and sales_order.company = %s {2}
-			group by order_item.item_code
-			order by value desc
-			limit %s
-		""".format(
-				select_field, select_doctype, date_condition
-			),
-			(company, cint(limit)),
-			as_dict=1,
-		)  # nosec
+		child_doctype = f"{select_doctype} Item"
+		return frappe.get_list(
+			select_doctype,
+			fields=[
+				f"`tab{child_doctype}`.item_code as name",
+				f"sum(`tab{child_doctype}`.{select_field}) as value",
+			],
+			filters=filters,
+			order_by="value desc",
+			group_by=f"`tab{child_doctype}`.item_code",
+			limit=limit,
+		)
 
 
 @frappe.whitelist()
 def get_all_suppliers(date_range, company, field, limit=None):
+	filters = [["docstatus", "=", "1"], ["company", "=", company]]
+	from_date, to_date = parse_date_range(date_range)
+
 	if field == "outstanding_amount":
-		filters = [["docstatus", "=", "1"], ["company", "=", company]]
-		if date_range:
-			date_range = frappe.parse_json(date_range)
-			filters.append(["posting_date", "between", [date_range[0], date_range[1]]])
-		return frappe.db.get_all(
+		if from_date and to_date:
+			filters.append(["posting_date", "between", [from_date, to_date]])
+
+		return frappe.get_list(
 			"Purchase Invoice",
 			fields=["supplier as name", "sum(outstanding_amount) as value"],
 			filters=filters,
@@ -154,48 +152,40 @@ def get_all_suppliers(date_range, company, field, limit=None):
 		)
 	else:
 		if field == "total_purchase_amount":
-			select_field = "sum(purchase_order_item.base_net_amount)"
+			select_field = "base_net_total"
 		elif field == "total_qty_purchased":
-			select_field = "sum(purchase_order_item.stock_qty)"
+			select_field = "total_qty"
 
-		date_condition = get_date_condition(date_range, "purchase_order.modified")
+		if from_date and to_date:
+			filters.append(["transaction_date", "between", [from_date, to_date]])
 
-		return frappe.db.sql(
-			"""
-			select purchase_order.supplier as name, {0} as value
-			FROM `tabPurchase Order` as purchase_order LEFT JOIN `tabPurchase Order Item`
-				as purchase_order_item ON purchase_order.name = purchase_order_item.parent
-			where
-				purchase_order.docstatus = 1
-				{1}
-				and  purchase_order.company = %s
-			group by purchase_order.supplier
-			order by value DESC
-			limit %s""".format(
-				select_field, date_condition
-			),
-			(company, cint(limit)),
-			as_dict=1,
-		)  # nosec
+		return frappe.get_list(
+			"Purchase Order",
+			fields=["supplier as name", f"sum({select_field}) as value"],
+			filters=filters,
+			group_by="supplier",
+			order_by="value desc",
+			limit=limit,
+		)
 
 
 @frappe.whitelist()
 def get_all_sales_partner(date_range, company, field, limit=None):
 	if field == "total_sales_amount":
-		select_field = "sum(`base_net_total`)"
+		select_field = "base_net_total"
 	elif field == "total_commission":
-		select_field = "sum(`total_commission`)"
+		select_field = "total_commission"
 
-	filters = {"sales_partner": ["!=", ""], "docstatus": 1, "company": company}
-	if date_range:
-		date_range = frappe.parse_json(date_range)
-		filters["transaction_date"] = ["between", [date_range[0], date_range[1]]]
+	filters = [["docstatus", "=", "1"], ["company", "=", company], ["sales_partner", "is", "set"]]
+	from_date, to_date = parse_date_range(date_range)
+	if from_date and to_date:
+		filters.append(["transaction_date", "between", [from_date, to_date]])
 
 	return frappe.get_list(
 		"Sales Order",
 		fields=[
-			"`sales_partner` as name",
-			"{} as value".format(select_field),
+			"sales_partner as name",
+			f"sum({select_field}) as value",
 		],
 		filters=filters,
 		group_by="sales_partner",
@@ -206,27 +196,29 @@ def get_all_sales_partner(date_range, company, field, limit=None):
 
 @frappe.whitelist()
 def get_all_sales_person(date_range, company, field=None, limit=0):
-	date_condition = get_date_condition(date_range, "sales_order.transaction_date")
+	filters = [
+		["docstatus", "=", "1"],
+		["company", "=", company],
+		["Sales Team", "sales_person", "is", "set"],
+	]
+	from_date, to_date = parse_date_range(date_range)
+	if from_date and to_date:
+		filters.append(["transaction_date", "between", [from_date, to_date]])
 
-	return frappe.db.sql(
-		"""
-		select sales_team.sales_person as name, sum(sales_order.base_net_total) as value
-		from `tabSales Order` as sales_order join `tabSales Team` as sales_team
-			on sales_order.name = sales_team.parent and sales_team.parenttype = 'Sales Order'
-		where sales_order.docstatus = 1
-			and sales_order.company = %s
-			{date_condition}
-		group by sales_team.sales_person
-		order by value DESC
-		limit %s
-	""".format(
-			date_condition=date_condition
-		),
-		(company, cint(limit)),
-		as_dict=1,
+	return frappe.get_list(
+		"Sales Order",
+		fields=[
+			"`tabSales Team`.sales_person as name",
+			"sum(`tabSales Team`.allocated_amount) as value",
+		],
+		filters=filters,
+		group_by="`tabSales Team`.sales_person",
+		order_by="value desc",
+		limit=limit,
 	)
 
 
+@deprecated
 def get_date_condition(date_range, field):
 	date_condition = ""
 	if date_range:
@@ -236,3 +228,11 @@ def get_date_condition(date_range, field):
 			field, frappe.db.escape(from_date), frappe.db.escape(to_date)
 		)
 	return date_condition
+
+
+def parse_date_range(date_range):
+	if date_range:
+		date_range = frappe.parse_json(date_range)
+		return date_range[0], date_range[1]
+
+	return None, None

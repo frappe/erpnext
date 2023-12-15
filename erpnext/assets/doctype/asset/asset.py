@@ -427,6 +427,10 @@ class Asset(AccountsController):
 				n == 0
 				and (has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata)
 				and not self.opening_accumulated_depreciation
+				and get_updated_rate_of_depreciation_for_wdv_and_dd(
+					self, value_after_depreciation, finance_book, False
+				)
+				== finance_book.rate_of_depreciation
 			):
 				from_date = add_days(
 					self.available_for_use_date, -1
@@ -1387,7 +1391,9 @@ def get_depreciation_amount(
 
 
 @erpnext.allow_regional
-def get_updated_rate_of_depreciation_for_wdv_and_dd(asset, depreciable_value, fb_row):
+def get_updated_rate_of_depreciation_for_wdv_and_dd(
+	asset, depreciable_value, fb_row, show_msg=True
+):
 	return fb_row.rate_of_depreciation
 
 
