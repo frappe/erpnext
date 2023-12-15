@@ -511,6 +511,22 @@ class SerialandBatchBundle(Document):
 		serial_batches = {}
 
 		for row in self.entries:
+			if self.has_serial_no and not row.serial_no:
+				frappe.throw(
+					_("At row {0}: Serial No is mandatory for Item {1}").format(
+						bold(row.idx), bold(self.item_code)
+					),
+					title=_("Serial No is mandatory"),
+				)
+
+			if self.has_batch_no and not row.batch_no:
+				frappe.throw(
+					_("At row {0}: Batch No is mandatory for Item {1}").format(
+						bold(row.idx), bold(self.item_code)
+					),
+					title=_("Batch No is mandatory"),
+				)
+
 			if row.serial_no:
 				serial_nos.append(row.serial_no)
 
@@ -693,6 +709,7 @@ class SerialandBatchBundle(Document):
 					"item_code": self.item_code,
 					"warehouse": self.warehouse,
 					"batch_no": batches,
+					"consider_negative_batches": True,
 				}
 			)
 		)
@@ -703,6 +720,9 @@ class SerialandBatchBundle(Document):
 		available_batches = get_available_batches_qty(available_batches)
 		for batch_no in batches:
 			if batch_no not in available_batches or available_batches[batch_no] < 0:
+				if flt(available_batches.get(batch_no)) < 0:
+					self.validate_negative_batch(batch_no, available_batches[batch_no])
+
 				self.throw_error_message(
 					f"Batch {bold(batch_no)} is not available in the selected warehouse {self.warehouse}"
 				)
@@ -794,6 +814,9 @@ def parse_csv_file_to_get_serial_batch(reader):
 		if index == 0:
 			has_serial_no = row[0] == "Serial No"
 			has_batch_no = row[0] == "Batch No"
+			if not has_batch_no:
+				has_batch_no = row[1] == "Batch No"
+
 			continue
 
 		if not row[0]:
@@ -804,6 +827,13 @@ def parse_csv_file_to_get_serial_batch(reader):
 
 			if has_batch_no:
 				_dict.update(
+					{
+						"batch_no": row[1],
+						"qty": row[2],
+					}
+				)
+
+				batch_nos.append(
 					{
 						"batch_no": row[1],
 						"qty": row[2],
@@ -845,6 +875,9 @@ def make_serial_nos(item_code, serial_nos):
 	serial_nos_details = []
 	user = frappe.session.user
 	for serial_no in serial_nos:
+		if frappe.db.exists("Serial No", serial_no):
+			continue
+
 		serial_nos_details.append(
 			(
 				serial_no,
@@ -875,7 +908,7 @@ def make_serial_nos(item_code, serial_nos):
 
 	frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
-	frappe.msgprint(_("Serial Nos are created successfully"))
+	frappe.msgprint(_("Serial Nos are created successfully"), alert=True)
 
 
 def make_batch_nos(item_code, batch_nos):
@@ -886,6 +919,9 @@ def make_batch_nos(item_code, batch_nos):
 	batch_nos_details = []
 	user = frappe.session.user
 	for batch_no in batch_nos:
+		if frappe.db.exists("Batch", batch_no):
+			continue
+
 		batch_nos_details.append(
 			(batch_no, batch_no, now(), now(), user, user, item.item_code, item.item_name, item.description)
 		)
@@ -904,7 +940,7 @@ def make_batch_nos(item_code, batch_nos):
 
 	frappe.db.bulk_insert("Batch", fields=fields, values=set(batch_nos_details))
 
-	frappe.msgprint(_("Batch Nos are created successfully"))
+	frappe.msgprint(_("Batch Nos are created successfully"), alert=True)
 
 
 def parse_serial_nos(data):
@@ -1459,7 +1495,8 @@ def get_auto_batch_nos(kwargs):
 			available_batches, stock_ledgers_batches, pos_invoice_batches, sre_reserved_batches
 		)
 
-	available_batches = list(filter(lambda x: x.qty > 0, available_batches))
+	if not kwargs.consider_negative_batches:
+		available_batches = list(filter(lambda x: x.qty > 0, available_batches))
 
 	if not qty:
 		return available_batches
