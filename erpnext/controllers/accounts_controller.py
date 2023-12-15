@@ -7,6 +7,11 @@ import json
 import frappe
 from frappe import _, bold, qb, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+<<<<<<< HEAD
+=======
+from frappe.query_builder import Criterion
+from frappe.query_builder.custom import ConstantColumn
+>>>>>>> ff60ec85b8 (refactor: pass dimension filters to query)
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import (
 	add_days,
@@ -2542,6 +2547,7 @@ def get_advance_payment_entries(
 	payment_entries_against_order, unallocated_payment_entries = [], []
 	limit_cond = "limit %s" % limit if limit else ""
 
+<<<<<<< HEAD
 	if order_list or against_all_orders:
 		if order_list:
 			reference_condition = " and t2.reference_name in ({0})".format(
@@ -2550,6 +2556,45 @@ def get_advance_payment_entries(
 		else:
 			reference_condition = ""
 			order_list = []
+=======
+	if payment_type == "Receive":
+		q = q.select((payment_entry.source_exchange_rate).as_("exchange_rate"))
+	else:
+		q = q.select((payment_entry.target_exchange_rate).as_("exchange_rate"))
+
+	if condition:
+		# conditions should be built as an array and passed as Criterion
+		common_filter_conditions = []
+
+		common_filter_conditions.append(payment_entry.company == condition["company"])
+		if condition.get("name", None):
+			common_filter_conditions.append(payment_entry.name.like(f"%{condition.get('name')}%"))
+
+		if condition.get("from_payment_date"):
+			common_filter_conditions.append(payment_entry.posting_date.gte(condition["from_payment_date"]))
+
+		if condition.get("to_payment_date"):
+			common_filter_conditions.append(payment_entry.posting_date.lte(condition["to_payment_date"]))
+
+		if condition.get("get_payments") == True:
+			if condition.get("cost_center"):
+				common_filter_conditions.append(payment_entry.cost_center == condition["cost_center"])
+
+			if condition.get("accounting_dimensions"):
+				for field, val in condition.get("accounting_dimensions").items():
+					common_filter_conditions.append(payment_entry[field] == val)
+
+			if condition.get("minimum_payment_amount"):
+				common_filter_conditions.append(
+					payment_entry.unallocated_amount.gte(condition["minimum_payment_amount"])
+				)
+
+			if condition.get("maximum_payment_amount"):
+				common_filter_conditions.append(
+					payment_entry.unallocated_amount.lte(condition["maximum_payment_amount"])
+				)
+		q = q.where(Criterion.all(common_filter_conditions))
+>>>>>>> ff60ec85b8 (refactor: pass dimension filters to query)
 
 		payment_name_filter = ""
 		if payment_name:
