@@ -1171,6 +1171,58 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
 		pr.reconcile()
 
+	def test_multi_currency_journal_with_same_exc_rate_as_payment(self):
+		self.supplier = "_Test Supplier USD"
+		amount = 10
+		exc_rate = 80
+		# Credit 'Creditors' account to simulate an invoice
+		je = self.create_journal_entry(self.creditors_usd, self.expense_account, -amount)
+		je.multi_currency = True
+		je.accounts[0].party_type = "Supplier"
+		je.accounts[0].party = self.supplier
+		je.accounts[0].account_currency = "USD"
+		je.accounts[0].exchange_rate = exc_rate
+		je.accounts[1].debit_in_account_currency = amount * exc_rate
+		je.save().submit()
+
+		pe = create_payment_entry(
+			company=self.company,
+			payment_type="Pay",
+			party_type="Supplier",
+			party=self.supplier,
+			paid_from=self.bank,
+			paid_to=self.creditors_usd,
+			paid_amount=amount * exc_rate,
+		)
+		pe.posting_date = nowdate()
+		pe.target_exchange_rate = exc_rate
+		pe.received_amount = amount
+		pe.base_received_amount = amount * exc_rate
+		pe.save().submit()
+
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Supplier"
+		pr.party = self.supplier
+		pr.receivable_payable_account = self.creditors_usd
+		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
+		pr.get_unreconciled_entries()
+
+		invoices = [invoice.as_dict() for invoice in pr.invoices]
+		payments = [payment.as_dict() for payment in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		# Reconciliation should succeed without creating any Exc Gain/Loss journal as both Journal and Payment Entry are having the same exc rate
+		pr.reconcile()
+		self.assertEqual(pr.invoices, [])
+		self.assertEqual(pr.payments, [])
+
+		journals = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"reference_type": "Journal Entry", "reference_name": je.name, "docstatus": 1},
+			fields=["parent"],
+		)
+		self.assertEqual(journals, [])
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
