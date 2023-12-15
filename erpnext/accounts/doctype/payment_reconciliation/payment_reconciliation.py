@@ -173,6 +173,15 @@ class PaymentReconciliation(Document):
 		if self.payment_name:
 			condition.update({"name": self.payment_name})
 
+		# pass dynamic dimension filter values to query builder
+		dimensions = {}
+		dimensions_and_defaults = get_dimensions()
+		for x in dimensions_and_defaults[0]:
+			dimension = x.fieldname
+			if self.get(dimension):
+				dimensions.update({dimension: self.get(dimension)})
+		condition.update({"accounting_dimensions": dimensions})
+
 		payment_entries = get_advance_payment_entries_for_regional(
 			self.party_type,
 			self.party,
