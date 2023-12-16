@@ -97,7 +97,7 @@ class Deferred_Item(object):
 		if base_amount + already_booked_amount > self.base_net_amount:
 			base_amount = self.base_net_amount - already_booked_amount
 
-		if not (get_first_day(start_date) == start_date and get_last_day(end_date) == end_date):
+		if get_first_day(start_date) != start_date or get_last_day(end_date) != end_date:
 			partial_month = flt(date_diff(end_date, start_date)) / flt(
 				date_diff(get_last_day(end_date), get_first_day(start_date))
 			)

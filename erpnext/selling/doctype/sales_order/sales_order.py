@@ -1005,7 +1005,6 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	# Should be called after mapping items.
 	set_missing_values(so, target_doc)
-	target_doc.set_onload("ignore_price_list", True)
 
 	return target_doc
 
@@ -1094,8 +1093,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	)
 	if automatically_fetch_payment_terms:
 		doclist.set_payment_schedule()
-
-	doclist.set_onload("ignore_price_list", True)
 
 	return doclist
 

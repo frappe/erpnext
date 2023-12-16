@@ -31,8 +31,23 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			secondary_action: () => this.edit_full_form(),
 		});
 
-		this.dialog.set_value("qty", this.item.qty);
 		this.dialog.show();
+
+		let qty = this.item.stock_qty || this.item.transfer_qty || this.item.qty;
+		this.dialog.set_value("qty", qty).then(() => {
+			if (this.item.serial_no) {
+				this.dialog.set_value("scan_serial_no", this.item.serial_no);
+				frappe.model.set_value(this.item.doctype, this.item.name, 'serial_no', '');
+			} else if (this.item.batch_no) {
+				this.dialog.set_value("scan_batch_no", this.item.batch_no);
+				frappe.model.set_value(this.item.doctype, this.item.name, 'batch_no', '');
+			}
+
+			this.dialog.fields_dict.entries.grid.refresh();
+		});
+
+		this.$scan_btn = this.dialog.$wrapper.find(".link-btn");
+		this.$scan_btn.css("display", "inline");
 	}
 
 	get_serial_no_filters() {
@@ -95,6 +110,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		if (this.item.has_serial_no) {
 			fields.push({
 				fieldtype: 'Data',
+				options: 'Barcode',
 				fieldname: 'scan_serial_no',
 				label: __('Scan Serial No'),
 				get_query: () => {
@@ -106,15 +122,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			});
 		}
 
-		if (this.item.has_batch_no && this.item.has_serial_no) {
-			fields.push({
-				fieldtype: 'Column Break',
-			});
-		}
-
-		if (this.item.has_batch_no) {
+		if (this.item.has_batch_no && !this.item.has_serial_no) {
 			fields.push({
 				fieldtype: 'Data',
+				options: 'Barcode',
 				fieldname: 'scan_batch_no',
 				label: __('Scan Batch No'),
 				onchange: () => this.update_serial_batch_no()
@@ -309,6 +320,14 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_auto_data() {
+		if (this.item.serial_and_batch_bundle || this.item.rejected_serial_and_batch_bundle) {
+			return;
+		}
+
+		if (this.item.serial_no || this.item.batch_no) {
+			return;
+		}
+
 		let { qty, based_on } = this.dialog.get_values();
 
 		if (!based_on) {
@@ -340,15 +359,56 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		const { scan_serial_no, scan_batch_no } = this.dialog.get_values();
 
 		if (scan_serial_no) {
-			this.dialog.fields_dict.entries.df.data.push({
-				serial_no: scan_serial_no
+			let existing_row = this.dialog.fields_dict.entries.df.data.filter(d => {
+				if (d.serial_no === scan_serial_no) {
+					return d
+				}
 			});
 
-			this.dialog.fields_dict.scan_serial_no.set_value('');
+			if (existing_row?.length) {
+				frappe.throw(__('Serial No {0} already exists', [scan_serial_no]));
+			}
+
+			if (!this.item.has_batch_no) {
+				this.dialog.fields_dict.entries.df.data.push({
+					serial_no: scan_serial_no
+				});
+
+				this.dialog.fields_dict.scan_serial_no.set_value('');
+			} else {
+				frappe.call({
+					method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_batch_no_from_serial_no',
+					args: {
+						serial_no: scan_serial_no,
+					},
+					callback: (r) => {
+						if (r.message) {
+							this.dialog.fields_dict.entries.df.data.push({
+								serial_no: scan_serial_no,
+								batch_no: r.message
+							});
+
+							this.dialog.fields_dict.scan_serial_no.set_value('');
+						}
+					}
+
+				})
+			}
 		} else if (scan_batch_no) {
-			this.dialog.fields_dict.entries.df.data.push({
-				batch_no: scan_batch_no
+			let existing_row = this.dialog.fields_dict.entries.df.data.filter(d => {
+				if (d.batch_no === scan_batch_no) {
+					return d
+				}
 			});
+
+			if (existing_row?.length) {
+				existing_row[0].qty += 1;
+			} else {
+				this.dialog.fields_dict.entries.df.data.push({
+					batch_no: scan_batch_no,
+					qty: 1
+				});
+			}
 
 			this.dialog.fields_dict.scan_batch_no.set_value('');
 		}

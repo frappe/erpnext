@@ -351,5 +351,6 @@ erpnext.patches.v15_0.set_reserved_stock_in_bin
 erpnext.patches.v14_0.create_accounting_dimensions_in_supplier_quotation
 erpnext.patches.v14_0.update_zero_asset_quantity_field
 execute:frappe.db.set_single_value("Buying Settings", "project_update_frequency", "Each Transaction")
+execute:frappe.db.set_default("date_format", frappe.db.get_single_value("System Settings", "date_format"))
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger

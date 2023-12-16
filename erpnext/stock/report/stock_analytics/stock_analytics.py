@@ -270,7 +270,7 @@ def get_items(filters):
 	if item_code := filters.get("item_code"):
 		return [item_code]
 	else:
-		item_filters = {}
+		item_filters = {"is_stock_item": 1}
 		if item_group := filters.get("item_group"):
 			children = get_descendants_of("Item Group", item_group, ignore_permissions=True)
 			item_filters["item_group"] = ("in", children + [item_group])

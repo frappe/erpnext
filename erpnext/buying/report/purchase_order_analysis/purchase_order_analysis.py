@@ -114,7 +114,7 @@ def prepare_data(data, filters):
 		if filters.get("group_by_po"):
 			po_name = row["purchase_order"]
 
-			if not po_name in purchase_order_map:
+			if po_name not in purchase_order_map:
 				# create an entry
 				row_copy = copy.deepcopy(row)
 				purchase_order_map[po_name] = row_copy
