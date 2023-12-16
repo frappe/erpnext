@@ -283,8 +283,8 @@ class ReceivablePayableReport(object):
 
 			must_consider = False
 			if self.filters.get("for_revaluation_journals"):
-				if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) or (
-					(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
+				if (abs(row.outstanding) > 0.0 / 10**self.currency_precision) or (
+					(abs(row.outstanding_in_account_currency) > 0.0 / 10**self.currency_precision)
 				):
 					must_consider = True
 			else:
@@ -1085,7 +1085,7 @@ class ReceivablePayableReport(object):
 			)
 
 		if self.filters.show_remarks:
-			self.add_column(label=_("Remarks"), fieldname="remarks", fieldtype="Text", width=200),
+			self.add_column(label=_("Remarks"), fieldname="remarks", fieldtype="Text", width=200)
 
 	def add_column(self, label, fieldname=None, fieldtype="Currency", options=None, width=120):
 		if not fieldname:

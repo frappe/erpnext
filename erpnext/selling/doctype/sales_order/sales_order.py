@@ -613,7 +613,9 @@ def make_material_request(source_name, target_doc=None):
 			"Sales Order Item": {
 				"doctype": "Material Request Item",
 				"field_map": {"name": "sales_order_item", "parent": "sales_order"},
-				"condition": lambda item: not frappe.db.exists("Product Bundle", item.item_code)
+				"condition": lambda item: not frappe.db.exists(
+					"Product Bundle", {"name": item.item_code, "disabled": 0}
+				)
 				and get_remaining_qty(item) > 0,
 				"postprocess": update_item,
 			},
@@ -714,8 +716,6 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 
 	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
 
-	target_doc.set_onload("ignore_price_list", True)
-
 	return target_doc
 
 
@@ -803,8 +803,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 	)
 	if automatically_fetch_payment_terms:
 		doclist.set_payment_schedule()
-
-	doclist.set_onload("ignore_price_list", True)
 
 	return doclist
 
@@ -1163,7 +1161,7 @@ def set_delivery_date(items, sales_order):
 
 
 def is_product_bundle(item_code):
-	return frappe.db.exists("Product Bundle", item_code)
+	return frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0})
 
 
 @frappe.whitelist()
@@ -1362,7 +1360,7 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 		product_bundle_parents = [
 			pb.new_item_code
 			for pb in frappe.get_all(
-				"Product Bundle", {"new_item_code": ["in", item_codes]}, ["new_item_code"]
+				"Product Bundle", {"new_item_code": ["in", item_codes], "disabled": 0}, ["new_item_code"]
 			)
 		]
 

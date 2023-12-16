@@ -182,7 +182,7 @@ def update_stock(args, out):
 
 
 def set_valuation_rate(out, args):
-	if frappe.db.exists("Product Bundle", args.item_code, cache=True):
+	if frappe.db.exists("Product Bundle", {"name": args.item_code, "disabled": 0}, cache=True):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
 
@@ -391,7 +391,6 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"net_amount": 0.0,
 			"discount_percentage": 0.0,
 			"discount_amount": flt(args.discount_amount) or 0.0,
-			"supplier": get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults),
 			"update_stock": args.get("update_stock")
 			if args.get("doctype") in ["Sales Invoice", "Purchase Invoice"]
 			else 0,
@@ -410,6 +409,10 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"grant_commission": item.get("grant_commission"),
 		}
 	)
+
+	default_supplier = get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults)
+	if default_supplier:
+		out.supplier = default_supplier
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 		out.update(calculate_service_end_date(args, item))

@@ -179,6 +179,7 @@ def get_balance_on(
 	in_account_currency=True,
 	cost_center=None,
 	ignore_account_permission=False,
+	start_date=None,
 ):
 	if not account and frappe.form_dict.get("account"):
 		account = frappe.form_dict.get("account")
@@ -192,6 +193,8 @@ def get_balance_on(
 		cost_center = frappe.form_dict.get("cost_center")
 
 	cond = ["is_cancelled=0"]
+	if start_date:
+		cond.append("posting_date >= %s" % frappe.db.escape(cstr(start_date)))
 	if date:
 		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
@@ -1806,6 +1809,8 @@ class QueryPaymentLedger(object):
 				.where(ple.delinked == 0)
 				.where(Criterion.all(filter_on_against_voucher_no))
 				.where(Criterion.all(self.common_filter))
+				.where(Criterion.all(self.dimensions_filter))
+				.where(Criterion.all(self.voucher_posting_date))
 				.groupby(ple.against_voucher_type, ple.against_voucher_no, ple.party_type, ple.party)
 				.orderby(ple.posting_date, ple.voucher_no)
 				.having(qb.Field("amount_in_account_currency") > 0)

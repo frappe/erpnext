@@ -6,4 +6,6 @@ from frappe.model.document import Document
 
 
 class PaymentReconciliationInvoice(Document):
-	pass
+	@staticmethod
+	def get_list(args):
+		pass

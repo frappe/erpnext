@@ -352,9 +352,6 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		ignore_permissions=ignore_permissions,
 	)
 
-	# postprocess: fetch shipping address, set missing values
-	doclist.set_onload("ignore_price_list", True)
-
 	return doclist
 
 
@@ -422,8 +419,6 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		set_missing_values,
 		ignore_permissions=ignore_permissions,
 	)
-
-	doclist.set_onload("ignore_price_list", True)
 
 	return doclist
 
