@@ -345,21 +345,16 @@ def get_tds_docs_query(filters, bank_accounts, tds_accounts):
 
 	if filters.get("party"):
 		party = [filters.get("party")]
-		query = query.where(
-			((gle.account.isin(tds_accounts) & gle.against.isin(party)))
-			| ((gle.voucher_type == "Journal Entry") & (gle.party == filters.get("party")))
-			| gle.party.isin(party)
+		jv_condition = gle.against.isin(party) | (
+			(gle.voucher_type == "Journal Entry") & (gle.party == filters.get("party"))
 		)
 	else:
 		party = frappe.get_all(filters.get("party_type"), pluck="name")
-		query = query.where(
-			((gle.account.isin(tds_accounts) & gle.against.isin(party)))
-			| (
-				(gle.voucher_type == "Journal Entry")
-				& ((gle.party_type == filters.get("party_type")) | (gle.party_type == ""))
-			)
-			| gle.party.isin(party)
+		jv_condition = gle.against.isin(party) | (
+			(gle.voucher_type == "Journal Entry")
+			& ((gle.party_type == filters.get("party_type")) | (gle.party_type == ""))
 		)
+	query = query.where((gle.account.isin(tds_accounts) & jv_condition) | gle.party.isin(party))
 	return query
 
 
