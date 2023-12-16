@@ -407,13 +407,10 @@
                         "Bewertungskorrektur zu Forderungen aus Lieferungen und Leistungen": {
                             "account_number": "9960"
                         },
-                        "Debitoren": {
-                            "is_group": 1,
-                            "account_number": "10000"
-                        },
-                        "Forderungen aus Lieferungen und Leistungen": {
+                        "Forderungen aus Lieferungen und Leistungen mit Kontokorrent": {
                             "account_number": "1200",
-                            "account_type": "Receivable"
+                            "account_type": "Receivable",
+                            "is_group": 1
                         },
                         "Forderungen aus Lieferungen und Leistungen ohne Kontokorrent": {
                             "account_number": "1210"
@@ -1138,17 +1135,14 @@
                     "Bewertungskorrektur zu Verb. aus Lieferungen und Leistungen": {
                         "account_number": "9964"
                     },
-                    "Kreditoren": {
-                        "account_number": "70000",
+                    "Verb. aus Lieferungen und Leistungen mit Kontokorrent": {
+                        "account_number": "3300",
+                        "account_type": "Payable",
                         "is_group": 1,
-                        "Wareneingangs-­Verrechnungskonto" : {
+                        "Wareneingangs-Verrechnungskonto" : {
                             "account_number": "70001",
                             "account_type": "Stock Received But Not Billed"
                         }
-                    },
-                    "Verb. aus Lieferungen und Leistungen": {
-                        "account_number": "3300",
-                        "account_type": "Payable"
                     },
                     "Verb. aus Lieferungen und Leistungen ohne Kontokorrent": {
                         "account_number": "3310"
