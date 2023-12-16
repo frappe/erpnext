@@ -188,7 +188,7 @@ frappe.query_reports["Accounts Receivable"] = {
 		},
 		{
 			"fieldname": "ignore_accounts",
-			"label": __("Ignore by Voucher"),
+			"label": __("Group by Voucher"),
 			"fieldtype": "Check",
 		}
 
