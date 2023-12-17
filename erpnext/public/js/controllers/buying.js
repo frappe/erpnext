@@ -361,9 +361,14 @@ erpnext.buying = {
 								new erpnext.SerialBatchPackageSelector(
 									me.frm, item, (r) => {
 										if (r) {
+											let qty = Math.abs(r.total_qty);
+											if (doc.is_return) {
+												qty = qty * -1;
+											}
+
 											let update_values = {
 												"serial_and_batch_bundle": r.name,
-												"qty": Math.abs(r.total_qty)
+												"qty": qty
 											}
 
 											if (r.warehouse) {
@@ -396,9 +401,14 @@ erpnext.buying = {
 								new erpnext.SerialBatchPackageSelector(
 									me.frm, item, (r) => {
 										if (r) {
+											let qty = Math.abs(r.total_qty);
+											if (doc.is_return) {
+												qty = qty * -1;
+											}
+
 											let update_values = {
 												"serial_and_batch_bundle": r.name,
-												"rejected_qty": Math.abs(r.total_qty)
+												"rejected_qty": qty
 											}
 
 											if (r.warehouse) {

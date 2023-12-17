@@ -174,6 +174,115 @@ class TestDeliveryNote(FrappeTestCase):
 		for field, value in field_values.items():
 			self.assertEqual(cstr(serial_no.get(field)), value)
 
+	def test_delivery_note_return_against_denormalized_serial_no(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		sn_item = "Old Serial NO Item Return Test - 1"
+		make_item(
+			sn_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "OSN-.####",
+				"is_stock_item": 1,
+			},
+		)
+
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		serial_nos = [
+			"OSN-1",
+			"OSN-2",
+			"OSN-3",
+			"OSN-4",
+			"OSN-5",
+			"OSN-6",
+			"OSN-7",
+			"OSN-8",
+			"OSN-9",
+			"OSN-10",
+			"OSN-11",
+			"OSN-12",
+		]
+
+		for sn in serial_nos:
+			if not frappe.db.exists("Serial No", sn):
+				sn_doc = frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"item_code": sn_item,
+						"serial_no": sn,
+					}
+				)
+				sn_doc.insert()
+
+		warehouse = "_Test Warehouse - _TC"
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		se_doc = make_stock_entry(
+			item_code=sn_item,
+			company=company,
+			target="_Test Warehouse - _TC",
+			qty=12,
+			basic_rate=100,
+			do_not_submit=1,
+		)
+
+		se_doc.items[0].serial_no = "\n".join(serial_nos)
+		se_doc.submit()
+
+		self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
+
+		dn = create_delivery_note(
+			item_code=sn_item,
+			qty=12,
+			rate=500,
+			warehouse=warehouse,
+			company=company,
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			do_not_submit=1,
+		)
+
+		dn.items[0].serial_no = "\n".join(serial_nos)
+		dn.submit()
+		dn.reload()
+
+		self.assertTrue(dn.items[0].serial_no)
+
+		frappe.flags.ignore_serial_batch_bundle_validation = False
+
+		# return entry
+		dn1 = make_sales_return(dn.name)
+
+		dn1.items[0].qty = -2
+
+		bundle_doc = frappe.get_doc("Serial and Batch Bundle", dn1.items[0].serial_and_batch_bundle)
+		bundle_doc.set("entries", bundle_doc.entries[:2])
+		bundle_doc.save()
+
+		dn1.save()
+		dn1.submit()
+
+		returned_serial_nos1 = get_serial_nos_from_bundle(dn1.items[0].serial_and_batch_bundle)
+		for serial_no in returned_serial_nos1:
+			self.assertTrue(serial_no in serial_nos)
+
+		dn2 = make_sales_return(dn.name)
+
+		dn2.items[0].qty = -2
+
+		bundle_doc = frappe.get_doc("Serial and Batch Bundle", dn2.items[0].serial_and_batch_bundle)
+		bundle_doc.set("entries", bundle_doc.entries[:2])
+		bundle_doc.save()
+
+		dn2.save()
+		dn2.submit()
+
+		returned_serial_nos2 = get_serial_nos_from_bundle(dn2.items[0].serial_and_batch_bundle)
+		for serial_no in returned_serial_nos2:
+			self.assertTrue(serial_no in serial_nos)
+			self.assertFalse(serial_no in returned_serial_nos1)
+
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
 

@@ -308,6 +308,8 @@ class SellingController(StockController):
 									"warehouse": p.warehouse or d.warehouse,
 									"item_code": p.item_code,
 									"qty": flt(p.qty),
+									"serial_no": p.serial_no if self.docstatus == 2 else None,
+									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
 									"serial_and_batch_bundle": p.serial_and_batch_bundle
 									or get_serial_and_batch_bundle(p, self),
@@ -330,6 +332,8 @@ class SellingController(StockController):
 							"warehouse": d.warehouse,
 							"item_code": d.item_code,
 							"qty": d.stock_qty,
+							"serial_no": d.serial_no if self.docstatus == 2 else None,
+							"batch_no": d.batch_no if self.docstatus == 2 else None,
 							"uom": d.uom,
 							"stock_uom": d.stock_uom,
 							"conversion_factor": d.conversion_factor,
