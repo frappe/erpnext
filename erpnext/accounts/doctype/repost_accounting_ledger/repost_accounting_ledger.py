@@ -108,7 +108,7 @@ class RepostAccountingLedger(Document):
 		return rendered_page
 
 	def on_submit(self):
-		if len(self.vouchers) > 1:
+		if len(self.vouchers) > 5:
 			job_name = "repost_accounting_ledger_" + self.name
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
@@ -151,8 +151,6 @@ def start_repost(account_repost_doc=str) -> None:
 					if not repost_doc.delete_cancelled_entries:
 						doc.make_gl_entries(1)
 					doc.make_gl_entries()
-
-				frappe.db.commit()
 
 
 def get_allowed_types_from_settings():

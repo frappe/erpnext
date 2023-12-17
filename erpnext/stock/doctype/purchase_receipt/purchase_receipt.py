@@ -1057,7 +1057,6 @@ def make_purchase_invoice(source_name, target_doc=None):
 		set_missing_values,
 	)
 
-	doclist.set_onload("ignore_price_list", True)
 	return doclist
 
 

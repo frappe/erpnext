@@ -441,6 +441,20 @@ class PurchaseOrder(BuyingController):
 		else:
 			self.db_set("per_received", 0, update_modified=False)
 
+	def update_ordered_qty_in_so_for_removed_items(self, removed_items):
+		"""
+		Updates ordered_qty in linked SO when item rows are removed using Update Items
+		"""
+		if not self.is_against_so():
+			return
+		for item in removed_items:
+			prev_ordered_qty = frappe.get_cached_value(
+				"Sales Order Item", item.get("sales_order_item"), "ordered_qty"
+			)
+			frappe.db.set_value(
+				"Sales Order Item", item.get("sales_order_item"), "ordered_qty", prev_ordered_qty - item.qty
+			)
+
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
 	"""get last purchase rate for an item"""
@@ -527,8 +541,6 @@ def make_purchase_receipt(source_name, target_doc=None):
 		set_missing_values,
 	)
 
-	doc.set_onload("ignore_price_list", True)
-
 	return doc
 
 
@@ -608,7 +620,6 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 		postprocess,
 		ignore_permissions=ignore_permissions,
 	)
-	doc.set_onload("ignore_price_list", True)
 
 	return doc
 

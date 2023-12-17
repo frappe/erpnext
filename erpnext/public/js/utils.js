@@ -971,7 +971,7 @@ function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 }
 
 function get_time_left(timestamp, agreement_status) {
-	const diff = moment(timestamp).diff(moment());
+	const diff = moment(timestamp).diff(frappe.datetime.system_datetime(true));
 	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : 'Failed';
 	let indicator = (diff_display == 'Failed' && agreement_status != 'Fulfilled') ? 'red' : 'green';
 	return {'diff_display': diff_display, 'indicator': indicator};
