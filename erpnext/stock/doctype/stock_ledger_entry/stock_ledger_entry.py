@@ -181,6 +181,9 @@ class StockLedgerEntry(Document):
 			frappe.throw(_("Actual Qty is mandatory"))
 
 	def validate_serial_batch_no_bundle(self):
+		if self.is_cancelled == 1:
+			return
+
 		item_detail = frappe.get_cached_value(
 			"Item",
 			self.item_code,
