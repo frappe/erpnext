@@ -200,7 +200,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		"""
 		select
 			name as gl_entry, posting_date, account, party_type, party,
-			voucher_type, voucher_no, {dimension_fields}
+			voucher_type, voucher_subtype, voucher_no, {dimension_fields}
 			cost_center, project, {transaction_currency_fields}
 			against_voucher_type, against_voucher, account_currency,
 			against_link, against, is_opening, creation {select_fields}
@@ -606,6 +606,12 @@ def get_columns(filters):
 
 	columns += [
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
+		{
+			"label": _("Voucher Subtype"),
+			"fieldname": "voucher_subtype",
+			"fieldtype": "Data",
+			"width": 180,
+		},
 		{
 			"label": _("Voucher No"),
 			"fieldname": "voucher_no",
