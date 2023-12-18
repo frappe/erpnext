@@ -1242,11 +1242,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-10-01 21:00:44.556816",
-=======
  "modified": "2023-12-18 17:26:41.279663",
->>>>>>> 8d79365e0d (perf: index `return_against` on delivery note (#38827))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
