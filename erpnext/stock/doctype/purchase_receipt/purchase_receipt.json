@@ -288,7 +288,8 @@
    "no_copy": 1,
    "options": "Purchase Receipt",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "section_addresses",
@@ -1241,7 +1242,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-01 21:00:44.556816",
+ "modified": "2023-12-18 17:26:41.279663",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
