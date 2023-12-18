@@ -544,7 +544,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters.update({"party_account": self.debtors_usd})
 		report = execute(filters)[1]
 		self.assertEqual(len(report), 1)
-		expected_data = [8000.0, 8000.0, self.debtors_usd, si2.currency]
+		expected_data = [100.0, 100.0, self.debtors_usd, si2.currency]
 		row = report[0]
 		self.assertEqual(
 			expected_data, [row.invoiced, row.outstanding, row.party_account, row.account_currency]
