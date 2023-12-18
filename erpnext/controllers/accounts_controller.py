@@ -939,13 +939,13 @@ class AccountsController(TransactionBase):
 		}
 		if self.doctype in voucher_subtypes:
 			return self.get(voucher_subtypes[self.doctype])
-		elif self.is_return and self.doctype == "Purchase Receipt":
+		elif self.doctype == "Purchase Receipt" and self.is_return:
 			return "Purchase Return"
-		elif self.is_return and self.doctype == "Delivery Note":
+		elif self.doctype == "Delivery Note" and self.is_return:
 			return "Sales Return"
-		elif (self.is_return and self.doctype == "Sales Invoice") or self.doctype == "Purchase Invoice":
+		elif (self.doctype == "Sales Invoice" and self.is_return) or self.doctype == "Purchase Invoice":
 			return "Credit Note"
-		elif (self.is_return and self.doctype == "Purchase Invoice") or self.doctype == "Sales Invoice":
+		elif (self.doctype == "Purchase Invoice" and self.is_return) or self.doctype == "Sales Invoice":
 			return "Debit Note"
 		return self.doctype
 
