@@ -1014,12 +1014,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 				"item_code": fg_item,
 				"warehouse": sco.items[0].warehouse,
 				"has_batch_no": 1,
-				"entries": [
-					{
-						"batch_no": frappe.generate_hash(length=10),
-						"qty": sco.items[0].qty
-					}
-				]
+				"entries": [{"batch_no": batch_doc.name, "qty": sco.items[0].qty}],
 			}
 		).insert(ignore_permissions=True)
 
