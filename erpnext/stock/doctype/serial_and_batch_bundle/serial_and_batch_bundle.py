@@ -459,7 +459,7 @@ class SerialandBatchBundle(Document):
 			qty_field = "qty"
 
 		precision = row.precision
-		if self.voucher_type in ["Subcontracting Receipt"]:
+		if row.get("doctype") in ["Subcontracting Receipt Supplied Item"]:
 			qty_field = "consumed_qty"
 
 		if abs(abs(flt(self.total_qty, precision)) - abs(flt(row.get(qty_field), precision))) > 0.01:
