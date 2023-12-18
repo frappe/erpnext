@@ -817,6 +817,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			self.assertEqual(rm_item.rate, 100)
 			self.assertEqual(rm_item.amount, rm_item.consumed_qty * rm_item.rate)
 
+<<<<<<< HEAD
 	def test_quality_inspection_for_subcontracting_receipt(self):
 		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
 			create_quality_inspection,
@@ -929,10 +930,58 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		# Transfer RM's to Subcontractor
 		make_stock_transfer_entry(
+=======
+	def test_subcontracting_receipt_cancel_with_batch(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		# Step - 1: Set Backflush Based On as "BOM"
+		set_backflush_based_on("BOM")
+
+		# Step - 2: Create FG and RM Items
+		fg_item = make_item(
+			properties={"is_stock_item": 1, "is_sub_contracted_item": 1, "has_batch_no": 1}
+		).name
+		rm_item1 = make_item(properties={"is_stock_item": 1}).name
+		rm_item2 = make_item(properties={"is_stock_item": 1}).name
+		make_item("Subcontracted Service Item Test For Batch 1", {"is_stock_item": 0})
+
+		# Step - 3: Create BOM for FG Item
+		bom = make_bom(item=fg_item, raw_materials=[rm_item1, rm_item2])
+		for rm_item in bom.items:
+			self.assertEqual(rm_item.rate, 0)
+			self.assertEqual(rm_item.amount, 0)
+		bom = bom.name
+
+		# Step - 4: Create PO and SCO
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item Test For Batch 1",
+				"qty": 100,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 100,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		for rm_item in sco.supplied_items:
+			self.assertEqual(rm_item.rate, 0)
+			self.assertEqual(rm_item.amount, 0)
+
+		# Step - 5: Inward Raw Materials
+		rm_items = get_rm_items(sco.supplied_items)
+		for rm_item in rm_items:
+			rm_item["rate"] = 100
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+
+		# Step - 6: Transfer RM's to Subcontractor
+		se = make_stock_transfer_entry(
+>>>>>>> fb5090fd3f (fix: not able to cancel SCR with Batch (#38817))
 			sco_no=sco.name,
 			rm_items=rm_items,
 			itemwise_details=copy.deepcopy(itemwise_details),
 		)
+<<<<<<< HEAD
 
 		# Create Subcontracting Receipt
 		scr = make_subcontracting_receipt(sco.name)
@@ -972,6 +1021,31 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.submit()
 
 		self.assertTrue(frappe.db.get_value("Purchase Receipt", {"subcontracting_receipt": scr.name}))
+=======
+		for item in se.items:
+			self.assertEqual(item.qty, 100)
+			self.assertEqual(item.basic_rate, 100)
+			self.assertEqual(item.amount, item.qty * item.basic_rate)
+
+		batch_doc = frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"item": fg_item,
+				"batch_id": frappe.generate_hash(length=10),
+			}
+		).insert(ignore_permissions=True)
+
+		# Step - 7: Create Subcontracting Receipt
+		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].batch_no = batch_doc.batch_id
+		scr.save()
+		scr.submit()
+		scr.load_from_db()
+
+		# Step - 8: Cancel Subcontracting Receipt
+		scr.cancel()
+		self.assertTrue(scr.docstatus == 2)
+>>>>>>> fb5090fd3f (fix: not able to cancel SCR with Batch (#38817))
 
 
 def make_return_subcontracting_receipt(**args):
