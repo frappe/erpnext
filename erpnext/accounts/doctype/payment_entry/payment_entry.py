@@ -401,13 +401,6 @@ class PaymentEntry(AccountsController):
 				)
 
 				for field, value in ref_details.items():
-					if d.exchange_gain_loss is not None:
-						# for cases where gain/loss is booked into invoice
-						# exchange_gain_loss is calculated from invoice & populated
-						# and row.exchange_rate is already set to payment entry's exchange rate
-						# refer -> `update_reference_in_payment_entry()` in utils.py
-						continue
-
 					if field == "exchange_rate" or not d.get(field) or force:
 						d.db_set(field, value)
 
