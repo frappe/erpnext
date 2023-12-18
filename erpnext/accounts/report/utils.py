@@ -252,7 +252,7 @@ def get_journal_entries(filters, args):
 		.where(
 			(je.voucher_type == "Journal Entry")
 			& (journal_account.party == filters.get(args.party))
-			& (journal_account.account.isin(args.party_account))
+			& (journal_account.account == args.party_account)
 		)
 		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
@@ -281,7 +281,7 @@ def get_payment_entries(filters, args):
 			pe.cost_center,
 		)
 		.where(
-			(pe.party == filters.get(args.party)) & (pe[args.account_fieldname].isin(args.party_account))
+			(pe.party == filters.get(args.party)) & (pe[args.account_fieldname] == args.party_account)
 		)
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
@@ -370,7 +370,7 @@ def filter_invoices_based_on_dimensions(filters, query, parent_doc):
 
 
 def get_opening_row(party_type, party, from_date, company):
-	party_account = get_party_account(party_type, party, company, include_advance=True)
+	party_account = get_party_account(party_type, party, company)
 	gle = frappe.qb.DocType("GL Entry")
 	return (
 		frappe.qb.from_(gle)
@@ -381,7 +381,7 @@ def get_opening_row(party_type, party, from_date, company):
 			(Sum(gle.debit) - Sum(gle.credit)).as_("balance"),
 		)
 		.where(
-			(gle.account.isin(party_account))
+			(gle.account == party_account)
 			& (gle.party == party)
 			& (gle.posting_date < from_date)
 			& (gle.is_cancelled == 0)
