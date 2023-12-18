@@ -12,8 +12,13 @@ from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
 from frappe.query_builder.custom import GROUP_CONCAT
+<<<<<<< HEAD
 from frappe.query_builder.functions import Coalesce, Locate, Replace, Sum
 from frappe.utils import cint, floor, flt
+=======
+from frappe.query_builder.functions import Coalesce, IfNull, Locate, Replace, Sum
+from frappe.utils import ceil, cint, floor, flt, today
+>>>>>>> e18dc5cea3 (fix: incorrect limit (#38818))
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.selling.doctype.sales_order.sales_order import (
@@ -728,8 +733,13 @@ def get_available_item_locations_for_serialized_item(
 		frappe.qb.from_(sn)
 		.select(sn.name, sn.warehouse)
 		.where((sn.item_code == item_code) & (sn.company == company))
+<<<<<<< HEAD
 		.orderby(sn.creation)
 		.limit(cint(required_qty + total_picked_qty))
+=======
+		.orderby(sn.purchase_date)
+		.limit(ceil(required_qty + total_picked_qty))
+>>>>>>> e18dc5cea3 (fix: incorrect limit (#38818))
 	)
 
 	if from_warehouses:
@@ -789,6 +799,13 @@ def get_available_item_locations_for_batched_item(
 				"qty": required_qty + total_picked_qty,
 			}
 		)
+<<<<<<< HEAD
+=======
+		.groupby(sle.warehouse, sle.batch_no, sle.item_code)
+		.having(Sum(sle.actual_qty) > 0)
+		.orderby(IfNull(batch.expiry_date, "2200-01-01"), batch.creation, sle.batch_no, sle.warehouse)
+		.limit(ceil(required_qty + total_picked_qty))
+>>>>>>> e18dc5cea3 (fix: incorrect limit (#38818))
 	)
 
 	warehouse_wise_batches = frappe._dict()
@@ -814,6 +831,7 @@ def get_available_item_locations_for_batched_item(
 			}
 		).make_serial_and_batch_bundle()
 
+<<<<<<< HEAD
 		locations.append(
 			{
 				"qty": qty,
@@ -822,6 +840,30 @@ def get_available_item_locations_for_batched_item(
 				"serial_and_batch_bundle": bundle_doc.name,
 			}
 		)
+=======
+	if locations:
+		sn = frappe.qb.DocType("Serial No")
+		conditions = (sn.item_code == item_code) & (sn.company == company)
+
+		for location in locations:
+			location.qty = (
+				required_qty if location.qty > required_qty else location.qty
+			)  # if extra qty in batch
+
+			serial_nos = (
+				frappe.qb.from_(sn)
+				.select(sn.name)
+				.where(
+					(conditions) & (sn.batch_no == location.batch_no) & (sn.warehouse == location.warehouse)
+				)
+				.orderby(sn.purchase_date)
+				.limit(ceil(location.qty + total_picked_qty))
+			).run(as_dict=True)
+
+			serial_nos = [sn.name for sn in serial_nos]
+			location.serial_no = serial_nos
+			location.qty = len(serial_nos)
+>>>>>>> e18dc5cea3 (fix: incorrect limit (#38818))
 
 	return locations
 
@@ -835,7 +877,7 @@ def get_available_item_locations_for_other_item(
 		.select(bin.warehouse, bin.actual_qty.as_("qty"))
 		.where((bin.item_code == item_code) & (bin.actual_qty > 0))
 		.orderby(bin.creation)
-		.limit(cint(required_qty + total_picked_qty))
+		.limit(ceil(required_qty + total_picked_qty))
 	)
 
 	if from_warehouses:
