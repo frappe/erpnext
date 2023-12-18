@@ -231,6 +231,9 @@ def get_conditions(filters):
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
+	if filters.get("voucher_no_not_in"):
+		conditions.append("voucher_no not in %(voucher_no_not_in)s")
+
 	if filters.get("group_by") == "Group by Party" and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
 
