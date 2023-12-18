@@ -13,7 +13,7 @@ from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
 from frappe.query_builder.custom import GROUP_CONCAT
 from frappe.query_builder.functions import Coalesce, IfNull, Locate, Replace, Sum
-from frappe.utils import cint, floor, flt, today
+from frappe.utils import ceil, cint, floor, flt, today
 from frappe.utils.nestedset import get_descendants_of
 
 from erpnext.selling.doctype.sales_order.sales_order import (
@@ -605,7 +605,7 @@ def get_available_item_locations_for_serialized_item(
 		.select(sn.name, sn.warehouse)
 		.where((sn.item_code == item_code) & (sn.company == company))
 		.orderby(sn.purchase_date)
-		.limit(cint(required_qty + total_picked_qty))
+		.limit(ceil(required_qty + total_picked_qty))
 	)
 
 	if from_warehouses:
@@ -647,7 +647,7 @@ def get_available_item_locations_for_batched_item(
 		.groupby(sle.warehouse, sle.batch_no, sle.item_code)
 		.having(Sum(sle.actual_qty) > 0)
 		.orderby(IfNull(batch.expiry_date, "2200-01-01"), batch.creation, sle.batch_no, sle.warehouse)
-		.limit(cint(required_qty + total_picked_qty))
+		.limit(ceil(required_qty + total_picked_qty))
 	)
 
 	if from_warehouses:
@@ -680,7 +680,7 @@ def get_available_item_locations_for_serial_and_batched_item(
 					(conditions) & (sn.batch_no == location.batch_no) & (sn.warehouse == location.warehouse)
 				)
 				.orderby(sn.purchase_date)
-				.limit(cint(location.qty + total_picked_qty))
+				.limit(ceil(location.qty + total_picked_qty))
 			).run(as_dict=True)
 
 			serial_nos = [sn.name for sn in serial_nos]
@@ -699,7 +699,7 @@ def get_available_item_locations_for_other_item(
 		.select(bin.warehouse, bin.actual_qty.as_("qty"))
 		.where((bin.item_code == item_code) & (bin.actual_qty > 0))
 		.orderby(bin.creation)
-		.limit(cint(required_qty + total_picked_qty))
+		.limit(ceil(required_qty + total_picked_qty))
 	)
 
 	if from_warehouses:
