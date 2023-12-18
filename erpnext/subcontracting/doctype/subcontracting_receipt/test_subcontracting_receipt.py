@@ -1008,9 +1008,24 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			}
 		).insert(ignore_permissions=True)
 
+		serial_batch_bundle = frappe.get_doc(
+			{
+				"doctype": "Serial and Batch Bundle",
+				"item_code": fg_item,
+				"warehouse": sco.items[0].warehouse,
+				"has_batch_no": 1,
+				"entries": [
+					{
+						"batch_no": frappe.generate_hash(length=10),
+						"qty": sco.items[0].qty
+					}
+				]
+			}
+		).insert(ignore_permissions=True)
+
 		# Step - 7: Create Subcontracting Receipt
 		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].batch_no = batch_doc.batch_id
+		scr.items[0].serial_and_batch_bundle = serial_batch_bundle.name
 		scr.save()
 		scr.submit()
 		scr.load_from_db()
