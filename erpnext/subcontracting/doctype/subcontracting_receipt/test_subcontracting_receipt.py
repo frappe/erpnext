@@ -817,7 +817,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			self.assertEqual(rm_item.rate, 100)
 			self.assertEqual(rm_item.amount, rm_item.consumed_qty * rm_item.rate)
 
-<<<<<<< HEAD
 	def test_quality_inspection_for_subcontracting_receipt(self):
 		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
 			create_quality_inspection,
@@ -930,7 +929,23 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		# Transfer RM's to Subcontractor
 		make_stock_transfer_entry(
-=======
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		# Create Subcontracting Receipt
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.get_scrap_items()
+
+		# Test - 1: Scrap Items should be fetched from BOM in items table with `is_scrap_item` = 1
+		scr_scrap_items = set([item.item_code for item in scr.items if item.is_scrap_item])
+		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
+		self.assertEqual(scr_scrap_items, set(scrap_items))
+
+		scr.submit()
+
 	def test_subcontracting_receipt_cancel_with_batch(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
@@ -976,24 +991,33 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		# Step - 6: Transfer RM's to Subcontractor
 		se = make_stock_transfer_entry(
->>>>>>> fb5090fd3f (fix: not able to cancel SCR with Batch (#38817))
 			sco_no=sco.name,
 			rm_items=rm_items,
 			itemwise_details=copy.deepcopy(itemwise_details),
 		)
-<<<<<<< HEAD
+		for item in se.items:
+			self.assertEqual(item.qty, 100)
+			self.assertEqual(item.basic_rate, 100)
+			self.assertEqual(item.amount, item.qty * item.basic_rate)
 
-		# Create Subcontracting Receipt
+		batch_doc = frappe.get_doc(
+			{
+				"doctype": "Batch",
+				"item": fg_item,
+				"batch_id": frappe.generate_hash(length=10),
+			}
+		).insert(ignore_permissions=True)
+
+		# Step - 7: Create Subcontracting Receipt
 		scr = make_subcontracting_receipt(sco.name)
+		scr.items[0].batch_no = batch_doc.batch_id
 		scr.save()
-		scr.get_scrap_items()
-
-		# Test - 1: Scrap Items should be fetched from BOM in items table with `is_scrap_item` = 1
-		scr_scrap_items = set([item.item_code for item in scr.items if item.is_scrap_item])
-		self.assertEqual(len(scr.items), 3)  # 1 FG Item + 2 Scrap Items
-		self.assertEqual(scr_scrap_items, set(scrap_items))
-
 		scr.submit()
+		scr.load_from_db()
+
+		# Step - 8: Cancel Subcontracting Receipt
+		scr.cancel()
+		self.assertTrue(scr.docstatus == 2)
 
 	@change_settings("Buying Settings", {"auto_create_purchase_receipt": 1})
 	def test_auto_create_purchase_receipt(self):
@@ -1021,31 +1045,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.submit()
 
 		self.assertTrue(frappe.db.get_value("Purchase Receipt", {"subcontracting_receipt": scr.name}))
-=======
-		for item in se.items:
-			self.assertEqual(item.qty, 100)
-			self.assertEqual(item.basic_rate, 100)
-			self.assertEqual(item.amount, item.qty * item.basic_rate)
-
-		batch_doc = frappe.get_doc(
-			{
-				"doctype": "Batch",
-				"item": fg_item,
-				"batch_id": frappe.generate_hash(length=10),
-			}
-		).insert(ignore_permissions=True)
-
-		# Step - 7: Create Subcontracting Receipt
-		scr = make_subcontracting_receipt(sco.name)
-		scr.items[0].batch_no = batch_doc.batch_id
-		scr.save()
-		scr.submit()
-		scr.load_from_db()
-
-		# Step - 8: Cancel Subcontracting Receipt
-		scr.cancel()
-		self.assertTrue(scr.docstatus == 2)
->>>>>>> fb5090fd3f (fix: not able to cancel SCR with Batch (#38817))
 
 
 def make_return_subcontracting_receipt(**args):
