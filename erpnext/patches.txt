@@ -354,3 +354,4 @@ execute:frappe.db.set_single_value("Buying Settings", "project_update_frequency"
 execute:frappe.db.set_default("date_format", frappe.db.get_single_value("System Settings", "date_format"))
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index
