@@ -18,7 +18,6 @@
   "section_break_7",
   "item_code",
   "item_serial_no",
-  "serial_no_name",
   "batch_no",
   "sample_size",
   "column_break1",
@@ -239,13 +238,6 @@
    "fieldname": "manual_inspection",
    "fieldtype": "Check",
    "label": "Manual Inspection"
-  },
-  {
-   "fetch_from": "item_serial_no.serial_no",
-   "fieldname": "serial_no_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Item Serial No Name"
   }
  ],
  "icon": "fa fa-search",
@@ -253,7 +245,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-10 10:38:45.978586",
+ "modified": "2023-08-23 11:56:50.282878",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

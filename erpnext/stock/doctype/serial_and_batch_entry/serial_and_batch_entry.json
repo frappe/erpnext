@@ -6,7 +6,6 @@
  "engine": "InnoDB",
  "field_order": [
   "serial_no",
-  "serial_no_name",
   "batch_no",
   "column_break_2",
   "qty",
@@ -116,13 +115,6 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
-  },
-  {
-   "fetch_from": "serial_no.serial_no",
-   "fieldname": "serial_no_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Serial No Name"
   }
  ],
  "index_web_pages_for_search": 1,

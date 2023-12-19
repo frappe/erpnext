@@ -109,14 +109,12 @@ def get_data(filters):
 		for index, bundle_data in enumerate(serial_nos):
 			if index == 0:
 				args.serial_no = bundle_data.get("serial_no")
-				args.serial_no_name = bundle_data.get("serial_no_name")
 				args.valuation_rate = bundle_data.get("valuation_rate")
 				data.append(args)
 			else:
 				data.append(
 					{
 						"serial_no": bundle_data.get("serial_no"),
-						"serial_no_name": bundle_data.get("serial_no_name"),
 						"valuation_rate": bundle_data.get("valuation_rate"),
 					}
 				)
@@ -132,14 +130,13 @@ def get_serial_nos(filters, serial_bundle_ids):
 
 	for d in frappe.get_all(
 		"Serial and Batch Entry",
-		fields=["serial_no", "serial_no_name", "parent", "stock_value_difference as valuation_rate"],
+		fields=["serial_no", "parent", "stock_value_difference as valuation_rate"],
 		filters=bundle_filters,
 		order_by="idx asc",
 	):
 		bundle_wise_serial_nos.setdefault(d.parent, []).append(
 			{
 				"serial_no": d.serial_no,
-				"serial_no_name": d.serial_no_name,
 				"valuation_rate": abs(d.valuation_rate),
 			}
 		)

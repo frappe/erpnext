@@ -12,7 +12,6 @@
   "column_break_3",
   "service_person",
   "serial_no",
-  "serial_no_name",
   "section_break_6",
   "description",
   "work_details",
@@ -104,19 +103,12 @@
   {
    "fieldname": "section_break_6",
    "fieldtype": "Section Break"
-  },
-  {
-   "fetch_from": "serial_no.serial_no",
-   "fieldname": "serial_no_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Serial No Name"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-10-10 10:40:57.946904",
+ "modified": "2023-02-27 11:09:33.114458",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit Purpose",

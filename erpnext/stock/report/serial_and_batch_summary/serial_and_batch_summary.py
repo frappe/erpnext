@@ -26,7 +26,6 @@ def get_data(filters):
 			"`tabSerial and Batch Bundle`.`item_code`",
 			"`tabSerial and Batch Bundle`.`item_name`",
 			"`tabSerial and Batch Entry`.`serial_no`",
-			"`tabSerial and Batch Entry`.`serial_no_name`",
 			"`tabSerial and Batch Entry`.`batch_no`",
 			"`tabSerial and Batch Entry`.`warehouse`",
 			"`tabSerial and Batch Entry`.`incoming_rate`",
@@ -148,13 +147,7 @@ def get_columns(filters, data):
 
 	if not item_details or item_details.get("has_serial_no"):
 		columns.append(
-			{
-				"label": _("Serial No"),
-				"fieldname": "serial_no",
-				"fieldtype": "Link",
-				"options": "Serial No",
-				"width": 120,
-			}
+			{"label": _("Serial No"), "fieldname": "serial_no", "fieldtype": "Data", "width": 120}
 		)
 
 	if not item_details or item_details.get("has_batch_no"):
