@@ -524,7 +524,7 @@ class TestItem(FrappeTestCase):
 	def test_item_variant_by_manufacturer(self):
 		template = make_item(
 			"_Test Item Variant By Manufacturer", {"has_variants": 1, "variant_based_on": "Manufacturer"}
-		)
+		).name
 
 		for manufacturer in ["DFSS", "DASA", "ASAAS"]:
 			if not frappe.db.exists("Manufacturer", manufacturer):
