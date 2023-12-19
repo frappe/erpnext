@@ -1447,6 +1447,47 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertEqual(row.get("uom"), "Nos")
 			self.assertEqual(row.get("conversion_factor"), 10.0)
 
+	def test_unreserve_qty_on_closing_of_pp(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.utils import get_or_make_bin
+
+		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
+
+		store_warehouse = create_warehouse("Store Warehouse", company="_Test Company")
+		rm_warehouse = create_warehouse("RM Warehouse", company="_Test Company")
+
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+
+		pln = create_production_plan(
+			item_code=fg_item, planned_qty=10, stock_uom="_Test UOM 1", do_not_submit=1
+		)
+
+		pln.for_warehouse = rm_warehouse
+		mr_items = get_items_for_material_requests(pln.as_dict())
+		for d in mr_items:
+			pln.append("mr_items", d)
+
+		pln.save()
+		pln.submit()
+
+		bin_name = get_or_make_bin(rm_item, rm_warehouse)
+		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+
+		pln.reload()
+		pln.set_status(close=True)
+
+		bin_name = get_or_make_bin(rm_item, rm_warehouse)
+		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		self.assertAlmostEqual(after_qty, before_qty - 10)
+
+		pln.reload()
+		pln.set_status(close=False)
+
+		bin_name = get_or_make_bin(rm_item, rm_warehouse)
+		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
+		self.assertAlmostEqual(after_qty, before_qty)
+
 
 def create_production_plan(**args):
 	"""
