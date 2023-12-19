@@ -250,27 +250,18 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		let fields = []
 
 		if (this.item.has_serial_no) {
-			let serial_fields = [
-				{
-					fieldtype: 'Link',
-					options: 'Serial No',
-					fieldname: 'serial_no',
-					label: __('Serial No'),
-					in_list_view: 1,
-					get_query: () => {
-						return {
-							filters: this.get_serial_no_filters()
-						}
-					},
-				},
-				{
-					fieldtype: 'Data',
-					fieldname: 'serial_no_name',
-					label: __('Serial No Name'),
-					hidden: 1,
+			fields.push({
+				fieldtype: 'Link',
+				options: 'Serial No',
+				fieldname: 'serial_no',
+				label: __('Serial No'),
+				in_list_view: 1,
+				get_query: () => {
+					return {
+						filters: this.get_serial_no_filters()
+					}
 				}
-			]
-			fields = [...fields, ...serial_fields];
+			})
 		}
 
 		let batch_fields = []

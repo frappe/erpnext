@@ -1166,7 +1166,7 @@ def get_available_batches_qty(available_batches):
 
 
 def get_available_serial_nos(kwargs):
-	fields = ["name as serial_no", "serial_no as serial_no_name", "warehouse"]
+	fields = ["name as serial_no", "warehouse"]
 	if kwargs.has_batch_no:
 		fields.append("batch_no")
 
