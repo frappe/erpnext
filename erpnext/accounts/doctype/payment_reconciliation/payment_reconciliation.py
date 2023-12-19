@@ -813,3 +813,20 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 @erpnext.allow_regional
 def adjust_allocations_for_taxes(doc):
 	pass
+
+
+@frappe.whitelist()
+def get_queries_for_dimension_filters(company: str = None):
+	dimensions_with_filters = []
+	for d in get_dimensions()[0]:
+		filters = {}
+		meta = frappe.get_meta(d.document_type)
+		if meta.has_field("company") and company:
+			filters.update({"company": company})
+
+		if meta.is_tree:
+			filters.update({"is_group": 0})
+
+		dimensions_with_filters.append({"fieldname": d.fieldname, "filters": filters})
+
+	return dimensions_with_filters
