@@ -459,7 +459,7 @@ def generate_leave_encashment():
 def allocate_earned_leaves():
 	"""Allocate earned leaves to Employees"""
 	e_leave_types = get_earned_leaves()
-	today = getdate()
+	today = frappe.flags.current_date or getdate()
 
 	for e_leave_type in e_leave_types:
 

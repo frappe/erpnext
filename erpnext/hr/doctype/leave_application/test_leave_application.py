@@ -713,25 +713,31 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(details.leave_balance, 30)
 
 	def test_earned_leaves_creation(self):
-		from erpnext.hr.utils import allocate_earned_leaves
+		from erpnext.hr.doctype.leave_policy_assignment.test_leave_policy_assignment import (
+			allocate_earned_leaves_for_months,
+		)
 
-		leave_period = get_leave_period()
+		year_start = get_year_start(getdate())
+		year_end = get_year_ending(getdate())
+		frappe.flags.current_date = year_start
+
+		leave_period = get_leave_period(year_start, year_end)
 		employee = get_employee()
 		leave_type = "Test Earned Leave Type"
+
 		make_policy_assignment(employee, leave_type, leave_period)
 
-		for i in range(0, 14):
-			allocate_earned_leaves()
-
-		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 6)
+		# leaves for 6 months = 3, but max leaves restricts allocation to 2
+		frappe.db.set_value("Leave Type", leave_type, "max_leaves_allowed", 2)
+		allocate_earned_leaves_for_months(6)
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type, frappe.flags.current_date), 2)
 
 		# validate earned leaves creation without maximum leaves
 		frappe.db.set_value("Leave Type", leave_type, "max_leaves_allowed", 0)
+		allocate_earned_leaves_for_months(5)
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type, frappe.flags.current_date), 4.5)
 
-		for i in range(0, 6):
-			allocate_earned_leaves()
-
-		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 9)
+		frappe.flags.current_date = None
 
 	# test to not consider current leave in leave balance while submitting
 	def test_current_leave_on_submit(self):
@@ -1254,7 +1260,7 @@ def set_leave_approver():
 	dept_doc.save(ignore_permissions=True)
 
 
-def get_leave_period():
+def get_leave_period(from_date=None, to_date=None):
 	leave_period_name = frappe.db.exists({"doctype": "Leave Period", "company": "_Test Company"})
 	if leave_period_name:
 		return frappe.get_doc("Leave Period", leave_period_name[0][0])
@@ -1263,8 +1269,8 @@ def get_leave_period():
 			dict(
 				name="Test Leave Period",
 				doctype="Leave Period",
-				from_date=add_months(nowdate(), -6),
-				to_date=add_months(nowdate(), 6),
+				from_date=from_date or add_months(nowdate(), -6),
+				to_date=to_date or add_months(nowdate(), 6),
 				company="_Test Company",
 				is_active=1,
 			)
