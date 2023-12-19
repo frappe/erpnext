@@ -20,6 +20,7 @@ jobs:
       - name: Setup dependencies
         run: |
           npm install @semantic-release/git @semantic-release/exec --no-save
+          pip install toml-cli
       - name: Create Release
         env:
           GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
