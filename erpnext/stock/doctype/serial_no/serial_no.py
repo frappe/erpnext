@@ -65,11 +65,11 @@ class SerialNo(StockController):
 		self.via_stock_ledger = False
 
 	def autoname(self):
-		self.name = self.serial_no
-
 		if frappe.db.get_single_value("Stock Settings", "allow_duplicate_serial_nos"):
 			self.validate_duplicate_in_same_item()
 			self.name = self.autoname_duplicate_serial_no()
+		else:
+			self.name = self.serial_no
 
 	def autoname_duplicate_serial_no(self):
 		"""
@@ -187,13 +187,21 @@ def get_items_html(serial_nos, item_code):
 
 def get_serial_nos(serial_no, item_code=None):
 	def _get_serial_no_name(serial_no):
-		"""Serial No field can be the same across different items."""
+		"""
+		Serial No field can have the same value across different items.
+		Return Serial No ID if it exists, else return the value as is.
+		"""
 		if not item_code:
 			return serial_no
 
-		return frappe.db.get_value("Serial No", {"serial_no": serial_no, "item_code": item_code}, "name")
+		serial_no_name = frappe.db.get_value(
+			"Serial No", {"serial_no": serial_no, "item_code": item_code}, "name"
+		)
+		return serial_no_name or serial_no
 
-	if not item_code and frappe.db.get_single_value("Stock Settings", "allow_duplicate_serial_nos"):
+	if not item_code and frappe.db.get_single_value(
+		"Stock Settings", "allow_duplicate_serial_nos", cache=True
+	):
 		frappe.throw(
 			msg=_("Item Code is mandatory if duplicate Serial Nos are allowed"), title=_("API Error")
 		)
@@ -260,7 +268,7 @@ def auto_fetch_serial_number(
 		exclude_sr_nos = []
 	else:
 		exclude_sr_nos = safe_json_loads(exclude_sr_nos)
-		exclude_sr_nos = get_serial_nos(clean_serial_no_string("\n".join(exclude_sr_nos), item_code))
+		exclude_sr_nos = get_serial_nos("\n".join(exclude_sr_nos), item_code)
 
 	if batch_nos:
 		batch_nos_list = safe_json_loads(batch_nos)
