@@ -1356,7 +1356,6 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.reload()
 		self.assertFalse(dn.items[0].target_warehouse)
 
-<<<<<<< HEAD
 	def test_serial_no_status(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
@@ -1375,7 +1374,7 @@ class TestDeliveryNote(FrappeTestCase):
 		dn = create_delivery_note(qty=1, item_code=item_code, serial_no=serial_no)
 		dn.reload()
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Delivered")
-=======
+
 	def test_sales_return_valuation_for_moving_average(self):
 		item_code = make_item(
 			"_Test Item Sales Return with MA", {"is_stock_item": 1, "valuation_method": "Moving Average"}
@@ -1425,7 +1424,6 @@ class TestDeliveryNote(FrappeTestCase):
 		# 2500 / 10 = 250
 
 		self.assertAlmostEqual(dn1.items[0].incoming_rate, 250.0)
->>>>>>> 7fdac62393 (fix: incoming rate for sales return with Moving Average valuation method (#38849))
 
 
 def create_delivery_note(**args):
