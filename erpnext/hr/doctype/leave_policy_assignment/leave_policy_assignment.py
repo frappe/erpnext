@@ -150,11 +150,14 @@ class LeavePolicyAssignment(Document):
 				)
 
 		# Calculate leaves at pro-rata basis for employees joining after the beginning of the given leave period
-		elif getdate(date_of_joining) > getdate(self.effective_from):
-			remaining_period = (date_diff(self.effective_to, date_of_joining) + 1) / (
-				date_diff(self.effective_to, self.effective_from) + 1
-			)
-			new_leaves_allocated = ceil(new_leaves_allocated * remaining_period)
+		else:
+			if getdate(date_of_joining) > getdate(self.effective_from):
+				remaining_period = (date_diff(self.effective_to, date_of_joining) + 1) / (
+					date_diff(self.effective_to, self.effective_from) + 1
+				)
+				new_leaves_allocated = ceil(annual_allocation * remaining_period)
+			else:
+				new_leaves_allocated = annual_allocation
 
 		# leave allocation should not exceed annual allocation as per policy assignment
 		if new_leaves_allocated > annual_allocation:
