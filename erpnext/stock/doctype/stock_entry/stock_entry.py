@@ -227,7 +227,7 @@ class StockEntry(StockController):
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
 
-		if not self.get("purpose") == "Manufacture":
+		if self.get("purpose") != "Manufacture":
 			# ignore scrap item wh difference and empty source/target wh
 			# in Manufacture Entry
 			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
@@ -1463,7 +1463,9 @@ class StockEntry(StockController):
 						self.get_gl_dict(
 							{
 								"account": account,
+								"against_type": "Account",
 								"against": d.expense_account,
+								"against_link": d.expense_account,
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 								"credit_in_account_currency": flt(amount["amount"]),
@@ -1477,7 +1479,9 @@ class StockEntry(StockController):
 						self.get_gl_dict(
 							{
 								"account": d.expense_account,
+								"against_type": "Account",
 								"against": account,
+								"against_link": account,
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 								"credit": -1

@@ -167,7 +167,7 @@ def prepare_data(data, so_elapsed_time, filters):
 		if filters.get("group_by_so"):
 			so_name = row["sales_order"]
 
-			if not so_name in sales_order_map:
+			if so_name not in sales_order_map:
 				# create an entry
 				row_copy = copy.deepcopy(row)
 				sales_order_map[so_name] = row_copy

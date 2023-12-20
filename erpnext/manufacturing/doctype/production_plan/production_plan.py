@@ -583,6 +583,7 @@ class ProductionPlan(Document):
 
 		if close:
 			self.db_set("status", "Closed")
+			self.update_bin_qty()
 			return
 
 		if self.total_produced_qty > 0:
@@ -596,6 +597,9 @@ class ProductionPlan(Document):
 
 		if close is not None:
 			self.db_set("status", self.status)
+
+		if self.docstatus == 1 and self.status != "Completed":
+			self.update_bin_qty()
 
 	def update_ordered_status(self):
 		update_status = False
@@ -815,7 +819,7 @@ class ProductionPlan(Document):
 			key = "{}:{}:{}".format(item.sales_order, material_request_type, item_doc.customer or "")
 			schedule_date = item.schedule_date or add_days(nowdate(), cint(item_doc.lead_time_days))
 
-			if not key in material_request_map:
+			if key not in material_request_map:
 				# make a new MR for the combination
 				material_request_map[key] = frappe.new_doc("Material Request")
 				material_request = material_request_map[key]
@@ -1597,18 +1601,22 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	)
 
 	locations = get_available_item_locations(
-		item.get("item_code"), warehouses, item.get("quantity"), company, ignore_validation=True
+		item.get("item_code"),
+		warehouses,
+		item.get("quantity") * item.get("conversion_factor"),
+		company,
+		ignore_validation=True,
 	)
 
 	required_qty = item.get("quantity")
+	if item.get("conversion_factor") and item.get("purchase_uom") != item.get("stock_uom"):
+		# Convert qty to stock UOM
+		required_qty = required_qty * item.get("conversion_factor")
+
 	# get available material by transferring to production warehouse
 	for d in locations:
 		if required_qty <= 0:
 			return
-
-		conversion_factor = 1.0
-		if purchase_uom != stock_uom and purchase_uom == item["uom"]:
-			conversion_factor = get_uom_conversion_factor(item["item_code"], item["uom"])
 
 		new_dict = copy.deepcopy(item)
 		quantity = required_qty if d.get("qty") > required_qty else d.get("qty")
@@ -1619,10 +1627,11 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 				"material_request_type": "Material Transfer",
 				"uom": new_dict.get("stock_uom"),  # internal transfer should be in stock UOM
 				"from_warehouse": d.get("warehouse"),
+				"conversion_factor": 1.0,
 			}
 		)
 
-		required_qty -= quantity / conversion_factor
+		required_qty -= quantity
 		new_mr_items.append(new_dict)
 
 	# raise purchase request for remaining qty
@@ -1634,7 +1643,7 @@ def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 		if frappe.db.get_value("UOM", purchase_uom, "must_be_whole_number"):
 			required_qty = ceil(required_qty)
 
-		item["quantity"] = required_qty
+		item["quantity"] = required_qty / item.get("conversion_factor")
 
 		new_mr_items.append(item)
 

@@ -313,7 +313,7 @@ class Asset(AccountsController):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
-			if not self.is_existing_asset and not (self.purchase_receipt or self.purchase_invoice):
+			if not self.is_existing_asset and not self.purchase_receipt and not self.purchase_invoice:
 				frappe.throw(
 					_("Please create purchase receipt or purchase invoice for the item {0}").format(
 						self.item_code
@@ -689,7 +689,9 @@ class Asset(AccountsController):
 				self.get_gl_dict(
 					{
 						"account": cwip_account,
+						"against_type": "Account",
 						"against": fixed_asset_account,
+						"against_link": fixed_asset_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
 						"credit": self.purchase_receipt_amount,
@@ -704,7 +706,9 @@ class Asset(AccountsController):
 				self.get_gl_dict(
 					{
 						"account": fixed_asset_account,
+						"against_type": "Account",
 						"against": cwip_account,
+						"against_link": cwip_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
 						"debit": self.purchase_receipt_amount,

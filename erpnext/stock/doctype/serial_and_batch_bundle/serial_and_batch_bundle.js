@@ -121,7 +121,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 			frappe.throw(__("Please attach CSV file"));
 		}
 
-		if (frm.doc.has_serial_no && !prompt_data.using_csv_file && !prompt_data.serial_nos) {
+		if (frm.doc.has_serial_no && !prompt_data.csv_file && !prompt_data.serial_nos) {
 			frappe.throw(__("Please enter serial nos"));
 		}
 	},
