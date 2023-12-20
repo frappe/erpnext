@@ -29,6 +29,7 @@ class PaymentReconciliation(Document):
 		self.common_filter_conditions = []
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
+		self.dimensions = get_dimensions()[0]
 
 	def load_from_db(self):
 		# 'modified' attribute is required for `run_doc_method` to work properly.
@@ -115,8 +116,7 @@ class PaymentReconciliation(Document):
 
 		# pass dynamic dimension filter values to query builder
 		dimensions = {}
-		dimensions_and_defaults = get_dimensions()
-		for x in dimensions_and_defaults[0]:
+		for x in self.dimensions:
 			dimension = x.fieldname
 			if self.get(dimension):
 				dimensions.update({dimension: self.get(dimension)})
@@ -472,7 +472,7 @@ class PaymentReconciliation(Document):
 		self.get_unreconciled_entries()
 
 	def get_payment_details(self, row, dr_or_cr):
-		return frappe._dict(
+		payment_details = frappe._dict(
 			{
 				"voucher_type": row.get("reference_type"),
 				"voucher_no": row.get("reference_name"),
@@ -494,6 +494,14 @@ class PaymentReconciliation(Document):
 				"cost_center": row.get("cost_center"),
 			}
 		)
+
+		dimensions_dict = {}
+		for x in self.dimensions:
+			if row.get(x.fieldname):
+				dimensions_dict.update({x.fieldname: row.get(x.fieldname)})
+
+		payment_details.update({"dimensions": dimensions_dict})
+		return payment_details
 
 	def check_mandatory_to_fetch(self):
 		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:
@@ -604,8 +612,7 @@ class PaymentReconciliation(Document):
 
 	def build_dimensions_filter_conditions(self):
 		ple = qb.DocType("Payment Ledger Entry")
-		dimensions_and_defaults = get_dimensions()
-		for x in dimensions_and_defaults[0]:
+		for x in self.dimensions:
 			dimension = x.fieldname
 			if self.get(dimension):
 				self.accounting_dimension_filter_conditions.append(ple[dimension] == self.get(dimension))
