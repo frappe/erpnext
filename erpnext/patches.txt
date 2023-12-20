@@ -352,6 +352,7 @@ erpnext.patches.v14_0.create_accounting_dimensions_in_supplier_quotation
 erpnext.patches.v14_0.update_zero_asset_quantity_field
 execute:frappe.db.set_single_value("Buying Settings", "project_update_frequency", "Each Transaction")
 erpnext.patches.v14_0.clear_reconciliation_values_from_singles
+erpnext.patches.v14_0.update_total_asset_cost_field
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index
