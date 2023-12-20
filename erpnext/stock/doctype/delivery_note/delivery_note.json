@@ -301,7 +301,8 @@
    "no_copy": 1,
    "options": "Delivery Note",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "collapsible": 1,
@@ -1400,7 +1401,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-04 14:15:28.363184",
+ "modified": "2023-12-18 17:19:39.368239",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

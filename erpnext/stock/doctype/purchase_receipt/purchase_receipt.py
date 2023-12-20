@@ -1199,10 +1199,6 @@ def get_item_account_wise_additional_cost(purchase_document):
 	return item_account_wise_cost
 
 
-def on_doctype_update():
-	frappe.db.add_index("Purchase Receipt", ["supplier", "is_return", "return_against"])
-
-
 @erpnext.allow_regional
 def update_regional_gl_entries(gl_list, doc):
 	return
