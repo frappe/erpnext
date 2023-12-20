@@ -668,6 +668,7 @@ def update_reference_in_payment_entry(
 		else payment_entry.get_exchange_rate(),
 		"exchange_gain_loss": d.difference_amount,
 		"account": d.account,
+		"dimensions": d.dimensions,
 	}
 
 	if d.voucher_detail_no:
@@ -2043,6 +2044,7 @@ def create_gain_loss_journal(
 	ref2_dn,
 	ref2_detail_no,
 	cost_center,
+	dimensions,
 ) -> str:
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Exchange Gain Or Loss"
