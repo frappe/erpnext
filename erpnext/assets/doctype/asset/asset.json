@@ -35,6 +35,7 @@
   "purchase_receipt",
   "purchase_invoice",
   "available_for_use_date",
+  "total_asset_cost",
   "column_break_23",
   "gross_purchase_amount",
   "asset_quantity",
@@ -532,6 +533,14 @@
    "label": "Capitalized In",
    "options": "Asset Capitalization",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus > 0",
+   "fieldname": "total_asset_cost",
+   "fieldtype": "Currency",
+   "label": "Total Asset Cost",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -565,7 +574,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2023-11-20 21:05:45.216899",
+ "modified": "2023-12-20 16:50:21.128595",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
