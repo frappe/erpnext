@@ -353,3 +353,4 @@ execute:frappe.db.set_single_value("Buying Settings", "project_update_frequency"
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index
+erpnext.patches.v14_0.set_maintain_stock_for_bom_item
