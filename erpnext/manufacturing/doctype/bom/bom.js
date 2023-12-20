@@ -96,6 +96,14 @@ frappe.ui.form.on("BOM", {
 			}
 		)
 
+		if (!frm.doc.docstatus) {
+			if (frm.doc.rm_cost_as_per != "Manual") {
+				frm.fields_dict["items"].grid.toggle_enable("rate", false);
+			} else {
+				frm.fields_dict["items"].grid.toggle_enable("rate", true);
+			}
+		}
+
 		if (!frm.is_new() && frm.doc.docstatus<2) {
 			frm.add_custom_button(__("Update Cost"), function() {
 				frm.events.update_cost(frm, true);
@@ -385,6 +393,11 @@ frappe.ui.form.on("BOM", {
 	rm_cost_as_per(frm) {
 		if (in_list(["Valuation Rate", "Last Purchase Rate"], frm.doc.rm_cost_as_per)) {
 			frm.set_value("plc_conversion_rate", 1.0);
+		}
+		if (frm.doc.rm_cost_as_per != "Manual") {
+			frm.fields_dict["items"].grid.toggle_enable("rate", false);
+		} else {
+			frm.fields_dict["items"].grid.toggle_enable("rate", true);
 		}
 	},
 
