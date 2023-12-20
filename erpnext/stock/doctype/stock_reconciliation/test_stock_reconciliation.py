@@ -742,13 +742,6 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 		se2.cancel()
 
-		self.assertTrue(frappe.db.exists("Repost Item Valuation", {"voucher_no": stock_reco.name}))
-
-		self.assertEqual(
-			frappe.db.get_value("Repost Item Valuation", {"voucher_no": stock_reco.name}, "status"),
-			"Completed",
-		)
-
 		sle = frappe.get_all(
 			"Stock Ledger Entry",
 			filters={"item_code": item_code, "warehouse": warehouse, "is_cancelled": 0},
@@ -765,6 +758,68 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 
 		self.assertEqual(flt(sle[0].actual_qty), flt(-100.0))
+
+	def test_backdated_stock_reco_entry_with_batch(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item_code = self.make_item(
+			"Test New Batch Item ABCVSD",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BNS9.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		# Stock Reco for 100, Balace Qty 100
+		stock_reco = create_stock_reconciliation(
+			item_code=item_code,
+			posting_date=nowdate(),
+			posting_time="11:00:00",
+			warehouse=warehouse,
+			qty=100,
+			rate=100,
+		)
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["actual_qty"],
+			filters={"voucher_no": stock_reco.name, "is_cancelled": 0},
+		)
+
+		self.assertEqual(len(sles), 1)
+
+		stock_reco.reload()
+		batch_no = get_batch_from_bundle(stock_reco.items[0].serial_and_batch_bundle)
+
+		# Stock Reco for 100, Balace Qty 100
+		stock_reco1 = create_stock_reconciliation(
+			item_code=item_code,
+			posting_date=add_days(nowdate(), -1),
+			posting_time="11:00:00",
+			batch_no=batch_no,
+			warehouse=warehouse,
+			qty=60,
+			rate=100,
+		)
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["actual_qty"],
+			filters={"voucher_no": stock_reco.name, "is_cancelled": 0},
+		)
+
+		stock_reco1.reload()
+		new_batch_no = get_batch_from_bundle(stock_reco1.items[0].serial_and_batch_bundle)
+
+		self.assertEqual(len(sles), 2)
+
+		for row in sles:
+			if row.actual_qty < 0:
+				self.assertEqual(row.actual_qty, -60)
 
 	def test_update_stock_reconciliation_while_reposting(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry

@@ -12,7 +12,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import get_incoming_rate, get_valuation_method
 
 
 class SellingController(StockController):
@@ -308,6 +308,8 @@ class SellingController(StockController):
 									"warehouse": p.warehouse or d.warehouse,
 									"item_code": p.item_code,
 									"qty": flt(p.qty),
+									"serial_no": p.serial_no if self.docstatus == 2 else None,
+									"batch_no": p.batch_no if self.docstatus == 2 else None,
 									"uom": p.uom,
 									"serial_and_batch_bundle": p.serial_and_batch_bundle
 									or get_serial_and_batch_bundle(p, self),
@@ -330,6 +332,8 @@ class SellingController(StockController):
 							"warehouse": d.warehouse,
 							"item_code": d.item_code,
 							"qty": d.stock_qty,
+							"serial_no": d.serial_no if self.docstatus == 2 else None,
+							"batch_no": d.batch_no if self.docstatus == 2 else None,
 							"uom": d.uom,
 							"stock_uom": d.stock_uom,
 							"conversion_factor": d.conversion_factor,
@@ -428,11 +432,13 @@ class SellingController(StockController):
 
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:
-			if not self.get("return_against"):
+			if not self.get("return_against") or (
+				get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return")
+			):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get("stock_qty") or d.get("actual_qty"))
 
-				if not (self.get("is_return") and d.incoming_rate):
+				if not d.incoming_rate:
 					d.incoming_rate = get_incoming_rate(
 						{
 							"item_code": d.item_code,

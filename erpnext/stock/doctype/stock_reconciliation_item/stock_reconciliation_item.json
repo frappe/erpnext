@@ -205,6 +205,7 @@
    "fieldname": "current_serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Current Serial / Batch Bundle",
+   "no_copy": 1,
    "options": "Serial and Batch Bundle",
    "read_only": 1
   },
@@ -216,7 +217,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-07-26 12:54:34.011915",
+ "modified": "2023-11-02 15:47:07.929550",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

@@ -167,13 +167,13 @@ class SubcontractingReceipt(SubcontractingController):
 		)
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
-		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
 		self.set_subcontracting_order_status()
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
 		self.update_status()
+		self.delete_auto_created_batches()
 
 	def validate_items_qty(self):
 		for item in self.items:
