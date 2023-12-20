@@ -100,7 +100,7 @@ class LeavePolicyAssignment(Document):
 			return leave_allocations
 
 	def create_leave_allocation(
-		self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining
+		self, leave_type, annual_allocation, leave_type_details, date_of_joining
 	):
 		# Creates leave allocation for the given employee in the provided leave period
 		carry_forward = self.carry_forward
@@ -108,7 +108,7 @@ class LeavePolicyAssignment(Document):
 			carry_forward = 0
 
 		new_leaves_allocated = self.get_new_leaves(
-			leave_type, new_leaves_allocated, leave_type_details, date_of_joining
+			leave_type, annual_allocation, leave_type_details, date_of_joining
 		)
 
 		allocation = frappe.get_doc(
@@ -129,7 +129,7 @@ class LeavePolicyAssignment(Document):
 		allocation.submit()
 		return allocation.name, new_leaves_allocated
 
-	def get_new_leaves(self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining):
+	def get_new_leaves(self, leave_type, annual_allocation, leave_type_details, date_of_joining):
 		from frappe.model.meta import get_field_precision
 
 		precision = get_field_precision(
@@ -146,20 +146,27 @@ class LeavePolicyAssignment(Document):
 			else:
 				# get leaves for past months if assignment is based on Leave Period / Joining Date
 				new_leaves_allocated = self.get_leaves_for_passed_months(
-					leave_type, new_leaves_allocated, leave_type_details, date_of_joining
+					leave_type, annual_allocation, leave_type_details, date_of_joining
 				)
 
 		# Calculate leaves at pro-rata basis for employees joining after the beginning of the given leave period
-		elif getdate(date_of_joining) > getdate(self.effective_from):
-			remaining_period = (date_diff(self.effective_to, date_of_joining) + 1) / (
-				date_diff(self.effective_to, self.effective_from) + 1
-			)
-			new_leaves_allocated = ceil(new_leaves_allocated * remaining_period)
+		else:
+			if getdate(date_of_joining) > getdate(self.effective_from):
+				remaining_period = (date_diff(self.effective_to, date_of_joining) + 1) / (
+					date_diff(self.effective_to, self.effective_from) + 1
+				)
+				new_leaves_allocated = ceil(annual_allocation * remaining_period)
+			else:
+				new_leaves_allocated = annual_allocation
+
+		# leave allocation should not exceed annual allocation as per policy assignment
+		if new_leaves_allocated > annual_allocation:
+			new_leaves_allocated = annual_allocation
 
 		return flt(new_leaves_allocated, precision)
 
 	def get_leaves_for_passed_months(
-		self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining
+		self, leave_type, annual_allocation, leave_type_details, date_of_joining
 	):
 		from erpnext.hr.utils import get_monthly_earned_leave
 
@@ -184,7 +191,7 @@ class LeavePolicyAssignment(Document):
 
 		if months_passed > 0:
 			monthly_earned_leave = get_monthly_earned_leave(
-				new_leaves_allocated,
+				annual_allocation,
 				leave_type_details.get(leave_type).earned_leave_frequency,
 				leave_type_details.get(leave_type).rounding,
 			)
