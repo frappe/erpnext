@@ -4,12 +4,7 @@
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
-from frappe.utils import cint, flt, getdate
-=======
 from frappe.utils import cint, flt, get_table_name, getdate
-from frappe.utils.deprecations import deprecated
->>>>>>> 9983283f95 (perf: use estimated rows instead of actual rows (#38830))
 from pypika import functions as fn
 
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
