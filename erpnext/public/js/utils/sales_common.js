@@ -317,9 +317,14 @@ erpnext.sales_common = {
 								new erpnext.SerialBatchPackageSelector(
 									me.frm, item, (r) => {
 										if (r) {
+											let qty = Math.abs(r.total_qty);
+											if (doc.is_return) {
+												qty = qty * -1;
+											}
+
 											frappe.model.set_value(item.doctype, item.name, {
 												"serial_and_batch_bundle": r.name,
-												"qty": Math.abs(r.total_qty)
+												"qty": qty
 											});
 										}
 									}

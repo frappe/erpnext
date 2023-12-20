@@ -26,4 +26,6 @@ class PaymentReconciliationInvoice(Document):
 		parenttype: DF.Data
 	# end: auto-generated types
 
-	pass
+	@staticmethod
+	def get_list(args):
+		pass

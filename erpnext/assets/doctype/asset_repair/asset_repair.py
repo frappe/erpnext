@@ -93,6 +93,9 @@ class AssetRepair(AccountsController):
 
 			self.increase_asset_value()
 
+			if self.capitalize_repair_cost:
+				self.asset_doc.total_asset_cost += self.repair_cost
+
 			if self.get("stock_consumption"):
 				self.check_for_stock_items_and_warehouse()
 				self.decrease_stock_quantity()
@@ -127,6 +130,9 @@ class AssetRepair(AccountsController):
 			self.asset_doc.flags.increase_in_asset_value_due_to_repair = True
 
 			self.decrease_asset_value()
+
+			if self.capitalize_repair_cost:
+				self.asset_doc.total_asset_cost -= self.repair_cost
 
 			if self.get("stock_consumption"):
 				self.increase_stock_quantity()
@@ -277,7 +283,9 @@ class AssetRepair(AccountsController):
 					"account": fixed_asset_account,
 					"debit": self.repair_cost,
 					"debit_in_account_currency": self.repair_cost,
+					"against_type": "Account",
 					"against": pi_expense_account,
+					"against_link": pi_expense_account,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
@@ -296,7 +304,9 @@ class AssetRepair(AccountsController):
 					"account": pi_expense_account,
 					"credit": self.repair_cost,
 					"credit_in_account_currency": self.repair_cost,
+					"against_type": "Account",
 					"against": fixed_asset_account,
+					"against_link": fixed_asset_account,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
@@ -330,7 +340,9 @@ class AssetRepair(AccountsController):
 							"account": item.expense_account or default_expense_account,
 							"credit": item.amount,
 							"credit_in_account_currency": item.amount,
+							"against_type": "Account",
 							"against": fixed_asset_account,
+							"against_link": fixed_asset_account,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"cost_center": self.cost_center,
@@ -347,7 +359,9 @@ class AssetRepair(AccountsController):
 							"account": fixed_asset_account,
 							"debit": item.amount,
 							"debit_in_account_currency": item.amount,
+							"against_type": "Account",
 							"against": item.expense_account or default_expense_account,
+							"against_link": item.expense_account or default_expense_account,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"cost_center": self.cost_center,

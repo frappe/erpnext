@@ -340,6 +340,10 @@ class AssetDepreciationSchedule(Document):
 				n == 0
 				and (has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata)
 				and not self.opening_accumulated_depreciation
+				and get_updated_rate_of_depreciation_for_wdv_and_dd(
+					asset_doc, value_after_depreciation, row, False
+				)
+				== row.rate_of_depreciation
 			):
 				from_date = add_days(
 					asset_doc.available_for_use_date, -1
@@ -605,7 +609,9 @@ def get_depreciation_amount(
 
 
 @erpnext.allow_regional
-def get_updated_rate_of_depreciation_for_wdv_and_dd(asset, depreciable_value, fb_row):
+def get_updated_rate_of_depreciation_for_wdv_and_dd(
+	asset, depreciable_value, fb_row, show_msg=True
+):
 	return fb_row.rate_of_depreciation
 
 

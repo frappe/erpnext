@@ -56,6 +56,7 @@ class ProcessStatementOfAccounts(Document):
 		frequency: DF.Literal["Weekly", "Monthly", "Quarterly"]
 		from_date: DF.Date | None
 		group_by: DF.Literal["", "Group by Voucher", "Group by Voucher (Consolidated)"]
+		ignore_exchange_rate_revaluation_journals: DF.Check
 		include_ageing: DF.Check
 		include_break: DF.Check
 		letter_head: DF.Link | None
@@ -119,6 +120,18 @@ def get_statement_dict(doc, get_statement_dict=False):
 	statement_dict = {}
 	ageing = ""
 
+	err_journals = None
+	if doc.report == "General Ledger" and doc.ignore_exchange_rate_revaluation_journals:
+		err_journals = frappe.db.get_all(
+			"Journal Entry",
+			filters={
+				"company": doc.company,
+				"docstatus": 1,
+				"voucher_type": ("in", ["Exchange Rate Revaluation", "Exchange Gain Or Loss"]),
+			},
+			as_list=True,
+		)
+
 	for entry in doc.customers:
 		if doc.include_ageing:
 			ageing = set_ageing(doc, entry)
@@ -131,6 +144,8 @@ def get_statement_dict(doc, get_statement_dict=False):
 		)
 
 		filters = get_common_filters(doc)
+		if err_journals:
+			filters.update({"voucher_no_not_in": [x[0] for x in err_journals]})
 
 		if doc.report == "General Ledger":
 			filters.update(get_gl_filters(doc, entry, tax_id, presentation_currency))
