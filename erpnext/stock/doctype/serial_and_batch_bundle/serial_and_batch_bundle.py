@@ -23,7 +23,11 @@ from frappe.utils import (
 )
 from frappe.utils.csvutils import build_csv_response
 
-from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
+from erpnext.stock.serial_batch_bundle import (
+	BatchNoValuation,
+	SerialNoValuation,
+	get_batches_from_bundle,
+)
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 
 
@@ -123,6 +127,11 @@ class SerialandBatchBundle(Document):
 				)
 
 	def validate_serial_nos_duplicate(self):
+		# Don't inward same serial number multiple times
+
+		if not self.warehouse:
+			return
+
 		if self.voucher_type in ["Stock Reconciliation", "Stock Entry"] and self.docstatus != 1:
 			return
 
@@ -146,7 +155,6 @@ class SerialandBatchBundle(Document):
 			kwargs["voucher_no"] = self.voucher_no
 
 		available_serial_nos = get_available_serial_nos(kwargs)
-
 		for data in available_serial_nos:
 			if data.serial_no in serial_nos:
 				self.throw_error_message(
@@ -327,6 +335,19 @@ class SerialandBatchBundle(Document):
 		):
 			values_to_set["posting_time"] = parent.posting_time
 
+		if parent.doctype in [
+			"Delivery Note",
+			"Purchase Receipt",
+			"Purchase Invoice",
+			"Sales Invoice",
+		] and parent.get("is_return"):
+			return_ref_field = frappe.scrub(parent.doctype) + "_item"
+			if parent.doctype == "Delivery Note":
+				return_ref_field = "dn_detail"
+
+			if row.get(return_ref_field):
+				values_to_set["returned_against"] = row.get(return_ref_field)
+
 		if values_to_set:
 			self.db_set(values_to_set)
 
@@ -438,7 +459,7 @@ class SerialandBatchBundle(Document):
 			qty_field = "qty"
 
 		precision = row.precision
-		if self.voucher_type in ["Subcontracting Receipt"]:
+		if row.get("doctype") in ["Subcontracting Receipt Supplied Item"]:
 			qty_field = "consumed_qty"
 
 		if abs(abs(flt(self.total_qty, precision)) - abs(flt(row.get(qty_field), precision))) > 0.01:
@@ -509,7 +530,6 @@ class SerialandBatchBundle(Document):
 		batch_nos = []
 
 		serial_batches = {}
-
 		for row in self.entries:
 			if self.has_serial_no and not row.serial_no:
 				frappe.throw(
@@ -589,6 +609,67 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(
 				f"Batch Nos {bold(incorrect_batch_nos)} does not belong to Item {bold(self.item_code)}"
 			)
+
+	def validate_serial_and_batch_no_for_returned(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		if not self.returned_against:
+			return
+
+		if self.voucher_type not in [
+			"Purchase Receipt",
+			"Purchase Invoice",
+			"Sales Invoice",
+			"Delivery Note",
+		]:
+			return
+
+		data = self.get_orignal_document_data()
+		if not data:
+			return
+
+		serial_nos, batches = [], []
+		current_serial_nos = [d.serial_no for d in self.entries if d.serial_no]
+		current_batches = [d.batch_no for d in self.entries if d.batch_no]
+
+		for d in data:
+			if self.has_serial_no:
+				if d.serial_and_batch_bundle:
+					serial_nos = get_serial_nos_from_bundle(d.serial_and_batch_bundle)
+				else:
+					serial_nos = get_serial_nos(d.serial_no)
+
+			elif self.has_batch_no:
+				if d.serial_and_batch_bundle:
+					batches = get_batches_from_bundle(d.serial_and_batch_bundle)
+				else:
+					batches = frappe._dict({d.batch_no: d.stock_qty})
+
+				if batches:
+					batches = [d for d in batches if batches[d] > 0]
+
+			if serial_nos:
+				if not set(current_serial_nos).issubset(set(serial_nos)):
+					self.throw_error_message(
+						f"Serial Nos {bold(', '.join(serial_nos))} are not part of the original document."
+					)
+
+			if batches:
+				if not set(current_batches).issubset(set(batches)):
+					self.throw_error_message(
+						f"Batch Nos {bold(', '.join(batches))} are not part of the original document."
+					)
+
+	def get_orignal_document_data(self):
+		fields = ["serial_and_batch_bundle", "stock_qty"]
+		if self.has_serial_no:
+			fields.append("serial_no")
+
+		elif self.has_batch_no:
+			fields.append("batch_no")
+
+		child_doc = self.voucher_type + " Item"
+		return frappe.get_all(child_doc, fields=fields, filters={"name": self.returned_against})
 
 	def validate_duplicate_serial_and_batch_no(self):
 		serial_nos = []
@@ -688,8 +769,28 @@ class SerialandBatchBundle(Document):
 		for batch in batches:
 			frappe.db.set_value("Batch", batch.name, {"reference_name": None, "reference_doctype": None})
 
+	def before_submit(self):
+		self.validate_serial_and_batch_no_for_returned()
+		self.set_purchase_document_no()
+
 	def on_submit(self):
 		self.validate_serial_nos_inventory()
+
+	def set_purchase_document_no(self):
+		if not self.has_serial_no:
+			return
+
+		if self.total_qty > 0:
+			serial_nos = [d.serial_no for d in self.entries if d.serial_no]
+			sn_table = frappe.qb.DocType("Serial No")
+			(
+				frappe.qb.update(sn_table)
+				.set(
+					sn_table.purchase_document_no,
+					self.voucher_no if not sn_table.purchase_document_no else self.voucher_no,
+				)
+				.where(sn_table.name.isin(serial_nos))
+			).run()
 
 	def validate_serial_and_batch_inventory(self):
 		self.check_future_entries_exists()

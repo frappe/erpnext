@@ -1120,6 +1120,7 @@ class AccountsController(TransactionBase):
 		)
 
 		credit_or_debit = "credit" if self.doctype == "Purchase Invoice" else "debit"
+		against_type = "Supplier" if self.doctype == "Purchase Invoice" else "Customer"
 		against = self.supplier if self.doctype == "Purchase Invoice" else self.customer
 
 		if precision_loss:
@@ -1127,7 +1128,9 @@ class AccountsController(TransactionBase):
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
+						"against_type": against_type,
 						"against": against,
+						"against_link": against,
 						credit_or_debit: precision_loss,
 						"cost_center": round_off_cost_center
 						if self.use_company_roundoff_cost_center
@@ -1476,11 +1479,13 @@ class AccountsController(TransactionBase):
 		if self.doctype == "Purchase Invoice":
 			dr_or_cr = "credit"
 			rev_dr_cr = "debit"
+			against_type = "Supplier"
 			supplier_or_customer = self.supplier
 
 		else:
 			dr_or_cr = "debit"
 			rev_dr_cr = "credit"
+			against_type = "Customer"
 			supplier_or_customer = self.customer
 
 		if enable_discount_accounting:
@@ -1505,7 +1510,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": item.discount_account,
+								"against_type": against_type,
 								"against": supplier_or_customer,
+								"against_link": supplier_or_customer,
 								dr_or_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1523,7 +1530,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": income_or_expense_account,
+								"against_type": against_type,
 								"against": supplier_or_customer,
+								"against_link": supplier_or_customer,
 								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1546,7 +1555,9 @@ class AccountsController(TransactionBase):
 				self.get_gl_dict(
 					{
 						"account": self.additional_discount_account,
+						"against_type": against_type,
 						"against": supplier_or_customer,
+						"against_link": supplier_or_customer,
 						dr_or_cr: self.base_discount_amount,
 						"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 					},
