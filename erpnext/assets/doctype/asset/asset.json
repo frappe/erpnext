@@ -574,11 +574,7 @@
    "link_fieldname": "target_asset"
   }
  ],
-<<<<<<< HEAD
- "modified": "2023-11-20 21:05:45.216899",
-=======
  "modified": "2023-12-20 16:50:21.128595",
->>>>>>> d370c60a6c (feat: total_asset_cost field (#38879))
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
