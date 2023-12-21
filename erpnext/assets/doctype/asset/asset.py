@@ -48,6 +48,7 @@ class Asset(AccountsController):
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()
 
+		self.total_asset_cost = self.gross_purchase_amount
 		self.status = self.get_status()
 
 	def on_submit(self):
