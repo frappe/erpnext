@@ -50,6 +50,7 @@ class Asset(AccountsController):
 
 		from erpnext.assets.doctype.asset_finance_book.asset_finance_book import AssetFinanceBook
 
+		additional_asset_cost: DF.Currency
 		amended_from: DF.Link | None
 		asset_category: DF.Link | None
 		asset_name: DF.Data
@@ -145,6 +146,7 @@ class Asset(AccountsController):
 							).format(asset_depr_schedules_links)
 						)
 
+		self.total_asset_cost = self.gross_purchase_amount
 		self.status = self.get_status()
 
 	def on_submit(self):
