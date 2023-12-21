@@ -288,11 +288,5 @@
  "quick_entry": 1,
  "search_fields": "voucher_no,account,posting_date,against_voucher",
  "sort_field": "modified",
-<<<<<<< HEAD
  "sort_order": "DESC"
 }
-=======
- "sort_order": "DESC",
- "states": []
-}
->>>>>>> 787333896c (perf: Drop unused/duplicate/sub-optimal indexes (#38884))
