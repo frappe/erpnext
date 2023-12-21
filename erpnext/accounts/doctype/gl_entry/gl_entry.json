@@ -142,8 +142,7 @@
    "label": "Against Voucher Type",
    "oldfieldname": "against_voucher_type",
    "oldfieldtype": "Data",
-   "options": "DocType",
-   "search_index": 1
+   "options": "DocType"
   },
   {
    "fieldname": "against_voucher",
@@ -162,8 +161,7 @@
    "label": "Voucher Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
-   "options": "DocType",
-   "search_index": 1
+   "options": "DocType"
   },
   {
    "fieldname": "voucher_no",
