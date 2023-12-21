@@ -138,8 +138,7 @@
    "label": "Against Voucher Type",
    "oldfieldname": "against_voucher_type",
    "oldfieldtype": "Data",
-   "options": "DocType",
-   "search_index": 1
+   "options": "DocType"
   },
   {
    "fieldname": "against_voucher",
@@ -158,8 +157,7 @@
    "label": "Voucher Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
-   "options": "DocType",
-   "search_index": 1
+   "options": "DocType"
   },
   {
    "fieldname": "voucher_no",
@@ -290,5 +288,11 @@
  "quick_entry": 1,
  "search_fields": "voucher_no,account,posting_date,against_voucher",
  "sort_field": "modified",
+<<<<<<< HEAD
  "sort_order": "DESC"
 }
+=======
+ "sort_order": "DESC",
+ "states": []
+}
+>>>>>>> 787333896c (perf: Drop unused/duplicate/sub-optimal indexes (#38884))

@@ -5,7 +5,7 @@ fail_fast: false
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.3.0
     hooks:
       - id: trailing-whitespace
         files: "erpnext.*"
@@ -15,6 +15,10 @@ repos:
         args: ['--branch', 'develop']
       - id: check-merge-conflict
       - id: check-ast
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
 
   - repo: https://github.com/PyCQA/flake8
     rev: 5.0.4
