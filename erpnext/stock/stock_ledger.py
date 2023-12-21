@@ -842,16 +842,6 @@ class update_entries_after(object):
 					get_rate_for_return,  # don't move this import to top
 				)
 
-<<<<<<< HEAD
-				rate = get_rate_for_return(
-					sle.voucher_type,
-					sle.voucher_no,
-					sle.item_code,
-					voucher_detail_no=sle.voucher_detail_no,
-					sle=sle,
-				)
-
-=======
 				if self.valuation_method == "Moving Average":
 					rate = get_incoming_rate(
 						{
@@ -862,6 +852,7 @@ class update_entries_after(object):
 							"qty": sle.actual_qty,
 							"serial_no": sle.get("serial_no"),
 							"batch_no": sle.get("batch_no"),
+							"serial_and_batch_bundle": sle.get("serial_and_batch_bundle"),
 							"company": sle.company,
 							"voucher_type": sle.voucher_type,
 							"voucher_no": sle.voucher_no,
@@ -878,7 +869,6 @@ class update_entries_after(object):
 						voucher_detail_no=sle.voucher_detail_no,
 						sle=sle,
 					)
->>>>>>> 3a668bbe96 (fix: reposting not fixing valuation rate for sales return using movin… (#38895))
 			elif (
 				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 				and sle.voucher_detail_no
