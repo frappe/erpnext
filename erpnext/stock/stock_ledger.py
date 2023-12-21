@@ -25,6 +25,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
+	get_incoming_rate,
 	get_or_make_bin,
 	get_stock_balance,
 	get_valuation_method,
@@ -841,6 +842,7 @@ class update_entries_after(object):
 					get_rate_for_return,  # don't move this import to top
 				)
 
+<<<<<<< HEAD
 				rate = get_rate_for_return(
 					sle.voucher_type,
 					sle.voucher_no,
@@ -849,6 +851,34 @@ class update_entries_after(object):
 					sle=sle,
 				)
 
+=======
+				if self.valuation_method == "Moving Average":
+					rate = get_incoming_rate(
+						{
+							"item_code": sle.item_code,
+							"warehouse": sle.warehouse,
+							"posting_date": sle.posting_date,
+							"posting_time": sle.posting_time,
+							"qty": sle.actual_qty,
+							"serial_no": sle.get("serial_no"),
+							"batch_no": sle.get("batch_no"),
+							"company": sle.company,
+							"voucher_type": sle.voucher_type,
+							"voucher_no": sle.voucher_no,
+							"allow_zero_valuation": self.allow_zero_rate,
+							"sle": sle.name,
+						}
+					)
+
+				else:
+					rate = get_rate_for_return(
+						sle.voucher_type,
+						sle.voucher_no,
+						sle.item_code,
+						voucher_detail_no=sle.voucher_detail_no,
+						sle=sle,
+					)
+>>>>>>> 3a668bbe96 (fix: reposting not fixing valuation rate for sales return using movin… (#38895))
 			elif (
 				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 				and sle.voucher_detail_no
