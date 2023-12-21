@@ -16,6 +16,7 @@ from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
+	get_incoming_rate,
 	get_or_make_bin,
 	get_valuation_method,
 )
@@ -701,7 +702,23 @@ class update_entries_after(object):
 				)
 
 				if self.valuation_method == "Moving Average":
-					rate = flt(self.data[self.args.warehouse].previous_sle.valuation_rate)
+					rate = get_incoming_rate(
+						{
+							"item_code": sle.item_code,
+							"warehouse": sle.warehouse,
+							"posting_date": sle.posting_date,
+							"posting_time": sle.posting_time,
+							"qty": sle.actual_qty,
+							"serial_no": sle.get("serial_no"),
+							"batch_no": sle.get("batch_no"),
+							"company": sle.company,
+							"voucher_type": sle.voucher_type,
+							"voucher_no": sle.voucher_no,
+							"allow_zero_valuation": self.allow_zero_rate,
+							"sle": sle.name,
+						}
+					)
+
 				else:
 					rate = get_rate_for_return(
 						sle.voucher_type,
