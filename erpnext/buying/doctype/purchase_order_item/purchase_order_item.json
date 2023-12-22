@@ -123,8 +123,7 @@
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
    "options": "Item",
-   "reqd": 1,
-   "search_index": 1
+   "reqd": 1
   },
   {
    "fieldname": "supplier_part_no",
