@@ -33,7 +33,7 @@ class PickList(Document):
 		self.set_item_locations()
 
 		# set percentage picked in SO
-		for location in self.get("locations"):
+		for location in self.locations:
 			if (
 				location.sales_order
 				and frappe.db.get_value("Sales Order", location.sales_order, "per_picked", cache=True) == 100
