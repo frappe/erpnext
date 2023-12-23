@@ -1332,6 +1332,109 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.reload()
 		self.assertFalse(dn.items[0].target_warehouse)
 
+	def test_sales_return_valuation_for_moving_average(self):
+		item_code = make_item(
+			"_Test Item Sales Return with MA", {"is_stock_item": 1, "valuation_method": "Moving Average"}
+		).name
+
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=5,
+			basic_rate=100.0,
+			posting_date=add_days(nowdate(), -5),
+		)
+		dn = create_delivery_note(
+			item_code=item_code, qty=5, rate=500, posting_date=add_days(nowdate(), -4)
+		)
+		self.assertEqual(dn.items[0].incoming_rate, 100.0)
+
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=5,
+			basic_rate=200.0,
+			posting_date=add_days(nowdate(), -3),
+		)
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=5,
+			basic_rate=300.0,
+			posting_date=add_days(nowdate(), -2),
+		)
+
+		dn1 = create_delivery_note(
+			is_return=1,
+			item_code=item_code,
+			return_against=dn.name,
+			qty=-5,
+			rate=500,
+			company=dn.company,
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			do_not_submit=1,
+			posting_date=add_days(nowdate(), -1),
+		)
+
+		# (300 * 5) + (200 * 5) = 2500
+		# 2500 / 10 = 250
+
+		self.assertAlmostEqual(dn1.items[0].incoming_rate, 250.0)
+
+	def test_sales_return_valuation_for_moving_average_case2(self):
+		# Make DN return
+		# Make Bakcdated Purchase Receipt and check DN return valuation rate
+		# The rate should be recalculate based on the backdated purchase receipt
+		frappe.flags.print_debug_messages = False
+		item_code = make_item(
+			"_Test Item Sales Return with MA Case2",
+			{"is_stock_item": 1, "valuation_method": "Moving Average", "stock_uom": "Nos"},
+		).name
+
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=5,
+			basic_rate=100.0,
+			posting_date=add_days(nowdate(), -5),
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			warehouse="_Test Warehouse - _TC",
+			qty=5,
+			rate=500,
+			posting_date=add_days(nowdate(), -4),
+		)
+
+		returned_dn = create_delivery_note(
+			is_return=1,
+			item_code=item_code,
+			return_against=dn.name,
+			qty=-5,
+			rate=500,
+			company=dn.company,
+			warehouse="_Test Warehouse - _TC",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			posting_date=add_days(nowdate(), -1),
+		)
+
+		self.assertAlmostEqual(returned_dn.items[0].incoming_rate, 100.0)
+
+		# Make backdated purchase receipt
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=5,
+			basic_rate=200.0,
+			posting_date=add_days(nowdate(), -3),
+		)
+
+		returned_dn.reload()
+		self.assertAlmostEqual(returned_dn.items[0].incoming_rate, 200.0)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

@@ -244,8 +244,12 @@ class ReceivablePayableReport(object):
 				row.invoiced_in_account_currency += amount_in_account_currency
 		else:
 			if self.is_invoice(ple):
-				row.credit_note -= amount
-				row.credit_note_in_account_currency -= amount_in_account_currency
+				if row.voucher_no == ple.voucher_no == ple.against_voucher_no:
+					row.paid -= amount
+					row.paid_in_account_currency -= amount_in_account_currency
+				else:
+					row.credit_note -= amount
+					row.credit_note_in_account_currency -= amount_in_account_currency
 			else:
 				row.paid -= amount
 				row.paid_in_account_currency -= amount_in_account_currency

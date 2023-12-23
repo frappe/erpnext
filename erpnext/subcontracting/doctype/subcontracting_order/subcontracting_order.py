@@ -7,6 +7,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import is_subcontracting_order_created
+from erpnext.buying.doctype.purchase_order.purchase_order import update_status as update_po_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.stock_balance import update_bin_qty
 from erpnext.stock.utils import get_bin
@@ -233,6 +234,9 @@ class SubcontractingOrder(SubcontractingController):
 			frappe.db.set_value(
 				"Subcontracting Order", self.name, "status", status, update_modified=update_modified
 			)
+
+			if status == "Closed":
+				update_po_status("Closed", self.purchase_order)
 
 
 @frappe.whitelist()
