@@ -433,8 +433,11 @@ class SubcontractingController(StockController):
 					self.__set_batch_no_as_per_qty(item_row, new_rm_obj, batch_no, batch_qty)
 					self.available_materials[key]["batch_no"][batch_no] = 0
 
-			if abs(qty) > 0 and not new_rm_obj:
+			if new_rm_obj:
+				self.remove(rm_obj)
+			elif abs(qty) > 0:
 				self.__set_consumed_qty(rm_obj, qty)
+
 		else:
 			self.__set_consumed_qty(rm_obj, qty, bom_item.required_qty or qty)
 			self.__set_serial_nos(item_row, rm_obj)
@@ -525,6 +528,10 @@ class SubcontractingController(StockController):
 						(row.item_code, row.get(self.subcontract_data.order_field))
 					] -= row.qty
 
+	def __reset_idx(self):
+		for idx, item in enumerate(self.get(self.raw_material_table)):
+			item.idx = idx + 1
+
 	def __prepare_supplied_items(self):
 		self.initialized_fields()
 		self.__get_subcontract_orders()
@@ -532,6 +539,7 @@ class SubcontractingController(StockController):
 		self.get_available_materials()
 		self.__remove_changed_rows()
 		self.__set_supplied_items()
+		self.__reset_idx()
 
 	def __validate_batch_no(self, row, key):
 		if row.get("batch_no") and row.get("batch_no") not in self.__transferred_items.get(key).get(
