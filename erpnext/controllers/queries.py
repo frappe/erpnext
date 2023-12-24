@@ -354,7 +354,9 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 
 	fields = get_fields(doctype, ["name", "project_name"])
 	searchfields = frappe.get_meta(doctype).get_search_fields()
-	searchfields = "(" + " or ".join(["`tabProject`." + field + " like %(txt)s" for field in searchfields]) + ")"
+	searchfields = (
+		"(" + " or ".join(["`tabProject`." + field + " like %(txt)s" for field in searchfields]) + ")"
+	)
 
 	return frappe.db.sql(
 		"""select {fields} from `tabProject`
