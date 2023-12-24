@@ -651,6 +651,12 @@ def get_filtered_dimensions(
 	if meta.has_field("disabled"):
 		query_filters.append(["disabled", "!=", 1])
 
+	if meta.has_field("is_active"):
+		query_filters.append(["is_active", "!=", "No"])
+
+	if meta.has_field("status"):
+		query_filters.append(["status", "not in", ["Completed", "Cancelled"]])
+
 	if meta.has_field("company"):
 		query_filters.append(["company", "=", filters.get("company")])
 
