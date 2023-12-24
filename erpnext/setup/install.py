@@ -85,8 +85,6 @@ def set_single_defaults():
 			except frappe.ValidationError:
 				pass
 
-	frappe.db.set_default("date_format", "dd-mm-yyyy")
-
 	setup_currency_exchange()
 
 
@@ -197,7 +195,7 @@ def add_standard_navbar_items():
 
 	for item in erpnext_navbar_items:
 		current_labels = [item.get("item_label") for item in current_navbar_items]
-		if not item.get("item_label") in current_labels:
+		if item.get("item_label") not in current_labels:
 			navbar_settings.append("help_dropdown", item)
 
 	for item in current_navbar_items:

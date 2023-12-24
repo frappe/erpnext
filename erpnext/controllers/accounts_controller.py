@@ -166,6 +166,7 @@ class AccountsController(TransactionBase):
 		self.disable_pricing_rule_on_internal_transfer()
 		self.disable_tax_included_prices_for_internal_transfer()
 		self.set_incoming_rate()
+		self.init_internal_values()
 
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
@@ -224,6 +225,16 @@ class AccountsController(TransactionBase):
 			apply_pricing_rule_on_transaction(self)
 
 		self.set_total_in_words()
+
+	def init_internal_values(self):
+		# init all the internal values as 0 on sa
+		if self.docstatus.is_draft():
+			# TODO: Add all such pending values here
+			fields = ["billed_amt", "delivered_qty"]
+			for item in self.get("items"):
+				for field in fields:
+					if hasattr(item, field):
+						item.set(field, 0)
 
 	def before_cancel(self):
 		validate_einvoice_fields(self)
@@ -292,6 +303,7 @@ class AccountsController(TransactionBase):
 	def on_trash(self):
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
+		self.remove_serial_and_batch_bundle()
 
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
@@ -306,6 +318,15 @@ class AccountsController(TransactionBase):
 				"delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s",
 				(self.doctype, self.name),
 			)
+
+	def remove_serial_and_batch_bundle(self):
+		bundles = frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": ("!=", 1)},
+		)
+
+		for bundle in bundles:
+			frappe.delete_doc("Serial and Batch Bundle", bundle.name)
 
 	def validate_deferred_income_expense_account(self):
 		field_map = {
@@ -1099,6 +1120,7 @@ class AccountsController(TransactionBase):
 		)
 
 		credit_or_debit = "credit" if self.doctype == "Purchase Invoice" else "debit"
+		against_type = "Supplier" if self.doctype == "Purchase Invoice" else "Customer"
 		against = self.supplier if self.doctype == "Purchase Invoice" else self.customer
 
 		if precision_loss:
@@ -1106,7 +1128,9 @@ class AccountsController(TransactionBase):
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
+						"against_type": against_type,
 						"against": against,
+						"against_link": against,
 						credit_or_debit: precision_loss,
 						"cost_center": round_off_cost_center
 						if self.use_company_roundoff_cost_center
@@ -1455,11 +1479,13 @@ class AccountsController(TransactionBase):
 		if self.doctype == "Purchase Invoice":
 			dr_or_cr = "credit"
 			rev_dr_cr = "debit"
+			against_type = "Supplier"
 			supplier_or_customer = self.supplier
 
 		else:
 			dr_or_cr = "debit"
 			rev_dr_cr = "credit"
+			against_type = "Customer"
 			supplier_or_customer = self.customer
 
 		if enable_discount_accounting:
@@ -1484,7 +1510,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": item.discount_account,
+								"against_type": against_type,
 								"against": supplier_or_customer,
+								"against_link": supplier_or_customer,
 								dr_or_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1502,7 +1530,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": income_or_expense_account,
+								"against_type": against_type,
 								"against": supplier_or_customer,
+								"against_link": supplier_or_customer,
 								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1525,7 +1555,9 @@ class AccountsController(TransactionBase):
 				self.get_gl_dict(
 					{
 						"account": self.additional_discount_account,
+						"against_type": against_type,
 						"against": supplier_or_customer,
+						"against_link": supplier_or_customer,
 						dr_or_cr: self.base_discount_amount,
 						"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 					},

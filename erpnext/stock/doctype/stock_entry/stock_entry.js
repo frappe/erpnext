@@ -512,7 +512,12 @@ frappe.ui.form.on('Stock Entry', {
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						["actual_qty", "basic_rate"].forEach((field) => {
+						let fields = ["actual_qty", "basic_rate"];
+						if (frm.doc.purpose == "Material Receipt") {
+							fields = ["actual_qty"];
+						}
+
+						fields.forEach((field) => {
 							frappe.model.set_value(cdt, cdn, field, (r.message[field] || 0.0));
 						});
 						frm.events.calculate_basic_amount(frm, child);
@@ -781,10 +786,9 @@ frappe.ui.form.on('Stock Entry Detail', {
 						});
 						refresh_field("items");
 
-						let no_batch_serial_number_value = !d.serial_no;
-						if (d.has_batch_no && !d.has_serial_no) {
-							// check only batch_no for batched item
-							no_batch_serial_number_value = !d.batch_no;
+						let no_batch_serial_number_value = false;
+						if (d.has_serial_no || d.has_batch_no) {
+							no_batch_serial_number_value = true;
 						}
 
 						if (no_batch_serial_number_value && !frappe.flags.hide_serial_batch_dialog && !frappe.flags.dialog_set) {
@@ -941,6 +945,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 	}
 
 	scan_barcode() {
+		frappe.flags.dialog_set = false;
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
 		barcode_scanner.process_scan();
 	}

@@ -583,6 +583,7 @@ class ProductionPlan(Document):
 
 		if close:
 			self.db_set("status", "Closed")
+			self.update_bin_qty()
 			return
 
 		if self.total_produced_qty > 0:
@@ -596,6 +597,9 @@ class ProductionPlan(Document):
 
 		if close is not None:
 			self.db_set("status", self.status)
+
+		if self.docstatus == 1 and self.status != "Completed":
+			self.update_bin_qty()
 
 	def update_ordered_status(self):
 		update_status = False
@@ -815,7 +819,7 @@ class ProductionPlan(Document):
 			key = "{}:{}:{}".format(item.sales_order, material_request_type, item_doc.customer or "")
 			schedule_date = item.schedule_date or add_days(nowdate(), cint(item_doc.lead_time_days))
 
-			if not key in material_request_map:
+			if key not in material_request_map:
 				# make a new MR for the combination
 				material_request_map[key] = frappe.new_doc("Material Request")
 				material_request = material_request_map[key]
