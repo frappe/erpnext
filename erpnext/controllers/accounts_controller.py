@@ -874,6 +874,7 @@ class AccountsController(TransactionBase):
 				"project": self.get("project"),
 				"post_net_value": args.get("post_net_value"),
 				"voucher_detail_no": args.get("voucher_detail_no"),
+				"voucher_subtype": self.get_voucher_subtype(),
 			}
 		)
 
@@ -928,6 +929,25 @@ class AccountsController(TransactionBase):
 		)
 
 		return gl_dict
+
+	def get_voucher_subtype(self):
+		voucher_subtypes = {
+			"Journal Entry": "voucher_type",
+			"Payment Entry": "payment_type",
+			"Stock Entry": "stock_entry_type",
+			"Asset Capitalization": "entry_type",
+		}
+		if self.doctype in voucher_subtypes:
+			return self.get(voucher_subtypes[self.doctype])
+		elif self.doctype == "Purchase Receipt" and self.is_return:
+			return "Purchase Return"
+		elif self.doctype == "Delivery Note" and self.is_return:
+			return "Sales Return"
+		elif (self.doctype == "Sales Invoice" and self.is_return) or self.doctype == "Purchase Invoice":
+			return "Credit Note"
+		elif (self.doctype == "Purchase Invoice" and self.is_return) or self.doctype == "Sales Invoice":
+			return "Debit Note"
+		return self.doctype
 
 	def get_value_in_transaction_currency(self, account_currency, args, field):
 		if account_currency == self.get("currency"):
