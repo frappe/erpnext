@@ -141,14 +141,15 @@ frappe.ui.form.on("Sales Order", {
 			};
 		});
 
-		frm.set_query('project', function(doc, cdt, cdn) {
-			return {
-				query: "erpnext.controllers.queries.get_project_name",
-				filters: {
-					'customer': doc.customer
-				}
-			}
-		});
+		// this doesn't do anything. is it ok to remove?
+		// frm.set_query('project', function(doc, cdt, cdn) {
+		// 	return {
+		// 		query: "erpnext.controllers.queries.get_project_name",
+		// 		filters: {
+		// 			'customer': doc.customer
+		// 		}
+		// 	}
+		// });
 
 		frm.set_query('warehouse', 'items', function(doc, cdt, cdn) {
 			let row  = locals[cdt][cdn];

@@ -11,6 +11,21 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 		}
 	}
 
+	project(doc, cdt, cdn) {
+		let me = this;
+		if (this.frm.doc.project) {
+			frappe.call({
+				method: 'erpnext.projects.doctype.project.project.get_cost_center_name',
+				args: { project: this.frm.doc.project },
+				callback: function (r, rt) {
+					if (!r.exc) {
+						frappe.model.set_value(me.frm.doc.doctype, me.frm.doc.name, "cost_center", r.message);
+					}
+				}
+			})
+		}
+	}
+
 	setup_warehouse_query() {
 		var me = this;
 		erpnext.queries.setup_queries(this.frm, "Warehouse", function() {

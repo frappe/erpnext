@@ -231,6 +231,18 @@ erpnext.buying = {
 			}
 
 			project(doc, cdt, cdn) {
+				let me = this;
+				if (this.frm.doc.project) {
+					frappe.call({
+						method: 'erpnext.projects.doctype.project.project.get_cost_center_name',
+						args: { project: this.frm.doc.project },
+						callback: function (r, rt) {
+							if (!r.exc) {
+								frappe.model.set_value(me.frm.doc.doctype, me.frm.doc.name, "cost_center", r.message);
+							}
+						}
+					})
+				}
 				var item = frappe.get_doc(cdt, cdn);
 				if(item.project) {
 					$.each(this.frm.doc["items"] || [],

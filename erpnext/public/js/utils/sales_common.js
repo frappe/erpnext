@@ -365,6 +365,11 @@ erpnext.sales_common = {
 							args: {project: this.frm.doc.project},
 							callback: function(r, rt) {
 								if(!r.exc) {
+									frappe.model.set_value(me.frm.doc.doctype, me.frm.doc.name, "cost_center", r.message);
+
+									// is this really necessary? would it make more sense to invoke this on change of cost centre instead?
+									// would it make sense to set project on each row also?
+									// should something similar be done on the purchase side of things too?
 									$.each(me.frm.doc["items"] || [], function(i, row) {
 										if(r.message) {
 											frappe.model.set_value(row.doctype, row.name, "cost_center", r.message);
