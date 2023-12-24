@@ -39,6 +39,8 @@ class GLEntry(Document):
 		account: DF.Link | None
 		account_currency: DF.Link | None
 		against: DF.Text | None
+		against_link: DF.DynamicLink | None
+		against_type: DF.Link | None
 		against_voucher: DF.DynamicLink | None
 		against_voucher_type: DF.Link | None
 		company: DF.Link | None
@@ -66,6 +68,7 @@ class GLEntry(Document):
 		transaction_exchange_rate: DF.Float
 		voucher_detail_no: DF.Data | None
 		voucher_no: DF.DynamicLink | None
+		voucher_subtype: DF.SmallText | None
 		voucher_type: DF.Link | None
 	# end: auto-generated types
 
