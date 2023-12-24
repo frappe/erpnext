@@ -94,6 +94,14 @@ erpnext.sales_common = {
 
 			customer() {
 				var me = this;
+				this.frm.set_query('project', function (doc) {
+					return {
+						query: "erpnext.controllers.queries.get_project_name",
+						filters: {
+							'customer': doc.customer
+						}
+					}
+				});
 				erpnext.utils.get_party_details(this.frm, null, null, function() {
 					me.apply_price_list();
 				});
