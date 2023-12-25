@@ -235,7 +235,7 @@ class JobCard(Document):
 		# alloted_capacity has key number starting from 1. Key number will increment by 1 if non sequential job card found
 		# if key number reaches/crosses to production_capacity means capacity is full and overlap error generated
 		# this will store last to_time of sequential job cards
-		alloted_capacity ={1: time_logs[0]["to_time"]}
+		alloted_capacity = {1: time_logs[0]["to_time"]}
 		# flag for sequential Job card found
 		sequential_job_card_found = False
 		for i in range(1, len(time_logs)):
