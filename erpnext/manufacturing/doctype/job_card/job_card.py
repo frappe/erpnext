@@ -230,33 +230,33 @@ class JobCard(Document):
 		if production_capacity == 1 and len(time_logs) > 0:
 			return True
 
-		#sorting overlapping job cards as per from_time
+		# sorting overlapping job cards as per from_time
 		time_logs = sorted(time_logs, key=lambda x: x.get("from_time"))
-		#alloted_capacity has key number starting from 1. Key number will increment by 1 if non sequential job card found
+		# alloted_capacity has key number starting from 1. Key number will increment by 1 if non sequential job card found
 		# if key number reaches/crosses to production_capacity means capacity is full and overlap error generated
 		# this will store last to_time of sequential job cards
-		alloted_capacity ={1: time_logs[0]['to_time']}
-		#flag for sequential Job card found
+		alloted_capacity ={1: time_logs[0]["to_time"]}
+		# flag for sequential Job card found
 		sequential_job_card_found = False
-		for i in range(1,len(time_logs)):
-			#scanning for all Existing keys
+		for i in range(1, len(time_logs)):
+			# scanning for all Existing keys
 			for key in alloted_capacity.keys():
-				#if current Job Card from time is greater than last to_time in that key means these job card are sequential
-				if alloted_capacity[key] <= time_logs[i]['from_time']:
+				# if current Job Card from time is greater than last to_time in that key means these job card are sequential
+				if alloted_capacity[key] <= time_logs[i]["from_time"]:
 					# So update key's value with last to_time
-					alloted_capacity[key] = time_logs[i]['to_time']
-					#flag is true as we get sequential Job Card for that key
+					alloted_capacity[key] = time_logs[i]["to_time"]
+					# flag is true as we get sequential Job Card for that key
 					sequential_job_card_found = True
 					# Immediately break so that job card to time is not added with any other key except this
 					break
-			#if sequential job card not found above means it is overlapping  so increment key number to alloted_capacity
-			if not sequential_job_card_found :
+			# if sequential job card not found above means it is overlapping  so increment key number to alloted_capacity
+			if not sequential_job_card_found:
 				# increment key number
 				key = key + 1
 				# for that key last to time is assigned.
-				alloted_capacity[key] = time_logs[i]['to_time']
+				alloted_capacity[key] = time_logs[i]["to_time"]
 		if len(alloted_capacity) >= production_capacity:
-			#if number of keys greater or equal to production caoacity means full capacity is utilized and we should throw overlap error
+			# if number of keys greater or equal to production caoacity means full capacity is utilized and we should throw overlap error
 			return True
 		return overlap
 
