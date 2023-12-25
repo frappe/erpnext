@@ -9104,3 +9104,7 @@ Select an item from each set to be used in the Sales Order.,"Wählen Sie aus den
 Is Alternative,Ist Alternative,
 Alternative Items,Alternativpositionen,
 Component Type,Komponententyp,
+Lost Quotations,Verlorene Angebote,
+Lost Quotations %,Verlorene Angebote %,
+Lost Value,Verlorener Wert,
+Lost Value %,Verlorener Wert %,
