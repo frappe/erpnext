@@ -6,8 +6,8 @@ import json
 
 import frappe
 from frappe import _
+from frappe.communications.inbox import link_communication_to_document
 from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now

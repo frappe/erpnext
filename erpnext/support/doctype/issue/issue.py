@@ -7,8 +7,8 @@ from datetime import timedelta
 
 import frappe
 from frappe import _
+from frappe.communications.inbox import link_communication_to_document
 from frappe.core.utils import get_parent_doc
-from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder import Interval

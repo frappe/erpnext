@@ -3,13 +3,13 @@
 
 import frappe
 from frappe import _
+from frappe.communications.inbox import link_communication_to_document
 from frappe.contacts.address_and_contact import (
 	delete_contact_and_address,
 	load_address_and_contact,
 )
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
-from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import comma_and, get_link_to_form, has_gravatar, validate_email_address
 
