@@ -760,7 +760,7 @@ class StockEntry(StockController):
 						frappe.bold(d.s_warehouse),
 						formatdate(self.posting_date),
 						format_time(self.posting_time),
-						frappe.bold(d.item_code),
+						frappe.utils.get_link_to_form(frappe.bold(d.item_code)),
 					)
 					+ "<br><br>"
 					+ _("Available quantity is {0}, you need {1}").format(
