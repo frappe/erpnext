@@ -1185,7 +1185,7 @@ def create_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse=Non
 		doc.append(
 			"entries",
 			{
-				"qty": (row.qty or 1.0) * (1 if type_of_transaction == "Inward" else -1),
+				"qty": (flt(row.qty) or 1.0) * (1 if type_of_transaction == "Inward" else -1),
 				"warehouse": warehouse,
 				"batch_no": row.batch_no,
 				"serial_no": row.serial_no,
@@ -1213,7 +1213,7 @@ def update_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse=Non
 		doc.append(
 			"entries",
 			{
-				"qty": d.get("qty") * (1 if doc.type_of_transaction == "Inward" else -1),
+				"qty": (flt(d.get("qty")) or 1.0) * (1 if doc.type_of_transaction == "Inward" else -1),
 				"warehouse": warehouse or d.get("warehouse"),
 				"batch_no": d.get("batch_no"),
 				"serial_no": d.get("serial_no"),
