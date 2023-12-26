@@ -48,6 +48,7 @@
   "material_request_planning",
   "include_non_stock_items",
   "include_subcontracted_items",
+  "consider_minimum_order_qty",
   "include_safety_stock",
   "ignore_existing_ordered_qty",
   "column_break_25",
@@ -423,13 +424,19 @@
    "fieldtype": "Link",
    "label": "Sub Assembly Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "consider_minimum_order_qty",
+   "fieldtype": "Check",
+   "label": "Consider Minimum Order Qty"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-03 14:08:11.928027",
+ "modified": "2023-12-26 16:31:13.740777",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
