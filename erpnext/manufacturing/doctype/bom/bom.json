@@ -607,11 +607,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-04-06 12:47:58.514795",
-=======
  "modified": "2023-12-26 19:34:08.159312",
->>>>>>> b09c9354fb (fix: min order qty optional in production plan (#38956))
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
