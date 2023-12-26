@@ -1192,11 +1192,7 @@ def update_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse=Non
 		doc.append(
 			"entries",
 			{
-<<<<<<< HEAD
-				"qty": d.get("qty") * (1 if doc.type_of_transaction == "Inward" else -1),
-=======
 				"qty": (flt(d.get("qty")) or 1.0) * (1 if doc.type_of_transaction == "Inward" else -1),
->>>>>>> d00f6672a8 (fix: not able to import serial batch bundle using csv (#38950))
 				"warehouse": warehouse or d.get("warehouse"),
 				"batch_no": d.get("batch_no"),
 				"serial_no": d.get("serial_no"),
