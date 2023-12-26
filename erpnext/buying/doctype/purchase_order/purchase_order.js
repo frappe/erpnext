@@ -214,7 +214,7 @@ frappe.ui.form.on("Purchase Order Item", {
 		}
 	},
 
-	fg_item_qty: async function(frm, cdt, cdn) {
+	qty: async function (frm, cdt, cdn) {
 		if (frm.doc.is_subcontracted && !frm.doc.is_old_subcontracting_flow) {
 			var row = locals[cdt][cdn];
 
@@ -222,7 +222,7 @@ frappe.ui.form.on("Purchase Order Item", {
 				var result = await frm.events.get_subcontracting_boms_for_finished_goods(row.fg_item)
 
 				if (result.message && row.item_code == result.message.service_item && row.uom == result.message.service_item_uom) {
-					frappe.model.set_value(cdt, cdn, "qty", flt(row.fg_item_qty) * flt(result.message.conversion_factor));
+					frappe.model.set_value(cdt, cdn, "fg_item_qty", flt(row.qty) / flt(result.message.conversion_factor));
 				}
 			}
 		}

@@ -225,7 +225,7 @@ class ReceivablePayableReport(object):
 		if not row:
 			return
 
-		if self.filters.get("in_party_currency"):
+		if self.filters.get("in_party_currency") or self.filters.get("party_account"):
 			amount = ple.amount_in_account_currency
 		else:
 			amount = ple.amount
@@ -244,8 +244,12 @@ class ReceivablePayableReport(object):
 				row.invoiced_in_account_currency += amount_in_account_currency
 		else:
 			if self.is_invoice(ple):
-				row.credit_note -= amount
-				row.credit_note_in_account_currency -= amount_in_account_currency
+				if row.voucher_no == ple.voucher_no == ple.against_voucher_no:
+					row.paid -= amount
+					row.paid_in_account_currency -= amount_in_account_currency
+				else:
+					row.credit_note -= amount
+					row.credit_note_in_account_currency -= amount_in_account_currency
 			else:
 				row.paid -= amount
 				row.paid_in_account_currency -= amount_in_account_currency
@@ -451,7 +455,7 @@ class ReceivablePayableReport(object):
 		party_details = self.get_party_details(row.party) or {}
 		row.update(party_details)
 
-		if self.filters.get("in_party_currency"):
+		if self.filters.get("in_party_currency") or self.filters.get("party_account"):
 			row.currency = row.account_currency
 		else:
 			row.currency = self.company_currency
