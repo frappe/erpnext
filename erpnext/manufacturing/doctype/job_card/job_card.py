@@ -227,8 +227,10 @@ class JobCard(Document):
 
 	def has_overlap(self, production_capacity, time_logs):
 		overlap = False
-		if production_capacity == 1 and len(time_logs) > 0:
+		if production_capacity == 1 and len(time_logs) >= 1:
 			return True
+		if not len(time_logs):
+			return False
 
 		# sorting overlapping job cards as per from_time
 		time_logs = sorted(time_logs, key=lambda x: x.get("from_time"))
