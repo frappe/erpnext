@@ -286,7 +286,6 @@
    "oldfieldname": "import_rate",
    "oldfieldtype": "Currency",
    "options": "currency",
-   "read_only_depends_on": "eval: (!parent.is_return && doc.purchase_receipt && doc.pr_detail)",
    "reqd": 1
   },
   {
@@ -894,7 +893,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-30 16:26:05.629780",
+ "modified": "2023-12-25 22:00:28.043555",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
