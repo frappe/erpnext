@@ -164,6 +164,18 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 					}
 				})
 			}, __("Get Items From"));
+
+			if (!this.frm.doc.is_return) {
+				frappe.db.get_single_value("Buying Settings", "maintain_same_rate").then((value) => {
+					if (value) {
+						this.frm.doc.items.forEach((item) => {
+							this.frm.fields_dict.items.grid.update_docfield_property(
+								"rate", "read_only", (item.purchase_receipt && item.pr_detail)
+							);
+						});
+					}
+				});
+			}
 		}
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted);
 
