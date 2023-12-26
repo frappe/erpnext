@@ -67,6 +67,7 @@ class ProductionPlan(Document):
 		combine_items: DF.Check
 		combine_sub_items: DF.Check
 		company: DF.Link
+		consider_minimum_order_qty: DF.Check
 		customer: DF.Link | None
 		for_warehouse: DF.Link | None
 		from_date: DF.Date | None
@@ -1211,7 +1212,14 @@ def get_subitems(
 
 
 def get_material_request_items(
-	row, sales_order, company, ignore_existing_ordered_qty, include_safety_stock, warehouse, bin_dict
+	doc,
+	row,
+	sales_order,
+	company,
+	ignore_existing_ordered_qty,
+	include_safety_stock,
+	warehouse,
+	bin_dict,
 ):
 	total_qty = row["qty"]
 
@@ -1220,8 +1228,14 @@ def get_material_request_items(
 		required_qty = total_qty
 	elif total_qty > bin_dict.get("projected_qty", 0):
 		required_qty = total_qty - bin_dict.get("projected_qty", 0)
-	if required_qty > 0 and required_qty < row["min_order_qty"]:
+
+	if (
+		doc.get("consider_minimum_order_qty")
+		and required_qty > 0
+		and required_qty < row["min_order_qty"]
+	):
 		required_qty = row["min_order_qty"]
+
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 
 	if not row["purchase_uom"]:
@@ -1559,6 +1573,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 			if details.qty > 0:
 				items = get_material_request_items(
+					doc,
 					details,
 					sales_order,
 					company,
