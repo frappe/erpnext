@@ -630,26 +630,12 @@ $.extend(erpnext.item, {
 						}
 					});
 				} else {
-					frappe.call({
-						method: "frappe.client.get",
-						args: {
-							doctype: "Item Attribute",
-							name: d.attribute
-						}
-					}).then((r) => {
-						if(r.message) {
-							const from = r.message.from_range;
-							const to = r.message.to_range;
-							const increment = r.message.increment;
-
-							let values = [];
-							for(var i = from; i <= to; i = flt(i + increment, 6)) {
-								values.push(i);
-							}
-							attr_val_fields[d.attribute] = values;
-							resolve();
-						}
-					});
+					let values = [];
+					for(var i = d.from_range; i <= d.to_range; i = flt(i + d.increment, 6)) {
+						values.push(i);
+					}
+					attr_val_fields[d.attribute] = values;
+					resolve();
 				}
 			});
 
