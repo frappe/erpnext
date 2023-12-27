@@ -1174,7 +1174,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 		doc.run_method("onload")
 		doc.run_method("set_missing_values")
 
-		if args.get("merge_taxes"):
+		if args and args.get("merge_taxes"):
 			merge_taxes(source.get("taxes") or [], doc)
 
 		doc.run_method("calculate_taxes_and_totals")
@@ -1243,7 +1243,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
 				"add_if_empty": True,
-				"ignore": args.get("merge_taxes"),
+				"ignore": args.get("merge_taxes") if args else 0,
 			},
 		},
 		target_doc,
