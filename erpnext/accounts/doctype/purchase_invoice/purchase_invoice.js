@@ -35,7 +35,11 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		super.onload();
 
 		// Ignore linked advances
+<<<<<<< HEAD
 		this.frm.ignore_doctypes_on_cancel_all = ['Journal Entry', 'Payment Entry', 'Purchase Invoice', "Repost Payment Ledger", "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries", "Serial and Batch Bundle"];
+=======
+		this.frm.ignore_doctypes_on_cancel_all = ['Journal Entry', 'Payment Entry', 'Purchase Invoice', "Repost Payment Ledger", "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries", "Bank Transaction"];
+>>>>>>> 0a95b38166 (fix: unreconcile Bank Transaction on cancel of payment voucher)
 
 		if(!this.frm.doc.__islocal) {
 			// show credit_to in print format
