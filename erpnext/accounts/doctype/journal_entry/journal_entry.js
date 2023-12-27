@@ -8,7 +8,11 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
+<<<<<<< HEAD
 		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement', "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries"];
+=======
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement', 'Asset Depreciation Schedule', "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries", "Bank Transaction"];
+>>>>>>> 0a95b38166 (fix: unreconcile Bank Transaction on cancel of payment voucher)
 	},
 
 	refresh: function(frm) {
