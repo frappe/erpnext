@@ -26,7 +26,7 @@
 				"0360 Bauliche Investitionen in fremden (gepachteten) Betriebs- und Geschäftsgebäuden": {"account_type": "Fixed Asset"},
 				"0370 Bauliche Investitionen in fremden (gepachteten) Wohn- und Sozialgebäuden": {"account_type": "Fixed Asset"},
 				"0390 Kumulierte Abschreibungen zu Grundstücken ": {"account_type": "Fixed Asset"},
-				"0400 Maschinen und Geräte ": {"account_type": "Fixed Asset"},				
+				"0400 Maschinen und Geräte ": {"account_type": "Fixed Asset"},
 				"0500 Maschinenwerkzeuge ": {"account_type": "Fixed Asset"},
 				"0510 Allgemeine Werkzeuge und Handwerkzeuge ": {"account_type": "Fixed Asset"},
 				"0520 Prototypen, Formen, Modelle ": {"account_type": "Fixed Asset"},
@@ -65,42 +65,41 @@
 				"0980 Geleistete Anzahlungen auf Finanzanlagen ": {"account_type": "Fixed Asset"},
 				"0990 Kumulierte Abschreibungen zu Finanzanlagen ": {"account_type": "Fixed Asset"},
             "root_type": "Asset"
-        },    
+        },
         "Klasse 1 Aktiva: Vorr\u00e4te": {
             "1000 Bezugsverrechnung": {"account_type": "Stock"},
             "1100 Rohstoffe": {"account_type": "Stock"},
             "1200 Bezogene Teile": {"account_type": "Stock"},
             "1300 Hilfsstoffe": {"account_type": "Stock"},
             "1350 Betriebsstoffe": {"account_type": "Stock"},
-            "1360 Vorrat Energietraeger": {"account_type": "Stock"},            
+            "1360 Vorrat Energietraeger": {"account_type": "Stock"},
             "1400 Unfertige Erzeugnisse": {"account_type": "Stock"},
             "1500 Fertige Erzeugnisse": {"account_type": "Stock"},
             "1600 Handelswarenvorrat": {"account_type": "Stock Received But Not Billed"},
             "1700 Noch nicht abrechenbare Leistungen": {"account_type": "Stock"},
-            "1900 Wertberichtigungen": {"account_type": "Stock"},
             "1800 Geleistete Anzahlungen": {"account_type": "Stock"},
             "1900 Wertberichtigungen": {"account_type": "Stock"},
             "root_type": "Asset"
-        },    
+        },
         "Klasse 3 Passiva: Verbindlichkeiten": {
             "3000 Allgemeine Verbindlichkeiten (Schuld)": {"account_type": "Payable"},
             "3010 R\u00fcckstellungen f\u00fcr Pensionen": {"account_type": "Payable"},
             "3020 Steuerr\u00fcckstellungen": {"account_type": "Tax"},
-            "3041 Sonstige R\u00fcckstellungen": {"account_type": "Payable"},            
+            "3041 Sonstige R\u00fcckstellungen": {"account_type": "Payable"},
             "3110 Verbindlichkeiten gegen\u00fcber Bank": {"account_type": "Payable"},
             "3150 Verbindlichkeiten Darlehen": {"account_type": "Payable"},
-            "3185 Verbindlichkeiten Kreditkarte": {"account_type": "Payable"},            
+            "3185 Verbindlichkeiten Kreditkarte": {"account_type": "Payable"},
             "3380 Verbindlichkeiten aus der Annahme gezogener Wechsel u. d. Ausstellungen eigener Wechsel": {
                 "account_type": "Payable"
             },
             "3400 Verbindlichkeiten gegen\u00fc. verb. Untern., Verbindl. gegen\u00fc. Untern., mit denen eine Beteiligungsverh\u00e4lnis besteht": {},
             "3460 Verbindlichkeiten gegenueber Gesellschaftern": {"account_type": "Payable"},
             "3470 Einlagen stiller Gesellschafter": {"account_type": "Payable"},
-            "3585 Verbindlichkeiten Lohnsteuer": {"account_type": "Tax"},             
-            "3590 Verbindlichkeiten Kommunalabgaben": {"account_type": "Tax"},  
-            "3595 Verbindlichkeiten Dienstgeberbeitrag": {"account_type": "Tax"},                       
+            "3585 Verbindlichkeiten Lohnsteuer": {"account_type": "Tax"},
+            "3590 Verbindlichkeiten Kommunalabgaben": {"account_type": "Tax"},
+            "3595 Verbindlichkeiten Dienstgeberbeitrag": {"account_type": "Tax"},
             "3600 Verbindlichkeiten Sozialversicherung": {"account_type": "Payable"},
-            "3640 Verbindlichkeiten Loehne und Gehaelter": {"account_type": "Payable"},            
+            "3640 Verbindlichkeiten Loehne und Gehaelter": {"account_type": "Payable"},
             "3700 Sonstige Verbindlichkeiten": {"account_type": "Payable"},
             "3900 Passive Rechnungsabgrenzungsposten": {"account_type": "Payable"},
             "3100 Anleihen (einschlie\u00dflich konvertibler)": {"account_type": "Payable"},
@@ -119,13 +118,13 @@
             },
             "3515 Umsatzsteuer Inland 10%": {
                 "account_type": "Tax"
-            },            
+            },
             "3520 Umsatzsteuer aus i.g. Erwerb 20%": {
                 "account_type": "Tax"
             },
             "3525 Umsatzsteuer aus i.g. Erwerb 10%": {
                 "account_type": "Tax"
-            },            
+            },
             "3560 Umsatzsteuer-Evidenzkonto f\u00fcr erhaltene Anzahlungen auf Bestellungen": {},
             "3360 Verbindlichkeiten aus Lieferungen u. Leistungen EU": {
                 "account_type": "Payable"
@@ -141,7 +140,7 @@
                 "account_type": "Tax"
             },
             "root_type": "Liability"
-        },      
+        },
         "Klasse 2 Aktiva: Umlaufverm\u00f6gen, Rechnungsabgrenzungen": {
             "2030 Forderungen aus Lieferungen und Leistungen Inland (0% USt, umsatzsteuerfrei)": {
                 "account_type": "Receivable"
@@ -154,7 +153,7 @@
             },
             "2040 Forderungen aus Lieferungen und Leistungen Inland (sonstiger USt-Satz)": {
                 "account_type": "Receivable"
-            },                                    
+            },
             "2100 Forderungen aus Lieferungen und Leistungen EU": {
                 "account_type": "Receivable"
             },
@@ -192,7 +191,7 @@
                 "account_type": "Receivable"
             },
             "2570 Einfuhrumsatzsteuer (bezahlt)": {"account_type": "Tax"},
-            
+
             "2460 Eingeforderte aber noch nicht eingezahlte Einlagen": {
                 "account_type": "Receivable"
             },
@@ -243,10 +242,10 @@
             },
             "2800 Guthaben bei Bank": {
                 "account_type": "Bank"
-            },  
+            },
             "2801 Guthaben bei Bank - Sparkonto": {
                 "account_type": "Bank"
-            },                      
+            },
             "2810 Guthaben bei Paypal": {
                 "account_type": "Bank"
             },
@@ -264,19 +263,19 @@
             },
             "2895 Schwebende Geldbewegugen": {
                 "account_type": "Bank"
-            },            
+            },
             "2513 Vorsteuer Inland 5%": {
                 "account_type": "Tax"
             },
             "2515 Vorsteuer Inland 20%": {
                 "account_type": "Tax"
-            },                        
+            },
             "2520 Vorsteuer aus innergemeinschaftlichem Erwerb 10%": {
                 "account_type": "Tax"
             },
             "2525 Vorsteuer aus innergemeinschaftlichem Erwerb 20%": {
                 "account_type": "Tax"
-            },            
+            },
             "2530 Vorsteuer \u00a719/Art 19 ( reverse charge ) ": {
                 "account_type": "Tax"
             },
@@ -286,16 +285,16 @@
             "root_type": "Asset"
         },
           "Klasse 4: Betriebliche Erträge": {
-            "4000 Erlöse 20 %": {"account_type": "Income Account"},          
-            "4020 Erl\u00f6se 0 % steuerbefreit": {"account_type": "Income Account"},            
+            "4000 Erlöse 20 %": {"account_type": "Income Account"},
+            "4020 Erl\u00f6se 0 % steuerbefreit": {"account_type": "Income Account"},
             "4010 Erl\u00f6se 10 %": {"account_type": "Income Account"},
-            "4030 Erl\u00f6se 13 %": {"account_type": "Income Account"},            
-            "4040 Erl\u00f6se 0 % innergemeinschaftliche Lieferungen": {"account_type": "Income Account"},      
-            "4400 Erl\u00f6sreduktion 0 % steuerbefreit": {"account_type": "Expense Account"},            
+            "4030 Erl\u00f6se 13 %": {"account_type": "Income Account"},
+            "4040 Erl\u00f6se 0 % innergemeinschaftliche Lieferungen": {"account_type": "Income Account"},
+            "4400 Erl\u00f6sreduktion 0 % steuerbefreit": {"account_type": "Expense Account"},
             "4410 Erl\u00f6sreduktion 10 %": {"account_type": "Expense Account"},
             "4420 Erl\u00f6sreduktion 20 %": {"account_type": "Expense Account"},
-            "4430 Erl\u00f6sreduktion 13 %": {"account_type": "Expense Account"},            
-            "4440 Erl\u00f6sreduktion 0 % innergemeinschaftliche Lieferungen": {"account_type": "Expense Account"}, 
+            "4430 Erl\u00f6sreduktion 13 %": {"account_type": "Expense Account"},
+            "4440 Erl\u00f6sreduktion 0 % innergemeinschaftliche Lieferungen": {"account_type": "Expense Account"},
             "4500 Ver\u00e4nderungen des Bestandes an fertigen und unfertigen Erzeugn. sowie an noch nicht abrechenbaren Leistungen": {"account_type": "Income Account"},
             "4580 Aktivierte Eigenleistungen": {"account_type": "Income Account"},
             "4600 Erl\u00f6se aus dem Abgang vom Anlageverm\u00f6gen, ausgen. Finanzanlagen": {"account_type": "Income Account"},
@@ -304,15 +303,15 @@
             "4700 Ertr\u00e4ge aus der Aufl\u00f6sung von R\u00fcckstellungen": {"account_type": "Income Account"},
             "4800 \u00dcbrige betriebliche Ertr\u00e4ge": {"account_type": "Income Account"},
             "root_type": "Income"
-        },        
+        },
         "Klasse 5: Aufwand f\u00fcr Material und Leistungen": {
-            "5000 Einkauf Partnerleistungen": {"account_type": "Cost of Goods Sold"},        
+            "5000 Einkauf Partnerleistungen": {"account_type": "Cost of Goods Sold"},
             "5100 Verbrauch an Rohstoffen": {"account_type": "Cost of Goods Sold"},
             "5200 Verbrauch von bezogenen Fertig- und Einzelteilen": {"account_type": "Cost of Goods Sold"},
             "5300 Verbrauch von Hilfsstoffen": {"account_type": "Cost of Goods Sold"},
             "5340 Verbrauch Verpackungsmaterial": {"account_type": "Cost of Goods Sold"},
             "5470 Verbrauch von Kleinmaterial": {"account_type": "Cost of Goods Sold"},
-            "5450 Verbrauch von Reinigungsmaterial": {"account_type": "Cost of Goods Sold"},                                  
+            "5450 Verbrauch von Reinigungsmaterial": {"account_type": "Cost of Goods Sold"},
             "5400 Verbrauch von Betriebsstoffen": {"account_type": "Cost of Goods Sold"},
             "5500 Verbrauch von Werkzeugen und anderen Erzeugungshilfsmittel": {"account_type": "Cost of Goods Sold"},
             "5600 Verbrauch von Brenn- und Treibstoffen, Energie und Wasser": {"account_type": "Cost of Goods Sold"},
@@ -340,7 +339,7 @@
             "6700 Sonstige Sozialaufwendungen": {"account_type": "Payable"},
             "6900 Aufwandsstellenrechnung Personal": {"account_type": "Payable"},
             "root_type": "Expense"
-        },       
+        },
          "Klasse 7: Abschreibungen und sonstige betriebliche Aufwendungen": {
             "7010 Abschreibungen auf das Anlageverm\u00f6gen (ausgenommen Finanzanlagen)": {"account_type": "Depreciation"},
             "7100 Sonstige Steuern und Geb\u00fchren": {"account_type": "Tax"},
@@ -349,7 +348,7 @@
             "7310 Fahrrad - Aufwand": {"account_type": "Expense Account"},
             "7320 Kfz - Aufwand": {"account_type": "Expense Account"},
             "7330 LKW - Aufwand": {"account_type": "Expense Account"},
-            "7340 Lastenrad - Aufwand": {"account_type": "Expense Account"},            
+            "7340 Lastenrad - Aufwand": {"account_type": "Expense Account"},
             "7350 Reise- und Fahraufwand": {"account_type": "Expense Account"},
             "7360 Tag- und N\u00e4chtigungsgelder": {"account_type": "Expense Account"},
             "7380 Nachrichtenaufwand": {"account_type": "Expense Account"},
@@ -409,7 +408,7 @@
             "8990 Gewinnabfuhr bzw. Verlust\u00fcberrechnung aus Ergebnisabf\u00fchrungsvertr\u00e4gen": {"account_type": "Expense Account"},
             "8350 nicht ausgenutzte Lieferantenskonti": {"account_type": "Expense Account"},
             "root_type": "Income"
-        },       
+        },
         "Klasse 9 Passiva: Eigenkapital, R\u00fccklagen, stille Einlagen, Abschlusskonten": {
             "9000 Gezeichnetes bzw. gewidmetes Kapital": {
                 "account_type": "Equity"
@@ -435,5 +434,5 @@
             },
             "root_type": "Equity"
         }
-     }   
+     }
   }

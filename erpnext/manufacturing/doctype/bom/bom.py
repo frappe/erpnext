@@ -744,6 +744,9 @@ class BOM(WebsiteGenerator):
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
+			if not d.is_stock_item and self.rm_cost_as_per == "Valuation Rate":
+				continue
+
 			old_rate = d.rate
 			if self.rm_cost_as_per != "Manual":
 				d.rate = self.get_rm_rate(
@@ -1017,6 +1020,8 @@ def get_bom_item_rate(args, bom_doc):
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
 		price_list_data = get_price_list_rate(bom_args, item_doc)
 		rate = price_list_data.price_list_rate
+	elif bom_doc.rm_cost_as_per == "Manual":
+		return
 
 	return flt(rate)
 

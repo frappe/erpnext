@@ -502,6 +502,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 	set_data(data) {
 		data.forEach(d => {
+			d.qty = Math.abs(d.qty);
 			this.dialog.fields_dict.entries.df.data.push(d);
 		});
 
