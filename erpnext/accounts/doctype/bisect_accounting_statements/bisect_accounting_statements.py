@@ -195,7 +195,7 @@ class BisectAccountingStatements(Document):
 				self.fetch_or_calculate()
 				self.save()
 			else:
-				frappe.msgprint("No more children on Left")
+				frappe.msgprint(_("No more children on Left"))
 
 	@frappe.whitelist()
 	def bisect_right(self):
@@ -209,7 +209,7 @@ class BisectAccountingStatements(Document):
 				self.fetch_or_calculate()
 				self.save()
 			else:
-				frappe.msgprint("No more children on Right")
+				frappe.msgprint(_("No more children on Right"))
 
 	@frappe.whitelist()
 	def move_up(self):
@@ -223,4 +223,4 @@ class BisectAccountingStatements(Document):
 				self.fetch_or_calculate()
 				self.save()
 			else:
-				frappe.msgprint("Reached Root")
+				frappe.msgprint(_("Reached Root"))
