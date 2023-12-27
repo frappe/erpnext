@@ -264,7 +264,7 @@ def new_bank_transaction(transaction):
 					"reference_number": (
 						transaction["check_number"]
 						or transaction["payment_meta"]["reference_number"]
-						or transaction["name"]
+						or transaction["name"][:20]
 					),
 					"description": transaction["name"],
 				}
