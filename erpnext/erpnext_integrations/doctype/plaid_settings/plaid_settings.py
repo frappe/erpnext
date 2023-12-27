@@ -242,7 +242,7 @@ def new_bank_transaction(transaction):
 	try:
 		tags += transaction["category"]
 		tags += [f'Plaid Cat. {transaction["category_id"]}']
-	except KeyError:
+	except (TypeError, KeyError):
 		pass
 
 	if not frappe.db.exists(
