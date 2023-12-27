@@ -214,6 +214,7 @@
    "options": "\nWork Order\nJob Card"
   },
   {
+   "default": "1",
    "fieldname": "conversion_rate",
    "fieldtype": "Float",
    "label": "Conversion Rate",
@@ -606,7 +607,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-06 12:47:58.514795",
+ "modified": "2023-12-26 19:34:08.159312",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
