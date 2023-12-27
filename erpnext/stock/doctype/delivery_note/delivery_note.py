@@ -311,11 +311,13 @@ class DeliveryNote(SellingController):
 			)
 
 	def set_serial_and_batch_bundle_from_pick_list(self):
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
 		if not self.pick_list:
 			return
 
 		for item in self.items:
-			if item.pick_list_item:
+			if item.pick_list_item and not item.serial_and_batch_bundle:
 				filters = {
 					"item_code": item.item_code,
 					"voucher_type": "Pick List",
@@ -326,7 +328,17 @@ class DeliveryNote(SellingController):
 				bundle_id = frappe.db.get_value("Serial and Batch Bundle", filters, "name")
 
 				if bundle_id:
-					item.serial_and_batch_bundle = bundle_id
+					cls_obj = SerialBatchCreation(
+						{
+							"type_of_transaction": "Outward",
+							"serial_and_batch_bundle": bundle_id,
+							"item_code": item.get("item_code"),
+						}
+					)
+
+					cls_obj.duplicate_package()
+
+					item.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -408,6 +420,7 @@ class DeliveryNote(SellingController):
 		self.update_stock_ledger()
 
 		self.cancel_packing_slips()
+		self.update_pick_list_status()
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
@@ -1294,7 +1307,3 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	)
 
 	return doclist
-
-
-def on_doctype_update():
-	frappe.db.add_index("Delivery Note", ["customer", "is_return", "return_against"])

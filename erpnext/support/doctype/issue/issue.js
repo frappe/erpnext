@@ -58,7 +58,9 @@ frappe.ui.form.on("Issue", {
 
 				frappe.call("erpnext.support.doctype.service_level_agreement.service_level_agreement.reset_service_level_agreement", {
 					reason: values.reason,
-					user: frappe.session.user_email
+					user: frappe.session.user_email,
+					doctype: frm.doc.doctype,
+					docname: frm.doc.name,
 				}, () => {
 					reset_sla.enable_primary_action();
 					frm.refresh();
