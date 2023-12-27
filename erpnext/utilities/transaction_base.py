@@ -98,6 +98,7 @@ class TransactionBase(StatusUpdater):
 				"Selling Settings", "None", ["maintain_same_rate_action", "role_to_override_stop_action"]
 			)
 
+		stop_actions = []
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
 			reference_names = [d.get(ref_link_field) for d in self.get("items") if d.get(ref_link_field)]
 			reference_details = self.get_reference_details(reference_names, ref_dt + " Item")
@@ -108,7 +109,7 @@ class TransactionBase(StatusUpdater):
 					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= 0.01:
 						if action == "Stop":
 							if role_allowed_to_override not in frappe.get_roles():
-								frappe.throw(
+								stop_actions.append(
 									_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
 										d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate
 									)
@@ -121,6 +122,8 @@ class TransactionBase(StatusUpdater):
 								title=_("Warning"),
 								indicator="orange",
 							)
+		if stop_actions:
+			frappe.throw(stop_actions, as_list=True)
 
 	def get_reference_details(self, reference_names, reference_doctype):
 		return frappe._dict(
