@@ -337,15 +337,17 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_auto_data() {
+		let { qty, based_on } = this.dialog.get_values();
+
 		if (this.item.serial_and_batch_bundle || this.item.rejected_serial_and_batch_bundle) {
-			return;
+			if (qty === this.qty) {
+				return;
+			}
 		}
 
 		if (this.item.serial_no || this.item.batch_no) {
 			return;
 		}
-
-		let { qty, based_on } = this.dialog.get_values();
 
 		if (!based_on) {
 			based_on = 'FIFO';
