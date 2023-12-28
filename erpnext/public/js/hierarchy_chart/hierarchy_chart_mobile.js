@@ -225,6 +225,10 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	load_children(node) {
+		if (!this.company) {
+			frappe.throw(__('Please select a company first'));
+		}
+
 		frappe.run_serially([
 			() => this.get_child_nodes(node.id),
 			(child_nodes) => this.render_child_nodes(node, child_nodes)
