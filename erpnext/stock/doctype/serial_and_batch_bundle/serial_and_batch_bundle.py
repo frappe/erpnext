@@ -1145,15 +1145,16 @@ def add_serial_batch_ledgers(entries, child_row, doc, warehouse) -> object:
 	if isinstance(entries, str):
 		entries = parse_json(entries)
 
-	if doc and isinstance(doc, str):
-		parent_doc = parse_json(doc)
+	parent_doc = doc
+	if parent_doc and isinstance(parent_doc, str):
+		parent_doc = parse_json(parent_doc)
 
 	if frappe.db.exists("Serial and Batch Bundle", child_row.serial_and_batch_bundle):
-		doc = update_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse)
+		sb_doc = update_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse)
 	else:
-		doc = create_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse)
+		sb_doc = create_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse)
 
-	return doc
+	return sb_doc
 
 
 def create_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse=None) -> object:
@@ -1177,6 +1178,7 @@ def create_serial_batch_no_ledgers(entries, child_row, parent_doc, warehouse=Non
 			"type_of_transaction": type_of_transaction,
 			"posting_date": parent_doc.get("posting_date"),
 			"posting_time": parent_doc.get("posting_time"),
+			"company": parent_doc.get("company"),
 		}
 	)
 
