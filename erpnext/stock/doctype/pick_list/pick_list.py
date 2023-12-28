@@ -21,6 +21,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
+	get_picked_serial_nos,
 )
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -166,6 +167,9 @@ class PickList(Document):
 				frappe.get_doc(
 					"Serial and Batch Bundle", row.serial_and_batch_bundle
 				).set_serial_and_batch_values(self, row)
+
+	def on_trash(self):
+		self.remove_serial_and_batch_bundle()
 
 	def remove_serial_and_batch_bundle(self):
 		for row in self.locations:
@@ -723,13 +727,14 @@ def get_available_item_locations(
 def get_available_item_locations_for_serialized_item(
 	item_code, from_warehouses, required_qty, company, total_picked_qty=0
 ):
+	picked_serial_nos = get_picked_serial_nos(item_code, from_warehouses)
+
 	sn = frappe.qb.DocType("Serial No")
 	query = (
 		frappe.qb.from_(sn)
 		.select(sn.name, sn.warehouse)
 		.where((sn.item_code == item_code) & (sn.company == company))
 		.orderby(sn.creation)
-		.limit(cint(required_qty + total_picked_qty))
 	)
 
 	if from_warehouses:
@@ -742,6 +747,9 @@ def get_available_item_locations_for_serialized_item(
 	warehouse_serial_nos_map = frappe._dict()
 	picked_qty = required_qty
 	for serial_no, warehouse in serial_nos:
+		if serial_no in picked_serial_nos:
+			continue
+
 		if picked_qty <= 0:
 			break
 
@@ -786,7 +794,8 @@ def get_available_item_locations_for_batched_item(
 			{
 				"item_code": item_code,
 				"warehouse": from_warehouses,
-				"qty": required_qty + total_picked_qty,
+				"qty": required_qty,
+				"is_pick_list": True,
 			}
 		)
 	)
@@ -1050,7 +1059,7 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 @frappe.whitelist()
 def target_document_exists(pick_list_name, purpose):
 	if purpose == "Delivery":
-		return frappe.db.exists("Delivery Note", {"pick_list": pick_list_name})
+		return frappe.db.exists("Delivery Note", {"pick_list": pick_list_name, "docstatus": 1})
 
 	return stock_entry_exists(pick_list_name)
 
