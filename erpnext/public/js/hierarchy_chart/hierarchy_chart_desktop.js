@@ -68,7 +68,7 @@ erpnext.HierarchyChart = class {
 
 	show() {
 		this.setup_actions();
-		if ($(`[data-fieldname="company"]`).length) return;
+		if (this.page.main.find('[data-fieldname="company"]').length) return;
 		let me = this;
 
 		let company = this.page.add_field({

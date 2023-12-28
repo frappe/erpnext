@@ -59,8 +59,8 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	show() {
+		if (this.page.main.find('[data-fieldname="company"]').length) return;
 		let me = this;
-		if ($(`[data-fieldname="company"]`).length) return;
 
 		let company = this.page.add_field({
 			fieldtype: 'Link',
