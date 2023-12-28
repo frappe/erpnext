@@ -80,7 +80,7 @@ erpnext.HierarchyChart = class {
 			only_select: true,
 			reqd: 1,
 			change: () => {
-				me.company = undefined;
+				me.company = '';
 				$('#hierarchy-chart-wrapper').remove();
 
 				if (company.get_value()) {
@@ -286,6 +286,10 @@ erpnext.HierarchyChart = class {
 	}
 
 	load_children(node, deep=false) {
+		if (!this.company) {
+			frappe.throw(__('Please select a company first.'));
+		}
+
 		if (!deep) {
 			frappe.run_serially([
 				() => this.get_child_nodes(node.id),
