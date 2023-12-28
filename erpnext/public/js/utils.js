@@ -737,7 +737,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			},
 			callback: function(r) {
 				if(!r.exc) {
-					var doc = frappe.model.sync(r.message);
+					frappe.model.sync(r.message);
 					cur_frm.dirty();
 					cur_frm.refresh();
 				}
@@ -764,6 +764,11 @@ erpnext.utils.map_current_doc = function(opts) {
 			target: opts.target,
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
+			data_fields: [{
+				fieldname: 'merge_taxes',
+				fieldtype: 'Check',
+				label: __('Merge taxes from multiple documents'),
+			}],
 			get_query: opts.get_query,
 			add_filters_group: 1,
 			allow_child_item_selection: opts.allow_child_item_selection,
@@ -777,10 +782,7 @@ erpnext.utils.map_current_doc = function(opts) {
 					return;
 				}
 				opts.source_name = values;
-				if (opts.allow_child_item_selection) {
-					// args contains filtered child docnames
-					opts.args = args;
-				}
+				opts.args = args;
 				d.dialog.hide();
 				_map();
 			},
