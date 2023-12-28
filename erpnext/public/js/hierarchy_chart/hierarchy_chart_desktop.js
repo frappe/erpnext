@@ -68,7 +68,7 @@ erpnext.HierarchyChart = class {
 
 	show() {
 		this.setup_actions();
-		if ($(`[data-fieldname="company"]`).length) return;
+		if (this.page.main.find('[data-fieldname="company"]').length) return;
 		let me = this;
 
 		let company = this.page.add_field({
@@ -80,7 +80,7 @@ erpnext.HierarchyChart = class {
 			only_select: true,
 			reqd: 1,
 			change: () => {
-				me.company = undefined;
+				me.company = '';
 				$('#hierarchy-chart-wrapper').remove();
 
 				if (company.get_value()) {
@@ -219,8 +219,8 @@ erpnext.HierarchyChart = class {
 			}
 		}).then(r => {
 			if (r.message.length) {
-				let expand_node = undefined;
-				let node = undefined;
+				let expand_node;
+				let node;
 
 				$.each(r.message, (_i, data) => {
 					if ($(`[id="${data.id}"]`).length)
@@ -229,7 +229,7 @@ erpnext.HierarchyChart = class {
 					node = new me.Node({
 						id: data.id,
 						parent: $('<li class="child-node"></li>').appendTo(me.$hierarchy.find('.node-children')),
-						parent_id: undefined,
+						parent_id: '',
 						image: data.image,
 						name: data.name,
 						title: data.title,
@@ -286,6 +286,10 @@ erpnext.HierarchyChart = class {
 	}
 
 	load_children(node, deep=false) {
+		if (!this.company) {
+			frappe.throw(__('Please select a company first.'));
+		}
+
 		if (!deep) {
 			frappe.run_serially([
 				() => this.get_child_nodes(node.id),
@@ -367,8 +371,8 @@ erpnext.HierarchyChart = class {
 	}
 
 	render_children_of_all_nodes(data_list) {
-		let entry = undefined;
-		let node = undefined;
+		let entry;
+		let node;
 
 		while (data_list.length) {
 			// to avoid overlapping connectors
@@ -423,7 +427,7 @@ erpnext.HierarchyChart = class {
 			title: data.title,
 			expandable: data.expandable,
 			connections: data.connections,
-			children: undefined
+			children: null,
 		});
 	}
 
@@ -519,7 +523,7 @@ erpnext.HierarchyChart = class {
 	collapse_previous_level_nodes(node) {
 		let node_parent = $(`[id="${node.parent_id}"]`);
 		let previous_level_nodes = node_parent.parent().parent().children('li');
-		let node_card = undefined;
+		let node_card;
 
 		previous_level_nodes.each(function() {
 			node_card = $(this).find('.node-card');
@@ -582,12 +586,12 @@ erpnext.HierarchyChart = class {
 		level.nextAll('li').remove();
 
 		let nodes = level.find('.node-card');
-		let node_object = undefined;
+		let node_object;
 
 		$.each(nodes, (_i, element) => {
 			node_object = this.nodes[element.id];
 			node_object.expanded = 0;
-			node_object.$children = undefined;
+			node_object.$children = null;
 		});
 
 		nodes.removeClass('collapsed active-path');
