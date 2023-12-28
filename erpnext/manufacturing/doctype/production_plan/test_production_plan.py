@@ -1488,6 +1488,29 @@ class TestProductionPlan(FrappeTestCase):
 		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 		self.assertAlmostEqual(after_qty, before_qty)
 
+	def test_min_order_qty_in_pp(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from erpnext.stock.utils import get_or_make_bin
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1, "min_order_qty": 1000}).name
+
+		rm_warehouse = create_warehouse("RM Warehouse", company="_Test Company")
+
+		make_bom(item=fg_item, raw_materials=[rm_item], source_warehouse="_Test Warehouse - _TC")
+
+		pln = create_production_plan(item_code=fg_item, planned_qty=10, do_not_submit=1)
+
+		pln.for_warehouse = rm_warehouse
+		mr_items = get_items_for_material_requests(pln.as_dict())
+		for d in mr_items:
+			self.assertEqual(d.get("quantity"), 10.0)
+
+		pln.consider_minimum_order_qty = 1
+		mr_items = get_items_for_material_requests(pln.as_dict())
+		for d in mr_items:
+			self.assertEqual(d.get("quantity"), 1000.0)
+
 
 def create_production_plan(**args):
 	"""

@@ -2388,10 +2388,6 @@ def get_loyalty_programs(customer):
 		return lp_details
 
 
-def on_doctype_update():
-	frappe.db.add_index("Sales Invoice", ["customer", "is_return", "return_against"])
-
-
 @frappe.whitelist()
 def create_invoice_discounting(source_name, target_doc=None):
 	invoice = frappe.get_doc("Sales Invoice", source_name)

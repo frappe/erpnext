@@ -28,8 +28,8 @@ from erpnext.accounts.utils import get_currency_precision
 #  6. Configurable Ageing Groups (0-30, 30-60 etc) can be set via filters
 #  7. For overpayment against an invoice with payment terms, there will be an additional row
 #  8. Invoice details like Sales Persons, Delivery Notes are also fetched comma separated
-#  9. Report amounts are in "Party Currency" if party is selected, or company currency for multi-party
-# 10. This reports is based on all GL Entries that are made against account_type "Receivable" or "Payable"
+#  9. Report amounts are in party currency if in_party_currency is selected, otherwise company currency
+# 10. This report is based on Payment Ledger Entries
 
 
 def execute(filters=None):
@@ -82,6 +82,9 @@ class ReceivablePayableReport(object):
 		if self.filters.get("group_by_party"):
 			self.previous_party = ""
 			self.total_row_map = {}
+			self.skip_total_row = 1
+
+		if self.filters.get("in_party_currency"):
 			self.skip_total_row = 1
 
 	def get_data(self):
@@ -145,7 +148,7 @@ class ReceivablePayableReport(object):
 			if self.filters.get("group_by_party"):
 				self.init_subtotal_row(ple.party)
 
-		if self.filters.get("group_by_party"):
+		if self.filters.get("group_by_party") and not self.filters.get("in_party_currency"):
 			self.init_subtotal_row("Total")
 
 	def get_invoices(self, ple):
@@ -224,8 +227,7 @@ class ReceivablePayableReport(object):
 		if not row:
 			return
 
-		# amount in "Party Currency", if its supplied. If not, amount in company currency
-		if self.filters.get("party_type") and self.filters.get("party"):
+		if self.filters.get("in_party_currency") or self.filters.get("party_account"):
 			amount = ple.amount_in_account_currency
 		else:
 			amount = ple.amount
@@ -260,8 +262,10 @@ class ReceivablePayableReport(object):
 	def update_sub_total_row(self, row, party):
 		total_row = self.total_row_map.get(party)
 
-		for field in self.get_currency_fields():
-			total_row[field] += row.get(field, 0.0)
+		if total_row:
+			for field in self.get_currency_fields():
+				total_row[field] += row.get(field, 0.0)
+			total_row["currency"] = row.get("currency", "")
 
 	def append_subtotal_row(self, party):
 		sub_total_row = self.total_row_map.get(party)
@@ -322,7 +326,7 @@ class ReceivablePayableReport(object):
 		if self.filters.get("group_by_party"):
 			self.append_subtotal_row(self.previous_party)
 			if self.data:
-				self.data.append(self.total_row_map.get("Total"))
+				self.data.append(self.total_row_map.get("Total", {}))
 
 	def append_row(self, row):
 		self.allocate_future_payments(row)
@@ -453,7 +457,7 @@ class ReceivablePayableReport(object):
 		party_details = self.get_party_details(row.party) or {}
 		row.update(party_details)
 
-		if self.filters.get("party_type") and self.filters.get("party"):
+		if self.filters.get("in_party_currency") or self.filters.get("party_account"):
 			row.currency = row.account_currency
 		else:
 			row.currency = self.company_currency
