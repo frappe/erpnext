@@ -8,6 +8,9 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, add_to_date, flt, nowdate, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	add_serial_batch_ledgers,
+)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
@@ -419,6 +422,43 @@ class TestSerialandBatchBundle(FrappeTestCase):
 
 		ste.delete()
 		self.assertFalse(frappe.db.exists("Serial and Batch Bundle", bundle_doc.name))
+
+	def test_serial_and_batch_bundle_company(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item = make_item(
+			properties={
+				"has_serial_no": 1,
+				"serial_no_series": "TT-SER-VAL-.#####",
+			}
+		)
+
+		pr = make_purchase_receipt(
+			item_code=item,
+			warehouse="_Test Warehouse - _TC",
+			qty=3,
+			rate=500,
+			do_not_submit=True,
+		)
+
+		entries = []
+		for serial_no in ["TT-SER-VAL-00001", "TT-SER-VAL-00002", "TT-SER-VAL-00003"]:
+			entries.append(frappe._dict({"serial_no": serial_no, "qty": 1}))
+
+			if not frappe.db.exists("Serial No", serial_no):
+				frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"serial_no": serial_no,
+						"item_code": item,
+					}
+				).insert(ignore_permissions=True)
+
+		item_row = pr.items[0]
+		item_row.type_of_transaction = "Inward"
+		item_row.is_rejected = 0
+		sn_doc = add_serial_batch_ledgers(entries, item_row, pr, "_Test Warehouse - _TC")
+		self.assertEqual(sn_doc.company, "_Test Company")
 
 
 def get_batch_from_bundle(bundle):
