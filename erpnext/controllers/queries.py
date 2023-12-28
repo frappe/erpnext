@@ -222,7 +222,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	searchfields = meta.get_search_fields()
 
 	columns = ""
-	extra_searchfields = [field for field in searchfields if not field in ["name", "description"]]
+	extra_searchfields = [field for field in searchfields if field not in ["name", "description"]]
 
 	if extra_searchfields:
 		columns += ", " + ", ".join(extra_searchfields)
@@ -233,8 +233,13 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	searchfields = searchfields + [
 		field
-		for field in [searchfield or "name", "item_code", "item_group", "item_name"]
-		if not field in searchfields
+		for field in [
+			searchfield or "name",
+			"item_code",
+			"item_group",
+			"item_name",
+		]
+		if field not in searchfields
 	]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
@@ -872,7 +877,7 @@ def get_fields(doctype, fields=None):
 	meta = frappe.get_meta(doctype)
 	fields.extend(meta.get_search_fields())
 
-	if meta.title_field and not meta.title_field.strip() in fields:
+	if meta.title_field and meta.title_field.strip() not in fields:
 		fields.insert(1, meta.title_field.strip())
 
 	return unique(fields)
@@ -891,3 +896,31 @@ def get_payment_terms_for_references(doctype, txt, searchfield, start, page_len,
 			as_list=1,
 		)
 	return terms
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_filtered_child_rows(doctype, txt, searchfield, start, page_len, filters) -> list:
+	table = frappe.qb.DocType(doctype)
+	query = (
+		frappe.qb.from_(table)
+		.select(
+			table.name,
+			Concat("#", table.idx, ", ", table.item_code),
+		)
+		.orderby(table.idx)
+		.offset(start)
+		.limit(page_len)
+	)
+
+	if filters:
+		for field, value in filters.items():
+			query = query.where(table[field] == value)
+
+	if txt:
+		txt += "%"
+		query = query.where(
+			((table.idx.like(txt.replace("#", ""))) | (table.item_code.like(txt))) | (table.name.like(txt))
+		)
+
+	return query.run(as_dict=False)

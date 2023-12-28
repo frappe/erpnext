@@ -123,7 +123,7 @@ class EmailDigest(Document):
 				if msg_for_this_recipient and row.recipient in valid_users:
 					frappe.sendmail(
 						recipients=row.recipient,
-						subject=_("{0} Digest").format(self.frequency),
+						subject=_("{0} Digest").format(_(self.frequency)),
 						message=msg_for_this_recipient,
 						reference_doctype=self.doctype,
 						reference_name=self.name,
@@ -689,7 +689,7 @@ class EmailDigest(Document):
 		]
 
 	def get_root_type_accounts(self, root_type):
-		if not root_type in self._accounts:
+		if root_type not in self._accounts:
 			self._accounts[root_type] = [
 				d.name
 				for d in frappe.db.get_all(

@@ -170,7 +170,7 @@ def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 				pending_qty -= qty_to_allocate
 				rule["free_space"] -= stock_qty_to_allocate
 
-				if not pending_stock_qty > 0:
+				if pending_stock_qty <= 0:
 					break
 
 		# if pending qty after applying all rules, add row without warehouse

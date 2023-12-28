@@ -930,7 +930,7 @@ class WorkOrder(Document):
 			validate_end_of_life(self.production_item)
 
 	def validate_qty(self):
-		if not self.qty > 0:
+		if self.qty <= 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
 
 		if (
@@ -957,7 +957,7 @@ class WorkOrder(Document):
 
 			max_qty = qty_dict.get("planned_qty", 0) + allowance_qty - qty_dict.get("ordered_qty", 0)
 
-			if not max_qty > 0:
+			if max_qty <= 0:
 				frappe.throw(
 					_("Cannot produce more item for {0}").format(self.production_item), OverProductionError
 				)
@@ -968,7 +968,7 @@ class WorkOrder(Document):
 				)
 
 	def validate_transfer_against(self):
-		if not self.docstatus == 1:
+		if self.docstatus != 1:
 			# let user configure operations until they're ready to submit
 			return
 		if not self.operations:
@@ -981,7 +981,7 @@ class WorkOrder(Document):
 
 	def validate_operation_time(self):
 		for d in self.operations:
-			if not d.time_in_mins > 0:
+			if d.time_in_mins <= 0:
 				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
 
 	def update_required_items(self):

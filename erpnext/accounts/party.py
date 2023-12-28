@@ -195,7 +195,7 @@ def set_address_details(
 	company_address=None,
 	shipping_address=None,
 	*,
-	ignore_permissions=False
+	ignore_permissions=False,
 ):
 	billing_address_field = (
 		"customer_address" if party_type == "Lead" else party_type.lower() + "_address"
@@ -239,7 +239,7 @@ def set_address_details(
 				shipping_address_display=render_address(
 					shipping_address, check_permissions=not ignore_permissions
 				),
-				**get_fetch_values(doctype, "shipping_address", shipping_address)
+				**get_fetch_values(doctype, "shipping_address", shipping_address),
 			)
 
 		if party_details.company_address:
@@ -250,7 +250,7 @@ def set_address_details(
 					party_details.company_address_display
 					or render_address(party_details.company_address, check_permissions=False)
 				),
-				**get_fetch_values(doctype, "billing_address", party_details.company_address)
+				**get_fetch_values(doctype, "billing_address", party_details.company_address),
 			)
 
 			# shipping address - if not already set
@@ -258,7 +258,7 @@ def set_address_details(
 				party_details.update(
 					shipping_address=party_details.billing_address,
 					shipping_address_display=party_details.billing_address_display,
-					**get_fetch_values(doctype, "shipping_address", party_details.billing_address)
+					**get_fetch_values(doctype, "shipping_address", party_details.billing_address),
 				)
 
 	party_address, shipping_address = (
@@ -775,7 +775,7 @@ def validate_party_frozen_disabled(party_type, party_name):
 				frozen_accounts_modifier = frappe.db.get_single_value(
 					"Accounts Settings", "frozen_accounts_modifier"
 				)
-				if not frozen_accounts_modifier in frappe.get_roles():
+				if frozen_accounts_modifier not in frappe.get_roles():
 					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
 
 		elif party_type == "Employee":
@@ -980,6 +980,9 @@ def get_partywise_advanced_payment_amount(
 
 	if party:
 		query = query.where(ple.party == party)
+
+	if invoice_doctypes := frappe.get_hooks("invoice_doctypes"):
+		query = query.where(ple.voucher_type.notin(invoice_doctypes))
 
 	data = query.run()
 	if data:

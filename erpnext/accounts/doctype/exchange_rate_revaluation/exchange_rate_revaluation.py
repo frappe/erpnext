@@ -44,7 +44,7 @@ class ExchangeRateRevaluation(Document):
 		self.set_total_gain_loss()
 
 	def validate_rounding_loss_allowance(self):
-		if not (self.rounding_loss_allowance >= 0 and self.rounding_loss_allowance < 1):
+		if self.rounding_loss_allowance < 0 or self.rounding_loss_allowance >= 1:
 			frappe.throw(_("Rounding Loss Allowance should be between 0 and 1"))
 
 	def set_total_gain_loss(self):
@@ -214,7 +214,7 @@ class ExchangeRateRevaluation(Document):
 				# round off balance based on currency precision
 				# and consider debit-credit difference allowance
 				currency_precision = get_currency_precision()
-				rounding_loss_allowance = float(rounding_loss_allowance) or 0.05
+				rounding_loss_allowance = float(rounding_loss_allowance)
 				for acc in account_details:
 					acc.balance_in_account_currency = flt(acc.balance_in_account_currency, currency_precision)
 					if abs(acc.balance_in_account_currency) <= rounding_loss_allowance:

@@ -79,10 +79,10 @@ class MaterialRequest(BuyingController):
 		so_items = {}  # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
 		for d in self.get("items"):
 			if d.sales_order:
-				if not d.sales_order in so_items:
+				if d.sales_order not in so_items:
 					so_items[d.sales_order] = {d.item_code: flt(d.qty)}
 				else:
-					if not d.item_code in so_items[d.sales_order]:
+					if d.item_code not in so_items[d.sales_order]:
 						so_items[d.sales_order][d.item_code] = flt(d.qty)
 					else:
 						so_items[d.sales_order][d.item_code] += flt(d.qty)
@@ -169,7 +169,9 @@ class MaterialRequest(BuyingController):
 	def on_submit(self):
 		self.update_requested_qty_in_production_plan()
 		self.update_requested_qty()
-		if self.material_request_type == "Purchase":
+		if self.material_request_type == "Purchase" and frappe.db.exists(
+			"Budget", {"applicable_on_material_request": 1, "docstatus": 1}
+		):
 			self.validate_budget()
 
 	def before_save(self):

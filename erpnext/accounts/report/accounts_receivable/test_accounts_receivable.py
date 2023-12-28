@@ -76,6 +76,41 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 
 		return credit_note
 
+	def test_pos_receivable(self):
+		filters = {
+			"company": self.company,
+			"party_type": "Customer",
+			"party": [self.customer],
+			"report_date": add_days(today(), 2),
+			"based_on_payment_terms": 0,
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"show_remarks": False,
+		}
+
+		pos_inv = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		pos_inv.posting_date = add_days(today(), 2)
+		pos_inv.is_pos = 1
+		pos_inv.append(
+			"payments",
+			frappe._dict(
+				mode_of_payment="Cash",
+				amount=flt(pos_inv.grand_total / 2),
+			),
+		)
+		pos_inv.disable_rounded_total = 1
+		pos_inv.save()
+		pos_inv.submit()
+
+		report = execute(filters)
+		expected_data = [[pos_inv.grand_total, pos_inv.paid_amount, 0]]
+
+		row = report[1][-1]
+		self.assertEqual(expected_data[0], [row.invoiced, row.paid, row.credit_note])
+		pos_inv.cancel()
+
 	def test_accounts_receivable(self):
 		filters = {
 			"company": self.company,
@@ -544,7 +579,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters.update({"party_account": self.debtors_usd})
 		report = execute(filters)[1]
 		self.assertEqual(len(report), 1)
-		expected_data = [8000.0, 8000.0, self.debtors_usd, si2.currency]
+		expected_data = [100.0, 100.0, self.debtors_usd, si2.currency]
 		row = report[0]
 		self.assertEqual(
 			expected_data, [row.invoiced, row.outstanding, row.party_account, row.account_currency]

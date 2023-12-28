@@ -261,8 +261,7 @@ class JobCard(Document):
 			# override capacity for employee
 			production_capacity = 1
 
-		overlap_count = self.get_overlap_count(time_logs)
-		if time_logs and production_capacity > overlap_count:
+		if not self.has_overlap(production_capacity, time_logs):
 			return {}
 
 		if self.workstation_type and time_logs:
@@ -272,36 +271,42 @@ class JobCard(Document):
 
 		return time_logs[-1]
 
-	@staticmethod
-	def get_overlap_count(time_logs):
-		count = 1
+	def has_overlap(self, production_capacity, time_logs):
+		overlap = False
+		if production_capacity == 1 and len(time_logs) >= 1:
+			return True
+		if not len(time_logs):
+			return False
 
-		# Check overlap exists or not between the overlapping time logs with the current Job Card
-		for idx, row in enumerate(time_logs):
-			next_idx = idx
-			if idx + 1 < len(time_logs):
-				next_idx = idx + 1
-				next_row = time_logs[next_idx]
-				if row.name == next_row.name:
-					continue
-
-				if (
-					(
-						get_datetime(next_row.from_time) >= get_datetime(row.from_time)
-						and get_datetime(next_row.from_time) <= get_datetime(row.to_time)
-					)
-					or (
-						get_datetime(next_row.to_time) >= get_datetime(row.from_time)
-						and get_datetime(next_row.to_time) <= get_datetime(row.to_time)
-					)
-					or (
-						get_datetime(next_row.from_time) <= get_datetime(row.from_time)
-						and get_datetime(next_row.to_time) >= get_datetime(row.to_time)
-					)
-				):
-					count += 1
-
-		return count
+		# sorting overlapping job cards as per from_time
+		time_logs = sorted(time_logs, key=lambda x: x.get("from_time"))
+		# alloted_capacity has key number starting from 1. Key number will increment by 1 if non sequential job card found
+		# if key number reaches/crosses to production_capacity means capacity is full and overlap error generated
+		# this will store last to_time of sequential job cards
+		alloted_capacity = {1: time_logs[0]["to_time"]}
+		# flag for sequential Job card found
+		sequential_job_card_found = False
+		for i in range(1, len(time_logs)):
+			# scanning for all Existing keys
+			for key in alloted_capacity.keys():
+				# if current Job Card from time is greater than last to_time in that key means these job card are sequential
+				if alloted_capacity[key] <= time_logs[i]["from_time"]:
+					# So update key's value with last to_time
+					alloted_capacity[key] = time_logs[i]["to_time"]
+					# flag is true as we get sequential Job Card for that key
+					sequential_job_card_found = True
+					# Immediately break so that job card to time is not added with any other key except this
+					break
+			# if sequential job card not found above means it is overlapping  so increment key number to alloted_capacity
+			if not sequential_job_card_found:
+				# increment key number
+				key = key + 1
+				# for that key last to time is assigned.
+				alloted_capacity[key] = time_logs[i]["to_time"]
+		if len(alloted_capacity) >= production_capacity:
+			# if number of keys greater or equal to production caoacity means full capacity is utilized and we should throw overlap error
+			return True
+		return overlap
 
 	def get_time_logs(self, args, doctype, check_next_available_slot=False):
 		jc = frappe.qb.DocType("Job Card")

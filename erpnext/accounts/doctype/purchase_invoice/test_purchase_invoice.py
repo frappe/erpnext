@@ -1747,6 +1747,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			paid_to="Creditors - _TC",
 			paid_amount=500,
 		)
+		pe.save()  # save trigger is needed for set_liability_account() to be executed
 		pe.submit()
 
 		pi = make_purchase_invoice(
@@ -1769,9 +1770,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		# Check GL Entry against payment doctype
 		expected_gle = [
-			["Advances Paid - _TC", 0.0, 500, nowdate()],
+			["Advances Paid - _TC", 500.0, 0.0, nowdate()],
+			["Advances Paid - _TC", 0.0, 500.0, nowdate()],
 			["Cash - _TC", 0.0, 500, nowdate()],
-			["Creditors - _TC", 500, 0.0, nowdate()],
 			["Creditors - _TC", 500, 0.0, nowdate()],
 		]
 

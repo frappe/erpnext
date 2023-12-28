@@ -280,6 +280,7 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 		"project",
 		"finance_book",
 		"voucher_no",
+		"against_link",
 	]
 
 	if dimensions:
@@ -597,7 +598,30 @@ def make_reverse_gl_entries(
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
 		validate_against_pcv(is_opening, gl_entries[0]["posting_date"], gl_entries[0]["company"])
-		if not partial_cancel:
+		if partial_cancel:
+			# Partial cancel is only used by `Advance` in separate account feature.
+			# Only cancel GL entries for unlinked reference using `voucher_detail_no`
+			gle = frappe.qb.DocType("GL Entry")
+			for x in gl_entries:
+				query = (
+					frappe.qb.update(gle)
+					.set(gle.is_cancelled, True)
+					.set(gle.modified, now())
+					.set(gle.modified_by, frappe.session.user)
+					.where(
+						(gle.company == x.company)
+						& (gle.account == x.account)
+						& (gle.party_type == x.party_type)
+						& (gle.party == x.party)
+						& (gle.voucher_type == x.voucher_type)
+						& (gle.voucher_no == x.voucher_no)
+						& (gle.against_voucher_type == x.against_voucher_type)
+						& (gle.against_voucher == x.against_voucher)
+						& (gle.voucher_detail_no == x.voucher_detail_no)
+					)
+				)
+				query.run()
+		else:
 			set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
 
 		for entry in gl_entries:
