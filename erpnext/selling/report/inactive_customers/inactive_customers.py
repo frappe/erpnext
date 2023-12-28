@@ -33,9 +33,13 @@ def get_sales_details(doctype):
 			max(so.posting_date) as 'last_order_date',
 			DATEDIFF(CURRENT_DATE, max(so.posting_date)) as 'days_since_last_order' """
 	if doctype == "Sales Order":
-		cond = """sum(if(so.status = "Stopped",
-				so.base_net_total * so.per_delivered/100,
-				so.base_net_total)) as 'total_order_considered',
+		cond = """
+			SUM(
+    			CASE
+        			WHEN so.status = 'Stopped' THEN so.base_net_total * so.per_delivered/100
+        			ELSE so.base_net_total
+    			END
+    		) AS "total_order_considered",
 			max(so.transaction_date) as 'last_order_date',
 			DATEDIFF(CURRENT_DATE, max(so.transaction_date)) as 'days_since_last_order'"""
 

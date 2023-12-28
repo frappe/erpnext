@@ -50,7 +50,7 @@ def get_pos_entries(filters, group_by_field):
 	order_by = "p.posting_date"
 	select_mop_field, from_sales_invoice_payment, group_by_mop_condition = "", "", ""
 	if group_by_field == "mode_of_payment":
-		select_mop_field = ", sip.mode_of_payment, sip.base_amount - IF(sip.type='Cash', p.change_amount, 0) as paid_amount"
+		select_mop_field = ", sip.mode_of_payment, sip.base_amount - CASE WHEN sip.type = 'Cash' THEN p.change_amountELSE 0 END AS paid_amount"
 		from_sales_invoice_payment = ", `tabSales Invoice Payment` sip"
 		group_by_mop_condition = "sip.parent = p.name AND ifnull(sip.base_amount - IF(sip.type='Cash', p.change_amount, 0), 0) != 0 AND"
 		order_by += ", sip.mode_of_payment"

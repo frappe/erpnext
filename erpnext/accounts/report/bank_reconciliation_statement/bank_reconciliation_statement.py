@@ -153,12 +153,27 @@ def get_payment_entries(filters):
 		select
 			"Payment Entry" as payment_document, name as payment_entry,
 			reference_no, reference_date as ref_date,
-			if(paid_to=%(account)s, received_amount, 0) as debit,
-			if(paid_from=%(account)s, paid_amount, 0) as credit,
-			posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
-			if(paid_to=%(account)s, paid_to_account_currency, paid_from_account_currency) as account_currency
-		from `tabPayment Entry`
-		where
+			CASE
+    			WHEN paid_to = %(account)s THEN received_amount
+    			ELSE 0
+			END AS debit,
+			CASE
+    			WHEN paid_from = %(account)s THEN paid_amount
+    			ELSE 0
+			END AS credit,
+			posting_date,
+			COALESCE(party, CASE
+                    WHEN paid_from = %(account)s THEN paid_to
+                    ELSE paid_from
+                END
+        	) AS against_account,
+			clearance_date,
+			CASE
+    			WHEN paid_to = %(account)s THEN paid_to_account_currency
+    			ELSE paid_from_account_currency
+			END AS account_currency
+			from `tabPayment Entry`
+			where
 			(paid_from=%(account)s or paid_to=%(account)s) and docstatus=1
 			and posting_date <= %(report_date)s
 			and ifnull(clearance_date, '4000-01-01') > %(report_date)s
@@ -243,10 +258,18 @@ def get_amounts_not_reflected_in_system(filters):
 
 	pe_amount = frappe.db.sql(
 		"""
-		select sum(if(paid_from=%(account)s, paid_amount, received_amount))
-		from `tabPayment Entry`
-		where (paid_from=%(account)s or paid_to=%(account)s) and docstatus=1
-		and posting_date > %(report_date)s and clearance_date <= %(report_date)s""",
+		SELECT SUM(
+    		CASE
+        		WHEN paid_from = %(account)s THEN paid_amount
+        		ELSE received_amount
+    		END
+			) AS total_amount
+			FROM "tabPayment Entry"
+			WHERE (paid_from = %(account)s OR paid_to = %(account)s)
+    		AND docstatus = 1
+    		AND posting_date > %(report_date)s
+    		AND clearance_date <= %(report_date)s;
+		""",
 		filters,
 	)
 

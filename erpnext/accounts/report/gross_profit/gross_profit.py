@@ -766,9 +766,10 @@ class GrossProfitGenerator(object):
 			sales_team_table = ""
 
 		if self.filters.group_by == "Payment Term":
-			payment_term_cols = """,if(`tabSales Invoice`.is_return = 1,
-										'{0}',
-										coalesce(schedule.payment_term, '{1}')) as payment_term,
+			payment_term_cols = """,CASE
+    									WHEN "tabSales Invoice".is_return = 1 THEN '{0}'
+    									ELSE COALESCE(schedule.payment_term, '{1}')
+									END AS payment_term,
 									schedule.invoice_portion,
 									schedule.payment_amount """.format(
 				_("Sales Return"), _("No Terms")

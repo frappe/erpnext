@@ -80,7 +80,10 @@ def get_entries(filters):
 	payment_entries = frappe.db.sql(
 		"""SELECT
 			"Payment Entry", name, posting_date, reference_no, clearance_date, party,
-			if(paid_from=%(account)s, ((paid_amount * -1) - total_taxes_and_charges) , received_amount)
+			CASE
+    			WHEN paid_from = %(account)s THEN ((paid_amount * -1) - total_taxes_and_charges)
+    			ELSE received_amount
+			END AS some_alias_name
 		FROM
 			`tabPayment Entry`
 		WHERE

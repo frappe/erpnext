@@ -218,8 +218,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		columns += ", " + ", ".join(extra_searchfields)
 
 	if "description" in searchfields:
-		columns += """, if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as description"""
+		columns += """, CASE WHEN length(tabItem.description) > 40 THEN concat(substr(tabItem.description, 1, 40), '...') ELSE description END AS description"""
 
 	searchfields = searchfields + [
 		field
@@ -272,11 +271,17 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				{description_cond})
 			{fcond} {mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
+			CASE
+        		WHEN POSITION(%(_txt)s IN name) > 0 THEN POSITION(%(_txt)s IN name)
+        		ELSE 99999
+    		END AS name_position,
+    		CASE
+        		WHEN POSITION(%(_txt)s IN item_name) > 0 THEN POSITION(%(_txt)s IN item_name)
+        		ELSE 99999
+    		END AS item_name_position,
 			idx desc,
 			name, item_name
-		limit %(start)s, %(page_len)s """.format(
+		LIMIT %(page_len)s OFFSET %(start)s """.format(
 			columns=columns,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),

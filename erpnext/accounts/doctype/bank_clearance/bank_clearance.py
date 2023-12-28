@@ -53,20 +53,34 @@ class BankClearance(Document):
 
 		payment_entries = frappe.db.sql(
 			"""
-			select
-				"Payment Entry" as payment_document, name as payment_entry,
-				reference_no as cheque_number, reference_date as cheque_date,
-				if(paid_from=%(account)s, paid_amount + total_taxes_and_charges, 0) as credit,
-				if(paid_from=%(account)s, 0, received_amount) as debit,
-				posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
-				if(paid_to=%(account)s, paid_to_account_currency, paid_from_account_currency) as account_currency
-			from `tabPayment Entry`
-			where
-				(paid_from=%(account)s or paid_to=%(account)s) and docstatus=1
-				and posting_date >= %(from)s and posting_date <= %(to)s
-				{condition}
-			order by
-				posting_date ASC, name DESC
+			SELECT
+    			'Payment Entry' AS payment_document,
+    			name AS payment_entry,
+    			reference_no AS cheque_number,
+    			reference_date AS cheque_date,
+    			CASE
+        			WHEN paid_from = %(account)s THEN paid_amount + total_taxes_and_charges
+        			ELSE 0
+    			END AS credit,
+    			CASE
+        			WHEN paid_from = %(account)s THEN 0
+        			ELSE received_amount
+    			END AS debit,
+    			posting_date,
+    			COALESCE(party, CASE WHEN paid_from = %(account)s THEN paid_to ELSE paid_from END) AS against_account,
+    			clearance_date,
+    			CASE
+        			WHEN paid_to = %(account)s THEN paid_to_account_currency
+        			ELSE paid_from_account_currency
+    			END AS account_currency
+				FROM "tabPayment Entry"
+				WHERE
+    			(paid_from = %(account)s OR paid_to = %(account)s)
+    			AND docstatus = 1
+    			AND posting_date >= %(from)s
+    			AND posting_date <= %(to)s
+    			{condition}
+				ORDER BY posting_date ASC, name DESC;
 		""".format(
 				condition=condition
 			),

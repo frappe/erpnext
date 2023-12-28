@@ -260,9 +260,9 @@ def get_period_wise_columns(bet_dates, period, pwc):
 
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
-	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.stock_qty, NULL)),
-					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.base_net_amount, NULL)),
-				""" % {
+	query_details += """
+	SUM(CASE WHEN t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s' THEN t2.stock_qty ELSE NULL END),
+	SUM(CASE WHEN t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s' THEN t2.base_net_amount ELSE NULL END),""" % {
 		"trans_date": trans_date,
 		"sd": bet_dates[0],
 		"ed": bet_dates[1],
@@ -332,7 +332,7 @@ def based_wise_columns_query(based_on, trans):
 		]
 		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
 		based_on_details["based_on_group_by"] = (
-			"t1.party_name" if trans == "Quotation" else "t1.customer"
+			"t1.party_name" if trans == "Quotation" else "t1.customer_name"
 		)
 		based_on_details["addl_tables"] = ""
 

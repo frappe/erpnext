@@ -1691,8 +1691,8 @@ def get_orders_to_be_billed(
 		"""
 		select
 			name as voucher_no,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
-			(if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) - advance_paid) as outstanding_amount,
+			COALESCE(NULLIF({rounded_total_field}, 0), {grand_total_field}) AS invoice_amount,
+			(COALESCE(NULLIF({rounded_total_field}, 0), {grand_total_field}) - advance_paid) AS outstanding_amount,
 			transaction_date as posting_date
 		from
 			`tab{voucher_type}`
@@ -1700,8 +1700,8 @@ def get_orders_to_be_billed(
 			{party_type} = %s
 			and docstatus = 1
 			and company = %s
-			and ifnull(status, "") != "Closed"
-			and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
+			AND COALESCE(status, '') != 'Closed'
+			AND COALESCE(NULLIF({rounded_total_field}, 0), {grand_total_field}) > advance_paid
 			and abs(100 - per_billed) > 0.01
 			{condition}
 		order by
@@ -1767,7 +1767,10 @@ def get_negative_outstanding_invoices(
 		"""
 		select
 			"{voucher_type}" as voucher_type, name as voucher_no,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
+			CASE
+    			WHEN {rounded_total_field} IS NOT NULL AND {rounded_total_field} <> 0 THEN {rounded_total_field}
+    			ELSE {grand_total_field}
+			END AS invoice_amount,
 			outstanding_amount, posting_date,
 			due_date, conversion_rate as exchange_rate
 		from
