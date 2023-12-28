@@ -715,6 +715,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	on_submit() {
+		if (in_list(["Purchase Invoice", "Sales Invoice"], this.frm.doc.doctype)
+			&& !this.frm.doc.update_stock) {
+			return;
+		}
+
 		this.refresh_serial_batch_bundle_field();
 	}
 
