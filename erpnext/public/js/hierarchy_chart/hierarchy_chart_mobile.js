@@ -71,7 +71,7 @@ erpnext.HierarchyChartMobile = class {
 			only_select: true,
 			reqd: 1,
 			change: () => {
-				me.company = undefined;
+				me.company = '';
 
 				if (company.get_value() && me.company != company.get_value()) {
 					me.company = company.get_value();
@@ -154,7 +154,7 @@ erpnext.HierarchyChartMobile = class {
 					return new me.Node({
 						id: data.id,
 						parent: root_level,
-						parent_id: undefined,
+						parent_id: '',
 						image: data.image,
 						name: data.name,
 						title: data.title,
@@ -174,7 +174,7 @@ erpnext.HierarchyChartMobile = class {
 
 		if (this.$sibling_group) {
 			const sibling_parent = this.$sibling_group.find('.node-group').attr('data-parent');
-			if (node.parent_id !== undefined && node.parent_id != sibling_parent)
+			if (node.parent_id != '' && node.parent_id != sibling_parent)
 				this.$sibling_group.empty();
 		}
 
@@ -281,7 +281,7 @@ erpnext.HierarchyChartMobile = class {
 			title: data.title,
 			expandable: data.expandable,
 			connections: data.connections,
-			children: undefined
+			children: null
 		});
 	}
 
@@ -291,7 +291,7 @@ erpnext.HierarchyChartMobile = class {
 
 		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
 
-		let connector = undefined;
+		let connector = null;
 
 		if ($(`[id="${parent_id}"]`).hasClass('active')) {
 			connector = this.get_connector_for_active_node(parent_node, child_node);
@@ -377,7 +377,7 @@ erpnext.HierarchyChartMobile = class {
 		let node_element = $(`[id="${node.id}"]`);
 
 		node_element.click(function() {
-			let el = undefined;
+			let el = null;
 
 			if (node.is_root) {
 				el = $(this).detach();
@@ -411,7 +411,7 @@ erpnext.HierarchyChartMobile = class {
 
 		$('.node-group').on('click', function() {
 			let parent = $(this).attr('data-parent');
-			if (parent === 'undefined') {
+			if (parent == '') {
 				me.setup_hierarchy();
 				me.render_root_nodes();
 			} else {
@@ -427,7 +427,7 @@ erpnext.HierarchyChartMobile = class {
 
 		let node_object = this.nodes[node.id];
 		node_object.expanded = 0;
-		node_object.$children = undefined;
+		node_object.$children = null;
 		this.nodes[node.id] = node_object;
 	}
 
@@ -484,7 +484,7 @@ erpnext.HierarchyChartMobile = class {
 
 		node.removeClass('active-child active-path');
 		node_object.expanded = 0;
-		node_object.$children = undefined;
+		node_object.$children = null;
 		this.nodes[node.id] = node_object;
 
 		// show parent's siblings and expand parent node
@@ -523,7 +523,7 @@ erpnext.HierarchyChartMobile = class {
 		current_node.removeClass('active-child active-path');
 
 		node_object.expanded = 0;
-		node_object.$children = undefined;
+		node_object.$children = null;
 
 		level.empty().append(current_node);
 	}
