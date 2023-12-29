@@ -8,7 +8,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
 from pypika import Order
 
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import get_party_and_advance_accounts
 from erpnext.accounts.report.utils import (
 	apply_common_conditions,
 	get_advance_taxes_and_charges,
@@ -419,10 +419,10 @@ def get_invoices(filters, additional_query_columns):
 	)
 
 	if filters.get("include_payments"):
-		party_account = get_party_account(
-			"Supplier", filters.get("supplier"), filters.get("company"), include_advance=True
+		party_accounts = get_party_and_advance_accounts(
+			"Supplier", filters.get("supplier"), filters.get("company")
 		)
-		query = query.where(pi.credit_to.isin(party_account))
+		query = query.where(pi.credit_to.isin(party_accounts))
 
 	invoices = query.run(as_dict=True)
 	return invoices
@@ -443,9 +443,7 @@ def get_payments(filters):
 		account_fieldname="paid_to",
 		party="supplier",
 		party_name="supplier_name",
-		party_account=get_party_account(
-			"Supplier", filters.supplier, filters.company, include_advance=True
-		),
+		party_accounts=get_party_and_advance_accounts("Supplier", filters.supplier, filters.company),
 	)
 	payment_entries = get_payment_entries(filters, args)
 	journal_entries = get_journal_entries(filters, args)
