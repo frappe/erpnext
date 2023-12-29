@@ -16,7 +16,7 @@ ERPNext Integrations
 Quality Management
 Communication
 Loan Management
-Telephony
+ERPNext Telephony
 Bulk Transaction
 E-commerce
 Subcontracting
