@@ -2570,7 +2570,7 @@ def get_advance_payment_entries_for_regional(*args, **kwargs):
 def get_advance_payment_entries(
 	party_type,
 	party,
-	party_accounts,
+	party_account,
 	order_doctype,
 	order_list=None,
 	include_unallocated=True,
@@ -2586,7 +2586,7 @@ def get_advance_payment_entries(
 		q = get_common_query(
 			party_type,
 			party,
-			party_accounts,
+			party_account,
 			limit,
 			condition,
 		)
@@ -2609,7 +2609,7 @@ def get_advance_payment_entries(
 		q = get_common_query(
 			party_type,
 			party,
-			party_accounts,
+			party_account,
 			limit,
 			condition,
 		)
