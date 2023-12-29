@@ -141,12 +141,11 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 		if (!this.frm.doc.receivable_payable_account && this.frm.doc.party_type && this.frm.doc.party) {
 			frappe.call({
-				method: "erpnext.accounts.party.get_party_account",
+				method: "erpnext.accounts.party.get_party_and_advance_accounts",
 				args: {
 					company: this.frm.doc.company,
 					party_type: this.frm.doc.party_type,
 					party: this.frm.doc.party,
-					include_advance: 1
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
