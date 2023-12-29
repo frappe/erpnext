@@ -332,7 +332,7 @@ def based_wise_columns_query(based_on, trans):
 		]
 		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
 		based_on_details["based_on_group_by"] = (
-			"t1.party_name, t1.territory," if trans == "Quotation" else "t1.customer_name, t1.territory,"
+			"t1.party_name, t1.territory" if trans == "Quotation" else "t1.customer_name, t1.territory"
 		)
 		based_on_details["addl_tables"] = ""
 

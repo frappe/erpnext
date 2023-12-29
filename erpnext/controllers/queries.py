@@ -261,7 +261,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	return frappe.db.sql(
 		"""select
-			tabItem.name {columns}
+			tabItem.name {columns},
+			CASE WHEN POSITION(%(_txt)s IN name) > 0 THEN POSITION(%(_txt)s IN name) ELSE 99999 END AS name_position,
+			CASE WHEN POSITION(%(_txt)s IN item_name) > 0 THEN POSITION(%(_txt)s IN item_name) ELSE 99999 END AS item_name_position
 		from tabItem
 		where tabItem.docstatus < 2
 			and tabItem.disabled=0
@@ -271,8 +273,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				{description_cond})
 			{fcond} {mcond}
 		order by
-			CASE WHEN POSITION(%(_txt)s IN name) > 0 THEN POSITION(%(_txt)s IN name) ELSE 99999 END AS name_position,
-    		CASE WHEN POSITION(%(_txt)s IN item_name) > 0 THEN POSITION(%(_txt)s IN item_name) ELSE 99999 END AS item_name_position,
+			name_position,
+			item_name_position,
 			idx desc, name, item_name
 		LIMIT %(page_len)s OFFSET %(start)s """.format(
 			columns=columns,
@@ -300,14 +302,14 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields(doctype, ["name", "item"])
 
 	return frappe.db.sql(
-		"""select {fields}
+		"""select {fields}, case when POSITION(%(_txt)s IN name) > 0 then POSITION(%(_txt)s IN name) else 99999 end as o1,
 		from `tabBOM`
 		where `tabBOM`.docstatus=1
 			and `tabBOM`.is_active=1
 			and `tabBOM`.`{key}` like %(txt)s
 			{fcond} {mcond}
 		order by
-			(case when POSITION(%(_txt)s IN name) > 0 then POSITION(%(_txt)s IN name) else 99999 end),
+			o1,
 			idx desc, name
 		limit %(page_len)s offset %(start)s""".format(
 			fields=", ".join(fields),
@@ -340,12 +342,13 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	searchfields = " or ".join(["`tabProject`." + field + " like %(txt)s" for field in searchfields])
 
 	return frappe.db.sql(
-		"""select {fields} from `tabProject`
+		"""select {fields}, case when POSITION(%(_txt)s IN `tabProject`.name) > 0 then POSITION(%(_txt)s IN `tabProject`.name) else 99999 end as o1
+		from `tabProject`
 		where
 			`tabProject`.status not in ('Completed', 'Cancelled')
 			and {cond} {scond} {match_cond}
 		order by
-			(case when POSITION(%(_txt)s IN `tabProject`.name) > 0 then POSITION(%(_txt)s IN `tabProject`.name) else 99999 end),
+			o1,
 			`tabProject`.idx desc,
 			`tabProject`.name asc
 		limit {page_len} offset {start}""".format(
