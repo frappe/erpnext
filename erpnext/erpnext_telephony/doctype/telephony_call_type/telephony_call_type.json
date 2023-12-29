@@ -34,7 +34,7 @@
  "links": [],
  "modified": "2022-02-25 16:14:07.087461",
  "modified_by": "Administrator",
- "module": "Telephony",
+ "module": "ERPNext Telephony",
  "name": "Telephony Call Type",
  "naming_rule": "By fieldname",
  "owner": "Administrator",

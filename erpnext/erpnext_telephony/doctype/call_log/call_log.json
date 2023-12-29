@@ -166,7 +166,7 @@
  "links": [],
  "modified": "2022-04-14 02:59:22.503202",
  "modified_by": "Administrator",
- "module": "Telephony",
+ "module": "EPRNext Telephony",
  "name": "Call Log",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
