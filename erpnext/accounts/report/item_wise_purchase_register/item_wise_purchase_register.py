@@ -309,7 +309,8 @@ def get_conditions(filters):
 
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
-
+	if additional_query_columns:
+		additional_query_columns = "," + ",".join(additional_query_columns)
 	return frappe.db.sql(
 		"""
 		select
