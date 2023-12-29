@@ -29,7 +29,7 @@ from erpnext.accounts.general_ledger import (
 	make_reverse_gl_entries,
 	process_gl_map,
 )
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import get_party_account, get_party_and_advance_accounts
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
@@ -135,9 +135,7 @@ class PaymentEntry(AccountsController):
 				self.book_advance_payments_in_separate_party_account = False
 				return
 
-		liability_account = get_party_account(
-			self.party_type, self.party, self.company, include_advance=True
-		)[1]
+		liability_account = get_party_and_advance_accounts(self.party_type, self.party, self.company)[1]
 
 		self.set(self.party_account_field, liability_account)
 
