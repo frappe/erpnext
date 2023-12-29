@@ -483,7 +483,11 @@ class SerialandBatchBundle(Document):
 		if row.get("doctype") in ["Subcontracting Receipt Supplied Item"]:
 			qty_field = "consumed_qty"
 
-		if abs(abs(flt(self.total_qty, precision)) - abs(flt(row.get(qty_field), precision))) > 0.01:
+		qty = row.get(qty_field)
+		if qty_field == "qty" and row.get("stock_qty"):
+			qty = row.get("stock_qty")
+
+		if abs(abs(flt(self.total_qty, precision)) - abs(flt(qty, precision))) > 0.01:
 			self.throw_error_message(
 				f"Total quantity {abs(flt(self.total_qty))} in the Serial and Batch Bundle {bold(self.name)} does not match with the quantity {abs(flt(row.get(qty_field)))} for the Item {bold(self.item_code)} in the {self.voucher_type} # {self.voucher_no}"
 			)
