@@ -562,16 +562,17 @@ def make_return_doc(
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 
-		item_details = frappe.get_cached_value(
-			"Item", source_doc.item_code, ["has_batch_no", "has_serial_no"], as_dict=1
-		)
+		if source_doc.item_code:
+			item_details = frappe.get_cached_value(
+				"Item", source_doc.item_code, ["has_batch_no", "has_serial_no"], as_dict=1
+			)
 
-		if not item_details.has_batch_no and not item_details.has_serial_no:
-			return
+			if not item_details.has_batch_no and not item_details.has_serial_no:
+				return
 
-		for qty_field in ["stock_qty", "rejected_qty"]:
-			if target_doc.get(qty_field):
-				update_serial_batch_no(source_doc, target_doc, source_parent, item_details, qty_field)
+			for qty_field in ["stock_qty", "rejected_qty"]:
+				if target_doc.get(qty_field):
+					update_serial_batch_no(source_doc, target_doc, source_parent, item_details, qty_field)
 
 	def update_terms(source_doc, target_doc, source_parent):
 		target_doc.payment_amount = -source_doc.payment_amount
