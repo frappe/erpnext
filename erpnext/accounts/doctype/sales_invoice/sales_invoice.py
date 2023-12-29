@@ -586,6 +586,8 @@ class SalesInvoice(SellingController):
 			"Serial and Batch Bundle",
 		)
 
+		self.delete_auto_created_batches()
+
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
 			self.status_updater.append(
@@ -2573,10 +2575,6 @@ def get_loyalty_programs(customer):
 		return lp_details
 	else:
 		return lp_details
-
-
-def on_doctype_update():
-	frappe.db.add_index("Sales Invoice", ["customer", "is_return", "return_against"])
 
 
 @frappe.whitelist()

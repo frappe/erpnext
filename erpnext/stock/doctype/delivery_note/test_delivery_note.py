@@ -1425,6 +1425,99 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertAlmostEqual(dn1.items[0].incoming_rate, 250.0)
 
+	def test_sales_return_valuation_for_moving_average_case2(self):
+		# Make DN return
+		# Make Bakcdated Purchase Receipt and check DN return valuation rate
+		# The rate should be recalculate based on the backdated purchase receipt
+		frappe.flags.print_debug_messages = False
+		item_code = make_item(
+			"_Test Item Sales Return with MA Case2",
+			{"is_stock_item": 1, "valuation_method": "Moving Average", "stock_uom": "Nos"},
+		).name
+
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=5,
+			basic_rate=100.0,
+			posting_date=add_days(nowdate(), -5),
+		)
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			warehouse="_Test Warehouse - _TC",
+			qty=5,
+			rate=500,
+			posting_date=add_days(nowdate(), -4),
+		)
+
+		returned_dn = create_delivery_note(
+			is_return=1,
+			item_code=item_code,
+			return_against=dn.name,
+			qty=-5,
+			rate=500,
+			company=dn.company,
+			warehouse="_Test Warehouse - _TC",
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			posting_date=add_days(nowdate(), -1),
+		)
+
+		self.assertAlmostEqual(returned_dn.items[0].incoming_rate, 100.0)
+
+		# Make backdated purchase receipt
+		make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=5,
+			basic_rate=200.0,
+			posting_date=add_days(nowdate(), -3),
+		)
+
+		returned_dn.reload()
+		self.assertAlmostEqual(returned_dn.items[0].incoming_rate, 200.0)
+
+	def test_batch_with_non_stock_uom(self):
+		frappe.db.set_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1
+		)
+
+		item = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TESTBATCH.#####",
+				"stock_uom": "Nos",
+			}
+		)
+		if not frappe.db.exists("UOM Conversion Detail", {"parent": item.name, "uom": "Kg"}):
+			item.append("uoms", {"uom": "Kg", "conversion_factor": 5.0})
+			item.save()
+
+		item_code = item.name
+
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100.0)
+		dn = create_delivery_note(
+			item_code=item_code, qty=1, rate=500, warehouse="_Test Warehouse - _TC", do_not_save=True
+		)
+		dn.items[0].uom = "Kg"
+		dn.items[0].conversion_factor = 5.0
+
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(dn.items[0].stock_qty, 5.0)
+		voucher_detail_no = dn.items[0].name
+		delivered_batch_qty = frappe.db.get_value(
+			"Serial and Batch Bundle", {"voucher_detail_no": voucher_detail_no}, "total_qty"
+		)
+		self.assertEqual(abs(delivered_batch_qty), 5.0)
+
+		frappe.db.set_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0
+		)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

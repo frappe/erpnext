@@ -149,33 +149,35 @@ frappe.query_reports["Reserved Stock"] = {
 	formatter: (value, row, column, data, default_formatter) => {
 		value = default_formatter(value, row, column, data);
 
-		if (column.fieldname == "status") {
-			switch (data.status) {
-				case "Partially Reserved":
-					value = "<span style='color:orange'>" + value + "</span>";
-					break;
-				case "Reserved":
-					value = "<span style='color:blue'>" + value + "</span>";
-					break;
-				case "Partially Delivered":
-					value = "<span style='color:purple'>" + value + "</span>";
-					break;
-				case "Delivered":
-					value = "<span style='color:green'>" + value + "</span>";
-					break;
+		if (data) {
+			if (column.fieldname == "status") {
+				switch (data.status) {
+					case "Partially Reserved":
+						value = "<span style='color:orange'>" + value + "</span>";
+						break;
+					case "Reserved":
+						value = "<span style='color:blue'>" + value + "</span>";
+						break;
+					case "Partially Delivered":
+						value = "<span style='color:purple'>" + value + "</span>";
+						break;
+					case "Delivered":
+						value = "<span style='color:green'>" + value + "</span>";
+						break;
+				}
 			}
-		}
-		else if (column.fieldname == "delivered_qty") {
-			if (data.delivered_qty > 0) {
-				if (data.reserved_qty > data.delivered_qty) {
-					value = "<span style='color:blue'>" + value + "</span>";
+			else if (column.fieldname == "delivered_qty") {
+				if (data.delivered_qty > 0) {
+					if (data.reserved_qty > data.delivered_qty) {
+						value = "<span style='color:blue'>" + value + "</span>";
+					}
+					else {
+						value = "<span style='color:green'>" + value + "</span>";
+					}
 				}
 				else {
-					value = "<span style='color:green'>" + value + "</span>";
+					value = "<span style='color:red'>" + value + "</span>";
 				}
-			}
-			else {
-				value = "<span style='color:red'>" + value + "</span>";
 			}
 		}
 

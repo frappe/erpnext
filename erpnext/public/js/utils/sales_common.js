@@ -184,6 +184,12 @@ erpnext.sales_common = {
 				refresh_field("incentives",row.name,row.parentfield);
 			}
 
+			warehouse(doc, cdt, cdn) {
+				if (doc.docstatus === 0 && doc.is_return && !doc.return_against) {
+					frappe.model.set_value(cdt, cdn, "incoming_rate", 0.0);
+				}
+			}
+
 			toggle_editable_price_list_rate() {
 				var df = frappe.meta.get_docfield(this.frm.doc.doctype + " Item", "price_list_rate", this.frm.doc.name);
 				var editable_price_list_rate = cint(frappe.defaults.get_default("editable_price_list_rate"));
