@@ -1812,7 +1812,6 @@ def prepare_boms_for_sub_assembly_test():
 			source_warehouse="Stores - _TC",
 			raw_materials=["Test Final SF Item 1", "Test Final SF Item 2"],
 		)
->>>>>>> 70abedc57a (fix: work order with multi level, fetch operting cost from sub-assembly (#38992))
 
 
 def prepare_data_for_workstation_type_check():
