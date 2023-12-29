@@ -1671,6 +1671,7 @@ class TestWorkOrder(FrappeTestCase):
 		job_card2.time_logs = []
 		job_card2.save()
 
+<<<<<<< HEAD
 	def test_make_serial_no_batch_from_work_order_for_serial_no(self):
 		item_code = "Test Serial No Item For Work Order"
 		warehouse = "_Test Warehouse - _TC"
@@ -1705,10 +1706,42 @@ class TestWorkOrder(FrappeTestCase):
 			item=item_code,
 			bom_no=bom.name,
 			qty=5,
+=======
+	def test_op_cost_and_scrap_based_on_sub_assemblies(self):
+		# Make Sub Assembly BOM 1
+
+		frappe.db.set_single_value(
+			"Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies", 1
+		)
+
+		items = {
+			"Test Final FG Item": 0,
+			"Test Final SF Item 1": 0,
+			"Test Final SF Item 2": 0,
+			"Test Final RM Item 1": 100,
+			"Test Final RM Item 2": 200,
+			"Test Final Scrap Item 1": 50,
+			"Test Final Scrap Item 2": 60,
+		}
+
+		for item in items:
+			if not frappe.db.exists("Item", item):
+				item_properties = {"is_stock_item": 1, "valuation_rate": items[item]}
+
+				make_item(item_code=item, properties=item_properties),
+
+		prepare_boms_for_sub_assembly_test()
+
+		wo_order = make_wo_order_test_record(
+			production_item="Test Final FG Item",
+			qty=10,
+			use_multi_level_bom=1,
+>>>>>>> 70abedc57a (fix: work order with multi level, fetch operting cost from sub-assembly (#38992))
 			skip_transfer=1,
 			from_wip_warehouse=1,
 		)
 
+<<<<<<< HEAD
 		serial_nos = frappe.get_all(
 			"Serial No",
 			filters={"item_code": item_code, "work_order": wo_order.name},
@@ -1725,6 +1758,61 @@ class TestWorkOrder(FrappeTestCase):
 				self.assertEqual(sorted(get_serial_nos(row.serial_no)), sorted(get_serial_nos(serial_nos)))
 
 		frappe.db.set_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order", 0)
+=======
+		se_doc = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+		se_doc.save()
+
+		self.assertTrue(se_doc.additional_costs)
+		scrap_items = []
+		for item in se_doc.items:
+			if item.is_scrap_item:
+				scrap_items.append(item.item_code)
+
+		self.assertEqual(
+			sorted(scrap_items), sorted(["Test Final Scrap Item 1", "Test Final Scrap Item 2"])
+		)
+		for row in se_doc.additional_costs:
+			self.assertEqual(row.amount, 3000)
+
+		frappe.db.set_single_value(
+			"Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies", 0
+		)
+
+
+def prepare_boms_for_sub_assembly_test():
+	if not frappe.db.exists("BOM", {"item": "Test Final SF Item 1"}):
+		bom = make_bom(
+			item="Test Final SF Item 1",
+			source_warehouse="Stores - _TC",
+			raw_materials=["Test Final RM Item 1"],
+			operating_cost_per_bom_quantity=100,
+			do_not_submit=True,
+		)
+
+		bom.append("scrap_items", {"item_code": "Test Final Scrap Item 1", "qty": 1})
+
+		bom.submit()
+
+	if not frappe.db.exists("BOM", {"item": "Test Final SF Item 2"}):
+		bom = make_bom(
+			item="Test Final SF Item 2",
+			source_warehouse="Stores - _TC",
+			raw_materials=["Test Final RM Item 2"],
+			operating_cost_per_bom_quantity=200,
+			do_not_submit=True,
+		)
+
+		bom.append("scrap_items", {"item_code": "Test Final Scrap Item 2", "qty": 1})
+
+		bom.submit()
+
+	if not frappe.db.exists("BOM", {"item": "Test Final FG Item"}):
+		bom = make_bom(
+			item="Test Final FG Item",
+			source_warehouse="Stores - _TC",
+			raw_materials=["Test Final SF Item 1", "Test Final SF Item 2"],
+		)
+>>>>>>> 70abedc57a (fix: work order with multi level, fetch operting cost from sub-assembly (#38992))
 
 
 def prepare_data_for_workstation_type_check():
@@ -1955,7 +2043,11 @@ def make_wo_order_test_record(**args):
 	wo_order.sales_order = args.sales_order or None
 	wo_order.planned_start_date = args.planned_start_date or now()
 	wo_order.transfer_material_against = args.transfer_material_against or "Work Order"
+<<<<<<< HEAD
 	wo_order.from_wip_warehouse = args.from_wip_warehouse or None
+=======
+	wo_order.from_wip_warehouse = args.from_wip_warehouse or 0
+>>>>>>> 70abedc57a (fix: work order with multi level, fetch operting cost from sub-assembly (#38992))
 
 	if args.source_warehouse:
 		for item in wo_order.get("required_items"):
