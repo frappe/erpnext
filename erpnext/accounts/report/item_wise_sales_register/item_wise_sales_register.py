@@ -381,7 +381,8 @@ def get_group_by_conditions(filters, doctype):
 
 def get_items(filters, additional_query_columns, additional_conditions=None):
 	conditions = get_conditions(filters, additional_conditions)
-
+	if additional_query_columns:
+		additional_query_columns = "," + ",".join(additional_query_columns)
 	return frappe.db.sql(
 		"""
 		select

@@ -2365,12 +2365,19 @@ def validate_taxes_and_charges(tax):
 
 def validate_account_head(idx, account, company, context=""):
 	account_company = frappe.get_cached_value("Account", account, "company")
+	is_group = frappe.get_cached_value("Account", account, "is_group")
 
 	if account_company != company:
 		frappe.throw(
 			_("Row {0}: {3} Account {1} does not belong to Company {2}").format(
 				idx, frappe.bold(account), frappe.bold(company), context
 			),
+			title=_("Invalid Account"),
+		)
+
+	if is_group:
+		frappe.throw(
+			_("Row {0}: Account {1} is a Group Account").format(idx, frappe.bold(account)),
 			title=_("Invalid Account"),
 		)
 
