@@ -30,8 +30,8 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 				or employee_name like %(txt)s)
 			{fcond} {mcond}
 		order by
-			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
-			(case when locate(%(_txt)s, employee_name) > 0 then locate(%(_txt)s, employee_name) else 99999 end),
+			(case when POSITION(%(_txt)s IN name) > 0 then POSITION(%(_txt)s IN name) else 99999 end),
+			(case when POSITION(%(_txt)s IN employee_name) > 0 then POSITION(%(_txt)s IN employee_name) else 99999 end),
 			idx desc,
 			name, employee_name
 		limit %(page_len)s offset %(start)s""".format(
@@ -62,9 +62,9 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 				or company_name like %(txt)s)
 			{mcond}
 		order by
-			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
-			(case when locate(%(_txt)s, lead_name) > 0 then locate(%(_txt)s, lead_name) else 99999 end),
-			(case when locate(%(_txt)s, company_name) > 0 then locate(%(_txt)s, company_name) else 99999 end),
+			(case when POSITION(%(_txt)s IN name) > 0 then POSITION(%(_txt)s IN name) else 99999 end),
+			(case when POSITION(%(_txt)s IN lead_name) > 0 then POSITION(%(_txt)s IN lead_name) else 99999 end),
+			(case when POSITION(%(_txt)s IN company_name) > 0 then POSITION(%(_txt)s IN company_name) else 99999 end),
 			idx desc,
 			name, lead_name
 		limit %(page_len)s offset %(start)s""".format(
@@ -97,8 +97,8 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters, as_dict=
 			and ({scond}) and disabled=0
 			{fcond} {mcond}
 		order by
-			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
-			(case when locate(%(_txt)s, customer_name) > 0 then locate(%(_txt)s, customer_name) else 99999 end),
+			(case when POSITION(%(_txt)s IN name) > 0 then POSITION(%(_txt)s IN name) else 99999 end),
+			(case when POSITION(%(_txt)s IN customer_name) > 0 then POSITION(%(_txt)s IN customer_name) else 99999 end),
 			idx desc,
 			name, customer_name
 		limit %(page_len)s offset %(start)s""".format(
@@ -135,8 +135,8 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters, as_dict=
 			and (on_hold = 0 or (on_hold = 1 and CURRENT_DATE > release_date))
 			{mcond}
 		order by
-			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
-			(case when locate(%(_txt)s, supplier_name) > 0 then locate(%(_txt)s, supplier_name) else 99999 end),
+			(case when POSITION(%(_txt)s IN name) > 0 then POSITION(%(_txt)s IN name) else 99999 end),
+			(case when POSITION(%(_txt)s IN supplier_name) > 0 then POSITION(%(_txt)s IN supplier_name) else 99999 end),
 			idx desc,
 			name, supplier_name
 		limit %(page_len)s offset %(start)s""".format(
@@ -271,16 +271,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				{description_cond})
 			{fcond} {mcond}
 		order by
-			CASE
-        		WHEN POSITION(%(_txt)s IN name) > 0 THEN POSITION(%(_txt)s IN name)
-        		ELSE 99999
-    		END AS name_position,
-    		CASE
-        		WHEN POSITION(%(_txt)s IN item_name) > 0 THEN POSITION(%(_txt)s IN item_name)
-        		ELSE 99999
-    		END AS item_name_position,
-			idx desc,
-			name, item_name
+			CASE WHEN POSITION(%(_txt)s IN name) > 0 THEN POSITION(%(_txt)s IN name) ELSE 99999 END AS name_position,
+    		CASE WHEN POSITION(%(_txt)s IN item_name) > 0 THEN POSITION(%(_txt)s IN item_name) ELSE 99999 END AS item_name_position,
+			idx desc, name, item_name
 		LIMIT %(page_len)s OFFSET %(start)s """.format(
 			columns=columns,
 			scond=searchfields,
@@ -314,7 +307,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 			and `tabBOM`.`{key}` like %(txt)s
 			{fcond} {mcond}
 		order by
-			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when POSITION(%(_txt)s IN name) > 0 then POSITION(%(_txt)s IN name) else 99999 end),
 			idx desc, name
 		limit %(page_len)s offset %(start)s""".format(
 			fields=", ".join(fields),
@@ -352,7 +345,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 			`tabProject`.status not in ('Completed', 'Cancelled')
 			and {cond} {scond} {match_cond}
 		order by
-			(case when locate(%(_txt)s, `tabProject`.name) > 0 then locate(%(_txt)s, `tabProject`.name) else 99999 end),
+			(case when POSITION(%(_txt)s IN `tabProject`.name) > 0 then POSITION(%(_txt)s IN `tabProject`.name) else 99999 end),
 			`tabProject`.idx desc,
 			`tabProject`.name asc
 		limit {page_len} offset {start}""".format(

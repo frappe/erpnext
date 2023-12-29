@@ -91,7 +91,7 @@ def get_data(filters, conditions):
 		if filters.get("group_by") == "Item":
 			sel_col = "t2.item_code"
 		elif filters.get("group_by") == "Customer":
-			sel_col = "t1.party_name" if conditions.get("trans") == "Quotation" else "t1.customer"
+			sel_col = "t1.party_name" if conditions.get("trans") == "Quotation" else "t1.customer_name"
 		elif filters.get("group_by") == "Supplier":
 			sel_col = "t1.supplier"
 
@@ -316,7 +316,7 @@ def based_wise_columns_query(based_on, trans):
 	if based_on == "Item":
 		based_on_details["based_on_cols"] = ["Item:Link/Item:120", "Item Name:Data:120"]
 		based_on_details["based_on_select"] = "t2.item_code, t2.item_name,"
-		based_on_details["based_on_group_by"] = "t2.item_code"
+		based_on_details["based_on_group_by"] = "t2.item_code, t2.item_name"
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Item Group":
@@ -332,7 +332,7 @@ def based_wise_columns_query(based_on, trans):
 		]
 		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
 		based_on_details["based_on_group_by"] = (
-			"t1.party_name" if trans == "Quotation" else "t1.customer_name"
+			"t1.party_name, t1.territory," if trans == "Quotation" else "t1.customer_name, t1.territory,"
 		)
 		based_on_details["addl_tables"] = ""
 
@@ -348,7 +348,7 @@ def based_wise_columns_query(based_on, trans):
 			"Supplier Group:Link/Supplier Group:140",
 		]
 		based_on_details["based_on_select"] = "t1.supplier, t3.supplier_group,"
-		based_on_details["based_on_group_by"] = "t1.supplier"
+		based_on_details["based_on_group_by"] = "t1.supplier, t3.supplier_group,"
 		based_on_details["addl_tables"] = ",`tabSupplier` t3"
 		based_on_details["addl_tables_relational_cond"] = " and t1.supplier = t3.name"
 
