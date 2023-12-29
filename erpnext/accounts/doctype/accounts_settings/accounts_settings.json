@@ -21,6 +21,8 @@
   "allow_multi_currency_invoices_against_single_party_account",
   "journals_section",
   "merge_similar_account_heads",
+  "report_setting_section",
+  "use_custom_cash_flow",
   "deferred_accounting_settings_section",
   "book_deferred_entries_based_on",
   "column_break_18",
@@ -32,7 +34,6 @@
   "column_break_19",
   "add_taxes_from_item_tax_template",
   "book_tax_discount_loss",
-  "round_row_wise_tax",
   "print_settings",
   "show_inclusive_tax_in_print",
   "show_taxes_as_table_in_print",
@@ -62,16 +63,18 @@
   "ignore_account_closing_balance",
   "column_break_25",
   "frozen_accounts_modifier",
-  "tab_break_dpet",
-  "show_balance_in_coa",
   "banking_tab",
   "enable_party_matching",
   "enable_fuzzy_matching",
+  "tab_break_dpet",
+  "show_balance_in_coa",
   "reports_tab",
   "remarks_section",
   "general_ledger_remarks_length",
   "column_break_lvjk",
-  "receivable_payable_remarks_length"
+  "receivable_payable_remarks_length",
+  "section_break_7aaov",
+  "monetary_columns_float_precison"
  ],
  "fields": [
   {
@@ -181,6 +184,13 @@
    "fieldname": "stale_days",
    "fieldtype": "Int",
    "label": "Stale Days"
+  },
+  {
+   "default": "0",
+   "description": "Only select this if you have set up the Cash Flow Mapper documents",
+   "fieldname": "use_custom_cash_flow",
+   "fieldtype": "Check",
+   "label": "Enable Custom Cash Flow Format"
   },
   {
    "default": "0",
@@ -341,22 +351,16 @@
    "label": "POS"
   },
   {
+   "fieldname": "report_setting_section",
+   "fieldtype": "Section Break",
+   "label": "Report Setting"
+  },
+  {
    "default": "0",
    "description": "Enabling this will allow creation of multi-currency invoices against single party account in company currency",
    "fieldname": "allow_multi_currency_invoices_against_single_party_account",
    "fieldtype": "Check",
    "label": "Allow multi-currency invoices against single party account "
-  },
-  {
-   "fieldname": "tab_break_dpet",
-   "fieldtype": "Tab Break",
-   "label": "Chart Of Accounts"
-  },
-  {
-   "default": "1",
-   "fieldname": "show_balance_in_coa",
-   "fieldtype": "Check",
-   "label": "Show Balances in Chart Of Accounts"
   },
   {
    "default": "0",
@@ -422,11 +426,15 @@
    "label": "Ignore Account Closing Balance"
   },
   {
-   "default": "0",
-   "description": "Tax Amount will be rounded on a row(items) level",
-   "fieldname": "round_row_wise_tax",
+   "fieldname": "tab_break_dpet",
+   "fieldtype": "Tab Break",
+   "label": "Chart Of Accounts"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_balance_in_coa",
    "fieldtype": "Check",
-   "label": "Round Tax Amount Row-wise"
+   "label": "Show Balances in Chart Of Accounts"
   },
   {
    "fieldname": "reports_tab",
@@ -455,6 +463,18 @@
    "fieldname": "remarks_section",
    "fieldtype": "Section Break",
    "label": "Remarks Column Length"
+  },
+  {
+   "fieldname": "section_break_7aaov",
+   "fieldtype": "Section Break",
+   "label": "Monetary Columns Representation Precison"
+  },
+  {
+   "description": "If This set to 0  the Float Precision will be set to System Setting , So Some Columns where it representing Currency without Symbol will be shown as set here .",
+   "fieldname": "monetary_columns_float_precison",
+   "fieldtype": "Select",
+   "label": "Monetary Columns Float Precison",
+   "options": "\n2\n3\n4\n5\n6\n7\n8\n9"
   }
  ],
  "icon": "icon-cog",
@@ -462,7 +482,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-20 09:37:47.650347",
+ "modified": "2023-12-29 20:13:33.864068",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
