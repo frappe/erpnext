@@ -85,13 +85,13 @@ class DeliveryTrip(Document):
 		)
 		draft_delivery_notes = frappe.get_all(
 			"Delivery Note",
-			{"status": "Draft", "name": ["in", delivery_notes]},
+			{"docstatus": 0, "name": ["in", delivery_notes]},
 			pluck="name",
 		)
 		if draft_delivery_notes:
 			frappe.throw(
 				_(
-					"Delivery Notes may not be in Draft to submit. The following Delivery Notes are in draft {0}"
+					"Delivery Notes should not be in draft state when submitting a Delivery Trip. The following Delivery Notes are still in draft state: {0}. Please submit them first."
 				).format(", ".join(draft_delivery_notes))
 			)
 
