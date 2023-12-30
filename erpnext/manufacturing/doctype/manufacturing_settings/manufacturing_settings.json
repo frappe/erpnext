@@ -31,6 +31,7 @@
   "job_card_excess_transfer",
   "other_settings_section",
   "update_bom_costs_automatically",
+  "set_op_cost_and_scrape_from_sub_assemblies",
   "column_break_23",
   "make_serial_no_batch_from_work_order"
  ],
@@ -194,13 +195,20 @@
    "fieldname": "job_card_excess_transfer",
    "fieldtype": "Check",
    "label": "Allow Excess Material Transfer"
+  },
+  {
+   "default": "0",
+   "description": "In the case of 'Use Multi-Level BOM' in a work order, if the user wishes to add sub-assembly costs to Finished Goods items without using a job card as well the scrap items, then this option needs to be enable.",
+   "fieldname": "set_op_cost_and_scrape_from_sub_assemblies",
+   "fieldtype": "Check",
+   "label": "Set Operating Cost / Scrape Items From Sub-assemblies"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-09-13 22:09:09.401559",
+ "modified": "2023-12-28 16:37:44.874096",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
@@ -216,5 +224,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
