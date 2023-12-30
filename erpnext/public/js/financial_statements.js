@@ -2,7 +2,54 @@ frappe.provide("erpnext.financial_statements");
 
 erpnext.financial_statements = {
 	"filters": get_filters(),
+	"baseData": null,
 	"formatter": function(value, row, column, data, default_formatter, filter) {
+		if(frappe.query_report.get_filter_value("selectedView") == "Growth" && data && column.colIndex >= 3){
+			const lastAnnualValue = row[column.colIndex - 1].content;
+			let currentAnnualvalue = data[column.fieldname];
+			if(currentAnnualvalue == undefined) return 'NA';
+			let diff = (currentAnnualvalue - lastAnnualValue);
+			let annualGrowth = 0;
+			console.log(lastAnnualValue);
+			if(lastAnnualValue == 0 && currentAnnualvalue > 0){
+				console.log("inside condition")
+				annualGrowth = 1;
+			}
+			else if(lastAnnualValue > 0){
+				annualGrowth  = (currentAnnualvalue - lastAnnualValue) / lastAnnualValue;
+			}
+			console.log(annualGrowth);
+			
+			growthPercent = (Math.round(annualGrowth*10000)/100);
+
+			value = $(`<span>${((growthPercent >=0)? '+':'' )+growthPercent+'%'}</span>`);
+			if(growthPercent < 0)
+				value = $(value).addClass("text-danger");
+			else
+				value = $(value).addClass("text-success");
+			value = $(value).wrap("<p></p>").parent().html();
+			return value;
+		}
+		else if(frappe.query_report.get_filter_value("selectedView") == "Margin" && data){
+			if(column.fieldname=="account" && data.account_name == "Income"){
+				this.baseData = row;
+				console.log(this.baseData);
+			}
+			if(column.colIndex >= 2){
+				let currentAnnualvalue = data[column.fieldname];
+				let baseValue = this.baseData[column.colIndex].content;
+				if(currentAnnualvalue == undefined) return 'NA';
+				let marginPercent = Math.round((currentAnnualvalue/baseValue)*10000)/100;
+				value = $(`<span>${marginPercent+'%'}</span>`);
+				if(marginPercent < 0)
+					value = $(value).addClass("text-danger");
+				else
+					value = $(value).addClass("text-success");
+				value = $(value).wrap("<p></p>").parent().html();
+				return value;
+			}
+			
+		}
 		if (data && column.fieldname=="account") {
 			value = data.account_name || value;
 
