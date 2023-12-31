@@ -1185,8 +1185,6 @@ class SalesInvoice(SellingController):
 
 		gl_entries = []
 
-		self.make_customer_gl_entry(gl_entries)
-
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
@@ -1205,44 +1203,30 @@ class SalesInvoice(SellingController):
 
 		return gl_entries
 
-	def make_customer_gl_entry(self, gl_entries):
-		# Checked both rounding_adjustment and rounded_total
-		# because rounded_total had value even before introduction of posting GLE based on rounded total
-		grand_total = (
-			self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
-		)
-		base_grand_total = flt(
-			self.base_rounded_total
-			if (self.base_rounding_adjustment and self.base_rounded_total)
-			else self.base_grand_total,
-			self.precision("base_grand_total"),
-		)
-
-		if grand_total and not self.is_internal_transfer():
-			# Did not use base_grand_total to book rounding loss gle
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": self.debit_to,
-						"party_type": "Customer",
-						"party": self.customer,
-						"due_date": self.due_date,
-						"against_type": "Account",
-						"against": self.against_income_account,
-						"against_link": self.against_income_account,
-						"debit": base_grand_total,
-						"debit_in_account_currency": base_grand_total
-						if self.party_account_currency == self.company_currency
-						else grand_total,
-						"against_voucher": self.name,
-						"against_voucher_type": self.doctype,
-						"cost_center": self.cost_center,
-						"project": self.project,
-					},
-					self.party_account_currency,
-					item=self,
-				)
+	def make_customer_gl_entry(self, gl_entries, item):
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
+					"due_date": self.due_date,
+					"against_type": "Account",
+					"against": item.income_account,
+					"against_link": item.income_account,
+					"debit": item.base_net_amount,
+					"debit_in_account_currency": item.base_net_amount
+					if self.party_account_currency == self.company_currency
+					else item.net_amount,
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center,
+					"project": self.project,
+				},
+				self.party_account_currency,
+				item=self,
 			)
+		)
 
 	def make_tax_gl_entries(self, gl_entries):
 		enable_discount_accounting = cint(
@@ -1300,6 +1284,8 @@ class SalesInvoice(SellingController):
 		)
 
 		for item in self.get("items"):
+			if not self.is_internal_transfer():
+				self.make_customer_gl_entry(gl_entries, item)
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
 					asset = self.get_asset(item)
