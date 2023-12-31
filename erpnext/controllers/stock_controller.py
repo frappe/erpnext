@@ -239,20 +239,26 @@ class StockController(AccountsController):
 			source_current_account = get_current_account(self.source_warehouse)
 			source_branch = frappe.get_doc('Warehouse', self.source_warehouse).branch
 
-			if not (source_current_account == target_current_account):
-				flag = 0
-				if getdate(self.creation) >= getdate('2024-01-01'):
-					for entry in processed_gl_map:
-						if(entry.account == intermediate_account):
-							flag = 1
-							if(self.get("purpose") == "Material Transfer" and not self.outgoing_stock_entry): # Sending Stock Entry
+			if source_current_account != target_current_account:
+				entry_found = False
+				is_material_transfer = self.get("purpose") == "Material Transfer"
+				creation_date = getdate(self.creation)
+				after_2024 = creation_date >= getdate('2024-01-01')
+
+				for entry in processed_gl_map:
+					if entry.account == intermediate_account:
+						entry_found = True
+						if is_material_transfer and not self.outgoing_stock_entry:
+							if after_2024:
 								source_wh_gl_entry = entry.copy()
-								source_wh_gl_entry.account = source_current_account
-								source_wh_gl_entry.branch = target_branch
-								source_wh_gl_entry.credit =  entry.debit
-								source_wh_gl_entry.credit_in_account_currency = entry.debit_in_account_currency
-								source_wh_gl_entry.debit = 0
-								source_wh_gl_entry.debit_in_account_currency = 0
+								source_wh_gl_entry.update({
+									'account': source_current_account,
+									'branch': target_branch,
+									'credit': entry.debit,
+									'credit_in_account_currency': entry.debit_in_account_currency,
+									'debit': 0,
+									'debit_in_account_currency': 0
+								})
 								processed_gl_map.append(source_wh_gl_entry)
 
 								target_wh_gl_entry = entry.copy()
@@ -261,37 +267,34 @@ class StockController(AccountsController):
 								processed_gl_map.append(target_wh_gl_entry)
 
 								entry.branch = target_branch
-							break
-					if not flag:
-						frappe.throw("No Intermediate Warehouse Account")
-				else:
-					for entry in processed_gl_map:
-						if(entry.account == intermediate_account):
-							flag = 1
-							current_account = None
-
-							if(self.get("purpose") == "Material Transfer" and not self.outgoing_stock_entry):
-								current_account = target_current_account
-
-							elif(self.get("purpose") == "Material Transfer" and self.outgoing_stock_entry):
-								current_account = source_current_account
-
-							intermediate = entry.copy()
-							intermediate.account = current_account
-
-							processed_gl_map.append(intermediate)
-
-							if(entry.credit > 0):
-								entry.debit = entry.credit
 							else:
-								entry.credit = entry.debit
-							break
+								current_account = target_current_account
+								intermediate = entry.copy()
+								intermediate.account = current_account
+								processed_gl_map.append(intermediate)
+								if entry.credit > 0:
+									entry.debit = entry.credit
+								else:
+									entry.credit = entry.debit
 
-				if not flag:
+						elif is_material_transfer and self.outgoing_stock_entry:
+							outgoing_stock_entry_creation = frappe.db.get_value("Stock Entry", self.outgoing_stock_entry, "creation")
+							if not getdate(outgoing_stock_entry_creation) >= getdate('2024-01-01'):
+								current_account = source_current_account
+								intermediate = entry.copy()
+								intermediate.account = current_account
+								processed_gl_map.append(intermediate)
+								if entry.credit > 0:
+									entry.debit = entry.credit
+								else:
+									entry.credit = entry.debit
+
+
+				if not entry_found:
 					frappe.throw("No Intermediate Warehouse Account")
 
-		return processed_gl_map
 
+		return processed_gl_map
 
 	def get_debit_field_precision(self):
 		if not frappe.flags.debit_field_precision:
