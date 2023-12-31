@@ -319,7 +319,6 @@ class SalesInvoice(SellingController):
 				else self.loyalty_redemption_cost_center
 			)
 
-		self.set_against_income_account()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount")
 		if not self.is_return:
@@ -921,14 +920,6 @@ class SalesInvoice(SellingController):
 			self.validate_rate_with_reference_doc(
 				[["Sales Order", "sales_order", "so_detail"], ["Delivery Note", "delivery_note", "dn_detail"]]
 			)
-
-	def set_against_income_account(self):
-		"""Set against account for debit to account"""
-		against_acc = []
-		for d in self.get("items"):
-			if d.income_account and d.income_account not in against_acc:
-				against_acc.append(d.income_account)
-		self.against_income_account = ",".join(against_acc)
 
 	def add_remarks(self):
 		if not self.remarks:
