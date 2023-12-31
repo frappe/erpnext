@@ -706,12 +706,8 @@ def make_contact(args, is_primary_contact=1):
 	else:
 		values.update(
 			{
-<<<<<<< HEAD
 				"first_name": args.get("customer_name"),
-				"company_name": args.get("customer_name"),
-=======
 				"company_name": args.get(party_name_key),
->>>>>>> 7842c9fba8 (fix: issue occured when creating supplier with contact details)
 			}
 		)
 		
