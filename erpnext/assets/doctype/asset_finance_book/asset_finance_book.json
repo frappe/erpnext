@@ -90,7 +90,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
    "fieldname": "daily_prorata_based",
    "fieldtype": "Check",
    "label": "Depreciate based on daily pro-rata"
@@ -106,7 +105,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-29 03:53:03.591098",
+ "modified": "2023-12-29 08:49:39.876439",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Finance Book",
