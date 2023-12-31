@@ -227,8 +227,7 @@ class StockController(AccountsController):
 
 			# intermediate_warehouse = frappe.get_doc(
 			#     "NCITY Settings").intermediate_warehouse
-			intermediate_warehouse = frappe.get_doc(
-				"Warehouse", self.source_warehouse).default_in_transit_warehouse
+			intermediate_warehouse = frappe.get_doc("Warehouse", self.source_warehouse).default_in_transit_warehouse
 			def get_current_account(warehouse):
 				branch = frappe.get_doc('Warehouse', warehouse).branch
 				return frappe.get_doc('Branch', branch).currant_account
@@ -236,31 +235,57 @@ class StockController(AccountsController):
 			intermediate_account = frappe.get_doc(
 				"Warehouse", intermediate_warehouse).account
 			target_current_account = get_current_account(self.target_warehouse)
+			target_branch = frappe.get_doc('Warehouse', self.target_warehouse).branch
 			source_current_account = get_current_account(self.source_warehouse)
+			source_branch = frappe.get_doc('Warehouse', self.source_warehouse).branch
 
 			if not (source_current_account == target_current_account):
 				flag = 0
-				for entry in processed_gl_map:
-					if(entry.account == intermediate_account):
-						flag = 1
-						current_account = None
+				if getdate(self.creation) >= getdate('2024-01-01'):
+					for entry in processed_gl_map:
+						if(entry.account == intermediate_account):
+							flag = 1
+							if(self.get("purpose") == "Material Transfer" and not self.outgoing_stock_entry): # Sending Stock Entry
+								source_wh_gl_entry = entry.copy()
+								source_wh_gl_entry.account = source_current_account
+								source_wh_gl_entry.branch = target_branch
+								source_wh_gl_entry.credit =  entry.debit
+								source_wh_gl_entry.credit_in_account_currency = entry.debit_in_account_currency
+								source_wh_gl_entry.debit = 0
+								source_wh_gl_entry.debit_in_account_currency = 0
+								processed_gl_map.append(source_wh_gl_entry)
 
-						if(self.get("purpose") == "Material Transfer" and not self.outgoing_stock_entry):
-							current_account = target_current_account
+								target_wh_gl_entry = entry.copy()
+								target_wh_gl_entry.account = target_current_account
+								target_wh_gl_entry.branch = source_branch
+								processed_gl_map.append(target_wh_gl_entry)
 
-						elif(self.get("purpose") == "Material Transfer" and self.outgoing_stock_entry):
-							current_account = source_current_account
+								entry.branch = target_branch
+							break
+					if not flag:
+						frappe.throw("No Intermediate Warehouse Account")
+				else:
+					for entry in processed_gl_map:
+						if(entry.account == intermediate_account):
+							flag = 1
+							current_account = None
 
-						intermediate = entry.copy()
-						intermediate.account = current_account
+							if(self.get("purpose") == "Material Transfer" and not self.outgoing_stock_entry):
+								current_account = target_current_account
 
-						processed_gl_map.append(intermediate)
+							elif(self.get("purpose") == "Material Transfer" and self.outgoing_stock_entry):
+								current_account = source_current_account
 
-						if(entry.credit > 0):
-							entry.debit = entry.credit
-						else:
-							entry.credit = entry.debit
-						break
+							intermediate = entry.copy()
+							intermediate.account = current_account
+
+							processed_gl_map.append(intermediate)
+
+							if(entry.credit > 0):
+								entry.debit = entry.credit
+							else:
+								entry.credit = entry.debit
+							break
 
 				if not flag:
 					frappe.throw("No Intermediate Warehouse Account")
