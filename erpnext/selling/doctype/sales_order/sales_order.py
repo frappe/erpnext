@@ -3,6 +3,7 @@
 
 
 import json
+from collections import Counter, defaultdict
 
 import frappe
 import frappe.utils
@@ -696,27 +697,54 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 
 	if not skip_item_mapping:
 
-		def condition(doc):
+		def condition(doc, items=None):
 			# make_mapped_doc sets js `args` into `frappe.flags.args`
 			if frappe.flags.args and frappe.flags.args.delivery_dates:
 				if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
 					return False
-			return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
+			conditions = [abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1]
+			if isinstance(items, list):
+				conditions.append(doc.name in items)
 
-		mapper["Sales Order Item"] = {
-			"doctype": "Delivery Note Item",
-			"field_map": {
-				"rate": "rate",
-				"name": "so_detail",
-				"parent": "against_sales_order",
-			},
-			"postprocess": update_item,
-			"condition": condition,
-		}
+			return all(conditions)
 
-	target_doc = get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
+		def map_doc(warehouse=None, items=None):
+			mapper["Sales Order Item"] = {
+				"doctype": "Delivery Note Item",
+				"field_map": {
+					"rate": "rate",
+					"name": "so_detail",
+					"parent": "against_sales_order",
+				},
+				"postprocess": update_item,
+				"condition": lambda doc: condition(doc, items),
+			}
 
-	return target_doc
+			return get_mapped_doc("Sales Order", source_name, mapper, target_doc, set_missing_values)
+
+		so_item_by_warehouse = defaultdict(list)
+		for name, warehouse in frappe.get_all(
+			"Sales Order Item",
+			{"parenttype": "Sales Order", "parentfield": "items", "parent": source_name},
+			["name", "warehouse"],
+			as_list=True
+		):
+			so_item_by_warehouse[warehouse].append(name)
+
+		warehouses_is_group = frappe.get_all(
+			"Warehouse", {"name": ["IN", so_item_by_warehouse.keys()]}, ["is_group"], pluck="is_group"
+		)
+		if len(Counter(warehouses_is_group)) > 1:
+			frappe.throw(_("All items must be a group warehouse or a non-group warehouse."))
+
+		if len(warehouses_is_group) > 1 and warehouses_is_group[0]:
+			docs = []
+			for warehouse, items in so_item_by_warehouse.items():
+				docs.append(
+					map_doc(warehouse, items).save())
+			return docs
+
+	return map_doc()
 
 
 @frappe.whitelist()
