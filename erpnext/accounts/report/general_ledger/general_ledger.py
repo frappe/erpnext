@@ -471,6 +471,7 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 					gle.get("account"),
 					gle.get("party_type"),
 					gle.get("party"),
+					gle.get("against"),
 				]
 				if filters.get("include_dimensions"):
 					for dim in accounting_dimensions:
