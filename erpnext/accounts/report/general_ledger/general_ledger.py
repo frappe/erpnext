@@ -523,7 +523,16 @@ def get_balance(row, balance, debit_field, credit_field):
 	balance += row.get(debit_field, 0) - row.get(credit_field, 0)
 
 	return balance
-
+def get_float_precison():
+	fp = frappe.db.get_single_value(
+			"Accounts Settings", "monetary_columns_float_precison"
+		)
+	if fp !="":
+		return fp
+	else :
+		return frappe.db.get_single_value(
+			"System Settings", "float_precision"
+		) 
 
 def get_columns(filters):
 	if filters.get("presentation_currency"):
@@ -534,6 +543,7 @@ def get_columns(filters):
 		else:
 			company = get_default_company()
 			currency = get_company_currency(company)
+	float_precision = get_float_precison()
 
 	columns = [
 		{
@@ -555,18 +565,21 @@ def get_columns(filters):
 			"label": _("Debit ({0})").format(currency),
 			"fieldname": "debit",
 			"fieldtype": "Float",
+			"precision": float_precision,
 			"width": 130,
 		},
 		{
 			"label": _("Credit ({0})").format(currency),
 			"fieldname": "credit",
 			"fieldtype": "Float",
+			"precision": float_precision,
 			"width": 130,
 		},
 		{
 			"label": _("Balance ({0})").format(currency),
 			"fieldname": "balance",
 			"fieldtype": "Float",
+			"precision": float_precision,
 			"width": 130,
 		},
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
