@@ -1195,6 +1195,31 @@ class SalesInvoice(SellingController):
 		return gl_entries
 
 	def make_customer_gl_entry(self, gl_entries, item):
+		enable_discount_accounting = (
+			cint(frappe.db.get_single_value("Selling Settings", "enable_discount_accounting"))
+			and self.discount_amount
+		)
+
+		item_coefficient = item.amount / self.total
+		if enable_discount_accounting:
+			base_item_amount, item_amount = item.base_net_amount, item.net_amount
+		else:
+			base_item_amount, item_amount = item.base_amount, item.amount
+
+		if self.rounding_adjustment and self.rounded_total:
+			base_item_amount += self.base_rounding_adjustment / len(self.items)
+			item_amount += self.rounding_adjustment / len(self.items)
+
+		debit, debit_in_account_currency = base_item_amount, item_amount
+		for tax in self.get("taxes"):
+			if not tax.included_in_print_rate:
+				if enable_discount_accounting:
+					debit += tax.base_tax_amount_after_discount_amount * item_coefficient
+					debit_in_account_currency += tax.tax_amount_after_discount_amount * item_coefficient
+				else:
+					debit += tax.base_tax_amount * item_coefficient
+					debit_in_account_currency += tax.tax_amount * item_coefficient
+
 		gl_entries.append(
 			self.get_gl_dict(
 				{
@@ -1205,10 +1230,8 @@ class SalesInvoice(SellingController):
 					"against_type": "Account",
 					"against": item.income_account,
 					"against_link": item.income_account,
-					"debit": item.base_net_amount,
-					"debit_in_account_currency": item.base_net_amount
-					if self.party_account_currency == self.company_currency
-					else item.net_amount,
+					"debit": debit,
+					"debit_in_account_currency": debit_in_account_currency,
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center,
