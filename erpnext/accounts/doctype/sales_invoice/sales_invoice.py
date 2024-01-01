@@ -1219,9 +1219,9 @@ class SalesInvoice(SellingController):
 		debit = base_item_amount + base_tax_amount
 		debit_in_account_currency = item_amount + tax_amount
 
-		if self.rounding_adjustment and self.rounded_total and tax_amount:
-			debit += self.base_rounding_adjustment / len(self.items)
-			debit_in_account_currency += self.rounding_adjustment / len(self.items)
+		if self.rounding_adjustment and self.rounded_total:
+			debit += self.base_rounding_adjustment * item_coefficient
+			debit_in_account_currency += self.rounding_adjustment * item_coefficient
 
 		gl_entries.append(
 			self.get_gl_dict(
