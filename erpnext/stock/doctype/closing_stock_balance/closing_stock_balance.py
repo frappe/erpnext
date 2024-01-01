@@ -128,6 +128,4 @@ def prepare_closing_stock_balance(name):
 		doc.db_set("status", "Completed")
 	except Exception as e:
 		doc.db_set("status", "Failed")
-		traceback = frappe.get_traceback()
-
-		frappe.log_error("Closing Stock Balance Failed", traceback, doc.doctype, doc.name)
+		doc.log_error(title="Closing Stock Balance Failed")
