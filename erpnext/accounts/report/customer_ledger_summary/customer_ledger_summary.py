@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, scrub
+from frappe import _, qb, scrub
 from frappe.utils import getdate, nowdate
 
 
@@ -38,7 +38,6 @@ class PartyLedgerSummaryReport(object):
 		"""
 		Additional Columns for 'User Permission' based access control
 		"""
-		from frappe import qb
 
 		if self.filters.party_type == "Customer":
 			self.territories = frappe._dict({})
@@ -365,12 +364,28 @@ class PartyLedgerSummaryReport(object):
 
 	def get_party_adjustment_amounts(self):
 		conditions = self.prepare_conditions()
-		income_or_expense = (
-			"Expense Account" if self.filters.party_type == "Customer" else "Income Account"
+		account_type = "Expense Account" if self.filters.party_type == "Customer" else "Income Account"
+		income_or_expense_accounts = frappe.db.get_all(
+			"Account", filters={"account_type": account_type, "company": self.filters.company}, pluck="name"
 		)
 		invoice_dr_or_cr = "debit" if self.filters.party_type == "Customer" else "credit"
 		reverse_dr_or_cr = "credit" if self.filters.party_type == "Customer" else "debit"
 		round_off_account = frappe.get_cached_value("Company", self.filters.company, "round_off_account")
+
+		gl = qb.DocType("GL Entry")
+		if not income_or_expense_accounts:
+			# prevent empty 'in' condition
+			income_or_expense_accounts.append("")
+
+		accounts_query = (
+			qb.from_(gl)
+			.select(gl.voucher_type, gl.voucher_no)
+			.where(
+				(gl.account.isin(income_or_expense_accounts))
+				& (gl.posting_date.gte(self.filters.from_date))
+				& (gl.posting_date.lte(self.filters.to_date))
+			)
+		)
 
 		gl_entries = frappe.db.sql(
 			"""
@@ -381,16 +396,15 @@ class PartyLedgerSummaryReport(object):
 			where
 				docstatus < 2 and is_cancelled = 0
 				and (voucher_type, voucher_no) in (
-					select voucher_type, voucher_no from `tabGL Entry` gle, `tabAccount` acc
-					where acc.name = gle.account and acc.account_type = '{income_or_expense}'
-					and gle.posting_date between %(from_date)s and %(to_date)s and gle.docstatus < 2
+				{accounts_query}
 				) and (voucher_type, voucher_no) in (
 					select voucher_type, voucher_no from `tabGL Entry` gle
 					where gle.party_type=%(party_type)s and ifnull(party, '') != ''
 					and gle.posting_date between %(from_date)s and %(to_date)s and gle.docstatus < 2 {conditions}
 				)
-		""".format(
-				conditions=conditions, income_or_expense=income_or_expense
+			""".format(
+				accounts_query=accounts_query,
+				conditions=conditions,
 			),
 			self.filters,
 			as_dict=True,
@@ -414,7 +428,7 @@ class PartyLedgerSummaryReport(object):
 				elif gle.party:
 					parties.setdefault(gle.party, 0)
 					parties[gle.party] += gle.get(reverse_dr_or_cr) - gle.get(invoice_dr_or_cr)
-				elif frappe.get_cached_value("Account", gle.account, "account_type") == income_or_expense:
+				elif frappe.get_cached_value("Account", gle.account, "account_type") == account_type:
 					accounts.setdefault(gle.account, 0)
 					accounts[gle.account] += gle.get(invoice_dr_or_cr) - gle.get(reverse_dr_or_cr)
 				else:
