@@ -427,11 +427,12 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		item = make_item(
+			"Test Serial and Batch Bundle Company Item",
 			properties={
 				"has_serial_no": 1,
 				"serial_no_series": "TT-SER-VAL-.#####",
-			}
-		)
+			},
+		).name
 
 		pr = make_purchase_receipt(
 			item_code=item,
@@ -459,6 +460,26 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		item_row.is_rejected = 0
 		sn_doc = add_serial_batch_ledgers(entries, item_row, pr, "_Test Warehouse - _TC")
 		self.assertEqual(sn_doc.company, "_Test Company")
+
+	def test_auto_cancel_serial_and_batch(self):
+		item_code = make_item(
+			properties={"has_serial_no": 1, "serial_no_series": "ATC-TT-SER-VAL-.#####"}
+		).name
+
+		se = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=5,
+			rate=500,
+		)
+
+		bundle = se.items[0].serial_and_batch_bundle
+		docstatus = frappe.db.get_value("Serial and Batch Bundle", bundle, "docstatus")
+		self.assertEqual(docstatus, 1)
+
+		se.cancel()
+		docstatus = frappe.db.get_value("Serial and Batch Bundle", bundle, "docstatus")
+		self.assertEqual(docstatus, 2)
 
 
 def get_batch_from_bundle(bundle):
