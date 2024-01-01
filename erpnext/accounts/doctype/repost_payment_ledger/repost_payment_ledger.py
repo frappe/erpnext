@@ -43,7 +43,7 @@ def start_payment_ledger_repost(docname=None):
 			except Exception as e:
 				frappe.db.rollback()
 
-				traceback = frappe.get_traceback()
+				traceback = frappe.get_traceback(with_context=True)
 				if traceback:
 					message = "Traceback: <br>" + traceback
 					frappe.db.set_value(repost_doc.doctype, repost_doc.name, "repost_error_log", message)
