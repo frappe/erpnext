@@ -524,15 +524,11 @@ def get_balance(row, balance, debit_field, credit_field):
 
 	return balance
 def get_float_precison():
-	fp = frappe.db.get_single_value(
-			"Accounts Settings", "monetary_columns_float_precison"
-		)
-	if fp !="":
+	fp = frappe.db.get_single_value("Accounts Settings", "monetary_columns_float_precison")
+	if fp != "":
 		return fp
-	else :
-		return frappe.db.get_single_value(
-			"System Settings", "float_precision"
-		) 
+	else:
+		return frappe.db.get_single_value("System Settings", "float_precision")
 
 def get_columns(filters):
 	if filters.get("presentation_currency"):
