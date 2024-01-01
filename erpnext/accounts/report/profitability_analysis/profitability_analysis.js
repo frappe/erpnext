@@ -119,18 +119,4 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 		"initial_depth": 3
 	}
 
-<<<<<<< HEAD
-	erpnext.dimension_filters.forEach((dimension) => {
-		frappe.query_reports["Profitability Analysis"].filters[1].options.push(dimension["document_type"]);
-	});
-
 });
-=======
-		frappe.set_route("query-report", "Profit and Loss Statement");
-	},
-	"tree": true,
-	"name_field": "account",
-	"parent_field": "parent_account",
-	"initial_depth": 3
-}
->>>>>>> 92bc962f60 (fix: undefined error in Budget Variance and Profitability report)
