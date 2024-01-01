@@ -1206,19 +1206,22 @@ class SalesInvoice(SellingController):
 		else:
 			base_item_amount, item_amount = item.base_amount, item.amount
 
-		if self.rounding_adjustment and self.rounded_total:
-			base_item_amount += self.base_rounding_adjustment / len(self.items)
-			item_amount += self.rounding_adjustment / len(self.items)
-
-		debit, debit_in_account_currency = base_item_amount, item_amount
+		base_tax_amount, tax_amount = 0, 0
 		for tax in self.get("taxes"):
 			if not tax.included_in_print_rate:
 				if enable_discount_accounting:
-					debit += tax.base_tax_amount_after_discount_amount * item_coefficient
-					debit_in_account_currency += tax.tax_amount_after_discount_amount * item_coefficient
+					base_tax_amount += tax.base_tax_amount_after_discount_amount * item_coefficient
+					tax_amount += tax.tax_amount_after_discount_amount * item_coefficient
 				else:
-					debit += tax.base_tax_amount * item_coefficient
-					debit_in_account_currency += tax.tax_amount * item_coefficient
+					base_tax_amount += tax.base_tax_amount * item_coefficient
+					tax_amount += tax.tax_amount * item_coefficient
+
+		debit = base_item_amount + base_tax_amount
+		debit_in_account_currency = item_amount + tax_amount
+
+		if self.rounding_adjustment and self.rounded_total and tax_amount:
+			debit += self.base_rounding_adjustment / len(self.items)
+			debit_in_account_currency += self.rounding_adjustment / len(self.items)
 
 		gl_entries.append(
 			self.get_gl_dict(
