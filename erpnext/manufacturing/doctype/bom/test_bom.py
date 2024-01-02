@@ -698,6 +698,35 @@ class TestBOM(FrappeTestCase):
 		bom.update_cost()
 		self.assertFalse(bom.flags.cost_updated)
 
+	def test_bom_with_service_item_cost(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 1000.0}).name
+
+		service_item = make_item(properties={"is_stock_item": 0}).name
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item, service_item], do_not_save=True)
+		bom.rm_cost_as_per = "Valuation Rate"
+
+		for row in bom.items:
+			if row.item_code == service_item:
+				row.rate = 566.00
+			else:
+				row.rate = 800.00
+
+		bom.save()
+
+		for row in bom.items:
+			if row.item_code == service_item:
+				self.assertEqual(row.is_stock_item, 0)
+				self.assertEqual(row.rate, 566.00)
+			else:
+				self.assertEqual(row.is_stock_item, 1)
+
 	def test_do_not_include_manufacturing_and_fixed_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import item_query
 

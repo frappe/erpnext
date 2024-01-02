@@ -46,6 +46,10 @@ class AssetRepair(AccountsController):
 
 			self.increase_asset_value()
 
+			if self.capitalize_repair_cost:
+				self.asset_doc.total_asset_cost += self.repair_cost
+				self.asset_doc.additional_asset_cost += self.repair_cost
+
 			if self.get("stock_consumption"):
 				self.check_for_stock_items_and_warehouse()
 				self.decrease_stock_quantity()
@@ -67,6 +71,10 @@ class AssetRepair(AccountsController):
 			self.asset_doc.flags.increase_in_asset_value_due_to_repair = True
 
 			self.decrease_asset_value()
+
+			if self.capitalize_repair_cost:
+				self.asset_doc.total_asset_cost -= self.repair_cost
+				self.asset_doc.additional_asset_cost -= self.repair_cost
 
 			if self.get("stock_consumption"):
 				self.increase_stock_quantity()

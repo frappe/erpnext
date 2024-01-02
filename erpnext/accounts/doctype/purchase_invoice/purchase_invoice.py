@@ -976,11 +976,17 @@ class PurchaseInvoice(BuyingController):
 						)
 
 		assets = frappe.db.get_all(
-			"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
+			"Asset",
+			filters={"purchase_invoice": self.name, "item_code": item.item_code},
+			fields=["name", "asset_quantity"],
 		)
 		for asset in assets:
-			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
+			frappe.db.set_value(
+				"Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate) * asset.asset_quantity
+			)
+			frappe.db.set_value(
+				"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate) * asset.asset_quantity
+			)
 
 	def make_stock_adjustment_entry(
 		self, gl_entries, item, voucher_wise_stock_value, account_currency
@@ -1658,10 +1664,6 @@ def make_inter_company_sales_invoice(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)
-
-
-def on_doctype_update():
-	frappe.db.add_index("Purchase Invoice", ["supplier", "is_return", "return_against"])
 
 
 @frappe.whitelist()

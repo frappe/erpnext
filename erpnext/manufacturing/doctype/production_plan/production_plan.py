@@ -508,6 +508,7 @@ class ProductionPlan(Document):
 
 		if close:
 			self.db_set("status", "Closed")
+			self.update_bin_qty()
 			return
 
 		if self.total_produced_qty > 0:
@@ -521,6 +522,9 @@ class ProductionPlan(Document):
 
 		if close is not None:
 			self.db_set("status", self.status)
+
+		if self.docstatus == 1 and self.status != "Completed":
+			self.update_bin_qty()
 
 	def update_ordered_status(self):
 		update_status = False
@@ -1131,7 +1135,14 @@ def get_subitems(
 
 
 def get_material_request_items(
-	row, sales_order, company, ignore_existing_ordered_qty, include_safety_stock, warehouse, bin_dict
+	doc,
+	row,
+	sales_order,
+	company,
+	ignore_existing_ordered_qty,
+	include_safety_stock,
+	warehouse,
+	bin_dict,
 ):
 	total_qty = row["qty"]
 
@@ -1140,8 +1151,14 @@ def get_material_request_items(
 		required_qty = total_qty
 	elif total_qty > bin_dict.get("projected_qty", 0):
 		required_qty = total_qty - bin_dict.get("projected_qty", 0)
-	if required_qty > 0 and required_qty < row["min_order_qty"]:
+
+	if (
+		doc.get("consider_minimum_order_qty")
+		and required_qty > 0
+		and required_qty < row["min_order_qty"]
+	):
 		required_qty = row["min_order_qty"]
+
 	item_group_defaults = get_item_group_defaults(row.item_code, company)
 
 	if not row["purchase_uom"]:
@@ -1479,6 +1496,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 
 			if details.qty > 0:
 				items = get_material_request_items(
+					doc,
 					details,
 					sales_order,
 					company,

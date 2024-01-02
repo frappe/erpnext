@@ -2,7 +2,44 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.query_reports["Budget Variance Report"] = {
-	"filters": [
+	"filters": get_filters(),
+	"formatter": function (value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+
+		if (column.fieldname.includes(__("variance"))) {
+
+			if (data[column.fieldname] < 0) {
+				value = "<span style='color:red'>" + value + "</span>";
+			}
+			else if (data[column.fieldname] > 0) {
+				value = "<span style='color:green'>" + value + "</span>";
+			}
+		}
+
+		return value;
+	}
+}
+function get_filters() {
+	function get_dimensions() {
+		let result = [];
+		frappe.call({
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			args: {
+				'with_cost_center_and_project': true
+			},
+			async: false,
+			callback: function(r) {
+				if(!r.exc) {
+					result = r.message[0].map(elem => elem.document_type);
+				}
+			}
+		});
+		return result;
+	}
+
+	let budget_against_options = get_dimensions();
+
+	let filters = [
 		{
 			fieldname: "from_fiscal_year",
 			label: __("From Fiscal Year"),
@@ -44,9 +81,13 @@ frappe.query_reports["Budget Variance Report"] = {
 			fieldname: "budget_against",
 			label: __("Budget Against"),
 			fieldtype: "Select",
-			options: ["Cost Center", "Project"],
+			options: budget_against_options,
 			default: "Cost Center",
 			reqd: 1,
+			get_data: function() {
+				console.log(this.options);
+				return ["Emacs", "Rocks"];
+			},
 			on_change: function() {
 				frappe.query_report.set_filter_value("budget_against_filter", []);
 				frappe.query_report.refresh();
@@ -71,24 +112,8 @@ frappe.query_reports["Budget Variance Report"] = {
 			fieldtype: "Check",
 			default: 0,
 		},
-	],
-	"formatter": function (value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+	]
 
-		if (column.fieldname.includes(__("variance"))) {
-
-			if (data[column.fieldname] < 0) {
-				value = "<span style='color:red'>" + value + "</span>";
-			}
-			else if (data[column.fieldname] > 0) {
-				value = "<span style='color:green'>" + value + "</span>";
-			}
-		}
-
-		return value;
-	}
+	return filters;
 }
 
-erpnext.dimension_filters.forEach((dimension) => {
-	frappe.query_reports["Budget Variance Report"].filters[4].options.push(dimension["document_type"]);
-});
