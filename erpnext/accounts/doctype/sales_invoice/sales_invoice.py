@@ -1208,7 +1208,7 @@ class SalesInvoice(SellingController):
 
 		base_tax_amount, tax_amount = 0, 0
 		for tax in self.get("taxes"):
-			if not tax.included_in_print_rate:
+			if not tax.included_in_print_rate or enable_discount_accounting:
 				if enable_discount_accounting:
 					base_tax_amount += tax.base_tax_amount_after_discount_amount * item_coefficient
 					tax_amount += tax.tax_amount_after_discount_amount * item_coefficient
