@@ -6,6 +6,7 @@ import unittest
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
+from frappe.query_builder.functions import Sum
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
@@ -893,13 +894,7 @@ class TestSalesInvoice(FrappeTestCase):
 		si.insert()
 		si.submit()
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
-		)
+		gl_entries = get_si_gl_entries_with_consolidated_values(si.name)
 
 		self.assertTrue(gl_entries)
 
@@ -1163,27 +1158,19 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 
 		# check gl entries
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc, credit asc""",
-			si.name,
-			as_dict=1,
-		)
+		gl_entries = get_si_gl_entries_with_consolidated_values(si.name)
 		self.assertTrue(gl_entries)
 
 		stock_in_hand = get_inventory_account("_Test Company with perpetual inventory")
 		expected_gl_entries = sorted(
 			[
-				[si.debit_to, 100.0, 0.0],
 				[pos.items[0].income_account, 0.0, 89.09],
 				["Round Off - TCP1", 0.0, 0.01],
 				[pos.taxes[0].account_head, 0.0, 10.69],
 				[pos.taxes[1].account_head, 0.0, 0.21],
 				[stock_in_hand, 0.0, abs(sle.stock_value_difference)],
 				[pos.items[0].expense_account, abs(sle.stock_value_difference), 0.0],
-				[si.debit_to, 0.0, 50.0],
-				[si.debit_to, 0.0, cash_amount],
+				[si.debit_to, 100.0, cash_amount + 50.0],
 				["_Test Bank - TCP1", 50, 0.0],
 				["Cash - TCP1", cash_amount, 0.0],
 			]
@@ -2062,13 +2049,7 @@ class TestSalesInvoice(FrappeTestCase):
 			]
 		)
 
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
-			si.name,
-			as_dict=1,
-		)
+		gl_entries = get_si_gl_entries_with_consolidated_values(si.name)
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account][0], gle.account)
@@ -2116,14 +2097,7 @@ class TestSalesInvoice(FrappeTestCase):
 			["Sales - _TC", 0.0, 1271.18],
 		]
 
-		gl_entries = frappe.db.sql(
-			"""select account, sum(debit) as debit, sum(credit) as credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			group by account
-			order by account asc""",
-			si.name,
-			as_dict=1,
-		)
+		gl_entries = get_si_gl_entries_with_consolidated_values(si.name)
 
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[i][0], gle.account)
@@ -2187,14 +2161,7 @@ class TestSalesInvoice(FrappeTestCase):
 			]
 		)
 
-		gl_entries = frappe.db.sql(
-			"""select account, sum(debit) as debit, sum(credit) as credit
-			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			group by account
-			order by account asc""",
-			si.name,
-			as_dict=1,
-		)
+		gl_entries = get_si_gl_entries_with_consolidated_values(si.name)
 
 		debit_credit_diff = 0
 		for gle in gl_entries:
@@ -2789,7 +2756,8 @@ class TestSalesInvoice(FrappeTestCase):
 		si = create_sales_invoice(discount_account=discount_account, discount_percentage=10, rate=90)
 
 		expected_gle = [
-			["Debtors - _TC", 90.0, 0.0, nowdate()],
+			["Debtors - _TC", 100.0, 0.0, nowdate()],
+			["Debtors - _TC", 0.0, 10.0, nowdate()],
 			["Discount Account - _TC", 10.0, 0.0, nowdate()],
 			["Sales - _TC", 0.0, 100.0, nowdate()],
 		]
@@ -3621,6 +3589,21 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="
 		doc.assertEqual(expected_gle[i][1], gle.debit)
 		doc.assertEqual(expected_gle[i][2], gle.credit)
 		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+
+def get_si_gl_entries_with_consolidated_values(si_name):
+	gle = frappe.qb.DocType("GL Entry")
+	return (
+		frappe.qb.from_(gle)
+		.select(
+			gle.account,
+			Sum(gle.debit).as_("debit"),
+			Sum(gle.credit).as_("credit"),
+		)
+		.where((gle.voucher_type == "Sales Invoice") & (gle.voucher_no == si_name))
+		.groupby(gle.account)
+		.orderby(gle.account)
+	).run(as_dict=1)
 
 
 def create_sales_invoice(**args):
