@@ -518,6 +518,7 @@ class PurchaseReceipt(BuyingController):
 							debit=0.0,
 							credit=discrepancy_caused_by_exchange_rate_difference,
 							remarks=remarks,
+							against_type="Supplier",
 							against_account=self.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
@@ -531,6 +532,7 @@ class PurchaseReceipt(BuyingController):
 							debit=discrepancy_caused_by_exchange_rate_difference,
 							credit=0.0,
 							remarks=remarks,
+							against_type="Supplier",
 							against_account=self.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
@@ -796,7 +798,7 @@ class PurchaseReceipt(BuyingController):
 			# Backward compatibility:
 			# and charges added via Landed Cost Voucher,
 			# post valuation related charges on "Stock Received But Not Billed"
-			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
+			against_accounts = [d.account for d in gl_entries if flt(d.debit) > 0]
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			stock_rbnb = (
@@ -828,16 +830,17 @@ class PurchaseReceipt(BuyingController):
 						)
 						amount_including_divisional_loss -= applicable_amount
 
-					self.add_gl_entry(
-						gl_entries=gl_entries,
-						account=account,
-						cost_center=tax.cost_center,
-						debit=0.0,
-						credit=applicable_amount,
-						remarks=self.remarks or _("Accounting Entry for Stock"),
-						against_account=against_account,
-						item=tax,
-					)
+					for against in against_accounts:
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=account,
+							cost_center=tax.cost_center,
+							debit=0.0,
+							credit=flt(applicable_amount) / len(against_accounts),
+							remarks=self.remarks or _("Accounting Entry for Stock"),
+							against_account=against,
+							item=tax,
+						)
 
 					i += 1
 
@@ -1121,8 +1124,39 @@ def get_item_wise_returned_qty(pr_doc):
 	)
 
 
+def merge_taxes(source_taxes, target_doc):
+	from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+		update_item_wise_tax_detail,
+	)
+
+	existing_taxes = target_doc.get("taxes") or []
+	idx = 1
+	for tax in source_taxes:
+		found = False
+		for t in existing_taxes:
+			if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
+				t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
+				t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
+				update_item_wise_tax_detail(t, tax)
+				found = True
+
+		if not found:
+			tax.charge_type = "Actual"
+			tax.idx = idx
+			idx += 1
+			tax.included_in_print_rate = 0
+			tax.dont_recompute_tax = 1
+			tax.row_id = ""
+			tax.tax_amount = tax.tax_amount_after_discount_amount
+			tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
+			tax.item_wise_tax_detail = tax.item_wise_tax_detail
+			existing_taxes.append(tax)
+
+	target_doc.set("taxes", existing_taxes)
+
+
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None):
+def make_purchase_invoice(source_name, target_doc=None, args=None):
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("Purchase Receipt", source_name)
@@ -1139,6 +1173,10 @@ def make_purchase_invoice(source_name, target_doc=None):
 		)
 		doc.run_method("onload")
 		doc.run_method("set_missing_values")
+
+		if args and args.get("merge_taxes"):
+			merge_taxes(source.get("taxes") or [], doc)
+
 		doc.run_method("calculate_taxes_and_totals")
 		doc.set_payment_schedule()
 
@@ -1202,7 +1240,11 @@ def make_purchase_invoice(source_name, target_doc=None):
 				if not doc.get("is_return")
 				else get_pending_qty(d)[0] > 0,
 			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
+			"Purchase Taxes and Charges": {
+				"doctype": "Purchase Taxes and Charges",
+				"add_if_empty": True,
+				"ignore": args.get("merge_taxes") if args else 0,
+			},
 		},
 		target_doc,
 		set_missing_values,
@@ -1355,10 +1397,6 @@ def get_item_account_wise_additional_cost(purchase_document):
 						]["base_amount"] += item.applicable_charges
 
 	return item_account_wise_cost
-
-
-def on_doctype_update():
-	frappe.db.add_index("Purchase Receipt", ["supplier", "is_return", "return_against"])
 
 
 @erpnext.allow_regional

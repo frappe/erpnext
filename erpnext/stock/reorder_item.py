@@ -141,7 +141,7 @@ def create_material_request(material_requests):
 			exceptions_list.extend(frappe.local.message_log)
 			frappe.local.message_log = []
 		else:
-			exceptions_list.append(frappe.get_traceback())
+			exceptions_list.append(frappe.get_traceback(with_context=True))
 
 		mr.log_error("Unable to create material request")
 

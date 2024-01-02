@@ -225,6 +225,11 @@ class AccountsController(TransactionBase):
 			apply_pricing_rule_on_transaction(self)
 
 		self.set_total_in_words()
+		self.set_default_letter_head()
+
+	def set_default_letter_head(self):
+		if hasattr(self, "letter_head") and not self.letter_head:
+			self.letter_head = frappe.db.get_value("Company", self.company, "default_letter_head")
 
 	def init_internal_values(self):
 		# init all the internal values as 0 on sa
@@ -874,6 +879,7 @@ class AccountsController(TransactionBase):
 				"project": self.get("project"),
 				"post_net_value": args.get("post_net_value"),
 				"voucher_detail_no": args.get("voucher_detail_no"),
+				"voucher_subtype": self.get_voucher_subtype(),
 			}
 		)
 
@@ -916,7 +922,7 @@ class AccountsController(TransactionBase):
 		# Update details in transaction currency
 		gl_dict.update(
 			{
-				"transaction_currency": self.get("currency") or self.company_currency,
+				"transaction_currency": args.get("currency") or self.get("currency") or self.company_currency,
 				"transaction_exchange_rate": self.get("conversion_rate", 1),
 				"debit_in_transaction_currency": self.get_value_in_transaction_currency(
 					account_currency, args, "debit"
@@ -929,11 +935,30 @@ class AccountsController(TransactionBase):
 
 		return gl_dict
 
+	def get_voucher_subtype(self):
+		voucher_subtypes = {
+			"Journal Entry": "voucher_type",
+			"Payment Entry": "payment_type",
+			"Stock Entry": "stock_entry_type",
+			"Asset Capitalization": "entry_type",
+		}
+		if self.doctype in voucher_subtypes:
+			return self.get(voucher_subtypes[self.doctype])
+		elif self.doctype == "Purchase Receipt" and self.is_return:
+			return "Purchase Return"
+		elif self.doctype == "Delivery Note" and self.is_return:
+			return "Sales Return"
+		elif (self.doctype == "Sales Invoice" and self.is_return) or self.doctype == "Purchase Invoice":
+			return "Credit Note"
+		elif (self.doctype == "Purchase Invoice" and self.is_return) or self.doctype == "Sales Invoice":
+			return "Debit Note"
+		return self.doctype
+
 	def get_value_in_transaction_currency(self, account_currency, args, field):
-		if account_currency == self.get("currency"):
+		if account_currency == args.get("currency") or self.get("currency"):
 			return args.get(field + "_in_account_currency")
 		else:
-			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
+			return flt(args.get(field, 0) / (args.get("conversion_rate") or self.get("conversion_rate", 1)))
 
 	def validate_qty_is_not_zero(self):
 		if self.doctype == "Purchase Receipt":
@@ -1120,6 +1145,7 @@ class AccountsController(TransactionBase):
 		)
 
 		credit_or_debit = "credit" if self.doctype == "Purchase Invoice" else "debit"
+		against_type = "Supplier" if self.doctype == "Purchase Invoice" else "Customer"
 		against = self.supplier if self.doctype == "Purchase Invoice" else self.customer
 
 		if precision_loss:
@@ -1127,7 +1153,9 @@ class AccountsController(TransactionBase):
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
+						"against_type": against_type,
 						"against": against,
+						"against_link": against,
 						credit_or_debit: precision_loss,
 						"cost_center": round_off_cost_center
 						if self.use_company_roundoff_cost_center
@@ -1476,11 +1504,13 @@ class AccountsController(TransactionBase):
 		if self.doctype == "Purchase Invoice":
 			dr_or_cr = "credit"
 			rev_dr_cr = "debit"
+			against_type = "Supplier"
 			supplier_or_customer = self.supplier
 
 		else:
 			dr_or_cr = "debit"
 			rev_dr_cr = "credit"
+			against_type = "Customer"
 			supplier_or_customer = self.customer
 
 		if enable_discount_accounting:
@@ -1505,7 +1535,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": item.discount_account,
+								"against_type": against_type,
 								"against": supplier_or_customer,
+								"against_link": supplier_or_customer,
 								dr_or_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1523,7 +1555,9 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": income_or_expense_account,
+								"against_type": against_type,
 								"against": supplier_or_customer,
+								"against_link": supplier_or_customer,
 								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1546,7 +1580,9 @@ class AccountsController(TransactionBase):
 				self.get_gl_dict(
 					{
 						"account": self.additional_discount_account,
+						"against_type": against_type,
 						"against": supplier_or_customer,
+						"against_link": supplier_or_customer,
 						dr_or_cr: self.base_discount_amount,
 						"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 					},
@@ -2395,12 +2431,19 @@ def validate_taxes_and_charges(tax):
 
 def validate_account_head(idx, account, company, context=""):
 	account_company = frappe.get_cached_value("Account", account, "company")
+	is_group = frappe.get_cached_value("Account", account, "is_group")
 
 	if account_company != company:
 		frappe.throw(
 			_("Row {0}: {3} Account {1} does not belong to Company {2}").format(
 				idx, frappe.bold(account), frappe.bold(company), context
 			),
+			title=_("Invalid Account"),
+		)
+
+	if is_group:
+		frappe.throw(
+			_("Row {0}: Account {1} is a Group Account").format(idx, frappe.bold(account)),
 			title=_("Invalid Account"),
 		)
 

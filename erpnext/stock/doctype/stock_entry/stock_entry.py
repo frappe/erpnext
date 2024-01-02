@@ -25,7 +25,12 @@ from frappe.utils import (
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
-from erpnext.manufacturing.doctype.bom.bom import add_additional_cost, validate_bom_no
+from erpnext.manufacturing.doctype.bom.bom import (
+	add_additional_cost,
+	get_op_cost_from_sub_assemblies,
+	get_scrap_items_from_sub_assemblies,
+	validate_bom_no,
+)
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -1463,7 +1468,9 @@ class StockEntry(StockController):
 						self.get_gl_dict(
 							{
 								"account": account,
+								"against_type": "Account",
 								"against": d.expense_account,
+								"against_link": d.expense_account,
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 								"credit_in_account_currency": flt(amount["amount"]),
@@ -1477,7 +1484,9 @@ class StockEntry(StockController):
 						self.get_gl_dict(
 							{
 								"account": d.expense_account,
+								"against_type": "Account",
 								"against": account,
+								"against_link": account,
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 								"credit": -1
@@ -1904,11 +1913,22 @@ class StockEntry(StockController):
 	def get_bom_scrap_material(self, qty):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
-		# item dict = { item_code: {qty, description, stock_uom} }
-		item_dict = (
-			get_bom_items_as_dict(self.bom_no, self.company, qty=qty, fetch_exploded=0, fetch_scrap_items=1)
-			or {}
-		)
+		if (
+			frappe.db.get_single_value(
+				"Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies"
+			)
+			and self.work_order
+			and frappe.get_cached_value("Work Order", self.work_order, "use_multi_level_bom")
+		):
+			item_dict = get_scrap_items_from_sub_assemblies(self.bom_no, self.company, qty)
+		else:
+			# item dict = { item_code: {qty, description, stock_uom} }
+			item_dict = (
+				get_bom_items_as_dict(
+					self.bom_no, self.company, qty=qty, fetch_exploded=0, fetch_scrap_items=1
+				)
+				or {}
+			)
 
 		for item in item_dict.values():
 			item.from_warehouse = ""
@@ -2659,6 +2679,15 @@ def get_work_order_details(work_order, company):
 def get_operating_cost_per_unit(work_order=None, bom_no=None):
 	operating_cost_per_unit = 0
 	if work_order:
+		if (
+			bom_no
+			and frappe.db.get_single_value(
+				"Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies"
+			)
+			and frappe.get_cached_value("Work Order", work_order, "use_multi_level_bom")
+		):
+			return get_op_cost_from_sub_assemblies(bom_no)
+
 		if not bom_no:
 			bom_no = work_order.bom_no
 

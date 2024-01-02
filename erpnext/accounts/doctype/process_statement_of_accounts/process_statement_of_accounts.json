@@ -15,6 +15,7 @@
   "group_by",
   "cost_center",
   "territory",
+  "ignore_exchange_rate_revaluation_journals",
   "column_break_14",
   "to_date",
   "finance_book",
@@ -376,10 +377,16 @@
    "fieldname": "pdf_name",
    "fieldtype": "Data",
    "label": "PDF Name"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_exchange_rate_revaluation_journals",
+   "fieldtype": "Check",
+   "label": "Ignore Exchange Rate Revaluation Journals"
   }
  ],
  "links": [],
- "modified": "2023-08-28 12:59:53.071334",
+ "modified": "2023-12-18 12:20:08.965120",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

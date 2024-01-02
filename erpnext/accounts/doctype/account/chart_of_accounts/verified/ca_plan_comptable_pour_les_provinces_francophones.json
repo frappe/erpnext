@@ -33,7 +33,9 @@
                 }, 
                 "Stocks": {
                     "Mati\u00e8res premi\u00e8res": {}, 
-                    "Stock de produits fini": {}, 
+                    "Stock de produits fini": {
+                        "account_type": "Stock"
+                    }, 
                     "Stock exp\u00e9di\u00e9 non-factur\u00e9": {}, 
                     "Travaux en cours": {}, 
                     "account_type": "Stock"
@@ -395,9 +397,11 @@
         }, 
         "Produits": {
             "Revenus de ventes": {
-                " Escomptes de volume sur ventes": {}, 
+                "Escomptes de volume sur ventes": {}, 
                 "Autres produits d'exploitation": {}, 
-                "Ventes": {}, 
+                "Ventes": {
+                    "account_type": "Income Account"
+                }, 
                 "Ventes avec des provinces harmonis\u00e9es": {}, 
                 "Ventes avec des provinces non-harmonis\u00e9es": {}, 
                 "Ventes \u00e0 l'\u00e9tranger": {}
