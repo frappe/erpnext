@@ -1200,8 +1200,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let item = frappe.get_doc(cdt, cdn);
 		// item.pricing_rules = ''
 		frappe.run_serially([
-			() => this.remove_pricing_rule(item),
+			() => this.remove_pricing_rule_for_item(item),
 			() => this.conversion_factor(doc, cdt, cdn, true),
+			() => this.apply_price_list(item, true), //reapply price list before applying pricing rule
 			() => this.calculate_stock_uom_rate(doc, cdt, cdn),
 			() => this.apply_pricing_rule(item, true)
 		]);
@@ -1448,8 +1449,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	ignore_pricing_rule() {
 		if(this.frm.doc.ignore_pricing_rule) {
-			var me = this;
-			var item_list = [];
+			let me = this;
+			let item_list = [];
 
 			$.each(this.frm.doc["items"] || [], function(i, d) {
 				if (d.item_code) {
@@ -1486,6 +1487,34 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		} else {
 			this.apply_pricing_rule();
 		}
+	}
+
+	remove_pricing_rule_for_item(item) {
+		let me = this;
+		return this.frm.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rule_for_item",
+			args: {
+				pricing_rules: item.pricing_rules,
+				item_details: {
+					"doctype": item.doctype,
+					"name": item.name,
+					"item_code": item.item_code,
+					"pricing_rules": item.pricing_rules,
+					"parenttype": item.parenttype,
+					"parent": item.parent,
+					"price_list_rate": item.price_list_rate
+				},
+				item_code: item.item_code,
+				rate: item.price_list_rate,
+			},
+			callback: function(r) {
+				if (!r.exc && r.message) {
+					me.remove_pricing_rule(r.message);
+					me.calculate_taxes_and_totals();
+					if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
+				}
+			}
+		});
 	}
 
 	apply_pricing_rule(item, calculate_taxes_and_totals) {
@@ -1712,8 +1741,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.set_value("plc_conversion_rate", "");
 		}
 
-		var me = this;
-		var args = this._get_args(item);
+		let me = this;
+		let args = this._get_args(item);
 		if (!((args.items && args.items.length) || args.price_list)) {
 			return;
 		}
@@ -1755,7 +1784,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"discount_amount", "margin_rate_or_amount", "rate_with_margin"];
 
 		if(item.remove_free_item) {
-			var items = [];
+			let items = [];
 
 			me.frm.doc.items.forEach(d => {
 				if(d.item_code != item.remove_free_item || !d.is_free_item) {
