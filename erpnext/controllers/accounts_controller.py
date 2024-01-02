@@ -1550,16 +1550,18 @@ class AccountsController(TransactionBase):
 						)
 					)
 
-					args = frappe._dict(
-						{
-							"against": item.discount_account,
-							rev_dr_cr: flt(
-								discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
-							),
-							rev_dr_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
-						}
-					)
-					self.make_party_gl_entry(gl_entries, args)
+					if not self.is_internal_transfer():
+						args = frappe._dict(
+							{
+								"against": item.discount_account,
+								rev_dr_cr: flt(
+									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
+								),
+								rev_dr_cr
+								+ "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
+							}
+						)
+						self.make_party_gl_entry(gl_entries, args)
 
 					account_currency = get_account_currency(income_or_expense_account)
 					gl_entries.append(
@@ -1582,16 +1584,17 @@ class AccountsController(TransactionBase):
 						)
 					)
 
-					args = frappe._dict(
-						{
-							"against": income_or_expense_account,
-							dr_or_cr: flt(
-								discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
-							),
-							dr_or_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
-						}
-					)
-					self.make_party_gl_entry(gl_entries, args)
+					if not self.is_internal_transfer():
+						args = frappe._dict(
+							{
+								"against": income_or_expense_account,
+								dr_or_cr: flt(
+									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
+								),
+								dr_or_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
+							}
+						)
+						self.make_party_gl_entry(gl_entries, args)
 
 		if (
 			(enable_discount_accounting or self.get("is_cash_or_non_trade_discount"))
@@ -1611,13 +1614,14 @@ class AccountsController(TransactionBase):
 					item=self,
 				)
 			)
-			args = frappe._dict(
-				{
-					"against": self.additional_discount_account,
-					rev_dr_cr: self.base_discount_amount,
-				}
-			)
-			self.make_party_gl_entry(gl_entries, args)
+			if not self.is_internal_transfer():
+				args = frappe._dict(
+					{
+						"against": self.additional_discount_account,
+						rev_dr_cr: self.base_discount_amount,
+					}
+				)
+				self.make_party_gl_entry(gl_entries, args)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on):
 		from erpnext.controllers.status_updater import get_allowance_for
