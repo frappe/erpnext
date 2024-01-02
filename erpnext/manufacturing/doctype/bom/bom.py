@@ -744,6 +744,9 @@ class BOM(WebsiteGenerator):
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
+			if not d.is_stock_item and self.rm_cost_as_per == "Valuation Rate":
+				continue
+
 			old_rate = d.rate
 			if self.rm_cost_as_per != "Manual":
 				d.rate = self.get_rm_rate(
@@ -1017,6 +1020,8 @@ def get_bom_item_rate(args, bom_doc):
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
 		price_list_data = get_price_list_rate(bom_args, item_doc)
 		rate = price_list_data.price_list_rate
+	elif bom_doc.rm_cost_as_per == "Manual":
+		return
 
 	return flt(rate)
 
@@ -1381,7 +1386,7 @@ def get_bom_diff(bom1, bom2):
 
 			# check for deletions
 			for d in old_value:
-				if not d.get(identifier) in new_row_by_identifier:
+				if d.get(identifier) not in new_row_by_identifier:
 					out.removed.append([df.fieldname, d.as_dict()])
 
 	return out
@@ -1397,13 +1402,18 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 	fields = ["name", "item_name", "item_group", "description"]
 	fields.extend(
-		[field for field in searchfields if not field in ["name", "item_group", "description"]]
+		[field for field in searchfields if field not in ["name", "item_group", "description"]]
 	)
 
 	searchfields = searchfields + [
 		field
-		for field in [searchfield or "name", "item_code", "item_group", "item_name"]
-		if not field in searchfields
+		for field in [
+			searchfield or "name",
+			"item_code",
+			"item_group",
+			"item_name",
+		]
+		if field not in searchfields
 	]
 
 	query_filters = {"disabled": 0, "ifnull(end_of_life, '3099-12-31')": (">", today())}
@@ -1481,3 +1491,47 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 	)
 
 	return doc
+
+
+def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
+	# Get operating cost from sub-assemblies
+
+	bom_items = frappe.get_all(
+		"BOM Item", filters={"parent": bom_no, "docstatus": 1}, fields=["bom_no"], order_by="idx asc"
+	)
+
+	for row in bom_items:
+		if not row.bom_no:
+			continue
+
+		if cost := frappe.get_cached_value("BOM", row.bom_no, "operating_cost_per_bom_quantity"):
+			op_cost += flt(cost)
+			get_op_cost_from_sub_assemblies(row.bom_no, op_cost)
+
+	return op_cost
+
+
+def get_scrap_items_from_sub_assemblies(bom_no, company, qty, scrap_items=None):
+	if not scrap_items:
+		scrap_items = {}
+
+	bom_items = frappe.get_all(
+		"BOM Item",
+		filters={"parent": bom_no, "docstatus": 1},
+		fields=["bom_no", "qty"],
+		order_by="idx asc",
+	)
+
+	for row in bom_items:
+		if not row.bom_no:
+			continue
+
+		qty = flt(row.qty) * flt(qty)
+		items = get_bom_items_as_dict(
+			row.bom_no, company, qty=qty, fetch_exploded=0, fetch_scrap_items=1
+		)
+		scrap_items.update(items)
+
+		get_scrap_items_from_sub_assemblies(row.bom_no, company, qty, scrap_items)
+
+	return scrap_items

@@ -356,18 +356,20 @@ class Subscription(Document):
 		self,
 		from_date: Optional[Union[str, datetime.date]] = None,
 		to_date: Optional[Union[str, datetime.date]] = None,
+		posting_date: Optional[Union[str, datetime.date]] = None,
 	) -> Document:
 		"""
 		Creates a `Invoice` for the `Subscription`, updates `self.invoices` and
 		saves the `Subscription`.
 		Backwards compatibility
 		"""
-		return self.create_invoice(from_date=from_date, to_date=to_date)
+		return self.create_invoice(from_date=from_date, to_date=to_date, posting_date=posting_date)
 
 	def create_invoice(
 		self,
 		from_date: Optional[Union[str, datetime.date]] = None,
 		to_date: Optional[Union[str, datetime.date]] = None,
+		posting_date: Optional[Union[str, datetime.date]] = None,
 	) -> Document:
 		"""
 		Creates a `Invoice`, submits it and returns it
@@ -385,11 +387,13 @@ class Subscription(Document):
 		invoice = frappe.new_doc(self.invoice_document_type)
 		invoice.company = company
 		invoice.set_posting_time = 1
-		invoice.posting_date = (
-			self.current_invoice_start
-			if self.generate_invoice_at == "Beginning of the current subscription period"
-			else self.current_invoice_end
-		)
+
+		if self.generate_invoice_at == "Beginning of the current subscription period":
+			invoice.posting_date = self.current_invoice_start
+		elif self.generate_invoice_at == "Days before the current subscription period":
+			invoice.posting_date = posting_date or self.current_invoice_start
+		else:
+			invoice.posting_date = self.current_invoice_end
 
 		invoice.cost_center = self.cost_center
 
@@ -413,6 +417,7 @@ class Subscription(Document):
 		# Subscription is better suited for service items. I won't update `update_stock`
 		# for that reason
 		items_list = self.get_items_from_plans(self.plans, is_prorate())
+
 		for item in items_list:
 			item["cost_center"] = self.cost_center
 			invoice.append("items", item)
@@ -556,7 +561,7 @@ class Subscription(Document):
 		if not self.is_current_invoice_generated(
 			self.current_invoice_start, self.current_invoice_end
 		) and self.can_generate_new_invoice(posting_date):
-			self.generate_invoice()
+			self.generate_invoice(posting_date=posting_date)
 			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
 		if self.cancel_at_period_end and (
@@ -676,7 +681,7 @@ class Subscription(Document):
 		to_generate_invoice = (
 			True
 			if self.status == "Active"
-			and not self.generate_invoice_at == "Beginning of the current subscription period"
+			and self.generate_invoice_at != "Beginning of the current subscription period"
 			else False
 		)
 		self.status = "Cancelled"
@@ -694,7 +699,7 @@ class Subscription(Document):
 		subscription and the `Subscription` will lose all the history of generated invoices
 		it has.
 		"""
-		if not self.status == "Cancelled":
+		if self.status != "Cancelled":
 			frappe.throw(_("You cannot restart a Subscription that is not cancelled."), InvoiceNotCancelled)
 
 		self.status = "Active"

@@ -440,7 +440,7 @@ def reconcile(doc: None | str = None) -> None:
 					# Update the parent doc about the exception
 					frappe.db.rollback()
 
-					traceback = frappe.get_traceback()
+					traceback = frappe.get_traceback(with_context=True)
 					if traceback:
 						message = "Traceback: <br>" + traceback
 						frappe.db.set_value("Process Payment Reconciliation Log", log, "error_log", message)
@@ -475,7 +475,7 @@ def reconcile(doc: None | str = None) -> None:
 						frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Completed")
 					else:
 
-						if not (frappe.db.get_value("Process Payment Reconciliation", doc, "status") == "Paused"):
+						if frappe.db.get_value("Process Payment Reconciliation", doc, "status") != "Paused":
 							# trigger next batch in job
 							# generate reconcile job name
 							allocation = get_next_allocation(log)

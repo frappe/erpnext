@@ -380,6 +380,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	scan_barcode() {
+		frappe.flags.dialog_set = false;
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
 		barcode_scanner.process_scan();
 	}
@@ -714,6 +715,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	on_submit() {
+		if (in_list(["Purchase Invoice", "Sales Invoice"], this.frm.doc.doctype)
+			&& !this.frm.doc.update_stock) {
+			return;
+		}
+
 		this.refresh_serial_batch_bundle_field();
 	}
 

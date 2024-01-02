@@ -25,7 +25,7 @@ def update_itemised_tax_data(doc):
 		# dont even bother checking in item tax template as it contains both input and output accounts - double the tax rate
 		item_code = row.item_code or row.item_name
 		if itemised_tax.get(item_code):
-			for tax in itemised_tax.get(row.item_code).values():
+			for tax in itemised_tax.get(item_code).values():
 				_tax_rate = flt(tax.get("tax_rate", 0), row.precision("tax_rate"))
 				tax_amount += flt((row.net_amount * _tax_rate) / 100, row.precision("tax_amount"))
 				tax_rate += _tax_rate
@@ -153,7 +153,9 @@ def make_gl_entry(tax, gl_entries, doc, tax_accounts):
 					"account": tax.account_head,
 					"cost_center": tax.cost_center,
 					"posting_date": doc.posting_date,
+					"against_type": "Supplier",
 					"against": doc.supplier,
+					"against_link": doc.supplier,
 					dr_or_cr: tax.base_tax_amount_after_discount_amount,
 					dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount
 					if account_currency == doc.company_currency

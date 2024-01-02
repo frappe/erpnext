@@ -66,11 +66,11 @@ def execute(filters=None):
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)
-	report_summary = get_report_summary(
+	report_summary, primitive_summary = get_report_summary(
 		period_list, filters.periodicity, income, expense, net_profit_loss, currency, filters
 	)
 
-	return columns, data, None, chart, report_summary
+	return columns, data, None, chart, report_summary, primitive_summary
 
 
 def get_report_summary(
@@ -82,14 +82,25 @@ def get_report_summary(
 	if filters.get("accumulated_in_group_company"):
 		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
 
-	for period in period_list:
-		key = period if consolidated else period.key
+	if filters.accumulated_values:
+		# when 'accumulated_values' is enabled, periods have running balance.
+		# so, last period will have the net amount.
+		key = period_list[-1].key
 		if income:
-			net_income += income[-2].get(key)
+			net_income = income[-2].get(key)
 		if expense:
-			net_expense += expense[-2].get(key)
+			net_expense = expense[-2].get(key)
 		if net_profit_loss:
-			net_profit += net_profit_loss.get(key)
+			net_profit = net_profit_loss.get(key)
+	else:
+		for period in period_list:
+			key = period if consolidated else period.key
+			if income:
+				net_income += income[-2].get(key)
+			if expense:
+				net_expense += expense[-2].get(key)
+			if net_profit_loss:
+				net_profit += net_profit_loss.get(key)
 
 	if len(period_list) == 1 and periodicity == "Yearly":
 		profit_label = _("Profit This Year")
@@ -112,7 +123,7 @@ def get_report_summary(
 			"datatype": "Currency",
 			"currency": currency,
 		},
-	]
+	], net_profit
 
 
 def get_net_profit_loss(income, expense, period_list, company, currency=None, consolidated=False):

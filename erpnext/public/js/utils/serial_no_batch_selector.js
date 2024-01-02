@@ -31,19 +31,40 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			secondary_action: () => this.edit_full_form(),
 		});
 
-		this.dialog.set_value("qty", this.item.qty).then(() => {
-			if (this.item.serial_no) {
-				this.dialog.set_value("scan_serial_no", this.item.serial_no);
-				frappe.model.set_value(this.item.doctype, this.item.name, 'serial_no', '');
-			} else if (this.item.batch_no) {
-				this.dialog.set_value("scan_batch_no", this.item.batch_no);
-				frappe.model.set_value(this.item.doctype, this.item.name, 'batch_no', '');
-			}
-		});
-
 		this.dialog.show();
 		this.$scan_btn = this.dialog.$wrapper.find(".link-btn");
 		this.$scan_btn.css("display", "inline");
+
+		let qty = this.item.stock_qty || this.item.transfer_qty || this.item.qty;
+
+		if (this.item?.is_rejected) {
+			qty = this.item.rejected_qty;
+		}
+
+		qty = Math.abs(qty);
+		if (qty > 0) {
+			this.dialog.set_value("qty", qty).then(() => {
+				if (this.item.serial_no && !this.item.serial_and_batch_bundle) {
+					let serial_nos = this.item.serial_no.split('\n');
+					if (serial_nos.length > 1) {
+						serial_nos.forEach(serial_no => {
+							this.dialog.fields_dict.entries.df.data.push({
+								serial_no: serial_no,
+								batch_no: this.item.batch_no
+							});
+						});
+					} else {
+						this.dialog.set_value("scan_serial_no", this.item.serial_no);
+					}
+					frappe.model.set_value(this.item.doctype, this.item.name, 'serial_no', '');
+				} else if (this.item.batch_no && !this.item.serial_and_batch_bundle) {
+					this.dialog.set_value("scan_batch_no", this.item.batch_no);
+					frappe.model.set_value(this.item.doctype, this.item.name, 'batch_no', '');
+				}
+
+				this.dialog.fields_dict.entries.grid.refresh();
+			});
+		}
 	}
 
 	get_serial_no_filters() {
@@ -316,15 +337,17 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	get_auto_data() {
+		let { qty, based_on } = this.dialog.get_values();
+
 		if (this.item.serial_and_batch_bundle || this.item.rejected_serial_and_batch_bundle) {
-			return;
+			if (qty === this.qty) {
+				return;
+			}
 		}
 
 		if (this.item.serial_no || this.item.batch_no) {
 			return;
 		}
-
-		let { qty, based_on } = this.dialog.get_values();
 
 		if (!based_on) {
 			based_on = 'FIFO';
@@ -463,13 +486,13 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	render_data() {
-		if (!this.frm.is_new() && this.bundle) {
+		if (this.bundle) {
 			frappe.call({
 				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers',
 				args: {
 					item_code: this.item.item_code,
 					name: this.bundle,
-					voucher_no: this.item.parent,
+					voucher_no: !this.frm.is_new() ? this.item.parent : "",
 				}
 			}).then(r => {
 				if (r.message) {
@@ -481,6 +504,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 
 	set_data(data) {
 		data.forEach(d => {
+			d.qty = Math.abs(d.qty);
 			this.dialog.fields_dict.entries.df.data.push(d);
 		});
 

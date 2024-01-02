@@ -1414,9 +1414,10 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_serialized_cancel(self):
 		si = self.test_serialized()
-		si.cancel()
-
+		si.reload()
 		serial_nos = get_serial_nos_from_bundle(si.get("items")[0].serial_and_batch_bundle)
+
+		si.cancel()
 
 		self.assertEqual(
 			frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC"
@@ -2792,6 +2793,12 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
+
+		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
+			update_repost_settings,
+		)
+
+		update_repost_settings()
 
 		additional_discount_account = create_account(
 			account_name="Discount Account",
