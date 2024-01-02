@@ -1550,6 +1550,17 @@ class AccountsController(TransactionBase):
 						)
 					)
 
+					args = frappe._dict(
+						{
+							"against": item.discount_account,
+							rev_dr_cr: flt(
+								discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
+							),
+							rev_dr_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
+						}
+					)
+					self.make_party_gl_entry(gl_entries, args)
+
 					account_currency = get_account_currency(income_or_expense_account)
 					gl_entries.append(
 						self.get_gl_dict(
@@ -1571,6 +1582,17 @@ class AccountsController(TransactionBase):
 						)
 					)
 
+					args = frappe._dict(
+						{
+							"against": income_or_expense_account,
+							dr_or_cr: flt(
+								discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
+							),
+							dr_or_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
+						}
+					)
+					self.make_party_gl_entry(gl_entries, args)
+
 		if (
 			(enable_discount_accounting or self.get("is_cash_or_non_trade_discount"))
 			and self.get("additional_discount_account")
@@ -1589,6 +1611,13 @@ class AccountsController(TransactionBase):
 					item=self,
 				)
 			)
+			args = frappe._dict(
+				{
+					"against": self.additional_discount_account,
+					rev_dr_cr: self.base_discount_amount,
+				}
+			)
+			self.make_party_gl_entry(gl_entries, args)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on):
 		from erpnext.controllers.status_updater import get_allowance_for
@@ -2343,6 +2372,40 @@ class AccountsController(TransactionBase):
 			self.db_set("repost_required", 0)
 		else:
 			frappe.throw(_("No updates pending for reposting"))
+
+	def make_party_gl_entry(self, gl_entries, args):
+		if self.doctype == "Sales Invoice":
+			account = self.debit_to
+			party_type = "Customer"
+			party = self.customer
+		elif self.doctype == "Purchase Invoice":
+			account = self.credit_to
+			party_type = "Supplier"
+			party = self.supplier
+
+		gl_entries.append(
+			self.get_gl_dict(
+				{
+					"account": account,
+					"party_type": party_type,
+					"party": party,
+					"due_date": self.due_date,
+					"against_type": "Account",
+					"against": args.against,
+					"against_link": args.against,
+					"debit": args.get("debit", 0),
+					"debit_in_account_currency": args.get("debit_in_account_currency", 0),
+					"credit": args.get("credit", 0),
+					"credit_in_account_currency": args.get("credit_in_account_currency", 0),
+					"against_voucher": self.name,
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center,
+					"project": self.project,
+				},
+				self.party_account_currency,
+				item=self,
+			)
+		)
 
 
 @frappe.whitelist()
