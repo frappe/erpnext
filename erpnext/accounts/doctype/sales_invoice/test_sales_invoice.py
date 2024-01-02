@@ -446,35 +446,40 @@ class TestSalesInvoice(FrappeTestCase):
 		gl_entries = frappe.db.sql(
 			"""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc""",
+			order by account asc, debit desc, credit desc""",
 			si.name,
 			as_dict=1,
 		)
 
 		self.assertTrue(gl_entries)
 
-		expected_values = dict(
-			(d[0], d)
-			for d in [
-				[si.debit_to, 1500, 0.0],
-				[test_records[3]["items"][0]["income_account"], 0.0, 1163.45],
-				[test_records[3]["taxes"][0]["account_head"], 0.0, 130.31],
-				[test_records[3]["taxes"][1]["account_head"], 0.0, 2.61],
-				[test_records[3]["taxes"][2]["account_head"], 0.0, 1.30],
-				[test_records[3]["taxes"][3]["account_head"], 0.0, 25.95],
-				[test_records[3]["taxes"][4]["account_head"], 0.0, 145.43],
-				[test_records[3]["taxes"][5]["account_head"], 0.0, 116.34],
-				[test_records[3]["taxes"][6]["account_head"], 0.0, 100],
-				[test_records[3]["taxes"][7]["account_head"], 168.54, 0.0],
-				["_Test Account Service Tax - _TC", 16.85, 0.0],
-				["Round Off - _TC", 0.01, 0.0],
-			]
-		)
+		expected_values = [
+			[test_records[3]["taxes"][3]["account_head"], 0.0, 25.95],
+			[test_records[3]["taxes"][5]["account_head"], 0.0, 116.34],
+			[test_records[3]["taxes"][7]["account_head"], 168.54, 0.0],
+			[test_records[3]["taxes"][1]["account_head"], 0.0, 2.61],
+			[test_records[3]["taxes"][0]["account_head"], 0.0, 130.31],
+			[test_records[3]["taxes"][2]["account_head"], 0.0, 1.30],
+			["_Test Account Service Tax - _TC", 16.85, 0.0],
+			[test_records[3]["taxes"][6]["account_head"], 0.0, 100],
+			[test_records[3]["taxes"][4]["account_head"], 0.0, 145.43],
+			[si.debit_to, 1163.45, 0.0],
+			[si.debit_to, 145.43, 0.0],
+			[si.debit_to, 130.31, 0.0],
+			[si.debit_to, 116.34, 0.0],
+			[si.debit_to, 100.0, 0.0],
+			[si.debit_to, 25.95, 0.0],
+			[si.debit_to, 2.61, 0.0],
+			[si.debit_to, 1.3, 0.0],
+			[si.debit_to, 0.0, 168.54],
+			[si.debit_to, 0.0, 16.85],
+			[test_records[3]["items"][0]["income_account"], 0.0, 1163.45],
+		]
 
-		for gle in gl_entries:
-			self.assertEqual(expected_values[gle.account][0], gle.account)
-			self.assertEqual(expected_values[gle.account][1], gle.debit)
-			self.assertEqual(expected_values[gle.account][2], gle.credit)
+		for i in range(len(gl_entries)):
+			self.assertEqual(expected_values[i][0], gl_entries[i].account)
+			self.assertEqual(expected_values[i][1], gl_entries[i].debit)
+			self.assertEqual(expected_values[i][2], gl_entries[i].credit)
 
 		# cancel
 		si.cancel()
@@ -2831,9 +2836,11 @@ class TestSalesInvoice(FrappeTestCase):
 
 		expected_gle = [
 			["_Test Account VAT - _TC", 0.0, 10.0, nowdate()],
-			["Debtors - _TC", 88, 0.0, nowdate()],
+			["Debtors - _TC", 10.0, 0.0, nowdate()],
+			["Debtors - _TC", 80.0, 0.0, nowdate()],
+			["Debtors - _TC", 0.0, 22.0, nowdate()],
 			["Discount Account - _TC", 22.0, 0.0, nowdate()],
-			["Sales - _TC", 0.0, 100.0, nowdate()],
+			["Sales - _TC", 0.0, 80.0, nowdate()],
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
@@ -2853,8 +2860,10 @@ class TestSalesInvoice(FrappeTestCase):
 
 		expected_gle = [
 			["_Test Account Sales - _TC", 22.0, 0.0, nowdate()],
-			["Debtors - _TC", 88, 0.0, nowdate()],
-			["Service - _TC", 0.0, 100.0, nowdate()],
+			["Debtors - _TC", 10.0, 0.0, nowdate()],
+			["Debtors - _TC", 80.0, 0.0, nowdate()],
+			["Debtors - _TC", 0.0, 22.0, nowdate()],
+			["Service - _TC", 0.0, 80.0, nowdate()],
 			["TDS Payable - _TC", 0.0, 10.0, nowdate()],
 		]
 
