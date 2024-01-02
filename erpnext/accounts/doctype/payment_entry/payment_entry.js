@@ -629,6 +629,20 @@ frappe.ui.form.on('Payment Entry', {
 			frm.events.set_unallocated_amount(frm);
 	},
 
+	get_dimensions: function(frm) {
+		let result = [];
+		frappe.call({
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			async: false,
+			callback: function(r) {
+				if(!r.exc) {
+					result = r.message[0].map(elem => elem.document_type);
+				}
+			}
+		});
+		return result;
+	},
+
 	get_outstanding_invoices_or_orders: function(frm, get_outstanding_invoices, get_orders_to_be_billed) {
 		const today = frappe.datetime.get_today();
 		const fields = [
