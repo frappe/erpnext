@@ -85,6 +85,7 @@ class SerialandBatchBundle(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.reset_serial_batch_bundle()
 		self.set_batch_no()
 		self.validate_serial_and_batch_no()
 		self.validate_duplicate_serial_and_batch_no()
@@ -99,6 +100,15 @@ class SerialandBatchBundle(Document):
 		self.set_warehouse()
 		self.set_incoming_rate()
 		self.calculate_qty_and_amount()
+
+	def reset_serial_batch_bundle(self):
+		if self.is_new() and self.amended_from:
+			for field in ["is_cancelled", "is_rejected"]:
+				if self.get(field):
+					self.set(field, 0)
+
+			if self.voucher_detail_no:
+				self.voucher_detail_no = None
 
 	def set_batch_no(self):
 		if self.has_serial_no and self.has_batch_no:
@@ -914,7 +924,11 @@ def upload_csv_file(item_code, file_path):
 
 
 def get_serial_batch_from_csv(item_code, file_path):
-	file_path = frappe.get_site_path() + file_path
+	if "private" in file_path:
+		file_path = frappe.get_site_path() + file_path
+	else:
+		file_path = frappe.get_site_path() + "/public" + file_path
+
 	serial_nos = []
 	batch_nos = []
 
