@@ -415,7 +415,7 @@ def reconcile(doc: None | str = None) -> None:
 					# Update the parent doc about the exception
 					frappe.db.rollback()
 
-					traceback = frappe.get_traceback()
+					traceback = frappe.get_traceback(with_context=True)
 					if traceback:
 						message = "Traceback: <br>" + traceback
 						frappe.db.set_value("Process Payment Reconciliation Log", log, "error_log", message)
