@@ -920,11 +920,9 @@ class TestWorkOrder(FrappeTestCase):
 			"Test RM Item 2 for Scrap Item Test",
 		]
 
-		from_time = add_days(now(), -1)
 		job_cards = frappe.get_all(
 			"Job Card Time Log",
 			fields=["distinct parent as name", "docstatus"],
-			filters={"from_time": (">", from_time)},
 			order_by="creation asc",
 		)
 

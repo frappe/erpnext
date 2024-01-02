@@ -242,6 +242,12 @@ class SerialBatchBundle:
 		if self.item_details.has_batch_no == 1:
 			self.update_batch_qty()
 
+		if self.sle.is_cancelled and self.sle.serial_and_batch_bundle:
+			self.cancel_serial_and_batch_bundle()
+
+	def cancel_serial_and_batch_bundle(self):
+		frappe.get_cached_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle).cancel()
+
 	def submit_serial_and_batch_bundle(self):
 		doc = frappe.get_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle)
 		self.validate_actual_qty(doc)
