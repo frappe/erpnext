@@ -1145,6 +1145,7 @@ class AccountsController(TransactionBase):
 		)
 
 		credit_or_debit = "credit" if self.doctype == "Purchase Invoice" else "debit"
+		rev_credit_or_debit = "debit" if self.doctype == "Purchase Invoice" else "credit"
 		against_type = "Supplier" if self.doctype == "Purchase Invoice" else "Customer"
 		against = self.supplier if self.doctype == "Purchase Invoice" else self.customer
 
@@ -1164,6 +1165,13 @@ class AccountsController(TransactionBase):
 					}
 				)
 			)
+			args = frappe._dict(
+				{
+					"against": round_off_account,
+					rev_credit_or_debit: precision_loss,
+				}
+			)
+			self.make_party_gl_entry(gl_entries, args)
 
 	def gain_loss_journal_already_booked(
 		self,
