@@ -705,7 +705,7 @@ def get_pos_reserved_qty(item_code, warehouse):
 	reserved_qty = (
 		frappe.qb.from_(p_inv)
 		.from_(p_item)
-		.select(Sum(p_item.qty).as_("qty"))
+		.select(Sum(p_item.stock_qty).as_("stock_qty"))
 		.where(
 			(p_inv.name == p_item.parent)
 			& (IfNull(p_inv.consolidated_invoice, "") == "")
@@ -716,7 +716,7 @@ def get_pos_reserved_qty(item_code, warehouse):
 		)
 	).run(as_dict=True)
 
-	return reserved_qty[0].qty or 0 if reserved_qty else 0
+	return flt(reserved_qty[0].stock_qty) if reserved_qty else 0
 
 
 @frappe.whitelist()

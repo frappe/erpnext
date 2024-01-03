@@ -1591,6 +1591,10 @@ def make_bom(**args):
 		}
 	)
 
+	if args.operating_cost_per_bom_quantity:
+		bom.fg_based_operating_cost = 1
+		bom.operating_cost_per_bom_quantity = args.operating_cost_per_bom_quantity
+
 	for item in args.raw_materials:
 		item_doc = frappe.get_doc("Item", item)
 		bom.append(
