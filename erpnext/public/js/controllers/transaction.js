@@ -1980,12 +1980,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	setup_item_selector() {
-		// TODO: remove item selector
-
-		return;
-		// if(!this.item_selector) {
-		// 	this.item_selector = new erpnext.ItemSelector({frm: this.frm});
-		// }
+		if (!this.item_selector) {
+			this.item_selector = new erpnext.ItemCatalog({ frm: this.frm });
+		}
 	}
 
 	get_advances() {

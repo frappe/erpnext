@@ -9,6 +9,7 @@ import "./controllers/taxes_and_totals";
 import "./controllers/transaction";
 import "./templates/item_selector.html";
 import "./utils/item_selector";
+import "./utils/item_catalog";
 import "./help_links";
 import "./templates/item_quick_entry.html";
 import "./utils/contact_address_quick_entry";
