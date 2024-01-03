@@ -24,6 +24,7 @@ from frappe.utils import (
 
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 from erpnext.manufacturing.doctype.bom.bom import (
 	add_additional_cost,
@@ -208,7 +209,6 @@ class StockEntry(StockController):
 		self.validate_bom()
 		self.set_process_loss_qty()
 		self.validate_purchase_order()
-		self.validate_subcontracting_order()
 
 		if self.purpose in ("Manufacture", "Repack"):
 			self.mark_finished_and_scrap_items()
@@ -274,6 +274,7 @@ class StockEntry(StockController):
 		return False
 
 	def on_submit(self):
+		self.validate_closed_subcontracting_order()
 		self.update_stock_ledger()
 		self.update_work_order()
 		self.validate_subcontract_order()
@@ -294,6 +295,7 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status("Completed")
 
 	def on_cancel(self):
+		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
 		self.update_subcontracting_order_status()
 
@@ -1197,19 +1199,9 @@ class StockEntry(StockController):
 					)
 				)
 
-	def validate_subcontracting_order(self):
-		if self.get("subcontracting_order") and self.purpose in [
-			"Send to Subcontractor",
-			"Material Transfer",
-		]:
-			sco_status = frappe.db.get_value("Subcontracting Order", self.subcontracting_order, "status")
-
-			if sco_status == "Closed":
-				frappe.throw(
-					_("Cannot create Stock Entry against a closed Subcontracting Order {0}.").format(
-						self.subcontracting_order
-					)
-				)
+	def validate_closed_subcontracting_order(self):
+		if self.get("subcontracting_order"):
+			check_on_hold_or_closed_status("Subcontracting Order", self.subcontracting_order)
 
 	def mark_finished_and_scrap_items(self):
 		if self.purpose != "Repack" and any(
