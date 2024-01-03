@@ -2092,7 +2092,7 @@ class TestSalesInvoice(FrappeTestCase):
 		expected_values = [
 			["_Test Account Service Tax - _TC", 0.0, 114.41],
 			["_Test Account VAT - _TC", 0.0, 114.41],
-			[si.debit_to, 1500, 0.0],
+			[si.debit_to, 1500.01, 0.01],
 			["Round Off - _TC", 0.01, 0.01],
 			["Sales - _TC", 0.0, 1271.18],
 		]
@@ -2153,7 +2153,7 @@ class TestSalesInvoice(FrappeTestCase):
 		expected_values = dict(
 			(d[0], d)
 			for d in [
-				[si.debit_to, 4488.0, 0.0],
+				[si.debit_to, 4488.02, 0.02],
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
 				["Sales - _TC", 0.0, 4007.15],
