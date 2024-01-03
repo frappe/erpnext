@@ -54,6 +54,7 @@
   {
    "fieldname": "item_name",
    "fieldtype": "Data",
+   "fetch_from": "item_code.item_name",
    "in_global_search": 1,
    "label": "Item Name",
    "no_copy": 1,
