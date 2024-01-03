@@ -37,7 +37,9 @@
   "col_break3",
   "is_advance",
   "user_remark",
-  "against_account"
+  "against_type",
+  "against_account",
+  "against_account_link"
  ],
  "fields": [
   {
@@ -250,14 +252,21 @@
    "print_hide": 1
   },
   {
-   "fieldname": "against_account",
-   "fieldtype": "Text",
-   "hidden": 1,
+    "fieldname": "against_account",
+    "fieldtype": "Text",
+    "hidden": 1,
+    "label": "Against Account",
+    "no_copy": 1,
+    "oldfieldname": "against_account",
+    "oldfieldtype": "Text",
+    "print_hide": 1
+  },
+  {
+   "fieldname": "against_account_link",
+   "fieldtype": "Dynamic Link",
    "label": "Against Account",
    "no_copy": 1,
-   "oldfieldname": "against_account",
-   "oldfieldtype": "Text",
-   "print_hide": 1
+   "options": "against_type"
   },
   {
    "collapsible": 1,
@@ -280,14 +289,19 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Reference Detail No",
-   "no_copy": 1,
-   "search_index": 1
+   "no_copy": 1
+  },
+  {
+   "fieldname": "against_type",
+   "fieldtype": "Link",
+   "label": "Against Type",
+   "options": "DocType"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-23 11:44:25.841187",
+ "modified": "2023-12-02 23:21:22.205409",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

@@ -274,7 +274,7 @@ class Company(NestedSet):
 						"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr)
 						if not wh_detail["is_group"]
 						else "",
-						"warehouse_type": wh_detail["warehouse_type"] if "warehouse_type" in wh_detail else None,
+						"warehouse_type": wh_detail.get("warehouse_type"),
 					}
 				)
 				warehouse.flags.ignore_permissions = True

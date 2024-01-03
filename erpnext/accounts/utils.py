@@ -642,6 +642,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	new_row.set("reference_name", d["against_voucher"])
 
 	new_row.against_account = cstr(jv_detail.against_account)
+	new_row.against_account_link = cstr(jv_detail.against_account)
 	new_row.is_advance = cstr(jv_detail.is_advance)
 	new_row.docstatus = 1
 
@@ -662,8 +663,10 @@ def update_reference_in_payment_entry(
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
-		"exchange_rate": d.exchange_rate if d.exchange_gain_loss else payment_entry.get_exchange_rate(),
-		"exchange_gain_loss": d.exchange_gain_loss,
+		"exchange_rate": d.exchange_rate
+		if d.difference_amount is not None
+		else payment_entry.get_exchange_rate(),
+		"exchange_gain_loss": d.difference_amount,
 		"account": d.account,
 	}
 
@@ -1062,11 +1065,11 @@ def get_outstanding_invoices(
 			if (
 				min_outstanding
 				and max_outstanding
-				and not (outstanding_amount >= min_outstanding and outstanding_amount <= max_outstanding)
+				and (outstanding_amount < min_outstanding or outstanding_amount > max_outstanding)
 			):
 				continue
 
-			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
+			if d.voucher_type != "Purchase Invoice" or d.voucher_no not in held_invoices:
 				outstanding_invoices.append(
 					frappe._dict(
 						{
@@ -1113,12 +1116,16 @@ def get_companies():
 
 
 @frappe.whitelist()
-def get_children(doctype, parent, company, is_root=False):
+def get_children(doctype, parent, company, is_root=False, include_disabled=False):
+	if isinstance(include_disabled, str):
+		include_disabled = frappe.json.loads(include_disabled)
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
 	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
 	fields = ["name as value", "is_group as expandable"]
 	filters = [["docstatus", "<", 2]]
+	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
+		filters.append(["disabled", "=", False])
 
 	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), "=", "" if is_root else parent])
 

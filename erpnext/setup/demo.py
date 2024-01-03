@@ -112,9 +112,9 @@ def create_transaction(doctype, company, start_date):
 	warehouse = get_warehouse(company)
 
 	if document_type == "Purchase Order":
-		posting_date = get_random_date(start_date, 1, 30)
+		posting_date = get_random_date(start_date, 1, 25)
 	else:
-		posting_date = get_random_date(start_date, 31, 364)
+		posting_date = get_random_date(start_date, 31, 350)
 
 	doctype.update(
 		{

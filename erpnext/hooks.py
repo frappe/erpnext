@@ -37,6 +37,7 @@ welcome_email = "erpnext.setup.utils.welcome_email"
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
+setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_demo"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
 before_install = [
@@ -255,11 +256,6 @@ standard_portal_menu_items = [
 		"role": "Customer",
 	},
 	{"title": "Appointment Booking", "route": "/book_appointment"},
-]
-
-default_roles = [
-	{"role": "Customer", "doctype": "Contact", "email_field": "email_id"},
-	{"role": "Supplier", "doctype": "Contact", "email_field": "email_id"},
 ]
 
 sounds = [
@@ -637,6 +633,7 @@ additional_timeline_content = {
 
 extend_bootinfo = [
 	"erpnext.support.doctype.service_level_agreement.service_level_agreement.add_sla_doctypes",
+	"erpnext.startup.boot.bootinfo",
 ]
 
 

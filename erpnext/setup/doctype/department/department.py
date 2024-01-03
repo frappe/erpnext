@@ -44,7 +44,7 @@ class Department(NestedSet):
 
 	def before_rename(self, old, new, merge=False):
 		# renaming consistency with abbreviation
-		if not frappe.get_cached_value("Company", self.company, "abbr") in new:
+		if frappe.get_cached_value("Company", self.company, "abbr") not in new:
 			new = get_abbreviated_name(new, self.company)
 
 		return new
@@ -69,7 +69,9 @@ def get_abbreviated_name(name, company):
 
 
 @frappe.whitelist()
-def get_children(doctype, parent=None, company=None, is_root=False):
+def get_children(doctype, parent=None, company=None, is_root=False, include_disabled=False):
+	if isinstance(include_disabled, str):
+		include_disabled = frappe.json.loads(include_disabled)
 	fields = ["name as value", "is_group as expandable"]
 	filters = {}
 
@@ -80,6 +82,9 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 		filters["company"] = company
 	else:
 		filters["parent_department"] = parent
+
+	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
+		filters["disabled"] = False
 
 	return frappe.get_all("Department", fields=fields, filters=filters, order_by="name")
 

@@ -162,7 +162,9 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": warehouse_account[sle.warehouse]["account"],
+									"against_type": "Account",
 									"against": expense_account,
+									"against_link": expense_account,
 									"cost_center": item_row.cost_center,
 									"project": item_row.project or self.get("project"),
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
@@ -178,7 +180,9 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": expense_account,
+									"against_type": "Account",
 									"against": warehouse_account[sle.warehouse]["account"],
+									"against_link": warehouse_account[sle.warehouse]["account"],
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 									"debit": -1 * flt(sle.stock_value_difference, precision),
@@ -210,7 +214,9 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": expense_account,
+							"against_type": "Account",
 							"against": warehouse_asset_account,
+							"against_link": warehouse_asset_account,
 							"cost_center": item_row.cost_center,
 							"project": item_row.project or self.get("project"),
 							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
@@ -226,7 +232,9 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": warehouse_asset_account,
+							"against_type": "Account",
 							"against": expense_account,
+							"against_link": expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
 							"credit": sle_rounding_diff,
@@ -455,6 +463,12 @@ class StockController(AccountsController):
 		sl_dict.update(args)
 		self.update_inventory_dimensions(d, sl_dict)
 
+		if self.docstatus == 2:
+			# To handle denormalized serial no records, will br deprecated in v16
+			for field in ["serial_no", "batch_no"]:
+				if d.get(field):
+					sl_dict[field] = d.get(field)
+
 		return sl_dict
 
 	def update_inventory_dimensions(self, row, sl_dict) -> None:
@@ -642,7 +656,7 @@ class StockController(AccountsController):
 		)
 		qa_docstatus = frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus")
 
-		if not qa_docstatus == 1:
+		if qa_docstatus != 1:
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = (
 				f"Row #{row.idx}: Quality Inspection {link} is not submitted for the item: {row.item_code}"
@@ -826,6 +840,7 @@ class StockController(AccountsController):
 		credit,
 		remarks,
 		against_account,
+		against_type="Account",
 		debit_in_account_currency=None,
 		credit_in_account_currency=None,
 		account_currency=None,
@@ -840,7 +855,9 @@ class StockController(AccountsController):
 			"cost_center": cost_center,
 			"debit": debit,
 			"credit": credit,
+			"against_type": against_type,
 			"against": against_account,
+			"against_link": against_account,
 			"remarks": remarks,
 		}
 

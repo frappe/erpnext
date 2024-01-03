@@ -170,7 +170,7 @@ def set_total(node, value, complete_list, totals):
 	totals[node["account"]] += value
 
 	parent = node["parent_account"]
-	if not parent == "":
+	if parent != "":
 		return set_total(
 			next(item for item in complete_list if item["account"] == parent), value, complete_list, totals
 		)
