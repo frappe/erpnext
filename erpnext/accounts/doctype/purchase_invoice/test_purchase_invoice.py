@@ -1998,7 +1998,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(return_pi.docstatus, 1)
 
 
-def get_pi_gl_entries_with_consolidated_values(voucher_no):
+def get_pi_gl_entries_with_consolidated_values(voucher_no, as_dict=True):
 	gle = frappe.qb.DocType("GL Entry")
 	return (
 		frappe.qb.from_(gle)
@@ -2006,7 +2006,7 @@ def get_pi_gl_entries_with_consolidated_values(voucher_no):
 		.where((gle.voucher_type == "Purchase Invoice") & (gle.voucher_no == voucher_no))
 		.groupby(gle.account)
 		.orderby(gle.account)
-	).run(as_dict=1)
+	).run(as_dict=as_dict)
 
 
 def set_advance_flag(company, flag, default_account):

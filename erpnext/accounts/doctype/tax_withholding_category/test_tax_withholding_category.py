@@ -7,6 +7,9 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.utils import today
 
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+	get_pi_gl_entries_with_consolidated_values,
+)
 from erpnext.accounts.utils import get_fiscal_year
 
 test_dependencies = ["Supplier Group", "Customer Group"]
@@ -70,17 +73,16 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		self.assertEqual(pi.grand_total, 18000)
 
 		# check gl entry for the purchase invoice
-		gl_entries = frappe.db.get_all("GL Entry", filters={"voucher_no": pi.name}, fields=["*"])
+		gl_entries = get_pi_gl_entries_with_consolidated_values(pi.name, as_dict=False)
 		self.assertEqual(len(gl_entries), 3)
-		for d in gl_entries:
-			if d.account == pi.credit_to:
-				self.assertEqual(d.credit, 18000)
-			elif d.account == pi.items[0].get("expense_account"):
-				self.assertEqual(d.debit, 20000)
-			elif d.account == pi.taxes[0].get("account_head"):
-				self.assertEqual(d.credit, 2000)
-			else:
-				raise ValueError("Account head does not match.")
+
+		expected_gle = (
+			("Creditors - _TC", 2000.0, 20000.0),
+			("Stock Received But Not Billed - _TC", 20000.0, 0.0),
+			("TDS - _TC", 0.0, 2000.0),
+		)
+
+		self.assertSequenceEqual(gl_entries, expected_gle)
 
 		pi = create_purchase_invoice(supplier="Test TDS Supplier1")
 		pi.submit()

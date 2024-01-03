@@ -1033,7 +1033,7 @@ class PurchaseInvoice(BuyingController):
 						gl_entries.append(
 							self.get_gl_dict(
 								{
-									"account": item.expense_account,
+									"account": expense_account,
 									"against_type": "Supplier",
 									"against": self.supplier,
 									"against_link": self.supplier,
@@ -1047,7 +1047,7 @@ class PurchaseInvoice(BuyingController):
 						)
 
 						party_entry_args = {
-							"against": item.expense_account,
+							"against": expense_account,
 							"credit": amount,
 						}
 						self.make_party_gl_entry(gl_entries, party_entry_args)
@@ -1067,7 +1067,7 @@ class PurchaseInvoice(BuyingController):
 								gl_entries.append(
 									self.get_gl_dict(
 										{
-											"account": item.expense_account,
+											"account": expense_account,
 											"against_type": "Supplier",
 											"against": self.supplier,
 											"against_link": self.supplier,
@@ -1081,7 +1081,7 @@ class PurchaseInvoice(BuyingController):
 								)
 
 								party_entry_args = {
-									"against": item.expense_account,
+									"against": expense_account,
 									"credit": discrepancy_caused_by_exchange_rate_difference,
 								}
 								self.make_party_gl_entry(gl_entries, party_entry_args)
