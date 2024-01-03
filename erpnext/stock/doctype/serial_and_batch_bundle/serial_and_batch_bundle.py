@@ -85,6 +85,7 @@ class SerialandBatchBundle(Document):
 	# end: auto-generated types
 
 	def validate(self):
+		self.reset_serial_batch_bundle()
 		self.set_batch_no()
 		self.validate_serial_and_batch_no()
 		self.validate_duplicate_serial_and_batch_no()
@@ -99,6 +100,15 @@ class SerialandBatchBundle(Document):
 		self.set_warehouse()
 		self.set_incoming_rate()
 		self.calculate_qty_and_amount()
+
+	def reset_serial_batch_bundle(self):
+		if self.is_new() and self.amended_from:
+			for field in ["is_cancelled", "is_rejected"]:
+				if self.get(field):
+					self.set(field, 0)
+
+			if self.voucher_detail_no:
+				self.voucher_detail_no = None
 
 	def set_batch_no(self):
 		if self.has_serial_no and self.has_batch_no:
@@ -483,7 +493,11 @@ class SerialandBatchBundle(Document):
 		if row.get("doctype") in ["Subcontracting Receipt Supplied Item"]:
 			qty_field = "consumed_qty"
 
-		if abs(abs(flt(self.total_qty, precision)) - abs(flt(row.get(qty_field), precision))) > 0.01:
+		qty = row.get(qty_field)
+		if qty_field == "qty" and row.get("stock_qty"):
+			qty = row.get("stock_qty")
+
+		if abs(abs(flt(self.total_qty, precision)) - abs(flt(qty, precision))) > 0.01:
 			self.throw_error_message(
 				f"Total quantity {abs(flt(self.total_qty))} in the Serial and Batch Bundle {bold(self.name)} does not match with the quantity {abs(flt(row.get(qty_field)))} for the Item {bold(self.item_code)} in the {self.voucher_type} # {self.voucher_no}"
 			)
@@ -910,7 +924,11 @@ def upload_csv_file(item_code, file_path):
 
 
 def get_serial_batch_from_csv(item_code, file_path):
-	file_path = frappe.get_site_path() + file_path
+	if "private" in file_path:
+		file_path = frappe.get_site_path() + file_path
+	else:
+		file_path = frappe.get_site_path() + "/public" + file_path
+
 	serial_nos = []
 	batch_nos = []
 

@@ -431,6 +431,8 @@ class DeliveryNote(SellingController):
 			"Serial and Batch Bundle",
 		)
 
+		self.delete_auto_created_batches()
+
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
 

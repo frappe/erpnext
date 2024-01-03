@@ -81,6 +81,7 @@
   "warehouse",
   "target_warehouse",
   "quality_inspection",
+  "pick_serial_and_batch",
   "serial_and_batch_bundle",
   "batch_no",
   "incoming_rate",
@@ -897,12 +898,18 @@
    "options": "Serial and Batch Bundle",
    "print_hide": 1,
    "search_index": 1
+  },
+  {
+   "depends_on": "eval:parent.update_stock === 1",
+   "fieldname": "pick_serial_and_batch",
+   "fieldtype": "Button",
+   "label": "Pick Serial / Batch No"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-14 18:34:10.479329",
+ "modified": "2023-12-29 13:03:14.121298",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

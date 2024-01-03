@@ -586,6 +586,8 @@ class SalesInvoice(SellingController):
 			"Serial and Batch Bundle",
 		)
 
+		self.delete_auto_created_batches()
+
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
 			self.status_updater.append(

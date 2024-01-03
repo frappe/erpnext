@@ -148,13 +148,13 @@
   {
    "fieldname": "additional_discount_percentage",
    "fieldtype": "Percent",
-   "label": "Additional DIscount Percentage"
+   "label": "Additional Discount Percentage"
   },
   {
    "collapsible": 1,
    "fieldname": "additional_discount_amount",
    "fieldtype": "Currency",
-   "label": "Additional DIscount Amount"
+   "label": "Additional Discount Amount"
   },
   {
    "collapsible": 1,
@@ -267,7 +267,7 @@
    "link_fieldname": "subscription"
   }
  ],
- "modified": "2023-09-18 17:48:21.900252",
+ "modified": "2023-12-28 17:20:42.687789",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
