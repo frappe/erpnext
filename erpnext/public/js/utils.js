@@ -865,16 +865,20 @@ erpnext.utils.map_current_doc = function(opts) {
 	}
 
 	if (opts.source_doctype) {
+		let data_fields = [];
+		if(opts.source_doctype == "Purchase Receipt") {
+			data_fields.push({
+				fieldname: 'merge_taxes',
+				fieldtype: 'Check',
+				label: __('Merge taxes from multiple documents'),
+			});
+		}
 		const d = new frappe.ui.form.MultiSelectDialog({
 			doctype: opts.source_doctype,
 			target: opts.target,
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
-			data_fields: [{
-				fieldname: 'merge_taxes',
-				fieldtype: 'Check',
-				label: __('Merge taxes from multiple documents'),
-			}],
+			data_fields: data_fields,
 			get_query: opts.get_query,
 			add_filters_group: 1,
 			allow_child_item_selection: opts.allow_child_item_selection,
@@ -888,7 +892,10 @@ erpnext.utils.map_current_doc = function(opts) {
 					return;
 				}
 				opts.source_name = values;
-				opts.args = args;
+				if (opts.allow_child_item_selection || opts.source_doctype == "Purchase Receipt") {
+					// args contains filtered child docnames
+					opts.args = args;
+				}
 				d.dialog.hide();
 				_map();
 			},
