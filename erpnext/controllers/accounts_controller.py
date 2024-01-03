@@ -1144,10 +1144,16 @@ class AccountsController(TransactionBase):
 			self.get("net_total") * self.conversion_rate, self.precision("net_total")
 		)
 
-		credit_or_debit = "credit" if self.doctype == "Purchase Invoice" else "debit"
-		rev_credit_or_debit = "debit" if self.doctype == "Purchase Invoice" else "credit"
-		against_type = "Supplier" if self.doctype == "Purchase Invoice" else "Customer"
-		against = self.supplier if self.doctype == "Purchase Invoice" else self.customer
+		if self.doctype == "Purchase Invoice":
+			credit_or_debit = "credit"
+			rev_credit_or_debit = "debit"
+			against_type = "Supplier"
+			against = self.supplier
+		else:
+			credit_or_debit = "debit"
+			rev_credit_or_debit = "credit"
+			against_type = "Customer"
+			against = self.customer
 
 		if precision_loss:
 			gl_entries.append(
@@ -1165,13 +1171,11 @@ class AccountsController(TransactionBase):
 					}
 				)
 			)
-			args = frappe._dict(
-				{
-					"against": round_off_account,
-					rev_credit_or_debit: precision_loss,
-				}
-			)
-			self.make_party_gl_entry(gl_entries, args)
+			party_entry_args = {
+				"against": round_off_account,
+				rev_credit_or_debit: precision_loss,
+			}
+			self.make_party_gl_entry(gl_entries, party_entry_args)
 
 	def gain_loss_journal_already_booked(
 		self,
@@ -1559,17 +1563,14 @@ class AccountsController(TransactionBase):
 					)
 
 					if not self.is_internal_transfer():
-						args = frappe._dict(
-							{
-								"against": item.discount_account,
-								rev_dr_cr: flt(
-									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
-								),
-								rev_dr_cr
-								+ "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
-							}
-						)
-						self.make_party_gl_entry(gl_entries, args)
+						party_entry_args = {
+							"against": item.discount_account,
+							rev_dr_cr: flt(
+								discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
+							),
+							rev_dr_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
+						}
+						self.make_party_gl_entry(gl_entries, party_entry_args)
 
 					account_currency = get_account_currency(income_or_expense_account)
 					gl_entries.append(
@@ -1593,16 +1594,14 @@ class AccountsController(TransactionBase):
 					)
 
 					if not self.is_internal_transfer():
-						args = frappe._dict(
-							{
-								"against": income_or_expense_account,
-								dr_or_cr: flt(
-									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
-								),
-								dr_or_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
-							}
-						)
-						self.make_party_gl_entry(gl_entries, args)
+						party_entry_args = {
+							"against": income_or_expense_account,
+							dr_or_cr: flt(
+								discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
+							),
+							dr_or_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
+						}
+						self.make_party_gl_entry(gl_entries, party_entry_args)
 
 		if (
 			(enable_discount_accounting or self.get("is_cash_or_non_trade_discount"))
@@ -1623,13 +1622,11 @@ class AccountsController(TransactionBase):
 				)
 			)
 			if not self.is_internal_transfer():
-				args = frappe._dict(
-					{
-						"against": self.additional_discount_account,
-						rev_dr_cr: self.base_discount_amount,
-					}
-				)
-				self.make_party_gl_entry(gl_entries, args)
+				party_entry_args = {
+					"against": self.additional_discount_account,
+					rev_dr_cr: self.base_discount_amount,
+				}
+				self.make_party_gl_entry(gl_entries, party_entry_args)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on):
 		from erpnext.controllers.status_updater import get_allowance_for
@@ -2386,6 +2383,7 @@ class AccountsController(TransactionBase):
 			frappe.throw(_("No updates pending for reposting"))
 
 	def make_party_gl_entry(self, gl_entries, args):
+		args = frappe._dict(args)
 		if self.doctype == "Sales Invoice":
 			account = self.debit_to
 			party_type = "Customer"

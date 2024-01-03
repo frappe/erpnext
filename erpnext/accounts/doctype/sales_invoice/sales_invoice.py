@@ -1225,18 +1225,16 @@ class SalesInvoice(SellingController):
 				)
 
 				if not self.is_internal_transfer():
-					args = frappe._dict(
-						{
-							"against": tax.account_head,
-							"debit": flt(base_amount, tax.precision("tax_amount_after_discount_amount")),
-							"debit_in_account_currency": (
-								flt(base_amount, tax.precision("base_tax_amount_after_discount_amount"))
-								if self.party_account_currency == self.company_currency
-								else flt(amount, tax.precision("tax_amount_after_discount_amount"))
-							),
-						}
-					)
-					self.make_party_gl_entry(gl_entries, args)
+					party_entry_args = {
+						"against": tax.account_head,
+						"debit": flt(base_amount, tax.precision("tax_amount_after_discount_amount")),
+						"debit_in_account_currency": (
+							flt(base_amount, tax.precision("base_tax_amount_after_discount_amount"))
+							if self.party_account_currency == self.company_currency
+							else flt(amount, tax.precision("tax_amount_after_discount_amount"))
+						),
+					}
+					self.make_party_gl_entry(gl_entries, party_entry_args)
 
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
@@ -1265,18 +1263,16 @@ class SalesInvoice(SellingController):
 
 		for item in self.get("items"):
 			if not self.is_internal_transfer():
-				args = frappe._dict(
-					{
-						"against": item.income_account,
-						"debit": item.base_net_amount,
-						"debit_in_account_currency": (
-							flt(item.base_net_amount, item.precision("base_net_amount"))
-							if self.party_account_currency == self.company_currency
-							else flt(item.net_amount, item.precision("net_amount"))
-						),
-					}
-				)
-				self.make_party_gl_entry(gl_entries, args)
+				party_entry_args = {
+					"against": item.income_account,
+					"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
+					"debit_in_account_currency": (
+						flt(item.base_net_amount, item.precision("base_net_amount"))
+						if self.party_account_currency == self.company_currency
+						else flt(item.net_amount, item.precision("net_amount"))
+					),
+				}
+				self.make_party_gl_entry(gl_entries, party_entry_args)
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
 					asset = self.get_asset(item)
@@ -1619,16 +1615,14 @@ class SalesInvoice(SellingController):
 				)
 			)
 
-			args = frappe._dict(
-				{
-					"against": round_off_account,
-					"debit": flt(self.base_rounding_adjustment, self.precision("base_rounding_adjustment")),
-					"debit_in_account_currency": flt(
-						self.rounding_adjustment, self.precision("rounding_adjustment")
-					),
-				}
-			)
-			self.make_party_gl_entry(gl_entries, args)
+			party_entry_args = {
+				"against": round_off_account,
+				"debit": flt(self.base_rounding_adjustment, self.precision("base_rounding_adjustment")),
+				"debit_in_account_currency": flt(
+					self.rounding_adjustment, self.precision("rounding_adjustment")
+				),
+			}
+			self.make_party_gl_entry(gl_entries, party_entry_args)
 
 	def update_billing_status_in_dn(self, update_modified=True):
 		if self.is_return and not self.update_billed_amount_in_delivery_note:
