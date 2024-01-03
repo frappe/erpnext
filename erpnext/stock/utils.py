@@ -591,6 +591,13 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 		as_dict=True,
 	)
 	if batch_no_data:
+		if frappe.get_cached_value("Item", batch_no_data.item_code, "has_serial_no"):
+			frappe.throw(
+				_(
+					"Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
+				).format(search_value, batch_no_data.item_code)
+			)
+
 		_update_item_info(batch_no_data)
 		set_cache(batch_no_data)
 		return batch_no_data
