@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.query_builder.functions import Sum
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, flt, getdate, nowdate, today
 
@@ -82,7 +83,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.submit()
 
 		expected_gl_entries = {
-			"_Test Payable - _TC": [0, 1512.0],
+			"_Test Payable - _TC": [168.33, 1680.33],
 			"_Test Account Cost for Goods Sold - _TC": [1250, 0],
 			"_Test Account Shipping Charges - _TC": [100, 0],
 			"_Test Account Excise Duty - _TC": [140, 0],
@@ -93,12 +94,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			"_Test Account Discount - _TC": [0, 168.03],
 			"Round Off - _TC": [0, 0.3],
 		}
-		gl_entries = frappe.db.sql(
-			"""select account, debit, credit from `tabGL Entry`
-			where voucher_type = 'Purchase Invoice' and voucher_no = %s""",
-			pi.name,
-			as_dict=1,
-		)
+
+		gl_entries = get_pi_gl_entries_with_consolidated_values(pi.name)
+
 		for d in gl_entries:
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 
@@ -288,13 +286,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.check_gle_for_pi(pi.name)
 
 	def check_gle_for_pi(self, pi):
-		gl_entries = frappe.db.sql(
-			"""select account, sum(debit) as debit, sum(credit) as credit
-			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
-			group by account""",
-			pi,
-			as_dict=1,
-		)
+		gl_entries = get_pi_gl_entries_with_consolidated_values(pi)
 
 		self.assertTrue(gl_entries)
 
@@ -2006,6 +1998,17 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(return_pi.docstatus, 1)
 
 
+def get_pi_gl_entries_with_consolidated_values(voucher_no):
+	gle = frappe.qb.DocType("GL Entry")
+	return (
+		frappe.qb.from_(gle)
+		.select(gle.account, Sum(gle.debit).as_("debit"), Sum(gle.credit).as_("credit"))
+		.where((gle.voucher_type == "Purchase Invoice") & (gle.voucher_no == voucher_no))
+		.groupby(gle.account)
+		.orderby(gle.account)
+	).run(as_dict=1)
+
+
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
 		"Company",
@@ -2035,7 +2038,7 @@ def check_gl_entries(
 			& (gl.posting_date >= posting_date)
 			& (gl.is_cancelled == 0)
 		)
-		.orderby(gl.posting_date, gl.account, gl.creation)
+		.orderby(gl.posting_date, gl.account, gl.credit, gl.creation)
 	)
 
 	if additional_columns:
