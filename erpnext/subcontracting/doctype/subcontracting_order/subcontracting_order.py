@@ -68,6 +68,7 @@ class SubcontractingOrder(SubcontractingController):
 			"Material Transferred",
 			"Partial Material Transferred",
 			"Cancelled",
+			"Closed",
 		]
 		supplied_items: DF.Table[SubcontractingOrderSuppliedItem]
 		supplier: DF.Link
@@ -357,8 +358,8 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def update_subcontracting_order_status(sco):
+def update_subcontracting_order_status(sco, status=None):
 	if isinstance(sco, str):
 		sco = frappe.get_doc("Subcontracting Order", sco)
 
-	sco.update_status()
+	sco.update_status(status)
