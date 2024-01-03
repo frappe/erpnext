@@ -1231,7 +1231,7 @@ class SalesInvoice(SellingController):
 							"debit": flt(base_amount, tax.precision("tax_amount_after_discount_amount")),
 							"debit_in_account_currency": (
 								flt(base_amount, tax.precision("base_tax_amount_after_discount_amount"))
-								if account_currency == self.company_currency
+								if self.party_account_currency == self.company_currency
 								else flt(amount, tax.precision("tax_amount_after_discount_amount"))
 							),
 						}
@@ -1264,6 +1264,19 @@ class SalesInvoice(SellingController):
 		)
 
 		for item in self.get("items"):
+			if not self.is_internal_transfer():
+				args = frappe._dict(
+					{
+						"against": item.income_account,
+						"debit": item.base_net_amount,
+						"debit_in_account_currency": (
+							flt(item.base_net_amount, item.precision("base_net_amount"))
+							if self.party_account_currency == self.company_currency
+							else flt(item.net_amount, item.precision("net_amount"))
+						),
+					}
+				)
+				self.make_party_gl_entry(gl_entries, args)
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
 				if item.is_fixed_asset:
 					asset = self.get_asset(item)
@@ -1333,11 +1346,11 @@ class SalesInvoice(SellingController):
 
 						amount, base_amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 
-						account_currency = get_account_currency(income_account)
+						account_currency = get_account_currency(item.income_account)
 						gl_entries.append(
 							self.get_gl_dict(
 								{
-									"account": income_account,
+									"account": item.income_account,
 									"against_type": "Customer",
 									"against": self.customer,
 									"against_link": self.customer,
@@ -1354,18 +1367,6 @@ class SalesInvoice(SellingController):
 								item=item,
 							)
 						)
-						args = frappe._dict(
-							{
-								"against": item.income_account,
-								"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
-								"debit_in_account_currency": (
-									flt(item.base_net_amount, item.precision("base_net_amount"))
-									if account_currency == self.company_currency
-									else flt(item.net_amount, item.precision("net_amount"))
-								),
-							}
-						)
-						self.make_party_gl_entry(gl_entries, args)
 
 		# expense account gl entries
 		if cint(self.update_stock) and erpnext.is_perpetual_inventory_enabled(self.company):
