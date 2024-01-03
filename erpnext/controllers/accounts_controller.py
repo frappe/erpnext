@@ -933,6 +933,12 @@ class AccountsController(TransactionBase):
 			}
 		)
 
+		if not args.get("against_voucher_type") and self.get("against_voucher_type"):
+			gl_dict.update({"against_voucher_type": self.get("against_voucher_type")})
+
+		if not args.get("against_voucher") and self.get("against_voucher"):
+			gl_dict.update({"against_voucher": self.get("against_voucher")})
+
 		return gl_dict
 
 	def get_voucher_subtype(self):
