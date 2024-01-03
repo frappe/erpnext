@@ -242,9 +242,8 @@ class StockController(AccountsController):
 			if source_current_account != target_current_account:
 				entry_found = False
 				is_material_transfer = self.get("purpose") == "Material Transfer"
-				creation_date = getdate(self.creation)
-				after_2024 = creation_date >= getdate('2024-01-01')
-
+				posting_date = getdate(self.posting_date)
+				after_2024 = posting_date >= getdate('2024-01-01')
 				for entry in processed_gl_map:
 					if entry.account == intermediate_account:
 						entry_found = True
@@ -278,8 +277,8 @@ class StockController(AccountsController):
 									entry.credit = entry.debit
 
 						elif is_material_transfer and self.outgoing_stock_entry:
-							outgoing_stock_entry_creation = frappe.db.get_value("Stock Entry", self.outgoing_stock_entry, "creation")
-							if not getdate(outgoing_stock_entry_creation) >= getdate('2024-01-01'):
+							outgoing_stock_entry_posting_date = frappe.db.get_value("Stock Entry", self.outgoing_stock_entry, "posting_date")
+							if not getdate(outgoing_stock_entry_posting_date) >= getdate('2024-01-01'):
 								current_account = source_current_account
 								intermediate = entry.copy()
 								intermediate.account = current_account
@@ -288,7 +287,7 @@ class StockController(AccountsController):
 									entry.debit = entry.credit
 								else:
 									entry.credit = entry.debit
-
+						break
 
 				if not entry_found:
 					frappe.throw("No Intermediate Warehouse Account")
