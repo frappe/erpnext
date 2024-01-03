@@ -7,7 +7,10 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+	get_pi_gl_entries_with_consolidated_values,
+	make_purchase_invoice,
+)
 from erpnext.accounts.utils import update_gl_entries_after
 from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -286,14 +289,14 @@ class TestLandedCostVoucher(FrappeTestCase):
 
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
 
-		gl_entries = get_gl_entries("Purchase Invoice", pi.name)
+		gl_entries = get_pi_gl_entries_with_consolidated_values(pi.name)
 
 		self.assertTrue(gl_entries)
 		stock_in_hand_account = get_inventory_account(pi.company, pi.get("items")[0].warehouse)
 
 		expected_values = {
-			stock_in_hand_account: [300.0, 0.0],
-			"Creditors - TCP1": [0.0, 250.0],
+			stock_in_hand_account: [550.0, 250.0],
+			"Creditors - TCP1": [300.0, 550.0],
 			"Expenses Included In Valuation - TCP1": [0.0, 50.0],
 		}
 

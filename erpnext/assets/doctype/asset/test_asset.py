@@ -17,7 +17,10 @@ from frappe.utils import (
 )
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+	get_pi_gl_entries_with_consolidated_values,
+	make_purchase_invoice,
+)
 from erpnext.assets.doctype.asset.asset import (
 	make_sales_invoice,
 	split_asset,
@@ -572,7 +575,7 @@ class TestAsset(AssetSetup):
 			("Creditors - _TC", 0.0, 5500.0),
 		)
 
-		pi_gle = get_gl_entries("Purchase Invoice", pi.name)
+		pi_gle = get_pi_gl_entries_with_consolidated_values(pi.name, as_dict=False)
 		self.assertSequenceEqual(pi_gle, expected_gle)
 
 		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")

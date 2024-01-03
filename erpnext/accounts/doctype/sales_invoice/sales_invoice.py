@@ -1262,9 +1262,14 @@ class SalesInvoice(SellingController):
 		)
 
 		for item in self.get("items"):
+			income_account = (
+				item.income_account
+				if (not item.enable_deferred_revenue or self.is_return)
+				else item.deferred_revenue_account
+			)
 			if not self.is_internal_transfer():
 				party_entry_args = {
-					"against": item.income_account,
+					"against": income_account,
 					"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
 					"debit_in_account_currency": (
 						flt(item.base_net_amount, item.precision("base_net_amount"))
@@ -1334,19 +1339,13 @@ class SalesInvoice(SellingController):
 				else:
 					# Do not book income for transfer within same company
 					if not self.is_internal_transfer():
-						income_account = (
-							item.income_account
-							if (not item.enable_deferred_revenue or self.is_return)
-							else item.deferred_revenue_account
-						)
-
 						amount, base_amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 
-						account_currency = get_account_currency(item.income_account)
+						account_currency = get_account_currency(income_account)
 						gl_entries.append(
 							self.get_gl_dict(
 								{
-									"account": item.income_account,
+									"account": income_account,
 									"against_type": "Customer",
 									"against": self.customer,
 									"against_link": self.customer,
