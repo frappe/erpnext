@@ -112,16 +112,10 @@ class SubcontractingOrder(SubcontractingController):
 
 	def on_submit(self):
 		self.update_prevdoc_status()
-		self.update_requested_qty()
-		self.update_ordered_qty_for_subcontracting()
-		self.update_reserved_qty_for_subcontracting()
 		self.update_status()
 
 	def on_cancel(self):
 		self.update_prevdoc_status()
-		self.update_requested_qty()
-		self.update_ordered_qty_for_subcontracting()
-		self.update_reserved_qty_for_subcontracting()
 		self.update_status()
 
 	def validate_purchase_order_for_subcontracting(self):
@@ -305,9 +299,11 @@ class SubcontractingOrder(SubcontractingController):
 				status = "Cancelled"
 
 		if status:
-			frappe.db.set_value(
-				"Subcontracting Order", self.name, "status", status, update_modified=update_modified
-			)
+			self.db_set("status", status, update_modified=update_modified)
+
+		self.update_requested_qty()
+		self.update_ordered_qty_for_subcontracting()
+		self.update_reserved_qty_for_subcontracting()
 
 
 @frappe.whitelist()
