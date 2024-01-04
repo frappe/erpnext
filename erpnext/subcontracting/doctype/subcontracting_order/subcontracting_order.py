@@ -272,7 +272,7 @@ class SubcontractingOrder(SubcontractingController):
 		self.set_missing_values()
 
 	def update_status(self, status=None, update_modified=True):
-		if self.status == "Closed":
+		if self.status == "Closed" and self.status != status:
 			check_on_hold_or_closed_status("Purchase Order", self.purchase_order)
 
 		if self.docstatus >= 1 and not status:
@@ -302,7 +302,7 @@ class SubcontractingOrder(SubcontractingController):
 			elif self.docstatus == 2:
 				status = "Cancelled"
 
-		if status:
+		if status and self.status != status:
 			self.db_set("status", status, update_modified=update_modified)
 
 		self.update_requested_qty()
