@@ -71,16 +71,20 @@ class StockLedgerEntry(Document):
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time,
 				"company": self.company,
+				"sle": self.name,
 			}
 		)
 
 		sle = get_previous_sle(kwargs, extra_cond=extra_cond)
+		qty_after_transaction = 0.0
+		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
 		if sle:
-			flt_precision = cint(frappe.db.get_default("float_precision")) or 2
-			diff = sle.qty_after_transaction + flt(self.actual_qty)
-			diff = flt(diff, flt_precision)
-			if diff < 0 and abs(diff) > 0.0001:
-				self.throw_validation_error(diff, dimensions)
+			qty_after_transaction = sle.qty_after_transaction
+
+		diff = qty_after_transaction + flt(self.actual_qty)
+		diff = flt(diff, flt_precision)
+		if diff < 0 and abs(diff) > 0.0001:
+			self.throw_validation_error(diff, dimensions)
 
 	def throw_validation_error(self, diff, dimensions):
 		dimension_msg = _(", with the inventory {0}: {1}").format(
