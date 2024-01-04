@@ -257,19 +257,19 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	description_cond = ""
 	if frappe.db.count(doctype, cache=True) < 50000:
 		# scan description only if items are less than 50000
-		description_cond = "or tabItem.description LIKE %(txt)s"
+		description_cond = """or "tabItem"."description" LIKE %(txt)s"""
 
 	return frappe.db.sql(
 		"""select
-			tabItem.name {columns},
+			name {columns},
 			CASE WHEN POSITION(%(_txt)s IN name) > 0 THEN POSITION(%(_txt)s IN name) ELSE 99999 END AS name_position,
 			CASE WHEN POSITION(%(_txt)s IN item_name) > 0 THEN POSITION(%(_txt)s IN item_name) ELSE 99999 END AS item_name_position
 		from tabItem
-		where tabItem.docstatus < 2
-			and tabItem.disabled=0
-			and tabItem.has_variants=0
-			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
-			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+		where "tabItem"."docstatus" < 2
+			and "tabItem"."disabled"=0
+			and "tabItem"."has_variants"=0
+			and ("tabItem"."end_of_life" > %(today)s or "tabItem"."end_of_life" IS NULL)
+			and ({scond} or "tabItem"."item_code" IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 				{description_cond})
 			{fcond} {mcond}
 		order by
