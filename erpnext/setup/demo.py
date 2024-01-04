@@ -149,6 +149,11 @@ def convert_order_to_invoices():
 			invoice.set_posting_time = 1
 			invoice.posting_date = order.transaction_date
 			invoice.due_date = order.transaction_date
+			invoice.bill_date = order.transaction_date
+
+			if invoice.get("payment_schedule"):
+				invoice.payment_schedule[0].due_date = order.transaction_date
+
 			invoice.update_stock = 1
 			invoice.submit()
 
