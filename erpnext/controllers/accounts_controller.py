@@ -561,18 +561,12 @@ class AccountsController(TransactionBase):
 			validate_due_date(
 				self.posting_date,
 				self.due_date,
-				"Customer",
-				self.customer,
-				self.company,
 				self.payment_terms_template,
 			)
 		elif self.doctype == "Purchase Invoice":
 			validate_due_date(
 				self.bill_date or self.posting_date,
 				self.due_date,
-				"Supplier",
-				self.supplier,
-				self.company,
 				self.bill_date,
 				self.payment_terms_template,
 			)
