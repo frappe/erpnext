@@ -101,7 +101,7 @@ frappe.ui.form.on('Subcontracting Order', {
 	},
 
 	refresh: function (frm) {
-		if (frm.has_perm("submit")) {
+		if (frm.doc.docstatus == 1 && frm.has_perm("submit")) {
 			if (frm.doc.status == "Closed") {
 				frm.add_custom_button(__('Re-open'), () => frm.events.update_subcontracting_order_status(frm), __("Status"));
 			} else if(flt(frm.doc.per_received, 2) < 100) {
