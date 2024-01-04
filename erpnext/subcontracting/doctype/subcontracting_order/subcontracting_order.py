@@ -7,6 +7,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import is_subcontracting_order_created
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.stock_balance import update_bin_qty
 from erpnext.stock.utils import get_bin
@@ -271,6 +272,9 @@ class SubcontractingOrder(SubcontractingController):
 		self.set_missing_values()
 
 	def update_status(self, status=None, update_modified=True):
+		if self.status == "Closed":
+			check_on_hold_or_closed_status("Purchase Order", self.purchase_order)
+
 		if self.docstatus >= 1 and not status:
 			if self.docstatus == 1:
 				if self.status == "Draft":
