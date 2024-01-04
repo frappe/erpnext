@@ -1435,6 +1435,68 @@ class TestDeliveryNote(FrappeTestCase):
 		returned_dn.reload()
 		self.assertAlmostEqual(returned_dn.items[0].incoming_rate, 200.0)
 
+<<<<<<< HEAD
+=======
+	def test_batch_with_non_stock_uom(self):
+		frappe.db.set_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1
+		)
+
+		item = make_item(
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TESTBATCH.#####",
+				"stock_uom": "Nos",
+			}
+		)
+		if not frappe.db.exists("UOM Conversion Detail", {"parent": item.name, "uom": "Kg"}):
+			item.append("uoms", {"uom": "Kg", "conversion_factor": 5.0})
+			item.save()
+
+		item_code = item.name
+
+		make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100.0)
+		dn = create_delivery_note(
+			item_code=item_code, qty=1, rate=500, warehouse="_Test Warehouse - _TC", do_not_save=True
+		)
+		dn.items[0].uom = "Kg"
+		dn.items[0].conversion_factor = 5.0
+
+		dn.save()
+		dn.submit()
+
+		self.assertEqual(dn.items[0].stock_qty, 5.0)
+		voucher_detail_no = dn.items[0].name
+		delivered_batch_qty = frappe.db.get_value(
+			"Serial and Batch Bundle", {"voucher_detail_no": voucher_detail_no}, "total_qty"
+		)
+		self.assertEqual(abs(delivered_batch_qty), 5.0)
+
+		frappe.db.set_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0
+		)
+
+	def test_internal_transfer_for_non_stock_item(self):
+		from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+		from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
+
+		item = make_item(properties={"is_stock_item": 0}).name
+		warehouse = "_Test Warehouse - _TC"
+		target = "Stores - _TC"
+		company = "_Test Company"
+		customer = create_internal_customer(represents_company=company)
+		rate = 100
+
+		so = make_sales_order(item_code=item, qty=1, rate=rate, customer=customer, warehouse=warehouse)
+		dn = make_delivery_note(so.name)
+		dn.items[0].target_warehouse = target
+		dn.save().submit()
+
+		self.assertEqual(so.items[0].rate, rate)
+		self.assertEqual(dn.items[0].rate, so.items[0].rate)
+
+>>>>>>> 57b6a98703 (test: internal transfer for non-stock item)
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
