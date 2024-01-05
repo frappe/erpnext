@@ -117,7 +117,7 @@ class MaintenanceSchedule(TransactionBase):
 					self.update_amc_date(serial_nos, d.end_date)
 
 			no_email_sp = []
-			if d.sales_person not in email_map:
+			if d.sales_person and d.sales_person not in email_map:
 				sp = frappe.get_doc("Sales Person", d.sales_person)
 				try:
 					email_map[d.sales_person] = sp.get_email_id()
@@ -133,9 +133,9 @@ class MaintenanceSchedule(TransactionBase):
 
 			scheduled_date = frappe.db.sql(
 				"""select scheduled_date from
-				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and
+				`tabMaintenance Schedule Detail` where item_code=%s and
 				parent=%s""",
-				(d.sales_person, d.item_code, self.name),
+				(d.item_code, self.name),
 				as_dict=1,
 			)
 
@@ -232,8 +232,6 @@ class MaintenanceSchedule(TransactionBase):
 				throw(_("Please select Start Date and End Date for Item {0}").format(d.item_code))
 			elif not d.no_of_visits:
 				throw(_("Please mention no of visits required"))
-			elif not d.sales_person:
-				throw(_("Please select a Sales Person for item: {0}").format(d.item_name))
 
 			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
