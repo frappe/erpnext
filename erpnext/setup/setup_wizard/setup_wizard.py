@@ -38,11 +38,6 @@ def get_setup_stages(args=None):
 				],
 			},
 			{
-				"status": _("Setting up demo data"),
-				"fail_msg": _("Failed to setup demo data"),
-				"tasks": [{"fn": setup_demo, "args": args, "fail_msg": _("Failed to setup demo data")}],
-			},
-			{
 				"status": _("Wrapping up"),
 				"fail_msg": _("Failed to login"),
 				"tasks": [{"fn": fin, "args": args, "fail_msg": _("Failed to login")}],

@@ -432,13 +432,18 @@ class SellingController(StockController):
 
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:
+			if not frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
+				continue
+
 			if not self.get("return_against") or (
 				get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return")
 			):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get("stock_qty") or d.get("actual_qty"))
 
-				if not d.incoming_rate:
+				if not d.incoming_rate or (
+					get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return")
+				):
 					d.incoming_rate = get_incoming_rate(
 						{
 							"item_code": d.item_code,

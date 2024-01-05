@@ -1116,12 +1116,16 @@ def get_companies():
 
 
 @frappe.whitelist()
-def get_children(doctype, parent, company, is_root=False):
+def get_children(doctype, parent, company, is_root=False, include_disabled=False):
+	if isinstance(include_disabled, str):
+		include_disabled = frappe.json.loads(include_disabled)
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
 	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
 	fields = ["name as value", "is_group as expandable"]
 	filters = [["docstatus", "<", 2]]
+	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
+		filters.append(["disabled", "=", False])
 
 	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), "=", "" if is_root else parent])
 
