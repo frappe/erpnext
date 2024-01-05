@@ -94,12 +94,11 @@ class MaintenanceSchedule(TransactionBase):
 					).format(self.owner, "<br>" + "<br>".join(no_email_sp))
 				)
 
-			scheduled_date = frappe.db.sql(
-				"""select scheduled_date from
-				`tabMaintenance Schedule Detail` where item_code=%s and
-				parent=%s""",
-				(d.item_code, self.name),
-				as_dict=1,
+			scheduled_date = frappe.db.get_all(
+				"Maintenance Schedule Detail",
+				{"parent": self.name, "item_code": d.item_code},
+				["scheduled_date"],
+				as_list=False,
 			)
 
 			for key in scheduled_date:
@@ -390,16 +389,36 @@ def get_serial_nos_from_schedule(item_code, schedule=None):
 def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=None):
 	from frappe.model.mapper import get_mapped_doc
 
+	def condition(doc):
+		if s_id:
+			return doc.name == s_id
+		elif item_name:
+			return doc.item_name == item_name
+
+		return True
+
 	def update_status_and_detail(source, target, parent):
 		target.maintenance_type = "Scheduled"
-		target.maintenance_schedule_detail = s_id
 
 	def update_serial(source, target, parent):
+<<<<<<< HEAD
 		serial_nos = get_serial_nos(target.serial_no)
 		if len(serial_nos) == 1:
 			target.serial_no = serial_nos[0]
 		else:
 			target.serial_no = ""
+=======
+		if source.item_reference:
+			if sbb := frappe.db.get_value(
+				"Maintenance Schedule Item", source.item_reference, "serial_and_batch_bundle"
+			):
+				serial_nos = frappe.get_doc("Serial and Batch Bundle", sbb).get_serial_nos()
+
+				if len(serial_nos) == 1:
+					target.serial_no = serial_nos[0]
+				else:
+					target.serial_no = ""
+>>>>>>> cd293a5173 (fix: update Maintenance Schedule status on Maintenance Visit submit)
 
 	doclist = get_mapped_doc(
 		"Maintenance Schedule",
@@ -411,10 +430,13 @@ def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=No
 				"validation": {"docstatus": ["=", 1]},
 				"postprocess": update_status_and_detail,
 			},
-			"Maintenance Schedule Item": {
+			"Maintenance Schedule Detail": {
 				"doctype": "Maintenance Visit Purpose",
-				"condition": lambda doc: doc.item_name == item_name if item_name else True,
-				"field_map": {"sales_person": "service_person"},
+				"condition": condition,
+				"field_map": {
+					"sales_person": "service_person",
+					"name": "maintenance_schedule_detail",
+				},
 				"postprocess": update_serial,
 			},
 		},
