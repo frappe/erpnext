@@ -646,6 +646,10 @@ class ProductionPlan(Document):
 				"project": self.project,
 			}
 
+			key = (d.item_code, d.sales_order, d.warehouse)
+			if not d.sales_order:
+				key = (d.name, d.item_code, d.warehouse)
+
 			if not item_details["project"] and d.sales_order:
 				item_details["project"] = frappe.get_cached_value("Sales Order", d.sales_order, "project")
 
@@ -654,12 +658,9 @@ class ProductionPlan(Document):
 				item_dict[(d.item_code, d.material_request_item, d.warehouse)] = item_details
 			else:
 				item_details.update(
-					{
-						"qty": flt(item_dict.get((d.item_code, d.sales_order, d.warehouse), {}).get("qty"))
-						+ (flt(d.planned_qty) - flt(d.ordered_qty))
-					}
+					{"qty": flt(item_dict.get(key, {}).get("qty")) + (flt(d.planned_qty) - flt(d.ordered_qty))}
 				)
-				item_dict[(d.item_code, d.sales_order, d.warehouse)] = item_details
+				item_dict[key] = item_details
 
 		return item_dict
 
