@@ -706,7 +706,9 @@ def make_contact(args, is_primary_contact=1):
 	else:
 		values.update(
 			{
-				"first_name": args.get("customer_name"),
+				"first_name": args.get("customer_name")
+				if args.doctype == "Customer"
+				else args.get("supplier_name"),
 				"company_name": args.get(party_name_key),
 			}
 		)
