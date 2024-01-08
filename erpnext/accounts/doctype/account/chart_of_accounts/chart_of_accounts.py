@@ -234,6 +234,9 @@ def build_account_tree(tree, parent, all_accounts):
 		if not parent:
 			tree[child.account_name]["root_type"] = child.root_type
 
+		if child.account_currency:
+			tree[child.account_name]["account_currency"] = child.account_currency
+
 		# call recursively to build a subtree for current account
 		build_account_tree(tree[child.account_name], child, all_accounts)
 
