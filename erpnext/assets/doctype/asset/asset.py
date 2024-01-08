@@ -57,7 +57,7 @@ class Asset(AccountsController):
 		asset_owner: DF.Literal["", "Company", "Supplier", "Customer"]
 		asset_owner_company: DF.Link | None
 		asset_quantity: DF.Int
-		available_for_use_date: DF.Date
+		available_for_use_date: DF.Date | None
 		booked_fixed_asset: DF.Check
 		calculate_depreciation: DF.Check
 		capitalized_in: DF.Link | None
@@ -92,7 +92,7 @@ class Asset(AccountsController):
 		number_of_depreciations_booked: DF.Int
 		opening_accumulated_depreciation: DF.Currency
 		policy_number: DF.Data | None
-		purchase_date: DF.Date
+		purchase_date: DF.Date | None
 		purchase_invoice: DF.Link | None
 		purchase_receipt: DF.Link | None
 		purchase_receipt_amount: DF.Currency
@@ -316,7 +316,12 @@ class Asset(AccountsController):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
-			if not self.is_existing_asset and not self.purchase_receipt and not self.purchase_invoice:
+			if (
+				not self.is_existing_asset
+				and not self.is_composite_asset
+				and not self.purchase_receipt
+				and not self.purchase_invoice
+			):
 				frappe.throw(
 					_("Please create purchase receipt or purchase invoice for the item {0}").format(
 						self.item_code
@@ -329,7 +334,7 @@ class Asset(AccountsController):
 				and not frappe.db.get_value("Purchase Invoice", self.purchase_invoice, "update_stock")
 			):
 				frappe.throw(
-					_("Update stock must be enable for the purchase invoice {0}").format(self.purchase_invoice)
+					_("Update stock must be enabled for the purchase invoice {0}").format(self.purchase_invoice)
 				)
 
 		if not self.calculate_depreciation:
