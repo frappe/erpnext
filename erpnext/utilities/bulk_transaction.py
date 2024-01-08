@@ -15,18 +15,15 @@ def transaction_processing(data, from_doctype, to_doctype):
 
 	length_of_data = len(deserialized_data)
 
-	if length_of_data > 10:
-		frappe.msgprint(
-			_("Started a background job to create {1} {0}").format(to_doctype, length_of_data)
-		)
-		frappe.enqueue(
-			job,
-			deserialized_data=deserialized_data,
-			from_doctype=from_doctype,
-			to_doctype=to_doctype,
-		)
-	else:
-		job(deserialized_data, from_doctype, to_doctype)
+	frappe.msgprint(
+		_("Started a background job to create {1} {0}").format(to_doctype, length_of_data)
+	)
+	frappe.enqueue(
+		job,
+		deserialized_data=deserialized_data,
+		from_doctype=from_doctype,
+		to_doctype=to_doctype,
+	)
 
 
 @frappe.whitelist()
