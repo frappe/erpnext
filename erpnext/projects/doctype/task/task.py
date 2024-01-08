@@ -28,7 +28,6 @@ class Task(NestedSet):
 
 		from erpnext.projects.doctype.task_depends_on.task_depends_on import TaskDependsOn
 
-
 		act_end_date: DF.Date | None
 		act_start_date: DF.Date | None
 		actual_time: DF.Float
