@@ -2,10 +2,15 @@
 # For license information, please see license.txt
 
 import frappe
+<<<<<<< HEAD
+=======
+from frappe import _
+from frappe.model.document import Document
+>>>>>>> 6de8c18f98 (fix: bank transction status upon reconciliation)
 from frappe.utils import flt
 
-from erpnext.controllers.status_updater import StatusUpdater
 
+<<<<<<< HEAD
 
 class BankTransaction(StatusUpdater):
 	def after_insert(self):
@@ -13,6 +18,83 @@ class BankTransaction(StatusUpdater):
 
 	def on_submit(self):
 		self.clear_linked_payment_entries()
+=======
+class BankTransaction(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.bank_transaction_payments.bank_transaction_payments import (
+			BankTransactionPayments,
+		)
+
+		allocated_amount: DF.Currency
+		amended_from: DF.Link | None
+		bank_account: DF.Link | None
+		bank_party_account_number: DF.Data | None
+		bank_party_iban: DF.Data | None
+		bank_party_name: DF.Data | None
+		company: DF.Link | None
+		currency: DF.Link | None
+		date: DF.Date | None
+		deposit: DF.Currency
+		description: DF.SmallText | None
+		naming_series: DF.Literal["ACC-BTN-.YYYY.-"]
+		party: DF.DynamicLink | None
+		party_type: DF.Link | None
+		payment_entries: DF.Table[BankTransactionPayments]
+		reference_number: DF.Data | None
+		status: DF.Literal["", "Pending", "Settled", "Unreconciled", "Reconciled", "Cancelled"]
+		transaction_id: DF.Data | None
+		transaction_type: DF.Data | None
+		unallocated_amount: DF.Currency
+		withdrawal: DF.Currency
+	# end: auto-generated types
+
+	def before_validate(self):
+		self.update_allocated_amount()
+
+	def validate(self):
+		self.validate_duplicate_references()
+
+	def set_status(self):
+		if self.docstatus == 2:
+			self.db_set("status", "Cancelled")
+		elif self.docstatus == 1:
+			if self.unallocated_amount > 0:
+				self.db_set("status", "Unreconciled")
+			elif self.unallocated_amount <= 0:
+				self.db_set("status", "Reconciled")
+
+	def validate_duplicate_references(self):
+		"""Make sure the same voucher is not allocated twice within the same Bank Transaction"""
+		if not self.payment_entries:
+			return
+
+		pe = []
+		for row in self.payment_entries:
+			reference = (row.payment_document, row.payment_entry)
+			if reference in pe:
+				frappe.throw(
+					_("{0} {1} is allocated twice in this Bank Transaction").format(
+						row.payment_document, row.payment_entry
+					)
+				)
+			pe.append(reference)
+
+	def update_allocated_amount(self):
+		self.allocated_amount = (
+			sum(p.allocated_amount for p in self.payment_entries) if self.payment_entries else 0.0
+		)
+		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit)) - self.allocated_amount
+
+	def before_submit(self):
+		self.allocate_payment_entries()
+>>>>>>> 6de8c18f98 (fix: bank transction status upon reconciliation)
 		self.set_status()
 
 		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
@@ -33,6 +115,7 @@ class BankTransaction(StatusUpdater):
 		self.clear_linked_payment_entries(for_cancel=True)
 		self.set_status(update=True)
 
+<<<<<<< HEAD
 	def update_allocations(self):
 		"The doctype does not allow modifications after submission, so write to the db direct"
 		if self.payment_entries:
@@ -45,6 +128,9 @@ class BankTransaction(StatusUpdater):
 		self.db_set("unallocated_amount", amount - flt(allocated_amount))
 		self.reload()
 		self.set_status(update=True)
+=======
+		self.set_status()
+>>>>>>> 6de8c18f98 (fix: bank transction status upon reconciliation)
 
 	def add_payment_entries(self, vouchers):
 		"Add the vouchers with zero allocation. Save() will perform the allocations and clearance"
