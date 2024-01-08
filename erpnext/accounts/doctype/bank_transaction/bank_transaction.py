@@ -366,15 +366,17 @@ def set_voucher_clearance(doctype, docname, clearance_date, self):
 			and len(get_reconciled_bank_transactions(doctype, docname)) < 2
 		):
 			return
-		frappe.db.set_value(doctype, docname, "clearance_date", clearance_date)
 
-	elif doctype == "Sales Invoice":
-		frappe.db.set_value(
-			"Sales Invoice Payment",
-			dict(parenttype=doctype, parent=docname),
-			"clearance_date",
-			clearance_date,
-		)
+		if doctype == "Sales Invoice":
+			frappe.db.set_value(
+				"Sales Invoice Payment",
+				dict(parenttype=doctype, parent=docname),
+				"clearance_date",
+				clearance_date,
+			)
+			return
+
+		frappe.db.set_value(doctype, docname, "clearance_date", clearance_date)
 
 	elif doctype == "Bank Transaction":
 		# For when a second bank transaction has fixed another, e.g. refund
