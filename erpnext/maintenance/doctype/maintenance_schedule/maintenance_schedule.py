@@ -401,24 +401,16 @@ def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=No
 		target.maintenance_type = "Scheduled"
 
 	def update_serial(source, target, parent):
-<<<<<<< HEAD
-		serial_nos = get_serial_nos(target.serial_no)
-		if len(serial_nos) == 1:
-			target.serial_no = serial_nos[0]
-		else:
-			target.serial_no = ""
-=======
 		if source.item_reference:
-			if sbb := frappe.db.get_value(
-				"Maintenance Schedule Item", source.item_reference, "serial_and_batch_bundle"
+			if serial_nos := frappe.db.get_value(
+				"Maintenance Schedule Item", source.item_reference, "serial_no"
 			):
-				serial_nos = frappe.get_doc("Serial and Batch Bundle", sbb).get_serial_nos()
+				serial_nos = serial_nos.split("\n")
 
 				if len(serial_nos) == 1:
 					target.serial_no = serial_nos[0]
 				else:
 					target.serial_no = ""
->>>>>>> cd293a5173 (fix: update Maintenance Schedule status on Maintenance Visit submit)
 
 	doclist = get_mapped_doc(
 		"Maintenance Schedule",
