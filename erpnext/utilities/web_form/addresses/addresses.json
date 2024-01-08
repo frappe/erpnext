@@ -98,7 +98,7 @@
    "fieldname": "state",
    "fieldtype": "Data",
    "hidden": 0,
-   "label": "State",
+   "label": "State/Province",
    "max_length": 0,
    "max_value": 0,
    "read_only": 0,
