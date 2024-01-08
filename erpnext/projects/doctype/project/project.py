@@ -16,8 +16,63 @@ from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
 class Project(Document):
+<<<<<<< HEAD
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), frappe.safe_decode(self.project_name))
+=======
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from erpnext.projects.doctype.project_user.project_user import ProjectUser
+		from frappe.types import DF
+
+		actual_end_date: DF.Date | None
+		actual_start_date: DF.Date | None
+		actual_time: DF.Float
+		collect_progress: DF.Check
+		company: DF.Link
+		copied_from: DF.Data | None
+		cost_center: DF.Link | None
+		customer: DF.Link | None
+		daily_time_to_send: DF.Time | None
+		day_to_send: DF.Literal["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+		department: DF.Link | None
+		estimated_costing: DF.Currency
+		expected_end_date: DF.Date | None
+		expected_start_date: DF.Date | None
+		first_email: DF.Time | None
+		frequency: DF.Literal["Hourly", "Twice Daily", "Daily", "Weekly"]
+		from_time: DF.Time | None
+		gross_margin: DF.Currency
+		holiday_list: DF.Link | None
+		is_active: DF.Literal["Yes", "No"]
+		message: DF.Text | None
+		naming_series: DF.Literal["PROJ-.####"]
+		notes: DF.TextEditor | None
+		per_gross_margin: DF.Percent
+		percent_complete: DF.Percent
+		percent_complete_method: DF.Literal["Manual", "Task Completion", "Task Progress", "Task Weight"]
+		priority: DF.Literal["Medium", "Low", "High"]
+		project_name: DF.Data
+		project_template: DF.Link | None
+		project_type: DF.Link | None
+		sales_order: DF.Link | None
+		second_email: DF.Time | None
+		status: DF.Literal["Open", "Completed", "Cancelled"]
+		to_time: DF.Time | None
+		total_billable_amount: DF.Currency
+		total_billed_amount: DF.Currency
+		total_consumed_material_cost: DF.Currency
+		total_costing_amount: DF.Currency
+		total_purchase_cost: DF.Currency
+		total_sales_amount: DF.Currency
+		users: DF.Table[ProjectUser]
+		weekly_time_to_send: DF.Time | None
+	# end: auto-generated types
+>>>>>>> 3d54fd8389 (fix: add expected_start_date in sort by)
 
 	def onload(self):
 		self.set_onload(

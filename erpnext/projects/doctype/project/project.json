@@ -131,6 +131,7 @@
    "set_only_once": 1
   },
   {
+   "bold": 1,
    "fieldname": "expected_start_date",
    "fieldtype": "Date",
    "label": "Expected Start Date",
@@ -452,7 +453,11 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
+<<<<<<< HEAD
  "modified": "2023-02-14 04:54:25.819620",
+=======
+ "modified": "2024-01-08 16:01:34.598258",
+>>>>>>> 3d54fd8389 (fix: add expected_start_date in sort by)
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

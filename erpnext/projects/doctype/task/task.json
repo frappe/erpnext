@@ -151,6 +151,7 @@
    "label": "Timeline"
   },
   {
+   "bold": 1,
    "fieldname": "exp_start_date",
    "fieldtype": "Date",
    "label": "Expected Start Date",
@@ -396,7 +397,11 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
+<<<<<<< HEAD
  "modified": "2023-09-28 13:52:05.861175",
+=======
+ "modified": "2024-01-08 16:00:41.296203",
+>>>>>>> 3d54fd8389 (fix: add expected_start_date in sort by)
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
