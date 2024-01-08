@@ -24,8 +24,10 @@ class Task(NestedSet):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.projects.doctype.task_depends_on.task_depends_on import TaskDependsOn
 		from frappe.types import DF
+
+		from erpnext.projects.doctype.task_depends_on.task_depends_on import TaskDependsOn
+
 
 		act_end_date: DF.Date | None
 		act_start_date: DF.Date | None
@@ -56,7 +58,9 @@ class Task(NestedSet):
 		review_date: DF.Date | None
 		rgt: DF.Int
 		start: DF.Int
-		status: DF.Literal["Open", "Working", "Pending Review", "Overdue", "Template", "Completed", "Cancelled"]
+		status: DF.Literal[
+			"Open", "Working", "Pending Review", "Overdue", "Template", "Completed", "Cancelled"
+		]
 		subject: DF.Data
 		task_weight: DF.Float
 		template_task: DF.Data | None
