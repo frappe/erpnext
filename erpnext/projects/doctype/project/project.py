@@ -25,8 +25,9 @@ class Project(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.projects.doctype.project_user.project_user import ProjectUser
 		from frappe.types import DF
+
+		from erpnext.projects.doctype.project_user.project_user import ProjectUser
 
 		actual_end_date: DF.Date | None
 		actual_start_date: DF.Date | None
@@ -37,7 +38,9 @@ class Project(Document):
 		cost_center: DF.Link | None
 		customer: DF.Link | None
 		daily_time_to_send: DF.Time | None
-		day_to_send: DF.Literal["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+		day_to_send: DF.Literal[
+			"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+		]
 		department: DF.Link | None
 		estimated_costing: DF.Currency
 		expected_end_date: DF.Date | None
