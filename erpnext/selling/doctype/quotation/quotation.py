@@ -370,15 +370,16 @@ def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_
 			)
 
 		# sales team
-		for d in customer.get("sales_team") or []:
-			target.append(
-				"sales_team",
-				{
-					"sales_person": d.sales_person,
-					"allocated_percentage": d.allocated_percentage or None,
-					"commission_rate": d.commission_rate,
-				},
-			)
+		if not target.get("sales_team"):
+			for d in customer.get("sales_team") or []:
+				target.append(
+					"sales_team",
+					{
+						"sales_person": d.sales_person,
+						"allocated_percentage": d.allocated_percentage or None,
+						"commission_rate": d.commission_rate,
+					},
+				)
 
 		target.flags.ignore_permissions = ignore_permissions
 		target.delivery_date = nowdate()
