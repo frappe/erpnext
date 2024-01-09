@@ -395,9 +395,8 @@ class StockEntry(StockController):
 				frappe.delete_doc("Stock Entry", d.name)
 
 	def set_transfer_qty(self):
+		self.validate_qty_is_not_zero()
 		for item in self.get("items"):
-			if not flt(item.qty):
-				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx), title=_("Zero quantity"))
 			if not flt(item.conversion_factor):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(
