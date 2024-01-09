@@ -2,11 +2,7 @@ import frappe
 
 
 def execute():
-	settings = frappe.db.get_single_value(
-		"Selling Settings",
-		["campaign_naming_by", "close_opportunity_after_days", "default_valid_till"],
-		as_dict=True,
-	)
+	settings = frappe.db.get_singles_dict("Selling Settings", cast=True)
 
 	frappe.reload_doc("crm", "doctype", "crm_settings")
 	if settings:
