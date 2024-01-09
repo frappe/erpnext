@@ -183,15 +183,20 @@ class Warehouse(NestedSet):
 
 
 @frappe.whitelist()
-def get_children(doctype, parent=None, company=None, is_root=False):
+def get_children(doctype, parent=None, company=None, is_root=False, include_disabled=False):
 	if is_root:
 		parent = ""
+
+	if isinstance(include_disabled, str):
+		include_disabled = frappe.json.loads(include_disabled)
 
 	fields = ["name as value", "is_group as expandable"]
 	filters = [
 		["ifnull(`parent_warehouse`, '')", "=", parent],
 		["company", "in", (company, None, "")],
 	]
+	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
+		filters.append(["disabled", "=", False])
 
 	return frappe.get_list(doctype, fields=fields, filters=filters, order_by="name")
 

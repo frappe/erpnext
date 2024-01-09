@@ -140,11 +140,8 @@ class RepostItemValuation(Document):
 		return query[0][0] if query else None
 
 	def validate_accounts_freeze(self):
-		acc_settings = frappe.db.get_value(
-			"Accounts Settings",
-			"Accounts Settings",
-			["acc_frozen_upto", "frozen_accounts_modifier"],
-			as_dict=1,
+		acc_settings = frappe.db.get_single_value(
+			"Accounts Settings", ["acc_frozen_upto", "frozen_accounts_modifier"], as_dict=1
 		)
 		if not acc_settings.acc_frozen_upto:
 			return
@@ -294,7 +291,7 @@ def repost(doc):
 			raise
 
 		frappe.db.rollback()
-		traceback = frappe.get_traceback()
+		traceback = frappe.get_traceback(with_context=True)
 		doc.log_error("Unable to repost item valuation")
 
 		message = frappe.message_log.pop() if frappe.message_log else ""

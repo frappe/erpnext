@@ -747,6 +747,10 @@ frappe.ui.form.on('Payment Entry', {
 			args["get_orders_to_be_billed"] = true;
 		}
 
+		if (frm.doc.book_advance_payments_in_separate_party_account) {
+			args["book_advance_payments_in_separate_party_account"] = true;
+		}
+
 		frappe.flags.allocate_payment_amount = filters['allocate_payment_amount'];
 
 		return  frappe.call({
