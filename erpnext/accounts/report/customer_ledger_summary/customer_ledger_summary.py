@@ -21,8 +21,8 @@ class PartyLedgerSummaryReport(object):
 			frappe.throw(_("From Date must be before To Date"))
 
 		self.filters.party_type = args.get("party_type")
-		self.party_naming_by = frappe.db.get_value(
-			args.get("naming_by")[0], None, args.get("naming_by")[1]
+		self.party_naming_by = frappe.db.get_single_value(
+			args.get("naming_by")[0], args.get("naming_by")[1]
 		)
 
 		self.get_gl_entries()
