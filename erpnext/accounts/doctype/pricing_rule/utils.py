@@ -521,7 +521,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 		values.extend(warehouses)
 
 	if items:
-		condition = " and `tab{child_doc}`.{apply_on} in ({items})".format(
+		condition += " and `tab{child_doc}`.{apply_on} in ({items})".format(
 			child_doc=child_doctype, apply_on=apply_on, items=",".join(["%s"] * len(items))
 		)
 
