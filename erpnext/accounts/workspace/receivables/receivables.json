@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"Vlj2FZtlHV\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Bills\",\"col\":3}},{\"id\":\"VVVjQVAhPf\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Incoming Payment\",\"col\":3}},{\"id\":\"X78jcbq1u3\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"vikWSkNm6_\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Quick Start</b></span>\",\"col\":12}},{\"id\":\"G984SgVRJN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"F9f4I1viNr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"id\":\"1ArNvt9qhz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Journal Entry\",\"col\":3}},{\"id\":\"4IBBOIxfqW\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Accounts Receivable\",\"col\":3}},{\"id\":\"El2anpPaFY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"General Ledger\",\"col\":3}},{\"id\":\"1nwcM9upJo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Trial Balance\",\"col\":3}},{\"id\":\"OF9WOi1Ppc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"id\":\"B7-uxs8tkU\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"tHb3yxthkR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"jLgv00c6ek\",\"type\":\"card\",\"data\":{\"card_name\":\"Invoicing\",\"col\":4}},{\"id\":\"npwfXlz0u1\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"id\":\"xOHTyD8b5l\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"vikWSkNm6_\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Shortcuts</b></span>\",\"col\":12}},{\"id\":\"G984SgVRJN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Sales Invoice\",\"col\":3}},{\"id\":\"5yHldR0JNk\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"POS Invoice\",\"col\":3}},{\"id\":\"F9f4I1viNr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"id\":\"1ArNvt9qhz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Journal Entry\",\"col\":3}},{\"id\":\"4IBBOIxfqW\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Accounts Receivable\",\"col\":3}},{\"id\":\"ILlIxJuexy\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Cost Center\",\"col\":3}},{\"id\":\"B7-uxs8tkU\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"tHb3yxthkR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"jLgv00c6ek\",\"type\":\"card\",\"data\":{\"card_name\":\"Invoicing\",\"col\":4}},{\"id\":\"npwfXlz0u1\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"id\":\"am70C27Jrb\",\"type\":\"card\",\"data\":{\"card_name\":\"Dunning\",\"col\":4}},{\"id\":\"xOHTyD8b5l\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2024-01-05 15:29:21.084241",
  "custom_blocks": [],
  "docstatus": 0,
@@ -1000,22 +1000,42 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Dunning",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Dunning",
+   "link_count": 0,
+   "link_to": "Dunning",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Dunning Type",
+   "link_count": 0,
+   "link_to": "Dunning Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2024-01-05 17:35:21.987643",
+ "modified": "2024-01-06 12:47:37.535946",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Receivables",
- "number_cards": [
-  {
-   "label": "Total Incoming Bills",
-   "number_card_name": "Total Incoming Bills"
-  },
-  {
-   "label": "Total Incoming Payment",
-   "number_card_name": "Total Incoming Payment"
-  }
- ],
+ "number_cards": [],
  "owner": "Administrator",
  "parent_page": "Accounting",
  "public": 1,
@@ -1024,6 +1044,21 @@
  "roles": [],
  "sequence_id": 4.0,
  "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "POS Invoice",
+   "link_to": "POS Invoice",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Cost Center",
+   "link_to": "Cost Center",
+   "type": "DocType"
+  },
   {
    "doc_view": "",
    "label": "Sales Invoice",
@@ -1048,24 +1083,6 @@
    "label": "Accounts Receivable",
    "link_to": "Accounts Receivable",
    "type": "Report"
-  },
-  {
-   "doc_view": "",
-   "label": "General Ledger",
-   "link_to": "General Ledger",
-   "type": "Report"
-  },
-  {
-   "doc_view": "",
-   "label": "Trial Balance",
-   "link_to": "Trial Balance",
-   "type": "Report"
-  },
-  {
-   "doc_view": "",
-   "label": "Dashboard",
-   "link_to": "Accounts",
-   "type": "Dashboard"
   }
  ],
  "title": "Receivables"

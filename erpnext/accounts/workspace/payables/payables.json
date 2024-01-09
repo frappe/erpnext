@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"VVvJ1lUcfc\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Outgoing Bills\",\"col\":3}},{\"id\":\"DySNdlysIW\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Total Outgoing Payment\",\"col\":3}},{\"id\":\"X78jcbq1u3\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"G984SgVRJN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Invoice\",\"col\":3}},{\"id\":\"F9f4I1viNr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"id\":\"1ArNvt9qhz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Journal Entry\",\"col\":3}},{\"id\":\"4IBBOIxfqW\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Accounts Payable\",\"col\":3}},{\"id\":\"El2anpPaFY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"General Ledger\",\"col\":3}},{\"id\":\"1nwcM9upJo\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Trial Balance\",\"col\":3}},{\"id\":\"OF9WOi1Ppc\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Dashboard\",\"col\":3}},{\"id\":\"B7-uxs8tkU\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"7dj93PEUjW\",\"type\":\"card\",\"data\":{\"card_name\":\"Invoicing\",\"col\":4}},{\"id\":\"_Cb7C8XdJJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"id\":\"9yseIkdG50\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
+ "content": "[{\"id\":\"rMMsfn2eB4\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Shortcuts</b></span>\",\"col\":12}},{\"id\":\"G984SgVRJN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Purchase Invoice\",\"col\":3}},{\"id\":\"F9f4I1viNr\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Entry\",\"col\":3}},{\"id\":\"1ArNvt9qhz\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Journal Entry\",\"col\":3}},{\"id\":\"4IBBOIxfqW\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Accounts Payable\",\"col\":3}},{\"id\":\"B7-uxs8tkU\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"jAcOH-cC-Q\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Reports &amp; Masters</b></span>\",\"col\":12}},{\"id\":\"7dj93PEUjW\",\"type\":\"card\",\"data\":{\"card_name\":\"Invoicing\",\"col\":4}},{\"id\":\"_Cb7C8XdJJ\",\"type\":\"card\",\"data\":{\"card_name\":\"Payments\",\"col\":4}},{\"id\":\"9yseIkdG50\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}}]",
  "creation": "2024-01-05 15:29:11.144373",
  "custom_blocks": [],
  "docstatus": 0,
@@ -697,8 +697,77 @@
   {
    "hidden": 0,
    "is_query_report": 0,
+   "label": "Invoicing",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Invoice",
+   "link_count": 0,
+   "link_to": "Purchase Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Supplier",
+   "link_count": 0,
+   "link_to": "Supplier",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payments",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Entry",
+   "link_count": 0,
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Journal Entry",
+   "link_count": 0,
+   "link_to": "Journal Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Reconciliation",
+   "link_count": 0,
+   "link_to": "Payment Reconciliation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Reports",
-   "link_count": 6,
+   "link_count": 7,
    "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
@@ -766,87 +835,19 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Invoicing",
-   "link_count": 2,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Purchase Invoice",
+   "label": "Supplier Ledger Summary",
    "link_count": 0,
-   "link_to": "Purchase Invoice",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Supplier",
-   "link_count": 0,
-   "link_to": "Supplier",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payments",
-   "link_count": 3,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payment Entry",
-   "link_count": 0,
-   "link_to": "Payment Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Journal Entry",
-   "link_count": 0,
-   "link_to": "Journal Entry",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Payment Reconciliation",
-   "link_count": 0,
-   "link_to": "Payment Reconciliation",
-   "link_type": "DocType",
+   "link_to": "Supplier Ledger Summary",
+   "link_type": "Report",
    "onboard": 0,
    "type": "Link"
   }
  ],
- "modified": "2024-01-05 17:35:00.611598",
+ "modified": "2024-01-09 10:11:52.767401",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payables",
- "number_cards": [
-  {
-   "label": "Total Outgoing Bills",
-   "number_card_name": "Total Outgoing Bills"
-  },
-  {
-   "label": "Total Outgoing Payment",
-   "number_card_name": "Total Outgoing Payment"
-  }
- ],
+ "number_cards": [],
  "owner": "Administrator",
  "parent_page": "Accounting",
  "public": 1,
@@ -878,24 +879,6 @@
    "label": "Payment Entry",
    "link_to": "Payment Entry",
    "type": "DocType"
-  },
-  {
-   "doc_view": "",
-   "label": "General Ledger",
-   "link_to": "General Ledger",
-   "type": "Report"
-  },
-  {
-   "doc_view": "",
-   "label": "Trial Balance",
-   "link_to": "Trial Balance",
-   "type": "Report"
-  },
-  {
-   "doc_view": "",
-   "label": "Dashboard",
-   "link_to": "Accounts",
-   "type": "Dashboard"
   }
  ],
  "title": "Payables"
