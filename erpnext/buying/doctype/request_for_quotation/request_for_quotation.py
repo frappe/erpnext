@@ -358,8 +358,8 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 			target_doc.currency = args.currency or get_party_account_currency(
 				"Supplier", for_supplier, source.company
 			)
-			target_doc.buying_price_list = args.buying_price_list or frappe.db.get_value(
-				"Buying Settings", None, "buying_price_list"
+			target_doc.buying_price_list = args.buying_price_list or frappe.db.get_single_value(
+				"Buying Settings", "buying_price_list"
 			)
 		set_missing_values(source, target_doc)
 
@@ -399,7 +399,7 @@ def create_supplier_quotation(doc):
 				"currency": doc.get("currency")
 				or get_party_account_currency("Supplier", doc.get("supplier"), doc.get("company")),
 				"buying_price_list": doc.get("buying_price_list")
-				or frappe.db.get_value("Buying Settings", None, "buying_price_list"),
+				or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
 			}
 		)
 		add_items(sq_doc, doc.get("supplier"), doc.get("items"))

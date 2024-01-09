@@ -552,7 +552,7 @@ class PurchaseInvoice(BuyingController):
 		self.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
-		if frappe.db.get_value("Buying Settings", None, "po_required") == "Yes":
+		if frappe.db.get_single_value("Buying Settings", "po_required") == "Yes":
 
 			if frappe.get_value(
 				"Supplier", self.supplier, "allow_purchase_invoice_creation_without_purchase_order"
@@ -572,7 +572,7 @@ class PurchaseInvoice(BuyingController):
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
-		if frappe.db.get_value("Buying Settings", None, "pr_required") == "Yes":
+		if frappe.db.get_single_value("Buying Settings", "pr_required") == "Yes":
 
 			if frappe.get_value(
 				"Supplier", self.supplier, "allow_purchase_invoice_creation_without_purchase_receipt"

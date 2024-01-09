@@ -35,8 +35,8 @@ class TestSalesOrder(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.unlink_setting = int(
-			frappe.db.get_value(
-				"Accounts Settings", "Accounts Settings", "unlink_advance_payment_on_cancelation_of_order"
+			frappe.db.get_single_value(
+				"Accounts Settings", "unlink_advance_payment_on_cancelation_of_order"
 			)
 		)
 
