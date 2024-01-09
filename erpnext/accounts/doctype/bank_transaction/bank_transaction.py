@@ -3,12 +3,11 @@
 
 import frappe
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.controllers.status_updater import StatusUpdater
 
-
-class BankTransaction(StatusUpdater):
+class BankTransaction(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -50,6 +49,15 @@ class BankTransaction(StatusUpdater):
 	def validate(self):
 		self.validate_duplicate_references()
 
+	def set_status(self):
+		if self.docstatus == 2:
+			self.db_set("status", "Cancelled")
+		elif self.docstatus == 1:
+			if self.unallocated_amount > 0:
+				self.db_set("status", "Unreconciled")
+			elif self.unallocated_amount <= 0:
+				self.db_set("status", "Reconciled")
+
 	def validate_duplicate_references(self):
 		"""Make sure the same voucher is not allocated twice within the same Bank Transaction"""
 		if not self.payment_entries:
@@ -88,7 +96,7 @@ class BankTransaction(StatusUpdater):
 		for payment_entry in self.payment_entries:
 			self.clear_linked_payment_entry(payment_entry, for_cancel=True)
 
-		self.set_status(update=True)
+		self.set_status()
 
 	def add_payment_entries(self, vouchers):
 		"Add the vouchers with zero allocation. Save() will perform the allocations and clearance"

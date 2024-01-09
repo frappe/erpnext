@@ -131,11 +131,6 @@ status_map = {
 			"eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Manufacture'",
 		],
 	],
-	"Bank Transaction": [
-		["Unreconciled", "eval:self.docstatus == 1 and self.unallocated_amount>0"],
-		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"],
-		["Cancelled", "eval:self.docstatus == 2"],
-	],
 	"POS Opening Entry": [
 		["Draft", None],
 		["Open", "eval:self.docstatus == 1 and not self.pos_closing_entry"],
