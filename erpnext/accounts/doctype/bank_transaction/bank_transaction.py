@@ -91,6 +91,7 @@ class BankTransaction(Document):
 		self.validate_duplicate_references()
 		self.allocate_payment_entries()
 		self.update_allocated_amount()
+		self.set_status()
 
 	def on_cancel(self):
 		for payment_entry in self.payment_entries:
