@@ -314,7 +314,6 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 def get_project_list(
 	doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"
 ):
-	user = frappe.session.user
 	customers, suppliers = get_customers_suppliers("Project", frappe.session.user)
 
 	ignore_permissions = False
