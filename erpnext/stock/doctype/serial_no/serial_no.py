@@ -41,7 +41,6 @@ class SerialNo(StockController):
 		batch_no: DF.Link | None
 		brand: DF.Link | None
 		company: DF.Link
-		delivery_document_type: DF.Link | None
 		description: DF.Text | None
 		employee: DF.Link | None
 		item_code: DF.Link
@@ -51,6 +50,7 @@ class SerialNo(StockController):
 		maintenance_status: DF.Literal[
 			"", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"
 		]
+		purchase_document_no: DF.Data | None
 		purchase_rate: DF.Float
 		serial_no: DF.Data
 		status: DF.Literal["", "Active", "Inactive", "Delivered", "Expired"]
@@ -229,26 +229,6 @@ def auto_fetch_serial_number(
 	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
 
 	return sorted([d.get("name") for d in serial_numbers])
-
-
-def get_delivered_serial_nos(serial_nos):
-	"""
-	Returns serial numbers that delivered from the list of serial numbers
-	"""
-	from frappe.query_builder.functions import Coalesce
-
-	SerialNo = frappe.qb.DocType("Serial No")
-	serial_nos = get_serial_nos(serial_nos)
-	query = (
-		frappe.qb.select(SerialNo.name)
-		.from_(SerialNo)
-		.where((SerialNo.name.isin(serial_nos)) & (Coalesce(SerialNo.delivery_document_type, "") != ""))
-	)
-
-	result = query.run()
-	if result and len(result) > 0:
-		delivered_serial_nos = [row[0] for row in result]
-		return delivered_serial_nos
 
 
 @frappe.whitelist()

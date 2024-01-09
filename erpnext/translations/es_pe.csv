@@ -310,7 +310,6 @@ Row {0}: Debit entry can not be linked with a {1},Fila {0}: Débito no puede vin
 Row {0}: Party Type and Party is required for Receivable / Payable account {1},Fila {0}: el tipo de entidad se requiere para las cuentas por cobrar/pagar {1},
 Row {0}: Payment against Sales/Purchase Order should always be marked as advance,Fila {0}: El pago de Compra/Venta siempre debe estar marcado como anticipo,
 Row {0}: Please check 'Is Advance' against Account {1} if this is an advance entry.,"Fila {0}: Por favor, consulte ""¿Es Avance 'contra la Cuenta {1} si se trata de una entrada con antelación.",
-Row {0}: Qty is mandatory,Fila {0}: Cantidad es obligatorio,
 Row {0}: {1} {2} does not match with {3},Fila {0}: {1} {2} no coincide con {3},
 Row {0}:Start Date must be before End Date,Fila {0}: Fecha de inicio debe ser anterior Fecha de finalización,
 Rules for adding shipping costs.,Reglas para la adición de los gastos de envío .,

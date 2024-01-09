@@ -380,6 +380,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	scan_barcode() {
+		frappe.flags.dialog_set = false;
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
 		barcode_scanner.process_scan();
 	}
@@ -453,7 +454,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		item.weight_uom = '';
 		item.conversion_factor = 0;
 
-		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
+		if(['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
 
@@ -471,6 +472,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				item.pricing_rules = ''
 				return this.frm.call({
 					method: "erpnext.stock.get_item_details.get_item_details",
+					child: item,
 					args: {
 						doc: me.frm.doc,
 						args: {
@@ -521,19 +523,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						if(!r.exc) {
 							frappe.run_serially([
 								() => {
-									var child = locals[cdt][cdn];
-									var std_field_list = ["doctype"]
-										.concat(frappe.model.std_fields_list)
-										.concat(frappe.model.child_table_field_list);
-
-									for (var key in r.message) {
-										if (std_field_list.indexOf(key) === -1) {
-											if (key === "qty" && child[key]) continue;
-											child[key] = r.message[key];
-										}
-									}
-								},
-								() => {
 									var d = locals[cdt][cdn];
 									me.add_taxes_from_item_tax_template(d.item_tax_rate);
 									if (d.free_item_data && d.free_item_data.length > 0) {
@@ -556,7 +545,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								() => me.toggle_conversion_factor(item),
 								() => {
-									if (show_batch_dialog)
+									if (show_batch_dialog && !frappe.flags.trigger_from_barcode_scanner)
 										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
 											.then((r) => {
 												if (r.message &&
@@ -726,6 +715,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	on_submit() {
+		if (in_list(["Purchase Invoice", "Sales Invoice"], this.frm.doc.doctype)
+			&& !this.frm.doc.update_stock) {
+			return;
+		}
+
 		this.refresh_serial_batch_bundle_field();
 	}
 
@@ -1245,6 +1239,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
+	sync_bundle_data() {
+		let doctypes = ["Sales Invoice", "Purchase Invoice", "Delivery Note", "Purchase Receipt"];
+
+		if (this.frm.is_new() && doctypes.includes(this.frm.doc.doctype)) {
+			const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
+			barcode_scanner.sync_bundle_data();
+			barcode_scanner.remove_item_from_localstorage();
+		}
+	}
+
+	before_save(doc) {
+		this.sync_bundle_data();
+	}
+
 	service_start_date(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 
@@ -1580,6 +1588,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 		return item_list;
+	}
+
+	items_delete() {
+		this.update_localstorage_scanned_data();
+	}
+
+	update_localstorage_scanned_data() {
+		let doctypes = ["Sales Invoice", "Purchase Invoice", "Delivery Note", "Purchase Receipt"];
+		if (this.frm.is_new() && doctypes.includes(this.frm.doc.doctype)) {
+			const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
+			barcode_scanner.update_localstorage_scanned_data();
+		}
 	}
 
 	_set_values_for_item_list(children) {

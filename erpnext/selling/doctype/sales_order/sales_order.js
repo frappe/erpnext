@@ -182,7 +182,7 @@ frappe.ui.form.on("Sales Order", {
 	create_stock_reservation_entries(frm) {
 		const dialog = new frappe.ui.Dialog({
 			title: __("Stock Reservation"),
-			size: "large",
+			size: "extra-large",
 			fields: [
 				{
 					fieldname: "set_warehouse",
@@ -207,6 +207,50 @@ frappe.ui.form.on("Sales Order", {
 					},
 				},
 				{fieldtype: "Column Break"},
+				{
+					fieldname: "add_item",
+					fieldtype: "Link",
+					label: __("Add Item"),
+					options: "Sales Order Item",
+					get_query: () => {
+						return {
+							query: "erpnext.controllers.queries.get_filtered_child_rows",
+							filters: {
+								"parenttype": frm.doc.doctype,
+								"parent": frm.doc.name,
+								"reserve_stock": 1,
+							}
+						}
+					},
+					onchange: () => {
+						let sales_order_item = dialog.get_value("add_item");
+
+						if (sales_order_item) {
+							frm.doc.items.forEach(item => {
+								if (item.name === sales_order_item) {
+									let unreserved_qty = (flt(item.stock_qty) - (item.stock_reserved_qty ? flt(item.stock_reserved_qty) : (flt(item.delivered_qty) * flt(item.conversion_factor)))) / flt(item.conversion_factor);
+
+									if (unreserved_qty > 0) {
+										dialog.fields_dict.items.df.data.forEach((row) => {
+											if (row.sales_order_item === sales_order_item) {
+												unreserved_qty -= row.qty_to_reserve;
+											}
+										});
+									}
+
+									dialog.fields_dict.items.df.data.push({
+										'sales_order_item': item.name,
+										'item_code': item.item_code,
+										'warehouse': dialog.get_value("set_warehouse") || item.warehouse,
+										'qty_to_reserve': Math.max(unreserved_qty, 0)
+									});
+									dialog.fields_dict.items.grid.refresh();
+									dialog.set_value("add_item", undefined);
+								}
+							});
+						}
+					},
+				},
 				{fieldtype: "Section Break"},
 				{
 					fieldname: "items",
@@ -218,10 +262,34 @@ frappe.ui.form.on("Sales Order", {
 					fields: [
 						{
 							fieldname: "sales_order_item",
-							fieldtype: "Data",
+							fieldtype: "Link",
 							label: __("Sales Order Item"),
+							options: "Sales Order Item",
 							reqd: 1,
-							read_only: 1,
+							in_list_view: 1,
+							get_query: () => {
+								return {
+									query: "erpnext.controllers.queries.get_filtered_child_rows",
+									filters: {
+										"parenttype": frm.doc.doctype,
+										"parent": frm.doc.name,
+										"reserve_stock": 1,
+									}
+								}
+							},
+							onchange: (event) => {
+								if (event) {
+									let name = $(event.currentTarget).closest(".grid-row").attr("data-name");
+									let item_row = dialog.fields_dict.items.grid.grid_rows_by_docname[name].doc;
+
+									frm.doc.items.forEach(item => {
+										if (item.name === item_row.sales_order_item) {
+											item_row.item_code = item.item_code;
+										}
+									});
+									dialog.fields_dict.items.grid.refresh();
+								}
+							}
 						},
 						{
 							fieldname: "item_code",
@@ -284,14 +352,14 @@ frappe.ui.form.on("Sales Order", {
 
 		frm.doc.items.forEach(item => {
 			if (item.reserve_stock) {
-				let unreserved_qty = (flt(item.stock_qty) - (item.stock_reserved_qty ? flt(item.stock_reserved_qty) : (flt(item.delivered_qty) * flt(item.conversion_factor))))
+				let unreserved_qty = (flt(item.stock_qty) - (item.stock_reserved_qty ? flt(item.stock_reserved_qty) : (flt(item.delivered_qty) * flt(item.conversion_factor)))) / flt(item.conversion_factor);
 
 				if (unreserved_qty > 0) {
 					dialog.fields_dict.items.df.data.push({
 						'sales_order_item': item.name,
 						'item_code': item.item_code,
 						'warehouse': item.warehouse,
-						'qty_to_reserve': (unreserved_qty / flt(item.conversion_factor))
+						'qty_to_reserve': unreserved_qty
 					});
 				}
 			}

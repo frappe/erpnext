@@ -31,7 +31,6 @@ def after_install():
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
-	hide_workspaces()
 	update_roles()
 	frappe.db.commit()
 
@@ -84,8 +83,6 @@ def set_single_defaults():
 				doc.save()
 			except frappe.ValidationError:
 				pass
-
-	frappe.db.set_default("date_format", "dd-mm-yyyy")
 
 	setup_currency_exchange()
 
@@ -218,11 +215,6 @@ def add_standard_navbar_items():
 
 def add_app_name():
 	frappe.db.set_single_value("System Settings", "app_name", "ERPNext")
-
-
-def hide_workspaces():
-	for ws in ["Integration", "Settings"]:
-		frappe.db.set_value("Workspace", ws, "public", 0)
 
 
 def update_roles():
