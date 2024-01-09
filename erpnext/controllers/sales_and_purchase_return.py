@@ -8,13 +8,7 @@ from frappe.model.meta import get_field_precision
 from frappe.utils import flt, format_datetime, get_datetime
 
 import erpnext
-<<<<<<< HEAD
-from erpnext.stock.utils import get_incoming_rate
-=======
-from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
-from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
 from erpnext.stock.utils import get_incoming_rate, get_valuation_method
->>>>>>> e0ad52b500 (fix: skip rate validation for return `DN Items` with `Moving Average` valuation)
 
 
 class StockOverReturnError(frappe.ValidationError):
