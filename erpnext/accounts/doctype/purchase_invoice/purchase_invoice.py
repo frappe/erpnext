@@ -1084,17 +1084,6 @@ class PurchaseInvoice(BuyingController):
 										item=item,
 									)
 								)
-
-						# update gross amount of asset bought through this document
-						assets = frappe.db.get_all(
-							"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
-						)
-						for asset in assets:
-							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-							frappe.db.set_value(
-								"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate)
-							)
-
 			if (
 				self.auto_accounting_for_stock
 				and self.is_opening == "No"
@@ -1134,17 +1123,24 @@ class PurchaseInvoice(BuyingController):
 							item.item_tax_amount, item.precision("item_tax_amount")
 						)
 
+			if item.is_fixed_asset and item.landed_cost_voucher_amount:
+				self.update_gross_purchase_amount_for_linked_assets(item)
+
+	def update_gross_purchase_amount_for_linked_assets(self, item):
 		assets = frappe.db.get_all(
 			"Asset",
 			filters={"purchase_invoice": self.name, "item_code": item.item_code},
 			fields=["name", "asset_quantity"],
 		)
 		for asset in assets:
+			purchase_amount = flt(item.valuation_rate) * asset.asset_quantity
 			frappe.db.set_value(
-				"Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate) * asset.asset_quantity
-			)
-			frappe.db.set_value(
-				"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate) * asset.asset_quantity
+				"Asset",
+				asset.name,
+				{
+					"gross_purchase_amount": purchase_amount,
+					"purchase_receipt_amount": purchase_amount,
+				},
 			)
 
 	def make_stock_adjustment_entry(
