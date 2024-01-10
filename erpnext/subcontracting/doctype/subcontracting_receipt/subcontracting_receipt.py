@@ -8,6 +8,7 @@ from frappe.utils import cint, flt, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.utils import get_account_currency
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.stock_ledger import get_valuation_rate
 
@@ -142,6 +143,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.get_current_stock()
 
 	def on_submit(self):
+		self.validate_closed_subcontracting_order()
 		self.validate_available_qty_for_consumption()
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
@@ -165,6 +167,7 @@ class SubcontractingReceipt(SubcontractingController):
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
 		)
+		self.validate_closed_subcontracting_order()
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 		self.set_consumed_qty_in_subcontract_order()
@@ -174,6 +177,11 @@ class SubcontractingReceipt(SubcontractingController):
 		self.repost_future_sle_and_gle()
 		self.update_status()
 		self.delete_auto_created_batches()
+
+	def validate_closed_subcontracting_order(self):
+		for item in self.items:
+			if item.subcontracting_order:
+				check_on_hold_or_closed_status("Subcontracting Order", item.subcontracting_order)
 
 	def validate_items_qty(self):
 		for item in self.items:

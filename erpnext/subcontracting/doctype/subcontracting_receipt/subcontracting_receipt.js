@@ -93,7 +93,8 @@ frappe.ui.form.on('Subcontracting Receipt', {
 					get_query_filters: {
 						docstatus: 1,
 						per_received: ['<', 100],
-						company: frm.doc.company
+						company: frm.doc.company,
+						status: ['!=', 'Closed'],
 					}
 				});
 			}, __('Get Items From'));

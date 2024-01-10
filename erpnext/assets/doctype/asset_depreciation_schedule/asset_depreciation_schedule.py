@@ -35,6 +35,7 @@ class AssetDepreciationSchedule(Document):
 
 		amended_from: DF.Link | None
 		asset: DF.Link
+		company: DF.Link | None
 		daily_prorata_based: DF.Check
 		depreciation_method: DF.Literal[
 			"", "Straight Line", "Double Declining Balance", "Written Down Value", "Manual"
