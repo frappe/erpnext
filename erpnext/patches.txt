@@ -357,3 +357,4 @@ erpnext.patches.v14_0.update_total_asset_cost_field
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index # 2023-12-20
 erpnext.patches.v14_0.set_maintain_stock_for_bom_item
+execute:frappe.db.set_single_value('E Commerce Settings', 'show_actual_qty', 1)
