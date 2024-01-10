@@ -19,6 +19,7 @@ from frappe.utils import (
 from frappe.utils.data import get_link_to_form
 from frappe.utils.user import get_users_with_role
 
+import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
@@ -472,6 +473,13 @@ def depreciate_asset(asset, date):
 	asset.save()
 
 	make_depreciation_entry(asset.name, date)
+
+	cancel_depreciation_entries(asset, date)
+
+
+@erpnext.allow_regional
+def cancel_depreciation_entries(asset, date):
+	pass
 
 
 def reset_depreciation_schedule(asset, date):
