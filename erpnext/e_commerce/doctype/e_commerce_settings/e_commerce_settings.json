@@ -31,6 +31,7 @@
   "column_break_21",
   "default_customer_group",
   "quotation_series",
+  "show_actual_qty",
   "checkout_settings_section",
   "enable_checkout",
   "show_price_in_quotation",
@@ -366,12 +367,19 @@
    "fieldtype": "Check",
    "label": "Enable Redisearch",
    "read_only_depends_on": "eval:!doc.is_redisearch_loaded"
+  },
+  {
+   "default": "1",
+   "description": "If enabled Actual Qty will be shown as <b>In Stock</b> on the product page instead of Projected Qty.",
+   "fieldname": "show_actual_qty",
+   "fieldtype": "Check",
+   "label": "Show Actual Qty"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-04-01 18:35:56.106756",
+ "modified": "2024-01-10 21:06:45.386977",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
