@@ -316,16 +316,12 @@ class Asset(AccountsController):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
-<<<<<<< HEAD
-			if not self.is_existing_asset and not (self.purchase_receipt or self.purchase_invoice):
-=======
 			if (
 				not self.is_existing_asset
 				and not self.is_composite_asset
 				and not self.purchase_receipt
 				and not self.purchase_invoice
 			):
->>>>>>> c34f09c503 (fix: Purchase date and amount is not mandatory for composite asset creation)
 				frappe.throw(
 					_("Please create purchase receipt or purchase invoice for the item {0}").format(
 						self.item_code
