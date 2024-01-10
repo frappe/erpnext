@@ -7,7 +7,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "down-arrow",
+ "icon": "arrow-right",
  "idx": 0,
  "indicator_color": "",
  "is_hidden": 0,
@@ -1031,7 +1031,7 @@
    "type": "Link"
   }
  ],
- "modified": "2024-01-06 12:47:37.535946",
+ "modified": "2024-01-10 15:47:14.123040",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Receivables",

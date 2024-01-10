@@ -7,7 +7,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "up-arrow",
+ "icon": "arrow-left",
  "idx": 0,
  "indicator_color": "",
  "is_hidden": 0,
@@ -843,7 +843,7 @@
    "type": "Link"
   }
  ],
- "modified": "2024-01-09 10:11:52.767401",
+ "modified": "2024-01-10 15:47:06.884189",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payables",
