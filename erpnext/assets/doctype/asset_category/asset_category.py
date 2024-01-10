@@ -67,12 +67,12 @@ class AssetCategory(Document):
 					if selected_key_type not in expected_key_types:
 						frappe.throw(
 							_(
-								"Row #{}: {} of {} should be {}. Please modify the account or select a different account."
+								"Row #{0}: {1} of {2} should be {3}. Please update the {1} or select a different account."
 							).format(
 								d.idx,
 								frappe.unscrub(key_to_match),
 								frappe.bold(selected_account),
-								frappe.bold(expected_key_types),
+								frappe.bold(" or ".join(expected_key_types)),
 							),
 							title=_("Invalid Account"),
 						)
