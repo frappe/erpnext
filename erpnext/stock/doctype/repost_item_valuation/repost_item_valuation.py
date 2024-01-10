@@ -219,7 +219,7 @@ class RepostItemValuation(Document):
 
 		transaction_status = frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus")
 		if transaction_status == 2:
-			msg = _("Cannot cancel as processing of cancelled documents is  pending.")
+			msg = _("Cannot cancel as processing of cancelled documents is pending.")
 			msg += "<br>" + _("Please try again in an hour.")
 			frappe.throw(msg, title=_("Pending processing"))
 
