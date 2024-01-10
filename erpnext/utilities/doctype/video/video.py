@@ -78,8 +78,7 @@ def get_frequency(value):
 
 def update_youtube_data():
 	# Called every 30 minutes via hooks
-	video_settings = frappe.db.get_singles_dict("Video Settings", cast=True)
-
+	video_settings = frappe.get_cached_doc("Video Settings")
 	if not video_settings.enable_youtube_tracking:
 		return
 
