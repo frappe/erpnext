@@ -890,8 +890,8 @@ frappe.ui.form.on('Sales Invoice', {
 				frm.events.append_time_log(frm, timesheet, 1.0);
 			}
 		});
-		frm.refresh_field("timesheets");
 		frm.trigger("calculate_timesheet_totals");
+		frm.refresh();
 	},
 
 	async get_exchange_rate(frm, from_currency, to_currency) {
