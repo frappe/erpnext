@@ -1475,14 +1475,14 @@ class TestProductionPlan(FrappeTestCase):
 		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 
 		pln.reload()
-		pln.set_status(close=True)
+		pln.set_status(close=True, update_bin=True)
 
 		bin_name = get_or_make_bin(rm_item, rm_warehouse)
 		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
 		self.assertAlmostEqual(after_qty, before_qty - 10)
 
 		pln.reload()
-		pln.set_status(close=False)
+		pln.set_status(close=False, update_bin=True)
 
 		bin_name = get_or_make_bin(rm_item, rm_warehouse)
 		after_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
