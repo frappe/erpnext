@@ -503,7 +503,7 @@ class ProductionPlan(Document):
 			frappe.delete_doc("Work Order", d.name)
 
 	@frappe.whitelist()
-	def set_status(self, close=None):
+	def set_status(self, close=None, update_bin=False):
 		self.status = {0: "Draft", 1: "Submitted", 2: "Cancelled"}.get(self.docstatus)
 
 		if close:
@@ -523,7 +523,7 @@ class ProductionPlan(Document):
 		if close is not None:
 			self.db_set("status", self.status)
 
-		if self.docstatus == 1 and self.status != "Completed":
+		if update_bin and self.docstatus == 1 and self.status != "Completed":
 			self.update_bin_qty()
 
 	def update_ordered_status(self):
