@@ -170,6 +170,15 @@ frappe.ui.form.on("Sales Order", {
 		}
 
 		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
+
+		// The sales order should only allow the selection of UOMs that have been predefined when choosing materials.
+		frm.fields_dict['items'].grid.get_field('uom').get_query = function(doc, cdt, cdn){
+			var row = locals[cdt][cdn];
+			return {
+				query:"erpnext.accounts.doctype.pricing_rule.pricing_rule.get_item_uoms",
+				filters: {'value':row.item_code, apply_on:"Item Code"},
+			}
+		};
 	},
 
 	delivery_date: function(frm) {
