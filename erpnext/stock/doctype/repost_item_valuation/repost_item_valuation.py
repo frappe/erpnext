@@ -140,9 +140,7 @@ class RepostItemValuation(Document):
 		return query[0][0] if query else None
 
 	def validate_accounts_freeze(self):
-		acc_settings = frappe.db.get_single_value(
-			"Accounts Settings", ["acc_frozen_upto", "frozen_accounts_modifier"], as_dict=1
-		)
+		acc_settings = frappe.get_cached_doc("Account Settings")
 		if not acc_settings.acc_frozen_upto:
 			return
 		if getdate(self.posting_date) <= getdate(acc_settings.acc_frozen_upto):
