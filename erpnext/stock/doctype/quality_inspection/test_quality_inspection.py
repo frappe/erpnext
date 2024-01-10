@@ -216,6 +216,70 @@ class TestQualityInspection(FrappeTestCase):
 		qa.save()
 		self.assertEqual(qa.status, "Accepted")
 
+<<<<<<< HEAD
+=======
+	@change_settings("System Settings", {"number_format": "#.###,##"})
+	def test_diff_number_format(self):
+		self.assertEqual(frappe.db.get_default("number_format"), "#.###,##")  # sanity check
+
+		# Test QI based on acceptance values (Non formula)
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		readings = [
+			{
+				"specification": "Iron Content",  # numeric reading
+				"min_value": 60,
+				"max_value": 100,
+				"reading_1": "70,000",
+			},
+			{
+				"specification": "Iron Content",  # numeric reading
+				"min_value": 60,
+				"max_value": 100,
+				"reading_1": "1.100,00",
+			},
+		]
+
+		qa = create_quality_inspection(
+			reference_type="Delivery Note", reference_name=dn.name, readings=readings, do_not_save=True
+		)
+
+		qa.save()
+
+		# status must be auto set as per formula
+		self.assertEqual(qa.readings[0].status, "Accepted")
+		self.assertEqual(qa.readings[1].status, "Rejected")
+
+		qa.delete()
+		dn.delete()
+
+	def test_delete_quality_inspection_linked_with_stock_entry(self):
+		item_code = create_item("_Test Cicuular Dependecy Item with QA").name
+
+		se = make_stock_entry(
+			item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100, do_not_submit=True
+		)
+
+		se.inspection_required = 1
+		se.save()
+
+		qa = create_quality_inspection(
+			item_code=item_code, reference_type="Stock Entry", reference_name=se.name, do_not_submit=True
+		)
+
+		se.reload()
+		se.items[0].quality_inspection = qa.name
+		se.save()
+
+		qa.delete()
+
+		se.reload()
+
+		qc = se.items[0].quality_inspection
+		self.assertFalse(qc)
+
+		se.delete()
+
+>>>>>>> 7cc324e31e (fix: circular dependency error while deleting QC)
 
 def create_quality_inspection(**args):
 	args = frappe._dict(args)
