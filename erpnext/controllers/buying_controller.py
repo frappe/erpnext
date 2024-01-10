@@ -730,11 +730,8 @@ class BuyingController(SubcontractingController):
 		item_data = frappe.db.get_value(
 			"Item", row.item_code, ["asset_naming_series", "asset_category"], as_dict=1
 		)
-
-		if is_grouped_asset:
-			purchase_amount = flt(row.base_amount + row.item_tax_amount)
-		else:
-			purchase_amount = flt(row.base_rate + row.item_tax_amount)
+		asset_quantity = row.qty if is_grouped_asset else 1
+		purchase_amount = flt(row.valuation_rate) * asset_quantity
 
 		asset = frappe.get_doc(
 			{
@@ -750,7 +747,7 @@ class BuyingController(SubcontractingController):
 				"calculate_depreciation": 1,
 				"purchase_receipt_amount": purchase_amount,
 				"gross_purchase_amount": purchase_amount,
-				"asset_quantity": row.qty if is_grouped_asset else 1,
+				"asset_quantity": asset_quantity,
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,
 				"purchase_invoice": self.name if self.doctype == "Purchase Invoice" else None,
 				"cost_center": row.cost_center,
