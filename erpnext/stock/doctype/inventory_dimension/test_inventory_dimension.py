@@ -429,6 +429,14 @@ class TestInventoryDimension(FrappeTestCase):
 		)
 
 		warehouse = create_warehouse("Negative Stock Warehouse")
+
+		doc = make_stock_entry(item_code=item_code, source=warehouse, qty=10, do_not_submit=True)
+		doc.items[0].inv_site = "Site 1"
+		self.assertRaises(frappe.ValidationError, doc.submit)
+		doc.reload()
+		if doc.docstatus == 1:
+			doc.cancel()
+
 		doc = make_stock_entry(item_code=item_code, target=warehouse, qty=10, do_not_submit=True)
 
 		doc.items[0].to_inv_site = "Site 1"

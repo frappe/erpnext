@@ -249,7 +249,7 @@ class Company(NestedSet):
 		if frappe.flags.parent_company_changed:
 			from frappe.utils.nestedset import rebuild_tree
 
-			rebuild_tree("Company", "parent_company")
+			rebuild_tree("Company")
 
 		frappe.clear_cache()
 
@@ -397,7 +397,7 @@ class Company(NestedSet):
 		frappe.local.flags.ignore_update_nsm = True
 		make_records(records)
 		frappe.local.flags.ignore_update_nsm = False
-		rebuild_tree("Department", "parent_department")
+		rebuild_tree("Department")
 
 	def validate_coa_input(self):
 		if self.create_chart_of_accounts_based_on == "Existing Company":

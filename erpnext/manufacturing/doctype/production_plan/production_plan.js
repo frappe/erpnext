@@ -173,7 +173,7 @@ frappe.ui.form.on('Production Plan', {
 			method: "set_status",
 			freeze: true,
 			doc: frm.doc,
-			args: {close : close},
+			args: {close : close, update_bin: true},
 			callback: function() {
 				frm.reload_doc();
 			}
