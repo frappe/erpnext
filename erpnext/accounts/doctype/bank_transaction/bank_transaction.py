@@ -3,11 +3,8 @@
 
 import frappe
 from frappe import _
-<<<<<<< HEAD
-from frappe.model.document import Document
-=======
 from frappe.model.docstatus import DocStatus
->>>>>>> 0a95b38166 (fix: unreconcile Bank Transaction on cancel of payment voucher)
+from frappe.model.document import Document
 from frappe.utils import flt
 
 
