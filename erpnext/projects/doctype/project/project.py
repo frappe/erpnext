@@ -370,18 +370,16 @@ def get_timeline_data(doctype: str, name: str) -> dict[int, int]:
 def get_project_list(
 	doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"
 ):
-	user = frappe.session.user
 	customers, suppliers = get_customers_suppliers("Project", frappe.session.user)
 
 	ignore_permissions = False
-	if is_website_user():
+	if is_website_user() and frappe.session.user != "Guest":
 		if not filters:
 			filters = []
 
 		if customers:
 			filters.append([doctype, "customer", "in", customers])
-
-		ignore_permissions = True
+			ignore_permissions = True
 
 	meta = frappe.get_meta(doctype)
 
