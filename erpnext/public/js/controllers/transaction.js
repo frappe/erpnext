@@ -454,7 +454,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		item.weight_uom = '';
 		item.conversion_factor = 0;
 
-		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
+		if(['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
 			show_batch_dialog = update_stock;
 
@@ -545,7 +545,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 								},
 								() => me.toggle_conversion_factor(item),
 								() => {
-									if (show_batch_dialog)
+									if (show_batch_dialog && !frappe.flags.trigger_from_barcode_scanner)
 										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
 											.then((r) => {
 												if (r.message &&
@@ -790,7 +790,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				if (me.frm.doc.price_list_currency == company_currency) {
 					me.frm.set_value('plc_conversion_rate', 1.0);
 				}
-				if (company_doc.default_letter_head) {
+				if (company_doc && company_doc.default_letter_head) {
 					if(me.frm.fields_dict.letter_head) {
 						me.frm.set_value("letter_head", company_doc.default_letter_head);
 					}
@@ -1239,6 +1239,20 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
+	sync_bundle_data() {
+		let doctypes = ["Sales Invoice", "Purchase Invoice", "Delivery Note", "Purchase Receipt"];
+
+		if (this.frm.is_new() && doctypes.includes(this.frm.doc.doctype)) {
+			const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
+			barcode_scanner.sync_bundle_data();
+			barcode_scanner.remove_item_from_localstorage();
+		}
+	}
+
+	before_save(doc) {
+		this.sync_bundle_data();
+	}
+
 	service_start_date(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 
@@ -1574,6 +1588,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 		return item_list;
+	}
+
+	items_delete() {
+		this.update_localstorage_scanned_data();
+	}
+
+	update_localstorage_scanned_data() {
+		let doctypes = ["Sales Invoice", "Purchase Invoice", "Delivery Note", "Purchase Receipt"];
+		if (this.frm.is_new() && doctypes.includes(this.frm.doc.doctype)) {
+			const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
+			barcode_scanner.update_localstorage_scanned_data();
+		}
 	}
 
 	_set_values_for_item_list(children) {

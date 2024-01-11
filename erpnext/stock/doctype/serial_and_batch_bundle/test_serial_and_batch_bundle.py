@@ -10,6 +10,8 @@ from frappe.utils import add_days, add_to_date, flt, nowdate, nowtime, today
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	add_serial_batch_ledgers,
+	make_batch_nos,
+	make_serial_nos,
 )
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
@@ -427,11 +429,12 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		item = make_item(
+			"Test Serial and Batch Bundle Company Item",
 			properties={
 				"has_serial_no": 1,
 				"serial_no_series": "TT-SER-VAL-.#####",
-			}
-		)
+			},
+		).name
 
 		pr = make_purchase_receipt(
 			item_code=item,
@@ -459,6 +462,58 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		item_row.is_rejected = 0
 		sn_doc = add_serial_batch_ledgers(entries, item_row, pr, "_Test Warehouse - _TC")
 		self.assertEqual(sn_doc.company, "_Test Company")
+
+	def test_auto_cancel_serial_and_batch(self):
+		item_code = make_item(
+			properties={"has_serial_no": 1, "serial_no_series": "ATC-TT-SER-VAL-.#####"}
+		).name
+
+		se = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=5,
+			rate=500,
+		)
+
+		bundle = se.items[0].serial_and_batch_bundle
+		docstatus = frappe.db.get_value("Serial and Batch Bundle", bundle, "docstatus")
+		self.assertEqual(docstatus, 1)
+
+		se.cancel()
+		docstatus = frappe.db.get_value("Serial and Batch Bundle", bundle, "docstatus")
+		self.assertEqual(docstatus, 2)
+
+	def test_batch_duplicate_entry(self):
+		item_code = make_item(properties={"has_batch_no": 1}).name
+
+		batch_id = "TEST-BATTCCH-VAL-00001"
+		batch_nos = [{"batch_no": batch_id, "qty": 1}]
+
+		make_batch_nos(item_code, batch_nos)
+		self.assertTrue(frappe.db.exists("Batch", batch_id))
+
+		batch_id = "TEST-BATTCCH-VAL-00001"
+		batch_nos = [{"batch_no": batch_id, "qty": 1}]
+
+		# Shouldn't throw duplicate entry error
+		make_batch_nos(item_code, batch_nos)
+		self.assertTrue(frappe.db.exists("Batch", batch_id))
+
+	def test_serial_no_duplicate_entry(self):
+		item_code = make_item(properties={"has_serial_no": 1}).name
+
+		serial_no_id = "TEST-SNID-VAL-00001"
+		serial_nos = [{"serial_no": serial_no_id, "qty": 1}]
+
+		make_serial_nos(item_code, serial_nos)
+		self.assertTrue(frappe.db.exists("Serial No", serial_no_id))
+
+		serial_no_id = "TEST-SNID-VAL-00001"
+		serial_nos = [{"batch_no": serial_no_id, "qty": 1}]
+
+		# Shouldn't throw duplicate entry error
+		make_serial_nos(item_code, serial_nos)
+		self.assertTrue(frappe.db.exists("Serial No", serial_no_id))
 
 
 def get_batch_from_bundle(bundle):

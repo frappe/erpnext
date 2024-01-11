@@ -7,7 +7,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
 from erpnext.buying.doctype.purchase_order.purchase_order import is_subcontracting_order_created
-from erpnext.buying.doctype.purchase_order.purchase_order import update_status as update_po_status
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.subcontracting_controller import SubcontractingController
 from erpnext.stock.stock_balance import update_bin_qty
 from erpnext.stock.utils import get_bin
@@ -68,6 +68,7 @@ class SubcontractingOrder(SubcontractingController):
 			"Material Transferred",
 			"Partial Material Transferred",
 			"Cancelled",
+			"Closed",
 		]
 		supplied_items: DF.Table[SubcontractingOrderSuppliedItem]
 		supplier: DF.Link
@@ -112,16 +113,10 @@ class SubcontractingOrder(SubcontractingController):
 
 	def on_submit(self):
 		self.update_prevdoc_status()
-		self.update_requested_qty()
-		self.update_ordered_qty_for_subcontracting()
-		self.update_reserved_qty_for_subcontracting()
 		self.update_status()
 
 	def on_cancel(self):
 		self.update_prevdoc_status()
-		self.update_requested_qty()
-		self.update_ordered_qty_for_subcontracting()
-		self.update_reserved_qty_for_subcontracting()
 		self.update_status()
 
 	def validate_purchase_order_for_subcontracting(self):
@@ -277,6 +272,9 @@ class SubcontractingOrder(SubcontractingController):
 		self.set_missing_values()
 
 	def update_status(self, status=None, update_modified=True):
+		if self.status == "Closed" and self.status != status:
+			check_on_hold_or_closed_status("Purchase Order", self.purchase_order)
+
 		if self.docstatus >= 1 and not status:
 			if self.docstatus == 1:
 				if self.status == "Draft":
@@ -285,11 +283,6 @@ class SubcontractingOrder(SubcontractingController):
 					status = "Completed"
 				elif self.per_received > 0 and self.per_received < 100:
 					status = "Partially Received"
-					for item in self.supplied_items:
-						if not item.returned_qty or (item.supplied_qty - item.consumed_qty - item.returned_qty) > 0:
-							break
-					else:
-						status = "Closed"
 				else:
 					total_required_qty = total_supplied_qty = 0
 					for item in self.supplied_items:
@@ -304,13 +297,12 @@ class SubcontractingOrder(SubcontractingController):
 			elif self.docstatus == 2:
 				status = "Cancelled"
 
-		if status:
-			frappe.db.set_value(
-				"Subcontracting Order", self.name, "status", status, update_modified=update_modified
-			)
+		if status and self.status != status:
+			self.db_set("status", status, update_modified=update_modified)
 
-			if status == "Closed":
-				update_po_status("Closed", self.purchase_order)
+		self.update_requested_qty()
+		self.update_ordered_qty_for_subcontracting()
+		self.update_reserved_qty_for_subcontracting()
 
 
 @frappe.whitelist()
@@ -357,8 +349,8 @@ def get_mapped_subcontracting_receipt(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def update_subcontracting_order_status(sco):
+def update_subcontracting_order_status(sco, status=None):
 	if isinstance(sco, str):
 		sco = frappe.get_doc("Subcontracting Order", sco)
 
-	sco.update_status()
+	sco.update_status(status)
