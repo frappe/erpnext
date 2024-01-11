@@ -153,6 +153,7 @@
    "label": "Timeline"
   },
   {
+   "bold": 1,
    "fieldname": "exp_start_date",
    "fieldtype": "Date",
    "label": "Expected Start Date",
@@ -398,7 +399,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2023-11-20 11:42:41.884069",
+ "modified": "2024-01-08 16:00:41.296203",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
