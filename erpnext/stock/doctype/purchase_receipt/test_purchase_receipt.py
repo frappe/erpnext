@@ -4,10 +4,12 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, cstr, flt, nowtime, today
+from pypika import Order
 from pypika import functions as fn
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
@@ -28,6 +30,23 @@ from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
 class TestPurchaseReceipt(FrappeTestCase):
 	def setUp(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
+
+	def test_purchase_receipt_qty(self):
+		pr = make_purchase_receipt(qty=0, rejected_qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			pr.save()
+
+		# No error with qty=1
+		pr.items[0].qty = 1
+		pr.save()
+		self.assertEqual(pr.items[0].qty, 1)
+
+		# No error with rejected_qty=1
+		pr.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.items[0].rejected_qty = 1
+		pr.items[0].qty = 0
+		pr.save()
+		self.assertEqual(pr.items[0].rejected_qty, 1)
 
 	def test_purchase_receipt_received_qty(self):
 		"""
@@ -990,7 +1009,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
 
-		self.assertFalse(gl_entries)
+		self.assertEqual(len(gl_entries), 2)
 
 		expected_sle = {"Work In Progress - TCP1": -5, "Stores - TCP1": 5}
 
@@ -2235,13 +2254,13 @@ def get_sl_entries(voucher_type, voucher_no):
 
 
 def get_gl_entries(voucher_type, voucher_no):
-	return frappe.db.sql(
-		"""select account, debit, credit, cost_center, is_cancelled
-		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
-		order by account desc""",
-		(voucher_type, voucher_no),
-		as_dict=1,
-	)
+	gle = frappe.qb.DocType("GL Entry")
+	return (
+		frappe.qb.from_(gle)
+		.select(gle.account, gle.debit, gle.credit, gle.cost_center, gle.is_cancelled)
+		.where((gle.voucher_type == voucher_type) & (gle.voucher_no == voucher_no))
+		.orderby(gle.account, gle.debit, order=Order.desc)
+	).run(as_dict=True)
 
 
 def get_taxes(**args):
@@ -2348,7 +2367,8 @@ def make_purchase_receipt(**args):
 	pr.is_return = args.is_return
 	pr.return_against = args.return_against
 	pr.apply_putaway_rule = args.apply_putaway_rule
-	qty = args.qty or 5
+
+	qty = args.qty if args.qty is not None else 5
 	rejected_qty = args.rejected_qty or 0
 	received_qty = args.received_qty or flt(rejected_qty) + flt(qty)
 

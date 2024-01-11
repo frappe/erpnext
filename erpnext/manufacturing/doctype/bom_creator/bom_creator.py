@@ -251,7 +251,7 @@ class BOMCreator(Document):
 
 			frappe.msgprint(_("BOMs created successfully"))
 		except Exception:
-			traceback = frappe.get_traceback()
+			traceback = frappe.get_traceback(with_context=True)
 			self.db_set(
 				{
 					"status": "Failed",
