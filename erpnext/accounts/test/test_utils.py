@@ -22,7 +22,8 @@ class TestUtils(unittest.TestCase):
 		super(TestUtils, cls).setUpClass()
 		make_test_objects("Address", ADDRESS_RECORDS)
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(cls):
 		frappe.db.rollback()
 
 	def test_get_party_shipping_address(self):
@@ -149,7 +150,6 @@ class TestUtils(unittest.TestCase):
 			"Supplier", None, "autoname", "SUP-.FY.-.#####", "Data", for_doctype="Doctype"
 		)
 
-		# Create Fiscal Year for Current Year
 		fiscal_year = get_fiscal_year(nowdate())[0]
 
 		# Create Supplier
@@ -159,6 +159,7 @@ class TestUtils(unittest.TestCase):
 		doc_name = supplier.name.split("-")
 		self.assertEqual(len(doc_name), 3)
 		self.assertSequenceEqual(doc_name[0:2], ("SUP", fiscal_year))
+		frappe.db.set_default("supp_master_name", "Supplier Name")
 
 
 ADDRESS_RECORDS = [
