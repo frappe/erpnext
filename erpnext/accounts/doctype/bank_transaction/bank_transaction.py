@@ -2,11 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
-<<<<<<< HEAD
-=======
-from frappe import _
 from frappe.model.docstatus import DocStatus
->>>>>>> 0a95b38166 (fix: unreconcile Bank Transaction on cancel of payment voucher)
 from frappe.utils import flt
 
 from erpnext.controllers.status_updater import StatusUpdater
@@ -73,7 +69,7 @@ class BankTransaction(StatusUpdater):
 					"payment_entry": voucher["payment_name"],
 					"allocated_amount": 0.0,  # Temporary
 				}
-				child = self.append("payment_entries", pe)
+				self.append("payment_entries", pe)
 				added = True
 
 		# runs on_update_after_submit
