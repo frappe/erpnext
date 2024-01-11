@@ -50,13 +50,14 @@ class Asset(AccountsController):
 
 		from erpnext.assets.doctype.asset_finance_book.asset_finance_book import AssetFinanceBook
 
+		additional_asset_cost: DF.Currency
 		amended_from: DF.Link | None
 		asset_category: DF.Link | None
 		asset_name: DF.Data
 		asset_owner: DF.Literal["", "Company", "Supplier", "Customer"]
 		asset_owner_company: DF.Link | None
 		asset_quantity: DF.Int
-		available_for_use_date: DF.Date
+		available_for_use_date: DF.Date | None
 		booked_fixed_asset: DF.Check
 		calculate_depreciation: DF.Check
 		capitalized_in: DF.Link | None
@@ -91,7 +92,7 @@ class Asset(AccountsController):
 		number_of_depreciations_booked: DF.Int
 		opening_accumulated_depreciation: DF.Currency
 		policy_number: DF.Data | None
-		purchase_date: DF.Date
+		purchase_date: DF.Date | None
 		purchase_invoice: DF.Link | None
 		purchase_receipt: DF.Link | None
 		purchase_receipt_amount: DF.Currency
@@ -111,6 +112,7 @@ class Asset(AccountsController):
 			"Decapitalized",
 		]
 		supplier: DF.Link | None
+		total_asset_cost: DF.Currency
 		total_number_of_depreciations: DF.Int
 		value_after_depreciation: DF.Currency
 	# end: auto-generated types
@@ -144,6 +146,7 @@ class Asset(AccountsController):
 							).format(asset_depr_schedules_links)
 						)
 
+		self.total_asset_cost = self.gross_purchase_amount
 		self.status = self.get_status()
 
 	def on_submit(self):
@@ -313,7 +316,12 @@ class Asset(AccountsController):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
-			if not self.is_existing_asset and not self.purchase_receipt and not self.purchase_invoice:
+			if (
+				not self.is_existing_asset
+				and not self.is_composite_asset
+				and not self.purchase_receipt
+				and not self.purchase_invoice
+			):
 				frappe.throw(
 					_("Please create purchase receipt or purchase invoice for the item {0}").format(
 						self.item_code
@@ -326,7 +334,7 @@ class Asset(AccountsController):
 				and not frappe.db.get_value("Purchase Invoice", self.purchase_invoice, "update_stock")
 			):
 				frappe.throw(
-					_("Update stock must be enable for the purchase invoice {0}").format(self.purchase_invoice)
+					_("Update stock must be enabled for the purchase invoice {0}").format(self.purchase_invoice)
 				)
 
 		if not self.calculate_depreciation:
@@ -689,7 +697,9 @@ class Asset(AccountsController):
 				self.get_gl_dict(
 					{
 						"account": cwip_account,
+						"against_type": "Account",
 						"against": fixed_asset_account,
+						"against_link": fixed_asset_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
 						"credit": self.purchase_receipt_amount,
@@ -704,7 +714,9 @@ class Asset(AccountsController):
 				self.get_gl_dict(
 					{
 						"account": fixed_asset_account,
+						"against_type": "Account",
 						"against": cwip_account,
+						"against_link": cwip_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
 						"debit": self.purchase_receipt_amount,

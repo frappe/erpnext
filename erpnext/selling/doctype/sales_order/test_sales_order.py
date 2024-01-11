@@ -9,7 +9,7 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
-from erpnext.controllers.accounts_controller import update_child_qty_rate
+from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
 	make_maintenance_schedule,
 )
@@ -35,8 +35,8 @@ class TestSalesOrder(FrappeTestCase):
 	def setUpClass(cls):
 		super().setUpClass()
 		cls.unlink_setting = int(
-			frappe.db.get_value(
-				"Accounts Settings", "Accounts Settings", "unlink_advance_payment_on_cancelation_of_order"
+			frappe.db.get_single_value(
+				"Accounts Settings", "unlink_advance_payment_on_cancelation_of_order"
 			)
 		)
 
@@ -79,6 +79,29 @@ class TestSalesOrder(FrappeTestCase):
 			]
 		)
 		update_child_qty_rate("Sales Order", trans_item, so.name)
+
+	def test_sales_order_qty(self):
+		so = make_sales_order(qty=1, do_not_save=True)
+
+		# NonNegativeError with qty=-1
+		so.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": -1,
+				"rate": 10,
+			},
+		)
+		self.assertRaises(frappe.NonNegativeError, so.save)
+
+		# InvalidQtyError with qty=0
+		so.items[1].qty = 0
+		self.assertRaises(InvalidQtyError, so.save)
+
+		# No error with qty=1
+		so.items[1].qty = 1
+		so.save()
+		self.assertEqual(so.items[0].qty, 1)
 
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)
@@ -2015,7 +2038,7 @@ def make_sales_order(**args):
 			{
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"uom": args.uom or None,
 				"price_list_rate": args.price_list_rate or None,
 				"discount_percentage": args.discount_percentage or None,

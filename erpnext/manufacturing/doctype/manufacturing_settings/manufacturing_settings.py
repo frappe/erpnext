@@ -32,6 +32,7 @@ class ManufacturingSettings(Document):
 		mins_between_operations: DF.Int
 		overproduction_percentage_for_sales_order: DF.Percent
 		overproduction_percentage_for_work_order: DF.Percent
+		set_op_cost_and_scrape_from_sub_assemblies: DF.Check
 		update_bom_costs_automatically: DF.Check
 	# end: auto-generated types
 

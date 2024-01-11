@@ -249,7 +249,7 @@ class Company(NestedSet):
 		if frappe.flags.parent_company_changed:
 			from frappe.utils.nestedset import rebuild_tree
 
-			rebuild_tree("Company", "parent_company")
+			rebuild_tree("Company")
 
 		frappe.clear_cache()
 
@@ -274,7 +274,7 @@ class Company(NestedSet):
 						"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr)
 						if not wh_detail["is_group"]
 						else "",
-						"warehouse_type": wh_detail["warehouse_type"] if "warehouse_type" in wh_detail else None,
+						"warehouse_type": wh_detail.get("warehouse_type"),
 					}
 				)
 				warehouse.flags.ignore_permissions = True
@@ -397,7 +397,7 @@ class Company(NestedSet):
 		frappe.local.flags.ignore_update_nsm = True
 		make_records(records)
 		frappe.local.flags.ignore_update_nsm = False
-		rebuild_tree("Department", "parent_department")
+		rebuild_tree("Department")
 
 	def validate_coa_input(self):
 		if self.create_chart_of_accounts_based_on == "Existing Company":

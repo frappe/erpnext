@@ -338,7 +338,7 @@ def get_valuation_method(item_code):
 	val_method = frappe.db.get_value("Item", item_code, "valuation_method", cache=True)
 	if not val_method:
 		val_method = (
-			frappe.db.get_value("Stock Settings", None, "valuation_method", cache=True) or "FIFO"
+			frappe.db.get_single_value("Stock Settings", "valuation_method", cache=True) or "FIFO"
 		)
 	return val_method
 
@@ -591,6 +591,13 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 		as_dict=True,
 	)
 	if batch_no_data:
+		if frappe.get_cached_value("Item", batch_no_data.item_code, "has_serial_no"):
+			frappe.throw(
+				_(
+					"Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
+				).format(search_value, batch_no_data.item_code)
+			)
+
 		_update_item_info(batch_no_data)
 		set_cache(batch_no_data)
 		return batch_no_data

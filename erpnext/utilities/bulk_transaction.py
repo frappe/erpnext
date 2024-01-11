@@ -15,18 +15,15 @@ def transaction_processing(data, from_doctype, to_doctype):
 
 	length_of_data = len(deserialized_data)
 
-	if length_of_data > 10:
-		frappe.msgprint(
-			_("Started a background job to create {1} {0}").format(to_doctype, length_of_data)
-		)
-		frappe.enqueue(
-			job,
-			deserialized_data=deserialized_data,
-			from_doctype=from_doctype,
-			to_doctype=to_doctype,
-		)
-	else:
-		job(deserialized_data, from_doctype, to_doctype)
+	frappe.msgprint(
+		_("Started a background job to create {1} {0}").format(to_doctype, length_of_data)
+	)
+	frappe.enqueue(
+		job,
+		deserialized_data=deserialized_data,
+		from_doctype=from_doctype,
+		to_doctype=to_doctype,
+	)
 
 
 @frappe.whitelist()
@@ -62,7 +59,7 @@ def retry_failed_transactions(failed_docs: list | None):
 				task(log.transaction_name, log.from_doctype, log.to_doctype)
 			except Exception as e:
 				frappe.db.rollback(save_point="before_creation_state")
-				update_log(log.name, "Failed", 1, str(frappe.get_traceback()))
+				update_log(log.name, "Failed", 1, str(frappe.get_traceback(with_context=True)))
 			else:
 				update_log(log.name, "Success", 1)
 
@@ -86,7 +83,7 @@ def job(deserialized_data, from_doctype, to_doctype):
 			fail_count += 1
 			create_log(
 				doc_name,
-				str(frappe.get_traceback()),
+				str(frappe.get_traceback(with_context=True)),
 				from_doctype,
 				to_doctype,
 				status="Failed",
