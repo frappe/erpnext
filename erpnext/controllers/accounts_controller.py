@@ -2185,6 +2185,9 @@ class AccountsController(TransactionBase):
 		jv.company = self.company
 		jv.remark = "Adjustment for {} {}".format(self.doctype, self.name)
 
+		if self.currency != self.company_currency:
+			jv.multi_currency = 1
+
 		reconcilation_entry = frappe._dict()
 		advance_entry = frappe._dict()
 
