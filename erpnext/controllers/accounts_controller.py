@@ -975,13 +975,15 @@ class AccountsController(TransactionBase):
 			return flt(args.get(field, 0) / (args.get("conversion_rate") or self.get("conversion_rate", 1)))
 
 	def validate_qty_is_not_zero(self):
-		if self.doctype == "Purchase Receipt":
-			return
-
 		for item in self.items:
+			if self.doctype == "Purchase Receipt" and item.rejected_qty:
+				continue
+
 			if not flt(item.qty):
 				frappe.throw(
-					msg=_("Row #{0}: Item quantity cannot be zero").format(item.idx),
+					msg=_("Row #{0}: Quantity for Item {1} cannot be zero.").format(
+						item.idx, frappe.bold(item.item_code)
+					),
 					title=_("Invalid Quantity"),
 					exc=InvalidQtyError,
 				)
@@ -1960,7 +1962,7 @@ class AccountsController(TransactionBase):
 			self.remove(item)
 
 	def set_payment_schedule(self):
-		if self.doctype == "Sales Invoice" and self.is_pos:
+		if (self.doctype == "Sales Invoice" and self.is_pos) or self.get("is_opening") == "Yes":
 			self.payment_terms_template = ""
 			return
 
@@ -2143,7 +2145,7 @@ class AccountsController(TransactionBase):
 			)
 
 	def validate_payment_schedule_amount(self):
-		if self.doctype == "Sales Invoice" and self.is_pos:
+		if (self.doctype == "Sales Invoice" and self.is_pos) or self.get("is_opening") == "Yes":
 			return
 
 		party_account_currency = self.get("party_account_currency")
@@ -3097,7 +3099,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	def validate_quantity(child_item, new_data):
 		if not flt(new_data.get("qty")):
 			frappe.throw(
-				_("Row # {0}: Quantity for Item {1} cannot be zero").format(
+				_("Row #{0}: Quantity for Item {1} cannot be zero.").format(
 					new_data.get("idx"), frappe.bold(new_data.get("item_code"))
 				),
 				title=_("Invalid Qty"),

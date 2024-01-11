@@ -338,7 +338,7 @@ def get_valuation_method(item_code):
 	val_method = frappe.db.get_value("Item", item_code, "valuation_method", cache=True)
 	if not val_method:
 		val_method = (
-			frappe.db.get_value("Stock Settings", None, "valuation_method", cache=True) or "FIFO"
+			frappe.db.get_single_value("Stock Settings", "valuation_method", cache=True) or "FIFO"
 		)
 	return val_method
 

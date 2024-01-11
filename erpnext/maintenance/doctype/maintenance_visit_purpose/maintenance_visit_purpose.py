@@ -14,9 +14,10 @@ class MaintenanceVisitPurpose(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		description: DF.TextEditor
+		description: DF.TextEditor | None
 		item_code: DF.Link | None
 		item_name: DF.Data | None
+		maintenance_schedule_detail: DF.Data | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
