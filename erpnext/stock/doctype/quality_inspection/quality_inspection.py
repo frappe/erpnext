@@ -68,6 +68,9 @@ class QualityInspection(Document):
 	def on_cancel(self):
 		self.update_qc_reference()
 
+	def on_trash(self):
+		self.update_qc_reference()
+
 	def validate_readings_status_mandatory(self):
 		for reading in self.readings:
 			if not reading.status:
