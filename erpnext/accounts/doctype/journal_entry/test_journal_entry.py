@@ -426,17 +426,86 @@ class TestJournalEntry(unittest.TestCase):
 		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=cost_center)
 		self.assertEqual(expected_account_balance, account_balance)
 
+	def test_auto_set_against_accounts_for_jv(self):
+		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import check_gl_entries
+
+		# Check entries when against accounts are auto-set
+		account_list = [
+			{
+				"account": "_Test Receivable - _TC",
+				"debit_in_account_currency": 1000,
+				"party_type": "Customer",
+				"party": "_Test Customer",
+			},
+			{
+				"account": "_Test Bank - _TC",
+				"credit_in_account_currency": 1000,
+			},
+			{
+				"account": "Debtors - _TC",
+				"credit_in_account_currency": 2000,
+				"party_type": "Customer",
+				"party": "_Test Customer",
+			},
+			{
+				"account": "Sales - _TC",
+				"debit_in_account_currency": 2000,
+			},
+		]
+		jv = make_journal_entry(account_list=account_list, submit=True)
+		expected_gle = [
+			["_Test Bank - _TC", 0.0, 1000.0, nowdate(), "_Test Customer"],
+			["_Test Receivable - _TC", 1000.0, 0.0, nowdate(), "_Test Bank - _TC"],
+			["Debtors - _TC", 0.0, 2000.0, nowdate(), "Sales - _TC"],
+			["Sales - _TC", 2000.0, 0.0, nowdate(), "_Test Customer"],
+		]
+		check_gl_entries(
+			doc=self,
+			voucher_type="Journal Entry",
+			voucher_no=jv.name,
+			posting_date=nowdate(),
+			expected_gle=expected_gle,
+			additional_columns=["against_link"],
+		)
+
+		# Check entries when against accounts are explicitly set
+		account_list[0]["debit_in_account_currency"] = 5000
+		account_list[1]["credit_in_account_currency"] = 7000
+		account_list[2]["credit_in_account_currency"] = 3000
+		account_list[3]["debit_in_account_currency"] = 5000
+
+		# Only set against for Sales Account
+		account_list[3]["against_type"] = "Customer"
+		account_list[3]["against_account_link"] = "_Test Customer"
+
+		jv = make_journal_entry(account_list=account_list, submit=True)
+		expected_gle = [
+			["_Test Bank - _TC", 0.0, 7000.0, nowdate(), None],
+			["_Test Receivable - _TC", 5000.0, 0.0, nowdate(), None],
+			["Debtors - _TC", 0.0, 3000.0, nowdate(), None],
+			["Sales - _TC", 5000.0, 0.0, nowdate(), "_Test Customer"],
+		]
+		check_gl_entries(
+			doc=self,
+			voucher_type="Journal Entry",
+			voucher_no=jv.name,
+			posting_date=nowdate(),
+			expected_gle=expected_gle,
+			additional_columns=["against_link"],
+		)
+
 
 def make_journal_entry(
-	account1,
-	account2,
-	amount,
+	account1=None,
+	account2=None,
+	amount=None,
 	cost_center=None,
 	posting_date=None,
 	exchange_rate=1,
 	save=True,
 	submit=False,
 	project=None,
+	account_list=None,
 ):
 	if not cost_center:
 		cost_center = "_Test Cost Center - _TC"
@@ -448,7 +517,8 @@ def make_journal_entry(
 	jv.multi_currency = 1
 	jv.set(
 		"accounts",
-		[
+		account_list
+		or [
 			{
 				"account": account1,
 				"cost_center": cost_center,
