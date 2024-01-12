@@ -16,9 +16,28 @@ from erpnext.accounts.utils import (
 
 
 class UnreconcilePayment(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.unreconcile_payment_entries.unreconcile_payment_entries import (
+			UnreconcilePaymentEntries,
+		)
+
+		allocations: DF.Table[UnreconcilePaymentEntries]
+		amended_from: DF.Link | None
+		company: DF.Link | None
+		voucher_no: DF.DynamicLink | None
+		voucher_type: DF.Link | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.supported_types = ["Payment Entry", "Journal Entry"]
-		if not self.voucher_type in self.supported_types:
+		if self.voucher_type not in self.supported_types:
 			frappe.throw(_("Only {0} are supported").format(comma_and(self.supported_types)))
 
 	@frappe.whitelist()

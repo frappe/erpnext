@@ -209,7 +209,7 @@ class SerialBatchBundle:
 		frappe.db.set_value(
 			"Serial and Batch Bundle",
 			{"voucher_no": self.sle.voucher_no, "voucher_type": self.sle.voucher_type},
-			{"is_cancelled": 1, "voucher_no": ""},
+			{"is_cancelled": 1},
 		)
 
 		if self.sle.serial_and_batch_bundle:
@@ -218,15 +218,16 @@ class SerialBatchBundle:
 			).validate_serial_and_batch_inventory()
 
 	def post_process(self):
-		if not self.sle.serial_and_batch_bundle:
+		if not self.sle.serial_and_batch_bundle and not self.sle.serial_no and not self.sle.batch_no:
 			return
 
-		docstatus = frappe.get_cached_value(
-			"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "docstatus"
-		)
+		if self.sle.serial_and_batch_bundle:
+			docstatus = frappe.get_cached_value(
+				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "docstatus"
+			)
 
-		if docstatus != 1:
-			self.submit_serial_and_batch_bundle()
+			if docstatus != 1:
+				self.submit_serial_and_batch_bundle()
 
 		if self.item_details.has_serial_no == 1:
 			self.set_warehouse_and_status_in_serial_nos()
@@ -241,6 +242,12 @@ class SerialBatchBundle:
 		if self.item_details.has_batch_no == 1:
 			self.update_batch_qty()
 
+		if self.sle.is_cancelled and self.sle.serial_and_batch_bundle:
+			self.cancel_serial_and_batch_bundle()
+
+	def cancel_serial_and_batch_bundle(self):
+		frappe.get_cached_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle).cancel()
+
 	def submit_serial_and_batch_bundle(self):
 		doc = frappe.get_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle)
 		self.validate_actual_qty(doc)
@@ -249,17 +256,33 @@ class SerialBatchBundle:
 		doc.submit()
 
 	def set_warehouse_and_status_in_serial_nos(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
+
 		serial_nos = get_serial_nos(self.sle.serial_and_batch_bundle)
+		if not self.sle.serial_and_batch_bundle and self.sle.serial_no:
+			serial_nos = get_parsed_serial_nos(self.sle.serial_no)
+
 		warehouse = self.warehouse if self.sle.actual_qty > 0 else None
 
 		if not serial_nos:
 			return
 
+		status = "Inactive"
+		if self.sle.actual_qty < 0:
+			status = "Delivered"
+
 		sn_table = frappe.qb.DocType("Serial No")
 		(
 			frappe.qb.update(sn_table)
 			.set(sn_table.warehouse, warehouse)
-			.set(sn_table.status, "Active" if warehouse else "Inactive")
+			.set(
+				sn_table.status,
+				"Active"
+				if warehouse
+				else status
+				if (sn_table.purchase_document_no != self.sle.voucher_no and self.sle.is_cancelled != 1)
+				else "Inactive",
+			)
 			.where(sn_table.name.isin(serial_nos))
 		).run()
 
@@ -286,6 +309,8 @@ class SerialBatchBundle:
 		from erpnext.stock.doctype.batch.batch import get_available_batches
 
 		batches = get_batch_nos(self.sle.serial_and_batch_bundle)
+		if not self.sle.serial_and_batch_bundle and self.sle.batch_no:
+			batches = frappe._dict({self.sle.batch_no: self.sle.actual_qty})
 
 		batches_qty = get_available_batches(
 			frappe._dict(
@@ -308,11 +333,33 @@ def get_serial_nos(serial_and_batch_bundle, serial_nos=None):
 	if serial_nos:
 		filters["serial_no"] = ("in", serial_nos)
 
-	entries = frappe.get_all("Serial and Batch Entry", fields=["serial_no"], filters=filters)
+	entries = frappe.get_all(
+		"Serial and Batch Entry", fields=["serial_no"], filters=filters, order_by="idx"
+	)
 	if not entries:
 		return []
 
 	return [d.serial_no for d in entries if d.serial_no]
+
+
+def get_batches_from_bundle(serial_and_batch_bundle, batches=None):
+	if not serial_and_batch_bundle:
+		return []
+
+	filters = {"parent": serial_and_batch_bundle, "batch_no": ("is", "set")}
+	if isinstance(serial_and_batch_bundle, list):
+		filters = {"parent": ("in", serial_and_batch_bundle)}
+
+	if batches:
+		filters["batch_no"] = ("in", batches)
+
+	entries = frappe.get_all(
+		"Serial and Batch Entry", fields=["batch_no", "qty"], filters=filters, order_by="idx", as_list=1
+	)
+	if not entries:
+		return frappe._dict({})
+
+	return frappe._dict(entries)
 
 
 def get_serial_nos_from_bundle(serial_and_batch_bundle, serial_nos=None):
@@ -402,7 +449,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			.orderby(bundle.posting_date, bundle.posting_time, bundle.creation)
 		)
 
-		# Important to exclude the current voucher
+		# Important to exclude the current voucher to calculate correct the stock value difference
 		if self.sle.voucher_no:
 			query = query.where(bundle.voucher_no != self.sle.voucher_no)
 
@@ -535,8 +582,10 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			.groupby(child.batch_no)
 		)
 
-		# Important to exclude the current voucher
-		if self.sle.voucher_no:
+		# Important to exclude the current voucher detail no / voucher no to calculate the correct stock value difference
+		if self.sle.voucher_detail_no:
+			query = query.where(parent.voucher_detail_no != self.sle.voucher_detail_no)
+		elif self.sle.voucher_no:
 			query = query.where(parent.voucher_no != self.sle.voucher_no)
 
 		if timestamp_condition:

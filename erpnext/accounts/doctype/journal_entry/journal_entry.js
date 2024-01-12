@@ -8,7 +8,7 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement', 'Asset Depreciation Schedule', "Repost Accounting Ledger"];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement', 'Asset Depreciation Schedule', "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries", "Bank Transaction"];
 	},
 
 	refresh: function(frm) {
@@ -219,6 +219,16 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		me.frm.set_query("account", "accounts", function(doc, cdt, cdn) {
 			return erpnext.journal_entry.account_query(me.frm);
 		});
+
+		me.frm.set_query("against_account_link", "accounts", function(doc, cdt, cdn) {
+			return erpnext.journal_entry.against_account_query(me.frm);
+		});
+
+		me.frm.set_query("against_type", "accounts", function(){
+			return {
+				query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_type",
+			}
+		})
 
 		me.frm.set_query("party_type", "accounts", function(doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
@@ -589,6 +599,21 @@ $.extend(erpnext.journal_entry, {
 			});
 		}
 		return { filters: filters };
+	},
+
+	against_account_query: function(frm) {
+		if (frm.doc.against_type != "Account"){
+			return { filters: {} };
+		}
+		else {
+			let filters = { company: frm.doc.company, is_group: 0 };
+			if(!frm.doc.multi_currency) {
+				$.extend(filters, {
+					account_currency: ['in', [frappe.get_doc(":Company", frm.doc.company).default_currency, null]]
+				});
+			}
+			return { filters: filters };
+		}
 	},
 
 	reverse_journal_entry: function() {

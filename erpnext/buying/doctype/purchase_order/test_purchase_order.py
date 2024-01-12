@@ -29,6 +29,8 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 class TestPurchaseOrder(FrappeTestCase):
 	def test_purchase_order_qty(self):
 		po = create_purchase_order(qty=1, do_not_save=True)
+
+		# NonNegativeError with qty=-1
 		po.append(
 			"items",
 			{
@@ -39,8 +41,14 @@ class TestPurchaseOrder(FrappeTestCase):
 		)
 		self.assertRaises(frappe.NonNegativeError, po.save)
 
+		# InvalidQtyError with qty=0
 		po.items[1].qty = 0
 		self.assertRaises(InvalidQtyError, po.save)
+
+		# No error with qty=1
+		po.items[1].qty = 1
+		po.save()
+		self.assertEqual(po.items[1].qty, 1)
 
 	def test_make_purchase_receipt(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -981,6 +989,38 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(po.items[0].qty, 30)
 		self.assertEqual(po.items[0].fg_item_qty, 30)
 
+	@change_settings("Buying Settings", {"auto_create_subcontracting_order": 1})
+	def test_auto_create_subcontracting_order(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+		]
+		po = create_purchase_order(
+			rm_items=service_items,
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+		)
+
+		self.assertTrue(frappe.db.get_value("Subcontracting Order", {"purchase_order": po.name}))
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -1076,7 +1116,7 @@ def create_purchase_order(**args):
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse or "_Test Warehouse - _TC",
 				"from_warehouse": args.from_warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"rate": args.rate or 500,
 				"schedule_date": add_days(nowdate(), 1),
 				"include_exploded_items": args.get("include_exploded_items", 1),

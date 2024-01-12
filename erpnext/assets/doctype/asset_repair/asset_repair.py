@@ -17,6 +17,42 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class AssetRepair(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.asset_repair_consumed_item.asset_repair_consumed_item import (
+			AssetRepairConsumedItem,
+		)
+
+		actions_performed: DF.LongText | None
+		amended_from: DF.Link | None
+		asset: DF.Link
+		asset_name: DF.ReadOnly | None
+		capitalize_repair_cost: DF.Check
+		company: DF.Link | None
+		completion_date: DF.Datetime | None
+		cost_center: DF.Link | None
+		description: DF.LongText | None
+		downtime: DF.Data | None
+		failure_date: DF.Datetime
+		increase_in_asset_life: DF.Int
+		naming_series: DF.Literal["ACC-ASR-.YYYY.-"]
+		project: DF.Link | None
+		purchase_invoice: DF.Link | None
+		repair_cost: DF.Currency
+		repair_status: DF.Literal["Pending", "Completed", "Cancelled"]
+		stock_consumption: DF.Check
+		stock_entry: DF.Link | None
+		stock_items: DF.Table[AssetRepairConsumedItem]
+		total_repair_cost: DF.Currency
+		warehouse: DF.Link | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.asset_doc = frappe.get_doc("Asset", self.asset)
 		self.update_status()
@@ -57,6 +93,10 @@ class AssetRepair(AccountsController):
 
 			self.increase_asset_value()
 
+			if self.capitalize_repair_cost:
+				self.asset_doc.total_asset_cost += self.repair_cost
+				self.asset_doc.additional_asset_cost += self.repair_cost
+
 			if self.get("stock_consumption"):
 				self.check_for_stock_items_and_warehouse()
 				self.decrease_stock_quantity()
@@ -91,6 +131,10 @@ class AssetRepair(AccountsController):
 			self.asset_doc.flags.increase_in_asset_value_due_to_repair = True
 
 			self.decrease_asset_value()
+
+			if self.capitalize_repair_cost:
+				self.asset_doc.total_asset_cost -= self.repair_cost
+				self.asset_doc.additional_asset_cost -= self.repair_cost
 
 			if self.get("stock_consumption"):
 				self.increase_stock_quantity()
@@ -241,7 +285,9 @@ class AssetRepair(AccountsController):
 					"account": fixed_asset_account,
 					"debit": self.repair_cost,
 					"debit_in_account_currency": self.repair_cost,
+					"against_type": "Account",
 					"against": pi_expense_account,
+					"against_link": pi_expense_account,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
@@ -260,7 +306,9 @@ class AssetRepair(AccountsController):
 					"account": pi_expense_account,
 					"credit": self.repair_cost,
 					"credit_in_account_currency": self.repair_cost,
+					"against_type": "Account",
 					"against": fixed_asset_account,
+					"against_link": fixed_asset_account,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
@@ -294,7 +342,9 @@ class AssetRepair(AccountsController):
 							"account": item.expense_account or default_expense_account,
 							"credit": item.amount,
 							"credit_in_account_currency": item.amount,
+							"against_type": "Account",
 							"against": fixed_asset_account,
+							"against_link": fixed_asset_account,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"cost_center": self.cost_center,
@@ -311,7 +361,9 @@ class AssetRepair(AccountsController):
 							"account": fixed_asset_account,
 							"debit": item.amount,
 							"debit_in_account_currency": item.amount,
+							"against_type": "Account",
 							"against": item.expense_account or default_expense_account,
+							"against_link": item.expense_account or default_expense_account,
 							"voucher_type": self.doctype,
 							"voucher_no": self.name,
 							"cost_center": self.cost_center,

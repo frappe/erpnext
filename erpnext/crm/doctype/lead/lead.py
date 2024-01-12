@@ -16,9 +16,76 @@ from frappe.utils import comma_and, get_link_to_form, has_gravatar, validate_ema
 from erpnext.accounts.party import set_taxes
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.crm.utils import CRMNote, copy_comments, link_communications, link_open_events
+from erpnext.selling.doctype.customer.customer import parse_full_name
 
 
 class Lead(SellingController, CRMNote):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.crm.doctype.crm_note.crm_note import CRMNote
+
+		annual_revenue: DF.Currency
+		blog_subscriber: DF.Check
+		campaign_name: DF.Link | None
+		city: DF.Data | None
+		company: DF.Link | None
+		company_name: DF.Data | None
+		country: DF.Link | None
+		customer: DF.Link | None
+		disabled: DF.Check
+		email_id: DF.Data | None
+		fax: DF.Data | None
+		first_name: DF.Data | None
+		gender: DF.Link | None
+		image: DF.AttachImage | None
+		industry: DF.Link | None
+		job_title: DF.Data | None
+		language: DF.Link | None
+		last_name: DF.Data | None
+		lead_name: DF.Data | None
+		lead_owner: DF.Link | None
+		market_segment: DF.Link | None
+		middle_name: DF.Data | None
+		mobile_no: DF.Data | None
+		naming_series: DF.Literal["CRM-LEAD-.YYYY.-"]
+		no_of_employees: DF.Literal["1-10", "11-50", "51-200", "201-500", "501-1000", "1000+"]
+		notes: DF.Table[CRMNote]
+		phone: DF.Data | None
+		phone_ext: DF.Data | None
+		qualification_status: DF.Literal["Unqualified", "In Process", "Qualified"]
+		qualified_by: DF.Link | None
+		qualified_on: DF.Date | None
+		request_type: DF.Literal[
+			"", "Product Enquiry", "Request for Information", "Suggestions", "Other"
+		]
+		salutation: DF.Link | None
+		source: DF.Link | None
+		state: DF.Data | None
+		status: DF.Literal[
+			"Lead",
+			"Open",
+			"Replied",
+			"Opportunity",
+			"Quotation",
+			"Lost Quotation",
+			"Interested",
+			"Converted",
+			"Do Not Contact",
+		]
+		territory: DF.Link | None
+		title: DF.Data | None
+		type: DF.Literal["", "Client", "Channel Partner", "Consultant"]
+		unsubscribed: DF.Check
+		website: DF.Data | None
+		whatsapp_no: DF.Data | None
+	# end: auto-generated types
+
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
 		self.get("__onload").is_customer = customer
@@ -36,7 +103,20 @@ class Lead(SellingController, CRMNote):
 	def before_insert(self):
 		self.contact_doc = None
 		if frappe.db.get_single_value("CRM Settings", "auto_creation_of_contact"):
+			if self.source == "Existing Customer" and self.customer:
+				contact = frappe.db.get_value(
+					"Dynamic Link",
+					{"link_doctype": "Customer", "parenttype": "Contact", "link_name": self.customer},
+					"parent",
+				)
+				if contact:
+					self.contact_doc = frappe.get_doc("Contact", contact)
+					return
 			self.contact_doc = self.create_contact()
+
+		# leads created by email inbox only have the full name set
+		if self.lead_name and not any([self.first_name, self.middle_name, self.last_name]):
+			self.first_name, self.middle_name, self.last_name = parse_full_name(self.lead_name)
 
 	def after_insert(self):
 		self.link_to_contact()

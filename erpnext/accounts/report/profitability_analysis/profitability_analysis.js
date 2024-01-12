@@ -117,8 +117,3 @@ frappe.query_reports["Profitability Analysis"] = {
 	"parent_field": "parent_account",
 	"initial_depth": 3
 }
-
-erpnext.dimension_filters.forEach((dimension) => {
-	frappe.query_reports["Profitability Analysis"].filters[1].options.push(dimension["document_type"]);
-});
-

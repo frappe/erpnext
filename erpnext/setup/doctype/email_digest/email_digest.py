@@ -30,6 +30,50 @@ from frappe.model.document import Document
 
 
 class EmailDigest(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.setup.doctype.email_digest_recipient.email_digest_recipient import (
+			EmailDigestRecipient,
+		)
+
+		add_quote: DF.Check
+		bank_balance: DF.Check
+		calendar_events: DF.Check
+		company: DF.Link
+		credit_balance: DF.Check
+		enabled: DF.Check
+		expense_year_to_date: DF.Check
+		expenses_booked: DF.Check
+		frequency: DF.Literal["Daily", "Weekly", "Monthly"]
+		income: DF.Check
+		income_year_to_date: DF.Check
+		invoiced_amount: DF.Check
+		issue: DF.Check
+		new_quotations: DF.Check
+		next_send: DF.Data | None
+		notifications: DF.Check
+		payables: DF.Check
+		pending_quotations: DF.Check
+		project: DF.Check
+		purchase_invoice: DF.Check
+		purchase_order: DF.Check
+		purchase_orders_items_overdue: DF.Check
+		purchase_orders_to_bill: DF.Check
+		purchase_orders_to_receive: DF.Check
+		recipients: DF.TableMultiSelect[EmailDigestRecipient]
+		sales_invoice: DF.Check
+		sales_order: DF.Check
+		sales_orders_to_bill: DF.Check
+		sales_orders_to_deliver: DF.Check
+		todo_list: DF.Check
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(EmailDigest, self).__init__(*args, **kwargs)
 
@@ -79,7 +123,7 @@ class EmailDigest(Document):
 				if msg_for_this_recipient and row.recipient in valid_users:
 					frappe.sendmail(
 						recipients=row.recipient,
-						subject=_("{0} Digest").format(self.frequency),
+						subject=_("{0} Digest").format(_(self.frequency)),
 						message=msg_for_this_recipient,
 						reference_doctype=self.doctype,
 						reference_name=self.name,
@@ -645,7 +689,7 @@ class EmailDigest(Document):
 		]
 
 	def get_root_type_accounts(self, root_type):
-		if not root_type in self._accounts:
+		if root_type not in self._accounts:
 			self._accounts[root_type] = [
 				d.name
 				for d in frappe.db.get_all(

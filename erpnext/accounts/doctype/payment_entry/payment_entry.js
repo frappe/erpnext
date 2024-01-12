@@ -9,7 +9,7 @@ erpnext.accounts.taxes.setup_tax_filters("Advance Taxes and Charges");
 
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger','Repost Accounting Ledger', 'Unreconcile Payment', 'Unreconcile Payment Entries'];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger','Repost Accounting Ledger', 'Unreconcile Payment', 'Unreconcile Payment Entries', "Bank Transaction"];
 
 		if(frm.doc.__islocal) {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
@@ -745,6 +745,10 @@ frappe.ui.form.on('Payment Entry', {
 		}
 		else if (get_orders_to_be_billed) {
 			args["get_orders_to_be_billed"] = true;
+		}
+
+		if (frm.doc.book_advance_payments_in_separate_party_account) {
+			args["book_advance_payments_in_separate_party_account"] = true;
 		}
 
 		frappe.flags.allocate_payment_amount = filters['allocate_payment_amount'];

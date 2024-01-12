@@ -20,6 +20,30 @@ class CanNotBeDefaultDimension(frappe.ValidationError):
 
 
 class InventoryDimension(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		apply_to_all_doctypes: DF.Check
+		condition: DF.Code | None
+		dimension_name: DF.Data
+		disabled: DF.Check
+		document_type: DF.Link | None
+		fetch_from_parent: DF.Literal
+		istable: DF.Check
+		mandatory_depends_on: DF.SmallText | None
+		reference_document: DF.Link
+		reqd: DF.Check
+		source_fieldname: DF.Data | None
+		target_fieldname: DF.Data | None
+		type_of_transaction: DF.Literal["", "Inward", "Outward", "Both"]
+		validate_negative_stock: DF.Check
+	# end: auto-generated types
+
 	def onload(self):
 		if not self.is_new() and frappe.db.has_column("Stock Ledger Entry", self.target_fieldname):
 			self.set_onload("has_stock_ledger", self.has_stock_ledger())
@@ -281,7 +305,7 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 	dimensions = get_document_wise_inventory_dimensions(doc.doctype)
 	filter_dimensions = []
 	for row in dimensions:
-		if row.type_of_transaction:
+		if row.type_of_transaction and row.type_of_transaction != "Both":
 			if (
 				row.type_of_transaction == "Inward"
 				if doc.docstatus == 1

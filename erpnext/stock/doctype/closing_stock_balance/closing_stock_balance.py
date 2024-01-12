@@ -15,6 +15,27 @@ from erpnext.stock.report.stock_balance.stock_balance import execute
 
 
 class ClosingStockBalance(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		company: DF.Link | None
+		from_date: DF.Date | None
+		include_uom: DF.Link | None
+		item_code: DF.Link | None
+		item_group: DF.Link | None
+		naming_series: DF.Literal["CBAL-.#####"]
+		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Canceled"]
+		to_date: DF.Date | None
+		warehouse: DF.Link | None
+		warehouse_type: DF.Link | None
+	# end: auto-generated types
+
 	def before_save(self):
 		self.set_status()
 
@@ -44,7 +65,7 @@ class ClosingStockBalance(Document):
 				& (
 					(table.from_date.between(self.from_date, self.to_date))
 					| (table.to_date.between(self.from_date, self.to_date))
-					| (table.from_date >= self.from_date and table.to_date <= self.to_date)
+					| (table.from_date >= self.from_date and table.to_date >= self.to_date)
 				)
 			)
 		)
@@ -128,6 +149,4 @@ def prepare_closing_stock_balance(name):
 		doc.db_set("status", "Completed")
 	except Exception as e:
 		doc.db_set("status", "Failed")
-		traceback = frappe.get_traceback()
-
-		frappe.log_error("Closing Stock Balance Failed", traceback, doc.doctype, doc.name)
+		doc.log_error(title="Closing Stock Balance Failed")

@@ -8,6 +8,24 @@ from frappe.utils.data import comma_and
 
 
 class RepostAccountingLedger(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.repost_accounting_ledger_items.repost_accounting_ledger_items import (
+			RepostAccountingLedgerItems,
+		)
+
+		amended_from: DF.Link | None
+		company: DF.Link | None
+		delete_cancelled_entries: DF.Check
+		vouchers: DF.Table[RepostAccountingLedgerItems]
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(RepostAccountingLedger, self).__init__(*args, **kwargs)
 		self._allowed_types = get_allowed_types_from_settings()
@@ -108,7 +126,7 @@ class RepostAccountingLedger(Document):
 		return rendered_page
 
 	def on_submit(self):
-		if len(self.vouchers) > 1:
+		if len(self.vouchers) > 5:
 			job_name = "repost_accounting_ledger_" + self.name
 			frappe.enqueue(
 				method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
@@ -151,8 +169,6 @@ def start_repost(account_repost_doc=str) -> None:
 					if not repost_doc.delete_cancelled_entries:
 						doc.make_gl_entries(1)
 					doc.make_gl_entries()
-
-				frappe.db.commit()
 
 
 def get_allowed_types_from_settings():

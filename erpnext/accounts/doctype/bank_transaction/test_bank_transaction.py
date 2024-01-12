@@ -2,10 +2,10 @@
 # See license.txt
 
 import json
-import unittest
 
 import frappe
 from frappe import utils
+from frappe.model.docstatus import DocStatus
 from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
@@ -80,6 +80,29 @@ class TestBankTransaction(FrappeTestCase):
 
 		clearance_date = frappe.db.get_value("Payment Entry", payment.name, "clearance_date")
 		self.assertFalse(clearance_date)
+
+	def test_cancel_voucher(self):
+		bank_transaction = frappe.get_doc(
+			"Bank Transaction",
+			dict(description="1512567 BG/000003025 OPSKATTUZWXXX AT776000000098709849 Herr G"),
+		)
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1700))
+		vouchers = json.dumps(
+			[
+				{
+					"payment_doctype": "Payment Entry",
+					"payment_name": payment.name,
+					"amount": bank_transaction.unallocated_amount,
+				}
+			]
+		)
+		reconcile_vouchers(bank_transaction.name, vouchers)
+		payment.reload()
+		payment.cancel()
+		bank_transaction.reload()
+		self.assertEqual(bank_transaction.docstatus, DocStatus.submitted())
+		self.assertEqual(bank_transaction.unallocated_amount, 1700)
+		self.assertEqual(bank_transaction.payment_entries, [])
 
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):

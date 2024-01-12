@@ -49,6 +49,61 @@ force_fields = [
 
 
 class AssetCapitalization(StockController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.asset_capitalization_asset_item.asset_capitalization_asset_item import (
+			AssetCapitalizationAssetItem,
+		)
+		from erpnext.assets.doctype.asset_capitalization_service_item.asset_capitalization_service_item import (
+			AssetCapitalizationServiceItem,
+		)
+		from erpnext.assets.doctype.asset_capitalization_stock_item.asset_capitalization_stock_item import (
+			AssetCapitalizationStockItem,
+		)
+
+		amended_from: DF.Link | None
+		asset_items: DF.Table[AssetCapitalizationAssetItem]
+		asset_items_total: DF.Currency
+		capitalization_method: DF.Literal[
+			"", "Create a new composite asset", "Choose a WIP composite asset"
+		]
+		company: DF.Link
+		cost_center: DF.Link | None
+		entry_type: DF.Literal["Capitalization", "Decapitalization"]
+		finance_book: DF.Link | None
+		naming_series: DF.Literal["ACC-ASC-.YYYY.-"]
+		posting_date: DF.Date
+		posting_time: DF.Time
+		service_items: DF.Table[AssetCapitalizationServiceItem]
+		service_items_total: DF.Currency
+		set_posting_time: DF.Check
+		stock_items: DF.Table[AssetCapitalizationStockItem]
+		stock_items_total: DF.Currency
+		target_asset: DF.Link | None
+		target_asset_location: DF.Link | None
+		target_asset_name: DF.Data | None
+		target_batch_no: DF.Link | None
+		target_fixed_asset_account: DF.Link | None
+		target_has_batch_no: DF.Check
+		target_has_serial_no: DF.Check
+		target_incoming_rate: DF.Currency
+		target_is_fixed_asset: DF.Check
+		target_item_code: DF.Link | None
+		target_item_name: DF.Data | None
+		target_qty: DF.Float
+		target_serial_no: DF.SmallText | None
+		target_stock_uom: DF.Link | None
+		target_warehouse: DF.Link | None
+		title: DF.Data | None
+		total_value: DF.Currency
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_posting_time()
 		self.set_missing_values(for_validate=True)
@@ -430,7 +485,9 @@ class AssetCapitalization(StockController):
 						self.get_gl_dict(
 							{
 								"account": account,
+								"against_type": "Account",
 								"against": target_account,
+								"against_link": target_account,
 								"cost_center": item_row.cost_center,
 								"project": item_row.get("project") or self.get("project"),
 								"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -471,7 +528,9 @@ class AssetCapitalization(StockController):
 			self.set_consumed_asset_status(asset)
 
 			for gle in fixed_asset_gl_entries:
+				gle["against_type"] = "Account"
 				gle["against"] = target_account
+				gle["against_link"] = target_account
 				gl_entries.append(self.get_gl_dict(gle, item=item))
 				target_against.add(gle["account"])
 
@@ -487,7 +546,9 @@ class AssetCapitalization(StockController):
 				self.get_gl_dict(
 					{
 						"account": item_row.expense_account,
+						"against_type": "Account",
 						"against": target_account,
+						"against_link": target_account,
 						"cost_center": item_row.cost_center,
 						"project": item_row.get("project") or self.get("project"),
 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -498,41 +559,46 @@ class AssetCapitalization(StockController):
 			)
 
 	def get_gl_entries_for_target_item(self, gl_entries, target_against, precision):
-		if self.target_is_fixed_asset:
-			# Capitalization
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": self.target_fixed_asset_account,
-						"against": ", ".join(target_against),
-						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-						"debit": flt(self.total_value, precision),
-						"cost_center": self.get("cost_center"),
-					},
-					item=self,
-				)
-			)
-		else:
-			# Target Stock Item
-			sle_list = self.sle_map.get(self.name)
-			for sle in sle_list:
-				stock_value_difference = flt(sle.stock_value_difference, precision)
-				account = self.warehouse_account[sle.warehouse]["account"]
-
+		for target_account in target_against:
+			if self.target_is_fixed_asset:
+				# Capitalization
 				gl_entries.append(
 					self.get_gl_dict(
 						{
-							"account": account,
-							"against": ", ".join(target_against),
-							"cost_center": self.cost_center,
-							"project": self.get("project"),
-							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": stock_value_difference,
+							"account": self.target_fixed_asset_account,
+							"against_type": "Account",
+							"against": target_account,
+							"against_link": target_account,
+							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+							"debit": flt(self.total_value, precision) / len(target_against),
+							"cost_center": self.get("cost_center"),
 						},
-						self.warehouse_account[sle.warehouse]["account_currency"],
 						item=self,
 					)
 				)
+			else:
+				# Target Stock Item
+				sle_list = self.sle_map.get(self.name)
+				for sle in sle_list:
+					stock_value_difference = flt(sle.stock_value_difference, precision)
+					account = self.warehouse_account[sle.warehouse]["account"]
+
+					gl_entries.append(
+						self.get_gl_dict(
+							{
+								"account": account,
+								"against_type": "Account",
+								"against": target_account,
+								"against_link": target_account,
+								"cost_center": self.cost_center,
+								"project": self.get("project"),
+								"remarks": self.get("remarks") or "Accounting Entry for Stock",
+								"debit": stock_value_difference / len(target_against),
+							},
+							self.warehouse_account[sle.warehouse]["account_currency"],
+							item=self,
+						)
+					)
 
 	def create_target_asset(self):
 		if (

@@ -280,6 +280,7 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 		"project",
 		"finance_book",
 		"voucher_no",
+		"against_link",
 	]
 
 	if dimensions:
@@ -597,7 +598,30 @@ def make_reverse_gl_entries(
 
 		is_opening = any(d.get("is_opening") == "Yes" for d in gl_entries)
 		validate_against_pcv(is_opening, gl_entries[0]["posting_date"], gl_entries[0]["company"])
-		if not partial_cancel:
+		if partial_cancel:
+			# Partial cancel is only used by `Advance` in separate account feature.
+			# Only cancel GL entries for unlinked reference using `voucher_detail_no`
+			gle = frappe.qb.DocType("GL Entry")
+			for x in gl_entries:
+				query = (
+					frappe.qb.update(gle)
+					.set(gle.is_cancelled, True)
+					.set(gle.modified, now())
+					.set(gle.modified_by, frappe.session.user)
+					.where(
+						(gle.company == x.company)
+						& (gle.account == x.account)
+						& (gle.party_type == x.party_type)
+						& (gle.party == x.party)
+						& (gle.voucher_type == x.voucher_type)
+						& (gle.voucher_no == x.voucher_no)
+						& (gle.against_voucher_type == x.against_voucher_type)
+						& (gle.against_voucher == x.against_voucher)
+						& (gle.voucher_detail_no == x.voucher_detail_no)
+					)
+				)
+				query.run()
+		else:
 			set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
 
 		for entry in gl_entries:
@@ -630,10 +654,10 @@ def check_freezing_date(posting_date, adv_adj=False):
 	Hence stop admin to bypass if accounts are freezed
 	"""
 	if not adv_adj:
-		acc_frozen_upto = frappe.db.get_value("Accounts Settings", None, "acc_frozen_upto")
+		acc_frozen_upto = frappe.db.get_single_value("Accounts Settings", "acc_frozen_upto")
 		if acc_frozen_upto:
-			frozen_accounts_modifier = frappe.db.get_value(
-				"Accounts Settings", None, "frozen_accounts_modifier"
+			frozen_accounts_modifier = frappe.db.get_single_value(
+				"Accounts Settings", "frozen_accounts_modifier"
 			)
 			if getdate(posting_date) <= getdate(acc_frozen_upto) and (
 				frozen_accounts_modifier not in frappe.get_roles() or frappe.session.user == "Administrator"

@@ -32,6 +32,39 @@ BOM_ITEM_FIELDS = [
 
 
 class BOMCreator(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.manufacturing.doctype.bom_creator_item.bom_creator_item import BOMCreatorItem
+
+		amended_from: DF.Link | None
+		buying_price_list: DF.Link | None
+		company: DF.Link
+		conversion_rate: DF.Float
+		currency: DF.Link
+		default_warehouse: DF.Link | None
+		error_log: DF.Text | None
+		item_code: DF.Link
+		item_group: DF.Link | None
+		item_name: DF.Data | None
+		items: DF.Table[BOMCreatorItem]
+		plc_conversion_rate: DF.Float
+		price_list_currency: DF.Link | None
+		project: DF.Link | None
+		qty: DF.Float
+		raw_material_cost: DF.Currency
+		remarks: DF.TextEditor | None
+		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List", "Manual"]
+		set_rate_based_on_warehouse: DF.Check
+		status: DF.Literal["Draft", "Submitted", "In Progress", "Completed", "Failed", "Cancelled"]
+		uom: DF.Link | None
+	# end: auto-generated types
+
 	def before_save(self):
 		self.set_status()
 		self.set_is_expandable()
@@ -218,7 +251,7 @@ class BOMCreator(Document):
 
 			frappe.msgprint(_("BOMs created successfully"))
 		except Exception:
-			traceback = frappe.get_traceback()
+			traceback = frappe.get_traceback(with_context=True)
 			self.db_set(
 				{
 					"status": "Failed",

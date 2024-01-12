@@ -29,6 +29,34 @@ class EmptyStockReconciliationItemsError(frappe.ValidationError):
 
 
 class StockReconciliation(StockController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.stock_reconciliation_item.stock_reconciliation_item import (
+			StockReconciliationItem,
+		)
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		cost_center: DF.Link | None
+		difference_amount: DF.Currency
+		expense_account: DF.Link | None
+		items: DF.Table[StockReconciliationItem]
+		naming_series: DF.Literal["MAT-RECO-.YYYY.-"]
+		posting_date: DF.Date
+		posting_time: DF.Time
+		purpose: DF.Literal["", "Opening Stock", "Stock Reconciliation"]
+		scan_barcode: DF.Data | None
+		scan_mode: DF.Check
+		set_posting_time: DF.Check
+		set_warehouse: DF.Link | None
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(StockReconciliation, self).__init__(*args, **kwargs)
 		self.head_row = ["Item Code", "Warehouse", "Quantity", "Valuation Rate"]
@@ -143,7 +171,7 @@ class StockReconciliation(StockController):
 						},
 					)
 
-			if item_details.has_batch_no:
+			elif item_details.has_batch_no:
 				batch_nos_details = get_available_batches(
 					frappe._dict(
 						{
@@ -200,6 +228,9 @@ class StockReconciliation(StockController):
 
 	def set_new_serial_and_batch_bundle(self):
 		for item in self.items:
+			if not item.qty:
+				continue
+
 			if item.current_serial_and_batch_bundle and not item.serial_and_batch_bundle:
 				current_doc = frappe.get_doc("Serial and Batch Bundle", item.current_serial_and_batch_bundle)
 
