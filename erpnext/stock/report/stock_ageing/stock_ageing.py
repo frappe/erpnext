@@ -3,7 +3,7 @@
 
 
 from operator import itemgetter
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Iterator, List, Tuple, Union
 
 import frappe
 from frappe import _
@@ -231,10 +231,12 @@ class FIFOSlots:
 		                consumed/updated and maintained via FIFO. **
 		}
 		"""
-		if self.sle is None:
-			self.sle = self.__get_stock_ledger_entries()
 
-		for d in self.sle:
+		stock_ledger_entries = self.sle
+		if stock_ledger_entries is None:
+			stock_ledger_entries = self.__get_stock_ledger_entries()
+
+		for d in stock_ledger_entries:
 			key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
 
 			if d.voucher_type == "Stock Reconciliation":
@@ -250,6 +252,9 @@ class FIFOSlots:
 				self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
 
 			self.__update_balances(d, key)
+
+		# Note that stock_ledger_entries is an iterator, you can not reuse it  like a list
+		del stock_ledger_entries
 
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
@@ -381,7 +386,7 @@ class FIFOSlots:
 
 		return item_aggregated_data
 
-	def __get_stock_ledger_entries(self) -> List[Dict]:
+	def __get_stock_ledger_entries(self) -> Iterator[Dict]:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self.__get_item_query()  # used as derived table in sle query
 
@@ -418,7 +423,7 @@ class FIFOSlots:
 
 		sle_query = sle_query.orderby(sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty)
 
-		return sle_query.run(as_dict=True)
+		return sle_query.run(as_dict=True, as_iterator=True)
 
 	def __get_item_query(self) -> str:
 		item_table = frappe.qb.DocType("Item")
