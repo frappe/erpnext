@@ -109,16 +109,16 @@ class JobCard(Document):
 		if job_card_qty and ((job_card_qty - completed_qty) > wo_qty):
 			form_link = get_link_to_form("Manufacturing Settings", "Manufacturing Settings")
 
-			msg = f"""
+			msg = _("""
 				Qty To Manufacture in the job card
 				cannot be greater than Qty To Manufacture in the
-				work order for the operation {bold(self.operation)}.
+				work order for the operation {0}.
 				<br><br><b>Solution: </b> Either you can reduce the
 				Qty To Manufacture in the job card or set the
 				'Overproduction Percentage For Work Order'
-				in the {form_link}."""
+				in the {1}.""").format(bold(self.operation), form_link)
 
-			frappe.throw(_(msg), title=_("Extra Job Card Quantity"))
+			frappe.throw(msg, title=_("Extra Job Card Quantity"))
 
 	def set_sub_operations(self):
 		if not self.sub_operations and self.operation:
