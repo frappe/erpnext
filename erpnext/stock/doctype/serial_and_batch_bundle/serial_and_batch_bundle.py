@@ -490,8 +490,10 @@ class SerialandBatchBundle(Document):
 			qty_field = "qty"
 
 		precision = row.precision
-		if row.get("doctype") in ["Subcontracting Receipt Supplied Item"]:
+		if row.get("doctype") == "Subcontracting Receipt Supplied Item":
 			qty_field = "consumed_qty"
+		elif row.get("doctype") == "Stock Entry Detail":
+			qty_field = "transfer_qty"
 
 		qty = row.get(qty_field)
 		if qty_field == "qty" and row.get("stock_qty"):
