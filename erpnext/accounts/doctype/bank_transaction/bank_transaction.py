@@ -91,7 +91,7 @@ class BankTransaction(StatusUpdater):
 		"""
 		remaining_amount = self.unallocated_amount
 		for payment_entry in self.payment_entries:
-			if payment_entry.allocated_amount != 0.0:
+			if isnumeric(payment_entry.allocated_amount):
 				unallocated_amount, should_clear, latest_transaction = get_clearance_details(
 					self, payment_entry
 				)
