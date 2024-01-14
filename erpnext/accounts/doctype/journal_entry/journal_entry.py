@@ -1038,74 +1038,34 @@ class JournalEntry(AccountsController):
 				r = [x for x in r if x]
 				remarks = "\n".join(r)
 
-				gl_dict = self.get_gl_dict(
-					{
-						"account": d.account,
-						"party_type": d.party_type,
-						"due_date": self.due_date,
-						"party": d.party,
-						"debit": flt(d.debit, d.precision("debit")),
-						"credit": flt(d.credit, d.precision("credit")),
-						"account_currency": d.account_currency,
-						"debit_in_account_currency": flt(
-							d.debit_in_account_currency, d.precision("debit_in_account_currency")
-						),
-						"credit_in_account_currency": flt(
-							d.credit_in_account_currency, d.precision("credit_in_account_currency")
-						),
-						"against_voucher_type": d.reference_type,
-						"against_voucher": d.reference_name,
-						"remarks": remarks,
-						"voucher_detail_no": d.reference_detail_no,
-						"cost_center": d.cost_center,
-						"project": d.project,
-						"finance_book": self.finance_book,
-					},
-					item=d,
+				gl_map.append(
+					self.get_gl_dict(
+						{
+							"account": d.account,
+							"party_type": d.party_type,
+							"due_date": self.due_date,
+							"party": d.party,
+							"against": d.against_account,
+							"debit": flt(d.debit, d.precision("debit")),
+							"credit": flt(d.credit, d.precision("credit")),
+							"account_currency": d.account_currency,
+							"debit_in_account_currency": flt(
+								d.debit_in_account_currency, d.precision("debit_in_account_currency")
+							),
+							"credit_in_account_currency": flt(
+								d.credit_in_account_currency, d.precision("credit_in_account_currency")
+							),
+							"against_voucher_type": d.reference_type,
+							"against_voucher": d.reference_name,
+							"remarks": remarks,
+							"voucher_detail_no": d.reference_detail_no,
+							"cost_center": d.cost_center,
+							"project": d.project,
+							"finance_book": self.finance_book,
+						},
+						item=d,
+					)
 				)
-
-				if not self.separate_against_account_entries:
-					gl_dict.update(
-						{
-							"against_type": d.against_type,
-							"against_link": d.against_account_link,
-						}
-					)
-					gl_map.append(gl_dict)
-
-				elif d in self.against_accounts:
-					gl_dict.update(
-						{
-							"against_type": self.split_account.get("party_type") or "Account",
-							"against": self.split_account.get("party") or self.split_account.get("account"),
-							"against_link": self.split_account.get("party") or self.split_account.get("account"),
-						}
-					)
-					gl_map.append(gl_dict)
-
-				else:
-					for against_account in self.against_accounts:
-						against_account = against_account.as_dict()
-						debit = against_account.credit or against_account.credit_in_account_currency
-						credit = against_account.debit or against_account.debit_in_account_currency
-						gl_dict = gl_dict.copy()
-						gl_dict.update(
-							{
-								"against_type": against_account.party_type or "Account",
-								"against": against_account.party or against_account.account,
-								"against_link": against_account.party or against_account.account,
-								"debit": flt(debit, d.precision("debit")),
-								"credit": flt(credit, d.precision("credit")),
-								"account_currency": d.account_currency,
-								"debit_in_account_currency": flt(
-									debit / d.exchange_rate, d.precision("debit_in_account_currency")
-								),
-								"credit_in_account_currency": flt(
-									credit / d.exchange_rate, d.precision("credit_in_account_currency")
-								),
-							}
-						)
-						gl_map.append(gl_dict)
 
 		return gl_map
 
