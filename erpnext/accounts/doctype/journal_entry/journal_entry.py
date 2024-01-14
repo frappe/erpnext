@@ -1001,6 +1001,10 @@ class JournalEntry(AccountsController):
 						item=d,
 					)
 				)
+<<<<<<< HEAD
+=======
+
+>>>>>>> fbeaf2b398 (Revert "fix: set against type in controllers")
 		return gl_map
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
