@@ -153,7 +153,6 @@ def make_gl_entry(tax, gl_entries, doc, tax_accounts):
 					"account": tax.account_head,
 					"cost_center": tax.cost_center,
 					"posting_date": doc.posting_date,
-					"against_type": "Supplier",
 					"against": doc.supplier,
 					"against_link": doc.supplier,
 					dr_or_cr: tax.base_tax_amount_after_discount_amount,
