@@ -835,7 +835,11 @@ class PurchaseReceipt(BuyingController):
 						debit=0.0,
 						credit=applicable_amount,
 						remarks=self.remarks or _("Accounting Entry for Stock"),
+<<<<<<< HEAD
 						against_account=against_account,
+=======
+						against_account=against_accounts,
+>>>>>>> b40d3b0a05 (Revert "fix: purchase receipt tests")
 						item=tax,
 					)
 
