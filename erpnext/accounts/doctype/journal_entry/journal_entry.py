@@ -1626,10 +1626,3 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
-
-
-@frappe.whitelist()
-def get_against_type(doctype, txt, searchfield, start, page_len, filters):
-	against_types = frappe.db.get_list("Party Type", pluck="name") + ["Account"]
-	doctype = frappe.qb.DocType("DocType")
-	return frappe.qb.from_(doctype).select(doctype.name).where(doctype.name.isin(against_types)).run()
