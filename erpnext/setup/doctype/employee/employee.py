@@ -34,7 +34,7 @@ class Employee(NestedSet):
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 
-		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
+		validate_status(self.status, ["Active", "Terminated", "Suspended"])
 
 		self.employee = self.name
 		self.set_employee_name()
@@ -42,7 +42,6 @@ class Employee(NestedSet):
 		self.validate_email()
 		self.validate_status()
 		self.validate_reports_to()
-		self.validate_preferred_email()
 
 		if self.user_id:
 			self.validate_user_details()
@@ -156,25 +155,11 @@ class Employee(NestedSet):
 			throw(_("Date of Joining must be greater than Date of Birth"))
 
 		elif (
-			self.date_of_retirement
-			and self.date_of_joining
-			and (getdate(self.date_of_retirement) <= getdate(self.date_of_joining))
-		):
-			throw(_("Date Of Retirement must be greater than Date of Joining"))
-
-		elif (
 			self.relieving_date
 			and self.date_of_joining
 			and (getdate(self.relieving_date) < getdate(self.date_of_joining))
 		):
 			throw(_("Relieving Date must be greater than or equal to Date of Joining"))
-
-		elif (
-			self.contract_end_date
-			and self.date_of_joining
-			and (getdate(self.contract_end_date) <= getdate(self.date_of_joining))
-		):
-			throw(_("Contract End Date must be greater than Date of Joining"))
 
 	def validate_email(self):
 		if self.company_email:
@@ -243,10 +228,6 @@ class Employee(NestedSet):
 	def on_trash(self):
 		self.update_nsm_model()
 		delete_events(self.doctype, self.name)
-
-	def validate_preferred_email(self):
-		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
-			frappe.msgprint(_("Please enter {0}").format(self.prefered_contact_email))
 
 	def reset_employee_emails_cache(self):
 		prev_doc = self.get_doc_before_save() or {}
