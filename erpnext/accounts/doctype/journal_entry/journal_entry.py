@@ -751,90 +751,27 @@ class JournalEntry(AccountsController):
 					)
 
 	def set_against_account(self):
+		accounts_debited, accounts_credited = [], []
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			for d in self.get("accounts"):
 				if d.reference_type == "Sales Invoice":
-					against_type = "Customer"
+					field = "customer"
 				else:
-					against_type = "Supplier"
+					field = "supplier"
 
-				against_account = frappe.db.get_value(d.reference_type, d.reference_name, against_type.lower())
-				d.against_type = against_type
-				d.against_account_link = against_account
+				d.against_account = frappe.db.get_value(d.reference_type, d.reference_name, field)
 		else:
-			self.get_debited_credited_accounts()
-			if len(self.accounts_credited) > 1 and len(self.accounts_debited) > 1:
-				self.auto_set_against_accounts()
-				return
-			self.get_against_accounts()
+			for d in self.get("accounts"):
+				if flt(d.debit) > 0:
+					accounts_debited.append(d.party or d.account)
+				if flt(d.credit) > 0:
+					accounts_credited.append(d.party or d.account)
 
-	def auto_set_against_accounts(self):
-		for i in range(0, len(self.accounts), 2):
-			acc = self.accounts[i]
-			against_acc = self.accounts[i + 1]
-			if acc.debit_in_account_currency > 0:
-				current_val = acc.debit_in_account_currency * flt(acc.exchange_rate)
-				against_val = against_acc.credit_in_account_currency * flt(against_acc.exchange_rate)
-			else:
-				current_val = acc.credit_in_account_currency * flt(acc.exchange_rate)
-				against_val = against_acc.debit_in_account_currency * flt(against_acc.exchange_rate)
-
-			if current_val == against_val:
-				acc.against_type = against_acc.party_type or "Account"
-				against_acc.against_type = acc.party_type or "Account"
-
-				acc.against_account_link = against_acc.party or against_acc.account
-				against_acc.against_account_link = acc.party or acc.account
-			else:
-				frappe.msgprint(
-					_(
-						"Unable to automatically determine {0} accounts. Set them up in the {1} table if needed."
-					).format(frappe.bold("against"), frappe.bold("Accounting Entries")),
-					alert=True,
-				)
-				break
-
-	def get_against_accounts(self):
-		self.against_accounts = []
-		self.split_account = {}
-		self.get_debited_credited_accounts()
-
-		if self.separate_against_account_entries:
-			no_of_credited_acc, no_of_debited_acc = len(self.accounts_credited), len(self.accounts_debited)
-			if no_of_credited_acc <= 1 and no_of_debited_acc <= 1:
-				self.set_against_accounts_for_single_dr_cr()
-				self.separate_against_account_entries = 0
-			elif no_of_credited_acc == 1:
-				self.against_accounts = self.accounts_debited
-				self.split_account = self.accounts_credited[0]
-			elif no_of_debited_acc == 1:
-				self.against_accounts = self.accounts_credited
-				self.split_account = self.accounts_debited[0]
-
-	def get_debited_credited_accounts(self):
-		self.accounts_debited, self.accounts_credited = [], []
-		self.separate_against_account_entries = 1
-		for d in self.get("accounts"):
-			if flt(d.debit) > 0:
-				self.accounts_debited.append(d)
-			elif flt(d.credit) > 0:
-				self.accounts_credited.append(d)
-
-			if d.against_account_link:
-				self.separate_against_account_entries = 0
-				break
-
-	def set_against_accounts_for_single_dr_cr(self):
-		against_account = None
-		for d in self.accounts:
-			if flt(d.debit) > 0:
-				against_account = self.accounts_credited[0]
-			elif flt(d.credit) > 0:
-				against_account = self.accounts_debited[0]
-			if against_account:
-				d.against_type = against_account.party_type or "Account"
-				d.against_account = against_account.party or against_account.account
-				d.against_account_link = against_account.party or against_account.account
+			for d in self.get("accounts"):
+				if flt(d.debit) > 0:
+					d.against_account = ", ".join(list(set(accounts_credited)))
+				if flt(d.credit) > 0:
+					d.against_account = ", ".join(list(set(accounts_debited)))
 
 	def validate_debit_credit_amount(self):
 		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
