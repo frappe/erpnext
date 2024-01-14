@@ -523,7 +523,7 @@ class PurchaseReceipt(BuyingController):
 							account_currency=account_currency,
 							item=item,
 						)
-   
+
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=self.get_company_default("exchange_gain_loss_account"),
@@ -796,7 +796,7 @@ class PurchaseReceipt(BuyingController):
 			# Backward compatibility:
 			# and charges added via Landed Cost Voucher,
 			# post valuation related charges on "Stock Received But Not Billed"
-			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
+			against_accounts = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			stock_rbnb = (
