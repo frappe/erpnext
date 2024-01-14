@@ -523,7 +523,7 @@ class PurchaseReceipt(BuyingController):
 							account_currency=account_currency,
 							item=item,
 						)
-
+   
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=self.get_company_default("exchange_gain_loss_account"),
