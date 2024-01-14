@@ -154,7 +154,6 @@ class InvoiceDiscounting(AccountsController):
 							"party_type": "Customer",
 							"party": d.customer,
 							"against": self.accounts_receivable_credit,
-							"against_link": self.accounts_receivable_credit,
 							"credit": outstanding_in_company_currency,
 							"credit_in_account_currency": outstanding_in_company_currency
 							if inv.party_account_currency == company_currency
@@ -175,7 +174,6 @@ class InvoiceDiscounting(AccountsController):
 							"party_type": "Customer",
 							"party": d.customer,
 							"against": inv.debit_to,
-							"against_link": inv.debit_to,
 							"debit": outstanding_in_company_currency,
 							"debit_in_account_currency": outstanding_in_company_currency
 							if ar_credit_account_currency == company_currency

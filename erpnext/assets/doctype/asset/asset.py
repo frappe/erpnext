@@ -698,7 +698,6 @@ class Asset(AccountsController):
 					{
 						"account": cwip_account,
 						"against": fixed_asset_account,
-						"against_link": fixed_asset_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
 						"credit": self.purchase_receipt_amount,
@@ -714,7 +713,6 @@ class Asset(AccountsController):
 					{
 						"account": fixed_asset_account,
 						"against": cwip_account,
-						"against_link": cwip_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
 						"debit": self.purchase_receipt_amount,

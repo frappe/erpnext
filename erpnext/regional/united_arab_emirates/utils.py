@@ -154,7 +154,6 @@ def make_gl_entry(tax, gl_entries, doc, tax_accounts):
 					"cost_center": tax.cost_center,
 					"posting_date": doc.posting_date,
 					"against": doc.supplier,
-					"against_link": doc.supplier,
 					dr_or_cr: tax.base_tax_amount_after_discount_amount,
 					dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount
 					if account_currency == doc.company_currency

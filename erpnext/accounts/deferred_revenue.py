@@ -516,7 +516,6 @@ def make_gl_entries(
 			{
 				"account": credit_account,
 				"against": against,
-				"against_link": against,
 				"credit": base_amount,
 				"credit_in_account_currency": amount,
 				"cost_center": cost_center,
@@ -536,7 +535,6 @@ def make_gl_entries(
 			{
 				"account": debit_account,
 				"against": against,
-				"against_link": against,
 				"debit": base_amount,
 				"debit_in_account_currency": amount,
 				"cost_center": cost_center,
