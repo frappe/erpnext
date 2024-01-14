@@ -162,7 +162,6 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": warehouse_account[sle.warehouse]["account"],
-									"against_type": "Account",
 									"against": expense_account,
 									"against_link": expense_account,
 									"cost_center": item_row.cost_center,
@@ -180,7 +179,6 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": expense_account,
-									"against_type": "Account",
 									"against": warehouse_account[sle.warehouse]["account"],
 									"against_link": warehouse_account[sle.warehouse]["account"],
 									"cost_center": item_row.cost_center,
@@ -214,7 +212,6 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": expense_account,
-							"against_type": "Account",
 							"against": warehouse_asset_account,
 							"against_link": warehouse_asset_account,
 							"cost_center": item_row.cost_center,
@@ -232,7 +229,6 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": warehouse_asset_account,
-							"against_type": "Account",
 							"against": expense_account,
 							"against_link": expense_account,
 							"cost_center": item_row.cost_center,
@@ -851,7 +847,6 @@ class StockController(AccountsController):
 			"cost_center": cost_center,
 			"debit": debit,
 			"credit": credit,
-			"against_type": against_type,
 			"against": against_account,
 			"against_link": against_account,
 			"remarks": remarks,
