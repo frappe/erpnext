@@ -1002,9 +1002,12 @@ class JournalEntry(AccountsController):
 					)
 				)
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> fbeaf2b398 (Revert "fix: set against type in controllers")
+=======
+>>>>>>> 2249b7c793 (Revert "fix: auto separate against accounts")
 		return gl_map
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
