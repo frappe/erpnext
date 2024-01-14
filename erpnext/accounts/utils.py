@@ -1222,10 +1222,6 @@ def get_autoname_with_number(number_value, doc_title, company):
 
 def parse_naming_series_variable(doc, variable):
 	if variable == "FY":
-<<<<<<< HEAD
-		date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
-		return get_fiscal_year(date=date, company=doc.get("company"))[0]
-=======
 		if doc:
 			date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
 			company = doc.get("company")
@@ -1233,7 +1229,6 @@ def parse_naming_series_variable(doc, variable):
 			date = getdate()
 			company = None
 		return get_fiscal_year(date=date, company=company)[0]
->>>>>>> d96a777edd (fix: date in master document for dictionary condition)
 
 
 @frappe.whitelist()
