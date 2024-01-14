@@ -280,14 +280,22 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Reference Detail No",
+<<<<<<< HEAD
    "no_copy": 1,
    "search_index": 1
+=======
+   "no_copy": 1
+>>>>>>> 8ee6dbc1e2 (Revert "fix: make JV account against field a dynamic link")
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-11-23 11:44:25.841187",
+=======
+ "modified": "2023-12-03 23:21:22.205409",
+>>>>>>> 8ee6dbc1e2 (Revert "fix: make JV account against field a dynamic link")
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
