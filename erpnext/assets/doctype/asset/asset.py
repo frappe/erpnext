@@ -697,7 +697,6 @@ class Asset(AccountsController):
 				self.get_gl_dict(
 					{
 						"account": cwip_account,
-						"against_type": "Account",
 						"against": fixed_asset_account,
 						"against_link": fixed_asset_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
@@ -714,7 +713,6 @@ class Asset(AccountsController):
 				self.get_gl_dict(
 					{
 						"account": fixed_asset_account,
-						"against_type": "Account",
 						"against": cwip_account,
 						"against_link": cwip_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
