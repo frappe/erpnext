@@ -60,7 +60,9 @@ class BankTransaction(Document):
 
 			if self.currency != account_currency:
 				frappe.throw(
-					_("Currency {0} cannot be different from Bank Account({1}) Currency: {2}").format(
+					_(
+						"Transaction currency: {0} cannot be different from Bank Account({1}) currency: {2}"
+					).format(
 						frappe.bold(self.currency), frappe.bold(self.bank_account), frappe.bold(account_currency)
 					)
 				)
