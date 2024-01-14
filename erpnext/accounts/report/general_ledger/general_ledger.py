@@ -203,7 +203,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			voucher_type, voucher_subtype, voucher_no, {dimension_fields}
 			cost_center, project, {transaction_currency_fields}
 			against_voucher_type, against_voucher, account_currency,
-			against_link, against, is_opening, creation {select_fields}
+			against, is_opening, creation {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		{order_by_statement}
@@ -398,7 +398,6 @@ def initialize_gle_map(gl_entries, filters):
 	group_by = group_by_field(filters.get("group_by"))
 
 	for gle in gl_entries:
-		gle.against = gle.get("against_link") or gle.get("against")
 		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
 	return gle_map
 
