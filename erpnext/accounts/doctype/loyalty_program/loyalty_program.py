@@ -161,7 +161,7 @@ def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None
                                 filters={'customer': customer,
                                          'loyalty_program': loyalty_program,
                                         #  'expiry_date':[">=",expire_date],
-                                         'invoice':["!=",""]
+                                        #  'invoice':["!=",""]
                                          },
                                 fields=['loyalty_points', 'invoice','posting_date','expiry_date'])
 
@@ -192,7 +192,8 @@ def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None
     #     loyalty_points = sum(loyalty_points_list)
     #     if loyalty_points < 0:
     #         loyalty_points = 0
-    total_lp=loyalty_points+get_opening_lp(customer)
+    total_lp=loyalty_points
+	# +get_opening_lp(customer)
     if total_lp<0:
         return {"loyalty_points":0}
     return {"loyalty_points":total_lp}
