@@ -968,7 +968,6 @@ class JournalEntry(AccountsController):
 
 	def build_gl_map(self):
 		gl_map = []
-		self.get_against_accounts()
 		for d in self.get("accounts"):
 			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
 				r = [d.user_remark, self.remark]
@@ -1003,7 +1002,6 @@ class JournalEntry(AccountsController):
 						item=d,
 					)
 				)
-
 		return gl_map
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
