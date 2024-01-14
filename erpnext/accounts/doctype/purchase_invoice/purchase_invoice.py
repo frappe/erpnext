@@ -1120,7 +1120,11 @@ class PurchaseInvoice(BuyingController):
 						gl_entries.append(
 							self.get_gl_dict(
 								{
+<<<<<<< HEAD
 									"account": stock_rbnb,
+=======
+									"account": self.stock_received_but_not_billed,
+>>>>>>> 1710e10b31 (Revert "fix: set against type in inv gl dict")
 									"against": self.supplier,
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
 									"remarks": self.remarks or _("Accounting Entry for Stock"),
