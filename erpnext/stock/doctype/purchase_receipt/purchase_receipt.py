@@ -832,17 +832,16 @@ class PurchaseReceipt(BuyingController):
 						)
 						amount_including_divisional_loss -= applicable_amount
 
-					for against in against_accounts:
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=account,
-							cost_center=tax.cost_center,
-							debit=0.0,
-							credit=flt(applicable_amount) / len(against_accounts),
-							remarks=self.remarks or _("Accounting Entry for Stock"),
-							against_account=against,
-							item=tax,
-						)
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=account,
+						cost_center=tax.cost_center,
+						debit=0.0,
+						credit=applicable_amount,
+						remarks=self.remarks or _("Accounting Entry for Stock"),
+						against_account=against_accounts,
+						item=tax,
+					)
 
 					i += 1
 

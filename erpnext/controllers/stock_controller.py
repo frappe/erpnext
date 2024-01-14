@@ -832,7 +832,6 @@ class StockController(AccountsController):
 		credit,
 		remarks,
 		against_account,
-		against_type="Account",
 		debit_in_account_currency=None,
 		credit_in_account_currency=None,
 		account_currency=None,
