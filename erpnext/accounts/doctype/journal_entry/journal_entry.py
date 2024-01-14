@@ -765,7 +765,6 @@ class JournalEntry(AccountsController):
 			self.get_debited_credited_accounts()
 			if len(self.accounts_credited) > 1 and len(self.accounts_debited) > 1:
 				self.auto_set_against_accounts()
-				self.separate_against_account_entries = 0
 				return
 			self.get_against_accounts()
 
@@ -1036,7 +1035,7 @@ class JournalEntry(AccountsController):
 		transaction_currency_map = self.get_transaction_currency_map()
 		company_currency = erpnext.get_company_currency(self.company)
 
-		self.set_against_account()
+		self.get_against_accounts()
 		for d in self.get("accounts"):
 			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
 				r = [d.user_remark, self.remark]
