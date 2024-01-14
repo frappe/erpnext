@@ -497,8 +497,8 @@ def update_barcode_value(out):
 
 
 def get_barcode_data(items_list):
-	# get itemwise batch no data
-	# exmaple: {'LED-GRE': [Batch001, Batch002]}
+	# get item-wise batch no data
+	# example: {'LED-GRE': [Batch001, Batch002]}
 	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
 
 	itemwise_barcode = {}

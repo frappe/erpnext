@@ -930,7 +930,7 @@ class AccountsController(TransactionBase):
 		# Update details in transaction currency
 		gl_dict.update(
 			{
-				"transaction_currency": args.get("currency") or self.get("currency") or self.company_currency,
+				"transaction_currency": self.get("currency") or self.company_currency,
 				"transaction_exchange_rate": self.get("conversion_rate", 1),
 				"debit_in_transaction_currency": self.get_value_in_transaction_currency(
 					account_currency, args, "debit"
@@ -969,19 +969,21 @@ class AccountsController(TransactionBase):
 		return self.doctype
 
 	def get_value_in_transaction_currency(self, account_currency, args, field):
-		if account_currency == args.get("currency") or self.get("currency"):
+		if account_currency == self.get("currency"):
 			return args.get(field + "_in_account_currency")
 		else:
-			return flt(args.get(field, 0) / (args.get("conversion_rate") or self.get("conversion_rate", 1)))
+			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
 
 	def validate_qty_is_not_zero(self):
-		if self.doctype == "Purchase Receipt":
-			return
-
 		for item in self.items:
+			if self.doctype == "Purchase Receipt" and item.rejected_qty:
+				continue
+
 			if not flt(item.qty):
 				frappe.throw(
-					msg=_("Row #{0}: Item quantity cannot be zero").format(item.idx),
+					msg=_("Row #{0}: Quantity for Item {1} cannot be zero.").format(
+						item.idx, frappe.bold(item.item_code)
+					),
 					title=_("Invalid Quantity"),
 					exc=InvalidQtyError,
 				)
@@ -1419,10 +1421,15 @@ class AccountsController(TransactionBase):
 			reconcile_against_document(lst)
 
 	def on_cancel(self):
+		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
+			remove_from_bank_transaction,
+		)
 		from erpnext.accounts.utils import (
 			cancel_exchange_gain_loss_journal,
 			unlink_ref_doc_from_payment_entries,
 		)
+
+		remove_from_bank_transaction(self.doctype, self.name)
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
 			# Cancel Exchange Gain/Loss Journal before unlinking
@@ -1960,7 +1967,7 @@ class AccountsController(TransactionBase):
 			self.remove(item)
 
 	def set_payment_schedule(self):
-		if self.doctype == "Sales Invoice" and self.is_pos:
+		if (self.doctype == "Sales Invoice" and self.is_pos) or self.get("is_opening") == "Yes":
 			self.payment_terms_template = ""
 			return
 
@@ -2143,7 +2150,7 @@ class AccountsController(TransactionBase):
 			)
 
 	def validate_payment_schedule_amount(self):
-		if self.doctype == "Sales Invoice" and self.is_pos:
+		if (self.doctype == "Sales Invoice" and self.is_pos) or self.get("is_opening") == "Yes":
 			return
 
 		party_account_currency = self.get("party_account_currency")
@@ -3097,7 +3104,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	def validate_quantity(child_item, new_data):
 		if not flt(new_data.get("qty")):
 			frappe.throw(
-				_("Row # {0}: Quantity for Item {1} cannot be zero").format(
+				_("Row #{0}: Quantity for Item {1} cannot be zero.").format(
 					new_data.get("idx"), frappe.bold(new_data.get("item_code"))
 				),
 				title=_("Invalid Qty"),

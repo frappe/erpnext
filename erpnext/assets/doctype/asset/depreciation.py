@@ -19,6 +19,7 @@ from frappe.utils import (
 )
 from frappe.utils.user import get_users_with_role
 
+import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
@@ -35,7 +36,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
 	if not cint(
-		frappe.db.get_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically")
+		frappe.db.get_single_value("Accounts Settings", "book_asset_depreciation_entry_automatically")
 	):
 		return
 
@@ -521,6 +522,13 @@ def depreciate_asset(asset_doc, date, notes):
 	asset_doc.save()
 
 	make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date)
+
+	cancel_depreciation_entries(asset_doc, date)
+
+
+@erpnext.allow_regional
+def cancel_depreciation_entries(asset_doc, date):
+	pass
 
 
 def reset_depreciation_schedule(asset_doc, date, notes):

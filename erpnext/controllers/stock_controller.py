@@ -395,11 +395,7 @@ class StockController(AccountsController):
 		}
 
 		for row in self.get(table_name):
-			for field in [
-				"serial_and_batch_bundle",
-				"current_serial_and_batch_bundle",
-				"rejected_serial_and_batch_bundle",
-			]:
+			for field in QTY_FIELD.keys():
 				if row.get(field):
 					frappe.get_doc("Serial and Batch Bundle", row.get(field)).set_serial_and_batch_values(
 						self, row, qty_field=QTY_FIELD[field]

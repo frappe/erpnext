@@ -295,9 +295,6 @@ class SellingController(StockController):
 	def get_item_list(self):
 		il = []
 		for d in self.get("items"):
-			if d.qty is None:
-				frappe.throw(_("Row {0}: Qty is mandatory").format(d.idx))
-
 			if self.has_product_bundle(d.item_code):
 				for p in self.get("packed_items"):
 					if p.parent_detail_docname == d.name and p.parent_item == d.item_code:
