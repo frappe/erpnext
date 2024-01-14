@@ -304,7 +304,6 @@ class JournalEntry(AccountsController):
 					"account": tax_withholding_details.get("account_head"),
 					rev_debit_or_credit: tax_withholding_details.get("tax_amount"),
 					"against_account": parties[0],
-					"against_account_link": parties[0],
 				},
 			)
 
