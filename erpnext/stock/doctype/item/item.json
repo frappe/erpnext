@@ -240,11 +240,9 @@
    "label": "Standard Selling Rate"
   },
   {
-   "default": "0",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
-   "label": "Is Fixed Asset",
-   "set_only_once": 1
+   "label": "Is Fixed Asset"
   },
   {
    "depends_on": "is_fixed_asset",

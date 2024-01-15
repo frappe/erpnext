@@ -218,7 +218,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		columns += ", " + ", ".join(extra_searchfields)
 
 	if "description" in searchfields:
-		columns += """, CASE WHEN length(tabItem.description) > 40 THEN concat(substr(tabItem.description, 1, 40), '...') ELSE description END AS description"""
+		columns += """, CASE WHEN length(description) > 40 THEN concat(substr(description, 1, 40), '...') ELSE description END AS description"""
 
 	searchfields = searchfields + [
 		field

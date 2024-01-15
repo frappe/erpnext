@@ -777,7 +777,7 @@
       "options": "\nSelf\nCompany Issued\nAbsconded"
     },
     {
-      "fieldname": "employee_code",
+      "fieldname": "employee_number",
       "fieldtype": "Data",
       "in_list_view": 1,
       "in_standard_filter": 1,
