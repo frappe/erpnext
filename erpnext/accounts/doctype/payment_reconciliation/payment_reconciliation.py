@@ -206,7 +206,7 @@ class PaymentReconciliation(Document):
 				conditions.append(jea[dimension] == self.get(dimension))
 
 		if self.payment_name:
-			conditions.append(je.name.like(f"%%{self.payent_name}%%"))
+			conditions.append(je.name.like(f"%%{self.payment_name}%%"))
 
 		if self.get("cost_center"):
 			conditions.append(jea.cost_center == self.cost_center)
@@ -713,7 +713,7 @@ class PaymentReconciliation(Document):
 			conditions.append(je.total_debit.gte(self.minimum_payment_amount))
 
 		if self.maximum_payment_amount:
-			conditions.append(je.total_debit.lte(self.maximumb_payment_amount))
+			conditions.append(je.total_debit.lte(self.maximum_payment_amount))
 
 		return conditions
 
@@ -801,6 +801,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 				inv.against_voucher,
 				None,
 				inv.cost_center,
+				frappe._dict(),
 			)
 
 
