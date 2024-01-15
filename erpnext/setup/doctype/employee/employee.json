@@ -11,7 +11,7 @@
   "field_order": [
     "basic_details_tab",
     "basic_information",
-    "employee_code",
+    "employee_number",
     "employee",
     "first_name",
     "middle_name",
@@ -63,6 +63,7 @@
     "column_break_19",
     "relation",
     "attendance_and_leave_details",
+    "leave_approver",
     "holiday_list",
     "weekly_off_count",
     "salary_information",
@@ -75,6 +76,8 @@
     "column_break_n56la",
     "previous_fixed",
     "previous_f_and_b",
+    "expense_details_section",
+    "expense_approver",
     "salary_details_section",
     "salary_currency",
     "salary_mode",
@@ -808,6 +811,23 @@
       "fieldtype": "Link",
       "label": "Job Applicant",
       "options": "Job Applicant"
+    },
+    {
+      "fieldname": "leave_approver",
+      "fieldtype": "Link",
+      "label": "Leave Approver",
+      "options": "Employee"
+    },
+    {
+      "fieldname": "expense_details_section",
+      "fieldtype": "Section Break",
+      "label": "Expense Details"
+    },
+    {
+      "fieldname": "expense_approver",
+      "fieldtype": "Link",
+      "label": "Expense Approver",
+      "options": "Employee"
     }
   ],
   "icon": "fa fa-user",
