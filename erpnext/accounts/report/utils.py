@@ -253,7 +253,7 @@ def get_journal_entries(filters, args):
 			(je.voucher_type == "Journal Entry")
 			& (je.docstatus == 1)
 			& (journal_account.party == filters.get(args.party))
-			& (journal_account.account == args.party_account)
+			& (journal_account.account.isin(args.party_account))
 		)
 		.orderby(je.posting_date, je.name, order=Order.desc)
 	)
