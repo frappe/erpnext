@@ -376,6 +376,10 @@ class PartyLedgerSummaryReport(object):
 		if not income_or_expense_accounts:
 			# prevent empty 'in' condition
 			income_or_expense_accounts.append("")
+		else:
+			# escape '%' in account name
+			# ignoring frappe.db.escape as it replaces single quotes with double quotes
+			income_or_expense_accounts = [x.replace("%", "%%") for x in income_or_expense_accounts]
 
 		accounts_query = (
 			qb.from_(gl)
