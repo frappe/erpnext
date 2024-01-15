@@ -17,12 +17,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-<<<<<<< HEAD
-          node-version: 18
-
-=======
           node-version: 20
->>>>>>> aef87cced7 (ci: bump node in release workflow)
+
       - name: Setup dependencies
         run: |
           npm install @semantic-release/git @semantic-release/exec --no-save
