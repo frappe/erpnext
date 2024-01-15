@@ -457,8 +457,15 @@ class PaymentReconciliation(Document):
 				row = self.append("allocation", {})
 				row.update(entry)
 
+	def update_dimension_values_in_allocated_entries(self, res):
+		for x in self.dimensions:
+			dimension = x.fieldname
+			if self.get(dimension):
+				res[dimension] = self.get(dimension)
+		return res
+
 	def get_allocated_entry(self, pay, inv, allocated_amount):
-		return frappe._dict(
+		res = frappe._dict(
 			{
 				"reference_type": pay.get("reference_type"),
 				"reference_name": pay.get("reference_name"),
@@ -473,6 +480,9 @@ class PaymentReconciliation(Document):
 				"cost_center": pay.get("cost_center"),
 			}
 		)
+
+		res = self.update_dimension_values_in_allocated_entries(res)
+		return res
 
 	def reconcile_allocations(self, skip_ref_details_update_for_pe=False):
 		adjust_allocations_for_taxes(self)
@@ -499,7 +509,7 @@ class PaymentReconciliation(Document):
 			reconcile_against_document(entry_list, skip_ref_details_update_for_pe)
 
 		if dr_or_cr_notes:
-			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
+			reconcile_dr_cr_note(dr_or_cr_notes, self.company, self.dimensions)
 
 	@frappe.whitelist()
 	def reconcile(self):
@@ -550,12 +560,10 @@ class PaymentReconciliation(Document):
 			}
 		)
 
-		dimensions_dict = {}
 		for x in self.dimensions:
 			if row.get(x.fieldname):
-				dimensions_dict.update({x.fieldname: row.get(x.fieldname)})
+				payment_details[x.fieldname] = row.get(x.fieldname)
 
-		payment_details.update({"dimensions": dimensions_dict})
 		return payment_details
 
 	def check_mandatory_to_fetch(self):
@@ -718,7 +726,7 @@ class PaymentReconciliation(Document):
 		return conditions
 
 
-def reconcile_dr_cr_note(dr_cr_notes, company):
+def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
 	for inv in dr_cr_notes:
 		voucher_type = "Credit Note" if inv.voucher_type == "Sales Invoice" else "Debit Note"
 
@@ -768,6 +776,15 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 			}
 		)
 
+		# Credit Note(JE) will inherit the same dimension values as payment
+		dimensions_dict = frappe._dict()
+		if active_dimensions:
+			for dim in active_dimensions:
+				dimensions_dict[dim.fieldname] = inv.get(dim.fieldname)
+
+		jv.accounts[0].update(dimensions_dict)
+		jv.accounts[1].update(dimensions_dict)
+
 		jv.flags.ignore_mandatory = True
 		jv.flags.ignore_exchange_rate = True
 		jv.remark = None
@@ -801,7 +818,7 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 				inv.against_voucher,
 				None,
 				inv.cost_center,
-				frappe._dict(),
+				dimensions_dict,
 			)
 
 
