@@ -2046,6 +2046,8 @@ def create_gain_loss_journal(
 	cost_center,
 	dimensions,
 ) -> str:
+	# TODO: pass dimensions to Journal
+
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Exchange Gain Or Loss"
 	journal_entry.company = company
