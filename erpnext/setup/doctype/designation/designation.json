@@ -8,6 +8,7 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "enabled",
   "designation_name",
   "description"
  ],
@@ -26,12 +27,18 @@
    "fieldname": "description",
    "fieldtype": "Text",
    "label": "Description"
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
   }
  ],
  "icon": "fa fa-bookmark",
  "idx": 1,
  "links": [],
- "modified": "2023-02-10 01:53:41.319386",
+ "modified": "2024-01-15 17:32:32.040320",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Designation",

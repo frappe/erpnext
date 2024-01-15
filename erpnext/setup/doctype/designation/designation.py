@@ -16,6 +16,7 @@ class Designation(Document):
 
 		description: DF.Text | None
 		designation_name: DF.Data
+		enabled: DF.Check
 	# end: auto-generated types
 
 	pass
