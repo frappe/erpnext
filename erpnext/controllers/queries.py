@@ -416,23 +416,14 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	meta = frappe.get_meta(doctype, cached=True)
 	searchfields = meta.get_search_fields()
 
-	query = get_batches_from_stock_ledger_entries(searchfields, txt, filters)
-	bundle_query = get_batches_from_serial_and_batch_bundle(searchfields, txt, filters)
-
-	data = (
-		frappe.qb.from_((query) + (bundle_query))
-		.select("batch_no", "qty", "manufacturing_date", "expiry_date")
-		.offset(start)
-		.limit(page_len)
+	batches = get_batches_from_stock_ledger_entries(searchfields, txt, filters, start, page_len)
+	batches.extend(
+		get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start, page_len)
 	)
 
-	for field in searchfields:
-		data = data.select(field)
+	filtered_batches = get_filterd_batches(batches)
 
-	data = data.run()
-	data = get_filterd_batches(data)
-
-	return data
+	return filtered_batches
 
 
 def get_filterd_batches(data):
@@ -452,7 +443,7 @@ def get_filterd_batches(data):
 	return filterd_batch
 
 
-def get_batches_from_stock_ledger_entries(searchfields, txt, filters):
+def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, page_len=100):
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
 
@@ -474,6 +465,8 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters):
 			& (stock_ledger_entry.batch_no.isnotnull())
 		)
 		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse)
+		.offset(start)
+		.limit(page_len)
 	)
 
 	query = query.select(
@@ -488,16 +481,16 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters):
 		query = query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(txt)
+		txt_condition = batch_table.name.like("%{0}%".format(txt))
 		for field in searchfields + ["name"]:
-			txt_condition |= batch_table[field].like(txt)
+			txt_condition |= batch_table[field].like("%{0}%".format(txt))
 
 		query = query.where(txt_condition)
 
-	return query
+	return query.run(as_list=1) or []
 
 
-def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters):
+def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0, page_len=100):
 	bundle = frappe.qb.DocType("Serial and Batch Entry")
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
@@ -522,6 +515,8 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters):
 			& (stock_ledger_entry.serial_and_batch_bundle.isnotnull())
 		)
 		.groupby(bundle.batch_no, bundle.warehouse)
+		.offset(start)
+		.limit(page_len)
 	)
 
 	bundle_query = bundle_query.select(
@@ -536,13 +531,13 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters):
 		bundle_query = bundle_query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(txt)
+		txt_condition = batch_table.name.like("%{0}%".format(txt))
 		for field in searchfields + ["name"]:
-			txt_condition |= batch_table[field].like(txt)
+			txt_condition |= batch_table[field].like("%{0}%".format(txt))
 
 		bundle_query = bundle_query.where(txt_condition)
 
-	return bundle_query
+	return bundle_query.run(as_list=1)
 
 
 @frappe.whitelist()
