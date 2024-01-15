@@ -433,7 +433,7 @@ def get_payments(filters):
 		account_fieldname="paid_to",
 		party="supplier",
 		party_name="supplier_name",
-		party_account=get_party_account("Supplier", filters.supplier, filters.company),
+		party_account=[get_party_account("Supplier", filters.supplier, filters.company)],
 	)
 	payment_entries = get_payment_entries(filters, args)
 	journal_entries = get_journal_entries(filters, args)
