@@ -16,6 +16,7 @@ from frappe.utils.data import (
 	date_diff,
 	flt,
 	get_last_day,
+	get_link_to_form,
 	getdate,
 	nowdate,
 )
@@ -316,6 +317,37 @@ class Subscription(Document):
 
 		if self.is_new():
 			self.set_subscription_status()
+
+		self.validate_party_billing_currency()
+
+	def validate_party_billing_currency(self):
+		"""
+		Subscription should be of the same currency as the Party's default billing currency or company default.
+		"""
+		if self.party:
+			party_billing_currency = frappe.get_cached_value(
+				self.party_type, self.party, "default_currency"
+			) or frappe.get_cached_value("Company", self.company, "default_currency")
+
+			plans = [x.plan for x in self.plans]
+			subscription_plan_currencies = frappe.db.get_all(
+				"Subscription Plan", filters={"name": ("in", plans)}, fields=["name", "currency"]
+			)
+			unsupported_plans = []
+			for x in subscription_plan_currencies:
+				if x.currency != party_billing_currency:
+					unsupported_plans.append("{0}".format(get_link_to_form("Subscription Plan", x.name)))
+
+			if unsupported_plans:
+				unsupported_plans = [
+					_(
+						"Below Subscription Plans are of different currency to the party default billing currency/Company currency: {0}"
+					).format(frappe.bold(party_billing_currency))
+				] + unsupported_plans
+
+				frappe.throw(
+					unsupported_plans, frappe.ValidationError, "Unsupported Subscription Plans", as_list=True
+				)
 
 	def validate_trial_period(self) -> None:
 		"""
