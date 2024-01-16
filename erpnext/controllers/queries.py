@@ -9,12 +9,19 @@ import frappe
 from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
 <<<<<<< HEAD
+<<<<<<< HEAD
 from frappe.utils import nowdate, unique
 =======
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Concat, Sum
 from frappe.utils import nowdate, today, unique
 >>>>>>> 4eefb445a7 (fix: project query controller logic)
+=======
+from frappe.query_builder import Criterion, CustomFunction
+from frappe.query_builder.functions import Concat, Locate, Sum
+from frappe.utils import nowdate, today, unique
+from pypika import Order
+>>>>>>> bfe42fdccb (refactor: better ordering of query result)
 
 import erpnext
 from erpnext.stock.get_item_details import _get_item_tax_template
@@ -338,6 +345,8 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	proj = qb.DocType("Project")
 	qb_filter_and_conditions = []
 	qb_filter_or_conditions = []
+	ifelse = CustomFunction("IF", ["condition", "then", "else"])
+
 	if filters and filters.get("customer"):
 		qb_filter_and_conditions.append(proj.customer == filters.get("customer"))
 
@@ -349,17 +358,29 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	for x in fields:
 		q = q.select(proj[x])
 
-	# ignore 'customer' and 'status' on searchfields as they must be exactly matched
+	# don't consider 'customer' and 'status' fields for pattern search, as they must be exactly matched
 	searchfields = [
 		x for x in frappe.get_meta(doctype).get_search_fields() if x not in ["customer", "status"]
 	]
+
+	# pattern search
 	if txt:
 		for x in searchfields:
 			qb_filter_or_conditions.append(proj[x].like(f"%{txt}%"))
 
 	q = q.where(Criterion.all(qb_filter_and_conditions)).where(Criterion.any(qb_filter_or_conditions))
+
+	# ordering
+	if txt:
+		# project_name containing search string 'txt' will be given higher precedence
+		q = q.orderby(ifelse(Locate(txt, proj.project_name) > 0, Locate(txt, proj.project_name), 99999))
+	q = q.orderby(proj.idx, order=Order.desc).orderby(proj.name)
+
 	if page_len:
 		q = q.limit(page_len)
+
+	if start:
+		q = q.offset(start)
 	return q.run()
 
 
