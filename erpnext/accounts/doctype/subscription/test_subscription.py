@@ -460,11 +460,13 @@ class TestSubscription(FrappeTestCase):
 		self.assertEqual(len(subscription.invoices), 1)
 
 	def test_multi_currency_subscription(self):
+		party = "_Test Subscription Customer"
+		frappe.db.set_value("Customer", party, "default_currency", "USD")
 		subscription = create_subscription(
 			start_date="2018-01-01",
 			generate_invoice_at="Beginning of the current subscription period",
 			plans=[{"plan": "_Test Plan Multicurrency", "qty": 1, "currency": "USD"}],
-			party="_Test Subscription Customer",
+			party=party,
 		)
 
 		subscription.process()
