@@ -234,23 +234,40 @@ class FIFOSlots:
 		if self.sle is None:
 			self.sle = self.__get_stock_ledger_entries()
 
+<<<<<<< HEAD
 		for d in self.sle:
 			key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
+=======
+		stock_ledger_entries = self.sle
 
-			if d.voucher_type == "Stock Reconciliation":
-				# get difference in qty shift as actual qty
-				prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
-				d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
+		with frappe.db.unbuffered_cursor():
+			if stock_ledger_entries is None:
+				stock_ledger_entries = self.__get_stock_ledger_entries()
+>>>>>>> ed927f102e (perf: use unbuffered_cursor for  stock_ageing report (#39399))
 
-			serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
+			for d in stock_ledger_entries:
+				key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
 
-			if d.actual_qty > 0:
-				self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
-			else:
-				self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
+				if d.voucher_type == "Stock Reconciliation":
+					# get difference in qty shift as actual qty
+					prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
+					d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
-			self.__update_balances(d, key)
+				serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
 
+				if d.actual_qty > 0:
+					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
+				else:
+					self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
+
+<<<<<<< HEAD
+=======
+				self.__update_balances(d, key)
+
+			# Note that stock_ledger_entries is an iterator, you can not reuse it  like a list
+			del stock_ledger_entries
+
+>>>>>>> ed927f102e (perf: use unbuffered_cursor for  stock_ageing report (#39399))
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
 			self.item_details = self.__aggregate_details_by_item(self.item_details)
