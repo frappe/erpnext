@@ -355,7 +355,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 
 	q = qb.from_(proj)
 
-	fields = get_fields("Project", ["name", "project_name"])
+	fields = get_fields(doctype, ["name", "project_name"])
 	for x in fields:
 		q = q.select(proj[x])
 
