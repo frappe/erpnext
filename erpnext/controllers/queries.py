@@ -6,8 +6,9 @@ import json
 from collections import OrderedDict, defaultdict
 
 import frappe
-from frappe import scrub
+from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
+from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Concat, Sum
 from frappe.utils import nowdate, today, unique
 
@@ -344,37 +345,32 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
-	doctype = "Project"
-	cond = ""
+	proj = qb.DocType("Project")
+	qb_filter_and_conditions = []
+	qb_filter_or_conditions = []
 	if filters and filters.get("customer"):
-		cond = """(`tabProject`.customer = %s or
-			ifnull(`tabProject`.customer,"")="") and""" % (
-			frappe.db.escape(filters.get("customer"))
-		)
+		qb_filter_and_conditions.append(proj.customer == filters.get("customer"))
 
-	fields = get_fields(doctype, ["name", "project_name"])
-	searchfields = frappe.get_meta(doctype).get_search_fields()
-	searchfields = " or ".join(["`tabProject`." + field + " like %(txt)s" for field in searchfields])
+	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
 
-	return frappe.db.sql(
-		"""select {fields} from `tabProject`
-		where
-			`tabProject`.status not in ('Completed', 'Cancelled')
-			and {cond} {scond} {match_cond}
-		order by
-			(case when locate(%(_txt)s, `tabProject`.name) > 0 then locate(%(_txt)s, `tabProject`.name) else 99999 end),
-			`tabProject`.idx desc,
-			`tabProject`.name asc
-		limit {page_len} offset {start}""".format(
-			fields=", ".join(["`tabProject`.{0}".format(f) for f in fields]),
-			cond=cond,
-			scond=searchfields,
-			match_cond=get_match_cond(doctype),
-			start=start,
-			page_len=page_len,
-		),
-		{"txt": "%{0}%".format(txt), "_txt": txt.replace("%", "")},
-	)
+	q = qb.from_(proj)
+
+	fields = get_fields("Project", ["name", "project_name"])
+	for x in fields:
+		q = q.select(proj[x])
+
+	# ignore 'customer' and 'status' on searchfields as they must be exactly matched
+	searchfields = [
+		x for x in frappe.get_meta(doctype).get_search_fields() if x not in ["customer", "status"]
+	]
+	if txt:
+		for x in searchfields:
+			qb_filter_or_conditions.append(proj[x].like(f"%{txt}%"))
+
+	q = q.where(Criterion.all(qb_filter_and_conditions)).where(Criterion.any(qb_filter_or_conditions))
+	if page_len:
+		q = q.limit(page_len)
+	return q.run()
 
 
 @frappe.whitelist()
