@@ -24,31 +24,31 @@ msgstr ""
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "  "
-msgstr ""
+msgstr "E-posta Özeti"
 
 #: selling/doctype/quotation/quotation.js:76
 msgid " Address"
-msgstr ""
+msgstr "Adres"
 
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:597
 msgid " Amount"
-msgstr ""
+msgstr "Miktar"
 
 #. Label of a Check field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgctxt "Inventory Dimension"
 msgid " Is Child Table"
-msgstr ""
+msgstr "Alt Tablo"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:181
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:107
 #: selling/report/sales_analytics/sales_analytics.py:66
 msgid " Name"
-msgstr ""
+msgstr "İsim"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:108
 msgid " Qty"
-msgstr ""
+msgstr "Adet"
 
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:588
 msgid " Rate"
@@ -56,16 +56,16 @@ msgstr ""
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:116
 msgid " Raw Material"
-msgstr ""
+msgstr "Hammadde"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:127
 #: public/js/bom_configurator/bom_configurator.bundle.js:157
 msgid " Sub Assembly"
-msgstr ""
+msgstr "Alt Montaj"
 
 #: projects/doctype/project_update/project_update.py:110
 msgid " Summary"
-msgstr ""
+msgstr "Özet"
 
 #: stock/doctype/item/item.py:235
 msgid "\"Customer Provided Item\" cannot be Purchase Item also"
@@ -708,7 +708,7 @@ msgstr ""
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "% Returned"
-msgstr ""
+msgstr "% İade Edilen"
 
 #. Description of the '% Amount Billed' (Percent) field in DocType 'Sales
 #. Order'
@@ -716,7 +716,7 @@ msgstr ""
 #, python-format
 msgctxt "Sales Order"
 msgid "% of materials billed against this Sales Order"
-msgstr ""
+msgstr "Satış Siparişi"
 
 #. Description of the '%  Delivered' (Percent) field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
