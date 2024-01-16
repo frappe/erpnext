@@ -662,12 +662,14 @@ class SalesOrder(SellingController):
 				)
 
 	def validate_reserved_stock(self):
-		"""Clean reserved stock flag for not stocked Item"""
+		"""Clean reserved stock flag for non-stock Item"""
+
+		enable_stock_reservation = frappe.db.get_single_value(
+			"Stock Settings", "enable_stock_reservation"
+		)
 
 		for item in self.items:
-			if not cint(item.is_stock_item) or not frappe.db.get_single_value(
-				"Stock Settings", "enable_stock_reservation"
-			):
+			if item.reserve_stock and (not enable_stock_reservation or not cint(item.is_stock_item)):
 				item.reserve_stock = 0
 
 	def has_unreserved_stock(self) -> bool:
