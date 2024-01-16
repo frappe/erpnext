@@ -930,7 +930,7 @@ class AccountsController(TransactionBase):
 		# Update details in transaction currency
 		gl_dict.update(
 			{
-				"transaction_currency": args.get("currency") or self.get("currency") or self.company_currency,
+				"transaction_currency": self.get("currency") or self.company_currency,
 				"transaction_exchange_rate": self.get("conversion_rate", 1),
 				"debit_in_transaction_currency": self.get_value_in_transaction_currency(
 					account_currency, args, "debit"
@@ -969,10 +969,10 @@ class AccountsController(TransactionBase):
 		return self.doctype
 
 	def get_value_in_transaction_currency(self, account_currency, args, field):
-		if account_currency == args.get("currency") or self.get("currency"):
+		if account_currency == self.get("currency"):
 			return args.get(field + "_in_account_currency")
 		else:
-			return flt(args.get(field, 0) / (args.get("conversion_rate") or self.get("conversion_rate", 1)))
+			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
 
 	def validate_qty_is_not_zero(self):
 		for item in self.items:

@@ -1031,10 +1031,6 @@ class JournalEntry(AccountsController):
 
 	def build_gl_map(self):
 		gl_map = []
-		conversion_rate_map = self.get_conversion_rate_map()
-		transaction_currency_map = self.get_transaction_currency_map()
-		company_currency = erpnext.get_company_currency(self.company)
-
 		self.get_against_accounts()
 		for d in self.get("accounts"):
 			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
@@ -1064,12 +1060,6 @@ class JournalEntry(AccountsController):
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"finance_book": self.finance_book,
-						"conversion_rate": conversion_rate_map.get(d.against_account_link, 1)
-						if d.account_currency == company_currency
-						else 1,
-						"currency": transaction_currency_map.get(d.against_account_link, d.account_currency)
-						if d.account_currency == company_currency
-						else d.account_currency,
 					},
 					item=d,
 				)
@@ -1118,20 +1108,6 @@ class JournalEntry(AccountsController):
 						gl_map.append(gl_dict)
 
 		return gl_map
-
-	def get_transaction_currency_map(self):
-		transaction_currency_map = {}
-		for account in self.get("accounts"):
-			transaction_currency_map.setdefault(account.party or account.account, account.account_currency)
-
-		return transaction_currency_map
-
-	def get_conversion_rate_map(self):
-		conversion_rate_map = {}
-		for account in self.get("accounts"):
-			conversion_rate_map.setdefault(account.party or account.account, account.exchange_rate)
-
-		return conversion_rate_map
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
