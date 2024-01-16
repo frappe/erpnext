@@ -233,28 +233,30 @@ class FIFOSlots:
 		"""
 
 		stock_ledger_entries = self.sle
-		if stock_ledger_entries is None:
-			stock_ledger_entries = self.__get_stock_ledger_entries()
 
-		for d in stock_ledger_entries:
-			key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
+		with frappe.db.unbuffered_cursor():
+			if stock_ledger_entries is None:
+				stock_ledger_entries = self.__get_stock_ledger_entries()
 
-			if d.voucher_type == "Stock Reconciliation":
-				# get difference in qty shift as actual qty
-				prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
-				d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
+			for d in stock_ledger_entries:
+				key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
 
-			serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
+				if d.voucher_type == "Stock Reconciliation":
+					# get difference in qty shift as actual qty
+					prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
+					d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
-			if d.actual_qty > 0:
-				self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
-			else:
-				self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
+				serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
 
-			self.__update_balances(d, key)
+				if d.actual_qty > 0:
+					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
+				else:
+					self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
 
-		# Note that stock_ledger_entries is an iterator, you can not reuse it  like a list
-		del stock_ledger_entries
+				self.__update_balances(d, key)
+
+			# Note that stock_ledger_entries is an iterator, you can not reuse it  like a list
+			del stock_ledger_entries
 
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
