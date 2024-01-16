@@ -43064,11 +43064,11 @@ msgstr "Yeni Seri Deposuz olamaz. Depo Stok Hareketi ile veya alım makbuzuyla a
 
 #: public/js/utils/crm_activities.js:63
 msgid "New Task"
-msgstr ""
+msgstr "Yeni Görev"
 
 #: manufacturing/doctype/bom/bom.js:112
 msgid "New Version"
-msgstr ""
+msgstr "Yeni Versiyon"
 
 #: stock/doctype/warehouse/warehouse_tree.js:15
 msgid "New Warehouse Name"
@@ -43078,7 +43078,7 @@ msgstr "Yeni Depo Adı"
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "New Workplace"
-msgstr "Yeni İş Yeri"
+msgstr "Yeni Çalışma Alanı"
 
 #: selling/doctype/customer/customer.py:337
 msgid "New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"
@@ -43097,18 +43097,18 @@ msgstr "Yeni çıkış tarihi olmalı"
 
 #: templates/pages/projects.html:37
 msgid "New task"
-msgstr "yeni görev"
+msgstr "Yeni Görev"
 
 #: accounts/doctype/promotional_scheme/promotional_scheme.py:211
 msgid "New {0} pricing rules are created"
-msgstr "Yeni {0} fiyatlandırma kuralları"
+msgstr "Yeni {0} fiyatlandırma kuralları oluşturuldu"
 
 #. Label of a Link in the CRM Workspace
 #. Label of a Link in the Settings Workspace
 #: crm/workspace/crm/crm.json setup/workspace/settings/settings.json
 msgctxt "Newsletter"
 msgid "Newsletter"
-msgstr ""
+msgstr "Bülten"
 
 #: www/book_appointment/index.html:34
 msgid "Next"
@@ -43118,7 +43118,7 @@ msgstr "Sonraki"
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Next Depreciation Date"
-msgstr "Bir sonraki değer kaybı tarihi"
+msgstr "Sonraki Değer Kaybı Tarihi"
 
 #. Label of a Date field in DocType 'Asset Maintenance Task'
 #: assets/doctype/asset_maintenance_task/asset_maintenance_task.json
@@ -43130,7 +43130,7 @@ msgstr "Sonraki Bitiş Tarihi"
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Next email will be sent on:"
-msgstr "Sonraki e-posta gönderilecek:"
+msgstr "Sonraki gönderilecek e-posta:"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:18
 msgid "No"
@@ -43409,7 +43409,7 @@ msgstr "Alınacak hiçbir öğe gecikmedi"
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:424
 msgid "No matches occurred via auto reconciliation"
-msgstr ""
+msgstr "Otomatik uzlaşma yoluyla hiçbir eşleşme gerçekleşmedi"
 
 #: manufacturing/doctype/production_plan/production_plan.py:879
 msgid "No material request created"
@@ -49406,15 +49406,15 @@ msgstr ""
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:121
 msgid "Please attach CSV file"
-msgstr ""
+msgstr "Lütfen bir CSV dosyası ekleyin"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2764
 msgid "Please cancel and amend the Payment Entry"
-msgstr ""
+msgstr "Lütfen Ödeme Girişini iptal edin ve değiştirin"
 
 #: accounts/utils.py:898
 msgid "Please cancel payment entry manually first"
-msgstr ""
+msgstr "Lütfen önce ödeme girişini manuel olarak iptal edin"
 
 #: accounts/doctype/gl_entry/gl_entry.py:337
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:327
