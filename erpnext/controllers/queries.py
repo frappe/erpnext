@@ -8,20 +8,10 @@ from collections import defaultdict
 import frappe
 from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
-<<<<<<< HEAD
-<<<<<<< HEAD
-from frappe.utils import nowdate, unique
-=======
-from frappe.query_builder import Criterion
-from frappe.query_builder.functions import Concat, Sum
-from frappe.utils import nowdate, today, unique
->>>>>>> 4eefb445a7 (fix: project query controller logic)
-=======
 from frappe.query_builder import Criterion, CustomFunction
-from frappe.query_builder.functions import Concat, Locate, Sum
-from frappe.utils import nowdate, today, unique
+from frappe.query_builder.functions import Locate
+from frappe.utils import nowdate, unique
 from pypika import Order
->>>>>>> bfe42fdccb (refactor: better ordering of query result)
 
 import erpnext
 from erpnext.stock.get_item_details import _get_item_tax_template
