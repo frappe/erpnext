@@ -162,6 +162,7 @@ class Asset(AccountsController):
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
+		self.cancel_capitalization()
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
 		self.set_status()
@@ -516,6 +517,16 @@ class Asset(AccountsController):
 		for movement in movements:
 			movement = frappe.get_doc("Asset Movement", movement.get("name"))
 			movement.cancel()
+
+	def cancel_capitalization(self):
+		asset_capitalization = frappe.db.get_value(
+			"Asset Capitalization",
+			{"target_asset": self.name, "docstatus": 1, "entry_type": "Capitalization"},
+		)
+
+		if asset_capitalization:
+			asset_capitalization = frappe.get_doc("Asset Capitalization", asset_capitalization)
+			asset_capitalization.cancel()
 
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
@@ -1027,6 +1038,8 @@ def is_cwip_accounting_enabled(asset_category):
 @frappe.whitelist()
 def get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
+	if not asset.calculate_depreciation:
+		return flt(asset.value_after_depreciation)
 
 	return asset.get_value_after_depreciation(finance_book)
 
