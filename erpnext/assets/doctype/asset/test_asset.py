@@ -844,8 +844,13 @@ class TestDepreciationMethods(AssetSetup):
 		expected_schedules = [
 			["2030-12-31", 28630.14, 28630.14],
 			["2031-12-31", 35684.93, 64315.07],
+<<<<<<< HEAD
 			["2032-12-31", 17842.47, 82157.54],
 			["2033-06-06", 5342.46, 87500.0],
+=======
+			["2032-12-31", 17842.46, 82157.53],
+			["2033-06-06", 5342.46, 87499.99],
+>>>>>>> 97f69986ff (fix: Asset module tests)
 		]
 
 		schedules = [
@@ -957,7 +962,15 @@ class TestDepreciationBasics(AssetSetup):
 			},
 		)
 
+<<<<<<< HEAD
 		depreciation_amount = get_depreciation_amount(asset, 100000, asset.finance_books[0])
+=======
+		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active")
+
+		depreciation_amount = get_depreciation_amount(
+			asset_depr_schedule_doc, asset, 100000, 100000, asset.finance_books[0]
+		)
+>>>>>>> 97f69986ff (fix: Asset module tests)
 		self.assertEqual(depreciation_amount, 30000)
 
 	def test_make_depreciation_schedule(self):
