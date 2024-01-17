@@ -16,6 +16,8 @@ erpnext.accounts.dimensions = {
 			},
 			callback: function(r) {
 				me.accounting_dimensions = r.message[0];
+				// Ignoring "Project" as it is already handled specifically in Sales Order and Delivery Note
+				me.accounting_dimensions = me.accounting_dimensions.filter(x=>{return x.document_type != "Project"});
 				me.default_dimensions = r.message[1];
 				me.setup_filters(frm, doctype);
 			}

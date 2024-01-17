@@ -1,7 +1,6 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import copy
 import json
 from typing import Optional, Set, Tuple
 
@@ -24,10 +23,6 @@ from erpnext.stock.valuation import FIFOValuation, LIFOValuation, round_off_if_n
 
 
 class NegativeStockError(frappe.ValidationError):
-	pass
-
-
-class SerialNoExistsInFutureTransaction(frappe.ValidationError):
 	pass
 
 
@@ -54,9 +49,6 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		future_sle_exists(args, sl_entries)
 
 		for sle in sl_entries:
-			if sle.serial_no and not via_landed_cost_voucher:
-				validate_serial_no(sle)
-
 			if cancel:
 				sle["actual_qty"] = -flt(sle.get("actual_qty"))
 
@@ -131,35 +123,6 @@ def get_args_for_future_sle(row):
 			"posting_time": row.get("posting_time"),
 		}
 	)
-
-
-def validate_serial_no(sle):
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
-	for sn in get_serial_nos(sle.serial_no):
-		args = copy.deepcopy(sle)
-		args.serial_no = sn
-		args.warehouse = ""
-
-		vouchers = []
-		for row in get_stock_ledger_entries(args, ">"):
-			voucher_type = frappe.bold(row.voucher_type)
-			voucher_no = frappe.bold(get_link_to_form(row.voucher_type, row.voucher_no))
-			vouchers.append(f"{voucher_type} {voucher_no}")
-
-		if vouchers:
-			serial_no = frappe.bold(sn)
-			msg = (
-				f"""The serial no {serial_no} has been used in the future transactions so you need to cancel them first.
-				The list of the transactions are as below."""
-				+ "<br><br><ul><li>"
-			)
-
-			msg += "</li><li>".join(vouchers)
-			msg += "</li></ul>"
-
-			title = "Cannot Submit" if not sle.get("is_cancelled") else "Cannot Cancel"
-			frappe.throw(_(msg), title=_(title), exc=SerialNoExistsInFutureTransaction)
 
 
 def validate_cancellation(args):
@@ -573,7 +536,12 @@ class update_entries_after(object):
 		if not self.args.get("sle_id"):
 			self.get_dynamic_incoming_outgoing_rate(sle)
 
-		if sle.voucher_type == "Stock Reconciliation" and sle.batch_no and sle.voucher_detail_no:
+		if (
+			sle.voucher_type == "Stock Reconciliation"
+			and not self.args.get("sle_id")
+			and sle.voucher_detail_no
+			and (sle.batch_no or sle.serial_no)
+		):
 			self.reset_actual_qty_for_stock_reco(sle)
 
 		if (
@@ -651,10 +619,51 @@ class update_entries_after(object):
 		doc.recalculate_current_qty(sle.voucher_detail_no, sle.creation, sle.actual_qty >= 0)
 
 		if sle.actual_qty < 0:
-			sle.actual_qty = (
-				flt(frappe.db.get_value("Stock Reconciliation Item", sle.voucher_detail_no, "current_qty"))
-				* -1
+			stock_reco_details = frappe.db.get_value(
+				"Stock Reconciliation Item",
+				sle.voucher_detail_no,
+				["current_qty", "current_serial_no as sn_no"],
+				as_dict=True,
 			)
+
+			sle.actual_qty = flt(stock_reco_details.current_qty) * -1
+
+			if stock_reco_details.sn_no:
+				sle.serial_no = stock_reco_details.sn_no
+				sle.qty_after_transaction = 0.0
+
+		if sle.serial_no:
+			self.update_serial_no_status(sle)
+
+	def update_serial_no_status(self, sle):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		serial_nos = get_serial_nos(sle.serial_no)
+		warehouse = None
+		status = "Delivered"
+		if sle.actual_qty > 0:
+			warehouse = sle.warehouse
+			status = "Active"
+
+		sn_table = frappe.qb.DocType("Serial No")
+
+		query = (
+			frappe.qb.update(sn_table)
+			.set(sn_table.warehouse, warehouse)
+			.set(sn_table.status, status)
+			.where(sn_table.name.isin(serial_nos))
+		)
+
+		if sle.actual_qty > 0:
+			query = query.set(sn_table.purchase_document_type, sle.voucher_type)
+			query = query.set(sn_table.purchase_document_no, sle.voucher_no)
+			query = query.set(sn_table.delivery_document_type, None)
+			query = query.set(sn_table.delivery_document_no, None)
+		else:
+			query = query.set(sn_table.delivery_document_type, sle.voucher_type)
+			query = query.set(sn_table.delivery_document_no, sle.voucher_no)
+
+		query.run()
 
 	def validate_negative_stock(self, sle):
 		"""
@@ -1281,6 +1290,9 @@ def get_stock_ledger_entries(
 
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
+
+	if operator in (">", "<=") and previous_sle.get("voucher_no"):
+		conditions += " and voucher_no!=%(voucher_no)s"
 
 	if extra_cond:
 		conditions += f"{extra_cond}"

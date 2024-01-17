@@ -634,30 +634,48 @@ class StockReconciliation(StockController):
 			if voucher_detail_no != row.name:
 				continue
 
-			current_qty = get_batch_qty_for_stock_reco(
-				row.item_code, row.warehouse, row.batch_no, self.posting_date, self.posting_time, self.name
-			)
+			if row.serial_no:
+				item_dict = get_stock_balance_for(
+					row.item_code,
+					row.warehouse,
+					self.posting_date,
+					self.posting_time,
+					voucher_no=self.name,
+				)
+
+				current_qty = item_dict.get("qty")
+				row.current_serial_no = item_dict.get("serial_nos")
+				row.current_valuation_rate = item_dict.get("rate")
+			else:
+				current_qty = get_batch_qty_for_stock_reco(
+					row.item_code, row.warehouse, row.batch_no, self.posting_date, self.posting_time, self.name
+				)
 
 			precesion = row.precision("current_qty")
 			if flt(current_qty, precesion) != flt(row.current_qty, precesion):
-				val_rate = get_valuation_rate(
-					row.item_code,
-					row.warehouse,
-					self.doctype,
-					self.name,
-					company=self.company,
-					batch_no=row.batch_no,
-				)
+				if not row.serial_no:
+					val_rate = get_valuation_rate(
+						row.item_code,
+						row.warehouse,
+						self.doctype,
+						self.name,
+						company=self.company,
+						batch_no=row.batch_no,
+					)
 
-				row.current_valuation_rate = val_rate
+					row.current_valuation_rate = val_rate
+
 				row.current_qty = current_qty
-				row.db_set(
-					{
-						"current_qty": row.current_qty,
-						"current_valuation_rate": row.current_valuation_rate,
-						"current_amount": flt(row.current_qty * row.current_valuation_rate),
-					}
-				)
+				values_to_update = {
+					"current_qty": row.current_qty,
+					"current_valuation_rate": row.current_valuation_rate,
+					"current_amount": flt(row.current_qty * row.current_valuation_rate),
+				}
+
+				if row.current_serial_no:
+					values_to_update["current_serial_no"] = row.current_serial_no
+
+				row.db_set(values_to_update)
 
 			if (
 				add_new_sle
@@ -880,6 +898,7 @@ def get_stock_balance_for(
 	batch_no: Optional[str] = None,
 	with_valuation_rate: bool = True,
 	inventory_dimensions_dict=None,
+	voucher_no=None,
 ):
 	frappe.has_permission("Stock Reconciliation", "write", throw=True)
 
@@ -910,6 +929,7 @@ def get_stock_balance_for(
 		with_serial_no=has_serial_no,
 		inventory_dimensions_dict=inventory_dimensions_dict,
 		batch_no=batch_no,
+		voucher_no=voucher_no,
 	)
 
 	if has_serial_no:

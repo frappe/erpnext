@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 import frappe
+from frappe.model.docstatus import DocStatus
 from frappe.utils import flt
 
 from erpnext.controllers.status_updater import StatusUpdater
@@ -68,7 +69,7 @@ class BankTransaction(StatusUpdater):
 					"payment_entry": voucher["payment_name"],
 					"allocated_amount": 0.0,  # Temporary
 				}
-				child = self.append("payment_entries", pe)
+				self.append("payment_entries", pe)
 				added = True
 
 		# runs on_update_after_submit
@@ -393,3 +394,21 @@ def unclear_reference_payment(doctype, docname, bt_name):
 	bt = frappe.get_doc("Bank Transaction", bt_name)
 	set_voucher_clearance(doctype, docname, None, bt)
 	return docname
+
+
+def remove_from_bank_transaction(doctype, docname):
+	"""Remove a (cancelled) voucher from all Bank Transactions."""
+	for bt_name in get_reconciled_bank_transactions(doctype, docname):
+		bt = frappe.get_doc("Bank Transaction", bt_name)
+		if bt.docstatus == DocStatus.cancelled():
+			continue
+
+		modified = False
+
+		for pe in bt.payment_entries:
+			if pe.payment_document == doctype and pe.payment_entry == docname:
+				bt.remove(pe)
+				modified = True
+
+		if modified:
+			bt.save()

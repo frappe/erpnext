@@ -63,7 +63,7 @@ class HolidayList(Document):
 		for holiday_date, holiday_name in country_holidays(
 			self.country,
 			subdiv=self.subdivision,
-			years=[from_date.year, to_date.year],
+			years=list(range(from_date.year, to_date.year + 1)),
 			language=frappe.local.lang,
 		).items():
 			if holiday_date in existing_holidays:
