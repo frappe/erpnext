@@ -794,7 +794,6 @@ def get_consumed_asset_details(args):
 		out.cost_center = get_default_cost_center(
 			args, item_defaults, item_group_defaults, brand_defaults
 		)
-
 	return out
 
 
@@ -842,10 +841,27 @@ def get_items_tagged_to_wip_composite_asset(asset):
 		"qty",
 		"valuation_rate",
 		"amount",
+		"is_fixed_asset",
+		"parent",
 	]
 
 	pr_items = frappe.get_all(
-		"Purchase Receipt Item", filters={"wip_composite_asset": asset}, fields=fields
+		"Purchase Receipt Item", filters={"wip_composite_asset": asset, "docstatus": 1}, fields=fields
 	)
 
-	return pr_items
+	stock_items = []
+	asset_items = []
+	for d in pr_items:
+		if not d.is_fixed_asset:
+			stock_items.append(frappe._dict(d))
+		else:
+			asset_details = frappe.db.get_value(
+				"Asset",
+				{"item_code": d.item_code, "purchase_receipt": d.parent},
+				["name as asset", "asset_name"],
+				as_dict=1,
+			)
+			d.update(asset_details)
+			asset_items.append(frappe._dict(d))
+
+	return stock_items, asset_items
