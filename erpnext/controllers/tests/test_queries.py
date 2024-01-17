@@ -68,7 +68,7 @@ class TestQueries(unittest.TestCase):
 		self.assertGreaterEqual(len(query(txt="_Test Item Home Desktop Manufactured")), 1)
 
 	def test_project_query(self):
-		query = add_default_params(queries.get_project_name, "BOM")
+		query = add_default_params(queries.get_project_name, "Project")
 
 		self.assertGreaterEqual(len(query(txt="_Test Project")), 1)
 
