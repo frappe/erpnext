@@ -56,6 +56,7 @@ class TestAccountsController(FrappeTestCase):
 	20 series - Sales Invoice against Journals
 	30 series - Sales Invoice against Credit Notes
 	40 series - Company default Cost center is unset
+	50 series - Dimension inheritence
 	"""
 
 	def setUp(self):
@@ -1188,3 +1189,88 @@ class TestAccountsController(FrappeTestCase):
 				)
 
 		frappe.db.set_value("Company", self.company, "cost_center", cc)
+
+	def setup_dimensions(self):
+		# create dimension
+		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+			create_dimension,
+		)
+
+		create_dimension()
+		# make it non-mandatory
+		loc = frappe.get_doc("Accounting Dimension", "Location")
+		for x in loc.dimension_defaults:
+			x.mandatory_for_bs = False
+			x.mandatory_for_pl = False
+		loc.save()
+
+	def test_50_dimensions_filter(self):
+		"""
+		Gain/Loss JE should inherit its dimension from payment
+		"""
+		self.setup_dimensions()
+		rate_in_account_currency = 1
+
+		# Invoices
+		si1 = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_submit=True)
+		si1.department = "Management"
+		si1.save().submit()
+
+		si2 = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_submit=True)
+		si2.department = "Operations"
+		si2.save().submit()
+
+		# Payments
+		cr_note1 = self.create_sales_invoice(qty=-1, conversion_rate=75, rate=1, do_not_save=True)
+		cr_note1.department = "Management"
+		cr_note1.is_return = 1
+		cr_note1.save().submit()
+
+		cr_note2 = self.create_sales_invoice(qty=-1, conversion_rate=75, rate=1, do_not_save=True)
+		cr_note2.department = "Legal"
+		cr_note2.is_return = 1
+		cr_note2.save().submit()
+
+		pe1 = get_payment_entry(si1.doctype, si1.name)
+		pe1.references = []
+		pe1.department = "Research & Development"
+		pe1.save().submit()
+
+		pe2 = get_payment_entry(si1.doctype, si1.name)
+		pe2.references = []
+		pe2.department = "Management"
+		pe2.save().submit()
+
+		je1 = self.create_journal_entry(
+			acc1=self.debit_usd,
+			acc1_exc_rate=75,
+			acc2=self.cash,
+			acc1_amount=-1,
+			acc2_amount=-75,
+			acc2_exc_rate=1,
+		)
+		je1.accounts[0].party_type = "Customer"
+		je1.accounts[0].party = self.customer
+		je1.accounts[0].department = "Management"
+		je1.save().submit()
+
+		# assert dimension filter's result
+		pr = self.create_payment_reconciliation()
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 2)
+		self.assertEqual(len(pr.payments), 5)
+
+		pr.department = "Legal"
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 1)
+
+		pr.department = "Management"
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 3)
+
+		pr.department = "Research & Development"
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 1)
