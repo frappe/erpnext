@@ -1038,6 +1038,8 @@ def is_cwip_accounting_enabled(asset_category):
 @frappe.whitelist()
 def get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
+	if not asset.calculate_depreciation:
+		return flt(asset.value_after_depreciation)
 
 	return asset.get_value_after_depreciation(finance_book)
 
