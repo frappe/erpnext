@@ -72,18 +72,13 @@ class AssetCapitalization(StockController):
 		self.update_target_asset()
 
 	def on_cancel(self):
-<<<<<<< HEAD
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Repost Item Valuation")
-=======
 		self.ignore_linked_doctypes = (
 			"GL Entry",
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
-			"Serial and Batch Bundle",
 			"Asset",
 		)
 		self.cancel_target_asset()
->>>>>>> efe9f6656f (fix: Cancel asset capitalisation record on cancellation of asset and vice-versa)
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.restore_consumed_asset_items()
