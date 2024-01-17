@@ -253,6 +253,7 @@ class PaymentReconciliation(Document):
 				min_outstanding=-(self.minimum_payment_amount) if self.minimum_payment_amount else None,
 				max_outstanding=-(self.maximum_payment_amount) if self.maximum_payment_amount else None,
 				get_payments=True,
+				accounting_dimensions=self.accounting_dimension_filter_conditions,
 			)
 
 			for inv in return_outstanding:
