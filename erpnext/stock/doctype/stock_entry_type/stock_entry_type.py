@@ -4,6 +4,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import flt
 
 from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
@@ -48,7 +49,7 @@ class ManufactureEntry:
 		self.stock_entry.from_bom = 1
 		self.stock_entry.bom_no = self.bom_no
 		self.stock_entry.use_multi_level_bom = 1
-		self.stock_entry.fg_completed_qty = self.qty_to_manufacture
+		self.stock_entry.fg_completed_qty = self.for_quantity
 		self.stock_entry.project = self.project
 		self.stock_entry.job_card = self.job_card
 		self.stock_entry.work_order = self.work_order
@@ -73,19 +74,63 @@ class ManufactureEntry:
 
 	def add_raw_materials(self):
 		if self.job_card:
-			item_dict = get_bom_items_as_dict(
-				self.bom_no,
-				self.company,
-				qty=self.qty_to_manufacture,
-				fetch_exploded=False,
-				fetch_qty_in_stock_uom=False,
-			)
+			item_dict = {}
+			# if self.bom_no:
+			# 	item_dict = get_bom_items_as_dict(
+			# 		self.bom_no,
+			# 		self.company,
+			# 		qty=self.qty_to_manufacture,
+			# 		fetch_exploded=False,
+			# 		fetch_qty_in_stock_uom=False,
+			# 	)
+
+			if not item_dict:
+				item_dict = self.get_items_from_job_card()
 
 			for item_code, _dict in item_dict.items():
 				_dict.from_warehouse = self.source_wh.get(item_code) or self.wip_warehouse
 				_dict.to_warehouse = ""
 
 			self.stock_entry.add_to_stock_entry_detail(item_dict)
+
+	def get_items_from_job_card(self):
+		item_dict = {}
+		items = frappe.get_all(
+			"Job Card Item",
+			fields=[
+				"item_code",
+				"source_warehouse",
+				"required_qty as qty",
+				"item_name",
+				"uom",
+				"stock_uom",
+				"item_group",
+				"description",
+			],
+			filters={"parent": self.job_card},
+		)
+
+		for item in items:
+			key = item.item_code
+
+			if key in item_dict:
+				item_dict[key]["qty"] += flt(item.qty)
+			else:
+				item_dict[key] = item
+
+		for item, item_details in item_dict.items():
+			for d in [
+				["Account", "expense_account", "stock_adjustment_account"],
+				["Cost Center", "cost_center", "cost_center"],
+				["Warehouse", "default_warehouse", ""],
+			]:
+				company_in_record = frappe.db.get_value(d[0], item_details.get(d[1]), "company")
+				if not item_details.get(d[1]) or (company_in_record and self.company != company_in_record):
+					item_dict[item][d[1]] = (
+						frappe.get_cached_value("Company", self.company, d[2]) if d[2] else None
+					)
+
+		return item_dict
 
 	def add_finished_good(self):
 		from erpnext.stock.doctype.item.item import get_item_defaults
@@ -95,7 +140,7 @@ class ManufactureEntry:
 		args = {
 			"to_warehouse": self.fg_warehouse,
 			"from_warehouse": "",
-			"qty": self.qty_to_manufacture,
+			"qty": self.for_quantity,
 			"item_name": item.item_name,
 			"description": item.description,
 			"stock_uom": item.stock_uom,

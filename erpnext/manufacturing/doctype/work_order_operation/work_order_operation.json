@@ -19,6 +19,8 @@
   "bom_no",
   "finished_good",
   "is_subcontracted",
+  "skip_material_transfer",
+  "backflush_from_wip_warehouse",
   "column_break_vjih",
   "source_warehouse",
   "wip_warehouse",
@@ -224,7 +226,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:parent.make_finished_good_against_job_card === 1",
+   "depends_on": "eval:parent.track_semi_finished_goods === 1",
    "fieldname": "section_break_insy",
    "fieldtype": "Section Break"
   },
@@ -276,12 +278,26 @@
    "fieldtype": "Check",
    "label": "Is Subcontracted",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_material_transfer",
+   "fieldtype": "Check",
+   "label": "Skip Material Transfer",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "backflush_from_wip_warehouse",
+   "fieldtype": "Check",
+   "label": "Backflush Materials From WIP Warehouse",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:12:00.595376",
+ "modified": "2024-05-26 15:57:17.958543",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",

@@ -143,9 +143,12 @@ frappe.ui.form.on("Work Order", {
 		}
 
 		if (frm.doc.status != "Closed") {
-			if (frm.doc.docstatus === 1 && frm.doc.status !== "Completed"
-				&& frm.doc.operations && frm.doc.operations.length) {
-
+			if (
+				frm.doc.docstatus === 1 &&
+				frm.doc.status !== "Completed" &&
+				frm.doc.operations &&
+				frm.doc.operations.length
+			) {
 				if (frm.doc.__onload?.show_create_job_card_button) {
 					frm.add_custom_button(__("Create Job Card"), () => {
 						frm.trigger("make_job_card");
@@ -268,6 +271,18 @@ frappe.ui.form.on("Work Order", {
 						label: __("Sequence Id"),
 						read_only: 1,
 					},
+					{
+						fieldtype: "Check",
+						fieldname: "skip_material_transfer",
+						label: __("Skip Material Transfer"),
+						read_only: 1,
+					},
+					{
+						fieldtype: "Check",
+						fieldname: "backflush_from_wip_warehouse",
+						label: __("Backflush Materials From WIP Warehouse"),
+						read_only: 1,
+					},
 				],
 				data: operations_data,
 				in_place_edit: true,
@@ -308,6 +323,8 @@ frappe.ui.form.on("Work Order", {
 						qty: pending_qty,
 						pending_qty: pending_qty,
 						sequence_id: data.sequence_id,
+						skip_material_transfer: data.skip_material_transfer,
+						backflush_from_wip_warehouse: data.backflush_from_wip_warehouse,
 					});
 				}
 			}
@@ -606,21 +623,21 @@ erpnext.work_order = {
 				);
 			}
 
-			if (!frm.doc.make_finished_good_against_job_card) {
-				const show_start_btn = (frm.doc.skip_transfer
-					|| frm.doc.transfer_material_against == "Job Card") ? 0 : 1;
+			if (!frm.doc.track_semi_finished_goods) {
+				const show_start_btn =
+					frm.doc.skip_transfer || frm.doc.transfer_material_against == "Job Card" ? 0 : 1;
 
 				if (show_start_btn) {
 					let pending_to_transfer = frm.doc.required_items.some(
-						item => flt(item.transferred_qty) < flt(item.required_qty)
+						(item) => flt(item.transferred_qty) < flt(item.required_qty)
 					);
 					if (pending_to_transfer && frm.doc.status != "Stopped") {
 						frm.has_start_btn = true;
-						frm.add_custom_button(__("Create Pick List"), function() {
+						frm.add_custom_button(__("Create Pick List"), function () {
 							erpnext.work_order.create_pick_list(frm);
 						});
 
-						var start_btn = frm.add_custom_button(__("Start"), function() {
+						var start_btn = frm.add_custom_button(__("Start"), function () {
 							erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
 						});
 						start_btn.addClass("btn-primary");

@@ -316,7 +316,9 @@ class StockEntry(StockController):
 
 		for row in self.items:
 			if row.is_finished_item and row.item_code != job_card.finished_good:
-				frappe.throw(_("Row #{0}: Finished Good must be {1}").format(row.idx, job_card.fininshed_good))
+				frappe.throw(
+					_("Row #{0}: Finished Good must be {1}").format(row.idx, job_card.fininshed_good)
+				)
 
 	def validate_job_card_item(self):
 		if not self.job_card or self.purpose == "Manufacture":
@@ -634,10 +636,7 @@ class StockEntry(StockController):
 			if (
 				(self.purpose == "Manufacture" or self.purpose == "Material Consumption for Manufacture")
 				and self.work_order
-				and frappe.get_cached_value(
-					"Work Order", self.work_order, "make_finished_good_against_job_card"
-				)
-				!= 1
+				and frappe.get_cached_value("Work Order", self.work_order, "track_semi_finished_goods") != 1
 			):
 				if not self.fg_completed_qty:
 					frappe.throw(_("For Quantity (Manufactured Qty) is mandatory"))

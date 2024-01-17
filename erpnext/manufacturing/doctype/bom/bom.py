@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.core.doctype.version.version import get_diff
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import cint, cstr, flt, today
+from frappe.utils import cint, cstr, flt, parse_json, today
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
@@ -125,6 +125,8 @@ class BOM(WebsiteGenerator):
 		company: DF.Link
 		conversion_rate: DF.Float
 		currency: DF.Link
+		default_source_warehouse: DF.Link | None
+		default_target_warehouse: DF.Link | None
 		description: DF.SmallText | None
 		exploded_items: DF.Table[BOMExplosionItem]
 		fg_based_operating_cost: DF.Check
@@ -136,6 +138,7 @@ class BOM(WebsiteGenerator):
 		item: DF.Link
 		item_name: DF.Data | None
 		items: DF.Table[BOMItem]
+		track_semi_finished_goods: DF.Check
 		operating_cost: DF.Currency
 		operating_cost_per_bom_quantity: DF.Currency
 		operations: DF.Table[BOMOperation]
@@ -545,8 +548,8 @@ class BOM(WebsiteGenerator):
 		if not self.with_operations:
 			self.set("operations", [])
 
-		if not self.with_operations and self.make_finished_good_against_job_card:
-			self.make_finished_good_against_job_card = 0
+		if not self.with_operations and self.track_semi_finished_goods:
+			self.track_semi_finished_goods = 0
 
 	def clear_inspection(self):
 		if not self.inspection_required:
@@ -650,12 +653,28 @@ class BOM(WebsiteGenerator):
 			_throw_error(self.name)
 
 	def set_materials_based_on_operation_bom(self):
-		if not self.make_finished_good_against_job_card:
+		if not self.track_semi_finished_goods:
 			return
 
 		for row in self.get("operations"):
 			if row.bom_no and row.finished_good:
 				self.add_materials_from_bom(row.finished_good, row.bom_no, row.idx, qty=row.finished_good_qty)
+
+	@frappe.whitelist()
+	def add_raw_materials(self, operation_row_id, items):
+		if isinstance(items, str):
+			items = parse_json(items)
+
+		for row in items:
+			row = parse_json(row)
+
+			row.update(get_item_details(row.get("item_code")))
+			row.operation_row_id = operation_row_id
+			row.idx = None
+			row.name = None
+			self.append("items", row)
+
+		self.save()
 
 	@frappe.whitelist()
 	def add_materials_from_bom(self, finished_good, bom_no, operation_row_id, qty=None):
@@ -1126,7 +1145,7 @@ def get_bom_items_as_dict(
 	item_dict = {}
 
 	group_by_cond = "group by item_code, stock_uom"
-	if frappe.get_cached_value("BOM", bom, "make_finished_good_against_job_card"):
+	if frappe.get_cached_value("BOM", bom, "track_semi_finished_goods"):
 		fetch_exploded = 0
 		group_by_cond = "group by item_code, operation_row_id, stock_uom"
 
@@ -1221,7 +1240,6 @@ def get_bom_items_as_dict(
 			if not item_details.get(d[1]) or (company_in_record and company != company_in_record):
 				item_dict[item][d[1]] = frappe.get_cached_value("Company", company, d[2]) if d[2] else None
 
-	print(item_dict)
 	return item_dict
 
 

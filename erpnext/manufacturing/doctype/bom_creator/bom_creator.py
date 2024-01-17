@@ -43,16 +43,20 @@ class BOMCreator(Document):
 		from erpnext.manufacturing.doctype.bom_creator_item.bom_creator_item import BOMCreatorItem
 
 		amended_from: DF.Link | None
+		backflush_from_wip_warehouse: DF.Check
 		buying_price_list: DF.Link | None
 		company: DF.Link
 		conversion_rate: DF.Float
 		currency: DF.Link
 		default_warehouse: DF.Link | None
 		error_log: DF.Text | None
+		fg_warehouse: DF.Link | None
 		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data | None
 		items: DF.Table[BOMCreatorItem]
+		operation: DF.Link | None
+		operation_time: DF.Float
 		plc_conversion_rate: DF.Float
 		price_list_currency: DF.Link | None
 		project: DF.Link | None
@@ -61,8 +65,15 @@ class BOMCreator(Document):
 		remarks: DF.TextEditor | None
 		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
 		set_rate_based_on_warehouse: DF.Check
+		skip_material_transfer: DF.Check
+		source_warehouse: DF.Link | None
 		status: DF.Literal["Draft", "Submitted", "In Progress", "Completed", "Failed", "Cancelled"]
+		track_operations: DF.Check
+		track_semi_finished_goods: DF.Check
 		uom: DF.Link | None
+		wip_warehouse: DF.Link | None
+		workstation: DF.Link | None
+		workstation_type: DF.Link | None
 	# end: auto-generated types
 
 	def before_save(self):
@@ -207,8 +218,7 @@ class BOMCreator(Document):
 				frappe.throw(_("Please set {0} in BOM Creator {1}").format(label, self.name))
 
 	def on_submit(self):
-		pass
-		# self.enqueue_create_boms()
+		self.enqueue_create_boms()
 
 	@frappe.whitelist()
 	def enqueue_create_boms(self):
@@ -237,8 +247,10 @@ class BOMCreator(Document):
 
 		self.db_set("status", "In Progress")
 		production_item_wise_rm = OrderedDict({})
+
+		final_product = (self.item_code, self.name)
 		production_item_wise_rm.setdefault(
-			(self.item_code, self.name), frappe._dict({"items": [], "bom_no": "", "fg_item_data": self})
+			final_product, frappe._dict({"items": [], "bom_no": "", "fg_item_data": self})
 		)
 
 		for row in self.items:
@@ -258,10 +270,13 @@ class BOMCreator(Document):
 
 		try:
 			for d in reverse_tree:
+				if self.track_operations and self.track_semi_finished_goods and final_product == d:
+					continue
+
 				fg_item_data = production_item_wise_rm.get(d).fg_item_data
 				self.create_bom(fg_item_data, production_item_wise_rm)
 
-			if self.track_operations and self.make_finished_good_against_job_card:
+			if self.track_operations and self.track_semi_finished_goods:
 				self.make_bom_for_final_product(production_item_wise_rm)
 
 			frappe.msgprint(_("BOMs created successfully"))
@@ -288,7 +303,7 @@ class BOMCreator(Document):
 				"bom_creator_item": self.name,
 				"rm_cost_as_per": "Manual",
 				"with_operations": 1,
-				"make_finished_good_against_job_card": 1,
+				"track_semi_finished_goods": 1,
 			}
 		)
 
@@ -304,23 +319,49 @@ class BOMCreator(Document):
 				"operations",
 				{
 					"operation": item.operation,
+					"workstation": item.workstation,
+					"source_warehouse": item.source_warehouse,
+					"wip_warehouse": item.wip_warehouse,
+					"fg_warehouse": item.fg_warehouse,
 					"finished_good": item.item_code,
 					"finished_good_qty": item.qty,
 					"bom_no": production_item_wise_rm[(item.item_code, item.name)].bom_no,
 					"workstation_type": item.workstation_type,
 					"time_in_mins": item.operation_time,
+					"is_subcontracted": item.is_subcontracted,
+					"skip_material_transfer": item.skip_material_transfer,
+					"backflush_from_wip_warehouse": item.backflush_from_wip_warehouse,
 				},
 			)
 
-		bom.append(
+		operation_row = bom.append(
 			"operations",
 			{
-				"operation": self.final_operation,
+				"operation": self.operation,
+				"time_in_mins": self.operation_time,
+				"workstation": self.workstation,
+				"workstation_type": self.workstation_type,
 				"finished_good": self.item_code,
 				"finished_good_qty": self.qty,
-				"bom_no": production_item_wise_rm[(self.item_code, self.name)].bom_no,
+				"source_warehouse": self.source_warehouse,
+				"wip_warehouse": self.wip_warehouse,
+				"fg_warehouse": self.fg_warehouse,
+				"skip_material_transfer": self.skip_material_transfer,
+				"backflush_from_wip_warehouse": self.backflush_from_wip_warehouse,
 			},
 		)
+
+		final_product = (self.item_code, self.name)
+		items = production_item_wise_rm.get(final_product).get("items")
+
+		bom.set_materials_based_on_operation_bom()
+
+		for item in items:
+			item_args = {"operation_row_id": operation_row.idx}
+			for field in BOM_ITEM_FIELDS:
+				item_args[field] = item.get(field)
+
+			bom.append("items", item_args)
 
 		bom.save(ignore_permissions=True)
 		bom.submit()
@@ -350,9 +391,10 @@ class BOMCreator(Document):
 			}
 		)
 
-		if self.track_operations and not self.make_finished_good_against_job_card:
+		if self.track_operations and not self.track_semi_finished_goods:
 			if row.item_code == self.item_code:
 				bom.with_operations = 1
+				bom.transfer_material_against = "Work Order"
 				for item in self.items:
 					if not item.operation:
 						continue
@@ -362,6 +404,7 @@ class BOMCreator(Document):
 						{
 							"operation": item.operation,
 							"workstation_type": item.workstation_type,
+							"workstation": item.workstation,
 							"time_in_mins": item.operation_time,
 						},
 					)
@@ -421,6 +464,16 @@ def get_children(doctype=None, parent=None, **kwargs):
 		"uom",
 		"rate",
 		"amount",
+		"workstation_type",
+		"operation",
+		"operation_time",
+		"is_subcontracted",
+		"workstation",
+		"source_warehouse",
+		"wip_warehouse",
+		"fg_warehouse",
+		"skip_material_transfer",
+		"backflush_from_wip_warehouse",
 	]
 
 	query_filters = {
@@ -434,6 +487,12 @@ def get_children(doctype=None, parent=None, **kwargs):
 	return frappe.get_all("BOM Creator Item", fields=fields, filters=query_filters, order_by="idx")
 
 
+def get_parent_row_no(doc, name):
+	for row in doc.items:
+		if row.name == name:
+			return row.idx
+
+
 @frappe.whitelist()
 def add_item(**kwargs):
 	if isinstance(kwargs, str):
@@ -444,6 +503,11 @@ def add_item(**kwargs):
 
 	doc = frappe.get_doc("BOM Creator", kwargs.parent)
 	item_info = get_item_details(kwargs.item_code)
+
+	parent_row_no = ""
+	if kwargs.fg_reference_id and doc.name != kwargs.fg_reference_id:
+		parent_row_no = get_parent_row_no(doc, kwargs.fg_reference_id)
+
 	kwargs.update(
 		{
 			"uom": item_info.stock_uom,
@@ -451,6 +515,9 @@ def add_item(**kwargs):
 			"conversion_factor": 1,
 		}
 	)
+
+	if parent_row_no:
+		kwargs.update({"parent_row_no": parent_row_no})
 
 	doc.append("items", kwargs)
 	doc.save()
@@ -471,7 +538,7 @@ def add_sub_assembly(**kwargs):
 
 	name = kwargs.fg_reference_id
 	parent_row_no = ""
-	print(kwargs)
+
 	if not kwargs.convert_to_sub_assembly:
 		item_info = get_item_details(bom_item.item_code)
 		item_row = doc.append(
@@ -490,6 +557,11 @@ def add_sub_assembly(**kwargs):
 				"operation": bom_item.operation,
 				"workstation_type": bom_item.workstation_type,
 				"operation_time": bom_item.operation_time,
+				"is_subcontracted": bom_item.is_subcontracted,
+				"workstation": bom_item.workstation,
+				"source_warehouse": bom_item.source_warehouse,
+				"wip_warehouse": bom_item.wip_warehouse,
+				"fg_warehouse": bom_item.fg_warehouse,
 			},
 		)
 
@@ -499,6 +571,20 @@ def add_sub_assembly(**kwargs):
 		parent_row_no = [row.idx for row in doc.items if row.name == kwargs.fg_reference_id]
 		if parent_row_no:
 			parent_row_no = parent_row_no[0]
+			doc.items[parent_row_no - 1].update(
+				{
+					"operation": bom_item.operation,
+					"workstation_type": bom_item.workstation_type,
+					"operation_time": bom_item.operation_time,
+					"is_subcontracted": bom_item.is_subcontracted,
+					"workstation": bom_item.workstation,
+					"source_warehouse": bom_item.source_warehouse,
+					"wip_warehouse": bom_item.wip_warehouse,
+					"fg_warehouse": bom_item.fg_warehouse,
+					"skip_material_transfer": bom_item.skip_material_transfer,
+					"backflush_from_wip_warehouse": bom_item.backflush_from_wip_warehouse,
+				}
+			)
 
 	for row in bom_item.get("items"):
 		row = frappe._dict(row)
@@ -555,10 +641,16 @@ def delete_node(**kwargs):
 
 
 @frappe.whitelist()
-def edit_qty(doctype, docname, qty, parent):
-	frappe.db.set_value(doctype, docname, "qty", qty)
+def edit_bom_creator(doctype, docname, data, parent):
+	if isinstance(data, str):
+		data = frappe.parse_json(data)
+
+	frappe.db.set_value(doctype, docname, data)
+
 	doc = frappe.get_doc("BOM Creator", parent)
 	doc.set_rate_for_items()
 	doc.save()
+
+	frappe.msgprint(_("Updated successfully"), alert=True)
 
 	return doc

@@ -441,13 +441,13 @@ class WorkOrder(Document):
 		production_plan.run_method("update_produced_pending_qty", produced_qty, self.production_plan_item)
 
 	def validate_warehouse(self):
-		if self.make_finished_good_against_job_card:
+		if self.track_semi_finished_goods:
 			return
 
 		if not self.wip_warehouse and not self.skip_transfer:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
-			frappe.throw(_("For Warehouse is required before Submit"))
+			frappe.throw(_("Target Warehouse is required before Submit"))
 
 	def before_submit(self):
 		self.create_serial_no_batch_no()
@@ -690,7 +690,7 @@ class WorkOrder(Document):
 			)
 
 	def update_planned_qty(self):
-		if self.make_finished_good_against_job_card:
+		if self.track_semi_finished_goods:
 			return
 
 		from erpnext.manufacturing.doctype.production_plan.production_plan import (
@@ -850,6 +850,8 @@ class WorkOrder(Document):
 					"batch_size",
 					"sequence_id",
 					"fixed_time",
+					"skip_material_transfer",
+					"backflush_from_wip_warehouse",
 				],
 				order_by="idx",
 			)
@@ -858,6 +860,9 @@ class WorkOrder(Document):
 				if not d.fixed_time:
 					d.time_in_mins = flt(d.time_in_mins) * flt(qty)
 				d.status = "Pending"
+
+				if self.track_semi_finished_goods and not d.sequence_id:
+					d.sequence_id = d.idx
 
 			return data
 
@@ -1317,9 +1322,7 @@ def make_work_order(bom_no, item, qty=0, project=None, variant_items=None):
 	item_details = get_item_details(item, project)
 
 	wo_doc = frappe.new_doc("Work Order")
-	wo_doc.make_finished_good_against_job_card = frappe.db.get_value(
-		"BOM", bom_no, "make_finished_good_against_job_card"
-	)
+	wo_doc.track_semi_finished_goods = frappe.db.get_value("BOM", bom_no, "track_semi_finished_goods")
 	wo_doc.production_item = item
 	wo_doc.update(item_details)
 	wo_doc.bom_no = bom_no
@@ -1624,13 +1627,15 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			"source_warehouse": row.get("source_warehouse"),
 			"target_warehouse": row.get("fg_warehouse"),
 			"wip_warehouse": work_order.wip_warehouse or row.get("wip_warehouse"),
+			"skip_material_transfer": row.get("skip_material_transfer"),
+			"backflush_from_wip_warehouse": row.get("backflush_from_wip_warehouse"),
 			"finished_good": row.get("finished_good"),
 			"semi_fg_bom": row.get("bom_no"),
 			"is_subcontracted": row.get("is_subcontracted"),
 		}
 	)
 
-	if work_order.make_finished_good_against_job_card or (
+	if work_order.track_semi_finished_goods or (
 		work_order.transfer_material_against == "Job Card" and not work_order.skip_transfer
 	):
 		doc.get_required_items()

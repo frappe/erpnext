@@ -22,7 +22,7 @@
   "total_completed_qty",
   "column_break_mcnb",
   "for_quantity",
-  "material_transferred_for_manufacturing",
+  "transferred_qty",
   "manufactured_qty",
   "process_loss_qty",
   "production_section",
@@ -69,10 +69,10 @@
   "for_operation",
   "more_information",
   "item_name",
-  "transferred_qty",
   "requested_qty",
   "status",
   "operation_row_id",
+  "is_paused",
   "column_break_20",
   "operation_row_number",
   "operation_id",
@@ -119,6 +119,7 @@
    "fieldname": "operation",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_preview": 1,
    "label": "Operation",
    "options": "Operation",
    "reqd": 1
@@ -144,6 +145,7 @@
    "fieldname": "for_quantity",
    "fieldtype": "Float",
    "in_list_view": 1,
+   "in_preview": 1,
    "label": "Qty To Manufacture"
   },
   {
@@ -177,6 +179,7 @@
    "depends_on": "eval:doc.is_subcontracted===0",
    "fieldname": "total_completed_qty",
    "fieldtype": "Float",
+   "in_preview": 1,
    "label": "Total Completed Qty",
    "read_only": 1
   },
@@ -216,9 +219,10 @@
   },
   {
    "default": "0",
+   "depends_on": "items",
    "fieldname": "transferred_qty",
    "fieldtype": "Float",
-   "label": "FG Qty from Transferred Raw Materials",
+   "label": "Transferred Raw Materials",
    "read_only": 1
   },
   {
@@ -294,7 +298,7 @@
    "fetch_from": "work_order.production_item",
    "fieldname": "production_item",
    "fieldtype": "Link",
-   "label": "Finished Good",
+   "label": "Final Product",
    "options": "Item",
    "read_only": 1
   },
@@ -520,7 +524,8 @@
   {
    "fieldname": "finished_good",
    "fieldtype": "Link",
-   "label": "Semi Finished Good",
+   "in_preview": 1,
+   "label": "Finished Good",
    "options": "Item",
    "read_only": 1
   },
@@ -535,14 +540,6 @@
    "fieldname": "operation_row_id",
    "fieldtype": "Int",
    "label": "Operation Row ID"
-  },
-  {
-   "depends_on": "eval:doc.is_subcontracted===0 && doc.finished_good",
-   "fieldname": "material_transferred_for_manufacturing",
-   "fieldtype": "Float",
-   "label": "Material Transferred for Manufacturing",
-   "no_copy": 1,
-   "read_only": 1
   },
   {
    "fieldname": "source_warehouse",
@@ -606,11 +603,18 @@
    "fieldname": "backflush_from_wip_warehouse",
    "fieldtype": "Check",
    "label": "Backflush Materials From WIP Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_paused",
+   "fieldtype": "Check",
+   "label": "Is Paused",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:56.634418",
+ "modified": "2024-05-26 17:44:18.324743",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
@@ -663,6 +667,7 @@
    "write": 1
   }
  ],
+ "show_preview_popup": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
