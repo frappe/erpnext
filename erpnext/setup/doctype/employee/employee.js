@@ -38,6 +38,13 @@ frappe.ui.form.on("Employee", {
 				}
 			};
 		});
+		frm.set_query("location_type", function() {
+			return {
+				"filters": {
+					"name": ["in", ["Hub Location", "City Location", "State Location", "Central Location"]]
+				}
+			};
+		});
 	},
 	prefered_contact_email: function(frm) {
 		frm.events.update_contact(frm);

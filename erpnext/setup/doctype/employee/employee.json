@@ -2,7 +2,7 @@
   "actions": [],
   "allow_events_in_timeline": 1,
   "allow_import": 1,
-  "allow_rename": 1,
+  "autoname": "field:employee_number",
   "creation": "2022-02-21 11:54:09.632218",
   "doctype": "DocType",
   "document_type": "Setup",
@@ -34,11 +34,12 @@
     "designation",
     "reports_to",
     "column_break_o4fx1",
+    "location_type",
+    "location",
     "assigned_hub",
     "off_roll_vendor",
     "employment_details",
     "application_details",
-    "job_applicant",
     "scheduled_confirmation_date",
     "column_break_32",
     "final_confirmation_date",
@@ -681,8 +682,7 @@
       "fieldtype": "Link",
       "label": "Off Roll Vendor",
       "mandatory_depends_on": "eval:doc.employment_type == 'Off-Roll';",
-      "options": "Off-Roll Hiring Vendor",
-      "reqd": 1
+      "options": "Off-Roll Hiring Vendor"
     },
     {
       "description": "Assigned Hub Code",
@@ -690,8 +690,7 @@
       "fieldtype": "Link",
       "label": "Assigned Hub",
       "mandatory_depends_on": "eval:doc.department == 'Operations';",
-      "options": "Hub Location",
-      "reqd": 1
+      "options": "Hub Location"
     },
     {
       "depends_on": "eval:doc.employment_type == 'Off-Roll';",
@@ -807,12 +806,6 @@
       "label": "Application Details"
     },
     {
-      "fieldname": "job_applicant",
-      "fieldtype": "Link",
-      "label": "Job Applicant",
-      "options": "Job Applicant"
-    },
-    {
       "fieldname": "employee_number",
       "fieldtype": "Data",
       "in_list_view": 1,
@@ -852,23 +845,37 @@
     {
       "fieldname": "pan_number",
       "fieldtype": "Data",
-      "label": "Pan Number",
-      "reqd": 1
+      "label": "Pan Number"
     },
     {
       "fieldname": "pan_photo",
       "fieldtype": "Attach",
       "label": "Pan Photo"
+    },
+    {
+      "fieldname": "location_type",
+      "fieldtype": "Link",
+      "label": "Location Type",
+      "options": "DocType",
+      "reqd": 1
+    },
+    {
+      "fieldname": "location",
+      "fieldtype": "Dynamic Link",
+      "label": "Location",
+      "options": "location_type",
+      "reqd": 1
     }
   ],
   "icon": "fa fa-user",
   "idx": 24,
   "image_field": "image",
   "links": [],
-  "modified": "2024-01-15 18:25:15.267671",
+  "modified": "2024-01-18 13:39:58.934419",
   "modified_by": "Administrator",
   "module": "Setup",
   "name": "Employee",
+  "naming_rule": "By fieldname",
   "owner": "Administrator",
   "permissions": [
     {

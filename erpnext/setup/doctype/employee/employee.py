@@ -28,7 +28,6 @@ class Employee(NestedSet):
 	nsm_parent_field = "reports_to"
 
 	def autoname(self):
-		set_name_by_naming_series(self)
 		self.employee = self.name
 
 	def validate(self):
