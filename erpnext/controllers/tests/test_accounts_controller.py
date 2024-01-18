@@ -1273,7 +1273,7 @@ class TestAccountsController(FrappeTestCase):
 
 	def test_50_dimensions_filter(self):
 		"""
-		Gain/Loss JE should inherit its dimension from payment
+		Test workings of dimension filters
 		"""
 		self.setup_dimensions()
 		rate_in_account_currency = 1
@@ -1341,3 +1341,45 @@ class TestAccountsController(FrappeTestCase):
 		pr.get_unreconciled_entries()
 		self.assertEqual(len(pr.invoices), 0)
 		self.assertEqual(len(pr.payments), 1)
+
+	def test_51_cr_note_should_inherit_dimension_from_payment(self):
+		self.setup_dimensions()
+		rate_in_account_currency = 1
+
+		# Invoice
+		si = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_submit=True)
+		si.department = "Management"
+		si.save().submit()
+
+		# Payment
+		cr_note = self.create_sales_invoice(qty=-1, conversion_rate=75, rate=1, do_not_save=True)
+		cr_note.department = "Management"
+		cr_note.is_return = 1
+		cr_note.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.department = "Management"
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		# There should be 2 journals, JE(Cr Note) and JE(Exchange Gain/Loss)
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_cr_note = self.get_journals_for(cr_note.doctype, cr_note.name)
+		self.assertNotEqual(exc_je_for_si, [])
+		self.assertEqual(len(exc_je_for_si), 2)
+		self.assertEqual(len(exc_je_for_cr_note), 2)
+		self.assertEqual(exc_je_for_si, exc_je_for_cr_note)
+
+		for x in exc_je_for_si + exc_je_for_cr_note:
+			with self.subTest(x=x):
+				self.assertEqual(
+					[cr_note.department, cr_note.department],
+					frappe.db.get_all("Journal Entry Account", filters={"parent": x.parent}, pluck="department"),
+				)
