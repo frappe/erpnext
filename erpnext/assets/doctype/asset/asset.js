@@ -40,6 +40,7 @@ frappe.ui.form.on('Asset', {
 	},
 
 	setup: function(frm) {
+		frm.trigger("toggle_reference_doc");
 		frm.make_methods = {
 			'Asset Movement': () => {
 				frappe.call({
@@ -190,6 +191,10 @@ frappe.ui.form.on('Asset', {
 			frm.toggle_reqd('purchase_receipt', 0);
 			frm.set_df_property('purchase_receipt', 'read_only', 1);
 		}
+		else if (frm.doc.asset_type && frm.doc.asset_type === 'OPEX') {
+			frm.toggle_reqd('purchase_receipt', 0);
+			frm.toggle_reqd('purchase_invoice', 0);
+		}
 		else {
 			frm.toggle_reqd('purchase_receipt', 1);
 			frm.set_df_property('purchase_receipt', 'read_only', 0);
@@ -307,6 +312,17 @@ frappe.ui.form.on('Asset', {
 	},
 
 	is_existing_asset: function(frm) {
+		frm.trigger("toggle_reference_doc");
+	},
+
+	asset_type: function(frm) {
+		if(frm.doc.asset_type == 'OPEX') {
+			frm.set_value('gross_purchase_amount', 0);
+			frm.set_df_property('gross_purchase_amount', 'read_only', 1);
+			frm.set_df_property('purchase_date', 'read_only', 0);
+		} else {
+			frm.set_df_property('gross_purchase_amount', 'read_only', 0);
+		}
 		frm.trigger("toggle_reference_doc");
 	},
 

@@ -78,7 +78,7 @@ class Employee(NestedSet):
 		frappe.utils.nestedset.update_nsm(self)
 
 	def on_update(self):
-		self.update_nsm_model()
+		# self.update_nsm_model()
 		if self.user_id:
 			self.update_user()
 			self.update_user_permissions()
@@ -433,7 +433,8 @@ def get_children(doctype, parent=None, company=None, is_root=False, is_tree=Fals
 
 
 def on_doctype_update():
-	frappe.db.add_index("Employee", ["lft", "rgt"])
+	pass
+	# frappe.db.add_index("Employee", ["lft", "rgt"])
 
 
 def has_user_permission_for_employee(user_name, employee_name):

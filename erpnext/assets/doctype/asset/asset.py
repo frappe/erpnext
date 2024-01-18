@@ -242,7 +242,7 @@ class Asset(AccountsController):
 		if not self.asset_category:
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
 
-		if not flt(self.gross_purchase_amount) and not self.is_composite_asset:
+		if not flt(self.gross_purchase_amount) and not (self.is_composite_asset or self.asset_type == 'OPEX'):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
@@ -279,7 +279,7 @@ class Asset(AccountsController):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
 
 	def validate_gross_and_purchase_amount(self):
-		if self.is_existing_asset:
+		if self.is_existing_asset or self.asset_type == 'OPEX':
 			return
 
 		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_receipt_amount:

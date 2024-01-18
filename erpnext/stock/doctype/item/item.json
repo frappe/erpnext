@@ -256,7 +256,8 @@
    "depends_on": "is_fixed_asset",
    "fieldname": "asset_naming_series",
    "fieldtype": "Select",
-   "label": "Asset Naming Series"
+   "label": "Asset Naming Series",
+   "set_only_once": 0
   },
   {
    "fieldname": "image",
@@ -895,7 +896,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "make_attachments_public": 1,
- "modified": "2023-09-18 15:41:32.688051",
+ "modified": "2024-01-15 00:33:37.420064",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
