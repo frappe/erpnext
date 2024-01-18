@@ -36,7 +36,6 @@
     "column_break_o4fx1",
     "location_type",
     "location",
-    "assigned_hub",
     "off_roll_vendor",
     "employment_details",
     "application_details",
@@ -685,14 +684,6 @@
       "options": "Off-Roll Hiring Vendor"
     },
     {
-      "description": "Assigned Hub Code",
-      "fieldname": "assigned_hub",
-      "fieldtype": "Link",
-      "label": "Assigned Hub",
-      "mandatory_depends_on": "eval:doc.department == 'Operations';",
-      "options": "Hub Location"
-    },
-    {
       "depends_on": "eval:doc.employment_type == 'Off-Roll';",
       "fieldname": "weekly_off_count",
       "fieldtype": "Int",
@@ -871,7 +862,7 @@
   "idx": 24,
   "image_field": "image",
   "links": [],
-  "modified": "2024-01-18 13:39:58.934419",
+  "modified": "2024-01-18 13:59:36.860734",
   "modified_by": "Administrator",
   "module": "Setup",
   "name": "Employee",
