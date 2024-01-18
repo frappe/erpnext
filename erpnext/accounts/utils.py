@@ -453,7 +453,19 @@ def add_cc(args=None):
 	return cc.name
 
 
-def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # nosemgrep
+def _build_dimensions_dict_for_exc_gain_loss(
+	entry: dict | object = None, active_dimensions: list = None
+):
+	dimensions_dict = frappe._dict()
+	if entry and active_dimensions:
+		for dim in active_dimensions:
+			dimensions_dict[dim.fieldname] = entry.get(dim.fieldname)
+	return dimensions_dict
+
+
+def reconcile_against_document(
+	args, skip_ref_details_update_for_pe=False, active_dimensions=None
+):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
 	"""
@@ -482,6 +494,8 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 			check_if_advance_entry_modified(entry)
 			validate_allocated_amount(entry)
 
+			dimensions_dict = _build_dimensions_dict_for_exc_gain_loss(entry, active_dimensions)
+
 			# update ref in advance entry
 			if voucher_type == "Journal Entry":
 				referenced_row = update_reference_in_journal_entry(entry, doc, do_not_save=False)
@@ -489,10 +503,14 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 				# amount and account in args
 				# referenced_row is used to deduplicate gain/loss journal
 				entry.update({"referenced_row": referenced_row})
-				doc.make_exchange_gain_loss_journal([entry])
+				doc.make_exchange_gain_loss_journal([entry], dimensions_dict)
 			else:
 				referenced_row = update_reference_in_payment_entry(
-					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
+					entry,
+					doc,
+					do_not_save=True,
+					skip_ref_details_update_for_pe=skip_ref_details_update_for_pe,
+					dimensions_dict=dimensions_dict,
 				)
 
 		doc.save(ignore_permissions=True)
@@ -649,7 +667,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 
 def update_reference_in_payment_entry(
-	d, payment_entry, do_not_save=False, skip_ref_details_update_for_pe=False
+	d, payment_entry, do_not_save=False, skip_ref_details_update_for_pe=False, dimensions_dict=None
 ):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
@@ -695,7 +713,14 @@ def update_reference_in_payment_entry(
 	if not skip_ref_details_update_for_pe:
 		payment_entry.set_missing_ref_details()
 	payment_entry.set_amounts()
+<<<<<<< HEAD
 	payment_entry.make_exchange_gain_loss_journal()
+=======
+
+	payment_entry.make_exchange_gain_loss_journal(
+		frappe._dict({"difference_posting_date": d.difference_posting_date}), dimensions_dict
+	)
+>>>>>>> c44eb432a5 (refactor: pass dimension values to Gain/Loss journal)
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)

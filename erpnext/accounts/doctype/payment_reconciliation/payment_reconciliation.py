@@ -507,7 +507,7 @@ class PaymentReconciliation(Document):
 				reconciled_entry.append(payment_details)
 
 		if entry_list:
-			reconcile_against_document(entry_list, skip_ref_details_update_for_pe)
+			reconcile_against_document(entry_list, skip_ref_details_update_for_pe, self.dimensions)
 
 		if dr_or_cr_notes:
 			reconcile_dr_cr_note(dr_or_cr_notes, self.company, self.dimensions)
