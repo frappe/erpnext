@@ -1220,7 +1220,9 @@ class AccountsController(TransactionBase):
 					return True
 		return False
 
-	def make_exchange_gain_loss_journal(self, args: dict = None) -> None:
+	def make_exchange_gain_loss_journal(
+		self, args: dict = None, dimensions_dict: dict = None
+	) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
 		"""
@@ -1275,7 +1277,7 @@ class AccountsController(TransactionBase):
 									self.name,
 									arg.get("referenced_row"),
 									arg.get("cost_center"),
-									{},
+									dimensions_dict,
 								)
 								frappe.msgprint(
 									_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1356,7 +1358,7 @@ class AccountsController(TransactionBase):
 							self.name,
 							d.idx,
 							self.cost_center,
-							{},
+							dimensions_dict,
 						)
 						frappe.msgprint(
 							_("Exchange Gain/Loss amount has been booked through {0}").format(
