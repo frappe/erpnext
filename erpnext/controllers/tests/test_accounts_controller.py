@@ -1342,7 +1342,7 @@ class TestAccountsController(FrappeTestCase):
 		self.assertEqual(len(pr.invoices), 0)
 		self.assertEqual(len(pr.payments), 1)
 
-	def test_51_cr_note_should_inherit_dimension_from_payment(self):
+	def test_51_cr_note_should_inherit_dimension(self):
 		self.setup_dimensions()
 		rate_in_account_currency = 1
 
@@ -1383,3 +1383,39 @@ class TestAccountsController(FrappeTestCase):
 					[cr_note.department, cr_note.department],
 					frappe.db.get_all("Journal Entry Account", filters={"parent": x.parent}, pluck="department"),
 				)
+
+	def test_52_dimension_inhertiance_exc_gain_loss(self):
+		# Sales Invoice in Foreign Currency
+		self.setup_dimensions()
+		rate = 80
+		rate_in_account_currency = 1
+		dimension = "Research & Development"
+
+		si = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_save=True)
+		si.department = dimension
+		si.save().submit()
+
+		pe = self.create_payment_entry(amount=1, source_exc_rate=82).save()
+		pe.department = dimension
+		pe = pe.save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.department = dimension
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+		journals = self.get_journals_for(si.doctype, si.name)
+		self.assertEqual(
+			[dimension, dimension],
+			frappe.db.get_all(
+				"Journal Entry Account",
+				filters={"parent": ("in", [x.parent for x in journals])},
+				pluck="department",
+			),
+		)
