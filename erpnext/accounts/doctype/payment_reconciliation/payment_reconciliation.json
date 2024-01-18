@@ -39,6 +39,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -215,7 +216,7 @@
  "is_virtual": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-17 17:33:55.701726",
+ "modified": "2024-01-18 11:56:20.234667",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
