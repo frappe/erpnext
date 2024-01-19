@@ -764,17 +764,14 @@ def get_wdv_or_dd_depr_amount(
 	has_wdv_or_dd_non_yearly_pro_rata,
 	asset_depr_schedule,
 ):
-	return (
-		get_default_wdv_or_dd_depr_amount(
-			asset,
-			fb_row,
-			depreciable_value,
-			schedule_idx,
-			prev_depreciation_amount,
-			has_wdv_or_dd_non_yearly_pro_rata,
-			asset_depr_schedule,
-		),
-		None,
+	return get_default_wdv_or_dd_depr_amount(
+		asset,
+		fb_row,
+		depreciable_value,
+		schedule_idx,
+		prev_depreciation_amount,
+		has_wdv_or_dd_non_yearly_pro_rata,
+		asset_depr_schedule,
 	)
 
 
