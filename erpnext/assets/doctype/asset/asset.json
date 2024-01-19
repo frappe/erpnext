@@ -202,9 +202,8 @@
    "fieldname": "purchase_date",
    "fieldtype": "Date",
    "label": "Purchase Date",
-   "read_only": 1,
-   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
-   "reqd": 1
+   "mandatory_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
+   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset"
   },
   {
    "fieldname": "disposal_date",
@@ -227,15 +226,15 @@
    "fieldname": "gross_purchase_amount",
    "fieldtype": "Currency",
    "label": "Gross Purchase Amount",
+   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)",
    "options": "Company:company:default_currency",
-   "read_only_depends_on": "eval:!doc.is_existing_asset",
-   "reqd": 1
+   "read_only_depends_on": "eval:!doc.is_existing_asset"
   },
   {
    "fieldname": "available_for_use_date",
    "fieldtype": "Date",
    "label": "Available-for-use Date",
-   "reqd": 1
+   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)"
   },
   {
    "default": "0",
@@ -583,7 +582,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2023-12-21 16:46:20.732869",
+ "modified": "2024-01-15 17:35:49.226603",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

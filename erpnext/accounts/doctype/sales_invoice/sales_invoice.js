@@ -34,7 +34,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		super.onload();
 
 		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet', 'POS Invoice Merge Log',
-							  'POS Closing Entry', 'Journal Entry', 'Payment Entry', "Repost Payment Ledger", "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries"];
+							  'POS Closing Entry', 'Journal Entry', 'Payment Entry', "Repost Payment Ledger", "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries", "Bank Transaction"];
 
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
@@ -890,8 +890,8 @@ frappe.ui.form.on('Sales Invoice', {
 				frm.events.append_time_log(frm, timesheet, 1.0);
 			}
 		});
-		frm.refresh_field("timesheets");
 		frm.trigger("calculate_timesheet_totals");
+		frm.refresh();
 	},
 
 	async get_exchange_rate(frm, from_currency, to_currency) {

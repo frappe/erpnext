@@ -61,6 +61,7 @@ class Asset(AccountsController):
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
+		self.cancel_capitalization()
 		self.delete_depreciation_entries()
 		self.set_status()
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
@@ -247,7 +248,12 @@ class Asset(AccountsController):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
-			if not self.is_existing_asset and not (self.purchase_receipt or self.purchase_invoice):
+			if (
+				not self.is_existing_asset
+				and not self.is_composite_asset
+				and not self.purchase_receipt
+				and not self.purchase_invoice
+			):
 				frappe.throw(
 					_("Please create purchase receipt or purchase invoice for the item {0}").format(
 						self.item_code
@@ -260,7 +266,7 @@ class Asset(AccountsController):
 				and not frappe.db.get_value("Purchase Invoice", self.purchase_invoice, "update_stock")
 			):
 				frappe.throw(
-					_("Update stock must be enable for the purchase invoice {0}").format(self.purchase_invoice)
+					_("Update stock must be enabled for the purchase invoice {0}").format(self.purchase_invoice)
 				)
 
 		if not self.calculate_depreciation:
@@ -428,10 +434,7 @@ class Asset(AccountsController):
 				n == 0
 				and (has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata)
 				and not self.opening_accumulated_depreciation
-				and get_updated_rate_of_depreciation_for_wdv_and_dd(
-					self, value_after_depreciation, finance_book, False
-				)
-				== finance_book.rate_of_depreciation
+				and not self.flags.wdv_it_act_applied
 			):
 				from_date = add_days(
 					self.available_for_use_date, -1
@@ -828,6 +831,16 @@ class Asset(AccountsController):
 		for movement in movements:
 			movement = frappe.get_doc("Asset Movement", movement.get("name"))
 			movement.cancel()
+
+	def cancel_capitalization(self):
+		asset_capitalization = frappe.db.get_value(
+			"Asset Capitalization",
+			{"target_asset": self.name, "docstatus": 1, "entry_type": "Capitalization"},
+		)
+
+		if asset_capitalization:
+			asset_capitalization = frappe.get_doc("Asset Capitalization", asset_capitalization)
+			asset_capitalization.cancel()
 
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
@@ -1349,6 +1362,8 @@ def is_cwip_accounting_enabled(asset_category):
 @frappe.whitelist()
 def get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
+	if not asset.calculate_depreciation:
+		return flt(asset.value_after_depreciation)
 
 	return asset.get_value_after_depreciation(finance_book)
 
@@ -1378,24 +1393,14 @@ def get_depreciation_amount(
 			asset, fb_row, schedule_idx, number_of_pending_depreciations
 		)
 	else:
-		rate_of_depreciation = get_updated_rate_of_depreciation_for_wdv_and_dd(
-			asset, depreciable_value, fb_row
-		)
 		return get_wdv_or_dd_depr_amount(
+			asset,
+			fb_row,
 			depreciable_value,
-			rate_of_depreciation,
-			fb_row.frequency_of_depreciation,
 			schedule_idx,
 			prev_depreciation_amount,
 			has_wdv_or_dd_non_yearly_pro_rata,
 		)
-
-
-@erpnext.allow_regional
-def get_updated_rate_of_depreciation_for_wdv_and_dd(
-	asset, depreciable_value, fb_row, show_msg=True
-):
-	return fb_row.rate_of_depreciation
 
 
 def get_straight_line_or_manual_depr_amount(
@@ -1532,30 +1537,53 @@ def get_asset_shift_factors_map():
 	return dict(frappe.db.get_all("Asset Shift Factor", ["shift_name", "shift_factor"], as_list=True))
 
 
+@erpnext.allow_regional
 def get_wdv_or_dd_depr_amount(
+	asset,
+	fb_row,
 	depreciable_value,
-	rate_of_depreciation,
-	frequency_of_depreciation,
 	schedule_idx,
 	prev_depreciation_amount,
 	has_wdv_or_dd_non_yearly_pro_rata,
 ):
-	if cint(frequency_of_depreciation) == 12:
-		return flt(depreciable_value) * (flt(rate_of_depreciation) / 100)
+	return get_default_wdv_or_dd_depr_amount(
+		asset,
+		fb_row,
+		depreciable_value,
+		schedule_idx,
+		prev_depreciation_amount,
+		has_wdv_or_dd_non_yearly_pro_rata,
+	)
+
+
+def get_default_wdv_or_dd_depr_amount(
+	asset,
+	fb_row,
+	depreciable_value,
+	schedule_idx,
+	prev_depreciation_amount,
+	has_wdv_or_dd_non_yearly_pro_rata,
+):
+	if cint(fb_row.frequency_of_depreciation) == 12:
+		return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100)
 	else:
 		if has_wdv_or_dd_non_yearly_pro_rata:
 			if schedule_idx == 0:
-				return flt(depreciable_value) * (flt(rate_of_depreciation) / 100)
-			elif schedule_idx % (12 / cint(frequency_of_depreciation)) == 1:
+				return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100)
+			elif schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 1:
 				return (
-					flt(depreciable_value) * flt(frequency_of_depreciation) * (flt(rate_of_depreciation) / 1200)
+					flt(depreciable_value)
+					* flt(fb_row.frequency_of_depreciation)
+					* (flt(fb_row.rate_of_depreciation) / 1200)
 				)
 			else:
 				return prev_depreciation_amount
 		else:
-			if schedule_idx % (12 / cint(frequency_of_depreciation)) == 0:
+			if schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 0:
 				return (
-					flt(depreciable_value) * flt(frequency_of_depreciation) * (flt(rate_of_depreciation) / 1200)
+					flt(depreciable_value)
+					* flt(fb_row.frequency_of_depreciation)
+					* (flt(fb_row.rate_of_depreciation) / 1200)
 				)
 			else:
 				return prev_depreciation_amount

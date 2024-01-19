@@ -432,17 +432,17 @@ class SalesOrder(SellingController):
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
-		if self.per_billed < 100 and self.per_delivered < 100:
-			self.indicator_color = "orange"
-			self.indicator_title = _("Not Paid and Not Delivered")
+		self.indicator_color = {
+			"Draft": "red",
+			"On Hold": "orange",
+			"To Deliver and Bill": "orange",
+			"To Bill": "orange",
+			"To Deliver": "orange",
+			"Completed": "green",
+			"Cancelled": "red",
+		}.get(self.status, "blue")
 
-		elif self.per_billed == 100 and self.per_delivered < 100:
-			self.indicator_color = "orange"
-			self.indicator_title = _("Paid and Not Delivered")
-
-		else:
-			self.indicator_color = "green"
-			self.indicator_title = _("Paid")
+		self.indicator_title = _(self.status)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):

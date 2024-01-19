@@ -503,7 +503,7 @@ class ProductionPlan(Document):
 			frappe.delete_doc("Work Order", d.name)
 
 	@frappe.whitelist()
-	def set_status(self, close=None):
+	def set_status(self, close=None, update_bin=False):
 		self.status = {0: "Draft", 1: "Submitted", 2: "Cancelled"}.get(self.docstatus)
 
 		if close:
@@ -523,7 +523,7 @@ class ProductionPlan(Document):
 		if close is not None:
 			self.db_set("status", self.status)
 
-		if self.docstatus == 1 and self.status != "Completed":
+		if update_bin and self.docstatus == 1 and self.status != "Completed":
 			self.update_bin_qty()
 
 	def update_ordered_status(self):
@@ -570,6 +570,10 @@ class ProductionPlan(Document):
 				"project": self.project,
 			}
 
+			key = (d.item_code, d.sales_order, d.warehouse)
+			if not d.sales_order:
+				key = (d.name, d.item_code, d.warehouse)
+
 			if not item_details["project"] and d.sales_order:
 				item_details["project"] = frappe.get_cached_value("Sales Order", d.sales_order, "project")
 
@@ -578,12 +582,9 @@ class ProductionPlan(Document):
 				item_dict[(d.item_code, d.material_request_item, d.warehouse)] = item_details
 			else:
 				item_details.update(
-					{
-						"qty": flt(item_dict.get((d.item_code, d.sales_order, d.warehouse), {}).get("qty"))
-						+ (flt(d.planned_qty) - flt(d.ordered_qty))
-					}
+					{"qty": flt(item_dict.get(key, {}).get("qty")) + (flt(d.planned_qty) - flt(d.ordered_qty))}
 				)
-				item_dict[(d.item_code, d.sales_order, d.warehouse)] = item_details
+				item_dict[key] = item_details
 
 		return item_dict
 

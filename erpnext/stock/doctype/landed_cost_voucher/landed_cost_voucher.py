@@ -167,7 +167,8 @@ class LandedCostVoucher(Document):
 		for d in self.get("purchase_receipts"):
 			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
 			# check if there are {qty} assets created and linked to this receipt document
-			self.validate_asset_qty_and_status(d.receipt_document_type, doc)
+			if self.docstatus != 2:
+				self.validate_asset_qty_and_status(d.receipt_document_type, doc)
 
 			# set landed cost voucher amount in pr item
 			doc.set_landed_cost_voucher_amount()
@@ -208,20 +209,20 @@ class LandedCostVoucher(Document):
 					filters={receipt_document_type: item.receipt_document, "item_code": item.item_code},
 					fields=["name", "docstatus"],
 				)
-				if not docs or len(docs) != item.qty:
+				if not docs or len(docs) < item.qty:
 					frappe.throw(
 						_(
-							"There are not enough asset created or linked to {0}. Please create or link {1} Assets with respective document."
-						).format(item.receipt_document, item.qty)
+							"There are only {0} asset created or linked to {1}. Please create or link {2} Assets with respective document."
+						).format(len(docs), item.receipt_document, item.qty)
 					)
 				if docs:
 					for d in docs:
 						if d.docstatus == 1:
 							frappe.throw(
 								_(
-									"{2} <b>{0}</b> has submitted Assets. Remove Item <b>{1}</b> from table to continue."
+									"{0} <b>{1}</b> has submitted Assets. Remove Item <b>{2}</b> from table to continue."
 								).format(
-									item.receipt_document, item.item_code, item.receipt_document_type
+									item.receipt_document_type, item.receipt_document, item.item_code
 								)
 							)
 

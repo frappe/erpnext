@@ -389,6 +389,9 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 				"timesheets",
 				{
 					"time_sheet": timesheet.name,
+					"project_name": time_log.project_name,
+					"from_time": time_log.from_time,
+					"to_time": time_log.to_time,
 					"billing_hours": time_log.billing_hours,
 					"billing_amount": time_log.billing_amount,
 					"timesheet_detail": time_log.name,
