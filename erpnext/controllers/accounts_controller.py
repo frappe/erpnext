@@ -28,6 +28,7 @@ from frappe.utils import (
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
+	get_dimensions,
 )
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	apply_pricing_rule_for_free_items,
@@ -1416,7 +1417,13 @@ class AccountsController(TransactionBase):
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 
-			reconcile_against_document(lst)
+			# pass dimension values to utility method
+			active_dimensions = get_dimensions()[0]
+			for x in lst:
+				for dim in active_dimensions:
+					if self.get(dim.fieldname):
+						x.update({dim.fieldname: self.get(dim.fieldname)})
+			reconcile_against_document(lst, active_dimensions=active_dimensions)
 
 	def on_cancel(self):
 		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
