@@ -1322,18 +1322,18 @@ class TestAccountsController(FrappeTestCase):
 		self.setup_dimensions()
 		rate = 80
 		rate_in_account_currency = 1
-		dimension = "Research & Development"
+		dpt = "Research & Development"
 
 		si = self.create_sales_invoice(qty=1, rate=rate_in_account_currency, do_not_save=True)
-		si.department = dimension
+		si.department = dpt
 		si.save().submit()
 
 		pe = self.create_payment_entry(amount=1, source_exc_rate=82).save()
-		pe.department = dimension
+		pe.department = dpt
 		pe = pe.save().submit()
 
 		pr = self.create_payment_reconciliation()
-		pr.department = dimension
+		pr.department = dpt
 		pr.get_unreconciled_entries()
 		self.assertEqual(len(pr.invoices), 1)
 		self.assertEqual(len(pr.payments), 1)
@@ -1343,9 +1343,57 @@ class TestAccountsController(FrappeTestCase):
 		pr.reconcile()
 		self.assertEqual(len(pr.invoices), 0)
 		self.assertEqual(len(pr.payments), 0)
+
+		# Exc Gain/Loss journals should inherit dimension from parent
 		journals = self.get_journals_for(si.doctype, si.name)
 		self.assertEqual(
-			[dimension, dimension],
+			[dpt, dpt],
+			frappe.db.get_all(
+				"Journal Entry Account",
+				filters={"parent": ("in", [x.parent for x in journals])},
+				pluck="department",
+			),
+		)
+
+	def test_53_dimension_inheritance_on_advance(self):
+		self.setup_dimensions()
+		dpt = "Research & Development"
+
+		adv = self.create_payment_entry(amount=1, source_exc_rate=85)
+		adv.department = dpt
+		adv.save().submit()
+		adv.reload()
+
+		# Sales Invoices in different exchange rates
+		si = self.create_sales_invoice(qty=1, conversion_rate=82, rate=1, do_not_submit=True)
+		si.department = dpt
+		advances = si.get_advance_entries()
+		self.assertEqual(len(advances), 1)
+		self.assertEqual(advances[0].reference_name, adv.name)
+		si.append(
+			"advances",
+			{
+				"doctype": "Sales Invoice Advance",
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
+				"reference_row": advances[0].reference_row,
+				"advance_amount": 1,
+				"allocated_amount": 1,
+				"ref_exchange_rate": advances[0].exchange_rate,
+				"remarks": advances[0].remarks,
+			},
+		)
+		si = si.save().submit()
+
+		# Outstanding in both currencies should be '0'
+		adv.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
+
+		# Exc Gain/Loss journals should inherit dimension from parent
+		journals = self.get_journals_for(si.doctype, si.name)
+		self.assertEqual(
+			[dpt, dpt],
 			frappe.db.get_all(
 				"Journal Entry Account",
 				filters={"parent": ("in", [x.parent for x in journals])},
