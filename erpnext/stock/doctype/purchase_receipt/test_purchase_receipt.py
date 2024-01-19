@@ -4,7 +4,6 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, cstr, flt, nowtime, today
-from pypika import Order
 from pypika import functions as fn
 
 import erpnext
@@ -1009,7 +1008,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
 
-		self.assertEqual(len(gl_entries), 2)
+		self.assertFalse(gl_entries)
 
 		expected_sle = {"Work In Progress - TCP1": -5, "Stores - TCP1": 5}
 
@@ -2254,13 +2253,13 @@ def get_sl_entries(voucher_type, voucher_no):
 
 
 def get_gl_entries(voucher_type, voucher_no):
-	gle = frappe.qb.DocType("GL Entry")
-	return (
-		frappe.qb.from_(gle)
-		.select(gle.account, gle.debit, gle.credit, gle.cost_center, gle.is_cancelled)
-		.where((gle.voucher_type == voucher_type) & (gle.voucher_no == voucher_no))
-		.orderby(gle.account, gle.debit, order=Order.desc)
-	).run(as_dict=True)
+	return frappe.db.sql(
+		"""select account, debit, credit, cost_center, is_cancelled
+		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
+		order by account desc""",
+		(voucher_type, voucher_no),
+		as_dict=1,
+	)
 
 
 def get_taxes(**args):
