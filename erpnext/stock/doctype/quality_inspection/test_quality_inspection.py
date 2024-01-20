@@ -216,6 +216,33 @@ class TestQualityInspection(FrappeTestCase):
 		qa.save()
 		self.assertEqual(qa.status, "Accepted")
 
+	def test_delete_quality_inspection_linked_with_stock_entry(self):
+		item_code = create_item("_Test Cicuular Dependecy Item with QA").name
+
+		se = make_stock_entry(
+			item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100, do_not_submit=True
+		)
+
+		se.inspection_required = 1
+		se.save()
+
+		qa = create_quality_inspection(
+			item_code=item_code, reference_type="Stock Entry", reference_name=se.name, do_not_submit=True
+		)
+
+		se.reload()
+		se.items[0].quality_inspection = qa.name
+		se.save()
+
+		qa.delete()
+
+		se.reload()
+
+		qc = se.items[0].quality_inspection
+		self.assertFalse(qc)
+
+		se.delete()
+
 
 def create_quality_inspection(**args):
 	args = frappe._dict(args)
