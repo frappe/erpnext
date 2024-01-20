@@ -23,7 +23,7 @@ frappe.ui.form.on('Stock Settings', {
 		msg += " ";
 		msg += __("This is considered dangerous from accounting point of view.")
 		msg += "<br>";
-		msg += ("Do you still want to enable negative inventory?");
+		msg += __("Do you still want to enable negative inventory?");
 
 		frappe.confirm(
 			msg,
