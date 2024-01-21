@@ -196,18 +196,18 @@
    "type": "Link"
   }
  ],
- "modified": "2023-05-24 14:47:20.243146",
+ "modified": "2024-01-05 17:40:34.570041",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
  "number_cards": [],
  "owner": "Administrator",
- "parent_page": "Accounting",
+ "parent_page": "",
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
  "roles": [],
- "sequence_id": 4.0,
+ "sequence_id": 7.0,
  "shortcuts": [
   {
    "label": "Asset",

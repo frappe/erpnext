@@ -642,7 +642,6 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	new_row.set("reference_name", d["against_voucher"])
 
 	new_row.against_account = cstr(jv_detail.against_account)
-	new_row.against_account_link = cstr(jv_detail.against_account)
 	new_row.is_advance = cstr(jv_detail.is_advance)
 	new_row.docstatus = 1
 
