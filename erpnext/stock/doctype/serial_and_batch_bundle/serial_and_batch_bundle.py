@@ -999,7 +999,23 @@ def get_serial_batch_from_data(item_code, kwargs):
 
 		make_serial_nos(item_code, serial_nos)
 
+	if kwargs.get("_has_serial_nos"):
+		return serial_nos
+
 	return serial_nos, batch_nos
+
+
+@frappe.whitelist()
+def create_serial_nos(item_code, serial_nos):
+	serial_nos = get_serial_batch_from_data(
+		item_code,
+		{
+			"serial_nos": serial_nos,
+			"_has_serial_nos": True,
+		},
+	)
+
+	return serial_nos
 
 
 def make_serial_nos(item_code, serial_nos):
