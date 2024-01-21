@@ -5,9 +5,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
-from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.tax_withholding_category.test_tax_withholding_category import (
 	create_tax_withholding_category,
@@ -17,7 +16,7 @@ from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
 
 
-class TestTdsPayableMonthly(AccountsTestMixin, FrappeTestCase):
+class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 	def setUp(self):
 		self.create_company()
 		self.clear_old_entries()
@@ -27,13 +26,25 @@ class TestTdsPayableMonthly(AccountsTestMixin, FrappeTestCase):
 	def test_tax_withholding_for_customers(self):
 		si = create_sales_invoice(rate=1000)
 		pe = create_tcs_payment_entry()
+		jv = make_journal_entry(
+			"TCS - _TC",
+			"Debtors - _TC",
+			1000,
+			"_Test Cost Center - _TC",
+			save=False,
+		)
+		jv.accounts[1].party_type = "Customer"
+		jv.accounts[1].party = "_Test Customer"
+		jv.submit()
+
 		filters = frappe._dict(
 			company="_Test Company", party_type="Customer", from_date=today(), to_date=today()
 		)
 		result = execute(filters)[1]
 		expected_values = [
+			[jv.name, "TCS", 0.075, 1000, -1000, 1000],
 			[pe.name, "TCS", 0.075, 2550, 0.53, 2550.53],
-			[si.name, "TCS", 0.075, 1000, 0.52, 1000.52],
+			[si.name, "TCS", 0.075, 1000, 0.525, 1000.525],
 		]
 		self.check_expected_values(result, expected_values)
 
@@ -41,12 +52,15 @@ class TestTdsPayableMonthly(AccountsTestMixin, FrappeTestCase):
 		for i in range(len(result)):
 			voucher = frappe._dict(result[i])
 			voucher_expected_values = expected_values[i]
-			self.assertEqual(voucher.ref_no, voucher_expected_values[0])
-			self.assertEqual(voucher.section_code, voucher_expected_values[1])
-			self.assertEqual(voucher.rate, voucher_expected_values[2])
-			self.assertEqual(voucher.base_total, voucher_expected_values[3])
-			self.assertAlmostEqual(voucher.tax_amount, voucher_expected_values[4])
-			self.assertAlmostEqual(voucher.grand_total, voucher_expected_values[5])
+			voucher_actual_values = (
+				voucher.ref_no,
+				voucher.section_code,
+				voucher.rate,
+				voucher.base_total,
+				voucher.tax_amount,
+				voucher.grand_total,
+			)
+			self.assertSequenceEqual(voucher_actual_values, voucher_expected_values)
 
 	def tearDown(self):
 		self.clear_old_entries()
