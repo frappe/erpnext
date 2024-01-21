@@ -179,11 +179,52 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			label = __('Serial Nos / Batch Nos');
 		}
 
-		return [
+		let fields = [
 			{
 				fieldtype: 'Section Break',
 				label: __('{0} {1} via CSV File', [primary_label, label])
-			},
+			}
+		]
+
+		if (this.item?.has_serial_no) {
+			fields = [...fields,
+				{
+					fieldtype: 'Check',
+					label: __('Upload Using CSV file'),
+					fieldname: 'upload_using_csv',
+					default: 0,
+				},
+				{
+					fieldtype: 'Section Break',
+					depends_on: 'eval:doc.upload_using_csv === 0',
+				},
+				{
+					fieldtype: 'Small Text',
+					label: __('Serial Nos'),
+					fieldname: 'upload_serial_nos',
+					depends_on: 'eval:doc.upload_using_csv === 0',
+				},
+				{
+					fieldtype: 'Column Break',
+					depends_on: 'eval:doc.upload_using_csv === 0',
+				},
+				{
+					fieldtype: 'Button',
+					fieldname: 'make_serial_nos',
+					label: __('Create Serial Nos'),
+					depends_on: 'eval:doc.upload_using_csv === 0',
+					click: () => {
+						this.create_serial_nos();
+					}
+				},
+				{
+					fieldtype: 'Section Break',
+					depends_on: 'eval:doc.upload_using_csv === 1',
+				}
+			];
+		}
+
+		fields = [...fields,
 			{
 				fieldtype: 'Button',
 				fieldname: 'download_csv',
@@ -199,7 +240,31 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				label: __('Attach CSV File'),
 				onchange: () => this.upload_csv_file()
 			}
-		]
+		];
+
+		return fields;
+	}
+
+	create_serial_nos() {
+		let {upload_serial_nos} = this.dialog.get_values();
+
+		if (!upload_serial_nos) {
+			frappe.throw(__('Please enter Serial Nos'));
+		}
+
+		frappe.call({
+			method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.create_serial_nos',
+			args: {
+				item_code: this.item.item_code,
+				serial_nos: upload_serial_nos
+			},
+			callback: (r) => {
+				if (r.message) {
+					this.dialog.fields_dict.entries.df.data = [];
+					this.set_data(r.message);
+				}
+			}
+		});
 	}
 
 	download_csv_file() {
