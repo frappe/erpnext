@@ -395,9 +395,8 @@ class StockEntry(StockController):
 				frappe.delete_doc("Stock Entry", d.name)
 
 	def set_transfer_qty(self):
+		self.validate_qty_is_not_zero()
 		for item in self.get("items"):
-			if not flt(item.qty):
-				frappe.throw(_("Row {0}: Qty is mandatory").format(item.idx), title=_("Zero quantity"))
 			if not flt(item.conversion_factor):
 				frappe.throw(_("Row {0}: UOM Conversion Factor is mandatory").format(item.idx))
 			item.transfer_qty = flt(
@@ -1460,9 +1459,7 @@ class StockEntry(StockController):
 						self.get_gl_dict(
 							{
 								"account": account,
-								"against_type": "Account",
 								"against": d.expense_account,
-								"against_link": d.expense_account,
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 								"credit_in_account_currency": flt(amount["amount"]),
@@ -1476,9 +1473,7 @@ class StockEntry(StockController):
 						self.get_gl_dict(
 							{
 								"account": d.expense_account,
-								"against_type": "Account",
 								"against": account,
-								"against_link": account,
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 								"credit": -1

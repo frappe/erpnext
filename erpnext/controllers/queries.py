@@ -6,10 +6,12 @@ import json
 from collections import OrderedDict, defaultdict
 
 import frappe
-from frappe import scrub
+from frappe import qb, scrub
 from frappe.desk.reportview import get_filters_cond, get_match_cond
-from frappe.query_builder.functions import Concat, Sum
+from frappe.query_builder import Criterion, CustomFunction
+from frappe.query_builder.functions import Concat, Locate, Sum
 from frappe.utils import nowdate, today, unique
+from pypika import Order
 
 import erpnext
 from erpnext.stock.get_item_details import _get_item_tax_template
@@ -344,37 +346,46 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
-	doctype = "Project"
-	cond = ""
+	proj = qb.DocType("Project")
+	qb_filter_and_conditions = []
+	qb_filter_or_conditions = []
+	ifelse = CustomFunction("IF", ["condition", "then", "else"])
+
 	if filters and filters.get("customer"):
-		cond = """(`tabProject`.customer = %s or
-			ifnull(`tabProject`.customer,"")="") and""" % (
-			frappe.db.escape(filters.get("customer"))
-		)
+		qb_filter_and_conditions.append(proj.customer == filters.get("customer"))
+
+	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
+
+	q = qb.from_(proj)
 
 	fields = get_fields(doctype, ["name", "project_name"])
-	searchfields = frappe.get_meta(doctype).get_search_fields()
-	searchfields = " or ".join(["`tabProject`." + field + " like %(txt)s" for field in searchfields])
+	for x in fields:
+		q = q.select(proj[x])
 
-	return frappe.db.sql(
-		"""select {fields} from `tabProject`
-		where
-			`tabProject`.status not in ('Completed', 'Cancelled')
-			and {cond} {scond} {match_cond}
-		order by
-			(case when locate(%(_txt)s, `tabProject`.name) > 0 then locate(%(_txt)s, `tabProject`.name) else 99999 end),
-			`tabProject`.idx desc,
-			`tabProject`.name asc
-		limit {page_len} offset {start}""".format(
-			fields=", ".join(["`tabProject`.{0}".format(f) for f in fields]),
-			cond=cond,
-			scond=searchfields,
-			match_cond=get_match_cond(doctype),
-			start=start,
-			page_len=page_len,
-		),
-		{"txt": "%{0}%".format(txt), "_txt": txt.replace("%", "")},
-	)
+	# don't consider 'customer' and 'status' fields for pattern search, as they must be exactly matched
+	searchfields = [
+		x for x in frappe.get_meta(doctype).get_search_fields() if x not in ["customer", "status"]
+	]
+
+	# pattern search
+	if txt:
+		for x in searchfields:
+			qb_filter_or_conditions.append(proj[x].like(f"%{txt}%"))
+
+	q = q.where(Criterion.all(qb_filter_and_conditions)).where(Criterion.any(qb_filter_or_conditions))
+
+	# ordering
+	if txt:
+		# project_name containing search string 'txt' will be given higher precedence
+		q = q.orderby(ifelse(Locate(txt, proj.project_name) > 0, Locate(txt, proj.project_name), 99999))
+	q = q.orderby(proj.idx, order=Order.desc).orderby(proj.name)
+
+	if page_len:
+		q = q.limit(page_len)
+
+	if start:
+		q = q.offset(start)
+	return q.run()
 
 
 @frappe.whitelist()
@@ -421,23 +432,14 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	meta = frappe.get_meta(doctype, cached=True)
 	searchfields = meta.get_search_fields()
 
-	query = get_batches_from_stock_ledger_entries(searchfields, txt, filters)
-	bundle_query = get_batches_from_serial_and_batch_bundle(searchfields, txt, filters)
-
-	data = (
-		frappe.qb.from_((query) + (bundle_query))
-		.select("batch_no", "qty", "manufacturing_date", "expiry_date")
-		.offset(start)
-		.limit(page_len)
+	batches = get_batches_from_stock_ledger_entries(searchfields, txt, filters, start, page_len)
+	batches.extend(
+		get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start, page_len)
 	)
 
-	for field in searchfields:
-		data = data.select(field)
+	filtered_batches = get_filterd_batches(batches)
 
-	data = data.run()
-	data = get_filterd_batches(data)
-
-	return data
+	return filtered_batches
 
 
 def get_filterd_batches(data):
@@ -457,7 +459,7 @@ def get_filterd_batches(data):
 	return filterd_batch
 
 
-def get_batches_from_stock_ledger_entries(searchfields, txt, filters):
+def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, page_len=100):
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
 
@@ -479,6 +481,8 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters):
 			& (stock_ledger_entry.batch_no.isnotnull())
 		)
 		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse)
+		.offset(start)
+		.limit(page_len)
 	)
 
 	query = query.select(
@@ -493,16 +497,16 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters):
 		query = query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(txt)
+		txt_condition = batch_table.name.like("%{0}%".format(txt))
 		for field in searchfields + ["name"]:
-			txt_condition |= batch_table[field].like(txt)
+			txt_condition |= batch_table[field].like("%{0}%".format(txt))
 
 		query = query.where(txt_condition)
 
-	return query
+	return query.run(as_list=1) or []
 
 
-def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters):
+def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0, page_len=100):
 	bundle = frappe.qb.DocType("Serial and Batch Entry")
 	stock_ledger_entry = frappe.qb.DocType("Stock Ledger Entry")
 	batch_table = frappe.qb.DocType("Batch")
@@ -527,6 +531,8 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters):
 			& (stock_ledger_entry.serial_and_batch_bundle.isnotnull())
 		)
 		.groupby(bundle.batch_no, bundle.warehouse)
+		.offset(start)
+		.limit(page_len)
 	)
 
 	bundle_query = bundle_query.select(
@@ -541,13 +547,13 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters):
 		bundle_query = bundle_query.select(batch_table[field])
 
 	if txt:
-		txt_condition = batch_table.name.like(txt)
+		txt_condition = batch_table.name.like("%{0}%".format(txt))
 		for field in searchfields + ["name"]:
-			txt_condition |= batch_table[field].like(txt)
+			txt_condition |= batch_table[field].like("%{0}%".format(txt))
 
 		bundle_query = bundle_query.where(txt_condition)
 
-	return bundle_query
+	return bundle_query.run(as_list=1)
 
 
 @frappe.whitelist()

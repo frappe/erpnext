@@ -57,7 +57,6 @@ execute:frappe.delete_doc_if_exists("Page", "production-analytics")
 erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v11_0.rename_bom_wo_fields
-erpnext.patches.v12_0.set_default_homepage_type
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')

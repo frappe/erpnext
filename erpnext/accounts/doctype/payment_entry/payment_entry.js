@@ -9,7 +9,7 @@ erpnext.accounts.taxes.setup_tax_filters("Advance Taxes and Charges");
 
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger','Repost Accounting Ledger', 'Unreconcile Payment', 'Unreconcile Payment Entries'];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger','Repost Accounting Ledger', 'Unreconcile Payment', 'Unreconcile Payment Entries', "Bank Transaction"];
 
 		if(frm.doc.__islocal) {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
@@ -747,6 +747,10 @@ frappe.ui.form.on('Payment Entry', {
 			args["get_orders_to_be_billed"] = true;
 		}
 
+		if (frm.doc.book_advance_payments_in_separate_party_account) {
+			args["book_advance_payments_in_separate_party_account"] = true;
+		}
+
 		frappe.flags.allocate_payment_amount = filters['allocate_payment_amount'];
 
 		return  frappe.call({
@@ -929,7 +933,7 @@ frappe.ui.form.on('Payment Entry', {
 			if(frm.doc.payment_type == "Receive"
 				&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions
 				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
-					unallocated_amount = (frm.doc.base_received_amount + total_deductions + flt(frm.doc.base_total_taxes_and_charges)
+					unallocated_amount = (frm.doc.base_received_amount + total_deductions - flt(frm.doc.base_total_taxes_and_charges)
 						- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
 			} else if (frm.doc.payment_type == "Pay"
 				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions

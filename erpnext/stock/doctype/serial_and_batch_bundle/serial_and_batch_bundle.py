@@ -490,8 +490,10 @@ class SerialandBatchBundle(Document):
 			qty_field = "qty"
 
 		precision = row.precision
-		if row.get("doctype") in ["Subcontracting Receipt Supplied Item"]:
+		if row.get("doctype") == "Subcontracting Receipt Supplied Item":
 			qty_field = "consumed_qty"
+		elif row.get("doctype") == "Stock Entry Detail":
+			qty_field = "transfer_qty"
 
 		qty = row.get(qty_field)
 		if qty_field == "qty" and row.get("stock_qty"):
@@ -1004,13 +1006,17 @@ def make_serial_nos(item_code, serial_nos):
 	item = frappe.get_cached_value("Item", item_code, ["description", "item_code"], as_dict=1)
 
 	serial_nos = [d.get("serial_no") for d in serial_nos if d.get("serial_no")]
+	existing_serial_nos = frappe.get_all("Serial No", filters={"name": ("in", serial_nos)})
+
+	existing_serial_nos = [d.get("name") for d in existing_serial_nos if d.get("name")]
+	serial_nos = list(set(serial_nos) - set(existing_serial_nos))
+
+	if not serial_nos:
+		return
 
 	serial_nos_details = []
 	user = frappe.session.user
 	for serial_no in serial_nos:
-		if frappe.db.exists("Serial No", serial_no):
-			continue
-
 		serial_nos_details.append(
 			(
 				serial_no,
@@ -1046,8 +1052,15 @@ def make_serial_nos(item_code, serial_nos):
 
 def make_batch_nos(item_code, batch_nos):
 	item = frappe.get_cached_value("Item", item_code, ["description", "item_code"], as_dict=1)
-
 	batch_nos = [d.get("batch_no") for d in batch_nos if d.get("batch_no")]
+
+	existing_batches = frappe.get_all("Batch", filters={"name": ("in", batch_nos)})
+
+	existing_batches = [d.get("name") for d in existing_batches if d.get("name")]
+
+	batch_nos = list(set(batch_nos) - set(existing_batches))
+	if not batch_nos:
+		return
 
 	batch_nos_details = []
 	user = frappe.session.user

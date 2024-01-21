@@ -83,9 +83,7 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 			"company": d.company,
 			"sales_order": d.sales_order,
 			"delivery_note": d.delivery_note,
-			"income_account": d.unrealized_profit_loss_account
-			if d.is_internal_customer == 1
-			else d.income_account,
+			"income_account": get_income_account(d),
 			"cost_center": d.cost_center,
 			"stock_qty": d.stock_qty,
 			"stock_uom": d.stock_uom,
@@ -148,6 +146,15 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 		skip_total_row = 1
 
 	return columns, data, None, None, None, skip_total_row
+
+
+def get_income_account(row):
+	if row.enable_deferred_revenue:
+		return row.deferred_revenue_account
+	elif row.is_internal_customer == 1:
+		return row.unrealized_profit_loss_account
+	else:
+		return row.income_account
 
 
 def get_columns(additional_table_columns, filters):
@@ -358,6 +365,13 @@ def get_conditions(filters, additional_conditions=None):
 	if filters.get("item_group"):
 		conditions += """and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s"""
 
+	if filters.get("income_account"):
+		conditions += """
+			and (ifnull(`tabSales Invoice Item`.income_account, '') = %(income_account)s
+			or ifnull(`tabSales Invoice Item`.deferred_revenue_account, '') = %(income_account)s
+			or ifnull(`tabSales Invoice`.unrealized_profit_loss_account, '') = %(income_account)s)
+		"""
+
 	if not filters.get("group_by"):
 		conditions += (
 			"ORDER BY `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_group desc"
@@ -399,6 +413,7 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			`tabItem`.`item_name` as i_item_name, `tabItem`.`item_group` as i_item_group,
 			`tabSales Invoice Item`.sales_order, `tabSales Invoice Item`.delivery_note,
 			`tabSales Invoice Item`.income_account, `tabSales Invoice Item`.cost_center,
+			`tabSales Invoice Item`.enable_deferred_revenue, `tabSales Invoice Item`.deferred_revenue_account,
 			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,
 			`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
 			`tabSales Invoice`.customer_name, `tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,

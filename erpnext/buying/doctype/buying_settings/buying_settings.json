@@ -214,7 +214,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-28 13:01:18.403492",
+ "modified": "2024-01-12 16:42:01.894346",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -238,6 +238,26 @@
    "role": "Purchase Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts User"
+  },
+  {
+   "read": 1,
+   "role": "Accounts Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "role": "Purchase User"
   }
  ],
  "sort_field": "modified",
