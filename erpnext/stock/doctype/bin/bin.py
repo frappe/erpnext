@@ -10,6 +10,31 @@ from frappe.utils import flt
 
 
 class Bin(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		actual_qty: DF.Float
+		indented_qty: DF.Float
+		item_code: DF.Link
+		ordered_qty: DF.Float
+		planned_qty: DF.Float
+		projected_qty: DF.Float
+		reserved_qty: DF.Float
+		reserved_qty_for_production: DF.Float
+		reserved_qty_for_production_plan: DF.Float
+		reserved_qty_for_sub_contract: DF.Float
+		reserved_stock: DF.Float
+		stock_uom: DF.Link | None
+		stock_value: DF.Float
+		valuation_rate: DF.Float
+		warehouse: DF.Link
+	# end: auto-generated types
+
 	def before_save(self):
 		if self.get("__islocal") or not self.stock_uom:
 			self.stock_uom = frappe.get_cached_value("Item", self.item_code, "stock_uom")

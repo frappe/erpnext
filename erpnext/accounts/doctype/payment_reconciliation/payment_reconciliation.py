@@ -23,11 +23,105 @@ from erpnext.controllers.accounts_controller import get_advance_payment_entries_
 
 
 class PaymentReconciliation(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.payment_reconciliation_allocation.payment_reconciliation_allocation import (
+			PaymentReconciliationAllocation,
+		)
+		from erpnext.accounts.doctype.payment_reconciliation_invoice.payment_reconciliation_invoice import (
+			PaymentReconciliationInvoice,
+		)
+		from erpnext.accounts.doctype.payment_reconciliation_payment.payment_reconciliation_payment import (
+			PaymentReconciliationPayment,
+		)
+
+		allocation: DF.Table[PaymentReconciliationAllocation]
+		bank_cash_account: DF.Link | None
+		company: DF.Link
+		cost_center: DF.Link | None
+		default_advance_account: DF.Link | None
+		from_invoice_date: DF.Date | None
+		from_payment_date: DF.Date | None
+		invoice_limit: DF.Int
+		invoice_name: DF.Data | None
+		invoices: DF.Table[PaymentReconciliationInvoice]
+		maximum_invoice_amount: DF.Currency
+		maximum_payment_amount: DF.Currency
+		minimum_invoice_amount: DF.Currency
+		minimum_payment_amount: DF.Currency
+		party: DF.DynamicLink
+		party_type: DF.Link
+		payment_limit: DF.Int
+		payment_name: DF.Data | None
+		payments: DF.Table[PaymentReconciliationPayment]
+		receivable_payable_account: DF.Link
+		to_invoice_date: DF.Date | None
+		to_payment_date: DF.Date | None
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(PaymentReconciliation, self).__init__(*args, **kwargs)
 		self.common_filter_conditions = []
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
+
+	def load_from_db(self):
+		# 'modified' attribute is required for `run_doc_method` to work properly.
+		doc_dict = frappe._dict(
+			{
+				"modified": None,
+				"company": None,
+				"party": None,
+				"party_type": None,
+				"receivable_payable_account": None,
+				"default_advance_account": None,
+				"from_invoice_date": None,
+				"to_invoice_date": None,
+				"invoice_limit": 50,
+				"from_payment_date": None,
+				"to_payment_date": None,
+				"payment_limit": 50,
+				"minimum_invoice_amount": None,
+				"minimum_payment_amount": None,
+				"maximum_invoice_amount": None,
+				"maximum_payment_amount": None,
+				"bank_cash_account": None,
+				"cost_center": None,
+				"payment_name": None,
+				"invoice_name": None,
+			}
+		)
+		super(Document, self).__init__(doc_dict)
+
+	def save(self):
+		return
+
+	@staticmethod
+	def get_list(args):
+		pass
+
+	@staticmethod
+	def get_count(args):
+		pass
+
+	@staticmethod
+	def get_stats(args):
+		pass
+
+	def db_insert(self, *args, **kwargs):
+		pass
+
+	def db_update(self, *args, **kwargs):
+		pass
+
+	def delete(self):
+		pass
 
 	@frappe.whitelist()
 	def get_unreconciled_entries(self):
@@ -499,6 +593,27 @@ class PaymentReconciliation(Document):
 			)
 
 			invoice_exchange_map.update(purchase_invoice_map)
+
+		journals = [
+			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Journal Entry"
+		]
+		journals.extend(
+			[d.get("reference_name") for d in payments if d.get("reference_type") == "Journal Entry"]
+		)
+		if journals:
+			journals = list(set(journals))
+			journals_map = frappe._dict(
+				frappe.db.get_all(
+					"Journal Entry Account",
+					filters={"parent": ("in", journals), "account": ("in", [self.receivable_payable_account])},
+					fields=[
+						"parent as `name`",
+						"exchange_rate",
+					],
+					as_list=1,
+				)
+			)
+			invoice_exchange_map.update(journals_map)
 
 		return invoice_exchange_map
 

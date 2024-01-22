@@ -12,6 +12,23 @@ class DuplicationError(frappe.ValidationError):
 
 
 class ActivityCost(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		activity_type: DF.Link
+		billing_rate: DF.Currency
+		costing_rate: DF.Currency
+		department: DF.Link | None
+		employee: DF.Link | None
+		employee_name: DF.Data | None
+		title: DF.Data | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.set_title()
 		self.check_unique()

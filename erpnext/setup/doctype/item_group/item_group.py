@@ -9,6 +9,28 @@ from frappe.utils.nestedset import NestedSet
 
 
 class ItemGroup(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.item_default.item_default import ItemDefault
+		from erpnext.stock.doctype.item_tax.item_tax import ItemTax
+
+		image: DF.AttachImage | None
+		is_group: DF.Check
+		item_group_defaults: DF.Table[ItemDefault]
+		item_group_name: DF.Data
+		lft: DF.Int
+		old_parent: DF.Link | None
+		parent_item_group: DF.Link | None
+		rgt: DF.Int
+		taxes: DF.Table[ItemTax]
+	# end: auto-generated types
+
 	def validate(self):
 		if not self.parent_item_group and not frappe.flags.in_test:
 			if frappe.db.exists("Item Group", _("All Item Groups")):

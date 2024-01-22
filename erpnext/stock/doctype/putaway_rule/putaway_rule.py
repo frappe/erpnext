@@ -15,6 +15,27 @@ from erpnext.stock.utils import get_stock_balance
 
 
 class PutawayRule(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		capacity: DF.Float
+		company: DF.Link
+		conversion_factor: DF.Float
+		disable: DF.Check
+		item_code: DF.Link
+		item_name: DF.Data | None
+		priority: DF.Int
+		stock_capacity: DF.Float
+		stock_uom: DF.Link | None
+		uom: DF.Link | None
+		warehouse: DF.Link
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_duplicate_rule()
 		self.validate_warehouse_and_company()
@@ -149,7 +170,7 @@ def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 				pending_qty -= qty_to_allocate
 				rule["free_space"] -= stock_qty_to_allocate
 
-				if not pending_stock_qty > 0:
+				if pending_stock_qty <= 0:
 					break
 
 		# if pending qty after applying all rules, add row without warehouse

@@ -112,9 +112,9 @@ def create_transaction(doctype, company, start_date):
 	warehouse = get_warehouse(company)
 
 	if document_type == "Purchase Order":
-		posting_date = get_random_date(start_date, 1, 30)
+		posting_date = get_random_date(start_date, 1, 25)
 	else:
-		posting_date = get_random_date(start_date, 31, 364)
+		posting_date = get_random_date(start_date, 31, 350)
 
 	doctype.update(
 		{
@@ -149,6 +149,11 @@ def convert_order_to_invoices():
 			invoice.set_posting_time = 1
 			invoice.posting_date = order.transaction_date
 			invoice.due_date = order.transaction_date
+			invoice.bill_date = order.transaction_date
+
+			if invoice.get("payment_schedule"):
+				invoice.payment_schedule[0].due_date = order.transaction_date
+
 			invoice.update_stock = 1
 			invoice.submit()
 

@@ -240,7 +240,7 @@ def get_chart_data(data):
 	for row in data:
 		item_key = row.get("item_code")
 
-		if not item_key in item_wise_sales_map:
+		if item_key not in item_wise_sales_map:
 			item_wise_sales_map[item_key] = 0
 
 		item_wise_sales_map[item_key] = flt(item_wise_sales_map[item_key]) + flt(row.get("amount"))

@@ -387,11 +387,7 @@ class StockController(AccountsController):
 		}
 
 		for row in self.get(table_name):
-			for field in [
-				"serial_and_batch_bundle",
-				"current_serial_and_batch_bundle",
-				"rejected_serial_and_batch_bundle",
-			]:
+			for field in QTY_FIELD.keys():
 				if row.get(field):
 					frappe.get_doc("Serial and Batch Bundle", row.get(field)).set_serial_and_batch_values(
 						self, row, qty_field=QTY_FIELD[field]
@@ -454,6 +450,12 @@ class StockController(AccountsController):
 
 		sl_dict.update(args)
 		self.update_inventory_dimensions(d, sl_dict)
+
+		if self.docstatus == 2:
+			# To handle denormalized serial no records, will br deprecated in v16
+			for field in ["serial_no", "batch_no"]:
+				if d.get(field):
+					sl_dict[field] = d.get(field)
 
 		return sl_dict
 
@@ -642,7 +644,7 @@ class StockController(AccountsController):
 		)
 		qa_docstatus = frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus")
 
-		if not qa_docstatus == 1:
+		if qa_docstatus != 1:
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = (
 				f"Row #{row.idx}: Quality Inspection {link} is not submitted for the item: {row.item_code}"

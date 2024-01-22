@@ -35,6 +35,78 @@ class StockAccountInvalidTransaction(frappe.ValidationError):
 
 
 class JournalEntry(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.journal_entry_account.journal_entry_account import (
+			JournalEntryAccount,
+		)
+
+		accounts: DF.Table[JournalEntryAccount]
+		amended_from: DF.Link | None
+		apply_tds: DF.Check
+		auto_repeat: DF.Link | None
+		bill_date: DF.Date | None
+		bill_no: DF.Data | None
+		cheque_date: DF.Date | None
+		cheque_no: DF.Data | None
+		clearance_date: DF.Date | None
+		company: DF.Link
+		difference: DF.Currency
+		due_date: DF.Date | None
+		finance_book: DF.Link | None
+		from_template: DF.Link | None
+		inter_company_journal_entry_reference: DF.Link | None
+		is_opening: DF.Literal["No", "Yes"]
+		is_system_generated: DF.Check
+		letter_head: DF.Link | None
+		mode_of_payment: DF.Link | None
+		multi_currency: DF.Check
+		naming_series: DF.Literal["ACC-JV-.YYYY.-"]
+		paid_loan: DF.Data | None
+		pay_to_recd_from: DF.Data | None
+		payment_order: DF.Link | None
+		posting_date: DF.Date
+		process_deferred_accounting: DF.Link | None
+		remark: DF.SmallText | None
+		reversal_of: DF.Link | None
+		select_print_heading: DF.Link | None
+		stock_entry: DF.Link | None
+		tax_withholding_category: DF.Link | None
+		title: DF.Data | None
+		total_amount: DF.Currency
+		total_amount_currency: DF.Link | None
+		total_amount_in_words: DF.Data | None
+		total_credit: DF.Currency
+		total_debit: DF.Currency
+		user_remark: DF.SmallText | None
+		voucher_type: DF.Literal[
+			"Journal Entry",
+			"Inter Company Journal Entry",
+			"Bank Entry",
+			"Cash Entry",
+			"Credit Card Entry",
+			"Debit Note",
+			"Credit Note",
+			"Contra Entry",
+			"Excise Entry",
+			"Write Off Entry",
+			"Opening Entry",
+			"Depreciation Entry",
+			"Exchange Rate Revaluation",
+			"Exchange Gain Or Loss",
+			"Deferred Revenue",
+			"Deferred Expense",
+		]
+		write_off_amount: DF.Currency
+		write_off_based_on: DF.Literal["Accounts Receivable", "Accounts Payable"]
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(JournalEntry, self).__init__(*args, **kwargs)
 
@@ -98,6 +170,8 @@ class JournalEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
@@ -508,7 +582,7 @@ class JournalEntry(AccountsController):
 							).format(d.reference_name, d.account)
 						)
 				else:
-					dr_or_cr = "debit" if d.credit > 0 else "credit"
+					dr_or_cr = "debit" if flt(d.credit) > 0 else "credit"
 					valid = False
 					for jvd in against_entries:
 						if flt(jvd[dr_or_cr]) > 0:
@@ -557,7 +631,7 @@ class JournalEntry(AccountsController):
 					)
 
 				# set totals
-				if not d.reference_name in self.reference_totals:
+				if d.reference_name not in self.reference_totals:
 					self.reference_totals[d.reference_name] = 0.0
 
 				if self.voucher_type not in ("Deferred Revenue", "Deferred Expense"):
@@ -868,7 +942,7 @@ class JournalEntry(AccountsController):
 					party_account_currency = d.account_currency
 
 			elif frappe.get_cached_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				bank_amount += d.debit_in_account_currency or d.credit_in_account_currency
+				bank_amount += flt(d.debit_in_account_currency) or flt(d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
 
 		if party_type and pay_to_recd_from:

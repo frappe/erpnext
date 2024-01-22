@@ -21,6 +21,7 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_auto_batch_nos,
+	get_picked_serial_nos,
 )
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.serial_batch_bundle import SerialBatchCreation
@@ -29,6 +30,34 @@ from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 
 class PickList(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.pick_list_item.pick_list_item import PickListItem
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		customer: DF.Link | None
+		customer_name: DF.Data | None
+		for_qty: DF.Float
+		group_same_items: DF.Check
+		locations: DF.Table[PickListItem]
+		material_request: DF.Link | None
+		naming_series: DF.Literal["STO-PICK-.YYYY.-"]
+		parent_warehouse: DF.Link | None
+		prompt_qty: DF.Check
+		purpose: DF.Literal["Material Transfer for Manufacture", "Material Transfer", "Delivery"]
+		scan_barcode: DF.Data | None
+		scan_mode: DF.Check
+		status: DF.Literal["Draft", "Open", "Completed", "Cancelled"]
+		work_order: DF.Link | None
+	# end: auto-generated types
+
 	def onload(self) -> None:
 		if frappe.get_cached_value("Stock Settings", None, "enable_stock_reservation"):
 			if self.has_unreserved_stock():
@@ -139,6 +168,9 @@ class PickList(Document):
 					"Serial and Batch Bundle", row.serial_and_batch_bundle
 				).set_serial_and_batch_values(self, row)
 
+	def on_trash(self):
+		self.remove_serial_and_batch_bundle()
+
 	def remove_serial_and_batch_bundle(self):
 		for row in self.locations:
 			if row.serial_and_batch_bundle:
@@ -233,7 +265,7 @@ class PickList(Document):
 		for location in self.locations:
 			if location.warehouse and location.sales_order and location.sales_order_item:
 				item_details = {
-					"name": location.sales_order_item,
+					"sales_order_item": location.sales_order_item,
 					"item_code": location.item_code,
 					"warehouse": location.warehouse,
 					"qty_to_reserve": (flt(location.picked_qty) - flt(location.stock_reserved_qty)),
@@ -368,7 +400,9 @@ class PickList(Document):
 				frappe.throw("Row #{0}: Item Code is Mandatory".format(item.idx))
 			if not cint(
 				frappe.get_cached_value("Item", item.item_code, "is_stock_item")
-			) and not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code}):
+			) and not frappe.db.exists(
+				"Product Bundle", {"new_item_code": item.item_code, "disabled": 0}
+			):
 				continue
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
@@ -507,7 +541,9 @@ class PickList(Document):
 		# bundle_item_code: Dict[component, qty]
 		product_bundle_qty_map = {}
 		for bundle_item_code in bundles:
-			bundle = frappe.get_last_doc("Product Bundle", {"new_item_code": bundle_item_code})
+			bundle = frappe.get_last_doc(
+				"Product Bundle", {"new_item_code": bundle_item_code, "disabled": 0}
+			)
 			product_bundle_qty_map[bundle_item_code] = {item.item_code: item.qty for item in bundle.items}
 		return product_bundle_qty_map
 
@@ -691,13 +727,14 @@ def get_available_item_locations(
 def get_available_item_locations_for_serialized_item(
 	item_code, from_warehouses, required_qty, company, total_picked_qty=0
 ):
+	picked_serial_nos = get_picked_serial_nos(item_code, from_warehouses)
+
 	sn = frappe.qb.DocType("Serial No")
 	query = (
 		frappe.qb.from_(sn)
 		.select(sn.name, sn.warehouse)
 		.where((sn.item_code == item_code) & (sn.company == company))
 		.orderby(sn.creation)
-		.limit(cint(required_qty + total_picked_qty))
 	)
 
 	if from_warehouses:
@@ -710,6 +747,9 @@ def get_available_item_locations_for_serialized_item(
 	warehouse_serial_nos_map = frappe._dict()
 	picked_qty = required_qty
 	for serial_no, warehouse in serial_nos:
+		if serial_no in picked_serial_nos:
+			continue
+
 		if picked_qty <= 0:
 			break
 
@@ -754,7 +794,8 @@ def get_available_item_locations_for_batched_item(
 			{
 				"item_code": item_code,
 				"warehouse": from_warehouses,
-				"qty": required_qty + total_picked_qty,
+				"qty": required_qty,
+				"is_pick_list": True,
 			}
 		)
 	)
@@ -1018,7 +1059,7 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 @frappe.whitelist()
 def target_document_exists(pick_list_name, purpose):
 	if purpose == "Delivery":
-		return frappe.db.exists("Delivery Note", {"pick_list": pick_list_name})
+		return frappe.db.exists("Delivery Note", {"pick_list": pick_list_name, "docstatus": 1})
 
 	return stock_entry_exists(pick_list_name)
 

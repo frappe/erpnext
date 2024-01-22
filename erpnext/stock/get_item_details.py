@@ -8,6 +8,7 @@ import frappe
 from frappe import _, throw
 from frappe.model import child_table_fields, default_fields
 from frappe.model.meta import get_field_precision
+from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_days, add_months, cint, cstr, flt, getdate
 
@@ -149,7 +150,7 @@ def remove_standard_fields(details):
 
 
 def set_valuation_rate(out, args):
-	if frappe.db.exists("Product Bundle", args.item_code, cache=True):
+	if frappe.db.exists("Product Bundle", {"name": args.item_code, "disabled": 0}, cache=True):
 		valuation_rate = 0.0
 		bundled_items = frappe.get_doc("Product Bundle", args.item_code)
 
@@ -357,7 +358,6 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"net_amount": 0.0,
 			"discount_percentage": 0.0,
 			"discount_amount": flt(args.discount_amount) or 0.0,
-			"supplier": get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults),
 			"update_stock": args.get("update_stock")
 			if args.get("doctype") in ["Sales Invoice", "Purchase Invoice"]
 			else 0,
@@ -376,6 +376,10 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			"grant_commission": item.get("grant_commission"),
 		}
 	)
+
+	default_supplier = get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults)
+	if default_supplier:
+		out.supplier = default_supplier
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
 		out.update(calculate_service_end_date(args, item))
@@ -493,8 +497,8 @@ def update_barcode_value(out):
 
 
 def get_barcode_data(items_list):
-	# get itemwise batch no data
-	# exmaple: {'LED-GRE': [Batch001, Batch002]}
+	# get item-wise batch no data
+	# example: {'LED-GRE': [Batch001, Batch002]}
 	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
 
 	itemwise_barcode = {}
@@ -570,6 +574,9 @@ def get_item_tax_template(args, item, out):
 			item_group_doc = frappe.get_cached_doc("Item Group", item_group)
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
+
+	if args.get("child_doctype") and item_tax_template:
+		out.update(get_fetch_values(args.get("child_doctype"), "item_tax_template", item_tax_template))
 
 
 def _get_item_tax_template(args, taxes, out=None, for_validate=False):

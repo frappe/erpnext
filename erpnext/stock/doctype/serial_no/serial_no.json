@@ -27,8 +27,6 @@
   "column_break_24",
   "location",
   "employee",
-  "delivery_details",
-  "delivery_document_type",
   "warranty_amc_details",
   "column_break6",
   "warranty_expiry_date",
@@ -39,7 +37,8 @@
   "more_info",
   "company",
   "column_break_2cmm",
-  "work_order"
+  "work_order",
+  "purchase_document_no"
  ],
  "fields": [
   {
@@ -154,20 +153,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "delivery_details",
-   "fieldtype": "Section Break",
-   "label": "Delivery Details",
-   "oldfieldtype": "Column Break"
-  },
-  {
-   "fieldname": "delivery_document_type",
-   "fieldtype": "Link",
-   "label": "Delivery Document Type",
-   "no_copy": 1,
-   "options": "DocType",
-   "read_only": 1
-  },
-  {
    "fieldname": "warranty_amc_details",
    "fieldtype": "Section Break",
    "label": "Warranty / AMC Details"
@@ -269,18 +254,25 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nActive\nInactive\nExpired",
+   "options": "\nActive\nInactive\nDelivered\nExpired",
    "read_only": 1
   },
   {
    "fieldname": "column_break_2cmm",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_document_no",
+   "fieldtype": "Data",
+   "label": "Creation Document No",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2023-04-16 15:58:46.139887",
+ "modified": "2023-12-17 10:52:55.767839",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",

@@ -25,6 +25,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
+	get_incoming_rate,
 	get_or_make_bin,
 	get_stock_balance,
 	get_valuation_method,
@@ -438,7 +439,7 @@ def get_distinct_item_warehouse(args=None, doc=None, reposting_data=None):
 		reposting_data = get_reposting_data(doc.reposting_data_file)
 
 	if reposting_data and reposting_data.distinct_item_and_warehouse:
-		return reposting_data.distinct_item_and_warehouse
+		return parse_distinct_items_and_warehouses(reposting_data.distinct_item_and_warehouse)
 
 	distinct_item_warehouses = {}
 
@@ -454,6 +455,16 @@ def get_distinct_item_warehouse(args=None, doc=None, reposting_data=None):
 			)
 
 	return distinct_item_warehouses
+
+
+def parse_distinct_items_and_warehouses(distinct_items_and_warehouses):
+	new_dict = frappe._dict({})
+
+	# convert string keys to tuple
+	for k, v in distinct_items_and_warehouses.items():
+		new_dict[frappe.safe_eval(k)] = frappe._dict(v)
+
+	return new_dict
 
 
 def get_affected_transactions(doc, reposting_data=None) -> Set[Tuple[str, str]]:
@@ -841,14 +852,33 @@ class update_entries_after(object):
 					get_rate_for_return,  # don't move this import to top
 				)
 
-				rate = get_rate_for_return(
-					sle.voucher_type,
-					sle.voucher_no,
-					sle.item_code,
-					voucher_detail_no=sle.voucher_detail_no,
-					sle=sle,
-				)
+				if self.valuation_method == "Moving Average":
+					rate = get_incoming_rate(
+						{
+							"item_code": sle.item_code,
+							"warehouse": sle.warehouse,
+							"posting_date": sle.posting_date,
+							"posting_time": sle.posting_time,
+							"qty": sle.actual_qty,
+							"serial_no": sle.get("serial_no"),
+							"batch_no": sle.get("batch_no"),
+							"serial_and_batch_bundle": sle.get("serial_and_batch_bundle"),
+							"company": sle.company,
+							"voucher_type": sle.voucher_type,
+							"voucher_no": sle.voucher_no,
+							"allow_zero_valuation": self.allow_zero_rate,
+							"sle": sle.name,
+						}
+					)
 
+				else:
+					rate = get_rate_for_return(
+						sle.voucher_type,
+						sle.voucher_no,
+						sle.item_code,
+						voucher_detail_no=sle.voucher_detail_no,
+						sle=sle,
+					)
 			elif (
 				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]
 				and sle.voucher_detail_no
@@ -1711,7 +1741,7 @@ def get_datetime_limit_condition(detail):
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
 		return
-	if not (args.actual_qty < 0 or args.voucher_type == "Stock Reconciliation"):
+	if args.actual_qty >= 0 and args.voucher_type != "Stock Reconciliation":
 		return
 
 	neg_sle = get_future_sle_with_negative_qty(args)

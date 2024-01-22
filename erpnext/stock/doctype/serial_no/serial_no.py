@@ -27,6 +27,39 @@ class SerialNoWarehouseError(ValidationError):
 
 
 class SerialNo(StockController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amc_expiry_date: DF.Date | None
+		asset: DF.Link | None
+		asset_status: DF.Literal["", "Issue", "Receipt", "Transfer"]
+		batch_no: DF.Link | None
+		brand: DF.Link | None
+		company: DF.Link
+		description: DF.Text | None
+		employee: DF.Link | None
+		item_code: DF.Link
+		item_group: DF.Link | None
+		item_name: DF.Data | None
+		location: DF.Link | None
+		maintenance_status: DF.Literal[
+			"", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"
+		]
+		purchase_document_no: DF.Data | None
+		purchase_rate: DF.Float
+		serial_no: DF.Data
+		status: DF.Literal["", "Active", "Inactive", "Delivered", "Expired"]
+		warehouse: DF.Link | None
+		warranty_expiry_date: DF.Date | None
+		warranty_period: DF.Int
+		work_order: DF.Link | None
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(SerialNo, self).__init__(*args, **kwargs)
 		self.via_stock_ledger = False
@@ -196,26 +229,6 @@ def auto_fetch_serial_number(
 	serial_numbers = fetch_serial_numbers(filters, qty, do_not_include=exclude_sr_nos)
 
 	return sorted([d.get("name") for d in serial_numbers])
-
-
-def get_delivered_serial_nos(serial_nos):
-	"""
-	Returns serial numbers that delivered from the list of serial numbers
-	"""
-	from frappe.query_builder.functions import Coalesce
-
-	SerialNo = frappe.qb.DocType("Serial No")
-	serial_nos = get_serial_nos(serial_nos)
-	query = (
-		frappe.qb.select(SerialNo.name)
-		.from_(SerialNo)
-		.where((SerialNo.name.isin(serial_nos)) & (Coalesce(SerialNo.delivery_document_type, "") != ""))
-	)
-
-	result = query.run()
-	if result and len(result) > 0:
-		delivered_serial_nos = [row[0] for row in result]
-		return delivered_serial_nos
 
 
 @frappe.whitelist()

@@ -9,6 +9,25 @@ from frappe.utils import cint, get_link_to_form
 
 
 class AssetCategory(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.asset_category_account.asset_category_account import (
+			AssetCategoryAccount,
+		)
+		from erpnext.assets.doctype.asset_finance_book.asset_finance_book import AssetFinanceBook
+
+		accounts: DF.Table[AssetCategoryAccount]
+		asset_category_name: DF.Data
+		enable_cwip_accounting: DF.Check
+		finance_books: DF.Table[AssetFinanceBook]
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_finance_books()
 		self.validate_account_types()
@@ -67,12 +86,12 @@ class AssetCategory(Document):
 					if selected_key_type not in expected_key_types:
 						frappe.throw(
 							_(
-								"Row #{}: {} of {} should be {}. Please modify the account or select a different account."
+								"Row #{0}: {1} of {2} should be {3}. Please update the {1} or select a different account."
 							).format(
 								d.idx,
 								frappe.unscrub(key_to_match),
 								frappe.bold(selected_account),
-								frappe.bold(expected_key_types),
+								frappe.bold(" or ".join(expected_key_types)),
 							),
 							title=_("Invalid Account"),
 						)

@@ -880,6 +880,7 @@ class SubcontractingController(StockController):
 							"posting_date": self.posting_date,
 							"posting_time": self.posting_time,
 							"qty": -1 * item.consumed_qty,
+							"voucher_detail_no": item.name,
 							"serial_and_batch_bundle": item.serial_and_batch_bundle,
 						}
 					)
@@ -951,6 +952,23 @@ class SubcontractingController(StockController):
 				self._sub_contracted_items = [item.name for item in items]
 
 		return self._sub_contracted_items
+
+	def update_requested_qty(self):
+		material_request_map = {}
+		for d in self.get("items"):
+			if d.material_request_item:
+				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
+
+		for mr, mr_item_rows in material_request_map.items():
+			if mr and mr_item_rows:
+				mr_obj = frappe.get_doc("Material Request", mr)
+
+				if mr_obj.status in ["Stopped", "Cancelled"]:
+					frappe.throw(
+						_("Material Request {0} is cancelled or stopped").format(mr), frappe.InvalidStatusError
+					)
+
+				mr_obj.update_requested_qty(mr_item_rows)
 
 
 def get_item_details(items):
