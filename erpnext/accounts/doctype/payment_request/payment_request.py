@@ -170,16 +170,12 @@ class PaymentRequest(Document):
 		elif self.payment_channel == "Phone":
 			self.request_phone_payment()
 
-		if (
-			self.reference_doctype in ["Sales Order"] and ref_doc.advance_payment_status == "Not Requested"
-		):
-			ref_doc.db_set("advance_payment_status", "Requested")
-
-		if (
-			self.reference_doctype in ["Purchase Order"]
-			and ref_doc.advance_payment_status == "Not Initiated"
-		):
-			ref_doc.db_set("advance_payment_status", "Initiated")
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_customer_doctypes"
+		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		if self.reference_doctype in advance_payment_doctypes:
+			# set advance payment status
+			ref_doc.set_total_advance_paid()
 
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
@@ -218,6 +214,13 @@ class PaymentRequest(Document):
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
 		self.set_as_cancelled()
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_customer_doctypes"
+		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		if self.reference_doctype in advance_payment_doctypes:
+			# set advance payment status
+			ref_doc.set_total_advance_paid()
 
 	def make_invoice(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
