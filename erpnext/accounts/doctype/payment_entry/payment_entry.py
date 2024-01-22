@@ -919,7 +919,10 @@ class PaymentEntry(AccountsController):
 
 	def calculate_base_allocated_amount_for_reference(self, d) -> float:
 		base_allocated_amount = 0
-		if d.reference_doctype in frappe.get_hooks("advance_payment_doctypes"):
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_customer_doctypes"
+		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		if d.reference_doctype in advance_payment_doctypes:
 			# When referencing Sales/Purchase Order, use the source/target exchange rate depending on payment type.
 			# This is so there are no Exchange Gain/Loss generated for such doctypes
 
@@ -1434,8 +1437,11 @@ class PaymentEntry(AccountsController):
 
 	def update_advance_paid(self):
 		if self.payment_type in ("Receive", "Pay") and self.party:
+			advance_payment_doctypes = frappe.get_hooks(
+				"advance_payment_customer_doctypes"
+			) + frappe.get_hooks("advance_payment_supplier_doctypes")
 			for d in self.get("references"):
-				if d.allocated_amount and d.reference_doctype in frappe.get_hooks("advance_payment_doctypes"):
+				if d.allocated_amount and d.reference_doctype in advance_payment_doctypes:
 					frappe.get_doc(
 						d.reference_doctype, d.reference_name, for_update=True
 					).set_total_advance_paid()

@@ -1921,7 +1921,10 @@ class AccountsController(TransactionBase):
 
 	def set_total_advance_paid(self):
 		ple = frappe.qb.DocType("Payment Ledger Entry")
-		party = self.customer if self.doctype == "Sales Order" else self.supplier
+		if self.doctype in frappe.get_hooks("advance_payment_customer_doctypes"):
+			party = self.customer
+		if self.doctype in frappe.get_hooks("advance_payment_supplier_doctypes"):
+			party = self.supplier
 		advance = (
 			frappe.qb.from_(ple)
 			.select(ple.account_currency, Abs(Sum(ple.amount_in_account_currency)).as_("amount"))
