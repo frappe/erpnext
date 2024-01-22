@@ -135,7 +135,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 						filters: this.get_serial_no_filters()
 					};
 				},
-				onchange: () => this.update_serial_batch_no()
+				onchange: () => this.scan_barcode_data()
 			});
 		}
 
@@ -145,7 +145,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				options: 'Barcode',
 				fieldname: 'scan_batch_no',
 				label: __('Scan Batch No'),
-				onchange: () => this.update_serial_batch_no()
+				onchange: () => this.scan_barcode_data()
 			});
 		}
 
@@ -190,36 +190,38 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			fields = [...fields,
 				{
 					fieldtype: 'Check',
-					label: __('Upload Using CSV file'),
-					fieldname: 'upload_using_csv',
+					label: __('Import Using CSV file'),
+					fieldname: 'import_using_csv_file',
 					default: 0,
 				},
 				{
 					fieldtype: 'Section Break',
-					depends_on: 'eval:doc.upload_using_csv === 0',
+					label: __('{0} {1} Manually', [primary_label, label]),
+					depends_on: 'eval:doc.import_using_csv_file === 0',
 				},
 				{
 					fieldtype: 'Small Text',
-					label: __('Serial Nos'),
+					label: __('Enter Serial Nos'),
 					fieldname: 'upload_serial_nos',
-					depends_on: 'eval:doc.upload_using_csv === 0',
+					depends_on: 'eval:doc.import_using_csv_file === 0',
+					description: __('Enter each serial no in a new line'),
 				},
 				{
 					fieldtype: 'Column Break',
-					depends_on: 'eval:doc.upload_using_csv === 0',
+					depends_on: 'eval:doc.import_using_csv_file === 0',
 				},
 				{
 					fieldtype: 'Button',
 					fieldname: 'make_serial_nos',
 					label: __('Create Serial Nos'),
-					depends_on: 'eval:doc.upload_using_csv === 0',
+					depends_on: 'eval:doc.import_using_csv_file === 0',
 					click: () => {
 						this.create_serial_nos();
 					}
 				},
 				{
 					fieldtype: 'Section Break',
-					depends_on: 'eval:doc.upload_using_csv === 1',
+					depends_on: 'eval:doc.import_using_csv_file === 1',
 				}
 			];
 		}
@@ -262,6 +264,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				if (r.message) {
 					this.dialog.fields_dict.entries.df.data = [];
 					this.set_data(r.message);
+					this.update_bundle_entries();
 				}
 			}
 		});
@@ -436,6 +439,26 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					}
 				}
 			});
+		}
+	}
+
+	scan_barcode_data() {
+		const { scan_serial_no, scan_batch_no } = this.dialog.get_values();
+
+		if (scan_serial_no || scan_batch_no) {
+			frappe.call({
+				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.is_serial_batch_no_exists',
+				args: {
+					item_code: this.item.item_code,
+					type_of_transaction: this.item.type_of_transaction,
+					serial_no: scan_serial_no,
+					batch_no: scan_batch_no,
+				},
+				callback: (r) => {
+					this.update_serial_batch_no();
+				}
+
+			})
 		}
 	}
 
