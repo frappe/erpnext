@@ -4,10 +4,6 @@
 erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	setup() {
 		this.fetch_round_off_accounts();
-		frappe.db.get_single_value("Accounts Settings", "adjust_grand_total_for_inclusive_tax")
-			.then((adjust_grand_total_for_inclusive_tax) => {
-				frappe.flags.adjust_grand_total_for_inclusive_tax = adjust_grand_total_for_inclusive_tax;
-			})
 	}
 
 	apply_pricing_rule_on_item(item) {
@@ -537,10 +533,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 	adjust_grand_total_for_inclusive_tax() {
 		var me = this;
-		if (!frappe.flags.adjust_grand_total_for_inclusive_tax) {
-			me.frm.doc.grand_total_diff = 0;
-			return;
-		}
+
 		// if fully inclusive taxes and diff
 		if (this.frm.doc["taxes"] && this.frm.doc["taxes"].length) {
 			var any_inclusive_tax = false;

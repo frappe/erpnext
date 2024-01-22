@@ -29,7 +29,6 @@
   "submit_journal_entries",
   "tax_settings_section",
   "determine_address_tax_category_from",
-  "adjust_grand_total_for_inclusive_tax",
   "column_break_19",
   "add_taxes_from_item_tax_template",
   "book_tax_discount_loss",
@@ -456,13 +455,6 @@
    "fieldname": "remarks_section",
    "fieldtype": "Section Break",
    "label": "Remarks Column Length"
-  },
-  {
-   "default": "1",
-   "description": "Adjust grand total in cases where rounding issue occurs due to inclusive tax rates.",
-   "fieldname": "adjust_grand_total_for_inclusive_tax",
-   "fieldtype": "Check",
-   "label": "Adjust Grand Total for Inclusive Tax"
   }
  ],
  "icon": "icon-cog",
@@ -470,7 +462,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-21 04:56:23.580607",
+ "modified": "2024-01-22 12:10:10.151819",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
