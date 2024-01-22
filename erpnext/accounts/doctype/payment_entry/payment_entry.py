@@ -189,7 +189,7 @@ class PaymentEntry(AccountsController):
 
 	def set_liability_account(self):
 		# Auto setting liability account should only be done during 'draft' status
-		if self.docstatus > 0:
+		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
 			return
 
 		if not frappe.db.get_value(
