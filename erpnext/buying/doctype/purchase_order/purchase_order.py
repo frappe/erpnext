@@ -216,6 +216,10 @@ class PurchaseOrder(BuyingController):
 
 		self.validate_fg_item_for_subcontracting()
 		self.set_received_qty_for_drop_ship_items()
+
+		if not self.advance_payment_status:
+			self.advance_payment_status = "Not Initiated"
+
 		validate_inter_company_party(
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
@@ -472,9 +476,6 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 		self.validate_budget()
 		self.update_reserved_qty_for_subcontract()
-
-		if not self.advance_payment_status:
-			self.advance_payment_status = "Not Initiated"
 
 		frappe.get_doc("Authorization Control").validate_approving_authority(
 			self.doctype, self.company, self.base_grand_total
