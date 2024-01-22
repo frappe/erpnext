@@ -209,7 +209,7 @@ class SerialBatchBundle:
 		frappe.db.set_value(
 			"Serial and Batch Bundle",
 			{"voucher_no": self.sle.voucher_no, "voucher_type": self.sle.voucher_type},
-			{"is_cancelled": 1, "voucher_no": ""},
+			{"is_cancelled": 1},
 		)
 
 		if self.sle.serial_and_batch_bundle:

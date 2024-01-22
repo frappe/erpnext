@@ -10,8 +10,9 @@
   "has_item_scanned",
   "item_code",
   "item_name",
-  "warehouse",
+  "item_group",
   "column_break_6",
+  "warehouse",
   "qty",
   "valuation_rate",
   "amount",
@@ -52,6 +53,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -213,11 +215,18 @@
    "fieldname": "add_serial_batch_bundle",
    "fieldtype": "Button",
    "label": "Add Serial / Batch No"
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-11-02 15:47:07.929550",
+ "modified": "2024-01-14 10:04:23.599951",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

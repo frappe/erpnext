@@ -642,7 +642,6 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	new_row.set("reference_name", d["against_voucher"])
 
 	new_row.against_account = cstr(jv_detail.against_account)
-	new_row.against_account_link = cstr(jv_detail.against_account)
 	new_row.is_advance = cstr(jv_detail.is_advance)
 	new_row.docstatus = 1
 
@@ -1275,7 +1274,7 @@ def get_autoname_with_number(number_value, doc_title, company):
 def parse_naming_series_variable(doc, variable):
 	if variable == "FY":
 		if doc:
-			date = doc.get("posting_date") or doc.get("transaction_date")
+			date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
 			company = doc.get("company")
 		else:
 			date = getdate()
