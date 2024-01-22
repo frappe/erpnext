@@ -1981,7 +1981,7 @@ class AccountsController(TransactionBase):
 		new_status = None
 		# if money is paid set the paid states
 		if advance_paid:
-			new_status = "Partially Paid" if advance_paid < order_total else "Paid"
+			new_status = "Partially Paid" if advance_paid < order_total else "Fully Paid"
 
 		if not new_status:
 			prs = frappe.db.count(

@@ -1280,7 +1280,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Not Initiated\nInitiated\nPartially Paid\nPaid",
+   "options": "Not Initiated\nInitiated\nPartially Paid\nFully Paid",
    "print_hide": 1
   }
  ],

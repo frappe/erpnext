@@ -1651,7 +1651,7 @@
    "in_standard_filter": 1,
    "label": "Advance Payment Status",
    "no_copy": 1,
-   "options": "Not Requested\nRequested\nPartially Paid\nPaid",
+   "options": "Not Requested\nRequested\nPartially Paid\nFully Paid",
    "print_hide": 1
   }
  ],

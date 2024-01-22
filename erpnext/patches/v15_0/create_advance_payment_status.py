@@ -19,7 +19,7 @@ def execute():
 			so.advance_paid < (so.rounded_total or so.grand_total)
 		).run()
 
-		frappe.qb.update(so).set(so.advance_payment_status, "Paid").where(so.docstatus == 1).where(
+		frappe.qb.update(so).set(so.advance_payment_status, "Fully Paid").where(so.docstatus == 1).where(
 			so.advance_payment_status.isnull()
 		).where(so.advance_paid == (so.rounded_total or so.grand_total)).run()
 
@@ -42,7 +42,7 @@ def execute():
 			po.advance_paid < (po.rounded_total or po.grand_total)
 		).run()
 
-		frappe.qb.update(po).set(po.advance_payment_status, "Paid").where(po.docstatus == 1).where(
+		frappe.qb.update(po).set(po.advance_payment_status, "Fully Paid").where(po.docstatus == 1).where(
 			po.advance_payment_status.isnull()
 		).where(po.advance_paid == (po.rounded_total or po.grand_total)).run()
 
