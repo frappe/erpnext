@@ -489,19 +489,22 @@ def update_stock_settings():
 
 def create_bank_account(args):
 	if not args.get("bank_account"):
-		args["bank_account"] = _("Bank Account")
+		account_name = _("Bank Account")
 
 	company_name = args.get("company_name")
-	bank_account_group = frappe.db.get_value(
+	bank_account_group = frappe.get_cached_value(
 		"Account",
 		{"account_type": "Bank", "is_group": 1, "root_type": "Asset", "company": company_name},
+		["name", "account_name"],
 	)
 	if bank_account_group:
 		bank_account = frappe.get_doc(
 			{
 				"doctype": "Account",
-				"account_name": args.get("bank_account"),
-				"parent_account": bank_account_group,
+				"account_name": "_" + account_name
+				if (bank_account_group[1] == account_name)
+				else account_name,
+				"parent_account": bank_account_group[0],
 				"is_group": 0,
 				"company": company_name,
 				"account_type": "Bank",
