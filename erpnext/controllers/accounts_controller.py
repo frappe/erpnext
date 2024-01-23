@@ -1749,7 +1749,10 @@ class AccountsController(TransactionBase):
 
 	def set_total_advance_paid(self):
 		ple = frappe.qb.DocType("Payment Ledger Entry")
-		party = self.customer if self.doctype == "Sales Order" else self.supplier
+		if self.doctype in frappe.get_hooks("advance_payment_customer_doctypes"):
+			party = self.customer
+		if self.doctype in frappe.get_hooks("advance_payment_supplier_doctypes"):
+			party = self.supplier
 		advance = (
 			frappe.qb.from_(ple)
 			.select(ple.account_currency, Abs(Sum(ple.amount_in_account_currency)).as_("amount"))
@@ -1762,6 +1765,8 @@ class AccountsController(TransactionBase):
 			)
 			.run(as_dict=True)
 		)
+
+		advance_paid, order_total = None, None
 
 		if advance:
 			advance = advance[0]
@@ -1791,7 +1796,38 @@ class AccountsController(TransactionBase):
 					).format(formatted_advance_paid, self.name, formatted_order_total)
 				)
 
-			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+			self.db_set("advance_paid", advance_paid)
+
+		self.set_advance_payment_status(advance_paid, order_total)
+
+	def set_advance_payment_status(
+		self, advance_paid: float | None = None, order_total: float | None = None
+	):
+		new_status = None
+		# if money is paid set the paid states
+		if advance_paid:
+			new_status = "Partially Paid" if advance_paid < order_total else "Fully Paid"
+
+		if not new_status:
+			prs = frappe.db.count(
+				"Payment Request",
+				{
+					"reference_doctype": self.doctype,
+					"reference_name": self.name,
+					"docstatus": 1,
+				},
+			)
+			if self.doctype in frappe.get_hooks("advance_payment_customer_doctypes"):
+				new_status = "Requested" if prs else "Not Requested"
+			if self.doctype in frappe.get_hooks("advance_payment_supplier_doctypes"):
+				new_status = "Initiated" if prs else "Not Initiated"
+
+		if new_status == self.advance_payment_status:
+			return
+
+		self.db_set("advance_payment_status", new_status)
+		self.set_status(update=True)
+		self.notify_update()
 
 	@property
 	def company_abbr(self):
