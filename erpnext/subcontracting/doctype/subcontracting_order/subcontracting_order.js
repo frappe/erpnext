@@ -101,7 +101,30 @@ frappe.ui.form.on('Subcontracting Order', {
 	},
 
 	refresh: function (frm) {
+		if (frm.doc.docstatus == 1 && frm.has_perm("submit")) {
+			if (frm.doc.status == "Closed") {
+				frm.add_custom_button(__('Re-open'), () => frm.events.update_subcontracting_order_status(frm), __("Status"));
+			} else if(flt(frm.doc.per_received, 2) < 100) {
+				frm.add_custom_button(__('Close'), () => frm.events.update_subcontracting_order_status(frm, "Closed"), __("Status"));
+			}
+		}
+
 		frm.trigger('get_materials_from_supplier');
+	},
+
+	update_subcontracting_order_status(frm, status) {
+		frappe.call({
+			method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.update_subcontracting_order_status",
+			args: {
+				sco: frm.doc.name,
+				status: status,
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					frm.reload_doc();
+				}
+			},
+		});
 	},
 
 	get_materials_from_supplier: function (frm) {

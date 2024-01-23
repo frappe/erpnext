@@ -5,10 +5,22 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, add_months, flt, getdate, nowdate
 
+from erpnext.controllers.accounts_controller import InvalidQtyError
+
 test_dependencies = ["Product Bundle"]
 
 
 class TestQuotation(FrappeTestCase):
+	def test_quotation_qty(self):
+		qo = make_quotation(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			qo.save()
+
+		# No error with qty=1
+		qo.items[0].qty = 1
+		qo.save()
+		self.assertEqual(qo.items[0].qty, 1)
+
 	def test_make_quotation_without_terms(self):
 		quotation = make_quotation(do_not_save=1)
 		self.assertFalse(quotation.get("payment_schedule"))
@@ -581,6 +593,22 @@ class TestQuotation(FrappeTestCase):
 		quotation.reload()
 		self.assertEqual(quotation.status, "Ordered")
 
+	def test_uom_validation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = "_Test Item FOR UOM Validation"
+		make_item(item, {"is_stock_item": 1})
+
+		if not frappe.db.exists("UOM", "lbs"):
+			frappe.get_doc({"doctype": "UOM", "uom_name": "lbs", "must_be_whole_number": 1}).insert()
+		else:
+			frappe.db.set_value("UOM", "lbs", "must_be_whole_number", 1)
+
+		quotation = make_quotation(item_code=item, qty=1, rate=100, do_not_submit=1)
+		quotation.items[0].uom = "lbs"
+		quotation.items[0].conversion_factor = 2.23
+		self.assertRaises(frappe.ValidationError, quotation.save)
+
 
 test_records = frappe.get_test_records("Quotation")
 
@@ -629,7 +657,7 @@ def make_quotation(**args):
 			{
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"uom": args.uom or None,
 				"rate": args.rate or 100,
 			},

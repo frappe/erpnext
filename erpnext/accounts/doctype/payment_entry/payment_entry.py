@@ -50,6 +50,88 @@ class InvalidPaymentEntry(ValidationError):
 
 
 class PaymentEntry(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.advance_taxes_and_charges.advance_taxes_and_charges import (
+			AdvanceTaxesandCharges,
+		)
+		from erpnext.accounts.doctype.payment_entry_deduction.payment_entry_deduction import (
+			PaymentEntryDeduction,
+		)
+		from erpnext.accounts.doctype.payment_entry_reference.payment_entry_reference import (
+			PaymentEntryReference,
+		)
+
+		amended_from: DF.Link | None
+		apply_tax_withholding_amount: DF.Check
+		auto_repeat: DF.Link | None
+		bank: DF.ReadOnly | None
+		bank_account: DF.Link | None
+		bank_account_no: DF.ReadOnly | None
+		base_paid_amount: DF.Currency
+		base_paid_amount_after_tax: DF.Currency
+		base_received_amount: DF.Currency
+		base_received_amount_after_tax: DF.Currency
+		base_total_allocated_amount: DF.Currency
+		base_total_taxes_and_charges: DF.Currency
+		book_advance_payments_in_separate_party_account: DF.Check
+		clearance_date: DF.Date | None
+		company: DF.Link
+		contact_email: DF.Data | None
+		contact_person: DF.Link | None
+		cost_center: DF.Link | None
+		custom_remarks: DF.Check
+		deductions: DF.Table[PaymentEntryDeduction]
+		difference_amount: DF.Currency
+		letter_head: DF.Link | None
+		mode_of_payment: DF.Link | None
+		naming_series: DF.Literal["ACC-PAY-.YYYY.-"]
+		paid_amount: DF.Currency
+		paid_amount_after_tax: DF.Currency
+		paid_from: DF.Link
+		paid_from_account_balance: DF.Currency
+		paid_from_account_currency: DF.Link
+		paid_from_account_type: DF.Data | None
+		paid_to: DF.Link
+		paid_to_account_balance: DF.Currency
+		paid_to_account_currency: DF.Link
+		paid_to_account_type: DF.Data | None
+		party: DF.DynamicLink | None
+		party_balance: DF.Currency
+		party_bank_account: DF.Link | None
+		party_name: DF.Data | None
+		party_type: DF.Link | None
+		payment_order: DF.Link | None
+		payment_order_status: DF.Literal["Initiated", "Payment Ordered"]
+		payment_type: DF.Literal["Receive", "Pay", "Internal Transfer"]
+		posting_date: DF.Date
+		print_heading: DF.Link | None
+		project: DF.Link | None
+		purchase_taxes_and_charges_template: DF.Link | None
+		received_amount: DF.Currency
+		received_amount_after_tax: DF.Currency
+		reference_date: DF.Date | None
+		reference_no: DF.Data | None
+		references: DF.Table[PaymentEntryReference]
+		remarks: DF.SmallText | None
+		sales_taxes_and_charges_template: DF.Link | None
+		source_exchange_rate: DF.Float
+		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
+		target_exchange_rate: DF.Float
+		tax_withholding_category: DF.Link | None
+		taxes: DF.Table[AdvanceTaxesandCharges]
+		title: DF.Data | None
+		total_allocated_amount: DF.Currency
+		total_taxes_and_charges: DF.Currency
+		unallocated_amount: DF.Currency
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(PaymentEntry, self).__init__(*args, **kwargs)
 		if not self.is_new():
@@ -256,6 +338,7 @@ class PaymentEntry(AccountsController):
 					"get_outstanding_invoices": True,
 					"get_orders_to_be_billed": True,
 					"vouchers": vouchers,
+					"book_advance_payments_in_separate_party_account": self.book_advance_payments_in_separate_party_account,
 				},
 				validate=True,
 			)
@@ -1061,9 +1144,7 @@ class PaymentEntry(AccountsController):
 					"account": self.party_account,
 					"party_type": self.party_type,
 					"party": self.party,
-					"against_type": "Account",
 					"against": against_account,
-					"against_link": against_account,
 					"account_currency": self.party_account_currency,
 					"cost_center": self.cost_center,
 				},
@@ -1228,9 +1309,7 @@ class PaymentEntry(AccountsController):
 					{
 						"account": self.paid_from,
 						"account_currency": self.paid_from_account_currency,
-						"against_type": self.party_type if self.payment_type == "Pay" else "Account",
 						"against": self.party if self.payment_type == "Pay" else self.paid_to,
-						"against_link": self.party if self.payment_type == "Pay" else self.paid_to,
 						"credit_in_account_currency": self.paid_amount,
 						"credit": self.base_paid_amount,
 						"cost_center": self.cost_center,
@@ -1245,9 +1324,7 @@ class PaymentEntry(AccountsController):
 					{
 						"account": self.paid_to,
 						"account_currency": self.paid_to_account_currency,
-						"against_type": self.party_type if self.payment_type == "Receive" else "Account",
 						"against": self.party if self.payment_type == "Receive" else self.paid_from,
-						"against_link": self.party if self.payment_type == "Receive" else self.paid_from,
 						"debit_in_account_currency": self.received_amount,
 						"debit": self.base_received_amount,
 						"cost_center": self.cost_center,
@@ -1271,7 +1348,6 @@ class PaymentEntry(AccountsController):
 				rev_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 				against = self.party or self.paid_to
 
-			against_type = self.party_type or "Account"
 			payment_account = self.get_party_account_for_taxes()
 			tax_amount = d.tax_amount
 			base_tax_amount = d.base_tax_amount
@@ -1280,9 +1356,7 @@ class PaymentEntry(AccountsController):
 				self.get_gl_dict(
 					{
 						"account": d.account_head,
-						"against_type": against_type,
 						"against": against,
-						"against_link": against,
 						dr_or_cr: tax_amount,
 						dr_or_cr + "_in_account_currency": base_tax_amount
 						if account_currency == self.company_currency
@@ -1307,9 +1381,7 @@ class PaymentEntry(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": payment_account,
-							"against_type": against_type,
 							"against": against,
-							"against_link": against,
 							rev_dr_or_cr: tax_amount,
 							rev_dr_or_cr + "_in_account_currency": base_tax_amount
 							if account_currency == self.company_currency
@@ -1334,9 +1406,7 @@ class PaymentEntry(AccountsController):
 						{
 							"account": d.account,
 							"account_currency": account_currency,
-							"against_type": self.party_type or "Account",
 							"against": self.party or self.paid_from,
-							"against_link": self.party or self.paid_from,
 							"debit_in_account_currency": d.amount,
 							"debit": d.amount,
 							"cost_center": d.cost_center,
@@ -1628,11 +1698,16 @@ def get_outstanding_reference_documents(args, validate=False):
 	outstanding_invoices = []
 	negative_outstanding_invoices = []
 
+	if args.get("book_advance_payments_in_separate_party_account"):
+		party_account = get_party_account(args.get("party_type"), args.get("party"), args.get("company"))
+	else:
+		party_account = args.get("party_account")
+
 	if args.get("get_outstanding_invoices"):
 		outstanding_invoices = get_outstanding_invoices(
 			args.get("party_type"),
 			args.get("party"),
-			get_party_account(args.get("party_type"), args.get("party"), args.get("company")),
+			party_account,
 			common_filter=common_filter,
 			posting_date=posting_and_due_date,
 			min_outstanding=args.get("outstanding_amt_greater_than"),

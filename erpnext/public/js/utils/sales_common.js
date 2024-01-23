@@ -22,6 +22,15 @@ erpnext.sales_common = {
 						}
 					};
 				});
+
+				this.frm.set_query('project', function(doc) {
+					return {
+						query: "erpnext.controllers.queries.get_project_name",
+						filters: {
+							'customer': doc.customer
+						}
+					}
+				});
 			}
 
 			setup_queries() {
@@ -182,6 +191,12 @@ erpnext.sales_common = {
 				var row = frappe.get_doc(cdt, cdn);
 				this.calculate_incentive(row);
 				refresh_field("incentives",row.name,row.parentfield);
+			}
+
+			warehouse(doc, cdt, cdn) {
+				if (doc.docstatus === 0 && doc.is_return && !doc.return_against) {
+					frappe.model.set_value(cdt, cdn, "incoming_rate", 0.0);
+				}
 			}
 
 			toggle_editable_price_list_rate() {

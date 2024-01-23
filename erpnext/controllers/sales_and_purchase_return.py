@@ -10,7 +10,7 @@ from frappe.utils import flt, format_datetime, get_datetime
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import get_incoming_rate, get_valuation_method
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -116,7 +116,12 @@ def validate_returned_items(doc):
 				ref = valid_items.get(d.item_code, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
 
-				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
+				if (
+					ref.rate
+					and flt(d.rate) > ref.rate
+					and doc.doctype in ("Delivery Note", "Sales Invoice")
+					and get_valuation_method(ref.item_code) != "Moving Average"
+				):
 					frappe.throw(
 						_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}").format(
 							d.idx, doc.doctype, doc.return_against
@@ -562,16 +567,17 @@ def make_return_doc(
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 
-		item_details = frappe.get_cached_value(
-			"Item", source_doc.item_code, ["has_batch_no", "has_serial_no"], as_dict=1
-		)
+		if source_doc.item_code:
+			item_details = frappe.get_cached_value(
+				"Item", source_doc.item_code, ["has_batch_no", "has_serial_no"], as_dict=1
+			)
 
-		if not item_details.has_batch_no and not item_details.has_serial_no:
-			return
+			if not item_details.has_batch_no and not item_details.has_serial_no:
+				return
 
-		for qty_field in ["stock_qty", "rejected_qty"]:
-			if target_doc.get(qty_field):
-				update_serial_batch_no(source_doc, target_doc, source_parent, item_details, qty_field)
+			for qty_field in ["stock_qty", "rejected_qty"]:
+				if target_doc.get(qty_field):
+					update_serial_batch_no(source_doc, target_doc, source_parent, item_details, qty_field)
 
 	def update_terms(source_doc, target_doc, source_parent):
 		target_doc.payment_amount = -source_doc.payment_amount

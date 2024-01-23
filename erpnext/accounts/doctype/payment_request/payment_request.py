@@ -424,6 +424,15 @@ def make_payment_request(**args):
 	"""Make payment request"""
 
 	args = frappe._dict(args)
+	if args.dt not in [
+		"Sales Order",
+		"Purchase Order",
+		"Sales Invoice",
+		"Purchase Invoice",
+		"POS Invoice",
+		"Fees",
+	]:
+		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
 
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 	gateway_account = get_gateway_details(args) or frappe._dict()

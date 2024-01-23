@@ -171,7 +171,7 @@ class StockReconciliation(StockController):
 						},
 					)
 
-			if item_details.has_batch_no:
+			elif item_details.has_batch_no:
 				batch_nos_details = get_available_batches(
 					frappe._dict(
 						{
@@ -228,6 +228,9 @@ class StockReconciliation(StockController):
 
 	def set_new_serial_and_batch_bundle(self):
 		for item in self.items:
+			if not item.qty:
+				continue
+
 			if item.current_serial_and_batch_bundle and not item.serial_and_batch_bundle:
 				current_doc = frappe.get_doc("Serial and Batch Bundle", item.current_serial_and_batch_bundle)
 

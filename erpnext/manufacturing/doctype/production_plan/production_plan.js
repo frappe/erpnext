@@ -173,7 +173,7 @@ frappe.ui.form.on('Production Plan', {
 			method: "set_status",
 			freeze: true,
 			doc: frm.doc,
-			args: {close : close},
+			args: {close : close, update_bin: true},
 			callback: function() {
 				frm.reload_doc();
 			}
@@ -304,6 +304,8 @@ frappe.ui.form.on('Production Plan', {
 			frm.trigger("toggle_for_warehouse");
 			frappe.throw(__("Select the Warehouse"));
 		}
+
+		frm.set_value("consider_minimum_order_qty", 0);
 
 		if (frm.doc.ignore_existing_ordered_qty) {
 			frm.events.get_items_for_material_requests(frm);
