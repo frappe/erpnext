@@ -519,14 +519,11 @@ class Asset(AccountsController):
 			movement.cancel()
 
 	def cancel_capitalization(self):
-		asset_capitalization = frappe.db.get_value(
-			"Asset Capitalization",
-			{"target_asset": self.name, "docstatus": 1, "entry_type": "Capitalization"},
-		)
-
-		if asset_capitalization:
-			asset_capitalization = frappe.get_doc("Asset Capitalization", asset_capitalization)
-			asset_capitalization.cancel()
+		if self.capitalized_in:
+			self.capitalized_in = None
+			asset_capitalization = frappe.get_doc("Asset Capitalization", self.capitalized_in)
+			if asset_capitalization.docstatus == 1:
+				asset_capitalization.cancel()
 
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
