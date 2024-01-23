@@ -128,19 +128,16 @@ frappe.ui.form.on('Batch', {
 							fieldtype: 'Data',
 						}],
 						(data) => {
-							frappe.call({
-								method: 'erpnext.stock.doctype.batch.batch.split_batch',
-								args: {
+							frappe.xcall(
+								'erpnext.stock.doctype.batch.batch.split_batch',
+								{
 									item_code: frm.doc.item,
 									batch_no: frm.doc.name,
 									qty: data.qty,
 									warehouse: $btn.attr('data-warehouse'),
 									new_batch_id: data.new_batch_id
-								},
-								callback: (r) => {
-									frm.refresh();
-								},
-							});
+								}
+							).then(() => frm.reload_doc());
 						},
 						__('Split Batch'),
 						__('Split')
