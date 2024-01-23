@@ -153,8 +153,6 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
-<<<<<<< HEAD
-=======
   },
   {
    "fieldname": "gain_loss_posting_date",
@@ -165,14 +163,10 @@
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
-<<<<<<< HEAD
->>>>>>> 1cde804c77 (refactor: dimensions section in allocation table in reconciliation)
-=======
   },
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
->>>>>>> 20576e0f47 (refactor: column break in dimension section)
   }
  ],
  "is_virtual": 1,

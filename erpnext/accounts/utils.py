@@ -713,14 +713,9 @@ def update_reference_in_payment_entry(
 	if not skip_ref_details_update_for_pe:
 		payment_entry.set_missing_ref_details()
 	payment_entry.set_amounts()
-<<<<<<< HEAD
-	payment_entry.make_exchange_gain_loss_journal()
-=======
-
 	payment_entry.make_exchange_gain_loss_journal(
 		frappe._dict({"difference_posting_date": d.difference_posting_date}), dimensions_dict
 	)
->>>>>>> c44eb432a5 (refactor: pass dimension values to Gain/Loss journal)
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
