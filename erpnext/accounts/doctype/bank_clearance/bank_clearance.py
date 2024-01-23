@@ -182,8 +182,8 @@ def get_payment_entries_for_bank_clearance(
 		pos_sales_invoices = frappe.db.sql(
 			"""
 				select
-					"Sales Invoice Payment" as payment_document, sip.name as payment_entry, sip.amount as debit,
-					si.posting_date, si.customer as against_account, sip.clearance_date,
+					"Sales Invoice" as payment_document, si.name as payment_entry, sip.reference_no,
+					sip.amount as debit, si.posting_date, si.customer as against_account, sip.clearance_date,
 					account.account_currency, 0 as credit
 				from `tabSales Invoice Payment` sip, `tabSales Invoice` si, `tabAccount` account
 				where
