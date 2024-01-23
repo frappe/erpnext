@@ -22,6 +22,15 @@ erpnext.sales_common = {
 						}
 					};
 				});
+
+				this.frm.set_query('project', function(doc) {
+					return {
+						query: "erpnext.controllers.queries.get_project_name",
+						filters: {
+							'customer': doc.customer
+						}
+					}
+				});
 			}
 
 			setup_queries() {

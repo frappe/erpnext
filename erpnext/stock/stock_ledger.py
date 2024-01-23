@@ -439,7 +439,7 @@ def get_distinct_item_warehouse(args=None, doc=None, reposting_data=None):
 		reposting_data = get_reposting_data(doc.reposting_data_file)
 
 	if reposting_data and reposting_data.distinct_item_and_warehouse:
-		return reposting_data.distinct_item_and_warehouse
+		return parse_distinct_items_and_warehouses(reposting_data.distinct_item_and_warehouse)
 
 	distinct_item_warehouses = {}
 
@@ -455,6 +455,16 @@ def get_distinct_item_warehouse(args=None, doc=None, reposting_data=None):
 			)
 
 	return distinct_item_warehouses
+
+
+def parse_distinct_items_and_warehouses(distinct_items_and_warehouses):
+	new_dict = frappe._dict({})
+
+	# convert string keys to tuple
+	for k, v in distinct_items_and_warehouses.items():
+		new_dict[frappe.safe_eval(k)] = frappe._dict(v)
+
+	return new_dict
 
 
 def get_affected_transactions(doc, reposting_data=None) -> Set[Tuple[str, str]]:
