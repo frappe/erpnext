@@ -932,6 +932,9 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		if frappe.flags.args and frappe.flags.args.delivery_dates:
 			if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
 				return False
+		if frappe.flags.args and frappe.flags.args.until_delivery_date:
+			if cstr(doc.delivery_date) > frappe.flags.args.until_delivery_date:
+				return False
 
 		return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
 

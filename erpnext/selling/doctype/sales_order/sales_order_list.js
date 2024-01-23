@@ -55,7 +55,18 @@ frappe.listview_settings['Sales Order'] = {
 		});
 
 		listview.page.add_action_item(__("Delivery Note"), ()=>{
-			erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Delivery Note");
+			var dialog = new frappe.ui.Dialog({
+				title: __("Select Items up to Delivery Date"),
+				fields: [{fieldtype: "Date", fieldname: "delivery_date", default: frappe.datetime.add_days(frappe.datetime.nowdate(), 1)}]
+			});
+			dialog.set_primary_action(__("Select"), function(values) {
+				var until_delivery_date = values.delivery_date;
+				erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Delivery Note", {
+    					until_delivery_date
+				});
+				dialog.hide();
+			});
+			dialog.show();
 		});
 
 		listview.page.add_action_item(__("Advance Payment"), ()=>{
