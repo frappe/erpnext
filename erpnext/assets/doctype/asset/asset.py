@@ -520,7 +520,7 @@ class Asset(AccountsController):
 
 	def cancel_capitalization(self):
 		if self.capitalized_in:
-			self.capitalized_in = None
+			self.db_set("capitalized_in", None)
 			asset_capitalization = frappe.get_doc("Asset Capitalization", self.capitalized_in)
 			if asset_capitalization.docstatus == 1:
 				asset_capitalization.cancel()
