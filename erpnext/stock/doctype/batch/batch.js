@@ -52,7 +52,7 @@ frappe.ui.form.on('Batch', {
 					// sort by qty
 					r.message.sort(function(a, b) { a.qty > b.qty ? 1 : -1 });
 
-					var rows = $('<div></div>').appendTo(section);
+					const rows = $('<div></div>').appendTo(section);
 
 					// show
 					(r.message || []).forEach(function(d) {
@@ -76,7 +76,7 @@ frappe.ui.form.on('Batch', {
 
 					// move - ask for target warehouse and make stock entry
 					rows.find('.btn-move').on('click', function() {
-						var $btn = $(this);
+						const $btn = $(this);
 						const fields = [
 							{
 								fieldname: 'to_warehouse',
@@ -115,7 +115,7 @@ frappe.ui.form.on('Batch', {
 					// split - ask for new qty and batch ID (optional)
 					// and make stock entry via batch.batch_split
 					rows.find('.btn-split').on('click', function() {
-						var $btn = $(this);
+						const $btn = $(this);
 						frappe.prompt([{
 							fieldname: 'qty',
 							label: __('New Batch Qty'),
