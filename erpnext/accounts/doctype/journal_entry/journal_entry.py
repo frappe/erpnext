@@ -187,8 +187,8 @@ class JournalEntry(AccountsController):
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
 		advance_payment_doctypes = frappe.get_hooks(
-			"advance_payment_customer_doctypes"
-		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
 		for d in self.get("accounts"):
 			if d.is_advance:
 				if d.reference_type in advance_payment_doctypes:

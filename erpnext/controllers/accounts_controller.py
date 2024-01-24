@@ -1761,9 +1761,9 @@ class AccountsController(TransactionBase):
 
 	def set_total_advance_paid(self):
 		ple = frappe.qb.DocType("Payment Ledger Entry")
-		if self.doctype in frappe.get_hooks("advance_payment_customer_doctypes"):
+		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
 			party = self.customer
-		if self.doctype in frappe.get_hooks("advance_payment_supplier_doctypes"):
+		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
 			party = self.supplier
 		advance = (
 			frappe.qb.from_(ple)
@@ -1829,9 +1829,9 @@ class AccountsController(TransactionBase):
 					"docstatus": 1,
 				},
 			)
-			if self.doctype in frappe.get_hooks("advance_payment_customer_doctypes"):
+			if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
 				new_status = "Requested" if prs else "Not Requested"
-			if self.doctype in frappe.get_hooks("advance_payment_supplier_doctypes"):
+			if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
 				new_status = "Initiated" if prs else "Not Initiated"
 
 		if new_status == self.advance_payment_status:

@@ -170,8 +170,8 @@ class PaymentRequest(Document):
 			self.request_phone_payment()
 
 		advance_payment_doctypes = frappe.get_hooks(
-			"advance_payment_customer_doctypes"
-		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
 		if self.reference_doctype in advance_payment_doctypes:
 			# set advance payment status
 			ref_doc.set_total_advance_paid()
@@ -216,8 +216,8 @@ class PaymentRequest(Document):
 
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 		advance_payment_doctypes = frappe.get_hooks(
-			"advance_payment_customer_doctypes"
-		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
 		if self.reference_doctype in advance_payment_doctypes:
 			# set advance payment status
 			ref_doc.set_total_advance_paid()

@@ -619,8 +619,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	# Update Advance Paid in SO/PO since they might be getting unlinked
 	advance_payment_doctypes = frappe.get_hooks(
-		"advance_payment_customer_doctypes"
-	) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		"advance_payment_receivable_doctypes"
+	) + frappe.get_hooks("advance_payment_payable_doctypes")
 	if jv_detail.get("reference_type") in advance_payment_doctypes:
 		frappe.get_doc(jv_detail.reference_type, jv_detail.reference_name).set_total_advance_paid()
 
@@ -696,8 +696,8 @@ def update_reference_in_payment_entry(
 
 		# Update Advance Paid in SO/PO since they are getting unlinked
 		advance_payment_doctypes = frappe.get_hooks(
-			"advance_payment_customer_doctypes"
-		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
 		if existing_row.get("reference_doctype") in advance_payment_doctypes:
 			frappe.get_doc(
 				existing_row.reference_doctype, existing_row.reference_name
