@@ -809,6 +809,40 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						me.frm.set_value("tc_name", company_doc.default_buying_terms);
 					}
 				}
+<<<<<<< HEAD
+=======
+
+				if (
+					company_doc.default_selling_terms &&
+					frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
+					[
+						"Sales Invoice",
+						"Quotation",
+						"Sales Order",
+						"Delivery Note",
+					].includes(me.frm.doc.doctype) &&
+					!me.frm.doc.tc_name
+				) {
+					me.frm.set_value("tc_name", company_doc.default_selling_terms);
+				}
+
+				if (
+					company_doc.default_buying_terms &&
+					frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
+					[
+						"Request for Quotation",
+						"Supplier Quotation",
+						"Purchase Order",
+						// Purchase Invoice is excluded as per issue #3345
+						"Material Request",
+						"Purchase Receipt",
+					].includes(me.frm.doc.doctype) &&
+					!me.frm.doc.tc_name
+				) {
+					me.frm.set_value("tc_name", company_doc.default_buying_terms);
+				}
+
+>>>>>>> 77b044f1a6 (fix: don't overwrite existing terms in transaction)
 				frappe.run_serially([
 					() => me.frm.script_manager.trigger("currency"),
 					() => me.update_item_tax_map(),
