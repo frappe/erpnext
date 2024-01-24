@@ -126,7 +126,7 @@
    "fieldname": "rate",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Rate",
+   "label": "Tax Rate",
    "oldfieldname": "rate",
    "oldfieldtype": "Currency"
   },
@@ -230,7 +230,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-08-05 20:04:36.618240",
+ "modified": "2024-01-14 10:04:36.618240",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",

@@ -214,7 +214,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-01-05 15:26:02.320942",
+ "modified": "2024-01-12 16:42:01.894346",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -240,39 +240,24 @@
    "write": 1
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
-   "role": "Accounts User",
-   "share": 1
+   "role": "Accounts User"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
-   "role": "Accounts Manager",
-   "share": 1
+   "role": "Accounts Manager"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
-   "role": "Stock Manager",
-   "share": 1
+   "role": "Stock Manager"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
-   "role": "Stock User",
-   "share": 1
+   "role": "Stock User"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
-   "role": "Purchase User",
-   "share": 1
+   "role": "Purchase User"
   }
  ],
  "sort_field": "modified",

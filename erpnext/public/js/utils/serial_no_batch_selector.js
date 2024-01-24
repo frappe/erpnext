@@ -71,6 +71,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		let warehouse = this.item?.type_of_transaction === "Outward" ?
 			(this.item.warehouse || this.item.s_warehouse) : "";
 
+		if (!warehouse && this.frm.doc.doctype === 'Stock Reconciliation') {
+			warehouse = this.get_warehouse();
+		}
+
 		return {
 			'item_code': this.item.item_code,
 			'warehouse': ["=", warehouse]
@@ -135,7 +139,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 						filters: this.get_serial_no_filters()
 					};
 				},
-				onchange: () => this.update_serial_batch_no()
+				onchange: () => this.scan_barcode_data()
 			});
 		}
 
@@ -145,7 +149,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				options: 'Barcode',
 				fieldname: 'scan_batch_no',
 				label: __('Scan Batch No'),
-				onchange: () => this.update_serial_batch_no()
+				onchange: () => this.scan_barcode_data()
 			});
 		}
 
@@ -179,11 +183,54 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			label = __('Serial Nos / Batch Nos');
 		}
 
-		return [
+		let fields = [
 			{
 				fieldtype: 'Section Break',
 				label: __('{0} {1} via CSV File', [primary_label, label])
-			},
+			}
+		]
+
+		if (this.item?.has_serial_no) {
+			fields = [...fields,
+				{
+					fieldtype: 'Check',
+					label: __('Import Using CSV file'),
+					fieldname: 'import_using_csv_file',
+					default: 0,
+				},
+				{
+					fieldtype: 'Section Break',
+					label: __('{0} {1} Manually', [primary_label, label]),
+					depends_on: 'eval:doc.import_using_csv_file === 0',
+				},
+				{
+					fieldtype: 'Small Text',
+					label: __('Enter Serial Nos'),
+					fieldname: 'upload_serial_nos',
+					depends_on: 'eval:doc.import_using_csv_file === 0',
+					description: __('Enter each serial no in a new line'),
+				},
+				{
+					fieldtype: 'Column Break',
+					depends_on: 'eval:doc.import_using_csv_file === 0',
+				},
+				{
+					fieldtype: 'Button',
+					fieldname: 'make_serial_nos',
+					label: __('Create Serial Nos'),
+					depends_on: 'eval:doc.import_using_csv_file === 0',
+					click: () => {
+						this.create_serial_nos();
+					}
+				},
+				{
+					fieldtype: 'Section Break',
+					depends_on: 'eval:doc.import_using_csv_file === 1',
+				}
+			];
+		}
+
+		fields = [...fields,
 			{
 				fieldtype: 'Button',
 				fieldname: 'download_csv',
@@ -199,7 +246,32 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 				label: __('Attach CSV File'),
 				onchange: () => this.upload_csv_file()
 			}
-		]
+		];
+
+		return fields;
+	}
+
+	create_serial_nos() {
+		let {upload_serial_nos} = this.dialog.get_values();
+
+		if (!upload_serial_nos) {
+			frappe.throw(__('Please enter Serial Nos'));
+		}
+
+		frappe.call({
+			method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.create_serial_nos',
+			args: {
+				item_code: this.item.item_code,
+				serial_nos: upload_serial_nos
+			},
+			callback: (r) => {
+				if (r.message) {
+					this.dialog.fields_dict.entries.df.data = [];
+					this.set_data(r.message);
+					this.update_bundle_entries();
+				}
+			}
+		});
 	}
 
 	download_csv_file() {
@@ -371,6 +443,26 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					}
 				}
 			});
+		}
+	}
+
+	scan_barcode_data() {
+		const { scan_serial_no, scan_batch_no } = this.dialog.get_values();
+
+		if (scan_serial_no || scan_batch_no) {
+			frappe.call({
+				method: 'erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.is_serial_batch_no_exists',
+				args: {
+					item_code: this.item.item_code,
+					type_of_transaction: this.item.type_of_transaction,
+					serial_no: scan_serial_no,
+					batch_no: scan_batch_no,
+				},
+				callback: (r) => {
+					this.update_serial_batch_no();
+				}
+
+			})
 		}
 	}
 

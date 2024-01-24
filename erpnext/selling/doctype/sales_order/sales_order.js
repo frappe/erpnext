@@ -94,6 +94,9 @@ frappe.ui.form.on("Sales Order", {
 						frm.set_value("reserve_stock", 0);
 						frm.set_df_property("reserve_stock", "read_only", 1);
 						frm.set_df_property("reserve_stock", "hidden", 1);
+						frm.fields_dict.items.grid.update_docfield_property('reserve_stock', 'hidden', 1);
+						frm.fields_dict.items.grid.update_docfield_property('reserve_stock', 'default', 0);
+						frm.fields_dict.items.grid.update_docfield_property('reserve_stock', 'read_only', 1);
 					}
 				})
 			}
@@ -139,15 +142,6 @@ frappe.ui.form.on("Sales Order", {
 					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
 				]
 			};
-		});
-
-		frm.set_query('project', function(doc, cdt, cdn) {
-			return {
-				query: "erpnext.controllers.queries.get_project_name",
-				filters: {
-					'customer': doc.customer
-				}
-			}
 		});
 
 		frm.set_query('warehouse', 'items', function(doc, cdt, cdn) {

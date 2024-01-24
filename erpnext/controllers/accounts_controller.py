@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, bold, qb, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import (
@@ -27,6 +28,7 @@ from frappe.utils import (
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
+	get_dimensions,
 )
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	apply_pricing_rule_for_free_items,
@@ -930,7 +932,7 @@ class AccountsController(TransactionBase):
 		# Update details in transaction currency
 		gl_dict.update(
 			{
-				"transaction_currency": args.get("currency") or self.get("currency") or self.company_currency,
+				"transaction_currency": self.get("currency") or self.company_currency,
 				"transaction_exchange_rate": self.get("conversion_rate", 1),
 				"debit_in_transaction_currency": self.get_value_in_transaction_currency(
 					account_currency, args, "debit"
@@ -969,10 +971,10 @@ class AccountsController(TransactionBase):
 		return self.doctype
 
 	def get_value_in_transaction_currency(self, account_currency, args, field):
-		if account_currency == args.get("currency") or self.get("currency"):
+		if account_currency == self.get("currency"):
 			return args.get(field + "_in_account_currency")
 		else:
-			return flt(args.get(field, 0) / (args.get("conversion_rate") or self.get("conversion_rate", 1)))
+			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
 
 	def validate_qty_is_not_zero(self):
 		for item in self.items:
@@ -1161,7 +1163,6 @@ class AccountsController(TransactionBase):
 		)
 
 		credit_or_debit = "credit" if self.doctype == "Purchase Invoice" else "debit"
-		against_type = "Supplier" if self.doctype == "Purchase Invoice" else "Customer"
 		against = self.supplier if self.doctype == "Purchase Invoice" else self.customer
 
 		if precision_loss:
@@ -1169,9 +1170,7 @@ class AccountsController(TransactionBase):
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
-						"against_type": against_type,
 						"against": against,
-						"against_link": against,
 						credit_or_debit: precision_loss,
 						"cost_center": round_off_cost_center
 						if self.use_company_roundoff_cost_center
@@ -1219,7 +1218,9 @@ class AccountsController(TransactionBase):
 					return True
 		return False
 
-	def make_exchange_gain_loss_journal(self, args: dict = None) -> None:
+	def make_exchange_gain_loss_journal(
+		self, args: dict = None, dimensions_dict: dict = None
+	) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
 		"""
@@ -1274,6 +1275,7 @@ class AccountsController(TransactionBase):
 									self.name,
 									arg.get("referenced_row"),
 									arg.get("cost_center"),
+									dimensions_dict,
 								)
 								frappe.msgprint(
 									_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1354,6 +1356,7 @@ class AccountsController(TransactionBase):
 							self.name,
 							d.idx,
 							self.cost_center,
+							dimensions_dict,
 						)
 						frappe.msgprint(
 							_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1418,7 +1421,13 @@ class AccountsController(TransactionBase):
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 
-			reconcile_against_document(lst)
+			# pass dimension values to utility method
+			active_dimensions = get_dimensions()[0]
+			for x in lst:
+				for dim in active_dimensions:
+					if self.get(dim.fieldname):
+						x.update({dim.fieldname: self.get(dim.fieldname)})
+			reconcile_against_document(lst, active_dimensions=active_dimensions)
 
 	def on_cancel(self):
 		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
@@ -1525,13 +1534,11 @@ class AccountsController(TransactionBase):
 		if self.doctype == "Purchase Invoice":
 			dr_or_cr = "credit"
 			rev_dr_cr = "debit"
-			against_type = "Supplier"
 			supplier_or_customer = self.supplier
 
 		else:
 			dr_or_cr = "debit"
 			rev_dr_cr = "credit"
-			against_type = "Customer"
 			supplier_or_customer = self.customer
 
 		if enable_discount_accounting:
@@ -1556,9 +1563,7 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": item.discount_account,
-								"against_type": against_type,
 								"against": supplier_or_customer,
-								"against_link": supplier_or_customer,
 								dr_or_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1576,9 +1581,7 @@ class AccountsController(TransactionBase):
 						self.get_gl_dict(
 							{
 								"account": income_or_expense_account,
-								"against_type": against_type,
 								"against": supplier_or_customer,
-								"against_link": supplier_or_customer,
 								rev_dr_cr: flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
@@ -1601,9 +1604,7 @@ class AccountsController(TransactionBase):
 				self.get_gl_dict(
 					{
 						"account": self.additional_discount_account,
-						"against_type": against_type,
 						"against": supplier_or_customer,
-						"against_link": supplier_or_customer,
 						dr_or_cr: self.base_discount_amount,
 						"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 					},
@@ -1760,7 +1761,10 @@ class AccountsController(TransactionBase):
 
 	def set_total_advance_paid(self):
 		ple = frappe.qb.DocType("Payment Ledger Entry")
-		party = self.customer if self.doctype == "Sales Order" else self.supplier
+		if self.doctype in frappe.get_hooks("advance_payment_customer_doctypes"):
+			party = self.customer
+		if self.doctype in frappe.get_hooks("advance_payment_supplier_doctypes"):
+			party = self.supplier
 		advance = (
 			frappe.qb.from_(ple)
 			.select(ple.account_currency, Abs(Sum(ple.amount_in_account_currency)).as_("amount"))
@@ -1773,6 +1777,8 @@ class AccountsController(TransactionBase):
 			)
 			.run(as_dict=True)
 		)
+
+		advance_paid, order_total = None, None
 
 		if advance:
 			advance = advance[0]
@@ -1802,7 +1808,38 @@ class AccountsController(TransactionBase):
 					).format(formatted_advance_paid, self.name, formatted_order_total)
 				)
 
-			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+			self.db_set("advance_paid", advance_paid)
+
+		self.set_advance_payment_status(advance_paid, order_total)
+
+	def set_advance_payment_status(
+		self, advance_paid: float | None = None, order_total: float | None = None
+	):
+		new_status = None
+		# if money is paid set the paid states
+		if advance_paid:
+			new_status = "Partially Paid" if advance_paid < order_total else "Fully Paid"
+
+		if not new_status:
+			prs = frappe.db.count(
+				"Payment Request",
+				{
+					"reference_doctype": self.doctype,
+					"reference_name": self.name,
+					"docstatus": 1,
+				},
+			)
+			if self.doctype in frappe.get_hooks("advance_payment_customer_doctypes"):
+				new_status = "Requested" if prs else "Not Requested"
+			if self.doctype in frappe.get_hooks("advance_payment_supplier_doctypes"):
+				new_status = "Initiated" if prs else "Not Initiated"
+
+		if new_status == self.advance_payment_status:
+			return
+
+		self.db_set("advance_payment_status", new_status)
+		self.set_status(update=True)
+		self.notify_update()
 
 	@property
 	def company_abbr(self):
@@ -2695,47 +2732,37 @@ def get_common_query(
 		q = q.select((payment_entry.target_exchange_rate).as_("exchange_rate"))
 
 	if condition:
-		if condition.get("name", None):
-			q = q.where(payment_entry.name.like(f"%{condition.get('name')}%"))
+		# conditions should be built as an array and passed as Criterion
+		common_filter_conditions = []
 
-		q = q.where(payment_entry.company == condition["company"])
-		q = (
-			q.where(payment_entry.posting_date >= condition["from_payment_date"])
-			if condition.get("from_payment_date")
-			else q
-		)
-		q = (
-			q.where(payment_entry.posting_date <= condition["to_payment_date"])
-			if condition.get("to_payment_date")
-			else q
-		)
+		common_filter_conditions.append(payment_entry.company == condition["company"])
+		if condition.get("name", None):
+			common_filter_conditions.append(payment_entry.name.like(f"%{condition.get('name')}%"))
+
+		if condition.get("from_payment_date"):
+			common_filter_conditions.append(payment_entry.posting_date.gte(condition["from_payment_date"]))
+
+		if condition.get("to_payment_date"):
+			common_filter_conditions.append(payment_entry.posting_date.lte(condition["to_payment_date"]))
+
 		if condition.get("get_payments") == True:
-			q = (
-				q.where(payment_entry.cost_center == condition["cost_center"])
-				if condition.get("cost_center")
-				else q
-			)
-			q = (
-				q.where(payment_entry.unallocated_amount >= condition["minimum_payment_amount"])
-				if condition.get("minimum_payment_amount")
-				else q
-			)
-			q = (
-				q.where(payment_entry.unallocated_amount <= condition["maximum_payment_amount"])
-				if condition.get("maximum_payment_amount")
-				else q
-			)
-		else:
-			q = (
-				q.where(payment_entry.total_debit >= condition["minimum_payment_amount"])
-				if condition.get("minimum_payment_amount")
-				else q
-			)
-			q = (
-				q.where(payment_entry.total_debit <= condition["maximum_payment_amount"])
-				if condition.get("maximum_payment_amount")
-				else q
-			)
+			if condition.get("cost_center"):
+				common_filter_conditions.append(payment_entry.cost_center == condition["cost_center"])
+
+			if condition.get("accounting_dimensions"):
+				for field, val in condition.get("accounting_dimensions").items():
+					common_filter_conditions.append(payment_entry[field] == val)
+
+			if condition.get("minimum_payment_amount"):
+				common_filter_conditions.append(
+					payment_entry.unallocated_amount.gte(condition["minimum_payment_amount"])
+				)
+
+			if condition.get("maximum_payment_amount"):
+				common_filter_conditions.append(
+					payment_entry.unallocated_amount.lte(condition["maximum_payment_amount"])
+				)
+		q = q.where(Criterion.all(common_filter_conditions))
 
 	q = q.orderby(payment_entry.posting_date)
 	q = q.limit(limit) if limit else q
