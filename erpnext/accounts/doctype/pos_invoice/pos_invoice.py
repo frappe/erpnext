@@ -371,7 +371,7 @@ class POSInvoice(SalesInvoice):
 			if d.get("qty") > 0:
 				frappe.throw(
 					_(
-						"Row #{}: You cannot add postive quantities in a return invoice. Please remove item {} to complete the return."
+						"Row #{}: You cannot add positive quantities in a return invoice. Please remove item {} to complete the return."
 					).format(d.idx, frappe.bold(d.item_code)),
 					title=_("Invalid Item"),
 				)
@@ -793,7 +793,7 @@ def make_merge_log(invoices):
 		invoices = json.loads(invoices)
 
 	if len(invoices) == 0:
-		frappe.throw(_("Atleast one invoice has to be selected."))
+		frappe.throw(_("At least one invoice has to be selected."))
 
 	merge_log = frappe.new_doc("POS Invoice Merge Log")
 	merge_log.posting_date = getdate(nowdate())

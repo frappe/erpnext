@@ -155,7 +155,7 @@ class TallyMigration(Document):
 			except RecursionError:
 				self.log(
 					_(
-						"Error occured while parsing Chart of Accounts: Please make sure that no two accounts have the same name"
+						"Error occurred while parsing Chart of Accounts: Please make sure that no two accounts have the same name"
 					)
 				)
 

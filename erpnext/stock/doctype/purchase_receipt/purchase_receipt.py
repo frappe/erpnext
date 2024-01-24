@@ -951,32 +951,32 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 		billed_against_po = flt(po_billed_amt_details.get(pr_item.purchase_order_item))
 
 		# Get billed amount directly against Purchase Receipt
-		billed_amt_agianst_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
+		billed_amt_against_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
 
 		# Distribute billed amount directly against PO between PRs based on FIFO
-		if billed_against_po and billed_amt_agianst_pr < pr_item.amount:
-			pending_to_bill = flt(pr_item.amount) - billed_amt_agianst_pr
+		if billed_against_po and billed_amt_against_pr < pr_item.amount:
+			pending_to_bill = flt(pr_item.amount) - billed_amt_against_pr
 			if pending_to_bill <= billed_against_po:
-				billed_amt_agianst_pr += pending_to_bill
+				billed_amt_against_pr += pending_to_bill
 				billed_against_po -= pending_to_bill
 			else:
-				billed_amt_agianst_pr += billed_against_po
+				billed_amt_against_pr += billed_against_po
 				billed_against_po = 0
 
 		po_billed_amt_details[pr_item.purchase_order_item] = billed_against_po
 
-		if pr_item.billed_amt != billed_amt_agianst_pr:
+		if pr_item.billed_amt != billed_amt_against_pr:
 			# update existing doc if possible
 			if pr_doc and pr_item.parent == pr_doc.name:
 				pr_item = next((item for item in pr_doc.items if item.name == pr_item.name), None)
-				pr_item.db_set("billed_amt", billed_amt_agianst_pr, update_modified=update_modified)
+				pr_item.db_set("billed_amt", billed_amt_against_pr, update_modified=update_modified)
 
 			else:
 				frappe.db.set_value(
 					"Purchase Receipt Item",
 					pr_item.name,
 					"billed_amt",
-					billed_amt_agianst_pr,
+					billed_amt_against_pr,
 					update_modified=update_modified,
 				)
 

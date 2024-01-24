@@ -39,7 +39,7 @@ frappe.query_reports["Account Balance"] = {
 				{ "value": "Asset Received But Not Billed", "label": __("Asset Received But Not Billed") },
 				{ "value": "Bank", "label": __("Bank") },
 				{ "value": "Cash", "label": __("Cash") },
-				{ "value": "Chargeble", "label": __("Chargeble") },
+				{ "value": "Chargeable", "label": __("Chargeable") },
 				{ "value": "Capital Work in Progress", "label": __("Capital Work in Progress") },
 				{ "value": "Cost of Goods Sold", "label": __("Cost of Goods Sold") },
 				{ "value": "Depreciation", "label": __("Depreciation") },

@@ -1011,7 +1011,7 @@ def make_asset_movement(assets, purpose=None):
 		assets = json.loads(assets)
 
 	if len(assets) == 0:
-		frappe.throw(_("Atleast one asset has to be selected."))
+		frappe.throw(_("At least one asset has to be selected."))
 
 	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.quantity = len(assets)
