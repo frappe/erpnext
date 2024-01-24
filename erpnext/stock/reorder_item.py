@@ -145,6 +145,7 @@ def create_material_request(material_requests):
 
 		mr.log_error("Unable to create material request")
 
+	company_wise_mr = frappe._dict({})
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
 			try:
@@ -206,17 +207,19 @@ def create_material_request(material_requests):
 				mr.submit()
 				mr_list.append(mr)
 
+				company_wise_mr.setdefault(company, []).append(mr)
+
 			except Exception:
 				_log_exception(mr)
 
-	if mr_list:
+	if company_wise_mr:
 		if getattr(frappe.local, "reorder_email_notify", None) is None:
 			frappe.local.reorder_email_notify = cint(
 				frappe.db.get_value("Stock Settings", None, "reorder_email_notify")
 			)
 
 		if frappe.local.reorder_email_notify:
-			send_email_notification(mr_list)
+			send_email_notification(company_wise_mr)
 
 	if exceptions_list:
 		notify_errors(exceptions_list)
@@ -224,20 +227,56 @@ def create_material_request(material_requests):
 	return mr_list
 
 
-def send_email_notification(mr_list):
+def send_email_notification(company_wise_mr):
 	"""Notify user about auto creation of indent"""
 
-	email_list = frappe.db.sql_list(
-		"""select distinct r.parent
-		from `tabHas Role` r, tabUser p
-		where p.name = r.parent and p.enabled = 1 and p.docstatus < 2
-		and r.role in ('Purchase Manager','Stock Manager')
-		and p.name not in ('Administrator', 'All', 'Guest')"""
+	for company, mr_list in company_wise_mr.items():
+		email_list = get_email_list(company)
+
+		if not email_list:
+			continue
+
+		msg = frappe.render_template("templates/emails/reorder_item.html", {"mr_list": mr_list})
+
+		frappe.sendmail(
+			recipients=email_list, subject=_("Auto Material Requests Generated"), message=msg
+		)
+
+
+def get_email_list(company):
+	users = get_comapny_wise_users(company)
+	user_table = frappe.qb.DocType("User")
+	role_table = frappe.qb.DocType("Has Role")
+
+	query = (
+		frappe.qb.from_(user_table)
+		.inner_join(role_table)
+		.on(user_table.name == role_table.parent)
+		.select(user_table.email)
+		.where(
+			(role_table.role.isin(["Purchase Manager", "Stock Manager"]))
+			& (user_table.name.notin(["Administrator", "All", "Guest"]))
+			& (user_table.enabled == 1)
+			& (user_table.docstatus < 2)
+		)
 	)
 
-	msg = frappe.render_template("templates/emails/reorder_item.html", {"mr_list": mr_list})
+	if users:
+		query = query.where(user_table.name.isin(users))
 
-	frappe.sendmail(recipients=email_list, subject=_("Auto Material Requests Generated"), message=msg)
+	emails = query.run(as_dict=True)
+
+	return list(set([email.email for email in emails]))
+
+
+def get_comapny_wise_users(company):
+	users = frappe.get_all(
+		"User Permission",
+		filters={"allow": "Company", "for_value": company, "apply_to_all_doctypes": 1},
+		fields=["user"],
+	)
+
+	return [user.user for user in users]
 
 
 def notify_errors(exceptions_list):
