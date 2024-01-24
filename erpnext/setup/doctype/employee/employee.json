@@ -116,6 +116,7 @@
   "feedback",
   "lft",
   "rgt",
+  "is_group",
   "old_parent",
   "connections_tab"
  ],
@@ -677,6 +678,7 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "lft",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -684,6 +686,7 @@
    "fieldtype": "Int",
    "hidden": 1,
    "label": "rgt",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -817,6 +820,12 @@
    "fieldname": "iban",
    "fieldtype": "Data",
    "label": "IBAN"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group"
   }
  ],
  "icon": "fa fa-user",
@@ -824,7 +833,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2024-01-24 02:20:26.145996",
+ "modified": "2024-01-24 18:19:41.016397",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
