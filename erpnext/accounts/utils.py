@@ -482,17 +482,12 @@ def reconcile_against_document(
 				entry.update({"referenced_row": referenced_row})
 				doc.make_exchange_gain_loss_journal([entry], dimensions_dict)
 			else:
-<<<<<<< HEAD
-				update_reference_in_payment_entry(
-					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
-=======
 				referenced_row = update_reference_in_payment_entry(
 					entry,
 					doc,
 					do_not_save=True,
 					skip_ref_details_update_for_pe=skip_ref_details_update_for_pe,
 					dimensions_dict=dimensions_dict,
->>>>>>> c44eb432a5 (refactor: pass dimension values to Gain/Loss journal)
 				)
 
 		doc.save(ignore_permissions=True)
@@ -653,11 +648,8 @@ def update_reference_in_payment_entry(
 		if d.difference_amount is not None
 		else payment_entry.get_exchange_rate(),
 		"exchange_gain_loss": d.difference_amount,
-<<<<<<< HEAD
-=======
 		"account": d.account,
 		"dimensions": d.dimensions,
->>>>>>> 5dc22e1811 (refactor: pass dimension details to query)
 	}
 
 	if d.voucher_detail_no:
