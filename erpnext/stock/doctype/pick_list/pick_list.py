@@ -641,7 +641,8 @@ def get_available_item_locations_for_serialized_item(
 		query = query.where(Coalesce(sn.warehouse, "") != "")
 
 	if not consider_rejected_warehouses:
-		query = query.where(sn.warehouse.notin(get_rejected_warehouses()))
+		if rejected_warehouses := get_rejected_warehouses():
+			query = query.where(sn.warehouse.notin(rejected_warehouses))
 
 	serial_nos = query.run(as_list=True)
 
@@ -689,7 +690,8 @@ def get_available_item_locations_for_batched_item(
 		query = query.where(sle.warehouse.isin(from_warehouses))
 
 	if not consider_rejected_warehouses:
-		query = query.where(sle.warehouse.notin(get_rejected_warehouses()))
+		if rejected_warehouses := get_rejected_warehouses():
+			query = query.where(sle.warehouse.notin(rejected_warehouses))
 
 	return query.run(as_dict=True)
 
@@ -761,7 +763,8 @@ def get_available_item_locations_for_other_item(
 		query = query.from_(wh).where((bin.warehouse == wh.name) & (wh.company == company))
 
 	if not consider_rejected_warehouses:
-		query = query.where(bin.warehouse.notin(get_rejected_warehouses()))
+		if rejected_warehouses := get_rejected_warehouses():
+			query = query.where(bin.warehouse.notin(rejected_warehouses))
 
 	item_locations = query.run(as_dict=True)
 
@@ -1093,6 +1096,5 @@ def get_rejected_warehouses():
 		frappe.local.rejected_warehouses = frappe.get_all(
 			"Warehouse", filters={"is_rejected_warehouse": 1}, pluck="name"
 		)
-		print("hiii")
 
 	return frappe.local.rejected_warehouses
