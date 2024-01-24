@@ -597,6 +597,61 @@ class TestQuotation(FrappeTestCase):
 		quotation.items[0].conversion_factor = 2.23
 		self.assertRaises(frappe.ValidationError, quotation.save)
 
+	def test_item_tax_template_for_quotation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		if not frappe.db.exists("Account", {"account_name": "_Test Vat", "company": "_Test Company"}):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Vat",
+					"company": "_Test Company",
+					"account_type": "Tax",
+					"root_type": "Asset",
+					"is_group": 0,
+					"parent_account": "Tax Assets - _TC",
+					"tax_rate": 10,
+				}
+			).insert()
+
+		if not frappe.db.exists("Item Tax Template", "Vat Template - _TC"):
+			doc = frappe.get_doc(
+				{
+					"doctype": "Item Tax Template",
+					"name": "Vat Template",
+					"title": "Vat Template",
+					"company": "_Test Company",
+					"taxes": [
+						{
+							"tax_type": "_Test Vat - _TC",
+							"tax_rate": 5,
+						}
+					],
+				}
+			).insert()
+
+		item_doc = make_item("_Test Item Tax Template QTN", {"is_stock_item": 1})
+		if not frappe.db.exists(
+			"Item Tax", {"parent": item_doc.name, "item_tax_template": "Vat Template - _TC"}
+		):
+			item_doc.append("taxes", {"item_tax_template": "Vat Template - _TC"})
+			item_doc.save()
+
+		quotation = make_quotation(
+			item_code="_Test Item Tax Template QTN", qty=1, rate=100, do_not_submit=1
+		)
+		self.assertFalse(quotation.taxes)
+
+		quotation.append_taxes_from_item_tax_template()
+		quotation.save()
+		self.assertTrue(quotation.taxes)
+		for row in quotation.taxes:
+			self.assertEqual(row.account_head, "_Test Vat - _TC")
+			self.assertAlmostEqual(row.base_tax_amount, quotation.total * 5 / 100)
+
+		item_doc.taxes = []
+		item_doc.save()
+
 
 test_records = frappe.get_test_records("Quotation")
 
