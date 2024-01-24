@@ -911,8 +911,8 @@ def generate_id_for_deletion_job(company):
 @frappe.whitelist()
 def is_deletion_job_running(company):
 	job_id = generate_id_for_deletion_job(company)
-	job_name = get_job(job_id).get_id()  # job name will have site prefix
 	if is_job_enqueued(job_id):
+		job_name = get_job(job_id).get_id()  # job name will have site prefix
 		frappe.throw(
 			_("A Transaction Deletion Job: {0} is already running for {1}").format(
 				frappe.bold(get_link_to_form("RQ Job", job_name)), frappe.bold(company)
