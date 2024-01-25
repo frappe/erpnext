@@ -402,11 +402,6 @@ class StockController(AccountsController):
 			d.batch_no = None
 			d.db_set("batch_no", None)
 
-		for data in frappe.get_all(
-			"Batch", {"reference_name": self.name, "reference_doctype": self.doctype}
-		):
-			frappe.delete_doc("Batch", data.name)
-
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(
 			{
