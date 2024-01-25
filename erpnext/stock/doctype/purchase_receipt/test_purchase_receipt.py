@@ -193,7 +193,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		batch_no = pr.items[0].batch_no
 		pr.cancel()
 
-		self.assertFalse(frappe.db.get_value("Batch", {"item": item.name, "reference_name": pr.name}))
 		self.assertFalse(frappe.db.get_all("Serial No", {"batch_no": batch_no}))
 
 	def test_purchase_receipt_gl_entry(self):
@@ -2171,6 +2170,19 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr_doc.save()
 		pr_doc.reload()
 		self.assertFalse(pr_doc.items[0].from_warehouse)
+
+	def test_do_not_delete_batch_implicitly(self):
+		item = make_item(
+			"_Test Item With Delete Batch",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "TBWDB.#####"},
+		).name
+
+		pr = make_purchase_receipt(item_code=item, qty=10, rate=100)
+		batch_no = pr.items[0].batch_no
+		self.assertTrue(frappe.db.exists("Batch", batch_no))
+
+		pr.cancel()
+		self.assertTrue(frappe.db.exists("Batch", batch_no))
 
 
 def prepare_data_for_internal_transfer():
