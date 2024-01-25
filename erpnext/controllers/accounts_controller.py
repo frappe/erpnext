@@ -187,6 +187,7 @@ class AccountsController(TransactionBase):
 		self.validate_party()
 		self.validate_currency()
 		self.validate_party_account_currency()
+		self.validate_return_against_account()
 
 		if self.doctype in ["Purchase Invoice", "Sales Invoice"]:
 			if invalid_advances := [
@@ -320,6 +321,32 @@ class AccountsController(TransactionBase):
 				(self.doctype, self.name),
 			)
 
+<<<<<<< HEAD
+=======
+	def remove_serial_and_batch_bundle(self):
+		bundles = frappe.get_all(
+			"Serial and Batch Bundle",
+			filters={"voucher_type": self.doctype, "voucher_no": self.name, "docstatus": ("!=", 1)},
+		)
+
+		for bundle in bundles:
+			frappe.delete_doc("Serial and Batch Bundle", bundle.name)
+
+	def validate_return_against_account(self):
+		if (
+			self.doctype in ["Sales Invoice", "Purchase Invoice"] and self.is_return and self.return_against
+		):
+			cr_dr_account_field = "debit_to" if self.doctype == "Sales Invoice" else "credit_to"
+			cr_dr_account_label = "Debit To" if self.doctype == "Sales Invoice" else "Credit To"
+			cr_dr_account = self.get(cr_dr_account_field)
+			if frappe.get_value(self.doctype, self.return_against, cr_dr_account_field) != cr_dr_account:
+				frappe.throw(
+					_("'{0}' account: '{1}' should match the Return Against Invoice").format(
+						frappe.bold(cr_dr_account_label), frappe.bold(cr_dr_account)
+					)
+				)
+
+>>>>>>> 6f2fae1b61 (refactor: prevent '{debit/credit}_to' account mismatch)
 	def validate_deferred_income_expense_account(self):
 		field_map = {
 			"Sales Invoice": "deferred_revenue_account",
