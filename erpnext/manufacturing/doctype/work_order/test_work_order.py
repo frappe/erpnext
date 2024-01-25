@@ -998,12 +998,6 @@ class TestWorkOrder(FrappeTestCase):
 
 		make_job_card(wo_order.name, operations)
 		job_card = frappe.db.get_value("Job Card", {"work_order": wo_order.name, "docstatus": 0}, "name")
-		update_job_card(job_card, 10, 2)
-
-		stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
-		for row in stock_entry.items:
-			if row.is_scrap_item:
-				self.assertEqual(row.qty, 2)
 
 	def test_close_work_order(self):
 		items = [

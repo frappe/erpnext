@@ -80,7 +80,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto"
+   "label": "Valid Up To"
   },
   {
    "depends_on": "eval: doc.coupon_type == \"Promotional\"",
@@ -115,7 +115,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-10-19 14:48:14.602481",
+ "modified": "2024-01-24 02:20:26.145996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Coupon Code",

@@ -54,7 +54,7 @@ class AuthorizationControl(TransactionBase):
 			if not has_common(appr_roles, frappe.get_roles()) and not has_common(
 				appr_users, [session["user"]]
 			):
-				frappe.msgprint(_("Not authroized since {0} exceeds limits").format(_(based_on)))
+				frappe.msgprint(_("Not authorized since {0} exceeds limits").format(_(based_on)))
 				frappe.throw(_("Can be approved by {0}").format(comma_or(appr_roles + appr_users)))
 
 	def validate_auth_rule(self, doctype_name, total, based_on, cond, company, master_name=""):

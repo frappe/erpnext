@@ -74,7 +74,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 
 		let fields = [
 			{
-				"label": __("Using CSV File"),
+				"label": __("Import Using CSV file"),
 				"fieldname": "using_csv_file",
 				"default": 1,
 				"fieldtype": "Check",
