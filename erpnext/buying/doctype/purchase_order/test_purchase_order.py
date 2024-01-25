@@ -16,7 +16,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 	make_purchase_invoice as make_pi_from_po,
 )
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-from erpnext.controllers.accounts_controller import update_child_qty_rate
+from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
@@ -27,6 +27,29 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 
 
 class TestPurchaseOrder(FrappeTestCase):
+	def test_purchase_order_qty(self):
+		po = create_purchase_order(qty=1, do_not_save=True)
+
+		# NonNegativeError with qty=-1
+		po.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": -1,
+				"rate": 10,
+			},
+		)
+		self.assertRaises(frappe.NonNegativeError, po.save)
+
+		# InvalidQtyError with qty=0
+		po.items[1].qty = 0
+		self.assertRaises(InvalidQtyError, po.save)
+
+		# No error with qty=1
+		po.items[1].qty = 1
+		po.save()
+		self.assertEqual(po.items[1].qty, 1)
+
 	def test_make_purchase_receipt(self):
 		po = create_purchase_order(do_not_submit=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_receipt, po.name)
@@ -966,6 +989,65 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(po.items[0].qty, 30)
 		self.assertEqual(po.items[0].fg_item_qty, 30)
 
+	@change_settings("Buying Settings", {"auto_create_subcontracting_order": 1})
+	def test_auto_create_subcontracting_order(self):
+		from erpnext.controllers.tests.test_subcontracting_controller import (
+			make_bom_for_subcontracted_items,
+			make_raw_materials,
+			make_service_items,
+			make_subcontracted_items,
+		)
+
+		make_subcontracted_items()
+		make_raw_materials()
+		make_service_items()
+		make_bom_for_subcontracted_items()
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 100,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+		]
+		po = create_purchase_order(
+			rm_items=service_items,
+			is_subcontracted=1,
+			supplier_warehouse="_Test Warehouse 1 - _TC",
+		)
+
+		self.assertTrue(frappe.db.get_value("Subcontracting Order", {"purchase_order": po.name}))
+
+	def test_purchase_order_advance_payment_status(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+
+		po = create_purchase_order()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
+		)
+
+		pr = make_payment_request(dt=po.doctype, dn=po.name, submit_doc=True, return_doc=True)
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
+
+		pe = get_payment_entry(po.doctype, po.name).save().submit()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Fully Paid"
+		)
+
+		pe.reload()
+		pe.cancel()
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
+
+		pr.reload()
+		pr.cancel()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
+		)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -1061,7 +1143,7 @@ def create_purchase_order(**args):
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse or "_Test Warehouse - _TC",
 				"from_warehouse": args.from_warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"rate": args.rate or 500,
 				"schedule_date": add_days(nowdate(), 1),
 				"include_exploded_items": args.get("include_exploded_items", 1),

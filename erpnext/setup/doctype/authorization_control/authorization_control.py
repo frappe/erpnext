@@ -10,6 +10,16 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class AuthorizationControl(TransactionBase):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+	# end: auto-generated types
+
 	def get_appr_user_role(self, det, doctype_name, total, based_on, condition, master_name, company):
 		amt_list, appr_users, appr_roles = [], [], []
 		users, roles = "", ""
@@ -44,7 +54,7 @@ class AuthorizationControl(TransactionBase):
 			if not has_common(appr_roles, frappe.get_roles()) and not has_common(
 				appr_users, [session["user"]]
 			):
-				frappe.msgprint(_("Not authroized since {0} exceeds limits").format(_(based_on)))
+				frappe.msgprint(_("Not authorized since {0} exceeds limits").format(_(based_on)))
 				frappe.throw(_("Can be approved by {0}").format(comma_or(appr_roles + appr_users)))
 
 	def validate_auth_rule(self, doctype_name, total, based_on, cond, company, master_name=""):
@@ -175,7 +185,10 @@ class AuthorizationControl(TransactionBase):
 
 		# Remove user specific rules from global authorization rules
 		for r in based_on:
-			if r in final_based_on and not r in ["Itemwise Discount", "Item Group wise Discount"]:
+			if r in final_based_on and r not in [
+				"Itemwise Discount",
+				"Item Group wise Discount",
+			]:
 				final_based_on.remove(r)
 
 		# Check for authorization set on particular roles
@@ -203,7 +216,10 @@ class AuthorizationControl(TransactionBase):
 
 		# Remove role specific rules from global authorization rules
 		for r in based_on:
-			if r in final_based_on and not r in ["Itemwise Discount", "Item Group wise Discount"]:
+			if r in final_based_on and r not in [
+				"Itemwise Discount",
+				"Item Group wise Discount",
+			]:
 				final_based_on.remove(r)
 
 		# Check for global authorization

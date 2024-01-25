@@ -1,4 +1,6 @@
 {
+  "country_code": "hu", 
+  "name": "Hungary - Chart of Accounts for Microenterprises", 
   "tree": {
     "SZ\u00c1MLAOSZT\u00c1LY BEFEKTETETT ESZK\u00d6Z\u00d6K": {
       "account_number": 1,

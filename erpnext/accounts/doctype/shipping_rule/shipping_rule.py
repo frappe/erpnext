@@ -25,6 +25,33 @@ class ManyBlankToValuesError(frappe.ValidationError):
 
 
 class ShippingRule(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.shipping_rule_condition.shipping_rule_condition import (
+			ShippingRuleCondition,
+		)
+		from erpnext.accounts.doctype.shipping_rule_country.shipping_rule_country import (
+			ShippingRuleCountry,
+		)
+
+		account: DF.Link
+		calculate_based_on: DF.Literal["Fixed", "Net Total", "Net Weight"]
+		company: DF.Link
+		conditions: DF.Table[ShippingRuleCondition]
+		cost_center: DF.Link
+		countries: DF.Table[ShippingRuleCountry]
+		disabled: DF.Check
+		label: DF.Data
+		shipping_amount: DF.Currency
+		shipping_rule_type: DF.Literal["Selling", "Buying"]
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_from_to_values()
 		self.sort_shipping_rule_conditions()
@@ -115,12 +142,12 @@ class ShippingRule(Document):
 		}
 		if self.shipping_rule_type == "Selling":
 			# check if not applied on purchase
-			if not doc.meta.get_field("taxes").options == "Sales Taxes and Charges":
+			if doc.meta.get_field("taxes").options != "Sales Taxes and Charges":
 				frappe.throw(_("Shipping rule only applicable for Selling"))
 			shipping_charge["doctype"] = "Sales Taxes and Charges"
 		else:
 			# check if not applied on sales
-			if not doc.meta.get_field("taxes").options == "Purchase Taxes and Charges":
+			if doc.meta.get_field("taxes").options != "Purchase Taxes and Charges":
 				frappe.throw(_("Shipping rule only applicable for Buying"))
 
 			shipping_charge["doctype"] = "Purchase Taxes and Charges"

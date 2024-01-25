@@ -1,0 +1,569 @@
+{
+	"country_code": "de",
+	"name": "SKR03 mit Kontonummern",
+	"tree": {
+		"Aktiva": {
+			"is_group": 1,
+			"root_type": "Asset",
+			"A - Anlagevermögen": {
+				"is_group": 1,
+				"EDV-Software": {
+					"account_number": "0027",
+					"account_type": "Fixed Asset"
+				},
+				"Geschäftsausstattung": {
+					"account_number": "0410",
+					"account_type": "Fixed Asset"
+				},
+				"Büroeinrichtung": {
+					"account_number": "0420",
+					"account_type": "Fixed Asset"
+				},
+				"Darlehen": {
+					"account_number": "0565"
+				},
+				"Maschinen": {
+					"account_number": "0210",
+					"account_type": "Fixed Asset"
+				},
+				"Betriebsausstattung": {
+					"account_number": "0400",
+					"account_type": "Fixed Asset"
+				},
+				"Ladeneinrichtung": {
+					"account_number": "0430",
+					"account_type": "Fixed Asset"
+				},
+				"Accumulated Depreciation": {
+					"account_type": "Accumulated Depreciation"
+				}
+			},
+			"B - Umlaufvermögen": {
+				"is_group": 1,
+				"I. Vorräte": {
+					"is_group": 1,
+					"Roh-, Hilfs- und Betriebsstoffe (Bestand)": {
+						"account_number": "3970",
+						"account_type": "Stock"
+					},
+					"Waren (Bestand)": {
+						"account_number": "3980",
+						"account_type": "Stock"
+					}
+				},
+				"II. Forderungen und sonstige Vermögensgegenstände": {
+					"is_group": 1,
+					"Forderungen aus Lieferungen und Leistungen mit Kontokorrent": {
+						"account_number": "1400",
+						"account_type": "Receivable",
+						"is_group": 1
+					},
+					"Forderungen aus Lieferungen und Leistungen ohne Kontokorrent": {
+						"account_number": "1410",
+						"account_type": "Receivable"
+					},
+					"Durchlaufende Posten": {
+						"account_number": "1590"
+					},
+					"Verrechnungskonto Gewinnermittlung § 4 Abs. 3 EStG, nicht ergebniswirksam": {
+						"account_number": "1371"
+					},
+					"Abziehbare Vorsteuer": {
+						"is_group": 1,
+						"Abziehbare Vorsteuer 7 %": {
+							"account_number": "1571",
+							"account_type": "Tax",
+							"tax_rate": 7.0
+						},
+						"Abziehbare Vorsteuer 19 %": {
+							"account_number": "1576",
+							"account_type": "Tax",
+							"tax_rate": 19.0
+						},
+						"Abziehbare Vorsteuer nach § 13b UStG 19 %": {
+							"account_number": "1577",
+							"account_type": "Tax",
+							"tax_rate": 19.0
+						}
+					}
+				},
+				"III. Wertpapiere": {
+					"is_group": 1,
+					"Anteile an verbundenen Unternehmen (Umlaufvermögen)": {
+						"account_number": "1340"
+					},
+					"Anteile an herrschender oder mit Mehrheit beteiligter Gesellschaft": {
+						"account_number": "1344"
+					},
+					"Sonstige Wertpapiere": {
+						"account_number": "1348"
+					}
+				},
+				"IV. Kassenbestand, Bundesbankguthaben, Guthaben bei Kreditinstituten und Schecks.": {
+					"is_group": 1,
+					"Kasse": {
+						"is_group": 1,
+						"account_type": "Cash",
+						"Kasse": {
+							"account_number": "1000",
+							"account_type": "Cash"
+						}
+					},
+					"Bank": {
+						"is_group": 1,
+						"account_type": "Bank",
+						"Postbank": {
+							"account_number": "1100",
+							"account_type": "Bank"
+						},
+						"Bankkonto": {
+							"account_number": "1200",
+							"account_type": "Bank"
+						}
+					}
+				}
+			},
+			"C - Rechnungsabgrenzungsposten": {
+				"is_group": 1,
+				"Aktive Rechnungsabgrenzung": {
+					"account_number": "0980"
+				}
+			},
+			"D - Aktive latente Steuern": {
+				"is_group": 1,
+				"Aktive latente Steuern": {
+					"account_number": "0983"
+				}
+			},
+			"E - Aktiver Unterschiedsbetrag aus der Vermögensverrechnung": {
+				"is_group": 1
+			}
+		},
+		"Passiva": {
+			"is_group": 1,
+			"root_type": "Liability",
+			"A. Eigenkapital": {
+				"is_group": 1,
+				"I. Gezeichnetes Kapital": {
+					"is_group": 1
+				},
+				"II. Kapitalrücklage": {
+					"is_group": 1
+				},
+				"III. Gewinnrücklagen": {
+					"is_group": 1
+				},
+				"IV. Gewinnvortrag/Verlustvortrag": {
+					"is_group": 1
+				},
+				"V. Jahresüberschuß/Jahresfehlbetrag": {
+					"is_group": 1
+				}
+			},
+			"B. Rückstellungen": {
+				"is_group": 1,
+				"I. Rückstellungen für Pensionen und ähnliche Verpflichtungen": {
+					"is_group": 1
+				},
+				"II. Steuerrückstellungen": {
+					"is_group": 1
+				},
+				"III. sonstige Rückstellungen": {
+					"is_group": 1
+				}
+			},
+			"C. Verbindlichkeiten": {
+				"is_group": 1,
+				"I. Anleihen": {
+					"is_group": 1
+				},
+				"II. Verbindlichkeiten gegenüber Kreditinstituten": {
+					"is_group": 1
+				},
+				"III. Erhaltene Anzahlungen auf Bestellungen": {
+					"is_group": 1
+				},
+				"IV. Verbindlichkeiten aus Lieferungen und Leistungen": {
+					"is_group": 1,
+					"Verbindlichkeiten aus Lieferungen und Leistungen mit Kontokorrent": {
+						"account_number": "1600",
+						"account_type": "Payable",
+						"is_group": 1
+					},
+					"Verbindlichkeiten aus Lieferungen und Leistungen ohne Kontokorrent": {
+						"account_number": "1610",
+						"account_type": "Payable"
+					}
+				},
+				"V. Verbindlichkeiten aus der Annahme gezogener Wechsel und der Ausstellung eigener Wechsel": {
+					"is_group": 1
+				},
+				"VI. Verbindlichkeiten gegenüber verbundenen Unternehmen": {
+					"is_group": 1
+				},
+				"VII. Verbindlichkeiten gegenüber Unternehmen, mit denen ein Beteiligungsverhältnis besteht": {
+					"is_group": 1
+				},
+				"VIII. sonstige Verbindlichkeiten": {
+					"is_group": 1,
+					"Sonstige Verbindlichkeiten": {
+						"account_number": "1700",
+						"account_type": "Asset Received But Not Billed"
+					},
+					"Sonstige Verbindlichkeiten (1 bis 5 Jahre)": {
+						"account_number": "1702",
+						"account_type": "Stock Received But Not Billed"
+					},
+					"Verbindlichkeiten aus Lohn und Gehalt": {
+						"account_number": "1740",
+						"account_type": "Payable"
+					},
+					"Umsatzsteuer": {
+						"is_group": 1,
+						"Umsatzsteuer 7 %": {
+							"account_number": "1771",
+							"account_type": "Tax",
+							"tax_rate": 7.0
+						},
+						"Umsatzsteuer 19 %": {
+							"account_number": "1776",
+							"account_type": "Tax",
+							"tax_rate": 19.0
+						},
+						"Umsatzsteuer-Vorauszahlung": {
+							"account_number": "1780",
+							"account_type": "Tax"
+						},
+						"Umsatzsteuer-Vorauszahlung 1/11": {
+							"account_number": "1781"
+						},
+						"Umsatzsteuer nach § 13b UStG 19 %": {
+							"account_number": "1787",
+							"account_type": "Tax",
+							"tax_rate": 19.0
+						},
+						"Umsatzsteuer Vorjahr": {
+							"account_number": "1790"
+						},
+						"Umsatzsteuer frühere Jahre": {
+							"account_number": "1791"
+						}
+					}
+				}
+			},
+			"D. Rechnungsabgrenzungsposten": {
+				"is_group": 1,
+				"Passive Rechnungsabgrenzung": {
+					"account_number": "0990"
+				}
+			},
+			"E. Passive latente Steuern": {
+				"is_group": 1
+			}
+		},
+		"Erlöse u. Erträge 2/8": {
+			"is_group": 1,
+			"root_type": "Income",
+			"Erlöskonten 8": {
+				"is_group": 1,
+				"Erlöse": {
+					"account_number": "8200",
+					"account_type": "Income Account"
+				},
+				"Erlöse USt. 19 %": {
+					"account_number": "8400",
+					"account_type": "Income Account"
+				},
+				"Erlöse USt. 7 %": {
+					"account_number": "8300",
+					"account_type": "Income Account"
+				}
+			},
+			"Ertragskonten 2": {
+				"is_group": 1,
+				"sonstige Zinsen und ähnliche Erträge": {
+					"account_number": "2650",
+					"account_type": "Income Account"
+				},
+				"Außerordentliche Erträge": {
+					"account_number": "2500",
+					"account_type": "Income Account"
+				},
+				"Sonstige Erträge": {
+					"account_number": "2700",
+					"account_type": "Income Account"
+				}
+			}
+		},
+		"Aufwendungen 2/4": {
+			"is_group": 1,
+			"root_type": "Expense",
+			"Fremdleistungen": {
+				"account_number": "3100",
+				"account_type": "Expense Account"
+			},
+			"Fremdleistungen ohne Vorsteuer": {
+				"account_number": "3109",
+				"account_type": "Expense Account"
+			},
+			"Bauleistungen eines im Inland ansässigen Unternehmers 19 % Vorsteuer und 19 % Umsatzsteuer": {
+				"account_number": "3120",
+				"account_type": "Expense Account"
+			},
+			"Wareneingang": {
+				"account_number": "3200"
+			},
+			"Bezugsnebenkosten": {
+				"account_number": "3800",
+				"account_type": "Expenses Included In Asset Valuation"
+			},
+			"Herstellungskosten": {
+				"account_number": "4996",
+				"account_type": "Cost of Goods Sold"
+			},
+			"Verluste aus dem Abgang von Gegenständen des Anlagevermögens": {
+				"account_number": "2320",
+				"account_type": "Stock Adjustment"
+			},
+			"Verwaltungskosten": {
+				"account_number": "4997",
+				"account_type": "Expenses Included In Valuation"
+			},
+			"Vertriebskosten": {
+				"account_number": "4998",
+				"account_type": "Expenses Included In Valuation"
+			},
+			"Gegenkonto 4996-4998": {
+				"account_number": "4999"
+			},
+			"Abschreibungen": {
+				"is_group": 1,
+				"Abschreibungen auf Sachanlagen (ohne AfA auf Kfz und Gebäude)": {
+					"account_number": "4830",
+					"account_type": "Accumulated Depreciation"
+				},
+				"Abschreibungen auf Gebäude": {
+					"account_number": "4831",
+					"account_type": "Depreciation"
+				},
+				"Abschreibungen auf Kfz": {
+					"account_number": "4832",
+					"account_type": "Depreciation"
+				},
+				"Sofortabschreibung GWG": {
+					"account_number": "4855",
+					"account_type": "Expense Account"
+				}
+			},
+			"Kfz-Kosten": {
+				"is_group": 1,
+				"Kfz-Steuer": {
+					"account_number": "4510",
+					"account_type": "Expense Account"
+				},
+				"Kfz-Versicherungen": {
+					"account_number": "4520",
+					"account_type": "Expense Account"
+				},
+				"laufende Kfz-Betriebskosten": {
+					"account_number": "4530",
+					"account_type": "Expense Account"
+				},
+				"Kfz-Reparaturen": {
+					"account_number": "4540",
+					"account_type": "Expense Account"
+				},
+				"Fremdfahrzeuge": {
+					"account_number": "4570",
+					"account_type": "Expense Account"
+				},
+				"sonstige Kfz-Kosten": {
+					"account_number": "4580",
+					"account_type": "Expense Account"
+				}
+			},
+			"Personalkosten": {
+				"is_group": 1,
+				"Gehälter": {
+					"account_number": "4120",
+					"account_type": "Expense Account"
+				},
+				"gesetzliche soziale Aufwendungen": {
+					"account_number": "4130",
+					"account_type": "Expense Account"
+				},
+				"Aufwendungen für Altersvorsorge": {
+					"account_number": "4165",
+					"account_type": "Expense Account"
+				},
+				"Vermögenswirksame Leistungen": {
+					"account_number": "4170",
+					"account_type": "Expense Account"
+				},
+				"Aushilfslöhne": {
+					"account_number": "4190",
+					"account_type": "Expense Account"
+				}
+			},
+			"Raumkosten": {
+				"is_group": 1,
+				"Miete und Nebenkosten": {
+					"account_number": "4210",
+					"account_type": "Expense Account"
+				},
+				"Gas, Wasser, Strom (Verwaltung, Vertrieb)": {
+					"account_number": "4240",
+					"account_type": "Expense Account"
+				},
+				"Reinigung": {
+					"account_number": "4250",
+					"account_type": "Expense Account"
+				}
+			},
+			"Reparatur/Instandhaltung": {
+				"is_group": 1,
+				"Reparaturen und Instandhaltungen von anderen Anlagen und Betriebs- und Geschäftsausstattung": {
+					"account_number": "4805",
+					"account_type": "Expense Account"
+				}
+			},
+			"Versicherungsbeiträge": {
+				"is_group": 1,
+				"Versicherungen": {
+					"account_number": "4360",
+					"account_type": "Expense Account"
+				},
+				"Beiträge": {
+					"account_number": "4380",
+					"account_type": "Expense Account"
+				},
+				"sonstige Ausgaben": {
+					"account_number": "4390",
+					"account_type": "Expense Account"
+				},
+				"steuerlich abzugsfähige Verspätungszuschläge und Zwangsgelder": {
+					"account_number": "4396",
+					"account_type": "Expense Account"
+				}
+			},
+			"Werbe-/Reisekosten": {
+				"is_group": 1,
+				"Werbekosten": {
+					"account_number": "4610",
+					"account_type": "Expense Account"
+				},
+				"Aufmerksamkeiten": {
+					"account_number": "4653",
+					"account_type": "Expense Account"
+				},
+				"nicht abzugsfähige Betriebsausg. aus Werbe-, Repräs.- u. Reisekosten": {
+					"account_number": "4665",
+					"account_type": "Expense Account"
+				},
+				"Reisekosten Unternehmer": {
+					"account_number": "4670",
+					"account_type": "Expense Account"
+				}
+			},
+			"verschiedene Kosten": {
+				"is_group": 1,
+				"Porto": {
+					"account_number": "4910",
+					"account_type": "Expense Account"
+				},
+				"Telekom": {
+					"account_number": "4920",
+					"account_type": "Expense Account"
+				},
+				"Mobilfunk D2": {
+					"account_number": "4921",
+					"account_type": "Expense Account"
+				},
+				"Internet": {
+					"account_number": "4922",
+					"account_type": "Expense Account"
+				},
+				"Bürobedarf": {
+					"account_number": "4930",
+					"account_type": "Expense Account"
+				},
+				"Zeitschriften, Bücher": {
+					"account_number": "4940",
+					"account_type": "Expense Account"
+				},
+				"Fortbildungskosten": {
+					"account_number": "4945",
+					"account_type": "Expense Account"
+				},
+				"Buchführungskosten": {
+					"account_number": "4955",
+					"account_type": "Expense Account"
+				},
+				"Abschluß- u. Prüfungskosten": {
+					"account_number": "4957",
+					"account_type": "Expense Account"
+				},
+				"Nebenkosten des Geldverkehrs": {
+					"account_number": "4970",
+					"account_type": "Expense Account"
+				},
+				"Werkzeuge und Kleingeräte": {
+					"account_number": "4985",
+					"account_type": "Expense Account"
+				}
+			},
+			"Zinsaufwendungen": {
+				"is_group": 1,
+				"Zinsaufwendungen für kurzfristige Verbindlichkeiten": {
+					"account_number": "2110",
+					"account_type": "Expense Account"
+				},
+				"Zinsaufwendungen für KFZ Finanzierung": {
+					"account_number": "2121",
+					"account_type": "Expense Account"
+				}
+			}
+		},
+		"Anfangsbestand 9": {
+			"is_group": 1,
+			"root_type": "Equity",
+			"Saldenvortragskonten": {
+				"is_group": 1,
+				"Saldenvortrag Sachkonten": {
+					"account_number": "9000"
+				},
+				"Saldenvorträge Debitoren": {
+					"account_number": "9008"
+				},
+				"Saldenvorträge Kreditoren": {
+					"account_number": "9009"
+				}
+			}
+		},
+		"Privatkonten 1": {
+			"is_group": 1,
+			"root_type": "Equity",
+			"Privatentnahmen/-einlagen": {
+				"is_group": 1,
+				"Privatentnahme allgemein": {
+					"account_number": "1800"
+				},
+				"Privatsteuern": {
+					"account_number": "1810"
+				},
+				"Sonderausgaben beschränkt abzugsfähig": {
+					"account_number": "1820"
+				},
+				"Sonderausgaben unbeschränkt abzugsfähig": {
+					"account_number": "1830"
+				},
+				"Außergewöhnliche Belastungen": {
+					"account_number": "1850"
+				},
+				"Privateinlagen": {
+					"account_number": "1890"
+				}
+			}
+		}
+	}
+}

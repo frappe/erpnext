@@ -49,6 +49,14 @@ frappe.ui.form.on("Purchase Receipt", {
 			}
 		});
 
+		frm.set_query("subcontracting_receipt", function() {
+			return {
+				filters: {
+					'docstatus': 1,
+					'supplier': frm.doc.supplier,
+				}
+			}
+		});
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
@@ -78,6 +86,20 @@ frappe.ui.form.on("Purchase Receipt", {
 					frm: cur_frm,
 				})
 			}, __('Create'));
+		}
+
+		if (frm.doc.docstatus === 0) {
+			if (!frm.doc.is_return) {
+				frappe.db.get_single_value("Buying Settings", "maintain_same_rate").then((value) => {
+					if (value) {
+						frm.doc.items.forEach((item) => {
+							frm.fields_dict.items.grid.update_docfield_property(
+								"rate", "read_only", (item.purchase_order && item.purchase_order_item)
+							);
+						});
+					}
+				});
+			}
 		}
 
 		frm.events.add_custom_buttons(frm);
@@ -112,6 +134,20 @@ frappe.ui.form.on("Purchase Receipt", {
 	company: function(frm) {
 		frm.trigger("toggle_display_account_head");
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+	},
+
+	subcontracting_receipt: (frm) => {
+		if (frm.doc.is_subcontracted === 1 && frm.doc.is_old_subcontracting_flow === 0 && frm.doc.subcontracting_receipt) {
+			frm.set_value('items', null);
+
+			erpnext.utils.map_current_doc({
+				method: 'erpnext.subcontracting.doctype.subcontracting_receipt.subcontracting_receipt.make_purchase_receipt',
+				source_name: frm.doc.subcontracting_receipt,
+				target_doc: frm,
+				freeze: true,
+				freeze_message: __('Mapping Purchase Receipt ...'),
+			});
+		}
 	},
 
 	toggle_display_account_head: function(frm) {

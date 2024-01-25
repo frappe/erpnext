@@ -232,7 +232,7 @@ def calculate_monthly_amount(
 			if amount + already_booked_amount_in_account_currency > item.net_amount:
 				amount = item.net_amount - already_booked_amount_in_account_currency
 
-		if not (get_first_day(start_date) == start_date and get_last_day(end_date) == end_date):
+		if get_first_day(start_date) != start_date or get_last_day(end_date) != end_date:
 			partial_month = flt(date_diff(end_date, start_date)) / flt(
 				date_diff(get_last_day(end_date), get_first_day(start_date))
 			)

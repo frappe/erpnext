@@ -3,7 +3,8 @@
 
 
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, qb
+from frappe.query_builder import Criterion
 
 from erpnext import get_company_currency
 
@@ -214,24 +215,33 @@ def get_conditions(filters, date_field):
 	if items:
 		conditions.append("dt_item.item_code in (%s)" % ", ".join(["%s"] * len(items)))
 		values += items
+	else:
+		# return empty result, if no items are fetched after filtering on 'item group' and 'brand'
+		conditions.append("dt_item.item_code = Null")
 
 	return " and ".join(conditions), values
 
 
 def get_items(filters):
+	item = qb.DocType("Item")
+
+	item_query_conditions = []
 	if filters.get("item_group"):
-		key = "item_group"
-	elif filters.get("brand"):
-		key = "brand"
-	else:
-		key = ""
-
-	items = []
-	if key:
-		items = frappe.db.sql_list(
-			"""select name from tabItem where %s = %s""" % (key, "%s"), (filters[key])
+		# Handle 'Parent' nodes as well.
+		item_group = qb.DocType("Item Group")
+		lft, rgt = frappe.db.get_all(
+			"Item Group", filters={"name": filters.get("item_group")}, fields=["lft", "rgt"], as_list=True
+		)[0]
+		item_group_query = (
+			qb.from_(item_group)
+			.select(item_group.name)
+			.where((item_group.lft >= lft) & (item_group.rgt <= rgt))
 		)
+		item_query_conditions.append(item.item_group.isin(item_group_query))
+	if filters.get("brand"):
+		item_query_conditions.append(item.brand == filters.get("brand"))
 
+	items = qb.from_(item).select(item.name).where(Criterion.all(item_query_conditions)).run()
 	return items
 
 

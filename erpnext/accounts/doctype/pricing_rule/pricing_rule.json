@@ -339,7 +339,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto"
+   "label": "Valid Up To"
   },
   {
    "fieldname": "col_break1",
@@ -608,7 +608,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2023-02-14 04:53:34.887358",
+ "modified": "2024-01-24 02:20:26.145996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",

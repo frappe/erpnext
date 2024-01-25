@@ -14,7 +14,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
-from erpnext.controllers.accounts_controller import get_payment_terms
+from erpnext.controllers.accounts_controller import InvalidQtyError, get_payment_terms
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
@@ -50,6 +50,16 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def tearDown(self):
 		frappe.db.rollback()
+
+	def test_purchase_invoice_qty(self):
+		pi = make_purchase_invoice(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			pi.save()
+
+		# No error with qty=1
+		pi.items[0].qty = 1
+		pi.save()
+		self.assertEqual(pi.items[0].qty, 1)
 
 	def test_purchase_invoice_received_qty(self):
 		"""
@@ -1227,11 +1237,11 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_gain_loss_with_advance_entry(self):
-		unlink_enabled = frappe.db.get_value(
-			"Accounts Settings", "Accounts Settings", "unlink_payment_on_cancel_of_invoice"
+		unlink_enabled = frappe.db.get_single_value(
+			"Accounts Settings", "unlink_payment_on_cancellation_of_invoice"
 		)
 
-		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancel_of_invoice", 1)
+		frappe.db.set_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice", 1)
 
 		original_account = frappe.db.get_value("Company", "_Test Company", "exchange_gain_loss_account")
 		frappe.db.set_value(
@@ -1422,7 +1432,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pay.cancel()
 
 		frappe.db.set_single_value(
-			"Accounts Settings", "unlink_payment_on_cancel_of_invoice", unlink_enabled
+			"Accounts Settings", "unlink_payment_on_cancellation_of_invoice", unlink_enabled
 		)
 		frappe.db.set_value("Company", "_Test Company", "exchange_gain_loss_account", original_account)
 
@@ -1747,6 +1757,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			paid_to="Creditors - _TC",
 			paid_amount=500,
 		)
+		pe.save()  # save trigger is needed for set_liability_account() to be executed
 		pe.submit()
 
 		pi = make_purchase_invoice(
@@ -1769,9 +1780,9 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		# Check GL Entry against payment doctype
 		expected_gle = [
-			["Advances Paid - _TC", 0.0, 500, nowdate()],
+			["Advances Paid - _TC", 500.0, 0.0, nowdate()],
+			["Advances Paid - _TC", 0.0, 500.0, nowdate()],
 			["Cash - _TC", 0.0, 500, nowdate()],
-			["Creditors - _TC", 500, 0.0, nowdate()],
 			["Creditors - _TC", 500, 0.0, nowdate()],
 		]
 
@@ -1984,6 +1995,26 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		self.assertEqual(pi.items[0].cost_center, "_Test Cost Center Buying - _TC")
 
+	def test_debit_note_without_item(self):
+		pi = make_purchase_invoice(item_name="_Test Item", qty=10, do_not_submit=True)
+		pi.items[0].item_code = ""
+		pi.save()
+
+		self.assertFalse(pi.items[0].item_code)
+		pi.submit()
+
+		return_pi = make_purchase_invoice(
+			item_name="_Test Item",
+			is_return=1,
+			return_against=pi.name,
+			qty=-10,
+			do_not_save=True,
+		)
+		return_pi.items[0].item_code = ""
+		return_pi.save()
+		return_pi.submit()
+		self.assertEqual(return_pi.docstatus, 1)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
@@ -2093,7 +2124,7 @@ def make_purchase_invoice(**args):
 	bundle_id = None
 	if args.get("batch_no") or args.get("serial_no"):
 		batches = {}
-		qty = args.qty or 5
+		qty = args.qty if args.qty is not None else 5
 		item_code = args.item or args.item_code or "_Test Item"
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
@@ -2120,8 +2151,9 @@ def make_purchase_invoice(**args):
 		"items",
 		{
 			"item_code": args.item or args.item_code or "_Test Item",
+			"item_name": args.item_name,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
-			"qty": args.qty or 5,
+			"qty": args.qty if args.qty is not None else 5,
 			"received_qty": args.received_qty or 0,
 			"rejected_qty": args.rejected_qty or 0,
 			"rate": args.rate or 50,

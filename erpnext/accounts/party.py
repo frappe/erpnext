@@ -114,14 +114,12 @@ def _get_party_details(
 		set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype)
 	)
 	party = party_details[party_type.lower()]
-
-	if not ignore_permissions and not (
-		frappe.has_permission(party_type, "read", party)
-		or frappe.has_permission(party_type, "select", party)
-	):
-		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
-
 	party = frappe.get_doc(party_type, party)
+
+	if not ignore_permissions:
+		ptype = "select" if frappe.only_has_select_perm(party_type) else "read"
+		frappe.has_permission(party_type, ptype, party, throw=True)
+
 	currency = party.get("default_currency") or currency or get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(
@@ -195,7 +193,7 @@ def set_address_details(
 	company_address=None,
 	shipping_address=None,
 	*,
-	ignore_permissions=False
+	ignore_permissions=False,
 ):
 	billing_address_field = (
 		"customer_address" if party_type == "Lead" else party_type.lower() + "_address"
@@ -239,7 +237,7 @@ def set_address_details(
 				shipping_address_display=render_address(
 					shipping_address, check_permissions=not ignore_permissions
 				),
-				**get_fetch_values(doctype, "shipping_address", shipping_address)
+				**get_fetch_values(doctype, "shipping_address", shipping_address),
 			)
 
 		if party_details.company_address:
@@ -250,7 +248,7 @@ def set_address_details(
 					party_details.company_address_display
 					or render_address(party_details.company_address, check_permissions=False)
 				),
-				**get_fetch_values(doctype, "billing_address", party_details.company_address)
+				**get_fetch_values(doctype, "billing_address", party_details.company_address),
 			)
 
 			# shipping address - if not already set
@@ -258,7 +256,7 @@ def set_address_details(
 				party_details.update(
 					shipping_address=party_details.billing_address,
 					shipping_address_display=party_details.billing_address_display,
-					**get_fetch_values(doctype, "shipping_address", party_details.billing_address)
+					**get_fetch_values(doctype, "shipping_address", party_details.billing_address),
 				)
 
 	party_address, shipping_address = (
@@ -637,9 +635,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 	return due_date
 
 
-def validate_due_date(
-	posting_date, due_date, party_type, party, company=None, bill_date=None, template_name=None
-):
+def validate_due_date(posting_date, due_date, bill_date=None, template_name=None):
 	if getdate(due_date) < getdate(posting_date):
 		frappe.throw(_("Due Date cannot be before Posting / Supplier Invoice Date"))
 	else:
@@ -775,7 +771,7 @@ def validate_party_frozen_disabled(party_type, party_name):
 				frozen_accounts_modifier = frappe.db.get_single_value(
 					"Accounts Settings", "frozen_accounts_modifier"
 				)
-				if not frozen_accounts_modifier in frappe.get_roles():
+				if frozen_accounts_modifier not in frappe.get_roles():
 					frappe.throw(_("{0} {1} is frozen").format(party_type, party_name), PartyFrozen)
 
 		elif party_type == "Employee":
@@ -980,6 +976,9 @@ def get_partywise_advanced_payment_amount(
 
 	if party:
 		query = query.where(ple.party == party)
+
+	if invoice_doctypes := frappe.get_hooks("invoice_doctypes"):
+		query = query.where(ple.voucher_type.notin(invoice_doctypes))
 
 	data = query.run()
 	if data:

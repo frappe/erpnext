@@ -16,6 +16,29 @@ class OverlapError(frappe.ValidationError):
 
 
 class HolidayList(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.setup.doctype.holiday.holiday import Holiday
+
+		color: DF.Color | None
+		country: DF.Autocomplete | None
+		from_date: DF.Date
+		holiday_list_name: DF.Data
+		holidays: DF.Table[Holiday]
+		subdivision: DF.Autocomplete | None
+		to_date: DF.Date
+		total_holidays: DF.Int
+		weekly_off: DF.Literal[
+			"", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
+		]
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_days()
 		self.total_holidays = len(self.holidays)
@@ -64,7 +87,7 @@ class HolidayList(Document):
 		for holiday_date, holiday_name in country_holidays(
 			self.country,
 			subdiv=self.subdivision,
-			years=[from_date.year, to_date.year],
+			years=list(range(from_date.year, to_date.year + 1)),
 			language=frappe.local.lang,
 		).items():
 			if holiday_date in existing_holidays:

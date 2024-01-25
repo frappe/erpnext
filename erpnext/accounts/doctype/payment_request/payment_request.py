@@ -27,6 +27,65 @@ def _get_payment_gateway_controller(*args, **kwargs):
 
 
 class PaymentRequest(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.subscription_plan_detail.subscription_plan_detail import (
+			SubscriptionPlanDetail,
+		)
+
+		account: DF.ReadOnly | None
+		amended_from: DF.Link | None
+		bank: DF.Link | None
+		bank_account: DF.Link | None
+		bank_account_no: DF.ReadOnly | None
+		branch_code: DF.ReadOnly | None
+		cost_center: DF.Link | None
+		currency: DF.Link | None
+		email_to: DF.Data | None
+		grand_total: DF.Currency
+		iban: DF.ReadOnly | None
+		is_a_subscription: DF.Check
+		make_sales_invoice: DF.Check
+		message: DF.Text | None
+		mode_of_payment: DF.Link | None
+		mute_email: DF.Check
+		naming_series: DF.Literal["ACC-PRQ-.YYYY.-"]
+		party: DF.DynamicLink | None
+		party_type: DF.Link | None
+		payment_account: DF.ReadOnly | None
+		payment_channel: DF.Literal["", "Email", "Phone"]
+		payment_gateway: DF.ReadOnly | None
+		payment_gateway_account: DF.Link | None
+		payment_order: DF.Link | None
+		payment_request_type: DF.Literal["Outward", "Inward"]
+		payment_url: DF.Data | None
+		print_format: DF.Literal
+		project: DF.Link | None
+		reference_doctype: DF.Link | None
+		reference_name: DF.DynamicLink | None
+		status: DF.Literal[
+			"",
+			"Draft",
+			"Requested",
+			"Initiated",
+			"Partially Paid",
+			"Payment Ordered",
+			"Paid",
+			"Failed",
+			"Cancelled",
+		]
+		subject: DF.Data | None
+		subscription_plans: DF.Table[SubscriptionPlanDetail]
+		swift_number: DF.ReadOnly | None
+		transaction_date: DF.Date | None
+	# end: auto-generated types
+
 	def validate(self):
 		if self.get("__islocal"):
 			self.status = "Draft"
@@ -110,6 +169,13 @@ class PaymentRequest(Document):
 		elif self.payment_channel == "Phone":
 			self.request_phone_payment()
 
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_customer_doctypes"
+		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		if self.reference_doctype in advance_payment_doctypes:
+			# set advance payment status
+			ref_doc.set_total_advance_paid()
+
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
 		request_amount = self.get_request_amount()
@@ -147,6 +213,14 @@ class PaymentRequest(Document):
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
 		self.set_as_cancelled()
+
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_customer_doctypes"
+		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+		if self.reference_doctype in advance_payment_doctypes:
+			# set advance payment status
+			ref_doc.set_total_advance_paid()
 
 	def make_invoice(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -365,6 +439,15 @@ def make_payment_request(**args):
 	"""Make payment request"""
 
 	args = frappe._dict(args)
+	if args.dt not in [
+		"Sales Order",
+		"Purchase Order",
+		"Sales Invoice",
+		"Purchase Invoice",
+		"POS Invoice",
+		"Fees",
+	]:
+		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
 
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 	gateway_account = get_gateway_details(args) or frappe._dict()

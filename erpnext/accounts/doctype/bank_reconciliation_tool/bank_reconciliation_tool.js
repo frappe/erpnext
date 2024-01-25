@@ -137,7 +137,7 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_account_balance",
 				args: {
 					bank_account: frm.doc.bank_account,
-					till_date: frm.doc.bank_statement_from_date,
+					till_date: frappe.datetime.add_days(frm.doc.bank_statement_from_date, -1)
 				},
 				callback: (response) => {
 					frm.set_value("account_opening_balance", response.message);

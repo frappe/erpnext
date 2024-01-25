@@ -200,7 +200,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		"""
 		select
 			name as gl_entry, posting_date, account, party_type, party,
-			voucher_type, voucher_no, {dimension_fields}
+			voucher_type, voucher_subtype, voucher_no, {dimension_fields}
 			cost_center, project, {transaction_currency_fields}
 			against_voucher_type, against_voucher, account_currency,
 			against, is_opening, creation {select_fields}
@@ -237,6 +237,12 @@ def get_conditions(filters):
 
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
+
+	if filters.get("against_voucher_no"):
+		conditions.append("against_voucher=%(against_voucher_no)s")
+
+	if filters.get("voucher_no_not_in"):
+		conditions.append("voucher_no not in %(voucher_no_not_in)s")
 
 	if filters.get("group_by") == "Group by Party" and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
@@ -289,7 +295,8 @@ def get_conditions(filters):
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if not dimension.disabled:
+			# Ignore 'Finance Book' set up as dimension in below logic, as it is already handled in above section
+			if not dimension.disabled and dimension.document_type != "Finance Book":
 				if filters.get(dimension.fieldname):
 					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
 						filters[dimension.fieldname] = get_dimension_with_children(
@@ -441,6 +448,10 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	for gle in gl_entries:
 		group_by_value = gle.get(group_by)
 		gle.voucher_type = _(gle.voucher_type)
+		gle.voucher_subtype = _(gle.voucher_subtype)
+		gle.against_voucher_type = _(gle.against_voucher_type)
+		gle.remarks = _(gle.remarks)
+		gle.party_type = _(gle.party_type)
 
 		if gle.posting_date < from_date or (cstr(gle.is_opening) == "Yes" and not show_opening_entries):
 			if not group_by_voucher_consolidated:
@@ -604,6 +615,12 @@ def get_columns(filters):
 
 	columns += [
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
+		{
+			"label": _("Voucher Subtype"),
+			"fieldname": "voucher_subtype",
+			"fieldtype": "Data",
+			"width": 180,
+		},
 		{
 			"label": _("Voucher No"),
 			"fieldname": "voucher_no",

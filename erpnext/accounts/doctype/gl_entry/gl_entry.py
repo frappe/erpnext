@@ -28,6 +28,50 @@ exclude_from_linked_with = True
 
 
 class GLEntry(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		account: DF.Link | None
+		account_currency: DF.Link | None
+		against: DF.Text | None
+		against_link: DF.DynamicLink | None
+		against_type: DF.Link | None
+		against_voucher: DF.DynamicLink | None
+		against_voucher_type: DF.Link | None
+		company: DF.Link | None
+		cost_center: DF.Link | None
+		credit: DF.Currency
+		credit_in_account_currency: DF.Currency
+		credit_in_transaction_currency: DF.Currency
+		debit: DF.Currency
+		debit_in_account_currency: DF.Currency
+		debit_in_transaction_currency: DF.Currency
+		due_date: DF.Date | None
+		finance_book: DF.Link | None
+		fiscal_year: DF.Link | None
+		is_advance: DF.Literal["No", "Yes"]
+		is_cancelled: DF.Check
+		is_opening: DF.Literal["No", "Yes"]
+		party: DF.DynamicLink | None
+		party_type: DF.Link | None
+		posting_date: DF.Date | None
+		project: DF.Link | None
+		remarks: DF.Text | None
+		to_rename: DF.Check
+		transaction_currency: DF.Link | None
+		transaction_date: DF.Date | None
+		transaction_exchange_rate: DF.Float
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_subtype: DF.SmallText | None
+		voucher_type: DF.Link | None
+	# end: auto-generated types
+
 	def autoname(self):
 		"""
 		Temporarily name doc for fast insertion
@@ -391,8 +435,8 @@ def update_outstanding_amt(
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.get_cached_value("Account", account, "freeze_account")
 	if frozen_account == "Yes" and not adv_adj:
-		frozen_accounts_modifier = frappe.db.get_value(
-			"Accounts Settings", None, "frozen_accounts_modifier"
+		frozen_accounts_modifier = frappe.db.get_single_value(
+			"Accounts Settings", "frozen_accounts_modifier"
 		)
 
 		if not frozen_accounts_modifier:
