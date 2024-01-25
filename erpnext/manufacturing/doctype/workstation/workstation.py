@@ -156,7 +156,7 @@ def check_if_within_operating_hours(workstation, operation, from_datetime, to_da
 		if not frappe.db.get_single_value("Manufacturing Settings", "allow_production_on_holidays"):
 			check_workstation_for_holiday(workstation, from_datetime, to_datetime)
 
-		if not cint(frappe.db.get_value("Manufacturing Settings", None, "allow_overtime")):
+		if not cint(frappe.db.get_single_value("Manufacturing Settings", "allow_overtime")):
 			is_within_operating_hours(workstation, operation, from_datetime, to_datetime)
 
 

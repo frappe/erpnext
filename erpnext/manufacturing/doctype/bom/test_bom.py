@@ -28,6 +28,28 @@ test_dependencies = ["Item", "Quality Inspection Template"]
 
 class TestBOM(FrappeTestCase):
 	@timeout
+	def test_bom_qty(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		# No error.
+		bom = frappe.new_doc("BOM")
+		item = make_item(properties={"is_stock_item": 1})
+		bom.item = fg_item.item_code
+		bom.quantity = 1
+		bom.append(
+			"items",
+			{
+				"item_code": bom_item.item_code,
+				"qty": 0,
+				"uom": bom_item.stock_uom,
+				"stock_uom": bom_item.stock_uom,
+				"rate": 100.0,
+			},
+		)
+		bom.save()
+		self.assertEqual(bom.items[0].qty, 0)
+
+	@timeout
 	def test_get_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 

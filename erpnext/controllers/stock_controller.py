@@ -162,9 +162,7 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": warehouse_account[sle.warehouse]["account"],
-									"against_type": "Account",
 									"against": expense_account,
-									"against_link": expense_account,
 									"cost_center": item_row.cost_center,
 									"project": item_row.project or self.get("project"),
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
@@ -180,9 +178,7 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": expense_account,
-									"against_type": "Account",
 									"against": warehouse_account[sle.warehouse]["account"],
-									"against_link": warehouse_account[sle.warehouse]["account"],
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 									"debit": -1 * flt(sle.stock_value_difference, precision),
@@ -214,9 +210,7 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": expense_account,
-							"against_type": "Account",
 							"against": warehouse_asset_account,
-							"against_link": warehouse_asset_account,
 							"cost_center": item_row.cost_center,
 							"project": item_row.project or self.get("project"),
 							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
@@ -232,9 +226,7 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": warehouse_asset_account,
-							"against_type": "Account",
 							"against": expense_account,
-							"against_link": expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
 							"credit": sle_rounding_diff,
@@ -395,11 +387,7 @@ class StockController(AccountsController):
 		}
 
 		for row in self.get(table_name):
-			for field in [
-				"serial_and_batch_bundle",
-				"current_serial_and_batch_bundle",
-				"rejected_serial_and_batch_bundle",
-			]:
+			for field in QTY_FIELD.keys():
 				if row.get(field):
 					frappe.get_doc("Serial and Batch Bundle", row.get(field)).set_serial_and_batch_values(
 						self, row, qty_field=QTY_FIELD[field]
@@ -840,7 +828,6 @@ class StockController(AccountsController):
 		credit,
 		remarks,
 		against_account,
-		against_type="Account",
 		debit_in_account_currency=None,
 		credit_in_account_currency=None,
 		account_currency=None,
@@ -855,9 +842,7 @@ class StockController(AccountsController):
 			"cost_center": cost_center,
 			"debit": debit,
 			"credit": credit,
-			"against_type": against_type,
 			"against": against_account,
-			"against_link": against_account,
 			"remarks": remarks,
 		}
 

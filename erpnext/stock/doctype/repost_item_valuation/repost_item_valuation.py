@@ -140,12 +140,7 @@ class RepostItemValuation(Document):
 		return query[0][0] if query else None
 
 	def validate_accounts_freeze(self):
-		acc_settings = frappe.db.get_value(
-			"Accounts Settings",
-			"Accounts Settings",
-			["acc_frozen_upto", "frozen_accounts_modifier"],
-			as_dict=1,
-		)
+		acc_settings = frappe.get_cached_doc("Accounts Settings")
 		if not acc_settings.acc_frozen_upto:
 			return
 		if getdate(self.posting_date) <= getdate(acc_settings.acc_frozen_upto):
@@ -224,7 +219,7 @@ class RepostItemValuation(Document):
 
 		transaction_status = frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus")
 		if transaction_status == 2:
-			msg = _("Cannot cancel as processing of cancelled documents is  pending.")
+			msg = _("Cannot cancel as processing of cancelled documents is pending.")
 			msg += "<br>" + _("Please try again in an hour.")
 			frappe.throw(msg, title=_("Pending processing"))
 

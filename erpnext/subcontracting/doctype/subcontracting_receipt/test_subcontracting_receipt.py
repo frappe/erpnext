@@ -365,17 +365,24 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		fg_warehouse_ac = get_inventory_account(scr.company, scr.items[0].warehouse)
 		supplier_warehouse_ac = get_inventory_account(scr.company, scr.supplier_warehouse)
 		expense_account = scr.items[0].expense_account
-		expected_values = [
-			[fg_warehouse_ac, 2100.0, 0.0],  # FG Amount (D)
-			[supplier_warehouse_ac, 0.0, 1000.0],  # RM Cost (C)
-			[additional_costs_expense_account, 0.0, 100.0],  # Additional Cost (C)
-			[expense_account, 0.0, 1000.0],  # Service Cost (C)
-		]
 
-		for i in range(len(expected_values)):
-			self.assertEqual(expected_values[i][0], gl_entries[i]["account"])
-			self.assertEqual(expected_values[i][1], gl_entries[i]["debit"])
-			self.assertEqual(expected_values[i][2], gl_entries[i]["credit"])
+		if fg_warehouse_ac == supplier_warehouse_ac:
+			expected_values = {
+				fg_warehouse_ac: [2100.0, 1000.0],  # FG Amount (D), RM Cost (C)
+				expense_account: [0.0, 1000.0],  # Service Cost (C)
+				additional_costs_expense_account: [0.0, 100.0],  # Additional Cost (C)
+			}
+		else:
+			expected_values = {
+				fg_warehouse_ac: [2100.0, 0.0],  # FG Amount (D)
+				supplier_warehouse_ac: [0.0, 1000.0],  # RM Cost (C)
+				expense_account: [0.0, 1000.0],  # Service Cost (C)
+				additional_costs_expense_account: [0.0, 100.0],  # Additional Cost (C)
+			}
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
 		scr.reload()
 		scr.cancel()
