@@ -392,7 +392,9 @@ class Asset(AccountsController):
 			if skip_row:
 				continue
 
-			schedule_date = add_months(finance_book.depreciation_start_date, n * cint(finance_book.frequency_of_depreciation))
+			schedule_date = add_months(
+				finance_book.depreciation_start_date, n * cint(finance_book.frequency_of_depreciation)
+			)
 			if not current_fiscal_year_end_date:
 				current_fiscal_year_end_date = get_fiscal_year(finance_book.depreciation_start_date)[2]
 			elif getdate(schedule_date) > getdate(current_fiscal_year_end_date):
