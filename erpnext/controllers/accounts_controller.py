@@ -22,6 +22,7 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 	nowdate,
+	parse_json,
 	today,
 )
 
@@ -832,6 +833,37 @@ class AccountsController(TransactionBase):
 				tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
 			self.extend("taxes", get_taxes_and_charges(tax_master_doctype, self.get("taxes_and_charges")))
+
+	def append_taxes_from_item_tax_template(self):
+		if not frappe.db.get_single_value("Accounts Settings", "add_taxes_from_item_tax_template"):
+			return
+
+		for row in self.items:
+			item_tax_rate = row.get("item_tax_rate")
+			if not item_tax_rate:
+				continue
+
+			if isinstance(item_tax_rate, str):
+				item_tax_rate = parse_json(item_tax_rate)
+
+			for account_head, rate in item_tax_rate.items():
+				row = self.get_tax_row(account_head)
+
+				if not row:
+					self.append(
+						"taxes",
+						{
+							"charge_type": "On Net Total",
+							"account_head": account_head,
+							"rate": 0,
+							"description": account_head,
+						},
+					)
+
+	def get_tax_row(self, account_head):
+		for row in self.taxes:
+			if row.account_head == account_head:
+				return row
 
 	def set_other_charges(self):
 		self.set("taxes", [])
