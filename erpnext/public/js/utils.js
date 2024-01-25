@@ -464,9 +464,9 @@ erpnext.utils.select_alternate_items = function(opts) {
 					default: "",
 					in_list_view: 1,
 					label: __('Alternate Item'),
-					onchange: function() {
-						const item_code = this.get_value();
-						const warehouse = this.grid_row.on_grid_fields_dict.warehouse.get_value();
+					onchange: function(e) {
+						const item_code = e.value;
+						const warehouse = e.grid_row.on_grid_fields_dict.warehouse.get_value();
 						if (item_code && warehouse) {
 							frappe.call({
 								method: "erpnext.stock.utils.get_latest_stock_qty",
@@ -475,8 +475,8 @@ erpnext.utils.select_alternate_items = function(opts) {
 									warehouse: warehouse
 								},
 								callback: (r) => {
-									this.grid_row.on_grid_fields_dict
-										.actual_qty.set_value(r.message || 0);
+									e.grid_row.on_grid_fields_dict
+										.actual_qty.set_value(r.message?r.message:0);
 								}
 							})
 						}
@@ -496,9 +496,9 @@ erpnext.utils.select_alternate_items = function(opts) {
 					default: "",
 					in_list_view: 1,
 					label: __('Warehouse'),
-					onchange: function() {
-						const warehouse = this.get_value();
-						const item_code = this.grid_row.on_grid_fields_dict.item_code.get_value();
+					onchange: function(e) {
+						const warehouse = e.value;
+						const item_code = e.grid_row.on_grid_fields_dict.alternate_item.get_value();
 						if (item_code && warehouse) {
 							frappe.call({
 								method: "erpnext.stock.utils.get_latest_stock_qty",
@@ -507,8 +507,8 @@ erpnext.utils.select_alternate_items = function(opts) {
 									warehouse: warehouse
 								},
 								callback: (r) => {
-									this.grid_row.on_grid_fields_dict
-										.actual_qty.set_value(r.message || 0);
+									e.grid_row.on_grid_fields_dict
+										.actual_qty.set_value(r.message?r.message:0);
 								}
 							})
 						}
