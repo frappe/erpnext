@@ -845,7 +845,7 @@ class TestDepreciationMethods(AssetSetup):
 			["2030-12-31", 28630.14, 28630.14],
 			["2031-12-31", 35684.93, 64315.07],
 			["2032-12-31", 17842.47, 82157.54],
-			["2033-06-06", 5342.46, 87500.0],
+			["2033-06-06", 5342.47, 87500.01],
 		]
 
 		schedules = [
@@ -957,7 +957,7 @@ class TestDepreciationBasics(AssetSetup):
 			},
 		)
 
-		depreciation_amount = get_depreciation_amount(asset, 100000, asset.finance_books[0])
+		depreciation_amount = get_depreciation_amount(asset, 100000, 100000, asset.finance_books[0])
 		self.assertEqual(depreciation_amount, 30000)
 
 	def test_make_depreciation_schedule(self):
