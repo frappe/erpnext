@@ -7,6 +7,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		super.setup();
 		let me = this;
 
+
 		this.frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
 
 		frappe.flags.hide_serial_batch_dialog = true;
