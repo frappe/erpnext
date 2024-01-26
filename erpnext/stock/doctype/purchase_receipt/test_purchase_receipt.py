@@ -11,7 +11,19 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+<<<<<<< HEAD
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError, get_serial_nos
+=======
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	SerialNoDuplicateError,
+	SerialNoExistsInFutureTransactionError,
+)
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
+>>>>>>> dbd4dae3d9 (test: Internal transfer using purchase receipt)
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 
@@ -609,7 +621,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		po.cancel()
 
 	def test_serial_no_against_purchase_receipt(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
@@ -893,6 +904,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+		from erpnext.stock.get_item_details import get_valuation_rate
+		from erpnext.stock.utils import get_stock_balance
 
 		prepare_data_for_internal_transfer()
 
@@ -906,6 +922,22 @@ class TestPurchaseReceipt(FrappeTestCase):
 			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 		)
+
+		if (
+			get_valuation_rate(
+				pr1.items[0].item_code, "_Test Company with perpetual inventory", warehouse="Stores - TCP1"
+			)
+			!= 50
+		):
+			balance = get_stock_balance(item_code=pr1.items[0].item_code, warehouse="Stores - TCP1")
+			create_stock_reconciliation(
+				item_code=pr1.items[0].item_code,
+				company="_Test Company with perpetual inventory",
+				warehouse="Stores - TCP1",
+				qty=balance,
+				rate=50,
+				do_not_save=True,
+			)
 
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
@@ -944,7 +976,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
 
 		expected_gle = [
-			["Stock In Hand - TCP1", 272.5, 0.0],
+			["Stock In Hand - TCP1", 250.0, 0.0],
+			["Cost of Goods Sold - TCP1", 22.5, 0.0],
 			["_Test Account Stock In Hand - TCP1", 0.0, 250.0],
 			["_Test Account Shipping Charges - TCP1", 0.0, 22.5],
 		]
