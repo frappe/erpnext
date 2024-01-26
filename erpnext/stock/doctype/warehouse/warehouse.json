@@ -173,7 +173,7 @@
   {
    "fieldname": "state",
    "fieldtype": "Data",
-   "label": "State",
+   "label": "State/Province",
    "oldfieldname": "state",
    "oldfieldtype": "Select"
   },
