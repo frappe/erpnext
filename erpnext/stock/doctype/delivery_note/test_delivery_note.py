@@ -1586,8 +1586,13 @@ def create_delivery_note(**args):
 		{
 			"item_code": args.item or args.item_code or "_Test Item",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
+<<<<<<< HEAD
 			"qty": args.qty or 1,
 			"rate": args.rate if args.get("rate") is not None else 100,
+=======
+			"qty": args.get("qty", 1),
+			"rate": args.get("rate", 100),
+>>>>>>> dbd4dae3d9 (test: Internal transfer using purchase receipt)
 			"conversion_factor": 1.0,
 			"serial_and_batch_bundle": bundle_id,
 			"allow_zero_valuation_rate": args.allow_zero_valuation_rate or 1,
