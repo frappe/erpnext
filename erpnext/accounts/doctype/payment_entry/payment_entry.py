@@ -178,6 +178,7 @@ class PaymentEntry(AccountsController):
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
+		self.set_total_in_words()
 
 	def on_submit(self):
 		if self.difference_amount:
@@ -785,6 +786,21 @@ class PaymentEntry(AccountsController):
 			self.status = "Draft"
 
 		self.db_set("status", self.status, update_modified=True)
+
+	def set_total_in_words(self):
+		from frappe.utils import money_in_words
+
+		if self.payment_type in ("Pay", "Internal Transfer"):
+			base_amount = abs(self.base_paid_amount)
+			amount = abs(self.paid_amount)
+			currency = self.paid_from_account_currency
+		elif self.payment_type == "Receive":
+			base_amount = abs(self.base_received_amount)
+			amount = abs(self.received_amount)
+			currency = self.paid_to_account_currency
+
+		self.base_in_words = money_in_words(base_amount, self.company_currency)
+		self.in_words = money_in_words(amount, currency)
 
 	def set_tax_withholding(self):
 		if self.party_type != "Supplier":
