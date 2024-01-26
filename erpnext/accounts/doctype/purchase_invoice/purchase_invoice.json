@@ -1248,6 +1248,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
+   "no_copy": 1,
    "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nPartly Paid\nUnpaid\nOverdue\nCancelled\nInternal Transfer",
    "print_hide": 1
   },
@@ -1594,7 +1595,11 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-11-03 15:47:30.319200",
+=======
+ "modified": "2024-01-26 10:46:00.469053",
+>>>>>>> 99b839d2b6 (chore: failing ci tests)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
