@@ -64,6 +64,7 @@
   "warehouse",
   "from_warehouse",
   "quality_inspection",
+  "add_serial_batch_bundle",
   "serial_and_batch_bundle",
   "serial_no",
   "col_br_wh",
@@ -913,12 +914,18 @@
    "fieldtype": "Link",
    "label": "WIP Composite Asset",
    "options": "Asset"
+  },
+  {
+   "depends_on": "eval:parent.update_stock === 1",
+   "fieldname": "add_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-12-25 22:00:28.043555",
+ "modified": "2024-01-21 19:46:25.537861",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

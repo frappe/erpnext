@@ -25,6 +25,10 @@ erpnext.accounts.dimensions = {
 	},
 
 	setup_filters(frm, doctype) {
+		if (doctype == 'Payment Entry' && this.accounting_dimensions) {
+			frm.dimension_filters = this.accounting_dimensions
+		}
+
 		if (this.accounting_dimensions) {
 			this.accounting_dimensions.forEach((dimension) => {
 				frappe.model.with_doctype(dimension['document_type'], () => {
