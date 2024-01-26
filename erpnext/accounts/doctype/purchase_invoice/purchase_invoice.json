@@ -1253,6 +1253,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
+   "no_copy": 1,
    "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nPartly Paid\nUnpaid\nOverdue\nCancelled\nInternal Transfer",
    "print_hide": 1
   },
@@ -1612,7 +1613,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-29 15:35:44.697496",
+ "modified": "2024-01-26 10:46:00.469053",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
