@@ -146,6 +146,7 @@ class AssetCapitalization(StockController):
 	def cancel_target_asset(self):
 		if self.entry_type == "Capitalization" and self.target_asset:
 			asset_doc = frappe.get_doc("Asset", self.target_asset)
+			frappe.db.set_value("Asset", self.target_asset, "capitalized_in", None)
 			if asset_doc.docstatus == 1:
 				asset_doc.cancel()
 

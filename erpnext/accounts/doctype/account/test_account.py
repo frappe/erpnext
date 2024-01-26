@@ -119,7 +119,7 @@ class TestAccount(unittest.TestCase):
 			InvalidAccountMergeError,
 			merge_account,
 			"Capital Stock - _TC",
-			"Softwares - _TC",
+			"Software - _TC",
 		)
 
 		# Raise error as currency doesn't match
