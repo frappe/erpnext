@@ -105,30 +105,45 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 				this.frm.has_items = false;
 			}
 
-			if (serial_no && this.is_duplicate_serial_no(row, item_code, serial_no)) {
-				this.clean_up();
-				reject();
-				return;
+			if (serial_no) {
+				this.is_duplicate_serial_no(row, item_code, serial_no)
+					.then((is_duplicate) => {
+						if (!is_duplicate) {
+							this.run_serially_tasks(row, data, resolve);
+						} else {
+							this.clean_up();
+							reject();
+							return;
+						}
+					});
+			} else {
+				this.run_serially_tasks(row, data, resolve);
 			}
 
-			frappe.run_serially([
-				() => this.set_serial_and_batch(row, item_code, serial_no, batch_no),
-				() => this.set_barcode(row, barcode),
-				() => this.set_item(row, item_code, barcode, batch_no, serial_no).then(qty => {
-					this.show_scan_message(row.idx, row.item_code, qty);
-				}),
-				() => this.set_barcode_uom(row, uom),
-				() => this.clean_up(),
-				() => resolve(row),
-				() => {
-					if (row.serial_and_batch_bundle && !this.frm.is_new()) {
-						this.frm.save();
-					}
 
-					frappe.flags.trigger_from_barcode_scanner = false;
-				}
-			]);
 		});
+	}
+
+	run_serially_tasks(row, data, resolve) {
+		const {item_code, barcode, batch_no, serial_no, uom} = data;
+
+		frappe.run_serially([
+			() => this.set_serial_and_batch(row, item_code, serial_no, batch_no),
+			() => this.set_barcode(row, barcode),
+			() => this.set_item(row, item_code, barcode, batch_no, serial_no).then(qty => {
+				this.show_scan_message(row.idx, row.item_code, qty);
+			}),
+			() => this.set_barcode_uom(row, uom),
+			() => this.clean_up(),
+			() => {
+				if (row.serial_and_batch_bundle && !this.frm.is_new()) {
+					this.frm.save();
+				}
+
+				frappe.flags.trigger_from_barcode_scanner = false;
+			},
+			() => resolve(row),
+		]);
 	}
 
 	set_item(row, item_code, barcode, batch_no, serial_no) {
@@ -475,26 +490,32 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		}
 	}
 
-	is_duplicate_serial_no(row, item_code, serial_no) {
-		if (this.frm.is_new() || !row.serial_and_batch_bundle) {
-			let is_duplicate = this.check_duplicate_serial_no_in_localstorage(item_code, serial_no);
-			if (is_duplicate) {
-				this.show_alert(__("Serial No {0} is already added", [serial_no]), "orange");
-			}
-
-			return is_duplicate;
-		} else if (row.serial_and_batch_bundle) {
-			this.check_duplicate_serial_no_in_db(row, serial_no, (r) => {
-				if (r.message) {
+	async is_duplicate_serial_no(row, item_code, serial_no) {
+		let is_duplicate = false;
+		const promise = new Promise((resolve, reject) => {
+			if (this.frm.is_new() || !row.serial_and_batch_bundle) {
+				is_duplicate = this.check_duplicate_serial_no_in_localstorage(item_code, serial_no);
+				if (is_duplicate) {
 					this.show_alert(__("Serial No {0} is already added", [serial_no]), "orange");
 				}
 
-				return r.message;
-			})
-		}
+				resolve(is_duplicate);
+			} else if (row.serial_and_batch_bundle) {
+				this.check_duplicate_serial_no_in_db(row, serial_no, (r) => {
+					if (r.message) {
+						this.show_alert(__("Serial No {0} is already added", [serial_no]), "orange");
+					}
+
+					is_duplicate = r.message;
+					resolve(is_duplicate);
+				})
+			}
+		});
+
+		return await promise;
 	}
 
-	async check_duplicate_serial_no_in_db(row, serial_no, response) {
+	check_duplicate_serial_no_in_db(row, serial_no, response) {
 		frappe.call({
 			method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.is_duplicate_serial_no",
 			args: {
@@ -504,7 +525,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 			callback(r) {
 				response(r);
 			}
-		})
+		});
 	}
 
 	check_duplicate_serial_no_in_localstorage(item_code, serial_no) {

@@ -193,7 +193,7 @@ class PricingRule(Document):
 
 	def validate_applicable_for_selling_or_buying(self):
 		if not self.selling and not self.buying:
-			throw(_("Atleast one of the Selling or Buying must be selected"))
+			throw(_("At least one of the Selling or Buying must be selected"))
 
 		if not self.selling and self.applicable_for in [
 			"Customer",
@@ -579,11 +579,16 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 			item_details[field] += pricing_rule.get(field, 0) if pricing_rule else args.get(field, 0)
 
 
+@frappe.whitelist()
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, rate=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
 	)
+
+	if isinstance(item_details, str):
+		item_details = json.loads(item_details)
+		item_details = frappe._dict(item_details)
 
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d):

@@ -36,13 +36,13 @@ def get():
 				"account_number": "1100-1600",
 			},
 			_("Fixed Assets"): {
-				_("Capital Equipments"): {"account_type": "Fixed Asset", "account_number": "1710"},
-				_("Electronic Equipments"): {"account_type": "Fixed Asset", "account_number": "1720"},
-				_("Furnitures and Fixtures"): {"account_type": "Fixed Asset", "account_number": "1730"},
-				_("Office Equipments"): {"account_type": "Fixed Asset", "account_number": "1740"},
+				_("Capital Equipment"): {"account_type": "Fixed Asset", "account_number": "1710"},
+				_("Electronic Equipment"): {"account_type": "Fixed Asset", "account_number": "1720"},
+				_("Furniture and Fixtures"): {"account_type": "Fixed Asset", "account_number": "1730"},
+				_("Office Equipment"): {"account_type": "Fixed Asset", "account_number": "1740"},
 				_("Plants and Machineries"): {"account_type": "Fixed Asset", "account_number": "1750"},
 				_("Buildings"): {"account_type": "Fixed Asset", "account_number": "1760"},
-				_("Softwares"): {"account_type": "Fixed Asset", "account_number": "1770"},
+				_("Software"): {"account_type": "Fixed Asset", "account_number": "1770"},
 				_("Accumulated Depreciation"): {
 					"account_type": "Accumulated Depreciation",
 					"account_number": "1780",

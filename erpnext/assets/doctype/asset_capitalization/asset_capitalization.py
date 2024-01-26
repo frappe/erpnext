@@ -136,10 +136,19 @@ class AssetCapitalization(StockController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Asset",
 		)
+		self.cancel_target_asset()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.restore_consumed_asset_items()
+
+	def cancel_target_asset(self):
+		if self.entry_type == "Capitalization" and self.target_asset:
+			asset_doc = frappe.get_doc("Asset", self.target_asset)
+			frappe.db.set_value("Asset", self.target_asset, "capitalized_in", None)
+			if asset_doc.docstatus == 1:
+				asset_doc.cancel()
 
 	def set_title(self):
 		self.title = self.target_asset_name or self.target_item_name or self.target_item_code
@@ -485,9 +494,7 @@ class AssetCapitalization(StockController):
 						self.get_gl_dict(
 							{
 								"account": account,
-								"against_type": "Account",
 								"against": target_account,
-								"against_link": target_account,
 								"cost_center": item_row.cost_center,
 								"project": item_row.get("project") or self.get("project"),
 								"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -528,9 +535,7 @@ class AssetCapitalization(StockController):
 			self.set_consumed_asset_status(asset)
 
 			for gle in fixed_asset_gl_entries:
-				gle["against_type"] = "Account"
 				gle["against"] = target_account
-				gle["against_link"] = target_account
 				gl_entries.append(self.get_gl_dict(gle, item=item))
 				target_against.add(gle["account"])
 
@@ -546,9 +551,7 @@ class AssetCapitalization(StockController):
 				self.get_gl_dict(
 					{
 						"account": item_row.expense_account,
-						"against_type": "Account",
 						"against": target_account,
-						"against_link": target_account,
 						"cost_center": item_row.cost_center,
 						"project": item_row.get("project") or self.get("project"),
 						"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -559,46 +562,41 @@ class AssetCapitalization(StockController):
 			)
 
 	def get_gl_entries_for_target_item(self, gl_entries, target_against, precision):
-		for target_account in target_against:
-			if self.target_is_fixed_asset:
-				# Capitalization
+		if self.target_is_fixed_asset:
+			# Capitalization
+			gl_entries.append(
+				self.get_gl_dict(
+					{
+						"account": self.target_fixed_asset_account,
+						"against": ", ".join(target_against),
+						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+						"debit": flt(self.total_value, precision),
+						"cost_center": self.get("cost_center"),
+					},
+					item=self,
+				)
+			)
+		else:
+			# Target Stock Item
+			sle_list = self.sle_map.get(self.name)
+			for sle in sle_list:
+				stock_value_difference = flt(sle.stock_value_difference, precision)
+				account = self.warehouse_account[sle.warehouse]["account"]
+
 				gl_entries.append(
 					self.get_gl_dict(
 						{
-							"account": self.target_fixed_asset_account,
-							"against_type": "Account",
-							"against": target_account,
-							"against_link": target_account,
-							"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-							"debit": flt(self.total_value, precision) / len(target_against),
-							"cost_center": self.get("cost_center"),
+							"account": account,
+							"against": ", ".join(target_against),
+							"cost_center": self.cost_center,
+							"project": self.get("project"),
+							"remarks": self.get("remarks") or "Accounting Entry for Stock",
+							"debit": stock_value_difference,
 						},
+						self.warehouse_account[sle.warehouse]["account_currency"],
 						item=self,
 					)
 				)
-			else:
-				# Target Stock Item
-				sle_list = self.sle_map.get(self.name)
-				for sle in sle_list:
-					stock_value_difference = flt(sle.stock_value_difference, precision)
-					account = self.warehouse_account[sle.warehouse]["account"]
-
-					gl_entries.append(
-						self.get_gl_dict(
-							{
-								"account": account,
-								"against_type": "Account",
-								"against": target_account,
-								"against_link": target_account,
-								"cost_center": self.cost_center,
-								"project": self.get("project"),
-								"remarks": self.get("remarks") or "Accounting Entry for Stock",
-								"debit": stock_value_difference / len(target_against),
-							},
-							self.warehouse_account[sle.warehouse]["account_currency"],
-							item=self,
-						)
-					)
 
 	def create_target_asset(self):
 		if (
@@ -892,7 +890,6 @@ def get_consumed_asset_details(args):
 		out.cost_center = get_default_cost_center(
 			args, item_defaults, item_group_defaults, brand_defaults
 		)
-
 	return out
 
 
@@ -940,10 +937,27 @@ def get_items_tagged_to_wip_composite_asset(asset):
 		"qty",
 		"valuation_rate",
 		"amount",
+		"is_fixed_asset",
+		"parent",
 	]
 
 	pr_items = frappe.get_all(
-		"Purchase Receipt Item", filters={"wip_composite_asset": asset}, fields=fields
+		"Purchase Receipt Item", filters={"wip_composite_asset": asset, "docstatus": 1}, fields=fields
 	)
 
-	return pr_items
+	stock_items = []
+	asset_items = []
+	for d in pr_items:
+		if not d.is_fixed_asset:
+			stock_items.append(frappe._dict(d))
+		else:
+			asset_details = frappe.db.get_value(
+				"Asset",
+				{"item_code": d.item_code, "purchase_receipt": d.parent},
+				["name as asset", "asset_name"],
+				as_dict=1,
+			)
+			d.update(asset_details)
+			asset_items.append(frappe._dict(d))
+
+	return stock_items, asset_items

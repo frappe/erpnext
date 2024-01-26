@@ -82,11 +82,11 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2020-11-05 12:16:53.081573",
+ "modified": "2024-01-17 13:06:01.608953",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
- "owner": "Administrator",
+  "owner": "Administrator",
  "permissions": [
   {
    "create": 1,
@@ -118,6 +118,14 @@
   {
    "read": 1,
    "role": "Employee"
+  },
+  {
+   "read": 1,
+   "role": "Accounts Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock Manager"
   }
  ],
  "show_name_in_global_search": 1,

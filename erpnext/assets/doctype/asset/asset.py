@@ -162,6 +162,7 @@ class Asset(AccountsController):
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
+		self.cancel_capitalization()
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
 		self.set_status()
@@ -517,6 +518,13 @@ class Asset(AccountsController):
 			movement = frappe.get_doc("Asset Movement", movement.get("name"))
 			movement.cancel()
 
+	def cancel_capitalization(self):
+		if self.capitalized_in:
+			self.db_set("capitalized_in", None)
+			asset_capitalization = frappe.get_doc("Asset Capitalization", self.capitalized_in)
+			if asset_capitalization.docstatus == 1:
+				asset_capitalization.cancel()
+
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
 			for row in self.get("finance_books"):
@@ -697,9 +705,7 @@ class Asset(AccountsController):
 				self.get_gl_dict(
 					{
 						"account": cwip_account,
-						"against_type": "Account",
 						"against": fixed_asset_account,
-						"against_link": fixed_asset_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
 						"credit": self.purchase_receipt_amount,
@@ -714,9 +720,7 @@ class Asset(AccountsController):
 				self.get_gl_dict(
 					{
 						"account": fixed_asset_account,
-						"against_type": "Account",
 						"against": cwip_account,
-						"against_link": cwip_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
 						"debit": self.purchase_receipt_amount,
@@ -1004,7 +1008,7 @@ def make_asset_movement(assets, purpose=None):
 		assets = json.loads(assets)
 
 	if len(assets) == 0:
-		frappe.throw(_("Atleast one asset has to be selected."))
+		frappe.throw(_("At least one asset has to be selected."))
 
 	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.quantity = len(assets)
@@ -1031,6 +1035,8 @@ def is_cwip_accounting_enabled(asset_category):
 @frappe.whitelist()
 def get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
+	if not asset.calculate_depreciation:
+		return flt(asset.value_after_depreciation)
 
 	return asset.get_value_after_depreciation(finance_book)
 
