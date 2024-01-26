@@ -155,14 +155,14 @@ class JournalEntry(AccountsController):
 			msgprint(_("The task has been enqueued as a background job."), alert=True)
 			self.queue_action("submit", timeout=4600)
 		else:
-			self._submit()
+			return self._submit()
 
 	def cancel(self):
 		if len(self.accounts) > 100:
 			msgprint(_("The task has been enqueued as a background job."), alert=True)
 			self.queue_action("cancel", timeout=4600)
 		else:
-			self._cancel()
+			return self._cancel()
 
 	def on_submit(self):
 		self.validate_cheque_info()
