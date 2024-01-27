@@ -6,13 +6,8 @@ from collections import defaultdict
 from typing import List, Tuple
 
 import frappe
-<<<<<<< HEAD
-from frappe import _
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
-=======
 from frappe import _, bold
-from frappe.utils import cint, flt, get_link_to_form, getdate
->>>>>>> 8fdc244e16 (fix: prevent extra transfer against inter transfer transaction (#39213))
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import (
