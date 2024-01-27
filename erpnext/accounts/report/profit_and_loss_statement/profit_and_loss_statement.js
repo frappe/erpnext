@@ -8,6 +8,21 @@ frappe.query_reports["Profit and Loss Statement"] = $.extend(
 
 erpnext.utils.add_dimensions("Profit and Loss Statement", 10);
 
+frappe.query_reports["Profit and Loss Statement"]["filters"].push(
+	{
+		"fieldname": "selected_view",
+		"label": __("Select View"),
+		"fieldtype": "Select",
+		"options": [
+			{ "value": "Report", "label": __("Report View") },
+			{ "value": "Growth", "label": __("Growth View") },
+			{ "value": "Margin", "label": __("Margin View") },
+		],
+		"default": "Report",
+		"reqd": 1
+	},
+);
+
 frappe.query_reports["Profit and Loss Statement"]["filters"].push({
 	fieldname: "accumulated_values",
 	label: __("Accumulated Values"),
