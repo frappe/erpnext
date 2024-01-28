@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, bold, qb, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
+from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import (
@@ -28,6 +29,7 @@ from frappe.utils import (
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
+	get_dimensions,
 )
 from erpnext.accounts.doctype.pricing_rule.utils import (
 	apply_pricing_rule_for_free_items,
@@ -1246,7 +1248,9 @@ class AccountsController(TransactionBase):
 					return True
 		return False
 
-	def make_exchange_gain_loss_journal(self, args: dict = None) -> None:
+	def make_exchange_gain_loss_journal(
+		self, args: dict = None, dimensions_dict: dict = None
+	) -> None:
 		"""
 		Make Exchange Gain/Loss journal for Invoices and Payments
 		"""
@@ -1299,6 +1303,7 @@ class AccountsController(TransactionBase):
 									self.name,
 									arg.get("referenced_row"),
 									arg.get("cost_center"),
+									dimensions_dict,
 								)
 								frappe.msgprint(
 									_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1379,6 +1384,7 @@ class AccountsController(TransactionBase):
 							self.name,
 							d.idx,
 							self.cost_center,
+							dimensions_dict,
 						)
 						frappe.msgprint(
 							_("Exchange Gain/Loss amount has been booked through {0}").format(
@@ -1443,7 +1449,13 @@ class AccountsController(TransactionBase):
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 
-			reconcile_against_document(lst)
+			# pass dimension values to utility method
+			active_dimensions = get_dimensions()[0]
+			for x in lst:
+				for dim in active_dimensions:
+					if self.get(dim.fieldname):
+						x.update({dim.fieldname: self.get(dim.fieldname)})
+			reconcile_against_document(lst, active_dimensions=active_dimensions)
 
 	def on_cancel(self):
 		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
@@ -2712,47 +2724,37 @@ def get_common_query(
 		q = q.select((payment_entry.target_exchange_rate).as_("exchange_rate"))
 
 	if condition:
-		if condition.get("name", None):
-			q = q.where(payment_entry.name.like(f"%{condition.get('name')}%"))
+		# conditions should be built as an array and passed as Criterion
+		common_filter_conditions = []
 
-		q = q.where(payment_entry.company == condition["company"])
-		q = (
-			q.where(payment_entry.posting_date >= condition["from_payment_date"])
-			if condition.get("from_payment_date")
-			else q
-		)
-		q = (
-			q.where(payment_entry.posting_date <= condition["to_payment_date"])
-			if condition.get("to_payment_date")
-			else q
-		)
+		common_filter_conditions.append(payment_entry.company == condition["company"])
+		if condition.get("name", None):
+			common_filter_conditions.append(payment_entry.name.like(f"%{condition.get('name')}%"))
+
+		if condition.get("from_payment_date"):
+			common_filter_conditions.append(payment_entry.posting_date.gte(condition["from_payment_date"]))
+
+		if condition.get("to_payment_date"):
+			common_filter_conditions.append(payment_entry.posting_date.lte(condition["to_payment_date"]))
+
 		if condition.get("get_payments") == True:
-			q = (
-				q.where(payment_entry.cost_center == condition["cost_center"])
-				if condition.get("cost_center")
-				else q
-			)
-			q = (
-				q.where(payment_entry.unallocated_amount >= condition["minimum_payment_amount"])
-				if condition.get("minimum_payment_amount")
-				else q
-			)
-			q = (
-				q.where(payment_entry.unallocated_amount <= condition["maximum_payment_amount"])
-				if condition.get("maximum_payment_amount")
-				else q
-			)
-		else:
-			q = (
-				q.where(payment_entry.total_debit >= condition["minimum_payment_amount"])
-				if condition.get("minimum_payment_amount")
-				else q
-			)
-			q = (
-				q.where(payment_entry.total_debit <= condition["maximum_payment_amount"])
-				if condition.get("maximum_payment_amount")
-				else q
-			)
+			if condition.get("cost_center"):
+				common_filter_conditions.append(payment_entry.cost_center == condition["cost_center"])
+
+			if condition.get("accounting_dimensions"):
+				for field, val in condition.get("accounting_dimensions").items():
+					common_filter_conditions.append(payment_entry[field] == val)
+
+			if condition.get("minimum_payment_amount"):
+				common_filter_conditions.append(
+					payment_entry.unallocated_amount.gte(condition["minimum_payment_amount"])
+				)
+
+			if condition.get("maximum_payment_amount"):
+				common_filter_conditions.append(
+					payment_entry.unallocated_amount.lte(condition["maximum_payment_amount"])
+				)
+		q = q.where(Criterion.all(common_filter_conditions))
 
 	q = q.orderby(payment_entry.posting_date)
 	q = q.limit(limit) if limit else q
