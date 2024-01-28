@@ -8,6 +8,7 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_to_date, flt, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.stock.doctype.item.test_item import (
 	create_item,
 	make_item,
@@ -53,6 +54,18 @@ class TestStockEntry(FrappeTestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 		frappe.set_user("Administrator")
+
+	def test_stock_entry_qty(self):
+		item_code = "_Test Item 2"
+		warehouse = "_Test Warehouse - _TC"
+		se = make_stock_entry(item_code=item_code, target=warehouse, qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			se.save()
+
+		# No error with qty=1
+		se.items[0].qty = 1
+		se.save()
+		self.assertEqual(se.items[0].qty, 1)
 
 	def test_fifo(self):
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
@@ -1732,6 +1745,45 @@ class TestStockEntry(FrappeTestCase):
 
 		self.assertFalse(doc.is_enqueue_action())
 		frappe.flags.in_test = True
+
+	def test_negative_batch(self):
+		item_code = "Test Negative Batch Item - 001"
+		make_item(
+			item_code,
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_naming_series": "Test-BCH-NNS.#####"},
+		)
+
+		se1 = make_stock_entry(
+			item_code=item_code,
+			purpose="Material Receipt",
+			qty=100,
+			target="_Test Warehouse - _TC",
+		)
+
+		se1.reload()
+
+		batch_no = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+
+		se2 = make_stock_entry(
+			item_code=item_code,
+			purpose="Material Issue",
+			batch_no=batch_no,
+			qty=10,
+			source="_Test Warehouse - _TC",
+		)
+
+		se2.reload()
+
+		se3 = make_stock_entry(
+			item_code=item_code,
+			purpose="Material Receipt",
+			qty=100,
+			target="_Test Warehouse - _TC",
+		)
+
+		se3.reload()
+
+		self.assertRaises(frappe.ValidationError, se1.cancel)
 
 
 def make_serialized_item(**args):

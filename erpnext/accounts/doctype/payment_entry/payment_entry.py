@@ -13,6 +13,7 @@ from pypika import Case
 from pypika.functions import Coalesce, Sum
 
 import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.bank_account.bank_account import (
 	get_bank_account_details,
 	get_party_bank_account,
@@ -50,6 +51,88 @@ class InvalidPaymentEntry(ValidationError):
 
 
 class PaymentEntry(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.advance_taxes_and_charges.advance_taxes_and_charges import (
+			AdvanceTaxesandCharges,
+		)
+		from erpnext.accounts.doctype.payment_entry_deduction.payment_entry_deduction import (
+			PaymentEntryDeduction,
+		)
+		from erpnext.accounts.doctype.payment_entry_reference.payment_entry_reference import (
+			PaymentEntryReference,
+		)
+
+		amended_from: DF.Link | None
+		apply_tax_withholding_amount: DF.Check
+		auto_repeat: DF.Link | None
+		bank: DF.ReadOnly | None
+		bank_account: DF.Link | None
+		bank_account_no: DF.ReadOnly | None
+		base_paid_amount: DF.Currency
+		base_paid_amount_after_tax: DF.Currency
+		base_received_amount: DF.Currency
+		base_received_amount_after_tax: DF.Currency
+		base_total_allocated_amount: DF.Currency
+		base_total_taxes_and_charges: DF.Currency
+		book_advance_payments_in_separate_party_account: DF.Check
+		clearance_date: DF.Date | None
+		company: DF.Link
+		contact_email: DF.Data | None
+		contact_person: DF.Link | None
+		cost_center: DF.Link | None
+		custom_remarks: DF.Check
+		deductions: DF.Table[PaymentEntryDeduction]
+		difference_amount: DF.Currency
+		letter_head: DF.Link | None
+		mode_of_payment: DF.Link | None
+		naming_series: DF.Literal["ACC-PAY-.YYYY.-"]
+		paid_amount: DF.Currency
+		paid_amount_after_tax: DF.Currency
+		paid_from: DF.Link
+		paid_from_account_balance: DF.Currency
+		paid_from_account_currency: DF.Link
+		paid_from_account_type: DF.Data | None
+		paid_to: DF.Link
+		paid_to_account_balance: DF.Currency
+		paid_to_account_currency: DF.Link
+		paid_to_account_type: DF.Data | None
+		party: DF.DynamicLink | None
+		party_balance: DF.Currency
+		party_bank_account: DF.Link | None
+		party_name: DF.Data | None
+		party_type: DF.Link | None
+		payment_order: DF.Link | None
+		payment_order_status: DF.Literal["Initiated", "Payment Ordered"]
+		payment_type: DF.Literal["Receive", "Pay", "Internal Transfer"]
+		posting_date: DF.Date
+		print_heading: DF.Link | None
+		project: DF.Link | None
+		purchase_taxes_and_charges_template: DF.Link | None
+		received_amount: DF.Currency
+		received_amount_after_tax: DF.Currency
+		reference_date: DF.Date | None
+		reference_no: DF.Data | None
+		references: DF.Table[PaymentEntryReference]
+		remarks: DF.SmallText | None
+		sales_taxes_and_charges_template: DF.Link | None
+		source_exchange_rate: DF.Float
+		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
+		target_exchange_rate: DF.Float
+		tax_withholding_category: DF.Link | None
+		taxes: DF.Table[AdvanceTaxesandCharges]
+		title: DF.Data | None
+		total_allocated_amount: DF.Currency
+		total_taxes_and_charges: DF.Currency
+		unallocated_amount: DF.Currency
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(PaymentEntry, self).__init__(*args, **kwargs)
 		if not self.is_new():
@@ -95,6 +178,7 @@ class PaymentEntry(AccountsController):
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
+		self.set_total_in_words()
 
 	def on_submit(self):
 		if self.difference_amount:
@@ -107,7 +191,7 @@ class PaymentEntry(AccountsController):
 
 	def set_liability_account(self):
 		# Auto setting liability account should only be done during 'draft' status
-		if self.docstatus > 0:
+		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
 			return
 
 		if not frappe.db.get_value(
@@ -256,6 +340,7 @@ class PaymentEntry(AccountsController):
 					"get_outstanding_invoices": True,
 					"get_orders_to_be_billed": True,
 					"vouchers": vouchers,
+					"book_advance_payments_in_separate_party_account": self.book_advance_payments_in_separate_party_account,
 				},
 				validate=True,
 			)
@@ -369,12 +454,12 @@ class PaymentEntry(AccountsController):
 				self.set(self.party_account_field, party_account)
 				self.party_account = party_account
 
-		if self.paid_from and not (self.paid_from_account_currency or self.paid_from_account_balance):
+		if self.paid_from and not self.paid_from_account_currency and not self.paid_from_account_balance:
 			acc = get_account_details(self.paid_from, self.posting_date, self.cost_center)
 			self.paid_from_account_currency = acc.account_currency
 			self.paid_from_account_balance = acc.account_balance
 
-		if self.paid_to and not (self.paid_to_account_currency or self.paid_to_account_balance):
+		if self.paid_to and not self.paid_to_account_currency and not self.paid_to_account_balance:
 			acc = get_account_details(self.paid_to, self.posting_date, self.cost_center)
 			self.paid_to_account_currency = acc.account_currency
 			self.paid_to_account_balance = acc.account_balance
@@ -390,8 +475,9 @@ class PaymentEntry(AccountsController):
 	) -> None:
 		for d in self.get("references"):
 			if d.allocated_amount:
-				if update_ref_details_only_for and (
-					not (d.reference_doctype, d.reference_name) in update_ref_details_only_for
+				if (
+					update_ref_details_only_for
+					and (d.reference_doctype, d.reference_name) not in update_ref_details_only_for
 				):
 					continue
 
@@ -701,8 +787,23 @@ class PaymentEntry(AccountsController):
 
 		self.db_set("status", self.status, update_modified=True)
 
+	def set_total_in_words(self):
+		from frappe.utils import money_in_words
+
+		if self.payment_type in ("Pay", "Internal Transfer"):
+			base_amount = abs(self.base_paid_amount)
+			amount = abs(self.paid_amount)
+			currency = self.paid_from_account_currency
+		elif self.payment_type == "Receive":
+			base_amount = abs(self.base_received_amount)
+			amount = abs(self.received_amount)
+			currency = self.paid_to_account_currency
+
+		self.base_in_words = money_in_words(base_amount, self.company_currency)
+		self.in_words = money_in_words(amount, currency)
+
 	def set_tax_withholding(self):
-		if not self.party_type == "Supplier":
+		if self.party_type != "Supplier":
 			return
 
 		if not self.apply_tax_withholding_amount:
@@ -793,7 +894,7 @@ class PaymentEntry(AccountsController):
 		self.base_received_amount = self.base_paid_amount
 		if (
 			self.paid_from_account_currency == self.paid_to_account_currency
-			and not self.payment_type == "Internal Transfer"
+			and self.payment_type != "Internal Transfer"
 		):
 			self.received_amount = self.paid_amount
 
@@ -841,7 +942,10 @@ class PaymentEntry(AccountsController):
 
 	def calculate_base_allocated_amount_for_reference(self, d) -> float:
 		base_allocated_amount = 0
-		if d.reference_doctype in frappe.get_hooks("advance_payment_doctypes"):
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
+		if d.reference_doctype in advance_payment_doctypes:
 			# When referencing Sales/Purchase Order, use the source/target exchange rate depending on payment type.
 			# This is so there are no Exchange Gain/Loss generated for such doctypes
 
@@ -1339,8 +1443,11 @@ class PaymentEntry(AccountsController):
 
 	def update_advance_paid(self):
 		if self.payment_type in ("Receive", "Pay") and self.party:
+			advance_payment_doctypes = frappe.get_hooks(
+				"advance_payment_receivable_doctypes"
+			) + frappe.get_hooks("advance_payment_payable_doctypes")
 			for d in self.get("references"):
-				if d.allocated_amount and d.reference_doctype in frappe.get_hooks("advance_payment_doctypes"):
+				if d.allocated_amount and d.reference_doctype in advance_payment_doctypes:
 					frappe.get_doc(
 						d.reference_doctype, d.reference_name, for_update=True
 					).set_total_advance_paid()
@@ -1587,6 +1694,13 @@ def get_outstanding_reference_documents(args, validate=False):
 		condition += " and cost_center='%s'" % args.get("cost_center")
 		accounting_dimensions_filter.append(ple.cost_center == args.get("cost_center"))
 
+	# dynamic dimension filters
+	active_dimensions = get_dimensions()[0]
+	for dim in active_dimensions:
+		if args.get(dim.fieldname):
+			condition += " and {0}='{1}'".format(dim.fieldname, args.get(dim.fieldname))
+			accounting_dimensions_filter.append(ple[dim.fieldname] == args.get(dim.fieldname))
+
 	date_fields_dict = {
 		"posting_date": ["from_posting_date", "to_posting_date"],
 		"due_date": ["from_due_date", "to_due_date"],
@@ -1614,11 +1728,16 @@ def get_outstanding_reference_documents(args, validate=False):
 	outstanding_invoices = []
 	negative_outstanding_invoices = []
 
+	if args.get("book_advance_payments_in_separate_party_account"):
+		party_account = get_party_account(args.get("party_type"), args.get("party"), args.get("company"))
+	else:
+		party_account = args.get("party_account")
+
 	if args.get("get_outstanding_invoices"):
 		outstanding_invoices = get_outstanding_invoices(
 			args.get("party_type"),
 			args.get("party"),
-			get_party_account(args.get("party_type"), args.get("party"), args.get("company")),
+			party_account,
 			common_filter=common_filter,
 			posting_date=posting_and_due_date,
 			min_outstanding=args.get("outstanding_amt_greater_than"),
@@ -1757,7 +1876,7 @@ def get_split_invoice_rows(invoice: dict, payment_term_template: str, exc_rates:
 		"Payment Schedule", filters={"parent": invoice.voucher_no}, fields=["*"], order_by="due_date"
 	)
 	for payment_term in payment_schedule:
-		if not payment_term.outstanding > 0.1:
+		if payment_term.outstanding <= 0.1:
 			continue
 
 		doc_details = exc_rates.get(payment_term.parent, None)
@@ -1814,6 +1933,12 @@ def get_orders_to_be_billed(
 	condition = ""
 	if doc and hasattr(doc, "cost_center") and doc.cost_center:
 		condition = " and cost_center='%s'" % cost_center
+
+	# dynamic dimension filters
+	active_dimensions = get_dimensions()[0]
+	for dim in active_dimensions:
+		if filters.get(dim.fieldname):
+			condition += " and {0}='{1}'".format(dim.fieldname, filters.get(dim.fieldname))
 
 	if party_account_currency == company_currency:
 		grand_total_field = "base_grand_total"

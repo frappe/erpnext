@@ -280,14 +280,13 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Reference Detail No",
-   "no_copy": 1,
-   "search_index": 1
+   "no_copy": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-23 11:44:25.841187",
+ "modified": "2023-12-03 23:21:22.205409",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

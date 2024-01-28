@@ -8,6 +8,7 @@ from pypika import functions as fn
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
@@ -20,14 +21,29 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
 
 
 class TestPurchaseReceipt(FrappeTestCase):
 	def setUp(self):
 		frappe.db.set_single_value("Buying Settings", "allow_multiple_items", 1)
+
+	def test_purchase_receipt_qty(self):
+		pr = make_purchase_receipt(qty=0, rejected_qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			pr.save()
+
+		# No error with qty=1
+		pr.items[0].qty = 1
+		pr.save()
+		self.assertEqual(pr.items[0].qty, 1)
+
+		# No error with rejected_qty=1
+		pr.items[0].rejected_warehouse = "_Test Rejected Warehouse - _TC"
+		pr.items[0].rejected_qty = 1
+		pr.items[0].qty = 0
+		pr.save()
+		self.assertEqual(pr.items[0].rejected_qty, 1)
 
 	def test_purchase_receipt_received_qty(self):
 		"""
@@ -717,7 +733,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		po.cancel()
 
 	def test_serial_no_against_purchase_receipt(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
@@ -1002,6 +1017,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+		from erpnext.stock.get_item_details import get_valuation_rate
+		from erpnext.stock.utils import get_stock_balance
 
 		prepare_data_for_internal_transfer()
 
@@ -1015,6 +1035,22 @@ class TestPurchaseReceipt(FrappeTestCase):
 			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 		)
+
+		if (
+			get_valuation_rate(
+				pr1.items[0].item_code, "_Test Company with perpetual inventory", warehouse="Stores - TCP1"
+			)
+			!= 50
+		):
+			balance = get_stock_balance(item_code=pr1.items[0].item_code, warehouse="Stores - TCP1")
+			create_stock_reconciliation(
+				item_code=pr1.items[0].item_code,
+				company="_Test Company with perpetual inventory",
+				warehouse="Stores - TCP1",
+				qty=balance,
+				rate=50,
+				do_not_save=True,
+			)
 
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
@@ -1053,7 +1089,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
 
 		expected_gle = [
-			["Stock In Hand - TCP1", 272.5, 0.0],
+			["Stock In Hand - TCP1", 250.0, 0.0],
+			["Cost of Goods Sold - TCP1", 22.5, 0.0],
 			["_Test Account Stock In Hand - TCP1", 0.0, 250.0],
 			["_Test Account Shipping Charges - TCP1", 0.0, 22.5],
 		]
@@ -1669,7 +1706,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.items[0].rejected_warehouse = from_warehouse
 		pr.save()
 
-		self.assertRaises(OverAllowanceError, pr.submit)
+		self.assertRaises(frappe.ValidationError, pr.submit)
 
 		# Step 5: Test Over Receipt Allowance
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 50)
@@ -1683,6 +1720,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			to_warehouse=target_warehouse,
 		)
 
+		pr.reload()
 		pr.submit()
 
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
@@ -2348,7 +2386,8 @@ def make_purchase_receipt(**args):
 	pr.is_return = args.is_return
 	pr.return_against = args.return_against
 	pr.apply_putaway_rule = args.apply_putaway_rule
-	qty = args.qty or 5
+
+	qty = args.qty if args.qty is not None else 5
 	rejected_qty = args.rejected_qty or 0
 	received_qty = args.received_qty or flt(rejected_qty) + flt(qty)
 

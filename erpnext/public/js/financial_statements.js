@@ -2,9 +2,15 @@ frappe.provide("erpnext.financial_statements");
 
 erpnext.financial_statements = {
 	"filters": get_filters(),
-	"formatter": function(value, row, column, data, default_formatter) {
+	"formatter": function(value, row, column, data, default_formatter, filter) {
 		if (data && column.fieldname=="account") {
 			value = data.account_name || value;
+
+			if (filter && filter?.text && filter?.type == "contains") {
+				if (!value.toLowerCase().includes(filter.text)) {
+					return value;
+				}
+			}
 
 			if (data.account) {
 				column.link_onclick =
@@ -68,22 +74,24 @@ erpnext.financial_statements = {
 			});
 		});
 
-		const views_menu = report.page.add_custom_button_group(__('Financial Statements'));
+		if (report.page){
+			const views_menu = report.page.add_custom_button_group(__('Financial Statements'));
 
-		report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function() {
-			var filters = report.get_values();
-			frappe.set_route('query-report', 'Balance Sheet', {company: filters.company});
-		});
+			report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function() {
+				var filters = report.get_values();
+				frappe.set_route('query-report', 'Balance Sheet', {company: filters.company});
+			});
 
-		report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function() {
-			var filters = report.get_values();
-			frappe.set_route('query-report', 'Profit and Loss Statement', {company: filters.company});
-		});
+			report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function() {
+				var filters = report.get_values();
+				frappe.set_route('query-report', 'Profit and Loss Statement', {company: filters.company});
+			});
 
-		report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function() {
-			var filters = report.get_values();
-			frappe.set_route('query-report', 'Cash Flow', {company: filters.company});
-		});
+			report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function() {
+				var filters = report.get_values();
+				frappe.set_route('query-report', 'Cash Flow', {company: filters.company});
+			});
+		}
 	}
 };
 

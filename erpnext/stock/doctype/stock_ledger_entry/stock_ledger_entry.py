@@ -111,16 +111,20 @@ class StockLedgerEntry(Document):
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time,
 				"company": self.company,
+				"sle": self.name,
 			}
 		)
 
 		sle = get_previous_sle(kwargs, extra_cond=extra_cond)
+		qty_after_transaction = 0.0
+		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
 		if sle:
-			flt_precision = cint(frappe.db.get_default("float_precision")) or 2
-			diff = sle.qty_after_transaction + flt(self.actual_qty)
-			diff = flt(diff, flt_precision)
-			if diff < 0 and abs(diff) > 0.0001:
-				self.throw_validation_error(diff, dimensions)
+			qty_after_transaction = sle.qty_after_transaction
+
+		diff = qty_after_transaction + flt(self.actual_qty)
+		diff = flt(diff, flt_precision)
+		if diff < 0 and abs(diff) > 0.0001:
+			self.throw_validation_error(diff, dimensions)
 
 	def throw_validation_error(self, diff, dimensions):
 		dimension_msg = _(", with the inventory {0}: {1}").format(
@@ -181,6 +185,9 @@ class StockLedgerEntry(Document):
 			frappe.throw(_("Actual Qty is mandatory"))
 
 	def validate_serial_batch_no_bundle(self):
+		if self.is_cancelled == 1:
+			return
+
 		item_detail = frappe.get_cached_value(
 			"Item",
 			self.item_code,
@@ -214,7 +221,9 @@ class StockLedgerEntry(Document):
 			if not self.serial_and_batch_bundle:
 				self.throw_error_message(f"Serial No / Batch No are mandatory for Item {self.item_code}")
 
-		if self.serial_and_batch_bundle and not (item_detail.has_serial_no or item_detail.has_batch_no):
+		if (
+			self.serial_and_batch_bundle and not item_detail.has_serial_no and not item_detail.has_batch_no
+		):
 			self.throw_error_message(f"Serial No and Batch No are not allowed for Item {self.item_code}")
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):

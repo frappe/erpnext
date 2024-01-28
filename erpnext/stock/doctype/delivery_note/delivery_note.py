@@ -311,11 +311,13 @@ class DeliveryNote(SellingController):
 			)
 
 	def set_serial_and_batch_bundle_from_pick_list(self):
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
 		if not self.pick_list:
 			return
 
 		for item in self.items:
-			if item.pick_list_item:
+			if item.pick_list_item and not item.serial_and_batch_bundle:
 				filters = {
 					"item_code": item.item_code,
 					"voucher_type": "Pick List",
@@ -326,7 +328,17 @@ class DeliveryNote(SellingController):
 				bundle_id = frappe.db.get_value("Serial and Batch Bundle", filters, "name")
 
 				if bundle_id:
-					item.serial_and_batch_bundle = bundle_id
+					cls_obj = SerialBatchCreation(
+						{
+							"type_of_transaction": "Outward",
+							"serial_and_batch_bundle": bundle_id,
+							"item_code": item.get("item_code"),
+						}
+					)
+
+					cls_obj.duplicate_package()
+
+					item.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -408,6 +420,7 @@ class DeliveryNote(SellingController):
 		self.update_stock_ledger()
 
 		self.cancel_packing_slips()
+		self.update_pick_list_status()
 
 		self.make_gl_entries_on_cancel()
 		self.repost_future_sle_and_gle()
@@ -417,6 +430,8 @@ class DeliveryNote(SellingController):
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
 		)
+
+		self.delete_auto_created_batches()
 
 	def update_stock_reservation_entries(self) -> None:
 		"""Updates Delivered Qty in Stock Reservation Entries."""
@@ -781,36 +796,36 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 
 	updated_dn = []
 	for dnd in dn_details:
-		billed_amt_agianst_dn = 0
+		billed_amt_against_dn = 0
 
 		# If delivered against Sales Invoice
 		if dnd.si_detail:
-			billed_amt_agianst_dn = flt(dnd.amount)
-			billed_against_so -= billed_amt_agianst_dn
+			billed_amt_against_dn = flt(dnd.amount)
+			billed_against_so -= billed_amt_against_dn
 		else:
 			# Get billed amount directly against Delivery Note
-			billed_amt_agianst_dn = frappe.db.sql(
+			billed_amt_against_dn = frappe.db.sql(
 				"""select sum(amount) from `tabSales Invoice Item`
 				where dn_detail=%s and docstatus=1""",
 				dnd.name,
 			)
-			billed_amt_agianst_dn = billed_amt_agianst_dn and billed_amt_agianst_dn[0][0] or 0
+			billed_amt_against_dn = billed_amt_against_dn and billed_amt_against_dn[0][0] or 0
 
 		# Distribute billed amount directly against SO between DNs based on FIFO
-		if billed_against_so and billed_amt_agianst_dn < dnd.amount:
-			pending_to_bill = flt(dnd.amount) - billed_amt_agianst_dn
+		if billed_against_so and billed_amt_against_dn < dnd.amount:
+			pending_to_bill = flt(dnd.amount) - billed_amt_against_dn
 			if pending_to_bill <= billed_against_so:
-				billed_amt_agianst_dn += pending_to_bill
+				billed_amt_against_dn += pending_to_bill
 				billed_against_so -= pending_to_bill
 			else:
-				billed_amt_agianst_dn += billed_against_so
+				billed_amt_against_dn += billed_against_so
 				billed_against_so = 0
 
 		frappe.db.set_value(
 			"Delivery Note Item",
 			dnd.name,
 			"billed_amt",
-			billed_amt_agianst_dn,
+			billed_amt_against_dn,
 			update_modified=update_modified,
 		)
 
@@ -1294,7 +1309,3 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	)
 
 	return doclist
-
-
-def on_doctype_update():
-	frappe.db.add_index("Delivery Note", ["customer", "is_return", "return_against"])

@@ -296,6 +296,18 @@ class PurchaseInvoice(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+		self.set_percentage_received()
+
+	def set_percentage_received(self):
+		total_billed_qty = 0.0
+		total_received_qty = 0.0
+		for row in self.items:
+			if row.purchase_receipt and row.pr_detail and row.received_qty:
+				total_billed_qty += row.qty
+				total_received_qty += row.received_qty
+
+		if total_billed_qty and total_received_qty:
+			self.per_received = total_received_qty / total_billed_qty * 100
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
@@ -371,7 +383,7 @@ class PurchaseInvoice(BuyingController):
 		check_list = []
 
 		for d in self.get("items"):
-			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
+			if d.purchase_order and d.purchase_order not in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
 				check_on_hold_or_closed_status("Purchase Order", d.purchase_order)
 
@@ -552,7 +564,7 @@ class PurchaseInvoice(BuyingController):
 		self.against_expense_account = ",".join(against_accounts)
 
 	def po_required(self):
-		if frappe.db.get_value("Buying Settings", None, "po_required") == "Yes":
+		if frappe.db.get_single_value("Buying Settings", "po_required") == "Yes":
 
 			if frappe.get_value(
 				"Supplier", self.supplier, "allow_purchase_invoice_creation_without_purchase_order"
@@ -572,7 +584,7 @@ class PurchaseInvoice(BuyingController):
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
-		if frappe.db.get_value("Buying Settings", None, "pr_required") == "Yes":
+		if frappe.db.get_single_value("Buying Settings", "pr_required") == "Yes":
 
 			if frappe.get_value(
 				"Supplier", self.supplier, "allow_purchase_invoice_creation_without_purchase_receipt"
@@ -1084,17 +1096,6 @@ class PurchaseInvoice(BuyingController):
 										item=item,
 									)
 								)
-
-						# update gross amount of asset bought through this document
-						assets = frappe.db.get_all(
-							"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
-						)
-						for asset in assets:
-							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-							frappe.db.set_value(
-								"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate)
-							)
-
 			if (
 				self.auto_accounting_for_stock
 				and self.is_opening == "No"
@@ -1119,7 +1120,7 @@ class PurchaseInvoice(BuyingController):
 						gl_entries.append(
 							self.get_gl_dict(
 								{
-									"account": stock_rbnb,
+									"account": self.stock_received_but_not_billed,
 									"against": self.supplier,
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
 									"remarks": self.remarks or _("Accounting Entry for Stock"),
@@ -1134,12 +1135,25 @@ class PurchaseInvoice(BuyingController):
 							item.item_tax_amount, item.precision("item_tax_amount")
 						)
 
+			if item.is_fixed_asset and item.landed_cost_voucher_amount:
+				self.update_gross_purchase_amount_for_linked_assets(item)
+
+	def update_gross_purchase_amount_for_linked_assets(self, item):
 		assets = frappe.db.get_all(
-			"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
+			"Asset",
+			filters={"purchase_invoice": self.name, "item_code": item.item_code},
+			fields=["name", "asset_quantity"],
 		)
 		for asset in assets:
-			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
+			purchase_amount = flt(item.valuation_rate) * asset.asset_quantity
+			frappe.db.set_value(
+				"Asset",
+				asset.name,
+				{
+					"gross_purchase_amount": purchase_amount,
+					"purchase_receipt_amount": purchase_amount,
+				},
+			)
 
 	def make_stock_adjustment_entry(
 		self, gl_entries, item, voucher_wise_stock_value, account_currency
@@ -1449,6 +1463,8 @@ class PurchaseInvoice(BuyingController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 			"Serial and Batch Bundle",
@@ -1812,10 +1828,6 @@ def make_inter_company_sales_invoice(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)
-
-
-def on_doctype_update():
-	frappe.db.add_index("Purchase Invoice", ["supplier", "is_return", "return_against"])
 
 
 @frappe.whitelist()

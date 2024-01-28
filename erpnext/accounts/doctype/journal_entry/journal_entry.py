@@ -150,6 +150,20 @@ class JournalEntry(AccountsController):
 		if not self.title:
 			self.title = self.get_title()
 
+	def submit(self):
+		if len(self.accounts) > 100:
+			msgprint(_("The task has been enqueued as a background job."), alert=True)
+			self.queue_action("submit", timeout=4600)
+		else:
+			return self._submit()
+
+	def cancel(self):
+		if len(self.accounts) > 100:
+			msgprint(_("The task has been enqueued as a background job."), alert=True)
+			self.queue_action("cancel", timeout=4600)
+		else:
+			return self._cancel()
+
 	def on_submit(self):
 		self.validate_cheque_info()
 		self.check_credit_limit()
@@ -170,6 +184,8 @@ class JournalEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
@@ -184,9 +200,12 @@ class JournalEntry(AccountsController):
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
 		for d in self.get("accounts"):
 			if d.is_advance:
-				if d.reference_type in frappe.get_hooks("advance_payment_doctypes"):
+				if d.reference_type in advance_payment_doctypes:
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
 		for voucher_type, order_list in advance_paid.items():
@@ -629,7 +648,7 @@ class JournalEntry(AccountsController):
 					)
 
 				# set totals
-				if not d.reference_name in self.reference_totals:
+				if d.reference_name not in self.reference_totals:
 					self.reference_totals[d.reference_name] = 0.0
 
 				if self.voucher_type not in ("Deferred Revenue", "Deferred Expense"):

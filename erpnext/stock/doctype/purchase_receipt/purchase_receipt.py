@@ -13,6 +13,7 @@ from pypika import functions as fn
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
@@ -302,7 +303,7 @@ class PurchaseReceipt(BuyingController):
 			)
 
 	def po_required(self):
-		if frappe.db.get_value("Buying Settings", None, "po_required") == "Yes":
+		if frappe.db.get_single_value("Buying Settings", "po_required") == "Yes":
 			for d in self.get("items"):
 				if not d.purchase_order:
 					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
@@ -672,15 +673,16 @@ class PurchaseReceipt(BuyingController):
 				landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 
 				if d.is_fixed_asset:
-					account_type = (
-						"capital_work_in_progress_account"
-						if is_cwip_accounting_enabled(d.asset_category)
-						else "fixed_asset_account"
-					)
-
-					stock_asset_account_name = get_asset_account(
-						account_type, asset_category=d.asset_category, company=self.company
-					)
+					if is_cwip_accounting_enabled(d.asset_category):
+						stock_asset_account_name = get_asset_account(
+							"capital_work_in_progress_account",
+							asset_category=d.asset_category,
+							company=self.company,
+						)
+					else:
+						stock_asset_account_name = get_asset_category_account(
+							"fixed_asset_account", asset_category=d.asset_category, company=self.company
+						)
 
 					stock_value_diff = (
 						flt(d.base_net_amount)
@@ -717,7 +719,7 @@ class PurchaseReceipt(BuyingController):
 			):
 				warehouse_with_no_account.append(d.warehouse or d.rejected_warehouse)
 
-			if d.is_fixed_asset:
+			if d.is_fixed_asset and d.landed_cost_voucher_amount:
 				self.update_assets(d, d.valuation_rate)
 
 		if warehouse_with_no_account:
@@ -796,7 +798,7 @@ class PurchaseReceipt(BuyingController):
 			# Backward compatibility:
 			# and charges added via Landed Cost Voucher,
 			# post valuation related charges on "Stock Received But Not Billed"
-			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
+			against_accounts = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			stock_rbnb = (
@@ -835,7 +837,7 @@ class PurchaseReceipt(BuyingController):
 						debit=0.0,
 						credit=applicable_amount,
 						remarks=self.remarks or _("Accounting Entry for Stock"),
-						against_account=against_account,
+						against_account=against_accounts,
 						item=tax,
 					)
 
@@ -849,11 +851,14 @@ class PurchaseReceipt(BuyingController):
 		)
 
 		for asset in assets:
+			purchase_amount = flt(valuation_rate) * asset.asset_quantity
 			frappe.db.set_value(
-				"Asset", asset.name, "gross_purchase_amount", flt(valuation_rate) * asset.asset_quantity
-			)
-			frappe.db.set_value(
-				"Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate) * asset.asset_quantity
+				"Asset",
+				asset.name,
+				{
+					"gross_purchase_amount": purchase_amount,
+					"purchase_receipt_amount": purchase_amount,
+				},
 			)
 
 	def update_status(self, status):
@@ -946,32 +951,32 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 		billed_against_po = flt(po_billed_amt_details.get(pr_item.purchase_order_item))
 
 		# Get billed amount directly against Purchase Receipt
-		billed_amt_agianst_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
+		billed_amt_against_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
 
 		# Distribute billed amount directly against PO between PRs based on FIFO
-		if billed_against_po and billed_amt_agianst_pr < pr_item.amount:
-			pending_to_bill = flt(pr_item.amount) - billed_amt_agianst_pr
+		if billed_against_po and billed_amt_against_pr < pr_item.amount:
+			pending_to_bill = flt(pr_item.amount) - billed_amt_against_pr
 			if pending_to_bill <= billed_against_po:
-				billed_amt_agianst_pr += pending_to_bill
+				billed_amt_against_pr += pending_to_bill
 				billed_against_po -= pending_to_bill
 			else:
-				billed_amt_agianst_pr += billed_against_po
+				billed_amt_against_pr += billed_against_po
 				billed_against_po = 0
 
 		po_billed_amt_details[pr_item.purchase_order_item] = billed_against_po
 
-		if pr_item.billed_amt != billed_amt_agianst_pr:
+		if pr_item.billed_amt != billed_amt_against_pr:
 			# update existing doc if possible
 			if pr_doc and pr_item.parent == pr_doc.name:
 				pr_item = next((item for item in pr_doc.items if item.name == pr_item.name), None)
-				pr_item.db_set("billed_amt", billed_amt_agianst_pr, update_modified=update_modified)
+				pr_item.db_set("billed_amt", billed_amt_against_pr, update_modified=update_modified)
 
 			else:
 				frappe.db.set_value(
 					"Purchase Receipt Item",
 					pr_item.name,
 					"billed_amt",
-					billed_amt_agianst_pr,
+					billed_amt_against_pr,
 					update_modified=update_modified,
 				)
 
@@ -1121,8 +1126,39 @@ def get_item_wise_returned_qty(pr_doc):
 	)
 
 
+def merge_taxes(source_taxes, target_doc):
+	from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+		update_item_wise_tax_detail,
+	)
+
+	existing_taxes = target_doc.get("taxes") or []
+	idx = 1
+	for tax in source_taxes:
+		found = False
+		for t in existing_taxes:
+			if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
+				t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
+				t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
+				update_item_wise_tax_detail(t, tax)
+				found = True
+
+		if not found:
+			tax.charge_type = "Actual"
+			tax.idx = idx
+			idx += 1
+			tax.included_in_print_rate = 0
+			tax.dont_recompute_tax = 1
+			tax.row_id = ""
+			tax.tax_amount = tax.tax_amount_after_discount_amount
+			tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
+			tax.item_wise_tax_detail = tax.item_wise_tax_detail
+			existing_taxes.append(tax)
+
+	target_doc.set("taxes", existing_taxes)
+
+
 @frappe.whitelist()
-def make_purchase_invoice(source_name, target_doc=None):
+def make_purchase_invoice(source_name, target_doc=None, args=None):
 	from erpnext.accounts.party import get_payment_terms_template
 
 	doc = frappe.get_doc("Purchase Receipt", source_name)
@@ -1139,6 +1175,10 @@ def make_purchase_invoice(source_name, target_doc=None):
 		)
 		doc.run_method("onload")
 		doc.run_method("set_missing_values")
+
+		if args and args.get("merge_taxes"):
+			merge_taxes(source.get("taxes") or [], doc)
+
 		doc.run_method("calculate_taxes_and_totals")
 		doc.set_payment_schedule()
 
@@ -1190,6 +1230,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"field_map": {
 					"name": "pr_detail",
 					"parent": "purchase_receipt",
+					"qty": "received_qty",
 					"purchase_order_item": "po_detail",
 					"purchase_order": "purchase_order",
 					"is_fixed_asset": "is_fixed_asset",
@@ -1202,7 +1243,11 @@ def make_purchase_invoice(source_name, target_doc=None):
 				if not doc.get("is_return")
 				else get_pending_qty(d)[0] > 0,
 			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
+			"Purchase Taxes and Charges": {
+				"doctype": "Purchase Taxes and Charges",
+				"add_if_empty": True,
+				"ignore": args.get("merge_taxes") if args else 0,
+			},
 		},
 		target_doc,
 		set_missing_values,
@@ -1355,10 +1400,6 @@ def get_item_account_wise_additional_cost(purchase_document):
 						]["base_amount"] += item.applicable_charges
 
 	return item_account_wise_cost
-
-
-def on_doctype_update():
-	frappe.db.add_index("Purchase Receipt", ["supplier", "is_return", "return_against"])
 
 
 @erpnext.allow_regional

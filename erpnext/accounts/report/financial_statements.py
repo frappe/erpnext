@@ -199,7 +199,13 @@ def get_data(
 		ignore_accumulated_values_for_fy,
 	)
 	accumulate_values_into_parents(accounts, accounts_by_name, period_list)
-	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
+	out = prepare_data(
+		accounts,
+		balance_must_be,
+		period_list,
+		company_currency,
+		accumulated_values=filters.accumulated_values,
+	)
 	out = filter_out_zero_value_rows(out, parent_children_map)
 
 	if out and total:
@@ -258,7 +264,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 			) + d.get("opening_balance", 0.0)
 
 
-def prepare_data(accounts, balance_must_be, period_list, company_currency):
+def prepare_data(accounts, balance_must_be, period_list, company_currency, accumulated_values):
 	data = []
 	year_start_date = period_list[0]["year_start_date"].strftime("%Y-%m-%d")
 	year_end_date = period_list[-1]["year_end_date"].strftime("%Y-%m-%d")
@@ -298,8 +304,14 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 				has_value = True
 				total += flt(row[period.key])
 
-		row["has_value"] = has_value
-		row["total"] = total
+		if accumulated_values:
+			# when 'accumulated_values' is enabled, periods have running balance.
+			# so, last period will have the net amount.
+			row["has_value"] = has_value
+			row["total"] = flt(d.get(period_list[-1].key, 0.0), 3)
+		else:
+			row["has_value"] = has_value
+			row["total"] = total
 		data.append(row)
 
 	return data

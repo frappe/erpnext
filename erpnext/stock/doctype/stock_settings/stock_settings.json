@@ -176,7 +176,7 @@
    "description": "No stock transactions can be created or modified before this date.",
    "fieldname": "stock_frozen_upto",
    "fieldtype": "Date",
-   "label": "Stock Frozen Upto"
+   "label": "Stock Frozen Up To"
   },
   {
    "description": "Stock transactions that are older than the mentioned days cannot be modified.",
@@ -427,7 +427,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-18 12:35:30.068799",
+ "modified": "2024-01-24 02:20:26.145996",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

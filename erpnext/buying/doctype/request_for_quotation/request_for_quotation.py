@@ -65,6 +65,7 @@ class RequestforQuotation(BuyingController):
 	def validate(self):
 		self.validate_duplicate_supplier()
 		self.validate_supplier_list()
+		super(RequestforQuotation, self).validate_qty_is_not_zero()
 		validate_for_items(self)
 		super(RequestforQuotation, self).set_qty_as_per_stock_uom()
 		self.update_email_id()
@@ -118,6 +119,15 @@ class RequestforQuotation(BuyingController):
 			supplier.email_sent = 0
 			supplier.quote_status = "Pending"
 		self.send_to_supplier()
+
+	def before_print(self, settings=None):
+		"""Use the first suppliers data to render the print preview."""
+		if self.vendor or not self.suppliers:
+			# If a specific supplier is already set, via Tools > Download PDF,
+			# we don't want to override it.
+			return
+
+		self.update_supplier_part_no(self.suppliers[0].supplier)
 
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
@@ -348,8 +358,8 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 			target_doc.currency = args.currency or get_party_account_currency(
 				"Supplier", for_supplier, source.company
 			)
-			target_doc.buying_price_list = args.buying_price_list or frappe.db.get_value(
-				"Buying Settings", None, "buying_price_list"
+			target_doc.buying_price_list = args.buying_price_list or frappe.db.get_single_value(
+				"Buying Settings", "buying_price_list"
 			)
 		set_missing_values(source, target_doc)
 
@@ -389,7 +399,7 @@ def create_supplier_quotation(doc):
 				"currency": doc.get("currency")
 				or get_party_account_currency("Supplier", doc.get("supplier"), doc.get("company")),
 				"buying_price_list": doc.get("buying_price_list")
-				or frappe.db.get_value("Buying Settings", None, "buying_price_list"),
+				or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
 			}
 		)
 		add_items(sq_doc, doc.get("supplier"), doc.get("items"))

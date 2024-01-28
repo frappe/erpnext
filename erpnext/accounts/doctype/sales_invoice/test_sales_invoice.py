@@ -23,7 +23,7 @@ from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_d
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule,
 )
-from erpnext.controllers.accounts_controller import update_invoice_status
+from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
@@ -71,6 +71,16 @@ class TestSalesInvoice(FrappeTestCase):
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+
+	def test_sales_invoice_qty(self):
+		si = create_sales_invoice(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			si.save()
+
+		# No error with qty=1
+		si.items[0].qty = 1
+		si.save()
+		self.assertEqual(si.items[0].qty, 1)
 
 	def test_timestamp_change(self):
 		w = frappe.copy_doc(test_records[0])
@@ -1414,9 +1424,10 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_serialized_cancel(self):
 		si = self.test_serialized()
-		si.cancel()
-
+		si.reload()
 		serial_nos = get_serial_nos_from_bundle(si.get("items")[0].serial_and_batch_bundle)
+
+		si.cancel()
 
 		self.assertEqual(
 			frappe.db.get_value("Serial No", serial_nos[0], "warehouse"), "_Test Warehouse - _TC"
@@ -2793,6 +2804,12 @@ class TestSalesInvoice(FrappeTestCase):
 	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
 
+		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
+			update_repost_settings,
+		)
+
+		update_repost_settings()
+
 		additional_discount_account = create_account(
 			account_name="Discount Account",
 			parent_account="Indirect Expenses - _TC",
@@ -3629,7 +3646,7 @@ def create_sales_invoice(**args):
 	bundle_id = None
 	if si.update_stock and (args.get("batch_no") or args.get("serial_no")):
 		batches = {}
-		qty = args.qty or 1
+		qty = args.qty if args.qty is not None else 1
 		item_code = args.item or args.item_code or "_Test Item"
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
@@ -3661,7 +3678,7 @@ def create_sales_invoice(**args):
 			"description": args.description or "_Test Item",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"target_warehouse": args.target_warehouse,
-			"qty": args.qty or 1,
+			"qty": args.qty if args.qty is not None else 1,
 			"uom": args.uom or "Nos",
 			"stock_uom": args.uom or "Nos",
 			"rate": args.rate if args.get("rate") is not None else 100,

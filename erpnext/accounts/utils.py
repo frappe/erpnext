@@ -240,7 +240,6 @@ def get_balance_on(
 			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False),))
 
 	if account:
-
 		if not (frappe.flags.ignore_account_permission or ignore_account_permission):
 			acc.check_permission("read")
 
@@ -286,18 +285,22 @@ def get_balance_on(
 		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
 	if account or (party_type and party) or account_type:
-
+		precision = get_currency_precision()
 		if in_account_currency:
-			select_field = "sum(debit_in_account_currency) - sum(credit_in_account_currency)"
+			select_field = (
+				"sum(round(debit_in_account_currency, %s)) - sum(round(credit_in_account_currency, %s))"
+			)
 		else:
-			select_field = "sum(debit) - sum(credit)"
+			select_field = "sum(round(debit, %s)) - sum(round(credit, %s))"
+
 		bal = frappe.db.sql(
 			"""
 			SELECT {0}
 			FROM `tabGL Entry` gle
 			WHERE {1}""".format(
 				select_field, " and ".join(cond)
-			)
+			),
+			(precision, precision),
 		)[0][0]
 		# if bal is None, return 0
 		return flt(bal)
@@ -453,7 +456,19 @@ def add_cc(args=None):
 	return cc.name
 
 
-def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # nosemgrep
+def _build_dimensions_dict_for_exc_gain_loss(
+	entry: dict | object = None, active_dimensions: list = None
+):
+	dimensions_dict = frappe._dict()
+	if entry and active_dimensions:
+		for dim in active_dimensions:
+			dimensions_dict[dim.fieldname] = entry.get(dim.fieldname)
+	return dimensions_dict
+
+
+def reconcile_against_document(
+	args, skip_ref_details_update_for_pe=False, active_dimensions=None
+):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
 	"""
@@ -482,6 +497,8 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 			check_if_advance_entry_modified(entry)
 			validate_allocated_amount(entry)
 
+			dimensions_dict = _build_dimensions_dict_for_exc_gain_loss(entry, active_dimensions)
+
 			# update ref in advance entry
 			if voucher_type == "Journal Entry":
 				referenced_row = update_reference_in_journal_entry(entry, doc, do_not_save=False)
@@ -489,10 +506,14 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 				# amount and account in args
 				# referenced_row is used to deduplicate gain/loss journal
 				entry.update({"referenced_row": referenced_row})
-				doc.make_exchange_gain_loss_journal([entry])
+				doc.make_exchange_gain_loss_journal([entry], dimensions_dict)
 			else:
 				referenced_row = update_reference_in_payment_entry(
-					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
+					entry,
+					doc,
+					do_not_save=True,
+					skip_ref_details_update_for_pe=skip_ref_details_update_for_pe,
+					dimensions_dict=dimensions_dict,
 				)
 
 		doc.save(ignore_permissions=True)
@@ -600,7 +621,10 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	jv_detail = journal_entry.get("accounts", {"name": d["voucher_detail_no"]})[0]
 
 	# Update Advance Paid in SO/PO since they might be getting unlinked
-	if jv_detail.get("reference_type") in ("Sales Order", "Purchase Order"):
+	advance_payment_doctypes = frappe.get_hooks(
+		"advance_payment_receivable_doctypes"
+	) + frappe.get_hooks("advance_payment_payable_doctypes")
+	if jv_detail.get("reference_type") in advance_payment_doctypes:
 		frappe.get_doc(jv_detail.reference_type, jv_detail.reference_name).set_total_advance_paid()
 
 	if flt(d["unadjusted_amount"]) - flt(d["allocated_amount"]) != 0:
@@ -654,7 +678,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 
 def update_reference_in_payment_entry(
-	d, payment_entry, do_not_save=False, skip_ref_details_update_for_pe=False
+	d, payment_entry, do_not_save=False, skip_ref_details_update_for_pe=False, dimensions_dict=None
 ):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
@@ -662,16 +686,22 @@ def update_reference_in_payment_entry(
 		"total_amount": d.grand_total,
 		"outstanding_amount": d.outstanding_amount,
 		"allocated_amount": d.allocated_amount,
-		"exchange_rate": d.exchange_rate if d.exchange_gain_loss else payment_entry.get_exchange_rate(),
-		"exchange_gain_loss": d.exchange_gain_loss,
+		"exchange_rate": d.exchange_rate
+		if d.difference_amount is not None
+		else payment_entry.get_exchange_rate(),
+		"exchange_gain_loss": d.difference_amount,
 		"account": d.account,
+		"dimensions": d.dimensions,
 	}
 
 	if d.voucher_detail_no:
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
 
 		# Update Advance Paid in SO/PO since they are getting unlinked
-		if existing_row.get("reference_doctype") in ("Sales Order", "Purchase Order"):
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
+		if existing_row.get("reference_doctype") in advance_payment_doctypes:
 			frappe.get_doc(
 				existing_row.reference_doctype, existing_row.reference_name
 			).set_total_advance_paid()
@@ -697,8 +727,9 @@ def update_reference_in_payment_entry(
 	if not skip_ref_details_update_for_pe:
 		payment_entry.set_missing_ref_details()
 	payment_entry.set_amounts()
+
 	payment_entry.make_exchange_gain_loss_journal(
-		frappe._dict({"difference_posting_date": d.difference_posting_date})
+		frappe._dict({"difference_posting_date": d.difference_posting_date}), dimensions_dict
 	)
 
 	if not do_not_save:
@@ -1062,11 +1093,11 @@ def get_outstanding_invoices(
 			if (
 				min_outstanding
 				and max_outstanding
-				and not (outstanding_amount >= min_outstanding and outstanding_amount <= max_outstanding)
+				and (outstanding_amount < min_outstanding or outstanding_amount > max_outstanding)
 			):
 				continue
 
-			if not d.voucher_type == "Purchase Invoice" or d.voucher_no not in held_invoices:
+			if d.voucher_type != "Purchase Invoice" or d.voucher_no not in held_invoices:
 				outstanding_invoices.append(
 					frappe._dict(
 						{
@@ -1113,12 +1144,16 @@ def get_companies():
 
 
 @frappe.whitelist()
-def get_children(doctype, parent, company, is_root=False):
+def get_children(doctype, parent, company, is_root=False, include_disabled=False):
+	if isinstance(include_disabled, str):
+		include_disabled = frappe.json.loads(include_disabled)
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
 	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
 	fields = ["name as value", "is_group as expandable"]
 	filters = [["docstatus", "<", 2]]
+	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
+		filters.append(["disabled", "=", False])
 
 	filters.append(['ifnull(`{0}`,"")'.format(parent_fieldname), "=", "" if is_root else parent])
 
@@ -1268,7 +1303,7 @@ def get_autoname_with_number(number_value, doc_title, company):
 def parse_naming_series_variable(doc, variable):
 	if variable == "FY":
 		if doc:
-			date = doc.get("posting_date") or doc.get("transaction_date")
+			date = doc.get("posting_date") or doc.get("transaction_date") or getdate()
 			company = doc.get("company")
 		else:
 			date = getdate()
@@ -2036,6 +2071,7 @@ def create_gain_loss_journal(
 	ref2_dn,
 	ref2_detail_no,
 	cost_center,
+	dimensions,
 ) -> str:
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Exchange Gain Or Loss"
@@ -2069,7 +2105,8 @@ def create_gain_loss_journal(
 			dr_or_cr + "_in_account_currency": 0,
 		}
 	)
-
+	if dimensions:
+		journal_account.update(dimensions)
 	journal_entry.append("accounts", journal_account)
 
 	journal_account = frappe._dict(
@@ -2085,7 +2122,8 @@ def create_gain_loss_journal(
 			reverse_dr_or_cr: abs(exc_gain_loss),
 		}
 	)
-
+	if dimensions:
+		journal_account.update(dimensions)
 	journal_entry.append("accounts", journal_account)
 
 	journal_entry.save()

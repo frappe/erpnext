@@ -37,6 +37,7 @@ welcome_email = "erpnext.setup.utils.welcome_email"
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
+setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_demo"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
 before_install = [
@@ -255,11 +256,6 @@ standard_portal_menu_items = [
 		"role": "Customer",
 	},
 	{"title": "Appointment Booking", "route": "/book_appointment"},
-]
-
-default_roles = [
-	{"role": "Customer", "doctype": "Contact", "email_field": "email_id"},
-	{"role": "Supplier", "doctype": "Contact", "email_field": "email_id"},
 ]
 
 sounds = [
@@ -485,7 +481,8 @@ payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account
 
 communication_doctypes = ["Customer", "Supplier"]
 
-advance_payment_doctypes = ["Sales Order", "Purchase Order"]
+advance_payment_receivable_doctypes = ["Sales Order"]
+advance_payment_payable_doctypes = ["Purchase Order"]
 
 invoice_doctypes = ["Sales Invoice", "Purchase Invoice"]
 
@@ -493,6 +490,7 @@ bank_reconciliation_doctypes = [
 	"Payment Entry",
 	"Journal Entry",
 	"Purchase Invoice",
+	"Sales Invoice",
 ]
 
 accounting_dimension_doctypes = [
@@ -541,6 +539,8 @@ accounting_dimension_doctypes = [
 	"Account Closing Balance",
 	"Supplier Quotation",
 	"Supplier Quotation Item",
+	"Payment Reconciliation",
+	"Payment Reconciliation Allocation",
 ]
 
 get_matching_queries = (
@@ -637,6 +637,7 @@ additional_timeline_content = {
 
 extend_bootinfo = [
 	"erpnext.support.doctype.service_level_agreement.service_level_agreement.add_sla_doctypes",
+	"erpnext.startup.boot.bootinfo",
 ]
 
 
