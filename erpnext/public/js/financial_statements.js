@@ -125,22 +125,24 @@ erpnext.financial_statements = {
 			});
 		});
 
-		const views_menu = report.page.add_custom_button_group(__('Financial Statements'));
+		if (report.page){
+			const views_menu = report.page.add_custom_button_group(__('Financial Statements'));
 
-		report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function() {
-			var filters = report.get_values();
-			frappe.set_route('query-report', 'Balance Sheet', {company: filters.company});
-		});
+			report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function() {
+				var filters = report.get_values();
+				frappe.set_route('query-report', 'Balance Sheet', {company: filters.company});
+			});
 
-		report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function() {
-			var filters = report.get_values();
-			frappe.set_route('query-report', 'Profit and Loss Statement', {company: filters.company});
-		});
+			report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function() {
+				var filters = report.get_values();
+				frappe.set_route('query-report', 'Profit and Loss Statement', {company: filters.company});
+			});
 
-		report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function() {
-			var filters = report.get_values();
-			frappe.set_route('query-report', 'Cash Flow', {company: filters.company});
-		});
+			report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function() {
+				var filters = report.get_values();
+				frappe.set_route('query-report', 'Cash Flow', {company: filters.company});
+			});
+		}
 	}
 };
 
