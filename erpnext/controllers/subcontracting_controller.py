@@ -881,7 +881,9 @@ class SubcontractingController(StockController):
 							"posting_time": self.posting_time,
 							"qty": -1 * item.consumed_qty,
 							"voucher_detail_no": item.name,
-							"serial_and_batch_bundle": item.serial_and_batch_bundle,
+							"serial_and_batch_bundle": item.get("serial_and_batch_bundle"),
+							"serial_no": item.get("serial_no"),
+							"batch_no": item.get("batch_no"),
 						}
 					)
 

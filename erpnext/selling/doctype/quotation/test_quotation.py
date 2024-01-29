@@ -99,7 +99,6 @@ class TestQuotation(FrappeTestCase):
 		self.assertEqual(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEqual(sales_order.customer, "_Test Customer")
 
-		sales_order.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
 		sales_order.insert()
@@ -132,7 +131,6 @@ class TestQuotation(FrappeTestCase):
 		self.assertEqual(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEqual(sales_order.customer, "_Test Customer")
 
-		sales_order.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
 		sales_order.insert()
