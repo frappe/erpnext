@@ -284,7 +284,7 @@ def get_payment_entries(filters, args):
 		.where(
 			(pe.docstatus == 1)
 			& (pe.party == filters.get(args.party))
-			& (pe[args.account_fieldname].isin(args.party_account))
+			& (pe[args.account_fieldname].isin(args.party_accounts))
 		)
 		.orderby(pe.posting_date, pe.name, order=Order.desc)
 	)
