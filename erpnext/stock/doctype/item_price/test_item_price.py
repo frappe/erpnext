@@ -64,7 +64,7 @@ class TestItemPrice(FrappeTestCase):
 		# Enter invalid dates valid_from  >= valid_upto
 		doc.valid_from = "2017-04-20"
 		doc.valid_upto = "2017-04-17"
-		# Valid Upto Date can not be less/equal than Valid From Date
+		# Valid Up To Date can not be less/equal than Valid From Date
 		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_price_in_a_qty(self):

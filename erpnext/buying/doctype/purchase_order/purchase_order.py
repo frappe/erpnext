@@ -215,6 +215,10 @@ class PurchaseOrder(BuyingController):
 
 		self.validate_fg_item_for_subcontracting()
 		self.set_received_qty_for_drop_ship_items()
+
+		if not self.advance_payment_status:
+			self.advance_payment_status = "Not Initiated"
+
 		validate_inter_company_party(
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)

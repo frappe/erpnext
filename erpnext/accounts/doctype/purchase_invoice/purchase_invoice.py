@@ -827,9 +827,7 @@ class PurchaseInvoice(BuyingController):
 						"party_type": "Supplier",
 						"party": self.supplier,
 						"due_date": self.due_date,
-						"against_type": "Account",
 						"against": self.against_expense_account,
-						"against_link": self.against_expense_account,
 						"credit": base_grand_total,
 						"credit_in_account_currency": base_grand_total
 						if self.party_account_currency == self.company_currency
@@ -902,9 +900,7 @@ class PurchaseInvoice(BuyingController):
 							self.get_gl_dict(
 								{
 									"account": warehouse_account[item.warehouse]["account"],
-									"against_type": "Account",
 									"against": warehouse_account[item.from_warehouse]["account"],
-									"against_link": warehouse_account[item.from_warehouse]["account"],
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
@@ -924,9 +920,7 @@ class PurchaseInvoice(BuyingController):
 							self.get_gl_dict(
 								{
 									"account": warehouse_account[item.from_warehouse]["account"],
-									"against_type": "Account",
 									"against": warehouse_account[item.warehouse]["account"],
-									"against_link": warehouse_account[item.warehouse]["account"],
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
@@ -943,9 +937,7 @@ class PurchaseInvoice(BuyingController):
 								self.get_gl_dict(
 									{
 										"account": item.expense_account,
-										"against_type": "Supplier",
 										"against": self.supplier,
-										"against_link": self.supplier,
 										"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
 										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 										"cost_center": item.cost_center,
@@ -962,9 +954,7 @@ class PurchaseInvoice(BuyingController):
 								self.get_gl_dict(
 									{
 										"account": item.expense_account,
-										"against_type": "Supplier",
 										"against": self.supplier,
-										"against_link": self.supplier,
 										"debit": warehouse_debit_amount,
 										"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 										"cost_center": item.cost_center,
@@ -983,9 +973,7 @@ class PurchaseInvoice(BuyingController):
 									self.get_gl_dict(
 										{
 											"account": account,
-											"against_type": "Account",
 											"against": item.expense_account,
-											"against_link": item.expense_account,
 											"cost_center": item.cost_center,
 											"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 											"credit": flt(amount["base_amount"]),
@@ -1005,9 +993,7 @@ class PurchaseInvoice(BuyingController):
 							self.get_gl_dict(
 								{
 									"account": supplier_warehouse_account,
-									"against_type": "Account",
 									"against": item.expense_account,
-									"against_link": item.expense_account,
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
@@ -1062,9 +1048,7 @@ class PurchaseInvoice(BuyingController):
 							self.get_gl_dict(
 								{
 									"account": expense_account,
-									"against_type": "Supplier",
 									"against": self.supplier,
-									"against_link": self.supplier,
 									"debit": amount,
 									"cost_center": item.cost_center,
 									"project": item.project or self.project,
@@ -1090,9 +1074,7 @@ class PurchaseInvoice(BuyingController):
 									self.get_gl_dict(
 										{
 											"account": expense_account,
-											"against_type": "Supplier",
 											"against": self.supplier,
-											"against_link": self.supplier,
 											"debit": discrepancy_caused_by_exchange_rate_difference,
 											"cost_center": item.cost_center,
 											"project": item.project or self.project,
@@ -1105,9 +1087,7 @@ class PurchaseInvoice(BuyingController):
 									self.get_gl_dict(
 										{
 											"account": self.get_company_default("exchange_gain_loss_account"),
-											"against_type": "Supplier",
 											"against": self.supplier,
-											"against_link": self.supplier,
 											"credit": discrepancy_caused_by_exchange_rate_difference,
 											"cost_center": item.cost_center,
 											"project": item.project or self.project,
@@ -1140,10 +1120,8 @@ class PurchaseInvoice(BuyingController):
 						gl_entries.append(
 							self.get_gl_dict(
 								{
-									"account": stock_rbnb,
-									"against_type": "Supplier",
+									"account": self.stock_received_but_not_billed,
 									"against": self.supplier,
-									"against_link": self.supplier,
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
 									"remarks": self.remarks or _("Accounting Entry for Stock"),
 									"cost_center": self.cost_center,
@@ -1204,9 +1182,7 @@ class PurchaseInvoice(BuyingController):
 				self.get_gl_dict(
 					{
 						"account": cost_of_goods_sold_account,
-						"against_type": "Account",
 						"against": item.expense_account,
-						"against_link": item.expense_account,
 						"debit": stock_adjustment_amt,
 						"remarks": self.get("remarks") or _("Stock Adjustment"),
 						"cost_center": item.cost_center,
@@ -1236,9 +1212,7 @@ class PurchaseInvoice(BuyingController):
 					self.get_gl_dict(
 						{
 							"account": tax.account_head,
-							"against_type": "Supplier",
 							"against": self.supplier,
-							"against_link": self.supplier,
 							dr_or_cr: base_amount,
 							dr_or_cr + "_in_account_currency": base_amount
 							if account_currency == self.company_currency
@@ -1286,10 +1260,8 @@ class PurchaseInvoice(BuyingController):
 						self.get_gl_dict(
 							{
 								"account": tax.account_head,
-								"against_type": "Supplier",
 								"cost_center": tax.cost_center,
 								"against": self.supplier,
-								"against_link": self.supplier,
 								"credit": applicable_amount,
 								"remarks": self.remarks or _("Accounting Entry for Stock"),
 							},
@@ -1307,9 +1279,7 @@ class PurchaseInvoice(BuyingController):
 							{
 								"account": tax.account_head,
 								"cost_center": tax.cost_center,
-								"against_type": "Supplier",
 								"against": self.supplier,
-								"against_link": self.supplier,
 								"credit": valuation_tax[tax.name],
 								"remarks": self.remarks or _("Accounting Entry for Stock"),
 							},
@@ -1324,9 +1294,7 @@ class PurchaseInvoice(BuyingController):
 				self.get_gl_dict(
 					{
 						"account": self.unrealized_profit_loss_account,
-						"against_type": "Supplier",
 						"against": self.supplier,
-						"against_link": self.supplier,
 						"credit": flt(self.total_taxes_and_charges),
 						"credit_in_account_currency": flt(self.base_total_taxes_and_charges),
 						"cost_center": self.cost_center,
@@ -1347,9 +1315,7 @@ class PurchaseInvoice(BuyingController):
 						"account": self.credit_to,
 						"party_type": "Supplier",
 						"party": self.supplier,
-						"against_type": "Account",
 						"against": self.cash_bank_account,
-						"against_link": self.cash_bank_account,
 						"debit": self.base_paid_amount,
 						"debit_in_account_currency": self.base_paid_amount
 						if self.party_account_currency == self.company_currency
@@ -1370,9 +1336,7 @@ class PurchaseInvoice(BuyingController):
 				self.get_gl_dict(
 					{
 						"account": self.cash_bank_account,
-						"against_type": "Supplier",
 						"against": self.supplier,
-						"against_link": self.supplier,
 						"credit": self.base_paid_amount,
 						"credit_in_account_currency": self.base_paid_amount
 						if bank_account_currency == self.company_currency
@@ -1396,9 +1360,7 @@ class PurchaseInvoice(BuyingController):
 						"account": self.credit_to,
 						"party_type": "Supplier",
 						"party": self.supplier,
-						"against_type": "Account",
 						"against": self.write_off_account,
-						"against_link": self.write_off_account,
 						"debit": self.base_write_off_amount,
 						"debit_in_account_currency": self.base_write_off_amount
 						if self.party_account_currency == self.company_currency
@@ -1418,9 +1380,7 @@ class PurchaseInvoice(BuyingController):
 				self.get_gl_dict(
 					{
 						"account": self.write_off_account,
-						"against_type": "Supplier",
 						"against": self.supplier,
-						"against_link": self.supplier,
 						"credit": flt(self.base_write_off_amount),
 						"credit_in_account_currency": self.base_write_off_amount
 						if write_off_account_currency == self.company_currency
@@ -1447,9 +1407,7 @@ class PurchaseInvoice(BuyingController):
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
-						"against_type": "Supplier",
 						"against": self.supplier,
-						"against_link": self.supplier,
 						"debit_in_account_currency": self.rounding_adjustment,
 						"debit": self.base_rounding_adjustment,
 						"cost_center": round_off_cost_center

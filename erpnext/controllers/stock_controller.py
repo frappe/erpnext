@@ -6,7 +6,7 @@ from collections import defaultdict
 from typing import List, Tuple
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.utils import cint, flt, get_link_to_form, getdate
 
 import erpnext
@@ -162,9 +162,7 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": warehouse_account[sle.warehouse]["account"],
-									"against_type": "Account",
 									"against": expense_account,
-									"against_link": expense_account,
 									"cost_center": item_row.cost_center,
 									"project": item_row.project or self.get("project"),
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
@@ -180,9 +178,7 @@ class StockController(AccountsController):
 							self.get_gl_dict(
 								{
 									"account": expense_account,
-									"against_type": "Account",
 									"against": warehouse_account[sle.warehouse]["account"],
-									"against_link": warehouse_account[sle.warehouse]["account"],
 									"cost_center": item_row.cost_center,
 									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 									"debit": -1 * flt(sle.stock_value_difference, precision),
@@ -214,9 +210,7 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": expense_account,
-							"against_type": "Account",
 							"against": warehouse_asset_account,
-							"against_link": warehouse_asset_account,
 							"cost_center": item_row.cost_center,
 							"project": item_row.project or self.get("project"),
 							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
@@ -232,9 +226,7 @@ class StockController(AccountsController):
 					self.get_gl_dict(
 						{
 							"account": warehouse_asset_account,
-							"against_type": "Account",
 							"against": expense_account,
-							"against_link": expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": _("Rounding gain/loss Entry for Stock Transfer"),
 							"credit": sle_rounding_diff,
@@ -705,6 +697,9 @@ class StockController(AccountsController):
 				self.validate_in_transit_warehouses()
 				self.validate_multi_currency()
 				self.validate_packed_items()
+
+				if self.get("is_internal_supplier"):
+					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
 
@@ -742,6 +737,116 @@ class StockController(AccountsController):
 	def validate_packed_items(self):
 		if self.doctype in ("Sales Invoice", "Delivery Note Item") and self.get("packed_items"):
 			frappe.throw(_("Packed Items cannot be transferred internally"))
+
+	def validate_internal_transfer_qty(self):
+		if self.doctype not in ["Purchase Invoice", "Purchase Receipt"]:
+			return
+
+		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty()
+		if not item_wise_transfer_qty:
+			return
+
+		item_wise_received_qty = self.get_item_wise_inter_received_qty()
+		precision = frappe.get_precision(self.doctype + " Item", "qty")
+
+		over_receipt_allowance = frappe.db.get_single_value(
+			"Stock Settings", "over_delivery_receipt_allowance"
+		)
+
+		parent_doctype = {
+			"Purchase Receipt": "Delivery Note",
+			"Purchase Invoice": "Sales Invoice",
+		}.get(self.doctype)
+
+		for key, transferred_qty in item_wise_transfer_qty.items():
+			recevied_qty = flt(item_wise_received_qty.get(key), precision)
+			if over_receipt_allowance:
+				transferred_qty = transferred_qty + flt(
+					transferred_qty * over_receipt_allowance / 100, precision
+				)
+
+			if recevied_qty > flt(transferred_qty, precision):
+				frappe.throw(
+					_("For Item {0} cannot be received more than {1} qty against the {2} {3}").format(
+						bold(key[1]),
+						bold(flt(transferred_qty, precision)),
+						bold(parent_doctype),
+						get_link_to_form(parent_doctype, self.get("inter_company_reference")),
+					)
+				)
+
+	def get_item_wise_inter_transfer_qty(self):
+		reference_field = "inter_company_reference"
+		if self.doctype == "Purchase Invoice":
+			reference_field = "inter_company_invoice_reference"
+
+		parent_doctype = {
+			"Purchase Receipt": "Delivery Note",
+			"Purchase Invoice": "Sales Invoice",
+		}.get(self.doctype)
+
+		child_doctype = parent_doctype + " Item"
+
+		parent_tab = frappe.qb.DocType(parent_doctype)
+		child_tab = frappe.qb.DocType(child_doctype)
+
+		query = (
+			frappe.qb.from_(parent_doctype)
+			.inner_join(child_tab)
+			.on(child_tab.parent == parent_tab.name)
+			.select(
+				child_tab.name,
+				child_tab.item_code,
+				child_tab.qty,
+			)
+			.where((parent_tab.name == self.get(reference_field)) & (parent_tab.docstatus == 1))
+		)
+
+		data = query.run(as_dict=True)
+		item_wise_transfer_qty = defaultdict(float)
+		for row in data:
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+
+		return item_wise_transfer_qty
+
+	def get_item_wise_inter_received_qty(self):
+		child_doctype = self.doctype + " Item"
+
+		parent_tab = frappe.qb.DocType(self.doctype)
+		child_tab = frappe.qb.DocType(child_doctype)
+
+		query = (
+			frappe.qb.from_(self.doctype)
+			.inner_join(child_tab)
+			.on(child_tab.parent == parent_tab.name)
+			.select(
+				child_tab.item_code,
+				child_tab.qty,
+			)
+			.where(parent_tab.docstatus < 2)
+		)
+
+		if self.doctype == "Purchase Invoice":
+			query = query.select(
+				child_tab.sales_invoice_item.as_("name"),
+			)
+
+			query = query.where(
+				parent_tab.inter_company_invoice_reference == self.inter_company_invoice_reference
+			)
+		else:
+			query = query.select(
+				child_tab.delivery_note_item.as_("name"),
+			)
+
+			query = query.where(parent_tab.inter_company_reference == self.inter_company_reference)
+
+		data = query.run(as_dict=True)
+		item_wise_transfer_qty = defaultdict(float)
+		for row in data:
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+
+		return item_wise_transfer_qty
 
 	def validate_putaway_capacity(self):
 		# if over receipt is attempted while 'apply putaway rule' is disabled
@@ -836,7 +941,6 @@ class StockController(AccountsController):
 		credit,
 		remarks,
 		against_account,
-		against_type="Account",
 		debit_in_account_currency=None,
 		credit_in_account_currency=None,
 		account_currency=None,
@@ -851,9 +955,7 @@ class StockController(AccountsController):
 			"cost_center": cost_center,
 			"debit": debit,
 			"credit": credit,
-			"against_type": against_type,
 			"against": against_account,
-			"against_link": against_account,
 			"remarks": remarks,
 		}
 

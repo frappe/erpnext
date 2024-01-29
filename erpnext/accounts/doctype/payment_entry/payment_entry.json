@@ -87,12 +87,14 @@
   "status",
   "custom_remarks",
   "remarks",
+  "base_in_words",
   "column_break_16",
   "letter_head",
   "print_heading",
   "bank",
   "bank_account_no",
   "payment_order",
+  "in_words",
   "subscription_section",
   "auto_repeat",
   "amended_from",
@@ -746,6 +748,20 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Book Advance Payments in Separate Party Account",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_in_words",
+   "fieldtype": "Small Text",
+   "label": "In Words (Company Currency)",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "in_words",
+   "fieldtype": "Small Text",
+   "label": "In Words",
+   "print_hide": 1,
    "read_only": 1
   }
  ],
