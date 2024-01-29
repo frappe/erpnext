@@ -2557,12 +2557,15 @@ def get_advance_payment_entries(
 
 	payment_entries_against_order, unallocated_payment_entries = [], []
 
+	if not condition:
+		condition = []
+
 	if payment_name:
 		condition.append(pe.name.like(f"%%{payment_name}%%"))
 
 	if order_list or against_all_orders:
 		if order_list:
-			condition.append(per.refernce_name.isin(order_list))
+			condition.append(per.reference_name.isin(order_list))
 		payment_entries_query = (
 			qb.from_(pe)
 			.inner_join(per)
