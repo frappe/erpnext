@@ -2564,15 +2564,16 @@ def get_advance_payment_entries(
 		condition.append(pe.name.like(f"%%{payment_name}%%"))
 
 	if order_list or against_all_orders:
+		orders_condition = []
 		if order_list:
-			condition.append(per.reference_name.isin(order_list))
+			orders_condition.append(per.reference_name.isin(order_list))
 		payment_entries_query = (
 			qb.from_(pe)
 			.inner_join(per)
 			.on(pe.name == per.parent)
 			.select(
 				ConstantColumn("Payment Entry").as_("reference_type"),
-				pe.name,
+				pe.name.as_("reference_name"),
 				pe.remarks,
 				per.allocated_amount.as_("amount"),
 				per.name.as_("reference_row"),
@@ -2590,6 +2591,7 @@ def get_advance_payment_entries(
 				& (per.reference_doctype == order_doctype)
 			)
 			.where(Criterion.all(condition))
+			.where(Criterion.all(orders_condition))
 			.orderby(pe.posting_date)
 		)
 
