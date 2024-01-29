@@ -8,8 +8,10 @@ frappe.listview_settings['Purchase Receipt'] = {
 			return [__("Closed"), "green", "status,=,Closed"];
 		} else if (flt(doc.per_returned, 2) === 100) {
 			return [__("Return Issued"), "grey", "per_returned,=,100"];
-		} else if (flt(doc.grand_total) !== 0 && flt(doc.per_billed, 2) < 100) {
+		} else if (flt(doc.grand_total) !== 0 && flt(doc.per_billed, 2) == 0) {
 			return [__("To Bill"), "orange", "per_billed,<,100"];
+		} else if (flt(doc.per_billed, 2) > 0 && flt(doc.per_billed, 2) < 100) {
+			return [__("Partly Billed"), "yellow", "per_billed,<,100"];
 		} else if (flt(doc.grand_total) === 0 || flt(doc.per_billed, 2) === 100) {
 			return [__("Completed"), "green", "per_billed,=,100"];
 		}

@@ -704,7 +704,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr2.load_from_db()
 		self.assertEqual(pr2.get("items")[0].billed_amt, 2000)
 		self.assertEqual(pr2.per_billed, 80)
-		self.assertEqual(pr2.status, "To Bill")
+		self.assertEqual(pr2.status, "Partly Billed")
 
 		pr2.cancel()
 		pi2.reload()
@@ -1115,7 +1115,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pi.load_from_db()
 		pr.load_from_db()
 
-		self.assertEqual(pr.status, "To Bill")
+		self.assertEqual(pr.status, "Partly Billed")
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
 	def test_purchase_receipt_with_exchange_rate_difference(self):

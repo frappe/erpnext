@@ -91,7 +91,8 @@ status_map = {
 	],
 	"Purchase Receipt": [
 		["Draft", None],
-		["To Bill", "eval:self.per_billed < 100 and self.docstatus == 1"],
+		["To Bill", "eval:self.per_billed == 0 and self.docstatus == 1"],
+		["Partly Billed", "eval:self.per_billed > 0 and self.per_billed < 100 and self.docstatus == 1"],
 		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
