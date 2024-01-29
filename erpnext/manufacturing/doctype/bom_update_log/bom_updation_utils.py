@@ -19,11 +19,10 @@ def replace_bom(boms: Dict, log_name: str) -> None:
 	current_bom = boms.get("current_bom")
 	new_bom = boms.get("new_bom")
 
-	unit_cost = get_bom_unit_cost(new_bom)
-	update_new_bom_in_bom_items(unit_cost, current_bom, new_bom)
-
 	frappe.cache().delete_key("bom_children")
 	parent_boms = get_ancestor_boms(new_bom)
+
+	parent_boms.insert(0, new_bom)
 
 	for bom in parent_boms:
 		bom_obj = frappe.get_doc("BOM", bom)
