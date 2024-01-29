@@ -8,7 +8,7 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "enabled",
+  "disabled",
   "designation_name",
   "description"
  ],
@@ -29,16 +29,16 @@
    "label": "Description"
   },
   {
-   "default": "1",
-   "fieldname": "enabled",
+   "default": "0",
+   "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Enabled"
+   "label": "Disabled"
   }
  ],
  "icon": "fa fa-bookmark",
  "idx": 1,
  "links": [],
- "modified": "2024-01-15 17:32:32.040320",
+ "modified": "2024-01-29 12:17:54.857413",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Designation",
