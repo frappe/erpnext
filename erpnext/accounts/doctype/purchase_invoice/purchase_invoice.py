@@ -859,9 +859,12 @@ class PurchaseInvoice(BuyingController):
 
 					if provisional_accounting_for_non_stock_items:
 						if item.purchase_receipt:
-							provisional_account = frappe.db.get_value(
-								"Purchase Receipt Item", item.pr_detail, "provisional_expense_account"
-							) or self.get_company_default("default_provisional_account")
+							provisional_account, pr_base_rate = frappe.get_cached_value(
+								"Purchase Receipt Item", item.pr_detail, ["provisional_expense_account", "base_rate"]
+							)
+							provisional_account = provisional_account or self.get_company_default(
+								"default_provisional_account"
+							)
 							purchase_receipt_doc = purchase_receipt_doc_map.get(item.purchase_receipt)
 
 							if not purchase_receipt_doc:
@@ -869,7 +872,7 @@ class PurchaseInvoice(BuyingController):
 								purchase_receipt_doc_map[item.purchase_receipt] = purchase_receipt_doc
 
 							# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-							expense_booked_in_pr, credit = frappe.db.get_value(
+							expense_booked_in_pr = frappe.db.get_value(
 								"GL Entry",
 								{
 									"is_cancelled": 0,
@@ -878,13 +881,18 @@ class PurchaseInvoice(BuyingController):
 									"voucher_detail_no": item.pr_detail,
 									"account": provisional_account,
 								},
-								["name", "credit"],
+								"name",
 							)
 
 							if expense_booked_in_pr:
 								# Intentionally passing purchase invoice item to handle partial billing
 								purchase_receipt_doc.add_provisional_gl_entry(
-									item, gl_entries, self.posting_date, provisional_account, reverse=1, item_amount=credit
+									item,
+									gl_entries,
+									self.posting_date,
+									provisional_account,
+									reverse=1,
+									item_amount=(item.qty * pr_base_rate),
 								)
 
 					if not self.is_internal_transfer():
