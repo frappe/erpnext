@@ -22,6 +22,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				} else {
 					var account_type = ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"];
 				}
+<<<<<<< HEAD
 
 				return {
 					query: "erpnext.controllers.queries.tax_account_query",
@@ -29,6 +30,18 @@ frappe.ui.form.on(cur_frm.doctype, {
 						"account_type": account_type,
 						"company": doc.company,
 					}
+=======
+			},
+			included_in_print_rate: function(frm, cdt, cdn) {
+				let tax = frappe.get_doc(cdt, cdn);
+				try {
+					me.validate_taxes_and_charges(cdt, cdn);
+					me.validate_inclusive_tax(tax, frm);
+				} catch(e) {
+					tax.included_in_print_rate = 0;
+					refresh_field("included_in_print_rate", tax.name, tax.parentfield);
+					throw e;
+>>>>>>> 50d56db0c2 (fix: specify precision for net_amount (#39481))
 				}
 			});
 			frm.set_query("cost_center", "taxes", function(doc) {
@@ -53,14 +66,24 @@ frappe.ui.form.on(cur_frm.doctype, {
 		erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm.open_grid_row());
 	},
 
+<<<<<<< HEAD
 	allocate_advances_automatically: function(frm) {
 		frm.trigger('fetch_advances');
 	},
+=======
+	validate_inclusive_tax: function(tax, frm) {
+		this.frm = this.frm || frm;
+		let actual_type_error = function() {
+			var msg = __("Actual type tax cannot be included in Item rate in row {0}", [tax.idx])
+			frappe.throw(msg);
+		};
+>>>>>>> 50d56db0c2 (fix: specify precision for net_amount (#39481))
 
 	only_include_allocated_payments: function(frm) {
 		frm.trigger('fetch_advances');
 	},
 
+<<<<<<< HEAD
 	fetch_advances: function(frm) {
 		if(frm.doc.allocate_advances_automatically) {
 			frappe.call({
@@ -68,6 +91,23 @@ frappe.ui.form.on(cur_frm.doctype, {
 				method: "set_advances",
 				callback: function(r, rt) {
 					refresh_field("advances");
+=======
+		if(cint(tax.included_in_print_rate)) {
+			if(tax.charge_type == "Actual") {
+				// inclusive tax cannot be of type Actual
+				actual_type_error();
+			} else if (tax.charge_type == "On Previous Row Amount" && this.frm &&
+				!cint(this.frm.doc["taxes"][tax.row_id - 1].included_in_print_rate)
+			) {
+				// referred row should also be an inclusive tax
+				on_previous_row_error(tax.row_id);
+			} else if (tax.charge_type == "On Previous Row Total" && this.frm) {
+				var taxes_not_included = $.map(this.frm.doc["taxes"].slice(0, tax.row_id),
+					function(t) { return cint(t.included_in_print_rate) ? null : t; });
+				if(taxes_not_included.length > 0) {
+					// all rows above this tax should be inclusive
+					on_previous_row_error(tax.row_id == 1 ? "1" : "1 - " + tax.row_id);
+>>>>>>> 50d56db0c2 (fix: specify precision for net_amount (#39481))
 				}
 			})
 		}
