@@ -112,7 +112,7 @@ class PaymentReconciliation(Document):
 
 	def get_payment_entries(self):
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
-		condition = self.get_conditions(get_payments=True)
+		condition = self.get_payment_entry_conditions()
 
 		# pass dynamic dimension filter values to query builder
 		dimensions = {}
@@ -651,6 +651,29 @@ class PaymentReconciliation(Document):
 				self.ple_posting_date_filter.append(ple.posting_date.lte(self.to_payment_date))
 
 		self.build_dimensions_filter_conditions()
+
+	def get_payment_entry_conditions(self):
+		condition = " and company = '{0}' ".format(self.company)
+
+		if self.get("cost_center"):
+			condition = " and cost_center = '{0}' ".format(self.cost_center)
+
+		condition += (
+			" and posting_date >= {0}".format(frappe.db.escape(self.from_payment_date))
+			if self.from_payment_date
+			else ""
+		)
+		condition += (
+			" and posting_date <= {0}".format(frappe.db.escape(self.to_payment_date))
+			if self.to_payment_date
+			else ""
+		)
+
+		if self.minimum_payment_amount:
+			condition += " and unallocated_amount >= {0}".format(flt(self.minimum_payment_amount))
+		if self.maximum_payment_amount:
+			condition += " and unallocated_amount <= {0}".format(flt(self.maximum_payment_amount))
+		return condition
 
 	def get_journal_filter_conditions(self):
 		conditions = []
