@@ -29,6 +29,8 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 class TestPurchaseOrder(FrappeTestCase):
 	def test_purchase_order_qty(self):
 		po = create_purchase_order(qty=1, do_not_save=True)
+
+		# NonNegativeError with qty=-1
 		po.append(
 			"items",
 			{
@@ -39,8 +41,14 @@ class TestPurchaseOrder(FrappeTestCase):
 		)
 		self.assertRaises(frappe.NonNegativeError, po.save)
 
+		# InvalidQtyError with qty=0
 		po.items[1].qty = 0
 		self.assertRaises(InvalidQtyError, po.save)
+
+		# No error with qty=1
+		po.items[1].qty = 1
+		po.save()
+		self.assertEqual(po.items[1].qty, 1)
 
 	def test_make_purchase_receipt(self):
 		po = create_purchase_order(do_not_submit=True)
@@ -1013,6 +1021,33 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertTrue(frappe.db.get_value("Subcontracting Order", {"purchase_order": po.name}))
 
+	def test_purchase_order_advance_payment_status(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+
+		po = create_purchase_order()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
+		)
+
+		pr = make_payment_request(dt=po.doctype, dn=po.name, submit_doc=True, return_doc=True)
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
+
+		pe = get_payment_entry(po.doctype, po.name).save().submit()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Fully Paid"
+		)
+
+		pe.reload()
+		pe.cancel()
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
+
+		pr.reload()
+		pr.cancel()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
+		)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -1108,7 +1143,7 @@ def create_purchase_order(**args):
 				"item_code": args.item or args.item_code or "_Test Item",
 				"warehouse": args.warehouse or "_Test Warehouse - _TC",
 				"from_warehouse": args.from_warehouse,
-				"qty": args.qty or 10,
+				"qty": args.qty if args.qty is not None else 10,
 				"rate": args.rate or 500,
 				"schedule_date": add_days(nowdate(), 1),
 				"include_exploded_items": args.get("include_exploded_items", 1),

@@ -18,4 +18,4 @@ def execute():
 		)
 	)
 
-	rebuild_tree("Department", "parent_department")
+	rebuild_tree("Department")

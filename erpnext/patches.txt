@@ -57,7 +57,6 @@ execute:frappe.delete_doc_if_exists("Page", "production-analytics")
 erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019
 erpnext.patches.v11_0.update_delivery_trip_status
 erpnext.patches.v11_0.rename_bom_wo_fields
-erpnext.patches.v12_0.set_default_homepage_type
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
@@ -353,6 +352,7 @@ erpnext.patches.v14_0.update_zero_asset_quantity_field
 execute:frappe.db.set_single_value("Buying Settings", "project_update_frequency", "Each Transaction")
 execute:frappe.db.set_default("date_format", frappe.db.get_single_value("System Settings", "date_format"))
 erpnext.patches.v14_0.update_total_asset_cost_field
+erpnext.patches.v15_0.create_advance_payment_status
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index # 2023-12-20

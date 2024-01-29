@@ -169,6 +169,13 @@ class PaymentRequest(Document):
 		elif self.payment_channel == "Phone":
 			self.request_phone_payment()
 
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
+		if self.reference_doctype in advance_payment_doctypes:
+			# set advance payment status
+			ref_doc.set_total_advance_paid()
+
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
 		request_amount = self.get_request_amount()
@@ -206,6 +213,14 @@ class PaymentRequest(Document):
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
 		self.set_as_cancelled()
+
+		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
+		if self.reference_doctype in advance_payment_doctypes:
+			# set advance payment status
+			ref_doc.set_total_advance_paid()
 
 	def make_invoice(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -424,6 +439,15 @@ def make_payment_request(**args):
 	"""Make payment request"""
 
 	args = frappe._dict(args)
+	if args.dt not in [
+		"Sales Order",
+		"Purchase Order",
+		"Sales Invoice",
+		"Purchase Invoice",
+		"POS Invoice",
+		"Fees",
+	]:
+		frappe.throw(_("Payment Requests cannot be created against: {0}").format(frappe.bold(args.dt)))
 
 	ref_doc = frappe.get_doc(args.dt, args.dn)
 	gateway_account = get_gateway_details(args) or frappe._dict()

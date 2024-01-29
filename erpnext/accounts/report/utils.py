@@ -251,6 +251,7 @@ def get_journal_entries(filters, args):
 		)
 		.where(
 			(je.voucher_type == "Journal Entry")
+			& (je.docstatus == 1)
 			& (journal_account.party == filters.get(args.party))
 			& (journal_account.account.isin(args.party_accounts))
 		)
@@ -367,7 +368,7 @@ def filter_invoices_based_on_dimensions(filters, query, parent_doc):
 						dimension.document_type, filters.get(dimension.fieldname)
 					)
 				fieldname = dimension.fieldname
-				query = query.where(parent_doc[fieldname] == filters.fieldname)
+				query = query.where(parent_doc[fieldname].isin(filters[fieldname]))
 	return query
 
 

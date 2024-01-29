@@ -4,7 +4,7 @@
  "doctype": "Form Tour",
  "idx": 0,
  "is_standard": 1,
- "modified": "2021-06-29 17:00:26.145996",
+ "modified": "2024-01-24 02:20:26.145996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
@@ -82,7 +82,7 @@
    "label": "Accounts Frozen Till Date",
    "parent_field": "",
    "position": "Right",
-   "title": "Accounts Frozen Upto"
+   "title": "Accounts Frozen Up To"
   },
   {
    "description": "Users with this Role are allowed to set frozen accounts and create/modify accounting entries against frozen accounts.",
