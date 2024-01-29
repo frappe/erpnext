@@ -114,14 +114,6 @@ class PaymentReconciliation(Document):
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
 		condition = self.get_payment_entry_conditions()
 
-		# pass dynamic dimension filter values to query builder
-		dimensions = {}
-		for x in self.dimensions:
-			dimension = x.fieldname
-			if self.get(dimension):
-				dimensions.update({dimension: self.get(dimension)})
-		condition.update({"accounting_dimensions": dimensions})
-
 		payment_entries = get_advance_payment_entries_for_regional(
 			self.party_type,
 			self.party,
@@ -653,27 +645,32 @@ class PaymentReconciliation(Document):
 		self.build_dimensions_filter_conditions()
 
 	def get_payment_entry_conditions(self):
-		condition = " and company = '{0}' ".format(self.company)
+		conditions = []
+		pe = qb.DocType("Payment Entry")
+		conditions.append(pe.company == self.company)
 
 		if self.get("cost_center"):
-			condition = " and cost_center = '{0}' ".format(self.cost_center)
+			conditions.append(pe.cost_center == self.cost_center)
 
-		condition += (
-			" and posting_date >= {0}".format(frappe.db.escape(self.from_payment_date))
-			if self.from_payment_date
-			else ""
-		)
-		condition += (
-			" and posting_date <= {0}".format(frappe.db.escape(self.to_payment_date))
-			if self.to_payment_date
-			else ""
-		)
+		if self.from_payment_date:
+			conditions.append(pe.posting_date.gte(self.from_payment_date))
+
+		if self.to_payment_date:
+			conditions.append(pe.posting_date.lte(self.to_payment_date))
 
 		if self.minimum_payment_amount:
-			condition += " and unallocated_amount >= {0}".format(flt(self.minimum_payment_amount))
+			conditions.append(pe.unallocated_amount.gte(flt(self.minimum_payment_amount)))
+
 		if self.maximum_payment_amount:
-			condition += " and unallocated_amount <= {0}".format(flt(self.maximum_payment_amount))
-		return condition
+			conditions.append(pe.unallocated_amount.lte(flt(self.maximum_payment_amount)))
+
+		# pass dynamic dimension filter values to payment query
+		for x in self.dimensions:
+			dimension = x.fieldname
+			if self.get(dimension):
+				conditions.append(pe[dimension] == self.get(dimension))
+
+		return conditions
 
 	def get_journal_filter_conditions(self):
 		conditions = []
