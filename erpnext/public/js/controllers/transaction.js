@@ -790,24 +790,25 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				if (me.frm.doc.price_list_currency == company_currency) {
 					me.frm.set_value('plc_conversion_rate', 1.0);
 				}
-				if (company_doc && company_doc.default_letter_head) {
-					if(me.frm.fields_dict.letter_head) {
-						me.frm.set_value("letter_head", company_doc.default_letter_head);
+				if (company_doc){
+					if (company_doc.default_letter_head) {
+						if(me.frm.fields_dict.letter_head) {
+							me.frm.set_value("letter_head", company_doc.default_letter_head);
+						}
+					}
+					let selling_doctypes_for_tc = ["Sales Invoice", "Quotation", "Sales Order", "Delivery Note"];
+					if (company_doc.default_selling_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
+					selling_doctypes_for_tc.indexOf(me.frm.doc.doctype) != -1) {
+						me.frm.set_value("tc_name", company_doc.default_selling_terms);
+					}
+					let buying_doctypes_for_tc = ["Request for Quotation", "Supplier Quotation", "Purchase Order",
+						"Material Request", "Purchase Receipt"];
+					// Purchase Invoice is excluded as per issue #3345
+					if (company_doc.default_buying_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
+					buying_doctypes_for_tc.indexOf(me.frm.doc.doctype) != -1) {
+						me.frm.set_value("tc_name", company_doc.default_buying_terms);
 					}
 				}
-				let selling_doctypes_for_tc = ["Sales Invoice", "Quotation", "Sales Order", "Delivery Note"];
-				if (company_doc.default_selling_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-				selling_doctypes_for_tc.indexOf(me.frm.doc.doctype) != -1) {
-					me.frm.set_value("tc_name", company_doc.default_selling_terms);
-				}
-				let buying_doctypes_for_tc = ["Request for Quotation", "Supplier Quotation", "Purchase Order",
-					"Material Request", "Purchase Receipt"];
-				// Purchase Invoice is excluded as per issue #3345
-				if (company_doc.default_buying_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-				buying_doctypes_for_tc.indexOf(me.frm.doc.doctype) != -1) {
-					me.frm.set_value("tc_name", company_doc.default_buying_terms);
-				}
-
 				frappe.run_serially([
 					() => me.frm.script_manager.trigger("currency"),
 					() => me.update_item_tax_map(),

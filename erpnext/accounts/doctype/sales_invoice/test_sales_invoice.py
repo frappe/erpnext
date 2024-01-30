@@ -1533,6 +1533,19 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount"), -1000)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 2500)
 
+	def test_return_invoice_with_account_mismatch(self):
+		debtors2 = create_account(
+			parent_account="Accounts Receivable - _TC",
+			account_name="Debtors 2",
+			company="_Test Company",
+			account_type="Receivable",
+		)
+		si = create_sales_invoice(qty=1, rate=1000)
+		cr_note = create_sales_invoice(
+			qty=-1, rate=1000, is_return=1, return_against=si.name, debit_to=debtors2, do_not_save=True
+		)
+		self.assertRaises(frappe.ValidationError, cr_note.save)
+
 	def test_gle_made_when_asset_is_returned(self):
 		create_asset_data()
 		asset = create_asset(item_code="Macbook Pro")

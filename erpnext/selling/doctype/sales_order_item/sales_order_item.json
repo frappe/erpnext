@@ -118,6 +118,7 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "print_width": "150px",
+   "reqd": 1,
    "width": "150px"
   },
   {
@@ -908,7 +909,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-24 13:24:55.756320",
+ "modified": "2024-01-25 14:24:00.330219",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

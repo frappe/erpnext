@@ -704,7 +704,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr2.load_from_db()
 		self.assertEqual(pr2.get("items")[0].billed_amt, 2000)
 		self.assertEqual(pr2.per_billed, 80)
-		self.assertEqual(pr2.status, "To Bill")
+		self.assertEqual(pr2.status, "Partly Billed")
 
 		pr2.cancel()
 		pi2.reload()
@@ -1115,7 +1115,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pi.load_from_db()
 		pr.load_from_db()
 
-		self.assertEqual(pr.status, "To Bill")
+		self.assertEqual(pr.status, "Partly Billed")
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
 	def test_purchase_receipt_with_exchange_rate_difference(self):
@@ -1638,9 +1638,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 		make_stock_entry(
 			purpose="Material Receipt",
 			item_code=item.name,
-			qty=15,
+			qty=20,
 			company=company,
 			to_warehouse=from_warehouse,
+			posting_date=add_days(today(), -3),
 		)
 
 		# Step 3: Create Delivery Note with Internal Customer
@@ -1663,13 +1664,15 @@ class TestPurchaseReceipt(FrappeTestCase):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.set_posting_time = 1
+		pr.posting_date = today()
 		pr.items[0].qty = 15
 		pr.items[0].from_warehouse = target_warehouse
 		pr.items[0].warehouse = to_warehouse
 		pr.items[0].rejected_warehouse = from_warehouse
 		pr.save()
 
-		self.assertRaises(OverAllowanceError, pr.submit)
+		self.assertRaises(frappe.ValidationError, pr.submit)
 
 		# Step 5: Test Over Receipt Allowance
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 50)
@@ -1681,8 +1684,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 			company=company,
 			from_warehouse=from_warehouse,
 			to_warehouse=target_warehouse,
+			posting_date=add_days(pr.posting_date, -1),
 		)
 
+		pr.reload()
 		pr.submit()
 
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
