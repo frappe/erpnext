@@ -26,23 +26,15 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 	def test_tax_withholding_for_customers(self):
 		si = create_sales_invoice(rate=1000)
 		pe = create_tcs_payment_entry()
-		jv = make_journal_entry(
-			"TCS - _TC",
-			"Debtors - _TC",
-			1000,
-			"_Test Cost Center - _TC",
-			save=False,
-		)
-		jv.accounts[1].party_type = "Customer"
-		jv.accounts[1].party = "_Test Customer"
-		jv.submit()
+		jv = create_tcs_journal_entry()
 
 		filters = frappe._dict(
 			company="_Test Company", party_type="Customer", from_date=today(), to_date=today()
 		)
 		result = execute(filters)[1]
 		expected_values = [
-			[jv.name, "TCS", 0.075, 1000, -1000, 1000],
+			# Check for JV totals using back calculation logic
+			[jv.name, "TCS", 0.075, -10000.0, -7.5, -10000.0],
 			[pe.name, "TCS", 0.075, 2550, 0.53, 2550.53],
 			[si.name, "TCS", 0.075, 1000, 0.525, 1000.525],
 		]
@@ -123,3 +115,32 @@ def create_tcs_payment_entry():
 	)
 	payment_entry.submit()
 	return payment_entry
+
+
+def create_tcs_journal_entry():
+	jv = frappe.new_doc("Journal Entry")
+	jv.posting_date = today()
+	jv.company = "_Test Company"
+	jv.set(
+		"accounts",
+		[
+			{
+				"account": "Debtors - _TC",
+				"party_type": "Customer",
+				"party": "_Test Customer",
+				"credit_in_account_currency": 10000,
+			},
+			{
+				"account": "Debtors - _TC",
+				"party_type": "Customer",
+				"party": "_Test Customer",
+				"debit_in_account_currency": 9992.5,
+			},
+			{
+				"account": "TCS - _TC",
+				"debit_in_account_currency": 7.5,
+			},
+		],
+	)
+	jv.insert()
+	return jv.submit()
