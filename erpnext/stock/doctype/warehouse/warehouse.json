@@ -13,6 +13,7 @@
   "column_break_3",
   "is_group",
   "parent_warehouse",
+  "is_rejected_warehouse",
   "column_break_4",
   "account",
   "company",
@@ -249,13 +250,20 @@
   {
    "fieldname": "column_break_qajx",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If yes, then this warehouse will be used to store rejected materials",
+   "fieldname": "is_rejected_warehouse",
+   "fieldtype": "Check",
+   "label": "Is Rejected Warehouse"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-05-29 13:10:43.333160",
+ "modified": "2024-01-24 16:27:28.299520",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
