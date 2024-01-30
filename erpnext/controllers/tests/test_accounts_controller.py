@@ -1258,18 +1258,53 @@ class TestAccountsController(FrappeTestCase):
 		frappe.db.set_value("Company", self.company, "cost_center", cc)
 
 	def setup_dimensions(self):
-		# create dimension
-		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
-			create_dimension,
-		)
+		if not frappe.db.exists("Accounting Dimension", {"document_type": "Department"}):
+			frappe.get_doc(
+				{
+					"doctype": "Accounting Dimension",
+					"document_type": "Department",
+				}
+			).insert()
+		else:
+			dimension = frappe.get_doc("Accounting Dimension", "Department")
+			dimension.disabled = 0
+			dimension.save()
 
-		create_dimension()
-		# make it non-mandatory
-		loc = frappe.get_doc("Accounting Dimension", "Location")
-		for x in loc.dimension_defaults:
-			x.mandatory_for_bs = False
-			x.mandatory_for_pl = False
-		loc.save()
+		if not frappe.db.exists("Accounting Dimension", {"document_type": "Location"}):
+			dimension1 = frappe.get_doc(
+				{
+					"doctype": "Accounting Dimension",
+					"document_type": "Location",
+				}
+			)
+			dimension1.append(
+				"dimension_defaults",
+				{
+					"company": "_Test Company",
+					"reference_document": "Location",
+					"default_dimension": "Block 1",
+					"mandatory_for_bs": 0,
+					"mandatory_for_pl": 0,
+				},
+			)
+
+			dimension1.insert()
+			dimension1.save()
+		else:
+			dimension1 = frappe.get_doc("Accounting Dimension", "Location")
+			dimension1.disabled = 0
+			dimension1.save()
+
+	def disable_dimensions(self):
+		if frappe.db.exists("Accounting Dimension", {"document_type": "Department"}):
+			dimension = frappe.get_doc("Accounting Dimension", "Department")
+			dimension.disabled = 1
+			dimension.save()
+
+		if frappe.db.exists("Accounting Dimension", {"document_type": "Location"}):
+			dimension1 = frappe.get_doc("Accounting Dimension", "Location")
+			dimension1.disabled = 1
+			dimension1.save()
 
 	def test_50_dimensions_filter(self):
 		"""
@@ -1341,6 +1376,7 @@ class TestAccountsController(FrappeTestCase):
 		pr.get_unreconciled_entries()
 		self.assertEqual(len(pr.invoices), 0)
 		self.assertEqual(len(pr.payments), 1)
+		self.disable_dimensions()
 
 	def test_51_cr_note_should_inherit_dimension(self):
 		self.setup_dimensions()
@@ -1383,6 +1419,7 @@ class TestAccountsController(FrappeTestCase):
 					[cr_note.department, cr_note.department],
 					frappe.db.get_all("Journal Entry Account", filters={"parent": x.parent}, pluck="department"),
 				)
+		self.disable_dimensions()
 
 	def test_52_dimension_inhertiance_exc_gain_loss(self):
 		# Sales Invoice in Foreign Currency
@@ -1421,6 +1458,7 @@ class TestAccountsController(FrappeTestCase):
 				pluck="department",
 			),
 		)
+		self.disable_dimensions()
 
 	def test_53_dimension_inheritance_on_advance(self):
 		self.setup_dimensions()
@@ -1467,3 +1505,4 @@ class TestAccountsController(FrappeTestCase):
 				pluck="department",
 			),
 		)
+		self.disable_dimensions()
