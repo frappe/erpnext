@@ -193,7 +193,7 @@ class PricingRule(Document):
 
 	def validate_applicable_for_selling_or_buying(self):
 		if not self.selling and not self.buying:
-			throw(_("Atleast one of the Selling or Buying must be selected"))
+			throw(_("At least one of the Selling or Buying must be selected"))
 
 		if not self.selling and self.applicable_for in [
 			"Customer",

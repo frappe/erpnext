@@ -178,6 +178,7 @@ class PaymentEntry(AccountsController):
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
+		self.set_total_in_words()
 
 	def on_submit(self):
 		if self.difference_amount:
@@ -190,7 +191,7 @@ class PaymentEntry(AccountsController):
 
 	def set_liability_account(self):
 		# Auto setting liability account should only be done during 'draft' status
-		if self.docstatus > 0:
+		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
 			return
 
 		if not frappe.db.get_value(
@@ -786,6 +787,21 @@ class PaymentEntry(AccountsController):
 
 		self.db_set("status", self.status, update_modified=True)
 
+	def set_total_in_words(self):
+		from frappe.utils import money_in_words
+
+		if self.payment_type in ("Pay", "Internal Transfer"):
+			base_amount = abs(self.base_paid_amount)
+			amount = abs(self.paid_amount)
+			currency = self.paid_from_account_currency
+		elif self.payment_type == "Receive":
+			base_amount = abs(self.base_received_amount)
+			amount = abs(self.received_amount)
+			currency = self.paid_to_account_currency
+
+		self.base_in_words = money_in_words(base_amount, self.company_currency)
+		self.in_words = money_in_words(amount, currency)
+
 	def set_tax_withholding(self):
 		if self.party_type != "Supplier":
 			return
@@ -927,8 +943,8 @@ class PaymentEntry(AccountsController):
 	def calculate_base_allocated_amount_for_reference(self, d) -> float:
 		base_allocated_amount = 0
 		advance_payment_doctypes = frappe.get_hooks(
-			"advance_payment_customer_doctypes"
-		) + frappe.get_hooks("advance_payment_supplier_doctypes")
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
 		if d.reference_doctype in advance_payment_doctypes:
 			# When referencing Sales/Purchase Order, use the source/target exchange rate depending on payment type.
 			# This is so there are no Exchange Gain/Loss generated for such doctypes
@@ -1428,8 +1444,8 @@ class PaymentEntry(AccountsController):
 	def update_advance_paid(self):
 		if self.payment_type in ("Receive", "Pay") and self.party:
 			advance_payment_doctypes = frappe.get_hooks(
-				"advance_payment_customer_doctypes"
-			) + frappe.get_hooks("advance_payment_supplier_doctypes")
+				"advance_payment_receivable_doctypes"
+			) + frappe.get_hooks("advance_payment_payable_doctypes")
 			for d in self.get("references"):
 				if d.allocated_amount and d.reference_doctype in advance_payment_doctypes:
 					frappe.get_doc(

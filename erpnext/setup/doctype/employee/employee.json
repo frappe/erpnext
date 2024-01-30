@@ -441,13 +441,13 @@
   {
    "fieldname": "prefered_contact_email",
    "fieldtype": "Select",
-   "label": "Prefered Contact Email",
+   "label": "Preferred Contact Email",
    "options": "\nCompany Email\nPersonal Email\nUser ID"
   },
   {
    "fieldname": "prefered_email",
    "fieldtype": "Data",
-   "label": "Prefered Email",
+   "label": "Preferred Email",
    "options": "Email",
    "read_only": 1
   },
@@ -524,7 +524,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto"
+   "label": "Valid Up To"
   },
   {
    "fieldname": "place_of_issue",
@@ -824,7 +824,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2024-01-03 17:36:20.984421",
+ "modified": "2024-01-24 02:20:26.145996",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

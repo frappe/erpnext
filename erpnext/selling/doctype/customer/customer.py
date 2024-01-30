@@ -124,6 +124,7 @@ class Customer(TransactionBase):
 				),
 				title=_("Note"),
 				indicator="yellow",
+				alert=True,
 			)
 
 			return new_customer_name

@@ -776,7 +776,7 @@ def raise_work_orders(material_request):
 			)
 		else:
 			msgprint(
-				_("The {0} {1} created sucessfully").format(frappe.bold(_("Work Order")), work_orders_list[0])
+				_("The {0} {1} created successfully").format(frappe.bold(_("Work Order")), work_orders_list[0])
 			)
 
 	if errors:
