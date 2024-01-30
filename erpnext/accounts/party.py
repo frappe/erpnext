@@ -439,8 +439,7 @@ def get_party_and_advance_accounts(party_type, party=None, company=None):
 	Returns a list containing the party account and the advance account.
 	"""
 	party_accounts = [get_party_account(party_type, party, company)]
-	if party and party_type in ["Customer", "Supplier"]:
-		party_accounts.append(get_party_advance_account(party_type, party, company))
+	party_accounts.append(get_party_advance_account(party_type, party, company))
 	return party_accounts
 
 
