@@ -19,10 +19,10 @@
  "owner": "Administrator",
  "recipients": [
   {
-   "receiver_by_document_field": "Accounts User"
+   "receiver_by_role": "Accounts User"
   },
   {
-   "receiver_by_document_field": "Accounts Manager"
+   "receiver_by_role": "Accounts Manager"
   }
  ],
  "send_system_notification": 0,
