@@ -1010,6 +1010,11 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				for idx, item in enumerate(target_doc.items):
 					item.idx = idx + 1
 
+	if not kwargs.skip_item_mapping and frappe.flags.bulk_transaction and not target_doc.items:
+		# the (date) condition filter resulted in an unintendedly created empty DN; remove it
+		del target_doc
+		return
+
 	# Should be called after mapping items.
 	set_missing_values(so, target_doc)
 

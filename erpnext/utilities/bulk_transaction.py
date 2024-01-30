@@ -156,9 +156,12 @@ def task(doc_name, from_doctype, to_doctype):
 	else:
 		obj = mapper[from_doctype][to_doctype](doc_name)
 
-	obj.flags.ignore_validate = True
-	obj.set_title_field()
-	obj.insert(ignore_mandatory=True)
+	if obj:
+		obj.flags.ignore_validate = True
+		obj.set_title_field()
+		obj.insert(ignore_mandatory=True)
+
+	del obj
 	del frappe.flags.bulk_transaction
 
 
