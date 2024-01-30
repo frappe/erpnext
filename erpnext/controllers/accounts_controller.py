@@ -187,6 +187,7 @@ class AccountsController(TransactionBase):
 		self.validate_party()
 		self.validate_currency()
 		self.validate_party_account_currency()
+		self.validate_return_against_account()
 
 		if self.doctype in ["Purchase Invoice", "Sales Invoice"]:
 			if invalid_advances := [
@@ -319,6 +320,20 @@ class AccountsController(TransactionBase):
 				"delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s",
 				(self.doctype, self.name),
 			)
+
+	def validate_return_against_account(self):
+		if (
+			self.doctype in ["Sales Invoice", "Purchase Invoice"] and self.is_return and self.return_against
+		):
+			cr_dr_account_field = "debit_to" if self.doctype == "Sales Invoice" else "credit_to"
+			cr_dr_account_label = "Debit To" if self.doctype == "Sales Invoice" else "Credit To"
+			cr_dr_account = self.get(cr_dr_account_field)
+			if frappe.get_value(self.doctype, self.return_against, cr_dr_account_field) != cr_dr_account:
+				frappe.throw(
+					_("'{0}' account: '{1}' should match the Return Against Invoice").format(
+						frappe.bold(cr_dr_account_label), frappe.bold(cr_dr_account)
+					)
+				)
 
 	def validate_deferred_income_expense_account(self):
 		field_map = {

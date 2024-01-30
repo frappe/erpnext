@@ -1893,6 +1893,21 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		self.assertEqual(pi.items[0].cost_center, "_Test Cost Center Buying - _TC")
 
+	def test_debit_note_with_account_mismatch(self):
+		new_creditors = create_account(
+			parent_account="Accounts Payable - _TC",
+			account_name="Creditors 2",
+			company="_Test Company",
+			account_type="Payable",
+		)
+		pi = make_purchase_invoice(qty=1, rate=1000)
+		dr_note = make_purchase_invoice(
+			qty=-1, rate=1000, is_return=1, return_against=pi.name, do_not_save=True
+		)
+		dr_note.credit_to = new_creditors
+
+		self.assertRaises(frappe.ValidationError, dr_note.save)
+
 
 def check_gl_entries(
 	doc,
