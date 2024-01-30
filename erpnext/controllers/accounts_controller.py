@@ -22,6 +22,7 @@ from frappe.utils import (
 	get_link_to_form,
 	getdate,
 	nowdate,
+	parse_json,
 	today,
 )
 
@@ -201,6 +202,7 @@ class AccountsController(TransactionBase):
 		self.validate_party()
 		self.validate_currency()
 		self.validate_party_account_currency()
+		self.validate_return_against_account()
 
 		if self.doctype in ["Purchase Invoice", "Sales Invoice"]:
 			if invalid_advances := [
@@ -348,6 +350,20 @@ class AccountsController(TransactionBase):
 
 		for bundle in bundles:
 			frappe.delete_doc("Serial and Batch Bundle", bundle.name)
+
+	def validate_return_against_account(self):
+		if (
+			self.doctype in ["Sales Invoice", "Purchase Invoice"] and self.is_return and self.return_against
+		):
+			cr_dr_account_field = "debit_to" if self.doctype == "Sales Invoice" else "credit_to"
+			cr_dr_account_label = "Debit To" if self.doctype == "Sales Invoice" else "Credit To"
+			cr_dr_account = self.get(cr_dr_account_field)
+			if frappe.get_value(self.doctype, self.return_against, cr_dr_account_field) != cr_dr_account:
+				frappe.throw(
+					_("'{0}' account: '{1}' should match the Return Against Invoice").format(
+						frappe.bold(cr_dr_account_label), frappe.bold(cr_dr_account)
+					)
+				)
 
 	def validate_deferred_income_expense_account(self):
 		field_map = {
@@ -832,6 +848,37 @@ class AccountsController(TransactionBase):
 				tax_master_doctype = self.meta.get_field("taxes_and_charges").options
 
 			self.extend("taxes", get_taxes_and_charges(tax_master_doctype, self.get("taxes_and_charges")))
+
+	def append_taxes_from_item_tax_template(self):
+		if not frappe.db.get_single_value("Accounts Settings", "add_taxes_from_item_tax_template"):
+			return
+
+		for row in self.items:
+			item_tax_rate = row.get("item_tax_rate")
+			if not item_tax_rate:
+				continue
+
+			if isinstance(item_tax_rate, str):
+				item_tax_rate = parse_json(item_tax_rate)
+
+			for account_head, rate in item_tax_rate.items():
+				row = self.get_tax_row(account_head)
+
+				if not row:
+					self.append(
+						"taxes",
+						{
+							"charge_type": "On Net Total",
+							"account_head": account_head,
+							"rate": 0,
+							"description": account_head,
+						},
+					)
+
+	def get_tax_row(self, account_head):
+		for row in self.taxes:
+			if row.account_head == account_head:
+				return row
 
 	def set_other_charges(self):
 		self.set("taxes", [])
@@ -1761,9 +1808,9 @@ class AccountsController(TransactionBase):
 
 	def set_total_advance_paid(self):
 		ple = frappe.qb.DocType("Payment Ledger Entry")
-		if self.doctype in frappe.get_hooks("advance_payment_customer_doctypes"):
+		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
 			party = self.customer
-		if self.doctype in frappe.get_hooks("advance_payment_supplier_doctypes"):
+		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
 			party = self.supplier
 		advance = (
 			frappe.qb.from_(ple)
@@ -1829,9 +1876,9 @@ class AccountsController(TransactionBase):
 					"docstatus": 1,
 				},
 			)
-			if self.doctype in frappe.get_hooks("advance_payment_customer_doctypes"):
+			if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
 				new_status = "Requested" if prs else "Not Requested"
-			if self.doctype in frappe.get_hooks("advance_payment_supplier_doctypes"):
+			if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
 				new_status = "Initiated" if prs else "Not Initiated"
 
 		if new_status == self.advance_payment_status:

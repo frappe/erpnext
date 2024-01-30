@@ -8,6 +8,20 @@ frappe.query_reports["Balance Sheet"] = $.extend(
 
 erpnext.utils.add_dimensions("Balance Sheet", 10);
 
+frappe.query_reports["Balance Sheet"]["filters"].push(
+	{
+		"fieldname": "selected_view",
+		"label": __("Select View"),
+		"fieldtype": "Select",
+		"options": [
+			{ "value": "Report", "label": __("Report View") },
+			{ "value": "Growth", "label": __("Growth View") }
+		],
+		"default": "Report",
+		"reqd": 1
+	},
+);
+
 frappe.query_reports["Balance Sheet"]["filters"].push({
 	fieldname: "accumulated_values",
 	label: __("Accumulated Values"),
