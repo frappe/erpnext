@@ -83,6 +83,8 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			this.frm.change_custom_button_type('Allocate', null, 'default');
 		}
 
+		this.frm.trigger("set_query_for_dimension_filters");
+
 		// check for any running reconciliation jobs
 		if (this.frm.doc.receivable_payable_account) {
 			this.frm.call({
@@ -112,6 +114,25 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			});
 		}
 
+	}
+	set_query_for_dimension_filters() {
+		frappe.call({
+			method: "erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation.get_queries_for_dimension_filters",
+			args: {
+				company: this.frm.doc.company,
+			},
+			callback: (r) => {
+				if (!r.exc && r.message) {
+					r.message.forEach(x => {
+						this.frm.set_query(x.fieldname, () => {
+							return {
+								'filters': x.filters
+							};
+						});
+					});
+				}
+			}
+		});
 	}
 
 	company() {

@@ -205,6 +205,7 @@ class PickList(Document):
 					self.item_count_map.get(item_code),
 					self.company,
 					picked_item_details=picked_items_details.get(item_code),
+					consider_rejected_warehouses=self.consider_rejected_warehouses,
 				),
 			)
 
@@ -524,6 +525,7 @@ def get_available_item_locations(
 	company,
 	ignore_validation=False,
 	picked_item_details=None,
+	consider_rejected_warehouses=False,
 ):
 	locations = []
 	total_picked_qty = (
@@ -534,19 +536,39 @@ def get_available_item_locations(
 
 	if has_batch_no and has_serial_no:
 		locations = get_available_item_locations_for_serial_and_batched_item(
-			item_code, from_warehouses, required_qty, company, total_picked_qty
+			item_code,
+			from_warehouses,
+			required_qty,
+			company,
+			total_picked_qty,
+			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
 	elif has_serial_no:
 		locations = get_available_item_locations_for_serialized_item(
-			item_code, from_warehouses, required_qty, company, total_picked_qty
+			item_code,
+			from_warehouses,
+			required_qty,
+			company,
+			total_picked_qty,
+			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
 	elif has_batch_no:
 		locations = get_available_item_locations_for_batched_item(
-			item_code, from_warehouses, required_qty, company, total_picked_qty
+			item_code,
+			from_warehouses,
+			required_qty,
+			company,
+			total_picked_qty,
+			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
 	else:
 		locations = get_available_item_locations_for_other_item(
-			item_code, from_warehouses, required_qty, company, total_picked_qty
+			item_code,
+			from_warehouses,
+			required_qty,
+			company,
+			total_picked_qty,
+			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
 
 	total_qty_available = sum(location.get("qty") for location in locations)
@@ -597,7 +619,12 @@ def get_available_item_locations(
 
 
 def get_available_item_locations_for_serialized_item(
-	item_code, from_warehouses, required_qty, company, total_picked_qty=0
+	item_code,
+	from_warehouses,
+	required_qty,
+	company,
+	total_picked_qty=0,
+	consider_rejected_warehouses=False,
 ):
 	sn = frappe.qb.DocType("Serial No")
 	query = (
@@ -613,6 +640,10 @@ def get_available_item_locations_for_serialized_item(
 	else:
 		query = query.where(Coalesce(sn.warehouse, "") != "")
 
+	if not consider_rejected_warehouses:
+		if rejected_warehouses := get_rejected_warehouses():
+			query = query.where(sn.warehouse.notin(rejected_warehouses))
+
 	serial_nos = query.run(as_list=True)
 
 	warehouse_serial_nos_map = frappe._dict()
@@ -627,7 +658,12 @@ def get_available_item_locations_for_serialized_item(
 
 
 def get_available_item_locations_for_batched_item(
-	item_code, from_warehouses, required_qty, company, total_picked_qty=0
+	item_code,
+	from_warehouses,
+	required_qty,
+	company,
+	total_picked_qty=0,
+	consider_rejected_warehouses=False,
 ):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	batch = frappe.qb.DocType("Batch")
@@ -653,15 +689,28 @@ def get_available_item_locations_for_batched_item(
 	if from_warehouses:
 		query = query.where(sle.warehouse.isin(from_warehouses))
 
+	if not consider_rejected_warehouses:
+		if rejected_warehouses := get_rejected_warehouses():
+			query = query.where(sle.warehouse.notin(rejected_warehouses))
+
 	return query.run(as_dict=True)
 
 
 def get_available_item_locations_for_serial_and_batched_item(
-	item_code, from_warehouses, required_qty, company, total_picked_qty=0
+	item_code,
+	from_warehouses,
+	required_qty,
+	company,
+	total_picked_qty=0,
+	consider_rejected_warehouses=False,
 ):
 	# Get batch nos by FIFO
 	locations = get_available_item_locations_for_batched_item(
-		item_code, from_warehouses, required_qty, company
+		item_code,
+		from_warehouses,
+		required_qty,
+		company,
+		consider_rejected_warehouses=consider_rejected_warehouses,
 	)
 
 	if locations:
@@ -691,7 +740,12 @@ def get_available_item_locations_for_serial_and_batched_item(
 
 
 def get_available_item_locations_for_other_item(
-	item_code, from_warehouses, required_qty, company, total_picked_qty=0
+	item_code,
+	from_warehouses,
+	required_qty,
+	company,
+	total_picked_qty=0,
+	consider_rejected_warehouses=False,
 ):
 	bin = frappe.qb.DocType("Bin")
 	query = (
@@ -707,6 +761,10 @@ def get_available_item_locations_for_other_item(
 	else:
 		wh = frappe.qb.DocType("Warehouse")
 		query = query.from_(wh).where((bin.warehouse == wh.name) & (wh.company == company))
+
+	if not consider_rejected_warehouses:
+		if rejected_warehouses := get_rejected_warehouses():
+			query = query.where(bin.warehouse.notin(rejected_warehouses))
 
 	item_locations = query.run(as_dict=True)
 
@@ -1028,3 +1086,15 @@ def update_common_item_properties(item, location):
 	item.serial_no = location.serial_no
 	item.batch_no = location.batch_no
 	item.material_request_item = location.material_request_item
+
+
+def get_rejected_warehouses():
+	if not hasattr(frappe.local, "rejected_warehouses"):
+		frappe.local.rejected_warehouses = []
+
+	if not frappe.local.rejected_warehouses:
+		frappe.local.rejected_warehouses = frappe.get_all(
+			"Warehouse", filters={"is_rejected_warehouse": 1}, pluck="name"
+		)
+
+	return frappe.local.rejected_warehouses

@@ -343,7 +343,7 @@ class SubcontractingController(StockController):
 			i += 1
 
 	def __get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
-		doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
+		doctype = "BOM Explosion Item" if exploded_item else "BOM Item"
 		fields = [f"`tab{doctype}`.`stock_qty` / `tabBOM`.`quantity` as qty_consumed_per_unit"]
 
 		alias_dict = {
@@ -447,6 +447,16 @@ class SubcontractingController(StockController):
 		rm_obj = self.append(self.raw_material_table, bom_item)
 		rm_obj.reference_name = item_row.name
 
+		if self.doctype == self.subcontract_data.order_doctype:
+			rm_obj.required_qty = qty
+			rm_obj.amount = rm_obj.required_qty * rm_obj.rate
+		else:
+			rm_obj.consumed_qty = 0
+			setattr(
+				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
+			)
+			self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
+
 		if self.doctype == "Subcontracting Receipt":
 			args = frappe._dict(
 				{
@@ -464,16 +474,6 @@ class SubcontractingController(StockController):
 				}
 			)
 			rm_obj.rate = get_incoming_rate(args)
-
-		if self.doctype == self.subcontract_data.order_doctype:
-			rm_obj.required_qty = qty
-			rm_obj.amount = rm_obj.required_qty * rm_obj.rate
-		else:
-			rm_obj.consumed_qty = 0
-			setattr(
-				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
-			)
-			self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
 
 	def __get_qty_based_on_material_transfer(self, item_row, transfer_item):
 		key = (item_row.item_code, item_row.get(self.subcontract_data.order_field))

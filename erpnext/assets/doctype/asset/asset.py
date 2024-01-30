@@ -10,6 +10,7 @@ from frappe import _
 from frappe.utils import (
 	add_days,
 	add_months,
+	add_years,
 	cint,
 	date_diff,
 	flt,
@@ -23,6 +24,7 @@ from frappe.utils import (
 
 import erpnext
 from erpnext.accounts.general_ledger import make_reverse_gl_entries
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.assets.doctype.asset.depreciation import (
 	get_depreciation_accounts,
 	get_disposal_account_and_cost_center,
@@ -381,13 +383,23 @@ class Asset(AccountsController):
 		should_get_last_day = is_last_day_of_the_month(finance_book.depreciation_start_date)
 
 		depreciation_amount = 0
-
 		number_of_pending_depreciations = final_number_of_depreciations - start[finance_book.idx - 1]
+		yearly_opening_wdv = value_after_depreciation
+		current_fiscal_year_end_date = None
 
 		for n in range(start[finance_book.idx - 1], final_number_of_depreciations):
 			# If depreciation is already completed (for double declining balance)
 			if skip_row:
 				continue
+
+			schedule_date = add_months(
+				finance_book.depreciation_start_date, n * cint(finance_book.frequency_of_depreciation)
+			)
+			if not current_fiscal_year_end_date:
+				current_fiscal_year_end_date = get_fiscal_year(finance_book.depreciation_start_date)[2]
+			elif getdate(schedule_date) > getdate(current_fiscal_year_end_date):
+				current_fiscal_year_end_date = add_years(current_fiscal_year_end_date, 1)
+				yearly_opening_wdv = value_after_depreciation
 
 			if n > 0 and len(self.get("schedules")) > n - 1:
 				prev_depreciation_amount = self.get("schedules")[n - 1].depreciation_amount
@@ -397,6 +409,7 @@ class Asset(AccountsController):
 			depreciation_amount = get_depreciation_amount(
 				self,
 				value_after_depreciation,
+				yearly_opening_wdv,
 				finance_book,
 				n,
 				prev_depreciation_amount,
@@ -494,7 +507,10 @@ class Asset(AccountsController):
 
 			if not depreciation_amount:
 				continue
-			value_after_depreciation -= flt(depreciation_amount, self.precision("gross_purchase_amount"))
+			value_after_depreciation = flt(
+				value_after_depreciation - flt(depreciation_amount),
+				self.precision("gross_purchase_amount"),
+			)
 
 			# Adjust depreciation amount in the last period based on the expected value after useful life
 			if finance_book.expected_value_after_useful_life and (
@@ -1380,6 +1396,7 @@ def get_total_days(date, frequency):
 def get_depreciation_amount(
 	asset,
 	depreciable_value,
+	yearly_opening_wdv,
 	fb_row,
 	schedule_idx=0,
 	prev_depreciation_amount=0,
@@ -1397,6 +1414,7 @@ def get_depreciation_amount(
 			asset,
 			fb_row,
 			depreciable_value,
+			yearly_opening_wdv,
 			schedule_idx,
 			prev_depreciation_amount,
 			has_wdv_or_dd_non_yearly_pro_rata,
@@ -1542,6 +1560,7 @@ def get_wdv_or_dd_depr_amount(
 	asset,
 	fb_row,
 	depreciable_value,
+	yearly_opening_wdv,
 	schedule_idx,
 	prev_depreciation_amount,
 	has_wdv_or_dd_non_yearly_pro_rata,
