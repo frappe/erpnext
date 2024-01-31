@@ -522,7 +522,8 @@ def reconcile_against_document(
 
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
 			# both ledgers must be posted to for `Advance` in separate account feature
-			doc.make_advance_gl_entries(referenced_row, update_outstanding="No")
+			doc.make_advance_gl_entries(cancel=1)
+			doc.make_advance_gl_entries()
 		else:
 			gl_map = doc.build_gl_map()
 			create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
