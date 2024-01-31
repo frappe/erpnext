@@ -1,7 +1,6 @@
 {
  "actions": [],
  "creation": "2013-06-25 11:04:03",
- "description": "Settings for Buying Module",
  "doctype": "DocType",
  "document_type": "Other",
  "engine": "InnoDB",
@@ -214,7 +213,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-01-12 16:42:01.894346",
+ "modified": "2024-01-30 14:04:43.177427",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
