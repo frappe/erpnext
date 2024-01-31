@@ -744,34 +744,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 						me.frm.set_value("letter_head", company_doc.default_letter_head);
 					}
 				}
-
-				if (
-					company_doc.default_selling_terms &&
-					frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-					[
-						"Sales Invoice",
-						"Quotation",
-						"Sales Order",
-						"Delivery Note",
-					].includes(me.frm.doc.doctype) &&
-					!me.frm.doc.tc_name
-				) {
+				let selling_doctypes_for_tc = ["Sales Invoice", "Quotation", "Sales Order", "Delivery Note"];
+				if (company_doc.default_selling_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
+				selling_doctypes_for_tc.includes(me.frm.doc.doctype) && !me.frm.doc.tc_name) {
 					me.frm.set_value("tc_name", company_doc.default_selling_terms);
 				}
-
-				if (
-					company_doc.default_buying_terms &&
-					frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-					[
-						"Request for Quotation",
-						"Supplier Quotation",
-						"Purchase Order",
-						// Purchase Invoice is excluded as per issue #3345
-						"Material Request",
-						"Purchase Receipt",
-					].includes(me.frm.doc.doctype) &&
-					!me.frm.doc.tc_name
-				) {
+				let buying_doctypes_for_tc = ["Request for Quotation", "Supplier Quotation", "Purchase Order",
+					"Material Request", "Purchase Receipt"];
+				// Purchase Invoice is excluded as per issue #3345
+				if (company_doc.default_buying_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
+				buying_doctypes_for_tc.includes(me.frm.doc.doctype) && !me.frm.doc.tc_name) {
 					me.frm.set_value("tc_name", company_doc.default_buying_terms);
 				}
 
