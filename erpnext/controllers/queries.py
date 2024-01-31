@@ -656,7 +656,7 @@ def get_filtered_dimensions(
 	searchfields = frappe.get_meta(doctype).get_search_fields()
 
 	meta = frappe.get_meta(doctype)
-	if meta.is_tree and doctype != 'Employee':
+	if meta.is_tree and doctype != "Employee":
 		query_filters.append(["is_group", "=", 0])
 
 	if meta.has_field("disabled"):
