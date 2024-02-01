@@ -29,6 +29,41 @@ from erpnext.support.doctype.issue.issue import get_holidays
 
 
 class ServiceLevelAgreement(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.support.doctype.pause_sla_on_status.pause_sla_on_status import PauseSLAOnStatus
+		from erpnext.support.doctype.service_day.service_day import ServiceDay
+		from erpnext.support.doctype.service_level_priority.service_level_priority import (
+			ServiceLevelPriority,
+		)
+		from erpnext.support.doctype.sla_fulfilled_on_status.sla_fulfilled_on_status import (
+			SLAFulfilledOnStatus,
+		)
+
+		apply_sla_for_resolution: DF.Check
+		condition: DF.Code | None
+		default_priority: DF.Link | None
+		default_service_level_agreement: DF.Check
+		document_type: DF.Link
+		enabled: DF.Check
+		end_date: DF.Date | None
+		entity: DF.DynamicLink | None
+		entity_type: DF.Literal["", "Customer", "Customer Group", "Territory"]
+		holiday_list: DF.Link
+		pause_sla_on: DF.Table[PauseSLAOnStatus]
+		priorities: DF.Table[ServiceLevelPriority]
+		service_level: DF.Data
+		sla_fulfilled_on: DF.Table[SLAFulfilledOnStatus]
+		start_date: DF.Date | None
+		support_and_resolution: DF.Table[ServiceDay]
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_selected_doctype()
 		self.validate_doc()
@@ -65,7 +100,7 @@ class ServiceLevelAgreement(Document):
 			priorities.append(priority.priority)
 
 		# Check if repeated priority
-		if not len(set(priorities)) == len(priorities):
+		if len(set(priorities)) != len(priorities):
 			repeated_priority = get_repeated(priorities)
 			frappe.throw(_("Priority {0} has been repeated.").format(repeated_priority))
 
@@ -93,7 +128,7 @@ class ServiceLevelAgreement(Document):
 				)
 
 		# Check for repeated workday
-		if not len(set(support_days)) == len(support_days):
+		if len(set(support_days)) != len(support_days):
 			repeated_days = get_repeated(support_days)
 			frappe.throw(_("Workday {0} has been repeated.").format(repeated_days))
 
@@ -713,13 +748,13 @@ def change_service_level_agreement_and_priority(self):
 		and frappe.db.get_single_value("Support Settings", "track_service_level_agreement")
 	):
 
-		if not self.priority == frappe.db.get_value("Issue", self.name, "priority"):
+		if self.priority != frappe.db.get_value("Issue", self.name, "priority"):
 			self.set_response_and_resolution_time(
 				priority=self.priority, service_level_agreement=self.service_level_agreement
 			)
 			frappe.msgprint(_("Priority has been changed to {0}.").format(self.priority))
 
-		if not self.service_level_agreement == frappe.db.get_value(
+		if self.service_level_agreement != frappe.db.get_value(
 			"Issue", self.name, "service_level_agreement"
 		):
 			self.set_response_and_resolution_time(
@@ -739,10 +774,12 @@ def get_response_and_resolution_duration(doc):
 	return priority
 
 
-def reset_service_level_agreement(doc, reason, user):
+@frappe.whitelist()
+def reset_service_level_agreement(doctype: str, docname: str, reason, user):
 	if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
 		frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
 
+	doc = frappe.get_doc(doctype, docname)
 	frappe.get_doc(
 		{
 			"doctype": "Comment",

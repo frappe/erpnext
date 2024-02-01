@@ -1,10 +1,4 @@
 import frappe
-from frappe.utils.nestedset import get_root_of
-
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
-	get_shopping_cart_settings,
-)
-from erpnext.e_commerce.shopping_cart.cart import get_debtors_account
 
 
 def set_default_role(doc, method):
@@ -56,26 +50,7 @@ def create_customer_or_supplier():
 	party = frappe.new_doc(doctype)
 	fullname = frappe.utils.get_fullname(user)
 
-	if doctype == "Customer":
-		cart_settings = get_shopping_cart_settings()
-
-		if cart_settings.enable_checkout:
-			debtors_account = get_debtors_account(cart_settings)
-		else:
-			debtors_account = ""
-
-		party.update(
-			{
-				"customer_name": fullname,
-				"customer_type": "Individual",
-				"customer_group": cart_settings.default_customer_group,
-				"territory": get_root_of("Territory"),
-			}
-		)
-
-		if debtors_account:
-			party.update({"accounts": [{"company": cart_settings.company, "account": debtors_account}]})
-	else:
+	if doctype != "Customer":
 		party.update(
 			{
 				"supplier_name": fullname,

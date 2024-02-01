@@ -10,6 +10,31 @@ from erpnext.controllers.status_updater import StatusUpdater
 
 
 class POSOpeningEntry(StatusUpdater):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.pos_opening_entry_detail.pos_opening_entry_detail import (
+			POSOpeningEntryDetail,
+		)
+
+		amended_from: DF.Link | None
+		balance_details: DF.Table[POSOpeningEntryDetail]
+		company: DF.Link
+		period_end_date: DF.Date | None
+		period_start_date: DF.Datetime
+		pos_closing_entry: DF.Data | None
+		pos_profile: DF.Link
+		posting_date: DF.Date
+		set_posting_date: DF.Check
+		status: DF.Literal["Draft", "Open", "Closed", "Cancelled"]
+		user: DF.Link
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_pos_profile_and_cashier()
 		self.validate_payment_method_account()

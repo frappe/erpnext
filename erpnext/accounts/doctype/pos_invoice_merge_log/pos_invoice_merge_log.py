@@ -16,6 +16,30 @@ from erpnext.accounts.doctype.pos_profile.pos_profile import required_accounting
 
 
 class POSInvoiceMergeLog(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
+			POSInvoiceReference,
+		)
+
+		amended_from: DF.Link | None
+		consolidated_credit_note: DF.Link | None
+		consolidated_invoice: DF.Link | None
+		customer: DF.Link
+		customer_group: DF.Link | None
+		merge_invoices_based_on: DF.Literal["Customer", "Customer Group"]
+		pos_closing_entry: DF.Link | None
+		pos_invoices: DF.Table[POSInvoiceReference]
+		posting_date: DF.Date
+		posting_time: DF.Time
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_customer()
 		self.validate_pos_invoice_status()
@@ -454,7 +478,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 	except Exception as e:
 		frappe.db.rollback()
 		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
-		error_message = safe_load_json(message_log)
+		error_message = get_error_message(message_log)
 
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Failed")
@@ -483,7 +507,7 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 	except Exception as e:
 		frappe.db.rollback()
 		message_log = frappe.message_log.pop() if frappe.message_log else str(e)
-		error_message = safe_load_json(message_log)
+		error_message = get_error_message(message_log)
 
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Submitted")
@@ -525,10 +549,8 @@ def check_scheduler_status():
 		frappe.throw(_("Scheduler is inactive. Cannot enqueue job."), title=_("Scheduler Inactive"))
 
 
-def safe_load_json(message):
+def get_error_message(message) -> str:
 	try:
-		json_message = json.loads(message).get("message")
+		return message["message"]
 	except Exception:
-		json_message = message
-
-	return json_message
+		return str(message)

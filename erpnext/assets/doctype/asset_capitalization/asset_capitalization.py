@@ -49,6 +49,61 @@ force_fields = [
 
 
 class AssetCapitalization(StockController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.asset_capitalization_asset_item.asset_capitalization_asset_item import (
+			AssetCapitalizationAssetItem,
+		)
+		from erpnext.assets.doctype.asset_capitalization_service_item.asset_capitalization_service_item import (
+			AssetCapitalizationServiceItem,
+		)
+		from erpnext.assets.doctype.asset_capitalization_stock_item.asset_capitalization_stock_item import (
+			AssetCapitalizationStockItem,
+		)
+
+		amended_from: DF.Link | None
+		asset_items: DF.Table[AssetCapitalizationAssetItem]
+		asset_items_total: DF.Currency
+		capitalization_method: DF.Literal[
+			"", "Create a new composite asset", "Choose a WIP composite asset"
+		]
+		company: DF.Link
+		cost_center: DF.Link | None
+		entry_type: DF.Literal["Capitalization", "Decapitalization"]
+		finance_book: DF.Link | None
+		naming_series: DF.Literal["ACC-ASC-.YYYY.-"]
+		posting_date: DF.Date
+		posting_time: DF.Time
+		service_items: DF.Table[AssetCapitalizationServiceItem]
+		service_items_total: DF.Currency
+		set_posting_time: DF.Check
+		stock_items: DF.Table[AssetCapitalizationStockItem]
+		stock_items_total: DF.Currency
+		target_asset: DF.Link | None
+		target_asset_location: DF.Link | None
+		target_asset_name: DF.Data | None
+		target_batch_no: DF.Link | None
+		target_fixed_asset_account: DF.Link | None
+		target_has_batch_no: DF.Check
+		target_has_serial_no: DF.Check
+		target_incoming_rate: DF.Currency
+		target_is_fixed_asset: DF.Check
+		target_item_code: DF.Link | None
+		target_item_name: DF.Data | None
+		target_qty: DF.Float
+		target_serial_no: DF.SmallText | None
+		target_stock_uom: DF.Link | None
+		target_warehouse: DF.Link | None
+		title: DF.Data | None
+		total_value: DF.Currency
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_posting_time()
 		self.set_missing_values(for_validate=True)
@@ -81,10 +136,19 @@ class AssetCapitalization(StockController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
+			"Asset",
 		)
+		self.cancel_target_asset()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.restore_consumed_asset_items()
+
+	def cancel_target_asset(self):
+		if self.entry_type == "Capitalization" and self.target_asset:
+			asset_doc = frappe.get_doc("Asset", self.target_asset)
+			frappe.db.set_value("Asset", self.target_asset, "capitalized_in", None)
+			if asset_doc.docstatus == 1:
+				asset_doc.cancel()
 
 	def set_title(self):
 		self.title = self.target_asset_name or self.target_item_name or self.target_item_code
@@ -826,7 +890,6 @@ def get_consumed_asset_details(args):
 		out.cost_center = get_default_cost_center(
 			args, item_defaults, item_group_defaults, brand_defaults
 		)
-
 	return out
 
 
@@ -874,14 +937,27 @@ def get_items_tagged_to_wip_composite_asset(asset):
 		"qty",
 		"valuation_rate",
 		"amount",
+		"is_fixed_asset",
+		"parent",
 	]
 
-	pi_items = frappe.get_all(
-		"Purchase Invoice Item", filters={"wip_composite_asset": asset}, fields=fields
-	)
-
 	pr_items = frappe.get_all(
-		"Purchase Receipt Item", filters={"wip_composite_asset": asset}, fields=fields
+		"Purchase Receipt Item", filters={"wip_composite_asset": asset, "docstatus": 1}, fields=fields
 	)
 
-	return pi_items + pr_items
+	stock_items = []
+	asset_items = []
+	for d in pr_items:
+		if not d.is_fixed_asset:
+			stock_items.append(frappe._dict(d))
+		else:
+			asset_details = frappe.db.get_value(
+				"Asset",
+				{"item_code": d.item_code, "purchase_receipt": d.parent},
+				["name as asset", "asset_name"],
+				as_dict=1,
+			)
+			d.update(asset_details)
+			asset_items.append(frappe._dict(d))
+
+	return stock_items, asset_items

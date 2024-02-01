@@ -3,7 +3,7 @@
  "allow_import": 1,
  "autoname": "field:year",
  "creation": "2013-01-22 16:50:25",
- "description": "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.",
+ "description": "Represents a Financial Year. All accounting entries and other major transactions are tracked against the Fiscal Year.",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -82,10 +82,11 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2020-11-05 12:16:53.081573",
+ "modified": "2024-01-30 12:35:38.645968",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -118,9 +119,18 @@
   {
    "read": 1,
    "role": "Employee"
+  },
+  {
+   "read": 1,
+   "role": "Accounts Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock Manager"
   }
  ],
  "show_name_in_global_search": 1,
  "sort_field": "name",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

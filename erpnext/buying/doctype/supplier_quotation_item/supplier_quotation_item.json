@@ -68,6 +68,8 @@
   "column_break_15",
   "manufacturer_part_no",
   "ad_sec_break",
+  "cost_center",
+  "dimension_col_break",
   "project",
   "section_break_44",
   "page_break"
@@ -553,19 +555,31 @@
    "fieldname": "expected_delivery_date",
    "fieldtype": "Date",
    "label": "Expected Delivery Date"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-19 12:36:26.913211",
+ "modified": "2023-11-17 12:25:26.235367",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

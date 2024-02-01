@@ -32,13 +32,6 @@ frappe.query_reports["Profitability Analysis"] = {
 			"label": __("Accounting Dimension"),
 			"fieldtype": "Link",
 			"options": "Accounting Dimension",
-			"get_query": () =>{
-				return {
-					filters: {
-						"disabled": 0
-					}
-				}
-			}
 		},
 		{
 			"fieldname": "fiscal_year",
@@ -124,8 +117,3 @@ frappe.query_reports["Profitability Analysis"] = {
 	"parent_field": "parent_account",
 	"initial_depth": 3
 }
-
-erpnext.dimension_filters.forEach((dimension) => {
-	frappe.query_reports["Profitability Analysis"].filters[1].options.push(dimension["document_type"]);
-});
-

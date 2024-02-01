@@ -6,10 +6,12 @@ import unittest
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import flt, nowdate
+from frappe.utils import add_days, flt, nowdate
 
+from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	InvalidPaymentEntry,
+	get_outstanding_reference_documents,
 	get_payment_entry,
 	get_reference_details,
 )
@@ -683,17 +685,6 @@ class TestPaymentEntry(FrappeTestCase):
 		self.validate_gl_entries(pe.name, expected_gle)
 
 	def test_payment_against_negative_sales_invoice(self):
-		pe1 = frappe.new_doc("Payment Entry")
-		pe1.payment_type = "Pay"
-		pe1.company = "_Test Company"
-		pe1.party_type = "Customer"
-		pe1.party = "_Test Customer"
-		pe1.paid_from = "_Test Cash - _TC"
-		pe1.paid_amount = 100
-		pe1.received_amount = 100
-
-		self.assertRaises(InvalidPaymentEntry, pe1.validate)
-
 		si1 = create_sales_invoice()
 
 		# create full payment entry against si1
@@ -751,8 +742,6 @@ class TestPaymentEntry(FrappeTestCase):
 
 		# pay more than outstanding against si1
 		pe3 = get_payment_entry("Sales Invoice", si1.name, bank_account="_Test Cash - _TC")
-		pe3.paid_amount = pe3.received_amount = 300
-		self.assertRaises(InvalidPaymentEntry, pe3.validate)
 
 		# pay negative outstanding against si1
 		pe3.paid_to = "Debtors - _TC"
@@ -1262,6 +1251,266 @@ class TestPaymentEntry(FrappeTestCase):
 		so.reload()
 		self.assertEqual(so.advance_paid, so.rounded_total)
 
+	def test_outstanding_invoices_api(self):
+		"""
+		Test if `get_outstanding_reference_documents` fetches invoices in the right order.
+		"""
+		customer = create_customer("Max Mustermann", "INR")
+		create_payment_terms_template()
+
+		# SI has an earlier due date and SI2 has a later due date
+		si = create_sales_invoice(
+			qty=1, rate=100, customer=customer, posting_date=add_days(nowdate(), -4)
+		)
+		si2 = create_sales_invoice(do_not_save=1, qty=1, rate=100, customer=customer)
+		si2.payment_terms_template = "Test Receivable Template"
+		si2.submit()
+
+		args = {
+			"posting_date": nowdate(),
+			"company": "_Test Company",
+			"party_type": "Customer",
+			"payment_type": "Pay",
+			"party": customer,
+			"party_account": "Debtors - _TC",
+		}
+		args.update(
+			{
+				"get_outstanding_invoices": True,
+				"from_posting_date": add_days(nowdate(), -4),
+				"to_posting_date": add_days(nowdate(), 2),
+			}
+		)
+		references = get_outstanding_reference_documents(args)
+
+		self.assertEqual(len(references), 3)
+		self.assertEqual(references[0].voucher_no, si.name)
+		self.assertEqual(references[1].voucher_no, si2.name)
+		self.assertEqual(references[2].voucher_no, si2.name)
+		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
+		self.assertEqual(references[2].payment_term, "Tax Receivable")
+
+	def test_receive_payment_from_payable_party_type(self):
+		"""
+		Checks GL entries generated while receiving payments from a Payable Party Type.
+		"""
+		pe = create_payment_entry(
+			party_type="Supplier",
+			party="_Test Supplier",
+			payment_type="Receive",
+			paid_from="Creditors - _TC",
+			paid_to="_Test Cash - _TC",
+			save=True,
+			submit=True,
+		)
+		self.voucher_no = pe.name
+		self.expected_gle = [
+			{"account": "Creditors - _TC", "debit": 0.0, "credit": 1000.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+		]
+		self.check_gl_entries()
+
+	def test_payment_against_partial_return_invoice(self):
+		"""
+		Checks GL entries generated for partial return invoice payments.
+		"""
+		si = create_sales_invoice(qty=10, rate=10, customer="_Test Customer")
+		credit_note = create_sales_invoice(
+			qty=-4, rate=10, customer="_Test Customer", is_return=1, return_against=si.name
+		)
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+		)
+		pe.set(
+			"references",
+			[
+				{
+					"reference_doctype": "Sales Invoice",
+					"reference_name": si.name,
+					"due_date": si.get("due_date"),
+					"total_amount": si.grand_total,
+					"outstanding_amount": si.outstanding_amount,
+					"allocated_amount": si.outstanding_amount,
+				},
+				{
+					"reference_doctype": "Sales Invoice",
+					"reference_name": credit_note.name,
+					"due_date": credit_note.get("due_date"),
+					"total_amount": credit_note.grand_total,
+					"outstanding_amount": credit_note.outstanding_amount,
+					"allocated_amount": credit_note.outstanding_amount,
+				},
+			],
+		)
+		pe.save()
+		pe.submit()
+		self.assertEqual(pe.total_allocated_amount, 60)
+		self.assertEqual(pe.unallocated_amount, 940)
+		self.voucher_no = pe.name
+		self.expected_gle = [
+			{"account": "Debtors - _TC", "debit": 40.0, "credit": 0.0},
+			{"account": "Debtors - _TC", "debit": 0.0, "credit": 940.0},
+			{"account": "Debtors - _TC", "debit": 0.0, "credit": 100.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+		]
+		self.check_gl_entries()
+
+	def test_ledger_entries_for_advance_as_liability(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		company = "_Test Company"
+
+		advance_account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Advances Received",
+			company=company,
+			account_type="Receivable",
+		)
+
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": advance_account,
+			},
+		)
+		# Advance Payment
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+		)
+		pe.save()  # use save() to trigger set_liability_account()
+		pe.submit()
+
+		# Normal Invoice
+		si = create_sales_invoice(qty=10, rate=100, customer="_Test Customer")
+
+		pre_reconciliation_gle = [
+			{"account": advance_account, "debit": 0.0, "credit": 1000.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+		]
+		pre_reconciliation_ple = [
+			{
+				"account": advance_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": -1000.0,
+			}
+		]
+
+		self.voucher_no = pe.name
+		self.expected_gle = pre_reconciliation_gle
+		self.expected_ple = pre_reconciliation_ple
+		self.check_gl_entries()
+		self.check_pl_entries()
+
+		# Partially reconcile advance against invoice
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = company
+		pr.party_type = "Customer"
+		pr.party = "_Test Customer"
+		pr.receivable_payable_account = si.debit_to
+		pr.default_advance_account = advance_account
+		pr.payment_name = pe.name
+		pr.invoice_name = si.name
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		invoices = [x.as_dict() for x in pr.get("invoices")]
+		payments = [x.as_dict() for x in pr.get("payments")]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.allocation[0].allocated_amount = 400
+		pr.reconcile()
+
+		# assert General and Payment Ledger entries post partial reconciliation
+		self.expected_gle = [
+			{"account": si.debit_to, "debit": 0.0, "credit": 400.0},
+			{"account": advance_account, "debit": 400.0, "credit": 0.0},
+			{"account": advance_account, "debit": 0.0, "credit": 1000.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+		]
+		self.expected_ple = [
+			{
+				"account": advance_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": -1000.0,
+			},
+			{
+				"account": si.debit_to,
+				"voucher_no": pe.name,
+				"against_voucher_no": si.name,
+				"amount": -400.0,
+			},
+			{
+				"account": advance_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": 400.0,
+			},
+		]
+		self.check_gl_entries()
+		self.check_pl_entries()
+
+		# Unreconcile
+		unrecon = (
+			frappe.get_doc(
+				{
+					"doctype": "Unreconcile Payment",
+					"company": company,
+					"voucher_type": pe.doctype,
+					"voucher_no": pe.name,
+					"allocations": [{"reference_doctype": si.doctype, "reference_name": si.name}],
+				}
+			)
+			.save()
+			.submit()
+		)
+
+		self.voucher_no = pe.name
+		self.expected_gle = pre_reconciliation_gle
+		self.expected_ple = pre_reconciliation_ple
+		self.check_gl_entries()
+		self.check_pl_entries()
+
+	def check_pl_entries(self):
+		ple = frappe.qb.DocType("Payment Ledger Entry")
+		pl_entries = (
+			frappe.qb.from_(ple)
+			.select(ple.account, ple.voucher_no, ple.against_voucher_no, ple.amount)
+			.where((ple.voucher_no == self.voucher_no) & (ple.delinked == 0))
+			.orderby(ple.creation)
+		).run(as_dict=True)
+		for row in range(len(self.expected_ple)):
+			for field in ["account", "voucher_no", "against_voucher_no", "amount"]:
+				self.assertEqual(self.expected_ple[row][field], pl_entries[row][field])
+
+	def check_gl_entries(self):
+		gle = frappe.qb.DocType("GL Entry")
+		gl_entries = (
+			frappe.qb.from_(gle)
+			.select(
+				gle.account,
+				gle.debit,
+				gle.credit,
+			)
+			.where((gle.voucher_no == self.voucher_no) & (gle.is_cancelled == 0))
+			.orderby(gle.account, gle.debit, gle.credit, order=frappe.qb.desc)
+		).run(as_dict=True)
+		for row in range(len(self.expected_gle)):
+			for field in ["account", "debit", "credit"]:
+				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
@@ -1322,6 +1571,9 @@ def create_payment_terms_template():
 def create_payment_terms_template_with_discount(
 	name=None, discount_type=None, discount=None, template_name=None
 ):
+	"""
+	Create a Payment Terms Template with %  or amount discount.
+	"""
 	create_payment_term(name or "30 Credit Days with 10% Discount")
 	template_name = template_name or "Test Discount Template"
 

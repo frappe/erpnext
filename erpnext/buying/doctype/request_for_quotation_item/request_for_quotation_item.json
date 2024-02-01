@@ -87,6 +87,7 @@
    "width": "300px"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -260,13 +261,15 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-24 17:26:46.276934",
+ "modified": "2023-11-14 18:34:48.327224",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation Item",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

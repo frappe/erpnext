@@ -5,14 +5,16 @@
 from datetime import date
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.core.doctype.role.role import get_users
 from frappe.model.document import Document
-from frappe.utils import add_days, cint, formatdate, get_datetime, getdate
+from frappe.utils import add_days, cint, flt, formatdate, get_datetime, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
+from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
 from erpnext.stock.serial_batch_bundle import SerialBatchBundle
+from erpnext.stock.stock_ledger import get_previous_sle
 
 
 class StockFreezeError(frappe.ValidationError):
@@ -27,6 +29,46 @@ exclude_from_linked_with = True
 
 
 class StockLedgerEntry(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		actual_qty: DF.Float
+		auto_created_serial_and_batch_bundle: DF.Check
+		batch_no: DF.Data | None
+		company: DF.Link | None
+		dependant_sle_voucher_detail_no: DF.Data | None
+		fiscal_year: DF.Data | None
+		has_batch_no: DF.Check
+		has_serial_no: DF.Check
+		incoming_rate: DF.Currency
+		is_adjustment_entry: DF.Check
+		is_cancelled: DF.Check
+		item_code: DF.Link | None
+		outgoing_rate: DF.Currency
+		posting_date: DF.Date | None
+		posting_time: DF.Time | None
+		project: DF.Link | None
+		qty_after_transaction: DF.Float
+		recalculate_rate: DF.Check
+		serial_and_batch_bundle: DF.Link | None
+		serial_no: DF.LongText | None
+		stock_queue: DF.Text | None
+		stock_uom: DF.Link | None
+		stock_value: DF.Currency
+		stock_value_difference: DF.Currency
+		to_rename: DF.Check
+		valuation_rate: DF.Currency
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_type: DF.Link | None
+		warehouse: DF.Link | None
+	# end: auto-generated types
+
 	def autoname(self):
 		"""
 		Temporarily name doc for fast insertion
@@ -48,6 +90,73 @@ class StockLedgerEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
+		self.validate_inventory_dimension_negative_stock()
+
+	def validate_inventory_dimension_negative_stock(self):
+		extra_cond = ""
+		kwargs = {}
+
+		dimensions = self._get_inventory_dimensions()
+		if not dimensions:
+			return
+
+		for dimension, values in dimensions.items():
+			kwargs[dimension] = values.get("value")
+			extra_cond += f" and {dimension} = %({dimension})s"
+
+		kwargs.update(
+			{
+				"item_code": self.item_code,
+				"warehouse": self.warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"company": self.company,
+				"sle": self.name,
+			}
+		)
+
+		sle = get_previous_sle(kwargs, extra_cond=extra_cond)
+		qty_after_transaction = 0.0
+		flt_precision = cint(frappe.db.get_default("float_precision")) or 2
+		if sle:
+			qty_after_transaction = sle.qty_after_transaction
+
+		diff = qty_after_transaction + flt(self.actual_qty)
+		diff = flt(diff, flt_precision)
+		if diff < 0 and abs(diff) > 0.0001:
+			self.throw_validation_error(diff, dimensions)
+
+	def throw_validation_error(self, diff, dimensions):
+		dimension_msg = _(", with the inventory {0}: {1}").format(
+			"dimensions" if len(dimensions) > 1 else "dimension",
+			", ".join(f"{bold(d.doctype)} ({d.value})" for k, d in dimensions.items()),
+		)
+
+		msg = _(
+			"{0} units of {1} are required in {2}{3}, on {4} {5} for {6} to complete the transaction."
+		).format(
+			abs(diff),
+			frappe.get_desk_link("Item", self.item_code),
+			frappe.get_desk_link("Warehouse", self.warehouse),
+			dimension_msg,
+			self.posting_date,
+			self.posting_time,
+			frappe.get_desk_link(self.voucher_type, self.voucher_no),
+		)
+
+		frappe.throw(msg, title=_("Inventory Dimension Negative Stock"))
+
+	def _get_inventory_dimensions(self):
+		inv_dimensions = get_inventory_dimensions()
+		inv_dimension_dict = {}
+		for dimension in inv_dimensions:
+			if not dimension.get("validate_negative_stock") or not self.get(dimension.fieldname):
+				continue
+
+			dimension["value"] = self.get(dimension.fieldname)
+			inv_dimension_dict.setdefault(dimension.fieldname, dimension)
+
+		return inv_dimension_dict
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
@@ -76,6 +185,9 @@ class StockLedgerEntry(Document):
 			frappe.throw(_("Actual Qty is mandatory"))
 
 	def validate_serial_batch_no_bundle(self):
+		if self.is_cancelled == 1:
+			return
+
 		item_detail = frappe.get_cached_value(
 			"Item",
 			self.item_code,
@@ -109,7 +221,9 @@ class StockLedgerEntry(Document):
 			if not self.serial_and_batch_bundle:
 				self.throw_error_message(f"Serial No / Batch No are mandatory for Item {self.item_code}")
 
-		if self.serial_and_batch_bundle and not (item_detail.has_serial_no or item_detail.has_batch_no):
+		if (
+			self.serial_and_batch_bundle and not item_detail.has_serial_no and not item_detail.has_batch_no
+		):
 			self.throw_error_message(f"Serial No and Batch No are not allowed for Item {self.item_code}")
 
 	def throw_error_message(self, message, exception=frappe.ValidationError):

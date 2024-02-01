@@ -53,6 +53,11 @@ frappe.query_reports["General Ledger"] = {
 			}
 		},
 		{
+			"fieldname":"against_voucher_no",
+			"label": __("Against Voucher No"),
+			"fieldtype": "Data",
+		},
+		{
 			"fieldtype": "Break",
 		},
 		{
@@ -175,7 +180,7 @@ frappe.query_reports["General Ledger"] = {
 		},
 		{
 			"fieldname": "include_default_book_entries",
-			"label": __("Include Default Book Entries"),
+			"label": __("Include Default FB Entries"),
 			"fieldtype": "Check",
 			"default": 1
 		},
@@ -193,7 +198,13 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname": "add_values_in_transaction_currency",
 			"label": __("Add Columns in Transaction Currency"),
 			"fieldtype": "Check"
+		},
+		{
+			"fieldname": "show_remarks",
+			"label": __("Show Remarks"),
+			"fieldtype": "Check"
 		}
+
 	]
 }
 

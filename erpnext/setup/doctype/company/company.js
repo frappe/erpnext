@@ -40,7 +40,7 @@ frappe.ui.form.on("Company", {
 				filters:{
 					'warehouse_type' : 'Transit',
 					'is_group': 0,
-					'company': frm.doc.company
+					'company': frm.doc.company_name
 				}
 			};
 		});
@@ -140,38 +140,48 @@ frappe.ui.form.on("Company", {
 	},
 
 	delete_company_transactions: function(frm) {
-		frappe.verify_password(function() {
-			var d = frappe.prompt({
-				fieldtype:"Data",
-				fieldname: "company_name",
-				label: __("Please enter the company name to confirm"),
-				reqd: 1,
-				description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")
+		frappe.call({
+			method: "erpnext.setup.doctype.company.company.is_deletion_job_running",
+			args: {
+				company: frm.doc.name
 			},
-			function(data) {
-				if(data.company_name !== frm.doc.name) {
-					frappe.msgprint(__("Company name not same"));
-					return;
+			freeze: true,
+			callback: function(r) {
+				if(!r.exc) {
+					frappe.verify_password(function() {
+						var d = frappe.prompt({
+							fieldtype:"Data",
+							fieldname: "company_name",
+							label: __("Please enter the company name to confirm"),
+							reqd: 1,
+							description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")
+						},
+								      function(data) {
+									      if(data.company_name !== frm.doc.name) {
+										      frappe.msgprint(__("Company name not same"));
+										      return;
+									      }
+									      frappe.call({
+										      method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
+										      args: {
+											      company: data.company_name
+										      },
+										      freeze: true,
+										      callback: function(r, rt) { },
+										      onerror: function() {
+											      frappe.msgprint(__("Wrong Password"));
+										      }
+									      });
+								      },
+								      __("Delete all the Transactions for this Company"), __("Delete")
+								     );
+						d.get_primary_btn().addClass("btn-danger");
+					});
 				}
-				frappe.call({
-					method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
-					args: {
-						company: data.company_name
-					},
-					freeze: true,
-					callback: function(r, rt) {
-						if(!r.exc)
-							frappe.msgprint(__("Successfully deleted all transactions related to this company!"));
-					},
-					onerror: function() {
-						frappe.msgprint(__("Wrong Password"));
-					}
-				});
+
 			},
-			__("Delete all the Transactions for this Company"), __("Delete")
-			);
-			d.get_primary_btn().addClass("btn-danger");
 		});
+
 	}
 });
 
@@ -221,7 +231,6 @@ erpnext.company.setup_queries = function(frm) {
 		["cost_center", {}],
 		["round_off_cost_center", {}],
 		["depreciation_cost_center", {}],
-		["expenses_included_in_asset_valuation", {"account_type": "Expenses Included In Asset Valuation"}],
 		["capital_work_in_progress_account", {"account_type": "Capital Work in Progress"}],
 		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}],
 		["unrealized_profit_loss_account", {"root_type": ["in", ["Liability", "Asset"]]}],
@@ -236,8 +245,6 @@ erpnext.company.setup_queries = function(frm) {
 		$.each([
 			["stock_adjustment_account",
 				{"root_type": "Expense", "account_type": "Stock Adjustment"}],
-			["expenses_included_in_valuation",
-				{"root_type": "Expense", "account_type": "Expenses Included in Valuation"}],
 			["stock_received_but_not_billed",
 				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}],
 			["service_received_but_not_billed",

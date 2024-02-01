@@ -6,7 +6,7 @@ from collections import defaultdict
 from typing import List, Tuple
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.utils import cint, flt, get_link_to_form, getdate
 
 import erpnext
@@ -62,9 +62,12 @@ class StockController(AccountsController):
 			)
 		)
 
+		is_asset_pr = any(d.get("is_fixed_asset") for d in self.get("items"))
+
 		if (
 			cint(erpnext.is_perpetual_inventory_enabled(self.company))
 			or provisional_accounting_for_non_stock_items
+			or is_asset_pr
 		):
 			warehouse_account = get_warehouse_account_map(self.company)
 
@@ -72,11 +75,6 @@ class StockController(AccountsController):
 				if not gl_entries:
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
-
-		elif self.doctype in ["Purchase Receipt", "Purchase Invoice"] and self.docstatus == 1:
-			gl_entries = []
-			gl_entries = self.get_asset_gl_entry(gl_entries)
-			make_gl_entries(gl_entries, from_repost=from_repost)
 
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -389,11 +387,7 @@ class StockController(AccountsController):
 		}
 
 		for row in self.get(table_name):
-			for field in [
-				"serial_and_batch_bundle",
-				"current_serial_and_batch_bundle",
-				"rejected_serial_and_batch_bundle",
-			]:
+			for field in QTY_FIELD.keys():
 				if row.get(field):
 					frappe.get_doc("Serial and Batch Bundle", row.get(field)).set_serial_and_batch_values(
 						self, row, qty_field=QTY_FIELD[field]
@@ -456,6 +450,12 @@ class StockController(AccountsController):
 
 		sl_dict.update(args)
 		self.update_inventory_dimensions(d, sl_dict)
+
+		if self.docstatus == 2:
+			# To handle denormalized serial no records, will br deprecated in v16
+			for field in ["serial_no", "batch_no"]:
+				if d.get(field):
+					sl_dict[field] = d.get(field)
 
 		return sl_dict
 
@@ -644,7 +644,7 @@ class StockController(AccountsController):
 		)
 		qa_docstatus = frappe.db.get_value("Quality Inspection", row.quality_inspection, "docstatus")
 
-		if not qa_docstatus == 1:
+		if qa_docstatus != 1:
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = (
 				f"Row #{row.idx}: Quality Inspection {link} is not submitted for the item: {row.item_code}"
@@ -692,13 +692,24 @@ class StockController(AccountsController):
 				d.stock_uom_rate = d.rate / (d.conversion_factor or 1)
 
 	def validate_internal_transfer(self):
-		if (
-			self.doctype in ("Sales Invoice", "Delivery Note", "Purchase Invoice", "Purchase Receipt")
-			and self.is_internal_transfer()
-		):
-			self.validate_in_transit_warehouses()
-			self.validate_multi_currency()
-			self.validate_packed_items()
+		if self.doctype in ("Sales Invoice", "Delivery Note", "Purchase Invoice", "Purchase Receipt"):
+			if self.is_internal_transfer():
+				self.validate_in_transit_warehouses()
+				self.validate_multi_currency()
+				self.validate_packed_items()
+
+				if self.get("is_internal_supplier"):
+					self.validate_internal_transfer_qty()
+			else:
+				self.validate_internal_transfer_warehouse()
+
+	def validate_internal_transfer_warehouse(self):
+		for row in self.items:
+			if row.get("target_warehouse"):
+				row.target_warehouse = None
+
+			if row.get("from_warehouse"):
+				row.from_warehouse = None
 
 	def validate_in_transit_warehouses(self):
 		if (
@@ -726,6 +737,116 @@ class StockController(AccountsController):
 	def validate_packed_items(self):
 		if self.doctype in ("Sales Invoice", "Delivery Note Item") and self.get("packed_items"):
 			frappe.throw(_("Packed Items cannot be transferred internally"))
+
+	def validate_internal_transfer_qty(self):
+		if self.doctype not in ["Purchase Invoice", "Purchase Receipt"]:
+			return
+
+		item_wise_transfer_qty = self.get_item_wise_inter_transfer_qty()
+		if not item_wise_transfer_qty:
+			return
+
+		item_wise_received_qty = self.get_item_wise_inter_received_qty()
+		precision = frappe.get_precision(self.doctype + " Item", "qty")
+
+		over_receipt_allowance = frappe.db.get_single_value(
+			"Stock Settings", "over_delivery_receipt_allowance"
+		)
+
+		parent_doctype = {
+			"Purchase Receipt": "Delivery Note",
+			"Purchase Invoice": "Sales Invoice",
+		}.get(self.doctype)
+
+		for key, transferred_qty in item_wise_transfer_qty.items():
+			recevied_qty = flt(item_wise_received_qty.get(key), precision)
+			if over_receipt_allowance:
+				transferred_qty = transferred_qty + flt(
+					transferred_qty * over_receipt_allowance / 100, precision
+				)
+
+			if recevied_qty > flt(transferred_qty, precision):
+				frappe.throw(
+					_("For Item {0} cannot be received more than {1} qty against the {2} {3}").format(
+						bold(key[1]),
+						bold(flt(transferred_qty, precision)),
+						bold(parent_doctype),
+						get_link_to_form(parent_doctype, self.get("inter_company_reference")),
+					)
+				)
+
+	def get_item_wise_inter_transfer_qty(self):
+		reference_field = "inter_company_reference"
+		if self.doctype == "Purchase Invoice":
+			reference_field = "inter_company_invoice_reference"
+
+		parent_doctype = {
+			"Purchase Receipt": "Delivery Note",
+			"Purchase Invoice": "Sales Invoice",
+		}.get(self.doctype)
+
+		child_doctype = parent_doctype + " Item"
+
+		parent_tab = frappe.qb.DocType(parent_doctype)
+		child_tab = frappe.qb.DocType(child_doctype)
+
+		query = (
+			frappe.qb.from_(parent_doctype)
+			.inner_join(child_tab)
+			.on(child_tab.parent == parent_tab.name)
+			.select(
+				child_tab.name,
+				child_tab.item_code,
+				child_tab.qty,
+			)
+			.where((parent_tab.name == self.get(reference_field)) & (parent_tab.docstatus == 1))
+		)
+
+		data = query.run(as_dict=True)
+		item_wise_transfer_qty = defaultdict(float)
+		for row in data:
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+
+		return item_wise_transfer_qty
+
+	def get_item_wise_inter_received_qty(self):
+		child_doctype = self.doctype + " Item"
+
+		parent_tab = frappe.qb.DocType(self.doctype)
+		child_tab = frappe.qb.DocType(child_doctype)
+
+		query = (
+			frappe.qb.from_(self.doctype)
+			.inner_join(child_tab)
+			.on(child_tab.parent == parent_tab.name)
+			.select(
+				child_tab.item_code,
+				child_tab.qty,
+			)
+			.where(parent_tab.docstatus < 2)
+		)
+
+		if self.doctype == "Purchase Invoice":
+			query = query.select(
+				child_tab.sales_invoice_item.as_("name"),
+			)
+
+			query = query.where(
+				parent_tab.inter_company_invoice_reference == self.inter_company_invoice_reference
+			)
+		else:
+			query = query.select(
+				child_tab.delivery_note_item.as_("name"),
+			)
+
+			query = query.where(parent_tab.inter_company_reference == self.inter_company_reference)
+
+		data = query.run(as_dict=True)
+		item_wise_transfer_qty = defaultdict(float)
+		for row in data:
+			item_wise_transfer_qty[(row.name, row.item_code)] += flt(row.qty)
+
+		return item_wise_transfer_qty
 
 	def validate_putaway_capacity(self):
 		# if over receipt is attempted while 'apply putaway rule' is disabled
@@ -855,8 +976,9 @@ class StockController(AccountsController):
 
 @frappe.whitelist()
 def show_accounting_ledger_preview(company, doctype, docname):
-	filters = {"company": company, "include_dimensions": 1}
+	filters = frappe._dict(company=company, include_dimensions=1)
 	doc = frappe.get_doc(doctype, docname)
+	doc.run_method("before_gl_preview")
 
 	gl_columns, gl_data = get_accounting_ledger_preview(doc, filters)
 
@@ -867,8 +989,9 @@ def show_accounting_ledger_preview(company, doctype, docname):
 
 @frappe.whitelist()
 def show_stock_ledger_preview(company, doctype, docname):
-	filters = {"company": company}
+	filters = frappe._dict(company=company)
 	doc = frappe.get_doc(doctype, docname)
+	doc.run_method("before_sl_preview")
 
 	sl_columns, sl_data = get_stock_ledger_preview(doc, filters)
 
@@ -1202,8 +1325,6 @@ def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=Fa
 
 		repost_entry = frappe.new_doc("Repost Item Valuation")
 		repost_entry.based_on = "Item and Warehouse"
-		repost_entry.voucher_type = voucher_type
-		repost_entry.voucher_no = voucher_no
 
 		repost_entry.item_code = sle.item_code
 		repost_entry.warehouse = sle.warehouse

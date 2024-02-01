@@ -1,7 +1,6 @@
 {
  "actions": [],
  "creation": "2013-06-24 15:49:57",
- "description": "Settings for Accounts",
  "doctype": "DocType",
  "document_type": "Other",
  "editable_grid": 1,
@@ -32,6 +31,7 @@
   "column_break_19",
   "add_taxes_from_item_tax_template",
   "book_tax_discount_loss",
+  "round_row_wise_tax",
   "print_settings",
   "show_inclusive_tax_in_print",
   "show_taxes_as_table_in_print",
@@ -65,7 +65,12 @@
   "show_balance_in_coa",
   "banking_tab",
   "enable_party_matching",
-  "enable_fuzzy_matching"
+  "enable_fuzzy_matching",
+  "reports_tab",
+  "remarks_section",
+  "general_ledger_remarks_length",
+  "column_break_lvjk",
+  "receivable_payable_remarks_length"
  ],
  "fields": [
   {
@@ -414,6 +419,41 @@
    "fieldname": "ignore_account_closing_balance",
    "fieldtype": "Check",
    "label": "Ignore Account Closing Balance"
+  },
+  {
+   "default": "0",
+   "description": "Tax Amount will be rounded on a row(items) level",
+   "fieldname": "round_row_wise_tax",
+   "fieldtype": "Check",
+   "label": "Round Tax Amount Row-wise"
+  },
+  {
+   "fieldname": "reports_tab",
+   "fieldtype": "Tab Break",
+   "label": "Reports"
+  },
+  {
+   "default": "0",
+   "description": "Truncates 'Remarks' column to set character length",
+   "fieldname": "general_ledger_remarks_length",
+   "fieldtype": "Int",
+   "label": "General Ledger"
+  },
+  {
+   "default": "0",
+   "description": "Truncates 'Remarks' column to set character length",
+   "fieldname": "receivable_payable_remarks_length",
+   "fieldtype": "Int",
+   "label": "Accounts Receivable/Payable"
+  },
+  {
+   "fieldname": "column_break_lvjk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Remarks Column Length"
   }
  ],
  "icon": "icon-cog",
@@ -421,7 +461,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-07-27 15:05:34.000264",
+ "modified": "2024-01-30 14:04:26.553554",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

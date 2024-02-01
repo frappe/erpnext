@@ -10,6 +10,25 @@ from frappe.utils import cint, create_batch
 
 
 class TransactionDeletionRecord(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.setup.doctype.transaction_deletion_record_item.transaction_deletion_record_item import (
+			TransactionDeletionRecordItem,
+		)
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		doctypes: DF.Table[TransactionDeletionRecordItem]
+		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
+		status: DF.Literal["Draft", "Completed"]
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(TransactionDeletionRecord, self).__init__(*args, **kwargs)
 		self.batch_size = 5000
@@ -108,7 +127,16 @@ class TransactionDeletionRecord(Document):
 
 				if no_of_docs > 0:
 					self.delete_version_log(docfield["parent"], docfield["fieldname"])
-					self.delete_communications(docfield["parent"], docfield["fieldname"])
+
+					reference_docs = frappe.get_all(
+						docfield["parent"], filters={docfield["fieldname"]: self.company}
+					)
+					reference_doc_names = [r.name for r in reference_docs]
+
+					self.delete_communications(docfield["parent"], reference_doc_names)
+					self.delete_comments(docfield["parent"], reference_doc_names)
+					self.unlink_attachments(docfield["parent"], reference_doc_names)
+
 					self.populate_doctypes_table(tables, docfield["parent"], no_of_docs)
 
 					self.delete_child_tables(docfield["parent"], docfield["fieldname"])
@@ -197,18 +225,48 @@ class TransactionDeletionRecord(Document):
 					(versions.ref_doctype == doctype) & (versions.docname.isin(batch))
 				).run()
 
-	def delete_communications(self, doctype, company_fieldname):
-		reference_docs = frappe.get_all(doctype, filters={company_fieldname: self.company})
-		reference_doc_names = [r.name for r in reference_docs]
-
+	def delete_communications(self, doctype, reference_doc_names):
 		communications = frappe.get_all(
 			"Communication",
 			filters={"reference_doctype": doctype, "reference_name": ["in", reference_doc_names]},
 		)
 		communication_names = [c.name for c in communications]
 
+		if not communication_names:
+			return
+
 		for batch in create_batch(communication_names, self.batch_size):
 			frappe.delete_doc("Communication", batch, ignore_permissions=True)
+
+	def delete_comments(self, doctype, reference_doc_names):
+		comments = frappe.get_all(
+			"Comment",
+			filters={"reference_doctype": doctype, "reference_name": ["in", reference_doc_names]},
+		)
+		comment_names = [c.name for c in comments]
+
+		if not comment_names:
+			return
+
+		for batch in create_batch(comment_names, self.batch_size):
+			frappe.delete_doc("Comment", batch, ignore_permissions=True)
+
+	def unlink_attachments(self, doctype, reference_doc_names):
+		files = frappe.get_all(
+			"File",
+			filters={"attached_to_doctype": doctype, "attached_to_name": ["in", reference_doc_names]},
+		)
+		file_names = [c.name for c in files]
+
+		if not file_names:
+			return
+
+		file = qb.DocType("File")
+
+		for batch in create_batch(file_names, self.batch_size):
+			qb.update(file).set(file.attached_to_doctype, None).set(file.attached_to_name, None).where(
+				file.name.isin(batch)
+			).run()
 
 
 @frappe.whitelist()

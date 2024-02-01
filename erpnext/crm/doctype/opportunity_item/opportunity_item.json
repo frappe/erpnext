@@ -103,6 +103,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -165,7 +166,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-30 16:39:09.775720",
+ "modified": "2023-11-14 18:35:30.887278",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Item",
@@ -173,5 +174,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

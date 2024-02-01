@@ -20,6 +20,30 @@ class CanNotBeDefaultDimension(frappe.ValidationError):
 
 
 class InventoryDimension(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		apply_to_all_doctypes: DF.Check
+		condition: DF.Code | None
+		dimension_name: DF.Data
+		disabled: DF.Check
+		document_type: DF.Link | None
+		fetch_from_parent: DF.Literal
+		istable: DF.Check
+		mandatory_depends_on: DF.SmallText | None
+		reference_document: DF.Link
+		reqd: DF.Check
+		source_fieldname: DF.Data | None
+		target_fieldname: DF.Data | None
+		type_of_transaction: DF.Literal["", "Inward", "Outward", "Both"]
+		validate_negative_stock: DF.Check
+	# end: auto-generated types
+
 	def onload(self):
 		if not self.is_new() and frappe.db.has_column("Stock Ledger Entry", self.target_fieldname):
 			self.set_onload("has_stock_ledger", self.has_stock_ledger())
@@ -60,6 +84,7 @@ class InventoryDimension(Document):
 			"fetch_from_parent",
 			"type_of_transaction",
 			"condition",
+			"validate_negative_stock",
 		]
 
 		for field in frappe.get_meta("Inventory Dimension").fields:
@@ -160,6 +185,7 @@ class InventoryDimension(Document):
 				insert_after="inventory_dimension",
 				options=self.reference_document,
 				label=label,
+				search_index=1,
 				reqd=self.reqd,
 				mandatory_depends_on=self.mandatory_depends_on,
 			),
@@ -255,7 +281,7 @@ def field_exists(doctype, fieldname) -> str or None:
 def get_inventory_documents(
 	doctype=None, txt=None, searchfield=None, start=None, page_len=None, filters=None
 ):
-	and_filters = [["DocField", "parent", "not in", ["Batch", "Serial No"]]]
+	and_filters = [["DocField", "parent", "not in", ["Batch", "Serial No", "Item Price"]]]
 	or_filters = [
 		["DocField", "options", "in", ["Batch", "Serial No"]],
 		["DocField", "parent", "in", ["Putaway Rule"]],
@@ -279,7 +305,7 @@ def get_evaluated_inventory_dimension(doc, sl_dict, parent_doc=None):
 	dimensions = get_document_wise_inventory_dimensions(doc.doctype)
 	filter_dimensions = []
 	for row in dimensions:
-		if row.type_of_transaction:
+		if row.type_of_transaction and row.type_of_transaction != "Both":
 			if (
 				row.type_of_transaction == "Inward"
 				if doc.docstatus == 1
@@ -340,6 +366,7 @@ def get_inventory_dimensions():
 			fields=[
 				"distinct target_fieldname as fieldname",
 				"reference_document as doctype",
+				"validate_negative_stock",
 			],
 			filters={"disabled": 0},
 		)

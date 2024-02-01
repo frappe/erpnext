@@ -239,7 +239,7 @@
    "print": 1, 
    "read": 1, 
    "report": 0, 
-   "role": "System Manager", 
+   "role": "Delivery Manager",
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 0, 

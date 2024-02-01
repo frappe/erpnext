@@ -23,9 +23,49 @@ STANDARD_USERS = ("Guest", "Administrator")
 
 
 class RequestforQuotation(BuyingController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.buying.doctype.request_for_quotation_item.request_for_quotation_item import (
+			RequestforQuotationItem,
+		)
+		from erpnext.buying.doctype.request_for_quotation_supplier.request_for_quotation_supplier import (
+			RequestforQuotationSupplier,
+		)
+
+		amended_from: DF.Link | None
+		billing_address: DF.Link | None
+		billing_address_display: DF.SmallText | None
+		company: DF.Link
+		email_template: DF.Link | None
+		incoterm: DF.Link | None
+		items: DF.Table[RequestforQuotationItem]
+		letter_head: DF.Link | None
+		message_for_supplier: DF.TextEditor
+		named_place: DF.Data | None
+		naming_series: DF.Literal["PUR-RFQ-.YYYY.-"]
+		opportunity: DF.Link | None
+		schedule_date: DF.Date | None
+		select_print_heading: DF.Link | None
+		send_attached_files: DF.Check
+		send_document_print: DF.Check
+		status: DF.Literal["", "Draft", "Submitted", "Cancelled"]
+		suppliers: DF.Table[RequestforQuotationSupplier]
+		tc_name: DF.Link | None
+		terms: DF.TextEditor | None
+		transaction_date: DF.Date
+		vendor: DF.Link | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_duplicate_supplier()
 		self.validate_supplier_list()
+		super(RequestforQuotation, self).validate_qty_is_not_zero()
 		validate_for_items(self)
 		super(RequestforQuotation, self).set_qty_as_per_stock_uom()
 		self.update_email_id()
@@ -79,6 +119,15 @@ class RequestforQuotation(BuyingController):
 			supplier.email_sent = 0
 			supplier.quote_status = "Pending"
 		self.send_to_supplier()
+
+	def before_print(self, settings=None):
+		"""Use the first suppliers data to render the print preview."""
+		if self.vendor or not self.suppliers:
+			# If a specific supplier is already set, via Tools > Download PDF,
+			# we don't want to override it.
+			return
+
+		self.update_supplier_part_no(self.suppliers[0].supplier)
 
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
@@ -309,8 +358,8 @@ def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=
 			target_doc.currency = args.currency or get_party_account_currency(
 				"Supplier", for_supplier, source.company
 			)
-			target_doc.buying_price_list = args.buying_price_list or frappe.db.get_value(
-				"Buying Settings", None, "buying_price_list"
+			target_doc.buying_price_list = args.buying_price_list or frappe.db.get_single_value(
+				"Buying Settings", "buying_price_list"
 			)
 		set_missing_values(source, target_doc)
 
@@ -350,7 +399,7 @@ def create_supplier_quotation(doc):
 				"currency": doc.get("currency")
 				or get_party_account_currency("Supplier", doc.get("supplier"), doc.get("company")),
 				"buying_price_list": doc.get("buying_price_list")
-				or frappe.db.get_value("Buying Settings", None, "buying_price_list"),
+				or frappe.db.get_single_value("Buying Settings", "buying_price_list"),
 			}
 		)
 		add_items(sq_doc, doc.get("supplier"), doc.get("items"))

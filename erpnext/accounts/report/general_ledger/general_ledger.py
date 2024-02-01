@@ -163,6 +163,14 @@ def get_gl_entries(filters, accounting_dimensions):
 	select_fields = """, debit, credit, debit_in_account_currency,
 		credit_in_account_currency """
 
+	if filters.get("show_remarks"):
+		if remarks_length := frappe.db.get_single_value(
+			"Accounts Settings", "general_ledger_remarks_length"
+		):
+			select_fields += f",substr(remarks, 1, {remarks_length}) as 'remarks'"
+		else:
+			select_fields += """,remarks"""
+
 	order_by_statement = "order by posting_date, account, creation"
 
 	if filters.get("include_dimensions"):
@@ -192,10 +200,10 @@ def get_gl_entries(filters, accounting_dimensions):
 		"""
 		select
 			name as gl_entry, posting_date, account, party_type, party,
-			voucher_type, voucher_no, {dimension_fields}
+			voucher_type, voucher_subtype, voucher_no, {dimension_fields}
 			cost_center, project, {transaction_currency_fields}
 			against_voucher_type, against_voucher, account_currency,
-			remarks, against, is_opening, creation {select_fields}
+			against, is_opening, creation {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		{order_by_statement}
@@ -230,6 +238,12 @@ def get_conditions(filters):
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
+	if filters.get("against_voucher_no"):
+		conditions.append("against_voucher=%(against_voucher_no)s")
+
+	if filters.get("voucher_no_not_in"):
+		conditions.append("voucher_no not in %(voucher_no_not_in)s")
+
 	if filters.get("group_by") == "Group by Party" and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
 
@@ -256,9 +270,7 @@ def get_conditions(filters):
 			if filters.get("company_fb") and cstr(filters.get("finance_book")) != cstr(
 				filters.get("company_fb")
 			):
-				frappe.throw(
-					_("To use a different finance book, please uncheck 'Include Default Book Entries'")
-				)
+				frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
 			else:
 				conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
 		else:
@@ -283,7 +295,8 @@ def get_conditions(filters):
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if not dimension.disabled:
+			# Ignore 'Finance Book' set up as dimension in below logic, as it is already handled in above section
+			if not dimension.disabled and dimension.document_type != "Finance Book":
 				if filters.get(dimension.fieldname):
 					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
 						filters[dimension.fieldname] = get_dimension_with_children(
@@ -435,6 +448,10 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	for gle in gl_entries:
 		group_by_value = gle.get(group_by)
 		gle.voucher_type = _(gle.voucher_type)
+		gle.voucher_subtype = _(gle.voucher_subtype)
+		gle.against_voucher_type = _(gle.against_voucher_type)
+		gle.remarks = _(gle.remarks)
+		gle.party_type = _(gle.party_type)
 
 		if gle.posting_date < from_date or (cstr(gle.is_opening) == "Yes" and not show_opening_entries):
 			if not group_by_voucher_consolidated:
@@ -599,6 +616,12 @@ def get_columns(filters):
 	columns += [
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 120},
 		{
+			"label": _("Voucher Subtype"),
+			"fieldname": "voucher_subtype",
+			"fieldtype": "Data",
+			"width": 180,
+		},
+		{
 			"label": _("Voucher No"),
 			"fieldname": "voucher_no",
 			"fieldtype": "Dynamic Link",
@@ -631,8 +654,10 @@ def get_columns(filters):
 				"width": 100,
 			},
 			{"label": _("Supplier Invoice No"), "fieldname": "bill_no", "fieldtype": "Data", "width": 100},
-			{"label": _("Remarks"), "fieldname": "remarks", "width": 400},
 		]
 	)
+
+	if filters.get("show_remarks"):
+		columns.extend([{"label": _("Remarks"), "fieldname": "remarks", "width": 400}])
 
 	return columns

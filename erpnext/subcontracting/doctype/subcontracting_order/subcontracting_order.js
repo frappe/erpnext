@@ -101,13 +101,36 @@ frappe.ui.form.on('Subcontracting Order', {
 	},
 
 	refresh: function (frm) {
+		if (frm.doc.docstatus == 1 && frm.has_perm("submit")) {
+			if (frm.doc.status == "Closed") {
+				frm.add_custom_button(__('Re-open'), () => frm.events.update_subcontracting_order_status(frm), __("Status"));
+			} else if(flt(frm.doc.per_received, 2) < 100) {
+				frm.add_custom_button(__('Close'), () => frm.events.update_subcontracting_order_status(frm, "Closed"), __("Status"));
+			}
+		}
+
 		frm.trigger('get_materials_from_supplier');
+	},
+
+	update_subcontracting_order_status(frm, status) {
+		frappe.call({
+			method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.update_subcontracting_order_status",
+			args: {
+				sco: frm.doc.name,
+				status: status,
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					frm.reload_doc();
+				}
+			},
+		});
 	},
 
 	get_materials_from_supplier: function (frm) {
 		let sco_rm_details = [];
 
-		if (frm.doc.status != "Closed" && frm.doc.supplied_items && frm.doc.per_received > 0) {
+		if (frm.doc.status != "Closed" && frm.doc.supplied_items) {
 			frm.doc.supplied_items.forEach(d => {
 				if (d.total_supplied_qty > 0 && d.total_supplied_qty != d.consumed_qty) {
 					sco_rm_details.push(d.name);
@@ -193,7 +216,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 	}
 
 	has_unsupplied_items() {
-		return this.frm.doc['supplied_items'].some(item => item.required_qty > item.supplied_qty);
+		return this.frm.doc['supplied_items'].some(item => item.required_qty > (item.supplied_qty - item.returned_qty));
 	}
 
 	make_subcontracting_receipt() {

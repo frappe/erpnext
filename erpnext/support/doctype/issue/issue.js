@@ -1,13 +1,6 @@
 frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
-		frm.set_query("customer", function () {
-			return {
-				filters: {
-					"disabled": 0
-				}
-			};
-		});
 
 		frappe.db.get_value("Support Settings", {name: "Support Settings"},
 			["allow_resetting_service_level_agreement", "track_service_level_agreement"], (r) => {
@@ -65,7 +58,9 @@ frappe.ui.form.on("Issue", {
 
 				frappe.call("erpnext.support.doctype.service_level_agreement.service_level_agreement.reset_service_level_agreement", {
 					reason: values.reason,
-					user: frappe.session.user_email
+					user: frappe.session.user_email,
+					doctype: frm.doc.doctype,
+					docname: frm.doc.name,
 				}, () => {
 					reset_sla.enable_primary_action();
 					frm.refresh();

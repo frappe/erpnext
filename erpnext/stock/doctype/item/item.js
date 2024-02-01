@@ -125,36 +125,6 @@ frappe.ui.form.on("Item", {
 			erpnext.toggle_naming_series();
 		}
 
-		if (!frm.doc.published_in_website) {
-			frm.add_custom_button(__("Publish in Website"), function() {
-				frappe.call({
-					method: "erpnext.e_commerce.doctype.website_item.website_item.make_website_item",
-					args: {doc: frm.doc},
-					freeze: true,
-					freeze_message: __("Publishing Item ..."),
-					callback: function(result) {
-						frappe.msgprint({
-							message: __("Website Item {0} has been created.",
-								[repl('<a href="/app/website-item/%(item_encoded)s" class="strong">%(item)s</a>', {
-									item_encoded: encodeURIComponent(result.message[0]),
-									item: result.message[1]
-								})]
-							),
-							title: __("Published"),
-							indicator: "green"
-						});
-					}
-				});
-			}, __('Actions'));
-		} else {
-			frm.add_custom_button(__("Website Item"), function() {
-				frappe.db.get_value("Website Item", {item_code: frm.doc.name}, "name", (d) => {
-					if (!d.name) frappe.throw(__("Website Item not found"));
-					frappe.set_route("Form", "Website Item", d.name);
-				});
-			}, __("View"));
-		}
-
 		erpnext.item.edit_prices_button(frm);
 		erpnext.item.toggle_attributes(frm);
 
@@ -630,26 +600,12 @@ $.extend(erpnext.item, {
 						}
 					});
 				} else {
-					frappe.call({
-						method: "frappe.client.get",
-						args: {
-							doctype: "Item Attribute",
-							name: d.attribute
-						}
-					}).then((r) => {
-						if(r.message) {
-							const from = r.message.from_range;
-							const to = r.message.to_range;
-							const increment = r.message.increment;
-
-							let values = [];
-							for(var i = from; i <= to; i = flt(i + increment, 6)) {
-								values.push(i);
-							}
-							attr_val_fields[d.attribute] = values;
-							resolve();
-						}
-					});
+					let values = [];
+					for(var i = d.from_range; i <= d.to_range; i = flt(i + d.increment, 6)) {
+						values.push(i);
+					}
+					attr_val_fields[d.attribute] = values;
+					resolve();
 				}
 			});
 

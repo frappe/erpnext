@@ -19,6 +19,7 @@ from frappe.utils import (
 )
 from frappe.utils.user import get_users_with_role
 
+import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
@@ -35,7 +36,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
 	if not cint(
-		frappe.db.get_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically")
+		frappe.db.get_single_value("Accounts Settings", "book_asset_depreciation_entry_automatically")
 	):
 		return
 
@@ -509,6 +510,9 @@ def restore_asset(asset_name):
 
 
 def depreciate_asset(asset_doc, date, notes):
+	if not asset_doc.calculate_depreciation:
+		return
+
 	asset_doc.flags.ignore_validate_update_after_submit = True
 
 	make_new_active_asset_depr_schedules_and_cancel_current_ones(
@@ -519,8 +523,18 @@ def depreciate_asset(asset_doc, date, notes):
 
 	make_depreciation_entry_for_all_asset_depr_schedules(asset_doc, date)
 
+	cancel_depreciation_entries(asset_doc, date)
+
+
+@erpnext.allow_regional
+def cancel_depreciation_entries(asset_doc, date):
+	pass
+
 
 def reset_depreciation_schedule(asset_doc, date, notes):
+	if not asset_doc.calculate_depreciation:
+		return
+
 	asset_doc.flags.ignore_validate_update_after_submit = True
 
 	make_new_active_asset_depr_schedules_and_cancel_current_ones(
@@ -547,6 +561,8 @@ def modify_depreciation_schedule_for_asset_repairs(asset, notes):
 def reverse_depreciation_entry_made_after_disposal(asset, date):
 	for row in asset.get("finance_books"):
 		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active", row.finance_book)
+		if not asset_depr_schedule_doc:
+			continue
 
 		for schedule_idx, schedule in enumerate(asset_depr_schedule_doc.get("depreciation_schedule")):
 			if schedule.schedule_date == date:
@@ -779,6 +795,15 @@ def get_disposal_account_and_cost_center(company):
 @frappe.whitelist()
 def get_value_after_depreciation_on_disposal_date(asset, disposal_date, finance_book=None):
 	asset_doc = frappe.get_doc("Asset", asset)
+
+	if asset_doc.available_for_use_date > getdate(disposal_date):
+		frappe.throw(
+			"Disposal date {0} cannot be before available for use date {1} of the asset.".format(
+				disposal_date, asset_doc.available_for_use_date
+			)
+		)
+	elif asset_doc.available_for_use_date == getdate(disposal_date):
+		return flt(asset_doc.gross_purchase_amount - asset_doc.opening_accumulated_depreciation)
 
 	if not asset_doc.calculate_depreciation:
 		return flt(asset_doc.value_after_depreciation)

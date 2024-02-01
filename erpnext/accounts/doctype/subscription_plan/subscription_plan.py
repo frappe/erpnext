@@ -12,6 +12,27 @@ from erpnext.utilities.product import get_price
 
 
 class SubscriptionPlan(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		billing_interval: DF.Literal["Day", "Week", "Month", "Year"]
+		billing_interval_count: DF.Int
+		cost: DF.Currency
+		cost_center: DF.Link | None
+		currency: DF.Link
+		item: DF.Link
+		payment_gateway: DF.Link | None
+		plan_name: DF.Data
+		price_determination: DF.Literal["", "Fixed Rate", "Based On Price List", "Monthly Rate"]
+		price_list: DF.Link | None
+		product_price_id: DF.Data | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_interval_count()
 
@@ -22,7 +43,7 @@ class SubscriptionPlan(Document):
 
 @frappe.whitelist()
 def get_plan_rate(
-	plan, quantity=1, customer=None, start_date=None, end_date=None, prorate_factor=1
+	plan, quantity=1, customer=None, start_date=None, end_date=None, prorate_factor=1, party=None
 ):
 	plan = frappe.get_doc("Subscription Plan", plan)
 	if plan.price_determination == "Fixed Rate":
@@ -40,6 +61,7 @@ def get_plan_rate(
 			customer_group=customer_group,
 			company=None,
 			qty=quantity,
+			party=party,
 		)
 		if not price:
 			return 0

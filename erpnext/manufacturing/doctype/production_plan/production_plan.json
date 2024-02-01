@@ -36,6 +36,7 @@
   "prod_plan_references",
   "section_break_24",
   "combine_sub_items",
+  "sub_assembly_warehouse",
   "section_break_ucc4",
   "skip_available_sub_assembly_item",
   "column_break_igxl",
@@ -47,6 +48,7 @@
   "material_request_planning",
   "include_non_stock_items",
   "include_subcontracted_items",
+  "consider_minimum_order_qty",
   "include_safety_stock",
   "ignore_existing_ordered_qty",
   "column_break_25",
@@ -416,13 +418,25 @@
   {
    "fieldname": "column_break_igxl",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sub_assembly_warehouse",
+   "fieldtype": "Link",
+   "label": "Sub Assembly Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "consider_minimum_order_qty",
+   "fieldtype": "Check",
+   "label": "Consider Minimum Order Qty"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-29 11:41:03.246059",
+ "modified": "2023-12-26 16:31:13.740777",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

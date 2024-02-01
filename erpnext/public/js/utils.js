@@ -8,7 +8,7 @@ $.extend(erpnext, {
 		if(!company && cur_frm)
 			company = cur_frm.doc.company;
 		if(company)
-			return frappe.get_doc(":Company", company).default_currency || frappe.boot.sysdefaults.currency;
+			return frappe.get_doc(":Company", company)?.default_currency || frappe.boot.sysdefaults.currency;
 		else
 			return frappe.boot.sysdefaults.currency;
 	},
@@ -21,7 +21,7 @@ $.extend(erpnext, {
 	},
 
 	toggle_naming_series: function() {
-		if(cur_frm.fields_dict.naming_series) {
+		if(cur_frm && cur_frm.fields_dict.naming_series) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal?true:false);
 		}
 	},
@@ -404,7 +404,7 @@ $.extend(erpnext.utils, {
 		});
 	},
 
-	get_fiscal_year: function(date, with_dates=false) {
+	get_fiscal_year: function(date, with_dates=false, boolean=false) {
 		if(!date) {
 			date = frappe.datetime.get_today();
 		}
@@ -413,7 +413,8 @@ $.extend(erpnext.utils, {
 		frappe.call({
 			method: "erpnext.accounts.utils.get_fiscal_year",
 			args: {
-				date: date
+				date: date,
+				boolean: boolean
 			},
 			async: false,
 			callback: function(r) {
@@ -842,7 +843,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			freeze_message: __("Mapping {0} ...", [opts.source_doctype]),
 			callback: function(r) {
 				if(!r.exc) {
-					var doc = frappe.model.sync(r.message);
+					frappe.model.sync(r.message);
 					cur_frm.dirty();
 					cur_frm.refresh();
 				}
@@ -864,11 +865,20 @@ erpnext.utils.map_current_doc = function(opts) {
 	}
 
 	if (opts.source_doctype) {
+		let data_fields = [];
+		if(opts.source_doctype == "Purchase Receipt") {
+			data_fields.push({
+				fieldname: 'merge_taxes',
+				fieldtype: 'Check',
+				label: __('Merge taxes from multiple documents'),
+			});
+		}
 		const d = new frappe.ui.form.MultiSelectDialog({
 			doctype: opts.source_doctype,
 			target: opts.target,
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
+			data_fields: data_fields,
 			get_query: opts.get_query,
 			add_filters_group: 1,
 			allow_child_item_selection: opts.allow_child_item_selection,
@@ -882,7 +892,7 @@ erpnext.utils.map_current_doc = function(opts) {
 					return;
 				}
 				opts.source_name = values;
-				if (opts.allow_child_item_selection) {
+				if (opts.allow_child_item_selection || opts.source_doctype == "Purchase Receipt") {
 					// args contains filtered child docnames
 					opts.args = args;
 				}
@@ -1076,7 +1086,7 @@ function set_time_to_resolve_and_response(frm, apply_sla_for_resolution) {
 }
 
 function get_time_left(timestamp, agreement_status) {
-	const diff = moment(timestamp).diff(moment());
+	const diff = moment(timestamp).diff(frappe.datetime.system_datetime(true));
 	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : 'Failed';
 	let indicator = (diff_display == 'Failed' && agreement_status != 'Fulfilled') ? 'red' : 'green';
 	return {'diff_display': diff_display, 'indicator': indicator};

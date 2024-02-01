@@ -64,7 +64,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto",
+   "label": "Valid Up To",
    "reqd": 1
   },
   {
@@ -135,7 +135,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-18 08:25:35.302081",
+ "modified": "2024-01-24 02:20:26.145996",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Lower Deduction Certificate",

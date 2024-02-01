@@ -25,6 +25,37 @@ RecoverableErrors = (JobTimeoutException, QueryDeadlockError, QueryTimeoutError)
 
 
 class RepostItemValuation(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		affected_transactions: DF.Code | None
+		allow_negative_stock: DF.Check
+		allow_zero_rate: DF.Check
+		amended_from: DF.Link | None
+		based_on: DF.Literal["Transaction", "Item and Warehouse"]
+		company: DF.Link | None
+		current_index: DF.Int
+		distinct_item_and_warehouse: DF.Code | None
+		error_log: DF.LongText | None
+		gl_reposting_index: DF.Int
+		item_code: DF.Link | None
+		items_to_be_repost: DF.Code | None
+		posting_date: DF.Date
+		posting_time: DF.Time | None
+		reposting_data_file: DF.Attach | None
+		status: DF.Literal["Queued", "In Progress", "Completed", "Skipped", "Failed"]
+		total_reposting_count: DF.Int
+		via_landed_cost_voucher: DF.Check
+		voucher_no: DF.DynamicLink | None
+		voucher_type: DF.Link | None
+		warehouse: DF.Link | None
+	# end: auto-generated types
+
 	@staticmethod
 	def clear_old_logs(days=None):
 		days = days or 90
@@ -109,12 +140,7 @@ class RepostItemValuation(Document):
 		return query[0][0] if query else None
 
 	def validate_accounts_freeze(self):
-		acc_settings = frappe.db.get_value(
-			"Accounts Settings",
-			"Accounts Settings",
-			["acc_frozen_upto", "frozen_accounts_modifier"],
-			as_dict=1,
-		)
+		acc_settings = frappe.get_cached_doc("Accounts Settings")
 		if not acc_settings.acc_frozen_upto:
 			return
 		if getdate(self.posting_date) <= getdate(acc_settings.acc_frozen_upto):
@@ -193,7 +219,7 @@ class RepostItemValuation(Document):
 
 		transaction_status = frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus")
 		if transaction_status == 2:
-			msg = _("Cannot cancel as processing of cancelled documents is  pending.")
+			msg = _("Cannot cancel as processing of cancelled documents is pending.")
 			msg += "<br>" + _("Please try again in an hour.")
 			frappe.throw(msg, title=_("Pending processing"))
 
@@ -263,7 +289,7 @@ def repost(doc):
 			raise
 
 		frappe.db.rollback()
-		traceback = frappe.get_traceback()
+		traceback = frappe.get_traceback(with_context=True)
 		doc.log_error("Unable to repost item valuation")
 
 		message = frappe.message_log.pop() if frappe.message_log else ""

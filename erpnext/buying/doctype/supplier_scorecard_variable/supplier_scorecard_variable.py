@@ -16,6 +16,21 @@ class VariablePathNotFound(frappe.ValidationError):
 
 
 class SupplierScorecardVariable(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		description: DF.SmallText | None
+		is_custom: DF.Check
+		param_name: DF.Data
+		path: DF.Data
+		variable_label: DF.Data
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_path_exists()
 
@@ -436,6 +451,23 @@ def get_ordered_qty(scorecard):
 			& (po.docstatus == 1)
 			& (po.transaction_date >= scorecard.get("start_date"))
 			& (po.transaction_date <= scorecard.get("end_date"))
+		)
+	).run(as_list=True)[0][0] or 0
+
+
+def get_invoiced_qty(scorecard):
+	"""Returns the total number of invoiced quantity (based on Purchase Invoice)"""
+
+	pi = frappe.qb.DocType("Purchase Invoice")
+
+	return (
+		frappe.qb.from_(pi)
+		.select(Sum(pi.total_qty))
+		.where(
+			(pi.supplier == scorecard.supplier)
+			& (pi.docstatus == 1)
+			& (pi.posting_date >= scorecard.get("start_date"))
+			& (pi.posting_date <= scorecard.get("end_date"))
 		)
 	).run(as_list=True)[0][0] or 0
 

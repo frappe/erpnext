@@ -37,6 +37,7 @@ welcome_email = "erpnext.setup.utils.welcome_email"
 # setup wizard
 setup_wizard_requires = "assets/erpnext/js/setup_wizard.js"
 setup_wizard_stages = "erpnext.setup.setup_wizard.setup_wizard.get_setup_stages"
+setup_wizard_complete = "erpnext.setup.setup_wizard.setup_wizard.setup_demo"
 setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wizard_test"
 
 before_install = [
@@ -52,11 +53,7 @@ leaderboards = "erpnext.startup.leaderboard.get_leaderboards"
 filters_config = "erpnext.startup.filters.get_filters_config"
 additional_print_settings = "erpnext.controllers.print_settings.get_print_settings"
 
-on_session_creation = [
-	"erpnext.portal.utils.create_customer_or_supplier",
-	"erpnext.e_commerce.shopping_cart.utils.set_cart_count",
-]
-on_logout = "erpnext.e_commerce.shopping_cart.utils.clear_cart_count"
+on_session_creation = "erpnext.portal.utils.create_customer_or_supplier"
 
 treeviews = [
 	"Account",
@@ -90,15 +87,11 @@ jinja = {
 }
 
 # website
-update_website_context = [
-	"erpnext.e_commerce.shopping_cart.utils.update_website_context",
-]
-my_account_context = "erpnext.e_commerce.shopping_cart.utils.update_my_account_context"
 webform_list_context = "erpnext.controllers.website_list_for_contact.get_webform_list_context"
 
 calendars = ["Task", "Work Order", "Sales Order", "Holiday List", "ToDo"]
 
-website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner"]
+website_generators = ["BOM", "Sales Partner"]
 
 website_context = {
 	"favicon": "/assets/erpnext/images/erpnext-favicon.svg",
@@ -265,11 +258,6 @@ standard_portal_menu_items = [
 	{"title": "Appointment Booking", "route": "/book_appointment"},
 ]
 
-default_roles = [
-	{"role": "Customer", "doctype": "Contact", "email_field": "email_id"},
-	{"role": "Supplier", "doctype": "Contact", "email_field": "email_id"},
-]
-
 sounds = [
 	{"name": "incoming-call", "src": "/assets/erpnext/sounds/incoming-call.mp3", "volume": 0.2},
 	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
@@ -349,9 +337,6 @@ doc_events = {
 	"Event": {
 		"after_insert": "erpnext.crm.utils.link_events_with_prospect",
 	},
-	"Sales Taxes and Charges Template": {
-		"on_update": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.validate_cart_settings"
-	},
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
@@ -430,9 +415,8 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.collect_project_status",
 	],
 	"hourly_long": [
-		"erpnext.accounts.doctype.process_subscription.process_subscription.create_subscription_process",
 		"erpnext.stock.doctype.repost_item_valuation.repost_item_valuation.repost_entries",
-		"erpnext.bulk_transaction.doctype.bulk_transaction_log.bulk_transaction_log.retry_failing_transaction",
+		"erpnext.utilities.bulk_transaction.retry",
 	],
 	"daily": [
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
@@ -461,6 +445,7 @@ scheduler_events = {
 		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_weekly",
 	],
 	"daily_long": [
+		"erpnext.accounts.doctype.process_subscription.process_subscription.create_subscription_process",
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.auto_update_latest_price_in_all_boms",
 		"erpnext.crm.utils.open_leads_opportunities_based_on_todays_event",
@@ -496,7 +481,8 @@ payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account
 
 communication_doctypes = ["Customer", "Supplier"]
 
-advance_payment_doctypes = ["Sales Order", "Purchase Order"]
+advance_payment_receivable_doctypes = ["Sales Order"]
+advance_payment_payable_doctypes = ["Purchase Order"]
 
 invoice_doctypes = ["Sales Invoice", "Purchase Invoice"]
 
@@ -504,6 +490,7 @@ bank_reconciliation_doctypes = [
 	"Payment Entry",
 	"Journal Entry",
 	"Purchase Invoice",
+	"Sales Invoice",
 ]
 
 accounting_dimension_doctypes = [
@@ -519,6 +506,7 @@ accounting_dimension_doctypes = [
 	"Sales Invoice Item",
 	"Purchase Invoice Item",
 	"Purchase Order Item",
+	"Sales Order Item",
 	"Journal Entry Account",
 	"Material Request Item",
 	"Delivery Note Item",
@@ -549,6 +537,10 @@ accounting_dimension_doctypes = [
 	"Subcontracting Receipt",
 	"Subcontracting Receipt Item",
 	"Account Closing Balance",
+	"Supplier Quotation",
+	"Supplier Quotation Item",
+	"Payment Reconciliation",
+	"Payment Reconciliation Allocation",
 ]
 
 get_matching_queries = (
@@ -645,4 +637,12 @@ additional_timeline_content = {
 
 extend_bootinfo = [
 	"erpnext.support.doctype.service_level_agreement.service_level_agreement.add_sla_doctypes",
+	"erpnext.startup.boot.bootinfo",
 ]
+
+
+default_log_clearing_doctypes = {
+	"Repost Item Valuation": 60,
+}
+
+export_python_type_annotations = True

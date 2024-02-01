@@ -360,7 +360,7 @@ erpnext.PointOfSale.Controller = class {
 							this.order_summary.load_summary_of(this.frm.doc, true);
 							frappe.show_alert({
 								indicator: 'green',
-								message: __('POS invoice {0} created succesfully', [r.doc.name])
+								message: __('POS invoice {0} created successfully', [r.doc.name])
 							});
 						});
 				}
@@ -548,6 +548,14 @@ erpnext.PointOfSale.Controller = class {
 				if (!item_code)
 					return;
 
+				if (rate == undefined || rate == 0) {
+					frappe.show_alert({
+						message: __('Price is not set for the item.'),
+						indicator: 'orange'
+					});
+					frappe.utils.play_sound("error");
+					return;
+				}
 				const new_item = { item_code, batch_no, rate, uom, [field]: value };
 
 				if (serial_no) {
@@ -601,11 +609,12 @@ erpnext.PointOfSale.Controller = class {
 			// if item is clicked twice from item selector
 			// then "item_code, batch_no, uom, rate" will help in getting the exact item
 			// to increase the qty by one
-			const has_batch_no = batch_no;
+			const has_batch_no = (batch_no !== 'null' && batch_no !== null);
 			item_row = this.frm.doc.items.find(
 				i => i.item_code === item_code
 					&& (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
 					&& (i.uom === uom)
+					&& (i.rate === flt(rate))
 			);
 		}
 

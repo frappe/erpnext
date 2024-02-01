@@ -95,6 +95,8 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			this.frm.change_custom_button_type(__('Allocate'), null, 'default');
 		}
 
+		this.frm.trigger("set_query_for_dimension_filters");
+
 		// check for any running reconciliation jobs
 		if (this.frm.doc.receivable_payable_account) {
 			this.frm.call({
@@ -124,6 +126,25 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			});
 		}
 
+	}
+	set_query_for_dimension_filters() {
+		frappe.call({
+			method: "erpnext.accounts.doctype.payment_reconciliation.payment_reconciliation.get_queries_for_dimension_filters",
+			args: {
+				company: this.frm.doc.company,
+			},
+			callback: (r) => {
+				if (!r.exc && r.message) {
+					r.message.forEach(x => {
+						this.frm.set_query(x.fieldname, () => {
+							return {
+								'filters': x.filters
+							};
+						});
+					});
+				}
+			}
+		});
 	}
 
 	company() {
@@ -229,6 +250,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			this.data = [];
 			const dialog = new frappe.ui.Dialog({
 				title: __("Select Difference Account"),
+				size: 'extra-large',
 				fields: [
 					{
 						fieldname: "allocation",
@@ -252,6 +274,13 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							in_list_view: 1,
 							read_only: 1
 						}, {
+							fieldtype:'Date',
+							fieldname:"gain_loss_posting_date",
+							label: __("Posting Date"),
+							in_list_view: 1,
+							reqd: 1,
+						}, {
+
 							fieldtype:'Link',
 							options: 'Account',
 							in_list_view: 1,
@@ -285,6 +314,9 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 					args.forEach(d => {
 						frappe.model.set_value("Payment Reconciliation Allocation", d.docname,
 							"difference_account", d.difference_account);
+						frappe.model.set_value("Payment Reconciliation Allocation", d.docname,
+							"gain_loss_posting_date", d.gain_loss_posting_date);
+
 					});
 
 					this.reconcile_payment_entries();
@@ -300,6 +332,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 						'reference_name': d.reference_name,
 						'difference_amount': d.difference_amount,
 						'difference_account': d.difference_account,
+						'gain_loss_posting_date': d.gain_loss_posting_date
 					});
 				}
 			});

@@ -1,6 +1,6 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
+import gzip
 import json
 
 import frappe
@@ -8,13 +8,34 @@ from frappe import _
 from frappe.core.doctype.prepared_report.prepared_report import create_json_gz_file
 from frappe.desk.form.load import get_attachments
 from frappe.model.document import Document
-from frappe.utils import get_link_to_form, gzip_decompress, parse_json
+from frappe.utils import get_link_to_form, parse_json
 from frappe.utils.background_jobs import enqueue
 
 from erpnext.stock.report.stock_balance.stock_balance import execute
 
 
 class ClosingStockBalance(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		amended_from: DF.Link | None
+		company: DF.Link | None
+		from_date: DF.Date | None
+		include_uom: DF.Link | None
+		item_code: DF.Link | None
+		item_group: DF.Link | None
+		naming_series: DF.Literal["CBAL-.#####"]
+		status: DF.Literal["Draft", "Queued", "In Progress", "Completed", "Failed", "Canceled"]
+		to_date: DF.Date | None
+		warehouse: DF.Link | None
+		warehouse_type: DF.Link | None
+	# end: auto-generated types
+
 	def before_save(self):
 		self.set_status()
 
@@ -44,7 +65,7 @@ class ClosingStockBalance(Document):
 				& (
 					(table.from_date.between(self.from_date, self.to_date))
 					| (table.to_date.between(self.from_date, self.to_date))
-					| (table.from_date >= self.from_date and table.to_date <= self.to_date)
+					| (table.from_date >= self.from_date and table.to_date >= self.to_date)
 				)
 			)
 		)
@@ -109,7 +130,7 @@ class ClosingStockBalance(Document):
 			attachment = attachments[0]
 			attached_file = frappe.get_doc("File", attachment.name)
 
-			data = gzip_decompress(attached_file.get_content())
+			data = gzip.decompress(attached_file.get_content())
 			if data := json.loads(data.decode("utf-8")):
 				data = data
 
@@ -128,6 +149,4 @@ def prepare_closing_stock_balance(name):
 		doc.db_set("status", "Completed")
 	except Exception as e:
 		doc.db_set("status", "Failed")
-		traceback = frappe.get_traceback()
-
-		frappe.log_error("Closing Stock Balance Failed", traceback, doc.doctype, doc.name)
+		doc.log_error(title="Closing Stock Balance Failed")

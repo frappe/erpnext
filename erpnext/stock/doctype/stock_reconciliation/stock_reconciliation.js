@@ -123,13 +123,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 				fieldname: "item_code",
 				fieldtype: "Link",
 				options: "Item",
-				"get_query": function() {
-					return {
-						"filters": {
-							"disabled": 0,
-						}
-					};
-				}
 			},
 			{
 				label: __("Ignore Empty Stock"),
@@ -216,7 +209,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 
 	set_amount_quantity: function(doc, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
-		if (d.qty & d.valuation_rate) {
+		if (d.qty && d.valuation_rate) {
 			frappe.model.set_value(cdt, cdn, "amount", flt(d.qty) * flt(d.valuation_rate));
 			frappe.model.set_value(cdt, cdn, "quantity_difference", flt(d.qty) - flt(d.current_qty));
 			frappe.model.set_value(cdt, cdn, "amount_difference", flt(d.amount) - flt(d.current_amount));

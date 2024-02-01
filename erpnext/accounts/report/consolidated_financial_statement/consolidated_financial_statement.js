@@ -104,7 +104,7 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 		},
 		{
 			"fieldname": "include_default_book_entries",
-			"label": __("Include Default Book Entries"),
+			"label": __("Include Default FB Entries"),
 			"fieldtype": "Check",
 			"default": 1
 		},
@@ -128,7 +128,7 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 		}
 
 		value = default_formatter(value, row, column, data);
-		if (!data.parent_account) {
+		if (data && !data.parent_account) {
 			value = $(`<span>${value}</span>`);
 
 			var $value = $(value).css("font-weight", "bold");

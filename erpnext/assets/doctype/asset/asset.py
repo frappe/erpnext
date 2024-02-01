@@ -40,19 +40,113 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 
 class Asset(AccountsController):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.asset_finance_book.asset_finance_book import AssetFinanceBook
+
+		additional_asset_cost: DF.Currency
+		amended_from: DF.Link | None
+		asset_category: DF.Link | None
+		asset_name: DF.Data
+		asset_owner: DF.Literal["", "Company", "Supplier", "Customer"]
+		asset_owner_company: DF.Link | None
+		asset_quantity: DF.Int
+		available_for_use_date: DF.Date | None
+		booked_fixed_asset: DF.Check
+		calculate_depreciation: DF.Check
+		capitalized_in: DF.Link | None
+		company: DF.Link
+		comprehensive_insurance: DF.Data | None
+		cost_center: DF.Link | None
+		custodian: DF.Link | None
+		customer: DF.Link | None
+		default_finance_book: DF.Link | None
+		department: DF.Link | None
+		depr_entry_posting_status: DF.Literal["", "Successful", "Failed"]
+		depreciation_method: DF.Literal["", "Straight Line", "Double Declining Balance", "Manual"]
+		disposal_date: DF.Date | None
+		finance_books: DF.Table[AssetFinanceBook]
+		frequency_of_depreciation: DF.Int
+		gross_purchase_amount: DF.Currency
+		image: DF.AttachImage | None
+		insurance_end_date: DF.Date | None
+		insurance_start_date: DF.Date | None
+		insured_value: DF.Data | None
+		insurer: DF.Data | None
+		is_composite_asset: DF.Check
+		is_existing_asset: DF.Check
+		is_fully_depreciated: DF.Check
+		item_code: DF.Link
+		item_name: DF.ReadOnly | None
+		journal_entry_for_scrap: DF.Link | None
+		location: DF.Link
+		maintenance_required: DF.Check
+		naming_series: DF.Literal["ACC-ASS-.YYYY.-"]
+		next_depreciation_date: DF.Date | None
+		number_of_depreciations_booked: DF.Int
+		opening_accumulated_depreciation: DF.Currency
+		policy_number: DF.Data | None
+		purchase_date: DF.Date | None
+		purchase_invoice: DF.Link | None
+		purchase_receipt: DF.Link | None
+		purchase_receipt_amount: DF.Currency
+		split_from: DF.Link | None
+		status: DF.Literal[
+			"Draft",
+			"Submitted",
+			"Partially Depreciated",
+			"Fully Depreciated",
+			"Sold",
+			"Scrapped",
+			"In Maintenance",
+			"Out of Order",
+			"Issue",
+			"Receipt",
+			"Capitalized",
+			"Decapitalized",
+		]
+		supplier: DF.Link | None
+		total_asset_cost: DF.Currency
+		total_number_of_depreciations: DF.Int
+		value_after_depreciation: DF.Currency
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_asset_values()
 		self.validate_asset_and_reference()
 		self.validate_item()
 		self.validate_cost_center()
 		self.set_missing_values()
-		self.validate_finance_books()
-		if not self.split_from:
-			self.prepare_depreciation_data()
-			update_draft_asset_depr_schedules(self)
 		self.validate_gross_and_purchase_amount()
 		self.validate_expected_value_after_useful_life()
+		self.validate_finance_books()
 
+		if not self.split_from:
+			self.prepare_depreciation_data()
+
+			if self.calculate_depreciation:
+				update_draft_asset_depr_schedules(self)
+
+				if frappe.db.exists("Asset", self.name):
+					asset_depr_schedules_names = make_draft_asset_depr_schedules_if_not_present(self)
+
+					if asset_depr_schedules_names:
+						asset_depr_schedules_links = get_comma_separated_links(
+							asset_depr_schedules_names, "Asset Depreciation Schedule"
+						)
+						frappe.msgprint(
+							_(
+								"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
+							).format(asset_depr_schedules_links)
+						)
+
+		self.total_asset_cost = self.gross_purchase_amount
 		self.status = self.get_status()
 
 	def on_submit(self):
@@ -61,23 +155,14 @@ class Asset(AccountsController):
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
 		if self.calculate_depreciation and not self.split_from:
-			asset_depr_schedules_names = make_draft_asset_depr_schedules_if_not_present(self)
 			convert_draft_asset_depr_schedules_into_active(self)
-			if asset_depr_schedules_names:
-				asset_depr_schedules_links = get_comma_separated_links(
-					asset_depr_schedules_names, "Asset Depreciation Schedule"
-				)
-				frappe.msgprint(
-					_(
-						"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
-					).format(asset_depr_schedules_links)
-				)
 		self.set_status()
 		add_asset_activity(self.name, _("Asset submitted"))
 
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
+		self.cancel_capitalization()
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
 		self.set_status()
@@ -232,7 +317,12 @@ class Asset(AccountsController):
 			frappe.throw(_("Gross Purchase Amount is mandatory"), frappe.MandatoryError)
 
 		if is_cwip_accounting_enabled(self.asset_category):
-			if not self.is_existing_asset and not (self.purchase_receipt or self.purchase_invoice):
+			if (
+				not self.is_existing_asset
+				and not self.is_composite_asset
+				and not self.purchase_receipt
+				and not self.purchase_invoice
+			):
 				frappe.throw(
 					_("Please create purchase receipt or purchase invoice for the item {0}").format(
 						self.item_code
@@ -245,7 +335,7 @@ class Asset(AccountsController):
 				and not frappe.db.get_value("Purchase Invoice", self.purchase_invoice, "update_stock")
 			):
 				frappe.throw(
-					_("Update stock must be enable for the purchase invoice {0}").format(self.purchase_invoice)
+					_("Update stock must be enabled for the purchase invoice {0}").format(self.purchase_invoice)
 				)
 
 		if not self.calculate_depreciation:
@@ -427,6 +517,13 @@ class Asset(AccountsController):
 		for movement in movements:
 			movement = frappe.get_doc("Asset Movement", movement.get("name"))
 			movement.cancel()
+
+	def cancel_capitalization(self):
+		if self.capitalized_in:
+			self.db_set("capitalized_in", None)
+			asset_capitalization = frappe.get_doc("Asset Capitalization", self.capitalized_in)
+			if asset_capitalization.docstatus == 1:
+				asset_capitalization.cancel()
 
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
@@ -818,11 +915,13 @@ def get_item_details(item_code, asset_category, gross_purchase_amount):
 				"depreciation_method": d.depreciation_method,
 				"total_number_of_depreciations": d.total_number_of_depreciations,
 				"frequency_of_depreciation": d.frequency_of_depreciation,
-				"daily_depreciation": d.daily_depreciation,
+				"daily_prorata_based": d.daily_prorata_based,
+				"shift_based": d.shift_based,
 				"salvage_value_percentage": d.salvage_value_percentage,
 				"expected_value_after_useful_life": flt(gross_purchase_amount)
 				* flt(d.salvage_value_percentage / 100),
 				"depreciation_start_date": d.depreciation_start_date or nowdate(),
+				"rate_of_depreciation": d.rate_of_depreciation,
 			}
 		)
 
@@ -909,7 +1008,7 @@ def make_asset_movement(assets, purpose=None):
 		assets = json.loads(assets)
 
 	if len(assets) == 0:
-		frappe.throw(_("Atleast one asset has to be selected."))
+		frappe.throw(_("At least one asset has to be selected."))
 
 	asset_movement = frappe.new_doc("Asset Movement")
 	asset_movement.quantity = len(assets)
@@ -936,6 +1035,8 @@ def is_cwip_accounting_enabled(asset_category):
 @frappe.whitelist()
 def get_asset_value_after_depreciation(asset_name, finance_book=None):
 	asset = frappe.get_doc("Asset", asset_name)
+	if not asset.calculate_depreciation:
+		return flt(asset.value_after_depreciation)
 
 	return asset.get_value_after_depreciation(finance_book)
 

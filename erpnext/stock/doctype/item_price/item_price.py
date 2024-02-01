@@ -15,6 +15,35 @@ class ItemPriceDuplicateItem(frappe.ValidationError):
 
 
 class ItemPrice(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		batch_no: DF.Link | None
+		brand: DF.Link | None
+		buying: DF.Check
+		currency: DF.Link | None
+		customer: DF.Link | None
+		item_code: DF.Link
+		item_description: DF.Text | None
+		item_name: DF.Data | None
+		lead_time_days: DF.Int
+		note: DF.Text | None
+		packing_unit: DF.Int
+		price_list: DF.Link
+		price_list_rate: DF.Currency
+		reference: DF.Data | None
+		selling: DF.Check
+		supplier: DF.Link | None
+		uom: DF.Link | None
+		valid_from: DF.Date | None
+		valid_upto: DF.Date | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_item()
 		self.validate_dates()
@@ -30,7 +59,7 @@ class ItemPrice(Document):
 	def validate_dates(self):
 		if self.valid_from and self.valid_upto:
 			if getdate(self.valid_from) > getdate(self.valid_upto):
-				frappe.throw(_("Valid From Date must be lesser than Valid Upto Date."))
+				frappe.throw(_("Valid From Date must be lesser than Valid Up To Date."))
 
 	def update_price_list_details(self):
 		if self.price_list:

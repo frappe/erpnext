@@ -4,20 +4,20 @@
         "cheque_no": "33",
         "doctype": "Journal Entry",
         "accounts": [
-         {
-          "party_type": "Customer",
-          "party": "ABC Enterprises",
-          "credit_in_account_currency": 40000.0,
-          "debit_in_account_currency": 0.0,
-          "doctype": "Journal Entry Account",
-          "parentfield": "accounts",
-         },
-         {
-          "credit_in_account_currency": 0.0,
-          "debit_in_account_currency": 40000.0,
-          "doctype": "Journal Entry Account",
-          "parentfield": "accounts",
-         }
+            {
+                "party_type": "Customer",
+                "party": "ABC Enterprises",
+                "credit_in_account_currency": 40000.0,
+                "debit_in_account_currency": 0.0,
+                "doctype": "Journal Entry Account",
+                "parentfield": "accounts"
+            },
+            {
+                "credit_in_account_currency": 0.0,
+                "debit_in_account_currency": 40000.0,
+                "doctype": "Journal Entry Account",
+                "parentfield": "accounts"
+            }
         ],
         "user_remark": "test",
         "voucher_type": "Bank Entry"

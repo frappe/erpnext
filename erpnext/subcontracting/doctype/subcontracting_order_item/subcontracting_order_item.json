@@ -40,11 +40,17 @@
   "manufacture_section",
   "manufacturer",
   "manufacturer_part_no",
+  "column_break_impp",
+  "reference_section",
+  "material_request",
+  "column_break_fpyl",
+  "material_request_item",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
   "project",
   "section_break_34",
+  "purchase_order_item",
   "page_break"
  ],
  "fields": [
@@ -112,6 +118,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -331,13 +338,53 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "column_break_impp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "no_copy": 1,
+   "options": "Material Request",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "label": "Material Request Item",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break",
+   "label": "Reference"
+  },
+  {
+   "fieldname": "column_break_fpyl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "purchase_order_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Purchase Order Item",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-01-20 23:25:45.363281",
+ "modified": "2023-11-30 15:29:43.744618",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Item",

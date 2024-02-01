@@ -31,8 +31,7 @@ def after_install():
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
-	setup_log_settings()
-	hide_workspaces()
+	update_roles()
 	frappe.db.commit()
 
 
@@ -84,8 +83,6 @@ def set_single_defaults():
 				doc.save()
 			except frappe.ValidationError:
 				pass
-
-	frappe.db.set_default("date_format", "dd-mm-yyyy")
 
 	setup_currency_exchange()
 
@@ -197,7 +194,7 @@ def add_standard_navbar_items():
 
 	for item in erpnext_navbar_items:
 		current_labels = [item.get("item_label") for item in current_navbar_items]
-		if not item.get("item_label") in current_labels:
+		if item.get("item_label") not in current_labels:
 			navbar_settings.append("help_dropdown", item)
 
 	for item in current_navbar_items:
@@ -220,16 +217,10 @@ def add_app_name():
 	frappe.db.set_single_value("System Settings", "app_name", "ERPNext")
 
 
-def setup_log_settings():
-	log_settings = frappe.get_single("Log Settings")
-	log_settings.append("logs_to_clear", {"ref_doctype": "Repost Item Valuation", "days": 60})
-
-	log_settings.save(ignore_permissions=True)
-
-
-def hide_workspaces():
-	for ws in ["Integration", "Settings"]:
-		frappe.db.set_value("Workspace", ws, "public", 0)
+def update_roles():
+	website_user_roles = ("Customer", "Supplier")
+	for role in website_user_roles:
+		frappe.db.set_value("Role", role, "desk_access", 0)
 
 
 def create_default_role_profiles():

@@ -89,6 +89,8 @@ def _execute(filters=None, additional_table_columns=None):
 			"payable_account": inv.credit_to,
 			"mode_of_payment": inv.mode_of_payment,
 			"project": ", ".join(project) if inv.doctype == "Purchase Invoice" else inv.project,
+			"bill_no": inv.bill_no,
+			"bill_date": inv.bill_date,
 			"remarks": inv.remarks,
 			"purchase_order": ", ".join(purchase_order),
 			"purchase_receipt": ", ".join(purchase_receipt),
@@ -407,6 +409,8 @@ def get_invoices(filters, additional_query_columns):
 
 	if filters.get("supplier"):
 		query = query.where(pi.supplier == filters.supplier)
+	if filters.get("supplier_group"):
+		query = query.where(pi.supplier_group == filters.supplier_group)
 
 	query = get_conditions(filters, query, "Purchase Invoice")
 

@@ -6,8 +6,6 @@ from urllib.parse import urlparse
 import frappe
 from frappe import _
 
-from erpnext import get_default_company
-
 
 def validate_webhooks_request(doctype, hmac_key, secret_key="secret"):
 	def innerfn(fn):
@@ -18,7 +16,7 @@ def validate_webhooks_request(doctype, hmac_key, secret_key="secret"):
 				hmac.new(settings.get(secret_key).encode("utf8"), frappe.request.data, hashlib.sha256).digest()
 			)
 
-			if frappe.request.data and not sig == bytes(frappe.get_request_header(hmac_key).encode()):
+			if frappe.request.data and sig != bytes(frappe.get_request_header(hmac_key).encode()):
 				frappe.throw(_("Unverified Webhook Data"))
 			frappe.set_user(settings.modified_by)
 
@@ -45,35 +43,6 @@ def get_webhook_address(connector_name, method, exclude_uri=False, force_https=F
 	server_url = f"{scheme}://{netloc}/api/method/{endpoint}"
 
 	return server_url
-
-
-def create_mode_of_payment(gateway, payment_type="General"):
-	payment_gateway_account = frappe.db.get_value(
-		"Payment Gateway Account", {"payment_gateway": gateway}, ["payment_account"]
-	)
-
-	mode_of_payment = frappe.db.exists("Mode of Payment", gateway)
-	if not mode_of_payment and payment_gateway_account:
-		mode_of_payment = frappe.get_doc(
-			{
-				"doctype": "Mode of Payment",
-				"mode_of_payment": gateway,
-				"enabled": 1,
-				"type": payment_type,
-				"accounts": [
-					{
-						"doctype": "Mode of Payment Account",
-						"company": get_default_company(),
-						"default_account": payment_gateway_account,
-					}
-				],
-			}
-		)
-		mode_of_payment.insert(ignore_permissions=True)
-
-		return mode_of_payment
-	elif mode_of_payment:
-		return frappe.get_doc("Mode of Payment", mode_of_payment)
 
 
 def get_tracking_url(carrier, tracking_number):

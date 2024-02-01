@@ -11,6 +11,25 @@ from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activ
 
 
 class AssetMovement(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.asset_movement_item.asset_movement_item import AssetMovementItem
+
+		amended_from: DF.Link | None
+		assets: DF.Table[AssetMovementItem]
+		company: DF.Link
+		purpose: DF.Literal["", "Issue", "Receipt", "Transfer"]
+		reference_doctype: DF.Link | None
+		reference_name: DF.DynamicLink | None
+		transaction_date: DF.Datetime
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_asset()
 		self.validate_location()
@@ -65,7 +84,7 @@ class AssetMovement(Document):
 					frappe.throw(_("Source and Target Location cannot be same"))
 
 			if self.purpose == "Receipt":
-				if not (d.source_location) and not (d.target_location or d.to_employee):
+				if not (d.source_location) and not d.target_location and not d.to_employee:
 					frappe.throw(
 						_("Target Location or To Employee is required while receiving Asset {0}").format(d.asset)
 					)

@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:floor_name",
+ "creation": "2023-10-06 15:06:07.976066",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "workstations_tab",
+  "plant_dashboard",
+  "stock_summary_tab",
+  "stock_summary",
+  "details_tab",
+  "column_break_mvbx",
+  "floor_name",
+  "company",
+  "warehouse"
+ ],
+ "fields": [
+  {
+   "fieldname": "floor_name",
+   "fieldtype": "Data",
+   "label": "Floor Name",
+   "unique": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "workstations_tab",
+   "fieldtype": "Tab Break",
+   "label": "Workstations"
+  },
+  {
+   "fieldname": "plant_dashboard",
+   "fieldtype": "HTML",
+   "label": "Plant Dashboard"
+  },
+  {
+   "fieldname": "details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Floor"
+  },
+  {
+   "fieldname": "column_break_mvbx",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal && doc.warehouse",
+   "fieldname": "stock_summary_tab",
+   "fieldtype": "Tab Break",
+   "label": "Stock Summary"
+  },
+  {
+   "fieldname": "stock_summary",
+   "fieldtype": "HTML",
+   "label": "Stock Summary"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-01-30 11:59:07.508535",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Plant Floor",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

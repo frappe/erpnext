@@ -15,7 +15,7 @@ frappe.ui.form.on("BOM Creator", {
 				|| frappe.bom_configurator.bom_configurator !== frm.doc.name)) {
 				frm.trigger("build_tree");
 			}
-		} else {
+		} else if (!frm.doc.items?.length ) {
 			let $parent = $(frm.fields_dict["bom_creator"].wrapper);
 			$parent.empty();
 			frm.trigger("make_new_entry");
@@ -101,6 +101,7 @@ frappe.ui.form.on("BOM Creator", {
 			}
 		})
 
+		dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
 		dialog.show();
 	},
 
@@ -111,6 +112,16 @@ frappe.ui.form.on("BOM Creator", {
 				filters: {
 					item: item.item_code,
 				}
+			}
+		});
+		frm.set_query("item_code", "items", function() {
+			return {
+				query: "erpnext.controllers.queries.item_query",
+			}
+		});
+		frm.set_query("fg_item", "items", function() {
+			return {
+				query: "erpnext.controllers.queries.item_query",
 			}
 		});
 	},

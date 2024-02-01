@@ -4,8 +4,6 @@
 import frappe
 from frappe import _
 
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import show_attachments
-
 
 def get_context(context):
 	context.no_cache = 1
@@ -14,16 +12,11 @@ def get_context(context):
 	if hasattr(context.doc, "set_indicator"):
 		context.doc.set_indicator()
 
-	if show_attachments():
-		context.attachments = get_attachments(frappe.form_dict.doctype, frappe.form_dict.name)
-
 	context.parents = frappe.form_dict.parents
 	context.title = frappe.form_dict.name
 	context.payment_ref = frappe.db.get_value(
 		"Payment Request", {"reference_name": frappe.form_dict.name}, "name"
 	)
-
-	context.enabled_checkout = frappe.get_doc("E Commerce Settings").enable_checkout
 
 	default_print_format = frappe.db.get_value(
 		"Property Setter",
@@ -55,7 +48,10 @@ def get_context(context):
 			)
 			context.available_loyalty_points = int(loyalty_program_details.get("loyalty_points"))
 
-	context.show_pay_button = frappe.db.get_single_value("Buying Settings", "show_pay_button")
+	context.show_pay_button = (
+		"payments" in frappe.get_installed_apps()
+		and frappe.db.get_single_value("Buying Settings", "show_pay_button")
+	)
 	context.show_make_pi_button = False
 	if context.doc.get("supplier"):
 		# show Make Purchase Invoice button based on permission

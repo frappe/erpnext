@@ -14,6 +14,7 @@
   "bom_no",
   "source_warehouse",
   "allow_alternative_item",
+  "is_stock_item",
   "section_break_5",
   "description",
   "col_break1",
@@ -111,6 +112,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -184,7 +186,7 @@
    "in_list_view": 1,
    "label": "Rate",
    "options": "currency",
-   "read_only": 1,
+   "read_only_depends_on": "eval:doc.is_stock_item == 1",
    "reqd": 1
   },
   {
@@ -283,13 +285,21 @@
    "fieldname": "do_not_explode",
    "fieldtype": "Check",
    "label": "Do Not Explode"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.is_stock_item",
+   "fieldname": "is_stock_item",
+   "fieldtype": "Check",
+   "label": "Is Stock Item",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-07-28 10:20:51.559010",
+ "modified": "2023-12-20 16:21:55.477883",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
