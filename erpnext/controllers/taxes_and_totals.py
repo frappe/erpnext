@@ -98,6 +98,7 @@ class calculate_taxes_and_totals(object):
 				item_doc = frappe.get_cached_doc("Item", item.item_code)
 				args = {
 					"net_rate": item.net_rate or item.rate,
+					"base_net_rate": item.base_net_rate or item.base_rate,
 					"tax_category": self.doc.get("tax_category"),
 					"posting_date": self.doc.get("posting_date"),
 					"bill_date": self.doc.get("bill_date"),
