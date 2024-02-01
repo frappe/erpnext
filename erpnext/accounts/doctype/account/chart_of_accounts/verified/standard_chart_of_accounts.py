@@ -23,13 +23,13 @@ def get():
 				_("Tax Assets"): {"is_group": 1},
 			},
 			_("Fixed Assets"): {
-				_("Capital Equipments"): {"account_type": "Fixed Asset"},
-				_("Electronic Equipments"): {"account_type": "Fixed Asset"},
-				_("Furnitures and Fixtures"): {"account_type": "Fixed Asset"},
-				_("Office Equipments"): {"account_type": "Fixed Asset"},
+				_("Capital Equipment"): {"account_type": "Fixed Asset"},
+				_("Electronic Equipment"): {"account_type": "Fixed Asset"},
+				_("Furniture and Fixtures"): {"account_type": "Fixed Asset"},
+				_("Office Equipment"): {"account_type": "Fixed Asset"},
 				_("Plants and Machineries"): {"account_type": "Fixed Asset"},
 				_("Buildings"): {"account_type": "Fixed Asset"},
-				_("Softwares"): {"account_type": "Fixed Asset"},
+				_("Software"): {"account_type": "Fixed Asset"},
 				_("Accumulated Depreciation"): {"account_type": "Accumulated Depreciation"},
 				_("CWIP Account"): {
 					"account_type": "Capital Work in Progress",

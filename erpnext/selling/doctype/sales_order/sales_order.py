@@ -223,6 +223,8 @@ class SalesOrder(SellingController):
 			self.billing_status = "Not Billed"
 		if not self.delivery_status:
 			self.delivery_status = "Not Delivered"
+		if not self.advance_payment_status:
+			self.advance_payment_status = "Not Requested"
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
@@ -641,7 +643,7 @@ class SalesOrder(SellingController):
 					if not frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
 						frappe.throw(
 							_(
-								"Item {0} has no Serial No. Only serilialized items can have delivery based on Serial No"
+								"Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
 							).format(item.item_code)
 						)
 					if not frappe.db.exists("BOM", {"item": item.item_code, "is_active": 1}):

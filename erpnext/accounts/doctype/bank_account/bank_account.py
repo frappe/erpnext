@@ -55,7 +55,7 @@ class BankAccount(Document):
 
 	def validate_company(self):
 		if self.is_company_account and not self.company:
-			frappe.throw(_("Company is manadatory for company account"))
+			frappe.throw(_("Company is mandatory for company account"))
 
 	def validate_iban(self):
 		"""
