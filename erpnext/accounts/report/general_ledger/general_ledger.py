@@ -231,6 +231,25 @@ def get_conditions(filters):
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
+<<<<<<< HEAD
+=======
+	if filters.get("against_voucher_no"):
+		conditions.append("against_voucher=%(against_voucher_no)s")
+
+	if filters.get("ignore_err"):
+		err_journals = frappe.db.get_all(
+			"Journal Entry",
+			filters={
+				"company": filters.get("company"),
+				"docstatus": 1,
+				"voucher_type": ("in", ["Exchange Rate Revaluation", "Exchange Gain Or Loss"]),
+			},
+			as_list=True,
+		)
+		if err_journals:
+			filters.update({"voucher_no_not_in": [x[0] for x in err_journals]})
+
+>>>>>>> c077eda64e (refactor: move ignore ERR filters from SOA to General Ledger)
 	if filters.get("voucher_no_not_in"):
 		conditions.append("voucher_no not in %(voucher_no_not_in)s")
 
