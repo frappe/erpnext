@@ -149,6 +149,13 @@ class LandedCostVoucher(Document):
 				self.get("items")[item_count - 1].applicable_charges += diff
 
 	def validate_applicable_charges_for_item(self):
+		if self.distribute_charges_based_on == "Distribute Manually" and len(self.taxes) > 1:
+			frappe.throw(
+				_(
+					"Please keep one Applicable Charges, when 'Distribute Charges Based On' is 'Distribute Manually'. For more charges, please create another Landed Cost Voucher."
+				)
+			)
+
 		based_on = self.distribute_charges_based_on.lower()
 
 		if based_on != "distribute manually":
