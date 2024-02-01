@@ -502,6 +502,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							project: item.project || me.frm.doc.project,
 							qty: item.qty || 1,
 							net_rate: item.rate,
+							base_net_rate: item.base_net_rate,
 							stock_qty: item.stock_qty,
 							conversion_factor: item.conversion_factor,
 							weight_per_unit: item.weight_per_unit,
@@ -1873,7 +1874,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if (item.item_code) {
 				// Use combination of name and item code in case same item is added multiple times
 				item_codes.push([item.item_code, item.name]);
-				item_rates[item.name] = item.net_rate;
+				item_rates[item.name] = item.base_net_rate;
 				item_tax_templates[item.name] = item.item_tax_template;
 			}
 		});
