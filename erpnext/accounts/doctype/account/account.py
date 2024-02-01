@@ -58,6 +58,7 @@ class Account(NestedSet):
 		self.validate_balance_must_be_debit_or_credit()
 		self.validate_account_currency()
 		self.validate_root_company_and_sync_account_to_children()
+		self.validate_receivable_payable_account_type()
 
 	def validate_parent(self):
 		"""Fetch Parent Details and validate parent account"""
@@ -113,6 +114,24 @@ class Account(NestedSet):
 			self.report_type = (
 				"Balance Sheet" if self.root_type in ("Asset", "Liability", "Equity") else "Profit and Loss"
 			)
+
+	def validate_receivable_payable_account_type(self):
+		doc_before_save = self.get_doc_before_save()
+		receivable_payable_types = ["Receivable", "Payable"]
+		if (
+			doc_before_save
+			and doc_before_save.account_type in receivable_payable_types
+			and doc_before_save.account_type != self.account_type
+		):
+			# check for ledger entries
+			if frappe.db.get_all("GL Entry", filters={"account": self.name, "is_cancelled": 0}, limit=1):
+				msg = _(
+					"There are ledger entries against this account. Changing {0} to non-{1} in live system will cause incorrect output in 'Accounts {2}' report"
+				).format(
+					frappe.bold("Account Type"), doc_before_save.account_type, doc_before_save.account_type
+				)
+				frappe.msgprint(msg)
+				self.add_comment("Comment", msg)
 
 	def validate_root_details(self):
 		# does not exists parent
