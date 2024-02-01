@@ -179,7 +179,7 @@ class TestGeneralLedger(FrappeTestCase):
 				{
 					"account": account.name,
 					"party_type": "Customer",
-					"party": "_Test Customer",
+					"party": "_Test Customer USD",
 					"debit_in_account_currency": 1000,
 					"credit_in_account_currency": 0,
 					"exchange_rate": 75,
