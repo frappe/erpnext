@@ -250,6 +250,7 @@ class SerialandBatchBundle(Document):
 
 		for d in self.entries:
 			available_qty = 0
+
 			if self.has_serial_no:
 				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
 			else:
@@ -890,6 +891,13 @@ class SerialandBatchBundle(Document):
 		if batch_nos:
 			self.set("entries", batch_nos)
 
+	def delete_serial_batch_entries(self):
+		SBBE = frappe.qb.DocType("Serial and Batch Entry")
+
+		frappe.qb.from_(SBBE).delete().where(SBBE.parent == self.name).run()
+
+		self.set("entries", [])
+
 
 @frappe.whitelist()
 def download_blank_csv_template(content):
@@ -1358,10 +1366,12 @@ def get_available_serial_nos(kwargs):
 	elif kwargs.based_on == "Expiry":
 		order_by = "amc_expiry_date asc"
 
-	filters = {"item_code": kwargs.item_code, "warehouse": ("is", "set")}
+	filters = {"item_code": kwargs.item_code}
 
-	if kwargs.warehouse:
-		filters["warehouse"] = kwargs.warehouse
+	if not kwargs.get("ignore_warehouse"):
+		filters["warehouse"] = ("is", "set")
+		if kwargs.warehouse:
+			filters["warehouse"] = kwargs.warehouse
 
 	# Since SLEs are not present against Reserved Stock [POS invoices, SRE], need to ignore reserved serial nos.
 	ignore_serial_nos = get_reserved_serial_nos(kwargs)

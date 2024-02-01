@@ -131,6 +131,7 @@
   "per_billed",
   "per_picked",
   "billing_status",
+  "advance_payment_status",
   "sales_team_section_break",
   "sales_partner",
   "column_break7",
@@ -1269,7 +1270,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nOn Hold\nTo Deliver and Bill\nTo Bill\nTo Deliver\nCompleted\nCancelled\nClosed",
+   "options": "\nDraft\nOn Hold\nTo Pay\nTo Deliver and Bill\nTo Bill\nTo Deliver\nCompleted\nCancelled\nClosed",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
@@ -1638,6 +1639,18 @@
    "no_copy": 1,
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "advance_payment_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "in_standard_filter": 1,
+   "label": "Advance Payment Status",
+   "no_copy": 1,
+   "options": "Not Requested\nRequested\nPartially Paid\nFully Paid",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",

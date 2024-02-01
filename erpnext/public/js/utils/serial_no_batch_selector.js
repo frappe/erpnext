@@ -71,6 +71,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		let warehouse = this.item?.type_of_transaction === "Outward" ?
 			(this.item.warehouse || this.item.s_warehouse) : "";
 
+		if (!warehouse && this.frm.doc.doctype === 'Stock Reconciliation') {
+			warehouse = this.get_warehouse();
+		}
+
 		return {
 			'item_code': this.item.item_code,
 			'warehouse': ["=", warehouse]

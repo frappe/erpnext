@@ -3,7 +3,7 @@
  "allow_import": 1,
  "autoname": "hash",
  "creation": "2013-05-02 16:29:48",
- "description": "Multiple Item prices.",
+ "description": "Log the selling and buying rate of an Item",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -191,7 +191,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto"
+   "label": "Valid Up To"
   },
   {
    "fieldname": "section_break_24",
@@ -220,7 +220,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-15 08:26:04.041861",
+ "modified": "2024-01-30 14:02:19.304854",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",

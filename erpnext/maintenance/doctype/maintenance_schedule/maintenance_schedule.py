@@ -222,7 +222,7 @@ class MaintenanceSchedule(TransactionBase):
 
 	def validate_maintenance_detail(self):
 		if not self.get("items"):
-			throw(_("Please enter Maintaince Details first"))
+			throw(_("Please enter Maintenance Details first"))
 
 		for d in self.get("items"):
 			if not d.item_code:

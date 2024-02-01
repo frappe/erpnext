@@ -46,7 +46,7 @@ class TestSubscription(FrappeTestCase):
 			get_date_str(subscription.current_invoice_end),
 		)
 		self.assertEqual(subscription.invoices, [])
-		self.assertEqual(subscription.status, "Trialling")
+		self.assertEqual(subscription.status, "Trialing")
 
 	def test_create_subscription_without_trial_with_correct_period(self):
 		subscription = create_subscription()
