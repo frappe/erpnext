@@ -671,7 +671,7 @@ class AccountsController(TransactionBase):
 					if self.get("is_subcontracted"):
 						args["is_subcontracted"] = self.is_subcontracted
 
-					ret = get_item_details(args, self, for_validate=True, overwrite_warehouse=False)
+					ret = get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
