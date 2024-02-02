@@ -110,7 +110,7 @@ class Account(NestedSet):
 		self.validate_parent()
 		self.validate_parent_child_account_type()
 		self.validate_root_details()
-		validate_field_number("Account", self.name, self.account_number, self.company, "account_number")
+		validate_account_number(self.name, self.account_number, self.company, self.root_type)
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
@@ -467,10 +467,10 @@ def get_account_autoname(account_number, account_name, company):
 	return " - ".join(parts)
 
 
-def validate_account_number(name, account_number, company):
+def validate_account_number(name, account_number, company, root_type):
 	if account_number:
 		account_with_same_number = frappe.db.get_value(
-			"Account", {"account_number": account_number, "company": company, "name": ["!=", name]}
+			"Account", {"account_number": account_number, "company": company, 'root_type': root_type, "name": ["!=", name]}
 		)
 		if account_with_same_number:
 			frappe.throw(
@@ -520,7 +520,7 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 
 				frappe.throw(message, title=_("Rename Not Allowed"))
 
-	validate_account_number(name, account_number, account.company)
+	validate_account_number(name, account_number, account.company, account.root_type)
 	if account_number:
 		frappe.db.set_value("Account", name, "account_number", account_number.strip())
 	else:
