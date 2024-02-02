@@ -237,7 +237,7 @@ def get_balance_on(
 			)
 
 		else:
-			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False),))
+			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center),))
 
 	if account:
 		if not (frappe.flags.ignore_account_permission or ignore_account_permission):
@@ -258,7 +258,7 @@ def get_balance_on(
 			if acc.account_currency == frappe.get_cached_value("Company", acc.company, "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False),))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account),))
 
 	if account_type:
 		accounts = frappe.db.get_all(
@@ -278,11 +278,11 @@ def get_balance_on(
 	if party_type and party:
 		cond.append(
 			"""gle.party_type = %s and gle.party = %s """
-			% (frappe.db.escape(party_type), frappe.db.escape(party, percent=False))
+			% (frappe.db.escape(party_type), frappe.db.escape(party))
 		)
 
 	if company:
-		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
+		cond.append("""gle.company = %s """ % (frappe.db.escape(company)))
 
 	if account or (party_type and party) or account_type:
 		precision = get_currency_precision()
@@ -348,7 +348,7 @@ def get_count_on(account, fieldname, date):
 				% (acc.lft, acc.rgt)
 			)
 		else:
-			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False),))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account),))
 
 		entries = frappe.db.sql(
 			"""
