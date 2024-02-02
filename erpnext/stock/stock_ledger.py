@@ -897,9 +897,12 @@ class update_entries_after(object):
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + doc.total_amount)
 
-		self.wh_data.qty_after_transaction += doc.total_qty
+		precision = doc.precision("total_qty")
+		self.wh_data.qty_after_transaction += flt(doc.total_qty, precision)
 		if self.wh_data.qty_after_transaction:
-			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
+			self.wh_data.valuation_rate = flt(self.wh_data.stock_value, precision) / flt(
+				self.wh_data.qty_after_transaction, precision
+			)
 
 	def validate_negative_stock(self, sle):
 		"""
