@@ -80,7 +80,8 @@ class BankStatementImport(DataImport):
 		from frappe.utils.background_jobs import is_job_enqueued
 		from frappe.utils.scheduler import is_scheduler_inactive
 
-		if is_scheduler_inactive() and not frappe.flags.in_test:
+		run_now = frappe.flags.in_test or frappe.conf.developer_mode
+		if is_scheduler_inactive() and not run_now:
 			frappe.throw(_("Scheduler is inactive. Cannot import data."), title=_("Scheduler Inactive"))
 
 		job_id = f"bank_statement_import::{self.name}"
@@ -97,7 +98,7 @@ class BankStatementImport(DataImport):
 				google_sheets_url=self.google_sheets_url,
 				bank=self.bank,
 				template_options=self.template_options,
-				now=frappe.conf.developer_mode or frappe.flags.in_test,
+				now=run_now,
 			)
 			return True
 
