@@ -40,7 +40,7 @@ def get_exploded_items(bom, data, indent=0, qty=1):
 			}
 		)
 		if item.bom_no:
-			get_exploded_items(item.bom_no, data, indent=indent + 1, qty=item.qty)
+			get_exploded_items(item.bom_no, data, indent=indent + 1, qty=item.qty * qty)
 
 
 def get_columns():
