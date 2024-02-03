@@ -28,7 +28,7 @@ class TransactionDeletionRecord(Document):
 		company: DF.Link
 		doctypes: DF.Table[TransactionDeletionRecordItem]
 		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
-		status: DF.Literal["Queued", "Running", "Completed"]
+		status: DF.Literal["Queued", "Running", "Failed", "Completed", "Cancelled"]
 	# end: auto-generated types
 
 >>>>>>> 0d65d878de (refactor: more options for 'status' and move it to top)
@@ -55,6 +55,16 @@ class TransactionDeletionRecord(Document):
 		if not self.doctypes_to_be_ignored:
 			self.populate_doctypes_to_be_ignored_table()
 
+	def before_save(self):
+		self.status = ""
+
+	def on_submit(self):
+		self.db_set("status", "Queued")
+
+	def on_cancel(self):
+		self.db_set("status", "Cancelled")
+
+	def start_deletion_process(self):
 		self.delete_bins()
 		self.delete_lead_addresses()
 		self.reset_company_values()
