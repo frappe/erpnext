@@ -7,10 +7,12 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
+  "column_break_txbg",
+  "status",
+  "section_break_tbej",
   "doctypes",
   "doctypes_to_be_ignored",
-  "amended_from",
-  "status"
+  "amended_from"
  ],
  "fields": [
   {
@@ -46,18 +48,27 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Status",
-   "options": "Draft\nCompleted"
+   "options": "Queued\nRunning\nFailed\nCompleted\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_txbg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_tbej",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-04 20:15:59.071493",
+ "modified": "2024-02-03 12:42:21.628177",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -76,5 +87,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

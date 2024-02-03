@@ -26,7 +26,7 @@ class TransactionDeletionRecord(Document):
 		company: DF.Link
 		doctypes: DF.Table[TransactionDeletionRecordItem]
 		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
-		status: DF.Literal["Draft", "Completed"]
+		status: DF.Literal["Queued", "Running", "Completed"]
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
