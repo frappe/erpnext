@@ -329,11 +329,37 @@ class BuyingController(SubcontractingController):
 						+ flt(item.landed_cost_voucher_amount)
 					) / qty_in_stock_uom
 				else:
+					rate_difference_with_purchase_invoice = item.get("rate_difference_with_purchase_invoice")
+					if item.get("rate_difference_with_purchase_invoice"):
+						if not self.get("is_return"):
+							rate_difference_with_purchase_invoice = frappe.db.get_all(
+								"Purchase Invoice Item",
+								filters={
+									"item_code": item.item_code,
+									"purchase_receipt": item.parent,
+									"pr_detail": item.name,
+								},
+								fields=["sum(base_net_amount)/sum(stock_qty)"],
+								group_by="item_code",
+								as_list=True,
+							)
+							rate_difference_with_purchase_invoice = (
+								flt(
+									flt(
+										rate_difference_with_purchase_invoice[0][0]
+										if rate_difference_with_purchase_invoice
+										else 0
+									)
+									* item.stock_qty
+								)
+								- item.base_net_amount
+							)
+
 					item.valuation_rate = (
 						item.base_net_amount
 						+ item.item_tax_amount
 						+ flt(item.landed_cost_voucher_amount)
-						+ flt(item.get("rate_difference_with_purchase_invoice"))
+						+ flt(rate_difference_with_purchase_invoice)
 					) / qty_in_stock_uom
 			else:
 				item.valuation_rate = 0.0

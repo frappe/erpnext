@@ -464,7 +464,7 @@ class PurchaseReceipt(BuyingController):
 				item=item,
 			)
 
-		def make_stock_received_but_not_billed_entry(item):
+		def make_stock_received_but_not_billed_entry(item, stock_value_diff=0):
 			account = (
 				warehouse_account[item.from_warehouse]["account"] if item.from_warehouse else stock_asset_rbnb
 			)
@@ -482,6 +482,10 @@ class PurchaseReceipt(BuyingController):
 			if self.is_internal_transfer() and item.valuation_rate:
 				outgoing_amount = abs(get_stock_value_difference(self.name, item.name, item.from_warehouse))
 				credit_amount = outgoing_amount
+
+			if item.rate_difference_with_purchase_invoice:
+				outgoing_amount = stock_value_diff
+				credit_amount = stock_value_diff
 
 			if credit_amount:
 				if not account:
@@ -569,22 +573,6 @@ class PurchaseReceipt(BuyingController):
 							item=item,
 						)
 
-		def make_rate_difference_entry(item):
-			if item.rate_difference_with_purchase_invoice and stock_asset_rbnb:
-				account_currency = get_account_currency(stock_asset_rbnb)
-				self.add_gl_entry(
-					gl_entries=gl_entries,
-					account=stock_asset_rbnb,
-					cost_center=item.cost_center,
-					debit=0.0,
-					credit=flt(item.rate_difference_with_purchase_invoice),
-					remarks=_("Adjustment based on Purchase Invoice rate"),
-					against_account=stock_asset_account_name,
-					account_currency=account_currency,
-					project=item.project,
-					item=item,
-				)
-
 		def make_sub_contracting_gl_entries(item):
 			# sub-contracting warehouse
 			if flt(item.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
@@ -601,7 +589,7 @@ class PurchaseReceipt(BuyingController):
 				)
 
 		def make_divisional_loss_gl_entry(item, outgoing_amount):
-			if item.is_fixed_asset:
+			if item.is_fixed_asset or item.rate_difference_with_purchase_invoice:
 				return
 
 			# divisional loss adjustment
@@ -709,9 +697,8 @@ class PurchaseReceipt(BuyingController):
 
 				if (flt(d.valuation_rate) or self.is_return or d.is_fixed_asset) and flt(d.qty):
 					make_item_asset_inward_gl_entry(d, stock_value_diff, stock_asset_account_name)
-					outgoing_amount = make_stock_received_but_not_billed_entry(d)
+					outgoing_amount = make_stock_received_but_not_billed_entry(d, stock_value_diff)
 					make_landed_cost_gl_entries(d)
-					make_rate_difference_entry(d)
 					make_sub_contracting_gl_entries(d)
 					make_divisional_loss_gl_entry(d, outgoing_amount)
 			elif (d.warehouse and d.warehouse not in warehouse_with_no_account) or (
@@ -1103,6 +1090,34 @@ def adjust_incoming_rate_for_pr(doc):
 	doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 	doc.make_gl_entries()
 	doc.repost_future_sle_and_gle()
+
+	if not doc.is_return:
+		adjust_incoming_rate_for_returns(doc)
+
+
+def adjust_incoming_rate_for_returns(doc):
+	returns = frappe.get_all(
+		"Purchase Receipt",
+		filters={"is_return": 1, "return_against": doc.name, "docstatus": 1},
+		fields=["name"],
+	)
+	item_valuation_map = {d.item_code: d.valuation_rate for d in doc.items}
+
+	for pr in returns:
+		pr_doc = frappe.get_doc("Purchase Receipt", pr.name)
+		for item in pr_doc.items:
+			if item_valuation_map.get(item.item_code) is None:
+				continue
+
+			item.db_set(
+				"rate_difference_with_purchase_invoice",
+				-1
+				* flt(
+					(flt(item_valuation_map.get(item.item_code)) * flt(item.qty)) - flt(item.base_net_amount)
+				),
+				update_modified=False,
+			)
+		adjust_incoming_rate_for_pr(pr_doc)
 
 
 def get_item_wise_returned_qty(pr_doc):
