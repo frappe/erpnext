@@ -955,6 +955,14 @@ class JobCard(Document):
 		if update_status:
 			self.db_set("status", self.status)
 
+		if self.status in ["Completed", "Work In Progress"]:
+			status = {
+				"Completed": "Off",
+				"Work In Progress": "Production",
+			}.get(self.status)
+
+			self.update_status_in_workstation(status)
+
 	def set_wip_warehouse(self):
 		if not self.wip_warehouse:
 			self.wip_warehouse = frappe.db.get_single_value(
@@ -1034,6 +1042,12 @@ class JobCard(Document):
 				return True
 
 		return False
+
+	def update_status_in_workstation(self, status):
+		if not self.workstation:
+			return
+
+		frappe.db.set_value("Workstation", self.workstation, "status", status)
 
 
 @frappe.whitelist()

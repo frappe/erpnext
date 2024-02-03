@@ -1,7 +1,7 @@
 {
  "actions": [],
  "creation": "2013-06-24 16:37:54",
- "description": "Settings",
+ "description": "Default settings for your stock-related transactions",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -427,7 +427,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-01-24 02:20:26.145996",
+ "modified": "2024-01-30 14:03:52.143457",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

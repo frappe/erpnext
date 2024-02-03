@@ -1,7 +1,6 @@
 {
  "actions": [],
  "creation": "2013-06-24 15:49:57",
- "description": "Settings for Accounts",
  "doctype": "DocType",
  "document_type": "Other",
  "editable_grid": 1,
@@ -462,7 +461,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-20 09:37:47.650347",
+ "modified": "2024-01-30 14:04:26.553554",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

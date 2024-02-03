@@ -228,7 +228,6 @@ class StockEntry(StockController):
 			self.fg_completed_qty = 0.0
 
 		self.validate_serialized_batch()
-		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
 
