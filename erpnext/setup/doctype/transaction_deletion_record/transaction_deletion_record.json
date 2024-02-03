@@ -9,6 +9,12 @@
   "company",
   "column_break_txbg",
   "status",
+  "tasks_section",
+  "delete_bin_data",
+  "delete_leads_and_addresses",
+  "reset_company_default_values",
+  "clear_notifications",
+  "delete_transactions",
   "section_break_tbej",
   "doctypes",
   "doctypes_to_be_ignored",
@@ -59,12 +65,57 @@
   {
    "fieldname": "section_break_tbej",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tasks_section",
+   "fieldtype": "Section Break",
+   "label": "Tasks"
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_bin_data",
+   "fieldtype": "Check",
+   "label": "Delete Bins",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_leads_and_addresses",
+   "fieldtype": "Check",
+   "label": "Delete Leads and Addresses",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "clear_notifications",
+   "fieldtype": "Check",
+   "label": "Clear Notifications",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reset_company_default_values",
+   "fieldtype": "Check",
+   "label": "Reset Company Default Values",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_transactions",
+   "fieldtype": "Check",
+   "label": "Delete Transactions",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-03 12:42:21.628177",
+ "modified": "2024-02-03 14:40:40.207482",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",

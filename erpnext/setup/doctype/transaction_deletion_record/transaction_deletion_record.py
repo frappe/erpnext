@@ -23,9 +23,14 @@ class TransactionDeletionRecord(Document):
 		)
 
 		amended_from: DF.Link | None
+		clear_notifications: DF.Check
 		company: DF.Link
+		delete_bin_data: DF.Check
+		delete_leads_and_addresses: DF.Check
+		delete_transactions: DF.Check
 		doctypes: DF.Table[TransactionDeletionRecordItem]
 		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
+		reset_company_default_values: DF.Check
 		status: DF.Literal["Queued", "Running", "Failed", "Completed", "Cancelled"]
 	# end: auto-generated types
 
@@ -52,8 +57,16 @@ class TransactionDeletionRecord(Document):
 		if not self.doctypes_to_be_ignored:
 			self.populate_doctypes_to_be_ignored_table()
 
+	def reset_task_flags(self):
+		self.clear_notifications = 0
+		self.delete_bin_data = 0
+		self.delete_leads_and_addresses = 0
+		self.delete_transactions = 0
+		self.reset_company_default_values = 0
+
 	def before_save(self):
 		self.status = ""
+		self.reset_task_flags()
 
 	def on_submit(self):
 		self.db_set("status", "Queued")
@@ -61,11 +74,13 @@ class TransactionDeletionRecord(Document):
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 
+	@frappe.whitelist()
 	def start_deletion_process(self):
 		self.delete_bins()
 		self.delete_lead_addresses()
 		self.reset_company_values()
 		clear_notifications()
+		self.db_set("clear_notifications", 1)
 		self.delete_company_transactions()
 
 	def populate_doctypes_to_be_ignored_table(self):
@@ -79,6 +94,7 @@ class TransactionDeletionRecord(Document):
 				(select name from tabWarehouse where company=%s)""",
 			self.company,
 		)
+		self.db_set("delete_bin_data", 1)
 
 	def delete_lead_addresses(self):
 		"""Delete addresses to which leads are linked"""
@@ -117,12 +133,14 @@ class TransactionDeletionRecord(Document):
 					leads=",".join(leads)
 				)
 			)
+		self.db_set("delete_leads_and_addresses", 1)
 
 	def reset_company_values(self):
 		company_obj = frappe.get_doc("Company", self.company)
 		company_obj.total_monthly_sales = 0
 		company_obj.sales_monthly_history = None
 		company_obj.save()
+		self.db_set("reset_company_default_values", 1)
 
 	def delete_company_transactions(self):
 		doctypes_to_be_ignored_list = self.get_doctypes_to_be_ignored_list()
@@ -156,6 +174,7 @@ class TransactionDeletionRecord(Document):
 					if naming_series:
 						if "#" in naming_series:
 							self.update_naming_series(naming_series, docfield["parent"])
+		self.db_set("delete_transactions", 1)
 
 	def get_doctypes_to_be_ignored_list(self):
 		singles = frappe.get_all("DocType", filters={"issingle": 1}, pluck="name")
