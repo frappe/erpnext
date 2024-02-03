@@ -1113,7 +1113,8 @@ def adjust_incoming_rate_for_returns(doc):
 				"rate_difference_with_purchase_invoice",
 				-1
 				* flt(
-					(flt(item_valuation_map.get(item.item_code)) * flt(item.qty)) - flt(item.base_net_amount)
+					(flt(item_valuation_map.get(item.item_code)) * flt(item.stock_qty))
+					- flt(item.base_net_amount)
 				),
 				update_modified=False,
 			)
