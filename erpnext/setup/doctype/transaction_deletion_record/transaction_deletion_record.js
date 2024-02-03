@@ -24,6 +24,17 @@ frappe.ui.form.on("Transaction Deletion Record", {
 	refresh: function (frm) {
 		frm.fields_dict["doctypes_to_be_ignored"].grid.set_column_disp("no_of_docs", false);
 		frm.refresh_field("doctypes_to_be_ignored");
+
+		if (frm.doc.docstatus==1 && ['Queued', 'Failed'].find(x => x == frm.doc.status)) {
+			let execute_btn = __("Start / Resume")
+
+			frm.add_custom_button(execute_btn, () => {
+				frm.call({
+					method: 'start_deletion_process',
+					doc: frm.doc
+				});
+			});
+		}
 	},
 });
 
