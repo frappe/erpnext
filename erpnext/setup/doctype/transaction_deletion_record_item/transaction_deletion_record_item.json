@@ -6,7 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "doctype_name",
-  "no_of_docs"
+  "docfield_name",
+  "no_of_docs",
+  "done"
  ],
  "fields": [
   {
@@ -22,12 +24,24 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Number of Docs"
+  },
+  {
+   "default": "0",
+   "fieldname": "done",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Done"
+  },
+  {
+   "fieldname": "docfield_name",
+   "fieldtype": "Data",
+   "label": "DocField Name"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-08 23:10:46.166744",
+ "modified": "2024-02-03 21:06:32.274445",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record Item",
@@ -35,5 +49,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
