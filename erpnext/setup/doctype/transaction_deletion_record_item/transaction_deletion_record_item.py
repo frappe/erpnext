@@ -15,7 +15,9 @@ class TransactionDeletionRecordItem(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		docfield_name: DF.Data | None
 		doctype_name: DF.Link
+		done: DF.Check
 		no_of_docs: DF.Data | None
 		parent: DF.Data
 		parentfield: DF.Data
