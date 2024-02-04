@@ -110,6 +110,7 @@ class TransactionDeletionRecord(Document):
 
 	@frappe.whitelist()
 	def delete_bins(self):
+		# This methid is the entry point for the chain of events that follow
 		if not self.delete_bin_data:
 			frappe.db.sql(
 				"""delete from `tabBin` where warehouse in
