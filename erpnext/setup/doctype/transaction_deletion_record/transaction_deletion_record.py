@@ -6,7 +6,7 @@ import frappe
 from frappe import _, qb
 from frappe.desk.notifications import clear_notifications
 from frappe.model.document import Document
-from frappe.utils import cint, create_batch
+from frappe.utils import cint, create_batch, get_link_to_form
 
 
 class TransactionDeletionRecord(Document):
@@ -40,7 +40,7 @@ class TransactionDeletionRecord(Document):
 
 	def __init__(self, *args, **kwargs):
 		super(TransactionDeletionRecord, self).__init__(*args, **kwargs)
-		self.batch_size = 5
+		self.batch_size = 5000
 
 	def validate(self):
 		frappe.only_for("System Manager")
@@ -98,6 +98,7 @@ class TransactionDeletionRecord(Document):
 		self.delete_company_transactions()
 
 	def delete_notifications(self):
+		self.validate_doc_status()
 		if not self.clear_notifications:
 			clear_notifications()
 			self.db_set("clear_notifications", 1)
@@ -108,9 +109,19 @@ class TransactionDeletionRecord(Document):
 		for doctype in doctypes_to_be_ignored_list:
 			self.append("doctypes_to_be_ignored", {"doctype_name": doctype})
 
+	def validate_doc_status(self):
+		if self.status != "Running":
+			frappe.throw(
+				_("{0} is not running. Cannot trigger events for this Document").format(
+					get_link_to_form("Transaction Deletion Record", self.name)
+				)
+			)
+
 	@frappe.whitelist()
 	def delete_bins(self):
 		# This methid is the entry point for the chain of events that follow
+		self.db_set("status", "Running")
+
 		if not self.delete_bin_data:
 			frappe.db.sql(
 				"""delete from `tabBin` where warehouse in
@@ -122,6 +133,7 @@ class TransactionDeletionRecord(Document):
 
 	def delete_lead_addresses(self):
 		"""Delete addresses to which leads are linked"""
+		self.validate_doc_status()
 		if not self.delete_leads_and_addresses:
 			leads = frappe.get_all("Lead", filters={"company": self.company})
 			leads = ["'%s'" % row.get("name") for row in leads]
@@ -162,6 +174,7 @@ class TransactionDeletionRecord(Document):
 		self.chain_call(method="reset_company_values")
 
 	def reset_company_values(self):
+		self.validate_doc_status()
 		if not self.reset_company_default_values:
 			company_obj = frappe.get_doc("Company", self.company)
 			company_obj.total_monthly_sales = 0
@@ -171,6 +184,7 @@ class TransactionDeletionRecord(Document):
 		self.chain_call(method="delete_notifications")
 
 	def initialize_doctypes_to_be_deleted_table(self):
+		self.validate_doc_status()
 		if not self.initialize_doctypes_table:
 			doctypes_to_be_ignored_list = self.get_doctypes_to_be_ignored_list()
 			docfields = self.get_doctypes_with_company_field(doctypes_to_be_ignored_list)
@@ -187,6 +201,7 @@ class TransactionDeletionRecord(Document):
 		self.chain_call(method="delete_company_transactions")
 
 	def delete_company_transactions(self):
+		self.validate_doc_status()
 		if not self.delete_transactions:
 			doctypes_to_be_ignored_list = self.get_doctypes_to_be_ignored_list()
 			docfields = self.get_doctypes_with_company_field(doctypes_to_be_ignored_list)
@@ -212,6 +227,7 @@ class TransactionDeletionRecord(Document):
 						processed = int(docfield.no_of_docs) + len(reference_doc_names)
 						frappe.db.set_value(docfield.doctype, docfield.name, "no_of_docs", processed)
 					else:
+						# reset naming series
 						naming_series = frappe.db.get_value("DocType", docfield.doctype_name, "autoname")
 						if naming_series:
 							if "#" in naming_series:
@@ -224,6 +240,7 @@ class TransactionDeletionRecord(Document):
 			if pending_doctypes:
 				self.chain_call(method="delete_company_transactions")
 			else:
+				self.db_set("status", "Completed")
 				self.db_set("delete_transactions", 1)
 
 	def get_doctypes_to_be_ignored_list(self):
