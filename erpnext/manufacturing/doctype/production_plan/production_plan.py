@@ -1334,10 +1334,10 @@ def get_sales_orders(self):
 	)
 
 	date_field_mapper = {
-		"from_date": self.from_date >= so.transaction_date,
-		"to_date": self.to_date <= so.transaction_date,
-		"from_delivery_date": self.from_delivery_date >= so_item.delivery_date,
-		"to_delivery_date": self.to_delivery_date <= so_item.delivery_date,
+		"from_date": so.transaction_date >= self.from_date,
+		"to_date": so.transaction_date <= self.to_date,
+		"from_delivery_date": so_item.delivery_date >= self.from_delivery_date,
+		"to_delivery_date": so_item.delivery_date <= self.to_delivery_date,
 	}
 
 	for field, value in date_field_mapper.items():
