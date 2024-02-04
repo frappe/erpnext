@@ -126,6 +126,54 @@ class StockController(AccountsController):
 				# remove extra whitespace and store one serial no on each line
 				row.serial_no = clean_serial_no_string(row.serial_no)
 
+	def make_bundle_using_old_serial_batch_fields(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+		for row in self.items:
+			if not row.serial_no and not row.batch_no and not row.get("rejected_serial_no"):
+				continue
+
+			if not row.use_serial_batch_fields and (
+				row.serial_no or row.batch_no or row.get("rejected_serial_no")
+			):
+				frappe.throw(_("Please enable Use Old Serial / Batch Fields to make_bundle"))
+
+			if row.use_serial_batch_fields and (
+				not row.serial_and_batch_bundle or not row.get("rejected_serial_and_batch_bundle")
+			):
+				sn_doc = SerialBatchCreation(
+					{
+						"item_code": row.item_code,
+						"warehouse": row.warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"voucher_detail_no": row.name,
+						"qty": row.stock_qty,
+						"type_of_transaction": "Inward" if row.stock_qty > 0 else "Outward",
+						"company": self.company,
+						"is_rejected": 1 if row.get("rejected_warehouse") else 0,
+						"serial_nos": get_serial_nos(row.serial_no) if row.serial_no else None,
+						"batches": frappe._dict({row.batch_no: row.stock_qty}) if row.batch_no else None,
+						"batch_no": row.batch_no,
+						"use_serial_batch_fields": row.use_serial_batch_fields,
+					}
+				).make_serial_and_batch_bundle()
+
+				if sn_doc.is_rejected:
+					row.rejected_serial_and_batch_bundle = sn_doc.name
+					row.db_set("rejected_serial_and_batch_bundle", sn_doc.name)
+				else:
+					row.serial_and_batch_bundle = sn_doc.name
+					row.db_set("serial_and_batch_bundle", sn_doc.name)
+
+	def set_use_serial_batch_fields(self):
+		if frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
+			for row in self.items:
+				row.use_serial_batch_fields = 1
+
 	def get_gl_entries(
 		self, warehouse_account=None, default_expense_account=None, default_cost_center=None
 	):
