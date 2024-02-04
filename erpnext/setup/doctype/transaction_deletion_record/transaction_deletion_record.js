@@ -15,9 +15,6 @@ frappe.ui.form.on("Transaction Deletion Record", {
 			});
 		}
 
-
-		frm.get_field('doctypes_to_be_ignored').grid.cannot_add_rows = true;
-
 	},
 
 	refresh: function(frm) {
@@ -25,6 +22,7 @@ frappe.ui.form.on("Transaction Deletion Record", {
 			let execute_btn = __("Start Deletion")
 
 			frm.add_custom_button(execute_btn, () => {
+				// Entry point for chain of events
 				frm.call({
 					method: 'delete_bins',
 					doc: frm.doc
