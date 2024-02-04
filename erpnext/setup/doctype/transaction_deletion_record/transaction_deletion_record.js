@@ -41,6 +41,18 @@ frappe.ui.form.on("Transaction Deletion Record", {
 				});
 			});
 		}
+
+		if (frm.doc.docstatus==1 && ['Queued', 'Failed'].find(x => x == frm.doc.status)) {
+			let execute_btn = __("Start Chain of Events")
+
+			frm.add_custom_button(execute_btn, () => {
+				frm.call({
+					method: 'delete_bins',
+					doc: frm.doc
+				});
+			});
+		}
+
 	},
 });
 
