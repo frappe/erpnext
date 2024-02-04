@@ -41,7 +41,8 @@
    "fieldname": "doctypes_to_be_ignored",
    "fieldtype": "Table",
    "label": "Excluded DocTypes",
-   "options": "Transaction Deletion Record Item"
+   "options": "Transaction Deletion Record Item",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -123,7 +124,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-04 10:55:09.430373",
+ "modified": "2024-02-04 15:28:29.532826",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
