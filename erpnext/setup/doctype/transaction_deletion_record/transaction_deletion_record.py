@@ -170,7 +170,7 @@ class TransactionDeletionRecord(Document):
 
 			tables = self.get_all_child_doctypes()
 			for docfield in self.doctypes:
-				if docfield.doctype_name != self.doctype:
+				if docfield.doctype_name != self.doctype and not docfield.done:
 					no_of_docs = self.get_number_of_docs_linked_with_specified_company(
 						docfield.doctype_name, docfield.docfield_name
 					)
@@ -193,6 +193,9 @@ class TransactionDeletionRecord(Document):
 						if naming_series:
 							if "#" in naming_series:
 								self.update_naming_series(naming_series, docfield.doctype_name)
+
+					else:
+						frappe.db.set_value(docfield.doctype, docfield.name, "done", 1)
 			self.db_set("delete_transactions", 1)
 
 	def get_doctypes_to_be_ignored_list(self):
