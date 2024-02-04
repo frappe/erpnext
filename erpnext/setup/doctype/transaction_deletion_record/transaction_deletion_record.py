@@ -20,6 +20,9 @@ class TransactionDeletionRecord(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		from erpnext.accounts.doctype.transaction_deletion_record_details.transaction_deletion_record_details import (
+			TransactionDeletionRecordDetails,
+		)
 		from erpnext.setup.doctype.transaction_deletion_record_item.transaction_deletion_record_item import (
 			TransactionDeletionRecordItem,
 		)
@@ -30,7 +33,7 @@ class TransactionDeletionRecord(Document):
 		delete_bin_data: DF.Check
 		delete_leads_and_addresses: DF.Check
 		delete_transactions: DF.Check
-		doctypes: DF.Table[TransactionDeletionRecordItem]
+		doctypes: DF.Table[TransactionDeletionRecordDetails]
 		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
 		initialize_doctypes_table: DF.Check
 		reset_company_default_values: DF.Check
@@ -40,7 +43,7 @@ class TransactionDeletionRecord(Document):
 >>>>>>> 0d65d878de (refactor: more options for 'status' and move it to top)
 	def __init__(self, *args, **kwargs):
 		super(TransactionDeletionRecord, self).__init__(*args, **kwargs)
-		self.batch_size = 5000
+		self.batch_size = 5
 
 	def validate(self):
 		frappe.only_for("System Manager")
@@ -78,7 +81,7 @@ class TransactionDeletionRecord(Document):
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 
-	def chain_callback(self, method):
+	def chain_call(self, method):
 		frappe.enqueue(
 			"frappe.utils.background_jobs.run_doc_method",
 			doctype=self.doctype,
@@ -101,7 +104,7 @@ class TransactionDeletionRecord(Document):
 		if not self.clear_notifications:
 			clear_notifications()
 			self.db_set("clear_notifications", 1)
-		self.chain_callback("initialize_doctypes_to_be_deleted_table")
+		self.chain_call("initialize_doctypes_to_be_deleted_table")
 
 	def populate_doctypes_to_be_ignored_table(self):
 		doctypes_to_be_ignored_list = get_doctypes_to_be_ignored()
@@ -117,7 +120,7 @@ class TransactionDeletionRecord(Document):
 				self.company,
 			)
 			self.db_set("delete_bin_data", 1)
-		self.chain_callback(method="delete_lead_addresses")
+		self.chain_call(method="delete_lead_addresses")
 
 	def delete_lead_addresses(self):
 		"""Delete addresses to which leads are linked"""
@@ -158,7 +161,7 @@ class TransactionDeletionRecord(Document):
 					)
 				)
 			self.db_set("delete_leads_and_addresses", 1)
-		self.chain_callback(method="reset_company_values")
+		self.chain_call(method="reset_company_values")
 
 	def reset_company_values(self):
 		if not self.reset_company_default_values:
@@ -167,7 +170,7 @@ class TransactionDeletionRecord(Document):
 			company_obj.sales_monthly_history = None
 			company_obj.save()
 			self.db_set("reset_company_default_values", 1)
-		self.chain_callback(method="delete_notifications")
+		self.chain_call(method="delete_notifications")
 
 	def initialize_doctypes_to_be_deleted_table(self):
 		if not self.initialize_doctypes_table:
@@ -183,7 +186,7 @@ class TransactionDeletionRecord(Document):
 						# Initialize
 						self.populate_doctypes_table(tables, docfield["parent"], docfield["fieldname"], 0)
 			self.db_set("initialize_doctypes_table", 1)
-		self.chain_callback(method="delete_company_transactions")
+		self.chain_call(method="delete_company_transactions")
 
 	def delete_company_transactions(self):
 		if not self.delete_transactions:
@@ -206,20 +209,24 @@ class TransactionDeletionRecord(Document):
 						self.delete_communications(docfield.doctype_name, reference_doc_names)
 						self.delete_comments(docfield.doctype_name, reference_doc_names)
 						self.unlink_attachments(docfield.doctype_name, reference_doc_names)
-
 						self.delete_child_tables(docfield.doctype_name, reference_doc_names)
-						self.delete_docs_linked_with_specified_company(docfield.doctype_name, docfield.docfield_name)
-
+						self.delete_docs_linked_with_specified_company(docfield.doctype_name, reference_doc_names)
+						processed = int(docfield.no_of_docs) + len(reference_doc_names)
+						frappe.db.set_value(docfield.doctype, docfield.name, "no_of_docs", processed)
+					else:
 						naming_series = frappe.db.get_value("DocType", docfield.doctype_name, "autoname")
-						# TODO: do this at the end of each doctype
 						if naming_series:
 							if "#" in naming_series:
 								self.update_naming_series(naming_series, docfield.doctype_name)
-
-						self.chain_callback(method="delete_company_transactions")
-					else:
 						frappe.db.set_value(docfield.doctype, docfield.name, "done", 1)
-			self.db_set("delete_transactions", 1)
+
+			pending_doctypes = frappe.db.get_all(
+				docfield.doctype, filters={"parent": self.name, "done": 0}, pluck="doctype_name"
+			)
+			if pending_doctypes:
+				self.chain_call(method="delete_company_transactions")
+			else:
+				self.db_set("delete_transactions", 1)
 
 	def get_doctypes_to_be_ignored_list(self):
 		singles = frappe.get_all("DocType", filters={"issingle": 1}, pluck="name")
@@ -264,8 +271,8 @@ class TransactionDeletionRecord(Document):
 		for table in child_tables:
 			frappe.db.delete(table, {"parent": ["in", reference_doc_names]})
 
-	def delete_docs_linked_with_specified_company(self, doctype, company_fieldname):
-		frappe.db.delete(doctype, {company_fieldname: self.company})
+	def delete_docs_linked_with_specified_company(self, doctype, reference_doc_names):
+		frappe.db.delete(doctype, {"name": ("in", reference_doc_names)})
 
 	def update_naming_series(self, naming_series, doctype_name):
 		if "." in naming_series:
