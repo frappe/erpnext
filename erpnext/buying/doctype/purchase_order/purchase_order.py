@@ -317,11 +317,7 @@ class PurchaseOrder(BuyingController):
 		self.update_requested_qty()
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_subcontract()
-<<<<<<< HEAD
-=======
-		self.update_subcontracting_order_status()
 		self.update_blanket_order()
->>>>>>> 61ded697a7 (fix: update BO Ordered Quantity on PO Close/Open)
 		self.notify_update()
 		clear_doctype_notifications(self)
 

@@ -916,11 +916,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-11-24 19:07:34.921094",
-=======
  "modified": "2024-02-05 11:23:24.859435",
->>>>>>> 5ce5c352e4 (fix: disable no-copy for blanket order in PO)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
