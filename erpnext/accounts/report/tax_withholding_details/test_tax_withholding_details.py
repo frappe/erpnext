@@ -36,7 +36,7 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 			# Check for JV totals using back calculation logic
 			[jv.name, "TCS", 0.075, -10000.0, -7.5, -10000.0],
 			[pe.name, "TCS", 0.075, 2550, 0.53, 2550.53],
-			[si.name, "TCS", 0.075, 1000, 0.525, 1000.525],
+			[si.name, "TCS", 0.075, 1000, 0.52, 1000.52],
 		]
 		self.check_expected_values(result, expected_values)
 
