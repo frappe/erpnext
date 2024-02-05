@@ -317,6 +317,7 @@ class PurchaseOrder(BuyingController):
 		self.update_requested_qty()
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_subcontract()
+		self.update_blanket_order()
 		self.notify_update()
 		clear_doctype_notifications(self)
 
