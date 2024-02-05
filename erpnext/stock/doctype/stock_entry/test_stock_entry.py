@@ -1734,47 +1734,6 @@ class TestStockEntry(FrappeTestCase):
 		self.assertFalse(doc.is_enqueue_action())
 		frappe.flags.in_test = True
 
-<<<<<<< HEAD
-=======
-	def test_negative_batch(self):
-		item_code = "Test Negative Batch Item - 001"
-		make_item(
-			item_code,
-			{"has_batch_no": 1, "create_new_batch": 1, "batch_naming_series": "Test-BCH-NNS.#####"},
-		)
-
-		se1 = make_stock_entry(
-			item_code=item_code,
-			purpose="Material Receipt",
-			qty=100,
-			target="_Test Warehouse - _TC",
-		)
-
-		se1.reload()
-
-		batch_no = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
-
-		se2 = make_stock_entry(
-			item_code=item_code,
-			purpose="Material Issue",
-			batch_no=batch_no,
-			qty=10,
-			source="_Test Warehouse - _TC",
-		)
-
-		se2.reload()
-
-		se3 = make_stock_entry(
-			item_code=item_code,
-			purpose="Material Receipt",
-			qty=100,
-			target="_Test Warehouse - _TC",
-		)
-
-		se3.reload()
-
-		self.assertRaises(frappe.ValidationError, se1.cancel)
-
 	def test_auto_reorder_level(self):
 		from erpnext.stock.reorder_item import reorder_item
 
@@ -1817,7 +1776,6 @@ class TestStockEntry(FrappeTestCase):
 			mr.cancel()
 			mr.delete()
 
->>>>>>> 951023f434 (perf: timeout for auto material request through reorder level)
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
