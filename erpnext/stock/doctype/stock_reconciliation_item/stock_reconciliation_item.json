@@ -198,7 +198,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.use_serial_batch_fields === 0",
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Serial / Batch Bundle",
@@ -208,7 +208,7 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.use_serial_batch_fields === 0",
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "current_serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Current Serial / Batch Bundle",
@@ -217,7 +217,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.use_serial_batch_fields === 0",
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "add_serial_batch_bundle",
    "fieldtype": "Button",
    "label": "Add Serial / Batch No"

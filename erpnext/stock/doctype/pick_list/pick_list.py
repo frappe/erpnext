@@ -147,12 +147,11 @@ class PickList(Document):
 						"voucher_no": self.name,
 						"voucher_detail_no": row.name,
 						"qty": row.stock_qty,
-						"type_of_transaction": "Inward" if row.stock_qty > 0 else "Outward",
+						"type_of_transaction": "Outward",
 						"company": self.company,
 						"serial_nos": get_serial_nos(row.serial_no) if row.serial_no else None,
 						"batches": frappe._dict({row.batch_no: row.stock_qty}) if row.batch_no else None,
 						"batch_no": row.batch_no,
-						"use_serial_batch_fields": row.use_serial_batch_fields,
 					}
 				).make_serial_and_batch_bundle()
 
@@ -188,6 +187,7 @@ class PickList(Document):
 					{"is_cancelled": 1, "voucher_no": ""},
 				)
 
+				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
 				row.db_set("serial_and_batch_bundle", None)
 
 	def on_update(self):
@@ -349,18 +349,13 @@ class PickList(Document):
 		self.item_location_map = frappe._dict()
 
 		from_warehouses = None
-		if self.parent_warehouse and frappe.get_cached_value(
-			"Warehouse", self.parent_warehouse, "is_group"
-		):
+		if self.parent_warehouse:
 			from_warehouses = get_descendants_of("Warehouse", self.parent_warehouse)
-		elif self.parent_warehouse:
-			from_warehouses = [self.parent_warehouse]
 
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")
 
 		# reset
-		self.remove_serial_and_batch_bundle()
 		self.delete_key("locations")
 		updated_locations = frappe._dict()
 		for item_doc in items:
@@ -387,13 +382,13 @@ class PickList(Document):
 			for row in locations:
 				location = item_doc.as_dict()
 				location.update(row)
-				bundle = location.serial_and_batch_bundle or location.serial_no or location.batch_no
 				key = (
 					location.item_code,
 					location.warehouse,
 					location.uom,
+					location.batch_no,
+					location.serial_no,
 					location.sales_order_item or location.material_request_item,
-					bundle,
 				)
 
 				if key not in updated_locations:
@@ -675,13 +670,17 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 			if not stock_qty:
 				break
 
+		serial_nos = None
+		if item_location.serial_nos:
+			serial_nos = "\n".join(item_location.serial_nos[0 : cint(stock_qty)])
+
 		locations.append(
 			frappe._dict(
 				{
 					"qty": qty,
 					"stock_qty": stock_qty,
 					"warehouse": item_location.warehouse,
-					"serial_no": item_location.serial_no,
+					"serial_no": serial_nos,
 					"batch_no": item_location.batch_no,
 					"use_serial_batch_fields": 1,
 				}
@@ -711,7 +710,6 @@ def get_available_item_locations(
 	company,
 	ignore_validation=False,
 	picked_item_details=None,
-	consider_rejected_warehouses=False,
 ):
 	locations = []
 	total_picked_qty = (
@@ -727,7 +725,6 @@ def get_available_item_locations(
 			required_qty,
 			company,
 			total_picked_qty,
-			consider_rejected_warehouses=consider_rejected_warehouses,
 		)
 	elif has_serial_no:
 		locations = get_available_item_locations_for_serialized_item(
@@ -778,7 +775,6 @@ def get_available_item_locations_for_serial_and_batched_item(
 	required_qty,
 	company,
 	total_picked_qty=0,
-	consider_rejected_warehouses=False,
 ):
 	# Get batch nos by FIFO
 	locations = get_available_item_locations_for_batched_item(
@@ -786,7 +782,6 @@ def get_available_item_locations_for_serial_and_batched_item(
 		from_warehouses,
 		required_qty,
 		company,
-		consider_rejected_warehouses=consider_rejected_warehouses,
 	)
 
 	if locations:
@@ -804,12 +799,12 @@ def get_available_item_locations_for_serial_and_batched_item(
 				.where(
 					(conditions) & (sn.batch_no == location.batch_no) & (sn.warehouse == location.warehouse)
 				)
-				.orderby(sn.purchase_date)
+				.orderby(sn.creation)
 				.limit(ceil(location.qty + total_picked_qty))
 			).run(as_dict=True)
 
 			serial_nos = [sn.name for sn in serial_nos]
-			location.serial_no = serial_nos
+			location.serial_nos = serial_nos
 			location.qty = len(serial_nos)
 
 	return locations
@@ -848,6 +843,7 @@ def get_available_item_locations_for_serialized_item(
 		picked_qty -= 1
 
 	locations = []
+
 	for warehouse, serial_nos in warehouse_serial_nos_map.items():
 		qty = len(serial_nos)
 
@@ -888,12 +884,14 @@ def get_available_item_locations_for_batched_item(
 	for warehouse, batches in warehouse_wise_batches.items():
 		for batch_no, qty in batches.items():
 			locations.append(
-				{
-					"qty": qty,
-					"warehouse": warehouse,
-					"item_code": item_code,
-					"batch_no": batch_no,
-				}
+				frappe._dict(
+					{
+						"qty": qty,
+						"warehouse": warehouse,
+						"item_code": item_code,
+						"batch_no": batch_no,
+					}
+				)
 			)
 
 	return locations

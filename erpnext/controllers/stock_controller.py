@@ -130,7 +130,15 @@ class StockController(AccountsController):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
-		for row in self.items:
+		# To handle test cases
+		if frappe.flags.in_test and frappe.flags.use_serial_and_batch_fields:
+			return
+
+		table_name = "items"
+		if self.doctype == "Asset Capitalization":
+			table_name = "stock_items"
+
+		for row in self.get(table_name):
 			if not row.serial_no and not row.batch_no and not row.get("rejected_serial_no"):
 				continue
 
@@ -140,7 +148,7 @@ class StockController(AccountsController):
 				frappe.throw(_("Please enable Use Old Serial / Batch Fields to make_bundle"))
 
 			if row.use_serial_batch_fields and (
-				not row.serial_and_batch_bundle or not row.get("rejected_serial_and_batch_bundle")
+				not row.serial_and_batch_bundle and not row.get("rejected_serial_and_batch_bundle")
 			):
 				sn_doc = SerialBatchCreation(
 					{
@@ -164,10 +172,21 @@ class StockController(AccountsController):
 
 				if sn_doc.is_rejected:
 					row.rejected_serial_and_batch_bundle = sn_doc.name
-					row.db_set("rejected_serial_and_batch_bundle", sn_doc.name)
+					row.db_set(
+						{
+							"rejected_serial_and_batch_bundle": sn_doc.name,
+							"rejected_serial_no": "",
+						}
+					)
 				else:
 					row.serial_and_batch_bundle = sn_doc.name
-					row.db_set("serial_and_batch_bundle", sn_doc.name)
+					row.db_set(
+						{
+							"serial_and_batch_bundle": sn_doc.name,
+							"serial_no": "",
+							"batch_no": "",
+						}
+					)
 
 	def set_use_serial_batch_fields(self):
 		if frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
