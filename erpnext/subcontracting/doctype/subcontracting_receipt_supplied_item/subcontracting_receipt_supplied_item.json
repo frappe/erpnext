@@ -201,7 +201,7 @@
   },
   {
    "columns": 2,
-   "depends_on": "eval:doc.use_serial_batch_fields === 0",
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
    "in_list_view": 1,

@@ -200,7 +200,6 @@ class TestDeliveryNote(FrappeTestCase):
 			},
 		)
 
-		frappe.flags.ignore_serial_batch_bundle_validation = True
 		serial_nos = [
 			"OSN-1",
 			"OSN-2",
@@ -239,6 +238,8 @@ class TestDeliveryNote(FrappeTestCase):
 		)
 
 		se_doc.items[0].serial_no = "\n".join(serial_nos)
+
+		frappe.flags.use_serial_and_batch_fields = True
 		se_doc.submit()
 
 		self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
@@ -293,6 +294,8 @@ class TestDeliveryNote(FrappeTestCase):
 		for serial_no in returned_serial_nos2:
 			self.assertTrue(serial_no in serial_nos)
 			self.assertFalse(serial_no in returned_serial_nos1)
+
+		frappe.flags.use_serial_and_batch_fields = False
 
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
