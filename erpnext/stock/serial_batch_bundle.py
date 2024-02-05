@@ -283,6 +283,7 @@ class SerialBatchBundle:
 				if (sn_table.purchase_document_no != self.sle.voucher_no and self.sle.is_cancelled != 1)
 				else "Inactive",
 			)
+			.set(sn_table.company, self.sle.company)
 			.where(sn_table.name.isin(serial_nos))
 		).run()
 
