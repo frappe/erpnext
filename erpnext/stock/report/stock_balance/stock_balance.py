@@ -98,13 +98,7 @@ class StockBalanceReport(object):
 
 		_func = itemgetter(1)
 
-<<<<<<< HEAD
-		self.item_warehouse_map = self.get_item_warehouse_map()
-=======
 		del self.sle_entries
-
-		sre_details = self.get_sre_reserved_qty_details()
->>>>>>> b70f3de16b (perf: memory consumption for the stock balance report (#39626))
 
 		variant_values = {}
 		if self.filters.get("show_variant_attributes"):
