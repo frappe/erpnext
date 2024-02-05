@@ -1,6 +1,7 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+from collections import OrderedDict
 
 import frappe
 from frappe import _, qb
@@ -42,15 +43,17 @@ class TransactionDeletionRecord(Document):
 	def __init__(self, *args, **kwargs):
 		super(TransactionDeletionRecord, self).__init__(*args, **kwargs)
 		self.batch_size = 5000
-		# Tasks are listged by their execution order
-		self.task_to_internal_method_map = {
-			"Delete Bins": "delete_bins",
-			"Delete Leads and Addresses": "delete_lead_addresses",
-			"Reset Company Values": "reset_company_values",
-			"Clear Notifications": "delete_notifications",
-			"Initialize Summary Table": "initialize_doctypes_to_be_deleted_table",
-			"Delete Transactions": "delete_company_transactions",
-		}
+		# Tasks are listed by their execution order
+		self.task_to_internal_method_map = OrderedDict(
+			{
+				"Delete Bins": "delete_bins",
+				"Delete Leads and Addresses": "delete_lead_addresses",
+				"Reset Company Values": "reset_company_values",
+				"Clear Notifications": "delete_notifications",
+				"Initialize Summary Table": "initialize_doctypes_to_be_deleted_table",
+				"Delete Transactions": "delete_company_transactions",
+			}
+		)
 
 	def validate(self):
 		frappe.only_for("System Manager")
@@ -71,10 +74,19 @@ class TransactionDeletionRecord(Document):
 		method = self.task_to_internal_method_map[task]
 		return f"{self.name}_{method}"
 
+	def generate_job_name_for_next_tasks(self, task=None):
+		job_names = []
+		current_task_idx = list(self.task_to_internal_method_map).index(task)
+		for idx, task in enumerate(self.task_to_internal_method_map.keys(), 0):
+			# generate job_name for next tasks
+			if idx > current_task_idx:
+				job_names.append(self.generate_job_name_for_task(task))
+		return job_names
+
 	def generate_job_name_for_all_tasks(self):
 		job_names = []
-		for method in self.task_to_internal_method_map.values():
-			job_names.append(self.generate_job_name_for_task)
+		for task in self.task_to_internal_method_map.keys():
+			job_names.append(self.generate_job_name_for_task(task))
 		return job_names
 
 	def before_submit(self):
@@ -116,6 +128,10 @@ class TransactionDeletionRecord(Document):
 
 	def chain_call(self, task=None):
 		if task and task in self.task_to_internal_method_map:
+			# make sure that none of next tasks are already running
+			job_names = self.generate_job_name_for_next_tasks(task=task)
+			self.validate_running_task_for_doc(job_names=job_names)
+
 			method = self.task_to_internal_method_map[task]
 			job_id = self.generate_job_name_for_task(task)
 
@@ -162,15 +178,15 @@ class TransactionDeletionRecord(Document):
 					get_link_to_form("Transaction Deletion Record", self.name)
 				)
 			)
-		# make sure that job none of tasks are already running
-		job_names = self.generate_job_name_for_all_tasks()
-		self.validate_running_task_for_doc(job_names=job_names)
 
 	@frappe.whitelist()
-	def delete_bins(self):
-		# This methid is the entry point for the chain of events that follow
+	def process_tasks(self):
+		# This method is the entry point for the chain of events that follow
 		self.db_set("status", "Running")
+		self.chain_call(task="Delete Bins")
 
+	def delete_bins(self):
+		self.validate_doc_status()
 		if not self.delete_bin_data:
 			frappe.db.sql(
 				"""delete from `tabBin` where warehouse in
