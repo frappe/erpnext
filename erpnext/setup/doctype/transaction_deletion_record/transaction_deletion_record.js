@@ -24,7 +24,7 @@ frappe.ui.form.on("Transaction Deletion Record", {
 			frm.add_custom_button(execute_btn, () => {
 				// Entry point for chain of events
 				frm.call({
-					method: 'delete_bins',
+					method: 'process_tasks',
 					doc: frm.doc
 				});
 			});
