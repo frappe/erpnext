@@ -57,6 +57,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
+   "no_copy": 1,
    "options": "Queued\nRunning\nFailed\nCompleted\nCancelled",
    "read_only": 1
   },
@@ -118,13 +119,14 @@
    "fieldname": "initialize_doctypes_table",
    "fieldtype": "Check",
    "label": "Initialize Summary Table",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-04 15:28:29.532826",
+ "modified": "2024-02-05 10:25:28.462255",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
