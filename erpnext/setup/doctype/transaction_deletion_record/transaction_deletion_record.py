@@ -58,6 +58,15 @@ class TransactionDeletionRecord(Document):
 				)
 
 	def before_submit(self):
+		if queued_docs := frappe.db.get_all(
+			"Transaction Deletion Record", filters={"company": self.company, "status": "Queued"}
+		):
+			frappe.throw(
+				_("There is another document: {0} Queued. Cannot queue multi docs for one company.").format(
+					self.queued_docs
+				)
+			)
+
 		if not self.doctypes_to_be_ignored:
 			self.populate_doctypes_to_be_ignored_table()
 
@@ -66,6 +75,7 @@ class TransactionDeletionRecord(Document):
 		self.delete_bin_data = 0
 		self.delete_leads_and_addresses = 0
 		self.delete_transactions = 0
+		self.initialize_doctypes_table = 0
 		self.reset_company_default_values = 0
 
 	def before_save(self):
@@ -87,15 +97,6 @@ class TransactionDeletionRecord(Document):
 			queue="long",
 			enqueue_after_commit=True,
 		)
-
-	@frappe.whitelist()
-	def start_deletion_process(self):
-		self.delete_bins()
-		self.delete_lead_addresses()
-		self.reset_company_values()
-		self.delete_notifications()
-		self.initialize_doctypes_to_be_deleted_table()
-		self.delete_company_transactions()
 
 	def delete_notifications(self):
 		self.validate_doc_status()
