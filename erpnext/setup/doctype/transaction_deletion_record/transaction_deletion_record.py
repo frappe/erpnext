@@ -6,7 +6,7 @@ import frappe
 from frappe import _, qb
 from frappe.desk.notifications import clear_notifications
 from frappe.model.document import Document
-from frappe.utils import cint, create_batch, get_link_to_form
+from frappe.utils import cint, comma_and, create_batch, get_link_to_form
 
 
 class TransactionDeletionRecord(Document):
@@ -59,11 +59,16 @@ class TransactionDeletionRecord(Document):
 
 	def before_submit(self):
 		if queued_docs := frappe.db.get_all(
-			"Transaction Deletion Record", filters={"company": self.company, "status": "Queued"}
+			"Transaction Deletion Record",
+			filters={"company": self.company, "status": ("in", ["Running", "Queued"]), "docstatus": 1},
+			pluck="name",
 		):
 			frappe.throw(
-				_("There is another document: {0} Queued. Cannot queue multi docs for one company.").format(
-					self.queued_docs
+				_(
+					"Cannot queue multi docs for one company. {0} is already queued/running for company: {1}"
+				).format(
+					comma_and([get_link_to_form("Transaction Deletion Record", x) for x in queued_docs]),
+					frappe.bold(self.company),
 				)
 			)
 
@@ -80,6 +85,7 @@ class TransactionDeletionRecord(Document):
 
 	def before_save(self):
 		self.status = ""
+		self.doctypes.clear()
 		self.reset_task_flags()
 
 	def on_submit(self):

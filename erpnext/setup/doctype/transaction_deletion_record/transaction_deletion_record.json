@@ -34,6 +34,7 @@
    "fieldname": "doctypes",
    "fieldtype": "Table",
    "label": "Summary",
+   "no_copy": 1,
    "options": "Transaction Deletion Record Details",
    "read_only": 1
   },
@@ -126,7 +127,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-05 10:25:28.462255",
+ "modified": "2024-02-05 10:36:34.229864",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
