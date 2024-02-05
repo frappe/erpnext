@@ -1,0 +1,19 @@
+{% $.each(workstations, (idx, row) => { %}
+	<div class="workstation-wrapper">
+		<div class="workstation-image">
+			<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+				<a class="workstation-image-link" href="{{row.workstation_link}}">
+					{% if(row.status_image) { %}
+						<img class="workstation-image-cls" src="{{row.status_image}}">
+					{% } else { %}
+						<div class="workstation-image-cls workstation-abbr">{{frappe.get_abbr(row.name, 2)}}</div>
+					{% } %}
+				</a>
+			</div>
+		</div>
+		<div class="workstation-card text-center">
+			<p style="background-color:{{row.background_color}};color:#fff">{{row.status}}</p>
+			<div>{{row.workstation_name}}</div>
+		</div>
+	</div>
+{% }); %}
