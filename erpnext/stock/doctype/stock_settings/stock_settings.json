@@ -423,7 +423,7 @@
    "label": "Auto Reserve Stock for Sales Order on Purchase"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
    "label": "Use Serial / Batch Fields"
