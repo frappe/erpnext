@@ -729,17 +729,24 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions, bin_conditions = [], []
 	filter_dict = get_doctype_wise_filters(filters)
 
-	query = """select `tabWarehouse`.name,
+	warehouse_field = "name"
+	meta = frappe.get_meta("Warehouse")
+	if meta.get("show_title_field_in_link") and meta.get("title_field"):
+		searchfield = meta.get("title_field")
+		warehouse_field = meta.get("title_field")
+
+	query = """select `tabWarehouse`.`{warehouse_field}`,
 		CONCAT_WS(' : ', 'Actual Qty', ifnull(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
 		from `tabWarehouse` left join `tabBin`
 		on `tabBin`.warehouse = `tabWarehouse`.name {bin_conditions}
 		where
 			`tabWarehouse`.`{key}` like {txt}
 			{fcond} {mcond}
-		order by ifnull(`tabBin`.actual_qty, 0) desc
+		order by ifnull(`tabBin`.actual_qty, 0) desc, `tabWarehouse`.`{warehouse_field}` asc
 		limit
 			{page_len} offset {start}
 		""".format(
+		warehouse_field=warehouse_field,
 		bin_conditions=get_filters_cond(
 			doctype, filter_dict.get("Bin"), bin_conditions, ignore_permissions=True
 		),
