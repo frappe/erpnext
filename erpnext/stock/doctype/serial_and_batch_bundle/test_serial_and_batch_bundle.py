@@ -136,6 +136,7 @@ class TestSerialandBatchBundle(FrappeTestCase):
 
 	def test_old_batch_valuation(self):
 		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
 		batch_item_code = "Old Batch Item Valuation 1"
 		make_item(
 			batch_item_code,
@@ -240,6 +241,7 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		bundle_doc.submit()
 
 		frappe.flags.ignore_serial_batch_bundle_validation = False
+		frappe.flags.use_serial_and_batch_fields = False
 
 	def test_old_serial_no_valuation(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -259,6 +261,7 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		)
 
 		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
 
 		serial_no_id = "Old Serial No 1"
 		if not frappe.db.exists("Serial No", serial_no_id):
@@ -319,6 +322,9 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		bundle_doc.reload()
 		for row in bundle_doc.entries:
 			self.assertEqual(flt(row.stock_value_difference, 2), -100.00)
+
+		frappe.flags.ignore_serial_batch_bundle_validation = False
+		frappe.flags.use_serial_and_batch_fields = False
 
 	def test_batch_not_belong_to_serial_no(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt

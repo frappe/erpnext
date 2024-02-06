@@ -99,6 +99,8 @@ class StockReconciliation(StockController):
 					)
 
 	def on_submit(self):
+		self.make_bundle_for_current_qty()
+		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()
@@ -116,9 +118,52 @@ class StockReconciliation(StockController):
 		self.repost_future_sle_and_gle()
 		self.delete_auto_created_batches()
 
+	def make_bundle_for_current_qty(self):
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+		for row in self.items:
+			if not row.use_serial_batch_fields:
+				continue
+
+			if row.current_serial_and_batch_bundle:
+				continue
+
+			if row.current_qty and (row.current_serial_no or row.batch_no):
+				sn_doc = SerialBatchCreation(
+					{
+						"item_code": row.item_code,
+						"warehouse": row.warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"voucher_detail_no": row.name,
+						"qty": row.qty,
+						"type_of_transaction": "Outward",
+						"company": self.company,
+						"is_rejected": 0,
+						"serial_nos": get_serial_nos(row.current_serial_no) if row.current_serial_no else None,
+						"batches": frappe._dict({row.batch_no: row.qty}) if row.batch_no else None,
+						"batch_no": row.batch_no,
+						"do_not_submit": True,
+					}
+				).make_serial_and_batch_bundle()
+
+				row.current_serial_and_batch_bundle = sn_doc.name
+				row.db_set(
+					{
+						"current_serial_and_batch_bundle": sn_doc.name,
+						"current_serial_no": "",
+						"batch_no": "",
+					}
+				)
+
 	def set_current_serial_and_batch_bundle(self, voucher_detail_no=None, save=False) -> None:
 		"""Set Serial and Batch Bundle for each item"""
 		for item in self.items:
+			if not save and item.use_serial_batch_fields:
+				continue
+
 			if voucher_detail_no and voucher_detail_no != item.name:
 				continue
 
@@ -229,6 +274,9 @@ class StockReconciliation(StockController):
 
 	def set_new_serial_and_batch_bundle(self):
 		for item in self.items:
+			if item.use_serial_batch_fields:
+				continue
+
 			if not item.qty:
 				continue
 
@@ -291,8 +339,10 @@ class StockReconciliation(StockController):
 				inventory_dimensions_dict=inventory_dimensions_dict,
 			)
 
-			if (item.qty is None or item.qty == item_dict.get("qty")) and (
-				item.valuation_rate is None or item.valuation_rate == item_dict.get("rate")
+			if (
+				(item.qty is None or item.qty == item_dict.get("qty"))
+				and (item.valuation_rate is None or item.valuation_rate == item_dict.get("rate"))
+				and (not item.serial_no or (item.serial_no == item_dict.get("serial_nos")))
 			):
 				return False
 			else:
@@ -302,6 +352,11 @@ class StockReconciliation(StockController):
 
 				if item.valuation_rate is None:
 					item.valuation_rate = item_dict.get("rate")
+
+				if item_dict.get("serial_nos"):
+					item.current_serial_no = item_dict.get("serial_nos")
+					if self.purpose == "Stock Reconciliation" and not item.serial_no and item.qty:
+						item.serial_no = item.current_serial_no
 
 				item.current_qty = item_dict.get("qty")
 				item.current_valuation_rate = item_dict.get("rate")
@@ -1135,9 +1190,16 @@ def get_stock_balance_for(
 	has_serial_no = bool(item_dict.get("has_serial_no"))
 	has_batch_no = bool(item_dict.get("has_batch_no"))
 
+	use_serial_batch_fields = frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")
+
 	if not batch_no and has_batch_no:
 		# Not enough information to fetch data
-		return {"qty": 0, "rate": 0, "serial_nos": None}
+		return {
+			"qty": 0,
+			"rate": 0,
+			"serial_nos": None,
+			"use_serial_batch_fields": use_serial_batch_fields,
+		}
 
 	# TODO: fetch only selected batch's values
 	data = get_stock_balance(
@@ -1160,7 +1222,12 @@ def get_stock_balance_for(
 			get_batch_qty(batch_no, warehouse, posting_date=posting_date, posting_time=posting_time) or 0
 		)
 
-	return {"qty": qty, "rate": rate, "serial_nos": serial_nos}
+	return {
+		"qty": qty,
+		"rate": rate,
+		"serial_nos": serial_nos,
+		"use_serial_batch_fields": use_serial_batch_fields,
+	}
 
 
 @frappe.whitelist()

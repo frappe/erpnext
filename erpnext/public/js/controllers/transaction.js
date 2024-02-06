@@ -7,6 +7,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		super.setup();
 		let me = this;
 
+		this.set_fields_onload_for_line_item();
 		this.frm.ignore_doctypes_on_cancel_all = ['Serial and Batch Bundle'];
 
 		frappe.flags.hide_serial_batch_dialog = true;
@@ -105,6 +106,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		frappe.ui.form.on(this.frm.doctype + " Item", {
 			items_add: function(frm, cdt, cdn) {
+				debugger
 				var item = frappe.get_doc(cdt, cdn);
 				if (!item.warehouse && frm.doc.set_warehouse) {
 					item.warehouse = frm.doc.set_warehouse;
@@ -116,6 +118,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 				if (!item.from_warehouse && frm.doc.set_from_warehouse) {
 					item.from_warehouse = frm.doc.set_from_warehouse;
+				}
+
+				if (item.docstatus === 0
+					&& frappe.meta.has_field(item.doctype, "use_serial_batch_fields")
+					&& cint(frappe.user_defaults?.use_serial_batch_fields) === 1
+				) {
+					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
 				}
 
 				erpnext.accounts.dimensions.copy_dimension_from_first_row(frm, cdt, cdn, 'items');
@@ -222,7 +231,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				};
 			});
 		}
+	}
 
+	set_fields_onload_for_line_item() {
+		if (this.frm.is_new && this.frm.doc?.items) {
+			this.frm.doc.items.forEach(item => {
+				if (item.docstatus === 0
+					&& frappe.meta.has_field(item.doctype, "use_serial_batch_fields")
+					&& cint(frappe.user_defaults?.use_serial_batch_fields) === 1
+				) {
+					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
+				}
+			})
+		}
 	}
 
 	toggle_enable_for_stock_uom(field) {
@@ -462,6 +483,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.doc.doctype === 'Delivery Note') {
 			show_batch_dialog = 1;
 		}
+
+		if (show_batch_dialog && item.use_serial_batch_fields === 1) {
+			show_batch_dialog = 0;
+		}
+
 		item.barcode = null;
 
 
@@ -706,10 +732,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				item.serial_no = item.serial_no.replace(/,/g, '\n');
 				item.conversion_factor = item.conversion_factor || 1;
 				refresh_field("serial_no", item.name, item.parentfield);
-				if (!doc.is_return && cint(frappe.user_defaults.set_qty_in_transactions_based_on_serial_no_input)) {
+				if (!doc.is_return) {
 					setTimeout(() => {
 						me.update_qty(cdt, cdn);
-					}, 10000);
+					}, 3000);
 				}
 			}
 		}
@@ -1240,20 +1266,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				frappe.throw(__("Service Stop Date cannot be after Service End Date"));
 			}
 		}
-	}
-
-	sync_bundle_data() {
-		let doctypes = ["Sales Invoice", "Purchase Invoice", "Delivery Note", "Purchase Receipt"];
-
-		if (this.frm.is_new() && doctypes.includes(this.frm.doc.doctype)) {
-			const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
-			barcode_scanner.sync_bundle_data();
-			barcode_scanner.remove_item_from_localstorage();
-		}
-	}
-
-	before_save(doc) {
-		this.sync_bundle_data();
 	}
 
 	service_start_date(frm, cdt, cdn) {

@@ -51,7 +51,7 @@
    "description": "Items under this warehouse will be suggested",
    "fieldname": "parent_warehouse",
    "fieldtype": "Link",
-   "label": "Parent Warehouse",
+   "label": "Warehouse",
    "options": "Warehouse"
   },
   {
@@ -188,7 +188,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-24 10:33:43.244476",
+ "modified": "2024-02-01 16:17:44.877426",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

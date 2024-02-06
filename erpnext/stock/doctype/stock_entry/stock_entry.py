@@ -274,6 +274,7 @@ class StockEntry(StockController):
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
+		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
 		self.update_work_order()
 		self.validate_subcontract_order()
