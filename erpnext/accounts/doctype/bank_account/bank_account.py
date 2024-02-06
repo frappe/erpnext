@@ -9,6 +9,7 @@ from frappe.contacts.address_and_contact import (
 	load_address_and_contact,
 )
 from frappe.model.document import Document
+from frappe.utils import comma_and, get_link_to_form
 
 
 class BankAccount(Document):
@@ -25,6 +26,17 @@ class BankAccount(Document):
 	def validate(self):
 		self.validate_company()
 		self.validate_iban()
+		self.validate_account()
+
+	def validate_account(self):
+		if self.account:
+			if accounts := frappe.db.get_all("Bank Account", filters={"account": self.account}, as_list=1):
+				frappe.throw(
+					_("'{0}' account is already used by {1}. Use another account.").format(
+						frappe.bold(self.account),
+						frappe.bold(comma_and([get_link_to_form(self.doctype, x[0]) for x in accounts])),
+					)
+				)
 
 	def validate_company(self):
 		if self.is_company_account and not self.company:
