@@ -21,6 +21,9 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
 )
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_type_of_transaction,
+)
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 
@@ -150,6 +153,13 @@ class StockController(AccountsController):
 			if row.use_serial_batch_fields and (
 				not row.serial_and_batch_bundle and not row.get("rejected_serial_and_batch_bundle")
 			):
+				if self.doctype == "Stock Reconciliation":
+					qty = row.qty
+					type_of_transaction = "Inward"
+				else:
+					qty = row.stock_qty
+					type_of_transaction = get_type_of_transaction(self, row)
+
 				sn_doc = SerialBatchCreation(
 					{
 						"item_code": row.item_code,
@@ -159,14 +169,15 @@ class StockController(AccountsController):
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
 						"voucher_detail_no": row.name,
-						"qty": row.stock_qty,
-						"type_of_transaction": "Inward" if row.stock_qty > 0 else "Outward",
+						"qty": qty,
+						"type_of_transaction": type_of_transaction,
 						"company": self.company,
 						"is_rejected": 1 if row.get("rejected_warehouse") else 0,
 						"serial_nos": get_serial_nos(row.serial_no) if row.serial_no else None,
-						"batches": frappe._dict({row.batch_no: row.stock_qty}) if row.batch_no else None,
+						"batches": frappe._dict({row.batch_no: qty}) if row.batch_no else None,
 						"batch_no": row.batch_no,
 						"use_serial_batch_fields": row.use_serial_batch_fields,
+						"do_not_submit": True,
 					}
 				).make_serial_and_batch_bundle()
 

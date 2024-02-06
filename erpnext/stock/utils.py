@@ -11,6 +11,9 @@ from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
 
 import erpnext
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_available_serial_nos,
+)
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
@@ -125,7 +128,21 @@ def get_stock_balance(
 
 	if with_valuation_rate:
 		if with_serial_no:
-			serial_nos = get_serial_nos_data_after_transactions(args)
+			serial_no_details = get_available_serial_nos(
+				frappe._dict(
+					{
+						"item_code": item_code,
+						"warehouse": warehouse,
+						"posting_date": posting_date,
+						"posting_time": posting_time,
+						"ignore_warehouse": 1,
+					}
+				)
+			)
+
+			serial_nos = ""
+			if serial_no_details:
+				serial_nos = "\n".join(d.serial_no for d in serial_no_details)
 
 			return (
 				(last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
@@ -138,38 +155,6 @@ def get_stock_balance(
 			)
 	else:
 		return last_entry.qty_after_transaction if last_entry else 0.0
-
-
-def get_serial_nos_data_after_transactions(args):
-
-	serial_nos = set()
-	args = frappe._dict(args)
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-
-	stock_ledger_entries = (
-		frappe.qb.from_(sle)
-		.select("serial_no", "actual_qty")
-		.where(
-			(sle.item_code == args.item_code)
-			& (sle.warehouse == args.warehouse)
-			& (
-				CombineDatetime(sle.posting_date, sle.posting_time)
-				< CombineDatetime(args.posting_date, args.posting_time)
-			)
-			& (sle.is_cancelled == 0)
-		)
-		.orderby(sle.posting_date, sle.posting_time, sle.creation)
-		.run(as_dict=1)
-	)
-
-	for stock_ledger_entry in stock_ledger_entries:
-		changed_serial_no = get_serial_nos_data(stock_ledger_entry.serial_no)
-		if stock_ledger_entry.actual_qty > 0:
-			serial_nos.update(changed_serial_no)
-		else:
-			serial_nos.difference_update(changed_serial_no)
-
-	return "\n".join(serial_nos)
 
 
 def get_serial_nos_data(serial_nos):

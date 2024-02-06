@@ -1566,7 +1566,7 @@ def create_delivery_note(**args):
 	dn.return_against = args.return_against
 
 	bundle_id = None
-	if args.get("batch_no") or args.get("serial_no"):
+	if not args.use_serial_batch_fields and (args.get("batch_no") or args.get("serial_no")):
 		type_of_transaction = args.type_of_transaction or "Outward"
 
 		if dn.is_return:
@@ -1608,6 +1608,9 @@ def create_delivery_note(**args):
 			"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 			"cost_center": args.cost_center or "_Test Cost Center - _TC",
 			"target_warehouse": args.target_warehouse,
+			"use_serial_batch_fields": args.use_serial_batch_fields,
+			"serial_no": args.serial_no if args.use_serial_batch_fields else None,
+			"batch_no": args.batch_no if args.use_serial_batch_fields else None,
 		},
 	)
 
