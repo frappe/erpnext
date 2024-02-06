@@ -295,7 +295,7 @@ def get_tds_docs(filters):
 	tds_accounts = {}
 	for tds_acc in _tds_accounts:
 		# if it turns out not to be the only tax withholding category, then don't include in the map
-		if tds_accounts.get(tds_acc["account"]):
+		if tds_acc["account"] in tds_accounts:
 			tds_accounts[tds_acc["account"]] = None
 		else:
 			tds_accounts[tds_acc["account"]] = tds_acc["parent"]
