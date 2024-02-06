@@ -87,7 +87,8 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	get_party_item_code(args, item, out)
 
-	set_valuation_rate(out, args)
+	if args.get("doctype") in ["Sales Order", "Quotation"]:
+		set_valuation_rate(out, args)
 
 	update_party_blanket_order(args, out)
 
@@ -303,7 +304,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if not item:
 		item = frappe.get_doc("Item", args.get("item_code"))
 
-	if item.variant_of and not item.taxes:
+	if (
+		item.variant_of and not item.taxes and frappe.db.exists("Item Tax", {"parent": item.variant_of})
+	):
 		item.update_template_tables()
 
 	item_defaults = get_item_defaults(item.name, args.company)
