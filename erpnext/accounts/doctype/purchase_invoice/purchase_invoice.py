@@ -13,6 +13,7 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
+	validate_docs_for_voucher_types,
 )
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	check_if_return_invoice_linked_with_payment_entry,
@@ -130,6 +131,18 @@ class PurchaseInvoice(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+		self.set_percentage_received()
+
+	def set_percentage_received(self):
+		total_billed_qty = 0.0
+		total_received_qty = 0.0
+		for row in self.items:
+			if row.purchase_receipt and row.pr_detail and row.received_qty:
+				total_billed_qty += row.qty
+				total_received_qty += row.received_qty
+
+		if total_billed_qty and total_received_qty:
+			self.per_received = total_received_qty / total_billed_qty * 100
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
@@ -494,6 +507,7 @@ class PurchaseInvoice(BuyingController):
 	def validate_for_repost(self):
 		self.validate_write_off_account()
 		self.validate_expense_account()
+		validate_docs_for_voucher_types(["Purchase Invoice"])
 		validate_docs_for_deferred_accounting([], [self.name])
 
 	def on_submit(self):
@@ -532,7 +546,11 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		self.update_project()
+		if (
+			frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction"
+		):
+			self.update_project()
+
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 		self.update_advance_tax_references()
 
@@ -653,9 +671,7 @@ class PurchaseInvoice(BuyingController):
 						"credit_in_account_currency": base_grand_total
 						if self.party_account_currency == self.company_currency
 						else grand_total,
-						"against_voucher": self.return_against
-						if cint(self.is_return) and self.return_against
-						else self.name,
+						"against_voucher": self.name,
 						"against_voucher_type": self.doctype,
 						"project": self.project,
 						"cost_center": self.cost_center,
@@ -919,17 +935,6 @@ class PurchaseInvoice(BuyingController):
 										item=item,
 									)
 								)
-
-						# update gross amount of asset bought through this document
-						assets = frappe.db.get_all(
-							"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
-						)
-						for asset in assets:
-							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-							frappe.db.set_value(
-								"Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate)
-							)
-
 			if (
 				self.auto_accounting_for_stock
 				and self.is_opening == "No"
@@ -969,12 +974,25 @@ class PurchaseInvoice(BuyingController):
 							item.item_tax_amount, item.precision("item_tax_amount")
 						)
 
+			if item.is_fixed_asset and item.landed_cost_voucher_amount:
+				self.update_gross_purchase_amount_for_linked_assets(item)
+
+	def update_gross_purchase_amount_for_linked_assets(self, item):
 		assets = frappe.db.get_all(
-			"Asset", filters={"purchase_invoice": self.name, "item_code": item.item_code}
+			"Asset",
+			filters={"purchase_invoice": self.name, "item_code": item.item_code},
+			fields=["name", "asset_quantity"],
 		)
 		for asset in assets:
-			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
+			purchase_amount = flt(item.valuation_rate) * asset.asset_quantity
+			frappe.db.set_value(
+				"Asset",
+				asset.name,
+				{
+					"gross_purchase_amount": purchase_amount,
+					"purchase_receipt_amount": purchase_amount,
+				},
+			)
 
 	def make_stock_adjustment_entry(
 		self, gl_entries, item, voucher_wise_stock_value, account_currency
@@ -1269,7 +1287,10 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		self.update_project()
+		if (
+			frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction"
+		):
+			self.update_project()
 		self.db_set("status", "Cancelled")
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
@@ -1281,19 +1302,29 @@ class PurchaseInvoice(BuyingController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 			"Payment Ledger Entry",
 			"Tax Withheld Vouchers",
 		)
 		self.update_advance_tax_references(cancel=1)
 
 	def update_project(self):
-		project_list = []
+		projects = frappe._dict()
 		for d in self.items:
-			if d.project and d.project not in project_list:
-				project = frappe.get_doc("Project", d.project)
-				project.update_purchase_costing()
-				project.db_update()
-				project_list.append(d.project)
+			if d.project:
+				if self.docstatus == 1:
+					projects[d.project] = projects.get(d.project, 0) + d.base_net_amount
+				elif self.docstatus == 2:
+					projects[d.project] = projects.get(d.project, 0) - d.base_net_amount
+
+		pj = frappe.qb.DocType("Project")
+		for proj, value in projects.items():
+			res = (
+				frappe.qb.from_(pj).select(pj.total_purchase_cost).where(pj.name == proj).for_update().run()
+			)
+			current_purchase_cost = res and res[0][0] or 0
+			frappe.db.set_value("Project", proj, "total_purchase_cost", current_purchase_cost + value)
 
 	def validate_supplier_invoice(self):
 		if self.bill_date:
@@ -1507,12 +1538,8 @@ class PurchaseInvoice(BuyingController):
 				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
 					self.status = "Unpaid"
 				# Check if outstanding amount is 0 due to debit note issued against invoice
-				elif (
-					outstanding_amount <= 0
-					and self.is_return == 0
-					and frappe.db.get_value(
-						"Purchase Invoice", {"is_return": 1, "return_against": self.name, "docstatus": 1}
-					)
+				elif self.is_return == 0 and frappe.db.get_value(
+					"Purchase Invoice", {"is_return": 1, "return_against": self.name, "docstatus": 1}
 				):
 					self.status = "Debit Note Issued"
 				elif self.is_return == 1:
@@ -1641,10 +1668,6 @@ def make_inter_company_sales_invoice(source_name, target_doc=None):
 	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)
 
 
-def on_doctype_update():
-	frappe.db.add_index("Purchase Invoice", ["supplier", "is_return", "return_against"])
-
-
 @frappe.whitelist()
 def make_purchase_receipt(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
@@ -1685,7 +1708,5 @@ def make_purchase_receipt(source_name, target_doc=None):
 		},
 		target_doc,
 	)
-
-	doc.set_onload("ignore_price_list", True)
 
 	return doc

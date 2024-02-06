@@ -202,7 +202,7 @@ def get_valuation_rate():
 	bin_data = (
 		frappe.qb.from_(bin)
 		.select(
-			bin.item_code, Sum(bin.actual_qty * bin.valuation_rate) / Sum(bin.actual_qty).as_("val_rate")
+			bin.item_code, (Sum(bin.actual_qty * bin.valuation_rate) / Sum(bin.actual_qty)).as_("val_rate")
 		)
 		.where(bin.actual_qty > 0)
 		.groupby(bin.item_code)

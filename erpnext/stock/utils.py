@@ -96,6 +96,7 @@ def get_stock_balance(
 	with_serial_no=False,
 	inventory_dimensions_dict=None,
 	batch_no=None,
+	voucher_no=None,
 ):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
@@ -114,6 +115,9 @@ def get_stock_balance(
 		"posting_date": posting_date,
 		"posting_time": posting_time,
 	}
+
+	if voucher_no:
+		args["voucher_no"] = voucher_no
 
 	extra_cond = ""
 	if inventory_dimensions_dict:

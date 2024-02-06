@@ -412,7 +412,7 @@ class DeliveryNote(SellingController):
 		items_list = [item.item_code for item in self.items]
 		return frappe.db.get_all(
 			"Product Bundle",
-			filters={"new_item_code": ["in", items_list]},
+			filters={"new_item_code": ["in", items_list], "disabled": 0},
 			pluck="name",
 		)
 
@@ -665,8 +665,6 @@ def make_sales_invoice(source_name, target_doc=None):
 	if automatically_fetch_payment_terms:
 		doc.set_payment_schedule()
 
-	doc.set_onload("ignore_price_list", True)
-
 	return doc
 
 
@@ -761,7 +759,7 @@ def make_packing_slip(source_name, target_doc=None):
 				},
 				"postprocess": update_item,
 				"condition": lambda item: (
-					not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code})
+					not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code, "disabled": 0})
 					and flt(item.packed_qty) < flt(item.qty)
 				),
 			},
@@ -999,7 +997,3 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	)
 
 	return doclist
-
-
-def on_doctype_update():
-	frappe.db.add_index("Delivery Note", ["customer", "is_return", "return_against"])

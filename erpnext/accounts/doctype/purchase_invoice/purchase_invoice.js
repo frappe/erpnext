@@ -31,7 +31,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		super.onload();
 
 		// Ignore linked advances
-		this.frm.ignore_doctypes_on_cancel_all = ['Journal Entry', 'Payment Entry', 'Purchase Invoice', "Repost Payment Ledger", "Repost Accounting Ledger"];
+		this.frm.ignore_doctypes_on_cancel_all = ['Journal Entry', 'Payment Entry', 'Purchase Invoice', "Repost Payment Ledger", "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries", "Bank Transaction"];
 
 		if(!this.frm.doc.__islocal) {
 			// show credit_to in print format
@@ -99,8 +99,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			}
 		}
 
-		if(doc.docstatus == 1 && doc.outstanding_amount != 0
-			&& !(doc.is_return && doc.return_against) && !doc.on_hold) {
+		if(doc.docstatus == 1 && doc.outstanding_amount != 0 && !doc.on_hold) {
 			this.frm.add_custom_button(
 				__('Payment'),
 				() => this.make_payment_entry(),
@@ -164,6 +163,18 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 					}
 				})
 			}, __("Get Items From"));
+
+			if (!this.frm.doc.is_return) {
+				frappe.db.get_single_value("Buying Settings", "maintain_same_rate").then((value) => {
+					if (value) {
+						this.frm.doc.items.forEach((item) => {
+							this.frm.fields_dict.items.grid.update_docfield_property(
+								"rate", "read_only", (item.purchase_receipt && item.pr_detail)
+							);
+						});
+					}
+				});
+			}
 		}
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted);
 
@@ -181,7 +192,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 
 		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
-		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(me.frm);
+		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
 	}
 
 	unblock_invoice() {

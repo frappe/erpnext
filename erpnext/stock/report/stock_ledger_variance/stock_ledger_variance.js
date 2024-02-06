@@ -14,9 +14,17 @@ const DIFFERENCE_FIELD_NAMES = [
 frappe.query_reports["Stock Ledger Variance"] = {
 	"filters": [
 		{
+			"fieldname": "company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"reqd": 1,
+			"default": frappe.defaults.get_user_default("Company")
+		},
+		{
 			"fieldname": "item_code",
 			"fieldtype": "Link",
-			"label": "Item",
+			"label": __("Item"),
 			"options": "Item",
 			get_query: function() {
 				return {
@@ -27,7 +35,7 @@ frappe.query_reports["Stock Ledger Variance"] = {
 		{
 			"fieldname": "warehouse",
 			"fieldtype": "Link",
-			"label": "Warehouse",
+			"label": __("Warehouse"),
 			"options": "Warehouse",
 			get_query: function() {
 				return {
@@ -38,7 +46,7 @@ frappe.query_reports["Stock Ledger Variance"] = {
 		{
 			"fieldname": "difference_in",
 			"fieldtype": "Select",
-			"label": "Difference In",
+			"label": __("Difference In"),
 			"options": [
 				"",
 				"Qty",
@@ -49,7 +57,7 @@ frappe.query_reports["Stock Ledger Variance"] = {
 		{
 			"fieldname": "include_disabled",
 			"fieldtype": "Check",
-			"label": "Include Disabled",
+			"label": __("Include Disabled"),
 		}
 	],
 

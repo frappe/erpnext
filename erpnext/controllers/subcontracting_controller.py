@@ -343,7 +343,7 @@ class SubcontractingController(StockController):
 			i += 1
 
 	def __get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
-		doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
+		doctype = "BOM Explosion Item" if exploded_item else "BOM Item"
 		fields = [f"`tab{doctype}`.`stock_qty` / `tabBOM`.`quantity` as qty_consumed_per_unit"]
 
 		alias_dict = {
@@ -433,8 +433,11 @@ class SubcontractingController(StockController):
 					self.__set_batch_no_as_per_qty(item_row, new_rm_obj, batch_no, batch_qty)
 					self.available_materials[key]["batch_no"][batch_no] = 0
 
-			if abs(qty) > 0 and not new_rm_obj:
+			if new_rm_obj:
+				self.remove(rm_obj)
+			elif abs(qty) > 0:
 				self.__set_consumed_qty(rm_obj, qty)
+
 		else:
 			self.__set_consumed_qty(rm_obj, qty, bom_item.required_qty or qty)
 			self.__set_serial_nos(item_row, rm_obj)
@@ -443,6 +446,16 @@ class SubcontractingController(StockController):
 		bom_item.conversion_factor = item_row.conversion_factor
 		rm_obj = self.append(self.raw_material_table, bom_item)
 		rm_obj.reference_name = item_row.name
+
+		if self.doctype == self.subcontract_data.order_doctype:
+			rm_obj.required_qty = qty
+			rm_obj.amount = rm_obj.required_qty * rm_obj.rate
+		else:
+			rm_obj.consumed_qty = 0
+			setattr(
+				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
+			)
+			self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
 
 		if self.doctype == "Subcontracting Receipt":
 			args = frappe._dict(
@@ -461,16 +474,6 @@ class SubcontractingController(StockController):
 				}
 			)
 			rm_obj.rate = get_incoming_rate(args)
-
-		if self.doctype == self.subcontract_data.order_doctype:
-			rm_obj.required_qty = qty
-			rm_obj.amount = rm_obj.required_qty * rm_obj.rate
-		else:
-			rm_obj.consumed_qty = 0
-			setattr(
-				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
-			)
-			self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
 
 	def __get_qty_based_on_material_transfer(self, item_row, transfer_item):
 		key = (item_row.item_code, item_row.get(self.subcontract_data.order_field))
@@ -525,6 +528,10 @@ class SubcontractingController(StockController):
 						(row.item_code, row.get(self.subcontract_data.order_field))
 					] -= row.qty
 
+	def __reset_idx(self):
+		for idx, item in enumerate(self.get(self.raw_material_table)):
+			item.idx = idx + 1
+
 	def __prepare_supplied_items(self):
 		self.initialized_fields()
 		self.__get_subcontract_orders()
@@ -532,6 +539,7 @@ class SubcontractingController(StockController):
 		self.get_available_materials()
 		self.__remove_changed_rows()
 		self.__set_supplied_items()
+		self.__reset_idx()
 
 	def __validate_batch_no(self, row, key):
 		if row.get("batch_no") and row.get("batch_no") not in self.__transferred_items.get(key).get(
@@ -788,6 +796,23 @@ class SubcontractingController(StockController):
 				self._sub_contracted_items = [item.name for item in items]
 
 		return self._sub_contracted_items
+
+	def update_requested_qty(self):
+		material_request_map = {}
+		for d in self.get("items"):
+			if d.material_request_item:
+				material_request_map.setdefault(d.material_request, []).append(d.material_request_item)
+
+		for mr, mr_item_rows in material_request_map.items():
+			if mr and mr_item_rows:
+				mr_obj = frappe.get_doc("Material Request", mr)
+
+				if mr_obj.status in ["Stopped", "Cancelled"]:
+					frappe.throw(
+						_("Material Request {0} is cancelled or stopped").format(mr), frappe.InvalidStatusError
+					)
+
+				mr_obj.update_requested_qty(mr_item_rows)
 
 
 def get_item_details(items):

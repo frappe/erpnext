@@ -44,7 +44,7 @@ class ClosingStockBalance(Document):
 				& (
 					(table.from_date.between(self.from_date, self.to_date))
 					| (table.to_date.between(self.from_date, self.to_date))
-					| (table.from_date >= self.from_date and table.to_date <= self.to_date)
+					| (table.from_date >= self.from_date and table.to_date >= self.to_date)
 				)
 			)
 		)
@@ -128,6 +128,4 @@ def prepare_closing_stock_balance(name):
 		doc.db_set("status", "Completed")
 	except Exception as e:
 		doc.db_set("status", "Failed")
-		traceback = frappe.get_traceback()
-
-		frappe.log_error("Closing Stock Balance Failed", traceback, doc.doctype, doc.name)
+		doc.log_error(title="Closing Stock Balance Failed")

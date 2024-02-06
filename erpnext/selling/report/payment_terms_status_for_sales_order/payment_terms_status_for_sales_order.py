@@ -210,7 +210,6 @@ def get_so_with_invoices(filters):
 		.where(
 			(so.docstatus == 1)
 			& (so.status.isin(["To Deliver and Bill", "To Bill"]))
-			& (so.payment_terms_template != "NULL")
 			& (so.company == conditions.company)
 			& (so.transaction_date[conditions.start_date : conditions.end_date])
 		)

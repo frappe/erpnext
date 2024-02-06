@@ -20,6 +20,7 @@ from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_
 from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
 from erpnext.selling.doctype.sales_order.sales_order import (
 	WarehouseRequired,
+	create_pick_list,
 	make_delivery_note,
 	make_material_request,
 	make_raw_material_request,
@@ -53,6 +54,35 @@ class TestSalesOrder(FrappeTestCase):
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
+
+	def test_sales_order_with_negative_rate(self):
+		"""
+		Test if negative rate is allowed in Sales Order via doc submission and update items
+		"""
+		so = make_sales_order(qty=1, rate=100, do_not_save=True)
+		so.append("items", {"item_code": "_Test Item", "qty": 1, "rate": -10})
+		so.save()
+		so.submit()
+
+		first_item = so.get("items")[0]
+		second_item = so.get("items")[1]
+		trans_item = json.dumps(
+			[
+				{
+					"item_code": first_item.item_code,
+					"rate": first_item.rate,
+					"qty": first_item.qty,
+					"docname": first_item.name,
+				},
+				{
+					"item_code": second_item.item_code,
+					"rate": -20,
+					"qty": second_item.qty,
+					"docname": second_item.name,
+				},
+			]
+		)
+		update_child_qty_rate("Sales Order", trans_item, so.name)
 
 	def test_make_material_request(self):
 		so = make_sales_order(do_not_submit=True)
@@ -2052,6 +2082,83 @@ class TestSalesOrder(FrappeTestCase):
 				self.assertEqual(so.packed_items[0].item_code, packed_item)
 				self.assertEqual(so.items[0].rate, scenario.get("expected_rate"))
 				self.assertEqual(so.packed_items[0].rate, scenario.get("expected_rate"))
+
+	def test_pick_list_without_rejected_materials(self):
+		serial_and_batch_item = make_item(
+			"_Test Serial and Batch Item for Rejected Materials",
+			properties={
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BAT-TSBIFRM-.#####",
+				"serial_no_series": "SN-TSBIFRM-.#####",
+			},
+		).name
+
+		serial_item = make_item(
+			"_Test Serial Item for Rejected Materials",
+			properties={
+				"has_serial_no": 1,
+				"serial_no_series": "SN-TSIFRM-.#####",
+			},
+		).name
+
+		batch_item = make_item(
+			"_Test Batch Item for Rejected Materials",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BAT-TBIFRM-.#####",
+			},
+		).name
+
+		normal_item = make_item("_Test Normal Item for Rejected Materials").name
+
+		warehouse = "_Test Warehouse - _TC"
+		rejected_warehouse = "_Test Dummy Rejected Warehouse - _TC"
+
+		if not frappe.db.exists("Warehouse", rejected_warehouse):
+			frappe.get_doc(
+				{
+					"doctype": "Warehouse",
+					"warehouse_name": rejected_warehouse,
+					"company": "_Test Company",
+					"warehouse_group": "_Test Warehouse Group",
+					"is_rejected_warehouse": 1,
+				}
+			).insert()
+
+		se = make_stock_entry(item_code=normal_item, qty=1, to_warehouse=warehouse, do_not_submit=True)
+		for item in [serial_and_batch_item, serial_item, batch_item]:
+			se.append("items", {"item_code": item, "qty": 1, "t_warehouse": warehouse})
+
+		se.save()
+		se.submit()
+
+		se = make_stock_entry(
+			item_code=normal_item, qty=1, to_warehouse=rejected_warehouse, do_not_submit=True
+		)
+		for item in [serial_and_batch_item, serial_item, batch_item]:
+			se.append("items", {"item_code": item, "qty": 1, "t_warehouse": rejected_warehouse})
+
+		se.save()
+		se.submit()
+
+		so = make_sales_order(item_code=normal_item, qty=2, do_not_submit=True)
+
+		for item in [serial_and_batch_item, serial_item, batch_item]:
+			so.append("items", {"item_code": item, "qty": 2, "warehouse": warehouse})
+
+		so.save()
+		so.submit()
+
+		pick_list = create_pick_list(so.name)
+
+		pick_list.save()
+		for row in pick_list.locations:
+			self.assertEqual(row.qty, 1.0)
+			self.assertFalse(row.warehouse == rejected_warehouse)
+			self.assertTrue(row.warehouse == warehouse)
 
 
 def automatically_fetch_payment_terms(enable=1):

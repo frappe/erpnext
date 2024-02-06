@@ -20,10 +20,10 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 			this.show_stock_ledger();
 		}
 
-		if (this.frm.doc.stock_items && !this.frm.doc.stock_items.length && this.frm.doc.target_asset && this.frm.doc.capitalization_method === "Choose a WIP composite asset") {
-			this.set_consumed_stock_items_tagged_to_wip_composite_asset(this.frm.doc.target_asset);
-			this.get_target_asset_details();
-		}
+		// if (this.frm.doc.stock_items && !this.frm.doc.stock_items.length && this.frm.doc.target_asset && this.frm.doc.capitalization_method === "Choose a WIP composite asset") {
+		// 	this.set_consumed_stock_items_tagged_to_wip_composite_asset(this.frm.doc.target_asset);
+		// 	this.get_target_asset_details();
+		// }
 	}
 
 	setup_queries() {
@@ -119,13 +119,20 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 				},
 				callback: function (r) {
 					if (!r.exc && r.message) {
-						me.frm.clear_table("stock_items");
-
-						for (let item of r.message) {
-							me.frm.add_child("stock_items", item);
+						if(r.message[0] && r.message[0].length) {
+							me.frm.clear_table("stock_items");
+							for (let item of r.message[0]) {
+								me.frm.add_child("stock_items", item);
+							}
+							refresh_field("stock_items");
 						}
-
-						refresh_field("stock_items");
+						if (r.message[1] && r.message[1].length) {
+							me.frm.clear_table("asset_items");
+							for (let item of r.message[1]) {
+								me.frm.add_child("asset_items", item);
+							}
+							me.frm.refresh_field("asset_items");
+						}
 
 						me.calculate_totals();
 					}

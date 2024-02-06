@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, getdate
+from frappe.utils import cint, flt, get_table_name, getdate
 from pypika import functions as fn
 
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -12,11 +12,22 @@ from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 SLE_COUNT_LIMIT = 10_000
 
 
+def _estimate_table_row_count(doctype: str):
+	table = get_table_name(doctype)
+	return cint(
+		frappe.db.sql(
+			f"""select table_rows
+			   from  information_schema.tables
+			   where table_name = '{table}' ;"""
+		)[0][0]
+	)
+
+
 def execute(filters=None):
 	if not filters:
 		filters = {}
 
-	sle_count = frappe.db.count("Stock Ledger Entry")
+	sle_count = _estimate_table_row_count("Stock Ledger Entry")
 
 	if sle_count > SLE_COUNT_LIMIT and not filters.get("item_code") and not filters.get("warehouse"):
 		frappe.throw(_("Please select either the Item or Warehouse filter to generate the report."))

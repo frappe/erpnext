@@ -87,7 +87,6 @@ class TestQuotation(FrappeTestCase):
 		self.assertEqual(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEqual(sales_order.customer, "_Test Customer")
 
-		sales_order.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
 		sales_order.insert()
@@ -120,7 +119,6 @@ class TestQuotation(FrappeTestCase):
 		self.assertEqual(sales_order.get("items")[0].prevdoc_docname, quotation.name)
 		self.assertEqual(sales_order.customer, "_Test Customer")
 
-		sales_order.delivery_date = "2014-01-01"
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
 		sales_order.insert()
@@ -589,6 +587,22 @@ class TestQuotation(FrappeTestCase):
 		sales_order.submit()
 		quotation.reload()
 		self.assertEqual(quotation.status, "Ordered")
+
+	def test_uom_validation(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		item = "_Test Item FOR UOM Validation"
+		make_item(item, {"is_stock_item": 1})
+
+		if not frappe.db.exists("UOM", "lbs"):
+			frappe.get_doc({"doctype": "UOM", "uom_name": "lbs", "must_be_whole_number": 1}).insert()
+		else:
+			frappe.db.set_value("UOM", "lbs", "must_be_whole_number", 1)
+
+		quotation = make_quotation(item_code=item, qty=1, rate=100, do_not_submit=1)
+		quotation.items[0].uom = "lbs"
+		quotation.items[0].conversion_factor = 2.23
+		self.assertRaises(frappe.ValidationError, quotation.save)
 
 
 test_records = frappe.get_test_records("Quotation")

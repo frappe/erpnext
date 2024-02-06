@@ -239,11 +239,12 @@ def new_bank_transaction(transaction):
 		withdrawal = 0.0
 
 	tags = []
-	try:
-		tags += transaction["category"]
-		tags += [f'Plaid Cat. {transaction["category_id"]}']
-	except KeyError:
-		pass
+	if transaction["category"]:
+		try:
+			tags += transaction["category"]
+			tags += [f'Plaid Cat. {transaction["category_id"]}']
+		except KeyError:
+			pass
 
 	if not frappe.db.exists(
 		"Bank Transaction", dict(transaction_id=transaction["transaction_id"])

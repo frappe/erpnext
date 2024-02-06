@@ -1137,6 +1137,40 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(pay.unallocated_amount, 1000)
 		self.assertEqual(pay.difference_amount, 0)
 
+	def test_rounding_of_unallocated_amount(self):
+		self.supplier = "_Test Supplier USD"
+		pi = self.create_purchase_invoice(qty=1, rate=10, do_not_submit=True)
+		pi.supplier = self.supplier
+		pi.currency = "USD"
+		pi.conversion_rate = 80
+		pi.credit_to = self.creditors_usd
+		pi.save().submit()
+
+		pe = get_payment_entry(pi.doctype, pi.name)
+		pe.target_exchange_rate = 78.726500000
+		pe.received_amount = 26.75
+		pe.paid_amount = 2105.93
+		pe.references = []
+		pe.save().submit()
+
+		# unallocated_amount will have some rounding loss - 26.749950
+		self.assertNotEqual(pe.unallocated_amount, 26.75)
+
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = self.company
+		pr.party_type = "Supplier"
+		pr.party = self.supplier
+		pr.receivable_payable_account = self.creditors_usd
+		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
+		pr.get_unreconciled_entries()
+
+		invoices = [invoice.as_dict() for invoice in pr.invoices]
+		payments = [payment.as_dict() for payment in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
+		pr.reconcile()
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):

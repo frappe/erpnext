@@ -164,7 +164,12 @@ def get_gl_entries(filters, accounting_dimensions):
 		credit_in_account_currency """
 
 	if filters.get("show_remarks"):
-		select_fields += """,remarks"""
+		if remarks_length := frappe.db.get_single_value(
+			"Accounts Settings", "general_ledger_remarks_length"
+		):
+			select_fields += f",substr(remarks, 1, {remarks_length}) as 'remarks'"
+		else:
+			select_fields += """,remarks"""
 
 	order_by_statement = "order by posting_date, account, creation"
 
@@ -226,6 +231,9 @@ def get_conditions(filters):
 	if filters.get("voucher_no"):
 		conditions.append("voucher_no=%(voucher_no)s")
 
+	if filters.get("voucher_no_not_in"):
+		conditions.append("voucher_no not in %(voucher_no_not_in)s")
+
 	if filters.get("group_by") == "Group by Party" and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
 
@@ -277,7 +285,8 @@ def get_conditions(filters):
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if not dimension.disabled:
+			# Ignore 'Finance Book' set up as dimension in below logic, as it is already handled in above section
+			if not dimension.disabled and dimension.document_type != "Finance Book":
 				if filters.get(dimension.fieldname):
 					if frappe.get_cached_value("DocType", dimension.document_type, "is_tree"):
 						filters[dimension.fieldname] = get_dimension_with_children(

@@ -78,6 +78,20 @@ class JournalEntry(AccountsController):
 		if not self.title:
 			self.title = self.get_title()
 
+	def submit(self):
+		if len(self.accounts) > 100:
+			msgprint(_("The task has been enqueued as a background job."), alert=True)
+			self.queue_action("submit", timeout=4600)
+		else:
+			return self._submit()
+
+	def cancel(self):
+		if len(self.accounts) > 100:
+			msgprint(_("The task has been enqueued as a background job."), alert=True)
+			self.queue_action("cancel", timeout=4600)
+		else:
+			return self._cancel()
+
 	def on_submit(self):
 		self.validate_cheque_info()
 		self.check_credit_limit()
@@ -98,6 +112,8 @@ class JournalEntry(AccountsController):
 			"Repost Payment Ledger Items",
 			"Repost Accounting Ledger",
 			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
 		)
 		self.make_gl_entries(1)
 		self.update_advance_paid()
@@ -496,7 +512,7 @@ class JournalEntry(AccountsController):
 							).format(d.reference_name, d.account)
 						)
 				else:
-					dr_or_cr = "debit" if d.credit > 0 else "credit"
+					dr_or_cr = "debit" if flt(d.credit) > 0 else "credit"
 					valid = False
 					for jvd in against_entries:
 						if flt(jvd[dr_or_cr]) > 0:

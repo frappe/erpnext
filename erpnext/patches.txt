@@ -270,6 +270,7 @@ erpnext.patches.v13_0.reset_corrupt_defaults
 erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
 erpnext.patches.v14_0.france_depreciation_warning
+erpnext.patches.v14_0.clear_reconciliation_values_from_singles
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -344,10 +345,16 @@ erpnext.patches.v14_0.migrate_deferred_accounts_to_item_defaults
 erpnext.patches.v14_0.create_accounting_dimensions_in_sales_order_item
 erpnext.patches.v14_0.rename_over_order_allowance_field
 erpnext.patches.v14_0.migrate_delivery_stop_lock_field
-execute:frappe.db.set_single_value("Payment Reconciliation", "invoice_limit", 50)
-execute:frappe.db.set_single_value("Payment Reconciliation", "payment_limit", 50)
 erpnext.patches.v14_0.rename_daily_depreciation_to_depreciation_amount_based_on_num_days_in_month
 erpnext.patches.v14_0.rename_depreciation_amount_based_on_num_days_in_month_to_daily_prorata_based
 erpnext.patches.v14_0.add_default_for_repost_settings
+erpnext.patches.v14_0.create_accounting_dimensions_in_supplier_quotation
+erpnext.patches.v14_0.update_zero_asset_quantity_field
+execute:frappe.db.set_single_value("Buying Settings", "project_update_frequency", "Each Transaction")
+erpnext.patches.v14_0.clear_reconciliation_values_from_singles
+erpnext.patches.v14_0.update_total_asset_cost_field
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
+erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index # 2023-12-20
+erpnext.patches.v14_0.set_maintain_stock_for_bom_item
+execute:frappe.db.set_single_value('E Commerce Settings', 'show_actual_qty', 1)

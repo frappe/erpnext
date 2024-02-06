@@ -8,7 +8,7 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger', 'Asset', 'Asset Movement', 'Repost Accounting Ledger'];
+		frm.ignore_doctypes_on_cancel_all = ["Sales Invoice", "Purchase Invoice", "Journal Entry", "Repost Payment Ledger", "Asset", "Asset Movement", "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries", "Bank Transaction"];
 	},
 
 	refresh: function(frm) {
@@ -51,7 +51,7 @@ frappe.ui.form.on("Journal Entry", {
 				}, __('Make'));
 		}
 
-		erpnext.accounts.unreconcile_payments.add_unreconcile_btn(frm);
+		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
 	},
 	before_save: function(frm) {
 		if ((frm.doc.docstatus == 0) && (!frm.doc.is_system_generated)) {

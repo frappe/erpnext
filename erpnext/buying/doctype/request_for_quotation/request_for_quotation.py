@@ -80,6 +80,15 @@ class RequestforQuotation(BuyingController):
 			supplier.quote_status = "Pending"
 		self.send_to_supplier()
 
+	def before_print(self, settings=None):
+		"""Use the first suppliers data to render the print preview."""
+		if self.vendor or not self.suppliers:
+			# If a specific supplier is already set, via Tools > Download PDF,
+			# we don't want to override it.
+			return
+
+		self.update_supplier_part_no(self.suppliers[0].supplier)
+
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 

@@ -737,7 +737,7 @@ class TestStockEntry(FrappeTestCase):
 		self.assertEqual(batch_in_serial_no, None)
 
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Inactive")
-		self.assertEqual(frappe.db.exists("Batch", batch_no), None)
+		self.assertTrue(frappe.db.exists("Batch", batch_no))
 
 	def test_serial_batch_item_qty_deduction(self):
 		"""

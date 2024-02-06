@@ -12,7 +12,7 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.doctype.item.item import set_item_default
 from erpnext.stock.get_item_details import get_bin_details, get_conversion_factor
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import get_incoming_rate, get_valuation_method
 
 
 class SellingController(StockController):
@@ -344,11 +344,12 @@ class SellingController(StockController):
 		return il
 
 	def has_product_bundle(self, item_code):
-		return frappe.db.sql(
-			"""select name from `tabProduct Bundle`
-			where new_item_code=%s and docstatus != 2""",
-			item_code,
-		)
+		product_bundle = frappe.qb.DocType("Product Bundle")
+		return (
+			frappe.qb.from_(product_bundle)
+			.select(product_bundle.name)
+			.where((product_bundle.new_item_code == item_code) & (product_bundle.disabled == 0))
+		).run()
 
 	def get_already_delivered_qty(self, current_docname, so, so_detail):
 		delivered_via_dn = frappe.db.sql(
@@ -421,11 +422,18 @@ class SellingController(StockController):
 
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:
-			if not self.get("return_against"):
+			if not frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
+				continue
+
+			if not self.get("return_against") or (
+				get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return")
+			):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get("stock_qty") or d.get("actual_qty"))
 
-				if not (self.get("is_return") and d.incoming_rate):
+				if not d.incoming_rate or (
+					get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return")
+				):
 					d.incoming_rate = get_incoming_rate(
 						{
 							"item_code": d.item_code,

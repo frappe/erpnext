@@ -661,6 +661,9 @@ class BOM(WebsiteGenerator):
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
+			if not d.is_stock_item and self.rm_cost_as_per == "Valuation Rate":
+				continue
+
 			old_rate = d.rate
 			d.rate = self.get_rm_rate(
 				{
@@ -1306,7 +1309,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 
 	order_by = "idx desc, name, item_name"
 
-	fields = ["name", "item_group", "item_name", "description"]
+	fields = ["name", "item_name", "item_group", "description"]
 	fields.extend(
 		[field for field in searchfields if not field in ["name", "item_group", "description"]]
 	)
@@ -1392,3 +1395,47 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 	)
 
 	return doc
+
+
+def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
+	# Get operating cost from sub-assemblies
+
+	bom_items = frappe.get_all(
+		"BOM Item", filters={"parent": bom_no, "docstatus": 1}, fields=["bom_no"], order_by="idx asc"
+	)
+
+	for row in bom_items:
+		if not row.bom_no:
+			continue
+
+		if cost := frappe.get_cached_value("BOM", row.bom_no, "operating_cost_per_bom_quantity"):
+			op_cost += flt(cost)
+			get_op_cost_from_sub_assemblies(row.bom_no, op_cost)
+
+	return op_cost
+
+
+def get_scrap_items_from_sub_assemblies(bom_no, company, qty, scrap_items=None):
+	if not scrap_items:
+		scrap_items = {}
+
+	bom_items = frappe.get_all(
+		"BOM Item",
+		filters={"parent": bom_no, "docstatus": 1},
+		fields=["bom_no", "qty"],
+		order_by="idx asc",
+	)
+
+	for row in bom_items:
+		if not row.bom_no:
+			continue
+
+		qty = flt(row.qty) * flt(qty)
+		items = get_bom_items_as_dict(
+			row.bom_no, company, qty=qty, fetch_exploded=0, fetch_scrap_items=1
+		)
+		scrap_items.update(items)
+
+		get_scrap_items_from_sub_assemblies(row.bom_no, company, qty, scrap_items)
+
+	return scrap_items

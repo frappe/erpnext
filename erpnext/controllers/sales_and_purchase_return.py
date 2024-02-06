@@ -8,7 +8,7 @@ from frappe.model.meta import get_field_precision
 from frappe.utils import flt, format_datetime, get_datetime
 
 import erpnext
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import get_incoming_rate, get_valuation_method
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -116,7 +116,12 @@ def validate_returned_items(doc):
 				ref = valid_items.get(d.item_code, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
 
-				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
+				if (
+					ref.rate
+					and flt(d.rate) > ref.rate
+					and doc.doctype in ("Delivery Note", "Sales Invoice")
+					and get_valuation_method(ref.item_code) != "Moving Average"
+				):
 					frappe.throw(
 						_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}").format(
 							d.idx, doc.doctype, doc.return_against
@@ -356,6 +361,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			if doc.doctype == "Sales Invoice" or doc.doctype == "POS Invoice":
 				doc.consolidated_invoice = ""
 				doc.set("payments", [])
+				doc.update_billed_amount_in_delivery_note = True
 				for data in source.payments:
 					paid_amount = 0.00
 					base_paid_amount = 0.00
@@ -528,8 +534,6 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 		target_doc,
 		set_missing_values,
 	)
-
-	doclist.set_onload("ignore_price_list", True)
 
 	return doclist
 

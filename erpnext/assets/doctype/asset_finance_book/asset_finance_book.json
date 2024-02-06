@@ -9,6 +9,7 @@
   "depreciation_method",
   "total_number_of_depreciations",
   "daily_prorata_based",
+  "shift_based",
   "column_break_5",
   "frequency_of_depreciation",
   "depreciation_start_date",
@@ -89,16 +90,22 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.depreciation_method == \"Straight Line\" || doc.depreciation_method == \"Manual\"",
    "fieldname": "daily_prorata_based",
    "fieldtype": "Check",
    "label": "Depreciate based on daily pro-rata"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.depreciation_method == \"Straight Line\"",
+   "fieldname": "shift_based",
+   "fieldtype": "Check",
+   "label": "Depreciate based on shifts"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-03 22:21:52.090191",
+ "modified": "2023-12-29 08:49:39.876439",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Finance Book",
