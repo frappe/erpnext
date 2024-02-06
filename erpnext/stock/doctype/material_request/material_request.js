@@ -199,9 +199,8 @@ frappe.ui.form.on('Material Request', {
 
 	get_item_data: function(frm, item, overwrite_warehouse=false) {
 		if (item && !item.item_code) { return; }
-		frm.call({
+		frappe.call({
 			method: "erpnext.stock.get_item_details.get_item_details",
-			child: item,
 			args: {
 				args: {
 					item_code: item.item_code,
@@ -430,6 +429,9 @@ frappe.ui.form.on("Material Request Item", {
 
 	rate: function(frm, doctype, name) {
 		const item = locals[doctype][name];
+		item.amount = flt(item.qty) * flt(item.rate);
+		frappe.model.set_value(doctype, name, "amount", item.amount);
+		refresh_field("amount", item.name, item.parentfield);
 		frm.events.get_item_data(frm, item, false);
 	},
 
@@ -514,6 +516,13 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 
 	schedule_date() {
 		set_schedule_date(this.frm);
+	}
+
+	qty(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		row.amount = flt(row.qty) * flt(row.rate);
+		frappe.model.set_value(cdt, cdn, "amount", row.amount);
+		refresh_field("amount", row.name, row.parentfield);
 	}
 };
 

@@ -3,6 +3,7 @@ import frappe
 
 def execute():
 	frappe.reload_doc("assets", "doctype", "Asset Depreciation Schedule")
+	frappe.reload_doc("assets", "doctype", "Asset Finance Book")
 
 	assets = get_details_of_draft_or_submitted_depreciable_assets()
 
@@ -86,6 +87,7 @@ def get_asset_finance_books_map():
 			afb.frequency_of_depreciation,
 			afb.rate_of_depreciation,
 			afb.expected_value_after_useful_life,
+			afb.daily_prorata_based,
 			afb.shift_based,
 		)
 		.where(asset.docstatus < 2)

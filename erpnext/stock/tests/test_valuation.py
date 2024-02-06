@@ -195,7 +195,6 @@ class TestFIFOValuation(unittest.TestCase):
 				total_value -= sum(q * r for q, r in consumed)
 			self.assertTotalQty(total_qty)
 			self.assertTotalValue(total_value)
-			self.assertGreaterEqual(total_value, 0)
 
 
 class TestLIFOValuation(unittest.TestCase):

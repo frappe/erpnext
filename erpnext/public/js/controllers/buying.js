@@ -36,14 +36,14 @@ erpnext.buying = {
 
 				// no idea where me is coming from
 				if(this.frm.get_field('shipping_address')) {
-					this.frm.set_query("shipping_address", function() {
-						if(me.frm.doc.customer) {
+					this.frm.set_query("shipping_address", () => {
+						if(this.frm.doc.customer) {
 							return {
 								query: 'frappe.contacts.doctype.address.address.address_query',
-								filters: { link_doctype: 'Customer', link_name: me.frm.doc.customer }
+								filters: { link_doctype: 'Customer', link_name: this.frm.doc.customer }
 							};
 						} else
-							return erpnext.queries.company_address_query(me.frm.doc)
+							return erpnext.queries.company_address_query(this.frm.doc)
 					});
 				}
 			}
@@ -361,9 +361,14 @@ erpnext.buying = {
 								new erpnext.SerialBatchPackageSelector(
 									me.frm, item, (r) => {
 										if (r) {
+											let qty = Math.abs(r.total_qty);
+											if (doc.is_return) {
+												qty = qty * -1;
+											}
+
 											let update_values = {
 												"serial_and_batch_bundle": r.name,
-												"qty": Math.abs(r.total_qty)
+												"qty": qty
 											}
 
 											if (r.warehouse) {
@@ -396,9 +401,14 @@ erpnext.buying = {
 								new erpnext.SerialBatchPackageSelector(
 									me.frm, item, (r) => {
 										if (r) {
+											let qty = Math.abs(r.total_qty);
+											if (doc.is_return) {
+												qty = qty * -1;
+											}
+
 											let update_values = {
 												"serial_and_batch_bundle": r.name,
-												"rejected_qty": Math.abs(r.total_qty)
+												"rejected_qty": qty
 											}
 
 											if (r.warehouse) {

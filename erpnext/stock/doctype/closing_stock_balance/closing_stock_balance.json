@@ -104,15 +104,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Closing Stock Balance",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "include_uom",
    "fieldtype": "Link",
    "label": "Include UOM",
@@ -122,7 +113,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-17 11:46:04.448220",
+ "modified": "2023-05-18 11:46:04.448220",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Closing Stock Balance",
