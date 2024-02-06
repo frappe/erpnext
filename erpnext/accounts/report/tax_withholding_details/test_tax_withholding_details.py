@@ -5,8 +5,8 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import today
 
-from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.tax_withholding_category.test_tax_withholding_category import (
 	create_tax_withholding_category,
@@ -21,9 +21,10 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 		self.create_company()
 		self.clear_old_entries()
 		create_tax_accounts()
-		create_tcs_category()
 
 	def test_tax_withholding_for_customers(self):
+		create_tax_category(cumulative_threshold=300)
+		frappe.db.set_value("Customer", "_Test Customer", "tax_withholding_category", "TCS")
 		si = create_sales_invoice(rate=1000)
 		pe = create_tcs_payment_entry()
 		jv = create_tcs_journal_entry()
@@ -37,6 +38,25 @@ class TestTaxWithholdingDetails(AccountsTestMixin, FrappeTestCase):
 			[jv.name, "TCS", 0.075, -10000.0, -7.5, -10000.0],
 			[pe.name, "TCS", 0.075, 2550, 0.53, 2550.53],
 			[si.name, "TCS", 0.075, 1000, 0.52, 1000.52],
+		]
+		self.check_expected_values(result, expected_values)
+
+	def test_single_account_for_multiple_categories(self):
+		create_tax_category("TDS - 1", rate=10, account="TDS - _TC")
+		inv_1 = make_purchase_invoice(rate=1000, do_not_submit=True)
+		inv_1.tax_withholding_category = "TDS - 1"
+		inv_1.submit()
+
+		create_tax_category("TDS - 2", rate=20, account="TDS - _TC")
+		inv_2 = make_purchase_invoice(rate=1000, do_not_submit=True)
+		inv_2.tax_withholding_category = "TDS - 2"
+		inv_2.submit()
+		result = execute(
+			frappe._dict(company="_Test Company", party_type="Supplier", from_date=today(), to_date=today())
+		)[1]
+		expected_values = [
+			[inv_1.name, "TDS - 1", 10, 5000, 500, 5500],
+			[inv_2.name, "TDS - 2", 20, 5000, 1000, 6000],
 		]
 		self.check_expected_values(result, expected_values)
 
@@ -73,23 +93,19 @@ def create_tax_accounts():
 		).insert(ignore_if_duplicate=True)
 
 
-def create_tcs_category():
+def create_tax_category(category="TCS", rate=0.075, account="TCS - _TC", cumulative_threshold=0):
 	fiscal_year = get_fiscal_year(today(), company="_Test Company")
 	from_date = fiscal_year[1]
 	to_date = fiscal_year[2]
 
-	tax_category = create_tax_withholding_category(
-		category_name="TCS",
-		rate=0.075,
+	create_tax_withholding_category(
+		category_name=category,
+		rate=rate,
 		from_date=from_date,
 		to_date=to_date,
-		account="TCS - _TC",
-		cumulative_threshold=300,
+		account=account,
+		cumulative_threshold=cumulative_threshold,
 	)
-
-	customer = frappe.get_doc("Customer", "_Test Customer")
-	customer.tax_withholding_category = "TCS"
-	customer.save()
 
 
 def create_tcs_payment_entry():
