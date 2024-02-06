@@ -86,7 +86,8 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	get_party_item_code(args, item, out)
 
-	set_valuation_rate(out, args)
+	if args.get("doctype") in ["Sales Order", "Quotation"]:
+		set_valuation_rate(out, args)
 
 	update_party_blanket_order(args, out)
 
@@ -269,7 +270,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if not item:
 		item = frappe.get_doc("Item", args.get("item_code"))
 
-	if item.variant_of and not item.taxes:
+	if (
+		item.variant_of and not item.taxes and frappe.db.exists("Item Tax", {"parent": item.variant_of})
+	):
 		item.update_template_tables()
 
 	item_defaults = get_item_defaults(item.name, args.company)
@@ -497,8 +500,8 @@ def update_barcode_value(out):
 
 
 def get_barcode_data(items_list):
-	# get itemwise batch no data
-	# exmaple: {'LED-GRE': [Batch001, Batch002]}
+	# get item-wise batch no data
+	# example: {'LED-GRE': [Batch001, Batch002]}
 	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
 
 	itemwise_barcode = {}
@@ -543,7 +546,7 @@ def get_item_tax_info(company, tax_category, item_codes, item_rates=None, item_t
 		args = {
 			"company": company,
 			"tax_category": tax_category,
-			"net_rate": item_rates.get(item_code[1]),
+			"base_net_rate": item_rates.get(item_code[1]),
 		}
 
 		if item_tax_templates:
@@ -635,7 +638,7 @@ def is_within_valid_range(args, tax):
 	if not flt(tax.maximum_net_rate):
 		# No range specified, just ignore
 		return True
-	elif flt(tax.minimum_net_rate) <= flt(args.get("net_rate")) <= flt(tax.maximum_net_rate):
+	elif flt(tax.minimum_net_rate) <= flt(args.get("base_net_rate")) <= flt(tax.maximum_net_rate):
 		return True
 
 	return False

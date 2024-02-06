@@ -482,6 +482,8 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			(item, warehouses[0], batches[1], 1, 200),
 			(item, warehouses[0], batches[0], 1, 200),
 		]
+
+		frappe.flags.use_serial_and_batch_fields = True
 		dns = create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list)
 		sle_details = fetch_sle_details_for_doc_list(dns, ["stock_value_difference"])
 		svd_list = [-1 * d["stock_value_difference"] for d in sle_details]
@@ -493,6 +495,8 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 				dn.items[0].incoming_rate in expected_abs_svd,
 				"Incorrect 'Incoming Rate' values fetched for DN items",
 			)
+
+		frappe.flags.use_serial_and_batch_fields = False
 
 	def test_batchwise_item_valuation_stock_reco(self):
 		item, warehouses, batches = setup_item_valuation_test()

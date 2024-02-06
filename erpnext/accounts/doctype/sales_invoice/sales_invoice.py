@@ -446,6 +446,7 @@ class SalesInvoice(SellingController):
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
+			self.make_bundle_using_old_serial_batch_fields()
 			self.update_stock_ledger()
 
 		# this sequence because outstanding may get -ve

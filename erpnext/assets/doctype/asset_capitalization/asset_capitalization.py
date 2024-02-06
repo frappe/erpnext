@@ -126,6 +126,7 @@ class AssetCapitalization(StockController):
 		self.create_target_asset()
 
 	def on_submit(self):
+		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.update_target_asset()

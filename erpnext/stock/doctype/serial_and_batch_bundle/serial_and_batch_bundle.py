@@ -1117,7 +1117,7 @@ def parse_serial_nos(data):
 	if isinstance(data, list):
 		return data
 
-	return [s.strip() for s in cstr(data).strip().upper().replace(",", "\n").split("\n") if s.strip()]
+	return [s.strip() for s in cstr(data).strip().replace(",", "\n").split("\n") if s.strip()]
 
 
 @frappe.whitelist()
@@ -1256,7 +1256,7 @@ def create_serial_batch_no_ledgers(
 
 
 def get_type_of_transaction(parent_doc, child_row):
-	type_of_transaction = child_row.type_of_transaction
+	type_of_transaction = child_row.get("type_of_transaction")
 	if parent_doc.get("doctype") == "Stock Entry":
 		type_of_transaction = "Outward" if child_row.s_warehouse else "Inward"
 
@@ -1384,6 +1384,8 @@ def get_available_serial_nos(kwargs):
 
 	filters = {"item_code": kwargs.item_code}
 
+	# ignore_warehouse is used for backdated stock transactions
+	# There might be chances that the serial no not exists in the warehouse during backdated stock transactions
 	if not kwargs.get("ignore_warehouse"):
 		filters["warehouse"] = ("is", "set")
 		if kwargs.warehouse:
@@ -1677,7 +1679,10 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 			query = query.where(sb_entry.batch_no == kwargs.batch_no)
 
 	if kwargs.warehouse:
-		query = query.where(sre.warehouse == kwargs.warehouse)
+		if isinstance(kwargs.warehouse, list):
+			query = query.where(sre.warehouse.isin(kwargs.warehouse))
+		else:
+			query = query.where(sre.warehouse == kwargs.warehouse)
 
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
