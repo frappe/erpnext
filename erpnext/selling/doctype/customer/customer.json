@@ -23,6 +23,7 @@
   "opportunity_name",
   "account_manager",
   "image",
+  "test",
   "defaults_tab",
   "default_currency",
   "default_bank_account",
@@ -570,6 +571,11 @@
   {
    "fieldname": "column_break_nwor",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "test",
+   "fieldtype": "Data",
+   "label": "test"
   }
  ],
  "icon": "fa fa-user",
@@ -583,7 +589,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2024-02-06 16:25:37.861475",
+ "modified": "2024-02-06 16:29:30.060686",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
