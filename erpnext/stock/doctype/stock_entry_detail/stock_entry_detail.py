@@ -63,6 +63,7 @@ class StockEntryDetail(Document):
 		transfer_qty: DF.Float
 		transferred_qty: DF.Float
 		uom: DF.Link
+		use_serial_batch_fields: DF.Check
 		valuation_rate: DF.Currency
 	# end: auto-generated types
 
