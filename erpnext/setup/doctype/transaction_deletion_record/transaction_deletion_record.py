@@ -453,3 +453,24 @@ def get_doctypes_to_be_ignored():
 	doctypes_to_be_ignored.extend(frappe.get_hooks("company_data_to_be_ignored") or [])
 
 	return doctypes_to_be_ignored
+
+
+def check_for_running_deletion_job(doc, method=None):
+	df = qb.DocType("DocField")
+	if (
+		not_allowed := qb.from_(df)
+		.select(df.parent)
+		.where((df.fieldname == "company") & (df.parent == doc.doctype))
+		.run()
+	):
+		if running_deletion_jobs := frappe.db.get_all(
+			"Transaction Deletion Record",
+			filters={"docstatus": 1, "company": doc.company, "status": "Running"},
+		):
+			frappe.throw(
+				_(
+					"Transaction Deletion job {0} is running for this Company. Cannot make any transactions until the deletion job is completed"
+				).format(
+					get_link_to_form("Transaction Deletion Record", running_deletion_jobs[0].name)
+				)
+			)
