@@ -105,6 +105,7 @@ def get_pr_instance(doc: str):
 		"to_invoice_date",
 		"from_payment_date",
 		"to_payment_date",
+		"cost_center",
 	]
 	d = {}
 	for field in fields:
