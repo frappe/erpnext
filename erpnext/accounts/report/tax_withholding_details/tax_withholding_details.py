@@ -63,16 +63,14 @@ def get_result(
 				tax_amount += entry.credit - entry.debit
 				# infer tax withholding category from the account if it's the single account for this category
 				tax_withholding_category = tds_accounts.get(entry.account)
-				rate = tax_rate_map.get(tax_withholding_category)
 				# or else the consolidated value from the voucher document
 				if not tax_withholding_category:
-					# or else from the party default
 					tax_withholding_category = tax_category_map.get(name)
-					rate = tax_rate_map.get(tax_withholding_category)
+				# or else from the party default
 				if not tax_withholding_category:
 					tax_withholding_category = party_map.get(party, {}).get("tax_withholding_category")
-					rate = tax_rate_map.get(tax_withholding_category)
 
+				rate = tax_rate_map.get(tax_withholding_category)
 			if net_total_map.get(name):
 				if voucher_type == "Journal Entry" and tax_amount and rate:
 					# back calcalute total amount from rate and tax_amount
@@ -295,7 +293,7 @@ def get_tds_docs(filters):
 	tds_accounts = {}
 	for tds_acc in _tds_accounts:
 		# if it turns out not to be the only tax withholding category, then don't include in the map
-		if tds_accounts.get(tds_acc["account"]):
+		if tds_acc["account"] in tds_accounts:
 			tds_accounts[tds_acc["account"]] = None
 		else:
 			tds_accounts[tds_acc["account"]] = tds_acc["parent"]
@@ -412,7 +410,7 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 			"paid_amount_after_tax",
 			"base_paid_amount",
 		],
-		"Journal Entry": ["tax_withholding_category", "total_amount"],
+		"Journal Entry": ["total_amount"],
 	}
 
 	entries = frappe.get_all(
