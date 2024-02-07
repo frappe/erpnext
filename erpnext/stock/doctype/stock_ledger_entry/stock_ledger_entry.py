@@ -51,6 +51,7 @@ class StockLedgerEntry(Document):
 		item_code: DF.Link | None
 		outgoing_rate: DF.Currency
 		posting_date: DF.Date | None
+		posting_datetime: DF.Datetime | None
 		posting_time: DF.Time | None
 		project: DF.Link | None
 		qty_after_transaction: DF.Float
@@ -91,6 +92,12 @@ class StockLedgerEntry(Document):
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
 		self.validate_inventory_dimension_negative_stock()
+
+	def set_posting_datetime(self):
+		from erpnext.stock.utils import get_combine_datetime
+
+		self.posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+		self.db_set("posting_datetime", self.posting_datetime)
 
 	def validate_inventory_dimension_negative_stock(self):
 		if self.is_cancelled:
@@ -162,6 +169,7 @@ class StockLedgerEntry(Document):
 		return inv_dimension_dict
 
 	def on_submit(self):
+		self.set_posting_datetime()
 		self.check_stock_frozen_date()
 
 		# Added to handle few test cases where serial_and_batch_bundles are not required
@@ -330,9 +338,7 @@ class StockLedgerEntry(Document):
 
 
 def on_doctype_update():
-	frappe.db.add_index(
-		"Stock Ledger Entry", fields=["posting_date", "posting_time"], index_name="posting_sort_index"
-	)
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
 	frappe.db.add_index("Stock Ledger Entry", ["warehouse", "item_code"], "item_warehouse")
+	frappe.db.add_index("Stock Ledger Entry", ["posting_datetime", "creation"])
