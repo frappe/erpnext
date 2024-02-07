@@ -8,7 +8,7 @@ from typing import Dict, Optional
 import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
-from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
+from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 
 import erpnext
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
@@ -619,3 +619,18 @@ def _update_item_info(scan_result: Dict[str, Optional[str]]) -> Dict[str, Option
 		):
 			scan_result.update(item_info)
 	return scan_result
+
+
+def get_combine_datetime(posting_date, posting_time):
+	import datetime
+
+	if isinstance(posting_date, str):
+		posting_date = getdate(posting_date)
+
+	if isinstance(posting_time, str):
+		posting_time = get_time(posting_time)
+
+	if isinstance(posting_time, datetime.timedelta):
+		posting_time = (datetime.datetime.min + posting_time).time()
+
+	return datetime.datetime.combine(posting_date, posting_time)

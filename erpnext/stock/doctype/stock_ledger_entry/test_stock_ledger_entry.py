@@ -1066,7 +1066,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 				frappe.qb.from_(sle)
 				.select("qty_after_transaction")
 				.where((sle.item_code == item) & (sle.warehouse == warehouse) & (sle.is_cancelled == 0))
-				.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+				.orderby(sle.posting_datetime)
 				.orderby(sle.creation)
 			).run(pluck=True)
 

@@ -28,6 +28,50 @@ exclude_from_linked_with = True
 
 
 class StockLedgerEntry(Document):
+<<<<<<< HEAD
+=======
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		actual_qty: DF.Float
+		auto_created_serial_and_batch_bundle: DF.Check
+		batch_no: DF.Data | None
+		company: DF.Link | None
+		dependant_sle_voucher_detail_no: DF.Data | None
+		fiscal_year: DF.Data | None
+		has_batch_no: DF.Check
+		has_serial_no: DF.Check
+		incoming_rate: DF.Currency
+		is_adjustment_entry: DF.Check
+		is_cancelled: DF.Check
+		item_code: DF.Link | None
+		outgoing_rate: DF.Currency
+		posting_date: DF.Date | None
+		posting_datetime: DF.Datetime | None
+		posting_time: DF.Time | None
+		project: DF.Link | None
+		qty_after_transaction: DF.Float
+		recalculate_rate: DF.Check
+		serial_and_batch_bundle: DF.Link | None
+		serial_no: DF.LongText | None
+		stock_queue: DF.Text | None
+		stock_uom: DF.Link | None
+		stock_value: DF.Currency
+		stock_value_difference: DF.Currency
+		to_rename: DF.Check
+		valuation_rate: DF.Currency
+		voucher_detail_no: DF.Data | None
+		voucher_no: DF.DynamicLink | None
+		voucher_type: DF.Link | None
+		warehouse: DF.Link | None
+	# end: auto-generated types
+
+>>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
 	def autoname(self):
 		"""
 		Temporarily name doc for fast insertion
@@ -51,6 +95,12 @@ class StockLedgerEntry(Document):
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
 		self.validate_inventory_dimension_negative_stock()
+
+	def set_posting_datetime(self):
+		from erpnext.stock.utils import get_combine_datetime
+
+		self.posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+		self.db_set("posting_datetime", self.posting_datetime)
 
 	def validate_inventory_dimension_negative_stock(self):
 		if self.is_cancelled:
@@ -122,6 +172,7 @@ class StockLedgerEntry(Document):
 		return inv_dimension_dict
 
 	def on_submit(self):
+		self.set_posting_datetime()
 		self.check_stock_frozen_date()
 		self.calculate_batch_qty()
 
@@ -293,9 +344,7 @@ class StockLedgerEntry(Document):
 
 
 def on_doctype_update():
-	frappe.db.add_index(
-		"Stock Ledger Entry", fields=["posting_date", "posting_time"], index_name="posting_sort_index"
-	)
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
 	frappe.db.add_index("Stock Ledger Entry", ["warehouse", "item_code"], "item_warehouse")
+	frappe.db.add_index("Stock Ledger Entry", ["posting_datetime", "creation"])
