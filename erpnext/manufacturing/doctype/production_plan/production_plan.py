@@ -236,9 +236,10 @@ class ProductionPlan(Document):
 				so_item.parent,
 				so_item.item_code,
 				so_item.warehouse,
-				(
-					(so_item.qty - so_item.work_order_qty - so_item.delivered_qty) * so_item.conversion_factor
-				).as_("pending_qty"),
+				so_item.qty,
+				so_item.work_order_qty,
+				so_item.delivered_qty,
+				so_item.conversion_factor,
 				so_item.description,
 				so_item.name,
 				so_item.bom_no,
@@ -260,6 +261,11 @@ class ProductionPlan(Document):
 		items_query = items_query.where(ExistsCriterion(items_subquery))
 
 		items = items_query.run(as_dict=True)
+
+		for item in items:
+			item.pending_qty = (
+				flt(item.qty) - max(item.work_order_qty, item.delivered_qty, 0) * item.conversion_factor
+			)
 
 		pi = frappe.qb.DocType("Packed Item")
 
