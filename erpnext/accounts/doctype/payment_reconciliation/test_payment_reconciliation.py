@@ -630,7 +630,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		)
 		self.assertEqual(len(journals), 1)
 
-		# assert status outstanding
+		# assert status and outstanding
 		si.reload()
 		self.assertEqual(si.status, "Credit Note Issued")
 		self.assertEqual(si.outstanding_amount, 0)
@@ -650,6 +650,10 @@ class TestPaymentReconciliation(FrappeTestCase):
 			pluck="name",
 		)
 		self.assertEqual(len(journals), 0)
+		# assert status and outstanding
+		si.reload()
+		self.assertEqual(si.status, "Unpaid")
+		self.assertEqual(si.outstanding_amount, 100)
 
 	def test_cr_note_partial_against_invoice(self):
 		transaction_date = nowdate()
