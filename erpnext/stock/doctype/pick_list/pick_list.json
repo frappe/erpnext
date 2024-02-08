@@ -196,11 +196,7 @@
  ],
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-02-01 16:17:44.877426",
-=======
- "modified": "2024-01-24 17:05:20.317180",
->>>>>>> f6725e4342 (fix: do not consider rejected warehouses in pick list (#39539))
+ "modified": "2024-02-02 16:17:44.877426",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
