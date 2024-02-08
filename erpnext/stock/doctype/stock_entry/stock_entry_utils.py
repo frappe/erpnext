@@ -92,6 +92,9 @@ def make_stock_entry(**args):
 		else:
 			args.qty = cint(args.qty)
 
+	if args.serial_no or args.batch_no:
+		args.use_serial_batch_fields = True
+
 	# purpose
 	if not args.purpose:
 		if args.source and args.target:
@@ -162,6 +165,7 @@ def make_stock_entry(**args):
 		)
 
 	args.serial_no = serial_number
+
 	s.append(
 		"items",
 		{
@@ -177,6 +181,7 @@ def make_stock_entry(**args):
 			"batch_no": args.batch_no,
 			"cost_center": args.cost_center,
 			"expense_account": args.expense_account,
+			"use_serial_batch_fields": args.use_serial_batch_fields,
 		},
 	)
 

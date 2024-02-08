@@ -457,6 +457,7 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_subcontract()
 		self.update_subcontracting_order_status()
+		self.update_blanket_order()
 		self.notify_update()
 		clear_doctype_notifications(self)
 
@@ -644,6 +645,7 @@ class PurchaseOrder(BuyingController):
 				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
 
 
+@frappe.request_cache
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
 	"""get last purchase rate for an item"""
 

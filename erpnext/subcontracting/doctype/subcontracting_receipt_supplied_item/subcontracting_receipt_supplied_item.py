@@ -35,6 +35,7 @@ class SubcontractingReceiptSuppliedItem(Document):
 		serial_no: DF.Text | None
 		stock_uom: DF.Link | None
 		subcontracting_order: DF.Link | None
+		use_serial_batch_fields: DF.Check
 	# end: auto-generated types
 
 	pass

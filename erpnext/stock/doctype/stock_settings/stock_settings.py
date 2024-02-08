@@ -57,6 +57,7 @@ class StockSettings(Document):
 		stock_uom: DF.Link | None
 		update_existing_price_list_rate: DF.Check
 		use_naming_series: DF.Check
+		use_serial_batch_fields: DF.Check
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
 	# end: auto-generated types
 
@@ -68,6 +69,7 @@ class StockSettings(Document):
 			"allow_negative_stock",
 			"default_warehouse",
 			"set_qty_in_transactions_based_on_serial_no_input",
+			"use_serial_batch_fields",
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
 
