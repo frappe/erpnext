@@ -300,5 +300,6 @@ def get_pr_items(purchase_receipt):
 			(pr_item.parent == purchase_receipt.receipt_document)
 			& ((item.is_stock_item == 1) | (item.is_fixed_asset == 1))
 		)
+		.orderby(pr_item.idx)
 		.run(as_dict=True)
 	)
