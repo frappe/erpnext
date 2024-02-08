@@ -831,7 +831,12 @@ def get_available_item_locations_for_serial_and_batched_item(
 
 
 def get_available_item_locations_for_serialized_item(
-	item_code, from_warehouses, required_qty, company, total_picked_qty=0, consider_rejected_warehouses=False,
+	item_code,
+	from_warehouses,
+	required_qty,
+	company,
+	total_picked_qty=0,
+	consider_rejected_warehouses=False,
 ):
 	picked_serial_nos = get_picked_serial_nos(item_code, from_warehouses)
 
@@ -884,7 +889,12 @@ def get_available_item_locations_for_serialized_item(
 
 
 def get_available_item_locations_for_batched_item(
-	item_code, from_warehouses, required_qty, company, total_picked_qty=0, consider_rejected_warehouses=False,
+	item_code,
+	from_warehouses,
+	required_qty,
+	company,
+	total_picked_qty=0,
+	consider_rejected_warehouses=False,
 ):
 	locations = []
 	data = get_auto_batch_nos(
@@ -899,8 +909,12 @@ def get_available_item_locations_for_batched_item(
 	)
 
 	warehouse_wise_batches = frappe._dict()
+	rejected_warehouses = get_rejected_warehouses()
+
 	for d in data:
-		if consider_rejected_warehouses and d.warehouse in consider_rejected_warehouses:
+		if (
+			not consider_rejected_warehouses and rejected_warehouses and d.warehouse in rejected_warehouses
+		):
 			continue
 
 		if d.warehouse not in warehouse_wise_batches:
