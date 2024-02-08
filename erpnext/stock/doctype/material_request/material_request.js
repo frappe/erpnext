@@ -229,7 +229,7 @@ frappe.ui.form.on('Material Request', {
 
 				if(!r.exc) {
 					$.each(r.message, function(key, value) {
-						if(!d[key] || in_list(qty_fields, key)) {
+						if(!d[key] || qty_fields.includes(key)) {
 							d[key] = value;
 						}
 					});
