@@ -1997,7 +1997,6 @@ class TestSalesOrder(FrappeTestCase):
 				self.assertEqual(so.items[0].rate, scenario.get("expected_rate"))
 				self.assertEqual(so.packed_items[0].rate, scenario.get("expected_rate"))
 
-<<<<<<< HEAD
 	def test_sales_order_advance_payment_status(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
@@ -2024,7 +2023,7 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(
 			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
 		)
-=======
+
 	def test_pick_list_without_rejected_materials(self):
 		serial_and_batch_item = make_item(
 			"_Test Serial and Batch Item for Rejected Materials",
@@ -2101,7 +2100,6 @@ class TestSalesOrder(FrappeTestCase):
 			self.assertEqual(row.qty, 1.0)
 			self.assertFalse(row.warehouse == rejected_warehouse)
 			self.assertTrue(row.warehouse == warehouse)
->>>>>>> f6725e4342 (fix: do not consider rejected warehouses in pick list (#39539))
 
 
 def automatically_fetch_payment_terms(enable=1):
