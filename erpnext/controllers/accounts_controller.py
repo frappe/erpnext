@@ -1472,6 +1472,24 @@ class AccountsController(TransactionBase):
 						x.update({dim.fieldname: self.get(dim.fieldname)})
 			reconcile_against_document(lst, active_dimensions=active_dimensions)
 
+	def cancel_system_generated_credit_debit_notes(self):
+		# Cancel 'Credit/Debit' Note Journal Entries, if found.
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			voucher_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
+			journals = frappe.db.get_all(
+				"Journal Entry",
+				filters={
+					"is_system_generated": 1,
+					"reference_type": self.doctype,
+					"reference_name": self.name,
+					"voucher_type": voucher_type,
+					"docstatus": 1,
+				},
+				pluck="name",
+			)
+			for x in journals:
+				frappe.get_doc("Journal Entry", x).cancel()
+
 	def on_cancel(self):
 		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
 			remove_from_bank_transaction,
@@ -1484,6 +1502,8 @@ class AccountsController(TransactionBase):
 		remove_from_bank_transaction(self.doctype, self.name)
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice", "Payment Entry", "Journal Entry"]:
+			self.cancel_system_generated_credit_debit_notes()
+
 			# Cancel Exchange Gain/Loss Journal before unlinking
 			cancel_exchange_gain_loss_journal(self)
 
