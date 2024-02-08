@@ -126,31 +126,40 @@ class TransactionDeletionRecord(Document):
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
 
-	def chain_call(self, task=None):
+	def enqueue_task(self, task: str | None = None):
 		if task and task in self.task_to_internal_method_map:
 			# make sure that none of next tasks are already running
 			job_names = self.generate_job_name_for_next_tasks(task=task)
 			self.validate_running_task_for_doc(job_names=job_names)
 
-			method = self.task_to_internal_method_map[task]
+			# method = self.task_to_internal_method_map[task]
+			# Generate Job Id to uniquely identify each task for this document
 			job_id = self.generate_job_name_for_task(task)
 
 			frappe.enqueue(
 				"frappe.utils.background_jobs.run_doc_method",
 				doctype=self.doctype,
 				name=self.name,
-				doc_method=method,
+				doc_method="execute_task",
 				job_id=job_id,
 				queue="long",
 				enqueue_after_commit=True,
+				task_to_execute=task,
 			)
+
+	def execute_task(self, task_to_execute: str | None = None):
+		if task_to_execute:
+			pass
+			method = self.task_to_internal_method_map[task_to_execute]
+			if task := getattr(self, method, None):
+				task()
 
 	def delete_notifications(self):
 		self.validate_doc_status()
 		if not self.clear_notifications:
 			clear_notifications()
 			self.db_set("clear_notifications", 1)
-		self.chain_call(task="Initialize Summary Table")
+		self.enqueue_task(task="Initialize Summary Table")
 
 	def populate_doctypes_to_be_ignored_table(self):
 		doctypes_to_be_ignored_list = get_doctypes_to_be_ignored()
@@ -183,7 +192,7 @@ class TransactionDeletionRecord(Document):
 	def process_tasks(self):
 		# This method is the entry point for the chain of events that follow
 		self.db_set("status", "Running")
-		self.chain_call(task="Delete Bins")
+		self.enqueue_task(task="Delete Bins")
 
 	def delete_bins(self):
 		self.validate_doc_status()
@@ -194,7 +203,7 @@ class TransactionDeletionRecord(Document):
 				self.company,
 			)
 			self.db_set("delete_bin_data", 1)
-		self.chain_call(task="Delete Leads and Addresses")
+		self.enqueue_task(task="Delete Leads and Addresses")
 
 	def delete_lead_addresses(self):
 		"""Delete addresses to which leads are linked"""
@@ -236,7 +245,7 @@ class TransactionDeletionRecord(Document):
 					)
 				)
 			self.db_set("delete_leads_and_addresses", 1)
-		self.chain_call(task="Reset Company Values")
+		self.enqueue_task(task="Reset Company Values")
 
 	def reset_company_values(self):
 		self.validate_doc_status()
@@ -246,7 +255,7 @@ class TransactionDeletionRecord(Document):
 			company_obj.sales_monthly_history = None
 			company_obj.save()
 			self.db_set("reset_company_default_values", 1)
-		self.chain_call(task="Clear Notifications")
+		self.enqueue_task(task="Clear Notifications")
 
 	def initialize_doctypes_to_be_deleted_table(self):
 		self.validate_doc_status()
@@ -263,7 +272,7 @@ class TransactionDeletionRecord(Document):
 						# Initialize
 						self.populate_doctypes_table(tables, docfield["parent"], docfield["fieldname"], 0)
 			self.db_set("initialize_doctypes_table", 1)
-		self.chain_call(task="Delete Transactions")
+		self.enqueue_task(task="Delete Transactions")
 
 	def delete_company_transactions(self):
 		self.validate_doc_status()
@@ -304,7 +313,8 @@ class TransactionDeletionRecord(Document):
 			)
 			if pending_doctypes:
 				# as method is enqueued after commit, calling itself will not make validate_doc_status to throw
-				self.chain_call(task="Delete Transactions")
+				# recursively call this task to delete all transactions
+				self.enqueue_task(task="Delete Transactions")
 			else:
 				self.db_set("status", "Completed")
 				self.db_set("delete_transactions", 1)
