@@ -695,6 +695,9 @@ class StockReconciliation(StockController):
 			data.actual_qty = row.qty
 			data.qty_after_transaction = 0.0
 			data.incoming_rate = flt(row.valuation_rate)
+		
+		if not data.qty_after_transaction:
+			data.qty_after_transaction = 0.0
 
 		self.update_inventory_dimensions(row, data)
 
