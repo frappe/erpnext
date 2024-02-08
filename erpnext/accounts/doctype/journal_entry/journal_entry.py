@@ -13,6 +13,10 @@ from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
 	get_party_account_based_on_invoice_discounting,
 )
+from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+	validate_docs_for_deferred_accounting,
+	validate_docs_for_voucher_types,
+)
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
@@ -149,6 +153,10 @@ class JournalEntry(AccountsController):
 		if not self.title:
 			self.title = self.get_title()
 
+	def validate_for_repost(self):
+		validate_docs_for_voucher_types(["Journal Entry"])
+		validate_docs_for_deferred_accounting([self.name], [])
+
 	def submit(self):
 		if len(self.accounts) > 100:
 			msgprint(_("The task has been enqueued as a background job."), alert=True)
@@ -177,7 +185,9 @@ class JournalEntry(AccountsController):
 			self.needs_repost = self.check_if_fields_updated(
 				fields_to_check=[], child_tables={"accounts": []}
 			)
-			self.db_set("repost_required", self.needs_repost)
+			if self.needs_repost:
+				self.validate_for_repost()
+				self.db_set("repost_required", self.needs_repost)
 
 	def on_cancel(self):
 		# References for this Journal are removed on the `on_cancel` event in accounts_controller
