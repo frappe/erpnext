@@ -7,6 +7,7 @@ frappe.provide("erpnext.assets");
 erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.stock.StockController {
 	setup() {
 		this.setup_posting_date_time_check();
+		this.frm.ignore_doctypes_on_cancel_all = ["Asset Movement"];
 	}
 
 	onload() {
