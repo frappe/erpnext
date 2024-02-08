@@ -727,10 +727,7 @@ def get_available_item_locations(
 			required_qty,
 			company,
 			total_picked_qty,
-<<<<<<< HEAD
-=======
 			consider_rejected_warehouses=consider_rejected_warehouses,
->>>>>>> f6725e4342 (fix: do not consider rejected warehouses in pick list (#39539))
 		)
 	elif has_serial_no:
 		locations = get_available_item_locations_for_serialized_item(
@@ -790,97 +787,13 @@ def get_available_item_locations(
 	return locations
 
 
-<<<<<<< HEAD
-=======
-def get_available_item_locations_for_serialized_item(
-	item_code,
-	from_warehouses,
-	required_qty,
-	company,
-	total_picked_qty=0,
-	consider_rejected_warehouses=False,
-):
-	sn = frappe.qb.DocType("Serial No")
-	query = (
-		frappe.qb.from_(sn)
-		.select(sn.name, sn.warehouse)
-		.where((sn.item_code == item_code) & (sn.company == company))
-		.orderby(sn.purchase_date)
-		.limit(ceil(required_qty + total_picked_qty))
-	)
-
-	if from_warehouses:
-		query = query.where(sn.warehouse.isin(from_warehouses))
-	else:
-		query = query.where(Coalesce(sn.warehouse, "") != "")
-
-	if not consider_rejected_warehouses:
-		if rejected_warehouses := get_rejected_warehouses():
-			query = query.where(sn.warehouse.notin(rejected_warehouses))
-
-	serial_nos = query.run(as_list=True)
-
-	warehouse_serial_nos_map = frappe._dict()
-	for serial_no, warehouse in serial_nos:
-		warehouse_serial_nos_map.setdefault(warehouse, []).append(serial_no)
-
-	locations = []
-	for warehouse, serial_nos in warehouse_serial_nos_map.items():
-		locations.append({"qty": len(serial_nos), "warehouse": warehouse, "serial_no": serial_nos})
-
-	return locations
-
-
-def get_available_item_locations_for_batched_item(
-	item_code,
-	from_warehouses,
-	required_qty,
-	company,
-	total_picked_qty=0,
-	consider_rejected_warehouses=False,
-):
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-	batch = frappe.qb.DocType("Batch")
-
-	query = (
-		frappe.qb.from_(sle)
-		.from_(batch)
-		.select(sle.warehouse, sle.batch_no, Sum(sle.actual_qty).as_("qty"))
-		.where(
-			(sle.batch_no == batch.name)
-			& (sle.item_code == item_code)
-			& (sle.company == company)
-			& (batch.disabled == 0)
-			& (sle.is_cancelled == 0)
-			& (IfNull(batch.expiry_date, "2200-01-01") > today())
-		)
-		.groupby(sle.warehouse, sle.batch_no, sle.item_code)
-		.having(Sum(sle.actual_qty) > 0)
-		.orderby(IfNull(batch.expiry_date, "2200-01-01"), batch.creation, sle.batch_no, sle.warehouse)
-		.limit(ceil(required_qty + total_picked_qty))
-	)
-
-	if from_warehouses:
-		query = query.where(sle.warehouse.isin(from_warehouses))
-
-	if not consider_rejected_warehouses:
-		if rejected_warehouses := get_rejected_warehouses():
-			query = query.where(sle.warehouse.notin(rejected_warehouses))
-
-	return query.run(as_dict=True)
-
-
->>>>>>> f6725e4342 (fix: do not consider rejected warehouses in pick list (#39539))
 def get_available_item_locations_for_serial_and_batched_item(
 	item_code,
 	from_warehouses,
 	required_qty,
 	company,
 	total_picked_qty=0,
-<<<<<<< HEAD
-=======
 	consider_rejected_warehouses=False,
->>>>>>> f6725e4342 (fix: do not consider rejected warehouses in pick list (#39539))
 ):
 	# Get batch nos by FIFO
 	locations = get_available_item_locations_for_batched_item(
@@ -888,10 +801,7 @@ def get_available_item_locations_for_serial_and_batched_item(
 		from_warehouses,
 		required_qty,
 		company,
-<<<<<<< HEAD
-=======
 		consider_rejected_warehouses=consider_rejected_warehouses,
->>>>>>> f6725e4342 (fix: do not consider rejected warehouses in pick list (#39539))
 	)
 
 	if locations:
@@ -921,7 +831,7 @@ def get_available_item_locations_for_serial_and_batched_item(
 
 
 def get_available_item_locations_for_serialized_item(
-	item_code, from_warehouses, required_qty, company, total_picked_qty=0
+	item_code, from_warehouses, required_qty, company, total_picked_qty=0, consider_rejected_warehouses=False,
 ):
 	picked_serial_nos = get_picked_serial_nos(item_code, from_warehouses)
 
@@ -937,6 +847,10 @@ def get_available_item_locations_for_serialized_item(
 		query = query.where(sn.warehouse.isin(from_warehouses))
 	else:
 		query = query.where(Coalesce(sn.warehouse, "") != "")
+
+	if not consider_rejected_warehouses:
+		if rejected_warehouses := get_rejected_warehouses():
+			query = query.where(sn.warehouse.notin(rejected_warehouses))
 
 	serial_nos = query.run(as_list=True)
 
@@ -970,7 +884,7 @@ def get_available_item_locations_for_serialized_item(
 
 
 def get_available_item_locations_for_batched_item(
-	item_code, from_warehouses, required_qty, company, total_picked_qty=0
+	item_code, from_warehouses, required_qty, company, total_picked_qty=0, consider_rejected_warehouses=False,
 ):
 	locations = []
 	data = get_auto_batch_nos(
@@ -986,6 +900,9 @@ def get_available_item_locations_for_batched_item(
 
 	warehouse_wise_batches = frappe._dict()
 	for d in data:
+		if consider_rejected_warehouses and d.warehouse in consider_rejected_warehouses:
+			continue
+
 		if d.warehouse not in warehouse_wise_batches:
 			warehouse_wise_batches.setdefault(d.warehouse, defaultdict(float))
 
