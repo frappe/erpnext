@@ -1974,35 +1974,6 @@ class TestSalesOrder(FrappeTestCase):
 				self.assertEqual(so.items[0].rate, scenario.get("expected_rate"))
 				self.assertEqual(so.packed_items[0].rate, scenario.get("expected_rate"))
 
-<<<<<<< HEAD
-=======
-	def test_sales_order_advance_payment_status(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-
-		so = make_sales_order(qty=1, rate=100)
-		self.assertEqual(
-			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
-		)
-
-		pr = make_payment_request(dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True)
-		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
-
-		pe = get_payment_entry(so.doctype, so.name).save().submit()
-		self.assertEqual(
-			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid"
-		)
-
-		pe.reload()
-		pe.cancel()
-		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
-
-		pr.reload()
-		pr.cancel()
-		self.assertEqual(
-			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
-		)
-
 	def test_pick_list_without_rejected_materials(self):
 		serial_and_batch_item = make_item(
 			"_Test Serial and Batch Item for Rejected Materials",
@@ -2080,7 +2051,6 @@ class TestSalesOrder(FrappeTestCase):
 			self.assertFalse(row.warehouse == rejected_warehouse)
 			self.assertTrue(row.warehouse == warehouse)
 
->>>>>>> 2c8e4c1ab3 (fix: do not consider rejected warehouses in pick list (backport #39539) (#39804))
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
