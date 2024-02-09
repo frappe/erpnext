@@ -989,7 +989,7 @@ class StockEntry(StockController):
 				continue
 
 			bundle_doc = None
-			if row.serial_and_batch_bundle and abs(row.qty) != abs(
+			if row.serial_and_batch_bundle and abs(row.transfer_qty) != abs(
 				frappe.get_cached_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")
 			):
 				bundle_doc = SerialBatchCreation(
@@ -999,7 +999,7 @@ class StockEntry(StockController):
 						"serial_and_batch_bundle": row.serial_and_batch_bundle,
 						"type_of_transaction": "Outward",
 						"ignore_serial_nos": already_picked_serial_nos,
-						"qty": row.qty * -1,
+						"qty": row.transfer_qty * -1,
 					}
 				).update_serial_and_batch_entries()
 			elif not row.serial_and_batch_bundle:
@@ -1011,7 +1011,7 @@ class StockEntry(StockController):
 						"posting_time": self.posting_time,
 						"voucher_type": self.doctype,
 						"voucher_detail_no": row.name,
-						"qty": row.qty * -1,
+						"qty": row.transfer_qty * -1,
 						"ignore_serial_nos": already_picked_serial_nos,
 						"type_of_transaction": "Outward",
 						"company": self.company,
