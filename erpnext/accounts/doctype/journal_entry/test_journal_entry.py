@@ -418,10 +418,18 @@ class TestJournalEntry(unittest.TestCase):
 	def test_repost_accounting_entries(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 
+		# Configure Repost Accounting Ledger for JVs
+		settings = frappe.get_doc("Repost Accounting Ledger Settings")
+		if not [x for x in settings.allowed_types if x.document_type == "Journal Entry"]:
+			settings.append("allowed_types", {"document_type": "Journal Entry", "allowed": True})
+		settings.save()
+
+		# Create JV with defaut cost center - _Test Cost Center
 		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
 		jv.multi_currency = 0
 		jv.submit()
 
+		# Check GL entries before reposting
 		self.voucher_no = jv.name
 
 		self.fields = [
@@ -448,33 +456,18 @@ class TestJournalEntry(unittest.TestCase):
 
 		self.check_gl_entries()
 
-		cost_center = "_Test Cost Center for BS Account - _TC"
+		# Change cost center for bank account - _Test Cost Center for BS Account
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
-
-		jv.accounts[0].account = "_Test Bank - _TC"
-		jv.accounts[0].cost_center = "_Test Cost Center for BS Account - _TC"
-		jv.accounts[1].account = "_Test Cash - _TC"
-
+		jv.accounts[1].cost_center = "_Test Cost Center for BS Account - _TC"
 		jv.save()
-		jv.load_from_db()
+
+		# Check if repost flag gets set on update after submit
 		self.assertTrue(jv.repost_required)
 		jv.repost_accounting_entries()
 
-		self.expected_gle = [
-			{
-				"account": "_Test Bank - _TC",
-				"debit_in_account_currency": 100,
-				"credit_in_account_currency": 0,
-				"cost_center": "_Test Cost Center for BS Account - _TC",
-			},
-			{
-				"account": "_Test Cash - _TC",
-				"debit_in_account_currency": 0,
-				"credit_in_account_currency": 100,
-				"cost_center": "_Test Cost Center - _TC",
-			},
-		]
-
+		# Check GL entries after reposting
+		jv.load_from_db()
+		self.expected_gle[0]["cost_center"] = "_Test Cost Center for BS Account - _TC"
 		self.check_gl_entries()
 
 	def check_gl_entries(self):
