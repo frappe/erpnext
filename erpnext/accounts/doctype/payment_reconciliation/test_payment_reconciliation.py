@@ -1321,6 +1321,68 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
 		pr.reconcile()
 
+	def test_reconcile_jv_with_exchange(self):
+		jv = frappe.new_doc("Journal Entry")
+		jv.posting_date = nowdate()
+		jv.company = self.company
+		jv.multi_currency = 1
+		jv.append(
+			"accounts",
+			{
+				"account": frappe.db.get_value(
+					"Account", {"company": self.company, "account_type": "Temporary"}, "name"
+				),
+				"credit": 132,
+				"credit_in_account_currency": 132,
+			},
+		)
+		jv.append(
+			"accounts",
+			{
+				"account": frappe.db.get_value(
+					"Account",
+					{"company": self.company, "account_type": "Receivable", "account_currency": "EUR"},
+					"name",
+				),
+				"debit": 132,
+				"debit_in_account_currency": 100,
+				"exchange_rate": 1.32,
+				"party_type": "Customer",
+				"party": self.customer3,
+			},
+		)
+		jv.submit()
+
+		pe = frappe.new_doc("Payment Entry")
+		pe.company = self.company
+		pe.payment_type = "Receive"
+		pe.party_type = "Customer"
+		pe.party = self.customer3
+		pe.paid_from = jv.accounts[-1].account
+		pe.paid_to = frappe.db.get_value(
+			"Account",
+			{"company": self.company, "account_type": ["IN", ["Bank", "Cash"]], "account_currency": "INR"},
+			"name",
+		)
+		pe.paid_amount = 100
+		pe.received_amount = 142
+		pe.source_exchange_rate = 1.42
+		pe.submit()
+
+		self.customer = self.customer3
+		pr = self.create_payment_reconciliation("Customer")
+		pr.get_unreconciled_entries()
+		pr.allocate_entries(
+			{
+				"payments": [p.as_dict() for p in pr.payments if p.reference_name == pe.name],
+				"invoices": [i.as_dict() for i in pr.invoices if i.invoice_number == jv.name],
+			}
+		)
+
+		# Doesn't raise frappe.exceptions.ValidationError:
+		# Row #1: For Debtors EUR - _PR, you can select reference document only if account gets credited
+		pr.reconcile()
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
