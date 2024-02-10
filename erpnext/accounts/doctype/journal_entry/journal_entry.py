@@ -133,7 +133,7 @@ class JournalEntry(AccountsController):
 		if not frappe.flags.in_import:
 			self.validate_total_debit_and_credit()
 
-		if not frappe.flags.is_reverse_depr_entry:
+		if not (frappe.flags.is_reverse_depr_entry or self.is_system_generated):
 			self.validate_against_jv()
 			self.validate_stock_accounts()
 
