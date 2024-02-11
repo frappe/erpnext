@@ -156,14 +156,18 @@ class StockController(AccountsController):
 				if self.doctype == "Stock Reconciliation":
 					qty = row.qty
 					type_of_transaction = "Inward"
+					warehouse = row.warehouse
 				else:
-					qty = row.stock_qty
+					qty = row.stock_qty if self.doctype != "Stock Entry" else row.transfer_qty
 					type_of_transaction = get_type_of_transaction(self, row)
+					warehouse = (
+						row.warehouse if self.doctype != "Stock Entry" else row.s_warehouse or row.t_warehouse
+					)
 
 				sn_doc = SerialBatchCreation(
 					{
 						"item_code": row.item_code,
-						"warehouse": row.warehouse,
+						"warehouse": warehouse,
 						"posting_date": self.posting_date,
 						"posting_time": self.posting_time,
 						"voucher_type": self.doctype,
