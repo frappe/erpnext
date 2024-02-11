@@ -1775,6 +1775,52 @@ class TestWorkOrder(FrappeTestCase):
 			"Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies", 0
 		)
 
+	@change_settings(
+		"Manufacturing Settings", {"material_consumption": 1, "get_rm_cost_from_consumption_entry": 1}
+	)
+	def test_get_rm_cost_from_consumption_entry(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+			make_stock_entry as make_stock_entry_test_record,
+		)
+
+		rm = make_item(properties={"is_stock_item": 1}).name
+		fg = make_item(properties={"is_stock_item": 1}).name
+
+		make_stock_entry_test_record(
+			purpose="Material Receipt",
+			item_code=rm,
+			target="Stores - _TC",
+			qty=10,
+			basic_rate=100,
+		)
+		make_stock_entry_test_record(
+			purpose="Material Receipt",
+			item_code=rm,
+			target="Stores - _TC",
+			qty=10,
+			basic_rate=200,
+		)
+
+		bom = make_bom(item=fg, raw_materials=[rm], rate=150).name
+		wo = make_wo_order_test_record(
+			production_item=fg,
+			bom_no=bom,
+			qty=10,
+		)
+
+		mte = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
+		mte.items[0].s_warehouse = "Stores - _TC"
+		mte.insert().submit()
+
+		mce = frappe.get_doc(make_stock_entry(wo.name, "Material Consumption for Manufacture", 10))
+		mce.insert().submit()
+
+		me = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		me.insert().submit()
+
+		valuation_rate = sum([item.valuation_rate * item.transfer_qty for item in mce.items]) / 10
+		self.assertEqual(me.items[0].valuation_rate, valuation_rate)
+
 
 def prepare_boms_for_sub_assembly_test():
 	if not frappe.db.exists("BOM", {"item": "Test Final SF Item 1"}):
