@@ -92,9 +92,6 @@ def make_stock_entry(**args):
 		else:
 			args.qty = cint(args.qty)
 
-	if args.serial_no or args.batch_no:
-		args.use_serial_batch_fields = True
-
 	# purpose
 	if not args.purpose:
 		if args.source and args.target:
@@ -136,7 +133,7 @@ def make_stock_entry(**args):
 	serial_number = args.serial_no
 
 	bundle_id = None
-	if args.serial_no or args.batch_no or args.batches:
+	if not args.use_serial_batch_fields and (args.serial_no or args.batch_no or args.batches):
 		batches = frappe._dict({})
 		if args.batch_no:
 			batches = frappe._dict({args.batch_no: args.qty})
@@ -164,7 +161,11 @@ def make_stock_entry(**args):
 			.name
 		)
 
-	args.serial_no = serial_number
+		args["serial_no"] = ""
+		args["batch_no"] = ""
+
+	else:
+		args.serial_no = serial_number
 
 	s.append(
 		"items",

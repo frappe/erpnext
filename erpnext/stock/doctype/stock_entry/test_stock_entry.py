@@ -1587,6 +1587,7 @@ class TestStockEntry(FrappeTestCase):
 			qty=4,
 			to_warehouse="_Test Warehouse - _TC",
 			batch_no=batch.name,
+			use_serial_batch_fields=1,
 			do_not_save=True,
 		)
 
@@ -1744,6 +1745,51 @@ class TestStockEntry(FrappeTestCase):
 		for mr in mr_list:
 			mr.cancel()
 			mr.delete()
+
+	def test_use_serial_and_batch_fields(self):
+		item = make_item(
+			"Test Use Serial and Batch Item SN Item",
+			{"has_serial_no": 1, "is_stock_item": 1},
+		)
+
+		serial_nos = [
+			"Test Use Serial and Batch Item SN Item - SN 001",
+			"Test Use Serial and Batch Item SN Item - SN 002",
+		]
+
+		se = make_stock_entry(
+			item_code=item.name,
+			qty=2,
+			to_warehouse="_Test Warehouse - _TC",
+			use_serial_batch_fields=1,
+			serial_no="\n".join(serial_nos),
+		)
+
+		self.assertTrue(se.items[0].use_serial_batch_fields)
+		self.assertFalse(se.items[0].serial_no)
+		self.assertTrue(se.items[0].serial_and_batch_bundle)
+
+		for serial_no in serial_nos:
+			self.assertTrue(frappe.db.exists("Serial No", serial_no))
+			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Active")
+
+		se1 = make_stock_entry(
+			item_code=item.name,
+			qty=2,
+			from_warehouse="_Test Warehouse - _TC",
+			use_serial_batch_fields=1,
+			serial_no="\n".join(serial_nos),
+		)
+
+		se1.reload()
+
+		self.assertTrue(se1.items[0].use_serial_batch_fields)
+		self.assertFalse(se1.items[0].serial_no)
+		self.assertTrue(se1.items[0].serial_and_batch_bundle)
+
+		for serial_no in serial_nos:
+			self.assertTrue(frappe.db.exists("Serial No", serial_no))
+			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Delivered")
 
 
 def make_serialized_item(**args):
