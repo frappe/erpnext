@@ -982,6 +982,9 @@ class StockEntry(StockController):
 		already_picked_serial_nos = []
 
 		for row in self.items:
+			if row.use_serial_batch_fields and (row.serial_no or row.batch_no):
+				continue
+
 			if not row.s_warehouse:
 				continue
 
