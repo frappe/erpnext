@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-02-02 12:58\n"
+"PO-Revision-Date: 2024-02-12 17:41\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -23095,31 +23095,31 @@ msgstr ""
 #. Name of a DocType
 #: setup/doctype/designation/designation.json
 msgid "Designation"
-msgstr "Bezeichnung"
+msgstr ""
 
 #. Label of a Data field in DocType 'Designation'
 #: setup/doctype/designation/designation.json
 msgctxt "Designation"
 msgid "Designation"
-msgstr "Bezeichnung"
+msgstr ""
 
 #. Label of a Link field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Designation"
-msgstr "Bezeichnung"
+msgstr ""
 
 #. Label of a Data field in DocType 'Employee External Work History'
 #: setup/doctype/employee_external_work_history/employee_external_work_history.json
 msgctxt "Employee External Work History"
 msgid "Designation"
-msgstr "Bezeichnung"
+msgstr ""
 
 #. Label of a Link field in DocType 'Employee Internal Work History'
 #: setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 msgctxt "Employee Internal Work History"
 msgid "Designation"
-msgstr "Bezeichnung"
+msgstr ""
 
 #. Name of a role
 #: crm/doctype/lead/lead.json projects/doctype/project/project.json
