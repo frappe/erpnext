@@ -4,7 +4,7 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_to_date, flt, nowdate, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -520,6 +520,24 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		# Shouldn't throw duplicate entry error
 		make_serial_nos(item_code, serial_nos)
 		self.assertTrue(frappe.db.exists("Serial No", serial_no_id))
+
+	@change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1})
+	def test_duplicate_serial_and_batch_bundle(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+
+		serial_no = f"{item_code}-001"
+		serial_nos = [{"serial_no": serial_no, "qty": 1}]
+		make_serial_nos(item_code, serial_nos)
+
+		pr1 = make_purchase_receipt(item=item_code, qty=1, rate=500, serial_no=[serial_no])
+		pr2 = make_purchase_receipt(item=item_code, qty=1, rate=500, do_not_save=True)
+
+		pr1.reload()
+		pr2.items[0].serial_and_batch_bundle = pr1.items[0].serial_and_batch_bundle
+
+		self.assertRaises(frappe.exceptions.ValidationError, pr2.save)
 
 
 def get_batch_from_bundle(bundle):
