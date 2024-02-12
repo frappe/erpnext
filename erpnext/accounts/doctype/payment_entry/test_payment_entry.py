@@ -1070,6 +1070,8 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, pe_draft.submit)
 
 	def test_details_update_on_reference_table(self):
+		from erpnext.accounts.party import get_party_account
+
 		so = make_sales_order(
 			customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_submit=True
 		)
@@ -1084,7 +1086,7 @@ class TestPaymentEntry(FrappeTestCase):
 
 		ref_details = get_reference_details(so.doctype, so.name, pe.paid_from_account_currency)
 		expected_response = {
-			"account": pe.paid_from,
+			"account": get_party_account("Customer", so.customer, so.company),
 			"total_amount": 5000.0,
 			"outstanding_amount": 5000.0,
 			"exchange_rate": 1.0,
