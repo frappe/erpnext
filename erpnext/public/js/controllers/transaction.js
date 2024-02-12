@@ -1504,30 +1504,32 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	remove_pricing_rule_for_item(item) {
 		let me = this;
-		return this.frm.call({
-			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rule_for_item",
-			args: {
-				pricing_rules: item.pricing_rules,
-				item_details: {
-					"doctype": item.doctype,
-					"name": item.name,
-					"item_code": item.item_code,
-					"pricing_rules": item.pricing_rules,
-					"parenttype": item.parenttype,
-					"parent": item.parent,
-					"price_list_rate": item.price_list_rate
+		if (item.pricing_rules){
+			return this.frm.call({
+				method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rule_for_item",
+				args: {
+					pricing_rules: item.pricing_rules,
+					item_details: {
+						"doctype": item.doctype,
+						"name": item.name,
+						"item_code": item.item_code,
+						"pricing_rules": item.pricing_rules,
+						"parenttype": item.parenttype,
+						"parent": item.parent,
+						"price_list_rate": item.price_list_rate
+					},
+					item_code: item.item_code,
+					rate: item.price_list_rate,
 				},
-				item_code: item.item_code,
-				rate: item.price_list_rate,
-			},
-			callback: function(r) {
-				if (!r.exc && r.message) {
-					me.remove_pricing_rule(r.message);
-					me.calculate_taxes_and_totals();
-					if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						me.remove_pricing_rule(r.message);
+						me.calculate_taxes_and_totals();
+						if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 
 	apply_pricing_rule(item, calculate_taxes_and_totals) {
