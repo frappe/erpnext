@@ -942,6 +942,9 @@ class StockController(AccountsController):
 			"Stock Reconciliation",
 		)
 
+		if not frappe.get_all("Putaway Rule", limit=1):
+			return
+
 		if self.doctype == "Purchase Invoice" and self.get("update_stock") == 0:
 			valid_doctype = False
 
