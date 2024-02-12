@@ -2317,6 +2317,23 @@ class TestPurchaseReceipt(FrappeTestCase):
 			serial_no_status = frappe.db.get_value("Serial No", sn, "status")
 			self.assertTrue(serial_no_status != "Active")
 
+	def test_multi_currency_pr(self):
+		"""Create and submit a Purchase Receipt in a foreign currency.
+
+		The purpose of this test is to check if this causes a debit/credit
+		mismatch error due to any conversion rate miscalculation.
+		"""
+		make_purchase_receipt(
+			company="_Test Company with perpetual inventory",
+			warehouse="Stores - TCP1",
+			supplier_warehouse="Work In Progress - TCP1",
+			currency="USD",
+			conversion_rate=83,
+			qty=1,
+			rate=100,
+			get_taxes_and_charges=True,
+		)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
