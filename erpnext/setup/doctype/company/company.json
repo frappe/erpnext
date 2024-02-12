@@ -694,7 +694,7 @@
    "fieldname": "default_advance_received_account",
    "fieldtype": "Link",
    "label": "Default Advance Received Account",
-   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "mandatory_depends_on": "book_advance_payments_in_separate_party_account",
    "options": "Account"
   },
   {
@@ -702,7 +702,7 @@
    "fieldname": "default_advance_paid_account",
    "fieldtype": "Link",
    "label": "Default Advance Paid Account",
-   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "mandatory_depends_on": "book_advance_payments_in_separate_party_account",
    "options": "Account"
   },
   {
