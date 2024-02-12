@@ -748,7 +748,7 @@ class JobCard(Document):
 			fields=["total_time_in_mins", "hour_rate"],
 			filters={"is_corrective_job_card": 1, "docstatus": 1, "work_order": self.work_order},
 		):
-			wo.corrective_operation_cost += flt(row.total_time_in_mins) * flt(row.hour_rate)
+			wo.corrective_operation_cost += flt(row.total_time_in_mins / 60) * flt(row.hour_rate)
 
 		wo.calculate_operating_cost()
 		wo.flags.ignore_validate_update_after_submit = True
