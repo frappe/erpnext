@@ -90,8 +90,6 @@ class AssetCapitalization(StockController):
 			asset_doc.db_set("capitalized_in", None)
 			if asset_doc.docstatus == 1:
 				asset_doc.cancel()
-			elif asset_doc.docstatus == 0:
-				asset_doc.delete()
 
 	def set_title(self):
 		self.title = self.target_asset_name or self.target_item_name or self.target_item_code
