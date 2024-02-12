@@ -11,6 +11,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		super.setup(doc);
 	}
 	company() {
+		super.company();
 		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 
 		let me = this;
