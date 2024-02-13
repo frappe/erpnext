@@ -10,6 +10,10 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 	}
+	company() {
+		super.company();
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	}
 	onload() {
 		var me = this;
 		super.onload();
