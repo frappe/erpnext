@@ -508,7 +508,7 @@ def modify_depreciation_schedule_for_asset_repairs(asset):
 
 
 def reverse_depreciation_entry_made_after_disposal(asset, date):
-	if not asset.calculate_depreciation:
+	if not asset.calculate_depreciation or not asset.get("schedules"):
 		return
 
 	row = -1
