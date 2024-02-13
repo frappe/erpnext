@@ -93,3 +93,6 @@ class SalesInvoiceItem(Document):
 	# end: auto-generated types
 
 	pass
+
+
+# Will it break?
