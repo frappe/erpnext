@@ -46,6 +46,9 @@ class BatchExpiredError(frappe.ValidationError):
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
+
+		if self.docstatus == 0:
+			self.validate_duplicate_serial_and_batch_bundle()
 		if not self.get("is_return"):
 			self.validate_inspection()
 		self.validate_serialized_batch()
@@ -54,6 +57,32 @@ class StockController(AccountsController):
 		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
+
+	def validate_duplicate_serial_and_batch_bundle(self):
+		if sbb_list := [
+			item.get("serial_and_batch_bundle")
+			for item in self.items
+			if item.get("serial_and_batch_bundle")
+		]:
+			SLE = frappe.qb.DocType("Stock Ledger Entry")
+			data = (
+				frappe.qb.from_(SLE)
+				.select(SLE.voucher_type, SLE.voucher_no, SLE.serial_and_batch_bundle)
+				.where(
+					(SLE.docstatus == 1)
+					& (SLE.serial_and_batch_bundle.notnull())
+					& (SLE.serial_and_batch_bundle.isin(sbb_list))
+				)
+				.limit(1)
+			).run(as_dict=True)
+
+			if data:
+				data = data[0]
+				frappe.throw(
+					_("Serial and Batch Bundle {0} is already used in {1} {2}.").format(
+						frappe.bold(data.serial_and_batch_bundle), data.voucher_type, data.voucher_no
+					)
+				)
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if self.docstatus == 2:
