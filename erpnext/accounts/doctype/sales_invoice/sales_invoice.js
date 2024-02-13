@@ -10,26 +10,6 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 		this.setup_posting_date_time_check();
 		super.setup(doc);
 	}
-	company() {
-		super.company();
-		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
-
-		let me = this;
-		if (this.frm.doc.company) {
-			frappe.call({
-				method:
-					"erpnext.accounts.party.get_party_account",
-				args: {
-					party_type: 'Customer',
-					party: this.frm.doc.customer,
-					company: this.frm.doc.company
-				},
-				callback: (response) => {
-					if (response) me.frm.set_value("debit_to", response.message);
-				},
-			});
-		}
-	}
 	onload() {
 		var me = this;
 		super.onload();
