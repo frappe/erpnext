@@ -217,8 +217,8 @@ class BuyingController(SubcontractingController):
 			lc_voucher_data = frappe.db.sql(
 				"""select sum(applicable_charges), cost_center
 				from `tabLanded Cost Item`
-				where docstatus = 1 and purchase_receipt_item = %s""",
-				d.name,
+				where docstatus = 1 and purchase_receipt_item = %s and receipt_document = %s""",
+				(d.name, self.name),
 			)
 			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
 			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:

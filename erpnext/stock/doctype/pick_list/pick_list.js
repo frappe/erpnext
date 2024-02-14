@@ -77,6 +77,9 @@ frappe.ui.form.on('Pick List', {
 				},
 				freeze: 1,
 				freeze_message: __("Setting Item Locations..."),
+				callback(r) {
+					refresh_field("locations");
+				}
 			});
 		}
 	},

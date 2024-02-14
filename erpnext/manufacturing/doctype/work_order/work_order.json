@@ -447,7 +447,8 @@
    "no_copy": 1,
    "options": "Production Plan",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "production_plan_item",
@@ -592,7 +593,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-08-11 18:35:49.852069",
+ "modified": "2024-02-11 15:47:13.454422",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
