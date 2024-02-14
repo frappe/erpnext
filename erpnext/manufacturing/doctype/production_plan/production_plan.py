@@ -576,7 +576,10 @@ class ProductionPlan(Document):
 				"project": self.project,
 			}
 
-			key = (d.item_code, d.sales_order, d.warehouse)
+			key = (d.item_code, d.sales_order, d.sales_order_item, d.warehouse)
+			if self.combine_items:
+				key = (d.item_code, d.sales_order, d.warehouse)
+
 			if not d.sales_order:
 				key = (d.name, d.item_code, d.warehouse)
 
