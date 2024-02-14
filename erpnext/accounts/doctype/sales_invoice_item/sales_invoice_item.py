@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 
@@ -92,4 +94,11 @@ class SalesInvoiceItem(Document):
 		weight_uom: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	def validate_cost_center(self, company: str):
+		cost_center_company = frappe.get_cached_value("Cost Center", self.cost_center, "company")
+		if cost_center_company != company:
+			frappe.throw(
+				_("Row #{0}: Cost Center {1} does not belong to company {2}").format(
+					frappe.bold(self.idx), frappe.bold(self.cost_center), frappe.bold(company)
+				)
+			)
