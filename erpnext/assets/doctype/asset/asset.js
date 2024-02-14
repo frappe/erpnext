@@ -322,7 +322,7 @@ frappe.ui.form.on('Asset', {
 	},
 
 	make_schedules_editable: function(frm) {
-		if (frm.doc.finance_books.length) {
+		if (frm.doc.finance_books && frm.doc.finance_books.length) {
 			var is_manual_hence_editable = frm.doc.finance_books.filter(d => d.depreciation_method == "Manual").length > 0
 				? true : false;
 			var is_shift_hence_editable = frm.doc.finance_books.filter(d => d.shift_based).length > 0

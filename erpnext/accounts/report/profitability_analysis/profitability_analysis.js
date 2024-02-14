@@ -105,7 +105,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"to_fiscal_year": data.fiscal_year
 			};
 
-			if(data.based_on == 'cost_center'){
+			if(data.based_on == 'Cost Center'){
 				frappe.route_options["cost_center"] = data.account
 			} else {
 				frappe.route_options["project"] = data.account

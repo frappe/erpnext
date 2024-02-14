@@ -1047,6 +1047,7 @@ def validate_cancelled_item(item_code, docstatus=None):
 		frappe.throw(_("Item {0} is cancelled").format(item_code))
 
 
+@frappe.request_cache
 def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
 	# get last purchase order item details
