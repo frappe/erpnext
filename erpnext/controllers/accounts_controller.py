@@ -2528,11 +2528,16 @@ def get_advance_journal_entries(
 		conditions.append("ifnull(t2.reference_name, '')=''")
 
 	if order_list:
+<<<<<<< HEAD
 		order_condition = ", ".join(["%s"] * len(order_list))
 		conditions.append(
 			" (t2.reference_type = '{0}' and ifnull(t2.reference_name, '') in ({1}))".format(
 				order_doctype, order_condition
 			)
+=======
+		q = q.where(
+			(journal_acc.reference_type == order_doctype) & ((journal_acc.reference_name).isin(order_list))
+>>>>>>> b124081065 (fix: use correct field name in accounts controller (#39884))
 		)
 
 	reference_condition = " and (" + " or ".join(conditions) + ")" if conditions else ""
