@@ -206,7 +206,7 @@ class StockController(AccountsController):
 						"type_of_transaction": type_of_transaction,
 						"company": self.company,
 						"is_rejected": 1 if row.get("rejected_warehouse") else 0,
-						"serial_nos": get_serial_nos(row.serial_no) if row.serial_no else None,
+						"serial_nos": get_serial_nos(row.serial_no, row.item_code) if row.serial_no else None,
 						"batches": frappe._dict({row.batch_no: qty}) if row.batch_no else None,
 						"batch_no": row.batch_no,
 						"use_serial_batch_fields": row.use_serial_batch_fields,
