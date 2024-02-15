@@ -51,7 +51,6 @@ class BlanketOrder(Document):
 		item_ref = {}
 		if self.blanket_order_type == "Selling":
 			item_ref = self.get_customer_items_ref()
-			print(item_ref)
 		else:
 			item_ref = self.get_supplier_items_ref()
 
