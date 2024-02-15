@@ -2,6 +2,7 @@
 # See license.txt
 
 import json
+import time
 from uuid import uuid4
 
 import frappe
@@ -1142,6 +1143,89 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			backdated_receipt.cancel()
 		except Exception as e:
 			self.fail("Double processing of qty for clashing timestamp.")
+
+	def test_previous_sle_with_clashed_timestamp(self):
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		reciept1 = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date="2021-01-01",
+			posting_time="02:00:00",
+		)
+
+		time.sleep(3)
+
+		reciept2 = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=5,
+			posting_date="2021-01-01",
+			rate=10,
+			posting_time="02:00:00.1234",
+		)
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": reciept1.name},
+			fields=["qty_after_transaction", "actual_qty"],
+		)
+		self.assertEqual(sle[0].qty_after_transaction, 100)
+		self.assertEqual(sle[0].actual_qty, 100)
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": reciept2.name},
+			fields=["qty_after_transaction", "actual_qty"],
+		)
+		self.assertEqual(sle[0].qty_after_transaction, 105)
+		self.assertEqual(sle[0].actual_qty, 5)
+
+	def test_backdated_sle_with_same_timestamp(self):
+
+		item = make_item().name
+		warehouse = "_Test Warehouse - _TC"
+
+		reciept1 = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=5,
+			posting_date="2021-01-01",
+			rate=10,
+			posting_time="02:00:00.1234",
+		)
+
+		time.sleep(3)
+
+		# backdated entry with same timestamp but different ms part
+		reciept2 = make_stock_entry(
+			item_code=item,
+			to_warehouse=warehouse,
+			qty=100,
+			rate=10,
+			posting_date="2021-01-01",
+			posting_time="02:00:00",
+		)
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": reciept1.name},
+			fields=["qty_after_transaction", "actual_qty"],
+		)
+		self.assertEqual(sle[0].qty_after_transaction, 105)
+		self.assertEqual(sle[0].actual_qty, 5)
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": reciept2.name},
+			fields=["qty_after_transaction", "actual_qty"],
+		)
+		self.assertEqual(sle[0].qty_after_transaction, 100)
+		self.assertEqual(sle[0].actual_qty, 100)
 
 	@change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
 	def test_transfer_invariants(self):
