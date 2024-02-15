@@ -64,7 +64,9 @@ def append_filters(query, report_filters, operations, job_card):
 	):
 		if report_filters.get(field):
 			if field == "serial_no":
-				query = query.where(job_card[field].like("%{}%".format(report_filters.get(field))))
+				sn_id = report_filters.get(field)
+				serial_no = frappe.db.get_value("Serial No", sn_id, "serial_no")
+				query = query.where(job_card[field].like(f"%{serial_no}%"))
 			elif field == "operation":
 				query = query.where(job_card[field].isin(operations))
 			else:
