@@ -21,6 +21,9 @@ from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
 )
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_type_of_transaction,
+)
 from erpnext.stock.stock_ledger import get_items_to_be_repost
 
 
@@ -43,6 +46,9 @@ class BatchExpiredError(frappe.ValidationError):
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
+
+		if self.docstatus == 0:
+			self.validate_duplicate_serial_and_batch_bundle()
 		if not self.get("is_return"):
 			self.validate_inspection()
 		self.validate_serialized_batch()
@@ -51,6 +57,32 @@ class StockController(AccountsController):
 		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
+
+	def validate_duplicate_serial_and_batch_bundle(self):
+		if sbb_list := [
+			item.get("serial_and_batch_bundle")
+			for item in self.items
+			if item.get("serial_and_batch_bundle")
+		]:
+			SLE = frappe.qb.DocType("Stock Ledger Entry")
+			data = (
+				frappe.qb.from_(SLE)
+				.select(SLE.voucher_type, SLE.voucher_no, SLE.serial_and_batch_bundle)
+				.where(
+					(SLE.docstatus == 1)
+					& (SLE.serial_and_batch_bundle.notnull())
+					& (SLE.serial_and_batch_bundle.isin(sbb_list))
+				)
+				.limit(1)
+			).run(as_dict=True)
+
+			if data:
+				data = data[0]
+				frappe.throw(
+					_("Serial and Batch Bundle {0} is already used in {1} {2}.").format(
+						frappe.bold(data.serial_and_batch_bundle), data.voucher_type, data.voucher_no
+					)
+				)
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if self.docstatus == 2:
@@ -125,6 +157,85 @@ class StockController(AccountsController):
 			if hasattr(row, "serial_no") and row.serial_no:
 				# remove extra whitespace and store one serial no on each line
 				row.serial_no = clean_serial_no_string(row.serial_no, row.item_code)
+
+	def make_bundle_using_old_serial_batch_fields(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+		# To handle test cases
+		if frappe.flags.in_test and frappe.flags.use_serial_and_batch_fields:
+			return
+
+		table_name = "items"
+		if self.doctype == "Asset Capitalization":
+			table_name = "stock_items"
+
+		for row in self.get(table_name):
+			if not row.serial_no and not row.batch_no and not row.get("rejected_serial_no"):
+				continue
+
+			if not row.use_serial_batch_fields and (
+				row.serial_no or row.batch_no or row.get("rejected_serial_no")
+			):
+				frappe.throw(_("Please enable Use Old Serial / Batch Fields to make_bundle"))
+
+			if row.use_serial_batch_fields and (
+				not row.serial_and_batch_bundle and not row.get("rejected_serial_and_batch_bundle")
+			):
+				if self.doctype == "Stock Reconciliation":
+					qty = row.qty
+					type_of_transaction = "Inward"
+					warehouse = row.warehouse
+				else:
+					qty = row.stock_qty if self.doctype != "Stock Entry" else row.transfer_qty
+					type_of_transaction = get_type_of_transaction(self, row)
+					warehouse = (
+						row.warehouse if self.doctype != "Stock Entry" else row.s_warehouse or row.t_warehouse
+					)
+
+				sn_doc = SerialBatchCreation(
+					{
+						"item_code": row.item_code,
+						"warehouse": warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"voucher_detail_no": row.name,
+						"qty": qty,
+						"type_of_transaction": type_of_transaction,
+						"company": self.company,
+						"is_rejected": 1 if row.get("rejected_warehouse") else 0,
+						"serial_nos": get_serial_nos(row.serial_no) if row.serial_no else None,
+						"batches": frappe._dict({row.batch_no: qty}) if row.batch_no else None,
+						"batch_no": row.batch_no,
+						"use_serial_batch_fields": row.use_serial_batch_fields,
+						"do_not_submit": True,
+					}
+				).make_serial_and_batch_bundle()
+
+				if sn_doc.is_rejected:
+					row.rejected_serial_and_batch_bundle = sn_doc.name
+					row.db_set(
+						{
+							"rejected_serial_and_batch_bundle": sn_doc.name,
+							"rejected_serial_no": "",
+						}
+					)
+				else:
+					row.serial_and_batch_bundle = sn_doc.name
+					row.db_set(
+						{
+							"serial_and_batch_bundle": sn_doc.name,
+							"serial_no": "",
+							"batch_no": "",
+						}
+					)
+
+	def set_use_serial_batch_fields(self):
+		if frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
+			for row in self.items:
+				row.use_serial_batch_fields = 1
 
 	def get_gl_entries(
 		self, warehouse_account=None, default_expense_account=None, default_cost_center=None
@@ -859,6 +970,9 @@ class StockController(AccountsController):
 			"Purchase Invoice",
 			"Stock Reconciliation",
 		)
+
+		if not frappe.get_all("Putaway Rule", limit=1):
+			return
 
 		if self.doctype == "Purchase Invoice" and self.get("update_stock") == 0:
 			valid_doctype = False

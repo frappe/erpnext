@@ -47,6 +47,7 @@ class PackedItem(Document):
 		serial_no: DF.Text | None
 		target_warehouse: DF.Link | None
 		uom: DF.Link | None
+		use_serial_batch_fields: DF.Check
 		warehouse: DF.Link | None
 	# end: auto-generated types
 

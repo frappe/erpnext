@@ -1094,7 +1094,7 @@ def create_stock_reconciliation(**args):
 	)
 
 	bundle_id = None
-	if args.batch_no or args.serial_no:
+	if not args.use_serial_batch_fields and (args.batch_no or args.serial_no):
 		batches = frappe._dict({})
 		if args.batch_no:
 			batches[args.batch_no] = args.qty
@@ -1125,7 +1125,10 @@ def create_stock_reconciliation(**args):
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"qty": args.qty,
 			"valuation_rate": args.rate,
+			"serial_no": args.serial_no if args.use_serial_batch_fields else None,
+			"batch_no": args.batch_no if args.use_serial_batch_fields else None,
 			"serial_and_batch_bundle": bundle_id,
+			"use_serial_batch_fields": args.use_serial_batch_fields,
 		},
 	)
 

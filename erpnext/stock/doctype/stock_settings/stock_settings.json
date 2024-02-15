@@ -51,6 +51,7 @@
   "disable_serial_no_and_batch_selector",
   "use_naming_series",
   "naming_series_prefix",
+  "use_serial_batch_fields",
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
@@ -423,6 +424,12 @@
    "label": "Auto Reserve Stock for Sales Order on Purchase"
   },
   {
+   "default": "1",
+   "fieldname": "use_serial_batch_fields",
+   "fieldtype": "Check",
+   "label": "Use Serial / Batch Fields"
+  },
+  {
    "default": "0",
    "description": "Allow duplicate serial numbers across different Items. Maintain uniqueness per Item.",
    "fieldname": "allow_duplicate_serial_nos",
@@ -435,7 +442,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-02-01 19:40:52.143457",
+ "modified": "2024-02-15 12:01:31.931864",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

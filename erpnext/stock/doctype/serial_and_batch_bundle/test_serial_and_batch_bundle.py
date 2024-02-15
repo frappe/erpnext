@@ -4,7 +4,7 @@
 import json
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, add_to_date, flt, nowdate, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
@@ -136,6 +136,7 @@ class TestSerialandBatchBundle(FrappeTestCase):
 
 	def test_old_batch_valuation(self):
 		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
 		batch_item_code = "Old Batch Item Valuation 1"
 		make_item(
 			batch_item_code,
@@ -240,6 +241,7 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		bundle_doc.submit()
 
 		frappe.flags.ignore_serial_batch_bundle_validation = False
+		frappe.flags.use_serial_and_batch_fields = False
 
 	def test_old_serial_no_valuation(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -259,6 +261,7 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		)
 
 		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
 
 		serial_no_id = "Old Serial No 1"
 		if not frappe.db.exists("Serial No", serial_no_id):
@@ -319,6 +322,9 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		bundle_doc.reload()
 		for row in bundle_doc.entries:
 			self.assertEqual(flt(row.stock_value_difference, 2), -100.00)
+
+		frappe.flags.ignore_serial_batch_bundle_validation = False
+		frappe.flags.use_serial_and_batch_fields = False
 
 	def test_batch_not_belong_to_serial_no(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -514,6 +520,24 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		# Shouldn't throw duplicate entry error
 		make_serial_nos(item_code, serial_nos)
 		self.assertTrue(frappe.db.exists("Serial No", serial_no_id))
+
+	@change_settings("Stock Settings", {"auto_create_serial_and_batch_bundle_for_outward": 1})
+	def test_duplicate_serial_and_batch_bundle(self):
+		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+
+		item_code = make_item(properties={"is_stock_item": 1, "has_serial_no": 1}).name
+
+		serial_no = f"{item_code}-001"
+		serial_nos = [{"serial_no": serial_no, "qty": 1}]
+		make_serial_nos(item_code, serial_nos)
+
+		pr1 = make_purchase_receipt(item=item_code, qty=1, rate=500, serial_no=[serial_no])
+		pr2 = make_purchase_receipt(item=item_code, qty=1, rate=500, do_not_save=True)
+
+		pr1.reload()
+		pr2.items[0].serial_and_batch_bundle = pr1.items[0].serial_and_batch_bundle
+
+		self.assertRaises(frappe.exceptions.ValidationError, pr2.save)
 
 
 def get_batch_from_bundle(bundle):

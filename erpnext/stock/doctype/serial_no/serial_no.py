@@ -209,7 +209,7 @@ def get_serial_nos(serial_no, item_code=None):
 	if isinstance(serial_no, list):
 		return serial_no
 
-	split_serial_nos = cstr(serial_no).strip().upper().replace(",", "\n").split("\n")
+	split_serial_nos = cstr(serial_no).strip().replace(",", "\n").split("\n")
 	return [_get_serial_no_name(s.strip()) for s in split_serial_nos if s.strip()]
 
 

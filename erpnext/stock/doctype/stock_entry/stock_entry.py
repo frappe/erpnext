@@ -274,6 +274,7 @@ class StockEntry(StockController):
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
+		self.make_bundle_using_old_serial_batch_fields()
 		self.update_stock_ledger()
 		self.update_work_order()
 		self.validate_subcontract_order()
@@ -903,14 +904,62 @@ class StockEntry(StockController):
 				return flt(outgoing_items_cost / total_fg_qty)
 
 	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0) -> float:
+		settings = frappe.get_single("Manufacturing Settings")
 		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_scrap_item])
 
-		# Get raw materials cost from BOM if multiple material consumption entries
-		if not outgoing_items_cost and frappe.db.get_single_value(
-			"Manufacturing Settings", "material_consumption", cache=True
-		):
-			bom_items = self.get_bom_raw_materials(finished_item_qty)
-			outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
+		if settings.material_consumption:
+			if settings.get_rm_cost_from_consumption_entry and self.work_order:
+
+				# Validate only if Material Consumption Entry exists for the Work Order.
+				if frappe.db.exists(
+					"Stock Entry",
+					{
+						"docstatus": 1,
+						"work_order": self.work_order,
+						"purpose": "Material Consumption for Manufacture",
+					},
+				):
+					for item in self.items:
+						if not item.is_finished_item and not item.is_scrap_item:
+							label = frappe.get_meta(settings.doctype).get_label("get_rm_cost_from_consumption_entry")
+							frappe.throw(
+								_(
+									"Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
+								).format(
+									item.idx,
+									frappe.bold(label),
+									frappe.bold("Manufacture"),
+									frappe.bold("Material Consumption for Manufacture"),
+								)
+							)
+
+					if frappe.db.exists(
+						"Stock Entry", {"docstatus": 1, "work_order": self.work_order, "purpose": "Manufacture"}
+					):
+						frappe.throw(
+							_("Only one {0} entry can be created against the Work Order {1}").format(
+								frappe.bold("Manufacture"), frappe.bold(self.work_order)
+							)
+						)
+
+					SE = frappe.qb.DocType("Stock Entry")
+					SE_ITEM = frappe.qb.DocType("Stock Entry Detail")
+
+					outgoing_items_cost = (
+						frappe.qb.from_(SE)
+						.left_join(SE_ITEM)
+						.on(SE.name == SE_ITEM.parent)
+						.select(Sum(SE_ITEM.valuation_rate * SE_ITEM.transfer_qty))
+						.where(
+							(SE.docstatus == 1)
+							& (SE.work_order == self.work_order)
+							& (SE.purpose == "Material Consumption for Manufacture")
+						)
+					).run()[0][0] or 0
+
+			elif not outgoing_items_cost:
+				bom_items = self.get_bom_raw_materials(finished_item_qty)
+				outgoing_items_cost = sum([flt(row.qty) * flt(row.rate) for row in bom_items.values()])
 
 		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
 
@@ -981,6 +1030,9 @@ class StockEntry(StockController):
 		already_picked_serial_nos = []
 
 		for row in self.items:
+			if row.use_serial_batch_fields and (row.serial_no or row.batch_no):
+				continue
+
 			if not row.s_warehouse:
 				continue
 
@@ -988,7 +1040,7 @@ class StockEntry(StockController):
 				continue
 
 			bundle_doc = None
-			if row.serial_and_batch_bundle and abs(row.qty) != abs(
+			if row.serial_and_batch_bundle and abs(row.transfer_qty) != abs(
 				frappe.get_cached_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "total_qty")
 			):
 				bundle_doc = SerialBatchCreation(
@@ -998,7 +1050,7 @@ class StockEntry(StockController):
 						"serial_and_batch_bundle": row.serial_and_batch_bundle,
 						"type_of_transaction": "Outward",
 						"ignore_serial_nos": already_picked_serial_nos,
-						"qty": row.qty * -1,
+						"qty": row.transfer_qty * -1,
 					}
 				).update_serial_and_batch_entries()
 			elif not row.serial_and_batch_bundle:
@@ -1010,7 +1062,7 @@ class StockEntry(StockController):
 						"posting_time": self.posting_time,
 						"voucher_type": self.doctype,
 						"voucher_detail_no": row.name,
-						"qty": row.qty * -1,
+						"qty": row.transfer_qty * -1,
 						"ignore_serial_nos": already_picked_serial_nos,
 						"type_of_transaction": "Outward",
 						"company": self.company,

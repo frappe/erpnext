@@ -2278,6 +2278,93 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr_doc.reload()
 		self.assertFalse(pr_doc.items[0].from_warehouse)
 
+	def test_use_serial_batch_fields_for_serial_nos(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		item_code = make_item(
+			"_Test Use Serial Fields Item Serial Item",
+			properties={"has_serial_no": 1, "serial_no_series": "SNU-TSFISI-.#####"},
+		).name
+
+		serial_nos = [
+			"SNU-TSFISI-000011",
+			"SNU-TSFISI-000012",
+			"SNU-TSFISI-000013",
+			"SNU-TSFISI-000014",
+			"SNU-TSFISI-000015",
+		]
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=5,
+			serial_no="\n".join(serial_nos),
+			use_serial_batch_fields=1,
+			rate=100,
+		)
+
+		self.assertEqual(pr.items[0].use_serial_batch_fields, 1)
+		self.assertFalse(pr.items[0].serial_no)
+		self.assertTrue(pr.items[0].serial_and_batch_bundle)
+
+		sbb_doc = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
+
+		for row in sbb_doc.entries:
+			self.assertTrue(row.serial_no in serial_nos)
+
+		serial_nos.remove("SNU-TSFISI-000015")
+
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			serial_no="\n".join(serial_nos),
+			qty=4,
+			warehouse=pr.items[0].warehouse,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		sr.reload()
+
+		serial_nos = get_serial_nos(sr.items[0].current_serial_no)
+		self.assertEqual(len(serial_nos), 5)
+		self.assertEqual(sr.items[0].current_qty, 5)
+
+		new_serial_nos = get_serial_nos(sr.items[0].serial_no)
+		self.assertEqual(len(new_serial_nos), 4)
+		self.assertEqual(sr.items[0].qty, 4)
+		self.assertEqual(sr.items[0].use_serial_batch_fields, 1)
+		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
+		self.assertFalse(sr.items[0].serial_and_batch_bundle)
+		self.assertTrue(sr.items[0].current_serial_no)
+		sr.submit()
+
+		sr.reload()
+		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
+		self.assertTrue(sr.items[0].serial_and_batch_bundle)
+
+		serial_no_status = frappe.db.get_value("Serial No", "SNU-TSFISI-000015", "status")
+
+		self.assertTrue(serial_no_status != "Active")
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=4,
+			serial_no="\n".join(new_serial_nos),
+			use_serial_batch_fields=1,
+		)
+
+		self.assertTrue(dn.items[0].serial_and_batch_bundle)
+		self.assertEqual(dn.items[0].qty, 4)
+		doc = frappe.get_doc("Serial and Batch Bundle", dn.items[0].serial_and_batch_bundle)
+		for row in doc.entries:
+			self.assertTrue(row.serial_no in new_serial_nos)
+
+		for sn in new_serial_nos:
+			serial_no_status = frappe.db.get_value("Serial No", sn, "status")
+			self.assertTrue(serial_no_status != "Active")
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -2447,7 +2534,7 @@ def make_purchase_receipt(**args):
 	uom = args.uom or frappe.db.get_value("Item", item_code, "stock_uom") or "_Test UOM"
 
 	bundle_id = None
-	if args.get("batch_no") or args.get("serial_no"):
+	if not args.use_serial_batch_fields and (args.get("batch_no") or args.get("serial_no")):
 		batches = {}
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
@@ -2489,6 +2576,9 @@ def make_purchase_receipt(**args):
 			"cost_center": args.cost_center
 			or frappe.get_cached_value("Company", pr.company, "cost_center"),
 			"asset_location": args.location or "Test Location",
+			"use_serial_batch_fields": args.use_serial_batch_fields or 0,
+			"serial_no": args.serial_no if args.use_serial_batch_fields else "",
+			"batch_no": args.batch_no if args.use_serial_batch_fields else "",
 		},
 	)
 

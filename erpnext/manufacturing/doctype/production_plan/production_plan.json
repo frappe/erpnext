@@ -298,7 +298,8 @@
    "no_copy": 1,
    "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nClosed\nCancelled\nMaterial Requested",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "amended_from",
@@ -436,7 +437,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-26 16:31:13.740777",
+ "modified": "2024-02-11 15:42:47.642481",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
