@@ -19,7 +19,7 @@
  "fields": [
   {
    "fieldname": "naming_series",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
    "options": "PROJ-UPD-.YYYY.-"
