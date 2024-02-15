@@ -927,7 +927,7 @@ class SerialBatchCreation:
 	def make_serial_no_if_not_exists(self):
 		non_exists_serial_nos = []
 		for row in self.serial_nos:
-			if not frappe.db.exists("Serial No", row):
+			if not frappe.db.exists("Serial No", {"serial_no": row, "item_code": self.item_code}):
 				non_exists_serial_nos.append(row)
 
 		if non_exists_serial_nos:
