@@ -925,57 +925,24 @@ class SerialBatchCreation:
 			self.batches = frappe._dict({self.batch_no: abs(self.actual_qty)})
 
 	def make_serial_no_if_not_exists(self):
-		non_exists_serial_nos = []
-		for row in self.serial_nos:
-			if not frappe.db.exists("Serial No", {"serial_no": row, "item_code": self.item_code}):
-				non_exists_serial_nos.append(row)
+		batch_no = list(self.batches.keys())[0] if self.batches else None
+		self.serial_nos = [
+			serial_no
+			if frappe.db.exists("Serial No", {"serial_no": serial_no, "item_code": self.item_code})
+			else self.make_serial_no(serial_no, batch_no)
+			for serial_no in self.serial_nos
+		]
 
-		if non_exists_serial_nos:
-			self.make_serial_nos(non_exists_serial_nos)
+	def make_serial_no(self, serial_no: str, batch_no: str | None) -> str:
+		sn_doc = frappe.new_doc("Serial No")
+		sn_doc.serial_no = serial_no
+		sn_doc.company = self.company
+		sn_doc.item_code = self.item_code
+		sn_doc.status = "Active"
+		sn_doc.batch_no = batch_no
+		sn_doc.save()
 
-	def make_serial_nos(self, serial_nos):
-		serial_nos_details = []
-		batch_no = None
-		if self.batches:
-			batch_no = list(self.batches.keys())[0]
-
-		for serial_no in serial_nos:
-			serial_nos_details.append(
-				(
-					serial_no,
-					serial_no,
-					now(),
-					now(),
-					frappe.session.user,
-					frappe.session.user,
-					self.warehouse,
-					self.company,
-					self.item_code,
-					self.item_name,
-					self.description,
-					"Active",
-					batch_no,
-				)
-			)
-
-		if serial_nos_details:
-			fields = [
-				"name",
-				"serial_no",
-				"creation",
-				"modified",
-				"owner",
-				"modified_by",
-				"warehouse",
-				"company",
-				"item_code",
-				"item_name",
-				"description",
-				"status",
-				"batch_no",
-			]
-
-			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
+		return sn_doc.name
 
 	def set_serial_batch_entries(self, doc):
 		if self.get("serial_nos"):
