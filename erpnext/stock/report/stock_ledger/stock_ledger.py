@@ -320,13 +320,43 @@ def get_stock_ledger_entries(filters, items):
 	if items:
 		query = query.where(sle.item_code.isin(items))
 
-	for field in ["voucher_no", "batch_no", "project", "company"]:
+	for field in ["voucher_no", "project", "company"]:
 		if filters.get(field) and field not in inventory_dimension_fields:
 			query = query.where(sle[field] == filters.get(field))
+
+	if filters.get("batch_no"):
+		bundles = get_serial_and_batch_bundles(filters)
+
+		if bundles:
+			query = query.where(
+				(sle.serial_and_batch_bundle.isin(bundles)) | (sle.batch_no == filters.batch_no)
+			)
+		else:
+			query = query.where(sle.batch_no == filters.batch_no)
 
 	query = apply_warehouse_filter(query, sle, filters)
 
 	return query.run(as_dict=True)
+
+
+def get_serial_and_batch_bundles(filters):
+	SBB = frappe.qb.DocType("Serial and Batch Bundle")
+	SBE = frappe.qb.DocType("Serial and Batch Entry")
+
+	query = (
+		frappe.qb.from_(SBE)
+		.inner_join(SBB)
+		.on(SBE.parent == SBB.name)
+		.select(SBE.parent)
+		.where(
+			(SBB.docstatus == 1)
+			& (SBB.has_batch_no == 1)
+			& (SBB.voucher_no.notnull())
+			& (SBE.batch_no == filters.batch_no)
+		)
+	)
+
+	return query.run(pluck=SBE.parent)
 
 
 def get_inventory_dimension_fields():
