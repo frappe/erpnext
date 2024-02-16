@@ -234,7 +234,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	set_fields_onload_for_line_item() {
-		if (this.frm.is_new && this.frm.doc?.items) {
+		if (this.frm.is_new() && this.frm.doc?.items) {
 			this.frm.doc.items.forEach(item => {
 				if (item.docstatus === 0
 					&& frappe.meta.has_field(item.doctype, "use_serial_batch_fields")
