@@ -13,7 +13,6 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_lo
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	SalesInvoice,
-	get_bank_cash_account,
 	get_mode_of_payment_info,
 	update_multi_mode_option,
 )
@@ -52,7 +51,6 @@ class POSInvoice(SalesInvoice):
 		self.validate_stock_availablility()
 		self.validate_return_items_qty()
 		self.set_status()
-		self.set_account_for_mode_of_payment()
 		self.validate_pos()
 		self.validate_payment_amount()
 		self.validate_loyalty_transaction()
@@ -583,11 +581,6 @@ class POSInvoice(SalesInvoice):
 			pos_profile = frappe.get_cached_doc("POS Profile", self.pos_profile)
 			update_multi_mode_option(self, pos_profile)
 			self.paid_amount = 0
-
-	def set_account_for_mode_of_payment(self):
-		for pay in self.payments:
-			if not pay.account:
-				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
 
 	@frappe.whitelist()
 	def create_payment_request(self):

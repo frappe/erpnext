@@ -322,7 +322,7 @@ frappe.ui.form.on('Asset', {
 	},
 
 	make_schedules_editable: function(frm) {
-		if (frm.doc.finance_books.length) {
+		if (frm.doc.finance_books && frm.doc.finance_books.length) {
 			var is_manual_hence_editable = frm.doc.finance_books.filter(d => d.depreciation_method == "Manual").length > 0
 				? true : false;
 			var is_shift_hence_editable = frm.doc.finance_books.filter(d => d.shift_based).length > 0
@@ -519,16 +519,16 @@ frappe.ui.form.on('Asset', {
 				indicator: 'red'
 			});
 		}
-		var is_grouped_asset = frappe.db.get_value('Item', item.item_code, 'is_grouped_asset');
-		var asset_quantity = is_grouped_asset ? item.qty : 1;
-		var purchase_amount = flt(item.valuation_rate * asset_quantity, precision('gross_purchase_amount'));
+		frappe.db.get_value('Item', item.item_code, 'is_grouped_asset', (r) => {
+			var asset_quantity = r.is_grouped_asset ? item.qty : 1;
+			var purchase_amount = flt(item.valuation_rate * asset_quantity, precision('gross_purchase_amount'));
 
-		frm.set_value('gross_purchase_amount', purchase_amount);
-		frm.set_value('purchase_receipt_amount', purchase_amount);
-		frm.set_value('asset_quantity', asset_quantity);
-		frm.set_value('cost_center', item.cost_center || purchase_doc.cost_center);
-		if(item.asset_location) { frm.set_value('location', item.asset_location); }
-
+			frm.set_value('gross_purchase_amount', purchase_amount);
+			frm.set_value('purchase_receipt_amount', purchase_amount);
+			frm.set_value('asset_quantity', asset_quantity);
+			frm.set_value('cost_center', item.cost_center || purchase_doc.cost_center);
+			if(item.asset_location) { frm.set_value('location', item.asset_location); }
+		});
 	},
 
 	set_depreciation_rate: function(frm, row) {

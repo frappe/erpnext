@@ -501,6 +501,7 @@ def get_party(user=None):
 	contact_name = get_contact_name(user)
 	party = None
 
+	contact = None
 	if contact_name:
 		contact = frappe.get_doc("Contact", contact_name)
 		if contact.links:
@@ -538,11 +539,15 @@ def get_party(user=None):
 		customer.flags.ignore_mandatory = True
 		customer.insert(ignore_permissions=True)
 
-		contact = frappe.new_doc("Contact")
-		contact.update({"first_name": fullname, "email_ids": [{"email_id": user, "is_primary": 1}]})
+		if not contact:
+			contact = frappe.new_doc("Contact")
+			contact.update({"first_name": fullname, "email_ids": [{"email_id": user, "is_primary": 1}]})
+			contact.insert(ignore_permissions=True)
+			contact.reload()
+
 		contact.append("links", dict(link_doctype="Customer", link_name=customer.name))
 		contact.flags.ignore_mandatory = True
-		contact.insert(ignore_permissions=True)
+		contact.save(ignore_permissions=True)
 
 		return customer
 

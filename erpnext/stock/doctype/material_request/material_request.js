@@ -228,9 +228,17 @@ frappe.ui.form.on('Material Request', {
 				const qty_fields = ['actual_qty', 'projected_qty', 'min_order_qty'];
 
 				if(!r.exc) {
-					$.each(r.message, function(k, v) {
-						if(!d[k] || in_list(qty_fields, k)) d[k] = v;
+					$.each(r.message, function(key, value) {
+						if(!d[key] || qty_fields.includes(key)) {
+							d[key] = value;
+						}
 					});
+
+					if (d.price_list_rate != r.message.price_list_rate) {
+						d.price_list_rate = r.message.price_list_rate;
+
+						frappe.model.set_value(d.doctype, d.name, "rate", d.price_list_rate);
+					}
 				}
 			}
 		});
@@ -429,7 +437,9 @@ frappe.ui.form.on("Material Request Item", {
 
 	rate: function(frm, doctype, name) {
 		const item = locals[doctype][name];
-		frm.events.get_item_data(frm, item, false);
+		item.amount = flt(item.qty) * flt(item.rate);
+		frappe.model.set_value(doctype, name, "amount", item.amount);
+		refresh_field("amount", item.name, item.parentfield);
 	},
 
 	item_code: function(frm, doctype, name) {
@@ -449,7 +459,12 @@ frappe.ui.form.on("Material Request Item", {
 				set_schedule_date(frm);
 			}
 		}
-	}
+	},
+
+	conversion_factor: function(frm, doctype, name) {
+		const item = locals[doctype][name];
+		frm.events.get_item_data(frm, item, false);
+	},
 });
 
 erpnext.buying.MaterialRequestController = class MaterialRequestController extends erpnext.buying.BuyingController {
@@ -513,6 +528,13 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 
 	schedule_date() {
 		set_schedule_date(this.frm);
+	}
+
+	qty(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		row.amount = flt(row.qty) * flt(row.rate);
+		frappe.model.set_value(cdt, cdn, "amount", row.amount);
+		refresh_field("amount", row.name, row.parentfield);
 	}
 };
 

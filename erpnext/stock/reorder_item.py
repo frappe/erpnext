@@ -34,73 +34,157 @@ def _reorder_item():
 		erpnext.get_default_company() or frappe.db.sql("""select name from tabCompany limit 1""")[0][0]
 	)
 
-	items_to_consider = frappe.db.sql_list(
-		"""select name from `tabItem` item
-		where is_stock_item=1 and has_variants=0
-			and disabled=0
-			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %(today)s)
-			and (exists (select name from `tabItem Reorder` ir where ir.parent=item.name)
-				or (variant_of is not null and variant_of != ''
-				and exists (select name from `tabItem Reorder` ir where ir.parent=item.variant_of))
-			)""",
-		{"today": nowdate()},
-	)
+	items_to_consider = get_items_for_reorder()
 
 	if not items_to_consider:
 		return
 
 	item_warehouse_projected_qty = get_item_warehouse_projected_qty(items_to_consider)
 
-	def add_to_material_request(
-		item_code, warehouse, reorder_level, reorder_qty, material_request_type, warehouse_group=None
-	):
-		if warehouse not in warehouse_company:
+	def add_to_material_request(**kwargs):
+		if isinstance(kwargs, dict):
+			kwargs = frappe._dict(kwargs)
+
+		if kwargs.warehouse not in warehouse_company:
 			# a disabled warehouse
 			return
 
-		reorder_level = flt(reorder_level)
-		reorder_qty = flt(reorder_qty)
+		reorder_level = flt(kwargs.reorder_level)
+		reorder_qty = flt(kwargs.reorder_qty)
 
 		# projected_qty will be 0 if Bin does not exist
-		if warehouse_group:
-			projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse_group))
+		if kwargs.warehouse_group:
+			projected_qty = flt(
+				item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse_group)
+			)
 		else:
-			projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse))
+			projected_qty = flt(
+				item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse)
+			)
 
 		if (reorder_level or reorder_qty) and projected_qty < reorder_level:
 			deficiency = reorder_level - projected_qty
 			if deficiency > reorder_qty:
 				reorder_qty = deficiency
 
-			company = warehouse_company.get(warehouse) or default_company
+			company = warehouse_company.get(kwargs.warehouse) or default_company
 
-			material_requests[material_request_type].setdefault(company, []).append(
-				{"item_code": item_code, "warehouse": warehouse, "reorder_qty": reorder_qty}
+			material_requests[kwargs.material_request_type].setdefault(company, []).append(
+				{
+					"item_code": kwargs.item_code,
+					"warehouse": kwargs.warehouse,
+					"reorder_qty": reorder_qty,
+					"item_details": kwargs.item_details,
+				}
 			)
 
-	for item_code in items_to_consider:
-		item = frappe.get_doc("Item", item_code)
+	for item_code, reorder_levels in items_to_consider.items():
+		for d in reorder_levels:
+			if d.has_variants:
+				continue
 
-		if item.variant_of and not item.get("reorder_levels"):
-			item.update_template_tables()
-
-		if item.get("reorder_levels"):
-			for d in item.get("reorder_levels"):
-				add_to_material_request(
-					item_code,
-					d.warehouse,
-					d.warehouse_reorder_level,
-					d.warehouse_reorder_qty,
-					d.material_request_type,
-					warehouse_group=d.warehouse_group,
-				)
+			add_to_material_request(
+				item_code=item_code,
+				warehouse=d.warehouse,
+				reorder_level=d.warehouse_reorder_level,
+				reorder_qty=d.warehouse_reorder_qty,
+				material_request_type=d.material_request_type,
+				warehouse_group=d.warehouse_group,
+				item_details=frappe._dict(
+					{
+						"item_code": item_code,
+						"name": item_code,
+						"item_name": d.item_name,
+						"item_group": d.item_group,
+						"brand": d.brand,
+						"description": d.description,
+						"stock_uom": d.stock_uom,
+						"purchase_uom": d.purchase_uom,
+					}
+				),
+			)
 
 	if material_requests:
 		return create_material_request(material_requests)
 
 
+def get_items_for_reorder() -> dict[str, list]:
+	reorder_table = frappe.qb.DocType("Item Reorder")
+	item_table = frappe.qb.DocType("Item")
+
+	query = (
+		frappe.qb.from_(reorder_table)
+		.inner_join(item_table)
+		.on(reorder_table.parent == item_table.name)
+		.select(
+			reorder_table.warehouse,
+			reorder_table.warehouse_group,
+			reorder_table.material_request_type,
+			reorder_table.warehouse_reorder_level,
+			reorder_table.warehouse_reorder_qty,
+			item_table.name,
+			item_table.stock_uom,
+			item_table.purchase_uom,
+			item_table.description,
+			item_table.item_name,
+			item_table.item_group,
+			item_table.brand,
+			item_table.variant_of,
+			item_table.has_variants,
+		)
+		.where(
+			(item_table.disabled == 0)
+			& (item_table.is_stock_item == 1)
+			& (
+				(item_table.end_of_life.isnull())
+				| (item_table.end_of_life > nowdate())
+				| (item_table.end_of_life == "0000-00-00")
+			)
+		)
+	)
+
+	data = query.run(as_dict=True)
+	itemwise_reorder = frappe._dict({})
+	for d in data:
+		itemwise_reorder.setdefault(d.name, []).append(d)
+
+	itemwise_reorder = get_reorder_levels_for_variants(itemwise_reorder)
+
+	return itemwise_reorder
+
+
+def get_reorder_levels_for_variants(itemwise_reorder):
+	item_table = frappe.qb.DocType("Item")
+
+	query = (
+		frappe.qb.from_(item_table)
+		.select(
+			item_table.name,
+			item_table.variant_of,
+		)
+		.where(
+			(item_table.disabled == 0)
+			& (item_table.is_stock_item == 1)
+			& (
+				(item_table.end_of_life.isnull())
+				| (item_table.end_of_life > nowdate())
+				| (item_table.end_of_life == "0000-00-00")
+			)
+			& (item_table.variant_of.notnull())
+		)
+	)
+
+	variants_item = query.run(as_dict=True)
+	for row in variants_item:
+		if not itemwise_reorder.get(row.name) and itemwise_reorder.get(row.variant_of):
+			itemwise_reorder.setdefault(row.name, []).extend(itemwise_reorder.get(row.variant_of, []))
+
+	return itemwise_reorder
+
+
 def get_item_warehouse_projected_qty(items_to_consider):
 	item_warehouse_projected_qty = {}
+	items_to_consider = list(items_to_consider.keys())
 
 	for item_code, warehouse, projected_qty in frappe.db.sql(
 		"""select item_code, warehouse, projected_qty
@@ -145,6 +229,7 @@ def create_material_request(material_requests):
 
 		mr.log_error("Unable to create material request")
 
+	company_wise_mr = frappe._dict({})
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
 			try:
@@ -163,7 +248,7 @@ def create_material_request(material_requests):
 
 				for d in items:
 					d = frappe._dict(d)
-					item = frappe.get_doc("Item", d.item_code)
+					item = d.get("item_details")
 					uom = item.stock_uom
 					conversion_factor = 1.0
 
@@ -189,6 +274,7 @@ def create_material_request(material_requests):
 							"item_code": d.item_code,
 							"schedule_date": add_days(nowdate(), cint(item.lead_time_days)),
 							"qty": qty,
+							"conversion_factor": conversion_factor,
 							"uom": uom,
 							"stock_uom": item.stock_uom,
 							"warehouse": d.warehouse,
@@ -206,17 +292,19 @@ def create_material_request(material_requests):
 				mr.submit()
 				mr_list.append(mr)
 
+				company_wise_mr.setdefault(company, []).append(mr)
+
 			except Exception:
 				_log_exception(mr)
 
-	if mr_list:
+	if company_wise_mr:
 		if getattr(frappe.local, "reorder_email_notify", None) is None:
 			frappe.local.reorder_email_notify = cint(
 				frappe.db.get_value("Stock Settings", None, "reorder_email_notify")
 			)
 
 		if frappe.local.reorder_email_notify:
-			send_email_notification(mr_list)
+			send_email_notification(company_wise_mr)
 
 	if exceptions_list:
 		notify_errors(exceptions_list)
@@ -224,20 +312,56 @@ def create_material_request(material_requests):
 	return mr_list
 
 
-def send_email_notification(mr_list):
+def send_email_notification(company_wise_mr):
 	"""Notify user about auto creation of indent"""
 
-	email_list = frappe.db.sql_list(
-		"""select distinct r.parent
-		from `tabHas Role` r, tabUser p
-		where p.name = r.parent and p.enabled = 1 and p.docstatus < 2
-		and r.role in ('Purchase Manager','Stock Manager')
-		and p.name not in ('Administrator', 'All', 'Guest')"""
+	for company, mr_list in company_wise_mr.items():
+		email_list = get_email_list(company)
+
+		if not email_list:
+			continue
+
+		msg = frappe.render_template("templates/emails/reorder_item.html", {"mr_list": mr_list})
+
+		frappe.sendmail(
+			recipients=email_list, subject=_("Auto Material Requests Generated"), message=msg
+		)
+
+
+def get_email_list(company):
+	users = get_comapny_wise_users(company)
+	user_table = frappe.qb.DocType("User")
+	role_table = frappe.qb.DocType("Has Role")
+
+	query = (
+		frappe.qb.from_(user_table)
+		.inner_join(role_table)
+		.on(user_table.name == role_table.parent)
+		.select(user_table.email)
+		.where(
+			(role_table.role.isin(["Purchase Manager", "Stock Manager"]))
+			& (user_table.name.notin(["Administrator", "All", "Guest"]))
+			& (user_table.enabled == 1)
+			& (user_table.docstatus < 2)
+		)
 	)
 
-	msg = frappe.render_template("templates/emails/reorder_item.html", {"mr_list": mr_list})
+	if users:
+		query = query.where(user_table.name.isin(users))
 
-	frappe.sendmail(recipients=email_list, subject=_("Auto Material Requests Generated"), message=msg)
+	emails = query.run(as_dict=True)
+
+	return list(set([email.email for email in emails]))
+
+
+def get_comapny_wise_users(company):
+	users = frappe.get_all(
+		"User Permission",
+		filters={"allow": "Company", "for_value": company, "apply_to_all_doctypes": 1},
+		fields=["user"],
+	)
+
+	return [user.user for user in users]
 
 
 def notify_errors(exceptions_list):

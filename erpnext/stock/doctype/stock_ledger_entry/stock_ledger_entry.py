@@ -53,6 +53,9 @@ class StockLedgerEntry(Document):
 		self.validate_inventory_dimension_negative_stock()
 
 	def validate_inventory_dimension_negative_stock(self):
+		if self.is_cancelled:
+			return
+
 		extra_cond = ""
 		kwargs = {}
 

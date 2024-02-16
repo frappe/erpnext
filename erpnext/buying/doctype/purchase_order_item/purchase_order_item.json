@@ -546,7 +546,6 @@
    "fieldname": "blanket_order",
    "fieldtype": "Link",
    "label": "Blanket Order",
-   "no_copy": 1,
    "options": "Blanket Order"
   },
   {
@@ -554,7 +553,6 @@
    "fieldname": "blanket_order_rate",
    "fieldtype": "Currency",
    "label": "Blanket Order Rate",
-   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -918,7 +916,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-24 19:07:34.921094",
+ "modified": "2024-02-05 11:23:24.859435",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

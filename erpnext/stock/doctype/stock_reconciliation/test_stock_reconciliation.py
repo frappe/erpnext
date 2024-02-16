@@ -312,7 +312,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		sr.cancel()
 
 		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Inactive")
-		self.assertEqual(frappe.db.exists("Batch", batch_no), None)
+		self.assertTrue(frappe.db.exists("Batch", batch_no))
 
 	def test_stock_reco_balance_qty_for_serial_and_batch_item(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry

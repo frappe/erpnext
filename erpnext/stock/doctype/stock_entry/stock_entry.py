@@ -159,7 +159,6 @@ class StockEntry(StockController):
 			set_batch_nos(self, "s_warehouse")
 
 		self.validate_serialized_batch()
-		self.set_actual_qty()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
 

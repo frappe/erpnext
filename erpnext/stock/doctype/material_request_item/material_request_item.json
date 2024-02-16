@@ -35,6 +35,7 @@
   "received_qty",
   "rate_and_amount_section_break",
   "rate",
+  "price_list_rate",
   "col_break3",
   "amount",
   "accounting_details_section",
@@ -474,13 +475,22 @@
    "fieldtype": "Link",
    "label": "WIP Composite Asset",
    "options": "Asset"
+  },
+  {
+   "fieldname": "price_list_rate",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Price List Rate",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-14 18:37:59.599115",
+ "modified": "2024-02-08 16:30:56.137858",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

@@ -11,7 +11,6 @@ from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
-	in_stock, stock_qty = 0, ""
 	template_item_code, is_stock_item = frappe.db.get_value(
 		"Item", item_code, ["variant_of", "is_stock_item"]
 	)
@@ -52,10 +51,11 @@ def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 				.where((BIN.item_code == item_code) & (BIN.warehouse == warehouse))
 			).run()
 
+			stock_qty = stock_qty[0][0]
 			if stock_qty:
 				total_stock += adjust_qty_for_expired_items(item_code, stock_qty, warehouse)
 
-		in_stock = total_stock > 0 and 1 or 0
+	in_stock = int(total_stock > 0)
 
 	return frappe._dict(
 		{"in_stock": in_stock, "stock_qty": total_stock, "is_stock_item": is_stock_item}
@@ -63,20 +63,16 @@ def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 
 
 def adjust_qty_for_expired_items(item_code, stock_qty, warehouse):
-	batches = frappe.get_all("Batch", filters=[{"item": item_code}], fields=["expiry_date", "name"])
+	batches = frappe.get_all("Batch", filters={"item": item_code}, fields=["expiry_date", "name"])
 	expired_batches = get_expired_batches(batches)
-	stock_qty = [list(item) for item in stock_qty]
 
 	for batch in expired_batches:
 		if warehouse:
-			stock_qty[0][0] = max(0, stock_qty[0][0] - get_batch_qty(batch, warehouse))
+			stock_qty = max(0, stock_qty - get_batch_qty(batch, warehouse))
 		else:
-			stock_qty[0][0] = max(0, stock_qty[0][0] - qty_from_all_warehouses(get_batch_qty(batch)))
+			stock_qty = max(0, stock_qty - qty_from_all_warehouses(get_batch_qty(batch)))
 
-		if not stock_qty[0][0]:
-			break
-
-	return stock_qty[0][0] if stock_qty else 0
+	return stock_qty
 
 
 def get_expired_batches(batches):

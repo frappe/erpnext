@@ -10,6 +10,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, fmt_money, get_link_to_form, getdate, nowdate, today
 
 import erpnext
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation import (
 	is_any_doc_running,
 )
@@ -28,6 +29,7 @@ class PaymentReconciliation(Document):
 		self.common_filter_conditions = []
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
+		self.dimensions = get_dimensions()[0]
 
 	def load_from_db(self):
 		# 'modified' attribute is required for `run_doc_method` to work properly.
@@ -110,7 +112,7 @@ class PaymentReconciliation(Document):
 
 	def get_payment_entries(self):
 		order_doctype = "Sales Order" if self.party_type == "Customer" else "Purchase Order"
-		condition = self.get_conditions(get_payments=True)
+		condition = self.get_payment_entry_conditions()
 
 		payment_entries = get_advance_payment_entries_for_regional(
 			self.party_type,
@@ -126,66 +128,67 @@ class PaymentReconciliation(Document):
 		return payment_entries
 
 	def get_jv_entries(self):
-		condition = self.get_conditions()
+		je = qb.DocType("Journal Entry")
+		jea = qb.DocType("Journal Entry Account")
+		conditions = self.get_journal_filter_conditions()
+
+		# Dimension filters
+		for x in self.dimensions:
+			dimension = x.fieldname
+			if self.get(dimension):
+				conditions.append(jea[dimension] == self.get(dimension))
 
 		if self.payment_name:
-			condition += f" and t1.name like '%%{self.payment_name}%%'"
+			conditions.append(je.name.like(f"%%{self.payment_name}%%"))
 
 		if self.get("cost_center"):
-			condition += f" and t2.cost_center = '{self.cost_center}' "
+			conditions.append(jea.cost_center == self.cost_center)
 
 		dr_or_cr = (
 			"credit_in_account_currency"
 			if erpnext.get_party_account_type(self.party_type) == "Receivable"
 			else "debit_in_account_currency"
 		)
+		conditions.append(jea[dr_or_cr].gt(0))
 
-		bank_account_condition = (
-			"t2.against_account like %(bank_cash_account)s" if self.bank_cash_account else "1=1"
+		if self.bank_cash_account:
+			conditions.append(jea.against_account.like(f"%%{self.bank_cash_account}%%"))
+
+		journal_query = (
+			qb.from_(je)
+			.inner_join(jea)
+			.on(jea.parent == je.name)
+			.select(
+				ConstantColumn("Journal Entry").as_("reference_type"),
+				je.name.as_("reference_name"),
+				je.posting_date,
+				je.remark.as_("remarks"),
+				jea.name.as_("reference_row"),
+				jea[dr_or_cr].as_("amount"),
+				jea.is_advance,
+				jea.exchange_rate,
+				jea.account_currency.as_("currency"),
+				jea.cost_center.as_("cost_center"),
+			)
+			.where(
+				(je.docstatus == 1)
+				& (jea.party_type == self.party_type)
+				& (jea.party == self.party)
+				& (jea.account == self.receivable_payable_account)
+				& (
+					(jea.reference_type == "")
+					| (jea.reference_type.isnull())
+					| (jea.reference_type.isin(("Sales Order", "Purchase Order")))
+				)
+			)
+			.where(Criterion.all(conditions))
+			.orderby(je.posting_date)
 		)
 
-		limit = f"limit {self.payment_limit}" if self.payment_limit else " "
+		if self.payment_limit:
+			journal_query = journal_query.limit(self.payment_limit)
 
-		# nosemgrep
-		journal_entries = frappe.db.sql(
-			"""
-			select
-				"Journal Entry" as reference_type, t1.name as reference_name,
-				t1.posting_date, t1.remark as remarks, t2.name as reference_row,
-				{dr_or_cr} as amount, t2.is_advance, t2.exchange_rate,
-				t2.account_currency as currency, t2.cost_center as cost_center
-			from
-				`tabJournal Entry` t1, `tabJournal Entry Account` t2
-			where
-				t1.name = t2.parent and t1.docstatus = 1 and t2.docstatus = 1
-				and t2.party_type = %(party_type)s and t2.party = %(party)s
-				and t2.account = %(account)s and {dr_or_cr} > 0 {condition}
-				and (t2.reference_type is null or t2.reference_type = '' or
-					(t2.reference_type in ('Sales Order', 'Purchase Order')
-						and t2.reference_name is not null and t2.reference_name != ''))
-				and (CASE
-					WHEN t1.voucher_type in ('Debit Note', 'Credit Note')
-					THEN 1=1
-					ELSE {bank_account_condition}
-				END)
-			order by t1.posting_date
-			{limit}
-			""".format(
-				**{
-					"dr_or_cr": dr_or_cr,
-					"bank_account_condition": bank_account_condition,
-					"condition": condition,
-					"limit": limit,
-				}
-			),
-			{
-				"party_type": self.party_type,
-				"party": self.party,
-				"account": self.receivable_payable_account,
-				"bank_cash_account": "%%%s%%" % self.bank_cash_account,
-			},
-			as_dict=1,
-		)
+		journal_entries = journal_query.run(as_dict=True)
 
 		return list(journal_entries)
 
@@ -228,20 +231,18 @@ class PaymentReconciliation(Document):
 		self.common_filter_conditions.append(ple.account == self.receivable_payable_account)
 
 		self.get_return_invoices()
-		return_invoices = [
-			x for x in self.return_invoices if x.return_against == None or x.return_against == ""
-		]
 
 		outstanding_dr_or_cr = []
-		if return_invoices:
+		if self.return_invoices:
 			ple_query = QueryPaymentLedger()
 			return_outstanding = ple_query.get_voucher_outstandings(
-				vouchers=return_invoices,
+				vouchers=self.return_invoices,
 				common_filter=self.common_filter_conditions,
 				posting_date=self.ple_posting_date_filter,
 				min_outstanding=-(self.minimum_payment_amount) if self.minimum_payment_amount else None,
 				max_outstanding=-(self.maximum_payment_amount) if self.maximum_payment_amount else None,
 				get_payments=True,
+				accounting_dimensions=self.accounting_dimension_filter_conditions,
 			)
 
 			for inv in return_outstanding:
@@ -391,8 +392,15 @@ class PaymentReconciliation(Document):
 				row = self.append("allocation", {})
 				row.update(entry)
 
+	def update_dimension_values_in_allocated_entries(self, res):
+		for x in self.dimensions:
+			dimension = x.fieldname
+			if self.get(dimension):
+				res[dimension] = self.get(dimension)
+		return res
+
 	def get_allocated_entry(self, pay, inv, allocated_amount):
-		return frappe._dict(
+		res = frappe._dict(
 			{
 				"reference_type": pay.get("reference_type"),
 				"reference_name": pay.get("reference_name"),
@@ -407,6 +415,9 @@ class PaymentReconciliation(Document):
 				"cost_center": pay.get("cost_center"),
 			}
 		)
+
+		res = self.update_dimension_values_in_allocated_entries(res)
+		return res
 
 	def reconcile_allocations(self, skip_ref_details_update_for_pe=False):
 		adjust_allocations_for_taxes(self)
@@ -430,10 +441,10 @@ class PaymentReconciliation(Document):
 				reconciled_entry.append(payment_details)
 
 		if entry_list:
-			reconcile_against_document(entry_list, skip_ref_details_update_for_pe)
+			reconcile_against_document(entry_list, skip_ref_details_update_for_pe, self.dimensions)
 
 		if dr_or_cr_notes:
-			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
+			reconcile_dr_cr_note(dr_or_cr_notes, self.company, self.dimensions)
 
 	@frappe.whitelist()
 	def reconcile(self):
@@ -462,7 +473,7 @@ class PaymentReconciliation(Document):
 		self.get_unreconciled_entries()
 
 	def get_payment_details(self, row, dr_or_cr):
-		return frappe._dict(
+		payment_details = frappe._dict(
 			{
 				"voucher_type": row.get("reference_type"),
 				"voucher_no": row.get("reference_name"),
@@ -484,6 +495,12 @@ class PaymentReconciliation(Document):
 				"cost_center": row.get("cost_center"),
 			}
 		)
+
+		for x in self.dimensions:
+			if row.get(x.fieldname):
+				payment_details[x.fieldname] = row.get(x.fieldname)
+
+		return payment_details
 
 	def check_mandatory_to_fetch(self):
 		for fieldname in ["company", "party_type", "party", "receivable_payable_account"]:
@@ -592,6 +609,13 @@ class PaymentReconciliation(Document):
 		if not invoices_to_reconcile:
 			frappe.throw(_("No records found in Allocation table"))
 
+	def build_dimensions_filter_conditions(self):
+		ple = qb.DocType("Payment Ledger Entry")
+		for x in self.dimensions:
+			dimension = x.fieldname
+			if self.get(dimension):
+				self.accounting_dimension_filter_conditions.append(ple[dimension] == self.get(dimension))
+
 	def build_qb_filter_conditions(self, get_invoices=False, get_return_invoices=False):
 		self.common_filter_conditions.clear()
 		self.accounting_dimension_filter_conditions.clear()
@@ -615,40 +639,58 @@ class PaymentReconciliation(Document):
 			if self.to_payment_date:
 				self.ple_posting_date_filter.append(ple.posting_date.lte(self.to_payment_date))
 
-	def get_conditions(self, get_payments=False):
-		condition = " and company = '{0}' ".format(self.company)
+		self.build_dimensions_filter_conditions()
 
-		if self.get("cost_center") and get_payments:
-			condition = " and cost_center = '{0}' ".format(self.cost_center)
+	def get_payment_entry_conditions(self):
+		conditions = []
+		pe = qb.DocType("Payment Entry")
+		conditions.append(pe.company == self.company)
 
-		condition += (
-			" and posting_date >= {0}".format(frappe.db.escape(self.from_payment_date))
-			if self.from_payment_date
-			else ""
-		)
-		condition += (
-			" and posting_date <= {0}".format(frappe.db.escape(self.to_payment_date))
-			if self.to_payment_date
-			else ""
-		)
+		if self.get("cost_center"):
+			conditions.append(pe.cost_center == self.cost_center)
+
+		if self.from_payment_date:
+			conditions.append(pe.posting_date.gte(self.from_payment_date))
+
+		if self.to_payment_date:
+			conditions.append(pe.posting_date.lte(self.to_payment_date))
 
 		if self.minimum_payment_amount:
-			condition += (
-				" and unallocated_amount >= {0}".format(flt(self.minimum_payment_amount))
-				if get_payments
-				else " and total_debit >= {0}".format(flt(self.minimum_payment_amount))
-			)
+			conditions.append(pe.unallocated_amount.gte(flt(self.minimum_payment_amount)))
+
 		if self.maximum_payment_amount:
-			condition += (
-				" and unallocated_amount <= {0}".format(flt(self.maximum_payment_amount))
-				if get_payments
-				else " and total_debit <= {0}".format(flt(self.maximum_payment_amount))
-			)
+			conditions.append(pe.unallocated_amount.lte(flt(self.maximum_payment_amount)))
 
-		return condition
+		# pass dynamic dimension filter values to payment query
+		for x in self.dimensions:
+			dimension = x.fieldname
+			if self.get(dimension):
+				conditions.append(pe[dimension] == self.get(dimension))
+
+		return conditions
+
+	def get_journal_filter_conditions(self):
+		conditions = []
+		je = qb.DocType("Journal Entry")
+		jea = qb.DocType("Journal Entry Account")
+		conditions.append(je.company == self.company)
+
+		if self.from_payment_date:
+			conditions.append(je.posting_date.gte(self.from_payment_date))
+
+		if self.to_payment_date:
+			conditions.append(je.posting_date.lte(self.to_payment_date))
+
+		if self.minimum_payment_amount:
+			conditions.append(je.total_debit.gte(self.minimum_payment_amount))
+
+		if self.maximum_payment_amount:
+			conditions.append(je.total_debit.lte(self.maximum_payment_amount))
+
+		return conditions
 
 
-def reconcile_dr_cr_note(dr_cr_notes, company):
+def reconcile_dr_cr_note(dr_cr_notes, company, active_dimensions=None):
 	for inv in dr_cr_notes:
 		voucher_type = "Credit Note" if inv.voucher_type == "Sales Invoice" else "Debit Note"
 
@@ -698,6 +740,15 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 			}
 		)
 
+		# Credit Note(JE) will inherit the same dimension values as payment
+		dimensions_dict = frappe._dict()
+		if active_dimensions:
+			for dim in active_dimensions:
+				dimensions_dict[dim.fieldname] = inv.get(dim.fieldname)
+
+		jv.accounts[0].update(dimensions_dict)
+		jv.accounts[1].update(dimensions_dict)
+
 		jv.flags.ignore_mandatory = True
 		jv.flags.skip_remarks_creation = True
 		jv.flags.ignore_exchange_rate = True
@@ -731,9 +782,27 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 				inv.against_voucher,
 				None,
 				inv.cost_center,
+				dimensions_dict,
 			)
 
 
 @erpnext.allow_regional
 def adjust_allocations_for_taxes(doc):
 	pass
+
+
+@frappe.whitelist()
+def get_queries_for_dimension_filters(company: str = None):
+	dimensions_with_filters = []
+	for d in get_dimensions()[0]:
+		filters = {}
+		meta = frappe.get_meta(d.document_type)
+		if meta.has_field("company") and company:
+			filters.update({"company": company})
+
+		if meta.is_tree:
+			filters.update({"is_group": 0})
+
+		dimensions_with_filters.append({"fieldname": d.fieldname, "filters": filters})
+
+	return dimensions_with_filters
