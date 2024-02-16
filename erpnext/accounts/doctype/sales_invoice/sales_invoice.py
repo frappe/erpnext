@@ -652,13 +652,8 @@ class SalesInvoice(SellingController):
 	def unlink_sales_invoice_from_timesheets(self):
 		for row in self.timesheets:
 			timesheet = frappe.get_doc("Timesheet", row.time_sheet)
-			for time_log in timesheet.time_logs:
-				if time_log.sales_invoice == self.name:
-					time_log.sales_invoice = None
-			timesheet.calculate_total_amounts()
-			timesheet.calculate_percentage_billed()
+			timesheet.unlink_sales_invoice(self.name)
 			timesheet.flags.ignore_validate_update_after_submit = True
-			timesheet.set_status()
 			timesheet.db_update_all()
 
 	@frappe.whitelist()

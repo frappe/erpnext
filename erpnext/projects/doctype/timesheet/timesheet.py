@@ -256,6 +256,16 @@ class Timesheet(Document):
 		if not ts_detail.is_billable:
 			ts_detail.billing_rate = 0.0
 
+	def unlink_sales_invoice(self, sales_invoice: str):
+		"""Remove link to Sales Invoice from all time logs."""
+		for time_log in self.time_logs:
+			if time_log.sales_invoice == sales_invoice:
+				time_log.sales_invoice = None
+
+		self.calculate_total_amounts()
+		self.calculate_percentage_billed()
+		self.set_status()
+
 
 @frappe.whitelist()
 def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to_time=None):
