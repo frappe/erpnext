@@ -1025,23 +1025,11 @@ class SalesInvoice(SellingController):
 					frappe.throw(_("Could not update stock, invoice contains drop shipping item."))
 
 	def update_current_stock(self):
-		for d in self.get("items"):
-			if d.item_code and d.warehouse:
-				bin = frappe.db.sql(
-					"select actual_qty from `tabBin` where item_code = %s and warehouse = %s",
-					(d.item_code, d.warehouse),
-					as_dict=1,
-				)
-				d.actual_qty = bin and flt(bin[0]["actual_qty"]) or 0
+		for item in self.items:
+			item.set_actual_qty()
 
-		for d in self.get("packed_items"):
-			bin = frappe.db.sql(
-				"select actual_qty, projected_qty from `tabBin` where item_code =	%s and warehouse = %s",
-				(d.item_code, d.warehouse),
-				as_dict=1,
-			)
-			d.actual_qty = bin and flt(bin[0]["actual_qty"]) or 0
-			d.projected_qty = bin and flt(bin[0]["projected_qty"]) or 0
+		for packed_item in self.packed_items:
+			packed_item.set_actual_and_projected_qty()
 
 	def update_packing_list(self):
 		if cint(self.update_stock) == 1:

@@ -102,3 +102,12 @@ class SalesInvoiceItem(Document):
 					frappe.bold(self.idx), frappe.bold(self.cost_center), frappe.bold(company)
 				)
 			)
+
+	def set_actual_qty(self):
+		if self.item_code and self.warehouse:
+			self.actual_qty = (
+				frappe.db.get_value(
+					"Bin", {"item_code": self.item_code, "warehouse": self.warehouse}, "actual_qty"
+				)
+				or 0
+			)
