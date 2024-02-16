@@ -936,12 +936,42 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		this.toggle_related_fields(this.frm.doc);
 		this.toggle_enable_bom();
 		this.show_stock_ledger();
+		this.set_fields_onload_for_line_item();
 		erpnext.utils.view_serial_batch_nos(this.frm);
 		if (this.frm.doc.docstatus===1 && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			this.show_general_ledger();
 		}
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
+	}
+
+	serial_no(doc, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+
+		if (item?.serial_no) {
+			// Replace all occurences of comma with line feed
+			item.serial_no = item.serial_no.replace(/,/g, '\n');
+			item.conversion_factor = item.conversion_factor || 1;
+
+			let valid_serial_nos = [];
+			let serialnos = item.serial_no.split("\n");
+			for (var i = 0; i < serialnos.length; i++) {
+				if (serialnos[i] != "") {
+					valid_serial_nos.push(serialnos[i]);
+				}
+			}
+			frappe.model.set_value(item.doctype, item.name,
+				"qty", valid_serial_nos.length / item.conversion_factor);
+		}
+	}
+
+	set_fields_onload_for_line_item() {
+		if (this.frm.is_new() && this.frm.doc?.items
+			&& cint(frappe.user_defaults?.use_serial_batch_fields) === 1) {
+			this.frm.doc.items.forEach(item => {
+				frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
+			})
+		}
 	}
 
 	scan_barcode() {
@@ -1074,6 +1104,10 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 		if(!row.s_warehouse) row.s_warehouse = this.frm.doc.from_warehouse;
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
+
+		if (cint(frappe.user_defaults?.use_serial_batch_fields)) {
+			frappe.model.set_value(row.doctype, row.name, "use_serial_batch_fields", 1);
+		}
 	}
 
 	from_warehouse(doc) {
