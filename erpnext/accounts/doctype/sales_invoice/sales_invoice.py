@@ -28,7 +28,6 @@ from erpnext.accounts.party import get_due_date, get_party_account, get_party_de
 from erpnext.accounts.utils import cancel_exchange_gain_loss_journal, get_account_currency
 from erpnext.assets.doctype.asset.depreciation import (
 	depreciate_asset,
-	get_disposal_account_and_cost_center,
 	get_gl_entries_on_asset_disposal,
 	get_gl_entries_on_asset_regain,
 	reset_depreciation_schedule,
@@ -1118,17 +1117,8 @@ class SalesInvoice(SellingController):
 		return warehouse
 
 	def set_income_account_for_fixed_assets(self):
-		disposal_account = depreciation_cost_center = None
-		for d in self.get("items"):
-			if d.is_fixed_asset:
-				if not disposal_account:
-					disposal_account, depreciation_cost_center = get_disposal_account_and_cost_center(
-						self.company
-					)
-
-				d.income_account = disposal_account
-				if not d.cost_center:
-					d.cost_center = depreciation_cost_center
+		for item in self.items:
+			item.set_income_account_for_fixed_asset(self.company)
 
 	def check_prev_docstatus(self):
 		for d in self.get("items"):
