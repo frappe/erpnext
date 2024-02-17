@@ -8,6 +8,7 @@ from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils.data import comma_and
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -301,7 +302,8 @@ class SalesInvoice(SellingController):
 			self.validate_dropship_item()
 			self.validate_warehouse()
 			self.update_current_stock()
-			self.validate_delivery_note()
+
+		self.validate_delivery_note()
 
 		# validate service stop date to lie in between start and end date
 		validate_service_stop_date(self)
@@ -1000,12 +1002,17 @@ class SalesInvoice(SellingController):
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
 
 	def validate_delivery_note(self):
-		for d in self.get("items"):
-			if d.delivery_note:
-				msgprint(
-					_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note),
-					raise_exception=1,
-				)
+		"""If items are linked with a delivery note, stock cannot be updated again."""
+		if not cint(self.update_stock):
+			return
+
+		notes = [item.delivery_note for item in self.items if item.delivery_note]
+		if notes:
+			frappe.throw(
+				_("Stock cannot be updated against the following Delivery Notes: {0}").format(
+					comma_and(notes)
+				),
+			)
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:
