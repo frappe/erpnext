@@ -39,7 +39,6 @@ from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
-from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -1642,48 +1641,9 @@ class SalesInvoice(SellingController):
 		"""
 		validate serial number agains Delivery Note and Sales Invoice
 		"""
-		self.set_serial_no_against_delivery_note()
-		self.validate_serial_against_delivery_note()
-
-	def set_serial_no_against_delivery_note(self):
 		for item in self.items:
-			if item.serial_no and item.delivery_note and item.qty != len(get_serial_nos(item.serial_no)):
-				item.serial_no = get_delivery_note_serial_no(item.item_code, item.qty, item.delivery_note)
-
-	def validate_serial_against_delivery_note(self):
-		"""
-		validate if the serial numbers in Sales Invoice Items are same as in
-		Delivery Note Item
-		"""
-
-		for item in self.items:
-			if not item.delivery_note or not item.dn_detail:
-				continue
-
-			serial_nos = frappe.db.get_value("Delivery Note Item", item.dn_detail, "serial_no") or ""
-			dn_serial_nos = set(get_serial_nos(serial_nos))
-
-			serial_nos = item.serial_no or ""
-			si_serial_nos = set(get_serial_nos(serial_nos))
-			serial_no_diff = si_serial_nos - dn_serial_nos
-
-			if serial_no_diff:
-				dn_link = frappe.utils.get_link_to_form("Delivery Note", item.delivery_note)
-				serial_no_msg = ", ".join(frappe.bold(d) for d in serial_no_diff)
-
-				msg = _("Row #{0}: The following Serial Nos are not present in Delivery Note {1}:").format(
-					item.idx, dn_link
-				)
-				msg += " " + serial_no_msg
-
-				frappe.throw(msg=msg, title=_("Serial Nos Mismatch"))
-
-			if item.serial_no and cint(item.qty) != len(si_serial_nos):
-				frappe.throw(
-					_("Row #{0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
-						item.idx, item.qty, item.item_code, len(si_serial_nos)
-					)
-				)
+			item.set_serial_no_against_delivery_note()
+			item.validate_serial_against_delivery_note()
 
 	def update_project(self):
 		if self.project:
