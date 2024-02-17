@@ -1492,47 +1492,46 @@ class SalesInvoice(SellingController):
 					)
 
 			if not skip_change_gl_entries:
-				self.make_gle_for_change_amount(gl_entries)
+				gl_entries.extend(self.get_gle_for_change_amount())
 
-	def make_gle_for_change_amount(self, gl_entries):
-		if self.change_amount:
-			if self.account_for_change_amount:
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": self.debit_to,
-							"party_type": "Customer",
-							"party": self.customer,
-							"against": self.account_for_change_amount,
-							"debit": flt(self.base_change_amount),
-							"debit_in_account_currency": flt(self.base_change_amount)
-							if self.party_account_currency == self.company_currency
-							else flt(self.change_amount),
-							"against_voucher": self.return_against
-							if cint(self.is_return) and self.return_against
-							else self.name,
-							"against_voucher_type": self.doctype,
-							"cost_center": self.cost_center,
-							"project": self.project,
-						},
-						self.party_account_currency,
-						item=self,
-					)
-				)
+	def get_gle_for_change_amount(self) -> list[dict]:
+		if not self.change_amount:
+			return []
 
-				gl_entries.append(
-					self.get_gl_dict(
-						{
-							"account": self.account_for_change_amount,
-							"against": self.customer,
-							"credit": self.base_change_amount,
-							"cost_center": self.cost_center,
-						},
-						item=self,
-					)
-				)
-			else:
-				frappe.throw(_("Select change amount account"), title=_("Mandatory Field"))
+		if not self.account_for_change_amount:
+			frappe.throw(_("Please set Account for Change Amount"), title=_("Mandatory Field"))
+
+		return [
+			self.get_gl_dict(
+				{
+					"account": self.debit_to,
+					"party_type": "Customer",
+					"party": self.customer,
+					"against": self.account_for_change_amount,
+					"debit": flt(self.base_change_amount),
+					"debit_in_account_currency": flt(self.base_change_amount)
+					if self.party_account_currency == self.company_currency
+					else flt(self.change_amount),
+					"against_voucher": self.return_against
+					if cint(self.is_return) and self.return_against
+					else self.name,
+					"against_voucher_type": self.doctype,
+					"cost_center": self.cost_center,
+					"project": self.project,
+				},
+				self.party_account_currency,
+				item=self,
+			),
+			self.get_gl_dict(
+				{
+					"account": self.account_for_change_amount,
+					"against": self.customer,
+					"credit": self.base_change_amount,
+					"cost_center": self.cost_center,
+				},
+				item=self,
+			),
+		]
 
 	def make_write_off_gl_entry(self, gl_entries):
 		# write off entries, applicable if only pos
