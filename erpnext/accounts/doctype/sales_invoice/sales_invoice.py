@@ -298,8 +298,9 @@ class SalesInvoice(SellingController):
 		if cint(self.is_pos):
 			self.validate_pos()
 
+		self.validate_dropship_item()
+
 		if cint(self.update_stock):
-			self.validate_dropship_item()
 			self.validate_warehouse()
 			self.update_current_stock()
 
@@ -1026,10 +1027,16 @@ class SalesInvoice(SellingController):
 			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
 	def validate_dropship_item(self):
-		for item in self.items:
-			if item.sales_order:
-				if frappe.db.get_value("Sales Order Item", item.so_detail, "delivered_by_supplier"):
-					frappe.throw(_("Could not update stock, invoice contains drop shipping item."))
+		"""If items are drop shipped, stock cannot be updated."""
+		if not cint(self.update_stock):
+			return
+
+		if any(item.delivered_by_supplier for item in self.items):
+			frappe.throw(
+				_(
+					"Stock cannot be updated because the invoice contains a drop shipping item. Please disable 'Update Stock' or remove the drop shipping item."
+				),
+			)
 
 	def update_current_stock(self):
 		for item in self.items:
