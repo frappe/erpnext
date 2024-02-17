@@ -397,104 +397,140 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 	}
 
 	get_suppliers_button (frm) {
-		var doc = frm.doc;
-		var dialog = new frappe.ui.Dialog({
-			title: __("Get Suppliers"),
-			fields: [
-				{
-					"fieldtype": "Select", "label": __("Get Suppliers By"),
-					"fieldname": "search_type",
-					"options": ["Supplier Group", "Tag"],
-					"reqd": 1,
-					onchange() {
-						if(dialog.get_value('search_type') == 'Tag'){
-							frappe.call({
-								method: 'erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_tag',
-							}).then(r => {
-								dialog.set_df_property("tag", "options", r.message)
-						});
-						}
-					}
-				},
-				{
-					"fieldtype": "Link", "label": __("Supplier Group"),
-					"fieldname": "supplier_group",
-					"options": "Supplier Group",
-					"reqd": 0,
-					"depends_on": "eval:doc.search_type == 'Supplier Group'"
-				},
-				{
-					"fieldtype": "Select", "label": __("Tag"),
-					"fieldname": "tag",
-					"reqd": 0,
-					"depends_on": "eval:doc.search_type == 'Tag'",
-				}
-			],
-			primary_action_label: __("Add Suppliers"),
-			primary_action : (args) => {
-				if(!args) return;
-				dialog.hide();
-
-				//Remove blanks
-				for (var j = 0; j < frm.doc.suppliers.length; j++) {
-					if(!Object.prototype.hasOwnProperty.call(frm.doc.suppliers[j], "supplier")) {
-						frm.get_field("suppliers").grid.grid_rows[j].remove();
-					}
-				}
-
-				function load_suppliers(r) {
-					if(r.message) {
-						for (var i = 0; i < r.message.length; i++) {
-							var exists = false;
-							let supplier = "";
-							if (r.message[i].constructor === Array){
-								supplier = r.message[i][0];
-							} else {
-								supplier = r.message[i].name;
-							}
-
-							for (var j = 0; j < doc.suppliers.length;j++) {
-								if (supplier === doc.suppliers[j].supplier) {
-									exists = true;
-								}
-							}
-							if(!exists) {
-								var d = frm.add_child('suppliers');
-								d.supplier = supplier;
-								frm.script_manager.trigger("supplier", d.doctype, d.name);
-							}
-						}
-					}
-					frm.refresh_field("suppliers");
-				}
-
-				if (args.search_type === "Tag" && args.tag) {
-					return frappe.call({
-						type: "GET",
-						method: "frappe.desk.doctype.tag.tag.get_tagged_docs",
-						args: {
-							"doctype": "Supplier",
-							"tag": args.tag
-						},
-						callback: load_suppliers
-					});
-				} else if (args.supplier_group) {
-					return frappe.call({
-						method: "frappe.client.get_list",
-						args: {
-							doctype: "Supplier",
-							order_by: "name",
-							fields: ["name"],
-							filters: [["Supplier", "supplier_group", "=", args.supplier_group]]
-
-						},
-						callback: load_suppliers
-					});
-				}
-			}
-		});
-
-		dialog.show();
+	    var doc = frm.doc;
+	    var current_page = 1;
+	    var page_size = 20;
+	
+	    function load_suppliers(r) {
+	        if(r.message) {
+	            for (var i = 0; i < r.message.length; i++) {
+	                var exists = false;
+	                let supplier = "";
+	                if (r.message[i].constructor === Array){
+	                    supplier = r.message[i][0];
+	                } else {
+	                    supplier = r.message[i].name;
+	                }
+	
+	                for (var j = 0; j < doc.suppliers.length; j++) {
+	                    if (supplier === doc.suppliers[j].supplier) {
+	                        exists = true;
+	                    }
+	                }
+	                if(!exists) {
+	                    var d = frm.add_child('suppliers');
+	                    d.supplier = supplier;
+	                    frm.script_manager.trigger("supplier", d.doctype, d.name);
+	                }
+	            }
+	            frm.refresh_field("suppliers");
+	        }
+	    }
+	
+	    function fetch_suppliers(args) {
+	        if (args.search_type === "Tag" && args.tag) {
+	            frappe.call({
+	                type: "GET",
+	                method: "frappe.desk.doctype.tag.tag.get_tagged_docs",
+	                args: {
+	                    "doctype": "Supplier",
+	                    "tag": args.tag,
+	                    "limit_start": (current_page - 1) * page_size,
+	                    "limit_page_length": page_size
+	                },
+	                callback: load_suppliers
+	            });
+	        } else if (args.supplier_group) {
+	            frappe.call({
+	                method: "frappe.client.get_list",
+	                args: {
+	                    doctype: "Supplier",
+	                    order_by: "name",
+	                    fields: ["name"],
+	                    filters: [["Supplier", "supplier_group", "=", args.supplier_group]],
+	                    limit_start: (current_page - 1) * page_size,
+	                    limit_page_length: page_size
+	                },
+	                callback: load_suppliers
+	            });
+	        }
+	    }
+	
+	    function go_to_page(page) {
+	        current_page = page;
+	        dialog.fields_dict.current_page.set_value(current_page);
+	        fetch_suppliers(dialog.get_values());
+	    }
+	
+	    var dialog = new frappe.ui.Dialog({
+	        title: __("Get Suppliers"),
+	        fields: [
+	            {
+	                "fieldtype": "Select", "label": __("Get Suppliers By"),
+	                "fieldname": "search_type",
+	                "options": ["Supplier Group", "Tag"],
+	                "reqd": 1,
+	                onchange() {
+	                    if(dialog.get_value('search_type') == 'Tag'){
+	                        frappe.call({
+	                            method: 'erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_tag',
+	                        }).then(r => {
+	                            dialog.set_df_property("tag", "options", r.message)
+	                        });
+	                    }
+	                }
+	            },
+	            {
+	                "fieldtype": "Link", "label": __("Supplier Group"),
+	                "fieldname": "supplier_group",
+	                "options": "Supplier Group",
+	                "reqd": 0,
+	                "depends_on": "eval:doc.search_type == 'Supplier Group'"
+	            },
+	            {
+	                "fieldtype": "Select", "label": __("Tag"),
+	                "fieldname": "tag",
+	                "reqd": 0,
+	                "depends_on": "eval:doc.search_type == 'Tag'",
+	            },
+	            {
+	                "fieldtype": "Int", "label": __("Current Page"),
+	                "fieldname": "current_page",
+	                "default": current_page,
+	                "read_only": 1
+	            },
+	            {
+	                "fieldtype": "Int", "label": __("Page Size"),
+	                "fieldname": "page_size",
+	                "default": page_size
+	            },
+	            {
+	                "fieldtype": "Button", "label": __("Previous"),
+	                "fieldname": "previous_page",
+	                "click": () => go_to_page(Math.max(1, current_page - 1))
+	            },
+	            {
+	                "fieldtype": "Button", "label": __("Next"),
+	                "fieldname": "next_page",
+	                "click": () => go_to_page(current_page + 1)
+	            }
+	        ],
+	        primary_action_label: __("Add Suppliers"),
+	        primary_action : (args) => {
+	            if(!args) return;
+	            dialog.hide();
+	
+	            for (var j = 0; j < frm.doc.suppliers.length; j++) {
+	                if(!Object.prototype.hasOwnProperty.call(frm.doc.suppliers[j], "supplier")) {
+	                    frm.get_field("suppliers").grid.grid_rows[j].remove();
+	                }
+	            }
+	
+	            fetch_suppliers(args);
+	        }
+	    });
+	
+	    dialog.show();
 	}
 };
 
