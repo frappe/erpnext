@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-02-18 18:58\n"
+"PO-Revision-Date: 2024-02-19 19:34\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -117,8 +117,8 @@ msgstr "# Kontoeinstellungen\n\n"
 #: assets/onboarding_step/existing_asset/existing_asset.json
 msgid "# Add an Existing Asset\n\n"
 "If you are just starting with ERPNext, you will need to enter Assets you already possess. You can add them as existing fixed assets in ERPNext. Please note that you will have to make a Journal Entry separately updating the opening balance in the fixed asset account."
-msgstr "# Fügen Sie ein bestehendes Asset\n\n"
-"hinzu, wenn Sie gerade mit ERPNext beginnen, müssen Sie Assets eingeben, die Sie bereits besitzen. Sie können diese als bestehende Anlagewerte in ERPNext hinzufügen. Bitte beachten Sie, dass Sie einen Journaleintrag separat erstellen müssen, um den Eröffnungssaldo im Festanlagenkonto zu aktualisieren."
+msgstr "# Vorhandene Vermögensgegenstände hinzufügen\n\n"
+"Wenn Sie gerade erst mit ERPNext beginnen, müssen Sie die Vermögensgegenstände, die Sie bereits besitzen, eingeben. Sie können sie als bestehende Vermögensgegenstände in ERPNext hinzufügen. Bitte beachten Sie, dass Sie einen separaten Journaleintrag vornehmen müssen, um den Eröffnungssaldo des Anlagenkontos zu aktualisieren."
 
 #. Description of the Onboarding Step 'Create Your First Sales Invoice '
 #: setup/onboarding_step/create_your_first_sales_invoice/create_your_first_sales_invoice.json
@@ -152,8 +152,8 @@ msgstr ""
 #: assets/onboarding_step/asset_item/asset_item.json
 msgid "# Asset Item\n\n"
 "Asset items are created based on Asset Category. You can create one or multiple items against once Asset Category. The sales and purchase transaction for Asset is done via Asset Item. "
-msgstr "# Sachanlage-Artikel\n\n"
-"Sachanlage-Artikel werden auf Basis der Anlagenkategorie erstellt. Sie können einen oder mehrere Artikel für eine Anlagenkategorie erstellen. Die Verkaufs- und Einkaufstransaktionen für Sachanlagen werden über Sachanlage-Artikel abgewickelt. "
+msgstr "# Vermögensgegenstand-Artikel\n\n"
+"Vermögensgegenstände werden auf der Grundlage der Vermögensgegenstand-Kategorie erstellt. Sie können einen oder mehrere Artikel für eine Vermögensgegenstand-Kategorie erstellen. Die Verkaufs- und Kauftransaktionen für Vermögensgegenstände werden über Vermögensgegenstand-Artikel abgewickelt. "
 
 #. Description of the Onboarding Step 'Buying Settings'
 #: buying/onboarding_step/introduction_to_buying/introduction_to_buying.json
@@ -255,13 +255,15 @@ msgstr "# Erstellen Sie einen Kunden\n\n"
 #: setup/onboarding_step/letterhead/letterhead.json
 msgid "# Create a Letter Head\n\n"
 "A Letter Head contains your organization's name, logo, address, etc which appears at the header and footer portion in documents. You can learn more about Setting up Letter Head in ERPNext here.\n"
-msgstr ""
+msgstr "# Erstellen Sie einen Briefkopf\n\n"
+"Ein Briefkopf enthält den Namen, das Logo, die Adresse usw. Ihrer Organisation, die in der Kopf- und Fußzeile von Dokumenten angezeigt werden. Weitere Informationen zum Einrichten des Briefkopfes in ERPNext finden Sie hier.\n"
 
 #. Description of the Onboarding Step 'Create your first Quotation'
 #: setup/onboarding_step/create_a_quotation/create_a_quotation.json
 msgid "# Create a Quotation\n\n"
 "Let’s get started with business transactions by creating your first Quotation. You can create a Quotation for an existing customer or a prospect. It will be an approved document, with items you sell and the proposed price + taxes applied. After completing the instructions, you will get a Quotation in a ready to share print format."
-msgstr ""
+msgstr "# Angebot erstellen\n\n"
+"Lassen Sie uns mit geschäftlichen Transaktionen beginnen, indem Sie Ihr erstes Angebot erstellen. Sie können ein Angebot für einen bestehenden Kunden oder einen potenziellen Kunden erstellen. Es handelt sich dabei um ein genehmigtes Dokument mit den Artikeln, die Sie verkaufen, und dem vorgeschlagenen Preis + Steuern. Nachdem Sie die Anweisungen befolgt haben, erhalten Sie ein Angebot in einem druckfertigen Format, das Sie mit anderen teilen können."
 
 #. Description of the Onboarding Step 'Create a Supplier'
 #: setup/onboarding_step/create_a_supplier/create_a_supplier.json
@@ -271,13 +273,19 @@ msgid "# Create a Supplier\n\n"
 " - Supplier’s multiple address and contacts\n"
 " - Account Receivables\n"
 " - Credit Limit and Credit Period\n"
-msgstr ""
+msgstr "# Erstellen Sie einen Lieferanten\n\n"
+"Die Lieferantenstammdaten stehen im Zentrum Ihrer Einkaufstransaktionen. Lieferanten werden in Angebotsanfragen, Lieferantenaufträgen, Eingangsbelegen und Auszahlungen verknüpft. Lieferanten können entweder nummeriert oder mit ihrem Namen identifiziert werden.\n\n"
+"Über den Stammdatenstamm des Lieferanten können Sie wichtige Informationen wie:\n"
+" - Mehrere Adressen und Kontakte des Lieferanten\n"
+" - Forderungen\n"
+" - Kreditlimit und Kreditzeitraum\n"
 
 #. Description of the Onboarding Step 'Create a Supplier'
 #: stock/onboarding_step/create_a_supplier/create_a_supplier.json
 msgid "# Create a Supplier\n"
 "In this step we will create a **Supplier**. If you have already created a **Supplier** you can skip this step."
-msgstr ""
+msgstr "# Erstellen Sie einen Lieferanten\n"
+"In diesem Schritt erstellen wir einen **Lieferanten**. Wenn Sie bereits einen **Lieferanten** erstellt haben, können Sie diesen Schritt überspringen."
 
 #. Description of the Onboarding Step 'Work Order'
 #: manufacturing/onboarding_step/work_order/work_order.json
@@ -294,27 +302,34 @@ msgstr ""
 msgid "# Create an Item\n\n"
 "Item is a product or a service offered by your company, or something you buy as a part of your supplies or raw materials.\n\n"
 "Items are integral to everything you do in ERPNext - from billing, purchasing to managing inventory. Everything you buy or sell, whether it is a physical product or a service is an Item. Items can be stock, non-stock, variants, serialized, batched, assets, etc.\n"
-msgstr ""
+msgstr "# Artikel erstellen\n\n"
+"Ein Artikel ist ein Produkt oder eine Dienstleistung, die von Ihrem Unternehmen angeboten wird, oder etwas, das Sie als Teil Ihrer Vorräte oder Rohmaterialien kaufen.\n\n"
+"Artikel sind ein integraler Bestandteil aller Vorgänge in ERPNext - von der Rechnungsstellung über den Einkauf bis hin zur Bestandsverwaltung. Alles, was Sie kaufen oder verkaufen, egal ob es sich um ein physisches Produkt oder eine Dienstleistung handelt, ist ein Artikel. Artikel können auf Lager, nicht auf Lager, in Varianten, in Seriennummern, in Chargen, als Anlagegüter usw. sein.\n"
 
 #. Description of the Onboarding Step 'Create an Item'
 #: stock/onboarding_step/create_an_item/create_an_item.json
 msgid "# Create an Item\n"
 "The Stock module deals with the movement of items.\n\n"
 "In this step we will create an  [**Item**](https://docs.erpnext.com/docs/user/manual/en/stock/item)."
-msgstr ""
+msgstr "# Erstellen Sie einen Artikel\n"
+"Das Modul Lagerverwaltung befasst sich mit der Bewegung von Artikeln.\n\n"
+"In diesem Schritt werden wir einen [**Artikel**] (https://docs.erpnext.com/docs/user/manual/en/stock/item) erstellen."
 
 #. Description of the Onboarding Step 'Create first Purchase Order'
 #: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
 msgid "# Create first Purchase Order\n\n"
 "Purchase Order is at the heart of your buying transactions. In ERPNext, Purchase Order can can be created against a Purchase Material Request (indent) and Supplier Quotation as well.  Purchase Orders is also linked to Purchase Receipt and Purchase Invoices, allowing you to keep a birds-eye view on your purchase deals.\n\n"
-msgstr ""
+msgstr "# Ersten Lieferantenauftrag erstellen\n\n"
+"Der Lieferantenauftrag ist das Herzstück Ihrer Einkaufstransaktionen. In ERPNext kann ein Lieferantenauftrag auch aus einer Materialanforderung und einem Lieferantenangebot erstellt werden.  Lieferantenaufträge sind auch mit Eingangsbelegen und Eingangsrechnungen verknüpft, so dass Sie Ihre Einkaufsgeschäfte aus der Vogelperspektive verfolgen können.\n\n"
 
 #. Description of the Onboarding Step 'Create Your First Purchase Invoice '
 #: accounts/onboarding_step/create_your_first_purchase_invoice/create_your_first_purchase_invoice.json
 msgid "# Create your first Purchase Invoice\n\n"
 "A Purchase Invoice is a bill received from a Supplier for a product(s) or service(s) delivery to your company. You can track payables through Purchase Invoice and process Payment Entries against it.\n\n"
 "Purchase Invoices can also be created against a Purchase Order or Purchase Receipt."
-msgstr ""
+msgstr "# Erstellen Sie Ihre erste Eingangsrechnung\n\n"
+"Eine Eingangsrechnung ist eine Rechnung, die Sie von einem Lieferanten für eine Produkt- oder Dienstleistungslieferung an Ihr Unternehmen erhalten. Sie können die Verbindlichkeiten über die Eingangsrechnung verfolgen und Auszahlungen mit ihr verarbeiten.\n\n"
+"Eingangsrechnungen können auch mit einem Lieferantenauftrag oder Eingangsbeleg erstellt werden."
 
 #. Description of the Onboarding Step 'Financial Statements'
 #: accounts/onboarding_step/financial_statements/financial_statements.json
@@ -331,19 +346,26 @@ msgid "# Fixed Asset Accounts\n\n"
 " - Accumulated depreciation\n"
 " - Capital Work in progress (CWIP) account\n"
 " - Asset Depreciation account (Expense account)"
-msgstr ""
+msgstr "# Vermögenskonten\n\n"
+"Mit dem Unternehmen ist eine Vielzahl von Vermögenskonten vorkonfiguriert. Um sicherzustellen, dass Ihre Vermögenstransaktionen zu korrekten Buchungen führen, können Sie die folgenden Vermögenskonten entsprechend Ihren geschäftlichen Anforderungen überprüfen und einrichten.\n"
+" - Anlagekonten (Aktivkonto)\n"
+" - Kumulierte Abschreibung\n"
+" - Konto für Anlagen im Bau (CWIP)\n"
+" - Konto für die Abschreibung von Anlagen (Aufwandskonto)"
 
 #. Description of the Onboarding Step 'Production Planning'
 #: manufacturing/onboarding_step/production_planning/production_planning.json
 msgid "# How Production Planning Works\n\n"
 "Production Plan helps in production and material planning for the Items planned for manufacturing. These production items can be committed via Sales Order (to Customers) or Material Requests (internally).\n"
-msgstr ""
+msgstr "# So funktioniert die Produktionsplanung\n\n"
+"Der Produktionsplan hilft bei der Produktions- und Materialplanung für die Artikel, die für die Herstellung geplant sind. Diese Produktionsartikel können über Kundenaufträge (an Kunden) oder Materialanforderungen (intern) bereitgestellt werden.\n"
 
 #. Description of the Onboarding Step 'Import Data from Spreadsheet'
 #: setup/onboarding_step/data_import/data_import.json
 msgid "# Import Data from Spreadsheet\n\n"
 "In ERPNext, you can easily migrate your historical data using spreadsheets. You can use it for migrating not just masters (like Customer, Supplier, Items), but also for transactions like (outstanding invoices, opening stock and accounting entries, etc)."
-msgstr ""
+msgstr "# Daten aus Tabellen importieren\n\n"
+"In ERPNext können Sie Ihre historischen Daten ganz einfach mithilfe von Tabellen migrieren. Sie können damit nicht nur Stammdaten (wie Kunden, Lieferanten, Artikel) migrieren, sondern auch Transaktionen (ausstehende Rechnungen, Anfangsbestand und Buchungen, etc.)."
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:148
 msgid "# In Stock"
@@ -353,7 +375,8 @@ msgstr "# Auf Lager"
 #: stock/onboarding_step/introduction_to_stock_entry/introduction_to_stock_entry.json
 msgid "# Introduction to Stock Entry\n"
 "This video will give a quick introduction to [**Stock Entry**](https://docs.erpnext.com/docs/user/manual/en/stock/stock-entry)."
-msgstr ""
+msgstr "# Einführung in die Lagerbewegung\n"
+"Dieses Video gibt eine kurze Einführung in die [**Lagerbewegung**] (https://docs.erpnext.com/docs/user/manual/en/stock/stock-entry)."
 
 #. Description of the Onboarding Step 'Manage Stock Movements'
 #: stock/onboarding_step/create_a_stock_entry/create_a_stock_entry.json
@@ -366,14 +389,15 @@ msgstr ""
 #: setup/onboarding_step/navigation_help/navigation_help.json
 msgid "# Navigation in ERPNext\n\n"
 "Ease of navigating and browsing around the ERPNext is one of our core strengths. In the following video, you will learn how to reach a specific feature in ERPNext via module page or AwesomeBar."
-msgstr ""
+msgstr "# Navigation in ERPNext\n\n"
+"Einfaches Navigieren und Browsen in ERPNext ist eine unserer Hauptstärken. Im folgenden Video erfahren Sie, wie Sie eine bestimmte Funktion in ERPNext über die Modulseite oder die AwesomeBar erreichen."
 
 #. Description of the Onboarding Step 'Purchase an Asset'
 #: assets/onboarding_step/asset_purchase/asset_purchase.json
 msgid "# Purchase an Asset\n\n"
 "Assets purchases process if done following the standard Purchase cycle. If capital work in progress is enabled in Asset Category, Asset will be created as soon as Purchase Receipt is created for it. You can quickly create a Purchase Receipt for Asset and see its impact on books of accounts."
-msgstr "# Kaufen Sie eine Sachanlage\n\n"
-"Sachanlage werden über den Standard-Einkaufsprozess gekauft. Wenn in der Kategorie Anlagevermögen die Option Unfertige Erzeugnisse aktiviert ist, wird das Anlagevermögen angelegt, sobald ein Eingangsbeleg dafür erstellt wird. Sie können schnell einen Eingangsbeleg für eine Sachanlage erstellen und dessen Auswirkungen auf die Buchhaltung sehen."
+msgstr "# Kauf eines Vermögensgegenstandes\n\n"
+"Der Kauf eines Vermögensgegenstandes wird nach dem Standard-Kaufzyklus abgewickelt. Falls Anlagen im Bau in der Vermögensgegenstand-Kategorie aktiviert sind, wird ein Vermögensgegenstand angelegt, sobald ein Eingangsbeleg für ihn erstellt wird. Sie können schnell einen Eingangsbeleg für einen Vermögensgegenstand erstellen und dessen Auswirkungen auf die Buchhaltung sehen."
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:141
 msgid "# Req'd Items"
@@ -417,14 +441,19 @@ msgid "# Selling Settings\n\n"
 "CRM and Selling module’s features are configurable as per your business needs. Selling Settings is the place where you can set your preferences for:\n"
 " - Customer naming and default values\n"
 " - Billing and shipping preference in sales transactions\n"
-msgstr ""
+msgstr "# Verkaufseinstellungen\n\n"
+"Die Funktionen des CRM- und Verkaufsmoduls lassen sich entsprechend Ihren geschäftlichen Anforderungen konfigurieren. In den Verkaufseinstellungen können Sie Ihre Präferenzen für folgende Bereiche festlegen:\n"
+" - Kundenbenennung und Standardwerte\n"
+" - Rechnungs- und Versandpräferenzen bei Verkaufstransaktionen\n"
 
 #. Description of the Onboarding Step 'Set Up a Company'
 #: setup/onboarding_step/company_set_up/company_set_up.json
 msgid "# Set Up a Company\n\n"
 "A company is a legal entity for which you will set up your books of account and create accounting transactions. In ERPNext, you can create multiple companies, and establish relationships (group/subsidiary) among them.\n\n"
 "Within the company master, you can capture various default accounts for that Company and set crucial settings related to the accounting methodology followed for a company.\n"
-msgstr ""
+msgstr "# Ein Unternehmen einrichten\n\n"
+"Ein Unternehmen ist eine juristische Person, für die Sie Ihre Geschäftsbücher einrichten und Buchhaltungstransaktionen erstellen werden. In ERPNext können Sie mehrere Unternehmen anlegen und Beziehungen (Konzern/Tochtergesellschaft) zwischen ihnen herstellen.\n\n"
+"Im Unternehmensstamm können Sie verschiedene Standardkonten für das Unternehmen erfassen und wichtige Einstellungen zur Buchhaltungsmethodik für ein Unternehmen vornehmen.\n"
 
 #. Description of the Onboarding Step 'Setting up Taxes'
 #: accounts/onboarding_step/setup_taxes/setup_taxes.json
@@ -2733,11 +2762,11 @@ msgstr "Buchungen"
 
 #: accounts/doctype/sales_invoice/sales_invoice.js:82
 msgid "Accounting Entries are reposted"
-msgstr ""
+msgstr "Buchhaltungseinträge werden umgebucht"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:79
 msgid "Accounting Entries are reposted."
-msgstr ""
+msgstr "Buchhaltungseinträge werden umgebucht."
 
 #: assets/doctype/asset/asset.py:709 assets/doctype/asset/asset.py:724
 #: assets/doctype/asset_capitalization/asset_capitalization.py:572
@@ -2767,7 +2796,7 @@ msgstr "Lagerbuchung"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.py:658
 msgid "Accounting Entry for {0}"
-msgstr ""
+msgstr "Buchungen für {0}"
 
 #: controllers/accounts_controller.py:1950
 msgid "Accounting Entry for {0}: {1} can only be made in currency: {2}"
@@ -3054,13 +3083,13 @@ msgstr "Forderungen"
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 msgctxt "Invoice Discounting"
 msgid "Accounts Receivable Credit Account"
-msgstr "Debitorenkreditkonto"
+msgstr ""
 
 #. Label of a Link field in DocType 'Invoice Discounting'
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 msgctxt "Invoice Discounting"
 msgid "Accounts Receivable Discounted Account"
-msgstr "Debitorenkonto mit Rabatt"
+msgstr ""
 
 #. Name of a report
 #. Label of a Link in the Receivables Workspace
@@ -3204,7 +3233,7 @@ msgstr "Zu verschmelzende Konten"
 #. Subtitle of the Module Onboarding 'Accounts'
 #: accounts/module_onboarding/accounts/accounts.json
 msgid "Accounts, Invoices, Taxation, and more."
-msgstr ""
+msgstr "Konten, Rechnungen, Steuern und mehr."
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:33
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:46
@@ -3791,7 +3820,7 @@ msgstr "Unterpunkt hinzufügen"
 
 #: accounts/report/general_ledger/general_ledger.js:199
 msgid "Add Columns in Transaction Currency"
-msgstr ""
+msgstr "Spalten in Transaktionswährung hinzufügen"
 
 #. Label of a Check field in DocType 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
@@ -3823,7 +3852,7 @@ msgstr ""
 
 #: crm/doctype/lead/lead.js:82
 msgid "Add Lead to Prospect"
-msgstr ""
+msgstr "Interessenten zu einem Potenziellen Kunden hinzufügen"
 
 #: public/js/event.js:15
 msgid "Add Leads"
@@ -3975,7 +4004,7 @@ msgstr "Zu arbeitsfreien Tagen hinzufügen"
 
 #: crm/doctype/lead/lead.js:42
 msgid "Add to Prospect"
-msgstr ""
+msgstr "Zu Potenziellem Kunden hinzufügen"
 
 #. Label of a Check field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -4019,13 +4048,13 @@ msgstr "Rolle {1} zu Benutzer {0} hinzugefügt."
 
 #: crm/doctype/lead/lead.js:80
 msgid "Adding Lead to Prospect..."
-msgstr ""
+msgstr "Interessent wird zu Potenziellem Kunden hinzugefügt..."
 
 #. Label of a Currency field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Additional Asset Cost"
-msgstr ""
+msgstr "Zusätzliche Kosten"
 
 #. Label of a Currency field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -4783,11 +4812,11 @@ msgstr "Adressen"
 
 #: assets/doctype/asset/asset.js:116
 msgid "Adjust Asset Value"
-msgstr "Wert der Sachanlage anpassen"
+msgstr "Wert des Vermögensgegenstands anpassen"
 
 #: accounts/doctype/sales_invoice/sales_invoice.js:996
 msgid "Adjustment Against"
-msgstr ""
+msgstr "Anpassung gegen"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.py:581
 msgid "Adjustment based on Purchase Invoice rate"
@@ -4917,7 +4946,7 @@ msgstr "Anzahlung kann nicht größer sein als {0} {1}"
 
 #: accounts/doctype/journal_entry/journal_entry.py:741
 msgid "Advance paid against {0} {1} cannot be greater than Grand Total {2}"
-msgstr ""
+msgstr "Der auf {0} {1} gezahlte Vorschuss kann nicht höher sein als die Gesamtsumme {2}"
 
 #. Description of the 'Only Include Allocated Payments' (Check) field in
 #. DocType 'Purchase Invoice'
@@ -5737,7 +5766,7 @@ msgstr "Zulassen, dass Artikel in einer Transaktion mehrmals hinzugefügt werden
 #: crm/doctype/crm_settings/crm_settings.json
 msgctxt "CRM Settings"
 msgid "Allow Lead Duplication based on Emails"
-msgstr ""
+msgstr "Mehrere Interessenten mit derselben E-Mail-Adresse erlauben"
 
 #. Label of a Check field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -5889,7 +5918,7 @@ msgstr "Benutzer darf Preisliste in Transaktionen bearbeiten"
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Allow User to Edit Rate"
-msgstr ""
+msgstr "Benutzer darf Preise ändern"
 
 #. Label of a Check field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
@@ -6030,7 +6059,7 @@ msgstr ""
 
 #: stock/doctype/pick_list/pick_list.py:721
 msgid "Already Picked"
-msgstr ""
+msgstr "Bereits kommissioniert"
 
 #: stock/doctype/item_alternative/item_alternative.py:83
 msgid "Already record exists for the item {0}"
@@ -7641,15 +7670,15 @@ msgstr "Partei automatisch anhand grober Übereinstimmung des Namens zuordnen"
 
 #: public/js/utils/demo.js:20
 msgid "Are you sure you want to clear all demo data?"
-msgstr ""
+msgstr "Sind Sie sicher, dass Sie alle Demodaten löschen möchten?"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:325
 msgid "Are you sure you want to delete this Item?"
-msgstr ""
+msgstr "Sind Sie sicher, dass Sie diesen Artikel löschen möchten?"
 
 #: accounts/doctype/subscription/subscription.js:70
 msgid "Are you sure you want to restart this subscription?"
-msgstr ""
+msgstr "Sind Sie sicher, dass Sie dieses Abonnement erneut starten möchten?"
 
 #. Label of a Float field in DocType 'Location'
 #: assets/doctype/location/location.json
@@ -7698,11 +7727,11 @@ msgstr "Da es bereits gebuchte Transaktionen für den Artikel {0} gibt, können 
 
 #: stock/doctype/stock_settings/stock_settings.py:195
 msgid "As there are negative stock, you can not enable {0}."
-msgstr ""
+msgstr "Da es negative Bestände gibt, können Sie {0} nicht aktivieren."
 
 #: stock/doctype/stock_settings/stock_settings.py:209
 msgid "As there are reserved stock, you cannot disable {0}."
-msgstr ""
+msgstr "Da es reservierte Bestände gibt, können Sie {0} nicht deaktivieren."
 
 #: manufacturing/doctype/production_plan/production_plan.py:1600
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
@@ -7711,7 +7740,7 @@ msgstr "Da genügend Rohstoffe vorhanden sind, ist für Warehouse {0} keine Mate
 #: stock/doctype/stock_settings/stock_settings.py:164
 #: stock/doctype/stock_settings/stock_settings.py:178
 msgid "As {0} is enabled, you can not enable {1}."
-msgstr ""
+msgstr "Da {0} aktiviert ist, können Sie {1} nicht aktivieren."
 
 #. Label of a Table field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
@@ -7728,93 +7757,93 @@ msgstr ""
 #: assets/doctype/asset/asset.json
 #: stock/doctype/purchase_receipt/purchase_receipt.js:177
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Option for the 'Root Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link in the Assets Workspace
 #. Label of a shortcut in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Asset Activity'
 #: assets/doctype/asset_activity/asset_activity.json
 msgctxt "Asset Activity"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Asset Capitalization Asset Item'
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgctxt "Asset Capitalization Asset Item"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Asset Depreciation Schedule'
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgctxt "Asset Depreciation Schedule"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Asset Movement Item'
 #: assets/doctype/asset_movement_item/asset_movement_item.json
 msgctxt "Asset Movement Item"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Asset Shift Allocation'
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.json
 msgctxt "Asset Shift Allocation"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Option for the 'Root Type' (Select) field in DocType 'Ledger Merge'
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgctxt "Ledger Merge"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
 msgctxt "Serial No"
 msgid "Asset"
-msgstr "Sachanlage"
+msgstr "Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Share Transfer'
 #: accounts/doctype/share_transfer/share_transfer.json
@@ -7829,36 +7858,36 @@ msgstr "Anlagenkonto"
 #: assets/report/asset_activity/asset_activity.json
 #: assets/workspace/assets/assets.json
 msgid "Asset Activity"
-msgstr ""
+msgstr "Vermögensgegenstand Aktivität"
 
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Activity"
-msgstr ""
+msgstr "Vermögensgegenstand Aktivität"
 
 #. Name of a DocType
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Asset Capitalization"
-msgstr "Anlagenaktivierung"
+msgstr "Vermögensgegenstand-Aktivierung"
 
 #. Group in Asset's connections
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Capitalization"
-msgstr "Anlagenaktivierung"
+msgstr "Vermögensgegenstand-Aktivierung"
 
 #. Label of a Link in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Capitalization"
 msgid "Asset Capitalization"
-msgstr "Anlagenaktivierung"
+msgstr "Vermögensgegenstand-Aktivierung"
 
 #. Name of a DocType
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgid "Asset Capitalization Asset Item"
-msgstr "Sachanlage für Anlagenaktivierung"
+msgstr "Zu aktivierender Vermögensgegenstand"
 
 #. Name of a DocType
 #: assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
@@ -7868,7 +7897,7 @@ msgstr "Dienstleistung für Anlagenaktivierung"
 #. Name of a DocType
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgid "Asset Capitalization Stock Item"
-msgstr "Lagerartikel für Anlagenaktivierung"
+msgstr "Lagerartikel für Vermögensgegenstand-Aktivierung"
 
 #. Name of a DocType
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.js:36
@@ -7879,55 +7908,55 @@ msgstr "Lagerartikel für Anlagenaktivierung"
 #: assets/report/fixed_asset_register/fixed_asset_register.js:24
 #: assets/report/fixed_asset_register/fixed_asset_register.py:418
 msgid "Asset Category"
-msgstr "Sachanlagekategorie"
+msgstr "Vermögensgegenstand-Kategorie"
 
 #. Label of a Link field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Category"
-msgstr "Sachanlagekategorie"
+msgstr "Vermögensgegenstand-Kategorie"
 
 #. Label of a Link in the Assets Workspace
 #. Label of a shortcut in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Category"
 msgid "Asset Category"
-msgstr "Sachanlagekategorie"
+msgstr "Vermögensgegenstand-Kategorie"
 
 #. Label of a Read Only field in DocType 'Asset Maintenance'
 #: assets/doctype/asset_maintenance/asset_maintenance.json
 msgctxt "Asset Maintenance"
 msgid "Asset Category"
-msgstr "Sachanlagekategorie"
+msgstr "Vermögensgegenstand-Kategorie"
 
 #. Label of a Read Only field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Asset Category"
-msgstr "Sachanlagekategorie"
+msgstr "Vermögensgegenstand-Kategorie"
 
 #. Label of a Link field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Asset Category"
-msgstr "Sachanlagekategorie"
+msgstr "Vermögensgegenstand-Kategorie"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Asset Category"
-msgstr "Sachanlagekategorie"
+msgstr "Vermögensgegenstand-Kategorie"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Asset Category"
-msgstr "Sachanlagekategorie"
+msgstr "Vermögensgegenstand-Kategorie"
 
 #. Name of a DocType
 #: assets/doctype/asset_category_account/asset_category_account.json
 msgid "Asset Category Account"
-msgstr "Sachanlagekategorie Konto"
+msgstr "Vermögensgegenstand-Kategorie Konto"
 
 #. Label of a Data field in DocType 'Asset Category'
 #: assets/doctype/asset_category/asset_category.json
@@ -7937,7 +7966,7 @@ msgstr "Name der Anlagenkategorie"
 
 #: stock/doctype/item/item.py:304
 msgid "Asset Category is mandatory for Fixed Asset item"
-msgstr "Anlagenkategorie ist obligatorisch für Sachanlage-Artikel"
+msgstr "Vermögensgegenstand-Kategorie ist obligatorisch für Artikel des Anlagevermögens"
 
 #. Label of a Link field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -7949,7 +7978,7 @@ msgstr "Kostenstelle für Vermögenswertabschreibung"
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Asset Depreciation Details"
-msgstr "Details zur Abschreibung von Sachanlagen"
+msgstr "Details zur Abschreibung von Vermögensgegenständen"
 
 #. Name of a report
 #. Label of a Link in the Assets Workspace
@@ -7961,23 +7990,23 @@ msgstr "Anlagenabschreibungensbuch"
 #. Name of a DocType
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgid "Asset Depreciation Schedule"
-msgstr "Zeitplan zur Abschreibung von Sachanlagen"
+msgstr "Zeitplan für die Abschreibung von Vermögensgegenständen"
 
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Depreciation Schedule"
-msgstr "Zeitplan zur Abschreibung von Sachanlagen"
+msgstr "Zeitplan für die Abschreibung von Vermögensgegenständen"
 
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.py:77
 msgid "Asset Depreciation Schedule for Asset {0} and Finance Book {1} is not using shift based depreciation"
-msgstr "Zeitplan zur Abschreibung von Sachanlagen für Sachanlage {0} und Finanzbuch {1} verwendet keine schichtbasierte Abschreibung"
+msgstr "Zeitplan zur Abschreibung von Vermögensgegenstand {0} und Finanzbuch {1} verwendet keine schichtbasierte Abschreibung"
 
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:898
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:944
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.py:83
 msgid "Asset Depreciation Schedule not found for Asset {0} and Finance Book {1}"
-msgstr ""
+msgstr "Vermögensgegenstand Abschreibungsplan nicht gefunden für Vermögensgegenstand {0} und Finanzbuch {1}"
 
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:94
 msgid "Asset Depreciation Schedule {0} for Asset {1} already exists."
@@ -7989,7 +8018,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:144 assets/doctype/asset/asset.py:181
 msgid "Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
-msgstr "Abschreibungspläne für Anlage erstellt:<br>{0}<br><br>Bitte prüfen Sie, bearbeiten Sie sie bei Bedarf und buchen Sie die Anlage."
+msgstr "Abschreibungspläne für Vermögensgegenstand erstellt:<br>{0}<br><br>Bitte prüfen Sie, bearbeiten Sie sie bei Bedarf und buchen Sie den Vermögensgegenstand."
 
 #. Name of a report
 #. Label of a Link in the Assets Workspace
@@ -8011,7 +8040,7 @@ msgstr "Anlagenfinanzierungsbuch"
 
 #: assets/report/fixed_asset_register/fixed_asset_register.py:410
 msgid "Asset ID"
-msgstr "Sachanlage ID"
+msgstr "Vermögensgegenstand ID"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -8084,13 +8113,13 @@ msgstr "Wartungsteam Vermögenswert"
 #: assets/doctype/asset_movement/asset_movement.json
 #: stock/doctype/purchase_receipt/purchase_receipt.js:184
 msgid "Asset Movement"
-msgstr "Sachanlage-Bewegung"
+msgstr "Vermögensgegenstand-Bewegung"
 
 #. Label of a Link in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Movement"
 msgid "Asset Movement"
-msgstr "Sachanlage-Bewegung"
+msgstr "Vermögensgegenstand-Bewegung"
 
 #. Name of a DocType
 #: assets/doctype/asset_movement_item/asset_movement_item.json
@@ -8099,7 +8128,7 @@ msgstr "Vermögensbewegungsgegenstand"
 
 #: assets/doctype/asset/asset.py:901
 msgid "Asset Movement record {0} created"
-msgstr "Sachanlage-Bewegung {0} erstellt"
+msgstr "Vermögensgegenstand-Bewegung {0} erstellt"
 
 #: assets/report/fixed_asset_register/fixed_asset_register.py:416
 msgid "Asset Name"
@@ -8163,7 +8192,7 @@ msgstr "Eigentümer des Vermögenswertes"
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Owner Company"
-msgstr "Unternehmen, dem die Sachanlage gehört"
+msgstr "Unternehmen, dem der Vermögensgegenstand gehört"
 
 #. Label of a Int field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -8175,54 +8204,54 @@ msgstr "Anzahl"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:127
 #: accounts/report/account_balance/account_balance.js:39
 msgid "Asset Received But Not Billed"
-msgstr "Erhaltene, aber nicht in Rechnung gestellte Sachanlage"
+msgstr "Erhaltene, nicht in Rechnung gestellte Vermögensgegenstände"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Asset Received But Not Billed"
-msgstr "Erhaltene, aber nicht in Rechnung gestellte Sachanlage"
+msgstr "Erhaltene, nicht in Rechnung gestellte Vermögensgegenstände"
 
 #. Label of a Link field in DocType 'Company'
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Asset Received But Not Billed"
-msgstr "Erhaltene, aber nicht in Rechnung gestellte Sachanlage"
+msgstr "Erhaltene, nicht in Rechnung gestellte Vermögensgegenstände"
 
 #. Name of a DocType
 #: assets/doctype/asset_repair/asset_repair.json
 msgid "Asset Repair"
-msgstr "Sachanlage Reparatur"
+msgstr "Vermögensgegenstand Reparatur"
 
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Repair"
-msgstr "Sachanlage Reparatur"
+msgstr "Vermögensgegenstand Reparatur"
 
 #. Label of a Link in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Repair"
 msgid "Asset Repair"
-msgstr "Sachanlage Reparatur"
+msgstr "Vermögensgegenstand Reparatur"
 
 #. Option for the 'Type of Transaction' (Select) field in DocType 'Serial and
 #. Batch Bundle'
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Asset Repair"
-msgstr "Sachanlage Reparatur"
+msgstr "Vermögensgegenstand Reparatur"
 
 #. Name of a DocType
 #: assets/doctype/asset_repair_consumed_item/asset_repair_consumed_item.json
 msgid "Asset Repair Consumed Item"
-msgstr "Sachanlage-Reparatur verbrauchten Gegenstand"
+msgstr "Vermögensgegenstand Reparatur Verbrauchter Artikel"
 
 #. Label of a Section Break field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Asset Settings"
-msgstr "Einstellungen für Sachanlagen"
+msgstr "Vermögensgegenstand Einstellungen"
 
 #. Name of a DocType
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.json
@@ -8249,13 +8278,13 @@ msgstr "Status Vermögenswert"
 #: assets/report/fixed_asset_register/fixed_asset_register.py:400
 #: assets/report/fixed_asset_register/fixed_asset_register.py:440
 msgid "Asset Value"
-msgstr "Wert der Sachanlage"
+msgstr "Vermögensgegenstand Wert"
 
 #. Label of a Currency field in DocType 'Asset Capitalization Asset Item'
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgctxt "Asset Capitalization Asset Item"
 msgid "Asset Value"
-msgstr "Wert der Sachanlage"
+msgstr "Vermögensgegenstand Wert"
 
 #. Name of a DocType
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
@@ -8276,7 +8305,7 @@ msgstr "Anpassung Vermögenswert"
 
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.py:71
 msgid "Asset Value Adjustment cannot be posted before Asset's purchase date <b>{0}</b>."
-msgstr "Asset-Wertberichtigung kann nicht vor dem Kaufdatum des Assets <b>{0}</b> gebucht werden."
+msgstr "Die Wertberichtigung des Vermögensgegenstandes kann nicht vor dem Kaufdatum des Vermögensgegenstandes gebucht werden <b>{0}</b>."
 
 #. Label of a chart in the Assets Workspace
 #: assets/dashboard_fixtures.py:57 assets/workspace/assets/assets.json
@@ -8285,7 +8314,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:172
 msgid "Asset cancelled"
-msgstr "Sachanlage abgebrochen"
+msgstr "Vermögensgegenstand storniert"
 
 #: assets/doctype/asset/asset.py:506
 msgid "Asset cannot be cancelled, as it is already {0}"
@@ -8293,99 +8322,99 @@ msgstr "Vermögenswert kann nicht rückgängig gemacht werden, da es ohnehin sch
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:687
 msgid "Asset capitalized after Asset Capitalization {0} was submitted"
-msgstr "Sachanlage aktiviert, nachdem die Anlagenaktivierung {0} gebucht wurde"
+msgstr "Vermögensgegenstand aktiviert, nachdem die Vermögensgegenstand-Aktivierung {0} gebucht wurde"
 
 #: assets/doctype/asset/asset.py:194
 msgid "Asset created"
-msgstr "Sachanlage erstellt"
+msgstr "Vermögensgegenstand erstellt"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:633
 msgid "Asset created after Asset Capitalization {0} was submitted"
-msgstr "Sachanlage erstellt, nachdem Anlagenaktivierung {0} gebucht wurde"
+msgstr "Vermögensgegenstand angelegt, nachdem die Vermögensgegenstand-Aktivierung {0} gebucht wurde"
 
 #: assets/doctype/asset/asset.py:1156
 msgid "Asset created after being split from Asset {0}"
-msgstr "Sachanlage erstellt nach Abspaltung von Sachanlage {0}"
+msgstr "Vermögensgegenstand, der nach der Abspaltung von Vermögensgegenstand {0} erstellt wurde"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:695
 msgid "Asset decapitalized after Asset Capitalization {0} was submitted"
-msgstr "Sachanlage de-aktiviert, nachdem Anlagenaktivierung {0} gebucht wurde"
+msgstr ""
 
 #: assets/doctype/asset/asset.py:197
 msgid "Asset deleted"
-msgstr "Sachanlage gelöscht"
+msgstr "Vermögensgegenstand gelöscht"
 
 #: assets/doctype/asset_movement/asset_movement.py:172
 msgid "Asset issued to Employee {0}"
-msgstr "Sachanlage ausgegeben an Mitarbeiter {0}"
+msgstr "Vermögensgegenstand ausgegeben an Mitarbeiter {0}"
 
 #: assets/doctype/asset_repair/asset_repair.py:69
 msgid "Asset out of order due to Asset Repair {0}"
-msgstr "Sachanlage außer Betrieb aufgrund von Reparatur {0}"
+msgstr "Vermögensgegenstand außer Betrieb aufgrund von Reparatur {0}"
 
 #: assets/doctype/asset_movement/asset_movement.py:159
 msgid "Asset received at Location {0} and issued to Employee {1}"
-msgstr "Sachanlage erhalten an Standort {0} und ausgegeben an Mitarbeiter {1}"
+msgstr "Vermögensgegenstand erhalten am Standort {0} und ausgegeben an Mitarbeiter {1}"
 
 #: assets/doctype/asset/depreciation.py:509
 msgid "Asset restored"
-msgstr "Sachanlage wiederhergestellt"
+msgstr "Vermögensgegenstand wiederhergestellt"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:703
 msgid "Asset restored after Asset Capitalization {0} was cancelled"
-msgstr "Sachanlage wiederhergestellt, nachdem die Anlagenaktivierung {0} abgebrochen wurde"
+msgstr "Vermögensgegenstand wiederhergestellt, nachdem die Vermögensgegenstand-Aktivierung {0} storniert wurde"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1320
 msgid "Asset returned"
-msgstr "Sachanlage zurückgegeben"
+msgstr "Vermögensgegenstand zurückgegeben"
 
 #: assets/doctype/asset/depreciation.py:483
 msgid "Asset scrapped"
-msgstr "Sachanlage verschrottet"
+msgstr "Vermögensgegenstand verschrottet"
 
 #: assets/doctype/asset/depreciation.py:485
 msgid "Asset scrapped via Journal Entry {0}"
-msgstr "Sachanlage über Buchungssatz {0} verschrottet"
+msgstr "Vermögensgegenstand verschrottet über Journaleintrag {0}"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1354
 msgid "Asset sold"
-msgstr "Sachanlage verkauft"
+msgstr "Vermögensgegenstand verkauft"
 
 #: assets/doctype/asset/asset.py:160
 msgid "Asset submitted"
-msgstr "Sachanlagen gebucht"
+msgstr "Vermögensgegenstand gebucht"
 
 #: assets/doctype/asset_movement/asset_movement.py:167
 msgid "Asset transferred to Location {0}"
-msgstr "Sachanlage an Standort {0} übertragen"
+msgstr "Vermögensgegenstand an Standort {0} übertragen"
 
 #: assets/doctype/asset/asset.py:1080
 msgid "Asset updated after being split into Asset {0}"
-msgstr "Sachanlage nach der Aufteilung in Sachanlage {0} aktualisiert"
+msgstr "Vermögensgegenstand nach der Abspaltung in Vermögensgegenstand {0} aktualisiert"
 
 #: assets/doctype/asset_repair/asset_repair.py:158
 msgid "Asset updated after cancellation of Asset Repair {0}"
-msgstr "Sachanlage nach Stornierung der Reparatur {0} aktualisiert"
+msgstr "Vermögensgegenstand aktualisiert nach Stornierung der Reparatur {0}"
 
 #: assets/doctype/asset_repair/asset_repair.py:120
 msgid "Asset updated after completion of Asset Repair {0}"
-msgstr "Sachanlage nach Abschluss der Reparatur {0} aktualisiert"
+msgstr "Vermögensgegenstand nach Abschluss der Reparatur {0} aktualisiert"
 
 #: assets/doctype/asset_movement/asset_movement.py:98
 msgid "Asset {0} cannot be received at a location and given to an employee in a single movement"
-msgstr "Sachanlage {0} kann nicht in derselben Bewegung an einem Ort entgegengenommen und an einen Mitarbeiter übergeben werden"
+msgstr "Vermögensgegenstand {0} kann nicht in derselben Bewegung an einem Ort entgegengenommen und an einen Mitarbeiter übergeben werden"
 
 #: assets/doctype/asset/depreciation.py:449
 msgid "Asset {0} cannot be scrapped, as it is already {1}"
-msgstr "Sachanlage {0} kann nicht verschrottet werden, da es bereits {1} ist"
+msgstr "Vermögensgegenstand {0} kann nicht verschrottet werden, da er bereits {1} ist"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:237
 msgid "Asset {0} does not belong to Item {1}"
-msgstr "Sachanlage {0} gehört nicht zum Artikel {1}"
+msgstr "Vermögensgegenstand {0} gehört nicht zum Artikel {1}"
 
 #: assets/doctype/asset_movement/asset_movement.py:45
 msgid "Asset {0} does not belong to company {1}"
-msgstr "Sachanlage {0} gehört nicht zu Unternehmen {1}"
+msgstr "Der Vermögensgegenstand {0} gehört nicht zum Unternehmen {1}"
 
 #: assets/doctype/asset_movement/asset_movement.py:110
 msgid "Asset {0} does not belongs to the custodian {1}"
@@ -8398,19 +8427,19 @@ msgstr "Anlage {0} gehört nicht zum Standort {1}"
 #: assets/doctype/asset_capitalization/asset_capitalization.py:759
 #: assets/doctype/asset_capitalization/asset_capitalization.py:859
 msgid "Asset {0} does not exist"
-msgstr "Sachanlage {0} existiert nicht"
+msgstr "Vermögensgegenstand {0} existiert nicht"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:639
 msgid "Asset {0} has been created. Please set the depreciation details if any and submit it."
-msgstr "Sachanlage {0} wurde erstellt. Bitte geben Sie die Abschreibungsdetails ein, falls vorhanden, und buchen Sie sie."
+msgstr "Vermögensgegenstand {0} wurde erstellt. Bitte geben Sie die Abschreibungsdetails ein, falls vorhanden, und buchen Sie sie."
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:661
 msgid "Asset {0} has been updated. Please set the depreciation details if any and submit it."
-msgstr "Sachanlage {0} wurde aktualisiert. Bitte geben Sie die Abschreibungsdetails ein, falls vorhanden, und buchen Sie sie."
+msgstr "Vermögensgegenstand {0} wurde aktualisiert. Bitte geben Sie die Abschreibungsdetails ein, falls vorhanden, und buchen Sie sie."
 
 #: assets/doctype/asset/depreciation.py:446
 msgid "Asset {0} must be submitted"
-msgstr "Sachanlage {0} muss gebucht werden"
+msgstr "Vermögensgegenstand {0} muss gebucht werden"
 
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.py:262
 msgid "Asset's depreciation schedule updated after Asset Shift Allocation {0}"
@@ -8418,11 +8447,11 @@ msgstr ""
 
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.py:62
 msgid "Asset's value adjusted after cancellation of Asset Value Adjustment {0}"
-msgstr ""
+msgstr "Wert des Vermögensgegenstandes nach Stornierung der Vermögenswertanpassung {0} angepasst"
 
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.py:53
 msgid "Asset's value adjusted after submission of Asset Value Adjustment {0}"
-msgstr ""
+msgstr "Der Wert des Vermögensgegenstandes wurde nach der Buchung der Vermögenswertanpassung angepasst {0}"
 
 #. Name of a Workspace
 #. Label of a Card Break in the Assets Workspace
@@ -8457,7 +8486,7 @@ msgstr "Assets nicht für {0} erstellt. Sie müssen das Asset manuell erstellen.
 #. Subtitle of the Module Onboarding 'Assets'
 #: assets/module_onboarding/assets/assets.json
 msgid "Assets, Depreciations, Repairs, and more."
-msgstr ""
+msgstr "Vermögensgegenstände, Abschreibungen, Reparaturen und mehr."
 
 #: controllers/buying_controller.py:720
 msgid "Asset{} {assets_link} created for {}"
@@ -8536,11 +8565,11 @@ msgstr "In Zeile {0}: Die Sequenz-ID {1} darf nicht kleiner sein als die vorheri
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:582
 msgid "At row {0}: Batch No is mandatory for Item {1}"
-msgstr ""
+msgstr "In Zeile {0}: Chargennummer ist obligatorisch für Artikel {1}"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:574
 msgid "At row {0}: Serial No is mandatory for Item {1}"
-msgstr ""
+msgstr "In Zeile {0}: Seriennummer ist obligatorisch für Artikel {1}"
 
 #. Description of the 'File to Rename' (Attach) field in DocType 'Rename Tool'
 #: utilities/doctype/rename_tool/rename_tool.json
@@ -9018,13 +9047,13 @@ msgstr "Verfügbare Menge"
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 msgctxt "Purchase Receipt Item Supplied"
 msgid "Available Qty For Consumption"
-msgstr ""
+msgstr "Verfügbare Menge zum Verbrauch"
 
 #. Label of a Float field in DocType 'Subcontracting Receipt Supplied Item'
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgctxt "Subcontracting Receipt Supplied Item"
 msgid "Available Qty For Consumption"
-msgstr ""
+msgstr "Verfügbare Menge zum Verbrauch"
 
 #. Label of a Float field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
@@ -9048,7 +9077,7 @@ msgstr "Verfügbare Menge bei Source Warehouse"
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Available Qty at Target Warehouse"
-msgstr ""
+msgstr "Verfügbare Menge im Ziellager"
 
 #. Label of a Float field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
@@ -9070,13 +9099,13 @@ msgstr "Verfügbarer Lagerbestand"
 
 #: stock/report/reserved_stock/reserved_stock.py:138
 msgid "Available Qty to Reserve"
-msgstr ""
+msgstr "Verfügbare Menge zum Reservieren"
 
 #. Label of a Float field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Available Qty to Reserve"
-msgstr ""
+msgstr "Verfügbare Menge zum Reservieren"
 
 #. Label of a Float field in DocType 'Quick Stock Balance'
 #: stock/doctype/quick_stock_balance/quick_stock_balance.json
@@ -9157,7 +9186,7 @@ msgstr "Durchschnittlicher täglicher Abgang"
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Avg Rate"
-msgstr ""
+msgstr "Durchschnittspreis"
 
 #: stock/report/stock_ledger/stock_ledger.py:197
 msgid "Avg Rate (Balance Stock)"
@@ -9298,35 +9327,35 @@ msgstr "Stücklisten-Vergleichstool"
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "BOM Created"
-msgstr ""
+msgstr "Stückliste erstellt"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgid "BOM Creator"
-msgstr ""
+msgstr "Stücklistenersteller"
 
 #. Label of a Link field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "BOM Creator"
-msgstr ""
+msgstr "Stücklistenersteller"
 
 #. Label of a shortcut in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgctxt "BOM Creator"
 msgid "BOM Creator"
-msgstr ""
+msgstr "Stücklistenersteller"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "BOM Creator Item"
-msgstr ""
+msgstr "Stücklistenerstellerelement"
 
 #. Label of a Data field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "BOM Creator Item"
-msgstr ""
+msgstr "Stücklistenerstellerelement"
 
 #. Label of a Data field in DocType 'Purchase Order Item Supplied'
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
@@ -9381,7 +9410,7 @@ msgstr "Stücklistenartikel"
 #: manufacturing/report/bom_explorer/bom_explorer.py:59
 #: manufacturing/report/production_plan_summary/production_plan_summary.py:147
 msgid "BOM Level"
-msgstr ""
+msgstr "Stücklistenebene"
 
 #: manufacturing/report/bom_variance_report/bom_variance_report.js:9
 #: manufacturing/report/bom_variance_report/bom_variance_report.py:31
@@ -9507,7 +9536,7 @@ msgstr "Stücklistenbaum"
 
 #: manufacturing/report/bom_stock_report/bom_stock_report.py:28
 msgid "BOM UoM"
-msgstr ""
+msgstr "Stücklisten-ME"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_update_batch/bom_update_batch.json
@@ -9516,31 +9545,31 @@ msgstr ""
 
 #: manufacturing/doctype/bom_update_tool/bom_update_tool.js:82
 msgid "BOM Update Initiated"
-msgstr ""
+msgstr "Stücklistenaktualisierung eingeleitet"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 msgid "BOM Update Log"
-msgstr ""
+msgstr "Stücklistenaktualisierungsprotokoll"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_update_tool/bom_update_tool.json
 msgid "BOM Update Tool"
-msgstr ""
+msgstr "Stücklisten-Update-Tool"
 
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgctxt "BOM Update Tool"
 msgid "BOM Update Tool"
-msgstr ""
+msgstr "Stücklisten-Update-Tool"
 
 #: manufacturing/doctype/bom_update_log/bom_update_log.py:99
 msgid "BOM Updation already in progress. Please wait until {0} is complete."
-msgstr ""
+msgstr "Stücklistenaktualisierung bereits im Gange. Bitte warten Sie, bis {0} abgeschlossen ist."
 
 #: manufacturing/doctype/bom_update_tool/bom_update_tool.js:81
 msgid "BOM Updation is queued and may take a few minutes. Check {0} for progress."
-msgstr ""
+msgstr "Die Stücklistenaktualisierung befindet sich in der Warteschlange und kann einige Minuten dauern. Überprüfen Sie {0} auf Fortschritt."
 
 #. Name of a report
 #: manufacturing/report/bom_variance_report/bom_variance_report.json
@@ -9572,7 +9601,7 @@ msgstr "Stücklistenrekursion: {0} darf nicht untergeordnet zu {1} sein"
 
 #: manufacturing/doctype/bom/bom.py:631
 msgid "BOM recursion: {1} cannot be parent or child of {0}"
-msgstr ""
+msgstr "Stücklistenrekursion: {1} kann nicht über- oder untergeordnet von {0} sein"
 
 #: manufacturing/doctype/bom/bom.py:1223
 msgid "BOM {0} does not belong to Item {1}"
@@ -9594,15 +9623,15 @@ msgstr "Stücklisten aktualisiert"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:252
 msgid "BOMs created successfully"
-msgstr ""
+msgstr "Stücklisten erfolgreich erstellt"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:262
 msgid "BOMs creation failed"
-msgstr ""
+msgstr "Die Stücklistenerstellung ist fehlgeschlagen"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:215
 msgid "BOMs creation has been enqueued, kindly check the status after some time"
-msgstr ""
+msgstr "Die Stücklistenerstellung wurde in die Warteschlange gestellt. Bitte überprüfen Sie den Status nach einiger Zeit"
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:323
 msgid "Backdated Stock Entry"
@@ -9639,7 +9668,7 @@ msgstr "Saldo"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:41
 msgid "Balance (Dr - Cr)"
-msgstr ""
+msgstr "Saldo (S - H)"
 
 #: accounts/report/general_ledger/general_ledger.py:584
 msgid "Balance ({0})"
@@ -10067,7 +10096,7 @@ msgstr ""
 #. Name of a DocType
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Bank Statement Import"
-msgstr ""
+msgstr "Kontoauszug Import"
 
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:43
 msgid "Bank Statement balance as per General Ledger"
@@ -10112,19 +10141,19 @@ msgstr ""
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:544
 msgid "Bank Transaction {0} added as Journal Entry"
-msgstr ""
+msgstr "Banktransaktion {0} als Journaleintrag hinzugefügt"
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:520
 msgid "Bank Transaction {0} added as Payment Entry"
-msgstr ""
+msgstr "Banktransaktion {0} als Zahlungseintrag hinzugefügt"
 
 #: accounts/doctype/bank_transaction/bank_transaction.py:124
 msgid "Bank Transaction {0} is already fully reconciled"
-msgstr ""
+msgstr "Die Banktransaktion {0} ist bereits vollständig abgeglichen"
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:563
 msgid "Bank Transaction {0} updated"
-msgstr ""
+msgstr "Banktransaktion {0} aktualisiert"
 
 #: setup/setup_wizard/operations/install_fixtures.py:525
 msgid "Bank account cannot be named as {0}"
@@ -10146,11 +10175,11 @@ msgstr "Fehler beim Erstellen der Banküberweisung"
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Bank/Cash Account"
-msgstr ""
+msgstr "Bank- / Kassenkonto"
 
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:54
 msgid "Bank/Cash Account {0} doesn't belong to company {1}"
-msgstr ""
+msgstr "Das Bank- / Kassenkonto {0} gehört nicht zu Unternehmen {1}"
 
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
@@ -10603,7 +10632,7 @@ msgstr "Chargennummer"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:585
 msgid "Batch No is mandatory"
-msgstr ""
+msgstr "Chargennummer ist obligatorisch"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2118
 msgid "Batch No {0} does not exists"
@@ -10611,7 +10640,7 @@ msgstr ""
 
 #: stock/utils.py:643
 msgid "Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
-msgstr ""
+msgstr "Die Chargennummer {0} ist mit dem Artikel {1} verknüpft, der eine Seriennummer hat. Bitte scannen Sie stattdessen die Seriennummer."
 
 #. Label of a Int field in DocType 'BOM Update Batch'
 #: manufacturing/doctype/bom_update_batch/bom_update_batch.json
@@ -10713,7 +10742,7 @@ msgstr "Chargenbezogener Bestandsverlauf"
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:160
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:84
 msgid "Batchwise Valuation"
-msgstr ""
+msgstr "Chargenweise Bewertung"
 
 #. Label of a Section Break field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
@@ -10732,7 +10761,7 @@ msgstr "Beginn an (Tage)"
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Beginning of the current subscription period"
-msgstr ""
+msgstr "Beginn des aktuellen Abonnementzeitraums"
 
 #: accounts/doctype/subscription/subscription.py:341
 msgid "Below Subscription Plans are of different currency to the party default billing currency/Company currency: {0}"
@@ -11306,7 +11335,7 @@ msgstr "Umsatzsteueranteil bei Skonto berücksichtigen"
 
 #: www/book_appointment/index.html:15
 msgid "Book an appointment"
-msgstr ""
+msgstr "Termin buchen"
 
 #: stock/doctype/shipment/shipment_list.js:5
 msgid "Booked"
@@ -11818,35 +11847,35 @@ msgstr "Kreditlimitprüfung im Auftrag umgehen"
 
 #: selling/report/customer_credit_balance/customer_credit_balance.py:68
 msgid "Bypass credit check at Sales Order"
-msgstr ""
+msgstr "Kreditprüfung im Kundenauftrag umgehen"
 
 #. Option for the 'Naming Series' (Select) field in DocType 'Closing Stock
 #. Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "CBAL-.#####"
-msgstr ""
+msgstr "CBAL-.#####"
 
 #. Label of a Link field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "CC To"
-msgstr ""
+msgstr "CC An"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "CODE-39"
-msgstr ""
+msgstr "CODE-39"
 
 #. Name of a report
 #: stock/report/cogs_by_item_group/cogs_by_item_group.json
 msgid "COGS By Item Group"
-msgstr ""
+msgstr "Herstellungskosten nach Artikelgruppe"
 
 #: stock/report/cogs_by_item_group/cogs_by_item_group.py:45
 msgid "COGS Debit"
-msgstr ""
+msgstr "Herstellungskosten Soll"
 
 #. Name of a Workspace
 #. Label of a Card Break in the Home Workspace
@@ -11857,7 +11886,7 @@ msgstr "CRM"
 #. Name of a DocType
 #: crm/doctype/crm_note/crm_note.json
 msgid "CRM Note"
-msgstr ""
+msgstr "CRM Notiz"
 
 #. Name of a DocType
 #. Title of an Onboarding Step
@@ -11918,7 +11947,7 @@ msgstr "Berechnen Sie die voraussichtliche Ankunftszeit"
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Calculate Product Bundle Price based on Child Items' Rates"
-msgstr ""
+msgstr "Preis der Produktbündel basierend auf den Preisen der enthaltenen Artikel berechnen"
 
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:56
 msgid "Calculated Bank Statement balance"
@@ -11945,7 +11974,7 @@ msgstr "Kalibrierung"
 
 #: telephony/doctype/call_log/call_log.js:8
 msgid "Call Again"
-msgstr ""
+msgstr "Erneut anrufen"
 
 #: public/js/call_popup/call_popup.js:41
 msgid "Call Connected"
@@ -12567,7 +12596,7 @@ msgstr "Kann nicht storniert werden, da die gebuchte Lagerbewegung {0} existiert
 
 #: stock/stock_ledger.py:196
 msgid "Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."
-msgstr ""
+msgstr "Sie können die Transaktion nicht stornieren. Die Umbuchung der Artikelbewertung bei der Buchung ist noch nicht abgeschlossen."
 
 #: controllers/buying_controller.py:811
 msgid "Cannot cancel this document as it is linked with submitted asset {0}. Please cancel it to continue."
@@ -12810,23 +12839,23 @@ msgstr "Anlagen im Bau"
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Capitalization"
-msgstr ""
+msgstr "Aktivierung"
 
 #. Label of a Select field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Capitalization Method"
-msgstr ""
+msgstr "Aktivierungsmethode"
 
 #: assets/doctype/asset/asset.js:155
 msgid "Capitalize Asset"
-msgstr "Sachanlage aktivieren"
+msgstr "Vermögensgegenstand aktivieren"
 
 #. Label of a Check field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Capitalize Repair Cost"
-msgstr ""
+msgstr "Reparaturkosten aktivieren"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -13698,7 +13727,7 @@ msgstr "Geschlosser Auftrag kann nicht abgebrochen werden. Bitte  wiedereröffne
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
 msgctxt "Prospect Opportunity"
 msgid "Closing"
-msgstr ""
+msgstr "Abschluss"
 
 #: accounts/report/trial_balance/trial_balance.py:464
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.py:221
@@ -15945,7 +15974,7 @@ msgstr ""
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Consumed Assets"
-msgstr "Verbrauchte Sachanlagen"
+msgstr "Verbrauchte Vermögensgegenstände"
 
 #. Label of a Table field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
@@ -16000,11 +16029,11 @@ msgstr "Verbrauchte Menge"
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Consumed Stock Items"
-msgstr ""
+msgstr "Verbrauchte Lagerartikel"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:321
 msgid "Consumed Stock Items or Consumed Asset Items is mandatory for Capitalization"
-msgstr ""
+msgstr "Verbrauchte Lagerartikel oder verbrauchte Vermögensgegenstand-Artikel sind für die Aktivierung obligatorisch"
 
 #. Label of a Currency field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
@@ -16157,19 +16186,19 @@ msgstr "Kontakt"
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Contact & Address"
-msgstr ""
+msgstr "Kontakt & Adresse"
 
 #. Label of a Tab Break field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Contact & Address"
-msgstr ""
+msgstr "Kontakt & Adresse"
 
 #. Label of a Tab Break field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Contact & Address"
-msgstr ""
+msgstr "Kontakt & Adresse"
 
 #. Label of a HTML field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
@@ -16385,7 +16414,7 @@ msgstr "Kontaktliste"
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Contact Mobile"
-msgstr ""
+msgstr "Kontakt-Mobiltelefonnummer"
 
 #. Label of a Small Text field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
@@ -17417,11 +17446,11 @@ msgstr "Aufwendungen für bezogene Artikel"
 
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:393
 msgid "Cost of Scrapped Asset"
-msgstr "Kosten der verschrotteten Sachanlage"
+msgstr "Aufwand für verschrotteten Vermögensgegenstand"
 
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:387
 msgid "Cost of Sold Asset"
-msgstr "Kosten der veräußerten Sachanlage"
+msgstr "Kosten des verkauften Vermögensgegenstandes"
 
 #: config/projects.py:67
 msgid "Cost of various activities"
@@ -17867,11 +17896,11 @@ msgstr "Buchungssatz erstellen"
 #. Title of an Onboarding Step
 #: crm/onboarding_step/create_lead/create_lead.json utilities/activation.py:80
 msgid "Create Lead"
-msgstr "Lead erstellen"
+msgstr "Interessent erstellen"
 
 #: utilities/activation.py:78
 msgid "Create Leads"
-msgstr "Leads erstellen"
+msgstr "Interessenten erstellen"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -17882,7 +17911,7 @@ msgstr "Buchungssätze für Wechselgeld erstellen"
 #: buying/doctype/supplier/supplier.js:191
 #: selling/doctype/customer/customer.js:236
 msgid "Create Link"
-msgstr ""
+msgstr "Verknüpfung erstellen"
 
 #. Label of a Check field in DocType 'Opening Invoice Creation Tool'
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
@@ -17904,7 +17933,7 @@ msgstr "Neuen Kunden erstellen"
 
 #: public/js/call_popup/call_popup.js:129
 msgid "Create New Lead"
-msgstr "Neuen Lead erstellen"
+msgstr "Neuen Interessenten erstellen"
 
 #. Title of an Onboarding Step
 #: crm/doctype/lead/lead.js:198
@@ -17934,7 +17963,7 @@ msgstr "Druckformat erstellen"
 
 #: crm/doctype/lead/lead_list.js:4
 msgid "Create Prospect"
-msgstr ""
+msgstr "Potenziellen Kunde erstellen"
 
 #: utilities/activation.py:107
 msgid "Create Purchase Order"
@@ -18058,12 +18087,12 @@ msgstr "Kunde erstellen"
 #. Title of an Onboarding Step
 #: selling/onboarding_step/create_product/create_product.json
 msgid "Create a Finished Good"
-msgstr ""
+msgstr "Fertigerzeugnis erstellen"
 
 #. Title of an Onboarding Step
 #: assets/onboarding_step/create_a_fixed_asset_item/create_a_fixed_asset_item.json
 msgid "Create a Fixed Asset Item"
-msgstr ""
+msgstr "Einen Vermögensgegenstand-Artikel erstellen"
 
 #. Label of an action in the Onboarding Step 'Manage Stock Movements'
 #: stock/onboarding_step/create_a_stock_entry/create_a_stock_entry.json
@@ -18075,7 +18104,7 @@ msgstr ""
 #: selling/onboarding_step/create_a_product/create_a_product.json
 #: stock/onboarding_step/create_a_product/create_a_product.json
 msgid "Create a Product"
-msgstr ""
+msgstr "Produkt erstellen"
 
 #. Title of an Onboarding Step
 #: selling/onboarding_step/create_a_quotation/create_a_quotation.json
@@ -18085,12 +18114,12 @@ msgstr "Angebot erstellen"
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_a_product/create_a_product.json
 msgid "Create a Sales Item"
-msgstr ""
+msgstr "Verkaufsartikel erstellen"
 
 #. Title of an Onboarding Step
 #: selling/onboarding_step/create_a_sales_order/create_a_sales_order.json
 msgid "Create a Sales Order"
-msgstr ""
+msgstr "Kundenauftrag erstellen"
 
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_a_supplier/create_a_supplier.json
@@ -18098,17 +18127,17 @@ msgstr ""
 #: setup/onboarding_step/create_a_supplier/create_a_supplier.json
 #: stock/onboarding_step/create_a_supplier/create_a_supplier.json
 msgid "Create a Supplier"
-msgstr ""
+msgstr "Lieferanten erstellen"
 
 #. Title of an Onboarding Step
 #: manufacturing/onboarding_step/warehouse/warehouse.json
 msgid "Create a Warehouse"
-msgstr ""
+msgstr "Lager erstellen"
 
 #. Label of an action in the Onboarding Step 'Create an Item'
 #: setup/onboarding_step/create_an_item/create_an_item.json
 msgid "Create a new Item"
-msgstr ""
+msgstr "Neuen Artikel erstellen"
 
 #. Option for the 'Capitalization Method' (Select) field in DocType 'Asset
 #. Capitalization'
@@ -18120,17 +18149,17 @@ msgstr ""
 #. Title of an Onboarding Step
 #: assets/onboarding_step/create_an_asset/create_an_asset.json
 msgid "Create an Asset"
-msgstr "Sachanlage erstellen"
+msgstr "Vermögensgegenstand erstellen"
 
 #. Title of an Onboarding Step
 #: assets/onboarding_step/create_an_asset_category/create_an_asset_category.json
 msgid "Create an Asset Category"
-msgstr "Eine Sachanlagekategorie erstellen"
+msgstr "Vermögensgegenstand-Kategorie erstellen"
 
 #. Title of an Onboarding Step
 #: assets/onboarding_step/asset_item/asset_item.json
 msgid "Create an Asset Item"
-msgstr "Einen Sachanlage-Artikel erstellen"
+msgstr "Vermögensgegenstand-Artikel erstellen"
 
 #. Label of an action in the Onboarding Step 'Finished Items'
 #. Title of an Onboarding Step
@@ -18138,7 +18167,7 @@ msgstr "Einen Sachanlage-Artikel erstellen"
 #: setup/onboarding_step/create_an_item/create_an_item.json
 #: stock/onboarding_step/create_an_item/create_an_item.json
 msgid "Create an Item"
-msgstr ""
+msgstr "Einen Artikel erstellen"
 
 #: stock/stock_ledger.py:1684
 msgid "Create an incoming stock transaction for the Item."
@@ -18147,7 +18176,7 @@ msgstr "Erstellen Sie eine eingehende Lagertransaktion für den Artikel."
 #. Title of an Onboarding Step
 #: crm/onboarding_step/create_and_send_quotation/create_and_send_quotation.json
 msgid "Create and Send Quotation"
-msgstr ""
+msgstr "Angebot erstellen und versenden"
 
 #: utilities/activation.py:87
 msgid "Create customer quotes"
@@ -18156,7 +18185,7 @@ msgstr "Kunden Angebote erstellen"
 #. Title of an Onboarding Step
 #: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
 msgid "Create first Purchase Order"
-msgstr ""
+msgstr "Ersten Lieferantenauftrag erstellen"
 
 #. Description of the 'Create Missing Party' (Check) field in DocType 'Opening
 #. Invoice Creation Tool'
@@ -18173,21 +18202,21 @@ msgstr "Erstellen Sie Ihre erste Stückliste"
 #. Title of an Onboarding Step
 #: setup/onboarding_step/create_a_quotation/create_a_quotation.json
 msgid "Create your first Quotation"
-msgstr ""
+msgstr "Erstellen Sie Ihr erstes Angebot"
 
 #. Title of an Onboarding Step
 #: selling/onboarding_step/create_your_first_sales_order/create_your_first_sales_order.json
 msgid "Create your first Sales Order"
-msgstr ""
+msgstr "Erstellen Sie Ihren ersten Kundenauftrag"
 
 #. Label of an action in the Onboarding Step 'Work Order'
 #: manufacturing/onboarding_step/work_order/work_order.json
 msgid "Create your first Work Order"
-msgstr ""
+msgstr "Erstellen Sie Ihren ersten Arbeitsauftrag"
 
 #: public/js/bulk_transaction_processing.js:14
 msgid "Create {0} {1} ?"
-msgstr ""
+msgstr "{0} {1} erstellen?"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:224
 msgid "Created On"
@@ -18195,7 +18224,7 @@ msgstr "Erstellt am"
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard.py:248
 msgid "Created {0} scorecards for {1} between:"
-msgstr ""
+msgstr "Erstellte {0} Scorecards für {1} zwischen:"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:126
 msgid "Creating Accounts..."
@@ -18207,7 +18236,7 @@ msgstr "Firma anlegen und Kontenplan importieren"
 
 #: selling/doctype/sales_order/sales_order.js:912
 msgid "Creating Delivery Note ..."
-msgstr ""
+msgstr "Lieferschein erstellen ..."
 
 #: accounts/doctype/accounting_dimension/accounting_dimension.py:137
 msgid "Creating Dimensions..."
@@ -18215,7 +18244,7 @@ msgstr "Dimensionen erstellen ..."
 
 #: stock/doctype/packing_slip/packing_slip.js:42
 msgid "Creating Packing Slip ..."
-msgstr ""
+msgstr "Packzettel erstellen ..."
 
 #: selling/doctype/sales_order/sales_order.js:1026
 msgid "Creating Purchase Order ..."
@@ -18225,12 +18254,12 @@ msgstr "Bestellung anlegen ..."
 #: buying/doctype/purchase_order/purchase_order.js:414
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:61
 msgid "Creating Purchase Receipt ..."
-msgstr ""
+msgstr "Eingangsbeleg erstellen ..."
 
 #: buying/doctype/purchase_order/purchase_order.js:81
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.js:146
 msgid "Creating Stock Entry"
-msgstr ""
+msgstr "Lagerbewegung erstellen"
 
 #: buying/doctype/purchase_order/purchase_order.js:429
 msgid "Creating Subcontracting Order ..."
@@ -18271,12 +18300,14 @@ msgstr "Erstellung erfolgreich: <b><a href='/app/{0}'>{1}</a></b>"
 #: utilities/bulk_transaction.py:190
 msgid "Creation of {0} failed.\n"
 "\t\t\t\tCheck <b><a href=\"/app/bulk-transaction-log\">Bulk Transaction Log</a></b>"
-msgstr ""
+msgstr "Die Erstellung von {0} ist fehlgeschlagen.\n"
+"\t\t\t\tÜberprüfen Sie <b><a href=\"/app/bulk-transaction-log\">Massentransaktionsprotokoll</a></b>"
 
 #: utilities/bulk_transaction.py:181
 msgid "Creation of {0} partially successful.\n"
 "\t\t\t\tCheck <b><a href=\"/app/bulk-transaction-log\">Bulk Transaction Log</a></b>"
-msgstr ""
+msgstr "Erstellung von {0} teilweise erfolgreich.\n"
+"\t\t\t\tÜberprüfen Sie <b><a href=\"/app/bulk-transaction-log\">Massentransaktionsprotokoll</a></b>"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:40
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:87
@@ -18303,7 +18334,7 @@ msgstr "Haben"
 
 #: accounts/report/general_ledger/general_ledger.py:601
 msgid "Credit (Transaction)"
-msgstr ""
+msgstr "Haben (Transaktion)"
 
 #: accounts/report/general_ledger/general_ledger.py:578
 msgid "Credit ({0})"
@@ -18341,7 +18372,7 @@ msgstr "(Gut)Haben-Betrag in Kontowährung"
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Credit Amount in Transaction Currency"
-msgstr ""
+msgstr "Haben-Betrag in Transaktionswährung"
 
 #: selling/report/customer_credit_balance/customer_credit_balance.py:67
 msgid "Credit Balance"
@@ -18847,7 +18878,7 @@ msgstr "Einstellungen Währungsumtausch"
 #. Name of a DocType
 #: accounts/doctype/currency_exchange_settings_details/currency_exchange_settings_details.json
 msgid "Currency Exchange Settings Details"
-msgstr ""
+msgstr "Details zu den Währungsumrechnungseinstellungen"
 
 #. Name of a DocType
 #: accounts/doctype/currency_exchange_settings_result/currency_exchange_settings_result.json
@@ -18961,13 +18992,13 @@ msgstr ""
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgctxt "Asset Capitalization Asset Item"
 msgid "Current Asset Value"
-msgstr "Aktueller Wert der Sachanlage"
+msgstr "Aktueller Wert des Vermögensgegenstandes"
 
 #. Label of a Currency field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Current Asset Value"
-msgstr "Aktueller Wert der Sachanlage"
+msgstr "Aktueller Wert des Vermögensgegenstandes"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:11
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:11
@@ -19469,7 +19500,7 @@ msgstr "Kunde / Artikel / Artikelgruppe"
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Customer / Lead Address"
-msgstr "Kunden- / Lead-Adresse"
+msgstr "Kunden- / Interessenten-Adresse"
 
 #. Name of a report
 #. Label of a Link in the Selling Workspace
@@ -20193,7 +20224,7 @@ msgstr "Kundenbezogener Artikelpreis"
 
 #: crm/report/lost_opportunity/lost_opportunity.py:38
 msgid "Customer/Lead Name"
-msgstr "Name des Kunden / Lead"
+msgstr "Name des Kunden / Interessenten"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:19
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:21
@@ -20831,7 +20862,7 @@ msgstr "Soll"
 
 #: accounts/report/general_ledger/general_ledger.py:594
 msgid "Debit (Transaction)"
-msgstr ""
+msgstr "Soll (Transaktion)"
 
 #: accounts/report/general_ledger/general_ledger.py:572
 msgid "Debit ({0})"
@@ -20906,17 +20937,17 @@ msgstr "Lastschrift ausgestellt am"
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Debit To"
-msgstr "Belasten auf"
+msgstr "Forderungskonto"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Debit To"
-msgstr "Belasten auf"
+msgstr "Forderungskonto"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:867
 msgid "Debit To is required"
-msgstr "Debit Um erforderlich"
+msgstr "Forderungskonto erforderlich"
 
 #: accounts/general_ledger.py:465
 msgid "Debit and Credit not equal for {0} #{1}. Difference is {2}."
@@ -20932,7 +20963,7 @@ msgstr "Soll in Unternehmenswährung"
 #: accounts/doctype/discounted_invoice/discounted_invoice.json
 msgctxt "Discounted Invoice"
 msgid "Debit to"
-msgstr "Belasten auf"
+msgstr "Forderungskonto"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:12
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:13
@@ -21778,7 +21809,7 @@ msgstr "Die Rechnungsabgrenzung ist bei einigen Rechnungen fehlgeschlagen:"
 #. Title of an Onboarding Step
 #: assets/onboarding_step/asset_category/asset_category.json
 msgid "Define Asset Category"
-msgstr "Eine Sachanlagekategorie definieren"
+msgstr "Vermögensgegenstand-Kategorie definieren"
 
 #: config/projects.py:39
 msgid "Define Project type."
@@ -23103,31 +23134,31 @@ msgstr "Beschreibung des Inhalts"
 #. Name of a DocType
 #: setup/doctype/designation/designation.json
 msgid "Designation"
-msgstr ""
+msgstr "Position"
 
 #. Label of a Data field in DocType 'Designation'
 #: setup/doctype/designation/designation.json
 msgctxt "Designation"
 msgid "Designation"
-msgstr ""
+msgstr "Position"
 
 #. Label of a Link field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Designation"
-msgstr ""
+msgstr "Position"
 
 #. Label of a Data field in DocType 'Employee External Work History'
 #: setup/doctype/employee_external_work_history/employee_external_work_history.json
 msgctxt "Employee External Work History"
 msgid "Designation"
-msgstr ""
+msgstr "Position"
 
 #. Label of a Link field in DocType 'Employee Internal Work History'
 #: setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 msgctxt "Employee Internal Work History"
 msgid "Designation"
-msgstr ""
+msgstr "Position"
 
 #. Name of a role
 #: crm/doctype/lead/lead.json projects/doctype/project/project.json
@@ -28276,7 +28307,7 @@ msgstr "Posten des Anlagevermögens muss ein Nichtlagerposition sein."
 #: assets/report/fixed_asset_register/fixed_asset_register.json
 #: assets/workspace/assets/assets.json
 msgid "Fixed Asset Register"
-msgstr "Sachanlagenverzeichnis"
+msgstr "Verzeichnis der Vermögensgegenstände"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:25
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:38
@@ -29662,7 +29693,7 @@ msgstr ""
 
 #: accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.js:30
 msgid "Generating Preview"
-msgstr ""
+msgstr "Vorschau wird erstellt"
 
 #. Label of a Button field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -31195,7 +31226,7 @@ msgstr "Wenn Ertrag oder Aufwand"
 
 #: manufacturing/doctype/operation/operation.js:30
 msgid "If an operation is divided into sub operations, they can be added here."
-msgstr ""
+msgstr "Wenn ein Vorgang in Untervorgänge unterteilt ist, können diese hier hinzugefügt werden."
 
 #. Description of the 'Account' (Link) field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
@@ -31208,51 +31239,51 @@ msgstr "Wenn leer, wird das übergeordnete Lagerkonto oder der Firmenstandard be
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "If checked, Rejected Quantity will be included while making Purchase Invoice from Purchase Receipt."
-msgstr ""
+msgstr "Falls aktiviert, wird die abgelehnte Menge bei der Erstellung der Eingangsrechnung aus dem Eingangsbeleg berücksichtigt."
 
 #. Description of the 'Reserve Stock' (Check) field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "If checked, Stock will be reserved on <b>Submit</b>"
-msgstr "Wenn diese Option aktiviert ist, wird der Bestand beim <b>Buchen</b>reserviert"
+msgstr "Falls aktiviert, wird der Bestand beim <b>Buchen</b>reserviert"
 
 #. Description of the 'Scan Mode' (Check) field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "If checked, picked qty won't automatically be fulfilled on submit of pick list."
-msgstr "Wenn diese Option aktiviert ist, wird die ausgewählte Menge nicht automatisch beim Buchen der Kommissionierliste erfüllt."
+msgstr "Falls aktiviert, wird die gewählte Menge beim Buchen der Pickliste nicht automatisch erfüllt."
 
 #. Description of the 'Considered In Paid Amount' (Check) field in DocType
 #. 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "If checked, the tax amount will be considered as already included in the Paid Amount in Payment Entry"
-msgstr ""
+msgstr "Falls aktiviert, wird der Betrag in einer Zahlung als Bruttobetrag (inkl. Steuer) betrachtet"
 
 #. Description of the 'Considered In Paid Amount' (Check) field in DocType
 #. 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "If checked, the tax amount will be considered as already included in the Paid Amount in Payment Entry"
-msgstr ""
+msgstr "Falls aktiviert, wird der Betrag in einer Zahlung als Bruttobetrag (inkl. Steuer) betrachtet"
 
 #. Description of the 'Is this Tax included in Basic Rate?' (Check) field in
 #. DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount"
-msgstr "Wenn aktiviert, wird der Steuerbetrag als bereits in den Druckkosten enthalten erachtet."
+msgstr "Falls aktiviert, wird der Steuerbetrag als im Einzelpreis enthalten betrachtet"
 
 #. Description of the 'Is this Tax included in Basic Rate?' (Check) field in
 #. DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount"
-msgstr "Wenn aktiviert, wird der Steuerbetrag als bereits in den Druckkosten enthalten erachtet."
+msgstr "Falls aktiviert, wird der Steuerbetrag als im Einzelpreis enthalten betrachtet"
 
 #: public/js/setup_wizard.js:48
 msgid "If checked, we will create demo data for you to explore the system. This demo data can be erased later."
-msgstr ""
+msgstr "Falls aktiviert, werden Demodaten erstellt, damit Sie das System erkunden können. Diese Demodaten können später wieder gelöscht werden."
 
 #. Description of the 'Service Address' (Small Text) field in DocType 'Warranty
 #. Claim'
@@ -31280,21 +31311,21 @@ msgstr "Wenn deaktiviert, wird das Feld \"Gerundeter Gesamtbetrag\" in keiner Tr
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "If enabled, a print of this document will be attached to each email"
-msgstr ""
+msgstr "Falls aktiviert, wird ein Ausdruck dieses Dokuments an jede E-Mail angehängt"
 
 #. Description of the 'Enable Discount Accounting for Selling' (Check) field in
 #. DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "If enabled, additional ledger entries will be made for discounts in a separate Discount Account"
-msgstr ""
+msgstr "Falls aktiviert, werden zusätzliche Buchungen für Rabatte in einem separaten Rabattkonto vorgenommen"
 
 #. Description of the 'Send Attached Files' (Check) field in DocType 'Request
 #. for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "If enabled, all files attached to this document will be attached to each email"
-msgstr ""
+msgstr "Falls aktiviert, werden alle Dateien, die an dieses Dokument angehängt sind, an jede E-Mail angehängt"
 
 #. Description of the 'Create Ledger Entries for Change Amount' (Check) field
 #. in DocType 'Accounts Settings'
@@ -31308,14 +31339,14 @@ msgstr "Wenn aktiviert, werden Buchungssätze für Wechselgeld in POS-Transaktio
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "If enabled, the consolidated invoices will have rounded total disabled"
-msgstr ""
+msgstr "Falls aktiviert, wird bei konsolidierten Rechnungen die gerundete Summe deaktiviert"
 
 #. Description of the 'Ignore Available Stock' (Check) field in DocType
 #. 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "If enabled, the system will create material requests even if the stock exists in the 'Raw Materials Warehouse'."
-msgstr ""
+msgstr "Falls aktiviert, erstellt das System auch dann Materialanforderungen, wenn der Bestand im „Rohstofflager“ vorhanden ist."
 
 #. Description of the 'Variant Of' (Link) field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -31384,14 +31415,14 @@ msgstr "Wenn kein Zeitschlitz zugewiesen ist, wird die Kommunikation von dieser 
 #: accounts/doctype/payment_terms_template/payment_terms_template.json
 msgctxt "Payment Terms Template"
 msgid "If this checkbox is checked, paid amount will be splitted and allocated as per the amounts in payment schedule against each payment term"
-msgstr "Wenn dieses Kontrollkästchen aktiviert ist, wird der bezahlte Betrag gemäß den Beträgen im Zahlungsplan auf jede Zahlungsbedingung aufgeteilt und zugewiesen"
+msgstr "Falls aktiviert, wird der gezahlte Betrag entsprechend den Beträgen im Zahlungsplan auf die einzelnen Zahlungsfristen aufgeteilt und zugewiesen"
 
 #. Description of the 'Skip Available Sub Assembly Items' (Check) field in
 #. DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "If this checkbox is enabled, then the system won’t run the MRP for the available sub-assembly items."
-msgstr ""
+msgstr "Falls aktiviert, führt das System keine Bedarfsplanung für verfügbaren Unterbaugruppen durch."
 
 #. Description of the 'Follow Calendar Months' (Check) field in DocType
 #. 'Subscription'
@@ -31412,7 +31443,7 @@ msgstr "Wenn diese Option nicht aktiviert ist, werden Journaleinträge im Entwur
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "If this is unchecked, direct GL entries will be created to book deferred revenue or expense"
-msgstr "Wenn diese Option nicht aktiviert ist, werden direkte FIBU-Einträge erstellt, um abgegrenzte Einnahmen oder Ausgaben zu buchen"
+msgstr "Falls deaktiviert, werden direkte Hauptbucheinträge erstellt, um abgegrenzte Einnahmen oder Ausgaben zu buchen"
 
 #: accounts/doctype/payment_entry/payment_entry.py:638
 msgid "If this is undesirable please cancel the corresponding Payment Entry."
@@ -32072,7 +32103,7 @@ msgstr "In Minuten"
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "In Minutes"
-msgstr ""
+msgstr "In Minuten"
 
 #: accounts/report/accounts_payable/accounts_payable.js:149
 #: accounts/report/accounts_receivable/accounts_receivable.js:181
@@ -32491,7 +32522,7 @@ msgstr "Standardbucheinträge einschließen"
 
 #: stock/report/stock_ledger_variance/stock_ledger_variance.js:60
 msgid "Include Disabled"
-msgstr ""
+msgstr "Deaktivierte einbeziehen"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:85
 msgid "Include Expired"
@@ -32599,7 +32630,7 @@ msgstr "Abgeglichene Buchungen einbeziehen"
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Include Safety Stock in Required Qty Calculation"
-msgstr ""
+msgstr "Sicherheitsbestand in die Berechnung der benötigten Menge einbeziehen"
 
 #: manufacturing/report/production_planning_report/production_planning_report.js:88
 msgid "Include Sub-assembly Raw Materials"
@@ -32613,7 +32644,7 @@ msgstr "Subkontrahierte Artikel einbeziehen"
 
 #: projects/report/timesheet_billing_summary/timesheet_billing_summary.js:57
 msgid "Include Timesheets in Draft Status"
-msgstr ""
+msgstr "Entwürfe einbeziehen"
 
 #: stock/report/stock_balance/stock_balance.js:84
 #: stock/report/stock_ledger/stock_ledger.js:82
@@ -32738,12 +32769,12 @@ msgstr "Eingehend"
 #. Name of a DocType
 #: telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
 msgid "Incoming Call Handling Schedule"
-msgstr ""
+msgstr "Zeitplan für die Bearbeitung eingehender Anrufe"
 
 #. Name of a DocType
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.json
 msgid "Incoming Call Settings"
-msgstr ""
+msgstr "Einstellungen für eingehende Anrufe"
 
 #: stock/report/serial_and_batch_summary/serial_and_batch_summary.py:163
 #: stock/report/stock_ledger/stock_ledger.py:189
@@ -32914,7 +32945,7 @@ msgstr "Incoterm"
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Increase In Asset Life(Months)"
-msgstr "Zusätzliche Lebensdauer der Sachanlage (in Monaten)"
+msgstr "Zusätzliche Lebensdauer des Vermögensgegenstandes (in Monaten)"
 
 #. Label of a Float field in DocType 'Item Attribute'
 #: stock/doctype/item_attribute/item_attribute.json
@@ -33474,7 +33505,7 @@ msgstr "Vorstellung"
 #. Title of an Onboarding Step
 #: assets/onboarding_step/introduction_to_assets/introduction_to_assets.json
 msgid "Introduction to Assets"
-msgstr "Einführung in Sachanlagen"
+msgstr "Einführung in Vermögensgegenstände"
 
 #. Title of an Onboarding Step
 #: crm/onboarding_step/introduction_to_crm/introduction_to_crm.json
@@ -33815,13 +33846,13 @@ msgstr "Rechnungsteil"
 #: accounts/doctype/payment_term/payment_term.json
 msgctxt "Payment Term"
 msgid "Invoice Portion (%)"
-msgstr ""
+msgstr "Rechnungsteil (%)"
 
 #. Label of a Float field in DocType 'Payment Terms Template Detail'
 #: accounts/doctype/payment_terms_template_detail/payment_terms_template_detail.json
 msgctxt "Payment Terms Template Detail"
 msgid "Invoice Portion (%)"
-msgstr ""
+msgstr "Rechnungsteil (%)"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:109
 msgid "Invoice Posting Date"
@@ -33895,7 +33926,7 @@ msgstr "Rechnungsbetrag"
 
 #: accounts/report/billed_items_to_be_received/billed_items_to_be_received.py:77
 msgid "Invoiced Qty"
-msgstr ""
+msgstr "In Rechnung gestellte Menge"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2028
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:62
@@ -34100,7 +34131,7 @@ msgstr "Ist Unternehmenskonto"
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Is Composite Asset"
-msgstr "Ist ein zusammengesetzte Sachanlage"
+msgstr "Ist ein zusammengesetzter Vermögensgegenstand"
 
 #. Label of a Check field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
@@ -34943,7 +34974,7 @@ msgstr ""
 
 #: stock/doctype/item/item.py:537
 msgid "It can take upto few hours for accurate stock values to be visible after merging items."
-msgstr ""
+msgstr "Es kann bis zu einigen Stunden dauern, bis nach der Zusammenführung von Artikeln genaue Bestandswerte sichtbar sind."
 
 #: public/js/controllers/transaction.js:1839
 msgid "It is needed to fetch Item Details."
@@ -36448,7 +36479,7 @@ msgstr "Artikelpreis"
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Item Price Settings"
-msgstr ""
+msgstr "Artikelpreiseinstellungen"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -37376,7 +37407,7 @@ msgstr "Jobkarten-Zeitprotokoll"
 
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:94
 msgid "Job Paused"
-msgstr ""
+msgstr "Auftrag pausiert"
 
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:54
 msgid "Job Started"
@@ -37828,23 +37859,23 @@ msgstr "Interessent"
 
 #: crm/doctype/lead/lead.py:555
 msgid "Lead -> Prospect"
-msgstr ""
+msgstr "Lead -> Potenzieller Kunde"
 
 #. Name of a report
 #: crm/report/lead_conversion_time/lead_conversion_time.json
 msgid "Lead Conversion Time"
-msgstr ""
+msgstr "Konvertierungszeit"
 
 #: crm/report/campaign_efficiency/campaign_efficiency.py:20
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:26
 msgid "Lead Count"
-msgstr "Anzahl der Leads"
+msgstr "Anzahl der Interessenten"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
 #: crm/report/lead_details/lead_details.json crm/workspace/crm/crm.json
 msgid "Lead Details"
-msgstr "Einzelheiten zum Lead"
+msgstr "Einzelheiten zum Interessent"
 
 #: crm/report/lead_details/lead_details.py:24
 msgid "Lead Name"
@@ -37859,26 +37890,26 @@ msgstr "Name Interessent"
 #: crm/report/lead_details/lead_details.py:28
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:21
 msgid "Lead Owner"
-msgstr "Eigentümer des Leads"
+msgstr "Verantwortlicher"
 
 #. Label of a Link field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Lead Owner"
-msgstr "Eigentümer des Leads"
+msgstr "Verantwortlicher"
 
 #. Label of a Data field in DocType 'Prospect Lead'
 #: crm/doctype/prospect_lead/prospect_lead.json
 msgctxt "Prospect Lead"
 msgid "Lead Owner"
-msgstr "Eigentümer des Leads"
+msgstr "Verantwortlicher"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.json
 #: crm/workspace/crm/crm.json
 msgid "Lead Owner Efficiency"
-msgstr "Lead Besitzer Effizienz"
+msgstr "Effizienz der Interessenten-Verantwortlichen"
 
 #: crm/doctype/lead/lead.py:176
 msgid "Lead Owner cannot be same as the Lead Email Address"
@@ -37887,14 +37918,14 @@ msgstr "Der Eigentümer des Interessenten darf nicht mit der E-Mail-Adresse des 
 #. Name of a DocType
 #: crm/doctype/lead_source/lead_source.json
 msgid "Lead Source"
-msgstr "Lead Ursprung"
+msgstr "Ursprung Interessent"
 
 #. Label of a Link in the CRM Workspace
 #. Label of a Link in the Selling Workspace
 #: crm/workspace/crm/crm.json selling/workspace/selling/selling.json
 msgctxt "Lead Source"
 msgid "Lead Source"
-msgstr "Lead Ursprung"
+msgstr "Ursprung Interessent"
 
 #. Label of a Float field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
@@ -37936,16 +37967,16 @@ msgstr "Lieferzeit in Tagen"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Lead Type"
-msgstr "Lead-Typ"
+msgstr "Interessenten-Art"
 
 #: crm/doctype/lead/lead.py:552
 msgid "Lead {0} has been added to prospect {1}."
-msgstr ""
+msgstr "Interessent {0} wurde zu Potenziellem Kunden {1} hinzugefügt."
 
 #. Subtitle of the Module Onboarding 'CRM'
 #: crm/module_onboarding/crm/crm.json
 msgid "Lead, Opportunity, Customer, and more."
-msgstr ""
+msgstr "Interessent, Chance, Kunde und mehr."
 
 #. Label of a shortcut in the Home Workspace
 #: setup/workspace/home/home.json
@@ -37960,7 +37991,7 @@ msgstr "Interessenten"
 
 #: utilities/activation.py:79
 msgid "Leads help you get business, add all your contacts and more as your leads"
-msgstr "Leads helfen bei der Kundengewinnung, fügen Sie alle Ihre Kontakte und mehr als Ihre Leads hinzu"
+msgstr "Interessenten helfen Ihnen bei der Geschäftsanbahnung. Fügen Sie alle Ihre Kontakte und mehr als Interessenten hinzu"
 
 #. Label of a shortcut in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
@@ -38184,12 +38215,12 @@ msgstr "Lassen Sie uns einen Eingangsbeleg erstellen"
 #. Label of an action in the Onboarding Step 'Create an Asset Item'
 #: assets/onboarding_step/asset_item/asset_item.json
 msgid "Let's create a new Asset item"
-msgstr "Lassen Sie uns einen neuen Sachanlage-Artikel erstellen"
+msgstr "Lassen Sie uns einen neuen Vermögensgegenstand-Artikel erstellen"
 
 #. Label of an action in the Onboarding Step 'Define Asset Category'
 #: assets/onboarding_step/asset_category/asset_category.json
 msgid "Let's review existing Asset Category"
-msgstr "Lassen Sie uns die bestehende Sachanlagekategorie überprüfen"
+msgstr "Lassen Sie uns die bestehende Vermögensgegenstand-Kategorie überprüfen"
 
 #. Label of an action in the Onboarding Step 'Set Up a Company'
 #: setup/onboarding_step/company_set_up/company_set_up.json
@@ -39178,7 +39209,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.js:102
 msgid "Maintain Asset"
-msgstr "Sachanlage warten"
+msgstr "Vermögensgegenstand warten"
 
 #. Label of a Check field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
@@ -39511,7 +39542,7 @@ msgstr "Eingangsrechnung erstellen"
 
 #: templates/pages/rfq.html:19
 msgid "Make Quotation"
-msgstr ""
+msgstr "Angebot erstellen"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:287
 msgid "Make Return Entry"
@@ -41150,7 +41181,7 @@ msgstr "Mindestabrechnung"
 
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.js:20
 msgid "Minimum Lead Age (Days)"
-msgstr "Mindest Lead-Alter (in Tagen)"
+msgstr "Mindestalter Interessent (in Tagen)"
 
 #. Label of a Float field in DocType 'Item Tax'
 #: stock/doctype/item_tax/item_tax.json
@@ -41256,7 +41287,7 @@ msgstr ""
 
 #: stock/doctype/quality_inspection/quality_inspection.py:216
 msgid "Missing Formula"
-msgstr ""
+msgstr "Fehlende Formel"
 
 #: assets/doctype/asset_repair/asset_repair.py:173
 msgid "Missing Items"
@@ -41264,7 +41295,7 @@ msgstr "Fehlende Artikel"
 
 #: utilities/__init__.py:53
 msgid "Missing Payments App"
-msgstr ""
+msgstr "Fehlende Zahlungs-App"
 
 #: assets/doctype/asset_repair/asset_repair.py:240
 msgid "Missing Serial No Bundle"
@@ -42061,7 +42092,7 @@ msgstr "Mehrere Varianten"
 
 #: stock/doctype/warehouse/warehouse.py:147
 msgid "Multiple Warehouse Accounts"
-msgstr ""
+msgstr "Mehrere Lager-Konten"
 
 #: controllers/accounts_controller.py:899
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
@@ -43199,7 +43230,7 @@ msgstr "Kein Artikel mit Seriennummer {0}"
 
 #: controllers/subcontracting_controller.py:1084
 msgid "No Items selected for transfer."
-msgstr ""
+msgstr "Keine Artikel zur Übertragung ausgewählt."
 
 #: selling/doctype/sales_order/sales_order.js:668
 msgid "No Items with Bill of Materials to Manufacture"
@@ -43211,11 +43242,11 @@ msgstr "Keine Artikel mit Stückliste."
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.js:213
 msgid "No Outstanding Invoices found for this party"
-msgstr ""
+msgstr "Für diese Partei wurden keine ausstehenden Rechnungen gefunden"
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:526
 msgid "No POS Profile found. Please create a New POS Profile first"
-msgstr ""
+msgstr "Kein POS-Profil gefunden. Bitte erstellen Sie zunächst ein neues POS-Profil"
 
 #: accounts/doctype/journal_entry/journal_entry.py:1420
 #: accounts/doctype/journal_entry/journal_entry.py:1486
@@ -43227,7 +43258,7 @@ msgstr "Keine Berechtigung"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:23
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:38
 msgid "No Records for these settings."
-msgstr ""
+msgstr "Keine Datensätze für diese Einstellungen."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:333
 #: accounts/doctype/sales_invoice/sales_invoice.py:949
@@ -43244,7 +43275,7 @@ msgstr "Es wurde kein Lieferant für Transaktionen zwischen Unternehmen gefunden
 
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.py:200
 msgid "No Tax Withholding data found for the current posting date."
-msgstr ""
+msgstr "Für das aktuelle Buchungsdatum wurden keine Quellensteuerdaten gefunden."
 
 #: accounts/report/gross_profit/gross_profit.py:777
 msgid "No Terms"
@@ -43256,7 +43287,7 @@ msgstr "Für diese Partei und dieses Konto wurden keine nicht abgeglichenen Rech
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.js:215
 msgid "No Unreconciled Payments found for this party"
-msgstr ""
+msgstr "Für diese Partei wurden keine nicht abgestimmten Zahlungen gefunden"
 
 #: manufacturing/doctype/production_plan/production_plan.py:682
 msgid "No Work Orders were created"
@@ -43289,7 +43320,7 @@ msgstr "Keine Daten für diesen Zeitraum"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:48
 msgid "No data found. Seems like you uploaded a blank file"
-msgstr ""
+msgstr "Keine Daten gefunden. Es scheint, als hätten Sie eine leere Datei hochgeladen"
 
 #: regional/report/electronic_invoice_register/electronic_invoice_register.js:38
 msgid "No data to export"
@@ -43309,16 +43340,16 @@ msgstr "Kein Gewinn oder Verlust im Wechselkurs"
 
 #: controllers/subcontracting_controller.py:1005
 msgid "No item available for transfer."
-msgstr ""
+msgstr "Kein Artikel zur Übertragung verfügbar."
 
 #: manufacturing/doctype/production_plan/production_plan.py:142
 msgid "No items are available in sales orders {0} for production"
-msgstr ""
+msgstr "In Kundenaufträgen {0} sind keine Artikel für die Produktion verfügbar"
 
 #: manufacturing/doctype/production_plan/production_plan.py:139
 #: manufacturing/doctype/production_plan/production_plan.py:151
 msgid "No items are available in the sales order {0} for production"
-msgstr ""
+msgstr "Im Kundenauftrag {0} sind keine Artikel für die Produktion verfügbar"
 
 #: selling/page/point_of_sale/pos_item_selector.js:320
 msgid "No items found. Scan barcode again."
@@ -43330,7 +43361,7 @@ msgstr "Keine zu übergebenden Artikel sind überfällig"
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:424
 msgid "No matches occurred via auto reconciliation"
-msgstr ""
+msgstr "Keine Treffer beim automatischen Abgleich"
 
 #: manufacturing/doctype/production_plan/production_plan.py:879
 msgid "No material request created"
@@ -43348,13 +43379,13 @@ msgstr ""
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "No of Employees"
-msgstr ""
+msgstr "Anzahl Mitarbeiter"
 
 #. Label of a Select field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "No of Employees"
-msgstr ""
+msgstr "Anzahl Mitarbeiter"
 
 #: crm/report/lead_conversion_time/lead_conversion_time.py:61
 msgid "No of Interactions"
@@ -43413,7 +43444,7 @@ msgstr "Es wurden keine ausstehenden Materialanforderungen gefunden, die für di
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.py:436
 msgid "No primary email found for customer: {0}"
-msgstr ""
+msgstr "Keine primäre E-Mail-Adresse für den Kunden gefunden: {0}"
 
 #: templates/includes/product_list.js:41
 msgid "No products found."
@@ -43431,7 +43462,7 @@ msgstr ""
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:579
 msgid "No records found in the Invoices table"
-msgstr ""
+msgstr "Keine Datensätze in der Tabelle Rechnungen gefunden"
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:582
 msgid "No records found in the Payments table"
@@ -43468,7 +43499,7 @@ msgstr "Nein."
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "No. of Employees"
-msgstr ""
+msgstr "Anzahl Mitarbeiter"
 
 #: manufacturing/doctype/workstation/workstation.js:42
 msgid "No. of parallel job cards which can be allowed on this workstation. Example: 2 would mean this workstation can process production for two Work Orders at a time."
@@ -43767,19 +43798,19 @@ msgstr "Anmerkungen"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Notes HTML"
-msgstr ""
+msgstr "Notizen HTML"
 
 #. Label of a HTML field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Notes HTML"
-msgstr ""
+msgstr "Notizen HTML"
 
 #. Label of a HTML field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "Notes HTML"
-msgstr ""
+msgstr "Notizen HTML"
 
 #: templates/pages/rfq.html:67
 msgid "Notes: "
@@ -44204,11 +44235,11 @@ msgstr "Auf vorherige Zeilensumme"
 
 #: setup/default_energy_point_rules.py:24
 msgid "On Purchase Order Submission"
-msgstr ""
+msgstr "Bei Buchung eines Lieferantenauftrags"
 
 #: setup/default_energy_point_rules.py:18
 msgid "On Sales Order Submission"
-msgstr ""
+msgstr "Bei Buchung eines Kundenauftrags"
 
 #: setup/default_energy_point_rules.py:30
 msgid "On Task Completion"
@@ -44216,7 +44247,7 @@ msgstr "Bei Abschluss der Aufgabe"
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:79
 msgid "On Track"
-msgstr ""
+msgstr "Auf Kurs"
 
 #: manufacturing/doctype/production_plan/production_plan.js:540
 msgid "On expanding a row in the Items to Manufacture table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
@@ -44274,7 +44305,7 @@ msgstr ""
 
 #: assets/report/fixed_asset_register/fixed_asset_register.js:44
 msgid "Only existing assets"
-msgstr "Nur bestehende Sachanlagen"
+msgstr "Nur bestehende Vermögensgegenstände"
 
 #. Description of the 'Is Group' (Check) field in DocType 'Customer Group'
 #: setup/doctype/customer_group/customer_group.json
@@ -44439,19 +44470,19 @@ msgstr "Offen"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Open Activities HTML"
-msgstr ""
+msgstr "Alle Aktivitäten HTML"
 
 #. Label of a HTML field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Open Activities HTML"
-msgstr ""
+msgstr "Alle Aktivitäten HTML"
 
 #. Label of a HTML field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "Open Activities HTML"
-msgstr ""
+msgstr "Alle Aktivitäten HTML"
 
 #: public/js/call_popup/call_popup.js:114
 msgid "Open Contact"
@@ -44948,7 +44979,7 @@ msgstr "Anzahl der Chancen"
 #: crm/report/campaign_efficiency/campaign_efficiency.py:25
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:31
 msgid "Opp/Lead %"
-msgstr ""
+msgstr "Chance/Inter %"
 
 #: selling/page/sales_funnel/sales_funnel.py:56
 msgid "Opportunities"
@@ -44963,7 +44994,7 @@ msgstr "Chancen"
 
 #: selling/page/sales_funnel/sales_funnel.js:43
 msgid "Opportunities by lead source"
-msgstr "Chancen nach Lead-Quelle"
+msgstr "Chancen nach Interessenten-Quelle"
 
 #. Name of a DocType
 #: buying/doctype/request_for_quotation/request_for_quotation.js:318
@@ -45250,7 +45281,7 @@ msgstr "Bestellwert"
 #: crm/report/campaign_efficiency/campaign_efficiency.py:27
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:33
 msgid "Order/Quot %"
-msgstr ""
+msgstr "Best/Ang %"
 
 #: buying/doctype/supplier_quotation/supplier_quotation_list.js:5
 #: selling/doctype/quotation/quotation_list.js:31
@@ -45426,7 +45457,7 @@ msgstr "Andere Details"
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Other Info"
-msgstr ""
+msgstr "Sonstiges"
 
 #. Label of a Card Break in the Financial Reports Workspace
 #. Label of a Card Break in the Buying Workspace
@@ -45502,7 +45533,7 @@ msgstr "Außerhalb der Garantie"
 
 #: templates/includes/macros.html:173
 msgid "Out of stock"
-msgstr ""
+msgstr "Nicht auf Lager"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.js:30
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:65
@@ -45743,17 +45774,17 @@ msgstr "Überfällige Tage"
 #. Name of a DocType
 #: accounts/doctype/overdue_payment/overdue_payment.json
 msgid "Overdue Payment"
-msgstr ""
+msgstr "Überfällige Zahlung"
 
 #. Label of a Table field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Overdue Payments"
-msgstr ""
+msgstr "Überfällige Zahlungen"
 
 #: projects/report/project_summary/project_summary.py:136
 msgid "Overdue Tasks"
-msgstr ""
+msgstr "Überfällige Aufgaben"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -45831,7 +45862,7 @@ msgstr "PAN Nr"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "PDF Name"
-msgstr ""
+msgstr "PDF-Name"
 
 #. Label of a Data field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
@@ -45843,7 +45874,7 @@ msgstr "STIFT"
 #: accounts/doctype/payment_order/payment_order.json
 msgctxt "Payment Order"
 msgid "PMO-"
-msgstr ""
+msgstr "PMO-"
 
 #. Label of a Data field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -46648,23 +46679,23 @@ msgstr "Parameter"
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Parcel Template"
-msgstr ""
+msgstr "Paketvorlage"
 
 #. Label of a Data field in DocType 'Shipment Parcel Template'
 #: stock/doctype/shipment_parcel_template/shipment_parcel_template.json
 msgctxt "Shipment Parcel Template"
 msgid "Parcel Template Name"
-msgstr ""
+msgstr "Paketvorlagenname"
 
 #: stock/doctype/shipment/shipment.py:94
 msgid "Parcel weight cannot be 0"
-msgstr ""
+msgstr "Paketgewicht kann nicht 0 sein"
 
 #. Label of a Section Break field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Parcels"
-msgstr ""
+msgstr "Pakete"
 
 #. Label of a Section Break field in DocType 'Quality Procedure'
 #: quality_management/doctype/quality_procedure/quality_procedure.json
@@ -46680,7 +46711,7 @@ msgstr "Übergeordnetes Konto"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:379
 msgid "Parent Account Missing"
-msgstr ""
+msgstr "Übergeordnetes Konto fehlt"
 
 #. Label of a Link field in DocType 'Batch'
 #: stock/doctype/batch/batch.json
@@ -46726,7 +46757,7 @@ msgstr "Übergeordnetes Detail Dokumentenname"
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "Parent Document"
-msgstr ""
+msgstr "Übergeordnetes Dokument"
 
 #. Label of a Link field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
@@ -46748,7 +46779,7 @@ msgstr "Übergeordnete Artikelgruppe"
 
 #: selling/doctype/product_bundle/product_bundle.py:79
 msgid "Parent Item {0} must not be a Fixed Asset"
-msgstr ""
+msgstr "Der übergeordnete Artikel {0} darf kein Anlagevermögen sein"
 
 #: selling/doctype/product_bundle/product_bundle.py:77
 msgid "Parent Item {0} must not be a Stock Item"
@@ -46770,7 +46801,7 @@ msgstr "Übergeordnetes Verfahren"
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "Parent Row No"
-msgstr ""
+msgstr "Übergeordnete Zeilennr"
 
 #. Label of a Link field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
@@ -46792,7 +46823,7 @@ msgstr "Übergeordnete Aufgabe"
 
 #: projects/doctype/task/task.py:157
 msgid "Parent Task {0} is not a Template Task"
-msgstr ""
+msgstr "Übergeordnete Aufgabe {0} ist keine Vorlage"
 
 #. Label of a Link field in DocType 'Territory'
 #: setup/doctype/territory/territory.json
@@ -46863,7 +46894,7 @@ msgstr "Teilweise abgeschlossen"
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Partially Delivered"
-msgstr ""
+msgstr "Teilweise geliefert"
 
 #: assets/doctype/asset/asset_list.js:8
 msgid "Partially Depreciated"
@@ -46942,20 +46973,20 @@ msgstr "Teilweise erhalten"
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Partially Reconciled"
-msgstr ""
+msgstr "Teilweise abgeglichen"
 
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
 #. Reconciliation Log'
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "Partially Reconciled"
-msgstr ""
+msgstr "Teilweise abgeglichen"
 
 #. Option for the 'Status' (Select) field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Partially Reserved"
-msgstr ""
+msgstr "Teilweise reserviert"
 
 #: stock/doctype/material_request/material_request_list.js:18
 msgid "Partially ordered"
@@ -47991,7 +48022,7 @@ msgstr "Zahlung zum Zahlungsabgleich"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Payment Reconciliations"
-msgstr ""
+msgstr "Zahlungsabgleich"
 
 #. Label of a Data field in DocType 'Payment Order Reference'
 #: accounts/doctype/payment_order_reference/payment_order_reference.json
@@ -48101,7 +48132,7 @@ msgstr "Zahlungsplan"
 
 #: public/js/controllers/transaction.js:925
 msgid "Payment Schedule Table"
-msgstr ""
+msgstr "Zahlungsplan Tabelle"
 
 #. Name of a DocType
 #: accounts/doctype/payment_term/payment_term.json
@@ -48312,7 +48343,7 @@ msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.py:713
 msgid "Payment term {0} not used in {1}"
-msgstr ""
+msgstr "Zahlungsbedingung {0} nicht verwendet in {1}"
 
 #. Label of a Card Break in the Accounting Workspace
 #. Label of a Card Break in the Payables Workspace
@@ -48525,7 +48556,7 @@ msgstr "Pro Monat"
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Per Received"
-msgstr ""
+msgstr "% Empfangen"
 
 #. Label of a Percent field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -48626,7 +48657,7 @@ msgstr "Prozentsatz"
 #: accounts/doctype/cost_center_allocation_percentage/cost_center_allocation_percentage.json
 msgctxt "Cost Center Allocation Percentage"
 msgid "Percentage (%)"
-msgstr ""
+msgstr "Prozentsatz (%)"
 
 #. Label of a Float field in DocType 'Monthly Distribution Percentage'
 #: accounts/doctype/monthly_distribution_percentage/monthly_distribution_percentage.json
@@ -48636,14 +48667,14 @@ msgstr "Prozentuale Aufteilung"
 
 #: accounts/doctype/monthly_distribution/monthly_distribution.py:58
 msgid "Percentage Allocation should be equal to 100%"
-msgstr ""
+msgstr "Die prozentuale Zuteilung sollte 100 % betragen"
 
 #. Description of the 'Blanket Order Allowance (%)' (Float) field in DocType
 #. 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Percentage you are allowed to order beyond the Blanket Order quantity."
-msgstr ""
+msgstr "Prozentsatz, den Sie über die Rahmenbestellmenge hinaus bestellen dürfen."
 
 #. Description of the 'Blanket Order Allowance (%)' (Float) field in DocType
 #. 'Selling Settings'
@@ -48895,13 +48926,13 @@ msgstr "Telefon"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Phone Ext."
-msgstr ""
+msgstr "Telefon Ext."
 
 #. Label of a Data field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Phone Ext."
-msgstr ""
+msgstr "Telefon Ext."
 
 #. Label of a Data field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -49096,7 +49127,7 @@ msgstr ""
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "Plaid Client ID"
-msgstr ""
+msgstr "Plaid Client ID"
 
 #. Label of a Select field in DocType 'Plaid Settings'
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
@@ -49107,21 +49138,21 @@ msgstr "Plaid-Umgebung"
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:136
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:160
 msgid "Plaid Link Failed"
-msgstr ""
+msgstr "Plaid-Link fehlgeschlagen"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:238
 msgid "Plaid Link Refresh Required"
-msgstr ""
+msgstr "Aktualisierung des Plaid-Links erforderlich"
 
 #: accounts/doctype/bank/bank.js:121
 msgid "Plaid Link Updated"
-msgstr ""
+msgstr "Plaid-Link aktualisiert"
 
 #. Label of a Password field in DocType 'Plaid Settings'
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "Plaid Secret"
-msgstr ""
+msgstr "Plaid Secret"
 
 #. Name of a DocType
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
@@ -49327,7 +49358,7 @@ msgstr ""
 
 #: buying/doctype/supplier/supplier.py:123
 msgid "Please add 'Supplier' role to user {0}."
-msgstr ""
+msgstr "Bitte fügen Sie dem Benutzer {0} die Rolle „Lieferant“ hinzu."
 
 #: selling/page/point_of_sale/pos_controller.js:87
 msgid "Please add Mode of payments and opening balance details."
@@ -49335,7 +49366,7 @@ msgstr "Bitte fügen Sie die Zahlungsweise und die Details zum Eröffnungssaldo 
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:169
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
-msgstr ""
+msgstr "Bitte fügen Sie „Angebotsanfrage“ zur Seitenleiste in den Portaleinstellungen hinzu."
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:416
 msgid "Please add Root Account for - {0}"
@@ -49347,11 +49378,11 @@ msgstr "Bitte fügen Sie ein vorübergehendes Eröffnungskonto im Kontenplan hin
 
 #: public/js/utils/serial_no_batch_selector.js:535
 msgid "Please add atleast one Serial No / Batch No"
-msgstr ""
+msgstr "Bitte fügen Sie mindestens eine Serien-/Chargennummer hinzu"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.py:78
 msgid "Please add the Bank Account column"
-msgstr ""
+msgstr "Bitte fügen Sie die Spalte „Bankkonto“ hinzu"
 
 #: accounts/doctype/account/account_tree.js:168
 msgid "Please add the account to root level Company - {0}"
@@ -49363,28 +49394,28 @@ msgstr "Bitte fügen Sie das Konto der Root-Ebene Company - {} hinzu"
 
 #: controllers/website_list_for_contact.py:300
 msgid "Please add {1} role to user {0}."
-msgstr ""
+msgstr "Bitte fügen Sie dem Benutzer {0} die Rolle {1} hinzu."
 
 #: controllers/stock_controller.py:909
 msgid "Please adjust the qty or edit {0} to proceed."
-msgstr ""
+msgstr "Bitte passen Sie die Menge an oder bearbeiten Sie {0}, um fortzufahren."
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:121
 msgid "Please attach CSV file"
-msgstr ""
+msgstr "Bitte CSV-Datei anhängen"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2735
 msgid "Please cancel and amend the Payment Entry"
-msgstr ""
+msgstr "Bitte stornieren und berichtigen Sie die Zahlung"
 
 #: accounts/utils.py:926
 msgid "Please cancel payment entry manually first"
-msgstr ""
+msgstr "Bitte stornieren Sie die Zahlung zunächst manuell"
 
 #: accounts/doctype/gl_entry/gl_entry.py:337
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:327
 msgid "Please cancel related transaction."
-msgstr ""
+msgstr "Bitte stornieren Sie die entsprechende Transaktion."
 
 #: accounts/doctype/journal_entry/journal_entry.py:836
 msgid "Please check Multi Currency option to allow accounts with other currency"
@@ -49428,7 +49459,7 @@ msgstr "Bitte auf \"Zeitplan generieren\" klicken, um den Zeitplan zu erhalten"
 
 #: selling/doctype/customer/customer.py:538
 msgid "Please contact any of the following users to extend the credit limits for {0}: {1}"
-msgstr ""
+msgstr "Bitte kontaktieren Sie einen der folgenden Benutzer, um die Kreditlimits für {0} zu erweitern: {1}"
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:321
 msgid "Please contact any of the following users to {} this transaction."
@@ -49436,7 +49467,7 @@ msgstr ""
 
 #: selling/doctype/customer/customer.py:531
 msgid "Please contact your administrator to extend the credit limits for {0}."
-msgstr ""
+msgstr "Bitte wenden Sie sich an Ihren Administrator, um die Kreditlimits für {0} zu erweitern."
 
 #: accounts/doctype/account/account.py:317
 msgid "Please convert the parent account in corresponding child company to a group account."
@@ -49444,7 +49475,7 @@ msgstr "Bitte konvertieren Sie das Elternkonto in der entsprechenden Kinderfirma
 
 #: selling/doctype/quotation/quotation.py:554
 msgid "Please create Customer from Lead {0}."
-msgstr "Bitte erstellen Sie einen Kunden aus Lead {0}."
+msgstr "Bitte erstellen Sie einen Kunden aus Interessent {0}."
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:96
 msgid "Please create Landed Cost Vouchers against Invoices that have 'Update Stock' enabled."
@@ -49633,7 +49664,7 @@ msgstr "Bitte eine Nachricht vor dem Versenden eingeben"
 
 #: accounts/doctype/pos_invoice/pos_invoice.js:247
 msgid "Please enter mobile number first."
-msgstr ""
+msgstr "Bitte geben Sie zuerst Ihre Handynummer ein."
 
 #: accounts/doctype/cost_center/cost_center.py:47
 msgid "Please enter parent cost center"
@@ -49641,7 +49672,7 @@ msgstr "Bitte übergeordnete Kostenstelle eingeben"
 
 #: public/js/utils/barcode_scanner.js:160
 msgid "Please enter quantity for item {0}"
-msgstr ""
+msgstr "Bitte geben Sie die Anzahl für den Artikel {0} ein"
 
 #: setup/doctype/employee/employee.py:187
 msgid "Please enter relieving date."
@@ -49649,7 +49680,7 @@ msgstr "Bitte Freistellungsdatum eingeben."
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:125
 msgid "Please enter serial nos"
-msgstr ""
+msgstr "Bitte geben Sie die Seriennummern ein"
 
 #: setup/doctype/company/company.js:155
 msgid "Please enter the company name to confirm"
@@ -49681,7 +49712,7 @@ msgstr "Bitte füllen Sie die Tabelle Aufträge aus"
 
 #: stock/doctype/shipment/shipment.js:248
 msgid "Please first set Last Name, Email and Phone for the user"
-msgstr ""
+msgstr "Bitte geben Sie zunächst Nachname, E-Mail und Telefonnummer des Benutzers ein"
 
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.js:92
 msgid "Please fix overlapping time slots for {0}"
@@ -50078,7 +50109,7 @@ msgstr ""
 #: regional/italy/utils.py:292
 #, python-format
 msgid "Please set Tax ID for the customer '%s'"
-msgstr ""
+msgstr "Bitte legen Sie die Steuernummer für den Kunden „%s“ fest"
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:324
 msgid "Please set Unrealized Exchange Gain/Loss Account in Company {0}"
@@ -50086,7 +50117,7 @@ msgstr "Bitte Konto für Wechselkursdifferenzen in Unternehmen {0} setzen."
 
 #: regional/report/vat_audit_report/vat_audit_report.py:54
 msgid "Please set VAT Accounts in {0}"
-msgstr ""
+msgstr "Bitte legen Sie die Umsatzsteuerkonten in {0} fest"
 
 #: regional/united_arab_emirates/utils.py:63
 msgid "Please set Vat Accounts for Company: \"{0}\" in UAE VAT Settings"
@@ -50098,7 +50129,7 @@ msgstr "Bitte legen Sie eine Firma fest"
 
 #: assets/doctype/asset/asset.py:262
 msgid "Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {}"
-msgstr "Bitte legen Sie eine Kostenstelle für die Sachanlage oder eine Standard-Kostenstelle für die Abschreibung von Sachanlagen für das Unternehmen {} fest"
+msgstr "Bitte legen Sie eine Kostenstelle für den Vermögensgegenstand oder eine Standard-Kostenstelle für die Abschreibung von Vermögensgegenständen für das Unternehmen {} fest"
 
 #: selling/doctype/sales_order/sales_order.py:1260
 msgid "Please set a Supplier against the Items to be considered in the Purchase Order."
@@ -50119,15 +50150,15 @@ msgstr "Bitte Konto in Lager {0} setzen"
 #: regional/italy/utils.py:246
 #, python-format
 msgid "Please set an Address on the Company '%s'"
-msgstr ""
+msgstr "Bitte geben Sie eine Adresse für das Unternehmen „%s“ ein"
 
 #: controllers/stock_controller.py:334
 msgid "Please set an Expense Account in the Items table"
-msgstr ""
+msgstr "Bitte legen Sie in der Artikeltabelle ein Aufwandskonto fest"
 
 #: crm/doctype/email_campaign/email_campaign.py:57
 msgid "Please set an email id for the Lead {0}"
-msgstr "Bitte geben Sie eine E-Mail-ID für den Lead {0} ein."
+msgstr "Bitte geben Sie eine E-Mail-ID für Interessent {0} ein"
 
 #: regional/italy/utils.py:303
 msgid "Please set at least one row in the Taxes and Charges Table"
@@ -50151,7 +50182,7 @@ msgstr "Bitte setzen Sie das Standard-Bargeld- oder Bankkonto im Zahlungsmodus {
 
 #: accounts/utils.py:2086
 msgid "Please set default Exchange Gain/Loss Account in Company {}"
-msgstr ""
+msgstr "Bitte legen Sie im Unternehmen {} das Standardkonto für Wechselkursgewinne/-verluste fest"
 
 #: assets/doctype/asset_repair/asset_repair.py:331
 msgid "Please set default Expense Account in Company {0}"
@@ -50284,7 +50315,7 @@ msgstr ""
 
 #: assets/doctype/asset_repair/asset_repair.py:168
 msgid "Please update Repair Status."
-msgstr ""
+msgstr "Bitte aktualisieren Sie den Reparaturstatus."
 
 #. Label of a Card Break in the Selling Workspace
 #. Label of a shortcut in the Selling Workspace
@@ -50314,19 +50345,19 @@ msgstr "Versicherungsnummer"
 #. Name of a DocType
 #: utilities/doctype/portal_user/portal_user.json
 msgid "Portal User"
-msgstr ""
+msgstr "Portal-Benutzer"
 
 #. Label of a Tab Break field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Portal Users"
-msgstr ""
+msgstr "Portal-Benutzer"
 
 #. Label of a Tab Break field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Portal Users"
-msgstr ""
+msgstr "Portal-Benutzer"
 
 #. Option for the 'Orientation' (Select) field in DocType 'Process Statement Of
 #. Accounts'
@@ -51576,7 +51607,7 @@ msgstr "Hauptadresse und -kontakt"
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Primary Contact"
-msgstr ""
+msgstr "Hauptkontakt"
 
 #: public/js/utils/contact_address_quick_entry.js:35
 msgid "Primary Contact Details"
@@ -52093,19 +52124,19 @@ msgstr "Die Priorität {0} wurde wiederholt."
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
 msgctxt "Prospect Opportunity"
 msgid "Probability"
-msgstr ""
+msgstr "Warscheinlichkeit"
 
 #. Label of a Percent field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Probability (%)"
-msgstr ""
+msgstr "Warscheinlichkeit (%)"
 
 #. Label of a Long Text field in DocType 'Quality Action Resolution'
 #: quality_management/doctype/quality_action_resolution/quality_action_resolution.json
 msgctxt "Quality Action Resolution"
 msgid "Problem"
-msgstr ""
+msgstr "Problem"
 
 #. Label of a Link field in DocType 'Non Conformance'
 #: quality_management/doctype/non_conformance/non_conformance.json
@@ -52162,60 +52193,60 @@ msgstr "Prozess fehlgeschlagen"
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Process Loss"
-msgstr ""
+msgstr "Prozessverlust"
 
 #. Label of a Section Break field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Process Loss"
-msgstr ""
+msgstr "Prozessverlust"
 
 #: manufacturing/doctype/bom/bom.py:987
 msgid "Process Loss Percentage cannot be greater than 100"
-msgstr ""
+msgstr "Der Prozentsatz der Prozessverluste kann nicht größer als 100 sein"
 
 #: manufacturing/report/process_loss_report/process_loss_report.py:95
 msgid "Process Loss Qty"
-msgstr ""
+msgstr "Prozessverlustmenge"
 
 #. Label of a Float field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Process Loss Qty"
-msgstr ""
+msgstr "Prozessverlustmenge"
 
 #. Label of a Float field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Process Loss Qty"
-msgstr ""
+msgstr "Prozessverlustmenge"
 
 #. Label of a Float field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Process Loss Qty"
-msgstr ""
+msgstr "Prozessverlustmenge"
 
 #. Label of a Float field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Process Loss Qty"
-msgstr ""
+msgstr "Prozessverlustmenge"
 
 #. Label of a Float field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "Process Loss Qty"
-msgstr ""
+msgstr "Prozessverlustmenge"
 
 #. Name of a report
 #: manufacturing/report/process_loss_report/process_loss_report.json
 msgid "Process Loss Report"
-msgstr ""
+msgstr "Prozessverlust-Bericht"
 
 #: manufacturing/report/process_loss_report/process_loss_report.py:101
 msgid "Process Loss Value"
-msgstr ""
+msgstr "Prozessverlustwert"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:58
 msgid "Process Master Data"
@@ -52242,7 +52273,7 @@ msgstr "Vollständiger Name des Prozessinhabers"
 #. Name of a DocType
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgid "Process Payment Reconciliation"
-msgstr ""
+msgstr "Zahlungsabgleich verarbeiten"
 
 #. Name of a DocType
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
@@ -53415,13 +53446,13 @@ msgstr "Prorieren"
 #: crm/doctype/lead/lead.js:41 crm/doctype/lead/lead.js:61
 #: crm/doctype/prospect/prospect.json
 msgid "Prospect"
-msgstr ""
+msgstr "Potenzieller Kunde"
 
 #. Label of a Link in the CRM Workspace
 #: crm/workspace/crm/crm.json
 msgctxt "Prospect"
 msgid "Prospect"
-msgstr ""
+msgstr "Potenzieller Kunde"
 
 #. Name of a DocType
 #: crm/doctype/prospect_lead/prospect_lead.json
@@ -53441,7 +53472,7 @@ msgstr ""
 
 #: crm/doctype/lead/lead.py:317
 msgid "Prospect {0} already exists"
-msgstr ""
+msgstr "Potenzieller Kunde {0} existiert bereits"
 
 #: setup/setup_wizard/operations/install_fixtures.py:389
 msgid "Prospecting"
@@ -53733,7 +53764,7 @@ msgstr "Trendanalyse Eingangsrechnungen"
 
 #: assets/doctype/asset/asset.py:213
 msgid "Purchase Invoice cannot be made against an existing asset {0}"
-msgstr "Eingangsrechnung kann nicht für eine bestehende Sachanlage erstellt werden {0}"
+msgstr "Eingangsrechnung kann nicht gegen bestehenden Vermögensgegenstand {0} ausgestellt werden"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.py:389
 #: stock/doctype/purchase_receipt/purchase_receipt.py:403
@@ -54338,12 +54369,12 @@ msgstr ""
 #. Title of an Onboarding Step
 #: assets/onboarding_step/asset_purchase/asset_purchase.json
 msgid "Purchase an Asset"
-msgstr "Sachanlage kaufen"
+msgstr "Vermögensgegenstand kaufen"
 
 #. Title of an Onboarding Step
 #: assets/onboarding_step/purchase_an_asset_item/purchase_an_asset_item.json
 msgid "Purchase an Asset Item"
-msgstr "Einen Sachanlage-Artikel kaufen"
+msgstr "Vermögensgegenstand-Artikel kaufen"
 
 #: utilities/activation.py:106
 msgid "Purchase orders help you plan and follow up on your purchases"
@@ -54706,13 +54737,13 @@ msgstr ""
 #: assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 msgctxt "Asset Capitalization Service Item"
 msgid "Qty and Rate"
-msgstr ""
+msgstr "Menge und Einzelpreis"
 
 #. Label of a Section Break field in DocType 'Asset Capitalization Stock Item'
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgctxt "Asset Capitalization Stock Item"
 msgid "Qty and Rate"
-msgstr ""
+msgstr "Menge und Einzelpreis"
 
 #. Label of a Section Break field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -54871,25 +54902,25 @@ msgstr "Qualifikation"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Qualification Status"
-msgstr ""
+msgstr "Qualifikationsstatus"
 
 #. Option for the 'Qualification Status' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Qualified"
-msgstr ""
+msgstr "Qualifiziert"
 
 #. Label of a Link field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Qualified By"
-msgstr ""
+msgstr "Qualifiziert durch"
 
 #. Label of a Date field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Qualified on"
-msgstr ""
+msgstr "Qualifiziert am"
 
 #. Name of a Workspace
 #: quality_management/workspace/quality/quality.json
@@ -55732,7 +55763,7 @@ msgstr ""
 #: crm/report/campaign_efficiency/campaign_efficiency.py:26
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:32
 msgid "Quot/Lead %"
-msgstr ""
+msgstr "Ang/Inter %"
 
 #. Name of a DocType
 #: accounts/doctype/sales_invoice/sales_invoice.js:257
@@ -58382,7 +58413,7 @@ msgstr "Reparieren"
 
 #: assets/doctype/asset/asset.js:107
 msgid "Repair Asset"
-msgstr "Sachanlage reparieren"
+msgstr "Vermögensgegenstand reparieren"
 
 #. Label of a Currency field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
@@ -58394,7 +58425,7 @@ msgstr "Reparaturkosten"
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Repair Details"
-msgstr ""
+msgstr "Reparaturdetails"
 
 #. Label of a Select field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
@@ -59399,7 +59430,7 @@ msgstr "Abonnement neu starten"
 
 #: assets/doctype/asset/asset.js:96
 msgid "Restore Asset"
-msgstr "Sachanlage wiederherstellen"
+msgstr "Vermögensgegenstand wiederherstellen"
 
 #. Option for the 'Allow Or Restrict Dimension' (Select) field in DocType
 #. 'Accounting Dimension Filter'
@@ -59537,7 +59568,7 @@ msgstr "Return / Gutschrift"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:119
 msgid "Return / Debit Note"
-msgstr "Return / Lastschrift"
+msgstr "Rückgabe / Lastschrift"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -59781,7 +59812,7 @@ msgstr "Überprüfungsdatum"
 #. Title of an Onboarding Step
 #: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
 msgid "Review Fixed Asset Accounts"
-msgstr "Konten für Sachanlagen überprüfen"
+msgstr "Konten für Vermögensgegenstände überprüfen"
 
 #. Title of an Onboarding Step
 #: stock/onboarding_step/stock_settings/stock_settings.json
@@ -60311,7 +60342,7 @@ msgstr ""
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:309
 msgid "Row #{0}: Amount must be a positive number"
-msgstr ""
+msgstr "Zeile #{0}: Betrag muss eine positive Zahl sein"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:375
 msgid "Row #{0}: Asset {1} cannot be submitted, it is already {2}"
@@ -60371,23 +60402,23 @@ msgstr "Zeile {0}: Räumungsdatum {1} kann nicht vor dem Scheck Datum sein {2}"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:286
 msgid "Row #{0}: Consumed Asset {1} cannot be Draft"
-msgstr "Zeile #{0}: verbrauchte Sachanlage {1} darf nicht im Entwurfsstatus sein"
+msgstr "Zeile #{0}: verbrauchter Vermögensgegenstand {1} darf nicht im Entwurfsstatus sein"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:288
 msgid "Row #{0}: Consumed Asset {1} cannot be cancelled"
-msgstr "Zeile #{0}: verbrauchte Sachanlage {1} darf nicht storniert sein"
+msgstr "Zeile #{0}: verbrauchter Vermögensgegenstand {1} darf nicht storniert sein"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:273
 msgid "Row #{0}: Consumed Asset {1} cannot be the same as the Target Asset"
-msgstr "Zeile #{0}: verbrauchte Sachanlage {1} darf nicht identisch mit der Ziel-Sachanlage sein"
+msgstr "Zeile #{0}: verbrauchter Vermögensgegenstand {1} darf nicht identisch mit der Ziel-Vermögensgegenstand sein"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:282
 msgid "Row #{0}: Consumed Asset {1} cannot be {2}"
-msgstr "Zeile #{0}: verbrauchte Sachanlage {1} darf nicht {2} sein"
+msgstr "Zeile #{0}: verbrauchter Vermögensgegenstand {1} darf nicht {2} sein"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:292
 msgid "Row #{0}: Consumed Asset {1} does not belong to company {2}"
-msgstr "Zeile #{0}: verbrauchte Sachanlage {1} gehört nicht zu Unternehmen {2}"
+msgstr "Zeile #{0}: verbrauchter Vermögensgegenstand {1} gehört nicht zu Unternehmen {2}"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:385
 msgid "Row #{0}: Cost Center {1} does not belong to company {2}"
@@ -60439,7 +60470,7 @@ msgstr ""
 
 #: accounts/doctype/journal_entry/journal_entry.py:577
 msgid "Row #{0}: For {1}, you can select reference document only if account gets debited"
-msgstr ""
+msgstr "Zeile #{0}: Für {1} können Sie den Referenzbeleg nur auswählen, wenn das Konto belastet wird"
 
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.py:44
 msgid "Row #{0}: From Date cannot be before To Date"
@@ -60463,11 +60494,11 @@ msgstr "Zeile {0}: Element {1} ist kein serialisiertes / gestapeltes Element. Es
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:303
 msgid "Row #{0}: Item {1} is not a service item"
-msgstr ""
+msgstr "Zeile #{0}: Artikel {1} ist kein Dienstleistungsartikel"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:261
 msgid "Row #{0}: Item {1} is not a stock item"
-msgstr ""
+msgstr "Zeile #{0}: Artikel {1} ist kein Lagerartikel"
 
 #: accounts/doctype/payment_entry/payment_entry.py:657
 msgid "Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher"
@@ -60520,7 +60551,7 @@ msgstr ""
 #: assets/doctype/asset_capitalization/asset_capitalization.py:264
 #: assets/doctype/asset_capitalization/asset_capitalization.py:306
 msgid "Row #{0}: Qty must be a positive number"
-msgstr ""
+msgstr "Zeile #{0}: Menge muss eine positive Zahl sein"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:301
 msgid "Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Iem {2} against Batch {3} in Warehouse {4}."
@@ -60680,7 +60711,7 @@ msgstr "Zeile {0}: {1} ist erforderlich, um die Eröffnungsrechnungen {2} zu ers
 
 #: assets/doctype/asset_category/asset_category.py:88
 msgid "Row #{0}: {1} of {2} should be {3}. Please update the {1} or select a different account."
-msgstr ""
+msgstr "Zeile #{0}: {1} von {2} sollte {3} sein. Bitte aktualisieren Sie die {1} oder wählen Sie ein anderes Konto."
 
 #: buying/utils.py:106
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
@@ -60696,7 +60727,7 @@ msgstr "Zeile # {}: Das Buchungsdatum der Abschreibung sollte nicht dem Datum de
 
 #: assets/doctype/asset/asset.py:308
 msgid "Row #{}: Finance Book should not be empty since you're using multiple."
-msgstr ""
+msgstr "Zeile #{}: Das Finanzbuch sollte nicht leer sein, da Sie mehrere verwenden."
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:338
 msgid "Row #{}: Item Code: {} is not available under warehouse {}."
@@ -60724,7 +60755,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:300
 msgid "Row #{}: Please use a different Finance Book."
-msgstr ""
+msgstr "Zeile #{}: Bitte verwenden Sie ein anderes Finanzbuch."
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:398
 msgid "Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}"
@@ -60812,7 +60843,7 @@ msgstr "Zeile {0}: Bill of Materials nicht für den Artikel gefunden {1}"
 
 #: accounts/doctype/journal_entry/journal_entry.py:796
 msgid "Row {0}: Both Debit and Credit values cannot be zero"
-msgstr ""
+msgstr "Zeile {0}: Sowohl Soll als auch Haben können nicht gleich Null sein"
 
 #: controllers/buying_controller.py:438 controllers/selling_controller.py:204
 msgid "Row {0}: Conversion Factor is mandatory"
@@ -61006,7 +61037,7 @@ msgstr "Zeile {0}: Menge für {4} in Lager {1} zum Buchungszeitpunkt des Eintrag
 
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.py:97
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
-msgstr ""
+msgstr "Zeile {0}: Schicht kann nicht geändert werden, da die Abschreibung bereits verarbeitet wurde"
 
 #: stock/doctype/stock_entry/stock_entry.py:1170
 msgid "Row {0}: Subcontracted Item is mandatory for the raw material {1}"
@@ -62911,7 +62942,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.js:87
 msgid "Scrap Asset"
-msgstr "Sachanlage verschrotten"
+msgstr "Vermögensgegenstand verschrotten"
 
 #. Label of a Float field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
@@ -63405,7 +63436,7 @@ msgstr "Verkaufen"
 
 #: assets/doctype/asset/asset.js:91
 msgid "Sell Asset"
-msgstr "Sachanlage verkaufen"
+msgstr "Vermögensgegenstand verkaufen"
 
 #. Name of a Workspace
 #. Label of a Card Break in the Selling Workspace
@@ -64969,7 +65000,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:672
 msgid "Set {0} in asset category {1} for company {2}"
-msgstr "Tragen Sie {0} in die Sachanlagenkategorie {1} für Unternehmen {2} ein"
+msgstr "Legen Sie {0} in die Vermögensgegenstand-Kategorie {1} für das Unternehmen {2} fest"
 
 #: assets/doctype/asset/asset.py:953
 msgid "Set {0} in asset category {1} or company {2}"
@@ -65203,25 +65234,25 @@ msgstr "Haltbarkeit in Tagen"
 
 #: assets/doctype/asset/asset.js:247
 msgid "Shift"
-msgstr ""
+msgstr "Schicht"
 
 #. Label of a Link field in DocType 'Depreciation Schedule'
 #: assets/doctype/depreciation_schedule/depreciation_schedule.json
 msgctxt "Depreciation Schedule"
 msgid "Shift"
-msgstr ""
+msgstr "Schicht"
 
 #. Label of a Float field in DocType 'Asset Shift Factor'
 #: assets/doctype/asset_shift_factor/asset_shift_factor.json
 msgctxt "Asset Shift Factor"
 msgid "Shift Factor"
-msgstr ""
+msgstr "Schichtfaktor"
 
 #. Label of a Data field in DocType 'Asset Shift Factor'
 #: assets/doctype/asset_shift_factor/asset_shift_factor.json
 msgctxt "Asset Shift Factor"
 msgid "Shift Name"
-msgstr ""
+msgstr "Schichtname"
 
 #. Name of a DocType
 #: stock/doctype/delivery_note/delivery_note.js:166
@@ -66260,7 +66291,7 @@ msgstr "Teilt"
 
 #: assets/doctype/asset/asset.js:111 assets/doctype/asset/asset.js:451
 msgid "Split Asset"
-msgstr "Sachanlage aufspalten"
+msgstr "Vermögensgegenstand aufspalten"
 
 #: stock/doctype/batch/batch.js:142
 msgid "Split Batch"
@@ -66277,7 +66308,7 @@ msgstr "Skontobetrag in Aufwand und Umsatzsteuerkorrektur aufteilen"
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Split From"
-msgstr ""
+msgstr "Abspalten von"
 
 #: support/doctype/issue/issue.js:90
 msgid "Split Issue"
@@ -66285,7 +66316,7 @@ msgstr "Split-Problem"
 
 #: assets/doctype/asset/asset.js:457
 msgid "Split Qty"
-msgstr ""
+msgstr "Abgespaltene Menge"
 
 #: assets/doctype/asset/asset.py:1050
 msgid "Split qty cannot be grater than or equal to asset qty"
@@ -66304,7 +66335,7 @@ msgstr "Pos"
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
 msgctxt "Prospect Opportunity"
 msgid "Stage"
-msgstr ""
+msgstr "Stufe"
 
 #. Label of a Data field in DocType 'Sales Stage'
 #: crm/doctype/sales_stage/sales_stage.json
@@ -70013,7 +70044,7 @@ msgstr "Systembenutzer-ID (Anmeldung). Wenn gesetzt, wird sie standardmäßig f�
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgctxt "Manufacturing Settings"
 msgid "System will automatically create the serial numbers / batch for the Finished Good on submission of work order"
-msgstr ""
+msgstr "Falls aktiviert, erstellt das System bei der Buchung des Arbeitsauftrags automatisch Serien- bzw. Chargennummern für die Fertigerzeugnisse"
 
 #. Description of the 'Invoice Limit' (Int) field in DocType 'Payment
 #. Reconciliation'
@@ -70132,7 +70163,7 @@ msgstr "Ziel ({})"
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Target Asset"
-msgstr "Ziel-Sachanlage"
+msgstr "Ziel-Vermögensgegenstand"
 
 #. Label of a Link field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
@@ -70142,29 +70173,29 @@ msgstr ""
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:248
 msgid "Target Asset {0} cannot be cancelled"
-msgstr "Ziel-Sachanlage {0} darf nicht storniert sein"
+msgstr "Ziel-Vermögensgegenstand {0} kann nicht storniert werden"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:246
 msgid "Target Asset {0} cannot be submitted"
-msgstr "Ziel-Sachanlage {0} kann nicht gebucht werden"
+msgstr "Ziel-Vermögensgegenstand {0} kann nicht gebucht werden"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:242
 msgid "Target Asset {0} cannot be {1}"
-msgstr "Ziel-Sachanlage {0} kann nicht {1} sein"
+msgstr "Ziel-Vermögensgegenstand {0} kann nicht {1} sein"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:252
 msgid "Target Asset {0} does not belong to company {1}"
-msgstr "Ziel-Sachanlage {0} gehört nicht zu Unternehmen {1}"
+msgstr "Ziel-Vermögensgegenstand {0} gehört nicht zum Unternehmen {1}"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:233
 msgid "Target Asset {0} needs to be composite asset"
-msgstr "Ziel-Sachanlage {0} muss eine zusammengesetzte Anlage sein"
+msgstr "Ziel-Vermögensgegenstand {0} muss ein zusammengesetzter Vermögensgegenstand sein"
 
 #. Label of a Link field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Target Batch No"
-msgstr ""
+msgstr "Ziel-Chargen-Nr"
 
 #. Name of a DocType
 #: setup/doctype/target_detail/target_detail.json
@@ -70204,13 +70235,13 @@ msgstr ""
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Target Has Batch No"
-msgstr ""
+msgstr "Ziel hat Chargennummer"
 
 #. Label of a Check field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Target Has Serial No"
-msgstr ""
+msgstr "Ziel hat Seriennummer"
 
 #. Label of a Currency field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
@@ -70228,25 +70259,25 @@ msgstr "Ziel ist Anlagevermögen"
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Target Item Code"
-msgstr ""
+msgstr "Ziel Artikelcode"
 
 #. Label of a Data field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Target Item Name"
-msgstr ""
+msgstr "Ziel Artikelname"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:203
 msgid "Target Item {0} is neither a Fixed Asset nor a Stock Item"
-msgstr ""
+msgstr "Der Zielartikel {0} ist weder ein Vermögensgegenstand noch ein Lagerartikel"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:207
 msgid "Target Item {0} must be a Fixed Asset item"
-msgstr ""
+msgstr "Zielartikel {0} muss ein Vermögensgegenstand sein"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:209
 msgid "Target Item {0} must be a Stock Item"
-msgstr ""
+msgstr "Zielartikel {0} muss ein Lagerartikel sein"
 
 #. Label of a Link field in DocType 'Asset Movement Item'
 #: assets/doctype/asset_movement_item/asset_movement_item.json
@@ -70286,13 +70317,13 @@ msgstr "Zielmenge"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:214
 msgid "Target Qty must be a positive number"
-msgstr ""
+msgstr "Zielmenge muss eine positive Zahl sein"
 
 #. Label of a Small Text field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Target Serial No"
-msgstr ""
+msgstr "Ziel Seriennummer"
 
 #: stock/dashboard/item_dashboard.js:222
 #: stock/doctype/stock_entry/stock_entry.js:549
@@ -71997,7 +72028,7 @@ msgstr ""
 
 #: assets/doctype/asset/depreciation.py:414
 msgid "The following assets have failed to automatically post depreciation entries: {0}"
-msgstr ""
+msgstr "Bei den folgenden Vermögensgegenständen wurden die Abschreibungen nicht automatisch gebucht: {0}"
 
 #: stock/doctype/item/item.py:832
 msgid "The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template."
@@ -72184,7 +72215,7 @@ msgstr ""
 
 #: manufacturing/doctype/work_order/work_order.js:827
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
-msgstr ""
+msgstr "Das Lager, in dem Sie Ihre Rohmaterialien lagern. Jeder benötigte Artikel kann ein eigenes Quelllager haben. Auch ein Gruppenlager kann als Quelllager ausgewählt werden. Bei Buchung des Arbeitsauftrags werden die Rohstoffe in diesen Lagern für die Produktion reserviert."
 
 #: manufacturing/doctype/work_order/work_order.js:837
 msgid "The warehouse where your Items will be transferred when you begin production. Group Warehouse can also be selected as a Work in Progress warehouse."
@@ -72448,23 +72479,23 @@ msgstr "Diese Option kann aktiviert werden, um die Felder 'Buchungsdatum' und 'B
 
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.py:158
 msgid "This schedule was created when Asset {0} was adjusted through Asset Value Adjustment {1}."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als der Vermögensgegenstand {0} durch die Vermögenswertanpassung {1} angepasst wurde."
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:516
 msgid "This schedule was created when Asset {0} was consumed through Asset Capitalization {1}."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als der Vermögensgegenstand {0} durch Vermögensgegenstand-Aktivierung {1} verbraucht wurde."
 
 #: assets/doctype/asset_repair/asset_repair.py:108
 msgid "This schedule was created when Asset {0} was repaired through Asset Repair {1}."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als Vermögensgegenstand {0} über Vermögensgegenstand-Reparatur {1} repariert wurde."
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:674
 msgid "This schedule was created when Asset {0} was restored on Asset Capitalization {1}'s cancellation."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als der Vermögensgegenstand {0} nach der Stornierung der Vermögensgegenstand-Aktivierung {1} wiederhergestellt wurde."
 
 #: assets/doctype/asset/depreciation.py:496
 msgid "This schedule was created when Asset {0} was restored."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als der Vermögensgegenstand {0} wiederhergestellt wurde."
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1325
 msgid "This schedule was created when Asset {0} was returned through Sales Invoice {1}."
@@ -72472,7 +72503,7 @@ msgstr ""
 
 #: assets/doctype/asset/depreciation.py:454
 msgid "This schedule was created when Asset {0} was scrapped."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als der Vermögensgegenstand {0} verschrottet wurde."
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1336
 msgid "This schedule was created when Asset {0} was sold through Sales Invoice {1}."
@@ -72480,15 +72511,15 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:1117
 msgid "This schedule was created when Asset {0} was updated after being split into new Asset {1}."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als Vermögensgegenstand {0} aktualisiert wurde, nachdem er in einen neuen Vermögensgegenstand {1} aufgeteilt wurde."
 
 #: assets/doctype/asset_repair/asset_repair.py:148
 msgid "This schedule was created when Asset {0}'s Asset Repair {1} was cancelled."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als die Reparatur {1} von Vermögensgegenstand {0} storniert wurde."
 
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.py:165
 msgid "This schedule was created when Asset {0}'s Asset Value Adjustment {1} was cancelled."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als die Vermögenswertanpassung {1} von Vermögensgegenstand {0} storniert wurde."
 
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.py:246
 msgid "This schedule was created when Asset {0}'s shifts were adjusted through Asset Shift Allocation {1}."
@@ -72496,7 +72527,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:1180
 msgid "This schedule was created when new Asset {0} was split from Asset {1}."
-msgstr ""
+msgstr "Dieser Zeitplan wurde erstellt, als der neue Vermögensgegenstand {0} von dem Vermögensgegenstand {1} abgespalten wurde."
 
 #. Description of the 'Dunning Letter' (Section Break) field in DocType
 #. 'Dunning Type'
@@ -73623,7 +73654,7 @@ msgstr "To Date darf nicht vor From Date liegen"
 
 #: assets/doctype/asset_category/asset_category.py:109
 msgid "To enable Capital Work in Progress Accounting,"
-msgstr ""
+msgstr "Um die Buchung von Anlagen im Bau zu ermöglichen,"
 
 #: manufacturing/doctype/production_plan/production_plan.js:545
 msgid "To include non-stock items in the material request planning. i.e. Items for which 'Maintain Stock' checkbox is unticked."
@@ -74558,7 +74589,7 @@ msgstr "Gesamtbetrag erhalten"
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Total Repair Cost"
-msgstr ""
+msgstr "Gesamtreparaturkosten"
 
 #. Label of a Int field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
@@ -74756,13 +74787,13 @@ msgstr "Noch nicht bezahlt: {0}"
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Total Value"
-msgstr ""
+msgstr "Gesamtwert"
 
 #. Label of a Currency field in DocType 'Asset Repair Consumed Item'
 #: assets/doctype/asset_repair_consumed_item/asset_repair_consumed_item.json
 msgctxt "Asset Repair Consumed Item"
 msgid "Total Value"
-msgstr ""
+msgstr "Gesamtwert"
 
 #. Label of a Currency field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -75187,7 +75218,7 @@ msgstr "Übertragung"
 
 #: assets/doctype/asset/asset.js:83
 msgid "Transfer Asset"
-msgstr "Sachanlage übertragen"
+msgstr "Vermögensgegenstand übertragen"
 
 #: manufacturing/doctype/production_plan/production_plan.js:318
 msgid "Transfer From Warehouses"
@@ -76074,7 +76105,7 @@ msgstr "Rechnung entsperren"
 #: accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:90
 #: accounts/report/consolidated_financial_statement/consolidated_financial_statement.py:91
 msgid "Unclosed Fiscal Years Profit / Loss (Credit)"
-msgstr "Offener Gewinn / Verlust (Kredit) des Geschäftsjahres"
+msgstr "Nicht abgeschlossene Geschäftsjahre Gewinn / Verlust (Haben)"
 
 #. Label of a Link field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
@@ -76226,7 +76257,7 @@ msgstr "Ungeplante Maschinenwartung"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Unqualified"
-msgstr ""
+msgstr "Nicht qualifiziert"
 
 #. Label of a Link field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -77666,7 +77697,7 @@ msgstr ""
 
 #: crm/doctype/campaign/campaign.js:11
 msgid "View Leads"
-msgstr "Leads anzeigen"
+msgstr "Interessenten anzeigen"
 
 #: accounts/doctype/account/account_tree.js:193 stock/doctype/batch/batch.js:18
 msgid "View Ledger"
@@ -80106,7 +80137,7 @@ msgstr ""
 
 #: accounts/doctype/journal_entry/journal_entry.py:809
 msgid "You cannot credit and debit same account at the same time"
-msgstr "Sie können ein Konto nicht gleichzeitig be- und entlasten"
+msgstr "Eine gleichzeitige Gutschrift und Belastung desselben Kontos ist nicht möglich"
 
 #: projects/doctype/project_type/project_type.py:25
 msgid "You cannot delete Project Type 'External'"
@@ -80714,7 +80745,7 @@ msgstr ""
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:253
 msgid "{0} <b>{1}</b> has submitted Assets. Remove Item <b>{2}</b> from table to continue."
-msgstr "{0} <b>{1}</b> hat gebuchte Sachanlagen. Entfernen Sie Artikel <b>{2}</b> aus der Tabelle, um fortzufahren."
+msgstr "{0} <b>{1}</b> hat Vermögensgegenstände gebucht. Entfernen Sie Artikel <b>{2}</b> aus der Tabelle, um fortzufahren."
 
 #: controllers/accounts_controller.py:1893
 msgid "{0} Account not found against Customer {1}."
@@ -81018,7 +81049,7 @@ msgstr "{0} {1} existiert nicht"
 
 #: accounts/party.py:535
 msgid "{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}."
-msgstr "{0} {1} hat Buchhaltungseinträge in Währung {2} für Firma {3}. Bitte wählen Sie ein Debitoren- oder Kreditorenkonto mit der Währung {2} aus."
+msgstr "{0} {1} hat Buchungen in der Währung {2} für das Unternehmen {3}. Bitte wählen Sie ein Forderungs- oder Verbindlichkeitskonto mit der Währung {2} aus."
 
 #: accounts/doctype/payment_entry/payment_entry.py:374
 msgid "{0} {1} has already been fully paid."
@@ -81226,7 +81257,7 @@ msgstr "{} kann nicht storniert werden, da die gesammelten Treuepunkte eingelös
 
 #: controllers/buying_controller.py:203
 msgid "{} has submitted assets linked to it. You need to cancel the assets to create purchase return."
-msgstr "{} ist mit gebuchten Sachanlagen verknüpft. Sie müssen die Sachanlagen stornieren, um eine Kaufrückgabe zu erstellen."
+msgstr "{} hat gebuchte Vermögensgegenstände, die mit ihm verknüpft sind. Sie müssen die Vermögensgegenstände stornieren, um eine Kaufrückgabe zu erstellen."
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:66
 msgid "{} is a child company."
