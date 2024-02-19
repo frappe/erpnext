@@ -899,7 +899,7 @@ class update_entries_after(object):
 
 		precision = doc.precision("total_qty")
 		self.wh_data.qty_after_transaction += flt(doc.total_qty, precision)
-		if self.wh_data.qty_after_transaction:
+		if flt(self.wh_data.qty_after_transaction, precision):
 			self.wh_data.valuation_rate = flt(self.wh_data.stock_value, precision) / flt(
 				self.wh_data.qty_after_transaction, precision
 			)
