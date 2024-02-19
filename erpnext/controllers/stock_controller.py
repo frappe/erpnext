@@ -174,6 +174,13 @@ class StockController(AccountsController):
 			table_name = "stock_items"
 
 		for row in self.get(table_name):
+			if row.serial_and_batch_bundle and (row.serial_no or row.batch_no):
+				frappe.throw(
+					_(
+						"At row {0}: Serial and Batch Bundle {1} has already created. Please remove the values from the serial no or batch no fields."
+					).format(row.idx, row.serial_and_batch_bundle)
+				)
+
 			if not row.serial_no and not row.batch_no and not row.get("rejected_serial_no"):
 				continue
 

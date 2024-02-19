@@ -262,7 +262,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			item_code=args.get("item_code"),
 		)
 
-		in_rate = sn_obj.get_incoming_rate()
+		return sn_obj.get_incoming_rate()
 
 	elif item_details and item_details.has_batch_no and args.get("serial_and_batch_bundle"):
 		args.actual_qty = args.qty
@@ -272,23 +272,33 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			item_code=args.get("item_code"),
 		)
 
-		in_rate = batch_obj.get_incoming_rate()
+		return batch_obj.get_incoming_rate()
 
 	elif (args.get("serial_no") or "").strip() and not args.get("serial_and_batch_bundle"):
-		in_rate = get_avg_purchase_rate(args.get("serial_no"))
+		args.actual_qty = args.qty
+		args.serial_nos = get_serial_nos_data(args.get("serial_no"))
+
+		sn_obj = SerialNoValuation(
+			sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code")
+		)
+
+		return sn_obj.get_incoming_rate()
 	elif (
 		args.get("batch_no")
 		and frappe.db.get_value("Batch", args.get("batch_no"), "use_batchwise_valuation", cache=True)
 		and not args.get("serial_and_batch_bundle")
 	):
-		in_rate = get_batch_incoming_rate(
-			item_code=args.get("item_code"),
+
+		args.actual_qty = args.qty
+		args.batch_nos = frappe._dict({args.batch_no: args})
+
+		batch_obj = BatchNoValuation(
+			sle=args,
 			warehouse=args.get("warehouse"),
-			batch_no=args.get("batch_no"),
-			posting_date=args.get("posting_date"),
-			posting_time=args.get("posting_time"),
+			item_code=args.get("item_code"),
 		)
 
+		return batch_obj.get_incoming_rate()
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
