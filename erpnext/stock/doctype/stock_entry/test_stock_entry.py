@@ -1766,7 +1766,7 @@ class TestStockEntry(FrappeTestCase):
 		)
 
 		self.assertTrue(se.items[0].use_serial_batch_fields)
-		self.assertFalse(se.items[0].serial_no)
+		self.assertTrue(se.items[0].serial_no)
 		self.assertTrue(se.items[0].serial_and_batch_bundle)
 
 		for serial_no in serial_nos:
@@ -1784,7 +1784,7 @@ class TestStockEntry(FrappeTestCase):
 		se1.reload()
 
 		self.assertTrue(se1.items[0].use_serial_batch_fields)
-		self.assertFalse(se1.items[0].serial_no)
+		self.assertTrue(se1.items[0].serial_no)
 		self.assertTrue(se1.items[0].serial_and_batch_bundle)
 
 		for serial_no in serial_nos:

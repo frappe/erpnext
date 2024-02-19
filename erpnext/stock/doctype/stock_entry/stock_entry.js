@@ -1178,7 +1178,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 							if (r) {
 								frappe.model.set_value(item.doctype, item.name, {
 									"serial_and_batch_bundle": r.name,
-									"qty": Math.abs(r.total_qty)
+									"qty": Math.abs(r.total_qty) / flt(item.conversion_factor || 1, precision("conversion_factor", item))
 								});
 							}
 						}

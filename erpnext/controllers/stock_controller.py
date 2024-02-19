@@ -162,6 +162,9 @@ class StockController(AccountsController):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
+		if self.get("_action") == "update_after_submit":
+			return
+
 		# To handle test cases
 		if frappe.flags.in_test and frappe.flags.use_serial_and_batch_fields:
 			return
@@ -219,7 +222,6 @@ class StockController(AccountsController):
 					row.db_set(
 						{
 							"rejected_serial_and_batch_bundle": sn_doc.name,
-							"rejected_serial_no": "",
 						}
 					)
 				else:
@@ -227,8 +229,6 @@ class StockController(AccountsController):
 					row.db_set(
 						{
 							"serial_and_batch_bundle": sn_doc.name,
-							"serial_no": "",
-							"batch_no": "",
 						}
 					)
 
