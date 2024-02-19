@@ -10,7 +10,7 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import AliasedQuery, Criterion, Table
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Round, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
 	cint,
@@ -549,16 +549,19 @@ def check_if_advance_entry_modified(args):
 				args,
 			)
 		else:
-			ret = frappe.db.sql(
-				"""select name from `tabPayment Entry`
-				where
-					name = %(voucher_no)s and docstatus = 1
-					and party_type = %(party_type)s and party = %(party)s and {0} = %(account)s
-					and round(unallocated_amount, {1}) = round(%(unreconciled_amount)s, {1})
-			""".format(
-					party_account_field, precision
-				),
-				args,
+			pe = qb.DocType("Payment Entry")
+			ret = (
+				qb.from_(pe)
+				.select(pe.name)
+				.where(
+					(pe.name == args.voucher_no)
+					& (pe.docstatus == 1)
+					& (pe.party_type == args.party_type)
+					& (pe.party == args.party)
+					& (pe[party_account_field] == args.account)
+					& (Round(pe.unallocated_amount, precision) == Round(args.unreconciled_amount, precision))
+				)
+				.run()
 			)
 
 	if not ret:
