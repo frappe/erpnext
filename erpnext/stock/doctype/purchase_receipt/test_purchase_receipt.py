@@ -2259,7 +2259,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		self.assertEqual(pr.items[0].use_serial_batch_fields, 1)
-		self.assertFalse(pr.items[0].serial_no)
+		self.assertTrue(pr.items[0].serial_no)
 		self.assertTrue(pr.items[0].serial_and_batch_bundle)
 
 		sbb_doc = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)

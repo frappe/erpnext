@@ -339,7 +339,7 @@ erpnext.sales_common = {
 
 											frappe.model.set_value(item.doctype, item.name, {
 												"serial_and_batch_bundle": r.name,
-												"qty": qty
+												"qty": qty / flt(item.conversion_factor || 1, precision("conversion_factor", item))
 											});
 										}
 									}
