@@ -548,7 +548,9 @@ frappe.ui.form.on('Stock Entry', {
 
 		let fields = [
 			{"fieldname":"bom", "fieldtype":"Link", "label":__("BOM"),
-			options:"BOM", reqd: 1, get_query: filters()},
+			options:"BOM", reqd: 1, get_query: () => {
+				return {filters: { docstatus:1, "is_active": 1 }};
+			}},
 			{"fieldname":"source_warehouse", "fieldtype":"Link", "label":__("Source Warehouse"),
 			options:"Warehouse"},
 			{"fieldname":"target_warehouse", "fieldtype":"Link", "label":__("Target Warehouse"),
