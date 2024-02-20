@@ -83,7 +83,7 @@ class AssetCapitalization(StockController):
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.restore_consumed_asset_items()
-	
+
 	def cancel_target_asset(self):
 		if self.entry_type == "Capitalization" and self.target_asset:
 			asset_doc = frappe.get_doc("Asset", self.target_asset)
