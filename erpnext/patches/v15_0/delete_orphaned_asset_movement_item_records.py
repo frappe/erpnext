@@ -2,6 +2,7 @@ import frappe
 
 
 def execute():
+	# nosemgrep
 	frappe.db.sql(
 		"""
 		DELETE FROM `tabAsset Movement Item`
