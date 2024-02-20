@@ -30,14 +30,14 @@ class PlaidConnector:
 
 	def get_token_request(self, update_mode=False):
 		country_codes = (
-			["US", "CA", "FR", "IE", "NL", "ES", "GB"]
+			["US", "CA", "FR", "IE", "NL", "ES", "GB", "DE"]
 			if self.settings.enable_european_access
 			else ["US", "CA"]
 		)
 		args = {
 			"client_name": self.client_name,
 			# only allow Plaid-supported languages and countries (LAST: Sep-19-2020)
-			"language": frappe.local.lang if frappe.local.lang in ["en", "fr", "es", "nl"] else "en",
+			"language": frappe.local.lang if frappe.local.lang in ["en", "fr", "es", "nl", "de"] else "en",
 			"country_codes": country_codes,
 			"user": {"client_user_id": frappe.generate_hash(frappe.session.user, length=32)},
 		}
