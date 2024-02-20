@@ -73,6 +73,10 @@ class PickList(Document):
 		self.update_status()
 		self.set_item_locations()
 
+		if self.get("locations"):
+			self.validate_sales_order_percentage()
+
+	def validate_sales_order_percentage(self):
 		# set percentage picked in SO
 		for location in self.get("locations"):
 			if (
