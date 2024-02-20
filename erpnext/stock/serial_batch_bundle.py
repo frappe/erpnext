@@ -5,7 +5,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, flt, get_link_to_form, now, nowtime, today
+from frappe.utils import cint, cstr, flt, get_link_to_form, now, nowtime, today
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
@@ -138,9 +138,17 @@ class SerialBatchBundle:
 				self.child_doctype, self.sle.voucher_detail_no, "rejected_serial_and_batch_bundle", sn_doc.name
 			)
 		else:
-			frappe.db.set_value(
-				self.child_doctype, self.sle.voucher_detail_no, "serial_and_batch_bundle", sn_doc.name
-			)
+			values_to_update = {
+				"serial_and_batch_bundle": sn_doc.name,
+			}
+
+			if frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
+				if sn_doc.has_serial_no:
+					values_to_update["serial_no"] = "\n".join(cstr(d.serial_no) for d in sn_doc.entries)
+				elif sn_doc.has_batch_no and len(sn_doc.entries) == 1:
+					values_to_update["batch_no"] = sn_doc.entries[0].batch_no
+
+			frappe.db.set_value(self.child_doctype, self.sle.voucher_detail_no, values_to_update)
 
 	@property
 	def child_doctype(self):
@@ -905,8 +913,6 @@ class SerialBatchCreation:
 			self.batches = get_available_batches(kwargs)
 
 	def set_auto_serial_batch_entries_for_inward(self):
-		print(self.get("serial_nos"))
-
 		if (self.get("batches") and self.has_batch_no) or (
 			self.get("serial_nos") and self.has_serial_no
 		):
