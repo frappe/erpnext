@@ -811,7 +811,8 @@ class BuyingController(SubcontractingController):
 		if self.doctype == "Purchase Invoice" and not self.get("update_stock"):
 			return
 
-		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s", self.name)
+		asset_movement = frappe.db.get_value("Asset Movement", {"reference_name": self.name}, "name")
+		frappe.delete_doc("Asset Movement", asset_movement, force=1)
 
 	def validate_schedule_date(self):
 		if not self.get("items"):
