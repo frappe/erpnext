@@ -77,7 +77,7 @@ class AssetCapitalization(StockController):
 			"Stock Ledger Entry",
 			"Repost Item Valuation",
 			"Asset",
-			"Asset Movement"
+			"Asset Movement",
 		)
 		self.cancel_target_asset()
 		self.update_stock_ledger()
