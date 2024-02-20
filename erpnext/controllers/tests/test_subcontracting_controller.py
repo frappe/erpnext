@@ -401,7 +401,7 @@ class TestSubcontractingController(FrappeTestCase):
 			{
 				"main_item_code": "Subcontracted Item SA4",
 				"item_code": "Subcontracted SRM Item 3",
-				"qty": 1.0,
+				"qty": 3.0,
 				"rate": 100.0,
 				"stock_uom": "Nos",
 				"warehouse": "_Test Warehouse - _TC",
@@ -914,12 +914,6 @@ def update_item_details(child_row, details):
 		else child_row.get("consumed_qty")
 	)
 
-	if child_row.serial_no:
-		details.serial_no.extend(get_serial_nos(child_row.serial_no))
-
-	if child_row.batch_no:
-		details.batch_no[child_row.batch_no] += child_row.get("qty") or child_row.get("consumed_qty")
-
 	if child_row.serial_and_batch_bundle:
 		doc = frappe.get_doc("Serial and Batch Bundle", child_row.serial_and_batch_bundle)
 		for row in doc.get("entries"):
@@ -928,6 +922,12 @@ def update_item_details(child_row, details):
 
 			if row.batch_no:
 				details.batch_no[row.batch_no] += row.qty * (-1 if doc.type_of_transaction == "Outward" else 1)
+	else:
+		if child_row.serial_no:
+			details.serial_no.extend(get_serial_nos(child_row.serial_no))
+
+		if child_row.batch_no:
+			details.batch_no[child_row.batch_no] += child_row.get("qty") or child_row.get("consumed_qty")
 
 
 def make_stock_transfer_entry(**args):

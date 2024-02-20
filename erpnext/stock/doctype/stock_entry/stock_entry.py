@@ -834,6 +834,7 @@ class StockEntry(StockController):
 					currency=erpnext.get_company_currency(self.company),
 					company=self.company,
 					raise_error_if_no_rate=raise_error_if_no_rate,
+					batch_no=d.batch_no,
 					serial_and_batch_bundle=d.serial_and_batch_bundle,
 				)
 
@@ -862,7 +863,7 @@ class StockEntry(StockController):
 				if reset_outgoing_rate:
 					args = self.get_args_for_incoming_rate(d)
 					rate = get_incoming_rate(args, raise_error_if_no_rate)
-					if rate > 0:
+					if rate >= 0:
 						d.basic_rate = rate
 
 				d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
@@ -885,6 +886,8 @@ class StockEntry(StockController):
 				"allow_zero_valuation": item.allow_zero_valuation_rate,
 				"serial_and_batch_bundle": item.serial_and_batch_bundle,
 				"voucher_detail_no": item.name,
+				"batch_no": item.batch_no,
+				"serial_no": item.serial_no,
 			}
 		)
 
