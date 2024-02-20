@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-02-19 19:34\n"
+"PO-Revision-Date: 2024-02-20 19:50\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -29464,14 +29464,14 @@ msgstr "vollständig abgeschriebene"
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Fully Paid"
-msgstr ""
+msgstr "Vollständig bezahlt"
 
 #. Option for the 'Advance Payment Status' (Select) field in DocType 'Sales
 #. Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Fully Paid"
-msgstr ""
+msgstr "Vollständig bezahlt"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:28
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:41
@@ -32040,7 +32040,7 @@ msgstr "Importtyp"
 #: public/js/utils/serial_no_batch_selector.js:197
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:77
 msgid "Import Using CSV file"
-msgstr ""
+msgstr "Importieren mit CSV-Datei"
 
 #. Label of a HTML field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
@@ -33975,7 +33975,7 @@ msgstr ""
 #: accounts/workspace/payables/payables.json
 #: accounts/workspace/receivables/receivables.json
 msgid "Invoicing"
-msgstr ""
+msgstr "Rechnungsstellung"
 
 #. Label of a Section Break field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -36939,7 +36939,7 @@ msgstr "Artikel {0} wurde deaktiviert"
 
 #: selling/doctype/sales_order/sales_order.py:645
 msgid "Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
-msgstr ""
+msgstr "Artikel {0} hat keine Seriennummer. Nur Artikel mit Seriennummer können basierend auf der Seriennummer geliefert werden"
 
 #: stock/doctype/item/item.py:1102
 msgid "Item {0} has reached its end of life on {1}"
@@ -38102,7 +38102,7 @@ msgstr ""
 #. Label of a Card Break in the Financial Reports Workspace
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Ledgers"
-msgstr ""
+msgstr "Bücher"
 
 #. Option for the 'Status' (Select) field in DocType 'Driver'
 #: setup/doctype/driver/driver.json
@@ -43593,7 +43593,7 @@ msgstr "Nicht geliefert"
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Not Initiated"
-msgstr ""
+msgstr "Nicht initiiert"
 
 #: buying/doctype/purchase_order/purchase_order.py:744
 #: templates/pages/material_request_info.py:21 templates/pages/order.py:32
@@ -43606,7 +43606,7 @@ msgstr "Nicht zulässig"
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Not Requested"
-msgstr ""
+msgstr "Nicht angefordert"
 
 #: selling/report/lost_quotations/lost_quotations.py:86
 #: support/report/issue_analytics/issue_analytics.py:208
@@ -43658,7 +43658,7 @@ msgstr "Aktualisierung von Transaktionen älter als {0} nicht erlaubt"
 
 #: setup/doctype/authorization_control/authorization_control.py:57
 msgid "Not authorized since {0} exceeds limits"
-msgstr ""
+msgstr "Nicht zugelassen, da {0} die Grenzwerte überschreitet"
 
 #: accounts/doctype/gl_entry/gl_entry.py:445
 msgid "Not authorized to edit frozen Account {0}"
@@ -44060,7 +44060,7 @@ msgstr "Angebotsdatum"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:29
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:42
 msgid "Office Equipment"
-msgstr ""
+msgstr "Büroausstattung"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:62
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:86
@@ -46177,7 +46177,7 @@ msgstr "POS-Transaktionen"
 
 #: selling/page/point_of_sale/pos_controller.js:363
 msgid "POS invoice {0} created successfully"
-msgstr ""
+msgstr "POS-Rechnung {0} erfolgreich erstellt"
 
 #. Option for the 'Series' (Select) field in DocType 'Cashier Closing'
 #: accounts/doctype/cashier_closing/cashier_closing.json
@@ -48081,7 +48081,7 @@ msgstr ""
 
 #: accounts/doctype/payment_request/payment_request.py:450
 msgid "Payment Requests cannot be created against: {0}"
-msgstr ""
+msgstr "Zahlungsanforderungen können nicht erstellt werden für: {0}"
 
 #. Name of a DocType
 #: accounts/doctype/payment_schedule/payment_schedule.json
@@ -49587,7 +49587,7 @@ msgstr "Bitte zuerst den Artikel angeben"
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.py:225
 msgid "Please enter Maintenance Details first"
-msgstr ""
+msgstr "Bitte geben Sie zuerst die Wartungsdetails ein"
 
 #: manufacturing/doctype/production_plan/production_plan.py:177
 msgid "Please enter Planned Qty for Item {0} at row {1}"
@@ -49623,7 +49623,7 @@ msgstr ""
 
 #: public/js/utils/serial_no_batch_selector.js:258
 msgid "Please enter Serial Nos"
-msgstr ""
+msgstr "Bitte Seriennummern eingeben"
 
 #: stock/doctype/shipment/shipment.py:83
 msgid "Please enter Shipment Parcel information"
@@ -50778,13 +50778,13 @@ msgstr "Präferenz"
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Preferred Contact Email"
-msgstr ""
+msgstr "Bevorzugte Kontakt-E-Mail"
 
 #. Label of a Data field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Preferred Email"
-msgstr ""
+msgstr "Bevorzugte E-Mail"
 
 #. Label of a Data field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
@@ -58533,7 +58533,7 @@ msgstr "Berichtstyp ist zwingend erforderlich"
 #: accounts/report/balance_sheet/balance_sheet.js:17
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:17
 msgid "Report View"
-msgstr ""
+msgstr "Berichtsansicht"
 
 #. Label of a Card Break in the Payables Workspace
 #. Label of a Card Break in the Receivables Workspace
@@ -60751,7 +60751,7 @@ msgstr "Zeile #{}: POS-Rechnung {} ist noch nicht gebucht"
 
 #: assets/doctype/asset_maintenance/asset_maintenance.py:43
 msgid "Row #{}: Please assign task to a member."
-msgstr ""
+msgstr "Zeile #{}: Bitte weisen Sie die Aufgabe einem Mitglied zu."
 
 #: assets/doctype/asset/asset.py:300
 msgid "Row #{}: Please use a different Finance Book."
@@ -60767,7 +60767,7 @@ msgstr "Zeile # {}: Lagermenge reicht nicht für Artikelcode: {} unter Lager {}.
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:371
 msgid "Row #{}: You cannot add positive quantities in a return invoice. Please remove item {} to complete the return."
-msgstr ""
+msgstr "Zeile #{}: Sie können keine positiven Mengen in einer Retourenrechnung hinzufügen. Bitte entfernen Sie Artikel {}, um die Rückgabe abzuschließen."
 
 #: stock/doctype/pick_list/pick_list.py:83
 msgid "Row #{}: item {} has been picked already."
@@ -61671,7 +61671,7 @@ msgstr "Verkäufe Monatliche Geschichte"
 
 #: selling/page/sales_funnel/sales_funnel.js:129
 msgid "Sales Opportunities by Source"
-msgstr ""
+msgstr "Verkaufschancen nach Quelle"
 
 #. Name of a DocType
 #. Title of an Onboarding Step
