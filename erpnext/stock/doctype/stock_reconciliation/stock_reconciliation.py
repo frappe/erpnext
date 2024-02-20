@@ -834,6 +834,7 @@ class StockReconciliation(StockController):
 			if voucher_detail_no != row.name:
 				continue
 
+			val_rate = 0.0
 			current_qty = 0.0
 			if row.current_serial_and_batch_bundle:
 				current_qty = self.get_current_qty_for_serial_or_batch(row)
@@ -843,7 +844,6 @@ class StockReconciliation(StockController):
 					row.warehouse,
 					self.posting_date,
 					self.posting_time,
-					voucher_no=self.name,
 				)
 
 				current_qty = item_dict.get("qty")
@@ -885,7 +885,7 @@ class StockReconciliation(StockController):
 					{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
 					"name",
 				)
-				and (not row.current_serial_and_batch_bundle and not row.batch_no)
+				and (not row.current_serial_and_batch_bundle)
 			):
 				self.set_current_serial_and_batch_bundle(voucher_detail_no, save=True)
 				row.reload()

@@ -142,10 +142,11 @@ class SerialBatchBundle:
 				"serial_and_batch_bundle": sn_doc.name,
 			}
 
-			if sn_doc.has_serial_no:
-				values_to_update["serial_no"] = "\n".join(cstr(d.serial_no) for d in sn_doc.entries)
-			elif sn_doc.has_batch_no and len(sn_doc.entries) == 1:
-				values_to_update["batch_no"] = sn_doc.entries[0].batch_no
+			if frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
+				if sn_doc.has_serial_no:
+					values_to_update["serial_no"] = "\n".join(cstr(d.serial_no) for d in sn_doc.entries)
+				elif sn_doc.has_batch_no and len(sn_doc.entries) == 1:
+					values_to_update["batch_no"] = sn_doc.entries[0].batch_no
 
 			frappe.db.set_value(self.child_doctype, self.sle.voucher_detail_no, values_to_update)
 
@@ -691,7 +692,7 @@ def get_batch_nos(serial_and_batch_bundle):
 	if not entries:
 		return frappe._dict({})
 
-	return frappe._dict({d.batch_no: d for d in entries})
+	return {d.batch_no: d for d in entries}
 
 
 def get_empty_batches_based_work_order(work_order, item_code):

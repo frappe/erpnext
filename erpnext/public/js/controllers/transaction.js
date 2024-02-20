@@ -145,6 +145,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
+		if(this.frm.fields_dict['items'].grid.get_field('batch_no')) {
+			this.frm.set_query('batch_no', 'items', function(doc, cdt, cdn) {
+				return me.set_query_for_batch(doc, cdt, cdn);
+			});
+		}
+
 		if(
 			this.frm.docstatus < 2
 			&& this.frm.fields_dict["payment_terms_template"]

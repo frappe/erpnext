@@ -2327,6 +2327,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 			},
 		).name
 
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+
 		pr = make_purchase_receipt(
 			item_code=item_code,
 			qty=5,
@@ -2336,6 +2338,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertTrue(pr.items[0].batch_no)
 		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
 		self.assertEqual(pr.items[0].batch_no, batch_no)
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
 
 def prepare_data_for_internal_transfer():
