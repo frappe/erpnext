@@ -1902,6 +1902,7 @@ class StockEntry(StockController):
 			return
 
 		id = create_serial_and_batch_bundle(
+			self,
 			row,
 			frappe._dict(
 				{
@@ -2172,7 +2173,7 @@ class StockEntry(StockController):
 			"to_warehouse": "",
 			"qty": qty,
 			"item_name": item.item_name,
-			"serial_and_batch_bundle": create_serial_and_batch_bundle(row, item, "Outward"),
+			"serial_and_batch_bundle": create_serial_and_batch_bundle(self, row, item, "Outward"),
 			"description": item.description,
 			"stock_uom": item.stock_uom,
 			"expense_account": item.expense_account,
@@ -2550,6 +2551,7 @@ class StockEntry(StockController):
 					row = frappe._dict({"serial_nos": serial_nos[0 : cint(d.qty)]})
 
 					id = create_serial_and_batch_bundle(
+						self,
 						row,
 						frappe._dict(
 							{
@@ -3073,7 +3075,7 @@ def get_stock_entry_data(work_order):
 	return data
 
 
-def create_serial_and_batch_bundle(row, child, type_of_transaction=None):
+def create_serial_and_batch_bundle(parent_doc, row, child, type_of_transaction=None):
 	item_details = frappe.get_cached_value(
 		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 	)
@@ -3091,6 +3093,8 @@ def create_serial_and_batch_bundle(row, child, type_of_transaction=None):
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,
 			"type_of_transaction": type_of_transaction,
+			"posting_date": parent_doc.posting_date,
+			"posting_time": parent_doc.posting_time,
 		}
 	)
 
