@@ -13,7 +13,6 @@ from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdat
 =======
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
-	add_to_date,
 	cint,
 	cstr,
 	flt,
@@ -470,7 +469,7 @@ class update_entries_after(object):
 					posting_datetime = %(posting_datetime)s
 				)
 			order by
-				posting_datetime ASC, creation ASC
+				creation ASC
 			for update
 		""",
 			self.args,
@@ -1208,16 +1207,11 @@ class update_entries_after(object):
 def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_voucher=False):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 
-	args["time_format"] = "%H:%i:%s"
 	if not args.get("posting_date"):
 		args["posting_datetime"] = "1900-01-01 00:00:00"
 
 	if not args.get("posting_datetime"):
 		args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
-
-	if operator == "<=":
-		# Add 1 second to handle millisecond for less than and equal to condition
-		args["posting_datetime"] = add_to_date(args["posting_datetime"], seconds=1)
 
 	voucher_condition = ""
 	if exclude_current_voucher:
@@ -1508,7 +1502,6 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 	datetime_limit_condition = ""
 	qty_shift = args.actual_qty
 
-	args["time_format"] = "%H:%i:%s"
 	args["posting_datetime"] = get_combine_datetime(args["posting_date"], args["posting_time"])
 
 	# find difference/shift in qty caused by stock reconciliation

@@ -633,4 +633,4 @@ def get_combine_datetime(posting_date, posting_time):
 	if isinstance(posting_time, datetime.timedelta):
 		posting_time = (datetime.datetime.min + posting_time).time()
 
-	return datetime.datetime.combine(posting_date, posting_time)
+	return datetime.datetime.combine(posting_date, posting_time).replace(microsecond=0)

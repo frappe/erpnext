@@ -1216,7 +1216,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			filters={"voucher_no": reciept1.name},
 			fields=["qty_after_transaction", "actual_qty"],
 		)
-		self.assertEqual(sle[0].qty_after_transaction, 105)
+		self.assertEqual(sle[0].qty_after_transaction, 5)
 		self.assertEqual(sle[0].actual_qty, 5)
 
 		sle = frappe.get_all(
@@ -1224,7 +1224,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			filters={"voucher_no": reciept2.name},
 			fields=["qty_after_transaction", "actual_qty"],
 		)
-		self.assertEqual(sle[0].qty_after_transaction, 100)
+		self.assertEqual(sle[0].qty_after_transaction, 105)
 		self.assertEqual(sle[0].actual_qty, 100)
 
 	@change_settings("System Settings", {"float_precision": 3, "currency_precision": 2})
