@@ -368,6 +368,7 @@ erpnext.buying = {
 
 											let update_values = {
 												"serial_and_batch_bundle": r.name,
+												"use_serial_batch_fields": 0,
 												"qty": qty / flt(item.conversion_factor || 1, precision("conversion_factor", item))
 											}
 
@@ -408,6 +409,7 @@ erpnext.buying = {
 
 											let update_values = {
 												"serial_and_batch_bundle": r.name,
+												"use_serial_batch_fields": 0,
 												"rejected_qty": qty / flt(item.conversion_factor || 1, precision("conversion_factor", item))
 											}
 
