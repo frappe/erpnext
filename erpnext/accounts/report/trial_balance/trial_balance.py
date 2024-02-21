@@ -236,7 +236,7 @@ def get_opening_balance(
 			opening_balance = opening_balance.where(closing_balance.is_opening == "No")
 		else:
 			opening_balance = opening_balance.where(
-				(closing_balance.posting_date < filters.from_date) | (closing_balance.is_opening == "Yes")
+				(closing_balance.posting_date < filters.from_date) | (closing_balance.is_opening == "Yes") and (closing_balance.posting_date <= filters.to_date)
 			)
 
 	if doctype == "GL Entry":
