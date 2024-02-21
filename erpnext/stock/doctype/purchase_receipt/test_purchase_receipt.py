@@ -2280,7 +2280,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 			serial_no_status = frappe.db.get_value("Serial No", sn, "status")
 			self.assertTrue(serial_no_status != "Active")
 
-<<<<<<< HEAD
 	def test_auto_set_batch_based_on_bundle(self):
 		item_code = make_item(
 			"_Test Auto Set Batch Based on Bundle",
@@ -2304,7 +2303,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.items[0].batch_no, batch_no)
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
-=======
+
 	def test_sle_qty_after_transaction(self):
 		item = make_item(
 			"_Test Item Qty After Transaction",
@@ -2393,7 +2392,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		for index, d in enumerate(data):
 			self.assertEqual(d.qty_after_transaction, 11 + index)
->>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
 
 
 def prepare_data_for_internal_transfer():
