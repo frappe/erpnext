@@ -145,6 +145,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 
+		if(this.frm.fields_dict['items'].grid.get_field('batch_no')) {
+			this.frm.set_query('batch_no', 'items', function(doc, cdt, cdn) {
+				return me.set_query_for_batch(doc, cdt, cdn);
+			});
+		}
+
 		if(
 			this.frm.docstatus < 2
 			&& this.frm.fields_dict["payment_terms_template"]
@@ -234,7 +240,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	set_fields_onload_for_line_item() {
-		if (this.frm.is_new && this.frm.doc?.items) {
+		if (this.frm.is_new() && this.frm.doc?.items) {
 			this.frm.doc.items.forEach(item => {
 				if (item.docstatus === 0
 					&& frappe.meta.has_field(item.doctype, "use_serial_batch_fields")
@@ -1631,18 +1637,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 		}
 		return item_list;
-	}
-
-	items_delete() {
-		this.update_localstorage_scanned_data();
-	}
-
-	update_localstorage_scanned_data() {
-		let doctypes = ["Sales Invoice", "Purchase Invoice", "Delivery Note", "Purchase Receipt"];
-		if (this.frm.is_new() && doctypes.includes(this.frm.doc.doctype)) {
-			const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
-			barcode_scanner.update_localstorage_scanned_data();
-		}
 	}
 
 	_set_values_for_item_list(children) {

@@ -7,7 +7,7 @@ from typing import List, Tuple
 
 import frappe
 from frappe import _, bold
-from frappe.utils import cint, flt, get_link_to_form, getdate
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
 
 import erpnext
 from erpnext.accounts.general_ledger import (
@@ -162,6 +162,9 @@ class StockController(AccountsController):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
+		if self.get("_action") == "update_after_submit":
+			return
+
 		# To handle test cases
 		if frappe.flags.in_test and frappe.flags.use_serial_and_batch_fields:
 			return
@@ -171,13 +174,16 @@ class StockController(AccountsController):
 			table_name = "stock_items"
 
 		for row in self.get(table_name):
+			if row.serial_and_batch_bundle and (row.serial_no or row.batch_no):
+				self.validate_serial_nos_and_batches_with_bundle(row)
+
 			if not row.serial_no and not row.batch_no and not row.get("rejected_serial_no"):
 				continue
 
 			if not row.use_serial_batch_fields and (
 				row.serial_no or row.batch_no or row.get("rejected_serial_no")
 			):
-				frappe.throw(_("Please enable Use Old Serial / Batch Fields to make_bundle"))
+				row.use_serial_batch_fields = 1
 
 			if row.use_serial_batch_fields and (
 				not row.serial_and_batch_bundle and not row.get("rejected_serial_and_batch_bundle")
@@ -219,7 +225,6 @@ class StockController(AccountsController):
 					row.db_set(
 						{
 							"rejected_serial_and_batch_bundle": sn_doc.name,
-							"rejected_serial_no": "",
 						}
 					)
 				else:
@@ -227,10 +232,43 @@ class StockController(AccountsController):
 					row.db_set(
 						{
 							"serial_and_batch_bundle": sn_doc.name,
-							"serial_no": "",
-							"batch_no": "",
 						}
 					)
+
+	def validate_serial_nos_and_batches_with_bundle(self, row):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		throw_error = False
+		if row.serial_no:
+			serial_nos = frappe.get_all(
+				"Serial and Batch Entry", fields=["serial_no"], filters={"parent": row.serial_and_batch_bundle}
+			)
+			serial_nos = sorted([cstr(d.serial_no) for d in serial_nos])
+			parsed_serial_nos = get_serial_nos(row.serial_no)
+
+			if len(serial_nos) != len(parsed_serial_nos):
+				throw_error = True
+			elif serial_nos != parsed_serial_nos:
+				for serial_no in serial_nos:
+					if serial_no not in parsed_serial_nos:
+						throw_error = True
+						break
+
+		elif row.batch_no:
+			batches = frappe.get_all(
+				"Serial and Batch Entry", fields=["batch_no"], filters={"parent": row.serial_and_batch_bundle}
+			)
+			batches = sorted([d.batch_no for d in batches])
+
+			if batches != [row.batch_no]:
+				throw_error = True
+
+		if throw_error:
+			frappe.throw(
+				_(
+					"At row {0}: Serial and Batch Bundle {1} has already created. Please remove the values from the serial no or batch no fields."
+				).format(row.idx, row.serial_and_batch_bundle)
+			)
 
 	def set_use_serial_batch_fields(self):
 		if frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
