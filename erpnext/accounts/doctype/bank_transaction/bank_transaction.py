@@ -41,9 +41,10 @@ class BankTransaction(StatusUpdater):
 		else:
 			allocated_amount = 0.0
 
-		amount = abs(flt(self.withdrawal) - flt(self.deposit))
-		self.db_set("allocated_amount", flt(allocated_amount))
-		self.db_set("unallocated_amount", amount - flt(allocated_amount))
+		unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit)) - allocated_amount
+
+		self.db_set("allocated_amount", flt(allocated_amount, self.precision("allocated_amount")))
+		self.db_set("unallocated_amount", flt(unallocated_amount, self.precision("unallocated_amount")))
 		self.reload()
 		self.set_status(update=True)
 

@@ -520,7 +520,7 @@ def reverse_depreciation_entry_made_after_disposal(asset, date):
 		else:
 			row += 1
 
-		if schedule.schedule_date == date:
+		if schedule.schedule_date == date and schedule.journal_entry:
 			if not disposal_was_made_on_original_schedule_date(
 				asset, schedule, row, date
 			) or disposal_happens_in_the_future(date):
