@@ -710,6 +710,7 @@ class StockReconciliation(StockController):
 
 		return allow_negative_stock
 
+
 def get_batch_qty_for_stock_reco(
 	item_code, warehouse, batch_no, posting_date, posting_time, voucher_no
 ):
