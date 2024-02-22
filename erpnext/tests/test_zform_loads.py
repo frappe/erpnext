@@ -23,6 +23,7 @@ class TestFormLoads(FrappeTestCase):
 			with self.subTest(msg=f"Loading {doctype} - {last_doc}", doctype=doctype, last_doc=last_doc):
 				self.assertFormLoad(doctype, last_doc)
 				self.assertDocPrint(doctype, last_doc)
+				self.assertDashboardLoading(doctype, last_doc)
 
 	def assertFormLoad(self, doctype, docname):
 		# reset previous response
@@ -56,3 +57,8 @@ class TestFormLoads(FrappeTestCase):
 
 		# html should exist
 		self.assertTrue(bool(ret["html"]))
+
+	def assertDashboardLoading(self, doctype, docname):
+		from frappe.desk.notifications import get_open_count
+
+		self.assertTrue(get_open_count(doctype, docname))
