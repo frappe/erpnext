@@ -909,8 +909,9 @@ class StockReconciliation(StockController):
 		if allow_negative_stock:
 			return True
 
-		if all(
-			(not d.batch_no or (d.batch_no and flt(d.qty) == flt(d.current_qty))) for d in self.items
+		if any(
+			((d.serial_and_batch_bundle or d.batch_no) and flt(d.qty) == flt(d.current_qty))
+			for d in self.items
 		):
 			allow_negative_stock = True
 
