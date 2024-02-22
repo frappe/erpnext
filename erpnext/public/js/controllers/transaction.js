@@ -960,11 +960,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				to_clear.push("Payment Schedule Table");
 			}
 
-			frappe.msgprint(
+			frappe.confirm(
 				__(
-					"Please clear the selected {0}",
+					"Do you want to clear the selected {0}?",
 					[frappe.utils.comma_and(to_clear.map(dt => __(dt)))]
-				)
+				),
+				() => {
+					this.frm.set_value("payment_terms_template", "");
+					this.frm.clear_table("payment_schedule");
+					this.frm.refresh_field("payment_schedule");
+				}
 			);
 		}
 	}
