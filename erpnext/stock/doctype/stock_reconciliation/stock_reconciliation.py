@@ -699,19 +699,16 @@ class StockReconciliation(StockController):
 
 	def has_negative_stock_allowed(self):
 		allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+		if allow_negative_stock:
+			return True
 
-<<<<<<< HEAD
-		if all(d.batch_no and flt(d.qty) == flt(d.current_qty) for d in self.items):
-=======
 		if any(
-			((d.serial_and_batch_bundle or d.batch_no) and flt(d.qty) == flt(d.current_qty))
+			(d.batch_no and flt(d.qty) == flt(d.current_qty))
 			for d in self.items
 		):
->>>>>>> da184d709b (fix: negative stock error while making stock reconciliation (#40016))
 			allow_negative_stock = True
 
 		return allow_negative_stock
-
 
 def get_batch_qty_for_stock_reco(
 	item_code, warehouse, batch_no, posting_date, posting_time, voucher_no
