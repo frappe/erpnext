@@ -942,25 +942,30 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	due_date() {
 		// due_date is to be changed, payment terms template and/or payment schedule must
 		// be removed as due_date is automatically changed based on payment terms
-		if (this.frm.doc.due_date && !this.frm.updating_party_details && !this.frm.doc.is_pos) {
-			if (this.frm.doc.payment_terms_template ||
-				(this.frm.doc.payment_schedule && this.frm.doc.payment_schedule.length)) {
-				var message1 = "";
-				var message2 = "";
-				var final_message = __("Please clear the") + " ";
-
-				if (this.frm.doc.payment_terms_template) {
-					message1 = __("selected Payment Terms Template");
-					final_message = final_message + message1;
-				}
-
-				if ((this.frm.doc.payment_schedule || []).length) {
-					message2 = __("Payment Schedule Table");
-					if (message1.length !== 0) message2 = " and " + message2;
-					final_message = final_message + message2;
-				}
-				frappe.msgprint(final_message);
+		if (
+			this.frm.doc.due_date &&
+			!this.frm.updating_party_details &&
+			!this.frm.doc.is_pos &&
+			(
+				this.frm.doc.payment_terms_template ||
+				this.frm.doc.payment_schedule?.length
+			)
+		) {
+			const to_clear = [];
+			if (this.frm.doc.payment_terms_template) {
+				to_clear.push("Payment Terms Template");
 			}
+
+			if (this.frm.doc.payment_schedule?.length) {
+				to_clear.push("Payment Schedule Table");
+			}
+
+			frappe.msgprint(
+				__(
+					"Please clear the selected {0}",
+					[frappe.utils.comma_and(to_clear.map(dt => __(dt)))]
+				)
+			);
 		}
 	}
 
