@@ -138,6 +138,7 @@ class AssetCapitalization(StockController):
 			"Repost Item Valuation",
 			"Serial and Batch Bundle",
 			"Asset",
+			"Asset Movement",
 		)
 		self.cancel_target_asset()
 		self.update_stock_ledger()
@@ -147,6 +148,7 @@ class AssetCapitalization(StockController):
 	def cancel_target_asset(self):
 		if self.entry_type == "Capitalization" and self.target_asset:
 			asset_doc = frappe.get_doc("Asset", self.target_asset)
+			asset_doc.db_set("capitalized_in", None)
 			if asset_doc.docstatus == 1:
 				asset_doc.cancel()
 
