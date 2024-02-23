@@ -269,7 +269,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 
-		if not self.is_pos:
+		if not (self.is_pos or self.is_debit_note):
 			self.so_dn_required()
 
 		self.set_tax_withholding()
