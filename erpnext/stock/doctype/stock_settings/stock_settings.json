@@ -424,6 +424,7 @@
   },
   {
    "default": "1",
+   "description": "On submission of the stock transaction, system will auto create the Serial and Batch Bundle based on the Serial No / Batch fields.",
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
    "label": "Use Serial / Batch Fields"
@@ -434,7 +435,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-02-04 12:01:31.931864",
+ "modified": "2024-02-24 12:50:51.740097",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
