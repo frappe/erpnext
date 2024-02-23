@@ -82,7 +82,15 @@ frappe.query_reports["Stock Ledger"] = {
 			"label": __("Include UOM"),
 			"fieldtype": "Link",
 			"options": "UOM"
-		}
+		},
+		{
+			"fieldname": "valuation_field_type",
+			"label": __("Valuation Field Type"),
+			"fieldtype": "Select",
+			"width": "80",
+			"options": "Currency\nFloat",
+			"default": "Currency"
+		},
 	],
 	"formatter": function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
@@ -95,4 +103,6 @@ frappe.query_reports["Stock Ledger"] = {
 
 		return value;
 	},
-}
+};
+
+erpnext.utils.add_inventory_dimensions('Stock Ledger', 10);

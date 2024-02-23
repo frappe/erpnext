@@ -3,7 +3,7 @@
 
 
 from operator import itemgetter
-from typing import Dict, List, Tuple, Union
+from typing import Dict, Iterator, List, Tuple, Union
 
 import frappe
 from frappe import _
@@ -34,6 +34,9 @@ def format_report_data(filters: Filters, item_details: Dict, to_date: str) -> Li
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
 
 	for item, item_dict in item_details.items():
+		if not flt(item_dict.get("total_qty"), precision):
+			continue
+
 		earliest_age, latest_age = 0, 0
 		details = item_dict["details"]
 
@@ -93,14 +96,14 @@ def get_range_age(filters: Filters, fifo_queue: List, to_date: str, item_dict: D
 	range1 = range2 = range3 = above_range3 = 0.0
 
 	for item in fifo_queue:
-		age = date_diff(to_date, item[1])
+		age = flt(date_diff(to_date, item[1]))
 		qty = flt(item[0]) if not item_dict["has_serial_no"] else 1.0
 
-		if age <= filters.range1:
+		if age <= flt(filters.range1):
 			range1 = flt(range1 + qty, precision)
-		elif age <= filters.range2:
+		elif age <= flt(filters.range2):
 			range2 = flt(range2 + qty, precision)
-		elif age <= filters.range3:
+		elif age <= flt(filters.range3):
 			range3 = flt(range3 + qty, precision)
 		else:
 			above_range3 = flt(above_range3 + qty, precision)
@@ -195,11 +198,11 @@ def setup_ageing_columns(filters: Filters, range_columns: List):
 		f"0 - {filters['range1']}",
 		f"{cint(filters['range1']) + 1} - {cint(filters['range2'])}",
 		f"{cint(filters['range2']) + 1} - {cint(filters['range3'])}",
-		f"{cint(filters['range3']) + 1} - {_('Above')}",
+		_("{0} - Above").format(cint(filters["range3"]) + 1),
 	]
 	for i, label in enumerate(ranges):
 		fieldname = "range" + str(i + 1)
-		add_column(range_columns, label=f"Age ({label})", fieldname=fieldname)
+		add_column(range_columns, label=_("Age ({0})").format(label), fieldname=fieldname)
 
 
 def add_column(
@@ -228,10 +231,12 @@ class FIFOSlots:
 		                consumed/updated and maintained via FIFO. **
 		}
 		"""
-		if self.sle is None:
-			self.sle = self.__get_stock_ledger_entries()
 
-		for d in self.sle:
+		stock_ledger_entries = self.sle
+		if stock_ledger_entries is None:
+			stock_ledger_entries = self.__get_stock_ledger_entries()
+
+		for d in stock_ledger_entries:
 			key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
 
 			if d.voucher_type == "Stock Reconciliation":
@@ -247,6 +252,9 @@ class FIFOSlots:
 				self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
 
 			self.__update_balances(d, key)
+
+		# Note that stock_ledger_entries is an iterator, you can not reuse it  like a list
+		del stock_ledger_entries
 
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
@@ -278,7 +286,7 @@ class FIFOSlots:
 			# consume transfer data and add stock to fifo queue
 			self.__adjust_incoming_transfer_qty(transfer_data, fifo_queue, row)
 		else:
-			if not serial_nos:
+			if not serial_nos and not row.get("has_serial_no"):
 				if fifo_queue and flt(fifo_queue[0][0]) <= 0:
 					# neutralize 0/negative stock by adding positive stock
 					fifo_queue[0][0] += flt(row.actual_qty)
@@ -378,7 +386,7 @@ class FIFOSlots:
 
 		return item_aggregated_data
 
-	def __get_stock_ledger_entries(self) -> List[Dict]:
+	def __get_stock_ledger_entries(self) -> Iterator[Dict]:
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		item = self.__get_item_query()  # used as derived table in sle query
 
@@ -415,7 +423,7 @@ class FIFOSlots:
 
 		sle_query = sle_query.orderby(sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty)
 
-		return sle_query.run(as_dict=True)
+		return sle_query.run(as_dict=True, as_iterator=True)
 
 	def __get_item_query(self) -> str:
 		item_table = frappe.qb.DocType("Item")

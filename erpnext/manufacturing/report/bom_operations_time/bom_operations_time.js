@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 frappe.query_reports["BOM Operations Time"] = {
 	"filters": [
@@ -12,7 +12,7 @@ frappe.query_reports["BOM Operations Time"] = {
 			"options": "Item",
 			"get_query": () =>{
 				return {
-					filters: { "disabled": 0, "is_stock_item": 1 }
+					filters: { "is_stock_item": 1 }
 				}
 			}
 		},

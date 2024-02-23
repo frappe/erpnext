@@ -7,24 +7,29 @@
  "engine": "InnoDB",
  "field_order": [
   "barcode",
+  "has_item_scanned",
   "item_code",
   "item_name",
-  "warehouse",
+  "item_group",
   "column_break_6",
+  "warehouse",
   "qty",
   "valuation_rate",
   "amount",
   "allow_zero_valuation_rate",
   "serial_no_and_batch_section",
-  "serial_no",
-  "column_break_11",
+  "add_serial_batch_bundle",
+  "serial_and_batch_bundle",
   "batch_no",
+  "column_break_11",
+  "current_serial_and_batch_bundle",
+  "serial_no",
   "section_break_3",
   "current_qty",
-  "current_serial_no",
+  "current_amount",
   "column_break_9",
   "current_valuation_rate",
-  "current_amount",
+  "current_serial_no",
   "section_break_14",
   "quantity_difference",
   "column_break_16",
@@ -48,6 +53,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -98,8 +104,9 @@
   },
   {
    "fieldname": "serial_no",
-   "fieldtype": "Small Text",
-   "label": "Serial No"
+   "fieldtype": "Long Text",
+   "label": "Serial No",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_11",
@@ -119,7 +126,7 @@
   },
   {
    "fieldname": "current_serial_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Long Text",
    "label": "Current Serial No",
    "no_copy": 1,
    "print_hide": 1,
@@ -167,7 +174,9 @@
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -177,11 +186,47 @@
    "label": "Allow Zero Valuation Rate",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "barcode",
+   "fieldname": "has_item_scanned",
+   "fieldtype": "Data",
+   "label": "Has Item Scanned",
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Serial / Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "print_hide": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "current_serial_and_batch_bundle",
+   "fieldtype": "Link",
+   "label": "Current Serial / Batch Bundle",
+   "no_copy": 1,
+   "options": "Serial and Batch Bundle",
+   "read_only": 1
+  },
+  {
+   "fieldname": "add_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No"
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-05-21 12:13:33.041266",
+ "modified": "2024-01-14 10:04:23.599951",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",
@@ -190,5 +235,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

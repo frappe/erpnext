@@ -78,7 +78,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	get_item_html(item) {
 		const me = this;
 		// eslint-disable-next-line no-unused-vars
-		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom, price_list_rate } = item;
+		const { item_image, serial_no, batch_no, barcode, actual_qty, uom, price_list_rate } = item;
 		const precision = flt(price_list_rate, 2) % 1 != 0 ? 2 : 0;
 		let indicator_color;
 		let qty_to_display = actual_qty;
@@ -103,9 +103,9 @@ erpnext.PointOfSale.ItemSelector = class {
 						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
 							<img
 								onerror="cur_pos.item_selector.handle_broken_image(this)"
-								class="h-full" src="${item_image}"
+								class="h-full item-img" src="${item_image}"
 								alt="${frappe.get_abbr(item.item_name)}"
-								style="object-fit: cover;">
+							>
 						</div>`;
 			} else {
 				return `<div class="item-qty-pill">
@@ -118,7 +118,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		return (
 			`<div class="item-wrapper"
 				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
-				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
+				data-batch-no="${escape(batch_no)}" data-uom="${escape(uom)}"
 				data-rate="${escape(price_list_rate || 0)}"
 				title="${item.item_name}">
 
@@ -128,7 +128,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					<div class="item-name">
 						${frappe.ellipsis(item.item_name, 18)}
 					</div>
-					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0}</div>
+					<div class="item-rate">${format_currency(price_list_rate, item.currency, precision) || 0} / ${uom}</div>
 				</div>
 			</div>`
 		);
@@ -179,6 +179,25 @@ erpnext.PointOfSale.ItemSelector = class {
 		});
 		this.search_field.toggle_label(false);
 		this.item_group_field.toggle_label(false);
+
+		this.attach_clear_btn();
+	}
+
+	attach_clear_btn() {
+		this.search_field.$wrapper.find('.control-input').append(
+			`<span class="link-btn" style="top: 2px;">
+				<a class="btn-open no-decoration" title="${__("Clear")}">
+					${frappe.utils.icon('close', 'sm')}
+				</a>
+			</span>`
+		);
+
+		this.$clear_search_btn = this.search_field.$wrapper.find('.link-btn');
+
+		this.$clear_search_btn.on('click', 'a', () => {
+			this.set_search_value('');
+			this.search_field.set_focus();
+		});
 	}
 
 	set_search_value(value) {
@@ -243,7 +262,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				value: "+1",
 				item: { item_code, batch_no, serial_no, uom, rate }
 			});
-			me.set_search_value('');
+			me.search_field.set_focus();
 		});
 
 		this.search_field.$input.on('input', (e) => {
@@ -252,6 +271,16 @@ erpnext.PointOfSale.ItemSelector = class {
 				const search_term = e.target.value;
 				this.filter_items({ search_term });
 			}, 300);
+
+			this.$clear_search_btn.toggle(
+				Boolean(this.search_field.$input.val())
+			);
+		});
+
+		this.search_field.$input.on('focus', () => {
+			this.$clear_search_btn.toggle(
+				Boolean(this.search_field.$input.val())
+			);
 		});
 	}
 
@@ -284,7 +313,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			if (this.items.length == 1) {
 				this.$items_container.find(".item-wrapper").click();
 				frappe.utils.play_sound("submit");
-				$(this.search_field.$input[0]).val("").trigger("input");
+				this.set_search_value('');
 			} else if (this.items.length == 0 && this.barcode_scanned) {
 				// only show alert of barcode is scanned and enter is pressed
 				frappe.show_alert({
@@ -293,7 +322,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				});
 				frappe.utils.play_sound("error");
 				this.barcode_scanned = false;
-				$(this.search_field.$input[0]).val("").trigger("input");
+				this.set_search_value('');
 			}
 		});
 	}
@@ -328,6 +357,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	add_filtered_item_to_cart() {
 		this.$items_container.find(".item-wrapper").click();
+		this.set_search_value('');
 	}
 
 	resize_selector(minimize) {
@@ -349,6 +379,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	toggle_component(show) {
-		show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
+		this.set_search_value('');
+		this.$component.css('display', show ? 'flex': 'none');
 	}
 };

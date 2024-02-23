@@ -34,8 +34,7 @@ def get_data(filters):
 		if filters.get(field):
 			query_filters[field] = ("in", filters.get(field))
 
-	query_filters["report_date"] = (">=", filters.get("from_date"))
-	query_filters["report_date"] = ("<=", filters.get("to_date"))
+	query_filters["report_date"] = ["between", [filters.get("from_date"), filters.get("to_date")]]
 
 	return frappe.get_all(
 		"Quality Inspection", fields=fields, filters=query_filters, order_by="report_date asc"
@@ -70,7 +69,7 @@ def get_columns(filters):
 			"label": _("Id"),
 			"fieldname": "name",
 			"fieldtype": "Link",
-			"options": "Work Order",
+			"options": "Quality Inspection",
 			"width": 100,
 		},
 		{"label": _("Report Date"), "fieldname": "report_date", "fieldtype": "Date", "width": 150},

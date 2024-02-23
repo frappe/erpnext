@@ -3,17 +3,83 @@
 
 
 import frappe
-from frappe import _, msgprint
+from frappe import _, msgprint, scrub, unscrub
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, now
 
 
 class POSProfile(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.pos_customer_group.pos_customer_group import POSCustomerGroup
+		from erpnext.accounts.doctype.pos_item_group.pos_item_group import POSItemGroup
+		from erpnext.accounts.doctype.pos_payment_method.pos_payment_method import POSPaymentMethod
+		from erpnext.accounts.doctype.pos_profile_user.pos_profile_user import POSProfileUser
+
+		account_for_change_amount: DF.Link | None
+		allow_discount_change: DF.Check
+		allow_rate_change: DF.Check
+		applicable_for_users: DF.Table[POSProfileUser]
+		apply_discount_on: DF.Literal["Grand Total", "Net Total"]
+		auto_add_item_to_cart: DF.Check
+		campaign: DF.Link | None
+		company: DF.Link
+		company_address: DF.Link | None
+		cost_center: DF.Link | None
+		country: DF.ReadOnly | None
+		currency: DF.Link
+		customer: DF.Link | None
+		customer_groups: DF.Table[POSCustomerGroup]
+		disable_rounded_total: DF.Check
+		disabled: DF.Check
+		expense_account: DF.Link | None
+		hide_images: DF.Check
+		hide_unavailable_items: DF.Check
+		ignore_pricing_rule: DF.Check
+		income_account: DF.Link | None
+		item_groups: DF.Table[POSItemGroup]
+		letter_head: DF.Link | None
+		payments: DF.Table[POSPaymentMethod]
+		print_format: DF.Link | None
+		select_print_heading: DF.Link | None
+		selling_price_list: DF.Link | None
+		tax_category: DF.Link | None
+		taxes_and_charges: DF.Link | None
+		tc_name: DF.Link | None
+		update_stock: DF.Check
+		validate_stock_on_save: DF.Check
+		warehouse: DF.Link
+		write_off_account: DF.Link
+		write_off_cost_center: DF.Link
+		write_off_limit: DF.Currency
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_default_profile()
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
 		self.validate_payment_methods()
+		self.validate_accounting_dimensions()
+
+	def validate_accounting_dimensions(self):
+		acc_dim_names = required_accounting_dimensions()
+		for acc_dim in acc_dim_names:
+			if not self.get(acc_dim):
+				frappe.throw(
+					_(
+						"{0} is a mandatory Accounting Dimension. <br>"
+						"Please set a value for {0} in Accounting Dimensions section."
+					).format(
+						unscrub(frappe.bold(acc_dim)),
+					),
+					title=_("Mandatory Accounting Dimension"),
+				)
 
 	def validate_default_profile(self):
 		for row in self.applicable_for_users:
@@ -61,13 +127,13 @@ class POSProfile(Document):
 
 		if len(item_groups) != len(set(item_groups)):
 			frappe.throw(
-				_("Duplicate item group found in the item group table"), title="Duplicate Item Group"
+				_("Duplicate item group found in the item group table"), title=_("Duplicate Item Group")
 			)
 
 		if len(customer_groups) != len(set(customer_groups)):
 			frappe.throw(
 				_("Duplicate customer group found in the cutomer group table"),
-				title="Duplicate Customer Group",
+				title=_("Duplicate Customer Group"),
 			)
 
 	def validate_payment_methods(self):
@@ -152,6 +218,24 @@ def get_child_nodes(group_type, root):
 	)
 
 
+def required_accounting_dimensions():
+
+	p = frappe.qb.DocType("Accounting Dimension")
+	c = frappe.qb.DocType("Accounting Dimension Detail")
+
+	acc_dim_doc = (
+		frappe.qb.from_(p)
+		.inner_join(c)
+		.on(p.name == c.parent)
+		.select(c.parent)
+		.where((c.mandatory_for_bs == 1) | (c.mandatory_for_pl == 1))
+		.where(p.disabled == 0)
+	).run(as_dict=1)
+
+	acc_dim_names = [scrub(d.parent) for d in acc_dim_doc]
+	return acc_dim_names
+
+
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
@@ -173,7 +257,7 @@ def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 		where
 			pfu.parent = pf.name and pfu.user = %(user)s and pf.company = %(company)s
 			and (pf.name like %(txt)s)
-			and pf.disabled = 0 limit %(start)s, %(page_len)s""",
+			and pf.disabled = 0 limit %(page_len)s offset %(start)s""",
 		args,
 	)
 

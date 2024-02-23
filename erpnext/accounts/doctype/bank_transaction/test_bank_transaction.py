@@ -2,9 +2,11 @@
 # See license.txt
 
 import json
-import unittest
 
 import frappe
+from frappe import utils
+from frappe.model.docstatus import DocStatus
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	get_linked_payments,
@@ -14,31 +16,24 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_paymen
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.tests.utils import if_lending_app_installed
 
 test_dependencies = ["Item", "Cost Center"]
 
 
-class TestBankTransaction(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
+class TestBankTransaction(FrappeTestCase):
+	def setUp(self):
+		for dt in [
+			"Bank Transaction",
+			"Payment Entry",
+			"Payment Entry Reference",
+			"POS Profile",
+		]:
+			frappe.db.delete(dt)
+		clear_loan_transactions()
 		make_pos_profile()
 		add_transactions()
 		add_vouchers()
-
-	@classmethod
-	def tearDownClass(cls):
-		for bt in frappe.get_all("Bank Transaction"):
-			doc = frappe.get_doc("Bank Transaction", bt.name)
-			if doc.docstatus == 1:
-				doc.cancel()
-			doc.delete()
-
-		# Delete directly in DB to avoid validation errors for countries not allowing deletion
-		frappe.db.sql("""delete from `tabPayment Entry Reference`""")
-		frappe.db.sql("""delete from `tabPayment Entry`""")
-
-		# Delete POS Profile
-		frappe.db.sql("delete from `tabPOS Profile`")
 
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
@@ -46,8 +41,13 @@ class TestBankTransaction(unittest.TestCase):
 			"Bank Transaction",
 			dict(description="Re 95282925234 FE/000002917 AT171513000281183046 Conrad Electronic"),
 		)
-		linked_payments = get_linked_payments(bank_transaction.name, ["payment_entry", "exact_match"])
-		self.assertTrue(linked_payments[0][6] == "Conrad Electronic")
+		linked_payments = get_linked_payments(
+			bank_transaction.name,
+			["payment_entry", "exact_match"],
+			from_date=bank_transaction.date,
+			to_date=utils.today(),
+		)
+		self.assertTrue(linked_payments[0]["party"] == "Conrad Electronic")
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):
@@ -81,14 +81,42 @@ class TestBankTransaction(unittest.TestCase):
 		clearance_date = frappe.db.get_value("Payment Entry", payment.name, "clearance_date")
 		self.assertFalse(clearance_date)
 
+	def test_cancel_voucher(self):
+		bank_transaction = frappe.get_doc(
+			"Bank Transaction",
+			dict(description="1512567 BG/000003025 OPSKATTUZWXXX AT776000000098709849 Herr G"),
+		)
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1700))
+		vouchers = json.dumps(
+			[
+				{
+					"payment_doctype": "Payment Entry",
+					"payment_name": payment.name,
+					"amount": bank_transaction.unallocated_amount,
+				}
+			]
+		)
+		reconcile_vouchers(bank_transaction.name, vouchers)
+		payment.reload()
+		payment.cancel()
+		bank_transaction.reload()
+		self.assertEqual(bank_transaction.docstatus, DocStatus.submitted())
+		self.assertEqual(bank_transaction.unallocated_amount, 1700)
+		self.assertEqual(bank_transaction.payment_entries, [])
+
 	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):
 		bank_transaction = frappe.get_doc(
 			"Bank Transaction",
 			dict(description="Auszahlung Karte MC/000002916 AUTOMAT 698769 K002 27.10. 14:07"),
 		)
-		linked_payments = get_linked_payments(bank_transaction.name, ["payment_entry", "exact_match"])
-		self.assertTrue(linked_payments[0][3])
+		linked_payments = get_linked_payments(
+			bank_transaction.name,
+			["payment_entry", "exact_match"],
+			from_date=bank_transaction.date,
+			to_date=utils.today(),
+		)
+		self.assertTrue(linked_payments[0]["paid_amount"])
 
 	# Check error if already reconciled
 	def test_already_reconciled(self):
@@ -154,6 +182,41 @@ class TestBankTransaction(unittest.TestCase):
 			frappe.db.get_value("Sales Invoice Payment", dict(parent=payment.name), "clearance_date")
 			is not None
 		)
+
+	@if_lending_app_installed
+	def test_matching_loan_repayment(self):
+		from lending.loan_management.doctype.loan.test_loan import create_loan_accounts
+
+		create_loan_accounts()
+		bank_account = frappe.get_doc(
+			{
+				"doctype": "Bank Account",
+				"account_name": "Payment Account",
+				"bank": "Citi Bank",
+				"account": "Payment Account - _TC",
+			}
+		).insert(ignore_if_duplicate=True)
+
+		bank_transaction = frappe.get_doc(
+			{
+				"doctype": "Bank Transaction",
+				"description": "Loan Repayment - OPSKATTUZWXXX AT776000000098709837 Herr G",
+				"date": "2018-10-27",
+				"deposit": 500,
+				"currency": "INR",
+				"bank_account": bank_account.name,
+			}
+		).submit()
+
+		repayment_entry = create_loan_and_repayment()
+
+		linked_payments = get_linked_payments(bank_transaction.name, ["loan_repayment", "exact_match"])
+		self.assertEqual(linked_payments[0]["name"], repayment_entry.name)
+
+
+@if_lending_app_installed
+def clear_loan_transactions():
+	frappe.db.delete("Loan Repayment")
 
 
 def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
@@ -364,3 +427,62 @@ def add_vouchers():
 	)
 	si.insert()
 	si.submit()
+
+
+@if_lending_app_installed
+def create_loan_and_repayment():
+	from lending.loan_management.doctype.loan.test_loan import (
+		create_loan,
+		create_loan_product,
+		create_repayment_entry,
+		make_loan_disbursement_entry,
+	)
+	from lending.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (
+		process_loan_interest_accrual_for_term_loans,
+	)
+
+	from erpnext.setup.doctype.employee.test_employee import make_employee
+
+	create_loan_product(
+		"Personal Loan",
+		"Personal Loan",
+		500000,
+		8.4,
+		is_term_loan=1,
+		mode_of_payment="Cash",
+		disbursement_account="Disbursement Account - _TC",
+		payment_account="Payment Account - _TC",
+		loan_account="Loan Account - _TC",
+		interest_income_account="Interest Income Account - _TC",
+		penalty_income_account="Penalty Income Account - _TC",
+	)
+
+	applicant = make_employee("test_bank_reco@loan.com", company="_Test Company")
+	loan = create_loan(applicant, "Personal Loan", 5000, "Repay Over Number of Periods", 20)
+	loan = frappe.get_doc(
+		{
+			"doctype": "Loan",
+			"applicant_type": "Employee",
+			"company": "_Test Company",
+			"applicant": applicant,
+			"loan_product": "Personal Loan",
+			"loan_amount": 5000,
+			"repayment_method": "Repay Fixed Amount per Period",
+			"monthly_repayment_amount": 500,
+			"repayment_start_date": "2018-09-27",
+			"is_term_loan": 1,
+			"posting_date": "2018-09-27",
+		}
+	).insert()
+
+	make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date="2018-09-27")
+	process_loan_interest_accrual_for_term_loans(posting_date="2018-10-27")
+
+	repayment_entry = create_repayment_entry(
+		loan.name,
+		applicant,
+		"2018-10-27",
+		500,
+	)
+	repayment_entry.submit()
+	return repayment_entry

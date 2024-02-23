@@ -19,7 +19,7 @@ frappe.listview_settings["Purchase Invoice"] = {
 	],
 	get_indicator(doc) {
 		if (doc.status == "Debit Note Issued") {
-			return [__(doc.status), "darkgrey", "status,=," + doc.status];
+			return [__(doc.status), "gray", "status,=," + doc.status];
 		}
 
 		if (
@@ -63,7 +63,7 @@ frappe.listview_settings["Purchase Invoice"] = {
 		});
 
 		listview.page.add_action_item(__("Payment"), ()=>{
-			erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Payment");
+			erpnext.bulk_transaction_processing.create(listview, "Purchase Invoice", "Payment Entry");
 		});
 	}
 };

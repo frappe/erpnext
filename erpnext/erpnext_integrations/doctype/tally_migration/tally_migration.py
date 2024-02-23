@@ -12,7 +12,9 @@ from decimal import Decimal
 import frappe
 from bs4 import BeautifulSoup as bs
 from frappe import _
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.custom_field.custom_field import (
+	create_custom_fields as _create_custom_fields,
+)
 from frappe.model.document import Document
 from frappe.utils.data import format_datetime
 
@@ -38,6 +40,39 @@ def new_doc(document):
 
 
 class TallyMigration(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		addresses: DF.Attach | None
+		chart_of_accounts: DF.Attach | None
+		day_book_data: DF.Attach | None
+		default_cost_center: DF.Link | None
+		default_round_off_account: DF.Link | None
+		default_uom: DF.Link | None
+		default_warehouse: DF.Link | None
+		erpnext_company: DF.Data | None
+		failed_import_log: DF.Code | None
+		fixed_errors_log: DF.Code | None
+		is_day_book_data_imported: DF.Check
+		is_day_book_data_processed: DF.Check
+		is_master_data_imported: DF.Check
+		is_master_data_processed: DF.Check
+		items: DF.Attach | None
+		master_data: DF.Attach | None
+		parties: DF.Attach | None
+		status: DF.Data | None
+		tally_company: DF.Data | None
+		tally_creditors_account: DF.Data
+		tally_debtors_account: DF.Data
+		uoms: DF.Attach | None
+		vouchers: DF.Attach | None
+	# end: auto-generated types
+
 	def validate(self):
 		failed_import_log = json.loads(self.failed_import_log)
 		sorted_failed_import_log = sorted(failed_import_log, key=lambda row: row["doc"]["creation"])
@@ -94,9 +129,7 @@ class TallyMigration(Document):
 		self.default_cost_center, self.default_round_off_account = frappe.db.get_value(
 			"Company", self.erpnext_company, ["cost_center", "round_off_account"]
 		)
-		self.default_warehouse = frappe.db.get_value(
-			"Stock Settings", "Stock Settings", "default_warehouse"
-		)
+		self.default_warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
 
 	def _process_master_data(self):
 		def get_company_name(collection):
@@ -302,6 +335,7 @@ class TallyMigration(Document):
 		frappe.publish_realtime(
 			"tally_migration_progress_update",
 			{"title": title, "message": message, "count": count, "total": total},
+			user=self.modified_by,
 		)
 
 	def _import_master_data(self):
@@ -577,22 +611,25 @@ class TallyMigration(Document):
 				new_year.save()
 				oldest_year = new_year
 
-		def create_custom_fields(doctypes):
-			tally_guid_df = {
-				"fieldtype": "Data",
-				"fieldname": "tally_guid",
-				"read_only": 1,
-				"label": "Tally GUID",
-			}
-			tally_voucher_no_df = {
-				"fieldtype": "Data",
-				"fieldname": "tally_voucher_no",
-				"read_only": 1,
-				"label": "Tally Voucher Number",
-			}
-			for df in [tally_guid_df, tally_voucher_no_df]:
-				for doctype in doctypes:
-					create_custom_field(doctype, df)
+		def create_custom_fields():
+			_create_custom_fields(
+				{
+					("Journal Entry", "Purchase Invoice", "Sales Invoice"): [
+						{
+							"fieldtype": "Data",
+							"fieldname": "tally_guid",
+							"read_only": 1,
+							"label": "Tally GUID",
+						},
+						{
+							"fieldtype": "Data",
+							"fieldname": "tally_voucher_no",
+							"read_only": 1,
+							"label": "Tally Voucher Number",
+						},
+					]
+				}
+			)
 
 		def create_price_list():
 			frappe.get_doc(
@@ -628,7 +665,7 @@ class TallyMigration(Document):
 
 			create_fiscal_years(vouchers)
 			create_price_list()
-			create_custom_fields(["Journal Entry", "Purchase Invoice", "Sales Invoice"])
+			create_custom_fields()
 
 			total = len(vouchers)
 			is_last = False

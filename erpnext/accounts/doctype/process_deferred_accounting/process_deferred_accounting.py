@@ -11,10 +11,27 @@ from erpnext.accounts.deferred_revenue import (
 	convert_deferred_expense_to_expense,
 	convert_deferred_revenue_to_income,
 )
-from erpnext.accounts.general_ledger import make_reverse_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries
 
 
 class ProcessDeferredAccounting(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		account: DF.Link | None
+		amended_from: DF.Link | None
+		company: DF.Link
+		end_date: DF.Date
+		posting_date: DF.Date
+		start_date: DF.Date
+		type: DF.Literal["", "Income", "Expense"]
+	# end: auto-generated types
+
 	def validate(self):
 		if self.end_date < self.start_date:
 			frappe.throw(_("End date cannot be before start date"))
@@ -34,4 +51,4 @@ class ProcessDeferredAccounting(Document):
 			filters={"against_voucher_type": self.doctype, "against_voucher": self.name},
 		)
 
-		make_reverse_gl_entries(gl_entries=gl_entries)
+		make_gl_entries(gl_map=gl_entries, cancel=1)

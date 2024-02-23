@@ -23,6 +23,12 @@ frappe.query_reports["Purchase Register"] = {
 			"options": "Supplier"
 		},
 		{
+			"fieldname":"supplier_group",
+			"label": __("Supplier Group"),
+			"fieldtype": "Link",
+			"options": "Supplier Group"
+		},
+		{
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",
@@ -52,6 +58,12 @@ frappe.query_reports["Purchase Register"] = {
 			"label": __("Item Group"),
 			"fieldtype": "Link",
 			"options": "Item Group"
+		},
+		{
+			"fieldname": "include_payments",
+			"label": __("Show Ledger View"),
+			"fieldtype": "Check",
+			"default": 0
 		}
 	]
 }

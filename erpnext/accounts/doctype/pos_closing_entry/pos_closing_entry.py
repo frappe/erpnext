@@ -14,11 +14,67 @@ from erpnext.controllers.status_updater import StatusUpdater
 
 
 class POSClosingEntry(StatusUpdater):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.pos_closing_entry_detail.pos_closing_entry_detail import (
+			POSClosingEntryDetail,
+		)
+		from erpnext.accounts.doctype.pos_closing_entry_taxes.pos_closing_entry_taxes import (
+			POSClosingEntryTaxes,
+		)
+		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
+			POSInvoiceReference,
+		)
+
+		amended_from: DF.Link | None
+		company: DF.Link
+		error_message: DF.SmallText | None
+		grand_total: DF.Currency
+		net_total: DF.Currency
+		payment_reconciliation: DF.Table[POSClosingEntryDetail]
+		period_end_date: DF.Datetime
+		period_start_date: DF.Datetime
+		pos_opening_entry: DF.Link
+		pos_profile: DF.Link
+		pos_transactions: DF.Table[POSInvoiceReference]
+		posting_date: DF.Date
+		posting_time: DF.Time
+		status: DF.Literal["Draft", "Submitted", "Queued", "Failed", "Cancelled"]
+		taxes: DF.Table[POSClosingEntryTaxes]
+		total_quantity: DF.Float
+		user: DF.Link
+	# end: auto-generated types
+
 	def validate(self):
+		self.posting_date = self.posting_date or frappe.utils.nowdate()
+		self.posting_time = self.posting_time or frappe.utils.nowtime()
+
 		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
 			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
 
+		self.validate_duplicate_pos_invoices()
 		self.validate_pos_invoices()
+
+	def validate_duplicate_pos_invoices(self):
+		pos_occurences = {}
+		for idx, inv in enumerate(self.pos_transactions, 1):
+			pos_occurences.setdefault(inv.pos_invoice, []).append(idx)
+
+		error_list = []
+		for key, value in pos_occurences.items():
+			if len(value) > 1:
+				error_list.append(
+					_("{} is added multiple times on rows: {}".format(frappe.bold(key), frappe.bold(value)))
+				)
+
+		if error_list:
+			frappe.throw(error_list, title=_("Duplicate POS Invoices found"), as_list=True)
 
 	def validate_pos_invoices(self):
 		invalid_rows = []

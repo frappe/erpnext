@@ -12,10 +12,12 @@ erpnext.StockGridReport = class StockGridReport extends frappe.views.TreeGridRep
 
 	get_value_diff(wh, sl, is_fifo) {
 		// value
+		let value_diff = 0;
+
 		if(sl.qty > 0) {
 			// incoming - rate is given
-			var rate = sl.incoming_rate;
-			var add_qty = sl.qty;
+			let rate = sl.incoming_rate;
+			let add_qty = sl.qty;
 			if(wh.balance_qty < 0) {
 				// negative valuation
 				// only add value of quantity if
@@ -25,10 +27,11 @@ erpnext.StockGridReport = class StockGridReport extends frappe.views.TreeGridRep
 					add_qty = 0;
 				}
 			}
+
 			if(sl.serial_no) {
-				var value_diff = this.get_serialized_value_diff(sl);
+				value_diff = this.get_serialized_value_diff(sl);
 			} else {
-				var value_diff = (rate * add_qty);
+				value_diff = (rate * add_qty);
 			}
 
 			if(add_qty)
@@ -39,19 +42,19 @@ erpnext.StockGridReport = class StockGridReport extends frappe.views.TreeGridRep
 
 			// outgoing
 			if(sl.serial_no) {
-				var value_diff = -1 * this.get_serialized_value_diff(sl);
+				value_diff = -1 * this.get_serialized_value_diff(sl);
 			} else if(is_fifo) {
-				var value_diff = fifo_value_diff;
+				value_diff = fifo_value_diff;
 			} else {
 				// average rate for weighted average
-				var rate = (wh.balance_qty.toFixed(2) == 0.00 ? 0 :
+				let rate = (wh.balance_qty.toFixed(2) == 0.00 ? 0 :
 					flt(wh.balance_value) / flt(wh.balance_qty));
 
 				// no change in value if negative qty
 				if((wh.balance_qty + sl.qty).toFixed(2) >= 0.00)
-					var value_diff = (rate * sl.qty);
+					value_diff = (rate * sl.qty);
 				else
-					var value_diff = -wh.balance_value;
+					value_diff = -wh.balance_value;
 			}
 		}
 

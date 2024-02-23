@@ -32,6 +32,7 @@
   "is_active": 1,
   "is_default": 1,
   "item": "_Test Item Home Desktop Manufactured",
+  "company": "_Test Company",
   "quantity": 1.0
  },
  {
@@ -161,5 +162,31 @@
   "item": "_Test Variant Item",
   "quantity": 1.0,
   "with_operations": 1
+ },
+ {
+  "items": [
+   {
+    "amount": 5000.0,
+    "doctype": "BOM Item",
+    "item_code": "_Test Item",
+    "parentfield": "items",
+    "qty": 2.0,
+    "rate": 3000.0,
+    "uom": "_Test UOM",
+    "stock_uom": "_Test UOM",
+    "source_warehouse": "_Test Warehouse - _TC",
+    "include_item_in_manufacturing": 1
+   }
+  ],
+  "docstatus": 1,
+  "doctype": "BOM",
+  "is_active": 1,
+  "is_default": 1,
+  "currency": "USD",
+  "item": "_Test Variant Item",
+  "quantity": 1.0,
+  "with_operations": 0,
+  "fg_based_operating_cost": 1,
+  "operating_cost_per_bom_quantity": 140
  }
 ]

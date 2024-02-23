@@ -14,6 +14,12 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "section_break_8",
+  "set_warehouse",
+  "section_break_22",
+  "scan_barcode",
+  "column_break_12",
+  "scan_mode",
   "sb9",
   "items",
   "section_break_9",
@@ -139,13 +145,45 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode",
+   "options": "Barcode"
+  },
+  {
+   "default": "0",
+   "description": "Disables auto-fetching of existing quantity",
+   "fieldname": "scan_mode",
+   "fieldtype": "Check",
+   "label": "Scan Mode"
+  },
+  {
+   "fieldname": "set_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval:!doc.docstatus",
+   "fieldname": "section_break_22",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-upload-alt",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-02-06 14:28:19.043905",
+ "modified": "2022-05-11 09:10:26.327652",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",

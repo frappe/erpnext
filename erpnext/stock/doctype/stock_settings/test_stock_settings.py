@@ -10,7 +10,7 @@ from frappe.tests.utils import FrappeTestCase
 class TestStockSettings(FrappeTestCase):
 	def setUp(self):
 		super().setUp()
-		frappe.db.set_value("Stock Settings", None, "clean_description_html", 0)
+		frappe.db.set_single_value("Stock Settings", "clean_description_html", 0)
 
 	def test_settings(self):
 		item = frappe.get_doc(

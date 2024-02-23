@@ -12,20 +12,20 @@
 			</tr>
 		</thead>
 		<tbody>
-			{% for item, taxes in itemised_tax.items() %}
+			{% for taxes in itemised_tax_data %}
 				<tr>
-					<td>{{ item }}</td>
-					<td class='text-right'>
+					<td>{{ taxes.item }}</td>
+					<td class="text-right">
 						{% if doc.get('is_return') %}
-							{{ frappe.utils.fmt_money((itemised_taxable_amount.get(item, 0))|abs, None, doc.currency) }}
+							{{ frappe.utils.fmt_money(taxes.taxable_amount |abs, None, doc.currency) }}
 						{% else %}
-							{{ frappe.utils.fmt_money(itemised_taxable_amount.get(item, 0), None, doc.currency) }}
+							{{ frappe.utils.fmt_money(taxes.taxable_amount, None, doc.currency) }}
 						{% endif %}
 					</td>
 					{% for tax_account in tax_accounts %}
 						{% set tax_details = taxes.get(tax_account) %}
 						{% if tax_details %}
-							<td class='text-right'>
+							<td class="text-right">
 								{% if tax_details.tax_rate or not tax_details.tax_amount %}
 									({{ tax_details.tax_rate }}%)
 								{% endif %}

@@ -42,7 +42,7 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			let warehouse = unescape(element.attr('data-warehouse'));
 			let actual_qty = unescape(element.attr('data-actual_qty'));
 			let disable_quick_entry = Number(unescape(element.attr('data-disable_quick_entry')));
-			let entry_type = action === "Move" ? "Material Transfer" : null;
+			let entry_type = action === "Move" ? "Material Transfer" : "Material Receipt";
 
 			if (disable_quick_entry) {
 				open_stock_entry(item, warehouse, entry_type);
@@ -63,11 +63,19 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 		function open_stock_entry(item, warehouse, entry_type) {
 			frappe.model.with_doctype('Stock Entry', function () {
 				var doc = frappe.model.get_new_doc('Stock Entry');
-				if (entry_type) doc.stock_entry_type = entry_type;
+				if (entry_type) {
+					doc.stock_entry_type = entry_type;
+				}
 
 				var row = frappe.model.add_child(doc, 'items');
 				row.item_code = item;
-				row.s_warehouse = warehouse;
+
+				if (entry_type === "Material Transfer") {
+					row.s_warehouse = warehouse;
+				}
+				else {
+					row.t_warehouse = warehouse;
+				}
 
 				frappe.set_route('Form', doc.doctype, doc.name);
 			});
@@ -102,6 +110,9 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			args: args,
 			callback: function (r) {
 				me.render(r.message);
+				if(me.after_refresh) {
+					me.after_refresh();
+				}
 			}
 		});
 	}
@@ -117,8 +128,6 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 		} else {
 			context = this.get_item_dashboard_data(data, this.max_count, true);
 		}
-
-		this.max_count = this.max_count;
 
 		// show more button
 		if (data && data.length === (this.page_length + 1)) {
@@ -260,6 +269,16 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 	}
 
 	dialog.set_primary_action(__('Create Stock Entry'), function () {
+		if (source && (dialog.get_value("qty") == 0 || dialog.get_value("qty") > actual_qty)) {
+			frappe.msgprint(__("Quantity must be greater than zero, and less or equal to {0}", [actual_qty]));
+			return;
+		}
+
+		if (dialog.get_value("source") === dialog.get_value("target")) {
+			frappe.msgprint(__("Source and target warehouse must be different"));
+			return;
+		}
+
 		frappe.model.with_doctype('Stock Entry', function () {
 			let doc = frappe.model.get_new_doc('Stock Entry');
 			doc.from_warehouse = dialog.get_value('source');

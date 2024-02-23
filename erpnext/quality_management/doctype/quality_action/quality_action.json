@@ -91,7 +91,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-27 16:21:59.533937",
+ "modified": "2023-08-28 22:33:14.358143",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Action",
@@ -117,12 +117,13 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "All",
+   "role": "Desk User",
    "share": 1,
    "write": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

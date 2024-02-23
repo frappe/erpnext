@@ -437,12 +437,20 @@
             },
             "Sales": {
                 "Sales from Other Regions": {
-                    "Sales from Other Region": {}
+                    "Sales from Other Region": {
+                        "account_type": "Income Account"
+                    }
                 },
                 "Sales of same region": {
-                    "Management Consultancy Fees 1": {},
-                    "Sales Account": {},
-                    "Sales of I/C": {}
+                    "Management Consultancy Fees 1": {
+                        "account_type": "Income Account"
+                    },
+                    "Sales Account": {
+                        "account_type": "Income Account"
+                    },
+                    "Sales of I/C": {
+                        "account_type": "Income Account"
+                    }
                 }
             },
             "root_type": "Income"

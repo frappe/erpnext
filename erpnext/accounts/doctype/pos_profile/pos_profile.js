@@ -1,8 +1,5 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
-
-{% include "erpnext/public/js/controllers/accounts.js" %}
-
 frappe.ui.form.on('POS Profile', {
 	setup: function(frm) {
 		frm.set_query("selling_price_list", function() {
@@ -142,6 +139,7 @@ frappe.ui.form.on('POS Profile', {
 	company: function(frm) {
 		frm.trigger("toggle_display_account_head");
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+
 	},
 
 	toggle_display_account_head: function(frm) {

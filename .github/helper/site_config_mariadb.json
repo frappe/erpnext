@@ -9,8 +9,8 @@
  "mail_password": "test",
  "admin_password": "admin",
  "root_login": "root",
- "root_password": "travis",
+ "root_password": "root",
  "host_name": "http://test_site:8000",
- "install_apps": ["erpnext"],
+ "install_apps": ["payments", "erpnext"],
  "throttle_user_limit": 100
 }

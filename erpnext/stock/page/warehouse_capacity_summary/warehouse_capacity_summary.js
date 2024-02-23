@@ -68,7 +68,7 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 			options: [
 				{fieldname: 'stock_capacity', label: __('Capacity (Stock UOM)')},
 				{fieldname: 'percent_occupied', label: __('% Occupied')},
-				{fieldname: 'actual_qty', label: __('Balance Qty (Stock ')}
+				{fieldname: 'actual_qty', label: __('Balance Qty (Stock)')}
 			]
 		},
 		change: function(sort_by, sort_order) {

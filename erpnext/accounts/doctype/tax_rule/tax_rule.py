@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.contacts.doctype.address.address import get_default_address
 from frappe.model.document import Document
-from frappe.utils import cint, cstr
+from frappe.utils import cstr
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
@@ -27,14 +27,48 @@ class ConflictingTaxRule(frappe.ValidationError):
 
 
 class TaxRule(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		billing_city: DF.Data | None
+		billing_country: DF.Link | None
+		billing_county: DF.Data | None
+		billing_state: DF.Data | None
+		billing_zipcode: DF.Data | None
+		company: DF.Link | None
+		customer: DF.Link | None
+		customer_group: DF.Link | None
+		from_date: DF.Date | None
+		item: DF.Link | None
+		item_group: DF.Link | None
+		priority: DF.Int
+		purchase_tax_template: DF.Link | None
+		sales_tax_template: DF.Link | None
+		shipping_city: DF.Data | None
+		shipping_country: DF.Link | None
+		shipping_county: DF.Data | None
+		shipping_state: DF.Data | None
+		shipping_zipcode: DF.Data | None
+		supplier: DF.Link | None
+		supplier_group: DF.Link | None
+		tax_category: DF.Link | None
+		tax_type: DF.Literal["Sales", "Purchase"]
+		to_date: DF.Date | None
+		use_for_shopping_cart: DF.Check
+	# end: auto-generated types
+
 	def __setup__(self):
 		self.flags.ignore_these_exceptions_in_test = [ConflictingTaxRule]
 
 	def validate(self):
 		self.validate_tax_template()
-		self.validate_date()
+		self.validate_from_to_dates("from_date", "to_date")
 		self.validate_filters()
-		self.validate_use_for_shopping_cart()
 
 	def validate_tax_template(self):
 		if self.tax_type == "Sales":
@@ -50,10 +84,6 @@ class TaxRule(Document):
 
 		if not (self.sales_tax_template or self.purchase_tax_template):
 			frappe.throw(_("Tax Template is mandatory."))
-
-	def validate_date(self):
-		if self.from_date and self.to_date and self.from_date > self.to_date:
-			frappe.throw(_("From Date cannot be greater than To Date"))
 
 	def validate_filters(self):
 		filters = {
@@ -110,21 +140,6 @@ class TaxRule(Document):
 			if tax_rule[0].priority == self.priority:
 				frappe.throw(_("Tax Rule Conflicts with {0}").format(tax_rule[0].name), ConflictingTaxRule)
 
-	def validate_use_for_shopping_cart(self):
-		"""If shopping cart is enabled and no tax rule exists for shopping cart, enable this one"""
-		if (
-			not self.use_for_shopping_cart
-			and cint(frappe.db.get_single_value("E Commerce Settings", "enabled"))
-			and not frappe.db.get_value("Tax Rule", {"use_for_shopping_cart": 1, "name": ["!=", self.name]})
-		):
-
-			self.use_for_shopping_cart = 1
-			frappe.msgprint(
-				_(
-					"Enabling 'Use for Shopping Cart', as Shopping Cart is enabled and there should be at least one Tax Rule for Shopping Cart"
-				)
-			)
-
 
 @frappe.whitelist()
 def get_party_details(party, party_type, args=None):
@@ -163,12 +178,15 @@ def get_party_details(party, party_type, args=None):
 def get_tax_template(posting_date, args):
 	"""Get matching tax rule"""
 	args = frappe._dict(args)
-	conditions = [
-		"""(from_date is null or from_date <= '{0}')
-		and (to_date is null or to_date >= '{0}')""".format(
-			posting_date
+	conditions = []
+
+	if posting_date:
+		conditions.append(
+			f"""(from_date is null or from_date <= '{posting_date}')
+			and (to_date is null or to_date >= '{posting_date}')"""
 		)
-	]
+	else:
+		conditions.append("(from_date is null) and (to_date is null)")
 
 	conditions.append(
 		"ifnull(tax_category, '') = {0}".format(frappe.db.escape(cstr(args.get("tax_category"))))

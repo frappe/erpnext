@@ -62,21 +62,27 @@ def get_data(filters, columns):
 
 
 def get_item_price_qty_data(filters):
-	conditions = ""
-	if filters.get("item_code"):
-		conditions += "where a.item_code=%(item_code)s"
+	item_price = frappe.qb.DocType("Item Price")
+	bin = frappe.qb.DocType("Bin")
 
-	item_results = frappe.db.sql(
-		"""select a.item_code, a.item_name, a.name as price_list_name,
-		a.brand as brand, b.warehouse as warehouse, b.actual_qty as actual_qty
-		from `tabItem Price` a left join `tabBin` b
-		ON a.item_code = b.item_code
-		{conditions}""".format(
-			conditions=conditions
-		),
-		filters,
-		as_dict=1,
+	query = (
+		frappe.qb.from_(item_price)
+		.left_join(bin)
+		.on(item_price.item_code == bin.item_code)
+		.select(
+			item_price.item_code,
+			item_price.item_name,
+			item_price.name.as_("price_list_name"),
+			item_price.brand.as_("brand"),
+			bin.warehouse.as_("warehouse"),
+			bin.actual_qty.as_("actual_qty"),
+		)
 	)
+
+	if filters.get("item_code"):
+		query = query.where(item_price.item_code == filters.get("item_code"))
+
+	item_results = query.run(as_dict=True)
 
 	price_list_names = list(set(item.price_list_name for item in item_results))
 

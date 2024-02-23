@@ -65,7 +65,7 @@ def get_data():
 		WHERE
 			so.docstatus = 1
 			and so.name = so_item.parent
-			and so.status not in  ("Closed","Completed","Cancelled")
+			and so.status not in  ('Closed','Completed','Cancelled')
 		GROUP BY
 			so.name,so_item.item_code
 		""",

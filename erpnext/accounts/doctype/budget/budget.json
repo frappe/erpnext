@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "autoname": "naming_series:",
  "creation": "2016-05-16 11:42:29.632528",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -9,6 +10,7 @@
   "budget_against",
   "company",
   "cost_center",
+  "naming_series",
   "project",
   "fiscal_year",
   "column_break_3",
@@ -190,15 +192,26 @@
    "label": "Budget Accounts",
    "options": "Budget Account",
    "reqd": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Series",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "set_only_once": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-06 15:13:54.055854",
+ "modified": "2022-10-10 22:14:36.361509",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Budget",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -220,5 +233,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -1,10 +1,13 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
 import frappe
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, timeout
 
-from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
+from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
+	update_cost_in_all_boms_in_test,
+)
+from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import enqueue_replace_bom
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -12,6 +15,12 @@ test_records = frappe.get_test_records("BOM")
 
 
 class TestBOMUpdateTool(FrappeTestCase):
+	"Test major functions run via BOM Update Tool."
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+	@timeout
 	def test_replace_bom(self):
 		current_bom = "BOM-_Test Item Home Desktop Manufactured-001"
 
@@ -19,19 +28,13 @@ class TestBOMUpdateTool(FrappeTestCase):
 		bom_doc.items[1].item_code = "_Test Item"
 		bom_doc.insert()
 
-		update_tool = frappe.get_doc("BOM Update Tool")
-		update_tool.current_bom = current_bom
-		update_tool.new_bom = bom_doc.name
-		update_tool.replace_bom()
+		boms = frappe._dict(current_bom=current_bom, new_bom=bom_doc.name)
+		enqueue_replace_bom(boms=boms)
 
-		self.assertFalse(frappe.db.sql("select name from `tabBOM Item` where bom_no=%s", current_bom))
-		self.assertTrue(frappe.db.sql("select name from `tabBOM Item` where bom_no=%s", bom_doc.name))
+		self.assertFalse(frappe.db.exists("BOM Item", {"bom_no": current_bom, "docstatus": 1}))
+		self.assertTrue(frappe.db.exists("BOM Item", {"bom_no": bom_doc.name, "docstatus": 1}))
 
-		# reverse, as it affects other testcases
-		update_tool.current_bom = bom_doc.name
-		update_tool.new_bom = current_bom
-		update_tool.replace_bom()
-
+	@timeout
 	def test_bom_cost(self):
 		for item in ["BOM Cost Test Item 1", "BOM Cost Test Item 2", "BOM Cost Test Item 3"]:
 			item_doc = create_item(item, valuation_rate=100)
@@ -51,13 +54,13 @@ class TestBOMUpdateTool(FrappeTestCase):
 		self.assertEqual(doc.total_cost, 200)
 
 		frappe.db.set_value("Item", "BOM Cost Test Item 2", "valuation_rate", 200)
-		update_cost()
+		update_cost_in_all_boms_in_test()
 
 		doc.load_from_db()
 		self.assertEqual(doc.total_cost, 300)
 
 		frappe.db.set_value("Item", "BOM Cost Test Item 2", "valuation_rate", 100)
-		update_cost()
+		update_cost_in_all_boms_in_test()
 
 		doc.load_from_db()
 		self.assertEqual(doc.total_cost, 200)

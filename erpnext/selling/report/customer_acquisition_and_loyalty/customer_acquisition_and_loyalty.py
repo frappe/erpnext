@@ -102,7 +102,7 @@ def get_data_by_time(filters, common_columns):
 def get_data_by_territory(filters, common_columns):
 	columns = [
 		{
-			"label": "Territory",
+			"label": _("Territory"),
 			"fieldname": "territory",
 			"fieldtype": "Link",
 			"options": "Territory",

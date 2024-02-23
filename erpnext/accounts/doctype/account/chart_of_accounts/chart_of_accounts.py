@@ -29,6 +29,7 @@ def create_charts(
 					"root_type",
 					"is_group",
 					"tax_rate",
+					"account_currency",
 				]:
 
 					account_number = cstr(child.get("account_number")).strip()
@@ -53,7 +54,7 @@ def create_charts(
 							"account_number": account_number,
 							"account_type": child.get("account_type"),
 							"account_currency": child.get("account_currency")
-							or frappe.db.get_value("Company", company, "default_currency"),
+							or frappe.get_cached_value("Company", company, "default_currency"),
 							"tax_rate": child.get("tax_rate"),
 						}
 					)
@@ -73,7 +74,7 @@ def create_charts(
 		# after all accounts are already inserted.
 		frappe.local.flags.ignore_update_nsm = True
 		_import_accounts(chart, None, None, root_account=True)
-		rebuild_tree("Account", "parent_account")
+		rebuild_tree("Account")
 		frappe.local.flags.ignore_update_nsm = False
 
 
@@ -95,7 +96,17 @@ def identify_is_group(child):
 		is_group = child.get("is_group")
 	elif len(
 		set(child.keys())
-		- set(["account_name", "account_type", "root_type", "is_group", "tax_rate", "account_number"])
+		- set(
+			[
+				"account_name",
+				"account_type",
+				"root_type",
+				"is_group",
+				"tax_rate",
+				"account_number",
+				"account_currency",
+			]
+		)
 	):
 		is_group = 1
 	else:
@@ -148,7 +159,7 @@ def get_charts_for_country(country, with_standard=False):
 			) or frappe.local.flags.allow_unverified_charts:
 				charts.append(content["name"])
 
-	country_code = frappe.db.get_value("Country", country, "code")
+	country_code = frappe.get_cached_value("Country", country, "code")
 	if country_code:
 		folders = ("verified",)
 		if frappe.local.flags.allow_unverified_charts:
@@ -185,6 +196,7 @@ def get_account_tree_from_existing_company(existing_company):
 			"root_type",
 			"tax_rate",
 			"account_number",
+			"account_currency",
 		],
 		order_by="lft, rgt",
 	)
@@ -219,6 +231,8 @@ def build_account_tree(tree, parent, all_accounts):
 			tree[child.account_name]["account_type"] = child.account_type
 		if child.tax_rate:
 			tree[child.account_name]["tax_rate"] = child.tax_rate
+		if child.account_currency:
+			tree[child.account_name]["account_currency"] = child.account_currency
 		if not parent:
 			tree[child.account_name]["root_type"] = child.root_type
 
@@ -267,6 +281,7 @@ def build_tree_from_json(chart_template, chart_data=None, from_coa_importer=Fals
 				"root_type",
 				"is_group",
 				"tax_rate",
+				"account_currency",
 			]:
 				continue
 

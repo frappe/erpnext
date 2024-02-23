@@ -1,7 +1,0 @@
-DocType: Instructor Log,Other Details,Otros Detalles
-DocType: Material Request Item,Lead Time Date,Fecha de la Iniciativa
-apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py +41,Lead Time Days,Tiempo de ejecución en días
-apps/erpnext/erpnext/selling/report/customer_credit_balance/customer_credit_balance.py +47,Outstanding Amt,Saldo Pendiente
-DocType: Bank Statement Transaction Invoice Item,Outstanding Amount,Saldo Pendiente
-DocType: Payment Entry Reference,Outstanding,Pendiente
-apps/erpnext/erpnext/crm/doctype/opportunity/opportunity.py +192,Lead must be set if Opportunity is made from Lead,La Iniciativa se debe establecer si la Oportunidad está hecha desde una Iniciativa

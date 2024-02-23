@@ -13,19 +13,17 @@
   "naming_series",
   "supplier",
   "supplier_name",
-  "column_break1",
   "company",
+  "column_break1",
+  "status",
   "transaction_date",
   "valid_till",
   "quotation_number",
   "amended_from",
-  "address_section",
-  "supplier_address",
-  "contact_person",
-  "address_display",
-  "contact_display",
-  "contact_mobile",
-  "contact_email",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -36,25 +34,25 @@
   "ignore_pricing_rule",
   "items_section",
   "items",
-  "pricing_rule_details",
-  "pricing_rules",
   "section_break_22",
   "total_qty",
+  "total_net_weight",
+  "column_break_26",
   "base_total",
   "base_net_total",
   "column_break_24",
   "total",
   "net_total",
-  "total_net_weight",
   "taxes_section",
   "tax_category",
-  "column_break_36",
-  "shipping_rule",
-  "section_break_38",
   "taxes_and_charges",
+  "column_break_34",
+  "shipping_rule",
+  "column_break_36",
+  "incoterm",
+  "named_place",
+  "section_break_38",
   "taxes",
-  "tax_breakup",
-  "other_charges_calculation",
   "totals",
   "base_taxes_and_charges_added",
   "base_taxes_and_charges_deducted",
@@ -80,24 +78,45 @@
   "rounded_total",
   "in_words",
   "disable_rounded_total",
-  "terms_section_break",
+  "tax_breakup",
+  "other_charges_calculation",
+  "pricing_rule_details",
+  "pricing_rules",
+  "address_and_contact_tab",
+  "supplier_address_section",
+  "supplier_address",
+  "address_display",
+  "column_break_72",
+  "contact_person",
+  "contact_display",
+  "contact_mobile",
+  "contact_email",
+  "shipping_address_section",
+  "shipping_address",
+  "column_break_zjaq",
+  "shipping_address_display",
+  "company_billing_address_section",
+  "billing_address",
+  "column_break_gcth",
+  "billing_address_display",
+  "terms_tab",
   "tc_name",
   "terms",
+  "more_info_tab",
   "printing_settings",
-  "select_print_heading",
-  "group_same_items",
-  "column_break_72",
   "letter_head",
+  "group_same_items",
+  "column_break_85",
+  "select_print_heading",
   "language",
   "subscription_section",
   "auto_repeat",
   "update_auto_repeat_reference",
   "more_info",
-  "status",
-  "column_break_57",
   "is_subcontracted",
-  "reference",
-  "opportunity"
+  "column_break_57",
+  "opportunity",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -146,7 +165,7 @@
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Name",
+   "label": "Supplier Name",
    "read_only": 1
   },
   {
@@ -194,12 +213,6 @@
    "search_index": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "address_section",
-   "fieldtype": "Section Break",
-   "label": "Address and Contact"
-  },
-  {
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Supplier Address",
@@ -230,6 +243,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -309,6 +323,7 @@
   {
    "fieldname": "items_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
   },
@@ -394,6 +409,7 @@
   {
    "fieldname": "taxes_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Taxes and Charges",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
@@ -417,7 +433,8 @@
   },
   {
    "fieldname": "section_break_38",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
    "fieldname": "taxes_and_charges",
@@ -523,7 +540,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "discount_amount",
    "fieldname": "section_break_41",
    "fieldtype": "Section Break",
    "label": "Additional Discount"
@@ -563,7 +579,8 @@
   },
   {
    "fieldname": "section_break_46",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Totals"
   },
   {
    "fieldname": "base_grand_total",
@@ -655,18 +672,9 @@
    "label": "Disable Rounded Total"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "terms",
-   "fieldname": "terms_section_break",
-   "fieldtype": "Section Break",
-   "label": "Terms and Conditions",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-legal"
-  },
-  {
    "fieldname": "tc_name",
    "fieldtype": "Link",
-   "label": "Terms",
+   "label": "Terms Template",
    "oldfieldname": "tc_name",
    "oldfieldtype": "Link",
    "options": "Terms and Conditions",
@@ -729,7 +737,7 @@
   {
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
-   "label": "Auto Repeat Section"
+   "label": "Auto Repeat"
   },
   {
    "fieldname": "auto_repeat",
@@ -751,7 +759,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
-   "label": "More Information",
+   "label": "Additional Info",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
   },
@@ -773,17 +781,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
+   "default": "0",
    "fieldname": "is_subcontracted",
-   "fieldtype": "Select",
+   "fieldtype": "Check",
    "label": "Is Subcontracted",
-   "options": "\nYes\nNo",
    "print_hide": 1
-  },
-  {
-   "fieldname": "reference",
-   "fieldtype": "Section Break",
-   "label": "Reference"
   },
   {
    "fieldname": "opportunity",
@@ -804,6 +806,121 @@
    "fieldname": "quotation_number",
    "fieldtype": "Data",
    "label": "Quotation Number"
+  },
+  {
+   "fieldname": "address_and_contact_tab",
+   "fieldtype": "Tab Break",
+   "label": "Address & Contact"
+  },
+  {
+   "fieldname": "terms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_85",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "incoterm",
+   "fieldtype": "Link",
+   "label": "Incoterm",
+   "options": "Incoterm"
+  },
+  {
+   "depends_on": "incoterm",
+   "fieldname": "named_place",
+   "fieldtype": "Data",
+   "label": "Named Place"
+  },
+  {
+   "fieldname": "shipping_address",
+   "fieldtype": "Link",
+   "label": "Shipping Address",
+   "options": "Address",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_zjaq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shipping_address_display",
+   "fieldtype": "Small Text",
+   "label": "Shipping Address Details",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "shipping_address_section",
+   "fieldtype": "Section Break",
+   "label": "Shipping Address"
+  },
+  {
+   "fieldname": "supplier_address_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Address"
+  },
+  {
+   "fieldname": "company_billing_address_section",
+   "fieldtype": "Section Break",
+   "label": "Company Billing Address"
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Link",
+   "label": "Company Billing Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "column_break_gcth",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_address_display",
+   "fieldtype": "Small Text",
+   "label": "Billing Address Details",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
   }
  ],
  "icon": "fa fa-shopping-cart",
@@ -811,7 +928,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-14 16:13:20.284572",
+ "modified": "2023-11-17 12:34:30.083077",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

@@ -17,7 +17,7 @@ class TestIssueAnalytics(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
 		frappe.db.sql("delete from `tabIssue` where company='_Test Company'")
-		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
+		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
 
 		current_month_date = getdate()
 		last_month_date = add_months(current_month_date, -1)

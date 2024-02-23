@@ -90,6 +90,23 @@ class TestPromotionalScheme(unittest.TestCase):
 		price_rules = frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})
 		self.assertEqual(price_rules, [])
 
+	def test_min_max_amount_configuration(self):
+		ps = make_promotional_scheme()
+		ps.price_discount_slabs[0].min_amount = 10
+		ps.price_discount_slabs[0].max_amount = 1000
+		ps.save()
+
+		price_rules_data = frappe.db.get_value(
+			"Pricing Rule", {"promotional_scheme": ps.name}, ["min_amt", "max_amt"], as_dict=1
+		)
+
+		self.assertEqual(price_rules_data.min_amt, 10)
+		self.assertEqual(price_rules_data.max_amt, 1000)
+
+		frappe.delete_doc("Promotional Scheme", ps.name)
+		price_rules = frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})
+		self.assertEqual(price_rules, [])
+
 
 def make_promotional_scheme(**args):
 	args = frappe._dict(args)

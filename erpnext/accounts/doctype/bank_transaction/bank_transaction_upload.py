@@ -56,7 +56,7 @@ def create_bank_entries(columns, data, bank_account):
 			bank_transaction.submit()
 			success += 1
 		except Exception:
-			frappe.log_error(frappe.get_traceback())
+			bank_transaction.log_error("Bank entry creation failed")
 			errors += 1
 
 	return {"success": success, "errors": errors}
@@ -74,7 +74,7 @@ def get_header_mapping(columns, bank_account):
 
 
 def get_bank_mapping(bank_account):
-	bank_name = frappe.db.get_value("Bank Account", bank_account, "bank")
+	bank_name = frappe.get_cached_value("Bank Account", bank_account, "bank")
 	bank = frappe.get_doc("Bank", bank_name)
 
 	mapping = {row.file_field: row.bank_transaction_field for row in bank.bank_transaction_mapping}

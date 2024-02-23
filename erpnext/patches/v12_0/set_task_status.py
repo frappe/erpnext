@@ -10,7 +10,7 @@ def execute():
 	)
 	if property_setter_name:
 		property_setter = frappe.get_doc("Property Setter", property_setter_name)
-		if not "Completed" in property_setter.value:
+		if "Completed" not in property_setter.value:
 			property_setter.value = property_setter.value + "\nCompleted"
 			property_setter.save()
 

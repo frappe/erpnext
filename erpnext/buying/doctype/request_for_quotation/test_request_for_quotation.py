@@ -2,14 +2,19 @@
 # See license.txt
 
 
+from urllib.parse import urlparse
+
 import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
 
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import (
+	RequestforQuotation,
 	create_supplier_quotation,
+	get_pdf,
 	make_supplier_quotation_from_rfq,
 )
+from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.stock.doctype.item.test_item import make_item
@@ -17,6 +22,16 @@ from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 
 
 class TestRequestforQuotation(FrappeTestCase):
+	def test_rfq_qty(self):
+		rfq = make_request_for_quotation(qty=0, do_not_save=True)
+		with self.assertRaises(InvalidQtyError):
+			rfq.save()
+
+		# No error with qty=1
+		rfq.items[0].qty = 1
+		rfq.save()
+		self.assertEqual(rfq.items[0].qty, 1)
+
 	def test_quote_status(self):
 		rfq = make_request_for_quotation()
 
@@ -65,7 +80,6 @@ class TestRequestforQuotation(FrappeTestCase):
 		)
 		sq.submit()
 
-		frappe.form_dict = frappe.local("form_dict")
 		frappe.form_dict.name = rfq.name
 
 		self.assertEqual(check_supplier_has_docname_access(supplier_wt_appos[0].get("supplier")), True)
@@ -125,8 +139,18 @@ class TestRequestforQuotation(FrappeTestCase):
 		rfq.status = "Draft"
 		rfq.submit()
 
+	def test_get_link(self):
+		rfq = make_request_for_quotation()
+		parsed_link = urlparse(rfq.get_link())
+		self.assertEqual(parsed_link.path, f"/rfq/{rfq.name}")
 
-def make_request_for_quotation(**args):
+	def test_get_pdf(self):
+		rfq = make_request_for_quotation()
+		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
+		self.assertEqual(frappe.local.response.type, "pdf")
+
+
+def make_request_for_quotation(**args) -> "RequestforQuotation":
 	"""
 	:param supplier_data: List containing supplier data
 	"""
@@ -148,14 +172,17 @@ def make_request_for_quotation(**args):
 			"description": "_Test Item",
 			"uom": args.uom or "_Test UOM",
 			"stock_uom": args.stock_uom or "_Test UOM",
-			"qty": args.qty or 5,
+			"qty": args.qty if args.qty is not None else 5,
 			"conversion_factor": args.conversion_factor or 1.0,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"schedule_date": nowdate(),
 		},
 	)
 
-	rfq.submit()
+	if not args.do_not_save:
+		rfq.insert()
+		if not args.do_not_submit:
+			rfq.submit()
 
 	return rfq
 

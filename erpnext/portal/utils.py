@@ -1,10 +1,4 @@
 import frappe
-from frappe.utils.nestedset import get_root_of
-
-from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
-	get_shopping_cart_settings,
-)
-from erpnext.e_commerce.shopping_cart.cart import get_debtors_account
 
 
 def set_default_role(doc, method):
@@ -23,10 +17,6 @@ def set_default_role(doc, method):
 				doc.add_roles("Customer")
 			elif link.link_doctype == "Supplier" and "Supplier" not in roles:
 				doc.add_roles("Supplier")
-	elif frappe.get_value("Student", dict(student_email_id=doc.email)) and "Student" not in roles:
-		doc.add_roles("Student")
-	elif frappe.get_value("Guardian", dict(email_address=doc.email)) and "Guardian" not in roles:
-		doc.add_roles("Guardian")
 
 
 def create_customer_or_supplier():
@@ -60,26 +50,7 @@ def create_customer_or_supplier():
 	party = frappe.new_doc(doctype)
 	fullname = frappe.utils.get_fullname(user)
 
-	if doctype == "Customer":
-		cart_settings = get_shopping_cart_settings()
-
-		if cart_settings.enable_checkout:
-			debtors_account = get_debtors_account(cart_settings)
-		else:
-			debtors_account = ""
-
-		party.update(
-			{
-				"customer_name": fullname,
-				"customer_type": "Individual",
-				"customer_group": cart_settings.default_customer_group,
-				"territory": get_root_of("Territory"),
-			}
-		)
-
-		if debtors_account:
-			party.update({"accounts": [{"company": cart_settings.company, "account": debtors_account}]})
-	else:
+	if doctype != "Customer":
 		party.update(
 			{
 				"supplier_name": fullname,
@@ -106,7 +77,7 @@ def create_party_contact(doctype, fullname, user, party_name):
 	contact = frappe.new_doc("Contact")
 	contact.update({"first_name": fullname, "email_id": user})
 	contact.append("links", dict(link_doctype=doctype, link_name=party_name))
-	contact.append("email_ids", dict(email_id=user))
+	contact.append("email_ids", dict(email_id=user, is_primary=True))
 	contact.flags.ignore_mandatory = True
 	contact.insert(ignore_permissions=True)
 

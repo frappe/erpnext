@@ -10,11 +10,9 @@ def set_print_templates_for_item_table(doc, settings):
 	doc.child_print_templates = {
 		"items": {
 			"qty": "templates/print_formats/includes/item_table_qty.html",
+			"serial_and_batch_bundle": "templates/print_formats/includes/serial_and_batch_bundle.html",
 		}
 	}
-
-	if doc.meta.get_field("items"):
-		doc.meta.get_field("items").hide_in_print_layout = ["uom", "stock_uom"]
 
 	doc.flags.compact_item_fields = ["description", "qty", "rate", "amount"]
 
@@ -30,9 +28,15 @@ def set_print_templates_for_taxes(doc, settings):
 	doc.print_templates.update(
 		{
 			"total": "templates/print_formats/includes/total.html",
-			"taxes": "templates/print_formats/includes/taxes.html",
 		}
 	)
+
+	if not doc.should_show_taxes_as_table_in_print():
+		doc.print_templates.update(
+			{
+				"taxes": "templates/print_formats/includes/taxes.html",
+			}
+		)
 
 
 def format_columns(display_columns, compact_fields):

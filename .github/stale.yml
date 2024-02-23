@@ -24,14 +24,4 @@ pulls:
     :) Also, even if it is closed, you can always reopen the PR when you're
     ready. Thank you for contributing.
 
-issues:
-  daysUntilStale: 60
-  daysUntilClose: 7
-  exemptLabels:
-    - valid
-    - to-validate
-    - QA
-  markComment: >
-    This issue has been automatically marked as inactive because it has not had
-    recent activity and it wasn't validated by maintainer team. It will be
-    closed within a week if no further activity occurs.
+only: pulls

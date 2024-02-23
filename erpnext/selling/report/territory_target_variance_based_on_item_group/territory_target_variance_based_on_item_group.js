@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 frappe.query_reports["Territory Target Variance Based On Item Group"] = {
 	"filters": [
@@ -16,7 +16,7 @@ frappe.query_reports["Territory Target Variance Based On Item Group"] = {
 			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: frappe.sys_defaults.fiscal_year
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today())
 		},
 		{
 			fieldname: "doctype",

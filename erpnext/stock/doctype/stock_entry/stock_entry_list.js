@@ -1,8 +1,12 @@
 frappe.listview_settings['Stock Entry'] = {
 	add_fields: ["`tabStock Entry`.`from_warehouse`", "`tabStock Entry`.`to_warehouse`",
-		"`tabStock Entry`.`purpose`", "`tabStock Entry`.`work_order`", "`tabStock Entry`.`bom_no`"],
+		"`tabStock Entry`.`purpose`", "`tabStock Entry`.`work_order`", "`tabStock Entry`.`bom_no`",
+		"`tabStock Entry`.`is_return`"],
 	get_indicator: function (doc) {
-		if (doc.docstatus === 0) {
+		if(doc.is_return===1 && doc.purpose === "Material Transfer for Manufacture") {
+			return [__("Material Returned from WIP"), "orange",
+				"is_return,=,1|purpose,=,Material Transfer for Manufacture|docstatus,<,2"];
+		} else if (doc.docstatus === 0) {
 			return [__("Draft"), "red", "docstatus,=,0"];
 
 		} else if (doc.purpose === 'Send to Warehouse' && doc.per_transferred < 100) {

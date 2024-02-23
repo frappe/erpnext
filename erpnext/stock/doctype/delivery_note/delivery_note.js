@@ -1,13 +1,16 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-{% include 'erpnext/selling/sales_common.js' %};
-
 cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
 frappe.provide("erpnext.accounts.dimensions");
+
+erpnext.accounts.taxes.setup_tax_filters("Sales Taxes and Charges");
+erpnext.accounts.taxes.setup_tax_validations("Delivery Note");
+erpnext.sales_common.setup_selling_controller();
+
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
@@ -77,8 +80,6 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
-
 		frm.set_df_property('packed_items', 'cannot_add_rows', true);
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
@@ -99,12 +100,12 @@ frappe.ui.form.on("Delivery Note", {
 		}
 
 		if (frm.doc.docstatus == 1 && !frm.doc.inter_company_reference) {
-			let internal = me.frm.doc.is_internal_customer;
+			let internal = frm.doc.is_internal_customer;
 			if (internal) {
-				let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Purchase Receipt" :
+				let button_label = (frm.doc.company === frm.doc.represents_company) ? "Internal Purchase Receipt" :
 					"Inter Company Purchase Receipt";
 
-				me.frm.add_custom_button(button_label, function() {
+				frm.add_custom_button(__(button_label), function() {
 					frappe.model.open_mapped_doc({
 						method: 'erpnext.stock.doctype.delivery_note.delivery_note.make_inter_company_purchase_receipt',
 						frm: frm,
@@ -149,6 +150,9 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 						}
 						erpnext.utils.map_current_doc({
 							method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+							args: {
+								for_reserved_stock: 1
+							},
 							source_doctype: "Sales Order",
 							target: me.frm,
 							setters: {
@@ -187,17 +191,23 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 			}
 
 			if(doc.docstatus==0 && !doc.__islocal) {
-				this.frm.add_custom_button(__('Packing Slip'), function() {
-					frappe.model.open_mapped_doc({
-						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
-						frm: me.frm
-					}) }, __('Create'));
+				if (doc.__onload && doc.__onload.has_unpacked_items) {
+					this.frm.add_custom_button(__('Packing Slip'), function() {
+						frappe.model.open_mapped_doc({
+							method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
+							frm: me.frm
+						}) }, __('Create')
+					);
+				}
 			}
 
 			if (!doc.__islocal && doc.docstatus==1) {
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 		}
+
+		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
+		erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 
 		if (doc.docstatus > 0) {
 			this.show_stock_ledger();
@@ -228,12 +238,6 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 				__("Status"))
 		}
 		erpnext.stock.delivery_note.set_print_hide(doc, dt, dn);
-
-		if(doc.docstatus==1 && !doc.is_return && !doc.auto_repeat) {
-			cur_frm.add_custom_button(__('Subscription'), function() {
-				erpnext.utils.make_subscription(doc.doctype, doc.name)
-			}, __('Create'))
-		}
 	}
 
 	make_shipment() {

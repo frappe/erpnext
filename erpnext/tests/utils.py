@@ -94,3 +94,25 @@ def execute_script_report(
 		except Exception:
 			print(f"Report failed to execute with filters: {test_filter}")
 			raise
+
+
+def if_lending_app_installed(function):
+	"""Decorator to check if lending app is installed"""
+
+	def wrapper(*args, **kwargs):
+		if "lending" in frappe.get_installed_apps():
+			return function(*args, **kwargs)
+		return
+
+	return wrapper
+
+
+def if_lending_app_not_installed(function):
+	"""Decorator to check if lending app is not installed"""
+
+	def wrapper(*args, **kwargs):
+		if "lending" not in frappe.get_installed_apps():
+			return function(*args, **kwargs)
+		return
+
+	return wrapper

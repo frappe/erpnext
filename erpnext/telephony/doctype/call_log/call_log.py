@@ -16,6 +16,34 @@ ONGOING_CALL_STATUSES = ["Ringing", "In Progress"]
 
 
 class CallLog(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.core.doctype.dynamic_link.dynamic_link import DynamicLink
+		from frappe.types import DF
+
+		call_received_by: DF.Link | None
+		customer: DF.Link | None
+		duration: DF.Duration | None
+		employee_user_id: DF.Link | None
+		end_time: DF.Datetime | None
+		id: DF.Data | None
+		links: DF.Table[DynamicLink]
+		medium: DF.Data | None
+		recording_url: DF.Data | None
+		start_time: DF.Datetime | None
+		status: DF.Literal[
+			"Ringing", "In Progress", "Completed", "Failed", "Busy", "No Answer", "Queued", "Canceled"
+		]
+		summary: DF.SmallText | None
+		to: DF.Data | None
+		type: DF.Literal["Incoming", "Outgoing"]
+		type_of_call: DF.Link | None
+	# end: auto-generated types
+
 	def validate(self):
 		deduplicate_dynamic_links(self)
 
@@ -24,13 +52,15 @@ class CallLog(Document):
 		lead_number = self.get("from") if self.is_incoming_call() else self.get("to")
 		lead_number = strip_number(lead_number)
 
-		contact = get_contact_with_phone_number(strip_number(lead_number))
-		if contact:
+		if contact := get_contact_with_phone_number(strip_number(lead_number)):
 			self.add_link(link_type="Contact", link_name=contact)
 
-		lead = get_lead_with_phone_number(lead_number)
-		if lead:
+		if lead := get_lead_with_phone_number(lead_number):
 			self.add_link(link_type="Lead", link_name=lead)
+
+		# Add Employee Name
+		if self.is_incoming_call():
+			self.update_received_by()
 
 	def after_insert(self):
 		self.trigger_call_popup()
@@ -49,6 +79,9 @@ class CallLog(Document):
 		if not doc_before_save:
 			return
 
+		if self.is_incoming_call() and self.has_value_changed("to"):
+			self.update_received_by()
+
 		if _is_call_missed(doc_before_save, self):
 			frappe.publish_realtime("call_{id}_missed".format(id=self.id), self)
 			self.trigger_call_popup()
@@ -63,32 +96,42 @@ class CallLog(Document):
 		self.append("links", {"link_doctype": link_type, "link_name": link_name})
 
 	def trigger_call_popup(self):
-		if self.is_incoming_call():
-			scheduled_employees = get_scheduled_employees_for_popup(self.medium)
-			employee_emails = get_employees_with_number(self.to)
+		if not self.is_incoming_call():
+			return
 
-			# check if employees with matched number are scheduled to receive popup
-			emails = set(scheduled_employees).intersection(employee_emails)
+		scheduled_employees = get_scheduled_employees_for_popup(self.medium)
+		employees = get_employees_with_number(self.to)
+		employee_emails = [employee.get("user_id") for employee in employees]
 
-			if frappe.conf.developer_mode:
-				self.add_comment(
-					text=f"""
+		# check if employees with matched number are scheduled to receive popup
+		emails = set(scheduled_employees).intersection(employee_emails)
+
+		if frappe.conf.developer_mode:
+			self.add_comment(
+				text=f"""
 					Scheduled Employees: {scheduled_employees}
 					Matching Employee: {employee_emails}
 					Show Popup To: {emails}
 				"""
-				)
+			)
 
-			if employee_emails and not emails:
-				self.add_comment(text=_("No employee was scheduled for call popup"))
+		if employee_emails and not emails:
+			self.add_comment(text=_("No employee was scheduled for call popup"))
 
-			for email in emails:
-				frappe.publish_realtime("show_call_popup", self, user=email)
+		for email in emails:
+			frappe.publish_realtime("show_call_popup", self, user=email)
+
+	def update_received_by(self):
+		if employees := get_employees_with_number(self.get("to")):
+			self.call_received_by = employees[0].get("name")
+			self.employee_user_id = employees[0].get("user_id")
 
 
 @frappe.whitelist()
-def add_call_summary(call_log, summary):
+def add_call_summary_and_call_type(call_log, summary, call_type):
 	doc = frappe.get_doc("Call Log", call_log)
+	doc.type_of_call = call_type
+	doc.save()
 	doc.add_comment("Comment", frappe.bold(_("Call Summary")) + "<br><br>" + summary)
 
 
@@ -97,20 +140,19 @@ def get_employees_with_number(number):
 	if not number:
 		return []
 
-	employee_emails = frappe.cache().hget("employees_with_number", number)
-	if employee_emails:
-		return employee_emails
+	employee_doc_name_and_emails = frappe.cache().hget("employees_with_number", number)
+	if employee_doc_name_and_emails:
+		return employee_doc_name_and_emails
 
-	employees = frappe.get_all(
+	employee_doc_name_and_emails = frappe.get_all(
 		"Employee",
-		filters={"cell_number": ["like", "%{}%".format(number)], "user_id": ["!=", ""]},
-		fields=["user_id"],
+		filters={"cell_number": ["like", f"%{number}%"], "user_id": ["!=", ""]},
+		fields=["name", "user_id"],
 	)
 
-	employee_emails = [employee.user_id for employee in employees]
-	frappe.cache().hset("employees_with_number", number, employee_emails)
+	frappe.cache().hset("employees_with_number", number, employee_doc_name_and_emails)
 
-	return employee_emails
+	return employee_doc_name_and_emails
 
 
 def link_existing_conversations(doc, state):
@@ -140,8 +182,8 @@ def link_existing_conversations(doc, state):
 						ELSE 0
 					END
 				)=0
-			""",
-				dict(phone_number="%{}".format(number), docname=doc.name, doctype=doc.doctype),
+				""",
+				dict(phone_number=f"%{number}", docname=doc.name, doctype=doc.doctype),
 			)
 
 			for log in logs:
@@ -161,7 +203,7 @@ def get_linked_call_logs(doctype, docname):
 		filters={"parenttype": "Call Log", "link_doctype": doctype, "link_name": docname},
 	)
 
-	logs = set([log.parent for log in logs])
+	logs = {log.parent for log in logs}
 
 	logs = frappe.get_all("Call Log", fields=["*"], filters={"name": ["in", logs]})
 

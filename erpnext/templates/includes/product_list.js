@@ -27,10 +27,10 @@ window.get_product_list = function() {
 }
 
 window.render_product_list = function(data) {
-	var table = $("#search-list .table");
+	let table = $("#search-list .table");
 	if(data.length) {
 		if(!table.length)
-			var table = $("<table class='table'>").appendTo("#search-list");
+			table = $("<table class='table'>").appendTo("#search-list");
 
 		$.each(data, function(i, d) {
 			$(d).appendTo(table);
@@ -38,11 +38,13 @@ window.render_product_list = function(data) {
 	}
 	if(data.length < 10) {
 		if(!table) {
+			let message = __("No products found.");
 			$(".more-btn")
-				.replaceWith("<div class='alert alert-warning'>{{ _("No products found.") }}</div>");
+				.replaceWith(`<div class='alert alert-warning'>{{ ${message} }}</div>`);
 		} else {
+			let message = __("Nothing more to show.");
 			$(".more-btn")
-				.replaceWith("<div class='text-muted'>{{ _("Nothing more to show.") }}</div>");
+				.replaceWith(`<div class='text-muted'>{{ ${message} }}</div>`);
 		}
 	} else {
 		$(".more-btn").toggle(true)

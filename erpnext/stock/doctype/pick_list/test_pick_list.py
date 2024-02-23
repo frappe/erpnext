@@ -3,21 +3,30 @@
 
 import frappe
 from frappe import _dict
-
-test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
-
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
+from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+from erpnext.stock.doctype.item.test_item import create_item, make_item
+from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
 from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+	get_serial_nos_from_bundle,
+	make_serial_batch_bundle,
+)
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
 
+test_dependencies = ["Item", "Sales Invoice", "Stock Entry", "Batch"]
+
 
 class TestPickList(FrappeTestCase):
 	def test_pick_list_picks_warehouse_for_each_item(self):
+		item_code = make_item().name
 		try:
 			frappe.get_doc(
 				{
@@ -27,7 +36,7 @@ class TestPickList(FrappeTestCase):
 					"expense_account": "Temporary Opening - _TC",
 					"items": [
 						{
-							"item_code": "_Test Item",
+							"item_code": item_code,
 							"warehouse": "_Test Warehouse - _TC",
 							"valuation_rate": 100,
 							"qty": 5,
@@ -47,7 +56,7 @@ class TestPickList(FrappeTestCase):
 				"purpose": "Delivery",
 				"locations": [
 					{
-						"item_code": "_Test Item",
+						"item_code": item_code,
 						"qty": 5,
 						"stock_qty": 5,
 						"conversion_factor": 1,
@@ -59,7 +68,7 @@ class TestPickList(FrappeTestCase):
 		)
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.locations[0].item_code, "_Test Item")
+		self.assertEqual(pick_list.locations[0].item_code, item_code)
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
 
@@ -135,6 +144,18 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(pick_list.locations[1].qty, 10)
 
 	def test_pick_list_shows_serial_no_for_serialized_item(self):
+		serial_nos = ["SADD-0001", "SADD-0002", "SADD-0003", "SADD-0004", "SADD-0005"]
+
+		for serial_no in serial_nos:
+			if not frappe.db.exists("Serial No", serial_no):
+				frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"company": "_Test Company",
+						"item_code": "_Test Serialized Item",
+						"serial_no": serial_no,
+					}
+				).insert()
 
 		stock_reconciliation = frappe.get_doc(
 			{
@@ -147,7 +168,20 @@ class TestPickList(FrappeTestCase):
 						"warehouse": "_Test Warehouse - _TC",
 						"valuation_rate": 100,
 						"qty": 5,
-						"serial_no": "123450\n123451\n123452\n123453\n123454",
+						"serial_and_batch_bundle": make_serial_batch_bundle(
+							frappe._dict(
+								{
+									"item_code": "_Test Serialized Item",
+									"warehouse": "_Test Warehouse - _TC",
+									"qty": 5,
+									"rate": 100,
+									"type_of_transaction": "Inward",
+									"do_not_submit": True,
+									"voucher_type": "Stock Reconciliation",
+									"serial_nos": serial_nos,
+								}
+							)
+						).name,
 					}
 				],
 			}
@@ -157,6 +191,10 @@ class TestPickList(FrappeTestCase):
 			stock_reconciliation.submit()
 		except EmptyStockReconciliationItemsError:
 			pass
+
+		so = make_sales_order(
+			item_code="_Test Serialized Item", warehouse="_Test Warehouse - _TC", qty=5, rate=1000
+		)
 
 		pick_list = frappe.get_doc(
 			{
@@ -171,18 +209,20 @@ class TestPickList(FrappeTestCase):
 						"qty": 1000,
 						"stock_qty": 1000,
 						"conversion_factor": 1,
-						"sales_order": "_T-Sales Order-1",
-						"sales_order_item": "_T-Sales Order-1_item",
+						"sales_order": so.name,
+						"sales_order_item": so.items[0].name,
 					}
 				],
 			}
 		)
 
-		pick_list.set_item_locations()
+		pick_list.save()
 		self.assertEqual(pick_list.locations[0].item_code, "_Test Serialized Item")
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
-		self.assertEqual(pick_list.locations[0].serial_no, "123450\n123451\n123452\n123453\n123454")
+		self.assertEqual(
+			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), serial_nos
+		)
 
 	def test_pick_list_shows_batch_no_for_batched_item(self):
 		# check if oldest batch no is picked
@@ -241,8 +281,8 @@ class TestPickList(FrappeTestCase):
 		pr1 = make_purchase_receipt(item_code="Batched and Serialised Item", qty=2, rate=100.0)
 
 		pr1.load_from_db()
-		oldest_batch_no = pr1.items[0].batch_no
-		oldest_serial_nos = pr1.items[0].serial_no
+		oldest_batch_no = get_batch_from_bundle(pr1.items[0].serial_and_batch_bundle)
+		oldest_serial_nos = get_serial_nos_from_bundle(pr1.items[0].serial_and_batch_bundle)
 
 		pr2 = make_purchase_receipt(item_code="Batched and Serialised Item", qty=2, rate=100.0)
 
@@ -263,13 +303,19 @@ class TestPickList(FrappeTestCase):
 		)
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.locations[0].batch_no, oldest_batch_no)
-		self.assertEqual(pick_list.locations[0].serial_no, oldest_serial_nos)
+		self.assertEqual(
+			get_batch_from_bundle(pick_list.locations[0].serial_and_batch_bundle), oldest_batch_no
+		)
+		self.assertEqual(
+			get_serial_nos_from_bundle(pick_list.locations[0].serial_and_batch_bundle), oldest_serial_nos
+		)
 
 		pr1.cancel()
 		pr2.cancel()
 
 	def test_pick_list_for_items_from_multiple_sales_orders(self):
+
+		item_code = make_item().name
 		try:
 			frappe.get_doc(
 				{
@@ -279,7 +325,7 @@ class TestPickList(FrappeTestCase):
 					"expense_account": "Temporary Opening - _TC",
 					"items": [
 						{
-							"item_code": "_Test Item",
+							"item_code": item_code,
 							"warehouse": "_Test Warehouse - _TC",
 							"valuation_rate": 100,
 							"qty": 10,
@@ -295,7 +341,14 @@ class TestPickList(FrappeTestCase):
 				"doctype": "Sales Order",
 				"customer": "_Test Customer",
 				"company": "_Test Company",
-				"items": [{"item_code": "_Test Item", "qty": 10, "delivery_date": frappe.utils.today()}],
+				"items": [
+					{
+						"item_code": item_code,
+						"qty": 10,
+						"delivery_date": frappe.utils.today(),
+						"warehouse": "_Test Warehouse - _TC",
+					}
+				],
 			}
 		)
 		sales_order.submit()
@@ -309,7 +362,7 @@ class TestPickList(FrappeTestCase):
 				"purpose": "Delivery",
 				"locations": [
 					{
-						"item_code": "_Test Item",
+						"item_code": item_code,
 						"qty": 5,
 						"stock_qty": 5,
 						"conversion_factor": 1,
@@ -317,7 +370,7 @@ class TestPickList(FrappeTestCase):
 						"sales_order_item": "_T-Sales Order-1_item",
 					},
 					{
-						"item_code": "_Test Item",
+						"item_code": item_code,
 						"qty": 5,
 						"stock_qty": 5,
 						"conversion_factor": 1,
@@ -329,18 +382,19 @@ class TestPickList(FrappeTestCase):
 		)
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.locations[0].item_code, "_Test Item")
+		self.assertEqual(pick_list.locations[0].item_code, item_code)
 		self.assertEqual(pick_list.locations[0].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[0].qty, 5)
 		self.assertEqual(pick_list.locations[0].sales_order_item, "_T-Sales Order-1_item")
 
-		self.assertEqual(pick_list.locations[1].item_code, "_Test Item")
+		self.assertEqual(pick_list.locations[1].item_code, item_code)
 		self.assertEqual(pick_list.locations[1].warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(pick_list.locations[1].qty, 5)
 		self.assertEqual(pick_list.locations[1].sales_order_item, sales_order.items[0].name)
 
 	def test_pick_list_for_items_with_multiple_UOM(self):
-		purchase_receipt = make_purchase_receipt(item_code="_Test Item", qty=10)
+		item_code = make_item().name
+		purchase_receipt = make_purchase_receipt(item_code=item_code, qty=10)
 		purchase_receipt.submit()
 
 		sales_order = frappe.get_doc(
@@ -350,17 +404,19 @@ class TestPickList(FrappeTestCase):
 				"company": "_Test Company",
 				"items": [
 					{
-						"item_code": "_Test Item",
+						"item_code": item_code,
 						"qty": 1,
 						"conversion_factor": 5,
 						"stock_qty": 5,
 						"delivery_date": frappe.utils.today(),
+						"warehouse": "_Test Warehouse - _TC",
 					},
 					{
-						"item_code": "_Test Item",
+						"item_code": item_code,
 						"qty": 1,
 						"conversion_factor": 1,
 						"delivery_date": frappe.utils.today(),
+						"warehouse": "_Test Warehouse - _TC",
 					},
 				],
 			}
@@ -376,7 +432,7 @@ class TestPickList(FrappeTestCase):
 				"purpose": "Delivery",
 				"locations": [
 					{
-						"item_code": "_Test Item",
+						"item_code": item_code,
 						"qty": 2,
 						"stock_qty": 1,
 						"conversion_factor": 0.5,
@@ -384,7 +440,7 @@ class TestPickList(FrappeTestCase):
 						"sales_order_item": sales_order.items[0].name,
 					},
 					{
-						"item_code": "_Test Item",
+						"item_code": item_code,
 						"qty": 1,
 						"stock_qty": 1,
 						"conversion_factor": 1,
@@ -398,6 +454,7 @@ class TestPickList(FrappeTestCase):
 		pick_list.submit()
 
 		delivery_note = create_delivery_note(pick_list.name)
+		pick_list.load_from_db()
 
 		self.assertEqual(pick_list.locations[0].qty, delivery_note.items[0].qty)
 		self.assertEqual(pick_list.locations[1].qty, delivery_note.items[1].qty)
@@ -429,10 +486,10 @@ class TestPickList(FrappeTestCase):
 		pl.before_print()
 		self.assertEqual(len(pl.locations), 4)
 
-		# grouping should halve the number of items
+		# grouping should not happen if group_same_items is False
 		pl = frappe.get_doc(
 			doctype="Pick List",
-			group_same_items=True,
+			group_same_items=False,
 			locations=[
 				_dict(item_code="A", warehouse="X", qty=5, picked_qty=1),
 				_dict(item_code="B", warehouse="Y", qty=4, picked_qty=2),
@@ -440,6 +497,11 @@ class TestPickList(FrappeTestCase):
 				_dict(item_code="B", warehouse="Y", qty=2, picked_qty=2),
 			],
 		)
+		pl.before_print()
+		self.assertEqual(len(pl.locations), 4)
+
+		# grouping should halve the number of items
+		pl.group_same_items = True
 		pl.before_print()
 		self.assertEqual(len(pl.locations), 2)
 
@@ -521,6 +583,8 @@ class TestPickList(FrappeTestCase):
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				self.assertEqual(dn_item.item_code, "_Test Item")
 				self.assertEqual(dn_item.against_sales_order, sales_order_1.name)
+				self.assertEqual(dn_item.pick_list_item, pick_list.locations[dn_item.idx - 1].name)
+
 		for dn in frappe.get_all(
 			"Delivery Note",
 			filters={"pick_list": pick_list.name, "customer": "_Test Customer 1"},
@@ -564,14 +628,228 @@ class TestPickList(FrappeTestCase):
 				if dn_item.item_code == "_Test Item 2":
 					self.assertEqual(dn_item.qty, 2)
 
-	# def test_pick_list_skips_items_in_expired_batch(self):
-	# 	pass
+	def test_picklist_with_multi_uom(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"uoms": [dict(uom="Box", conversion_factor=24)]}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=1000)
 
-	# def test_pick_list_from_sales_order(self):
-	# 	pass
+		so = make_sales_order(item_code=item, qty=10, rate=42, uom="Box")
+		pl = create_pick_list(so.name)
+		# pick half the qty
+		for loc in pl.locations:
+			loc.picked_qty = loc.stock_qty / 2
+		pl.save()
+		pl.submit()
 
-	# def test_pick_list_from_work_order(self):
-	# 	pass
+		so.reload()
+		self.assertEqual(so.per_picked, 50)
 
-	# def test_pick_list_from_material_request(self):
-	# 	pass
+	def test_picklist_for_batch_item(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_no_series": "PICKLT-.######"}
+		).name
+
+		# create batch
+		for batch_id in ["PICKLT-000001", "PICKLT-000002"]:
+			if not frappe.db.exists("Batch", batch_id):
+				frappe.get_doc(
+					{
+						"doctype": "Batch",
+						"batch_id": batch_id,
+						"item": item,
+					}
+				).insert()
+
+		make_stock_entry(
+			item=item,
+			to_warehouse=warehouse,
+			qty=50,
+			basic_rate=100,
+			batches=frappe._dict({"PICKLT-000001": 30, "PICKLT-000002": 20}),
+		)
+
+		so = make_sales_order(item_code=item, qty=25.0, rate=100)
+		pl = create_pick_list(so.name)
+		# pick half the qty
+		for loc in pl.locations:
+			self.assertEqual(loc.qty, 25.0)
+			self.assertTrue(loc.serial_and_batch_bundle)
+
+			data = frappe.get_all(
+				"Serial and Batch Entry",
+				fields=["qty", "batch_no"],
+				filters={"parent": loc.serial_and_batch_bundle},
+			)
+
+			for d in data:
+				self.assertEqual(d.batch_no, "PICKLT-000001")
+				self.assertEqual(d.qty, 25.0 * -1)
+
+		pl.save()
+		pl.submit()
+
+		so1 = make_sales_order(item_code=item, qty=10.0, rate=100)
+		pl = create_pick_list(so1.name)
+		# pick half the qty
+		for loc in pl.locations:
+			self.assertEqual(loc.qty, 10.0)
+			self.assertTrue(loc.serial_and_batch_bundle)
+
+			data = frappe.get_all(
+				"Serial and Batch Entry",
+				fields=["qty", "batch_no"],
+				filters={"parent": loc.serial_and_batch_bundle},
+			)
+
+			for d in data:
+				self.assertTrue(d.batch_no in ["PICKLT-000001", "PICKLT-000002"])
+				if d.batch_no == "PICKLT-000001":
+					self.assertEqual(d.qty, 5.0 * -1)
+				elif d.batch_no == "PICKLT-000002":
+					self.assertEqual(d.qty, 5.0 * -1)
+
+		pl.save()
+		pl.submit()
+		pl.cancel()
+
+	def test_picklist_for_serial_item(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SN-PICKLT-.######"}
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=50, basic_rate=100)
+
+		so = make_sales_order(item_code=item, qty=25.0, rate=100)
+		pl = create_pick_list(so.name)
+		picked_serial_nos = []
+		# pick half the qty
+		for loc in pl.locations:
+			self.assertEqual(loc.qty, 25.0)
+			self.assertTrue(loc.serial_and_batch_bundle)
+
+			data = frappe.get_all(
+				"Serial and Batch Entry", fields=["serial_no"], filters={"parent": loc.serial_and_batch_bundle}
+			)
+
+			picked_serial_nos = [d.serial_no for d in data]
+			self.assertEqual(len(picked_serial_nos), 25)
+
+		pl.save()
+		pl.submit()
+
+		so1 = make_sales_order(item_code=item, qty=10.0, rate=100)
+		pl = create_pick_list(so1.name)
+		# pick half the qty
+		for loc in pl.locations:
+			self.assertEqual(loc.qty, 10.0)
+			self.assertTrue(loc.serial_and_batch_bundle)
+
+			data = frappe.get_all(
+				"Serial and Batch Entry",
+				fields=["qty", "batch_no"],
+				filters={"parent": loc.serial_and_batch_bundle},
+			)
+
+			self.assertEqual(len(data), 10)
+			for d in data:
+				self.assertTrue(d.serial_no not in picked_serial_nos)
+
+		pl.save()
+		pl.submit()
+		pl.cancel()
+
+	def test_picklist_with_bundles(self):
+		warehouse = "_Test Warehouse - _TC"
+
+		quantities = [5, 2]
+		bundle, components = create_product_bundle(quantities, warehouse=warehouse)
+		bundle_items = dict(zip(components, quantities))
+
+		so = make_sales_order(item_code=bundle, qty=3, rate=42)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(len(pl.locations), 2)
+		for item in pl.locations:
+			self.assertEqual(item.stock_qty, bundle_items[item.item_code] * 3)
+
+		# check picking status on sales order
+		pl.submit()
+		so.reload()
+		self.assertEqual(so.per_picked, 100)
+
+		# deliver
+		dn = create_delivery_note(pl.name).submit()
+		self.assertEqual(dn.items[0].rate, 42)
+		self.assertEqual(dn.packed_items[0].warehouse, warehouse)
+		so.reload()
+		self.assertEqual(so.per_delivered, 100)
+
+	def test_picklist_with_partial_bundles(self):
+		# from test_records.json
+		warehouse = "_Test Warehouse - _TC"
+
+		quantities = [5, 2]
+		bundle, components = create_product_bundle(quantities, warehouse=warehouse)
+
+		so = make_sales_order(item_code=bundle, qty=4, rate=42)
+
+		pl = create_pick_list(so.name)
+		for loc in pl.locations:
+			loc.picked_qty = loc.qty / 2
+
+		pl.save().submit()
+		so.reload()
+		self.assertEqual(so.per_picked, 50)
+
+		# deliver half qty
+		dn = create_delivery_note(pl.name).submit()
+		self.assertEqual(dn.items[0].rate, 42)
+		so.reload()
+		self.assertEqual(so.per_delivered, 50)
+
+		pl = create_pick_list(so.name)
+		pl.save().submit()
+		so.reload()
+		self.assertEqual(so.per_picked, 100)
+
+		# deliver remaining
+		dn = create_delivery_note(pl.name).submit()
+		self.assertEqual(dn.items[0].rate, 42)
+		so.reload()
+		self.assertEqual(so.per_delivered, 100)
+
+	def test_pick_list_status(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(properties={"maintain_stock": 1}).name
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.reload()
+		self.assertEqual(pl.status, "Draft")
+
+		pl.submit()
+		pl.reload()
+		self.assertEqual(pl.status, "Open")
+
+		dn = create_delivery_note(pl.name)
+		dn.save()
+		pl.reload()
+		self.assertEqual(pl.status, "Open")
+
+		dn.submit()
+		pl.reload()
+		self.assertEqual(pl.status, "Completed")
+
+		dn.cancel()
+		pl.reload()
+		self.assertEqual(pl.status, "Open")
+
+		pl.cancel()
+		pl.reload()
+		self.assertEqual(pl.status, "Cancelled")

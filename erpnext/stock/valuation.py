@@ -60,9 +60,7 @@ class FIFOValuation(BinWiseValuation):
 
 	# specifying the attributes to save resources
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
-	__slots__ = [
-		"queue",
-	]
+	__slots__ = ["queue"]
 
 	def __init__(self, state: Optional[List[StockBin]]):
 		self.queue: List[StockBin] = state if state is not None else []
@@ -123,15 +121,9 @@ class FIFOValuation(BinWiseValuation):
 						index = idx
 						break
 
-				# If no entry found with outgoing rate, collapse queue
+				# If no entry found with outgoing rate, consume as per FIFO
 				if index is None:  # nosemgrep
-					new_stock_value = sum(d[QTY] * d[RATE] for d in self.queue) - qty * outgoing_rate
-					new_stock_qty = sum(d[QTY] for d in self.queue) - qty
-					self.queue = [
-						[new_stock_qty, new_stock_value / new_stock_qty if new_stock_qty > 0 else outgoing_rate]
-					]
-					consumed_bins.append([qty, outgoing_rate])
-					break
+					index = 0
 			else:
 				index = 0
 
@@ -172,9 +164,7 @@ class LIFOValuation(BinWiseValuation):
 
 	# specifying the attributes to save resources
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
-	__slots__ = [
-		"stack",
-	]
+	__slots__ = ["stack"]
 
 	def __init__(self, state: Optional[List[StockBin]]):
 		self.stack: List[StockBin] = state if state is not None else []

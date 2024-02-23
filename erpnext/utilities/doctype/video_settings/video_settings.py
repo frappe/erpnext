@@ -9,6 +9,19 @@ from frappe.model.document import Document
 
 
 class VideoSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		api_key: DF.Data | None
+		enable_youtube_tracking: DF.Check
+		frequency: DF.Literal["30 mins", "1 hr", "6 hrs", "Daily"]
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_youtube_api_key()
 
@@ -18,5 +31,5 @@ class VideoSettings(Document):
 				build("youtube", "v3", developerKey=self.api_key)
 			except Exception:
 				title = _("Failed to Authenticate the API key.")
-				frappe.log_error(title + "\n\n" + frappe.get_traceback(), title=title)
+				self.log_error("Failed to authenticate API key")
 				frappe.throw(title + " Please check the error logs.", title=_("Invalid Credentials"))

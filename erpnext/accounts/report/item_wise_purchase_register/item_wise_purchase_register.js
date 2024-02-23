@@ -24,6 +24,12 @@ frappe.query_reports["Item-wise Purchase Register"] = {
 			"options": "Item",
 		},
 		{
+			"fieldname": "item_group",
+			"label": __("Item Group"),
+			"fieldtype": "Link",
+			"options": "Item Group",
+		},
+		{
 			"fieldname":"supplier",
 			"label": __("Supplier"),
 			"fieldtype": "Link",

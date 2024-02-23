@@ -1,9 +1,9 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import json
+from itertools import groupby
 
 import frappe
-import pandas
 from frappe import _
 from frappe.utils import flt
 
@@ -101,18 +101,19 @@ class OpportunitySummaryBySalesStage(object):
 
 			self.convert_to_base_currency()
 
-			dataframe = pandas.DataFrame.from_records(self.query_result)
-			dataframe.replace(to_replace=[None], value="Not Assigned", inplace=True)
-			result = dataframe.groupby(["sales_stage", based_on], as_index=False)["amount"].sum()
+			for row in self.query_result:
+				if not row.get(based_on):
+					row[based_on] = "Not Assigned"
 
 			self.grouped_data = []
 
-			for i in range(len(result["amount"])):
+			grouping_key = lambda o: (o["sales_stage"], o[based_on])  # noqa
+			for (sales_stage, _based_on), rows in groupby(self.query_result, grouping_key):
 				self.grouped_data.append(
 					{
-						"sales_stage": result["sales_stage"][i],
-						based_on: result[based_on][i],
-						"amount": result["amount"][i],
+						"sales_stage": sales_stage,
+						based_on: _based_on,
+						"amount": sum(flt(r["amount"]) for r in rows),
 					}
 				)
 
@@ -200,26 +201,21 @@ class OpportunitySummaryBySalesStage(object):
 	def get_chart_data(self):
 		labels = []
 		datasets = []
-		values = [0] * 8
-
-		for sales_stage in self.sales_stage_list:
-			labels.append(sales_stage)
+		values = [0] * len(self.sales_stage_list)
 
 		options = {"Number": "count", "Amount": "amount"}[self.filters.get("data_based_on")]
 
 		for data in self.query_result:
-			for count in range(len(values)):
-				if data["sales_stage"] == labels[count]:
+			for count in range(len(self.sales_stage_list)):
+				if data["sales_stage"] == self.sales_stage_list[count]:
 					values[count] = values[count] + data[options]
 
 		datasets.append({"name": options, "values": values})
+		self.chart = {"data": {"labels": self.sales_stage_list, "datasets": datasets}, "type": "line"}
 
-		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
-
-	def currency_conversion(self, from_currency, to_currency):
+	def get_exchange_rate(self, from_currency, to_currency):
 		cacheobj = frappe.cache()
-
-		if cacheobj.get(from_currency):
+		if cacheobj and cacheobj.get(from_currency):
 			return flt(str(cacheobj.get(from_currency), "UTF-8"))
 
 		else:
@@ -234,7 +230,7 @@ class OpportunitySummaryBySalesStage(object):
 	def convert_to_base_currency(self):
 		default_currency = self.get_default_currency()
 		for data in self.query_result:
-			if data.get("currency") != default_currency:
+			if data.get("currency") and data.get("currency") != default_currency:
 				opportunity_currency = data.get("currency")
-				value = self.currency_conversion(opportunity_currency, default_currency)
-				data["amount"] = data["amount"] * value
+				exchange_rate = self.get_exchange_rate(opportunity_currency, default_currency)
+				data["amount"] = data["amount"] * exchange_rate

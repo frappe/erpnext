@@ -1,23 +1,26 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:dunning_type",
+ "beta": 1,
  "creation": "2019-12-04 04:59:08.003664",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "dunning_type",
-  "overdue_interval_section",
-  "start_day",
-  "column_break_4",
-  "end_day",
+  "is_default",
+  "column_break_3",
+  "company",
   "section_break_6",
   "dunning_fee",
   "column_break_8",
   "rate_of_interest",
   "text_block_section",
-  "dunning_letter_text"
+  "dunning_letter_text",
+  "section_break_9",
+  "income_account",
+  "column_break_13",
+  "cost_center"
  ],
  "fields": [
   {
@@ -46,10 +49,6 @@
    "options": "Dunning Letter Text"
   },
   {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "section_break_6",
    "fieldtype": "Section Break"
   },
@@ -58,32 +57,61 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "overdue_interval_section",
-   "fieldtype": "Section Break",
-   "label": "Overdue Interval"
-  },
-  {
-   "fieldname": "start_day",
-   "fieldtype": "Int",
-   "label": "Start Day"
-  },
-  {
-   "fieldname": "end_day",
-   "fieldtype": "Int",
-   "label": "End Day"
-  },
-  {
    "fieldname": "rate_of_interest",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Rate of Interest (%) Yearly"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "label": "Is Default"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "income_account",
+   "fieldtype": "Link",
+   "label": "Income Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
   }
  ],
- "links": [],
- "modified": "2020-07-15 17:14:17.835074",
+ "links": [
+  {
+   "link_doctype": "Dunning",
+   "link_fieldname": "dunning_type"
+  }
+ ],
+ "modified": "2021-11-13 00:25:35.659283",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning Type",
+ "naming_rule": "By script",
  "owner": "Administrator",
  "permissions": [
   {

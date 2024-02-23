@@ -17,7 +17,7 @@
 					title = "Warehouse",
 					actual_qty = (frm.doc.doctype==="Sales Order"
 						? doc.projected_qty : doc.actual_qty);
-                if(flt(frm.doc.per_delivered) < 100
+                if(flt(frm.doc.per_delivered, 2) < 100
                     && in_list(["Sales Order Item", "Delivery Note Item"], doc.doctype)) {
     				if(actual_qty != undefined) {
     					if(actual_qty >= doc.qty) {

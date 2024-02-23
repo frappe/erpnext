@@ -26,7 +26,7 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 				doc: frm.doc,
 				callback: function(r) {
 					if (r.message) {
-						frm.add_custom_button(__('Journal Entry'), function() {
+						frm.add_custom_button(__('Journal Entries'), function() {
 							return frm.events.make_jv(frm);
 						}, __('Create'));
 					}
@@ -35,10 +35,26 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 		}
 	},
 
-	get_entries: function(frm) {
+	validate_rounding_loss: function(frm) {
+		let allowance = frm.doc.rounding_loss_allowance;
+		if (!(allowance >= 0 && allowance < 1)) {
+			frappe.throw(__("Rounding Loss Allowance should be between 0 and 1"));
+		}
+	},
+
+	rounding_loss_allowance: function(frm) {
+		frm.events.validate_rounding_loss(frm);
+	},
+
+	validate: function(frm) {
+		frm.events.validate_rounding_loss(frm);
+	},
+
+	get_entries: function(frm, account) {
 		frappe.call({
 			method: "get_accounts_data",
 			doc: cur_frm.doc,
+			account: account,
 			callback: function(r){
 				frappe.model.clear_table(frm.doc, "accounts");
 				if(r.message) {
@@ -57,7 +73,6 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 
 		let total_gain_loss = 0;
 		frm.doc.accounts.forEach((d) => {
-			d.gain_loss = flt(d.new_balance_in_base_currency, precision("new_balance_in_base_currency", d)) - flt(d.balance_in_base_currency, precision("balance_in_base_currency", d));
 			total_gain_loss += flt(d.gain_loss, precision("gain_loss", d));
 		});
 
@@ -66,13 +81,19 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 	},
 
 	make_jv : function(frm) {
+		let revaluation_journal = null;
+		let zero_balance_journal = null;
 		frappe.call({
-			method: "make_jv_entry",
+			method: "make_jv_entries",
 			doc: frm.doc,
+			freeze: true,
+			freeze_message: "Making Journal Entries...",
 			callback: function(r){
 				if (r.message) {
-					var doc = frappe.model.sync(r.message)[0];
-					frappe.set_route("Form", doc.doctype, doc.name);
+					let response = r.message;
+					if(response['revaluation_jv'] || response['zero_balance_jv']) {
+						frappe.msgprint(__("Journals have been created"));
+					}
 				}
 			}
 		});
@@ -120,7 +141,8 @@ var get_account_details = function(frm, cdt, cdn) {
 			company: frm.doc.company,
 			posting_date: frm.doc.posting_date,
 			party_type: row.party_type,
-			party: row.party
+			party: row.party,
+			rounding_loss_allowance: frm.doc.rounding_loss_allowance
 		},
 		callback: function(r){
 			$.extend(row, r.message);

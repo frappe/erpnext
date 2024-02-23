@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.desk.doctype.tag.tag import add_tag
 from frappe.model.document import Document
-from frappe.utils import add_months, formatdate, getdate, today
+from frappe.utils import add_months, formatdate, getdate, sbool, today
 from plaid.errors import ItemError
 
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
@@ -15,6 +15,22 @@ from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import 
 
 
 class PlaidSettings(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		automatic_sync: DF.Check
+		enable_european_access: DF.Check
+		enabled: DF.Check
+		plaid_client_id: DF.Data | None
+		plaid_env: DF.Literal["sandbox", "development", "production"]
+		plaid_secret: DF.Password | None
+	# end: auto-generated types
+
 	@staticmethod
 	@frappe.whitelist()
 	def get_link_token():
@@ -54,7 +70,7 @@ def add_institution(token, response):
 			)
 			bank.insert()
 		except Exception:
-			frappe.log_error(frappe.get_traceback(), title=_("Plaid Link Error"))
+			frappe.log_error("Plaid Link Error")
 	else:
 		bank = frappe.get_doc("Bank", response["institution"]["name"])
 		bank.plaid_access_token = access_token
@@ -70,7 +86,8 @@ def add_bank_accounts(response, bank, company):
 	except TypeError:
 		pass
 
-	bank = json.loads(bank)
+	if isinstance(bank, str):
+		bank = json.loads(bank)
 	result = []
 
 	default_gl_account = get_default_bank_cash_account(company, "Bank")
@@ -113,7 +130,7 @@ def add_bank_accounts(response, bank, company):
 					_("Bank account {0} already exists and could not be created again").format(account["name"])
 				)
 			except Exception:
-				frappe.log_error(frappe.get_traceback(), title=_("Plaid Link Error"))
+				frappe.log_error("Plaid Link Error")
 				frappe.throw(
 					_("There was an error creating Bank Account while linking with Plaid."),
 					title=_("Plaid Link Failed"),
@@ -135,7 +152,7 @@ def add_bank_accounts(response, bank, company):
 				existing_account.save()
 				result.append(existing_bank_account)
 			except Exception:
-				frappe.log_error(frappe.get_traceback(), title=_("Plaid Link Error"))
+				frappe.log_error("Plaid Link Error")
 				frappe.throw(
 					_("There was an error updating Bank Account {} while linking with Plaid.").format(
 						existing_bank_account
@@ -160,7 +177,6 @@ def add_account_subtype(account_subtype):
 		frappe.throw(frappe.get_traceback())
 
 
-@frappe.whitelist()
 def sync_transactions(bank, bank_account):
 	"""Sync transactions based on the last integration date as the start date, after sync is completed
 	add the transaction date of the oldest transaction as the last integration date."""
@@ -177,16 +193,15 @@ def sync_transactions(bank, bank_account):
 		)
 
 		result = []
-		for transaction in reversed(transactions):
-			result += new_bank_transaction(transaction)
+		if transactions:
+			for transaction in reversed(transactions):
+				result += new_bank_transaction(transaction)
 
 		if result:
 			last_transaction_date = frappe.db.get_value("Bank Transaction", result.pop(), "date")
 
 			frappe.logger().info(
-				"Plaid added {} new Bank Transactions from '{}' between {} and {}".format(
-					len(result), bank_account, start_date, end_date
-				)
+				f"Plaid added {len(result)} new Bank Transactions from '{bank_account}' between {start_date} and {end_date}"
 			)
 
 			frappe.db.set_value(
@@ -220,7 +235,7 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 		if e.code == "ITEM_LOGIN_REQUIRED":
 			msg = _("There was an error syncing transactions.") + " "
 			msg += _("Please refresh or reset the Plaid linking of the Bank {}.").format(bank) + " "
-			frappe.log_error(msg, title=_("Plaid Link Refresh Required"))
+			frappe.log_error(message=msg, title=_("Plaid Link Refresh Required"))
 
 	return transactions
 
@@ -230,35 +245,43 @@ def new_bank_transaction(transaction):
 
 	bank_account = frappe.db.get_value("Bank Account", dict(integration_id=transaction["account_id"]))
 
-	if float(transaction["amount"]) >= 0:
-		debit = 0
-		credit = float(transaction["amount"])
+	amount = float(transaction["amount"])
+	if amount >= 0.0:
+		deposit = 0.0
+		withdrawal = amount
 	else:
-		debit = abs(float(transaction["amount"]))
-		credit = 0
-
-	status = "Pending" if transaction["pending"] == "True" else "Settled"
+		deposit = abs(amount)
+		withdrawal = 0.0
 
 	tags = []
-	try:
-		tags += transaction["category"]
-		tags += ["Plaid Cat. {}".format(transaction["category_id"])]
-	except KeyError:
-		pass
+	if transaction["category"]:
+		try:
+			tags += transaction["category"]
+			tags += [f'Plaid Cat. {transaction["category_id"]}']
+		except KeyError:
+			pass
 
-	if not frappe.db.exists("Bank Transaction", dict(transaction_id=transaction["transaction_id"])):
+	if not frappe.db.exists(
+		"Bank Transaction", dict(transaction_id=transaction["transaction_id"])
+	) and not sbool(transaction["pending"]):
 		try:
 			new_transaction = frappe.get_doc(
 				{
 					"doctype": "Bank Transaction",
 					"date": getdate(transaction["date"]),
-					"status": status,
 					"bank_account": bank_account,
-					"deposit": debit,
-					"withdrawal": credit,
+					"deposit": deposit,
+					"withdrawal": withdrawal,
 					"currency": transaction["iso_currency_code"],
 					"transaction_id": transaction["transaction_id"],
-					"reference_number": transaction["payment_meta"]["reference_number"],
+					"transaction_type": (
+						transaction["transaction_code"] or transaction["payment_meta"]["payment_method"]
+					),
+					"reference_number": (
+						transaction["check_number"]
+						or transaction["payment_meta"]["reference_number"]
+						or transaction["name"]
+					),
 					"description": transaction["name"],
 				}
 			)
@@ -271,7 +294,7 @@ def new_bank_transaction(transaction):
 			result.append(new_transaction.name)
 
 		except Exception:
-			frappe.throw(title=_("Bank transaction creation error"))
+			frappe.throw(_("Bank transaction creation error"))
 
 	return result
 
@@ -300,3 +323,26 @@ def enqueue_synchronization():
 def get_link_token_for_update(access_token):
 	plaid = PlaidConnector(access_token)
 	return plaid.get_link_token(update_mode=True)
+
+
+def get_company(bank_account_name):
+	from frappe.defaults import get_user_default
+
+	company_names = frappe.db.get_all("Company", pluck="name")
+	if len(company_names) == 1:
+		return company_names[0]
+	if frappe.db.exists("Bank Account", bank_account_name):
+		return frappe.db.get_value("Bank Account", bank_account_name, "company")
+	company_default = get_user_default("Company")
+	if company_default:
+		return company_default
+	frappe.throw(_("Could not detect the Company for updating Bank Accounts"))
+
+
+@frappe.whitelist()
+def update_bank_account_ids(response):
+	data = json.loads(response)
+	institution_name = data["institution"]["name"]
+	bank = frappe.get_doc("Bank", institution_name).as_dict()
+	bank_account_name = f"{data['account']['name']} - {institution_name}"
+	return add_bank_accounts(response, bank, get_company(bank_account_name))

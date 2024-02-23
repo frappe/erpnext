@@ -32,13 +32,66 @@ class OverlapError(frappe.ValidationError):
 
 
 class Workstation(Document):
-	def validate(self):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.manufacturing.doctype.workstation_working_hour.workstation_working_hour import (
+			WorkstationWorkingHour,
+		)
+
+		description: DF.Text | None
+		holiday_list: DF.Link | None
+		hour_rate: DF.Currency
+		hour_rate_consumable: DF.Currency
+		hour_rate_electricity: DF.Currency
+		hour_rate_labour: DF.Currency
+		hour_rate_rent: DF.Currency
+		production_capacity: DF.Int
+		working_hours: DF.Table[WorkstationWorkingHour]
+		workstation_name: DF.Data
+		workstation_type: DF.Link | None
+	# end: auto-generated types
+
+	def before_save(self):
+		self.set_data_based_on_workstation_type()
+		self.set_hour_rate()
+
+	def set_hour_rate(self):
 		self.hour_rate = (
 			flt(self.hour_rate_labour)
 			+ flt(self.hour_rate_electricity)
 			+ flt(self.hour_rate_consumable)
 			+ flt(self.hour_rate_rent)
 		)
+
+	@frappe.whitelist()
+	def set_data_based_on_workstation_type(self):
+		if self.workstation_type:
+			fields = [
+				"hour_rate_labour",
+				"hour_rate_electricity",
+				"hour_rate_consumable",
+				"hour_rate_rent",
+				"hour_rate",
+				"description",
+			]
+
+			data = frappe.get_cached_value("Workstation Type", self.workstation_type, fields, as_dict=True)
+
+			if not data:
+				return
+
+			for field in fields:
+				if self.get(field):
+					continue
+
+				if value := data.get(field):
+					self.set(field, value)
 
 	def on_update(self):
 		self.validate_overlap_for_operation_timings()
@@ -86,7 +139,7 @@ class Workstation(Document):
 
 		if schedule_date in tuple(get_holidays(self.holiday_list)):
 			schedule_date = add_days(schedule_date, 1)
-			self.validate_workstation_holiday(schedule_date, skip_holiday_list_check=True)
+			return self.validate_workstation_holiday(schedule_date, skip_holiday_list_check=True)
 
 		return schedule_date
 
@@ -100,12 +153,10 @@ def get_default_holiday_list():
 
 def check_if_within_operating_hours(workstation, operation, from_datetime, to_datetime):
 	if from_datetime and to_datetime:
-		if not cint(
-			frappe.db.get_value("Manufacturing Settings", "None", "allow_production_on_holidays")
-		):
+		if not frappe.db.get_single_value("Manufacturing Settings", "allow_production_on_holidays"):
 			check_workstation_for_holiday(workstation, from_datetime, to_datetime)
 
-		if not cint(frappe.db.get_value("Manufacturing Settings", None, "allow_overtime")):
+		if not cint(frappe.db.get_single_value("Manufacturing Settings", "allow_overtime")):
 			is_within_operating_hours(workstation, operation, from_datetime, to_datetime)
 
 

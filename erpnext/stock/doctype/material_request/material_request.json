@@ -11,33 +11,40 @@
   "naming_series",
   "title",
   "material_request_type",
-  "transfer_status",
   "customer",
-  "status",
+  "company",
   "column_break_2",
   "transaction_date",
   "schedule_date",
-  "company",
   "amended_from",
   "warehouse_section",
+  "scan_barcode",
+  "column_break_13",
   "set_from_warehouse",
   "column_break5",
   "set_warehouse",
   "items_section",
-  "scan_barcode",
   "items",
-  "more_info",
-  "per_ordered",
-  "column_break2",
-  "per_received",
-  "printing_details",
-  "letter_head",
-  "select_print_heading",
+  "terms_tab",
   "terms_section_break",
   "tc_name",
   "terms",
+  "more_info_tab",
+  "status_section",
+  "status",
+  "per_ordered",
+  "column_break2",
+  "transfer_status",
+  "per_received",
+  "printing_details",
+  "letter_head",
+  "column_break_31",
+  "select_print_heading",
   "reference",
-  "job_card"
+  "job_card",
+  "column_break_35",
+  "work_order",
+  "connections_tab"
  ],
  "fields": [
   {
@@ -147,14 +154,6 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "More Information",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-file-text"
-  },
-  {
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
@@ -182,7 +181,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nOrdered\nIssued\nTransferred\nReceived",
+   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nPartially Received\nOrdered\nIssued\nTransferred\nReceived",
    "print_hide": 1,
    "print_width": "100px",
    "read_only": 1,
@@ -238,7 +237,6 @@
    "collapsible_depends_on": "terms",
    "fieldname": "terms_section_break",
    "fieldtype": "Section Break",
-   "label": "Terms and Conditions",
    "oldfieldtype": "Section Break",
    "options": "fa fa-legal"
   },
@@ -276,12 +274,13 @@
   {
    "fieldname": "warehouse_section",
    "fieldtype": "Section Break",
-   "label": "Warehouse"
+   "hide_border": 1,
+   "label": "Items"
   },
   {
-   "description": "Sets 'Target Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Set Target Warehouse",
    "options": "Warehouse"
@@ -295,9 +294,9 @@
   },
   {
    "depends_on": "eval:doc.material_request_type == 'Material Transfer'",
-   "description": "Sets 'Source Warehouse' in each row of the Items table.",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Set Source Warehouse",
    "options": "Warehouse"
   },
@@ -309,16 +308,60 @@
    "label": "Transfer Status",
    "options": "\nNot Started\nIn Transit\nCompleted",
    "read_only": 1
+  },
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "options": "Work Order",
+   "read_only": 1
+  },
+  {
+   "fieldname": "terms_tab",
+   "fieldtype": "Tab Break",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "more_info_tab",
+   "fieldtype": "Tab Break",
+   "label": "More Info"
+  },
+  {
+   "fieldname": "connections_tab",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-file-text"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-17 20:16:12.737743",
+ "modified": "2023-09-15 12:07:24.789471",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -386,5 +429,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "title"
 }

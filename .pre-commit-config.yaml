@@ -5,7 +5,7 @@ fail_fast: false
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.0.1
+    rev: v4.3.0
     hooks:
       - id: trailing-whitespace
         files: "erpnext.*"
@@ -15,13 +15,36 @@ repos:
         args: ['--branch', 'develop']
       - id: check-merge-conflict
       - id: check-ast
+      - id: check-json
+      - id: check-toml
+      - id: check-yaml
+      - id: debug-statements
 
-  - repo: https://gitlab.com/pycqa/flake8
-    rev: 3.9.2
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.44.0
+    hooks:
+      - id: eslint
+        types_or: [javascript]
+        args: ['--quiet']
+        # Ignore any files that might contain jinja / bundles
+        exclude: |
+            (?x)^(
+                erpnext/public/dist/.*|
+                cypress/.*|
+                .*node_modules.*|
+                .*boilerplate.*|
+                erpnext/public/js/controllers/.*|
+                erpnext/templates/pages/order.js|
+                erpnext/templates/includes/.*
+            )$
+
+  - repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
     hooks:
       - id: flake8
         additional_dependencies: [
           'flake8-bugbear',
+          'flake8-tuple',
         ]
         args: ['--config', '.github/helper/.flake8_strict']
         exclude: ".*setup.py$"
@@ -30,9 +53,10 @@ repos:
     rev: 9cb0a69f4d0030cdf687eddf314468b39ed54119
     hooks:
       - id: black
+        additional_dependencies: ['click==8.0.4']
 
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.9.1
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.12.0
     hooks:
       - id: isort
         exclude: ".*setup.py$"

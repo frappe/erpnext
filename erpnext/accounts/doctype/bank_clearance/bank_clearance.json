@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_copy": 1,
  "creation": "2013-01-10 16:34:05",
  "doctype": "DocType",
@@ -13,11 +14,8 @@
   "bank_account",
   "include_reconciled_entries",
   "include_pos_transactions",
-  "get_payment_entries",
   "section_break_10",
-  "payment_entries",
-  "update_clearance_date",
-  "total_amount"
+  "payment_entries"
  ],
  "fields": [
   {
@@ -77,11 +75,6 @@
    "label": "Include POS Transactions"
   },
   {
-   "fieldname": "get_payment_entries",
-   "fieldtype": "Button",
-   "label": "Get Payment Entries"
-  },
-  {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
   },
@@ -91,25 +84,14 @@
    "fieldtype": "Table",
    "label": "Payment Entries",
    "options": "Bank Clearance Detail"
-  },
-  {
-   "fieldname": "update_clearance_date",
-   "fieldtype": "Button",
-   "label": "Update Clearance Date"
-  },
-  {
-   "fieldname": "total_amount",
-   "fieldtype": "Currency",
-   "label": "Total Amount",
-   "options": "account_currency",
-   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "icon": "fa fa-check",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-04-06 16:12:06.628008",
+ "links": [],
+ "modified": "2022-11-28 17:24:13.008692",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Clearance",
@@ -126,5 +108,6 @@
  "quick_entry": 1,
  "read_only": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

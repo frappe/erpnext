@@ -10,6 +10,35 @@ from frappe.utils import cstr
 
 
 class SMSCenter(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		branch: DF.Link | None
+		customer: DF.Link | None
+		department: DF.Link | None
+		message: DF.Text
+		receiver_list: DF.Code | None
+		sales_partner: DF.Link | None
+		send_to: DF.Literal[
+			"",
+			"All Contact",
+			"All Customer Contact",
+			"All Supplier Contact",
+			"All Sales Partner Contact",
+			"All Lead (Open)",
+			"All Employee (Active)",
+			"All Sales Person",
+		]
+		supplier: DF.Link | None
+		total_characters: DF.Int
+		total_messages: DF.Int
+	# end: auto-generated types
+
 	@frappe.whitelist()
 	def create_receiver_list(self):
 		rec, where_clause = "", ""

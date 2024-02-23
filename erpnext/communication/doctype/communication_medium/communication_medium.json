@@ -61,7 +61,7 @@
    "fieldname": "communication_channel",
    "fieldtype": "Select",
    "label": "Communication Channel",
-   "options": "\nExotel"
+   "options": ""
   }
  ],
  "links": [],

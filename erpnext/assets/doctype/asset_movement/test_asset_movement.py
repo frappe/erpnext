@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import now
 
 from erpnext.assets.doctype.asset.test_asset import create_asset_data
-from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.setup.doctype.employee.test_employee import make_employee
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
@@ -47,7 +47,7 @@ class TestAssetMovement(unittest.TestCase):
 		if not frappe.db.exists("Location", "Test Location 2"):
 			frappe.get_doc({"doctype": "Location", "location_name": "Test Location 2"}).insert()
 
-		movement1 = create_asset_movement(
+		create_asset_movement(
 			purpose="Transfer",
 			company=asset.company,
 			assets=[
@@ -58,7 +58,7 @@ class TestAssetMovement(unittest.TestCase):
 		)
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location 2")
 
-		create_asset_movement(
+		movement1 = create_asset_movement(
 			purpose="Transfer",
 			company=asset.company,
 			assets=[
@@ -70,20 +70,31 @@ class TestAssetMovement(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
 		movement1.cancel()
-		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location 2")
 
 		employee = make_employee("testassetmovemp@example.com", company="_Test Company")
 		create_asset_movement(
 			purpose="Issue",
 			company=asset.company,
-			assets=[{"asset": asset.name, "source_location": "Test Location", "to_employee": employee}],
+			assets=[{"asset": asset.name, "source_location": "Test Location 2", "to_employee": employee}],
 			reference_doctype="Purchase Receipt",
 			reference_name=pr.name,
 		)
 
-		# after issuing asset should belong to an employee not at a location
+		# after issuing, asset should belong to an employee not at a location
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), None)
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "custodian"), employee)
+
+		create_asset_movement(
+			purpose="Receipt",
+			company=asset.company,
+			assets=[{"asset": asset.name, "from_employee": employee, "target_location": "Test Location"}],
+			reference_doctype="Purchase Receipt",
+			reference_name=pr.name,
+		)
+
+		# after receiving, asset should belong to a location not at an employee
+		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
 	def test_last_movement_cancellation(self):
 		pr = make_purchase_receipt(

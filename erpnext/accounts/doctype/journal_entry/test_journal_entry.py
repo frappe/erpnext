@@ -5,6 +5,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import change_settings
 from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -13,6 +14,7 @@ from erpnext.exceptions import InvalidAccountCurrency
 
 
 class TestJournalEntry(unittest.TestCase):
+	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_journal_entry_with_against_jv(self):
 		jv_invoice = frappe.copy_doc(test_records[2])
 		base_jv = frappe.copy_doc(test_records[0])
@@ -43,7 +45,7 @@ class TestJournalEntry(unittest.TestCase):
 				frappe.db.sql(
 					"""select name from `tabJournal Entry Account`
 				where account = %s and docstatus = 1 and parent = %s""",
-					("_Test Receivable - _TC", test_voucher.name),
+					("Debtors - _TC", test_voucher.name),
 				)
 			)
 
@@ -105,8 +107,8 @@ class TestJournalEntry(unittest.TestCase):
 
 		elif test_voucher.doctype in ["Sales Order", "Purchase Order"]:
 			# if test_voucher is a Sales Order/Purchase Order, test error on cancellation of test_voucher
-			frappe.db.set_value(
-				"Accounts Settings", "Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0
+			frappe.db.set_single_value(
+				"Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0
 			)
 			submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
 			self.assertRaises(frappe.LinkExistsError, submitted_voucher.cancel)
@@ -273,7 +275,7 @@ class TestJournalEntry(unittest.TestCase):
 		jv.submit()
 
 		# create jv in USD, but account currency in INR
-		jv = make_journal_entry("_Test Bank - _TC", "_Test Receivable - _TC", 100, save=False)
+		jv = make_journal_entry("_Test Bank - _TC", "Debtors - _TC", 100, save=False)
 
 		jv.accounts[1].update({"party_type": "Customer", "party": "_Test Customer USD"})
 
@@ -287,10 +289,6 @@ class TestJournalEntry(unittest.TestCase):
 		jv.submit()
 
 	def test_inter_company_jv(self):
-		frappe.db.set_value("Account", "Sales Expenses - _TC", "inter_company_account", 1)
-		frappe.db.set_value("Account", "Buildings - _TC", "inter_company_account", 1)
-		frappe.db.set_value("Account", "Sales Expenses - _TC1", "inter_company_account", 1)
-		frappe.db.set_value("Account", "Buildings - _TC1", "inter_company_account", 1)
 		jv = make_journal_entry(
 			"Sales Expenses - _TC",
 			"Buildings - _TC",

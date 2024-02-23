@@ -125,6 +125,7 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 		this.serialized_buying_rates = this.get_serialized_buying_rates();
 
 		for(var i=0, j=data.length; i<j; i++) {
+			let diff = 0;
 			var sl = data[i];
 			sl.posting_datetime = sl.posting_date + " " + sl.posting_time;
 			var posting_datetime = frappe.datetime.str_to_obj(sl.posting_datetime);
@@ -140,18 +141,18 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 					var is_fifo = valuation_method == "FIFO";
 
 					if(sl.voucher_type=="Stock Reconciliation") {
-						var diff = (sl.qty_after_transaction * sl.valuation_rate) - item.closing_qty_value;
+						diff = (sl.qty_after_transaction * sl.valuation_rate) - item.closing_qty_value;
 						wh.fifo_stack = [[sl.qty_after_transaction, sl.valuation_rate, sl.posting_date]];
 						wh.balance_qty = sl.qty_after_transaction;
 						wh.balance_value = sl.valuation_rate * sl.qty_after_transaction;
 					} else {
-						var diff = me.get_value_diff(wh, sl, is_fifo);
+						diff = me.get_value_diff(wh, sl, is_fifo);
 					}
 				} else {
 					if(sl.voucher_type=="Stock Reconciliation") {
-						var diff = sl.qty_after_transaction - item.closing_qty_value;
+						diff = sl.qty_after_transaction - item.closing_qty_value;
 					} else {
-						var diff = sl.qty;
+						diff = sl.qty;
 					}
 				}
 

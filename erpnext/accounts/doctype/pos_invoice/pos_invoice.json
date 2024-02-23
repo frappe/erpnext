@@ -18,6 +18,7 @@
   "is_pos",
   "is_return",
   "update_billed_amount_in_sales_order",
+  "update_billed_amount_in_delivery_note",
   "column_break1",
   "company",
   "posting_date",
@@ -164,8 +165,6 @@
   "debit_to",
   "party_account_currency",
   "is_opening",
-  "c_form_applicable",
-  "c_form_no",
   "column_break8",
   "remarks",
   "sales_team_section_break",
@@ -345,7 +344,8 @@
    "no_copy": 1,
    "options": "POS Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -443,6 +443,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Mobile No",
+   "options": "Phone",
    "read_only": 1
   },
   {
@@ -1400,23 +1401,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "c_form_applicable",
-   "fieldtype": "Select",
-   "label": "C-Form Applicable",
-   "no_copy": 1,
-   "options": "No\nYes",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "c_form_no",
-   "fieldtype": "Link",
-   "label": "C-Form No",
-   "no_copy": 1,
-   "options": "C-Form",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break8",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
@@ -1567,16 +1551,22 @@
    "fieldtype": "Currency",
    "label": "Amount Eligible for Commission",
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: doc.is_return && doc.return_against",
+   "fieldname": "update_billed_amount_in_delivery_note",
+   "fieldtype": "Check",
+   "label": "Update Billed Amount in Delivery Note"
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2022-03-22 13:00:24.166684",
+ "modified": "2023-11-20 12:27:12.848149",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
- "name_case": "Title Case",
  "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [

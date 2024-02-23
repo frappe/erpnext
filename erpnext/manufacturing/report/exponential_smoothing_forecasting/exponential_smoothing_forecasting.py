@@ -96,37 +96,40 @@ class ForecastingReport(ExponentialSmoothingForecast):
 					value["avg"] = flt(sum(list_of_period_value)) / flt(sum(total_qty))
 
 	def get_data_for_forecast(self):
-		cond = ""
-		if self.filters.item_code:
-			cond = " AND soi.item_code = %s" % (frappe.db.escape(self.filters.item_code))
+		parent = frappe.qb.DocType(self.doctype)
+		child = frappe.qb.DocType(self.child_doctype)
 
-		warehouses = []
-		if self.filters.warehouse:
-			warehouses = get_child_warehouses(self.filters.warehouse)
-			cond += " AND soi.warehouse in ({})".format(",".join(["%s"] * len(warehouses)))
-
-		input_data = [self.filters.from_date, self.filters.company]
-		if warehouses:
-			input_data.extend(warehouses)
-
-		date_field = "posting_date" if self.doctype == "Delivery Note" else "transaction_date"
-
-		return frappe.db.sql(
-			"""
-			SELECT
-				so.{date_field} as posting_date, soi.item_code, soi.warehouse,
-				soi.item_name, soi.stock_qty as qty, soi.base_amount as amount
-			FROM
-				`tab{doc}` so, `tab{child_doc}` soi
-			WHERE
-				so.docstatus = 1 AND so.name = soi.parent AND
-				so.{date_field} < %s AND so.company = %s {cond}
-		""".format(
-				doc=self.doctype, child_doc=self.child_doctype, date_field=date_field, cond=cond
-			),
-			tuple(input_data),
-			as_dict=1,
+		date_field = (
+			"posting_date" if self.doctype in ("Delivery Note", "Sales Invoice") else "transaction_date"
 		)
+
+		query = (
+			frappe.qb.from_(parent)
+			.from_(child)
+			.select(
+				parent[date_field].as_("posting_date"),
+				child.item_code,
+				child.warehouse,
+				child.item_name,
+				child.stock_qty.as_("qty"),
+				child.base_amount.as_("amount"),
+			)
+			.where(
+				(parent.docstatus == 1)
+				& (parent.name == child.parent)
+				& (parent[date_field] < self.filters.from_date)
+				& (parent.company == self.filters.company)
+			)
+		)
+
+		if self.filters.item_code:
+			query = query.where(child.item_code == self.filters.item_code)
+
+		if self.filters.warehouse:
+			warehouses = get_child_warehouses(self.filters.warehouse) or []
+			query = query.where(child.warehouse.isin(warehouses))
+
+		return query.run(as_dict=True)
 
 	def prepare_final_data(self):
 		self.data = []

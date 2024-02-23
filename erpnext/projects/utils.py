@@ -25,7 +25,7 @@ def query_task(doctype, txt, searchfield, start, page_len, filters):
 			case when `%s` like %s then 0 else 1 end,
 			`%s`,
 			subject
-		limit %s, %s"""
+		limit %s offset %s"""
 		% (searchfield, "%s", "%s", match_conditions, "%s", searchfield, "%s", searchfield, "%s", "%s"),
-		(search_string, search_string, order_by_string, order_by_string, start, page_len),
+		(search_string, search_string, order_by_string, order_by_string, page_len, start),
 	)

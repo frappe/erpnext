@@ -18,4 +18,4 @@ def execute():
 			).run()
 
 		except Exception:
-			frappe.log_error(title="Failed to Patch SLA Status")
+			frappe.log_error("Failed to Patch SLA Status")

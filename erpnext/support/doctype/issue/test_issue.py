@@ -20,7 +20,7 @@ class TestSetUp(unittest.TestCase):
 		frappe.db.sql("delete from `tabSLA Fulfilled On Status`")
 		frappe.db.sql("delete from `tabPause SLA On Status`")
 		frappe.db.sql("delete from `tabService Day`")
-		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
+		frappe.db.set_single_value("Support Settings", "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
 

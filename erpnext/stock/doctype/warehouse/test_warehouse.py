@@ -38,6 +38,16 @@ class TestWarehouse(FrappeTestCase):
 			self.assertEqual(p_warehouse.name, child_warehouse.parent_warehouse)
 			self.assertEqual(child_warehouse.is_group, 0)
 
+	def test_naming(self):
+		company = "Wind Power LLC"
+		warehouse_name = "Named Warehouse - WP"
+		wh = frappe.get_doc(doctype="Warehouse", warehouse_name=warehouse_name, company=company).insert()
+		self.assertEqual(wh.name, warehouse_name)
+
+		warehouse_name = "Unnamed Warehouse"
+		wh = frappe.get_doc(doctype="Warehouse", warehouse_name=warehouse_name, company=company).insert()
+		self.assertIn(warehouse_name, wh.name)
+
 	def test_unlinking_warehouse_from_item_defaults(self):
 		company = "_Test Company"
 

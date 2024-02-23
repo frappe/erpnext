@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder.functions import IfNull
 from frappe.utils import flt
 
 
@@ -70,31 +71,33 @@ def get_columns(filters):
 	return columns
 
 
-def get_conditions(filters):
-	conditions = ""
-	values = []
+def get_consumed_details(filters):
+	item = frappe.qb.DocType("Item")
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	query = (
+		frappe.qb.from_(sle)
+		.from_(item)
+		.select(
+			sle.item_code,
+			item.item_name,
+			item.description,
+			item.stock_uom,
+			sle.actual_qty,
+			sle.stock_value_difference,
+			sle.voucher_no,
+			sle.voucher_type,
+		)
+		.where((sle.is_cancelled == 0) & (sle.item_code == item.name) & (sle.actual_qty < 0))
+	)
 
 	if filters.get("from_date") and filters.get("to_date"):
-		conditions = "and sle.posting_date>=%s and sle.posting_date<=%s"
-		values = [filters.get("from_date"), filters.get("to_date")]
+		query = query.where(
+			(sle.posting_date >= filters.get("from_date")) & (sle.posting_date <= filters.get("to_date"))
+		)
 
-	return conditions, values
-
-
-def get_consumed_details(filters):
-	conditions, values = get_conditions(filters)
 	consumed_details = {}
-
-	for d in frappe.db.sql(
-		"""select sle.item_code, i.item_name, i.description,
-		i.stock_uom, sle.actual_qty, sle.stock_value_difference,
-		sle.voucher_no, sle.voucher_type
-		from `tabStock Ledger Entry` sle, `tabItem` i
-		where sle.is_cancelled = 0 and sle.item_code=i.name and sle.actual_qty < 0 %s"""
-		% conditions,
-		values,
-		as_dict=1,
-	):
+	for d in query.run(as_dict=True):
 		consumed_details.setdefault(d.item_code, []).append(d)
 
 	return consumed_details
@@ -104,24 +107,54 @@ def get_suppliers_details(filters):
 	item_supplier_map = {}
 	supplier = filters.get("supplier")
 
-	for d in frappe.db.sql(
-		"""select pr.supplier, pri.item_code from
-		`tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri
-		where pr.name=pri.parent and pr.docstatus=1 and
-		pri.item_code=(select name from `tabItem` where
-			is_stock_item=1 and name=pri.item_code)""",
-		as_dict=1,
-	):
+	item = frappe.qb.DocType("Item")
+	pr = frappe.qb.DocType("Purchase Receipt")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
+
+	query = (
+		frappe.qb.from_(pr)
+		.from_(pr_item)
+		.select(pr.supplier, pr_item.item_code)
+		.where(
+			(pr.name == pr_item.parent)
+			& (pr.docstatus == 1)
+			& (
+				pr_item.item_code
+				== (
+					frappe.qb.from_(item)
+					.select(item.name)
+					.where((item.is_stock_item == 1) & (item.name == pr_item.item_code))
+				)
+			)
+		)
+	)
+
+	for d in query.run(as_dict=True):
 		item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
 
-	for d in frappe.db.sql(
-		"""select pr.supplier, pri.item_code from
-		`tabPurchase Invoice` pr, `tabPurchase Invoice Item` pri
-		where pr.name=pri.parent and pr.docstatus=1 and
-		ifnull(pr.update_stock, 0) = 1 and pri.item_code=(select name from `tabItem`
-			where is_stock_item=1 and name=pri.item_code)""",
-		as_dict=1,
-	):
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+
+	query = (
+		frappe.qb.from_(pi)
+		.from_(pi_item)
+		.select(pi.supplier, pi_item.item_code)
+		.where(
+			(pi.name == pi_item.parent)
+			& (pi.docstatus == 1)
+			& (IfNull(pi.update_stock, 0) == 1)
+			& (
+				pi_item.item_code
+				== (
+					frappe.qb.from_(item)
+					.select(item.name)
+					.where((item.is_stock_item == 1) & (item.name == pi_item.item_code))
+				)
+			)
+		)
+	)
+
+	for d in query.run(as_dict=True):
 		if d.item_code not in item_supplier_map:
 			item_supplier_map.setdefault(d.item_code, []).append(d.supplier)
 
@@ -138,7 +171,11 @@ def get_suppliers_details(filters):
 
 
 def get_material_transfer_vouchers():
-	return frappe.db.sql_list(
-		"""select name from `tabStock Entry` where
-		purpose='Material Transfer' and docstatus=1"""
+	se = frappe.qb.DocType("Stock Entry")
+	query = (
+		frappe.qb.from_(se)
+		.select(se.name)
+		.where((se.purpose == "Material Transfer") & (se.docstatus == 1))
 	)
+
+	return [r[0] for r in query.run()]

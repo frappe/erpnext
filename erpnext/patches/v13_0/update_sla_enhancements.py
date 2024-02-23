@@ -46,7 +46,7 @@ def execute():
 					{"response_time": response_time, "resolution_time": resolution_time},
 				)
 			if priority.parenttype == "Service Level":
-				if not priority.parent in priority_dict:
+				if priority.parent not in priority_dict:
 					priority_dict[priority.parent] = []
 				priority_dict[priority.parent].append(priority)
 

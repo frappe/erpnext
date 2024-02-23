@@ -97,8 +97,8 @@ def get_columns(filters):
 			if filters["period"] == "Yearly":
 				labels = [
 					_("Budget") + " " + str(year[0]),
-					_("Actual ") + " " + str(year[0]),
-					_("Variance ") + " " + str(year[0]),
+					_("Actual") + " " + str(year[0]),
+					_("Variance") + " " + str(year[0]),
 				]
 				for label in labels:
 					columns.append(
@@ -383,8 +383,8 @@ def get_chart_data(filters, columns, data):
 		"data": {
 			"labels": labels,
 			"datasets": [
-				{"name": "Budget", "chartType": "bar", "values": budget_values},
-				{"name": "Actual Expense", "chartType": "bar", "values": actual_values},
+				{"name": _("Budget"), "chartType": "bar", "values": budget_values},
+				{"name": _("Actual Expense"), "chartType": "bar", "values": actual_values},
 			],
 		},
 		"type": "bar",

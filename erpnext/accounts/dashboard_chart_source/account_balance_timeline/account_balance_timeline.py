@@ -76,7 +76,7 @@ def get(
 
 def build_result(account, dates, gl_entries):
 	result = [[getdate(date), 0.0] for date in dates]
-	root_type = frappe.db.get_value("Account", account, "root_type")
+	root_type = frappe.get_cached_value("Account", account, "root_type")
 
 	# start with the first date
 	date_index = 0

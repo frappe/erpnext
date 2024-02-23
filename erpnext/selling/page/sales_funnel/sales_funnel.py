@@ -1,10 +1,11 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from itertools import groupby
 
 import frappe
-import pandas as pd
 from frappe import _
+from frappe.utils import flt
 
 from erpnext.accounts.report.utils import convert
 
@@ -89,28 +90,21 @@ def get_opp_by_lead_source(from_date, to_date, company):
 			for x in opportunities
 		]
 
-		df = (
-			pd.DataFrame(cp_opportunities)
-			.groupby(["source", "sales_stage"], as_index=False)
-			.agg({"compound_amount": "sum"})
-		)
+		summary = {}
+		sales_stages = set()
+		group_key = lambda o: (o["source"], o["sales_stage"])  # noqa
+		for (source, sales_stage), rows in groupby(cp_opportunities, group_key):
+			summary.setdefault(source, {})[sales_stage] = sum(r["compound_amount"] for r in rows)
+			sales_stages.add(sales_stage)
 
-		result = {}
-		result["labels"] = list(set(df.source.values))
-		result["datasets"] = []
+		pivot_table = []
+		for sales_stage in sales_stages:
+			row = []
+			for source, sales_stage_values in summary.items():
+				row.append(flt(sales_stage_values.get(sales_stage)))
+			pivot_table.append({"chartType": "bar", "name": sales_stage, "values": row})
 
-		for s in set(df.sales_stage.values):
-			result["datasets"].append(
-				{"name": s, "values": [0] * len(result["labels"]), "chartType": "bar"}
-			)
-
-		for row in df.itertuples():
-			source_index = result["labels"].index(row.source)
-
-			for dataset in result["datasets"]:
-				if dataset["name"] == row.sales_stage:
-					dataset["values"][source_index] = row.compound_amount
-
+		result = {"datasets": pivot_table, "labels": list(summary.keys())}
 		return result
 
 	else:
@@ -148,20 +142,14 @@ def get_pipeline_data(from_date, to_date, company):
 			for x in opportunities
 		]
 
-		df = (
-			pd.DataFrame(cp_opportunities)
-			.groupby(["sales_stage"], as_index=True)
-			.agg({"compound_amount": "sum"})
-			.to_dict()
-		)
+		summary = {}
+		for sales_stage, rows in groupby(cp_opportunities, lambda o: o["sales_stage"]):
+			summary[sales_stage] = sum(flt(r["compound_amount"]) for r in rows)
 
-		result = {}
-		result["labels"] = df["compound_amount"].keys()
-		result["datasets"] = []
-		result["datasets"].append(
-			{"name": _("Total Amount"), "values": df["compound_amount"].values(), "chartType": "bar"}
-		)
-
+		result = {
+			"labels": list(summary.keys()),
+			"datasets": [{"name": _("Total Amount"), "values": list(summary.values()), "chartType": "bar"}],
+		}
 		return result
 
 	else:

@@ -61,7 +61,6 @@ def execute():
 		doc.load_items_from_bom()
 		doc.calculate_rate_and_amount()
 		set_expense_account(doc)
-		doc.make_batches("t_warehouse")
 
 		if doc.docstatus == 0:
 			doc.save()
@@ -96,8 +95,7 @@ def repost_stock_entry(doc):
 			make_sl_entries(sl_entries, True)
 		except Exception:
 			print(f"SLE entries not posted for the stock entry {doc.name}")
-			traceback = frappe.get_traceback()
-			frappe.log_error(traceback)
+			doc.log_error("Stock respost failed")
 
 
 def get_sle_for_target_warehouse(doc, sl_entries, finished_item_row):

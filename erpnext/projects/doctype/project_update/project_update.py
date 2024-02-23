@@ -7,6 +7,25 @@ from frappe.model.document import Document
 
 
 class ProjectUpdate(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.projects.doctype.project_user.project_user import ProjectUser
+
+		amended_from: DF.Link | None
+		date: DF.Date | None
+		naming_series: DF.Data | None
+		project: DF.Link
+		sent: DF.Check
+		time: DF.Time | None
+		users: DF.Table[ProjectUser]
+	# end: auto-generated types
+
 	pass
 
 
@@ -28,7 +47,7 @@ def daily_reminder():
 		for drafts in draft:
 			number_of_drafts = drafts[0]
 		update = frappe.db.sql(
-			"""SELECT name,date,time,progress,progress_details FROM `tabProject Update` WHERE `tabProject Update`.project = %s AND date = DATE_ADD(CURDATE(), INTERVAL -1 DAY);""",
+			"""SELECT name,date,time,progress,progress_details FROM `tabProject Update` WHERE `tabProject Update`.project = %s AND date = DATE_ADD(CURRENT_DATE, INTERVAL -1 DAY);""",
 			project_name,
 		)
 		email_sending(project_name, frequency, date_start, date_end, progress, number_of_drafts, update)
@@ -39,7 +58,7 @@ def email_sending(
 ):
 
 	holiday = frappe.db.sql(
-		"""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURDATE();"""
+		"""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURRENT_DATE;"""
 	)
 	msg = (
 		"<p>Project Name: "

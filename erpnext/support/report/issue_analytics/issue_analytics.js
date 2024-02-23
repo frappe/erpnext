@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-/* eslint-disable */
+
 
 frappe.query_reports["Issue Analytics"] = {
 	"filters": [
@@ -93,11 +93,11 @@ frappe.query_reports["Issue Analytics"] = {
 			events: {
 				onCheckRow: function(data) {
 					if (data && data.length) {
-						row_name = data[2].content;
-						row_values = data.slice(3).map(function(column) {
+						let row_name = data[2].content;
+						let row_values = data.slice(3).map(function(column) {
 							return column.content;
 						})
-						entry  = {
+						let entry  = {
 							'name': row_name,
 							'values': row_values
 						}

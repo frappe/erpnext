@@ -10,6 +10,29 @@ from frappe.utils import add_days, add_months, add_years, getdate, nowdate
 
 
 class AssetMaintenance(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.assets.doctype.asset_maintenance_task.asset_maintenance_task import (
+			AssetMaintenanceTask,
+		)
+
+		asset_category: DF.ReadOnly | None
+		asset_maintenance_tasks: DF.Table[AssetMaintenanceTask]
+		asset_name: DF.Link
+		company: DF.Link
+		item_code: DF.ReadOnly | None
+		item_name: DF.ReadOnly | None
+		maintenance_manager: DF.Data | None
+		maintenance_manager_name: DF.ReadOnly | None
+		maintenance_team: DF.Link
+	# end: auto-generated types
+
 	def validate(self):
 		for task in self.get("asset_maintenance_tasks"):
 			if task.end_date and (getdate(task.start_date) >= getdate(task.end_date)):
@@ -42,22 +65,23 @@ class AssetMaintenance(Document):
 				maintenance_log.db_set("maintenance_status", "Cancelled")
 
 
-@frappe.whitelist()
 def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, next_due_date):
 	team_member = frappe.db.get_value("User", assign_to_member, "email")
 	args = {
 		"doctype": "Asset Maintenance",
-		"assign_to": [team_member],
+		"assign_to": team_member,
 		"name": asset_maintenance_name,
 		"description": maintenance_task,
 		"date": next_due_date,
 	}
 	if not frappe.db.sql(
 		"""select owner from `tabToDo`
-		where reference_type=%(doctype)s and reference_name=%(name)s and status="Open"
+		where reference_type=%(doctype)s and reference_name=%(name)s and status='Open'
 		and owner=%(assign_to)s""",
 		args,
 	):
+		# assign_to function expects a list
+		args["assign_to"] = [args["assign_to"]]
 		assign_to.add(args)
 
 
@@ -78,12 +102,16 @@ def calculate_next_due_date(
 		next_due_date = add_days(start_date, 7)
 	if periodicity == "Monthly":
 		next_due_date = add_months(start_date, 1)
+	if periodicity == "Quarterly":
+		next_due_date = add_months(start_date, 3)
+	if periodicity == "Half-yearly":
+		next_due_date = add_months(start_date, 6)
 	if periodicity == "Yearly":
 		next_due_date = add_years(start_date, 1)
 	if periodicity == "2 Yearly":
 		next_due_date = add_years(start_date, 2)
-	if periodicity == "Quarterly":
-		next_due_date = add_months(start_date, 3)
+	if periodicity == "3 Yearly":
+		next_due_date = add_years(start_date, 3)
 	if end_date and (
 		(start_date and start_date >= end_date)
 		or (last_completion_date and last_completion_date >= end_date)

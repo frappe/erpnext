@@ -14,7 +14,6 @@
   "applicable_modules_section",
   "selling",
   "buying",
-  "hr",
   "section_break_7",
   "terms",
   "terms_and_conditions_help"
@@ -34,7 +33,6 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "in_list_view": 1,
    "label": "Disabled"
   },
   {
@@ -61,19 +59,15 @@
    "default": "1",
    "fieldname": "selling",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Selling"
   },
   {
    "default": "1",
    "fieldname": "buying",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Buying"
-  },
-  {
-   "default": "1",
-   "fieldname": "hr",
-   "fieldtype": "Check",
-   "label": "HR"
   },
   {
    "fieldname": "section_break_7",
@@ -83,10 +77,11 @@
  "icon": "icon-legal",
  "idx": 1,
  "links": [],
- "modified": "2020-06-16 22:54:38.094844",
+ "modified": "2023-02-01 14:33:39.246532",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Terms and Conditions",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -140,5 +135,6 @@
  "quick_entry": 1,
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

@@ -6,6 +6,7 @@
  "creation": "2013-01-10 16:34:24",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "supplier_group_name",
   "parent_supplier_group",
@@ -106,10 +107,11 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:10:49.228407",
+ "modified": "2022-12-24 11:16:12.486719",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Supplier Group",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_supplier_group",
  "owner": "Administrator",
  "permissions": [
@@ -156,8 +158,18 @@
    "permlevel": 1,
    "read": 1,
    "role": "Purchase User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
   }
  ],
  "show_name_in_global_search": 1,
- "sort_order": "ASC"
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "states": []
 }

@@ -20,7 +20,7 @@ frappe.ui.form.on("Project", {
 	onload: function (frm) {
 		const so = frm.get_docfield("sales_order");
 		so.get_route_options_for_new_doc = () => {
-			if (frm.is_new()) return;
+			if (frm.is_new()) return {};
 			return {
 				"customer": frm.doc.customer,
 				"project_name": frm.doc.name
@@ -68,6 +68,10 @@ frappe.ui.form.on("Project", {
 				frm.events.create_duplicate(frm);
 			}, __("Actions"));
 
+			frm.add_custom_button(__('Update Total Purchase Cost'), () => {
+				frm.events.update_total_purchase_cost(frm);
+			}, __("Actions"));
+
 			frm.trigger("set_project_status_button");
 
 
@@ -90,6 +94,22 @@ frappe.ui.form.on("Project", {
 		}
 
 
+	},
+
+	update_total_purchase_cost: function(frm) {
+		frappe.call({
+			method: "erpnext.projects.doctype.project.project.recalculate_project_total_purchase_cost",
+			args: {project: frm.doc.name},
+			freeze: true,
+			freeze_message: __('Recalculating Purchase Cost against this Project...'),
+			callback: function(r) {
+				if (r && !r.exc) {
+					frappe.msgprint(__('Total Purchase Cost has been updated'));
+					frm.refresh();
+				}
+			}
+
+		});
 	},
 
 	set_project_status_button: function(frm) {
@@ -152,6 +172,7 @@ function open_form(frm, doctype, child_doctype, parentfield) {
 		new_child_doc.parentfield = parentfield;
 		new_child_doc.parenttype = doctype;
 		new_doc[parentfield] = [new_child_doc];
+		new_doc.project = frm.doc.name;
 
 		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 	});

@@ -12,7 +12,6 @@ frappe.ui.form.on('Payment Order', {
 		});
 
 		frm.set_df_property('references', 'cannot_add_rows', true);
-		frm.set_df_property('references', 'cannot_delete_rows', true);
 	},
 	refresh: function(frm) {
 		if (frm.doc.docstatus == 0) {
@@ -125,7 +124,7 @@ frappe.ui.form.on('Payment Order', {
 			return frappe.call({
 				method: "erpnext.accounts.doctype.payment_order.payment_order.make_payment_records",
 				args: {
-					"name": me.frm.doc.name,
+					"name": frm.doc.name,
 					"supplier": args.supplier,
 					"mode_of_payment": args.mode_of_payment
 				},

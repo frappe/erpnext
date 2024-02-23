@@ -4,41 +4,9 @@
 
 import frappe
 from frappe import _
+from pypika import Order
 
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
-
-# and bom_no is not null and bom_no !=''
-
-mapper = {
-	"Sales Order": {
-		"fields": """ item_code as production_item, item_name as production_item_name, stock_uom,
-			stock_qty as qty_to_manufacture, `tabSales Order Item`.parent as name, bom_no, warehouse,
-			`tabSales Order Item`.delivery_date, `tabSales Order`.base_grand_total """,
-		"filters": """`tabSales Order Item`.docstatus = 1 and stock_qty > produced_qty
-			and `tabSales Order`.per_delivered < 100.0""",
-	},
-	"Material Request": {
-		"fields": """ item_code as production_item, item_name as production_item_name, stock_uom,
-			stock_qty as qty_to_manufacture, `tabMaterial Request Item`.parent as name, bom_no, warehouse,
-			`tabMaterial Request Item`.schedule_date """,
-		"filters": """`tabMaterial Request`.docstatus = 1 and `tabMaterial Request`.per_ordered < 100
-			and `tabMaterial Request`.material_request_type = 'Manufacture' """,
-	},
-	"Work Order": {
-		"fields": """ production_item, item_name as production_item_name, planned_start_date,
-			stock_uom, qty as qty_to_manufacture, name, bom_no, fg_warehouse as warehouse """,
-		"filters": "docstatus = 1 and status not in ('Completed', 'Stopped')",
-	},
-}
-
-order_mapper = {
-	"Sales Order": {
-		"Delivery Date": "`tabSales Order Item`.delivery_date asc",
-		"Total Amount": "`tabSales Order`.base_grand_total desc",
-	},
-	"Material Request": {"Required Date": "`tabMaterial Request Item`.schedule_date asc"},
-	"Work Order": {"Planned Start Date": "planned_start_date asc"},
-}
 
 
 def execute(filters=None):
@@ -63,40 +31,81 @@ class ProductionPlanReport(object):
 		return self.columns, self.data
 
 	def get_open_orders(self):
-		doctype = (
-			"`tabWork Order`"
-			if self.filters.based_on == "Work Order"
-			else "`tab{doc}`, `tab{doc} Item`".format(doc=self.filters.based_on)
-		)
+		doctype, order_by = self.filters.based_on, self.filters.order_by
 
-		filters = mapper.get(self.filters.based_on)["filters"]
-		filters = self.prepare_other_conditions(filters, self.filters.based_on)
-		order_by = " ORDER BY %s" % (order_mapper[self.filters.based_on][self.filters.order_by])
+		parent = frappe.qb.DocType(doctype)
+		query = None
 
-		self.orders = frappe.db.sql(
-			""" SELECT {fields} from {doctype}
-			WHERE {filters} {order_by}""".format(
-				doctype=doctype,
-				filters=filters,
-				order_by=order_by,
-				fields=mapper.get(self.filters.based_on)["fields"],
-			),
-			tuple(self.filters.docnames),
-			as_dict=1,
-		)
+		if doctype == "Work Order":
+			query = (
+				frappe.qb.from_(parent)
+				.select(
+					parent.production_item,
+					parent.item_name.as_("production_item_name"),
+					parent.planned_start_date,
+					parent.stock_uom,
+					parent.qty.as_("qty_to_manufacture"),
+					parent.name,
+					parent.bom_no,
+					parent.fg_warehouse.as_("warehouse"),
+				)
+				.where(parent.status.notin(["Completed", "Stopped", "Closed"]))
+			)
 
-	def prepare_other_conditions(self, filters, doctype):
-		if self.filters.docnames:
-			field = "name" if doctype == "Work Order" else "`tab{} Item`.parent".format(doctype)
-			filters += " and %s in (%s)" % (field, ",".join(["%s"] * len(self.filters.docnames)))
+			if order_by == "Planned Start Date":
+				query = query.orderby(parent.planned_start_date, order=Order.asc)
 
-		if doctype != "Work Order":
-			filters += " and `tab{doc}`.name = `tab{doc} Item`.parent".format(doc=doctype)
+			if self.filters.docnames:
+				query = query.where(parent.name.isin(self.filters.docnames))
+
+		else:
+			child = frappe.qb.DocType(f"{doctype} Item")
+			query = (
+				frappe.qb.from_(parent)
+				.from_(child)
+				.select(
+					child.bom_no,
+					child.stock_uom,
+					child.warehouse,
+					child.parent.as_("name"),
+					child.item_code.as_("production_item"),
+					child.stock_qty.as_("qty_to_manufacture"),
+					child.item_name.as_("production_item_name"),
+				)
+				.where(parent.name == child.parent)
+			)
+
+			if self.filters.docnames:
+				query = query.where(child.parent.isin(self.filters.docnames))
+
+			if doctype == "Sales Order":
+				query = query.select(child.delivery_date, parent.base_grand_total,).where(
+					(child.stock_qty > child.produced_qty)
+					& (parent.per_delivered < 100.0)
+					& (parent.status.notin(["Completed", "Closed"]))
+				)
+
+				if order_by == "Delivery Date":
+					query = query.orderby(child.delivery_date, order=Order.asc)
+				elif order_by == "Total Amount":
+					query = query.orderby(parent.base_grand_total, order=Order.desc)
+
+			elif doctype == "Material Request":
+				query = query.select(child.schedule_date,).where(
+					(parent.per_ordered < 100)
+					& (parent.material_request_type == "Manufacture")
+					& (parent.status != "Stopped")
+				)
+
+				if order_by == "Required Date":
+					query = query.orderby(child.schedule_date, order=Order.asc)
+
+		query = query.where(parent.docstatus == 1)
 
 		if self.filters.company:
-			filters += " and `tab%s`.company = %s" % (doctype, frappe.db.escape(self.filters.company))
+			query = query.where(parent.company == self.filters.company)
 
-		return filters
+		self.orders = query.run(as_dict=True)
 
 	def get_raw_materials(self):
 		if not self.orders:
@@ -134,29 +143,29 @@ class ProductionPlanReport(object):
 
 				bom_nos.append(bom_no)
 
-			bom_doctype = (
+			bom_item_doctype = (
 				"BOM Explosion Item" if self.filters.include_subassembly_raw_materials else "BOM Item"
 			)
 
-			qty_field = (
-				"qty_consumed_per_unit"
-				if self.filters.include_subassembly_raw_materials
-				else "(bom_item.qty / bom.quantity)"
-			)
+			bom = frappe.qb.DocType("BOM")
+			bom_item = frappe.qb.DocType(bom_item_doctype)
 
-			raw_materials = frappe.db.sql(
-				""" SELECT bom_item.parent, bom_item.item_code,
-					bom_item.item_name as raw_material_name, {0} as required_qty_per_unit
-				FROM
-					`tabBOM` as bom, `tab{1}` as bom_item
-				WHERE
-					bom_item.parent in ({2}) and bom_item.parent = bom.name and bom.docstatus = 1
-			""".format(
-					qty_field, bom_doctype, ",".join(["%s"] * len(bom_nos))
-				),
-				tuple(bom_nos),
-				as_dict=1,
-			)
+			if self.filters.include_subassembly_raw_materials:
+				qty_field = bom_item.qty_consumed_per_unit
+			else:
+				qty_field = bom_item.qty / bom.quantity
+
+			raw_materials = (
+				frappe.qb.from_(bom)
+				.from_(bom_item)
+				.select(
+					bom_item.parent,
+					bom_item.item_code,
+					bom_item.item_name.as_("raw_material_name"),
+					qty_field.as_("required_qty_per_unit"),
+				)
+				.where((bom_item.parent.isin(bom_nos)) & (bom_item.parent == bom.name) & (bom.docstatus == 1))
+			).run(as_dict=True)
 
 		if not raw_materials:
 			return

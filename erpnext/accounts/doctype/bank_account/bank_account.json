@@ -13,6 +13,7 @@
   "account_type",
   "account_subtype",
   "column_break_7",
+  "disabled",
   "is_default",
   "is_company_account",
   "company",
@@ -27,7 +28,6 @@
   "bank_account_no",
   "address_and_contact",
   "address_html",
-  "website",
   "column_break_13",
   "contact_html",
   "integration_details_section",
@@ -157,11 +157,6 @@
    "label": "Address HTML"
   },
   {
-   "fieldname": "website",
-   "fieldtype": "Data",
-   "label": "Website"
-  },
-  {
    "fieldname": "column_break_13",
    "fieldtype": "Column Break"
   },
@@ -205,10 +200,16 @@
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Branch Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "links": [],
- "modified": "2020-10-23 16:48:06.303658",
+ "modified": "2023-09-22 21:31:34.763977",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
@@ -243,5 +244,6 @@
  "search_fields": "bank,account",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

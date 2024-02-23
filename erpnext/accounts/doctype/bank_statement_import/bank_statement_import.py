@@ -20,6 +20,30 @@ INVALID_VALUES = ("", None)
 
 
 class BankStatementImport(DataImport):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		bank: DF.Link | None
+		bank_account: DF.Link
+		company: DF.Link
+		google_sheets_url: DF.Data | None
+		import_file: DF.Attach | None
+		import_type: DF.Literal["", "Insert New Records", "Update Existing Records"]
+		mute_emails: DF.Check
+		reference_doctype: DF.Link
+		show_failed_logs: DF.Check
+		statement_import_log: DF.Code | None
+		status: DF.Literal["Pending", "Success", "Partial Success", "Error"]
+		submit_after_import: DF.Check
+		template_options: DF.Code | None
+		template_warnings: DF.Code | None
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(BankStatementImport, self).__init__(*args, **kwargs)
 
@@ -53,21 +77,20 @@ class BankStatementImport(DataImport):
 		if "Bank Account" not in json.dumps(preview["columns"]):
 			frappe.throw(_("Please add the Bank Account column"))
 
-		from frappe.core.page.background_jobs.background_jobs import get_info
+		from frappe.utils.background_jobs import is_job_enqueued
 		from frappe.utils.scheduler import is_scheduler_inactive
 
 		if is_scheduler_inactive() and not frappe.flags.in_test:
 			frappe.throw(_("Scheduler is inactive. Cannot import data."), title=_("Scheduler Inactive"))
 
-		enqueued_jobs = [d.get("job_name") for d in get_info()]
-
-		if self.name not in enqueued_jobs:
+		job_id = f"bank_statement_import::{self.name}"
+		if not is_job_enqueued(job_id):
 			enqueue(
 				start_import,
 				queue="default",
 				timeout=6000,
 				event="data_import",
-				job_name=self.name,
+				job_id=job_id,
 				data_import=self.name,
 				bank_account=self.bank_account,
 				import_file_path=self.import_file,
@@ -136,7 +159,7 @@ def start_import(
 	except Exception:
 		frappe.db.rollback()
 		data_import.db_set("status", "Error")
-		frappe.log_error(title=data_import.name)
+		data_import.log_error("Bank Statement Import failed")
 	finally:
 		frappe.flags.in_import = False
 

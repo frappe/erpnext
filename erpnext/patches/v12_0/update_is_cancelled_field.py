@@ -20,7 +20,7 @@ def execute():
 			"""
 				UPDATE `tab{doctype}`
 				SET is_cancelled = 0
-				where is_cancelled in ('', NULL, 'No')""".format(
+				where is_cancelled in ('', 'No') or is_cancelled is NULL""".format(
 				doctype=doctype
 			)
 		)

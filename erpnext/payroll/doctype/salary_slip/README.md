@@ -1,1 +1,0 @@
-Details of monthly salary paid for an Employee.

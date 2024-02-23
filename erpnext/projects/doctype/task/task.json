@@ -42,7 +42,6 @@
   "act_end_date",
   "sb_costing",
   "total_costing_amount",
-  "total_expense_claim",
   "column_break_20",
   "total_billing_amount",
   "sb_more_info",
@@ -53,10 +52,12 @@
   "company",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "template_task"
  ],
  "fields": [
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "subject",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -66,6 +67,7 @@
    "search_index": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "project",
    "fieldtype": "Link",
@@ -151,6 +153,7 @@
    "label": "Timeline"
   },
   {
+   "bold": 1,
    "fieldname": "exp_start_date",
    "fieldtype": "Date",
    "label": "Expected Start Date",
@@ -241,7 +244,7 @@
   {
    "fieldname": "act_start_date",
    "fieldtype": "Date",
-   "label": "Actual Start Date (via Time Sheet)",
+   "label": "Actual Start Date (via Timesheet)",
    "oldfieldname": "act_start_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -249,7 +252,7 @@
   {
    "fieldname": "actual_time",
    "fieldtype": "Float",
-   "label": "Actual Time (in Hours via Time Sheet)",
+   "label": "Actual Time in Hours (via Timesheet)",
    "read_only": 1
   },
   {
@@ -259,7 +262,7 @@
   {
    "fieldname": "act_end_date",
    "fieldtype": "Date",
-   "label": "Actual End Date (via Time Sheet)",
+   "label": "Actual End Date (via Timesheet)",
    "oldfieldname": "act_end_date",
    "oldfieldtype": "Date",
    "read_only": 1
@@ -273,16 +276,9 @@
   {
    "fieldname": "total_costing_amount",
    "fieldtype": "Currency",
-   "label": "Total Costing Amount (via Time Sheet)",
+   "label": "Total Costing Amount (via Timesheet)",
    "oldfieldname": "actual_budget",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_expense_claim",
-   "fieldtype": "Currency",
-   "label": "Total Expense Claim (via Expense Claim)",
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -293,7 +289,7 @@
   {
    "fieldname": "total_billing_amount",
    "fieldtype": "Currency",
-   "label": "Total Billing Amount (via Time Sheet)",
+   "label": "Total Billable Amount (via Timesheet)",
    "read_only": 1
   },
   {
@@ -390,6 +386,12 @@
    "fieldtype": "Date",
    "label": "Completed On",
    "mandatory_depends_on": "eval: doc.status == \"Completed\""
+  },
+  {
+   "fieldname": "template_task",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Template Task"
   }
  ],
  "icon": "fa fa-check",
@@ -397,7 +399,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2022-01-29 13:58:47.005241",
+ "modified": "2024-01-08 16:00:41.296203",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
@@ -417,6 +419,7 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "search_fields": "subject",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,

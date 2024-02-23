@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "REPOST-ITEM-VAL-.######",
+ "autoname": "hash",
  "creation": "2022-01-11 15:03:38.273179",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -22,9 +22,15 @@
   "amended_from",
   "error_section",
   "error_log",
+  "reposting_info_section",
+  "reposting_data_file",
   "items_to_be_repost",
   "distinct_item_and_warehouse",
-  "current_index"
+  "column_break_o1sj",
+  "total_reposting_count",
+  "current_index",
+  "gl_reposting_index",
+  "affected_transactions"
  ],
  "fields": [
   {
@@ -48,13 +54,15 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "label": "Posting Date",
+   "read_only_depends_on": "eval: doc.based_on == \"Transaction\"",
    "reqd": 1
   },
   {
    "fetch_from": "voucher_no.posting_time",
    "fieldname": "posting_time",
    "fieldtype": "Time",
-   "label": "Posting Time"
+   "label": "Posting Time",
+   "read_only_depends_on": "eval: doc.based_on == \"Transaction\""
   },
   {
    "default": "Queued",
@@ -172,16 +180,55 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "affected_transactions",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Affected Transactions",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "gl_reposting_index",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "GL reposting index",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reposting_info_section",
+   "fieldtype": "Section Break",
+   "label": "Reposting Info"
+  },
+  {
+   "fieldname": "column_break_o1sj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_reposting_count",
+   "fieldtype": "Int",
+   "label": "Total Reposting Count",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reposting_data_file",
+   "fieldtype": "Attach",
+   "label": "Reposting Data File",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-18 10:57:33.450907",
+ "modified": "2023-05-31 12:48:57.138693",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {

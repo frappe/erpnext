@@ -6,12 +6,34 @@ from collections import Counter
 
 import frappe
 from frappe import _
+from frappe.desk.form.assign_to import add as add_assignment
 from frappe.model.document import Document
-from frappe.utils import get_url, getdate
+from frappe.share import add_docshare
+from frappe.utils import get_url, getdate, now
 from frappe.utils.verified_command import get_signed_params
 
 
 class Appointment(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		appointment_with: DF.Link | None
+		calendar_event: DF.Link | None
+		customer_details: DF.LongText | None
+		customer_email: DF.Data
+		customer_name: DF.Data
+		customer_phone_number: DF.Data | None
+		customer_skype: DF.Data | None
+		party: DF.DynamicLink | None
+		scheduled_time: DF.Datetime
+		status: DF.Literal["Open", "Unverified", "Closed"]
+	# end: auto-generated types
+
 	def find_lead_by_email(self):
 		lead_list = frappe.get_list(
 			"Lead", filters={"email_id": self.customer_email}, ignore_permissions=True
@@ -33,7 +55,7 @@ class Appointment(Document):
 			"Appointment", filters={"scheduled_time": self.scheduled_time}
 		)
 		number_of_agents = frappe.db.get_single_value("Appointment Booking Settings", "number_of_agents")
-		if not number_of_agents == 0:
+		if number_of_agents != 0:
 			if number_of_appointments_in_same_slot >= number_of_agents:
 				frappe.throw(_("Time slot is not available"))
 		# Link lead
@@ -54,7 +76,7 @@ class Appointment(Document):
 			self.create_calendar_event()
 		else:
 			# Set status to unverified
-			self.status = "Unverified"
+			self.db_set("status", "Unverified")
 			# Send email to confirm
 			self.send_confirmation_email()
 
@@ -88,7 +110,7 @@ class Appointment(Document):
 		cal_event.save(ignore_permissions=True)
 
 	def set_verified(self, email):
-		if not email == self.customer_email:
+		if email != self.customer_email:
 			frappe.throw(_("Email verification failed."))
 		# Create new lead
 		self.create_lead_and_link()
@@ -104,35 +126,44 @@ class Appointment(Document):
 		# Return if already linked
 		if self.party:
 			return
+
 		lead = frappe.get_doc(
 			{
 				"doctype": "Lead",
 				"lead_name": self.customer_name,
 				"email_id": self.customer_email,
-				"notes": self.customer_details,
 				"phone": self.customer_phone_number,
 			}
 		)
+
+		if self.customer_details:
+			lead.append(
+				"notes",
+				{
+					"note": self.customer_details,
+					"added_by": frappe.session.user,
+					"added_on": now(),
+				},
+			)
+
 		lead.insert(ignore_permissions=True)
+
 		# Link lead
 		self.party = lead.name
 
 	def auto_assign(self):
-		from frappe.desk.form.assign_to import add as add_assignemnt
-
 		existing_assignee = self.get_assignee_from_latest_opportunity()
 		if existing_assignee:
 			# If the latest opportunity is assigned to someone
 			# Assign the appointment to the same
-			add_assignemnt({"doctype": self.doctype, "name": self.name, "assign_to": [existing_assignee]})
+			self.assign_agent(existing_assignee)
 			return
 		if self._assign:
 			return
 		available_agents = _get_agents_sorted_by_asc_workload(getdate(self.scheduled_time))
 		for agent in available_agents:
 			if _check_agent_availability(agent, self.scheduled_time):
-				agent = agent[0]
-				add_assignemnt({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
+				self.assign_agent(agent[0])
 			break
 
 	def get_assignee_from_latest_opportunity(self):
@@ -187,9 +218,15 @@ class Appointment(Document):
 		params = {"email": self.customer_email, "appointment": self.name}
 		return get_url(verify_route + "?" + get_signed_params(params))
 
+	def assign_agent(self, agent):
+		if not frappe.has_permission(doc=self, user=agent):
+			add_docshare(self.doctype, self.name, agent, flags={"ignore_share_permission": True})
+
+		add_assignment({"doctype": self.doctype, "name": self.name, "assign_to": [agent]})
+
 
 def _get_agents_sorted_by_asc_workload(date):
-	appointments = frappe.db.get_list("Appointment", fields="*")
+	appointments = frappe.get_all("Appointment", fields="*")
 	agent_list = _get_agent_list_as_strings()
 	if not appointments:
 		return agent_list
@@ -214,7 +251,7 @@ def _get_agent_list_as_strings():
 
 
 def _check_agent_availability(agent_email, scheduled_time):
-	appointemnts_at_scheduled_time = frappe.get_list(
+	appointemnts_at_scheduled_time = frappe.get_all(
 		"Appointment", filters={"scheduled_time": scheduled_time}
 	)
 	for appointment in appointemnts_at_scheduled_time:

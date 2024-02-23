@@ -18,7 +18,7 @@ def reorder_item():
 	if not (frappe.db.a_row_exists("Company") and frappe.db.a_row_exists("Fiscal Year")):
 		return
 
-	if cint(frappe.db.get_value("Stock Settings", None, "auto_indent")):
+	if cint(frappe.db.get_single_value("Stock Settings", "auto_indent")):
 		return _reorder_item()
 
 
@@ -67,7 +67,7 @@ def _reorder_item():
 		else:
 			projected_qty = flt(item_warehouse_projected_qty.get(item_code, {}).get(warehouse))
 
-		if (reorder_level or reorder_qty) and projected_qty < reorder_level:
+		if (reorder_level or reorder_qty) and projected_qty <= reorder_level:
 			deficiency = reorder_level - projected_qty
 			if deficiency > reorder_qty:
 				reorder_qty = deficiency
@@ -105,7 +105,7 @@ def get_item_warehouse_projected_qty(items_to_consider):
 	for item_code, warehouse, projected_qty in frappe.db.sql(
 		"""select item_code, warehouse, projected_qty
 		from tabBin where item_code in ({0})
-			and (warehouse != "" and warehouse is not null)""".format(
+			and (warehouse != '' and warehouse is not null)""".format(
 			", ".join(["%s"] * len(items_to_consider))
 		),
 		items_to_consider,
@@ -136,14 +136,14 @@ def create_material_request(material_requests):
 	mr_list = []
 	exceptions_list = []
 
-	def _log_exception():
+	def _log_exception(mr):
 		if frappe.local.message_log:
 			exceptions_list.extend(frappe.local.message_log)
 			frappe.local.message_log = []
 		else:
-			exceptions_list.append(frappe.get_traceback())
+			exceptions_list.append(frappe.get_traceback(with_context=True))
 
-		frappe.log_error(frappe.get_traceback())
+		mr.log_error("Unable to create material request")
 
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
@@ -207,12 +207,12 @@ def create_material_request(material_requests):
 				mr_list.append(mr)
 
 			except Exception:
-				_log_exception()
+				_log_exception(mr)
 
 	if mr_list:
 		if getattr(frappe.local, "reorder_email_notify", None) is None:
 			frappe.local.reorder_email_notify = cint(
-				frappe.db.get_value("Stock Settings", None, "reorder_email_notify")
+				frappe.db.get_single_value("Stock Settings", "reorder_email_notify")
 			)
 
 		if frappe.local.reorder_email_notify:
@@ -246,18 +246,20 @@ def notify_errors(exceptions_list):
 		_("Dear System Manager,")
 		+ "<br>"
 		+ _(
-			"An error occured for certain Items while creating Material Requests based on Re-order level. \
-		Please rectify these issues :"
+			"An error occured for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
 		)
 		+ "<br>"
 	)
 
 	for exception in exceptions_list:
-		exception = json.loads(exception)
-		error_message = """<div class='small text-muted'>{0}</div><br>""".format(
-			_(exception.get("message"))
-		)
-		content += error_message
+		try:
+			exception = json.loads(exception)
+			error_message = """<div class='small text-muted'>{0}</div><br>""".format(
+				_(exception.get("message"))
+			)
+			content += error_message
+		except Exception:
+			pass
 
 	content += _("Regards,") + "<br>" + _("Administrator")
 

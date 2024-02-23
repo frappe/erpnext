@@ -28,16 +28,38 @@ frappe.ui.form.on('Asset Repair', {
 				}
 			};
 		};
+
+		frm.set_query("serial_and_batch_bundle", "stock_items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': row.item_code,
+					'voucher_type': doc.doctype,
+					'voucher_no': ["in", [doc.name, ""]],
+					'is_cancelled': 0,
+				}
+			}
+		});
 	},
 
 	refresh: function(frm) {
 		if (frm.doc.docstatus) {
-			frm.add_custom_button("View General Ledger", function() {
+			frm.add_custom_button(__("View General Ledger"), function() {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name
 				};
 				frappe.set_route("query-report", "General Ledger");
 			});
+		}
+
+		let sbb_field = frm.get_docfield('stock_items', 'serial_and_batch_bundle');
+		if (sbb_field) {
+			sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					'item_code': row.doc.item_code,
+					'voucher_type': frm.doc.doctype,
+				}
+			};
 		}
 	},
 
@@ -76,7 +98,7 @@ frappe.ui.form.on('Asset Repair Consumed Item', {
 			'warehouse': frm.doc.warehouse,
 			'qty': item.consumed_quantity,
 			'serial_no': item.serial_no,
-			'company': frm.doc.company
+			'company': frm.doc.company,
 		};
 
 		frappe.call({

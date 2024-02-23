@@ -10,7 +10,17 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class AuthorizationControl(TransactionBase):
-	def get_appr_user_role(self, det, doctype_name, total, based_on, condition, item, company):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+	# end: auto-generated types
+
+	def get_appr_user_role(self, det, doctype_name, total, based_on, condition, master_name, company):
 		amt_list, appr_users, appr_roles = [], [], []
 		users, roles = "", ""
 		if det:
@@ -47,11 +57,11 @@ class AuthorizationControl(TransactionBase):
 				frappe.msgprint(_("Not authroized since {0} exceeds limits").format(_(based_on)))
 				frappe.throw(_("Can be approved by {0}").format(comma_or(appr_roles + appr_users)))
 
-	def validate_auth_rule(self, doctype_name, total, based_on, cond, company, item=""):
+	def validate_auth_rule(self, doctype_name, total, based_on, cond, company, master_name=""):
 		chk = 1
 		add_cond1, add_cond2 = "", ""
-		if based_on == "Itemwise Discount":
-			add_cond1 += " and master_name = " + frappe.db.escape(cstr(item))
+		if based_on in ["Itemwise Discount", "Item Group wise Discount"]:
+			add_cond1 += " and master_name = " + frappe.db.escape(cstr(master_name))
 			itemwise_exists = frappe.db.sql(
 				"""select value from `tabAuthorization Rule`
 				where transaction = %s and value <= %s
@@ -71,11 +81,11 @@ class AuthorizationControl(TransactionBase):
 
 			if itemwise_exists:
 				self.get_appr_user_role(
-					itemwise_exists, doctype_name, total, based_on, cond + add_cond1, item, company
+					itemwise_exists, doctype_name, total, based_on, cond + add_cond1, master_name, company
 				)
 				chk = 0
 		if chk == 1:
-			if based_on == "Itemwise Discount":
+			if based_on in ["Itemwise Discount", "Item Group wise Discount"]:
 				add_cond2 += " and ifnull(master_name,'') = ''"
 
 			appr = frappe.db.sql(
@@ -95,7 +105,9 @@ class AuthorizationControl(TransactionBase):
 					(doctype_name, total, based_on),
 				)
 
-			self.get_appr_user_role(appr, doctype_name, total, based_on, cond + add_cond2, item, company)
+			self.get_appr_user_role(
+				appr, doctype_name, total, based_on, cond + add_cond2, master_name, company
+			)
 
 	def bifurcate_based_on_type(self, doctype_name, total, av_dis, based_on, doc_obj, val, company):
 		add_cond = ""
@@ -123,6 +135,12 @@ class AuthorizationControl(TransactionBase):
 					self.validate_auth_rule(
 						doctype_name, t.discount_percentage, based_on, add_cond, company, t.item_code
 					)
+		elif based_on == "Item Group wise Discount":
+			if doc_obj:
+				for t in doc_obj.get("items"):
+					self.validate_auth_rule(
+						doctype_name, t.discount_percentage, based_on, add_cond, company, t.item_group
+					)
 		else:
 			self.validate_auth_rule(doctype_name, auth_value, based_on, add_cond, company)
 
@@ -135,8 +153,8 @@ class AuthorizationControl(TransactionBase):
 			price_list_rate, base_rate = 0, 0
 			for d in doc_obj.get("items"):
 				if d.base_rate:
-					price_list_rate += flt(d.base_price_list_rate) or flt(d.base_rate)
-					base_rate += flt(d.base_rate)
+					price_list_rate += (flt(d.base_price_list_rate) or flt(d.base_rate)) * flt(d.qty)
+					base_rate += flt(d.base_rate) * flt(d.qty)
 			if doc_obj.get("discount_amount"):
 				base_rate -= flt(doc_obj.discount_amount)
 
@@ -148,6 +166,7 @@ class AuthorizationControl(TransactionBase):
 			"Average Discount",
 			"Customerwise Discount",
 			"Itemwise Discount",
+			"Item Group wise Discount",
 		]
 
 		# Check for authorization set for individual user
@@ -166,7 +185,10 @@ class AuthorizationControl(TransactionBase):
 
 		# Remove user specific rules from global authorization rules
 		for r in based_on:
-			if r in final_based_on and r != "Itemwise Discount":
+			if r in final_based_on and r not in [
+				"Itemwise Discount",
+				"Item Group wise Discount",
+			]:
 				final_based_on.remove(r)
 
 		# Check for authorization set on particular roles
@@ -194,7 +216,10 @@ class AuthorizationControl(TransactionBase):
 
 		# Remove role specific rules from global authorization rules
 		for r in based_on:
-			if r in final_based_on and r != "Itemwise Discount":
+			if r in final_based_on and r not in [
+				"Itemwise Discount",
+				"Item Group wise Discount",
+			]:
 				final_based_on.remove(r)
 
 		# Check for global authorization
@@ -248,61 +273,3 @@ class AuthorizationControl(TransactionBase):
 			)
 
 		return rule
-
-	# related to payroll module only
-	def get_approver_name(self, doctype_name, total, doc_obj=""):
-		app_user = []
-		app_specific_user = []
-		rule = {}
-
-		if doc_obj:
-			if doctype_name == "Expense Claim":
-				rule = self.get_value_based_rule(
-					doctype_name, doc_obj.employee, doc_obj.total_claimed_amount, doc_obj.company
-				)
-			elif doctype_name == "Appraisal":
-				rule = frappe.db.sql(
-					"""select name, to_emp, to_designation, approving_role, approving_user
-					from `tabAuthorization Rule` where transaction=%s
-					and (to_emp=%s or to_designation IN (select designation from `tabEmployee` where name=%s))
-					and company = %s and docstatus!=2""",
-					(doctype_name, doc_obj.employee, doc_obj.employee, doc_obj.company),
-					as_dict=1,
-				)
-
-				if not rule:
-					rule = frappe.db.sql(
-						"""select name, to_emp, to_designation, approving_role, approving_user
-						from `tabAuthorization Rule`
-						where transaction=%s and (to_emp=%s or
-							to_designation IN (select designation from `tabEmployee` where name=%s))
-							and ifnull(company,'') = '' and docstatus!=2""",
-						(doctype_name, doc_obj.employee, doc_obj.employee),
-						as_dict=1,
-					)
-
-			if rule:
-				for m in rule:
-					if m["to_emp"] or m["to_designation"]:
-						if m["approving_user"]:
-							app_specific_user.append(m["approving_user"])
-						elif m["approving_role"]:
-							user_lst = [
-								z[0]
-								for z in frappe.db.sql(
-									"""select distinct t1.name
-								from `tabUser` t1, `tabHas Role` t2 where t2.role=%s
-								and t2.parent=t1.name and t1.name !='Administrator'
-								and t1.name != 'Guest' and t1.docstatus !=2""",
-									m["approving_role"],
-								)
-							]
-
-							for x in user_lst:
-								if not x in app_user:
-									app_user.append(x)
-
-			if len(app_specific_user) > 0:
-				return app_specific_user
-			else:
-				return app_user

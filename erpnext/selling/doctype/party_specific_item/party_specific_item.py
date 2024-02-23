@@ -7,6 +7,20 @@ from frappe.model.document import Document
 
 
 class PartySpecificItem(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		based_on_value: DF.DynamicLink
+		party: DF.DynamicLink
+		party_type: DF.Literal["Customer", "Supplier"]
+		restrict_based_on: DF.Literal["Item", "Item Group", "Brand"]
+	# end: auto-generated types
+
 	def validate(self):
 		exists = frappe.db.exists(
 			{

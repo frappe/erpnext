@@ -41,7 +41,7 @@ frappe.ui.form.on('Batch', {
 		if(!frm.is_new()) {
 			frappe.call({
 				method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
-				args: {batch_no: frm.doc.name},
+				args: {batch_no: frm.doc.name, item_code: frm.doc.item},
 				callback: (r) => {
 					if(!r.message) {
 						return;

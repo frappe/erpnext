@@ -11,13 +11,56 @@ from frappe.core.utils import get_parent_doc
 from frappe.email.inbox import link_communication_to_document
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
+from frappe.query_builder import Interval
+from frappe.query_builder.functions import Now
 from frappe.utils import date_diff, get_datetime, now_datetime, time_diff_in_seconds
 from frappe.utils.user import is_website_user
 
 
 class Issue(Document):
-	def get_feed(self):
-		return "{0}: {1}".format(_(self.status), self.subject)
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		agreement_status: DF.Literal["First Response Due", "Resolution Due", "Fulfilled", "Failed"]
+		attachment: DF.Attach | None
+		avg_response_time: DF.Duration | None
+		company: DF.Link | None
+		contact: DF.Link | None
+		content_type: DF.Data | None
+		customer: DF.Link | None
+		customer_name: DF.Data | None
+		description: DF.TextEditor | None
+		email_account: DF.Link | None
+		first_responded_on: DF.Datetime | None
+		first_response_time: DF.Duration | None
+		issue_split_from: DF.Link | None
+		issue_type: DF.Link | None
+		lead: DF.Link | None
+		naming_series: DF.Literal["ISS-.YYYY.-"]
+		on_hold_since: DF.Datetime | None
+		opening_date: DF.Date | None
+		opening_time: DF.Time | None
+		priority: DF.Link | None
+		project: DF.Link | None
+		raised_by: DF.Data | None
+		resolution_by: DF.Datetime | None
+		resolution_date: DF.Datetime | None
+		resolution_details: DF.TextEditor | None
+		resolution_time: DF.Duration | None
+		response_by: DF.Datetime | None
+		service_level_agreement: DF.Link | None
+		service_level_agreement_creation: DF.Datetime | None
+		status: DF.Literal["Open", "Replied", "On Hold", "Resolved", "Closed"]
+		subject: DF.Data
+		total_hold_time: DF.Duration | None
+		user_resolution_time: DF.Duration | None
+		via_customer_portal: DF.Check
+	# end: auto-generated types
 
 	def validate(self):
 		if self.is_new() and self.via_customer_portal:
@@ -187,18 +230,20 @@ def set_status(name, status):
 def auto_close_tickets():
 	"""Auto-close replied support tickets after 7 days"""
 	auto_close_after_days = (
-		frappe.db.get_value("Support Settings", "Support Settings", "close_issue_after_days") or 7
+		frappe.db.get_single_value("Support Settings", "close_issue_after_days") or 7
 	)
 
-	issues = frappe.db.sql(
-		""" select name from tabIssue where status='Replied' and
-		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """,
-		(auto_close_after_days),
-		as_dict=True,
-	)
+	table = frappe.qb.DocType("Issue")
+	issues = (
+		frappe.qb.from_(table)
+		.select(table.name)
+		.where(
+			(table.modified < (Now() - Interval(days=auto_close_after_days))) & (table.status == "Replied")
+		)
+	).run(pluck=True)
 
 	for issue in issues:
-		doc = frappe.get_doc("Issue", issue.get("name"))
+		doc = frappe.get_doc("Issue", issue)
 		doc.status = "Closed"
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True

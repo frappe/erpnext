@@ -12,6 +12,9 @@ frappe.ui.form.on('Maintenance Visit', {
 		// filters for serial no based on item code
 		if (frm.doc.maintenance_type === "Scheduled") {
 			let item_code = frm.doc.purposes[0].item_code;
+			if (!item_code) {
+				return;
+			}
 			frappe.call({
 				method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.get_serial_nos_from_schedule",
 				args: {

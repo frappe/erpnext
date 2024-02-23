@@ -7,6 +7,7 @@ import sys
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.query_builder.functions import Sum
 from frappe.utils import getdate
 
 
@@ -15,6 +16,21 @@ class VariablePathNotFound(frappe.ValidationError):
 
 
 class SupplierScorecardVariable(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		description: DF.SmallText | None
+		is_custom: DF.Check
+		param_name: DF.Data
+		path: DF.Data
+		variable_label: DF.Data
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_path_exists()
 
@@ -420,6 +436,40 @@ def get_total_shipments(scorecard):
 	if not data:
 		data = 0
 	return data
+
+
+def get_ordered_qty(scorecard):
+	"""Returns the total number of ordered quantity (based on Purchase Orders)"""
+
+	po = frappe.qb.DocType("Purchase Order")
+
+	return (
+		frappe.qb.from_(po)
+		.select(Sum(po.total_qty))
+		.where(
+			(po.supplier == scorecard.supplier)
+			& (po.docstatus == 1)
+			& (po.transaction_date >= scorecard.get("start_date"))
+			& (po.transaction_date <= scorecard.get("end_date"))
+		)
+	).run(as_list=True)[0][0] or 0
+
+
+def get_invoiced_qty(scorecard):
+	"""Returns the total number of invoiced quantity (based on Purchase Invoice)"""
+
+	pi = frappe.qb.DocType("Purchase Invoice")
+
+	return (
+		frappe.qb.from_(pi)
+		.select(Sum(pi.total_qty))
+		.where(
+			(pi.supplier == scorecard.supplier)
+			& (pi.docstatus == 1)
+			& (pi.posting_date >= scorecard.get("start_date"))
+			& (pi.posting_date <= scorecard.get("end_date"))
+		)
+	).run(as_list=True)[0][0] or 0
 
 
 def get_rfq_total_number(scorecard):

@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, scrub
+from frappe import _, qb, scrub
 from frappe.utils import getdate, nowdate
 
 
@@ -21,17 +21,53 @@ class PartyLedgerSummaryReport(object):
 			frappe.throw(_("From Date must be before To Date"))
 
 		self.filters.party_type = args.get("party_type")
-		self.party_naming_by = frappe.db.get_value(
-			args.get("naming_by")[0], None, args.get("naming_by")[1]
+		self.party_naming_by = frappe.db.get_single_value(
+			args.get("naming_by")[0], args.get("naming_by")[1]
 		)
 
 		self.get_gl_entries()
+		self.get_additional_columns()
 		self.get_return_invoices()
 		self.get_party_adjustment_amounts()
 
 		columns = self.get_columns()
 		data = self.get_data()
 		return columns, data
+
+	def get_additional_columns(self):
+		"""
+		Additional Columns for 'User Permission' based access control
+		"""
+
+		if self.filters.party_type == "Customer":
+			self.territories = frappe._dict({})
+			self.customer_group = frappe._dict({})
+
+			customer = qb.DocType("Customer")
+			result = (
+				frappe.qb.from_(customer)
+				.select(
+					customer.name, customer.territory, customer.customer_group, customer.default_sales_partner
+				)
+				.where((customer.disabled == 0))
+				.run(as_dict=True)
+			)
+
+			for x in result:
+				self.territories[x.name] = x.territory
+				self.customer_group[x.name] = x.customer_group
+		else:
+			self.supplier_group = frappe._dict({})
+			supplier = qb.DocType("Supplier")
+			result = (
+				frappe.qb.from_(supplier)
+				.select(supplier.name, supplier.supplier_group)
+				.where((supplier.disabled == 0))
+				.run(as_dict=True)
+			)
+
+			for x in result:
+				self.supplier_group[x.name] = x.supplier_group
 
 	def get_columns(self):
 		columns = [
@@ -116,6 +152,35 @@ class PartyLedgerSummaryReport(object):
 			},
 		]
 
+		# Hidden columns for handling 'User Permissions'
+		if self.filters.party_type == "Customer":
+			columns += [
+				{
+					"label": _("Territory"),
+					"fieldname": "territory",
+					"fieldtype": "Link",
+					"options": "Territory",
+					"hidden": 1,
+				},
+				{
+					"label": _("Customer Group"),
+					"fieldname": "customer_group",
+					"fieldtype": "Link",
+					"options": "Customer Group",
+					"hidden": 1,
+				},
+			]
+		else:
+			columns += [
+				{
+					"label": _("Supplier Group"),
+					"fieldname": "supplier_group",
+					"fieldtype": "Link",
+					"options": "Supplier Group",
+					"hidden": 1,
+				}
+			]
+
 		return columns
 
 	def get_data(self):
@@ -142,6 +207,12 @@ class PartyLedgerSummaryReport(object):
 					}
 				),
 			)
+
+			if self.filters.party_type == "Customer":
+				self.party_data[gle.party].update({"territory": self.territories.get(gle.party)})
+				self.party_data[gle.party].update({"customer_group": self.customer_group.get(gle.party)})
+			else:
+				self.party_data[gle.party].update({"supplier_group": self.supplier_group.get(gle.party)})
 
 			amount = gle.get(invoice_dr_or_cr) - gle.get(reverse_dr_or_cr)
 			self.party_data[gle.party].closing_balance += amount
@@ -220,8 +291,8 @@ class PartyLedgerSummaryReport(object):
 
 		if self.filters.party_type == "Customer":
 			if self.filters.get("customer_group"):
-				lft, rgt = frappe.db.get_value(
-					"Customer Group", self.filters.get("customer_group"), ["lft", "rgt"]
+				lft, rgt = frappe.get_cached_value(
+					"Customer Group", self.filters["customer_group"], ["lft", "rgt"]
 				)
 
 				conditions.append(
@@ -293,12 +364,32 @@ class PartyLedgerSummaryReport(object):
 
 	def get_party_adjustment_amounts(self):
 		conditions = self.prepare_conditions()
-		income_or_expense = (
-			"Expense Account" if self.filters.party_type == "Customer" else "Income Account"
+		account_type = "Expense Account" if self.filters.party_type == "Customer" else "Income Account"
+		income_or_expense_accounts = frappe.db.get_all(
+			"Account", filters={"account_type": account_type, "company": self.filters.company}, pluck="name"
 		)
 		invoice_dr_or_cr = "debit" if self.filters.party_type == "Customer" else "credit"
 		reverse_dr_or_cr = "credit" if self.filters.party_type == "Customer" else "debit"
 		round_off_account = frappe.get_cached_value("Company", self.filters.company, "round_off_account")
+
+		gl = qb.DocType("GL Entry")
+		if not income_or_expense_accounts:
+			# prevent empty 'in' condition
+			income_or_expense_accounts.append("")
+		else:
+			# escape '%' in account name
+			# ignoring frappe.db.escape as it replaces single quotes with double quotes
+			income_or_expense_accounts = [x.replace("%", "%%") for x in income_or_expense_accounts]
+
+		accounts_query = (
+			qb.from_(gl)
+			.select(gl.voucher_type, gl.voucher_no)
+			.where(
+				(gl.account.isin(income_or_expense_accounts))
+				& (gl.posting_date.gte(self.filters.from_date))
+				& (gl.posting_date.lte(self.filters.to_date))
+			)
+		)
 
 		gl_entries = frappe.db.sql(
 			"""
@@ -309,16 +400,15 @@ class PartyLedgerSummaryReport(object):
 			where
 				docstatus < 2 and is_cancelled = 0
 				and (voucher_type, voucher_no) in (
-					select voucher_type, voucher_no from `tabGL Entry` gle, `tabAccount` acc
-					where acc.name = gle.account and acc.account_type = '{income_or_expense}'
-					and gle.posting_date between %(from_date)s and %(to_date)s and gle.docstatus < 2
+				{accounts_query}
 				) and (voucher_type, voucher_no) in (
 					select voucher_type, voucher_no from `tabGL Entry` gle
 					where gle.party_type=%(party_type)s and ifnull(party, '') != ''
 					and gle.posting_date between %(from_date)s and %(to_date)s and gle.docstatus < 2 {conditions}
 				)
-		""".format(
-				conditions=conditions, income_or_expense=income_or_expense
+			""".format(
+				accounts_query=accounts_query,
+				conditions=conditions,
 			),
 			self.filters,
 			as_dict=True,
@@ -342,7 +432,7 @@ class PartyLedgerSummaryReport(object):
 				elif gle.party:
 					parties.setdefault(gle.party, 0)
 					parties[gle.party] += gle.get(reverse_dr_or_cr) - gle.get(invoice_dr_or_cr)
-				elif frappe.get_cached_value("Account", gle.account, "account_type") == income_or_expense:
+				elif frappe.get_cached_value("Account", gle.account, "account_type") == account_type:
 					accounts.setdefault(gle.account, 0)
 					accounts[gle.account] += gle.get(invoice_dr_or_cr) - gle.get(reverse_dr_or_cr)
 				else:

@@ -3,13 +3,18 @@
 
 
 import frappe
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt
 
 from erpnext.accounts.party import get_due_date
 from erpnext.exceptions import PartyDisabled, PartyFrozen
-from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
+from erpnext.selling.doctype.customer.customer import (
+	get_credit_limit,
+	get_customer_outstanding,
+	parse_full_name,
+)
 from erpnext.tests.utils import create_test_contact_and_address
 
 test_ignore = ["Price List"]
@@ -45,7 +50,8 @@ class TestCustomer(FrappeTestCase):
 		c_doc.customer_name = "Testing Customer"
 		c_doc.customer_group = "_Testing Customer Group"
 		c_doc.payment_terms = c_doc.default_price_list = ""
-		c_doc.accounts = c_doc.credit_limits = []
+		c_doc.accounts = []
+		c_doc.credit_limits = []
 		c_doc.insert()
 		c_doc.get_customer_group_details()
 		self.assertEqual(c_doc.payment_terms, "_Test Payment Term Template 3")
@@ -340,6 +346,53 @@ class TestCustomer(FrappeTestCase):
 		due_date = get_due_date("2017-01-22", "Customer", "_Test Customer")
 		self.assertEqual(due_date, "2017-01-22")
 
+	def test_serach_fields_for_customer(self):
+		from erpnext.controllers.queries import customer_query
+
+		frappe.db.set_single_value("Selling Settings", "cust_master_name", "Naming Series")
+
+		make_property_setter(
+			"Customer", None, "search_fields", "customer_group", "Data", for_doctype="Doctype"
+		)
+
+		data = customer_query(
+			"Customer", "_Test Customer", "", 0, 20, filters={"name": "_Test Customer"}, as_dict=True
+		)
+
+		self.assertEqual(data[0].name, "_Test Customer")
+		self.assertEqual(data[0].customer_group, "_Test Customer Group")
+		self.assertTrue("territory" not in data[0])
+
+		make_property_setter(
+			"Customer", None, "search_fields", "customer_group, territory", "Data", for_doctype="Doctype"
+		)
+		data = customer_query(
+			"Customer", "_Test Customer", "", 0, 20, filters={"name": "_Test Customer"}, as_dict=True
+		)
+
+		self.assertEqual(data[0].name, "_Test Customer")
+		self.assertEqual(data[0].customer_group, "_Test Customer Group")
+		self.assertEqual(data[0].territory, "_Test Territory")
+		self.assertTrue("territory" in data[0])
+
+		frappe.db.set_single_value("Selling Settings", "cust_master_name", "Customer Name")
+
+	def test_parse_full_name(self):
+		first, middle, last = parse_full_name("John")
+		self.assertEqual(first, "John")
+		self.assertEqual(middle, None)
+		self.assertEqual(last, None)
+
+		first, middle, last = parse_full_name("John Doe")
+		self.assertEqual(first, "John")
+		self.assertEqual(middle, None)
+		self.assertEqual(last, "Doe")
+
+		first, middle, last = parse_full_name("John Michael Doe")
+		self.assertEqual(first, "John")
+		self.assertEqual(middle, "Michael")
+		self.assertEqual(last, "Doe")
+
 
 def get_customer_dict(customer_name):
 	return {
@@ -366,7 +419,20 @@ def set_credit_limit(customer, company, credit_limit):
 		customer.credit_limits[-1].db_insert()
 
 
-def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
+def create_internal_customer(
+	customer_name=None, represents_company=None, allowed_to_interact_with=None
+):
+	if not customer_name:
+		customer_name = represents_company
+	if not allowed_to_interact_with:
+		allowed_to_interact_with = represents_company
+
+	exisiting_representative = frappe.db.get_value(
+		"Customer", {"represents_company": represents_company}
+	)
+	if exisiting_representative:
+		return exisiting_representative
+
 	if not frappe.db.exists("Customer", customer_name):
 		customer = frappe.get_doc(
 			{

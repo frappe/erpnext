@@ -1,23 +1,28 @@
 {
  "actions": [],
- "autoname": "MAT-BIN-.YYYY.-.#####",
+ "autoname": "hash",
  "creation": "2013-01-10 16:34:25",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "warehouse",
   "item_code",
-  "reserved_qty",
+  "column_break_yreo",
+  "warehouse",
+  "section_break_stag",
   "actual_qty",
-  "ordered_qty",
-  "indented_qty",
   "planned_qty",
+  "indented_qty",
+  "ordered_qty",
   "projected_qty",
+  "column_break_xn5j",
+  "reserved_qty",
   "reserved_qty_for_production",
   "reserved_qty_for_sub_contract",
-  "ma_rate",
+  "reserved_qty_for_production_plan",
+  "reserved_stock",
+  "section_break_pmrs",
   "stock_uom",
-  "fcfs_rate",
+  "column_break_0slj",
   "valuation_rate",
   "stock_value"
  ],
@@ -47,15 +52,14 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "read_only": 1,
-   "reqd": 1,
-   "search_index": 1
+   "reqd": 1
   },
   {
    "default": "0.00",
    "fieldname": "reserved_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Reserved Quantity",
+   "label": "Reserved Qty",
    "oldfieldname": "reserved_qty",
    "oldfieldtype": "Currency",
    "read_only": 1
@@ -66,7 +70,7 @@
    "fieldtype": "Float",
    "in_filter": 1,
    "in_list_view": 1,
-   "label": "Actual Quantity",
+   "label": "Actual Qty",
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
    "read_only": 1
@@ -76,7 +80,7 @@
    "fieldname": "ordered_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Ordered Quantity",
+   "label": "Ordered Qty",
    "oldfieldname": "ordered_qty",
    "oldfieldtype": "Currency",
    "read_only": 1
@@ -85,7 +89,7 @@
    "default": "0.00",
    "fieldname": "indented_qty",
    "fieldtype": "Float",
-   "label": "Requested Quantity",
+   "label": "Requested Qty",
    "oldfieldname": "indented_qty",
    "oldfieldtype": "Currency",
    "read_only": 1
@@ -115,19 +119,8 @@
   {
    "fieldname": "reserved_qty_for_sub_contract",
    "fieldtype": "Float",
-   "label": "Reserved Qty for sub contract",
+   "label": "Reserved Qty for Subcontract",
    "read_only": 1
-  },
-  {
-   "fieldname": "ma_rate",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Moving Average Rate",
-   "oldfieldname": "ma_rate",
-   "oldfieldtype": "Currency",
-   "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1
   },
   {
    "fieldname": "stock_uom",
@@ -138,17 +131,6 @@
    "oldfieldtype": "Data",
    "options": "UOM",
    "read_only": 1
-  },
-  {
-   "fieldname": "fcfs_rate",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "FCFS Rate",
-   "oldfieldname": "fcfs_rate",
-   "oldfieldtype": "Currency",
-   "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1
   },
   {
    "fieldname": "valuation_rate",
@@ -165,17 +147,50 @@
    "oldfieldname": "stock_value",
    "oldfieldtype": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "reserved_qty_for_production_plan",
+   "fieldtype": "Float",
+   "label": "Reserved Qty for Production Plan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_stag",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_yreo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_xn5j",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_pmrs",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_0slj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "reserved_stock",
+   "fieldtype": "Float",
+   "label": "Reserved Stock",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "idx": 1,
  "in_create": 1,
  "links": [],
- "modified": "2022-01-30 17:04:54.715288",
+ "modified": "2023-11-01 16:51:17.079107",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",
- "naming_rule": "Expression (old style)",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [
   {

@@ -11,6 +11,38 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class InstallationNote(TransactionBase):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.selling.doctype.installation_note_item.installation_note_item import (
+			InstallationNoteItem,
+		)
+
+		address_display: DF.SmallText | None
+		amended_from: DF.Link | None
+		company: DF.Link
+		contact_display: DF.SmallText | None
+		contact_email: DF.Data | None
+		contact_mobile: DF.SmallText | None
+		contact_person: DF.Link | None
+		customer: DF.Link
+		customer_address: DF.Link | None
+		customer_group: DF.Link | None
+		customer_name: DF.Data | None
+		inst_date: DF.Date
+		inst_time: DF.Time | None
+		items: DF.Table[InstallationNoteItem]
+		naming_series: DF.Literal["MAT-INS-.YYYY.-"]
+		remarks: DF.SmallText | None
+		status: DF.Literal["Draft", "Submitted", "Cancelled"]
+		territory: DF.Link
+	# end: auto-generated types
+
 	def __init__(self, *args, **kwargs):
 		super(InstallationNote, self).__init__(*args, **kwargs)
 		self.status_updater = [
@@ -87,13 +119,13 @@ class InstallationNote(TransactionBase):
 			frappe.throw(_("Please pull items from Delivery Note"))
 
 	def on_update(self):
-		frappe.db.set(self, "status", "Draft")
+		self.db_set("status", "Draft")
 
 	def on_submit(self):
 		self.validate_serial_no()
 		self.update_prevdoc_status()
-		frappe.db.set(self, "status", "Submitted")
+		self.db_set("status", "Submitted")
 
 	def on_cancel(self):
 		self.update_prevdoc_status()
-		frappe.db.set(self, "status", "Cancelled")
+		self.db_set("status", "Cancelled")

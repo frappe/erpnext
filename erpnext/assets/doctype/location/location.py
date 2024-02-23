@@ -13,6 +13,27 @@ EARTH_RADIUS = 6378137
 
 
 class Location(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		area: DF.Float
+		area_uom: DF.Link | None
+		is_container: DF.Check
+		is_group: DF.Check
+		latitude: DF.Float
+		lft: DF.Int
+		location_name: DF.Data
+		longitude: DF.Float
+		old_parent: DF.Data | None
+		parent_location: DF.Link | None
+		rgt: DF.Int
+	# end: auto-generated types
+
 	nsm_parent_field = "parent_location"
 
 	def validate(self):
@@ -200,11 +221,11 @@ def get_children(doctype, parent=None, location=None, is_root=False):
 			name as value,
 			is_group as expandable
 		from
-			`tab{doctype}` comp
+			`tabLocation` comp
 		where
 			ifnull(parent_location, "")={parent}
 		""".format(
-			doctype=doctype, parent=frappe.db.escape(parent)
+			parent=frappe.db.escape(parent)
 		),
 		as_dict=1,
 	)

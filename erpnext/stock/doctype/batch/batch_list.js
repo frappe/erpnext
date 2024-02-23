@@ -9,6 +9,6 @@ frappe.listview_settings['Batch'] = {
 			return [__("Expired"), "red", "expiry_date,not in,|expiry_date,<=,Today|batch_qty,>,0|disabled,=,0"]
 		} else {
 			return [__("Active"), "green", "batch_qty,>,0|disabled,=,0"];
-		};
+		}
 	}
 };

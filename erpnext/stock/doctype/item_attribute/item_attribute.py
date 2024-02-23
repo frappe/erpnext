@@ -19,6 +19,24 @@ class ItemAttributeIncrementError(frappe.ValidationError):
 
 
 class ItemAttribute(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.stock.doctype.item_attribute_value.item_attribute_value import ItemAttributeValue
+
+		attribute_name: DF.Data
+		from_range: DF.Float
+		increment: DF.Float
+		item_attribute_values: DF.Table[ItemAttributeValue]
+		numeric_values: DF.Check
+		to_range: DF.Float
+	# end: auto-generated types
+
 	def __setup__(self):
 		self.flags.ignore_these_exceptions_in_test = [InvalidItemAttributeValueError]
 
@@ -74,11 +92,10 @@ class ItemAttribute(Document):
 	def validate_duplication(self):
 		values, abbrs = [], []
 		for d in self.item_attribute_values:
-			d.abbr = d.abbr.upper()
-			if d.attribute_value in values:
-				frappe.throw(_("{0} must appear only once").format(d.attribute_value))
+			if d.attribute_value.lower() in map(str.lower, values):
+				frappe.throw(_("Attribute value: {0} must appear only once").format(d.attribute_value.title()))
 			values.append(d.attribute_value)
 
-			if d.abbr in abbrs:
-				frappe.throw(_("{0} must appear only once").format(d.abbr))
+			if d.abbr.lower() in map(str.lower, abbrs):
+				frappe.throw(_("Abbreviation: {0} must appear only once").format(d.abbr.title()))
 			abbrs.append(d.abbr)

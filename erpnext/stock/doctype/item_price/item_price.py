@@ -3,8 +3,10 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
+from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Cast_
 from frappe.utils import getdate
 
 
@@ -13,12 +15,42 @@ class ItemPriceDuplicateItem(frappe.ValidationError):
 
 
 class ItemPrice(Document):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		batch_no: DF.Link | None
+		brand: DF.Link | None
+		buying: DF.Check
+		currency: DF.Link | None
+		customer: DF.Link | None
+		item_code: DF.Link
+		item_description: DF.Text | None
+		item_name: DF.Data | None
+		lead_time_days: DF.Int
+		note: DF.Text | None
+		packing_unit: DF.Int
+		price_list: DF.Link
+		price_list_rate: DF.Currency
+		reference: DF.Data | None
+		selling: DF.Check
+		supplier: DF.Link | None
+		uom: DF.Link | None
+		valid_from: DF.Date | None
+		valid_upto: DF.Date | None
+	# end: auto-generated types
+
 	def validate(self):
 		self.validate_item()
 		self.validate_dates()
 		self.update_price_list_details()
 		self.update_item_details()
 		self.check_duplicates()
+		self.validate_item_template()
 
 	def validate_item(self):
 		if not frappe.db.exists("Item", self.item_code):
@@ -47,35 +79,63 @@ class ItemPrice(Document):
 				"Item", self.item_code, ["item_name", "description"]
 			)
 
-	def check_duplicates(self):
-		conditions = (
-			"""where item_code = %(item_code)s and price_list = %(price_list)s and name != %(name)s"""
-		)
+	def validate_item_template(self):
+		if frappe.get_cached_value("Item", self.item_code, "has_variants"):
+			msg = f"Item Price cannot be created for the template item {bold(self.item_code)}"
 
-		for field in [
+			frappe.throw(_(msg))
+
+	def check_duplicates(self):
+
+		item_price = frappe.qb.DocType("Item Price")
+
+		query = (
+			frappe.qb.from_(item_price)
+			.select(item_price.price_list_rate)
+			.where(
+				(item_price.item_code == self.item_code)
+				& (item_price.price_list == self.price_list)
+				& (item_price.name != self.name)
+			)
+		)
+		data_fields = (
 			"uom",
 			"valid_from",
 			"valid_upto",
-			"packing_unit",
 			"customer",
 			"supplier",
 			"batch_no",
-		]:
-			if self.get(field):
-				conditions += " and {0} = %({0})s ".format(field)
-			else:
-				conditions += "and (isnull({0}) or {0} = '')".format(field)
-
-		price_list_rate = frappe.db.sql(
-			"""
-				select price_list_rate
-				from `tabItem Price`
-				{conditions}
-			""".format(
-				conditions=conditions
-			),
-			self.as_dict(),
 		)
+
+		number_fields = ["packing_unit"]
+
+		for field in data_fields:
+			if self.get(field):
+				query = query.where(item_price[field] == self.get(field))
+			else:
+				query = query.where(
+					Criterion.any(
+						[
+							item_price[field].isnull(),
+							Cast_(item_price[field], "varchar") == "",
+						]
+					)
+				)
+
+		for field in number_fields:
+			if self.get(field):
+				query = query.where(item_price[field] == self.get(field))
+			else:
+				query = query.where(
+					Criterion.any(
+						[
+							item_price[field].isnull(),
+							item_price[field] == 0,
+						]
+					)
+				)
+
+		price_list_rate = query.run(as_dict=True)
 
 		if price_list_rate:
 			frappe.throw(

@@ -29,7 +29,7 @@ def get_columns():
 			"options": "Item Group",
 			"width": 150,
 		},
-		{"fieldname": "item", "fieldtype": "Link", "options": "Item", "label": "Item", "width": 150},
+		{"fieldname": "item", "fieldtype": "Link", "options": "Item", "label": _("Item"), "width": 150},
 		{"fieldname": "item_name", "fieldtype": "Data", "label": _("Item Name"), "width": 150},
 		{
 			"fieldname": "customer",
@@ -100,7 +100,7 @@ def get_sales_details(filters):
 	sales_data = frappe.db.sql(
 		"""
 		select s.territory, s.customer, si.item_group, si.item_code, si.qty, {date_field} as last_order_date,
-		DATEDIFF(CURDATE(), {date_field}) as days_since_last_order
+		DATEDIFF(CURRENT_DATE, {date_field}) as days_since_last_order
 		from `tab{doctype}` s, `tab{doctype} Item` si
 		where s.name = si.parent and s.docstatus = 1
 		order by days_since_last_order """.format(  # nosec

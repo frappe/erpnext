@@ -15,10 +15,15 @@
   "default_supplier",
   "column_break_8",
   "expense_account",
+  "default_provisional_account",
   "selling_defaults",
   "selling_cost_center",
   "column_break_12",
-  "income_account"
+  "income_account",
+  "deferred_accounting_defaults_section",
+  "deferred_expense_account",
+  "column_break_kwad",
+  "deferred_revenue_account"
  ],
  "fields": [
   {
@@ -101,11 +106,40 @@
    "fieldtype": "Link",
    "label": "Default Discount Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "default_provisional_account",
+   "fieldtype": "Link",
+   "label": "Default Provisional Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "deferred_accounting_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting Defaults"
+  },
+  {
+   "depends_on": "eval: parent.enable_deferred_expense",
+   "fieldname": "deferred_expense_account",
+   "fieldtype": "Link",
+   "label": "Deferred Expense Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval: parent.enable_deferred_revenue",
+   "fieldname": "deferred_revenue_account",
+   "fieldtype": "Link",
+   "label": "Deferred Revenue Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_kwad",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-07-13 01:26:03.860065",
+ "modified": "2023-09-04 12:33:14.607267",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",
@@ -114,5 +148,6 @@
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

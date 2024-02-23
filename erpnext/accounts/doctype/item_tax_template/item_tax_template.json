@@ -35,6 +35,7 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_filter": 1,
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
@@ -56,7 +57,7 @@
   }
  ],
  "links": [],
- "modified": "2022-01-18 21:11:23.105589",
+ "modified": "2023-07-09 18:11:23.105589",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Item Tax Template",

@@ -41,15 +41,6 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.docstatus == 1 && frm.doc.employee) {
-			frm.add_custom_button(__('Expense Claim'), function() {
-				frappe.model.open_mapped_doc({
-					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.make_expense_claim',
-					frm: cur_frm,
-				});
-			}, __("Create"));
-		}
-
 		if (frm.doc.docstatus == 1 && frm.doc.delivery_stops.length > 0) {
 			frm.add_custom_button(__("Notify Customers via Email"), function () {
 				frm.trigger('notify_customers');
@@ -71,8 +62,13 @@ frappe.ui.form.on('Delivery Trip', {
 						company: frm.doc.company,
 					}
 				})
-			}, __("Get customers from"));
+			}, __("Get stops from"));
 		}
+		frm.add_custom_button(__("Delivery Notes"), function () {
+			frappe.set_route("List", "Delivery Note",
+					{'name': ["in", frm.doc.delivery_stops.map((stop) => {return stop.delivery_note;})]}
+			);
+		}, __("View"));
 	},
 
 	calculate_arrival_time: function (frm) {
@@ -101,7 +97,7 @@ frappe.ui.form.on('Delivery Trip', {
 					frm.set_value("driver_email", data.message.email);
 				}
 			});
-		};
+		}
 	},
 
 	optimize_route: function (frm) {

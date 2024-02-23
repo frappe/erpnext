@@ -6,7 +6,7 @@
   "cost_center": "_Test Cost Center - _TC",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
-  "debit_to": "_Test Receivable - _TC",
+  "debit_to": "Debtors - _TC",
   "doctype": "Sales Invoice",
   "items": [
    {
@@ -78,7 +78,7 @@
   "currency": "INR",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
-  "debit_to": "_Test Receivable - _TC",
+  "debit_to": "Debtors - _TC",
   "doctype": "Sales Invoice",
   "cost_center": "_Test Cost Center - _TC",
   "items": [
@@ -137,7 +137,7 @@
   "currency": "INR",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
-  "debit_to": "_Test Receivable - _TC",
+  "debit_to": "Debtors - _TC",
   "doctype": "Sales Invoice",
   "cost_center": "_Test Cost Center - _TC",
   "items": [
@@ -265,7 +265,7 @@
   "currency": "INR",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
-  "debit_to": "_Test Receivable - _TC",
+  "debit_to": "Debtors - _TC",
   "doctype": "Sales Invoice",
   "cost_center": "_Test Cost Center - _TC",
   "items": [

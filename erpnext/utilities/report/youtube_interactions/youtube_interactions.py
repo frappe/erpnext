@@ -67,7 +67,7 @@ def get_chart_summary_data(data):
 		{
 			"value": total_views,
 			"indicator": "Blue",
-			"label": "Total Views",
+			"label": _("Total Views"),
 			"datatype": "Float",
 		}
 	]

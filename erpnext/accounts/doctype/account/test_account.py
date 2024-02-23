@@ -5,9 +5,16 @@
 import unittest
 
 import frappe
+from frappe.test_runner import make_test_records
 
-from erpnext.accounts.doctype.account.account import merge_account, update_account_number
+from erpnext.accounts.doctype.account.account import (
+	InvalidAccountMergeError,
+	merge_account,
+	update_account_number,
+)
 from erpnext.stock import get_company_default_inventory_account, get_warehouse_account
+
+test_dependencies = ["Company"]
 
 
 class TestAccount(unittest.TestCase):
@@ -44,49 +51,53 @@ class TestAccount(unittest.TestCase):
 		frappe.delete_doc("Account", "1211-11-4 - 6 - Debtors 1 - Test - - _TC")
 
 	def test_merge_account(self):
-		if not frappe.db.exists("Account", "Current Assets - _TC"):
-			acc = frappe.new_doc("Account")
-			acc.account_name = "Current Assets"
-			acc.is_group = 1
-			acc.parent_account = "Application of Funds (Assets) - _TC"
-			acc.company = "_Test Company"
-			acc.insert()
-		if not frappe.db.exists("Account", "Securities and Deposits - _TC"):
-			acc = frappe.new_doc("Account")
-			acc.account_name = "Securities and Deposits"
-			acc.parent_account = "Current Assets - _TC"
-			acc.is_group = 1
-			acc.company = "_Test Company"
-			acc.insert()
-		if not frappe.db.exists("Account", "Earnest Money - _TC"):
-			acc = frappe.new_doc("Account")
-			acc.account_name = "Earnest Money"
-			acc.parent_account = "Securities and Deposits - _TC"
-			acc.company = "_Test Company"
-			acc.insert()
-		if not frappe.db.exists("Account", "Cash In Hand - _TC"):
-			acc = frappe.new_doc("Account")
-			acc.account_name = "Cash In Hand"
-			acc.is_group = 1
-			acc.parent_account = "Current Assets - _TC"
-			acc.company = "_Test Company"
-			acc.insert()
-		if not frappe.db.exists("Account", "Accumulated Depreciation - _TC"):
-			acc = frappe.new_doc("Account")
-			acc.account_name = "Accumulated Depreciation"
-			acc.parent_account = "Fixed Assets - _TC"
-			acc.company = "_Test Company"
-			acc.account_type = "Accumulated Depreciation"
-			acc.insert()
+		create_account(
+			account_name="Current Assets",
+			is_group=1,
+			parent_account="Application of Funds (Assets) - _TC",
+			company="_Test Company",
+		)
 
-		doc = frappe.get_doc("Account", "Securities and Deposits - _TC")
+		create_account(
+			account_name="Securities and Deposits",
+			is_group=1,
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+		)
+
+		create_account(
+			account_name="Earnest Money",
+			parent_account="Securities and Deposits - _TC",
+			company="_Test Company",
+		)
+
+		create_account(
+			account_name="Cash In Hand",
+			is_group=1,
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+		)
+
+		create_account(
+			account_name="Receivable INR",
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+			account_currency="INR",
+		)
+
+		create_account(
+			account_name="Receivable USD",
+			parent_account="Current Assets - _TC",
+			company="_Test Company",
+			account_currency="USD",
+		)
+
 		parent = frappe.db.get_value("Account", "Earnest Money - _TC", "parent_account")
 
 		self.assertEqual(parent, "Securities and Deposits - _TC")
 
-		merge_account(
-			"Securities and Deposits - _TC", "Cash In Hand - _TC", doc.is_group, doc.root_type, doc.company
-		)
+		merge_account("Securities and Deposits - _TC", "Cash In Hand - _TC")
+
 		parent = frappe.db.get_value("Account", "Earnest Money - _TC", "parent_account")
 
 		# Parent account of the child account changes after merging
@@ -95,30 +106,28 @@ class TestAccount(unittest.TestCase):
 		# Old account doesn't exist after merging
 		self.assertFalse(frappe.db.exists("Account", "Securities and Deposits - _TC"))
 
-		doc = frappe.get_doc("Account", "Current Assets - _TC")
-
 		# Raise error as is_group property doesn't match
 		self.assertRaises(
-			frappe.ValidationError,
+			InvalidAccountMergeError,
 			merge_account,
 			"Current Assets - _TC",
 			"Accumulated Depreciation - _TC",
-			doc.is_group,
-			doc.root_type,
-			doc.company,
 		)
-
-		doc = frappe.get_doc("Account", "Capital Stock - _TC")
 
 		# Raise error as root_type property doesn't match
 		self.assertRaises(
-			frappe.ValidationError,
+			InvalidAccountMergeError,
 			merge_account,
 			"Capital Stock - _TC",
 			"Softwares - _TC",
-			doc.is_group,
-			doc.root_type,
-			doc.company,
+		)
+
+		# Raise error as currency doesn't match
+		self.assertRaises(
+			InvalidAccountMergeError,
+			merge_account,
+			"Receivable INR - _TC",
+			"Receivable USD - _TC",
 		)
 
 	def test_account_sync(self):
@@ -188,6 +197,58 @@ class TestAccount(unittest.TestCase):
 		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC4")
 		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC5")
 
+	def test_account_currency_sync(self):
+		"""
+		In a parent->child company setup, child should inherit parent account currency if explicitly specified.
+		"""
+
+		make_test_records("Company")
+
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		def create_bank_account():
+			acc = frappe.new_doc("Account")
+			acc.account_name = "_Test Bank JPY"
+
+			acc.parent_account = "Temporary Accounts - _TC6"
+			acc.company = "_Test Company 6"
+			return acc
+
+		acc = create_bank_account()
+		# Explicitly set currency
+		acc.account_currency = "JPY"
+		acc.insert()
+		self.assertTrue(
+			frappe.db.exists(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Bank JPY",
+					"account_currency": "JPY",
+					"company": "_Test Company 7",
+				}
+			)
+		)
+
+		frappe.delete_doc("Account", "_Test Bank JPY - _TC6")
+		frappe.delete_doc("Account", "_Test Bank JPY - _TC7")
+
+		acc = create_bank_account()
+		# default currency is used
+		acc.insert()
+		self.assertTrue(
+			frappe.db.exists(
+				{
+					"doctype": "Account",
+					"account_name": "_Test Bank JPY",
+					"account_currency": "USD",
+					"company": "_Test Company 7",
+				}
+			)
+		)
+
+		frappe.delete_doc("Account", "_Test Bank JPY - _TC6")
+		frappe.delete_doc("Account", "_Test Bank JPY - _TC7")
+
 	def test_child_company_account_rename_sync(self):
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
@@ -241,6 +302,28 @@ class TestAccount(unittest.TestCase):
 		for doc in to_delete:
 			frappe.delete_doc("Account", doc)
 
+	def test_validate_account_currency(self):
+		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+
+		if not frappe.db.get_value("Account", "Test Currency Account - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Test Currency Account"
+			acc.parent_account = "Tax Assets - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+		else:
+			acc = frappe.get_doc("Account", "Test Currency Account - _TC")
+
+		self.assertEqual(acc.account_currency, "INR")
+
+		# Make a JV against this account
+		make_journal_entry(
+			"Test Currency Account - _TC", "Miscellaneous Expenses - _TC", 100, submit=True
+		)
+
+		acc.account_currency = "USD"
+		self.assertRaises(frappe.ValidationError, acc.save)
+
 
 def _make_test_records(verbose=None):
 	from frappe.test_runner import make_test_objects
@@ -275,7 +358,7 @@ def _make_test_records(verbose=None):
 		# fixed asset depreciation
 		["_Test Fixed Asset", "Current Assets", 0, "Fixed Asset", None],
 		["_Test Accumulated Depreciations", "Current Assets", 0, "Accumulated Depreciation", None],
-		["_Test Depreciations", "Expenses", 0, None, None],
+		["_Test Depreciations", "Expenses", 0, "Depreciation", None],
 		["_Test Gain/Loss on Asset Disposal", "Expenses", 0, None, None],
 		# Receivable / Payable Account
 		["_Test Receivable", "Current Assets", 0, "Receivable", None],
@@ -323,11 +406,20 @@ def create_account(**kwargs):
 		"Account", filters={"account_name": kwargs.get("account_name"), "company": kwargs.get("company")}
 	)
 	if account:
-		return account
+		account = frappe.get_doc("Account", account)
+		account.update(
+			dict(
+				is_group=kwargs.get("is_group", 0),
+				parent_account=kwargs.get("parent_account"),
+			)
+		)
+		account.save()
+		return account.name
 	else:
 		account = frappe.get_doc(
 			dict(
 				doctype="Account",
+				is_group=kwargs.get("is_group", 0),
 				account_name=kwargs.get("account_name"),
 				account_type=kwargs.get("account_type"),
 				parent_account=kwargs.get("parent_account"),

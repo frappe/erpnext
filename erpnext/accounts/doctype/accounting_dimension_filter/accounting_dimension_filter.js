@@ -3,10 +3,6 @@
 
 frappe.ui.form.on('Accounting Dimension Filter', {
 	refresh: function(frm, cdt, cdn) {
-		if (frm.doc.accounting_dimension) {
-			frm.set_df_property('dimensions', 'label', frm.doc.accounting_dimension, cdn, 'dimension_value');
-		}
-
 		let help_content =
 			`<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
@@ -68,9 +64,20 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 		frm.clear_table("dimensions");
 		let row = frm.add_child("dimensions");
 		row.accounting_dimension = frm.doc.accounting_dimension;
+		frm.fields_dict["dimensions"].grid.update_docfield_property("dimension_value", "label", frm.doc.accounting_dimension);
 		frm.refresh_field("dimensions");
 		frm.trigger('setup_filters');
 	},
+	apply_restriction_on_values: function(frm) {
+		/** If restriction on values is not applied, we should set "allow_or_restrict" to "Restrict" with an empty allowed dimension table.
+		 * Hence it's not "restricted" on any value.
+		  */
+		if (!frm.doc.apply_restriction_on_values) {
+			frm.set_value("allow_or_restrict", "Restrict");
+			frm.clear_table("dimensions");
+			frm.refresh_field("dimensions");
+		}
+	}
 });
 
 frappe.ui.form.on('Allowed Dimension', {
