@@ -160,7 +160,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if(this.frm.fields_dict["items"]) {
-			this["items_remove"] = this.calculate_net_weight;
+			this["items_remove"] = this.process_item_removal;
 		}
 
 		if(this.frm.fields_dict["recurring_print_format"]) {
@@ -1280,6 +1280,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				}
 			})
 		}
+	}
+
+	process_item_removal() {
+		this.frm.trigger("calculate_taxes_and_totals");
+		this.frm.trigger("calculate_net_weight");
 	}
 
 	calculate_net_weight(){
