@@ -234,8 +234,8 @@ def get_customers_suppliers(doctype, user):
 	has_supplier_field = meta.has_field("supplier")
 
 	if has_common(["Supplier", "Customer"], frappe.get_roles(user)):
-		suppliers = get_parents_for_user("Supplier")
-		customers = get_parents_for_user("Customer")
+		suppliers = get_parents_for_user("Supplier", user)
+		customers = get_parents_for_user("Customer", user)
 	elif frappe.has_permission(doctype, "read", user=user):
 		customer_list = frappe.get_list("Customer")
 		customers = suppliers = [customer.name for customer in customer_list]
@@ -243,13 +243,13 @@ def get_customers_suppliers(doctype, user):
 	return customers if has_customer_field else None, suppliers if has_supplier_field else None
 
 
-def get_parents_for_user(parenttype: str) -> list[str]:
+def get_parents_for_user(parenttype: str, user="") -> list[str]:
 	portal_user = frappe.qb.DocType("Portal User")
 
 	return (
 		frappe.qb.from_(portal_user)
 		.select(portal_user.parent)
-		.where(portal_user.user == frappe.session.user)
+		.where(portal_user.user == user or frappe.session.user)
 		.where(portal_user.parenttype == parenttype)
 	).run(pluck="name")
 
