@@ -199,6 +199,7 @@ frappe.ui.form.on('Material Request', {
 
 	get_item_data: function(frm, item, overwrite_warehouse=false) {
 		if (item && !item.item_code) { return; }
+
 		frappe.call({
 			method: "erpnext.stock.get_item_details.get_item_details",
 			args: {
@@ -225,12 +226,22 @@ frappe.ui.form.on('Material Request', {
 			},
 			callback: function(r) {
 				const d = item;
-				const qty_fields = ['actual_qty', 'projected_qty', 'min_order_qty'];
+				const allow_to_change_fields = ['actual_qty', 'projected_qty', 'min_order_qty', 'item_name', 'description', 'stock_uom', 'uom', 'conversion_factor', 'stock_qty'];
 
 				if(!r.exc) {
-					$.each(r.message, function(k, v) {
-						if(!d[k] || in_list(qty_fields, k)) d[k] = v;
+					$.each(r.message, function(key, value) {
+						if(!d[key] || allow_to_change_fields.includes(key)) {
+							d[key] = value;
+						}
 					});
+
+					if (d.price_list_rate != r.message.price_list_rate) {
+						d.rate = 0.0;
+						d.price_list_rate = r.message.price_list_rate;
+						frappe.model.set_value(d.doctype, d.name, "rate", d.price_list_rate);
+					}
+
+					refresh_field("items");
 				}
 			}
 		});
@@ -242,7 +253,7 @@ frappe.ui.form.on('Material Request', {
 			fields: [
 				{"fieldname":"bom", "fieldtype":"Link", "label":__("BOM"),
 					options:"BOM", reqd: 1, get_query: function() {
-						return {filters: { docstatus:1 }};
+						return {filters: { docstatus:1, "is_active": 1 }};
 					}},
 				{"fieldname":"warehouse", "fieldtype":"Link", "label":__("For Warehouse"),
 					options:"Warehouse", reqd: 1},
@@ -427,9 +438,11 @@ frappe.ui.form.on("Material Request Item", {
 		frm.events.get_item_data(frm, item, false);
 	},
 
-	rate: function(frm, doctype, name) {
+	rate(frm, doctype, name) {
 		const item = locals[doctype][name];
-		frm.events.get_item_data(frm, item, false);
+		item.amount = flt(item.qty) * flt(item.rate);
+		frappe.model.set_value(doctype, name, "amount", item.amount);
+		refresh_field("amount", item.name, item.parentfield);
 	},
 
 	item_code: function(frm, doctype, name) {
@@ -449,7 +462,12 @@ frappe.ui.form.on("Material Request Item", {
 				set_schedule_date(frm);
 			}
 		}
-	}
+	},
+
+	conversion_factor: function(frm, doctype, name) {
+		const item = locals[doctype][name];
+		frm.events.get_item_data(frm, item, false);
+	},
 });
 
 erpnext.buying.MaterialRequestController = class MaterialRequestController extends erpnext.buying.BuyingController {
@@ -513,6 +531,13 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 
 	schedule_date() {
 		set_schedule_date(this.frm);
+	}
+
+	qty(doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		row.amount = flt(row.qty) * flt(row.rate);
+		frappe.model.set_value(cdt, cdn, "amount", row.amount);
+		refresh_field("amount", row.name, row.parentfield);
 	}
 };
 

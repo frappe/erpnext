@@ -5,7 +5,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, flt, get_link_to_form, now, nowtime, today
+from frappe.utils import cint, cstr, flt, get_link_to_form, now, nowtime, today
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
@@ -138,9 +138,17 @@ class SerialBatchBundle:
 				self.child_doctype, self.sle.voucher_detail_no, "rejected_serial_and_batch_bundle", sn_doc.name
 			)
 		else:
-			frappe.db.set_value(
-				self.child_doctype, self.sle.voucher_detail_no, "serial_and_batch_bundle", sn_doc.name
-			)
+			values_to_update = {
+				"serial_and_batch_bundle": sn_doc.name,
+			}
+
+			if frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
+				if sn_doc.has_serial_no:
+					values_to_update["serial_no"] = "\n".join(cstr(d.serial_no) for d in sn_doc.entries)
+				elif sn_doc.has_batch_no and len(sn_doc.entries) == 1:
+					values_to_update["batch_no"] = sn_doc.entries[0].batch_no
+
+			frappe.db.set_value(self.child_doctype, self.sle.voucher_detail_no, values_to_update)
 
 	@property
 	def child_doctype(self):
@@ -283,6 +291,7 @@ class SerialBatchBundle:
 				if (sn_table.purchase_document_no != self.sle.voucher_no and self.sle.is_cancelled != 1)
 				else "Inactive",
 			)
+			.set(sn_table.company, self.sle.company)
 			.where(sn_table.name.isin(serial_nos))
 		).run()
 
@@ -793,6 +802,9 @@ class SerialBatchCreation:
 			setattr(self, "actual_qty", qty)
 			self.__dict__["actual_qty"] = self.actual_qty
 
+		if not hasattr(self, "use_serial_batch_fields"):
+			setattr(self, "use_serial_batch_fields", 0)
+
 	def duplicate_package(self):
 		if not self.serial_and_batch_bundle:
 			return
@@ -904,6 +916,9 @@ class SerialBatchCreation:
 		if (self.get("batches") and self.has_batch_no) or (
 			self.get("serial_nos") and self.has_serial_no
 		):
+			if self.use_serial_batch_fields and self.get("serial_nos"):
+				self.make_serial_no_if_not_exists()
+
 			return
 
 		self.batch_no = None
@@ -914,6 +929,59 @@ class SerialBatchCreation:
 			self.serial_nos = self.get_auto_created_serial_nos()
 		else:
 			self.batches = frappe._dict({self.batch_no: abs(self.actual_qty)})
+
+	def make_serial_no_if_not_exists(self):
+		non_exists_serial_nos = []
+		for row in self.serial_nos:
+			if not frappe.db.exists("Serial No", row):
+				non_exists_serial_nos.append(row)
+
+		if non_exists_serial_nos:
+			self.make_serial_nos(non_exists_serial_nos)
+
+	def make_serial_nos(self, serial_nos):
+		serial_nos_details = []
+		batch_no = None
+		if self.batches:
+			batch_no = list(self.batches.keys())[0]
+
+		for serial_no in serial_nos:
+			serial_nos_details.append(
+				(
+					serial_no,
+					serial_no,
+					now(),
+					now(),
+					frappe.session.user,
+					frappe.session.user,
+					self.warehouse,
+					self.company,
+					self.item_code,
+					self.item_name,
+					self.description,
+					"Active",
+					batch_no,
+				)
+			)
+
+		if serial_nos_details:
+			fields = [
+				"name",
+				"serial_no",
+				"creation",
+				"modified",
+				"owner",
+				"modified_by",
+				"warehouse",
+				"company",
+				"item_code",
+				"item_name",
+				"description",
+				"status",
+				"batch_no",
+			]
+
+			frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
 	def set_serial_batch_entries(self, doc):
 		if self.get("serial_nos"):

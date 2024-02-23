@@ -7,6 +7,7 @@ from frappe.model.document import Document
 from frappe.utils import (
 	add_days,
 	add_months,
+	add_years,
 	cint,
 	date_diff,
 	flt,
@@ -18,6 +19,7 @@ from frappe.utils import (
 )
 
 import erpnext
+from erpnext.accounts.utils import get_fiscal_year
 
 
 class AssetDepreciationSchedule(Document):
@@ -283,11 +285,19 @@ class AssetDepreciationSchedule(Document):
 		depreciation_amount = 0
 
 		number_of_pending_depreciations = final_number_of_depreciations - start
-
+		yearly_opening_wdv = value_after_depreciation
+		current_fiscal_year_end_date = None
 		for n in range(start, final_number_of_depreciations):
 			# If depreciation is already completed (for double declining balance)
 			if skip_row:
 				continue
+
+			schedule_date = add_months(row.depreciation_start_date, n * cint(row.frequency_of_depreciation))
+			if not current_fiscal_year_end_date:
+				current_fiscal_year_end_date = get_fiscal_year(row.depreciation_start_date)[2]
+			elif getdate(schedule_date) > getdate(current_fiscal_year_end_date):
+				current_fiscal_year_end_date = add_years(current_fiscal_year_end_date, 1)
+				yearly_opening_wdv = value_after_depreciation
 
 			if n > 0 and len(self.get("depreciation_schedule")) > n - 1:
 				prev_depreciation_amount = self.get("depreciation_schedule")[n - 1].depreciation_amount
@@ -298,6 +308,7 @@ class AssetDepreciationSchedule(Document):
 				self,
 				asset_doc,
 				value_after_depreciation,
+				yearly_opening_wdv,
 				row,
 				n,
 				prev_depreciation_amount,
@@ -401,19 +412,19 @@ class AssetDepreciationSchedule(Document):
 
 			if not depreciation_amount:
 				continue
-			value_after_depreciation -= flt(
-				depreciation_amount, asset_doc.precision("gross_purchase_amount")
+			value_after_depreciation = flt(
+				value_after_depreciation - flt(depreciation_amount),
+				asset_doc.precision("gross_purchase_amount"),
 			)
 
 			# Adjust depreciation amount in the last period based on the expected value after useful life
-			if row.expected_value_after_useful_life and (
-				(
-					n == cint(final_number_of_depreciations) - 1
-					and value_after_depreciation != row.expected_value_after_useful_life
+			if (
+				n == cint(final_number_of_depreciations) - 1
+				and flt(value_after_depreciation) != flt(row.expected_value_after_useful_life)
+			) or flt(value_after_depreciation) < flt(row.expected_value_after_useful_life):
+				depreciation_amount += flt(value_after_depreciation) - flt(
+					row.expected_value_after_useful_life
 				)
-				or value_after_depreciation < row.expected_value_after_useful_life
-			):
-				depreciation_amount += value_after_depreciation - row.expected_value_after_useful_life
 				skip_row = True
 
 			if flt(depreciation_amount, asset_doc.precision("gross_purchase_amount")) > 0:
@@ -582,6 +593,7 @@ def get_depreciation_amount(
 	asset_depr_schedule,
 	asset,
 	depreciable_value,
+	yearly_opening_wdv,
 	fb_row,
 	schedule_idx=0,
 	prev_depreciation_amount=0,
@@ -597,6 +609,7 @@ def get_depreciation_amount(
 			asset,
 			fb_row,
 			depreciable_value,
+			yearly_opening_wdv,
 			schedule_idx,
 			prev_depreciation_amount,
 			has_wdv_or_dd_non_yearly_pro_rata,
@@ -744,6 +757,7 @@ def get_wdv_or_dd_depr_amount(
 	asset,
 	fb_row,
 	depreciable_value,
+	yearly_opening_wdv,
 	schedule_idx,
 	prev_depreciation_amount,
 	has_wdv_or_dd_non_yearly_pro_rata,
@@ -798,15 +812,11 @@ def make_draft_asset_depr_schedules_if_not_present(asset_doc):
 	asset_depr_schedules_names = []
 
 	for row in asset_doc.get("finance_books"):
-		draft_asset_depr_schedule_name = get_asset_depr_schedule_name(
-			asset_doc.name, "Draft", row.finance_book
+		asset_depr_schedule = get_asset_depr_schedule_name(
+			asset_doc.name, ["Draft", "Active"], row.finance_book
 		)
 
-		active_asset_depr_schedule_name = get_asset_depr_schedule_name(
-			asset_doc.name, "Active", row.finance_book
-		)
-
-		if not draft_asset_depr_schedule_name and not active_asset_depr_schedule_name:
+		if not asset_depr_schedule:
 			name = make_draft_asset_depr_schedule(asset_doc, row)
 			asset_depr_schedules_names.append(name)
 
@@ -982,16 +992,20 @@ def get_asset_depr_schedule_doc(asset_name, status, finance_book=None):
 
 
 def get_asset_depr_schedule_name(asset_name, status, finance_book=None):
-	finance_book_filter = ["finance_book", "is", "not set"]
-	if finance_book:
+	if finance_book is None:
+		finance_book_filter = ["finance_book", "is", "not set"]
+	else:
 		finance_book_filter = ["finance_book", "=", finance_book]
+
+	if isinstance(status, str):
+		status = [status]
 
 	return frappe.db.get_value(
 		doctype="Asset Depreciation Schedule",
 		filters=[
 			["asset", "=", asset_name],
 			finance_book_filter,
-			["status", "=", status],
+			["status", "in", status],
 		],
 	)
 

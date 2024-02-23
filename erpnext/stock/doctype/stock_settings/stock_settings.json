@@ -1,7 +1,7 @@
 {
  "actions": [],
  "creation": "2013-06-24 16:37:54",
- "description": "Settings",
+ "description": "Default settings for your stock-related transactions",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -50,6 +50,7 @@
   "disable_serial_no_and_batch_selector",
   "use_naming_series",
   "naming_series_prefix",
+  "use_serial_batch_fields",
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
@@ -176,7 +177,7 @@
    "description": "No stock transactions can be created or modified before this date.",
    "fieldname": "stock_frozen_upto",
    "fieldtype": "Date",
-   "label": "Stock Frozen Upto"
+   "label": "Stock Frozen Up To"
   },
   {
    "description": "Stock transactions that are older than the mentioned days cannot be modified.",
@@ -420,6 +421,12 @@
    "fieldname": "auto_reserve_stock_for_sales_order_on_purchase",
    "fieldtype": "Check",
    "label": "Auto Reserve Stock for Sales Order on Purchase"
+  },
+  {
+   "default": "1",
+   "fieldname": "use_serial_batch_fields",
+   "fieldtype": "Check",
+   "label": "Use Serial / Batch Fields"
   }
  ],
  "icon": "icon-cog",
@@ -427,7 +434,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-18 12:35:30.068799",
+ "modified": "2024-02-04 12:01:31.931864",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

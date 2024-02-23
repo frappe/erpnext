@@ -217,8 +217,8 @@ class BuyingController(SubcontractingController):
 			lc_voucher_data = frappe.db.sql(
 				"""select sum(applicable_charges), cost_center
 				from `tabLanded Cost Item`
-				where docstatus = 1 and purchase_receipt_item = %s""",
-				d.name,
+				where docstatus = 1 and purchase_receipt_item = %s and receipt_document = %s""",
+				(d.name, self.name),
 			)
 			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
 			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
@@ -824,7 +824,8 @@ class BuyingController(SubcontractingController):
 		if self.doctype == "Purchase Invoice" and not self.get("update_stock"):
 			return
 
-		frappe.db.sql("delete from `tabAsset Movement` where reference_name=%s", self.name)
+		asset_movement = frappe.db.get_value("Asset Movement", {"reference_name": self.name}, "name")
+		frappe.delete_doc("Asset Movement", asset_movement, force=1)
 
 	def validate_schedule_date(self):
 		if not self.get("items"):

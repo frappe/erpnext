@@ -36,16 +36,16 @@
                 }
             },
             "Fixed Assets": {
-                "Capital Equipments": {
+                "Capital Equipment": {
                     "account_type": "Fixed Asset"
                 },
-                "Electronic Equipments": {
+                "Electronic Equipment": {
                     "account_type": "Fixed Asset"
                 },
-                "Furnitures and Fixtures": {
+                "Furniture and Fixtures": {
                     "account_type": "Fixed Asset"
                 },
-                "Office Equipments": {
+                "Office Equipment": {
                     "account_type": "Fixed Asset"
                 },
                 "Plants and Machineries": {

@@ -237,10 +237,9 @@ def get_balance_on(
 			)
 
 		else:
-			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False),))
+			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center),))
 
 	if account:
-
 		if not (frappe.flags.ignore_account_permission or ignore_account_permission):
 			acc.check_permission("read")
 
@@ -259,7 +258,7 @@ def get_balance_on(
 			if acc.account_currency == frappe.get_cached_value("Company", acc.company, "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False),))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account),))
 
 	if account_type:
 		accounts = frappe.db.get_all(
@@ -279,25 +278,29 @@ def get_balance_on(
 	if party_type and party:
 		cond.append(
 			"""gle.party_type = %s and gle.party = %s """
-			% (frappe.db.escape(party_type), frappe.db.escape(party, percent=False))
+			% (frappe.db.escape(party_type), frappe.db.escape(party))
 		)
 
 	if company:
-		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
+		cond.append("""gle.company = %s """ % (frappe.db.escape(company)))
 
 	if account or (party_type and party) or account_type:
-
+		precision = get_currency_precision()
 		if in_account_currency:
-			select_field = "sum(debit_in_account_currency) - sum(credit_in_account_currency)"
+			select_field = (
+				"sum(round(debit_in_account_currency, %s)) - sum(round(credit_in_account_currency, %s))"
+			)
 		else:
-			select_field = "sum(debit) - sum(credit)"
+			select_field = "sum(round(debit, %s)) - sum(round(credit, %s))"
+
 		bal = frappe.db.sql(
 			"""
 			SELECT {0}
 			FROM `tabGL Entry` gle
 			WHERE {1}""".format(
 				select_field, " and ".join(cond)
-			)
+			),
+			(precision, precision),
 		)[0][0]
 		# if bal is None, return 0
 		return flt(bal)
@@ -345,7 +348,7 @@ def get_count_on(account, fieldname, date):
 				% (acc.lft, acc.rgt)
 			)
 		else:
-			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False),))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account),))
 
 		entries = frappe.db.sql(
 			"""
@@ -453,7 +456,19 @@ def add_cc(args=None):
 	return cc.name
 
 
-def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # nosemgrep
+def _build_dimensions_dict_for_exc_gain_loss(
+	entry: dict | object = None, active_dimensions: list = None
+):
+	dimensions_dict = frappe._dict()
+	if entry and active_dimensions:
+		for dim in active_dimensions:
+			dimensions_dict[dim.fieldname] = entry.get(dim.fieldname)
+	return dimensions_dict
+
+
+def reconcile_against_document(
+	args, skip_ref_details_update_for_pe=False, active_dimensions=None
+):  # nosemgrep
 	"""
 	Cancel PE or JV, Update against document, split if required and resubmit
 	"""
@@ -482,6 +497,8 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 			check_if_advance_entry_modified(entry)
 			validate_allocated_amount(entry)
 
+			dimensions_dict = _build_dimensions_dict_for_exc_gain_loss(entry, active_dimensions)
+
 			# update ref in advance entry
 			if voucher_type == "Journal Entry":
 				referenced_row = update_reference_in_journal_entry(entry, doc, do_not_save=False)
@@ -489,10 +506,14 @@ def reconcile_against_document(args, skip_ref_details_update_for_pe=False):  # n
 				# amount and account in args
 				# referenced_row is used to deduplicate gain/loss journal
 				entry.update({"referenced_row": referenced_row})
-				doc.make_exchange_gain_loss_journal([entry])
+				doc.make_exchange_gain_loss_journal([entry], dimensions_dict)
 			else:
 				referenced_row = update_reference_in_payment_entry(
-					entry, doc, do_not_save=True, skip_ref_details_update_for_pe=skip_ref_details_update_for_pe
+					entry,
+					doc,
+					do_not_save=True,
+					skip_ref_details_update_for_pe=skip_ref_details_update_for_pe,
+					dimensions_dict=dimensions_dict,
 				)
 
 		doc.save(ignore_permissions=True)
@@ -600,7 +621,10 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	jv_detail = journal_entry.get("accounts", {"name": d["voucher_detail_no"]})[0]
 
 	# Update Advance Paid in SO/PO since they might be getting unlinked
-	if jv_detail.get("reference_type") in ("Sales Order", "Purchase Order"):
+	advance_payment_doctypes = frappe.get_hooks(
+		"advance_payment_receivable_doctypes"
+	) + frappe.get_hooks("advance_payment_payable_doctypes")
+	if jv_detail.get("reference_type") in advance_payment_doctypes:
 		frappe.get_doc(jv_detail.reference_type, jv_detail.reference_name).set_total_advance_paid()
 
 	if flt(d["unadjusted_amount"]) - flt(d["allocated_amount"]) != 0:
@@ -642,7 +666,6 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	new_row.set("reference_name", d["against_voucher"])
 
 	new_row.against_account = cstr(jv_detail.against_account)
-	new_row.against_account_link = cstr(jv_detail.against_account)
 	new_row.is_advance = cstr(jv_detail.is_advance)
 	new_row.docstatus = 1
 
@@ -655,7 +678,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 
 def update_reference_in_payment_entry(
-	d, payment_entry, do_not_save=False, skip_ref_details_update_for_pe=False
+	d, payment_entry, do_not_save=False, skip_ref_details_update_for_pe=False, dimensions_dict=None
 ):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
@@ -668,13 +691,17 @@ def update_reference_in_payment_entry(
 		else payment_entry.get_exchange_rate(),
 		"exchange_gain_loss": d.difference_amount,
 		"account": d.account,
+		"dimensions": d.dimensions,
 	}
 
 	if d.voucher_detail_no:
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
 
 		# Update Advance Paid in SO/PO since they are getting unlinked
-		if existing_row.get("reference_doctype") in ("Sales Order", "Purchase Order"):
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
+		if existing_row.get("reference_doctype") in advance_payment_doctypes:
 			frappe.get_doc(
 				existing_row.reference_doctype, existing_row.reference_name
 			).set_total_advance_paid()
@@ -700,8 +727,9 @@ def update_reference_in_payment_entry(
 	if not skip_ref_details_update_for_pe:
 		payment_entry.set_missing_ref_details()
 	payment_entry.set_amounts()
+
 	payment_entry.make_exchange_gain_loss_journal(
-		frappe._dict({"difference_posting_date": d.difference_posting_date})
+		frappe._dict({"difference_posting_date": d.difference_posting_date}), dimensions_dict
 	)
 
 	if not do_not_save:
@@ -952,46 +980,6 @@ def get_currency_precision():
 		precision = get_number_format_info(number_format)[2]
 
 	return precision
-
-
-def get_stock_rbnb_difference(posting_date, company):
-	stock_items = frappe.db.sql_list(
-		"""select distinct item_code
-		from `tabStock Ledger Entry` where company=%s""",
-		company,
-	)
-
-	pr_valuation_amount = frappe.db.sql(
-		"""
-		select sum(pr_item.valuation_rate * pr_item.qty * pr_item.conversion_factor)
-		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
-		where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
-		and pr.posting_date <= %s and pr_item.item_code in (%s)"""
-		% ("%s", "%s", ", ".join(["%s"] * len(stock_items))),
-		tuple([company, posting_date] + stock_items),
-	)[0][0]
-
-	pi_valuation_amount = frappe.db.sql(
-		"""
-		select sum(pi_item.valuation_rate * pi_item.qty * pi_item.conversion_factor)
-		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` pi
-		where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
-		and pi.posting_date <= %s and pi_item.item_code in (%s)"""
-		% ("%s", "%s", ", ".join(["%s"] * len(stock_items))),
-		tuple([company, posting_date] + stock_items),
-	)[0][0]
-
-	# Balance should be
-	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
-
-	# Balance as per system
-	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.get_cached_value(
-		"Company", company, "abbr"
-	)
-	sys_bal = get_balance_on(stock_rbnb_account, posting_date, in_account_currency=False)
-
-	# Amount should be credited
-	return flt(stock_rbnb) + flt(sys_bal)
 
 
 def get_held_invoices(party_type, party):
@@ -1400,8 +1388,7 @@ def sort_stock_vouchers_by_posting_date(
 		.select(sle.voucher_type, sle.voucher_no, sle.posting_date, sle.posting_time, sle.creation)
 		.where((sle.is_cancelled == 0) & (sle.voucher_no.isin(voucher_nos)))
 		.groupby(sle.voucher_type, sle.voucher_no)
-		.orderby(sle.posting_date)
-		.orderby(sle.posting_time)
+		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
 	).run(as_dict=True)
 	sorted_vouchers = [(sle.voucher_type, sle.voucher_no) for sle in sles]
@@ -2043,6 +2030,7 @@ def create_gain_loss_journal(
 	ref2_dn,
 	ref2_detail_no,
 	cost_center,
+	dimensions,
 ) -> str:
 	journal_entry = frappe.new_doc("Journal Entry")
 	journal_entry.voucher_type = "Exchange Gain Or Loss"
@@ -2076,7 +2064,8 @@ def create_gain_loss_journal(
 			dr_or_cr + "_in_account_currency": 0,
 		}
 	)
-
+	if dimensions:
+		journal_account.update(dimensions)
 	journal_entry.append("accounts", journal_account)
 
 	journal_account = frappe._dict(
@@ -2092,7 +2081,8 @@ def create_gain_loss_journal(
 			reverse_dr_or_cr: abs(exc_gain_loss),
 		}
 	)
-
+	if dimensions:
+		journal_account.update(dimensions)
 	journal_entry.append("accounts", journal_account)
 
 	journal_entry.save()

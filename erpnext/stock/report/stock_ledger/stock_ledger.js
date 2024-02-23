@@ -91,6 +91,12 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "Currency\nFloat",
 			"default": "Currency"
 		},
+		{
+			"fieldname": "segregate_serial_batch_bundle",
+			"label": __("Segregate Serial / Batch Bundle"),
+			"fieldtype": "Check",
+			"default": 0
+		}
 	],
 	"formatter": function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);

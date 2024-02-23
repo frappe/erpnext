@@ -571,16 +571,16 @@ frappe.ui.form.on('Asset', {
 				indicator: 'red'
 			});
 		}
-		var is_grouped_asset = frappe.db.get_value('Item', item.item_code, 'is_grouped_asset');
-		var asset_quantity = is_grouped_asset ? item.qty : 1;
-		var purchase_amount = flt(item.valuation_rate * asset_quantity, precision('gross_purchase_amount'));
+		frappe.db.get_value('Item', item.item_code, 'is_grouped_asset', (r) => {
+			var asset_quantity = r.is_grouped_asset ? item.qty : 1;
+			var purchase_amount = flt(item.valuation_rate * asset_quantity, precision('gross_purchase_amount'));
 
-		frm.set_value('gross_purchase_amount', purchase_amount);
-		frm.set_value('purchase_receipt_amount', purchase_amount);
-		frm.set_value('asset_quantity', asset_quantity);
-		frm.set_value('cost_center', item.cost_center || purchase_doc.cost_center);
-		if(item.asset_location) { frm.set_value('location', item.asset_location); }
-
+			frm.set_value('gross_purchase_amount', purchase_amount);
+			frm.set_value('purchase_receipt_amount', purchase_amount);
+			frm.set_value('asset_quantity', asset_quantity);
+			frm.set_value('cost_center', item.cost_center || purchase_doc.cost_center);
+			if(item.asset_location) { frm.set_value('location', item.asset_location); }
+		});
 	},
 
 	set_depreciation_rate: function(frm, row) {

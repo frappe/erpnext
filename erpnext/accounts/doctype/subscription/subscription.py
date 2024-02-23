@@ -78,9 +78,7 @@ class Subscription(Document):
 		purchase_tax_template: DF.Link | None
 		sales_tax_template: DF.Link | None
 		start_date: DF.Date | None
-		status: DF.Literal[
-			"", "Trialling", "Active", "Past Due Date", "Cancelled", "Unpaid", "Completed"
-		]
+		status: DF.Literal["", "Trialing", "Active", "Past Due Date", "Cancelled", "Unpaid", "Completed"]
 		submit_invoice: DF.Check
 		trial_period_end: DF.Date | None
 		trial_period_start: DF.Date | None
@@ -233,7 +231,7 @@ class Subscription(Document):
 		Sets the status of the `Subscription`
 		"""
 		if self.is_trialling():
-			self.status = "Trialling"
+			self.status = "Trialing"
 		elif (
 			self.status == "Active" and self.end_date and getdate(posting_date) > getdate(self.end_date)
 		):
@@ -595,6 +593,8 @@ class Subscription(Document):
 		) and self.can_generate_new_invoice(posting_date):
 			self.generate_invoice(posting_date=posting_date)
 			self.update_subscription_period(add_days(self.current_invoice_end, 1))
+		elif posting_date and getdate(posting_date) > getdate(self.current_invoice_end):
+			self.update_subscription_period()
 
 		if self.cancel_at_period_end and (
 			getdate(posting_date) >= getdate(self.current_invoice_end)

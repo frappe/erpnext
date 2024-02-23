@@ -7,6 +7,7 @@
  "field_order": [
   "payment_request_type",
   "transaction_date",
+  "failed_reason",
   "column_break_2",
   "naming_series",
   "mode_of_payment",
@@ -389,13 +390,22 @@
    "options": "Payment Request",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "failed_reason",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reason for Failure",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-27 09:51:42.277638",
+ "modified": "2024-01-20 00:37:06.988919",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

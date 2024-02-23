@@ -281,6 +281,7 @@ def repost(doc):
 		repost_gl_entries(doc)
 
 		doc.set_status("Completed")
+		remove_attached_file(doc.name)
 
 	except Exception as e:
 		if frappe.flags.in_test:
@@ -293,9 +294,20 @@ def repost(doc):
 		doc.log_error("Unable to repost item valuation")
 
 		message = frappe.message_log.pop() if frappe.message_log else ""
+		if isinstance(message, dict):
+			message = message.get("message")
+
 		if traceback:
-			message += "<br>" + "Traceback: <br>" + traceback
-		frappe.db.set_value(doc.doctype, doc.name, "error_log", message)
+			message += "<br><br>" + "<b>Traceback:</b> <br>" + traceback
+
+		frappe.db.set_value(
+			doc.doctype,
+			doc.name,
+			{
+				"error_log": message,
+				"status": "Failed",
+			},
+		)
 
 		outgoing_email_account = frappe.get_cached_value(
 			"Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "name"
@@ -307,6 +319,13 @@ def repost(doc):
 	finally:
 		if not frappe.flags.in_test:
 			frappe.db.commit()
+
+
+def remove_attached_file(docname):
+	if file_name := frappe.db.get_value(
+		"File", {"attached_to_name": docname, "attached_to_doctype": "Repost Item Valuation"}, "name"
+	):
+		frappe.delete_doc("File", file_name, delete_permanently=True)
 
 
 def repost_sl_entries(doc):

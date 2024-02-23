@@ -1511,16 +1511,16 @@ def get_serial_nos_for_work_order(work_order, production_item):
 
 
 def validate_operation_data(row):
-	if row.get("qty") <= 0:
+	if flt(row.get("qty")) <= 0:
 		frappe.throw(
 			_("Quantity to Manufacture can not be zero for the operation {0}").format(
 				frappe.bold(row.get("operation"))
 			)
 		)
 
-	if row.get("qty") > row.get("pending_qty"):
+	if flt(row.get("qty")) > flt(row.get("pending_qty")):
 		frappe.throw(
-			_("For operation {0}: Quantity ({1}) can not be greter than pending quantity({2})").format(
+			_("For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})").format(
 				frappe.bold(row.get("operation")),
 				frappe.bold(row.get("qty")),
 				frappe.bold(row.get("pending_qty")),

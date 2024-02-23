@@ -41,7 +41,9 @@ class SalesPipelineAnalytics(object):
 			month_list = self.get_month_list()
 
 			for month in month_list:
-				self.columns.append({"fieldname": month, "fieldtype": based_on, "label": month, "width": 200})
+				self.columns.append(
+					{"fieldname": month, "fieldtype": based_on, "label": _(month), "width": 200}
+				)
 
 		elif self.filters.get("range") == "Quarterly":
 			for quarter in range(1, 5):
@@ -156,7 +158,7 @@ class SalesPipelineAnalytics(object):
 
 		for column in self.columns:
 			if column["fieldname"] != "opportunity_owner" and column["fieldname"] != "sales_stage":
-				labels.append(column["fieldname"])
+				labels.append(_(column["fieldname"]))
 
 		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
 

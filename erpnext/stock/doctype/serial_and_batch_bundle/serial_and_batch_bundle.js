@@ -74,7 +74,7 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 
 		let fields = [
 			{
-				"label": __("Using CSV File"),
+				"label": __("Import Using CSV file"),
 				"fieldname": "using_csv_file",
 				"default": 1,
 				"fieldtype": "Check",
@@ -207,13 +207,24 @@ frappe.ui.form.on('Serial and Batch Bundle', {
 			};
 		});
 
-		frm.set_query('batch_no', 'entries', () => {
-			return {
-				filters: {
-					item: frm.doc.item_code,
-					disabled: 0,
+		frm.set_query('batch_no', 'entries', (doc) => {
+
+			if (doc.type_of_transaction ==="Outward") {
+				return {
+					query : "erpnext.controllers.queries.get_batch_no",
+					filters: {
+						item_code: doc.item_code,
+						warehouse: doc.warehouse,
+					}
 				}
-			};
+			} else {
+				return {
+					filters: {
+						item: doc.item_code,
+						disabled: 0,
+					}
+				};
+			}
 		});
 
 		frm.set_query('warehouse', 'entries', () => {
