@@ -40,7 +40,10 @@ $.extend(erpnext, {
 
 	is_perpetual_inventory_enabled: function(company) {
 		if(company) {
-			return frappe.get_doc(":Company", company).enable_perpetual_inventory
+			let company_local = locals[":Company"] && locals[":Company"][company];
+			if(company_local) {
+				return cint(company_local.enable_perpetual_inventory);
+			}
 		}
 	},
 
