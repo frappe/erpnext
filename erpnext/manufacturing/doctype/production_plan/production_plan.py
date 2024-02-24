@@ -1430,19 +1430,17 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 				frappe.throw(_("For row {0}: Enter Planned Qty").format(data.get("idx")))
 
 			if bom_no:
-				if (
-					data.get("include_exploded_items")
-					and doc.get("sub_assembly_items")
-					and doc.get("skip_available_sub_assembly_item")
-				):
-					item_details = get_raw_materials_of_sub_assembly_items(
-						item_details,
-						company,
-						bom_no,
-						include_non_stock_items,
-						sub_assembly_items,
-						planned_qty=planned_qty,
-					)
+				if data.get("include_exploded_items") and doc.get("skip_available_sub_assembly_item"):
+					item_details = {}
+					if doc.get("sub_assembly_items"):
+						item_details = get_raw_materials_of_sub_assembly_items(
+							item_details,
+							company,
+							bom_no,
+							include_non_stock_items,
+							sub_assembly_items,
+							planned_qty=planned_qty,
+						)
 
 				elif data.get("include_exploded_items") and include_subcontracted_items:
 					# fetch exploded items from BOM
