@@ -144,7 +144,7 @@ class SerialBatchBundle:
 
 			if frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
 				if sn_doc.has_serial_no:
-					values_to_update["serial_no"] = "\n".join(cstr(d.serial_no) for d in sn_doc.entries)
+					values_to_update["serial_no"] = ",".join(cstr(d.serial_no) for d in sn_doc.entries)
 				elif sn_doc.has_batch_no and len(sn_doc.entries) == 1:
 					values_to_update["batch_no"] = sn_doc.entries[0].batch_no
 
