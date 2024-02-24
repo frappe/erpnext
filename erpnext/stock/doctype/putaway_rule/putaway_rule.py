@@ -97,6 +97,9 @@ def get_available_putaway_capacity(rule):
 	free_space = flt(stock_capacity) - flt(balance_qty)
 	return free_space if free_space > 0 else 0
 
+@frappe.whitelist()
+def get_putaway_capacity(rule):
+	return flt(frappe.db.get_value("Putaway Rule", rule, "stock_capacity"))
 
 @frappe.whitelist()
 def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
