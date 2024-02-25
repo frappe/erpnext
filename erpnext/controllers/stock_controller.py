@@ -781,7 +781,7 @@ class StockController(AccountsController):
 		"""Check if QI is present on row level. Warn on save and stop on submit if missing."""
 		if not row.quality_inspection:
 			msg = _("Row #{0}: Quality Inspection is required for Item {1}").format(
-					row.idx, frappe.bold(row.item_code)
+				row.idx, frappe.bold(row.item_code)
 			)
 			if self.docstatus == 1:
 				frappe.throw(msg, title=_("Inspection Required"), exc=QualityInspectionRequiredError)
@@ -798,7 +798,7 @@ class StockController(AccountsController):
 		if qa_docstatus != 1:
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = _("Row #{0}: Quality Inspection {1} is not submitted for the item: {2}").format(
-					row.idx, link, row.item_code
+				row.idx, link, row.item_code
 			)
 			if action == "Stop":
 				frappe.throw(msg, title=_("Inspection Submission"), exc=QualityInspectionNotSubmittedError)
@@ -813,7 +813,7 @@ class StockController(AccountsController):
 		if qa_status == "Rejected":
 			link = frappe.utils.get_link_to_form("Quality Inspection", row.quality_inspection)
 			msg = _("Row #{0}: Quality Inspection {1} was rejected for item {2}").format(
-					row.idx, link, row.item_code
+				row.idx, link, row.item_code
 			)
 			if action == "Stop":
 				frappe.throw(msg, title=_("Inspection Rejected"), exc=QualityInspectionRejectedError)
