@@ -625,7 +625,7 @@
   {
    "depends_on": "eval: doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
    "fieldname": "serial_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text",
    "label": "Serial No",
    "oldfieldname": "serial_no",
    "oldfieldtype": "Small Text"
@@ -926,7 +926,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-04 11:52:16.106541",
+ "modified": "2024-02-25 15:56:44.828634",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

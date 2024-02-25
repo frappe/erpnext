@@ -51,6 +51,7 @@
   "use_naming_series",
   "naming_series_prefix",
   "use_serial_batch_fields",
+  "do_not_update_serial_batch_on_creation_of_auto_bundle",
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
@@ -428,6 +429,14 @@
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
    "label": "Use Serial / Batch Fields"
+  },
+  {
+   "default": "1",
+   "depends_on": "use_serial_batch_fields",
+   "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
+   "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
+   "fieldtype": "Check",
+   "label": "Do Not Update Serial / Batch on Creation of Auto Bundle"
   }
  ],
  "icon": "icon-cog",
@@ -435,7 +444,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-02-24 12:50:51.740097",
+ "modified": "2024-02-25 16:32:01.084453",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
