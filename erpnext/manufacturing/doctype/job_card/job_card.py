@@ -163,22 +163,7 @@ class JobCard(Document):
 		for row in self.sub_operations:
 			self.total_completed_qty += row.completed_qty
 
-<<<<<<< HEAD
-	def get_overlap_for(self, args, check_next_available_slot=False):
-=======
 	def get_overlap_for(self, args):
-		time_logs = []
-
-		time_logs.extend(self.get_time_logs(args, "Job Card Time Log"))
-
-		time_logs.extend(self.get_time_logs(args, "Job Card Scheduled Time"))
-
-		if not time_logs:
-			return {}
-
-		time_logs = sorted(time_logs, key=lambda x: x.get("to_time"))
-
->>>>>>> 75f8464724 (fix: capacity planning issue in the job card (#40092))
 		production_capacity = 1
 
 		jc = frappe.qb.DocType("Job Card")
@@ -189,9 +174,6 @@ class JobCard(Document):
 			((jctl.from_time < args.to_time) & (jctl.to_time > args.to_time)),
 			((jctl.from_time >= args.from_time) & (jctl.to_time <= args.to_time)),
 		]
-
-		if check_next_available_slot:
-			time_conditions.append(((jctl.from_time >= args.from_time) & (jctl.to_time >= args.to_time)))
 
 		query = (
 			frappe.qb.from_(jctl)
@@ -238,11 +220,7 @@ class JobCard(Document):
 				self.workstation = workstation
 				return None
 
-<<<<<<< HEAD
 		return existing_time_logs[0] if existing_time_logs else None
-=======
-		return time_logs[0]
->>>>>>> 75f8464724 (fix: capacity planning issue in the job card (#40092))
 
 	def has_overlap(self, production_capacity, time_logs):
 		overlap = False
@@ -281,58 +259,7 @@ class JobCard(Document):
 			return True
 		return overlap
 
-<<<<<<< HEAD
 	def get_workstation_based_on_available_slot(self, existing) -> Optional[str]:
-=======
-	def get_time_logs(self, args, doctype):
-		jc = frappe.qb.DocType("Job Card")
-		jctl = frappe.qb.DocType(doctype)
-
-		time_conditions = [
-			((jctl.from_time < args.from_time) & (jctl.to_time > args.from_time)),
-			((jctl.from_time < args.to_time) & (jctl.to_time > args.to_time)),
-			((jctl.from_time >= args.from_time) & (jctl.to_time <= args.to_time)),
-		]
-
-		query = (
-			frappe.qb.from_(jctl)
-			.from_(jc)
-			.select(
-				jc.name.as_("name"),
-				jctl.name.as_("row_name"),
-				jctl.from_time,
-				jctl.to_time,
-				jc.workstation,
-				jc.workstation_type,
-			)
-			.where(
-				(jctl.parent == jc.name)
-				& (Criterion.any(time_conditions))
-				& (jctl.name != f"{args.name or 'No Name'}")
-				& (jc.name != f"{args.parent or 'No Name'}")
-				& (jc.docstatus < 2)
-			)
-			.orderby(jctl.to_time)
-		)
-
-		if self.workstation_type:
-			query = query.where(jc.workstation_type == self.workstation_type)
-
-		if self.workstation:
-			query = query.where(jc.workstation == self.workstation)
-
-		if args.get("employee") and doctype == "Job Card Time Log":
-			query = query.where(jctl.employee == args.get("employee"))
-
-		if doctype != "Job Card Time Log":
-			query = query.where(jc.total_time_in_mins == 0)
-
-		time_logs = query.run(as_dict=True)
-
-		return time_logs
-
-	def get_workstation_based_on_available_slot(self, existing_time_logs) -> dict:
->>>>>>> 75f8464724 (fix: capacity planning issue in the job card (#40092))
 		workstations = get_workstations(self.workstation_type)
 		if workstations:
 			busy_workstations = [row.workstation for row in existing]
@@ -350,14 +277,6 @@ class JobCard(Document):
 
 	def validate_overlap_for_workstation(self, args, row):
 		# get the last record based on the to time from the job card
-<<<<<<< HEAD
-		data = self.get_overlap_for(args, check_next_available_slot=True)
-		if data:
-			if not self.workstation:
-				self.workstation = data.workstation
-
-			row.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
-=======
 		data = self.get_overlap_for(args)
 
 		if not self.workstation:
@@ -380,7 +299,6 @@ class JobCard(Document):
 			args.to_time = add_to_date(args.planned_start_time, minutes=row.remaining_time_in_mins)
 
 			self.validate_overlap_for_workstation(args, row)
->>>>>>> 75f8464724 (fix: capacity planning issue in the job card (#40092))
 
 	def check_workstation_time(self, row):
 		workstation_doc = frappe.get_cached_doc("Workstation", self.workstation)
