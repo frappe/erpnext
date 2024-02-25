@@ -95,7 +95,17 @@ def create_demo_record(doctype):
 
 def make_transactions(company):
 	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
-	start_date = get_fiscal_year(date=getdate())[1]
+	from erpnext.accounts.utils import FiscalYearError
+
+	try:
+		start_date = get_fiscal_year(date=getdate())[1]
+	except FiscalYearError:
+		# User might have setup fiscal year for previous or upcoming years
+		active_fiscal_years = frappe.db.get_all("Fiscal Year", filters={"disabled": 0}, as_list=1)
+		if active_fiscal_years:
+			start_date = frappe.db.get_value("Fiscal Year", active_fiscal_years[0][0], "year_start_date")
+		else:
+			frappe.throw(_("There are no active Fiscal Years for which Demo Data can be generated."))
 
 	for doctype in frappe.get_hooks("demo_transaction_doctypes"):
 		data = read_data_file_using_hooks(doctype)
@@ -159,6 +169,7 @@ def convert_order_to_invoices():
 
 			if i % 2 != 0:
 				payment = get_payment_entry(invoice.doctype, invoice.name)
+				payment.posting_date = order.transaction_date
 				payment.reference_no = invoice.name
 				payment.submit()
 
