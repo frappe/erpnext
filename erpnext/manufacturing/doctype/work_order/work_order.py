@@ -242,8 +242,12 @@ class WorkOrder(Document):
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
-			d.planned_operating_cost = flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0)
-			d.actual_operating_cost = flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0)
+			d.planned_operating_cost = flt(
+				flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
+			)
+			d.actual_operating_cost = flt(
+				flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0), d.precision("actual_operating_cost")
+			)
 
 			self.planned_operating_cost += flt(d.planned_operating_cost)
 			self.actual_operating_cost += flt(d.actual_operating_cost)
