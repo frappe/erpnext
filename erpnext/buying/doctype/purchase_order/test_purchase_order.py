@@ -1037,6 +1037,68 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertTrue(frappe.db.get_value("Subcontracting Order", {"purchase_order": po.name}))
 
+<<<<<<< HEAD
+=======
+	def test_purchase_order_advance_payment_status(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+
+		po = create_purchase_order()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
+		)
+
+		pr = make_payment_request(dt=po.doctype, dn=po.name, submit_doc=True, return_doc=True)
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
+
+		pe = get_payment_entry(po.doctype, po.name).save().submit()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Fully Paid"
+		)
+
+		pe.reload()
+		pe.cancel()
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
+
+		pr.reload()
+		pr.cancel()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
+		)
+
+	def test_po_billed_amount_against_return_entry(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+
+		# Create a Purchase Order and Fully Bill it
+		po = create_purchase_order()
+		pi = make_pi_from_po(po.name)
+		pi.insert()
+		pi.submit()
+
+		# Debit Note - 50% Qty & enable updating PO billed amount
+		pi_return = make_debit_note(pi.name)
+		pi_return.items[0].qty = -5
+		pi_return.update_billed_amount_in_purchase_order = 1
+		pi_return.submit()
+
+		# Check if the billed amount reduced
+		po.reload()
+		self.assertEqual(po.per_billed, 50)
+
+		pi_return.reload()
+		pi_return.cancel()
+
+		# Debit Note - 50% Qty & disable updating PO billed amount
+		pi_return = make_debit_note(pi.name)
+		pi_return.items[0].qty = -5
+		pi_return.update_billed_amount_in_purchase_order = 0
+		pi_return.submit()
+
+		# Check if the billed amount stayed the same
+		po.reload()
+		self.assertEqual(po.per_billed, 100)
+
+>>>>>>> 81dbfe189e (test: po billed amount against debit note)
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
