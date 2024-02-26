@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, cint, cstr, flt, today, nowtime
+from frappe.utils import add_days, cint, cstr, flt, nowtime, today
 from pypika import functions as fn
 
 import erpnext

@@ -1398,18 +1398,21 @@ def get_valuation_rate(
 		)
 
 	# Get valuation rate from last sle for the same item and warehouse
-	if last_valuation_rate := frappe.db.sql(
-		"""select valuation_rate
-		from `tabStock Ledger Entry` force index (item_warehouse)
-		where
-			item_code = %s
-			AND warehouse = %s
-			AND valuation_rate >= 0
-			AND is_cancelled = 0
-			AND NOT (voucher_no = %s AND voucher_type = %s)
-		order by posting_datetime desc, name desc limit 1""",
-		(item_code, warehouse, voucher_no, voucher_type),
-	):
+	if not last_valuation_rate or last_valuation_rate[0][0] is None:
+		last_valuation_rate = frappe.db.sql(
+			"""select valuation_rate
+			from `tabStock Ledger Entry` force index (item_warehouse)
+			where
+				item_code = %s
+				AND warehouse = %s
+				AND valuation_rate >= 0
+				AND is_cancelled = 0
+				AND NOT (voucher_no = %s AND voucher_type = %s)
+			order by posting_datetime desc, name desc limit 1""",
+			(item_code, warehouse, voucher_no, voucher_type),
+		)
+
+	if last_valuation_rate:
 		return flt(last_valuation_rate[0][0])
 
 	# If negative stock allowed, and item delivered without any incoming entry,
