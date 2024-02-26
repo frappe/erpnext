@@ -7,23 +7,8 @@ from typing import Optional, Set, Tuple
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-<<<<<<< HEAD
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
-=======
-from frappe.query_builder.functions import Sum
-from frappe.utils import (
-	cint,
-	cstr,
-	flt,
-	get_link_to_form,
-	getdate,
-	now,
-	nowdate,
-	nowtime,
-	parse_json,
-)
->>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate, nowtime, parse_json
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
@@ -84,11 +69,8 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 
 			args = sle_doc.as_dict()
-<<<<<<< HEAD
 			args["allow_zero_valuation_rate"] = sle.get("allow_zero_valuation_rate") or False
-=======
 			args["posting_datetime"] = get_combine_datetime(args.posting_date, args.posting_time)
->>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
 
 			if sle.get("voucher_type") == "Stock Reconciliation":
 				# preserve previous_qty_after_transaction for qty reposting
@@ -1416,23 +1398,6 @@ def get_valuation_rate(
 		)
 
 	# Get valuation rate from last sle for the same item and warehouse
-<<<<<<< HEAD
-	if not last_valuation_rate or last_valuation_rate[0][0] is None:
-		last_valuation_rate = frappe.db.sql(
-			"""select valuation_rate
-			from `tabStock Ledger Entry` force index (item_warehouse)
-			where
-				item_code = %s
-				AND warehouse = %s
-				AND valuation_rate >= 0
-				AND is_cancelled = 0
-				AND NOT (voucher_no = %s AND voucher_type = %s)
-			order by posting_date desc, posting_time desc, name desc limit 1""",
-			(item_code, warehouse, voucher_no, voucher_type),
-		)
-
-	if last_valuation_rate:
-=======
 	if last_valuation_rate := frappe.db.sql(
 		"""select valuation_rate
 		from `tabStock Ledger Entry` force index (item_warehouse)
@@ -1445,7 +1410,6 @@ def get_valuation_rate(
 		order by posting_datetime desc, name desc limit 1""",
 		(item_code, warehouse, voucher_no, voucher_type),
 	):
->>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
 		return flt(last_valuation_rate[0][0])
 
 	# If negative stock allowed, and item delivered without any incoming entry,
@@ -1665,7 +1629,6 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
-<<<<<<< HEAD
 def get_future_sle_with_negative_qty(sle):
 	SLE = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
@@ -1678,35 +1641,14 @@ def get_future_sle_with_negative_qty(sle):
 			& (SLE.warehouse == sle.warehouse)
 			& (SLE.voucher_no != sle.voucher_no)
 			& (
-				CombineDatetime(SLE.posting_date, SLE.posting_time)
-				>= CombineDatetime(sle.posting_date, sle.posting_time)
+				SLE.posting_datetime
+				>= get_combine_datetime(sle.posting_date, sle.posting_time)
 			)
 			& (SLE.is_cancelled == 0)
 			& (SLE.qty_after_transaction < 0)
 		)
-		.orderby(CombineDatetime(SLE.posting_date, SLE.posting_time))
+		.orderby(SLE.posting_datetime)
 		.limit(1)
-=======
-def get_future_sle_with_negative_qty(args):
-	return frappe.db.sql(
-		"""
-		select
-			qty_after_transaction, posting_date, posting_time,
-			voucher_type, voucher_no
-		from `tabStock Ledger Entry`
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and voucher_no != %(voucher_no)s
-			and posting_datetime >= %(posting_datetime)s
-			and is_cancelled = 0
-			and qty_after_transaction < 0
-		order by posting_datetime asc
-		limit 1
-	""",
-		args,
-		as_dict=1,
->>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
 	)
 
 	if sle.voucher_type == "Stock Reconciliation" and sle.batch_no:
