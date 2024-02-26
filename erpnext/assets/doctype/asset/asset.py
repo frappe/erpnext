@@ -152,6 +152,7 @@ class Asset(AccountsController):
 	def on_submit(self):
 		self.validate_in_use_date()
 		self.make_asset_movement()
+		self.reload()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
 		if self.calculate_depreciation and not self.split_from:
@@ -163,6 +164,7 @@ class Asset(AccountsController):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
 		self.cancel_capitalization()
+		self.reload()
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
 		self.set_status()
