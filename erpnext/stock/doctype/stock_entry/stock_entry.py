@@ -1721,22 +1721,9 @@ class StockEntry(StockController):
 			if qty <= 0:
 				break
 
-<<<<<<< HEAD
 			fg_qty = batch_qty
 			if batch_qty >= qty:
 				fg_qty = qty
-=======
-		id = create_serial_and_batch_bundle(
-			self,
-			row,
-			frappe._dict(
-				{
-					"item_code": self.pro_doc.production_item,
-					"warehouse": args.get("to_warehouse"),
-				}
-			),
-		)
->>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
 
 			qty -= batch_qty
 			args["qty"] = fg_qty
@@ -1982,11 +1969,7 @@ class StockEntry(StockController):
 			"to_warehouse": "",
 			"qty": qty,
 			"item_name": item.item_name,
-<<<<<<< HEAD
 			"batch_no": item.batch_no,
-=======
-			"serial_and_batch_bundle": create_serial_and_batch_bundle(self, row, item, "Outward"),
->>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
 			"description": item.description,
 			"stock_uom": item.stock_uom,
 			"expense_account": item.expense_account,
@@ -2394,39 +2377,6 @@ class StockEntry(StockController):
 				frappe.db.set_value("Material Request", material_request, "transfer_status", status)
 
 	def set_serial_no_batch_for_finished_good(self):
-<<<<<<< HEAD
-=======
-		if not (
-			(self.pro_doc.has_serial_no or self.pro_doc.has_batch_no)
-			and frappe.db.get_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order")
-		):
-			return
-
-		for d in self.items:
-			if (
-				d.is_finished_item
-				and d.item_code == self.pro_doc.production_item
-				and not d.serial_and_batch_bundle
-			):
-				serial_nos = self.get_available_serial_nos()
-				if serial_nos:
-					row = frappe._dict({"serial_nos": serial_nos[0 : cint(d.qty)]})
-
-					id = create_serial_and_batch_bundle(
-						self,
-						row,
-						frappe._dict(
-							{
-								"item_code": d.item_code,
-								"warehouse": d.t_warehouse,
-							}
-						),
-					)
-
-					d.serial_and_batch_bundle = id
-
-	def get_available_serial_nos(self) -> List[str]:
->>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
 		serial_nos = []
 		if self.pro_doc.serial_no:
 			serial_nos = self.get_serial_nos_for_fg() or []
@@ -2905,91 +2855,3 @@ def get_stock_entry_data(work_order):
 		)
 		.orderby(stock_entry.creation, stock_entry_detail.item_code, stock_entry_detail.idx)
 	).run(as_dict=1)
-<<<<<<< HEAD
-=======
-
-	if not data:
-		return []
-
-	voucher_nos = [row.get("name") for row in data if row.get("name")]
-	if voucher_nos:
-		bundle_data = get_voucher_wise_serial_batch_from_bundle(voucher_no=voucher_nos)
-		for row in data:
-			key = (row.item_code, row.warehouse, row.name)
-			if row.purpose != "Material Transfer for Manufacture":
-				key = (row.item_code, row.s_warehouse, row.name)
-
-			if bundle_data.get(key):
-				row.update(bundle_data.get(key))
-
-	return data
-
-
-def create_serial_and_batch_bundle(parent_doc, row, child, type_of_transaction=None):
-	item_details = frappe.get_cached_value(
-		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
-	)
-
-	if not (item_details.has_serial_no or item_details.has_batch_no):
-		return
-
-	if not type_of_transaction:
-		type_of_transaction = "Inward"
-
-	doc = frappe.get_doc(
-		{
-			"doctype": "Serial and Batch Bundle",
-			"voucher_type": "Stock Entry",
-			"item_code": child.item_code,
-			"warehouse": child.warehouse,
-			"type_of_transaction": type_of_transaction,
-			"posting_date": parent_doc.posting_date,
-			"posting_time": parent_doc.posting_time,
-		}
-	)
-
-	if row.serial_nos and row.batches_to_be_consume:
-		doc.has_serial_no = 1
-		doc.has_batch_no = 1
-		batchwise_serial_nos = get_batchwise_serial_nos(child.item_code, row)
-		for batch_no, qty in row.batches_to_be_consume.items():
-
-			while qty > 0:
-				qty -= 1
-				doc.append(
-					"entries",
-					{
-						"batch_no": batch_no,
-						"serial_no": batchwise_serial_nos.get(batch_no).pop(0),
-						"warehouse": row.warehouse,
-						"qty": -1,
-					},
-				)
-
-	elif row.serial_nos:
-		doc.has_serial_no = 1
-		for serial_no in row.serial_nos:
-			doc.append("entries", {"serial_no": serial_no, "warehouse": row.warehouse, "qty": -1})
-
-	elif row.batches_to_be_consume:
-		doc.has_batch_no = 1
-		for batch_no, qty in row.batches_to_be_consume.items():
-			doc.append("entries", {"batch_no": batch_no, "warehouse": row.warehouse, "qty": qty * -1})
-
-	return doc.insert(ignore_permissions=True).name
-
-
-def get_batchwise_serial_nos(item_code, row):
-	batchwise_serial_nos = {}
-
-	for batch_no in row.batches_to_be_consume:
-		serial_nos = frappe.get_all(
-			"Serial No",
-			filters={"item_code": item_code, "batch_no": batch_no, "name": ("in", row.serial_nos)},
-		)
-
-		if serial_nos:
-			batchwise_serial_nos[batch_no] = sorted([serial_no.name for serial_no in serial_nos])
-
-	return batchwise_serial_nos
->>>>>>> d80ca523a4 (perf: new column posting datetime in SLE to optimize stock ledger related queries)
