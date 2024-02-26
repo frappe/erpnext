@@ -57,6 +57,12 @@ frappe.ui.form.on("Purchase Receipt", {
 				}
 			}
 		});
+		
+		frm.set_query("transporter", function() {
+			return {
+				filters: {'is_transporter': 1 }
+			}
+		});
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
