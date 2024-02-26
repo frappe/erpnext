@@ -2237,6 +2237,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 			create_stock_reconciliation,
 		)
 
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
+		)
+
 		item_code = make_item(
 			"_Test Use Serial Fields Item Serial Item",
 			properties={"has_serial_no": 1, "serial_no_series": "SNU-TSFISI-.#####"},
@@ -2316,6 +2320,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for sn in new_serial_nos:
 			serial_no_status = frappe.db.get_value("Serial No", sn, "status")
 			self.assertTrue(serial_no_status != "Active")
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
+		)
 
 	def test_sle_qty_after_transaction(self):
 		item = make_item(
@@ -2416,7 +2424,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 			},
 		).name
 
-		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
+		)
 
 		pr = make_purchase_receipt(
 			item_code=item_code,
@@ -2428,7 +2438,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
 		self.assertEqual(pr.items[0].batch_no, batch_no)
 
-		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
+		)
 
 
 def prepare_data_for_internal_transfer():
