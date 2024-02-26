@@ -39,6 +39,7 @@ class StockSettings(Document):
 		clean_description_html: DF.Check
 		default_warehouse: DF.Link | None
 		disable_serial_no_and_batch_selector: DF.Check
+		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
 		item_naming_by: DF.Literal["Item Code", "Naming Series"]
