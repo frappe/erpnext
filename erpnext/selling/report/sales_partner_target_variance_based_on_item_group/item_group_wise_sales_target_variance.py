@@ -206,42 +206,36 @@ def prepare_data(
 
 def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_field):
 	fiscal_year = get_fiscal_year(fiscal_year=filters.get("fiscal_year"), as_dict=1)
-	dates = [fiscal_year.year_start_date, fiscal_year.year_end_date]
 
-	select_field = "`tab{0}`.{1}".format(filters.get("doctype"), sales_field)
-	child_table = "`tab{0}`".format(filters.get("doctype") + " Item")
+	parent_doc = frappe.qb.DocType(filters.get("doctype"))
+	child_doc = frappe.qb.DocType(filters.get("doctype") + " Item")
+	sales_team = frappe.qb.DocType("Sales Team")
+
+	query = (
+		frappe.qb.from_(parent_doc)
+		.inner_join(child_doc)
+		.on(child_doc.parent == parent_doc.name)
+		.inner_join(sales_team)
+		.on(sales_team.parent == parent_doc.name)
+		.select(
+			child_doc.item_group,
+			(child_doc.stock_qty * sales_team.allocated_percentage / 100).as_("stock_qty"),
+			(child_doc.base_net_amount * sales_team.allocated_percentage / 100).as_("base_net_amount"),
+			sales_team.sales_person,
+			parent_doc[date_field],
+		)
+		.where(
+			(parent_doc.docstatus == 1)
+			& (parent_doc[date_field].between(fiscal_year.year_start_date, fiscal_year.year_end_date))
+		)
+	)
 
 	if sales_field == "sales_person":
-		select_field = "`tabSales Team`.sales_person"
-		child_table = "`tab{0}`, `tabSales Team`".format(filters.get("doctype") + " Item")
-		cond = """`tabSales Team`.parent = `tab{0}`.name and
-			`tabSales Team`.sales_person in ({1}) """.format(
-			filters.get("doctype"), ",".join(["%s"] * len(sales_users_or_territory_data))
-		)
+		query = query.where(sales_team.sales_person.isin(sales_users_or_territory_data))
 	else:
-		cond = "`tab{0}`.{1} in ({2})".format(
-			filters.get("doctype"), sales_field, ",".join(["%s"] * len(sales_users_or_territory_data))
-		)
+		query = query.where(parent_doc[sales_field].isin(sales_users_or_territory_data))
 
-	return frappe.db.sql(
-		""" SELECT `tab{child_doc}`.item_group,
-			`tab{child_doc}`.stock_qty, `tab{child_doc}`.base_net_amount,
-			{select_field}, `tab{parent_doc}`.{date_field}
-		FROM `tab{parent_doc}`, {child_table}
-		WHERE
-			`tab{child_doc}`.parent = `tab{parent_doc}`.name
-			and `tab{parent_doc}`.docstatus = 1 and {cond}
-			and `tab{parent_doc}`.{date_field} between %s and %s""".format(
-			cond=cond,
-			date_field=date_field,
-			select_field=select_field,
-			child_table=child_table,
-			parent_doc=filters.get("doctype"),
-			child_doc=filters.get("doctype") + " Item",
-		),
-		tuple(sales_users_or_territory_data + dates),
-		as_dict=1,
-	)
+	return query.run(as_dict=True)
 
 
 def get_parents_data(filters, partner_doctype):
