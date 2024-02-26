@@ -319,7 +319,8 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total,
 			`tabPurchase Invoice`.unrealized_profit_loss_account,
 			`tabPurchase Invoice Item`.`item_code`, `tabPurchase Invoice Item`.description,
-			`tabPurchase Invoice Item`.`item_name` as pi_item_name, `tabPurchase Invoice Item`.`item_group` as pi_item_group,
+			`tabPurchase Invoice Item`.`item_name` as pi_item_name, `tabPurchase Invoice Item`.`item_group`
+			,`tabPurchase Invoice Item`.`item_group` as pi_item_group,
 			`tabItem`.`item_name` as i_item_name, `tabItem`.`item_group` as i_item_group,
 			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,

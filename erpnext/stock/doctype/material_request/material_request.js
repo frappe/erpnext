@@ -250,7 +250,7 @@ frappe.ui.form.on('Material Request', {
 			fields: [
 				{"fieldname":"bom", "fieldtype":"Link", "label":__("BOM"),
 					options:"BOM", reqd: 1, get_query: function() {
-						return {filters: { docstatus:1 }};
+						return {filters: { docstatus:1, "is_active": 1 }};
 					}},
 				{"fieldname":"warehouse", "fieldtype":"Link", "label":__("For Warehouse"),
 					options:"Warehouse", reqd: 1},

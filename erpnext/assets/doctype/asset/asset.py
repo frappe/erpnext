@@ -513,14 +513,15 @@ class Asset(AccountsController):
 			)
 
 			# Adjust depreciation amount in the last period based on the expected value after useful life
-			if finance_book.expected_value_after_useful_life and (
-				(
-					n == cint(final_number_of_depreciations) - 1
-					and value_after_depreciation != finance_book.expected_value_after_useful_life
-				)
-				or value_after_depreciation < finance_book.expected_value_after_useful_life
+			if (
+				n == cint(final_number_of_depreciations) - 1
+				and flt(value_after_depreciation) != flt(finance_book.expected_value_after_useful_life)
+			) or flt(value_after_depreciation) < flt(
+				finance_book.expected_value_after_useful_life
 			):
-				depreciation_amount += value_after_depreciation - finance_book.expected_value_after_useful_life
+				depreciation_amount += flt(value_after_depreciation) - flt(
+					finance_book.expected_value_after_useful_life
+				)
 				skip_row = True
 
 			if flt(depreciation_amount, self.precision("gross_purchase_amount")) > 0:

@@ -51,8 +51,8 @@ def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 				.where((BIN.item_code == item_code) & (BIN.warehouse == warehouse))
 			).run()
 
-			stock_qty = stock_qty[0][0]
 			if stock_qty:
+				stock_qty = flt(stock_qty[0][0])
 				total_stock += adjust_qty_for_expired_items(item_code, stock_qty, warehouse)
 
 	in_stock = int(total_stock > 0)
