@@ -7,8 +7,8 @@ from typing import Optional, Set, Tuple
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate, nowtime, parse_json
+from frappe.query_builder.functions import Sum
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
@@ -1640,10 +1640,7 @@ def get_future_sle_with_negative_qty(sle):
 			(SLE.item_code == sle.item_code)
 			& (SLE.warehouse == sle.warehouse)
 			& (SLE.voucher_no != sle.voucher_no)
-			& (
-				SLE.posting_datetime
-				>= get_combine_datetime(sle.posting_date, sle.posting_time)
-			)
+			& (SLE.posting_datetime >= get_combine_datetime(sle.posting_date, sle.posting_time))
 			& (SLE.is_cancelled == 0)
 			& (SLE.qty_after_transaction < 0)
 		)

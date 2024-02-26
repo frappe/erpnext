@@ -931,6 +931,46 @@ def get_currency_precision():
 	return precision
 
 
+def get_stock_rbnb_difference(posting_date, company):
+	stock_items = frappe.db.sql_list(
+		"""select distinct item_code
+		from `tabStock Ledger Entry` where company=%s""",
+		company,
+	)
+
+	pr_valuation_amount = frappe.db.sql(
+		"""
+		select sum(pr_item.valuation_rate * pr_item.qty * pr_item.conversion_factor)
+		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
+		where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
+		and pr.posting_date <= %s and pr_item.item_code in (%s)"""
+		% ("%s", "%s", ", ".join(["%s"] * len(stock_items))),
+		tuple([company, posting_date] + stock_items),
+	)[0][0]
+
+	pi_valuation_amount = frappe.db.sql(
+		"""
+		select sum(pi_item.valuation_rate * pi_item.qty * pi_item.conversion_factor)
+		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` pi
+		where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
+		and pi.posting_date <= %s and pi_item.item_code in (%s)"""
+		% ("%s", "%s", ", ".join(["%s"] * len(stock_items))),
+		tuple([company, posting_date] + stock_items),
+	)[0][0]
+
+	# Balance should be
+	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
+
+	# Balance as per system
+	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.get_cached_value(
+		"Company", company, "abbr"
+	)
+	sys_bal = get_balance_on(stock_rbnb_account, posting_date, in_account_currency=False)
+
+	# Amount should be credited
+	return flt(stock_rbnb) + flt(sys_bal)
+
+
 def get_held_invoices(party_type, party):
 	"""
 	Returns a list of names Purchase Invoices for the given party that are on hold
