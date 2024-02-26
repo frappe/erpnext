@@ -703,6 +703,9 @@ def set_default_income_account_for_item(obj):
 def get_serial_and_batch_bundle(child, parent):
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
+	if child.get("use_serial_batch_fields"):
+		return
+
 	if not frappe.db.get_single_value(
 		"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
 	):

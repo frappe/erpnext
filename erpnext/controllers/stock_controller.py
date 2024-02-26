@@ -158,7 +158,7 @@ class StockController(AccountsController):
 				# remove extra whitespace and store one serial no on each line
 				row.serial_no = clean_serial_no_string(row.serial_no)
 
-	def make_bundle_using_old_serial_batch_fields(self):
+	def make_bundle_using_old_serial_batch_fields(self, table_name=None):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
@@ -169,7 +169,9 @@ class StockController(AccountsController):
 		if frappe.flags.in_test and frappe.flags.use_serial_and_batch_fields:
 			return
 
-		table_name = "items"
+		if not table_name:
+			table_name = "items"
+
 		if self.doctype == "Asset Capitalization":
 			table_name = "stock_items"
 
@@ -192,6 +194,12 @@ class StockController(AccountsController):
 					qty = row.qty
 					type_of_transaction = "Inward"
 					warehouse = row.warehouse
+				elif table_name == "packed_items":
+					qty = row.qty
+					warehouse = row.warehouse
+					type_of_transaction = "Outward"
+					if self.is_return:
+						type_of_transaction = "Inward"
 				else:
 					qty = row.stock_qty if self.doctype != "Stock Entry" else row.transfer_qty
 					type_of_transaction = get_type_of_transaction(self, row)
