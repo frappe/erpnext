@@ -193,6 +193,7 @@ class PurchaseInvoice(BuyingController):
 		supplied_items: DF.Table[PurchaseReceiptItemSupplied]
 		supplier: DF.Link
 		supplier_address: DF.Link | None
+		supplier_group: DF.Link | None
 		supplier_name: DF.Data | None
 		supplier_warehouse: DF.Link | None
 		tax_category: DF.Link | None
@@ -214,6 +215,8 @@ class PurchaseInvoice(BuyingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		unrealized_profit_loss_account: DF.Link | None
+		update_billed_amount_in_purchase_order: DF.Check
+		update_billed_amount_in_purchase_receipt: DF.Check
 		update_stock: DF.Check
 		use_company_roundoff_cost_center: DF.Check
 		use_transaction_date_exchange_rate: DF.Check
@@ -679,6 +682,11 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).on_submit()
 
 		self.check_prev_docstatus()
+
+		if self.is_return and not self.update_billed_amount_in_purchase_order:
+			# NOTE status updating bypassed for is_return
+			self.status_updater = []
+
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 
@@ -1427,6 +1435,10 @@ class PurchaseInvoice(BuyingController):
 
 		self.check_on_hold_or_closed_status()
 
+		if self.is_return and not self.update_billed_amount_in_purchase_order:
+			# NOTE status updating bypassed for is_return
+			self.status_updater = []
+
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 
@@ -1521,6 +1533,9 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Supplier Invoice No exists in Purchase Invoice {0}").format(pi))
 
 	def update_billing_status_in_pr(self, update_modified=True):
+		if self.is_return and not self.update_billed_amount_in_purchase_receipt:
+			return
+
 		updated_pr = []
 		po_details = []
 
