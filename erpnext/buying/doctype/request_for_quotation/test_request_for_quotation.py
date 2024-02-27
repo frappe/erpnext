@@ -138,6 +138,33 @@ class TestRequestforQuotation(FrappeTestCase):
 		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
 		self.assertEqual(frappe.local.response.type, "pdf")
 
+	def test_portal_user_with_new_supplier(self):
+		supplier_doc = frappe.get_doc(
+			{
+				"doctype": "Supplier",
+				"supplier_name": "Test Supplier for RFQ",
+				"supplier_group": "_Test Supplier Group",
+			}
+		).insert()
+
+		self.assertFalse(supplier_doc.portal_users)
+
+		rfq = make_request_for_quotation(
+			supplier_data=[
+				{
+					"supplier": supplier_doc.name,
+					"supplier_name": supplier_doc.supplier_name,
+					"email_id": "123_testrfquser@example.com",
+				}
+			],
+			do_not_submit=True,
+		)
+		for rfq_supplier in rfq.suppliers:
+			rfq.update_supplier_contact(rfq_supplier, rfq.get_link())
+
+		supplier_doc.reload()
+		self.assertTrue(supplier_doc.portal_users[0].user)
+
 
 def make_request_for_quotation(**args) -> "RequestforQuotation":
 	"""
