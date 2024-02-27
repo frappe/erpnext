@@ -101,7 +101,6 @@
    "columns": 1,
    "fieldname": "bom_level",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "Level (BOM)",
    "read_only": 1
   },
@@ -149,8 +148,10 @@
    "label": "Indent"
   },
   {
+   "columns": 2,
    "fieldname": "fg_warehouse",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Target Warehouse",
    "options": "Warehouse"
   },
@@ -170,6 +171,7 @@
    "options": "Supplier"
   },
   {
+   "columns": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
@@ -207,7 +209,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-03 13:33:42.959387",
+ "modified": "2024-02-27 13:45:17.422435",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Sub Assembly Item",
