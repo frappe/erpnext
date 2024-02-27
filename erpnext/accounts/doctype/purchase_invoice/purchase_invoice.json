@@ -1628,11 +1628,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-11-29 15:35:44.697496",
-=======
- "modified": "2024-02-25 11:20:28.366808",
->>>>>>> 9f6535472d (feat: update billed amount in PO and PR)
+ "modified": "2024-02-25 11:20:28.366808"
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
