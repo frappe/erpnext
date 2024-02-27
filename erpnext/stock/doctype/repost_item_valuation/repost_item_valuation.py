@@ -272,6 +272,7 @@ def on_doctype_update():
 
 def repost(doc):
 	try:
+		frappe.flags.through_repost_item_valuation = True
 		if not frappe.db.exists("Repost Item Valuation", doc.name):
 			return
 
