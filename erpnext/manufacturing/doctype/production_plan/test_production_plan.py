@@ -1194,6 +1194,7 @@ class TestProductionPlan(FrappeTestCase):
 			ignore_existing_ordered_qty=1,
 			do_not_submit=1,
 			skip_available_sub_assembly_item=1,
+			sub_assembly_warehouse="_Test Warehouse - _TC",
 			warehouse="_Test Warehouse - _TC",
 		)
 
@@ -1327,6 +1328,7 @@ class TestProductionPlan(FrappeTestCase):
 			ignore_existing_ordered_qty=1,
 			do_not_submit=1,
 			skip_available_sub_assembly_item=1,
+			sub_assembly_warehouse="_Test Warehouse - _TC",
 			warehouse="_Test Warehouse - _TC",
 		)
 
@@ -1578,6 +1580,48 @@ class TestProductionPlan(FrappeTestCase):
 
 		for row in work_orders:
 			self.assertEqual(row.qty, wo_qty[row.name])
+
+	def test_parent_warehouse_for_sub_assembly_items(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		parent_warehouse = "_Test Warehouse Group - _TC"
+		sub_warehouse = create_warehouse("Sub Warehouse", company="_Test Company")
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+		sf_item = make_item(properties={"is_stock_item": 1}).name
+		rm_item = make_item(properties={"is_stock_item": 1}).name
+
+		bom_tree = {fg_item: {sf_item: {rm_item: {}}}}
+		create_nested_bom(bom_tree, prefix="")
+
+		pln = create_production_plan(
+			item_code=fg_item,
+			planned_qty=10,
+			warehouse="_Test Warehouse - _TC",
+			sub_assembly_warehouse=parent_warehouse,
+			skip_available_sub_assembly_item=1,
+			do_not_submit=1,
+			skip_getting_mr_items=1,
+		)
+
+		pln.get_sub_assembly_items()
+
+		for row in pln.sub_assembly_items:
+			self.assertFalse(row.fg_warehouse)
+			self.assertEqual(row.production_item, sf_item)
+			self.assertEqual(row.qty, 10.0)
+
+		make_stock_entry(item_code=sf_item, qty=5, target=sub_warehouse, rate=100)
+
+		pln.sub_assembly_items = []
+		pln.get_sub_assembly_items()
+
+		self.assertEqual(pln.sub_assembly_warehouse, parent_warehouse)
+		for row in pln.sub_assembly_items:
+			self.assertFalse(row.fg_warehouse)
+			self.assertEqual(row.production_item, sf_item)
+			self.assertEqual(row.qty, 5.0)
 
 
 def create_production_plan(**args):
