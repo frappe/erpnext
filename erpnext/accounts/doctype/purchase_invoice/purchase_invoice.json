@@ -22,6 +22,8 @@
   "is_paid",
   "is_return",
   "return_against",
+  "update_billed_amount_in_purchase_order",
+  "update_billed_amount_in_purchase_receipt",
   "apply_tds",
   "tax_withholding_category",
   "amended_from",
@@ -411,6 +413,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.is_return",
+   "fieldname": "update_billed_amount_in_purchase_order",
+   "fieldtype": "Check",
+   "label": "Update Billed Amount in Purchase Order"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: doc.is_return",
+   "fieldname": "update_billed_amount_in_purchase_receipt",
+   "fieldtype": "Check",
+   "label": "Update Billed Amount in Purchase Receipt"
   },
   {
    "fieldname": "section_addresses",
@@ -1612,7 +1628,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-29 15:35:44.697496",
+ "modified": "2024-02-25 11:20:28.366808",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
