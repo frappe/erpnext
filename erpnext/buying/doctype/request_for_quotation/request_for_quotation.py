@@ -266,6 +266,10 @@ class RequestforQuotation(BuyingController):
 				"user_fullname": full_name,
 			}
 		)
+
+		if not self.email_template:
+			return
+
 		email_template = frappe.get_doc("Email Template", self.email_template)
 		message = frappe.render_template(email_template.response_, doc_args)
 		subject = frappe.render_template(email_template.subject, doc_args)
