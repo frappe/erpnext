@@ -397,7 +397,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	refresh() {
 		erpnext.toggle_naming_series();
-		erpnext.hide_company();
+		erpnext.hide_company(this.frm);
 		this.set_dynamic_labels();
 		this.setup_sms();
 		this.setup_quality_inspection();
