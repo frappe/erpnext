@@ -216,6 +216,19 @@ class AccountsController(TransactionBase):
 					)
 				)
 
+			if self.get("is_return") and self.get("return_against") and not self.get("is_pos"):
+				# if self.get("is_return") and self.get("return_against"):
+				document_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
+				frappe.msgprint(
+					_(
+						"{0} will be treated as a standalone {0}. Post creation use {1} tool to reconcile against {2}."
+					).format(
+						document_type,
+						get_link_to_form("Payment Reconciliation"),
+						get_link_to_form(self.doctype, self.get("return_against")),
+					)
+				)
+
 			pos_check_field = "is_pos" if self.doctype == "Sales Invoice" else "is_paid"
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
 				self.set_advances()
@@ -333,6 +346,12 @@ class AccountsController(TransactionBase):
 			ple = frappe.qb.DocType("Payment Ledger Entry")
 			frappe.qb.from_(ple).delete().where(
 				(ple.voucher_type == self.doctype) & (ple.voucher_no == self.name)
+				| (
+					(ple.against_voucher_type == self.doctype)
+					& (ple.against_voucher_no == self.name)
+					& ple.delinked
+					== 1
+				)
 			).run()
 			frappe.db.sql(
 				"delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s", (self.doctype, self.name)
@@ -2684,7 +2703,7 @@ def get_advance_journal_entries(
 
 	if order_list:
 		q = q.where(
-			(journal_acc.reference_type == order_doctype) & ((journal_acc.reference_type).isin(order_list))
+			(journal_acc.reference_type == order_doctype) & ((journal_acc.reference_name).isin(order_list))
 		)
 
 	q = q.orderby(journal_entry.posting_date)

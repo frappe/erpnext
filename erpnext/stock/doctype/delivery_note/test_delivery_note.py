@@ -1078,6 +1078,8 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(si2.items[1].qty, 1)
 
 	def test_delivery_note_bundle_with_batched_item(self):
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
+
 		batched_bundle = make_item("_Test Batched bundle", {"is_stock_item": 0})
 		batched_item = make_item(
 			"_Test Batched Item",
@@ -1098,6 +1100,8 @@ class TestDeliveryNote(FrappeTestCase):
 
 		batch_no = get_batch_from_bundle(dn.packed_items[0].serial_and_batch_bundle)
 		self.assertTrue(batch_no)
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
@@ -1550,6 +1554,53 @@ class TestDeliveryNote(FrappeTestCase):
 
 		self.assertEqual(so.items[0].rate, rate)
 		self.assertEqual(dn.items[0].rate, so.items[0].rate)
+
+	def test_use_serial_batch_fields_for_packed_items(self):
+		bundle_item = make_item("Test _Packed Product Bundle Item ", {"is_stock_item": 0})
+		serial_item = make_item(
+			"Test _Packed Serial Item ",
+			{"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SN-TESTSERIAL-.#####"},
+		)
+		batch_item = make_item(
+			"Test _Packed Batch Item ",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_no_series": "BATCH-TESTSERIAL-.#####",
+				"create_new_batch": 1,
+			},
+		)
+		make_product_bundle(parent=bundle_item.name, items=[serial_item.name, batch_item.name])
+
+		item_details = {}
+		for item in [serial_item, batch_item]:
+			se = make_stock_entry(
+				item_code=item.name, target="_Test Warehouse - _TC", qty=5, basic_rate=100
+			)
+			item_details[item.name] = se.items[0].serial_and_batch_bundle
+
+		dn = create_delivery_note(item_code=bundle_item.name, qty=1, do_not_submit=True)
+		serial_no = ""
+		for row in dn.packed_items:
+			row.use_serial_batch_fields = 1
+
+			if row.item_code == serial_item.name:
+				serial_and_batch_bundle = item_details[serial_item.name]
+				row.serial_no = get_serial_nos_from_bundle(serial_and_batch_bundle)[3]
+				serial_no = row.serial_no
+			else:
+				serial_and_batch_bundle = item_details[batch_item.name]
+				row.batch_no = get_batch_from_bundle(serial_and_batch_bundle)
+
+		dn.submit()
+		dn.load_from_db()
+
+		for row in dn.packed_items:
+			self.assertTrue(row.serial_no or row.batch_no)
+			self.assertTrue(row.serial_and_batch_bundle)
+
+			if row.serial_no:
+				self.assertEqual(row.serial_no, serial_no)
 
 
 def create_delivery_note(**args):

@@ -73,6 +73,10 @@ class PickList(Document):
 		self.update_status()
 		self.set_item_locations()
 
+		if self.get("locations"):
+			self.validate_sales_order_percentage()
+
+	def validate_sales_order_percentage(self):
 		# set percentage picked in SO
 		for location in self.get("locations"):
 			if (
@@ -348,9 +352,9 @@ class PickList(Document):
 		picked_items_details = self.get_picked_items_details(items)
 		self.item_location_map = frappe._dict()
 
-		from_warehouses = None
+		from_warehouses = [self.parent_warehouse] if self.parent_warehouse else []
 		if self.parent_warehouse:
-			from_warehouses = get_descendants_of("Warehouse", self.parent_warehouse)
+			from_warehouses.extend(get_descendants_of("Warehouse", self.parent_warehouse))
 
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica = self.get("locations")

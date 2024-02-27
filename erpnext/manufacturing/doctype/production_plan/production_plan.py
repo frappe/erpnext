@@ -652,7 +652,10 @@ class ProductionPlan(Document):
 				"project": self.project,
 			}
 
-			key = (d.item_code, d.sales_order, d.warehouse)
+			key = (d.item_code, d.sales_order, d.sales_order_item, d.warehouse)
+			if self.combine_items:
+				key = (d.item_code, d.sales_order, d.warehouse)
+
 			if not d.sales_order:
 				key = (d.name, d.item_code, d.warehouse)
 
@@ -1504,19 +1507,17 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 				frappe.throw(_("For row {0}: Enter Planned Qty").format(data.get("idx")))
 
 			if bom_no:
-				if (
-					data.get("include_exploded_items")
-					and doc.get("sub_assembly_items")
-					and doc.get("skip_available_sub_assembly_item")
-				):
-					item_details = get_raw_materials_of_sub_assembly_items(
-						item_details,
-						company,
-						bom_no,
-						include_non_stock_items,
-						sub_assembly_items,
-						planned_qty=planned_qty,
-					)
+				if data.get("include_exploded_items") and doc.get("skip_available_sub_assembly_item"):
+					item_details = {}
+					if doc.get("sub_assembly_items"):
+						item_details = get_raw_materials_of_sub_assembly_items(
+							item_details,
+							company,
+							bom_no,
+							include_non_stock_items,
+							sub_assembly_items,
+							planned_qty=planned_qty,
+						)
 
 				elif data.get("include_exploded_items") and include_subcontracted_items:
 					# fetch exploded items from BOM
@@ -1768,23 +1769,23 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	return reserved_qty_for_production_plan - reserved_qty_for_production
 
 
+@frappe.request_cache
 def get_non_completed_production_plans():
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Production Plan Item")
 
-	query = (
+	return (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
 		.select(table.name)
+		.distinct()
 		.where(
 			(table.docstatus == 1)
 			& (table.status.notin(["Completed", "Closed"]))
 			& (child.planned_qty > child.ordered_qty)
 		)
-	).run(as_dict=True)
-
-	return list(set([d.name for d in query]))
+	).run(pluck="name")
 
 
 def get_raw_materials_of_sub_assembly_items(

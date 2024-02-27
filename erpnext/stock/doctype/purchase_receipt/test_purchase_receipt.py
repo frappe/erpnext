@@ -2237,6 +2237,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 			create_stock_reconciliation,
 		)
 
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
+		)
+
 		item_code = make_item(
 			"_Test Use Serial Fields Item Serial Item",
 			properties={"has_serial_no": 1, "serial_no_series": "SNU-TSFISI-.#####"},
@@ -2259,7 +2263,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		self.assertEqual(pr.items[0].use_serial_batch_fields, 1)
-		self.assertFalse(pr.items[0].serial_no)
+		self.assertTrue(pr.items[0].serial_no)
 		self.assertTrue(pr.items[0].serial_and_batch_bundle)
 
 		sbb_doc = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
@@ -2316,6 +2320,127 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for sn in new_serial_nos:
 			serial_no_status = frappe.db.get_value("Serial No", sn, "status")
 			self.assertTrue(serial_no_status != "Active")
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
+		)
+
+	def test_sle_qty_after_transaction(self):
+		item = make_item(
+			"_Test Item Qty After Transaction",
+			properties={"is_stock_item": 1, "valuation_method": "FIFO"},
+		).name
+
+		posting_date = today()
+		posting_time = nowtime()
+
+		# Step 1: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=1,
+			rate=100,
+			posting_date=posting_date,
+			posting_time=posting_time,
+			do_not_save=1,
+		)
+
+		for i in range(9):
+			pr.append(
+				"items",
+				{
+					"item_code": item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": pr.items[0].warehouse,
+					"cost_center": pr.items[0].cost_center,
+					"expense_account": pr.items[0].expense_account,
+					"uom": pr.items[0].uom,
+					"stock_uom": pr.items[0].stock_uom,
+					"conversion_factor": pr.items[0].conversion_factor,
+				},
+			)
+
+		self.assertEqual(len(pr.items), 10)
+		pr.save()
+		pr.submit()
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["qty_after_transaction", "creation", "posting_datetime"],
+			filters={"voucher_no": pr.name, "is_cancelled": 0},
+			order_by="creation",
+		)
+
+		for index, d in enumerate(data):
+			self.assertEqual(d.qty_after_transaction, 1 + index)
+
+		# Step 2: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=1,
+			rate=100,
+			posting_date=posting_date,
+			posting_time=posting_time,
+			do_not_save=1,
+		)
+
+		for i in range(9):
+			pr.append(
+				"items",
+				{
+					"item_code": item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": pr.items[0].warehouse,
+					"cost_center": pr.items[0].cost_center,
+					"expense_account": pr.items[0].expense_account,
+					"uom": pr.items[0].uom,
+					"stock_uom": pr.items[0].stock_uom,
+					"conversion_factor": pr.items[0].conversion_factor,
+				},
+			)
+
+		self.assertEqual(len(pr.items), 10)
+		pr.save()
+		pr.submit()
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["qty_after_transaction", "creation", "posting_datetime"],
+			filters={"voucher_no": pr.name, "is_cancelled": 0},
+			order_by="creation",
+		)
+
+		for index, d in enumerate(data):
+			self.assertEqual(d.qty_after_transaction, 11 + index)
+
+	def test_auto_set_batch_based_on_bundle(self):
+		item_code = make_item(
+			"_Test Auto Set Batch Based on Bundle",
+			properties={
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-BNU-TASBBB-.#####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
+		)
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=5,
+			rate=100,
+		)
+
+		self.assertTrue(pr.items[0].batch_no)
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		self.assertEqual(pr.items[0].batch_no, batch_no)
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
+		)
 
 
 def prepare_data_for_internal_transfer():
