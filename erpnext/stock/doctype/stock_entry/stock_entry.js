@@ -943,7 +943,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		if (this.frm.doc.docstatus===1 && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			this.show_general_ledger();
 		}
-		erpnext.hide_company();
+		erpnext.hide_company(this.frm);
 		erpnext.utils.add_item(this.frm);
 	}
 
