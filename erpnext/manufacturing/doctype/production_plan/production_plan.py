@@ -1732,8 +1732,8 @@ def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, company, warehouse=
 					)
 				)
 
-				if d.value:
-					get_sub_assembly_items(d.value, bom_data, stock_qty, company, warehouse, indent=indent + 1)
+			if d.value:
+				get_sub_assembly_items(d.value, bom_data, stock_qty, company, warehouse, indent=indent + 1)
 
 
 def set_default_warehouses(row, default_warehouses):
