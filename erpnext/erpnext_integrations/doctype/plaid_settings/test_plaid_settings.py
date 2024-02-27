@@ -42,7 +42,7 @@ class TestPlaidSettings(unittest.TestCase):
 		add_account_subtype("loan")
 		self.assertEqual(frappe.get_doc("Bank Account Subtype", "loan").name, "loan")
 
-	def test_default_bank_account(self):
+	def test_parent_bank_account_validation(self):
 		if not frappe.db.exists("Bank", "Citi"):
 			frappe.get_doc({"doctype": "Bank", "bank_name": "Citi"}).insert()
 
@@ -70,11 +70,18 @@ class TestPlaidSettings(unittest.TestCase):
 
 		bank = json.dumps(frappe.get_doc("Bank", "Citi").as_dict(), default=json_handler)
 		company = frappe.db.get_single_value("Global Defaults", "default_company")
-		frappe.db.set_value("Company", company, "default_bank_account", None)
+		group_bank_account = frappe.db.get_all(
+			"Account", {"company": company, "account_type": "Bank", "is_group": 1}, pluck="name"
+		)
+		if group_bank_account:
+			frappe.db.set_value("Account", group_bank_account[0], "disabled", 1)
 
 		self.assertRaises(
 			frappe.ValidationError, add_bank_accounts, response=bank_accounts, bank=bank, company=company
 		)
+
+		if group_bank_account:
+			frappe.db.set_value("Account", group_bank_account[0], "disabled", 0)
 
 	def test_new_transaction(self):
 		if not frappe.db.exists("Bank", "Citi"):
