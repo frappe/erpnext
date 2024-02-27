@@ -943,7 +943,7 @@ class PurchaseInvoice(BuyingController):
 				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
 			)
 		)
-
+		provisional_enpenses_booked_in_pr = False
 		purchase_receipt_doc_map = {}
 
 		for item in self.get("items"):
@@ -1084,6 +1084,7 @@ class PurchaseInvoice(BuyingController):
 
 					if provisional_accounting_for_non_stock_items:
 						if item.purchase_receipt:
+<<<<<<< HEAD
 							provisional_account, pr_qty, pr_base_rate, pr_rate = frappe.get_cached_value(
 								"Purchase Receipt Item",
 								item.pr_detail,
@@ -1099,21 +1100,39 @@ class PurchaseInvoice(BuyingController):
 									"Purchase Receipt", item.purchase_receipt
 								)
 								purchase_receipt_doc_map[item.purchase_receipt] = purchase_receipt_doc
+=======
+							if not provisional_enpenses_booked_in_pr:
+								provisional_account, pr_qty, pr_base_rate = frappe.get_cached_value(
+									"Purchase Receipt Item",
+									item.pr_detail,
+									["provisional_expense_account", "qty", "base_rate"],
+								)
+								provisional_account = provisional_account or self.get_company_default(
+									"default_provisional_account"
+								)
+								# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
+								provision_gle_against_pr = frappe.db.get_value(
+									"GL Entry",
+									{
+										"is_cancelled": 0,
+										"voucher_type": "Purchase Receipt",
+										"voucher_no": item.purchase_receipt,
+										"voucher_detail_no": item.pr_detail,
+										"account": provisional_account,
+									},
+									["name"],
+								)
+								if provision_gle_against_pr:
+									provisional_enpenses_booked_in_pr = True
 
-							# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-							expense_booked_in_pr = frappe.db.get_value(
-								"GL Entry",
-								{
-									"is_cancelled": 0,
-									"voucher_type": "Purchase Receipt",
-									"voucher_no": item.purchase_receipt,
-									"voucher_detail_no": item.pr_detail,
-									"account": provisional_account,
-								},
-								"name",
-							)
+							if provisional_enpenses_booked_in_pr:
+								purchase_receipt_doc = purchase_receipt_doc_map.get(item.purchase_receipt)
+>>>>>>> d7b738ff61 (perf: Optimization for providional gl entries)
 
-							if expense_booked_in_pr:
+								if not purchase_receipt_doc:
+									purchase_receipt_doc = frappe.get_doc("Purchase Receipt", item.purchase_receipt)
+									purchase_receipt_doc_map[item.purchase_receipt] = purchase_receipt_doc
+
 								# Intentionally passing purchase invoice item to handle partial billing
 								purchase_receipt_doc.add_provisional_gl_entry(
 									item,
