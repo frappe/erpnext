@@ -822,6 +822,30 @@ class TestPurchaseOrder(FrappeTestCase):
 		# To test if the PO does NOT have a Blanket Order
 		self.assertEqual(po_doc.items[0].blanket_order, None)
 
+	def test_blanket_order_on_po_close_and_open(self):
+		# Step - 1: Create Blanket Order
+		bo = make_blanket_order(blanket_order_type="Purchasing", quantity=10, rate=10)
+
+		# Step - 2: Create Purchase Order
+		po = create_purchase_order(
+			item_code="_Test Item", qty=5, against_blanket_order=1, against_blanket=bo.name
+		)
+
+		bo.load_from_db()
+		self.assertEqual(bo.items[0].ordered_qty, 5)
+
+		# Step - 3: Close Purchase Order
+		po.update_status("Closed")
+
+		bo.load_from_db()
+		self.assertEqual(bo.items[0].ordered_qty, 0)
+
+		# Step - 4: Re-Open Purchase Order
+		po.update_status("Re-open")
+
+		bo.load_from_db()
+		self.assertEqual(bo.items[0].ordered_qty, 5)
+
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
@@ -1021,6 +1045,33 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertTrue(frappe.db.get_value("Subcontracting Order", {"purchase_order": po.name}))
 
+	def test_purchase_order_advance_payment_status(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+
+		po = create_purchase_order()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
+		)
+
+		pr = make_payment_request(dt=po.doctype, dn=po.name, submit_doc=True, return_doc=True)
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
+
+		pe = get_payment_entry(po.doctype, po.name).save().submit()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Fully Paid"
+		)
+
+		pe.reload()
+		pe.cancel()
+		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
+
+		pr.reload()
+		pr.cancel()
+		self.assertEqual(
+			frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated"
+		)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -1121,6 +1172,7 @@ def create_purchase_order(**args):
 				"schedule_date": add_days(nowdate(), 1),
 				"include_exploded_items": args.get("include_exploded_items", 1),
 				"against_blanket_order": args.against_blanket_order,
+				"against_blanket": args.against_blanket,
 				"material_request": args.material_request,
 				"material_request_item": args.material_request_item,
 			},

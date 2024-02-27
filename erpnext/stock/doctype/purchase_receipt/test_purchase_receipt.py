@@ -4,7 +4,6 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, cstr, flt, nowtime, today
-from pypika import Order
 from pypika import functions as fn
 
 import erpnext
@@ -22,9 +21,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
 
 
 class TestPurchaseReceipt(FrappeTestCase):
@@ -723,7 +720,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr2.load_from_db()
 		self.assertEqual(pr2.get("items")[0].billed_amt, 2000)
 		self.assertEqual(pr2.per_billed, 80)
-		self.assertEqual(pr2.status, "To Bill")
+		self.assertEqual(pr2.status, "Partly Billed")
 
 		pr2.cancel()
 		pi2.reload()
@@ -736,7 +733,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		po.cancel()
 
 	def test_serial_no_against_purchase_receipt(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
@@ -1009,7 +1005,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
 
-		self.assertEqual(len(gl_entries), 2)
+		self.assertFalse(gl_entries)
 
 		expected_sle = {"Work In Progress - TCP1": -5, "Stores - TCP1": 5}
 
@@ -1021,6 +1017,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+		from erpnext.stock.get_item_details import get_valuation_rate
+		from erpnext.stock.utils import get_stock_balance
 
 		prepare_data_for_internal_transfer()
 
@@ -1034,6 +1035,22 @@ class TestPurchaseReceipt(FrappeTestCase):
 			warehouse="Stores - TCP1",
 			company="_Test Company with perpetual inventory",
 		)
+
+		if (
+			get_valuation_rate(
+				pr1.items[0].item_code, "_Test Company with perpetual inventory", warehouse="Stores - TCP1"
+			)
+			!= 50
+		):
+			balance = get_stock_balance(item_code=pr1.items[0].item_code, warehouse="Stores - TCP1")
+			create_stock_reconciliation(
+				item_code=pr1.items[0].item_code,
+				company="_Test Company with perpetual inventory",
+				warehouse="Stores - TCP1",
+				qty=balance,
+				rate=50,
+				do_not_save=True,
+			)
 
 		customer = "_Test Internal Customer 2"
 		company = "_Test Company with perpetual inventory"
@@ -1072,7 +1089,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		sl_entries = get_sl_entries("Purchase Receipt", pr.name)
 
 		expected_gle = [
-			["Stock In Hand - TCP1", 272.5, 0.0],
+			["Stock In Hand - TCP1", 250.0, 0.0],
+			["Cost of Goods Sold - TCP1", 22.5, 0.0],
 			["_Test Account Stock In Hand - TCP1", 0.0, 250.0],
 			["_Test Account Shipping Charges - TCP1", 0.0, 22.5],
 		]
@@ -1134,7 +1152,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pi.load_from_db()
 		pr.load_from_db()
 
-		self.assertEqual(pr.status, "To Bill")
+		self.assertEqual(pr.status, "Partly Billed")
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
 	def test_purchase_receipt_with_exchange_rate_difference(self):
@@ -1657,9 +1675,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 		make_stock_entry(
 			purpose="Material Receipt",
 			item_code=item.name,
-			qty=15,
+			qty=20,
 			company=company,
 			to_warehouse=from_warehouse,
+			posting_date=add_days(today(), -3),
 		)
 
 		# Step 3: Create Delivery Note with Internal Customer
@@ -1682,13 +1701,15 @@ class TestPurchaseReceipt(FrappeTestCase):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
+		pr.set_posting_time = 1
+		pr.posting_date = today()
 		pr.items[0].qty = 15
 		pr.items[0].from_warehouse = target_warehouse
 		pr.items[0].warehouse = to_warehouse
 		pr.items[0].rejected_warehouse = from_warehouse
 		pr.save()
 
-		self.assertRaises(OverAllowanceError, pr.submit)
+		self.assertRaises(frappe.ValidationError, pr.submit)
 
 		# Step 5: Test Over Receipt Allowance
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 50)
@@ -1700,8 +1721,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 			company=company,
 			from_warehouse=from_warehouse,
 			to_warehouse=target_warehouse,
+			posting_date=add_days(pr.posting_date, -1),
 		)
 
+		pr.reload()
 		pr.submit()
 
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
@@ -2207,6 +2230,218 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr_doc.reload()
 		self.assertFalse(pr_doc.items[0].from_warehouse)
 
+	def test_use_serial_batch_fields_for_serial_nos(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+			create_stock_reconciliation,
+		)
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
+		)
+
+		item_code = make_item(
+			"_Test Use Serial Fields Item Serial Item",
+			properties={"has_serial_no": 1, "serial_no_series": "SNU-TSFISI-.#####"},
+		).name
+
+		serial_nos = [
+			"SNU-TSFISI-000011",
+			"SNU-TSFISI-000012",
+			"SNU-TSFISI-000013",
+			"SNU-TSFISI-000014",
+			"SNU-TSFISI-000015",
+		]
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=5,
+			serial_no="\n".join(serial_nos),
+			use_serial_batch_fields=1,
+			rate=100,
+		)
+
+		self.assertEqual(pr.items[0].use_serial_batch_fields, 1)
+		self.assertTrue(pr.items[0].serial_no)
+		self.assertTrue(pr.items[0].serial_and_batch_bundle)
+
+		sbb_doc = frappe.get_doc("Serial and Batch Bundle", pr.items[0].serial_and_batch_bundle)
+
+		for row in sbb_doc.entries:
+			self.assertTrue(row.serial_no in serial_nos)
+
+		serial_nos.remove("SNU-TSFISI-000015")
+
+		sr = create_stock_reconciliation(
+			item_code=item_code,
+			serial_no="\n".join(serial_nos),
+			qty=4,
+			warehouse=pr.items[0].warehouse,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+		sr.reload()
+
+		serial_nos = get_serial_nos(sr.items[0].current_serial_no)
+		self.assertEqual(len(serial_nos), 5)
+		self.assertEqual(sr.items[0].current_qty, 5)
+
+		new_serial_nos = get_serial_nos(sr.items[0].serial_no)
+		self.assertEqual(len(new_serial_nos), 4)
+		self.assertEqual(sr.items[0].qty, 4)
+		self.assertEqual(sr.items[0].use_serial_batch_fields, 1)
+		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
+		self.assertFalse(sr.items[0].serial_and_batch_bundle)
+		self.assertTrue(sr.items[0].current_serial_no)
+		sr.submit()
+
+		sr.reload()
+		self.assertTrue(sr.items[0].current_serial_and_batch_bundle)
+		self.assertTrue(sr.items[0].serial_and_batch_bundle)
+
+		serial_no_status = frappe.db.get_value("Serial No", "SNU-TSFISI-000015", "status")
+
+		self.assertTrue(serial_no_status != "Active")
+
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=4,
+			serial_no="\n".join(new_serial_nos),
+			use_serial_batch_fields=1,
+		)
+
+		self.assertTrue(dn.items[0].serial_and_batch_bundle)
+		self.assertEqual(dn.items[0].qty, 4)
+		doc = frappe.get_doc("Serial and Batch Bundle", dn.items[0].serial_and_batch_bundle)
+		for row in doc.entries:
+			self.assertTrue(row.serial_no in new_serial_nos)
+
+		for sn in new_serial_nos:
+			serial_no_status = frappe.db.get_value("Serial No", sn, "status")
+			self.assertTrue(serial_no_status != "Active")
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
+		)
+
+	def test_sle_qty_after_transaction(self):
+		item = make_item(
+			"_Test Item Qty After Transaction",
+			properties={"is_stock_item": 1, "valuation_method": "FIFO"},
+		).name
+
+		posting_date = today()
+		posting_time = nowtime()
+
+		# Step 1: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=1,
+			rate=100,
+			posting_date=posting_date,
+			posting_time=posting_time,
+			do_not_save=1,
+		)
+
+		for i in range(9):
+			pr.append(
+				"items",
+				{
+					"item_code": item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": pr.items[0].warehouse,
+					"cost_center": pr.items[0].cost_center,
+					"expense_account": pr.items[0].expense_account,
+					"uom": pr.items[0].uom,
+					"stock_uom": pr.items[0].stock_uom,
+					"conversion_factor": pr.items[0].conversion_factor,
+				},
+			)
+
+		self.assertEqual(len(pr.items), 10)
+		pr.save()
+		pr.submit()
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["qty_after_transaction", "creation", "posting_datetime"],
+			filters={"voucher_no": pr.name, "is_cancelled": 0},
+			order_by="creation",
+		)
+
+		for index, d in enumerate(data):
+			self.assertEqual(d.qty_after_transaction, 1 + index)
+
+		# Step 2: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=1,
+			rate=100,
+			posting_date=posting_date,
+			posting_time=posting_time,
+			do_not_save=1,
+		)
+
+		for i in range(9):
+			pr.append(
+				"items",
+				{
+					"item_code": item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": pr.items[0].warehouse,
+					"cost_center": pr.items[0].cost_center,
+					"expense_account": pr.items[0].expense_account,
+					"uom": pr.items[0].uom,
+					"stock_uom": pr.items[0].stock_uom,
+					"conversion_factor": pr.items[0].conversion_factor,
+				},
+			)
+
+		self.assertEqual(len(pr.items), 10)
+		pr.save()
+		pr.submit()
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["qty_after_transaction", "creation", "posting_datetime"],
+			filters={"voucher_no": pr.name, "is_cancelled": 0},
+			order_by="creation",
+		)
+
+		for index, d in enumerate(data):
+			self.assertEqual(d.qty_after_transaction, 11 + index)
+
+	def test_auto_set_batch_based_on_bundle(self):
+		item_code = make_item(
+			"_Test Auto Set Batch Based on Bundle",
+			properties={
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-BNU-TASBBB-.#####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
+		)
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=5,
+			rate=100,
+		)
+
+		self.assertTrue(pr.items[0].batch_no)
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		self.assertEqual(pr.items[0].batch_no, batch_no)
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
+		)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -2254,13 +2489,13 @@ def get_sl_entries(voucher_type, voucher_no):
 
 
 def get_gl_entries(voucher_type, voucher_no):
-	gle = frappe.qb.DocType("GL Entry")
-	return (
-		frappe.qb.from_(gle)
-		.select(gle.account, gle.debit, gle.credit, gle.cost_center, gle.is_cancelled)
-		.where((gle.voucher_type == voucher_type) & (gle.voucher_no == voucher_no))
-		.orderby(gle.account, gle.debit, order=Order.desc)
-	).run(as_dict=True)
+	return frappe.db.sql(
+		"""select account, debit, credit, cost_center, is_cancelled
+		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
+		order by account desc""",
+		(voucher_type, voucher_no),
+		as_dict=1,
+	)
 
 
 def get_taxes(**args):
@@ -2376,7 +2611,7 @@ def make_purchase_receipt(**args):
 	uom = args.uom or frappe.db.get_value("Item", item_code, "stock_uom") or "_Test UOM"
 
 	bundle_id = None
-	if args.get("batch_no") or args.get("serial_no"):
+	if not args.use_serial_batch_fields and (args.get("batch_no") or args.get("serial_no")):
 		batches = {}
 		if args.get("batch_no"):
 			batches = frappe._dict({args.batch_no: qty})
@@ -2418,6 +2653,9 @@ def make_purchase_receipt(**args):
 			"cost_center": args.cost_center
 			or frappe.get_cached_value("Company", pr.company, "cost_center"),
 			"asset_location": args.location or "Test Location",
+			"use_serial_batch_fields": args.use_serial_batch_fields or 0,
+			"serial_no": args.serial_no if args.use_serial_batch_fields else "",
+			"batch_no": args.batch_no if args.use_serial_batch_fields else "",
 		},
 	)
 

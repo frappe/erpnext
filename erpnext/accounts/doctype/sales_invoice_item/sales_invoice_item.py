@@ -75,7 +75,7 @@ class SalesInvoiceItem(Document):
 		sales_invoice_item: DF.Data | None
 		sales_order: DF.Link | None
 		serial_and_batch_bundle: DF.Link | None
-		serial_no: DF.SmallText | None
+		serial_no: DF.Text | None
 		service_end_date: DF.Date | None
 		service_start_date: DF.Date | None
 		service_stop_date: DF.Date | None
@@ -86,6 +86,7 @@ class SalesInvoiceItem(Document):
 		target_warehouse: DF.Link | None
 		total_weight: DF.Float
 		uom: DF.Link
+		use_serial_batch_fields: DF.Check
 		warehouse: DF.Link | None
 		weight_per_unit: DF.Float
 		weight_uom: DF.Link | None

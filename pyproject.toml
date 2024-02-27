@@ -39,3 +39,6 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 indent = "\t"
+
+[tool.bench.frappe-dependencies]
+frappe = ">=16.0.0-dev,<17.0.0"

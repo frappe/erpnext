@@ -72,7 +72,7 @@ class POSInvoiceItem(Document):
 		rate_with_margin: DF.Currency
 		sales_order: DF.Link | None
 		serial_and_batch_bundle: DF.Link | None
-		serial_no: DF.SmallText | None
+		serial_no: DF.Text | None
 		service_end_date: DF.Date | None
 		service_start_date: DF.Date | None
 		service_stop_date: DF.Date | None
@@ -82,6 +82,7 @@ class POSInvoiceItem(Document):
 		target_warehouse: DF.Link | None
 		total_weight: DF.Float
 		uom: DF.Link
+		use_serial_batch_fields: DF.Check
 		warehouse: DF.Link | None
 		weight_per_unit: DF.Float
 		weight_uom: DF.Link | None

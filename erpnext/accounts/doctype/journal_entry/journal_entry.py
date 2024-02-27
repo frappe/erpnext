@@ -150,6 +150,20 @@ class JournalEntry(AccountsController):
 		if not self.title:
 			self.title = self.get_title()
 
+	def submit(self):
+		if len(self.accounts) > 100:
+			msgprint(_("The task has been enqueued as a background job."), alert=True)
+			self.queue_action("submit", timeout=4600)
+		else:
+			return self._submit()
+
+	def cancel(self):
+		if len(self.accounts) > 100:
+			msgprint(_("The task has been enqueued as a background job."), alert=True)
+			self.queue_action("cancel", timeout=4600)
+		else:
+			return self._cancel()
+
 	def on_submit(self):
 		self.validate_cheque_info()
 		self.check_credit_limit()
@@ -186,9 +200,12 @@ class JournalEntry(AccountsController):
 
 	def update_advance_paid(self):
 		advance_paid = frappe._dict()
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
 		for d in self.get("accounts"):
 			if d.is_advance:
-				if d.reference_type in frappe.get_hooks("advance_payment_doctypes"):
+				if d.reference_type in advance_payment_doctypes:
 					advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
 
 		for voucher_type, order_list in advance_paid.items():
@@ -304,7 +321,6 @@ class JournalEntry(AccountsController):
 					"account": tax_withholding_details.get("account_head"),
 					rev_debit_or_credit: tax_withholding_details.get("tax_amount"),
 					"against_account": parties[0],
-					"against_account_link": parties[0],
 				},
 			)
 
@@ -751,91 +767,27 @@ class JournalEntry(AccountsController):
 					)
 
 	def set_against_account(self):
+		accounts_debited, accounts_credited = [], []
 		if self.voucher_type in ("Deferred Revenue", "Deferred Expense"):
 			for d in self.get("accounts"):
 				if d.reference_type == "Sales Invoice":
-					against_type = "Customer"
+					field = "customer"
 				else:
-					against_type = "Supplier"
+					field = "supplier"
 
-				against_account = frappe.db.get_value(d.reference_type, d.reference_name, against_type.lower())
-				d.against_type = against_type
-				d.against_account_link = against_account
+				d.against_account = frappe.db.get_value(d.reference_type, d.reference_name, field)
 		else:
-			self.get_debited_credited_accounts()
-			if len(self.accounts_credited) > 1 and len(self.accounts_debited) > 1:
-				self.auto_set_against_accounts()
-				self.separate_against_account_entries = 0
-				return
-			self.get_against_accounts()
+			for d in self.get("accounts"):
+				if flt(d.debit) > 0:
+					accounts_debited.append(d.party or d.account)
+				if flt(d.credit) > 0:
+					accounts_credited.append(d.party or d.account)
 
-	def auto_set_against_accounts(self):
-		for i in range(0, len(self.accounts), 2):
-			acc = self.accounts[i]
-			against_acc = self.accounts[i + 1]
-			if acc.debit_in_account_currency > 0:
-				current_val = acc.debit_in_account_currency * flt(acc.exchange_rate)
-				against_val = against_acc.credit_in_account_currency * flt(against_acc.exchange_rate)
-			else:
-				current_val = acc.credit_in_account_currency * flt(acc.exchange_rate)
-				against_val = against_acc.debit_in_account_currency * flt(against_acc.exchange_rate)
-
-			if current_val == against_val:
-				acc.against_type = against_acc.party_type or "Account"
-				against_acc.against_type = acc.party_type or "Account"
-
-				acc.against_account_link = against_acc.party or against_acc.account
-				against_acc.against_account_link = acc.party or acc.account
-			else:
-				frappe.msgprint(
-					_(
-						"Unable to automatically determine {0} accounts. Set them up in the {1} table if needed."
-					).format(frappe.bold("against"), frappe.bold("Accounting Entries")),
-					alert=True,
-				)
-				break
-
-	def get_against_accounts(self):
-		self.against_accounts = []
-		self.split_account = {}
-		self.get_debited_credited_accounts()
-
-		if self.separate_against_account_entries:
-			no_of_credited_acc, no_of_debited_acc = len(self.accounts_credited), len(self.accounts_debited)
-			if no_of_credited_acc <= 1 and no_of_debited_acc <= 1:
-				self.set_against_accounts_for_single_dr_cr()
-				self.separate_against_account_entries = 0
-			elif no_of_credited_acc == 1:
-				self.against_accounts = self.accounts_debited
-				self.split_account = self.accounts_credited[0]
-			elif no_of_debited_acc == 1:
-				self.against_accounts = self.accounts_credited
-				self.split_account = self.accounts_debited[0]
-
-	def get_debited_credited_accounts(self):
-		self.accounts_debited, self.accounts_credited = [], []
-		self.separate_against_account_entries = 1
-		for d in self.get("accounts"):
-			if flt(d.debit) > 0:
-				self.accounts_debited.append(d)
-			elif flt(d.credit) > 0:
-				self.accounts_credited.append(d)
-
-			if d.against_account_link:
-				self.separate_against_account_entries = 0
-				break
-
-	def set_against_accounts_for_single_dr_cr(self):
-		against_account = None
-		for d in self.accounts:
-			if flt(d.debit) > 0:
-				against_account = self.accounts_credited[0]
-			elif flt(d.credit) > 0:
-				against_account = self.accounts_debited[0]
-			if against_account:
-				d.against_type = against_account.party_type or "Account"
-				d.against_account = against_account.party or against_account.account
-				d.against_account_link = against_account.party or against_account.account
+			for d in self.get("accounts"):
+				if flt(d.debit) > 0:
+					d.against_account = ", ".join(list(set(accounts_credited)))
+				if flt(d.credit) > 0:
+					d.against_account = ", ".join(list(set(accounts_debited)))
 
 	def validate_debit_credit_amount(self):
 		if not (self.voucher_type == "Exchange Gain Or Loss" and self.multi_currency):
@@ -1032,107 +984,41 @@ class JournalEntry(AccountsController):
 
 	def build_gl_map(self):
 		gl_map = []
-		conversion_rate_map = self.get_conversion_rate_map()
-		transaction_currency_map = self.get_transaction_currency_map()
-		company_currency = erpnext.get_company_currency(self.company)
-
-		self.set_against_account()
 		for d in self.get("accounts"):
 			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
 				r = [d.user_remark, self.remark]
 				r = [x for x in r if x]
 				remarks = "\n".join(r)
 
-				gl_dict = self.get_gl_dict(
-					{
-						"account": d.account,
-						"party_type": d.party_type,
-						"due_date": self.due_date,
-						"party": d.party,
-						"debit": flt(d.debit, d.precision("debit")),
-						"credit": flt(d.credit, d.precision("credit")),
-						"account_currency": d.account_currency,
-						"debit_in_account_currency": flt(
-							d.debit_in_account_currency, d.precision("debit_in_account_currency")
-						),
-						"credit_in_account_currency": flt(
-							d.credit_in_account_currency, d.precision("credit_in_account_currency")
-						),
-						"against_voucher_type": d.reference_type,
-						"against_voucher": d.reference_name,
-						"remarks": remarks,
-						"voucher_detail_no": d.reference_detail_no,
-						"cost_center": d.cost_center,
-						"project": d.project,
-						"finance_book": self.finance_book,
-						"conversion_rate": conversion_rate_map.get(d.against_account_link, 1)
-						if d.account_currency == company_currency
-						else 1,
-						"currency": transaction_currency_map.get(d.against_account_link, d.account_currency)
-						if d.account_currency == company_currency
-						else d.account_currency,
-					},
-					item=d,
+				gl_map.append(
+					self.get_gl_dict(
+						{
+							"account": d.account,
+							"party_type": d.party_type,
+							"due_date": self.due_date,
+							"party": d.party,
+							"against": d.against_account,
+							"debit": flt(d.debit, d.precision("debit")),
+							"credit": flt(d.credit, d.precision("credit")),
+							"account_currency": d.account_currency,
+							"debit_in_account_currency": flt(
+								d.debit_in_account_currency, d.precision("debit_in_account_currency")
+							),
+							"credit_in_account_currency": flt(
+								d.credit_in_account_currency, d.precision("credit_in_account_currency")
+							),
+							"against_voucher_type": d.reference_type,
+							"against_voucher": d.reference_name,
+							"remarks": remarks,
+							"voucher_detail_no": d.reference_detail_no,
+							"cost_center": d.cost_center,
+							"project": d.project,
+							"finance_book": self.finance_book,
+						},
+						item=d,
+					)
 				)
-
-				if not self.separate_against_account_entries:
-					gl_dict.update(
-						{
-							"against_type": d.against_type,
-							"against_link": d.against_account_link,
-						}
-					)
-					gl_map.append(gl_dict)
-
-				elif d in self.against_accounts:
-					gl_dict.update(
-						{
-							"against_type": self.split_account.get("party_type") or "Account",
-							"against": self.split_account.get("party") or self.split_account.get("account"),
-							"against_link": self.split_account.get("party") or self.split_account.get("account"),
-						}
-					)
-					gl_map.append(gl_dict)
-
-				else:
-					for against_account in self.against_accounts:
-						against_account = against_account.as_dict()
-						debit = against_account.credit or against_account.credit_in_account_currency
-						credit = against_account.debit or against_account.debit_in_account_currency
-						gl_dict = gl_dict.copy()
-						gl_dict.update(
-							{
-								"against_type": against_account.party_type or "Account",
-								"against": against_account.party or against_account.account,
-								"against_link": against_account.party or against_account.account,
-								"debit": flt(debit, d.precision("debit")),
-								"credit": flt(credit, d.precision("credit")),
-								"account_currency": d.account_currency,
-								"debit_in_account_currency": flt(
-									debit / d.exchange_rate, d.precision("debit_in_account_currency")
-								),
-								"credit_in_account_currency": flt(
-									credit / d.exchange_rate, d.precision("credit_in_account_currency")
-								),
-							}
-						)
-						gl_map.append(gl_dict)
-
 		return gl_map
-
-	def get_transaction_currency_map(self):
-		transaction_currency_map = {}
-		for account in self.get("accounts"):
-			transaction_currency_map.setdefault(account.party or account.account, account.account_currency)
-
-		return transaction_currency_map
-
-	def get_conversion_rate_map(self):
-		conversion_rate_map = {}
-		for account in self.get("accounts"):
-			conversion_rate_map.setdefault(account.party or account.account, account.exchange_rate)
-
-		return conversion_rate_map
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		from erpnext.accounts.general_ledger import make_gl_entries
@@ -1283,7 +1169,9 @@ class JournalEntry(AccountsController):
 
 
 @frappe.whitelist()
-def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
+def get_default_bank_cash_account(
+	company, account_type=None, mode_of_payment=None, account=None, ignore_permissions=False
+):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 
 	if mode_of_payment:
@@ -1321,7 +1209,7 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 		return frappe._dict(
 			{
 				"account": account,
-				"balance": get_balance_on(account),
+				"balance": get_balance_on(account, ignore_account_permission=ignore_permissions),
 				"account_currency": account_details.account_currency,
 				"account_type": account_details.account_type,
 			}
@@ -1756,10 +1644,3 @@ def make_reverse_journal_entry(source_name, target_doc=None):
 	)
 
 	return doclist
-
-
-@frappe.whitelist()
-def get_against_type(doctype, txt, searchfield, start, page_len, filters):
-	against_types = frappe.db.get_list("Party Type", pluck="name") + ["Account"]
-	doctype = frappe.qb.DocType("DocType")
-	return frappe.qb.from_(doctype).select(doctype.name).where(doctype.name.isin(against_types)).run()

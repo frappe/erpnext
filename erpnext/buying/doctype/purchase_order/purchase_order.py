@@ -215,6 +215,10 @@ class PurchaseOrder(BuyingController):
 
 		self.validate_fg_item_for_subcontracting()
 		self.set_received_qty_for_drop_ship_items()
+
+		if not self.advance_payment_status:
+			self.advance_payment_status = "Not Initiated"
+
 		validate_inter_company_party(
 			self.doctype, self.supplier, self.company, self.inter_company_order_reference
 		)
@@ -453,6 +457,7 @@ class PurchaseOrder(BuyingController):
 		self.update_ordered_qty()
 		self.update_reserved_qty_for_subcontract()
 		self.update_subcontracting_order_status()
+		self.update_blanket_order()
 		self.notify_update()
 		clear_doctype_notifications(self)
 
@@ -640,6 +645,7 @@ class PurchaseOrder(BuyingController):
 				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
 
 
+@frappe.request_cache
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
 	"""get last purchase rate for an item"""
 

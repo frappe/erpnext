@@ -24,9 +24,10 @@ class AssetCapitalizationStockItem(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		serial_and_batch_bundle: DF.Link | None
-		serial_no: DF.SmallText | None
+		serial_no: DF.Text | None
 		stock_qty: DF.Float
 		stock_uom: DF.Link
+		use_serial_batch_fields: DF.Check
 		valuation_rate: DF.Currency
 		warehouse: DF.Link
 	# end: auto-generated types

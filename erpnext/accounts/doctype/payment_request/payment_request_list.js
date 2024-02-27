@@ -16,6 +16,9 @@ frappe.listview_settings['Payment Request'] = {
 		else if(doc.status == "Paid") {
 			return [__("Paid"), "blue", "status,=,Paid"];
 		}
+		else if(doc.status == "Failed") {
+			return [__("Failed"), "red", "status,=,Failed"];
+		}
 		else if(doc.status == "Cancelled") {
 			return [__("Cancelled"), "red", "status,=,Cancelled"];
 		}

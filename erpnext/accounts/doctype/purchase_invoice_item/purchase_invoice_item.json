@@ -62,15 +62,19 @@
   "rm_supp_cost",
   "warehouse_section",
   "warehouse",
+  "add_serial_batch_bundle",
+  "serial_and_batch_bundle",
+  "use_serial_batch_fields",
+  "col_br_wh",
   "from_warehouse",
   "quality_inspection",
-  "serial_and_batch_bundle",
-  "serial_no",
-  "col_br_wh",
   "rejected_warehouse",
   "rejected_serial_and_batch_bundle",
-  "batch_no",
+  "section_break_rqbe",
+  "serial_no",
   "rejected_serial_no",
+  "column_break_vbbb",
+  "batch_no",
   "manufacture_details",
   "manufacturer",
   "column_break_13",
@@ -439,13 +443,11 @@
    "print_hide": 1
   },
   {
-   "depends_on": "eval:!doc.is_fixed_asset",
+   "depends_on": "eval:!doc.is_fixed_asset && doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
    "fieldname": "batch_no",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Batch No",
    "options": "Batch",
-   "read_only": 1,
    "search_index": 1
   },
   {
@@ -453,21 +455,18 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:!doc.is_fixed_asset",
+   "depends_on": "eval:!doc.is_fixed_asset && doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
    "fieldname": "serial_no",
    "fieldtype": "Text",
-   "hidden": 1,
-   "label": "Serial No",
-   "read_only": 1
+   "label": "Serial No"
   },
   {
-   "depends_on": "eval:!doc.is_fixed_asset",
+   "depends_on": "eval:!doc.is_fixed_asset && doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
    "fieldname": "rejected_serial_no",
    "fieldtype": "Text",
    "label": "Rejected Serial No",
    "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "accounting",
@@ -890,7 +889,7 @@
    "label": "Apply TDS"
   },
   {
-   "depends_on": "eval:parent.update_stock == 1",
+   "depends_on": "eval:parent.update_stock == 1 && (doc.use_serial_batch_fields === 0 || doc.docstatus === 1)",
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Serial and Batch Bundle",
@@ -900,7 +899,7 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:parent.update_stock == 1",
+   "depends_on": "eval:parent.update_stock == 1 && (doc.use_serial_batch_fields === 0 || doc.docstatus === 1)",
    "fieldname": "rejected_serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Rejected Serial and Batch Bundle",
@@ -913,12 +912,33 @@
    "fieldtype": "Link",
    "label": "WIP Composite Asset",
    "options": "Asset"
+  },
+  {
+   "depends_on": "eval:parent.update_stock === 1 && (doc.use_serial_batch_fields === 0 || doc.docstatus === 1)",
+   "fieldname": "add_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_serial_batch_fields",
+   "fieldtype": "Check",
+   "label": "Use Serial No / Batch Fields"
+  },
+  {
+   "depends_on": "eval:!doc.is_fixed_asset && doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
+   "fieldname": "section_break_rqbe",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vbbb",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-12-25 22:00:28.043555",
+ "modified": "2024-02-04 14:11:52.742228",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

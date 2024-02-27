@@ -8,6 +8,7 @@
   "default",
   "mode_of_payment",
   "amount",
+  "reference_no",
   "column_break_3",
   "account",
   "type",
@@ -75,11 +76,16 @@
    "hidden": 1,
    "label": "Default",
    "read_only": 1
+  },
+  {
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "label": "Reference No"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-08-03 12:45:39.986598",
+ "modified": "2024-01-23 16:20:06.436979",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Payment",
@@ -87,5 +93,6 @@
  "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

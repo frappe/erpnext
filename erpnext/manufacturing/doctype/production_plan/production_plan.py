@@ -312,9 +312,10 @@ class ProductionPlan(Document):
 				so_item.parent,
 				so_item.item_code,
 				so_item.warehouse,
-				(
-					(so_item.qty - so_item.work_order_qty - so_item.delivered_qty) * so_item.conversion_factor
-				).as_("pending_qty"),
+				so_item.qty,
+				so_item.work_order_qty,
+				so_item.delivered_qty,
+				so_item.conversion_factor,
 				so_item.description,
 				so_item.name,
 				so_item.bom_no,
@@ -336,6 +337,11 @@ class ProductionPlan(Document):
 		items_query = items_query.where(ExistsCriterion(items_subquery))
 
 		items = items_query.run(as_dict=True)
+
+		for item in items:
+			item.pending_qty = (
+				flt(item.qty) - max(item.work_order_qty, item.delivered_qty, 0) * item.conversion_factor
+			)
 
 		pi = frappe.qb.DocType("Packed Item")
 
@@ -646,7 +652,10 @@ class ProductionPlan(Document):
 				"project": self.project,
 			}
 
-			key = (d.item_code, d.sales_order, d.warehouse)
+			key = (d.item_code, d.sales_order, d.sales_order_item, d.warehouse)
+			if self.combine_items:
+				key = (d.item_code, d.sales_order, d.warehouse)
+
 			if not d.sales_order:
 				key = (d.name, d.item_code, d.warehouse)
 
@@ -1334,10 +1343,10 @@ def get_sales_orders(self):
 	)
 
 	date_field_mapper = {
-		"from_date": self.from_date >= so.transaction_date,
-		"to_date": self.to_date <= so.transaction_date,
-		"from_delivery_date": self.from_delivery_date >= so_item.delivery_date,
-		"to_delivery_date": self.to_delivery_date <= so_item.delivery_date,
+		"from_date": so.transaction_date >= self.from_date,
+		"to_date": so.transaction_date <= self.to_date,
+		"from_delivery_date": so_item.delivery_date >= self.from_delivery_date,
+		"to_delivery_date": so_item.delivery_date <= self.to_delivery_date,
 	}
 
 	for field, value in date_field_mapper.items():
@@ -1498,19 +1507,17 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 				frappe.throw(_("For row {0}: Enter Planned Qty").format(data.get("idx")))
 
 			if bom_no:
-				if (
-					data.get("include_exploded_items")
-					and doc.get("sub_assembly_items")
-					and doc.get("skip_available_sub_assembly_item")
-				):
-					item_details = get_raw_materials_of_sub_assembly_items(
-						item_details,
-						company,
-						bom_no,
-						include_non_stock_items,
-						sub_assembly_items,
-						planned_qty=planned_qty,
-					)
+				if data.get("include_exploded_items") and doc.get("skip_available_sub_assembly_item"):
+					item_details = {}
+					if doc.get("sub_assembly_items"):
+						item_details = get_raw_materials_of_sub_assembly_items(
+							item_details,
+							company,
+							bom_no,
+							include_non_stock_items,
+							sub_assembly_items,
+							planned_qty=planned_qty,
+						)
 
 				elif data.get("include_exploded_items") and include_subcontracted_items:
 					# fetch exploded items from BOM
@@ -1762,23 +1769,23 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	return reserved_qty_for_production_plan - reserved_qty_for_production
 
 
+@frappe.request_cache
 def get_non_completed_production_plans():
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Production Plan Item")
 
-	query = (
+	return (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
 		.select(table.name)
+		.distinct()
 		.where(
 			(table.docstatus == 1)
 			& (table.status.notin(["Completed", "Closed"]))
 			& (child.planned_qty > child.ordered_qty)
 		)
-	).run(as_dict=True)
-
-	return list(set([d.name for d in query]))
+	).run(pluck="name")
 
 
 def get_raw_materials_of_sub_assembly_items(

@@ -200,6 +200,7 @@ class SalesOrder(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_drop_ship()
+		self.validate_reserved_stock()
 		self.validate_serial_no_based_delivery()
 		validate_against_blanket_order(self)
 		validate_inter_company_party(
@@ -222,6 +223,8 @@ class SalesOrder(SellingController):
 			self.billing_status = "Not Billed"
 		if not self.delivery_status:
 			self.delivery_status = "Not Delivered"
+		if not self.advance_payment_status:
+			self.advance_payment_status = "Not Requested"
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
@@ -512,6 +515,9 @@ class SalesOrder(SellingController):
 	def on_update(self):
 		pass
 
+	def on_update_after_submit(self):
+		self.check_credit_limit()
+
 	def before_update_after_submit(self):
 		self.validate_po()
 		self.validate_drop_ship()
@@ -640,7 +646,7 @@ class SalesOrder(SellingController):
 					if not frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
 						frappe.throw(
 							_(
-								"Item {0} has no Serial No. Only serilialized items can have delivery based on Serial No"
+								"Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
 							).format(item.item_code)
 						)
 					if not frappe.db.exists("BOM", {"item": item.item_code, "is_active": 1}):
@@ -659,6 +665,17 @@ class SalesOrder(SellingController):
 						"Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No."
 					).format(item.item_code)
 				)
+
+	def validate_reserved_stock(self):
+		"""Clean reserved stock flag for non-stock Item"""
+
+		enable_stock_reservation = frappe.db.get_single_value(
+			"Stock Settings", "enable_stock_reservation"
+		)
+
+		for item in self.items:
+			if item.reserve_stock and (not enable_stock_reservation or not cint(item.is_stock_item)):
+				item.reserve_stock = 0
 
 	def has_unreserved_stock(self) -> bool:
 		"""Returns True if there is any unreserved item in the Sales Order."""
@@ -892,6 +909,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
 
 		if source.company_address:
 			target.update({"company_address": source.company_address})
@@ -1012,6 +1030,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
 
 		if source.company_address:
 			target.update({"company_address": source.company_address})
@@ -1594,7 +1613,11 @@ def create_pick_list(source_name, target_doc=None):
 		"Sales Order",
 		source_name,
 		{
-			"Sales Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
+			"Sales Order": {
+				"doctype": "Pick List",
+				"field_map": {"set_warehouse": "parent_warehouse"},
+				"validation": {"docstatus": ["=", 1]},
+			},
 			"Sales Order Item": {
 				"doctype": "Pick List Item",
 				"field_map": {"parent": "sales_order", "name": "sales_order_item"},

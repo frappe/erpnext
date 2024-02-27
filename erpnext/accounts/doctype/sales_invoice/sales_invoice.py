@@ -7,7 +7,7 @@ from frappe import _, msgprint, throw
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
-from frappe.utils import add_days, cint, flt, formatdate, get_link_to_form, getdate, nowdate
+from frappe.utils import add_days, cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
@@ -270,7 +270,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 
-		if not self.is_pos:
+		if not (self.is_pos or self.is_debit_note):
 			self.so_dn_required()
 
 		self.set_tax_withholding()
@@ -421,7 +421,8 @@ class SalesInvoice(SellingController):
 		self.calculate_taxes_and_totals()
 
 	def before_save(self):
-		set_account_for_mode_of_payment(self)
+		self.set_account_for_mode_of_payment()
+		self.set_paid_amount()
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
@@ -446,6 +447,11 @@ class SalesInvoice(SellingController):
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
+			for table_name in ["items", "packed_items"]:
+				if not self.get(table_name):
+					continue
+
+				self.make_bundle_using_old_serial_batch_fields(table_name)
 			self.update_stock_ledger()
 
 		# this sequence because outstanding may get -ve
@@ -712,9 +718,6 @@ class SalesInvoice(SellingController):
 			):
 				data.sales_invoice = sales_invoice
 
-	def on_update(self):
-		self.set_paid_amount()
-
 	def on_update_after_submit(self):
 		if hasattr(self, "repost_required"):
 			fields_to_check = [
@@ -744,6 +747,11 @@ class SalesInvoice(SellingController):
 
 		self.paid_amount = paid_amount
 		self.base_paid_amount = base_paid_amount
+
+	def set_account_for_mode_of_payment(self):
+		for payment in self.payments:
+			if not payment.account:
+				payment.account = get_bank_cash_account(payment.mode_of_payment, self.company).get("account")
 
 	def validate_time_sheets_are_submitted(self):
 		for data in self.timesheets:
@@ -1233,9 +1241,7 @@ class SalesInvoice(SellingController):
 						"party_type": "Customer",
 						"party": self.customer,
 						"due_date": self.due_date,
-						"against_type": "Account",
 						"against": self.against_income_account,
-						"against_link": self.against_income_account,
 						"debit": base_grand_total,
 						"debit_in_account_currency": base_grand_total
 						if self.party_account_currency == self.company_currency
@@ -1264,9 +1270,7 @@ class SalesInvoice(SellingController):
 					self.get_gl_dict(
 						{
 							"account": tax.account_head,
-							"against_type": "Customer",
 							"against": self.customer,
-							"against_link": self.customer,
 							"credit": flt(base_amount, tax.precision("tax_amount_after_discount_amount")),
 							"credit_in_account_currency": (
 								flt(base_amount, tax.precision("base_tax_amount_after_discount_amount"))
@@ -1287,9 +1291,7 @@ class SalesInvoice(SellingController):
 				self.get_gl_dict(
 					{
 						"account": self.unrealized_profit_loss_account,
-						"against_type": "Customer",
 						"against": self.customer,
-						"against_link": self.customer,
 						"debit": flt(self.total_taxes_and_charges),
 						"debit_in_account_currency": flt(self.base_total_taxes_and_charges),
 						"cost_center": self.cost_center,
@@ -1357,9 +1359,7 @@ class SalesInvoice(SellingController):
 						add_asset_activity(asset.name, _("Asset sold"))
 
 					for gle in fixed_asset_gl_entries:
-						gle["against_type"] = "Customer"
 						gle["against"] = self.customer
-						gle["against_link"] = self.customer
 						gl_entries.append(self.get_gl_dict(gle, item=item))
 
 					self.set_asset_status(asset)
@@ -1380,9 +1380,7 @@ class SalesInvoice(SellingController):
 							self.get_gl_dict(
 								{
 									"account": income_account,
-									"against_type": "Customer",
 									"against": self.customer,
-									"against_link": self.customer,
 									"credit": flt(base_amount, item.precision("base_net_amount")),
 									"credit_in_account_currency": (
 										flt(base_amount, item.precision("base_net_amount"))
@@ -1436,9 +1434,9 @@ class SalesInvoice(SellingController):
 						"account": self.debit_to,
 						"party_type": "Customer",
 						"party": self.customer,
-						"against_type": "Account",
-						"against": self.loyalty_redemption_account,
-						"against_link": self.loyalty_redemption_account,
+						"against": "Expense account - "
+						+ cstr(self.loyalty_redemption_account)
+						+ " for the Loyalty Program",
 						"credit": self.loyalty_amount,
 						"against_voucher": self.return_against if cint(self.is_return) else self.name,
 						"against_voucher_type": self.doctype,
@@ -1452,9 +1450,7 @@ class SalesInvoice(SellingController):
 					{
 						"account": self.loyalty_redemption_account,
 						"cost_center": self.cost_center or self.loyalty_redemption_cost_center,
-						"against_type": "Customer",
 						"against": self.customer,
-						"against_link": self.customer,
 						"debit": self.loyalty_amount,
 						"remark": "Loyalty Points redeemed by the customer",
 					},
@@ -1481,16 +1477,12 @@ class SalesInvoice(SellingController):
 								"account": self.debit_to,
 								"party_type": "Customer",
 								"party": self.customer,
-								"against_type": "Account",
 								"against": payment_mode.account,
-								"against_link": payment_mode.account,
 								"credit": payment_mode.base_amount,
 								"credit_in_account_currency": payment_mode.base_amount
 								if self.party_account_currency == self.company_currency
 								else payment_mode.amount,
-								"against_voucher": self.return_against
-								if cint(self.is_return) and self.return_against
-								else self.name,
+								"against_voucher": self.name,
 								"against_voucher_type": self.doctype,
 								"cost_center": self.cost_center,
 							},
@@ -1504,9 +1496,7 @@ class SalesInvoice(SellingController):
 						self.get_gl_dict(
 							{
 								"account": payment_mode.account,
-								"against_type": "Customer",
 								"against": self.customer,
-								"against_link": self.customer,
 								"debit": payment_mode.base_amount,
 								"debit_in_account_currency": payment_mode.base_amount
 								if payment_mode_account_currency == self.company_currency
@@ -1530,9 +1520,7 @@ class SalesInvoice(SellingController):
 							"account": self.debit_to,
 							"party_type": "Customer",
 							"party": self.customer,
-							"against_type": "Account",
 							"against": self.account_for_change_amount,
-							"against_link": self.account_for_change_amount,
 							"debit": flt(self.base_change_amount),
 							"debit_in_account_currency": flt(self.base_change_amount)
 							if self.party_account_currency == self.company_currency
@@ -1553,9 +1541,7 @@ class SalesInvoice(SellingController):
 					self.get_gl_dict(
 						{
 							"account": self.account_for_change_amount,
-							"against_type": "Customer",
 							"against": self.customer,
-							"against_link": self.customer,
 							"credit": self.base_change_amount,
 							"cost_center": self.cost_center,
 						},
@@ -1581,9 +1567,7 @@ class SalesInvoice(SellingController):
 						"account": self.debit_to,
 						"party_type": "Customer",
 						"party": self.customer,
-						"against_type": "Account",
 						"against": self.write_off_account,
-						"against_link": self.write_off_account,
 						"credit": flt(self.base_write_off_amount, self.precision("base_write_off_amount")),
 						"credit_in_account_currency": (
 							flt(self.base_write_off_amount, self.precision("base_write_off_amount"))
@@ -1603,9 +1587,7 @@ class SalesInvoice(SellingController):
 				self.get_gl_dict(
 					{
 						"account": self.write_off_account,
-						"against_type": "Customer",
 						"against": self.customer,
-						"against_link": self.customer,
 						"debit": flt(self.base_write_off_amount, self.precision("base_write_off_amount")),
 						"debit_in_account_currency": (
 							flt(self.base_write_off_amount, self.precision("base_write_off_amount"))
@@ -1633,9 +1615,7 @@ class SalesInvoice(SellingController):
 				self.get_gl_dict(
 					{
 						"account": round_off_account,
-						"against_type": "Customer",
 						"against": self.customer,
-						"against_link": self.customer,
 						"credit_in_account_currency": flt(
 							self.rounding_adjustment, self.precision("rounding_adjustment")
 						),
@@ -2137,12 +2117,6 @@ def make_sales_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 	return make_return_doc("Sales Invoice", source_name, target_doc)
-
-
-def set_account_for_mode_of_payment(self):
-	for data in self.payments:
-		if not data.account:
-			data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
 
 
 def get_inter_company_details(doc, doctype):

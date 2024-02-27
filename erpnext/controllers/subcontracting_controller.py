@@ -260,18 +260,22 @@ class SubcontractingController(StockController):
 		return frappe.get_all(f"{doctype}", fields=fields, filters=filters)
 
 	def __get_consumed_items(self, doctype, receipt_items):
+		fields = [
+			"serial_no",
+			"rm_item_code",
+			"reference_name",
+			"batch_no",
+			"consumed_qty",
+			"main_item_code",
+			"parent as voucher_no",
+		]
+
+		if self.subcontract_data.receipt_supplied_items_field != "Purchase Receipt Item Supplied":
+			fields.append("serial_and_batch_bundle")
+
 		return frappe.get_all(
 			self.subcontract_data.receipt_supplied_items_field,
-			fields=[
-				"serial_no",
-				"rm_item_code",
-				"reference_name",
-				"serial_and_batch_bundle",
-				"batch_no",
-				"consumed_qty",
-				"main_item_code",
-				"parent as voucher_no",
-			],
+			fields=fields,
 			filters={"docstatus": 1, "reference_name": ("in", list(receipt_items)), "parenttype": doctype},
 		)
 
@@ -535,6 +539,10 @@ class SubcontractingController(StockController):
 	def __add_supplied_item(self, item_row, bom_item, qty):
 		bom_item.conversion_factor = item_row.conversion_factor
 		rm_obj = self.append(self.raw_material_table, bom_item)
+		if rm_obj.get("qty"):
+			# Qty field not exists
+			rm_obj.qty = 0.0
+
 		rm_obj.reference_name = item_row.name
 
 		if self.doctype == self.subcontract_data.order_doctype:
@@ -881,7 +889,9 @@ class SubcontractingController(StockController):
 							"posting_time": self.posting_time,
 							"qty": -1 * item.consumed_qty,
 							"voucher_detail_no": item.name,
-							"serial_and_batch_bundle": item.serial_and_batch_bundle,
+							"serial_and_batch_bundle": item.get("serial_and_batch_bundle"),
+							"serial_no": item.get("serial_no"),
+							"batch_no": item.get("batch_no"),
 						}
 					)
 

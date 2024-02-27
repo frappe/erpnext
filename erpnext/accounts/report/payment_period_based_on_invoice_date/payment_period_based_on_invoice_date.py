@@ -163,7 +163,7 @@ def get_entries(filters):
 		"""select
 		voucher_type, voucher_no, party_type, party, posting_date, debit, credit, remarks, against_voucher
 		from `tabGL Entry`
-		where company=%(company)s and voucher_type in ('Journal Entry', 'Payment Entry') {0}
+		where company=%(company)s and voucher_type in ('Journal Entry', 'Payment Entry') and is_cancelled = 0 {0}
 	""".format(
 			get_conditions(filters)
 		),

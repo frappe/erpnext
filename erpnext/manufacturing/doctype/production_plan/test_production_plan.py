@@ -1232,6 +1232,35 @@ class TestProductionPlan(FrappeTestCase):
 			if row.item_code == "SubAssembly2 For SUB Test":
 				self.assertEqual(row.quantity, 10)
 
+	def test_sub_assembly_and_their_raw_materials_exists(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		bom_tree = {
+			"FG1 For SUB Test": {
+				"SAB1 For SUB Test": {"CP1 For SUB Test": {}},
+				"SAB2 For SUB Test": {},
+			}
+		}
+
+		parent_bom = create_nested_bom(bom_tree, prefix="")
+		for item in ["SAB1 For SUB Test", "SAB2 For SUB Test"]:
+			make_stock_entry(item_code=item, qty=10, rate=100, target="_Test Warehouse - _TC")
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=10,
+			ignore_existing_ordered_qty=1,
+			do_not_submit=1,
+			skip_available_sub_assembly_item=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		items = get_items_for_material_requests(
+			plan.as_dict(), warehouses=[{"warehouse": "_Test Warehouse - _TC"}]
+		)
+
+		self.assertFalse(items)
+
 	def test_transfer_and_purchase_mrp_for_purchase_uom(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse

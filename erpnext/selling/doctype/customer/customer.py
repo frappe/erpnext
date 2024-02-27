@@ -124,6 +124,7 @@ class Customer(TransactionBase):
 				),
 				title=_("Note"),
 				indicator="yellow",
+				alert=True,
 			)
 
 			return new_customer_name
@@ -229,6 +230,7 @@ class Customer(TransactionBase):
 
 		if self.flags.is_new_doc:
 			self.link_lead_address_and_contact()
+			self.copy_communication()
 
 		self.update_customer_groups()
 
@@ -289,6 +291,17 @@ class Customer(TransactionBase):
 				if not linked_doc.has_link("Customer", self.name):
 					linked_doc.append("links", dict(link_doctype="Customer", link_name=self.name))
 					linked_doc.save(ignore_permissions=self.flags.ignore_permissions)
+
+	def copy_communication(self):
+		if not self.lead_name or not frappe.db.get_single_value(
+			"CRM Settings", "carry_forward_communication_and_comments"
+		):
+			return
+
+		from erpnext.crm.utils import copy_comments, link_communications
+
+		copy_comments("Lead", self.lead_name, self)
+		link_communications("Lead", self.lead_name, self)
 
 	def validate_name_with_customer_group(self):
 		if frappe.db.exists("Customer Group", self.name):
@@ -559,15 +572,14 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 
 
 @frappe.whitelist()
-def send_emails(args):
-	args = json.loads(args)
-	subject = _("Credit limit reached for customer {0}").format(args.get("customer"))
+def send_emails(customer, customer_outstanding, credit_limit, credit_controller_users_list):
+	if isinstance(credit_controller_users_list, str):
+		credit_controller_users_list = json.loads(credit_controller_users_list)
+	subject = _("Credit limit reached for customer {0}").format(customer)
 	message = _("Credit limit has been crossed for customer {0} ({1}/{2})").format(
-		args.get("customer"), args.get("customer_outstanding"), args.get("credit_limit")
+		customer, customer_outstanding, credit_limit
 	)
-	frappe.sendmail(
-		recipients=args.get("credit_controller_users_list"), subject=subject, message=message
-	)
+	frappe.sendmail(recipients=credit_controller_users_list, subject=subject, message=message)
 
 
 def get_customer_outstanding(

@@ -250,15 +250,16 @@ class SerialandBatchBundle(Document):
 
 		for d in self.entries:
 			available_qty = 0
+
 			if self.has_serial_no:
 				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
 			else:
 				if sn_obj.batch_avg_rate.get(d.batch_no):
 					d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
 
-				available_qty = flt(sn_obj.available_qty.get(d.batch_no))
+				available_qty = flt(sn_obj.available_qty.get(d.batch_no), d.precision("qty"))
 				if self.docstatus == 1:
-					available_qty += flt(d.qty)
+					available_qty += flt(d.qty, d.precision("qty"))
 
 				if not allow_negative_stock:
 					self.validate_negative_batch(d.batch_no, available_qty)
@@ -892,6 +893,13 @@ class SerialandBatchBundle(Document):
 		elif batch_nos:
 			self.set("entries", batch_nos)
 
+	def delete_serial_batch_entries(self):
+		SBBE = frappe.qb.DocType("Serial and Batch Entry")
+
+		frappe.qb.from_(SBBE).delete().where(SBBE.parent == self.name).run()
+
+		self.set("entries", [])
+
 
 @frappe.whitelist()
 def download_blank_csv_template(content):
@@ -999,7 +1007,23 @@ def get_serial_batch_from_data(item_code, kwargs):
 
 		make_serial_nos(item_code, serial_nos)
 
+	if kwargs.get("_has_serial_nos"):
+		return serial_nos
+
 	return serial_nos, batch_nos
+
+
+@frappe.whitelist()
+def create_serial_nos(item_code, serial_nos):
+	serial_nos = get_serial_batch_from_data(
+		item_code,
+		{
+			"serial_nos": serial_nos,
+			"_has_serial_nos": True,
+		},
+	)
+
+	return serial_nos
 
 
 def make_serial_nos(item_code, serial_nos):
@@ -1093,7 +1117,7 @@ def parse_serial_nos(data):
 	if isinstance(data, list):
 		return data
 
-	return [s.strip() for s in cstr(data).strip().upper().replace(",", "\n").split("\n") if s.strip()]
+	return [s.strip() for s in cstr(data).strip().replace(",", "\n").split("\n") if s.strip()]
 
 
 @frappe.whitelist()
@@ -1232,7 +1256,7 @@ def create_serial_batch_no_ledgers(
 
 
 def get_type_of_transaction(parent_doc, child_row):
-	type_of_transaction = child_row.type_of_transaction
+	type_of_transaction = child_row.get("type_of_transaction")
 	if parent_doc.get("doctype") == "Stock Entry":
 		type_of_transaction = "Outward" if child_row.s_warehouse else "Inward"
 
@@ -1358,10 +1382,14 @@ def get_available_serial_nos(kwargs):
 	elif kwargs.based_on == "Expiry":
 		order_by = "amc_expiry_date asc"
 
-	filters = {"item_code": kwargs.item_code, "warehouse": ("is", "set")}
+	filters = {"item_code": kwargs.item_code}
 
-	if kwargs.warehouse:
-		filters["warehouse"] = kwargs.warehouse
+	# ignore_warehouse is used for backdated stock transactions
+	# There might be chances that the serial no not exists in the warehouse during backdated stock transactions
+	if not kwargs.get("ignore_warehouse"):
+		filters["warehouse"] = ("is", "set")
+		if kwargs.warehouse:
+			filters["warehouse"] = kwargs.warehouse
 
 	# Since SLEs are not present against Reserved Stock [POS invoices, SRE], need to ignore reserved serial nos.
 	ignore_serial_nos = get_reserved_serial_nos(kwargs)
@@ -1651,7 +1679,10 @@ def get_reserved_batches_for_sre(kwargs) -> dict:
 			query = query.where(sb_entry.batch_no == kwargs.batch_no)
 
 	if kwargs.warehouse:
-		query = query.where(sre.warehouse == kwargs.warehouse)
+		if isinstance(kwargs.warehouse, list):
+			query = query.where(sre.warehouse.isin(kwargs.warehouse))
+		else:
+			query = query.where(sre.warehouse == kwargs.warehouse)
 
 	if kwargs.ignore_voucher_nos:
 		query = query.where(sre.name.notin(kwargs.ignore_voucher_nos))
@@ -2077,6 +2108,35 @@ def get_stock_ledgers_batches(kwargs):
 @frappe.whitelist()
 def get_batch_no_from_serial_no(serial_no):
 	return frappe.get_cached_value("Serial No", serial_no, "batch_no")
+
+
+@frappe.whitelist()
+def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, batch_no=None):
+	if serial_no and not frappe.db.exists("Serial No", serial_no):
+		if type_of_transaction != "Inward":
+			frappe.throw(_("Serial No {0} does not exists").format(serial_no))
+
+		make_serial_no(serial_no, item_code)
+
+	if batch_no and frappe.db.exists("Batch", batch_no):
+		if type_of_transaction != "Inward":
+			frappe.throw(_("Batch No {0} does not exists").format(batch_no))
+
+		make_batch_no(batch_no, item_code)
+
+
+def make_serial_no(serial_no, item_code):
+	serial_no_doc = frappe.new_doc("Serial No")
+	serial_no_doc.serial_no = serial_no
+	serial_no_doc.item_code = item_code
+	serial_no_doc.save(ignore_permissions=True)
+
+
+def make_batch_no(batch_no, item_code):
+	batch_doc = frappe.new_doc("Batch")
+	batch_doc.batch_id = batch_no
+	batch_doc.item = item_code
+	batch_doc.save(ignore_permissions=True)
 
 
 @frappe.whitelist()
