@@ -64,7 +64,8 @@
   "stock_entry",
   "subscription_section",
   "auto_repeat",
-  "amended_from"
+  "amended_from",
+  "repost_required"
  ],
  "fields": [
   {
@@ -543,6 +544,15 @@
    "label": "Is System Generated",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "repost_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Repost Required",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -558,6 +568,7 @@
   }
  ],
  "modified": "2023-11-23 12:11:04.128015",
+
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
