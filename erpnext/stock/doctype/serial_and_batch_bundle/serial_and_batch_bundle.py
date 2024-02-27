@@ -257,9 +257,9 @@ class SerialandBatchBundle(Document):
 				if sn_obj.batch_avg_rate.get(d.batch_no):
 					d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
 
-				available_qty = flt(sn_obj.available_qty.get(d.batch_no))
+				available_qty = flt(sn_obj.available_qty.get(d.batch_no), d.precision("qty"))
 				if self.docstatus == 1:
-					available_qty += flt(d.qty)
+					available_qty += flt(d.qty, d.precision("qty"))
 
 				if not allow_negative_stock:
 					self.validate_negative_batch(d.batch_no, available_qty)
