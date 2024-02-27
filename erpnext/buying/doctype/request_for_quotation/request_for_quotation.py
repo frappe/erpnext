@@ -206,9 +206,29 @@ class RequestforQuotation(BuyingController):
 
 		contact.save(ignore_permissions=True)
 
+		if rfq_supplier.supplier:
+			self.update_user_in_supplier(rfq_supplier.supplier, user.name)
+
 		if not rfq_supplier.contact:
 			# return contact to later update, RFQ supplier row's contact
 			return contact.name
+
+	def update_user_in_supplier(self, supplier, user):
+		"""Update user in Supplier."""
+		if not frappe.db.exists("Portal User", {"parent": supplier, "user": user}):
+			supplier_doc = frappe.get_doc("Supplier", supplier)
+			supplier_doc.append(
+				"portal_users",
+				{
+					"user": user,
+				},
+			)
+
+			supplier_doc.flags.ignore_validate = True
+			supplier_doc.flags.ignore_mandatory = True
+			supplier_doc.flags.ignore_permissions = True
+
+			supplier_doc.save()
 
 	def create_user(self, rfq_supplier, link):
 		user = frappe.get_doc(
