@@ -77,7 +77,7 @@ class Timesheet(Document):
 	def set_status(self):
 		self.status = {"0": "Draft", "1": "Submitted", "2": "Cancelled"}[str(self.docstatus or 0)]
 
-		if self.per_billed == 100:
+		if flt(self.per_billed, self.precision("per_billed")) >= 100.0:
 			self.status = "Billed"
 
 		if self.sales_invoice:

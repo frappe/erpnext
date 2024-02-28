@@ -518,6 +518,12 @@ frappe.ui.form.on("Production Plan Sales Order", {
 	}
 });
 
+frappe.ui.form.on("Production Plan Sub Assembly Item", {
+	fg_warehouse(frm, cdt, cdn) {
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "sub_assembly_items", "fg_warehouse");
+	},
+})
+
 frappe.tour['Production Plan'] = [
 	{
 		fieldname: "get_items_from",

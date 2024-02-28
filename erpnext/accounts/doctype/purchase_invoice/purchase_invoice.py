@@ -514,6 +514,11 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).on_submit()
 
 		self.check_prev_docstatus()
+
+		if self.is_return and not self.update_billed_amount_in_purchase_order:
+			# NOTE status updating bypassed for is_return
+			self.status_updater = []
+
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 
@@ -1264,6 +1269,10 @@ class PurchaseInvoice(BuyingController):
 
 		self.check_on_hold_or_closed_status()
 
+		if self.is_return and not self.update_billed_amount_in_purchase_order:
+			# NOTE status updating bypassed for is_return
+			self.status_updater = []
+
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 
@@ -1357,6 +1366,9 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Supplier Invoice No exists in Purchase Invoice {0}").format(pi))
 
 	def update_billing_status_in_pr(self, update_modified=True):
+		if self.is_return and not self.update_billed_amount_in_purchase_receipt:
+			return
+
 		updated_pr = []
 		po_details = []
 
