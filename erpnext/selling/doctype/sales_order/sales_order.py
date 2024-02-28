@@ -102,7 +102,8 @@ class SalesOrder(SellingController):
 					frappe.msgprint(
 						_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(
 							frappe.bold(so[0][0]), frappe.bold(self.po_no)
-						)
+						),
+						alert=True,
 					)
 				else:
 					frappe.throw(
