@@ -784,7 +784,7 @@ class WorkOrder(Document):
 				)
 
 	def update_completed_qty_in_material_request(self):
-		if self.material_request:
+		if self.material_request and self.material_request_item:
 			frappe.get_doc("Material Request", self.material_request).update_completed_qty(
 				[self.material_request_item]
 			)
