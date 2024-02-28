@@ -5,7 +5,7 @@ import json
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, add_to_date, flt, nowdate, nowtime, today
+from frappe.utils import flt, nowtime, today
 
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -191,6 +191,7 @@ class TestSerialandBatchBundle(FrappeTestCase):
 			doc.flags.ignore_links = True
 			doc.flags.ignore_validate = True
 			doc.submit()
+			doc.reload()
 
 		bundle_doc = make_serial_batch_bundle(
 			{
