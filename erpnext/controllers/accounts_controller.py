@@ -573,17 +573,26 @@ class AccountsController(TransactionBase):
 				)
 
 	def validate_due_date(self):
-		if self.get("is_pos"):
+		if self.get("is_pos") or self.doctype not in ["Sales Invoice", "Purchase Invoice"]:
 			return
 
 		from erpnext.accounts.party import validate_due_date
 
-		if self.doctype == "Sales Invoice":
+		posting_date = (
+			self.posting_date if self.doctype == "Sales Invoice" else (self.bill_date or self.posting_date)
+		)
+		via_data_import = (
+			self.flags.updater_reference and self.flags.updater_reference.get("doctype") == "Data Import"
+		)
+		if via_data_import and getdate(self.due_date) < getdate(posting_date):
+			self.due_date = posting_date
+
+		elif self.doctype == "Sales Invoice":
 			if not self.due_date:
 				frappe.throw(_("Due Date is mandatory"))
 
 			validate_due_date(
-				self.posting_date,
+				posting_date,
 				self.due_date,
 				"Customer",
 				self.customer,
@@ -592,7 +601,7 @@ class AccountsController(TransactionBase):
 			)
 		elif self.doctype == "Purchase Invoice":
 			validate_due_date(
-				self.bill_date or self.posting_date,
+				posting_date,
 				self.due_date,
 				"Supplier",
 				self.supplier,
