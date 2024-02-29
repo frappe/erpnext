@@ -694,7 +694,7 @@
    "fieldname": "default_advance_received_account",
    "fieldtype": "Link",
    "label": "Default Advance Received Account",
-   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "mandatory_depends_on": "book_advance_payments_in_separate_party_account",
    "options": "Account"
   },
   {
@@ -702,7 +702,7 @@
    "fieldname": "default_advance_paid_account",
    "fieldtype": "Link",
    "label": "Default Advance Paid Account",
-   "mandatory_depends_on": "book_advance_payments_as_liability",
+   "mandatory_depends_on": "book_advance_payments_in_separate_party_account",
    "options": "Account"
   },
   {
@@ -766,7 +766,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2023-10-23 10:19:24.322898",
+ "modified": "2023-12-29 02:35:15.121778",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

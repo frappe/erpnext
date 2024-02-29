@@ -40,6 +40,7 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.party import (
 	get_party_account,
 	get_party_account_currency,
+	get_party_and_advance_accounts,
 	get_party_gle_currency,
 	validate_party_frozen_disabled,
 )
@@ -1148,18 +1149,16 @@ class AccountsController(TransactionBase):
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
 
-		party_account = get_party_account(
-			party_type, party=party, company=self.company, include_advance=True
-		)
+		party_accounts = get_party_and_advance_accounts(party_type, party=party, company=self.company)
 
 		order_list = list(set(d.get(order_field) for d in self.get("items") if d.get(order_field)))
 
 		journal_entries = get_advance_journal_entries(
-			party_type, party, party_account, amount_field, order_doctype, order_list, include_unallocated
+			party_type, party, party_accounts, amount_field, order_doctype, order_list, include_unallocated
 		)
 
 		payment_entries = get_advance_payment_entries_for_regional(
-			party_type, party, party_account, order_doctype, order_list, include_unallocated
+			party_type, party, party_accounts, order_doctype, order_list, include_unallocated
 		)
 
 		res = journal_entries + payment_entries
@@ -2663,7 +2662,7 @@ def set_balance_in_account_currency(
 def get_advance_journal_entries(
 	party_type,
 	party,
-	party_account,
+	party_accounts,
 	amount_field,
 	order_doctype,
 	order_list,
@@ -2685,7 +2684,7 @@ def get_advance_journal_entries(
 			(journal_acc.exchange_rate),
 		)
 		.where(
-			journal_acc.account.isin(party_account)
+			journal_acc.account.isin(party_accounts)
 			& (journal_acc.party_type == party_type)
 			& (journal_acc.party == party)
 			& (journal_acc.is_advance == "Yes")
@@ -2774,7 +2773,7 @@ def get_advance_payment_entries(
 def get_common_query(
 	party_type,
 	party,
-	party_account,
+	party_accounts,
 	limit,
 	condition,
 ):
@@ -2799,11 +2798,11 @@ def get_common_query(
 	if payment_type == "Receive":
 		q = q.select((payment_entry.paid_from_account_currency).as_("currency"))
 		q = q.select(payment_entry.paid_from)
-		q = q.where(payment_entry.paid_from.isin(party_account))
+		q = q.where(payment_entry.paid_from.isin(party_accounts))
 	else:
 		q = q.select((payment_entry.paid_to_account_currency).as_("currency"))
 		q = q.select(payment_entry.paid_to)
-		q = q.where(payment_entry.paid_to.isin(party_account))
+		q = q.where(payment_entry.paid_to.isin(party_accounts))
 
 	if payment_type == "Receive":
 		q = q.select((payment_entry.source_exchange_rate).as_("exchange_rate"))
