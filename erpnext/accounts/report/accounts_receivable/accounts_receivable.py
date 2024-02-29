@@ -671,7 +671,7 @@ class ReceivablePayableReport(object):
 			else:
 				future_amount_field = "future_amount_in_base_currency"
 
-			if row.remaining_balance > 0 and future.get(future_amount_field):
+			if row.remaining_balance != 0 and future.get(future_amount_field):
 				if future.get(future_amount_field) > row.outstanding:
 					row.future_amount = row.outstanding
 					future[future_amount_field] = future.get(future_amount_field) - row.outstanding
