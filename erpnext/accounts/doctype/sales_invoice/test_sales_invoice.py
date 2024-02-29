@@ -3615,6 +3615,33 @@ class TestSalesInvoice(FrappeTestCase):
 		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
 
+	def test_pulling_advance_based_on_debit_to(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+
+		debtors2 = create_account(
+			parent_account="Accounts Receivable - _TC",
+			account_name="Debtors 2",
+			company="_Test Company",
+			account_type="Receivable",
+		)
+		si = create_sales_invoice(do_not_submit=True)
+		si.debit_to = debtors2
+		si.save()
+
+		pe = create_payment_entry(
+			company=si.company,
+			payment_type="Receive",
+			party_type="Customer",
+			party=si.customer,
+			paid_from=debtors2,
+			paid_to="Cash - _TC",
+			paid_amount=1000,
+		)
+		pe.submit()
+		advances = si.get_advance_entries()
+		self.assertEqual(1, len(advances))
+		self.assertEqual(advances[0].reference_name, pe.name)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(

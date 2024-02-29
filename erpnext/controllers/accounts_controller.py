@@ -1135,21 +1135,24 @@ class AccountsController(TransactionBase):
 			self.append("advances", advance_row)
 
 	def get_advance_entries(self, include_unallocated=True):
+		party_account = []
 		if self.doctype == "Sales Invoice":
 			party_type = "Customer"
 			party = self.customer
 			amount_field = "credit_in_account_currency"
 			order_field = "sales_order"
 			order_doctype = "Sales Order"
+			party_account.append(self.debit_to)
 		else:
 			party_type = "Supplier"
 			party = self.supplier
 			amount_field = "debit_in_account_currency"
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
+			party_account.append(self.credit_to)
 
-		party_account = get_party_account(
-			party_type, party=party, company=self.company, include_advance=True
+		party_account.extend(
+			get_party_account(party_type, party=party, company=self.company, include_advance=True)
 		)
 
 		order_list = list(set(d.get(order_field) for d in self.get("items") if d.get(order_field)))
