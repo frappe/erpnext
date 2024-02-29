@@ -253,10 +253,17 @@ class LandedCostVoucher(Document):
 			doc.make_bundle_using_old_serial_batch_fields(via_landed_cost_voucher=True)
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 <<<<<<< HEAD
+<<<<<<< HEAD
 			doc.make_gl_entries()
 			doc.repost_future_sle_and_gle(via_landed_cost_voucher=True)
 =======
 			doc.make_gl_entries(via_landed_cost_voucher=True)
+=======
+			if d.receipt_document_type == "Purchase Receipt":
+				doc.make_gl_entries(via_landed_cost_voucher=True)
+			else:
+				doc.make_gl_entries()
+>>>>>>> 8b3d46610e (fix: parameters for PI references)
 			doc.repost_future_sle_and_gle()
 >>>>>>> baa3fee1bf (fix: add LCV flag to determine negative expenses)
 

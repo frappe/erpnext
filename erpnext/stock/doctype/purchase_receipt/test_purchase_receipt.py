@@ -2956,7 +2956,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 			("Expenses Included In Valuation - _TC", 0, 2000, "Main - _TC"),
 		)
 		self.assertSequenceEqual(expected_gle, gl_entries)
+<<<<<<< HEAD
 >>>>>>> 53642e7417 (test: LCV entries after billing)
+=======
+		frappe.db.rollback()
+>>>>>>> 8b3d46610e (fix: parameters for PI references)
 
 
 def prepare_data_for_internal_transfer():
