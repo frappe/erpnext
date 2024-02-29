@@ -10,6 +10,7 @@ import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.accounts_controller import InvalidQtyError
 from erpnext.controllers.buying_controller import QtyMismatchError
+from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -1730,7 +1731,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
 
 	def test_internal_pr_gl_entries(self):
-		from erpnext.stock import get_warehouse_account_map
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -2482,11 +2482,14 @@ class TestPurchaseReceipt(FrappeTestCase):
 			make_landed_cost_voucher,
 		)
 
-		company = frappe.get_doc("Company", "_Test Company")
-		company.enable_perpetual_inventory = 1
-		company.default_inventory_account = "Stock In Hand - _TC"
-		company.stock_received_but_not_billed = "Stock Received But Not Billed - _TC"
-		company.save()
+		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
+		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			"stock_received_but_not_billed",
+			"Stock Received But Not Billed - _TC",
+		)
 
 		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
 		pr.append(
@@ -2502,7 +2505,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.submit()
 		pi = make_purchase_invoice(pr.name)
 		pi.submit()
-		lcv = make_landed_cost_voucher(
+		make_landed_cost_voucher(
 			company=pr.company,
 			receipt_document_type="Purchase Receipt",
 			receipt_document=pr.name,
@@ -2512,14 +2515,15 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=False)
+		warehouse_account = get_warehouse_account_map("_Test Company")
 		expected_gle = (
 			("Stock Received But Not Billed - _TC", 0, 10000, "Main - _TC"),
-			("Stock In Hand - _TC", 14000, 0, "Main - _TC"),
 			("Freight and Forwarding Charges - _TC", 0, 2000, "Main - _TC"),
 			("Expenses Included In Valuation - _TC", 0, 2000, "Main - _TC"),
+			(warehouse_account[pr.items[0].warehouse]["account"], 14000, 0, "Main - _TC"),
 		)
 		self.assertSequenceEqual(expected_gle, gl_entries)
-		frappe.db.rollback()
+		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
 
 
 def prepare_data_for_internal_transfer():
