@@ -757,6 +757,8 @@ class SalesInvoice(SellingController):
 	def validate_time_sheets_are_submitted(self):
 		for data in self.timesheets:
 			if data.time_sheet:
+				if self.is_return:
+					continue
 				status = frappe.db.get_value("Timesheet", data.time_sheet, "status")
 				if status not in ["Submitted", "Payslip"]:
 					frappe.throw(_("Timesheet {0} is already completed or cancelled").format(data.time_sheet))
