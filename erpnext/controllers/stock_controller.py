@@ -105,7 +105,11 @@ class StockController(AccountsController):
 
 			if self.docstatus == 1:
 				if not gl_entries:
-					gl_entries = self.get_gl_entries(warehouse_account, via_landed_cost_voucher)
+					gl_entries = (
+						self.get_gl_entries(warehouse_account, via_landed_cost_voucher)
+						if self.doctype == "Purchase Receipt"
+						else self.get_gl_entries(warehouse_account)
+					)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
 	def validate_serialized_batch(self):
