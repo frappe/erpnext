@@ -1513,6 +1513,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	remove_pricing_rule_for_item(item) {
+		// capture pricing rule before removing it to delete free items
+		let removed_pricing_rule = item.pricing_rules;
 		if (item.pricing_rules){
 			let me = this;
 			return this.frm.call({
@@ -1533,7 +1535,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function(r) {
 					if (!r.exc && r.message) {
-						me.remove_pricing_rule(r.message);
+						me.remove_pricing_rule(r.message, removed_pricing_rule);
 						me.calculate_taxes_and_totals();
 						if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
 					}
@@ -1791,7 +1793,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 	}
 
-	remove_pricing_rule(item) {
+	remove_pricing_rule(item, removed_pricing_rule) {
 		let me = this;
 		const fields = ["discount_percentage",
 			"discount_amount", "margin_rate_or_amount", "rate_with_margin"];
@@ -1800,7 +1802,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			let items = [];
 
 			me.frm.doc.items.forEach(d => {
-				if(d.item_code != item.remove_free_item || !d.is_free_item) {
+				// if same item was added a free item through a different pricing rule, keep it
+				if(d.item_code != item.remove_free_item || !d.is_free_item || removed_pricing_rule?.includes(d.pricing_rules)) {
 					items.push(d);
 				}
 			});
