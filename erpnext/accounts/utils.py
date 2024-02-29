@@ -1217,7 +1217,8 @@ def update_cost_center(docname, cost_center_name, cost_center_number, company, m
 	Renames the document by adding the number as a prefix to the current name and updates
 	all transaction where it was present.
 	"""
-	validate_field_number("Cost Center", docname, cost_center_number, company, "cost_center_number")
+	if not merge:
+		validate_field_number("Cost Center", docname, cost_center_number, company, "cost_center_number")
 
 	if cost_center_number:
 		frappe.db.set_value("Cost Center", docname, "cost_center_number", cost_center_number.strip())
