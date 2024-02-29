@@ -2301,6 +2301,115 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for index, d in enumerate(data):
 			self.assertEqual(d.qty_after_transaction, 11 + index)
 
+<<<<<<< HEAD
+=======
+	def test_auto_set_batch_based_on_bundle(self):
+		item_code = make_item(
+			"_Test Auto Set Batch Based on Bundle",
+			properties={
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-BNU-TASBBB-.#####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
+		)
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=5,
+			rate=100,
+		)
+
+		self.assertTrue(pr.items[0].batch_no)
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		self.assertEqual(pr.items[0].batch_no, batch_no)
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
+		)
+
+	def test_pr_billed_amount_against_return_entry(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as make_pi_from_pr,
+		)
+
+		# Create a Purchase Receipt and Fully Bill it
+		pr = make_purchase_receipt(qty=10)
+		pi = make_pi_from_pr(pr.name)
+		pi.insert()
+		pi.submit()
+
+		# Debit Note - 50% Qty & enable updating PR billed amount
+		pi_return = make_debit_note(pi.name)
+		pi_return.items[0].qty = -5
+		pi_return.update_billed_amount_in_purchase_receipt = 1
+		pi_return.submit()
+
+		# Check if the billed amount reduced
+		pr.reload()
+		self.assertEqual(pr.per_billed, 50)
+
+		pi_return.reload()
+		pi_return.cancel()
+
+		# Debit Note - 50% Qty & disable updating PR billed amount
+		pi_return = make_debit_note(pi.name)
+		pi_return.items[0].qty = -5
+		pi_return.update_billed_amount_in_purchase_receipt = 0
+		pi_return.submit()
+
+		# Check if the billed amount stayed the same
+		pr.reload()
+		self.assertEqual(pr.per_billed, 100)
+
+	def test_valuation_taxes_lcv_repost_after_billing(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		company = frappe.get_doc("Company", "_Test Company")
+		company.enable_perpetual_inventory = 1
+		company.default_inventory_account = "Stock In Hand - _TC"
+		company.stock_received_but_not_billed = "Stock Received But Not Billed - _TC"
+		company.save()
+
+		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
+		pr.append(
+			"taxes",
+			{
+				"category": "Valuation and Total",
+				"charge_type": "Actual",
+				"account_head": "Freight and Forwarding Charges - _TC",
+				"tax_amount": 2000,
+				"description": "Test",
+			},
+		)
+		pr.submit()
+		pi = make_purchase_invoice(pr.name)
+		pi.submit()
+		lcv = make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=2000,
+			distribute_charges_based_on="Qty",
+			expense_account="Expenses Included In Valuation - _TC",
+		)
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=False)
+		expected_gle = (
+			("Stock Received But Not Billed - _TC", 0, 10000, "Main - _TC"),
+			("Stock In Hand - _TC", 14000, 0, "Main - _TC"),
+			("Freight and Forwarding Charges - _TC", 0, 2000, "Main - _TC"),
+			("Expenses Included In Valuation - _TC", 0, 2000, "Main - _TC"),
+		)
+		self.assertSequenceEqual(expected_gle, gl_entries)
+
+>>>>>>> 53642e7417 (test: LCV entries after billing)
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -2347,14 +2456,24 @@ def get_sl_entries(voucher_type, voucher_no):
 	)
 
 
-def get_gl_entries(voucher_type, voucher_no):
-	return frappe.db.sql(
-		"""select account, debit, credit, cost_center, is_cancelled
-		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
-		order by account desc""",
-		(voucher_type, voucher_no),
-		as_dict=1,
+def get_gl_entries(voucher_type, voucher_no, skip_cancelled=False, as_dict=True):
+	gl = frappe.qb.DocType("GL Entry")
+	gl_query = (
+		frappe.qb.from_(gl)
+		.select(
+			gl.account,
+			gl.debit,
+			gl.credit,
+			gl.cost_center,
+		)
+		.where((gl.voucher_type == voucher_type) & (gl.voucher_no == voucher_no))
+		.orderby(gl.account, order=frappe.qb.desc)
 	)
+	if skip_cancelled:
+		gl_query = gl_query.where(gl.is_cancelled == 0)
+	else:
+		gl_query = gl_query.select(gl.is_cancelled)
+	return gl_query.run(as_dict=as_dict)
 
 
 def get_taxes(**args):
