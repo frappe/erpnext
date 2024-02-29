@@ -41,7 +41,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Cost Center Number",
-   "read_only": 1
+   "read_only_depends_on": "eval:!doc.__islocal"
   },
   {
    "fieldname": "parent_cost_center",
