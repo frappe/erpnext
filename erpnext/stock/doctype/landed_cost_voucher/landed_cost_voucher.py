@@ -252,8 +252,13 @@ class LandedCostVoucher(Document):
 			doc.docstatus = 1
 			doc.make_bundle_using_old_serial_batch_fields(via_landed_cost_voucher=True)
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
+<<<<<<< HEAD
 			doc.make_gl_entries()
 			doc.repost_future_sle_and_gle(via_landed_cost_voucher=True)
+=======
+			doc.make_gl_entries(via_landed_cost_voucher=True)
+			doc.repost_future_sle_and_gle()
+>>>>>>> baa3fee1bf (fix: add LCV flag to determine negative expenses)
 
 	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
 		for item in self.get("items"):
