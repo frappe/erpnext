@@ -562,17 +562,28 @@ class JournalEntry(AccountsController):
 					elif d.party_type == "Supplier" and flt(d.credit) > 0:
 						frappe.throw(_("Row {0}: Advance against Supplier must be debit").format(d.idx))
 
+	def system_generated_gain_loss(self):
+		return (
+			self.voucher_type == "Exchange Gain Or Loss"
+			and self.multi_currency
+			and self.is_system_generated
+		)
+
 	def validate_against_jv(self):
 		for d in self.get("accounts"):
 			if d.reference_type == "Journal Entry":
 				account_root_type = frappe.get_cached_value("Account", d.account, "root_type")
-				if account_root_type == "Asset" and flt(d.debit) > 0:
+				if account_root_type == "Asset" and flt(d.debit) > 0 and not self.system_generated_gain_loss():
 					frappe.throw(
 						_(
 							"Row #{0}: For {1}, you can select reference document only if account gets credited"
 						).format(d.idx, d.account)
 					)
-				elif account_root_type == "Liability" and flt(d.credit) > 0:
+				elif (
+					account_root_type == "Liability"
+					and flt(d.credit) > 0
+					and not self.system_generated_gain_loss()
+				):
 					frappe.throw(
 						_(
 							"Row #{0}: For {1}, you can select reference document only if account gets debited"
@@ -604,7 +615,7 @@ class JournalEntry(AccountsController):
 					for jvd in against_entries:
 						if flt(jvd[dr_or_cr]) > 0:
 							valid = True
-					if not valid:
+					if not valid and not self.system_generated_gain_loss():
 						frappe.throw(
 							_("Against Journal Entry {0} does not have any unmatched {1} entry").format(
 								d.reference_name, dr_or_cr
