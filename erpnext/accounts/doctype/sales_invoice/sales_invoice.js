@@ -486,7 +486,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	currency() {
 		var me = this;
 		super.currency();
-		if (!this.frm.doc.is_return && this.frm.doc.timesheets) {
+		if (this.frm.doc.timesheets) {
 			this.frm.doc.timesheets.forEach((d) => {
 				let row = frappe.get_doc(d.doctype, d.name)
 				set_timesheet_detail_rate(row.doctype, row.name, me.frm.doc.currency, row.timesheet_detail)
