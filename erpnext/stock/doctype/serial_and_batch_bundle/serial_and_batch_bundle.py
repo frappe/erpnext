@@ -2118,7 +2118,7 @@ def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, ba
 
 		make_serial_no(serial_no, item_code)
 
-	if batch_no and frappe.db.exists("Batch", batch_no):
+	if batch_no and not frappe.db.exists("Batch", batch_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Batch No {0} does not exists").format(batch_no))
 
