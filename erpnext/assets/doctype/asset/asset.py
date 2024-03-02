@@ -351,7 +351,7 @@ class Asset(AccountsController):
 
 		if len(self.get("finance_books")) > 1 and any(start):
 			self.sort_depreciation_schedule()
-
+		
 	def _make_depreciation_schedule(
 		self, finance_book, start, date_of_disposal, value_after_depreciation=None
 	):
@@ -428,7 +428,7 @@ class Asset(AccountsController):
 					schedule_date = get_last_day(schedule_date)
 
 			# if asset is being sold
-			if date_of_disposal:
+			if date_of_disposal and getdate(schedule_date) >= getdate(date_of_disposal):
 				from_date = self.get_from_date_for_disposal(finance_book)
 				depreciation_amount, days, months = self.get_pro_rata_amt(
 					finance_book,
