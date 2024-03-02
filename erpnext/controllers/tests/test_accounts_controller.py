@@ -1506,9 +1506,7 @@ class TestAccountsController(FrappeTestCase):
 				pluck="department",
 			),
 		)
-<<<<<<< HEAD
 		self.disable_dimensions()
-=======
 
 	def test_50_journal_against_journal(self):
 		# Invoice in Foreign Currency
@@ -1576,4 +1574,3 @@ class TestAccountsController(FrappeTestCase):
 		exc_je_for_je = self.get_journals_for(journal_as_payment.doctype, journal_as_payment.name)
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_je, [])
->>>>>>> 8a5078b826 (test: gain/loss on Journals against Journals)
