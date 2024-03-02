@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _, msgprint, scrub
 from frappe.utils import cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from frappe.utils.caching import redis_cache
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -1478,6 +1479,7 @@ def get_outstanding(args):
 
 
 @frappe.whitelist()
+@redis_cache(ttl=5 * 60, user=True)
 def get_party_account_and_balance(company, party_type, party, cost_center=None):
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
