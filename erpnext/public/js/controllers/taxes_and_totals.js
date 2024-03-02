@@ -22,7 +22,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		item_rate = flt(item.rate_with_margin , precision("rate", item));
 
-		if (item.discount_percentage) {
+		if (item.discount_percentage && !item.discount_amount) {
 			item.discount_amount = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
 		}
 
