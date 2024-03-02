@@ -38,7 +38,8 @@
    "in_list_view": 1,
    "label": "Item Code",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "item_name",
@@ -53,7 +54,8 @@
    "in_standard_filter": 1,
    "label": "For Warehouse",
    "options": "Warehouse",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "columns": 1,
@@ -141,7 +143,8 @@
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
    "label": "From Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "search_index": 1
   },
   {
    "fetch_from": "item_code.safety_stock",
@@ -199,7 +202,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-09-12 12:09:08.358326",
+ "modified": "2024-02-11 16:21:11.977018",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Plan Item",

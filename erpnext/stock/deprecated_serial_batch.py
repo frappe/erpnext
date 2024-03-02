@@ -8,9 +8,12 @@ from pypika import Order
 class DeprecatedSerialNoValuation:
 	@deprecated
 	def calculate_stock_value_from_deprecarated_ledgers(self):
-		serial_nos = list(
-			filter(lambda x: x not in self.serial_no_incoming_rate and x, self.get_serial_nos())
-		)
+		if not frappe.db.get_value(
+			"Stock Ledger Entry", {"serial_no": ("is", "set"), "is_cancelled": 0}, "name"
+		):
+			return
+
+		serial_nos = self.get_serial_nos()
 
 		actual_qty = flt(self.sle.actual_qty)
 
@@ -25,23 +28,12 @@ class DeprecatedSerialNoValuation:
 	@deprecated
 	def get_incoming_value_for_serial_nos(self, serial_nos):
 		# get rate from serial nos within same company
-		all_serial_nos = frappe.get_all(
-			"Serial No", fields=["purchase_rate", "name", "company"], filters={"name": ("in", serial_nos)}
-		)
-
 		incoming_values = 0.0
-		for d in all_serial_nos:
-			if d.company == self.sle.company:
-				self.serial_no_incoming_rate[d.name] += flt(d.purchase_rate)
-				incoming_values += flt(d.purchase_rate)
-
-		# Get rate for serial nos which has been transferred to other company
-		invalid_serial_nos = [d.name for d in all_serial_nos if d.company != self.sle.company]
-		for serial_no in invalid_serial_nos:
+		for serial_no in serial_nos:
 			table = frappe.qb.DocType("Stock Ledger Entry")
-			incoming_rate = (
+			stock_ledgers = (
 				frappe.qb.from_(table)
-				.select(table.incoming_rate)
+				.select(table.incoming_rate, table.actual_qty, table.stock_value_difference)
 				.where(
 					(
 						(table.serial_no == serial_no)
@@ -51,15 +43,18 @@ class DeprecatedSerialNoValuation:
 					)
 					& (table.company == self.sle.company)
 					& (table.serial_and_batch_bundle.isnull())
-					& (table.actual_qty > 0)
 					& (table.is_cancelled == 0)
 				)
-				.orderby(table.posting_date, order=Order.desc)
-				.limit(1)
-			).run()
+				.orderby(table.posting_datetime, order=Order.desc)
+			).run(as_dict=1)
 
-			self.serial_no_incoming_rate[serial_no] += flt(incoming_rate[0][0]) if incoming_rate else 0
-			incoming_values += self.serial_no_incoming_rate[serial_no]
+			for sle in stock_ledgers:
+				self.serial_no_incoming_rate[serial_no] += (
+					flt(sle.incoming_rate)
+					if sle.actual_qty > 0
+					else (sle.stock_value_difference / sle.actual_qty) * -1
+				)
+				incoming_values += self.serial_no_incoming_rate[serial_no]
 
 		return incoming_values
 

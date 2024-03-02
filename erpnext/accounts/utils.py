@@ -237,7 +237,7 @@ def get_balance_on(
 			)
 
 		else:
-			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False),))
+			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center),))
 
 	if account:
 		if not (frappe.flags.ignore_account_permission or ignore_account_permission):
@@ -258,7 +258,7 @@ def get_balance_on(
 			if acc.account_currency == frappe.get_cached_value("Company", acc.company, "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False),))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account),))
 
 	if account_type:
 		accounts = frappe.db.get_all(
@@ -278,11 +278,11 @@ def get_balance_on(
 	if party_type and party:
 		cond.append(
 			"""gle.party_type = %s and gle.party = %s """
-			% (frappe.db.escape(party_type), frappe.db.escape(party, percent=False))
+			% (frappe.db.escape(party_type), frappe.db.escape(party))
 		)
 
 	if company:
-		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
+		cond.append("""gle.company = %s """ % (frappe.db.escape(company)))
 
 	if account or (party_type and party) or account_type:
 		precision = get_currency_precision()
@@ -348,7 +348,7 @@ def get_count_on(account, fieldname, date):
 				% (acc.lft, acc.rgt)
 			)
 		else:
-			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False),))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account),))
 
 		entries = frappe.db.sql(
 			"""
@@ -725,7 +725,7 @@ def update_reference_in_payment_entry(
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	if not skip_ref_details_update_for_pe:
-		payment_entry.set_missing_ref_details()
+		payment_entry.set_missing_ref_details(ref_exchange_rate=d.exchange_rate or None)
 	payment_entry.set_amounts()
 
 	payment_entry.make_exchange_gain_loss_journal(
@@ -980,46 +980,6 @@ def get_currency_precision():
 		precision = get_number_format_info(number_format)[2]
 
 	return precision
-
-
-def get_stock_rbnb_difference(posting_date, company):
-	stock_items = frappe.db.sql_list(
-		"""select distinct item_code
-		from `tabStock Ledger Entry` where company=%s""",
-		company,
-	)
-
-	pr_valuation_amount = frappe.db.sql(
-		"""
-		select sum(pr_item.valuation_rate * pr_item.qty * pr_item.conversion_factor)
-		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
-		where pr.name = pr_item.parent and pr.docstatus=1 and pr.company=%s
-		and pr.posting_date <= %s and pr_item.item_code in (%s)"""
-		% ("%s", "%s", ", ".join(["%s"] * len(stock_items))),
-		tuple([company, posting_date] + stock_items),
-	)[0][0]
-
-	pi_valuation_amount = frappe.db.sql(
-		"""
-		select sum(pi_item.valuation_rate * pi_item.qty * pi_item.conversion_factor)
-		from `tabPurchase Invoice Item` pi_item, `tabPurchase Invoice` pi
-		where pi.name = pi_item.parent and pi.docstatus=1 and pi.company=%s
-		and pi.posting_date <= %s and pi_item.item_code in (%s)"""
-		% ("%s", "%s", ", ".join(["%s"] * len(stock_items))),
-		tuple([company, posting_date] + stock_items),
-	)[0][0]
-
-	# Balance should be
-	stock_rbnb = flt(pr_valuation_amount, 2) - flt(pi_valuation_amount, 2)
-
-	# Balance as per system
-	stock_rbnb_account = "Stock Received But Not Billed - " + frappe.get_cached_value(
-		"Company", company, "abbr"
-	)
-	sys_bal = get_balance_on(stock_rbnb_account, posting_date, in_account_currency=False)
-
-	# Amount should be credited
-	return flt(stock_rbnb) + flt(sys_bal)
 
 
 def get_held_invoices(party_type, party):
@@ -1428,8 +1388,7 @@ def sort_stock_vouchers_by_posting_date(
 		.select(sle.voucher_type, sle.voucher_no, sle.posting_date, sle.posting_time, sle.creation)
 		.where((sle.is_cancelled == 0) & (sle.voucher_no.isin(voucher_nos)))
 		.groupby(sle.voucher_type, sle.voucher_no)
-		.orderby(sle.posting_date)
-		.orderby(sle.posting_time)
+		.orderby(sle.posting_datetime)
 		.orderby(sle.creation)
 	).run(as_dict=True)
 	sorted_vouchers = [(sle.voucher_type, sle.voucher_no) for sle in sles]

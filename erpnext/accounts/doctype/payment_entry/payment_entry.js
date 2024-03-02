@@ -149,7 +149,7 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	refresh: function(frm) {
-		erpnext.hide_company();
+		erpnext.hide_company(frm);
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);

@@ -39,6 +39,7 @@ class StockSettings(Document):
 		clean_description_html: DF.Check
 		default_warehouse: DF.Link | None
 		disable_serial_no_and_batch_selector: DF.Check
+		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
 		item_naming_by: DF.Literal["Item Code", "Naming Series"]
@@ -57,6 +58,7 @@ class StockSettings(Document):
 		stock_uom: DF.Link | None
 		update_existing_price_list_rate: DF.Check
 		use_naming_series: DF.Check
+		use_serial_batch_fields: DF.Check
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]
 	# end: auto-generated types
 
@@ -68,6 +70,7 @@ class StockSettings(Document):
 			"allow_negative_stock",
 			"default_warehouse",
 			"set_qty_in_transactions_based_on_serial_no_input",
+			"use_serial_batch_fields",
 		]:
 			frappe.db.set_default(key, self.get(key, ""))
 

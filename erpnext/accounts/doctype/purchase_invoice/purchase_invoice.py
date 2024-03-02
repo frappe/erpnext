@@ -193,6 +193,7 @@ class PurchaseInvoice(BuyingController):
 		supplied_items: DF.Table[PurchaseReceiptItemSupplied]
 		supplier: DF.Link
 		supplier_address: DF.Link | None
+		supplier_group: DF.Link | None
 		supplier_name: DF.Data | None
 		supplier_warehouse: DF.Link | None
 		tax_category: DF.Link | None
@@ -214,6 +215,8 @@ class PurchaseInvoice(BuyingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		unrealized_profit_loss_account: DF.Link | None
+		update_billed_amount_in_purchase_order: DF.Check
+		update_billed_amount_in_purchase_receipt: DF.Check
 		update_stock: DF.Check
 		use_company_roundoff_cost_center: DF.Check
 		use_transaction_date_exchange_rate: DF.Check
@@ -679,6 +682,11 @@ class PurchaseInvoice(BuyingController):
 		super(PurchaseInvoice, self).on_submit()
 
 		self.check_prev_docstatus()
+
+		if self.is_return and not self.update_billed_amount_in_purchase_order:
+			# NOTE status updating bypassed for is_return
+			self.status_updater = []
+
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 
@@ -696,6 +704,7 @@ class PurchaseInvoice(BuyingController):
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		if self.update_stock == 1:
+			self.make_bundle_using_old_serial_batch_fields()
 			self.update_stock_ledger()
 
 			if self.is_old_subcontracting_flow:
@@ -723,6 +732,7 @@ class PurchaseInvoice(BuyingController):
 				"cash_bank_account",
 				"write_off_account",
 				"unrealized_profit_loss_account",
+				"is_opening",
 			]
 			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
 			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
@@ -1015,9 +1025,14 @@ class PurchaseInvoice(BuyingController):
 
 					if provisional_accounting_for_non_stock_items:
 						if item.purchase_receipt:
-							provisional_account = frappe.db.get_value(
-								"Purchase Receipt Item", item.pr_detail, "provisional_expense_account"
-							) or self.get_company_default("default_provisional_account")
+							provisional_account, pr_qty, pr_base_rate = frappe.get_cached_value(
+								"Purchase Receipt Item",
+								item.pr_detail,
+								["provisional_expense_account", "qty", "base_rate"],
+							)
+							provisional_account = provisional_account or self.get_company_default(
+								"default_provisional_account"
+							)
 							purchase_receipt_doc = purchase_receipt_doc_map.get(item.purchase_receipt)
 
 							if not purchase_receipt_doc:
@@ -1034,13 +1049,18 @@ class PurchaseInvoice(BuyingController):
 									"voucher_detail_no": item.pr_detail,
 									"account": provisional_account,
 								},
-								["name"],
+								"name",
 							)
 
 							if expense_booked_in_pr:
 								# Intentionally passing purchase invoice item to handle partial billing
 								purchase_receipt_doc.add_provisional_gl_entry(
-									item, gl_entries, self.posting_date, provisional_account, reverse=1
+									item,
+									gl_entries,
+									self.posting_date,
+									provisional_account,
+									reverse=1,
+									item_amount=(min(item.qty, pr_qty) * pr_base_rate),
 								)
 
 					if not self.is_internal_transfer():
@@ -1425,6 +1445,10 @@ class PurchaseInvoice(BuyingController):
 
 		self.check_on_hold_or_closed_status()
 
+		if self.is_return and not self.update_billed_amount_in_purchase_order:
+			# NOTE status updating bypassed for is_return
+			self.status_updater = []
+
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 
@@ -1519,6 +1543,9 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Supplier Invoice No exists in Purchase Invoice {0}").format(pi))
 
 	def update_billing_status_in_pr(self, update_modified=True):
+		if self.is_return and not self.update_billed_amount_in_purchase_receipt:
+			return
+
 		updated_pr = []
 		po_details = []
 

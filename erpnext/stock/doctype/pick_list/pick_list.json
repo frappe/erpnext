@@ -16,6 +16,7 @@
   "for_qty",
   "column_break_4",
   "parent_warehouse",
+  "consider_rejected_warehouses",
   "get_item_locations",
   "section_break_6",
   "scan_barcode",
@@ -51,7 +52,7 @@
    "description": "Items under this warehouse will be suggested",
    "fieldname": "parent_warehouse",
    "fieldtype": "Link",
-   "label": "Parent Warehouse",
+   "label": "Warehouse",
    "options": "Warehouse"
   },
   {
@@ -184,11 +185,18 @@
    "report_hide": 1,
    "reqd": 1,
    "search_index": 1
+  },
+  {
+   "default": "0",
+   "description": "Enable it if users want to consider rejected materials to dispatch.",
+   "fieldname": "consider_rejected_warehouses",
+   "fieldtype": "Check",
+   "label": "Consider Rejected Warehouses"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-01-24 10:33:43.244476",
+ "modified": "2024-02-02 16:17:44.877426",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

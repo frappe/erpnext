@@ -418,14 +418,13 @@ class AssetDepreciationSchedule(Document):
 			)
 
 			# Adjust depreciation amount in the last period based on the expected value after useful life
-			if row.expected_value_after_useful_life and (
-				(
-					n == cint(final_number_of_depreciations) - 1
-					and value_after_depreciation != row.expected_value_after_useful_life
+			if (
+				n == cint(final_number_of_depreciations) - 1
+				and flt(value_after_depreciation) != flt(row.expected_value_after_useful_life)
+			) or flt(value_after_depreciation) < flt(row.expected_value_after_useful_life):
+				depreciation_amount += flt(value_after_depreciation) - flt(
+					row.expected_value_after_useful_life
 				)
-				or value_after_depreciation < row.expected_value_after_useful_life
-			):
-				depreciation_amount += value_after_depreciation - row.expected_value_after_useful_life
 				skip_row = True
 
 			if flt(depreciation_amount, asset_doc.precision("gross_purchase_amount")) > 0:
@@ -813,15 +812,11 @@ def make_draft_asset_depr_schedules_if_not_present(asset_doc):
 	asset_depr_schedules_names = []
 
 	for row in asset_doc.get("finance_books"):
-		draft_asset_depr_schedule_name = get_asset_depr_schedule_name(
-			asset_doc.name, "Draft", row.finance_book
+		asset_depr_schedule = get_asset_depr_schedule_name(
+			asset_doc.name, ["Draft", "Active"], row.finance_book
 		)
 
-		active_asset_depr_schedule_name = get_asset_depr_schedule_name(
-			asset_doc.name, "Active", row.finance_book
-		)
-
-		if not draft_asset_depr_schedule_name and not active_asset_depr_schedule_name:
+		if not asset_depr_schedule:
 			name = make_draft_asset_depr_schedule(asset_doc, row)
 			asset_depr_schedules_names.append(name)
 
@@ -997,16 +992,20 @@ def get_asset_depr_schedule_doc(asset_name, status, finance_book=None):
 
 
 def get_asset_depr_schedule_name(asset_name, status, finance_book=None):
-	finance_book_filter = ["finance_book", "is", "not set"]
-	if finance_book:
+	if finance_book is None:
+		finance_book_filter = ["finance_book", "is", "not set"]
+	else:
 		finance_book_filter = ["finance_book", "=", finance_book]
+
+	if isinstance(status, str):
+		status = [status]
 
 	return frappe.db.get_value(
 		doctype="Asset Depreciation Schedule",
 		filters=[
 			["asset", "=", asset_name],
 			finance_book_filter,
-			["status", "=", status],
+			["status", "in", status],
 		],
 	)
 

@@ -28,7 +28,8 @@ class SellingController(StockController):
 	def validate(self):
 		super(SellingController, self).validate()
 		self.validate_items()
-		self.validate_max_discount()
+		if not self.get("is_debit_note"):
+			self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
 		self.set_po_nos(for_validate=True)
@@ -599,7 +600,7 @@ class SellingController(StockController):
 		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
 				item.gross_profit = flt(
-					((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item)
+					((item.base_rate - flt(item.valuation_rate)) * item.stock_qty), self.precision("amount", item)
 				)
 
 	def set_customer_address(self):
@@ -702,6 +703,9 @@ def set_default_income_account_for_item(obj):
 
 def get_serial_and_batch_bundle(child, parent):
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+	if child.get("use_serial_batch_fields"):
+		return
 
 	if not frappe.db.get_single_value(
 		"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"

@@ -19,11 +19,14 @@
   "allow_zero_valuation_rate",
   "serial_no_and_batch_section",
   "add_serial_batch_bundle",
-  "serial_and_batch_bundle",
-  "batch_no",
+  "use_serial_batch_fields",
   "column_break_11",
+  "serial_and_batch_bundle",
   "current_serial_and_batch_bundle",
+  "section_break_lypk",
   "serial_no",
+  "column_break_eefq",
+  "batch_no",
   "section_break_3",
   "current_qty",
   "current_amount",
@@ -103,10 +106,10 @@
    "label": "Serial No and Batch"
   },
   {
+   "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "serial_no",
    "fieldtype": "Long Text",
-   "label": "Serial No",
-   "read_only": 1
+   "label": "Serial No"
   },
   {
    "fieldname": "column_break_11",
@@ -171,11 +174,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch",
-   "read_only": 1,
    "search_index": 1
   },
   {
@@ -195,6 +198,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Serial / Batch Bundle",
@@ -204,6 +208,7 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "current_serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Current Serial / Batch Bundle",
@@ -212,6 +217,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "add_serial_batch_bundle",
    "fieldtype": "Button",
    "label": "Add Serial / Batch No"
@@ -222,11 +228,26 @@
    "fieldtype": "Link",
    "label": "Item Group",
    "options": "Item Group"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_serial_batch_fields",
+   "fieldtype": "Check",
+   "label": "Use Serial No / Batch Fields"
+  },
+  {
+   "depends_on": "eval:doc.use_serial_batch_fields === 1",
+   "fieldname": "section_break_lypk",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_eefq",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-01-14 10:04:23.599951",
+ "modified": "2024-02-04 16:19:44.576022",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",
