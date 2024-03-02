@@ -219,6 +219,7 @@ class RepostItemValuation(Document):
 		if self.status not in ("Queued", "In Progress"):
 			return
 
+<<<<<<< HEAD
 		if not (self.voucher_no and self.voucher_no):
 			return
 
@@ -227,6 +228,11 @@ class RepostItemValuation(Document):
 			msg = _("Cannot cancel as processing of cancelled documents is  pending.")
 			msg += "<br>" + _("Please try again in an hour.")
 			frappe.throw(msg, title=_("Pending processing"))
+=======
+		msg = _("Cannot cancel as processing of cancelled documents is pending.")
+		msg += "<br>" + _("Please try again in an hour.")
+		frappe.throw(msg, title=_("Pending processing"))
+>>>>>>> 72ac56b6c4 (fix: do not allow to cancel incomplete reposting (#40224))
 
 	@frappe.whitelist()
 	def restart_reposting(self):
