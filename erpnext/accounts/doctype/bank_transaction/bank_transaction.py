@@ -94,10 +94,13 @@ class BankTransaction(Document):
 			pe.append(reference)
 
 	def update_allocated_amount(self):
-		self.allocated_amount = (
+		allocated_amount = (
 			sum(p.allocated_amount for p in self.payment_entries) if self.payment_entries else 0.0
 		)
-		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit)) - self.allocated_amount
+		unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit)) - allocated_amount
+
+		self.allocated_amount = flt(allocated_amount, self.precision("allocated_amount"))
+		self.unallocated_amount = flt(unallocated_amount, self.precision("unallocated_amount"))
 
 	def before_submit(self):
 		self.allocate_payment_entries()

@@ -26,21 +26,24 @@ $.extend(erpnext, {
 		}
 	},
 
-	hide_company: function() {
-		if(cur_frm.fields_dict.company) {
+	hide_company: function(frm) {
+		if(frm?.fields_dict.company) {
 			var companies = Object.keys(locals[":Company"] || {});
 			if(companies.length === 1) {
-				if(!cur_frm.doc.company) cur_frm.set_value("company", companies[0]);
-				cur_frm.toggle_display("company", false);
+				if(!frm.doc.company) frm.set_value("company", companies[0]);
+				frm.toggle_display("company", false);
 			} else if(erpnext.last_selected_company) {
-				if(!cur_frm.doc.company) cur_frm.set_value("company", erpnext.last_selected_company);
+				if(!frm.doc.company) frm.set_value("company", erpnext.last_selected_company);
 			}
 		}
 	},
 
 	is_perpetual_inventory_enabled: function(company) {
 		if(company) {
-			return frappe.get_doc(":Company", company).enable_perpetual_inventory
+			let company_local = locals[":Company"] && locals[":Company"][company];
+			if(company_local) {
+				return cint(company_local.enable_perpetual_inventory);
+			}
 		}
 	},
 
@@ -676,6 +679,7 @@ erpnext.utils.update_child_items = function(opts) {
 			fieldname: frm.doc.doctype == 'Sales Order' ? "delivery_date" : "schedule_date",
 			in_list_view: 1,
 			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date"),
+			default: frm.doc.doctype == 'Sales Order' ? frm.doc.delivery_date : frm.doc.schedule_date,
 			reqd: 1
 		})
 		fields.splice(3, 0, {

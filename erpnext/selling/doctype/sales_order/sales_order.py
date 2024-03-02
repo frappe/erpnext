@@ -251,7 +251,8 @@ class SalesOrder(SellingController):
 					frappe.msgprint(
 						_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(
 							frappe.bold(so[0][0]), frappe.bold(self.po_no)
-						)
+						),
+						alert=True,
 					)
 				else:
 					frappe.throw(
@@ -514,6 +515,9 @@ class SalesOrder(SellingController):
 
 	def on_update(self):
 		pass
+
+	def on_update_after_submit(self):
+		self.check_credit_limit()
 
 	def before_update_after_submit(self):
 		self.validate_po()
@@ -906,6 +910,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
 
 		if source.company_address:
 			target.update({"company_address": source.company_address})
@@ -931,6 +936,9 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		# make_mapped_doc sets js `args` into `frappe.flags.args`
 		if frappe.flags.args and frappe.flags.args.delivery_dates:
 			if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
+				return False
+		if frappe.flags.args and frappe.flags.args.until_delivery_date:
+			if cstr(doc.delivery_date) > frappe.flags.args.until_delivery_date:
 				return False
 
 		return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
@@ -1007,6 +1015,11 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				for idx, item in enumerate(target_doc.items):
 					item.idx = idx + 1
 
+	if not kwargs.skip_item_mapping and frappe.flags.bulk_transaction and not target_doc.items:
+		# the (date) condition filter resulted in an unintendedly created empty DN; remove it
+		del target_doc
+		return
+
 	# Should be called after mapping items.
 	set_missing_values(so, target_doc)
 
@@ -1026,6 +1039,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
 
 		if source.company_address:
 			target.update({"company_address": source.company_address})
@@ -1608,7 +1622,11 @@ def create_pick_list(source_name, target_doc=None):
 		"Sales Order",
 		source_name,
 		{
-			"Sales Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
+			"Sales Order": {
+				"doctype": "Pick List",
+				"field_map": {"set_warehouse": "parent_warehouse"},
+				"validation": {"docstatus": ["=", 1]},
+			},
 			"Sales Order Item": {
 				"doctype": "Pick List Item",
 				"field_map": {"parent": "sales_order", "name": "sales_order_item"},

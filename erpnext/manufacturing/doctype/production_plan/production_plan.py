@@ -312,9 +312,10 @@ class ProductionPlan(Document):
 				so_item.parent,
 				so_item.item_code,
 				so_item.warehouse,
-				(
-					(so_item.qty - so_item.work_order_qty - so_item.delivered_qty) * so_item.conversion_factor
-				).as_("pending_qty"),
+				so_item.qty,
+				so_item.work_order_qty,
+				so_item.delivered_qty,
+				so_item.conversion_factor,
 				so_item.description,
 				so_item.name,
 				so_item.bom_no,
@@ -336,6 +337,11 @@ class ProductionPlan(Document):
 		items_query = items_query.where(ExistsCriterion(items_subquery))
 
 		items = items_query.run(as_dict=True)
+
+		for item in items:
+			item.pending_qty = (
+				flt(item.qty) - max(item.work_order_qty, item.delivered_qty, 0) * item.conversion_factor
+			)
 
 		pi = frappe.qb.DocType("Packed Item")
 
@@ -646,7 +652,10 @@ class ProductionPlan(Document):
 				"project": self.project,
 			}
 
-			key = (d.item_code, d.sales_order, d.warehouse)
+			key = (d.item_code, d.sales_order, d.sales_order_item, d.warehouse)
+			if self.combine_items:
+				key = (d.item_code, d.sales_order, d.warehouse)
+
 			if not d.sales_order:
 				key = (d.name, d.item_code, d.warehouse)
 
@@ -885,8 +894,8 @@ class ProductionPlan(Document):
 		sub_assembly_items_store = []  # temporary store to process all subassembly items
 
 		for row in self.po_items:
-			if self.skip_available_sub_assembly_item and not row.warehouse:
-				frappe.throw(_("Row #{0}: Please select the FG Warehouse in Assembly Items").format(row.idx))
+			if self.skip_available_sub_assembly_item and not self.sub_assembly_warehouse:
+				frappe.throw(_("Row #{0}: Please select the Sub Assembly Warehouse").format(row.idx))
 
 			if not row.item_code:
 				frappe.throw(_("Row #{0}: Please select Item Code in Assembly Items").format(row.idx))
@@ -896,14 +905,23 @@ class ProductionPlan(Document):
 
 			bom_data = []
 
-			warehouse = (
-				(self.sub_assembly_warehouse or row.warehouse)
-				if self.skip_available_sub_assembly_item
-				else None
-			)
+			warehouse = (self.sub_assembly_warehouse) if self.skip_available_sub_assembly_item else None
 			get_sub_assembly_items(row.bom_no, bom_data, row.planned_qty, self.company, warehouse=warehouse)
 			self.set_sub_assembly_items_based_on_level(row, bom_data, manufacturing_type)
 			sub_assembly_items_store.extend(bom_data)
+
+		if not sub_assembly_items_store and self.skip_available_sub_assembly_item:
+			message = (
+				_(
+					"As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
+				).format(self.sub_assembly_warehouse)
+				+ "<br><br>"
+			)
+			message += _(
+				"If you still want to proceed, please disable 'Skip Available Sub Assembly Items' checkbox."
+			)
+
+			frappe.msgprint(message, title=_("Note"))
 
 		if self.combine_sub_items:
 			# Combine subassembly items
@@ -917,14 +935,18 @@ class ProductionPlan(Document):
 
 	def set_sub_assembly_items_based_on_level(self, row, bom_data, manufacturing_type=None):
 		"Modify bom_data, set additional details."
+		is_group_warehouse = frappe.db.get_value("Warehouse", self.sub_assembly_warehouse, "is_group")
+
 		for data in bom_data:
 			data.qty = data.stock_qty
 			data.production_plan_item = row.name
-			data.fg_warehouse = self.sub_assembly_warehouse or row.warehouse
 			data.schedule_date = row.planned_start_date
 			data.type_of_manufacturing = manufacturing_type or (
 				"Subcontract" if data.is_sub_contracted_item else "In House"
 			)
+
+			if not is_group_warehouse:
+				data.fg_warehouse = self.sub_assembly_warehouse
 
 	def set_default_supplier_for_subcontracting_order(self):
 		items = [
@@ -1334,10 +1356,10 @@ def get_sales_orders(self):
 	)
 
 	date_field_mapper = {
-		"from_date": self.from_date >= so.transaction_date,
-		"to_date": self.to_date <= so.transaction_date,
-		"from_delivery_date": self.from_delivery_date >= so_item.delivery_date,
-		"to_delivery_date": self.to_delivery_date <= so_item.delivery_date,
+		"from_date": so.transaction_date >= self.from_date,
+		"to_date": so.transaction_date <= self.to_date,
+		"from_delivery_date": so_item.delivery_date >= self.from_delivery_date,
+		"to_delivery_date": so_item.delivery_date <= self.to_delivery_date,
 	}
 
 	for field, value in date_field_mapper.items():
@@ -1469,7 +1491,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 	so_item_details = frappe._dict()
 
 	sub_assembly_items = {}
-	if doc.get("skip_available_sub_assembly_item"):
+	if doc.get("skip_available_sub_assembly_item") and doc.get("sub_assembly_items"):
 		for d in doc.get("sub_assembly_items"):
 			sub_assembly_items.setdefault((d.get("production_item"), d.get("bom_no")), d.get("qty"))
 
@@ -1498,19 +1520,17 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 				frappe.throw(_("For row {0}: Enter Planned Qty").format(data.get("idx")))
 
 			if bom_no:
-				if (
-					data.get("include_exploded_items")
-					and doc.get("sub_assembly_items")
-					and doc.get("skip_available_sub_assembly_item")
-				):
-					item_details = get_raw_materials_of_sub_assembly_items(
-						item_details,
-						company,
-						bom_no,
-						include_non_stock_items,
-						sub_assembly_items,
-						planned_qty=planned_qty,
-					)
+				if data.get("include_exploded_items") and doc.get("skip_available_sub_assembly_item"):
+					item_details = {}
+					if doc.get("sub_assembly_items"):
+						item_details = get_raw_materials_of_sub_assembly_items(
+							item_details,
+							company,
+							bom_no,
+							include_non_stock_items,
+							sub_assembly_items,
+							planned_qty=planned_qty,
+						)
 
 				elif data.get("include_exploded_items") and include_subcontracted_items:
 					# fetch exploded items from BOM
@@ -1683,34 +1703,37 @@ def get_sub_assembly_items(bom_no, bom_data, to_produce_qty, company, warehouse=
 			stock_qty = (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 
 			if warehouse:
-				bin_dict = get_bin_details(d, company, for_warehouse=warehouse)
+				bin_details = get_bin_details(d, company, for_warehouse=warehouse)
 
-				if bin_dict and bin_dict[0].projected_qty > 0:
-					if bin_dict[0].projected_qty > stock_qty:
-						continue
-					else:
-						stock_qty = stock_qty - bin_dict[0].projected_qty
+				for _bin_dict in bin_details:
+					if _bin_dict.projected_qty > 0:
+						if _bin_dict.projected_qty > stock_qty:
+							stock_qty = 0
+							continue
+						else:
+							stock_qty = stock_qty - _bin_dict.projected_qty
 
-			bom_data.append(
-				frappe._dict(
-					{
-						"parent_item_code": parent_item_code,
-						"description": d.description,
-						"production_item": d.item_code,
-						"item_name": d.item_name,
-						"stock_uom": d.stock_uom,
-						"uom": d.stock_uom,
-						"bom_no": d.value,
-						"is_sub_contracted_item": d.is_sub_contracted_item,
-						"bom_level": indent,
-						"indent": indent,
-						"stock_qty": stock_qty,
-					}
+			if stock_qty > 0:
+				bom_data.append(
+					frappe._dict(
+						{
+							"parent_item_code": parent_item_code,
+							"description": d.description,
+							"production_item": d.item_code,
+							"item_name": d.item_name,
+							"stock_uom": d.stock_uom,
+							"uom": d.stock_uom,
+							"bom_no": d.value,
+							"is_sub_contracted_item": d.is_sub_contracted_item,
+							"bom_level": indent,
+							"indent": indent,
+							"stock_qty": stock_qty,
+						}
+					)
 				)
-			)
 
-			if d.value:
-				get_sub_assembly_items(d.value, bom_data, stock_qty, company, warehouse, indent=indent + 1)
+				if d.value:
+					get_sub_assembly_items(d.value, bom_data, stock_qty, company, warehouse, indent=indent + 1)
 
 
 def set_default_warehouses(row, default_warehouses):
@@ -1762,23 +1785,23 @@ def get_reserved_qty_for_production_plan(item_code, warehouse):
 	return reserved_qty_for_production_plan - reserved_qty_for_production
 
 
+@frappe.request_cache
 def get_non_completed_production_plans():
 	table = frappe.qb.DocType("Production Plan")
 	child = frappe.qb.DocType("Production Plan Item")
 
-	query = (
+	return (
 		frappe.qb.from_(table)
 		.inner_join(child)
 		.on(table.name == child.parent)
 		.select(table.name)
+		.distinct()
 		.where(
 			(table.docstatus == 1)
 			& (table.status.notin(["Completed", "Closed"]))
 			& (child.planned_qty > child.ordered_qty)
 		)
-	).run(as_dict=True)
-
-	return list(set([d.name for d in query]))
+	).run(pluck="name")
 
 
 def get_raw_materials_of_sub_assembly_items(

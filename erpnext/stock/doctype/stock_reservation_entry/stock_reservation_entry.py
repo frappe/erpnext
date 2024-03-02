@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, nowdate, nowtime
 
 from erpnext.stock.utils import get_or_make_bin, get_stock_balance
 
@@ -866,6 +866,8 @@ def get_ssb_bundle_for_voucher(sre: dict) -> object:
 		bundle = frappe.new_doc("Serial and Batch Bundle")
 		bundle.type_of_transaction = "Outward"
 		bundle.voucher_type = "Delivery Note"
+		bundle.posting_date = nowdate()
+		bundle.posting_time = nowtime()
 
 		for field in ("item_code", "warehouse", "has_serial_no", "has_batch_no"):
 			setattr(bundle, field, sre[field])

@@ -1,7 +1,7 @@
 frappe.provide("erpnext.bulk_transaction_processing");
 
 $.extend(erpnext.bulk_transaction_processing, {
-	create: function(listview, from_doctype, to_doctype) {
+	create: function(listview, from_doctype, to_doctype, args) {
 		let checked_items = listview.get_checked_items();
 		const doc_name = [];
 		checked_items.forEach((Item)=> {
@@ -15,7 +15,7 @@ $.extend(erpnext.bulk_transaction_processing, {
 			if (doc_name.length == 0) {
 				frappe.call({
 					method: "erpnext.utilities.bulk_transaction.transaction_processing",
-					args: {data: checked_items, from_doctype: from_doctype, to_doctype: to_doctype}
+					args: {data: checked_items, from_doctype: from_doctype, to_doctype: to_doctype, args: args}
 				}).then(()=> {
 
 				});

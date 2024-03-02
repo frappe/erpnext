@@ -471,7 +471,10 @@ class PaymentEntry(AccountsController):
 		)
 
 	def set_missing_ref_details(
-		self, force: bool = False, update_ref_details_only_for: list | None = None
+		self,
+		force: bool = False,
+		update_ref_details_only_for: list | None = None,
+		ref_exchange_rate: float | None = None,
 	) -> None:
 		for d in self.get("references"):
 			if d.allocated_amount:
@@ -484,6 +487,8 @@ class PaymentEntry(AccountsController):
 				ref_details = get_reference_details(
 					d.reference_doctype, d.reference_name, self.party_account_currency
 				)
+				if ref_exchange_rate:
+					ref_details.update({"exchange_rate": ref_exchange_rate})
 
 				for field, value in ref_details.items():
 					if d.exchange_gain_loss:
@@ -1032,19 +1037,19 @@ class PaymentEntry(AccountsController):
 		)
 
 		base_party_amount = flt(self.base_total_allocated_amount) + flt(base_unallocated_amount)
-
-		if self.payment_type == "Receive":
-			self.difference_amount = base_party_amount - self.base_received_amount
-		elif self.payment_type == "Pay":
-			self.difference_amount = self.base_paid_amount - base_party_amount
-		else:
-			self.difference_amount = self.base_paid_amount - flt(self.base_received_amount)
-
-		total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
 		included_taxes = self.get_included_taxes()
 
+		if self.payment_type == "Receive":
+			self.difference_amount = base_party_amount - self.base_received_amount + included_taxes
+		elif self.payment_type == "Pay":
+			self.difference_amount = self.base_paid_amount - base_party_amount - included_taxes
+		else:
+			self.difference_amount = self.base_paid_amount - flt(self.base_received_amount) - included_taxes
+
+		total_deductions = sum(flt(d.amount) for d in self.get("deductions"))
+
 		self.difference_amount = flt(
-			self.difference_amount - total_deductions - included_taxes, self.precision("difference_amount")
+			self.difference_amount - total_deductions, self.precision("difference_amount")
 		)
 
 	def get_included_taxes(self):
@@ -2220,6 +2225,7 @@ def get_payment_entry(
 	party_type=None,
 	payment_type=None,
 	reference_date=None,
+	ignore_permissions=False,
 ):
 	doc = frappe.get_doc(dt, dn)
 	over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
@@ -2242,14 +2248,14 @@ def get_payment_entry(
 	)
 
 	# bank or cash
-	bank = get_bank_cash_account(doc, bank_account)
+	bank = get_bank_cash_account(doc, bank_account, ignore_permissions=ignore_permissions)
 
 	# if default bank or cash account is not set in company master and party has default company bank account, fetch it
 	if party_type in ["Customer", "Supplier"] and not bank:
 		party_bank_account = get_party_bank_account(party_type, doc.get(scrub(party_type)))
 		if party_bank_account:
 			account = frappe.db.get_value("Bank Account", party_bank_account, "account")
-			bank = get_bank_cash_account(doc, account)
+			bank = get_bank_cash_account(doc, account, ignore_permissions=ignore_permissions)
 
 	paid_amount, received_amount = set_paid_amount_and_received_amount(
 		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc
@@ -2389,9 +2395,13 @@ def update_accounting_dimensions(pe, doc):
 		pe.set(dimension, doc.get(dimension))
 
 
-def get_bank_cash_account(doc, bank_account):
+def get_bank_cash_account(doc, bank_account, ignore_permissions=False):
 	bank = get_default_bank_cash_account(
-		doc.company, "Bank", mode_of_payment=doc.get("mode_of_payment"), account=bank_account
+		doc.company,
+		"Bank",
+		mode_of_payment=doc.get("mode_of_payment"),
+		account=bank_account,
+		ignore_permissions=ignore_permissions,
 	)
 
 	if not bank:

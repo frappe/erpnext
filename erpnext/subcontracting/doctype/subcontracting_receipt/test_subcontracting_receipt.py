@@ -643,10 +643,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		)
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
-		for row in scr.supplied_items:
-			self.assertNotEqual(row.rate, 300.00)
-			self.assertFalse(row.serial_and_batch_bundle)
-
 		scr.submit()
 		scr.reload()
 

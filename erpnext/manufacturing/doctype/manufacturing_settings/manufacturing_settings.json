@@ -7,6 +7,7 @@
  "field_order": [
   "raw_materials_consumption_section",
   "material_consumption",
+  "get_rm_cost_from_consumption_entry",
   "column_break_3",
   "backflush_raw_materials_based_on",
   "capacity_planning",
@@ -202,13 +203,20 @@
    "fieldname": "set_op_cost_and_scrape_from_sub_assemblies",
    "fieldtype": "Check",
    "label": "Set Operating Cost / Scrape Items From Sub-assemblies"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.material_consumption",
+   "fieldname": "get_rm_cost_from_consumption_entry",
+   "fieldtype": "Check",
+   "label": "Get Raw Materials Cost from Consumption Entry"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-12-28 16:37:44.874096",
+ "modified": "2024-02-08 19:00:37.561244",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
