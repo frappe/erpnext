@@ -56,7 +56,8 @@ class TestAccountsController(FrappeTestCase):
 	20 series - Sales Invoice against Journals
 	30 series - Sales Invoice against Credit Notes
 	40 series - Company default Cost center is unset
-	50 series - Dimension inheritence
+	50 series = Journals against Journals
+	90 series - Dimension inheritence
 	"""
 
 	def setUp(self):
@@ -1306,7 +1307,7 @@ class TestAccountsController(FrappeTestCase):
 			dimension1.disabled = 1
 			dimension1.save()
 
-	def test_50_dimensions_filter(self):
+	def test_90_dimensions_filter(self):
 		"""
 		Test workings of dimension filters
 		"""
@@ -1378,7 +1379,7 @@ class TestAccountsController(FrappeTestCase):
 		self.assertEqual(len(pr.payments), 1)
 		self.disable_dimensions()
 
-	def test_51_cr_note_should_inherit_dimension(self):
+	def test_91_cr_note_should_inherit_dimension(self):
 		self.setup_dimensions()
 		rate_in_account_currency = 1
 
@@ -1421,7 +1422,7 @@ class TestAccountsController(FrappeTestCase):
 				)
 		self.disable_dimensions()
 
-	def test_52_dimension_inhertiance_exc_gain_loss(self):
+	def test_92_dimension_inhertiance_exc_gain_loss(self):
 		# Sales Invoice in Foreign Currency
 		self.setup_dimensions()
 		rate = 80
@@ -1460,7 +1461,7 @@ class TestAccountsController(FrappeTestCase):
 		)
 		self.disable_dimensions()
 
-	def test_53_dimension_inheritance_on_advance(self):
+	def test_93_dimension_inheritance_on_advance(self):
 		self.setup_dimensions()
 		dpt = "Research & Development"
 
@@ -1506,3 +1507,70 @@ class TestAccountsController(FrappeTestCase):
 			),
 		)
 		self.disable_dimensions()
+
+	def test_50_journal_against_journal(self):
+		# Invoice in Foreign Currency
+		journal_as_invoice = self.create_journal_entry(
+			acc1=self.debit_usd,
+			acc1_exc_rate=83,
+			acc2=self.cash,
+			acc1_amount=1,
+			acc2_amount=83,
+			acc2_exc_rate=1,
+		)
+		journal_as_invoice.accounts[0].party_type = "Customer"
+		journal_as_invoice.accounts[0].party = self.customer
+		journal_as_invoice = journal_as_invoice.save().submit()
+
+		# Payment
+		journal_as_payment = self.create_journal_entry(
+			acc1=self.debit_usd,
+			acc1_exc_rate=75,
+			acc2=self.cash,
+			acc1_amount=-1,
+			acc2_amount=-75,
+			acc2_exc_rate=1,
+		)
+		journal_as_payment.accounts[0].party_type = "Customer"
+		journal_as_payment.accounts[0].party = self.customer
+		journal_as_payment = journal_as_payment.save().submit()
+
+		# Reconcile the remaining amount
+		pr = self.create_payment_reconciliation()
+		# pr.receivable_payable_account = self.debit_usd
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		# There should be no outstanding in both currencies
+		journal_as_invoice.reload()
+		self.assert_ledger_outstanding(journal_as_invoice.doctype, journal_as_invoice.name, 0.0, 0.0)
+
+		# Exchange Gain/Loss Journal should've been created.
+		exc_je_for_si = self.get_journals_for(journal_as_invoice.doctype, journal_as_invoice.name)
+		exc_je_for_je = self.get_journals_for(journal_as_payment.doctype, journal_as_payment.name)
+		self.assertNotEqual(exc_je_for_si, [])
+		self.assertEqual(
+			len(exc_je_for_si), 2
+		)  # payment also has reference. so, there are 2 journals referencing invoice
+		self.assertEqual(len(exc_je_for_je), 1)
+		self.assertIn(exc_je_for_je[0], exc_je_for_si)
+
+		# Cancel Payment
+		journal_as_payment.reload()
+		journal_as_payment.cancel()
+
+		journal_as_invoice.reload()
+		self.assert_ledger_outstanding(journal_as_invoice.doctype, journal_as_invoice.name, 83.0, 1.0)
+
+		# Exchange Gain/Loss Journal should've been cancelled
+		exc_je_for_si = self.get_journals_for(journal_as_invoice.doctype, journal_as_invoice.name)
+		exc_je_for_je = self.get_journals_for(journal_as_payment.doctype, journal_as_payment.name)
+		self.assertEqual(exc_je_for_si, [])
+		self.assertEqual(exc_je_for_je, [])
