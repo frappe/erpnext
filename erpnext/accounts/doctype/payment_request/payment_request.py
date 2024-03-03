@@ -360,8 +360,9 @@ class PaymentRequest(Document):
 				},
 			)
 
+		payment_entry.insert(ignore_permissions=True)
+		
 		if submit:
-			payment_entry.insert(ignore_permissions=True)
 			payment_entry.submit()
 
 		return payment_entry
