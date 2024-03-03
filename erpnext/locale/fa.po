@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-02 11:17\n"
+"PO-Revision-Date: 2024-03-03 11:19\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1063,7 +1063,7 @@ msgstr ""
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "<h5 class=\"text-muted uppercase\">Or</h5>"
-msgstr ""
+msgstr "<h5 class=\"text-muted uppercase\">یا</h5>"
 
 #. Content of the 'account_no_settings' (HTML) field in DocType 'Cheque Print
 #. Template'
@@ -37978,7 +37978,7 @@ msgstr ""
 #: accounts/doctype/payment_entry/payment_entry.js:265
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.js:24
 msgid "Ledger"
-msgstr ""
+msgstr "دفتر کل"
 
 #. Name of a DocType
 #: accounts/doctype/ledger_merge/ledger_merge.json
@@ -43497,7 +43497,7 @@ msgstr ""
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Not Requested"
-msgstr ""
+msgstr "درخواست نشده"
 
 #: selling/report/lost_quotations/lost_quotations.py:86
 #: support/report/issue_analytics/issue_analytics.py:208
@@ -44246,116 +44246,116 @@ msgstr ""
 #: support/report/issue_summary/issue_summary.js:43
 #: support/report/issue_summary/issue_summary.py:348
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Appointment'
 #: crm/doctype/appointment/appointment.json
 msgctxt "Appointment"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Non Conformance'
 #: quality_management/doctype/non_conformance/non_conformance.json
 msgctxt "Non Conformance"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Entry'
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
 msgctxt "POS Opening Entry"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Action'
 #: quality_management/doctype/quality_action/quality_action.json
 msgctxt "Quality Action"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Action
 #. Resolution'
 #: quality_management/doctype/quality_action_resolution/quality_action_resolution.json
 msgctxt "Quality Action Resolution"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Meeting'
 #: quality_management/doctype/quality_meeting/quality_meeting.json
 msgctxt "Quality Meeting"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Review'
 #: quality_management/doctype/quality_review/quality_review.json
 msgctxt "Quality Review"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Review Objective'
 #: quality_management/doctype/quality_review_objective/quality_review_objective.json
 msgctxt "Quality Review Objective"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
 msgctxt "Warranty Claim"
 msgid "Open"
-msgstr ""
+msgstr "باز"
 
 #. Label of a HTML field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
