@@ -70,6 +70,7 @@ class RepostAccountingLedger(Document):
 			).append(gle.update({"old": True}))
 
 	def generate_preview_data(self):
+		frappe.flags.through_repost_accounting_ledger = True
 		self.gl_entries = []
 		self.get_existing_ledger_entries()
 		for x in self.vouchers:
@@ -123,6 +124,7 @@ class RepostAccountingLedger(Document):
 
 @frappe.whitelist()
 def start_repost(account_repost_doc=str) -> None:
+	frappe.flags.through_repost_accounting_ledger = True
 	if account_repost_doc:
 		repost_doc = frappe.get_doc("Repost Accounting Ledger", account_repost_doc)
 

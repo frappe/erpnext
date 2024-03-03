@@ -199,6 +199,7 @@ frappe.ui.form.on('Material Request', {
 
 	get_item_data: function(frm, item, overwrite_warehouse=false) {
 		if (item && !item.item_code) { return; }
+
 		frappe.call({
 			method: "erpnext.stock.get_item_details.get_item_details",
 			args: {
@@ -225,20 +226,22 @@ frappe.ui.form.on('Material Request', {
 			},
 			callback: function(r) {
 				const d = item;
-				const qty_fields = ['actual_qty', 'projected_qty', 'min_order_qty'];
+				const allow_to_change_fields = ['actual_qty', 'projected_qty', 'min_order_qty', 'item_name', 'description', 'stock_uom', 'uom', 'conversion_factor', 'stock_qty'];
 
 				if(!r.exc) {
 					$.each(r.message, function(key, value) {
-						if(!d[key] || qty_fields.includes(key)) {
+						if(!d[key] || allow_to_change_fields.includes(key)) {
 							d[key] = value;
 						}
 					});
 
 					if (d.price_list_rate != r.message.price_list_rate) {
+						d.rate = 0.0;
 						d.price_list_rate = r.message.price_list_rate;
-
 						frappe.model.set_value(d.doctype, d.name, "rate", d.price_list_rate);
 					}
+
+					refresh_field("items");
 				}
 			}
 		});
@@ -435,7 +438,7 @@ frappe.ui.form.on("Material Request Item", {
 		frm.events.get_item_data(frm, item, false);
 	},
 
-	rate: function(frm, doctype, name) {
+	rate(frm, doctype, name) {
 		const item = locals[doctype][name];
 		item.amount = flt(item.qty) * flt(item.rate);
 		frappe.model.set_value(doctype, name, "amount", item.amount);

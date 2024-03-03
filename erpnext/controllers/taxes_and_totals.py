@@ -1005,7 +1005,7 @@ def get_itemised_tax_breakup_data(doc):
 	for item_code, taxes in itemised_tax.items():
 		itemised_tax_data.append(
 			frappe._dict(
-				{"item": item_code, "taxable_amount": itemised_taxable_amount.get(item_code), **taxes}
+				{"item": item_code, "taxable_amount": itemised_taxable_amount.get(item_code, 0), **taxes}
 			)
 		)
 

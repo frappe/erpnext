@@ -163,7 +163,7 @@ class JobCard(Document):
 		for row in self.sub_operations:
 			self.total_completed_qty += row.completed_qty
 
-	def get_overlap_for(self, args, check_next_available_slot=False):
+	def get_overlap_for(self, args):
 		production_capacity = 1
 
 		jc = frappe.qb.DocType("Job Card")
@@ -174,9 +174,6 @@ class JobCard(Document):
 			((jctl.from_time < args.to_time) & (jctl.to_time > args.to_time)),
 			((jctl.from_time >= args.from_time) & (jctl.to_time <= args.to_time)),
 		]
-
-		if check_next_available_slot:
-			time_conditions.append(((jctl.from_time >= args.from_time) & (jctl.to_time >= args.to_time)))
 
 		query = (
 			frappe.qb.from_(jctl)
@@ -279,13 +276,29 @@ class JobCard(Document):
 			self.check_workstation_time(row)
 
 	def validate_overlap_for_workstation(self, args, row):
+		if args.get("to_time") and get_datetime(args.to_time) < get_datetime(args.from_time):
+			args.to_time = add_to_date(row.planned_start_time, minutes=row.remaining_time_in_mins)
+
 		# get the last record based on the to time from the job card
-		data = self.get_overlap_for(args, check_next_available_slot=True)
+		data = self.get_overlap_for(args)
+
+		if not data:
+			row.planned_start_time = args.from_time
+			return
+
 		if data:
 			if not self.workstation:
 				self.workstation = data.workstation
 
-			row.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
+			if data.get("planned_start_time"):
+				args.planned_start_time = get_datetime(data.planned_start_time)
+			else:
+				args.planned_start_time = get_datetime(data.to_time + get_mins_between_operations())
+
+			args.from_time = args.planned_start_time
+			args.to_time = add_to_date(args.planned_start_time, minutes=row.remaining_time_in_mins)
+
+			self.validate_overlap_for_workstation(args, row)
 
 	def check_workstation_time(self, row):
 		workstation_doc = frappe.get_cached_doc("Workstation", self.workstation)

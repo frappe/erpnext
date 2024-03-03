@@ -242,7 +242,7 @@ def get_columns(filters):
 				"width": 120,
 			},
 			{
-				"label": _("Tax Amount"),
+				"label": _("TDS Amount") if filters.get("party_type") == "Supplier" else _("TCS Amount"),
 				"fieldname": "tax_amount",
 				"fieldtype": "Float",
 				"width": 120,

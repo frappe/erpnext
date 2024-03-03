@@ -940,6 +940,38 @@ class TestPurchaseOrder(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, po.save)
 
+	def test_po_billed_amount_against_return_entry(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+
+		# Create a Purchase Order and Fully Bill it
+		po = create_purchase_order()
+		pi = make_pi_from_po(po.name)
+		pi.insert()
+		pi.submit()
+
+		# Debit Note - 50% Qty & enable updating PO billed amount
+		pi_return = make_debit_note(pi.name)
+		pi_return.items[0].qty = -5
+		pi_return.update_billed_amount_in_purchase_order = 1
+		pi_return.submit()
+
+		# Check if the billed amount reduced
+		po.reload()
+		self.assertEqual(po.per_billed, 50)
+
+		pi_return.reload()
+		pi_return.cancel()
+
+		# Debit Note - 50% Qty & disable updating PO billed amount
+		pi_return = make_debit_note(pi.name)
+		pi_return.items[0].qty = -5
+		pi_return.update_billed_amount_in_purchase_order = 0
+		pi_return.submit()
+
+		# Check if the billed amount stayed the same
+		po.reload()
+		self.assertEqual(po.per_billed, 100)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier

@@ -297,11 +297,35 @@ class TestCustomer(FrappeTestCase):
 		if credit_limit > outstanding_amt:
 			set_credit_limit("_Test Customer", "_Test Company", credit_limit)
 
-		# Makes Sales invoice from Sales Order
-		so.save(ignore_permissions=True)
-		si = make_sales_invoice(so.name)
-		si.save(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, make_sales_order)
+	def test_customer_credit_limit_after_submit(self):
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		outstanding_amt = self.get_customer_outstanding_amount()
+		credit_limit = get_credit_limit("_Test Customer", "_Test Company")
+
+		if outstanding_amt <= 0.0:
+			item_qty = int((abs(outstanding_amt) + 200) / 100)
+			make_sales_order(qty=item_qty)
+
+		if credit_limit <= 0.0:
+			set_credit_limit("_Test Customer", "_Test Company", outstanding_amt + 100)
+
+		so = make_sales_order(rate=100, qty=1)
+		# Update qty in submitted Sales Order to trigger Credit Limit validation
+		fields = ["name", "item_code", "delivery_date", "conversion_factor", "qty", "rate", "uom", "idx"]
+		modified_item = frappe._dict()
+		for x in fields:
+			modified_item[x] = so.items[0].get(x)
+		modified_item["docname"] = so.items[0].name
+		modified_item["qty"] = 2
+		self.assertRaises(
+			frappe.ValidationError,
+			update_child_qty_rate,
+			so.doctype,
+			frappe.json.dumps([modified_item]),
+			so.name,
+		)
 
 	def test_customer_credit_limit_on_change(self):
 		outstanding_amt = self.get_customer_outstanding_amount()
