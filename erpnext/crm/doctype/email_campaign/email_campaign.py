@@ -83,7 +83,6 @@ class EmailCampaign(Document):
 			self.status = "In Progress"
 		elif end_date < today_date:
 			self.status = "Completed"
-		frappe.db.set_value("Email Campaign", self.name, "status", self.status)
 
 
 # called through hooks to send campaign mails to leads
@@ -145,3 +144,4 @@ def set_email_campaign_status():
 	for entry in email_campaigns:
 		email_campaign = frappe.get_doc("Email Campaign", entry.name)
 		email_campaign.update_status()
+		email_campaign.save()
