@@ -490,7 +490,9 @@ def reconcile_against_document(
 
 		# For payments with `Advance` in separate account feature enabled, only new ledger entries are posted for each reference.
 		# No need to cancel/delete payment ledger entries
-		if not (voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account):
+		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
+			doc.make_advance_gl_entries(cancel=1)
+		else:
 			_delete_pl_entries(voucher_type, voucher_no)
 
 		for entry in entries:
@@ -501,14 +503,16 @@ def reconcile_against_document(
 
 			# update ref in advance entry
 			if voucher_type == "Journal Entry":
-				referenced_row = update_reference_in_journal_entry(entry, doc, do_not_save=False)
+				referenced_row, update_advance_paid = update_reference_in_journal_entry(
+					entry, doc, do_not_save=False
+				)
 				# advance section in sales/purchase invoice and reconciliation tool,both pass on exchange gain/loss
 				# amount and account in args
 				# referenced_row is used to deduplicate gain/loss journal
 				entry.update({"referenced_row": referenced_row})
 				doc.make_exchange_gain_loss_journal([entry], dimensions_dict)
 			else:
-				referenced_row = update_reference_in_payment_entry(
+				referenced_row, update_advance_paid = update_reference_in_payment_entry(
 					entry,
 					doc,
 					do_not_save=True,
@@ -522,7 +526,7 @@ def reconcile_against_document(
 
 		if voucher_type == "Payment Entry" and doc.book_advance_payments_in_separate_party_account:
 			# both ledgers must be posted to for `Advance` in separate account feature
-			doc.make_advance_gl_entries(cancel=1)
+			# TODO: find a more efficient way post only for the new linked vouchers
 			doc.make_advance_gl_entries()
 		else:
 			gl_map = doc.build_gl_map()
@@ -533,6 +537,10 @@ def reconcile_against_document(
 			update_voucher_outstanding(
 				entry.against_voucher_type, entry.against_voucher, entry.account, entry.party_type, entry.party
 			)
+		# update advance paid in Advance Receivable/Payable doctypes
+		if update_advance_paid:
+			for t, n in update_advance_paid:
+				frappe.get_doc(t, n).set_total_advance_paid()
 
 		frappe.flags.ignore_party_validation = False
 
@@ -617,8 +625,17 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	jv_detail = journal_entry.get("accounts", {"name": d["voucher_detail_no"]})[0]
 
 	# Update Advance Paid in SO/PO since they might be getting unlinked
+<<<<<<< HEAD
 	if jv_detail.get("reference_type") in ("Sales Order", "Purchase Order"):
 		frappe.get_doc(jv_detail.reference_type, jv_detail.reference_name).set_total_advance_paid()
+=======
+	update_advance_paid = []
+	advance_payment_doctypes = frappe.get_hooks(
+		"advance_payment_receivable_doctypes"
+	) + frappe.get_hooks("advance_payment_payable_doctypes")
+	if jv_detail.get("reference_type") in advance_payment_doctypes:
+		update_advance_paid.append((jv_detail.reference_type, jv_detail.reference_name))
+>>>>>>> d9a0494fc3 (fix: advance paid amount and ledger entries against SO/PO)
 
 	if flt(d["unadjusted_amount"]) - flt(d["allocated_amount"]) != 0:
 		# adjust the unreconciled balance
@@ -667,7 +684,7 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 	if not do_not_save:
 		journal_entry.save(ignore_permissions=True)
 
-	return new_row.name
+	return new_row.name, update_advance_paid
 
 
 def update_reference_in_payment_entry(
@@ -686,15 +703,24 @@ def update_reference_in_payment_entry(
 		"account": d.account,
 		"dimensions": d.dimensions,
 	}
+	update_advance_paid = []
 
 	if d.voucher_detail_no:
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
 
 		# Update Advance Paid in SO/PO since they are getting unlinked
+<<<<<<< HEAD
 		if existing_row.get("reference_doctype") in ("Sales Order", "Purchase Order"):
 			frappe.get_doc(
 				existing_row.reference_doctype, existing_row.reference_name
 			).set_total_advance_paid()
+=======
+		advance_payment_doctypes = frappe.get_hooks(
+			"advance_payment_receivable_doctypes"
+		) + frappe.get_hooks("advance_payment_payable_doctypes")
+		if existing_row.get("reference_doctype") in advance_payment_doctypes:
+			update_advance_paid.append((existing_row.reference_doctype, existing_row.reference_name))
+>>>>>>> d9a0494fc3 (fix: advance paid amount and ledger entries against SO/PO)
 
 		if d.allocated_amount <= existing_row.allocated_amount:
 			existing_row.allocated_amount -= d.allocated_amount
@@ -723,7 +749,7 @@ def update_reference_in_payment_entry(
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
-	return row
+	return row, update_advance_paid
 
 
 def cancel_exchange_gain_loss_journal(

@@ -1857,7 +1857,7 @@ class AccountsController(TransactionBase):
 				(ple.against_voucher_type == self.doctype)
 				& (ple.against_voucher_no == self.name)
 				& (ple.party == party)
-				& (ple.docstatus == 1)
+				& (ple.delinked == 0)
 				& (ple.company == self.company)
 			)
 			.run(as_dict=True)
