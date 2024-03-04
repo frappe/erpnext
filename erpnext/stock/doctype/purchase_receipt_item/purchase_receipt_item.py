@@ -99,6 +99,7 @@ class PurchaseReceiptItem(Document):
 		supplier_part_no: DF.Data | None
 		total_weight: DF.Float
 		uom: DF.Link
+		use_serial_batch_fields: DF.Check
 		valuation_rate: DF.Currency
 		warehouse: DF.Link | None
 		weight_per_unit: DF.Float

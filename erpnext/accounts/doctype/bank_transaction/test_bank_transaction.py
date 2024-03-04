@@ -32,8 +32,16 @@ class TestBankTransaction(FrappeTestCase):
 			frappe.db.delete(dt)
 		clear_loan_transactions()
 		make_pos_profile()
-		add_transactions()
-		add_vouchers()
+
+		# generate and use a uniq hash identifier for 'Bank Account' and it's linked GL 'Account' to avoid validation error
+		uniq_identifier = frappe.generate_hash(length=10)
+		gl_account = create_gl_account("_Test Bank " + uniq_identifier)
+		bank_account = create_bank_account(
+			gl_account=gl_account, bank_account_name="Checking Account " + uniq_identifier
+		)
+
+		add_transactions(bank_account=bank_account)
+		add_vouchers(gl_account=gl_account)
 
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
@@ -219,7 +227,9 @@ def clear_loan_transactions():
 	frappe.db.delete("Loan Repayment")
 
 
-def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
+def create_bank_account(
+	bank_name="Citi Bank", gl_account="_Test Bank - _TC", bank_account_name="Checking Account"
+):
 	try:
 		frappe.get_doc(
 			{
@@ -231,21 +241,35 @@ def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
 		pass
 
 	try:
-		frappe.get_doc(
+		bank_account = frappe.get_doc(
 			{
 				"doctype": "Bank Account",
-				"account_name": "Checking Account",
+				"account_name": bank_account_name,
 				"bank": bank_name,
-				"account": account_name,
+				"account": gl_account,
 			}
 		).insert(ignore_if_duplicate=True)
 	except frappe.DuplicateEntryError:
 		pass
 
+	return bank_account.name
 
-def add_transactions():
-	create_bank_account()
 
+def create_gl_account(gl_account_name="_Test Bank - _TC"):
+	gl_account = frappe.get_doc(
+		{
+			"doctype": "Account",
+			"company": "_Test Company",
+			"parent_account": "Current Assets - _TC",
+			"account_type": "Bank",
+			"is_group": 0,
+			"account_name": gl_account_name,
+		}
+	).insert()
+	return gl_account.name
+
+
+def add_transactions(bank_account="_Test Bank - _TC"):
 	doc = frappe.get_doc(
 		{
 			"doctype": "Bank Transaction",
@@ -253,7 +277,7 @@ def add_transactions():
 			"date": "2018-10-23",
 			"deposit": 1200,
 			"currency": "INR",
-			"bank_account": "Checking Account - Citi Bank",
+			"bank_account": bank_account,
 		}
 	).insert()
 	doc.submit()
@@ -265,7 +289,7 @@ def add_transactions():
 			"date": "2018-10-23",
 			"deposit": 1700,
 			"currency": "INR",
-			"bank_account": "Checking Account - Citi Bank",
+			"bank_account": bank_account,
 		}
 	).insert()
 	doc.submit()
@@ -277,7 +301,7 @@ def add_transactions():
 			"date": "2018-10-26",
 			"withdrawal": 690,
 			"currency": "INR",
-			"bank_account": "Checking Account - Citi Bank",
+			"bank_account": bank_account,
 		}
 	).insert()
 	doc.submit()
@@ -289,7 +313,7 @@ def add_transactions():
 			"date": "2018-10-27",
 			"deposit": 3900,
 			"currency": "INR",
-			"bank_account": "Checking Account - Citi Bank",
+			"bank_account": bank_account,
 		}
 	).insert()
 	doc.submit()
@@ -301,13 +325,13 @@ def add_transactions():
 			"date": "2018-10-27",
 			"withdrawal": 109080,
 			"currency": "INR",
-			"bank_account": "Checking Account - Citi Bank",
+			"bank_account": bank_account,
 		}
 	).insert()
 	doc.submit()
 
 
-def add_vouchers():
+def add_vouchers(gl_account="_Test Bank - _TC"):
 	try:
 		frappe.get_doc(
 			{
@@ -323,7 +347,7 @@ def add_vouchers():
 
 	pi = make_purchase_invoice(supplier="Conrad Electronic", qty=1, rate=690)
 
-	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account=gl_account)
 	pe.reference_no = "Conrad Oct 18"
 	pe.reference_date = "2018-10-24"
 	pe.insert()
@@ -342,14 +366,14 @@ def add_vouchers():
 		pass
 
 	pi = make_purchase_invoice(supplier="Mr G", qty=1, rate=1200)
-	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account=gl_account)
 	pe.reference_no = "Herr G Oct 18"
 	pe.reference_date = "2018-10-24"
 	pe.insert()
 	pe.submit()
 
 	pi = make_purchase_invoice(supplier="Mr G", qty=1, rate=1700)
-	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account=gl_account)
 	pe.reference_no = "Herr G Nov 18"
 	pe.reference_date = "2018-11-01"
 	pe.insert()
@@ -380,10 +404,10 @@ def add_vouchers():
 		pass
 
 	pi = make_purchase_invoice(supplier="Poore Simon's", qty=1, rate=3900, is_paid=1, do_not_save=1)
-	pi.cash_bank_account = "_Test Bank - _TC"
+	pi.cash_bank_account = gl_account
 	pi.insert()
 	pi.submit()
-	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
+	pe = get_payment_entry("Purchase Invoice", pi.name, bank_account=gl_account)
 	pe.reference_no = "Poore Simon's Oct 18"
 	pe.reference_date = "2018-10-28"
 	pe.paid_amount = 690
@@ -392,7 +416,7 @@ def add_vouchers():
 	pe.submit()
 
 	si = create_sales_invoice(customer="Poore Simon's", qty=1, rate=3900)
-	pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
+	pe = get_payment_entry("Sales Invoice", si.name, bank_account=gl_account)
 	pe.reference_no = "Poore Simon's Oct 18"
 	pe.reference_date = "2018-10-28"
 	pe.insert()
@@ -415,16 +439,12 @@ def add_vouchers():
 	if not frappe.db.get_value(
 		"Mode of Payment Account", {"company": "_Test Company", "parent": "Cash"}
 	):
-		mode_of_payment.append(
-			"accounts", {"company": "_Test Company", "default_account": "_Test Bank - _TC"}
-		)
+		mode_of_payment.append("accounts", {"company": "_Test Company", "default_account": gl_account})
 		mode_of_payment.save()
 
 	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080, do_not_save=1)
 	si.is_pos = 1
-	si.append(
-		"payments", {"mode_of_payment": "Cash", "account": "_Test Bank - _TC", "amount": 109080}
-	)
+	si.append("payments", {"mode_of_payment": "Cash", "account": gl_account, "amount": 109080})
 	si.insert()
 	si.submit()
 

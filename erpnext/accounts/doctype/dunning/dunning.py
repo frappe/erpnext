@@ -85,7 +85,14 @@ class Dunning(AccountsController):
 				frappe.throw(
 					_(
 						"The currency of invoice {} ({}) is different from the currency of this dunning ({})."
-					).format(row.sales_invoice, invoice_currency, self.currency)
+					).format(
+						frappe.get_desk_link(
+							"Sales Invoice",
+							row.sales_invoice,
+						),
+						invoice_currency,
+						self.currency,
+					)
 				)
 
 	def validate_overdue_payments(self):

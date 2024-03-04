@@ -20,6 +20,7 @@ class BlanketOrderItem(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		party_item_code: DF.Data | None
 		qty: DF.Float
 		rate: DF.Currency
 		terms_and_conditions: DF.Text | None

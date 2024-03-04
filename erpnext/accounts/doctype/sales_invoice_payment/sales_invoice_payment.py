@@ -23,6 +23,7 @@ class SalesInvoicePayment(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		reference_no: DF.Data | None
 		type: DF.ReadOnly | None
 	# end: auto-generated types
 

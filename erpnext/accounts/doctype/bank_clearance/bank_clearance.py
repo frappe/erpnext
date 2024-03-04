@@ -5,7 +5,9 @@
 import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
+from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, fmt_money, getdate
+from pypika import Order
 
 import erpnext
 
@@ -179,39 +181,62 @@ def get_payment_entries_for_bank_clearance(
 
 	pos_sales_invoices, pos_purchase_invoices = [], []
 	if include_pos_transactions:
-		pos_sales_invoices = frappe.db.sql(
-			"""
-				select
-					"Sales Invoice Payment" as payment_document, sip.name as payment_entry, sip.amount as debit,
-					si.posting_date, si.customer as against_account, sip.clearance_date,
-					account.account_currency, 0 as credit
-				from `tabSales Invoice Payment` sip, `tabSales Invoice` si, `tabAccount` account
-				where
-					sip.account=%(account)s and si.docstatus=1 and sip.parent = si.name
-					and account.name = sip.account and si.posting_date >= %(from)s and si.posting_date <= %(to)s
-				order by
-					si.posting_date ASC, si.name DESC
-			""",
-			{"account": account, "from": from_date, "to": to_date},
-			as_dict=1,
-		)
+		si_payment = frappe.qb.DocType("Sales Invoice Payment")
+		si = frappe.qb.DocType("Sales Invoice")
+		acc = frappe.qb.DocType("Account")
 
-		pos_purchase_invoices = frappe.db.sql(
-			"""
-				select
-					"Purchase Invoice" as payment_document, pi.name as payment_entry, pi.paid_amount as credit,
-					pi.posting_date, pi.supplier as against_account, pi.clearance_date,
-					account.account_currency, 0 as debit
-				from `tabPurchase Invoice` pi, `tabAccount` account
-				where
-					pi.cash_bank_account=%(account)s and pi.docstatus=1 and account.name = pi.cash_bank_account
-					and pi.posting_date >= %(from)s and pi.posting_date <= %(to)s
-				order by
-					pi.posting_date ASC, pi.name DESC
-			""",
-			{"account": account, "from": from_date, "to": to_date},
-			as_dict=1,
-		)
+		pos_sales_invoices = (
+			frappe.qb.from_(si_payment)
+			.inner_join(si)
+			.on(si_payment.parent == si.name)
+			.inner_join(acc)
+			.on(si_payment.account == acc.name)
+			.select(
+				ConstantColumn("Sales Invoice").as_("payment_document"),
+				si.name.as_("payment_entry"),
+				si_payment.reference_no.as_("cheque_number"),
+				si_payment.amount.as_("debit"),
+				si.posting_date,
+				si.customer.as_("against_account"),
+				si_payment.clearance_date,
+				acc.account_currency,
+				ConstantColumn(0).as_("credit"),
+			)
+			.where(
+				(si.docstatus == 1)
+				& (si_payment.account == account)
+				& (si.posting_date >= from_date)
+				& (si.posting_date <= to_date)
+			)
+			.orderby(si.posting_date)
+			.orderby(si.name, order=Order.desc)
+		).run(as_dict=True)
+
+		pi = frappe.qb.DocType("Purchase Invoice")
+
+		pos_purchase_invoices = (
+			frappe.qb.from_(pi)
+			.inner_join(acc)
+			.on(pi.cash_bank_account == acc.name)
+			.select(
+				ConstantColumn("Purchase Invoice").as_("payment_document"),
+				pi.name.as_("payment_entry"),
+				pi.paid_amount.as_("credit"),
+				pi.posting_date,
+				pi.supplier.as_("against_account"),
+				pi.clearance_date,
+				acc.account_currency,
+				ConstantColumn(0).as_("debit"),
+			)
+			.where(
+				(pi.docstatus == 1)
+				& (pi.cash_bank_account == account)
+				& (pi.posting_date >= from_date)
+				& (pi.posting_date <= to_date)
+			)
+			.orderby(pi.posting_date)
+			.orderby(pi.name, order=Order.desc)
+		).run(as_dict=True)
 
 	entries = (
 		list(payment_entries)
