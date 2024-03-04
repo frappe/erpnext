@@ -459,6 +459,7 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 				queue="short",
 				method=frappe.sendmail,
 				recipients=recipients,
+				#need to pass email of sender instead doc.sender?
 				sender=doc.sender or frappe.session.user,
 				cc=cc,
 				subject=subject,
