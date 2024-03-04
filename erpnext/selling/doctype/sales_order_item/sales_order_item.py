@@ -43,7 +43,8 @@ class SalesOrderItem(Document):
 		gross_profit: DF.Currency
 		image: DF.Attach | None
 		is_free_item: DF.Check
-		item_code: DF.Link | None
+		is_stock_item: DF.Check
+		item_code: DF.Link
 		item_group: DF.Link | None
 		item_name: DF.Data
 		item_tax_rate: DF.Code | None

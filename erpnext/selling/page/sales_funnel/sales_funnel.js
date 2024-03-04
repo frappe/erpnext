@@ -126,9 +126,9 @@ erpnext.SalesFunnel = class SalesFunnel {
 		if (me.options.chart == 'sales_funnel'){
 			me.render_funnel();
 		} else if (me.options.chart == 'opp_by_lead_source'){
-			me.render_chart("Sales Opportunities by Source");
+			me.render_chart(__("Sales Opportunities by Source"));
 		} else if (me.options.chart == 'sales_pipeline'){
-			me.render_chart("Sales Pipeline by Stage");
+			me.render_chart(__("Sales Pipeline by Stage"));
 		}
 	}
 

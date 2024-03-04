@@ -3,6 +3,7 @@
 
 import frappe
 from frappe.model.document import Document
+from frappe.utils import now_datetime
 
 
 class AssetActivity(Document):
@@ -30,5 +31,6 @@ def add_asset_activity(asset, subject):
 			"asset": asset,
 			"subject": subject,
 			"user": frappe.session.user,
+			"date": now_datetime(),
 		}
 	).insert(ignore_permissions=True, ignore_links=True)

@@ -4,6 +4,8 @@
 import frappe
 from frappe import _
 
+from erpnext.accounts.doctype.payment_request.payment_request import get_amount
+
 
 def get_context(context):
 	context.no_cache = 1
@@ -48,7 +50,7 @@ def get_context(context):
 			)
 			context.available_loyalty_points = int(loyalty_program_details.get("loyalty_points"))
 
-	context.show_pay_button = frappe.db.get_single_value("Buying Settings", "show_pay_button")
+	context.show_pay_button, context.pay_amount = get_payment_details(context.doc)
 	context.show_make_pi_button = False
 	if context.doc.get("supplier"):
 		# show Make Purchase Invoice button based on permission
@@ -61,3 +63,14 @@ def get_attachments(dt, dn):
 		fields=["name", "file_name", "file_url", "is_private"],
 		filters={"attached_to_name": dn, "attached_to_doctype": dt, "is_private": 0},
 	)
+
+
+def get_payment_details(doc):
+	show_pay_button, amount = (
+		"payments" in frappe.get_installed_apps()
+		and frappe.db.get_single_value("Buying Settings", "show_pay_button")
+	), 0
+	if not show_pay_button:
+		return show_pay_button, amount
+	amount = get_amount(doc)
+	return bool(amount), amount

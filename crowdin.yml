@@ -1,0 +1,3 @@
+files:
+  - source: /erpnext/locale/main.pot
+    translation: /erpnext/locale/%two_letters_code%.po

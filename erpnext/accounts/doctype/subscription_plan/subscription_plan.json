@@ -41,7 +41,8 @@
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
-   "options": "Currency"
+   "options": "Currency",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_3",
@@ -148,10 +149,11 @@
   }
  ],
  "links": [],
- "modified": "2021-12-10 15:24:15.794477",
+ "modified": "2024-01-14 17:59:34.687977",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -193,5 +195,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

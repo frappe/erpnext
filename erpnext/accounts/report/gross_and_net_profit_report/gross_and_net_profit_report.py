@@ -134,7 +134,7 @@ def get_revenue(data, period_list, include_in_gross=1):
 
 def remove_parent_with_no_child(data):
 	data_to_be_removed = False
-	for parent in data:
+	for parent in list(data):
 		if "is_group" in parent and parent.get("is_group") == 1:
 			have_child = False
 			for child in data:

@@ -24,7 +24,7 @@ class SubscriptionPlan(Document):
 		billing_interval_count: DF.Int
 		cost: DF.Currency
 		cost_center: DF.Link | None
-		currency: DF.Link | None
+		currency: DF.Link
 		item: DF.Link
 		payment_gateway: DF.Link | None
 		plan_name: DF.Data

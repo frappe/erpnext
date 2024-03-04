@@ -151,9 +151,7 @@ def get_serial_nos(serial_no):
 	if isinstance(serial_no, list):
 		return serial_no
 
-	return [
-		s.strip() for s in cstr(serial_no).strip().upper().replace(",", "\n").split("\n") if s.strip()
-	]
+	return [s.strip() for s in cstr(serial_no).strip().replace(",", "\n").split("\n") if s.strip()]
 
 
 def clean_serial_no_string(serial_no: str) -> str:

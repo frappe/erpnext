@@ -56,7 +56,9 @@
                     "Constru\u00e7\u00f5es em Andamento de Im\u00f3veis Destinados \u00e0 Venda": {}, 
                     "Estoques Destinados \u00e0 Doa\u00e7\u00e3o": {}, 
                     "Im\u00f3veis Destinados \u00e0 Venda": {}, 
-                    "Insumos (materiais diretos)": {}, 
+                    "Insumos (materiais diretos)": {
+                        "account_type": "Stock"
+                    }, 
                     "Insumos Agropecu\u00e1rios": {}, 
                     "Mercadorias para Revenda": {}, 
                     "Outras 11": {}, 
@@ -146,6 +148,65 @@
             "root_type": "Asset"
         }, 
         "CUSTOS DE PRODU\u00c7\u00c3O": {
+            "CUSTO DOS PRODUTOS E SERVI\u00c7OS VENDIDOS": {
+                "CUSTO DOS PRODUTOS VENDIDOS": {
+                    "CUSTO DOS PRODUTOS VENDIDOS PARA AS DEMAIS ATIVIDADES": {
+                        "Custos dos Produtos Vendidos em Geral": {
+                            "account_type": "Cost of Goods Sold"
+                        }, 
+                        "Outros Custos 4": {}, 
+                        "account_type": "Cost of Goods Sold"
+                    }, 
+                    "CUSTO DOS PRODUTOS VENDIDOS PARA ASSIST\u00caNCIA SOCIAL": {
+                        "Custos dos Produtos para Assist\u00eancia Social - Gratuidades": {}, 
+                        "Custos dos Produtos para Assist\u00eancia Social - Vendidos": {}, 
+                        "Outras": {}
+                    }, 
+                    "CUSTO DOS PRODUTOS VENDIDOS PARA EDUCA\u00c7\u00c3O": {
+                        "Custos dos Produtos para Educa\u00e7\u00e3o - Gratuidades": {}, 
+                        "Custos dos Produtos para Educa\u00e7\u00e3o - Vendidos": {}, 
+                        "Outros Custos 6": {}
+                    }, 
+                    "CUSTO DOS PRODUTOS VENDIDOS PARA SA\u00daDE": {
+                        "Custos dos Produtos para Sa\u00fade - Gratuidades": {}, 
+                        "Custos dos Produtos para Sa\u00fade \u2013 Vendidos": {}, 
+                        "Outros Custos 5": {}
+                    }, 
+                    "account_type": "Cost of Goods Sold"
+                }, 
+                "CUSTO DOS SERVI\u00c7OS PRESTADOS": {
+                    "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA AS DEMAIS ATIVIDADES": {
+                        "Custo dos Servi\u00e7os Prestados em Geral": {}, 
+                        "Outros Custos": {}
+                    }, 
+                    "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA ASSIST\u00caNCIA SOCIAL": {
+                        "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es 1": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas 1": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Gratuidade 1": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Pacientes Particulares": {}, 
+                        "Outros Custos 2": {}
+                    }, 
+                    "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA EDUCA\u00c7\u00c3O": {
+                        "Custo dos Servi\u00e7os Prestados a Alunos N\u00e3o Bolsistas": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias (Exceto PROUNI)": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Gratuidade": {}, 
+                        "Custo dos Servi\u00e7os Prestados ao PROUNI": {}, 
+                        "Outros Custos 1": {}
+                    }, 
+                    "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA SA\u00daDE": {
+                        "Custo dos Servi\u00e7os Prestados a Conv\u00eanios SUS": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias 1": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es 2": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas 2": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Gratuidade 2": {}, 
+                        "Custo dos Servi\u00e7os Prestados a Pacientes Particulares 1": {}, 
+                        "Outros Custos 3": {}
+                    }
+                }
+            }, 
             "CUSTO DOS BENS E SERVI\u00c7OS PRODUZIDOS": {
                 "CUSTO DOS PRODUTOS DE FABRICA\u00c7\u00c3O PR\u00d3PRIA PRODUZIDOS": {
                     "Alimenta\u00e7\u00e3o do Trabalhador": {}, 
@@ -621,7 +682,9 @@
                             "Receita das Unidades Imobili\u00e1rias Vendidas": {}, 
                             "Receita de Exporta\u00e7\u00e3o Direta de Mercadorias e Produtos": {}, 
                             "Receita de Exporta\u00e7\u00e3o de Servi\u00e7os": {}, 
-                            "Receita de Loca\u00e7\u00e3o de Bens M\u00f3veis e Im\u00f3veis": {}, 
+                            "Receita de Loca\u00e7\u00e3o de Bens M\u00f3veis e Im\u00f3veis": {
+                                "account_type": "Income Account"
+                            }, 
                             "Receita de Vendas de Mercadorias e Produtos a Comercial Exportadora com Fim Espec\u00edfico de Exporta\u00e7\u00e3o": {}
                         }
                     }
@@ -645,65 +708,6 @@
                 }
             }, 
             "RESULTADO OPERACIONAL": {
-                "CUSTO DOS PRODUTOS E SERVI\u00c7OS VENDIDOS": {
-                    "CUSTO DOS PRODUTOS VENDIDOS": {
-                        "CUSTO DOS PRODUTOS VENDIDOS PARA AS DEMAIS ATIVIDADES": {
-                            "Custos dos Produtos Vendidos em Geral": {
-                                "account_type": "Cost of Goods Sold"
-                            }, 
-                            "Outros Custos 4": {}, 
-                            "account_type": "Cost of Goods Sold"
-                        }, 
-                        "CUSTO DOS PRODUTOS VENDIDOS PARA ASSIST\u00caNCIA SOCIAL": {
-                            "Custos dos Produtos para Assist\u00eancia Social - Gratuidades": {}, 
-                            "Custos dos Produtos para Assist\u00eancia Social - Vendidos": {}, 
-                            "Outras": {}
-                        }, 
-                        "CUSTO DOS PRODUTOS VENDIDOS PARA EDUCA\u00c7\u00c3O": {
-                            "Custos dos Produtos para Educa\u00e7\u00e3o - Gratuidades": {}, 
-                            "Custos dos Produtos para Educa\u00e7\u00e3o - Vendidos": {}, 
-                            "Outros Custos 6": {}
-                        }, 
-                        "CUSTO DOS PRODUTOS VENDIDOS PARA SA\u00daDE": {
-                            "Custos dos Produtos para Sa\u00fade - Gratuidades": {}, 
-                            "Custos dos Produtos para Sa\u00fade \u2013 Vendidos": {}, 
-                            "Outros Custos 5": {}
-                        }, 
-                        "account_type": "Cost of Goods Sold"
-                    }, 
-                    "CUSTO DOS SERVI\u00c7OS PRESTADOS": {
-                        "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA AS DEMAIS ATIVIDADES": {
-                            "Custo dos Servi\u00e7os Prestados em Geral": {}, 
-                            "Outros Custos": {}
-                        }, 
-                        "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA ASSIST\u00caNCIA SOCIAL": {
-                            "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es 1": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas 1": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Gratuidade 1": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Pacientes Particulares": {}, 
-                            "Outros Custos 2": {}
-                        }, 
-                        "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA EDUCA\u00c7\u00c3O": {
-                            "Custo dos Servi\u00e7os Prestados a Alunos N\u00e3o Bolsistas": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias (Exceto PROUNI)": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Gratuidade": {}, 
-                            "Custo dos Servi\u00e7os Prestados ao PROUNI": {}, 
-                            "Outros Custos 1": {}
-                        }, 
-                        "CUSTO DOS SERVI\u00c7OS PRESTADOS PARA SA\u00daDE": {
-                            "Custo dos Servi\u00e7os Prestados a Conv\u00eanios SUS": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Conv\u00eanios/Contratos/Parcerias 1": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es 2": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Doa\u00e7\u00f5es/Subven\u00e7\u00f5es Vinculadas 2": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Gratuidade 2": {}, 
-                            "Custo dos Servi\u00e7os Prestados a Pacientes Particulares 1": {}, 
-                            "Outros Custos 3": {}
-                        }
-                    }
-                }, 
                 "DESPESAS OPERACIONAIS": {
                     "DESPESAS OPERACIONAIS 1": {
                         "DESPESAS OPERACIONAIS 2": {

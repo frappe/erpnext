@@ -31,6 +31,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    env:
+      NODE_ENV: "production"
+      WITH_COVERAGE: ${{ github.event_name != 'pull_request' }}
 
     strategy:
       fail-fast: false
@@ -117,11 +120,11 @@ jobs:
           FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
 
       - name: Run Tests
-        run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --with-coverage --total-builds 4 --build-number ${{ matrix.container }}'
+        run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --total-builds 4 --build-number ${{ matrix.container }}'
         env:
           TYPE: server
-          CI_BUILD_ID: ${{ github.run_id }}
-          ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
+          CAPTURE_COVERAGE: ${{ github.event_name != 'pull_request' }}
+
 
       - name: Show bench output
         if: ${{ always() }}
@@ -129,6 +132,7 @@ jobs:
 
       - name: Upload coverage data
         uses: actions/upload-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           name: coverage-${{ matrix.container }}
           path: /home/runner/frappe-bench/sites/coverage.xml
@@ -137,6 +141,7 @@ jobs:
     name: Coverage Wrap Up
     needs: test
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'pull_request' }}
     steps:
       - name: Clone
         uses: actions/checkout@v2
@@ -148,5 +153,6 @@ jobs:
         uses: codecov/codecov-action@v2
         with:
           name: MariaDB
+          token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
           verbose: true

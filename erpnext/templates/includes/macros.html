@@ -33,38 +33,6 @@
 	</div>
 {% endmacro %}
 
-{% macro render_homepage_section(section) %}
-
-{% if section.section_based_on == 'Custom HTML' and section.section_html %}
-	{{ section.section_html }}
-{% elif section.section_based_on == 'Cards' %}
-<section class="container my-5">
-	<h3>{{ section.name }}</h3>
-
-	<div class="row">
-		{% for card in section.section_cards %}
-		<div class="col-md-{{ section.column_value }} mb-4">
-			<div class="card h-100 justify-content-between">
-				{% if card.image %}
-				<img class="card-img-top h-75" src="{{ card.image }}" loading="lazy" alt="{{ card.title }}"></img>
-				{% endif %}
-				<div class="card-body">
-					<h5 class="card-title">{{ card.title }}</h5>
-					<p class="card-subtitle mb-2 text-muted">{{ card.subtitle or '' }}</p>
-					<p class="card-text">{{ card.content or '' | truncate(140, True) }}</p>
-				</div>
-				<div class="card-body flex-grow-0">
-					<a href="{{ card.route }}" class="card-link">{{ _('More details') }}</a>
-				</div>
-			</div>
-		</div>
-		{% endfor %}
-	</div>
-</section>
-{% endif %}
-
-{% endmacro %}
-
 {%- macro item_card(item, is_featured=False, is_full_width=False, align="Left") -%}
 {%- set align_items_class = resolve_class({
 	'align-items-end': align == 'Right',

@@ -94,6 +94,9 @@ frappe.ui.form.on("Sales Order", {
 						frm.set_value("reserve_stock", 0);
 						frm.set_df_property("reserve_stock", "read_only", 1);
 						frm.set_df_property("reserve_stock", "hidden", 1);
+						frm.fields_dict.items.grid.update_docfield_property('reserve_stock', 'hidden', 1);
+						frm.fields_dict.items.grid.update_docfield_property('reserve_stock', 'default', 0);
+						frm.fields_dict.items.grid.update_docfield_property('reserve_stock', 'read_only', 1);
 					}
 				})
 			}
@@ -139,15 +142,6 @@ frappe.ui.form.on("Sales Order", {
 					["Warehouse", "company", "in", ["", cstr(frm.doc.company)]],
 				]
 			};
-		});
-
-		frm.set_query('project', function(doc, cdt, cdn) {
-			return {
-				query: "erpnext.controllers.queries.get_project_name",
-				filters: {
-					'customer': doc.customer
-				}
-			}
 		});
 
 		frm.set_query('warehouse', 'items', function(doc, cdt, cdn) {
@@ -861,6 +855,8 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 		var delivery_dates = this.frm.doc.items.map(i => i.delivery_date);
 		delivery_dates = [ ...new Set(delivery_dates) ];
 
+		var today = new Date();
+
 		var item_grid = this.frm.fields_dict["items"].grid;
 		if(!item_grid.get_selected().length && delivery_dates.length > 1) {
 			var dialog = new frappe.ui.Dialog({
@@ -879,7 +875,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						<div class="list-item">
 							<div class="list-item__content list-item__content--flex-2">
 								<label>
-								<input type="checkbox" data-date="${date}" checked="checked"/>
+								<input
+									type="checkbox"
+									data-date="${date}"
+									${frappe.datetime.get_day_diff(new Date(date), today) > 0 ? "" : 'checked="checked"'}
+								/>
 								${frappe.datetime.str_to_user(date)}
 								</label>
 							</div>

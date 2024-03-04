@@ -41,4 +41,4 @@ def build_tree():
 			}
 		).insert(ignore_permissions=True)
 
-	rebuild_tree("Supplier Group", "parent_supplier_group")
+	rebuild_tree("Supplier Group")

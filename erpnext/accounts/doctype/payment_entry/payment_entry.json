@@ -87,12 +87,14 @@
   "status",
   "custom_remarks",
   "remarks",
+  "base_in_words",
   "column_break_16",
   "letter_head",
   "print_heading",
   "bank",
   "bank_account_no",
   "payment_order",
+  "in_words",
   "subscription_section",
   "auto_repeat",
   "amended_from",
@@ -223,6 +225,7 @@
    "fieldname": "party_balance",
    "fieldtype": "Currency",
    "label": "Party Balance",
+   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -746,6 +749,20 @@
    "hidden": 1,
    "label": "Book Advance Payments in Separate Party Account",
    "read_only": 1
+  },
+  {
+   "fieldname": "base_in_words",
+   "fieldtype": "Small Text",
+   "label": "In Words (Company Currency)",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "in_words",
+   "fieldtype": "Small Text",
+   "label": "In Words",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -759,7 +776,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2023-11-23 12:07:20.887885",
+ "modified": "2024-01-08 13:17:15.744754",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

@@ -176,8 +176,10 @@ class BOM(WebsiteGenerator):
 
 	def autoname(self):
 		# ignore amended documents while calculating current index
+
+		search_key = f"{self.doctype}-{self.item}%"
 		existing_boms = frappe.get_all(
-			"BOM", filters={"item": self.item, "amended_from": ["is", "not set"]}, pluck="name"
+			"BOM", filters={"name": ("like", search_key), "amended_from": ["is", "not set"]}, pluck="name"
 		)
 
 		if existing_boms:
@@ -1069,8 +1071,7 @@ def get_valuation_rate(data):
 			frappe.qb.from_(sle)
 			.select(sle.valuation_rate)
 			.where((sle.item_code == item_code) & (sle.valuation_rate > 0) & (sle.is_cancelled == 0))
-			.orderby(sle.posting_date, order=frappe.qb.desc)
-			.orderby(sle.posting_time, order=frappe.qb.desc)
+			.orderby(sle.posting_datetime, order=frappe.qb.desc)
 			.orderby(sle.creation, order=frappe.qb.desc)
 			.limit(1)
 		).run(as_dict=True)

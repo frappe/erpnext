@@ -56,7 +56,11 @@ def make_variant_based_on_manufacturer(template, manufacturer, manufacturer_part
 
 	copy_attributes_to_variant(template, variant)
 
-	variant.item_code = append_number_if_name_exists("Item", template.name)
+	variant_name = f"{template.name} - {manufacturer}"
+	if manufacturer_part_no:
+		variant_name += f" - {manufacturer_part_no}"
+
+	variant.item_code = append_number_if_name_exists("Item", variant_name)
 	variant.flags.ignore_mandatory = True
 	variant.save()
 

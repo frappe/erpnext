@@ -3,7 +3,7 @@
 	if((df.fieldname !== "description" && df.fieldname !== "item_name") && val) { %}
 		<div class="row">
 			<div class="col-xs-4 ellipsis">
-				<strong title="{%= __(df.label) %}">{%= __(df.label) %}:</strong>
+				<strong title="{%= __(df.label, null, df.parent) %}">{%= __(df.label, null, df.parent) %}:</strong>
 			</div>
 			<div class="col-xs-8">
 				{%= doc.get_formatted(df.fieldname) %}

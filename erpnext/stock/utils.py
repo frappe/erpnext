@@ -8,9 +8,12 @@ from typing import Dict, Optional
 import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
-from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
+from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 
 import erpnext
+from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	get_available_serial_nos,
+)
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
@@ -125,7 +128,21 @@ def get_stock_balance(
 
 	if with_valuation_rate:
 		if with_serial_no:
-			serial_nos = get_serial_nos_data_after_transactions(args)
+			serial_no_details = get_available_serial_nos(
+				frappe._dict(
+					{
+						"item_code": item_code,
+						"warehouse": warehouse,
+						"posting_date": posting_date,
+						"posting_time": posting_time,
+						"ignore_warehouse": 1,
+					}
+				)
+			)
+
+			serial_nos = ""
+			if serial_no_details:
+				serial_nos = "\n".join(d.serial_no for d in serial_no_details)
 
 			return (
 				(last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
@@ -138,38 +155,6 @@ def get_stock_balance(
 			)
 	else:
 		return last_entry.qty_after_transaction if last_entry else 0.0
-
-
-def get_serial_nos_data_after_transactions(args):
-
-	serial_nos = set()
-	args = frappe._dict(args)
-	sle = frappe.qb.DocType("Stock Ledger Entry")
-
-	stock_ledger_entries = (
-		frappe.qb.from_(sle)
-		.select("serial_no", "actual_qty")
-		.where(
-			(sle.item_code == args.item_code)
-			& (sle.warehouse == args.warehouse)
-			& (
-				CombineDatetime(sle.posting_date, sle.posting_time)
-				< CombineDatetime(args.posting_date, args.posting_time)
-			)
-			& (sle.is_cancelled == 0)
-		)
-		.orderby(sle.posting_date, sle.posting_time, sle.creation)
-		.run(as_dict=1)
-	)
-
-	for stock_ledger_entry in stock_ledger_entries:
-		changed_serial_no = get_serial_nos_data(stock_ledger_entry.serial_no)
-		if stock_ledger_entry.actual_qty > 0:
-			serial_nos.update(changed_serial_no)
-		else:
-			serial_nos.difference_update(changed_serial_no)
-
-	return "\n".join(serial_nos)
 
 
 def get_serial_nos_data(serial_nos):
@@ -277,7 +262,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			item_code=args.get("item_code"),
 		)
 
-		in_rate = sn_obj.get_incoming_rate()
+		return sn_obj.get_incoming_rate()
 
 	elif item_details and item_details.has_batch_no and args.get("serial_and_batch_bundle"):
 		args.actual_qty = args.qty
@@ -287,8 +272,33 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			item_code=args.get("item_code"),
 		)
 
-		in_rate = batch_obj.get_incoming_rate()
+		return batch_obj.get_incoming_rate()
 
+	elif (args.get("serial_no") or "").strip() and not args.get("serial_and_batch_bundle"):
+		args.actual_qty = args.qty
+		args.serial_nos = get_serial_nos_data(args.get("serial_no"))
+
+		sn_obj = SerialNoValuation(
+			sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code")
+		)
+
+		return sn_obj.get_incoming_rate()
+	elif (
+		args.get("batch_no")
+		and frappe.db.get_value("Batch", args.get("batch_no"), "use_batchwise_valuation", cache=True)
+		and not args.get("serial_and_batch_bundle")
+	):
+
+		args.actual_qty = args.qty
+		args.batch_nos = frappe._dict({args.batch_no: args})
+
+		batch_obj = BatchNoValuation(
+			sle=args,
+			warehouse=args.get("warehouse"),
+			item_code=args.get("item_code"),
+		)
+
+		return batch_obj.get_incoming_rate()
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
@@ -319,6 +329,38 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 	return flt(in_rate)
 
 
+def get_batch_incoming_rate(
+	item_code, warehouse, batch_no, posting_date, posting_time, creation=None
+):
+
+	sle = frappe.qb.DocType("Stock Ledger Entry")
+
+	timestamp_condition = CombineDatetime(sle.posting_date, sle.posting_time) < CombineDatetime(
+		posting_date, posting_time
+	)
+	if creation:
+		timestamp_condition |= (
+			CombineDatetime(sle.posting_date, sle.posting_time)
+			== CombineDatetime(posting_date, posting_time)
+		) & (sle.creation < creation)
+
+	batch_details = (
+		frappe.qb.from_(sle)
+		.select(Sum(sle.stock_value_difference).as_("batch_value"), Sum(sle.actual_qty).as_("batch_qty"))
+		.where(
+			(sle.item_code == item_code)
+			& (sle.warehouse == warehouse)
+			& (sle.batch_no == batch_no)
+			& (sle.serial_and_batch_bundle.isnull())
+			& (sle.is_cancelled == 0)
+		)
+		.where(timestamp_condition)
+	).run(as_dict=True)
+
+	if batch_details and batch_details[0].batch_qty:
+		return batch_details[0].batch_value / batch_details[0].batch_qty
+
+
 def get_avg_purchase_rate(serial_nos):
 	"""get average value of serial numbers"""
 
@@ -338,7 +380,7 @@ def get_valuation_method(item_code):
 	val_method = frappe.db.get_value("Item", item_code, "valuation_method", cache=True)
 	if not val_method:
 		val_method = (
-			frappe.db.get_value("Stock Settings", None, "valuation_method", cache=True) or "FIFO"
+			frappe.db.get_single_value("Stock Settings", "valuation_method", cache=True) or "FIFO"
 		)
 	return val_method
 
@@ -591,6 +633,13 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 		as_dict=True,
 	)
 	if batch_no_data:
+		if frappe.get_cached_value("Item", batch_no_data.item_code, "has_serial_no"):
+			frappe.throw(
+				_(
+					"Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
+				).format(search_value, batch_no_data.item_code)
+			)
+
 		_update_item_info(batch_no_data)
 		set_cache(batch_no_data)
 		return batch_no_data
@@ -608,3 +657,18 @@ def _update_item_info(scan_result: Dict[str, Optional[str]]) -> Dict[str, Option
 		):
 			scan_result.update(item_info)
 	return scan_result
+
+
+def get_combine_datetime(posting_date, posting_time):
+	import datetime
+
+	if isinstance(posting_date, str):
+		posting_date = getdate(posting_date)
+
+	if isinstance(posting_time, str):
+		posting_time = get_time(posting_time)
+
+	if isinstance(posting_time, datetime.timedelta):
+		posting_time = (datetime.datetime.min + posting_time).time()
+
+	return datetime.datetime.combine(posting_date, posting_time).replace(microsecond=0)

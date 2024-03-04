@@ -13,6 +13,7 @@ from pypika import functions as fn
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
@@ -302,7 +303,7 @@ class PurchaseReceipt(BuyingController):
 			)
 
 	def po_required(self):
-		if frappe.db.get_value("Buying Settings", None, "po_required") == "Yes":
+		if frappe.db.get_single_value("Buying Settings", "po_required") == "Yes":
 			for d in self.get("items"):
 				if not d.purchase_order:
 					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
@@ -368,6 +369,7 @@ class PurchaseReceipt(BuyingController):
 		else:
 			self.db_set("status", "Completed")
 
+		self.make_bundle_using_old_serial_batch_fields()
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
@@ -518,7 +520,6 @@ class PurchaseReceipt(BuyingController):
 							debit=0.0,
 							credit=discrepancy_caused_by_exchange_rate_difference,
 							remarks=remarks,
-							against_type="Supplier",
 							against_account=self.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
@@ -532,7 +533,6 @@ class PurchaseReceipt(BuyingController):
 							debit=discrepancy_caused_by_exchange_rate_difference,
 							credit=0.0,
 							remarks=remarks,
-							against_type="Supplier",
 							against_account=self.supplier,
 							debit_in_account_currency=-1 * discrepancy_caused_by_exchange_rate_difference,
 							account_currency=account_currency,
@@ -674,20 +674,19 @@ class PurchaseReceipt(BuyingController):
 				landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 
 				if d.is_fixed_asset:
-					account_type = (
-						"capital_work_in_progress_account"
-						if is_cwip_accounting_enabled(d.asset_category)
-						else "fixed_asset_account"
-					)
-
-					stock_asset_account_name = get_asset_account(
-						account_type, asset_category=d.asset_category, company=self.company
-					)
+					if is_cwip_accounting_enabled(d.asset_category):
+						stock_asset_account_name = get_asset_account(
+							"capital_work_in_progress_account",
+							asset_category=d.asset_category,
+							company=self.company,
+						)
+					else:
+						stock_asset_account_name = get_asset_category_account(
+							"fixed_asset_account", asset_category=d.asset_category, company=self.company
+						)
 
 					stock_value_diff = (
-						flt(d.base_net_amount)
-						+ flt(d.item_tax_amount / self.conversion_rate)
-						+ flt(d.landed_cost_voucher_amount)
+						flt(d.base_net_amount) + flt(d.item_tax_amount) + flt(d.landed_cost_voucher_amount)
 					)
 				elif warehouse_account.get(d.warehouse):
 					stock_value_diff = get_stock_value_difference(self.name, d.name, d.warehouse)
@@ -719,7 +718,7 @@ class PurchaseReceipt(BuyingController):
 			):
 				warehouse_with_no_account.append(d.warehouse or d.rejected_warehouse)
 
-			if d.is_fixed_asset:
+			if d.is_fixed_asset and d.landed_cost_voucher_amount:
 				self.update_assets(d, d.valuation_rate)
 
 		if warehouse_with_no_account:
@@ -730,16 +729,19 @@ class PurchaseReceipt(BuyingController):
 			)
 
 	def add_provisional_gl_entry(
-		self, item, gl_entries, posting_date, provisional_account, reverse=0
+		self, item, gl_entries, posting_date, provisional_account, reverse=0, item_amount=None
 	):
 		credit_currency = get_account_currency(provisional_account)
 		expense_account = item.expense_account
 		debit_currency = get_account_currency(item.expense_account)
 		remarks = self.get("remarks") or _("Accounting Entry for Service")
 		multiplication_factor = 1
+		amount = item.base_amount
 
 		if reverse:
 			multiplication_factor = -1
+			# Post reverse entry for previously posted amount
+			amount = item_amount
 			expense_account = frappe.db.get_value(
 				"Purchase Receipt Item", {"name": item.get("pr_detail")}, ["expense_account"]
 			)
@@ -749,7 +751,7 @@ class PurchaseReceipt(BuyingController):
 			account=provisional_account,
 			cost_center=item.cost_center,
 			debit=0.0,
-			credit=multiplication_factor * item.base_amount,
+			credit=multiplication_factor * amount,
 			remarks=remarks,
 			against_account=expense_account,
 			account_currency=credit_currency,
@@ -763,7 +765,7 @@ class PurchaseReceipt(BuyingController):
 			gl_entries=gl_entries,
 			account=expense_account,
 			cost_center=item.cost_center,
-			debit=multiplication_factor * item.base_amount,
+			debit=multiplication_factor * amount,
 			credit=0.0,
 			remarks=remarks,
 			against_account=provisional_account,
@@ -798,7 +800,7 @@ class PurchaseReceipt(BuyingController):
 			# Backward compatibility:
 			# and charges added via Landed Cost Voucher,
 			# post valuation related charges on "Stock Received But Not Billed"
-			against_accounts = [d.account for d in gl_entries if flt(d.debit) > 0]
+			against_accounts = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			stock_rbnb = (
@@ -830,17 +832,16 @@ class PurchaseReceipt(BuyingController):
 						)
 						amount_including_divisional_loss -= applicable_amount
 
-					for against in against_accounts:
-						self.add_gl_entry(
-							gl_entries=gl_entries,
-							account=account,
-							cost_center=tax.cost_center,
-							debit=0.0,
-							credit=flt(applicable_amount) / len(against_accounts),
-							remarks=self.remarks or _("Accounting Entry for Stock"),
-							against_account=against,
-							item=tax,
-						)
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=account,
+						cost_center=tax.cost_center,
+						debit=0.0,
+						credit=applicable_amount,
+						remarks=self.remarks or _("Accounting Entry for Stock"),
+						against_account=against_accounts,
+						item=tax,
+					)
 
 					i += 1
 
@@ -852,11 +853,14 @@ class PurchaseReceipt(BuyingController):
 		)
 
 		for asset in assets:
+			purchase_amount = flt(valuation_rate) * asset.asset_quantity
 			frappe.db.set_value(
-				"Asset", asset.name, "gross_purchase_amount", flt(valuation_rate) * asset.asset_quantity
-			)
-			frappe.db.set_value(
-				"Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate) * asset.asset_quantity
+				"Asset",
+				asset.name,
+				{
+					"gross_purchase_amount": purchase_amount,
+					"purchase_receipt_amount": purchase_amount,
+				},
 			)
 
 	def update_status(self, status):
@@ -949,32 +953,32 @@ def update_billed_amount_based_on_po(po_details, update_modified=True, pr_doc=No
 		billed_against_po = flt(po_billed_amt_details.get(pr_item.purchase_order_item))
 
 		# Get billed amount directly against Purchase Receipt
-		billed_amt_agianst_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
+		billed_amt_against_pr = flt(pr_items_billed_amount.get(pr_item.name, 0))
 
 		# Distribute billed amount directly against PO between PRs based on FIFO
-		if billed_against_po and billed_amt_agianst_pr < pr_item.amount:
-			pending_to_bill = flt(pr_item.amount) - billed_amt_agianst_pr
+		if billed_against_po and billed_amt_against_pr < pr_item.amount:
+			pending_to_bill = flt(pr_item.amount) - billed_amt_against_pr
 			if pending_to_bill <= billed_against_po:
-				billed_amt_agianst_pr += pending_to_bill
+				billed_amt_against_pr += pending_to_bill
 				billed_against_po -= pending_to_bill
 			else:
-				billed_amt_agianst_pr += billed_against_po
+				billed_amt_against_pr += billed_against_po
 				billed_against_po = 0
 
 		po_billed_amt_details[pr_item.purchase_order_item] = billed_against_po
 
-		if pr_item.billed_amt != billed_amt_agianst_pr:
+		if pr_item.billed_amt != billed_amt_against_pr:
 			# update existing doc if possible
 			if pr_doc and pr_item.parent == pr_doc.name:
 				pr_item = next((item for item in pr_doc.items if item.name == pr_item.name), None)
-				pr_item.db_set("billed_amt", billed_amt_agianst_pr, update_modified=update_modified)
+				pr_item.db_set("billed_amt", billed_amt_against_pr, update_modified=update_modified)
 
 			else:
 				frappe.db.set_value(
 					"Purchase Receipt Item",
 					pr_item.name,
 					"billed_amt",
-					billed_amt_agianst_pr,
+					billed_amt_against_pr,
 					update_modified=update_modified,
 				)
 
@@ -1228,6 +1232,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 				"field_map": {
 					"name": "pr_detail",
 					"parent": "purchase_receipt",
+					"qty": "received_qty",
 					"purchase_order_item": "po_detail",
 					"purchase_order": "purchase_order",
 					"is_fixed_asset": "is_fixed_asset",
@@ -1357,16 +1362,16 @@ def get_item_account_wise_additional_cost(purchase_document):
 	for lcv in landed_cost_vouchers:
 		landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", lcv.parent)
 
+		based_on_field = None
 		# Use amount field for total item cost for manually cost distributed LCVs
-		if landed_cost_voucher_doc.distribute_charges_based_on == "Distribute Manually":
-			based_on_field = "amount"
-		else:
+		if landed_cost_voucher_doc.distribute_charges_based_on != "Distribute Manually":
 			based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
 
 		total_item_cost = 0
 
-		for item in landed_cost_voucher_doc.items:
-			total_item_cost += item.get(based_on_field)
+		if based_on_field:
+			for item in landed_cost_voucher_doc.items:
+				total_item_cost += item.get(based_on_field)
 
 		for item in landed_cost_voucher_doc.items:
 			if item.receipt_document == purchase_document:

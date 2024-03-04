@@ -13,16 +13,9 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
-	get_dimension_filter_map,
-)
 from erpnext.accounts.party import validate_party_frozen_disabled, validate_party_gle_currency
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
-from erpnext.exceptions import (
-	InvalidAccountCurrency,
-	InvalidAccountDimensionError,
-	MandatoryAccountDimensionError,
-)
+from erpnext.exceptions import InvalidAccountCurrency
 
 exclude_from_linked_with = True
 
@@ -98,7 +91,6 @@ class GLEntry(Document):
 		if not self.flags.from_repost and self.voucher_type != "Period Closing Voucher":
 			self.validate_account_details(adv_adj)
 			self.validate_dimensions_for_pl_and_bs()
-			self.validate_allowed_dimensions()
 			validate_balance_type(self.account, adv_adj)
 			validate_frozen_account(self.account, adv_adj)
 
@@ -207,42 +199,6 @@ class GLEntry(Document):
 							dimension.label, self.account
 						)
 					)
-
-	def validate_allowed_dimensions(self):
-		dimension_filter_map = get_dimension_filter_map()
-		for key, value in dimension_filter_map.items():
-			dimension = key[0]
-			account = key[1]
-
-			if self.account == account:
-				if value["is_mandatory"] and not self.get(dimension):
-					frappe.throw(
-						_("{0} is mandatory for account {1}").format(
-							frappe.bold(frappe.unscrub(dimension)), frappe.bold(self.account)
-						),
-						MandatoryAccountDimensionError,
-					)
-
-				if value["allow_or_restrict"] == "Allow":
-					if self.get(dimension) and self.get(dimension) not in value["allowed_dimensions"]:
-						frappe.throw(
-							_("Invalid value {0} for {1} against account {2}").format(
-								frappe.bold(self.get(dimension)),
-								frappe.bold(frappe.unscrub(dimension)),
-								frappe.bold(self.account),
-							),
-							InvalidAccountDimensionError,
-						)
-				else:
-					if self.get(dimension) and self.get(dimension) in value["allowed_dimensions"]:
-						frappe.throw(
-							_("Invalid value {0} for {1} against account {2}").format(
-								frappe.bold(self.get(dimension)),
-								frappe.bold(frappe.unscrub(dimension)),
-								frappe.bold(self.account),
-							),
-							InvalidAccountDimensionError,
-						)
 
 	def check_pl_account(self):
 		if (
@@ -435,8 +391,8 @@ def update_outstanding_amt(
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.get_cached_value("Account", account, "freeze_account")
 	if frozen_account == "Yes" and not adv_adj:
-		frozen_accounts_modifier = frappe.db.get_value(
-			"Accounts Settings", None, "frozen_accounts_modifier"
+		frozen_accounts_modifier = frappe.db.get_single_value(
+			"Accounts Settings", "frozen_accounts_modifier"
 		)
 
 		if not frozen_accounts_modifier:

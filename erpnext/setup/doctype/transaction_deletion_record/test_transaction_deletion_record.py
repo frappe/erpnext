@@ -4,9 +4,10 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestTransactionDeletionRecord(unittest.TestCase):
+class TestTransactionDeletionRecord(FrappeTestCase):
 	def setUp(self):
 		create_company("Dunder Mifflin Paper Co")
 
@@ -14,7 +15,7 @@ class TestTransactionDeletionRecord(unittest.TestCase):
 		frappe.db.rollback()
 
 	def test_doctypes_contain_company_field(self):
-		tdr = create_transaction_deletion_request("Dunder Mifflin Paper Co")
+		tdr = create_transaction_deletion_doc("Dunder Mifflin Paper Co")
 		for doctype in tdr.doctypes:
 			contains_company = False
 			doctype_fields = frappe.get_meta(doctype.doctype_name).as_dict()["fields"]
@@ -27,16 +28,26 @@ class TestTransactionDeletionRecord(unittest.TestCase):
 	def test_no_of_docs_is_correct(self):
 		for i in range(5):
 			create_task("Dunder Mifflin Paper Co")
-		tdr = create_transaction_deletion_request("Dunder Mifflin Paper Co")
+		tdr = create_transaction_deletion_doc("Dunder Mifflin Paper Co")
 		for doctype in tdr.doctypes:
 			if doctype.doctype_name == "Task":
 				self.assertEqual(doctype.no_of_docs, 5)
 
 	def test_deletion_is_successful(self):
 		create_task("Dunder Mifflin Paper Co")
-		create_transaction_deletion_request("Dunder Mifflin Paper Co")
+		create_transaction_deletion_doc("Dunder Mifflin Paper Co")
 		tasks_containing_company = frappe.get_all("Task", filters={"company": "Dunder Mifflin Paper Co"})
 		self.assertEqual(tasks_containing_company, [])
+
+	def test_company_transaction_deletion_request(self):
+		from erpnext.setup.doctype.company.company import create_transaction_deletion_request
+
+		# don't reuse below company for other test cases
+		company = "Deep Space Exploration"
+		create_company(company)
+
+		# below call should not raise any exceptions or throw errors
+		create_transaction_deletion_request(company)
 
 
 def create_company(company_name):
@@ -46,7 +57,7 @@ def create_company(company_name):
 	company.insert(ignore_if_duplicate=True)
 
 
-def create_transaction_deletion_request(company):
+def create_transaction_deletion_doc(company):
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
 	tdr.insert()
 	tdr.submit()

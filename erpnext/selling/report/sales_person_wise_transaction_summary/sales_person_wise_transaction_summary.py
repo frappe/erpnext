@@ -36,6 +36,7 @@ def execute(filters=None):
 					d.base_net_amount,
 					d.sales_person,
 					d.allocated_percentage,
+					(d.stock_qty * d.allocated_percentage / 100),
 					d.contribution_amt,
 					company_currency,
 				]
@@ -103,7 +104,7 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"width": 140,
 		},
-		{"label": _("Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 140},
+		{"label": _("SO Total Qty"), "fieldname": "qty", "fieldtype": "Float", "width": 140},
 		{
 			"label": _("Amount"),
 			"options": "currency",
@@ -119,6 +120,12 @@ def get_columns(filters):
 			"width": 140,
 		},
 		{"label": _("Contribution %"), "fieldname": "contribution", "fieldtype": "Float", "width": 140},
+		{
+			"label": _("Contribution Qty"),
+			"fieldname": "contribution_qty",
+			"fieldtype": "Float",
+			"width": 140,
+		},
 		{
 			"label": _("Contribution Amount"),
 			"options": "currency",

@@ -1,7 +1,6 @@
 {
  "actions": [],
  "creation": "2013-06-25 11:04:03",
- "description": "Settings for Buying Module",
  "doctype": "DocType",
  "document_type": "Other",
  "engine": "InnoDB",
@@ -152,6 +151,7 @@
   },
   {
    "default": "1",
+   "depends_on": "eval: frappe.boot.versions && frappe.boot.versions.payments",
    "fieldname": "show_pay_button",
    "fieldtype": "Check",
    "label": "Show Pay Button in Purchase Order Portal"
@@ -214,7 +214,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-28 13:01:18.403492",
+ "modified": "2024-01-31 13:34:18.101256",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -238,6 +238,26 @@
    "role": "Purchase Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts User"
+  },
+  {
+   "read": 1,
+   "role": "Accounts Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "role": "Purchase User"
   }
  ],
  "sort_field": "modified",

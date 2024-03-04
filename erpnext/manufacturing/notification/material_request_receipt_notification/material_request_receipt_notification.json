@@ -11,18 +11,20 @@
  "event": "Value Change",
  "idx": 0,
  "is_standard": 1,
- "message": "<b>Material Request Type</b>: {{ doc.material_request_type }}<br>\n<b>Company</b>: {{ doc.company }}\n\n<h3>Order Summary</h3>\n\n<table border=2 >\n    <tr align=\"center\">\n        <th>Item Name</th>\n        <th>Received Quantity</th>\n    </tr>\n    {% for item in doc.items %}\n        {% if frappe.utils.flt(item.received_qty, 2) > 0.0 %}\n            <tr align=\"center\">\n                <td>{{ item.item_code }}</td>\n                <td>{{ frappe.utils.flt(item.received_qty, 2) }}</td>\n            </tr>\n        {% endif %}\n    {% endfor %}\n</table>",
+ "message_type": "HTML",
  "method": "",
- "modified": "2019-05-01 18:02:51.090037",
+ "modified": "2023-11-17 08:53:29.525296",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Receipt Notification",
  "owner": "Administrator",
  "recipients": [
   {
-   "email_by_document_field": "requested_by"
+   "receiver_by_document_field": "requested_by"
   }
  ],
+ "send_system_notification": 0,
+ "send_to_all_assignees": 0,
  "sender_email": "",
  "subject": "{{ doc.name }} has been received",
  "value_changed": "status"

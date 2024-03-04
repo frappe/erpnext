@@ -6,6 +6,7 @@ import unittest
 
 import frappe
 from frappe.test_runner import make_test_records
+from frappe.utils import nowdate
 
 from erpnext.accounts.doctype.account.account import (
 	InvalidAccountMergeError,
@@ -119,7 +120,7 @@ class TestAccount(unittest.TestCase):
 			InvalidAccountMergeError,
 			merge_account,
 			"Capital Stock - _TC",
-			"Softwares - _TC",
+			"Software - _TC",
 		)
 
 		# Raise error as currency doesn't match
@@ -323,6 +324,19 @@ class TestAccount(unittest.TestCase):
 
 		acc.account_currency = "USD"
 		self.assertRaises(frappe.ValidationError, acc.save)
+
+	def test_account_balance(self):
+		from erpnext.accounts.utils import get_balance_on
+
+		if not frappe.db.exists("Account", "Test Percent Account %5 - _TC"):
+			acc = frappe.new_doc("Account")
+			acc.account_name = "Test Percent Account %5"
+			acc.parent_account = "Tax Assets - _TC"
+			acc.company = "_Test Company"
+			acc.insert()
+
+		balance = get_balance_on(account="Test Percent Account %5 - _TC", date=nowdate())
+		self.assertEqual(balance, 0)
 
 
 def _make_test_records(verbose=None):

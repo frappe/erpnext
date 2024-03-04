@@ -140,38 +140,48 @@ frappe.ui.form.on("Company", {
 	},
 
 	delete_company_transactions: function(frm) {
-		frappe.verify_password(function() {
-			var d = frappe.prompt({
-				fieldtype:"Data",
-				fieldname: "company_name",
-				label: __("Please enter the company name to confirm"),
-				reqd: 1,
-				description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")
+		frappe.call({
+			method: "erpnext.setup.doctype.company.company.is_deletion_job_running",
+			args: {
+				company: frm.doc.name
 			},
-			function(data) {
-				if(data.company_name !== frm.doc.name) {
-					frappe.msgprint(__("Company name not same"));
-					return;
+			freeze: true,
+			callback: function(r) {
+				if(!r.exc) {
+					frappe.verify_password(function() {
+						var d = frappe.prompt({
+							fieldtype:"Data",
+							fieldname: "company_name",
+							label: __("Please enter the company name to confirm"),
+							reqd: 1,
+							description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")
+						},
+								      function(data) {
+									      if(data.company_name !== frm.doc.name) {
+										      frappe.msgprint(__("Company name not same"));
+										      return;
+									      }
+									      frappe.call({
+										      method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
+										      args: {
+											      company: data.company_name
+										      },
+										      freeze: true,
+										      callback: function(r, rt) { },
+										      onerror: function() {
+											      frappe.msgprint(__("Wrong Password"));
+										      }
+									      });
+								      },
+								      __("Delete all the Transactions for this Company"), __("Delete")
+								     );
+						d.get_primary_btn().addClass("btn-danger");
+					});
 				}
-				frappe.call({
-					method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
-					args: {
-						company: data.company_name
-					},
-					freeze: true,
-					callback: function(r, rt) {
-						if(!r.exc)
-							frappe.msgprint(__("Successfully deleted all transactions related to this company!"));
-					},
-					onerror: function() {
-						frappe.msgprint(__("Wrong Password"));
-					}
-				});
+
 			},
-			__("Delete all the Transactions for this Company"), __("Delete")
-			);
-			d.get_primary_btn().addClass("btn-danger");
 		});
+
 	}
 });
 

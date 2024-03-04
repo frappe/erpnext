@@ -42,7 +42,6 @@ setup_wizard_test = "erpnext.setup.setup_wizard.test_setup_wizard.run_setup_wiza
 
 before_install = [
 	"erpnext.setup.install.check_setup_wizard_not_completed",
-	"erpnext.setup.install.check_frappe_version",
 ]
 after_install = "erpnext.setup.install.after_install"
 
@@ -481,7 +480,8 @@ payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account
 
 communication_doctypes = ["Customer", "Supplier"]
 
-advance_payment_doctypes = ["Sales Order", "Purchase Order"]
+advance_payment_receivable_doctypes = ["Sales Order"]
+advance_payment_payable_doctypes = ["Purchase Order"]
 
 invoice_doctypes = ["Sales Invoice", "Purchase Invoice"]
 
@@ -489,6 +489,7 @@ bank_reconciliation_doctypes = [
 	"Payment Entry",
 	"Journal Entry",
 	"Purchase Invoice",
+	"Sales Invoice",
 ]
 
 accounting_dimension_doctypes = [
@@ -537,6 +538,8 @@ accounting_dimension_doctypes = [
 	"Account Closing Balance",
 	"Supplier Quotation",
 	"Supplier Quotation Item",
+	"Payment Reconciliation",
+	"Payment Reconciliation Allocation",
 ]
 
 get_matching_queries = (

@@ -1,6 +1,7 @@
 erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	constructor(opts) {
 		this.frm = opts.frm;
+		// frappe.flags.trigger_from_barcode_scanner is used for custom scripts
 
 		// field from which to capture input of scanned data
 		this.scan_field_name = opts.scan_field_name || "scan_barcode";
@@ -84,6 +85,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	update_table(data) {
 		return new Promise((resolve, reject) => {
 			let cur_grid = this.frm.fields_dict[this.items_table_name].grid;
+			frappe.flags.trigger_from_barcode_scanner = true;
 
 			const {item_code, barcode, batch_no, serial_no, uom} = data;
 
@@ -114,13 +116,13 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 			frappe.run_serially([
 				() => this.set_selector_trigger_flag(data),
-				() => this.set_serial_no(row, serial_no),
-				() => this.set_batch_no(row, batch_no),
-				() => this.set_barcode(row, barcode),
 				() => this.set_item(row, item_code, barcode, batch_no, serial_no).then(qty => {
 					this.show_scan_message(row.idx, row.item_code, qty);
 				}),
 				() => this.set_barcode_uom(row, uom),
+				() => this.set_serial_no(row, serial_no),
+				() => this.set_batch_no(row, batch_no),
+				() => this.set_barcode(row, barcode),
 				() => this.clean_up(),
 				() => this.revert_selector_flag(),
 				() => resolve(row)
@@ -131,10 +133,10 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 	// batch and serial selector is reduandant when all info can be added by scan
 	// this flag on item row is used by transaction.js to avoid triggering selector
 	set_selector_trigger_flag(data) {
-		const {has_batch_no, has_serial_no} = data;
+		const {batch_no, serial_no, has_batch_no, has_serial_no} = data;
 
-		const require_selecting_batch = has_batch_no;
-		const require_selecting_serial = has_serial_no;
+		const require_selecting_batch = has_batch_no && !batch_no;
+		const require_selecting_serial = has_serial_no && !serial_no;
 
 		if (!(require_selecting_batch || require_selecting_serial)) {
 			frappe.flags.hide_serial_batch_dialog = true;
@@ -143,12 +145,14 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 
 	revert_selector_flag() {
 		frappe.flags.hide_serial_batch_dialog = false;
+		frappe.flags.trigger_from_barcode_scanner = false;
 	}
 
 	set_item(row, item_code, barcode, batch_no, serial_no) {
 		return new Promise(resolve => {
 			const increment = async (value = 1) => {
-				const item_data = {item_code: item_code};
+				const item_data = {item_code: item_code, use_serial_batch_fields: 1.0};
+				frappe.flags.trigger_from_barcode_scanner = true;
 				item_data[this.qty_field] = Number((row[this.qty_field] || 0)) + Number(value);
 				await frappe.model.set_value(row.doctype, row.name, item_data);
 				return value;

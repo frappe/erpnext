@@ -1,7 +1,7 @@
 frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Warehouse Capacity Summary',
+		title: __('Warehouse Capacity Summary'),
 		single_column: true
 	});
 	page.set_secondary_action('Refresh', () => page.capacity_dashboard.refresh(), 'refresh');

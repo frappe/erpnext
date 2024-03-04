@@ -93,7 +93,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 		inv.save()
 
-		self.assertEqual(inv.net_total, 4298.25)
+		self.assertEqual(inv.net_total, 4298.24)
 		self.assertEqual(inv.grand_total, 4900.00)
 
 	def test_tax_calculation_with_multiple_items(self):

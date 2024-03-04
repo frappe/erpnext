@@ -198,6 +198,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "amount", row.qty * row.valuation_rate);
 					frappe.model.set_value(cdt, cdn, "current_serial_no", r.message.serial_nos);
+					frappe.model.set_value(cdt, cdn, "use_serial_batch_fields", r.message.use_serial_batch_fields);
 
 					if (frm.doc.purpose == "Stock Reconciliation" && !frm.doc.scan_mode) {
 						frappe.model.set_value(cdt, cdn, "serial_no", r.message.serial_nos);

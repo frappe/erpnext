@@ -16,6 +16,8 @@ erpnext.accounts.dimensions = {
 			},
 			callback: function(r) {
 				me.accounting_dimensions = r.message[0];
+				// Ignoring "Project" as it is already handled specifically in Sales Order and Delivery Note
+				me.accounting_dimensions = me.accounting_dimensions.filter(x=>{return x.document_type != "Project"});
 				me.default_dimensions = r.message[1];
 				me.setup_filters(frm, doctype);
 			}
@@ -23,6 +25,10 @@ erpnext.accounts.dimensions = {
 	},
 
 	setup_filters(frm, doctype) {
+		if (doctype == 'Payment Entry' && this.accounting_dimensions) {
+			frm.dimension_filters = this.accounting_dimensions
+		}
+
 		if (this.accounting_dimensions) {
 			this.accounting_dimensions.forEach((dimension) => {
 				frappe.model.with_doctype(dimension['document_type'], () => {

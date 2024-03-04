@@ -132,7 +132,7 @@ class POSProfile(Document):
 
 		if len(customer_groups) != len(set(customer_groups)):
 			frappe.throw(
-				_("Duplicate customer group found in the cutomer group table"),
+				_("Duplicate customer group found in the customer group table"),
 				title=_("Duplicate Customer Group"),
 			)
 

@@ -76,7 +76,7 @@ class Appointment(Document):
 			self.create_calendar_event()
 		else:
 			# Set status to unverified
-			self.status = "Unverified"
+			self.db_set("status", "Unverified")
 			# Send email to confirm
 			self.send_confirmation_email()
 

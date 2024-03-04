@@ -10,7 +10,7 @@ from frappe.utils import flt, format_datetime, get_datetime
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
 from erpnext.stock.serial_batch_bundle import get_serial_nos as get_serial_nos_from_bundle
-from erpnext.stock.utils import get_incoming_rate
+from erpnext.stock.utils import get_incoming_rate, get_valuation_method
 
 
 class StockOverReturnError(frappe.ValidationError):
@@ -116,7 +116,12 @@ def validate_returned_items(doc):
 				ref = valid_items.get(d.item_code, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
 
-				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
+				if (
+					ref.rate
+					and flt(d.rate) > ref.rate
+					and doc.doctype in ("Delivery Note", "Sales Invoice")
+					and get_valuation_method(ref.item_code) != "Moving Average"
+				):
 					frappe.throw(
 						_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}").format(
 							d.idx, doc.doctype, doc.return_against
@@ -136,7 +141,7 @@ def validate_returned_items(doc):
 			items_returned = True
 
 	if not items_returned:
-		frappe.throw(_("Atleast one item should be entered with negative quantity in return document"))
+		frappe.throw(_("At least one item should be entered with negative quantity in return document"))
 
 
 def validate_quantity(doc, args, ref, valid_items, already_returned_items):

@@ -8,11 +8,30 @@ frappe.provide("erpnext.journal_entry");
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {
 		frm.add_fetch("bank_account", "account", "account");
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement', 'Asset Depreciation Schedule', "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries"];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', "Repost Payment Ledger", 'Asset', 'Asset Movement', 'Asset Depreciation Schedule', "Repost Accounting Ledger", "Unreconcile Payment", "Unreconcile Payment Entries", "Bank Transaction"];
 	},
 
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
+
+		if (frm.doc.repost_required && frm.doc.docstatus===1) {
+			frm.set_intro(__("Accounting entries for this Journal Entry need to be reposted. Please click on 'Repost' button to update."));
+			frm.add_custom_button(__('Repost Accounting Entries'),
+				() => {
+					frm.call({
+						doc: frm.doc,
+						method: 'repost_accounting_entries',
+						freeze: true,
+						freeze_message: __('Reposting...'),
+						callback: (r) => {
+							if (!r.exc) {
+								frappe.msgprint(__('Accounting Entries are reposted.'));
+								frm.refresh();
+							}
+						}
+					});
+				}).removeClass('btn-default').addClass('btn-warning');
+		}
 
 		if(frm.doc.docstatus > 0) {
 			frm.add_custom_button(__('Ledger'), function() {
@@ -184,7 +203,6 @@ var update_jv_details = function(doc, r) {
 	$.each(r, function(i, d) {
 		var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
 		frappe.model.set_value(row.doctype, row.name, "account", d.account)
-		frappe.model.set_value(row.doctype, row.name, "balance", d.balance)
 	});
 	refresh_field("accounts");
 }
@@ -193,7 +211,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 	onload() {
 		this.load_defaults();
 		this.setup_queries();
-		this.setup_balance_formatter();
 		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	}
 
@@ -219,16 +236,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		me.frm.set_query("account", "accounts", function(doc, cdt, cdn) {
 			return erpnext.journal_entry.account_query(me.frm);
 		});
-
-		me.frm.set_query("against_account_link", "accounts", function(doc, cdt, cdn) {
-			return erpnext.journal_entry.against_account_query(me.frm);
-		});
-
-		me.frm.set_query("against_type", "accounts", function(){
-			return {
-				query: "erpnext.accounts.doctype.journal_entry.journal_entry.get_against_type",
-			}
-		})
 
 		me.frm.set_query("party_type", "accounts", function(doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
@@ -300,19 +307,6 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 		});
 
 
-	}
-
-	setup_balance_formatter() {
-		const formatter = function(value, df, options, doc) {
-			var currency = frappe.meta.get_field_currency(df, doc);
-			var dr_or_cr = value ? ('<label>' + (value > 0.0 ? __("Dr") : __("Cr")) + '</label>') : "";
-			return "<div style='text-align: right'>"
-				+ ((value==null || value==="") ? "" : format_currency(Math.abs(value), currency))
-				+ " " + dr_or_cr
-				+ "</div>";
-		};
-		this.frm.fields_dict.accounts.grid.update_docfield_property('balance', 'formatter', formatter);
-		this.frm.fields_dict.accounts.grid.update_docfield_property('party_balance', 'formatter', formatter);
 	}
 
 	reference_name(doc, cdt, cdn) {
@@ -410,23 +404,22 @@ frappe.ui.form.on("Journal Entry Account", {
 		if(!d.account && d.party_type && d.party) {
 			if(!frm.doc.company) frappe.throw(__("Please select Company"));
 			return frm.call({
-				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_balance",
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_party_account_and_currency",
 				child: d,
 				args: {
 					company: frm.doc.company,
 					party_type: d.party_type,
 					party: d.party,
-					cost_center: d.cost_center
 				}
 			});
 		}
 	},
 	cost_center: function(frm, dt, dn) {
-		erpnext.journal_entry.set_account_balance(frm, dt, dn);
+		erpnext.journal_entry.set_account_details(frm, dt, dn);
 	},
 
 	account: function(frm, dt, dn) {
-		erpnext.journal_entry.set_account_balance(frm, dt, dn);
+		erpnext.journal_entry.set_account_details(frm, dt, dn);
 	},
 
 	debit_in_account_currency: function(frm, cdt, cdn) {
@@ -601,21 +594,6 @@ $.extend(erpnext.journal_entry, {
 		return { filters: filters };
 	},
 
-	against_account_query: function(frm) {
-		if (frm.doc.against_type != "Account"){
-			return { filters: {} };
-		}
-		else {
-			let filters = { company: frm.doc.company, is_group: 0 };
-			if(!frm.doc.multi_currency) {
-				$.extend(filters, {
-					account_currency: ['in', [frappe.get_doc(":Company", frm.doc.company).default_currency, null]]
-				});
-			}
-			return { filters: filters };
-		}
-	},
-
 	reverse_journal_entry: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_reverse_journal_entry",
@@ -625,14 +603,14 @@ $.extend(erpnext.journal_entry, {
 });
 
 $.extend(erpnext.journal_entry, {
-	set_account_balance: function(frm, dt, dn) {
+	set_account_details: function(frm, dt, dn) {
 		var d = locals[dt][dn];
 		if(d.account) {
 			if(!frm.doc.company) frappe.throw(__("Please select Company first"));
 			if(!frm.doc.posting_date) frappe.throw(__("Please select Posting Date first"));
 
 			return frappe.call({
-				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_balance_and_party_type",
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_account_details_and_party_type",
 				args: {
 					account: d.account,
 					date: frm.doc.posting_date,
@@ -640,7 +618,6 @@ $.extend(erpnext.journal_entry, {
 					debit: flt(d.debit_in_account_currency),
 					credit: flt(d.credit_in_account_currency),
 					exchange_rate: d.exchange_rate,
-					cost_center: d.cost_center
 				},
 				callback: function(r) {
 					if(r.message) {

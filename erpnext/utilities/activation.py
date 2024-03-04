@@ -124,7 +124,7 @@ def get_help_messages():
 			doctype="Timesheet",
 			title=_("Add Timesheets"),
 			description=_(
-				"Timesheets help keep track of time, cost and billing for activites done by your team"
+				"Timesheets help keep track of time, cost and billing for activities done by your team"
 			),
 			action=_("Create Timesheet"),
 			route="List/Timesheet",

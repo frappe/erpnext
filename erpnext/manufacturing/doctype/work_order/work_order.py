@@ -242,8 +242,12 @@ class WorkOrder(Document):
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
-			d.planned_operating_cost = flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0)
-			d.actual_operating_cost = flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0)
+			d.planned_operating_cost = flt(
+				flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
+			)
+			d.actual_operating_cost = flt(
+				flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0), d.precision("actual_operating_cost")
+			)
 
 			self.planned_operating_cost += flt(d.planned_operating_cost)
 			self.actual_operating_cost += flt(d.actual_operating_cost)
@@ -588,7 +592,6 @@ class WorkOrder(Document):
 	def prepare_data_for_job_card(self, row, index, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(index, row)
 
-		original_start_time = row.planned_start_time
 		job_card_doc = create_job_card(
 			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning
 		)
@@ -597,11 +600,15 @@ class WorkOrder(Document):
 			row.planned_start_time = job_card_doc.scheduled_time_logs[-1].from_time
 			row.planned_end_time = job_card_doc.scheduled_time_logs[-1].to_time
 
-			if date_diff(row.planned_start_time, original_start_time) > plan_days:
+			if date_diff(row.planned_end_time, self.planned_start_date) > plan_days:
 				frappe.message_log.pop()
 				frappe.throw(
-					_("Unable to find the time slot in the next {0} days for the operation {1}.").format(
-						plan_days, row.operation
+					_(
+						"Unable to find the time slot in the next {0} days for the operation {1}. Please increase the 'Capacity Planning For (Days)' in the {2}."
+					).format(
+						plan_days,
+						row.operation,
+						get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
 					),
 					CapacityError,
 				)
@@ -1511,16 +1518,16 @@ def get_serial_nos_for_work_order(work_order, production_item):
 
 
 def validate_operation_data(row):
-	if row.get("qty") <= 0:
+	if flt(row.get("qty")) <= 0:
 		frappe.throw(
 			_("Quantity to Manufacture can not be zero for the operation {0}").format(
 				frappe.bold(row.get("operation"))
 			)
 		)
 
-	if row.get("qty") > row.get("pending_qty"):
+	if flt(row.get("qty")) > flt(row.get("pending_qty")):
 		frappe.throw(
-			_("For operation {0}: Quantity ({1}) can not be greter than pending quantity({2})").format(
+			_("For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})").format(
 				frappe.bold(row.get("operation")),
 				frappe.bold(row.get("qty")),
 				frappe.bold(row.get("pending_qty")),

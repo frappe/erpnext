@@ -154,7 +154,7 @@ frappe.ui.form.on('Invoice Discounting', {
 					}
 				});
 			},
-			primary_action_label: __('Get Invocies')
+			primary_action_label: __('Get Invoices')
 		});
 		d.show();
 	},

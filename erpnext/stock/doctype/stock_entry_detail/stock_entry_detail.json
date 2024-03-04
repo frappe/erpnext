@@ -47,9 +47,12 @@
   "amount",
   "serial_no_batch",
   "add_serial_batch_bundle",
-  "serial_and_batch_bundle",
+  "use_serial_batch_fields",
   "col_break4",
+  "serial_and_batch_bundle",
+  "section_break_rdtg",
   "serial_no",
+  "column_break_prps",
   "batch_no",
   "accounting",
   "expense_account",
@@ -289,27 +292,27 @@
    "no_copy": 1
   },
   {
+   "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "serial_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text",
    "label": "Serial No",
    "no_copy": 1,
    "oldfieldname": "serial_no",
-   "oldfieldtype": "Text",
-   "read_only": 1
+   "oldfieldtype": "Text"
   },
   {
    "fieldname": "col_break4",
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
    "no_copy": 1,
    "oldfieldname": "batch_no",
    "oldfieldtype": "Link",
-   "options": "Batch",
-   "read_only": 1
+   "options": "Batch"
   },
   {
    "depends_on": "eval:parent.inspection_required && doc.t_warehouse",
@@ -561,7 +564,8 @@
    "label": "Job Card Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "default": "0",
@@ -572,24 +576,41 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.use_serial_batch_fields === 0",
    "fieldname": "add_serial_batch_bundle",
    "fieldtype": "Button",
    "label": "Add Serial / Batch No"
   },
   {
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.docstatus === 1",
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Serial and Batch Bundle",
    "no_copy": 1,
    "options": "Serial and Batch Bundle",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "use_serial_batch_fields",
+   "fieldtype": "Check",
+   "label": "Use Serial No / Batch Fields"
+  },
+  {
+   "depends_on": "eval:doc.use_serial_batch_fields === 1",
+   "fieldname": "section_break_rdtg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_prps",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-05-09 12:41:18.210864",
+ "modified": "2024-02-25 15:58:40.982582",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

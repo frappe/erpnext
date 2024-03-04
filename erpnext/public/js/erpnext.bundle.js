@@ -5,6 +5,8 @@ import "./sms_manager";
 import "./utils/party";
 import "./controllers/stock_controller";
 import "./payment/payments";
+import "./templates/visual_plant_floor_template.html";
+import "./plant_floor_visual/visual_plant";
 import "./controllers/taxes_and_totals";
 import "./controllers/transaction";
 import "./templates/item_selector.html";

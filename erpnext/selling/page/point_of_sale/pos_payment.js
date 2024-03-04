@@ -389,7 +389,7 @@ erpnext.PointOfSale.Payment = class {
 				df: {
 					label: p.mode_of_payment,
 					fieldtype: 'Currency',
-					placeholder: __('Enter {0} amount.', [p.mode_of_payment]),
+					placeholder: __('Enter {0} amount.', [__(p.mode_of_payment)]),
 					onchange: function() {
 						const current_value = frappe.model.get_value(p.doctype, p.name, 'amount');
 						if (current_value != this.value) {

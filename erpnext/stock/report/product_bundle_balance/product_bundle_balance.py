@@ -213,13 +213,11 @@ def get_stock_ledger_entries(filters, items):
 
 	query = (
 		frappe.qb.from_(sle)
-		.force_index("posting_sort_index")
 		.left_join(sle2)
 		.on(
 			(sle.item_code == sle2.item_code)
 			& (sle.warehouse == sle2.warehouse)
-			& (sle.posting_date < sle2.posting_date)
-			& (sle.posting_time < sle2.posting_time)
+			& (sle.posting_datetime < sle2.posting_datetime)
 			& (sle.name < sle2.name)
 		)
 		.select(sle.item_code, sle.warehouse, sle.qty_after_transaction, sle.company)

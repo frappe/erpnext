@@ -2,7 +2,7 @@
  "actions": [],
  "allow_import": 1,
  "creation": "2013-06-20 11:53:21",
- "description": "Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. \n\nThe package **Item** will have \"Is Stock Item\" as \"No\" and \"Is Sales Item\" as \"Yes\".\n\nFor Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.\n\nNote: BOM = Bill of Materials",
+ "description": "Aggregate a group of Items into another Item. This is useful if you are maintaining the stock of the packed items and not the bundled item",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
@@ -77,7 +77,7 @@
  "icon": "fa fa-sitemap",
  "idx": 1,
  "links": [],
- "modified": "2023-11-22 15:20:46.805114",
+ "modified": "2024-01-30 13:57:04.951788",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Product Bundle",

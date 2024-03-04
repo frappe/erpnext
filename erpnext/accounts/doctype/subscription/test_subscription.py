@@ -46,7 +46,7 @@ class TestSubscription(FrappeTestCase):
 			get_date_str(subscription.current_invoice_end),
 		)
 		self.assertEqual(subscription.invoices, [])
-		self.assertEqual(subscription.status, "Trialling")
+		self.assertEqual(subscription.status, "Trialing")
 
 	def test_create_subscription_without_trial_with_correct_period(self):
 		subscription = create_subscription()
@@ -460,11 +460,13 @@ class TestSubscription(FrappeTestCase):
 		self.assertEqual(len(subscription.invoices), 1)
 
 	def test_multi_currency_subscription(self):
+		party = "_Test Subscription Customer"
+		frappe.db.set_value("Customer", party, "default_currency", "USD")
 		subscription = create_subscription(
 			start_date="2018-01-01",
 			generate_invoice_at="Beginning of the current subscription period",
-			plans=[{"plan": "_Test Plan Multicurrency", "qty": 1}],
-			party="_Test Subscription Customer",
+			plans=[{"plan": "_Test Plan Multicurrency", "qty": 1, "currency": "USD"}],
+			party=party,
 		)
 
 		subscription.process()
@@ -528,13 +530,21 @@ class TestSubscription(FrappeTestCase):
 
 
 def make_plans():
-	create_plan(plan_name="_Test Plan Name", cost=900)
-	create_plan(plan_name="_Test Plan Name 2", cost=1999)
+	create_plan(plan_name="_Test Plan Name", cost=900, currency="INR")
+	create_plan(plan_name="_Test Plan Name 2", cost=1999, currency="INR")
 	create_plan(
-		plan_name="_Test Plan Name 3", cost=1999, billing_interval="Day", billing_interval_count=14
+		plan_name="_Test Plan Name 3",
+		cost=1999,
+		billing_interval="Day",
+		billing_interval_count=14,
+		currency="INR",
 	)
 	create_plan(
-		plan_name="_Test Plan Name 4", cost=20000, billing_interval="Month", billing_interval_count=3
+		plan_name="_Test Plan Name 4",
+		cost=20000,
+		billing_interval="Month",
+		billing_interval_count=3,
+		currency="INR",
 	)
 	create_plan(
 		plan_name="_Test Plan Multicurrency", cost=50, billing_interval="Month", currency="USD"

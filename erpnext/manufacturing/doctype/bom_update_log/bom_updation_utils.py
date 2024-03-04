@@ -86,10 +86,12 @@ def get_ancestor_boms(new_bom: str, bom_list: Optional[List] = None) -> List:
 		if new_bom == d.parent:
 			frappe.throw(_("BOM recursion: {0} cannot be child of {1}").format(new_bom, d.parent))
 
-		bom_list.append(d.parent)
+		if d.parent not in tuple(bom_list):
+			bom_list.append(d.parent)
+
 		get_ancestor_boms(d.parent, bom_list)
 
-	return list(set(bom_list))
+	return bom_list
 
 
 def update_new_bom_in_bom_items(unit_cost: float, current_bom: str, new_bom: str) -> None:

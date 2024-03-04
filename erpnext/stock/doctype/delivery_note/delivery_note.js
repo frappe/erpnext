@@ -31,15 +31,6 @@ frappe.ui.form.on("Delivery Note", {
 		});
 		erpnext.queries.setup_warehouse_query(frm);
 
-		frm.set_query('project', function(doc) {
-			return {
-				query: "erpnext.controllers.queries.get_project_name",
-				filters: {
-					'customer': doc.customer
-				}
-			}
-		})
-
 		frm.set_query('transporter', function() {
 			return {
 				filters: {

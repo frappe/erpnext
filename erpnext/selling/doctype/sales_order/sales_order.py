@@ -200,6 +200,7 @@ class SalesOrder(SellingController):
 		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_drop_ship()
+		self.validate_reserved_stock()
 		self.validate_serial_no_based_delivery()
 		validate_against_blanket_order(self)
 		validate_inter_company_party(
@@ -222,6 +223,8 @@ class SalesOrder(SellingController):
 			self.billing_status = "Not Billed"
 		if not self.delivery_status:
 			self.delivery_status = "Not Delivered"
+		if not self.advance_payment_status:
+			self.advance_payment_status = "Not Requested"
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
@@ -248,7 +251,8 @@ class SalesOrder(SellingController):
 					frappe.msgprint(
 						_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(
 							frappe.bold(so[0][0]), frappe.bold(self.po_no)
-						)
+						),
+						alert=True,
 					)
 				else:
 					frappe.throw(
@@ -512,6 +516,9 @@ class SalesOrder(SellingController):
 	def on_update(self):
 		pass
 
+	def on_update_after_submit(self):
+		self.check_credit_limit()
+
 	def before_update_after_submit(self):
 		self.validate_po()
 		self.validate_drop_ship()
@@ -582,17 +589,17 @@ class SalesOrder(SellingController):
 
 	def set_indicator(self):
 		"""Set indicator for portal"""
-		if self.per_billed < 100 and self.per_delivered < 100:
-			self.indicator_color = "orange"
-			self.indicator_title = _("Not Paid and Not Delivered")
+		self.indicator_color = {
+			"Draft": "red",
+			"On Hold": "orange",
+			"To Deliver and Bill": "orange",
+			"To Bill": "orange",
+			"To Deliver": "orange",
+			"Completed": "green",
+			"Cancelled": "red",
+		}.get(self.status, "blue")
 
-		elif self.per_billed == 100 and self.per_delivered < 100:
-			self.indicator_color = "orange"
-			self.indicator_title = _("Paid and Not Delivered")
-
-		else:
-			self.indicator_color = "green"
-			self.indicator_title = _("Paid")
+		self.indicator_title = _(self.status)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):
@@ -640,7 +647,7 @@ class SalesOrder(SellingController):
 					if not frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
 						frappe.throw(
 							_(
-								"Item {0} has no Serial No. Only serilialized items can have delivery based on Serial No"
+								"Item {0} has no Serial No. Only serialized items can have delivery based on Serial No"
 							).format(item.item_code)
 						)
 					if not frappe.db.exists("BOM", {"item": item.item_code, "is_active": 1}):
@@ -659,6 +666,17 @@ class SalesOrder(SellingController):
 						"Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No."
 					).format(item.item_code)
 				)
+
+	def validate_reserved_stock(self):
+		"""Clean reserved stock flag for non-stock Item"""
+
+		enable_stock_reservation = frappe.db.get_single_value(
+			"Stock Settings", "enable_stock_reservation"
+		)
+
+		for item in self.items:
+			if item.reserve_stock and (not enable_stock_reservation or not cint(item.is_stock_item)):
+				item.reserve_stock = 0
 
 	def has_unreserved_stock(self) -> bool:
 		"""Returns True if there is any unreserved item in the Sales Order."""
@@ -892,6 +910,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
 
 		if source.company_address:
 			target.update({"company_address": source.company_address})
@@ -917,6 +936,9 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		# make_mapped_doc sets js `args` into `frappe.flags.args`
 		if frappe.flags.args and frappe.flags.args.delivery_dates:
 			if cstr(doc.delivery_date) not in frappe.flags.args.delivery_dates:
+				return False
+		if frappe.flags.args and frappe.flags.args.until_delivery_date:
+			if cstr(doc.delivery_date) > frappe.flags.args.until_delivery_date:
 				return False
 
 		return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
@@ -993,6 +1015,11 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				for idx, item in enumerate(target_doc.items):
 					item.idx = idx + 1
 
+	if not kwargs.skip_item_mapping and frappe.flags.bulk_transaction and not target_doc.items:
+		# the (date) condition filter resulted in an unintendedly created empty DN; remove it
+		del target_doc
+		return
+
 	# Should be called after mapping items.
 	set_missing_values(so, target_doc)
 
@@ -1012,6 +1039,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
 
 		if source.company_address:
 			target.update({"company_address": source.company_address})
@@ -1594,7 +1622,11 @@ def create_pick_list(source_name, target_doc=None):
 		"Sales Order",
 		source_name,
 		{
-			"Sales Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
+			"Sales Order": {
+				"doctype": "Pick List",
+				"field_map": {"set_warehouse": "parent_warehouse"},
+				"validation": {"docstatus": ["=", 1]},
+			},
 			"Sales Order Item": {
 				"doctype": "Pick List Item",
 				"field_map": {"parent": "sales_order", "name": "sales_order_item"},

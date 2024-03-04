@@ -104,7 +104,8 @@
    "in_standard_filter": 1,
    "label": "Stock Entry Type",
    "options": "Stock Entry Type",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "depends_on": "eval:doc.purpose == 'Material Transfer'",
@@ -546,7 +547,8 @@
    "label": "Job Card",
    "options": "Job Card",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "amended_from",
@@ -679,7 +681,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-19 18:23:40.748114",
+ "modified": "2024-01-12 11:56:58.644882",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

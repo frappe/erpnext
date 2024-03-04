@@ -232,7 +232,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto"
+   "label": "Valid Up To"
   },
   {
    "fieldname": "column_break_26",
@@ -278,7 +278,7 @@
   }
  ],
  "links": [],
- "modified": "2021-05-06 16:20:22.039078",
+ "modified": "2024-01-24 02:20:26.145996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme",

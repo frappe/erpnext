@@ -270,7 +270,7 @@ def start_import(invoices):
 				errors, "<a href='/app/List/Error Log' class='variant-click'>Error Log</a>"
 			),
 			indicator="red",
-			title=_("Error Occured"),
+			title=_("Error Occurred"),
 		)
 	return names
 

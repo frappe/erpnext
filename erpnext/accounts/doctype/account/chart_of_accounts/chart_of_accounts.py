@@ -74,7 +74,7 @@ def create_charts(
 		# after all accounts are already inserted.
 		frappe.local.flags.ignore_update_nsm = True
 		_import_accounts(chart, None, None, root_account=True)
-		rebuild_tree("Account", "parent_account")
+		rebuild_tree("Account")
 		frappe.local.flags.ignore_update_nsm = False
 
 
@@ -231,6 +231,8 @@ def build_account_tree(tree, parent, all_accounts):
 			tree[child.account_name]["account_type"] = child.account_type
 		if child.tax_rate:
 			tree[child.account_name]["tax_rate"] = child.tax_rate
+		if child.account_currency:
+			tree[child.account_name]["account_currency"] = child.account_currency
 		if not parent:
 			tree[child.account_name]["root_type"] = child.root_type
 

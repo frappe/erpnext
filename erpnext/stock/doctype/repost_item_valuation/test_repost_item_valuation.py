@@ -420,3 +420,38 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 
 		self.assertRaises(frappe.ValidationError, riv.save)
 		doc.cancel()
+
+	def test_remove_attached_file(self):
+		item_code = make_item("_Test Remove Attached File Item", properties={"is_stock_item": 1})
+
+		make_purchase_receipt(
+			item_code=item_code,
+			qty=1,
+			rate=100,
+		)
+
+		pr1 = make_purchase_receipt(
+			item_code=item_code,
+			qty=1,
+			rate=100,
+			posting_date=add_days(today(), days=-1),
+		)
+
+		if docname := frappe.db.exists("Repost Item Valuation", {"voucher_no": pr1.name}):
+			self.assertFalse(
+				frappe.db.get_value(
+					"File",
+					{"attached_to_doctype": "Repost Item Valuation", "attached_to_name": docname},
+					"name",
+				)
+			)
+		else:
+			repost_entries = create_item_wise_repost_entries(pr1.doctype, pr1.name)
+			for entry in repost_entries:
+				self.assertFalse(
+					frappe.db.get_value(
+						"File",
+						{"attached_to_doctype": "Repost Item Valuation", "attached_to_name": entry.name},
+						"name",
+					)
+				)

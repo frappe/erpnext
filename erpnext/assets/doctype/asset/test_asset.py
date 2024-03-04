@@ -251,16 +251,7 @@ class TestAsset(AssetSetup):
 				flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
 				0.0,
 			),
-			(
-				"_Test Fixed Asset - _TC",
-				0.0,
-				flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
-			),
-			(
-				"_Test Fixed Asset - _TC",
-				0.0,
-				flt(82000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
-			),
+			("_Test Fixed Asset - _TC", 0.0, 100000.0),
 			(
 				"_Test Gain/Loss on Asset Disposal - _TC",
 				flt(82000.0 - pro_rata_amount, asset.precision("gross_purchase_amount")),
@@ -900,7 +891,7 @@ class TestDepreciationMethods(AssetSetup):
 			["2030-12-31", 28630.14, 28630.14],
 			["2031-12-31", 35684.93, 64315.07],
 			["2032-12-31", 17842.46, 82157.53],
-			["2033-06-06", 5342.47, 87500.0],
+			["2033-06-06", 5342.46, 87499.99],
 		]
 
 		schedules = [
@@ -1012,7 +1003,7 @@ class TestDepreciationBasics(AssetSetup):
 		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active")
 
 		depreciation_amount = get_depreciation_amount(
-			asset_depr_schedule_doc, asset, 100000, asset.finance_books[0]
+			asset_depr_schedule_doc, asset, 100000, 100000, asset.finance_books[0]
 		)
 		self.assertEqual(depreciation_amount, 30000)
 

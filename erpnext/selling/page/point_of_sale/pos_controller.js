@@ -360,7 +360,7 @@ erpnext.PointOfSale.Controller = class {
 							this.order_summary.load_summary_of(this.frm.doc, true);
 							frappe.show_alert({
 								indicator: 'green',
-								message: __('POS invoice {0} created succesfully', [r.doc.name])
+								message: __('POS invoice {0} created successfully', [r.doc.name])
 							});
 						});
 				}

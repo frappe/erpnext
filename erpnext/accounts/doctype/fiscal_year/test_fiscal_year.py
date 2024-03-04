@@ -39,7 +39,7 @@ def test_record_generator():
 	]
 
 	start = 2012
-	end = now_datetime().year + 5
+	end = now_datetime().year + 25
 	for year in range(start, end):
 		test_records.append(
 			{

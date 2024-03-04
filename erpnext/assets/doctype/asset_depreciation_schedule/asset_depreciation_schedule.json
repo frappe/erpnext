@@ -9,6 +9,7 @@
  "field_order": [
   "asset",
   "naming_series",
+  "company",
   "column_break_2",
   "gross_purchase_amount",
   "opening_accumulated_depreciation",
@@ -193,12 +194,20 @@
    "fieldtype": "Check",
    "label": "Depreciate based on shifts",
    "read_only": 1
+  },
+  {
+   "fetch_from": "asset.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-29 00:57:00.461998",
+ "modified": "2024-01-08 16:31:04.533928",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Depreciation Schedule",

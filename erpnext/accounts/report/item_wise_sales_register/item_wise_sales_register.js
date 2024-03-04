@@ -59,7 +59,21 @@ frappe.query_reports["Item-wise Sales Register"] = {
 			"fieldname": "group_by",
 			"fieldtype": "Select",
 			"options": ["Customer Group", "Customer", "Item Group", "Item", "Territory", "Invoice"]
-		}
+		},
+		{
+			"fieldname": "income_account",
+			"label": __("Income Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			get_query: () => {
+				let company = frappe.query_report.get_filter_value('company');
+				return {
+					filters: {
+						'company': company,
+					}
+				};
+			}
+		},
 	],
 	"formatter": function(value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);

@@ -76,6 +76,7 @@ class TestBankReconciliationTool(AccountsTestMixin, FrappeTestCase):
 					"deposit": 100,
 					"bank_account": self.bank_account,
 					"reference_number": "123",
+					"currency": "INR",
 				}
 			)
 			.save()

@@ -26,6 +26,7 @@ class StockReconciliationItem(Document):
 		current_valuation_rate: DF.Currency
 		has_item_scanned: DF.Data | None
 		item_code: DF.Link
+		item_group: DF.Link | None
 		item_name: DF.Data | None
 		parent: DF.Data
 		parentfield: DF.Data
@@ -34,6 +35,7 @@ class StockReconciliationItem(Document):
 		quantity_difference: DF.ReadOnly | None
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.LongText | None
+		use_serial_batch_fields: DF.Check
 		valuation_rate: DF.Currency
 		warehouse: DF.Link
 	# end: auto-generated types

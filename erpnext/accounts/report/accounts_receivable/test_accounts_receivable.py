@@ -772,3 +772,92 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		# post sorting output should be [[Additional Debtors, ...], [Debtors, ...]]
 		report_output = sorted(report_output, key=lambda x: x[0])
 		self.assertEqual(expected_data, report_output)
+
+	def test_future_payments_on_foreign_currency(self):
+		self.customer2 = (
+			frappe.get_doc(
+				{
+					"doctype": "Customer",
+					"customer_name": "Jane Doe",
+					"type": "Individual",
+					"default_currency": "USD",
+				}
+			)
+			.insert()
+			.submit()
+		)
+
+		si = self.create_sales_invoice(do_not_submit=True)
+		si.posting_date = add_days(today(), -1)
+		si.customer = self.customer2
+		si.currency = "USD"
+		si.conversion_rate = 80
+		si.debit_to = self.debtors_usd
+		si.save().submit()
+
+		# full payment in USD
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), 1)
+		pe.base_received_amount = 7500
+		pe.received_amount = 7500
+		pe.source_exchange_rate = 75
+		pe.save().submit()
+
+		filters = frappe._dict(
+			{
+				"company": self.company,
+				"report_date": today(),
+				"range1": 30,
+				"range2": 60,
+				"range3": 90,
+				"range4": 120,
+				"show_future_payments": True,
+				"in_party_currency": False,
+			}
+		)
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+
+		expected_data = [8000.0, 8000.0, 500.0, 7500.0]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
+		)
+
+		filters.in_party_currency = True
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, 0.0, 100.0]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
+		)
+
+		pe.cancel()
+		# partial payment in USD on a future date
+		pe = get_payment_entry(si.doctype, si.name)
+		pe.posting_date = add_days(today(), 1)
+		pe.base_received_amount = 6750
+		pe.received_amount = 6750
+		pe.source_exchange_rate = 75
+		pe.paid_amount = 90  # in USD
+		pe.references[0].allocated_amount = 90
+		pe.save().submit()
+
+		filters.in_party_currency = False
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [8000.0, 8000.0, 1250.0, 6750.0]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
+		)
+
+		filters.in_party_currency = True
+		report = execute(filters)[1]
+		self.assertEqual(len(report), 1)
+		expected_data = [100.0, 100.0, 10.0, 90.0]
+		row = report[0]
+		self.assertEqual(
+			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
+		)

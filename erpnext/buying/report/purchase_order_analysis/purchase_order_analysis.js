@@ -54,7 +54,7 @@ frappe.query_reports["Purchase Order Analysis"] = {
 			"fieldtype": "MultiSelectList",
 			"width": "80",
 			get_data: function(txt) {
-				let status = ["To Bill", "To Receive", "To Receive and Bill", "Completed"]
+				let status = ["To Pay", "To Bill", "To Receive", "To Receive and Bill", "Completed"]
 				let options = []
 				for (let option of status){
 					options.push({

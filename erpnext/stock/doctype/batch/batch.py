@@ -9,7 +9,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
 from frappe.query_builder.functions import CurDate, Sum
-from frappe.utils import cint, flt, get_link_to_form, nowtime, today
+from frappe.utils import cint, flt, get_link_to_form
 from frappe.utils.data import add_days
 from frappe.utils.jinja import render_template
 
@@ -248,8 +248,9 @@ def get_batches_by_oldest(item_code, warehouse):
 
 
 @frappe.whitelist()
-def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
-
+def split_batch(
+	batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None
+):
 	"""Split the batch into a new batch"""
 	batch = frappe.get_doc(dict(doctype="Batch", item=item_code, batch_id=new_batch_id)).insert()
 	qty = flt(qty)
@@ -257,29 +258,21 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 	company = frappe.db.get_value("Warehouse", warehouse, "company")
 
 	from_bundle_id = make_batch_bundle(
-		frappe._dict(
-			{
-				"item_code": item_code,
-				"warehouse": warehouse,
-				"batches": frappe._dict({batch_no: qty}),
-				"company": company,
-				"type_of_transaction": "Outward",
-				"qty": qty,
-			}
-		)
+		item_code=item_code,
+		warehouse=warehouse,
+		batches=frappe._dict({batch_no: qty}),
+		company=company,
+		type_of_transaction="Outward",
+		qty=qty,
 	)
 
 	to_bundle_id = make_batch_bundle(
-		frappe._dict(
-			{
-				"item_code": item_code,
-				"warehouse": warehouse,
-				"batches": frappe._dict({batch.name: qty}),
-				"company": company,
-				"type_of_transaction": "Inward",
-				"qty": qty,
-			}
-		)
+		item_code=item_code,
+		warehouse=warehouse,
+		batches=frappe._dict({batch.name: qty}),
+		company=company,
+		type_of_transaction="Inward",
+		qty=qty,
 	)
 
 	stock_entry = frappe.get_doc(
@@ -304,21 +297,30 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 	return batch.name
 
 
-def make_batch_bundle(kwargs):
+def make_batch_bundle(
+	item_code: str,
+	warehouse: str,
+	batches: dict[str, float],
+	company: str,
+	type_of_transaction: str,
+	qty: float,
+):
+	from frappe.utils import nowtime, today
+
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 	return (
 		SerialBatchCreation(
 			{
-				"item_code": kwargs.item_code,
-				"warehouse": kwargs.warehouse,
+				"item_code": item_code,
+				"warehouse": warehouse,
 				"posting_date": today(),
 				"posting_time": nowtime(),
 				"voucher_type": "Stock Entry",
-				"qty": flt(kwargs.qty),
-				"type_of_transaction": kwargs.type_of_transaction,
-				"company": kwargs.company,
-				"batches": kwargs.batches,
+				"qty": qty,
+				"type_of_transaction": type_of_transaction,
+				"company": company,
+				"batches": batches,
 				"do_not_submit": True,
 			}
 		)

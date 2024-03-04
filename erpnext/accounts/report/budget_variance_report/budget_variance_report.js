@@ -84,10 +84,6 @@ function get_filters() {
 			options: budget_against_options,
 			default: "Cost Center",
 			reqd: 1,
-			get_data: function() {
-				console.log(this.options);
-				return ["Emacs", "Rocks"];
-			},
 			on_change: function() {
 				frappe.query_report.set_filter_value("budget_against_filter", []);
 				frappe.query_report.refresh();

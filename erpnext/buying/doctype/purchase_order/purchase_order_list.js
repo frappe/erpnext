@@ -1,6 +1,6 @@
 frappe.listview_settings['Purchase Order'] = {
 	add_fields: ["base_grand_total", "company", "currency", "supplier",
-		"supplier_name", "per_received", "per_billed", "status"],
+		"supplier_name", "per_received", "per_billed", "status", "advance_payment_status"],
 	get_indicator: function (doc) {
 		if (doc.status === "Closed") {
 			return [__("Closed"), "green", "status,=,Closed"];
@@ -8,6 +8,8 @@ frappe.listview_settings['Purchase Order'] = {
 			return [__("On Hold"), "orange", "status,=,On Hold"];
 		} else if (doc.status === "Delivered") {
 			return [__("Delivered"), "green", "status,=,Closed"];
+		} else if (doc.advance_payment_status == "Initiated") {
+			return [__("To Pay"), "gray", "advance_payment_status,=,Initiated"];
 		} else if (flt(doc.per_received, 2) < 100 && doc.status !== "Closed") {
 			if (flt(doc.per_billed, 2) < 100) {
 				return [__("To Receive and Bill"), "orange",

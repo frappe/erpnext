@@ -51,7 +51,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "\nTrialling\nActive\nPast Due Date\nCancelled\nUnpaid\nCompleted",
+   "options": "\nTrialing\nActive\nPast Due Date\nCancelled\nUnpaid\nCompleted",
    "read_only": 1
   },
   {
@@ -267,7 +267,7 @@
    "link_fieldname": "subscription"
   }
  ],
- "modified": "2023-12-28 17:20:42.687789",
+ "modified": "2024-01-24 02:20:26.145996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
