@@ -1299,7 +1299,7 @@ class PaymentEntry(AccountsController):
 		if getdate(posting_date) < getdate(self.posting_date):
 			posting_date = self.posting_date
 
-		dr_or_cr = "credit" if invoice.reference_doctype == "Sales Invoice" else "debit"
+		dr_or_cr = "credit" if invoice.reference_doctype in ["Sales Invoice", "Sales Order"] else "debit"
 		args_dict["account"] = invoice.account
 		args_dict[dr_or_cr] = invoice.allocated_amount
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
