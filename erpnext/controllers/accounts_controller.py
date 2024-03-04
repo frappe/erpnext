@@ -1871,7 +1871,10 @@ class AccountsController(TransactionBase):
 				advance_paid, precision=self.precision("advance_paid"), currency=advance.account_currency
 			)
 
-			frappe.db.set_value(self.doctype, self.name, "party_account_currency", advance.account_currency)
+			if advance.account_currency:
+				frappe.db.set_value(
+					self.doctype, self.name, "party_account_currency", advance.account_currency
+				)
 
 			if advance.account_currency == self.currency:
 				order_total = self.get("rounded_total") or self.grand_total
