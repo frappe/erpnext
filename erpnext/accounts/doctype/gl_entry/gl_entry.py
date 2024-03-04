@@ -127,7 +127,7 @@ class GLEntry(Document):
 			frappe.throw(msg, title=_("Missing Cost Center"))
 
 	def validate_dimensions_for_pl_and_bs(self):
-		account_type = frappe.db.get_value("Account", self.account, "report_type")
+		account_type = frappe.get_cached_value("Account", self.account, "report_type")
 
 		for dimension in get_checks_for_pl_and_bs_accounts():
 			if (
@@ -252,7 +252,7 @@ class GLEntry(Document):
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
-		balance_must_be = frappe.db.get_value("Account", account, "balance_must_be")
+		balance_must_be = frappe.get_cached_value("Account", account, "balance_must_be")
 		if balance_must_be:
 			balance = frappe.db.sql(
 				"""select sum(debit) - sum(credit)
