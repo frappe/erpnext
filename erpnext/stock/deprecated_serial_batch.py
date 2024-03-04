@@ -61,7 +61,9 @@ class DeprecatedSerialNoValuation:
 					& (table.serial_and_batch_bundle.isnull())
 					& (table.actual_qty > 0)
 					& (table.is_cancelled == 0)
-					& (table.posting_datetime <= get_combine_datetime(self.sle.posting_date, self.sle.posting_time))
+					& (
+						table.posting_datetime <= get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
+					)
 				)
 				.orderby(table.posting_datetime, order=Order.desc)
 				.limit(1)
