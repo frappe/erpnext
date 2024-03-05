@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-02-22 19:45\n"
+"PO-Revision-Date: 2024-02-29 05:57\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -17540,7 +17540,7 @@ msgstr ""
 #: buying/doctype/supplier_scorecard_variable/supplier_scorecard_variable.py:46
 #: buying/doctype/supplier_scorecard_variable/supplier_scorecard_variable.py:50
 msgid "Could not find path for "
-msgstr ""
+msgstr "Konnte keinen Pfad finden für "
 
 #: accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:128
 #: accounts/report/financial_statements.py:236
@@ -21473,7 +21473,7 @@ msgstr "Standard Provisorisches Konto"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Default Purchase Unit of Measure"
-msgstr "Standard Maßeinheit Verkauf"
+msgstr "Standard Maßeinheit Einkauf"
 
 #. Label of a Data field in DocType 'CRM Settings'
 #: crm/doctype/crm_settings/crm_settings.json
@@ -27364,7 +27364,7 @@ msgstr ""
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:195
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:119
 msgid "FIFO/LIFO Queue"
-msgstr ""
+msgstr "FIFO/LIFO-Warteschlange"
 
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:62
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:13
@@ -60274,11 +60274,11 @@ msgstr "Routing-Name"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:428
 msgid "Row #"
-msgstr ""
+msgstr "Zeile #"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:334
 msgid "Row # {0}:"
-msgstr ""
+msgstr "Zeile # {0}:"
 
 #: controllers/sales_and_purchase_return.py:181
 msgid "Row # {0}: Cannot return more than {1} for Item {2}"
@@ -60304,15 +60304,15 @@ msgstr "Zeile {0} (Zahlungstabelle): Betrag muss positiv sein"
 
 #: stock/doctype/item/item.py:480
 msgid "Row #{0}: A reorder entry already exists for warehouse {1} with reorder type {2}."
-msgstr ""
+msgstr "Zeile #{0}: Für das Lager {1} mit dem Nachbestellungstyp {2} ist bereits ein Nachbestellungseintrag vorhanden."
 
 #: stock/doctype/quality_inspection/quality_inspection.py:235
 msgid "Row #{0}: Acceptance Criteria Formula is incorrect."
-msgstr ""
+msgstr "Zeile #{0}: Die Formel für die Akzeptanzkriterien ist falsch."
 
 #: stock/doctype/quality_inspection/quality_inspection.py:215
 msgid "Row #{0}: Acceptance Criteria Formula is required."
-msgstr ""
+msgstr "Zeile #{0}: Die Formel für die Akzeptanzkriterien ist erforderlich."
 
 #: controllers/subcontracting_controller.py:72
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:413
@@ -60446,7 +60446,7 @@ msgstr "Zeile {0}: Voraussichtlicher Liefertermin kann nicht vor Bestelldatum se
 
 #: controllers/stock_controller.py:336
 msgid "Row #{0}: Expense Account not set for the Item {1}. {2}"
-msgstr ""
+msgstr "Zeile #{0}: Aufwandskonto für den Artikel nicht festgelegt {1}. {2}"
 
 #: buying/doctype/purchase_order/purchase_order.py:378
 msgid "Row #{0}: Finished Good Item Qty can not be zero"
@@ -60474,7 +60474,7 @@ msgstr "Zeile #{0}: Für {1} können Sie den Referenzbeleg nur auswählen, wenn 
 
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.py:44
 msgid "Row #{0}: From Date cannot be before To Date"
-msgstr ""
+msgstr "Zeile #{0}: Von-Datum kann nicht vor Bis-Datum liegen"
 
 #: public/js/utils/barcode_scanner.js:489
 msgid "Row #{0}: Item added"
@@ -60546,7 +60546,7 @@ msgstr ""
 
 #: public/js/utils/barcode_scanner.js:487
 msgid "Row #{0}: Qty increased by {1}"
-msgstr ""
+msgstr "Zeile #{0}: Menge erhöht um {1}"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:264
 #: assets/doctype/asset_capitalization/asset_capitalization.py:306
@@ -60555,7 +60555,7 @@ msgstr "Zeile #{0}: Menge muss eine positive Zahl sein"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:301
 msgid "Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Iem {2} against Batch {3} in Warehouse {4}."
-msgstr ""
+msgstr "Zeile #{0}: Die Menge sollte kleiner oder gleich der verfügbaren Menge zum Reservieren sein (Ist-Menge – reservierte Menge) {1} für Artikel {2} der Charge {3} im Lager {4}."
 
 #: controllers/accounts_controller.py:1018
 #: controllers/accounts_controller.py:3166
@@ -60564,15 +60564,15 @@ msgstr "Zeile {0}: Artikelmenge {1} kann nicht Null sein."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1017
 msgid "Row #{0}: Quantity to reserve for the Item {1} should be greater than 0."
-msgstr ""
+msgstr "Zeile #{0}: Die zu reservierende Menge für den Artikel {1} sollte größer als 0 sein."
 
 #: utilities/transaction_base.py:113 utilities/transaction_base.py:119
 msgid "Row #{0}: Rate must be same as {1}: {2} ({3} / {4})"
-msgstr ""
+msgstr "Zeile #{0}: Einzelpreis muss gleich sein wie {1}: {2} ({3} / {4})"
 
 #: controllers/buying_controller.py:470
 msgid "Row #{0}: Received Qty must be equal to Accepted + Rejected Qty for Item {1}"
-msgstr ""
+msgstr "Zeile #{0}: Die erhaltene Menge muss gleich der angenommenen + abgelehnten Menge für Artikel {1} sein"
 
 #: accounts/doctype/payment_entry/payment_entry.js:1016
 msgid "Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry"
@@ -60655,23 +60655,23 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:975
 msgid "Row #{0}: Stock cannot be reserved in group warehouse {1}."
-msgstr ""
+msgstr "Zeile #{0}: Bestand kann nicht im Gruppenlager {1} reserviert werden."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:989
 msgid "Row #{0}: Stock is already reserved for the Item {1}."
-msgstr ""
+msgstr "Zeile #{0}: Für den Artikel {1} ist bereits ein Lagerbestand reserviert."
 
 #: stock/doctype/delivery_note/delivery_note.py:605
 msgid "Row #{0}: Stock is reserved for item {1} in warehouse {2}."
-msgstr ""
+msgstr "Zeile #{0}: Der Bestand ist für den Artikel {1} im Lager {2} reserviert."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:285
 msgid "Row #{0}: Stock not available to reserve for Item {1} against Batch {2} in Warehouse {3}."
-msgstr ""
+msgstr "Zeile #{0}: Bestand nicht verfügbar für Artikel {1} von Charge {2} im Lager {3}."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1003
 msgid "Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}."
-msgstr ""
+msgstr "Zeile #{0}: Kein Bestand für den Artikel {1} im Lager {2} verfügbar."
 
 #: controllers/stock_controller.py:110
 msgid "Row #{0}: The batch {1} has already expired."
@@ -60679,7 +60679,7 @@ msgstr "Zeile {0}: Der Stapel {1} ist bereits abgelaufen."
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1687
 msgid "Row #{0}: The following Serial Nos are not present in Delivery Note {1}:"
-msgstr ""
+msgstr "Zeile #{0}: Die folgenden Seriennummern sind nicht im Lieferschein {1} enthalten:"
 
 #: manufacturing/doctype/workstation/workstation.py:116
 msgid "Row #{0}: Timings conflicts with row {1}"
@@ -60691,11 +60691,11 @@ msgstr ""
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1402
 msgid "Row #{0}: You must select an Asset for Item {1}."
-msgstr ""
+msgstr "Zeile #{0}: Sie müssen einen Vermögensgegenstand für Artikel {1} auswählen."
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1696
 msgid "Row #{0}: {1} Serial numbers required for Item {2}. You have provided {3}."
-msgstr ""
+msgstr "Zeile #{0}: {1} Seriennummern erforderlich für Artikel {2}. Sie haben {3} angegeben."
 
 #: controllers/buying_controller.py:483 public/js/controllers/buying.js:208
 msgid "Row #{0}: {1} can not be negative for item {2}"
@@ -60715,7 +60715,7 @@ msgstr "Zeile #{0}: {1} von {2} sollte {3} sein. Bitte aktualisieren Sie die {1}
 
 #: buying/utils.py:106
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
-msgstr ""
+msgstr "Zeile #{1}: Lager ist obligatorisch für Artikel {0}"
 
 #: assets/doctype/asset_category/asset_category.py:65
 msgid "Row #{}: Currency of {} - {} doesn't matches company currency."
@@ -60735,7 +60735,7 @@ msgstr "Zeile # {}: Artikelcode: {} ist unter Lager {} nicht verfügbar."
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:99
 msgid "Row #{}: Original Invoice {} of return invoice {} is {}."
-msgstr ""
+msgstr "Zeile #{}: Originalrechnung {} der Rechnungskorrektur {} ist {}."
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:87
 msgid "Row #{}: POS Invoice {} has been {}"
@@ -60787,7 +60787,7 @@ msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:433
 msgid "Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}"
-msgstr ""
+msgstr "Zeile Nr. {0}: Lager ist erforderlich. Bitte legen Sie ein Standardlager für Artikel {1} und Unternehmen {2} fest"
 
 #: manufacturing/doctype/job_card/job_card.py:599
 msgid "Row {0} : Operation is required against the raw material item {1}"
@@ -60803,11 +60803,11 @@ msgstr ""
 
 #: stock/doctype/stock_entry/stock_entry.py:1159
 msgid "Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
-msgstr ""
+msgstr "Zeile {0}# Artikel {1} wurde in der Tabelle „Gelieferte Rohstoffe“ in {2} {3} nicht gefunden"
 
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:190
 msgid "Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time."
-msgstr ""
+msgstr "Zeile {0}: Die akzeptierte Menge und die abgelehnte Menge können nicht gleichzeitig Null sein."
 
 #: accounts/doctype/journal_entry/journal_entry.py:509
 msgid "Row {0}: Account {1} and Party Type {2} have different account types"
@@ -60815,7 +60815,7 @@ msgstr ""
 
 #: controllers/accounts_controller.py:2536
 msgid "Row {0}: Account {1} is a Group Account"
-msgstr ""
+msgstr "Zeile {0}: Konto {1} ist eine Kontogruppe"
 
 #: projects/doctype/timesheet/timesheet.py:117
 msgid "Row {0}: Activity Type is mandatory."
@@ -60851,7 +60851,7 @@ msgstr "Zeile {0}: Umrechnungsfaktor ist zwingend erfoderlich"
 
 #: controllers/accounts_controller.py:2549
 msgid "Row {0}: Cost Center {1} does not belong to Company {2}"
-msgstr ""
+msgstr "Zeile {0}: Die Kostenstelle {1} gehört nicht zum Unternehmen {2}"
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:116
 msgid "Row {0}: Cost center is required for an item {1}"
@@ -60945,11 +60945,11 @@ msgstr ""
 
 #: controllers/buying_controller.py:400 controllers/selling_controller.py:479
 msgid "Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-msgstr ""
+msgstr "Zeile {0}: Der Einzelpreis wurde gemäß dem Bewertungskurs aktualisiert, da es sich um eine interne Umlagerung handelt"
 
 #: controllers/subcontracting_controller.py:98
 msgid "Row {0}: Item {1} must be a stock item."
-msgstr ""
+msgstr "Zeile {0}: Artikel {1} muss ein Lagerartikel sein."
 
 #: controllers/subcontracting_controller.py:103
 msgid "Row {0}: Item {1} must be a subcontracted item."
@@ -60961,7 +60961,7 @@ msgstr ""
 
 #: stock/doctype/packing_slip/packing_slip.py:148
 msgid "Row {0}: Packing Slip is already created for Item {1}."
-msgstr ""
+msgstr "Zeile {0}: Für den Artikel {1} wurde bereits ein Packzettel erstellt."
 
 #: accounts/doctype/journal_entry/journal_entry.py:687
 msgid "Row {0}: Party / Account does not match with {1} / {2} in {3} {4}"
@@ -60989,15 +60989,15 @@ msgstr ""
 
 #: controllers/subcontracting_controller.py:118
 msgid "Row {0}: Please select a BOM for Item {1}."
-msgstr ""
+msgstr "Zeile {0}: Bitte wählen Sie eine Stückliste für Artikel {1}."
 
 #: controllers/subcontracting_controller.py:111
 msgid "Row {0}: Please select an active BOM for Item {1}."
-msgstr ""
+msgstr "Zeile {0}: Bitte wählen Sie eine aktive Stückliste für Artikel {1}."
 
 #: controllers/subcontracting_controller.py:115
 msgid "Row {0}: Please select an valid BOM for Item {1}."
-msgstr ""
+msgstr "Zeile {0}: Bitte wählen Sie eine gültige Stückliste für Artikel {1}."
 
 #: regional/italy/utils.py:310
 msgid "Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges"
@@ -62734,7 +62734,7 @@ msgstr "Barcode scannen"
 
 #: public/js/utils/serial_no_batch_selector.js:151
 msgid "Scan Batch No"
-msgstr ""
+msgstr "Chargennummer scannen"
 
 #. Label of a Check field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
@@ -62750,15 +62750,15 @@ msgstr "Scan-Modus"
 
 #: public/js/utils/serial_no_batch_selector.js:136
 msgid "Scan Serial No"
-msgstr ""
+msgstr "Seriennummer scannen"
 
 #: public/js/utils/barcode_scanner.js:172
 msgid "Scan barcode for item {0}"
-msgstr ""
+msgstr "Barcode für Artikel {0} scannen"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.js:94
 msgid "Scan mode enabled, existing quantity will not be fetched."
-msgstr ""
+msgstr "Scanmodus aktiviert, vorhandene Menge wird nicht abgerufen."
 
 #. Label of a Attach field in DocType 'Cheque Print Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
@@ -62768,7 +62768,7 @@ msgstr "Gescannte Scheck"
 
 #: public/js/utils/barcode_scanner.js:238
 msgid "Scanned Quantity"
-msgstr ""
+msgstr "Gescannte Menge"
 
 #. Label of a Section Break field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
@@ -62837,7 +62837,7 @@ msgstr "Geplante Zeit"
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Scheduled Time Logs"
-msgstr ""
+msgstr "Geplante Zeitprotokolle"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.py:84
 #: accounts/doctype/ledger_merge/ledger_merge.py:39
@@ -63269,7 +63269,7 @@ msgstr "Ansicht auswählen"
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:248
 msgid "Select Vouchers to Match"
-msgstr ""
+msgstr "Passende Belege auswählen"
 
 #: public/js/stock_analytics.js:46
 msgid "Select Warehouse..."
@@ -63289,7 +63289,7 @@ msgstr "Wählen Sie ein Unternehmen, zu dem dieser Mitarbeiter gehört."
 
 #: buying/doctype/supplier/supplier.js:160
 msgid "Select a Customer"
-msgstr ""
+msgstr "Wählen Sie einen Kunden"
 
 #: support/doctype/service_level_agreement/service_level_agreement.py:111
 msgid "Select a Default Priority."
@@ -63309,7 +63309,7 @@ msgstr "Wählen Sie eine Firma aus"
 
 #: stock/doctype/item/item.js:809
 msgid "Select an Item Group."
-msgstr ""
+msgstr "Wählen Sie eine Artikelgruppe."
 
 #: accounts/report/general_ledger/general_ledger.py:31
 msgid "Select an account to print in account currency"
@@ -63358,16 +63358,16 @@ msgstr ""
 
 #: manufacturing/doctype/work_order/work_order.js:807
 msgid "Select the Item to be manufactured."
-msgstr ""
+msgstr "Wählen Sie den Artikel, der hergestellt werden soll."
 
 #: manufacturing/doctype/bom/bom.js:725
 msgid "Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically."
-msgstr ""
+msgstr "Wählen Sie den Artikel, der hergestellt werden soll. Der Name des Artikels, die ME, das Unternehmen und die Währung werden automatisch abgerufen."
 
 #: manufacturing/doctype/production_plan/production_plan.js:294
 #: manufacturing/doctype/production_plan/production_plan.js:305
 msgid "Select the Warehouse"
-msgstr ""
+msgstr "Wählen Sie das Lager aus"
 
 #: accounts/doctype/bank_guarantee/bank_guarantee.py:47
 msgid "Select the customer or supplier."
@@ -63375,11 +63375,11 @@ msgstr "Wählen Sie den Kunden oder den Lieferanten aus."
 
 #: www/book_appointment/index.html:16
 msgid "Select the date and your timezone"
-msgstr ""
+msgstr "Wählen Sie das Datum und Ihre Zeitzone"
 
 #: manufacturing/doctype/bom/bom.js:740
 msgid "Select the raw materials (Items) required to manufacture the Item"
-msgstr ""
+msgstr "Wählen Sie die Rohstoffe (Artikel) aus, die zur Herstellung des Artikels benötigt werden"
 
 #: manufacturing/doctype/bom/bom.js:338
 msgid "Select variant item code for the template item {0}"
@@ -63546,13 +63546,13 @@ msgstr "Senden nach (Tage)"
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Send Attached Files"
-msgstr ""
+msgstr "Angehängte Dateien senden"
 
 #. Label of a Check field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Send Document Print"
-msgstr ""
+msgstr "Ausdruck der Anfrage senden"
 
 #. Label of a Check field in DocType 'Request for Quotation Supplier'
 #: buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
@@ -63562,7 +63562,7 @@ msgstr "E-Mail absenden"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:11
 msgid "Send Emails"
-msgstr ""
+msgstr "E-Mails senden"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:46
 msgid "Send Emails to Suppliers"
@@ -63661,19 +63661,19 @@ msgstr "Sequenz-ID"
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.json
 msgctxt "Incoming Call Settings"
 msgid "Sequential"
-msgstr ""
+msgstr "Sequentiell"
 
 #. Label of a Tab Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Serial & Batch Item"
-msgstr ""
+msgstr "Serien- und Chargenartikel"
 
 #. Label of a Section Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Serial & Batch Item Settings"
-msgstr ""
+msgstr "Einstellungen für Serien- und Chargenartikel"
 
 #. Label of a Link field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
@@ -63695,7 +63695,7 @@ msgstr ""
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Serial / Batch No"
-msgstr ""
+msgstr "Serien-/Chargennr"
 
 #: public/js/utils.js:124
 msgid "Serial / Batch Nos"
@@ -63979,16 +63979,16 @@ msgstr "Seriennummer: {0} wurde bereits in eine andere POS-Rechnung übertragen.
 #: public/js/utils/serial_no_batch_selector.js:178
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:48
 msgid "Serial Nos"
-msgstr ""
+msgstr "Seriennummern"
 
 #: public/js/utils/serial_no_batch_selector.js:20
 #: public/js/utils/serial_no_batch_selector.js:183
 msgid "Serial Nos / Batch Nos"
-msgstr ""
+msgstr "Serien-/Chargennummern"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1692
 msgid "Serial Nos Mismatch"
-msgstr ""
+msgstr "Seriennummern stimmen nicht überein"
 
 #. Label of a Section Break field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -63998,11 +63998,11 @@ msgstr "Seriennummern und Chargen"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1074
 msgid "Serial Nos are created successfully"
-msgstr ""
+msgstr "Seriennummern wurden erfolgreich erstellt"
 
 #: stock/stock_ledger.py:1972
 msgid "Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
-msgstr ""
+msgstr "Seriennummern sind bereits reserviert. Sie müssen die Reservierung aufheben, bevor Sie fortfahren."
 
 #. Label of a Data field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -64762,7 +64762,7 @@ msgstr "Grundpreis manuell einstellen"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:150
 msgid "Set Default Supplier"
-msgstr ""
+msgstr "Standard-Lieferant festlegen"
 
 #. Label of a Button field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -64835,7 +64835,7 @@ msgstr ""
 #: projects/doctype/project/project.js:118
 #: projects/doctype/project/project.js:132
 msgid "Set Project Status"
-msgstr ""
+msgstr "Projektstatus festlegen"
 
 #: projects/doctype/project/project.js:154
 msgid "Set Project and all Tasks to status {0}?"
@@ -64923,7 +64923,7 @@ msgstr ""
 
 #: selling/doctype/sales_order/sales_order.js:184
 msgid "Set Warehouse"
-msgstr ""
+msgstr "Lager festlegen"
 
 #: crm/doctype/opportunity/opportunity_list.js:17
 #: support/doctype/issue/issue_list.js:12
