@@ -399,7 +399,12 @@ class DeliveryNote(SellingController):
 		elif self.issue_credit_note:
 			self.make_return_invoice()
 
-		self.make_bundle_using_old_serial_batch_fields()
+		for table_name in ["items", "packed_items"]:
+			if not self.get(table_name):
+				continue
+
+			self.make_bundle_using_old_serial_batch_fields(table_name)
+
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		self.update_stock_ledger()

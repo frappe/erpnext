@@ -54,7 +54,7 @@ class StockEntryDetail(Document):
 		sample_quantity: DF.Int
 		sco_rm_detail: DF.Data | None
 		serial_and_batch_bundle: DF.Link | None
-		serial_no: DF.SmallText | None
+		serial_no: DF.Text | None
 		set_basic_rate_manually: DF.Check
 		ste_detail: DF.Data | None
 		stock_uom: DF.Link

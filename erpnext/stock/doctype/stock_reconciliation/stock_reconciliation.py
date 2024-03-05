@@ -834,6 +834,7 @@ class StockReconciliation(StockController):
 			if voucher_detail_no != row.name:
 				continue
 
+			val_rate = 0.0
 			current_qty = 0.0
 			if row.current_serial_and_batch_bundle:
 				current_qty = self.get_current_qty_for_serial_or_batch(row)
@@ -843,7 +844,6 @@ class StockReconciliation(StockController):
 					row.warehouse,
 					self.posting_date,
 					self.posting_time,
-					voucher_no=self.name,
 				)
 
 				current_qty = item_dict.get("qty")
@@ -885,7 +885,7 @@ class StockReconciliation(StockController):
 					{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
 					"name",
 				)
-				and (not row.current_serial_and_batch_bundle and not row.batch_no)
+				and (not row.current_serial_and_batch_bundle)
 			):
 				self.set_current_serial_and_batch_bundle(voucher_detail_no, save=True)
 				row.reload()
@@ -906,8 +906,13 @@ class StockReconciliation(StockController):
 
 	def has_negative_stock_allowed(self):
 		allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+		if allow_negative_stock:
+			return True
 
-		if all(d.serial_and_batch_bundle and flt(d.qty) == flt(d.current_qty) for d in self.items):
+		if any(
+			((d.serial_and_batch_bundle or d.batch_no) and flt(d.qty) == flt(d.current_qty))
+			for d in self.items
+		):
 			allow_negative_stock = True
 
 		return allow_negative_stock

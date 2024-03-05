@@ -5,7 +5,7 @@
 <div class="row {% if df.bold %}important{% endif %} data-field">
 	<div class="col-xs-{{ "9" if df.fieldtype=="Check" else "5" }}
 		{%- if doc.align_labels_right %} text-right{%- endif -%}">
-		<label>{{ _(df.label) }}</label>
+		<label>{{ _(df.label, context=df.parent) }}</label>
 	</div>
 	<div class="col-xs-{{ "3" if df.fieldtype=="Check" else "7" }} value">
 		{% if doc.get(df.fieldname) != None -%}

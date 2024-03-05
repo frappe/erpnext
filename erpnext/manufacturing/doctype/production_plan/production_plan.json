@@ -421,9 +421,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "When a parent warehouse is chosen, the system conducts stock checks against the associated child warehouses",
    "fieldname": "sub_assembly_warehouse",
    "fieldtype": "Link",
    "label": "Sub Assembly Warehouse",
+   "mandatory_depends_on": "eval:doc.skip_available_sub_assembly_item === 1",
    "options": "Warehouse"
   },
   {
@@ -437,7 +439,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-11 15:42:47.642481",
+ "modified": "2024-02-27 13:34:20.692211",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

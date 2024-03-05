@@ -839,6 +839,7 @@ class StockEntry(StockController):
 					currency=erpnext.get_company_currency(self.company),
 					company=self.company,
 					raise_error_if_no_rate=raise_error_if_no_rate,
+					batch_no=d.batch_no,
 					serial_and_batch_bundle=d.serial_and_batch_bundle,
 				)
 
@@ -867,7 +868,7 @@ class StockEntry(StockController):
 				if reset_outgoing_rate:
 					args = self.get_args_for_incoming_rate(d)
 					rate = get_incoming_rate(args, raise_error_if_no_rate)
-					if rate > 0:
+					if rate >= 0:
 						d.basic_rate = rate
 
 				d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
@@ -890,6 +891,8 @@ class StockEntry(StockController):
 				"allow_zero_valuation": item.allow_zero_valuation_rate,
 				"serial_and_batch_bundle": item.serial_and_batch_bundle,
 				"voucher_detail_no": item.name,
+				"batch_no": item.batch_no,
+				"serial_no": item.serial_no,
 			}
 		)
 
@@ -1030,7 +1033,7 @@ class StockEntry(StockController):
 		already_picked_serial_nos = []
 
 		for row in self.items:
-			if row.use_serial_batch_fields and (row.serial_no or row.batch_no):
+			if row.use_serial_batch_fields:
 				continue
 
 			if not row.s_warehouse:
@@ -1899,6 +1902,7 @@ class StockEntry(StockController):
 			return
 
 		id = create_serial_and_batch_bundle(
+			self,
 			row,
 			frappe._dict(
 				{
@@ -2169,7 +2173,7 @@ class StockEntry(StockController):
 			"to_warehouse": "",
 			"qty": qty,
 			"item_name": item.item_name,
-			"serial_and_batch_bundle": create_serial_and_batch_bundle(row, item, "Outward"),
+			"serial_and_batch_bundle": create_serial_and_batch_bundle(self, row, item, "Outward"),
 			"description": item.description,
 			"stock_uom": item.stock_uom,
 			"expense_account": item.expense_account,
@@ -2547,6 +2551,7 @@ class StockEntry(StockController):
 					row = frappe._dict({"serial_nos": serial_nos[0 : cint(d.qty)]})
 
 					id = create_serial_and_batch_bundle(
+						self,
 						row,
 						frappe._dict(
 							{
@@ -3070,7 +3075,7 @@ def get_stock_entry_data(work_order):
 	return data
 
 
-def create_serial_and_batch_bundle(row, child, type_of_transaction=None):
+def create_serial_and_batch_bundle(parent_doc, row, child, type_of_transaction=None):
 	item_details = frappe.get_cached_value(
 		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 	)
@@ -3088,6 +3093,8 @@ def create_serial_and_batch_bundle(row, child, type_of_transaction=None):
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,
 			"type_of_transaction": type_of_transaction,
+			"posting_date": parent_doc.posting_date,
+			"posting_time": parent_doc.posting_time,
 		}
 	)
 
