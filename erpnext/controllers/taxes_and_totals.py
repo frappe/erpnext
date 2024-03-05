@@ -97,6 +97,7 @@ class calculate_taxes_and_totals(object):
 				item_doc = frappe.get_cached_doc("Item", item.item_code)
 				args = {
 					"net_rate": item.net_rate or item.rate,
+					"base_net_rate": item.base_net_rate or item.base_rate,
 					"tax_category": self.doc.get("tax_category"),
 					"posting_date": self.doc.get("posting_date"),
 					"bill_date": self.doc.get("bill_date"),
@@ -1019,7 +1020,7 @@ def get_itemised_tax_breakup_data(doc):
 	for item_code, taxes in itemised_tax.items():
 		itemised_tax_data.append(
 			frappe._dict(
-				{"item": item_code, "taxable_amount": itemised_taxable_amount.get(item_code), **taxes}
+				{"item": item_code, "taxable_amount": itemised_taxable_amount.get(item_code, 0), **taxes}
 			)
 		)
 

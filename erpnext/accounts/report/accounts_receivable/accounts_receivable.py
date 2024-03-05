@@ -83,7 +83,10 @@ class ReceivablePayableReport(object):
 			self.skip_total_row = 1
 
 		if self.filters.get("in_party_currency"):
-			self.skip_total_row = 1
+			if self.filters.get("party") and len(self.filters.get("party")) == 1:
+				self.skip_total_row = 0
+			else:
+				self.skip_total_row = 1
 
 	def get_data(self):
 		self.get_ple_entries()

@@ -9,7 +9,7 @@ from frappe import _, msgprint, qb, scrub
 from frappe.contacts.doctype.address.address import get_company_address, get_default_address
 from frappe.core.doctype.user_permission.user_permission import get_permitted_documents
 from frappe.model.utils import get_fetch_values
-from frappe.query_builder.functions import Abs, Date, Sum
+from frappe.query_builder.functions import Abs, Count, Date, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -784,34 +784,37 @@ def get_timeline_data(doctype, name):
 	from frappe.desk.form.load import get_communication_data
 
 	out = {}
-	fields = "creation, count(*)"
 	after = add_years(None, -1).strftime("%Y-%m-%d")
-	group_by = "group by Date(creation)"
 
 	data = get_communication_data(
 		doctype,
 		name,
 		after=after,
-		group_by="group by creation",
-		fields="C.creation as creation, count(C.name)",
+		group_by="group by communication_date",
+		fields="C.communication_date as communication_date, count(C.name)",
 		as_dict=False,
 	)
 
 	# fetch and append data from Activity Log
-	data += frappe.db.sql(
-		"""select {fields}
-		from `tabActivity Log`
-		where (reference_doctype=%(doctype)s and reference_name=%(name)s)
-		or (timeline_doctype in (%(doctype)s) and timeline_name=%(name)s)
-		or (reference_doctype in ("Quotation", "Opportunity") and timeline_name=%(name)s)
-		and status!='Success' and creation > {after}
-		{group_by} order by creation desc
-		""".format(
-			fields=fields, group_by=group_by, after=after
-		),
-		{"doctype": doctype, "name": name},
-		as_dict=False,
-	)
+	activity_log = frappe.qb.DocType("Activity Log")
+	data += (
+		frappe.qb.from_(activity_log)
+		.select(activity_log.communication_date, Count(activity_log.name))
+		.where(
+			(
+				((activity_log.reference_doctype == doctype) & (activity_log.reference_name == name))
+				| ((activity_log.timeline_doctype == doctype) & (activity_log.timeline_name == name))
+				| (
+					(activity_log.reference_doctype.isin(["Quotation", "Opportunity"]))
+					& (activity_log.timeline_name == name)
+				)
+			)
+			& (activity_log.status != "Success")
+			& (activity_log.creation > after)
+		)
+		.groupby(activity_log.communication_date)
+		.orderby(activity_log.communication_date, order=frappe.qb.desc)
+	).run()
 
 	timeline_items = dict(data)
 

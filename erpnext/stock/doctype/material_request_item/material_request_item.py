@@ -41,6 +41,7 @@ class MaterialRequestItem(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		price_list_rate: DF.Currency
 		production_plan: DF.Link | None
 		project: DF.Link | None
 		projected_qty: DF.Float

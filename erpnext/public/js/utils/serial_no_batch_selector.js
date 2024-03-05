@@ -71,6 +71,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		let warehouse = this.item?.type_of_transaction === "Outward" ?
 			(this.item.warehouse || this.item.s_warehouse) : "";
 
+		if (this.frm.doc.doctype === 'Stock Entry') {
+			warehouse = this.item.s_warehouse || this.item.t_warehouse;
+		}
+
 		if (!warehouse && this.frm.doc.doctype === 'Stock Reconciliation') {
 			warehouse = this.get_warehouse();
 		}
@@ -367,19 +371,11 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					label: __('Batch No'),
 					in_list_view: 1,
 					get_query: () => {
-						if (this.item.type_of_transaction !== "Outward") {
-							return {
-								filters: {
-									'item': this.item.item_code,
-								}
-							}
-						} else {
-							return {
-								query : "erpnext.controllers.queries.get_batch_no",
-								filters: {
-									'item_code': this.item.item_code,
-									'warehouse': this.get_warehouse()
-								}
+						return {
+							query : "erpnext.controllers.queries.get_batch_no",
+							filters: {
+								'item_code': this.item.item_code,
+								'warehouse': this.item.s_warehouse || this.item.t_warehouse,
 							}
 						}
 					},

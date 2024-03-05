@@ -561,13 +561,14 @@ def modify_depreciation_schedule_for_asset_repairs(asset, notes):
 def reverse_depreciation_entry_made_after_disposal(asset, date):
 	for row in asset.get("finance_books"):
 		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active", row.finance_book)
+		if not asset_depr_schedule_doc or not asset_depr_schedule_doc.get("depreciation_schedule"):
+			continue
 
 		for schedule_idx, schedule in enumerate(asset_depr_schedule_doc.get("depreciation_schedule")):
-			if schedule.schedule_date == date:
+			if schedule.schedule_date == date and schedule.journal_entry:
 				if not disposal_was_made_on_original_schedule_date(
 					schedule_idx, row, date
 				) or disposal_happens_in_the_future(date):
-
 					reverse_journal_entry = make_reverse_journal_entry(schedule.journal_entry)
 					reverse_journal_entry.posting_date = nowdate()
 

@@ -4,7 +4,7 @@
  "allow_rename": 1,
  "autoname": "field:sales_person_name",
  "creation": "2013-01-10 16:34:24",
- "description": "All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.",
+ "description": "All Sales Transactions can be tagged against multiple Sales Persons so that you can set and monitor targets.",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
@@ -145,10 +145,11 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:11:13.968024",
+ "modified": "2024-01-30 13:57:26.436991",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
+ "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_sales_person",
  "owner": "Administrator",
  "permissions": [
@@ -181,5 +182,6 @@
  "search_fields": "parent_sales_person",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "states": []
 }

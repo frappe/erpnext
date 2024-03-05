@@ -11,6 +11,7 @@
   "bom_no",
   "column_break_6",
   "planned_qty",
+  "stock_uom",
   "warehouse",
   "planned_start_date",
   "section_break_9",
@@ -18,7 +19,6 @@
   "ordered_qty",
   "column_break_17",
   "description",
-  "stock_uom",
   "produced_qty",
   "reference_section",
   "sales_order",
@@ -65,6 +65,7 @@
    "width": "100px"
   },
   {
+   "columns": 1,
    "fieldname": "planned_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -80,6 +81,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -141,8 +143,10 @@
    "width": "200px"
   },
   {
+   "columns": 1,
    "fieldname": "stock_uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Data",
@@ -216,7 +220,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-11-25 14:15:40.061514",
+ "modified": "2024-02-27 13:24:43.571844",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Item",

@@ -1,0 +1,125 @@
+<style>
+	.job-card-link {
+		min-height: 100px;
+	}
+
+	.section-head-job-card {
+		margin-bottom: 0px;
+		padding-bottom: 0px;
+	}
+</style>
+
+<div style = "max-height: 400px; overflow-y: auto;">
+{% $.each(data, (idx, d) => { %}
+	<div class="row form-dashboard-section job-card-link form-links border-gray-200" data-name="{{d.name}}">
+		<div class="section-head section-head-job-card">
+			{{ d.operation }} - {{ d.production_item }}
+			<span class="ml-2 collapse-indicator-job mb-1" style="">
+				{{frappe.utils.icon("es-line-down", "sm", "mb-1")}}
+			</span>
+		</div>
+		<div class="row form-section" style="width:100%;margin-bottom:10px">
+			<div class="form-column col-sm-3">
+				<div class="frappe-control" title="{{__('Job Card')}}" style="text-decoration:underline">
+					{{ d.job_card_link }}
+				</div>
+				<div class="frappe-control" title="{{__('Work Order')}}" style="text-decoration:underline">
+					{{ d.work_order_link }}
+				</div>
+			</div>
+			<div class="form-column col-sm-2">
+				<div class="frappe-control timer" title="{{__('Timer')}}" style="text-align:center;font-size:14px;" data-job-card = {{escape(d.name)}}>
+					<span class="hours">00</span>
+					<span class="colon">:</span>
+					<span class="minutes">00</span>
+					<span class="colon">:</span>
+					<span class="seconds">00</span>
+				</div>
+
+				{% if(d.status === "Open") { %}
+					<div class="frappe-control" title="{{__('Expected Start Date')}}" style="text-align:center;font-size:11px;padding-top: 4px;">
+						{{ frappe.format(d.expected_start_date, { fieldtype: 'Datetime' }) }}
+					</div>
+				{% } else { %}
+					<div class="frappe-control" title="{{__('Expected End Date')}}" style="text-align:center;font-size:11px;padding-top: 4px;">
+						{{ frappe.format(d.expected_end_date, { fieldtype: 'Datetime' }) }}
+					</div>
+				{% } %}
+
+			</div>
+			<div class="form-column col-sm-2">
+				<div class="frappe-control job-card-status" title="{{__('Status')}}" style="background:{{d.status_color}};text-align:center;border-radius:var(--border-radius-full)">
+					{{ d.status }}
+				</div>
+			</div>
+			<div class="form-column col-sm-2">
+				<div class="frappe-control" title="{{__('Qty to Manufacture')}}">
+					<div class="progress" title = "{{d.progress_title}}">
+						<div class="progress-bar progress-bar-success" style="width: {{d.progress_percent}}%">
+						</div>
+					</div>
+				</div>
+				<div class="frappe-control" style="text-align: center; font-size: 10px;">
+					{{ d.for_quantity }} / {{ d.total_completed_qty }}
+				</div>
+			</div>
+			<div class="form-column col-sm-2 text-center">
+				<button style="width: 85px;" class="btn btn-default btn-start {% if(d.status !== "Open") { %} hide {% } %}" job-card="{{d.name}}"> {{__("Start")}} </button>
+				<button style="width: 85px;" class="btn btn-default btn-complete {% if(d.status === "Open") { %} hide {% } %}" job-card="{{d.name}}" pending-qty="{{d.for_quantity - d.transferred_qty}}"> {{__("Complete")}} </button>
+			</div>
+		</div>
+
+		<div class="section-body section-body-job-card form-section hide">
+			<hr>
+			<div class="row">
+				<div class="form-column col-sm-2">
+					{{ __("Raw Materials") }}
+				</div>
+				{% if(d.make_material_request) { %}
+					<div class="form-column col-sm-10 text-right">
+						<button class="btn btn-default btn-xs make-material-request" job-card="{{d.name}}">{{ __("Material Request") }}</button>
+					</div>
+				{% } %}
+			</div>
+
+			{% if(d.raw_materials) { %}
+			<table class="table table-bordered table-condensed">
+				<thead>
+					<tr>
+						<th style="width: 5%" class="table-sr">Sr</th>
+
+						<th style="width: 15%">{{ __("Item") }}</th>
+						<th style="width: 15%">{{ __("Warehouse") }}</th>
+						<th style="width: 10%">{{__("UOM")}}</th>
+						<th style="width: 15%">{{__("Item Group")}}</th>
+						<th style="width: 20%" >{{__("Required Qty")}}</th>
+						<th style="width: 20%" >{{__("Transferred Qty")}}</th>
+					</tr>
+				</thead>
+				<tbody>
+
+				{% $.each(d.raw_materials, (row_index, child_row) => { %}
+					<tr>
+						<td class="table-sr">{{ row_index+1 }}</td>
+						{% if(child_row.item_code === child_row.item_name) { %}
+							<td>{{ child_row.item_code }}</td>
+						{% } else { %}
+							<td>{{ child_row.item_code }}: {{child_row.item_name}}</td>
+						{% } %}
+						<td>{{ child_row.source_warehouse }}</td>
+						<td>{{ child_row.uom }}</td>
+						<td>{{ child_row.item_group }}</td>
+						<td>{{ child_row.required_qty }}</td>
+						<td>{{ child_row.transferred_qty }}</td>
+					</tr>
+				{% }); %}
+
+				</tbody>
+			{% } %}
+
+			</table>
+		</div>
+
+	</div>
+{% }); %}
+</div>

@@ -490,3 +490,53 @@ body[data-route="pos"] {
 .exercise-col {
 	padding: 10px;
 }
+
+.plant-floor, .workstation-wrapper, .workstation-card p {
+	border-radius: var(--border-radius-md);
+	border: 1px solid var(--border-color);
+	box-shadow: none;
+	background-color: var(--card-bg);
+	position: relative;
+}
+
+.plant-floor {
+	padding-bottom: 25px;
+}
+
+.plant-floor-filter {
+	padding-top: 10px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.plant-floor-container {
+	display: grid;
+	grid-template-columns: repeat(6,minmax(0,1fr));
+	gap: var(--margin-xl);
+}
+
+@media screen and (max-width: 620px) {
+	.plant-floor-container {
+		grid-template-columns: repeat(2,minmax(0,1fr));
+	}
+}
+
+.plant-floor-container .workstation-card {
+	padding: 5px;
+}
+
+.plant-floor-container .workstation-image-link {
+	width: 100%;
+	font-size: 50px;
+	margin: var(--margin-sm);
+	min-height: 9rem;
+}
+
+.workstation-abbr {
+	display: flex;
+	background-color: var(--control-bg);
+	height:100%;
+	width:100%;
+	align-items: center;
+	justify-content: center;
+}

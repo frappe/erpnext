@@ -1041,18 +1041,18 @@ class TestAccountsController(FrappeTestCase):
 		cr_note.reload()
 		cr_note.cancel()
 
-		# Exchange Gain/Loss Journal should've been created.
+		# with the introduction of 'cancel_system_generated_credit_debit_notes' in accounts controller
+		# JE(Credit Note) will be cancelled once the parent is cancelled
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_cr = self.get_journals_for(cr_note.doctype, cr_note.name)
-		self.assertNotEqual(exc_je_for_si, [])
-		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(exc_je_for_si, [])
+		self.assertEqual(len(exc_je_for_si), 0)
 		self.assertEqual(len(exc_je_for_cr), 0)
 
-		# The Credit Note JE is still active and is referencing the sales invoice
-		# So, outstanding stays the same
+		# No references, full outstanding
 		si.reload()
-		self.assertEqual(si.outstanding_amount, 1)
-		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
+		self.assertEqual(si.outstanding_amount, 2)
+		self.assert_ledger_outstanding(si.doctype, si.name, 160.0, 2.0)
 
 	def test_40_cost_center_from_payment_entry(self):
 		"""

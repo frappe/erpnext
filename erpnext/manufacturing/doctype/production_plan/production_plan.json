@@ -298,7 +298,8 @@
    "no_copy": 1,
    "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nClosed\nCancelled\nMaterial Requested",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "amended_from",
@@ -420,9 +421,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "When a parent warehouse is chosen, the system conducts stock checks against the associated child warehouses",
    "fieldname": "sub_assembly_warehouse",
    "fieldtype": "Link",
    "label": "Sub Assembly Warehouse",
+   "mandatory_depends_on": "eval:doc.skip_available_sub_assembly_item === 1",
    "options": "Warehouse"
   },
   {
@@ -436,7 +439,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-26 16:31:13.740777",
+ "modified": "2024-02-27 13:34:20.692211",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

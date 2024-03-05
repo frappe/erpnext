@@ -513,6 +513,9 @@ class SalesOrder(SellingController):
 	def on_update(self):
 		pass
 
+	def on_update_after_submit(self):
+		self.check_credit_limit()
+
 	def before_update_after_submit(self):
 		self.validate_po()
 		self.validate_drop_ship()
@@ -904,6 +907,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
 
 		if source.company_address:
 			target.update({"company_address": source.company_address})
@@ -1024,6 +1028,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
 
 		if source.company_address:
 			target.update({"company_address": source.company_address})
@@ -1606,7 +1611,11 @@ def create_pick_list(source_name, target_doc=None):
 		"Sales Order",
 		source_name,
 		{
-			"Sales Order": {"doctype": "Pick List", "validation": {"docstatus": ["=", 1]}},
+			"Sales Order": {
+				"doctype": "Pick List",
+				"field_map": {"set_warehouse": "parent_warehouse"},
+				"validation": {"docstatus": ["=", 1]},
+			},
 			"Sales Order Item": {
 				"doctype": "Pick List Item",
 				"field_map": {"parent": "sales_order", "name": "sales_order_item"},

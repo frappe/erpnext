@@ -11,6 +11,7 @@
   "warehouse",
   "posting_date",
   "posting_time",
+  "posting_datetime",
   "is_adjustment_entry",
   "auto_created_serial_and_batch_bundle",
   "column_break_6",
@@ -100,7 +101,6 @@
    "oldfieldtype": "Date",
    "print_width": "100px",
    "read_only": 1,
-   "search_index": 1,
    "width": "100px"
   },
   {
@@ -253,7 +253,6 @@
    "options": "Company",
    "print_width": "150px",
    "read_only": 1,
-   "search_index": 1,
    "width": "150px"
   },
   {
@@ -348,6 +347,11 @@
    "fieldname": "auto_created_serial_and_batch_bundle",
    "fieldtype": "Check",
    "label": "Auto Created Serial and Batch Bundle"
+  },
+  {
+   "fieldname": "posting_datetime",
+   "fieldtype": "Datetime",
+   "label": "Posting Datetime"
   }
  ],
  "hide_toolbar": 1,
@@ -356,7 +360,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-14 16:47:39.791967",
+ "modified": "2024-02-07 09:18:13.999231",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

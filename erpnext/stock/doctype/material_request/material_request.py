@@ -462,6 +462,7 @@ def make_purchase_order(source_name, target_doc=None, args=None):
 		postprocess,
 	)
 
+	doclist.set_onload("load_after_mapping", False)
 	return doclist
 
 
