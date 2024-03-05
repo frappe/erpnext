@@ -344,6 +344,11 @@ def copy_attributes_to_variant(item, variant):
 						if row.get("name"):
 							row.name = None
 						variant.append(field.fieldname, row)
+				elif field.fieldtype == "Table MultiSelect":
+					tbl = item.get(field.fieldname)
+					for row in tbl:
+						row.name = None  # force creation of new name
+					variant.set(field.fieldname, tbl)
 				else:
 					variant.set(field.fieldname, item.get(field.fieldname))
 
