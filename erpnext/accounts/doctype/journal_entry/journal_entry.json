@@ -64,7 +64,8 @@
   "stock_entry",
   "subscription_section",
   "auto_repeat",
-  "amended_from"
+  "amended_from",
+  "repost_required"
  ],
  "fields": [
   {
@@ -542,6 +543,15 @@
    "fieldtype": "Check",
    "label": "Is System Generated",
    "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "repost_required",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Repost Required",
+   "print_hide": 1,
    "read_only": 1
   }
  ],

@@ -332,13 +332,8 @@ class SerialandBatchBundle(Document):
 			rate = frappe.db.get_value(child_table, self.voucher_detail_no, valuation_field)
 
 		for d in self.entries:
-			if not rate or (
-				flt(rate, precision) == flt(d.incoming_rate, precision) and d.stock_value_difference
-			):
-				continue
-
 			d.incoming_rate = flt(rate, precision)
-			if self.has_batch_no:
+			if d.qty:
 				d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
 
 			if save:
@@ -2118,7 +2113,7 @@ def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, ba
 
 		make_serial_no(serial_no, item_code)
 
-	if batch_no and frappe.db.exists("Batch", batch_no):
+	if batch_no and not frappe.db.exists("Batch", batch_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Batch No {0} does not exists").format(batch_no))
 

@@ -952,7 +952,12 @@ class update_entries_after(object):
 					get_rate_for_return,  # don't move this import to top
 				)
 
-				if self.valuation_method == "Moving Average":
+				if (
+					self.valuation_method == "Moving Average"
+					and not sle.get("serial_no")
+					and not sle.get("batch_no")
+					and not sle.get("serial_and_batch_bundle")
+				):
 					rate = get_incoming_rate(
 						{
 							"item_code": sle.item_code,
@@ -978,6 +983,18 @@ class update_entries_after(object):
 						sle.item_code,
 						voucher_detail_no=sle.voucher_detail_no,
 						sle=sle,
+					)
+
+				if (
+					sle.get("serial_and_batch_bundle")
+					and rate > 0
+					and sle.voucher_type in ["Delivery Note", "Sales Invoice"]
+				):
+					frappe.db.set_value(
+						sle.voucher_type + " Item",
+						sle.voucher_detail_no,
+						"incoming_rate",
+						rate,
 					)
 			elif (
 				sle.voucher_type in ["Purchase Receipt", "Purchase Invoice"]

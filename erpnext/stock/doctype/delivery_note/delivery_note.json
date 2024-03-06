@@ -28,7 +28,6 @@
   "column_break_18",
   "project",
   "dimension_col_break",
-  "custom_dimensions_section",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -927,7 +926,7 @@
    "width": "50%"
   },
   {
-   "fetch_from": "transporter.name",
+   "fetch_from": "transporter.supplier_name",
    "fieldname": "transporter_name",
    "fieldtype": "Data",
    "label": "Transporter Name",
@@ -1356,10 +1355,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "custom_dimensions_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "shipping_address_section",
    "fieldtype": "Section Break",
    "label": "Shipping Address"
@@ -1402,7 +1397,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-18 17:19:39.368239",
+ "modified": "2024-03-05 11:58:47.784349",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
