@@ -1520,18 +1520,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		self.assertEqual(payment_entry.taxes[0].allocated_amount, 0)
 
 	def test_provisional_accounting_entry(self):
-		create_item("_Test Non Stock Item", is_stock_item=0)
-
-		provisional_account = create_account(
-			account_name="Provision Account",
-			parent_account="Current Liabilities - _TC",
-			company="_Test Company",
-		)
-
-		company = frappe.get_doc("Company", "_Test Company")
-		company.enable_provisional_accounting_for_non_stock_items = 1
-		company.default_provisional_account = provisional_account
-		company.save()
+		setup_provisional_accounting()
 
 		pr = make_purchase_receipt(
 			item_code="_Test Non Stock Item", posting_date=add_days(nowdate(), -2)
@@ -1575,8 +1564,97 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			self, pr.name, expected_gle_for_purchase_receipt_post_pi_cancel, pr.posting_date
 		)
 
-		company.enable_provisional_accounting_for_non_stock_items = 0
-		company.save()
+		toggle_provisional_accounting_setting()
+
+	def test_provisional_accounting_entry_for_over_billing(self):
+		setup_provisional_accounting()
+
+		# Configure Buying Settings to allow rate change
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		# Create PR: rate = 1000, qty = 5
+		pr = make_purchase_receipt(
+			item_code="_Test Non Stock Item", rate=1000, posting_date=add_days(nowdate(), -2)
+		)
+
+		# Overbill PR: rate = 2000, qty = 10
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.set_posting_time = 1
+		pi.posting_date = add_days(pr.posting_date, -1)
+		pi.items[0].qty = 10
+		pi.items[0].rate = 2000
+		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
+		pi.save()
+		pi.submit()
+
+		expected_gle = [
+			["Cost of Goods Sold - _TC", 20000, 0, add_days(pr.posting_date, -1)],
+			["Creditors - _TC", 0, 20000, add_days(pr.posting_date, -1)],
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
+
+		expected_gle_for_purchase_receipt = [
+			["Provision Account - _TC", 5000, 0, pr.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 0, 5000, pr.posting_date],
+			["Provision Account - _TC", 0, 5000, pi.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 5000, 0, pi.posting_date],
+		]
+
+		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date)
+
+		# Cancel purchase invoice to check reverse provisional entry cancellation
+		pi.cancel()
+
+		expected_gle_for_purchase_receipt_post_pi_cancel = [
+			["Provision Account - _TC", 0, 5000, pi.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 5000, 0, pi.posting_date],
+		]
+
+		check_gl_entries(
+			self, pr.name, expected_gle_for_purchase_receipt_post_pi_cancel, pr.posting_date
+		)
+
+		toggle_provisional_accounting_setting()
+
+	def test_provisional_accounting_entry_for_partial_billing(self):
+		setup_provisional_accounting()
+
+		# Configure Buying Settings to allow rate change
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		# Create PR: rate = 1000, qty = 5
+		pr = make_purchase_receipt(
+			item_code="_Test Non Stock Item", rate=1000, posting_date=add_days(nowdate(), -2)
+		)
+
+		# Partially bill PR: rate = 500, qty = 2
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		pi.set_posting_time = 1
+		pi.posting_date = add_days(pr.posting_date, -1)
+		pi.items[0].qty = 2
+		pi.items[0].rate = 500
+		pi.items[0].expense_account = "Cost of Goods Sold - _TC"
+		pi.save()
+		pi.submit()
+
+		expected_gle = [
+			["Cost of Goods Sold - _TC", 1000, 0, add_days(pr.posting_date, -1)],
+			["Creditors - _TC", 0, 1000, add_days(pr.posting_date, -1)],
+		]
+
+		check_gl_entries(self, pi.name, expected_gle, pi.posting_date)
+
+		expected_gle_for_purchase_receipt = [
+			["Provision Account - _TC", 5000, 0, pr.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 0, 5000, pr.posting_date],
+			["Provision Account - _TC", 0, 1000, pi.posting_date],
+			["_Test Account Cost for Goods Sold - _TC", 1000, 0, pi.posting_date],
+		]
+
+		check_gl_entries(self, pr.name, expected_gle_for_purchase_receipt, pr.posting_date)
+
+		toggle_provisional_accounting_setting()
 
 	def test_adjust_incoming_rate(self):
 		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
@@ -2089,6 +2167,28 @@ def make_purchase_invoice_against_cost_center(**args):
 		if not args.do_not_submit:
 			pi.submit()
 	return pi
+
+
+def setup_provisional_accounting(**args):
+	args = frappe._dict(args)
+	create_item("_Test Non Stock Item", is_stock_item=0)
+	company = args.company or "_Test Company"
+	provisional_account = create_account(
+		account_name=args.account_name or "Provision Account",
+		parent_account=args.parent_account or "Current Liabilities - _TC",
+		company=company,
+	)
+	toggle_provisional_accounting_setting(
+		enable=1, company=company, provisional_account=provisional_account
+	)
+
+
+def toggle_provisional_accounting_setting(**args):
+	args = frappe._dict(args)
+	company = frappe.get_doc("Company", args.company or "_Test Company")
+	company.enable_provisional_accounting_for_non_stock_items = args.enable or 0
+	company.default_provisional_account = args.provisional_account
+	company.save()
 
 
 test_records = frappe.get_test_records("Purchase Invoice")

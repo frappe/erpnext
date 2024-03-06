@@ -566,7 +566,12 @@ class PaymentReconciliation(Document):
 			journals_map = frappe._dict(
 				frappe.db.get_all(
 					"Journal Entry Account",
-					filters={"parent": ("in", journals), "account": ("in", [self.receivable_payable_account])},
+					filters={
+						"parent": ("in", journals),
+						"account": ("in", [self.receivable_payable_account]),
+						"party_type": self.party_type,
+						"party": self.party,
+					},
 					fields=[
 						"parent as `name`",
 						"exchange_rate",

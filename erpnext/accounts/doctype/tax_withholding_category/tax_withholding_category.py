@@ -522,6 +522,7 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 			"GL Entry",
 			{
 				"is_cancelled": 0,
+				"party_type": "Customer",
 				"party": ["in", parties],
 				"company": inv.company,
 				"voucher_no": ["in", vouchers],
@@ -536,6 +537,7 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	conditions = []
 	conditions.append(ple.amount.lt(0))
 	conditions.append(ple.delinked == 0)
+	conditions.append(ple.party_type == "Customer")
 	conditions.append(ple.party.isin(parties))
 	conditions.append(ple.voucher_no == ple.against_voucher_no)
 	conditions.append(ple.company == inv.company)
@@ -555,6 +557,7 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 			{
 				"is_cancelled": 0,
 				"credit": [">", 0],
+				"party_type": "Customer",
 				"party": ["in", parties],
 				"posting_date": ["between", (tax_details.from_date, tax_details.to_date)],
 				"company": inv.company,
