@@ -1263,6 +1263,13 @@ def get_type_of_transaction(parent_doc, child_row):
 	if parent_doc.get("is_return"):
 		type_of_transaction = "Inward" if type_of_transaction == "Outward" else "Outward"
 
+	if parent_doc.get("doctype") == "Subcontracting Receipt":
+		type_of_transaction = "Outward"
+		if child_row.get("doctype") == "Subcontracting Receipt Item":
+			type_of_transaction = "Inward"
+	elif parent_doc.get("doctype") == "Stock Reconciliation":
+		type_of_transaction = "Inward"
+
 	return type_of_transaction
 
 

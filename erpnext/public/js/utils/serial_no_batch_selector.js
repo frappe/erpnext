@@ -371,11 +371,18 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					label: __('Batch No'),
 					in_list_view: 1,
 					get_query: () => {
+						let is_inward = false;
+						if ((["Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype) && !this.frm.doc.is_return)
+							|| (this.frm.doc.doctype === 'Stock Entry' && this.frm.doc.purpose === 'Material Receipt')) {
+							is_inward = true;
+						}
+
 						return {
 							query : "erpnext.controllers.queries.get_batch_no",
 							filters: {
 								'item_code': this.item.item_code,
-								'warehouse': this.item.s_warehouse || this.item.t_warehouse,
+								'warehouse': this.item.s_warehouse || this.item.t_warehouse || this.item.warehouse,
+								'is_inward': is_inward
 							}
 						}
 					},
