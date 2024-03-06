@@ -97,6 +97,7 @@ def get_dimension_filter_map():
 			f.is_mandatory,
 =======
 	if not frappe.flags.get("dimension_filter_map"):
+		# nosemgrep
 		filters = frappe.db.sql(
 			"""
 			SELECT
