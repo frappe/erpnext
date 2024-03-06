@@ -7,7 +7,7 @@ import copy
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.utils import cint, cstr, flt, formatdate, getdate, now
+from frappe.utils import cint, flt, formatdate, getdate, now
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -274,6 +274,7 @@ def merge_similar_entries(gl_map, precision=None):
 
 	return merged_gl_map
 
+
 def get_merge_properties(dimensions=None):
 	merge_properties = [
 		"account",
@@ -290,17 +291,20 @@ def get_merge_properties(dimensions=None):
 		merge_properties.extend(dimensions)
 	return merge_properties
 
+
 def get_merge_key(entry, merge_properties):
 	merge_key = []
 	for fieldname in merge_properties:
-		merge_key.append(entry.get(fieldname, ''))
-	
+		merge_key.append(entry.get(fieldname, ""))
+
 	return tuple(merge_key)
+
 
 def check_if_in_list(gle, gl_map):
 	for e in gl_map:
 		if e.merge_key == gle.merge_key:
 			return e
+
 
 def toggle_debit_credit_if_negative(gl_map):
 	for entry in gl_map:
