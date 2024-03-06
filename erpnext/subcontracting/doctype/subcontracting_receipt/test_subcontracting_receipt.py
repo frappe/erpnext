@@ -1061,6 +1061,77 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertTrue(frappe.db.get_value("Purchase Receipt", {"subcontracting_receipt": scr.name}))
 
+	def test_use_serial_batch_fields_for_subcontracting_receipt(self):
+		fg_item = make_item(
+			"Test Subcontracted Item With Batch No",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-BNGS-.####",
+				"is_sub_contracted_item": 1,
+			},
+		).name
+
+		make_item(
+			"Test Subcontracted Item With Batch No Service Item 1",
+			properties={"is_stock_item": 0},
+		)
+
+		make_bom(
+			item=fg_item,
+			raw_materials=[
+				make_item(
+					"Test Subcontracted Item With Batch No RM Item 1",
+					properties={
+						"is_stock_item": 1,
+						"has_batch_no": 1,
+						"create_new_batch": 1,
+						"batch_number_series": "BATCH-RM-BNGS-.####",
+					},
+				).name
+			],
+		)
+
+		service_items = [
+			{
+				"warehouse": "_Test Warehouse - _TC",
+				"item_code": "Test Subcontracted Item With Batch No Service Item 1",
+				"qty": 1,
+				"rate": 100,
+				"fg_item": fg_item,
+				"fg_item_qty": 1,
+			},
+		]
+		sco = get_subcontracting_order(service_items=service_items)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+
+		batch_no = "BATCH-BNGS-0001"
+		if not frappe.db.exists("Batch", batch_no):
+			frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"batch_id": batch_no,
+					"item": fg_item,
+				}
+			).insert()
+
+		scr = make_subcontracting_receipt(sco.name)
+		self.assertFalse(scr.items[0].serial_and_batch_bundle)
+		scr.items[0].use_serial_batch_fields = 1
+		scr.items[0].batch_no = batch_no
+
+		scr.save()
+		scr.submit()
+		scr.reload()
+		self.assertTrue(scr.items[0].serial_and_batch_bundle)
+
 
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)
