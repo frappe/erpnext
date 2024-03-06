@@ -78,6 +78,7 @@ class TestAccountingDimension(unittest.TestCase):
 
 	def tearDown(self):
 		disable_dimension()
+		frappe.flags.accounting_dimensions_details = None
 
 
 def create_dimension():
