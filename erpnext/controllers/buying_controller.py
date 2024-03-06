@@ -559,7 +559,7 @@ class BuyingController(SubcontractingController):
 							{
 								"incoming_rate": incoming_rate,
 								"recalculate_rate": 1
-								if (self.is_subcontracted and (d.bom or d.fg_item)) or d.from_warehouse
+								if (self.is_subcontracted and (d.bom or d.get("fg_item"))) or d.from_warehouse
 								else 0,
 							}
 						)
