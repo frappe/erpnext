@@ -90,7 +90,10 @@ def get_redeemption_factor(loyalty_program=None, customer=None):
 def validate_loyalty_points(ref_doc, points_to_redeem):
 	loyalty_program = None
 	posting_date = None
-
+	server_type=get_server_type()
+	if server_type:
+		return
+	
 	if ref_doc.doctype == "Sales Invoice":
 		posting_date = ref_doc.posting_date
 	else:
@@ -197,3 +200,12 @@ def get_loyalty_details(customer, loyalty_program,expiry_date=None, company=None
     if total_lp<0:
         return {"loyalty_points":0}
     return {"loyalty_points":total_lp}
+
+
+
+
+
+
+
+def get_server_type():
+	return frappe.get_doc("Sync Settings").is_sub_server
