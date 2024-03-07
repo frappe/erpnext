@@ -2141,6 +2141,40 @@ class TestSalesOrder(FrappeTestCase):
 		dn.submit()
 		dn.reload()
 
+	def test_auto_update_price_list(self):
+		item = make_item(
+			"_Test Auto Update Price List Item",
+		)
+
+		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 1)
+		so = make_sales_order(
+			item_code=item.name, currency="USD", qty=1, rate=100, price_list_rate=100, do_not_submit=True
+		)
+		so.save()
+
+		item_price = frappe.db.get_value("Item Price", {"item_code": item.name}, "price_list_rate")
+		self.assertEqual(item_price, 100)
+
+		so = make_sales_order(
+			item_code=item.name, currency="USD", qty=1, rate=200, price_list_rate=100, do_not_submit=True
+		)
+		so.save()
+
+		item_price = frappe.db.get_value("Item Price", {"item_code": item.name}, "price_list_rate")
+		self.assertEqual(item_price, 100)
+
+		frappe.db.set_single_value("Stock Settings", "update_existing_price_list_rate", 1)
+		so = make_sales_order(
+			item_code=item.name, currency="USD", qty=1, rate=200, price_list_rate=200, do_not_submit=True
+		)
+		so.save()
+
+		item_price = frappe.db.get_value("Item Price", {"item_code": item.name}, "price_list_rate")
+		self.assertEqual(item_price, 200)
+
+		frappe.db.set_single_value("Stock Settings", "update_existing_price_list_rate", 0)
+		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
