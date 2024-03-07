@@ -267,6 +267,7 @@ def get_doctypes_to_be_ignored():
 		"Bank Account",
 		"Item Tax Template",
 		"Mode of Payment",
+		"Mode of Payment Account",
 		"Item Default",
 		"Customer",
 		"Supplier",
