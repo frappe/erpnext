@@ -159,9 +159,6 @@ class StockController(AccountsController):
 				row.serial_no = clean_serial_no_string(row.serial_no)
 
 	def make_bundle_using_old_serial_batch_fields(self, table_name=None):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
-
 		if self.get("_action") == "update_after_submit":
 			return
 
@@ -199,31 +196,21 @@ class StockController(AccountsController):
 					"voucher_detail_no": row.name,
 					"company": self.company,
 					"is_rejected": 1 if row.get("rejected_warehouse") else 0,
-					"serial_nos": get_serial_nos(row.serial_no) if row.serial_no else None,
-					"batch_no": row.batch_no,
 					"use_serial_batch_fields": row.use_serial_batch_fields,
 					"do_not_submit": True,
 				}
 
-				self.update_bundle_details(bundle_details, table_name, row)
-				sn_doc = SerialBatchCreation(bundle_details).make_serial_and_batch_bundle()
+				if row.qty:
+					self.update_bundle_details(bundle_details, table_name, row)
+					self.create_serial_batch_bundle(bundle_details, row)
 
-				if sn_doc.is_rejected:
-					row.rejected_serial_and_batch_bundle = sn_doc.name
-					row.db_set(
-						{
-							"rejected_serial_and_batch_bundle": sn_doc.name,
-						}
-					)
-				else:
-					row.serial_and_batch_bundle = sn_doc.name
-					row.db_set(
-						{
-							"serial_and_batch_bundle": sn_doc.name,
-						}
-					)
+				if row.get("rejected_qty"):
+					self.update_bundle_details(bundle_details, table_name, row, is_rejected=True)
+					self.create_serial_batch_bundle(bundle_details, row)
 
-	def update_bundle_details(self, bundle_details, table_name, row):
+	def update_bundle_details(self, bundle_details, table_name, row, is_rejected=False):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 		# Since qty field is different for different doctypes
 		qty = row.get("qty")
 		warehouse = row.get("warehouse")
@@ -242,14 +229,36 @@ class StockController(AccountsController):
 			qty = row.transfer_qty
 			warehouse = row.s_warehouse or row.t_warehouse
 
+		serial_nos = row.serial_no
+		if is_rejected:
+			serial_nos = row.get("rejected_serial_no")
+			type_of_transaction = "Inward" if not self.is_return else "Outward"
+			qty = row.get("rejected_qty")
+			warehouse = row.get("rejected_warehouse")
+
 		bundle_details.update(
 			{
 				"qty": qty,
+				"is_rejected": is_rejected,
 				"type_of_transaction": type_of_transaction,
 				"warehouse": warehouse,
 				"batches": frappe._dict({row.batch_no: qty}) if row.batch_no else None,
+				"serial_nos": get_serial_nos(serial_nos) if serial_nos else None,
+				"batch_no": row.batch_no,
 			}
 		)
+
+	def create_serial_batch_bundle(self, bundle_details, row):
+		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+		sn_doc = SerialBatchCreation(bundle_details).make_serial_and_batch_bundle()
+
+		field = "serial_and_batch_bundle"
+		if bundle_details.get("is_rejected"):
+			field = "rejected_serial_and_batch_bundle"
+
+		row.set(field, sn_doc.name)
+		row.db_set({field: sn_doc.name})
 
 	def validate_serial_nos_and_batches_with_bundle(self, row):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
