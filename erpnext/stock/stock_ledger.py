@@ -893,6 +893,9 @@ class update_entries_after(object):
 		query.run()
 
 	def calculate_valuation_for_serial_batch_bundle(self, sle):
+		if not frappe.db.exists("Serial and Batch Bundle", sle.serial_and_batch_bundle):
+			return
+
 		doc = frappe.get_cached_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
 
 		doc.set_incoming_rate(save=True, allow_negative_stock=self.allow_negative_stock)
