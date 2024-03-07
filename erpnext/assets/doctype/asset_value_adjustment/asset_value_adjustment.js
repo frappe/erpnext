@@ -22,6 +22,22 @@ frappe.ui.form.on("Asset Value Adjustment", {
 				},
 			};
 		});
+		frm.set_query('revaluation_surplus_account', function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0
+				}
+			}
+		});
+		frm.set_query('impairment_loss_account', function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0
+				}
+			}
+		});
 	},
 
 	onload: function (frm) {
@@ -60,4 +76,9 @@ frappe.ui.form.on("Asset Value Adjustment", {
 			});
 		}
 	},
+
+	new_asset_value: function(frm) {
+		// set difference amount
+		frm.set_value('difference_amount', flt(frm.doc.new_asset_value) - flt(frm.doc.current_asset_value));
+	}
 });

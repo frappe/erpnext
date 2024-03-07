@@ -5,11 +5,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "company",
   "asset",
   "asset_category",
   "column_break_4",
   "date",
+  "company",
   "finance_book",
   "amended_from",
   "value_details_section",
@@ -19,8 +19,10 @@
   "difference_amount",
   "journal_entry",
   "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break"
+  "revaluation_surplus_account",
+  "impairment_loss_account",
+  "dimension_col_break",
+  "cost_center"
  ],
  "fields": [
   {
@@ -34,7 +36,8 @@
    "fieldtype": "Link",
    "label": "Asset",
    "options": "Asset",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fetch_from": "asset.asset_category",
@@ -61,6 +64,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
    "label": "Date",
@@ -106,7 +110,7 @@
   {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Accounting"
   },
   {
    "fieldname": "dimension_col_break",
@@ -115,17 +119,33 @@
   {
    "fieldname": "value_details_section",
    "fieldtype": "Section Break",
-   "label": "Value Details"
+   "label": "Asset Value"
   },
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.difference_amount > 0",
+   "fieldname": "revaluation_surplus_account",
+   "fieldtype": "Link",
+   "label": "Revaluation Surplus Account",
+   "mandatory_depends_on": "eval:doc.difference_amount > 0",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.difference_amount < 0",
+   "fieldname": "impairment_loss_account",
+   "fieldtype": "Link",
+   "label": "Impairment Loss Account",
+   "mandatory_depends_on": "eval:doc.difference_amount < 0",
+   "options": "Account"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-22 14:10:23.085181",
+ "modified": "2024-02-05 16:14:20.377151",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Value Adjustment",
@@ -177,9 +197,9 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "asset",
  "track_changes": 1
 }
