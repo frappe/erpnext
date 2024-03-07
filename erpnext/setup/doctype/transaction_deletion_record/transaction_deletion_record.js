@@ -29,7 +29,7 @@ frappe.ui.form.on('Transaction Deletion Record', {
 });
 
 function populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm) {
-	if (!(frm.doc.doctypes_to_be_ignored)) {
+	if (frm.doc.doctypes_to_be_ignored.length === 0) {
 		var i;
 		for (i = 0; i < doctypes_to_be_ignored_array.length; i++) {
 			frm.add_child('doctypes_to_be_ignored', {
