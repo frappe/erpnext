@@ -101,7 +101,7 @@ class DeliveryTrip(Document):
 		update_fields = {
 			"driver": self.driver,
 			"driver_name": self.driver_name,
-			"vehicle_no": self.vehicle,
+			"vehicle_no": self.transport,
 			"lr_no": self.name,
 			"lr_date": self.departure_time,
 		}

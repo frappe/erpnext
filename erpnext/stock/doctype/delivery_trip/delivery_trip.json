@@ -19,7 +19,7 @@
   "total_distance",
   "uom",
   "column_break_4",
-  "vehicle",
+  "transport",
   "departure_time",
   "employee",
   "delivery_service_stops",
@@ -96,10 +96,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "vehicle",
+   "fieldname": "transport",
    "fieldtype": "Link",
-   "label": "Vehicle",
-   "options": "Vehicle",
+   "label": "Transport",
+   "options": "Transport",
    "reqd": 1
   },
   {

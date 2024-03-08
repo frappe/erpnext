@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-18 14:32:21.797800",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "transport_logistic_feature"
+ ],
+ "fields": [
+  {
+   "fieldname": "transport_logistic_feature",
+   "fieldtype": "Link",
+   "label": "Transport Logistic Feature",
+   "options": "Transport Logistic Feature"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-11-18 14:33:50.980813",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "Transport Features",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

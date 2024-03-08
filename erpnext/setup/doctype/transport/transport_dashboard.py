@@ -5,6 +5,6 @@
 def get_data():
 	return {
 		"fieldname": "license_plate",
-		"non_standard_fieldnames": {"Delivery Trip": "vehicle"},
-		"transactions": [{"items": ["Vehicle Log"]}, {"items": ["Delivery Trip"]}],
+		"non_standard_fieldnames": {"Delivery Trip": "transport"},
+		"transactions": [{"items": ["Transport Log"]}, {"items": ["Delivery Trip"]}],
 	}

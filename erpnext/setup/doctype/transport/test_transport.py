@@ -9,19 +9,18 @@ from frappe.utils import random_string
 # test_records = frappe.get_test_records('Vehicle')
 
 
-class TestVehicle(unittest.TestCase):
-	def test_make_vehicle(self):
+class TestTransport(unittest.TestCase):
+	def test_make_transport(self):
 		vehicle = frappe.get_doc(
 			{
-				"doctype": "Vehicle",
-				"license_plate": random_string(10).upper(),
-				"make": "Maruti",
+				"doctype": "Transport",
+				"idenifier": random_string(10).upper(),
+				"manufacturer": "Maruti",
 				"model": "PCM",
 				"last_odometer": 5000,
 				"acquisition_date": frappe.utils.nowdate(),
 				"location": "Mumbai",
-				"chassis_no": "1234ABCD",
-				"uom": "Litre",
+				"serial_no": "1234ABCD",
 				"vehicle_value": frappe.utils.flt(500000),
 			}
 		)
