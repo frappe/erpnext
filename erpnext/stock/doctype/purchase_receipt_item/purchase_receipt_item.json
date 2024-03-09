@@ -87,6 +87,7 @@
   "quality_inspection",
   "material_request_item",
   "purchase_order_item",
+  "receipt_plan",
   "purchase_invoice_item",
   "purchase_receipt_item",
   "delivery_note_item",
@@ -1107,7 +1108,16 @@
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
    "label": "Use Serial No / Batch Fields"
-  }
+  },
+  {
+    "fieldname": "receipt_plan",
+    "fieldtype": "Data",
+    "hidden": 1,
+    "label": "Receipt Plan",
+    "no_copy": 1,
+    "print_hide": 1,
+    "search_index": 1
+   }
  ],
  "idx": 1,
  "istable": 1,
