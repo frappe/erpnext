@@ -556,7 +556,13 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 
 					// delivery note
 					if(flt(doc.per_delivered, 2) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
-						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(true), __('Create'));
+						if (doc.has_delivery_plan) {
+							this.frm.add_custom_button(__('Delivery Note'), function() {
+								me.make_delivery_note_by_plan();
+							}, __('Create'));
+						} else {
+							this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(true), __('Create'));
+						}
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
 					}
 
@@ -917,6 +923,85 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 			freeze: true,
 			freeze_message: __("Creating Delivery Note ...")
 		})
+	}
+
+	make_delivery_note_by_plan() {
+		frappe.call({
+			method: "erpnext.selling.doctype.sales_order.sales_order.get_used_delivery_plan",
+			args: {
+				sales_order: cur_frm.doc.name,
+			},
+			callback(r) {
+				let plans = cur_frm.doc.delivery_plan.map(plan => {
+					return {...plan, done: r.message.includes(plan.name)};
+				});
+				var dialog = new frappe.ui.Dialog({
+					title: __("Select Delivery Plan"),
+					fields: [{
+						fieldname: 'delivery_plan',
+						fieldtype: 'Table',
+						label: __("Installments"),
+						cannot_add_rows: 1,
+						fields: [
+							{
+								fieldtype: 'Data',
+								fieldname: 'idx',
+								label: __('No.'),
+								read_only: 1,
+								in_list_view: 1
+							},
+							{
+								fieldtype: 'Data',
+								fieldname: 'name',
+								label: __('Name'),
+								read_only: 1,
+								in_list_view: 0
+							},
+							{
+								fieldtype: 'Data',
+								fieldname: 'description',
+								label: __('Description'),
+								read_only: 1,
+								in_list_view: 1
+							},
+							{
+								fieldtype: 'Percent',
+								fieldname: 'delivery_portion',
+								label: __('Delivery Portion'),
+								read_only: 1,
+								in_list_view: 1
+							},
+							{
+								fieldtype: 'Check',
+								fieldname: 'done',
+								label: __('Done'),
+								read_only: 1,
+								in_list_view: 1
+							},
+						],
+						data: plans
+					}]
+				});
+				dialog.set_primary_action(__('Create Delivery Note'), function() {
+					var selected_plans = dialog.fields_dict.delivery_plan.grid.get_selected_children();
+					if (selected_plans.length != 1) { frappe.throw(__('Please select only 1 installment')); }
+					for (let plan of selected_plans) {
+						if (plan.done) {
+							frappe.throw(__('Installment {0} is already created', [plan.idx]));
+						}
+					}
+					frappe.model.open_mapped_doc({
+						method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
+						frm: cur_frm,
+						args: {
+							plan: selected_plans[0].name,
+							portion: selected_plans[0].delivery_portion
+						},
+					})
+				})
+				dialog.show();
+			},
+		});
 	}
 
 	make_sales_invoice() {
