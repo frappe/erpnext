@@ -35,6 +35,14 @@ frappe.ui.form.on("Project", {
 			};
 		});
 
+		frm.set_query("department", function (doc) {
+			return {
+				filters: {
+					"company": doc.company,
+				}
+			};
+		});
+
 		// sales order
 		frm.set_query('sales_order', function () {
 			var filters = {

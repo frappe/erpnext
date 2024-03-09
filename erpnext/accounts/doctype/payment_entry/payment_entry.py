@@ -335,7 +335,10 @@ class PaymentEntry(AccountsController):
 		)
 
 	def set_missing_ref_details(
-		self, force: bool = False, update_ref_details_only_for: list | None = None
+		self,
+		force: bool = False,
+		update_ref_details_only_for: list | None = None,
+		ref_exchange_rate: float | None = None,
 	) -> None:
 		for d in self.get("references"):
 			if d.allocated_amount:
@@ -347,6 +350,8 @@ class PaymentEntry(AccountsController):
 				ref_details = get_reference_details(
 					d.reference_doctype, d.reference_name, self.party_account_currency
 				)
+				if ref_exchange_rate:
+					ref_details.update({"exchange_rate": ref_exchange_rate})
 
 				for field, value in ref_details.items():
 					if d.exchange_gain_loss:
