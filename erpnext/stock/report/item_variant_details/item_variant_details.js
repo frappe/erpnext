@@ -1,9 +1,12 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
+<<<<<<< HEAD
 /* eslint-disable */
+=======
+>>>>>>> ec74a5e566 (style: format js files)
 
 frappe.query_reports["Item Variant Details"] = {
-	"filters": [
+	filters: [
 		{
 			reqd: 1,
 			default: "",
@@ -13,9 +16,9 @@ frappe.query_reports["Item Variant Details"] = {
 			fieldtype: "Link",
 			get_query: () => {
 				return {
-					filters: { "has_variants": 1 }
-				}
-			}
-		}
-	]
-}
+					filters: { has_variants: 1 },
+				};
+			},
+		},
+	],
+};

@@ -26,8 +26,12 @@ frappe.ui.form.on('Account', {
 		frm.toggle_enable(['is_group', 'company'], false);
 
 		if (cint(frm.doc.is_group) == 0) {
+<<<<<<< HEAD
 			frm.toggle_display('freeze_account', frm.doc.__onload
 				&& frm.doc.__onload.can_freeze_account);
+=======
+			frm.toggle_display("freeze_account", frm.doc.__onload && frm.doc.__onload.can_freeze_account);
+>>>>>>> ec74a5e566 (style: format js files)
 		}
 
 		// read-only for root accounts
@@ -64,6 +68,7 @@ frappe.ui.form.on('Account', {
 		}, __('View'));
 
 		if (frm.doc.is_group == 1) {
+<<<<<<< HEAD
 			frm.add_custom_button(__('Convert to Non-Group'), function () {
 				return frappe.call({
 					doc: frm.doc,
@@ -85,6 +90,35 @@ frappe.ui.form.on('Account', {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __('View'));
+=======
+			frm.add_custom_button(
+				__("Convert to Non-Group"),
+				function () {
+					return frappe.call({
+						doc: frm.doc,
+						method: "convert_group_to_ledger",
+						callback: function () {
+							frm.refresh();
+						},
+					});
+				},
+				__("Actions")
+			);
+		} else if (cint(frm.doc.is_group) == 0 && frappe.boot.user.can_read.indexOf("GL Entry") !== -1) {
+			frm.add_custom_button(
+				__("General Ledger"),
+				function () {
+					frappe.route_options = {
+						account: frm.doc.name,
+						from_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
+						to_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
+						company: frm.doc.company,
+					};
+					frappe.set_route("query-report", "General Ledger");
+				},
+				__("View")
+			);
+>>>>>>> ec74a5e566 (style: format js files)
 
 			frm.add_custom_button(__('Convert to Group'), function () {
 				return frappe.call({

@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
+<<<<<<< HEAD
 frappe.query_reports["Gross and Net Profit Report"] = {
 	"filters": [
 
@@ -18,4 +19,12 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			"fieldtype": "Check"
 		}
 	);
+=======
+frappe.query_reports["Gross and Net Profit Report"] = $.extend({}, erpnext.financial_statements);
+
+frappe.query_reports["Gross and Net Profit Report"]["filters"].push({
+	fieldname: "accumulated_values",
+	label: __("Accumulated Values"),
+	fieldtype: "Check",
+>>>>>>> ec74a5e566 (style: format js files)
 });

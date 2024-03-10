@@ -26,5 +26,14 @@ import "./bulk_transaction_processing";
 import "./utils/crm_activities";
 import "./templates/crm_activities.html";
 import "./templates/crm_notes.html";
+<<<<<<< HEAD
+=======
+import "./controllers/accounts.js";
+import "./utils/landed_taxes_and_charges_common.js";
+import "./utils/sales_common.js";
+import "./controllers/buying.js";
+import "./utils/demo.js";
+import "./financial_statements.js";
+>>>>>>> ec74a5e566 (style: format js files)
 
 // import { sum } from 'frappe/public/utils/util.js'

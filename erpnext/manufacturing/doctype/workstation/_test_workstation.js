@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 /* eslint-disable */
+=======
+>>>>>>> ec74a5e566 (style: format js files)
 // rename this file from _test_[name] to test_[name] to activate
 // and remove above this line
 
@@ -8,16 +11,16 @@ QUnit.test("test: Workstation", function (assert) {
 	// number of asserts
 	assert.expect(1);
 
-	frappe.run_serially('Workstation', [
+	frappe.run_serially("Workstation", [
 		// insert a new Workstation
-		() => frappe.tests.make([
-			// values to be set
-			{key: 'value'}
-		]),
+		() =>
+			frappe.tests.make([
+				// values to be set
+				{ key: "value" },
+			]),
 		() => {
-			assert.equal(cur_frm.doc.key, 'value');
+			assert.equal(cur_frm.doc.key, "value");
 		},
-		() => done()
+		() => done(),
 	]);
-
 });

@@ -1,9 +1,12 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
+<<<<<<< HEAD
 /* eslint-disable */
+=======
+>>>>>>> ec74a5e566 (style: format js files)
 
 frappe.query_reports["Inactive Sales Items"] = {
-	"filters": [
+	filters: [
 		{
 			fieldname: "territory",
 			label: __("Territory"),
@@ -15,27 +18,27 @@ frappe.query_reports["Inactive Sales Items"] = {
 			fieldname: "item",
 			label: __("Item"),
 			fieldtype: "Link",
-			options: "Item"
+			options: "Item",
 		},
 		{
 			fieldname: "item_group",
 			label: __("Item Group"),
 			fieldtype: "Link",
-			options: "Item Group"
+			options: "Item Group",
 		},
 		{
 			fieldname: "based_on",
 			label: __("Based On"),
 			fieldtype: "Select",
 			options: "Sales Order\nSales Invoice",
-			default: "Sales Order"
+			default: "Sales Order",
 		},
 		{
 			fieldname: "days",
 			label: __("Days Since Last order"),
 			fieldtype: "Select",
 			options: [30, 60, 90],
-			default: 30
+			default: 30,
 		},
-	]
+	],
 };
