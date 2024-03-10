@@ -2264,9 +2264,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	get_method_for_payment() {
-		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
-		if(cur_frm.doc.__onload && cur_frm.doc.__onload.make_payment_via_journal_entry){
-			if(['Sales Invoice', 'Purchase Invoice'].includes( cur_frm.doc.doctype)){
+		let method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
+		if(this.frm.doc.__onload && this.frm.doc.__onload.make_payment_via_journal_entry){
+			if(['Sales Invoice', 'Purchase Invoice'].includes( this.frm.doc.doctype)){
 				method = "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice";
 			}else {
 				method= "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order";
