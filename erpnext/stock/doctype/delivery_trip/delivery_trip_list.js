@@ -1,4 +1,4 @@
-frappe.listview_settings['Delivery Trip'] = {
+frappe.listview_settings["Delivery Trip"] = {
 	add_fields: ["status"],
 	get_indicator: function (doc) {
 		if (in_list(["Cancelled", "Draft"], doc.status)) {
@@ -8,5 +8,5 @@ frappe.listview_settings['Delivery Trip'] = {
 		} else if (doc.status === "Completed") {
 			return [__(doc.status), "green", "status,=," + doc.status];
 		}
-	}
+	},
 };
