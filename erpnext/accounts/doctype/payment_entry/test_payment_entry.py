@@ -1475,6 +1475,7 @@ class TestPaymentEntry(FrappeTestCase):
 			for field in ["account", "debit", "credit"]:
 				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
 
+<<<<<<< HEAD
 	def test_outstanding_invoices_api(self):
 		"""
 		Test if `get_outstanding_reference_documents` fetches invoices in the right order.
@@ -1513,6 +1514,45 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(references[2].voucher_no, si2.name)
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
+=======
+	def test_reverse_payment_reconciliation(self):
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+		)
+		pe.submit()
+
+		reverse_pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Pay",
+			paid_from="_Test Cash - _TC",
+			paid_to="Debtors - _TC",
+		)
+		reverse_pe.submit()
+
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = "_Test Company"
+		pr.party_type = "Customer"
+		pr.party = "_Test Customer"
+		pr.receivable_payable_account = "Debtors - _TC"
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		self.assertEqual(reverse_pe.name, pr.invoices[0].invoice_number)
+		self.assertEqual(pe.name, pr.payments[0].reference_name)
+
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [pr.payments[0].as_dict()]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+>>>>>>> 6d9074d585 (test: reverse payment reconciliation)
 
 
 def create_payment_entry(**args):
