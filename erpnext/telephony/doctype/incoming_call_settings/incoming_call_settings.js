@@ -3,17 +3,17 @@
 
 function time_to_seconds(time_str) {
 	// Convert time string of format HH:MM:SS into seconds.
-	let seq = time_str.split(':');
+	let seq = time_str.split(":");
 	seq = seq.map((n) => parseInt(n));
-	return (seq[0]*60*60) + (seq[1]*60) + seq[2];
+	return seq[0] * 60 * 60 + seq[1] * 60 + seq[2];
 }
 
-function number_sort(array, ascending=true) {
+function number_sort(array, ascending = true) {
 	let array_copy = [...array];
 	if (ascending) {
-		array_copy.sort((a, b) => a-b); // ascending order
+		array_copy.sort((a, b) => a - b); // ascending order
 	} else {
-		array_copy.sort((a, b) => b-a); // descending order
+		array_copy.sort((a, b) => b - a); // descending order
 	}
 	return array_copy;
 }
@@ -54,7 +54,9 @@ function validate_call_schedule_timeslot(schedule) {
 		let from_time_in_secs = time_to_seconds(record.from_time);
 		let to_time_in_secs = time_to_seconds(record.to_time);
 		if (from_time_in_secs >= to_time_in_secs) {
-			errors.push(__('Call Schedule Row {0}: To time slot should always be ahead of From time slot.', [row]));
+			errors.push(
+				__("Call Schedule Row {0}: To time slot should always be ahead of From time slot.", [row])
+			);
 		}
 	}
 
@@ -66,7 +68,7 @@ function validate_call_schedule_timeslot(schedule) {
 function is_call_schedule_overlapped(day_schedule) {
 	// Check if any time slots are overlapped in a day schedule.
 	let timeslots = [];
-	day_schedule.forEach((record)=> {
+	day_schedule.forEach((record) => {
 		timeslots.push([time_to_seconds(record.from_time), time_to_seconds(record.to_time)]);
 	});
 
@@ -77,8 +79,8 @@ function is_call_schedule_overlapped(day_schedule) {
 	timeslots = number_sort(timeslots);
 
 	// Sorted timeslots will be in ascending order if not overlapped.
-	for (let i=1; i < timeslots.length; i++) {
-		if (check_timeslot_overlap(timeslots[i-1], timeslots[i])) {
+	for (let i = 1; i < timeslots.length; i++) {
+		if (check_timeslot_overlap(timeslots[i - 1], timeslots[i])) {
 			return true;
 		}
 	}
@@ -86,16 +88,16 @@ function is_call_schedule_overlapped(day_schedule) {
 }
 
 function validate_call_schedule_overlaps(schedule) {
-	let group_by_day = groupby(schedule, 'day_of_week');
+	let group_by_day = groupby(schedule, "day_of_week");
 	for (const [day, day_schedule] of Object.entries(group_by_day)) {
 		if (is_call_schedule_overlapped(day_schedule)) {
-			frappe.throw(__('Please fix overlapping time slots for {0}', [day]));
+			frappe.throw(__("Please fix overlapping time slots for {0}", [day]));
 		}
 	}
 }
 
-frappe.ui.form.on('Incoming Call Settings', {
+frappe.ui.form.on("Incoming Call Settings", {
 	validate(frm) {
 		validate_call_schedule(frm.doc.call_handling_schedule);
-	}
+	},
 });

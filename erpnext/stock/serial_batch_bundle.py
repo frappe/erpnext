@@ -4,8 +4,9 @@ from typing import List
 import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
-from frappe.query_builder.functions import CombineDatetime, Sum
+from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
 from frappe.utils import cint, cstr, flt, get_link_to_form, now, nowtime, today
+from pypika import Order
 
 from erpnext.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
@@ -324,9 +325,7 @@ class SerialBatchBundle:
 			batches = frappe._dict({self.sle.batch_no: self.sle.actual_qty})
 
 		batches_qty = get_available_batches(
-			frappe._dict(
-				{"item_code": self.item_code, "warehouse": self.warehouse, "batch_no": list(batches.keys())}
-			)
+			frappe._dict({"item_code": self.item_code, "batch_no": list(batches.keys())})
 		)
 
 		for batch_no in batches:
@@ -424,19 +423,21 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			)
 
 		else:
-			entries = self.get_serial_no_ledgers()
-
 			self.serial_no_incoming_rate = defaultdict(float)
 			self.stock_value_change = 0.0
 
-			for ledger in entries:
-				self.stock_value_change += ledger.incoming_rate
-				self.serial_no_incoming_rate[ledger.serial_no] += ledger.incoming_rate
+			serial_nos = self.get_serial_nos()
+			for serial_no in serial_nos:
+				incoming_rate = self.get_incoming_rate_from_bundle(serial_no)
+				if not incoming_rate:
+					continue
+
+				self.stock_value_change += incoming_rate
+				self.serial_no_incoming_rate[serial_no] += incoming_rate
 
 			self.calculate_stock_value_from_deprecarated_ledgers()
 
-	def get_serial_no_ledgers(self):
-		serial_nos = self.get_serial_nos()
+	def get_incoming_rate_from_bundle(self, serial_no) -> float:
 		bundle = frappe.qb.DocType("Serial and Batch Bundle")
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 
@@ -444,20 +445,18 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 			frappe.qb.from_(bundle)
 			.inner_join(bundle_child)
 			.on(bundle.name == bundle_child.parent)
-			.select(
-				bundle.name,
-				bundle_child.serial_no,
-				(bundle_child.incoming_rate * bundle_child.qty).as_("incoming_rate"),
-			)
+			.select((bundle_child.incoming_rate * bundle_child.qty).as_("incoming_rate"))
 			.where(
 				(bundle.is_cancelled == 0)
 				& (bundle.docstatus == 1)
-				& (bundle_child.serial_no.isin(serial_nos))
-				& (bundle.type_of_transaction.isin(["Inward", "Outward"]))
+				& (bundle_child.serial_no == serial_no)
+				& (bundle.type_of_transaction == "Inward")
+				& (bundle_child.qty > 0)
 				& (bundle.item_code == self.sle.item_code)
 				& (bundle_child.warehouse == self.sle.warehouse)
 			)
-			.orderby(bundle.posting_date, bundle.posting_time, bundle.creation)
+			.orderby(Timestamp(bundle.posting_date, bundle.posting_time), order=Order.desc)
+			.limit(1)
 		)
 
 		# Important to exclude the current voucher to calculate correct the stock value difference
@@ -474,7 +473,8 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 
 			query = query.where(timestamp_condition)
 
-		return query.run(as_dict=True)
+		incoming_rate = query.run()
+		return flt(incoming_rate[0][0]) if incoming_rate else 0.0
 
 	def get_serial_nos(self):
 		if self.sle.get("serial_nos"):

@@ -1,57 +1,56 @@
 // Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-
 frappe.query_reports["Item-wise Sales History"] = {
-	"filters": [
+	filters: [
 		{
-			fieldname:"company",
+			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1
+			reqd: 1,
 		},
 		{
-			fieldname:"from_date",
+			fieldname: "from_date",
 			reqd: 1,
 			label: __("From Date"),
 			fieldtype: "Date",
 			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 		},
 		{
-			fieldname:"to_date",
+			fieldname: "to_date",
 			reqd: 1,
 			default: frappe.datetime.get_today(),
 			label: __("To Date"),
 			fieldtype: "Date",
 		},
 		{
-			fieldname:"item_group",
+			fieldname: "item_group",
 			label: __("Item Group"),
 			fieldtype: "Link",
-			options: "Item Group"
+			options: "Item Group",
 		},
 		{
-			fieldname:"item_code",
+			fieldname: "item_code",
 			label: __("Item"),
 			fieldtype: "Link",
 			options: "Item",
 			get_query: () => {
 				return {
-					query: "erpnext.controllers.queries.item_query"
-				}
-			}
+					query: "erpnext.controllers.queries.item_query",
+				};
+			},
 		},
 		{
-			fieldname:"customer",
+			fieldname: "customer",
 			label: __("Customer"),
 			fieldtype: "Link",
-			options: "Customer"
-		}
+			options: "Customer",
+		},
 	],
 
-	"formatter": function (value, row, column, data, default_formatter) {
+	formatter: function (value, row, column, data, default_formatter) {
 		value = default_formatter(value, row, column, data);
 		let format_fields = ["delivered_quantity", "billed_amount"];
 
@@ -59,5 +58,5 @@ frappe.query_reports["Item-wise Sales History"] = {
 			value = "<span style='color:green;'>" + value + "</span>";
 		}
 		return value;
-	}
+	},
 };

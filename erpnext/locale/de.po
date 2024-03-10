@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-02-22 19:45\n"
+"PO-Revision-Date: 2024-03-06 14:36\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -295,7 +295,12 @@ msgid "# Create a Work Order\n\n"
 "- Issue of raw-material to shop material\n"
 "- Progress on each Workstation via Job Card\n"
 "- Manufactured Quantity against Work Order\n"
-msgstr ""
+msgstr "# Erstellen Sie einen Arbeitsauftrag\n\n"
+"Ein Arbeitsauftrag oder ein Job wird von der Produktionsleitung an die Fertigungsabteilung erteilt, um die Herstellung einer bestimmten Menge eines Artikels zu veranlassen. Ein Arbeitsauftrag enthält Details über den Produktionsartikel, seine Stückliste, die zu produzierenden Mengen und die Vorgänge.\n\n"
+"Über den Arbeitsauftrag können Sie verschiedene Produktionsstatus verfolgen, wie z. B.:\n\n"
+"- Ausgabe des Rohmaterials an das Fertigungsmaterial\n"
+"- Fortschritt an jedem Arbeitsplatz über die Jobkarte\n"
+"- Gefertigte Menge im Arbeitsauftrag\n"
 
 #. Description of the Onboarding Step 'Create an Item'
 #: setup/onboarding_step/create_an_item/create_an_item.json
@@ -336,7 +341,9 @@ msgstr "# Erstellen Sie Ihre erste Eingangsrechnung\n\n"
 msgid "# Financial Statements\n\n"
 "In ERPNext, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.\n\n"
 "<b>[Check Accounting reports](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
-msgstr ""
+msgstr "# Finanzberichte\n\n"
+"In ERPNext können Sie mit einem Klick wichtige Finanzberichte wie [Bilanz] und [Gewinn- und Verlustrechnungen] abrufen. Sie können den Bericht für einen beliebigen Zeitraum ausführen und Diagramme basierend auf den Daten erstellen. Weitere Berichte finden Sie in den Abschnitten „Finanzberichte“, „Hauptbuch“ und „Rentabilitätsberichte“.\n\n"
+"<b>[Buchhaltungsberichte prüfen](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
 
 #. Description of the Onboarding Step 'Review Fixed Asset Accounts'
 #: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
@@ -5489,7 +5496,7 @@ msgstr "Alle Lager"
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "All allocations have been successfully reconciled"
-msgstr ""
+msgstr "Alle Zuweisungen wurden erfolgreich abgeglichen"
 
 #: support/doctype/issue/issue.js:97
 msgid "All communications including and above this shall be moved into the new Issue"
@@ -5742,7 +5749,7 @@ msgstr "Kontinuierlichen Materialverbrauch zulassen"
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgctxt "Manufacturing Settings"
 msgid "Allow Excess Material Transfer"
-msgstr ""
+msgstr "Transfer von überschüssigem Material zulassen"
 
 #. Label of a Check field in DocType 'POS Payment Method'
 #: accounts/doctype/pos_payment_method/pos_payment_method.json
@@ -5854,7 +5861,7 @@ msgstr "Erstellen von Eingangsrechnung ohne Bestellung zulassen"
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Allow Purchase Invoice Creation Without Purchase Receipt"
-msgstr ""
+msgstr "Erstellen von Eingangsrechnungen ohne Eingangsbeleg zulassen"
 
 #. Label of a Check field in DocType 'Item Variant Settings'
 #: stock/doctype/item_variant_settings/item_variant_settings.json
@@ -5998,7 +6005,7 @@ msgstr ""
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgctxt "Manufacturing Settings"
 msgid "Allow transferring raw materials even after the Required Quantity is fulfilled"
-msgstr ""
+msgstr "Rohstoffübertragung auch nach Erfüllung der erforderlichen Menge erlauben"
 
 #. Label of a Check field in DocType 'Repost Allowed Types'
 #: accounts/doctype/repost_allowed_types/repost_allowed_types.json
@@ -7562,7 +7569,7 @@ msgstr "Steuereinbehaltungsbetrag anwenden"
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Apply Tax Withholding Amount "
-msgstr ""
+msgstr "Quellensteuerbetrag anwenden"
 
 #. Label of a Check field in DocType 'Accounting Dimension Filter'
 #: accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
@@ -8748,7 +8755,7 @@ msgstr ""
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Auto Create Subcontracting Order"
-msgstr ""
+msgstr "Unterauftrag automatisch erstellen"
 
 #. Label of a Check field in DocType 'Fiscal Year'
 #: accounts/doctype/fiscal_year/fiscal_year.json
@@ -10085,13 +10092,13 @@ msgstr "Kontoauszug zum Kontenabgleich"
 #. Name of a DocType
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 msgid "Bank Reconciliation Tool"
-msgstr ""
+msgstr "Bankabstimmungswerkzeug"
 
 #. Label of a Link in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgctxt "Bank Reconciliation Tool"
 msgid "Bank Reconciliation Tool"
-msgstr ""
+msgstr "Bankabstimmungswerkzeug"
 
 #. Name of a DocType
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
@@ -11114,11 +11121,11 @@ msgstr "Lebenslauf / Anschreiben"
 #. Name of a DocType
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgid "Bisect Accounting Statements"
-msgstr ""
+msgstr "Buchhaltungsberichte teilen"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:9
 msgid "Bisect Left"
-msgstr ""
+msgstr "Links teilen"
 
 #. Name of a DocType
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -11127,27 +11134,27 @@ msgstr ""
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:13
 msgid "Bisect Right"
-msgstr ""
+msgstr "Rechts teilen"
 
 #. Label of a Heading field in DocType 'Bisect Accounting Statements'
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "Bisecting From"
-msgstr ""
+msgstr "Teilen ab"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:61
 msgid "Bisecting Left ..."
-msgstr ""
+msgstr "Teile links ..."
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:71
 msgid "Bisecting Right ..."
-msgstr ""
+msgstr "Teile rechts ..."
 
 #. Label of a Heading field in DocType 'Bisect Accounting Statements'
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "Bisecting To"
-msgstr ""
+msgstr "Teilen bis"
 
 #: setup/setup_wizard/operations/install_fixtures.py:236
 msgid "Black"
@@ -11688,7 +11695,7 @@ msgstr ""
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:20
 msgid "Build Tree"
-msgstr ""
+msgstr "Baum erstellen"
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:155
 msgid "Buildable Qty"
@@ -12053,7 +12060,7 @@ msgstr "Anruftyp"
 
 #: telephony/doctype/call_log/call_log.js:8
 msgid "Callback"
-msgstr ""
+msgstr "Rückruf"
 
 #. Name of a DocType
 #. Label of a Card Break in the CRM Workspace
@@ -16685,7 +16692,7 @@ msgstr "Steuerungsaktion"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Control Historical Stock Transactions"
-msgstr ""
+msgstr "Historische Lagerbewegungen überprüfen"
 
 #: public/js/utils.js:684
 msgid "Conversion Factor"
@@ -16896,23 +16903,23 @@ msgstr "Korrekturmaßnahme"
 
 #: manufacturing/doctype/job_card/job_card.js:146
 msgid "Corrective Job Card"
-msgstr ""
+msgstr "Nacharbeitsauftrag"
 
 #: manufacturing/doctype/job_card/job_card.js:151
 msgid "Corrective Operation"
-msgstr ""
+msgstr "Nacharbeit"
 
 #. Label of a Tab Break field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Corrective Operation"
-msgstr ""
+msgstr "Nacharbeit"
 
 #. Label of a Currency field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Corrective Operation Cost"
-msgstr ""
+msgstr "Nacharbeitskosten"
 
 #. Label of a Select field in DocType 'Quality Action'
 #: quality_management/doctype/quality_action/quality_action.json
@@ -17540,7 +17547,7 @@ msgstr ""
 #: buying/doctype/supplier_scorecard_variable/supplier_scorecard_variable.py:46
 #: buying/doctype/supplier_scorecard_variable/supplier_scorecard_variable.py:50
 msgid "Could not find path for "
-msgstr ""
+msgstr "Konnte keinen Pfad finden für "
 
 #: accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:128
 #: accounts/report/financial_statements.py:236
@@ -18267,7 +18274,7 @@ msgstr ""
 
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.js:226
 msgid "Creating Subcontracting Receipt ..."
-msgstr ""
+msgstr "Erstelle Unterauftragsbeleg ..."
 
 #: setup/doctype/employee/employee.js:85
 msgid "Creating User..."
@@ -21473,7 +21480,7 @@ msgstr "Standard Provisorisches Konto"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Default Purchase Unit of Measure"
-msgstr "Standard Maßeinheit Verkauf"
+msgstr "Standard Maßeinheit Einkauf"
 
 #. Label of a Data field in DocType 'CRM Settings'
 #: crm/doctype/crm_settings/crm_settings.json
@@ -27364,7 +27371,7 @@ msgstr ""
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:195
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:119
 msgid "FIFO/LIFO Queue"
-msgstr ""
+msgstr "FIFO/LIFO-Warteschlange"
 
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:62
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:13
@@ -27752,13 +27759,13 @@ msgstr "Filtern nach Rechnungsstatus"
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "Filter on Invoice"
-msgstr ""
+msgstr "Nach Rechnung filtern"
 
 #. Label of a Data field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "Filter on Payment"
-msgstr ""
+msgstr "Nach Zahlung filtern"
 
 #: accounts/doctype/payment_entry/payment_entry.js:696
 #: public/js/bank_reconciliation_tool/dialog_manager.js:192
@@ -27811,7 +27818,7 @@ msgstr "Filter"
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Final Product"
-msgstr ""
+msgstr "Endprodukt"
 
 #. Name of a DocType
 #: accounts/doctype/finance_book/finance_book.json
@@ -28103,7 +28110,7 @@ msgstr "Fertigerzeugnis {0} stimmt nicht mit dem Arbeitsauftrag {1} überein"
 #. Title of an Onboarding Step
 #: manufacturing/onboarding_step/create_product/create_product.json
 msgid "Finished Items"
-msgstr ""
+msgstr "Fertigerzeugnisse"
 
 #. Label of a Time field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -30658,7 +30665,7 @@ msgstr ""
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Has Alternative Item"
-msgstr ""
+msgstr "Hat alternativen Artikel"
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -30862,7 +30869,7 @@ msgstr "Hier sind die Fehlerprotokolle für die oben erwähnten fehlgeschlagenen
 
 #: stock/stock_ledger.py:1669
 msgid "Here are the options to proceed:"
-msgstr ""
+msgstr "Hier sind die Optionen für das weitere Vorgehen:"
 
 #. Description of the 'Family Background' (Small Text) field in DocType
 #. 'Employee'
@@ -30879,7 +30886,7 @@ msgstr "Hier können Sie Größe, Gewicht, Allergien, medizinische Belange usw. 
 
 #: setup/doctype/employee/employee.js:122
 msgid "Here, you can select a senior of this Employee. Based on this, Organization Chart will be populated."
-msgstr ""
+msgstr "Hier können Sie einen Vorgesetzten dieses Mitarbeiters auswählen. Auf dieser Grundlage wird das Organigramm erstellt."
 
 #: setup/doctype/holiday_list/holiday_list.js:75
 msgid "Here, your weekly offs are pre-populated based on the previous selections. You can add more rows to also add public and national holidays individually."
@@ -34107,7 +34114,7 @@ msgstr "Ist storniert"
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Is Cash or Non Trade Discount"
-msgstr ""
+msgstr "Ist Skonto bzw. kein Handelsrabatt "
 
 #. Label of a Check field in DocType 'Share Balance'
 #: accounts/doctype/share_balance/share_balance.json
@@ -34155,7 +34162,7 @@ msgstr ""
 #: manufacturing/doctype/operation/operation.json
 msgctxt "Operation"
 msgid "Is Corrective Operation"
-msgstr ""
+msgstr "Ist Nacharbeit"
 
 #. Label of a Check field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -34375,7 +34382,7 @@ msgstr "Ist gesperrt"
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Is Fully Depreciated"
-msgstr ""
+msgstr "Ist vollständig abgeschrieben"
 
 #: accounts/doctype/account/account_tree.js:110
 #: accounts/doctype/cost_center/cost_center_tree.js:23
@@ -43332,7 +43339,7 @@ msgstr "Keine Beschreibung angegeben"
 
 #: telephony/doctype/call_log/call_log.py:119
 msgid "No employee was scheduled for call popup"
-msgstr ""
+msgstr "Es war kein Mitarbeiter für das Anruf-Popup eingeplant"
 
 #: accounts/doctype/payment_entry/payment_entry.js:1064
 msgid "No gain or loss in the exchange rate"
@@ -43458,7 +43465,7 @@ msgstr "Kein Datensatz gefunden"
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:677
 msgid "No records found in Allocation table"
-msgstr ""
+msgstr "Keine Datensätze in der Zuteilungstabelle gefunden"
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:579
 msgid "No records found in the Invoices table"
@@ -43466,7 +43473,7 @@ msgstr "Keine Datensätze in der Tabelle Rechnungen gefunden"
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:582
 msgid "No records found in the Payments table"
-msgstr ""
+msgstr "Keine Datensätze in der Zahlungstabelle gefunden"
 
 #. Description of the 'Stock Frozen Up To' (Date) field in DocType 'Stock
 #. Settings'
@@ -49463,7 +49470,7 @@ msgstr "Bitte kontaktieren Sie einen der folgenden Benutzer, um die Kreditlimits
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:321
 msgid "Please contact any of the following users to {} this transaction."
-msgstr ""
+msgstr "Bitte kontaktieren Sie einen der folgenden Benutzer, um diese Transaktion zu {}."
 
 #: selling/doctype/customer/customer.py:531
 msgid "Please contact your administrator to extend the credit limits for {0}."
@@ -49529,7 +49536,7 @@ msgstr ""
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:871
 msgid "Please ensure {} account is a Balance Sheet account."
-msgstr ""
+msgstr "Bitte stellen Sie sicher, dass das Konto {} ein Bilanzkonto ist."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:366
 msgid "Please ensure {} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
@@ -50914,7 +50921,7 @@ msgstr "Preis"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:246
 msgid "Price ({0})"
-msgstr ""
+msgstr "Preis ({0})"
 
 #. Label of a Section Break field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -51314,7 +51321,7 @@ msgstr "Preis nicht UOM abhängig"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:253
 msgid "Price Per Unit ({0})"
-msgstr ""
+msgstr "Preis pro Einheit ({0})"
 
 #: selling/page/point_of_sale/pos_controller.js:553
 msgid "Price is not set for the item."
@@ -52110,7 +52117,7 @@ msgstr "Priorität"
 
 #: stock/doctype/putaway_rule/putaway_rule.py:60
 msgid "Priority cannot be lesser than 1."
-msgstr ""
+msgstr "Die Priorität kann nicht kleiner als 1 sein."
 
 #: support/doctype/service_level_agreement/service_level_agreement.py:755
 msgid "Priority has been changed to {0}."
@@ -52668,7 +52675,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: manufacturing/onboarding_step/production_planning/production_planning.json
 msgid "Production Planning"
-msgstr ""
+msgstr "Produktionsplanung"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
@@ -52685,17 +52692,17 @@ msgstr "Produkte"
 #. Subtitle of the Module Onboarding 'Buying'
 #: buying/module_onboarding/buying/buying.json
 msgid "Products, Purchases, Analysis, and more."
-msgstr ""
+msgstr "Produkte, Einkäufe, Analysen und mehr."
 
 #. Subtitle of the Module Onboarding 'Manufacturing'
 #: manufacturing/module_onboarding/manufacturing/manufacturing.json
 msgid "Products, Raw Materials, BOM, Work Order, and more."
-msgstr ""
+msgstr "Produkte, Rohmaterialien, Stücklisten, Arbeitsaufträge und mehr."
 
 #. Subtitle of the Module Onboarding 'Selling'
 #: selling/module_onboarding/selling/selling.json
 msgid "Products, Sales, Analysis, and more."
-msgstr ""
+msgstr "Produkte, Vertrieb, Analyse und mehr."
 
 #. Label of a Tab Break field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -52736,13 +52743,13 @@ msgstr "Gewinn- und Verlustrechnung"
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "Profit and Loss Summary"
-msgstr ""
+msgstr "Gewinn und Verlust Zusammenfassung"
 
 #. Label of a Float field in DocType 'Bisect Nodes'
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
 msgctxt "Bisect Nodes"
 msgid "Profit and Loss Summary"
-msgstr ""
+msgstr "Gewinn und Verlust Zusammenfassung"
 
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:132
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:133
@@ -52774,11 +52781,11 @@ msgstr "Fortschritt"
 #: projects/doctype/task/task.py:143
 #, python-format
 msgid "Progress % for a task cannot be more than 100."
-msgstr ""
+msgstr "Der prozentuale Fortschritt für eine Aufgabe darf nicht mehr als 100 betragen."
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:94
 msgid "Progress (%)"
-msgstr ""
+msgstr "Fortschritt (%)"
 
 #. Name of a DocType
 #: accounts/doctype/sales_invoice/sales_invoice.js:973
@@ -53142,7 +53149,7 @@ msgstr "Projektname"
 
 #: templates/pages/projects.html:114
 msgid "Project Progress:"
-msgstr ""
+msgstr "Projektfortschritt:"
 
 #: projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:47
 msgid "Project Start Date"
@@ -56765,7 +56772,7 @@ msgstr "Nachbestellmenge"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.py:226
 msgid "Reached Root"
-msgstr ""
+msgstr "Oberste Ebene erreicht"
 
 #. Label of a Check field in DocType 'POS Field'
 #: accounts/doctype/pos_field/pos_field.json
@@ -56842,7 +56849,7 @@ msgstr "Hochgeladene Datei lesen"
 #: stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgctxt "Quality Inspection Reading"
 msgid "Reading Value"
-msgstr ""
+msgstr "Abgelesener Wert"
 
 #. Label of a Table field in DocType 'Quality Inspection'
 #: stock/doctype/quality_inspection/quality_inspection.json
@@ -57256,15 +57263,15 @@ msgstr ""
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "Reconciliation Error Log"
-msgstr ""
+msgstr "Abstimmungsfehlerprotokoll"
 
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation_dashboard.py:9
 msgid "Reconciliation Logs"
-msgstr ""
+msgstr "Abstimmungsprotokolle"
 
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.js:13
 msgid "Reconciliation Progress"
-msgstr ""
+msgstr "Abstimmungsfortschritt"
 
 #. Label of a HTML field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
@@ -58745,7 +58752,7 @@ msgstr "Angebotsanfrage"
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "Request Parameters"
-msgstr ""
+msgstr "Anfrageparameter"
 
 #: accounts/doctype/pos_invoice/pos_invoice.js:269
 msgid "Request Timeout"
@@ -59071,13 +59078,13 @@ msgstr "Zahlungsemail erneut senden"
 
 #: stock/report/reserved_stock/reserved_stock.js:121
 msgid "Reservation Based On"
-msgstr ""
+msgstr "Reservierung basierend auf"
 
 #. Label of a Select field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Reservation Based On"
-msgstr ""
+msgstr "Reservierung basierend auf"
 
 #: selling/doctype/sales_order/sales_order.js:68
 #: stock/doctype/pick_list/pick_list.js:110
@@ -59086,19 +59093,19 @@ msgstr "Reservieren"
 
 #: selling/doctype/sales_order/sales_order.js:322
 msgid "Reserve Stock"
-msgstr ""
+msgstr "Reservierter Bestand"
 
 #. Label of a Check field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Reserve Stock"
-msgstr ""
+msgstr "Reservierter Bestand"
 
 #. Label of a Check field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Reserve Stock"
-msgstr ""
+msgstr "Reservierter Bestand"
 
 #. Label of a Link field in DocType 'Purchase Order Item Supplied'
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
@@ -59137,7 +59144,7 @@ msgstr "Reservierte Menge"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:133
 msgid "Reserved Qty ({0}) cannot be a fraction. To allow this, disable '{1}' in UOM {3}."
-msgstr ""
+msgstr "Die reservierte Menge ({0}) darf kein Bruchteil sein. Um dies zu ermöglichen, deaktivieren Sie '{1}' in UOM {3}."
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
@@ -59155,17 +59162,17 @@ msgstr "Reserviert Menge für Produktion"
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Reserved Qty for Production Plan"
-msgstr ""
+msgstr "Reservierte Menge für Produktionsplan"
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Reserved Qty for Subcontract"
-msgstr ""
+msgstr "Reservierte Menge für Unterauftrag"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:497
 msgid "Reserved Qty should be greater than Delivered Qty."
-msgstr ""
+msgstr "Die reservierte Menge sollte größer sein als die gelieferte Menge."
 
 #: stock/report/item_shortage_report/item_shortage_report.py:116
 msgid "Reserved Quantity"
@@ -59177,7 +59184,7 @@ msgstr "Reservierte Menge für die Produktion"
 
 #: stock/stock_ledger.py:1982
 msgid "Reserved Serial No."
-msgstr ""
+msgstr "Reservierte Seriennr."
 
 #. Name of a report
 #: selling/doctype/sales_order/sales_order.js:79
@@ -59196,23 +59203,23 @@ msgstr "Reservierter Bestand"
 
 #: stock/stock_ledger.py:2012
 msgid "Reserved Stock for Batch"
-msgstr ""
+msgstr "Reservierter Bestand für Charge"
 
 #: stock/report/stock_projected_qty/stock_projected_qty.py:192
 msgid "Reserved for POS Transactions"
-msgstr ""
+msgstr "Für Kassentransaktionen reserviert"
 
 #: stock/report/stock_projected_qty/stock_projected_qty.py:171
 msgid "Reserved for Production"
-msgstr ""
+msgstr "Für die Produktion reserviert"
 
 #: stock/report/stock_projected_qty/stock_projected_qty.py:178
 msgid "Reserved for Production Plan"
-msgstr ""
+msgstr "Für Produktionsplan reserviert"
 
 #: stock/report/stock_projected_qty/stock_projected_qty.py:185
 msgid "Reserved for Sub Contracting"
-msgstr ""
+msgstr "Für Unteraufträge reserviert"
 
 #: stock/page/stock_balance/stock_balance.js:53
 msgid "Reserved for manufacturing"
@@ -59238,7 +59245,7 @@ msgstr "Zurücksetzen"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:19
 msgid "Reset Plaid Link"
-msgstr ""
+msgstr "Plaid-Link zurücksetzen"
 
 #: support/doctype/issue/issue.js:39
 msgid "Reset Service Level Agreement"
@@ -60274,11 +60281,11 @@ msgstr "Routing-Name"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:428
 msgid "Row #"
-msgstr ""
+msgstr "Zeile #"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:334
 msgid "Row # {0}:"
-msgstr ""
+msgstr "Zeile # {0}:"
 
 #: controllers/sales_and_purchase_return.py:181
 msgid "Row # {0}: Cannot return more than {1} for Item {2}"
@@ -60304,15 +60311,15 @@ msgstr "Zeile {0} (Zahlungstabelle): Betrag muss positiv sein"
 
 #: stock/doctype/item/item.py:480
 msgid "Row #{0}: A reorder entry already exists for warehouse {1} with reorder type {2}."
-msgstr ""
+msgstr "Zeile #{0}: Für das Lager {1} mit dem Nachbestellungstyp {2} ist bereits ein Nachbestellungseintrag vorhanden."
 
 #: stock/doctype/quality_inspection/quality_inspection.py:235
 msgid "Row #{0}: Acceptance Criteria Formula is incorrect."
-msgstr ""
+msgstr "Zeile #{0}: Die Formel für die Akzeptanzkriterien ist falsch."
 
 #: stock/doctype/quality_inspection/quality_inspection.py:215
 msgid "Row #{0}: Acceptance Criteria Formula is required."
-msgstr ""
+msgstr "Zeile #{0}: Die Formel für die Akzeptanzkriterien ist erforderlich."
 
 #: controllers/subcontracting_controller.py:72
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:413
@@ -60446,7 +60453,7 @@ msgstr "Zeile {0}: Voraussichtlicher Liefertermin kann nicht vor Bestelldatum se
 
 #: controllers/stock_controller.py:336
 msgid "Row #{0}: Expense Account not set for the Item {1}. {2}"
-msgstr ""
+msgstr "Zeile #{0}: Aufwandskonto für den Artikel nicht festgelegt {1}. {2}"
 
 #: buying/doctype/purchase_order/purchase_order.py:378
 msgid "Row #{0}: Finished Good Item Qty can not be zero"
@@ -60474,7 +60481,7 @@ msgstr "Zeile #{0}: Für {1} können Sie den Referenzbeleg nur auswählen, wenn 
 
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.py:44
 msgid "Row #{0}: From Date cannot be before To Date"
-msgstr ""
+msgstr "Zeile #{0}: Von-Datum kann nicht vor Bis-Datum liegen"
 
 #: public/js/utils/barcode_scanner.js:489
 msgid "Row #{0}: Item added"
@@ -60526,7 +60533,7 @@ msgstr "Zeile {0}: Der Zahlungsbeleg ist erforderlich, um die Transaktion abzusc
 
 #: manufacturing/doctype/production_plan/production_plan.py:892
 msgid "Row #{0}: Please select Item Code in Assembly Items"
-msgstr ""
+msgstr "Zeile #{0}: Bitte wählen Sie den Artikelcode in den Baugruppenartikeln aus"
 
 #: manufacturing/doctype/production_plan/production_plan.py:895
 msgid "Row #{0}: Please select the BOM No in Assembly Items"
@@ -60546,7 +60553,7 @@ msgstr ""
 
 #: public/js/utils/barcode_scanner.js:487
 msgid "Row #{0}: Qty increased by {1}"
-msgstr ""
+msgstr "Zeile #{0}: Menge erhöht um {1}"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:264
 #: assets/doctype/asset_capitalization/asset_capitalization.py:306
@@ -60555,7 +60562,7 @@ msgstr "Zeile #{0}: Menge muss eine positive Zahl sein"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:301
 msgid "Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Iem {2} against Batch {3} in Warehouse {4}."
-msgstr ""
+msgstr "Zeile #{0}: Die Menge sollte kleiner oder gleich der verfügbaren Menge zum Reservieren sein (Ist-Menge – reservierte Menge) {1} für Artikel {2} der Charge {3} im Lager {4}."
 
 #: controllers/accounts_controller.py:1018
 #: controllers/accounts_controller.py:3166
@@ -60564,15 +60571,15 @@ msgstr "Zeile {0}: Artikelmenge {1} kann nicht Null sein."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1017
 msgid "Row #{0}: Quantity to reserve for the Item {1} should be greater than 0."
-msgstr ""
+msgstr "Zeile #{0}: Die zu reservierende Menge für den Artikel {1} sollte größer als 0 sein."
 
 #: utilities/transaction_base.py:113 utilities/transaction_base.py:119
 msgid "Row #{0}: Rate must be same as {1}: {2} ({3} / {4})"
-msgstr ""
+msgstr "Zeile #{0}: Einzelpreis muss gleich sein wie {1}: {2} ({3} / {4})"
 
 #: controllers/buying_controller.py:470
 msgid "Row #{0}: Received Qty must be equal to Accepted + Rejected Qty for Item {1}"
-msgstr ""
+msgstr "Zeile #{0}: Die erhaltene Menge muss gleich der angenommenen + abgelehnten Menge für Artikel {1} sein"
 
 #: accounts/doctype/payment_entry/payment_entry.js:1016
 msgid "Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry"
@@ -60588,7 +60595,7 @@ msgstr "Zeile {0}: Abgelehnte Menge kann nicht in Kaufrückgabe eingegeben werde
 
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:387
 msgid "Row #{0}: Rejected Qty cannot be set for Scrap Item {1}."
-msgstr ""
+msgstr "Zeile #{0}: Die abgelehnte Menge kann nicht für den Ausschussartikel {1} festgelegt werden."
 
 #: controllers/subcontracting_controller.py:65
 msgid "Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}"
@@ -60600,7 +60607,7 @@ msgstr "Zeile {0}: Erforderlich nach Datum darf nicht vor dem Transaktionsdatum 
 
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:382
 msgid "Row #{0}: Scrap Item Qty cannot be zero"
-msgstr ""
+msgstr "Zeile #{0}: Die Menge des Ausschussartikels darf nicht Null sein"
 
 #: controllers/selling_controller.py:212
 msgid "Row #{0}: Selling rate for item {1} is lower than its {2}.\n"
@@ -60619,7 +60626,7 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:264
 msgid "Row #{0}: Serial No {1} is already selected."
-msgstr ""
+msgstr "Zeile #{0}: Die Seriennummer {1} ist bereits ausgewählt."
 
 #: controllers/accounts_controller.py:395
 msgid "Row #{0}: Service End Date cannot be before Invoice Posting Date"
@@ -60639,7 +60646,7 @@ msgstr "Zeile {0}: Lieferanten für Artikel {1} einstellen"
 
 #: stock/doctype/quality_inspection/quality_inspection.py:120
 msgid "Row #{0}: Status is mandatory"
-msgstr ""
+msgstr "Zeile #{0}: Status ist obligatorisch"
 
 #: accounts/doctype/journal_entry/journal_entry.py:381
 msgid "Row #{0}: Status must be {1} for Invoice Discounting {2}"
@@ -60647,7 +60654,7 @@ msgstr "Zeile {0}: Status muss {1} für Rechnungsrabatt {2} sein"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:273
 msgid "Row #{0}: Stock cannot be reserved for Item {1} against a disabled Batch {2}."
-msgstr ""
+msgstr "Zeile #{0}: Der Bestand kann nicht für Artikel {1} für eine deaktivierte Charge {2} reserviert werden."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:962
 msgid "Row #{0}: Stock cannot be reserved for a non-stock Item {1}"
@@ -60655,23 +60662,23 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:975
 msgid "Row #{0}: Stock cannot be reserved in group warehouse {1}."
-msgstr ""
+msgstr "Zeile #{0}: Bestand kann nicht im Gruppenlager {1} reserviert werden."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:989
 msgid "Row #{0}: Stock is already reserved for the Item {1}."
-msgstr ""
+msgstr "Zeile #{0}: Für den Artikel {1} ist bereits ein Lagerbestand reserviert."
 
 #: stock/doctype/delivery_note/delivery_note.py:605
 msgid "Row #{0}: Stock is reserved for item {1} in warehouse {2}."
-msgstr ""
+msgstr "Zeile #{0}: Der Bestand ist für den Artikel {1} im Lager {2} reserviert."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:285
 msgid "Row #{0}: Stock not available to reserve for Item {1} against Batch {2} in Warehouse {3}."
-msgstr ""
+msgstr "Zeile #{0}: Bestand nicht verfügbar für Artikel {1} von Charge {2} im Lager {3}."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1003
 msgid "Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}."
-msgstr ""
+msgstr "Zeile #{0}: Kein Bestand für den Artikel {1} im Lager {2} verfügbar."
 
 #: controllers/stock_controller.py:110
 msgid "Row #{0}: The batch {1} has already expired."
@@ -60679,7 +60686,7 @@ msgstr "Zeile {0}: Der Stapel {1} ist bereits abgelaufen."
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1687
 msgid "Row #{0}: The following Serial Nos are not present in Delivery Note {1}:"
-msgstr ""
+msgstr "Zeile #{0}: Die folgenden Seriennummern sind nicht im Lieferschein {1} enthalten:"
 
 #: manufacturing/doctype/workstation/workstation.py:116
 msgid "Row #{0}: Timings conflicts with row {1}"
@@ -60691,11 +60698,11 @@ msgstr ""
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1402
 msgid "Row #{0}: You must select an Asset for Item {1}."
-msgstr ""
+msgstr "Zeile #{0}: Sie müssen einen Vermögensgegenstand für Artikel {1} auswählen."
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1696
 msgid "Row #{0}: {1} Serial numbers required for Item {2}. You have provided {3}."
-msgstr ""
+msgstr "Zeile #{0}: {1} Seriennummern erforderlich für Artikel {2}. Sie haben {3} angegeben."
 
 #: controllers/buying_controller.py:483 public/js/controllers/buying.js:208
 msgid "Row #{0}: {1} can not be negative for item {2}"
@@ -60715,7 +60722,7 @@ msgstr "Zeile #{0}: {1} von {2} sollte {3} sein. Bitte aktualisieren Sie die {1}
 
 #: buying/utils.py:106
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
-msgstr ""
+msgstr "Zeile #{1}: Lager ist obligatorisch für Artikel {0}"
 
 #: assets/doctype/asset_category/asset_category.py:65
 msgid "Row #{}: Currency of {} - {} doesn't matches company currency."
@@ -60735,7 +60742,7 @@ msgstr "Zeile # {}: Artikelcode: {} ist unter Lager {} nicht verfügbar."
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:99
 msgid "Row #{}: Original Invoice {} of return invoice {} is {}."
-msgstr ""
+msgstr "Zeile #{}: Originalrechnung {} der Rechnungskorrektur {} ist {}."
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:87
 msgid "Row #{}: POS Invoice {} has been {}"
@@ -60787,7 +60794,7 @@ msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:433
 msgid "Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}"
-msgstr ""
+msgstr "Zeile Nr. {0}: Lager ist erforderlich. Bitte legen Sie ein Standardlager für Artikel {1} und Unternehmen {2} fest"
 
 #: manufacturing/doctype/job_card/job_card.py:599
 msgid "Row {0} : Operation is required against the raw material item {1}"
@@ -60803,11 +60810,11 @@ msgstr ""
 
 #: stock/doctype/stock_entry/stock_entry.py:1159
 msgid "Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
-msgstr ""
+msgstr "Zeile {0}# Artikel {1} wurde in der Tabelle „Gelieferte Rohstoffe“ in {2} {3} nicht gefunden"
 
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:190
 msgid "Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time."
-msgstr ""
+msgstr "Zeile {0}: Die akzeptierte Menge und die abgelehnte Menge können nicht gleichzeitig Null sein."
 
 #: accounts/doctype/journal_entry/journal_entry.py:509
 msgid "Row {0}: Account {1} and Party Type {2} have different account types"
@@ -60815,7 +60822,7 @@ msgstr ""
 
 #: controllers/accounts_controller.py:2536
 msgid "Row {0}: Account {1} is a Group Account"
-msgstr ""
+msgstr "Zeile {0}: Konto {1} ist eine Kontogruppe"
 
 #: projects/doctype/timesheet/timesheet.py:117
 msgid "Row {0}: Activity Type is mandatory."
@@ -60851,7 +60858,7 @@ msgstr "Zeile {0}: Umrechnungsfaktor ist zwingend erfoderlich"
 
 #: controllers/accounts_controller.py:2549
 msgid "Row {0}: Cost Center {1} does not belong to Company {2}"
-msgstr ""
+msgstr "Zeile {0}: Die Kostenstelle {1} gehört nicht zum Unternehmen {2}"
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:116
 msgid "Row {0}: Cost center is required for an item {1}"
@@ -60945,11 +60952,11 @@ msgstr ""
 
 #: controllers/buying_controller.py:400 controllers/selling_controller.py:479
 msgid "Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-msgstr ""
+msgstr "Zeile {0}: Der Einzelpreis wurde gemäß dem Bewertungskurs aktualisiert, da es sich um eine interne Umlagerung handelt"
 
 #: controllers/subcontracting_controller.py:98
 msgid "Row {0}: Item {1} must be a stock item."
-msgstr ""
+msgstr "Zeile {0}: Artikel {1} muss ein Lagerartikel sein."
 
 #: controllers/subcontracting_controller.py:103
 msgid "Row {0}: Item {1} must be a subcontracted item."
@@ -60961,7 +60968,7 @@ msgstr ""
 
 #: stock/doctype/packing_slip/packing_slip.py:148
 msgid "Row {0}: Packing Slip is already created for Item {1}."
-msgstr ""
+msgstr "Zeile {0}: Für den Artikel {1} wurde bereits ein Packzettel erstellt."
 
 #: accounts/doctype/journal_entry/journal_entry.py:687
 msgid "Row {0}: Party / Account does not match with {1} / {2} in {3} {4}"
@@ -60973,7 +60980,7 @@ msgstr "Zeile {0}: Partei-Typ und Partei sind für Forderungen-/Verbindlichkeite
 
 #: accounts/doctype/payment_terms_template/payment_terms_template.py:47
 msgid "Row {0}: Payment Term is mandatory"
-msgstr ""
+msgstr "Zeile {0}: Zahlungsbedingung ist obligatorisch"
 
 #: accounts/doctype/journal_entry/journal_entry.py:554
 msgid "Row {0}: Payment against Sales/Purchase Order should always be marked as advance"
@@ -60989,15 +60996,15 @@ msgstr ""
 
 #: controllers/subcontracting_controller.py:118
 msgid "Row {0}: Please select a BOM for Item {1}."
-msgstr ""
+msgstr "Zeile {0}: Bitte wählen Sie eine Stückliste für Artikel {1}."
 
 #: controllers/subcontracting_controller.py:111
 msgid "Row {0}: Please select an active BOM for Item {1}."
-msgstr ""
+msgstr "Zeile {0}: Bitte wählen Sie eine aktive Stückliste für Artikel {1}."
 
 #: controllers/subcontracting_controller.py:115
 msgid "Row {0}: Please select an valid BOM for Item {1}."
-msgstr ""
+msgstr "Zeile {0}: Bitte wählen Sie eine gültige Stückliste für Artikel {1}."
 
 #: regional/italy/utils.py:310
 msgid "Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges"
@@ -61017,19 +61024,19 @@ msgstr ""
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:93
 msgid "Row {0}: Purchase Invoice {1} has no stock impact."
-msgstr ""
+msgstr "Zeile {0}: Eingangsrechnung {1} hat keine Auswirkungen auf den Bestand."
 
 #: stock/doctype/packing_slip/packing_slip.py:154
 msgid "Row {0}: Qty cannot be greater than {1} for the Item {2}."
-msgstr ""
+msgstr "Zeile {0}: Die Menge darf für den Artikel {2} nicht größer als {1} sein."
 
 #: stock/doctype/stock_entry/stock_entry.py:407
 msgid "Row {0}: Qty in Stock UOM can not be zero."
-msgstr ""
+msgstr "Zeile {0}: Menge in Lager-ME kann nicht Null sein."
 
 #: stock/doctype/packing_slip/packing_slip.py:125
 msgid "Row {0}: Qty must be greater than 0."
-msgstr ""
+msgstr "Zeile {0}: Menge muss größer als 0 sein."
 
 #: stock/doctype/stock_entry/stock_entry.py:762
 msgid "Row {0}: Quantity not available for {4} in warehouse {1} at posting time of the entry ({2} {3})"
@@ -61177,7 +61184,7 @@ msgstr "Nummer der Lieferantenbestellung"
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "SABB-.########"
-msgstr ""
+msgstr "SABB-.########"
 
 #. Option for the 'Naming Series' (Select) field in DocType 'Campaign'
 #: crm/doctype/campaign/campaign.json
@@ -61219,7 +61226,7 @@ msgstr "SER-WRN-.YYYY.-"
 #: support/doctype/service_level_agreement/service_level_agreement.json
 msgctxt "Service Level Agreement"
 msgid "SLA Fulfilled On"
-msgstr ""
+msgstr "SLA erfüllt am"
 
 #. Name of a DocType
 #: support/doctype/sla_fulfilled_on_status/sla_fulfilled_on_status.json
@@ -61230,7 +61237,7 @@ msgstr ""
 #: support/doctype/service_level_agreement/service_level_agreement.json
 msgctxt "Service Level Agreement"
 msgid "SLA Paused On"
-msgstr ""
+msgstr "SLA pausiert am"
 
 #: public/js/utils.js:1015
 msgid "SLA is on hold since {0}"
@@ -61242,7 +61249,7 @@ msgstr ""
 
 #: support/doctype/service_level_agreement/service_level_agreement.js:32
 msgid "SLA will be applied on every {0}"
-msgstr ""
+msgstr "SLA wird alle {0} angewendet"
 
 #. Name of a DocType
 #: selling/doctype/sms_center/sms_center.json
@@ -62734,7 +62741,7 @@ msgstr "Barcode scannen"
 
 #: public/js/utils/serial_no_batch_selector.js:151
 msgid "Scan Batch No"
-msgstr ""
+msgstr "Chargennummer scannen"
 
 #. Label of a Check field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
@@ -62750,15 +62757,15 @@ msgstr "Scan-Modus"
 
 #: public/js/utils/serial_no_batch_selector.js:136
 msgid "Scan Serial No"
-msgstr ""
+msgstr "Seriennummer scannen"
 
 #: public/js/utils/barcode_scanner.js:172
 msgid "Scan barcode for item {0}"
-msgstr ""
+msgstr "Barcode für Artikel {0} scannen"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.js:94
 msgid "Scan mode enabled, existing quantity will not be fetched."
-msgstr ""
+msgstr "Scanmodus aktiviert, vorhandene Menge wird nicht abgerufen."
 
 #. Label of a Attach field in DocType 'Cheque Print Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
@@ -62768,7 +62775,7 @@ msgstr "Gescannte Scheck"
 
 #: public/js/utils/barcode_scanner.js:238
 msgid "Scanned Quantity"
-msgstr ""
+msgstr "Gescannte Menge"
 
 #. Label of a Section Break field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
@@ -62837,7 +62844,7 @@ msgstr "Geplante Zeit"
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Scheduled Time Logs"
-msgstr ""
+msgstr "Geplante Zeitprotokolle"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.py:84
 #: accounts/doctype/ledger_merge/ledger_merge.py:39
@@ -62856,7 +62863,7 @@ msgstr ""
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:549
 msgid "Scheduler is inactive. Cannot enqueue job."
-msgstr ""
+msgstr "Zeitplaner ist inaktiv. Aufgabe kann nicht eingereiht werden."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.py:84
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:232
@@ -62865,7 +62872,7 @@ msgstr "Scheduler ist inaktiv. Daten können nicht importiert werden."
 
 #: accounts/doctype/ledger_merge/ledger_merge.py:39
 msgid "Scheduler is inactive. Cannot merge accounts."
-msgstr ""
+msgstr "Zeitplaner ist inaktiv. Konten können nicht zusammengeführt werden."
 
 #. Label of a Table field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
@@ -62877,7 +62884,7 @@ msgstr "Zeitablaufpläne"
 #: stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgctxt "Stock Reposting Settings"
 msgid "Scheduling"
-msgstr ""
+msgstr "Zeitplan"
 
 #. Label of a Small Text field in DocType 'Employee Education'
 #: setup/doctype/employee_education/employee_education.json
@@ -63269,7 +63276,7 @@ msgstr "Ansicht auswählen"
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:248
 msgid "Select Vouchers to Match"
-msgstr ""
+msgstr "Passende Belege auswählen"
 
 #: public/js/stock_analytics.js:46
 msgid "Select Warehouse..."
@@ -63289,7 +63296,7 @@ msgstr "Wählen Sie ein Unternehmen, zu dem dieser Mitarbeiter gehört."
 
 #: buying/doctype/supplier/supplier.js:160
 msgid "Select a Customer"
-msgstr ""
+msgstr "Wählen Sie einen Kunden"
 
 #: support/doctype/service_level_agreement/service_level_agreement.py:111
 msgid "Select a Default Priority."
@@ -63309,7 +63316,7 @@ msgstr "Wählen Sie eine Firma aus"
 
 #: stock/doctype/item/item.js:809
 msgid "Select an Item Group."
-msgstr ""
+msgstr "Wählen Sie eine Artikelgruppe."
 
 #: accounts/report/general_ledger/general_ledger.py:31
 msgid "Select an account to print in account currency"
@@ -63358,16 +63365,16 @@ msgstr ""
 
 #: manufacturing/doctype/work_order/work_order.js:807
 msgid "Select the Item to be manufactured."
-msgstr ""
+msgstr "Wählen Sie den Artikel, der hergestellt werden soll."
 
 #: manufacturing/doctype/bom/bom.js:725
 msgid "Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically."
-msgstr ""
+msgstr "Wählen Sie den Artikel, der hergestellt werden soll. Der Name des Artikels, die ME, das Unternehmen und die Währung werden automatisch abgerufen."
 
 #: manufacturing/doctype/production_plan/production_plan.js:294
 #: manufacturing/doctype/production_plan/production_plan.js:305
 msgid "Select the Warehouse"
-msgstr ""
+msgstr "Wählen Sie das Lager aus"
 
 #: accounts/doctype/bank_guarantee/bank_guarantee.py:47
 msgid "Select the customer or supplier."
@@ -63375,11 +63382,11 @@ msgstr "Wählen Sie den Kunden oder den Lieferanten aus."
 
 #: www/book_appointment/index.html:16
 msgid "Select the date and your timezone"
-msgstr ""
+msgstr "Wählen Sie das Datum und Ihre Zeitzone"
 
 #: manufacturing/doctype/bom/bom.js:740
 msgid "Select the raw materials (Items) required to manufacture the Item"
-msgstr ""
+msgstr "Wählen Sie die Rohstoffe (Artikel) aus, die zur Herstellung des Artikels benötigt werden"
 
 #: manufacturing/doctype/bom/bom.js:338
 msgid "Select variant item code for the template item {0}"
@@ -63546,13 +63553,13 @@ msgstr "Senden nach (Tage)"
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Send Attached Files"
-msgstr ""
+msgstr "Angehängte Dateien senden"
 
 #. Label of a Check field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Send Document Print"
-msgstr ""
+msgstr "Ausdruck der Anfrage senden"
 
 #. Label of a Check field in DocType 'Request for Quotation Supplier'
 #: buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
@@ -63562,7 +63569,7 @@ msgstr "E-Mail absenden"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:11
 msgid "Send Emails"
-msgstr ""
+msgstr "E-Mails senden"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:46
 msgid "Send Emails to Suppliers"
@@ -63661,19 +63668,19 @@ msgstr "Sequenz-ID"
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.json
 msgctxt "Incoming Call Settings"
 msgid "Sequential"
-msgstr ""
+msgstr "Sequentiell"
 
 #. Label of a Tab Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Serial & Batch Item"
-msgstr ""
+msgstr "Serien- und Chargenartikel"
 
 #. Label of a Section Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Serial & Batch Item Settings"
-msgstr ""
+msgstr "Einstellungen für Serien- und Chargenartikel"
 
 #. Label of a Link field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
@@ -63695,7 +63702,7 @@ msgstr ""
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Serial / Batch No"
-msgstr ""
+msgstr "Serien-/Chargennr"
 
 #: public/js/utils.js:124
 msgid "Serial / Batch Nos"
@@ -63918,7 +63925,7 @@ msgstr ""
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:577
 msgid "Serial No is mandatory"
-msgstr ""
+msgstr "Seriennummer ist obligatorisch"
 
 #: selling/doctype/installation_note/installation_note.py:76
 msgid "Serial No is mandatory for Item {0}"
@@ -63926,11 +63933,11 @@ msgstr "Seriennummer ist für Artikel {0} zwingend erforderlich"
 
 #: public/js/utils/serial_no_batch_selector.js:480
 msgid "Serial No {0} already exists"
-msgstr ""
+msgstr "Die Seriennummer {0} existiert bereits"
 
 #: public/js/utils/barcode_scanner.js:311
 msgid "Serial No {0} already scanned"
-msgstr ""
+msgstr "Seriennummer {0} bereits gescannt"
 
 #: selling/doctype/installation_note/installation_note.py:93
 msgid "Serial No {0} does not belong to Delivery Note {1}"
@@ -63951,12 +63958,12 @@ msgstr "Seriennummer {0} existiert nicht"
 
 #: public/js/utils/barcode_scanner.js:402
 msgid "Serial No {0} has already scanned."
-msgstr ""
+msgstr "Seriennummer {0} wurde bereits gescannt."
 
 #: public/js/utils/barcode_scanner.js:499
 #: public/js/utils/barcode_scanner.js:506
 msgid "Serial No {0} is already added"
-msgstr ""
+msgstr "Die Seriennummer {0} ist bereits hinzugefügt"
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.py:341
 msgid "Serial No {0} is under maintenance contract upto {1}"
@@ -63979,16 +63986,16 @@ msgstr "Seriennummer: {0} wurde bereits in eine andere POS-Rechnung übertragen.
 #: public/js/utils/serial_no_batch_selector.js:178
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:48
 msgid "Serial Nos"
-msgstr ""
+msgstr "Seriennummern"
 
 #: public/js/utils/serial_no_batch_selector.js:20
 #: public/js/utils/serial_no_batch_selector.js:183
 msgid "Serial Nos / Batch Nos"
-msgstr ""
+msgstr "Serien-/Chargennummern"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1692
 msgid "Serial Nos Mismatch"
-msgstr ""
+msgstr "Seriennummern stimmen nicht überein"
 
 #. Label of a Section Break field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -63998,11 +64005,11 @@ msgstr "Seriennummern und Chargen"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:1074
 msgid "Serial Nos are created successfully"
-msgstr ""
+msgstr "Seriennummern wurden erfolgreich erstellt"
 
 #: stock/stock_ledger.py:1972
 msgid "Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
-msgstr ""
+msgstr "Seriennummern sind bereits reserviert. Sie müssen die Reservierung aufheben, bevor Sie fortfahren."
 
 #. Label of a Data field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -64014,14 +64021,14 @@ msgstr "Serie der Seriennummer"
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Serial and Batch"
-msgstr ""
+msgstr "Seriennummer und Charge"
 
 #. Option for the 'Reservation Based On' (Select) field in DocType 'Stock
 #. Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Serial and Batch"
-msgstr ""
+msgstr "Seriennummer und Charge"
 
 #. Name of a DocType
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
@@ -64667,13 +64674,13 @@ msgstr "Service Level Priorität"
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "Service Provider"
-msgstr ""
+msgstr "Anbieter"
 
 #. Label of a Data field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Service Provider"
-msgstr ""
+msgstr "Anbieter"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
@@ -64762,7 +64769,7 @@ msgstr "Grundpreis manuell einstellen"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:150
 msgid "Set Default Supplier"
-msgstr ""
+msgstr "Standard-Lieferant festlegen"
 
 #. Label of a Button field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -64835,7 +64842,7 @@ msgstr ""
 #: projects/doctype/project/project.js:118
 #: projects/doctype/project/project.js:132
 msgid "Set Project Status"
-msgstr ""
+msgstr "Projektstatus festlegen"
 
 #: projects/doctype/project/project.js:154
 msgid "Set Project and all Tasks to status {0}?"
@@ -64923,7 +64930,7 @@ msgstr ""
 
 #: selling/doctype/sales_order/sales_order.js:184
 msgid "Set Warehouse"
-msgstr ""
+msgstr "Lager festlegen"
 
 #: crm/doctype/opportunity/opportunity_list.js:17
 #: support/doctype/issue/issue_list.js:12
@@ -65258,13 +65265,13 @@ msgstr "Schichtname"
 #: stock/doctype/delivery_note/delivery_note.js:166
 #: stock/doctype/shipment/shipment.json
 msgid "Shipment"
-msgstr ""
+msgstr "Sendung"
 
 #. Linked DocType in Incoterm's connections
 #: setup/doctype/incoterm/incoterm.json
 msgctxt "Incoterm"
 msgid "Shipment"
-msgstr ""
+msgstr "Sendung"
 
 #. Label of a Currency field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -65275,53 +65282,53 @@ msgstr ""
 #. Name of a DocType
 #: stock/doctype/shipment_delivery_note/shipment_delivery_note.json
 msgid "Shipment Delivery Note"
-msgstr ""
+msgstr "Lieferschein für die Sendung"
 
 #. Label of a Table field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Shipment Delivery Note"
-msgstr ""
+msgstr "Lieferschein für die Sendung"
 
 #. Label of a Data field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Shipment ID"
-msgstr ""
+msgstr "Sendungs-ID"
 
 #. Label of a Section Break field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Shipment Information"
-msgstr ""
+msgstr "Sendungsinformationen"
 
 #. Name of a DocType
 #: stock/doctype/shipment_parcel/shipment_parcel.json
 msgid "Shipment Parcel"
-msgstr ""
+msgstr "Versandpaket"
 
 #. Label of a Table field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Shipment Parcel"
-msgstr ""
+msgstr "Versandpaket"
 
 #. Name of a DocType
 #: stock/doctype/shipment_parcel_template/shipment_parcel_template.json
 msgid "Shipment Parcel Template"
-msgstr ""
+msgstr "Versandpaketvorlage"
 
 #. Label of a Select field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Shipment Type"
-msgstr ""
+msgstr "Sendungstyp"
 
 #. Label of a Section Break field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Shipment details"
-msgstr ""
+msgstr "Sendungsdetails"
 
 #: stock/doctype/delivery_note/delivery_note.py:846
 msgid "Shipments"
@@ -65417,19 +65424,19 @@ msgstr "Lieferadresse"
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Shipping Address Details"
-msgstr ""
+msgstr "Lieferadressendetails"
 
 #. Label of a Small Text field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Shipping Address Details"
-msgstr ""
+msgstr "Lieferadressendetails"
 
 #. Label of a Small Text field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Shipping Address Details"
-msgstr ""
+msgstr "Lieferadressendetails"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -65453,7 +65460,7 @@ msgstr "Lieferadresse Bezeichnung"
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Shipping Address Template"
-msgstr ""
+msgstr "Vorlage Lieferadresse"
 
 #: accounts/doctype/shipping_rule/shipping_rule.py:130
 msgid "Shipping Address does not have country, which is required for this Shipping Rule"
@@ -65838,7 +65845,7 @@ msgstr ""
 
 #: stock/utils.py:588
 msgid "Show pending entries"
-msgstr ""
+msgstr "Ausstehende Einträge anzeigen"
 
 #: accounts/report/trial_balance/trial_balance.js:93
 msgid "Show unclosed fiscal year's P&L balances"
@@ -66282,7 +66289,7 @@ msgstr ""
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Spacer"
-msgstr ""
+msgstr "Abstandshalter"
 
 #: assets/doctype/asset/asset.js:467 stock/doctype/batch/batch.js:143
 #: support/doctype/issue/issue.js:100
@@ -66295,7 +66302,7 @@ msgstr "Vermögensgegenstand aufspalten"
 
 #: stock/doctype/batch/batch.js:142
 msgid "Split Batch"
-msgstr ""
+msgstr "Charge aufteilen"
 
 #. Description of the 'Book Tax Loss on Early Payment Discount' (Check) field
 #. in DocType 'Accounts Settings'
@@ -68160,19 +68167,19 @@ msgstr ""
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgctxt "Production Plan Sub Assembly Item"
 msgid "Sub Assembly Item Code"
-msgstr ""
+msgstr "Artikelcode der Unterbaugruppe"
 
 #. Label of a Section Break field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Sub Assembly Items"
-msgstr ""
+msgstr "Artikel der Unterbaugruppe"
 
 #. Label of a Link field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Sub Assembly Warehouse"
-msgstr ""
+msgstr "Unterbaugruppe Lager"
 
 #. Name of a DocType
 #: manufacturing/doctype/sub_operation/sub_operation.json
@@ -68222,14 +68229,14 @@ msgstr "Zulieferer"
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Subcontract BOM"
-msgstr ""
+msgstr "Stückliste für Unterauftragnehmer"
 
 #: buying/report/subcontract_order_summary/subcontract_order_summary.js:37
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:128
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:22
 #: buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:22
 msgid "Subcontract Order"
-msgstr ""
+msgstr "Unterauftrag"
 
 #. Name of a report
 #: buying/report/subcontract_order_summary/subcontract_order_summary.json
@@ -68302,7 +68309,7 @@ msgstr ""
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Subcontracting Order (Draft) will be auto-created on submission of Purchase Order."
-msgstr ""
+msgstr "Unterauftrag (Entwurf) wird automatisch bei der Buchung der Lieferantenbestellung erstellt."
 
 #. Name of a DocType
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
@@ -68339,20 +68346,20 @@ msgstr ""
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.js:188
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Subcontracting Receipt"
-msgstr ""
+msgstr "Unterauftragsbeleg"
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Subcontracting Receipt"
-msgstr ""
+msgstr "Unterauftragsbeleg"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Quality
 #. Inspection'
 #: stock/doctype/quality_inspection/quality_inspection.json
 msgctxt "Quality Inspection"
 msgid "Subcontracting Receipt"
-msgstr ""
+msgstr "Unterauftragsbeleg"
 
 #. Name of a DocType
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
@@ -69580,7 +69587,7 @@ msgstr "Lieferanten-Artikelnummer"
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Supplier Portal Users"
-msgstr ""
+msgstr "Benutzer des Lieferantenportals"
 
 #. Label of a Link field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -69820,7 +69827,7 @@ msgstr "Rohmaterial für Einkauf bereitstellen"
 #: setup/setup_wizard/operations/install_fixtures.py:251
 #: support/workspace/support/support.json
 msgid "Support"
-msgstr ""
+msgstr "Hilfe"
 
 #. Name of a report
 #: support/report/support_hour_distribution/support_hour_distribution.json
@@ -69882,7 +69889,7 @@ msgstr "Jetzt synchronisieren"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:31
 msgid "Sync Started"
-msgstr ""
+msgstr "Synchronisierung gestartet"
 
 #. Label of a Check field in DocType 'Plaid Settings'
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
@@ -71906,12 +71913,12 @@ msgstr "Die Stückliste (BOM) wird ersetzt."
 #. Success message of the Module Onboarding 'Buying'
 #: buying/module_onboarding/buying/buying.json
 msgid "The Buying Module is all set up!"
-msgstr ""
+msgstr "Das Einkaufsmodul ist fertig eingerichtet!"
 
 #. Success message of the Module Onboarding 'CRM'
 #: crm/module_onboarding/crm/crm.json
 msgid "The CRM Module is all set up!"
-msgstr ""
+msgstr "Das CRM-Modul ist fertig eingerichtet!"
 
 #: crm/doctype/email_campaign/email_campaign.py:71
 msgid "The Campaign '{0}' already exists for the {1} '{2}'"
@@ -71927,11 +71934,11 @@ msgstr ""
 
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.py:70
 msgid "The GL Entries will be cancelled in the background, it can take a few minutes."
-msgstr ""
+msgstr "Die Hauptbucheinträge werden im Hintergrund storniert, dies kann einige Minuten dauern."
 
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.py:176
 msgid "The GL Entries will be processed in the background, it can take a few minutes."
-msgstr ""
+msgstr "Die Hauptbucheinträge werden im Hintergrund verarbeitet, dies kann einige Minuten dauern."
 
 #: accounts/doctype/loyalty_program/loyalty_program.py:163
 msgid "The Loyalty Program isn't valid for the selected company"
@@ -71956,7 +71963,7 @@ msgstr ""
 #. Success message of the Module Onboarding 'Selling'
 #: selling/module_onboarding/selling/selling.json
 msgid "The Selling Module is all set up!"
-msgstr ""
+msgstr "Das Vertriebsmodul ist fertig eingerichtet!"
 
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:16
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
@@ -71965,7 +71972,7 @@ msgstr "Der Lagereintrag vom Typ &#39;Herstellung&#39; wird als Rückspülung be
 #. Success message of the Module Onboarding 'Stock'
 #: stock/module_onboarding/stock/stock.json
 msgid "The Stock Module is all set up!"
-msgstr ""
+msgstr "Das Lagermodul ist fertig eingerichtet!"
 
 #. Description of the 'Closing Account Head' (Link) field in DocType 'Period
 #. Closing Voucher'
@@ -71987,11 +71994,11 @@ msgstr "Der in dieser Zahlungsaufforderung angegebene Betrag von {0} unterscheid
 
 #: accounts/doctype/dunning/dunning.py:86
 msgid "The currency of invoice {} ({}) is different from the currency of this dunning ({})."
-msgstr ""
+msgstr "Die Währung der Rechnung {} ({}) unterscheidet sich von der Währung dieser Mahnung ({})."
 
 #: manufacturing/doctype/work_order/work_order.js:812
 msgid "The default BOM for that item will be fetched by the system. You can also change the BOM."
-msgstr ""
+msgstr "Die Standardstückliste für diesen Artikel wird vom System abgerufen. Sie können die Stückliste auch ändern."
 
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.py:69
 msgid "The difference between from time and To Time must be a multiple of Appointment"
@@ -72024,7 +72031,7 @@ msgstr "Die Folionummern stimmen nicht überein"
 
 #: stock/doctype/putaway_rule/putaway_rule.py:292
 msgid "The following Items, having Putaway Rules, could not be accomodated:"
-msgstr ""
+msgstr "Die folgenden Artikel, für die Einlagerungsregeln gelten, konnten nicht untergebracht werden:"
 
 #: assets/doctype/asset/depreciation.py:414
 msgid "The following assets have failed to automatically post depreciation entries: {0}"
@@ -75294,7 +75301,7 @@ msgstr "Übertragene Menge"
 
 #: assets/doctype/asset_movement/asset_movement.py:76
 msgid "Transferring cannot be done to an Employee. Please enter location where Asset {0} has to be transferred"
-msgstr ""
+msgstr "Die Übertragung kann nicht an einen Mitarbeiter erfolgen. Bitte geben Sie den Ort ein, an den der Vermögensgegenstand {0} übertragen werden soll."
 
 #. Label of a Section Break field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
@@ -76420,7 +76427,7 @@ msgstr "Ungeprüfte Webhook-Daten"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:17
 msgid "Up"
-msgstr ""
+msgstr "Hoch"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json

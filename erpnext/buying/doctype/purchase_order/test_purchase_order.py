@@ -762,11 +762,94 @@ class TestPurchaseOrder(FrappeTestCase):
 		pe_doc = frappe.get_doc("Payment Entry", pe.name)
 		pe_doc.cancel()
 
+	def create_account(self, account_name, company, currency, parent):
+		if not frappe.db.get_value(
+			"Account", filters={"account_name": account_name, "company": company}
+		):
+			account = frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": account_name,
+					"parent_account": parent,
+					"company": company,
+					"account_currency": currency,
+					"is_group": 0,
+					"account_type": "Payable",
+				}
+			).insert()
+		else:
+			account = frappe.db.get_value(
+				"Account",
+				filters={"account_name": account_name, "company": company},
+				fieldname="name",
+				pluck=True,
+			)
+
+		return account
+
+	def test_advance_payment_with_separate_party_account_enabled(self):
+		"""
+		Test "Advance Paid" on Purchase Order, when "Book Advance Payments in Separate Party Account" is enabled and
+		the payment entry linked to the Order is allocated to Purchase Invoice.
+		"""
+		supplier = "_Test Supplier"
+		company = "_Test Company"
+
+		# Setup default 'Advance Paid' account
+		account = self.create_account(
+			"Advance Paid", company, "INR", "Application of Funds (Assets) - _TC"
+		)
+		company_doc = frappe.get_doc("Company", company)
+		company_doc.book_advance_payments_in_separate_party_account = True
+		company_doc.default_advance_paid_account = account.name
+		company_doc.save()
+
+		po_doc = create_purchase_order(supplier=supplier)
+
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+
+		pe = get_payment_entry("Purchase Order", po_doc.name)
+		pe.save().submit()
+
+		po_doc.reload()
+		self.assertEqual(po_doc.advance_paid, 5000)
+
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+
+		pi = make_purchase_invoice(po_doc.name)
+		pi.append(
+			"advances",
+			{
+				"reference_type": pe.doctype,
+				"reference_name": pe.name,
+				"reference_row": pe.references[0].name,
+				"advance_amount": 5000,
+				"allocated_amount": 5000,
+			},
+		)
+		pi.save().submit()
+		pe.reload()
+		po_doc.reload()
+		self.assertEqual(po_doc.advance_paid, 0)
+
+		company_doc.book_advance_payments_in_separate_party_account = False
+		company_doc.save()
+
 	@change_settings("Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1})
 	def test_advance_paid_upon_payment_entry_cancellation(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
-		po_doc = create_purchase_order(supplier="_Test Supplier USD", currency="USD", do_not_submit=1)
+		supplier = "_Test Supplier USD"
+		company = "_Test Company"
+
+		# Setup default USD payable account for Supplier
+		account = self.create_account("Creditors USD", company, "USD", "Accounts Payable - _TC")
+		supplier_doc = frappe.get_doc("Supplier", supplier)
+		if not [x for x in supplier_doc.accounts if x.company == company]:
+			supplier_doc.append("accounts", {"company": company, "account": account.name})
+			supplier_doc.save()
+
+		po_doc = create_purchase_order(supplier=supplier, currency="USD", do_not_submit=1)
 		po_doc.conversion_rate = 80
 		po_doc.submit()
 

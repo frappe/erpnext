@@ -352,7 +352,9 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	ifelse = CustomFunction("IF", ["condition", "then", "else"])
 
 	if filters and filters.get("customer"):
-		qb_filter_and_conditions.append(proj.customer == filters.get("customer"))
+		qb_filter_and_conditions.append(
+			(proj.customer == filters.get("customer")) | proj.customer.isnull() | proj.customer == ""
+		)
 
 	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
 
@@ -439,7 +441,19 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 
 	filtered_batches = get_filterd_batches(batches)
 
+	if filters.get("is_inward"):
+		filtered_batches.extend(get_empty_batches(filters))
+
 	return filtered_batches
+
+
+def get_empty_batches(filters):
+	return frappe.get_all(
+		"Batch",
+		fields=["name", "batch_qty"],
+		filters={"item": filters.get("item_code"), "batch_qty": 0.0},
+		as_list=1,
+	)
 
 
 def get_filterd_batches(data):
