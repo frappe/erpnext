@@ -1697,7 +1697,7 @@ def get_valuation_rate(
 		solutions += (
 			"<li>"
 			+ _("If not, you can Cancel / Submit this entry")
-			+ " {0} ".format(frappe.bold("after"))
+			+ " {0} ".format(frappe.bold(_("after")))
 			+ _("performing either one below:")
 			+ "</li>"
 		)
