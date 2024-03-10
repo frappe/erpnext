@@ -28,4 +28,14 @@ b147b85e6ac19a9220cd1e2958a6ebd99373283a
 494bd9ef78313436f0424b918f200dab8fc7c20b
 
 # bulk format python code with black
+<<<<<<< HEAD
 baec607ff5905b1c67531096a9cf50ec7ff00a5d
+=======
+baec607ff5905b1c67531096a9cf50ec7ff00a5d
+
+# bulk refactor with sourcery
+eb9ee3f79b94e594fc6dfa4f6514580e125eee8c
+
+# js formatting
+ec74a5e56617bbd76ac402451468fd4668af543d
+>>>>>>> 0b100782e2 (chore: update blame ignore)
