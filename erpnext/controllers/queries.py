@@ -352,7 +352,9 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	ifelse = CustomFunction("IF", ["condition", "then", "else"])
 
 	if filters and filters.get("customer"):
-		qb_filter_and_conditions.append(proj.customer == filters.get("customer"))
+		qb_filter_and_conditions.append(
+			(proj.customer == filters.get("customer")) | proj.customer.isnull() | proj.customer == ""
+		)
 
 	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
 
