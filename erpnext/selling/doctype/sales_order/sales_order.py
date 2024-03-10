@@ -52,20 +52,19 @@ class SalesOrder(SellingController):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
-		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
-			SalesTaxesandCharges,
-		)
+		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import SalesTaxesandCharges
 		from erpnext.selling.doctype.sales_order_item.sales_order_item import SalesOrderItem
 		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
+		from erpnext.stock.doctype.delivery_plan.delivery_plan import DeliveryPlan
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
+		from frappe.types import DF
 
 		additional_discount_percentage: DF.Float
 		address_display: DF.SmallText | None
 		advance_paid: DF.Currency
+		advance_payment_status: DF.Literal["Not Requested", "Requested", "Partially Paid", "Fully Paid"]
 		amended_from: DF.Link | None
 		amount_eligible_for_commission: DF.Currency
 		apply_discount_on: DF.Literal["", "Grand Total", "Net Total"]
@@ -98,9 +97,8 @@ class SalesOrder(SellingController):
 		customer_group: DF.Link | None
 		customer_name: DF.Data | None
 		delivery_date: DF.Date | None
-		delivery_status: DF.Literal[
-			"Not Delivered", "Fully Delivered", "Partly Delivered", "Closed", "Not Applicable"
-		]
+		delivery_plan: DF.Table[DeliveryPlan]
+		delivery_status: DF.Literal["Not Delivered", "Fully Delivered", "Partly Delivered", "Closed", "Not Applicable"]
 		disable_rounded_total: DF.Check
 		discount_amount: DF.Currency
 		dispatch_address: DF.SmallText | None
@@ -108,6 +106,7 @@ class SalesOrder(SellingController):
 		from_date: DF.Date | None
 		grand_total: DF.Currency
 		group_same_items: DF.Check
+		has_delivery_plan: DF.Check
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
@@ -151,17 +150,7 @@ class SalesOrder(SellingController):
 		shipping_rule: DF.Link | None
 		skip_delivery_note: DF.Check
 		source: DF.Link | None
-		status: DF.Literal[
-			"",
-			"Draft",
-			"On Hold",
-			"To Deliver and Bill",
-			"To Bill",
-			"To Deliver",
-			"Completed",
-			"Cancelled",
-			"Closed",
-		]
+		status: DF.Literal["", "Draft", "On Hold", "To Pay", "To Deliver and Bill", "To Bill", "To Deliver", "Completed", "Cancelled", "Closed"]
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
 		taxes: DF.Table[SalesTaxesandCharges]
@@ -402,6 +391,7 @@ class SalesOrder(SellingController):
 		self.update_prevdoc_status("submit")
 
 		self.update_blanket_order()
+		self.validate_delivery_plan()
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 		if self.coupon_code:
@@ -481,6 +471,12 @@ class SalesOrder(SellingController):
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
+	def validate_delivery_plan(self):
+		if self.has_delivery_plan:
+			total = sum([d.delivery_portion for d in self.delivery_plan])
+			if total != 100:
+				frappe.throw(_("Total Delivery Plan must be 100%"))
+
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
@@ -518,6 +514,7 @@ class SalesOrder(SellingController):
 
 	def on_update_after_submit(self):
 		self.check_credit_limit()
+		self.validate_delivery_plan()
 
 	def before_update_after_submit(self):
 		self.validate_po()
@@ -944,9 +941,15 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 		return abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1
 
 	def update_item(source, target, source_parent):
-		target.base_amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.base_rate)
-		target.amount = (flt(source.qty) - flt(source.delivered_qty)) * flt(source.rate)
-		target.qty = flt(source.qty) - flt(source.delivered_qty)
+		qty = qty_remain = flt(source.qty) - flt(source.delivered_qty)
+		args = frappe.flags.args
+		if args and args.plan and args.portion:
+			qty = flt(source.qty) * flt(args.portion) / 100
+			qty = qty_remain if (qty > qty_remain) else qty
+			target.delivery_plan = args.plan
+		target.qty = qty
+		target.amount = qty * flt(source.rate)
+		target.base_amount = qty * flt(source.base_rate)
 
 		item = get_item_defaults(target.item_code, source_parent.company)
 		item_group = get_item_group_defaults(target.item_code, source_parent.company)
@@ -1024,6 +1027,19 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 	set_missing_values(so, target_doc)
 
 	return target_doc
+
+
+@frappe.whitelist()
+def get_used_delivery_plan(sales_order):
+	delivery_plans = frappe.get_all(
+		"Delivery Note Item",
+		filters={
+			"against_sales_order": sales_order,
+			"docstatus": ["!=", 2],
+		},
+		pluck="delivery_plan",
+	)
+	return delivery_plans
 
 
 @frappe.whitelist()

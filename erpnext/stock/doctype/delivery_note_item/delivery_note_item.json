@@ -72,6 +72,7 @@
   "col_break4",
   "allow_zero_valuation_rate",
   "against_sales_order",
+  "delivery_plan",
   "so_detail",
   "against_sales_invoice",
   "si_detail",
@@ -906,7 +907,16 @@
   {
    "fieldname": "column_break_rxvc",
    "fieldtype": "Column Break"
-  }
+  },
+  {
+    "fieldname": "delivery_plan",
+    "fieldtype": "Data",
+    "hidden": 1,
+    "label": "Delivery Plan",
+    "no_copy": 1,
+    "print_hide": 1,
+    "search_index": 1
+   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
