@@ -15,10 +15,7 @@ frappe.query_reports["Reserved Stock"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.add_months(
-				frappe.datetime.get_today(),
-				-1
-			),
+			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 			reqd: 1,
 		},
 		{
@@ -72,7 +69,7 @@ frappe.query_reports["Reserved Stock"] = {
 			get_query: () => ({
 				filters: {
 					name: ["in", ["Sales Order"]],
-				}
+				},
 			}),
 		},
 		{
@@ -98,7 +95,7 @@ frappe.query_reports["Reserved Stock"] = {
 			get_query: () => ({
 				filters: {
 					name: ["in", ["Pick List", "Purchase Receipt"]],
-				}
+				},
 			}),
 		},
 		{
@@ -126,13 +123,7 @@ frappe.query_reports["Reserved Stock"] = {
 			fieldname: "status",
 			label: __("Status"),
 			fieldtype: "Select",
-			options: [
-				"",
-				"Partially Reserved",
-				"Reserved",
-				"Partially Delivered",
-				"Delivered",
-			],
+			options: ["", "Partially Reserved", "Reserved", "Partially Delivered", "Delivered"],
 		},
 		{
 			fieldname: "project",
@@ -165,17 +156,14 @@ frappe.query_reports["Reserved Stock"] = {
 						value = "<span style='color:green'>" + value + "</span>";
 						break;
 				}
-			}
-			else if (column.fieldname == "delivered_qty") {
+			} else if (column.fieldname == "delivered_qty") {
 				if (data.delivered_qty > 0) {
 					if (data.reserved_qty > data.delivered_qty) {
 						value = "<span style='color:blue'>" + value + "</span>";
-					}
-					else {
+					} else {
 						value = "<span style='color:green'>" + value + "</span>";
 					}
-				}
-				else {
+				} else {
 					value = "<span style='color:red'>" + value + "</span>";
 				}
 			}

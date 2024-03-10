@@ -16,9 +16,9 @@ frappe.ui.form.on("Closing Stock Balance", {
 					freeze: true,
 					callback: () => {
 						frm.reload_doc();
-					}
-				})
-			})
+					},
+				});
+			});
 		}
 	},
 
@@ -31,9 +31,9 @@ frappe.ui.form.on("Closing Stock Balance", {
 					freeze: true,
 					callback: () => {
 						frm.reload_doc();
-					}
-				})
-			})
+					},
+				});
+			});
 		}
-	}
+	},
 });

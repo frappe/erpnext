@@ -11,11 +11,10 @@ frappe.ui.form.on("BOM Creator", {
 		frm.dashboard.clear_comment();
 
 		if (!frm.is_new()) {
-			if ((!frappe.bom_configurator
-				|| frappe.bom_configurator.bom_configurator !== frm.doc.name)) {
+			if (!frappe.bom_configurator || frappe.bom_configurator.bom_configurator !== frm.doc.name) {
 				frm.trigger("build_tree");
 			}
-		} else if (!frm.doc.items?.length ) {
+		} else if (!frm.doc.items?.length) {
 			let $parent = $(frm.fields_dict["bom_creator"].wrapper);
 			$parent.empty();
 			frm.trigger("make_new_entry");
@@ -27,7 +26,7 @@ frappe.ui.form.on("BOM Creator", {
 		$parent.empty();
 		frm.toggle_enable("item_code", false);
 
-		frappe.require('bom_configurator.bundle.js').then(() => {
+		frappe.require("bom_configurator.bundle.js").then(() => {
 			frappe.bom_configurator = new frappe.ui.BOMConfigurator({
 				wrapper: $parent,
 				page: $parent,
@@ -45,7 +44,7 @@ frappe.ui.form.on("BOM Creator", {
 					label: __("Name"),
 					fieldtype: "Data",
 					fieldname: "name",
-					reqd: 1
+					reqd: 1,
 				},
 				{ fieldtype: "Column Break" },
 				{
@@ -62,7 +61,7 @@ frappe.ui.form.on("BOM Creator", {
 					fieldtype: "Link",
 					fieldname: "item_code",
 					options: "Item",
-					reqd: 1
+					reqd: 1,
 				},
 				{ fieldtype: "Column Break" },
 				{
@@ -70,7 +69,7 @@ frappe.ui.form.on("BOM Creator", {
 					fieldtype: "Float",
 					fieldname: "qty",
 					reqd: 1,
-					default: 1.0
+					default: 1.0,
 				},
 				{ fieldtype: "Section Break" },
 				{
@@ -79,7 +78,7 @@ frappe.ui.form.on("BOM Creator", {
 					fieldname: "currency",
 					options: "Currency",
 					reqd: 1,
-					default: frappe.defaults.get_global_default("currency")
+					default: frappe.defaults.get_global_default("currency"),
 				},
 				{ fieldtype: "Column Break" },
 				{
@@ -87,42 +86,40 @@ frappe.ui.form.on("BOM Creator", {
 					fieldtype: "Float",
 					fieldname: "conversion_rate",
 					reqd: 1,
-					default: 1.0
+					default: 1.0,
 				},
 			],
 			primary_action_label: __("Create"),
 			primary_action: (values) => {
 				values.doctype = frm.doc.doctype;
-				frappe.db
-					.insert(values)
-					.then((doc) => {
-						frappe.set_route("Form", doc.doctype, doc.name);
-					});
-			}
-		})
+				frappe.db.insert(values).then((doc) => {
+					frappe.set_route("Form", doc.doctype, doc.name);
+				});
+			},
+		});
 
 		dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
 		dialog.show();
 	},
 
 	set_queries(frm) {
-		frm.set_query("bom_no", "items", function(doc, cdt, cdn) {
+		frm.set_query("bom_no", "items", function (doc, cdt, cdn) {
 			let item = frappe.get_doc(cdt, cdn);
 			return {
 				filters: {
 					item: item.item_code,
-				}
-			}
+				},
+			};
 		});
-		frm.set_query("item_code", "items", function() {
+		frm.set_query("item_code", "items", function () {
 			return {
 				query: "erpnext.controllers.queries.item_query",
-			}
+			};
 		});
-		frm.set_query("fg_item", "items", function() {
+		frm.set_query("fg_item", "items", function () {
 			return {
 				query: "erpnext.controllers.queries.item_query",
-			}
+			};
 		});
 	},
 
@@ -134,8 +131,7 @@ frappe.ui.form.on("BOM Creator", {
 
 	set_root_item(frm) {
 		if (frm.is_new() && frm.doc.items?.length) {
-			frappe.model.set_value(frm.doc.items[0].doctype,
-				frm.doc.items[0].name, "is_root", 1);
+			frappe.model.set_value(frm.doc.items[0].doctype, frm.doc.items[0].name, "is_root", 1);
 		}
 	},
 
@@ -157,8 +153,8 @@ frappe.ui.form.on("BOM Creator", {
 		frm.call({
 			method: "enqueue_create_boms",
 			doc: frm.doc,
-		})
-	}
+		});
+	},
 });
 
 frappe.ui.form.on("BOM Creator Item", {
@@ -176,24 +172,23 @@ frappe.ui.form.on("BOM Creator Item", {
 				method: "get_default_bom",
 				doc: frm.doc,
 				args: {
-					item_code: item.item_code
+					item_code: item.item_code,
 				},
 				callback(r) {
 					if (r.message) {
 						frappe.model.set_value(cdt, cdn, "bom_no", r.message);
 					}
-				}
-			})
+				},
+			});
 		} else {
 			frappe.model.set_value(cdt, cdn, "bom_no", "");
 		}
-	}
+	},
 });
-
 
 erpnext.bom.BomConfigurator = class BomConfigurator extends erpnext.TransactionController {
 	conversion_rate(doc) {
-		if(this.frm.doc.currency === this.get_company_currency()) {
+		if (this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		} else {
 			erpnext.bom.update_cost(doc);
@@ -222,4 +217,4 @@ erpnext.bom.BomConfigurator = class BomConfigurator extends erpnext.TransactionC
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.bom.BomConfigurator({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.bom.BomConfigurator({ frm: cur_frm }));
