@@ -332,13 +332,9 @@ frappe.help.help_links["Form/Selling Settings"] = [
 
 //Buying
 
-frappe.help.help_links["List/Supplier"] = [
-	{ label: "Supplier", url: docsUrl + "user/manual/en/supplier" },
-];
+frappe.help.help_links["List/Supplier"] = [{ label: "Supplier", url: docsUrl + "user/manual/en/supplier" }];
 
-frappe.help.help_links["Form/Supplier"] = [
-	{ label: "Supplier", url: docsUrl + "user/manual/en/supplier" },
-];
+frappe.help.help_links["Form/Supplier"] = [{ label: "Supplier", url: docsUrl + "user/manual/en/supplier" }];
 
 frappe.help.help_links["Form/Request for Quotation"] = [
 	{
@@ -441,9 +437,7 @@ frappe.help.help_links["Tree/Territory"] = [
 	},
 ];
 
-frappe.help.help_links["List/Workflow"] = [
-	{ label: "Workflow", url: docsUrl + "user/manual/en/workflows" },
-];
+frappe.help.help_links["List/Workflow"] = [{ label: "Workflow", url: docsUrl + "user/manual/en/workflows" }];
 
 frappe.help.help_links["List/Company"] = [
 	{
@@ -620,9 +614,7 @@ frappe.help.help_links["List/Item"] = [
 	},
 	{
 		label: "Item Valuation",
-		url:
-			docsUrl +
-			"user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average",
+		url: docsUrl + "user/manual/en/calculation-of-valuation-rate-in-fifo-and-moving-average",
 	},
 ];
 
@@ -706,9 +698,7 @@ frappe.help.help_links["List/Installation Note"] = [
 	},
 ];
 
-frappe.help.help_links["List/Budget"] = [
-	{ label: "Budgeting", url: docsUrl + "user/manual/en/budgeting" },
-];
+frappe.help.help_links["List/Budget"] = [{ label: "Budgeting", url: docsUrl + "user/manual/en/budgeting" }];
 
 frappe.help.help_links["List/Material Request"] = [
 	{
@@ -768,13 +758,9 @@ frappe.help.help_links["Form/Serial No"] = [
 	{ label: "Serial No", url: docsUrl + "user/manual/en/serial-no" },
 ];
 
-frappe.help.help_links["List/Batch"] = [
-	{ label: "Batch", url: docsUrl + "user/manual/en/batch" },
-];
+frappe.help.help_links["List/Batch"] = [{ label: "Batch", url: docsUrl + "user/manual/en/batch" }];
 
-frappe.help.help_links["Form/Batch"] = [
-	{ label: "Batch", url: docsUrl + "user/manual/en/batch" },
-];
+frappe.help.help_links["Form/Batch"] = [{ label: "Batch", url: docsUrl + "user/manual/en/batch" }];
 
 frappe.help.help_links["Form/Packing Slip"] = [
 	{
@@ -827,29 +813,21 @@ frappe.help.help_links["Form/Stock Reconciliation"] = [
 
 //CRM
 
-frappe.help.help_links["Form/Lead"] = [
-	{ label: "Lead", url: docsUrl + "user/manual/en/lead" },
-];
+frappe.help.help_links["Form/Lead"] = [{ label: "Lead", url: docsUrl + "user/manual/en/lead" }];
 
 frappe.help.help_links["Form/Opportunity"] = [
 	{ label: "Opportunity", url: docsUrl + "user/manual/en/opportunity" },
 ];
 
-frappe.help.help_links["Form/Address"] = [
-	{ label: "Address", url: docsUrl + "user/manual/en/address" },
-];
+frappe.help.help_links["Form/Address"] = [{ label: "Address", url: docsUrl + "user/manual/en/address" }];
 
-frappe.help.help_links["Form/Contact"] = [
-	{ label: "Contact", url: docsUrl + "user/manual/en/contact" },
-];
+frappe.help.help_links["Form/Contact"] = [{ label: "Contact", url: docsUrl + "user/manual/en/contact" }];
 
 frappe.help.help_links["Form/Newsletter"] = [
 	{ label: "Newsletter", url: docsUrl + "user/manual/en/newsletter" },
 ];
 
-frappe.help.help_links["Form/Campaign"] = [
-	{ label: "Campaign", url: docsUrl + "user/manual/en/campaign" },
-];
+frappe.help.help_links["Form/Campaign"] = [{ label: "Campaign", url: docsUrl + "user/manual/en/campaign" }];
 
 frappe.help.help_links["Tree/Sales Person"] = [
 	{

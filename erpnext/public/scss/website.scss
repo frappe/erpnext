@@ -1,4 +1,4 @@
-@import './order-page';
+@import "./order-page";
 
 .filter-options {
 	max-height: 300px;
@@ -52,7 +52,8 @@
 	border-bottom: 1px solid var(--border-color);
 	position: relative;
 
-	&:only-child, &:last-child {
+	&:only-child,
+	&:last-child {
 		border: 0;
 	}
 
@@ -80,7 +81,8 @@
 	}
 }
 
-.list-item-name, .item-total {
+.list-item-name,
+.item-total {
 	font-size: var(--font-size-sm);
 }
 
