@@ -3,11 +3,11 @@
 
 frappe.ui.form.on("Item Price", {
 	setup(frm) {
-		frm.set_query("item_code", function() {
+		frm.set_query("item_code", function () {
 			return {
 				filters: {
-					"has_variants": 0
-				}
+					has_variants: 0,
+				},
 			};
 		});
 	},
@@ -23,15 +23,18 @@ frappe.ui.form.on("Item Price", {
 		frm.add_fetch("item_code", "description", "item_description");
 		frm.add_fetch("item_code", "stock_uom", "uom");
 
-		frm.set_df_property("bulk_import_help", "options",
-			'<a href="/app/data-import-tool/Item Price">' + __("Import in Bulk") + '</a>');
+		frm.set_df_property(
+			"bulk_import_help",
+			"options",
+			'<a href="/app/data-import-tool/Item Price">' + __("Import in Bulk") + "</a>"
+		);
 
-		frm.set_query('batch_no', function() {
+		frm.set_query("batch_no", function () {
 			return {
 				filters: {
-					'item': frm.doc.item_code
-				}
+					item: frm.doc.item_code,
+				},
 			};
 		});
-	}
+	},
 });

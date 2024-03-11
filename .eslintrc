@@ -124,6 +124,7 @@
 		"beforeEach": true,
 		"onScan": true,
 		"extend_cscript": true,
-		"localforage": true
+		"localforage": true,
+		"Plaid": true
 	}
 }
