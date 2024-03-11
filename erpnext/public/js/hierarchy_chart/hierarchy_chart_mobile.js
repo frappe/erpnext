@@ -12,12 +12,12 @@ erpnext.HierarchyChartMobile = class {
 		this.doctype = doctype;
 
 		this.page.main.css({
-			'min-height': '300px',
-			'max-height': '600px',
-			'overflow': 'auto',
-			'position': 'relative'
+			"min-height": "300px",
+			"max-height": "600px",
+			overflow: "auto",
+			position: "relative",
 		});
-		this.page.main.addClass('frappe-card');
+		this.page.main.addClass("frappe-card");
 
 		this.nodes = {};
 		this.setup_node_class();
@@ -27,7 +27,15 @@ erpnext.HierarchyChartMobile = class {
 		let me = this;
 		this.Node = class {
 			constructor({
-				id, parent, parent_id, image, name, title, expandable, connections, is_root // eslint-disable-line
+				id,
+				parent,
+				parent_id,
+				image,
+				name,
+				title,
+				expandable,
+				connections,
+				is_root, // eslint-disable-line
 			}) {
 				// to setup values passed via constructor
 				$.extend(this, arguments[0]);
@@ -43,19 +51,19 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	make_node_element(node) {
-		let node_card = frappe.render_template('node_card', {
+		let node_card = frappe.render_template("node_card", {
 			id: node.id,
 			name: node.name,
 			title: node.title,
 			image: node.image,
 			parent: node.parent_id,
 			connections: node.connections,
-			is_mobile: true
+			is_mobile: true,
 		});
 
 		node.parent.append(node_card);
 		node.$link = $(`[id="${node.id}"]`);
-		node.$link.addClass('mobile-node');
+		node.$link.addClass("mobile-node");
 	}
 
 	show() {
@@ -63,15 +71,15 @@ erpnext.HierarchyChartMobile = class {
 		let me = this;
 
 		let company = this.page.add_field({
-			fieldtype: 'Link',
-			options: 'Company',
-			fieldname: 'company',
-			placeholder: __('Select Company'),
-			default: frappe.defaults.get_default('company'),
+			fieldtype: "Link",
+			options: "Company",
+			fieldname: "company",
+			placeholder: __("Select Company"),
+			default: frappe.defaults.get_default("company"),
 			only_select: true,
 			reqd: 1,
 			change: () => {
-				me.company = '';
+				me.company = "";
 
 				if (company.get_value() && me.company != company.get_value()) {
 					me.company = company.get_value();
@@ -79,8 +87,7 @@ erpnext.HierarchyChartMobile = class {
 					// svg for connectors
 					me.make_svg_markers();
 
-					if (me.$sibling_group)
-						me.$sibling_group.remove();
+					if (me.$sibling_group) me.$sibling_group.remove();
 
 					// setup sibling group wrapper
 					me.$sibling_group = $(`<div class="sibling-group mt-4 mb-4"></div>`);
@@ -89,15 +96,15 @@ erpnext.HierarchyChartMobile = class {
 					me.setup_hierarchy();
 					me.render_root_nodes();
 				}
-			}
+			},
 		});
 
 		company.refresh();
-		$(`[data-fieldname="company"]`).trigger('change');
+		$(`[data-fieldname="company"]`).trigger("change");
 	}
 
 	make_svg_markers() {
-		$('#arrows').remove();
+		$("#arrows").remove();
 
 		this.page.main.prepend(`
 			<svg id="arrows" width="100%" height="100%">
@@ -123,16 +130,15 @@ erpnext.HierarchyChartMobile = class {
 
 	setup_hierarchy() {
 		$(`#connectors`).empty();
-		if (this.$hierarchy)
-			this.$hierarchy.remove();
+		if (this.$hierarchy) this.$hierarchy.remove();
 
-		if (this.$sibling_group)
-			this.$sibling_group.empty();
+		if (this.$sibling_group) this.$sibling_group.empty();
 
 		this.$hierarchy = $(
 			`<ul class="hierarchy-mobile">
 				<li class="root-level level"></li>
-			</ul>`);
+			</ul>`
+		);
 
 		this.page.main.append(this.$hierarchy);
 	}
@@ -140,42 +146,43 @@ erpnext.HierarchyChartMobile = class {
 	render_root_nodes() {
 		let me = this;
 
-		frappe.call({
-			method: me.method,
-			args: {
-				company: me.company
-			},
-		}).then(r => {
-			if (r.message.length) {
-				let root_level = me.$hierarchy.find('.root-level');
-				root_level.empty();
+		frappe
+			.call({
+				method: me.method,
+				args: {
+					company: me.company,
+				},
+			})
+			.then((r) => {
+				if (r.message.length) {
+					let root_level = me.$hierarchy.find(".root-level");
+					root_level.empty();
 
-				$.each(r.message, (_i, data) => {
-					return new me.Node({
-						id: data.id,
-						parent: root_level,
-						parent_id: '',
-						image: data.image,
-						name: data.name,
-						title: data.title,
-						expandable: true,
-						connections: data.connections,
-						is_root: true
+					$.each(r.message, (_i, data) => {
+						return new me.Node({
+							id: data.id,
+							parent: root_level,
+							parent_id: "",
+							image: data.image,
+							name: data.name,
+							title: data.title,
+							expandable: true,
+							connections: data.connections,
+							is_root: true,
+						});
 					});
-				});
-			}
-		});
+				}
+			});
 	}
 
 	expand_node(node) {
-		const is_same_node = (this.selected_node && this.selected_node.id === node.id);
+		const is_same_node = this.selected_node && this.selected_node.id === node.id;
 		this.set_selected_node(node);
 		this.show_active_path(node);
 
 		if (this.$sibling_group) {
-			const sibling_parent = this.$sibling_group.find('.node-group').attr('data-parent');
-			if (node.parent_id != '' && node.parent_id != sibling_parent)
-				this.$sibling_group.empty();
+			const sibling_parent = this.$sibling_group.find(".node-group").attr("data-parent");
+			if (node.parent_id != "" && node.parent_id != sibling_parent) this.$sibling_group.empty();
 		}
 
 		if (!is_same_node) {
@@ -184,7 +191,7 @@ erpnext.HierarchyChartMobile = class {
 			this.refresh_connectors(node.parent_id, node.id);
 
 			// rebuild incoming connections of parent
-			let grandparent = $(`[id="${node.parent_id}"]`).attr('data-parent');
+			let grandparent = $(`[id="${node.parent_id}"]`).attr("data-parent");
 			this.refresh_connectors(grandparent, node.parent_id);
 		}
 
@@ -202,65 +209,61 @@ erpnext.HierarchyChartMobile = class {
 			// add a collapsed level to show the collapsed parent
 			// and a button beside it to move to that level
 			let node_parent = node.$link.parent();
-			node_parent.prepend(
-				`<div class="collapsed-level d-flex flex-row"></div>`
-			);
+			node_parent.prepend(`<div class="collapsed-level d-flex flex-row"></div>`);
 
-			node_parent
-				.find('.collapsed-level')
-				.append(node.$link);
+			node_parent.find(".collapsed-level").append(node.$link);
 
 			frappe.run_serially([
 				() => this.get_child_nodes(node.parent_id, node.id),
 				(child_nodes) => this.get_node_group(child_nodes, node.parent_id),
-				(node_group) => node_parent.find('.collapsed-level').append(node_group),
-				() => this.setup_node_group_action()
+				(node_group) => node_parent.find(".collapsed-level").append(node_group),
+				() => this.setup_node_group_action(),
 			]);
 		}
 	}
 
 	show_active_path(node) {
 		// mark node parent on active path
-		$(`[id="${node.parent_id}"]`).addClass('active-path');
+		$(`[id="${node.parent_id}"]`).addClass("active-path");
 	}
 
 	load_children(node) {
 		if (!this.company) {
-			frappe.throw(__('Please select a company first'));
+			frappe.throw(__("Please select a company first"));
 		}
 
 		frappe.run_serially([
 			() => this.get_child_nodes(node.id),
-			(child_nodes) => this.render_child_nodes(node, child_nodes)
+			(child_nodes) => this.render_child_nodes(node, child_nodes),
 		]);
 	}
 
-	get_child_nodes(node_id, exclude_node=null) {
+	get_child_nodes(node_id, exclude_node = null) {
 		let me = this;
-		return new Promise(resolve => {
-			frappe.call({
-				method: me.method,
-				args: {
-					parent: node_id,
-					company: me.company,
-					exclude_node: exclude_node
-				}
-			}).then(r => resolve(r.message));
+		return new Promise((resolve) => {
+			frappe
+				.call({
+					method: me.method,
+					args: {
+						parent: node_id,
+						company: me.company,
+						exclude_node: exclude_node,
+					},
+				})
+				.then((r) => resolve(r.message));
 		});
 	}
 
 	render_child_nodes(node, child_nodes) {
 		if (!node.$children) {
-			node.$children = $('<ul class="node-children"></ul>')
-				.hide()
-				.appendTo(node.$link.parent());
+			node.$children = $('<ul class="node-children"></ul>').hide().appendTo(node.$link.parent());
 
 			node.$children.empty();
 
 			if (child_nodes) {
 				$.each(child_nodes, (_i, data) => {
 					this.add_node(node, data);
-					$(`[id="${data.id}"]`).addClass('active-child');
+					$(`[id="${data.id}"]`).addClass("active-child");
 
 					setTimeout(() => {
 						this.add_connector(node.id, data.id);
@@ -285,7 +288,7 @@ erpnext.HierarchyChartMobile = class {
 			title: data.title,
 			expandable: data.expandable,
 			connections: data.connections,
-			children: null
+			children: null,
 		});
 	}
 
@@ -293,41 +296,49 @@ erpnext.HierarchyChartMobile = class {
 		const parent_node = document.getElementById(`${parent_id}`);
 		const child_node = document.getElementById(`${child_id}`);
 
-		const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
 		let connector = null;
 
-		if ($(`[id="${parent_id}"]`).hasClass('active')) {
+		if ($(`[id="${parent_id}"]`).hasClass("active")) {
 			connector = this.get_connector_for_active_node(parent_node, child_node);
-		} else if ($(`[id="${parent_id}"]`).hasClass('active-path')) {
+		} else if ($(`[id="${parent_id}"]`).hasClass("active-path")) {
 			connector = this.get_connector_for_collapsed_node(parent_node, child_node);
 		}
 
-		path.setAttribute('d', connector);
+		path.setAttribute("d", connector);
 		this.set_path_attributes(path, parent_id, child_id);
 
-		document.getElementById('connectors').appendChild(path);
+		document.getElementById("connectors").appendChild(path);
 	}
 
 	get_connector_for_active_node(parent_node, child_node) {
 		// we need to connect the bottom left of the parent to the left side of the child node
 		let pos_parent_bottom = {
 			x: parent_node.offsetLeft + 20,
-			y: parent_node.offsetTop + parent_node.offsetHeight
+			y: parent_node.offsetTop + parent_node.offsetHeight,
 		};
 		let pos_child_left = {
 			x: child_node.offsetLeft - 5,
-			y: child_node.offsetTop + child_node.offsetHeight / 2
+			y: child_node.offsetTop + child_node.offsetHeight / 2,
 		};
 
 		let connector =
 			"M" +
-			(pos_parent_bottom.x) + "," + (pos_parent_bottom.y) + " " +
+			pos_parent_bottom.x +
+			"," +
+			pos_parent_bottom.y +
+			" " +
 			"L" +
-			(pos_parent_bottom.x) + "," + (pos_child_left.y - 10) + " " +
+			pos_parent_bottom.x +
+			"," +
+			(pos_child_left.y - 10) +
+			" " +
 			"a10,10 1 0 0 10,10 " +
 			"L" +
-			(pos_child_left.x) + "," + (pos_child_left.y);
+			pos_child_left.x +
+			"," +
+			pos_child_left.y;
 
 		return connector;
 	}
@@ -336,18 +347,23 @@ erpnext.HierarchyChartMobile = class {
 		// we need to connect the bottom left of the parent to the top left of the child node
 		let pos_parent_bottom = {
 			x: parent_node.offsetLeft + 20,
-			y: parent_node.offsetTop + parent_node.offsetHeight
+			y: parent_node.offsetTop + parent_node.offsetHeight,
 		};
 		let pos_child_top = {
 			x: child_node.offsetLeft + 20,
-			y: child_node.offsetTop
+			y: child_node.offsetTop,
 		};
 
 		let connector =
 			"M" +
-			(pos_parent_bottom.x) + "," + (pos_parent_bottom.y) + " " +
+			pos_parent_bottom.x +
+			"," +
+			pos_parent_bottom.y +
+			" " +
 			"L" +
-			(pos_child_top.x) + "," + (pos_child_top.y);
+			pos_child_top.x +
+			"," +
+			pos_child_top.y;
 
 		return connector;
 	}
@@ -357,30 +373,29 @@ erpnext.HierarchyChartMobile = class {
 		path.setAttribute("data-child", child_id);
 		const parent = $(`[id="${parent_id}"]`);
 
-		if (parent.hasClass('active')) {
+		if (parent.hasClass("active")) {
 			path.setAttribute("class", "active-connector");
 			path.setAttribute("marker-start", "url(#arrowstart-active)");
 			path.setAttribute("marker-end", "url(#arrowhead-active)");
-		} else if (parent.hasClass('active-path')) {
+		} else if (parent.hasClass("active-path")) {
 			path.setAttribute("class", "collapsed-connector");
 		}
 	}
 
 	set_selected_node(node) {
 		// remove .active class from the current node
-		if (this.selected_node)
-			this.selected_node.$link.removeClass('active');
+		if (this.selected_node) this.selected_node.$link.removeClass("active");
 
 		// add active class to the newly selected node
 		this.selected_node = node;
-		node.$link.addClass('active');
+		node.$link.addClass("active");
 	}
 
 	setup_node_click_action(node) {
 		let me = this;
 		let node_element = $(`[id="${node.id}"]`);
 
-		node_element.click(function() {
+		node_element.click(function () {
 			let el = null;
 
 			if (node.is_root) {
@@ -388,7 +403,7 @@ erpnext.HierarchyChartMobile = class {
 				me.$hierarchy.empty();
 				$(`#connectors`).empty();
 				me.add_node_to_hierarchy(el, node);
-			} else if (node_element.is(':visible') && node_element.hasClass('active-path')) {
+			} else if (node_element.is(":visible") && node_element.hasClass("active-path")) {
 				me.remove_levels_after_node(node);
 				me.remove_orphaned_connectors();
 			} else {
@@ -405,17 +420,17 @@ erpnext.HierarchyChartMobile = class {
 		let node_element = $(`[id="${node.id}"]`);
 		let me = this;
 
-		node_element.find('.btn-edit-node').click(function() {
-			frappe.set_route('Form', me.doctype, node.id);
+		node_element.find(".btn-edit-node").click(function () {
+			frappe.set_route("Form", me.doctype, node.id);
 		});
 	}
 
 	setup_node_group_action() {
 		let me = this;
 
-		$('.node-group').on('click', function() {
-			let parent = $(this).attr('data-parent');
-			if (parent == '') {
+		$(".node-group").on("click", function () {
+			let parent = $(this).attr("data-parent");
+			if (parent == "") {
 				me.setup_hierarchy();
 				me.render_root_nodes();
 			} else {
@@ -426,8 +441,8 @@ erpnext.HierarchyChartMobile = class {
 
 	add_node_to_hierarchy(node_element, node) {
 		this.$hierarchy.append(`<li class="level"></li>`);
-		node_element.removeClass('active-child active-path');
-		this.$hierarchy.find('.level:last').append(node_element);
+		node_element.removeClass("active-child active-path");
+		this.$hierarchy.find(".level:last").append(node_element);
 
 		let node_object = this.nodes[node.id];
 		node_object.expanded = 0;
@@ -435,14 +450,12 @@ erpnext.HierarchyChartMobile = class {
 		this.nodes[node.id] = node_object;
 	}
 
-	get_node_group(nodes, parent, collapsed=true) {
+	get_node_group(nodes, parent, collapsed = true) {
 		let limit = 2;
 		const display_nodes = nodes.slice(0, limit);
 		const extra_nodes = nodes.slice(limit);
 
-		let html = display_nodes.map(node =>
-			this.get_avatar(node)
-		).join('');
+		let html = display_nodes.map((node) => this.get_avatar(node)).join("");
 
 		if (extra_nodes.length === 1) {
 			let node = extra_nodes[0];
@@ -452,7 +465,7 @@ erpnext.HierarchyChartMobile = class {
 				${html}
 				<span class="avatar avatar-small">
 					<div class="avatar-frame standard-image avatar-extra-count"
-						title="${extra_nodes.map(node => node.name).join(', ')}">
+						title="${extra_nodes.map((node) => node.name).join(", ")}">
 						+${extra_nodes.length}
 					</div>
 				</span>
@@ -460,15 +473,13 @@ erpnext.HierarchyChartMobile = class {
 		}
 
 		if (html) {
-			const $node_group =
-				$(`<div class="node-group card cursor-pointer" data-parent=${parent}>
+			const $node_group = $(`<div class="node-group card cursor-pointer" data-parent=${parent}>
 					<div class="avatar-group right overlap">
 						${html}
 					</div>
 				</div>`);
 
-			if (collapsed)
-				$node_group.addClass('collapsed');
+			if (collapsed) $node_group.addClass("collapsed");
 
 			return $node_group;
 		}
@@ -486,7 +497,7 @@ erpnext.HierarchyChartMobile = class {
 		let node_object = this.nodes[parent];
 		let node = node_object.$link;
 
-		node.removeClass('active-child active-path');
+		node.removeClass("active-child active-path");
 		node_object.expanded = 0;
 		node_object.$children = null;
 		this.nodes[node.id] = node_object;
@@ -496,11 +507,10 @@ erpnext.HierarchyChartMobile = class {
 			() => this.get_child_nodes(node_object.parent_id, node_object.id),
 			(child_nodes) => this.get_node_group(child_nodes, node_object.parent_id, false),
 			(node_group) => {
-				if (node_group)
-					this.$sibling_group.empty().append(node_group);
+				if (node_group) this.$sibling_group.empty().append(node_group);
 			},
 			() => this.setup_node_group_action(),
-			() => this.reattach_and_expand_node(node, node_object)
+			() => this.reattach_and_expand_node(node, node_object),
 		]);
 	}
 
@@ -510,7 +520,7 @@ erpnext.HierarchyChartMobile = class {
 		this.$hierarchy.empty().append(`
 			<li class="level"></li>
 		`);
-		this.$hierarchy.find('.level').append(el);
+		this.$hierarchy.find(".level").append(el);
 		$(`#connectors`).empty();
 		this.expand_node(node_object);
 	}
@@ -518,13 +528,13 @@ erpnext.HierarchyChartMobile = class {
 	remove_levels_after_node(node) {
 		let level = $(`[id="${node.id}"]`).parent().parent().index();
 
-		level = $('.hierarchy-mobile > li:eq('+ level + ')');
-		level.nextAll('li').remove();
+		level = $(".hierarchy-mobile > li:eq(" + level + ")");
+		level.nextAll("li").remove();
 
 		let node_object = this.nodes[node.id];
 		let current_node = level.find(`[id="${node.id}"]`).detach();
 
-		current_node.removeClass('active-child active-path');
+		current_node.removeClass("active-child active-path");
 
 		node_object.expanded = 0;
 		node_object.$children = null;
@@ -533,13 +543,12 @@ erpnext.HierarchyChartMobile = class {
 	}
 
 	remove_orphaned_connectors() {
-		let paths = $('#connectors > path');
+		let paths = $("#connectors > path");
 		$.each(paths, (_i, path) => {
-			const parent = $(path).data('parent');
-			const child = $(path).data('child');
+			const parent = $(path).data("parent");
+			const child = $(path).data("child");
 
-			if ($(`[id="${parent}"]`).length && $(`[id="${child}"]`).length)
-				return;
+			if ($(`[id="${parent}"]`).length && $(`[id="${child}"]`).length) return;
 
 			$(path).remove();
 		});

@@ -1,4 +1,4 @@
-import html2canvas from 'html2canvas';
+import html2canvas from "html2canvas";
 erpnext.HierarchyChart = class {
 	/* Options:
 		- doctype
@@ -13,7 +13,7 @@ erpnext.HierarchyChart = class {
 		this.doctype = doctype;
 
 		this.setup_page_style();
-		this.page.main.addClass('frappe-card');
+		this.page.main.addClass("frappe-card");
 
 		this.nodes = {};
 		this.setup_node_class();
@@ -21,10 +21,10 @@ erpnext.HierarchyChart = class {
 
 	setup_page_style() {
 		this.page.main.css({
-			'min-height': '300px',
-			'max-height': '600px',
-			'overflow': 'auto',
-			'position': 'relative'
+			"min-height": "300px",
+			"max-height": "600px",
+			overflow: "auto",
+			position: "relative",
 		});
 	}
 
@@ -32,7 +32,15 @@ erpnext.HierarchyChart = class {
 		let me = this;
 		this.Node = class {
 			constructor({
-				id, parent, parent_id, image, name, title, expandable, connections, is_root // eslint-disable-line
+				id,
+				parent,
+				parent_id,
+				image,
+				name,
+				title,
+				expandable,
+				connections,
+				is_root, // eslint-disable-line
 			}) {
 				// to setup values passed via constructor
 				$.extend(this, arguments[0]);
@@ -52,14 +60,14 @@ erpnext.HierarchyChart = class {
 	}
 
 	make_node_element(node) {
-		let node_card = frappe.render_template('node_card', {
+		let node_card = frappe.render_template("node_card", {
 			id: node.id,
 			name: node.name,
 			title: node.title,
 			image: node.image,
 			parent: node.parent_id,
 			connections: node.connections,
-			is_mobile: false
+			is_mobile: false,
 		});
 
 		node.parent.append(node_card);
@@ -72,16 +80,16 @@ erpnext.HierarchyChart = class {
 		let me = this;
 
 		let company = this.page.add_field({
-			fieldtype: 'Link',
-			options: 'Company',
-			fieldname: 'company',
-			placeholder: __('Select Company'),
-			default: frappe.defaults.get_default('company'),
+			fieldtype: "Link",
+			options: "Company",
+			fieldname: "company",
+			placeholder: __("Select Company"),
+			default: frappe.defaults.get_default("company"),
 			only_select: true,
 			reqd: 1,
 			change: () => {
-				me.company = '';
-				$('#hierarchy-chart-wrapper').remove();
+				me.company = "";
+				$("#hierarchy-chart-wrapper").remove();
 
 				if (company.get_value()) {
 					me.company = company.get_value();
@@ -92,75 +100,76 @@ erpnext.HierarchyChart = class {
 					me.render_root_nodes();
 					me.all_nodes_expanded = false;
 				} else {
-					frappe.throw(__('Please select a company first.'));
+					frappe.throw(__("Please select a company first."));
 				}
-			}
+			},
 		});
 
 		company.refresh();
-		$(`[data-fieldname="company"]`).trigger('change');
-		$(`[data-fieldname="company"] .link-field`).css('z-index', 2);
+		$(`[data-fieldname="company"]`).trigger("change");
+		$(`[data-fieldname="company"] .link-field`).css("z-index", 2);
 	}
 
 	setup_actions() {
 		let me = this;
 		this.page.clear_inner_toolbar();
-		this.page.add_inner_button(__('Export'), function() {
+		this.page.add_inner_button(__("Export"), function () {
 			me.export_chart();
 		});
 
-		this.page.add_inner_button(__('Expand All'), function() {
+		this.page.add_inner_button(__("Expand All"), function () {
 			me.load_children(me.root_node, true);
 			me.all_nodes_expanded = true;
 
-			me.page.remove_inner_button(__('Expand All'));
-			me.page.add_inner_button(__('Collapse All'), function() {
+			me.page.remove_inner_button(__("Expand All"));
+			me.page.add_inner_button(__("Collapse All"), function () {
 				me.setup_hierarchy();
 				me.render_root_nodes();
 				me.all_nodes_expanded = false;
 
-				me.page.remove_inner_button(__('Collapse All'));
+				me.page.remove_inner_button(__("Collapse All"));
 				me.setup_actions();
 			});
 		});
 	}
 
 	export_chart() {
-		frappe.dom.freeze(__('Exporting...'));
+		frappe.dom.freeze(__("Exporting..."));
 		this.page.main.css({
-			'min-height': '',
-			'max-height': '',
-			'overflow': 'visible',
-			'position': 'fixed',
-			'left': '0',
-			'top': '0'
+			"min-height": "",
+			"max-height": "",
+			overflow: "visible",
+			position: "fixed",
+			left: "0",
+			top: "0",
 		});
 
-		$('.node-card').addClass('exported');
+		$(".node-card").addClass("exported");
 
-		html2canvas(document.querySelector('#hierarchy-chart-wrapper'), {
+		html2canvas(document.querySelector("#hierarchy-chart-wrapper"), {
 			scrollY: -window.scrollY,
-			scrollX: 0
-		}).then(function(canvas) {
-			// Export the canvas to its data URI representation
-			let dataURL = canvas.toDataURL('image/png');
+			scrollX: 0,
+		})
+			.then(function (canvas) {
+				// Export the canvas to its data URI representation
+				let dataURL = canvas.toDataURL("image/png");
 
-			// download the image
-			let a = document.createElement('a');
-			a.href = dataURL;
-			a.download = 'hierarchy_chart';
-			a.click();
-		}).finally(() => {
-			frappe.dom.unfreeze();
-		});
+				// download the image
+				let a = document.createElement("a");
+				a.href = dataURL;
+				a.download = "hierarchy_chart";
+				a.click();
+			})
+			.finally(() => {
+				frappe.dom.unfreeze();
+			});
 
 		this.setup_page_style();
-		$('.node-card').removeClass('exported');
+		$(".node-card").removeClass("exported");
 	}
 
 	setup_hierarchy() {
-		if (this.$hierarchy)
-			this.$hierarchy.remove();
+		if (this.$hierarchy) this.$hierarchy.remove();
 
 		$(`#connectors`).empty();
 
@@ -170,18 +179,16 @@ erpnext.HierarchyChart = class {
 				<li class="root-level level">
 					<ul class="node-children"></ul>
 				</li>
-			</ul>`);
+			</ul>`
+		);
 
-		this.page.main
-			.find('#hierarchy-chart')
-			.empty()
-			.append(this.$hierarchy);
+		this.page.main.find("#hierarchy-chart").empty().append(this.$hierarchy);
 
 		this.nodes = {};
 	}
 
 	make_svg_markers() {
-		$('#hierarchy-chart-wrapper').remove();
+		$("#hierarchy-chart-wrapper").remove();
 
 		this.page.main.append(`
 			<div id="hierarchy-chart-wrapper">
@@ -209,45 +216,47 @@ erpnext.HierarchyChart = class {
 			</div>`);
 	}
 
-	render_root_nodes(expanded_view=false) {
+	render_root_nodes(expanded_view = false) {
 		let me = this;
 
-		return frappe.call({
-			method: me.method,
-			args: {
-				company: me.company
-			}
-		}).then(r => {
-			if (r.message.length) {
-				let expand_node;
-				let node;
+		return frappe
+			.call({
+				method: me.method,
+				args: {
+					company: me.company,
+				},
+			})
+			.then((r) => {
+				if (r.message.length) {
+					let expand_node;
+					let node;
 
-				$.each(r.message, (_i, data) => {
-					if ($(`[id="${data.id}"]`).length)
-						return;
+					$.each(r.message, (_i, data) => {
+						if ($(`[id="${data.id}"]`).length) return;
 
-					node = new me.Node({
-						id: data.id,
-						parent: $('<li class="child-node"></li>').appendTo(me.$hierarchy.find('.node-children')),
-						parent_id: '',
-						image: data.image,
-						name: data.name,
-						title: data.title,
-						expandable: true,
-						connections: data.connections,
-						is_root: true
+						node = new me.Node({
+							id: data.id,
+							parent: $('<li class="child-node"></li>').appendTo(
+								me.$hierarchy.find(".node-children")
+							),
+							parent_id: "",
+							image: data.image,
+							name: data.name,
+							title: data.title,
+							expandable: true,
+							connections: data.connections,
+							is_root: true,
+						});
+
+						if (!expand_node && data.connections) expand_node = node;
 					});
 
-					if (!expand_node && data.connections)
-						expand_node = node;
-				});
-
-				me.root_node = expand_node;
-				if (!expanded_view) {
-					me.expand_node(expand_node);
+					me.root_node = expand_node;
+					if (!expanded_view) {
+						me.expand_node(expand_node);
+					}
 				}
-			}
-		});
+			});
 	}
 
 	expand_node(node) {
@@ -263,7 +272,7 @@ erpnext.HierarchyChart = class {
 			this.refresh_connectors(node.parent_id);
 
 			// rebuild incoming connections
-			let grandparent = $(`[id="${node.parent_id}"]`).attr('data-parent');
+			let grandparent = $(`[id="${node.parent_id}"]`).attr("data-parent");
 			this.refresh_connectors(grandparent);
 		}
 
@@ -282,18 +291,18 @@ erpnext.HierarchyChart = class {
 
 	show_active_path(node) {
 		// mark node parent on active path
-		$(`[id="${node.parent_id}"]`).addClass('active-path');
+		$(`[id="${node.parent_id}"]`).addClass("active-path");
 	}
 
-	load_children(node, deep=false) {
+	load_children(node, deep = false) {
 		if (!this.company) {
-			frappe.throw(__('Please select a company first.'));
+			frappe.throw(__("Please select a company first."));
 		}
 
 		if (!deep) {
 			frappe.run_serially([
 				() => this.get_child_nodes(node.id),
-				(child_nodes) => this.render_child_nodes(node, child_nodes)
+				(child_nodes) => this.render_child_nodes(node, child_nodes),
 			]);
 		} else {
 			frappe.run_serially([
@@ -302,26 +311,28 @@ erpnext.HierarchyChart = class {
 				() => this.render_root_nodes(true),
 				() => this.get_all_nodes(),
 				(data_list) => this.render_children_of_all_nodes(data_list),
-				() => frappe.dom.unfreeze()
+				() => frappe.dom.unfreeze(),
 			]);
 		}
 	}
 
 	get_child_nodes(node_id) {
 		let me = this;
-		return new Promise(resolve => {
-			frappe.call({
-				method: me.method,
-				args: {
-					parent: node_id,
-					company: me.company
-				}
-			}).then(r => resolve(r.message));
+		return new Promise((resolve) => {
+			frappe
+				.call({
+					method: me.method,
+					args: {
+						parent: node_id,
+						company: me.company,
+					},
+				})
+				.then((r) => resolve(r.message));
 		});
 	}
 
 	render_child_nodes(node, child_nodes) {
-		const last_level = this.$hierarchy.find('.level:last').index();
+		const last_level = this.$hierarchy.find(".level:last").index();
 		const current_level = $(`[id="${node.id}"]`).parent().parent().parent().index();
 
 		if (last_level === current_level) {
@@ -333,7 +344,7 @@ erpnext.HierarchyChart = class {
 		if (!node.$children) {
 			node.$children = $('<ul class="node-children"></ul>')
 				.hide()
-				.appendTo(this.$hierarchy.find('.level:last'));
+				.appendTo(this.$hierarchy.find(".level:last"));
 
 			node.$children.empty();
 
@@ -356,16 +367,16 @@ erpnext.HierarchyChart = class {
 
 	get_all_nodes() {
 		let me = this;
-		return new Promise(resolve => {
+		return new Promise((resolve) => {
 			frappe.call({
-				method: 'erpnext.utilities.hierarchy_chart.get_all_nodes',
+				method: "erpnext.utilities.hierarchy_chart.get_all_nodes",
 				args: {
 					method: me.method,
-					company: me.company
+					company: me.company,
 				},
 				callback: (r) => {
 					resolve(r.message);
-				}
+				},
 			});
 		});
 	}
@@ -389,16 +400,16 @@ erpnext.HierarchyChart = class {
 	render_child_nodes_for_expanded_view(node, child_nodes) {
 		node.$children = $('<ul class="node-children"></ul>');
 
-		const last_level = this.$hierarchy.find('.level:last').index();
+		const last_level = this.$hierarchy.find(".level:last").index();
 		const node_level = $(`[id="${node.id}"]`).parent().parent().parent().index();
 
 		if (last_level === node_level) {
 			this.$hierarchy.append(`
 				<li class="level"></li>
 			`);
-			node.$children.appendTo(this.$hierarchy.find('.level:last'));
+			node.$children.appendTo(this.$hierarchy.find(".level:last"));
 		} else {
-			node.$children.appendTo(this.$hierarchy.find('.level:eq(' + (node_level + 1) + ')'));
+			node.$children.appendTo(this.$hierarchy.find(".level:eq(" + (node_level + 1) + ")"));
 		}
 
 		node.$children.hide().empty();
@@ -436,33 +447,40 @@ erpnext.HierarchyChart = class {
 		const parent_node = document.getElementById(`${parent_id}`);
 		const child_node = document.getElementById(`${child_id}`);
 
-		let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+		let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
 
 		// we need to connect right side of the parent to the left side of the child node
 		const pos_parent_right = {
 			x: parent_node.offsetLeft + parent_node.offsetWidth,
-			y: parent_node.offsetTop + parent_node.offsetHeight / 2
+			y: parent_node.offsetTop + parent_node.offsetHeight / 2,
 		};
 		const pos_child_left = {
 			x: child_node.offsetLeft - 5,
-			y: child_node.offsetTop + child_node.offsetHeight / 2
+			y: child_node.offsetTop + child_node.offsetHeight / 2,
 		};
 
 		const connector = this.get_connector(pos_parent_right, pos_child_left);
 
-		path.setAttribute('d', connector);
+		path.setAttribute("d", connector);
 		this.set_path_attributes(path, parent_id, child_id);
 
-		document.getElementById('connectors').appendChild(path);
+		document.getElementById("connectors").appendChild(path);
 	}
 
 	get_connector(pos_parent_right, pos_child_left) {
 		if (pos_parent_right.y === pos_child_left.y) {
 			// don't add arcs if it's a straight line
-			return "M" +
-			(pos_parent_right.x) + "," + (pos_parent_right.y) + " " +
-			"L"+
-			(pos_child_left.x) + "," + (pos_child_left.y);
+			return (
+				"M" +
+				pos_parent_right.x +
+				"," +
+				pos_parent_right.y +
+				" " +
+				"L" +
+				pos_child_left.x +
+				"," +
+				pos_child_left.y
+			);
 		} else {
 			let arc_1 = "";
 			let arc_2 = "";
@@ -482,15 +500,29 @@ erpnext.HierarchyChart = class {
 				offset = -10;
 			}
 
-			return "M" + (pos_parent_right.x) + "," + (pos_parent_right.y) + " " +
+			return (
+				"M" +
+				pos_parent_right.x +
+				"," +
+				pos_parent_right.y +
+				" " +
 				"L" +
-				(pos_parent_right.x + 40) + "," + (pos_parent_right.y) + " " +
+				(pos_parent_right.x + 40) +
+				"," +
+				pos_parent_right.y +
+				" " +
 				arc_1 +
 				"L" +
-				(pos_parent_right.x + 50) + "," + (pos_child_left.y + offset) + " " +
+				(pos_parent_right.x + 50) +
+				"," +
+				(pos_child_left.y + offset) +
+				" " +
 				arc_2 +
-				"L"+
-				(pos_child_left.x) + "," + (pos_child_left.y);
+				"L" +
+				pos_child_left.x +
+				"," +
+				pos_child_left.y
+			);
 		}
 	}
 
@@ -499,7 +531,7 @@ erpnext.HierarchyChart = class {
 		path.setAttribute("data-child", child_id);
 		const parent = $(`[id="${parent_id}"]`);
 
-		if (parent.hasClass('active')) {
+		if (parent.hasClass("active")) {
 			path.setAttribute("class", "active-connector");
 			path.setAttribute("marker-start", "url(#arrowstart-active)");
 			path.setAttribute("marker-end", "url(#arrowhead-active)");
@@ -512,24 +544,23 @@ erpnext.HierarchyChart = class {
 
 	set_selected_node(node) {
 		// remove active class from the current node
-		if (this.selected_node)
-			this.selected_node.$link.removeClass('active');
+		if (this.selected_node) this.selected_node.$link.removeClass("active");
 
 		// add active class to the newly selected node
 		this.selected_node = node;
-		node.$link.addClass('active');
+		node.$link.addClass("active");
 	}
 
 	collapse_previous_level_nodes(node) {
 		let node_parent = $(`[id="${node.parent_id}"]`);
-		let previous_level_nodes = node_parent.parent().parent().children('li');
+		let previous_level_nodes = node_parent.parent().parent().children("li");
 		let node_card;
 
-		previous_level_nodes.each(function() {
-			node_card = $(this).find('.node-card');
+		previous_level_nodes.each(function () {
+			node_card = $(this).find(".node-card");
 
-			if (!node_card.hasClass('active-path')) {
-				node_card.addClass('collapsed');
+			if (!node_card.hasClass("active-path")) {
+				node_card.addClass("collapsed");
 			}
 		});
 	}
@@ -547,7 +578,7 @@ erpnext.HierarchyChart = class {
 						this.add_connector(node_parent, data.id);
 					});
 				}
-			}
+			},
 		]);
 	}
 
@@ -555,13 +586,15 @@ erpnext.HierarchyChart = class {
 		let me = this;
 		let node_element = $(`[id="${node.id}"]`);
 
-		node_element.click(function() {
+		node_element.click(function () {
 			const is_sibling = me.selected_node.parent_id === node.parent_id;
 
 			if (is_sibling) {
 				me.collapse_node();
-			} else if (node_element.is(':visible')
-				&& (node_element.hasClass('collapsed') || node_element.hasClass('active-path'))) {
+			} else if (
+				node_element.is(":visible") &&
+				(node_element.hasClass("collapsed") || node_element.hasClass("active-path"))
+			) {
 				me.remove_levels_after_node(node);
 				me.remove_orphaned_connectors();
 			}
@@ -574,18 +607,18 @@ erpnext.HierarchyChart = class {
 		let node_element = $(`[id="${node.id}"]`);
 		let me = this;
 
-		node_element.find('.btn-edit-node').click(function() {
-			frappe.set_route('Form', me.doctype, node.id);
+		node_element.find(".btn-edit-node").click(function () {
+			frappe.set_route("Form", me.doctype, node.id);
 		});
 	}
 
 	remove_levels_after_node(node) {
 		let level = $(`[id="${node.id}"]`).parent().parent().parent().index();
 
-		level = $('.hierarchy > li:eq('+ level + ')');
-		level.nextAll('li').remove();
+		level = $(".hierarchy > li:eq(" + level + ")");
+		level.nextAll("li").remove();
 
-		let nodes = level.find('.node-card');
+		let nodes = level.find(".node-card");
 		let node_object;
 
 		$.each(nodes, (_i, element) => {
@@ -594,17 +627,16 @@ erpnext.HierarchyChart = class {
 			node_object.$children = null;
 		});
 
-		nodes.removeClass('collapsed active-path');
+		nodes.removeClass("collapsed active-path");
 	}
 
 	remove_orphaned_connectors() {
-		let paths = $('#connectors > path');
+		let paths = $("#connectors > path");
 		$.each(paths, (_i, path) => {
-			const parent = $(path).data('parent');
-			const child = $(path).data('child');
+			const parent = $(path).data("parent");
+			const child = $(path).data("child");
 
-			if ($(`[id="${parent}"]`).length && $(`[id="${child}"]`).length)
-				return;
+			if ($(`[id="${parent}"]`).length && $(`[id="${child}"]`).length) return;
 
 			$(path).remove();
 		});

@@ -3,20 +3,19 @@
 /* eslint-disable */
 
 frappe.query_reports["Sales Person Commission Summary"] = {
-	"filters": [
-
+	filters: [
 		{
 			fieldname: "sales_person",
 			label: __("Sales Person"),
 			fieldtype: "Link",
-			options: "Sales Person"
+			options: "Sales Person",
 		},
 		{
 			fieldname: "doc_type",
 			label: __("Document Type"),
 			fieldtype: "Select",
 			options: "Sales Order\nDelivery Note\nSales Invoice",
-			default: "Sales Order"
+			default: "Sales Order",
 		},
 		{
 			fieldname: "from_date",
@@ -25,30 +24,29 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 			default: frappe.defaults.get_user_default("year_start_date"),
 		},
 		{
-			fieldname:"to_date",
+			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.get_today()
+			default: frappe.datetime.get_today(),
 		},
 		{
-			fieldname:"company",
+			fieldname: "company",
 			label: __("Company"),
 			fieldtype: "Link",
 			options: "Company",
-			default: frappe.defaults.get_user_default("Company")
+			default: frappe.defaults.get_user_default("Company"),
 		},
 		{
-			fieldname:"customer",
+			fieldname: "customer",
 			label: __("Customer"),
 			fieldtype: "Link",
 			options: "Customer",
 		},
 		{
-			fieldname:"territory",
+			fieldname: "territory",
 			label: __("Territory"),
 			fieldtype: "Link",
 			options: "Territory",
 		},
-
-	]
-}
+	],
+};

@@ -3,39 +3,36 @@
 
 frappe.ui.form.on("Unreconcile Payment", {
 	refresh(frm) {
-		frm.set_query("voucher_type", function() {
+		frm.set_query("voucher_type", function () {
 			return {
 				filters: {
-					name: ["in", ["Payment Entry", "Journal Entry"]]
-				}
-			}
+					name: ["in", ["Payment Entry", "Journal Entry"]],
+				},
+			};
 		});
 
-
-		frm.set_query("voucher_no", function(doc) {
+		frm.set_query("voucher_no", function (doc) {
 			return {
 				filters: {
 					company: doc.company,
-					docstatus: 1
-				}
-			}
+					docstatus: 1,
+				},
+			};
 		});
-
 	},
-	get_allocations: function(frm) {
+	get_allocations: function (frm) {
 		frm.clear_table("allocations");
 		frappe.call({
 			method: "get_allocations_from_payment",
 			doc: frm.doc,
-			callback: function(r) {
+			callback: function (r) {
 				if (r.message) {
-					r.message.forEach(x => {
-						frm.add_child("allocations", x)
-					})
+					r.message.forEach((x) => {
+						frm.add_child("allocations", x);
+					});
 					frm.refresh_fields();
 				}
-			}
-		})
-
-	}
+			},
+		});
+	},
 });

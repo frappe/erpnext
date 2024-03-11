@@ -10,8 +10,8 @@ $(() => {
 			// Render Product Views, Filters & Search
 			new erpnext.ProductView({
 				view_type: view_type,
-				products_section: $('#product-listing'),
-				item_group: me.item_group
+				products_section: $("#product-listing"),
+				item_group: me.item_group,
 			});
 
 			this.bind_card_actions();
