@@ -1554,6 +1554,128 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(len(pr.payments), 0)
 >>>>>>> 6d9074d585 (test: reverse payment reconciliation)
 
+	def test_advance_reverse_payment_reconciliation(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		company = "_Test Company"
+		advance_account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Advances Received",
+			company=company,
+			account_type="Receivable",
+		)
+
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": advance_account,
+			},
+		)
+		# Reverse Payment(essentially an Invoice)
+		reverse_pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Pay",
+			paid_from="_Test Cash - _TC",
+			paid_to=advance_account,
+		)
+		reverse_pe.save()  # use save() to trigger set_liability_account()
+		reverse_pe.submit()
+
+		# Advance Payment
+		pe = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from=advance_account,
+			paid_to="_Test Cash - _TC",
+		)
+		pe.save()  # use save() to trigger set_liability_account()
+		pe.submit()
+
+		# Partially reconcile advance against invoice
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = company
+		pr.party_type = "Customer"
+		pr.party = "_Test Customer"
+		pr.receivable_payable_account = "Debtors - _TC"
+		pr.default_advance_account = advance_account
+		pr.get_unreconciled_entries()
+
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		invoices = [x.as_dict() for x in pr.get("invoices")]
+		payments = [x.as_dict() for x in pr.get("payments")]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.allocation[0].allocated_amount = 400
+		pr.reconcile()
+
+		# assert General and Payment Ledger entries post partial reconciliation
+		self.expected_gle = [
+			{"account": "Debtors - _TC", "debit": 0.0, "credit": 400.0},
+			{"account": advance_account, "debit": 400.0, "credit": 0.0},
+			{"account": advance_account, "debit": 0.0, "credit": 1000.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+		]
+		self.expected_ple = [
+			{
+				"account": advance_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": -1000.0,
+			},
+			{
+				"account": "Debtors - _TC",
+				"voucher_no": pe.name,
+				"against_voucher_no": reverse_pe.name,
+				"amount": -400.0,
+			},
+			{
+				"account": advance_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": 400.0,
+			},
+		]
+		self.voucher_no = pe.name
+		self.check_gl_entries()
+		self.check_pl_entries()
+
+		# Unreconcile
+		unrecon = (
+			frappe.get_doc(
+				{
+					"doctype": "Unreconcile Payment",
+					"company": company,
+					"voucher_type": pe.doctype,
+					"voucher_no": pe.name,
+					"allocations": [{"reference_doctype": reverse_pe.doctype, "reference_name": reverse_pe.name}],
+				}
+			)
+			.save()
+			.submit()
+		)
+
+		# assert General and Payment Ledger entries post unreconciliation
+		self.expected_gle = [
+			{"account": advance_account, "debit": 0.0, "credit": 1000.0},
+			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
+		]
+		self.expected_ple = [
+			{
+				"account": advance_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": -1000.0,
+			},
+		]
+		self.voucher_no = pe.name
+		self.check_gl_entries()
+		self.check_pl_entries()
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
