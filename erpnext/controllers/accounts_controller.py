@@ -218,15 +218,19 @@ class AccountsController(TransactionBase):
 				)
 
 			if self.get("is_return") and self.get("return_against") and not self.get("is_pos"):
-				# if self.get("is_return") and self.get("return_against"):
 				document_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
 				frappe.msgprint(
 					_(
-						"{0} will be treated as a standalone {0}. Post creation use {1} tool to reconcile against {2}."
+						"{0} will be treated as a standalone {0}. If you want {1}'s outstanding to be updated, uncheck {2} checkbox. <br><br> Or you can use {3} tool to reconcile against {1} later."
 					).format(
 						document_type,
+<<<<<<< HEAD
 						get_link_to_form("Payment Reconciliation", "Payment Reconciliation"),
+=======
+>>>>>>> adf13a19c4 (chore: update popup message)
 						get_link_to_form(self.doctype, self.get("return_against")),
+						frappe.bold("Update Outstanding for Self"),
+						get_link_to_form("Payment Reconciliation"),
 					)
 				)
 
