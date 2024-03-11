@@ -220,6 +220,7 @@ class SalesInvoice(SellingController):
 		unrealized_profit_loss_account: DF.Link | None
 		update_billed_amount_in_delivery_note: DF.Check
 		update_billed_amount_in_sales_order: DF.Check
+		update_outstanding_for_self: DF.Check
 		update_stock: DF.Check
 		use_company_roundoff_cost_center: DF.Check
 		write_off_account: DF.Link | None
@@ -1241,7 +1242,9 @@ class SalesInvoice(SellingController):
 						"debit_in_account_currency": base_grand_total
 						if self.party_account_currency == self.company_currency
 						else grand_total,
-						"against_voucher": self.name,
+						"against_voucher": self.name
+						if self.is_return and self.return_against and self.update_outstanding_for_self
+						else self.return_against,
 						"against_voucher_type": self.doctype,
 						"cost_center": self.cost_center,
 						"project": self.project,
