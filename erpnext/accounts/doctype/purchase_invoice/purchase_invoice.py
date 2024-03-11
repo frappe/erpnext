@@ -217,6 +217,7 @@ class PurchaseInvoice(BuyingController):
 		unrealized_profit_loss_account: DF.Link | None
 		update_billed_amount_in_purchase_order: DF.Check
 		update_billed_amount_in_purchase_receipt: DF.Check
+		update_outstanding_for_self: DF.Check
 		update_stock: DF.Check
 		use_company_roundoff_cost_center: DF.Check
 		use_transaction_date_exchange_rate: DF.Check
