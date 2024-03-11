@@ -159,7 +159,8 @@
    "label": "Opportunity Type",
    "oldfieldname": "enquiry_type",
    "oldfieldtype": "Select",
-   "options": "Opportunity Type"
+   "options": "Opportunity Type",
+   "translatable": 1
   },
   {
    "default": "Open",
