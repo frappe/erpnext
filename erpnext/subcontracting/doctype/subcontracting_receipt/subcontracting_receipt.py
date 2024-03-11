@@ -74,8 +74,9 @@ class SubcontractingReceipt(SubcontractingController):
 		if (
 			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
 			== "BOM"
-		):
+		) and not self.has_serial_batch_items():
 			self.supplied_items = []
+
 		super(SubcontractingReceipt, self).validate()
 		self.set_missing_values()
 		self.validate_posting_time()
@@ -124,6 +125,14 @@ class SubcontractingReceipt(SubcontractingController):
 		self.calculate_additional_costs()
 		self.calculate_supplied_items_qty_and_amount()
 		self.calculate_items_qty_and_amount()
+
+	def has_serial_batch_items(self):
+		if not self.get("supplied_items"):
+			return False
+
+		for row in self.get("supplied_items"):
+			if row.serial_no or row.batch_no:
+				return True
 
 	def set_available_qty_for_consumption(self):
 		supplied_items_details = {}
