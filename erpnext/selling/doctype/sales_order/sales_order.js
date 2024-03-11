@@ -176,7 +176,7 @@ frappe.ui.form.on("Sales Order", {
 				method: "erpnext.setup.doctype.company.company.get_default_company_address",
 				args: {
 					name: frm.doc.company,
-					existing_address: frm.doc.company_address || ""
+					existing_address: frm.doc.company_address || "",
 				},
 				debounce: 2000,
 				callback: function (r) {
