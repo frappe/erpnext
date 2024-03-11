@@ -3,33 +3,33 @@
 /* eslint-disable */
 
 frappe.query_reports["Incorrect Serial No Valuation"] = {
-	"filters": [
+	filters: [
 		{
-			label: __('Item Code'),
-			fieldtype: 'Link',
-			fieldname: 'item_code',
-			options: 'Item',
-			get_query: function() {
+			label: __("Item Code"),
+			fieldtype: "Link",
+			fieldname: "item_code",
+			options: "Item",
+			get_query: function () {
 				return {
 					filters: {
-						'has_serial_no': 1
-					}
-				}
-			}
+						has_serial_no: 1,
+					},
+				};
+			},
 		},
 		{
-			label: __('From Date'),
-			fieldtype: 'Date',
-			fieldname: 'from_date',
+			label: __("From Date"),
+			fieldtype: "Date",
+			fieldname: "from_date",
 			reqd: 1,
-			default: frappe.defaults.get_user_default("year_start_date")
+			default: frappe.defaults.get_user_default("year_start_date"),
 		},
 		{
-			label: __('To Date'),
-			fieldtype: 'Date',
-			fieldname: 'to_date',
+			label: __("To Date"),
+			fieldtype: "Date",
+			fieldname: "to_date",
 			reqd: 1,
-			default: frappe.defaults.get_user_default("year_end_date")
-		}
-	]
+			default: frappe.defaults.get_user_default("year_end_date"),
+		},
+	],
 };

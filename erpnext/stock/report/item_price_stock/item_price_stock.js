@@ -3,12 +3,12 @@
 /* eslint-disable */
 
 frappe.query_reports["Item Price Stock"] = {
-	"filters": [
+	filters: [
 		{
-			"fieldname":"item_code",
-			"label": __("Item"),
-			"fieldtype": "Link",
-			"options": "Item"
-		}
-	]
-}
+			fieldname: "item_code",
+			label: __("Item"),
+			fieldtype: "Link",
+			options: "Item",
+		},
+	],
+};

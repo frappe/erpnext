@@ -4,7 +4,5 @@
 /* global frappe */
 
 frappe.ui.form.on("Supplier Scorecard Standing", {
-	refresh: function() {
-
-	}
+	refresh: function () {},
 });

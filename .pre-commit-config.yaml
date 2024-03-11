@@ -20,6 +20,51 @@ repos:
       - id: check-yaml
       - id: debug-statements
 
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.7.1
+    hooks:
+      - id: prettier
+        types_or: [javascript, vue, scss]
+        # Ignore any files that might contain jinja / bundles
+        exclude: |
+            (?x)^(
+                erpnext/public/dist/.*|
+                cypress/.*|
+                .*node_modules.*|
+                .*boilerplate.*|
+                erpnext/public/js/controllers/.*|
+                erpnext/templates/pages/order.js|
+                erpnext/templates/includes/.*|
+                .*/supplier_quotation.js|
+                .*/sales_taxes_and_charges_template.js|
+                .*/purchase_taxes_and_charges_template.js|
+                .*/subcontracting_order.js|
+                .*/landed_cost_voucher.js|
+                .*/payment_entry.js|
+                .*/loan_interest_accrual.js|
+                .*/loan_disbursement.js|
+                .*/loan_application.js|
+                .*/italy.js|
+                .*/sales_invoice.js|
+                .*/subcontracting_receipt.js|
+                .*/request_for_quotation.js|
+                .*/pos_profile.js|
+                .*/opportunity.js|
+                .*/quotation.js|
+                .*/sales_common.js|
+                .*/sales_order.js|
+                .*/pos_invoice.js|
+                .*/purchase_invoice.js|
+                .*/loan_repayment.js|
+                .*/material_request.js|
+                .*/purchase_receipt.js|
+                .*/delivery_note.js|
+                .*/loan.js|
+                .*/stock_entry.js|
+                .*/purchase_order.js|
+                .*/loan_write_off.js
+            )$
+
   - repo: https://github.com/PyCQA/flake8
     rev: 5.0.4
     hooks:
