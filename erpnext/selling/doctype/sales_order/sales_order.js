@@ -737,14 +737,6 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 							status: ["!=", "Lost"],
 						},
 					});
-
-					setTimeout(() => {
-						d.$parent.append(`
-							<span class='small text-muted'>
-								${__("Note: Please create Sales Orders from individual Quotations to select from among Alternative Items.")}
-							</span>
-					`);
-					}, 200);
 				},
 				__("Get Items From")
 			);
