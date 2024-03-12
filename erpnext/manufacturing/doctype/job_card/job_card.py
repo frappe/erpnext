@@ -215,10 +215,17 @@ class JobCard(Document):
 		if not self.has_overlap(production_capacity, existing_time_logs):
 			return {}
 
+<<<<<<< HEAD
 		if self.workstation_type:
 			if workstation := self.get_workstation_based_on_available_slot(existing_time_logs):
 				self.workstation = workstation
 				return None
+=======
+		if not self.workstation and self.workstation_type and time_logs:
+			if workstation_time := self.get_workstation_based_on_available_slot(time_logs):
+				self.workstation = workstation_time.get("workstation")
+				return workstation_time
+>>>>>>> 72614bb8ff (fix: recursion issue while submitting work order (#40400))
 
 		return existing_time_logs[0] if existing_time_logs else None
 
@@ -305,7 +312,7 @@ class JobCard(Document):
 		if not workstation_doc.working_hours or cint(
 			frappe.db.get_single_value("Manufacturing Settings", "allow_overtime")
 		):
-			if get_datetime(row.planned_end_time) < get_datetime(row.planned_start_time):
+			if get_datetime(row.planned_end_time) <= get_datetime(row.planned_start_time):
 				row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.time_in_mins)
 				row.remaining_time_in_mins = 0.0
 			else:
