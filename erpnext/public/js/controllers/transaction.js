@@ -1813,8 +1813,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			let items = [];
 
 			me.frm.doc.items.forEach(d => {
-				// if same item was added a free item through a different pricing rule, keep it
-				if(d.item_code != item.remove_free_item || !d.is_free_item || removed_pricing_rule?.includes(d.pricing_rules)) {
+				// if same item was added as free item through a different pricing rule, keep it
+				if(d.item_code != item.remove_free_item || !d.is_free_item || !removed_pricing_rule?.includes(d.pricing_rules)) {
 					items.push(d);
 				}
 			});
