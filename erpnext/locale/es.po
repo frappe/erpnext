@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-08 14:55\n"
+"PO-Revision-Date: 2024-03-12 15:37\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -3718,7 +3718,7 @@ msgstr "Agregar"
 
 #: stock/doctype/item/item.js:417 stock/doctype/price_list/price_list.js:7
 msgid "Add / Edit Prices"
-msgstr "Añadir / editar precios"
+msgstr "Añadir / Editar precios"
 
 #: accounts/doctype/account/account_tree.js:176
 msgid "Add Child"
@@ -11965,7 +11965,7 @@ msgstr "Devolver Llamada"
 #. Label of a Card Break in the CRM Workspace
 #: crm/doctype/campaign/campaign.json crm/workspace/crm/crm.json
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Section Break field in DocType 'Campaign'
 #. Label of a Link in the CRM Workspace
@@ -11974,50 +11974,50 @@ msgstr ""
 #: selling/workspace/selling/selling.json
 msgctxt "Campaign"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Link field in DocType 'Campaign Item'
 #: accounts/doctype/campaign_item/campaign_item.json
 msgctxt "Campaign Item"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Link field in DocType 'Email Campaign'
 #: crm/doctype/email_campaign/email_campaign.json
 msgctxt "Email Campaign"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Link field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Link field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Option for the 'Applicable For' (Select) field in DocType 'Pricing Rule'
 #. Label of a Link field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Option for the 'Applicable For' (Select) field in DocType 'Promotional
 #. Scheme'
@@ -12025,25 +12025,25 @@ msgstr ""
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Campaign"
-msgstr ""
+msgstr "Campaña"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
@@ -37168,7 +37168,7 @@ msgstr "Los artículos a fabricar están obligados a extraer las materias primas
 #. Label of a Link in the Buying Workspace
 #: buying/workspace/buying/buying.json
 msgid "Items to Order and Receive"
-msgstr ""
+msgstr "Productos para Ordenar y Recibir"
 
 #: selling/doctype/sales_order/sales_order.js:252
 msgid "Items to Reserve"
