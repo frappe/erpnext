@@ -599,6 +599,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		elif self.sle.voucher_no:
 			query = query.where(parent.voucher_no != self.sle.voucher_no)
 
+		query = query.where(parent.voucher_type != "Pick List")
 		if timestamp_condition:
 			query = query.where(timestamp_condition)
 
