@@ -330,6 +330,13 @@ class WorkOrder(Document):
 		else:
 			status = "Cancelled"
 
+		if (
+			self.skip_transfer
+			and self.produced_qty
+			and self.qty > (flt(self.produced_qty) + flt(self.process_loss_qty))
+		):
+			status = "In Process"
+
 		return status
 
 	def update_work_order_qty(self):
