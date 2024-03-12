@@ -698,7 +698,16 @@ class Asset(AccountsController):
 		purchase_document = self.get_purchase_document()
 		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
+<<<<<<< HEAD
 		if purchase_document and self.purchase_receipt_amount and self.available_for_use_date <= nowdate():
+=======
+		if (
+			purchase_document
+			and self.purchase_receipt_amount
+			and getdate(self.available_for_use_date) <= getdate()
+		):
+
+>>>>>>> 7e301f02df (fix: convert str to date)
 			gl_entries.append(
 				self.get_gl_dict(
 					{
