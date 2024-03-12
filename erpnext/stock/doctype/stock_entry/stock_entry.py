@@ -2064,6 +2064,7 @@ class StockEntry(StockController):
 			as_dict=1,
 		)
 
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for key, row in available_materials.items():
 			remaining_qty_to_produce = flt(wo_data.trans_qty) - flt(wo_data.produced_qty)
 			if remaining_qty_to_produce <= 0 and not self.is_return:
@@ -2086,7 +2087,8 @@ class StockEntry(StockController):
 				serial_nos = row.serial_nos[0 : cint(qty)]
 				row.serial_nos = serial_nos
 
-			self.update_item_in_stock_entry_detail(row, item, qty)
+			if flt(qty, precision) != 0.0:
+				self.update_item_in_stock_entry_detail(row, item, qty)
 
 	def update_batches_to_be_consume(self, batches, row, qty):
 		qty_to_be_consumed = qty
