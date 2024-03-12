@@ -95,7 +95,8 @@ class AssetValueAdjustment(Document):
 		)
 
 		je = frappe.new_doc("Journal Entry")
-		je.voucher_type = "Depreciation Entry"
+		if self.difference_amount < 0:
+			je.voucher_type = "Depreciation Entry"
 		je.naming_series = depreciation_series
 		je.posting_date = self.date
 		je.company = self.company
