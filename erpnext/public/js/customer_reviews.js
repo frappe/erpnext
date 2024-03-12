@@ -13,27 +13,27 @@ $(() => {
 
 		write_review() {
 			//TODO: make dialog popup on stray page
-			$('.page_content').on('click', '.btn-write-review', (e) => {
+			$(".page_content").on("click", ".btn-write-review", (e) => {
 				// Bind action on write a review button
 				const $btn = $(e.currentTarget);
 
 				let d = new frappe.ui.Dialog({
 					title: __("Write a Review"),
 					fields: [
-						{fieldname: "title", fieldtype: "Data", label: "Headline", reqd: 1},
-						{fieldname: "rating", fieldtype: "Rating", label: "Overall Rating", reqd: 1},
-						{fieldtype: "Section Break"},
-						{fieldname: "comment", fieldtype: "Small Text", label: "Your Review"}
+						{ fieldname: "title", fieldtype: "Data", label: "Headline", reqd: 1 },
+						{ fieldname: "rating", fieldtype: "Rating", label: "Overall Rating", reqd: 1 },
+						{ fieldtype: "Section Break" },
+						{ fieldname: "comment", fieldtype: "Small Text", label: "Your Review" },
 					],
-					primary_action: function() {
+					primary_action: function () {
 						let data = d.get_values();
 						frappe.call({
 							method: "erpnext.e_commerce.doctype.item_review.item_review.add_item_review",
 							args: {
-								web_item: $btn.attr('data-web-item'),
+								web_item: $btn.attr("data-web-item"),
 								title: data.title,
 								rating: data.rating,
-								comment: data.comment
+								comment: data.comment,
 							},
 							freeze: true,
 							freeze_message: __("Submitting Review ..."),
@@ -42,25 +42,25 @@ $(() => {
 									frappe.msgprint({
 										message: __("Thank you for submitting your review"),
 										title: __("Review Submitted"),
-										indicator: "green"
+										indicator: "green",
 									});
 									d.hide();
 									location.reload();
 								}
-							}
+							},
 						});
 					},
-					primary_action_label: __('Submit')
+					primary_action_label: __("Submit"),
 				});
 				d.show();
 			});
 		}
 
 		view_more() {
-			$('.page_content').on('click', '.btn-view-more', (e) => {
+			$(".page_content").on("click", ".btn-view-more", (e) => {
 				// Bind action on view more button
 				const $btn = $(e.currentTarget);
-				$btn.prop('disabled', true);
+				$btn.prop("disabled", true);
 
 				this.start += this.page_length;
 				let me = this;
@@ -68,30 +68,28 @@ $(() => {
 				frappe.call({
 					method: "erpnext.e_commerce.doctype.item_review.item_review.get_item_reviews",
 					args: {
-						web_item: $btn.attr('data-web-item'),
+						web_item: $btn.attr("data-web-item"),
 						start: me.start,
-						end: me.page_length
+						end: me.page_length,
 					},
 					callback: (result) => {
 						if (result.message) {
 							let res = result.message;
 							me.get_user_review_html(res.reviews);
 
-							$btn.prop('disabled', false);
-							if (res.total_reviews <= (me.start + me.page_length)) {
+							$btn.prop("disabled", false);
+							if (res.total_reviews <= me.start + me.page_length) {
 								$btn.hide();
 							}
-
 						}
-					}
+					},
 				});
 			});
-
 		}
 
 		get_user_review_html(reviews) {
 			let me = this;
-			let $content = $('.user-reviews');
+			let $content = $(".user-reviews");
 
 			reviews.forEach((review) => {
 				$content.append(`
@@ -123,7 +121,7 @@ $(() => {
 		get_review_stars(rating) {
 			let stars = ``;
 			for (let i = 1; i < 6; i++) {
-				let fill_class = i <= rating ? 'star-click' : '';
+				let fill_class = i <= rating ? "star-click" : "";
 				stars += `
 					<svg class="icon icon-sm ${fill_class}">
 						<use href="#icon-star"></use>

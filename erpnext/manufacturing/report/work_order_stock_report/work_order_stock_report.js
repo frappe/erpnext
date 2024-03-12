@@ -3,12 +3,12 @@
 /* eslint-disable */
 
 frappe.query_reports["Work Order Stock Report"] = {
-	"filters": [
+	filters: [
 		{
-			"fieldname": "warehouse",
-			"label": __("Warehouse"),
-			"fieldtype": "Link",
-			"options": "Warehouse"
-		}
-	]
-}
+			fieldname: "warehouse",
+			label: __("Warehouse"),
+			fieldtype: "Link",
+			options: "Warehouse",
+		},
+	],
+};

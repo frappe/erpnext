@@ -26,8 +26,7 @@ erpnext.accounts.bank_reconciliation.NumberCardManager = class NumberCardManager
 				currency: this.currency,
 			},
 			{
-				value:
-					this.bank_statement_closing_balance - this.cleared_balance,
+				value: this.bank_statement_closing_balance - this.cleared_balance,
 				label: __("Difference"),
 				datatype: "Currency",
 				currency: this.currency,
@@ -41,11 +40,9 @@ erpnext.accounts.bank_reconciliation.NumberCardManager = class NumberCardManager
 			number_card.$card.appendTo(this.$summary);
 		});
 		this.$cards[2].set_value_color(
-			this.bank_statement_closing_balance - this.cleared_balance == 0
-				? "text-success"
-				: "text-danger"
+			this.bank_statement_closing_balance - this.cleared_balance == 0 ? "text-success" : "text-danger"
 		);
-		this.$summary.css({"border-bottom": "0px", "margin-left": "0px", "margin-right": "0px"});
+		this.$summary.css({ "border-bottom": "0px", "margin-left": "0px", "margin-right": "0px" });
 		this.$summary.show();
 	}
 };
@@ -60,16 +57,10 @@ erpnext.accounts.NumberCard = class NumberCard {
 	}
 
 	set_value_color(color) {
-		this.$card
-			.find("div")
-			.removeClass("text-danger text-success")
-			.addClass(`${color}`);
+		this.$card.find("div").removeClass("text-danger text-success").addClass(`${color}`);
 	}
 
 	set_indicator(color) {
-		this.$card
-			.find("span")
-			.removeClass("indicator red green")
-			.addClass(`indicator ${color}`);
+		this.$card.find("span").removeClass("indicator red green").addClass(`indicator ${color}`);
 	}
 };

@@ -3,25 +3,25 @@
 /* eslint-disable */
 
 frappe.query_reports["Customer-wise Item Price"] = {
-	"filters": [
+	filters: [
 		{
-			"label": __("Customer"),
-			"fieldname": "customer",
-			"fieldtype": "Link",
-			"options": "Customer",
-			"reqd": 1
+			label: __("Customer"),
+			fieldname: "customer",
+			fieldtype: "Link",
+			options: "Customer",
+			reqd: 1,
 		},
 		{
-			"label": __("Item"),
-			"fieldname": "item",
-			"fieldtype": "Link",
-			"options": "Item",
-			"get_query": () => {
+			label: __("Item"),
+			fieldname: "item",
+			fieldtype: "Link",
+			options: "Item",
+			get_query: () => {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: { 'is_sales_item': 1 }
-				}
-			}
-		}
-	]
-}
+					filters: { is_sales_item: 1 },
+				};
+			},
+		},
+	],
+};

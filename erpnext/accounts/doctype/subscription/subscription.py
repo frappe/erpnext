@@ -349,7 +349,9 @@ class Subscription(Document):
 		company = self.get("company") or get_default_company()
 		if not company:
 			frappe.throw(
-				_("Company is mandatory was generating invoice. Please set default company in Global Defaults")
+				_(
+					"Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
+				)
 			)
 
 		invoice.company = company
@@ -594,7 +596,7 @@ class Subscription(Document):
 		"""
 		current_invoice = self.get_current_invoice()
 		if not current_invoice:
-			frappe.throw(_("Current invoice {0} is missing").format(current_invoice.invoice))
+			frappe.throw(_("Subscription {0}: Current invoice is missing.").format(frappe.bold(self.name)))
 		else:
 			if not self.has_outstanding_invoice():
 				self.status = "Active"

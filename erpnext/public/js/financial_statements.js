@@ -1,59 +1,57 @@
 frappe.provide("erpnext.financial_statements");
 
 erpnext.financial_statements = {
-	"filters": get_filters(),
-	"baseData": null,
-	"formatter": function(value, row, column, data, default_formatter, filter) {
-		if(frappe.query_report.get_filter_value("selected_view") == "Growth" && data && column.colIndex >= 3){
+	filters: get_filters(),
+	baseData: null,
+	formatter: function (value, row, column, data, default_formatter, filter) {
+		if (
+			frappe.query_report.get_filter_value("selected_view") == "Growth" &&
+			data &&
+			column.colIndex >= 3
+		) {
 			//Assuming that the first three columns are s.no, account name and the very first year of the accounting values, to calculate the relative percentage values of the successive columns.
 			const lastAnnualValue = row[column.colIndex - 1].content;
 			const currentAnnualvalue = data[column.fieldname];
-			if(currentAnnualvalue == undefined) return 'NA'; //making this not applicable for undefined/null values
+			if (currentAnnualvalue == undefined) return "NA"; //making this not applicable for undefined/null values
 			let annualGrowth = 0;
-			if(lastAnnualValue == 0 && currentAnnualvalue > 0){
+			if (lastAnnualValue == 0 && currentAnnualvalue > 0) {
 				//If the previous year value is 0 and the current value is greater than 0
 				annualGrowth = 1;
-			}
-			else if(lastAnnualValue > 0){
-				annualGrowth  = (currentAnnualvalue - lastAnnualValue) / lastAnnualValue;
+			} else if (lastAnnualValue > 0) {
+				annualGrowth = (currentAnnualvalue - lastAnnualValue) / lastAnnualValue;
 			}
 
-			const growthPercent = (Math.round(annualGrowth*10000)/100); //calculating the rounded off percentage
+			const growthPercent = Math.round(annualGrowth * 10000) / 100; //calculating the rounded off percentage
 
-			value = $(`<span>${((growthPercent >=0)? '+':'' )+growthPercent+'%'}</span>`);
-			if(growthPercent < 0){
+			value = $(`<span>${(growthPercent >= 0 ? "+" : "") + growthPercent + "%"}</span>`);
+			if (growthPercent < 0) {
 				value = $(value).addClass("text-danger");
-			}
-			else{
+			} else {
 				value = $(value).addClass("text-success");
 			}
 			value = $(value).wrap("<p></p>").parent().html();
 
 			return value;
-		}
-		else if(frappe.query_report.get_filter_value("selected_view") == "Margin" && data){
-			if(column.fieldname =="account" && data.account_name == __("Income")){
+		} else if (frappe.query_report.get_filter_value("selected_view") == "Margin" && data) {
+			if (column.fieldname == "account" && data.account_name == __("Income")) {
 				//Taking the total income from each column (for all the financial years) as the base (100%)
 				this.baseData = row;
 			}
-			if(column.colIndex >= 2){
+			if (column.colIndex >= 2) {
 				//Assuming that the first two columns are s.no and account name, to calculate the relative percentage values of the successive columns.
 				const currentAnnualvalue = data[column.fieldname];
 				const baseValue = this.baseData[column.colIndex].content;
-				if(currentAnnualvalue == undefined || baseValue <= 0) return 'NA';
-				const marginPercent = Math.round((currentAnnualvalue/baseValue)*10000)/100;
+				if (currentAnnualvalue == undefined || baseValue <= 0) return "NA";
+				const marginPercent = Math.round((currentAnnualvalue / baseValue) * 10000) / 100;
 
-				value = $(`<span>${marginPercent+'%'}</span>`);
-				if(marginPercent < 0)
-					value = $(value).addClass("text-danger");
-				else
-					value = $(value).addClass("text-success");
+				value = $(`<span>${marginPercent + "%"}</span>`);
+				if (marginPercent < 0) value = $(value).addClass("text-danger");
+				else value = $(value).addClass("text-success");
 				value = $(value).wrap("<p></p>").parent().html();
 				return value;
 			}
-
 		}
-		if (data && column.fieldname=="account") {
+		if (data && column.fieldname == "account") {
 			value = data.account_name || value;
 
 			if (filter && filter?.text && filter?.type == "contains") {
@@ -84,16 +82,18 @@ erpnext.financial_statements = {
 
 		return value;
 	},
-	"open_general_ledger": function(data) {
+	open_general_ledger: function (data) {
 		if (!data.account) return;
-		let project = $.grep(frappe.query_report.filters, function(e){ return e.df.fieldname == 'project'; });
+		let project = $.grep(frappe.query_report.filters, function (e) {
+			return e.df.fieldname == "project";
+		});
 
 		frappe.route_options = {
-			"account": data.account,
-			"company": frappe.query_report.get_filter_value('company'),
-			"from_date": data.from_date || data.year_start_date,
-			"to_date": data.to_date || data.year_end_date,
-			"project": (project && project.length > 0) ? project[0].$input.val() : ""
+			account: data.account,
+			company: frappe.query_report.get_filter_value("company"),
+			from_date: data.from_date || data.year_start_date,
+			to_date: data.to_date || data.year_end_date,
+			project: project && project.length > 0 ? project[0].$input.val() : "",
 		};
 
 		let report = "General Ledger";
@@ -106,152 +106,161 @@ erpnext.financial_statements = {
 
 		frappe.set_route("query-report", report);
 	},
-	"tree": true,
-	"name_field": "account",
-	"parent_field": "parent_account",
-	"initial_depth": 3,
-	onload: function(report) {
+	tree: true,
+	name_field: "account",
+	parent_field: "parent_account",
+	initial_depth: 3,
+	onload: function (report) {
 		// dropdown for links to other financial statements
-		erpnext.financial_statements.filters = get_filters()
+		erpnext.financial_statements.filters = get_filters();
 
 		let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today());
 
-		frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
+		frappe.model.with_doc("Fiscal Year", fiscal_year, function (r) {
 			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
 			frappe.query_report.set_filter_value({
 				period_start_date: fy.year_start_date,
-				period_end_date: fy.year_end_date
+				period_end_date: fy.year_end_date,
 			});
 		});
 
-		const views_menu = report.page.add_custom_button_group(__('Financial Statements'));
+		const views_menu = report.page.add_custom_button_group(__("Financial Statements"));
 
-		report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function() {
+		report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function () {
 			var filters = report.get_values();
-			frappe.set_route('query-report', 'Balance Sheet', {company: filters.company});
+			frappe.set_route("query-report", "Balance Sheet", { company: filters.company });
 		});
 
-		report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function() {
+		report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function () {
 			var filters = report.get_values();
-			frappe.set_route('query-report', 'Profit and Loss Statement', {company: filters.company});
+			frappe.set_route("query-report", "Profit and Loss Statement", { company: filters.company });
 		});
 
-		report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function() {
+		report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function () {
 			var filters = report.get_values();
-			frappe.set_route('query-report', 'Cash Flow', {company: filters.company});
+			frappe.set_route("query-report", "Cash Flow", { company: filters.company });
 		});
-	}
+	},
 };
 
 function get_filters() {
 	let filters = [
 		{
-			"fieldname":"company",
-			"label": __("Company"),
-			"fieldtype": "Link",
-			"options": "Company",
-			"default": frappe.defaults.get_user_default("Company"),
-			"reqd": 1
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
+			default: frappe.defaults.get_user_default("Company"),
+			reqd: 1,
 		},
 		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
+			fieldname: "finance_book",
+			label: __("Finance Book"),
+			fieldtype: "Link",
+			options: "Finance Book",
 		},
 		{
-			"fieldname":"filter_based_on",
-			"label": __("Filter Based On"),
-			"fieldtype": "Select",
-			"options": ["Fiscal Year", "Date Range"],
-			"default": ["Fiscal Year"],
-			"reqd": 1,
-			on_change: function() {
-				let filter_based_on = frappe.query_report.get_filter_value('filter_based_on');
-				frappe.query_report.toggle_filter_display('from_fiscal_year', filter_based_on === 'Date Range');
-				frappe.query_report.toggle_filter_display('to_fiscal_year', filter_based_on === 'Date Range');
-				frappe.query_report.toggle_filter_display('period_start_date', filter_based_on === 'Fiscal Year');
-				frappe.query_report.toggle_filter_display('period_end_date', filter_based_on === 'Fiscal Year');
+			fieldname: "filter_based_on",
+			label: __("Filter Based On"),
+			fieldtype: "Select",
+			options: ["Fiscal Year", "Date Range"],
+			default: ["Fiscal Year"],
+			reqd: 1,
+			on_change: function () {
+				let filter_based_on = frappe.query_report.get_filter_value("filter_based_on");
+				frappe.query_report.toggle_filter_display(
+					"from_fiscal_year",
+					filter_based_on === "Date Range"
+				);
+				frappe.query_report.toggle_filter_display("to_fiscal_year", filter_based_on === "Date Range");
+				frappe.query_report.toggle_filter_display(
+					"period_start_date",
+					filter_based_on === "Fiscal Year"
+				);
+				frappe.query_report.toggle_filter_display(
+					"period_end_date",
+					filter_based_on === "Fiscal Year"
+				);
 
 				frappe.query_report.refresh();
-			}
+			},
 		},
 		{
-			"fieldname":"period_start_date",
-			"label": __("Start Date"),
-			"fieldtype": "Date",
-			"reqd": 1,
-			"depends_on": "eval:doc.filter_based_on == 'Date Range'"
+			fieldname: "period_start_date",
+			label: __("Start Date"),
+			fieldtype: "Date",
+			reqd: 1,
+			depends_on: "eval:doc.filter_based_on == 'Date Range'",
 		},
 		{
-			"fieldname":"period_end_date",
-			"label": __("End Date"),
-			"fieldtype": "Date",
-			"reqd": 1,
-			"depends_on": "eval:doc.filter_based_on == 'Date Range'"
+			fieldname: "period_end_date",
+			label: __("End Date"),
+			fieldtype: "Date",
+			reqd: 1,
+			depends_on: "eval:doc.filter_based_on == 'Date Range'",
 		},
 		{
-			"fieldname":"from_fiscal_year",
-			"label": __("Start Year"),
-			"fieldtype": "Link",
-			"options": "Fiscal Year",
-			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
-			"reqd": 1,
-			"depends_on": "eval:doc.filter_based_on == 'Fiscal Year'"
+			fieldname: "from_fiscal_year",
+			label: __("Start Year"),
+			fieldtype: "Link",
+			options: "Fiscal Year",
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			reqd: 1,
+			depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
 		},
 		{
-			"fieldname":"to_fiscal_year",
-			"label": __("End Year"),
-			"fieldtype": "Link",
-			"options": "Fiscal Year",
-			"default": erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
-			"reqd": 1,
-			"depends_on": "eval:doc.filter_based_on == 'Fiscal Year'"
+			fieldname: "to_fiscal_year",
+			label: __("End Year"),
+			fieldtype: "Link",
+			options: "Fiscal Year",
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			reqd: 1,
+			depends_on: "eval:doc.filter_based_on == 'Fiscal Year'",
 		},
 		{
-			"fieldname": "periodicity",
-			"label": __("Periodicity"),
-			"fieldtype": "Select",
-			"options": [
-				{ "value": "Monthly", "label": __("Monthly") },
-				{ "value": "Quarterly", "label": __("Quarterly") },
-				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
-				{ "value": "Yearly", "label": __("Yearly") }
+			fieldname: "periodicity",
+			label: __("Periodicity"),
+			fieldtype: "Select",
+			options: [
+				{ value: "Monthly", label: __("Monthly") },
+				{ value: "Quarterly", label: __("Quarterly") },
+				{ value: "Half-Yearly", label: __("Half-Yearly") },
+				{ value: "Yearly", label: __("Yearly") },
 			],
-			"default": "Yearly",
-			"reqd": 1
+			default: "Yearly",
+			reqd: 1,
 		},
 		// Note:
 		// If you are modifying this array such that the presentation_currency object
 		// is no longer the last object, please make adjustments in cash_flow.js
 		// accordingly.
 		{
-			"fieldname": "presentation_currency",
-			"label": __("Currency"),
-			"fieldtype": "Select",
-			"options": erpnext.get_presentation_currency_list()
+			fieldname: "presentation_currency",
+			label: __("Currency"),
+			fieldtype: "Select",
+			options: erpnext.get_presentation_currency_list(),
 		},
 		{
-			"fieldname": "cost_center",
-			"label": __("Cost Center"),
-			"fieldtype": "MultiSelectList",
-			get_data: function(txt) {
-				return frappe.db.get_link_options('Cost Center', txt, {
-					company: frappe.query_report.get_filter_value("company")
-				});
-			}
-		},
-		{
-			"fieldname": "project",
-			"label": __("Project"),
-			"fieldtype": "MultiSelectList",
-			get_data: function(txt) {
-				return frappe.db.get_link_options('Project', txt, {
-					company: frappe.query_report.get_filter_value("company")
+			fieldname: "cost_center",
+			label: __("Cost Center"),
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Cost Center", txt, {
+					company: frappe.query_report.get_filter_value("company"),
 				});
 			},
-		}
-	]
+		},
+		{
+			fieldname: "project",
+			label: __("Project"),
+			fieldtype: "MultiSelectList",
+			get_data: function (txt) {
+				return frappe.db.get_link_options("Project", txt, {
+					company: frappe.query_report.get_filter_value("company"),
+				});
+			},
+		},
+	];
 
 	return filters;
 }
