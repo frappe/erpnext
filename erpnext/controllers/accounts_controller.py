@@ -1864,7 +1864,7 @@ class AccountsController(TransactionBase):
 				(ple.against_voucher_type == self.doctype)
 				& (ple.against_voucher_no == self.name)
 				& (ple.party == party)
-				& (ple.docstatus == 1)
+				& (ple.delinked == 0)
 				& (ple.company == self.company)
 			)
 			.run(as_dict=True)
@@ -1880,7 +1880,10 @@ class AccountsController(TransactionBase):
 				advance_paid, precision=self.precision("advance_paid"), currency=advance.account_currency
 			)
 
-			frappe.db.set_value(self.doctype, self.name, "party_account_currency", advance.account_currency)
+			if advance.account_currency:
+				frappe.db.set_value(
+					self.doctype, self.name, "party_account_currency", advance.account_currency
+				)
 
 			if advance.account_currency == self.currency:
 				order_total = self.get("rounded_total") or self.grand_total

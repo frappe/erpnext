@@ -27,7 +27,9 @@
   "threshold_percentage",
   "column_break_15",
   "priority",
-  "is_recursive"
+  "is_recursive",
+  "recurse_for",
+  "apply_recursion_over"
  ],
  "fields": [
   {
@@ -161,17 +163,36 @@
    "fieldname": "is_recursive",
    "fieldtype": "Check",
    "label": "Is Recursive"
+  },
+  {
+   "default": "0",
+   "depends_on": "is_recursive",
+   "description": "Give free item for every N quantity",
+   "fieldname": "recurse_for",
+   "fieldtype": "Float",
+   "label": "Recurse Every (As Per Transaction UOM)",
+   "mandatory_depends_on": "is_recursive"
+  },
+  {
+   "default": "0",
+   "depends_on": "is_recursive",
+   "description": "Qty for which recursion isn't applicable.",
+   "fieldname": "apply_recursion_over",
+   "fieldtype": "Float",
+   "label": "Apply Recursion Over (As Per Transaction UOM)",
+   "mandatory_depends_on": "is_recursive"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-06 21:58:18.162346",
+ "modified": "2024-03-12 12:53:58.199108",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme Product Discount",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

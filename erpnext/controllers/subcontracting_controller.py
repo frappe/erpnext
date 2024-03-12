@@ -859,6 +859,7 @@ class SubcontractingController(StockController):
 							item,
 							{
 								"warehouse": item.rejected_warehouse,
+								"serial_and_batch_bundle": item.get("rejected_serial_and_batch_bundle"),
 								"actual_qty": flt(item.rejected_qty) * flt(item.conversion_factor),
 								"incoming_rate": 0.0,
 							},

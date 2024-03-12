@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "ACC-TAX-RULE-.YYYY.-.#####",
  "creation": "2015-08-07 02:33:52.670866",
  "doctype": "DocType",
@@ -225,7 +226,7 @@
   }
  ],
  "links": [],
- "modified": "2021-06-04 23:14:27.186879",
+ "modified": "2024-03-09 08:08:27.186879",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Rule",

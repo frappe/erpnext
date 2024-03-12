@@ -17,7 +17,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
 
-			if(item.price_list_rate) {
+			if(item.price_list_rate && !item.blanket_order_rate) {
 				if(item.rate > item.price_list_rate && has_margin_field) {
 					// if rate is greater than price_list_rate, set margin
 					// or set discount
@@ -409,6 +409,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		frappe.flags.dialog_set = false;
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({frm:this.frm});
 		barcode_scanner.process_scan();
+	}
+
+	barcode(doc, cdt, cdn)  {
+		let row = locals[cdt][cdn];
+		if (row.barcode) {
+			erpnext.stock.utils.set_item_details_using_barcode(this.frm, row, (r) => {
+				debugger
+				frappe.model.set_value(cdt, cdn, {
+					"item_code": r.message.item_code,
+					"qty": 1,
+				});
+			});
+		}
 	}
 
 	validate_has_items () {
@@ -1813,8 +1826,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			let items = [];
 
 			me.frm.doc.items.forEach(d => {
-				// if same item was added a free item through a different pricing rule, keep it
-				if(d.item_code != item.remove_free_item || !d.is_free_item || removed_pricing_rule?.includes(d.pricing_rules)) {
+				// if same item was added as free item through a different pricing rule, keep it
+				if(d.item_code != item.remove_free_item || !d.is_free_item || !removed_pricing_rule?.includes(d.pricing_rules)) {
 					items.push(d);
 				}
 			});
@@ -2216,7 +2229,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		this.frm.doc.items.forEach(item => {
-			if (!item.quality_inspection) {
+			if (this.has_inspection_required(item)) {
 				let dialog_items = dialog.fields_dict.items;
 				dialog_items.df.data.push({
 					"docname": item.name,
@@ -2237,6 +2250,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			frappe.msgprint(__("All items in this document already have a linked Quality Inspection."));
 		} else {
 			dialog.show();
+		}
+	}
+
+	has_inspection_required(item) {
+		if (this.frm.doc.doctype === "Stock Entry" && this.frm.doc.purpose == "Manufacture" ) {
+			if (item.is_finished_item && !item.quality_inspection) {
+				return true;
+			}
+		} else if (!item.quality_inspection) {
+			return true;
 		}
 	}
 

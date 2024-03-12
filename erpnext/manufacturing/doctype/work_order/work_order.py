@@ -330,6 +330,13 @@ class WorkOrder(Document):
 		else:
 			status = "Cancelled"
 
+		if (
+			self.skip_transfer
+			and self.produced_qty
+			and self.qty > (flt(self.produced_qty) + flt(self.process_loss_qty))
+		):
+			status = "In Process"
+
 		return status
 
 	def update_work_order_qty(self):
@@ -784,7 +791,7 @@ class WorkOrder(Document):
 				)
 
 	def update_completed_qty_in_material_request(self):
-		if self.material_request:
+		if self.material_request and self.material_request_item:
 			frappe.get_doc("Material Request", self.material_request).update_completed_qty(
 				[self.material_request_item]
 			)

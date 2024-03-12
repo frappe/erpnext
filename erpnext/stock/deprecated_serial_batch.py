@@ -13,7 +13,9 @@ class DeprecatedSerialNoValuation:
 		):
 			return
 
-		serial_nos = self.get_serial_nos()
+		serial_nos = self.get_filterd_serial_nos()
+		if not serial_nos:
+			return
 
 		actual_qty = flt(self.sle.actual_qty)
 
@@ -25,8 +27,21 @@ class DeprecatedSerialNoValuation:
 
 		self.stock_value_change += stock_value_change
 
+	def get_filterd_serial_nos(self):
+		serial_nos = []
+		non_filtered_serial_nos = self.get_serial_nos()
+
+		# If the serial no inwarded using the Serial and Batch Bundle, then the serial no should not be considered
+		for serial_no in non_filtered_serial_nos:
+			if serial_no and serial_no not in self.serial_no_incoming_rate:
+				serial_nos.append(serial_no)
+
+		return serial_nos
+
 	@deprecated
 	def get_incoming_value_for_serial_nos(self, serial_nos):
+		from erpnext.stock.utils import get_combine_datetime
+
 		# get rate from serial nos within same company
 		incoming_values = 0.0
 		for serial_no in serial_nos:
@@ -42,18 +57,19 @@ class DeprecatedSerialNoValuation:
 						| (table.serial_no.like("%\n" + serial_no + "\n%"))
 					)
 					& (table.company == self.sle.company)
+					& (table.warehouse == self.sle.warehouse)
 					& (table.serial_and_batch_bundle.isnull())
+					& (table.actual_qty > 0)
 					& (table.is_cancelled == 0)
+					& table.posting_datetime
+					<= get_combine_datetime(self.sle.posting_date, self.sle.posting_time)
 				)
 				.orderby(table.posting_datetime, order=Order.desc)
+				.limit(1)
 			).run(as_dict=1)
 
 			for sle in stock_ledgers:
-				self.serial_no_incoming_rate[serial_no] += (
-					flt(sle.incoming_rate)
-					if sle.actual_qty > 0
-					else (sle.stock_value_difference / sle.actual_qty) * -1
-				)
+				self.serial_no_incoming_rate[serial_no] += flt(sle.incoming_rate)
 				incoming_values += self.serial_no_incoming_rate[serial_no]
 
 		return incoming_values
