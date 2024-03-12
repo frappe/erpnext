@@ -157,6 +157,7 @@ def get_depreciation_cost_center_and_depreciation_series_for_company():
 
 	return res
 
+
 @frappe.whitelist()
 def make_depreciation_entry(
 	asset_name,
@@ -464,13 +465,13 @@ def restore_asset(asset_name):
 def depreciate_asset(asset, date):
 	if not asset.calculate_depreciation:
 		return
-	
+
 	asset.flags.ignore_validate_update_after_submit = True
 	asset.prepare_depreciation_data(date_of_disposal=date)
 	asset.save()
 
 	make_depreciation_entry(asset.name, date)
-	
+
 	asset.reload()
 	cancel_depreciation_entries(asset, date)
 

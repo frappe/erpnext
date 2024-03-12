@@ -351,7 +351,7 @@ class Asset(AccountsController):
 
 		if len(self.get("finance_books")) > 1 and any(start):
 			self.sort_depreciation_schedule()
-		
+
 	def _make_depreciation_schedule(
 		self, finance_book, start, date_of_disposal, value_after_depreciation=None
 	):
