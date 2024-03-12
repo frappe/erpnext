@@ -2216,7 +2216,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 
 		this.frm.doc.items.forEach(item => {
-			if (!item.quality_inspection) {
+			if (this.has_inspection_required(item)) {
 				let dialog_items = dialog.fields_dict.items;
 				dialog_items.df.data.push({
 					"docname": item.name,
@@ -2237,6 +2237,16 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			frappe.msgprint(__("All items in this document already have a linked Quality Inspection."));
 		} else {
 			dialog.show();
+		}
+	}
+
+	has_inspection_required(item) {
+		if (this.frm.doc.doctype === "Stock Entry" && this.frm.doc.purpose == "Manufacture" ) {
+			if (item.is_finished_item && !item.quality_inspection) {
+				return true;
+			}
+		} else if (!item.quality_inspection) {
+			return true;
 		}
 	}
 
