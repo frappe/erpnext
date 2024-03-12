@@ -700,7 +700,9 @@ class Asset(AccountsController):
 		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
 		if (
-			purchase_document and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()
+			purchase_document
+			and self.purchase_receipt_amount
+			and getdate(self.available_for_use_date) <= getdate()
 		):
 
 			gl_entries.append(
