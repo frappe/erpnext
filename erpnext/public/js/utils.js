@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 frappe.provide("erpnext");
 frappe.provide("erpnext.utils");
+frappe.provide("erpnext.stock.utils");
 
 $.extend(erpnext, {
 	get_currency: function (company) {
@@ -1084,3 +1085,10 @@ function attach_selector_button(inner_text, append_loction, context, grid_row) {
 		context.show_serial_batch_selector(grid_row.frm, grid_row.doc, "", "", true);
 	});
 }
+
+$.extend(erpnext.stock.utils, {
+	set_item_details_using_barcode(frm, child_row, callback) {
+		const barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: frm });
+		barcode_scanner.scan_api_call(child_row.barcode, callback);
+	},
+});

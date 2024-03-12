@@ -354,6 +354,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		barcode_scanner.process_scan();
 	}
 
+	barcode(doc, cdt, cdn)  {
+		let row = locals[cdt][cdn];
+		if (row.barcode) {
+			erpnext.stock.utils.set_item_details_using_barcode(this.frm, row, (r) => {
+				debugger
+				frappe.model.set_value(cdt, cdn, {
+					"item_code": r.message.item_code,
+					"qty": 1,
+				});
+			});
+		}
+	}
+
 	validate_has_items () {
 		let table = this.frm.doc.items;
 		this.frm.has_items = (table && table.length
