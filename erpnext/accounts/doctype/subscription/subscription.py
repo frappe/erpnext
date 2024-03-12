@@ -349,7 +349,9 @@ class Subscription(Document):
 		company = self.get("company") or get_default_company()
 		if not company:
 			frappe.throw(
-				_("Company is mandatory was generating invoice. Please set default company in Global Defaults")
+				_(
+					"Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
+				)
 			)
 
 		invoice.company = company
