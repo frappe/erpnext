@@ -1605,15 +1605,6 @@
    "fieldtype": "Check",
    "label": "Use Transaction Date Exchange Rate",
    "read_only": 1
-<<<<<<< HEAD
-=======
-  },
-  {
-   "fetch_from": "supplier.supplier_group",
-   "fieldname": "supplier_group",
-   "fieldtype": "Link",
-   "label": "Supplier Group",
-   "options": "Supplier Group"
   },
   {
    "default": "1",
@@ -1622,7 +1613,6 @@
    "fieldname": "update_outstanding_for_self",
    "fieldtype": "Check",
    "label": "Update Outstanding for Self"
->>>>>>> 767f2157e6 (refactor: checkbox in purchase invoice)
   }
  ],
  "icon": "fa fa-file-text",
