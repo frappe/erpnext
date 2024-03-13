@@ -40,6 +40,7 @@ from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timeshe
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
+from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code, update_coupon_code_count
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -51,25 +52,16 @@ class SalesInvoice(SellingController):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from frappe.types import DF
-
 		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
 		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
-		from erpnext.accounts.doctype.sales_invoice_advance.sales_invoice_advance import (
-			SalesInvoiceAdvance,
-		)
+		from erpnext.accounts.doctype.sales_invoice_advance.sales_invoice_advance import SalesInvoiceAdvance
 		from erpnext.accounts.doctype.sales_invoice_item.sales_invoice_item import SalesInvoiceItem
-		from erpnext.accounts.doctype.sales_invoice_payment.sales_invoice_payment import (
-			SalesInvoicePayment,
-		)
-		from erpnext.accounts.doctype.sales_invoice_timesheet.sales_invoice_timesheet import (
-			SalesInvoiceTimesheet,
-		)
-		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
-			SalesTaxesandCharges,
-		)
+		from erpnext.accounts.doctype.sales_invoice_payment.sales_invoice_payment import SalesInvoicePayment
+		from erpnext.accounts.doctype.sales_invoice_timesheet.sales_invoice_timesheet import SalesInvoiceTimesheet
+		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import SalesTaxesandCharges
 		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
+		from frappe.types import DF
 
 		account_for_change_amount: DF.Link | None
 		additional_discount_account: DF.Link | None
@@ -107,6 +99,7 @@ class SalesInvoice(SellingController):
 		contact_person: DF.Link | None
 		conversion_rate: DF.Float
 		cost_center: DF.Link | None
+		coupon_code: DF.Link | None
 		currency: DF.Link
 		customer: DF.Link | None
 		customer_address: DF.Link | None
@@ -183,22 +176,7 @@ class SalesInvoice(SellingController):
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		source: DF.Link | None
-		status: DF.Literal[
-			"",
-			"Draft",
-			"Return",
-			"Credit Note Issued",
-			"Submitted",
-			"Paid",
-			"Partly Paid",
-			"Unpaid",
-			"Unpaid and Discounted",
-			"Partly Paid and Discounted",
-			"Overdue and Discounted",
-			"Overdue",
-			"Cancelled",
-			"Internal Transfer",
-		]
+		status: DF.Literal["", "Draft", "Return", "Credit Note Issued", "Submitted", "Paid", "Partly Paid", "Unpaid", "Unpaid and Discounted", "Partly Paid and Discounted", "Overdue and Discounted", "Overdue", "Cancelled", "Internal Transfer"]
 		subscription: DF.Link | None
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
@@ -293,6 +271,8 @@ class SalesInvoice(SellingController):
 		validate_inter_company_party(
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
 		)
+		if self.coupon_code:
+			validate_coupon_code(self.coupon_code)
 
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -473,6 +453,9 @@ class SalesInvoice(SellingController):
 			self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
+		if self.coupon_code:
+			update_coupon_code_count(self.coupon_code, "used")
+
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if (
 			not self.is_return
@@ -562,6 +545,9 @@ class SalesInvoice(SellingController):
 
 		self.db_set("status", "Cancelled")
 		self.db_set("repost_required", 0)
+
+		if self.coupon_code:
+			update_coupon_code_count(self.coupon_code, "cancelled")
 
 		if (
 			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction"

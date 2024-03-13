@@ -89,6 +89,7 @@
   "section_break_49",
   "apply_discount_on",
   "base_discount_amount",
+  "coupon_code",
   "is_cash_or_non_trade_discount",
   "additional_discount_account",
   "column_break_51",
@@ -2170,6 +2171,12 @@
    "fieldtype": "Check",
    "label": "Don't Create Loyalty Points",
    "no_copy": 1
+  },
+  {
+   "fieldname": "coupon_code",
+   "fieldtype": "Link",
+   "label": "Coupon Code",
+   "options": "Coupon Code"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2182,7 +2189,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-01-02 17:25:46.027523",
+ "modified": "2024-03-13 16:42:18.153555",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
