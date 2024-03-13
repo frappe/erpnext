@@ -60,6 +60,8 @@ product_discount_fields = [
 	"free_item_rate",
 	"same_item",
 	"is_recursive",
+	"recurse_for",
+	"apply_recursion_over",
 	"apply_multiple_pricing_rules",
 ]
 

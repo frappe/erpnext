@@ -1185,7 +1185,13 @@ class PaymentEntry(AccountsController):
 				references = [x for x in self.get("references") if x.name == entry.name]
 
 			for ref in references:
-				if ref.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Journal Entry"):
+				if ref.reference_doctype in (
+					"Sales Invoice",
+					"Purchase Invoice",
+					"Journal Entry",
+					"Sales Order",
+					"Purchase Order",
+				):
 					self.add_advance_gl_for_reference(gl_entries, ref)
 
 	def add_advance_gl_for_reference(self, gl_entries, invoice):
@@ -1199,14 +1205,15 @@ class PaymentEntry(AccountsController):
 			"voucher_detail_no": invoice.name,
 		}
 
-		posting_date = frappe.db.get_value(
-			invoice.reference_doctype, invoice.reference_name, "posting_date"
-		)
+		date_field = "posting_date"
+		if invoice.reference_doctype in ["Sales Order", "Purchase Order"]:
+			date_field = "transaction_date"
+		posting_date = frappe.db.get_value(invoice.reference_doctype, invoice.reference_name, date_field)
 
 		if getdate(posting_date) < getdate(self.posting_date):
 			posting_date = self.posting_date
 
-		dr_or_cr = "credit" if invoice.reference_doctype == "Sales Invoice" else "debit"
+		dr_or_cr = "credit" if invoice.reference_doctype in ["Sales Invoice", "Sales Order"] else "debit"
 		args_dict["account"] = invoice.account
 		args_dict[dr_or_cr] = invoice.allocated_amount
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
@@ -2108,6 +2115,11 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		else:
 			outstanding_amount = flt(total_amount) - flt(ref_doc.get("advance_paid"))
 
+		if reference_doctype in ["Sales Order", "Purchase Order"]:
+			party_type = "Customer" if reference_doctype == "Sales Order" else "Supplier"
+			party_field = "customer" if reference_doctype == "Sales Order" else "supplier"
+			party = ref_doc.get(party_field)
+			account = get_party_account(party_type, party, ref_doc.company)
 	else:
 		# Get the exchange rate based on the posting date of the ref doc.
 		exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
