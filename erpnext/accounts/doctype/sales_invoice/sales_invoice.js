@@ -3,6 +3,8 @@
 
 frappe.provide("erpnext.accounts");
 
+cur_frm.cscript.tax_table = "Sales Taxes and Charges";
+
 erpnext.accounts.taxes.setup_tax_validations("Sales Invoice");
 erpnext.accounts.payment_triggers.setup("Sales Invoice");
 erpnext.accounts.pos.setup("Sales Invoice");
