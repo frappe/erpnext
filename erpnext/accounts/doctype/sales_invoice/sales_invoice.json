@@ -2182,11 +2182,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
- "modified": "2024-01-02 17:25:46.027523",
-=======
  "modified": "2024-03-11 14:20:34.874192",
->>>>>>> 2cefe2a20e (refactor: checkbox to toggle always standalone credit note)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
