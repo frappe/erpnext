@@ -210,9 +210,7 @@ def make_depreciation_entry(
 				debit_account,
 				accounting_dimensions,
 			)
-			frappe.db.commit()
 		except Exception as e:
-			frappe.db.rollback()
 			depreciation_posting_error = e
 
 	asset.set_status()
@@ -474,6 +472,7 @@ def depreciate_asset(asset, date):
 
 	make_depreciation_entry(asset.name, date)
 
+	asset.reload()
 	cancel_depreciation_entries(asset, date)
 
 
