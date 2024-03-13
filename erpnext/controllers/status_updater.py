@@ -573,6 +573,7 @@ class StatusUpdater(Document):
 			ref_doc.set_status(update=True)
 
 
+@frappe.request_cache
 def get_allowance_for(
 	item_code,
 	item_allowance=None,
@@ -602,20 +603,20 @@ def get_allowance_for(
 				global_amount_allowance,
 			)
 
-	qty_allowance, over_billing_allowance = frappe.db.get_value(
+	qty_allowance, over_billing_allowance = frappe.get_cached_value(
 		"Item", item_code, ["over_delivery_receipt_allowance", "over_billing_allowance"]
 	)
 
 	if qty_or_amount == "qty" and not qty_allowance:
 		if global_qty_allowance == None:
 			global_qty_allowance = flt(
-				frappe.db.get_single_value("Stock Settings", "over_delivery_receipt_allowance")
+				frappe.get_cached_value("Stock Settings", None, "over_delivery_receipt_allowance")
 			)
 		qty_allowance = global_qty_allowance
 	elif qty_or_amount == "amount" and not over_billing_allowance:
 		if global_amount_allowance == None:
 			global_amount_allowance = flt(
-				frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
+				frappe.get_cached_value("Accounts Settings", None, "over_billing_allowance")
 			)
 		over_billing_allowance = global_amount_allowance
 
