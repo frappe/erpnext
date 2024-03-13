@@ -65,7 +65,6 @@ class BuyingSettings(Document):
 
 
 def set_search_fields(doctype, fieldname, naming_series):
-	"""Change a doctype's naming to user naming series"""
 	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 	searchfields = frappe.get_meta(doctype).get_search_fields()
