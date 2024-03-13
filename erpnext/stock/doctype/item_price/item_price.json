@@ -107,7 +107,8 @@
    "in_standard_filter": 1,
    "label": "Price List",
    "options": "Price List",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "bold": 1,
@@ -223,7 +224,11 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-04-02 22:18:00.450641",
+=======
+ "modified": "2024-03-13 12:23:39.630290",
+>>>>>>> d279e23623 (fix: added index for price_list column in Item Price)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
