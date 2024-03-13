@@ -14,9 +14,9 @@ def set_default_role(doc, method):
 		for link in contact.links:
 			frappe.flags.setting_role = True
 			if link.link_doctype == "Customer" and "Customer" not in roles:
-				doc.add_roles("Customer")
+				doc.append_roles("Customer")
 			elif link.link_doctype == "Supplier" and "Supplier" not in roles:
-				doc.add_roles("Supplier")
+				doc.append_roles("Supplier")
 
 
 def create_customer_or_supplier():
