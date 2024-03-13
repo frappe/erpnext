@@ -126,39 +126,6 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters, as_dict=
 	)
 
 
-# searches for supplier
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def supplier_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
-	doctype = "Supplier"
-	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
-
-	fields = ["name"]
-	if supp_master_name != "Supplier Name":
-		fields.append("supplier_name")
-
-	fields = get_fields(doctype, fields)
-
-	return frappe.db.sql(
-		"""select {field} from `tabSupplier`
-		where docstatus < 2
-			and ({key} like %(txt)s
-			or supplier_name like %(txt)s) and disabled=0
-			and (on_hold = 0 or (on_hold = 1 and CURRENT_DATE > release_date))
-			{mcond}
-		order by
-			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
-			(case when locate(%(_txt)s, supplier_name) > 0 then locate(%(_txt)s, supplier_name) else 99999 end),
-			idx desc,
-			name, supplier_name
-		limit %(page_len)s offset %(start)s""".format(
-			**{"field": ", ".join(fields), "key": searchfield, "mcond": get_match_cond(doctype)}
-		),
-		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
-		as_dict=as_dict,
-	)
-
-
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def tax_account_query(doctype, txt, searchfield, start, page_len, filters):

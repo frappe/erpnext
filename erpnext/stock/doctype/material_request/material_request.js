@@ -365,12 +365,6 @@ frappe.ui.form.on("Material Request", {
 				description: __(
 					"Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only."
 				),
-				get_query: () => {
-					return {
-						query: "erpnext.stock.doctype.material_request.material_request.get_default_supplier_query",
-						filters: { doc: frm.doc.name },
-					};
-				},
 			},
 			(values) => {
 				frappe.model.open_mapped_doc({
