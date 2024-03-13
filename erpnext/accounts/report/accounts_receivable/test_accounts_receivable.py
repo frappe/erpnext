@@ -207,7 +207,6 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 
 		# check invoice grand total, invoiced, paid and outstanding column's value after credit note
 		cr_note = self.create_credit_note(si.name, do_not_submit=True)
-		cr_note.posting_date = add_days(today(), 1)
 		cr_note.update_outstanding_for_self = True
 		cr_note.save().submit()
 		report = execute(filters)
@@ -218,10 +217,9 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		]
 		self.assertEqual(len(report[1]), 2)
 		for i in range(2):
-			row = report[1][i - 1]
-			# row = report[1][0]
+			row = report[1][i]
 			self.assertEqual(
-				expected_data_after_credit_note[i - 1],
+				expected_data_after_credit_note[i],
 				[
 					row.invoice_grand_total,
 					row.invoiced,
