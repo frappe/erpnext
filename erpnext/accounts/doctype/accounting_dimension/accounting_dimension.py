@@ -236,14 +236,16 @@ def get_accounting_dimensions(as_list=True, filters=None):
 
 
 def get_checks_for_pl_and_bs_accounts():
-	dimensions = frappe.db.sql(
-		"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
-		FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
-		WHERE p.name = c.parent""",
-		as_dict=1,
-	)
+	if frappe.flags.accounting_dimensions_details is None:
+		# nosemgrep
+		frappe.flags.accounting_dimensions_details = frappe.db.sql(
+			"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
+			FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
+			WHERE p.name = c.parent""",
+			as_dict=1,
+		)
 
-	return dimensions
+	return frappe.flags.accounting_dimensions_details
 
 
 def get_dimension_with_children(doctype, dimensions):

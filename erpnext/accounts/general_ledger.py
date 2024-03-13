@@ -7,7 +7,7 @@ import copy
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.utils import cint, cstr, flt, formatdate, getdate, now
+from frappe.utils import cint, flt, formatdate, getdate, now
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -234,11 +234,13 @@ def get_cost_center_allocation_data(company, posting_date):
 def merge_similar_entries(gl_map, precision=None):
 	merged_gl_map = []
 	accounting_dimensions = get_accounting_dimensions()
+	merge_properties = get_merge_properties(accounting_dimensions)
 
 	for entry in gl_map:
+		entry.merge_key = get_merge_key(entry, merge_properties)
 		# if there is already an entry in this account then just add it
 		# to that entry
-		same_head = check_if_in_list(entry, merged_gl_map, accounting_dimensions)
+		same_head = check_if_in_list(entry, merged_gl_map)
 		if same_head:
 			same_head.debit = flt(same_head.debit) + flt(entry.debit)
 			same_head.debit_in_account_currency = flt(same_head.debit_in_account_currency) + flt(
@@ -273,33 +275,34 @@ def merge_similar_entries(gl_map, precision=None):
 	return merged_gl_map
 
 
-def check_if_in_list(gle, gl_map, dimensions=None):
-	account_head_fieldnames = [
-		"voucher_detail_no",
-		"party",
-		"against_voucher",
+def get_merge_properties(dimensions=None):
+	merge_properties = [
+		"account",
 		"cost_center",
-		"against_voucher_type",
+		"party",
 		"party_type",
+		"voucher_detail_no",
+		"against_voucher",
+		"against_voucher_type",
 		"project",
 		"finance_book",
 	]
-
 	if dimensions:
-		account_head_fieldnames = account_head_fieldnames + dimensions
+		merge_properties.extend(dimensions)
+	return merge_properties
 
+
+def get_merge_key(entry, merge_properties):
+	merge_key = []
+	for fieldname in merge_properties:
+		merge_key.append(entry.get(fieldname, ""))
+
+	return tuple(merge_key)
+
+
+def check_if_in_list(gle, gl_map):
 	for e in gl_map:
-		same_head = True
-		if e.account != gle.account:
-			same_head = False
-			continue
-
-		for fieldname in account_head_fieldnames:
-			if cstr(e.get(fieldname)) != cstr(gle.get(fieldname)):
-				same_head = False
-				break
-
-		if same_head:
+		if e.merge_key == gle.merge_key:
 			return e
 
 

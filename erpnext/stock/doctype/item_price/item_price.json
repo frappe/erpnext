@@ -104,7 +104,8 @@
    "in_standard_filter": 1,
    "label": "Price List",
    "options": "Price List",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "bold": 1,
@@ -220,7 +221,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-11-15 08:26:04.041861",
+ "modified": "2024-03-13 12:23:39.630290",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",

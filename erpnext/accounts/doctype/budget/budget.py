@@ -109,12 +109,19 @@ class Budget(Document):
 
 def validate_expense_against_budget(args, expense_amount=0):
 	args = frappe._dict(args)
+	if not frappe.get_all("Budget", limit=1):
+		return
 
 	if args.get("company") and not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get("posting_date"), company=args.get("company"))[0]
 		frappe.flags.exception_approver_role = frappe.get_cached_value(
 			"Company", args.get("company"), "exception_budget_approver_role"
 		)
+
+	if not frappe.get_cached_value(
+		"Budget", {"fiscal_year": args.fiscal_year, "company": args.company}
+	):  # nosec
+		return
 
 	if not args.account:
 		args.account = args.get("expense_account")
@@ -142,13 +149,13 @@ def validate_expense_against_budget(args, expense_amount=0):
 		if (
 			args.get(budget_against)
 			and args.account
-			and frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"})
+			and (frappe.get_cached_value("Account", args.account, "root_type") == "Expense")
 		):
 
 			doctype = dimension.get("document_type")
 
 			if frappe.get_cached_value("DocType", doctype, "is_tree"):
-				lft, rgt = frappe.db.get_value(doctype, args.get(budget_against), ["lft", "rgt"])
+				lft, rgt = frappe.get_cached_value(doctype, args.get(budget_against), ["lft", "rgt"])
 				condition = """and exists(select name from `tab%s`
 					where lft<=%s and rgt>=%s and name=b.%s)""" % (
 					doctype,
