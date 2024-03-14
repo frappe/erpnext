@@ -157,6 +157,13 @@ class AccountsController(TransactionBase):
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
 
+		if (
+			self.doctype in ["Sales Invoice", "Purchase Invoice"]
+			and self.get("is_return")
+			and self.get("update_stock")
+		):
+			self.validate_zero_qty_for_return_invoices_with_stock()
+
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
@@ -950,6 +957,46 @@ class AccountsController(TransactionBase):
 
 		return gl_dict
 
+<<<<<<< HEAD
+=======
+	def get_voucher_subtype(self):
+		voucher_subtypes = {
+			"Journal Entry": "voucher_type",
+			"Payment Entry": "payment_type",
+			"Stock Entry": "stock_entry_type",
+			"Asset Capitalization": "entry_type",
+		}
+		if self.doctype in voucher_subtypes:
+			return self.get(voucher_subtypes[self.doctype])
+		elif self.doctype == "Purchase Receipt" and self.is_return:
+			return "Purchase Return"
+		elif self.doctype == "Delivery Note" and self.is_return:
+			return "Sales Return"
+		elif (self.doctype == "Sales Invoice" and self.is_return) or self.doctype == "Purchase Invoice":
+			return "Credit Note"
+		elif (self.doctype == "Purchase Invoice" and self.is_return) or self.doctype == "Sales Invoice":
+			return "Debit Note"
+		return self.doctype
+
+	def get_value_in_transaction_currency(self, account_currency, args, field):
+		if account_currency == self.get("currency"):
+			return args.get(field + "_in_account_currency")
+		else:
+			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
+
+	def validate_zero_qty_for_return_invoices_with_stock(self):
+		rows = []
+		for item in self.items:
+			if not flt(item.qty):
+				rows.append(item)
+		if rows:
+			frappe.throw(
+				_(
+					"For Return Invoices with Stock effect, '0' qty Items are not allowed. Following rows are affected: {0}"
+				).format(frappe.bold(comma_and(["#" + str(x.idx) for x in rows])))
+			)
+
+>>>>>>> 898affbee9 (refactor: disallow '0' qty return invoices with stock effect)
 	def validate_qty_is_not_zero(self):
 		if self.doctype == "Purchase Receipt":
 			return
