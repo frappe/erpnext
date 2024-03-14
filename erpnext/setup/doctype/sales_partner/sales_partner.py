@@ -64,7 +64,7 @@ class SalesPartner(WebsiteGenerator):
 		addresses = []
 		for address_name in address_names:
 			address_doc = frappe.get_doc("Address", address_name[0])
-			city_state = ", ".join(filter(None, [address_doc.city, address_doc.state]))
+			city_state = ", ".join([item for item in [address_doc.city, address_doc.state] if item])
 			address_rows = [
 				address_doc.address_line1,
 				address_doc.address_line2,
