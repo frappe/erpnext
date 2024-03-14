@@ -182,8 +182,10 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		}
 
 		# check invoice grand total and invoiced column's value for 3 payment terms
-		si = self.create_sales_invoice(no_payment_schedule=True)
-		name = si.name
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.set_posting_time = True
+		si.posting_date = add_days(today(), -1)
+		si.save().submit()
 
 		report = execute(filters)
 
@@ -207,30 +209,42 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 
 		# check invoice grand total, invoiced, paid and outstanding column's value after credit note
 		cr_note = self.create_credit_note(si.name, do_not_submit=True)
-		cr_note.posting_date = add_days(today(), 1)
 		cr_note.update_outstanding_for_self = True
 		cr_note.save().submit()
 		report = execute(filters)
 
 		expected_data_after_credit_note = [
-			[100.0, 100.0, 40.0, 0.0, 60.0, self.debit_to],
-			[0, 0, 100.0, 0.0, -100.0, self.debit_to],
+			[100.0, 100.0, 40.0, 0.0, 60.0, si.name],
+			[0, 0, 100.0, 0.0, -100.0, cr_note.name],
 		]
 		self.assertEqual(len(report[1]), 2)
-		for i in range(2):
-			row = report[1][i - 1]
-			# row = report[1][0]
-			self.assertEqual(
-				expected_data_after_credit_note[i - 1],
-				[
-					row.invoice_grand_total,
-					row.invoiced,
-					row.paid,
-					row.credit_note,
-					row.outstanding,
-					row.party_account,
-				],
-			)
+		si_row = [
+			[
+				row.invoice_grand_total,
+				row.invoiced,
+				row.paid,
+				row.credit_note,
+				row.outstanding,
+				row.voucher_no,
+			]
+			for row in report[1]
+			if row.voucher_no == si.name
+		][0]
+
+		cr_note_row = [
+			[
+				row.invoice_grand_total,
+				row.invoiced,
+				row.paid,
+				row.credit_note,
+				row.outstanding,
+				row.voucher_no,
+			]
+			for row in report[1]
+			if row.voucher_no == cr_note.name
+		][0]
+		self.assertEqual(expected_data_after_credit_note[0], si_row)
+		self.assertEqual(expected_data_after_credit_note[1], cr_note_row)
 
 	def test_payment_againt_po_in_receivable_report(self):
 		"""
