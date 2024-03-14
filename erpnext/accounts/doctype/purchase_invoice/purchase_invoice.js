@@ -3,6 +3,8 @@
 
 frappe.provide("erpnext.accounts");
 
+cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
+
 erpnext.accounts.payment_triggers.setup("Purchase Invoice");
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Purchase Invoice");
