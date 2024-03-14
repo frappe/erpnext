@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-12 15:37\n"
+"PO-Revision-Date: 2024-03-14 17:21\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -5992,13 +5992,13 @@ msgstr "Rechnungswährung darf sich von Kontowährung unterscheiden"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Allow to Edit Stock UOM Qty for Purchase Documents"
-msgstr ""
+msgstr "Bearbeitung der Menge in Lager-ME für Einkaufsdokumente zulassen"
 
 #. Label of a Check field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Allow to Edit Stock UOM Qty for Sales Documents"
-msgstr ""
+msgstr "Bearbeitung der Menge in Lager-ME für Verkaufsdokumente zulassen"
 
 #. Description of the 'Allow Excess Material Transfer' (Check) field in DocType
 #. 'Manufacturing Settings'
@@ -43376,11 +43376,11 @@ msgstr "Es wurde keine Materialanforderung erstellt"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.py:198
 msgid "No more children on Left"
-msgstr ""
+msgstr "Keine Unterpunkte auf der linken Seite"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.py:212
 msgid "No more children on Right"
-msgstr ""
+msgstr "Keine Unterpunkte auf der rechten Seite"
 
 #. Label of a Select field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -49634,11 +49634,11 @@ msgstr "Bitte Seriennummern eingeben"
 
 #: stock/doctype/shipment/shipment.py:83
 msgid "Please enter Shipment Parcel information"
-msgstr ""
+msgstr "Bitte geben Sie die Paketinformationen für die Sendung ein"
 
 #: assets/doctype/asset_repair/asset_repair.py:173
 msgid "Please enter Stock Items consumed during the Repair."
-msgstr ""
+msgstr "Bitte geben Sie die während der Reparatur verbrauchten Lagerartikel ein."
 
 #: stock/doctype/quick_stock_balance/quick_stock_balance.js:29
 msgid "Please enter Warehouse and Date"
@@ -49646,7 +49646,7 @@ msgstr "Bitte geben Sie Lager und Datum ein"
 
 #: assets/doctype/asset_repair/asset_repair.py:177
 msgid "Please enter Warehouse from which Stock Items consumed during the Repair were taken."
-msgstr ""
+msgstr "Bitte geben Sie das Lagerhaus ein, aus dem Lagerartikel während der Reparatur verbraucht wurden."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:609
 #: accounts/doctype/sales_invoice/sales_invoice.py:1020
