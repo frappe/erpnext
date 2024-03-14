@@ -740,10 +740,10 @@ def validate_coupon_code(coupon_name):
 	if coupon.valid_from:
 		if coupon.valid_from > getdate(today()):
 			frappe.throw(_("Sorry, this coupon code's validity has not started"))
-	if coupon.valid_upto:
+	elif coupon.valid_upto:
 		if coupon.valid_upto < getdate(today()):
 			frappe.throw(_("Sorry, this coupon code's validity has expired"))
-	if coupon.used >= coupon.maximum_use:
+	elif coupon.used >= coupon.maximum_use:
 		frappe.throw(_("Sorry, this coupon code is no longer valid"))
 
 

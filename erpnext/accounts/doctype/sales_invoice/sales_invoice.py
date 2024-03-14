@@ -271,6 +271,8 @@ class SalesInvoice(SellingController):
 		validate_inter_company_party(
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
 		)
+
+		# Validating coupon code
 		if self.coupon_code:
 			validate_coupon_code(self.coupon_code)
 
