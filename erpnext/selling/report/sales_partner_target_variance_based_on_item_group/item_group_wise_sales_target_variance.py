@@ -197,6 +197,8 @@ def prepare_data(
 				):
 					details[p_key] += r.get(qty_or_amount_field, 0)
 					details[variance_key] = details.get(p_key) - details.get(target_key)
+				else:
+					details[variance_key] = details.get(p_key) - details.get(target_key)
 
 			details["total_achieved"] += details.get(p_key)
 			details["total_variance"] = details.get("total_achieved") - details.get("total_target")
