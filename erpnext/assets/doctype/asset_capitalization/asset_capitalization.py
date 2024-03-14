@@ -84,6 +84,10 @@ class AssetCapitalization(StockController):
 		self.make_gl_entries()
 		self.restore_consumed_asset_items()
 
+	def on_trash(self):
+		frappe.db.set_value("Asset", self.target_asset, "capitalized_in", None)
+		super(AssetCapitalization, self).on_trash()
+
 	def cancel_target_asset(self):
 		if self.entry_type == "Capitalization" and self.target_asset:
 			asset_doc = frappe.get_doc("Asset", self.target_asset)

@@ -127,7 +127,7 @@ class GLEntry(Document):
 			frappe.throw(msg, title=_("Missing Cost Center"))
 
 	def validate_dimensions_for_pl_and_bs(self):
-		account_type = frappe.db.get_value("Account", self.account, "report_type")
+		account_type = frappe.get_cached_value("Account", self.account, "report_type")
 
 		for dimension in get_checks_for_pl_and_bs_accounts():
 			if (
@@ -159,7 +159,7 @@ class GLEntry(Document):
 	def check_pl_account(self):
 		if (
 			self.is_opening == "Yes"
-			and frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss"
+			and frappe.get_cached_value("Account", self.account, "report_type") == "Profit and Loss"
 			and not self.is_cancelled
 		):
 			frappe.throw(
@@ -252,7 +252,7 @@ class GLEntry(Document):
 
 def validate_balance_type(account, adv_adj=False):
 	if not adv_adj and account:
-		balance_must_be = frappe.db.get_value("Account", account, "balance_must_be")
+		balance_must_be = frappe.get_cached_value("Account", account, "balance_must_be")
 		if balance_must_be:
 			balance = frappe.db.sql(
 				"""select sum(debit) - sum(credit)
@@ -279,7 +279,7 @@ def update_outstanding_amt(
 		party_condition = ""
 
 	if against_voucher_type == "Sales Invoice":
-		party_account = frappe.db.get_value(against_voucher_type, against_voucher, "debit_to")
+		party_account = frappe.get_cached_value(against_voucher_type, against_voucher, "debit_to")
 		account_condition = "and account in ({0}, {1})".format(
 			frappe.db.escape(account), frappe.db.escape(party_account)
 		)
@@ -347,7 +347,7 @@ def update_outstanding_amt(
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.get_cached_value("Account", account, "freeze_account")
 	if frozen_account == "Yes" and not adv_adj:
-		frozen_accounts_modifier = frappe.db.get_value(
+		frozen_accounts_modifier = frappe.get_cached_value(
 			"Accounts Settings", None, "frozen_accounts_modifier"
 		)
 
