@@ -230,7 +230,7 @@
   },
   {
    "fieldname": "stock_queue",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "FIFO Stock Queue (qty, rate)",
    "oldfieldname": "fcfs_stack",
    "oldfieldtype": "Text",
@@ -360,7 +360,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-07 09:18:13.999231",
+ "modified": "2024-03-13 09:56:13.021696",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
