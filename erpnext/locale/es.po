@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-12 15:37\n"
+"PO-Revision-Date: 2024-03-15 17:18\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -1430,7 +1430,7 @@ msgstr "Clave de API"
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "AWB Number"
-msgstr ""
+msgstr "Número AWB"
 
 #. Label of a Data field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -11702,7 +11702,7 @@ msgstr "Compras"
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Buying & Selling Settings"
-msgstr ""
+msgstr "Configuración de Compra y Venta"
 
 #: accounts/report/gross_profit/gross_profit.py:280
 msgid "Buying Amount"
@@ -37120,7 +37120,7 @@ msgstr ""
 #. Label of a Card Break in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Items Catalogue"
-msgstr ""
+msgstr "Catálogo de Productos"
 
 #: stock/report/item_prices/item_prices.js:8
 msgid "Items Filter"
@@ -65676,7 +65676,7 @@ msgstr "Mostrar horario de pago en Imprimir"
 
 #: accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.js:25
 msgid "Show Preview"
-msgstr ""
+msgstr "Mostrar Vista Previa"
 
 #: accounts/report/accounts_payable/accounts_payable.js:139
 #: accounts/report/accounts_receivable/accounts_receivable.js:176
@@ -80103,7 +80103,7 @@ msgstr "Debe habilitar el reordenamiento automático en la Configuración de inv
 
 #: templates/pages/projects.html:134
 msgid "You haven't created a {0} yet"
-msgstr ""
+msgstr "Aún no ha creado un {0}"
 
 #: selling/page/point_of_sale/pos_controller.js:196
 msgid "You must add atleast one item to save it as draft."
@@ -80627,7 +80627,7 @@ msgstr "debe seleccionar Cuenta Capital Work in Progress en la tabla de cuentas"
 #: accounts/report/cash_flow/cash_flow.py:226
 #: accounts/report/cash_flow/cash_flow.py:227
 msgid "{0}"
-msgstr ""
+msgstr "{0}"
 
 #: controllers/accounts_controller.py:878
 msgid "{0} '{1}' is disabled"
