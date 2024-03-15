@@ -509,7 +509,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					target: me.frm,
 					setters: {
 						schedule_date: undefined,
-						status: undefined,
 					},
 					get_query_filters: {
 						material_request_type: "Purchase",
