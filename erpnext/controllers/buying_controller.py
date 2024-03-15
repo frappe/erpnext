@@ -526,14 +526,18 @@ class BuyingController(SubcontractingController):
 
 						sl_entries.append(from_warehouse_sle)
 
+					type_of_transaction = "Inward"
+					if self.docstatus == 2:
+						type_of_transaction = "Outward"
+
 					sle = self.get_sl_entries(
 						d,
 						{
 							"actual_qty": flt(pr_qty),
 							"serial_and_batch_bundle": (
 								d.serial_and_batch_bundle
-								if not self.is_internal_transfer()
-								else self.get_package_for_target_warehouse(d)
+								if not self.is_internal_transfer() or self.is_return
+								else self.get_package_for_target_warehouse(d, type_of_transaction=type_of_transaction)
 							),
 						},
 					)
@@ -570,7 +574,17 @@ class BuyingController(SubcontractingController):
 						or (cint(self.is_return) and self.docstatus == 1)
 					):
 						from_warehouse_sle = self.get_sl_entries(
-							d, {"actual_qty": -1 * pr_qty, "warehouse": d.from_warehouse, "recalculate_rate": 1}
+							d,
+							{
+								"actual_qty": -1 * pr_qty,
+								"warehouse": d.from_warehouse,
+								"recalculate_rate": 1,
+								"serial_and_batch_bundle": (
+									self.get_package_for_target_warehouse(d, d.from_warehouse, "Inward")
+									if self.is_internal_transfer() and self.is_return
+									else None
+								),
+							},
 						)
 
 						sl_entries.append(from_warehouse_sle)
@@ -597,13 +611,15 @@ class BuyingController(SubcontractingController):
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
 
-	def get_package_for_target_warehouse(self, item) -> str:
+	def get_package_for_target_warehouse(self, item, warehouse=None, type_of_transaction=None) -> str:
 		if not item.serial_and_batch_bundle:
 			return ""
 
+		if not warehouse:
+			warehouse = item.warehouse
+
 		return self.make_package_for_transfer(
-			item.serial_and_batch_bundle,
-			item.warehouse,
+			item.serial_and_batch_bundle, warehouse, type_of_transaction=type_of_transaction
 		)
 
 	def update_ordered_and_reserved_qty(self):

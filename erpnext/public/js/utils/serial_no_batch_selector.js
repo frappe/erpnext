@@ -542,6 +542,10 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 			frappe.throw(__("Please add atleast one Serial No / Batch No"));
 		}
 
+		if (!warehouse) {
+			frappe.throw(__("Please select a Warehouse"));
+		}
+
 		frappe
 			.call({
 				method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.add_serial_batch_ledgers",
