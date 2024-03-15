@@ -358,7 +358,10 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends e
 					target: me.frm,
 					setters: {
 						schedule_date: undefined,
+<<<<<<< HEAD
 						status: undefined
+=======
+>>>>>>> 1ff8a6f24f (fix: stopped mr showing in the popup (#40478))
 					},
 					get_query_filters: {
 						material_request_type: "Purchase",
