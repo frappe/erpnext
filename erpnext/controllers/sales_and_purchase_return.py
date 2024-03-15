@@ -423,6 +423,15 @@ def make_return_doc(
 			]:
 				type_of_transaction = "Outward"
 
+			warehouse = source_doc.warehouse if qty_field == "stock_qty" else source_doc.rejected_warehouse
+			if source_parent.doctype in [
+				"Sales Invoice",
+				"POS Invoice",
+				"Delivery Note",
+			] and source_parent.get("is_internal_customer"):
+				type_of_transaction = "Outward"
+				warehouse = source_doc.target_warehouse
+
 			cls_obj = SerialBatchCreation(
 				{
 					"type_of_transaction": type_of_transaction,
@@ -432,7 +441,7 @@ def make_return_doc(
 					"returned_serial_nos": returned_serial_nos,
 					"voucher_type": source_parent.doctype,
 					"do_not_submit": True,
-					"warehouse": source_doc.warehouse,
+					"warehouse": warehouse,
 					"has_serial_no": item_details.has_serial_no,
 					"has_batch_no": item_details.has_batch_no,
 				}
@@ -575,11 +584,14 @@ def make_return_doc(
 			if not item_details.has_batch_no and not item_details.has_serial_no:
 				return
 
-			for qty_field in ["stock_qty", "rejected_qty"]:
-				if target_doc.get(qty_field) and not target_doc.get("use_serial_batch_fields"):
+			if not target_doc.get("use_serial_batch_fields"):
+				for qty_field in ["stock_qty", "rejected_qty"]:
+					if not target_doc.get(qty_field):
+						continue
+
 					update_serial_batch_no(source_doc, target_doc, source_parent, item_details, qty_field)
-				elif target_doc.get(qty_field) and target_doc.get("use_serial_batch_fields"):
-					update_non_bundled_serial_nos(source_doc, target_doc, source_parent)
+			elif target_doc.get("use_serial_batch_fields"):
+				update_non_bundled_serial_nos(source_doc, target_doc, source_parent)
 
 	def update_non_bundled_serial_nos(source_doc, target_doc, source_parent):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos

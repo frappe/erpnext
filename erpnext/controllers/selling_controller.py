@@ -439,8 +439,10 @@ class SellingController(StockController):
 				# Get incoming rate based on original item cost based on valuation method
 				qty = flt(d.get("stock_qty") or d.get("actual_qty"))
 
-				if not d.incoming_rate or (
-					get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return")
+				if (
+					not d.incoming_rate
+					or self.is_internal_transfer()
+					or (get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return"))
 				):
 					d.incoming_rate = get_incoming_rate(
 						{
@@ -455,6 +457,8 @@ class SellingController(StockController):
 							"voucher_no": self.name,
 							"voucher_detail_no": d.name,
 							"allow_zero_valuation": d.get("allow_zero_valuation"),
+							"batch_no": d.batch_no,
+							"serial_no": d.serial_no,
 						},
 						raise_error_if_no_rate=False,
 					)
@@ -527,13 +531,26 @@ class SellingController(StockController):
 		self.make_sl_entries(sl_entries)
 
 	def get_sle_for_source_warehouse(self, item_row):
+		serial_and_batch_bundle = item_row.serial_and_batch_bundle
+		if serial_and_batch_bundle and self.is_internal_transfer() and self.is_return:
+			if self.docstatus == 1:
+				serial_and_batch_bundle = self.make_package_for_transfer(
+					serial_and_batch_bundle, item_row.warehouse, type_of_transaction="Inward"
+				)
+			else:
+				serial_and_batch_bundle = frappe.db.get_value(
+					"Stock Ledger Entry",
+					{"voucher_detail_no": item_row.name, "warehouse": item_row.warehouse},
+					"serial_and_batch_bundle",
+				)
+
 		sle = self.get_sl_entries(
 			item_row,
 			{
 				"actual_qty": -1 * flt(item_row.qty),
 				"incoming_rate": item_row.incoming_rate,
 				"recalculate_rate": cint(self.is_return),
-				"serial_and_batch_bundle": item_row.serial_and_batch_bundle,
+				"serial_and_batch_bundle": serial_and_batch_bundle,
 			},
 		)
 		if item_row.target_warehouse and not cint(self.is_return):
@@ -554,9 +571,15 @@ class SellingController(StockController):
 				if item_row.warehouse:
 					sle.dependant_sle_voucher_detail_no = item_row.name
 
-			if item_row.serial_and_batch_bundle:
+			if item_row.serial_and_batch_bundle and not cint(self.is_return):
+				type_of_transaction = "Inward"
+				if cint(self.is_return):
+					type_of_transaction = "Outward"
+
 				sle["serial_and_batch_bundle"] = self.make_package_for_transfer(
-					item_row.serial_and_batch_bundle, item_row.target_warehouse
+					item_row.serial_and_batch_bundle,
+					item_row.target_warehouse,
+					type_of_transaction=type_of_transaction,
 				)
 
 		return sle
