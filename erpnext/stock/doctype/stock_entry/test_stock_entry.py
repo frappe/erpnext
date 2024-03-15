@@ -999,6 +999,7 @@ class TestStockEntry(FrappeTestCase):
 				"type_of_transaction": "Inward",
 				"serial_and_batch_bundle": s2.items[0].serial_and_batch_bundle,
 				"item_code": "_Test Serialized Item",
+				"warehouse": "_Test Warehouse - _TC",
 			}
 		)
 

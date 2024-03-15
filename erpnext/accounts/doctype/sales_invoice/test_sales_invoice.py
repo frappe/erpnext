@@ -3932,7 +3932,6 @@ def create_internal_supplier(supplier_name, represents_company, allowed_to_inter
 		)
 
 		supplier.append("companies", {"company": allowed_to_interact_with})
-
 		supplier.insert()
 		supplier_name = supplier.name
 	else:
