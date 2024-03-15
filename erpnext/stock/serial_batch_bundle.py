@@ -820,6 +820,10 @@ class SerialBatchCreation:
 			self.remove_returned_serial_nos(new_package)
 
 		new_package.docstatus = 0
+		new_package.warehouse = self.warehouse
+		new_package.voucher_no = ""
+		new_package.posting_date = today()
+		new_package.posting_time = nowtime()
 		new_package.type_of_transaction = self.type_of_transaction
 		new_package.returned_against = self.get("returned_against")
 		new_package.save()
