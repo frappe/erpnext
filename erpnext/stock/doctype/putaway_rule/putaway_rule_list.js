@@ -1,4 +1,4 @@
-frappe.listview_settings['Putaway Rule'] = {
+frappe.listview_settings["Putaway Rule"] = {
 	add_fields: ["disable"],
 	get_indicator: (doc) => {
 		if (doc.disable) {
@@ -10,9 +10,8 @@ frappe.listview_settings['Putaway Rule'] = {
 
 	reports: [
 		{
-			name: 'Warehouse Capacity Summary',
-			report_type: 'Page',
-			route: 'warehouse-capacity-summary'
-		}
-	]
+			name: "Warehouse Capacity Summary",
+			route: "/app/warehouse-capacity-summary",
+		},
+	],
 };

@@ -152,6 +152,7 @@ class Asset(AccountsController):
 	def on_submit(self):
 		self.validate_in_use_date()
 		self.make_asset_movement()
+		self.reload()
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
 		if self.calculate_depreciation and not self.split_from:
@@ -163,6 +164,7 @@ class Asset(AccountsController):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
 		self.cancel_capitalization()
+		self.reload()
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
 		self.set_status()
@@ -698,7 +700,9 @@ class Asset(AccountsController):
 		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
 		if (
-			purchase_document and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()
+			purchase_document
+			and self.purchase_receipt_amount
+			and getdate(self.available_for_use_date) <= getdate()
 		):
 
 			gl_entries.append(

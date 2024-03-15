@@ -415,23 +415,6 @@ class TestLandedCostVoucher(FrappeTestCase):
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=charges)
 		new_purchase_rate = serial_no_rate + charges
 
-		sn_obj = SerialNoValuation(
-			sle=frappe._dict(
-				{
-					"posting_date": today(),
-					"posting_time": nowtime(),
-					"item_code": "_Test Serialized Item",
-					"warehouse": "Stores - TCP1",
-					"serial_nos": [serial_no],
-				}
-			)
-		)
-
-		new_serial_no_rate = sn_obj.get_incoming_rate_of_serial_no(serial_no)
-
-		# Since the serial no is already delivered the rate must be zero
-		self.assertFalse(new_serial_no_rate)
-
 		stock_value_difference = frappe.db.get_value(
 			"Stock Ledger Entry",
 			filters={

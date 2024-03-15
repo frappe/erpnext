@@ -1,4 +1,4 @@
-frappe.listview_settings['BOM Creator'] = {
+frappe.listview_settings["BOM Creator"] = {
 	add_fields: ["status"],
 	get_indicator: function (doc) {
 		if (doc.status === "Draft") {

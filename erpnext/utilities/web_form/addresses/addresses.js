@@ -1,3 +1,3 @@
-frappe.ready(function() {
+frappe.ready(function () {
 	// bind events here
-})
+});
