@@ -608,10 +608,9 @@ class AccountsController(TransactionBase):
 		posting_date = (
 			self.posting_date if self.doctype == "Sales Invoice" else (self.bill_date or self.posting_date)
 		)
-		via_data_import = (
-			self.flags.updater_reference and self.flags.updater_reference.get("doctype") == "Data Import"
-		)
-		if via_data_import and getdate(self.due_date) < getdate(posting_date):
+
+		# skip due date validation for records via Data Import
+		if frappe.flags.in_import and getdate(self.due_date) < getdate(posting_date):
 			self.due_date = posting_date
 
 		elif self.doctype == "Sales Invoice":
