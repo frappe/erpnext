@@ -89,6 +89,7 @@ force_item_fields = (
 	"weight_per_unit",
 	"weight_uom",
 	"total_weight",
+	"valuation_rate",
 )
 
 
@@ -167,6 +168,13 @@ class AccountsController(TransactionBase):
 	def validate(self):
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
+
+		if (
+			self.doctype in ["Sales Invoice", "Purchase Invoice"]
+			and self.get("is_return")
+			and self.get("update_stock")
+		):
+			self.validate_zero_qty_for_return_invoices_with_stock()
 
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
@@ -1043,6 +1051,18 @@ class AccountsController(TransactionBase):
 			return args.get(field + "_in_account_currency")
 		else:
 			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
+
+	def validate_zero_qty_for_return_invoices_with_stock(self):
+		rows = []
+		for item in self.items:
+			if not flt(item.qty):
+				rows.append(item)
+		if rows:
+			frappe.throw(
+				_(
+					"For Return Invoices with Stock effect, '0' qty Items are not allowed. Following rows are affected: {0}"
+				).format(frappe.bold(comma_and(["#" + str(x.idx) for x in rows])))
+			)
 
 	def validate_qty_is_not_zero(self):
 		for item in self.items:
@@ -2708,13 +2728,19 @@ def get_advance_journal_entries(
 	else:
 		q = q.where(journal_acc.debit_in_account_currency > 0)
 
+	reference_or_condition = []
+
 	if include_unallocated:
-		q = q.where((journal_acc.reference_name.isnull()) | (journal_acc.reference_name == ""))
+		reference_or_condition.append(journal_acc.reference_name.isnull())
+		reference_or_condition.append(journal_acc.reference_name == "")
 
 	if order_list:
-		q = q.where(
+		reference_or_condition.append(
 			(journal_acc.reference_type == order_doctype) & ((journal_acc.reference_name).isin(order_list))
 		)
+
+	if reference_or_condition:
+		q = q.where(Criterion.any(reference_or_condition))
 
 	q = q.orderby(journal_entry.posting_date)
 
