@@ -1475,7 +1475,6 @@ class TestPaymentEntry(FrappeTestCase):
 			for field in ["account", "debit", "credit"]:
 				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
 
-<<<<<<< HEAD
 	def test_outstanding_invoices_api(self):
 		"""
 		Test if `get_outstanding_reference_documents` fetches invoices in the right order.
@@ -1514,7 +1513,7 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(references[2].voucher_no, si2.name)
 		self.assertEqual(references[1].payment_term, "Basic Amount Receivable")
 		self.assertEqual(references[2].payment_term, "Tax Receivable")
-=======
+
 	def test_reverse_payment_reconciliation(self):
 		customer = create_customer(frappe.generate_hash(length=10), "INR")
 		pe = create_payment_entry(
@@ -1553,7 +1552,6 @@ class TestPaymentEntry(FrappeTestCase):
 		pr.reconcile()
 		self.assertEqual(len(pr.invoices), 0)
 		self.assertEqual(len(pr.payments), 0)
->>>>>>> 6d9074d585 (test: reverse payment reconciliation)
 
 	def test_advance_reverse_payment_reconciliation(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
