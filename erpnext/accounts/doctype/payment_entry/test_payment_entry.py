@@ -1515,9 +1515,10 @@ class TestPaymentEntry(FrappeTestCase):
 				self.assertEqual(self.expected_gle[row][field], gl_entries[row][field])
 
 	def test_reverse_payment_reconciliation(self):
+		customer = create_customer(frappe.generate_hash(length=10), "INR")
 		pe = create_payment_entry(
 			party_type="Customer",
-			party="_Test Customer",
+			party=customer,
 			payment_type="Receive",
 			paid_from="Debtors - _TC",
 			paid_to="_Test Cash - _TC",
@@ -1526,7 +1527,7 @@ class TestPaymentEntry(FrappeTestCase):
 
 		reverse_pe = create_payment_entry(
 			party_type="Customer",
-			party="_Test Customer",
+			party=customer,
 			payment_type="Pay",
 			paid_from="_Test Cash - _TC",
 			paid_to="Debtors - _TC",
@@ -1536,7 +1537,7 @@ class TestPaymentEntry(FrappeTestCase):
 		pr = frappe.get_doc("Payment Reconciliation")
 		pr.company = "_Test Company"
 		pr.party_type = "Customer"
-		pr.party = "_Test Customer"
+		pr.party = customer
 		pr.receivable_payable_account = "Debtors - _TC"
 		pr.get_unreconciled_entries()
 		self.assertEqual(len(pr.invoices), 1)
@@ -1556,6 +1557,7 @@ class TestPaymentEntry(FrappeTestCase):
 		from erpnext.accounts.doctype.account.test_account import create_account
 
 		company = "_Test Company"
+		customer = create_customer(frappe.generate_hash(length=10), "INR")
 		advance_account = create_account(
 			parent_account="Current Assets - _TC",
 			account_name="Advances Received",
@@ -1574,7 +1576,7 @@ class TestPaymentEntry(FrappeTestCase):
 		# Reverse Payment(essentially an Invoice)
 		reverse_pe = create_payment_entry(
 			party_type="Customer",
-			party="_Test Customer",
+			party=customer,
 			payment_type="Pay",
 			paid_from="_Test Cash - _TC",
 			paid_to=advance_account,
@@ -1585,7 +1587,7 @@ class TestPaymentEntry(FrappeTestCase):
 		# Advance Payment
 		pe = create_payment_entry(
 			party_type="Customer",
-			party="_Test Customer",
+			party=customer,
 			payment_type="Receive",
 			paid_from=advance_account,
 			paid_to="_Test Cash - _TC",
@@ -1597,7 +1599,7 @@ class TestPaymentEntry(FrappeTestCase):
 		pr = frappe.get_doc("Payment Reconciliation")
 		pr.company = company
 		pr.party_type = "Customer"
-		pr.party = "_Test Customer"
+		pr.party = customer
 		pr.receivable_payable_account = "Debtors - _TC"
 		pr.default_advance_account = advance_account
 		pr.get_unreconciled_entries()
