@@ -333,6 +333,7 @@ class DeliveryNote(SellingController):
 							"type_of_transaction": "Outward",
 							"serial_and_batch_bundle": bundle_id,
 							"item_code": item.get("item_code"),
+							"warehouse": item.get("warehouse"),
 						}
 					)
 

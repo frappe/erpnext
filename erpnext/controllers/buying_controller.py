@@ -513,6 +513,14 @@ class BuyingController(SubcontractingController):
 						(not cint(self.is_return) and self.docstatus == 1)
 						or (cint(self.is_return) and self.docstatus == 2)
 					):
+						serial_and_batch_bundle = d.get("serial_and_batch_bundle")
+						if self.is_internal_transfer() and self.is_return and self.docstatus == 2:
+							serial_and_batch_bundle = frappe.db.get_value(
+								"Stock Ledger Entry",
+								{"voucher_detail_no": d.name, "warehouse": d.from_warehouse},
+								"serial_and_batch_bundle",
+							)
+
 						from_warehouse_sle = self.get_sl_entries(
 							d,
 							{
@@ -521,6 +529,7 @@ class BuyingController(SubcontractingController):
 								"outgoing_rate": d.rate,
 								"recalculate_rate": 1,
 								"dependant_sle_voucher_detail_no": d.name,
+								"serial_and_batch_bundle": serial_and_batch_bundle,
 							},
 						)
 
