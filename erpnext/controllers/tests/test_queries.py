@@ -31,12 +31,6 @@ class TestQueries(unittest.TestCase):
 		self.assertGreaterEqual(len(query(txt="_Test Lead")), 4)
 		self.assertEqual(len(query(txt="_Test Lead 4")), 1)
 
-	def test_customer_query(self):
-		query = add_default_params(queries.customer_query, "Customer")
-
-		self.assertGreaterEqual(len(query(txt="_Test Customer")), 7)
-		self.assertGreaterEqual(len(query(txt="_Test Customer USD")), 1)
-
 	def test_item_query(self):
 		query = add_default_params(queries.item_query, "Item")
 

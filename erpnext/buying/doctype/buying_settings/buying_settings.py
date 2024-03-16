@@ -54,34 +54,9 @@ class BuyingSettings(Document):
 			hide_name_field=False,
 		)
 
-		set_search_fields("Supplier", "supplier_name", self.get("supp_master_name") == "Naming Series")
-
 	def before_save(self):
 		self.check_maintain_same_rate()
 
 	def check_maintain_same_rate(self):
 		if self.maintain_same_rate:
 			self.set_landed_cost_based_on_purchase_invoice_rate = 0
-
-
-def set_search_fields(doctype, fieldname, naming_series):
-	from frappe.custom.doctype.property_setter.property_setter import make_property_setter
-
-	searchfields = frappe.get_meta(doctype).get_search_fields()
-
-	if naming_series:
-		if fieldname not in searchfields:
-			searchfields.append(fieldname)
-	else:
-		if fieldname in searchfields:
-			searchfields.remove(fieldname)
-
-	make_property_setter(
-		doctype,
-		"",
-		"search_fields",
-		", ".join(searchfields),
-		"Data",
-		for_doctype=True,
-		validate_fields_for_doctype=False,
-	)
