@@ -130,6 +130,7 @@ class DeliveryNote(SellingController):
 	def validate(self):
 		self.validate_posting_time()
 		super(DeliveryNote, self).validate()
+		self.validate_references()
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
@@ -194,6 +195,58 @@ class DeliveryNote(SellingController):
 					["Sales Invoice", "against_sales_invoice", "si_detail"],
 				]
 			)
+
+	def validate_references(self):
+		self.validate_sales_order_references()
+		self.validate_sales_invoice_references()
+
+	def validate_sales_order_references(self):
+		err_msg = ""
+		for item in self.items:
+			if (item.against_sales_order and not item.so_detail) or (
+				not item.against_sales_order and item.so_detail
+			):
+				if not item.against_sales_order:
+					err_msg += (
+						_("'Sales Order' reference ({1}) is missing in row {0}").format(
+							frappe.bold(item.idx), frappe.bold("against_sales_order")
+						)
+						+ "<br>"
+					)
+				else:
+					err_msg += (
+						_("'Sales Order Item' reference ({1}) is missing in row {0}").format(
+							frappe.bold(item.idx), frappe.bold("so_detail")
+						)
+						+ "<br>"
+					)
+
+		if err_msg:
+			frappe.throw(err_msg, title=_("References to Sales Orders are Incomplete"))
+
+	def validate_sales_invoice_references(self):
+		err_msg = ""
+		for item in self.items:
+			if (item.against_sales_invoice and not item.si_detail) or (
+				not item.against_sales_invoice and item.si_detail
+			):
+				if not item.against_sales_invoice:
+					err_msg += (
+						_("'Sales Invoice' reference ({1}) is missing in row {0}").format(
+							frappe.bold(item.idx), frappe.bold("against_sales_invoice")
+						)
+						+ "<br>"
+					)
+				else:
+					err_msg += (
+						_("'Sales Invoice Item' reference ({1}) is missing in row {0}").format(
+							frappe.bold(item.idx), frappe.bold("si_detail")
+						)
+						+ "<br>"
+					)
+
+		if err_msg:
+			frappe.throw(err_msg, title=_("References to Sales Invoices are Incomplete"))
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""

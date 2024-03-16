@@ -2225,13 +2225,14 @@ def make_sales_order(**args):
 	return so
 
 
-def create_dn_against_so(so, delivered_qty=0):
-	frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+def create_dn_against_so(so, delivered_qty=0, do_not_submit=False):
+	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 	dn = make_delivery_note(so)
 	dn.get("items")[0].qty = delivered_qty or 5
 	dn.insert()
-	dn.submit()
+	if not do_not_submit:
+		dn.submit()
 	return dn
 
 
