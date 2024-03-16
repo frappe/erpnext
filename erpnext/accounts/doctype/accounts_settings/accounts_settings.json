@@ -105,7 +105,7 @@
   },
   {
    "default": "0",
-   "description": "Enabling ensure each Purchase Invoice has a unique value in Supplier Invoice No. field based on the fiscal year",
+   "description": "Enabling this ensures each Purchase Invoice has a unique value in Supplier Invoice No. field within a particular fiscal year",
    "fieldname": "check_supplier_invoice_uniqueness",
    "fieldtype": "Check",
    "label": "Check Supplier Invoice Number Uniqueness"
