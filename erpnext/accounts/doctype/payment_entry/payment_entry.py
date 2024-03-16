@@ -526,9 +526,9 @@ class PaymentEntry(AccountsController):
 
 	def get_valid_reference_doctypes(self):
 		if self.party_type == "Customer":
-			return ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning")
+			return ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning", "Payment Entry")
 		elif self.party_type == "Supplier":
-			return ("Purchase Order", "Purchase Invoice", "Journal Entry")
+			return ("Purchase Order", "Purchase Invoice", "Journal Entry", "Payment Entry")
 		elif self.party_type == "Shareholder":
 			return ("Journal Entry",)
 		elif self.party_type == "Employee":
@@ -1191,6 +1191,7 @@ class PaymentEntry(AccountsController):
 					"Journal Entry",
 					"Sales Order",
 					"Purchase Order",
+					"Payment Entry",
 				):
 					self.add_advance_gl_for_reference(gl_entries, ref)
 
@@ -1213,7 +1214,9 @@ class PaymentEntry(AccountsController):
 		if getdate(posting_date) < getdate(self.posting_date):
 			posting_date = self.posting_date
 
-		dr_or_cr = "credit" if invoice.reference_doctype in ["Sales Invoice", "Sales Order"] else "debit"
+		dr_or_cr = (
+			"credit" if invoice.reference_doctype in ["Sales Invoice", "Payment Entry"] else "debit"
+		)
 		args_dict["account"] = invoice.account
 		args_dict[dr_or_cr] = invoice.allocated_amount
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
@@ -1660,7 +1663,7 @@ def get_outstanding_reference_documents(args, validate=False):
 		outstanding_invoices = get_outstanding_invoices(
 			args.get("party_type"),
 			args.get("party"),
-			party_account,
+			[party_account],
 			common_filter=common_filter,
 			posting_date=posting_and_due_date,
 			min_outstanding=args.get("outstanding_amt_greater_than"),
