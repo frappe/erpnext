@@ -4,6 +4,8 @@
 frappe.provide("erpnext.buying");
 frappe.provide("erpnext.accounts.dimensions");
 
+cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
+
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Purchase Order");
 erpnext.buying.setup_buying_controller();
