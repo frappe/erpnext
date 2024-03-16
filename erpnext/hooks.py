@@ -282,9 +282,6 @@ has_website_permission = {
 
 before_tests = "erpnext.setup.utils.before_tests"
 
-standard_queries = {
-	"Customer": "erpnext.controllers.queries.customer_query",
-}
 
 period_closing_doctypes = [
 	"Sales Invoice",
