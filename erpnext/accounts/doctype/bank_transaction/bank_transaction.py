@@ -12,8 +12,101 @@ class BankTransaction(StatusUpdater):
 	def after_insert(self):
 		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
 
+<<<<<<< HEAD
 	def on_submit(self):
 		self.clear_linked_payment_entries()
+=======
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.accounts.doctype.bank_transaction_payments.bank_transaction_payments import (
+			BankTransactionPayments,
+		)
+
+		allocated_amount: DF.Currency
+		amended_from: DF.Link | None
+		bank_account: DF.Link | None
+		bank_party_account_number: DF.Data | None
+		bank_party_iban: DF.Data | None
+		bank_party_name: DF.Data | None
+		company: DF.Link | None
+		currency: DF.Link | None
+		date: DF.Date | None
+		deposit: DF.Currency
+		description: DF.SmallText | None
+		naming_series: DF.Literal["ACC-BTN-.YYYY.-"]
+		party: DF.DynamicLink | None
+		party_type: DF.Link | None
+		payment_entries: DF.Table[BankTransactionPayments]
+		reference_number: DF.Data | None
+		status: DF.Literal["", "Pending", "Settled", "Unreconciled", "Reconciled", "Cancelled"]
+		transaction_id: DF.Data | None
+		transaction_type: DF.Data | None
+		unallocated_amount: DF.Currency
+		withdrawal: DF.Currency
+	# end: auto-generated types
+
+	def before_validate(self):
+		self.update_allocated_amount()
+
+	def validate(self):
+		self.validate_duplicate_references()
+		self.validate_currency()
+
+	def validate_currency(self):
+		"""
+		Bank Transaction should be on the same currency as the Bank Account.
+		"""
+		if self.currency and self.bank_account:
+			if account := frappe.get_cached_value("Bank Account", self.bank_account, "account"):
+				account_currency = frappe.get_cached_value("Account", account, "account_currency")
+
+				if self.currency != account_currency:
+					frappe.throw(
+						_(
+							"Transaction currency: {0} cannot be different from Bank Account({1}) currency: {2}"
+						).format(
+							frappe.bold(self.currency), frappe.bold(self.bank_account), frappe.bold(account_currency)
+						)
+					)
+
+	def set_status(self):
+		if self.docstatus == 2:
+			self.db_set("status", "Cancelled")
+		elif self.docstatus == 1:
+			if self.unallocated_amount > 0:
+				self.db_set("status", "Unreconciled")
+			elif self.unallocated_amount <= 0:
+				self.db_set("status", "Reconciled")
+
+	def validate_duplicate_references(self):
+		"""Make sure the same voucher is not allocated twice within the same Bank Transaction"""
+		if not self.payment_entries:
+			return
+
+		pe = []
+		for row in self.payment_entries:
+			reference = (row.payment_document, row.payment_entry)
+			if reference in pe:
+				frappe.throw(
+					_("{0} {1} is allocated twice in this Bank Transaction").format(
+						row.payment_document, row.payment_entry
+					)
+				)
+			pe.append(reference)
+
+	def update_allocated_amount(self):
+		allocated_amount = (
+			sum(p.allocated_amount for p in self.payment_entries) if self.payment_entries else 0.0
+		)
+		unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit)) - allocated_amount
+
+		self.allocated_amount = flt(allocated_amount, self.precision("allocated_amount"))
+		self.unallocated_amount = flt(unallocated_amount, self.precision("unallocated_amount"))
+
+	def before_submit(self):
+		self.allocate_payment_entries()
+>>>>>>> 3cde81be65 (fix: don't validate for currency, if account is unavailable)
 		self.set_status()
 
 		if frappe.db.get_single_value("Accounts Settings", "enable_party_matching"):
