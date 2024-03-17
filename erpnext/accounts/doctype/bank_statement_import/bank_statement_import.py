@@ -149,6 +149,9 @@ def start_import(
 	import_file = ImportFile("Bank Transaction", file=file, import_type="Insert New Records")
 
 	data = parse_data_from_template(import_file.raw_data)
+	# Importer expects 'Data Import' class, which has 'payload_count' attribute
+	if not data_import.get("payload_count"):
+		data_import.payload_count = len(data) - 1
 
 	if import_file_path:
 		add_bank_account(data, bank_account)
