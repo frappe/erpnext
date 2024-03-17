@@ -74,11 +74,6 @@ erpnext.buying = {
 				me.frm.set_query('billing_address', erpnext.queries.company_address_query);
 				erpnext.accounts.dimensions.setup_dimension_filters(me.frm, me.frm.doctype);
 
-				if(this.frm.fields_dict.supplier) {
-					this.frm.set_query("supplier", function() {
-						return{	query: "erpnext.controllers.queries.supplier_query" }});
-				}
-
 				this.frm.set_query("item_code", "items", function() {
 					if (me.frm.doc.is_subcontracted) {
 						var filters = {'supplier': me.frm.doc.supplier};
