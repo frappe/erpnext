@@ -56,17 +56,17 @@ class BankTransaction(Document):
 		Bank Transaction should be on the same currency as the Bank Account.
 		"""
 		if self.currency and self.bank_account:
-			account = frappe.get_cached_value("Bank Account", self.bank_account, "account")
-			account_currency = frappe.get_cached_value("Account", account, "account_currency")
+			if account := frappe.get_cached_value("Bank Account", self.bank_account, "account"):
+				account_currency = frappe.get_cached_value("Account", account, "account_currency")
 
-			if self.currency != account_currency:
-				frappe.throw(
-					_(
-						"Transaction currency: {0} cannot be different from Bank Account({1}) currency: {2}"
-					).format(
-						frappe.bold(self.currency), frappe.bold(self.bank_account), frappe.bold(account_currency)
+				if self.currency != account_currency:
+					frappe.throw(
+						_(
+							"Transaction currency: {0} cannot be different from Bank Account({1}) currency: {2}"
+						).format(
+							frappe.bold(self.currency), frappe.bold(self.bank_account), frappe.bold(account_currency)
+						)
 					)
-				)
 
 	def set_status(self):
 		if self.docstatus == 2:
