@@ -57,7 +57,7 @@ class SalesPartner(WebsiteGenerator):
 		address_names = frappe.db.get_all(
 			"Dynamic Link",
 			filters={"link_doctype": "Sales Partner", "link_name": self.name, "parenttype": "Address"},
-			pluck=["parent"]
+			pluck=["parent"],
 		)
 
 		addresses = []
