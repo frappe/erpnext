@@ -184,7 +184,11 @@ class PickList(Document):
 
 	def delink_serial_and_batch_bundle(self):
 		for row in self.locations:
-			if row.serial_and_batch_bundle:
+			if (
+				row.serial_and_batch_bundle
+				and frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "docstatus")
+				== 1
+			):
 				frappe.db.set_value(
 					"Serial and Batch Bundle",
 					row.serial_and_batch_bundle,
