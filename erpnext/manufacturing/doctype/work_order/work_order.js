@@ -9,6 +9,8 @@ frappe.ui.form.on("Work Order", {
 			"Job Card": "Create Job Card",
 		};
 
+		frm.ignore_doctypes_on_cancel_all = ["Serial and Batch Bundle"];
+
 		// Set query for warehouses
 		frm.set_query("wip_warehouse", function () {
 			return {
