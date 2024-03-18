@@ -9,6 +9,7 @@
   "disabled",
   "service_provider",
   "api_endpoint",
+  "use_http",
   "access_key",
   "url",
   "column_break_3",
@@ -91,12 +92,19 @@
    "fieldname": "access_key",
    "fieldtype": "Data",
    "label": "Access Key"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.service_provider != \"Custom\"",
+   "fieldname": "use_http",
+   "fieldtype": "Check",
+   "label": "Use HTTP Protocol"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-10-04 15:30:25.333860",
+ "modified": "2024-03-18 08:32:26.895076",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Currency Exchange Settings",
