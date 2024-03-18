@@ -56,6 +56,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.expense_account = "Cost of Goods Sold - _PR"
 		self.debit_to = "Debtors - _PR"
 		self.creditors = "Creditors - _PR"
+		self.cash = "Cash - _PR"
 
 		# create bank account
 		if frappe.db.exists("Account", "HDFC - _PR"):
@@ -485,6 +486,91 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# check PR tool output
 		self.assertEqual(len(pr.get("invoices")), 0)
 		self.assertEqual(len(pr.get("payments")), 0)
+
+	def test_payment_against_foreign_currency_journal(self):
+		transaction_date = nowdate()
+
+		self.supplier = "_Test Supplier USD"
+		self.supplier2 = make_supplier("_Test Supplier2 USD", "USD")
+		amount = 100
+		exc_rate1 = 80
+		exc_rate2 = 83
+
+		je = frappe.new_doc("Journal Entry")
+		je.posting_date = transaction_date
+		je.company = self.company
+		je.user_remark = "test"
+		je.multi_currency = 1
+		je.set(
+			"accounts",
+			[
+				{
+					"account": self.creditors_usd,
+					"party_type": "Supplier",
+					"party": self.supplier,
+					"exchange_rate": exc_rate1,
+					"cost_center": self.cost_center,
+					"credit": amount * exc_rate1,
+					"credit_in_account_currency": amount,
+				},
+				{
+					"account": self.creditors_usd,
+					"party_type": "Supplier",
+					"party": self.supplier2,
+					"exchange_rate": exc_rate2,
+					"cost_center": self.cost_center,
+					"credit": amount * exc_rate2,
+					"credit_in_account_currency": amount,
+				},
+				{
+					"account": self.expense_account,
+					"cost_center": self.cost_center,
+					"debit": (amount * exc_rate1) + (amount * exc_rate2),
+					"debit_in_account_currency": (amount * exc_rate1) + (amount * exc_rate2),
+				},
+			],
+		)
+		je.save().submit()
+
+		pe = self.create_payment_entry(amount=amount, posting_date=transaction_date)
+		pe.payment_type = "Pay"
+		pe.party_type = "Supplier"
+		pe.party = self.supplier
+		pe.paid_to = self.creditors_usd
+		pe.paid_from = self.cash
+		pe.paid_amount = 8000
+		pe.received_amount = 100
+		pe.target_exchange_rate = exc_rate1
+		pe.paid_to_account_currency = "USD"
+		pe.save().submit()
+
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.receivable_payable_account = self.creditors_usd
+		pr.minimum_invoice_amount = pr.maximum_invoice_amount = amount
+		pr.from_invoice_date = pr.to_invoice_date = transaction_date
+		pr.from_payment_date = pr.to_payment_date = transaction_date
+
+		pr.get_unreconciled_entries()
+		invoices = [x.as_dict() for x in pr.get("invoices")]
+		payments = [x.as_dict() for x in pr.get("payments")]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+
+		# There should no difference_amount as the Journal and Payment have same exchange rate -  'exc_rate1'
+		for row in pr.allocation:
+			self.assertEqual(flt(row.get("difference_amount")), 0.0)
+
+		pr.reconcile()
+
+		# check PR tool output
+		self.assertEqual(len(pr.get("invoices")), 0)
+		self.assertEqual(len(pr.get("payments")), 0)
+
+		journals = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"reference_type": je.doctype, "reference_name": je.name, "docstatus": 1},
+			fields=["parent"],
+		)
+		self.assertEqual([], journals)
 
 	def test_journal_against_invoice(self):
 		transaction_date = nowdate()
@@ -1248,3 +1334,17 @@ def make_customer(customer_name, currency=None):
 		return customer.name
 	else:
 		return customer_name
+
+
+def make_supplier(supplier_name, currency=None):
+	if not frappe.db.exists("Supplier", supplier_name):
+		supplier = frappe.new_doc("Supplier")
+		supplier.supplier_name = supplier_name
+		supplier.type = "Individual"
+
+		if currency:
+			supplier.default_currency = currency
+		supplier.save()
+		return supplier.name
+	else:
+		return supplier_name

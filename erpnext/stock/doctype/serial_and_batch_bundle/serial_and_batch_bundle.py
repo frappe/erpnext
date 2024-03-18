@@ -257,9 +257,9 @@ class SerialandBatchBundle(Document):
 				if sn_obj.batch_avg_rate.get(d.batch_no):
 					d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
 
-				available_qty = flt(sn_obj.available_qty.get(d.batch_no))
+				available_qty = flt(sn_obj.available_qty.get(d.batch_no), d.precision("qty"))
 				if self.docstatus == 1:
-					available_qty += flt(d.qty)
+					available_qty += flt(d.qty, d.precision("qty"))
 
 				if not allow_negative_stock:
 					self.validate_negative_batch(d.batch_no, available_qty)
@@ -332,13 +332,8 @@ class SerialandBatchBundle(Document):
 			rate = frappe.db.get_value(child_table, self.voucher_detail_no, valuation_field)
 
 		for d in self.entries:
-			if not rate or (
-				flt(rate, precision) == flt(d.incoming_rate, precision) and d.stock_value_difference
-			):
-				continue
-
 			d.incoming_rate = flt(rate, precision)
-			if self.has_batch_no:
+			if d.qty:
 				d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
 
 			if save:
@@ -806,6 +801,7 @@ class SerialandBatchBundle(Document):
 		self.set_purchase_document_no()
 
 	def on_submit(self):
+		self.validate_batch_inventory()
 		self.validate_serial_nos_inventory()
 
 	def set_purchase_document_no(self):
@@ -852,7 +848,7 @@ class SerialandBatchBundle(Document):
 
 		available_batches = get_available_batches_qty(available_batches)
 		for batch_no in batches:
-			if batch_no not in available_batches or available_batches[batch_no] < 0:
+			if batch_no in available_batches and available_batches[batch_no] < 0:
 				if flt(available_batches.get(batch_no)) < 0:
 					self.validate_negative_batch(batch_no, available_batches[batch_no])
 
@@ -1267,6 +1263,13 @@ def get_type_of_transaction(parent_doc, child_row):
 
 	if parent_doc.get("is_return"):
 		type_of_transaction = "Inward" if type_of_transaction == "Outward" else "Outward"
+
+	if parent_doc.get("doctype") == "Subcontracting Receipt":
+		type_of_transaction = "Outward"
+		if child_row.get("doctype") == "Subcontracting Receipt Item":
+			type_of_transaction = "Inward"
+	elif parent_doc.get("doctype") == "Stock Reconciliation":
+		type_of_transaction = "Inward"
 
 	return type_of_transaction
 
@@ -2118,7 +2121,7 @@ def is_serial_batch_no_exists(item_code, type_of_transaction, serial_no=None, ba
 
 		make_serial_no(serial_no, item_code)
 
-	if batch_no and frappe.db.exists("Batch", batch_no):
+	if batch_no and not frappe.db.exists("Batch", batch_no):
 		if type_of_transaction != "Inward":
 			frappe.throw(_("Batch No {0} does not exists").format(batch_no))
 

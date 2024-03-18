@@ -10,17 +10,7 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import (
-	cint,
-	comma_or,
-	cstr,
-	flt,
-	format_time,
-	formatdate,
-	getdate,
-	month_diff,
-	nowdate,
-)
+from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
 
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
@@ -236,41 +226,6 @@ class StockEntry(StockController):
 			# in Manufacture Entry
 			self.reset_default_field_value("from_warehouse", "items", "s_warehouse")
 			self.reset_default_field_value("to_warehouse", "items", "t_warehouse")
-
-	def submit(self):
-		if self.is_enqueue_action():
-			frappe.msgprint(
-				_(
-					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Entry and revert to the Draft stage"
-				)
-			)
-			self.queue_action("submit", timeout=2000)
-		else:
-			self._submit()
-
-	def cancel(self):
-		if self.is_enqueue_action():
-			frappe.msgprint(
-				_(
-					"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Entry and revert to the Submitted stage"
-				)
-			)
-			self.queue_action("cancel", timeout=2000)
-		else:
-			self._cancel()
-
-	def is_enqueue_action(self, force=False) -> bool:
-		if force:
-			return True
-
-		if frappe.flags.in_test:
-			return False
-
-		# If line items are more than 100 or record is older than 6 months
-		if len(self.items) > 50 or month_diff(nowdate(), self.posting_date) > 6:
-			return True
-
-		return False
 
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
@@ -839,6 +794,7 @@ class StockEntry(StockController):
 					currency=erpnext.get_company_currency(self.company),
 					company=self.company,
 					raise_error_if_no_rate=raise_error_if_no_rate,
+					batch_no=d.batch_no,
 					serial_and_batch_bundle=d.serial_and_batch_bundle,
 				)
 
@@ -867,7 +823,7 @@ class StockEntry(StockController):
 				if reset_outgoing_rate:
 					args = self.get_args_for_incoming_rate(d)
 					rate = get_incoming_rate(args, raise_error_if_no_rate)
-					if rate > 0:
+					if rate >= 0:
 						d.basic_rate = rate
 
 				d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
@@ -890,6 +846,8 @@ class StockEntry(StockController):
 				"allow_zero_valuation": item.allow_zero_valuation_rate,
 				"serial_and_batch_bundle": item.serial_and_batch_bundle,
 				"voucher_detail_no": item.name,
+				"batch_no": item.batch_no,
+				"serial_no": item.serial_no,
 			}
 		)
 
@@ -1030,7 +988,7 @@ class StockEntry(StockController):
 		already_picked_serial_nos = []
 
 		for row in self.items:
-			if row.use_serial_batch_fields and (row.serial_no or row.batch_no):
+			if row.use_serial_batch_fields:
 				continue
 
 			if not row.s_warehouse:
@@ -1899,6 +1857,7 @@ class StockEntry(StockController):
 			return
 
 		id = create_serial_and_batch_bundle(
+			self,
 			row,
 			frappe._dict(
 				{
@@ -2110,6 +2069,7 @@ class StockEntry(StockController):
 			as_dict=1,
 		)
 
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for key, row in available_materials.items():
 			remaining_qty_to_produce = flt(wo_data.trans_qty) - flt(wo_data.produced_qty)
 			if remaining_qty_to_produce <= 0 and not self.is_return:
@@ -2132,7 +2092,8 @@ class StockEntry(StockController):
 				serial_nos = row.serial_nos[0 : cint(qty)]
 				row.serial_nos = serial_nos
 
-			self.update_item_in_stock_entry_detail(row, item, qty)
+			if flt(qty, precision) != 0.0:
+				self.update_item_in_stock_entry_detail(row, item, qty)
 
 	def update_batches_to_be_consume(self, batches, row, qty):
 		qty_to_be_consumed = qty
@@ -2164,23 +2125,42 @@ class StockEntry(StockController):
 		if not qty:
 			return
 
+		use_serial_batch_fields = frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")
+
 		ste_item_details = {
 			"from_warehouse": item.warehouse,
 			"to_warehouse": "",
 			"qty": qty,
 			"item_name": item.item_name,
-			"serial_and_batch_bundle": create_serial_and_batch_bundle(row, item, "Outward"),
+			"serial_and_batch_bundle": create_serial_and_batch_bundle(self, row, item, "Outward")
+			if not use_serial_batch_fields
+			else "",
 			"description": item.description,
 			"stock_uom": item.stock_uom,
 			"expense_account": item.expense_account,
 			"cost_center": item.buying_cost_center,
 			"original_item": item.original_item,
+			"serial_no": "\n".join(row.serial_nos)
+			if row.serial_nos and not row.batches_to_be_consume
+			else "",
+			"use_serial_batch_fields": use_serial_batch_fields,
 		}
 
 		if self.is_return:
 			ste_item_details["to_warehouse"] = item.s_warehouse
 
-		self.add_to_stock_entry_detail({item.item_code: ste_item_details})
+		if use_serial_batch_fields and not row.serial_no and row.batches_to_be_consume:
+			for batch_no, batch_qty in row.batches_to_be_consume.items():
+				ste_item_details.update(
+					{
+						"batch_no": batch_no,
+						"qty": batch_qty,
+					}
+				)
+
+				self.add_to_stock_entry_detail({item.item_code: ste_item_details})
+		else:
+			self.add_to_stock_entry_detail({item.item_code: ste_item_details})
 
 	@staticmethod
 	def get_serial_nos_based_on_transferred_batch(batch_no, serial_nos) -> list:
@@ -2331,6 +2311,9 @@ class StockEntry(StockController):
 				"item_name",
 				"serial_and_batch_bundle",
 				"allow_zero_valuation_rate",
+				"use_serial_batch_fields",
+				"batch_no",
+				"serial_no",
 			]:
 				if item_row.get(field):
 					se_child.set(field, item_row.get(field))
@@ -2547,6 +2530,7 @@ class StockEntry(StockController):
 					row = frappe._dict({"serial_nos": serial_nos[0 : cint(d.qty)]})
 
 					id = create_serial_and_batch_bundle(
+						self,
 						row,
 						frappe._dict(
 							{
@@ -2627,6 +2611,7 @@ def move_sample_to_retention_warehouse(company, items):
 						"type_of_transaction": "Outward",
 						"serial_and_batch_bundle": item.get("serial_and_batch_bundle"),
 						"item_code": item.get("item_code"),
+						"warehouse": item.get("t_warehouse"),
 					}
 				)
 
@@ -2978,7 +2963,7 @@ def get_available_materials(work_order) -> dict:
 			if row.batch_no:
 				item_data.batch_details[row.batch_no] += row.qty
 
-			if row.batch_nos:
+			elif row.batch_nos:
 				for batch_no, qty in row.batch_nos.items():
 					item_data.batch_details[batch_no] += qty
 
@@ -2986,7 +2971,7 @@ def get_available_materials(work_order) -> dict:
 				item_data.serial_nos.extend(get_serial_nos(row.serial_no))
 				item_data.serial_nos.sort()
 
-			if row.serial_nos:
+			elif row.serial_nos:
 				item_data.serial_nos.extend(get_serial_nos(row.serial_nos))
 				item_data.serial_nos.sort()
 		else:
@@ -2996,7 +2981,7 @@ def get_available_materials(work_order) -> dict:
 			if row.batch_no:
 				item_data.batch_details[row.batch_no] -= row.qty
 
-			if row.batch_nos:
+			elif row.batch_nos:
 				for batch_no, qty in row.batch_nos.items():
 					item_data.batch_details[batch_no] += qty
 
@@ -3004,7 +2989,7 @@ def get_available_materials(work_order) -> dict:
 				for serial_no in get_serial_nos(row.serial_no):
 					item_data.serial_nos.remove(serial_no)
 
-			if row.serial_nos:
+			elif row.serial_nos:
 				for serial_no in get_serial_nos(row.serial_nos):
 					item_data.serial_nos.remove(serial_no)
 
@@ -3070,7 +3055,7 @@ def get_stock_entry_data(work_order):
 	return data
 
 
-def create_serial_and_batch_bundle(row, child, type_of_transaction=None):
+def create_serial_and_batch_bundle(parent_doc, row, child, type_of_transaction=None):
 	item_details = frappe.get_cached_value(
 		"Item", child.item_code, ["has_serial_no", "has_batch_no"], as_dict=1
 	)
@@ -3088,6 +3073,8 @@ def create_serial_and_batch_bundle(row, child, type_of_transaction=None):
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,
 			"type_of_transaction": type_of_transaction,
+			"posting_date": parent_doc.posting_date,
+			"posting_time": parent_doc.posting_time,
 		}
 	)
 

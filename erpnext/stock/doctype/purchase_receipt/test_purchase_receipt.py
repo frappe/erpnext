@@ -2237,6 +2237,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 			create_stock_reconciliation,
 		)
 
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
+		)
+
 		item_code = make_item(
 			"_Test Use Serial Fields Item Serial Item",
 			properties={"has_serial_no": 1, "serial_no_series": "SNU-TSFISI-.#####"},
@@ -2316,6 +2320,518 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for sn in new_serial_nos:
 			serial_no_status = frappe.db.get_value("Serial No", sn, "status")
 			self.assertTrue(serial_no_status != "Active")
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
+		)
+
+	def test_sle_qty_after_transaction(self):
+		item = make_item(
+			"_Test Item Qty After Transaction",
+			properties={"is_stock_item": 1, "valuation_method": "FIFO"},
+		).name
+
+		posting_date = today()
+		posting_time = nowtime()
+
+		# Step 1: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=1,
+			rate=100,
+			posting_date=posting_date,
+			posting_time=posting_time,
+			do_not_save=1,
+		)
+
+		for i in range(9):
+			pr.append(
+				"items",
+				{
+					"item_code": item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": pr.items[0].warehouse,
+					"cost_center": pr.items[0].cost_center,
+					"expense_account": pr.items[0].expense_account,
+					"uom": pr.items[0].uom,
+					"stock_uom": pr.items[0].stock_uom,
+					"conversion_factor": pr.items[0].conversion_factor,
+				},
+			)
+
+		self.assertEqual(len(pr.items), 10)
+		pr.save()
+		pr.submit()
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["qty_after_transaction", "creation", "posting_datetime"],
+			filters={"voucher_no": pr.name, "is_cancelled": 0},
+			order_by="creation",
+		)
+
+		for index, d in enumerate(data):
+			self.assertEqual(d.qty_after_transaction, 1 + index)
+
+		# Step 2: Create Purchase Receipt
+		pr = make_purchase_receipt(
+			item_code=item,
+			qty=1,
+			rate=100,
+			posting_date=posting_date,
+			posting_time=posting_time,
+			do_not_save=1,
+		)
+
+		for i in range(9):
+			pr.append(
+				"items",
+				{
+					"item_code": item,
+					"qty": 1,
+					"rate": 100,
+					"warehouse": pr.items[0].warehouse,
+					"cost_center": pr.items[0].cost_center,
+					"expense_account": pr.items[0].expense_account,
+					"uom": pr.items[0].uom,
+					"stock_uom": pr.items[0].stock_uom,
+					"conversion_factor": pr.items[0].conversion_factor,
+				},
+			)
+
+		self.assertEqual(len(pr.items), 10)
+		pr.save()
+		pr.submit()
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["qty_after_transaction", "creation", "posting_datetime"],
+			filters={"voucher_no": pr.name, "is_cancelled": 0},
+			order_by="creation",
+		)
+
+		for index, d in enumerate(data):
+			self.assertEqual(d.qty_after_transaction, 11 + index)
+
+	def test_auto_set_batch_based_on_bundle(self):
+		item_code = make_item(
+			"_Test Auto Set Batch Based on Bundle",
+			properties={
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-BNU-TASBBB-.#####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
+		)
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=5,
+			rate=100,
+		)
+
+		self.assertTrue(pr.items[0].batch_no)
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		self.assertEqual(pr.items[0].batch_no, batch_no)
+
+		frappe.db.set_single_value(
+			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
+		)
+
+	def test_pr_billed_amount_against_return_entry(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_invoice as make_pi_from_pr,
+		)
+
+		# Create a Purchase Receipt and Fully Bill it
+		pr = make_purchase_receipt(qty=10)
+		pi = make_pi_from_pr(pr.name)
+		pi.insert()
+		pi.submit()
+
+		# Debit Note - 50% Qty & enable updating PR billed amount
+		pi_return = make_debit_note(pi.name)
+		pi_return.items[0].qty = -5
+		pi_return.update_billed_amount_in_purchase_receipt = 1
+		pi_return.submit()
+
+		# Check if the billed amount reduced
+		pr.reload()
+		self.assertEqual(pr.per_billed, 50)
+
+		pi_return.reload()
+		pi_return.cancel()
+
+		# Debit Note - 50% Qty & disable updating PR billed amount
+		pi_return = make_debit_note(pi.name)
+		pi_return.items[0].qty = -5
+		pi_return.update_billed_amount_in_purchase_receipt = 0
+		pi_return.submit()
+
+		# Check if the billed amount stayed the same
+		pr.reload()
+		self.assertEqual(pr.per_billed, 100)
+
+	def test_purchase_receipt_with_use_serial_batch_field_for_rejected_qty(self):
+		batch_item = make_item(
+			"_Test Purchase Receipt Batch Item For Rejected Qty",
+			properties={"has_batch_no": 1, "create_new_batch": 1, "is_stock_item": 1},
+		).name
+
+		serial_item = make_item(
+			"_Test Purchase Receipt Serial Item for Rejected Qty",
+			properties={"has_serial_no": 1, "is_stock_item": 1},
+		).name
+
+		rej_warehouse = create_warehouse("_Test Purchase Warehouse For Rejected Qty")
+
+		batch_no = "BATCH-BNU-TPRBI-0001"
+		serial_nos = ["SNU-TPRSI-0001", "SNU-TPRSI-0002", "SNU-TPRSI-0003"]
+
+		if not frappe.db.exists("Batch", batch_no):
+			frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"batch_id": batch_no,
+					"item": batch_item,
+				}
+			).insert()
+
+		for serial_no in serial_nos:
+			if not frappe.db.exists("Serial No", serial_no):
+				frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"item_code": serial_item,
+						"serial_no": serial_no,
+					}
+				).insert()
+
+		pr = make_purchase_receipt(
+			item_code=batch_item,
+			received_qty=10,
+			qty=8,
+			rejected_qty=2,
+			rejected_warehouse=rej_warehouse,
+			use_serial_batch_fields=1,
+			batch_no=batch_no,
+			rate=100,
+			do_not_submit=1,
+		)
+
+		pr.append(
+			"items",
+			{
+				"item_code": serial_item,
+				"qty": 2,
+				"rate": 100,
+				"base_rate": 100,
+				"item_name": serial_item,
+				"uom": "Nos",
+				"stock_uom": "Nos",
+				"conversion_factor": 1,
+				"rejected_qty": 1,
+				"warehouse": pr.items[0].warehouse,
+				"rejected_warehouse": rej_warehouse,
+				"use_serial_batch_fields": 1,
+				"serial_no": "\n".join(serial_nos[:2]),
+				"rejected_serial_no": serial_nos[2],
+			},
+		)
+
+		pr.save()
+		pr.submit()
+
+		pr.reload()
+
+		for row in pr.items:
+			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertTrue(row.rejected_serial_and_batch_bundle)
+
+			if row.item_code == batch_item:
+				self.assertEqual(row.batch_no, batch_no)
+			else:
+				self.assertEqual(row.serial_no, "\n".join(serial_nos[:2]))
+				self.assertEqual(row.rejected_serial_no, serial_nos[2])
+
+	def test_internal_transfer_with_serial_batch_items_and_their_valuation(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		prepare_data_for_internal_transfer()
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		batch_item_doc = make_item(
+			"_Test Batch Item For Stock Transfer",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "BT-BIFST-.####"},
+		)
+
+		serial_item_doc = make_item(
+			"_Test Serial No Item For Stock Transfer",
+			{"has_serial_no": 1, "serial_no_series": "BT-BIFST-.####"},
+		)
+
+		inward_entry = make_purchase_receipt(
+			item_code=batch_item_doc.name,
+			qty=10,
+			rate=150,
+			warehouse="Stores - TCP1",
+			company="_Test Company with perpetual inventory",
+			use_serial_batch_fields=1,
+			do_not_submit=1,
+		)
+
+		inward_entry.append(
+			"items",
+			{
+				"item_code": serial_item_doc.name,
+				"qty": 15,
+				"rate": 250,
+				"item_name": serial_item_doc.item_name,
+				"conversion_factor": 1.0,
+				"uom": serial_item_doc.stock_uom,
+				"stock_uom": serial_item_doc.stock_uom,
+				"warehouse": "Stores - TCP1",
+				"use_serial_batch_fields": 1,
+			},
+		)
+
+		inward_entry.submit()
+		inward_entry.reload()
+
+		for row in inward_entry.items:
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		inter_transfer_dn = create_delivery_note(
+			item_code=inward_entry.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+			batch_no=get_batch_from_bundle(inward_entry.items[0].serial_and_batch_bundle),
+			use_serial_batch_fields=1,
+			do_not_submit=1,
+		)
+
+		inter_transfer_dn.append(
+			"items",
+			{
+				"item_code": serial_item_doc.name,
+				"qty": 15,
+				"rate": 350,
+				"item_name": serial_item_doc.item_name,
+				"conversion_factor": 1.0,
+				"uom": serial_item_doc.stock_uom,
+				"stock_uom": serial_item_doc.stock_uom,
+				"warehouse": "Stores - TCP1",
+				"target_warehouse": "Work In Progress - TCP1",
+				"serial_no": "\n".join(
+					get_serial_nos_from_bundle(inward_entry.items[1].serial_and_batch_bundle)
+				),
+				"use_serial_batch_fields": 1,
+			},
+		)
+
+		inter_transfer_dn.submit()
+		inter_transfer_dn.reload()
+		for row in inter_transfer_dn.items:
+			if row.item_code == batch_item_doc.name:
+				self.assertEqual(row.rate, 150.0)
+			else:
+				self.assertEqual(row.rate, 250.0)
+
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		inter_transfer_pr = make_inter_company_purchase_receipt(inter_transfer_dn.name)
+		for row in inter_transfer_pr.items:
+			row.from_warehouse = "Work In Progress - TCP1"
+			row.warehouse = "Stores - TCP1"
+		inter_transfer_pr.submit()
+
+		for row in inter_transfer_pr.items:
+			if row.item_code == batch_item_doc.name:
+				self.assertEqual(row.rate, 150.0)
+			else:
+				self.assertEqual(row.rate, 250.0)
+
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		inter_transfer_pr_return = make_return_doc("Purchase Receipt", inter_transfer_pr.name)
+
+		inter_transfer_pr_return.submit()
+		inter_transfer_pr_return.reload()
+		for row in inter_transfer_pr_return.items:
+			self.assertTrue(row.serial_and_batch_bundle)
+			if row.item_code == serial_item_doc.name:
+				self.assertEqual(row.rate, 250.0)
+				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				for sn in serial_nos:
+					serial_no_details = frappe.db.get_value("Serial No", sn, ["status", "warehouse"], as_dict=1)
+					self.assertTrue(serial_no_details.status == "Active")
+					self.assertEqual(serial_no_details.warehouse, "Work In Progress - TCP1")
+
+		inter_transfer_dn_return = make_return_doc("Delivery Note", inter_transfer_dn.name)
+		inter_transfer_dn_return.posting_date = today()
+		inter_transfer_dn_return.posting_time = nowtime()
+		for row in inter_transfer_dn_return.items:
+			row.target_warehouse = "Work In Progress - TCP1"
+
+		inter_transfer_dn_return.submit()
+		inter_transfer_dn_return.reload()
+
+		for row in inter_transfer_dn_return.items:
+			self.assertTrue(row.serial_and_batch_bundle)
+
+	def test_internal_transfer_with_serial_batch_items_without_user_serial_batch_fields(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
+
+		prepare_data_for_internal_transfer()
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		batch_item_doc = make_item(
+			"_Test Batch Item For Stock Transfer USE SERIAL BATCH FIELDS",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "USBF-BT-BIFST-.####"},
+		)
+
+		serial_item_doc = make_item(
+			"_Test Serial No Item For Stock Transfer USE SERIAL BATCH FIELDS",
+			{"has_serial_no": 1, "serial_no_series": "USBF-BT-BIFST-.####"},
+		)
+
+		inward_entry = make_purchase_receipt(
+			item_code=batch_item_doc.name,
+			qty=10,
+			rate=150,
+			warehouse="Stores - TCP1",
+			company="_Test Company with perpetual inventory",
+			use_serial_batch_fields=0,
+			do_not_submit=1,
+		)
+
+		inward_entry.append(
+			"items",
+			{
+				"item_code": serial_item_doc.name,
+				"qty": 15,
+				"rate": 250,
+				"item_name": serial_item_doc.item_name,
+				"conversion_factor": 1.0,
+				"uom": serial_item_doc.stock_uom,
+				"stock_uom": serial_item_doc.stock_uom,
+				"warehouse": "Stores - TCP1",
+				"use_serial_batch_fields": 0,
+			},
+		)
+
+		inward_entry.submit()
+		inward_entry.reload()
+
+		for row in inward_entry.items:
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		inter_transfer_dn = create_delivery_note(
+			item_code=inward_entry.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+			batch_no=get_batch_from_bundle(inward_entry.items[0].serial_and_batch_bundle),
+			use_serial_batch_fields=0,
+			do_not_submit=1,
+		)
+
+		inter_transfer_dn.append(
+			"items",
+			{
+				"item_code": serial_item_doc.name,
+				"qty": 15,
+				"rate": 350,
+				"item_name": serial_item_doc.item_name,
+				"conversion_factor": 1.0,
+				"uom": serial_item_doc.stock_uom,
+				"stock_uom": serial_item_doc.stock_uom,
+				"warehouse": "Stores - TCP1",
+				"target_warehouse": "Work In Progress - TCP1",
+				"serial_no": "\n".join(
+					get_serial_nos_from_bundle(inward_entry.items[1].serial_and_batch_bundle)
+				),
+				"use_serial_batch_fields": 0,
+			},
+		)
+
+		inter_transfer_dn.submit()
+		inter_transfer_dn.reload()
+		for row in inter_transfer_dn.items:
+			if row.item_code == batch_item_doc.name:
+				self.assertEqual(row.rate, 150.0)
+			else:
+				self.assertEqual(row.rate, 250.0)
+
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		inter_transfer_pr = make_inter_company_purchase_receipt(inter_transfer_dn.name)
+		for row in inter_transfer_pr.items:
+			row.from_warehouse = "Work In Progress - TCP1"
+			row.warehouse = "Stores - TCP1"
+		inter_transfer_pr.submit()
+
+		for row in inter_transfer_pr.items:
+			if row.item_code == batch_item_doc.name:
+				self.assertEqual(row.rate, 150.0)
+			else:
+				self.assertEqual(row.rate, 250.0)
+
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		inter_transfer_pr_return = make_return_doc("Purchase Receipt", inter_transfer_pr.name)
+
+		inter_transfer_pr_return.submit()
+		inter_transfer_pr_return.reload()
+		for row in inter_transfer_pr_return.items:
+			self.assertTrue(row.serial_and_batch_bundle)
+			if row.item_code == serial_item_doc.name:
+				self.assertEqual(row.rate, 250.0)
+				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
+				for sn in serial_nos:
+					serial_no_details = frappe.db.get_value("Serial No", sn, ["status", "warehouse"], as_dict=1)
+					self.assertTrue(serial_no_details.status == "Active")
+					self.assertEqual(serial_no_details.warehouse, "Work In Progress - TCP1")
+
+		inter_transfer_dn_return = make_return_doc("Delivery Note", inter_transfer_dn.name)
+		inter_transfer_dn_return.posting_date = today()
+		inter_transfer_dn_return.posting_time = nowtime()
+		for row in inter_transfer_dn_return.items:
+			row.target_warehouse = "Work In Progress - TCP1"
+
+		inter_transfer_dn_return.submit()
+		inter_transfer_dn_return.reload()
+
+		for row in inter_transfer_dn_return.items:
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 
 def prepare_data_for_internal_transfer():

@@ -83,7 +83,7 @@ class Timesheet(Document):
 	def set_status(self):
 		self.status = {"0": "Draft", "1": "Submitted", "2": "Cancelled"}[str(self.docstatus or 0)]
 
-		if self.per_billed == 100:
+		if flt(self.per_billed, self.precision("per_billed")) >= 100.0:
 			self.status = "Billed"
 
 		if self.sales_invoice:
@@ -255,6 +255,16 @@ class Timesheet(Document):
 	def update_time_rates(self, ts_detail):
 		if not ts_detail.is_billable:
 			ts_detail.billing_rate = 0.0
+
+	def unlink_sales_invoice(self, sales_invoice: str):
+		"""Remove link to Sales Invoice from all time logs."""
+		for time_log in self.time_logs:
+			if time_log.sales_invoice == sales_invoice:
+				time_log.sales_invoice = None
+
+		self.calculate_total_amounts()
+		self.calculate_percentage_billed()
+		self.set_status()
 
 
 @frappe.whitelist()

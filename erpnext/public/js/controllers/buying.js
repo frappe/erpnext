@@ -74,11 +74,6 @@ erpnext.buying = {
 				me.frm.set_query('billing_address', erpnext.queries.company_address_query);
 				erpnext.accounts.dimensions.setup_dimension_filters(me.frm, me.frm.doctype);
 
-				if(this.frm.fields_dict.supplier) {
-					this.frm.set_query("supplier", function() {
-						return{	query: "erpnext.controllers.queries.supplier_query" }});
-				}
-
 				this.frm.set_query("item_code", "items", function() {
 					if (me.frm.doc.is_subcontracted) {
 						var filters = {'supplier': me.frm.doc.supplier};
@@ -368,6 +363,7 @@ erpnext.buying = {
 
 											let update_values = {
 												"serial_and_batch_bundle": r.name,
+												"use_serial_batch_fields": 0,
 												"qty": qty / flt(item.conversion_factor || 1, precision("conversion_factor", item))
 											}
 
@@ -408,6 +404,7 @@ erpnext.buying = {
 
 											let update_values = {
 												"serial_and_batch_bundle": r.name,
+												"use_serial_batch_fields": 0,
 												"rejected_qty": qty / flt(item.conversion_factor || 1, precision("conversion_factor", item))
 											}
 

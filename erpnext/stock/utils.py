@@ -8,7 +8,7 @@ from typing import Dict, Optional
 import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
-from frappe.utils import cstr, flt, get_link_to_form, nowdate, nowtime
+from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 
 import erpnext
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -262,7 +262,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			item_code=args.get("item_code"),
 		)
 
-		in_rate = sn_obj.get_incoming_rate()
+		return sn_obj.get_incoming_rate()
 
 	elif item_details and item_details.has_batch_no and args.get("serial_and_batch_bundle"):
 		args.actual_qty = args.qty
@@ -272,23 +272,33 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			item_code=args.get("item_code"),
 		)
 
-		in_rate = batch_obj.get_incoming_rate()
+		return batch_obj.get_incoming_rate()
 
 	elif (args.get("serial_no") or "").strip() and not args.get("serial_and_batch_bundle"):
-		in_rate = get_avg_purchase_rate(args.get("serial_no"))
+		args.actual_qty = args.qty
+		args.serial_nos = get_serial_nos_data(args.get("serial_no"))
+
+		sn_obj = SerialNoValuation(
+			sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code")
+		)
+
+		return sn_obj.get_incoming_rate()
 	elif (
 		args.get("batch_no")
 		and frappe.db.get_value("Batch", args.get("batch_no"), "use_batchwise_valuation", cache=True)
 		and not args.get("serial_and_batch_bundle")
 	):
-		in_rate = get_batch_incoming_rate(
-			item_code=args.get("item_code"),
+
+		args.actual_qty = args.qty
+		args.batch_nos = frappe._dict({args.batch_no: args})
+
+		batch_obj = BatchNoValuation(
+			sle=args,
 			warehouse=args.get("warehouse"),
-			batch_no=args.get("batch_no"),
-			posting_date=args.get("posting_date"),
-			posting_time=args.get("posting_time"),
+			item_code=args.get("item_code"),
 		)
 
+		return batch_obj.get_incoming_rate()
 	else:
 		valuation_method = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
@@ -647,3 +657,18 @@ def _update_item_info(scan_result: Dict[str, Optional[str]]) -> Dict[str, Option
 		):
 			scan_result.update(item_info)
 	return scan_result
+
+
+def get_combine_datetime(posting_date, posting_time):
+	import datetime
+
+	if isinstance(posting_date, str):
+		posting_date = getdate(posting_date)
+
+	if isinstance(posting_time, str):
+		posting_time = get_time(posting_time)
+
+	if isinstance(posting_time, datetime.timedelta):
+		posting_time = (datetime.datetime.min + posting_time).time()
+
+	return datetime.datetime.combine(posting_date, posting_time).replace(microsecond=0)

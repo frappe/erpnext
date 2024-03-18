@@ -297,11 +297,35 @@ class TestCustomer(FrappeTestCase):
 		if credit_limit > outstanding_amt:
 			set_credit_limit("_Test Customer", "_Test Company", credit_limit)
 
-		# Makes Sales invoice from Sales Order
-		so.save(ignore_permissions=True)
-		si = make_sales_invoice(so.name)
-		si.save(ignore_permissions=True)
-		self.assertRaises(frappe.ValidationError, make_sales_order)
+	def test_customer_credit_limit_after_submit(self):
+		from erpnext.controllers.accounts_controller import update_child_qty_rate
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		outstanding_amt = self.get_customer_outstanding_amount()
+		credit_limit = get_credit_limit("_Test Customer", "_Test Company")
+
+		if outstanding_amt <= 0.0:
+			item_qty = int((abs(outstanding_amt) + 200) / 100)
+			make_sales_order(qty=item_qty)
+
+		if credit_limit <= 0.0:
+			set_credit_limit("_Test Customer", "_Test Company", outstanding_amt + 100)
+
+		so = make_sales_order(rate=100, qty=1)
+		# Update qty in submitted Sales Order to trigger Credit Limit validation
+		fields = ["name", "item_code", "delivery_date", "conversion_factor", "qty", "rate", "uom", "idx"]
+		modified_item = frappe._dict()
+		for x in fields:
+			modified_item[x] = so.items[0].get(x)
+		modified_item["docname"] = so.items[0].name
+		modified_item["qty"] = 2
+		self.assertRaises(
+			frappe.ValidationError,
+			update_child_qty_rate,
+			so.doctype,
+			frappe.json.dumps([modified_item]),
+			so.name,
+		)
 
 	def test_customer_credit_limit_on_change(self):
 		outstanding_amt = self.get_customer_outstanding_amount()
@@ -345,37 +369,6 @@ class TestCustomer(FrappeTestCase):
 
 		due_date = get_due_date("2017-01-22", "Customer", "_Test Customer")
 		self.assertEqual(due_date, "2017-01-22")
-
-	def test_serach_fields_for_customer(self):
-		from erpnext.controllers.queries import customer_query
-
-		frappe.db.set_single_value("Selling Settings", "cust_master_name", "Naming Series")
-
-		make_property_setter(
-			"Customer", None, "search_fields", "customer_group", "Data", for_doctype="Doctype"
-		)
-
-		data = customer_query(
-			"Customer", "_Test Customer", "", 0, 20, filters={"name": "_Test Customer"}, as_dict=True
-		)
-
-		self.assertEqual(data[0].name, "_Test Customer")
-		self.assertEqual(data[0].customer_group, "_Test Customer Group")
-		self.assertTrue("territory" not in data[0])
-
-		make_property_setter(
-			"Customer", None, "search_fields", "customer_group, territory", "Data", for_doctype="Doctype"
-		)
-		data = customer_query(
-			"Customer", "_Test Customer", "", 0, 20, filters={"name": "_Test Customer"}, as_dict=True
-		)
-
-		self.assertEqual(data[0].name, "_Test Customer")
-		self.assertEqual(data[0].customer_group, "_Test Customer Group")
-		self.assertEqual(data[0].territory, "_Test Territory")
-		self.assertTrue("territory" in data[0])
-
-		frappe.db.set_single_value("Selling Settings", "cust_master_name", "Customer Name")
 
 	def test_parse_full_name(self):
 		first, middle, last = parse_full_name("John")

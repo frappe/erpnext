@@ -7,7 +7,6 @@ import unittest
 import frappe
 from frappe.utils.response import json_handler
 
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
 	add_account_subtype,
 	add_account_type,
@@ -71,14 +70,6 @@ class TestPlaidSettings(unittest.TestCase):
 
 		bank = json.dumps(frappe.get_doc("Bank", "Citi").as_dict(), default=json_handler)
 		company = frappe.db.get_single_value("Global Defaults", "default_company")
-
-		if frappe.db.get_value("Company", company, "default_bank_account") is None:
-			frappe.db.set_value(
-				"Company",
-				company,
-				"default_bank_account",
-				get_default_bank_cash_account(company, "Cash").get("account"),
-			)
 
 		add_bank_accounts(bank_accounts, bank, company)
 

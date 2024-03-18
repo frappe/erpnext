@@ -68,7 +68,7 @@
   {
    "fieldname": "incoming_rate",
    "fieldtype": "Float",
-   "label": "Incoming Rate",
+   "label": "Valuation Rate",
    "no_copy": 1,
    "read_only": 1,
    "read_only_depends_on": "eval:parent.type_of_transaction == \"Outward\""
@@ -76,6 +76,7 @@
   {
    "fieldname": "outgoing_rate",
    "fieldtype": "Float",
+   "hidden": 1,
    "label": "Outgoing Rate",
    "no_copy": 1,
    "read_only": 1
@@ -95,6 +96,7 @@
    "default": "0",
    "fieldname": "is_outward",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Outward",
    "read_only": 1
   },
@@ -120,7 +122,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-12-10 19:47:48.227772",
+ "modified": "2024-02-23 12:44:18.054270",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Entry",

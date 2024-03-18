@@ -51,7 +51,16 @@ class PackedItem(Document):
 		warehouse: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	def set_actual_and_projected_qty(self):
+		"Set actual and projected qty based on warehouse and item_code"
+		_bin = frappe.db.get_value(
+			"Bin",
+			{"item_code": self.item_code, "warehouse": self.warehouse},
+			["actual_qty", "projected_qty"],
+			as_dict=True,
+		)
+		self.actual_qty = _bin.actual_qty if _bin else 0
+		self.projected_qty = _bin.projected_qty if _bin else 0
 
 
 def make_packing_list(doc):
@@ -227,6 +236,9 @@ def update_packed_item_stock_data(main_item_row, pi_row, packing_item, item_data
 	bin = get_packed_item_bin_qty(packing_item.item_code, pi_row.warehouse)
 	pi_row.actual_qty = flt(bin.get("actual_qty"))
 	pi_row.projected_qty = flt(bin.get("projected_qty"))
+	pi_row.use_serial_batch_fields = frappe.db.get_single_value(
+		"Stock Settings", "use_serial_batch_fields"
+	)
 
 
 def update_packed_item_price_data(pi_row, item_data, doc):

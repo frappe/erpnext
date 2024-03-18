@@ -2101,6 +2101,46 @@ class TestSalesOrder(FrappeTestCase):
 			self.assertFalse(row.warehouse == rejected_warehouse)
 			self.assertTrue(row.warehouse == warehouse)
 
+	def test_pick_list_for_batch(self):
+		from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
+
+		batch_item = make_item(
+			"_Test Batch Item for Pick LIST",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BATCH-SDDTBIFRM-.#####",
+			},
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+		se = make_stock_entry(item_code=batch_item, qty=10, target=warehouse, use_serial_batch_fields=1)
+		so = make_sales_order(item_code=batch_item, qty=10, warehouse=warehouse)
+		pick_list = create_pick_list(so.name)
+
+		pick_list.save()
+		batch_no = frappe.get_all(
+			"Serial and Batch Entry",
+			filters={"parent": se.items[0].serial_and_batch_bundle},
+			fields=["batch_no"],
+		)[0].batch_no
+
+		for row in pick_list.locations:
+			self.assertEqual(row.qty, 10.0)
+			self.assertTrue(row.warehouse == warehouse)
+			self.assertTrue(row.batch_no == batch_no)
+
+		pick_list.submit()
+
+		dn = create_delivery_note(pick_list.name)
+		for row in dn.items:
+			self.assertEqual(row.qty, 10.0)
+			self.assertTrue(row.warehouse == warehouse)
+			self.assertTrue(row.batch_no == batch_no)
+
+		dn.submit()
+		dn.reload()
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
@@ -2166,13 +2206,14 @@ def make_sales_order(**args):
 	return so
 
 
-def create_dn_against_so(so, delivered_qty=0):
+def create_dn_against_so(so, delivered_qty=0, do_not_submit=False):
 	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 	dn = make_delivery_note(so)
 	dn.get("items")[0].qty = delivered_qty or 5
 	dn.insert()
-	dn.submit()
+	if not do_not_submit:
+		dn.submit()
 	return dn
 
 

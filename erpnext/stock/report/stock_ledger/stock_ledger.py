@@ -2,6 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import copy
+from collections import defaultdict
+
 import frappe
 from frappe import _
 from frappe.query_builder.functions import CombineDatetime
@@ -26,6 +29,10 @@ def execute(filters=None):
 	item_details = get_item_details(items, sl_entries, include_uom)
 	opening_row = get_opening_balance(filters, columns, sl_entries)
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
+	bundle_details = {}
+
+	if filters.get("segregate_serial_batch_bundle"):
+		bundle_details = get_serial_batch_bundle_details(sl_entries, filters)
 
 	data = []
 	conversion_factors = []
@@ -41,10 +48,14 @@ def execute(filters=None):
 	available_serial_nos = {}
 	inventory_dimension_filters_applied = check_inventory_dimension_filters_applied(filters)
 
+	batch_balance_dict = defaultdict(float)
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 
 		sle.update(item_detail)
+		if bundle_info := bundle_details.get(sle.serial_and_batch_bundle):
+			data.extend(get_segregated_bundle_entries(sle, bundle_info, batch_balance_dict))
+			continue
 
 		if filters.get("batch_no") or inventory_dimension_filters_applied:
 			actual_qty += flt(sle.actual_qty, precision)
@@ -74,6 +85,67 @@ def execute(filters=None):
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
+
+
+def get_segregated_bundle_entries(sle, bundle_details, batch_balance_dict):
+	segregated_entries = []
+	qty_before_transaction = sle.qty_after_transaction - sle.actual_qty
+	stock_value_before_transaction = sle.stock_value - sle.stock_value_difference
+
+	for row in bundle_details:
+		new_sle = copy.deepcopy(sle)
+		new_sle.update(row)
+		new_sle.update(
+			{
+				"in_out_rate": flt(new_sle.stock_value_difference / row.qty) if row.qty else 0,
+				"in_qty": row.qty if row.qty > 0 else 0,
+				"out_qty": row.qty if row.qty < 0 else 0,
+				"qty_after_transaction": qty_before_transaction + row.qty,
+				"stock_value": stock_value_before_transaction + new_sle.stock_value_difference,
+				"incoming_rate": row.incoming_rate if row.qty > 0 else 0,
+			}
+		)
+
+		if row.batch_no:
+			batch_balance_dict[row.batch_no] += row.qty
+			new_sle.update({"qty_after_transaction": batch_balance_dict[row.batch_no]})
+
+		qty_before_transaction += row.qty
+		stock_value_before_transaction += new_sle.stock_value_difference
+
+		new_sle.valuation_rate = (
+			stock_value_before_transaction / qty_before_transaction if qty_before_transaction else 0
+		)
+
+		segregated_entries.append(new_sle)
+
+	return segregated_entries
+
+
+def get_serial_batch_bundle_details(sl_entries, filters=None):
+	bundle_details = []
+	for sle in sl_entries:
+		if sle.serial_and_batch_bundle:
+			bundle_details.append(sle.serial_and_batch_bundle)
+
+	if not bundle_details:
+		return frappe._dict({})
+
+	query_filers = {"parent": ("in", bundle_details)}
+	if filters.get("batch_no"):
+		query_filers["batch_no"] = filters.batch_no
+
+	_bundle_details = frappe._dict({})
+	batch_entries = frappe.get_all(
+		"Serial and Batch Entry",
+		filters=query_filers,
+		fields=["parent", "qty", "incoming_rate", "stock_value_difference", "batch_no", "serial_no"],
+		order_by="parent, idx",
+	)
+	for entry in batch_entries:
+		_bundle_details.setdefault(entry.parent, []).append(entry)
+
+	return _bundle_details
 
 
 def update_available_serial_nos(available_serial_nos, sle):
@@ -256,7 +328,6 @@ def get_columns(filters):
 				"options": "Serial and Batch Bundle",
 				"width": 100,
 			},
-			{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
 			{
 				"label": _("Project"),
 				"fieldname": "project",
@@ -283,7 +354,7 @@ def get_stock_ledger_entries(filters, items):
 		frappe.qb.from_(sle)
 		.select(
 			sle.item_code,
-			CombineDatetime(sle.posting_date, sle.posting_time).as_("date"),
+			sle.posting_datetime.as_("date"),
 			sle.warehouse,
 			sle.posting_date,
 			sle.posting_time,
