@@ -60,6 +60,7 @@ def execute(filters=None):
 		if filters.get("batch_no") or inventory_dimension_filters_applied:
 			actual_qty += flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
+			batch_balance_dict[sle.batch_no] += sle.actual_qty
 
 			if sle.voucher_type == "Stock Reconciliation" and not sle.actual_qty:
 				actual_qty = sle.qty_after_transaction
