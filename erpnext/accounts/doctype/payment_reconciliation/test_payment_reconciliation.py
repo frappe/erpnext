@@ -1130,6 +1130,17 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(pr.allocation[0].allocated_amount, 85)
 		self.assertEqual(pr.allocation[0].difference_amount, 0)
 
+		pr.reconcile()
+		si.reload()
+		self.assertEqual(si.outstanding_amount, 0)
+		# No Exchange Gain/Loss journal should be generated
+		exc_gain_loss_journals = frappe.db.get_all(
+			"Journal Entry Account",
+			filters={"reference_type": si.doctype, "reference_name": si.name, "docstatus": 1},
+			fields=["parent"],
+		)
+		self.assertEqual(exc_gain_loss_journals, [])
+
 	def test_reconciliation_purchase_invoice_against_return(self):
 		self.supplier = "_Test Supplier USD"
 		pi = self.create_purchase_invoice(qty=5, rate=50, do_not_submit=True)
