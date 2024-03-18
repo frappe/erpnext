@@ -754,6 +754,13 @@ def get_list_context(context=None):
 
 
 @frappe.whitelist()
+def is_enable_cutoff_date_on_bulk_delivery_note_creation():
+	return frappe.db.get_single_value(
+		"Accounts Settings", "enable_cutoff_date_on_bulk_delivery_note_creation"
+	)
+
+
+@frappe.whitelist()
 def close_or_unclose_sales_orders(names, status):
 	if not frappe.has_permission("Sales Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
