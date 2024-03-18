@@ -162,7 +162,7 @@ def create_log(doc_name, e, from_doctype, to_doctype, status, log_date=None, res
 	transaction_log.from_doctype = from_doctype
 	transaction_log.to_doctype = to_doctype
 	transaction_log.retried = restarted
-	transaction_log.save()
+	transaction_log.save(ignore_permissions=True)
 
 
 def show_job_status(fail_count, deserialized_data_count, to_doctype):
