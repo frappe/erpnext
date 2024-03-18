@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-14 17:21\n"
+"PO-Revision-Date: 2024-03-18 18:19\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -735,7 +735,7 @@ msgstr "\"Bis-Datum\" ist erforderlich,"
 
 #: stock/doctype/packing_slip/packing_slip.py:96
 msgid "'To Package No.' cannot be less than 'From Package No.'"
-msgstr ""
+msgstr "„Bis Paket-Nr.' darf nicht kleiner als „Von Paket Nr.“ sein"
 
 #: controllers/sales_and_purchase_return.py:67
 msgid "'Update Stock' can not be checked because items are not delivered via {0}"
@@ -43500,7 +43500,7 @@ msgstr "Keine {0} für Inter-Company-Transaktionen gefunden."
 
 #: assets/doctype/asset/asset.js:239
 msgid "No."
-msgstr "Nein."
+msgstr "Nr."
 
 #. Label of a Select field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
@@ -47226,7 +47226,7 @@ msgstr "Währung des Kontos der Partei"
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Party Account No. (Bank Statement)"
-msgstr ""
+msgstr "Konto-Nr. der Partei (Kontoauszug)"
 
 #: controllers/accounts_controller.py:1983
 msgid "Party Account {0} currency ({1}) and document currency ({2}) should be same"
