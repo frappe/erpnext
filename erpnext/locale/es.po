@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-15 17:18\n"
+"PO-Revision-Date: 2024-03-18 18:19\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -23647,7 +23647,7 @@ msgstr ""
 
 #: controllers/accounts_controller.py:550
 msgid "Disabled pricing rules since this {} is an internal transfer"
-msgstr ""
+msgstr "Deshabilitado las reglas de precios ya que esta {} es una transferencia interna"
 
 #: controllers/accounts_controller.py:564
 msgid "Disabled tax included prices since this {} is an internal transfer"
@@ -60847,7 +60847,7 @@ msgstr ""
 
 #: controllers/buying_controller.py:400 controllers/selling_controller.py:479
 msgid "Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-msgstr ""
+msgstr "Fila {0}: La tarifa del artículo se ha actualizado según la tarifa de valoración, ya que se trata de una transferencia de stock interna"
 
 #: controllers/subcontracting_controller.py:98
 msgid "Row {0}: Item {1} must be a stock item."
@@ -80773,7 +80773,7 @@ msgstr ""
 
 #: setup/default_success_action.py:14
 msgid "{0} has been submitted successfully"
-msgstr "{0} ha sido enviado con éxito"
+msgstr "{0} se ha enviado correctamente"
 
 #: controllers/accounts_controller.py:2212
 msgid "{0} in row {1}"
