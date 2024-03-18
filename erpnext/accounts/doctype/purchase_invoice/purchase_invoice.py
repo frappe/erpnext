@@ -1158,12 +1158,12 @@ class PurchaseInvoice(BuyingController):
 
 	def make_provisional_gl_entry(self, gl_entries, item):
 		if item.purchase_receipt:
-			if not self.provisional_enpenses_booked_in_pr:
-				pr_item = self.provisional_accounts.get(item.pr_detail, {})
-				provisional_account = pr_item.get("provisional_account")
-				pr_qty = pr_item.get("qty")
-				pr_base_rate = pr_item.get("base_rate")
+			pr_item = self.provisional_accounts.get(item.pr_detail, {})
+			provisional_account = pr_item.get("provisional_account")
+			pr_qty = pr_item.get("qty")
+			pr_base_rate = pr_item.get("base_rate")
 
+			if not self.provisional_enpenses_booked_in_pr:
 				# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
 				provision_gle_against_pr = frappe.db.get_value(
 					"GL Entry",
