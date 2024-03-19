@@ -606,21 +606,21 @@ def get_account_details(
 	if account_balance and (
 		account_balance[0].balance or account_balance[0].balance_in_account_currency
 	):
-		account_with_new_balance = ExchangeRateRevaluation.calculate_new_account_balance(
+		if account_with_new_balance := ExchangeRateRevaluation.calculate_new_account_balance(
 			company, posting_date, account_balance
-		)
-		row = account_with_new_balance[0]
-		account_details.update(
-			{
-				"balance_in_base_currency": row["balance_in_base_currency"],
-				"balance_in_account_currency": row["balance_in_account_currency"],
-				"current_exchange_rate": row["current_exchange_rate"],
-				"new_exchange_rate": row["new_exchange_rate"],
-				"new_balance_in_base_currency": row["new_balance_in_base_currency"],
-				"new_balance_in_account_currency": row["new_balance_in_account_currency"],
-				"zero_balance": row["zero_balance"],
-				"gain_loss": row["gain_loss"],
-			}
-		)
+		):
+			row = account_with_new_balance[0]
+			account_details.update(
+				{
+					"balance_in_base_currency": row["balance_in_base_currency"],
+					"balance_in_account_currency": row["balance_in_account_currency"],
+					"current_exchange_rate": row["current_exchange_rate"],
+					"new_exchange_rate": row["new_exchange_rate"],
+					"new_balance_in_base_currency": row["new_balance_in_base_currency"],
+					"new_balance_in_account_currency": row["new_balance_in_account_currency"],
+					"zero_balance": row["zero_balance"],
+					"gain_loss": row["gain_loss"],
+				}
+			)
 
 	return account_details

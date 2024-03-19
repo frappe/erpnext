@@ -723,6 +723,15 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.cancel()
 		self.assertEqual(dn.status, "Cancelled")
 
+	def test_sales_order_reference_validation(self):
+		so = make_sales_order(po_no="12345")
+		dn = create_dn_against_so(so.name, delivered_qty=2, do_not_submit=True)
+		dn.items[0].against_sales_order = None
+		self.assertRaises(frappe.ValidationError, dn.save)
+		dn.reload()
+		dn.items[0].so_detail = None
+		self.assertRaises(frappe.ValidationError, dn.save)
+
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI
 		so = make_sales_order(po_no="12345")

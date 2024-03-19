@@ -3,22 +3,36 @@
 
 frappe.ui.form.on("Currency Exchange Settings", {
 	service_provider: function (frm) {
-		if (frm.doc.service_provider == "exchangerate.host") {
-			let result = ["result"];
-			let params = {
-				date: "{transaction_date}",
-				from: "{from_currency}",
-				to: "{to_currency}",
-			};
-			add_param(frm, "https://api.exchangerate.host/convert", params, result);
-		} else if (frm.doc.service_provider == "frankfurter.app") {
-			let result = ["rates", "{to_currency}"];
-			let params = {
-				base: "{from_currency}",
-				symbols: "{to_currency}",
-			};
-			add_param(frm, "https://frankfurter.app/{transaction_date}", params, result);
-		}
+		frm.call({
+			method: "erpnext.accounts.doctype.currency_exchange_settings.currency_exchange_settings.get_api_endpoint",
+			args: {
+				service_provider: frm.doc.service_provider,
+				use_http: frm.doc.use_http,
+			},
+			callback: function (r) {
+				if (r && r.message) {
+					if (frm.doc.service_provider == "exchangerate.host") {
+						let result = ["result"];
+						let params = {
+							date: "{transaction_date}",
+							from: "{from_currency}",
+							to: "{to_currency}",
+						};
+						add_param(frm, r.message, params, result);
+					} else if (frm.doc.service_provider == "frankfurter.app") {
+						let result = ["rates", "{to_currency}"];
+						let params = {
+							base: "{from_currency}",
+							symbols: "{to_currency}",
+						};
+						add_param(frm, r.message, params, result);
+					}
+				}
+			},
+		});
+	},
+	use_http: function (frm) {
+		frm.trigger("service_provider");
 	},
 });
 
