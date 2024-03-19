@@ -10,26 +10,24 @@ frappe.ui.form.on("Transaction Deletion Record", {
 				callback: function (r) {
 					doctypes_to_be_ignored_array = r.message;
 					populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm);
-					frm.refresh_field('doctypes_to_be_ignored');
-				}
+					frm.refresh_field("doctypes_to_be_ignored");
+				},
 			});
 		}
-
 	},
 
-	refresh: function(frm) {
-		if (frm.doc.docstatus==1 && ['Queued', 'Failed'].find(x => x == frm.doc.status)) {
-			let execute_btn = __("Start Deletion")
+	refresh: function (frm) {
+		if (frm.doc.docstatus == 1 && ["Queued", "Failed"].find((x) => x == frm.doc.status)) {
+			let execute_btn = frm.doc.status == "Queued" ? __("Start Deletion") : __("Retry");
 
 			frm.add_custom_button(execute_btn, () => {
 				// Entry point for chain of events
 				frm.call({
-					method: 'process_tasks',
-					doc: frm.doc
+					method: "process_tasks",
+					doc: frm.doc,
 				});
 			});
 		}
-
 	},
 });
 
