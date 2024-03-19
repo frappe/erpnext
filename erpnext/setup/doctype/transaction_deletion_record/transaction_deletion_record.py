@@ -135,7 +135,6 @@ class TransactionDeletionRecord(Document):
 			job_names = self.generate_job_name_for_next_tasks(task=task)
 			self.validate_running_task_for_doc(job_names=job_names)
 
-			# method = self.task_to_internal_method_map[task]
 			# Generate Job Id to uniquely identify each task for this document
 			job_id = self.generate_job_name_for_task(task)
 
@@ -152,7 +151,6 @@ class TransactionDeletionRecord(Document):
 
 	def execute_task(self, task_to_execute: str | None = None):
 		if task_to_execute:
-			pass
 			method = self.task_to_internal_method_map[task_to_execute]
 			if task := getattr(self, method, None):
 				task()
@@ -312,7 +310,9 @@ class TransactionDeletionRecord(Document):
 						frappe.db.set_value(docfield.doctype, docfield.name, "done", 1)
 
 			pending_doctypes = frappe.db.get_all(
-				docfield.doctype, filters={"parent": self.name, "done": 0}, pluck="doctype_name"
+				"Transaction Deletion Record Details",
+				filters={"parent": self.name, "done": 0},
+				pluck="doctype_name",
 			)
 			if pending_doctypes:
 				# as method is enqueued after commit, calling itself will not make validate_doc_status to throw
