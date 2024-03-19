@@ -5,6 +5,7 @@ import unittest
 
 import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.e_commerce.doctype.e_commerce_settings.test_e_commerce_settings import (
 	setup_e_commerce_settings,
@@ -19,7 +20,7 @@ from erpnext.e_commerce.shopping_cart.cart import get_party
 from erpnext.stock.doctype.item.test_item import make_item
 
 
-class TestItemReview(unittest.TestCase):
+class TestItemReview(FrappeTestCase):
 	def setUp(self):
 		item = make_item("Test Mobile Phone")
 		if not frappe.db.exists("Website Item", {"item_code": "Test Mobile Phone"}):
@@ -29,8 +30,7 @@ class TestItemReview(unittest.TestCase):
 		frappe.local.shopping_cart_settings = None
 
 	def tearDown(self):
-		frappe.get_cached_doc("Website Item", {"item_code": "Test Mobile Phone"}).delete()
-		setup_e_commerce_settings({"enable_reviews": 0})
+		frappe.db.rollback()
 
 	def test_add_and_get_item_reviews_from_customer(self):
 		"Add / Get Reviews from a User that is a valid customer (has added to cart or purchased in the past)"
