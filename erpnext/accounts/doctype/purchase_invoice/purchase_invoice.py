@@ -1217,10 +1217,12 @@ class PurchaseInvoice(BuyingController):
 			fields=["name", "provisional_expense_account", "qty", "base_rate"],
 		)
 		default_provisional_account = self.get_company_default("default_provisional_account")
-		provisional_accounts = [
-			d.provisional_expense_account if d.provisional_expense_account else default_provisional_account
-			for d in pr_items
-		]
+		provisional_accounts = set(
+			[
+				d.provisional_expense_account if d.provisional_expense_account else default_provisional_account
+				for d in pr_items
+			]
+		)
 
 		provisional_gl_entries = frappe.get_all(
 			"GL Entry",
