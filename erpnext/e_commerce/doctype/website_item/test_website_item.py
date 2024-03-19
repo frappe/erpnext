@@ -28,8 +28,7 @@ from frappe.tests.utils import FrappeTestCase
 
 
 class TestWebsiteItem(FrappeTestCase):
-	@classmethod
-	def setUpClass(cls):
+	def setUp(self):
 		setup_e_commerce_settings(
 			{
 				"company": "_Test Company",
@@ -39,11 +38,6 @@ class TestWebsiteItem(FrappeTestCase):
 			}
 		)
 
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.rollback()
-
-	def setUp(self):
 		if self._testMethodName in WEBITEM_DESK_TESTS:
 			make_item(
 				"Test Web Item",
