@@ -828,6 +828,13 @@ class SerialandBatchBundle(Document):
 		if not self.has_batch_no:
 			return
 
+		if (
+			self.voucher_type == "Stock Reconciliation"
+			and self.type_of_transaction == "Outward"
+			and frappe.db.get_value("Stock Reconciliation Item", self.voucher_detail_no, "qty") > 0
+		):
+			return
+
 		batches = [d.batch_no for d in self.entries if d.batch_no]
 		if not batches:
 			return
