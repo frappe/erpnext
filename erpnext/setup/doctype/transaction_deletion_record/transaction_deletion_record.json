@@ -7,10 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "column_break_txbg",
+  "section_break_qpwb",
   "status",
-  "tasks_section",
   "error_log",
+  "tasks_section",
   "delete_bin_data",
   "delete_leads_and_addresses",
   "reset_company_default_values",
@@ -62,10 +62,6 @@
    "no_copy": 1,
    "options": "Queued\nRunning\nFailed\nCompleted\nCancelled",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_txbg",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "section_break_tbej",
@@ -129,12 +125,16 @@
    "fieldname": "error_log",
    "fieldtype": "Long Text",
    "label": "Error Log"
+  },
+  {
+   "fieldname": "section_break_qpwb",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-19 17:04:49.369734",
+ "modified": "2024-03-19 17:47:04.490196",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
