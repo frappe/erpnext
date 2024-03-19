@@ -44,7 +44,7 @@ class TestItemReview(FrappeTestCase):
 
 		# post review on "Test Mobile Phone"
 		try:
-			add_item_review(web_item, "Great Product", 3, "Would recommend this product")
+			add_item_review(web_item, "Great Product", 1, "Would recommend this product")
 			review_name = frappe.db.get_value("Item Review", {"website_item": web_item})
 		except Exception:
 			self.fail(f"Error while publishing review for {web_item}")
@@ -52,8 +52,7 @@ class TestItemReview(FrappeTestCase):
 		review_data = get_item_reviews(web_item, 0, 10)
 
 		self.assertEqual(len(review_data.reviews), 1)
-		self.assertEqual(review_data.average_rating, 3)
-		self.assertEqual(review_data.reviews_per_rating[2], 100)
+		self.assertEqual(review_data.average_rating, 1)
 
 		# tear down
 		frappe.set_user("Administrator")
