@@ -9,7 +9,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	apply_pricing_rule_on_item(item) {
 		let effective_item_rate = item.price_list_rate;
 		let item_rate = item.rate;
-		if (in_list(["Sales Order", "Quotation"], item.parenttype) && item.blanket_order_rate) {
+		if (["Sales Order", "Quotation"].includes(item.parenttype) && item.blanket_order_rate) {
 			effective_item_rate = item.blanket_order_rate;
 		}
 		if (item.margin_type == "Percentage") {
@@ -52,7 +52,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		// Advance calculation applicable to Sales/Purchase Invoice
 		if (
-			in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)
+			["Sales Invoice", "POS Invoice", "Purchase Invoice"].includes(this.frm.doc.doctype)
 			&& this.frm.doc.docstatus < 2
 			&& !this.frm.doc.is_return
 		) {
@@ -60,7 +60,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 
 		if (
-			in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
+			["Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)
 			&& this.frm.doc.is_pos
 			&& this.frm.doc.is_return
 		) {
@@ -69,7 +69,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 
 		// Sales person's commission
-		if (in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
+		if (["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"].includes(this.frm.doc.doctype)) {
 			this.calculate_commission();
 			this.calculate_contribution();
 		}
@@ -547,7 +547,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			? this.frm.doc["taxes"][tax_count - 1].total + flt(this.frm.doc.rounding_adjustment)
 			: this.frm.doc.net_total);
 
-		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"], this.frm.doc.doctype)) {
+		if(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)) {
 			this.frm.doc.base_grand_total = (this.frm.doc.total_taxes_and_charges) ?
 				flt(this.frm.doc.grand_total * this.frm.doc.conversion_rate) : this.frm.doc.base_net_total;
 		} else {
@@ -555,7 +555,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			this.frm.doc.taxes_and_charges_added = this.frm.doc.taxes_and_charges_deducted = 0.0;
 			if(tax_count) {
 				$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-					if (in_list(["Valuation and Total", "Total"], tax.category)) {
+					if (["Valuation and Total", "Total"].includes(tax.category)) {
 						if(tax.add_deduct_tax == "Add") {
 							me.frm.doc.taxes_and_charges_added += flt(tax.tax_amount_after_discount_amount);
 						} else {
@@ -702,7 +702,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			var actual_taxes_dict = {};
 
 			$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-				if (in_list(["Actual", "On Item Quantity"], tax.charge_type)) {
+				if (["Actual", "On Item Quantity"].includes(tax.charge_type)) {
 					var tax_amount = (tax.category == "Valuation") ? 0.0 : tax.tax_amount;
 					tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 					actual_taxes_dict[tax.idx] = tax_amount;
@@ -747,7 +747,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		// NOTE:
 		// paid_amount and write_off_amount is only for POS/Loyalty Point Redemption Invoice
 		// total_advance is only for non POS Invoice
-		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_return){
+		if(["Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype) && this.frm.doc.is_return){
 			this.calculate_paid_amount();
 		}
 
@@ -755,7 +755,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
 
-		if(in_list(["Sales Invoice", "POS Invoice", "Purchase Invoice"], this.frm.doc.doctype)) {
+		if(["Sales Invoice", "POS Invoice", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
 			let grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 			let base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
 
@@ -778,7 +778,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 				this.frm.refresh_field("base_paid_amount");
 			}
 
-			if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)) {
+			if(["Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)) {
 				let total_amount_for_payment = (this.frm.doc.redeem_loyalty_points && this.frm.doc.loyalty_amount)
 					? flt(total_amount_to_pay - this.frm.doc.loyalty_amount, precision("base_grand_total"))
 					: total_amount_to_pay;
@@ -882,7 +882,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	calculate_change_amount(){
 		this.frm.doc.change_amount = 0.0;
 		this.frm.doc.base_change_amount = 0.0;
-		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype)
+		if(["Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)
 			&& this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return) {
 
 			var payment_types = $.map(this.frm.doc.payments, function(d) { return d.type; });
