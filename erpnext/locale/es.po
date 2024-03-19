@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-18 18:19\n"
+"PO-Revision-Date: 2024-03-19 18:20\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -3857,7 +3857,7 @@ msgstr "Añadir Proveedores"
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Add Template"
-msgstr ""
+msgstr "Añadir plantilla"
 
 #: utilities/activation.py:125
 msgid "Add Timesheets"
@@ -13169,7 +13169,7 @@ msgstr "N° de Chasis"
 #: communication/doctype/communication_medium/communication_medium.json
 msgctxt "Communication Medium"
 msgid "Chat"
-msgstr ""
+msgstr "Chat"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Check Stock Ledger'
@@ -15661,97 +15661,97 @@ msgstr "Conectando a QuickBooks"
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #. Label of a Tab Break field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Connections"
-msgstr ""
+msgstr "Conexiones"
 
 #: accounts/report/general_ledger/general_ledger.js:172
 msgid "Consider Accounting Dimensions"
@@ -17930,7 +17930,7 @@ msgstr "Crear Nro. de Serie"
 #: stock/dashboard/item_dashboard.js:271
 #: stock/doctype/material_request/material_request.js:376
 msgid "Create Stock Entry"
-msgstr ""
+msgstr "Crear entrada de stock"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:153
 msgid "Create Supplier Quotation"
@@ -25156,7 +25156,7 @@ msgstr "Editar"
 
 #: public/js/utils/serial_no_batch_selector.js:30
 msgid "Edit Full Form"
-msgstr ""
+msgstr "Editar formulario completo"
 
 #: controllers/item_variant.py:158
 msgid "Edit Not Allowed"
@@ -26283,31 +26283,31 @@ msgstr "Cuenta de Patrimonio / Pasivo"
 #: manufacturing/doctype/job_card/job_card.py:773
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:197
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #. Option for the 'Status' (Select) field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #. Option for the 'Status' (Select) field in DocType 'Ledger Merge'
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgctxt "Ledger Merge"
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #. Label of a Small Text field in DocType 'POS Closing Entry'
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgctxt "POS Closing Entry"
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #. Label of a Section Break field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Error"
-msgstr ""
+msgstr "Error"
 
 #. Label of a Long Text field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
@@ -33315,7 +33315,7 @@ msgstr "Interesado"
 
 #: buying/doctype/purchase_order/purchase_order_dashboard.py:29
 msgid "Internal"
-msgstr ""
+msgstr "Interno"
 
 #. Label of a Section Break field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
@@ -40209,7 +40209,7 @@ msgstr "Maestros"
 
 #: projects/doctype/project/project_dashboard.py:14
 msgid "Material"
-msgstr ""
+msgstr "Material"
 
 #: manufacturing/doctype/work_order/work_order.js:613
 msgid "Material Consumption"
@@ -43169,7 +43169,7 @@ msgstr "No hay observaciones"
 
 #: stock/dashboard/item_dashboard.js:147
 msgid "No Stock Available Currently"
-msgstr ""
+msgstr "No hay existencias disponibles actualmente"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2130
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
