@@ -154,7 +154,6 @@ class StockReconciliation(StockController):
 					{
 						"current_serial_and_batch_bundle": sn_doc.name,
 						"current_serial_no": "",
-						"batch_no": "",
 					}
 				)
 
