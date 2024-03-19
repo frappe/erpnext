@@ -904,7 +904,6 @@ class PurchaseInvoice(BuyingController):
 				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
 			)
 		)
-		self.provisional_enpenses_booked_in_pr = False
 		if provisional_accounting_for_non_stock_items:
 			self.get_provisional_accounts()
 
@@ -1149,37 +1148,36 @@ class PurchaseInvoice(BuyingController):
 			fields=["name", "provisional_expense_account", "qty", "base_rate"],
 		)
 		default_provisional_account = self.get_company_default("default_provisional_account")
+		provisional_accounts = set(
+			[
+				d.provisional_expense_account if d.provisional_expense_account else default_provisional_account
+				for d in pr_items
+			]
+		)
+
+		provisional_gl_entries = frappe.get_all(
+			"GL Entry",
+			filters={
+				"voucher_type": "Purchase Receipt",
+				"voucher_no": ("in", linked_purchase_receipts),
+				"account": ("in", provisional_accounts),
+				"is_cancelled": 0,
+			},
+			fields=["voucher_detail_no"],
+		)
+		rows_with_provisional_entries = [d.voucher_detail_no for d in provisional_gl_entries]
 		for item in pr_items:
 			self.provisional_accounts[item.name] = {
 				"provisional_account": item.provisional_expense_account or default_provisional_account,
 				"qty": item.qty,
 				"base_rate": item.base_rate,
+				"has_provisional_entry": item.name in rows_with_provisional_entries,
 			}
 
 	def make_provisional_gl_entry(self, gl_entries, item):
 		if item.purchase_receipt:
 			pr_item = self.provisional_accounts.get(item.pr_detail, {})
-			provisional_account = pr_item.get("provisional_account")
-			pr_qty = pr_item.get("qty")
-			pr_base_rate = pr_item.get("base_rate")
-
-			if not self.provisional_enpenses_booked_in_pr:
-				# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-				provision_gle_against_pr = frappe.db.get_value(
-					"GL Entry",
-					{
-						"is_cancelled": 0,
-						"voucher_type": "Purchase Receipt",
-						"voucher_no": item.purchase_receipt,
-						"voucher_detail_no": item.pr_detail,
-						"account": provisional_account,
-					},
-					["name"],
-				)
-				if provision_gle_against_pr:
-					self.provisional_enpenses_booked_in_pr = True
-
-			if self.provisional_enpenses_booked_in_pr:
+			if pr_item.get("has_provisional_entry"):
 				purchase_receipt_doc = frappe.get_cached_doc("Purchase Receipt", item.purchase_receipt)
 
 				# Intentionally passing purchase invoice item to handle partial billing
@@ -1187,9 +1185,9 @@ class PurchaseInvoice(BuyingController):
 					item,
 					gl_entries,
 					self.posting_date,
-					provisional_account,
+					pr_item.get("provisional_account"),
 					reverse=1,
-					item_amount=(min(item.qty, pr_qty) * pr_base_rate),
+					item_amount=(min(item.qty, pr_item.get("qty")) * pr_item.get("base_rate")),
 				)
 
 	def update_gross_purchase_amount_for_linked_assets(self, item):
