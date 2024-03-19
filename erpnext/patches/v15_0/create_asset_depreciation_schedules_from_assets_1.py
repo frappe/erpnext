@@ -14,8 +14,8 @@ def execute():
 
 	blocks = split_list_into_blocks(assets, block_size)
 
-	if len(blocks) > 0:
-		for asset in blocks[0]:
+	if len(blocks) > 1:
+		for asset in blocks[1]:
 			if not asset_depreciation_schedules_map.get(asset.name):
 				continue
 

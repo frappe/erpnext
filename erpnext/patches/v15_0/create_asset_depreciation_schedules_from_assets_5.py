@@ -13,9 +13,9 @@ def execute():
 	block_size = 100  # Size of each block
 
 	blocks = split_list_into_blocks(assets, block_size)
-
-	if len(blocks) > 0:
-		for asset in blocks[0]:
+	print(len(blocks), len(assets), "Checking Value \n\n\n")
+	if len(blocks) > 5:
+		for asset in blocks[5]:
 			if not asset_depreciation_schedules_map.get(asset.name):
 				continue
 
