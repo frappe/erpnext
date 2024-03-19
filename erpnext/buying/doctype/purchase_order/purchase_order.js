@@ -291,7 +291,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 				this.frm.fields_dict.items_section.wrapper.removeClass("hide-border");
 			}
 
-			if (!in_list(["Closed", "Delivered"], doc.status)) {
+			if (!["Closed", "Delivered"].includes(doc.status)) {
 				if (
 					this.frm.doc.status !== "Closed" &&
 					flt(this.frm.doc.per_received, 2) < 100 &&
@@ -336,7 +336,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 
 					this.frm.page.set_inner_btn_group_as_primary(__("Status"));
 				}
-			} else if (in_list(["Closed", "Delivered"], doc.status)) {
+			} else if (["Closed", "Delivered"].includes(doc.status)) {
 				if (this.frm.has_perm("submit")) {
 					this.frm.add_custom_button(
 						__("Re-open"),
