@@ -129,7 +129,7 @@ erpnext.buying = {
 			}
 
 			toggle_subcontracting_fields() {
-				if (in_list(['Purchase Receipt', 'Purchase Invoice'], this.frm.doc.doctype)) {
+				if (['Purchase Receipt', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
 					this.frm.fields_dict.supplied_items.grid.update_docfield_property('consumed_qty',
 						'read_only', this.frm.doc.__onload && this.frm.doc.__onload.backflush_based_on === 'BOM');
 
