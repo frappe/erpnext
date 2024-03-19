@@ -37,6 +37,7 @@ class TransactionDeletionRecord(Document):
 		delete_transactions: DF.Check
 		doctypes: DF.Table[TransactionDeletionRecordDetails]
 		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
+		error_log: DF.LongText | None
 		initialize_doctypes_table: DF.Check
 		reset_company_default_values: DF.Check
 		status: DF.Literal["Queued", "Running", "Failed", "Completed", "Cancelled"]
@@ -149,11 +150,21 @@ class TransactionDeletionRecord(Document):
 				task_to_execute=task,
 			)
 
+			# todo: add a non-background job based approach as well
+
 	def execute_task(self, task_to_execute: str | None = None):
 		if task_to_execute:
 			method = self.task_to_internal_method_map[task_to_execute]
 			if task := getattr(self, method, None):
-				task()
+				try:
+					task()
+				except Exception as err:
+					frappe.db.rollback()
+					traceback = frappe.get_traceback(with_context=True)
+					if traceback:
+						message = "Traceback: <br>" + traceback
+						frappe.db.set_value(self.doctype, self.name, "error_log", message)
+					frappe.db.set_value(self.doctype, self.name, "status", "Failed")
 
 	def delete_notifications(self):
 		self.validate_doc_status()
