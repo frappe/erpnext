@@ -89,10 +89,11 @@
 	<table class="table table-bordered">
 		<thead>
 			<tr>
-				<th style="width: 25%">30 Days</th>
-				<th style="width: 25%">60 Days</th>
-				<th style="width: 25%">90 Days</th>
-				<th style="width: 25%">120 Days</th>
+				<th style="width: 20%">0 - 30 Days</th>
+				<th style="width: 20%">30 - 60 Days</th>
+				<th style="width: 20%">60 - 90 Days</th>
+				<th style="width: 20%">90 - 120 Days</th>
+				<th style="width: 20%">Above 120 Days</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -101,6 +102,7 @@
 				<td>{{ frappe.utils.fmt_money(ageing.range2, currency=filters.presentation_currency) }}</td>
 				<td>{{ frappe.utils.fmt_money(ageing.range3, currency=filters.presentation_currency) }}</td>
 				<td>{{ frappe.utils.fmt_money(ageing.range4, currency=filters.presentation_currency) }}</td>
+				<td>{{ frappe.utils.fmt_money(ageing.range5, currency=filters.presentation_currency) }}</td>
 			</tr>
 		</tbody>
 	</table>
