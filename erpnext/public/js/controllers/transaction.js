@@ -260,11 +260,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	setup_quality_inspection() {
-<<<<<<< HEAD
-		if(!in_list(["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)) {
-=======
-		if(!["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(this.frm.doc.doctype)) {
->>>>>>> d238751e6b (refactor: usage of in_list)
+		if(!["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
 			return;
 		}
 
@@ -276,11 +272,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
-<<<<<<< HEAD
-		const inspection_type = in_list(["Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)
-=======
-		const inspection_type = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(this.frm.doc.doctype)
->>>>>>> d238751e6b (refactor: usage of in_list)
+		const inspection_type = ["Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype)
 			? "Incoming" : "Outgoing";
 
 		let quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
@@ -699,24 +691,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
-<<<<<<< HEAD
-=======
-	on_submit() {
-		if (["Purchase Invoice", "Sales Invoice"].includes(this.frm.doc.doctype)
-			&& !this.frm.doc.update_stock) {
-			return;
-		}
-
-		this.refresh_serial_batch_bundle_field();
-	}
-
-	refresh_serial_batch_bundle_field() {
-		frappe.route_hooks.after_submit = (frm_obj) => {
-			frm_obj.reload_doc();
-		}
-	}
-
->>>>>>> d238751e6b (refactor: usage of in_list)
 	update_qty(cdt, cdn) {
 		var valid_serial_nos = [];
 		var serialnos = [];
@@ -2377,7 +2351,6 @@ erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_
 	}
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-<<<<<<< HEAD
 		new erpnext.SerialNoBatchSelector({
 			frm: frm,
 			item: d,
@@ -2388,28 +2361,6 @@ erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_
 			callback: callback,
 			on_close: on_close
 		}, show_dialog);
-=======
-		if (["Sales Invoice", "Delivery Note"].includes(frm.doc.doctype)) {
-			item_row.type_of_transaction = frm.doc.is_return ? "Inward" : "Outward";
-		} else {
-			item_row.type_of_transaction = frm.doc.is_return ? "Outward" : "Inward";
-		}
-
-		new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
-			if (r) {
-				let update_values = {
-					"serial_and_batch_bundle": r.name,
-					"qty": Math.abs(r.total_qty)
-				}
-
-				if (r.warehouse) {
-					update_values[warehouse_field] = r.warehouse;
-				}
-
-				frappe.model.set_value(item_row.doctype, item_row.name, update_values);
-			}
-		});
->>>>>>> d238751e6b (refactor: usage of in_list)
 	});
 }
 

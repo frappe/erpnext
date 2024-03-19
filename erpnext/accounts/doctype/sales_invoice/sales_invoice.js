@@ -200,7 +200,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 			if(cur_frm.meta._default_print_format) {
 				cur_frm.meta.default_print_format = cur_frm.meta._default_print_format;
 				cur_frm.meta._default_print_format = null;
-			} else if(in_list([cur_frm.pos_print_format, cur_frm.return_print_format], cur_frm.meta.default_print_format)) {
+			} else if([cur_frm.pos_print_format, cur_frm.return_print_format].includes(cur_frm.meta.default_print_format)) {
 				cur_frm.meta.default_print_format = null;
 				cur_frm.meta._default_print_format = null;
 			}

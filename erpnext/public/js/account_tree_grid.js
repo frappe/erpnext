@@ -240,7 +240,7 @@ erpnext.AccountTreeGrid = class AccountTreeGrid extends frappe.views.TreeGridRep
 									flt(account.closing_dr) -
 									flt(account.closing_cr);
 								me.set_debit_or_credit(parent_account, "closing", bal);
-							} else if (in_list(["debit", "credit"], col.field)) {
+							} else if (["debit", "credit"].includes(col.field)) {
 								parent_account[col.field] =
 									flt(parent_account[col.field]) + flt(account[col.field]);
 							}

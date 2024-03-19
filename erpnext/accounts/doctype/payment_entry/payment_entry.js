@@ -21,14 +21,8 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("paid_from", function() {
 			frm.events.validate_company(frm);
 
-<<<<<<< HEAD
-			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
+			var account_types = ["Pay", "Internal Transfer"].includes(frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-=======
-			var account_types = ["Pay", "Internal Transfer"].includes(frm.doc.payment_type)
-				? ["Bank", "Cash"]
-				: [frappe.boot.party_account_types[frm.doc.party_type]];
->>>>>>> d238751e6b (refactor: usage of in_list)
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -81,14 +75,8 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("paid_to", function() {
 			frm.events.validate_company(frm);
 
-<<<<<<< HEAD
-			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
+			var account_types = ["Receive", "Internal Transfer"].includes(frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-=======
-			var account_types = ["Receive", "Internal Transfer"].includes(frm.doc.payment_type)
-				? ["Bank", "Cash"]
-				: [frappe.boot.party_account_types[frm.doc.party_type]];
->>>>>>> d238751e6b (refactor: usage of in_list)
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -133,14 +121,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_query('payment_term', 'references', function(frm, cdt, cdn) {
 			const child = locals[cdt][cdn];
-<<<<<<< HEAD
-			if (in_list(['Purchase Invoice', 'Sales Invoice'], child.reference_doctype) && child.reference_name) {
-=======
-			if (
-				["Purchase Invoice", "Sales Invoice"].includes(child.reference_doctype) &&
-				child.reference_name
-			) {
->>>>>>> d238751e6b (refactor: usage of in_list)
+			if (['Purchase Invoice', 'Sales Invoice'].includes(child.reference_doctype) && child.reference_name) {
 				return {
 					query: "erpnext.controllers.queries.get_payment_terms_for_references",
 					filters: {
@@ -503,13 +484,8 @@ frappe.ui.form.on('Payment Entry', {
 
 		if (frm.doc.paid_from_account_currency == company_currency) {
 			frm.set_value("source_exchange_rate", 1);
-<<<<<<< HEAD
 		} else if (frm.doc.paid_from){
-			if (in_list(["Internal Transfer", "Pay"], frm.doc.payment_type)) {
-=======
-		} else if (frm.doc.paid_from) {
 			if (["Internal Transfer", "Pay"].includes(frm.doc.payment_type)) {
->>>>>>> d238751e6b (refactor: usage of in_list)
 				let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 				frappe.call({
 					method: "erpnext.setup.utils.get_exchange_rate",
@@ -876,19 +852,11 @@ frappe.ui.form.on('Payment Entry', {
 						total_negative_outstanding : remaining_outstanding;
 			}
 
-<<<<<<< HEAD
 			var allocated_positive_outstanding =  paid_amount + allocated_negative_outstanding;
-		} else if (in_list(["Customer", "Supplier"], frm.doc.party_type)) {
+		} else if (["Customer", "Supplier"].includes(frm.doc.party_type)) {
 			total_negative_outstanding = flt(total_negative_outstanding, precision("outstanding_amount"))
 			if(paid_amount > total_negative_outstanding) {
 				if(total_negative_outstanding == 0) {
-=======
-			var allocated_positive_outstanding = paid_amount + allocated_negative_outstanding;
-		} else if (["Customer", "Supplier"].includes(frm.doc.party_type)) {
-			total_negative_outstanding = flt(total_negative_outstanding, precision("outstanding_amount"));
-			if (paid_amount > total_negative_outstanding) {
-				if (total_negative_outstanding == 0) {
->>>>>>> d238751e6b (refactor: usage of in_list)
 					frappe.msgprint(
 						__("Cannot {0} {1} {2} without any negative outstanding invoice", [frm.doc.payment_type,
 							(frm.doc.party_type=="Customer" ? "to" : "from"), frm.doc.party_type])
@@ -1019,28 +987,16 @@ frappe.ui.form.on('Payment Entry', {
 				return;
 			}
 
-<<<<<<< HEAD
 			if(frm.doc.party_type=="Customer" &&
-				!in_list(["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"], row.reference_doctype)
-=======
-			if (
-				frm.doc.party_type == "Customer" &&
 				!["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"].includes(row.reference_doctype)
->>>>>>> d238751e6b (refactor: usage of in_list)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "reference_doctype", null);
 				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning", [row.idx]));
 				return false;
 			}
 
-<<<<<<< HEAD
 			if(frm.doc.party_type=="Supplier" &&
-				!in_list(["Purchase Order", "Purchase Invoice", "Journal Entry"], row.reference_doctype)
-=======
-			if (
-				frm.doc.party_type == "Supplier" &&
 				!["Purchase Order", "Purchase Invoice", "Journal Entry"].includes(row.reference_doctype)
->>>>>>> d238751e6b (refactor: usage of in_list)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", null);
 				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry", [row.idx]));
@@ -1122,15 +1078,9 @@ frappe.ui.form.on('Payment Entry', {
 		}
 	},
 
-<<<<<<< HEAD
 	bank_account: function(frm) {
 		const field = frm.doc.payment_type == "Pay" ? "paid_from":"paid_to";
-		if (frm.doc.bank_account && in_list(['Pay', 'Receive'], frm.doc.payment_type)) {
-=======
-	bank_account: function (frm) {
-		const field = frm.doc.payment_type == "Pay" ? "paid_from" : "paid_to";
-		if (frm.doc.bank_account && ["Pay", "Receive"].includes(frm.doc.payment_type)) {
->>>>>>> d238751e6b (refactor: usage of in_list)
+		if (frm.doc.bank_account && ['Pay', 'Receive'].includes(frm.doc.payment_type)) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.bank_account.bank_account.get_bank_account_details",
 				args: {
