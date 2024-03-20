@@ -1266,8 +1266,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	calculate_stock_uom_rate(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		item.stock_uom_rate = flt(item.rate)/flt(item.conversion_factor);
-		refresh_field("stock_uom_rate", item.name, item.parentfield);
+
+		if (item?.rate) {
+			item.stock_uom_rate = flt(item.rate) / flt(item.conversion_factor);
+			refresh_field("stock_uom_rate", item.name, item.parentfield);
+		}
 	}
 	service_stop_date(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
