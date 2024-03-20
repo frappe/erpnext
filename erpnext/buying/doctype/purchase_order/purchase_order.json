@@ -641,7 +641,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1275,7 +1275,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-01 20:58:07.851037",
+ "modified": "2024-03-20 16:03:31.611808",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
