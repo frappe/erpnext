@@ -1401,11 +1401,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-12-18 17:19:39.368239",
-=======
  "modified": "2024-03-20 16:05:02.854990",
->>>>>>> 1c63983873 (fix: use Text Editor for rendering tax breakup table)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
