@@ -496,3 +496,7 @@ body[data-route="pos"] {
 .exercise-col {
 	padding: 10px;
 }
+
+.frappe-control[data-fieldname="other_charges_calculation"] .ql-editor {
+	white-space: normal;
+}
