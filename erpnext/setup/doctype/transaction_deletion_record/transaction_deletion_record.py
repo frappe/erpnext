@@ -477,7 +477,25 @@ def get_doctypes_to_be_ignored():
 	return doctypes_to_be_ignored
 
 
+@frappe.whitelist()
+def is_deletion_doc_running(company: str | None = None, err_msg: str | None = None):
+	if company:
+		if running_deletion_jobs := frappe.db.get_all(
+			"Transaction Deletion Record",
+			filters={"docstatus": 1, "company": company, "status": "Running"},
+		):
+			if not err_msg:
+				err_msg = ""
+			frappe.throw(
+				title=_("Deletion in Progress!"),
+				msg=_("Transaction Deletion Document: {0} is running for this Company. {1}").format(
+					get_link_to_form("Transaction Deletion Record", running_deletion_jobs[0].name), err_msg
+				),
+			)
+
+
 def check_for_running_deletion_job(doc, method=None):
+	# Check if DocType has 'company' field
 	df = qb.DocType("DocField")
 	if (
 		not_allowed := qb.from_(df)
@@ -485,14 +503,6 @@ def check_for_running_deletion_job(doc, method=None):
 		.where((df.fieldname == "company") & (df.parent == doc.doctype))
 		.run()
 	):
-		if running_deletion_jobs := frappe.db.get_all(
-			"Transaction Deletion Record",
-			filters={"docstatus": 1, "company": doc.company, "status": "Running"},
-		):
-			frappe.throw(
-				_(
-					"Transaction Deletion job {0} is running for this Company. Cannot make any transactions until the deletion job is completed"
-				).format(
-					get_link_to_form("Transaction Deletion Record", running_deletion_jobs[0].name)
-				)
-			)
+		is_deletion_doc_running(
+			doc.company, _("Cannot make any transactions until the deletion job is completed")
+		)
