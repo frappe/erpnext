@@ -282,9 +282,7 @@ def get_regional_address_details(party_details, doctype, company):
 	pass
 
 
-def set_contact_details(party_details, party, party_type):
-	party_details.contact_person = get_default_contact(party_type, party.name)
-
+def complete_contact_details(party_details):
 	if not party_details.contact_person:
 		party_details.update(
 			{
@@ -313,6 +311,11 @@ def set_contact_details(party_details, party, party_type):
 		)
 
 		party_details.update(contact_details)
+
+
+def set_contact_details(party_details, party, party_type):
+	party_details.contact_person = get_default_contact(party_type, party.name)
+	complete_contact_details(party_details)
 
 
 def set_other_values(party_details, party, party_type):
