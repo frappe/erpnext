@@ -20,7 +20,8 @@
   "section_break_tbej",
   "doctypes",
   "doctypes_to_be_ignored",
-  "amended_from"
+  "amended_from",
+  "process_in_single_transaction"
  ],
  "fields": [
   {
@@ -129,12 +130,18 @@
   {
    "fieldname": "section_break_qpwb",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "process_in_single_transaction",
+   "fieldtype": "Check",
+   "label": "Process in Single Transaction"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-19 17:47:04.490196",
+ "modified": "2024-03-20 14:58:15.086360",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",

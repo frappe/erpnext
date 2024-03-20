@@ -37,6 +37,7 @@ class TransactionDeletionRecord(Document):
 		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
 		error_log: DF.LongText | None
 		initialize_doctypes_table: DF.Check
+		process_in_single_transaction: DF.Check
 		reset_company_default_values: DF.Check
 		status: DF.Literal["Queued", "Running", "Failed", "Completed", "Cancelled"]
 	# end: auto-generated types
@@ -136,18 +137,19 @@ class TransactionDeletionRecord(Document):
 			# Generate Job Id to uniquely identify each task for this document
 			job_id = self.generate_job_name_for_task(task)
 
-			frappe.enqueue(
-				"frappe.utils.background_jobs.run_doc_method",
-				doctype=self.doctype,
-				name=self.name,
-				doc_method="execute_task",
-				job_id=job_id,
-				queue="long",
-				enqueue_after_commit=True,
-				task_to_execute=task,
-			)
-
-			# todo: add a non-background job based approach as well
+			if self.process_in_single_transaction:
+				self.execute_task(task_to_execute=task)
+			else:
+				frappe.enqueue(
+					"frappe.utils.background_jobs.run_doc_method",
+					doctype=self.doctype,
+					name=self.name,
+					doc_method="execute_task",
+					job_id=job_id,
+					queue="long",
+					enqueue_after_commit=True,
+					task_to_execute=task,
+				)
 
 	def execute_task(self, task_to_execute: str | None = None):
 		if task_to_execute:
