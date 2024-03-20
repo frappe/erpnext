@@ -71,7 +71,7 @@ class SupplierQuotation(BuyingController):
 		naming_series: DF.Literal["PUR-SQTN-.YYYY.-"]
 		net_total: DF.Currency
 		opportunity: DF.Link | None
-		other_charges_calculation: DF.LongText | None
+		other_charges_calculation: DF.MarkdownEditor | None
 		plc_conversion_rate: DF.Float
 		price_list_currency: DF.Link | None
 		pricing_rules: DF.Table[PricingRuleDetail]
