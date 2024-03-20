@@ -911,6 +911,7 @@ def get_item_price(args, item_code, ignore_party=False):
 		.orderby(ip.valid_from, order=frappe.qb.desc)
 		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
 		.orderby(ip.uom, order=frappe.qb.desc)
+		.limit(1)
 	)
 
 	if not ignore_party:
