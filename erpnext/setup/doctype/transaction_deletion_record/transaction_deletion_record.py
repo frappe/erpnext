@@ -12,39 +12,6 @@ from frappe.utils.background_jobs import get_job, is_job_enqueued
 
 
 class TransactionDeletionRecord(Document):
-<<<<<<< HEAD
-=======
-	# begin: auto-generated types
-	# This code is auto-generated. Do not modify anything in this block.
-
-	from typing import TYPE_CHECKING
-
-	if TYPE_CHECKING:
-		from frappe.types import DF
-
-		from erpnext.accounts.doctype.transaction_deletion_record_details.transaction_deletion_record_details import (
-			TransactionDeletionRecordDetails,
-		)
-		from erpnext.setup.doctype.transaction_deletion_record_item.transaction_deletion_record_item import (
-			TransactionDeletionRecordItem,
-		)
-
-		amended_from: DF.Link | None
-		clear_notifications: DF.Check
-		company: DF.Link
-		delete_bin_data: DF.Check
-		delete_leads_and_addresses: DF.Check
-		delete_transactions: DF.Check
-		doctypes: DF.Table[TransactionDeletionRecordDetails]
-		doctypes_to_be_ignored: DF.Table[TransactionDeletionRecordItem]
-		error_log: DF.LongText | None
-		initialize_doctypes_table: DF.Check
-		process_in_single_transaction: DF.Check
-		reset_company_default_values: DF.Check
-		status: DF.Literal["Queued", "Running", "Failed", "Completed", "Cancelled"]
-	# end: auto-generated types
-
->>>>>>> 0d65d878de (refactor: more options for 'status' and move it to top)
 	def __init__(self, *args, **kwargs):
 		super(TransactionDeletionRecord, self).__init__(*args, **kwargs)
 		self.batch_size = 5000
