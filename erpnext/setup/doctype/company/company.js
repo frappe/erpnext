@@ -168,7 +168,7 @@ frappe.ui.form.on("Company", {
 
 	delete_company_transactions: function (frm) {
 		frappe.call({
-			method: "erpnext.setup.doctype.company.company.is_deletion_job_running",
+			method: "erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.is_deletion_doc_running",
 			args: {
 				company: frm.doc.name,
 			},
