@@ -57,6 +57,7 @@ class PurchaseOrder(BuyingController):
 		additional_discount_percentage: DF.Float
 		address_display: DF.SmallText | None
 		advance_paid: DF.Currency
+		advance_payment_status: DF.Literal["Not Initiated", "Initiated", "Partially Paid", "Fully Paid"]
 		amended_from: DF.Link | None
 		apply_discount_on: DF.Literal["", "Grand Total", "Net Total"]
 		apply_tds: DF.Check
@@ -109,7 +110,7 @@ class PurchaseOrder(BuyingController):
 		net_total: DF.Currency
 		order_confirmation_date: DF.Date | None
 		order_confirmation_no: DF.Data | None
-		other_charges_calculation: DF.LongText | None
+		other_charges_calculation: DF.TextEditor | None
 		party_account_currency: DF.Link | None
 		payment_schedule: DF.Table[PaymentSchedule]
 		payment_terms_template: DF.Link | None
