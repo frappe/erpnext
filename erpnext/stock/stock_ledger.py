@@ -1340,9 +1340,15 @@ def get_batch_incoming_rate(
 	item_code, warehouse, batch_no, posting_date, posting_time, creation=None
 ):
 
+	import datetime
+
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
-	timestamp_condition = sle.posting_datetime < get_combine_datetime(posting_date, posting_time)
+	posting_datetime = get_combine_datetime(posting_date, posting_time)
+	if not creation:
+		posting_datetime = posting_datetime + datetime.timedelta(milliseconds=1)
+
+	timestamp_condition = sle.posting_datetime < posting_datetime
 	if creation:
 		timestamp_condition |= (
 			sle.posting_datetime == get_combine_datetime(posting_date, posting_time)
