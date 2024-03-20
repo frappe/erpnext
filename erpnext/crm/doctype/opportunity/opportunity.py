@@ -182,6 +182,7 @@ class Opportunity(TransactionBase, CRMNote):
 				prospect.append("opportunities", opportunity_values)
 				prospect.flags.ignore_permissions = True
 				prospect.flags.ignore_mandatory = True
+				prospect.flags.ignore_links = True
 				prospect.save()
 
 	def make_new_lead_if_required(self):
