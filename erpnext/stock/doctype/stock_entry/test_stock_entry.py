@@ -1008,6 +1008,7 @@ class TestStockEntry(FrappeTestCase):
 				"type_of_transaction": "Inward",
 				"serial_and_batch_bundle": s2.items[0].serial_and_batch_bundle,
 				"item_code": "_Test Serialized Item",
+				"warehouse": "_Test Warehouse - _TC",
 			}
 		)
 
@@ -1641,36 +1642,6 @@ class TestStockEntry(FrappeTestCase):
 		)
 
 		self.assertRaises(frappe.ValidationError, sr_doc.submit)
-
-	def test_enqueue_action(self):
-		frappe.flags.in_test = False
-		item_code = "Test Enqueue Item - 001"
-		create_item(item_code=item_code, is_stock_item=1, valuation_rate=10)
-
-		doc = make_stock_entry(
-			item_code=item_code,
-			posting_date=add_to_date(today(), months=-7),
-			posting_time="00:00:00",
-			purpose="Material Receipt",
-			qty=10,
-			to_warehouse="_Test Warehouse - _TC",
-			do_not_submit=True,
-		)
-
-		self.assertTrue(doc.is_enqueue_action())
-
-		doc = make_stock_entry(
-			item_code=item_code,
-			posting_date=today(),
-			posting_time="00:00:00",
-			purpose="Material Receipt",
-			qty=10,
-			to_warehouse="_Test Warehouse - _TC",
-			do_not_submit=True,
-		)
-
-		self.assertFalse(doc.is_enqueue_action())
-		frappe.flags.in_test = True
 
 	def test_negative_batch(self):
 		item_code = "Test Negative Batch Item - 001"

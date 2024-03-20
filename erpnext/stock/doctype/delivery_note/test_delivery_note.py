@@ -824,6 +824,15 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.cancel()
 		self.assertEqual(dn.status, "Cancelled")
 
+	def test_sales_order_reference_validation(self):
+		so = make_sales_order(po_no="12345")
+		dn = create_dn_against_so(so.name, delivered_qty=2, do_not_submit=True)
+		dn.items[0].against_sales_order = None
+		self.assertRaises(frappe.ValidationError, dn.save)
+		dn.reload()
+		dn.items[0].so_detail = None
+		self.assertRaises(frappe.ValidationError, dn.save)
+
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI
 		so = make_sales_order(po_no="12345")
@@ -1099,9 +1108,30 @@ class TestDeliveryNote(FrappeTestCase):
 		dn.load_from_db()
 
 		batch_no = get_batch_from_bundle(dn.packed_items[0].serial_and_batch_bundle)
+		packed_name = dn.packed_items[0].name
 		self.assertTrue(batch_no)
 
+		dn.cancel()
+
+		# Cancel the reposting entry
+		reposting_entries = frappe.get_all("Repost Item Valuation", filters={"docstatus": 1})
+		for entry in reposting_entries:
+			doc = frappe.get_doc("Repost Item Valuation", entry.name)
+			doc.cancel()
+			doc.delete()
+
+		frappe.db.set_single_value("Accounts Settings", "delete_linked_ledger_entries", 1)
+
+		dn.reload()
+		dn.delete()
+
+		bundle = frappe.db.get_value(
+			"Serial and Batch Bundle", {"voucher_detail_no": packed_name}, "name"
+		)
+		self.assertFalse(bundle)
+
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		frappe.db.set_single_value("Accounts Settings", "delete_linked_ledger_entries", 0)
 
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (

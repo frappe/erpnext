@@ -89,6 +89,7 @@ force_item_fields = (
 	"weight_per_unit",
 	"weight_uom",
 	"total_weight",
+	"valuation_rate",
 )
 
 
@@ -168,6 +169,13 @@ class AccountsController(TransactionBase):
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
 
+		if (
+			self.doctype in ["Sales Invoice", "Purchase Invoice"]
+			and self.get("is_return")
+			and self.get("update_stock")
+		):
+			self.validate_zero_qty_for_return_invoices_with_stock()
+
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
@@ -218,17 +226,18 @@ class AccountsController(TransactionBase):
 				)
 
 			if self.get("is_return") and self.get("return_against") and not self.get("is_pos"):
-				# if self.get("is_return") and self.get("return_against"):
-				document_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
-				frappe.msgprint(
-					_(
-						"{0} will be treated as a standalone {0}. Post creation use {1} tool to reconcile against {2}."
-					).format(
-						document_type,
-						get_link_to_form("Payment Reconciliation"),
-						get_link_to_form(self.doctype, self.get("return_against")),
+				if self.get("update_outstanding_for_self"):
+					document_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
+					frappe.msgprint(
+						_(
+							"We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck '{2}' checkbox. <br><br> Or you can use {3} tool to reconcile against {1} later."
+						).format(
+							frappe.bold(document_type),
+							get_link_to_form(self.doctype, self.get("return_against")),
+							frappe.bold("Update Outstanding for Self"),
+							get_link_to_form("Payment Reconciliation"),
+						)
 					)
-				)
 
 			pos_check_field = "is_pos" if self.doctype == "Sales Invoice" else "is_paid"
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
@@ -601,23 +610,31 @@ class AccountsController(TransactionBase):
 				)
 
 	def validate_due_date(self):
-		if self.get("is_pos"):
+		if self.get("is_pos") or self.doctype not in ["Sales Invoice", "Purchase Invoice"]:
 			return
 
 		from erpnext.accounts.party import validate_due_date
 
-		if self.doctype == "Sales Invoice":
+		posting_date = (
+			self.posting_date if self.doctype == "Sales Invoice" else (self.bill_date or self.posting_date)
+		)
+
+		# skip due date validation for records via Data Import
+		if frappe.flags.in_import and getdate(self.due_date) < getdate(posting_date):
+			self.due_date = posting_date
+
+		elif self.doctype == "Sales Invoice":
 			if not self.due_date:
 				frappe.throw(_("Due Date is mandatory"))
 
 			validate_due_date(
-				self.posting_date,
+				posting_date,
 				self.due_date,
 				self.payment_terms_template,
 			)
 		elif self.doctype == "Purchase Invoice":
 			validate_due_date(
-				self.bill_date or self.posting_date,
+				posting_date,
 				self.due_date,
 				self.bill_date,
 				self.payment_terms_template,
@@ -1042,6 +1059,18 @@ class AccountsController(TransactionBase):
 			return args.get(field + "_in_account_currency")
 		else:
 			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
+
+	def validate_zero_qty_for_return_invoices_with_stock(self):
+		rows = []
+		for item in self.items:
+			if not flt(item.qty):
+				rows.append(item)
+		if rows:
+			frappe.throw(
+				_(
+					"For Return Invoices with Stock effect, '0' qty Items are not allowed. Following rows are affected: {0}"
+				).format(frappe.bold(comma_and(["#" + str(x.idx) for x in rows])))
+			)
 
 	def validate_qty_is_not_zero(self):
 		for item in self.items:
@@ -1710,8 +1739,8 @@ class AccountsController(TransactionBase):
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
 
-		role_allowed_to_over_bill = frappe.db.get_single_value(
-			"Accounts Settings", "role_allowed_to_over_bill"
+		role_allowed_to_over_bill = frappe.get_cached_value(
+			"Accounts Settings", None, "role_allowed_to_over_bill"
 		)
 		user_roles = frappe.get_roles()
 
@@ -1864,7 +1893,7 @@ class AccountsController(TransactionBase):
 				(ple.against_voucher_type == self.doctype)
 				& (ple.against_voucher_no == self.name)
 				& (ple.party == party)
-				& (ple.docstatus == 1)
+				& (ple.delinked == 0)
 				& (ple.company == self.company)
 			)
 			.run(as_dict=True)
@@ -1880,7 +1909,10 @@ class AccountsController(TransactionBase):
 				advance_paid, precision=self.precision("advance_paid"), currency=advance.account_currency
 			)
 
-			frappe.db.set_value(self.doctype, self.name, "party_account_currency", advance.account_currency)
+			if advance.account_currency:
+				frappe.db.set_value(
+					self.doctype, self.name, "party_account_currency", advance.account_currency
+				)
 
 			if advance.account_currency == self.currency:
 				order_total = self.get("rounded_total") or self.grand_total
@@ -2704,13 +2736,19 @@ def get_advance_journal_entries(
 	else:
 		q = q.where(journal_acc.debit_in_account_currency > 0)
 
+	reference_or_condition = []
+
 	if include_unallocated:
-		q = q.where((journal_acc.reference_name.isnull()) | (journal_acc.reference_name == ""))
+		reference_or_condition.append(journal_acc.reference_name.isnull())
+		reference_or_condition.append(journal_acc.reference_name == "")
 
 	if order_list:
-		q = q.where(
+		reference_or_condition.append(
 			(journal_acc.reference_type == order_doctype) & ((journal_acc.reference_name).isin(order_list))
 		)
+
+	if reference_or_condition:
+		q = q.where(Criterion.any(reference_or_condition))
 
 	q = q.orderby(journal_entry.posting_date)
 

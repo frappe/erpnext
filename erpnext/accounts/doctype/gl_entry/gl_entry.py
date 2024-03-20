@@ -32,8 +32,6 @@ class GLEntry(Document):
 		account: DF.Link | None
 		account_currency: DF.Link | None
 		against: DF.Text | None
-		against_link: DF.DynamicLink | None
-		against_type: DF.Link | None
 		against_voucher: DF.DynamicLink | None
 		against_voucher_type: DF.Link | None
 		company: DF.Link | None
@@ -323,7 +321,7 @@ def update_outstanding_amt(
 		party_condition = ""
 
 	if against_voucher_type == "Sales Invoice":
-		party_account = frappe.db.get_value(against_voucher_type, against_voucher, "debit_to")
+		party_account = frappe.get_cached_value(against_voucher_type, against_voucher, "debit_to")
 		account_condition = "and account in ({0}, {1})".format(
 			frappe.db.escape(account), frappe.db.escape(party_account)
 		)
@@ -391,8 +389,8 @@ def update_outstanding_amt(
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.get_cached_value("Account", account, "freeze_account")
 	if frozen_account == "Yes" and not adv_adj:
-		frozen_accounts_modifier = frappe.db.get_single_value(
-			"Accounts Settings", "frozen_accounts_modifier"
+		frozen_accounts_modifier = frappe.get_cached_value(
+			"Accounts Settings", None, "frozen_accounts_modifier"
 		)
 
 		if not frozen_accounts_modifier:

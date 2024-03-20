@@ -1,20 +1,22 @@
-# Translations template for ERPNext.
-# Copyright (C) 2024 Frappe Technologies Pvt. Ltd.
-# This file is distributed under the same license as the ERPNext project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: ERPNext VERSION\n"
+"Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-01-29 18:13+0053\n"
+"PO-Revision-Date: 2024-03-04 11:36\n"
 "Last-Translator: info@erpnext.com\n"
-"Language-Team: info@erpnext.com\n"
+"Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.13.1\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: frappe\n"
+"X-Crowdin-Project-ID: 639578\n"
+"X-Crowdin-Language: fa\n"
+"X-Crowdin-File: /[frappe.erpnext] develop/erpnext/locale/main.pot\n"
+"X-Crowdin-File-ID: 46\n"
+"Language: fa_IR\n"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:85
 msgid " "
@@ -48,7 +50,7 @@ msgstr " نام"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:108
 msgid " Qty"
-msgstr " تعداد"
+msgstr " مقدار"
 
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:603
 msgid " Rate"
@@ -61,7 +63,7 @@ msgstr " ماده خام"
 #: public/js/bom_configurator/bom_configurator.bundle.js:127
 #: public/js/bom_configurator/bom_configurator.bundle.js:157
 msgid " Sub Assembly"
-msgstr " مجمع فرعی"
+msgstr " زیر مونتاژ"
 
 #: projects/doctype/project_update/project_update.py:110
 msgid " Summary"
@@ -69,114 +71,93 @@ msgstr " خلاصه"
 
 #: stock/doctype/item/item.py:235
 msgid "\"Customer Provided Item\" cannot be Purchase Item also"
-msgstr ""
+msgstr "\"مورد ارائه شده توسط مشتری\" نمی تواند مورد خرید هم باشد"
 
 #: stock/doctype/item/item.py:237
 msgid "\"Customer Provided Item\" cannot have Valuation Rate"
-msgstr ""
+msgstr "\"مورد ارائه شده توسط مشتری\" نمی تواند دارای نرخ ارزیابی باشد"
 
 #: stock/doctype/item/item.py:313
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
-msgstr ""
+msgstr "علامت \"دارایی ثابت است\" را نمی توان بردارید، زیرا سابقه دارایی در برابر آیتم وجود دارد"
 
 #. Description of the Onboarding Step 'Accounts Settings'
 #: accounts/onboarding_step/accounts_settings/accounts_settings.json
-msgid ""
-"# Account Settings\n"
-"\n"
-"In ERPNext, Accounting features are configurable as per your business needs. Accounts Settings is the place to define some of your accounting preferences like:\n"
-"\n"
+msgid "# Account Settings\n\n"
+"In ERPNext, Accounting features are configurable as per your business needs. Accounts Settings is the place to define some of your accounting preferences like:\n\n"
 " - Credit Limit and over billing settings\n"
 " - Taxation preferences\n"
 " - Deferred accounting preferences\n"
-msgstr ""
+msgstr "# تنظیمات حساب\n\n"
+"در ERPNext، ویژگی های حسابداری بر اساس نیازهای کسب و کار شما قابل تنظیم هستند. تنظیمات حساب‌ها مکانی برای تعریف برخی از اولویت‌های حسابداری شما است مانند:\n\n"
+" - محدودیت اعتبار و تنظیمات بیش از صورتحساب\n"
+" - اولویت‌های مالیاتی\n"
+" - اولویت‌های حسابداری معوق\n"
 
 #. Description of the Onboarding Step 'Configure Account Settings'
 #: accounts/onboarding_step/configure_account_settings/configure_account_settings.json
-msgid ""
-"# Account Settings\n"
-"\n"
-"This is a crucial piece of configuration. There are various account settings in ERPNext to restrict and configure actions in the Accounting module.\n"
-"\n"
-"The following settings are avaialble for you to configure\n"
-"\n"
+msgid "# Account Settings\n\n"
+"This is a crucial piece of configuration. There are various account settings in ERPNext to restrict and configure actions in the Accounting module.\n\n"
+"The following settings are avaialble for you to configure\n\n"
 "1. Account Freezing \n"
 "2. Credit and Overbilling\n"
 "3. Invoicing and Tax Automations\n"
-"4. Balance Sheet configurations\n"
-"\n"
+"4. Balance Sheet configurations\n\n"
 "There's much more, you can check it all out in this step"
 msgstr ""
 
 #. Description of the Onboarding Step 'Add an Existing Asset'
 #: assets/onboarding_step/existing_asset/existing_asset.json
-msgid ""
-"# Add an Existing Asset\n"
-"\n"
+msgid "# Add an Existing Asset\n\n"
 "If you are just starting with ERPNext, you will need to enter Assets you already possess. You can add them as existing fixed assets in ERPNext. Please note that you will have to make a Journal Entry separately updating the opening balance in the fixed asset account."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create Your First Sales Invoice '
 #: setup/onboarding_step/create_your_first_sales_invoice/create_your_first_sales_invoice.json
-msgid ""
-"# All about sales invoice\n"
-"\n"
+msgid "# All about sales invoice\n\n"
 "A Sales Invoice is a bill that you send to your Customers against which the Customer makes the payment. Sales Invoice is an accounting transaction. On submission of Sales Invoice, the system updates the receivable and books income against a Customer Account."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create Your First Sales Invoice '
 #: accounts/onboarding_step/create_your_first_sales_invoice/create_your_first_sales_invoice.json
-msgid ""
-"# All about sales invoice\n"
-"\n"
-"A Sales Invoice is a bill that you send to your Customers against which the Customer makes the payment. Sales Invoice is an accounting transaction. On submission of Sales Invoice, the system updates the receivable and books income against a Customer Account.\n"
-"\n"
-"Here's the flow of how a sales invoice is generally created\n"
-"\n"
-"\n"
+msgid "# All about sales invoice\n\n"
+"A Sales Invoice is a bill that you send to your Customers against which the Customer makes the payment. Sales Invoice is an accounting transaction. On submission of Sales Invoice, the system updates the receivable and books income against a Customer Account.\n\n"
+"Here's the flow of how a sales invoice is generally created\n\n\n"
 "![Sales Flow](https://docs.erpnext.com/docs/assets/img/accounts/so-flow.png)"
 msgstr ""
 
 #. Description of the Onboarding Step 'Define Asset Category'
 #: assets/onboarding_step/asset_category/asset_category.json
-msgid ""
-"# Asset Category\n"
-"\n"
-"An Asset Category classifies different assets of a Company.\n"
-"\n"
+msgid "# Asset Category\n\n"
+"An Asset Category classifies different assets of a Company.\n\n"
 "You can create an Asset Category based on the type of assets. For example, all your desktops and laptops can be part of an Asset Category named \"Electronic Equipment\". Create a separate category for furniture. Also, you can update default properties for each category, like:\n"
 " - Depreciation type and duration\n"
 " - Fixed asset account\n"
 " - Depreciation account\n"
-msgstr ""
+msgstr "# دسته دارایی\n\n"
+"یک دسته دارایی دارایی های مختلف یک شرکت را طبقه بندی می کند.\n\n"
+"شما می توانید یک دسته دارایی بر اساس نوع دارایی ایجاد کنید. به عنوان مثال، تمام رایانه های رومیزی و لپ تاپ های شما می توانند بخشی از یک دسته دارایی به نام «تجهیزات الکترونیکی» باشند. یک دسته بندی جداگانه برای مبلمان ایجاد کنید. همچنین، می‌توانید ویژگی‌های پیش‌فرض را برای هر دسته به‌روزرسانی کنید، مانند:\n"
+" - نوع و مدت استهلاک\n"
+" - حساب دارایی ثابت\n"
+" - حساب استهلاک\n"
 
 #. Description of the Onboarding Step 'Create an Asset Item'
 #: assets/onboarding_step/asset_item/asset_item.json
-msgid ""
-"# Asset Item\n"
-"\n"
+msgid "# Asset Item\n\n"
 "Asset items are created based on Asset Category. You can create one or multiple items against once Asset Category. The sales and purchase transaction for Asset is done via Asset Item. "
 msgstr ""
 
 #. Description of the Onboarding Step 'Buying Settings'
 #: buying/onboarding_step/introduction_to_buying/introduction_to_buying.json
-msgid ""
-"# Buying Settings\n"
-"\n"
-"\n"
-"Buying module’s features are highly configurable as per your business needs. Buying Settings is the place where you can set your preferences for:\n"
-"\n"
+msgid "# Buying Settings\n\n\n"
+"Buying module’s features are highly configurable as per your business needs. Buying Settings is the place where you can set your preferences for:\n\n"
 "- Supplier naming and default values\n"
-"- Billing and shipping preference in buying transactions\n"
-"\n"
-"\n"
+"- Billing and shipping preference in buying transactions\n\n\n"
 msgstr ""
 
 #. Description of the Onboarding Step 'CRM Settings'
 #: crm/onboarding_step/crm_settings/crm_settings.json
-msgid ""
-"# CRM Settings\n"
-"\n"
+msgid "# CRM Settings\n\n"
 "CRM module’s features are configurable as per your business needs. CRM Settings is the place where you can set your preferences for:\n"
 "- Campaign\n"
 "- Lead\n"
@@ -186,9 +167,7 @@ msgstr ""
 
 #. Description of the Onboarding Step 'Review Chart of Accounts'
 #: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
-msgid ""
-"# Chart Of Accounts\n"
-"\n"
+msgid "# Chart Of Accounts\n\n"
 "ERPNext sets up a simple chart of accounts for each Company you create, but you can modify it according to business and legal requirements."
 msgstr ""
 
@@ -196,62 +175,46 @@ msgstr ""
 #. Description of the Onboarding Step 'Check Stock Projected Qty'
 #: stock/onboarding_step/check_stock_ledger_report/check_stock_ledger_report.json
 #: stock/onboarding_step/view_stock_projected_qty/view_stock_projected_qty.json
-msgid ""
-"# Check Stock Reports\n"
+msgid "# Check Stock Reports\n"
 "Based on the various stock transactions, you can get a host of one-click Stock Reports in ERPNext like Stock Ledger, Stock Balance, Projected Quantity, and Ageing analysis."
 msgstr ""
 
 #. Description of the Onboarding Step 'Cost Centers for Budgeting and Analysis'
 #: accounts/onboarding_step/cost_centers_for_report_and_budgeting/cost_centers_for_report_and_budgeting.json
-msgid ""
-"# Cost Centers for Budgeting and Analysis\n"
-"\n"
-"While your Books of Accounts are framed to fulfill statutory requirements, you can set up Cost Center and Accounting Dimensions to address your companies reporting and budgeting requirements.\n"
-"\n"
+msgid "# Cost Centers for Budgeting and Analysis\n\n"
+"While your Books of Accounts are framed to fulfill statutory requirements, you can set up Cost Center and Accounting Dimensions to address your companies reporting and budgeting requirements.\n\n"
 "Click here to learn more about how  <b>[Cost Center](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/cost-center)</b> and <b> [Dimensions](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-dimensions)</b> allow you to get advanced financial analytics reports from ERPNext."
 msgstr ""
 
 #. Description of the Onboarding Step 'Finished Items'
 #: manufacturing/onboarding_step/create_product/create_product.json
-msgid ""
-"# Create Items for Bill of Materials\n"
-"\n"
+msgid "# Create Items for Bill of Materials\n\n"
 "One of the prerequisites of a BOM is the creation of raw materials, sub-assembly, and finished items. Once these items are created, you will be able to proceed to the Bill of Materials master, which is composed of items and routing.\n"
 msgstr ""
 
 #. Description of the Onboarding Step 'Operation'
 #: manufacturing/onboarding_step/operation/operation.json
-msgid ""
-"# Create Operations\n"
-"\n"
+msgid "# Create Operations\n\n"
 "An Operation refers to any manufacturing operation performed on the raw materials to process it further in the manufacturing path. As an example, if you are into garments manufacturing, you will create Operations like fabric cutting, stitching, and washing as some of the operations."
 msgstr ""
 
 #. Description of the Onboarding Step 'Workstation'
 #: manufacturing/onboarding_step/workstation/workstation.json
-msgid ""
-"# Create Workstations\n"
-"\n"
+msgid "# Create Workstations\n\n"
 "A Workstation stores information regarding the place where the workstation operations are performed. As an example, if you have ten sewing machines doing stitching jobs, each machine will be added as a workstation."
 msgstr ""
 
 #. Description of the Onboarding Step 'Bill of Materials'
 #: manufacturing/onboarding_step/create_bom/create_bom.json
-msgid ""
-"# Create a Bill of Materials\n"
-"\n"
-"A Bill of Materials (BOM) is a list of items and sub-assemblies with quantities required to manufacture an Item.\n"
-"\n"
+msgid "# Create a Bill of Materials\n\n"
+"A Bill of Materials (BOM) is a list of items and sub-assemblies with quantities required to manufacture an Item.\n\n"
 "BOM also provides cost estimation for the production of the item. It takes raw-materials cost based on valuation and operations to cost based on routing, which gives total costing for a BOM."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create a Customer'
 #: setup/onboarding_step/create_a_customer/create_a_customer.json
-msgid ""
-"# Create a Customer\n"
-"\n"
-"The Customer master is at the heart of your sales transactions. Customers are linked in Quotations, Sales Orders, Invoices, and Payments. Customers can be either numbered or identified by name (you would typically do this based on the number of customers you have).\n"
-"\n"
+msgid "# Create a Customer\n\n"
+"The Customer master is at the heart of your sales transactions. Customers are linked in Quotations, Sales Orders, Invoices, and Payments. Customers can be either numbered or identified by name (you would typically do this based on the number of customers you have).\n\n"
 "Through Customer’s master, you can effectively track essentials like:\n"
 " - Customer’s multiple address and contacts\n"
 " - Account Receivables\n"
@@ -260,27 +223,20 @@ msgstr ""
 
 #. Description of the Onboarding Step 'Setup Your Letterhead'
 #: setup/onboarding_step/letterhead/letterhead.json
-msgid ""
-"# Create a Letter Head\n"
-"\n"
+msgid "# Create a Letter Head\n\n"
 "A Letter Head contains your organization's name, logo, address, etc which appears at the header and footer portion in documents. You can learn more about Setting up Letter Head in ERPNext here.\n"
 msgstr ""
 
 #. Description of the Onboarding Step 'Create your first Quotation'
 #: setup/onboarding_step/create_a_quotation/create_a_quotation.json
-msgid ""
-"# Create a Quotation\n"
-"\n"
+msgid "# Create a Quotation\n\n"
 "Let’s get started with business transactions by creating your first Quotation. You can create a Quotation for an existing customer or a prospect. It will be an approved document, with items you sell and the proposed price + taxes applied. After completing the instructions, you will get a Quotation in a ready to share print format."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create a Supplier'
 #: setup/onboarding_step/create_a_supplier/create_a_supplier.json
-msgid ""
-"# Create a Supplier\n"
-"\n"
-"Also known as Vendor, is a master at the center of your purchase transactions. Suppliers are linked in Request for Quotation, Purchase Orders, Receipts, and Payments. Suppliers can be either numbered or identified by name.\n"
-"\n"
+msgid "# Create a Supplier\n\n"
+"Also known as Vendor, is a master at the center of your purchase transactions. Suppliers are linked in Request for Quotation, Purchase Orders, Receipts, and Payments. Suppliers can be either numbered or identified by name.\n\n"
 "Through Supplier’s master, you can effectively track essentials like:\n"
 " - Supplier’s multiple address and contacts\n"
 " - Account Receivables\n"
@@ -289,20 +245,15 @@ msgstr ""
 
 #. Description of the Onboarding Step 'Create a Supplier'
 #: stock/onboarding_step/create_a_supplier/create_a_supplier.json
-msgid ""
-"# Create a Supplier\n"
+msgid "# Create a Supplier\n"
 "In this step we will create a **Supplier**. If you have already created a **Supplier** you can skip this step."
 msgstr ""
 
 #. Description of the Onboarding Step 'Work Order'
 #: manufacturing/onboarding_step/work_order/work_order.json
-msgid ""
-"# Create a Work Order\n"
-"\n"
-"A Work Order or a Job order is given to the manufacturing shop floor by the Production Manager to initiate the manufacturing of a certain quantity of an item. Work Order carriers details of production Item, its BOM, quantities to be manufactured, and operations.\n"
-"\n"
-"Through Work Order, you can track various production status like:\n"
-"\n"
+msgid "# Create a Work Order\n\n"
+"A Work Order or a Job order is given to the manufacturing shop floor by the Production Manager to initiate the manufacturing of a certain quantity of an item. Work Order carriers details of production Item, its BOM, quantities to be manufactured, and operations.\n\n"
+"Through Work Order, you can track various production status like:\n\n"
 "- Issue of raw-material to shop material\n"
 "- Progress on each Workstation via Job Card\n"
 "- Manufactured Quantity against Work Order\n"
@@ -310,57 +261,41 @@ msgstr ""
 
 #. Description of the Onboarding Step 'Create an Item'
 #: setup/onboarding_step/create_an_item/create_an_item.json
-msgid ""
-"# Create an Item\n"
-"\n"
-"Item is a product or a service offered by your company, or something you buy as a part of your supplies or raw materials.\n"
-"\n"
+msgid "# Create an Item\n\n"
+"Item is a product or a service offered by your company, or something you buy as a part of your supplies or raw materials.\n\n"
 "Items are integral to everything you do in ERPNext - from billing, purchasing to managing inventory. Everything you buy or sell, whether it is a physical product or a service is an Item. Items can be stock, non-stock, variants, serialized, batched, assets, etc.\n"
 msgstr ""
 
 #. Description of the Onboarding Step 'Create an Item'
 #: stock/onboarding_step/create_an_item/create_an_item.json
-msgid ""
-"# Create an Item\n"
-"The Stock module deals with the movement of items.\n"
-"\n"
+msgid "# Create an Item\n"
+"The Stock module deals with the movement of items.\n\n"
 "In this step we will create an  [**Item**](https://docs.erpnext.com/docs/user/manual/en/stock/item)."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create first Purchase Order'
 #: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
-msgid ""
-"# Create first Purchase Order\n"
-"\n"
-"Purchase Order is at the heart of your buying transactions. In ERPNext, Purchase Order can can be created against a Purchase Material Request (indent) and Supplier Quotation as well.  Purchase Orders is also linked to Purchase Receipt and Purchase Invoices, allowing you to keep a birds-eye view on your purchase deals.\n"
-"\n"
+msgid "# Create first Purchase Order\n\n"
+"Purchase Order is at the heart of your buying transactions. In ERPNext, Purchase Order can can be created against a Purchase Material Request (indent) and Supplier Quotation as well.  Purchase Orders is also linked to Purchase Receipt and Purchase Invoices, allowing you to keep a birds-eye view on your purchase deals.\n\n"
 msgstr ""
 
 #. Description of the Onboarding Step 'Create Your First Purchase Invoice '
 #: accounts/onboarding_step/create_your_first_purchase_invoice/create_your_first_purchase_invoice.json
-msgid ""
-"# Create your first Purchase Invoice\n"
-"\n"
-"A Purchase Invoice is a bill received from a Supplier for a product(s) or service(s) delivery to your company. You can track payables through Purchase Invoice and process Payment Entries against it.\n"
-"\n"
+msgid "# Create your first Purchase Invoice\n\n"
+"A Purchase Invoice is a bill received from a Supplier for a product(s) or service(s) delivery to your company. You can track payables through Purchase Invoice and process Payment Entries against it.\n\n"
 "Purchase Invoices can also be created against a Purchase Order or Purchase Receipt."
 msgstr ""
 
 #. Description of the Onboarding Step 'Financial Statements'
 #: accounts/onboarding_step/financial_statements/financial_statements.json
-msgid ""
-"# Financial Statements\n"
-"\n"
-"In ERPNext, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.\n"
-"\n"
+msgid "# Financial Statements\n\n"
+"In ERPNext, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.\n\n"
 "<b>[Check Accounting reports](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
 msgstr ""
 
 #. Description of the Onboarding Step 'Review Fixed Asset Accounts'
 #: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
-msgid ""
-"# Fixed Asset Accounts\n"
-"\n"
+msgid "# Fixed Asset Accounts\n\n"
 "With the company, a host of fixed asset accounts are pre-configured. To ensure your asset transactions are leading to correct accounting entries, you can review and set up following asset accounts as per your business  requirements.\n"
 " - Fixed asset accounts (Asset account)\n"
 " - Accumulated depreciation\n"
@@ -370,67 +305,54 @@ msgstr ""
 
 #. Description of the Onboarding Step 'Production Planning'
 #: manufacturing/onboarding_step/production_planning/production_planning.json
-msgid ""
-"# How Production Planning Works\n"
-"\n"
+msgid "# How Production Planning Works\n\n"
 "Production Plan helps in production and material planning for the Items planned for manufacturing. These production items can be committed via Sales Order (to Customers) or Material Requests (internally).\n"
-msgstr ""
+msgstr "# برنامه ریزی تولید چگونه کار می کند\n\n"
+"برنامه تولید به برنامه ریزی تولید و مواد برای آیتم‌های برنامه ریزی شده برای ساخت کمک می کند. این آیتم‌های تولیدی را می توان از طریق سفارش فروش (به مشتریان) یا درخواست مواد (داخلی) متعهد شد.\n"
 
 #. Description of the Onboarding Step 'Import Data from Spreadsheet'
 #: setup/onboarding_step/data_import/data_import.json
-msgid ""
-"# Import Data from Spreadsheet\n"
-"\n"
+msgid "# Import Data from Spreadsheet\n\n"
 "In ERPNext, you can easily migrate your historical data using spreadsheets. You can use it for migrating not just masters (like Customer, Supplier, Items), but also for transactions like (outstanding invoices, opening stock and accounting entries, etc)."
 msgstr ""
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:148
 msgid "# In Stock"
-msgstr "# در انبار"
+msgstr "# در موجودی"
 
 #. Description of the Onboarding Step 'Introduction to Stock Entry'
 #: stock/onboarding_step/introduction_to_stock_entry/introduction_to_stock_entry.json
-msgid ""
-"# Introduction to Stock Entry\n"
+msgid "# Introduction to Stock Entry\n"
 "This video will give a quick introduction to [**Stock Entry**](https://docs.erpnext.com/docs/user/manual/en/stock/stock-entry)."
 msgstr ""
 
 #. Description of the Onboarding Step 'Manage Stock Movements'
 #: stock/onboarding_step/create_a_stock_entry/create_a_stock_entry.json
-msgid ""
-"# Manage Stock Movements\n"
-"Stock entry allows you to register the movement of stock for various purposes like transfer, received, issues, repacked, etc. To address issues related to theft and pilferages,  you can always ensure that the movement of goods happens against a document reference Stock Entry in ERPNext.\n"
-"\n"
+msgid "# Manage Stock Movements\n"
+"Stock entry allows you to register the movement of stock for various purposes like transfer, received, issues, repacked, etc. To address issues related to theft and pilferages,  you can always ensure that the movement of goods happens against a document reference Stock Entry in ERPNext.\n\n"
 "Let’s get a quick walk-through on the various scenarios covered in Stock Entry by watching [*this video*](https://www.youtube.com/watch?v=Njt107hlY3I)."
 msgstr ""
 
 #. Description of the Onboarding Step 'How to Navigate in ERPNext'
 #: setup/onboarding_step/navigation_help/navigation_help.json
-msgid ""
-"# Navigation in ERPNext\n"
-"\n"
+msgid "# Navigation in ERPNext\n\n"
 "Ease of navigating and browsing around the ERPNext is one of our core strengths. In the following video, you will learn how to reach a specific feature in ERPNext via module page or AwesomeBar."
 msgstr ""
 
 #. Description of the Onboarding Step 'Purchase an Asset'
 #: assets/onboarding_step/asset_purchase/asset_purchase.json
-msgid ""
-"# Purchase an Asset\n"
-"\n"
+msgid "# Purchase an Asset\n\n"
 "Assets purchases process if done following the standard Purchase cycle. If capital work in progress is enabled in Asset Category, Asset will be created as soon as Purchase Receipt is created for it. You can quickly create a Purchase Receipt for Asset and see its impact on books of accounts."
 msgstr ""
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:141
 msgid "# Req'd Items"
-msgstr "# موارد درخواست شده"
+msgstr "# آیتم‌های درخواست شده"
 
 #. Description of the Onboarding Step 'Manufacturing Settings'
 #: manufacturing/onboarding_step/explore_manufacturing_settings/explore_manufacturing_settings.json
-msgid ""
-"# Review Manufacturing Settings\n"
-"\n"
-"In ERPNext, the Manufacturing module’s features are configurable as per your business needs. Manufacturing Settings is the place where you can set your preferences for:\n"
-"\n"
+msgid "# Review Manufacturing Settings\n\n"
+"In ERPNext, the Manufacturing module’s features are configurable as per your business needs. Manufacturing Settings is the place where you can set your preferences for:\n\n"
 "- Capacity planning for allocating jobs to workstations\n"
 "- Raw-material consumption based on BOM or actual\n"
 "- Default values and over-production allowance\n"
@@ -438,9 +360,7 @@ msgstr ""
 
 #. Description of the Onboarding Step 'Review Stock Settings'
 #: stock/onboarding_step/stock_settings/stock_settings.json
-msgid ""
-"# Review Stock Settings\n"
-"\n"
+msgid "# Review Stock Settings\n\n"
 "In ERPNext, the Stock module’s features are configurable as per your business needs. Stock Settings is the place where you can set your preferences for:\n"
 "- Default values for Item and Pricing\n"
 "- Default valuation method for inventory valuation\n"
@@ -450,19 +370,14 @@ msgstr ""
 
 #. Description of the Onboarding Step 'Sales Order'
 #: selling/onboarding_step/sales_order/sales_order.json
-msgid ""
-"# Sales Order\n"
-"\n"
-"A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.\n"
-"\n"
+msgid "# Sales Order\n\n"
+"A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.\n\n"
 "Sales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer."
 msgstr ""
 
 #. Description of the Onboarding Step 'Selling Settings'
 #: selling/onboarding_step/selling_settings/selling_settings.json
-msgid ""
-"# Selling Settings\n"
-"\n"
+msgid "# Selling Settings\n\n"
 "CRM and Selling module’s features are configurable as per your business needs. Selling Settings is the place where you can set your preferences for:\n"
 " - Customer naming and default values\n"
 " - Billing and shipping preference in sales transactions\n"
@@ -470,109 +385,78 @@ msgstr ""
 
 #. Description of the Onboarding Step 'Set Up a Company'
 #: setup/onboarding_step/company_set_up/company_set_up.json
-msgid ""
-"# Set Up a Company\n"
-"\n"
-"A company is a legal entity for which you will set up your books of account and create accounting transactions. In ERPNext, you can create multiple companies, and establish relationships (group/subsidiary) among them.\n"
-"\n"
+msgid "# Set Up a Company\n\n"
+"A company is a legal entity for which you will set up your books of account and create accounting transactions. In ERPNext, you can create multiple companies, and establish relationships (group/subsidiary) among them.\n\n"
 "Within the company master, you can capture various default accounts for that Company and set crucial settings related to the accounting methodology followed for a company.\n"
 msgstr ""
 
 #. Description of the Onboarding Step 'Setting up Taxes'
 #: accounts/onboarding_step/setup_taxes/setup_taxes.json
-msgid ""
-"# Setting up Taxes\n"
-"\n"
+msgid "# Setting up Taxes\n\n"
 "ERPNext lets you configure your taxes so that they are automatically applied in your buying and selling transactions. You can configure them globally or even on Items. ERPNext taxes are pre-configured for most regions."
 msgstr ""
 
 #. Description of the Onboarding Step 'Routing'
 #: manufacturing/onboarding_step/routing/routing.json
-msgid ""
-"# Setup Routing\n"
-"\n"
+msgid "# Setup Routing\n\n"
 "A Routing stores all Operations along with the description, hourly rate, operation time, batch size, etc. Click below to learn how the Routing template can be created, for quick selection in the BOM."
 msgstr ""
 
 #. Description of the Onboarding Step 'Setup a Warehouse'
 #: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
-msgid ""
-"# Setup a Warehouse\n"
-"The warehouse can be your location/godown/store where you maintain the item's inventory, and receive/deliver them to various parties.\n"
-"\n"
+msgid "# Setup a Warehouse\n"
+"The warehouse can be your location/godown/store where you maintain the item's inventory, and receive/deliver them to various parties.\n\n"
 "In ERPNext, you can maintain a Warehouse in the tree structure, so that location and sub-location of an item can be tracked. Also, you can link a Warehouse to a specific Accounting ledger, where the real-time stock value of that warehouse’s item will be reflected."
 msgstr ""
 
 #. Description of the Onboarding Step 'Track Material Request'
 #: buying/onboarding_step/create_a_material_request/create_a_material_request.json
-msgid ""
-"# Track Material Request\n"
-"\n"
-"\n"
-"Also known as Purchase Request or an Indent, is a document identifying a requirement of a set of items (products or services) for various purposes like procurement, transfer, issue, or manufacturing. Once the Material Request is validated, a purchase manager can take the next actions for purchasing items like requesting RFQ from a supplier or directly placing an order with an identified Supplier.\n"
-"\n"
+msgid "# Track Material Request\n\n\n"
+"Also known as Purchase Request or an Indent, is a document identifying a requirement of a set of items (products or services) for various purposes like procurement, transfer, issue, or manufacturing. Once the Material Request is validated, a purchase manager can take the next actions for purchasing items like requesting RFQ from a supplier or directly placing an order with an identified Supplier.\n\n"
 msgstr ""
 
 #. Description of the Onboarding Step 'Update Stock Opening Balance'
 #: stock/onboarding_step/stock_opening_balance/stock_opening_balance.json
-msgid ""
-"# Update Stock Opening Balance\n"
-"It’s an entry to update the stock balance of an item, in a warehouse, on a date and time you are going live on ERPNext.\n"
-"\n"
+msgid "# Update Stock Opening Balance\n"
+"It’s an entry to update the stock balance of an item, in a warehouse, on a date and time you are going live on ERPNext.\n\n"
 "Once opening stocks are updated, you can create transactions like manufacturing and stock deliveries, where this opening stock will be consumed."
 msgstr ""
 
 #. Description of the Onboarding Step 'Updating Opening Balances'
 #: accounts/onboarding_step/updating_opening_balances/updating_opening_balances.json
-msgid ""
-"# Updating Opening Balances\n"
-"\n"
+msgid "# Updating Opening Balances\n\n"
 "Once you close the financial statement in previous accounting software, you can update the same as opening in your ERPNext's Balance Sheet accounts. This will allow you to get complete financial statements from ERPNext in the coming years, and discontinue the parallel accounting system right away."
 msgstr ""
 
 #. Description of the Onboarding Step 'View Warehouses'
 #: stock/onboarding_step/view_warehouses/view_warehouses.json
-msgid ""
-"# View Warehouse\n"
-"In ERPNext the term 'warehouse' can be thought of as a storage location.\n"
-"\n"
-"Warehouses are arranged in ERPNext in a tree like structure, where multiple sub-warehouses can be grouped under a single warehouse.\n"
-"\n"
+msgid "# View Warehouse\n"
+"In ERPNext the term 'warehouse' can be thought of as a storage location.\n\n"
+"Warehouses are arranged in ERPNext in a tree like structure, where multiple sub-warehouses can be grouped under a single warehouse.\n\n"
 "In this step we will view the [**Warehouse Tree**](https://docs.erpnext.com/docs/user/manual/en/stock/warehouse#21-tree-view) to view the [**Warehouses**](https://docs.erpnext.com/docs/user/manual/en/stock/warehouse) that are set by default."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create a Sales Item'
 #: accounts/onboarding_step/create_a_product/create_a_product.json
-msgid ""
-"## Products and Services\n"
-"\n"
+msgid "## Products and Services\n\n"
 "Depending on the nature of your business, you might be selling products or services to your clients or even both. \n"
-"ERPNext is optimized for itemized management of your sales and purchase.\n"
-"\n"
-"The **Item Master**  is where you can add all your sales items. If you are in services, you can create an Item for each service that you offer. If you run a manufacturing business, the same master is used for keeping a record of raw materials, sub-assemblies etc.\n"
-"\n"
+"ERPNext is optimized for itemized management of your sales and purchase.\n\n"
+"The **Item Master**  is where you can add all your sales items. If you are in services, you can create an Item for each service that you offer. If you run a manufacturing business, the same master is used for keeping a record of raw materials, sub-assemblies etc.\n\n"
 "Completing the Item Master is very essential for the successful implementation of ERPNext. We have a brief video introducing the item master for you, you can watch it in the next step."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create a Customer'
 #: accounts/onboarding_step/create_a_customer/create_a_customer.json
-msgid ""
-"## Who is a Customer?\n"
-"\n"
-"A customer, who is sometimes known as a client, buyer, or purchaser is the one who receives goods, services, products, or ideas, from a seller for a monetary consideration.\n"
-"\n"
-"Every customer needs to be assigned a unique id. Customer name itself can be the id or you can set a naming series for ids to be generated in Selling Settings.\n"
-"\n"
+msgid "## Who is a Customer?\n\n"
+"A customer, who is sometimes known as a client, buyer, or purchaser is the one who receives goods, services, products, or ideas, from a seller for a monetary consideration.\n\n"
+"Every customer needs to be assigned a unique id. Customer name itself can be the id or you can set a naming series for ids to be generated in Selling Settings.\n\n"
 "Just like the supplier, let's quickly create a customer."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create a Supplier'
 #: accounts/onboarding_step/create_a_supplier/create_a_supplier.json
-msgid ""
-"## Who is a Supplier?\n"
-"\n"
-"Suppliers are companies or individuals who provide you with products or services. ERPNext has comprehensive features for purchase cycles. \n"
-"\n"
+msgid "## Who is a Supplier?\n\n"
+"Suppliers are companies or individuals who provide you with products or services. ERPNext has comprehensive features for purchase cycles. \n\n"
 "Let's quickly create a supplier with the minimal details required. You need the name of the supplier, assign the supplier to a group, and select the type of the supplier, viz. Company or Individual."
 msgstr ""
 
@@ -739,7 +623,7 @@ msgstr "بر اساس و \"گروه بر اساس\" نمی توانند یکسا
 
 #: stock/report/product_bundle_balance/product_bundle_balance.py:232
 msgid "'Date' is required"
-msgstr "تاریخ الزامی است"
+msgstr "'تاریخ' الزامی است"
 
 #: selling/report/inactive_customers/inactive_customers.py:18
 msgid "'Days Since Last Order' must be greater than or equal to zero"
@@ -775,7 +659,7 @@ msgstr "'افتتاح'"
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:101
 #: stock/report/stock_analytics/stock_analytics.py:326
 msgid "'To Date' is required"
-msgstr "تا به امروز مورد نیاز است"
+msgstr "«تا تاریخ» مورد نیاز است"
 
 #: stock/doctype/packing_slip/packing_slip.py:96
 msgid "'To Package No.' cannot be less than 'From Package No.'"
@@ -909,19 +793,19 @@ msgstr "1 ساعت"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "1-10"
-msgstr ""
+msgstr "1-10"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "1-10"
-msgstr ""
+msgstr "1-10"
 
 #. Option for the 'No. of Employees' (Select) field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "1-10"
-msgstr ""
+msgstr "1-10"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -962,7 +846,7 @@ msgstr ""
 #: regional/report/uae_vat_201/uae_vat_201.py:99
 #: regional/report/uae_vat_201/uae_vat_201.py:105
 msgid "1{0}"
-msgstr "1{0}"
+msgstr ""
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Asset Maintenance
 #. Task'
@@ -1004,7 +888,7 @@ msgstr "30 دقیقه"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:119
 msgid "30-60"
-msgstr "30-60"
+msgstr ""
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "30-60 Days"
@@ -1054,7 +938,7 @@ msgstr "6 ساعت"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:120
 msgid "60-90"
-msgstr "60-90"
+msgstr ""
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "60-90 Days"
@@ -1074,8 +958,7 @@ msgstr "<b>از زمان</b> نمی تواند دیرتر از <b>تا زمان<
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #, python-format
 msgctxt "Process Statement Of Accounts"
-msgid ""
-"<br>\n"
+msgid "<br>\n"
 "<h4>Note</h4>\n"
 "<ul>\n"
 "<li>\n"
@@ -1115,13 +998,12 @@ msgstr "<div class=\"text-muted text-center\">هیچ تراکنش بانکی م�
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:258
 msgid "<div class=\"text-muted text-center\">{0}</div>"
-msgstr "<div class=\"text-muted text-center\">{0}</div>"
+msgstr ""
 
 #. Content of the 'settings' (HTML) field in DocType 'Cheque Print Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
-msgid ""
-"<div>\n"
+msgid "<div>\n"
 "<h3> All dimensions in centimeter only </h3>\n"
 "</div>"
 msgstr ""
@@ -1129,9 +1011,7 @@ msgstr ""
 #. Content of the 'about' (HTML) field in DocType 'Product Bundle'
 #: selling/doctype/product_bundle/product_bundle.json
 msgctxt "Product Bundle"
-msgid ""
-"<h3>About Product Bundle</h3>\n"
-"\n"
+msgid "<h3>About Product Bundle</h3>\n\n"
 "<p>Aggregate group of <b>Items</b> into another <b>Item</b>. This is useful if you are bundling a certain <b>Items</b> into a package and you maintain stock of the packed <b>Items</b> and not the aggregate <b>Item</b>.</p>\n"
 "<p>The package <b>Item</b> will have <code>Is Stock Item</code> as <b>No</b> and <code>Is Sales Item</code> as <b>Yes</b>.</p>\n"
 "<h4>Example:</h4>\n"
@@ -1141,8 +1021,7 @@ msgstr ""
 #. Content of the 'Help' (HTML) field in DocType 'Currency Exchange Settings'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
-msgid ""
-"<h3>Currency Exchange Settings Help</h3>\n"
+msgid "<h3>Currency Exchange Settings Help</h3>\n"
 "<p>There are 3 variables that could be used within the endpoint, result key and in values of the parameter.</p>\n"
 "<p>Exchange rate between {from_currency} and {to_currency} on {transaction_date} is fetched by the API.</p>\n"
 "<p>Example: If your endpoint is exchange.com/2021-08-01, then, you will have to input exchange.com/{transaction_date}</p>"
@@ -1152,17 +1031,11 @@ msgstr ""
 #. Letter Text'
 #: accounts/doctype/dunning_letter_text/dunning_letter_text.json
 msgctxt "Dunning Letter Text"
-msgid ""
-"<h4>Body Text and Closing Text Example</h4>\n"
-"\n"
-"<div>We have noticed that you have not yet paid invoice {{sales_invoice}} for {{frappe.db.get_value(\"Currency\", currency, \"symbol\")}} {{outstanding_amount}}. This is a friendly reminder that the invoice was due on {{due_date}}. Please pay the amount due immediately to avoid any further dunning cost.</div>\n"
-"\n"
-"<h4>How to get fieldnames</h4>\n"
-"\n"
-"<p>The fieldnames you can use in your template are the fields in the document. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>\n"
-"\n"
-"<h4>Templating</h4>\n"
-"\n"
+msgid "<h4>Body Text and Closing Text Example</h4>\n\n"
+"<div>We have noticed that you have not yet paid invoice {{sales_invoice}} for {{frappe.db.get_value(\"Currency\", currency, \"symbol\")}} {{outstanding_amount}}. This is a friendly reminder that the invoice was due on {{due_date}}. Please pay the amount due immediately to avoid any further dunning cost.</div>\n\n"
+"<h4>How to get fieldnames</h4>\n\n"
+"<p>The fieldnames you can use in your template are the fields in the document. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>\n\n"
+"<h4>Templating</h4>\n\n"
 "<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">read this documentation.</a></p>"
 msgstr ""
 
@@ -1170,21 +1043,14 @@ msgstr ""
 #. Template'
 #: crm/doctype/contract_template/contract_template.json
 msgctxt "Contract Template"
-msgid ""
-"<h4>Contract Template Example</h4>\n"
-"\n"
-"<pre>Contract for Customer {{ party_name }}\n"
-"\n"
+msgid "<h4>Contract Template Example</h4>\n\n"
+"<pre>Contract for Customer {{ party_name }}\n\n"
 "-Valid From : {{ start_date }} \n"
 "-Valid To : {{ end_date }}\n"
-"</pre>\n"
-"\n"
-"<h4>How to get fieldnames</h4>\n"
-"\n"
-"<p>The field names you can use in your Contract Template are the fields in the Contract for which you are creating the template. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Contract)</p>\n"
-"\n"
-"<h4>Templating</h4>\n"
-"\n"
+"</pre>\n\n"
+"<h4>How to get fieldnames</h4>\n\n"
+"<p>The field names you can use in your Contract Template are the fields in the Contract for which you are creating the template. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Contract)</p>\n\n"
+"<h4>Templating</h4>\n\n"
 "<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">read this documentation.</a></p>"
 msgstr ""
 
@@ -1192,21 +1058,14 @@ msgstr ""
 #. and Conditions'
 #: setup/doctype/terms_and_conditions/terms_and_conditions.json
 msgctxt "Terms and Conditions"
-msgid ""
-"<h4>Standard Terms and Conditions Example</h4>\n"
-"\n"
-"<pre>Delivery Terms for Order number {{ name }}\n"
-"\n"
+msgid "<h4>Standard Terms and Conditions Example</h4>\n\n"
+"<pre>Delivery Terms for Order number {{ name }}\n\n"
 "-Order Date : {{ transaction_date }} \n"
 "-Expected Delivery Date : {{ delivery_date }}\n"
-"</pre>\n"
-"\n"
-"<h4>How to get fieldnames</h4>\n"
-"\n"
-"<p>The fieldnames you can use in your email template are the fields in the document from which you are sending the email. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>\n"
-"\n"
-"<h4>Templating</h4>\n"
-"\n"
+"</pre>\n\n"
+"<h4>How to get fieldnames</h4>\n\n"
+"<p>The fieldnames you can use in your email template are the fields in the document from which you are sending the email. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>\n\n"
+"<h4>Templating</h4>\n\n"
 "<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">read this documentation.</a></p>"
 msgstr ""
 
@@ -1227,7 +1086,7 @@ msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">تنظیم�
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Amount In Words</label>"
-msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">مقدار در کلمات</label>"
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">مقدار به حروف</label>"
 
 #. Content of the 'Date Settings' (HTML) field in DocType 'Cheque Print
 #. Template'
@@ -1239,8 +1098,7 @@ msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">تنظیم�
 #. Content of the 'html_llwp' (HTML) field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
-msgid ""
-"<p>In your <b>Email Template</b>, you can use the following special variables:\n"
+msgid "<p>In your <b>Email Template</b>, you can use the following special variables:\n"
 "</p>\n"
 "<ul>\n"
 "        <li>\n"
@@ -1266,40 +1124,28 @@ msgstr ""
 #. Account'
 #: accounts/doctype/payment_gateway_account/payment_gateway_account.json
 msgctxt "Payment Gateway Account"
-msgid ""
-"<pre><h5>Message Example</h5>\n"
-"\n"
-"&lt;p&gt; Thank You for being a part of {{ doc.company }}! We hope you are enjoying the service.&lt;/p&gt;\n"
-"\n"
-"&lt;p&gt; Please find enclosed the E Bill statement. The outstanding amount is {{ doc.grand_total }}.&lt;/p&gt;\n"
-"\n"
-"&lt;p&gt; We don't want you to be spending time running around in order to pay for your Bill.<br>After all, life is beautiful and the time you have in hand should be spent to enjoy it!<br>So here are our little ways to help you get more time for life! &lt;/p&gt;\n"
-"\n"
-"&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n"
-"\n"
+msgid "<pre><h5>Message Example</h5>\n\n"
+"&lt;p&gt; Thank You for being a part of {{ doc.company }}! We hope you are enjoying the service.&lt;/p&gt;\n\n"
+"&lt;p&gt; Please find enclosed the E Bill statement. The outstanding amount is {{ doc.grand_total }}.&lt;/p&gt;\n\n"
+"&lt;p&gt; We don't want you to be spending time running around in order to pay for your Bill.<br>After all, life is beautiful and the time you have in hand should be spent to enjoy it!<br>So here are our little ways to help you get more time for life! &lt;/p&gt;\n\n"
+"&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n"
 "</pre>\n"
 msgstr ""
 
 #. Content of the 'Message Examples' (HTML) field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
-msgid ""
-"<pre><h5>Message Example</h5>\n"
-"\n"
-"&lt;p&gt;Dear {{ doc.contact_person }},&lt;/p&gt;\n"
-"\n"
-"&lt;p&gt;Requesting payment for {{ doc.doctype }}, {{ doc.name }} for {{ doc.grand_total }}.&lt;/p&gt;\n"
-"\n"
-"&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n"
-"\n"
+msgid "<pre><h5>Message Example</h5>\n\n"
+"&lt;p&gt;Dear {{ doc.contact_person }},&lt;/p&gt;\n\n"
+"&lt;p&gt;Requesting payment for {{ doc.doctype }}, {{ doc.name }} for {{ doc.grand_total }}.&lt;/p&gt;\n\n"
+"&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n"
 "</pre>\n"
 msgstr ""
 
 #. Content of the 'html_19' (HTML) field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgctxt "Inventory Dimension"
-msgid ""
-"<table class=\"table table-bordered table-condensed\">\n"
+msgid "<table class=\"table table-bordered table-condensed\">\n"
 "<thead>\n"
 "  <tr>\n"
 "         <th class=\"table-sr\" style=\"width: 50%;\">Child Document</th>\n"
@@ -1309,8 +1155,7 @@ msgid ""
 "<tbody>\n"
 "<tr>\n"
 "         <td>\n"
-"                  <p> To access parent document field use parent.fieldname and to access child table document field use doc.fieldname </p>\n"
-"\n"
+"                  <p> To access parent document field use parent.fieldname and to access child table document field use doc.fieldname </p>\n\n"
 "         </td>\n"
 "         <td>\n"
 "                    <p>To access document field use doc.fieldname </p>\n"
@@ -1318,22 +1163,14 @@ msgid ""
 "</tr>\n"
 "<tr>\n"
 "        <td>\n"
-"                   <p><b>Example: </b> parent.doctype == \"Stock Entry\" and doc.item_code == \"Test\" </p>\n"
-"\n"
+"                   <p><b>Example: </b> parent.doctype == \"Stock Entry\" and doc.item_code == \"Test\" </p>\n\n"
 "        </td>\n"
 "         <td>\n"
 "                   <p><b>Example: </b> doc.doctype == \"Stock Entry\" and doc.purpose == \"Manufacture\"</p>    \n"
 "          </td>\n"
-"</tr>\n"
-"\n"
+"</tr>\n\n"
 "</tbody>\n"
-"</table>\n"
-"\n"
-"\n"
-"\n"
-"\n"
-"\n"
-"\n"
+"</table>\n\n\n\n\n\n\n"
 msgstr ""
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:190
@@ -1373,19 +1210,17 @@ msgstr "یک کار آشتی {0} برای همین فیلترها در حال ا
 
 #. Description of the Onboarding Step 'Create a Sales Order'
 #: selling/onboarding_step/create_a_sales_order/create_a_sales_order.json
-msgid ""
-"A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.\n"
-"\n"
+msgid "A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.\n\n"
 "Sales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer."
 msgstr ""
 
 #: setup/doctype/company/company.py:937
 msgid "A Transaction Deletion Job is triggered for {0}"
-msgstr "یک کار حذف تراکنش برای {0} راه اندازی می شود"
+msgstr "یک کار حذف تراکنش برای {0} فعال می شود"
 
 #: setup/doctype/company/company.py:914
 msgid "A Transaction Deletion Job: {0} is already running for {1}"
-msgstr "یک کار حذف تراکنش: {0} از قبل برای {1} در حال اجرا است"
+msgstr "یک کار حذف تراکنش: {0} در حال حاضر برای {1} در حال اجرا است"
 
 #. Description of the 'Send To Primary Contact' (Check) field in DocType
 #. 'Process Statement Of Accounts'
@@ -1446,105 +1281,105 @@ msgstr "AB-"
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgctxt "Asset Depreciation Schedule"
 msgid "ACC-ADS-.YYYY.-"
-msgstr "ACC-ADS-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Asset Maintenance Log'
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
 msgctxt "Asset Maintenance Log"
 msgid "ACC-AML-.YYYY.-"
-msgstr "ACC-AML-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Naming Series' (Select) field in DocType 'Asset Shift
 #. Allocation'
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.json
 msgctxt "Asset Shift Allocation"
 msgid "ACC-ASA-.YYYY.-"
-msgstr "ACC-ASA-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "ACC-ASC-.YYYY.-"
-msgstr "ACC-ASC-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "ACC-ASR-.YYYY.-"
-msgstr "ACC-ASR-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Naming Series' (Select) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "ACC-ASS-.YYYY.-"
-msgstr "ACC-ASS-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "ACC-BTN-.YYYY.-"
-msgstr "ACC-BTN-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "ACC-JV-.YYYY.-"
-msgstr "ACC-JV-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "ACC-PAY-.YYYY.-"
-msgstr "ACC-PAY-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Invoice Series' (Select) field in DocType 'Import Supplier
 #. Invoice'
 #: regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgctxt "Import Supplier Invoice"
 msgid "ACC-PINV-.YYYY.-"
-msgstr "ACC-PINV-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "ACC-PINV-.YYYY.-"
-msgstr "ACC-PINV-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "ACC-PINV-RET-.YYYY.-"
-msgstr "ACC-PINV-RET-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "ACC-PRQ-.YYYY.-"
-msgstr "ACC-PRQ-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "ACC-PSINV-.YYYY.-"
-msgstr "ACC-PSINV-.YYYY.-"
+msgstr ""
 
 #. Option for the 'naming_series' (Select) field in DocType 'Shareholder'
 #: accounts/doctype/shareholder/shareholder.json
 msgctxt "Shareholder"
 msgid "ACC-SH-.YYYY.-"
-msgstr "ACC-SH-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "ACC-SINV-.YYYY.-"
-msgstr "ACC-SINV-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "ACC-SINV-RET-.YYYY.-"
-msgstr "ACC-SINV-RET-.YYYY.-"
+msgstr ""
 
 #. Label of a Date field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
@@ -1588,7 +1423,7 @@ msgstr "نقطه پایانی API"
 #: utilities/doctype/video_settings/video_settings.json
 msgctxt "Video Settings"
 msgid "API Key"
-msgstr "کلید ای پی ای"
+msgstr "کلید API"
 
 #. Label of a Data field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -1600,7 +1435,7 @@ msgstr "شماره AWB"
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Abbr"
-msgstr "اببر"
+msgstr ""
 
 #. Label of a Data field in DocType 'Item Attribute Value'
 #: stock/doctype/item_attribute_value/item_attribute_value.json
@@ -3303,7 +3138,7 @@ msgstr "حساب ها برای ادغام"
 #. Subtitle of the Module Onboarding 'Accounts'
 #: accounts/module_onboarding/accounts/accounts.json
 msgid "Accounts, Invoices, Taxation, and more."
-msgstr ""
+msgstr "حساب ها، فاکتورها، مالیات و موارد دیگر."
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:33
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:46
@@ -3779,7 +3614,7 @@ msgstr "تعداد واقعی (در منبع/هدف)"
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgctxt "Asset Capitalization Stock Item"
 msgid "Actual Qty in Warehouse"
-msgstr "تعداد واقعی در انبار"
+msgstr "مقدار واقعی در انبار"
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:185
 msgid "Actual Qty is mandatory"
@@ -4946,13 +4781,13 @@ msgstr "پیش پرداخت"
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Advance Payment Status"
-msgstr ""
+msgstr "وضعیت پیش پرداخت"
 
 #. Label of a Select field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Advance Payment Status"
-msgstr ""
+msgstr "وضعیت پیش پرداخت"
 
 #: controllers/accounts_controller.py:214
 msgid "Advance Payments"
@@ -5381,7 +5216,7 @@ msgstr "کاربر کشاورزی"
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "Algorithm"
-msgstr ""
+msgstr "الگوریتم"
 
 #. Name of a role
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -5818,7 +5653,7 @@ msgstr "اجازه انتقال مواد اضافی را بدهید"
 #: accounts/doctype/pos_payment_method/pos_payment_method.json
 msgctxt "POS Payment Method"
 msgid "Allow In Returns"
-msgstr "Allow In Returns"
+msgstr ""
 
 #. Label of a Check field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
@@ -6091,13 +5926,13 @@ msgstr "Doctypes مجاز"
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Allowed Items"
-msgstr ""
+msgstr "آیتم‌های مجاز"
 
 #. Group in Supplier's connections
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Allowed Items"
-msgstr ""
+msgstr "آیتم‌های مجاز"
 
 #. Name of a DocType
 #: accounts/doctype/allowed_to_transact_with/allowed_to_transact_with.json
@@ -7414,6 +7249,7 @@ msgstr "کد کوپن کاربردی"
 #. Description of the 'Minimum Value' (Float) field in DocType 'Quality
 #. Inspection Reading'
 #. Description of the 'Maximum Value' (Float) field in DocType 'Quality
+#. Inspection Reading'
 #: stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgctxt "Quality Inspection Reading"
 msgid "Applied on each reading."
@@ -9283,7 +9119,7 @@ msgstr "B+"
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "B-"
-msgstr "ب-"
+msgstr "B-"
 
 #. Option for the 'Algorithm' (Select) field in DocType 'Bisect Accounting
 #. Statements'
@@ -9296,7 +9132,7 @@ msgstr ""
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "BIN Qty"
-msgstr "BIN Qty"
+msgstr ""
 
 #. Name of a DocType
 #: manufacturing/doctype/bom/bom.json manufacturing/doctype/bom/bom_tree.js:8
@@ -9376,7 +9212,7 @@ msgstr "BOM"
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:21
 msgid "BOM 1"
-msgstr "BOM 1"
+msgstr ""
 
 #: manufacturing/doctype/bom/bom.py:1348
 msgid "BOM 1 {0} and BOM 2 {1} should not be same"
@@ -9384,7 +9220,7 @@ msgstr "BOM 1 {0} و BOM 2 {1} نباید یکسان باشند"
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:38
 msgid "BOM 2"
-msgstr "BOM 2"
+msgstr ""
 
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:4
@@ -9453,7 +9289,7 @@ msgstr "شماره جزئیات BOM"
 #. Name of a report
 #: manufacturing/report/bom_explorer/bom_explorer.json
 msgid "BOM Explorer"
-msgstr "BOM Explorer"
+msgstr ""
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
@@ -9566,7 +9402,7 @@ msgstr "زمان عملیات BOM"
 
 #: manufacturing/report/bom_stock_report/bom_stock_report.py:27
 msgid "BOM Qty"
-msgstr "BOM Qty"
+msgstr ""
 
 #: stock/report/item_prices/item_prices.py:60
 msgid "BOM Rate"
@@ -9605,7 +9441,7 @@ msgstr "درخت BOM"
 
 #: manufacturing/report/bom_stock_report/bom_stock_report.py:28
 msgid "BOM UoM"
-msgstr "BOM UoM"
+msgstr ""
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_update_batch/bom_update_batch.json
@@ -9793,13 +9629,13 @@ msgstr "ترازنامه"
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "Balance Sheet Summary"
-msgstr ""
+msgstr "خلاصه ترازنامه"
 
 #. Label of a Float field in DocType 'Bisect Nodes'
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
 msgctxt "Bisect Nodes"
 msgid "Balance Sheet Summary"
-msgstr ""
+msgstr "خلاصه ترازنامه"
 
 #. Label of a Currency field in DocType 'Stock Ledger Entry'
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
@@ -10705,7 +10541,7 @@ msgstr "شماره دسته اجباری است"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2118
 msgid "Batch No {0} does not exists"
-msgstr "شماره دسته {0} وجود ندارد"
+msgstr ""
 
 #: stock/utils.py:643
 msgid "Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
@@ -10834,7 +10670,7 @@ msgstr "شروع دوره اشتراک فعلی"
 
 #: accounts/doctype/subscription/subscription.py:341
 msgid "Below Subscription Plans are of different currency to the party default billing currency/Company currency: {0}"
-msgstr "طرح‌های اشتراک زیر دارای واحد پولی متفاوت با ارز پیش‌فرض صورت‌حساب طرف/ارز شرکت هستند: {0}"
+msgstr ""
 
 #: accounts/report/accounts_receivable/accounts_receivable.py:1061
 #: accounts/report/purchase_register/purchase_register.py:214
@@ -11923,7 +11759,7 @@ msgstr "دور زدن بررسی اعتبار در سفارش فروش"
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "CBAL-.#####"
-msgstr "CBAL-.#####"
+msgstr ""
 
 #. Label of a Link field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
@@ -11944,13 +11780,13 @@ msgstr "COGS بر اساس گروه آیتم"
 
 #: stock/report/cogs_by_item_group/cogs_by_item_group.py:45
 msgid "COGS Debit"
-msgstr "COGS Debit"
+msgstr ""
 
 #. Name of a Workspace
 #. Label of a Card Break in the Home Workspace
 #: crm/workspace/crm/crm.json setup/workspace/home/home.json
 msgid "CRM"
-msgstr "CRM"
+msgstr ""
 
 #. Name of a DocType
 #: crm/doctype/crm_note/crm_note.json
@@ -11975,19 +11811,19 @@ msgstr "تنظیمات CRM"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "CRM-LEAD-.YYYY.-"
-msgstr "CRM-LEAD-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "CRM-OPP-.YYYY.-"
-msgstr "CRM-OPP-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "CUST-.YYYY.-"
-msgstr "CUST-.YYYY.-"
+msgstr ""
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:34
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:50
@@ -12875,7 +12711,7 @@ msgstr "ظرفیت باید بیشتر از 0 باشد"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:26
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:39
 msgid "Capital Equipment"
-msgstr ""
+msgstr "تجهیزات سرمایه ای"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:103
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:151
@@ -17415,7 +17251,7 @@ msgstr "شماره مرکز هزینه"
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Cost Center and Budgeting"
-msgstr ""
+msgstr "مرکز هزینه و بودجه"
 
 #: accounts/doctype/cost_center/cost_center.py:77
 msgid "Cost Center is a part of Cost Center Allocation, hence cannot be converted to a group"
@@ -17768,7 +17604,7 @@ msgstr "نوع کوپن"
 #: accounts/doctype/bank_clearance/bank_clearance.py:79
 #: accounts/doctype/journal_entry/journal_entry.js:298
 msgid "Cr"
-msgstr "Cr"
+msgstr ""
 
 #: accounts/doctype/account/account_tree.js:148
 #: accounts/doctype/account/account_tree.js:151
@@ -18088,7 +17924,7 @@ msgstr "ورود نمونه ذخیره موجودی را ایجاد کنید"
 
 #: public/js/utils/serial_no_batch_selector.js:220
 msgid "Create Serial Nos"
-msgstr "شماره های سریال ایجاد کنید"
+msgstr "ایجاد شماره‌های سریال"
 
 #: stock/dashboard/item_dashboard.js:271
 #: stock/doctype/material_request/material_request.js:376
@@ -18138,13 +17974,13 @@ msgstr "ایجاد انواع"
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_your_first_purchase_invoice/create_your_first_purchase_invoice.json
 msgid "Create Your First Purchase Invoice "
-msgstr ""
+msgstr "اولین فاکتور خرید خود را ایجاد کنید "
 
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_your_first_sales_invoice/create_your_first_sales_invoice.json
 #: setup/onboarding_step/create_your_first_sales_invoice/create_your_first_sales_invoice.json
 msgid "Create Your First Sales Invoice "
-msgstr ""
+msgstr "اولین فاکتور فروش خود را ایجاد کنید "
 
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_a_customer/create_a_customer.json
@@ -18196,12 +18032,12 @@ msgstr ""
 #: setup/onboarding_step/create_a_supplier/create_a_supplier.json
 #: stock/onboarding_step/create_a_supplier/create_a_supplier.json
 msgid "Create a Supplier"
-msgstr ""
+msgstr "یک تامین کننده ایجاد کنید"
 
 #. Title of an Onboarding Step
 #: manufacturing/onboarding_step/warehouse/warehouse.json
 msgid "Create a Warehouse"
-msgstr ""
+msgstr "یک انبار ایجاد کنید"
 
 #. Label of an action in the Onboarding Step 'Create an Item'
 #: setup/onboarding_step/create_an_item/create_an_item.json
@@ -18367,14 +18203,12 @@ msgid "Creation of <b><a href='/app/{0}'>{1}(s)</a></b> successful"
 msgstr "ایجاد <b><a href='/app/{0}'>{1}(ها)</a></b> با موفقیت"
 
 #: utilities/bulk_transaction.py:190
-msgid ""
-"Creation of {0} failed.\n"
+msgid "Creation of {0} failed.\n"
 "\t\t\t\tCheck <b><a href=\"/app/bulk-transaction-log\">Bulk Transaction Log</a></b>"
 msgstr ""
 
 #: utilities/bulk_transaction.py:181
-msgid ""
-"Creation of {0} partially successful.\n"
+msgid "Creation of {0} partially successful.\n"
 "\t\t\t\tCheck <b><a href=\"/app/bulk-transaction-log\">Bulk Transaction Log</a></b>"
 msgstr ""
 
@@ -20358,13 +20192,13 @@ msgstr ""
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
 msgctxt "Downtime Entry"
 msgid "DT-"
-msgstr "DT-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "DUNN-.MM.-.YY.-"
-msgstr "DUNN-.MM.-.YY.-"
+msgstr ""
 
 #: public/js/stock_analytics.js:51
 msgid "Daily"
@@ -20890,7 +20724,7 @@ msgstr "چند روز قبل از دوره اشتراک فعلی"
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "DeLinked"
-msgstr "DeLinked"
+msgstr ""
 
 #. Label of a Data field in DocType 'Prospect Opportunity'
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
@@ -25194,7 +25028,7 @@ msgstr "پروژه تکراری با وظایف"
 
 #: accounts/doctype/pos_profile/pos_profile.py:135
 msgid "Duplicate customer group found in the customer group table"
-msgstr ""
+msgstr "گروه مشتری تکراری در جدول گروه مشتری یافت شد"
 
 #: stock/doctype/item_manufacturer/item_manufacturer.py:44
 msgid "Duplicate entry against the item code {0} and manufacturer {1}"
@@ -25261,19 +25095,19 @@ msgstr "اطلاعات صورتحساب الکترونیکی وجود ندارد
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "EAN"
-msgstr "EAN"
+msgstr ""
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "EAN-12"
-msgstr "EAN-12"
+msgstr ""
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "EAN-8"
-msgstr "EAN-8"
+msgstr ""
 
 #. Label of a Data field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -25460,7 +25294,7 @@ msgstr "برق قطع شد"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:27
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:40
 msgid "Electronic Equipment"
-msgstr ""
+msgstr "تجهیزات الکترونیکی"
 
 #. Name of a report
 #: regional/report/electronic_invoice_register/electronic_invoice_register.json
@@ -26351,18 +26185,16 @@ msgstr "اگر منبع استعلام کمپین است، نام کمپین ر�
 
 #: accounts/doctype/bank_guarantee/bank_guarantee.py:51
 msgid "Enter the Bank Guarantee Number before submitting."
-msgstr ""
+msgstr "قبل از ارسال، شماره ضمانت نامه بانکی را وارد کنید."
 
 #: manufacturing/doctype/routing/routing.js:82
-msgid ""
-"Enter the Operation, the table will fetch the Operation details like Hourly Rate, Workstation automatically.\n"
-"\n"
+msgid "Enter the Operation, the table will fetch the Operation details like Hourly Rate, Workstation automatically.\n\n"
 " After that, set the Operation Time in minutes and the table will calculate the Operation Costs based on the Hourly Rate and Operation Time."
 msgstr ""
 
 #: accounts/doctype/bank_guarantee/bank_guarantee.py:53
 msgid "Enter the name of the Beneficiary before submitting."
-msgstr ""
+msgstr "قبل از ارسال نام ذینفع را وارد کنید."
 
 #: accounts/doctype/bank_guarantee/bank_guarantee.py:55
 msgid "Enter the name of the bank or lending institution before submitting."
@@ -26520,7 +26352,7 @@ msgstr "پیغام خطا"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:273
 msgid "Error Occurred"
-msgstr ""
+msgstr "خطا رخ داده است"
 
 #: telephony/doctype/call_log/call_log.py:195
 msgid "Error during caller information update"
@@ -26604,8 +26436,7 @@ msgstr "نمونه ای از یک سند پیوندی: {0}"
 #. Description of the 'Serial Number Series' (Data) field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
-msgid ""
-"Example: ABCD.#####\n"
+msgid "Example: ABCD.#####\n"
 "If series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank."
 msgstr ""
 
@@ -27402,7 +27233,7 @@ msgstr "هزینه عملیاتی مبتنی بر FG"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "FIFO"
-msgstr "FIFO"
+msgstr ""
 
 #. Option for the 'Default Valuation Method' (Select) field in DocType 'Stock
 #. Settings'
@@ -27411,7 +27242,7 @@ msgstr "FIFO"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "FIFO"
-msgstr "FIFO"
+msgstr ""
 
 #. Name of a report
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.json
@@ -28018,7 +27849,7 @@ msgstr "نسبت های مالی"
 #. Name of a Workspace
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Financial Reports"
-msgstr ""
+msgstr "گزارشهای مالی"
 
 #. Title of an Onboarding Step
 #. Label of a Card Break in the Financial Reports Workspace
@@ -28476,7 +28307,7 @@ msgstr "برای تامین کننده پیش فرض (اختیاری)"
 
 #: controllers/stock_controller.py:770
 msgid "For Item {0} cannot be received more than {1} qty against the {2} {3}"
-msgstr "برای مورد {0} نمی توان بیش از {1} تعداد در برابر {2} {3} دریافت کرد"
+msgstr ""
 
 #. Label of a Link field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
@@ -28503,6 +28334,7 @@ msgstr "برای لیست قیمت"
 #. Description of the 'Planned Quantity' (Float) field in DocType 'Sales Order
 #. Item'
 #. Description of the 'Produced Quantity' (Float) field in DocType 'Sales Order
+#. Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "For Production"
@@ -29533,19 +29365,19 @@ msgstr "کاملا مستهلک شده"
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Fully Paid"
-msgstr ""
+msgstr "به طور کامل پرداخت شده"
 
 #. Option for the 'Advance Payment Status' (Select) field in DocType 'Sales
 #. Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Fully Paid"
-msgstr ""
+msgstr "به طور کامل پرداخت شده"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:28
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:41
 msgid "Furniture and Fixtures"
-msgstr ""
+msgstr "مبلمان و وسایل"
 
 #: accounts/doctype/account/account_tree.js:111
 msgid "Further accounts can be made under Groups, but entries can be made against non-Groups"
@@ -29577,7 +29409,7 @@ msgstr "پرداخت های آینده"
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:235
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:159
 msgid "G - D"
-msgstr "G - D"
+msgstr ""
 
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:174
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:243
@@ -29606,13 +29438,13 @@ msgstr "نمایه ارسال مجدد GL"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "GS1"
-msgstr "GS1"
+msgstr ""
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "GTIN"
-msgstr "GTIN"
+msgstr ""
 
 #. Label of a Currency field in DocType 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
@@ -30662,7 +30494,7 @@ msgstr "نمای رشد"
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:245
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:169
 msgid "H - F"
-msgstr "H - F"
+msgstr ""
 
 #. Name of a role
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.json
@@ -30686,13 +30518,13 @@ msgstr "کاربر منابع انسانی"
 #: setup/doctype/driver/driver.json
 msgctxt "Driver"
 msgid "HR-DRI-.YYYY.-"
-msgstr "HR-DRI-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "HR-EMP-"
-msgstr "HR-EMP-"
+msgstr ""
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Maintenance Schedule
 #. Item'
@@ -31183,25 +31015,25 @@ msgstr "من - ک"
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "IBAN"
-msgstr "IBAN"
+msgstr ""
 
 #. Label of a Data field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgctxt "Bank Guarantee"
 msgid "IBAN"
-msgstr "IBAN"
+msgstr ""
 
 #. Label of a Data field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "IBAN"
-msgstr "IBAN"
+msgstr ""
 
 #. Label of a Read Only field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "IBAN"
-msgstr "IBAN"
+msgstr ""
 
 #: accounts/doctype/bank_account/bank_account.py:84
 #: accounts/doctype/bank_account/bank_account.py:87
@@ -31228,7 +31060,7 @@ msgstr "آدرس آی پی"
 #. Name of a report
 #: regional/report/irs_1099/irs_1099.json
 msgid "IRS 1099"
-msgstr "IRS 1099"
+msgstr ""
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -31240,25 +31072,25 @@ msgstr "شابک"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "ISBN-10"
-msgstr "ISBN-10"
+msgstr ""
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "ISBN-13"
-msgstr "ISBN-13"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "ISS-.YYYY.-"
-msgstr "ISS-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "ISSN"
-msgstr "ISSN"
+msgstr ""
 
 #: manufacturing/report/job_card_summary/job_card_summary.py:128
 #: manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:69
@@ -31568,10 +31400,13 @@ msgstr "اگر شما {0} {1} مورد ارزش {2} را داشته باشید،
 #. Option for the 'Action if Accumulated Monthly Budget Exceeded on MR'
 #. (Select) field in DocType 'Budget'
 #. Option for the 'Action if Annual Budget Exceeded on PO' (Select) field in
+#. DocType 'Budget'
 #. Option for the 'Action if Accumulated Monthly Budget Exceeded on PO'
+#. (Select) field in DocType 'Budget'
 #. Option for the 'Action if Annual Budget Exceeded on Actual' (Select) field
 #. in DocType 'Budget'
 #. Option for the 'Action if Accumulated Monthly Budget Exceeded on Actual'
+#. (Select) field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Ignore"
@@ -32021,7 +31856,7 @@ msgstr "وارد كردن"
 #: setup/workspace/home/home.json setup/workspace/settings/settings.json
 msgctxt "Data Import"
 msgid "Import Data"
-msgstr ""
+msgstr "وارد کردن داده‌ها"
 
 #. Title of an Onboarding Step
 #: setup/onboarding_step/data_import/data_import.json
@@ -33743,7 +33578,7 @@ msgstr "عبارت شرط نامعتبر است"
 
 #: selling/doctype/quotation/quotation.py:253
 msgid "Invalid lost reason {0}, please create a new lost reason"
-msgstr "دلیل گمشده نامعتبر {0}، لطفاً یک دلیل گمشده جدید ایجاد کنید"
+msgstr "دلیل از دست رفتن نامعتبر {0}، لطفاً یک دلیل از دست رفتن جدید ایجاد کنید"
 
 #: stock/doctype/item/item.py:402
 msgid "Invalid naming series (. missing) for {0}"
@@ -37676,7 +37511,7 @@ msgstr "لطفا ابتدا شرکت را انتخاب کنید"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "LIFO"
-msgstr "LIFO"
+msgstr ""
 
 #. Option for the 'Default Valuation Method' (Select) field in DocType 'Stock
 #. Settings'
@@ -37685,7 +37520,7 @@ msgstr "LIFO"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "LIFO"
-msgstr "LIFO"
+msgstr ""
 
 #. Label of a Data field in DocType 'Item Website Specification'
 #: stock/doctype/item_website_specification/item_website_specification.json
@@ -38132,8 +37967,7 @@ msgstr "ترک Encashed؟"
 #. 'Appointment Booking Settings'
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgctxt "Appointment Booking Settings"
-msgid ""
-"Leave blank for home.\n"
+msgid "Leave blank for home.\n"
 "This is relative to site URL, for example \"about\" will redirect to \"https://yoursitename.com/about\""
 msgstr ""
 
@@ -38169,7 +38003,7 @@ msgstr "حساب های ادغام دفتر کل"
 #. Label of a Card Break in the Financial Reports Workspace
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Ledgers"
-msgstr ""
+msgstr "دفتر کل"
 
 #. Option for the 'Status' (Select) field in DocType 'Driver'
 #: setup/doctype/driver/driver.json
@@ -38533,13 +38367,13 @@ msgstr "سطح (BOM)"
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Lft"
-msgstr "Lft"
+msgstr ""
 
 #. Label of a Int field in DocType 'Company'
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Lft"
-msgstr "Lft"
+msgstr ""
 
 #: accounts/report/balance_sheet/balance_sheet.py:240
 msgid "Liabilities"
@@ -39132,115 +38966,115 @@ msgstr "نوع برنامه وفاداری"
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "MAT-DN-.YYYY.-"
-msgstr "MAT-DN-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "MAT-DN-RET-.YYYY.-"
-msgstr "MAT-DN-RET-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
 msgctxt "Delivery Trip"
 msgid "MAT-DT-.YYYY.-"
-msgstr "MAT-DT-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Installation Note'
 #: selling/doctype/installation_note/installation_note.json
 msgctxt "Installation Note"
 msgid "MAT-INS-.YYYY.-"
-msgstr "MAT-INS-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Landed Cost Voucher'
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgctxt "Landed Cost Voucher"
 msgid "MAT-LCV-.YYYY.-"
-msgstr "MAT-LCV-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "MAT-MR-.YYYY.-"
-msgstr "MAT-MR-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgctxt "Maintenance Schedule"
 msgid "MAT-MSH-.YYYY.-"
-msgstr "MAT-MSH-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Maintenance Visit'
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgctxt "Maintenance Visit"
 msgid "MAT-MVS-.YYYY.-"
-msgstr "MAT-MVS-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Packing Slip'
 #: stock/doctype/packing_slip/packing_slip.json
 msgctxt "Packing Slip"
 msgid "MAT-PAC-.YYYY.-"
-msgstr "MAT-PAC-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "MAT-PR-RET-.YYYY.-"
-msgstr "MAT-PR-RET-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "MAT-PRE-.YYYY.-"
-msgstr "MAT-PRE-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Quality Inspection'
 #: stock/doctype/quality_inspection/quality_inspection.json
 msgctxt "Quality Inspection"
 msgid "MAT-QA-.YYYY.-"
-msgstr "MAT-QA-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Stock Reconciliation'
 #: stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgctxt "Stock Reconciliation"
 msgid "MAT-RECO-.YYYY.-"
-msgstr "MAT-RECO-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "MAT-SCR-.YYYY.-"
-msgstr "MAT-SCR-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "MAT-SCR-RET-.YYYY.-"
-msgstr "MAT-SCR-RET-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "MAT-STE-.YYYY.-"
-msgstr "MAT-STE-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Blanket Order'
 #: manufacturing/doctype/blanket_order/blanket_order.json
 msgctxt "Blanket Order"
 msgid "MFG-BLR-.YYYY.-"
-msgstr "MFG-BLR-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Naming Series' (Select) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "MFG-PP-.YYYY.-"
-msgstr "MFG-PP-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "MFG-WO-.YYYY.-"
-msgstr "MFG-WO-.YYYY.-"
+msgstr ""
 
 #: manufacturing/report/downtime_analysis/downtime_analysis.js:22
 #: manufacturing/report/downtime_analysis/downtime_analysis.py:78
@@ -40293,7 +40127,7 @@ msgstr "نوع حاشیه"
 
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:19
 msgid "Margin View"
-msgstr "نمای حاشیه"
+msgstr ""
 
 #. Label of a Select field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -43673,7 +43507,7 @@ msgstr "غیر مجاز"
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Not Requested"
-msgstr ""
+msgstr "درخواست نشده"
 
 #: selling/report/lost_quotations/lost_quotations.py:86
 #: support/report/issue_analytics/issue_analytics.py:208
@@ -44127,7 +43961,7 @@ msgstr "تاریخ پیشنهاد"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:29
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:42
 msgid "Office Equipment"
-msgstr ""
+msgstr "تجهیزات اداری"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:62
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:86
@@ -44406,8 +44240,7 @@ msgstr "فقط مواردی را از این گروه های مورد نشان �
 #. 'Exchange Rate Revaluation'
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.json
 msgctxt "Exchange Rate Revaluation"
-msgid ""
-"Only values between [0,1) are allowed. Like {0.00, 0.04, 0.09, ...}\n"
+msgid "Only values between [0,1) are allowed. Like {0.00, 0.04, 0.09, ...}\n"
 "Ex: If allowance is set at 0.07, accounts that have balance of 0.07 in either of the currencies will be considered as zero balance account"
 msgstr ""
 
@@ -44423,116 +44256,116 @@ msgstr "فقط {0} پشتیبانی می شود"
 #: support/report/issue_summary/issue_summary.js:43
 #: support/report/issue_summary/issue_summary.py:348
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Appointment'
 #: crm/doctype/appointment/appointment.json
 msgctxt "Appointment"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Non Conformance'
 #: quality_management/doctype/non_conformance/non_conformance.json
 msgctxt "Non Conformance"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Entry'
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
 msgctxt "POS Opening Entry"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Action'
 #: quality_management/doctype/quality_action/quality_action.json
 msgctxt "Quality Action"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Action
 #. Resolution'
 #: quality_management/doctype/quality_action_resolution/quality_action_resolution.json
 msgctxt "Quality Action Resolution"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Meeting'
 #: quality_management/doctype/quality_meeting/quality_meeting.json
 msgctxt "Quality Meeting"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Review'
 #: quality_management/doctype/quality_review/quality_review.json
 msgctxt "Quality Review"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Review Objective'
 #: quality_management/doctype/quality_review_objective/quality_review_objective.json
 msgctxt "Quality Review Objective"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Option for the 'Status' (Select) field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
 msgctxt "Warranty Claim"
 msgid "Open"
-msgstr "باز کن"
+msgstr "باز"
 
 #. Label of a HTML field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -45942,7 +45775,7 @@ msgstr "پین"
 #: accounts/doctype/payment_order/payment_order.json
 msgctxt "Payment Order"
 msgid "PMO-"
-msgstr "PMO-"
+msgstr ""
 
 #. Label of a Data field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -45954,13 +45787,13 @@ msgstr "آیتم PO عرضه شده"
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "PO-JOB.#####"
-msgstr "PO-JOB.#####"
+msgstr ""
 
 #. Label of a Tab Break field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "POS"
-msgstr "POS"
+msgstr ""
 
 #. Name of a DocType
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
@@ -46251,19 +46084,19 @@ msgstr ""
 #: accounts/doctype/cashier_closing/cashier_closing.json
 msgctxt "Cashier Closing"
 msgid "POS-CLO-"
-msgstr "POS-CLO-"
+msgstr ""
 
 #. Option for the 'Naming Series' (Select) field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "PRLE-.####"
-msgstr "PRLE-.####"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "PROJ-.####"
-msgstr "PROJ-.####"
+msgstr ""
 
 #. Name of a DocType
 #: accounts/doctype/psoa_cost_center/psoa_cost_center.json
@@ -46280,31 +46113,31 @@ msgstr "پروژه PSOA"
 #: buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 msgctxt "Supplier Scorecard Period"
 msgid "PU-SSP-.YYYY.-"
-msgstr "PU-SSP-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "PUR-ORD-.YYYY.-"
-msgstr "PUR-ORD-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "PUR-RFQ-.YYYY.-"
-msgstr "PUR-RFQ-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "PUR-SQTN-.YYYY.-"
-msgstr "PUR-SQTN-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "PZN"
-msgstr "PZN"
+msgstr ""
 
 #: stock/doctype/packing_slip/packing_slip.py:117
 msgid "Package No(s) already in use. Try from Package No {0}"
@@ -50846,19 +50679,19 @@ msgstr "ترجیح"
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Preferred Contact Email"
-msgstr ""
+msgstr "ایمیل تماس ترجیحی"
 
 #. Label of a Data field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Preferred Email"
-msgstr ""
+msgstr "ایمیل ترجیحی"
 
 #. Label of a Data field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Prevdoc DocType"
-msgstr "Prevdoc DocType"
+msgstr ""
 
 #. Label of a Check field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -54583,149 +54416,149 @@ msgstr "قانون Putaway از قبل برای مورد {0} در انبار {1}
 #: stock/report/serial_no_ledger/serial_no_ledger.py:70
 #: templates/generators/bom.html:50 templates/pages/rfq.html:40
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Asset Capitalization Service Item'
 #: assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 msgctxt "Asset Capitalization Service Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Asset Capitalization Stock Item'
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgctxt "Asset Capitalization Stock Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'BOM Item'
 #: manufacturing/doctype/bom_item/bom_item.json
 msgctxt "BOM Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'BOM Scrap Item'
 #: manufacturing/doctype/bom_scrap_item/bom_scrap_item.json
 msgctxt "BOM Scrap Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'BOM Website Item'
 #: manufacturing/doctype/bom_website_item/bom_website_item.json
 msgctxt "BOM Website Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Section Break field in DocType 'Job Card Item'
 #: manufacturing/doctype/job_card_item/job_card_item.json
 msgctxt "Job Card Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Job Card Scrap Item'
 #: manufacturing/doctype/job_card_scrap_item/job_card_scrap_item.json
 msgctxt "Job Card Scrap Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Landed Cost Item'
 #: stock/doctype/landed_cost_item/landed_cost_item.json
 msgctxt "Landed Cost Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Option for the 'Distribute Charges Based On' (Select) field in DocType
 #. 'Landed Cost Voucher'
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgctxt "Landed Cost Voucher"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Opportunity Item'
 #: crm/doctype/opportunity_item/opportunity_item.json
 msgctxt "Opportunity Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Pick List Item'
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgctxt "Pick List Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Product Bundle Item'
 #: selling/doctype/product_bundle_item/product_bundle_item.json
 msgctxt "Product Bundle Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Data field in DocType 'Production Plan Item Reference'
 #: manufacturing/doctype/production_plan_item_reference/production_plan_item_reference.json
 msgctxt "Production Plan Item Reference"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Promotional Scheme Product Discount'
 #: accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgctxt "Promotional Scheme Product Discount"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Serial and Batch Entry'
 #: stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgctxt "Serial and Batch Entry"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Option for the 'Reservation Based On' (Select) field in DocType 'Stock
 #. Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Option for the 'Distribute Additional Costs Based On ' (Select) field in
 #. DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Option for the 'Distribute Additional Costs Based On ' (Select) field in
 #. DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Section Break field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgctxt "Work Order Item"
 msgid "Qty"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #: templates/pages/order.html:167
 msgid "Qty "
@@ -55276,7 +55109,7 @@ msgstr "نام الگوی بازرسی کیفیت"
 #: public/js/controllers/transaction.js:298
 #: stock/doctype/stock_entry/stock_entry.js:143
 msgid "Quality Inspection(s)"
-msgstr "بازرسی کیفیت"
+msgstr "بازرسی(های) کیفیت"
 
 #: setup/doctype/company/company.py:377
 msgid "Quality Management"
@@ -55815,7 +55648,7 @@ msgstr "موجودی سریع موجودی"
 #. Name of a DocType
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "QuickBooks Migrator"
-msgstr "QuickBooks Migrator"
+msgstr ""
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
@@ -55904,30 +55737,30 @@ msgstr "مورد نقل قول"
 #. Name of a DocType
 #: setup/doctype/quotation_lost_reason/quotation_lost_reason.json
 msgid "Quotation Lost Reason"
-msgstr "نقل قول دلیل گمشده"
+msgstr "دلیل از دست رفتن نقل قول"
 
 #. Label of a Data field in DocType 'Quotation Lost Reason'
 #: setup/doctype/quotation_lost_reason/quotation_lost_reason.json
 msgctxt "Quotation Lost Reason"
 msgid "Quotation Lost Reason"
-msgstr "نقل قول دلیل گمشده"
+msgstr "دلیل از دست رفتن نقل قول"
 
 #. Label of a Link field in DocType 'Quotation Lost Reason Detail'
 #: setup/doctype/quotation_lost_reason_detail/quotation_lost_reason_detail.json
 msgctxt "Quotation Lost Reason Detail"
 msgid "Quotation Lost Reason"
-msgstr "نقل قول دلیل گمشده"
+msgstr "دلیل از دست رفتن نقل قول"
 
 #. Name of a DocType
 #: setup/doctype/quotation_lost_reason_detail/quotation_lost_reason_detail.json
 msgid "Quotation Lost Reason Detail"
-msgstr "نقل قول جزئیات دلیل گمشده"
+msgstr "جزئیات دلیل از دست رفتن نقل قول"
 
 #. Linked DocType in Quotation Lost Reason's connections
 #: setup/doctype/quotation_lost_reason/quotation_lost_reason.json
 msgctxt "Quotation Lost Reason"
 msgid "Quotation Lost Reason Detail"
-msgstr "نقل قول جزئیات دلیل گمشده"
+msgstr "جزئیات دلیل از دست رفتن نقل قول"
 
 #. Label of a Data field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
@@ -57627,7 +57460,7 @@ msgstr "ارجاع"
 
 #: accounts/doctype/journal_entry/journal_entry.py:899
 msgid "Reference #{0} dated {1}"
-msgstr "مرجع شماره {0} به تاریخ {1}"
+msgstr "مرجع #{0} به تاریخ {1}"
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:112
 msgid "Reference Date"
@@ -58057,7 +57890,7 @@ msgstr "پیوند شطرنجی را تازه کنید"
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Refresh Token"
-msgstr "Refresh Token"
+msgstr ""
 
 #: stock/reorder_item.py:303
 msgid "Regards,"
@@ -59908,13 +59741,13 @@ msgstr "بررسی ها"
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Rgt"
-msgstr "Rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Company'
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Rgt"
-msgstr "Rgt"
+msgstr ""
 
 #. Label of a Link field in DocType 'Bisect Nodes'
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -60466,7 +60299,7 @@ msgstr "ردیف #{0}: مورد فرزند نباید یک بسته محصول �
 
 #: accounts/doctype/bank_clearance/bank_clearance.py:97
 msgid "Row #{0}: Clearance date {1} cannot be before Cheque Date {2}"
-msgstr "ردیف شماره {0}: تاریخ پاکسازی {1} نمی تواند قبل از تاریخ بررسی {2} باشد"
+msgstr "ردیف شماره #{0}: تاریخ پاکسازی {1} نمی تواند قبل از تاریخ بررسی {2} باشد"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:286
 msgid "Row #{0}: Consumed Asset {1} cannot be Draft"
@@ -60570,7 +60403,7 @@ msgstr "ردیف #{0}: مورد {1} یک کالای موجودی نیست"
 
 #: accounts/doctype/payment_entry/payment_entry.py:657
 msgid "Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher"
-msgstr "ردیف شماره {0}: ورودی مجله {1} دارای حساب {2} نیست یا قبلاً با کوپن دیگری مطابقت دارد"
+msgstr "ردیف #{0}: ورودی مجله {1} دارای حساب {2} نیست یا قبلاً با کوپن دیگری مطابقت دارد"
 
 #: stock/doctype/item/item.py:351
 msgid "Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"
@@ -60671,8 +60504,7 @@ msgid "Row #{0}: Scrap Item Qty cannot be zero"
 msgstr "ردیف #{0}: تعداد مورد ضایعات نمی تواند صفر باشد"
 
 #: controllers/selling_controller.py:212
-msgid ""
-"Row #{0}: Selling rate for item {1} is lower than its {2}.\n"
+msgid "Row #{0}: Selling rate for item {1} is lower than its {2}.\n"
 "\t\t\t\t\tSelling {3} should be atleast {4}.<br><br>Alternatively,\n"
 "\t\t\t\t\tyou can disable selling price validation in {5} to bypass\n"
 "\t\t\t\t\tthis validation."
@@ -60712,7 +60544,7 @@ msgstr "ردیف #{0}: وضعیت اجباری است"
 
 #: accounts/doctype/journal_entry/journal_entry.py:381
 msgid "Row #{0}: Status must be {1} for Invoice Discounting {2}"
-msgstr "ردیف شماره {0}: وضعیت باید {1} برای تخفیف فاکتور {2} باشد"
+msgstr "ردیف #{0}: وضعیت باید {1} برای تخفیف فاکتور {2} باشد"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:273
 msgid "Row #{0}: Stock cannot be reserved for Item {1} against a disabled Batch {2}."
@@ -60780,7 +60612,7 @@ msgstr "ردیف #{0}: {1} برای ایجاد فاکتورهای افتتاحی
 
 #: assets/doctype/asset_category/asset_category.py:88
 msgid "Row #{0}: {1} of {2} should be {3}. Please update the {1} or select a different account."
-msgstr "ردیف شماره {0}: {1} از {2} باید {3} باشد. لطفاً {1} را به روز کنید یا حساب دیگری را انتخاب کنید."
+msgstr "ردیف #{0}: {1} از {2} باید {3} باشد. لطفاً {1} را به روز کنید یا حساب دیگری را انتخاب کنید."
 
 #: buying/utils.py:106
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
@@ -60820,7 +60652,7 @@ msgstr "ردیف #{}: فاکتور POS {} هنوز ارسال نشده است"
 
 #: assets/doctype/asset_maintenance/asset_maintenance.py:43
 msgid "Row #{}: Please assign task to a member."
-msgstr ""
+msgstr "ردیف #{}: لطفاً کار را به یک عضو اختصاص دهید."
 
 #: assets/doctype/asset/asset.py:300
 msgid "Row #{}: Please use a different Finance Book."
@@ -60836,7 +60668,7 @@ msgstr "ردیف #{}: مقدار موجودی برای کد کالا کافی ن
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:371
 msgid "Row #{}: You cannot add positive quantities in a return invoice. Please remove item {} to complete the return."
-msgstr ""
+msgstr "ردیف #{}: نمی توانید مقادیر مثبت را در فاکتور برگشتی اضافه کنید. لطفاً مورد {} را برای تکمیل بازگشت حذف کنید."
 
 #: stock/doctype/pick_list/pick_list.py:83
 msgid "Row #{}: item {} has been picked already."
@@ -61246,31 +61078,31 @@ msgstr "بنابراین نه."
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "SABB-.########"
-msgstr "SABB-.########"
+msgstr ""
 
 #. Option for the 'Naming Series' (Select) field in DocType 'Campaign'
 #: crm/doctype/campaign/campaign.json
 msgctxt "Campaign"
 msgid "SAL-CAM-.YYYY.-"
-msgstr "SAL-CAM-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "SAL-ORD-.YYYY.-"
-msgstr "SAL-ORD-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "SAL-QTN-.YYYY.-"
-msgstr "SAL-QTN-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "SC-ORD-.YYYY.-"
-msgstr "SC-ORD-.YYYY.-"
+msgstr ""
 
 #. Label of a Data field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -61282,7 +61114,7 @@ msgstr "مورد عرضه شده SCO"
 #: support/doctype/warranty_claim/warranty_claim.json
 msgctxt "Warranty Claim"
 msgid "SER-WRN-.YYYY.-"
-msgstr "SER-WRN-.YYYY.-"
+msgstr ""
 
 #. Label of a Table field in DocType 'Service Level Agreement'
 #: support/doctype/service_level_agreement/service_level_agreement.json
@@ -61338,7 +61170,7 @@ msgstr "تنظیمات پیامک"
 
 #: selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:43
 msgid "SO Qty"
-msgstr "SO Qty"
+msgstr ""
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:16
 msgid "STATEMENTS OF ACCOUNTS"
@@ -61348,19 +61180,19 @@ msgstr "صورتحسابها"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "STO-ITEM-.YYYY.-"
-msgstr "STO-ITEM-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "STO-PICK-.YYYY.-"
-msgstr "STO-PICK-.YYYY.-"
+msgstr ""
 
 #. Option for the 'Series' (Select) field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "SUP-.YYYY.-"
-msgstr "SUP-.YYYY.-"
+msgstr ""
 
 #. Label of a Read Only field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
@@ -62976,8 +62808,7 @@ msgstr "اقدامات کارت امتیازی"
 #. 'Supplier Scorecard'
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgctxt "Supplier Scorecard"
-msgid ""
-"Scorecard variables can be used, as well as:\n"
+msgid "Scorecard variables can be used, as well as:\n"
 "{total_score} (the total score from that period),\n"
 "{period_number} (the number of periods to present day)\n"
 msgstr ""
@@ -63335,7 +63166,7 @@ msgstr "زمان را انتخاب کنید"
 #: accounts/report/balance_sheet/balance_sheet.js:14
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:14
 msgid "Select View"
-msgstr "View را انتخاب کنید"
+msgstr ""
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:248
 msgid "Select Vouchers to Match"
@@ -63456,8 +63287,7 @@ msgid "Select variant item code for the template item {0}"
 msgstr "کد نوع مورد را برای مورد الگو انتخاب کنید {0}"
 
 #: manufacturing/doctype/production_plan/production_plan.js:525
-msgid ""
-"Select whether to get items from a Sales Order or a Material Request. For now select <b>Sales Order</b>.\n"
+msgid "Select whether to get items from a Sales Order or a Material Request. For now select <b>Sales Order</b>.\n"
 " A Production Plan can also be created manually where you can select the Items to manufacture."
 msgstr ""
 
@@ -64018,7 +63848,7 @@ msgstr "شماره سریال {0} وجود ندارد"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2112
 msgid "Serial No {0} does not exists"
-msgstr "شماره سریال {0} وجود ندارد"
+msgstr ""
 
 #: public/js/utils/barcode_scanner.js:402
 msgid "Serial No {0} has already scanned."
@@ -65008,7 +64838,7 @@ msgstr "به عنوان تکمیل شده تنظیم کنید"
 #: public/js/utils/sales_common.js:406
 #: selling/doctype/quotation/quotation.js:124
 msgid "Set as Lost"
-msgstr "به عنوان گمشده تنظیم کنید"
+msgstr "به عنوان از دست رفته ست کنید"
 
 #: crm/doctype/opportunity/opportunity_list.js:13
 #: projects/doctype/task/task_list.js:8 support/doctype/issue/issue_list.js:8
@@ -65758,7 +65588,7 @@ msgstr "نمایش انبارهای غیرفعال"
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Show Failed Logs"
-msgstr "نمایش گزارش های ناموفق"
+msgstr ""
 
 #: accounts/report/accounts_payable/accounts_payable.js:144
 #: accounts/report/accounts_receivable/accounts_receivable.js:161
@@ -65989,8 +65819,7 @@ msgstr "عبارت ساده پایتون، مثال: territory != 'همه قلم
 #. 'Item Quality Inspection Parameter'
 #: stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
 msgctxt "Item Quality Inspection Parameter"
-msgid ""
-"Simple Python formula applied on Reading fields.<br> Numeric eg. 1: <b>reading_1 &gt; 0.2 and reading_1 &lt; 0.5</b><br>\n"
+msgid "Simple Python formula applied on Reading fields.<br> Numeric eg. 1: <b>reading_1 &gt; 0.2 and reading_1 &lt; 0.5</b><br>\n"
 "Numeric eg. 2: <b>mean &gt; 3.5</b> (mean of populated fields)<br>\n"
 "Value based eg.:  <b>reading_value in (\"A\", \"B\", \"C\")</b>"
 msgstr ""
@@ -65999,8 +65828,7 @@ msgstr ""
 #. 'Quality Inspection Reading'
 #: stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgctxt "Quality Inspection Reading"
-msgid ""
-"Simple Python formula applied on Reading fields.<br> Numeric eg. 1: <b>reading_1 &gt; 0.2 and reading_1 &lt; 0.5</b><br>\n"
+msgid "Simple Python formula applied on Reading fields.<br> Numeric eg. 1: <b>reading_1 &gt; 0.2 and reading_1 &lt; 0.5</b><br>\n"
 "Numeric eg. 2: <b>mean &gt; 3.5</b> (mean of populated fields)<br>\n"
 "Value based eg.:  <b>reading_value in (\"A\", \"B\", \"C\")</b>"
 msgstr ""
@@ -68117,10 +67945,13 @@ msgstr "متوقف کردن"
 #. Option for the 'Action if Accumulated Monthly Budget Exceeded on MR'
 #. (Select) field in DocType 'Budget'
 #. Option for the 'Action if Annual Budget Exceeded on PO' (Select) field in
+#. DocType 'Budget'
 #. Option for the 'Action if Accumulated Monthly Budget Exceeded on PO'
+#. (Select) field in DocType 'Budget'
 #. Option for the 'Action if Annual Budget Exceeded on Actual' (Select) field
 #. in DocType 'Budget'
 #. Option for the 'Action if Accumulated Monthly Budget Exceeded on Actual'
+#. (Select) field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Stop"
@@ -70119,6 +69950,7 @@ msgstr "سیستم به طور خودکار شماره سریال / دسته ا�
 #. Description of the 'Invoice Limit' (Int) field in DocType 'Payment
 #. Reconciliation'
 #. Description of the 'Payment Limit' (Int) field in DocType 'Payment
+#. Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "System will fetch all the entries if limit value is zero."
@@ -70158,7 +69990,7 @@ msgstr ""
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "TS-.YYYY.-"
-msgstr "TS-.YYYY.-"
+msgstr ""
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:427
 msgid "Tag"
@@ -71101,8 +70933,7 @@ msgstr "نرخ های کسر مالیات"
 #. Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
-msgid ""
-"Tax detail table fetched from item master as a string and stored in this field.\n"
+msgid "Tax detail table fetched from item master as a string and stored in this field.\n"
 "Used for Taxes and Charges"
 msgstr ""
 
@@ -71110,8 +70941,7 @@ msgstr ""
 #. Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
-msgid ""
-"Tax detail table fetched from item master as a string and stored in this field.\n"
+msgid "Tax detail table fetched from item master as a string and stored in this field.\n"
 "Used for Taxes and Charges"
 msgstr ""
 
@@ -71119,8 +70949,7 @@ msgstr ""
 #. Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
-msgid ""
-"Tax detail table fetched from item master as a string and stored in this field.\n"
+msgid "Tax detail table fetched from item master as a string and stored in this field.\n"
 "Used for Taxes and Charges"
 msgstr ""
 
@@ -71128,8 +70957,7 @@ msgstr ""
 #. Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
-msgid ""
-"Tax detail table fetched from item master as a string and stored in this field.\n"
+msgid "Tax detail table fetched from item master as a string and stored in this field.\n"
 "Used for Taxes and Charges"
 msgstr ""
 
@@ -72241,7 +72069,7 @@ msgstr "همگام سازی در پس زمینه شروع شده است، لطف
 #: accounts/doctype/journal_entry/journal_entry.py:155
 #: accounts/doctype/journal_entry/journal_entry.py:162
 msgid "The task has been enqueued as a background job."
-msgstr "وظیفه به عنوان یک کار پس زمینه در نوبت قرار گرفته است."
+msgstr ""
 
 #: stock/doctype/stock_entry/stock_entry.py:244
 msgid "The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Entry and revert to the Draft stage"
@@ -74981,7 +74809,7 @@ msgstr "مجموع (AMT)"
 
 #: controllers/trends.py:23 controllers/trends.py:30
 msgid "Total(Qty)"
-msgstr "مجموع تعداد)"
+msgstr "مجموع (مقدار)"
 
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.py:88
 msgid "Totals"
@@ -75230,7 +75058,7 @@ msgstr "ارز تراکنش باید همان ارز درگاه پرداخت ب�
 
 #: accounts/doctype/bank_transaction/bank_transaction.py:64
 msgid "Transaction currency: {0} cannot be different from Bank Account({1}) currency: {2}"
-msgstr "واحد پول تراکنش: {0} نمی تواند با واحد پول حساب بانکی ({1}) متفاوت باشد: {2}"
+msgstr ""
 
 #: manufacturing/doctype/job_card/job_card.py:647
 msgid "Transaction not allowed against stopped Work Order {0}"
@@ -75754,235 +75582,235 @@ msgstr "تنظیمات مالیات بر ارزش افزوده امارات مت
 #: templates/emails/reorder_item.html:11
 #: templates/includes/rfq/rfq_items.html:17
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Asset Capitalization Service Item'
 #: assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 msgctxt "Asset Capitalization Service Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'BOM Item'
 #: manufacturing/doctype/bom_item/bom_item.json
 msgctxt "BOM Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Delivery Stop'
 #: stock/doctype/delivery_stop/delivery_stop.json
 msgctxt "Delivery Stop"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Item Price'
 #: stock/doctype/item_price/item_price.json
 msgctxt "Item Price"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Job Card Item'
 #: manufacturing/doctype/job_card_item/job_card_item.json
 msgctxt "Job Card Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Opportunity Item'
 #: crm/doctype/opportunity_item/opportunity_item.json
 msgctxt "Opportunity Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Packing Slip Item'
 #: stock/doctype/packing_slip_item/packing_slip_item.json
 msgctxt "Packing Slip Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Pick List Item'
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgctxt "Pick List Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Pricing Rule Brand'
 #: accounts/doctype/pricing_rule_brand/pricing_rule_brand.json
 msgctxt "Pricing Rule Brand"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Pricing Rule Item Code'
 #: accounts/doctype/pricing_rule_item_code/pricing_rule_item_code.json
 msgctxt "Pricing Rule Item Code"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Pricing Rule Item Group'
 #: accounts/doctype/pricing_rule_item_group/pricing_rule_item_group.json
 msgctxt "Pricing Rule Item Group"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Product Bundle Item'
 #: selling/doctype/product_bundle_item/product_bundle_item.json
 msgctxt "Product Bundle Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Production Plan Item'
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 msgctxt "Production Plan Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Production Plan Sub Assembly Item'
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgctxt "Production Plan Sub Assembly Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Promotional Scheme Product Discount'
 #: accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgctxt "Promotional Scheme Product Discount"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Putaway Rule'
 #: stock/doctype/putaway_rule/putaway_rule.json
 msgctxt "Putaway Rule"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Quality Goal Objective'
 #: quality_management/doctype/quality_goal_objective/quality_goal_objective.json
 msgctxt "Quality Goal Objective"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Quality Review Objective'
 #: quality_management/doctype/quality_review_objective/quality_review_objective.json
 msgctxt "Quality Review Objective"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Request for Quotation Item'
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 msgctxt "Request for Quotation Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Label of a Link field in DocType 'UOM Conversion Detail'
 #: stock/doctype/uom_conversion_detail/uom_conversion_detail.json
 msgctxt "UOM Conversion Detail"
 msgid "UOM"
-msgstr "UOM"
+msgstr "واحد اندازه گیری"
 
 #. Name of a DocType
 #: stock/doctype/uom_category/uom_category.json
@@ -76111,13 +75939,13 @@ msgstr "UOM ها"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "UPC"
-msgstr "UPC"
+msgstr ""
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "UPC-A"
-msgstr "UPC-A"
+msgstr ""
 
 #. Label of a Data field in DocType 'Video'
 #: utilities/doctype/video/video.json
@@ -76493,7 +76321,7 @@ msgstr "داده های وب هوک تایید نشده"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:17
 msgid "Up"
-msgstr ""
+msgstr "بالا"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -76736,6 +76564,7 @@ msgstr "به‌روزرسانی موجودی باید برای فاکتور خر
 #. Description of the 'Actual End Time' (Datetime) field in DocType 'Work Order
 #. Operation'
 #. Description of the 'Actual Operation Time' (Float) field in DocType 'Work
+#. Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "Updated via 'Time Log' (In Minutes)"
@@ -77812,7 +77641,7 @@ msgstr "بازدیدها"
 #: utilities/doctype/video/video.json
 msgctxt "Video"
 msgid "Vimeo"
-msgstr "Vimeo"
+msgstr ""
 
 #: templates/pages/help.html:46
 msgid "Visit the forums"
@@ -78435,7 +78264,7 @@ msgstr "انبار"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:4
 msgid "Warehouse Capacity Summary"
-msgstr "خلاصه ظرفیت انبار"
+msgstr ""
 
 #: stock/doctype/putaway_rule/putaway_rule.py:78
 msgid "Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} {2}."
@@ -78628,10 +78457,13 @@ msgstr "انبارهای دارای تراکنش موجود را نمی توان
 #. Option for the 'Action if Accumulated Monthly Budget Exceeded on MR'
 #. (Select) field in DocType 'Budget'
 #. Option for the 'Action if Annual Budget Exceeded on PO' (Select) field in
+#. DocType 'Budget'
 #. Option for the 'Action if Accumulated Monthly Budget Exceeded on PO'
+#. (Select) field in DocType 'Budget'
 #. Option for the 'Action if Annual Budget Exceeded on Actual' (Select) field
 #. in DocType 'Budget'
 #. Option for the 'Action if Accumulated Monthly Budget Exceeded on Actual'
+#. (Select) field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Warn"
@@ -80416,7 +80248,7 @@ msgstr "نوع_doc"
 #: selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:25
 #: selling/report/sales_partner_transaction_summary/sales_partner_transaction_summary.py:25
 msgid "doctype"
-msgstr "doctype"
+msgstr ""
 
 #. Description of the 'Coupon Name' (Data) field in DocType 'Coupon Code'
 #: accounts/doctype/coupon_code/coupon_code.json
@@ -80443,7 +80275,7 @@ msgstr "مبادله.میزبان"
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "frankfurter.app"
-msgstr "frankfurter.app"
+msgstr ""
 
 #. Label of a Attach Image field in DocType 'Batch'
 #: stock/doctype/batch/batch.json
@@ -80596,6 +80428,7 @@ msgstr "برنامه پرداخت نصب نشده است لطفاً آن را ا
 #. Description of the 'Billing Rate' (Currency) field in DocType 'Activity
 #. Cost'
 #. Description of the 'Costing Rate' (Currency) field in DocType 'Activity
+#. Cost'
 #: projects/doctype/activity_cost/activity_cost.json
 msgctxt "Activity Cost"
 msgid "per hour"
@@ -80604,6 +80437,7 @@ msgstr "در ساعت"
 #. Description of the 'Electricity Cost' (Currency) field in DocType
 #. 'Workstation'
 #. Description of the 'Consumable Cost' (Currency) field in DocType
+#. 'Workstation'
 #. Description of the 'Rent Cost' (Currency) field in DocType 'Workstation'
 #. Description of the 'Net Hour Rate' (Currency) field in DocType 'Workstation'
 #: manufacturing/doctype/workstation/workstation.json
@@ -80614,9 +80448,11 @@ msgstr "در ساعت"
 #. Description of the 'Electricity Cost' (Currency) field in DocType
 #. 'Workstation Type'
 #. Description of the 'Consumable Cost' (Currency) field in DocType
+#. 'Workstation Type'
 #. Description of the 'Rent Cost' (Currency) field in DocType 'Workstation
 #. Type'
 #. Description of the 'Net Hour Rate' (Currency) field in DocType 'Workstation
+#. Type'
 #: manufacturing/doctype/workstation_type/workstation_type.json
 msgctxt "Workstation Type"
 msgid "per hour"
@@ -80644,7 +80480,7 @@ msgstr "تولید"
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "quotation_item"
-msgstr "quotation_item"
+msgstr ""
 
 #: templates/includes/macros.html:202
 msgid "ratings"
@@ -80658,67 +80494,67 @@ msgstr "دریافت شده از"
 #: accounts/doctype/cost_center/cost_center.json
 msgctxt "Cost Center"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Customer Group'
 #: setup/doctype/customer_group/customer_group.json
 msgctxt "Customer Group"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Department'
 #: setup/doctype/department/department.json
 msgctxt "Department"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Item Group'
 #: setup/doctype/item_group/item_group.json
 msgctxt "Item Group"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Location'
 #: assets/doctype/location/location.json
 msgctxt "Location"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
 msgctxt "Sales Person"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Supplier Group'
 #: setup/doctype/supplier_group/supplier_group.json
 msgctxt "Supplier Group"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Territory'
 #: setup/doctype/territory/territory.json
 msgctxt "Territory"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Label of a Int field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "rgt"
-msgstr "rgt"
+msgstr ""
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
@@ -80737,7 +80573,7 @@ msgstr "اشتراک در حال حاضر لغو شده است."
 
 #: controllers/status_updater.py:353 controllers/status_updater.py:373
 msgid "target_ref_field"
-msgstr "target_ref_field"
+msgstr ""
 
 #. Label of a Data field in DocType 'Production Plan Item'
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
@@ -80790,7 +80626,7 @@ msgstr "باید در جدول حسابها، حساب سرمایه در جری�
 #: accounts/report/cash_flow/cash_flow.py:226
 #: accounts/report/cash_flow/cash_flow.py:227
 msgid "{0}"
-msgstr "{0}"
+msgstr ""
 
 #: controllers/accounts_controller.py:878
 msgid "{0} '{1}' is disabled"
@@ -80932,7 +80768,7 @@ msgstr "{0} برای {1}"
 
 #: accounts/doctype/payment_entry/payment_entry.py:364
 msgid "{0} has Payment Term based allocation enabled. Select a Payment Term for Row #{1} in Payment References section"
-msgstr "{0} تخصیص مبتنی بر مدت پرداخت را فعال کرده است. در بخش مراجع پرداخت، یک شرایط پرداخت برای ردیف شماره {1} انتخاب کنید"
+msgstr "{0} تخصیص مبتنی بر مدت پرداخت را فعال کرده است. در بخش مراجع پرداخت، یک شرایط پرداخت برای ردیف #{1} انتخاب کنید"
 
 #: setup/default_success_action.py:14
 msgid "{0} has been submitted successfully"
@@ -81088,11 +80924,11 @@ msgstr "{0} به عنوان تخفیف داده می شود."
 
 #: manufacturing/doctype/job_card/job_card.py:773
 msgid "{0} {1}"
-msgstr "{0} {1}"
+msgstr ""
 
 #: public/js/utils/serial_no_batch_selector.js:203
 msgid "{0} {1} Manually"
-msgstr "{0} {1} به صورت دستی"
+msgstr ""
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:433
 msgid "{0} {1} Partially Reconciled"
@@ -81310,7 +81146,7 @@ msgstr "{range4}-بالا"
 
 #: assets/report/fixed_asset_register/fixed_asset_register.py:372
 msgid "{}"
-msgstr "{}"
+msgstr ""
 
 #: controllers/buying_controller.py:712
 msgid "{} Assets created for {}"

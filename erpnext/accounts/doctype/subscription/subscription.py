@@ -408,11 +408,11 @@ class Subscription(Document):
 		# Earlier subscription didn't had any company field
 		company = self.get("company") or get_default_company()
 		if not company:
-			# fmt: off
 			frappe.throw(
-				_("Company is mandatory was generating invoice. Please set default company in Global Defaults.")
+				_(
+					"Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
+				)
 			)
-			# fmt: on
 
 		invoice = frappe.new_doc(self.invoice_document_type)
 		invoice.company = company

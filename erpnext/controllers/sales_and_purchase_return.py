@@ -423,6 +423,15 @@ def make_return_doc(
 			]:
 				type_of_transaction = "Outward"
 
+			warehouse = source_doc.warehouse if qty_field == "stock_qty" else source_doc.rejected_warehouse
+			if source_parent.doctype in [
+				"Sales Invoice",
+				"POS Invoice",
+				"Delivery Note",
+			] and source_parent.get("is_internal_customer"):
+				type_of_transaction = "Outward"
+				warehouse = source_doc.target_warehouse
+
 			cls_obj = SerialBatchCreation(
 				{
 					"type_of_transaction": type_of_transaction,
@@ -432,7 +441,7 @@ def make_return_doc(
 					"returned_serial_nos": returned_serial_nos,
 					"voucher_type": source_parent.doctype,
 					"do_not_submit": True,
-					"warehouse": source_doc.warehouse,
+					"warehouse": warehouse,
 					"has_serial_no": item_details.has_serial_no,
 					"has_batch_no": item_details.has_batch_no,
 				}
@@ -575,9 +584,56 @@ def make_return_doc(
 			if not item_details.has_batch_no and not item_details.has_serial_no:
 				return
 
-			for qty_field in ["stock_qty", "rejected_qty"]:
-				if target_doc.get(qty_field):
+			if not target_doc.get("use_serial_batch_fields"):
+				for qty_field in ["stock_qty", "rejected_qty"]:
+					if not target_doc.get(qty_field):
+						continue
+
 					update_serial_batch_no(source_doc, target_doc, source_parent, item_details, qty_field)
+			elif target_doc.get("use_serial_batch_fields"):
+				update_non_bundled_serial_nos(source_doc, target_doc, source_parent)
+
+	def update_non_bundled_serial_nos(source_doc, target_doc, source_parent):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		if source_doc.serial_no:
+			returned_serial_nos = get_returned_non_bundled_serial_nos(source_doc, source_parent)
+			serial_nos = list(set(get_serial_nos(source_doc.serial_no)) - set(returned_serial_nos))
+			if serial_nos:
+				target_doc.serial_no = "\n".join(serial_nos)
+
+		if source_doc.get("rejected_serial_no"):
+			returned_serial_nos = get_returned_non_bundled_serial_nos(
+				source_doc, source_parent, serial_no_field="rejected_serial_no"
+			)
+			rejected_serial_nos = list(
+				set(get_serial_nos(source_doc.rejected_serial_no)) - set(returned_serial_nos)
+			)
+			if rejected_serial_nos:
+				target_doc.rejected_serial_no = "\n".join(rejected_serial_nos)
+
+	def get_returned_non_bundled_serial_nos(child_doc, parent_doc, serial_no_field="serial_no"):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		return_ref_field = frappe.scrub(child_doc.doctype)
+		if child_doc.doctype == "Delivery Note Item":
+			return_ref_field = "dn_detail"
+
+		serial_nos = []
+
+		fields = [f"`{'tab' + child_doc.doctype}`.`{serial_no_field}`"]
+
+		filters = [
+			[parent_doc.doctype, "return_against", "=", parent_doc.name],
+			[parent_doc.doctype, "is_return", "=", 1],
+			[child_doc.doctype, return_ref_field, "=", child_doc.name],
+			[parent_doc.doctype, "docstatus", "=", 1],
+		]
+
+		for row in frappe.get_all(parent_doc.doctype, fields=fields, filters=filters):
+			serial_nos.extend(get_serial_nos(row.get(serial_no_field)))
+
+		return serial_nos
 
 	def update_terms(source_doc, target_doc, source_parent):
 		target_doc.payment_amount = -source_doc.payment_amount

@@ -1588,6 +1588,12 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount"), -1000)
 		self.assertEqual(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"), 2500)
 
+	def test_zero_qty_return_invoice_with_stock_effect(self):
+		cr_note = create_sales_invoice(qty=-1, rate=300, is_return=1, do_not_submit=True)
+		cr_note.update_stock = True
+		cr_note.items[0].qty = 0
+		self.assertRaises(frappe.ValidationError, cr_note.save)
+
 	def test_return_invoice_with_account_mismatch(self):
 		debtors2 = create_account(
 			parent_account="Accounts Receivable - _TC",
@@ -3945,7 +3951,6 @@ def create_internal_supplier(supplier_name, represents_company, allowed_to_inter
 		)
 
 		supplier.append("companies", {"company": allowed_to_interact_with})
-
 		supplier.insert()
 		supplier_name = supplier.name
 	else:

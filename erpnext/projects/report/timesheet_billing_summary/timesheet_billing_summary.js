@@ -27,21 +27,16 @@ frappe.query_reports["Timesheet Billing Summary"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.add_months(
-				frappe.datetime.month_start(),
-				-1
-			),
+			default: frappe.datetime.add_months(frappe.datetime.month_start(), -1),
 		},
 		{
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.add_days(
-				frappe.datetime.month_start(),
-				-1
-			),
+			default: frappe.datetime.add_days(frappe.datetime.month_start(), -1),
 		},
-		{  // NOTE: `update_group_by_options` expects this filter to be the fifth in the list
+		{
+			// NOTE: `update_group_by_options` expects this filter to be the fifth in the list
 			fieldname: "group_by",
 			label: __("Group By"),
 			fieldtype: "Select",

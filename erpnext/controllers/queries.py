@@ -85,79 +85,6 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
 	)
 
-	# searches for customer
-
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def customer_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
-	doctype = "Customer"
-	conditions = []
-	cust_master_name = frappe.defaults.get_user_default("cust_master_name")
-
-	fields = ["name"]
-	if cust_master_name != "Customer Name":
-		fields.append("customer_name")
-
-	fields = get_fields(doctype, fields)
-	searchfields = frappe.get_meta(doctype).get_search_fields()
-	searchfields = " or ".join(field + " like %(txt)s" for field in searchfields)
-
-	return frappe.db.sql(
-		"""select {fields} from `tabCustomer`
-		where docstatus < 2
-			and ({scond}) and disabled=0
-			{fcond} {mcond}
-		order by
-			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
-			(case when locate(%(_txt)s, customer_name) > 0 then locate(%(_txt)s, customer_name) else 99999 end),
-			idx desc,
-			name, customer_name
-		limit %(page_len)s offset %(start)s""".format(
-			**{
-				"fields": ", ".join(fields),
-				"scond": searchfields,
-				"mcond": get_match_cond(doctype),
-				"fcond": get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
-			}
-		),
-		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
-		as_dict=as_dict,
-	)
-
-
-# searches for supplier
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def supplier_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
-	doctype = "Supplier"
-	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
-
-	fields = ["name"]
-	if supp_master_name != "Supplier Name":
-		fields.append("supplier_name")
-
-	fields = get_fields(doctype, fields)
-
-	return frappe.db.sql(
-		"""select {field} from `tabSupplier`
-		where docstatus < 2
-			and ({key} like %(txt)s
-			or supplier_name like %(txt)s) and disabled=0
-			and (on_hold = 0 or (on_hold = 1 and CURRENT_DATE > release_date))
-			{mcond}
-		order by
-			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
-			(case when locate(%(_txt)s, supplier_name) > 0 then locate(%(_txt)s, supplier_name) else 99999 end),
-			idx desc,
-			name, supplier_name
-		limit %(page_len)s offset %(start)s""".format(
-			**{"field": ", ".join(fields), "key": searchfield, "mcond": get_match_cond(doctype)}
-		),
-		{"txt": "%%%s%%" % txt, "_txt": txt.replace("%", ""), "start": start, "page_len": page_len},
-		as_dict=as_dict,
-	)
-
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -352,7 +279,9 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	ifelse = CustomFunction("IF", ["condition", "then", "else"])
 
 	if filters and filters.get("customer"):
-		qb_filter_and_conditions.append(proj.customer == filters.get("customer"))
+		qb_filter_and_conditions.append(
+			(proj.customer == filters.get("customer")) | proj.customer.isnull() | proj.customer == ""
+		)
 
 	qb_filter_and_conditions.append(proj.status.notin(["Completed", "Cancelled"]))
 
@@ -439,7 +368,19 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 
 	filtered_batches = get_filterd_batches(batches)
 
+	if filters.get("is_inward"):
+		filtered_batches.extend(get_empty_batches(filters))
+
 	return filtered_batches
+
+
+def get_empty_batches(filters):
+	return frappe.get_all(
+		"Batch",
+		fields=["name", "batch_qty"],
+		filters={"item": filters.get("item_code"), "batch_qty": 0.0},
+		as_list=1,
+	)
 
 
 def get_filterd_batches(data):
@@ -656,7 +597,7 @@ def get_filtered_dimensions(
 	searchfields = frappe.get_meta(doctype).get_search_fields()
 
 	meta = frappe.get_meta(doctype)
-	if meta.is_tree:
+	if meta.is_tree and meta.has_field("is_group"):
 		query_filters.append(["is_group", "=", 0])
 
 	if meta.has_field("disabled"):

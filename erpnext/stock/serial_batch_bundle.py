@@ -325,9 +325,7 @@ class SerialBatchBundle:
 			batches = frappe._dict({self.sle.batch_no: self.sle.actual_qty})
 
 		batches_qty = get_available_batches(
-			frappe._dict(
-				{"item_code": self.item_code, "warehouse": self.warehouse, "batch_no": list(batches.keys())}
-			)
+			frappe._dict({"item_code": self.item_code, "batch_no": list(batches.keys())})
 		)
 
 		for batch_no in batches:
@@ -601,6 +599,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		elif self.sle.voucher_no:
 			query = query.where(parent.voucher_no != self.sle.voucher_no)
 
+		query = query.where(parent.voucher_type != "Pick List")
 		if timestamp_condition:
 			query = query.where(timestamp_condition)
 
@@ -821,6 +820,10 @@ class SerialBatchCreation:
 			self.remove_returned_serial_nos(new_package)
 
 		new_package.docstatus = 0
+		new_package.warehouse = self.warehouse
+		new_package.voucher_no = ""
+		new_package.posting_date = today()
+		new_package.posting_time = nowtime()
 		new_package.type_of_transaction = self.type_of_transaction
 		new_package.returned_against = self.get("returned_against")
 		new_package.save()

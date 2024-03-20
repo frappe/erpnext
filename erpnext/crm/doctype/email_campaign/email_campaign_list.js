@@ -1,11 +1,11 @@
-frappe.listview_settings['Email Campaign'] = {
-	get_indicator: function(doc) {
+frappe.listview_settings["Email Campaign"] = {
+	get_indicator: function (doc) {
 		var colors = {
-			"Unsubscribed": "red",
-			"Scheduled": "blue",
+			Unsubscribed: "red",
+			Scheduled: "blue",
 			"In Progress": "orange",
-			"Completed": "green"
+			Completed: "green",
 		};
 		return [__(doc.status), colors[doc.status], "status,=," + doc.status];
-	}
+	},
 };

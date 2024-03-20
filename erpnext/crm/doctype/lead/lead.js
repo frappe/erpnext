@@ -5,41 +5,41 @@ frappe.provide("erpnext");
 cur_frm.email_field = "email_id";
 
 erpnext.LeadController = class LeadController extends frappe.ui.form.Controller {
-	setup () {
+	setup() {
 		this.frm.make_methods = {
-			'Customer': this.make_customer,
-			'Quotation': this.make_quotation,
-			'Opportunity': this.make_opportunity
+			Customer: this.make_customer,
+			Quotation: this.make_quotation,
+			Opportunity: this.make_opportunity,
 		};
 
 		// For avoiding integration issues.
-		this.frm.set_df_property('first_name', 'reqd', true);
+		this.frm.set_df_property("first_name", "reqd", true);
 	}
 
-	onload () {
-		this.frm.set_query("customer", function (doc, cdt, cdn) {
-			return { query: "erpnext.controllers.queries.customer_query" }
-		});
-
+	onload() {
 		this.frm.set_query("lead_owner", function (doc, cdt, cdn) {
-			return { query: "frappe.core.doctype.user.user.user_query" }
+			return { query: "frappe.core.doctype.user.user.user_query" };
 		});
 	}
 
-	refresh () {
+	refresh() {
 		var me = this;
 		let doc = this.frm.doc;
 		erpnext.toggle_naming_series();
 
 		if (!this.frm.is_new() && doc.__onload && !doc.__onload.is_customer) {
 			this.frm.add_custom_button(__("Customer"), this.make_customer, __("Create"));
-			this.frm.add_custom_button(__("Opportunity"), function() {
-				me.frm.trigger("make_opportunity");
-			}, __("Create"));
+			this.frm.add_custom_button(
+				__("Opportunity"),
+				function () {
+					me.frm.trigger("make_opportunity");
+				},
+				__("Create")
+			);
 			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Create"));
 			if (!doc.__onload.linked_prospects.length) {
 				this.frm.add_custom_button(__("Prospect"), this.make_prospect, __("Create"));
-				this.frm.add_custom_button(__('Add to Prospect'), this.add_lead_to_prospect, __('Action'));
+				this.frm.add_custom_button(__("Add to Prospect"), this.add_lead_to_prospect, __("Action"));
 			}
 		}
 
@@ -53,51 +53,55 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		this.show_activities();
 	}
 
-	add_lead_to_prospect () {
+	add_lead_to_prospect() {
 		let me = this;
-		frappe.prompt([
-			{
-				fieldname: 'prospect',
-				label: __('Prospect'),
-				fieldtype: 'Link',
-				options: 'Prospect',
-				reqd: 1
-			}
-		],
-		function(data) {
-			frappe.call({
-				method: 'erpnext.crm.doctype.lead.lead.add_lead_to_prospect',
-				args: {
-					'lead': me.frm.doc.name,
-					'prospect': data.prospect
+		frappe.prompt(
+			[
+				{
+					fieldname: "prospect",
+					label: __("Prospect"),
+					fieldtype: "Link",
+					options: "Prospect",
+					reqd: 1,
 				},
-				callback: function(r) {
-					if (!r.exc) {
-						me.frm.reload_doc();
-					}
-				},
-				freeze: true,
-				freeze_message: __('Adding Lead to Prospect...')
-			});
-		}, __('Add Lead to Prospect'), __('Add'));
+			],
+			function (data) {
+				frappe.call({
+					method: "erpnext.crm.doctype.lead.lead.add_lead_to_prospect",
+					args: {
+						lead: me.frm.doc.name,
+						prospect: data.prospect,
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+						}
+					},
+					freeze: true,
+					freeze_message: __("Adding Lead to Prospect..."),
+				});
+			},
+			__("Add Lead to Prospect"),
+			__("Add")
+		);
 	}
 
-	make_customer () {
+	make_customer() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_customer",
-			frm: cur_frm
-		})
+			frm: cur_frm,
+		});
 	}
 
-	make_quotation () {
+	make_quotation() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_quotation",
-			frm: cur_frm
-		})
+			frm: cur_frm,
+		});
 	}
 
-	make_prospect () {
-		frappe.model.with_doctype("Prospect", function() {
+	make_prospect() {
+		frappe.model.with_doctype("Prospect", function () {
 			let prospect = frappe.model.get_new_doc("Prospect");
 			prospect.company_name = cur_frm.doc.company_name;
 			prospect.no_of_employees = cur_frm.doc.no_of_employees;
@@ -109,14 +113,14 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			prospect.prospect_owner = cur_frm.doc.lead_owner;
 			prospect.notes = cur_frm.doc.notes;
 
-			let leads_row = frappe.model.add_child(prospect, 'leads');
+			let leads_row = frappe.model.add_child(prospect, "leads");
 			leads_row.lead = cur_frm.doc.name;
 
 			frappe.set_route("Form", "Prospect", prospect.name);
 		});
 	}
 
-	company_name () {
+	company_name() {
 		if (!this.frm.doc.lead_name) {
 			this.frm.set_value("lead_name", this.frm.doc.company_name);
 		}
@@ -145,86 +149,91 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	}
 };
 
-
 extend_cscript(cur_frm.cscript, new erpnext.LeadController({ frm: cur_frm }));
 
 frappe.ui.form.on("Lead", {
-	make_opportunity: async function(frm) {
-		let existing_prospect = (await frappe.db.get_value("Prospect Lead",
-			{
-				"lead": frm.doc.name
-			},
-			"name", null, "Prospect"
-		)).message.name;
+	make_opportunity: async function (frm) {
+		let existing_prospect = (
+			await frappe.db.get_value(
+				"Prospect Lead",
+				{
+					lead: frm.doc.name,
+				},
+				"name",
+				null,
+				"Prospect"
+			)
+		).message.name;
 
 		if (!existing_prospect) {
 			var fields = [
 				{
-					"label": "Create Prospect",
-					"fieldname": "create_prospect",
-					"fieldtype": "Check",
-					"default": 1
+					label: "Create Prospect",
+					fieldname: "create_prospect",
+					fieldtype: "Check",
+					default: 1,
 				},
 				{
-					"label": "Prospect Name",
-					"fieldname": "prospect_name",
-					"fieldtype": "Data",
-					"default": frm.doc.company_name,
-					"depends_on": "create_prospect"
-				}
+					label: "Prospect Name",
+					fieldname: "prospect_name",
+					fieldtype: "Data",
+					default: frm.doc.company_name,
+					depends_on: "create_prospect",
+				},
 			];
 		}
-		let existing_contact = (await frappe.db.get_value("Contact",
-			{
-				"first_name": frm.doc.first_name || frm.doc.lead_name,
-				"last_name": frm.doc.last_name
-			},
-			"name"
-		)).message.name;
+		let existing_contact = (
+			await frappe.db.get_value(
+				"Contact",
+				{
+					first_name: frm.doc.first_name || frm.doc.lead_name,
+					last_name: frm.doc.last_name,
+				},
+				"name"
+			)
+		).message.name;
 
 		if (!existing_contact) {
-			fields.push(
-				{
-					"label": "Create Contact",
-					"fieldname": "create_contact",
-					"fieldtype": "Check",
-					"default": "1"
-				}
-			);
+			fields.push({
+				label: "Create Contact",
+				fieldname: "create_contact",
+				fieldtype: "Check",
+				default: "1",
+			});
 		}
 
 		if (fields) {
 			var d = new frappe.ui.Dialog({
-				title: __('Create Opportunity'),
+				title: __("Create Opportunity"),
 				fields: fields,
-				primary_action: function() {
+				primary_action: function () {
 					var data = d.get_values();
 					frappe.call({
-						method: 'create_prospect_and_contact',
+						method: "create_prospect_and_contact",
 						doc: frm.doc,
 						args: {
 							data: data,
 						},
 						freeze: true,
-						callback: function(r) {
+						callback: function (r) {
 							if (!r.exc) {
 								frappe.model.open_mapped_doc({
 									method: "erpnext.crm.doctype.lead.lead.make_opportunity",
-									frm: frm
+									frm: frm,
 								});
 							}
 							d.hide();
-						}
+						},
 					});
 				},
-				primary_action_label: __('Create')
+				primary_action_label: __("Create"),
 			});
 			d.show();
 		} else {
 			frappe.model.open_mapped_doc({
 				method: "erpnext.crm.doctype.lead.lead.make_opportunity",
-				frm: frm
+				frm: frm,
 			});
 		}
-	}
+	},
 });
