@@ -78,7 +78,7 @@ class Quotation(SellingController):
 		opportunity: DF.Link | None
 		order_lost_reason: DF.SmallText | None
 		order_type: DF.Literal["", "Sales", "Maintenance", "Shopping Cart"]
-		other_charges_calculation: DF.LongText | None
+		other_charges_calculation: DF.TextEditor | None
 		packed_items: DF.Table[PackedItem]
 		party_name: DF.DynamicLink | None
 		payment_schedule: DF.Table[PaymentSchedule]
