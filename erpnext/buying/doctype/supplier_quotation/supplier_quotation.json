@@ -928,11 +928,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-11-20 11:15:30.083077",
-=======
  "modified": "2024-03-20 16:03:59.069145",
->>>>>>> 1c63983873 (fix: use Text Editor for rendering tax breakup table)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
