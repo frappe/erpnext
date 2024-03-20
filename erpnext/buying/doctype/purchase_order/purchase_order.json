@@ -1275,11 +1275,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-10-01 20:58:07.851037",
-=======
  "modified": "2024-03-20 16:03:31.611808",
->>>>>>> 1c63983873 (fix: use Text Editor for rendering tax breakup table)
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
