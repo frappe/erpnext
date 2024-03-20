@@ -944,7 +944,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Taxes and Charges Calculation",
@@ -2184,7 +2184,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-03-15 16:44:17.778370",
+ "modified": "2024-03-20 16:02:52.237732",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
