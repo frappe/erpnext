@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-18 18:19\n"
+"PO-Revision-Date: 2024-03-20 18:16\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -30318,13 +30318,13 @@ msgstr "Grün"
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.json
 msgctxt "Incoming Call Settings"
 msgid "Greeting Message"
-msgstr ""
+msgstr "Grußnachricht"
 
 #. Label of a Data field in DocType 'Voice Call Settings'
 #: telephony/doctype/voice_call_settings/voice_call_settings.json
 msgctxt "Voice Call Settings"
 msgid "Greeting Message"
-msgstr ""
+msgstr "Grußnachricht"
 
 #. Label of a Data field in DocType 'Support Settings'
 #: support/doctype/support_settings/support_settings.json
@@ -41042,19 +41042,19 @@ msgstr ""
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Message"
-msgstr "Botschaft"
+msgstr "Nachricht"
 
 #. Label of a Text field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Message"
-msgstr "Botschaft"
+msgstr "Nachricht"
 
 #. Label of a Text field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
 msgctxt "SMS Center"
 msgid "Message"
-msgstr "Botschaft"
+msgstr "Nachricht"
 
 #. Label of a HTML field in DocType 'Payment Gateway Account'
 #: accounts/doctype/payment_gateway_account/payment_gateway_account.json
@@ -80225,7 +80225,7 @@ msgstr ""
 #. Success message of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
 msgid "You're ready to start your journey with ERPNext"
-msgstr ""
+msgstr "Sie sind bereit, Ihre Reise mit ERPNext zu beginnen"
 
 #. Option for the 'Provider' (Select) field in DocType 'Video'
 #: utilities/doctype/video/video.json
