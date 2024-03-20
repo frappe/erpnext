@@ -201,7 +201,7 @@ class TransactionDeletionRecord(Document):
 			)
 
 	@frappe.whitelist()
-	def process_tasks(self):
+	def start_deletion_tasks(self):
 		# This method is the entry point for the chain of events that follow
 		self.db_set("status", "Running")
 		self.enqueue_task(task="Delete Bins")
