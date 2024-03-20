@@ -340,10 +340,15 @@ class PaymentReconciliation(Document):
 
 		self.build_qb_filter_conditions(get_invoices=True)
 
+		accounts = [self.receivable_payable_account]
+
+		if self.default_advance_account:
+			accounts.append(self.default_advance_account)
+
 		non_reconciled_invoices = get_outstanding_invoices(
 			self.party_type,
 			self.party,
-			self.receivable_payable_account,
+			accounts,
 			common_filter=self.common_filter_conditions,
 			posting_date=self.ple_posting_date_filter,
 			min_outstanding=self.minimum_invoice_amount if self.minimum_invoice_amount else None,

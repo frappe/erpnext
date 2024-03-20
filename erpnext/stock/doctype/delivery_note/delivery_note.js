@@ -3,6 +3,8 @@
 
 cur_frm.add_fetch("customer", "tax_id", "tax_id");
 
+cur_frm.cscript.tax_table = "Sales Taxes and Charges";
+
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
 frappe.provide("erpnext.accounts.dimensions");

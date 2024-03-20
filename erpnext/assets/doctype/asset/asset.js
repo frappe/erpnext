@@ -79,7 +79,7 @@ frappe.ui.form.on("Asset", {
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 
 		if (frm.doc.docstatus == 1) {
-			if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
+			if (["Submitted", "Partially Depreciated", "Fully Depreciated"].includes(frm.doc.status)) {
 				frm.add_custom_button(
 					__("Transfer Asset"),
 					function () {
@@ -365,7 +365,7 @@ frappe.ui.form.on("Asset", {
 				if (v.journal_entry) {
 					asset_values.push(asset_value);
 				} else {
-					if (in_list(["Scrapped", "Sold"], frm.doc.status)) {
+					if (["Scrapped", "Sold"].includes(frm.doc.status)) {
 						asset_values.push(null);
 					} else {
 						asset_values.push(asset_value);
@@ -400,7 +400,7 @@ frappe.ui.form.on("Asset", {
 			});
 		}
 
-		if (in_list(["Scrapped", "Sold"], frm.doc.status)) {
+		if (["Scrapped", "Sold"].includes(frm.doc.status)) {
 			x_intervals.push(frappe.format(frm.doc.disposal_date, { fieldtype: "Date" }));
 			asset_values.push(0);
 		}

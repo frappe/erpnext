@@ -236,6 +236,14 @@ class StockController(AccountsController):
 			qty = row.get("rejected_qty")
 			warehouse = row.get("rejected_warehouse")
 
+		if (
+			self.is_internal_transfer()
+			and self.doctype in ["Sales Invoice", "Delivery Note"]
+			and self.is_return
+		):
+			warehouse = row.get("target_warehouse") or row.get("warehouse")
+			type_of_transaction = "Outward"
+
 		bundle_details.update(
 			{
 				"qty": qty,
@@ -579,7 +587,7 @@ class StockController(AccountsController):
 		bundle_doc.warehouse = warehouse
 		bundle_doc.type_of_transaction = type_of_transaction
 		bundle_doc.voucher_type = self.doctype
-		bundle_doc.voucher_no = self.name
+		bundle_doc.voucher_no = "" if self.is_new() or self.docstatus == 2 else self.name
 		bundle_doc.is_cancelled = 0
 
 		for row in bundle_doc.entries:
@@ -595,6 +603,7 @@ class StockController(AccountsController):
 
 		bundle_doc.calculate_qty_and_amount()
 		bundle_doc.flags.ignore_permissions = True
+		bundle_doc.flags.ignore_validate = True
 		bundle_doc.save(ignore_permissions=True)
 
 		return bundle_doc.name

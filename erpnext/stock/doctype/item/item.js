@@ -406,14 +406,6 @@ $.extend(erpnext.item, {
 			};
 		};
 
-		frm.fields_dict.customer_items.grid.get_field("customer_name").get_query = function (doc, cdt, cdn) {
-			return { query: "erpnext.controllers.queries.customer_query" };
-		};
-
-		frm.fields_dict.supplier_items.grid.get_field("supplier").get_query = function (doc, cdt, cdn) {
-			return { query: "erpnext.controllers.queries.supplier_query" };
-		};
-
 		frm.fields_dict["item_defaults"].grid.get_field("default_warehouse").get_query = function (
 			doc,
 			cdt,

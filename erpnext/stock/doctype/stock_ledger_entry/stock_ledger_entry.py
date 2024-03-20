@@ -58,7 +58,7 @@ class StockLedgerEntry(Document):
 		recalculate_rate: DF.Check
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.LongText | None
-		stock_queue: DF.Text | None
+		stock_queue: DF.LongText | None
 		stock_uom: DF.Link | None
 		stock_value: DF.Currency
 		stock_value_difference: DF.Currency

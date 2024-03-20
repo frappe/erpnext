@@ -2606,6 +2606,7 @@ def move_sample_to_retention_warehouse(company, items):
 						"type_of_transaction": "Outward",
 						"serial_and_batch_bundle": item.get("serial_and_batch_bundle"),
 						"item_code": item.get("item_code"),
+						"warehouse": item.get("t_warehouse"),
 					}
 				)
 

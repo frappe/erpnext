@@ -303,7 +303,7 @@ erpnext.sales_common = {
 				if ((doc.packed_items || []).length) {
 					$(this.frm.fields_dict.packing_list.row.wrapper).toggle(true);
 
-					if (in_list(["Delivery Note", "Sales Invoice"], doc.doctype)) {
+					if (["Delivery Note", "Sales Invoice"].includes(doc.doctype)) {
 						var help_msg =
 							"<div class='alert alert-warning'>" +
 							__(
@@ -315,7 +315,7 @@ erpnext.sales_common = {
 					}
 				} else {
 					$(this.frm.fields_dict.packing_list.row.wrapper).toggle(false);
-					if (in_list(["Delivery Note", "Sales Invoice"], doc.doctype)) {
+					if (["Delivery Note", "Sales Invoice"].includes(doc.doctype)) {
 						frappe.meta.get_docfield(doc.doctype, "product_bundle_help", doc.name).options = "";
 					}
 				}
@@ -416,7 +416,7 @@ erpnext.sales_common = {
 
 			project() {
 				let me = this;
-				if (in_list(["Delivery Note", "Sales Invoice", "Sales Order"], this.frm.doc.doctype)) {
+				if (["Delivery Note", "Sales Invoice", "Sales Order"].includes(this.frm.doc.doctype)) {
 					if (this.frm.doc.project) {
 						frappe.call({
 							method: "erpnext.projects.doctype.project.project.get_cost_center_name",

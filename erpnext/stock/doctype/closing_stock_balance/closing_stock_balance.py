@@ -123,7 +123,9 @@ class ClosingStockBalance(Document):
 			)
 		)
 
-		create_json_gz_file({"columns": columns, "data": data}, self.doctype, self.name)
+		create_json_gz_file(
+			{"columns": columns, "data": data}, self.doctype, self.name, "closing-stock-balance"
+		)
 
 	def get_prepared_data(self):
 		if attachments := get_attachments(self.doctype, self.name):

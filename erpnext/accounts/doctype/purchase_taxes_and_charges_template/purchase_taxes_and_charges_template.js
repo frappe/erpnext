@@ -1,6 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
 erpnext.accounts.taxes.setup_tax_validations("Purchase Taxes and Charges Template");
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 

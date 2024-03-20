@@ -4,6 +4,8 @@
 frappe.provide("erpnext.buying");
 frappe.provide("erpnext.accounts.dimensions");
 
+cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
+
 erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 erpnext.accounts.taxes.setup_tax_validations("Purchase Order");
 erpnext.buying.setup_buying_controller();
@@ -289,7 +291,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 				this.frm.fields_dict.items_section.wrapper.removeClass("hide-border");
 			}
 
-			if (!in_list(["Closed", "Delivered"], doc.status)) {
+			if (!["Closed", "Delivered"].includes(doc.status)) {
 				if (
 					this.frm.doc.status !== "Closed" &&
 					flt(this.frm.doc.per_received, 2) < 100 &&
@@ -334,7 +336,7 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 
 					this.frm.page.set_inner_btn_group_as_primary(__("Status"));
 				}
-			} else if (in_list(["Closed", "Delivered"], doc.status)) {
+			} else if (["Closed", "Delivered"].includes(doc.status)) {
 				if (this.frm.has_perm("submit")) {
 					this.frm.add_custom_button(
 						__("Re-open"),
@@ -507,7 +509,6 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					target: me.frm,
 					setters: {
 						schedule_date: undefined,
-						status: undefined,
 					},
 					get_query_filters: {
 						material_request_type: "Purchase",
