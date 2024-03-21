@@ -8,7 +8,7 @@ from frappe import _, qb
 from frappe.desk.notifications import clear_notifications
 from frappe.model.document import Document
 from frappe.utils import cint, comma_and, create_batch, get_link_to_form
-from frappe.utils.background_jobs import get_job, is_job_enqueued
+from frappe.utils.background_jobs import create_job_id, is_job_enqueued
 
 
 class TransactionDeletionRecord(Document):
@@ -152,7 +152,7 @@ class TransactionDeletionRecord(Document):
 		running_tasks = []
 		for x in job_names:
 			if is_job_enqueued(x):
-				running_tasks.append(get_job(x).get_id())
+				running_tasks.append(create_job_id(x))
 
 		if running_tasks:
 			frappe.throw(
