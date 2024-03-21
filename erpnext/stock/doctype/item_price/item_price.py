@@ -39,7 +39,7 @@ class ItemPrice(Document):
 		reference: DF.Data | None
 		selling: DF.Check
 		supplier: DF.Link | None
-		uom: DF.Link | None
+		uom: DF.Link
 		valid_from: DF.Date | None
 		valid_upto: DF.Date | None
 	# end: auto-generated types
