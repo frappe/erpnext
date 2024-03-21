@@ -121,7 +121,8 @@ class PeriodClosingVoucher(AccountsController):
 		previous_fiscal_year = get_fiscal_year(last_year_closing, company=self.company, boolean=True)
 
 		if previous_fiscal_year and not frappe.db.exists(
-			"GL Entry", {"posting_date": ("<=", last_year_closing), "company": self.company}
+			"GL Entry",
+			{"posting_date": ("<=", last_year_closing), "company": self.company, "is_cancelled": 0},
 		):
 			return
 
