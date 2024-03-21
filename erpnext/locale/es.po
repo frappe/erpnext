@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-19 18:20\n"
+"PO-Revision-Date: 2024-03-21 18:16\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -60947,7 +60947,7 @@ msgstr "Fila {0}: el artículo subcontratado es obligatorio para la materia prim
 
 #: controllers/stock_controller.py:721
 msgid "Row {0}: Target Warehouse is mandatory for internal transfers"
-msgstr ""
+msgstr "Fila {0}: El almacén de destino es obligatorio para las transferencias internas"
 
 #: stock/doctype/stock_entry/stock_entry.py:450
 msgid "Row {0}: The item {1}, quantity must be positive number"
@@ -62715,13 +62715,13 @@ msgstr "Programado."
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.js:111
 msgid "Scheduled Date"
-msgstr "Fecha prevista."
+msgstr "Fecha prevista"
 
 #. Label of a Date field in DocType 'Maintenance Schedule Detail'
 #: maintenance/doctype/maintenance_schedule_detail/maintenance_schedule_detail.json
 msgctxt "Maintenance Schedule Detail"
 msgid "Scheduled Date"
-msgstr "Fecha prevista."
+msgstr "Fecha prevista"
 
 #. Label of a Datetime field in DocType 'Appointment'
 #: crm/doctype/appointment/appointment.json
@@ -70525,55 +70525,55 @@ msgstr "Impuestos pagados"
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Tax Breakup"
-msgstr "Disolución de Impuestos"
+msgstr "Desglose de impuestos"
 
 #. Label of a Section Break field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Tax Breakup"
-msgstr "Disolución de Impuestos"
+msgstr "Desglose de impuestos"
 
 #. Label of a Section Break field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Tax Breakup"
-msgstr "Disolución de Impuestos"
+msgstr "Desglose de impuestos"
 
 #. Label of a Section Break field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Tax Breakup"
-msgstr "Disolución de Impuestos"
+msgstr "Desglose de impuestos"
 
 #. Label of a Section Break field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Tax Breakup"
-msgstr "Disolución de Impuestos"
+msgstr "Desglose de impuestos"
 
 #. Label of a Section Break field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Tax Breakup"
-msgstr "Disolución de Impuestos"
+msgstr "Desglose de impuestos"
 
 #. Label of a Section Break field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Tax Breakup"
-msgstr "Disolución de Impuestos"
+msgstr "Desglose de impuestos"
 
 #. Label of a Section Break field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Tax Breakup"
-msgstr "Disolución de Impuestos"
+msgstr "Desglose de impuestos"
 
 #. Label of a Section Break field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Tax Breakup"
-msgstr "Disolución de Impuestos"
+msgstr "Desglose de impuestos"
 
 #. Name of a DocType
 #: accounts/doctype/tax_category/tax_category.json
