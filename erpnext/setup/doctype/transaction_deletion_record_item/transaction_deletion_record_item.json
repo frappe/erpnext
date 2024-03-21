@@ -5,8 +5,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "doctype_name",
-  "no_of_docs"
+  "doctype_name"
  ],
  "fields": [
   {
@@ -16,18 +15,12 @@
    "label": "DocType",
    "options": "DocType",
    "reqd": 1
-  },
-  {
-   "fieldname": "no_of_docs",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Number of Docs"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-08 23:10:46.166744",
+ "modified": "2024-02-04 10:56:27.413691",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record Item",
@@ -35,5 +28,6 @@
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
