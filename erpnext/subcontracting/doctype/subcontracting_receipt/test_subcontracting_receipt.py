@@ -292,6 +292,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertRaises(OverAllowanceError, make_return_subcontracting_receipt, **args)
 
 	def test_subcontracting_receipt_no_gl_entry(self):
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 		sco = get_subcontracting_order()
 		rm_items = get_rm_items(sco.supplied_items)
 		itemwise_details = make_stock_in_entry(rm_items=rm_items)
@@ -327,8 +328,10 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		# Service Cost(100 * 10) + Raw Materials Cost(100 * 10) + Additional Costs(10 * 10) = 2100
 		self.assertEqual(stock_value_difference, 2100)
 		self.assertFalse(get_gl_entries("Subcontracting Receipt", scr.name))
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_subcontracting_receipt_gl_entry(self):
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 		sco = get_subcontracting_order(
 			company="_Test Company with perpetual inventory",
 			warehouse="Stores - TCP1",
@@ -387,6 +390,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.reload()
 		scr.cancel()
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_supplied_items_consumed_qty(self):
 		# Set Backflush Based On as "Material Transferred for Subcontracting" to transfer RM's more than the required qty
@@ -664,6 +668,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		)
 
 	def test_subcontracting_receipt_valuation_for_fg_with_auto_created_serial_batch_bundle(self):
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 		set_backflush_based_on("BOM")
 
 		fg_item = make_item(
@@ -760,9 +765,11 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		frappe.db.set_single_value(
 			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0
 		)
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_subcontracting_receipt_raw_material_rate(self):
 		# Step - 1: Set Backflush Based On as "BOM"
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 		set_backflush_based_on("BOM")
 
 		# Step - 2: Create FG and RM Items
@@ -819,6 +826,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 			self.assertEqual(rm_item.consumed_qty, 100)
 			self.assertEqual(rm_item.rate, 100)
 			self.assertEqual(rm_item.amount, rm_item.consumed_qty * rm_item.rate)
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_quality_inspection_for_subcontracting_receipt(self):
 		from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
