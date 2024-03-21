@@ -7,7 +7,6 @@ from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Cast_
-from frappe.utils import getdate
 
 
 class ItemPriceDuplicateItem(frappe.ValidationError):
@@ -46,7 +45,7 @@ class ItemPrice(Document):
 
 	def validate(self):
 		self.validate_item()
-		self.validate_dates()
+		self.validate_from_to_dates("valid_from", "valid_upto")
 		self.update_price_list_details()
 		self.update_item_details()
 		self.check_duplicates()
@@ -56,11 +55,14 @@ class ItemPrice(Document):
 		if not frappe.db.exists("Item", self.item_code):
 			frappe.throw(_("Item {0} not found.").format(self.item_code))
 
+<<<<<<< HEAD
 	def validate_dates(self):
 		if self.valid_from and self.valid_upto:
 			if getdate(self.valid_from) > getdate(self.valid_upto):
 				frappe.throw(_("Valid From Date must be lesser than Valid Upto Date."))
 
+=======
+>>>>>>> cbcc47b5c4 (refactor(Item Price): validate dates)
 	def update_price_list_details(self):
 		if self.price_list:
 			price_list_details = frappe.db.get_value(
