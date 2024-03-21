@@ -135,13 +135,16 @@
    "default": "0",
    "fieldname": "process_in_single_transaction",
    "fieldtype": "Check",
-   "label": "Process in Single Transaction"
+   "hidden": 1,
+   "label": "Process in Single Transaction",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 14:58:15.086360",
+ "modified": "2024-03-21 10:29:19.456413",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
