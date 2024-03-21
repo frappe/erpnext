@@ -379,10 +379,10 @@ class SubcontractingController(StockController):
 			if row.serial_no:
 				details.serial_no.extend(get_serial_nos(row.serial_no))
 
-			if row.batch_no:
+			elif row.batch_no:
 				details.batch_no[row.batch_no] += row.qty
 
-			if voucher_bundle_data:
+			elif voucher_bundle_data:
 				bundle_key = (row.rm_item_code, row.main_item_code, row.t_warehouse, row.voucher_no)
 
 				bundle_data = voucher_bundle_data.get(bundle_key, frappe._dict())
@@ -392,6 +392,9 @@ class SubcontractingController(StockController):
 
 				if bundle_data.batch_nos:
 					for batch_no, qty in bundle_data.batch_nos.items():
+						if qty < 0:
+							qty = abs(qty)
+
 						if qty > 0:
 							details.batch_no[batch_no] += qty
 							bundle_data.batch_nos[batch_no] -= qty
@@ -545,17 +548,24 @@ class SubcontractingController(StockController):
 
 		rm_obj.reference_name = item_row.name
 
+		use_serial_batch_fields = frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")
+
 		if self.doctype == self.subcontract_data.order_doctype:
 			rm_obj.required_qty = qty
 			rm_obj.amount = rm_obj.required_qty * rm_obj.rate
 		else:
 			rm_obj.consumed_qty = qty
 			rm_obj.required_qty = bom_item.required_qty or qty
+			rm_obj.serial_and_batch_bundle = None
 			setattr(
 				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
 			)
 
-		if self.doctype == "Subcontracting Receipt":
+			if use_serial_batch_fields:
+				rm_obj.use_serial_batch_fields = 1
+				self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
+
+		if self.doctype == "Subcontracting Receipt" and not use_serial_batch_fields:
 			args = frappe._dict(
 				{
 					"item_code": rm_obj.rm_item_code,
@@ -580,6 +590,68 @@ class SubcontractingController(StockController):
 				args["serial_and_batch_bundle"] = rm_obj.serial_and_batch_bundle
 
 			rm_obj.rate = get_incoming_rate(args)
+
+	def __set_batch_nos(self, bom_item, item_row, rm_obj, qty):
+		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))
+
+		if self.available_materials.get(key) and self.available_materials[key]["batch_no"]:
+			new_rm_obj = None
+			for batch_no, batch_qty in self.available_materials[key]["batch_no"].items():
+				if batch_qty >= qty or (
+					rm_obj.consumed_qty == 0
+					and self.backflush_based_on == "BOM"
+					and len(self.available_materials[key]["batch_no"]) == 1
+				):
+					if rm_obj.consumed_qty == 0:
+						self.__set_consumed_qty(rm_obj, qty)
+
+					self.__set_batch_no_as_per_qty(item_row, rm_obj, batch_no, qty)
+					self.available_materials[key]["batch_no"][batch_no] -= qty
+					return
+
+				elif qty > 0 and batch_qty > 0:
+					qty -= batch_qty
+					new_rm_obj = self.append(self.raw_material_table, bom_item)
+					new_rm_obj.serial_and_batch_bundle = None
+					new_rm_obj.use_serial_batch_fields = 1
+					new_rm_obj.reference_name = item_row.name
+					self.__set_batch_no_as_per_qty(item_row, new_rm_obj, batch_no, batch_qty)
+					self.available_materials[key]["batch_no"][batch_no] = 0
+
+			if new_rm_obj:
+				self.remove(rm_obj)
+			elif abs(qty) > 0:
+				self.__set_consumed_qty(rm_obj, qty)
+
+		else:
+			self.__set_consumed_qty(rm_obj, qty, bom_item.required_qty or qty)
+			self.__set_serial_nos(item_row, rm_obj)
+
+	def __set_consumed_qty(self, rm_obj, consumed_qty, required_qty=0):
+		rm_obj.required_qty = required_qty
+		rm_obj.consumed_qty = consumed_qty
+
+	def __set_serial_nos(self, item_row, rm_obj):
+		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))
+		if self.available_materials.get(key) and self.available_materials[key]["serial_no"]:
+			used_serial_nos = self.available_materials[key]["serial_no"][0 : cint(rm_obj.consumed_qty)]
+			rm_obj.serial_no = "\n".join(used_serial_nos)
+
+			# Removed the used serial nos from the list
+			for sn in used_serial_nos:
+				self.available_materials[key]["serial_no"].remove(sn)
+
+	def __set_batch_no_as_per_qty(self, item_row, rm_obj, batch_no, qty):
+		rm_obj.update(
+			{
+				"consumed_qty": qty,
+				"batch_no": batch_no,
+				"required_qty": qty,
+				self.subcontract_data.order_field: item_row.get(self.subcontract_data.order_field),
+			}
+		)
+
+		self.__set_serial_nos(item_row, rm_obj)
 
 	def __get_qty_based_on_material_transfer(self, item_row, transfer_item):
 		key = (item_row.item_code, item_row.get(self.subcontract_data.order_field))
@@ -1076,6 +1148,9 @@ def make_rm_stock_entry(
 								"serial_and_batch_bundle": rm_item.get("serial_and_batch_bundle"),
 								"main_item_code": fg_item_code,
 								"allow_alternative_item": item_wh.get(rm_item_code, {}).get("allow_alternative_item"),
+								"use_serial_batch_fields": rm_item.get("use_serial_batch_fields"),
+								"serial_no": rm_item.get("serial_no") if rm_item.get("use_serial_batch_fields") else None,
+								"batch_no": rm_item.get("batch_no") if rm_item.get("use_serial_batch_fields") else None,
 							}
 						}
 

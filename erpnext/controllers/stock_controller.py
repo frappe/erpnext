@@ -48,7 +48,9 @@ class StockController(AccountsController):
 		super(StockController, self).validate()
 
 		if self.docstatus == 0:
-			self.validate_duplicate_serial_and_batch_bundle()
+			for table_name in ["items", "packed_items", "supplied_items"]:
+				self.validate_duplicate_serial_and_batch_bundle(table_name)
+
 		if not self.get("is_return"):
 			self.validate_inspection()
 		self.validate_serialized_batch()
@@ -58,12 +60,19 @@ class StockController(AccountsController):
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
 
-	def validate_duplicate_serial_and_batch_bundle(self):
-		if sbb_list := [
-			item.get("serial_and_batch_bundle")
-			for item in self.items
-			if item.get("serial_and_batch_bundle")
-		]:
+	def validate_duplicate_serial_and_batch_bundle(self, table_name):
+		if not self.get(table_name):
+			return
+
+		sbb_list = []
+		for item in self.get(table_name):
+			if item.get("serial_and_batch_bundle"):
+				sbb_list.append(item.get("serial_and_batch_bundle"))
+
+			if item.get("rejected_serial_and_batch_bundle"):
+				sbb_list.append(item.get("rejected_serial_and_batch_bundle"))
+
+		if sbb_list:
 			SLE = frappe.qb.DocType("Stock Ledger Entry")
 			data = (
 				frappe.qb.from_(SLE)
@@ -188,7 +197,7 @@ class StockController(AccountsController):
 				not row.serial_and_batch_bundle and not row.get("rejected_serial_and_batch_bundle")
 			):
 				bundle_details = {
-					"item_code": row.item_code,
+					"item_code": row.get("rm_item_code") or row.item_code,
 					"posting_date": self.posting_date,
 					"posting_time": self.posting_time,
 					"voucher_type": self.doctype,
@@ -200,7 +209,7 @@ class StockController(AccountsController):
 					"do_not_submit": True,
 				}
 
-				if row.qty:
+				if row.get("qty") or row.get("consumed_qty"):
 					self.update_bundle_details(bundle_details, table_name, row)
 					self.create_serial_batch_bundle(bundle_details, row)
 
@@ -219,6 +228,12 @@ class StockController(AccountsController):
 			type_of_transaction = "Inward"
 			if not self.is_return:
 				type_of_transaction = "Outward"
+		elif table_name == "supplied_items":
+			qty = row.consumed_qty
+			warehouse = self.supplier_warehouse
+			type_of_transaction = "Outward"
+			if self.is_return:
+				type_of_transaction = "Inward"
 		else:
 			type_of_transaction = get_type_of_transaction(self, row)
 
@@ -550,13 +565,30 @@ class StockController(AccountsController):
 				)
 
 	def delete_auto_created_batches(self):
-		for row in self.items:
-			if row.serial_and_batch_bundle:
-				frappe.db.set_value(
-					"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
-				)
+		for table_name in ["items", "packed_items", "supplied_items"]:
+			if not self.get(table_name):
+				continue
 
-				row.db_set("serial_and_batch_bundle", None)
+			for row in self.get(table_name):
+				update_values = {}
+				if row.get("batch_no"):
+					update_values["batch_no"] = None
+
+				if row.serial_and_batch_bundle:
+					update_values["serial_and_batch_bundle"] = None
+					frappe.db.set_value(
+						"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
+					)
+
+				if update_values:
+					row.db_set(update_values)
+
+				if table_name == "items" and row.get("rejected_serial_and_batch_bundle"):
+					frappe.db.set_value(
+						"Serial and Batch Bundle", row.rejected_serial_and_batch_bundle, {"is_cancelled": 1}
+					)
+
+					row.db_set("rejected_serial_and_batch_bundle", None)
 
 	def set_serial_and_batch_bundle(self, table_name=None, ignore_validate=False):
 		if not table_name:
