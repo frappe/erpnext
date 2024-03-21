@@ -62,7 +62,7 @@ def get_pos_entries(filters, group_by_field):
 	return frappe.db.sql(
 		"""
 		SELECT
-			p.posting_date, p.name as pos_invoice, p.pos_profile,
+			p.posting_date, p.name as pos_invoice, p.pos_profile, p.company,
 			p.owner, p.customer, p.is_return, p.base_grand_total as grand_total {select_mop_field}
 		FROM
 			`tabPOS Invoice` p {from_sales_invoice_payment}
@@ -207,14 +207,14 @@ def get_columns(filters):
 			"label": _("Grand Total"),
 			"fieldname": "grand_total",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 120,
 		},
 		{
 			"label": _("Paid Amount"),
 			"fieldname": "paid_amount",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 120,
 		},
 		{
@@ -224,6 +224,13 @@ def get_columns(filters):
 			"width": 150,
 		},
 		{"label": _("Is Return"), "fieldname": "is_return", "fieldtype": "Data", "width": 80},
+		{
+			"label": _("Company"),
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"options": "Company",
+			"width": 120,
+		},
 	]
 
 	return columns
