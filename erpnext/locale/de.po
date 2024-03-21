@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-20 18:16\n"
+"PO-Revision-Date: 2024-03-21 18:16\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -8552,7 +8552,7 @@ msgstr "Mindestens ein Artikel sollte mit negativer Menge in den Retourenbeleg e
 #: accounts/doctype/pos_invoice/pos_invoice.py:405
 #: accounts/doctype/sales_invoice/sales_invoice.py:509
 msgid "At least one mode of payment is required for POS invoice."
-msgstr "Mindestens eine Art der Bezahlung ist für POS-Rechnung erforderlich."
+msgstr "Mindestens eine Zahlungsweise ist für POS-Rechnung erforderlich."
 
 #: setup/doctype/terms_and_conditions/terms_and_conditions.py:39
 msgid "At least one of the Applicable Modules should be selected"
@@ -41470,7 +41470,7 @@ msgstr "Mobilfunknummer"
 #: accounts/report/purchase_register/purchase_register.py:201
 #: accounts/report/sales_register/sales_register.py:222
 msgid "Mode Of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Name of a DocType
 #: accounts/doctype/mode_of_payment/mode_of_payment.json
@@ -41481,19 +41481,19 @@ msgstr "Zahlungsart"
 #: accounts/report/purchase_register/purchase_register.js:40
 #: accounts/report/sales_register/sales_register.js:40
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Cashier Closing Payments'
 #: accounts/doctype/cashier_closing_payments/cashier_closing_payments.json
 msgctxt "Cashier Closing Payments"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Data field in DocType 'Mode of Payment'
 #. Label of a Link in the Accounting Workspace
@@ -41501,88 +41501,88 @@ msgstr "Zahlungsart"
 #: accounts/workspace/accounting/accounting.json
 msgctxt "Mode of Payment"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Overdue Payment'
 #: accounts/doctype/overdue_payment/overdue_payment.json
 msgctxt "Overdue Payment"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'POS Closing Entry Detail'
 #: accounts/doctype/pos_closing_entry_detail/pos_closing_entry_detail.json
 msgctxt "POS Closing Entry Detail"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'POS Opening Entry Detail'
 #: accounts/doctype/pos_opening_entry_detail/pos_opening_entry_detail.json
 msgctxt "POS Opening Entry Detail"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'POS Payment Method'
 #: accounts/doctype/pos_payment_method/pos_payment_method.json
 msgctxt "POS Payment Method"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Payment Order Reference'
 #: accounts/doctype/payment_order_reference/payment_order_reference.json
 msgctxt "Payment Order Reference"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Payment Schedule'
 #: accounts/doctype/payment_schedule/payment_schedule.json
 msgctxt "Payment Schedule"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Payment Term'
 #: accounts/doctype/payment_term/payment_term.json
 msgctxt "Payment Term"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Payment Terms Template Detail'
 #: accounts/doctype/payment_terms_template_detail/payment_terms_template_detail.json
 msgctxt "Payment Terms Template Detail"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Label of a Link field in DocType 'Sales Invoice Payment'
 #: accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
 msgctxt "Sales Invoice Payment"
 msgid "Mode of Payment"
-msgstr "Zahlungsart"
+msgstr "Zahlungsweise"
 
 #. Name of a DocType
 #: accounts/doctype/mode_of_payment_account/mode_of_payment_account.json
 msgid "Mode of Payment Account"
-msgstr "Art des Zahlungskontos"
+msgstr "Konto für Zahlungsweise"
 
 #: accounts/doctype/pos_closing_entry/closing_voucher_details.html:35
 msgid "Mode of Payments"
-msgstr "Zahlungsweise"
+msgstr "Zahlungsweisen"
 
 #. Label of a Data field in DocType 'Vehicle'
 #: setup/doctype/vehicle/vehicle.json
@@ -41594,7 +41594,7 @@ msgstr "Modell"
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgctxt "POS Closing Entry"
 msgid "Modes of Payment"
-msgstr "Zahlungsmodi"
+msgstr "Zahlungsweisen"
 
 #: templates/pages/projects.html:69
 msgid "Modified By"
@@ -46137,7 +46137,7 @@ msgstr "Verkaufsstellen-Profil benötigt, um Verkaufsstellen-Buchung zu erstelle
 
 #: accounts/doctype/mode_of_payment/mode_of_payment.py:63
 msgid "POS Profile {} contains Mode of Payment {}. Please remove them to disable this mode."
-msgstr ""
+msgstr "Das POS-Profil {} enthält die Zahlungsweise {}. Bitte entfernen Sie diese erst dort, bevor Sie sie deaktivieren."
 
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.py:46
 msgid "POS Profile {} does not belongs to company {}"
@@ -49951,7 +49951,7 @@ msgstr "Bitte wählen Sie ein Datum und eine Uhrzeit"
 
 #: accounts/doctype/pos_profile/pos_profile.py:145
 msgid "Please select a default mode of payment"
-msgstr "Bitte wählen Sie eine Standardzahlungsart"
+msgstr "Bitte wählen Sie eine Standardzahlungsweise"
 
 #: selling/page/point_of_sale/pos_item_cart.js:753
 msgid "Please select a field to edit from numpad"
@@ -50173,19 +50173,19 @@ msgstr "Bitte setzen Sie mindestens eine Zeile in die Tabelle Steuern und Abgabe
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2041
 msgid "Please set default Cash or Bank account in Mode of Payment {0}"
-msgstr "Bitte Standardeinstellungen für Kassen- oder Bankkonto in \"Zahlungsart\" {0} setzen"
+msgstr "Bitte tragen Sie ein Bank- oder Kassenkonto in Zahlungsweise {0} ein"
 
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.py:66
 #: accounts/doctype/pos_profile/pos_profile.py:163
 #: accounts/doctype/sales_invoice/sales_invoice.py:2599
 msgid "Please set default Cash or Bank account in Mode of Payment {}"
-msgstr "Bitte setzen Sie das Standard-Bargeld- oder Bankkonto im Zahlungsmodus {}"
+msgstr "Bitte tragen Sie ein Bank- oder Kassenkonto in Zahlungsweise {} ein"
 
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.py:68
 #: accounts/doctype/pos_profile/pos_profile.py:165
 #: accounts/doctype/sales_invoice/sales_invoice.py:2601
 msgid "Please set default Cash or Bank account in Mode of Payments {}"
-msgstr "Bitte setzen Sie das Standard-Bargeld- oder Bankkonto im Zahlungsmodus {}"
+msgstr "Bitte tragen Sie jeweils ein Bank- oder Kassenkonto in Zahlungsweisen {} ein"
 
 #: accounts/utils.py:2086
 msgid "Please set default Exchange Gain/Loss Account in Company {}"
@@ -61012,7 +61012,7 @@ msgstr "Zeile {0}: Bitte setzen Sie den Steuerbefreiungsgrund in den Umsatzsteue
 
 #: regional/italy/utils.py:338
 msgid "Row {0}: Please set the Mode of Payment in Payment Schedule"
-msgstr "Zeile {0}: Bitte legen Sie die Zahlungsart im Zahlungsplan fest"
+msgstr "Zeile {0}: Bitte legen Sie die Zahlungsweise im Zahlungsplan fest"
 
 #: regional/italy/utils.py:345
 msgid "Row {0}: Please set the correct code on Mode of Payment {1}"
@@ -69881,7 +69881,7 @@ msgstr "Suspendiert"
 
 #: selling/page/point_of_sale/pos_payment.js:308
 msgid "Switch Between Payment Modes"
-msgstr "Zwischen Zahlungsmodi wechseln"
+msgstr "Zwischen Zahlungsweisen wechseln"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
@@ -80103,7 +80103,7 @@ msgstr "Sie können maximal {0} Punkte in dieser Reihenfolge einlösen."
 
 #: accounts/doctype/pos_profile/pos_profile.py:148
 msgid "You can only select one mode of payment as default"
-msgstr "Sie können standardmäßig nur eine Zahlungsart auswählen"
+msgstr "Sie können nur eine Zahlungsweise als Standard auswählen"
 
 #: selling/page/point_of_sale/pos_payment.js:478
 msgid "You can redeem upto {0}."
