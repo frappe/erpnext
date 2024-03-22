@@ -306,7 +306,7 @@
   },
   {
    "fieldname": "source_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Source Warehouse Address",
    "read_only": 1
   },
@@ -336,7 +336,7 @@
   },
   {
    "fieldname": "target_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Target Warehouse Address",
    "read_only": 1
   },
@@ -681,7 +681,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-22 16:01:13.749949",
+ "modified": "2024-03-22 16:23:13.683565",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

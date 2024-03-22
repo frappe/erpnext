@@ -351,7 +351,7 @@
   },
   {
    "fieldname": "shipping_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address",
    "read_only": 1
   },
@@ -1289,7 +1289,7 @@
   {
    "depends_on": "dispatch_address_name",
    "fieldname": "dispatch_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Dispatch Address",
    "print_hide": 1,
    "read_only": 1
@@ -1397,7 +1397,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-22 16:01:18.561700",
+ "modified": "2024-03-22 16:15:07.253135",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

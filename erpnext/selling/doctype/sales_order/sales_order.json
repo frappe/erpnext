@@ -450,7 +450,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "shipping_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Shipping Address",
@@ -1525,7 +1525,7 @@
    "allow_on_submit": 1,
    "depends_on": "dispatch_address_name",
    "fieldname": "dispatch_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Dispatch Address",
    "read_only": 1
   },
@@ -1657,7 +1657,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-22 16:01:12.705941",
+ "modified": "2024-03-22 16:15:04.884816",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

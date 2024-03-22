@@ -475,7 +475,7 @@
   },
   {
    "fieldname": "shipping_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address",
    "print_hide": 1,
    "read_only": 1
@@ -1563,7 +1563,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-22 16:01:14.633947",
+ "modified": "2024-03-22 16:15:08.561034",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
