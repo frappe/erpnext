@@ -822,6 +822,9 @@ def get_price_list_rate(args, item_doc, out=None):
 			if args.price_list and args.rate:
 				insert_item_price(args)
 
+			if not price_list_rate:
+				return out
+
 		out.price_list_rate = (
 			flt(price_list_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)
 		)
