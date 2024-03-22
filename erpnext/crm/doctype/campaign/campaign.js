@@ -11,7 +11,7 @@ frappe.ui.form.on("Campaign", {
 				frappe.boot.sysdefaults.campaign_naming_by == "Naming Series"
 			);
 		} else {
-			cur_frm.add_custom_button(
+			frm.add_custom_button(
 				__("View Leads"),
 				function () {
 					frappe.route_options = { source: "Campaign", campaign_name: frm.doc.name };

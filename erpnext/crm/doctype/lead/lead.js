@@ -89,32 +89,33 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	make_customer() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_customer",
-			frm: cur_frm,
+			frm: this.frm,
 		});
 	}
 
 	make_quotation() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_quotation",
-			frm: cur_frm,
+			frm: this.frm,
 		});
 	}
 
 	make_prospect() {
+		const me = this;
 		frappe.model.with_doctype("Prospect", function () {
 			let prospect = frappe.model.get_new_doc("Prospect");
-			prospect.company_name = cur_frm.doc.company_name;
-			prospect.no_of_employees = cur_frm.doc.no_of_employees;
-			prospect.industry = cur_frm.doc.industry;
-			prospect.market_segment = cur_frm.doc.market_segment;
-			prospect.territory = cur_frm.doc.territory;
-			prospect.fax = cur_frm.doc.fax;
-			prospect.website = cur_frm.doc.website;
-			prospect.prospect_owner = cur_frm.doc.lead_owner;
-			prospect.notes = cur_frm.doc.notes;
+			prospect.company_name = me.frm.doc.company_name;
+			prospect.no_of_employees = me.frm.doc.no_of_employees;
+			prospect.industry = me.frm.doc.industry;
+			prospect.market_segment = me.frm.doc.market_segment;
+			prospect.territory = me.frm.doc.territory;
+			prospect.fax = me.frm.doc.fax;
+			prospect.website = me.frm.doc.website;
+			prospect.prospect_owner = me.frm.doc.lead_owner;
+			prospect.notes = me.frm.doc.notes;
 
 			let leads_row = frappe.model.add_child(prospect, "leads");
-			leads_row.lead = cur_frm.doc.name;
+			leads_row.lead = me.frm.doc.name;
 
 			frappe.set_route("Form", "Prospect", prospect.name);
 		});
