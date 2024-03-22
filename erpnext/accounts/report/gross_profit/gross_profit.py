@@ -965,7 +965,7 @@ class GrossProfitGenerator(object):
 						& (sle.is_cancelled == 0)
 					)
 					.orderby(sle.item_code)
-					.orderby(sle.warehouse, sle.posting_date, sle.posting_time, sle.creation, order=Order.desc)
+					.orderby(sle.warehouse, sle.posting_datetime, sle.creation, order=Order.desc)
 					.run(as_dict=True)
 				)
 

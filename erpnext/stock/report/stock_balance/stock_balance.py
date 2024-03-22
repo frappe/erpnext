@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, TypedDict
 import frappe
 from frappe import _
 from frappe.query_builder import Order
-from frappe.query_builder.functions import Coalesce, CombineDatetime
+from frappe.query_builder.functions import Coalesce
 from frappe.utils import add_days, cint, date_diff, flt, getdate
 from frappe.utils.nestedset import get_descendants_of
 
@@ -283,7 +283,7 @@ class StockBalanceReport(object):
 				item_table.item_name,
 			)
 			.where((sle.docstatus < 2) & (sle.is_cancelled == 0))
-			.orderby(CombineDatetime(sle.posting_date, sle.posting_time))
+			.orderby(sle.posting_datetime)
 			.orderby(sle.creation)
 			.orderby(sle.actual_qty)
 		)
