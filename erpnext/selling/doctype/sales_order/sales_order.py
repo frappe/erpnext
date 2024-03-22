@@ -756,7 +756,7 @@ def get_list_context(context=None):
 @frappe.whitelist()
 def is_enable_cutoff_date_on_bulk_delivery_note_creation():
 	return frappe.db.get_single_value(
-		"Accounts Settings", "enable_cutoff_date_on_bulk_delivery_note_creation"
+		"Selling Settings", "enable_cutoff_date_on_bulk_delivery_note_creation"
 	)
 
 
