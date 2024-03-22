@@ -1643,52 +1643,30 @@ class AccountsController(TransactionBase):
 		return amount, base_amount
 
 	def make_discount_gl_entries(self, gl_entries):
-		if self.doctype == "Purchase Invoice":
-			enable_discount_accounting = cint(
-				frappe.db.get_single_value("Buying Settings", "enable_discount_accounting")
-			)
-		elif self.doctype == "Sales Invoice":
-			enable_discount_accounting = cint(
-				frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
-			)
-
-		if self.doctype == "Purchase Invoice":
-			dr_or_cr = "credit"
-			rev_dr_cr = "debit"
-			supplier_or_customer = self.supplier
-
-		else:
-			dr_or_cr = "debit"
-			rev_dr_cr = "credit"
-			supplier_or_customer = self.customer
+		enable_discount_accounting = cint(
+			frappe.db.get_single_value("Selling Settings", "enable_discount_accounting")
+		)
 
 		if enable_discount_accounting:
 			for item in self.get("items"):
 				if item.get("discount_amount") and item.get("discount_account"):
 					discount_amount = item.discount_amount * item.qty
-					if self.doctype == "Purchase Invoice":
-						income_or_expense_account = (
-							item.expense_account
-							if (not item.enable_deferred_expense or self.is_return)
-							else item.deferred_expense_account
-						)
-					else:
-						income_or_expense_account = (
-							item.income_account
-							if (not item.enable_deferred_revenue or self.is_return)
-							else item.deferred_revenue_account
-						)
+					income_account = (
+						item.income_account
+						if (not item.enable_deferred_revenue or self.is_return)
+						else item.deferred_revenue_account
+					)
 
 					account_currency = get_account_currency(item.discount_account)
 					gl_entries.append(
 						self.get_gl_dict(
 							{
 								"account": item.discount_account,
-								"against": supplier_or_customer,
-								dr_or_cr: flt(
+								"against": self.customer,
+								"debit": flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
-								dr_or_cr + "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
+								"debit_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
 								"cost_center": item.cost_center,
 								"project": item.project,
 							},
@@ -1697,17 +1675,16 @@ class AccountsController(TransactionBase):
 						)
 					)
 
-					account_currency = get_account_currency(income_or_expense_account)
+					account_currency = get_account_currency(income_account)
 					gl_entries.append(
 						self.get_gl_dict(
 							{
-								"account": income_or_expense_account,
-								"against": supplier_or_customer,
-								rev_dr_cr: flt(
+								"account": income_account,
+								"against": self.customer,
+								"credit": flt(
 									discount_amount * self.get("conversion_rate"), item.precision("discount_amount")
 								),
-								rev_dr_cr
-								+ "_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
+								"credit_in_account_currency": flt(discount_amount, item.precision("discount_amount")),
 								"cost_center": item.cost_center,
 								"project": item.project or self.project,
 							},
@@ -1725,8 +1702,8 @@ class AccountsController(TransactionBase):
 				self.get_gl_dict(
 					{
 						"account": self.additional_discount_account,
-						"against": supplier_or_customer,
-						dr_or_cr: self.base_discount_amount,
+						"against": self.customer,
+						"debit": self.base_discount_amount,
 						"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
 					},
 					item=self,
