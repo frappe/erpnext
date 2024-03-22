@@ -194,7 +194,7 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	add_custom_button_to_return_components: function (frm) {
-		if (frm.doc.docstatus === 1 && in_list(["Closed", "Completed"], frm.doc.status)) {
+		if (frm.doc.docstatus === 1 && ["Closed", "Completed"].includes(frm.doc.status)) {
 			let non_consumed_items = frm.doc.required_items.filter((d) => {
 				return flt(d.consumed_qty) < flt(d.transferred_qty - d.returned_qty);
 			});
@@ -594,7 +594,7 @@ erpnext.work_order = {
 			);
 		}
 
-		if (doc.docstatus === 1 && !in_list(["Closed", "Completed"], doc.status)) {
+		if (doc.docstatus === 1 && !["Closed", "Completed"].includes(doc.status)) {
 			if (doc.status != "Stopped" && doc.status != "Completed") {
 				frm.add_custom_button(
 					__("Stop"),

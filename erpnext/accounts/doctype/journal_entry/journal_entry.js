@@ -171,7 +171,7 @@ frappe.ui.form.on("Journal Entry", {
 			!(frm.doc.accounts || []).length ||
 			((frm.doc.accounts || []).length === 1 && !frm.doc.accounts[0].account)
 		) {
-			if (in_list(["Bank Entry", "Cash Entry"], frm.doc.voucher_type)) {
+			if (["Bank Entry", "Cash Entry"].includes(frm.doc.voucher_type)) {
 				return frappe.call({
 					type: "GET",
 					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
@@ -283,7 +283,7 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				filters: [[jvd.reference_type, "docstatus", "=", 1]],
 			};
 
-			if (in_list(["Sales Invoice", "Purchase Invoice"], jvd.reference_type)) {
+			if (["Sales Invoice", "Purchase Invoice"].includes(jvd.reference_type)) {
 				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
 				// Filter by cost center
 				if (jvd.cost_center) {
@@ -295,7 +295,7 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
 			}
 
-			if (in_list(["Sales Order", "Purchase Order"], jvd.reference_type)) {
+			if (["Sales Order", "Purchase Order"].includes(jvd.reference_type)) {
 				// party_type and party mandatory
 				frappe.model.validate_missing(jvd, "party_type");
 				frappe.model.validate_missing(jvd, "party");

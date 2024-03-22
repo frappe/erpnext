@@ -14,10 +14,10 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 	if (!args) {
 		if (
 			(frm.doctype != "Purchase Order" && frm.doc.customer) ||
-			(frm.doc.party_name && in_list(["Quotation", "Opportunity"], frm.doc.doctype))
+			(frm.doc.party_name && ["Quotation", "Opportunity"].includes(frm.doc.doctype))
 		) {
 			let party_type = "Customer";
-			if (frm.doc.quotation_to && in_list(["Lead", "Prospect"], frm.doc.quotation_to)) {
+			if (frm.doc.quotation_to && ["Lead", "Prospect"].includes(frm.doc.quotation_to)) {
 				party_type = frm.doc.quotation_to;
 			}
 
