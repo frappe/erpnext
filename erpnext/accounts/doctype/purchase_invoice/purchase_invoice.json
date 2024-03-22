@@ -443,7 +443,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "read_only": 1
   },
@@ -489,7 +489,7 @@
   },
   {
    "fieldname": "shipping_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address",
    "print_hide": 1,
    "read_only": 1
@@ -1363,7 +1363,7 @@
   },
   {
    "fieldname": "billing_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Billing Address",
    "read_only": 1
   },
@@ -1638,7 +1638,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 15:57:00.736868",
+ "modified": "2024-03-22 16:01:15.970626",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

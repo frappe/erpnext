@@ -408,7 +408,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Billing Address",
    "read_only": 1
   },
@@ -420,7 +420,7 @@
   },
   {
    "fieldname": "company_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Company Address",
    "read_only": 1
   },
@@ -1397,7 +1397,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 16:05:02.854990",
+ "modified": "2024-03-22 16:01:18.561700",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

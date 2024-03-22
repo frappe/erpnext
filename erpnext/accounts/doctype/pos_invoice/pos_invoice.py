@@ -47,7 +47,7 @@ class POSInvoice(SalesInvoice):
 
 		account_for_change_amount: DF.Link | None
 		additional_discount_percentage: DF.Float
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		advances: DF.Table[SalesInvoiceAdvance]
 		against_income_account: DF.SmallText | None
 		allocate_advances_automatically: DF.Check
@@ -72,7 +72,7 @@ class POSInvoice(SalesInvoice):
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
-		company_address_display: DF.SmallText | None
+		company_address_display: DF.TextEditor | None
 		consolidated_invoice: DF.Link | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None

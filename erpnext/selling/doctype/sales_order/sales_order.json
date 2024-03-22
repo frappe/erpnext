@@ -369,7 +369,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Address",
@@ -415,7 +415,7 @@
   },
   {
    "fieldname": "company_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Company Address",
@@ -1657,7 +1657,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 16:04:43.627183",
+ "modified": "2024-03-22 16:01:12.705941",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

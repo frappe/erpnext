@@ -265,7 +265,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "oldfieldname": "customer_address",
    "oldfieldtype": "Small Text",
@@ -965,7 +965,7 @@
   },
   {
    "fieldname": "company_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Company Address",
    "read_only": 1
   },
@@ -1073,7 +1073,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 16:04:21.567847",
+ "modified": "2024-03-22 16:01:17.601728",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

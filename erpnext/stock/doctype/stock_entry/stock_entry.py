@@ -85,7 +85,7 @@ class StockEntry(StockController):
 
 		add_to_transit: DF.Check
 		additional_costs: DF.Table[LandedCostTaxesandCharges]
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		apply_putaway_rule: DF.Check
 		bom_no: DF.Link | None

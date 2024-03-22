@@ -464,7 +464,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address"
   },
   {
@@ -681,7 +681,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-12 11:56:58.644882",
+ "modified": "2024-03-22 16:01:13.749949",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

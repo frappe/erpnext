@@ -182,7 +182,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Supplier Address Details",
    "read_only": 1
   },
@@ -230,7 +230,7 @@
   },
   {
    "fieldname": "shipping_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address Details",
    "print_hide": 1,
    "read_only": 1
@@ -243,7 +243,7 @@
   },
   {
    "fieldname": "billing_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Billing Address Details",
    "read_only": 1
   },
@@ -454,7 +454,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-03 20:56:04.670380",
+ "modified": "2024-03-22 16:01:14.143770",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",

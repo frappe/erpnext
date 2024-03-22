@@ -36,10 +36,10 @@ class SubcontractingOrder(SubcontractingController):
 		)
 
 		additional_costs: DF.Table[LandedCostTaxesandCharges]
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		billing_address: DF.Link | None
-		billing_address_display: DF.SmallText | None
+		billing_address_display: DF.TextEditor | None
 		company: DF.Link
 		contact_display: DF.SmallText | None
 		contact_email: DF.SmallText | None
@@ -59,7 +59,7 @@ class SubcontractingOrder(SubcontractingController):
 		set_reserve_warehouse: DF.Link | None
 		set_warehouse: DF.Link | None
 		shipping_address: DF.Link | None
-		shipping_address_display: DF.SmallText | None
+		shipping_address_display: DF.TextEditor | None
 		status: DF.Literal[
 			"Draft",
 			"Open",

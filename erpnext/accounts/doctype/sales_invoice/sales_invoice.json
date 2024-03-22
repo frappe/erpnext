@@ -495,7 +495,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Address",
@@ -584,7 +584,7 @@
   },
   {
    "fieldname": "company_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Company Address",

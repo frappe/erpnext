@@ -18,7 +18,7 @@ class WarrantyClaim(TransactionBase):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amc_expiry_date: DF.Date | None
 		amended_from: DF.Link | None
 		company: DF.Link
