@@ -2170,7 +2170,8 @@
    "fieldname": "update_outstanding_for_self",
    "fieldtype": "Check",
    "label": "Update Outstanding for Self",
-   "no_copy": 1
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2183,7 +2184,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-03-20 16:02:52.237732",
+ "modified": "2024-03-22 17:50:34.395602",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
