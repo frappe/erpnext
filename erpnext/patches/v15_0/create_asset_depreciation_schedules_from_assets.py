@@ -138,7 +138,7 @@ def get_asset_depreciation_schedules_map():
 
 	# If the column exists, include it in the select statement
 	if finance_book_id:
-		columns_to_select.append(ds.daily_prorata_based)
+		columns_to_select.append(ds.finance_book_id)
 
 	records = (
 		frappe.qb.from_(ds)
