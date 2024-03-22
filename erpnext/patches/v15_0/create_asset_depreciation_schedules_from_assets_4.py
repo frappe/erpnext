@@ -90,27 +90,37 @@ def group_records_by_asset_name(records):
 def get_asset_finance_books_map():
 	afb = frappe.qb.DocType("Asset Finance Book")
 	asset = frappe.qb.DocType("Asset")
+	daily_prorata_based = frappe.db.sql(f"SHOW COLUMNS FROM `tabAsset Finance Book` LIKE 'daily_prorata_based'")
+	shift_based = frappe.db.sql(f"SHOW COLUMNS FROM `tabAsset Finance Book` LIKE 'shift_based'")
+	
+	# Initialize the list of columns to select
+	columns_to_select = [
+		asset.name.as_("asset_name"),
+		afb.finance_book,
+		afb.idx,
+		afb.depreciation_method,
+		afb.total_number_of_depreciations,
+		afb.frequency_of_depreciation,
+		afb.rate_of_depreciation,
+		afb.expected_value_after_useful_life,
+	]
+
+	# If the column exists, include it in the select statement
+	if daily_prorata_based:
+		columns_to_select.append(afb.daily_prorata_based)
+
+	if shift_based:
+		columns_to_select.append(afb.shift_based)
 
 	records = (
 		frappe.qb.from_(afb)
 		.join(asset)
 		.on(afb.parent == asset.name)
-		.select(
-			asset.name.as_("asset_name"),
-			afb.finance_book,
-			afb.idx,
-			afb.depreciation_method,
-			afb.total_number_of_depreciations,
-			afb.frequency_of_depreciation,
-			afb.rate_of_depreciation,
-			afb.expected_value_after_useful_life,
-			afb.daily_prorata_based,
-			afb.shift_based,
-		)
+		.select(*columns_to_select)
 		.where(asset.docstatus < 2)
 		.orderby(afb.idx)
 	).run(as_dict=True)
-
+	
 	asset_finance_books_map = group_records_by_asset_name(records)
 
 	return asset_finance_books_map
@@ -119,16 +129,23 @@ def get_asset_finance_books_map():
 def get_asset_depreciation_schedules_map():
 	ds = frappe.qb.DocType("Depreciation Schedule")
 	asset = frappe.qb.DocType("Asset")
+	finance_book_id = frappe.db.sql(f"SHOW COLUMNS FROM `tabDepreciation Schedule` LIKE 'finance_book_id'")
+	
+	# Initialize the list of columns to select
+	columns_to_select = [
+		asset.name.as_("asset_name"),
+		ds.name,
+	]
+
+	# If the column exists, include it in the select statement
+	if finance_book_id:
+		columns_to_select.append(ds.daily_prorata_based)
 
 	records = (
 		frappe.qb.from_(ds)
 		.join(asset)
 		.on(ds.parent == asset.name)
-		.select(
-			asset.name.as_("asset_name"),
-			ds.name,
-			ds.finance_book_id,
-		)
+		.select(*columns_to_select)
 		.where(asset.docstatus < 2)
 		.orderby(ds.idx)
 	).run(as_dict=True)
