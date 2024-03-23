@@ -276,7 +276,7 @@ def get_stock_ledger_entries(filters, items):
 		frappe.qb.from_(sle)
 		.select(
 			sle.item_code,
-			CombineDatetime(sle.posting_date, sle.posting_time).as_("date"),
+			sle.posting_datetime.as_("date"),
 			sle.warehouse,
 			sle.posting_date,
 			sle.posting_time,

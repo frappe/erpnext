@@ -24,10 +24,11 @@ WEBITEM_PRICE_TESTS = (
 	"test_website_item_price_for_guest_user",
 )
 
+from frappe.tests.utils import FrappeTestCase
 
-class TestWebsiteItem(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
+
+class TestWebsiteItem(FrappeTestCase):
+	def setUp(self):
 		setup_e_commerce_settings(
 			{
 				"company": "_Test Company",
@@ -37,11 +38,6 @@ class TestWebsiteItem(unittest.TestCase):
 			}
 		)
 
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.rollback()
-
-	def setUp(self):
 		if self._testMethodName in WEBITEM_DESK_TESTS:
 			make_item(
 				"Test Web Item",
@@ -74,6 +70,9 @@ class TestWebsiteItem(unittest.TestCase):
 				applicable_for="Customer",
 				customer="_Test Customer",
 			)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_index_creation(self):
 		"Check if index is getting created in db."

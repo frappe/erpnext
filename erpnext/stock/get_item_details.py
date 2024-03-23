@@ -854,10 +854,14 @@ def get_price_list_rate(args, item_doc, out=None):
 			price_list_rate = get_price_list_rate_for(args, item_doc.variant_of)
 
 		# insert in database
-		if price_list_rate is None:
+		if price_list_rate is None or frappe.db.get_single_value(
+			"Stock Settings", "update_existing_price_list_rate"
+		):
 			if args.price_list and args.rate:
 				insert_item_price(args)
-			return out
+
+			if not price_list_rate:
+				return out
 
 		out.price_list_rate = (
 			flt(price_list_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)
