@@ -5,7 +5,7 @@ def execute():
 	frappe.db.sql(
 		"""
 		UPDATE `tabStock Ledger Entry`
-			SET posting_datetime = timestamp(posting_date, posting_time)
+			SET posting_datetime = DATE_FORMAT(timestamp(posting_date, posting_time), '%Y-%m-%d %H:%i:%s')
 	"""
 	)
 
