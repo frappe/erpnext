@@ -47,6 +47,8 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 	def tearDown(self):
 		disable_dimension_filter()
 		disable_dimension()
+		frappe.flags.accounting_dimensions_details = None
+		frappe.flags.dimension_filter_map = None
 
 		for si in self.invoice_list:
 			si.load_from_db()

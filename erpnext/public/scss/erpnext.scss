@@ -548,3 +548,7 @@ body[data-route="pos"] {
 	align-items: center;
 	justify-content: center;
 }
+
+.frappe-control[data-fieldname="other_charges_calculation"] .ql-editor {
+	white-space: normal;
+}

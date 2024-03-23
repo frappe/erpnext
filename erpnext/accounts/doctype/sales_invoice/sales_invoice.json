@@ -947,7 +947,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Taxes and Charges Calculation",
@@ -2187,7 +2187,8 @@
    "fieldname": "update_outstanding_for_self",
    "fieldtype": "Check",
    "label": "Update Outstanding for Self",
-   "no_copy": 1
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2200,7 +2201,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-03-13 16:42:18.153555",
+ "modified": "2024-03-22 17:50:34.395602",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

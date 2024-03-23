@@ -131,17 +131,17 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 		if (doc.docstatus == 1 && doc.outstanding_amount != 0 && !doc.on_hold) {
 			this.frm.add_custom_button(__("Payment"), () => this.make_payment_entry(), __("Create"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Create"));
+			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
 		if (!doc.is_return && doc.docstatus == 1) {
 			if (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				cur_frm.add_custom_button(__("Return / Debit Note"), this.make_debit_note, __("Create"));
+				this.frm.add_custom_button(__("Return / Debit Note"), this.make_debit_note, __("Create"));
 			}
 		}
 
 		if (doc.outstanding_amount > 0 && !cint(doc.is_return) && !doc.on_hold) {
-			cur_frm.add_custom_button(
+			this.frm.add_custom_button(
 				__("Payment Request"),
 				function () {
 					me.make_payment_request();
@@ -462,7 +462,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 	make_debit_note() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note",
-			frm: cur_frm,
+			frm: this.frm,
 		});
 	}
 };

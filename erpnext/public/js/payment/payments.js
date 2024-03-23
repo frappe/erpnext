@@ -218,7 +218,7 @@ erpnext.payments = class payments extends erpnext.stock.StockController {
 
 	update_paid_amount(update_write_off) {
 		var me = this;
-		if (in_list(["change_amount", "write_off_amount"], this.idx)) {
+		if (["change_amount", "write_off_amount"].includes(this.idx)) {
 			var value = me.selected_mode.val();
 			if (me.idx == "change_amount") {
 				me.change_amount(value);

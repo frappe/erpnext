@@ -66,6 +66,7 @@ class SalesOrder(SellingController):
 		additional_discount_percentage: DF.Float
 		address_display: DF.SmallText | None
 		advance_paid: DF.Currency
+		advance_payment_status: DF.Literal["Not Requested", "Requested", "Partially Paid", "Fully Paid"]
 		amended_from: DF.Link | None
 		amount_eligible_for_commission: DF.Currency
 		apply_discount_on: DF.Literal["", "Grand Total", "Net Total"]
@@ -122,7 +123,7 @@ class SalesOrder(SellingController):
 		naming_series: DF.Literal["SAL-ORD-.YYYY.-"]
 		net_total: DF.Currency
 		order_type: DF.Literal["", "Sales", "Maintenance", "Shopping Cart"]
-		other_charges_calculation: DF.LongText | None
+		other_charges_calculation: DF.TextEditor | None
 		packed_items: DF.Table[PackedItem]
 		party_account_currency: DF.Link | None
 		payment_schedule: DF.Table[PaymentSchedule]
@@ -155,6 +156,7 @@ class SalesOrder(SellingController):
 			"",
 			"Draft",
 			"On Hold",
+			"To Pay",
 			"To Deliver and Bill",
 			"To Bill",
 			"To Deliver",
@@ -751,6 +753,13 @@ def get_list_context(context=None):
 	)
 
 	return list_context
+
+
+@frappe.whitelist()
+def is_enable_cutoff_date_on_bulk_delivery_note_creation():
+	return frappe.db.get_single_value(
+		"Selling Settings", "enable_cutoff_date_on_bulk_delivery_note_creation"
+	)
 
 
 @frappe.whitelist()

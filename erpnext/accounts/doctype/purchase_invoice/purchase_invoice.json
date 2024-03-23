@@ -760,7 +760,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1638,7 +1638,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-11 14:46:30.298184",
+ "modified": "2024-03-20 15:57:00.736868",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
