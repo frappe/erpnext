@@ -90,6 +90,7 @@
   "section_break_49",
   "apply_discount_on",
   "base_discount_amount",
+  "coupon_code",
   "is_cash_or_non_trade_discount",
   "additional_discount_account",
   "column_break_51",
@@ -2172,6 +2173,12 @@
    "fieldtype": "Check",
    "label": "Don't Create Loyalty Points",
    "no_copy": 1
+  },
+  {
+   "fieldname": "coupon_code",
+   "fieldtype": "Link",
+   "label": "Coupon Code",
+   "options": "Coupon Code"
   },
   {
    "default": "1",

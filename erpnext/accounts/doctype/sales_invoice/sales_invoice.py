@@ -16,6 +16,10 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
 )
+from erpnext.accounts.doctype.pricing_rule.utils import (
+	update_coupon_code_count,
+	validate_coupon_code,
+)
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
@@ -106,6 +110,7 @@ class SalesInvoice(SellingController):
 		contact_person: DF.Link | None
 		conversion_rate: DF.Float
 		cost_center: DF.Link | None
+		coupon_code: DF.Link | None
 		currency: DF.Link
 		customer: DF.Link | None
 		customer_address: DF.Link | None
@@ -294,6 +299,10 @@ class SalesInvoice(SellingController):
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
 		)
 
+		# Validating coupon code
+		if self.coupon_code:
+			validate_coupon_code(self.coupon_code)
+
 		if cint(self.is_pos):
 			self.validate_pos()
 
@@ -473,6 +482,9 @@ class SalesInvoice(SellingController):
 			self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
+		if self.coupon_code:
+			update_coupon_code_count(self.coupon_code, "used")
+
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if (
 			not self.is_return
@@ -562,6 +574,9 @@ class SalesInvoice(SellingController):
 
 		self.db_set("status", "Cancelled")
 		self.db_set("repost_required", 0)
+
+		if self.coupon_code:
+			update_coupon_code_count(self.coupon_code, "cancelled")
 
 		if (
 			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction"
