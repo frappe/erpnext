@@ -380,6 +380,12 @@ class AccountsController(TransactionBase):
 		for bundle in bundles:
 			frappe.delete_doc("Serial and Batch Bundle", bundle.name)
 
+		batches = frappe.get_all(
+			"Batch", filters={"reference_doctype": self.doctype, "reference_name": self.name}
+		)
+		for row in batches:
+			frappe.delete_doc("Batch", row.name)
+
 	def validate_return_against_account(self):
 		if (
 			self.doctype in ["Sales Invoice", "Purchase Invoice"] and self.is_return and self.return_against
