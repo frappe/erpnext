@@ -1081,7 +1081,9 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			cint(frappe.user_defaults?.use_serial_batch_fields) === 1
 		) {
 			this.frm.doc.items.forEach((item) => {
-				frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
+				if (!item.serial_and_batch_bundle) {
+					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
+				}
 			});
 		}
 	}
