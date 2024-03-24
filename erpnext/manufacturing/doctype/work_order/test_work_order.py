@@ -1207,6 +1207,51 @@ class TestWorkOrder(FrappeTestCase):
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
 
+	@change_settings("Manufacturing Settings", {"make_serial_no_batch_from_work_order": 1})
+	def test_auto_serial_no_batch_creation(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+
+		fg_item = frappe.generate_hash(length=20)
+		child_item = frappe.generate_hash(length=20)
+
+		bom_tree = {fg_item: {child_item: {}}}
+
+		create_nested_bom(bom_tree, prefix="")
+
+		item = frappe.get_doc("Item", fg_item)
+		item.update(
+			{
+				"has_serial_no": 1,
+				"has_batch_no": 1,
+				"serial_no_series": f"SN-TEST-{item.name}.#####",
+				"create_new_batch": 1,
+				"batch_number_series": f"BATCH-TEST-{item.name}.#####",
+			}
+		)
+		item.save()
+
+		try:
+			wo_order = make_wo_order_test_record(item=fg_item, batch_size=5, qty=10, skip_transfer=True)
+			serial_nos = self.get_serial_nos_for_fg(wo_order.name)
+
+			stock_entry = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 10))
+			stock_entry.set_work_order_details()
+			stock_entry.set_serial_no_batch_for_finished_good()
+			for row in stock_entry.items:
+				if row.item_code == fg_item:
+					self.assertTrue(row.serial_and_batch_bundle)
+					self.assertEqual(
+						sorted(get_serial_nos_from_bundle(row.serial_and_batch_bundle)), sorted(serial_nos)
+					)
+
+					sn_doc = frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle)
+					for row in sn_doc.entries:
+						self.assertTrue(row.serial_no)
+						self.assertTrue(row.batch_no)
+
+		except frappe.MandatoryError:
+			self.fail("Batch generation causing failing in Work Order")
+
 	def get_serial_nos_for_fg(self, work_order):
 		serial_nos = []
 		for row in frappe.get_all("Serial No", filters={"work_order": work_order}):
@@ -2269,6 +2314,7 @@ def make_wo_order_test_record(**args):
 	wo_order.planned_start_date = args.planned_start_date or now()
 	wo_order.transfer_material_against = args.transfer_material_against or "Work Order"
 	wo_order.from_wip_warehouse = args.from_wip_warehouse or 0
+	wo_order.batch_size = args.batch_size or 0
 
 	if args.source_warehouse:
 		for item in wo_order.get("required_items"):
