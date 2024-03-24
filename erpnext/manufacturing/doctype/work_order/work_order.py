@@ -536,6 +536,12 @@ class WorkOrder(Document):
 			"Item", self.production_item, ["serial_no_series", "item_name", "description"], as_dict=1
 		)
 
+		batches = []
+		if self.has_batch_no:
+			batches = frappe.get_all(
+				"Batch", filters={"reference_name": self.name}, order_by="creation", pluck="name"
+			)
+
 		serial_nos = []
 		if item_details.serial_no_series:
 			serial_nos = get_available_serial_nos(item_details.serial_no_series, self.qty)
@@ -556,10 +562,20 @@ class WorkOrder(Document):
 			"description",
 			"status",
 			"work_order",
+			"batch_no",
 		]
 
 		serial_nos_details = []
+		index = 0
 		for serial_no in serial_nos:
+			index += 1
+			batch_no = None
+			if batches and self.batch_size:
+				batch_no = batches[0]
+
+				if index % self.batch_size == 0:
+					batches.remove(batch_no)
+
 			serial_nos_details.append(
 				(
 					serial_no,
@@ -574,6 +590,7 @@ class WorkOrder(Document):
 					item_details.description,
 					"Inactive",
 					self.name,
+					batch_no,
 				)
 			)
 

@@ -2541,6 +2541,7 @@ class StockEntry(StockController):
 					)
 
 					d.serial_and_batch_bundle = id
+					d.use_serial_batch_fields = 0
 
 	def get_available_serial_nos(self) -> List[str]:
 		serial_nos = []
