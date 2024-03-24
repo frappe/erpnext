@@ -246,6 +246,8 @@ class DeprecatedBatchNoValuation:
 		if self.sle.serial_and_batch_bundle:
 			query = query.where(bundle.name != self.sle.serial_and_batch_bundle)
 
+		query = query.where(bundle.voucher_type != "Pick List")
+
 		for d in query.run(as_dict=True):
 			self.non_batchwise_balance_value += flt(d.batch_value)
 			self.non_batchwise_balance_qty += flt(d.batch_qty)
