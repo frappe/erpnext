@@ -1333,7 +1333,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	change_form_labels(company_currency) {
-		var me = this;
+		let me = this;
 
 		this.frm.set_currency_labels(["base_total", "base_net_total", "base_total_taxes_and_charges",
 			"base_discount_amount", "base_grand_total", "base_rounded_total", "base_in_words",
@@ -1351,11 +1351,11 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.set_currency_labels(["outstanding_amount", "total_advance"],
 			this.frm.doc.party_account_currency);
 
-		cur_frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
+		this.frm.set_df_property("conversion_rate", "description", "1 " + this.frm.doc.currency
 			+ " = [?] " + company_currency);
 
 		if(this.frm.doc.price_list_currency && this.frm.doc.price_list_currency!=company_currency) {
-			cur_frm.set_df_property("plc_conversion_rate", "description", "1 "
+			this.frm.set_df_property("plc_conversion_rate", "description", "1 "
 				+ this.frm.doc.price_list_currency + " = [?] " + company_currency);
 		}
 
@@ -1370,14 +1370,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.frm.toggle_display(["plc_conversion_rate", "price_list_currency"],
 			this.frm.doc.price_list_currency != company_currency);
 
-		var show = cint(cur_frm.doc.discount_amount) ||
-				((cur_frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
+		let show = cint(this.frm.doc.discount_amount) ||
+				((this.frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
 
 		if(frappe.meta.get_docfield(cur_frm.doctype, "net_total"))
-			cur_frm.toggle_display("net_total", show);
+			this.frm.toggle_display("net_total", show);
 
 		if(frappe.meta.get_docfield(cur_frm.doctype, "base_net_total"))
-			cur_frm.toggle_display("base_net_total", (show && (me.frm.doc.currency != company_currency)));
+			this.frm.toggle_display("base_net_total", (show && (me.frm.doc.currency != company_currency)));
 
 	}
 
