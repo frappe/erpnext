@@ -93,7 +93,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hidden": 1,
    "label": "Address",
    "read_only": 1
@@ -231,7 +231,11 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-06-03 16:31:08.386961",
+=======
+ "modified": "2024-03-22 16:01:13.513355",
+>>>>>>> e055147849 (fix: address_display, text -> text editor (#40621))
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Installation Note",
