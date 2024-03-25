@@ -159,7 +159,7 @@ def get_invoice_summary(items, taxes):
 						rate=reference_row.tax_amount,
 						qty=1.0,
 						amount=reference_row.tax_amount,
-						stock_uom=frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos"),
+						stock_uom=frappe.db.get_single_value("Stock Settings", "stock_uom") or "Nos",
 						tax_rate=tax.rate,
 						tax_amount=(reference_row.tax_amount * tax.rate) / 100,
 						net_amount=reference_row.tax_amount,

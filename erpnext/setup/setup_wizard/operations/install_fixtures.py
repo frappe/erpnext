@@ -474,7 +474,7 @@ def update_stock_settings():
 	stock_settings.default_warehouse = frappe.db.get_value(
 		"Warehouse", {"warehouse_name": _("Stores")}
 	)
-	stock_settings.stock_uom = _("Nos")
+	stock_settings.stock_uom = "Nos"
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
 	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
