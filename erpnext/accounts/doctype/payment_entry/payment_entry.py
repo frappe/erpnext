@@ -30,7 +30,7 @@ from erpnext.accounts.general_ledger import (
 	make_reverse_gl_entries,
 	process_gl_map,
 )
-from erpnext.accounts.party import get_party_account, set_contact_details
+from erpnext.accounts.party import complete_contact_details, get_party_account, set_contact_details
 from erpnext.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	get_account_currency,
@@ -446,6 +446,8 @@ class PaymentEntry(AccountsController):
 		if self.party:
 			if not self.contact_person:
 				set_contact_details(self, party=frappe._dict({"name": self.party}), party_type=self.party_type)
+			else:
+				complete_contact_details(self)
 			if not self.party_balance:
 				self.party_balance = get_balance_on(
 					party_type=self.party_type, party=self.party, date=self.posting_date, company=self.company
@@ -2295,7 +2297,7 @@ def get_payment_entry(
 	pe.party_type = party_type
 	pe.party = doc.get(scrub(party_type))
 	pe.contact_person = doc.get("contact_person")
-	pe.contact_email = doc.get("contact_email")
+	complete_contact_details(pe)
 	pe.ensure_supplier_is_not_blocked()
 
 	pe.paid_from = party_account if payment_type == "Receive" else bank.account
