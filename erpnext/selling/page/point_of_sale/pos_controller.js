@@ -577,8 +577,8 @@ erpnext.PointOfSale.Controller = class {
 
 				if (rate == undefined || rate == 0) {
 					frappe.show_alert({
-						message: __('Price is not set for the item.'),
-						indicator: 'orange'
+						message: __("Price is not set for the item."),
+						indicator: "orange"
 					});
 					frappe.utils.play_sound("error");
 					return;
