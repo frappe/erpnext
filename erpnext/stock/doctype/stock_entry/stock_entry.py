@@ -85,7 +85,7 @@ class StockEntry(StockController):
 
 		add_to_transit: DF.Check
 		additional_costs: DF.Table[LandedCostTaxesandCharges]
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		apply_putaway_rule: DF.Check
 		bom_no: DF.Link | None
@@ -127,14 +127,14 @@ class StockEntry(StockController):
 		scan_barcode: DF.Data | None
 		select_print_heading: DF.Link | None
 		set_posting_time: DF.Check
-		source_address_display: DF.SmallText | None
+		source_address_display: DF.TextEditor | None
 		source_warehouse_address: DF.Link | None
 		stock_entry_type: DF.Link
 		subcontracting_order: DF.Link | None
 		supplier: DF.Link | None
 		supplier_address: DF.Link | None
 		supplier_name: DF.Data | None
-		target_address_display: DF.SmallText | None
+		target_address_display: DF.TextEditor | None
 		target_warehouse_address: DF.Link | None
 		to_warehouse: DF.Link | None
 		total_additional_costs: DF.Currency
@@ -2541,6 +2541,7 @@ class StockEntry(StockController):
 					)
 
 					d.serial_and_batch_bundle = id
+					d.use_serial_batch_fields = 0
 
 	def get_available_serial_nos(self) -> List[str]:
 		serial_nos = []
@@ -2640,7 +2641,9 @@ def make_stock_in_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()
-		target.make_serial_and_batch_bundle_for_transfer()
+
+		if not frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
+			target.make_serial_and_batch_bundle_for_transfer()
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.t_warehouse = ""

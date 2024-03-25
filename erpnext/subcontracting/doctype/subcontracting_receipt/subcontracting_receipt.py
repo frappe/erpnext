@@ -33,13 +33,13 @@ class SubcontractingReceipt(SubcontractingController):
 		)
 
 		additional_costs: DF.Table[LandedCostTaxesandCharges]
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		auto_repeat: DF.Link | None
 		bill_date: DF.Date | None
 		bill_no: DF.Data | None
 		billing_address: DF.Link | None
-		billing_address_display: DF.SmallText | None
+		billing_address_display: DF.TextEditor | None
 		company: DF.Link
 		contact_display: DF.SmallText | None
 		contact_email: DF.SmallText | None
@@ -69,7 +69,7 @@ class SubcontractingReceipt(SubcontractingController):
 		set_posting_time: DF.Check
 		set_warehouse: DF.Link | None
 		shipping_address: DF.Link | None
-		shipping_address_display: DF.SmallText | None
+		shipping_address_display: DF.TextEditor | None
 		status: DF.Literal["", "Draft", "Completed", "Return", "Return Issued", "Cancelled", "Closed"]
 		supplied_items: DF.Table[SubcontractingReceiptSuppliedItem]
 		supplier: DF.Link
@@ -149,7 +149,9 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_prevdoc_status()
 		self.set_subcontracting_order_status()
 		self.set_consumed_qty_in_subcontract_order()
-		self.make_bundle_using_old_serial_batch_fields()
+
+		for table_name in ["items", "supplied_items"]:
+			self.make_bundle_using_old_serial_batch_fields(table_name)
 		self.update_stock_ledger()
 		self.make_gl_entries()
 		self.repost_future_sle_and_gle()

@@ -64,7 +64,7 @@ class SalesOrder(SellingController):
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
 
 		additional_discount_percentage: DF.Float
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		advance_paid: DF.Currency
 		advance_payment_status: DF.Literal["Not Requested", "Requested", "Partially Paid", "Fully Paid"]
 		amended_from: DF.Link | None
@@ -84,7 +84,7 @@ class SalesOrder(SellingController):
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
-		company_address_display: DF.SmallText | None
+		company_address_display: DF.TextEditor | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
 		contact_mobile: DF.SmallText | None
@@ -104,7 +104,7 @@ class SalesOrder(SellingController):
 		]
 		disable_rounded_total: DF.Check
 		discount_amount: DF.Currency
-		dispatch_address: DF.SmallText | None
+		dispatch_address: DF.TextEditor | None
 		dispatch_address_name: DF.Link | None
 		from_date: DF.Date | None
 		grand_total: DF.Currency
@@ -147,7 +147,7 @@ class SalesOrder(SellingController):
 		select_print_heading: DF.Link | None
 		selling_price_list: DF.Link
 		set_warehouse: DF.Link | None
-		shipping_address: DF.SmallText | None
+		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		skip_delivery_note: DF.Check
@@ -753,6 +753,13 @@ def get_list_context(context=None):
 	)
 
 	return list_context
+
+
+@frappe.whitelist()
+def is_enable_cutoff_date_on_bulk_delivery_note_creation():
+	return frappe.db.get_single_value(
+		"Selling Settings", "enable_cutoff_date_on_bulk_delivery_note_creation"
+	)
 
 
 @frappe.whitelist()
