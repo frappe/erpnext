@@ -378,9 +378,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Email Campaign",
+   "label": "Campaign Run",
    "link_count": 0,
-   "link_to": "Email Campaign",
+   "link_to": "Campaign Run",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"

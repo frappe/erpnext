@@ -366,7 +366,7 @@ doc_events = {
 		"validate": ["erpnext.crm.utils.update_lead_phone_numbers"],
 	},
 	"Email Unsubscribe": {
-		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
+		"after_insert": "erpnext.crm.doctype.campaign_run.campaign_run.unsubscribe_recipient"
 	},
 	"Integration Request": {
 		"validate": "erpnext.accounts.doctype.payment_request.payment_request.validate_payment"
@@ -429,8 +429,8 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.send_project_status_email_to_users",
 		"erpnext.quality_management.doctype.quality_review.quality_review.review",
 		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status",
-		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts",
-		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
+		"erpnext.crm.doctype.campaign_run.campaign_run.send_communication_to_leads_or_contacts",
+		"erpnext.crm.doctype.campaign_run.campaign_run.set_campaign_run_status",
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
 		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
