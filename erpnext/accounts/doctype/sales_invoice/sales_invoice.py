@@ -77,7 +77,7 @@ class SalesInvoice(SellingController):
 		account_for_change_amount: DF.Link | None
 		additional_discount_account: DF.Link | None
 		additional_discount_percentage: DF.Float
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		advances: DF.Table[SalesInvoiceAdvance]
 		against_income_account: DF.SmallText | None
 		allocate_advances_automatically: DF.Check
@@ -102,7 +102,7 @@ class SalesInvoice(SellingController):
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
-		company_address_display: DF.SmallText | None
+		company_address_display: DF.TextEditor | None
 		company_tax_id: DF.Data | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
@@ -119,7 +119,7 @@ class SalesInvoice(SellingController):
 		debit_to: DF.Link
 		disable_rounded_total: DF.Check
 		discount_amount: DF.Currency
-		dispatch_address: DF.SmallText | None
+		dispatch_address: DF.TextEditor | None
 		dispatch_address_name: DF.Link | None
 		dont_create_loyalty_points: DF.Check
 		due_date: DF.Date | None
@@ -183,7 +183,7 @@ class SalesInvoice(SellingController):
 		set_posting_time: DF.Check
 		set_target_warehouse: DF.Link | None
 		set_warehouse: DF.Link | None
-		shipping_address: DF.SmallText | None
+		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		source: DF.Link | None

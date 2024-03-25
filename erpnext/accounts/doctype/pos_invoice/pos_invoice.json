@@ -420,7 +420,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "read_only": 1
   },
@@ -475,7 +475,7 @@
   },
   {
    "fieldname": "shipping_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address",
    "print_hide": 1,
    "read_only": 1
@@ -489,7 +489,7 @@
   },
   {
    "fieldname": "company_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hidden": 1,
    "label": "Company Address",
    "print_hide": 1,
@@ -1563,7 +1563,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 16:00:34.268756",
+ "modified": "2024-03-22 16:15:08.561034",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

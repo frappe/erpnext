@@ -311,7 +311,7 @@
   {
    "depends_on": "customer",
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "read_only": 1
   },
@@ -379,7 +379,7 @@
  "icon": "fa fa-bug",
  "idx": 1,
  "links": [],
- "modified": "2023-11-28 17:30:35.676410",
+ "modified": "2024-03-22 16:01:11.412114",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",
