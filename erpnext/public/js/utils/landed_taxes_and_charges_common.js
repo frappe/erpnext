@@ -17,6 +17,7 @@ erpnext.landed_cost_taxes_and_charges = {
 								],
 							],
 							company: frm.doc.company,
+							is_group: 0,
 						},
 					};
 				});
