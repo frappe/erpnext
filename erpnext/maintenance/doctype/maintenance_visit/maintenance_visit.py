@@ -10,8 +10,46 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 
 class MaintenanceVisit(TransactionBase):
+<<<<<<< HEAD
 	def get_feed(self):
 		return _("To {0}").format(self.customer_name)
+=======
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.maintenance.doctype.maintenance_visit_purpose.maintenance_visit_purpose import (
+			MaintenanceVisitPurpose,
+		)
+
+		address_display: DF.TextEditor | None
+		amended_from: DF.Link | None
+		company: DF.Link
+		completion_status: DF.Literal["", "Partially Completed", "Fully Completed"]
+		contact_display: DF.SmallText | None
+		contact_email: DF.Data | None
+		contact_mobile: DF.Data | None
+		contact_person: DF.Link | None
+		customer: DF.Link
+		customer_address: DF.Link | None
+		customer_feedback: DF.SmallText | None
+		customer_group: DF.Link | None
+		customer_name: DF.Data | None
+		maintenance_schedule: DF.Link | None
+		maintenance_schedule_detail: DF.Link | None
+		maintenance_type: DF.Literal["", "Scheduled", "Unscheduled", "Breakdown"]
+		mntc_date: DF.Date
+		mntc_time: DF.Time | None
+		naming_series: DF.Literal["MAT-MVS-.YYYY.-"]
+		purposes: DF.Table[MaintenanceVisitPurpose]
+		status: DF.Literal["", "Draft", "Cancelled", "Submitted"]
+		territory: DF.Link | None
+	# end: auto-generated types
+>>>>>>> e055147849 (fix: address_display, text -> text editor (#40621))
 
 	def validate_serial_no(self):
 		for d in self.get("purposes"):
