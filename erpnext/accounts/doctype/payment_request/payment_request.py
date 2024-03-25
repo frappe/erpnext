@@ -49,6 +49,7 @@ class PaymentRequest(Document):
 		cost_center: DF.Link | None
 		currency: DF.Link | None
 		email_to: DF.Data | None
+		failed_reason: DF.Data | None
 		grand_total: DF.Currency
 		iban: DF.ReadOnly | None
 		is_a_subscription: DF.Check
@@ -396,8 +397,10 @@ class PaymentRequest(Document):
 		if self.message:
 			return frappe.render_template(self.message, context)
 
-	def set_failed(self):
-		pass
+	def set_as_failed(self, reason=None):
+		self.db_set("status", "Failed")
+		if reason:
+			self.db_set("failed_reason", reason)
 
 	def set_as_cancelled(self):
 		self.db_set("status", "Cancelled")
