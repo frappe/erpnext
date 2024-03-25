@@ -891,7 +891,7 @@ def insert_item_price(args):
 				)
 
 
-def get_item_price(args, item_code, ignore_party=False):
+def get_item_price(args, item_code, ignore_party=False) -> list[dict]:
 	"""
 	Get name, price_list_rate from Item Price based on conditions
 	        Check if the desired qty is within the increment of the packing list.
@@ -929,7 +929,7 @@ def get_item_price(args, item_code, ignore_party=False):
 			& (IfNull(ip.valid_upto, "2500-12-31") >= args["transaction_date"])
 		)
 
-	return query.run()
+	return query.run(as_dict=True)
 
 
 def get_price_list_rate_for(args, item_code):
@@ -955,7 +955,7 @@ def get_price_list_rate_for(args, item_code):
 	price_list_rate = get_item_price(item_price_args, item_code)
 	if price_list_rate:
 		desired_qty = args.get("qty")
-		if desired_qty and check_packing_list(price_list_rate[0][0], desired_qty, item_code):
+		if desired_qty and check_packing_list(price_list_rate[0].name, desired_qty, item_code):
 			item_price_data = price_list_rate
 	else:
 		for field in ["customer", "supplier"]:
@@ -975,12 +975,12 @@ def get_price_list_rate_for(args, item_code):
 			item_price_data = general_price_list_rate
 
 	if item_price_data:
-		if item_price_data[0][2] == args.get("uom"):
-			return item_price_data[0][1]
+		if item_price_data[0].uom == args.get("uom"):
+			return item_price_data[0].price_list_rate
 		elif not args.get("price_list_uom_dependant"):
-			return flt(item_price_data[0][1] * flt(args.get("conversion_factor", 1)))
+			return flt(item_price_data[0].price_list_rate * flt(args.get("conversion_factor", 1)))
 		else:
-			return item_price_data[0][1]
+			return item_price_data[0].price_list_rate
 
 
 def check_packing_list(price_list_rate_name, desired_qty, item_code):
