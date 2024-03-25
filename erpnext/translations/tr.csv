@@ -7842,8 +7842,6 @@ Set the Item Code which will be used for billing the Clinical Procedure.,Klinik 
 Select an Item Group for the Clinical Procedure Item.,Klinik göz Öğesi için bir Öğe Grubu seçin.,
 Clinical Procedure Rate,Klinik çevre Oranı,
 Check this if the Clinical Procedure is billable and also set the rate.,Klinik bölümlerin faturalandırılabilir olup olmadığı kontrol edin ve maliyet de ayarı.,
-Check this if the Clinical Procedure utilises consumables. Click ,Klinik çevre sarf malzemelerini kullanansa bunu kontrol edin. Tıklayın,
- to know more,daha fazlasını bilmek,
 "You can also set the Medical Department for the template. After saving the document, an Item will automatically be created for billing this Clinical Procedure. You can then use this template while creating Clinical Procedures for Patients. Templates save you from filling up redundant data every single time. You can also create templates for other operations like Lab Tests, Therapy Sessions, etc.","Ayrıca şablon için Tıp Departmanını da ayarlayabilirsiniz. Belgeyi kaydettikten sonra, bu Klinik davanın faturalandırılması için otomatik olarak bir Öğe oluşturulacaktır. Daha sonra Hastalar için Klinik gözlemler oluştururken bu şablonu kullanabilirsiniz. Şablonlar sizi her fırsatta gereksiz verileri doldurmaktan kurtarır. Ayrıca Laboratuar Testleri, Terapi Oturumları vb. Gibi diğer yapılar için şablonlar oluşturabilirsiniz.",
 Descriptive Test Result,Tanımlayıcı Test Sonucu,
 Allow Blank,Boşluğa İzin Ver,
