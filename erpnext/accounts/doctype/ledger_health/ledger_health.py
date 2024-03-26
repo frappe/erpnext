@@ -16,6 +16,7 @@ class LedgerHealth(Document):
 
 		checked_on: DF.Datetime | None
 		debit_credit_mismatch: DF.Check
+		general_and_payment_ledger_mismatch: DF.Check
 		name: DF.Int | None
 		voucher_no: DF.Data | None
 		voucher_type: DF.Data | None
