@@ -16,8 +16,22 @@ frappe.query_reports["Profit and Loss Statement"]["filters"].push({
 	],
 	default: "Report",
 	reqd: 1,
+	on_change: function () {
+		let filter_based_on = frappe.query_reports.get_filter_value("selected_view");
+		frappe.query_reports.toggle_filter_display("report_view", filter_based_on === "Report");
+		frappe.query_reports.refresh();
+	},
 });
 
+frappe.query_reports["Profit and Loss Statement"]["filters"].push({
+	fieldname: "report_view",
+	label: __("Report View"),
+	fieldtype: "Select",
+	options: ["Horizontal", "Vertical"],
+	default: ["Vertical"],
+	reqd: 1,
+	depends_on: "eval:doc.selected_view == 'Report'",
+});
 frappe.query_reports["Profit and Loss Statement"]["filters"].push({
 	fieldname: "accumulated_values",
 	label: __("Accumulated Values"),

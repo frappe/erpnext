@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import cint, cstr, flt
 
 from erpnext.accounts.report.financial_statements import (
 	get_columns,
@@ -12,6 +12,135 @@ from erpnext.accounts.report.financial_statements import (
 	get_filtered_list_for_consolidated_report,
 	get_period_list,
 )
+
+
+def get_all_columns(periodicity, period_list, accumulated_values=1, company=None):
+	columns = [
+		{
+			"fieldname": "expense_account",
+			"label": _("Expense"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"width": 300,
+		}
+	]
+	if company:
+		columns.append(
+			{
+				"fieldname": "expense_currency",
+				"label": _("Currency"),
+				"fieldtype": "Link",
+				"options": "Currency",
+				"hidden": 1,
+			}
+		)
+	for period in period_list:
+		key_name = "expense_" + cstr(period.key)
+		columns.append(
+			{
+				"fieldname": key_name,
+				"label": period.label,
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 150,
+			}
+		)
+	columns.append(
+		{
+			"fieldname": "income_account",
+			"label": _("Income"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"width": 300,
+		}
+	)
+	if company:
+		columns.append(
+			{
+				"fieldname": "income_currency",
+				"label": _("Currency"),
+				"fieldtype": "Link",
+				"options": "Currency",
+				"hidden": 1,
+			}
+		)
+	for period in period_list:
+		key_name = "income_" + cstr(period.key)
+		columns.append(
+			{
+				"fieldname": key_name,
+				"label": period.label,
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 150,
+			}
+		)
+	if periodicity != "Yearly":
+		if not accumulated_values:
+			columns.append(
+				{
+					"fieldname": "total",
+					"label": _("Total"),
+					"fieldtype": "Currency",
+					"width": 150,
+					"options": "currency",
+				}
+			)
+	return columns
+
+
+def create_data(period_list, income, expense, income_indent, expense_indent):
+	row = frappe._dict({})
+	for period in period_list:
+		key_name = "expense_" + cstr(period.key)
+		row[key_name] = expense[period.key] if expense else ""
+		key_name = "income_" + cstr(period.key)
+		row[key_name] = income[period.key] if income else ""
+	row["income_account"] = income["account"] if income else ""
+	row["income_currency"] = income["currency"] if income else ""
+	row["income_indent"] = income_indent
+	row["expense_account"] = expense["account"] if expense else ""
+	row["expense_currency"] = expense["currency"] if expense else ""
+	row["expense_indent"] = expense_indent
+
+	return row
+
+
+def formated_data(income, expense, period_list):
+	new_data = []
+	i = 0
+	while i < len(income) - 1 or i < len(expense) - 1:
+		if i >= len(income) - 1:
+			income_indent = ""
+			expense_indent = (
+				"&nbsp" * cint(expense[i]["indent"]) * 3
+				if expense[i]["account"] != "Total Expense (Debit)"
+				else ""
+			)
+			d = create_data(period_list, None, expense[i], income_indent, expense_indent)
+		elif i >= len(expense) - 1:
+			income_indent = (
+				"&nbsp" * cint(income[i]["indent"]) * 3
+				if income[i]["account"] != "Total Income (Credit)"
+				else ""
+			)
+			expense_indent = ""
+			d = create_data(period_list, income[i], None, income_indent, expense_indent)
+		else:
+			income_indent = (
+				"&nbsp" * cint(income[i]["indent"]) * 3
+				if income[i]["account"] != "Total Income (Credit)"
+				else ""
+			)
+			expense_indent = (
+				"&nbsp" * cint(expense[i]["indent"]) * 3
+				if expense[i]["account"] != "Total Expense (Debit)"
+				else ""
+			)
+			d = create_data(period_list, income[i], expense[i], income_indent, expense_indent)
+		new_data.append(d)
+		i += 1
+	return new_data
 
 
 def execute(filters=None):
@@ -50,16 +179,34 @@ def execute(filters=None):
 	net_profit_loss = get_net_profit_loss(
 		income, expense, period_list, filters.company, filters.presentation_currency
 	)
-
+	new_data = formated_data(income, expense, period_list)
 	data = []
 	data.extend(income or [])
 	data.extend(expense or [])
 	if net_profit_loss:
+		row = frappe._dict({})
+		for period in period_list:
+			key_name = "expense_" + cstr(period.key)
+			row[key_name] = net_profit_loss[period.key]
+			key_name = "income_" + cstr(period.key)
+			row[key_name] = net_profit_loss[period.key]
+		row["income_account"] = net_profit_loss["account"]
+		row["expense_account"] = net_profit_loss["account"]
+		row["income_indent"] = ""
+		row["expense_indent"] = ""
+		new_data.append(row)
+
 		data.append(net_profit_loss)
 
-	columns = get_columns(
-		filters.periodicity, period_list, filters.accumulated_values, filters.company
-	)
+	if filters.report_view == "Horizontal":
+		columns = get_all_columns(
+			filters.periodicity, period_list, filters.accumulated_values, filters.company
+		)
+		data = new_data
+	else:
+		columns = get_columns(
+			filters.periodicity, period_list, filters.accumulated_values, filters.company
+		)
 
 	chart = get_chart_data(filters, columns, income, expense, net_profit_loss)
 
@@ -69,7 +216,6 @@ def execute(filters=None):
 	report_summary, primitive_summary = get_report_summary(
 		period_list, filters.periodicity, income, expense, net_profit_loss, currency, filters
 	)
-
 	return columns, data, None, chart, report_summary, primitive_summary
 
 
