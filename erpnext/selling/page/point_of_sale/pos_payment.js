@@ -586,6 +586,9 @@ erpnext.PointOfSale.Payment = class {
 		const currency = doc.currency;
 		const label = change ? __("Change") : __("To Be Paid");
 
+		doc.write_off_amount = 0
+		doc.base_write_off_amount = 0
+		
 		this.$totals.html(
 			`<div class="col">
 				<div class="total-label">${__("Grand Total")}</div>
@@ -599,9 +602,47 @@ erpnext.PointOfSale.Payment = class {
 			<div class="seperator-y"></div>
 			<div class="col">
 				<div class="total-label">${label}</div>
-				<div class="value">${format_currency(change || remaining, currency)}</div>
-			</div>`
+				<div class="value total_difference">${format_currency(change || remaining, currency)}</div>
+			</div>
+			<div class="seperator-y"></div>
+			<div class="col">
+				<div class="total-label">${__('Write Off')}</div>
+				<div class="value total_write_off">${format_currency(doc.write_off_amount, currency)}</div>
+			</div>
+			`
 		);
+		this.$totals.find('.total_difference').attr("contenteditable", remaining < 0 ? "true" : "false")
+		this.add_write_off_events(doc, remaining, change, currency)
+	}
+
+	add_write_off_events(doc, remaining, change, currency) {
+		let me = this;
+
+		this.$totals.find('.total_difference')
+		.on('focus', function() {
+			var range = document.createRange();
+			range.selectNodeContents(this);
+			var selection = window.getSelection();
+			selection.removeAllRanges();
+			selection.addRange(range);
+		})	
+		.on('focusout', function() {
+			let new_difference_value = flt($(this).text())
+			if (remaining < 0 && new_difference_value <= (-1*remaining) && new_difference_value >= 0){	
+				change = new_difference_value
+			}
+			$(this).text(format_currency(change, currency))
+			doc.write_off_amount = flt(remaining + change, precision("write_off_amount", doc))
+			doc.base_write_off_amount = flt(doc.write_off_amount * doc.conversion_rate,
+				precision("base_write_off_amount", doc));
+
+			me.$totals.find('.total_write_off').text(format_currency(doc.write_off_amount, currency))
+		})
+		.on('keypress', function(e) {
+			if(e.which == 13) {
+				$(this).blur();
+			}
+		})
 	}
 
 	toggle_component(show) {
