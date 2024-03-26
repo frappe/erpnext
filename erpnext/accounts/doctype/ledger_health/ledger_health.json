@@ -7,8 +7,9 @@
  "field_order": [
   "voucher_type",
   "voucher_no",
+  "checked_on",
   "debit_credit_mismatch",
-  "checked_on"
+  "general_and_payment_ledger_mismatch"
  ],
  "fields": [
   {
@@ -31,11 +32,17 @@
    "fieldname": "checked_on",
    "fieldtype": "Datetime",
    "label": "Checked On"
+  },
+  {
+   "default": "0",
+   "fieldname": "general_and_payment_ledger_mismatch",
+   "fieldtype": "Check",
+   "label": "General and Payment Ledger mismatch"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-26 17:54:47.662290",
+ "modified": "2024-03-26 19:59:41.180161",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Ledger Health",
