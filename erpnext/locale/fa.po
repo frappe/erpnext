@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-01-29 18:13+0053\n"
-"PO-Revision-Date: 2024-03-04 11:36\n"
+"PO-Revision-Date: 2024-03-11 14:08\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -7039,7 +7039,7 @@ msgstr "در طول فرآیند به روز رسانی خطایی رخ داد"
 
 #: stock/reorder_item.py:287
 msgid "An error occurred for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
-msgstr ""
+msgstr "هنگام ایجاد درخواست‌های مواد بر اساس سطح سفارش مجدد، برای موارد خاصی خطایی رخ داد. لطفا این مشکلات را اصلاح کنید:"
 
 #: accounts/doctype/budget/budget.py:232
 msgid "Annual"
@@ -8437,7 +8437,7 @@ msgstr "شرایط واگذاری"
 
 #: assets/doctype/asset/asset.py:1011
 msgid "At least one asset has to be selected."
-msgstr ""
+msgstr "حداقل یک دارایی باید انتخاب شود."
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:789
 msgid "At least one invoice has to be selected."
