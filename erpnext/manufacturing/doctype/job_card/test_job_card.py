@@ -8,7 +8,7 @@ import frappe
 from frappe.test_runner import make_test_records
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import random_string
-from frappe.utils.data import add_to_date, now, today
+from frappe.utils.data import add_to_date, now, today, flt
 
 from erpnext.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
@@ -426,7 +426,14 @@ class TestJobCard(FrappeTestCase):
 		self.work_order.reload()
 		cost_after_cancel = self.work_order.total_operating_cost
 		self.assertEqual(cost_after_cancel, original_cost)
-
+		
+	def test_over_production_qty(self):
+		wo_qty=flt(frappe.db.get_value("Work Order",self.work_order,{"qty":7000}))
+  		over_production_percentage=flt(frappe.db.get_single_value("Manufacturing Settings", {"overproduction_percentage_for_work_order":80}))
+		wo_qty = wo_qty + (wo_qty * over_production_percentage / 100)
+  		if flt(self.total_completed_qty,precision) > flt(wo_qty,precision):
+			self.assertRaises(StockOverProductionError, self.submit)
+			
 	def test_job_card_statuses(self):
 		def assertStatus(status):
 			jc.set_status()
