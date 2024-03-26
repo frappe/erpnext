@@ -57,7 +57,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Due Date Based On",
-   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month",
+   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month\nMonth(s) after invoice date",
    "reqd": 1
   },
   {
@@ -74,7 +74,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.due_date_based_on=='Month(s) after the end of the invoice month'",
+   "depends_on": "eval:in_list(['Month(s) after invoice date', 'Month(s) after the end of the invoice month'], doc.due_date_based_on)",
    "fetch_from": "payment_term.credit_months",
    "fetch_if_empty": 1,
    "fieldname": "credit_months",
@@ -126,7 +126,7 @@
    "fieldname": "discount_validity_based_on",
    "fieldtype": "Select",
    "label": "Discount Validity Based On",
-   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
+   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month\nMonth(s) after invoice date"
   },
   {
    "collapsible": 1,
