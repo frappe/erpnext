@@ -369,16 +369,26 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	filtered_batches = get_filterd_batches(batches)
 
 	if filters.get("is_inward"):
-		filtered_batches.extend(get_empty_batches(filters))
+		filtered_batches.extend(get_empty_batches(filters, start, page_len, filtered_batches, txt))
 
 	return filtered_batches
 
 
-def get_empty_batches(filters):
+def get_empty_batches(filters, start, page_len, filtered_batches=None, txt=None):
+	query_filter = {"item": filters.get("item_code")}
+	if txt:
+		query_filter["name"] = ("like", "%{0}%".format(txt))
+
+	exclude_batches = [batch[0] for batch in filtered_batches] if filtered_batches else []
+	if exclude_batches:
+		query_filter["name"] = ("not in", exclude_batches)
+
 	return frappe.get_all(
 		"Batch",
 		fields=["name", "batch_qty"],
-		filters={"item": filters.get("item_code"), "batch_qty": 0.0},
+		filters=query_filter,
+		limit_start=start,
+		limit_page_length=page_len,
 		as_list=1,
 	)
 
