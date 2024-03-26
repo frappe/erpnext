@@ -1954,9 +1954,9 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 		companies = [d.company for d in companies]
 		if company not in companies:
 			frappe.throw(
-				_("{0} not allowed to transact with {1}. Please change the Company.").format(
-					_(partytype), company
-				)
+				_(
+					"{0} not allowed to transact with {1}. Please change the Company or add the Company in the 'Allowed To Transact With'-Section in the Customer record."
+				).format(_(partytype), company)
 			)
 
 
