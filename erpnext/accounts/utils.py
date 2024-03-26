@@ -13,11 +13,13 @@ from frappe.query_builder import AliasedQuery, Criterion, Table
 from frappe.query_builder.functions import Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
+	add_days,
 	cint,
 	create_batch,
 	cstr,
 	flt,
 	formatdate,
+	get_datetime,
 	get_number_format_info,
 	getdate,
 	now,
@@ -2097,3 +2099,40 @@ def create_gain_loss_journal(
 
 def get_party_types_from_account_type(account_type):
 	return frappe.db.get_all("Party Type", {"account_type": account_type}, pluck="name")
+
+
+def run_ledger_health_checks():
+	# run for last 1 month
+	period_end = getdate()
+	period_start = add_days(period_end, -100)
+
+	run_date = get_datetime()
+
+	# Debit-Credit mismatch report
+	voucher_wise = frappe.get_doc("Report", "Voucher-wise Balance")
+
+	# todo: company and dates should be configurable
+	filters = {"company": "நுண்ணறி", "from_date": period_start, "to_date": period_end}
+
+	res = voucher_wise.execute_script_report(filters=filters)
+	for x in res[1]:
+		doc = frappe.new_doc("Ledger Health")
+		doc.voucher_type = x.voucher_type
+		doc.voucher_no = x.voucher_no
+		doc.debit_credit_mismatch = True
+		doc.checked_on = run_date
+		doc.save()
+
+	# General Ledger and Payment Ledger discrepancy
+	gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
+	# todo: company and dates should be configurable
+	filters = {"company": "நுண்ணறி", "period_start_date": period_start, "period_end_date": period_end}
+	res = gl_pl_comparison.execute_script_report(filters=filters)
+
+	for x in res[1]:
+		doc = frappe.new_doc("Ledger Health")
+		doc.voucher_type = x.voucher_type
+		doc.voucher_no = x.voucher_no
+		doc.general_and_payment_ledger_mismatch = True
+		doc.checked_on = run_date
+		doc.save()
