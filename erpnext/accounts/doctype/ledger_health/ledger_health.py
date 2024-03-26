@@ -14,6 +14,7 @@ class LedgerHealth(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
+		checked_on: DF.Datetime | None
 		debit_credit_mismatch: DF.Check
 		name: DF.Int | None
 		voucher_no: DF.Data | None
