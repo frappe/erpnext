@@ -9,7 +9,9 @@
   "monitor_section",
   "monitor_for_last_x_days",
   "debit_credit_mismatch",
-  "general_and_payment_ledger_mismatch"
+  "general_and_payment_ledger_mismatch",
+  "section_break_xdsp",
+  "companies"
  ],
  "fields": [
   {
@@ -21,7 +23,7 @@
   {
    "fieldname": "monitor_section",
    "fieldtype": "Section Break",
-   "label": "Monitor"
+   "label": "Configuration"
   },
   {
    "default": "0",
@@ -42,12 +44,22 @@
    "in_list_view": 1,
    "label": "Monitor for Last 'X' days",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_xdsp",
+   "fieldtype": "Section Break",
+   "label": "Companies"
+  },
+  {
+   "fieldname": "companies",
+   "fieldtype": "Table",
+   "options": "Ledger Health Monitor Company"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 09:53:00.674708",
+ "modified": "2024-03-27 10:07:28.601546",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Ledger Health Monitor",
