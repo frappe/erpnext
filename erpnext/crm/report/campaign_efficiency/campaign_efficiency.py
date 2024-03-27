@@ -33,13 +33,11 @@ def get_lead_data(filters, based_on):
 	conditions = get_filter_conditions(filters)
 
 	lead_details = frappe.db.sql(
-		"""
+		f"""
 		select {based_on_field}, name
 		from `tabLead`
 		where {based_on_field} is not null and {based_on_field} != '' {conditions}
-	""".format(
-			based_on_field=based_on_field, conditions=conditions
-		),
+	""",
 		filters,
 		as_dict=1,
 	)
@@ -82,9 +80,7 @@ def get_lead_quotation_count(leads):
 		where quotation_to = 'Lead' and party_name in (%s)"""
 		% ", ".join(["%s"] * len(leads)),
 		tuple(leads),
-	)[0][
-		0
-	]  # nosec
+	)[0][0]  # nosec
 
 
 def get_lead_opp_count(leads):

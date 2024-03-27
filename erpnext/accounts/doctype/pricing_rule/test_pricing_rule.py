@@ -103,8 +103,6 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(details.get("discount_percentage"), 15)
 
 	def test_pricing_rule_for_margin(self):
-		from frappe import MandatoryError
-
 		from erpnext.stock.get_item_details import get_item_details
 
 		test_record = {
@@ -205,8 +203,6 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(details.get("discount_percentage"), 10)
 
 	def test_pricing_rule_for_variants(self):
-		from frappe import MandatoryError
-
 		from erpnext.stock.get_item_details import get_item_details
 
 		if not frappe.db.exists("Item", "Test Variant PRT"):
@@ -1181,8 +1177,7 @@ def delete_existing_pricing_rules():
 		"Pricing Rule Item Group",
 		"Pricing Rule Brand",
 	]:
-
-		frappe.db.sql("delete from `tab{0}`".format(doctype))
+		frappe.db.sql(f"delete from `tab{doctype}`")
 
 
 def make_item_price(item, price_list_name, item_price):

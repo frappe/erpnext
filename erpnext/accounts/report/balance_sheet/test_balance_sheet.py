@@ -13,15 +13,13 @@ class TestBalanceSheet(FrappeTestCase):
 		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
 			create_sales_invoice,
-			make_sales_invoice,
 		)
-		from erpnext.accounts.utils import get_fiscal_year
 
 		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company 6'")
 		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company 6'")
 		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 6'")
 
-		pi = make_purchase_invoice(
+		make_purchase_invoice(
 			company="_Test Company 6",
 			warehouse="Finished Goods - _TC6",
 			expense_account="Cost of Goods Sold - _TC6",
@@ -29,7 +27,7 @@ class TestBalanceSheet(FrappeTestCase):
 			qty=10,
 			rate=100,
 		)
-		si = create_sales_invoice(
+		create_sales_invoice(
 			company="_Test Company 6",
 			debit_to="Debtors - _TC6",
 			income_account="Sales - _TC6",

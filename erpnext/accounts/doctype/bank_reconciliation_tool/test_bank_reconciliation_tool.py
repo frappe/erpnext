@@ -1,12 +1,11 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
 
 import frappe
 from frappe import qb
-from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, getdate, today
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, today
 
 from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	auto_reconcile_vouchers,
@@ -22,7 +21,7 @@ class TestBankReconciliationTool(AccountsTestMixin, FrappeTestCase):
 		self.create_customer()
 		self.clear_old_entries()
 		bank_dt = qb.DocType("Bank")
-		q = qb.from_(bank_dt).delete().where(bank_dt.name == "HDFC").run()
+		qb.from_(bank_dt).delete().where(bank_dt.name == "HDFC").run()
 		self.create_bank_account()
 
 	def tearDown(self):

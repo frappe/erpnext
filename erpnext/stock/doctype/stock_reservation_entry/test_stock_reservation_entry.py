@@ -25,9 +25,7 @@ class TestStockReservationEntry(FrappeTestCase):
 	def setUp(self) -> None:
 		self.warehouse = "_Test Warehouse - _TC"
 		self.sr_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
-		create_material_receipt(
-			items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100
-		)
+		create_material_receipt(items={self.sr_item.name: self.sr_item}, warehouse=self.warehouse, qty=100)
 
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:

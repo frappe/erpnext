@@ -134,9 +134,7 @@ class TestLead(unittest.TestCase):
 		self.assertEqual(event.event_participants[1].reference_docname, opportunity.name)
 
 		self.assertTrue(
-			frappe.db.get_value(
-				"ToDo", {"reference_type": "Opportunity", "reference_name": opportunity.name}
-			)
+			frappe.db.get_value("ToDo", {"reference_type": "Opportunity", "reference_name": opportunity.name})
 		)
 
 	def test_copy_events_from_lead_to_prospect(self):
@@ -194,7 +192,7 @@ def make_lead(**args):
 			"doctype": "Lead",
 			"first_name": args.first_name or "_Test",
 			"last_name": args.last_name or "Lead",
-			"email_id": args.email_id or "new_lead_{}@example.com".format(random_string(5)),
+			"email_id": args.email_id or f"new_lead_{random_string(5)}@example.com",
 			"company_name": args.company_name or "_Test Company",
 		}
 	).insert()

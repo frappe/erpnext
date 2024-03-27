@@ -44,7 +44,10 @@ class TestUtils(unittest.TestCase):
 					item_code="_Test Item", qty=1, basic_rate=200, s_warehouse="_Test Warehouse - _TC"
 				),
 				frappe._dict(
-					item_code="_Test FG Item", qty=4, t_warehouse="_Test Warehouse 1 - _TC", is_finished_item=1
+					item_code="_Test FG Item",
+					qty=4,
+					t_warehouse="_Test Warehouse 1 - _TC",
+					is_finished_item=1,
 				),
 			],
 		)

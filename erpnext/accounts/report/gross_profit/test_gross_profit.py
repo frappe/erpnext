@@ -1,7 +1,7 @@
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, flt, nowdate
+from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice

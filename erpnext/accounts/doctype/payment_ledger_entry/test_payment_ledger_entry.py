@@ -159,9 +159,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		for doctype in doctype_list:
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
 
-	def create_journal_entry(
-		self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None
-	):
+	def create_journal_entry(self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None):
 		je = frappe.new_doc("Journal Entry")
 		je.posting_date = posting_date or nowdate()
 		je.company = self.company
@@ -319,9 +317,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 				ple.amount,
 				ple.delinked,
 			)
-			.where(
-				(ple.against_voucher_type == cr_note1.doctype) & (ple.against_voucher_no == cr_note1.name)
-			)
+			.where((ple.against_voucher_type == cr_note1.doctype) & (ple.against_voucher_no == cr_note1.name))
 			.orderby(ple.creation)
 			.run(as_dict=True)
 		)
@@ -362,9 +358,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		)
 		cr_note2.is_return = 1
 		cr_note2 = cr_note2.save().submit()
-		je1 = self.create_journal_entry(
-			self.debit_to, self.debit_to, amount, posting_date=transaction_date
-		)
+		je1 = self.create_journal_entry(self.debit_to, self.debit_to, amount, posting_date=transaction_date)
 		je1.get("accounts")[0].party_type = je1.get("accounts")[1].party_type = "Customer"
 		je1.get("accounts")[0].party = je1.get("accounts")[1].party = self.customer
 		je1.get("accounts")[0].reference_type = cr_note2.doctype
@@ -419,9 +413,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 				ple.amount,
 				ple.delinked,
 			)
-			.where(
-				(ple.against_voucher_type == cr_note2.doctype) & (ple.against_voucher_no == cr_note2.name)
-			)
+			.where((ple.against_voucher_type == cr_note2.doctype) & (ple.against_voucher_no == cr_note2.name))
 			.orderby(ple.creation)
 			.run(as_dict=True)
 		)
@@ -518,7 +510,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		amount = 100
 		so = self.create_sales_order(qty=1, rate=amount, posting_date=transaction_date).save().submit()
 
-		pe = get_payment_entry(so.doctype, so.name).save().submit()
+		get_payment_entry(so.doctype, so.name).save().submit()
 
 		so.reload()
 		so.cancel()

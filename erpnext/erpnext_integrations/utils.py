@@ -13,7 +13,9 @@ def validate_webhooks_request(doctype, hmac_key, secret_key="secret"):
 
 		if frappe.request and settings and settings.get(secret_key) and not frappe.flags.in_test:
 			sig = base64.b64encode(
-				hmac.new(settings.get(secret_key).encode("utf8"), frappe.request.data, hashlib.sha256).digest()
+				hmac.new(
+					settings.get(secret_key).encode("utf8"), frappe.request.data, hashlib.sha256
+				).digest()
 			)
 
 			if frappe.request.data and not sig == bytes(frappe.get_request_header(hmac_key).encode()):
@@ -26,7 +28,7 @@ def validate_webhooks_request(doctype, hmac_key, secret_key="secret"):
 
 
 def get_webhook_address(connector_name, method, exclude_uri=False, force_https=False):
-	endpoint = "erpnext.erpnext_integrations.connectors.{0}.{1}".format(connector_name, method)
+	endpoint = f"erpnext.erpnext_integrations.connectors.{connector_name}.{method}"
 
 	if exclude_uri:
 		return endpoint

@@ -45,9 +45,7 @@ class WarrantyClaim(TransactionBase):
 		service_address: DF.SmallText | None
 		status: DF.Literal["", "Open", "Closed", "Work In Progress", "Cancelled"]
 		territory: DF.Link | None
-		warranty_amc_status: DF.Literal[
-			"", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"
-		]
+		warranty_amc_status: DF.Literal["", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"]
 		warranty_expiry_date: DF.Date | None
 	# end: auto-generated types
 

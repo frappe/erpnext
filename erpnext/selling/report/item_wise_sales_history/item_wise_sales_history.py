@@ -128,7 +128,6 @@ def get_columns(filters):
 
 
 def get_data(filters):
-
 	data = []
 
 	company_list = get_descendants_of("Company", filters.get("company"))
@@ -181,9 +180,7 @@ def get_item_details():
 	details = frappe.db.get_all("Item", fields=["name", "item_name", "item_group"])
 	item_details = {}
 	for d in details:
-		item_details.setdefault(
-			d.name, frappe._dict({"item_name": d.item_name, "item_group": d.item_group})
-		)
+		item_details.setdefault(d.name, frappe._dict({"item_name": d.item_name, "item_group": d.item_group}))
 	return item_details
 
 
@@ -240,14 +237,13 @@ def get_chart_data(data):
 	for row in data:
 		item_key = row.get("item_code")
 
-		if not item_key in item_wise_sales_map:
+		if item_key not in item_wise_sales_map:
 			item_wise_sales_map[item_key] = 0
 
 		item_wise_sales_map[item_key] = flt(item_wise_sales_map[item_key]) + flt(row.get("amount"))
 
 	item_wise_sales_map = {
-		item: value
-		for item, value in (sorted(item_wise_sales_map.items(), key=lambda i: i[1], reverse=True))
+		item: value for item, value in (sorted(item_wise_sales_map.items(), key=lambda i: i[1], reverse=True))
 	}
 
 	for key in item_wise_sales_map:

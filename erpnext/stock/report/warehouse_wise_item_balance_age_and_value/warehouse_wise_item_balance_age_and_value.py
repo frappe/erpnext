@@ -40,7 +40,7 @@ def execute(filters=None):
 	item_balance = {}
 	item_value = {}
 
-	for (company, item, warehouse) in sorted(iwb_map):
+	for company, item, warehouse in sorted(iwb_map):
 		if not item_map.get(item):
 			continue
 
@@ -71,7 +71,7 @@ def execute(filters=None):
 
 		row += [average_age]
 
-		bal_qty = [sum(bal_qty) for bal_qty in zip(*wh_balance)]
+		bal_qty = [sum(bal_qty) for bal_qty in zip(*wh_balance, strict=False)]
 		total_qty = sum(bal_qty)
 		if len(warehouse_list) > 1:
 			row += [total_qty]

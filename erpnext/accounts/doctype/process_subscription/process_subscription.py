@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 from datetime import datetime
-from typing import Union
 
 import frappe
 from frappe.model.document import Document
@@ -30,7 +29,7 @@ class ProcessSubscription(Document):
 
 
 def create_subscription_process(
-	subscription: str | None = None, posting_date: Union[str, datetime.date] | None = None
+	subscription: str | None = None, posting_date: str | datetime.date | None = None
 ):
 	"""Create a new Process Subscription document"""
 	doc = frappe.new_doc("Process Subscription")

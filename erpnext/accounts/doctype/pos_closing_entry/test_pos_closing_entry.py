@@ -62,9 +62,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
-		pos_inv = create_pos_invoice(
-			rate=3500, do_not_submit=1, item_name="Test Item", without_item_code=1
-		)
+		pos_inv = create_pos_invoice(rate=3500, do_not_submit=1, item_name="Test Item", without_item_code=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv.submit()
 
@@ -211,7 +209,7 @@ def get_test_item_qty(pos_profile):
 		item_group="All Item Groups",
 	)
 
-	test_item_qty = [item for item in test_item_pos["items"] if item["item_code"] == "_Test Item"][
-		0
-	].get("actual_qty")
+	test_item_qty = next(item for item in test_item_pos["items"] if item["item_code"] == "_Test Item").get(
+		"actual_qty"
+	)
 	return test_item_qty

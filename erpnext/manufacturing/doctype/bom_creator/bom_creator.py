@@ -101,9 +101,7 @@ class BOMCreator(Document):
 				has_completed = False
 				break
 
-		if not frappe.get_cached_value(
-			"BOM", {"bom_creator": self.name, "item": self.item_code}, "name"
-		):
+		if not frappe.get_cached_value("BOM", {"bom_creator": self.name, "item": self.item_code}, "name"):
 			has_completed = False
 
 		if has_completed:
@@ -234,7 +232,8 @@ class BOMCreator(Document):
 			if row.is_expandable:
 				if (row.item_code, row.name) not in production_item_wise_rm:
 					production_item_wise_rm.setdefault(
-						(row.item_code, row.name), frappe._dict({"items": [], "bom_no": "", "fg_item_data": row})
+						(row.item_code, row.name),
+						frappe._dict({"items": [], "bom_no": "", "fg_item_data": row}),
 					)
 
 			if not row.fg_reference_id and production_item_wise_rm.get((row.fg_item, row.fg_reference_id)):
@@ -403,7 +402,6 @@ def add_sub_assembly(**kwargs):
 				"conversion_factor": 1,
 				"fg_reference_id": name,
 				"stock_qty": bom_item.qty,
-				"fg_reference_id": name,
 				"do_not_explode": 1,
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,

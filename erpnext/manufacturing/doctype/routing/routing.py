@@ -47,9 +47,9 @@ class Routing(Document):
 				row.sequence_id = sequence_id + 1
 			elif sequence_id and row.sequence_id and cint(sequence_id) > cint(row.sequence_id):
 				frappe.throw(
-					_("At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2}").format(
-						row.idx, row.sequence_id, sequence_id
-					)
+					_(
+						"At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2}"
+					).format(row.idx, row.sequence_id, sequence_id)
 				)
 
 			sequence_id = row.sequence_id

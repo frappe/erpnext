@@ -40,7 +40,7 @@ def start_payment_ledger_repost(docname=None):
 
 				frappe.db.set_value(repost_doc.doctype, repost_doc.name, "repost_error_log", "")
 				frappe.db.set_value(repost_doc.doctype, repost_doc.name, "repost_status", "Completed")
-			except Exception as e:
+			except Exception:
 				frappe.db.rollback()
 
 				traceback = frappe.get_traceback(with_context=True)
@@ -75,7 +75,7 @@ class RepostPaymentLedger(Document):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(RepostPaymentLedger, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.vouchers = []
 
 	def before_validate(self):

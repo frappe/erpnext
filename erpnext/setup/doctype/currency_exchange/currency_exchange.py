@@ -38,7 +38,7 @@ class CurrencyExchange(Document):
 		if cint(self.for_buying) == 1 and cint(self.for_selling) == 0:
 			purpose = "Buying"
 
-		self.name = "{0}-{1}-{2}{3}".format(
+		self.name = "{}-{}-{}{}".format(
 			formatdate(get_datetime_str(self.date), "yyyy-MM-dd"),
 			self.from_currency,
 			self.to_currency,
