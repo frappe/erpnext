@@ -2095,27 +2095,38 @@ def get_party_types_from_account_type(account_type):
 
 
 def run_ledger_health_checks():
-	# run for last 1 month
-	period_end = getdate()
-	period_start = add_days(period_end, -100)
+	health_monitor_settings = frappe.get_doc("Ledger Health Monitor")
+	if health_monitor_settings.enable_health_monitor:
+		period_end = getdate()
+		period_start = add_days(period_end, -abs(health_monitor_settings.monitor_for_last_x_days))
 
-	run_date = get_datetime()
+		run_date = get_datetime()
 
-	# Debit-Credit mismatch report
-	voucher_wise = frappe.get_doc("Report", "Voucher-wise Balance")
+		# Debit-Credit mismatch report
+		if health_monitor_settings.debit_credit_mismatch:
+			voucher_wise = frappe.get_doc("Report", "Voucher-wise Balance")
+			filters = {"company": "நுண்ணறி", "from_date": period_start, "to_date": period_end}
 
-	# todo: company and dates should be configurable
-	filters = {"company": "நுண்ணறி", "from_date": period_start, "to_date": period_end}
+			res = voucher_wise.execute_script_report(filters=filters)
+			for x in res[1]:
+				doc = frappe.new_doc("Ledger Health")
+				doc.voucher_type = x.voucher_type
+				doc.voucher_no = x.voucher_no
+				doc.debit_credit_mismatch = True
+				doc.checked_on = run_date
+				doc.save()
 
-	res = voucher_wise.execute_script_report(filters=filters)
-	for x in res[1]:
-		doc = frappe.new_doc("Ledger Health")
-		doc.voucher_type = x.voucher_type
-		doc.voucher_no = x.voucher_no
-		doc.debit_credit_mismatch = True
-		doc.checked_on = run_date
-		doc.save()
+		# General Ledger and Payment Ledger discrepancy
+		if health_monitor_settings.general_and_payment_ledger_mismatch:
+			gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
+			filters = {
+				"company": "நுண்ணறி",
+				"period_start_date": period_start,
+				"period_end_date": period_end,
+			}
+			res = gl_pl_comparison.execute_script_report(filters=filters)
 
+<<<<<<< HEAD
 	# General Ledger and Payment Ledger discrepancy
 	gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
 	# todo: company and dates should be configurable
@@ -2130,3 +2141,12 @@ def run_ledger_health_checks():
 		doc.checked_on = run_date
 		doc.save()
 >>>>>>> 8c8d9be810 (refactor: barebones method to run checks)
+=======
+			for x in res[1]:
+				doc = frappe.new_doc("Ledger Health")
+				doc.voucher_type = x.voucher_type
+				doc.voucher_no = x.voucher_no
+				doc.general_and_payment_ledger_mismatch = True
+				doc.checked_on = run_date
+				doc.save()
+>>>>>>> a42482ce35 (refactor: control monitoring through settings page)
