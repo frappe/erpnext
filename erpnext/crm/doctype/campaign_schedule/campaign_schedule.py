@@ -6,7 +6,7 @@
 from frappe.model.document import Document
 
 
-class CampaignEmailSchedule(Document):
+class CampaignSchedule(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
