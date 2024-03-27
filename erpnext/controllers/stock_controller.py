@@ -669,7 +669,7 @@ class StockController(AccountsController):
 				self.validate_multi_currency()
 				self.validate_packed_items()
 
-				if self.get("is_internal_supplier"):
+				if self.get("is_internal_supplier") and self.docstatus == 1:
 					self.validate_internal_transfer_qty()
 			else:
 				self.validate_internal_transfer_warehouse()
