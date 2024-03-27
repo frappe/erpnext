@@ -146,3 +146,26 @@ def create_communication(
 		}
 	)
 	communication.save()
+
+def test_make_opportunity_from_prospect(self):
+	prospect_doc = frappe.get_doc(
+		{
+			"doctype": "Prospect",
+			"company_name": "_Test Company {}".format(random_string(3)),
+		}
+	).insert()
+
+	opp_doc = frappe.get_doc(
+		{
+			"doctype": "Opportunity",
+			"company": "_Test Company {}".format(random_string(3)),
+			"opportunity_from": "Prospect",
+			"opportunity_type": "Sales",
+			"conversion_rate": 1.0,
+			"transaction_date": today(),
+			"party_name": prospect_doc.name,
+		}
+	).insert()
+
+	self.assertEqual(opp_doc.party_name, prospect_doc.name)
+
