@@ -52,6 +52,35 @@ erpnext.financial_statements = {
 			}
 		}
 
+		if (frappe.query_report.get_filter_value("report_view") == "Horizontal") {
+			if (value == data["expense_account"]) {
+				value = data["expense_indent"] + value;
+				value = $(`<span>${value}</span>`);
+				if (data["expense_indent"] == "") {
+					var $value = $(value).css("font-weight", "bold");
+				} else {
+					$value = $(value);
+				}
+			} else if (value == data["income_account"]) {
+				value = data["income_indent"] + value;
+				value = $(`<span>${value}</span>`);
+				if (data["income_indent"] == "") {
+					$value = $(value).css("font-weight", "bold");
+				} else {
+					$value = $(value);
+				}
+			} else {
+				value = $(`<span>${value}</span>`);
+				$value = $(value);
+			}
+			if (data.warn_if_negative && data[column.fieldname] < 0) {
+				$value.addClass("text-danger");
+			}
+
+			value = $value.wrap("<p></p>").parent().html();
+			return value;
+		}
+
 		if (data && column.fieldname == "account") {
 			value = data.account_name || value;
 
@@ -73,7 +102,7 @@ erpnext.financial_statements = {
 		if (data && !data.parent_account) {
 			value = $(`<span>${value}</span>`);
 
-			var $value = $(value).css("font-weight", "bold");
+			$value = $(value).css("font-weight", "bold");
 			if (data.warn_if_negative && data[column.fieldname] < 0) {
 				$value.addClass("text-danger");
 			}
@@ -230,6 +259,7 @@ function get_filters() {
 			],
 			default: "Yearly",
 			reqd: 1,
+			depends_on: "eval:doc.report_view != 'Horizontal'",
 		},
 		// Note:
 		// If you are modifying this array such that the presentation_currency object
