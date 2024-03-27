@@ -373,12 +373,9 @@ def get_actual_expense(args):
 
 		args.update(lft_rgt)
 
-		condition2 = """and exists(select name from `tab{doctype}`
+		condition2 = f"""and exists(select name from `tab{args.budget_against_doctype}`
 			where lft>=%(lft)s and rgt<=%(rgt)s
-			and name=gle.{budget_against_field})""".format(
-			doctype=args.budget_against_doctype,
-			budget_against_field=budget_against_field,  # nosec
-		)
+			and name=gle.{budget_against_field})"""
 	else:
 		condition2 = f"""and exists(select name from `tab{args.budget_against_doctype}`
 		where name=gle.{budget_against_field} and

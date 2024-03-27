@@ -84,11 +84,14 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 			self.customer = customer.name
 
 	def create_sales_invoice(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
@@ -112,10 +115,12 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		)
 		return sinv
 
-	def create_payment_entry(self, amount=100, posting_date=nowdate()):
+	def create_payment_entry(self, amount=100, posting_date=None):
 		"""
 		Helper function to populate default values in payment entry
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
 		payment = create_payment_entry(
 			company=self.company,
 			payment_type="Receive",
@@ -128,9 +133,10 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		payment.posting_date = posting_date
 		return payment
 
-	def create_sales_order(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
-	):
+	def create_sales_order(self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False):
+		if posting_date is None:
+			posting_date = nowdate()
+
 		so = make_sales_order(
 			company=self.company,
 			transaction_date=posting_date,

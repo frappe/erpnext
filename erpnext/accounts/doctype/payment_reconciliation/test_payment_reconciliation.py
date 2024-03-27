@@ -134,11 +134,14 @@ class TestPaymentReconciliation(FrappeTestCase):
 			setattr(self, x.attribute, acc.name)
 
 	def create_sales_invoice(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
@@ -162,10 +165,13 @@ class TestPaymentReconciliation(FrappeTestCase):
 		)
 		return sinv
 
-	def create_payment_entry(self, amount=100, posting_date=nowdate(), customer=None):
+	def create_payment_entry(self, amount=100, posting_date=None, customer=None):
 		"""
 		Helper function to populate default values in payment entry
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		payment = create_payment_entry(
 			company=self.company,
 			payment_type="Receive",
@@ -179,11 +185,14 @@ class TestPaymentReconciliation(FrappeTestCase):
 		return payment
 
 	def create_purchase_invoice(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		pinv = make_purchase_invoice(
 			qty=qty,
 			rate=rate,
@@ -208,11 +217,14 @@ class TestPaymentReconciliation(FrappeTestCase):
 		return pinv
 
 	def create_purchase_order(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		pord = create_purchase_order(
 			qty=qty,
 			rate=rate,

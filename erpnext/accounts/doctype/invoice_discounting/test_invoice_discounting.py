@@ -75,8 +75,8 @@ class TestInvoiceDiscounting(unittest.TestCase):
 		gle = get_gl_entries("Invoice Discounting", inv_disc.name)
 
 		expected_gle = {inv.debit_to: [0.0, 200], self.ar_credit: [200, 0.0]}
-		for _i, gle in enumerate(gle):
-			self.assertEqual([gle.debit, gle.credit], expected_gle.get(gle.account))
+		for _i, gle_value in enumerate(gle):
+			self.assertEqual([gle_value.debit, gle_value.credit], expected_gle.get(gle_value.account))
 
 	def test_loan_on_submit(self):
 		inv = create_sales_invoice(rate=300)

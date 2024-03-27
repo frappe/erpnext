@@ -192,7 +192,7 @@ class Deferred_Invoice:
 		for item in self.items:
 			item_total = item.calculate_item_revenue_expense_for_period()
 			# update invoice total
-			for idx, period in enumerate(self.period_list, 0):
+			for idx in range(len(self.period_list)):
 				self.period_total[idx].total += item_total[idx].total
 				self.period_total[idx].actual += item_total[idx].actual
 		return self.period_total
@@ -346,7 +346,7 @@ class Deferred_Revenue_and_Expense_Report:
 		for inv in self.deferred_invoices:
 			inv_total = inv.calculate_invoice_revenue_expense_for_period()
 			# calculate total for whole report
-			for idx, period in enumerate(self.period_list, 0):
+			for idx in range(len(self.period_list)):
 				self.period_total[idx].total += inv_total[idx].total
 				self.period_total[idx].actual += inv_total[idx].actual
 

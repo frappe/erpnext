@@ -87,7 +87,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 						entry.get(self.based_on_field)
 					)
 
-		for key, value in self.period_wise_data.items():
+		for value in self.period_wise_data.values():
 			list_of_period_value = [value.get(p.key, 0) for p in self.period_list]
 
 			if list_of_period_value:

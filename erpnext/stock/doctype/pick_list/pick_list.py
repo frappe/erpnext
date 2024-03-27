@@ -4,7 +4,6 @@
 import json
 from collections import OrderedDict, defaultdict
 from itertools import groupby
-from typing import Dict, List
 
 import frappe
 from frappe import _

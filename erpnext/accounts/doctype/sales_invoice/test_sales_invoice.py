@@ -3730,41 +3730,6 @@ def set_advance_flag(company, flag, default_account):
 	)
 
 
-def get_sales_invoice_for_e_invoice():
-	si = make_sales_invoice_for_ewaybill()
-	si.naming_series = "INV-2020-.#####"
-	si.items = []
-	si.append(
-		"items",
-		{
-			"item_code": "_Test Item",
-			"uom": "Nos",
-			"warehouse": "_Test Warehouse - _TC",
-			"qty": 2000,
-			"rate": 12,
-			"income_account": "Sales - _TC",
-			"expense_account": "Cost of Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-		},
-	)
-
-	si.append(
-		"items",
-		{
-			"item_code": "_Test Item 2",
-			"uom": "Nos",
-			"warehouse": "_Test Warehouse - _TC",
-			"qty": 420,
-			"rate": 15,
-			"income_account": "Sales - _TC",
-			"expense_account": "Cost of Goods Sold - _TC",
-			"cost_center": "_Test Cost Center - _TC",
-		},
-	)
-
-	return si
-
-
 def check_gl_entries(doc, voucher_no, expected_gle, posting_date, voucher_type="Sales Invoice"):
 	gl = frappe.qb.DocType("GL Entry")
 	q = (

@@ -117,10 +117,10 @@ class TestBatch(FrappeTestCase):
 		self.assertTrue(receipt2.items[0].serial_and_batch_bundle)
 
 		batchwise_qty = frappe._dict({})
-		for receipt in [receipt, receipt2]:
-			batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
-			key = (batch_no, receipt.items[0].warehouse)
-			batchwise_qty[key] = receipt.items[0].qty
+		for r in [receipt, receipt2]:
+			batch_no = get_batch_from_bundle(r.items[0].serial_and_batch_bundle)
+			key = (batch_no, r.items[0].warehouse)
+			batchwise_qty[key] = r.items[0].qty
 
 		batches = get_batch_qty(batch_no)
 		for d in batches:
