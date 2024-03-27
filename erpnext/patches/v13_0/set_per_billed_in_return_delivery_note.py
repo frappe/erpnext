@@ -20,9 +20,9 @@ def execute():
 		.run(as_dict=True)
 	)
 
-	frappe.qb.update(dn_item).inner_join(dn).on(dn.name == dn_item.parent).set(
-		dn_item.returned_qty, 0
-	).where(dn.is_return == 1).where(dn_item.returned_qty > 0).run()
+	frappe.qb.update(dn_item).inner_join(dn).on(dn.name == dn_item.parent).set(dn_item.returned_qty, 0).where(
+		dn.is_return == 1
+	).where(dn_item.returned_qty > 0).run()
 
 	for d in dn_list:
 		dn_doc = frappe.get_doc("Delivery Note", d.get("name"))

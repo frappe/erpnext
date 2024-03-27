@@ -43,8 +43,8 @@ class SupplierScorecardCriteria(Document):
 		regex = r"\{(.*?)\}"
 
 		mylist = re.finditer(regex, test_formula, re.MULTILINE | re.DOTALL)
-		for dummy1, match in enumerate(mylist):
-			for dummy2 in range(0, len(match.groups())):
+		for _dummy1, match in enumerate(mylist):
+			for _dummy2 in range(0, len(match.groups())):
 				test_formula = test_formula.replace("{" + match.group(1) + "}", "0")
 
 		try:
@@ -78,8 +78,8 @@ def _get_variables(criteria):
 	regex = r"\{(.*?)\}"
 
 	mylist = re.finditer(regex, criteria.formula, re.MULTILINE | re.DOTALL)
-	for dummy1, match in enumerate(mylist):
-		for dummy2 in range(0, len(match.groups())):
+	for _dummy1, match in enumerate(mylist):
+		for _dummy2 in range(0, len(match.groups())):
 			try:
 				var = frappe.db.sql(
 					"""
@@ -94,6 +94,8 @@ def _get_variables(criteria):
 				)[0]
 				my_variables.append(var)
 			except Exception:
-				frappe.throw(_("Unable to find variable:") + " " + str(match.group(1)), InvalidFormulaVariable)
+				frappe.throw(
+					_("Unable to find variable:") + " " + str(match.group(1)), InvalidFormulaVariable
+				)
 
 	return my_variables

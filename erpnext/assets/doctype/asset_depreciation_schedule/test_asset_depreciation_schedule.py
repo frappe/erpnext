@@ -18,7 +18,7 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
 
 		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")
-		self.assertEquals(first_asset_depr_schedule.status, "Active")
+		self.assertEqual(first_asset_depr_schedule.status, "Active")
 
 		second_asset_depr_schedule = frappe.get_doc(
 			{"doctype": "Asset Depreciation Schedule", "asset": asset.name, "finance_book": None}

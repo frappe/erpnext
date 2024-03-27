@@ -20,7 +20,6 @@ def execute(filters=None):
 		total_qty = total_amount = 0.0
 		if consumed_details.get(item_code):
 			for cd in consumed_details.get(item_code):
-
 				if cd.voucher_no not in material_transfer_vouchers:
 					if cd.voucher_type in ["Delivery Note", "Sales Invoice"]:
 						delivered_qty += abs(flt(cd.actual_qty))
@@ -54,19 +53,19 @@ def execute(filters=None):
 def get_columns(filters):
 	"""return columns based on filters"""
 
-	columns = (
-		[_("Item") + ":Link/Item:100"]
-		+ [_("Item Name") + "::100"]
-		+ [_("Description") + "::150"]
-		+ [_("UOM") + ":Link/UOM:90"]
-		+ [_("Consumed Qty") + ":Float:110"]
-		+ [_("Consumed Amount") + ":Currency:130"]
-		+ [_("Delivered Qty") + ":Float:110"]
-		+ [_("Delivered Amount") + ":Currency:130"]
-		+ [_("Total Qty") + ":Float:110"]
-		+ [_("Total Amount") + ":Currency:130"]
-		+ [_("Supplier(s)") + "::250"]
-	)
+	columns = [
+		_("Item") + ":Link/Item:100",
+		_("Item Name") + "::100",
+		_("Description") + "::150",
+		_("UOM") + ":Link/UOM:90",
+		_("Consumed Qty") + ":Float:110",
+		_("Consumed Amount") + ":Currency:130",
+		_("Delivered Qty") + ":Float:110",
+		_("Delivered Amount") + ":Currency:130",
+		_("Total Qty") + ":Float:110",
+		_("Total Amount") + ":Currency:130",
+		_("Supplier(s)") + "::250",
+	]
 
 	return columns
 
@@ -173,9 +172,7 @@ def get_suppliers_details(filters):
 def get_material_transfer_vouchers():
 	se = frappe.qb.DocType("Stock Entry")
 	query = (
-		frappe.qb.from_(se)
-		.select(se.name)
-		.where((se.purpose == "Material Transfer") & (se.docstatus == 1))
+		frappe.qb.from_(se).select(se.name).where((se.purpose == "Material Transfer") & (se.docstatus == 1))
 	)
 
 	return [r[0] for r in query.run()]

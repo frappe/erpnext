@@ -31,15 +31,11 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			pos_inv.submit()
 
 			pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
-			pos_inv2.append(
-				"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200}
-			)
+			pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
 			pos_inv2.submit()
 
 			pos_inv3 = create_pos_invoice(customer="_Test Customer 2", rate=2300, do_not_submit=1)
-			pos_inv3.append(
-				"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 2300}
-			)
+			pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 2300})
 			pos_inv3.submit()
 
 			consolidate_pos_invoices()
@@ -68,15 +64,11 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			pos_inv.submit()
 
 			pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
-			pos_inv2.append(
-				"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200}
-			)
+			pos_inv2.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3200})
 			pos_inv2.submit()
 
 			pos_inv3 = create_pos_invoice(customer="_Test Customer 2", rate=2300, do_not_submit=1)
-			pos_inv3.append(
-				"payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 2300}
-			)
+			pos_inv3.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 2300})
 			pos_inv3.submit()
 
 			pos_inv_cn = make_sales_return(pos_inv.name)
@@ -312,7 +304,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			init_user_and_profile()
 
 			item_rates = [69, 59, 29]
-			for i in [1, 2]:
+			for _i in [1, 2]:
 				inv = create_pos_invoice(is_return=1, do_not_save=1)
 				inv.items = []
 				for rate in item_rates:
@@ -406,7 +398,6 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		The second and third POS Invoice should be consolidated with a single Merge Log
 		"""
 
-		from erpnext.stock.doctype.serial_no.test_serial_no import get_serial_nos
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		frappe.db.sql("delete from `tabPOS Invoice`")

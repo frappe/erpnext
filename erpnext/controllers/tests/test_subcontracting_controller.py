@@ -16,8 +16,6 @@ from erpnext.controllers.subcontracting_controller import (
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -351,7 +349,6 @@ class TestSubcontractingController(FrappeTestCase):
 		- Create the 3 SCR against the SCO and split Subcontracted Items into two batches.
 		- Keep the qty as 2 for Subcontracted Item in the SCR.
 		"""
-		from erpnext.stock.serial_batch_bundle import get_batch_nos
 
 		set_backflush_based_on("BOM")
 		service_items = [
@@ -434,7 +431,7 @@ class TestSubcontractingController(FrappeTestCase):
 		scr1.set_missing_values()
 		scr1.submit()
 
-		for key, value in get_supplied_items(scr1).items():
+		for _key, value in get_supplied_items(scr1).items():
 			self.assertEqual(value.qty, 4)
 
 		frappe.flags.add_debugger = True
@@ -446,7 +443,7 @@ class TestSubcontractingController(FrappeTestCase):
 		scr2.set_missing_values()
 		scr2.submit()
 
-		for key, value in get_supplied_items(scr2).items():
+		for _key, value in get_supplied_items(scr2).items():
 			self.assertEqual(value.qty, 4)
 
 		scr3 = make_subcontracting_receipt(sco.name)
@@ -456,7 +453,7 @@ class TestSubcontractingController(FrappeTestCase):
 		scr3.set_missing_values()
 		scr3.submit()
 
-		for key, value in get_supplied_items(scr3).items():
+		for _key, value in get_supplied_items(scr3).items():
 			self.assertEqual(value.qty, 2)
 
 	def test_item_with_batch_based_on_material_transfer(self):
@@ -563,7 +560,7 @@ class TestSubcontractingController(FrappeTestCase):
 		scr2.set_missing_values()
 		scr2.submit()
 
-		for key, value in get_supplied_items(scr2).items():
+		for value in get_supplied_items(scr2).values():
 			self.assertEqual(value.qty, 4)
 
 		scr3 = make_subcontracting_receipt(sco.name)
@@ -573,7 +570,7 @@ class TestSubcontractingController(FrappeTestCase):
 		scr3.set_missing_values()
 		scr3.submit()
 
-		for key, value in get_supplied_items(scr3).items():
+		for value in get_supplied_items(scr3).values():
 			self.assertEqual(value.qty, 1)
 
 	def test_partial_transfer_serial_no_components_based_on_material_transfer(self):
@@ -700,9 +697,7 @@ class TestSubcontractingController(FrappeTestCase):
 
 		scr1 = make_subcontracting_receipt(sco.name)
 		scr1.save()
-		bundle = frappe.get_doc(
-			"Serial and Batch Bundle", scr1.supplied_items[0].serial_and_batch_bundle
-		)
+		bundle = frappe.get_doc("Serial and Batch Bundle", scr1.supplied_items[0].serial_and_batch_bundle)
 		original_serial_no = ""
 		for row in bundle.entries:
 			if row.idx == 1:
@@ -773,7 +768,6 @@ class TestSubcontractingController(FrappeTestCase):
 		scr1.items[0].qty = 5
 		scr1.save()
 
-		transferred_batch_no = ""
 		for key, value in get_supplied_items(scr1).items():
 			details = itemwise_details.get(key)
 			self.assertEqual(value.qty, 3)
@@ -1139,9 +1133,7 @@ def make_stock_in_entry(**args):
 
 def update_item_details(child_row, details):
 	details.qty += (
-		child_row.get("qty")
-		if child_row.doctype == "Stock Entry Detail"
-		else child_row.get("consumed_qty")
+		child_row.get("qty") if child_row.doctype == "Stock Entry Detail" else child_row.get("consumed_qty")
 	)
 
 	details.use_serial_batch_fields = child_row.get("use_serial_batch_fields")
@@ -1152,7 +1144,9 @@ def update_item_details(child_row, details):
 				details.serial_no.append(row.serial_no)
 
 			if row.batch_no:
-				details.batch_no[row.batch_no] += row.qty * (-1 if doc.type_of_transaction == "Outward" else 1)
+				details.batch_no[row.batch_no] += row.qty * (
+					-1 if doc.type_of_transaction == "Outward" else 1
+				)
 	else:
 		if child_row.serial_no:
 			details.serial_no.extend(get_serial_nos(child_row.serial_no))
@@ -1268,7 +1262,9 @@ def make_raw_materials():
 			make_item(item, properties)
 
 
-def make_service_item(item, properties={}):
+def make_service_item(item, properties=None):
+	if properties is None:
+		properties = {}
 	if not frappe.db.exists("Item", item):
 		properties.update({"is_stock_item": 0})
 		make_item(item, properties)
@@ -1316,9 +1312,7 @@ def make_bom_for_subcontracted_items():
 
 
 def set_backflush_based_on(based_on):
-	frappe.db.set_single_value(
-		"Buying Settings", "backflush_raw_materials_of_subcontract_based_on", based_on
-	)
+	frappe.db.set_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on", based_on)
 
 
 def get_subcontracting_order(**args):

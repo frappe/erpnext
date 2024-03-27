@@ -45,9 +45,7 @@ class AssetShiftAllocation(Document):
 		self.fetch_and_set_depr_schedule()
 
 	def validate(self):
-		self.asset_depr_schedule_doc = get_asset_depr_schedule_doc(
-			self.asset, "Active", self.finance_book
-		)
+		self.asset_depr_schedule_doc = get_asset_depr_schedule_doc(self.asset, "Active", self.finance_book)
 
 		self.validate_invalid_shift_change()
 		self.update_depr_schedule()
@@ -90,9 +88,7 @@ class AssetShiftAllocation(Document):
 			return
 
 		for i, sch in enumerate(self.depreciation_schedule):
-			if (
-				sch.journal_entry and self.asset_depr_schedule_doc.depreciation_schedule[i].shift != sch.shift
-			):
+			if sch.journal_entry and self.asset_depr_schedule_doc.depreciation_schedule[i].shift != sch.shift:
 				frappe.throw(
 					_(
 						"Row {0}: Shift cannot be changed since the depreciation has already been processed"
@@ -130,9 +126,7 @@ class AssetShiftAllocation(Document):
 
 	def allocate_shift_diff_in_depr_schedule(self):
 		asset_shift_factors_map = get_asset_shift_factors_map()
-		reverse_asset_shift_factors_map = {
-			asset_shift_factors_map[k]: k for k in asset_shift_factors_map
-		}
+		reverse_asset_shift_factors_map = {asset_shift_factors_map[k]: k for k in asset_shift_factors_map}
 
 		original_shift_factors_sum = sum(
 			flt(asset_shift_factors_map.get(schedule.shift))
@@ -162,9 +156,9 @@ class AssetShiftAllocation(Document):
 						)
 						diff = 0
 					except Exception:
-						frappe.throw(_("Could not auto update shifts. Shift with shift factor {0} needed.")).format(
-							shift_factor - diff
-						)
+						frappe.throw(
+							_("Could not auto update shifts. Shift with shift factor {0} needed.")
+						).format(shift_factor - diff)
 		elif diff < 0:
 			shift_factors = list(asset_shift_factors_map.values())
 			desc_shift_factors = sorted(shift_factors, reverse=True)
@@ -222,9 +216,9 @@ class AssetShiftAllocation(Document):
 							)
 							diff = 0
 						except Exception:
-							frappe.throw(_("Could not auto update shifts. Shift with shift factor {0} needed.")).format(
-								shift_factor + diff
-							)
+							frappe.throw(
+								_("Could not auto update shifts. Shift with shift factor {0} needed.")
+							).format(shift_factor + diff)
 
 	def create_new_asset_depr_schedule(self):
 		new_asset_depr_schedule_doc = frappe.copy_doc(self.asset_depr_schedule_doc)
@@ -273,9 +267,7 @@ def find_subsets_with_sum(numbers, k, target_sum, current_subset, result):
 		return
 
 	# Include the current number in the subset
-	find_subsets_with_sum(
-		numbers, k - 1, target_sum - numbers[0], current_subset + [numbers[0]], result
-	)
+	find_subsets_with_sum(numbers, k - 1, target_sum - numbers[0], [*current_subset, numbers[0]], result)
 
 	# Exclude the current number from the subset
 	find_subsets_with_sum(numbers[1:], k, target_sum, current_subset, result)

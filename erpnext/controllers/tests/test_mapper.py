@@ -29,7 +29,6 @@ class TestMapper(unittest.TestCase):
 		self.assertEqual(set(d for d in src_items), set(d.item_code for d in updated_so.items))
 
 	def make_quotation(self, item_list, customer):
-
 		qtn = frappe.get_doc(
 			{
 				"doctype": "Quotation",

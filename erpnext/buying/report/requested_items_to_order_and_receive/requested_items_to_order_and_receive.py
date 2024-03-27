@@ -57,9 +57,7 @@ def get_data(filters):
 				"qty_to_receive"
 			),
 			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
-			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.ordered_qty, 0))).as_(
-				"qty_to_order"
-			),
+			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.ordered_qty, 0))).as_("qty_to_order"),
 			mr_item.item_name,
 			mr_item.description,
 			mr.company,

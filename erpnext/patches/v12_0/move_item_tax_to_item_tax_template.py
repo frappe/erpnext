@@ -80,11 +80,9 @@ def execute():
 
 	for dt in doctypes:
 		for d in frappe.db.sql(
-			"""select name, parenttype, parent, item_code, item_tax_rate from `tab{0} Item`
+			f"""select name, parenttype, parent, item_code, item_tax_rate from `tab{dt} Item`
 								where ifnull(item_tax_rate, '') not in ('', '{{}}')
-								and item_tax_template is NULL""".format(
-				dt
-			),
+								and item_tax_template is NULL""",
 			as_dict=1,
 		):
 			item_tax_map = json.loads(d.item_tax_rate)
@@ -145,13 +143,23 @@ def get_item_tax_template(
 				if not parent_account:
 					parent_account = frappe.db.get_value(
 						"Account",
-						filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0, "company": company},
+						filters={
+							"account_type": "Tax",
+							"root_type": "Liability",
+							"is_group": 0,
+							"company": company,
+						},
 						fieldname="parent_account",
 					)
 				if not parent_account:
 					parent_account = frappe.db.get_value(
 						"Account",
-						filters={"account_type": "Tax", "root_type": "Liability", "is_group": 1, "company": company},
+						filters={
+							"account_type": "Tax",
+							"root_type": "Liability",
+							"is_group": 1,
+							"company": company,
+						},
 					)
 				filters = {
 					"account_name": account_name,

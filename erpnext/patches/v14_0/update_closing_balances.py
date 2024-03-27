@@ -22,7 +22,6 @@ def execute():
 			filters={"docstatus": 1, "company": company},
 			order_by="posting_date",
 		):
-
 			company_wise_order.setdefault(pcv.company, [])
 			if pcv.posting_date not in company_wise_order[pcv.company]:
 				pcv_doc = frappe.get_doc("Period Closing Voucher", pcv.name)

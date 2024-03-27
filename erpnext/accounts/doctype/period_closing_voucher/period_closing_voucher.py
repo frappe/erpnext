@@ -67,7 +67,8 @@ class PeriodClosingVoucher(AccountsController):
 				enqueue_after_commit=True,
 			)
 			frappe.msgprint(
-				_("The GL Entries will be cancelled in the background, it can take a few minutes."), alert=True
+				_("The GL Entries will be cancelled in the background, it can take a few minutes."),
+				alert=True,
 			)
 		else:
 			make_reverse_gl_entries(voucher_type="Period Closing Voucher", voucher_no=self.name)
@@ -109,9 +110,7 @@ class PeriodClosingVoucher(AccountsController):
 			self.posting_date, self.fiscal_year, self.company, label=_("Posting Date"), doc=self
 		)
 
-		self.year_start_date = get_fiscal_year(
-			self.posting_date, self.fiscal_year, company=self.company
-		)[1]
+		self.year_start_date = get_fiscal_year(self.posting_date, self.fiscal_year, company=self.company)[1]
 
 		self.check_if_previous_year_closed()
 
@@ -225,7 +224,9 @@ class PeriodClosingVoucher(AccountsController):
 				"credit_in_account_currency": abs(flt(acc.bal_in_account_currency))
 				if flt(acc.bal_in_account_currency) > 0
 				else 0,
-				"credit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) > 0 else 0,
+				"credit": abs(flt(acc.bal_in_company_currency))
+				if flt(acc.bal_in_company_currency) > 0
+				else 0,
 				"is_period_closing_voucher_entry": 1,
 			},
 			item=acc,
@@ -249,7 +250,9 @@ class PeriodClosingVoucher(AccountsController):
 				"credit_in_account_currency": abs(flt(acc.bal_in_account_currency))
 				if flt(acc.bal_in_account_currency) < 0
 				else 0,
-				"credit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) < 0 else 0,
+				"credit": abs(flt(acc.bal_in_company_currency))
+				if flt(acc.bal_in_company_currency) < 0
+				else 0,
 				"is_period_closing_voucher_entry": 1,
 			},
 			item=acc,

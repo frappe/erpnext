@@ -13,7 +13,7 @@ def execute(filters=None):
 	return Analytics(filters).run()
 
 
-class Analytics(object):
+class Analytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.date_field = (
@@ -87,9 +87,7 @@ class Analytics(object):
 				{"label": _(period), "fieldname": scrub(period), "fieldtype": "Float", "width": 120}
 			)
 
-		self.columns.append(
-			{"label": _("Total"), "fieldname": "total", "fieldtype": "Float", "width": 120}
-		)
+		self.columns.append({"label": _("Total"), "fieldname": "total", "fieldtype": "Float", "width": 120})
 
 	def get_data(self):
 		if self.filters.tree_type in ["Customer", "Supplier"]:
@@ -129,9 +127,7 @@ class Analytics(object):
 			""" select s.order_type as entity, s.{value_field} as value_field, s.{date_field}
 			from `tab{doctype}` s where s.docstatus = 1 and s.company = %s and s.{date_field} between %s and %s
 			and ifnull(s.order_type, '') != '' order by s.order_type
-		""".format(
-				date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type
-			),
+		""".format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
 			(self.filters.company, self.filters.from_date, self.filters.to_date),
 			as_dict=1,
 		)
@@ -166,7 +162,6 @@ class Analytics(object):
 			self.entity_names.setdefault(d.entity, d.entity_name)
 
 	def get_sales_transactions_based_on_items(self):
-
 		if self.filters["value_quantity"] == "Value":
 			value_field = "base_net_amount"
 		else:
@@ -178,9 +173,7 @@ class Analytics(object):
 			from `tab{doctype} Item` i , `tab{doctype}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
 			and s.{date_field} between %s and %s
-		""".format(
-				date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type
-			),
+		""".format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
 			(self.filters.company, self.filters.from_date, self.filters.to_date),
 			as_dict=1,
 		)
@@ -221,14 +214,12 @@ class Analytics(object):
 			value_field = "qty"
 
 		self.entries = frappe.db.sql(
-			"""
-			select i.item_group as entity, i.{value_field} as value_field, s.{date_field}
-			from `tab{doctype} Item` i , `tab{doctype}` s
+			f"""
+			select i.item_group as entity, i.{value_field} as value_field, s.{self.date_field}
+			from `tab{self.filters.doc_type} Item` i , `tab{self.filters.doc_type}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{date_field} between %s and %s
-		""".format(
-				date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type
-			),
+			and s.{self.date_field} between %s and %s
+		""",
 			(self.filters.company, self.filters.from_date, self.filters.to_date),
 			as_dict=1,
 		)
@@ -294,7 +285,7 @@ class Analytics(object):
 				total += amount
 
 			row["total"] = total
-			out = [row] + out
+			out = [row, *out]
 
 		self.data = out
 
@@ -330,9 +321,7 @@ class Analytics(object):
 
 		from_date, to_date = getdate(self.filters.from_date), getdate(self.filters.to_date)
 
-		increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(
-			self.filters.range, 1
-		)
+		increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(self.filters.range, 1)
 
 		if self.filters.range in ["Monthly", "Quarterly"]:
 			from_date = from_date.replace(day=1)
@@ -342,7 +331,7 @@ class Analytics(object):
 			from_date = from_date + relativedelta(from_date, weekday=MO(-1))
 
 		self.periodic_daterange = []
-		for dummy in range(1, 53):
+		for _dummy in range(1, 53):
 			if self.filters.range == "Weekly":
 				period_end_date = add_days(from_date, 6)
 			else:
@@ -370,10 +359,8 @@ class Analytics(object):
 		self.depth_map = frappe._dict()
 
 		self.group_entries = frappe.db.sql(
-			"""select name, lft, rgt , {parent} as parent
-			from `tab{tree}` order by lft""".format(
-				tree=self.filters.tree_type, parent=parent
-			),
+			f"""select name, lft, rgt , {parent} as parent
+			from `tab{self.filters.tree_type}` order by lft""",
 			as_dict=1,
 		)
 
@@ -387,12 +374,10 @@ class Analytics(object):
 		self.depth_map = frappe._dict()
 
 		self.group_entries = frappe.db.sql(
-			""" select * from (select "Order Types" as name, 0 as lft,
+			f""" select * from (select "Order Types" as name, 0 as lft,
 			2 as rgt, '' as parent union select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
-			from `tab{doctype}` where ifnull(order_type, '') != '') as b order by lft, name
-		""".format(
-				doctype=self.filters.doc_type
-			),
+			from `tab{self.filters.doc_type}` where ifnull(order_type, '') != '') as b order by lft, name
+		""",
 			as_dict=1,
 		)
 

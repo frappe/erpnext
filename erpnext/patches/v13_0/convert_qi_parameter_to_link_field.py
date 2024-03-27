@@ -6,9 +6,7 @@ def execute():
 	params = set()
 
 	# get all parameters from QI readings table
-	for (p,) in frappe.db.get_all(
-		"Quality Inspection Reading", fields=["specification"], as_list=True
-	):
+	for (p,) in frappe.db.get_all("Quality Inspection Reading", fields=["specification"], as_list=True):
 		params.add(p.strip())
 
 	# get all parameters from QI Template as some may be unused in QI

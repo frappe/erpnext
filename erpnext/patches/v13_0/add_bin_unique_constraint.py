@@ -21,7 +21,6 @@ def delete_broken_bins():
 
 
 def delete_and_patch_duplicate_bins():
-
 	duplicate_bins = frappe.db.sql(
 		"""
 		SELECT

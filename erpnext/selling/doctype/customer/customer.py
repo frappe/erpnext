@@ -17,7 +17,7 @@ from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
-from erpnext.accounts.party import get_dashboard_info, validate_party_accounts  # noqa
+from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
 from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -106,17 +106,16 @@ class Customer(TransactionBase):
 			self.name = set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def get_customer_name(self):
-
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			count = frappe.db.sql(
 				"""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
 				 where name like %s""",
-				"%{0} - %".format(self.customer_name),
+				f"%{self.customer_name} - %",
 				as_list=1,
 			)[0][0]
 			count = cint(count) + 1
 
-			new_customer_name = "{0} - {1}".format(self.customer_name, cstr(count))
+			new_customer_name = f"{self.customer_name} - {cstr(count)}"
 
 			msgprint(
 				_("Changed customer name to '{}' as '{}' already exists.").format(
@@ -326,9 +325,7 @@ class Customer(TransactionBase):
 			)
 		]
 
-		current_credit_limits = [
-			d.credit_limit for d in sorted(self.credit_limits, key=lambda k: k.company)
-		]
+		current_credit_limits = [d.credit_limit for d in sorted(self.credit_limits, key=lambda k: k.company)]
 
 		if past_credit_limits == current_credit_limits:
 			return
@@ -492,9 +489,7 @@ def get_loyalty_programs(doc):
 		) and (
 			not loyalty_program.customer_territory
 			or doc.territory
-			in get_nested_links(
-				"Territory", loyalty_program.customer_territory, doc.flags.ignore_permissions
-			)
+			in get_nested_links("Territory", loyalty_program.customer_territory, doc.flags.ignore_permissions)
 		):
 			lp_details.append(loyalty_program.name)
 
@@ -540,12 +535,12 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			]
 			if not credit_controller_users_formatted:
 				frappe.throw(
-					_("Please contact your administrator to extend the credit limits for {0}.").format(customer)
+					_("Please contact your administrator to extend the credit limits for {0}.").format(
+						customer
+					)
 				)
 
-			user_list = "<br><br><ul><li>{0}</li></ul>".format(
-				"<li>".join(credit_controller_users_formatted)
-			)
+			user_list = "<br><br><ul><li>{}</li></ul>".format("<li>".join(credit_controller_users_formatted))
 
 			message += _(
 				"Please contact any of the following users to extend the credit limits for {0}: {1}"
@@ -582,27 +577,21 @@ def send_emails(customer, customer_outstanding, credit_limit, credit_controller_
 	frappe.sendmail(recipients=credit_controller_users_list, subject=subject, message=message)
 
 
-def get_customer_outstanding(
-	customer, company, ignore_outstanding_sales_order=False, cost_center=None
-):
+def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries
 	cond = ""
 	if cost_center:
 		lft, rgt = frappe.get_cached_value("Cost Center", cost_center, ["lft", "rgt"])
 
-		cond = """ and cost_center in (select name from `tabCost Center` where
-			lft >= {0} and rgt <= {1})""".format(
-			lft, rgt
-		)
+		cond = f""" and cost_center in (select name from `tabCost Center` where
+			lft >= {lft} and rgt <= {rgt})"""
 
 	outstanding_based_on_gle = frappe.db.sql(
-		"""
+		f"""
 		select sum(debit) - sum(credit)
 		from `tabGL Entry` where party_type = 'Customer'
 		and is_cancelled = 0 and party = %s
-		and company=%s {0}""".format(
-			cond
-		),
+		and company=%s {cond}""",
 		(customer, company),
 	)
 
@@ -750,7 +739,7 @@ def make_address(args, is_primary_address=1, is_shipping_address=1):
 	if reqd_fields:
 		msg = _("Following fields are mandatory to create address:")
 		frappe.throw(
-			"{0} <br><br> <ul>{1}</ul>".format(msg, "\n".join(reqd_fields)),
+			"{} <br><br> <ul>{}</ul>".format(msg, "\n".join(reqd_fields)),
 			title=_("Missing Values Required"),
 		)
 

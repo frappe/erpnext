@@ -139,9 +139,7 @@ class DeprecatedBatchNoValuation:
 			if not self.non_batchwise_balance_qty:
 				continue
 
-			self.batch_avg_rate[batch_no] = (
-				self.non_batchwise_balance_value / self.non_batchwise_balance_qty
-			)
+			self.batch_avg_rate[batch_no] = self.non_batchwise_balance_value / self.non_batchwise_balance_qty
 
 			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change
@@ -208,9 +206,9 @@ class DeprecatedBatchNoValuation:
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
 
-		timestamp_condition = CombineDatetime(
-			bundle.posting_date, bundle.posting_time
-		) < CombineDatetime(self.sle.posting_date, self.sle.posting_time)
+		timestamp_condition = CombineDatetime(bundle.posting_date, bundle.posting_time) < CombineDatetime(
+			self.sle.posting_date, self.sle.posting_time
+		)
 
 		if self.sle.creation:
 			timestamp_condition |= (

@@ -43,7 +43,6 @@ class CurrencyExchangeSettings(Document):
 
 	def set_parameters_and_result(self):
 		if self.service_provider == "exchangerate.host":
-
 			if not self.access_key:
 				frappe.throw(
 					_("Access Key is required for Service Provider: {0}").format(
@@ -78,9 +77,7 @@ class CurrencyExchangeSettings(Document):
 				transaction_date=nowdate(), to_currency="INR", from_currency="USD"
 			)
 
-		api_url = self.api_endpoint.format(
-			transaction_date=nowdate(), to_currency="INR", from_currency="USD"
-		)
+		api_url = self.api_endpoint.format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
 
 		try:
 			response = requests.get(api_url, params=params)
@@ -100,14 +97,14 @@ class CurrencyExchangeSettings(Document):
 				]
 		except Exception:
 			frappe.throw(_("Invalid result key. Response:") + " " + response.text)
-		if not isinstance(value, (int, float)):
+		if not isinstance(value, int | float):
 			frappe.throw(_("Returned exchange rate is neither integer not float."))
 
 		self.url = response.url
 
 
 @frappe.whitelist()
-def get_api_endpoint(service_provider: str = None, use_http: bool = False):
+def get_api_endpoint(service_provider: str | None = None, use_http: bool = False):
 	if service_provider and service_provider in ["exchangerate.host", "frankfurter.app"]:
 		if service_provider == "exchangerate.host":
 			api = "api.exchangerate.host/convert"
