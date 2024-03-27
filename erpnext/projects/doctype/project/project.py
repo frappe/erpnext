@@ -87,6 +87,7 @@ class Project(Document):
 				is_group=task_details.is_group,
 				color=task_details.color,
 				template_task=task_details.name,
+				priority=task_details.priority,
 			)
 		).insert()
 
