@@ -87,7 +87,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-07-01 19:45:00.323953",
+ "modified": "2024-03-27 13:09:45.400219",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Global Defaults",
@@ -102,7 +102,7 @@
   }
  ],
  "read_only": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

@@ -29,14 +29,15 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-05-29 15:08:41.949378",
+ "modified": "2024-03-27 13:10:16.209635",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Opening Entry Detail",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -69,14 +69,15 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-14 01:20:48.588052",
+ "modified": "2024-03-27 13:09:57.323835",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card Scrap Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

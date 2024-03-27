@@ -78,7 +78,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-28 18:59:50.678917",
+ "modified": "2024-03-27 13:10:21.721160",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Update",
@@ -99,7 +99,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

@@ -22,13 +22,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-26 14:15:34.695605",
+ "modified": "2024-03-27 13:10:13.951962",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Portal User",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

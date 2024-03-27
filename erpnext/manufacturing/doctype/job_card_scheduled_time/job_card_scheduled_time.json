@@ -33,13 +33,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-14 15:27:03.203045",
+ "modified": "2024-03-27 13:09:57.211836",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card Scheduled Time",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

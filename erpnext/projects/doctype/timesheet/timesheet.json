@@ -310,7 +310,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-20 15:59:11.107831",
+ "modified": "2024-03-27 13:10:53.551907",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
@@ -386,7 +386,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "title_field": "title"

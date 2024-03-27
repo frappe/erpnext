@@ -60,12 +60,11 @@
   {
    "fieldname": "communication_channel",
    "fieldtype": "Select",
-   "label": "Communication Channel",
-   "options": ""
+   "label": "Communication Channel"
   }
  ],
  "links": [],
- "modified": "2020-10-27 16:22:08.068542",
+ "modified": "2024-03-27 13:06:45.112268",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Communication Medium",
@@ -84,7 +83,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

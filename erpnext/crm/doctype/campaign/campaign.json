@@ -67,7 +67,7 @@
  "icon": "fa fa-bullhorn",
  "idx": 1,
  "links": [],
- "modified": "2021-06-30 18:05:06.412712",
+ "modified": "2024-03-27 13:06:43.861206",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Campaign",
@@ -83,7 +83,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales Manager",
-   "set_user_permissions": 1,
    "write": 1
   },
   {
@@ -106,6 +105,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

@@ -19,14 +19,15 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-26 12:55:00.778201",
+ "modified": "2024-03-27 13:10:20.638727",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Material Request Warehouse",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
