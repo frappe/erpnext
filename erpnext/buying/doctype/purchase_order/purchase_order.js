@@ -350,7 +350,9 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					if (flt(doc.per_received, 2) < 100 && allow_receipt) {
 						this.frm.add_custom_button(
 							__("Purchase Receipt"),
-							this.make_purchase_receipt,
+							() => {
+								me.make_purchase_receipt();
+							},
 							__("Create")
 						);
 						if (doc.is_subcontracted) {
@@ -367,7 +369,9 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 							} else {
 								this.frm.add_custom_button(
 									__("Subcontracting Order"),
-									this.make_subcontracting_order,
+									() => {
+										me.make_subcontracting_order();
+									},
 									__("Create")
 								);
 							}
@@ -376,7 +380,9 @@ erpnext.buying.PurchaseOrderController = class PurchaseOrderController extends (
 					if (flt(doc.per_billed, 2) < 100)
 						this.frm.add_custom_button(
 							__("Purchase Invoice"),
-							this.make_purchase_invoice,
+							() => {
+								me.make_purchase_invoice();
+							},
 							__("Create")
 						);
 
