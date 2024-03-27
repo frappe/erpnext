@@ -288,7 +288,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2023-08-07 15:45:06.176313",
+ "modified": "2024-03-27 13:06:40.535884",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
@@ -323,7 +323,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

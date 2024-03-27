@@ -32,7 +32,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-23 09:13:44.292792",
+ "modified": "2024-03-27 13:10:48.283833",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Settings",
@@ -70,7 +70,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

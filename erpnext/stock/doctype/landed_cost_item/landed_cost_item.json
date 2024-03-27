@@ -30,8 +30,6 @@
    "options": "Item",
    "read_only": 1,
    "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "100px"
   },
   {
@@ -44,8 +42,6 @@
    "print_width": "300px",
    "read_only": 1,
    "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "120px"
   },
   {
@@ -55,9 +51,7 @@
    "no_copy": 1,
    "options": "Purchase Invoice\nPurchase Receipt",
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "receipt_document",
@@ -66,33 +60,25 @@
    "no_copy": 1,
    "options": "receipt_document_type",
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "col_break2",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
    "label": "Rate",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "amount",
@@ -103,9 +89,7 @@
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
    "read_only": 1,
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "applicable_charges",
@@ -113,9 +97,7 @@
    "in_list_view": 1,
    "label": "Applicable Charges",
    "options": "Company:company:default_currency",
-   "read_only_depends_on": "eval:parent.distribute_charges_based_on != 'Distribute Manually'",
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only_depends_on": "eval:parent.distribute_charges_based_on != 'Distribute Manually'"
   },
   {
    "fieldname": "purchase_receipt_item",
@@ -124,30 +106,22 @@
    "label": "Purchase Receipt Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Accounting Dimensions"
   },
   {
    "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -156,20 +130,19 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Fixed Asset",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-25 23:09:23.322282",
+ "modified": "2024-03-27 13:09:59.220459",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Item",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

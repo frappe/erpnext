@@ -98,7 +98,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-06-20 15:43:55.696388",
+ "modified": "2024-03-27 13:06:41.658172",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Log",
@@ -131,7 +131,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

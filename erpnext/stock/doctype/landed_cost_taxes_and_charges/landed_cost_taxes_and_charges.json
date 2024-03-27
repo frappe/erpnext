@@ -67,12 +67,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-17 13:57:10.807980",
+ "modified": "2024-03-27 13:09:59.493991",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

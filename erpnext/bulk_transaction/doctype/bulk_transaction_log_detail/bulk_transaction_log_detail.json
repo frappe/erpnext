@@ -81,7 +81,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-10 11:44:10.758342",
+ "modified": "2024-03-27 13:06:43.240040",
  "modified_by": "Administrator",
  "module": "Bulk Transaction",
  "name": "Bulk Transaction Log Detail",
@@ -100,7 +100,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

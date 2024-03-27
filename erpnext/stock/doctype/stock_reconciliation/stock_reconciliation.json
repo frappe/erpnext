@@ -183,7 +183,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-05-11 09:10:26.327652",
+ "modified": "2024-03-27 13:10:44.699413",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",
@@ -205,7 +205,7 @@
  ],
  "search_fields": "posting_date",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

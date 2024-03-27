@@ -2201,7 +2201,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-03-22 17:50:34.395602",
+ "modified": "2024-03-27 13:10:35.407256",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2249,7 +2249,7 @@
  "quick_entry": 1,
  "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",

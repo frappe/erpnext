@@ -91,7 +91,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-11-28 17:24:13.008692",
+ "modified": "2024-03-27 13:06:37.477927",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Clearance",
@@ -107,7 +107,7 @@
  ],
  "quick_entry": 1,
  "read_only": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": []
 }
