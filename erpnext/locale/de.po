@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-24 09:35+0000\n"
-"PO-Revision-Date: 2024-03-26 12:46\n"
+"PO-Revision-Date: 2024-03-27 13:04\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -4903,7 +4903,7 @@ msgstr "Anpassung gegen"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.py:582
 msgid "Adjustment based on Purchase Invoice rate"
-msgstr ""
+msgstr "Anpassung basierend auf dem Rechnungspreis"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:54
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:79
@@ -6030,7 +6030,7 @@ msgstr "Benutzer darf Preise ändern"
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Allow Zero Rate"
-msgstr ""
+msgstr "Null-Bewertung erlauben"
 
 #. Label of a Check field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -6154,14 +6154,14 @@ msgstr "Erlaubt Transaktionen mit"
 
 #: accounts/doctype/party_link/party_link.py:27
 msgid "Allowed primary roles are 'Customer' and 'Supplier'. Please select one of these roles only."
-msgstr ""
+msgstr "Zulässige Hauptrollen sind „Kunde“ und „Lieferant“. Bitte wählen Sie nur eine dieser Rollen aus."
 
 #. Description of the 'Enable Stock Reservation' (Check) field in DocType
 #. 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Allows to keep aside a specific quantity of inventory for a particular order."
-msgstr ""
+msgstr "Ermöglicht es, eine bestimmte Menge an Inventar für eine bestimmte Bestellung zurückzubehalten."
 
 #: stock/doctype/pick_list/pick_list.py:792
 msgid "Already Picked"
@@ -7245,7 +7245,7 @@ msgstr ""
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:26
 msgctxt "<a href='/app/error-log' class='variant-click'>Error Log</a>"
 msgid "An error has occurred during {0}. Check {1} for more details"
-msgstr ""
+msgstr "Während {0} ist ein Fehler aufgetreten. Prüfen Sie {1} für weitere Details"
 
 #: public/js/controllers/buying.js:292 public/js/utils/sales_common.js:408
 msgid "An error occurred during the update process"
@@ -7299,7 +7299,7 @@ msgstr "Ein weiterer Budgeteintrag &#39;{0}&#39; existiert bereits für {1} &#39
 
 #: accounts/doctype/cost_center_allocation/cost_center_allocation.py:109
 msgid "Another Cost Center Allocation record {0} applicable from {1}, hence this allocation will be applicable upto {2}"
-msgstr ""
+msgstr "Ein weiterer Datensatz der Kostenstellen-Zuordnung {0} gilt ab {1}, daher gilt diese Zuordnung bis {2}"
 
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.py:133
 msgid "Another Period Closing Entry {0} has been made after {1}"
@@ -7311,7 +7311,7 @@ msgstr "Ein weiterer Vertriebsmitarbeiter {0} existiert bereits mit der gleichen
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:37
 msgid "Any one of following filters required: warehouse, Item Code, Item Group"
-msgstr ""
+msgstr "Einer der folgenden Filter ist erforderlich: Lager, Artikelcode, Artikelgruppe"
 
 #. Label of a Currency field in DocType 'Landed Cost Item'
 #: stock/doctype/landed_cost_item/landed_cost_item.json
@@ -7368,13 +7368,13 @@ msgstr "Anwendbare Module"
 #. Name of a DocType
 #: accounts/doctype/applicable_on_account/applicable_on_account.json
 msgid "Applicable On Account"
-msgstr ""
+msgstr "Auf Konto anwendbar"
 
 #. Label of a Table field in DocType 'Accounting Dimension Filter'
 #: accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgctxt "Accounting Dimension Filter"
 msgid "Applicable On Account"
-msgstr ""
+msgstr "Auf Konto anwendbar"
 
 #. Label of a Link field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
@@ -13104,7 +13104,7 @@ msgstr "Kassenbuchung"
 #: accounts/report/cash_flow/cash_flow.json
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Cash Flow"
-msgstr ""
+msgstr "Cashflow"
 
 #: public/js/financial_statements.js:141
 msgid "Cash Flow Statement"
@@ -15825,7 +15825,7 @@ msgstr "Abgeschlossene Aufgaben"
 #: manufacturing/doctype/job_card_operation/job_card_operation.json
 msgctxt "Job Card Operation"
 msgid "Completed Time"
-msgstr ""
+msgstr "Benötigte Zeit"
 
 #. Name of a report
 #: manufacturing/report/completed_work_orders/completed_work_orders.json
@@ -15899,13 +15899,13 @@ msgstr "Zustand"
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgctxt "Inventory Dimension"
 msgid "Conditional Rule"
-msgstr ""
+msgstr "Bedingte Regel"
 
 #. Label of a Section Break field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgctxt "Inventory Dimension"
 msgid "Conditional Rule Examples"
-msgstr ""
+msgstr "Beispiele für bedingte Regeln"
 
 #. Description of the 'Mixed Conditions' (Check) field in DocType 'Pricing
 #. Rule'
@@ -74309,25 +74309,25 @@ msgstr "Bezeichnung"
 #: accounts/doctype/sales_invoice/sales_invoice.js:1043
 #: templates/pages/projects.html:68
 msgid "To"
-msgstr "Zu"
+msgstr "An"
 
 #. Label of a Data field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
 msgctxt "Call Log"
 msgid "To"
-msgstr "Zu"
+msgstr "An"
 
 #. Label of a Data field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "To"
-msgstr "Zu"
+msgstr "An"
 
 #. Label of a Link field in DocType 'UOM Conversion Factor'
 #: setup/doctype/uom_conversion_factor/uom_conversion_factor.json
 msgctxt "UOM Conversion Factor"
 msgid "To"
-msgstr "Zu"
+msgstr "An"
 
 #: selling/page/point_of_sale/pos_payment.js:587
 msgid "To Be Paid"
@@ -79861,7 +79861,7 @@ msgstr "Zusammenfassung der Lagerkapazität"
 
 #: stock/doctype/putaway_rule/putaway_rule.py:78
 msgid "Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} {2}."
-msgstr ""
+msgstr "Die Lagerkapazität für Artikel '{0}' muss größer sein als der vorhandene Lagerbestand von {1} {2}."
 
 #. Label of a Section Break field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
@@ -80216,7 +80216,7 @@ msgstr "Garantiefrist (in Tagen)"
 
 #: utilities/doctype/video/video.js:7
 msgid "Watch Video"
-msgstr "Schau Video"
+msgstr "Video ansehen"
 
 #: controllers/accounts_controller.py:232
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck '{2}' checkbox. <br><br> Or you can use {3} tool to reconcile against {1} later."
@@ -80898,7 +80898,7 @@ msgstr "Arbeitsauftragsanalyse"
 #: manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Work Order Consumed Materials"
-msgstr ""
+msgstr "In Arbeitsauftrag verbrauchtes Material"
 
 #. Name of a DocType
 #: manufacturing/doctype/work_order_item/work_order_item.json
@@ -81330,7 +81330,7 @@ msgstr "Abschreibungsbuchung"
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Write Off Limit"
-msgstr ""
+msgstr "Abschreibungsgrenze"
 
 #. Label of a Check field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -81583,7 +81583,7 @@ msgstr "Sie haben keine Berechtigung Buchungen vor {0} hinzuzufügen oder zu akt
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:328
 msgid "You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
-msgstr ""
+msgstr "Sie sind nicht berechtigt, Lagertransaktionen für Artikel {0} im Lager {1} vor diesem Zeitpunkt durchzuführen/zu bearbeiten."
 
 #: accounts/doctype/account/account.py:282
 msgid "You are not authorized to set Frozen value"
@@ -81641,11 +81641,11 @@ msgstr ""
 #. Description of a report in the Onboarding Step 'Check Stock Projected Qty'
 #: stock/onboarding_step/view_stock_projected_qty/view_stock_projected_qty.json
 msgid "You can set the filters to narrow the results, then click on Generate New Report to see the updated report."
-msgstr ""
+msgstr "Sie können Filter festlegen, um die Ergebnisse einzugrenzen. Klicken Sie auf „Neuen Bericht erstellen“, um den aktualisierten Bericht anzuzeigen."
 
 #: manufacturing/doctype/job_card/job_card.py:1042
 msgid "You can't make any changes to Job Card since Work Order is closed."
-msgstr ""
+msgstr "Sie können keine Änderungen an der Jobkarte vornehmen, da der Arbeitsauftrag geschlossen ist."
 
 #: accounts/doctype/loyalty_program/loyalty_program.py:176
 msgid "You can't redeem Loyalty Points having more value than the Rounded Total."
@@ -82729,7 +82729,7 @@ msgstr "{0} {1}: Konto {2} gehört nicht zu Unternehmen {3}"
 #: accounts/doctype/gl_entry/gl_entry.py:225
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:75
 msgid "{0} {1}: Account {2} is a Group Account and group accounts cannot be used in transactions"
-msgstr ""
+msgstr "{0} {1}: Das Konto {2} ist ein Gruppenkonto und Gruppenkonten können nicht für Transaktionen verwendet werden"
 
 #: accounts/doctype/gl_entry/gl_entry.py:232
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:82
@@ -82754,7 +82754,7 @@ msgstr "{0} {1}: Kostenstelle {2} gehört nicht zu Unternehmen {3}"
 
 #: accounts/doctype/gl_entry/gl_entry.py:259
 msgid "{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot be used in transactions"
-msgstr ""
+msgstr "{0} {1}: Die Kostenstelle {2} ist eine Gruppenkostenstelle und Gruppenkostenstellen können nicht für Transaktionen verwendet werden"
 
 #: accounts/doctype/gl_entry/gl_entry.py:127
 msgid "{0} {1}: Customer is required against Receivable account {2}"
