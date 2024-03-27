@@ -248,7 +248,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-07 11:15:58.385521",
+ "modified": "2024-03-27 13:06:46.177457",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",
@@ -316,8 +316,9 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1,
  "track_seen": 1
 }

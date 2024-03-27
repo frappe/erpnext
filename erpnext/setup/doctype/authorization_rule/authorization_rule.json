@@ -162,7 +162,7 @@
  "icon": "fa fa-shield",
  "idx": 1,
  "links": [],
- "modified": "2023-09-11 10:29:02.863193",
+ "modified": "2024-03-27 13:06:36.613880",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Authorization Rule",
@@ -183,7 +183,7 @@
  ],
  "search_fields": "transaction,based_on,system_user,system_role,approving_user,approving_role",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

@@ -31,14 +31,14 @@ class TestDelayedTasksSummary(unittest.TestCase):
 			{"subject": "_Test Task 98", "status": "Completed", "priority": "Low", "delay": -1},
 		]
 		report = execute(filters)
-		data = list(filter(lambda x: x.subject == "_Test Task 99", report[1]))[0]
+		data = next(filter(lambda x: x.subject == "_Test Task 99", report[1]))
 
 		for key in ["subject", "status", "priority", "delay"]:
 			self.assertEqual(expected_data[0].get(key), data.get(key))
 
 		filters.status = "Completed"
 		report = execute(filters)
-		data = list(filter(lambda x: x.subject == "_Test Task 98", report[1]))[0]
+		data = next(filter(lambda x: x.subject == "_Test Task 98", report[1]))
 
 		for key in ["subject", "status", "priority", "delay"]:
 			self.assertEqual(expected_data[1].get(key), data.get(key))

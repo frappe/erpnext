@@ -102,11 +102,10 @@
   }
  ],
  "links": [],
- "modified": "2022-12-15 11:11:02.131986",
+ "modified": "2024-03-27 13:05:59.300573",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment",
- "name_case": "UPPER CASE",
  "owner": "Administrator",
  "permissions": [
   {
@@ -158,7 +157,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

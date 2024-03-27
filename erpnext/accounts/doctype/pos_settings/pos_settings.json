@@ -24,7 +24,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-04-19 14:56:24.465218",
+ "modified": "2024-03-27 13:10:17.083132",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",
@@ -56,7 +56,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

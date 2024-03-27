@@ -110,9 +110,7 @@ def get_entries(filters):
 			{cond} and dt.name = dt_item.parent and dt.docstatus = 1
 			and dt.sales_partner is not null and dt.sales_partner != ''
 			order by dt.name desc, dt.sales_partner
-		""".format(
-			date_field=date_field, doctype=filters.get("doctype"), cond=conditions
-		),
+		""".format(date_field=date_field, doctype=filters.get("doctype"), cond=conditions),
 		filters,
 		as_dict=1,
 	)
@@ -125,13 +123,13 @@ def get_conditions(filters, date_field):
 
 	for field in ["company", "customer", "territory", "sales_partner"]:
 		if filters.get(field):
-			conditions += " and dt.{0} = %({1})s".format(field, field)
+			conditions += f" and dt.{field} = %({field})s"
 
 	if filters.get("from_date"):
-		conditions += " and dt.{0} >= %(from_date)s".format(date_field)
+		conditions += f" and dt.{date_field} >= %(from_date)s"
 
 	if filters.get("to_date"):
-		conditions += " and dt.{0} <= %(to_date)s".format(date_field)
+		conditions += f" and dt.{date_field} <= %(to_date)s"
 
 	if not filters.get("show_return_entries"):
 		conditions += " and dt_item.qty > 0.0"
@@ -142,10 +140,7 @@ def get_conditions(filters, date_field):
 	if filters.get("item_group"):
 		lft, rgt = frappe.get_cached_value("Item Group", filters.get("item_group"), ["lft", "rgt"])
 
-		conditions += """ and dt_item.item_group in (select name from
-			`tabItem Group` where lft >= %s and rgt <= %s)""" % (
-			lft,
-			rgt,
-		)
+		conditions += f""" and dt_item.item_group in (select name from
+			`tabItem Group` where lft >= {lft} and rgt <= {rgt})"""
 
 	return conditions

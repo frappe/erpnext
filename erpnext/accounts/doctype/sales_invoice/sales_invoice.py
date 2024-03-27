@@ -16,6 +16,10 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
 	get_loyalty_program_details_with_points,
 	validate_loyalty_points,
 )
+from erpnext.accounts.doctype.pricing_rule.utils import (
+	update_coupon_code_count,
+	validate_coupon_code,
+)
 from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	validate_docs_for_deferred_accounting,
 	validate_docs_for_voucher_types,
@@ -73,7 +77,7 @@ class SalesInvoice(SellingController):
 		account_for_change_amount: DF.Link | None
 		additional_discount_account: DF.Link | None
 		additional_discount_percentage: DF.Float
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		advances: DF.Table[SalesInvoiceAdvance]
 		against_income_account: DF.SmallText | None
 		allocate_advances_automatically: DF.Check
@@ -98,7 +102,7 @@ class SalesInvoice(SellingController):
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
-		company_address_display: DF.SmallText | None
+		company_address_display: DF.TextEditor | None
 		company_tax_id: DF.Data | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
@@ -106,6 +110,7 @@ class SalesInvoice(SellingController):
 		contact_person: DF.Link | None
 		conversion_rate: DF.Float
 		cost_center: DF.Link | None
+		coupon_code: DF.Link | None
 		currency: DF.Link
 		customer: DF.Link | None
 		customer_address: DF.Link | None
@@ -114,7 +119,7 @@ class SalesInvoice(SellingController):
 		debit_to: DF.Link
 		disable_rounded_total: DF.Check
 		discount_amount: DF.Currency
-		dispatch_address: DF.SmallText | None
+		dispatch_address: DF.TextEditor | None
 		dispatch_address_name: DF.Link | None
 		dont_create_loyalty_points: DF.Check
 		due_date: DF.Date | None
@@ -146,7 +151,7 @@ class SalesInvoice(SellingController):
 		naming_series: DF.Literal["ACC-SINV-.YYYY.-", "ACC-SINV-RET-.YYYY.-"]
 		net_total: DF.Currency
 		only_include_allocated_payments: DF.Check
-		other_charges_calculation: DF.LongText | None
+		other_charges_calculation: DF.TextEditor | None
 		outstanding_amount: DF.Currency
 		packed_items: DF.Table[PackedItem]
 		paid_amount: DF.Currency
@@ -178,7 +183,7 @@ class SalesInvoice(SellingController):
 		set_posting_time: DF.Check
 		set_target_warehouse: DF.Link | None
 		set_warehouse: DF.Link | None
-		shipping_address: DF.SmallText | None
+		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		source: DF.Link | None
@@ -230,7 +235,7 @@ class SalesInvoice(SellingController):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(SalesInvoice, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.status_updater = [
 			{
 				"source_dt": "Sales Invoice Item",
@@ -267,7 +272,7 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Paid")
 
 	def validate(self):
-		super(SalesInvoice, self).validate()
+		super().validate()
 		self.validate_auto_set_posting_time()
 
 		if not (self.is_pos or self.is_debit_note):
@@ -293,6 +298,10 @@ class SalesInvoice(SellingController):
 		validate_inter_company_party(
 			self.doctype, self.customer, self.company, self.inter_company_invoice_reference
 		)
+
+		# Validating coupon code
+		if self.coupon_code:
+			validate_coupon_code(self.coupon_code)
 
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -466,12 +475,13 @@ class SalesInvoice(SellingController):
 
 		self.update_time_sheet(self.name)
 
-		if (
-			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction"
-		):
+		if frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
 			update_company_current_month_sales(self.company)
 			self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
+
+		if self.coupon_code:
+			update_coupon_code_count(self.coupon_code, "used")
 
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if (
@@ -481,9 +491,7 @@ class SalesInvoice(SellingController):
 			and not self.dont_create_loyalty_points
 		):
 			self.make_loyalty_point_entry()
-		elif (
-			self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program
-		):
+		elif self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
 			against_si_doc.delete_loyalty_point_entry()
 			against_si_doc.make_loyalty_point_entry()
@@ -512,11 +520,11 @@ class SalesInvoice(SellingController):
 	def check_if_consolidated_invoice(self):
 		# since POS Invoice extends Sales Invoice, we explicitly check if doctype is Sales Invoice
 		if self.doctype == "Sales Invoice" and self.is_consolidated:
-			invoice_or_credit_note = (
-				"consolidated_credit_note" if self.is_return else "consolidated_invoice"
-			)
+			invoice_or_credit_note = "consolidated_credit_note" if self.is_return else "consolidated_invoice"
 			pos_closing_entry = frappe.get_all(
-				"POS Invoice Merge Log", filters={invoice_or_credit_note: self.name}, pluck="pos_closing_entry"
+				"POS Invoice Merge Log",
+				filters={invoice_or_credit_note: self.name},
+				pluck="pos_closing_entry",
 			)
 			if pos_closing_entry and pos_closing_entry[0]:
 				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}.").format(
@@ -528,13 +536,13 @@ class SalesInvoice(SellingController):
 	def before_cancel(self):
 		self.check_if_consolidated_invoice()
 
-		super(SalesInvoice, self).before_cancel()
+		super().before_cancel()
 		self.update_time_sheet(None)
 
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
 
-		super(SalesInvoice, self).on_cancel()
+		super().on_cancel()
 
 		self.check_sales_order_on_hold_or_close("sales_order")
 
@@ -563,16 +571,15 @@ class SalesInvoice(SellingController):
 		self.db_set("status", "Cancelled")
 		self.db_set("repost_required", 0)
 
-		if (
-			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction"
-		):
+		if self.coupon_code:
+			update_coupon_code_count(self.coupon_code, "cancelled")
+
+		if frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
 			update_company_current_month_sales(self.company)
 			self.update_project()
 		if not self.is_return and not self.is_consolidated and self.loyalty_program:
 			self.delete_loyalty_point_entry()
-		elif (
-			self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program
-		):
+		elif self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
 			against_si_doc.delete_loyalty_point_entry()
 			against_si_doc.make_loyalty_point_entry()
@@ -679,7 +686,7 @@ class SalesInvoice(SellingController):
 		if not self.due_date and self.customer:
 			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
-		super(SalesInvoice, self).set_missing_values(for_validate)
+		super().set_missing_values(for_validate)
 
 		print_format = pos.get("print_format") if pos else None
 		if not print_format and not cint(frappe.db.get_value("Print Format", "POS Invoice", "disabled")):
@@ -870,7 +877,8 @@ class SalesInvoice(SellingController):
 
 		if account.report_type != "Balance Sheet":
 			msg = (
-				_("Please ensure {} account is a Balance Sheet account.").format(frappe.bold("Debit To")) + " "
+				_("Please ensure {} account is a Balance Sheet account.").format(frappe.bold("Debit To"))
+				+ " "
 			)
 			msg += _(
 				"You can change the parent account to a Balance Sheet account or select a different account."
@@ -899,11 +907,16 @@ class SalesInvoice(SellingController):
 		)
 
 	def validate_with_previous_doc(self):
-		super(SalesInvoice, self).validate_with_previous_doc(
+		super().validate_with_previous_doc(
 			{
 				"Sales Order": {
 					"ref_dn_field": "sales_order",
-					"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]],
+					"compare_fields": [
+						["customer", "="],
+						["company", "="],
+						["project", "="],
+						["currency", "="],
+					],
 				},
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
@@ -913,7 +926,12 @@ class SalesInvoice(SellingController):
 				},
 				"Delivery Note": {
 					"ref_dn_field": "delivery_note",
-					"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]],
+					"compare_fields": [
+						["customer", "="],
+						["company", "="],
+						["project", "="],
+						["currency", "="],
+					],
 				},
 				"Delivery Note Item": {
 					"ref_dn_field": "dn_detail",
@@ -968,13 +986,14 @@ class SalesInvoice(SellingController):
 		}
 		for key, value in prev_doc_field_map.items():
 			if frappe.db.get_single_value("Selling Settings", value[0]) == "Yes":
-
 				if frappe.get_value("Customer", self.customer, value[0]):
 					continue
 
 				for d in self.get("items"):
 					if d.item_code and not d.get(key.lower().replace(" ", "_")) and not self.get(value[1]):
-						msgprint(_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1)
+						msgprint(
+							_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1
+						)
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -996,7 +1015,7 @@ class SalesInvoice(SellingController):
 				frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
 	def validate_warehouse(self):
-		super(SalesInvoice, self).validate_warehouse()
+		super().validate_warehouse()
 
 		for d in self.get_item_list():
 			if (
@@ -1316,7 +1335,9 @@ class SalesInvoice(SellingController):
 						add_asset_activity(asset.name, _("Asset returned"))
 
 						if asset.calculate_depreciation:
-							posting_date = frappe.db.get_value("Sales Invoice", self.return_against, "posting_date")
+							posting_date = frappe.db.get_value(
+								"Sales Invoice", self.return_against, "posting_date"
+							)
 							reverse_depreciation_entry_made_after_disposal(asset, posting_date)
 							notes = _(
 								"This schedule was created when Asset {0} was returned through Sales Invoice {1}."
@@ -1364,7 +1385,9 @@ class SalesInvoice(SellingController):
 							else item.deferred_revenue_account
 						)
 
-						amount, base_amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
+						amount, base_amount = self.get_amount_and_base_amount(
+							item, enable_discount_accounting
+						)
 
 						account_currency = get_account_currency(income_account)
 						gl_entries.append(
@@ -1388,7 +1411,7 @@ class SalesInvoice(SellingController):
 
 		# expense account gl entries
 		if cint(self.update_stock) and erpnext.is_perpetual_inventory_enabled(self.company):
-			gl_entries += super(SalesInvoice, self).get_gl_entries()
+			gl_entries += super().get_gl_entries()
 
 	def get_asset(self, item):
 		if item.get("asset"):
@@ -1451,7 +1474,6 @@ class SalesInvoice(SellingController):
 
 	def make_pos_gl_entries(self, gl_entries):
 		if cint(self.is_pos):
-
 			skip_change_gl_entries = not cint(
 				frappe.db.get_single_value("Accounts Settings", "post_change_gl_entries")
 			)
@@ -1609,7 +1631,9 @@ class SalesInvoice(SellingController):
 						"credit_in_account_currency": flt(
 							self.rounding_adjustment, self.precision("rounding_adjustment")
 						),
-						"credit": flt(self.base_rounding_adjustment, self.precision("base_rounding_adjustment")),
+						"credit": flt(
+							self.base_rounding_adjustment, self.precision("base_rounding_adjustment")
+						),
 						"cost_center": round_off_cost_center
 						if self.use_company_roundoff_cost_center
 						else (self.cost_center or round_off_cost_center),
@@ -1631,7 +1655,11 @@ class SalesInvoice(SellingController):
 				)
 				billed_amt = billed_amt and billed_amt[0][0] or 0
 				frappe.db.set_value(
-					"Delivery Note Item", d.dn_detail, "billed_amt", billed_amt, update_modified=update_modified
+					"Delivery Note Item",
+					d.dn_detail,
+					"billed_amt",
+					billed_amt,
+					update_modified=update_modified,
 				)
 				updated_delivery_notes.append(d.delivery_note)
 			elif d.so_detail:
@@ -1686,7 +1714,6 @@ class SalesInvoice(SellingController):
 			and getdate(lp_details.from_date) <= getdate(self.posting_date)
 			and (not lp_details.to_date or getdate(lp_details.to_date) >= getdate(self.posting_date))
 		):
-
 			collection_factor = lp_details.collection_factor if lp_details.collection_factor else 1.0
 			points_earned = cint(eligible_amount / collection_factor)
 
@@ -1939,14 +1966,13 @@ def validate_inter_company_party(doctype, party, company, inter_company_referenc
 		companies = [d.company for d in companies]
 		if company not in companies:
 			frappe.throw(
-				_("{0} not allowed to transact with {1}. Please change the Company.").format(
-					_(partytype), company
-				)
+				_(
+					"{0} not allowed to transact with {1}. Please change the Company or add the Company in the 'Allowed To Transact With'-Section in the Customer record."
+				).format(_(partytype), company)
 			)
 
 
 def update_linked_doc(doctype, name, inter_company_reference):
-
 	if doctype in ["Sales Invoice", "Purchase Invoice"]:
 		ref_field = "inter_company_invoice_reference"
 	else:
@@ -1957,7 +1983,6 @@ def update_linked_doc(doctype, name, inter_company_reference):
 
 
 def unlink_inter_company_doc(doctype, name, inter_company_reference):
-
 	if doctype in ["Sales Invoice", "Purchase Invoice"]:
 		ref_doc = "Purchase Invoice" if doctype == "Sales Invoice" else "Sales Invoice"
 		ref_field = "inter_company_invoice_reference"
@@ -2132,16 +2157,13 @@ def get_internal_party(parties, link_doctype, doc):
 
 
 def validate_inter_company_transaction(doc, doctype):
-
 	details = get_inter_company_details(doc, doctype)
 	price_list = (
 		doc.selling_price_list
 		if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"]
 		else doc.buying_price_list
 	)
-	valid_price_list = frappe.db.get_value(
-		"Price List", {"name": price_list, "buying": 1, "selling": 1}
-	)
+	valid_price_list = frappe.db.get_value("Price List", {"name": price_list, "buying": 1, "selling": 1})
 	if not valid_price_list and not doc.is_internal_transfer():
 		frappe.throw(_("Selected Price List should have buying and selling fields checked."))
 
@@ -2402,9 +2424,7 @@ def update_pr_items(doc, sales_item_map, purchase_item_map, parent_child_map, wa
 	for item in doc.get("items"):
 		item.warehouse = warehouse_map.get(sales_item_map.get(item.delivery_note_item))
 		if not item.warehouse and item.get("purchase_order") and item.get("purchase_order_item"):
-			item.warehouse = frappe.db.get_value(
-				"Purchase Order Item", item.purchase_order_item, "warehouse"
-			)
+			item.warehouse = frappe.db.get_value("Purchase Order Item", item.purchase_order_item, "warehouse")
 
 
 def get_delivery_note_details(internal_reference):
@@ -2650,9 +2670,7 @@ def check_if_return_invoice_linked_with_payment_entry(self):
 	# If a Return invoice is linked with payment entry along with other invoices,
 	# the cancellation of the Return causes allocated amount to be greater than paid
 
-	if not frappe.db.get_single_value(
-		"Accounts Settings", "unlink_payment_on_cancellation_of_invoice"
-	):
+	if not frappe.db.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"):
 		return
 
 	payment_entries = []

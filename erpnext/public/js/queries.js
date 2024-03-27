@@ -12,14 +12,6 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.controllers.queries.lead_query" };
 	},
 
-	customer: function () {
-		return { query: "erpnext.controllers.queries.customer_query" };
-	},
-
-	supplier: function () {
-		return { query: "erpnext.controllers.queries.supplier_query" };
-	},
-
 	item: function (filters) {
 		var args = { query: "erpnext.controllers.queries.item_query" };
 		if (filters) args["filters"] = filters;

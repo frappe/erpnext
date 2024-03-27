@@ -226,7 +226,7 @@
   }
  ],
  "links": [],
- "modified": "2024-03-09 08:08:27.186879",
+ "modified": "2024-03-27 13:10:52.121252",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Rule",
@@ -246,6 +246,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

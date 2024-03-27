@@ -548,3 +548,15 @@ body[data-route="pos"] {
 	align-items: center;
 	justify-content: center;
 }
+
+.frappe-control[data-fieldname="other_charges_calculation"] .ql-editor,
+.frappe-control[data-fieldname="address_display"] .ql-editor,
+.frappe-control[data-fieldname="shipping_address_display"] .ql-editor,
+.frappe-control[data-fieldname="shipping_address"] .ql-editor,
+.frappe-control[data-fieldname="dispatch_address"] .ql-editor,
+.frappe-control[data-fieldname="source_address_display"] .ql-editor,
+.frappe-control[data-fieldname="target_address_display"] .ql-editor,
+.frappe-control[data-fieldname="billing_address_display"] .ql-editor,
+.frappe-control[data-fieldname="company_address_display"] .ql-editor {
+	white-space: normal;
+}

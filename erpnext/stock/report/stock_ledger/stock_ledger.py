@@ -60,6 +60,7 @@ def execute(filters=None):
 		if filters.get("batch_no") or inventory_dimension_filters_applied:
 			actual_qty += flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
+			batch_balance_dict[sle.batch_no] += sle.actual_qty
 
 			if sle.voucher_type == "Stock Reconciliation" and not sle.actual_qty:
 				actual_qty = sle.qty_after_transaction
@@ -546,11 +547,8 @@ def get_opening_balance(filters, columns, sl_entries):
 def get_warehouse_condition(warehouse):
 	warehouse_details = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"], as_dict=1)
 	if warehouse_details:
-		return (
-			" exists (select name from `tabWarehouse` wh \
-			where wh.lft >= %s and wh.rgt <= %s and warehouse = wh.name)"
-			% (warehouse_details.lft, warehouse_details.rgt)
-		)
+		return f" exists (select name from `tabWarehouse` wh \
+			where wh.lft >= {warehouse_details.lft} and wh.rgt <= {warehouse_details.rgt} and warehouse = wh.name)"
 
 	return ""
 
@@ -561,22 +559,17 @@ def get_item_group_condition(item_group, item_table=None):
 		if item_table:
 			ig = frappe.qb.DocType("Item Group")
 			return item_table.item_group.isin(
-				(
-					frappe.qb.from_(ig)
-					.select(ig.name)
-					.where(
-						(ig.lft >= item_group_details.lft)
-						& (ig.rgt <= item_group_details.rgt)
-						& (item_table.item_group == ig.name)
-					)
+				frappe.qb.from_(ig)
+				.select(ig.name)
+				.where(
+					(ig.lft >= item_group_details.lft)
+					& (ig.rgt <= item_group_details.rgt)
+					& (item_table.item_group == ig.name)
 				)
 			)
 		else:
-			return (
-				"item.item_group in (select ig.name from `tabItem Group` ig \
-				where ig.lft >= %s and ig.rgt <= %s and item.item_group = ig.name)"
-				% (item_group_details.lft, item_group_details.rgt)
-			)
+			return f"item.item_group in (select ig.name from `tabItem Group` ig \
+				where ig.lft >= {item_group_details.lft} and ig.rgt <= {item_group_details.rgt} and item.item_group = ig.name)"
 
 
 def check_inventory_dimension_filters_applied(filters) -> bool:

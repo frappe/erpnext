@@ -43,9 +43,7 @@ def get_data(filters):
 	gle = frappe.qb.DocType("GL Entry")
 	query = (
 		frappe.qb.from_(gle)
-		.select(
-			gle.voucher_type, gle.voucher_no, Sum(gle.debit).as_("debit"), Sum(gle.credit).as_("credit")
-		)
+		.select(gle.voucher_type, gle.voucher_no, Sum(gle.debit).as_("debit"), Sum(gle.credit).as_("credit"))
 		.where(gle.is_cancelled == 0)
 		.groupby(gle.voucher_no)
 	)

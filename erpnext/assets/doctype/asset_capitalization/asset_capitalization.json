@@ -356,7 +356,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-03 22:55:59.461456",
+ "modified": "2024-03-27 13:06:33.080441",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization",
@@ -394,7 +394,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "title",

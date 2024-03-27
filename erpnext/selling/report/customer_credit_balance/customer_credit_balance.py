@@ -77,7 +77,6 @@ def get_columns(customer_naming_type):
 
 
 def get_details(filters):
-
 	sql_query = """SELECT
 						c.name, c.customer_name,
 						ccl.bypass_credit_limit_check,

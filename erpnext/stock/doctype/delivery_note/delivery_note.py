@@ -35,7 +35,7 @@ class DeliveryNote(SellingController):
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
 
 		additional_discount_percentage: DF.Float
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		amount_eligible_for_commission: DF.Currency
 		apply_discount_on: DF.Literal["", "Grand Total", "Net Total"]
@@ -52,7 +52,7 @@ class DeliveryNote(SellingController):
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
-		company_address_display: DF.SmallText | None
+		company_address_display: DF.TextEditor | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
 		contact_mobile: DF.SmallText | None
@@ -66,7 +66,7 @@ class DeliveryNote(SellingController):
 		customer_name: DF.Data | None
 		disable_rounded_total: DF.Check
 		discount_amount: DF.Currency
-		dispatch_address: DF.SmallText | None
+		dispatch_address: DF.TextEditor | None
 		dispatch_address_name: DF.Link | None
 		driver: DF.Link | None
 		driver_name: DF.Data | None
@@ -76,7 +76,7 @@ class DeliveryNote(SellingController):
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
-		installation_status: DF.Literal
+		installation_status: DF.Literal[None]
 		instructions: DF.Text | None
 		inter_company_reference: DF.Link | None
 		is_internal_customer: DF.Check
@@ -90,7 +90,7 @@ class DeliveryNote(SellingController):
 		named_place: DF.Data | None
 		naming_series: DF.Literal["MAT-DN-.YYYY.-", "MAT-DN-RET-.YYYY.-"]
 		net_total: DF.Currency
-		other_charges_calculation: DF.LongText | None
+		other_charges_calculation: DF.TextEditor | None
 		packed_items: DF.Table[PackedItem]
 		per_billed: DF.Percent
 		per_installed: DF.Percent
@@ -117,7 +117,7 @@ class DeliveryNote(SellingController):
 		set_posting_time: DF.Check
 		set_target_warehouse: DF.Link | None
 		set_warehouse: DF.Link | None
-		shipping_address: DF.SmallText | None
+		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		source: DF.Link | None
@@ -141,7 +141,7 @@ class DeliveryNote(SellingController):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(DeliveryNote, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.status_updater = [
 			{
 				"source_dt": "Delivery Note Item",
@@ -229,7 +229,7 @@ class DeliveryNote(SellingController):
 			for f in fieldname:
 				toggle_print_hide(self.meta if key == "parent" else item_meta, f)
 
-		super(DeliveryNote, self).before_print(settings)
+		super().before_print(settings)
 
 	def set_actual_qty(self):
 		for d in self.get("items"):
@@ -250,7 +250,8 @@ class DeliveryNote(SellingController):
 
 	def validate(self):
 		self.validate_posting_time()
-		super(DeliveryNote, self).validate()
+		super().validate()
+		self.validate_references()
 		self.set_status()
 		self.so_required()
 		self.validate_proj_cust()
@@ -273,11 +274,16 @@ class DeliveryNote(SellingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_with_previous_doc(self):
-		super(DeliveryNote, self).validate_with_previous_doc(
+		super().validate_with_previous_doc(
 			{
 				"Sales Order": {
 					"ref_dn_field": "against_sales_order",
-					"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]],
+					"compare_fields": [
+						["customer", "="],
+						["company", "="],
+						["project", "="],
+						["currency", "="],
+					],
 				},
 				"Sales Order Item": {
 					"ref_dn_field": "so_detail",
@@ -287,7 +293,12 @@ class DeliveryNote(SellingController):
 				},
 				"Sales Invoice": {
 					"ref_dn_field": "against_sales_invoice",
-					"compare_fields": [["customer", "="], ["company", "="], ["project", "="], ["currency", "="]],
+					"compare_fields": [
+						["customer", "="],
+						["company", "="],
+						["project", "="],
+						["currency", "="],
+					],
 				},
 				"Sales Invoice Item": {
 					"ref_dn_field": "si_detail",
@@ -341,6 +352,58 @@ class DeliveryNote(SellingController):
 
 					item.serial_and_batch_bundle = cls_obj.serial_and_batch_bundle
 
+	def validate_references(self):
+		self.validate_sales_order_references()
+		self.validate_sales_invoice_references()
+
+	def validate_sales_order_references(self):
+		err_msg = ""
+		for item in self.items:
+			if (item.against_sales_order and not item.so_detail) or (
+				not item.against_sales_order and item.so_detail
+			):
+				if not item.against_sales_order:
+					err_msg += (
+						_("'Sales Order' reference ({1}) is missing in row {0}").format(
+							frappe.bold(item.idx), frappe.bold("against_sales_order")
+						)
+						+ "<br>"
+					)
+				else:
+					err_msg += (
+						_("'Sales Order Item' reference ({1}) is missing in row {0}").format(
+							frappe.bold(item.idx), frappe.bold("so_detail")
+						)
+						+ "<br>"
+					)
+
+		if err_msg:
+			frappe.throw(err_msg, title=_("References to Sales Orders are Incomplete"))
+
+	def validate_sales_invoice_references(self):
+		err_msg = ""
+		for item in self.items:
+			if (item.against_sales_invoice and not item.si_detail) or (
+				not item.against_sales_invoice and item.si_detail
+			):
+				if not item.against_sales_invoice:
+					err_msg += (
+						_("'Sales Invoice' reference ({1}) is missing in row {0}").format(
+							frappe.bold(item.idx), frappe.bold("against_sales_invoice")
+						)
+						+ "<br>"
+					)
+				else:
+					err_msg += (
+						_("'Sales Invoice Item' reference ({1}) is missing in row {0}").format(
+							frappe.bold(item.idx), frappe.bold("si_detail")
+						)
+						+ "<br>"
+					)
+
+		if err_msg:
+			frappe.throw(err_msg, title=_("References to Sales Invoices are Incomplete"))
+
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
 		if self.project and self.customer:
@@ -356,7 +419,7 @@ class DeliveryNote(SellingController):
 				)
 
 	def validate_warehouse(self):
-		super(DeliveryNote, self).validate_warehouse()
+		super().validate_warehouse()
 
 		for d in self.get_item_list():
 			if not d["warehouse"] and frappe.get_cached_value("Item", d["item_code"], "is_stock_item") == 1:
@@ -413,7 +476,7 @@ class DeliveryNote(SellingController):
 		self.repost_future_sle_and_gle()
 
 	def on_cancel(self):
-		super(DeliveryNote, self).on_cancel()
+		super().on_cancel()
 
 		self.check_sales_order_on_hold_or_close("against_sales_order")
 		self.check_next_docstatus()
@@ -502,7 +565,9 @@ class DeliveryNote(SellingController):
 									delivered_batch_qty[entry.batch_no] -= delivered_qty
 					else:
 						# `Delivered Qty` should be less than or equal to `Reserved Qty`.
-						qty_can_be_deliver = min((sre_doc.reserved_qty - sre_doc.delivered_qty), qty_to_deliver)
+						qty_can_be_deliver = min(
+							(sre_doc.reserved_qty - sre_doc.delivered_qty), qty_to_deliver
+						)
 
 					sre_doc.delivered_qty += qty_can_be_deliver
 					sre_doc.db_update()
@@ -560,7 +625,9 @@ class DeliveryNote(SellingController):
 							batch_qty_to_undelivered = {d.batch_no: -1 * d.qty for d in sbb.entries}
 							for entry in sre_doc.sb_entries:
 								if entry.batch_no in batch_qty_to_undelivered:
-									undelivered_qty = min(entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no])
+									undelivered_qty = min(
+										entry.delivered_qty, batch_qty_to_undelivered[entry.batch_no]
+									)
 									entry.delivered_qty -= undelivered_qty
 									entry.db_update()
 									qty_can_be_undelivered += undelivered_qty
@@ -616,7 +683,8 @@ class DeliveryNote(SellingController):
 						frappe.bold(reserved_warehouses[0])
 						if len(reserved_warehouses) == 1
 						else _("{0} and {1}").format(
-							frappe.bold(", ".join(reserved_warehouses[:-1])), frappe.bold(reserved_warehouses[-1])
+							frappe.bold(", ".join(reserved_warehouses[:-1])),
+							frappe.bold(reserved_warehouses[-1]),
 						),
 					)
 					frappe.throw(msg, title=_("Stock Reservation Warehouse Mismatch"))
@@ -1113,7 +1181,7 @@ def make_shipment(source_name, target_doc=None):
 			"User", frappe.session.user, ["email", "full_name", "phone", "mobile_no"], as_dict=1
 		)
 		target.pickup_contact_email = user.email
-		pickup_contact_display = "{}".format(user.full_name)
+		pickup_contact_display = f"{user.full_name}"
 		if user:
 			if user.email:
 				pickup_contact_display += "<br>" + user.email
@@ -1129,7 +1197,7 @@ def make_shipment(source_name, target_doc=None):
 		contact = frappe.db.get_value(
 			"Contact", source.contact_person, ["email_id", "phone", "mobile_no"], as_dict=1
 		)
-		delivery_contact_display = "{}".format(source.contact_display)
+		delivery_contact_display = f"{source.contact_display}"
 		if contact:
 			if contact.email_id:
 				delivery_contact_display += "<br>" + contact.email_id
@@ -1298,8 +1366,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"postprocess": update_details,
 				"field_no_map": ["taxes_and_charges", "set_warehouse"],
 			},
-			doctype
-			+ " Item": {
+			doctype + " Item": {
 				"doctype": target_doctype + " Item",
 				"field_map": {
 					source_document_warehouse_field: target_document_warehouse_field,

@@ -55,9 +55,7 @@ def execute(filters=None):
 			fiscal_year, companies, columns, filters
 		)
 	elif filters.get("report") == "Profit and Loss Statement":
-		data, message, chart, report_summary = get_profit_loss_data(
-			fiscal_year, companies, columns, filters
-		)
+		data, message, chart, report_summary = get_profit_loss_data(fiscal_year, companies, columns, filters)
 	else:
 		data, report_summary = get_cash_flow_data(fiscal_year, companies, filters)
 
@@ -81,9 +79,7 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 		asset, liability, equity, companies, filters.get("company"), company_currency, True
 	)
 
-	message, opening_balance = prepare_companywise_opening_balance(
-		asset, liability, equity, companies
-	)
+	message, opening_balance = prepare_companywise_opening_balance(asset, liability, equity, companies)
 
 	if opening_balance:
 		unclosed = {
@@ -192,9 +188,7 @@ def get_income_expense_data(companies, fiscal_year, filters):
 
 	expense = get_data(companies, "Expense", "Debit", fiscal_year, filters, True)
 
-	net_profit_loss = get_net_profit_loss(
-		income, expense, companies, filters.company, company_currency, True
-	)
+	net_profit_loss = get_net_profit_loss(income, expense, companies, filters.company, company_currency, True)
 
 	return income, expense, net_profit_loss
 
@@ -323,9 +317,7 @@ def get_columns(companies, filters):
 	return columns
 
 
-def get_data(
-	companies, root_type, balance_must_be, fiscal_year, filters=None, ignore_closing_entries=False
-):
+def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, ignore_closing_entries=False):
 	accounts, accounts_by_name, parent_children_map = get_account_heads(root_type, companies, filters)
 
 	if not accounts:
@@ -349,7 +341,6 @@ def get_data(
 		root_type,
 		as_dict=1,
 	):
-
 		set_gl_entries_by_account(
 			start_date,
 			end_date,
@@ -366,9 +357,7 @@ def get_data(
 	calculate_values(accounts_by_name, gl_entries_by_account, companies, filters, fiscal_year)
 	accumulate_values_into_parents(accounts, accounts_by_name, companies)
 
-	out = prepare_data(
-		accounts, start_date, end_date, balance_must_be, companies, company_currency, filters
-	)
+	out = prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency, filters)
 
 	out = filter_out_zero_value_rows(
 		out, parent_children_map, show_zero_values=filters.get("show_zero_values")
@@ -388,9 +377,7 @@ def get_company_currency(filters=None):
 
 def calculate_values(accounts_by_name, gl_entries_by_account, companies, filters, fiscal_year):
 	start_date = (
-		fiscal_year.year_start_date
-		if filters.filter_based_on == "Fiscal Year"
-		else filters.period_start_date
+		fiscal_year.year_start_date if filters.filter_based_on == "Fiscal Year" else filters.period_start_date
 	)
 
 	for entries in gl_entries_by_account.values():
@@ -422,8 +409,12 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, filters
 							and parent_company_currency != child_company_currency
 							and filters.get("accumulated_in_group_company")
 						):
-							debit = convert(debit, parent_company_currency, child_company_currency, filters.end_date)
-							credit = convert(credit, parent_company_currency, child_company_currency, filters.end_date)
+							debit = convert(
+								debit, parent_company_currency, child_company_currency, filters.end_date
+							)
+							credit = convert(
+								credit, parent_company_currency, child_company_currency, filters.end_date
+							)
 
 						d[company] = d.get(company, 0.0) + flt(debit) - flt(credit)
 
@@ -507,10 +498,8 @@ def get_subsidiary_companies(company):
 	lft, rgt = frappe.get_cached_value("Company", company, ["lft", "rgt"])
 
 	return frappe.db.sql_list(
-		"""select name from `tabCompany`
-		where lft >= {0} and rgt <= {1} order by lft, rgt""".format(
-			lft, rgt
-		)
+		f"""select name from `tabCompany`
+		where lft >= {lft} and rgt <= {rgt} order by lft, rgt"""
 	)
 
 
@@ -547,9 +536,7 @@ def get_accounts(root_type, companies):
 	return accounts
 
 
-def prepare_data(
-	accounts, start_date, end_date, balance_must_be, companies, company_currency, filters
-):
+def prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency, filters):
 	data = []
 
 	for d in accounts:
@@ -559,9 +546,7 @@ def prepare_data(
 		row = frappe._dict(
 			{
 				"account_name": (
-					"%s - %s" % (_(d.account_number), _(d.account_name))
-					if d.account_number
-					else _(d.account_name)
+					f"{_(d.account_number)} - {_(d.account_name)}" if d.account_number else _(d.account_name)
 				),
 				"account": _(d.name),
 				"parent_account": _(d.parent_account),
@@ -609,9 +594,7 @@ def set_gl_entries_by_account(
 ):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 
-	company_lft, company_rgt = frappe.get_cached_value(
-		"Company", filters.get("company"), ["lft", "rgt"]
-	)
+	company_lft, company_rgt = frappe.get_cached_value("Company", filters.get("company"), ["lft", "rgt"])
 
 	companies = frappe.db.sql(
 		""" select name, default_currency from `tabCompany`
@@ -739,7 +722,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters, d):
 	additional_conditions = []
 
 	if ignore_closing_entries:
-		additional_conditions.append((gle.voucher_type != "Period Closing Voucher"))
+		additional_conditions.append(gle.voucher_type != "Period Closing Voucher")
 
 	if from_date:
 		additional_conditions.append(gle.posting_date >= from_date)
@@ -802,7 +785,7 @@ def filter_accounts(accounts, depth=10):
 	def add_to_list(parent, level):
 		if level < depth:
 			children = parent_children_map.get(parent) or []
-			sort_accounts(children, is_root=True if parent == None else False)
+			sort_accounts(children, is_root=True if parent is None else False)
 
 			for child in children:
 				child.indent = level

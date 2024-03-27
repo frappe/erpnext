@@ -1,18 +1,15 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import unittest
 
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, getdate, nowdate
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import add_days, getdate, nowdate
 
-from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
 from erpnext.stock.doctype.item.test_item import create_item
@@ -142,13 +139,16 @@ class TestAccountsController(FrappeTestCase):
 		qty=1,
 		rate=1,
 		conversion_rate=80,
-		posting_date=nowdate(),
+		posting_date=None,
 		do_not_save=False,
 		do_not_submit=False,
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
@@ -173,12 +173,13 @@ class TestAccountsController(FrappeTestCase):
 		)
 		return sinv
 
-	def create_payment_entry(
-		self, amount=1, source_exc_rate=75, posting_date=nowdate(), customer=None
-	):
+	def create_payment_entry(self, amount=1, source_exc_rate=75, posting_date=None, customer=None):
 		"""
 		Helper function to populate default values in payment entry
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		payment = create_payment_entry(
 			company=self.company,
 			payment_type="Receive",
@@ -293,9 +294,7 @@ class TestAccountsController(FrappeTestCase):
 			.run(as_dict=True)[0]
 		)
 		self.assertEqual(outstanding, current_outstanding.outstanding)
-		self.assertEqual(
-			outstanding_in_account_currency, current_outstanding.outstanding_in_account_currency
-		)
+		self.assertEqual(outstanding_in_account_currency, current_outstanding.outstanding_in_account_currency)
 
 	def test_10_payment_against_sales_invoice(self):
 		# Sales Invoice in Foreign Currency
@@ -401,7 +400,6 @@ class TestAccountsController(FrappeTestCase):
 		adv.reload()
 
 		# sales invoice with advance(partial amount)
-		rate = 80
 		rate_in_account_currency = 1
 		si = self.create_sales_invoice(
 			qty=2, conversion_rate=80, rate=rate_in_account_currency, do_not_submit=True
@@ -788,7 +786,9 @@ class TestAccountsController(FrappeTestCase):
 				self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 
 				# Exchange Gain/Loss Journal should've been created.
-				exc_je_for_si = [x for x in self.get_journals_for(si.doctype, si.name) if x.parent != adv.name]
+				exc_je_for_si = [
+					x for x in self.get_journals_for(si.doctype, si.name) if x.parent != adv.name
+				]
 				exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
 				self.assertNotEqual(exc_je_for_si, [])
 				self.assertEqual(len(exc_je_for_si), 1)
@@ -1253,7 +1253,9 @@ class TestAccountsController(FrappeTestCase):
 			with self.subTest(x=x):
 				self.assertEqual(
 					[self.cost_center, self.cost_center],
-					frappe.db.get_all("Journal Entry Account", filters={"parent": x.parent}, pluck="cost_center"),
+					frappe.db.get_all(
+						"Journal Entry Account", filters={"parent": x.parent}, pluck="cost_center"
+					),
 				)
 
 		frappe.db.set_value("Company", self.company, "cost_center", cc)
@@ -1382,13 +1384,14 @@ class TestAccountsController(FrappeTestCase):
 			with self.subTest(x=x):
 				self.assertEqual(
 					[cr_note.department, cr_note.department],
-					frappe.db.get_all("Journal Entry Account", filters={"parent": x.parent}, pluck="department"),
+					frappe.db.get_all(
+						"Journal Entry Account", filters={"parent": x.parent}, pluck="department"
+					),
 				)
 
 	def test_92_dimension_inhertiance_exc_gain_loss(self):
 		# Sales Invoice in Foreign Currency
 		self.setup_dimensions()
-		rate = 80
 		rate_in_account_currency = 1
 		dpt = "Research & Development"
 

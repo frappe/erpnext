@@ -15,9 +15,7 @@ def execute():
 	for print_format in print_formats:
 		frappe.delete_doc("Print Format", print_format, ignore_missing=True, force=True)
 
-	reports = frappe.get_all(
-		"Report", {"module": "Loan Management", "is_standard": "Yes"}, pluck="name"
-	)
+	reports = frappe.get_all("Report", {"module": "Loan Management", "is_standard": "Yes"}, pluck="name")
 	for report in reports:
 		frappe.delete_doc("Report", report, ignore_missing=True, force=True)
 

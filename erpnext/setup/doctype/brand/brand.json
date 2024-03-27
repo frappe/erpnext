@@ -56,7 +56,7 @@
  "idx": 1,
  "image_field": "image",
  "links": [],
- "modified": "2021-03-01 15:57:30.005783",
+ "modified": "2024-03-27 13:06:42.500721",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Brand",
@@ -106,6 +106,7 @@
  ],
  "quick_entry": 1,
  "show_name_in_global_search": 1,
- "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
 }

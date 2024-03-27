@@ -58,13 +58,14 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-07-14 18:02:35.988958",
+ "modified": "2024-03-27 13:08:19.435616",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning Letter Text",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

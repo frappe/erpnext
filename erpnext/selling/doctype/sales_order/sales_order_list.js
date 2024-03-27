@@ -68,10 +68,10 @@ frappe.listview_settings["Sales Order"] = {
 		});
 
 		listview.page.add_action_item(__("Delivery Note"), () => {
-			frappe.db
-				.get_single_value("Selling Settings", "enable_cutoff_date_on_bulk_delivery_note_creation")
-				.then((value) => {
-					if (value) {
+			frappe.call({
+				method: "erpnext.selling.doctype.sales_order.sales_order.is_enable_cutoff_date_on_bulk_delivery_note_creation",
+				callback: (r) => {
+					if (r.message) {
 						var dialog = new frappe.ui.Dialog({
 							title: __("Select Items up to Delivery Date"),
 							fields: [
@@ -98,7 +98,8 @@ frappe.listview_settings["Sales Order"] = {
 					} else {
 						erpnext.bulk_transaction_processing.create(listview, "Sales Order", "Delivery Note");
 					}
-				});
+				},
+			});
 		});
 
 		listview.page.add_action_item(__("Advance Payment"), () => {
