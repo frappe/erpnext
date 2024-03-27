@@ -52,8 +52,8 @@
    "fieldname": "campaign_run_for",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Campaign Run For",
-   "options": "\nLead\nContact\nEmail Group",
+   "label": "Campaign Run For ",
+   "options": "\nLead\nContact\nEmail Group\nList of Contacts",
    "reqd": 1
   },
   {

@@ -1,0 +1,70 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2015-03-18 06:15:59.321619",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "engine": "InnoDB",
+ "field_order": [
+  "column_break_zsvv",
+  "title",
+  "total_members"
+ ],
+ "fields": [
+  {
+   "fieldname": "column_break_zsvv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "total_members",
+   "fieldtype": "Int",
+   "label": "Total Members",
+   "read_only": 1
+  }
+ ],
+ "links": [
+  {
+   "group": "Members",
+   "link_doctype": "List of Contacts Member",
+   "link_fieldname": "contact_list"
+  }
+ ],
+ "modified": "2024-03-27 05:55:46.048652",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "List of Contacts",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "show_name_in_global_search": 1,
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "title"
+}

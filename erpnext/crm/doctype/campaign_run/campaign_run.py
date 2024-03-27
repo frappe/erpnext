@@ -19,7 +19,7 @@ class CampaignRun(Document):
 		from frappe.types import DF
 
 		campaign_name: DF.Link
-		campaign_run_for: DF.Literal["", "Lead", "Contact", "Email Group"]
+		campaign_run_for: DF.Literal["", "Lead", "Contact", "Email Group", "List of Contacts"]
 		end_date: DF.Date | None
 		recipient: DF.DynamicLink
 		sender: DF.Link | None
@@ -96,7 +96,8 @@ def send_communication_to_leads_or_contacts():
 		for entry in campaign.get("campaign_schedules"):
 			scheduled_date = add_days(campaign_run.get("start_date"), entry.get("send_after_days"))
 			if scheduled_date == getdate(today()):
-				send_email(entry, campaign_run)
+				if entry.schedule_for == "Email Template":
+					send_email(entry, campaign_run)
 
 
 def send_email(entry, campaign_run):
@@ -106,12 +107,19 @@ def send_email(entry, campaign_run):
 			"Email Group Member", filters={"email_group": campaign_run.get("recipient")}, fields=["email"]
 		):
 			recipient_list.append(member["email"])
+	if campaign_run.campaign_run_for == "List of Contacts":
+		for member in frappe.db.get_list(
+			"List of Contacts",
+			filters={"contact_list": campaign_run.get("recipient")},
+			fields=["contact.email"],
+		):
+			recipient_list.append(member["email"])
 	else:
 		recipient_list.append(
 			frappe.db.get_value(campaign_run.campaign_run_for, campaign_run.get("recipient"), "email_id")
 		)
 
-	email_template = frappe.get_doc("Email Template", entry.get("email_template"))
+	email_template = frappe.get_doc("Email Template", entry.get("template"))
 	sender = frappe.db.get_value("User", campaign_run.get("sender"), "email")
 	context = {"doc": frappe.get_doc(campaign_run.campaign_run_for, campaign_run.recipient)}
 	# send mail and link communication to document
