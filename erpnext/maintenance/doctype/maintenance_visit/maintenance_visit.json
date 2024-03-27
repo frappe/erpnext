@@ -83,7 +83,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hidden": 1,
    "label": "Address",
    "read_only": 1
@@ -295,7 +295,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-03 16:19:07.902723",
+ "modified": "2024-03-22 16:01:12.354826",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit",

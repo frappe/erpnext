@@ -250,7 +250,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hidden": 1,
    "label": "Address",
    "oldfieldname": "address",
@@ -622,7 +622,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2022-10-13 12:42:21.545636",
+ "modified": "2024-03-22 16:01:10.721453",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

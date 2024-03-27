@@ -40,7 +40,7 @@ class RequestforQuotation(BuyingController):
 
 		amended_from: DF.Link | None
 		billing_address: DF.Link | None
-		billing_address_display: DF.SmallText | None
+		billing_address_display: DF.TextEditor | None
 		company: DF.Link
 		email_template: DF.Link | None
 		incoterm: DF.Link | None

@@ -32,14 +32,14 @@ class Dunning(AccountsController):
 
 		from erpnext.accounts.doctype.overdue_payment.overdue_payment import OverduePayment
 
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		base_dunning_amount: DF.Currency
 		body_text: DF.TextEditor | None
 		closing_text: DF.TextEditor | None
 		company: DF.Link
 		company_address: DF.Link | None
-		company_address_display: DF.SmallText | None
+		company_address_display: DF.TextEditor | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
 		contact_mobile: DF.SmallText | None

@@ -85,7 +85,7 @@ class StockEntry(StockController):
 
 		add_to_transit: DF.Check
 		additional_costs: DF.Table[LandedCostTaxesandCharges]
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		apply_putaway_rule: DF.Check
 		bom_no: DF.Link | None
@@ -127,14 +127,14 @@ class StockEntry(StockController):
 		scan_barcode: DF.Data | None
 		select_print_heading: DF.Link | None
 		set_posting_time: DF.Check
-		source_address_display: DF.SmallText | None
+		source_address_display: DF.TextEditor | None
 		source_warehouse_address: DF.Link | None
 		stock_entry_type: DF.Link
 		subcontracting_order: DF.Link | None
 		supplier: DF.Link | None
 		supplier_address: DF.Link | None
 		supplier_name: DF.Data | None
-		target_address_display: DF.SmallText | None
+		target_address_display: DF.TextEditor | None
 		target_warehouse_address: DF.Link | None
 		to_warehouse: DF.Link | None
 		total_additional_costs: DF.Currency

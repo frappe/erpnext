@@ -187,7 +187,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hidden": 1,
    "label": "Address",
    "read_only": 1
@@ -238,7 +238,7 @@
    "link_fieldname": "maintenance_schedule"
   }
  ],
- "modified": "2023-06-03 16:15:43.958072",
+ "modified": "2024-03-22 16:01:11.868813",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",
