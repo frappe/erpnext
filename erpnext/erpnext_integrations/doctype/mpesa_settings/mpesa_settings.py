@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+import typing
 from json import dumps, loads
 
 import frappe
@@ -19,7 +20,7 @@ from erpnext.utilities import payment_app_import_guard
 
 
 class MpesaSettings(Document):
-	supported_currencies = ["KES"]
+	supported_currencies: typing.ClassVar[list] = ["KES"]
 
 	def validate_transaction_currency(self, currency):
 		if currency not in self.supported_currencies:

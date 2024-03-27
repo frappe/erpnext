@@ -900,14 +900,14 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		receipt.submit()
 
 		expected_queues = []
-		for idx, rate in enumerate(rates, start=1):
+		for idx in range(1, len(rates) + 1):
 			expected_queues.append({"stock_queue": [[10, 10 * i] for i in range(1, idx + 1)]})
 		self.assertSLEs(receipt, expected_queues)
 
 		transfer = make_stock_entry(
 			item_code=item.name, source=source, target=target, qty=10, do_not_save=True, rate=10
 		)
-		for rate in rates[1:]:
+		for _ in rates[1:]:
 			row = frappe.copy_doc(transfer.items[0], ignore_no_copy=False)
 			transfer.append("items", row)
 
@@ -936,7 +936,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		repack = make_stock_entry(
 			item_code=rm.name, source=warehouse, qty=10, do_not_save=True, rate=10, purpose="Repack"
 		)
-		for rate in rates[1:]:
+		for _ in rates[1:]:
 			row = frappe.copy_doc(repack.items[0], ignore_no_copy=False)
 			repack.append("items", row)
 

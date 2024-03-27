@@ -3,6 +3,7 @@
 
 
 import datetime
+import typing
 
 import frappe
 from frappe import _
@@ -10,7 +11,7 @@ from frappe.model.document import Document
 
 
 class AppointmentBookingSettings(Document):
-	agent_list = []  # Hack
+	agent_list: typing.ClassVar[list] = []  # Hack
 	min_date = "01/01/1970 "
 	format_string = "%d/%m/%Y %H:%M:%S"
 

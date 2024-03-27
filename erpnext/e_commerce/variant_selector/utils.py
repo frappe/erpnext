@@ -80,7 +80,7 @@ def get_attributes_and_values(item_code):
 	attribute_list = [a.attribute for a in attributes]
 
 	valid_options = {}
-	for item_code, attribute, attribute_value in item_variants_data:
+	for _, attribute, attribute_value in item_variants_data:
 		if attribute in attribute_list:
 			valid_options.setdefault(attribute, set()).add(attribute_value)
 

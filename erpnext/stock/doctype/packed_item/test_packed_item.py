@@ -182,12 +182,12 @@ class TestPackedItem(FrappeTestCase):
 		def sort_function(p):
 			return p.parent_item, p.item_code, p.qty
 
-		for sent, returned in zip(
+		for sent_item, returned_item in zip(
 			sorted(original, key=sort_function), sorted(returned, key=sort_function), strict=False
 		):
-			self.assertEqual(sent.item_code, returned.item_code)
-			self.assertEqual(sent.parent_item, returned.parent_item)
-			self.assertEqual(sent.qty, -1 * returned.qty)
+			self.assertEqual(sent_item.item_code, returned_item.item_code)
+			self.assertEqual(sent_item.parent_item, returned_item.parent_item)
+			self.assertEqual(sent_item.qty, -1 * returned_item.qty)
 
 	def test_returning_full_bundles(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return

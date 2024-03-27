@@ -551,7 +551,7 @@ class TestSubcontractingController(FrappeTestCase):
 		scr2.set_missing_values()
 		scr2.submit()
 
-		for key, value in get_supplied_items(scr2).items():
+		for value in get_supplied_items(scr2).values():
 			self.assertEqual(value.qty, 4)
 
 		scr3 = make_subcontracting_receipt(sco.name)
@@ -561,7 +561,7 @@ class TestSubcontractingController(FrappeTestCase):
 		scr3.set_missing_values()
 		scr3.submit()
 
-		for key, value in get_supplied_items(scr3).items():
+		for value in get_supplied_items(scr3).values():
 			self.assertEqual(value.qty, 1)
 
 	def test_partial_transfer_serial_no_components_based_on_material_transfer(self):

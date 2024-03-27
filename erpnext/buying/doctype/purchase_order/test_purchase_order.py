@@ -692,7 +692,7 @@ class TestPurchaseOrder(FrappeTestCase):
 
 				supplier.on_hold = 0
 				supplier.save()
-			except:
+			except Exception:
 				pass
 			else:
 				raise Exception

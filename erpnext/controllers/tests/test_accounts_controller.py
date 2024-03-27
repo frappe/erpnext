@@ -140,13 +140,16 @@ class TestAccountsController(FrappeTestCase):
 		qty=1,
 		rate=1,
 		conversion_rate=80,
-		posting_date=nowdate(),
+		posting_date=None,
 		do_not_save=False,
 		do_not_submit=False,
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
@@ -171,10 +174,13 @@ class TestAccountsController(FrappeTestCase):
 		)
 		return sinv
 
-	def create_payment_entry(self, amount=1, source_exc_rate=75, posting_date=nowdate(), customer=None):
+	def create_payment_entry(self, amount=1, source_exc_rate=75, posting_date=None, customer=None):
 		"""
 		Helper function to populate default values in payment entry
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		payment = create_payment_entry(
 			company=self.company,
 			payment_type="Receive",

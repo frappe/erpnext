@@ -1503,7 +1503,7 @@ def get_items_for_material_requests(doc, warehouses=None, get_parent_warehouse_d
 				so_item_details[sales_order][item_code] = details
 
 	mr_items = []
-	for sales_order, item_code in so_item_details.items():
+	for sales_order in so_item_details:
 		item_dict = so_item_details[sales_order]
 		for details in item_dict.values():
 			bin_dict = get_bin_details(details, doc.company, warehouse)

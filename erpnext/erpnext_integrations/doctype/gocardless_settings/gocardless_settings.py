@@ -2,6 +2,7 @@
 # For license information, please see license.txt
 
 
+import typing
 from urllib.parse import urlencode
 
 import frappe
@@ -15,7 +16,7 @@ from erpnext.utilities import payment_app_import_guard
 
 
 class GoCardlessSettings(Document):
-	supported_currencies = ["EUR", "DKK", "GBP", "SEK", "AUD", "NZD", "CAD", "USD"]
+	supported_currencies: typing.ClassVar[list] = ["EUR", "DKK", "GBP", "SEK", "AUD", "NZD", "CAD", "USD"]
 
 	def validate(self):
 		self.initialize_client()

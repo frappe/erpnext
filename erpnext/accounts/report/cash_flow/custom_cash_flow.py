@@ -473,7 +473,7 @@ def execute(filters=None):
 
 
 def _get_account_type_based_data(filters, account_names, period_list, accumulated_values, opening_balances=0):
-	if not account_names or not account_names[0] or not type(account_names[0]) == str:
+	if not account_names or not account_names[0] or not isinstance(account_names[0], str):
 		# only proceed if account_names is a list of account names
 		return {}
 

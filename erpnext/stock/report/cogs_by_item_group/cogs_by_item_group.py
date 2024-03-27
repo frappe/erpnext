@@ -3,7 +3,6 @@
 
 import datetime
 from collections import OrderedDict
-from typing import Union
 
 import frappe
 from frappe import _
@@ -15,7 +14,7 @@ Filters = frappe._dict
 Row = frappe._dict
 Data = list[Row]
 Columns = list[dict[str, str]]
-DateTime = Union[datetime.date, datetime.datetime]
+DateTime = datetime.date | datetime.datetime
 FilteredEntries = list[dict[str, str | float | DateTime | None]]
 ItemGroupsDict = dict[tuple[int, int], dict[str, str | int]]
 SVDList = list[frappe._dict]

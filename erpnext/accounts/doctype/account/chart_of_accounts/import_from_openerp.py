@@ -253,7 +253,7 @@ def make_charts():
 		for key, val in chart["tree"].items():
 			if key in ["name", "parent_id"]:
 				chart["tree"].pop(key)
-			if type(val) == dict:
+			if isinstance(val, dict):
 				val["root_type"] = ""
 		if chart:
 			fpath = os.path.join(
