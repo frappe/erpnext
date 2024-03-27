@@ -1154,10 +1154,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
 				((item.uom != item.stock_uom) && !frappe.meta.get_docfield(cur_frm.fields_dict.items.grid.doctype, "conversion_factor").read_only)? true: false);
 		}
-
 	}
 
 	qty(doc, cdt, cdn) {
+<<<<<<< HEAD
 		let item = frappe.get_doc(cdt, cdn);
 		// item.pricing_rules = ''
 		frappe.run_serially([
@@ -1166,6 +1166,19 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			() => this.calculate_stock_uom_rate(doc, cdt, cdn),
 			() => this.apply_pricing_rule(item, true)
 		]);
+=======
+		if (!this.frm.doc.__onload?.load_after_mapping) {
+			let item = frappe.get_doc(cdt, cdn);
+			// item.pricing_rules = ''
+			frappe.run_serially([
+				() => this.remove_pricing_rule_for_item(item),
+				() => this.conversion_factor(doc, cdt, cdn, true),
+				() => this.apply_price_list(item, true), //reapply price list before applying pricing rule
+				() => this.calculate_stock_uom_rate(doc, cdt, cdn),
+				() => this.apply_pricing_rule(item, true)
+			]);
+		}
+>>>>>>> cd36a1051f (fix: rate changed on changing of the qty)
 	}
 
 	calculate_stock_uom_rate(doc, cdt, cdn) {
