@@ -52,7 +52,7 @@ class BOMUpdateLog(Document):
 		frappe.db.delete(
 			table,
 			filters=(
-				(table.modified < (Now() - Interval(days=days))) & (table.update_type == "Update Cost")
+				(table.creation < (Now() - Interval(days=days))) & (table.update_type == "Update Cost")
 			),
 		)
 
