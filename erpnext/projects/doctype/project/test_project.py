@@ -23,7 +23,11 @@ class TestProject(FrappeTestCase):
 		task1 = task_exists("Test Template Task with No Parent and Dependency")
 		if not task1:
 			task1 = create_task(
-				subject="Test Template Task with No Parent and Dependency", is_template=1, begin=5, duration=3
+				subject="Test Template Task with No Parent and Dependency",
+				is_template=1,
+				begin=5,
+				duration=3,
+				priority="High",
 			)
 
 		template = make_project_template(
@@ -32,11 +36,12 @@ class TestProject(FrappeTestCase):
 		project = get_project(project_name, template)
 		tasks = frappe.get_all(
 			"Task",
-			["subject", "exp_end_date", "depends_on_tasks"],
+			["subject", "exp_end_date", "depends_on_tasks", "priority"],
 			dict(project=project.name),
 			order_by="creation asc",
 		)
 
+		self.assertEqual(tasks[0].priority, "High")
 		self.assertEqual(tasks[0].subject, "Test Template Task with No Parent and Dependency")
 		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 5, 3))
 		self.assertEqual(len(tasks), 1)
