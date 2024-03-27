@@ -22,7 +22,7 @@ def execute():
 		.where(
 			(si.creation.gte(creation_date))
 			& (si.docstatus == 1)
-			& (si.is_return is True)
+			& (si.is_return == 1)
 			& (si.return_against.notnull())
 		)
 		.run()
@@ -51,7 +51,7 @@ def execute():
 		.where(
 			(pi.creation.gte(creation_date))
 			& (pi.docstatus == 1)
-			& (pi.is_return is True)
+			& (pi.is_return == 1)
 			& (pi.return_against.notnull())
 		)
 		.run()
