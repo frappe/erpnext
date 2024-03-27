@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-24 09:35+0000\n"
-"PO-Revision-Date: 2024-03-26 12:47\n"
+"PO-Revision-Date: 2024-03-27 11:23\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -10450,7 +10450,7 @@ msgstr "Basado en la lista de precios"
 #: selling/doctype/party_specific_item/party_specific_item.json
 msgctxt "Party Specific Item"
 msgid "Based On Value"
-msgstr ""
+msgstr "Basado en el Valor"
 
 #: setup/doctype/holiday_list/holiday_list.js:60
 msgid "Based on your HR Policy, select your leave allocation period's end date"
@@ -15330,14 +15330,14 @@ msgstr "Los números de registro de la compañía para su referencia. Números f
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Company which internal customer represents"
-msgstr ""
+msgstr "Compañía a la que representa el Cliente Interno"
 
 #. Description of the 'Represents Company' (Link) field in DocType 'Delivery
 #. Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Company which internal customer represents."
-msgstr ""
+msgstr "Compañía a la que representa el Cliente Interno."
 
 #. Description of the 'Represents Company' (Link) field in DocType 'Purchase
 #. Invoice'
@@ -18080,7 +18080,7 @@ msgstr ""
 
 #: public/js/call_popup/call_popup.js:122
 msgid "Create New Contact"
-msgstr "Crear nuevo contacto"
+msgstr "Crear Nuevo Contacto"
 
 #: public/js/call_popup/call_popup.js:128
 msgid "Create New Customer"
@@ -20221,7 +20221,7 @@ msgstr "ID de POS del cliente"
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Customer Portal Users"
-msgstr ""
+msgstr "Usuarios del Portal del Cliente"
 
 #. Label of a Link field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
@@ -29425,7 +29425,7 @@ msgstr "Desde Nro"
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "From Opportunity"
-msgstr ""
+msgstr "Desde Oportunidad"
 
 #. Label of a Int field in DocType 'Packing Slip'
 #: stock/doctype/packing_slip/packing_slip.json
@@ -33874,11 +33874,11 @@ msgstr "Interno"
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Internal Customer"
-msgstr ""
+msgstr "Cliente Interno"
 
 #: selling/doctype/customer/customer.py:218
 msgid "Internal Customer for company {0} already exists"
-msgstr ""
+msgstr "Cliente Interno para empresa {0} ya existe"
 
 #: controllers/accounts_controller.py:577
 msgid "Internal Sale or Delivery Reference missing."
@@ -41514,7 +41514,7 @@ msgstr "Mencione Tasa de valoración en el maestro de artículos."
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Mention if non-standard Receivable account"
-msgstr ""
+msgstr "Indique si no es Cuenta por Cobrar estándar"
 
 #. Description of the 'Accounts' (Table) field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -41526,13 +41526,13 @@ msgstr "Mencionar si la cuenta no  es cuenta estándar a pagar"
 #: setup/doctype/customer_group/customer_group.json
 msgctxt "Customer Group"
 msgid "Mention if non-standard receivable account applicable"
-msgstr "Indique si una cuenta por cobrar no estándar es  aplicable"
+msgstr "Indique si una Cuenta por Cobrar no estándar es aplicable"
 
 #. Description of the 'Accounts' (Table) field in DocType 'Supplier Group'
 #: setup/doctype/supplier_group/supplier_group.json
 msgctxt "Supplier Group"
 msgid "Mention if non-standard receivable account applicable"
-msgstr "Indique si una cuenta por cobrar no estándar es  aplicable"
+msgstr "Indique si una Cuenta por Cobrar no estándar es aplicable"
 
 #: accounts/doctype/account/account.js:152
 msgid "Merge"
@@ -48001,19 +48001,19 @@ msgstr ""
 #. Name of a DocType
 #: selling/doctype/party_specific_item/party_specific_item.json
 msgid "Party Specific Item"
-msgstr ""
+msgstr "Producto específico de la Parte"
 
 #. Linked DocType in Customer's connections
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Party Specific Item"
-msgstr ""
+msgstr "Producto específico de la Parte"
 
 #. Linked DocType in Supplier's connections
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Party Specific Item"
-msgstr ""
+msgstr "Producto específico de la Parte"
 
 #. Name of a DocType
 #: accounts/report/accounts_payable/accounts_payable.js:99
@@ -51096,13 +51096,13 @@ msgstr ""
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Portal Users"
-msgstr ""
+msgstr "Usuario del Portal"
 
 #. Label of a Tab Break field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Portal Users"
-msgstr ""
+msgstr "Usuario del Portal"
 
 #. Option for the 'Orientation' (Select) field in DocType 'Process Statement Of
 #. Accounts'
@@ -52359,13 +52359,13 @@ msgstr "Detalles de la Dirección Primaria"
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Primary Address and Contact"
-msgstr ""
+msgstr "Dirección principal y Contacto"
 
 #. Label of a Section Break field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Primary Address and Contact"
-msgstr ""
+msgstr "Dirección principal y Contacto"
 
 #. Label of a Section Break field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
@@ -60377,7 +60377,7 @@ msgstr ""
 #: selling/doctype/party_specific_item/party_specific_item.json
 msgctxt "Party Specific Item"
 msgid "Restrict Items Based On"
-msgstr ""
+msgstr "Restringir Pruductos según"
 
 #. Label of a Section Break field in DocType 'Shipping Rule'
 #: accounts/doctype/shipping_rule/shipping_rule.json
@@ -70694,19 +70694,19 @@ msgstr "Número de pieza del proveedor."
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Supplier Portal Users"
-msgstr ""
+msgstr "Usuarios del Portal del Proveedor"
 
 #. Label of a Link field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Supplier Primary Address"
-msgstr ""
+msgstr "Dirección principal del Proveedor"
 
 #. Label of a Link field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Supplier Primary Contact"
-msgstr ""
+msgstr "Contacto principal del Proveedor"
 
 #. Name of a DocType
 #: buying/doctype/purchase_order/purchase_order.js:529
