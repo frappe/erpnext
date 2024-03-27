@@ -4,7 +4,6 @@ import frappe
 
 
 def execute():
-
 	doctypes_to_update = {
 		"projects": ["Activity Cost", "Timesheet"],
 		"setup": ["Sales Person"],

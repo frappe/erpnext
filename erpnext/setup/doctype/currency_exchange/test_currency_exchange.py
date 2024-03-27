@@ -49,6 +49,7 @@ def save_new_records(test_records):
 
 test_exchange_values = {"2015-12-15": "66.999", "2016-01-15": "65.1"}
 
+
 # Removing API call from get_exchange_rate
 def patched_requests_get(*args, **kwargs):
 	class PatchResponse:
@@ -83,7 +84,7 @@ class TestCurrencyExchange(unittest.TestCase):
 	def clear_cache(self):
 		cache = frappe.cache()
 		for date in test_exchange_values.keys():
-			key = "currency_exchange_rate_{0}:{1}:{2}".format(date, "USD", "INR")
+			key = "currency_exchange_rate_{}:{}:{}".format(date, "USD", "INR")
 			cache.delete(key)
 
 	def tearDown(self):

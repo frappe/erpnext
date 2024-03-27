@@ -39,7 +39,7 @@ def export_invoices(filters=None):
 
 	attachments = get_e_invoice_attachments(invoices)
 
-	zip_filename = "{0}-einvoices.zip".format(frappe.utils.get_datetime().strftime("%Y%m%d_%H%M%S"))
+	zip_filename = "{}-einvoices.zip".format(frappe.utils.get_datetime().strftime("%Y%m%d_%H%M%S"))
 
 	download_zip(attachments, zip_filename)
 
@@ -307,7 +307,9 @@ def sales_invoice_validate(doc):
 		for row in doc.taxes:
 			if row.rate == 0 and row.tax_amount == 0 and not row.tax_exemption_reason:
 				frappe.throw(
-					_("Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges").format(row.idx),
+					_("Row {0}: Please set at Tax Exemption Reason in Sales Taxes and Charges").format(
+						row.idx
+					),
 					title=_("E-Invoicing Information Missing"),
 				)
 
@@ -338,9 +340,7 @@ def sales_invoice_on_submit(doc, method):
 					_("Row {0}: Please set the Mode of Payment in Payment Schedule").format(schedule.idx),
 					title=_("E-Invoicing Information Missing"),
 				)
-			elif not frappe.db.get_value(
-				"Mode of Payment", schedule.mode_of_payment, "mode_of_payment_code"
-			):
+			elif not frappe.db.get_value("Mode of Payment", schedule.mode_of_payment, "mode_of_payment_code"):
 				frappe.throw(
 					_("Row {0}: Please set the correct code on Mode of Payment {1}").format(
 						schedule.idx, schedule.mode_of_payment
@@ -473,9 +473,7 @@ def get_progressive_name_and_number(doc, replace=False):
 			filename = attachment.file_name.split(".xml")[0]
 			return filename, filename.split("_")[1]
 
-	company_tax_id = (
-		doc.company_tax_id if doc.company_tax_id.startswith("IT") else "IT" + doc.company_tax_id
-	)
+	company_tax_id = doc.company_tax_id if doc.company_tax_id.startswith("IT") else "IT" + doc.company_tax_id
 	progressive_name = frappe.model.naming.make_autoname(company_tax_id + "_.#####")
 	progressive_number = progressive_name.split("_")[1]
 

@@ -3,7 +3,7 @@
 
 
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 import frappe
 from frappe import _
@@ -105,9 +105,7 @@ class Subscription(Document):
 
 		return _current_invoice_start, _current_invoice_end
 
-	def get_current_invoice_start(
-		self, date: Optional["DateTimeLikeObject"] = None
-	) -> Union[datetime.date, str]:
+	def get_current_invoice_start(self, date: Optional["DateTimeLikeObject"] = None) -> datetime.date | str:
 		"""
 		This returns the date of the beginning of the current billing period.
 		If the `date` parameter is not given , it will be automatically set as today's
@@ -130,9 +128,7 @@ class Subscription(Document):
 
 		return _current_invoice_start
 
-	def get_current_invoice_end(
-		self, date: Optional["DateTimeLikeObject"] = None
-	) -> Union[datetime.date, str]:
+	def get_current_invoice_end(self, date: Optional["DateTimeLikeObject"] = None) -> datetime.date | str:
 		"""
 		This returns the date of the end of the current billing period.
 		If the subscription is in trial period, it will be set as the end of the
@@ -174,7 +170,7 @@ class Subscription(Document):
 		return _current_invoice_end
 
 	@staticmethod
-	def validate_plans_billing_cycle(billing_cycle_data: List[Dict[str, str]]) -> None:
+	def validate_plans_billing_cycle(billing_cycle_data: list[dict[str, str]]) -> None:
 		"""
 		Makes sure that all `Subscription Plan` in the `Subscription` have the
 		same billing interval
@@ -182,7 +178,7 @@ class Subscription(Document):
 		if billing_cycle_data and len(billing_cycle_data) != 1:
 			frappe.throw(_("You can only have Plans with the same billing cycle in a Subscription"))
 
-	def get_billing_cycle_and_interval(self) -> List[Dict[str, str]]:
+	def get_billing_cycle_and_interval(self) -> list[dict[str, str]]:
 		"""
 		Returns a dict representing the billing interval and cycle for this `Subscription`.
 		You shouldn't need to call this directly. Use `get_billing_cycle` instead.
@@ -199,7 +195,7 @@ class Subscription(Document):
 
 		return billing_info
 
-	def get_billing_cycle_data(self) -> Dict[str, int]:
+	def get_billing_cycle_data(self) -> dict[str, int]:
 		"""
 		Returns dict contain the billing cycle data.
 		You shouldn't need to call this directly. Use `get_billing_cycle` instead.
@@ -232,9 +228,7 @@ class Subscription(Document):
 		"""
 		if self.is_trialling():
 			self.status = "Trialing"
-		elif (
-			self.status == "Active" and self.end_date and getdate(posting_date) > getdate(self.end_date)
-		):
+		elif self.status == "Active" and self.end_date and getdate(posting_date) > getdate(self.end_date):
 			self.status = "Completed"
 		elif self.is_past_grace_period():
 			self.status = self.get_status_for_past_grace_period()
@@ -252,7 +246,7 @@ class Subscription(Document):
 
 	@staticmethod
 	def period_has_passed(
-		end_date: Union[str, datetime.date], posting_date: Optional["DateTimeLikeObject"] = None
+		end_date: str | datetime.date, posting_date: Optional["DateTimeLikeObject"] = None
 	) -> bool:
 		"""
 		Returns true if the given `end_date` has passed
@@ -282,9 +276,7 @@ class Subscription(Document):
 		grace_period = cint(frappe.get_value("Subscription Settings", None, "grace_period"))
 		return getdate(posting_date) >= getdate(add_days(self.current_invoice.due_date, grace_period))
 
-	def current_invoice_is_past_due(
-		self, posting_date: Optional["DateTimeLikeObject"] = None
-	) -> bool:
+	def current_invoice_is_past_due(self, posting_date: Optional["DateTimeLikeObject"] = None) -> bool:
 		"""
 		Returns `True` if the current generated invoice is overdue
 		"""
@@ -334,14 +326,15 @@ class Subscription(Document):
 			unsupported_plans = []
 			for x in subscription_plan_currencies:
 				if x.currency != party_billing_currency:
-					unsupported_plans.append("{0}".format(get_link_to_form("Subscription Plan", x.name)))
+					unsupported_plans.append("{}".format(get_link_to_form("Subscription Plan", x.name)))
 
 			if unsupported_plans:
 				unsupported_plans = [
 					_(
 						"Below Subscription Plans are of different currency to the party default billing currency/Company currency: {0}"
-					).format(frappe.bold(party_billing_currency))
-				] + unsupported_plans
+					).format(frappe.bold(party_billing_currency)),
+					*unsupported_plans,
+				]
 
 				frappe.throw(
 					unsupported_plans, frappe.ValidationError, "Unsupported Subscription Plans", as_list=True
@@ -384,9 +377,9 @@ class Subscription(Document):
 
 	def generate_invoice(
 		self,
-		from_date: Optional[Union[str, datetime.date]] = None,
-		to_date: Optional[Union[str, datetime.date]] = None,
-		posting_date: Optional[Union[str, datetime.date]] = None,
+		from_date: str | datetime.date | None = None,
+		to_date: str | datetime.date | None = None,
+		posting_date: str | datetime.date | None = None,
 	) -> Document:
 		"""
 		Creates a `Invoice` for the `Subscription`, updates `self.invoices` and
@@ -397,9 +390,9 @@ class Subscription(Document):
 
 	def create_invoice(
 		self,
-		from_date: Optional[Union[str, datetime.date]] = None,
-		to_date: Optional[Union[str, datetime.date]] = None,
-		posting_date: Optional[Union[str, datetime.date]] = None,
+		from_date: str | datetime.date | None = None,
+		to_date: str | datetime.date | None = None,
+		posting_date: str | datetime.date | None = None,
 	) -> Document:
 		"""
 		Creates a `Invoice`, submits it and returns it
@@ -503,9 +496,7 @@ class Subscription(Document):
 
 		return invoice
 
-	def get_items_from_plans(
-		self, plans: List[Dict[str, str]], prorate: Optional[bool] = None
-	) -> List[Dict]:
+	def get_items_from_plans(self, plans: list[dict[str, str]], prorate: bool | None = None) -> list[dict]:
 		"""
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
@@ -628,8 +619,8 @@ class Subscription(Document):
 
 	def is_current_invoice_generated(
 		self,
-		_current_start_date: Union[datetime.date, str] = None,
-		_current_end_date: Union[datetime.date, str] = None,
+		_current_start_date: datetime.date | str | None = None,
+		_current_end_date: datetime.date | str | None = None,
 	) -> bool:
 		if not (_current_start_date and _current_end_date):
 			_current_start_date, _current_end_date = self._get_subscription_period(
@@ -644,13 +635,13 @@ class Subscription(Document):
 		return False
 
 	@property
-	def current_invoice(self) -> Union[Document, None]:
+	def current_invoice(self) -> Document | None:
 		"""
 		Adds property for accessing the current_invoice
 		"""
 		return self.get_current_invoice()
 
-	def get_current_invoice(self) -> Union[Document, None]:
+	def get_current_invoice(self) -> Document | None:
 		"""
 		Returns the most recent generated invoice.
 		"""
@@ -675,7 +666,7 @@ class Subscription(Document):
 		self.cancelation_date = nowdate()
 
 	@property
-	def invoices(self) -> List[Dict]:
+	def invoices(self) -> list[dict]:
 		return frappe.get_all(
 			self.invoice_document_type,
 			filters={"subscription": self.name},
@@ -745,10 +736,10 @@ def is_prorate() -> int:
 
 
 def get_prorata_factor(
-	period_end: Union[datetime.date, str],
-	period_start: Union[datetime.date, str],
-	is_prepaid: Optional[int] = None,
-) -> Union[int, float]:
+	period_end: datetime.date | str,
+	period_start: datetime.date | str,
+	is_prepaid: int | None = None,
+) -> int | float:
 	if is_prepaid:
 		return 1
 
@@ -757,9 +748,7 @@ def get_prorata_factor(
 	return diff / plan_days
 
 
-def process_all(
-	subscription: str | None = None, posting_date: Optional["DateTimeLikeObject"] = None
-) -> None:
+def process_all(subscription: str | None = None, posting_date: Optional["DateTimeLikeObject"] = None) -> None:
 	"""
 	Task to updates the status of all `Subscription` apart from those that are cancelled
 	"""

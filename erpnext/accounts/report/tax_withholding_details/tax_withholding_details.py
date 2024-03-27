@@ -37,9 +37,7 @@ def validate_filters(filters):
 		frappe.throw(_("From Date must be before To Date"))
 
 
-def get_result(
-	filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map, net_total_map
-):
+def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_party_map, net_total_map):
 	party_map = get_party_pan_map(filters.get("party_type"))
 	tax_rate_map = get_tax_rate_map(filters)
 	gle_map = get_gle_map(tds_docs)
@@ -92,9 +90,9 @@ def get_result(
 					party_type = "customer_type"
 
 				row = {
-					"pan"
-					if frappe.db.has_column(filters.party_type, "pan")
-					else "tax_id": party_map.get(party, {}).get("pan"),
+					"pan" if frappe.db.has_column(filters.party_type, "pan") else "tax_id": party_map.get(
+						party, {}
+					).get("pan"),
 					"party": party_map.get(party, {}).get("name"),
 				}
 
@@ -281,7 +279,7 @@ def get_tds_docs(filters):
 	journal_entries = []
 	tax_category_map = frappe._dict()
 	net_total_map = frappe._dict()
-	or_filters = frappe._dict()
+	frappe._dict()
 	journal_entry_party_map = frappe._dict()
 	bank_accounts = frappe.get_all("Account", {"is_group": 0, "account_type": "Bank"}, pluck="name")
 
@@ -344,7 +342,7 @@ def get_tds_docs_query(filters, bank_accounts, tds_accounts):
 	query = (
 		frappe.qb.from_(gle)
 		.select("voucher_no", "voucher_type", "against", "party")
-		.where((gle.is_cancelled == 0))
+		.where(gle.is_cancelled == 0)
 	)
 
 	if filters.get("from_date"):

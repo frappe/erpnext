@@ -85,7 +85,7 @@ def get_opp_by_lead_source(from_date, to_date, company):
 						* x["probability"]
 						/ 100
 					)
-				}
+				},
 			)
 			for x in opportunities
 		]
@@ -137,7 +137,7 @@ def get_pipeline_data(from_date, to_date, company):
 						* x["probability"]
 						/ 100
 					)
-				}
+				},
 			)
 			for x in opportunities
 		]

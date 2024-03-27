@@ -49,12 +49,12 @@ class Contract(Document):
 		name = self.party_name
 
 		if self.contract_template:
-			name += " - {} Agreement".format(self.contract_template)
+			name += f" - {self.contract_template} Agreement"
 
 		# If identical, append contract name with the next number in the iteration
 		if frappe.db.exists("Contract", name):
-			count = len(frappe.get_all("Contract", filters={"name": ["like", "%{}%".format(name)]}))
-			name = "{} - {}".format(name, count)
+			count = len(frappe.get_all("Contract", filters={"name": ["like", f"%{name}%"]}))
+			name = f"{name} - {count}"
 
 		self.name = _(name)
 

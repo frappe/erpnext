@@ -47,7 +47,6 @@ class SupplierScorecardPeriod(Document):
 		self.calculate_score()
 
 	def validate_criteria_weights(self):
-
 		weight = 0
 		for c in self.criteria:
 			weight += c.weight
@@ -70,14 +69,17 @@ class SupplierScorecardPeriod(Document):
 				crit.score = min(
 					crit.max_score,
 					max(
-						0, frappe.safe_eval(self.get_eval_statement(crit.formula), None, {"max": max, "min": min})
+						0,
+						frappe.safe_eval(
+							self.get_eval_statement(crit.formula), None, {"max": max, "min": min}
+						),
 					),
 				)
 			except Exception:
 				frappe.throw(
-					_("Could not solve criteria score function for {0}. Make sure the formula is valid.").format(
-						crit.criteria_name
-					),
+					_(
+						"Could not solve criteria score function for {0}. Make sure the formula is valid."
+					).format(crit.criteria_name),
 					frappe.ValidationError,
 				)
 				crit.score = 0
@@ -108,7 +110,7 @@ class SupplierScorecardPeriod(Document):
 			if var.value:
 				if var.param_name in my_eval_statement:
 					my_eval_statement = my_eval_statement.replace(
-						"{" + var.param_name + "}", "{:.2f}".format(var.value)
+						"{" + var.param_name + "}", f"{var.value:.2f}"
 					)
 			else:
 				if var.param_name in my_eval_statement:

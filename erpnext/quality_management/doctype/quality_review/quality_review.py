@@ -67,9 +67,7 @@ def review():
 def create_review(goal):
 	goal = frappe.get_doc("Quality Goal", goal)
 
-	review = frappe.get_doc(
-		{"doctype": "Quality Review", "goal": goal.name, "date": frappe.utils.getdate()}
-	)
+	review = frappe.get_doc({"doctype": "Quality Review", "goal": goal.name, "date": frappe.utils.getdate()})
 
 	review.insert(ignore_permissions=True)
 

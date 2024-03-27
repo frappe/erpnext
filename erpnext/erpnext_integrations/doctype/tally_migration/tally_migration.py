@@ -190,7 +190,7 @@ class TallyMigration(Document):
 
 		def get_children_and_parent_dict(accounts):
 			children, parents = {}, {}
-			for parent, account, is_group in accounts:
+			for parent, account, _is_group in accounts:
 				children.setdefault(parent, set()).add(account)
 				parents.setdefault(account, set()).add(parent)
 				parents[account].update(parents.get(parent, []))
@@ -235,7 +235,9 @@ class TallyMigration(Document):
 						{
 							"doctype": party_type,
 							"customer_name": account.NAME.string.strip(),
-							"tax_id": account.INCOMETAXNUMBER.string.strip() if account.INCOMETAXNUMBER else None,
+							"tax_id": account.INCOMETAXNUMBER.string.strip()
+							if account.INCOMETAXNUMBER
+							else None,
 							"customer_group": "All Customer Groups",
 							"territory": "All Territories",
 							"customer_type": "Individual",
@@ -249,7 +251,9 @@ class TallyMigration(Document):
 						{
 							"doctype": party_type,
 							"supplier_name": account.NAME.string.strip(),
-							"pan": account.INCOMETAXNUMBER.string.strip() if account.INCOMETAXNUMBER else None,
+							"pan": account.INCOMETAXNUMBER.string.strip()
+							if account.INCOMETAXNUMBER
+							else None,
 							"supplier_group": "All Supplier Groups",
 							"supplier_type": "Individual",
 						}
@@ -265,7 +269,9 @@ class TallyMigration(Document):
 							"address_line2": address[140:].strip(),
 							"country": account.COUNTRYNAME.string.strip() if account.COUNTRYNAME else None,
 							"state": account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else None,
-							"gst_state": account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else None,
+							"gst_state": account.LEDSTATENAME.string.strip()
+							if account.LEDSTATENAME
+							else None,
 							"pin_code": account.PINCODE.string.strip() if account.PINCODE else None,
 							"mobile": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
 							"phone": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
@@ -607,7 +613,7 @@ class TallyMigration(Document):
 				if new_year.year_start_date.year == new_year.year_end_date.year:
 					new_year.year = new_year.year_start_date.year
 				else:
-					new_year.year = "{}-{}".format(new_year.year_start_date.year, new_year.year_end_date.year)
+					new_year.year = f"{new_year.year_start_date.year}-{new_year.year_end_date.year}"
 				new_year.save()
 				oldest_year = new_year
 

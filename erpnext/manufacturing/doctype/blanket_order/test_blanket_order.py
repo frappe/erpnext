@@ -98,9 +98,7 @@ class TestBlanketOrder(FrappeTestCase):
 		customer = "_Test Customer"
 		supplier = "_Test Supplier"
 
-		if not frappe.db.exists(
-			"Item Customer Detail", {"customer_name": customer, "parent": item_code}
-		):
+		if not frappe.db.exists("Item Customer Detail", {"customer_name": customer, "parent": item_code}):
 			item_doc.append("customer_items", {"customer_name": customer, "ref_code": "CUST-REF-1"})
 			item_doc.save()
 

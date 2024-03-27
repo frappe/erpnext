@@ -53,9 +53,7 @@ def get_columns(group_by: Literal["Lost Reason", "Competitor"]):
 	]
 
 
-def get_data(
-	company: str, from_date: str, to_date: str, group_by: Literal["Lost Reason", "Competitor"]
-):
+def get_data(company: str, from_date: str, to_date: str, group_by: Literal["Lost Reason", "Competitor"]):
 	"""Return quotation value grouped by lost reason or competitor"""
 	if group_by == "Lost Reason":
 		fieldname = "lost_reason"

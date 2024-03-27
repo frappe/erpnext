@@ -29,12 +29,10 @@ def move_credit_limit_to_child_table():
 			fields = ", bypass_credit_limit_check_at_sales_order"
 
 		credit_limit_records = frappe.db.sql(
-			"""
-			SELECT name, credit_limit {0}
-			FROM `tab{1}` where credit_limit > 0
-		""".format(
-				fields, doctype
-			),
+			f"""
+			SELECT name, credit_limit {fields}
+			FROM `tab{doctype}` where credit_limit > 0
+		""",
 			as_dict=1,
 		)  # nosec
 

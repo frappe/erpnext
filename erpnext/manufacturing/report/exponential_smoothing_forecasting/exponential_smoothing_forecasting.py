@@ -15,9 +15,9 @@ def execute(filters=None):
 	return ForecastingReport(filters).execute_report()
 
 
-class ExponentialSmoothingForecast(object):
+class ExponentialSmoothingForecast:
 	def forecast_future_data(self):
-		for key, value in self.period_wise_data.items():
+		for _key, value in self.period_wise_data.items():
 			forecast_data = []
 			for period in self.period_list:
 				forecast_key = "forecast_" + period.key
@@ -185,7 +185,6 @@ class ForecastingReport(ExponentialSmoothingForecast):
 				"Half-Yearly",
 				"Quarterly",
 			] or period.from_date >= getdate(self.filters.from_date):
-
 				forecast_key = period.key
 				label = _(period.label)
 				if period.from_date >= getdate(self.filters.from_date):
