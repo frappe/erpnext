@@ -57,9 +57,7 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 
 
 def create_accounting_dimension_filter():
-	if not frappe.db.get_value(
-		"Accounting Dimension Filter", {"accounting_dimension": "Cost Center"}
-	):
+	if not frappe.db.get_value("Accounting Dimension Filter", {"accounting_dimension": "Cost Center"}):
 		frappe.get_doc(
 			{
 				"doctype": "Accounting Dimension Filter",

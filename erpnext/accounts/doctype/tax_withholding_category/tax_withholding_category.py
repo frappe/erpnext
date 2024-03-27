@@ -36,13 +36,11 @@ class TaxWithholdingCategory(Document):
 
 	def validate_thresholds(self):
 		for d in self.get("rates"):
-			if (
-				d.cumulative_threshold and d.single_threshold and d.cumulative_threshold < d.single_threshold
-			):
+			if d.cumulative_threshold and d.single_threshold and d.cumulative_threshold < d.single_threshold:
 				frappe.throw(
-					_("Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold").format(
-						d.idx
-					)
+					_(
+						"Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold"
+					).format(d.idx)
 				)
 
 
@@ -295,9 +293,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	doctype = "Purchase Invoice" if party_type == "Supplier" else "Sales Invoice"
 	field = (
-		"base_tax_withholding_net_total as base_net_total"
-		if party_type == "Supplier"
-		else "base_net_total"
+		"base_tax_withholding_net_total as base_net_total" if party_type == "Supplier" else "base_net_total"
 	)
 	voucher_wise_amount = {}
 	vouchers = []
@@ -351,9 +347,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	return vouchers, voucher_wise_amount
 
 
-def get_advance_vouchers(
-	parties, company=None, from_date=None, to_date=None, party_type="Supplier"
-):
+def get_advance_vouchers(parties, company=None, from_date=None, to_date=None, party_type="Supplier"):
 	"""
 	Use Payment Ledger to fetch unallocated Advance Payments
 	"""
@@ -374,9 +368,7 @@ def get_advance_vouchers(
 	if from_date and to_date:
 		conditions.append(ple.posting_date[from_date:to_date])
 
-	advances = (
-		qb.from_(ple).select(ple.voucher_no).distinct().where(Criterion.all(conditions)).run(as_list=1)
-	)
+	advances = qb.from_(ple).select(ple.voucher_no).distinct().where(Criterion.all(conditions)).run(as_list=1)
 	if advances:
 		advances = [x[0] for x in advances]
 
@@ -542,9 +534,7 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	conditions.append(ple.voucher_no == ple.against_voucher_no)
 	conditions.append(ple.company == inv.company)
 
-	advances = (
-		qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run(as_list=1)
-	)
+	(qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run(as_list=1))
 
 	advance_amt = (
 		qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run()[0][0] or 0.0
@@ -603,9 +593,7 @@ def get_limit_consumed(ldc, parties):
 	return limit_consumed
 
 
-def get_lower_deduction_amount(
-	current_amount, limit_consumed, certificate_limit, rate, tax_details
-):
+def get_lower_deduction_amount(current_amount, limit_consumed, certificate_limit, rate, tax_details):
 	if certificate_limit - flt(limit_consumed) - flt(current_amount) >= 0:
 		return current_amount * rate / 100
 	else:
@@ -617,9 +605,7 @@ def get_lower_deduction_amount(
 
 def is_valid_certificate(ldc, posting_date, limit_consumed):
 	available_amount = flt(ldc.certificate_limit) - flt(limit_consumed)
-	if (
-		getdate(ldc.valid_from) <= getdate(posting_date) <= getdate(ldc.valid_upto)
-	) and available_amount > 0:
+	if (getdate(ldc.valid_from) <= getdate(posting_date) <= getdate(ldc.valid_upto)) and available_amount > 0:
 		return True
 
 	return False

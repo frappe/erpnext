@@ -102,9 +102,7 @@ class TestAsset(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_purchase_asset(self):
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset = frappe.get_doc("Asset", asset_name)
@@ -209,7 +207,7 @@ class TestAsset(AssetSetup):
 			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
 			asset.precision("gross_purchase_amount"),
 		)
-		self.assertEquals(accumulated_depr_amount, 18000.0)
+		self.assertEqual(accumulated_depr_amount, 18000.0)
 
 		scrap_asset(asset.name)
 		asset.load_from_db()
@@ -226,7 +224,7 @@ class TestAsset(AssetSetup):
 			original_schedule_date=get_last_day(nowdate()),
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
-		self.assertEquals(
+		self.assertEqual(
 			accumulated_depr_amount,
 			flt(18000.0 + pro_rata_amount, asset.precision("gross_purchase_amount")),
 		)
@@ -263,7 +261,7 @@ class TestAsset(AssetSetup):
 		)
 		this_month_depr_amount = 9000.0 if is_last_day_of_the_month(date) else 0
 
-		self.assertEquals(accumulated_depr_amount, 18000.0 + this_month_depr_amount)
+		self.assertEqual(accumulated_depr_amount, 18000.0 + this_month_depr_amount)
 
 	def test_gle_made_by_asset_sale(self):
 		date = nowdate()
@@ -467,9 +465,7 @@ class TestAsset(AssetSetup):
 		self.assertEqual(jv.accounts[3].reference_name, new_asset.name)
 
 	def test_expense_head(self):
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=2, rate=200000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=2, rate=200000.0, location="Test Location")
 		doc = make_invoice(pr.name)
 
 		self.assertEqual("Asset Received But Not Billed - _TC", doc.items[0].expense_account)
@@ -579,9 +575,7 @@ class TestAsset(AssetSetup):
 		self.assertFalse(gle)
 
 		# case 1 -- PR with cwip disabled, Asset with cwip enabled
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=200000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=200000.0, location="Test Location")
 		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 1)
 		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", cwip_acc)
 		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")
@@ -593,9 +587,7 @@ class TestAsset(AssetSetup):
 		self.assertFalse(gle)
 
 		# case 2 -- PR with cwip enabled, Asset with cwip disabled
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=200000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=200000.0, location="Test Location")
 		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 0)
 		asset = frappe.db.get_value("Asset", {"purchase_receipt": pr.name, "docstatus": 0}, "name")
 		asset_doc = frappe.get_doc("Asset", asset)
@@ -1207,8 +1199,7 @@ class TestDepreciationBasics(AssetSetup):
 
 		je = frappe.get_doc("Journal Entry", asset.schedules[0].journal_entry)
 		accounting_entries = [
-			{"account": entry.account, "debit": entry.debit, "credit": entry.credit}
-			for entry in je.accounts
+			{"account": entry.account, "debit": entry.debit, "credit": entry.credit} for entry in je.accounts
 		]
 
 		for entry in accounting_entries:
@@ -1243,8 +1234,7 @@ class TestDepreciationBasics(AssetSetup):
 
 		je = frappe.get_doc("Journal Entry", asset.schedules[0].journal_entry)
 		accounting_entries = [
-			{"account": entry.account, "debit": entry.debit, "credit": entry.credit}
-			for entry in je.accounts
+			{"account": entry.account, "debit": entry.debit, "credit": entry.credit} for entry in je.accounts
 		]
 
 		for entry in accounting_entries:
@@ -1468,13 +1458,13 @@ class TestDepreciationBasics(AssetSetup):
 		asset.finance_books[0].expected_value_after_useful_life = 100
 		asset.save()
 		asset.reload()
-		self.assertEquals(asset.finance_books[0].value_after_depreciation, 98000.0)
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 98000.0)
 
 		# changing expected_value_after_useful_life shouldn't affect value_after_depreciation
 		asset.finance_books[0].expected_value_after_useful_life = 200
 		asset.save()
 		asset.reload()
-		self.assertEquals(asset.finance_books[0].value_after_depreciation, 98000.0)
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 98000.0)
 
 	def test_asset_cost_center(self):
 		asset = create_asset(is_existing_asset=1, do_not_save=1)

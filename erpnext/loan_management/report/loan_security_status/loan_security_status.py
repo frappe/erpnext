@@ -61,12 +61,11 @@ def get_columns(filters):
 
 
 def get_data(filters):
-
 	data = []
 	conditions = get_conditions(filters)
 
 	loan_security_pledges = frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			p.name, p.applicant, p.loan, p.status, p.pledge_time,
 			c.loan_security, c.qty, c.loan_security_price, c.amount
@@ -77,9 +76,7 @@ def get_data(filters):
 			AND c.parent = p.name
 			AND p.company = %(company)s
 			{conditions}
-	""".format(
-			conditions=conditions
-		),
+	""",
 		(filters),
 		as_dict=1,
 	)  # nosec

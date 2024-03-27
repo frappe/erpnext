@@ -33,7 +33,6 @@ def get_context(context):
 
 @frappe.whitelist(allow_guest=True)
 def confirm_payment(redirect_flow_id, reference_doctype, reference_docname):
-
 	client = gocardless_initialization(reference_docname)
 
 	try:
@@ -59,7 +58,7 @@ def confirm_payment(redirect_flow_id, reference_doctype, reference_docname):
 
 		try:
 			create_mandate(data)
-		except Exception as e:
+		except Exception:
 			frappe.log_error("GoCardless Mandate Registration Error")
 
 		gateway_controller = get_gateway_controller(reference_docname)
@@ -67,7 +66,7 @@ def confirm_payment(redirect_flow_id, reference_doctype, reference_docname):
 
 		return {"redirect_to": confirmation_url}
 
-	except Exception as e:
+	except Exception:
 		frappe.log_error("GoCardless Payment Error")
 		return {"redirect_to": "/integrations/payment-failed"}
 

@@ -10,7 +10,7 @@ from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.accounts.utils import get_fiscal_year
 
 
-class Deferred_Item(object):
+class Deferred_Item:
 	"""
 	Helper class for processing items with deferred revenue/expense
 	"""
@@ -152,13 +152,11 @@ class Deferred_Item(object):
 					if posting.posted == "posted":
 						actual += self.get_amount(posting)
 
-			self.period_total.append(
-				frappe._dict({"key": period.key, "total": period_sum, "actual": actual})
-			)
+			self.period_total.append(frappe._dict({"key": period.key, "total": period_sum, "actual": actual}))
 		return self.period_total
 
 
-class Deferred_Invoice(object):
+class Deferred_Invoice:
 	def __init__(self, invoice, items, filters, period_list):
 		"""
 		Helper class for processing invoices with deferred revenue/expense items
@@ -219,7 +217,7 @@ class Deferred_Invoice(object):
 		return ret_data
 
 
-class Deferred_Revenue_and_Expense_Report(object):
+class Deferred_Revenue_and_Expense_Report:
 	def __init__(self, filters=None):
 		"""
 		Initialize deferred revenue/expense report with user provided filters or system defaults, if none is provided

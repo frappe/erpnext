@@ -61,7 +61,6 @@ def get_conditions(filters):
 
 
 def get_data(filters):
-
 	data = []
 	conditions = get_conditions(filters)
 	accounts = frappe.db.get_all(

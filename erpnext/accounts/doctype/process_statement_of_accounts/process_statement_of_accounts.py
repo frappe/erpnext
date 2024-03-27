@@ -423,9 +423,7 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 			else:
 				new_to_date = add_months(new_to_date, 1 if doc.frequency == "Monthly" else 3)
 			new_from_date = add_months(new_to_date, -1 * doc.filter_duration)
-			doc.add_comment(
-				"Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now())
-			)
+			doc.add_comment("Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now()))
 			if doc.report == "General Ledger":
 				doc.db_set("to_date", new_to_date, commit=True)
 				doc.db_set("from_date", new_from_date, commit=True)

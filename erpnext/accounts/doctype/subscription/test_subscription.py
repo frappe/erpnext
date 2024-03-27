@@ -1,7 +1,6 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -85,9 +84,7 @@ def create_parties():
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = "_Test Subscription Customer"
 		customer.billing_currency = "USD"
-		customer.append(
-			"accounts", {"company": "_Test Company", "account": "_Test Receivable USD - _TC"}
-		)
+		customer.append("accounts", {"company": "_Test Company", "account": "_Test Receivable USD - _TC"})
 		customer.insert()
 
 
@@ -358,9 +355,7 @@ class TestSubscription(FrappeTestCase):
 
 		invoice = subscription.get_current_invoice()
 		diff = flt(date_diff(nowdate(), subscription.current_invoice_start) + 1)
-		plan_days = flt(
-			date_diff(subscription.current_invoice_end, subscription.current_invoice_start) + 1
-		)
+		plan_days = flt(date_diff(subscription.current_invoice_end, subscription.current_invoice_start) + 1)
 		prorate_factor = flt(diff / plan_days)
 
 		self.assertEqual(
@@ -417,9 +412,7 @@ class TestSubscription(FrappeTestCase):
 
 		invoice = subscription.get_current_invoice()
 		diff = flt(date_diff(nowdate(), subscription.current_invoice_start) + 1)
-		plan_days = flt(
-			date_diff(subscription.current_invoice_end, subscription.current_invoice_start) + 1
-		)
+		plan_days = flt(date_diff(subscription.current_invoice_end, subscription.current_invoice_start) + 1)
 		prorate_factor = flt(diff / plan_days)
 
 		self.assertEqual(flt(invoice.grand_total, 2), flt(prorate_factor * 900, 2))

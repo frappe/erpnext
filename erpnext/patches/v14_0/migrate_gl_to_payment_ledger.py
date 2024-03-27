@@ -152,7 +152,8 @@ def execute():
 						gl.star,
 						ConstantColumn(1).as_("docstatus"),
 						IfNull(
-							ifelse(gl.against_voucher_type == "", None, gl.against_voucher_type), gl.voucher_type
+							ifelse(gl.against_voucher_type == "", None, gl.against_voucher_type),
+							gl.voucher_type,
 						).as_("against_voucher_type"),
 						IfNull(ifelse(gl.against_voucher == "", None, gl.against_voucher), gl.voucher_no).as_(
 							"against_voucher_no"

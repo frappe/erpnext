@@ -112,9 +112,7 @@ class TestHolidayList(unittest.TestCase):
 		frappe.local.lang = lang
 
 
-def make_holiday_list(
-	name, from_date=getdate() - timedelta(days=10), to_date=getdate(), holiday_dates=None
-):
+def make_holiday_list(name, from_date=getdate() - timedelta(days=10), to_date=getdate(), holiday_dates=None):
 	frappe.delete_doc_if_exists("Holiday List", name, force=1)
 	doc = frappe.get_doc(
 		{

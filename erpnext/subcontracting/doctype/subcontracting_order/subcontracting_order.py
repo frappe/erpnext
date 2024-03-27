@@ -15,7 +15,7 @@ from erpnext.stock.utils import get_bin
 
 class SubcontractingOrder(SubcontractingController):
 	def __init__(self, *args, **kwargs):
-		super(SubcontractingOrder, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 		self.status_updater = [
 			{
@@ -32,10 +32,10 @@ class SubcontractingOrder(SubcontractingController):
 		]
 
 	def before_validate(self):
-		super(SubcontractingOrder, self).before_validate()
+		super().before_validate()
 
 	def validate(self):
-		super(SubcontractingOrder, self).validate()
+		super().validate()
 		self.validate_purchase_order_for_subcontracting()
 		self.validate_items()
 		self.validate_service_items()
@@ -136,9 +136,7 @@ class SubcontractingOrder(SubcontractingController):
 			):
 				item_wh_list.append([item.item_code, item.warehouse])
 		for item_code, warehouse in item_wh_list:
-			update_bin_qty(
-				item_code, warehouse, {"ordered_qty": self.get_ordered_qty(item_code, warehouse)}
-			)
+			update_bin_qty(item_code, warehouse, {"ordered_qty": self.get_ordered_qty(item_code, warehouse)})
 
 	@staticmethod
 	def get_ordered_qty(item_code, warehouse):
@@ -212,7 +210,10 @@ class SubcontractingOrder(SubcontractingController):
 				elif self.per_received > 0 and self.per_received < 100:
 					status = "Partially Received"
 					for item in self.supplied_items:
-						if not item.returned_qty or (item.supplied_qty - item.consumed_qty - item.returned_qty) > 0:
+						if (
+							not item.returned_qty
+							or (item.supplied_qty - item.consumed_qty - item.returned_qty) > 0
+						):
 							break
 					else:
 						status = "Closed"

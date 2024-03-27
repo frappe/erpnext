@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_months, getdate, today
+from frappe.utils import add_months, today
 
 from erpnext.accounts.report.purchase_register.purchase_register import execute
 
@@ -13,9 +13,7 @@ class TestPurchaseRegister(FrappeTestCase):
 		frappe.db.sql("delete from `tabPurchase Invoice` where company='_Test Company 6'")
 		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 6'")
 
-		filters = frappe._dict(
-			company="_Test Company 6", from_date=add_months(today(), -1), to_date=today()
-		)
+		filters = frappe._dict(company="_Test Company 6", from_date=add_months(today(), -1), to_date=today())
 
 		pi = make_purchase_invoice()
 
@@ -40,7 +38,7 @@ class TestPurchaseRegister(FrappeTestCase):
 			supplier="_Test Supplier",
 		)
 
-		pi = make_purchase_invoice()
+		make_purchase_invoice()
 		pe = make_payment_entry()
 
 		report_results = execute(filters)
@@ -58,7 +56,7 @@ def make_purchase_invoice():
 	from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
-	gst_acc = create_account(
+	create_account(
 		account_name="GST",
 		account_type="Tax",
 		parent_account="Duties and Taxes - _TC6",

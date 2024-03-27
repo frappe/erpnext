@@ -39,9 +39,7 @@ class LoanSecurityUnpledge(Document):
 
 		pledge_qty_map = get_pledged_security_qty(self.loan)
 
-		ltv_ratio_map = frappe._dict(
-			frappe.get_all("Loan Security Type", fields=["name", "loan_to_value_ratio"], as_list=1)
-		)
+		frappe._dict(frappe.get_all("Loan Security Type", fields=["name", "loan_to_value_ratio"], as_list=1))
 
 		loan_security_price_map = frappe._dict(
 			frappe.get_all(
@@ -129,7 +127,7 @@ class LoanSecurityUnpledge(Document):
 			pledged_qty = 0
 			current_pledges = get_pledged_security_qty(self.loan)
 
-			for security, qty in current_pledges.items():
+			for _security, qty in current_pledges.items():
 				pledged_qty += qty
 
 			if not pledged_qty:
@@ -138,7 +136,6 @@ class LoanSecurityUnpledge(Document):
 
 @frappe.whitelist()
 def get_pledged_security_qty(loan):
-
 	current_pledges = {}
 
 	unpledges = frappe._dict(

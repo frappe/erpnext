@@ -12,7 +12,6 @@ def execute():
 
 	count = 1
 	for d in accounting_dimensions:
-
 		if count % 2 == 0:
 			insert_after_field = "dimension_col_break"
 		else:
@@ -24,7 +23,6 @@ def execute():
 			"Subcontracting Receipt",
 			"Subcontracting Receipt Item",
 		]:
-
 			field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": d.fieldname})
 
 			if field:

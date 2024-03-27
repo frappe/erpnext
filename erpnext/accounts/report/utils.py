@@ -78,10 +78,10 @@ def get_rate_as_at(date, from_currency, to_currency):
 	:return: Retrieved exchange rate
 	"""
 
-	rate = __exchange_rates.get("{0}-{1}@{2}".format(from_currency, to_currency, date))
+	rate = __exchange_rates.get(f"{from_currency}-{to_currency}@{date}")
 	if not rate:
 		rate = get_exchange_rate(from_currency, to_currency, date) or 1
-		__exchange_rates["{0}-{1}@{2}".format(from_currency, to_currency, date)] = rate
+		__exchange_rates[f"{from_currency}-{to_currency}@{date}"] = rate
 
 	return rate
 
@@ -136,9 +136,7 @@ def get_appropriate_company(filters):
 
 
 @frappe.whitelist()
-def get_invoiced_item_gross_margin(
-	sales_invoice=None, item_code=None, company=None, with_item_data=False
-):
+def get_invoiced_item_gross_margin(sales_invoice=None, item_code=None, company=None, with_item_data=False):
 	from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator
 
 	sales_invoice = sales_invoice or frappe.form_dict.get("sales_invoice")

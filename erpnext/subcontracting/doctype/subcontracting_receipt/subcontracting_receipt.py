@@ -12,7 +12,7 @@ from erpnext.controllers.subcontracting_controller import SubcontractingControll
 
 class SubcontractingReceipt(SubcontractingController):
 	def __init__(self, *args, **kwargs):
-		super(SubcontractingReceipt, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.status_updater = [
 			{
 				"target_dt": "Subcontracting Order Item",
@@ -31,9 +31,7 @@ class SubcontractingReceipt(SubcontractingController):
 	def onload(self):
 		self.set_onload(
 			"backflush_based_on",
-			frappe.db.get_single_value(
-				"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
-			),
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
 		)
 
 	def update_status_updater_args(self):
@@ -64,7 +62,7 @@ class SubcontractingReceipt(SubcontractingController):
 			)
 
 	def before_validate(self):
-		super(SubcontractingReceipt, self).before_validate()
+		super().before_validate()
 		self.validate_items_qty()
 		self.set_items_bom()
 		self.set_items_cost_center()
@@ -77,7 +75,7 @@ class SubcontractingReceipt(SubcontractingController):
 		) and not self.has_serial_batch_items():
 			self.supplied_items = []
 
-		super(SubcontractingReceipt, self).validate()
+		super().validate()
 		self.set_missing_values()
 		self.validate_posting_time()
 		self.validate_rejected_warehouse()
@@ -144,7 +142,9 @@ class SubcontractingReceipt(SubcontractingController):
 				.select(
 					sco_supplied_item.rm_item_code,
 					sco_supplied_item.reference_name,
-					(sco_supplied_item.total_supplied_qty - sco_supplied_item.consumed_qty).as_("available_qty"),
+					(sco_supplied_item.total_supplied_qty - sco_supplied_item.consumed_qty).as_(
+						"available_qty"
+					),
 				)
 				.where(
 					(sco_supplied_item.parent == item.subcontracting_order)
@@ -157,7 +157,9 @@ class SubcontractingReceipt(SubcontractingController):
 				supplied_items_details[item.name] = {}
 
 				for supplied_item in supplied_items:
-					supplied_items_details[item.name][supplied_item.rm_item_code] = supplied_item.available_qty
+					supplied_items_details[item.name][
+						supplied_item.rm_item_code
+					] = supplied_item.available_qty
 		else:
 			for item in self.get("supplied_items"):
 				item.available_qty_for_consumption = supplied_items_details.get(item.reference_name, {}).get(
@@ -233,7 +235,9 @@ class SubcontractingReceipt(SubcontractingController):
 		for item in self.items:
 			if not (item.qty or item.rejected_qty):
 				frappe.throw(
-					_("Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time.").format(item.idx)
+					_("Row {0}: Accepted Qty and Rejected Qty can't be zero at the same time.").format(
+						item.idx
+					)
 				)
 
 	def set_items_bom(self):
@@ -328,10 +332,12 @@ class SubcontractingReceipt(SubcontractingController):
 
 					warehouse_account_name = warehouse_account[item.warehouse]["account"]
 					warehouse_account_currency = warehouse_account[item.warehouse]["account_currency"]
-					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get("account")
-					supplier_warehouse_account_currency = warehouse_account.get(self.supplier_warehouse, {}).get(
-						"account_currency"
+					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get(
+						"account"
 					)
+					supplier_warehouse_account_currency = warehouse_account.get(
+						self.supplier_warehouse, {}
+					).get("account_currency")
 					remarks = self.get("remarks") or _("Accounting Entry for Stock")
 
 					# FG Warehouse Account (Debit)

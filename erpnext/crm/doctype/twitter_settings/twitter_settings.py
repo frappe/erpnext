@@ -16,10 +16,8 @@ from tweepy.error import TweepError
 class TwitterSettings(Document):
 	@frappe.whitelist()
 	def get_authorize_url(self):
-		callback_url = (
-			"{0}/api/method/erpnext.crm.doctype.twitter_settings.twitter_settings.callback?".format(
-				frappe.utils.get_url()
-			)
+		callback_url = "{}/api/method/erpnext.crm.doctype.twitter_settings.twitter_settings.callback?".format(
+			frappe.utils.get_url()
 		)
 		auth = tweepy.OAuthHandler(
 			self.consumer_key, self.get_password(fieldname="consumer_secret"), callback_url
@@ -27,10 +25,12 @@ class TwitterSettings(Document):
 		try:
 			redirect_url = auth.get_authorization_url()
 			return redirect_url
-		except tweepy.TweepError as e:
+		except tweepy.TweepError:
 			frappe.msgprint(_("Error! Failed to get request token."))
 			frappe.throw(
-				_("Invalid {0} or {1}").format(frappe.bold("Consumer Key"), frappe.bold("Consumer Secret Key"))
+				_("Invalid {0} or {1}").format(
+					frappe.bold("Consumer Key"), frappe.bold("Consumer Secret Key")
+				)
 			)
 
 	def get_access_token(self, oauth_token, oauth_verifier):
@@ -59,7 +59,7 @@ class TwitterSettings(Document):
 
 			frappe.local.response["type"] = "redirect"
 			frappe.local.response["location"] = get_url_to_form("Twitter Settings", "Twitter Settings")
-		except TweepError as e:
+		except TweepError:
 			frappe.msgprint(_("Error! Failed to get access token."))
 			frappe.throw(_("Invalid Consumer Key or Consumer Secret Key"))
 

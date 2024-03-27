@@ -17,9 +17,7 @@ class TestAssetMaintenance(unittest.TestCase):
 		create_maintenance_team()
 
 	def test_create_asset_maintenance(self):
-		pr = make_purchase_receipt(
-			item_code="Photocopier", qty=1, rate=100000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Photocopier", qty=1, rate=100000.0, location="Test Location")
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)
@@ -130,8 +128,7 @@ def create_maintenance_team():
 
 def get_maintenance_team(user_list):
 	return [
-		{"team_member": user, "full_name": user, "maintenance_role": "Technician"}
-		for user in user_list[1:]
+		{"team_member": user, "full_name": user, "maintenance_role": "Technician"} for user in user_list[1:]
 	]
 
 

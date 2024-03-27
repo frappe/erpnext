@@ -40,7 +40,6 @@ class TestWorkOrder(FrappeTestCase):
 		frappe.db.rollback()
 
 	def check_planned_qty(self):
-
 		planned0 = (
 			frappe.db.get_value(
 				"Bin", {"item_code": "_Test FG Item", "warehouse": "_Test Warehouse 1 - _TC"}, "planned_qty"
@@ -129,9 +128,7 @@ class TestWorkOrder(FrappeTestCase):
 		# reserved qty for production is updated
 		self.assertEqual(cint(bin1_at_start.reserved_qty_for_production) + 2, reserved_qty_on_submission)
 
-		test_stock_entry.make_stock_entry(
-			item_code="_Test Item", target=warehouse, qty=100, basic_rate=100
-		)
+		test_stock_entry.make_stock_entry(item_code="_Test Item", target=warehouse, qty=100, basic_rate=100)
 		test_stock_entry.make_stock_entry(
 			item_code="_Test Item Home Desktop 100", target=warehouse, qty=100, basic_rate=100
 		)
@@ -141,9 +138,7 @@ class TestWorkOrder(FrappeTestCase):
 
 		bin1_at_completion = get_bin(item, warehouse)
 
-		self.assertEqual(
-			cint(bin1_at_completion.reserved_qty_for_production), reserved_qty_on_submission - 1
-		)
+		self.assertEqual(cint(bin1_at_completion.reserved_qty_for_production), reserved_qty_on_submission - 1)
 
 	def test_production_item(self):
 		wo_order = make_wo_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)
@@ -178,9 +173,7 @@ class TestWorkOrder(FrappeTestCase):
 			cint(self.bin1_at_start.reserved_qty_for_production) + 2,
 			cint(self.bin1_on_submit.reserved_qty_for_production),
 		)
-		self.assertEqual(
-			cint(self.bin1_at_start.projected_qty), cint(self.bin1_on_submit.projected_qty) + 2
-		)
+		self.assertEqual(cint(self.bin1_at_start.projected_qty), cint(self.bin1_on_submit.projected_qty) + 2)
 
 	def test_reserved_qty_for_production_cancel(self):
 		self.test_reserved_qty_for_production_submit()
@@ -234,7 +227,6 @@ class TestWorkOrder(FrappeTestCase):
 		)
 
 	def test_reserved_qty_for_production_closed(self):
-
 		wo1 = make_wo_order_test_record(item="_Test FG Item", qty=2, source_warehouse=self.warehouse)
 		item = wo1.required_items[0].item_code
 		bin_before = get_bin(item, self.warehouse)
@@ -366,7 +358,9 @@ class TestWorkOrder(FrappeTestCase):
 		for item in s.items:
 			if item.bom_no and item.item_code in scrap_item_details:
 				self.assertEqual(wo_order_details.scrap_warehouse, item.t_warehouse)
-				self.assertEqual(flt(wo_order_details.qty) * flt(scrap_item_details[item.item_code]), item.qty)
+				self.assertEqual(
+					flt(wo_order_details.qty) * flt(scrap_item_details[item.item_code]), item.qty
+				)
 
 	def test_allow_overproduction(self):
 		allow_overproduction("overproduction_percentage_for_work_order", 0)
@@ -480,7 +474,7 @@ class TestWorkOrder(FrappeTestCase):
 		)
 		self.assertEqual(len(job_cards), len(bom.operations))
 
-		for i, job_card in enumerate(job_cards):
+		for _i, job_card in enumerate(job_cards):
 			doc = frappe.get_doc("Job Card", job_card)
 			doc.time_logs[0].completed_qty = 1
 			doc.submit()
@@ -571,9 +565,7 @@ class TestWorkOrder(FrappeTestCase):
 		for item in ["Test Batch Size Item For BOM", "Test Batch Size Item RM 1 For BOM"]:
 			make_item(item, {"include_item_in_manufacturing": 1, "is_stock_item": 1})
 
-		bom_name = frappe.db.get_value(
-			"BOM", {"item": fg_item, "is_active": 1, "with_operations": 1}, "name"
-		)
+		bom_name = frappe.db.get_value("BOM", {"item": fg_item, "is_active": 1, "with_operations": 1}, "name")
 
 		if not bom_name:
 			bom = make_bom(item=fg_item, rate=1000, raw_materials=[rm1], do_not_save=True)
@@ -625,9 +617,7 @@ class TestWorkOrder(FrappeTestCase):
 
 			make_item(item, item_args)
 
-		bom_name = frappe.db.get_value(
-			"BOM", {"item": fg_item, "is_active": 1, "with_operations": 1}, "name"
-		)
+		bom_name = frappe.db.get_value("BOM", {"item": fg_item, "is_active": 1, "with_operations": 1}, "name")
 
 		if not bom_name:
 			bom = make_bom(item=fg_item, rate=1000, raw_materials=[rm1], do_not_save=True)
@@ -847,7 +837,6 @@ class TestWorkOrder(FrappeTestCase):
 		)
 
 		qty = 10
-		scrap_qty = 0.25  # bom item qty = 1, consider as 25% of FG
 		source_warehouse = "Stores - _TC"
 		wip_warehouse = "_Test Warehouse - _TC"
 		fg_item_non_whole, _, bom_item = create_process_loss_bom_items()
@@ -1189,7 +1178,9 @@ class TestWorkOrder(FrappeTestCase):
 			for row in stock_entry.items:
 				if row.item_code == fg_item:
 					self.assertTrue(row.serial_no)
-					self.assertEqual(sorted(get_serial_nos(row.serial_no)), sorted(get_serial_nos(serial_nos)))
+					self.assertEqual(
+						sorted(get_serial_nos(row.serial_no)), sorted(get_serial_nos(serial_nos))
+					)
 
 		except frappe.MandatoryError:
 			self.fail("Batch generation causing failing in Work Order")
@@ -1663,9 +1654,7 @@ class TestWorkOrder(FrappeTestCase):
 		job_card2 = frappe.copy_doc(job_card_doc)
 		self.assertRaises(frappe.ValidationError, job_card2.save)
 
-		frappe.db.set_single_value(
-			"Manufacturing Settings", "overproduction_percentage_for_work_order", 100
-		)
+		frappe.db.set_single_value("Manufacturing Settings", "overproduction_percentage_for_work_order", 100)
 
 		job_card2 = frappe.copy_doc(job_card_doc)
 		job_card2.time_logs = []
@@ -1729,9 +1718,7 @@ class TestWorkOrder(FrappeTestCase):
 	def test_op_cost_and_scrap_based_on_sub_assemblies(self):
 		# Make Sub Assembly BOM 1
 
-		frappe.db.set_single_value(
-			"Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies", 1
-		)
+		frappe.db.set_single_value("Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies", 1)
 
 		items = {
 			"Test Final FG Item": 0,
@@ -1747,7 +1734,7 @@ class TestWorkOrder(FrappeTestCase):
 			if not frappe.db.exists("Item", item):
 				item_properties = {"is_stock_item": 1, "valuation_rate": items[item]}
 
-				make_item(item_code=item, properties=item_properties),
+				(make_item(item_code=item, properties=item_properties),)
 
 		prepare_boms_for_sub_assembly_test()
 
@@ -1768,15 +1755,11 @@ class TestWorkOrder(FrappeTestCase):
 			if item.is_scrap_item:
 				scrap_items.append(item.item_code)
 
-		self.assertEqual(
-			sorted(scrap_items), sorted(["Test Final Scrap Item 1", "Test Final Scrap Item 2"])
-		)
+		self.assertEqual(sorted(scrap_items), sorted(["Test Final Scrap Item 1", "Test Final Scrap Item 2"]))
 		for row in se_doc.additional_costs:
 			self.assertEqual(row.amount, 3000)
 
-		frappe.db.set_single_value(
-			"Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies", 0
-		)
+		frappe.db.set_single_value("Manufacturing Settings", "set_op_cost_and_scrape_from_sub_assemblies", 0)
 
 	def test_capcity_planning_for_workstation(self):
 		frappe.db.set_single_value(

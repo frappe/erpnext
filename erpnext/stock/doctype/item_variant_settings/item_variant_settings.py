@@ -24,7 +24,6 @@ class ItemVariantSettings(Document):
 			"description",
 			"variant_of",
 			"valuation_rate",
-			"description",
 			"barcodes",
 			"has_variants",
 			"attributes",
@@ -50,4 +49,6 @@ class ItemVariantSettings(Document):
 	def validate(self):
 		for d in self.fields:
 			if d.field_name in self.invalid_fields_for_copy_fields_in_variants:
-				frappe.throw(_("Cannot set the field <b>{0}</b> for copying in variants").format(d.field_name))
+				frappe.throw(
+					_("Cannot set the field <b>{0}</b> for copying in variants").format(d.field_name)
+				)

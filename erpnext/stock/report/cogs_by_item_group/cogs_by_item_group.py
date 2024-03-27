@@ -3,7 +3,7 @@
 
 import datetime
 from collections import OrderedDict
-from typing import Dict, List, Tuple, Union
+from typing import Union
 
 import frappe
 from frappe import _
@@ -13,15 +13,15 @@ from erpnext.accounts.report.general_ledger.general_ledger import get_gl_entries
 
 Filters = frappe._dict
 Row = frappe._dict
-Data = List[Row]
-Columns = List[Dict[str, str]]
+Data = list[Row]
+Columns = list[dict[str, str]]
 DateTime = Union[datetime.date, datetime.datetime]
-FilteredEntries = List[Dict[str, Union[str, float, DateTime, None]]]
-ItemGroupsDict = Dict[Tuple[int, int], Dict[str, Union[str, int]]]
-SVDList = List[frappe._dict]
+FilteredEntries = list[dict[str, str | float | DateTime | None]]
+ItemGroupsDict = dict[tuple[int, int], dict[str, str | int]]
+SVDList = list[frappe._dict]
 
 
-def execute(filters: Filters) -> Tuple[Columns, Data]:
+def execute(filters: Filters) -> tuple[Columns, Data]:
 	update_filters_with_account(filters)
 	validate_filters(filters)
 	columns = get_columns()
@@ -158,7 +158,7 @@ def assign_item_groups_to_svd_list(svd_list: SVDList) -> None:
 		item.item_group = ig_map[item.get("item_code")]
 
 
-def get_item_groups_map(svd_list: SVDList) -> Dict[str, str]:
+def get_item_groups_map(svd_list: SVDList) -> dict[str, str]:
 	item_codes = set(i["item_code"] for i in svd_list)
 	ig_list = frappe.get_list(
 		"Item", fields=["item_code", "item_group"], filters=[("item_code", "in", item_codes)]
@@ -168,9 +168,7 @@ def get_item_groups_map(svd_list: SVDList) -> Dict[str, str]:
 
 def get_item_groups_dict() -> ItemGroupsDict:
 	item_groups_list = frappe.get_all("Item Group", fields=("name", "is_group", "lft", "rgt"))
-	return {
-		(i["lft"], i["rgt"]): {"name": i["name"], "is_group": i["is_group"]} for i in item_groups_list
-	}
+	return {(i["lft"], i["rgt"]): {"name": i["name"], "is_group": i["is_group"]} for i in item_groups_list}
 
 
 def update_leveled_dict(leveled_dict: OrderedDict) -> None:

@@ -108,9 +108,9 @@ class PaymentLedgerEntry(Document):
 			):
 				if not self.get(dimension.fieldname):
 					frappe.throw(
-						_("Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}.").format(
-							dimension.label, self.account
-						)
+						_(
+							"Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}."
+						).format(dimension.label, self.account)
 					)
 
 			if (
@@ -121,9 +121,9 @@ class PaymentLedgerEntry(Document):
 			):
 				if not self.get(dimension.fieldname):
 					frappe.throw(
-						_("Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}.").format(
-							dimension.label, self.account
-						)
+						_(
+							"Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}."
+						).format(dimension.label, self.account)
 					)
 
 	def validate(self):

@@ -4,7 +4,6 @@
 import json
 from collections import OrderedDict, defaultdict
 from itertools import groupby
-from typing import Dict, List
 
 import frappe
 from frappe import _
@@ -213,9 +212,7 @@ class PickList(Document):
 				),
 			)
 
-			locations = get_items_with_location_and_quantity(
-				item_doc, self.item_location_map, self.docstatus
-			)
+			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map, self.docstatus)
 
 			item_doc.idx = None
 			item_doc.name = None
@@ -269,12 +266,10 @@ class PickList(Document):
 		item_map = OrderedDict()
 		for item in locations:
 			if not item.item_code:
-				frappe.throw("Row #{0}: Item Code is Mandatory".format(item.idx))
+				frappe.throw(f"Row #{item.idx}: Item Code is Mandatory")
 			if not cint(
 				frappe.get_cached_value("Item", item.item_code, "is_stock_item")
-			) and not frappe.db.exists(
-				"Product Bundle", {"new_item_code": item.item_code, "disabled": 0}
-			):
+			) and not frappe.db.exists("Product Bundle", {"new_item_code": item.item_code, "disabled": 0}):
 				continue
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
@@ -395,7 +390,7 @@ class PickList(Document):
 
 		return picked_items
 
-	def _get_product_bundles(self) -> Dict[str, str]:
+	def _get_product_bundles(self) -> dict[str, str]:
 		# Dict[so_item_row: item_code]
 		product_bundles = {}
 		for item in self.locations:
@@ -408,13 +403,11 @@ class PickList(Document):
 			)
 		return product_bundles
 
-	def _get_product_bundle_qty_map(self, bundles: List[str]) -> Dict[str, Dict[str, float]]:
+	def _get_product_bundle_qty_map(self, bundles: list[str]) -> dict[str, dict[str, float]]:
 		# bundle_item_code: Dict[component, qty]
 		product_bundle_qty_map = {}
 		for bundle_item_code in bundles:
-			bundle = frappe.get_last_doc(
-				"Product Bundle", {"new_item_code": bundle_item_code, "disabled": 0}
-			)
+			bundle = frappe.get_last_doc("Product Bundle", {"new_item_code": bundle_item_code, "disabled": 0})
 			product_bundle_qty_map[bundle_item_code] = {item.item_code: item.qty for item in bundle.items}
 		return product_bundle_qty_map
 
@@ -440,7 +433,7 @@ def update_pick_list_status(pick_list):
 		doc.run_method("update_status")
 
 
-def get_picked_items_qty(items) -> List[Dict]:
+def get_picked_items_qty(items) -> list[dict]:
 	pi_item = frappe.qb.DocType("Pick List Item")
 	return (
 		frappe.qb.from_(pi_item)
@@ -470,17 +463,13 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 	locations = []
 
 	# if stock qty is zero on submitted entry, show positive remaining qty to recalculate in case of restock.
-	remaining_stock_qty = (
-		item_doc.qty if (docstatus == 1 and item_doc.stock_qty == 0) else item_doc.stock_qty
-	)
+	remaining_stock_qty = item_doc.qty if (docstatus == 1 and item_doc.stock_qty == 0) else item_doc.stock_qty
 
 	while flt(remaining_stock_qty) > 0 and available_locations:
 		item_location = available_locations.pop(0)
 		item_location = frappe._dict(item_location)
 
-		stock_qty = (
-			remaining_stock_qty if item_location.qty >= remaining_stock_qty else item_location.qty
-		)
+		stock_qty = remaining_stock_qty if item_location.qty >= remaining_stock_qty else item_location.qty
 		qty = stock_qty / (item_doc.conversion_factor or 1)
 
 		uom_must_be_whole_number = frappe.get_cached_value("UOM", item_doc.uom, "must_be_whole_number")
@@ -515,7 +504,7 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 			if item_location.serial_no:
 				# set remaining serial numbers
 				item_location.serial_no = item_location.serial_no[-int(qty_diff) :]
-			available_locations = [item_location] + available_locations
+			available_locations = [item_location, *available_locations]
 
 	# update available locations for the item
 	item_location_map[item_doc.item_code] = available_locations
@@ -830,8 +819,7 @@ def create_dn_with_so(sales_dict, pick_list):
 			"name": "so_detail",
 			"parent": "against_sales_order",
 		},
-		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty)
-		and doc.delivered_by_supplier != 1,
+		"condition": lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier != 1,
 	}
 
 	for customer in sales_dict:
@@ -852,7 +840,6 @@ def create_dn_with_so(sales_dict, pick_list):
 
 
 def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
-
 	for location in pick_list.locations:
 		if location.sales_order != sales_order or location.product_bundle_item:
 			continue
@@ -883,9 +870,7 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 	delivery_note.customer = frappe.get_value("Sales Order", sales_order, "customer")
 
 
-def add_product_bundles_to_delivery_note(
-	pick_list: "PickList", delivery_note, item_mapper
-) -> None:
+def add_product_bundles_to_delivery_note(pick_list: "PickList", delivery_note, item_mapper) -> None:
 	"""Add product bundles found in pick list to delivery note.
 
 	When mapping pick list items, the bundle item itself isn't part of the
@@ -963,7 +948,7 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 			& (wo.qty > wo.material_transferred_for_manufacturing)
 			& (wo.docstatus == 1)
 			& (wo.company == filters.get("company"))
-			& (wo.name.like("%{0}%".format(txt)))
+			& (wo.name.like(f"%{txt}%"))
 		)
 		.orderby(Case().when(Locate(txt, wo.name) > 0, Locate(txt, wo.name)).else_(99999))
 		.orderby(wo.name)
@@ -1030,9 +1015,7 @@ def update_stock_entry_based_on_work_order(pick_list, stock_entry):
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = pick_list.for_qty
 	if work_order.bom_no:
-		stock_entry.inspection_required = frappe.db.get_value(
-			"BOM", work_order.bom_no, "inspection_required"
-		)
+		stock_entry.inspection_required = frappe.db.get_value("BOM", work_order.bom_no, "inspection_required")
 
 	is_wip_warehouse_group = frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group")
 	if not (is_wip_warehouse_group and work_order.skip_transfer):

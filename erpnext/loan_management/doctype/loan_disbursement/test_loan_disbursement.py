@@ -8,7 +8,6 @@ from frappe.utils import (
 	add_days,
 	add_to_date,
 	date_diff,
-	flt,
 	get_datetime,
 	get_first_day,
 	get_last_day,
@@ -76,9 +75,7 @@ class TestLoanDisbursement(unittest.TestCase):
 	def test_loan_topup(self):
 		pledge = [{"loan_security": "Test Security 1", "qty": 4000.00}]
 
-		loan_application = create_loan_application(
-			"_Test Company", self.applicant, "Demand Loan", pledge
-		)
+		loan_application = create_loan_application("_Test Company", self.applicant, "Demand Loan", pledge)
 		create_pledge(loan_application)
 
 		loan = create_demand_loan(
@@ -92,18 +89,14 @@ class TestLoanDisbursement(unittest.TestCase):
 
 		no_of_days = date_diff(last_date, first_date) + 1
 
-		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) / (
-			days_in_year(get_datetime().year) * 100
-		)
+		(loan.loan_amount * loan.rate_of_interest * no_of_days) / (days_in_year(get_datetime().year) * 100)
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
 
 		process_loan_interest_accrual_for_demand_loans(posting_date=add_days(last_date, 1))
 
 		# Should not be able to create loan disbursement entry before repayment
-		self.assertRaises(
-			frappe.ValidationError, make_loan_disbursement_entry, loan.name, 500000, first_date
-		)
+		self.assertRaises(frappe.ValidationError, make_loan_disbursement_entry, loan.name, 500000, first_date)
 
 		repayment_entry = create_repayment_entry(
 			loan.name, self.applicant, add_days(get_last_day(nowdate()), 5), 611095.89
@@ -125,14 +118,10 @@ class TestLoanDisbursement(unittest.TestCase):
 	def test_loan_topup_with_additional_pledge(self):
 		pledge = [{"loan_security": "Test Security 1", "qty": 4000.00}]
 
-		loan_application = create_loan_application(
-			"_Test Company", self.applicant, "Demand Loan", pledge
-		)
+		loan_application = create_loan_application("_Test Company", self.applicant, "Demand Loan", pledge)
 		create_pledge(loan_application)
 
-		loan = create_demand_loan(
-			self.applicant, "Demand Loan", loan_application, posting_date="2019-10-01"
-		)
+		loan = create_demand_loan(self.applicant, "Demand Loan", loan_application, posting_date="2019-10-01")
 		loan.submit()
 
 		self.assertEqual(loan.loan_amount, 1000000)
@@ -145,7 +134,7 @@ class TestLoanDisbursement(unittest.TestCase):
 		process_loan_interest_accrual_for_demand_loans(posting_date=last_date)
 		amounts = calculate_amounts(loan.name, add_days(last_date, 1))
 
-		previous_interest = amounts["interest_amount"]
+		amounts["interest_amount"]
 
 		pledge1 = [{"loan_security": "Test Security 1", "qty": 2000.00}]
 
@@ -157,6 +146,6 @@ class TestLoanDisbursement(unittest.TestCase):
 		amounts = calculate_amounts(loan.name, add_days(last_date, 15))
 
 		per_day_interest = get_per_day_interest(1500000, 13.5, "2019-10-30")
-		interest = per_day_interest * 15
+		per_day_interest * 15
 
 		self.assertEqual(amounts["pending_principal_amount"], 1500000)

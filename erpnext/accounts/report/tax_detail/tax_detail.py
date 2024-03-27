@@ -34,7 +34,7 @@ def execute(filters=None):
 	fieldstr = get_fieldstr(fieldlist)
 
 	gl_entries = frappe.db.sql(
-		"""
+		f"""
 		select {fieldstr}
 		from `tabGL Entry` ge
 		inner join `tabAccount` a on
@@ -52,9 +52,7 @@ def execute(filters=None):
 			ge.posting_date>=%(from_date)s and
 			ge.posting_date<=%(to_date)s
 		order by ge.posting_date, ge.voucher_no
-		""".format(
-			fieldstr=fieldstr
-		),
+		""",
 		filters,
 		as_dict=1,
 	)
@@ -94,7 +92,9 @@ def run_report(report_name, data):
 						report[section_name]["subtotal"] += row["amount"]
 			if component["type"] == "section":
 				if component_name == section_name:
-					frappe.throw(_("A report component cannot refer to its parent section") + ": " + section_name)
+					frappe.throw(
+						_("A report component cannot refer to its parent section") + ": " + section_name
+					)
 				try:
 					report[section_name]["rows"] += report[component_name]["rows"]
 					report[section_name]["subtotal"] += report[component_name]["subtotal"]

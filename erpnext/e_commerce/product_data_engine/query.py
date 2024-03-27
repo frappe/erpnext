@@ -56,7 +56,7 @@ class ProductQuery:
 		"""
 		# track if discounts included in field filters
 		self.filter_with_discount = bool(fields.get("discount"))
-		result, discount_list, website_item_groups, cart_items, count = [], [], [], [], 0
+		result, discount_list, _website_item_groups, cart_items, count = [], [], [], [], 0
 
 		if fields:
 			self.build_fields_filters(fields)
@@ -215,7 +215,7 @@ class ProductQuery:
 			search_fields.discard("web_long_description")
 
 		# Build or filters for query
-		search = "%{}%".format(search_term)
+		search = f"%{search_term}%"
 		for field in search_fields:
 			self.or_filters.append([field, "like", search])
 
