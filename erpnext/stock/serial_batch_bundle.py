@@ -888,11 +888,11 @@ class SerialBatchCreation:
 		return doc
 
 	def validate_qty(self, doc):
-		if doc.type_of_transaction == "Outward":
+		if doc.type_of_transaction == "Outward" and self.actual_qty and doc.total_qty:
 			precision = doc.precision("total_qty")
 
-			total_qty = abs(flt(doc.total_qty, precision))
-			required_qty = abs(flt(self.actual_qty, precision))
+			total_qty = flt(abs(doc.total_qty), precision)
+			required_qty = flt(abs(self.actual_qty), precision)
 
 			if required_qty - total_qty > 0:
 				msg = f"For the item {bold(doc.item_code)}, the Avaliable qty {bold(total_qty)} is less than the Required Qty {bold(required_qty)} in the warehouse {bold(doc.warehouse)}. Please add sufficient qty in the warehouse."

@@ -181,8 +181,10 @@ def get_random_date(start_date, start_range, end_range):
 def create_transaction_deletion_record(company):
 	transaction_deletion_record = frappe.new_doc("Transaction Deletion Record")
 	transaction_deletion_record.company = company
+	transaction_deletion_record.process_in_single_transaction = True
 	transaction_deletion_record.save(ignore_permissions=True)
 	transaction_deletion_record.submit()
+	transaction_deletion_record.start_deletion_tasks()
 
 
 def clear_masters():

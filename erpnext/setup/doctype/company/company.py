@@ -12,7 +12,6 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cint, formatdate, get_link_to_form, get_timestamp, today
-from frappe.utils.background_jobs import get_job, is_job_enqueued
 from frappe.utils.nestedset import NestedSet, rebuild_tree
 
 from erpnext.accounts.doctype.account.account import get_account_currency
@@ -904,37 +903,21 @@ def get_default_company_address(name, sort_key="is_primary_address", existing_ad
 		return None
 
 
-def generate_id_for_deletion_job(company):
-	return "delete_company_transactions_" + company
-
-
-@frappe.whitelist()
-def is_deletion_job_running(company):
-	job_id = generate_id_for_deletion_job(company)
-	if is_job_enqueued(job_id):
-		job_name = get_job(job_id).get_id()  # job name will have site prefix
-		frappe.throw(
-			_("A Transaction Deletion Job: {0} is already running for {1}").format(
-				frappe.bold(get_link_to_form("RQ Job", job_name)), frappe.bold(company)
-			)
-		)
-
-
 @frappe.whitelist()
 def create_transaction_deletion_request(company):
-	is_deletion_job_running(company)
-	job_id = generate_id_for_deletion_job(company)
+	from erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record import (
+		is_deletion_doc_running,
+	)
+
+	is_deletion_doc_running(company)
 
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
-	tdr.insert()
+	tdr.submit()
+	tdr.start_deletion_tasks()
 
-	frappe.enqueue(
-		"frappe.utils.background_jobs.run_doc_method",
-		doctype=tdr.doctype,
-		name=tdr.name,
-		doc_method="submit",
-		job_id=job_id,
-		queue="long",
-		enqueue_after_commit=True,
+	frappe.msgprint(
+		_("A Transaction Deletion Document: {0} is triggered for {0}").format(
+			get_link_to_form("Transaction Deletion Record", tdr.name)
+		),
+		frappe.bold(company),
 	)
-	frappe.msgprint(_("A Transaction Deletion Job is triggered for {0}").format(frappe.bold(company)))

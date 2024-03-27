@@ -2536,6 +2536,7 @@ class StockEntry(StockController):
 					)
 
 					d.serial_and_batch_bundle = id
+					d.use_serial_batch_fields = 0
 
 	def get_available_serial_nos(self) -> List[str]:
 		serial_nos = []
@@ -2635,7 +2636,9 @@ def make_stock_in_entry(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.stock_entry_type = "Material Transfer"
 		target.set_missing_values()
-		target.make_serial_and_batch_bundle_for_transfer()
+
+		if not frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields"):
+			target.make_serial_and_batch_bundle_for_transfer()
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.t_warehouse = ""

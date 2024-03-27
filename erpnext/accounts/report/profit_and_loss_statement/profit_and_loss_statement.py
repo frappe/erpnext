@@ -66,11 +66,11 @@ def execute(filters=None):
 	currency = filters.presentation_currency or frappe.get_cached_value(
 		"Company", filters.company, "default_currency"
 	)
-	report_summary = get_report_summary(
+	report_summary, primitive_summary = get_report_summary(
 		period_list, filters.periodicity, income, expense, net_profit_loss, currency, filters
 	)
 
-	return columns, data, None, chart, report_summary
+	return columns, data, None, chart, report_summary, primitive_summary
 
 
 def get_report_summary(
@@ -123,7 +123,7 @@ def get_report_summary(
 			"datatype": "Currency",
 			"currency": currency,
 		},
-	]
+	], net_profit
 
 
 def get_net_profit_loss(income, expense, period_list, company, currency=None, consolidated=False):
