@@ -494,7 +494,7 @@ class GrossProfitGenerator:
 	def get_average_rate_based_on_group_by(self):
 		for key in list(self.grouped):
 			if self.filters.get("group_by") == "Invoice":
-				for i, row in enumerate(self.grouped[key]):
+				for row in self.grouped[key]:
 					if row.indent == 1.0:
 						if (
 							row.parent in self.returned_invoices

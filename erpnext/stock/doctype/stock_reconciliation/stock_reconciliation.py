@@ -743,9 +743,7 @@ class StockReconciliation(StockController):
 
 				data.incoming_rate = (data.total_amount) / data.actual_qty
 
-		for key, value in merge_similar_entries.items():
-			new_sl_entries.append(value)
-
+		new_sl_entries.extend(merge_similar_entries.values())
 		return new_sl_entries
 
 	def get_gl_entries(self, warehouse_account=None):

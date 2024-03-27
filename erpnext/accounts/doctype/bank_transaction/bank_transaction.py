@@ -182,7 +182,7 @@ class BankTransaction(Document):
 					frappe.throw(_("Voucher {0} is over-allocated by {1}").format(unallocated_amount))
 
 		for payment_entry in to_remove:
-			self.remove(to_remove)
+			self.remove(payment_entry)
 
 	@frappe.whitelist()
 	def remove_payment_entries(self):

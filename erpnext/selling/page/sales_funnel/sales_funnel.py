@@ -100,7 +100,7 @@ def get_opp_by_lead_source(from_date, to_date, company):
 		pivot_table = []
 		for sales_stage in sales_stages:
 			row = []
-			for source, sales_stage_values in summary.items():
+			for sales_stage_values in summary.values():
 				row.append(flt(sales_stage_values.get(sales_stage)))
 			pivot_table.append({"chartType": "bar", "name": sales_stage, "values": row})
 

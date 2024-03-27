@@ -501,7 +501,7 @@ def reconcile(doc: None | str = None) -> None:
 def is_any_doc_running(for_filter: str | dict | None = None) -> str | None:
 	running_doc = None
 	if for_filter:
-		if type(for_filter) == str:
+		if isinstance(for_filter, str):
 			for_filter = frappe.json.loads(for_filter)
 
 		running_doc = frappe.db.get_value(

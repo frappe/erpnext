@@ -2,10 +2,9 @@
 # License: GNU General Public License v3. See license.txt
 
 
-import frappe
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, nowdate, nowtime, today
+from frappe.utils import add_days, flt, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.accounts_controller import InvalidQtyError
@@ -533,10 +532,10 @@ class TestStockEntry(FrappeTestCase):
 		self.assertTrue(sle)
 		sle.sort(key=lambda x: x[1])
 
-		for i, sle in enumerate(sle):
-			self.assertEqual(expected_sle[i][0], sle[0])
-			self.assertEqual(expected_sle[i][1], sle[1])
-			self.assertEqual(expected_sle[i][2], sle[2])
+		for i, sle_value in enumerate(sle):
+			self.assertEqual(expected_sle[i][0], sle_value[0])
+			self.assertEqual(expected_sle[i][1], sle_value[1])
+			self.assertEqual(expected_sle[i][2], sle_value[2])
 
 	def check_gl_entries(self, voucher_type, voucher_no, expected_gl_entries):
 		expected_gl_entries.sort(key=lambda x: x[0])

@@ -2,8 +2,7 @@
 # For license information, please see license.txt
 
 
-from datetime import datetime
-from typing import Optional, Union
+from datetime import date
 
 import frappe
 from frappe import _
@@ -37,7 +36,7 @@ class InvoiceNotCancelled(frappe.ValidationError):
 	pass
 
 
-DateTimeLikeObject = Union[str, datetime.date]
+DateTimeLikeObject = str | date
 
 
 class Subscription(Document):
@@ -88,7 +87,7 @@ class Subscription(Document):
 		# update start just before the subscription doc is created
 		self.update_subscription_period(self.start_date)
 
-	def update_subscription_period(self, date: Optional["DateTimeLikeObject"] = None):
+	def update_subscription_period(self, date: DateTimeLikeObject | None = None):
 		"""
 		Subscription period is the period to be billed. This method updates the
 		beginning of the billing period and end of the billing period.
@@ -99,13 +98,13 @@ class Subscription(Document):
 		self.current_invoice_start = self.get_current_invoice_start(date)
 		self.current_invoice_end = self.get_current_invoice_end(self.current_invoice_start)
 
-	def _get_subscription_period(self, date: Optional["DateTimeLikeObject"] = None):
+	def _get_subscription_period(self, date: DateTimeLikeObject | None = None):
 		_current_invoice_start = self.get_current_invoice_start(date)
 		_current_invoice_end = self.get_current_invoice_end(_current_invoice_start)
 
 		return _current_invoice_start, _current_invoice_end
 
-	def get_current_invoice_start(self, date: Optional["DateTimeLikeObject"] = None) -> datetime.date | str:
+	def get_current_invoice_start(self, date: DateTimeLikeObject | None = None) -> DateTimeLikeObject:
 		"""
 		This returns the date of the beginning of the current billing period.
 		If the `date` parameter is not given , it will be automatically set as today's
@@ -128,7 +127,7 @@ class Subscription(Document):
 
 		return _current_invoice_start
 
-	def get_current_invoice_end(self, date: Optional["DateTimeLikeObject"] = None) -> datetime.date | str:
+	def get_current_invoice_end(self, date: DateTimeLikeObject | None = None) -> DateTimeLikeObject:
 		"""
 		This returns the date of the end of the current billing period.
 		If the subscription is in trial period, it will be set as the end of the
@@ -222,7 +221,7 @@ class Subscription(Document):
 
 		return data
 
-	def set_subscription_status(self, posting_date: Optional["DateTimeLikeObject"] = None) -> None:
+	def set_subscription_status(self, posting_date: DateTimeLikeObject | None = None) -> None:
 		"""
 		Sets the status of the `Subscription`
 		"""
@@ -246,7 +245,7 @@ class Subscription(Document):
 
 	@staticmethod
 	def period_has_passed(
-		end_date: str | datetime.date, posting_date: Optional["DateTimeLikeObject"] = None
+		end_date: DateTimeLikeObject, posting_date: DateTimeLikeObject | None = None
 	) -> bool:
 		"""
 		Returns true if the given `end_date` has passed
@@ -266,7 +265,7 @@ class Subscription(Document):
 
 		return status
 
-	def is_past_grace_period(self, posting_date: Optional["DateTimeLikeObject"] = None) -> bool:
+	def is_past_grace_period(self, posting_date: DateTimeLikeObject | None = None) -> bool:
 		"""
 		Returns `True` if the grace period for the `Subscription` has passed
 		"""
@@ -276,7 +275,7 @@ class Subscription(Document):
 		grace_period = cint(frappe.get_value("Subscription Settings", None, "grace_period"))
 		return getdate(posting_date) >= getdate(add_days(self.current_invoice.due_date, grace_period))
 
-	def current_invoice_is_past_due(self, posting_date: Optional["DateTimeLikeObject"] = None) -> bool:
+	def current_invoice_is_past_due(self, posting_date: DateTimeLikeObject | None = None) -> bool:
 		"""
 		Returns `True` if the current generated invoice is overdue
 		"""
@@ -377,9 +376,9 @@ class Subscription(Document):
 
 	def generate_invoice(
 		self,
-		from_date: str | datetime.date | None = None,
-		to_date: str | datetime.date | None = None,
-		posting_date: str | datetime.date | None = None,
+		from_date: DateTimeLikeObject | None = None,
+		to_date: DateTimeLikeObject | None = None,
+		posting_date: DateTimeLikeObject | None = None,
 	) -> Document:
 		"""
 		Creates a `Invoice` for the `Subscription`, updates `self.invoices` and
@@ -390,9 +389,9 @@ class Subscription(Document):
 
 	def create_invoice(
 		self,
-		from_date: str | datetime.date | None = None,
-		to_date: str | datetime.date | None = None,
-		posting_date: str | datetime.date | None = None,
+		from_date: DateTimeLikeObject | None = None,
+		to_date: DateTimeLikeObject | None = None,
+		posting_date: DateTimeLikeObject | None = None,
 	) -> Document:
 		"""
 		Creates a `Invoice`, submits it and returns it
@@ -572,7 +571,7 @@ class Subscription(Document):
 		return items
 
 	@frappe.whitelist()
-	def process(self, posting_date: Optional["DateTimeLikeObject"] = None) -> bool:
+	def process(self, posting_date: DateTimeLikeObject | None = None) -> bool:
 		"""
 		To be called by task periodically. It checks the subscription and takes appropriate action
 		as need be. It calls either of these methods depending the `Subscription` status:
@@ -597,7 +596,7 @@ class Subscription(Document):
 
 		self.save()
 
-	def can_generate_new_invoice(self, posting_date: Optional["DateTimeLikeObject"] = None) -> bool:
+	def can_generate_new_invoice(self, posting_date: DateTimeLikeObject | None = None) -> bool:
 		if self.cancelation_date:
 			return False
 
@@ -619,8 +618,8 @@ class Subscription(Document):
 
 	def is_current_invoice_generated(
 		self,
-		_current_start_date: datetime.date | str | None = None,
-		_current_end_date: datetime.date | str | None = None,
+		_current_start_date: DateTimeLikeObject | None = None,
+		_current_end_date: DateTimeLikeObject | None = None,
 	) -> bool:
 		if not (_current_start_date and _current_end_date):
 			_current_start_date, _current_end_date = self._get_subscription_period(
@@ -716,7 +715,7 @@ class Subscription(Document):
 		self.save()
 
 	@frappe.whitelist()
-	def restart_subscription(self, posting_date: Optional["DateTimeLikeObject"] = None) -> None:
+	def restart_subscription(self, posting_date: DateTimeLikeObject | None = None) -> None:
 		"""
 		This sets the subscription as active. The subscription will be made to be like a new
 		subscription and the `Subscription` will lose all the history of generated invoices
@@ -736,8 +735,8 @@ def is_prorate() -> int:
 
 
 def get_prorata_factor(
-	period_end: datetime.date | str,
-	period_start: datetime.date | str,
+	period_end: DateTimeLikeObject,
+	period_start: DateTimeLikeObject,
 	is_prepaid: int | None = None,
 ) -> int | float:
 	if is_prepaid:
@@ -748,7 +747,7 @@ def get_prorata_factor(
 	return diff / plan_days
 
 
-def process_all(subscription: str | None = None, posting_date: Optional["DateTimeLikeObject"] = None) -> None:
+def process_all(subscription: str | None = None, posting_date: DateTimeLikeObject | None = None) -> None:
 	"""
 	Task to updates the status of all `Subscription` apart from those that are cancelled
 	"""

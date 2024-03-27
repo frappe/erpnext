@@ -1,6 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
+import typing
 
 import frappe
 from frappe import _
@@ -23,7 +23,7 @@ class ItemVariantSettings(Document):
 		fields: DF.Table[VariantField]
 	# end: auto-generated types
 
-	invalid_fields_for_copy_fields_in_variants = ["barcodes"]
+	invalid_fields_for_copy_fields_in_variants: typing.ClassVar[list] = ["barcodes"]
 
 	def set_default_fields(self):
 		self.fields = []
