@@ -315,7 +315,6 @@ class AssetDepreciationSchedule(Document):
 				has_wdv_or_dd_non_yearly_pro_rata,
 				number_of_pending_depreciations,
 			)
-
 			if not has_pro_rata or (
 				n < (cint(final_number_of_depreciations) - 1) or final_number_of_depreciations == 2
 			):
@@ -340,6 +339,7 @@ class AssetDepreciationSchedule(Document):
 					depreciation_amount,
 					from_date,
 					date_of_disposal,
+					original_schedule_date=schedule_date,
 				)
 
 				if depreciation_amount > 0:
@@ -568,14 +568,19 @@ def _get_modified_available_for_use_date(asset_doc, row, wdv_or_dd_non_yearly=Fa
 
 
 def _get_pro_rata_amt(
-	row, depreciation_amount, from_date, to_date, has_wdv_or_dd_non_yearly_pro_rata=False
+	row,
+	depreciation_amount,
+	from_date,
+	to_date,
+	has_wdv_or_dd_non_yearly_pro_rata=False,
+	original_schedule_date=None,
 ):
 	days = date_diff(to_date, from_date)
 	months = month_diff(to_date, from_date)
 	if has_wdv_or_dd_non_yearly_pro_rata:
-		total_days = get_total_days(to_date, 12)
+		total_days = get_total_days(original_schedule_date or to_date, 12)
 	else:
-		total_days = get_total_days(to_date, row.frequency_of_depreciation)
+		total_days = get_total_days(original_schedule_date or to_date, row.frequency_of_depreciation)
 
 	return (depreciation_amount * flt(days)) / flt(total_days), days, months
 
@@ -583,7 +588,7 @@ def _get_pro_rata_amt(
 def get_total_days(date, frequency):
 	period_start_date = add_months(date, cint(frequency) * -1)
 
-	if is_last_day_of_the_month(date):
+	if not is_last_day_of_the_month(date):
 		period_start_date = get_last_day(period_start_date)
 
 	return date_diff(date, period_start_date)
@@ -661,7 +666,7 @@ def get_straight_line_or_manual_depr_amount(
 					),
 					1,
 				),
-			)
+			) + 1
 
 			to_date = get_last_day(
 				add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
@@ -696,8 +701,7 @@ def get_straight_line_or_manual_depr_amount(
 				add_days(
 					get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)), 1
 				),
-			)
-
+			) + 1
 			to_date = get_last_day(
 				add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
 			)
@@ -707,7 +711,6 @@ def get_straight_line_or_manual_depr_amount(
 				),
 				1,
 			)
-
 			return daily_depr_amount * (date_diff(to_date, from_date) + 1)
 		else:
 			return (
