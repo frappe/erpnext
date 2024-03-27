@@ -2111,32 +2111,32 @@ def run_ledger_health_checks():
 
 		# Debit-Credit mismatch report
 		if health_monitor_settings.debit_credit_mismatch:
-			voucher_wise = frappe.get_doc("Report", "Voucher-wise Balance")
-			filters = {"company": "நுண்ணறி", "from_date": period_start, "to_date": period_end}
-
-			res = voucher_wise.execute_script_report(filters=filters)
-			for x in res[1]:
-				doc = frappe.new_doc("Ledger Health")
-				doc.voucher_type = x.voucher_type
-				doc.voucher_no = x.voucher_no
-				doc.debit_credit_mismatch = True
-				doc.checked_on = run_date
-				doc.save()
+			for x in health_monitor_settings.companies:
+				filters = {"company": x.company, "from_date": period_start, "to_date": period_end}
+				voucher_wise = frappe.get_doc("Report", "Voucher-wise Balance")
+				res = voucher_wise.execute_script_report(filters=filters)
+				for x in res[1]:
+					doc = frappe.new_doc("Ledger Health")
+					doc.voucher_type = x.voucher_type
+					doc.voucher_no = x.voucher_no
+					doc.debit_credit_mismatch = True
+					doc.checked_on = run_date
+					doc.save()
 
 		# General Ledger and Payment Ledger discrepancy
 		if health_monitor_settings.general_and_payment_ledger_mismatch:
-			gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
-			filters = {
-				"company": "நுண்ணறி",
-				"period_start_date": period_start,
-				"period_end_date": period_end,
-			}
-			res = gl_pl_comparison.execute_script_report(filters=filters)
-
-			for x in res[1]:
-				doc = frappe.new_doc("Ledger Health")
-				doc.voucher_type = x.voucher_type
-				doc.voucher_no = x.voucher_no
-				doc.general_and_payment_ledger_mismatch = True
-				doc.checked_on = run_date
-				doc.save()
+			for x in health_monitor_settings.companies:
+				filters = {
+					"company": x.company,
+					"period_start_date": period_start,
+					"period_end_date": period_end,
+				}
+				gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
+				res = gl_pl_comparison.execute_script_report(filters=filters)
+				for x in res[1]:
+					doc = frappe.new_doc("Ledger Health")
+					doc.voucher_type = x.voucher_type
+					doc.voucher_no = x.voucher_no
+					doc.general_and_payment_ledger_mismatch = True
+					doc.checked_on = run_date
+					doc.save()
