@@ -52,6 +52,12 @@ class StockLedgerEntry(Document):
 		self.validate_with_last_transaction_posting_time()
 		self.validate_inventory_dimension_negative_stock()
 
+	def set_posting_datetime(self):
+		from erpnext.stock.utils import get_combine_datetime
+
+		self.posting_datetime = get_combine_datetime(self.posting_date, self.posting_time)
+		self.db_set("posting_datetime", self.posting_datetime)
+
 	def validate_inventory_dimension_negative_stock(self):
 		if self.is_cancelled:
 			return
@@ -122,6 +128,7 @@ class StockLedgerEntry(Document):
 		return inv_dimension_dict
 
 	def on_submit(self):
+		self.set_posting_datetime()
 		self.check_stock_frozen_date()
 		self.calculate_batch_qty()
 
@@ -293,9 +300,7 @@ class StockLedgerEntry(Document):
 
 
 def on_doctype_update():
-	frappe.db.add_index(
-		"Stock Ledger Entry", fields=["posting_date", "posting_time"], index_name="posting_sort_index"
-	)
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
 	frappe.db.add_index("Stock Ledger Entry", ["warehouse", "item_code"], "item_warehouse")
+	frappe.db.add_index("Stock Ledger Entry", ["posting_datetime", "creation"])

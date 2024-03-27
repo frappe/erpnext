@@ -669,20 +669,20 @@ class GrossProfitGenerator(object):
 			elif row.sales_order and row.so_detail:
 				incoming_amount = self.get_buying_amount_from_so_dn(row.sales_order, row.so_detail, item_code)
 				if incoming_amount:
-					return incoming_amount
+					return flt(row.qty) * incoming_amount
 			else:
 				return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 
 		return flt(row.qty) * self.get_average_buying_rate(row, item_code)
 
 	def get_buying_amount_from_so_dn(self, sales_order, so_detail, item_code):
-		from frappe.query_builder.functions import Sum
+		from frappe.query_builder.functions import Avg
 
 		delivery_note_item = frappe.qb.DocType("Delivery Note Item")
 
 		query = (
 			frappe.qb.from_(delivery_note_item)
-			.select(Sum(delivery_note_item.incoming_rate * delivery_note_item.stock_qty))
+			.select(Avg(delivery_note_item.incoming_rate))
 			.where(delivery_note_item.docstatus == 1)
 			.where(delivery_note_item.item_code == item_code)
 			.where(delivery_note_item.against_sales_order == sales_order)
@@ -965,7 +965,7 @@ class GrossProfitGenerator(object):
 						& (sle.is_cancelled == 0)
 					)
 					.orderby(sle.item_code)
-					.orderby(sle.warehouse, sle.posting_date, sle.posting_time, sle.creation, order=Order.desc)
+					.orderby(sle.warehouse, sle.posting_datetime, sle.creation, order=Order.desc)
 					.run(as_dict=True)
 				)
 

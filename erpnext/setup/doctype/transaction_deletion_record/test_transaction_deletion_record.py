@@ -28,6 +28,7 @@ class TestTransactionDeletionRecord(unittest.TestCase):
 		for i in range(5):
 			create_task("Dunder Mifflin Paper Co")
 		tdr = create_transaction_deletion_request("Dunder Mifflin Paper Co")
+		tdr.reload()
 		for doctype in tdr.doctypes:
 			if doctype.doctype_name == "Task":
 				self.assertEqual(doctype.no_of_docs, 5)
@@ -49,7 +50,9 @@ def create_company(company_name):
 def create_transaction_deletion_request(company):
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
 	tdr.insert()
+	tdr.process_in_single_transaction = True
 	tdr.submit()
+	tdr.start_deletion_tasks()
 	return tdr
 
 

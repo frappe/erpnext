@@ -375,7 +375,7 @@ class JobCard(Document):
 						{
 							"to_time": get_datetime(args.get("complete_time")),
 							"operation": args.get("sub_operation"),
-							"completed_qty": args.get("completed_qty") or 0.0,
+							"completed_qty": (args.get("completed_qty") if last_row.idx == row.idx else 0.0),
 						}
 					)
 		elif args.get("start_time"):
