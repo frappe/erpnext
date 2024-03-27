@@ -427,12 +427,15 @@ class TestJobCard(FrappeTestCase):
 		cost_after_cancel = self.work_order.total_operating_cost
 		self.assertEqual(cost_after_cancel, original_cost)
 		
-	def test_over_production_qty(self):
-		wo_qty=flt(frappe.db.get_value("Work Order",self.work_order,{"qty":7000}))
-  		over_production_percentage=flt(frappe.db.get_single_value("Manufacturing Settings", {"overproduction_percentage_for_work_order":80}))
-		wo_qty = wo_qty + (wo_qty * over_production_percentage / 100)
-  		if flt(self.total_completed_qty,precision) > flt(wo_qty,precision):
-			self.assertRaises(StockOverProductionError, self.submit)
+	 def test_over_production_qty(self):
+        wo_qty = flt(frappe.db.get_value("Work Order", self.work_order, {"qty": 7000}))
+        over_production_percentage = flt(frappe.db.get_single_value("Manufacturing Settings", {"overproduction_percentage_for_work_order":100}))
+        wo_qty_with_overproduction = wo_qty + (wo_qty * over_production_percentage / 100)
+        total_completed_qty = 15000
+        precision = 0.001
+        if flt(total_completed_qty, precision) > flt(wo_qty_with_overproduction, precision):
+            self.assertRaises(StockOverProductionError,self.submit())
+                
 			
 	def test_job_card_statuses(self):
 		def assertStatus(status):
