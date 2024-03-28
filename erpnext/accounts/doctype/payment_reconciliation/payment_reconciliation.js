@@ -254,7 +254,7 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			this.data = [];
 			const dialog = new frappe.ui.Dialog({
 				title: __("Select Difference Account"),
-				size: 'extra-large',
+				size: "extra-large",
 				fields: [
 					{
 						fieldname: "allocation",
@@ -266,7 +266,6 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 						get_data: () => {
 							return this.data;
 						},
-<<<<<<< HEAD
 						fields: [
 							{
 								fieldtype: "Data",
@@ -280,6 +279,13 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 								label: __("Voucher No"),
 								in_list_view: 1,
 								read_only: 1,
+							},
+							{
+								fieldtype: "Date",
+								fieldname: "gain_loss_posting_date",
+								label: __("Posting Date"),
+								in_list_view: 1,
+								reqd: 1,
 							},
 							{
 								fieldtype: "Link",
@@ -305,48 +311,6 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 								read_only: 1,
 							},
 						],
-=======
-						fields: [{
-							fieldtype:'Data',
-							fieldname:"docname",
-							in_list_view: 1,
-							hidden: 1
-						}, {
-							fieldtype:'Data',
-							fieldname:"reference_name",
-							label: __("Voucher No"),
-							in_list_view: 1,
-							read_only: 1
-						}, {
-							fieldtype:'Date',
-							fieldname:"gain_loss_posting_date",
-							label: __("Posting Date"),
-							in_list_view: 1,
-							reqd: 1,
-						}, {
-
-							fieldtype:'Link',
-							options: 'Account',
-							in_list_view: 1,
-							label: __("Difference Account"),
-							fieldname: 'difference_account',
-							reqd: 1,
-							get_query: () => {
-								return {
-									filters: {
-										company: this.frm.doc.company,
-										is_group: 0
-									}
-								}
-							}
-						}, {
-							fieldtype:'Currency',
-							in_list_view: 1,
-							label: __("Difference Amount"),
-							fieldname: 'difference_amount',
-							read_only: 1
-						}]
->>>>>>> 5323bb7bee (refactor: introduce fields in popup)
 					},
 					{
 						fieldtype: "HTML",
@@ -356,7 +320,6 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				primary_action: () => {
 					const args = dialog.get_values()["allocation"];
 
-<<<<<<< HEAD
 					args.forEach((d) => {
 						frappe.model.set_value(
 							"Payment Reconciliation Allocation",
@@ -364,14 +327,12 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 							"difference_account",
 							d.difference_account
 						);
-=======
-					args.forEach(d => {
-						frappe.model.set_value("Payment Reconciliation Allocation", d.docname,
-							"difference_account", d.difference_account);
-						frappe.model.set_value("Payment Reconciliation Allocation", d.docname,
-							"gain_loss_posting_date", d.gain_loss_posting_date);
-
->>>>>>> 5323bb7bee (refactor: introduce fields in popup)
+						frappe.model.set_value(
+							"Payment Reconciliation Allocation",
+							d.docname,
+							"gain_loss_posting_date",
+							d.gain_loss_posting_date
+						);
 					});
 
 					this.reconcile_payment_entries();
@@ -383,18 +344,11 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 			this.frm.doc.allocation.forEach((d) => {
 				if (d.difference_amount) {
 					dialog.fields_dict.allocation.df.data.push({
-<<<<<<< HEAD
 						docname: d.name,
 						reference_name: d.reference_name,
 						difference_amount: d.difference_amount,
 						difference_account: d.difference_account,
-=======
-						'docname': d.name,
-						'reference_name': d.reference_name,
-						'difference_amount': d.difference_amount,
-						'difference_account': d.difference_account,
-						'gain_loss_posting_date': d.gain_loss_posting_date
->>>>>>> 5323bb7bee (refactor: introduce fields in popup)
+						gain_loss_posting_date: d.gain_loss_posting_date,
 					});
 				}
 			});
