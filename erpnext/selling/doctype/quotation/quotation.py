@@ -8,6 +8,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate, nowdate
 
 from erpnext.controllers.selling_controller import SellingController
+from erpnext.utilities.authorization_control import validate_approving_authority
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -268,9 +269,7 @@ class Quotation(SellingController):
 
 	def on_submit(self):
 		# Check for Approving Authority
-		frappe.get_doc("Authorization Control").validate_approving_authority(
-			self.doctype, self.company, self.base_grand_total, self
-		)
+		validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
 
 		# update enquiry status
 		self.update_opportunity("Quotation")

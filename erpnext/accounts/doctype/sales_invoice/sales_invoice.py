@@ -43,6 +43,7 @@ from erpnext.controllers.selling_controller import SellingController
 from erpnext.projects.doctype.timesheet.timesheet import get_projectwise_timesheet_data
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
 from erpnext.stock.doctype.delivery_note.delivery_note import update_billed_amount_based_on_so
+from erpnext.utilities.authorization_control import validate_approving_authority
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -433,9 +434,7 @@ class SalesInvoice(SellingController):
 		self.validate_pos_paid_amount()
 
 		if not self.auto_repeat:
-			frappe.get_doc("Authorization Control").validate_approving_authority(
-				self.doctype, self.company, self.base_grand_total, self
-			)
+			validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
 
 		self.check_prev_docstatus()
 

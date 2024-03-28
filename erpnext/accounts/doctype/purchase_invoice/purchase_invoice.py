@@ -44,6 +44,7 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	get_item_account_wise_additional_cost,
 	update_billed_amount_based_on_po,
 )
+from erpnext.utilities.authorization_control import validate_approving_authority
 
 
 class WarehouseMissingError(frappe.ValidationError):
@@ -698,9 +699,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 
-		frappe.get_doc("Authorization Control").validate_approving_authority(
-			self.doctype, self.company, self.base_grand_total
-		)
+		validate_approving_authority(self.doctype, self.company, self.base_grand_total)
 
 		if not self.is_return:
 			self.update_against_document_in_jv()

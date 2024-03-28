@@ -67,6 +67,7 @@ from erpnext.stock.get_item_details import (
 	get_item_tax_map,
 	get_item_warehouse,
 )
+from erpnext.utilities.authorization_control import validate_approving_authority
 from erpnext.utilities.regional import temporary_flag
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -3427,9 +3428,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	if parent_doctype == "Sales Order":
 		make_packing_list(parent)
 		parent.set_gross_profit()
-	frappe.get_doc("Authorization Control").validate_approving_authority(
-		parent.doctype, parent.company, parent.base_grand_total
-	)
+	validate_approving_authority(parent.doctype, parent.company, parent.base_grand_total)
 
 	parent.set_payment_schedule()
 	if parent_doctype == "Purchase Order":
