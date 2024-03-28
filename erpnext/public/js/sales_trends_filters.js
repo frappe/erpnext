@@ -1,8 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.get_sales_trends_filters = function () {
-	return [
+erpnext.sales_trends_filters = {
+	filters: [
 		{
 			fieldname: "period",
 			label: __("Period"),
@@ -44,7 +44,7 @@ erpnext.get_sales_trends_filters = function () {
 			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			default: "2023-2024",
 		},
 		{
 			fieldname: "company",
@@ -53,5 +53,5 @@ erpnext.get_sales_trends_filters = function () {
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
 		},
-	];
+	],
 };
