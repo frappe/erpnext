@@ -229,7 +229,7 @@
   {
    "fetch_from": "sales_invoice.address_display",
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "read_only": 1
   },
@@ -254,8 +254,13 @@
   {
    "fetch_from": "sales_invoice.company_address_display",
    "fieldname": "company_address_display",
+<<<<<<< HEAD
    "fieldtype": "Small Text",
    "label": "Company Address",
+=======
+   "fieldtype": "Text Editor",
+   "label": "Company Address Display",
+>>>>>>> e055147849 (fix: address_display, text -> text editor (#40621))
    "read_only": 1
   },
   {
@@ -315,7 +320,11 @@
  ],
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2020-08-03 18:55:43.683053",
+=======
+ "modified": "2024-03-22 16:01:13.231067",
+>>>>>>> e055147849 (fix: address_display, text -> text editor (#40621))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",

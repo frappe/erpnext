@@ -245,6 +245,7 @@
    "unique": 0
   }, 
   {
+<<<<<<< HEAD
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
    "allow_on_submit": 0, 
@@ -275,6 +276,14 @@
    "translatable": 0, 
    "unique": 0
   }, 
+=======
+   "fieldname": "address_display",
+   "fieldtype": "Text Editor",
+   "hidden": 1,
+   "label": "Address",
+   "read_only": 1
+  },
+>>>>>>> e055147849 (fix: address_display, text -> text editor (#40621))
   {
    "allow_bulk_edit": 0, 
    "allow_in_quick_entry": 0, 
@@ -741,6 +750,7 @@
    "translatable": 0, 
    "unique": 0
   }
+<<<<<<< HEAD
  ], 
  "has_web_view": 0, 
  "hide_heading": 0, 
@@ -758,6 +768,19 @@
  "module": "Selling", 
  "name": "Installation Note", 
  "owner": "Administrator", 
+=======
+ ],
+ "icon": "fa fa-wrench",
+ "idx": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2024-03-22 16:01:13.513355",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Installation Note",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+>>>>>>> e055147849 (fix: address_display, text -> text editor (#40621))
  "permissions": [
   {
    "amend": 1, 
@@ -797,6 +820,7 @@
    "submit": 0, 
    "write": 0
   }
+<<<<<<< HEAD
  ], 
  "quick_entry": 0, 
  "read_only": 0, 
@@ -809,4 +833,12 @@
  "track_changes": 0, 
  "track_seen": 0, 
  "track_views": 0
+=======
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "timeline_field": "customer",
+ "title_field": "customer_name"
+>>>>>>> e055147849 (fix: address_display, text -> text editor (#40621))
 }

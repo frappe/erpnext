@@ -185,7 +185,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hidden": 1,
    "label": "Address",
    "read_only": 1
@@ -236,7 +236,11 @@
    "link_fieldname": "maintenance_schedule"
   }
  ],
+<<<<<<< HEAD
  "modified": "2021-05-27 16:05:10.746465",
+=======
+ "modified": "2024-03-22 16:01:11.868813",
+>>>>>>> e055147849 (fix: address_display, text -> text editor (#40621))
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",
