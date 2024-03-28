@@ -159,7 +159,6 @@
    "fieldname": "gain_loss_posting_date",
    "fieldtype": "Date",
    "label": "Difference Posting Date"
-<<<<<<< HEAD
   },
   {
    "fieldname": "accounting_dimensions_section",
@@ -169,18 +168,12 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
-=======
->>>>>>> 55dbcee36a (refactor: gain_loss posting date fields in the allocation table)
   }
  ],
  "is_virtual": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2023-12-14 13:38:26.104150",
-=======
- "modified": "2023-10-23 10:44:56.066303",
->>>>>>> 55dbcee36a (refactor: gain_loss posting date fields in the allocation table)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation Allocation",

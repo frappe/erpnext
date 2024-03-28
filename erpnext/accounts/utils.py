@@ -726,11 +726,7 @@ def update_reference_in_payment_entry(
 		payment_entry.set_missing_ref_details(ref_exchange_rate=d.exchange_rate or None)
 	payment_entry.set_amounts()
 	payment_entry.make_exchange_gain_loss_journal(
-<<<<<<< HEAD
 		frappe._dict({"difference_posting_date": d.difference_posting_date}), dimensions_dict
-=======
-		frappe._dict({"difference_posting_date": d.difference_posting_date})
->>>>>>> 7e600a6494 (refactor: pass gain loss posting date to controller)
 	)
 
 	if not do_not_save:
