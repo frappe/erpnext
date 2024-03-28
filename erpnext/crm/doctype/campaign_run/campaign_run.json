@@ -1,13 +1,13 @@
 {
  "actions": [],
- "autoname": "format:MAIL-CAMP-{YYYY}-{#####}",
+ "autoname": "format:CRM-CAMP-{YYYY}-{#####}",
  "creation": "2019-06-30 16:05:30.015615",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "campaign_name",
-  "email_campaign_for",
+  "campaign_run_for",
   "recipient",
   "sender",
   "column_break_4",
@@ -49,18 +49,18 @@
   },
   {
    "default": "Lead",
-   "fieldname": "email_campaign_for",
+   "fieldname": "campaign_run_for",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Email Campaign For ",
-   "options": "\nLead\nContact\nEmail Group",
+   "label": "Campaign Run For ",
+   "options": "\nLead\nContact\nEmail Group\nList of Contacts",
    "reqd": 1
   },
   {
    "fieldname": "recipient",
    "fieldtype": "Dynamic Link",
    "label": "Recipient",
-   "options": "email_campaign_for",
+   "options": "campaign_run_for",
    "reqd": 1
   },
   {
@@ -75,7 +75,7 @@
  "modified": "2024-03-27 13:09:36.177528",
  "modified_by": "Administrator",
  "module": "CRM",
- "name": "Email Campaign",
+ "name": "Campaign Run",
  "owner": "Administrator",
  "permissions": [
   {

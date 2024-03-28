@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import add_days, getdate, today
 
 
-class EmailCampaign(Document):
+class CampaignRun(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -19,7 +19,7 @@ class EmailCampaign(Document):
 		from frappe.types import DF
 
 		campaign_name: DF.Link
-		email_campaign_for: DF.Literal["", "Lead", "Contact", "Email Group"]
+		campaign_run_for: DF.Literal["", "Lead", "Contact", "Email Group", "List of Contacts"]
 		end_date: DF.Date | None
 		recipient: DF.DynamicLink
 		sender: DF.Link | None
@@ -30,9 +30,9 @@ class EmailCampaign(Document):
 	def validate(self):
 		self.set_date()
 		# checking if email is set for lead. Not checking for contact as email is a mandatory field for contact.
-		if self.email_campaign_for == "Lead":
+		if self.campaign_run_for == "Lead":
 			self.validate_lead()
-		self.validate_email_campaign_already_exists()
+		self.validate_campaign_run_already_exists()
 		self.update_status()
 
 	def set_date(self):
@@ -56,9 +56,9 @@ class EmailCampaign(Document):
 			lead_name = frappe.db.get_value("Lead", self.recipient, "lead_name")
 			frappe.throw(_("Please set an email id for the Lead {0}").format(lead_name))
 
-	def validate_email_campaign_already_exists(self):
-		email_campaign_exists = frappe.db.exists(
-			"Email Campaign",
+	def validate_campaign_run_already_exists(self):
+		campaign_run_exists = frappe.db.exists(
+			"Campaign Run",
 			{
 				"campaign_name": self.campaign_name,
 				"recipient": self.recipient,
@@ -66,10 +66,10 @@ class EmailCampaign(Document):
 				"name": ("!=", self.name),
 			},
 		)
-		if email_campaign_exists:
+		if campaign_run_exists:
 			frappe.throw(
 				_("The Campaign '{0}' already exists for the {1} '{2}'").format(
-					self.campaign_name, self.email_campaign_for, self.recipient
+					self.campaign_name, self.campaign_run_for, self.recipient
 				)
 			)
 
@@ -86,40 +86,46 @@ class EmailCampaign(Document):
 
 
 # called through hooks to send campaign mails to leads
-def send_email_to_leads_or_contacts():
-	email_campaigns = frappe.get_all(
-		"Email Campaign", filters={"status": ("not in", ["Unsubscribed", "Completed", "Scheduled"])}
+def send_communication_to_leads_or_contacts():
+	campaign_runs = frappe.get_all(
+		"Campaign Run", filters={"status": ("not in", ["Unsubscribed", "Completed", "Scheduled"])}
 	)
-	for camp in email_campaigns:
-		email_campaign = frappe.get_doc("Email Campaign", camp.name)
-		campaign = frappe.get_cached_doc("Campaign", email_campaign.campaign_name)
+	for camp in campaign_runs:
+		campaign_run = frappe.get_doc("Campaign Run", camp.name)
+		campaign = frappe.get_cached_doc("Campaign", campaign_run.campaign_name)
 		for entry in campaign.get("campaign_schedules"):
-			scheduled_date = add_days(email_campaign.get("start_date"), entry.get("send_after_days"))
+			scheduled_date = add_days(campaign_run.get("start_date"), entry.get("send_after_days"))
 			if scheduled_date == getdate(today()):
-				send_mail(entry, email_campaign)
+				if entry.schedule_for == "Email Template":
+					send_email(entry, campaign_run)
 
 
-def send_mail(entry, email_campaign):
+def send_email(entry, campaign_run):
 	recipient_list = []
-	if email_campaign.email_campaign_for == "Email Group":
+	if campaign_run.campaign_run_for == "Email Group":
 		for member in frappe.db.get_list(
-			"Email Group Member", filters={"email_group": email_campaign.get("recipient")}, fields=["email"]
+			"Email Group Member", filters={"email_group": campaign_run.get("recipient")}, fields=["email"]
+		):
+			recipient_list.append(member["email"])
+	if campaign_run.campaign_run_for == "List of Contacts":
+		for member in frappe.db.get_list(
+			"List of Contacts",
+			filters={"contact_list": campaign_run.get("recipient")},
+			fields=["contact.email"],
 		):
 			recipient_list.append(member["email"])
 	else:
 		recipient_list.append(
-			frappe.db.get_value(
-				email_campaign.email_campaign_for, email_campaign.get("recipient"), "email_id"
-			)
+			frappe.db.get_value(campaign_run.campaign_run_for, campaign_run.get("recipient"), "email_id")
 		)
 
-	email_template = frappe.get_doc("Email Template", entry.get("email_template"))
-	sender = frappe.db.get_value("User", email_campaign.get("sender"), "email")
-	context = {"doc": frappe.get_doc(email_campaign.email_campaign_for, email_campaign.recipient)}
+	email_template = frappe.get_doc("Email Template", entry.get("template"))
+	sender = frappe.db.get_value("User", campaign_run.get("sender"), "email")
+	context = {"doc": frappe.get_doc(campaign_run.campaign_run_for, campaign_run.recipient)}
 	# send mail and link communication to document
 	comm = make(
-		doctype="Email Campaign",
-		name=email_campaign.name,
+		doctype="Campaign Run",
+		name=campaign_run.name,
 		subject=frappe.render_template(email_template.get("subject"), context),
 		content=frappe.render_template(email_template.get("response"), context),
 		sender=sender,
@@ -134,14 +140,14 @@ def send_mail(entry, email_campaign):
 
 # called from hooks on doc_event Email Unsubscribe
 def unsubscribe_recipient(unsubscribe, method):
-	if unsubscribe.reference_doctype == "Email Campaign":
-		frappe.db.set_value("Email Campaign", unsubscribe.reference_name, "status", "Unsubscribed")
+	if unsubscribe.reference_doctype == "Campaign Run":
+		frappe.db.set_value("Campaign Run", unsubscribe.reference_name, "status", "Unsubscribed")
 
 
 # called through hooks to update email campaign status daily
-def set_email_campaign_status():
-	email_campaigns = frappe.get_all("Email Campaign", filters={"status": ("!=", "Unsubscribed")})
-	for entry in email_campaigns:
-		email_campaign = frappe.get_doc("Email Campaign", entry.name)
-		email_campaign.update_status()
-		email_campaign.save()
+def set_campaign_run_status():
+	campaign_runs = frappe.get_all("Campaign Run", filters={"status": ("!=", "Unsubscribed")})
+	for entry in campaign_runs:
+		campaign_run = frappe.get_doc("Campaign Run", entry.name)
+		campaign_run.update_status()
+		campaign_run.save()

@@ -360,6 +360,7 @@
    "is_query_report": 0,
    "label": "Campaign",
    "link_count": 5,
+   "link_type": "DocType",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -378,9 +379,9 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Email Campaign",
+   "label": "Campaign Run",
    "link_count": 0,
-   "link_to": "Email Campaign",
+   "link_to": "Campaign Run",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -400,26 +401,25 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "SMS Log",
-   "link_count": 0,
-   "link_to": "SMS Log",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Email Group",
    "link_count": 0,
    "link_to": "Email Group",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "List of Contacts",
+   "link_count": 0,
+   "link_to": "List of Contacts",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2023-09-14 12:11:03.968048",
+ "modified": "2024-03-27 05:56:21.311432",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",

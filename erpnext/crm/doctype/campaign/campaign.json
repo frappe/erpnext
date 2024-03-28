@@ -48,7 +48,7 @@
    "fieldname": "campaign_schedules",
    "fieldtype": "Table",
    "label": "Campaign Schedules",
-   "options": "Campaign Email Schedule"
+   "options": "Campaign Schedule"
   },
   {
    "fieldname": "description_section",

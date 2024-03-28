@@ -15,12 +15,12 @@ class Campaign(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.crm.doctype.campaign_email_schedule.campaign_email_schedule import (
-			CampaignEmailSchedule,
+		from erpnext.crm.doctype.campaign_schedule.campaign_schedule import (
+			CampaignSchedule,
 		)
 
 		campaign_name: DF.Data
-		campaign_schedules: DF.Table[CampaignEmailSchedule]
+		campaign_schedules: DF.Table[CampaignSchedule]
 		description: DF.Text | None
 		naming_series: DF.Literal["SAL-CAM-.YYYY.-"]
 	# end: auto-generated types

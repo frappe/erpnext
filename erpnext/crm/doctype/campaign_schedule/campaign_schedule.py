@@ -6,7 +6,7 @@
 from frappe.model.document import Document
 
 
-class CampaignEmailSchedule(Document):
+class CampaignSchedule(Document):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -15,11 +15,12 @@ class CampaignEmailSchedule(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		email_template: DF.Link
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		schedule_for: DF.Literal["", "Email Template"]
 		send_after_days: DF.Int
+		template: DF.DynamicLink
 	# end: auto-generated types
 
 	pass

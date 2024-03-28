@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2024-03-25 12:19:55.758901",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "contact_list",
+  "column_break_vmpd",
+  "contact",
+  "unsubscribed"
+ ],
+ "fields": [
+  {
+   "fieldname": "contact",
+   "fieldtype": "Link",
+   "label": "Contact",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "column_break_vmpd",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "contact.unsubscribed",
+   "fetch_if_empty": 1,
+   "fieldname": "unsubscribed",
+   "fieldtype": "Check",
+   "label": "Unsubscribed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "contact_list",
+   "fieldtype": "Link",
+   "label": "Contact List",
+   "options": "List of Contacts"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2024-03-27 05:55:08.263523",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "List of Contacts Member",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "contact"
+}
