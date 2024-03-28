@@ -31,6 +31,7 @@ from erpnext.stock.utils import get_bin
 from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
+from erpnext.utilities.authorization_control import validate_approving_authority
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -477,9 +478,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_budget()
 		self.update_reserved_qty_for_subcontract()
 
-		frappe.get_doc("Authorization Control").validate_approving_authority(
-			self.doctype, self.company, self.base_grand_total
-		)
+		validate_approving_authority(self.doctype, self.company, self.base_grand_total)
 
 		self.update_blanket_order()
 

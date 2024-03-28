@@ -13,6 +13,7 @@ from frappe.utils import cint, flt
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from erpnext.utilities.authorization_control import validate_approving_authority
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -448,9 +449,7 @@ class DeliveryNote(SellingController):
 		self.update_pick_list_status()
 
 		# Check for Approving Authority
-		frappe.get_doc("Authorization Control").validate_approving_authority(
-			self.doctype, self.company, self.base_grand_total, self
-		)
+		validate_approving_authority(self.doctype, self.company, self.base_grand_total, self)
 
 		# update delivered qty in sales order
 		self.update_prevdoc_status()
