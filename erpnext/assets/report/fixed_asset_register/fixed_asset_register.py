@@ -145,6 +145,7 @@ def get_data(filters):
 			"asset_category": asset.asset_category,
 			"purchase_date": asset.purchase_date,
 			"asset_value": asset_value,
+			"company": asset.company,
 		}
 		data.append(row)
 
@@ -369,29 +370,36 @@ def get_columns(filters):
 				"label": _("Gross Purchase Amount"),
 				"fieldname": "gross_purchase_amount",
 				"fieldtype": "Currency",
-				"options": "company:currency",
+				"options": "Company:company:default_currency",
 				"width": 250,
 			},
 			{
 				"label": _("Opening Accumulated Depreciation"),
 				"fieldname": "opening_accumulated_depreciation",
 				"fieldtype": "Currency",
-				"options": "company:currency",
+				"options": "Company:company:default_currency",
 				"width": 250,
 			},
 			{
 				"label": _("Depreciated Amount"),
 				"fieldname": "depreciated_amount",
 				"fieldtype": "Currency",
-				"options": "company:currency",
+				"options": "Company:company:default_currency",
 				"width": 250,
 			},
 			{
 				"label": _("Asset Value"),
 				"fieldname": "asset_value",
 				"fieldtype": "Currency",
-				"options": "company:currency",
+				"options": "Company:company:default_currency",
 				"width": 250,
+			},
+			{
+				"label": _("Company"),
+				"fieldname": "company",
+				"fieldtype": "Link",
+				"options": "Company",
+				"width": 120,
 			},
 		]
 
@@ -423,28 +431,28 @@ def get_columns(filters):
 			"label": _("Gross Purchase Amount"),
 			"fieldname": "gross_purchase_amount",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 100,
 		},
 		{
 			"label": _("Asset Value"),
 			"fieldname": "asset_value",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 100,
 		},
 		{
 			"label": _("Opening Accumulated Depreciation"),
 			"fieldname": "opening_accumulated_depreciation",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 90,
 		},
 		{
 			"label": _("Depreciated Amount"),
 			"fieldname": "depreciated_amount",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 100,
 		},
 		{
@@ -468,5 +476,12 @@ def get_columns(filters):
 			"fieldname": "location",
 			"options": "Location",
 			"width": 100,
+		},
+		{
+			"label": _("Company"),
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"options": "Company",
+			"width": 120,
 		},
 	]
