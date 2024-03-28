@@ -61,11 +61,12 @@ class ListofContacts(Document):
 		return self.total_members
 
 	def get_total_members(self):
-		return frappe.db.sql(
-			"""select count(*) from `tabList of Contacts Member`
-			where contact_list=%s""",
-			self.name,
-		)[0][0]
+		return frappe.db.count(
+			"List of Contacts Member",
+			filters={
+				"contact_list": self.name,
+			},
+		)
 
 	def on_trash(self):
 		for d in frappe.get_all("List of Contacts Member", "name", {"contact_list": self.name}):
