@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-24 09:35+0000\n"
-"PO-Revision-Date: 2024-03-27 13:04\n"
+"PO-Revision-Date: 2024-03-28 13:08\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -46470,7 +46470,7 @@ msgstr ""
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Over Billing Allowance (%)"
-msgstr ""
+msgstr "Erlaubte Mehrabrechnung (%)"
 
 #. Label of a Float field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -68680,7 +68680,7 @@ msgstr "Lagerleiter"
 
 #: stock/doctype/item/item_dashboard.py:34
 msgid "Stock Movement"
-msgstr ""
+msgstr "Lagerbewegung"
 
 #. Label of a Tab Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -75200,7 +75200,7 @@ msgstr "Gesamtsumme erreicht"
 #. Label of a number card in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Total Active Items"
-msgstr ""
+msgstr "Anzahl aktive Artikel"
 
 #: accounts/report/budget_variance_report/budget_variance_report.py:125
 msgid "Total Actual"
@@ -75923,7 +75923,7 @@ msgstr "Gesamt Stock Zusammenfassung"
 #. Label of a number card in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Total Stock Value"
-msgstr ""
+msgstr "Gesamter Lagerwert"
 
 #. Label of a Float field in DocType 'Purchase Order Item Supplied'
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
@@ -76122,7 +76122,7 @@ msgstr "Gesamte Aufrufe"
 #. Label of a number card in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Total Warehouses"
-msgstr ""
+msgstr "Anzahl Lager"
 
 #. Label of a Float field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
