@@ -49,6 +49,7 @@ frappe.ui.form.on("Warehouse", {
 			frm.add_custom_button(__("Stock Balance"), function () {
 				frappe.set_route("query-report", "Stock Balance", {
 					warehouse: frm.doc.name,
+					company: frm.doc.company,
 				});
 			});
 
