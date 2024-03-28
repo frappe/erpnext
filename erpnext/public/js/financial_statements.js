@@ -53,31 +53,34 @@ erpnext.financial_statements = {
 		}
 
 		if (frappe.query_report.get_filter_value("report_view") == "Horizontal") {
-			if (value == data["expense_account"]) {
-				value = data["expense_indent"] + value;
-				value = $(`<span>${value}</span>`);
-				if (data["expense_indent"] == "") {
-					var $value = $(value).css("font-weight", "bold");
-				} else {
-					$value = $(value);
-				}
-			} else if (value == data["income_account"]) {
-				value = data["income_indent"] + value;
-				value = $(`<span>${value}</span>`);
-				if (data["income_indent"] == "") {
-					$value = $(value).css("font-weight", "bold");
-				} else {
-					$value = $(value);
-				}
+			if (+value) {
+				value = default_formatter(value, row, column, data);
 			} else {
-				value = $(`<span>${value}</span>`);
-				$value = $(value);
+				if (value == data["expense_account"]) {
+					value = data["expense_indent"] + value;
+					value = $(`<span>${value}</span>`);
+					if (data["expense_indent"] == "") {
+						var $value = $(value).css("font-weight", "bold");
+					} else {
+						$value = $(value);
+					}
+				} else if (value == data["income_account"]) {
+					value = data["income_indent"] + value;
+					value = $(`<span>${value}</span>`);
+					if (data["income_indent"] == "") {
+						$value = $(value).css("font-weight", "bold");
+					} else {
+						$value = $(value);
+					}
+				} else {
+					value = $(`<span>${value}</span>`);
+					$value = $(value);
+				}
+				if (data.warn_if_negative && data[column.fieldname] < 0) {
+					$value.addClass("text-danger");
+				}
+				value = $value.wrap("<p></p>").parent().html();
 			}
-			if (data.warn_if_negative && data[column.fieldname] < 0) {
-				$value.addClass("text-danger");
-			}
-
-			value = $value.wrap("<p></p>").parent().html();
 			return value;
 		}
 
@@ -96,7 +99,6 @@ erpnext.financial_statements = {
 			}
 			column.is_tree = true;
 		}
-
 		value = default_formatter(value, row, column, data);
 
 		if (data && !data.parent_account) {
