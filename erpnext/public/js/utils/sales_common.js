@@ -350,7 +350,6 @@ erpnext.sales_common = {
 			pick_serial_and_batch(doc, cdt, cdn) {
 				let item = locals[cdt][cdn];
 				let me = this;
-				let path = "assets/erpnext/js/utils/serial_no_batch_selector.js";
 
 				frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 					if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
@@ -364,26 +363,24 @@ erpnext.sales_common = {
 							item.title = __("Select Serial and Batch");
 						}
 
-						frappe.require(path, function () {
-							new erpnext.SerialBatchPackageSelector(me.frm, item, (r) => {
-								if (r) {
-									let qty = Math.abs(r.total_qty);
-									if (doc.is_return) {
-										qty = qty * -1;
-									}
-
-									frappe.model.set_value(item.doctype, item.name, {
-										serial_and_batch_bundle: r.name,
-										use_serial_batch_fields: 0,
-										qty:
-											qty /
-											flt(
-												item.conversion_factor || 1,
-												precision("conversion_factor", item)
-											),
-									});
+						new erpnext.SerialBatchPackageSelector(me.frm, item, (r) => {
+							if (r) {
+								let qty = Math.abs(r.total_qty);
+								if (doc.is_return) {
+									qty = qty * -1;
 								}
-							});
+
+								frappe.model.set_value(item.doctype, item.name, {
+									serial_and_batch_bundle: r.name,
+									use_serial_batch_fields: 0,
+									qty:
+										qty /
+										flt(
+											item.conversion_factor || 1,
+											precision("conversion_factor", item)
+										),
+								});
+							}
 						});
 					}
 				});
