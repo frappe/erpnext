@@ -14,8 +14,8 @@ def execute():
 
 	blocks = split_list_into_blocks(assets, block_size)
 
-	if len(blocks) > 0:
-		for asset in blocks[0]:
+	if len(blocks) > 5:
+		for asset in blocks[5]:
 			if not asset_depreciation_schedules_map.get(asset.name):
 				continue
 
@@ -92,6 +92,7 @@ def get_asset_finance_books_map():
 	asset = frappe.qb.DocType("Asset")
 	daily_prorata_based = frappe.db.sql(f"SHOW COLUMNS FROM `tabAsset Finance Book` LIKE 'daily_prorata_based'")
 	shift_based = frappe.db.sql(f"SHOW COLUMNS FROM `tabAsset Finance Book` LIKE 'shift_based'")
+	
 	# Initialize the list of columns to select
 	columns_to_select = [
 		asset.name.as_("asset_name"),
@@ -119,7 +120,7 @@ def get_asset_finance_books_map():
 		.where(asset.docstatus < 2)
 		.orderby(afb.idx)
 	).run(as_dict=True)
-
+	
 	asset_finance_books_map = group_records_by_asset_name(records)
 
 	return asset_finance_books_map
