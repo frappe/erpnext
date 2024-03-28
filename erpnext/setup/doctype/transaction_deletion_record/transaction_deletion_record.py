@@ -418,17 +418,11 @@ class TransactionDeletionRecord(Document):
 			frappe.delete_doc("Communication", batch, ignore_permissions=True)
 
 	def delete_comments(self, doctype, reference_doc_names):
-		comments = frappe.get_all(
-			"Comment",
-			filters={"reference_doctype": doctype, "reference_name": ["in", reference_doc_names]},
-		)
-		comment_names = [c.name for c in comments]
-
-		if not comment_names:
-			return
-
-		for batch in create_batch(comment_names, self.batch_size):
-			frappe.delete_doc("Comment", batch, ignore_permissions=True)
+		if reference_doc_names:
+			comment = qb.DocType("Comment")
+			qb.from_(comment).delete().where(
+				(comment.reference_doctype == doctype) & (comment.reference_name.isin(reference_doc_names))
+			).run()
 
 	def unlink_attachments(self, doctype, reference_doc_names):
 		files = frappe.get_all(
