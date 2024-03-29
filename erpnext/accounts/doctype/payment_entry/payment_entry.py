@@ -1922,7 +1922,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			)
 		else:
 			exchange_rate = 1
-			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
+		outstanding_amount = get_outstanding_on_journal_entry(reference_name)
 
 	elif reference_doctype != "Journal Entry":
 		if not total_amount:
