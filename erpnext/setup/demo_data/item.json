@@ -1,0 +1,92 @@
+[
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU001",
+        "item_name": "T-shirt",
+        "valuation_rate": 400.0,
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/1484808/pexels-photo-1484808.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU002",
+        "valuation_rate": 300.0,
+        "item_name": "Laptop",
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/3999538/pexels-photo-3999538.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU003",
+        "valuation_rate": 523.0,
+        "item_name": "Book",
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/2422178/pexels-photo-2422178.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU004",
+        "valuation_rate": 725.0,
+        "item_name": "Smartphone",
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/1647976/pexels-photo-1647976.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU005",
+        "valuation_rate": 222.0,
+        "item_name": "Sneakers",
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU006",
+        "valuation_rate": 420.0,
+        "item_name": "Coffee Mug",
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/585753/pexels-photo-585753.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU007",
+        "valuation_rate": 375.0,
+        "item_name": "Television",
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/8059376/pexels-photo-8059376.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU008",
+        "valuation_rate": 333.0,
+        "item_name": "Backpack",
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/3731256/pexels-photo-3731256.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU009",
+        "valuation_rate": 700.0,
+        "item_name": "Headphones",
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/3587478/pexels-photo-3587478.jpeg"
+    },
+    {
+        "doctype": "Item",
+        "item_group": "Demo Item Group",
+        "item_code": "SKU010",
+        "valuation_rate": 500.0,
+        "item_name": "Camera",
+        "gst_hsn_code": "999512",
+        "image": "https://images.pexels.com/photos/51383/photo-camera-subject-photographer-51383.jpeg"
+    }
+]

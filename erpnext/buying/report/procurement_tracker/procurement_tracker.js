@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 frappe.query_reports["Procurement Tracker"] = {
-	"filters": [
+	filters: [
 		{
 			fieldname: "company",
 			label: __("Company"),
@@ -30,10 +30,10 @@ frappe.query_reports["Procurement Tracker"] = {
 			default: frappe.defaults.get_user_default("year_start_date"),
 		},
 		{
-			fieldname:"to_date",
+			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
 			default: frappe.defaults.get_user_default("year_end_date"),
 		},
-	]
-}
+	],
+};

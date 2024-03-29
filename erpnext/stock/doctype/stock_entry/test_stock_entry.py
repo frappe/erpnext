@@ -1671,24 +1671,22 @@ class TestStockEntry(FrappeTestCase):
 		item_code = "Test Negative Item - 001"
 		item_doc = create_item(item_code=item_code, is_stock_item=1, valuation_rate=10)
 
-		make_stock_entry(
+		se1 = make_stock_entry(
 			item_code=item_code,
 			posting_date=add_days(today(), -3),
 			posting_time="00:00:00",
-			purpose="Material Receipt",
+			target="_Test Warehouse - _TC",
 			qty=10,
 			to_warehouse="_Test Warehouse - _TC",
-			do_not_save=True,
 		)
 
-		make_stock_entry(
+		se2 = make_stock_entry(
 			item_code=item_code,
 			posting_date=today(),
 			posting_time="00:00:00",
-			purpose="Material Receipt",
+			source="_Test Warehouse - _TC",
 			qty=8,
 			from_warehouse="_Test Warehouse - _TC",
-			do_not_save=True,
 		)
 
 		sr_doc = create_stock_reconciliation(

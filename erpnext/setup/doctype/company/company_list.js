@@ -1,5 +1,5 @@
-frappe.listview_settings['Company'] = {
+frappe.listview_settings["Company"] = {
 	onload() {
-		frappe.breadcrumbs.add('Accounts');
+		frappe.breadcrumbs.add("Accounts");
 	},
 };

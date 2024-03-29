@@ -25,7 +25,7 @@ def update_itemised_tax_data(doc):
 		# dont even bother checking in item tax template as it contains both input and output accounts - double the tax rate
 		item_code = row.item_code or row.item_name
 		if itemised_tax.get(item_code):
-			for tax in itemised_tax.get(row.item_code).values():
+			for tax in itemised_tax.get(item_code).values():
 				_tax_rate = flt(tax.get("tax_rate", 0), row.precision("tax_rate"))
 				tax_amount += flt((row.net_amount * _tax_rate) / 100, row.precision("tax_amount"))
 				tax_rate += _tax_rate

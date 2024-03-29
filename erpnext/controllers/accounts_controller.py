@@ -88,6 +88,7 @@ force_item_fields = (
 	"weight_per_unit",
 	"weight_uom",
 	"total_weight",
+	"valuation_rate",
 )
 
 
@@ -156,6 +157,13 @@ class AccountsController(TransactionBase):
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
 
+		if (
+			self.doctype in ["Sales Invoice", "Purchase Invoice"]
+			and self.get("is_return")
+			and self.get("update_stock")
+		):
+			self.validate_zero_qty_for_return_invoices_with_stock()
+
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
 
@@ -203,17 +211,18 @@ class AccountsController(TransactionBase):
 				)
 
 			if self.get("is_return") and self.get("return_against") and not self.get("is_pos"):
-				# if self.get("is_return") and self.get("return_against"):
-				document_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
-				frappe.msgprint(
-					_(
-						"{0} will be treated as a standalone {0}. Post creation use {1} tool to reconcile against {2}."
-					).format(
-						document_type,
-						get_link_to_form("Payment Reconciliation", "Payment Reconciliation"),
-						get_link_to_form(self.doctype, self.get("return_against")),
+				if self.get("update_outstanding_for_self"):
+					document_type = "Credit Note" if self.doctype == "Sales Invoice" else "Debit Note"
+					frappe.msgprint(
+						_(
+							"We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck '{2}' checkbox. <br><br> Or you can use {3} tool to reconcile against {1} later."
+						).format(
+							frappe.bold(document_type),
+							get_link_to_form(self.doctype, self.get("return_against")),
+							frappe.bold("Update Outstanding for Self"),
+							get_link_to_form("Payment Reconciliation", "Payment Reconciliation"),
+						)
 					)
-				)
 
 			pos_check_field = "is_pos" if self.doctype == "Sales Invoice" else "is_paid"
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
@@ -948,6 +957,18 @@ class AccountsController(TransactionBase):
 
 		return gl_dict
 
+	def validate_zero_qty_for_return_invoices_with_stock(self):
+		rows = []
+		for item in self.items:
+			if not flt(item.qty):
+				rows.append(item)
+		if rows:
+			frappe.throw(
+				_(
+					"For Return Invoices with Stock effect, '0' qty Items are not allowed. Following rows are affected: {0}"
+				).format(frappe.bold(comma_and(["#" + str(x.idx) for x in rows])))
+			)
+
 	def validate_qty_is_not_zero(self):
 		if self.doctype == "Purchase Receipt":
 			return
@@ -1605,8 +1626,8 @@ class AccountsController(TransactionBase):
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
 
-		role_allowed_to_over_bill = frappe.db.get_single_value(
-			"Accounts Settings", "role_allowed_to_over_bill"
+		role_allowed_to_over_bill = frappe.get_cached_value(
+			"Accounts Settings", None, "role_allowed_to_over_bill"
 		)
 		user_roles = frappe.get_roles()
 

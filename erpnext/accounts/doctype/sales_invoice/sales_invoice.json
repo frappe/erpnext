@@ -25,6 +25,7 @@
   "is_consolidated",
   "is_return",
   "return_against",
+  "update_outstanding_for_self",
   "update_billed_amount_in_sales_order",
   "update_billed_amount_in_delivery_note",
   "is_debit_note",
@@ -942,7 +943,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Taxes and Charges Calculation",
@@ -2161,6 +2162,16 @@
    "fieldtype": "Check",
    "label": "Don't Create Loyalty Points",
    "no_copy": 1
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: doc.is_return && doc.return_against",
+   "description": "Credit Note will update it's own outstanding amount, even if \"Return Against\" is specified.",
+   "fieldname": "update_outstanding_for_self",
+   "fieldtype": "Check",
+   "label": "Update Outstanding for Self",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -2173,7 +2184,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-01-02 17:25:46.027523",
+ "modified": "2024-03-22 17:50:34.395602",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

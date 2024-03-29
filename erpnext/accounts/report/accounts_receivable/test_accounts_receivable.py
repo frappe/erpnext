@@ -62,7 +62,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		pe.insert()
 		pe.submit()
 
-	def create_credit_note(self, docname):
+	def create_credit_note(self, docname, do_not_submit=False):
 		credit_note = create_sales_invoice(
 			company=self.company,
 			customer=self.customer,
@@ -72,6 +72,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			cost_center=self.cost_center,
 			is_return=1,
 			return_against=docname,
+			do_not_submit=do_not_submit,
 		)
 
 		return credit_note
@@ -149,7 +150,9 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			)
 
 		# check invoice grand total, invoiced, paid and outstanding column's value after credit note
-		self.create_credit_note(si.name)
+		cr_note = self.create_credit_note(si.name, do_not_submit=True)
+		cr_note.update_outstanding_for_self = False
+		cr_note.save().submit()
 		report = execute(filters)
 
 		expected_data_after_credit_note = [100, 0, 0, 40, -40, self.debit_to]
@@ -166,6 +169,82 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 				row.party_account,
 			],
 		)
+
+	def test_cr_note_flag_to_update_self(self):
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+			"show_remarks": True,
+		}
+
+		# check invoice grand total and invoiced column's value for 3 payment terms
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.set_posting_time = True
+		si.posting_date = add_days(today(), -1)
+		si.save().submit()
+
+		report = execute(filters)
+
+		expected_data = [100, 100, "No Remarks"]
+
+		self.assertEqual(len(report[1]), 1)
+		row = report[1][0]
+		self.assertEqual(expected_data, [row.invoice_grand_total, row.invoiced, row.remarks])
+
+		# check invoice grand total, invoiced, paid and outstanding column's value after payment
+		self.create_payment_entry(si.name)
+		report = execute(filters)
+
+		expected_data_after_payment = [100, 100, 40, 60]
+		self.assertEqual(len(report[1]), 1)
+		row = report[1][0]
+		self.assertEqual(
+			expected_data_after_payment,
+			[row.invoice_grand_total, row.invoiced, row.paid, row.outstanding],
+		)
+
+		# check invoice grand total, invoiced, paid and outstanding column's value after credit note
+		cr_note = self.create_credit_note(si.name, do_not_submit=True)
+		cr_note.update_outstanding_for_self = True
+		cr_note.save().submit()
+		report = execute(filters)
+
+		expected_data_after_credit_note = [
+			[100.0, 100.0, 40.0, 0.0, 60.0, si.name],
+			[0, 0, 100.0, 0.0, -100.0, cr_note.name],
+		]
+		self.assertEqual(len(report[1]), 2)
+		si_row = [
+			[
+				row.invoice_grand_total,
+				row.invoiced,
+				row.paid,
+				row.credit_note,
+				row.outstanding,
+				row.voucher_no,
+			]
+			for row in report[1]
+			if row.voucher_no == si.name
+		][0]
+
+		cr_note_row = [
+			[
+				row.invoice_grand_total,
+				row.invoiced,
+				row.paid,
+				row.credit_note,
+				row.outstanding,
+				row.voucher_no,
+			]
+			for row in report[1]
+			if row.voucher_no == cr_note.name
+		][0]
+		self.assertEqual(expected_data_after_credit_note[0], si_row)
+		self.assertEqual(expected_data_after_credit_note[1], cr_note_row)
 
 	def test_payment_againt_po_in_receivable_report(self):
 		"""

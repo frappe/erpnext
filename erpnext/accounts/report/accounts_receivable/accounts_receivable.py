@@ -692,7 +692,12 @@ class ReceivablePayableReport(object):
 
 	def get_return_entries(self):
 		doctype = "Sales Invoice" if self.account_type == "Receivable" else "Purchase Invoice"
-		filters = {"is_return": 1, "docstatus": 1, "company": self.filters.company}
+		filters = {
+			"is_return": 1,
+			"docstatus": 1,
+			"company": self.filters.company,
+			"update_outstanding_for_self": 0,
+		}
 		or_filters = {}
 		for party_type in self.party_type:
 			party_field = scrub(party_type)

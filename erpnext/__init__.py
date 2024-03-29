@@ -3,7 +3,7 @@ import inspect
 
 import frappe
 
-__version__ = "14.65.0"
+__version__ = "14.66.2"
 
 
 def get_default_company(user=None):
@@ -13,7 +13,7 @@ def get_default_company(user=None):
 	if not user:
 		user = frappe.session.user
 
-	companies = get_user_default_as_list(user, "company")
+	companies = get_user_default_as_list("company", user)
 	if companies:
 		default_company = companies[0]
 	else:

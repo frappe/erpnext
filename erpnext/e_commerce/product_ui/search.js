@@ -28,7 +28,7 @@ erpnext.ProductSearch = class {
 		// Click can happen anywhere on the page
 		$("body").on("click", (e) => {
 			let searchEvent = $(e.target).closest(this.search_box_id).length;
-			let resultsEvent = $(e.target).closest('#search-results-container').length;
+			let resultsEvent = $(e.target).closest("#search-results-container").length;
 			let isResultHidden = this.search_dropdown.hasClass("hidden");
 
 			if (!searchEvent && !resultsEvent && !isResultHidden) {
@@ -50,10 +50,11 @@ erpnext.ProductSearch = class {
 			frappe.call({
 				method: "erpnext.templates.pages.product_search.search",
 				args: {
-					query: query
+					query: query,
 				},
 				callback: (data) => {
-					let product_results = null, category_results = null;
+					let product_results = null,
+						category_results = null;
 
 					// Populate product results
 					product_results = data.message ? data.message.product_results : null;
@@ -69,7 +70,7 @@ erpnext.ProductSearch = class {
 					if (!$.isEmptyObject(product_results) || !$.isEmptyObject(category_results)) {
 						me.setRecentSearches(query);
 					}
-				}
+				},
 			});
 
 			this.search_dropdown.removeClass("hidden");
@@ -77,13 +78,17 @@ erpnext.ProductSearch = class {
 	}
 
 	setupSearchResultContainer() {
-		this.search_dropdown = this.search_area.append(`
+		this.search_dropdown = this.search_area
+			.append(
+				`
 			<div class="overflow-hidden shadow dropdown-menu w-100 hidden"
 				id="search-results-container"
 				aria-labelledby="dropdownMenuSearch"
 				style="display: flex; flex-direction: column;">
 			</div>
-		`).find("#search-results-container");
+		`
+			)
+			.find("#search-results-container");
 
 		this.setupCategoryContainer();
 		this.setupProductsContainer();
@@ -91,36 +96,52 @@ erpnext.ProductSearch = class {
 	}
 
 	setupProductsContainer() {
-		this.products_container = this.search_dropdown.append(`
+		this.products_container = this.search_dropdown
+			.append(
+				`
 			<div id="product-results mt-2">
 				<div id="product-scroll" style="overflow: scroll; max-height: 300px">
 				</div>
 			</div>
-		`).find("#product-scroll");
+		`
+			)
+			.find("#product-scroll");
 	}
 
 	setupCategoryContainer() {
-		this.category_container = this.search_dropdown.append(`
+		this.category_container = this.search_dropdown
+			.append(
+				`
 			<div class="category-container mt-2 mb-1">
 				<div class="category-chips">
 				</div>
 			</div>
-		`).find(".category-chips");
+		`
+			)
+			.find(".category-chips");
 	}
 
 	setupRecentsContainer() {
-		let $recents_section = this.search_dropdown.append(`
+		let $recents_section = this.search_dropdown
+			.append(
+				`
 			<div class="mb-2 mt-2 recent-searches">
 				<div>
-					<b>${ __("Recent") }</b>
+					<b>${__("Recent")}</b>
 				</div>
 			</div>
-		`).find(".recent-searches");
+		`
+			)
+			.find(".recent-searches");
 
-		this.recents_container = $recents_section.append(`
+		this.recents_container = $recents_section
+			.append(
+				`
 			<div id="recents" style="padding: .25rem 0 1rem 0;">
 			</div>
-		`).find("#recents");
+		`
+			)
+			.find("#recents");
 	}
 
 	getRecentSearches() {
@@ -128,7 +149,7 @@ erpnext.ProductSearch = class {
 	}
 
 	attachEventListenersToChips() {
-		let me  = this;
+		let me = this;
 		const chips = $(".recent-search");
 		window.chips = chips;
 
@@ -178,7 +199,7 @@ erpnext.ProductSearch = class {
 							<path d="M8.00027 5.20947V8.00017L10 10" stroke="var(--gray-500)" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
 						</svg>
 					</span>
-					${ key }
+					${key}
 				</div>
 			`;
 		});
@@ -197,7 +218,7 @@ erpnext.ProductSearch = class {
 		let html = "";
 
 		product_results.forEach((res) => {
-			let thumbnail = res.thumbnail || '/assets/erpnext/images/ui-states/cart-empty-state.png';
+			let thumbnail = res.thumbnail || "/assets/erpnext/images/ui-states/cart-empty-state.png";
 			html += `
 				<div class="dropdown-item" style="display: flex;">
 					<img class="item-thumb col-2" src=${thumbnail} />
@@ -226,7 +247,7 @@ erpnext.ProductSearch = class {
 
 		let html = `
 			<div class="mb-2">
-				<b>${ __("Categories") }</b>
+				<b>${__("Categories")}</b>
 			</div>
 		`;
 
@@ -234,7 +255,7 @@ erpnext.ProductSearch = class {
 			html += `
 				<a href="/${category.route}" class="btn btn-sm category-chip mr-2 mb-2"
 					style="font-size: 13px" role="button">
-				${ category.name }
+				${category.name}
 				</button>
 			`;
 		});

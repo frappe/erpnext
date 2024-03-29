@@ -51,7 +51,7 @@
 }
 
 // assessment tool
-.frappe-control[data-fieldname='result_html'] {
+.frappe-control[data-fieldname="result_html"] {
 	overflow: scroll;
 }
 .assessment-result-tool {
@@ -70,7 +70,9 @@
 		text-overflow: ellipsis;
 	}
 
-	.total-score, .grade, .score {
+	.total-score,
+	.grade,
+	.score {
 		text-align: right;
 	}
 }
@@ -78,13 +80,13 @@
 /* pos */
 
 body[data-route="pos"] {
-
 	.pos-bill-toolbar {
 		padding: 10px 0px;
 		height: 51px;
 	}
 
-	.pos-bill-item:hover, .list-customers-table > .pos-list-row:hover {
+	.pos-bill-item:hover,
+	.list-customers-table > .pos-list-row:hover {
 		background-color: #f5f7fa;
 		cursor: pointer;
 	}
@@ -135,50 +137,52 @@ body[data-route="pos"] {
 	}
 
 	.pos-payment-row .col-xs-6 {
-		padding :15px;
+		padding: 15px;
 	}
 
 	.pos-payment-row {
-		border-bottom:1px solid var(--border-color);
+		border-bottom: 1px solid var(--border-color);
 		margin: 2px 0px 5px 0px;
 		height: 60px;
 		margin-top: 0px;
 		margin-bottom: 0px;
 	}
 
-	.pos-payment-row:hover, .pos-keyboard-key:hover{
+	.pos-payment-row:hover,
+	.pos-keyboard-key:hover {
 		background-color: var(--bg-color);
 		cursor: pointer;
 	}
 
-	.pos-keyboard-key, .delete-btn {
+	.pos-keyboard-key,
+	.delete-btn {
 		border: 1px solid var(--border-color);
-		height:85px;
-		width:85px;
-		margin:10px 10px;
-		font-size:24px;
-		font-weight:200;
-		background-color: #FDFDFD;
+		height: 85px;
+		width: 85px;
+		margin: 10px 10px;
+		font-size: 24px;
+		font-weight: 200;
+		background-color: #fdfdfd;
 		border-color: #e8e8e8;
 	}
 
 	.numeric-keypad {
 		border: 1px solid var(--border-color);
-		height:69px;
-		width:69px;
-		font-size:20px;
-		font-weight:200;
-		background-color: #FDFDFD;
+		height: 69px;
+		width: 69px;
+		font-size: 20px;
+		font-weight: 200;
+		background-color: #fdfdfd;
 		border-color: #e8e8e8;
-		margin-left:-4px;
+		margin-left: -4px;
 	}
 
 	.pos-pay {
-		height:69px;
-		width:69px;
-		font-size:17px;
-		font-weight:200;
-		margin-left:-4px;
+		height: 69px;
+		width: 69px;
+		font-size: 17px;
+		font-weight: 200;
+		margin-left: -4px;
 	}
 
 	.numeric-keypad {
@@ -188,7 +192,7 @@ body[data-route="pos"] {
 		font-weight: 200;
 		border-radius: 0;
 		background-color: #fff;
-		margin-left:-4px;
+		margin-left: -4px;
 
 		@media (max-width: var(--xl-width)) {
 			height: 45px;
@@ -253,7 +257,8 @@ body[data-route="pos"] {
 		.amount-row h3 {
 			font-size: 15px;
 		}
-		.pos-keyboard-key, .delete-btn {
+		.pos-keyboard-key,
+		.delete-btn {
 			height: 50px;
 		}
 		.multimode-payments {
@@ -277,7 +282,8 @@ body[data-route="pos"] {
 		padding: 15px 10px;
 	}
 
-	.write_off_amount, .change_amount {
+	.write_off_amount,
+	.change_amount {
 		margin: 15px;
 		width: 130px;
 	}
@@ -301,10 +307,11 @@ body[data-route="pos"] {
 		}
 
 		.subject {
-			width: 40%
+			width: 40%;
 		}
 
-		.list-row-checkbox, .list-select-all {
+		.list-row-checkbox,
+		.list-select-all {
 			margin-right: 7px;
 		}
 	}
@@ -397,7 +404,7 @@ body[data-route="pos"] {
 			padding-top: 0;
 		}
 
-		&> .pos-list-row {
+		& > .pos-list-row {
 			border: none;
 
 			@media (max-width: var(--xl-width)) {
@@ -442,13 +449,12 @@ body[data-route="pos"] {
 	padding: 5px 9px;
 	border-radius: 3px;
 	color: #fff;
-
 }
 
 // Healthcare
 
 .exercise-card {
-	box-shadow: 0 1px 3px rgba(0,0,0,0.30);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 	border-radius: 2px;
 	padding: 6px 6px 6px 8px;
 	margin-top: 10px;
@@ -489,4 +495,8 @@ body[data-route="pos"] {
 
 .exercise-col {
 	padding: 10px;
+}
+
+.frappe-control[data-fieldname="other_charges_calculation"] .ql-editor {
+	white-space: normal;
 }

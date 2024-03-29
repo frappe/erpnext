@@ -274,6 +274,7 @@ erpnext.patches.v14_0.clear_reconciliation_values_from_singles
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
+erpnext.patches.v14_0.update_posting_datetime_and_dropped_indexes #22-02-2024
 erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
 erpnext.patches.v14_0.delete_shopify_doctypes
 erpnext.patches.v14_0.delete_healthcare_doctypes
@@ -354,9 +355,11 @@ execute:frappe.db.set_single_value("Buying Settings", "project_update_frequency"
 erpnext.patches.v14_0.clear_reconciliation_values_from_singles
 erpnext.patches.v14_0.update_total_asset_cost_field
 erpnext.patches.v14_0.create_accounting_dimensions_in_reconciliation_tool
+erpnext.patches.v14_0.update_flag_for_return_invoices #2024-03-22
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index # 2023-12-20
 erpnext.patches.v14_0.set_maintain_stock_for_bom_item
 execute:frappe.db.set_single_value('E Commerce Settings', 'show_actual_qty', 1)
 erpnext.patches.v14_0.delete_orphaned_asset_movement_item_records
+erpnext.patches.v14_0.remove_cancelled_asset_capitalization_from_asset
