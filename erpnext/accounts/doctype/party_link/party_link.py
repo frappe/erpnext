@@ -38,7 +38,10 @@ class PartyLink(Document):
 		if existing_party_link:
 			frappe.throw(
 				_("{} {} is already linked with {} {}").format(
-					self.primary_role, bold(self.primary_party), self.secondary_role, bold(self.secondary_party)
+					self.primary_role,
+					bold(self.primary_party),
+					self.secondary_role,
+					bold(self.secondary_party),
 				)
 			)
 

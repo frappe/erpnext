@@ -25,7 +25,7 @@ class TestTaxes(unittest.TestCase):
 				"account_name": uuid4(),
 				"account_type": "Tax",
 				"company": self.company.name,
-				"parent_account": "Duties and Taxes - {self.company.abbr}".format(self=self),
+				"parent_account": f"Duties and Taxes - {self.company.abbr}",
 			}
 		).insert()
 		self.item_group = frappe.get_doc(

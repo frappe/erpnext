@@ -24,9 +24,7 @@ class ProcessPaymentReconciliationLog(Document):
 		process_pr: DF.Link
 		reconciled: DF.Check
 		reconciled_entries: DF.Int
-		status: DF.Literal[
-			"Running", "Paused", "Reconciled", "Partially Reconciled", "Failed", "Cancelled"
-		]
+		status: DF.Literal["Running", "Paused", "Reconciled", "Partially Reconciled", "Failed", "Cancelled"]
 		total_allocations: DF.Int
 	# end: auto-generated types
 

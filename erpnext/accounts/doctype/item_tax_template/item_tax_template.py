@@ -32,7 +32,7 @@ class ItemTaxTemplate(Document):
 	def autoname(self):
 		if self.company and self.title:
 			abbr = frappe.get_cached_value("Company", self.company, "abbr")
-			self.name = "{0} - {1}".format(self.title, abbr)
+			self.name = f"{self.title} - {abbr}"
 
 	def validate_tax_accounts(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""

@@ -9,36 +9,35 @@ test_records = frappe.get_test_records("Company")
 
 class TestInit(unittest.TestCase):
 	def test_encode_company_abbr(self):
-
 		abbr = "NFECT"
 
 		names = [
 			"Warehouse Name",
 			"ERPNext Foundation India",
-			"Gold - Member - {a}".format(a=abbr),
-			" - {a}".format(a=abbr),
+			f"Gold - Member - {abbr}",
+			f" - {abbr}",
 			"ERPNext - Foundation - India",
-			"ERPNext Foundation India - {a}".format(a=abbr),
-			"No-Space-{a}".format(a=abbr),
+			f"ERPNext Foundation India - {abbr}",
+			f"No-Space-{abbr}",
 			"- Warehouse",
 		]
 
 		expected_names = [
-			"Warehouse Name - {a}".format(a=abbr),
-			"ERPNext Foundation India - {a}".format(a=abbr),
-			"Gold - Member - {a}".format(a=abbr),
-			" - {a}".format(a=abbr),
-			"ERPNext - Foundation - India - {a}".format(a=abbr),
-			"ERPNext Foundation India - {a}".format(a=abbr),
-			"No-Space-{a} - {a}".format(a=abbr),
-			"- Warehouse - {a}".format(a=abbr),
+			f"Warehouse Name - {abbr}",
+			f"ERPNext Foundation India - {abbr}",
+			f"Gold - Member - {abbr}",
+			f" - {abbr}",
+			f"ERPNext - Foundation - India - {abbr}",
+			f"ERPNext Foundation India - {abbr}",
+			f"No-Space-{abbr} - {abbr}",
+			f"- Warehouse - {abbr}",
 		]
 
 		for i in range(len(names)):
 			enc_name = encode_company_abbr(names[i], abbr=abbr)
 			self.assertTrue(
 				enc_name == expected_names[i],
-				"{enc} is not same as {exp}".format(enc=enc_name, exp=expected_names[i]),
+				f"{enc_name} is not same as {expected_names[i]}",
 			)
 
 	def test_translation_files(self):

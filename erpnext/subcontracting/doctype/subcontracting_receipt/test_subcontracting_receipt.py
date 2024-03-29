@@ -6,7 +6,7 @@ import copy
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, cint, cstr, flt, nowtime, today
+from frappe.utils import add_days, cint, flt, nowtime, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -48,9 +48,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 	def test_subcontracting(self):
 		set_backflush_based_on("BOM")
-		make_stock_entry(
-			item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100
-		)
+		make_stock_entry(item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100)
 		make_stock_entry(
 			item_code="_Test Item Home Desktop 100",
 			qty=100,
@@ -82,9 +80,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(scr.get("items")[0].rm_supp_cost, flt(rm_supp_cost))
 
 	def test_available_qty_for_consumption(self):
-		make_stock_entry(
-			item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100
-		)
+		make_stock_entry(item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100)
 		make_stock_entry(
 			item_code="_Test Item Home Desktop 100",
 			qty=100,
@@ -185,9 +181,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			make_subcontracting_receipt,
 		)
-		from erpnext.subcontracting.doctype.subcontracting_order.test_subcontracting_order import (
-			make_subcontracted_item,
-		)
 
 		set_backflush_based_on("Material Transferred for Subcontract")
 		item_code = "_Test Subcontracted FG Item 1"
@@ -211,12 +204,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		make_stock_entry(
 			target="_Test Warehouse - _TC", item_code="Test Extra Item 1", qty=10, basic_rate=100
 		)
-		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="_Test FG Item", qty=1, basic_rate=100
-		)
-		make_stock_entry(
-			target="_Test Warehouse - _TC", item_code="Test Extra Item 2", qty=1, basic_rate=100
-		)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test FG Item", qty=1, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="Test Extra Item 2", qty=1, basic_rate=100)
 
 		rm_items = [
 			{
@@ -397,9 +386,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		set_backflush_based_on("Material Transferred for Subcontract")
 
 		# Create Material Receipt for RM's
-		make_stock_entry(
-			item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100
-		)
+		make_stock_entry(item_code="_Test Item", qty=100, target="_Test Warehouse 1 - _TC", basic_rate=100)
 		make_stock_entry(
 			item_code="_Test Item Home Desktop 100",
 			qty=100,
@@ -614,7 +601,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		bom = make_bom(item=fg_item, raw_materials=[rm_item1, rm_item2, rm_item3])
 
-		rm_batch_no = None
 		for row in bom.items:
 			make_stock_entry(
 				item_code=row.item_code,
@@ -642,9 +628,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		]
 		sco = get_subcontracting_order(service_items=service_items)
 
-		frappe.db.set_single_value(
-			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1
-		)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
 		scr.submit()
@@ -663,9 +647,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertEqual(scr.items[0].rm_cost_per_qty, 900)
 		self.assertEqual(scr.items[0].service_cost_per_qty, 100)
-		frappe.db.set_single_value(
-			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0
-		)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0)
 
 	def test_subcontracting_receipt_valuation_for_fg_with_auto_created_serial_batch_bundle(self):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
@@ -711,7 +693,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		bom = make_bom(item=fg_item, raw_materials=[rm_item1, rm_item2, rm_item3])
 
-		rm_batch_no = None
 		for row in bom.items:
 			make_stock_entry(
 				item_code=row.item_code,
@@ -732,9 +713,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		]
 		sco = get_subcontracting_order(service_items=service_items)
 
-		frappe.db.set_single_value(
-			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1
-		)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
 		scr = make_subcontracting_receipt(sco.name)
 		scr.save()
 		scr.submit()
@@ -762,9 +741,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 
 		self.assertEqual(flt(valuation_rate), flt(1000))
 
-		frappe.db.set_single_value(
-			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0
-		)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0)
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_subcontracting_receipt_raw_material_rate(self):
@@ -1225,9 +1202,7 @@ class TestSubcontractingReceipt(FrappeTestCase):
 def make_return_subcontracting_receipt(**args):
 	args = frappe._dict(args)
 	return_doc = make_return_doc("Subcontracting Receipt", args.scr_name)
-	return_doc.supplier_warehouse = (
-		args.supplier_warehouse or args.warehouse or "_Test Warehouse 1 - _TC"
-	)
+	return_doc.supplier_warehouse = args.supplier_warehouse or args.warehouse or "_Test Warehouse 1 - _TC"
 
 	if args.qty:
 		for item in return_doc.items:

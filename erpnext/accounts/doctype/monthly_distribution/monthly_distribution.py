@@ -54,9 +54,7 @@ class MonthlyDistribution(Document):
 		total = sum(flt(d.percentage_allocation) for d in self.get("percentages"))
 
 		if flt(total, 2) != 100.0:
-			frappe.throw(
-				_("Percentage Allocation should be equal to 100%") + " ({0}%)".format(str(flt(total, 2)))
-			)
+			frappe.throw(_("Percentage Allocation should be equal to 100%") + f" ({flt(total, 2)!s}%)")
 
 
 def get_periodwise_distribution_data(distribution_id, period_list, periodicity):

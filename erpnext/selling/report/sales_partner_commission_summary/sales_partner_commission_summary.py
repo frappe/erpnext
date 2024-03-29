@@ -75,16 +75,14 @@ def get_entries(filters):
 	entries = frappe.db.sql(
 		"""
 		SELECT
-			name, customer, territory, {0} as posting_date, base_net_total as amount,
+			name, customer, territory, {} as posting_date, base_net_total as amount,
 			sales_partner, commission_rate, total_commission
 		FROM
-			`tab{1}`
+			`tab{}`
 		WHERE
-			{2} and docstatus = 1 and sales_partner is not null
+			{} and docstatus = 1 and sales_partner is not null
 			and sales_partner != '' order by name desc, sales_partner
-		""".format(
-			date_field, filters.get("doctype"), conditions
-		),
+		""".format(date_field, filters.get("doctype"), conditions),
 		filters,
 		as_dict=1,
 	)
@@ -97,15 +95,15 @@ def get_conditions(filters, date_field):
 
 	for field in ["company", "customer", "territory"]:
 		if filters.get(field):
-			conditions += " and {0} = %({1})s".format(field, field)
+			conditions += f" and {field} = %({field})s"
 
 	if filters.get("sales_partner"):
 		conditions += " and sales_partner = %(sales_partner)s"
 
 	if filters.get("from_date"):
-		conditions += " and {0} >= %(from_date)s".format(date_field)
+		conditions += f" and {date_field} >= %(from_date)s"
 
 	if filters.get("to_date"):
-		conditions += " and {0} <= %(to_date)s".format(date_field)
+		conditions += f" and {date_field} <= %(to_date)s"
 
 	return conditions

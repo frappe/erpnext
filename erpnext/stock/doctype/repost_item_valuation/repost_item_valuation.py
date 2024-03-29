@@ -63,7 +63,7 @@ class RepostItemValuation(Document):
 		frappe.db.delete(
 			table,
 			filters=(
-				(table.modified < (Now() - Interval(days=days)))
+				(table.creation < (Now() - Interval(days=days)))
 				& (table.status.isin(["Completed", "Skipped"]))
 			),
 		)
@@ -144,15 +144,12 @@ class RepostItemValuation(Document):
 		if not acc_settings.acc_frozen_upto:
 			return
 		if getdate(self.posting_date) <= getdate(acc_settings.acc_frozen_upto):
-			if (
+			if acc_settings.frozen_accounts_modifier and frappe.session.user in get_users_with_role(
 				acc_settings.frozen_accounts_modifier
-				and frappe.session.user in get_users_with_role(acc_settings.frozen_accounts_modifier)
 			):
 				frappe.msgprint(_("Caution: This might alter frozen accounts."))
 				return
-			frappe.throw(
-				_("You cannot repost item valuation before {}").format(acc_settings.acc_frozen_upto)
-			)
+			frappe.throw(_("You cannot repost item valuation before {}").format(acc_settings.acc_frozen_upto))
 
 	def reset_field_values(self):
 		if self.based_on == "Transaction":

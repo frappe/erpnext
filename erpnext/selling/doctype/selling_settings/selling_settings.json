@@ -214,7 +214,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-01 12:07:39.994520",
+ "modified": "2024-03-27 13:10:38.633352",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -239,7 +239,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

@@ -55,6 +55,11 @@ class ItemPrice(Document):
 		if not frappe.db.exists("Item", self.item_code):
 			frappe.throw(_("Item {0} not found.").format(self.item_code))
 
+		if self.uom and not frappe.db.exists(
+			"UOM Conversion Detail", {"parenttype": "Item", "parent": self.item_code, "uom": self.uom}
+		):
+			frappe.throw(_("UOM {0} not found in Item {1}").format(self.uom, self.item_code))
+
 	def update_price_list_details(self):
 		if self.price_list:
 			price_list_details = frappe.db.get_value(
@@ -63,7 +68,7 @@ class ItemPrice(Document):
 
 			if not price_list_details:
 				link = frappe.utils.get_link_to_form("Price List", self.price_list)
-				frappe.throw("The price list {0} does not exist or is disabled".format(link))
+				frappe.throw(f"The price list {link} does not exist or is disabled")
 
 			self.buying, self.selling, self.currency = price_list_details
 
@@ -80,7 +85,6 @@ class ItemPrice(Document):
 			frappe.throw(_(msg))
 
 	def check_duplicates(self):
-
 		item_price = frappe.qb.DocType("Item Price")
 
 		query = (

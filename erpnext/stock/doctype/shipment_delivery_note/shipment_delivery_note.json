@@ -27,14 +27,15 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-12-02 15:44:34.028703",
+ "modified": "2024-03-27 13:10:41.282195",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment Delivery Note",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

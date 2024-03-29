@@ -19,14 +19,15 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-02-18 13:18:57.810536",
+ "modified": "2024-03-27 13:10:59.786446",
  "modified_by": "Administrator",
  "module": "Portal",
  "name": "Website Attribute",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

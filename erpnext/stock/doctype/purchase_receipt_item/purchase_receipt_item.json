@@ -1112,7 +1112,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-04 11:48:06.653771",
+ "modified": "2024-03-27 13:10:25.896543",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
@@ -1120,7 +1120,7 @@
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

@@ -23,7 +23,7 @@ class InstallationNote(TransactionBase):
 			InstallationNoteItem,
 		)
 
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		company: DF.Link
 		contact_display: DF.SmallText | None
@@ -38,13 +38,14 @@ class InstallationNote(TransactionBase):
 		inst_time: DF.Time | None
 		items: DF.Table[InstallationNoteItem]
 		naming_series: DF.Literal["MAT-INS-.YYYY.-"]
+		project: DF.Link | None
 		remarks: DF.SmallText | None
 		status: DF.Literal["Draft", "Submitted", "Cancelled"]
 		territory: DF.Link
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(InstallationNote, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.status_updater = [
 			{
 				"source_dt": "Installation Note Item",

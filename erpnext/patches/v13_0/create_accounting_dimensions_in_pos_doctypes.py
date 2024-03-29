@@ -15,14 +15,12 @@ def execute():
 
 	count = 1
 	for d in accounting_dimensions:
-
 		if count % 2 == 0:
 			insert_after_field = "dimension_col_break"
 		else:
 			insert_after_field = "accounting_dimensions_section"
 
 		for doctype in ["POS Invoice", "POS Invoice Item"]:
-
 			field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": d.fieldname})
 
 			if field:

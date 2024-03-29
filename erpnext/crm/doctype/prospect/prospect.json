@@ -218,7 +218,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2022-10-13 12:29:33.674561",
+ "modified": "2024-03-27 13:10:22.771484",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect",
@@ -258,7 +258,7 @@
    "share": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "company_name",

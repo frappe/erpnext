@@ -1,5 +1,4 @@
 import unittest
-from typing import List, Tuple
 
 import frappe
 
@@ -14,7 +13,7 @@ DEFAULT_FILTERS = {
 
 batch = frappe.db.get_value("Batch", fieldname=["name"], as_dict=True, order_by="creation desc")
 
-REPORT_FILTER_TEST_CASES: List[Tuple[ReportName, ReportFilters]] = [
+REPORT_FILTER_TEST_CASES: list[tuple[ReportName, ReportFilters]] = [
 	("Stock Ledger", {"_optional": True}),
 	("Stock Ledger", {"batch_no": batch}),
 	("Stock Ledger", {"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"}),

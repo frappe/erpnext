@@ -1,14 +1,11 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from datetime import datetime
-from typing import Union
-
 import frappe
 from frappe.model.document import Document
 from frappe.utils import getdate
 
-from erpnext.accounts.doctype.subscription.subscription import process_all
+from erpnext.accounts.doctype.subscription.subscription import DateTimeLikeObject, process_all
 
 
 class ProcessSubscription(Document):
@@ -30,7 +27,7 @@ class ProcessSubscription(Document):
 
 
 def create_subscription_process(
-	subscription: str | None = None, posting_date: Union[str, datetime.date] | None = None
+	subscription: str | None = None, posting_date: DateTimeLikeObject | None = None
 ):
 	"""Create a new Process Subscription document"""
 	doc = frappe.new_doc("Process Subscription")

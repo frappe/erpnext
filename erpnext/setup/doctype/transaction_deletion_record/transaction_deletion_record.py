@@ -43,7 +43,7 @@ class TransactionDeletionRecord(Document):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(TransactionDeletionRecord, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.batch_size = 5000
 		# Tasks are listed by their execution order
 		self.task_to_internal_method_map = OrderedDict(
@@ -157,7 +157,7 @@ class TransactionDeletionRecord(Document):
 			if task := getattr(self, method, None):
 				try:
 					task()
-				except Exception as err:
+				except Exception:
 					frappe.db.rollback()
 					traceback = frappe.get_traceback(with_context=True)
 					if traceback:
@@ -177,7 +177,7 @@ class TransactionDeletionRecord(Document):
 		for doctype in doctypes_to_be_ignored_list:
 			self.append("doctypes_to_be_ignored", {"doctype_name": doctype})
 
-	def validate_running_task_for_doc(self, job_names: list = None):
+	def validate_running_task_for_doc(self, job_names: list | None = None):
 		# at most only one task should be runnning
 		running_tasks = []
 		for x in job_names:
@@ -226,9 +226,7 @@ class TransactionDeletionRecord(Document):
 			if leads:
 				addresses = frappe.db.sql_list(
 					"""select parent from `tabDynamic Link` where link_name
-					in ({leads})""".format(
-						leads=",".join(leads)
-					)
+					in ({leads})""".format(leads=",".join(leads))
 				)
 
 				if addresses:
@@ -238,16 +236,12 @@ class TransactionDeletionRecord(Document):
 						"""delete from `tabAddress` where name in ({addresses}) and
 						name not in (select distinct dl1.parent from `tabDynamic Link` dl1
 						inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent
-						and dl1.link_doctype<>dl2.link_doctype)""".format(
-							addresses=",".join(addresses)
-						)
+						and dl1.link_doctype<>dl2.link_doctype)""".format(addresses=",".join(addresses))
 					)
 
 					frappe.db.sql(
 						"""delete from `tabDynamic Link` where link_doctype='Lead'
-						and parenttype='Address' and link_name in ({leads})""".format(
-							leads=",".join(leads)
-						)
+						and parenttype='Address' and link_name in ({leads})""".format(leads=",".join(leads))
 					)
 
 				frappe.db.sql(
@@ -289,9 +283,9 @@ class TransactionDeletionRecord(Document):
 		self.validate_doc_status()
 		if not self.delete_transactions:
 			doctypes_to_be_ignored_list = self.get_doctypes_to_be_ignored_list()
-			docfields = self.get_doctypes_with_company_field(doctypes_to_be_ignored_list)
+			self.get_doctypes_with_company_field(doctypes_to_be_ignored_list)
 
-			tables = self.get_all_child_doctypes()
+			self.get_all_child_doctypes()
 			for docfield in self.doctypes:
 				if docfield.doctype_name != self.doctype and not docfield.done:
 					no_of_docs = self.get_number_of_docs_linked_with_specified_company(
@@ -299,7 +293,9 @@ class TransactionDeletionRecord(Document):
 					)
 					if no_of_docs > 0:
 						reference_docs = frappe.get_all(
-							docfield.doctype_name, filters={docfield.docfield_name: self.company}, limit=self.batch_size
+							docfield.doctype_name,
+							filters={docfield.docfield_name: self.company},
+							limit=self.batch_size,
 						)
 						reference_doc_names = [r.name for r in reference_docs]
 
@@ -308,7 +304,9 @@ class TransactionDeletionRecord(Document):
 						self.delete_comments(docfield.doctype_name, reference_doc_names)
 						self.unlink_attachments(docfield.doctype_name, reference_doc_names)
 						self.delete_child_tables(docfield.doctype_name, reference_doc_names)
-						self.delete_docs_linked_with_specified_company(docfield.doctype_name, reference_doc_names)
+						self.delete_docs_linked_with_specified_company(
+							docfield.doctype_name, reference_doc_names
+						)
 						processed = int(docfield.no_of_docs) + len(reference_doc_names)
 						frappe.db.set_value(docfield.doctype, docfield.name, "no_of_docs", processed)
 					else:
@@ -385,10 +383,8 @@ class TransactionDeletionRecord(Document):
 		else:
 			prefix, hashes = naming_series.rsplit("{", 1)
 		last = frappe.db.sql(
-			"""select max(name) from `tab{0}`
-						where name like %s""".format(
-				doctype_name
-			),
+			f"""select max(name) from `tab{doctype_name}`
+						where name like %s""",
 			prefix + "%",
 		)
 		if last and last[0][0]:
@@ -418,17 +414,11 @@ class TransactionDeletionRecord(Document):
 			frappe.delete_doc("Communication", batch, ignore_permissions=True)
 
 	def delete_comments(self, doctype, reference_doc_names):
-		comments = frappe.get_all(
-			"Comment",
-			filters={"reference_doctype": doctype, "reference_name": ["in", reference_doc_names]},
-		)
-		comment_names = [c.name for c in comments]
-
-		if not comment_names:
-			return
-
-		for batch in create_batch(comment_names, self.batch_size):
-			frappe.delete_doc("Comment", batch, ignore_permissions=True)
+		if reference_doc_names:
+			comment = qb.DocType("Comment")
+			qb.from_(comment).delete().where(
+				(comment.reference_doctype == doctype) & (comment.reference_name.isin(reference_doc_names))
+			).run()
 
 	def unlink_attachments(self, doctype, reference_doc_names):
 		files = frappe.get_all(
@@ -496,12 +486,7 @@ def is_deletion_doc_running(company: str | None = None, err_msg: str | None = No
 def check_for_running_deletion_job(doc, method=None):
 	# Check if DocType has 'company' field
 	df = qb.DocType("DocField")
-	if (
-		not_allowed := qb.from_(df)
-		.select(df.parent)
-		.where((df.fieldname == "company") & (df.parent == doc.doctype))
-		.run()
-	):
+	if qb.from_(df).select(df.parent).where((df.fieldname == "company") & (df.parent == doc.doctype)).run():
 		is_deletion_doc_running(
 			doc.company, _("Cannot make any transactions until the deletion job is completed")
 		)

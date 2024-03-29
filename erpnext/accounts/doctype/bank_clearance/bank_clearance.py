@@ -127,7 +127,7 @@ def get_payment_entries_for_bank_clearance(
 		condition = "and (clearance_date IS NULL or clearance_date='0000-00-00')"
 
 	journal_entries = frappe.db.sql(
-		"""
+		f"""
 			select
 				"Journal Entry" as payment_document, t1.name as payment_entry,
 				t1.cheque_no as cheque_number, t1.cheque_date,
@@ -141,9 +141,7 @@ def get_payment_entries_for_bank_clearance(
 				and ifnull(t1.is_opening, 'No') = 'No' {condition}
 			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
-		""".format(
-			condition=condition
-		),
+		""",
 		{"account": account, "from": from_date, "to": to_date},
 		as_dict=1,
 	)
@@ -152,7 +150,7 @@ def get_payment_entries_for_bank_clearance(
 		condition += "and bank_account = %(bank_account)s"
 
 	payment_entries = frappe.db.sql(
-		"""
+		f"""
 			select
 				"Payment Entry" as payment_document, name as payment_entry,
 				reference_no as cheque_number, reference_date as cheque_date,
@@ -167,9 +165,7 @@ def get_payment_entries_for_bank_clearance(
 				{condition}
 			order by
 				posting_date ASC, name DESC
-		""".format(
-			condition=condition
-		),
+		""",
 		{
 			"account": account,
 			"from": from_date,
@@ -239,10 +235,7 @@ def get_payment_entries_for_bank_clearance(
 		).run(as_dict=True)
 
 	entries = (
-		list(payment_entries)
-		+ list(journal_entries)
-		+ list(pos_sales_invoices)
-		+ list(pos_purchase_invoices)
+		list(payment_entries) + list(journal_entries) + list(pos_sales_invoices) + list(pos_purchase_invoices)
 	)
 
 	return entries

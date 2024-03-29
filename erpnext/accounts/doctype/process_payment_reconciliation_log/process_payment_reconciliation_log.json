@@ -110,7 +110,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-02 11:32:12.254018",
+ "modified": "2024-03-27 13:10:18.769659",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation Log",
@@ -143,7 +143,7 @@
   }
  ],
  "search_fields": "allocated, reconciled, total_allocations, reconciled_entries",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
