@@ -273,7 +273,8 @@ class SerialandBatchBundle(Document):
 
 	def validate_negative_batch(self, batch_no, available_qty):
 		if available_qty < 0:
-			msg = f"""Batch No {bold(batch_no)} has negative stock
+			msg = f"""Batch No {bold(batch_no)} of an Item {bold(self.item_code)}
+				has negative stock
 				of quantity {bold(available_qty)} in the
 				warehouse {self.warehouse}"""
 
