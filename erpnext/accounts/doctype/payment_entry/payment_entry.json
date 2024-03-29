@@ -576,6 +576,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Payment Order Status",
+   "no_copy": 1,
    "options": "Initiated\nPayment Ordered",
    "read_only": 1
   },
