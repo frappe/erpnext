@@ -117,10 +117,10 @@ class TestBatch(FrappeTestCase):
 		self.assertTrue(receipt2.items[0].serial_and_batch_bundle)
 
 		batchwise_qty = frappe._dict({})
-		for receipt in [receipt, receipt2]:
-			batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
-			key = (batch_no, receipt.items[0].warehouse)
-			batchwise_qty[key] = receipt.items[0].qty
+		for r in [receipt, receipt2]:
+			batch_no = get_batch_from_bundle(r.items[0].serial_and_batch_bundle)
+			key = (batch_no, r.items[0].warehouse)
+			batchwise_qty[key] = r.items[0].qty
 
 		batches = get_batch_qty(batch_no)
 		for d in batches:
@@ -156,9 +156,7 @@ class TestBatch(FrappeTestCase):
 
 		bundle = stock_entry.items[0].serial_and_batch_bundle
 		self.assertTrue(bundle)
-		self.assertEqual(
-			get_batch_qty(get_batch_from_bundle(bundle), stock_entry.items[0].t_warehouse), 90
-		)
+		self.assertEqual(get_batch_qty(get_batch_from_bundle(bundle), stock_entry.items[0].t_warehouse), 90)
 
 	def test_delivery_note(self):
 		"""Test automatic batch selection for outgoing items"""
@@ -543,9 +541,7 @@ class TestBatch(FrappeTestCase):
 			get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle),
 		)
 
-		self.assertEqual(
-			"BATCHEXISTING002", get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle)
-		)
+		self.assertEqual("BATCHEXISTING002", get_batch_from_bundle(pr_2.items[0].serial_and_batch_bundle))
 
 
 def create_batch(item_code, rate, create_item_price_for_batch):

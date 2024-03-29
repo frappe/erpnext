@@ -49,30 +49,35 @@ class SalesPartner(WebsiteGenerator):
 	def validate(self):
 		if not self.route:
 			self.route = "partners/" + self.scrub(self.partner_name)
-		super(SalesPartner, self).validate()
+		super().validate()
 		if self.partner_website and not self.partner_website.startswith("http"):
 			self.partner_website = "http://" + self.partner_website
 
 	def get_context(self, context):
-		address = frappe.db.get_value(
-			"Address", {"sales_partner": self.name, "is_primary_address": 1}, "*", as_dict=True
+		address_names = frappe.db.get_all(
+			"Dynamic Link",
+			filters={"link_doctype": "Sales Partner", "link_name": self.name, "parenttype": "Address"},
+			pluck=["parent"],
 		)
-		if address:
-			city_state = ", ".join(filter(None, [address.city, address.state]))
-			address_rows = [
-				address.address_line1,
-				address.address_line2,
-				city_state,
-				address.pincode,
-				address.country,
-			]
 
-			context.update(
+		addresses = []
+		for address_name in address_names:
+			address_doc = frappe.get_doc("Address", address_name)
+			city_state = ", ".join([item for item in [address_doc.city, address_doc.state] if item])
+			address_rows = [
+				address_doc.address_line1,
+				address_doc.address_line2,
+				city_state,
+				address_doc.pincode,
+				address_doc.country,
+			]
+			addresses.append(
 				{
-					"email": address.email_id,
+					"email": address_doc.email_id,
 					"partner_address": filter_strip_join(address_rows, "\n<br>"),
-					"phone": filter_strip_join(cstr(address.phone).split(","), "\n<br>"),
+					"phone": filter_strip_join(cstr(address_doc.phone).split(","), "\n<br>"),
 				}
 			)
 
+		context["addresses"] = addresses
 		return context

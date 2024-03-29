@@ -38,9 +38,7 @@ def execute():
 		if correct_sr_no == sle.serial_no:
 			continue
 
-		frappe.db.set_value(
-			"Stock Ledger Entry", sle.name, "serial_no", correct_sr_no, update_modified=False
-		)
+		frappe.db.set_value("Stock Ledger Entry", sle.name, "serial_no", correct_sr_no, update_modified=False)
 		broken_serial_nos.update(serial_no_list)
 
 	if not broken_serial_nos:

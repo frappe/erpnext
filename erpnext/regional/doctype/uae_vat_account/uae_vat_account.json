@@ -22,14 +22,15 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-28 12:02:56.444007",
+ "modified": "2024-03-27 13:10:55.699335",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "UAE VAT Account",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

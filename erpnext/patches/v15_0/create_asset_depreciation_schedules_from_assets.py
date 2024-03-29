@@ -57,7 +57,7 @@ def group_records_by_asset_name(records):
 	grouped_dict = {}
 
 	for item in records:
-		key = list(item.keys())[0]
+		key = next(iter(item.keys()))
 		value = item[key]
 
 		if value not in grouped_dict:

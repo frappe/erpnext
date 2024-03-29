@@ -250,9 +250,7 @@ def get_bin_list(filters):
 		query = query.where(bin.item_code == filters.item_code)
 
 	if filters.warehouse:
-		warehouse_details = frappe.db.get_value(
-			"Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1
-		)
+		warehouse_details = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"], as_dict=1)
 
 		if warehouse_details:
 			wh = frappe.qb.DocType("Warehouse")
@@ -286,7 +284,9 @@ def get_item_map(item_code, include_uom):
 			(item.is_stock_item == 1)
 			& (item.disabled == 0)
 			& (
-				(item.end_of_life > today()) | (item.end_of_life.isnull()) | (item.end_of_life == "0000-00-00")
+				(item.end_of_life > today())
+				| (item.end_of_life.isnull())
+				| (item.end_of_life == "0000-00-00")
 			)
 			& (ExistsCriterion(frappe.qb.from_(bin).select(bin.name).where(bin.item_code == item.name)))
 		)

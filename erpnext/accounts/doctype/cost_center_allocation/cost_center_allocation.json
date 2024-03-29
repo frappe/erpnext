@@ -68,11 +68,10 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-01-31 11:47:12.086253",
+ "modified": "2024-03-27 13:06:46.938642",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center Allocation",
- "name_case": "UPPER CASE",
  "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
@@ -122,7 +121,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

@@ -824,7 +824,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2024-01-24 02:20:26.145996",
+ "modified": "2024-03-27 13:09:36.900706",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
@@ -868,7 +868,7 @@
  ],
  "search_fields": "employee_name",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "employee_name"

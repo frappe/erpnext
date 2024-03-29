@@ -39,9 +39,7 @@ def correct_value_for_assets_with_manual_depr_entries():
 			asset.opening_accumulated_depreciation.as_("opening_accumulated_depreciation"),
 			Sum(gle.debit).as_("depr_amount"),
 		)
-		.where(
-			gle.account == IfNull(aca.depreciation_expense_account, company.depreciation_expense_account)
-		)
+		.where(gle.account == IfNull(aca.depreciation_expense_account, company.depreciation_expense_account))
 		.where(gle.debit != 0)
 		.where(gle.is_cancelled == 0)
 		.where(asset.docstatus == 1)
@@ -80,9 +78,7 @@ def correct_value_for_assets_with_auto_depr(fb_name=None):
 			asset.opening_accumulated_depreciation.as_("opening_accumulated_depreciation"),
 			Sum(gle.debit).as_("depr_amount"),
 		)
-		.where(
-			gle.account == IfNull(aca.depreciation_expense_account, company.depreciation_expense_account)
-		)
+		.where(gle.account == IfNull(aca.depreciation_expense_account, company.depreciation_expense_account))
 		.where(gle.debit != 0)
 		.where(gle.is_cancelled == 0)
 		.where(asset.docstatus == 1)

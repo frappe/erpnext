@@ -12,7 +12,9 @@ class TestProjectTemplate(unittest.TestCase):
 	pass
 
 
-def make_project_template(project_template_name, project_tasks=[]):
+def make_project_template(project_template_name, project_tasks=None):
+	if project_tasks is None:
+		project_tasks = []
 	if not frappe.db.exists("Project Template", project_template_name):
 		project_tasks = project_tasks or [
 			create_task(subject="_Test Template Task 1", is_template=1, begin=0, duration=3),

@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, getdate, today
+from frappe.utils import getdate, today
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.financial_statements import get_period_list
@@ -61,7 +61,7 @@ class TestProfitAndLossStatement(AccountsTestMixin, FrappeTestCase):
 		)
 
 	def test_profit_and_loss_output_and_summary(self):
-		si = self.create_sales_invoice(qty=1, rate=150)
+		self.create_sales_invoice(qty=1, rate=150)
 
 		filters = self.get_report_filters()
 		period_list = get_period_list(
@@ -75,9 +75,7 @@ class TestProfitAndLossStatement(AccountsTestMixin, FrappeTestCase):
 		)
 
 		result = execute(filters)[1]
-		current_period = [x for x in period_list if x.from_date <= getdate() and x.to_date >= getdate()][
-			0
-		]
+		current_period = next(x for x in period_list if x.from_date <= getdate() and x.to_date >= getdate())
 		current_period_key = current_period.key
 		without_current_period = [x for x in period_list if x.key != current_period.key]
 		# all period except current period(whence invoice was posted), should be '0'

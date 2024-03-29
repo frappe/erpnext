@@ -182,7 +182,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Supplier Address Details",
    "read_only": 1
   },
@@ -230,7 +230,7 @@
   },
   {
    "fieldname": "shipping_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address Details",
    "print_hide": 1,
    "read_only": 1
@@ -243,7 +243,7 @@
   },
   {
    "fieldname": "billing_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Billing Address Details",
    "read_only": 1
   },
@@ -454,7 +454,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-03 20:56:04.670380",
+ "modified": "2024-03-27 13:10:46.060843",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order",
@@ -503,7 +503,7 @@
  ],
  "search_fields": "status, transaction_date, supplier",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",

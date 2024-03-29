@@ -5,7 +5,6 @@ import frappe
 
 
 def execute():
-
 	job_card = frappe.qb.DocType("Job Card")
 	(
 		frappe.qb.update(job_card)

@@ -52,7 +52,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-02-15 13:00:50.379713",
+ "modified": "2024-03-27 13:10:08.752476",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Party Specific Item",
@@ -71,7 +71,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "party",

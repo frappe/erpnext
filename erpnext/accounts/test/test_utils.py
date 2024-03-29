@@ -10,7 +10,6 @@ from erpnext.accounts.utils import (
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
 	sort_stock_vouchers_by_posting_date,
-	update_reference_in_payment_entry,
 )
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
@@ -20,7 +19,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 class TestUtils(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		super(TestUtils, cls).setUpClass()
+		super().setUpClass()
 		make_test_objects("Address", ADDRESS_RECORDS)
 
 	@classmethod
@@ -36,7 +35,6 @@ class TestUtils(unittest.TestCase):
 		self.assertEqual(address, "_Test Shipping Address 2 Title-Shipping")
 
 	def test_get_voucher_wise_gl_entry(self):
-
 		pr = make_purchase_receipt(
 			item_code="_Test Item",
 			posting_date="2021-02-01",
@@ -144,12 +142,8 @@ class TestUtils(unittest.TestCase):
 		frappe.db.set_default("supp_master_name", "Auto Name")
 
 		# Configure Autoname in Supplier DocType
-		make_property_setter(
-			"Supplier", None, "naming_rule", "Expression", "Data", for_doctype="Doctype"
-		)
-		make_property_setter(
-			"Supplier", None, "autoname", "SUP-.FY.-.#####", "Data", for_doctype="Doctype"
-		)
+		make_property_setter("Supplier", None, "naming_rule", "Expression", "Data", for_doctype="Doctype")
+		make_property_setter("Supplier", None, "autoname", "SUP-.FY.-.#####", "Data", for_doctype="Doctype")
 
 		fiscal_year = get_fiscal_year(nowdate())[0]
 
@@ -171,9 +165,7 @@ ADDRESS_RECORDS = [
 		"address_title": "_Test Billing Address Title",
 		"city": "Lagos",
 		"country": "Nigeria",
-		"links": [
-			{"link_doctype": "Customer", "link_name": "_Test Customer 2", "doctype": "Dynamic Link"}
-		],
+		"links": [{"link_doctype": "Customer", "link_name": "_Test Customer 2", "doctype": "Dynamic Link"}],
 	},
 	{
 		"doctype": "Address",
@@ -182,9 +174,7 @@ ADDRESS_RECORDS = [
 		"address_title": "_Test Shipping Address 1 Title",
 		"city": "Lagos",
 		"country": "Nigeria",
-		"links": [
-			{"link_doctype": "Customer", "link_name": "_Test Customer 2", "doctype": "Dynamic Link"}
-		],
+		"links": [{"link_doctype": "Customer", "link_name": "_Test Customer 2", "doctype": "Dynamic Link"}],
 	},
 	{
 		"doctype": "Address",
@@ -194,9 +184,7 @@ ADDRESS_RECORDS = [
 		"city": "Lagos",
 		"country": "Nigeria",
 		"is_shipping_address": "1",
-		"links": [
-			{"link_doctype": "Customer", "link_name": "_Test Customer 2", "doctype": "Dynamic Link"}
-		],
+		"links": [{"link_doctype": "Customer", "link_name": "_Test Customer 2", "doctype": "Dynamic Link"}],
 	},
 	{
 		"doctype": "Address",
@@ -206,8 +194,6 @@ ADDRESS_RECORDS = [
 		"city": "Lagos",
 		"country": "Nigeria",
 		"is_shipping_address": "1",
-		"links": [
-			{"link_doctype": "Customer", "link_name": "_Test Customer 1", "doctype": "Dynamic Link"}
-		],
+		"links": [{"link_doctype": "Customer", "link_name": "_Test Customer 1", "doctype": "Dynamic Link"}],
 	},
 ]

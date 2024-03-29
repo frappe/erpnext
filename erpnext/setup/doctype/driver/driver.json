@@ -129,11 +129,10 @@
  ],
  "icon": "fa fa-user",
  "links": [],
- "modified": "2024-01-23 21:47:12.507540",
+ "modified": "2024-03-27 13:08:18.825438",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Driver",
- "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -189,7 +188,7 @@
  "quick_entry": 1,
  "search_fields": "full_name",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "full_name",

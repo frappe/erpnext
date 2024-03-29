@@ -400,7 +400,7 @@ frappe.ui.form.on("BOM", {
 	},
 
 	rm_cost_as_per(frm) {
-		if (in_list(["Valuation Rate", "Last Purchase Rate"], frm.doc.rm_cost_as_per)) {
+		if (["Valuation Rate", "Last Purchase Rate"].includes(frm.doc.rm_cost_as_per)) {
 			frm.set_value("plc_conversion_rate", 1.0);
 		}
 	},

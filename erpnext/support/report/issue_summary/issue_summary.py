@@ -13,7 +13,7 @@ def execute(filters=None):
 	return IssueSummary(filters).run()
 
 
-class IssueSummary(object):
+class IssueSummary:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 
@@ -41,7 +41,13 @@ class IssueSummary(object):
 
 		elif self.filters.based_on == "Assigned To":
 			self.columns.append(
-				{"label": _("User"), "fieldname": "user", "fieldtype": "Link", "options": "User", "width": 200}
+				{
+					"label": _("User"),
+					"fieldname": "user",
+					"fieldtype": "Link",
+					"options": "User",
+					"width": 200,
+				}
 			)
 
 		elif self.filters.based_on == "Issue Type":
@@ -84,9 +90,7 @@ class IssueSummary(object):
 		}
 
 		for label, fieldname in self.sla_status_map.items():
-			self.columns.append(
-				{"label": _(label), "fieldname": fieldname, "fieldtype": "Int", "width": 100}
-			)
+			self.columns.append({"label": _(label), "fieldname": fieldname, "fieldtype": "Int", "width": 100})
 
 		self.metrics = [
 			"Avg First Response Time",
@@ -185,8 +189,12 @@ class IssueSummary(object):
 				if d._assign:
 					for entry in json.loads(d._assign):
 						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(status, 0.0)
-						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(agreement_status, 0.0)
-						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault("total_issues", 0.0)
+						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(
+							agreement_status, 0.0
+						)
+						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(
+							"total_issues", 0.0
+						)
 						self.issue_summary_data[entry][status] += 1
 						self.issue_summary_data[entry][agreement_status] += 1
 						self.issue_summary_data[entry]["total_issues"] += 1
@@ -229,14 +237,20 @@ class IssueSummary(object):
 					if d._assign:
 						for entry in json.loads(d._assign):
 							for metric in metrics_list:
-								self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(metric, 0.0)
+								self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(
+									metric, 0.0
+								)
 
-							self.issue_summary_data[entry]["avg_response_time"] += d.get("avg_response_time") or 0.0
+							self.issue_summary_data[entry]["avg_response_time"] += (
+								d.get("avg_response_time") or 0.0
+							)
 							self.issue_summary_data[entry]["avg_first_response_time"] += (
 								d.get("first_response_time") or 0.0
 							)
 							self.issue_summary_data[entry]["avg_hold_time"] += d.get("total_hold_time") or 0.0
-							self.issue_summary_data[entry]["avg_resolution_time"] += d.get("resolution_time") or 0.0
+							self.issue_summary_data[entry]["avg_resolution_time"] += (
+								d.get("resolution_time") or 0.0
+							)
 							self.issue_summary_data[entry]["avg_user_resolution_time"] += (
 								d.get("user_resolution_time") or 0.0
 							)
@@ -251,9 +265,9 @@ class IssueSummary(object):
 
 			else:
 				data = frappe.db.sql(
-					"""
+					f"""
 					SELECT
-						{0}, AVG(first_response_time) as avg_frt,
+						{field}, AVG(first_response_time) as avg_frt,
 						AVG(avg_response_time) as avg_resp_time,
 						AVG(total_hold_time) as avg_hold_time,
 						AVG(resolution_time) as avg_resolution_time,
@@ -261,10 +275,8 @@ class IssueSummary(object):
 					FROM `tabIssue`
 					WHERE
 						name IN %(issues)s
-					GROUP BY {0}
-				""".format(
-						field
-					),
+					GROUP BY {field}
+				""",
 					{"issues": issues},
 					as_dict=1,
 				)

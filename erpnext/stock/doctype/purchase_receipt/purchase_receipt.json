@@ -313,7 +313,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "read_only": 1
   },
@@ -352,7 +352,7 @@
   },
   {
    "fieldname": "shipping_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address",
    "print_hide": 1,
    "read_only": 1
@@ -651,7 +651,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1095,7 +1095,7 @@
   },
   {
    "fieldname": "billing_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Billing Address",
    "read_only": 1
   },
@@ -1252,7 +1252,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-18 17:26:41.279663",
+ "modified": "2024-03-27 13:10:25.441066",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
@@ -1315,7 +1315,7 @@
  ],
  "search_fields": "status, posting_date, supplier",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",

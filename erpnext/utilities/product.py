@@ -61,7 +61,9 @@ def get_price(item_code, price_list, customer_group, company, qty=1, party=None)
 				if pricing_rule.pricing_rule_for == "Rate":
 					rate_discount = flt(mrp) - flt(pricing_rule.price_list_rate)
 					if rate_discount > 0:
-						price_obj.formatted_discount_rate = fmt_money(rate_discount, currency=price_obj["currency"])
+						price_obj.formatted_discount_rate = fmt_money(
+							rate_discount, currency=price_obj["currency"]
+						)
 					price_obj.price_list_rate = pricing_rule.price_list_rate or 0
 
 			if price_obj:
@@ -131,7 +133,7 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 		else:
 			variant_of_query = ""
 
-		query = """
+		query = f"""
 			SELECT
 				t1.parent
 			FROM
@@ -154,9 +156,7 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 				t1.parent
 			ORDER BY
 				NULL
-		""".format(
-			attribute_query=attribute_query, variant_of_query=variant_of_query
-		)
+		"""
 
 		item_codes = set([r[0] for r in frappe.db.sql(query, query_values)])
 		items.append(item_codes)

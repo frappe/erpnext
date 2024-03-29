@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-05-26 20:46:57.999300",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -15,14 +16,16 @@
   }
  ],
  "istable": 1,
- "modified": "2019-05-26 20:49:01.328146",
+ "links": [],
+ "modified": "2024-03-27 13:10:29.623622",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting Agenda",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

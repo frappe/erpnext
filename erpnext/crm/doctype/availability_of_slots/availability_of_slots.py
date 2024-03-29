@@ -15,9 +15,7 @@ class AvailabilityOfSlots(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		day_of_week: DF.Literal[
-			"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
-		]
+		day_of_week: DF.Literal["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 		from_time: DF.Time
 		parent: DF.Data
 		parentfield: DF.Data

@@ -23,9 +23,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		)
 
 	def test_current_asset_value(self):
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)
@@ -52,9 +50,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		self.assertEqual(current_value, 100000.0)
 
 	def test_asset_depreciation_value_adjustment(self):
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)
@@ -75,7 +71,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		asset_doc.submit()
 
 		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset_doc.name, "Active")
-		self.assertEquals(first_asset_depr_schedule.status, "Active")
+		self.assertEqual(first_asset_depr_schedule.status, "Active")
 
 		post_depreciation_entries(getdate("2023-08-21"))
 
@@ -92,8 +88,8 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		first_asset_depr_schedule.load_from_db()
 
 		second_asset_depr_schedule = get_asset_depr_schedule_doc(asset_doc.name, "Active")
-		self.assertEquals(second_asset_depr_schedule.status, "Active")
-		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
+		self.assertEqual(second_asset_depr_schedule.status, "Active")
+		self.assertEqual(first_asset_depr_schedule.status, "Cancelled")
 
 		expected_gle = (
 			("_Test Accumulated Depreciations - _TC", 0.0, 4625.29),

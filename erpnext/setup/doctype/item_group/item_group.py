@@ -47,7 +47,7 @@ class ItemGroup(NestedSet):
 					frappe.throw(
 						_("{0} entered twice {1} in Item Taxes").format(
 							frappe.bold(d.item_tax_template),
-							"for tax category {0}".format(frappe.bold(d.tax_category)) if d.tax_category else "",
+							f"for tax category {frappe.bold(d.tax_category)}" if d.tax_category else "",
 						)
 					)
 				else:

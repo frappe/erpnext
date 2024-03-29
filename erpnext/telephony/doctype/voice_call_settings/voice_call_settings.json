@@ -53,7 +53,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-14 18:49:34.600194",
+ "modified": "2024-03-27 13:10:59.080888",
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Voice Call Settings",
@@ -118,7 +118,8 @@
    "share": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

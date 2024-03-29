@@ -208,7 +208,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 5,
- "modified": "2023-11-09 12:17:28.339975",
+ "modified": "2024-03-27 13:06:38.677265",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
@@ -230,7 +230,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "batch_id",

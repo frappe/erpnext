@@ -58,9 +58,7 @@ class TransactionBase(StatusUpdater):
 
 	def compare_values(self, ref_doc, fields, doc=None):
 		for reference_doctype, ref_dn_list in ref_doc.items():
-			prev_doc_detail_map = self.get_prev_doc_reference_details(
-				ref_dn_list, reference_doctype, fields
-			)
+			prev_doc_detail_map = self.get_prev_doc_reference_details(ref_dn_list, reference_doctype, fields)
 			for reference_name in ref_dn_list:
 				prevdoc_values = prev_doc_detail_map.get(reference_name)
 				if not prevdoc_values:

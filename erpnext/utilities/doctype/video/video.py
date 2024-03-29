@@ -112,9 +112,7 @@ def get_id_from_url(url):
 	if not isinstance(url, str):
 		frappe.throw(_("URL can only be a string"), title=_("Invalid URL"))
 
-	pattern = re.compile(
-		r'[a-z\:\//\.]+(youtube|youtu)\.(com|be)/(watch\?v=|embed/|.+\?v=)?([^"&?\s]{11})?'
-	)
+	pattern = re.compile(r'[a-z\:\//\.]+(youtube|youtu)\.(com|be)/(watch\?v=|embed/|.+\?v=)?([^"&?\s]{11})?')
 	id = pattern.match(url)
 	return id.groups()[-1]
 

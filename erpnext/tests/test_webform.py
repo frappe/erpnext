@@ -47,7 +47,7 @@ def get_data():
 	webform_list_contexts = frappe.get_hooks("webform_list_context")
 	if webform_list_contexts:
 		context = frappe._dict(frappe.get_attr(webform_list_contexts[0])("Buying") or {})
-	kwargs = dict(doctype="Order Assignment", order_by="modified desc")
+	kwargs = dict(doctype="Order Assignment", order_by="creation desc")
 	return context.get_list(**kwargs)
 
 

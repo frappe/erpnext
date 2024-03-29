@@ -70,18 +70,18 @@ def execute(filters=None):
 def get_columns(filters):
 	"""return columns based on filters"""
 
-	columns = (
-		[_("Item") + ":Link/Item:100"]
-		+ [_("Item Name") + "::150"]
-		+ [_("Description") + "::150"]
-		+ [_("Warehouse") + ":Link/Warehouse:100"]
-		+ [_("Batch") + ":Link/Batch:100"]
-		+ [_("Opening Qty") + ":Float:90"]
-		+ [_("In Qty") + ":Float:80"]
-		+ [_("Out Qty") + ":Float:80"]
-		+ [_("Balance Qty") + ":Float:90"]
-		+ [_("UOM") + "::90"]
-	)
+	columns = [
+		_("Item") + ":Link/Item:100",
+		_("Item Name") + "::150",
+		_("Description") + "::150",
+		_("Warehouse") + ":Link/Warehouse:100",
+		_("Batch") + ":Link/Batch:100",
+		_("Opening Qty") + ":Float:90",
+		_("In Qty") + ":Float:80",
+		_("Out Qty") + ":Float:80",
+		_("Balance Qty") + ":Float:90",
+		_("UOM") + "::90",
+	]
 
 	return columns
 
@@ -195,9 +195,7 @@ def get_item_warehouse_batch_map(filters, float_precision):
 
 def get_item_details(filters):
 	item_map = {}
-	for d in (frappe.qb.from_("Item").select("name", "item_name", "description", "stock_uom")).run(
-		as_dict=1
-	):
+	for d in (frappe.qb.from_("Item").select("name", "item_name", "description", "stock_uom")).run(as_dict=1):
 		item_map.setdefault(d.name, d)
 
 	return item_map

@@ -650,7 +650,7 @@ def get_batch_from_bundle(bundle):
 
 	batches = get_batch_nos(bundle)
 
-	return list(batches.keys())[0]
+	return next(iter(batches.keys()))
 
 
 def get_serial_nos_from_bundle(bundle):

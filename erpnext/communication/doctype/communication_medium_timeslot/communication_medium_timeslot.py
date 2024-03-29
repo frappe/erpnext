@@ -15,9 +15,7 @@ class CommunicationMediumTimeslot(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		day_of_week: DF.Literal[
-			"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-		]
+		day_of_week: DF.Literal["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 		employee_group: DF.Link
 		from_time: DF.Time
 		parent: DF.Data
