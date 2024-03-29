@@ -273,12 +273,10 @@ def get_amount(args, budget):
 	amount = 0
 
 	if args.get("doctype") == "Material Request" and budget.for_material_request:
-		amount = (
-			get_requested_amount(args, budget) + get_ordered_amount(args, budget) + get_actual_expense(args)
-		)
+		amount = get_requested_amount(args, budget) + get_ordered_amount(args, budget)
 
 	elif args.get("doctype") == "Purchase Order" and budget.for_purchase_order:
-		amount = get_ordered_amount(args, budget) + get_actual_expense(args)
+		amount = get_ordered_amount(args, budget)
 
 	return amount
 
