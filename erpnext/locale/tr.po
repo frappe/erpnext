@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-24 09:35+0000\n"
-"PO-Revision-Date: 2024-03-28 13:09\n"
+"PO-Revision-Date: 2024-03-29 13:36\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -1458,7 +1458,7 @@ msgstr ""
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Abbr"
-msgstr ""
+msgstr "Kısaltma"
 
 #. Label of a Data field in DocType 'Item Attribute Value'
 #: stock/doctype/item_attribute_value/item_attribute_value.json
