@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-24 09:35+0000\n"
-"PO-Revision-Date: 2024-03-28 13:09\n"
+"PO-Revision-Date: 2024-03-30 14:26\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -13670,7 +13670,7 @@ msgstr "Cliente"
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Client ID"
-msgstr ""
+msgstr "Id del cliente"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
@@ -17848,7 +17848,7 @@ msgstr "Tipo de cupón"
 #: accounts/doctype/bank_clearance/bank_clearance.py:81
 #: templates/form_grid/bank_reconciliation_grid.html:16
 msgid "Cr"
-msgstr ""
+msgstr "Cr"
 
 #: accounts/doctype/account/account_tree.js:209
 #: accounts/doctype/account/account_tree.js:216
@@ -35232,7 +35232,7 @@ msgstr "Es sub-contratado"
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Is System Generated"
-msgstr ""
+msgstr "Es generado por el sistema"
 
 #. Label of a Check field in DocType 'Task'
 #: projects/doctype/task/task.json
@@ -43667,13 +43667,13 @@ msgstr "El siguiente correo electrónico será enviado el:"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:18
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Frozen' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Purchase Order Required for Purchase Invoice & Receipt
 #. Creation?' (Select) field in DocType 'Buying Settings'
@@ -43682,72 +43682,72 @@ msgstr ""
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Leave Encashed?' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Opening' (Select) field in DocType 'GL Entry'
 #. Option for the 'Is Advance' (Select) field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Hide Currency Symbol' (Select) field in DocType 'Global
 #. Defaults'
 #: setup/doctype/global_defaults/global_defaults.json
 msgctxt "Global Defaults"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Opening' (Select) field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Advance' (Select) field in DocType 'Journal Entry
 #. Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Opening' (Select) field in DocType 'Journal Entry
 #. Template'
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgctxt "Journal Entry Template"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Opening Entry' (Select) field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Active' (Select) field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Opening Entry' (Select) field in DocType 'Purchase
 #. Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Opening Entry' (Select) field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Sales Order Required for Sales Invoice & Delivery Note
 #. Creation?' (Select) field in DocType 'Selling Settings'
@@ -43756,19 +43756,19 @@ msgstr ""
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Pallets' (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #. Option for the 'Is Opening' (Select) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "No"
-msgstr ""
+msgstr "No"
 
 #: setup/doctype/company/test_company.py:94
 msgid "No Account matched these filters: {}"
@@ -44108,7 +44108,7 @@ msgstr "No se ha encontrado {0} para transacciones entre empresas."
 
 #: assets/doctype/asset/asset.js:274
 msgid "No."
-msgstr ""
+msgstr "Nº"
 
 #. Label of a Select field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
@@ -47039,91 +47039,91 @@ msgstr "Unidad de Embalaje"
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Packing Slip Item'
 #: stock/doctype/packing_slip_item/packing_slip_item.json
 msgctxt "Packing Slip Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Request for Quotation Item'
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 msgctxt "Request for Quotation Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Page Break"
-msgstr ""
+msgstr "Salto de Página"
 
 #. Label of a Check field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
@@ -53485,7 +53485,7 @@ msgstr ""
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Profile"
-msgstr ""
+msgstr "Perfil"
 
 #. Label of a Column Break field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -56764,7 +56764,7 @@ msgstr "Propuesto por (Email)"
 #: maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
 msgctxt "Maintenance Schedule Item"
 msgid "Random"
-msgstr ""
+msgstr "Aleatorio"
 
 #: buying/report/purchase_analytics/purchase_analytics.js:57
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.js:25
@@ -61734,7 +61734,7 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:491
 msgid "Row Number"
-msgstr ""
+msgstr "Número de fila"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:376
 msgid "Row {0}"
