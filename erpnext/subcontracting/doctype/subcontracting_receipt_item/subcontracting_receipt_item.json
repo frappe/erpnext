@@ -582,11 +582,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-03-07 11:43:38.954262",
-=======
  "modified": "2024-03-29 15:42:43.425544",
->>>>>>> d73b1f3e6a (fix: button to select serial / batch bundle in the subcontracting receipt)
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",
