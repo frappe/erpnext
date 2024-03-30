@@ -844,6 +844,9 @@ class SerialBatchCreation:
 		if not doc.get("entries"):
 			return frappe._dict({})
 
+		if doc.voucher_no and frappe.get_cached_value(doc.voucher_type, doc.voucher_no, "docstatus") == 2:
+			doc.voucher_no = ""
+
 		doc.save()
 		self.validate_qty(doc)
 
