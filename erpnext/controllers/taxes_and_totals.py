@@ -33,6 +33,7 @@ class calculate_taxes_and_totals:
 		self._items = self.filter_rows() if self.doc.doctype == "Quotation" else self.doc.get("items")
 
 		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)
+
 		self.calculate()
 
 	def filter_rows(self):
@@ -45,6 +46,7 @@ class calculate_taxes_and_totals:
 			return
 
 		self.discount_amount_applied = False
+
 		self._calculate()
 
 		if self.doc.meta.get_field("discount_amount"):
@@ -163,12 +165,12 @@ class calculate_taxes_and_totals:
 							item.price_list_rate * (1.0 - (item.discount_percentage / 100.0)),
 							item.precision("rate"),
 						)
-
+						
 						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
 
 					elif item.discount_amount and item.pricing_rules:
 						item.rate = item.price_list_rate - item.discount_amount
-
+				
 				if item.doctype in [
 					"Quotation Item",
 					"Sales Order Item",
@@ -193,6 +195,7 @@ class calculate_taxes_and_totals:
 
 					elif flt(item.price_list_rate) > 0:
 						item.discount_amount = item.price_list_rate - item.rate
+
 				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
 					item.discount_amount = item.price_list_rate - item.rate
 
@@ -216,6 +219,7 @@ class calculate_taxes_and_totals:
 				)
 
 				item.item_tax_amount = 0.0
+				
 
 	def _set_in_company_currency(self, doc, fields):
 		"""set values in base currency"""
@@ -922,12 +926,14 @@ class calculate_taxes_and_totals:
 					item.margin_type = None
 					item.margin_rate_or_amount = 0.0
 
+			margin_value = 0
 			if not item.pricing_rules and flt(item.rate) > flt(item.price_list_rate):
 				item.margin_type = "Amount"
 				item.margin_rate_or_amount = flt(
 					item.rate - item.price_list_rate, item.precision("margin_rate_or_amount")
 				)
 				item.rate_with_margin = item.rate
+				margin_value = item.rate - item.price_list_rate
 
 			elif item.margin_type and item.margin_rate_or_amount:
 				margin_value = (
@@ -935,8 +941,9 @@ class calculate_taxes_and_totals:
 					if item.margin_type == "Amount"
 					else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
 				)
-				rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
-				base_rate_with_margin = flt(rate_with_margin) * flt(self.doc.conversion_rate)
+
+			rate_with_margin = flt(item.price_list_rate) + flt(margin_value)
+			base_rate_with_margin = flt(rate_with_margin) * flt(self.doc.conversion_rate)
 
 		return rate_with_margin, base_rate_with_margin
 
