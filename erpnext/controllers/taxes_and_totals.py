@@ -33,7 +33,6 @@ class calculate_taxes_and_totals:
 		self._items = self.filter_rows() if self.doc.doctype == "Quotation" else self.doc.get("items")
 
 		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)
-
 		self.calculate()
 
 	def filter_rows(self):
@@ -46,7 +45,6 @@ class calculate_taxes_and_totals:
 			return
 
 		self.discount_amount_applied = False
-
 		self._calculate()
 
 		if self.doc.meta.get_field("discount_amount"):
@@ -219,7 +217,6 @@ class calculate_taxes_and_totals:
 				)
 
 				item.item_tax_amount = 0.0
-				
 
 	def _set_in_company_currency(self, doc, fields):
 		"""set values in base currency"""
