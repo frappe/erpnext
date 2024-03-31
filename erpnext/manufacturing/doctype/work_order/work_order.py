@@ -824,7 +824,7 @@ class WorkOrder(Document):
 
 			for d in data:
 				if not d.fixed_time:
-					d.time_in_mins = flt(d.time_in_mins) * flt(qty)
+					d.time_in_mins = flt(d.time_in_mins) * flt(d.batch_size) * flt(qty)
 				d.status = "Pending"
 
 			return data
