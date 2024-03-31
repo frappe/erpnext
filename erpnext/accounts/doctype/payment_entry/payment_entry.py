@@ -16,6 +16,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
 from erpnext.accounts.doctype.bank_account.bank_account import (
 	get_bank_account_details,
+	get_default_company_bank_account,
 	get_party_bank_account,
 )
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import (
@@ -1999,7 +2000,9 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
 	if party_type in ["Customer", "Supplier"]:
-		bank_account = get_party_bank_account(party_type, party)
+		party_bank_account = get_party_bank_account(party_type, party)
+
+	bank_account = get_default_company_bank_account(company)
 
 	return {
 		"party_account": party_account,
@@ -2007,6 +2010,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 		"party_account_currency": account_currency,
 		"party_balance": party_balance,
 		"account_balance": account_balance,
+		"party_bank_account": party_bank_account,
 		"bank_account": bank_account,
 	}
 
