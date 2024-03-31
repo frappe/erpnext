@@ -386,7 +386,7 @@ erpnext.buying = {
 						if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
 							item.has_serial_no = r.message.has_serial_no;
 							item.has_batch_no = r.message.has_batch_no;
-							item.type_of_transaction = item.qty > 0 ? "Inward" : "Outward";
+							item.type_of_transaction = item.rejected_qty > 0 ? "Inward" : "Outward";
 							item.is_rejected = true;
 
 							new erpnext.SerialBatchPackageSelector(
