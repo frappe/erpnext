@@ -934,7 +934,7 @@ erpnext.utils.map_current_doc = function (opts) {
 
 	if (opts.source_doctype) {
 		let data_fields = [];
-		if (opts.source_doctype == "Purchase Receipt") {
+		if (["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)) {
 			data_fields.push({
 				fieldname: "merge_taxes",
 				fieldtype: "Check",
@@ -960,7 +960,10 @@ erpnext.utils.map_current_doc = function (opts) {
 					return;
 				}
 				opts.source_name = values;
-				if (opts.allow_child_item_selection || opts.source_doctype == "Purchase Receipt") {
+				if (
+					opts.allow_child_item_selection ||
+					["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)
+				) {
 					// args contains filtered child docnames
 					opts.args = args;
 				}
