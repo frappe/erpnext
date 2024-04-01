@@ -525,6 +525,8 @@ class SalesOrder(SellingController):
 		pass
 
 	def on_update_after_submit(self):
+		self.calculate_commission()
+		self.calculate_contribution()
 		self.check_credit_limit()
 
 	def before_update_after_submit(self):
