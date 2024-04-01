@@ -53,6 +53,18 @@ frappe.ui.form.on("Stock Reconciliation", {
 		if (frm.doc.company) {
 			frm.trigger("toggle_display_account_head");
 		}
+
+		frm.events.set_fields_onload_for_line_item(frm);
+	},
+
+	set_fields_onload_for_line_item(frm) {
+		if (frm.is_new() && frm.doc?.items && cint(frappe.user_defaults?.use_serial_batch_fields) === 1) {
+			frm.doc.items.forEach((item) => {
+				if (!item.serial_and_batch_bundle) {
+					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
+				}
+			});
+		}
 	},
 
 	scan_barcode: function (frm) {
@@ -127,6 +139,9 @@ frappe.ui.form.on("Stock Reconciliation", {
 
 							item.qty = item.qty || 0;
 							item.valuation_rate = item.valuation_rate || 0;
+							item.use_serial_batch_fields = cint(
+								frappe.user_defaults?.use_serial_batch_fields
+							);
 						});
 						frm.refresh_field("items");
 					},
@@ -266,6 +281,10 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		var item = frappe.get_doc(cdt, cdn);
 		if (!item.warehouse && frm.doc.set_warehouse) {
 			frappe.model.set_value(cdt, cdn, "warehouse", frm.doc.set_warehouse);
+		}
+
+		if (item.docstatus === 0 && cint(frappe.user_defaults?.use_serial_batch_fields) === 1) {
+			frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
 		}
 	},
 });

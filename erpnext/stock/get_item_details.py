@@ -524,12 +524,27 @@ def update_barcode_value(out):
 		out["barcode"] = barcode_data.get(out.item_code)[0]
 
 
+<<<<<<< HEAD
 def get_barcode_data(items_list):
 	# get itemwise batch no data
 	# exmaple: {'LED-GRE': [Batch001, Batch002]}
+=======
+def get_barcode_data(items_list=None, item_code=None):
+	# get item-wise batch no data
+	# example: {'LED-GRE': [Batch001, Batch002]}
+>>>>>>> b0730293e2 (fix: barcode not fetched on selection of item)
 	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
 
 	itemwise_barcode = {}
+	if not items_list and item_code:
+		_dict_item_code = frappe._dict(
+			{
+				"item_code": item_code,
+			}
+		)
+
+		items_list = [frappe._dict(_dict_item_code)]
+
 	for item in items_list:
 		barcodes = frappe.db.get_all("Item Barcode", filters={"parent": item.item_code}, fields="barcode")
 
