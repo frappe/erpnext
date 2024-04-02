@@ -158,11 +158,11 @@ class PaymentRequest(Document):
 			# set advance payment status
 			ref_doc.set_advance_payment_status()
 
-	def on_submit(self):
+	def before_submit(self):
 		if self.payment_request_type == "Outward":
-			self.db_set("status", "Initiated")
+			self.status = "Initiated"
 		elif self.payment_request_type == "Inward":
-			self.db_set("status", "Requested")
+			self.status = "Requested"
 
 		if self.payment_request_type == "Inward":
 			if self.payment_channel == "Phone":
@@ -232,9 +232,6 @@ class PaymentRequest(Document):
 	def set_payment_request_url(self):
 		if self.payment_account and self.payment_gateway and self.payment_gateway_validation():
 			self.payment_url = self.get_payment_url()
-
-		if self.payment_url:
-			self.db_set("payment_url", self.payment_url)
 
 	def get_payment_url(self):
 		if self.reference_doctype != "Fees":
@@ -364,7 +361,14 @@ class PaymentRequest(Document):
 				)
 			],
 		}
-		enqueue(method=frappe.sendmail, queue="short", timeout=300, is_async=True, **email_args)
+		enqueue(
+			method=frappe.sendmail,
+			queue="short",
+			timeout=300,
+			is_async=True,
+			enqueue_after_commit=True,
+			**email_args,
+		)
 
 	def get_message(self):
 		"""return message with payment gateway link"""
