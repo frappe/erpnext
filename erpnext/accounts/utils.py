@@ -1709,7 +1709,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 		)
 
 		ref_doc.set_status(update=True)
-
+		ref_doc.notify_update()
 
 def delink_original_entry(pl_entry, partial_cancel=False):
 	if pl_entry:
