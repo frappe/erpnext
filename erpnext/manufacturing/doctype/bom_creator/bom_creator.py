@@ -59,7 +59,7 @@ class BOMCreator(Document):
 		qty: DF.Float
 		raw_material_cost: DF.Currency
 		remarks: DF.TextEditor | None
-		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List", "Manual"]
+		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
 		set_rate_based_on_warehouse: DF.Check
 		status: DF.Literal["Draft", "Submitted", "In Progress", "Completed", "Failed", "Cancelled"]
 		uom: DF.Link | None
@@ -141,9 +141,6 @@ class BOMCreator(Document):
 		self.submit()
 
 	def set_rate_for_items(self):
-		if self.rm_cost_as_per == "Manual":
-			return
-
 		amount = self.get_raw_material_cost()
 		self.raw_material_cost = amount
 
@@ -285,7 +282,6 @@ class BOMCreator(Document):
 				"allow_alternative_item": 1,
 				"bom_creator": self.name,
 				"bom_creator_item": bom_creator_item,
-				"rm_cost_as_per": "Manual",
 			}
 		)
 
