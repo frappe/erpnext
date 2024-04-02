@@ -194,7 +194,8 @@ class TestPaymentRequest(unittest.TestCase):
 			dt="Sales Order",
 			dn=so.name,
 			payment_gateway_account="_Test Gateway - USD",  # email channel
-			order_type="Shopping Cart",
+			make_sales_invoice=True,
+			mute_email=True,
 			submit_doc=True,
 			return_doc=True,
 		)
