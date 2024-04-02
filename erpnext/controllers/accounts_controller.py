@@ -1924,43 +1924,32 @@ class AccountsController(TransactionBase):
 
 			self.db_set("advance_paid", advance_paid)
 
-		self.set_advance_payment_status()
+		self.set_advance_payment_status(advance_paid, order_total)
 
-	def set_advance_payment_status(self):
+	def set_advance_payment_status(self, advance_paid: float | None = None, order_total: float | None = None):
 		new_status = None
+		# if money is paid set the paid states
+		if advance_paid:
+			new_status = "Partially Paid" if advance_paid < order_total else "Fully Paid"
 
-		stati = frappe.get_list(
-			"Payment Request",
-			{
-				"reference_doctype": self.doctype,
-				"reference_name": self.name,
-				"docstatus": 1,
-			},
-			pluck="status",
-		)
-		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
-			if not stati:
-				new_status = "Not Requested"
-			elif "Requested" in stati or "Failed" in stati:
-				new_status = "Requested"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
-		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
-			if not stati:
-				new_status = "Not Initiated"
-			elif "Initiated" in stati or "Failed" in stati or "Payment Ordered" in stati:
-				new_status = "Initiated"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
+		if not new_status:
+			prs = frappe.db.count(
+				"Payment Request",
+				{
+					"reference_doctype": self.doctype,
+					"reference_name": self.name,
+					"docstatus": 1,
+				},
+			)
+			if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
+				new_status = "Requested" if prs else "Not Requested"
+			if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
+				new_status = "Initiated" if prs else "Not Initiated"
 
 		if new_status == self.advance_payment_status:
 			return
 
-		self.db_set("advance_payment_status", new_status, update_modified=False)
+		self.db_set("advance_payment_status", new_status)
 		self.set_status(update=True)
 		self.notify_update()
 
