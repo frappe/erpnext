@@ -2078,21 +2078,27 @@ class AccountsController(TransactionBase):
 		)
 
 	def group_similar_items(self):
-		group_item_qty = {}
-		group_item_amount = {}
+		grouped_items = {}
 		# to update serial number in print
 		count = 0
 
+		grouping_fields = frappe.get_hooks("group_similar_item_fields")
+		grouping_fields = list(set(grouping_fields))
+
 		for item in self.items:
-			group_item_qty[item.item_code] = group_item_qty.get(item.item_code, 0) + item.qty
-			group_item_amount[item.item_code] = group_item_amount.get(item.item_code, 0) + item.amount
+			grouped_items.setdefault(item.item_code, frappe._dict())
+
+			for field in grouping_fields:
+				grouped_items[item.item_code].setdefault(field, 0)
+				grouped_items[item.item_code][field] += item.get(field, 0)
 
 		duplicate_list = []
 		for item in self.items:
-			if item.item_code in group_item_qty:
+			if item.item_code in grouped_items:
 				count += 1
-				item.qty = group_item_qty[item.item_code]
-				item.amount = group_item_amount[item.item_code]
+
+				for field in grouping_fields:
+					item.set(field, grouped_items[item.item_code][field])
 
 				if item.qty:
 					item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
@@ -2100,7 +2106,7 @@ class AccountsController(TransactionBase):
 					item.rate = 0
 
 				item.idx = count
-				del group_item_qty[item.item_code]
+				del grouped_items[item.item_code]
 			else:
 				duplicate_list.append(item)
 		for item in duplicate_list:
