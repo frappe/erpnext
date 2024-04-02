@@ -218,8 +218,17 @@ class TestAsset(AssetSetup):
 			asset.gross_purchase_amount - asset.finance_books[0].value_after_depreciation,
 			asset.precision("gross_purchase_amount"),
 		)
+<<<<<<< HEAD
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
 			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
+=======
+		pro_rata_amount, _, _ = _get_pro_rata_amt(
+			asset.finance_books[0],
+			9000,
+			get_last_day(add_months(purchase_date, 1)),
+			date,
+			original_schedule_date=get_last_day(nowdate()),
+>>>>>>> e8dcbe2625 (fix: depr amount pro rata and related tests)
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 		self.assertEquals(
@@ -286,8 +295,23 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
+<<<<<<< HEAD
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
 			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
+=======
+		first_asset_depr_schedule.load_from_db()
+
+		second_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")
+		self.assertEquals(second_asset_depr_schedule.status, "Active")
+		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
+
+		pro_rata_amount, _, _ = _get_pro_rata_amt(
+			asset.finance_books[0],
+			9000,
+			get_last_day(add_months(purchase_date, 1)),
+			date,
+			original_schedule_date=get_last_day(nowdate()),
+>>>>>>> e8dcbe2625 (fix: depr amount pro rata and related tests)
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 
@@ -305,7 +329,6 @@ class TestAsset(AssetSetup):
 			),
 			("Debtors - _TC", 25000.0, 0.0),
 		)
-
 		gle = get_gl_entries("Sales Invoice", si.name)
 		self.assertSequenceEqual(gle, expected_gle)
 
@@ -349,7 +372,7 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
-		expected_values = [["2023-03-31", 12000, 36000], ["2023-05-23", 1742.47, 37742.47]]
+		expected_values = [["2023-03-31", 12000, 36000], ["2023-05-23", 1737.7, 37737.7]]
 
 		for i, schedule in enumerate(asset.schedules):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
@@ -360,7 +383,7 @@ class TestAsset(AssetSetup):
 		expected_gle = (
 			(
 				"_Test Accumulated Depreciations - _TC",
-				37742.47,
+				37737.7,
 				0.0,
 			),
 			(
@@ -371,7 +394,7 @@ class TestAsset(AssetSetup):
 			(
 				"_Test Gain/Loss on Asset Disposal - _TC",
 				0.0,
-				17742.47,
+				17737.7,
 			),
 			("Debtors - _TC", 40000.0, 0.0),
 		)
@@ -691,23 +714,48 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		expected_schedules = [
-			["2023-01-31", 1021.98, 1021.98],
-			["2023-02-28", 923.08, 1945.06],
-			["2023-03-31", 1021.98, 2967.04],
-			["2023-04-30", 989.01, 3956.05],
-			["2023-05-31", 1021.98, 4978.03],
-			["2023-06-30", 989.01, 5967.04],
-			["2023-07-31", 1021.98, 6989.02],
-			["2023-08-31", 1021.98, 8011.0],
-			["2023-09-30", 989.01, 9000.01],
-			["2023-10-31", 1021.98, 10021.99],
-			["2023-11-30", 989.01, 11011.0],
-			["2023-12-31", 989.0, 12000.0],
+			["2023-01-31", 1019.18, 1019.18],
+			["2023-02-28", 920.55, 1939.73],
+			["2023-03-31", 1019.18, 2958.91],
+			["2023-04-30", 986.3, 3945.21],
+			["2023-05-31", 1019.18, 4964.39],
+			["2023-06-30", 986.3, 5950.69],
+			["2023-07-31", 1019.18, 6969.87],
+			["2023-08-31", 1019.18, 7989.05],
+			["2023-09-30", 986.3, 8975.35],
+			["2023-10-31", 1019.18, 9994.53],
+			["2023-11-30", 986.3, 10980.83],
+			["2023-12-31", 1019.17, 12000.0],
 		]
 
 		schedules = [
 			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+<<<<<<< HEAD
 			for d in asset.get("schedules")
+=======
+			for d in get_depr_schedule(asset.name, "Draft")
+		]
+		self.assertEqual(schedules, expected_schedules)
+
+	def test_schedule_for_straight_line_method_for_existing_asset(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			available_for_use_date="2030-06-06",
+			is_existing_asset=1,
+			number_of_depreciations_booked=2,
+			opening_accumulated_depreciation=47095.89,
+			expected_value_after_useful_life=10000,
+			depreciation_start_date="2032-12-31",
+			total_number_of_depreciations=3,
+			frequency_of_depreciation=12,
+		)
+
+		self.assertEqual(asset.status, "Draft")
+		expected_schedules = [["2032-12-31", 42904.11, 90000.0]]
+		schedules = [
+			[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
+			for d in get_depr_schedule(asset.name, "Draft")
+>>>>>>> e8dcbe2625 (fix: depr amount pro rata and related tests)
 		]
 
 		self.assertEqual(schedules, expected_schedules)
