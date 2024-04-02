@@ -139,7 +139,7 @@ class TestPaymentRequest(unittest.TestCase):
 		pr.reload()
 
 		self.assertEqual(pr.payment_channel, "Phone")
-		self.assertEqual(pr.mute_email, False)
+		self.assertEqual(pr.mute_email, True)
 
 		self.assertIsNone(pr.payment_url)
 		self.assertEqual(self.send_email.call_count, 0)  # no increment on phone channel
@@ -178,9 +178,9 @@ class TestPaymentRequest(unittest.TestCase):
 		pr.reload()
 
 		self.assertEqual(pr.payment_channel, "Email")
-		self.assertEqual(pr.mute_email, False)
+		self.assertEqual(pr.mute_email, True)
 
-		self.assertIsNone(pr.payment_url)
+		self.assertEqual(pr.payment_url, PAYMENT_URL)
 		self.assertEqual(self.send_email.call_count, 1)  # no increment on shopping cart
 		self.assertEqual(self._get_payment_gateway_controller.call_count, 5)
 		pr.cancel()
