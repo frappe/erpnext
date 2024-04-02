@@ -552,11 +552,7 @@ class Subscription(Document):
 				}
 			
 			if plan.description:
-				item.update(
-					{
-						"description": plan.description,
-					}
-				)
+				item["description"] = plan.description
 
 			if deferred:
 				item.update(
