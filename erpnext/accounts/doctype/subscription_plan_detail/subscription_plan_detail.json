@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "plan",
-  "qty"
+  "qty",
+  "description"
  ],
  "fields": [
   {
@@ -23,11 +24,17 @@
    "label": "Plan",
    "options": "Subscription Plan",
    "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Description"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:48.168122",
+ "modified": "2024-04-02 15:11:53.693323",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan Detail",
