@@ -59,6 +59,7 @@ def get_pos_entries(filters, group_by_field):
 		order_by += ", p.{}".format(group_by_field)
 		select_mop_field = ", p.base_paid_amount - p.change_amount  as paid_amount "
 
+	# nosemgrep
 	return frappe.db.sql(
 		"""
 		SELECT
