@@ -14,7 +14,7 @@ def execute(filters=None):
 	return OpportunitySummaryBySalesStage(filters).run()
 
 
-class OpportunitySummaryBySalesStage(object):
+class OpportunitySummaryBySalesStage:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 
@@ -199,7 +199,6 @@ class OpportunitySummaryBySalesStage(object):
 		return filters
 
 	def get_chart_data(self):
-		labels = []
 		datasets = []
 		values = [0] * len(self.sales_stage_list)
 

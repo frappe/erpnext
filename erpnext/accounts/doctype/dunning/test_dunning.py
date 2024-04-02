@@ -109,9 +109,7 @@ class TestDunning(FrappeTestCase):
 
 def create_dunning(overdue_days, dunning_type_name=None):
 	posting_date = add_days(today(), -1 * overdue_days)
-	sales_invoice = create_sales_invoice_against_cost_center(
-		posting_date=posting_date, qty=1, rate=100
-	)
+	sales_invoice = create_sales_invoice_against_cost_center(posting_date=posting_date, qty=1, rate=100)
 	dunning = create_dunning_from_sales_invoice(sales_invoice.name)
 
 	if dunning_type_name:

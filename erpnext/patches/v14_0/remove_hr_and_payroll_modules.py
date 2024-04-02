@@ -33,9 +33,7 @@ def execute():
 	]:
 		frappe.delete_doc("Report", report, ignore_missing=True, force=True)
 
-	doctypes = frappe.get_all(
-		"DocType", {"module": ("in", ["HR", "Payroll"]), "custom": 0}, pluck="name"
-	)
+	doctypes = frappe.get_all("DocType", {"module": ("in", ["HR", "Payroll"]), "custom": 0}, pluck="name")
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, ignore_missing=True, force=True)
 
@@ -51,9 +49,7 @@ def execute():
 	frappe.delete_doc("User Type", "Employee Self Service", ignore_missing=True, force=True)
 
 	for dt in ["Web Form", "Dashboard", "Dashboard Chart", "Number Card"]:
-		records = frappe.get_all(
-			dt, {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name"
-		)
+		records = frappe.get_all(dt, {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name")
 		for record in records:
 			frappe.delete_doc(dt, record, ignore_missing=True, force=True)
 

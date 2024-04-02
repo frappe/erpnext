@@ -8,7 +8,7 @@ from frappe import _, qb
 from frappe.query_builder import Criterion
 
 
-class PaymentLedger(object):
+class PaymentLedger:
 	def __init__(self, filters=None):
 		self.filters = filters
 		self.columns, self.data = [], []

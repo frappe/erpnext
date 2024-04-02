@@ -107,7 +107,7 @@ def get_opportunities(filters):
 	conditions = ""
 
 	if filters.get("transaction_date"):
-		conditions = " WHERE transaction_date between {0} and {1}".format(
+		conditions = " WHERE transaction_date between {} and {}".format(
 			frappe.db.escape(filters["transaction_date"][0]),
 			frappe.db.escape(filters["transaction_date"][1]),
 		)
@@ -120,12 +120,10 @@ def get_opportunities(filters):
 		conditions += " company = %(company)s"
 
 	return frappe.db.sql(
-		"""
+		f"""
 		SELECT name, territory, opportunity_amount
-		FROM `tabOpportunity` {0}
-	""".format(
-			conditions
-		),
+		FROM `tabOpportunity` {conditions}
+	""",
 		filters,
 		as_dict=1,
 	)  # nosec
@@ -141,10 +139,8 @@ def get_quotations(opportunities):
 		"""
 		SELECT `name`,`base_grand_total`, `opportunity`
 		FROM `tabQuotation`
-		WHERE docstatus=1 AND opportunity in ({0})
-	""".format(
-			", ".join(["%s"] * len(opportunity_names))
-		),
+		WHERE docstatus=1 AND opportunity in ({})
+	""".format(", ".join(["%s"] * len(opportunity_names))),
 		tuple(opportunity_names),
 		as_dict=1,
 	)  # nosec
@@ -160,10 +156,8 @@ def get_sales_orders(quotations):
 		"""
 	SELECT so.`name`, so.`base_grand_total`, soi.prevdoc_docname as quotation
 	FROM `tabSales Order` so, `tabSales Order Item` soi
-	WHERE so.docstatus=1 AND so.name = soi.parent AND soi.prevdoc_docname in ({0})
-	""".format(
-			", ".join(["%s"] * len(quotation_names))
-		),
+	WHERE so.docstatus=1 AND so.name = soi.parent AND soi.prevdoc_docname in ({})
+	""".format(", ".join(["%s"] * len(quotation_names))),
 		tuple(quotation_names),
 		as_dict=1,
 	)  # nosec
@@ -179,10 +173,8 @@ def get_sales_invoice(sales_orders):
 		"""
 	SELECT si.name, si.base_grand_total, sii.sales_order
 	FROM `tabSales Invoice` si, `tabSales Invoice Item` sii
-	WHERE si.docstatus=1 AND si.name = sii.parent AND sii.sales_order in ({0})
-	""".format(
-			", ".join(["%s"] * len(so_names))
-		),
+	WHERE si.docstatus=1 AND si.name = sii.parent AND sii.sales_order in ({})
+	""".format(", ".join(["%s"] * len(so_names))),
 		tuple(so_names),
 		as_dict=1,
 	)  # nosec

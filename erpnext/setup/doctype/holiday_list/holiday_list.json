@@ -141,7 +141,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2023-07-14 13:28:53.156421",
+ "modified": "2024-03-27 13:09:49.920245",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Holiday List",
@@ -160,7 +160,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

@@ -8,8 +8,12 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "enabled",
   "uom_name",
+  "symbol",
+  "common_code",
+  "description",
+  "column_break_obth",
+  "enabled",
   "must_be_whole_number"
  ],
  "fields": [
@@ -35,12 +39,33 @@
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Enabled"
+  },
+  {
+   "fieldname": "symbol",
+   "fieldtype": "Data",
+   "label": "Symbol"
+  },
+  {
+   "description": "According to CEFACT/ICG/2010/IC013 or CEFACT/ICG/2010/IC010",
+   "fieldname": "common_code",
+   "fieldtype": "Data",
+   "label": "Common Code",
+   "length": 3
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "column_break_obth",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-compass",
  "idx": 1,
  "links": [],
- "modified": "2021-10-18 14:07:43.722144",
+ "modified": "2024-03-27 13:10:57.375141",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "UOM",
@@ -77,6 +102,8 @@
  ],
  "quick_entry": 1,
  "show_name_in_global_search": 1,
- "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": [],
+ "translated_doctype": 1
 }

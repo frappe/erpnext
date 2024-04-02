@@ -1,5 +1,5 @@
 {
- "_comments": "[]",
+ "actions": [],
  "allow_copy": 1,
  "creation": "2019-09-06 12:01:33.933063",
  "doctype": "DocType",
@@ -98,7 +98,8 @@
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2019-10-04 21:59:48.597497",
+ "links": [],
+ "modified": "2024-03-27 13:10:30.449554",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quick Stock Balance",
@@ -131,7 +132,8 @@
  ],
  "quick_entry": 1,
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

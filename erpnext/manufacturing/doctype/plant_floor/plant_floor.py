@@ -67,22 +67,15 @@ class PlantFloor(Document):
 
 @frappe.whitelist()
 def get_stock_summary(warehouse, start=0, item_code=None, item_group=None):
-	stock_details = get_stock_details(
-		warehouse, start=start, item_code=item_code, item_group=item_group
-	)
+	stock_details = get_stock_details(warehouse, start=start, item_code=item_code, item_group=item_group)
 
 	max_count = 0.0
 	for d in stock_details:
 		d.actual_or_pending = (
-			d.projected_qty
-			+ d.reserved_qty
-			+ d.reserved_qty_for_production
-			+ d.reserved_qty_for_sub_contract
+			d.projected_qty + d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract
 		)
 		d.pending_qty = 0
-		d.total_reserved = (
-			d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract
-		)
+		d.total_reserved = d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract
 		if d.actual_or_pending > d.actual_qty:
 			d.pending_qty = d.actual_or_pending - d.actual_qty
 

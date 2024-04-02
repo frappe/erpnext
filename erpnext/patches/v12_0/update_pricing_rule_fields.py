@@ -8,7 +8,6 @@ parentfield = {"item_code": "items", "item_group": "item_groups", "brand": "bran
 
 
 def execute():
-
 	if not frappe.get_all("Pricing Rule", limit=1):
 		return
 
@@ -33,20 +32,16 @@ def execute():
 		child_doctype = doctype + " Item"
 
 		frappe.db.sql(
-			""" UPDATE `tab{child_doctype}` SET pricing_rules = pricing_rule
+			f""" UPDATE `tab{child_doctype}` SET pricing_rules = pricing_rule
 			WHERE docstatus < 2 and pricing_rule is not null and pricing_rule != ''
-		""".format(
-				child_doctype=child_doctype
-			)
+		"""
 		)
 
 		data = frappe.db.sql(
-			""" SELECT pricing_rule, name, parent,
+			f""" SELECT pricing_rule, name, parent,
 				parenttype, creation, modified, docstatus, modified_by, owner, name
-			FROM `tab{child_doc}` where docstatus < 2 and pricing_rule is not null
-			and pricing_rule != ''""".format(
-				child_doc=child_doctype
-			),
+			FROM `tab{child_doctype}` where docstatus < 2 and pricing_rule is not null
+			and pricing_rule != ''""",
 			as_dict=1,
 		)
 
@@ -73,9 +68,7 @@ def execute():
 				""" INSERT INTO
 				`tabPricing Rule Detail` (`pricing_rule`, `child_docname`, `parent`, `parentfield`, `parenttype`,
 				`creation`, `modified`, `docstatus`, `modified_by`, `owner`, `name`)
-			VALUES {values} """.format(
-					values=", ".join(["%s"] * len(values))
-				),
+			VALUES {values} """.format(values=", ".join(["%s"] * len(values))),
 				tuple(values),
 			)
 
@@ -116,8 +109,6 @@ def execute():
 				""" INSERT INTO
 				`tab{doctype}` ({field}, parent, parentfield, parenttype, creation, modified,
 					owner, modified_by, name)
-			VALUES {values} """.format(
-					doctype=doctype, field=field, values=", ".join(["%s"] * len(values))
-				),
+			VALUES {values} """.format(doctype=doctype, field=field, values=", ".join(["%s"] * len(values))),
 				tuple(values),
 			)

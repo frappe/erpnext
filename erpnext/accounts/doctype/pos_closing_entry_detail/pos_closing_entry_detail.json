@@ -58,14 +58,15 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-19 20:08:44.523861",
+ "modified": "2024-03-27 13:10:14.302402",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry Detail",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

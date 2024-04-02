@@ -8,9 +8,7 @@ import frappe
 def execute():
 	frappe.reload_doc("manufacturing", "doctype", "job_card_time_log")
 
-	if frappe.db.table_exists("Job Card") and frappe.get_meta("Job Card").has_field(
-		"actual_start_date"
-	):
+	if frappe.db.table_exists("Job Card") and frappe.get_meta("Job Card").has_field("actual_start_date"):
 		time_logs = []
 		for d in frappe.get_all(
 			"Job Card",
@@ -37,9 +35,7 @@ def execute():
                 `tabJob Card Time Log`
                     (from_time, to_time, time_in_mins, completed_qty, parent, parenttype, parentfield, name)
                 values {values}
-            """.format(
-					values=",".join(["%s"] * len(time_logs))
-				),
+            """.format(values=",".join(["%s"] * len(time_logs))),
 				tuple(time_logs),
 			)
 

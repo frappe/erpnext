@@ -48,7 +48,7 @@ frappe.ui.form.on("Asset", {
 					method: "erpnext.assets.doctype.asset.asset.make_asset_movement",
 					freeze: true,
 					args: {
-						assets: [{ name: cur_frm.doc.name }],
+						assets: [{ name: frm.doc.name }],
 					},
 					callback: function (r) {
 						if (r.message) {
@@ -791,9 +791,7 @@ erpnext.asset.scrap_asset = function (frm) {
 				asset_name: frm.doc.name,
 			},
 			method: "erpnext.assets.doctype.asset.depreciation.scrap_asset",
-			callback: function (r) {
-				cur_frm.reload_doc();
-			},
+			callback: (r) => frm.reload_doc(),
 		});
 	});
 };
@@ -805,19 +803,17 @@ erpnext.asset.restore_asset = function (frm) {
 				asset_name: frm.doc.name,
 			},
 			method: "erpnext.assets.doctype.asset.depreciation.restore_asset",
-			callback: function (r) {
-				cur_frm.reload_doc();
-			},
+			callback: (r) => frm.reload_doc(),
 		});
 	});
 };
 
-erpnext.asset.transfer_asset = function () {
+erpnext.asset.transfer_asset = function (frm) {
 	frappe.call({
 		method: "erpnext.assets.doctype.asset.asset.make_asset_movement",
 		freeze: true,
 		args: {
-			assets: [{ name: cur_frm.doc.name }],
+			assets: [{ name: frm.doc.name }],
 			purpose: "Transfer",
 		},
 		callback: function (r) {

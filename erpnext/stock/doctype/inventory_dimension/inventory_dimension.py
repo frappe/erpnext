@@ -384,9 +384,7 @@ def delete_dimension(dimension):
 
 @frappe.whitelist()
 def get_parent_fields(child_doctype, dimension_name):
-	parent_doctypes = frappe.get_all(
-		"DocField", fields=["parent"], filters={"options": child_doctype}
-	)
+	parent_doctypes = frappe.get_all("DocField", fields=["parent"], filters={"options": child_doctype})
 
 	fields = []
 

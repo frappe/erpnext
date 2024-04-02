@@ -139,9 +139,7 @@ class DeprecatedBatchNoValuation:
 			if not self.non_batchwise_balance_qty:
 				continue
 
-			self.batch_avg_rate[batch_no] = (
-				self.non_batchwise_balance_value / self.non_batchwise_balance_qty
-			)
+			self.batch_avg_rate[batch_no] = self.non_batchwise_balance_value / self.non_batchwise_balance_qty
 
 			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change
@@ -208,9 +206,9 @@ class DeprecatedBatchNoValuation:
 		bundle_child = frappe.qb.DocType("Serial and Batch Entry")
 		batch = frappe.qb.DocType("Batch")
 
-		timestamp_condition = CombineDatetime(
-			bundle.posting_date, bundle.posting_time
-		) < CombineDatetime(self.sle.posting_date, self.sle.posting_time)
+		timestamp_condition = CombineDatetime(bundle.posting_date, bundle.posting_time) < CombineDatetime(
+			self.sle.posting_date, self.sle.posting_time
+		)
 
 		if self.sle.creation:
 			timestamp_condition |= (
@@ -244,6 +242,8 @@ class DeprecatedBatchNoValuation:
 
 		if self.sle.serial_and_batch_bundle:
 			query = query.where(bundle.name != self.sle.serial_and_batch_bundle)
+
+		query = query.where(bundle.voucher_type != "Pick List")
 
 		for d in query.run(as_dict=True):
 			self.non_batchwise_balance_value += flt(d.batch_value)

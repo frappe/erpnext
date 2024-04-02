@@ -101,7 +101,7 @@
   }
  ],
  "links": [],
- "modified": "2020-07-17 14:00:13.105433",
+ "modified": "2024-03-27 13:06:36.896195",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank",
@@ -121,7 +121,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

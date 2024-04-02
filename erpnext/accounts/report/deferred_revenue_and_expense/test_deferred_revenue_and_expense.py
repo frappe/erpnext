@@ -1,5 +1,3 @@
-import unittest
-
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
@@ -13,8 +11,6 @@ from erpnext.accounts.report.deferred_revenue_and_expense.deferred_revenue_and_e
 )
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
-from erpnext.stock.doctype.item.test_item import create_item
 
 
 class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):

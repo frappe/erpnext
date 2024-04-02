@@ -103,7 +103,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2022-12-15 11:10:13.517742",
+ "modified": "2024-03-27 13:05:59.465023",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Appointment Booking Settings",
@@ -140,7 +140,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

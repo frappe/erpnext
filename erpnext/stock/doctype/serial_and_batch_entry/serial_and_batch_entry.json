@@ -122,13 +122,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-23 12:44:18.054270",
+ "modified": "2024-03-27 13:10:39.060322",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial and Batch Entry",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
