@@ -110,6 +110,12 @@ class TestStockEntry(FrappeTestCase):
 		self._test_auto_material_request("_Test Item")
 		self._test_auto_material_request("_Test Item", material_request_type="Transfer")
 
+	def test_barcode_item_stock_entry(self):
+		item_code = make_item("_Test Item Stock Entry For Barcode", barcode="BDD-1234567890")
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1, basic_rate=100)
+		self.assertEqual(se.items[0].barcode, "BDD-1234567890")
+
 	def test_auto_material_request_for_variant(self):
 		fields = [{"field_name": "reorder_levels"}]
 		set_item_variant_settings(fields)
