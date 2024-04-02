@@ -196,6 +196,7 @@ class POSInvoiceMergeLog(Document):
         sales_invoice = frappe.new_doc('Sales Invoice')
         sales_invoice.customer = self.customer
         sales_invoice.is_pos = 1
+        sales_invoice.disable_rounded_total = frappe.db.get_single_value("Global Defaults", "disable_rounded_total")
 
         return sales_invoice
 
