@@ -66,7 +66,7 @@
    "fieldname": "rm_cost_as_per",
    "fieldtype": "Select",
    "label": "Rate Of Materials Based On",
-   "options": "Valuation Rate\nLast Purchase Rate\nPrice List\nManual",
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List",
    "reqd": 1
   },
   {
@@ -288,7 +288,11 @@
    "link_fieldname": "bom_creator"
   }
  ],
+<<<<<<< HEAD
  "modified": "2023-08-07 15:45:06.176313",
+=======
+ "modified": "2024-04-02 16:30:59.779190",
+>>>>>>> 0b63dbf221 (chore: remove rate of material based on Manual)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",

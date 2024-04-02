@@ -150,7 +150,7 @@ class BOM(WebsiteGenerator):
 		quality_inspection_template: DF.Link | None
 		quantity: DF.Float
 		raw_material_cost: DF.Currency
-		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List", "Manual"]
+		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
 		route: DF.SmallText | None
 		routing: DF.Link | None
 		scrap_items: DF.Table[BOMScrapItem]
@@ -742,6 +742,7 @@ class BOM(WebsiteGenerator):
 
 	def calculate_rm_cost(self, save=False):
 		"""Fetch RM rate as per today's valuation rate and calculate totals"""
+
 		total_rm_cost = 0
 		base_total_rm_cost = 0
 
@@ -750,7 +751,7 @@ class BOM(WebsiteGenerator):
 				continue
 
 			old_rate = d.rate
-			if self.rm_cost_as_per != "Manual":
+			if not self.bom_creator:
 				d.rate = self.get_rm_rate(
 					{
 						"company": self.company,
@@ -1022,8 +1023,6 @@ def get_bom_item_rate(args, bom_doc):
 		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
 		price_list_data = get_price_list_rate(bom_args, item_doc)
 		rate = price_list_data.price_list_rate
-	elif bom_doc.rm_cost_as_per == "Manual":
-		return
 
 	return flt(rate)
 
