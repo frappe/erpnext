@@ -1960,7 +1960,9 @@ class TestSalesOrder(FrappeTestCase):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 
-		so = make_sales_order(qty=1, rate=100)
+		so = make_sales_order(qty=1, rate=100, do_not_submit=True)
+		so.order_type = "Shopping Cart"  # trigger auto Sales Invoice creation
+		so.submit()
 		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested")
 
 		pr = make_payment_request(dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True)
