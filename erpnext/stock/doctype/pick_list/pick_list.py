@@ -42,6 +42,7 @@ class PickList(Document):
 
 		amended_from: DF.Link | None
 		company: DF.Link
+		consider_rejected_warehouses: DF.Check
 		customer: DF.Link | None
 		customer_name: DF.Data | None
 		for_qty: DF.Float
@@ -50,6 +51,7 @@ class PickList(Document):
 		material_request: DF.Link | None
 		naming_series: DF.Literal["STO-PICK-.YYYY.-"]
 		parent_warehouse: DF.Link | None
+		pick_manually: DF.Check
 		prompt_qty: DF.Check
 		purpose: DF.Literal["Material Transfer for Manufacture", "Material Transfer", "Delivery"]
 		scan_barcode: DF.Data | None
@@ -71,7 +73,8 @@ class PickList(Document):
 
 	def before_save(self):
 		self.update_status()
-		self.set_item_locations()
+		if not self.pick_manually:
+			self.set_item_locations()
 
 		if self.get("locations"):
 			self.validate_sales_order_percentage()
