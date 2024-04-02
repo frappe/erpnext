@@ -1968,7 +1968,9 @@ class TestSalesOrder(FrappeTestCase):
 		pr = make_payment_request(dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True)
 		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
 
-		pe = get_payment_entry(so.doctype, so.name).save().submit()
+		pe = pr.set_as_paid()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pe.references[0].reference_doctype, "Sales Invoice")
 		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid")
 
 		pe.reload()
