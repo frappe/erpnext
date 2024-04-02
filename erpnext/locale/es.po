@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-31 09:35+0000\n"
-"PO-Revision-Date: 2024-04-01 14:43\n"
+"PO-Revision-Date: 2024-04-02 16:09\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -1433,7 +1433,7 @@ msgstr "Fecha de caducidad de CMA (Contrato de Mantenimiento Anual)"
 #: support/doctype/support_search_source/support_search_source.json
 msgctxt "Support Search Source"
 msgid "API"
-msgstr ""
+msgstr "API"
 
 #. Label of a Section Break field in DocType 'Currency Exchange Settings'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -1445,13 +1445,13 @@ msgstr ""
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "API Endpoint"
-msgstr ""
+msgstr "Endpoint de la API"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "API Endpoint"
-msgstr ""
+msgstr "Endpoint de la API"
 
 #. Label of a Data field in DocType 'Video Settings'
 #: utilities/doctype/video_settings/video_settings.json
@@ -24914,23 +24914,23 @@ msgstr "¿Quieres enviar la solicitud de material?"
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgctxt "Transaction Deletion Record Details"
 msgid "DocField"
-msgstr ""
+msgstr "DocField"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "DocType"
-msgstr ""
+msgstr "DocType"
 
 #. Label of a Link field in DocType 'Transaction Deletion Record Details'
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgctxt "Transaction Deletion Record Details"
 msgid "DocType"
-msgstr ""
+msgstr "DocType"
 
 #. Label of a Link field in DocType 'Transaction Deletion Record Item'
 #: setup/doctype/transaction_deletion_record_item/transaction_deletion_record_item.json
 msgctxt "Transaction Deletion Record Item"
 msgid "DocType"
-msgstr ""
+msgstr "DocType"
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:69
 msgid "DocTypes should not be added manually to the 'Excluded DocTypes' table. You are only allowed to remove entries from it."
@@ -24942,13 +24942,13 @@ msgstr "Búsqueda de documentos"
 
 #: selling/report/inactive_customers/inactive_customers.js:14
 msgid "Doctype"
-msgstr ""
+msgstr "Doctype"
 
 #. Label of a Link field in DocType 'Repost Allowed Types'
 #: accounts/doctype/repost_allowed_types/repost_allowed_types.json
 msgctxt "Repost Allowed Types"
 msgid "Doctype"
-msgstr ""
+msgstr "Doctype"
 
 #: manufacturing/report/production_plan_summary/production_plan_summary.py:141
 #: manufacturing/report/production_planning_report/production_planning_report.js:42
@@ -42759,13 +42759,13 @@ msgstr "Condiciones mixtas"
 
 #: crm/report/lead_details/lead_details.py:42
 msgid "Mobile"
-msgstr ""
+msgstr "Móvil"
 
 #. Label of a Data field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Mobile"
-msgstr ""
+msgstr "Móvil"
 
 #. Label of a Read Only field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
@@ -50509,7 +50509,7 @@ msgstr "Se requiere un inventario perpetuo para que la empresa {0} vea este info
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Personal"
-msgstr ""
+msgstr "Personal"
 
 #. Option for the 'Preferred Contact Email' (Select) field in DocType
 #. 'Employee'
@@ -68091,7 +68091,7 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:49
 msgid "Skipping {0} of {1}, {2}"
-msgstr ""
+msgstr "Saltando {0} de {1}, {2}"
 
 #. Label of a Data field in DocType 'Appointment'
 #: crm/doctype/appointment/appointment.json
@@ -70260,7 +70260,7 @@ msgstr ""
 #: manufacturing/doctype/work_order/work_order.js:602
 #: stock/doctype/material_request/material_request.js:109
 msgid "Stop"
-msgstr ""
+msgstr "Detener"
 
 #. Option for the 'Action if Annual Budget Exceeded on MR' (Select) field in
 #. DocType 'Budget'
@@ -70277,21 +70277,21 @@ msgstr ""
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Stop"
-msgstr ""
+msgstr "Detener"
 
 #. Option for the 'Action If Same Rate is Not Maintained' (Select) field in
 #. DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Stop"
-msgstr ""
+msgstr "Detener"
 
 #. Option for the 'Action if Same Rate is Not Maintained Throughout Sales
 #. Cycle' (Select) field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Stop"
-msgstr ""
+msgstr "Detener"
 
 #. Option for the 'Action If Quality Inspection Is Not Submitted' (Select)
 #. field in DocType 'Stock Settings'
@@ -70300,7 +70300,7 @@ msgstr ""
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Stop"
-msgstr ""
+msgstr "Detener"
 
 #: manufacturing/report/downtime_analysis/downtime_analysis.py:94
 msgid "Stop Reason"
@@ -75095,7 +75095,7 @@ msgstr "Tiempo (en minutos)"
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Timeline"
-msgstr ""
+msgstr "Línea de tiempo"
 
 #: manufacturing/doctype/workstation/workstation_job_card.html:31
 #: public/js/projects/timer.js:5
@@ -78475,7 +78475,7 @@ msgstr ""
 #: utilities/doctype/video/video.json
 msgctxt "Video"
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: utilities/doctype/video/video.py:113
 msgid "URL can only be a string"
@@ -79398,13 +79398,13 @@ msgstr "Usuario"
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "User Details"
-msgstr ""
+msgstr "Detalles de Usuario"
 
 #. Label of a Section Break field in DocType 'POS Closing Entry'
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgctxt "POS Closing Entry"
 msgid "User Details"
-msgstr ""
+msgstr "Detalles de Usuario"
 
 #. Label of a Link field in DocType 'Employee'
 #. Option for the 'Preferred Contact Email' (Select) field in DocType
