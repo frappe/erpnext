@@ -637,11 +637,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-12-26 19:34:08.159312",
-=======
  "modified": "2024-04-02 16:22:47.518411",
->>>>>>> 0b63dbf221 (chore: remove rate of material based on Manual)
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
