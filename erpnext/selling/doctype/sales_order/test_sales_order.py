@@ -1966,6 +1966,7 @@ class TestSalesOrder(FrappeTestCase):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 
+		# Flow progressing to SI with payment entries "moved" from SO to SI
 		so = make_sales_order(qty=1, rate=100, do_not_submit=True)
 		# no-op; for optical consistency with how a webshop SO would look like
 		so.order_type = "Shopping Cart"
@@ -1996,6 +1997,28 @@ class TestSalesOrder(FrappeTestCase):
 		self.assertEqual(
 			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
 		)  # TODO: this might be a bug; handover has happened
+
+		# Flow NOT progressing to SI with payment entries NOT "moved"
+		so = make_sales_order(qty=1, rate=100)
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested")
+
+		pr = make_payment_request(dt=so.doctype, dn=so.name, submit_doc=True, return_doc=True)
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
+
+		pe = get_payment_entry(so.doctype, so.name).save().submit()
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid")
+
+		pe.reload()
+		pe.cancel()
+		self.assertEqual(
+			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested"
+		)  # here: reset
+
+		pr.reload()
+		pr.cancel()
+		self.assertEqual(
+			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
+		)  # here: reset
 
 	def test_pick_list_without_rejected_materials(self):
 		serial_and_batch_item = make_item(
