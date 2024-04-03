@@ -279,7 +279,7 @@ class SalesInvoice(SellingController):
 			for payment in self.payments:
 				total_amount_in_payments += payment.amount
 			invoice_total = self.rounded_total or self.grand_total
-			if flt(total_amount_in_payments, 3) < flt(invoice_total, 3):
+			if flt(total_amount_in_payments, 2) < flt(invoice_total, 2):
 				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
 	def validate_pos_paid_amount(self):
