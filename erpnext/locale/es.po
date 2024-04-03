@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-31 09:35+0000\n"
-"PO-Revision-Date: 2024-04-02 16:09\n"
+"PO-Revision-Date: 2024-04-03 16:12\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -66,7 +66,7 @@ msgstr "\"Es activo fijo\" no puede estar sin marcar, ya que existe registro de 
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "#"
-msgstr ""
+msgstr "#"
 
 #. Description of the Onboarding Step 'Accounts Settings'
 #: accounts/onboarding_step/accounts_settings/accounts_settings.json
@@ -1093,20 +1093,20 @@ msgstr "<h5 class=\"text-muted uppercase\">O</h5>"
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Account Number Settings</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Configuración del número de cuenta</label>"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Cheque Print Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Amount In Words</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Cantidad en palabras</label>"
 
 #. Content of the 'Date Settings' (HTML) field in DocType 'Cheque Print
 #. Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Date Settings</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Configuración de fecha</label>"
 
 #. Content of the 'html_llwp' (HTML) field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
@@ -3251,12 +3251,12 @@ msgstr "Fecha de Adquisición"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Acre"
-msgstr ""
+msgstr "Acre"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Acre (US)"
-msgstr ""
+msgstr "Acre (EE. UU.)"
 
 #: crm/doctype/lead/lead.js:42
 #: public/js/bank_reconciliation_tool/dialog_manager.js:175
@@ -3802,7 +3802,7 @@ msgstr ""
 
 #: templates/pages/task_info.html:94 templates/pages/task_info.html:96
 msgid "Add Comment"
-msgstr ""
+msgstr "Agregar Comentario"
 
 #. Label of a Check field in DocType 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
@@ -3817,7 +3817,7 @@ msgstr "Agregar Clientes"
 #: selling/page/point_of_sale/pos_item_cart.js:92
 #: selling/page/point_of_sale/pos_item_cart.js:411
 msgid "Add Discount"
-msgstr ""
+msgstr "Agregar descuento"
 
 #: public/js/event.js:40
 msgid "Add Employees"
@@ -7173,22 +7173,22 @@ msgstr "Monto {0} {1} {2} {3}"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere"
-msgstr ""
+msgstr "Amperio"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Hour"
-msgstr ""
+msgstr "Amperio-Hora"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Minute"
-msgstr ""
+msgstr "Amperio-Minuto"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Second"
-msgstr ""
+msgstr "Amperio-Segundo"
 
 #: controllers/trends.py:237 controllers/trends.py:249
 #: controllers/trends.py:254
@@ -7762,7 +7762,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Are"
-msgstr ""
+msgstr "Área"
 
 #: public/js/utils/demo.js:20
 msgid "Are you sure you want to clear all demo data?"
@@ -8688,7 +8688,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Atmosphere"
-msgstr ""
+msgstr "Atmósfera"
 
 #. Description of the 'File to Rename' (Attach) field in DocType 'Rename Tool'
 #: utilities/doctype/rename_tool/rename_tool.json
@@ -12197,7 +12197,7 @@ msgstr "Calibración"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calibre"
-msgstr ""
+msgstr "Calibre"
 
 #: telephony/doctype/call_log/call_log.js:8
 msgid "Call Again"
@@ -12309,7 +12309,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calorie/Seconds"
-msgstr ""
+msgstr "Calorías/segundos"
 
 #. Name of a DocType
 #. Label of a Card Break in the CRM Workspace
@@ -13336,7 +13336,7 @@ msgstr "Número Celular"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Celsius"
-msgstr ""
+msgstr "Celsius"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -13457,7 +13457,7 @@ msgstr "Cambio"
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:155
 msgid "Changes in {0}"
-msgstr ""
+msgstr "Cambios en {0}"
 
 #: stock/doctype/item/item.js:277
 msgid "Changing Customer Group for the selected Customer is not allowed."
@@ -83157,43 +83157,43 @@ msgstr ""
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "old_parent"
-msgstr ""
+msgstr "old_parent"
 
 #. Label of a Link field in DocType 'Cost Center'
 #: accounts/doctype/cost_center/cost_center.json
 msgctxt "Cost Center"
 msgid "old_parent"
-msgstr ""
+msgstr "old_parent"
 
 #. Label of a Link field in DocType 'Customer Group'
 #: setup/doctype/customer_group/customer_group.json
 msgctxt "Customer Group"
 msgid "old_parent"
-msgstr ""
+msgstr "old_parent"
 
 #. Label of a Link field in DocType 'Item Group'
 #: setup/doctype/item_group/item_group.json
 msgctxt "Item Group"
 msgid "old_parent"
-msgstr ""
+msgstr "old_parent"
 
 #. Label of a Data field in DocType 'Quality Procedure'
 #: quality_management/doctype/quality_procedure/quality_procedure.json
 msgctxt "Quality Procedure"
 msgid "old_parent"
-msgstr ""
+msgstr "old_parent"
 
 #. Label of a Data field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
 msgctxt "Sales Person"
 msgid "old_parent"
-msgstr ""
+msgstr "old_parent"
 
 #. Label of a Link field in DocType 'Territory'
 #: setup/doctype/territory/territory.json
 msgctxt "Territory"
 msgid "old_parent"
-msgstr ""
+msgstr "old_parent"
 
 #: templates/pages/task_info.html:90
 msgid "on"
