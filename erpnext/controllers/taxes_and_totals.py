@@ -3,6 +3,7 @@
 
 
 import json
+import decimal
 
 import frappe
 from frappe import _, scrub
@@ -481,12 +482,22 @@ class calculate_taxes_and_totals:
 			].grand_total_for_current_item
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
-
+			
+		current_tax_amount = float(self.truncate_tax_amount_(tax_amount=current_tax_amount))
+		
 		if not (self.doc.get("is_consolidated") or tax.get("dont_recompute_tax")):
 			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
 		return current_tax_amount
-
+		
+	def truncate_tax_amount_(self, tax_amount):
+        float_precision = frappe.db.get_single_value("System Settings", "float_precision")
+        return float(
+            decimal.Decimal(tax_amount).quantize(
+                decimal.Decimal((0, (1,), -int(float_precision))), rounding=decimal.ROUND_DOWN
+            )
+        )
+	
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
 		# store tax breakup for each item
 		key = item.item_code or item.item_name
