@@ -1032,10 +1032,10 @@ class AccountsController(TransactionBase):
 				"transaction_currency": self.get("currency") or self.company_currency,
 				"transaction_exchange_rate": self.get("conversion_rate", 1),
 				"debit_in_transaction_currency": self.get_value_in_transaction_currency(
-					account_currency, args, "debit"
+					account_currency, gl_dict, "debit"
 				),
 				"credit_in_transaction_currency": self.get_value_in_transaction_currency(
-					account_currency, args, "credit"
+					account_currency, gl_dict, "credit"
 				),
 			}
 		)
@@ -1067,11 +1067,11 @@ class AccountsController(TransactionBase):
 			return "Debit Note"
 		return self.doctype
 
-	def get_value_in_transaction_currency(self, account_currency, args, field):
+	def get_value_in_transaction_currency(self, account_currency, gl_dict, field):
 		if account_currency == self.get("currency"):
-			return args.get(field + "_in_account_currency")
+			return gl_dict.get(field + "_in_account_currency")
 		else:
-			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
+			return flt(gl_dict.get(field, 0) / self.get("conversion_rate", 1))
 
 	def validate_zero_qty_for_return_invoices_with_stock(self):
 		rows = []
