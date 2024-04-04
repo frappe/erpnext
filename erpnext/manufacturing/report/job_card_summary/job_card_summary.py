@@ -33,6 +33,7 @@ def get_data(filters):
 		"total_completed_qty",
 		"workstation",
 		"operation",
+		"time_required",
 		"total_time_in_mins",
 	]
 
@@ -180,6 +181,12 @@ def get_columns(filters):
 			{"label": _("To Time"), "fieldname": "to_time", "fieldtype": "Datetime", "width": 120},
 			{
 				"label": _("Time Required (In Mins)"),
+				"fieldname": "time_required",
+				"fieldtype": "Float",
+				"width": 100,
+			},
+			{
+				"label": _("Time Taken (In Mins)"),
 				"fieldname": "total_time_in_mins",
 				"fieldtype": "Float",
 				"width": 100,
