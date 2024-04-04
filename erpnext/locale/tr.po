@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-31 09:35+0000\n"
-"PO-Revision-Date: 2024-04-01 14:43\n"
+"PO-Revision-Date: 2024-04-04 16:42\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -1487,7 +1487,7 @@ msgstr ""
 #: setup/workspace/settings/settings.json
 msgctxt "About Us Settings"
 msgid "About Us Settings"
-msgstr ""
+msgstr "Hakkımızda Ayarları"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:37
 msgid "About {0} minute remaining"
@@ -5710,7 +5710,7 @@ msgstr ""
 #: accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgctxt "Accounting Dimension Filter"
 msgid "Allow"
-msgstr ""
+msgstr "İzin Ver"
 
 #: accounts/doctype/account/account.py:502
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:66
@@ -8880,7 +8880,7 @@ msgstr ""
 #: setup/workspace/settings/settings.json
 msgctxt "Auto Email Report"
 msgid "Auto Email Report"
-msgstr ""
+msgstr "Otomatik E-Posta Raporu"
 
 #: public/js/utils/serial_no_batch_selector.js:322
 msgid "Auto Fetch"
@@ -8907,14 +8907,14 @@ msgstr ""
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Auto Name"
-msgstr ""
+msgstr "Otomatik İsim"
 
 #. Option for the 'Customer Naming By' (Select) field in DocType 'Selling
 #. Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Auto Name"
-msgstr ""
+msgstr "Otomatik İsim"
 
 #. Label of a Check field in DocType 'Loyalty Program'
 #: accounts/doctype/loyalty_program/loyalty_program.json
@@ -10311,7 +10311,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Bar"
-msgstr ""
+msgstr "Çubuk"
 
 #: public/js/utils/barcode_scanner.js:282
 msgid "Barcode"
@@ -11889,7 +11889,7 @@ msgstr ""
 #: setup/workspace/settings/settings.json
 msgctxt "Bulk Update"
 msgid "Bulk Update"
-msgstr ""
+msgstr "Toplu Güncelleme"
 
 #. Label of a Table field in DocType 'Quotation'
 #. Label of a Section Break field in DocType 'Quotation'
@@ -16933,7 +16933,7 @@ msgstr ""
 #: setup/workspace/settings/settings.json
 msgctxt "Contact Us Settings"
 msgid "Contact Us Settings"
-msgstr ""
+msgstr "İletişim Ayarları"
 
 #. Label of a Tab Break field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
@@ -17949,7 +17949,7 @@ msgstr ""
 #: stock/doctype/shipment_parcel/shipment_parcel.json
 msgctxt "Shipment Parcel"
 msgid "Count"
-msgstr ""
+msgstr "Sayı"
 
 #: crm/report/lead_details/lead_details.py:63
 #: public/js/utils/contact_address_quick_entry.js:89
@@ -18618,7 +18618,7 @@ msgstr ""
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:224
 msgid "Created On"
-msgstr ""
+msgstr "Oluşturulma Zamanı"
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard.py:250
 msgid "Created {0} scorecards for {1} between:"
@@ -19599,7 +19599,7 @@ msgstr ""
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "Custom"
-msgstr ""
+msgstr "Özel"
 
 #. Label of a Check field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -20840,31 +20840,31 @@ msgstr ""
 #: crm/workspace/crm/crm.json projects/workspace/projects/projects.json
 #: selling/workspace/selling/selling.json stock/workspace/stock/stock.json
 msgid "Dashboard"
-msgstr ""
+msgstr "Gösterge Paneli"
 
 #. Label of a Tab Break field in DocType 'Company'
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Dashboard"
-msgstr ""
+msgstr "Gösterge Paneli"
 
 #. Label of a Tab Break field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Dashboard"
-msgstr ""
+msgstr "Gösterge Paneli"
 
 #. Label of a Tab Break field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Dashboard"
-msgstr ""
+msgstr "Gösterge Paneli"
 
 #. Label of a Tab Break field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Dashboard"
-msgstr ""
+msgstr "Gösterge Paneli"
 
 #: crm/report/opportunity_summary_by_sales_stage/opportunity_summary_by_sales_stage.js:15
 msgid "Data Based On"
@@ -25854,7 +25854,7 @@ msgstr ""
 
 #: public/js/utils/serial_no_batch_selector.js:30
 msgid "Edit Full Form"
-msgstr ""
+msgstr "Tam Sayfa Düzenle"
 
 #: controllers/item_variant.py:154
 msgid "Edit Not Allowed"
@@ -26146,7 +26146,7 @@ msgstr ""
 #: setup/workspace/settings/settings.json
 msgctxt "Email Domain"
 msgid "Email Domain"
-msgstr ""
+msgstr "E-posta Etki Alanı"
 
 #. Option for the 'Email Campaign For ' (Select) field in DocType 'Email
 #. Campaign'
