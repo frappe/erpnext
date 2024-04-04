@@ -689,18 +689,24 @@ def get_straight_line_or_manual_depr_amount(
 				- flt(row.expected_value_after_useful_life)
 			)
 
-			total_days = date_diff(
-				get_last_day(
-					add_months(
-						row.depreciation_start_date,
-						flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
-						* row.frequency_of_depreciation,
-					)
-				),
-				add_days(
-					get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)), 1
-				),
-			) + 1
+			total_days = (
+				date_diff(
+					get_last_day(
+						add_months(
+							row.depreciation_start_date,
+							flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
+							* row.frequency_of_depreciation,
+						)
+					),
+					add_days(
+						get_last_day(
+							add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)
+						),
+						1,
+					),
+				)
+				+ 1
+			)
 
 			daily_depr_amount = amount / total_days
 
