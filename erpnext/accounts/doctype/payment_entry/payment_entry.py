@@ -112,6 +112,9 @@ class PaymentEntry(AccountsController):
 		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
 			return
 
+		if self.party_type not in ("Customer", "Supplier"):
+			return
+
 		if not frappe.db.get_value(
 			"Company", self.company, "book_advance_payments_in_separate_party_account"
 		):
