@@ -12,14 +12,12 @@ def execute():
 
 	count = 1
 	for d in accounting_dimensions:
-
 		if count % 2 == 0:
 			insert_after_field = "dimension_col_break"
 		else:
 			insert_after_field = "accounting_dimensions_section"
 
 		for doctype in ["Purchase Order", "Purchase Receipt", "Sales Order"]:
-
 			field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": d.fieldname})
 
 			if field:
@@ -36,7 +34,7 @@ def execute():
 			try:
 				create_custom_field(doctype, df, ignore_validate=True)
 				frappe.clear_cache(doctype=doctype)
-			except Exception as e:
+			except Exception:
 				pass
 
 		count += 1

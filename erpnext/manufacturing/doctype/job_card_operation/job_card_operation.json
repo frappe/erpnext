@@ -46,14 +46,15 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-16 18:24:35.399593",
+ "modified": "2024-03-27 13:09:57.090298",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card Operation",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

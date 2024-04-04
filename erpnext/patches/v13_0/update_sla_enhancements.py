@@ -39,7 +39,9 @@ def execute():
 		for priority in priorities:
 			if priority.parenttype == "Service Level Agreement":
 				response_time = convert_to_seconds(priority.response_time, priority.response_time_period)
-				resolution_time = convert_to_seconds(priority.resolution_time, priority.resolution_time_period)
+				resolution_time = convert_to_seconds(
+					priority.resolution_time, priority.resolution_time_period
+				)
 				frappe.db.set_value(
 					"Service Level Priority",
 					priority.name,
@@ -86,7 +88,9 @@ def execute():
 							{
 								"priority": priority.priority,
 								"default_priority": priority.default_priority,
-								"response_time": convert_to_seconds(priority.response_time, priority.response_time_period),
+								"response_time": convert_to_seconds(
+									priority.response_time, priority.response_time_period
+								),
 								"resolution_time": convert_to_seconds(
 									priority.resolution_time, priority.resolution_time_period
 								),

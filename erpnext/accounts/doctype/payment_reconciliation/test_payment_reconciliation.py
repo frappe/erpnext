@@ -1,7 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
 
 import frappe
 from frappe import qb
@@ -127,11 +126,14 @@ class TestPaymentReconciliation(FrappeTestCase):
 			setattr(self, x.attribute, acc.name)
 
 	def create_sales_invoice(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
@@ -155,10 +157,13 @@ class TestPaymentReconciliation(FrappeTestCase):
 		)
 		return sinv
 
-	def create_payment_entry(self, amount=100, posting_date=nowdate(), customer=None):
+	def create_payment_entry(self, amount=100, posting_date=None, customer=None):
 		"""
 		Helper function to populate default values in payment entry
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		payment = create_payment_entry(
 			company=self.company,
 			payment_type="Receive",
@@ -172,11 +177,14 @@ class TestPaymentReconciliation(FrappeTestCase):
 		return payment
 
 	def create_purchase_invoice(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		pinv = make_purchase_invoice(
 			qty=qty,
 			rate=rate,
@@ -201,11 +209,14 @@ class TestPaymentReconciliation(FrappeTestCase):
 		return pinv
 
 	def create_purchase_order(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		pord = create_purchase_order(
 			qty=qty,
 			rate=rate,
@@ -250,9 +261,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
 		return pr
 
-	def create_journal_entry(
-		self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None
-	):
+	def create_journal_entry(self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None):
 		je = frappe.new_doc("Journal Entry")
 		je.posting_date = posting_date or nowdate()
 		je.company = self.company
@@ -402,7 +411,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		rate = 100
 		invoices = []
 		payments = []
-		for i in range(5):
+		for _i in range(5):
 			invoices.append(self.create_sales_invoice(qty=1, rate=rate, posting_date=transaction_date))
 			pe = self.create_payment_entry(amount=rate, posting_date=transaction_date).save().submit()
 			payments.append(pe)
@@ -821,9 +830,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 
 		cr_note.cancel()
 
-		pay = self.create_payment_entry(
-			amount=amount, posting_date=transaction_date, customer=self.customer3
-		)
+		pay = self.create_payment_entry(amount=amount, posting_date=transaction_date, customer=self.customer3)
 		pay.paid_from = self.debtors_eur
 		pay.paid_from_account_currency = "EUR"
 		pay.source_exchange_rate = exchange_rate
@@ -1025,9 +1032,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		rate = 100
 
 		# 'Main - PR' Cost Center
-		si1 = self.create_sales_invoice(
-			qty=1, rate=rate, posting_date=transaction_date, do_not_submit=True
-		)
+		si1 = self.create_sales_invoice(qty=1, rate=rate, posting_date=transaction_date, do_not_submit=True)
 		si1.cost_center = self.main_cc.name
 		si1.submit()
 
@@ -1043,9 +1048,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		je1 = je1.save().submit()
 
 		# 'Sub - PR' Cost Center
-		si2 = self.create_sales_invoice(
-			qty=1, rate=rate, posting_date=transaction_date, do_not_submit=True
-		)
+		si2 = self.create_sales_invoice(qty=1, rate=rate, posting_date=transaction_date, do_not_submit=True)
 		si2.cost_center = self.sub_cc.name
 		si2.submit()
 

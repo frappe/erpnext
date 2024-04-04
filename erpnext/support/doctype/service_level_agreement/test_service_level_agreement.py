@@ -51,9 +51,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 			resolution_time=21600,
 		)
 
-		get_default_service_level_agreement = get_service_level_agreement(
-			default_service_level_agreement=1
-		)
+		get_default_service_level_agreement = get_service_level_agreement(default_service_level_agreement=1)
 
 		self.assertEqual(
 			create_default_service_level_agreement.name, get_default_service_level_agreement.name
@@ -198,9 +196,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		)
 
 		# check default SLA for custom dt
-		default_sla = get_service_level_agreement(
-			default_service_level_agreement=1, doctype=doctype.name
-		)
+		default_sla = get_service_level_agreement(default_service_level_agreement=1, doctype=doctype.name)
 		self.assertEqual(sla.name, default_sla.name)
 
 		# check SLA docfields created
@@ -390,14 +386,17 @@ def create_service_level_agreement(
 	resolution_time=0,
 	doctype="Issue",
 	condition="",
-	sla_fulfilled_on=[],
-	pause_sla_on=[],
+	sla_fulfilled_on=None,
+	pause_sla_on=None,
 	apply_sla_for_resolution=1,
 	service_level=None,
 	start_time="10:00:00",
 	end_time="18:00:00",
 ):
-
+	if pause_sla_on is None:
+		pause_sla_on = []
+	if sla_fulfilled_on is None:
+		sla_fulfilled_on = []
 	make_holiday_list()
 	make_priorities()
 
@@ -484,9 +483,7 @@ def create_service_level_agreement(
 	if sla:
 		frappe.delete_doc("Service Level Agreement", sla, force=1)
 
-	return frappe.get_doc(service_level_agreement).insert(
-		ignore_permissions=True, ignore_if_duplicate=True
-	)
+	return frappe.get_doc(service_level_agreement).insert(ignore_permissions=True, ignore_if_duplicate=True)
 
 
 def create_customer():
@@ -615,7 +612,12 @@ def create_custom_doctype():
 				"fields": [
 					{"label": "Date", "fieldname": "date", "fieldtype": "Date"},
 					{"label": "Description", "fieldname": "desc", "fieldtype": "Long Text"},
-					{"label": "Email ID", "fieldname": "email_id", "fieldtype": "Link", "options": "Customer"},
+					{
+						"label": "Email ID",
+						"fieldname": "email_id",
+						"fieldtype": "Link",
+						"options": "Customer",
+					},
 					{
 						"label": "Status",
 						"fieldname": "status",
@@ -637,8 +639,8 @@ def make_lead(creation=None, index=0, company=None):
 	return frappe.get_doc(
 		{
 			"doctype": "Lead",
-			"email_id": "test_lead1@example{0}.com".format(index),
-			"lead_name": "_Test Lead {0}".format(index),
+			"email_id": f"test_lead1@example{index}.com",
+			"lead_name": f"_Test Lead {index}",
 			"status": "Open",
 			"creation": creation,
 			"service_level_agreement_creation": creation,

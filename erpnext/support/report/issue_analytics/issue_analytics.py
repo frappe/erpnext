@@ -15,7 +15,7 @@ def execute(filters=None):
 	return IssueAnalytics(filters).run()
 
 
-class IssueAnalytics(object):
+class IssueAnalytics:
 	def __init__(self, filters=None):
 		"""Issue Analytics Report"""
 		self.filters = frappe._dict(filters or {})
@@ -44,7 +44,13 @@ class IssueAnalytics(object):
 
 		elif self.filters.based_on == "Assigned To":
 			self.columns.append(
-				{"label": _("User"), "fieldname": "user", "fieldtype": "Link", "options": "User", "width": 200}
+				{
+					"label": _("User"),
+					"fieldname": "user",
+					"fieldtype": "Link",
+					"options": "User",
+					"width": 200,
+				}
 			)
 
 		elif self.filters.based_on == "Issue Type":
@@ -75,9 +81,7 @@ class IssueAnalytics(object):
 				{"label": _(period), "fieldname": scrub(period), "fieldtype": "Int", "width": 120}
 			)
 
-		self.columns.append(
-			{"label": _("Total"), "fieldname": "total", "fieldtype": "Int", "width": 120}
-		)
+		self.columns.append({"label": _("Total"), "fieldname": "total", "fieldtype": "Int", "width": 120})
 
 	def get_data(self):
 		self.get_issues()
@@ -109,9 +113,7 @@ class IssueAnalytics(object):
 
 		from_date, to_date = getdate(self.filters.from_date), getdate(self.filters.to_date)
 
-		increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(
-			self.filters.range, 1
-		)
+		increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(self.filters.range, 1)
 
 		if self.filters.range in ["Monthly", "Quarterly"]:
 			from_date = from_date.replace(day=1)
@@ -121,7 +123,7 @@ class IssueAnalytics(object):
 			from_date = from_date + relativedelta(from_date, weekday=MO(-1))
 
 		self.periodic_daterange = []
-		for dummy in range(1, 53):
+		for _dummy in range(1, 53):
 			if self.filters.range == "Weekly":
 				period_end_date = add_days(from_date, 6)
 			else:

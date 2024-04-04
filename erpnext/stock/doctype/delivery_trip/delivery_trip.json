@@ -188,7 +188,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-01 07:06:06.314503",
+ "modified": "2024-03-27 13:06:50.643296",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Trip",
@@ -256,7 +256,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "driver_name"

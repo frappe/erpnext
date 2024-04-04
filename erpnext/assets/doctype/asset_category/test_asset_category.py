@@ -31,9 +31,7 @@ class TestAssetCategory(unittest.TestCase):
 			pass
 
 	def test_cwip_accounting(self):
-		company_cwip_acc = frappe.db.get_value(
-			"Company", "_Test Company", "capital_work_in_progress_account"
-		)
+		frappe.db.get_value("Company", "_Test Company", "capital_work_in_progress_account")
 		frappe.db.set_value("Company", "_Test Company", "capital_work_in_progress_account", "")
 
 		asset_category = frappe.new_doc("Asset Category")

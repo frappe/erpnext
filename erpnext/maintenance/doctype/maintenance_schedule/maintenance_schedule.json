@@ -238,7 +238,7 @@
    "link_fieldname": "maintenance_schedule"
   }
  ],
- "modified": "2024-03-22 16:01:11.868813",
+ "modified": "2024-03-27 13:10:03.659952",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",
@@ -261,7 +261,7 @@
   }
  ],
  "search_fields": "status,customer,customer_name",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer"

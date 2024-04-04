@@ -4,6 +4,7 @@ import "./queries";
 import "./sms_manager";
 import "./utils/party";
 import "./controllers/stock_controller";
+import "./utils/serial_no_batch_selector";
 import "./payment/payments";
 import "./templates/visual_plant_floor_template.html";
 import "./plant_floor_visual/visual_plant";
@@ -33,5 +34,7 @@ import "./utils/sales_common.js";
 import "./controllers/buying.js";
 import "./utils/demo.js";
 import "./financial_statements.js";
+import "./sales_trends_filters.js";
+import "./purchase_trends_filters.js";
 
 // import { sum } from 'frappe/public/utils/util.js'

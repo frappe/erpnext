@@ -13,7 +13,7 @@ def execute(filters=None, consolidated=False):
 	return data, columns
 
 
-class DelayedItemReport(object):
+class DelayedItemReport:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 

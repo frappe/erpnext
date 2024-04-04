@@ -71,7 +71,7 @@ class SupplierQuotation(BuyingController):
 		naming_series: DF.Literal["PUR-SQTN-.YYYY.-"]
 		net_total: DF.Currency
 		opportunity: DF.Link | None
-		other_charges_calculation: DF.MarkdownEditor | None
+		other_charges_calculation: DF.TextEditor | None
 		plc_conversion_rate: DF.Float
 		price_list_currency: DF.Link | None
 		pricing_rules: DF.Table[PricingRuleDetail]
@@ -104,7 +104,7 @@ class SupplierQuotation(BuyingController):
 	# end: auto-generated types
 
 	def validate(self):
-		super(SupplierQuotation, self).validate()
+		super().validate()
 
 		if not self.status:
 			self.status = "Draft"
@@ -130,7 +130,7 @@ class SupplierQuotation(BuyingController):
 		pass
 
 	def validate_with_previous_doc(self):
-		super(SupplierQuotation, self).validate_with_previous_doc(
+		super().validate_with_previous_doc(
 			{
 				"Material Request": {
 					"ref_dn_field": "prevdoc_docname",

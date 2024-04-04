@@ -52,7 +52,7 @@
   }
  ],
  "links": [],
- "modified": "2020-09-28 12:51:00.320421",
+ "modified": "2024-03-27 13:10:41.521126",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment Parcel Template",
@@ -72,7 +72,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

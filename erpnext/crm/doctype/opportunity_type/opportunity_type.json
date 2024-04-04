@@ -19,7 +19,7 @@
   }
  ],
  "links": [],
- "modified": "2024-03-13 09:09:24.754423",
+ "modified": "2024-03-27 13:10:07.690090",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Type",
@@ -61,7 +61,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1,

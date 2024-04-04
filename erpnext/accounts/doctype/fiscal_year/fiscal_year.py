@@ -108,9 +108,9 @@ class FiscalYear(Document):
 
 				if overlap:
 					frappe.throw(
-						_("Year start date or end date is overlapping with {0}. To avoid please set company").format(
-							existing.name
-						),
+						_(
+							"Year start date or end date is overlapping with {0}. To avoid please set company"
+						).format(existing.name),
 						frappe.NameError,
 					)
 
@@ -126,9 +126,9 @@ def check_duplicate_fiscal_year(doc):
 			not frappe.flags.in_test
 		):
 			frappe.throw(
-				_("Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0}").format(
-					fiscal_year
-				)
+				_(
+					"Fiscal Year Start Date and Fiscal Year End Date are already set in Fiscal Year {0}"
+				).format(fiscal_year)
 			)
 
 

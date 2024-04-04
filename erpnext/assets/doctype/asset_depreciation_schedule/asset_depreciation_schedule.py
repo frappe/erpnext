@@ -275,9 +275,7 @@ class AssetDepreciationSchedule(Document):
 			row.depreciation_method in ("Written Down Value", "Double Declining Balance")
 			and cint(row.frequency_of_depreciation) != 12
 		):
-			has_wdv_or_dd_non_yearly_pro_rata = _check_is_pro_rata(
-				asset_doc, row, wdv_or_dd_non_yearly=True
-			)
+			has_wdv_or_dd_non_yearly_pro_rata = _check_is_pro_rata(asset_doc, row, wdv_or_dd_non_yearly=True)
 
 		skip_row = False
 		should_get_last_day = is_last_day_of_the_month(row.depreciation_start_date)
@@ -670,7 +668,9 @@ def get_straight_line_or_manual_depr_amount(
 			)
 			from_date = add_days(
 				get_last_day(
-					add_months(row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation)
+					add_months(
+						row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
+					)
 				),
 				1,
 			)
@@ -689,21 +689,18 @@ def get_straight_line_or_manual_depr_amount(
 				- flt(row.expected_value_after_useful_life)
 			)
 
-			total_days = (
-				date_diff(
-					get_last_day(
-						add_months(
-							row.depreciation_start_date,
-							flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
-							* row.frequency_of_depreciation,
-						)
-					),
-					add_days(
-						get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)), 1
-					),
-				)
-				+ 1
-			)
+			total_days = date_diff(
+				get_last_day(
+					add_months(
+						row.depreciation_start_date,
+						flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
+						* row.frequency_of_depreciation,
+					)
+				),
+				add_days(
+					get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)), 1
+				),
+			) + 1
 
 			daily_depr_amount = amount / total_days
 
@@ -712,7 +709,9 @@ def get_straight_line_or_manual_depr_amount(
 			)
 			from_date = add_days(
 				get_last_day(
-					add_months(row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation)
+					add_months(
+						row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
+					)
 				),
 				1,
 			)
@@ -938,9 +937,7 @@ def get_temp_asset_depr_schedule_doc(
 	update_asset_finance_book_row=False,
 	new_depr_schedule=None,
 ):
-	current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
-		asset_doc.name, "Active", row.finance_book
-	)
+	current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_doc.name, "Active", row.finance_book)
 
 	if not current_asset_depr_schedule_doc:
 		frappe.throw(

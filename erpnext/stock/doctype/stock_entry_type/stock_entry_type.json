@@ -29,7 +29,7 @@
   }
  ],
  "links": [],
- "modified": "2021-05-21 11:27:01.144110",
+ "modified": "2024-03-27 13:10:44.322729",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
@@ -85,7 +85,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

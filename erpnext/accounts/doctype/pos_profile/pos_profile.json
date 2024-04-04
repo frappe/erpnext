@@ -402,7 +402,7 @@
    "link_fieldname": "pos_profile"
   }
  ],
- "modified": "2022-08-10 12:57:06.241439",
+ "modified": "2024-03-27 13:10:16.476972",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
@@ -428,7 +428,7 @@
    "role": "Accounts User"
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

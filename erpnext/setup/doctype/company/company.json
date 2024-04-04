@@ -766,7 +766,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2023-10-23 10:19:24.322898",
+ "modified": "2024-03-27 13:06:45.374715",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -825,7 +825,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1

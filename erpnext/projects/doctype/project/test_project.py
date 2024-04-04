@@ -23,20 +23,23 @@ class TestProject(FrappeTestCase):
 		task1 = task_exists("Test Template Task with No Parent and Dependency")
 		if not task1:
 			task1 = create_task(
-				subject="Test Template Task with No Parent and Dependency", is_template=1, begin=5, duration=3
+				subject="Test Template Task with No Parent and Dependency",
+				is_template=1,
+				begin=5,
+				duration=3,
+				priority="High",
 			)
 
-		template = make_project_template(
-			"Test Project Template - No Parent and Dependend Tasks", [task1]
-		)
+		template = make_project_template("Test Project Template - No Parent and Dependend Tasks", [task1])
 		project = get_project(project_name, template)
 		tasks = frappe.get_all(
 			"Task",
-			["subject", "exp_end_date", "depends_on_tasks"],
+			["subject", "exp_end_date", "depends_on_tasks", "priority"],
 			dict(project=project.name),
 			order_by="creation asc",
 		)
 
+		self.assertEqual(tasks[0].priority, "High")
 		self.assertEqual(tasks[0].subject, "Test Template Task with No Parent and Dependency")
 		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 5, 3))
 		self.assertEqual(len(tasks), 1)
@@ -180,9 +183,7 @@ class TestProject(FrappeTestCase):
 			template_parent_task3,
 			template_task3,
 		]
-		project_template = make_project_template(
-			"Project template with common Task Subject", template_tasks
-		)
+		project_template = make_project_template("Project template with common Task Subject", template_tasks)
 
 		# Step - 4: Create Project against the Project Template
 		project = get_project("Project with common Task Subject", project_template)
@@ -191,7 +192,7 @@ class TestProject(FrappeTestCase):
 		)
 
 		# Test - 1: No. of Project Tasks should be equal to No. of Template Tasks
-		self.assertEquals(len(project_tasks), len(template_tasks))
+		self.assertEqual(len(project_tasks), len(template_tasks))
 
 		# Test - 2: All child Project Tasks should have Parent Task linked
 		for pt in project_tasks:
@@ -200,7 +201,6 @@ class TestProject(FrappeTestCase):
 
 
 def get_project(name, template):
-
 	project = frappe.get_doc(
 		dict(
 			doctype="Project",

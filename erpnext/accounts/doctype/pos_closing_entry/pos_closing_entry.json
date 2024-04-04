@@ -236,7 +236,7 @@
    "link_fieldname": "pos_closing_entry"
   }
  ],
- "modified": "2023-08-10 16:25:49.322697",
+ "modified": "2024-03-27 13:10:14.073467",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
@@ -285,7 +285,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

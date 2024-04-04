@@ -164,14 +164,14 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-03-22 18:44:36.816037",
+ "modified": "2024-03-27 13:10:03.992727",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }
