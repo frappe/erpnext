@@ -347,7 +347,7 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 			# acc
 			if acc_dict.entries:
 				# opening
-				data.append({})
+				data.append({"debit_in_transaction_currency": None, "credit_in_transaction_currency": None})
 				if filters.get("group_by") != "Group by Voucher":
 					data.append(acc_dict.totals.opening)
 
@@ -359,7 +359,8 @@ def get_data_with_opening_closing(filters, account_details, accounting_dimension
 				# closing
 				if filters.get("group_by") != "Group by Voucher":
 					data.append(acc_dict.totals.closing)
-		data.append({})
+
+		data.append({"debit_in_transaction_currency": None, "credit_in_transaction_currency": None})
 	else:
 		data += entries
 
@@ -380,6 +381,8 @@ def get_totals_dict():
 			credit=0.0,
 			debit_in_account_currency=0.0,
 			credit_in_account_currency=0.0,
+			debit_in_transaction_currency=None,
+			credit_in_transaction_currency=None,
 		)
 
 	return _dict(
@@ -423,6 +426,10 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 
 		data[key].debit_in_account_currency += gle.debit_in_account_currency
 		data[key].credit_in_account_currency += gle.credit_in_account_currency
+
+		if filters.get("add_values_in_transaction_currency") and key not in ["opening", "closing", "total"]:
+			data[key].debit_in_transaction_currency += gle.debit_in_transaction_currency
+			data[key].credit_in_transaction_currency += gle.credit_in_transaction_currency
 
 		if filters.get("show_net_values_in_party_account") and account_type_map.get(data[key].account) in (
 			"Receivable",
