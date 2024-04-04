@@ -1543,7 +1543,7 @@ class TestPaymentEntry(FrappeTestCase):
 		company = "_Test Company"
 		customer = create_customer(frappe.generate_hash(length=10), "INR")
 		advance_account = create_account(
-			parent_account="Current Assets - _TC",
+			parent_account="Current Liabilities - _TC",
 			account_name="Advances Received",
 			company=company,
 			account_type="Receivable",
