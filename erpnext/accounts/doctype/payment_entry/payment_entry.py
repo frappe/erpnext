@@ -1205,6 +1205,26 @@ class PaymentEntry(AccountsController):
 				):
 					self.add_advance_gl_for_reference(gl_entries, ref)
 
+	def get_dr_and_account_for_advances(self, reference):
+		if reference.reference_doctype == "Sales Invoice":
+			return "credit", reference.account
+
+		if reference.reference_doctype == "Payment Entry":
+			reverse_payment_details = frappe.db.get_all(
+				"Payment Entry",
+				filters={"name": reference.reference_name},
+				fields=["payment_type", "party_type"],
+			)[0]
+			if (
+				reverse_payment_details.payment_type == "Pay"
+				and reverse_payment_details.party_type == "Customer"
+			):
+				return "credit", self.party_account
+			else:
+				return "debit", self.party_account
+
+		return "debit", reference.account
+
 	def add_advance_gl_for_reference(self, gl_entries, invoice):
 		args_dict = {
 			"party_type": self.party_type,
@@ -1224,10 +1244,15 @@ class PaymentEntry(AccountsController):
 		if getdate(posting_date) < getdate(self.posting_date):
 			posting_date = self.posting_date
 
+<<<<<<< HEAD
 		dr_or_cr = (
 			"credit" if invoice.reference_doctype in ["Sales Invoice", "Payment Entry"] else "debit"
 		)
 		args_dict["account"] = invoice.account
+=======
+		dr_or_cr, account = self.get_dr_and_account_for_advances(invoice)
+		args_dict["account"] = account
+>>>>>>> 9fd2dddfde (fix: invalid ledger entries on payment against reverse payments)
 		args_dict[dr_or_cr] = invoice.allocated_amount
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
 		args_dict.update(
