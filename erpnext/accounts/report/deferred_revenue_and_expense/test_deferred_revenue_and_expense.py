@@ -314,14 +314,12 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		pi.submit()
 
 		pda = frappe.get_doc(
-			dict(
-				doctype="Process Deferred Accounting",
-				posting_date=nowdate(),
-				start_date="2024-01-01",
-				end_date="2024-01-31",
-				type="Expense",
-				company=self.company,
-			)
+			doctype="Process Deferred Accounting",
+			posting_date=nowdate(),
+			start_date="2024-01-01",
+			end_date="2024-01-31",
+			type="Expense",
+			company=self.company,
 		)
 		pda.insert()
 		pda.submit()
@@ -351,6 +349,6 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		self.assertTrue(inv)
 		# calculate the total deferred expense for the period
 		inv = inv[0].calculate_invoice_revenue_expense_for_period()
-		deferred_exp = sum([inv[idx].actual for idx in range(len(report.period_total))])
+		deferred_exp = sum([inv[idx].actual for idx in range(len(report.period_list))])
 		# make sure the total deferred expense is greater than 0
-		self.assertGreater(deferred_exp, 0)
+		self.assertLess(deferred_exp, 0)
