@@ -682,7 +682,19 @@ def update_reference_in_payment_entry(
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	if not skip_ref_details_update_for_pe:
-		payment_entry.set_missing_ref_details(ref_exchange_rate=d.exchange_rate or None)
+		reference_exchange_details = frappe._dict()
+		if d.against_voucher_type == "Journal Entry" and d.exchange_rate:
+			reference_exchange_details.update(
+				{
+					"reference_doctype": d.against_voucher_type,
+					"reference_name": d.against_voucher,
+					"exchange_rate": d.exchange_rate,
+				}
+			)
+		payment_entry.set_missing_ref_details(
+			update_ref_details_only_for=[(d.against_voucher_type, d.against_voucher)],
+			reference_exchange_details=reference_exchange_details,
+		)
 	payment_entry.set_amounts()
 
 	payment_entry.make_exchange_gain_loss_journal(
