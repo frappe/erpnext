@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-31 09:35+0000\n"
-"PO-Revision-Date: 2024-04-04 16:42\n"
+"PO-Revision-Date: 2024-04-05 16:44\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -25115,7 +25115,7 @@ msgstr "İndir"
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgid "Download Backups"
-msgstr ""
+msgstr "Yedekleri İndir"
 
 #: public/js/utils/serial_no_batch_selector.js:241
 msgid "Download CSV Template"
@@ -31673,7 +31673,7 @@ msgstr ""
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "Heatmap"
-msgstr ""
+msgstr "Isı Haritası"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
