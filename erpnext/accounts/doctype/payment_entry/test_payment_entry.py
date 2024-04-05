@@ -1599,9 +1599,9 @@ class TestPaymentEntry(FrappeTestCase):
 
 		# assert General and Payment Ledger entries post partial reconciliation
 		self.expected_gle = [
-			{"account": "Debtors - _TC", "debit": 0.0, "credit": 400.0},
 			{"account": advance_account, "debit": 400.0, "credit": 0.0},
 			{"account": advance_account, "debit": 0.0, "credit": 1000.0},
+			{"account": advance_account, "debit": 0.0, "credit": 400.0},
 			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
 		]
 		self.expected_ple = [
@@ -1612,7 +1612,7 @@ class TestPaymentEntry(FrappeTestCase):
 				"amount": -1000.0,
 			},
 			{
-				"account": "Debtors - _TC",
+				"account": advance_account,
 				"voucher_no": pe.name,
 				"against_voucher_no": reverse_pe.name,
 				"amount": -400.0,
