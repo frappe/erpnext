@@ -180,7 +180,7 @@ def get_columns(filters):
 			{"label": _("From Time"), "fieldname": "from_time", "fieldtype": "Datetime", "width": 120},
 			{"label": _("To Time"), "fieldname": "to_time", "fieldtype": "Datetime", "width": 120},
 			{
-				"label": _("Excepted Time Required (In Mins)"),
+				"label": _("Expected Time Required (In Mins)"),
 				"fieldname": "time_required",
 				"fieldtype": "Float",
 				"width": 100,
