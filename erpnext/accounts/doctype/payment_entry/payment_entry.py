@@ -1321,15 +1321,7 @@ class PaymentEntry(AccountsController):
 			return "credit", reference.account
 
 		if reference.reference_doctype == "Payment Entry":
-			reverse_payment_details = frappe.db.get_all(
-				"Payment Entry",
-				filters={"name": reference.reference_name},
-				fields=["payment_type", "party_type"],
-			)[0]
-			if (
-				reverse_payment_details.payment_type == "Pay"
-				and reverse_payment_details.party_type == "Customer"
-			):
+			if reference.account_type == "Receivable" and reference.payment_type == "Pay":
 				return "credit", self.party_account
 			else:
 				return "debit", self.party_account
@@ -2214,6 +2206,10 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
 	company_currency = ref_doc.get("company_currency") or erpnext.get_company_currency(ref_doc.company)
 
+	# Only applies for Reverse Payment Entries
+	account_type = None
+	payment_type = None
+
 	if reference_doctype == "Dunning":
 		total_amount = outstanding_amount = ref_doc.get("dunning_amount")
 		exchange_rate = 1
@@ -2225,6 +2221,18 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		else:
 			exchange_rate = 1
 			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
+
+	elif reference_doctype == "Payment Entry":
+		if reverse_payment_details := frappe.db.get_all(
+			"Payment Entry",
+			filters={"name": reference_name},
+			fields=["payment_type", "party_type"],
+		)[0]:
+			payment_type = reverse_payment_details.payment_type
+			account_type = frappe.db.get_value(
+				"Party Type", reverse_payment_details.party_type, "account_type"
+			)
+		exchange_rate = 1
 
 	elif reference_doctype != "Journal Entry":
 		if not total_amount:
@@ -2270,6 +2278,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			"outstanding_amount": flt(outstanding_amount),
 			"exchange_rate": flt(exchange_rate),
 			"bill_no": ref_doc.get("bill_no"),
+			"account_type": account_type,
+			"payment_type": payment_type,
 		}
 	)
 	if account:
