@@ -1335,6 +1335,59 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
 		pr.reconcile()
 
+	def test_reverse_payment_against_payment_for_supplier(self):
+		"""
+		Reconcile a payment against a reverse payment, for a supplier.
+		"""
+		self.supplier = "_Test Supplier"
+		amount = 4000
+
+		pe = self.create_payment_entry(amount=amount)
+		pe.party_type = "Supplier"
+		pe.party = self.supplier
+		pe.payment_type = "Pay"
+		pe.paid_from = self.cash
+		pe.paid_to = self.creditors
+		pe.save().submit()
+
+		reverse_pe = self.create_payment_entry(amount=amount)
+		reverse_pe.party_type = "Supplier"
+		reverse_pe.party = self.supplier
+		reverse_pe.payment_type = "Receive"
+		reverse_pe.paid_from = self.creditors
+		reverse_pe.paid_to = self.cash
+		reverse_pe.save().submit()
+
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		self.assertEqual(pr.invoices[0].invoice_number, reverse_pe.name)
+		self.assertEqual(pr.payments[0].reference_name, pe.name)
+
+		invoices = [invoice.as_dict() for invoice in pr.invoices]
+		payments = [payment.as_dict() for payment in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		pe.reload()
+		self.assertEqual(len(pe.references), 1)
+		self.assertEqual(pe.references[0].exchange_rate, 1)
+		# There should not be any Exc Gain/Loss
+		self.assertEqual(pe.references[0].exchange_gain_loss, 0)
+		self.assertEqual(pe.references[0].reference_name, reverse_pe.name)
+
+		journals = frappe.db.get_all(
+			"Journal Entry",
+			filters={
+				"voucher_type": "Exchange Gain Or Loss",
+				"reference_type": "Payment Entry",
+				"reference_name": ("in", [pe.name, reverse_pe.name]),
+			},
+		)
+		# There should be no Exchange Gain/Loss created
+		self.assertEqual(journals, [])
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
