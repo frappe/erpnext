@@ -56,7 +56,8 @@ class TestAccountsController(FrappeTestCase):
 	20 series - Sales Invoice against Journals
 	30 series - Sales Invoice against Credit Notes
 	40 series - Company default Cost center is unset
-	50 series = Journals against Journals
+	50 series - Journals against Journals
+	60 series - Journals against Payment Entries
 	90 series - Dimension inheritence
 	"""
 
@@ -1535,3 +1536,70 @@ class TestAccountsController(FrappeTestCase):
 		exc_je_for_je = self.get_journals_for(journal_as_payment.doctype, journal_as_payment.name)
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_je, [])
+
+	def test_60_payment_entry_against_journal(self):
+		# Invoices
+		exc_rate1 = 75
+		exc_rate2 = 77
+		amount = 1
+		je1 = self.create_journal_entry(
+			acc1=self.debit_usd,
+			acc1_exc_rate=exc_rate1,
+			acc2=self.cash,
+			acc1_amount=amount,
+			acc2_amount=(amount * 75),
+			acc2_exc_rate=1,
+		)
+		je1.accounts[0].party_type = "Customer"
+		je1.accounts[0].party = self.customer
+		je1 = je1.save().submit()
+
+		je2 = self.create_journal_entry(
+			acc1=self.debit_usd,
+			acc1_exc_rate=exc_rate2,
+			acc2=self.cash,
+			acc1_amount=amount,
+			acc2_amount=(amount * exc_rate2),
+			acc2_exc_rate=1,
+		)
+		je2.accounts[0].party_type = "Customer"
+		je2.accounts[0].party = self.customer
+		je2 = je2.save().submit()
+
+		# Payment
+		pe = self.create_payment_entry(amount=2, source_exc_rate=exc_rate1).save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.receivable_payable_account = self.debit_usd
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 2)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		# There should be no outstanding in both currencies
+		self.assert_ledger_outstanding(je1.doctype, je1.name, 0.0, 0.0)
+		self.assert_ledger_outstanding(je2.doctype, je2.name, 0.0, 0.0)
+
+		# Exchange Gain/Loss Journal should've been created only for JE2
+		exc_je_for_je1 = self.get_journals_for(je1.doctype, je1.name)
+		exc_je_for_je2 = self.get_journals_for(je2.doctype, je2.name)
+		self.assertEqual(exc_je_for_je1, [])
+		self.assertEqual(len(exc_je_for_je2), 1)
+
+		# Cancel Payment
+		pe.reload()
+		pe.cancel()
+
+		self.assert_ledger_outstanding(je1.doctype, je1.name, (amount * exc_rate1), amount)
+		self.assert_ledger_outstanding(je2.doctype, je2.name, (amount * exc_rate2), amount)
+
+		# Exchange Gain/Loss Journal should've been cancelled
+		exc_je_for_je1 = self.get_journals_for(je1.doctype, je1.name)
+		exc_je_for_je2 = self.get_journals_for(je2.doctype, je2.name)
+		self.assertEqual(exc_je_for_je1, [])
+		self.assertEqual(exc_je_for_je2, [])
