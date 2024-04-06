@@ -280,7 +280,10 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		]
 		self.assertEqual(report.period_total, expected)
 
-	@change_settings("Accounts Settings", {"book_deferred_entries_based_on": "Months"})
+	@change_settings(
+		"Accounts Settings",
+		{"book_deferred_entries_based_on": "Months", "book_deferred_entries_via_journal_entry": 0},
+	)
 	def test_zero_amount(self):
 		self.create_item("_Test Office Desk", 0, self.warehouse, self.company)
 		item = frappe.get_doc("Item", self.item)
@@ -295,7 +298,7 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 			supplier=self.supplier,
 			is_return=False,
 			update_stock=False,
-			posting_date=frappe.utils.datetime.date(2023, 12, 30),
+			posting_date=frappe.utils.datetime.date(2021, 12, 30),
 			parent_cost_center=self.cost_center,
 			cost_center=self.cost_center,
 			do_not_save=True,
@@ -306,8 +309,8 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		)
 		pi.set_posting_time = True
 		pi.items[0].enable_deferred_expense = 1
-		pi.items[0].service_start_date = "2023-12-30"
-		pi.items[0].service_end_date = "2024-12-30"
+		pi.items[0].service_start_date = "2021-12-30"
+		pi.items[0].service_end_date = "2022-12-30"
 		pi.items[0].deferred_expense_account = self.deferred_expense_account
 		pi.items[0].expense_account = self.expense_account
 		pi.save()
@@ -316,8 +319,8 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		pda = frappe.get_doc(
 			doctype="Process Deferred Accounting",
 			posting_date=nowdate(),
-			start_date="2024-01-01",
-			end_date="2024-01-31",
+			start_date="2022-01-01",
+			end_date="2022-01-31",
 			type="Expense",
 			company=self.company,
 		)
@@ -325,13 +328,13 @@ class TestDeferredRevenueAndExpense(FrappeTestCase, AccountsTestMixin):
 		pda.submit()
 
 		# execute report
-		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2024-01-31"))
+		fiscal_year = frappe.get_doc("Fiscal Year", get_fiscal_year(date="2022-01-31"))
 		self.filters = frappe._dict(
 			{
 				"company": self.company,
 				"filter_based_on": "Date Range",
-				"period_start_date": "2024-01-01",
-				"period_end_date": "2024-01-31",
+				"period_start_date": "2022-01-01",
+				"period_end_date": "2022-01-31",
 				"from_fiscal_year": fiscal_year.year,
 				"to_fiscal_year": fiscal_year.year,
 				"periodicity": "Monthly",
