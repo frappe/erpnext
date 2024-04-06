@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_group_name",
@@ -21,7 +22,8 @@
   "taxes",
   "lft",
   "old_parent",
-  "rgt"
+  "rgt",
+  "route"
  ],
  "fields": [
   {
@@ -127,15 +129,21 @@
    "options": "Item Group",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "route",
+   "fieldtype": "Data",
+   "label": "Route"
   }
  ],
+ "has_web_view": 1,
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2024-03-27 13:09:54.588785",
+ "modified": "2024-04-06 11:07:20.012507",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
