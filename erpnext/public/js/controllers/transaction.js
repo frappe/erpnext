@@ -1163,10 +1163,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				method: "erpnext.stock.get_item_details.get_conversion_factor",
 				args: {
 					item_code: item.item_code,
-					uom: item.uom
+					uom: item.uom,
+					warehouse: item.warehouse || me.frm.doc.set_warehouse || me.frm.doc.warehouse,
 				},
 				callback: function(r) {
 					if(!r.exc) {
+						frappe.model.set_value(cdt, cdn, 'last_purchase_rate', flt(r.message.last_purchase_rate));
 						frappe.model.set_value(cdt, cdn, 'conversion_factor', r.message.conversion_factor);
 					}
 				}
