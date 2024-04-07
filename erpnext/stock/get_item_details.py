@@ -962,7 +962,7 @@ def get_serial_no_batchwise(args, sales_order=None):
 			}))
 
 @frappe.whitelist()
-def get_conversion_factor(item_code, uom):
+def get_conversion_factor(item_code, uom, warehouse=None):
 	variant_of = frappe.db.get_value("Item", item_code, "variant_of", cache=True)
 	filters = {"parent": item_code, "uom": uom}
 	if variant_of:
@@ -972,7 +972,23 @@ def get_conversion_factor(item_code, uom):
 	if not conversion_factor:
 		stock_uom = frappe.db.get_value("Item", item_code, "stock_uom")
 		conversion_factor = get_uom_conv_factor(uom, stock_uom)
-	return {"conversion_factor": conversion_factor or 1.0}
+
+	last_purchase_rate = get_last_purchase_rate_by_uom(item_code, uom, warehouse)
+
+	return {"conversion_factor": conversion_factor or 1.0, "last_purchase_rate": last_purchase_rate}
+
+def get_last_purchase_rate_by_uom(item_code, uom, warehouse):
+    if warehouse:
+        query = """SELECT item.rate FROM `tabPurchase Invoice Item` item
+				   INNER JOIN `tabPurchase Invoice` invoice ON item.parent = invoice.name
+				   WHERE item.item_code = %s AND item.uom = %s AND item.warehouse = %s
+				   AND invoice.docstatus = 1 AND invoice.is_return = 0
+				   AND item.rate > 0
+        		   ORDER BY invoice.posting_date DESC LIMIT 1"""
+        rate = frappe.db.sql(query, (item_code, uom, warehouse))
+        return rate[0][0] if rate else 0
+    else:
+        return 0
 
 @frappe.whitelist()
 def get_projected_qty(item_code, warehouse):
