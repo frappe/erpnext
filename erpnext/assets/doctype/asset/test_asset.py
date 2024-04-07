@@ -219,7 +219,11 @@ class TestAsset(AssetSetup):
 			asset.precision("gross_purchase_amount"),
 		)
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
-			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
+			asset.finance_books[0],
+			9000,
+			get_last_day(add_months(purchase_date, 1)),
+			date,
+			original_schedule_date=get_last_day(nowdate()),
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 		self.assertEquals(
@@ -287,7 +291,11 @@ class TestAsset(AssetSetup):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
 		pro_rata_amount, _, _ = asset.get_pro_rata_amt(
-			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
+			asset.finance_books[0],
+			9000,
+			get_last_day(add_months(purchase_date, 1)),
+			date,
+			original_schedule_date=get_last_day(nowdate()),
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 
@@ -349,7 +357,7 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
-		expected_values = [["2023-03-31", 12000, 36000], ["2023-05-23", 1742.47, 37742.47]]
+		expected_values = [["2023-03-31", 12000, 36000], ["2023-05-23", 1737.7, 37737.7]]
 
 		for i, schedule in enumerate(asset.schedules):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
@@ -360,7 +368,7 @@ class TestAsset(AssetSetup):
 		expected_gle = (
 			(
 				"_Test Accumulated Depreciations - _TC",
-				37742.47,
+				37737.7,
 				0.0,
 			),
 			(
@@ -371,7 +379,7 @@ class TestAsset(AssetSetup):
 			(
 				"_Test Gain/Loss on Asset Disposal - _TC",
 				0.0,
-				17742.47,
+				17737.7,
 			),
 			("Debtors - _TC", 40000.0, 0.0),
 		)
@@ -691,18 +699,18 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		expected_schedules = [
-			["2023-01-31", 1021.98, 1021.98],
-			["2023-02-28", 923.08, 1945.06],
-			["2023-03-31", 1021.98, 2967.04],
-			["2023-04-30", 989.01, 3956.05],
-			["2023-05-31", 1021.98, 4978.03],
-			["2023-06-30", 989.01, 5967.04],
-			["2023-07-31", 1021.98, 6989.02],
-			["2023-08-31", 1021.98, 8011.0],
-			["2023-09-30", 989.01, 9000.01],
-			["2023-10-31", 1021.98, 10021.99],
-			["2023-11-30", 989.01, 11011.0],
-			["2023-12-31", 989.0, 12000.0],
+			["2023-01-31", 1019.18, 1019.18],
+			["2023-02-28", 920.55, 1939.73],
+			["2023-03-31", 1019.18, 2958.91],
+			["2023-04-30", 986.3, 3945.21],
+			["2023-05-31", 1019.18, 4964.39],
+			["2023-06-30", 986.3, 5950.69],
+			["2023-07-31", 1019.18, 6969.87],
+			["2023-08-31", 1019.18, 7989.05],
+			["2023-09-30", 986.3, 8975.35],
+			["2023-10-31", 1019.18, 9994.53],
+			["2023-11-30", 986.3, 10980.83],
+			["2023-12-31", 1019.17, 12000.0],
 		]
 
 		schedules = [
