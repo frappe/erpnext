@@ -636,32 +636,36 @@ def get_straight_line_or_manual_depr_amount(
 	# if the Depreciation Schedule is being modified after Asset Value Adjustment due to decrease in asset value
 	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment:
 		if row.daily_prorata_based:
-			daily_depr_amount = (
-				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
-			) / date_diff(
-				get_last_day(
-					add_months(
-						row.depreciation_start_date,
-						flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
-						* row.frequency_of_depreciation,
-					)
-				),
-				add_days(
+			amount = flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
+			total_days = (
+				date_diff(
 					get_last_day(
 						add_months(
 							row.depreciation_start_date,
-							flt(
-								row.total_number_of_depreciations
-								- asset.number_of_depreciations_booked
-								- number_of_pending_depreciations
-								- 1
-							)
+							flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
 							* row.frequency_of_depreciation,
 						)
 					),
-					1,
-				),
-			) + 1
+					add_days(
+						get_last_day(
+							add_months(
+								row.depreciation_start_date,
+								flt(
+									row.total_number_of_depreciations
+									- asset.number_of_depreciations_booked
+									- number_of_pending_depreciations
+									- 1
+								)
+								* row.frequency_of_depreciation,
+							)
+						),
+						1,
+					),
+				)
+				+ 1
+			)
+
+			daily_depr_amount = amount / total_days
 
 			to_date = get_last_day(
 				add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
