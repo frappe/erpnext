@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-31 09:35+0000\n"
-"PO-Revision-Date: 2024-04-06 16:42\n"
+"PO-Revision-Date: 2024-04-07 07:05\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -14171,7 +14171,7 @@ msgstr "Kod"
 
 #: public/js/setup_wizard.js:190
 msgid "Collapse All"
-msgstr ""
+msgstr "Sklopi sve"
 
 #. Label of a Check field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -16124,103 +16124,103 @@ msgstr ""
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #. Label of a Tab Break field in DocType 'Workstation'
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Connections"
-msgstr ""
+msgstr "Veze"
 
 #: accounts/report/general_ledger/general_ledger.js:172
 msgid "Consider Accounting Dimensions"
@@ -16434,134 +16434,134 @@ msgstr ""
 #: selling/workspace/selling/selling.json
 msgctxt "Contact"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Option for the 'Email Campaign For ' (Select) field in DocType 'Email
 #. Campaign'
 #: crm/doctype/email_campaign/email_campaign.json
 msgctxt "Email Campaign"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Data field in DocType 'Employee External Work History'
 #: setup/doctype/employee_external_work_history/employee_external_work_history.json
 msgctxt "Employee External Work History"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Installation Note'
 #: selling/doctype/installation_note/installation_note.json
 msgctxt "Installation Note"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Link field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgctxt "Maintenance Schedule"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Maintenance Visit'
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgctxt "Maintenance Visit"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Link field in DocType 'Request for Quotation Supplier'
 #: buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
 msgctxt "Request for Quotation Supplier"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Link field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Small Text field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
 msgctxt "Warranty Claim"
 msgid "Contact"
-msgstr ""
+msgstr "Kontakt"
 
 #. Label of a Tab Break field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
@@ -16591,109 +16591,109 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Installation Note'
 #: selling/doctype/installation_note/installation_note.json
 msgctxt "Installation Note"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgctxt "Maintenance Schedule"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Maintenance Visit'
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgctxt "Maintenance Visit"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Small Text field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Small Text field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Small Text field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Small Text field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Small Text field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a Data field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
 msgctxt "Warranty Claim"
 msgid "Contact Email"
-msgstr ""
+msgstr "Kontakt e-pošta"
 
 #. Label of a HTML field in DocType 'Bank'
 #: accounts/doctype/bank/bank.json
@@ -16933,7 +16933,7 @@ msgstr ""
 #: setup/workspace/settings/settings.json
 msgctxt "Contact Us Settings"
 msgid "Contact Us Settings"
-msgstr ""
+msgstr "Kontaktirajte nas Postavke"
 
 #. Label of a Tab Break field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
@@ -16945,7 +16945,7 @@ msgstr ""
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Content Type"
-msgstr ""
+msgstr "Vrsta sadržaja"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:157
 #: public/js/controllers/transaction.js:2118
@@ -20916,175 +20916,175 @@ msgstr ""
 #: support/report/first_response_time_for_issues/first_response_time_for_issues.py:11
 #: support/report/support_hour_distribution/support_hour_distribution.py:68
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Datetime field in DocType 'Asset Activity'
 #: assets/doctype/asset_activity/asset_activity.json
 msgctxt "Asset Activity"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Bulk Transaction Log'
 #: bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.json
 msgctxt "Bulk Transaction Log"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Cashier Closing'
 #: accounts/doctype/cashier_closing/cashier_closing.json
 msgctxt "Cashier Closing"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Currency Exchange'
 #: setup/doctype/currency_exchange/currency_exchange.json
 msgctxt "Currency Exchange"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Discounted Invoice'
 #: accounts/doctype/discounted_invoice/discounted_invoice.json
 msgctxt "Discounted Invoice"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Holiday'
 #: setup/doctype/holiday/holiday.json
 msgctxt "Holiday"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'POS Invoice Reference'
 #: accounts/doctype/pos_invoice_reference/pos_invoice_reference.json
 msgctxt "POS Invoice Reference"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Project Update'
 #: projects/doctype/project_update/project_update.json
 msgctxt "Project Update"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Quality Action'
 #: quality_management/doctype/quality_action/quality_action.json
 msgctxt "Quality Action"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Select field in DocType 'Quality Goal'
 #: quality_management/doctype/quality_goal/quality_goal.json
 msgctxt "Quality Goal"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Quality Review'
 #: quality_management/doctype/quality_review/quality_review.json
 msgctxt "Quality Review"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Quick Stock Balance'
 #: stock/doctype/quick_stock_balance/quick_stock_balance.json
 msgctxt "Quick Stock Balance"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Share Transfer'
 #: accounts/doctype/share_transfer/share_transfer.json
 msgctxt "Share Transfer"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Date"
-msgstr ""
+msgstr "Datum"
 
 #. Label of a Date field in DocType 'Bulk Transaction Log Detail'
 #: bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
@@ -21168,14 +21168,14 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Day"
-msgstr ""
+msgstr "Dan"
 
 #. Option for the 'Billing Interval' (Select) field in DocType 'Subscription
 #. Plan'
 #: accounts/doctype/subscription_plan/subscription_plan.json
 msgctxt "Subscription Plan"
 msgid "Day"
-msgstr ""
+msgstr "Dan"
 
 #. Label of a Attach field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -21212,7 +21212,7 @@ msgstr ""
 #: communication/doctype/communication_medium_timeslot/communication_medium_timeslot.json
 msgctxt "Communication Medium Timeslot"
 msgid "Day of Week"
-msgstr ""
+msgstr "Dan u sedmici"
 
 #. Label of a Select field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -21298,11 +21298,11 @@ msgstr ""
 
 #: templates/emails/confirm_appointment.html:1
 msgid "Dear"
-msgstr ""
+msgstr "Poštovani"
 
 #: stock/reorder_item.py:369
 msgid "Dear System Manager,"
-msgstr ""
+msgstr "Poštovani menadžeru sistema,"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:39
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.html:13
@@ -21514,43 +21514,43 @@ msgstr ""
 
 #: manufacturing/doctype/bom/bom_list.js:7
 msgid "Default"
-msgstr ""
+msgstr "Zadano"
 
 #. Label of a Check field in DocType 'Asset Shift Factor'
 #: assets/doctype/asset_shift_factor/asset_shift_factor.json
 msgctxt "Asset Shift Factor"
 msgid "Default"
-msgstr ""
+msgstr "Zadano"
 
 #. Label of a Check field in DocType 'POS Payment Method'
 #: accounts/doctype/pos_payment_method/pos_payment_method.json
 msgctxt "POS Payment Method"
 msgid "Default"
-msgstr ""
+msgstr "Zadano"
 
 #. Label of a Check field in DocType 'POS Profile User'
 #: accounts/doctype/pos_profile_user/pos_profile_user.json
 msgctxt "POS Profile User"
 msgid "Default"
-msgstr ""
+msgstr "Zadano"
 
 #. Label of a Check field in DocType 'Purchase Taxes and Charges Template'
 #: accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.json
 msgctxt "Purchase Taxes and Charges Template"
 msgid "Default"
-msgstr ""
+msgstr "Zadano"
 
 #. Label of a Check field in DocType 'Sales Invoice Payment'
 #: accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
 msgctxt "Sales Invoice Payment"
 msgid "Default"
-msgstr ""
+msgstr "Zadano"
 
 #. Label of a Check field in DocType 'Sales Taxes and Charges Template'
 #: accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.json
 msgctxt "Sales Taxes and Charges Template"
 msgid "Default"
-msgstr ""
+msgstr "Zadano"
 
 #. Label of a Link field in DocType 'Mode of Payment Account'
 #: accounts/doctype/mode_of_payment_account/mode_of_payment_account.json
@@ -21846,7 +21846,7 @@ msgstr ""
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Default Letter Head"
-msgstr ""
+msgstr "Zadano zaglavlje pisma"
 
 #. Label of a Data field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -25036,13 +25036,13 @@ msgstr ""
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Domain"
-msgstr ""
+msgstr "Domena"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgctxt "Domain Settings"
 msgid "Domain Settings"
-msgstr ""
+msgstr "Postavke domene"
 
 #. Label of a Check field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
@@ -25060,20 +25060,20 @@ msgstr ""
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Don't Send Emails"
-msgstr ""
+msgstr "Nemojte slati e-poštu"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.py:328
 #: erpnext_integrations/doctype/tally_migration/tally_migration.py:413
 #: erpnext_integrations/doctype/tally_migration/tally_migration.py:589
 #: public/js/utils/crm_activities.js:212
 msgid "Done"
-msgstr ""
+msgstr "Gotovo"
 
 #. Label of a Check field in DocType 'Transaction Deletion Record Details'
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgctxt "Transaction Deletion Record Details"
 msgid "Done"
-msgstr ""
+msgstr "Gotovo"
 
 #. Label of a Check field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
@@ -25110,12 +25110,12 @@ msgstr ""
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:93
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.js:27
 msgid "Download"
-msgstr ""
+msgstr "Preuzmi"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgid "Download Backups"
-msgstr ""
+msgstr "Preuzmi sigurnosne kopije"
 
 #: public/js/utils/serial_no_batch_selector.js:241
 msgid "Download CSV Template"
@@ -25139,19 +25139,19 @@ msgstr ""
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:31
 msgid "Download Template"
-msgstr ""
+msgstr "Preuzmite skicu"
 
 #. Label of a Button field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Download Template"
-msgstr ""
+msgstr "Preuzmite skicu"
 
 #. Label of a Button field in DocType 'Chart of Accounts Importer'
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
 msgctxt "Chart of Accounts Importer"
 msgid "Download Template"
-msgstr ""
+msgstr "Preuzmite skicu"
 
 #. Label of a Data field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
@@ -25205,206 +25205,206 @@ msgstr ""
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:5
 #: stock/doctype/stock_entry/stock_entry_list.js:18
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset Depreciation
 #. Schedule'
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgctxt "Asset Depreciation Schedule"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Closing Stock Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
 msgctxt "Delivery Trip"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Installation Note'
 #: selling/doctype/installation_note/installation_note.json
 msgctxt "Installation Note"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Invoice Discounting'
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 msgctxt "Invoice Discounting"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgctxt "Maintenance Schedule"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Maintenance Visit'
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgctxt "Maintenance Visit"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Closing Entry'
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgctxt "POS Closing Entry"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Entry'
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
 msgctxt "POS Opening Entry"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Option for the 'Status' (Select) field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Draft"
-msgstr ""
+msgstr "Nacrt"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -28404,7 +28404,7 @@ msgstr ""
 #: accounts/doctype/pos_field/pos_field.json
 msgctxt "POS Field"
 msgid "Fieldtype"
-msgstr ""
+msgstr "Tip polja"
 
 #. Label of a Attach field in DocType 'Rename Tool'
 #: utilities/doctype/rename_tool/rename_tool.json
@@ -30127,43 +30127,43 @@ msgstr ""
 #: setup/doctype/driver/driver.json
 msgctxt "Driver"
 msgid "Full Name"
-msgstr ""
+msgstr "Puno ime"
 
 #. Label of a Data field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Full Name"
-msgstr ""
+msgstr "Puno ime"
 
 #. Label of a Data field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Full Name"
-msgstr ""
+msgstr "Puno ime"
 
 #. Label of a Data field in DocType 'Maintenance Team Member'
 #: assets/doctype/maintenance_team_member/maintenance_team_member.json
 msgctxt "Maintenance Team Member"
 msgid "Full Name"
-msgstr ""
+msgstr "Puno ime"
 
 #. Label of a Data field in DocType 'Manufacturer'
 #: stock/doctype/manufacturer/manufacturer.json
 msgctxt "Manufacturer"
 msgid "Full Name"
-msgstr ""
+msgstr "Puno ime"
 
 #. Label of a Data field in DocType 'Non Conformance'
 #: quality_management/doctype/non_conformance/non_conformance.json
 msgctxt "Non Conformance"
 msgid "Full Name"
-msgstr ""
+msgstr "Puno ime"
 
 #. Label of a Read Only field in DocType 'Project User'
 #: projects/doctype/project_user/project_user.json
 msgctxt "Project User"
 msgid "Full Name"
-msgstr ""
+msgstr "Puno ime"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
