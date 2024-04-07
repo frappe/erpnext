@@ -116,7 +116,9 @@ def get_party_bank_account(party_type, party):
 
 
 def get_default_company_bank_account(company):
-	return frappe.db.get_value("Bank Account", {"company": company, "is_company_account": 1, "is_default": 1})
+	return frappe.db.get_value(
+		"Bank Account", {"company": company, "is_company_account": 1, "is_default": 1}
+	)
 
 
 @frappe.whitelist()

@@ -204,7 +204,9 @@ def setup_ageing_columns(filters: Filters, range_columns: list):
 		add_column(range_columns, label=_("Age ({0})").format(label), fieldname=fieldname)
 
 
-def add_column(range_columns: list, label: str, fieldname: str, fieldtype: str = "Float", width: int = 140):
+def add_column(
+	range_columns: list, label: str, fieldname: str, fieldtype: str = "Float", width: int = 140
+):
 	range_columns.append(dict(label=label, fieldname=fieldname, fieldtype=fieldtype, width=width))
 
 
@@ -286,7 +288,9 @@ class FIFOSlots:
 
 		return key, fifo_queue, transferred_item_key
 
-	def __compute_incoming_stock(self, row: dict, fifo_queue: list, transfer_key: tuple, serial_nos: list):
+	def __compute_incoming_stock(
+		self, row: dict, fifo_queue: list, transfer_key: tuple, serial_nos: list
+	):
 		"Update FIFO Queue on inward stock."
 
 		transfer_data = self.transferred_item_details.get(transfer_key)
@@ -312,7 +316,9 @@ class FIFOSlots:
 					self.serial_no_batch_purchase_details.setdefault(serial_no, row.posting_date)
 					fifo_queue.append([serial_no, row.posting_date])
 
-	def __compute_outgoing_stock(self, row: dict, fifo_queue: list, transfer_key: tuple, serial_nos: list):
+	def __compute_outgoing_stock(
+		self, row: dict, fifo_queue: list, transfer_key: tuple, serial_nos: list
+	):
 		"Update FIFO Queue on outward stock."
 		if serial_nos:
 			fifo_queue[:] = [serial_no for serial_no in fifo_queue if serial_no[0] not in serial_nos]
