@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-31 09:35+0000\n"
-"PO-Revision-Date: 2024-04-04 16:42\n"
+"PO-Revision-Date: 2024-04-07 07:04\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -82961,7 +82961,7 @@ msgstr "Sie haben bereits Elemente aus {0} {1} gewählt"
 
 #: projects/doctype/project/project.py:336
 msgid "You have been invited to collaborate on the project: {0}"
-msgstr "Sie wurden zur Zusammenarbeit für das Projekt {0} eingeladen."
+msgstr "Sie wurden zur Zusammenarbeit für das Projekt {0} eingeladen"
 
 #: stock/doctype/shipment/shipment.js:442
 msgid "You have entered a duplicate Delivery Note on Row"
@@ -83017,7 +83017,7 @@ msgstr "Ihr Name (erforderlich)"
 #: templates/includes/footer/footer_extension.html:5
 #: templates/includes/footer/footer_extension.html:6
 msgid "Your email address..."
-msgstr "Deine Emailadresse..."
+msgstr "Ihre E-Mail-Adresse..."
 
 #: www/book_appointment/verify/index.html:11
 msgid "Your email has been verified and your appointment has been scheduled"
