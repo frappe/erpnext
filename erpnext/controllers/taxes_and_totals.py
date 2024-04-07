@@ -1081,6 +1081,11 @@ def get_rounded_tax_amount(itemised_tax, precision):
 				row["tax_amount"] = flt(row["tax_amount"], precision)
 
 
+@frappe.whitelist()
+def get_rounding_tax_settings():
+	return frappe.db.get_single_value("Accounts Settings", "round_row_wise_tax")
+
+
 class init_landed_taxes_and_totals:
 	def __init__(self, doc):
 		self.doc = doc
