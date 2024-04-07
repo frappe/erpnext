@@ -699,14 +699,10 @@ def get_straight_line_or_manual_depr_amount(
 						)
 					),
 					add_days(
-<<<<<<< HEAD
-						get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)), 1
-=======
 						get_last_day(
 							add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)
 						),
 						1,
->>>>>>> be0cb5289f (fix:linter issue)
 					),
 				)
 				+ 1
