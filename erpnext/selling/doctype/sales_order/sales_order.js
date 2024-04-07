@@ -111,16 +111,26 @@ frappe.ui.form.on("Sales Order", {
 			}
 
 			if (frm.doc.docstatus === 0) {
-				frappe.db.get_single_value("Stock Settings", "enable_stock_reservation").then((value) => {
-					if (!value) {
-						// If `Stock Reservation` is disabled in Stock Settings, set Reserve Stock to 0 and make the field read-only and hidden.
-						frm.set_value("reserve_stock", 0);
-						frm.set_df_property("reserve_stock", "read_only", 1);
-						frm.set_df_property("reserve_stock", "hidden", 1);
-						frm.fields_dict.items.grid.update_docfield_property("reserve_stock", "hidden", 1);
-						frm.fields_dict.items.grid.update_docfield_property("reserve_stock", "default", 0);
-						frm.fields_dict.items.grid.update_docfield_property("reserve_stock", "read_only", 1);
-					}
+				frappe.call({
+					method: "erpnext.selling.doctype.sales_order.sales_order.get_stock_reservation_status",
+					callback: function (r) {
+						if (!r.message) {
+							frm.set_value("reserve_stock", 0);
+							frm.set_df_property("reserve_stock", "read_only", 1);
+							frm.set_df_property("reserve_stock", "hidden", 1);
+							frm.fields_dict.items.grid.update_docfield_property("reserve_stock", "hidden", 1);
+							frm.fields_dict.items.grid.update_docfield_property(
+								"reserve_stock",
+								"default",
+								0
+							);
+							frm.fields_dict.items.grid.update_docfield_property(
+								"reserve_stock",
+								"read_only",
+								1
+							);
+						}
+					},
 				});
 			}
 		}
