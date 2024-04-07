@@ -698,7 +698,7 @@ def insert_item_price(args):
 				if args.get("conversion_factor") else args.rate)
 
 			item_price = frappe.db.get_value('Item Price',
-				{'item_code': args.item_code, 'price_list': args.price_list, 'currency': args.currency},
+				{'item_code': args.item_code, 'price_list': args.price_list, 'currency': args.currency, 'uom': args.uom},
 				['name', 'price_list_rate'], as_dict=1)
 			if item_price and item_price.name:
 				if item_price.price_list_rate != price_list_rate:
@@ -711,7 +711,8 @@ def insert_item_price(args):
 					"price_list": args.price_list,
 					"item_code": args.item_code,
 					"currency": args.currency,
-					"price_list_rate": price_list_rate
+					"price_list_rate": price_list_rate,
+					"uom": args.uom
 				})
 				item_price.insert()
 				frappe.msgprint(_("Item Price added for {0} in Price List {1}").format(args.item_code,
