@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-03-31 09:35+0000\n"
-"PO-Revision-Date: 2024-04-07 07:05\n"
+"PO-Revision-Date: 2024-04-08 07:51\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -18618,7 +18618,7 @@ msgstr ""
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:224
 msgid "Created On"
-msgstr ""
+msgstr "Kreirano na"
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard.py:250
 msgid "Created {0} scorecards for {1} between:"
@@ -19111,201 +19111,201 @@ msgstr ""
 #: selling/report/sales_partner_transaction_summary/sales_partner_transaction_summary.py:85
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:137
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgctxt "Currency"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Section Break field in DocType 'Dunning'
 #. Label of a Link field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Item Price'
 #: stock/doctype/item_price/item_price.json
 msgctxt "Item Price"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Section Break field in DocType 'Journal Entry Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Read Only field in DocType 'Payment Gateway Account'
 #: accounts/doctype/payment_gateway_account/payment_gateway_account.json
 msgctxt "Payment Gateway Account"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Payment Ledger Entry'
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Payment Reconciliation Allocation'
 #: accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
 msgctxt "Payment Reconciliation Allocation"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Payment Reconciliation Invoice'
 #: accounts/doctype/payment_reconciliation_invoice/payment_reconciliation_invoice.json
 msgctxt "Payment Reconciliation Invoice"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Payment Reconciliation Payment'
 #: accounts/doctype/payment_reconciliation_payment/payment_reconciliation_payment.json
 msgctxt "Payment Reconciliation Payment"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Price List'
 #: stock/doctype/price_list/price_list.json
 msgctxt "Price List"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Process Payment Reconciliation Log
 #. Allocations'
 #: accounts/doctype/process_payment_reconciliation_log_allocations/process_payment_reconciliation_log_allocations.json
 msgctxt "Process Payment Reconciliation Log Allocations"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Promotional Scheme'
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Prospect Opportunity'
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
 msgctxt "Prospect Opportunity"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Subscription Plan'
 #: accounts/doctype/subscription_plan/subscription_plan.json
 msgctxt "Subscription Plan"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Label of a Link field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Currency"
-msgstr ""
+msgstr "Valuta"
 
 #. Name of a DocType
 #: setup/doctype/currency_exchange/currency_exchange.json
@@ -19599,7 +19599,7 @@ msgstr ""
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "Custom"
-msgstr ""
+msgstr "Prilagođeno"
 
 #. Label of a Check field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -24903,23 +24903,23 @@ msgstr ""
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgctxt "Transaction Deletion Record Details"
 msgid "DocField"
-msgstr ""
+msgstr "DocField"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "DocType"
-msgstr ""
+msgstr "DocType"
 
 #. Label of a Link field in DocType 'Transaction Deletion Record Details'
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgctxt "Transaction Deletion Record Details"
 msgid "DocType"
-msgstr ""
+msgstr "DocType"
 
 #. Label of a Link field in DocType 'Transaction Deletion Record Item'
 #: setup/doctype/transaction_deletion_record_item/transaction_deletion_record_item.json
 msgctxt "Transaction Deletion Record Item"
 msgid "DocType"
-msgstr ""
+msgstr "DocType"
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:69
 msgid "DocTypes should not be added manually to the 'Excluded DocTypes' table. You are only allowed to remove entries from it."
@@ -25506,80 +25506,80 @@ msgstr ""
 #: accounts/doctype/payment_entry/payment_entry.js:795
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:40
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Date field in DocType 'Asset Maintenance Log'
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
 msgctxt "Asset Maintenance Log"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Date field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Date field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Date field in DocType 'Opening Invoice Creation Tool Item'
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgctxt "Opening Invoice Creation Tool Item"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Date field in DocType 'Overdue Payment'
 #: accounts/doctype/overdue_payment/overdue_payment.json
 msgctxt "Overdue Payment"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Date field in DocType 'Payment Entry Reference'
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 msgctxt "Payment Entry Reference"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Date field in DocType 'Payment Ledger Entry'
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Date field in DocType 'Payment Schedule'
 #: accounts/doctype/payment_schedule/payment_schedule.json
 msgctxt "Payment Schedule"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Option for the 'Ageing Based On' (Select) field in DocType 'Process
 #. Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Date field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Due Date"
-msgstr ""
+msgstr "Krajnji rok"
 
 #. Label of a Select field in DocType 'Payment Term'
 #: accounts/doctype/payment_term/payment_term.json
 msgctxt "Payment Term"
 msgid "Due Date Based On"
-msgstr ""
+msgstr "Krajnji rok na osnovu"
 
 #. Label of a Select field in DocType 'Payment Terms Template Detail'
 #: accounts/doctype/payment_terms_template_detail/payment_terms_template_detail.json
 msgctxt "Payment Terms Template Detail"
 msgid "Due Date Based On"
-msgstr ""
+msgstr "Krajnji rok na osnovu"
 
 #: accounts/party.py:616
 msgid "Due Date cannot be before Posting / Supplier Invoice Date"
@@ -25671,7 +25671,7 @@ msgstr ""
 
 #: stock/doctype/item/item.js:178 stock/doctype/putaway_rule/putaway_rule.py:55
 msgid "Duplicate"
-msgstr ""
+msgstr "Duplikat"
 
 #: stock/doctype/closing_stock_balance/closing_stock_balance.py:82
 msgid "Duplicate Closing Stock Balance"
@@ -25728,19 +25728,19 @@ msgstr ""
 
 #: utilities/report/youtube_interactions/youtube_interactions.py:24
 msgid "Duration"
-msgstr ""
+msgstr "Trajanje"
 
 #. Label of a Duration field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
 msgctxt "Call Log"
 msgid "Duration"
-msgstr ""
+msgstr "Trajanje"
 
 #. Label of a Duration field in DocType 'Video'
 #: utilities/doctype/video/video.json
 msgctxt "Video"
 msgid "Duration"
-msgstr ""
+msgstr "Trajanje"
 
 #. Label of a Int field in DocType 'Task'
 #: projects/doctype/task/task.json
@@ -26187,7 +26187,7 @@ msgstr "Id e-pošte"
 #: buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
 msgctxt "Request for Quotation Supplier"
 msgid "Email Sent"
-msgstr ""
+msgstr "E-pošta poslana"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:312
 msgid "Email Sent to Supplier {0}"
@@ -26197,29 +26197,29 @@ msgstr ""
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Email Settings"
-msgstr ""
+msgstr "Postavke e-pošte"
 
 #. Label of a Link field in DocType 'Campaign Email Schedule'
 #: crm/doctype/campaign_email_schedule/campaign_email_schedule.json
 msgctxt "Campaign Email Schedule"
 msgid "Email Template"
-msgstr ""
+msgstr "Šablon e-pošte"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgctxt "Email Template"
 msgid "Email Template"
-msgstr ""
+msgstr "Šablon e-pošte"
 
 #. Label of a Link field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Email Template"
-msgstr ""
+msgstr "Šablon e-pošte"
 
 #: selling/page/point_of_sale/pos_past_order_summary.js:278
 msgid "Email not sent to {0} (unsubscribed / disabled)"
-msgstr ""
+msgstr "E-pošta nije poslana na {0} (odjavljena / onemogućena)"
 
 #: stock/doctype/shipment/shipment.js:174
 msgid "Email or Phone/Mobile of the Contact are mandatory to continue."
@@ -28391,7 +28391,7 @@ msgstr ""
 #: stock/doctype/item_variant_settings/item_variant_settings.json
 msgctxt "Item Variant Settings"
 msgid "Fields"
-msgstr ""
+msgstr "Polja"
 
 #. Description of the 'Do not update variants on save' (Check) field in DocType
 #. 'Item Variant Settings'
@@ -30793,25 +30793,25 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:97
 msgid "Go to {0} List"
-msgstr ""
+msgstr "Idite na {0} listu"
 
 #. Label of a Link field in DocType 'Quality Action'
 #: quality_management/doctype/quality_action/quality_action.json
 msgctxt "Quality Action"
 msgid "Goal"
-msgstr ""
+msgstr "Cilj"
 
 #. Label of a Data field in DocType 'Quality Goal'
 #: quality_management/doctype/quality_goal/quality_goal.json
 msgctxt "Quality Goal"
 msgid "Goal"
-msgstr ""
+msgstr "Cilj"
 
 #. Label of a Link field in DocType 'Quality Review'
 #: quality_management/doctype/quality_review/quality_review.json
 msgctxt "Quality Review"
 msgid "Goal"
-msgstr ""
+msgstr "Cilj"
 
 #. Label of a Card Break in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
@@ -31146,21 +31146,21 @@ msgstr ""
 
 #: setup/setup_wizard/operations/install_fixtures.py:234
 msgid "Green"
-msgstr ""
+msgstr "Zeleno"
 
 #. Option for the 'Color' (Select) field in DocType 'Supplier Scorecard Scoring
 #. Standing'
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgctxt "Supplier Scorecard Scoring Standing"
 msgid "Green"
-msgstr ""
+msgstr "Zeleno"
 
 #. Option for the 'Color' (Select) field in DocType 'Supplier Scorecard
 #. Standing'
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 msgctxt "Supplier Scorecard Standing"
 msgid "Green"
-msgstr ""
+msgstr "Zeleno"
 
 #. Label of a Data field in DocType 'Incoming Call Settings'
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.json
@@ -31276,7 +31276,7 @@ msgstr ""
 
 #: accounts/doctype/payment_terms_template/payment_terms_template_dashboard.py:17
 msgid "Group"
-msgstr ""
+msgstr "Grupiši"
 
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.js:30
 #: accounts/report/gross_profit/gross_profit.js:36
@@ -31288,13 +31288,13 @@ msgstr ""
 #: selling/report/lost_quotations/lost_quotations.js:33
 #: stock/report/total_stock_summary/total_stock_summary.js:8
 msgid "Group By"
-msgstr ""
+msgstr "Grupiši po"
 
 #. Label of a Select field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Group By"
-msgstr ""
+msgstr "Grupiši po"
 
 #: accounts/report/accounts_receivable/accounts_receivable.js:154
 msgid "Group By Customer"
@@ -31816,19 +31816,19 @@ msgstr ""
 
 #: setup/setup_wizard/operations/install_fixtures.py:243
 msgid "High"
-msgstr ""
+msgstr "Visoka"
 
 #. Option for the 'Priority' (Select) field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "High"
-msgstr ""
+msgstr "Visoka"
 
 #. Option for the 'Priority' (Select) field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "High"
-msgstr ""
+msgstr "Visoka"
 
 #. Description of the 'Priority' (Select) field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -31925,7 +31925,7 @@ msgstr ""
 #. Name of a Workspace
 #: setup/workspace/home/home.json
 msgid "Home"
-msgstr ""
+msgstr "Početna"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -31965,7 +31965,7 @@ msgstr ""
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Hourly"
-msgstr ""
+msgstr "Po satu"
 
 #: projects/report/daily_timesheet_summary/daily_timesheet_summary.py:31
 #: templates/pages/timelog_info.html:37
@@ -32069,19 +32069,19 @@ msgstr ""
 #: manufacturing/report/downtime_analysis/downtime_analysis.py:71
 #: manufacturing/report/production_planning_report/production_planning_report.py:350
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. Label of a Data field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
 msgctxt "Call Log"
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #. Label of a Data field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgctxt "Contract"
 msgid "IP Address"
-msgstr ""
+msgstr "IP adresa"
 
 #. Name of a report
 #: regional/report/irs_1099/irs_1099.json
@@ -32962,19 +32962,19 @@ msgstr ""
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Import Log"
-msgstr ""
+msgstr "Dnevnik uvoza"
 
 #. Label of a Section Break field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Import Log"
-msgstr ""
+msgstr "Dnevnik uvoza"
 
 #. Label of a HTML field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Import Log Preview"
-msgstr ""
+msgstr "Pregled dnevnika uvoza"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:59
 msgid "Import Master Data"
@@ -32984,11 +32984,11 @@ msgstr ""
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Import Preview"
-msgstr ""
+msgstr "Pregled uvoza"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:51
 msgid "Import Progress"
-msgstr ""
+msgstr "Napredak uvoza"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:144
 msgid "Import Successful"
@@ -33009,7 +33009,7 @@ msgstr ""
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Import Type"
-msgstr ""
+msgstr "Uvoz vrste"
 
 #: public/js/utils/serial_no_batch_selector.js:200
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:80
@@ -33020,13 +33020,13 @@ msgstr ""
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Import Warnings"
-msgstr ""
+msgstr "Uvoz upozorenja"
 
 #. Label of a Data field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Import from Google Sheets"
-msgstr ""
+msgstr "Uvoz iz Google tabela"
 
 #: stock/doctype/item_price/item_price.js:29
 msgid "Import in Bulk"
