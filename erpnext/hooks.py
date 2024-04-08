@@ -643,3 +643,15 @@ extend_bootinfo = [
 	"erpnext.support.doctype.service_level_agreement.service_level_agreement.add_sla_doctypes",
 	"erpnext.startup.boot.bootinfo",
 ]
+<<<<<<< HEAD
+=======
+
+
+default_log_clearing_doctypes = {
+	"Repost Item Valuation": 60,
+}
+
+export_python_type_annotations = True
+
+fields_for_group_similar_items = ["qty", "amount"]
+>>>>>>> f7c9e1538b (feat: new hook `fields_for_group_similar_items` to group additional fields for print formats (#40831))
