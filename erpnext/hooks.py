@@ -636,4 +636,4 @@ default_log_clearing_doctypes = {
 
 export_python_type_annotations = True
 
-group_similar_item_fields = ["qty", "amount"]
+fields_for_group_similar_items = ["qty", "amount"]

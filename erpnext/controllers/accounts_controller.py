@@ -3,6 +3,7 @@
 
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _, bold, qb, throw
@@ -2082,22 +2083,21 @@ class AccountsController(TransactionBase):
 		# to update serial number in print
 		count = 0
 
-		grouping_fields = frappe.get_hooks("group_similar_item_fields")
-		grouping_fields = list(set(grouping_fields))
+		fields_to_group = frappe.get_hooks("fields_for_group_similar_items")
+		fields_to_group = set(fields_to_group)
 
 		for item in self.items:
-			grouped_items.setdefault(item.item_code, frappe._dict())
+			item_values = grouped_items.setdefault(item.item_code, defaultdict(int))
 
-			for field in grouping_fields:
-				grouped_items[item.item_code].setdefault(field, 0)
-				grouped_items[item.item_code][field] += item.get(field, 0)
+			for field in fields_to_group:
+				item_values[field] += item.get(field, 0)
 
 		duplicate_list = []
 		for item in self.items:
 			if item.item_code in grouped_items:
 				count += 1
 
-				for field in grouping_fields:
+				for field in fields_to_group:
 					item.set(field, grouped_items[item.item_code][field])
 
 				if item.qty:
