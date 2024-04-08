@@ -3438,126 +3438,6 @@ class TestSalesInvoice(FrappeTestCase):
 		si.items[0].rate = 10
 		si.save()
 
-
-<<<<<<< HEAD
-def get_sales_invoice_for_e_invoice():
-	si = make_sales_invoice_for_ewaybill()
-	si.naming_series = "INV-2020-.#####"
-	si.items = []
-	si.append(
-		"items",
-=======
-		company = "_Test Company"
-		customer = "_Test Customer"
-		debtors_acc = "Debtors - _TC"
-		advance_account = create_account(
-			parent_account="Current Liabilities - _TC",
-			account_name="Advances Received",
-			company="_Test Company",
-			account_type="Receivable",
-		)
-
-		set_advance_flag(company="_Test Company", flag=1, default_account=advance_account)
-
-		pe = create_payment_entry(
-			company=company,
-			payment_type="Receive",
-			party_type="Customer",
-			party=customer,
-			paid_from=advance_account,
-			paid_to="Cash - _TC",
-			paid_amount=1000,
-		)
-		pe.submit()
-
-		si = create_sales_invoice(
-			company=company,
-			customer=customer,
-			do_not_save=True,
-			do_not_submit=True,
-			rate=1000,
-			price_list_rate=1000,
-		)
-		si.base_grand_total = 1000
-		si.grand_total = 1000
-		si.set_advances()
-		for advance in si.advances:
-			advance.allocated_amount = 200 if advance.reference_name == pe.name else 0
-		si.save()
-		si.submit()
-
-		self.assertEqual(si.advances[0].allocated_amount, 200)
-
-		# Check GL Entry against partial from advance
-		expected_gle = [
-			[advance_account, 0.0, 1000.0, nowdate()],
-			[advance_account, 200.0, 0.0, nowdate()],
-			["Cash - _TC", 1000.0, 0.0, nowdate()],
-			[debtors_acc, 0.0, 200.0, nowdate()],
-		]
-		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
-		si.reload()
-		self.assertEqual(si.outstanding_amount, 800.0)
-
-		pr = frappe.get_doc("Payment Reconciliation")
-		pr.company = company
-		pr.party_type = "Customer"
-		pr.party = customer
-		pr.receivable_payable_account = debtors_acc
-		pr.default_advance_account = advance_account
-		pr.get_unreconciled_entries()
-
-		# allocate some more of the same advance
-		# self.assertEqual(len(pr.invoices), 1)
-		# self.assertEqual(len(pr.payments), 1)
-		invoices = [x.as_dict() for x in pr.invoices if x.get("invoice_number") == si.name]
-		payments = [x.as_dict() for x in pr.payments if x.get("reference_name") == pe.name]
-		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
-		pr.allocation[0].allocated_amount = 300
-		pr.reconcile()
-
-		si.reload()
-		self.assertEqual(si.outstanding_amount, 500.0)
-
-		# Check GL Entry against multi partial allocations from advance
-		expected_gle = [
-			[advance_account, 0.0, 1000.0, nowdate()],
-			[advance_account, 200.0, 0.0, nowdate()],
-			[advance_account, 300.0, 0.0, nowdate()],
-			["Cash - _TC", 1000.0, 0.0, nowdate()],
-			[debtors_acc, 0.0, 200.0, nowdate()],
-			[debtors_acc, 0.0, 300.0, nowdate()],
-		]
-		check_gl_entries(self, pe.name, expected_gle, nowdate(), voucher_type="Payment Entry")
-		set_advance_flag(company="_Test Company", flag=0, default_account="")
-
-	def test_pulling_advance_based_on_debit_to(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-
-		debtors2 = create_account(
-			parent_account="Accounts Receivable - _TC",
-			account_name="Debtors 2",
-			company="_Test Company",
-			account_type="Receivable",
-		)
-		si = create_sales_invoice(do_not_submit=True)
-		si.debit_to = debtors2
-		si.save()
-
-		pe = create_payment_entry(
-			company=si.company,
-			payment_type="Receive",
-			party_type="Customer",
-			party=si.customer,
-			paid_from=debtors2,
-			paid_to="Cash - _TC",
-			paid_amount=1000,
-		)
-		pe.submit()
-		advances = si.get_advance_entries()
-		self.assertEqual(1, len(advances))
-		self.assertEqual(advances[0].reference_name, pe.name)
-
 	def test_taxes_merging_from_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
@@ -3658,11 +3538,12 @@ def get_sales_invoice_for_e_invoice():
 		self.assertEqual(expected, actual)
 
 
-def set_advance_flag(company, flag, default_account):
-	frappe.db.set_value(
-		"Company",
-		company,
->>>>>>> 39a48a2e2a (test: tax merging from 2 Delivery Note to Sales Invoice)
+def get_sales_invoice_for_e_invoice():
+	si = make_sales_invoice_for_ewaybill()
+	si.naming_series = "INV-2020-.#####"
+	si.items = []
+	si.append(
+		"items",
 		{
 			"item_code": "_Test Item",
 			"uom": "Nos",
