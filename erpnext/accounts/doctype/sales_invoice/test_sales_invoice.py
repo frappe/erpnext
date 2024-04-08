@@ -3635,6 +3635,105 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(1, len(advances))
 		self.assertEqual(advances[0].reference_name, pe.name)
 
+	def test_taxes_merging_from_delivery_note(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		dn1 = create_delivery_note(do_not_submit=1)
+		dn1.items[0].qty = 10
+		dn1.items[0].rate = 100
+		dn1.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "Freight and Forwarding Charges - _TC",
+				"description": "movement charges",
+				"tax_amount": 100,
+			},
+		)
+		dn1.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "Marketing Expenses - _TC",
+				"description": "marketing",
+				"tax_amount": 150,
+			},
+		)
+		dn1.save().submit()
+
+		dn2 = create_delivery_note(do_not_submit=1)
+		dn2.items[0].qty = 5
+		dn2.items[0].rate = 100
+		dn2.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "Freight and Forwarding Charges - _TC",
+				"description": "movement charges",
+				"tax_amount": 20,
+			},
+		)
+		dn2.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "Miscellaneous Expenses - _TC",
+				"description": "marketing",
+				"tax_amount": 60,
+			},
+		)
+		dn2.save().submit()
+
+		# si = make_sales_invoice(dn1.name)
+		si = create_sales_invoice(do_not_submit=True)
+		si.customer = dn1.customer
+		si.items.clear()
+
+		from frappe.model.mapper import map_docs
+
+		map_docs(
+			method="erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+			source_names=frappe.json.dumps([dn1.name, dn2.name]),
+			target_doc=si,
+			args=frappe.json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
+		)
+		si.save().submit()
+
+		expected = [
+			{
+				"charge_type": "Actual",
+				"account_head": "Freight and Forwarding Charges - _TC",
+				"tax_amount": 120.0,
+				"total": 1520.0,
+				"base_total": 1520.0,
+			},
+			{
+				"charge_type": "Actual",
+				"account_head": "Marketing Expenses - _TC",
+				"tax_amount": 150.0,
+				"total": 1670.0,
+				"base_total": 1670.0,
+			},
+			{
+				"charge_type": "Actual",
+				"account_head": "Miscellaneous Expenses - _TC",
+				"tax_amount": 60.0,
+				"total": 1610.0,
+				"base_total": 1610.0,
+			},
+		]
+		actual = [
+			dict(
+				charge_type=x.charge_type,
+				account_head=x.account_head,
+				tax_amount=x.tax_amount,
+				total=x.total,
+				base_total=x.base_total,
+			)
+			for x in si.taxes
+		]
+		self.assertEqual(expected, actual)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(
