@@ -1205,6 +1205,18 @@ class PaymentEntry(AccountsController):
 				):
 					self.add_advance_gl_for_reference(gl_entries, ref)
 
+	def get_dr_and_account_for_advances(self, reference):
+		if reference.reference_doctype == "Sales Invoice":
+			return "credit", reference.account
+
+		if reference.reference_doctype == "Payment Entry":
+			if reference.account_type == "Receivable" and reference.payment_type == "Pay":
+				return "credit", self.party_account
+			else:
+				return "debit", self.party_account
+
+		return "debit", reference.account
+
 	def add_advance_gl_for_reference(self, gl_entries, invoice):
 		args_dict = {
 			"party_type": self.party_type,
@@ -1224,10 +1236,8 @@ class PaymentEntry(AccountsController):
 		if getdate(posting_date) < getdate(self.posting_date):
 			posting_date = self.posting_date
 
-		dr_or_cr = (
-			"credit" if invoice.reference_doctype in ["Sales Invoice", "Payment Entry"] else "debit"
-		)
-		args_dict["account"] = invoice.account
+		dr_or_cr, account = self.get_dr_and_account_for_advances(invoice)
+		args_dict["account"] = account
 		args_dict[dr_or_cr] = invoice.allocated_amount
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
 		args_dict.update(
@@ -2089,6 +2099,10 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		ref_doc.company
 	)
 
+	# Only applies for Reverse Payment Entries
+	account_type = None
+	payment_type = None
+
 	if reference_doctype == "Dunning":
 		total_amount = outstanding_amount = ref_doc.get("dunning_amount")
 		exchange_rate = 1
@@ -2102,6 +2116,18 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		else:
 			exchange_rate = 1
 			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
+
+	elif reference_doctype == "Payment Entry":
+		if reverse_payment_details := frappe.db.get_all(
+			"Payment Entry",
+			filters={"name": reference_name},
+			fields=["payment_type", "party_type"],
+		)[0]:
+			payment_type = reverse_payment_details.payment_type
+			account_type = frappe.db.get_value(
+				"Party Type", reverse_payment_details.party_type, "account_type"
+			)
+		exchange_rate = 1
 
 	elif reference_doctype != "Journal Entry":
 		if not total_amount:
@@ -2147,6 +2173,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			"outstanding_amount": flt(outstanding_amount),
 			"exchange_rate": flt(exchange_rate),
 			"bill_no": ref_doc.get("bill_no"),
+			"account_type": account_type,
+			"payment_type": payment_type,
 		}
 	)
 	if account:
