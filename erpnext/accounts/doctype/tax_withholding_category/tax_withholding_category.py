@@ -146,7 +146,12 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 		tax_row = get_tax_row_for_tcs(inv, tax_details, tax_amount, tax_deducted)
 
 	cost_center = get_cost_center(inv)
-	tax_row.update({"cost_center": cost_center})
+	tax_row.update(
+		{
+			"cost_center": cost_center,
+			"is_tax_withholding_account": 1,
+		}
+	)
 
 	if inv.doctype == "Purchase Invoice":
 		return tax_row, tax_deducted_on_advances, voucher_wise_amount
