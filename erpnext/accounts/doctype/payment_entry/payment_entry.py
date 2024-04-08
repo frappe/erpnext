@@ -1236,15 +1236,8 @@ class PaymentEntry(AccountsController):
 		if getdate(posting_date) < getdate(self.posting_date):
 			posting_date = self.posting_date
 
-<<<<<<< HEAD
-		dr_or_cr = (
-			"credit" if invoice.reference_doctype in ["Sales Invoice", "Payment Entry"] else "debit"
-		)
-		args_dict["account"] = invoice.account
-=======
 		dr_or_cr, account = self.get_dr_and_account_for_advances(invoice)
 		args_dict["account"] = account
->>>>>>> 9fd2dddfde (fix: invalid ledger entries on payment against reverse payments)
 		args_dict[dr_or_cr] = invoice.allocated_amount
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
 		args_dict.update(
