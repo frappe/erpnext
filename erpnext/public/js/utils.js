@@ -452,6 +452,9 @@ $.extend(erpnext.utils, {
 	},
 
 	get_fiscal_year: function (date, with_dates = false, boolean = false) {
+		if (!frappe.boot.setup_complete) {
+			return;
+		}
 		if (!date) {
 			date = frappe.datetime.get_today();
 		}
