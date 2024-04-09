@@ -1386,6 +1386,7 @@ def sort_stock_vouchers_by_posting_date(stock_vouchers: list[tuple[str, str]]) -
 
 
 def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
+	from erpnext.stock.utils import get_combine_datetime
 	values = []
 	condition = ""
 	if for_items:
@@ -1400,15 +1401,16 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 		condition += " and company = %s"
 		values.append(company)
 
+	posting_datetime = get_combine_datetime(posting_date, posting_time)
 	future_stock_vouchers = frappe.db.sql(
 		f"""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where
-			timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s)
+			sle.posting_datetime >= %s
 			and is_cancelled = 0
 			{condition}
-		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""",
-		tuple([posting_date, posting_time, *values]),
+		order by sle.posting_datetime asc, creation asc for update""",
+		tuple([posting_datetime, *values]),
 		as_dict=True,
 	)
 

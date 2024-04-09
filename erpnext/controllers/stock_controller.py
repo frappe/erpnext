@@ -1400,6 +1400,9 @@ def is_reposting_pending():
 
 
 def future_sle_exists(args, sl_entries=None):
+	from erpnext.stock.utils import get_combine_datetime
+	import datetime
+
 	key = (args.voucher_type, args.voucher_no)
 	if not hasattr(frappe.local, "future_sle"):
 		frappe.local.future_sle = {}
@@ -1416,18 +1419,23 @@ def future_sle_exists(args, sl_entries=None):
 
 	or_conditions = get_conditions_to_validate_future_sle(sl_entries)
 
+	posting_datetime = get_combine_datetime(args.posting_date, args.posting_time)
+	posting_datetime = posting_datetime + datetime.timedelta(milliseconds=1)
+
+	args["posting_datetime"] = posting_datetime
 	data = frappe.db.sql(
 		"""
 		select item_code, warehouse, count(name) as total_row
-		from `tabStock Ledger Entry` force index (item_warehouse)
+		from `tabStock Ledger Entry`
 		where
 			({})
-			and timestamp(posting_date, posting_time)
-				>= timestamp(%(posting_date)s, %(posting_time)s)
+			and posting_datetime
+				>= %(posting_datetime)s
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 		GROUP BY
 			item_code, warehouse
+		FOR UPDATE
 		""".format(" or ".join(or_conditions)),
 		args,
 		as_dict=1,

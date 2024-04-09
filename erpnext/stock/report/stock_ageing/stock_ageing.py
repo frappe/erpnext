@@ -435,7 +435,7 @@ class FIFOSlots:
 		if self.filters.get("warehouse"):
 			sle_query = self.__get_warehouse_conditions(sle, sle_query)
 
-		sle_query = sle_query.orderby(sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty)
+		sle_query = sle_query.orderby(sle.posting_datetime, sle.creation, sle.actual_qty)
 
 		return sle_query.run(as_dict=True, as_iterator=True)
 
