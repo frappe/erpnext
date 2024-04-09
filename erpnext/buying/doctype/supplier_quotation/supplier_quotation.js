@@ -22,9 +22,13 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 			this.frm.set_value("valid_till", frappe.datetime.add_months(this.frm.doc.transaction_date, 1));
 		}
 		if (this.frm.doc.docstatus === 1) {
-			this.frm.add_custom_button(__("Purchase Order"), this.make_purchase_order, __("Create"));
+			this.frm.add_custom_button(
+				__("Purchase Order"),
+				this.make_purchase_order.bind(this),
+				__("Create")
+			);
 			this.frm.page.set_inner_btn_group_as_primary(__("Create"));
-			this.frm.add_custom_button(__("Quotation"), this.make_quotation, __("Create"));
+			this.frm.add_custom_button(__("Quotation"), this.make_quotation.bind(this), __("Create"));
 		} else if (this.frm.doc.docstatus === 0) {
 			this.frm.add_custom_button(
 				__("Material Request"),
