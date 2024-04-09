@@ -65,6 +65,8 @@
    "label": "Is Group"
   },
   {
+   "fetch_from": "parent_account.company",
+   "fetch_if_empty": 1,
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -192,7 +194,11 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-04-11 16:08:46.983677",
+=======
+ "modified": "2024-04-09 11:08:23.994983",
+>>>>>>> d791fa7460 (fix: by default company field value is fetched from parent account)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
