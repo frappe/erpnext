@@ -1395,8 +1395,17 @@ frappe.ui.form.on('Payment Entry Reference', {
 				args: {
 					reference_doctype: row.reference_doctype,
 					reference_name: row.reference_name,
+<<<<<<< HEAD
 					party_account_currency: frm.doc.payment_type=="Receive" ?
 						frm.doc.paid_from_account_currency : frm.doc.paid_to_account_currency
+=======
+					party_account_currency:
+						frm.doc.payment_type == "Receive"
+							? frm.doc.paid_from_account_currency
+							: frm.doc.paid_to_account_currency,
+					party_type: frm.doc.party_type,
+					party: frm.doc.party,
+>>>>>>> f331f9b15c (fix: Fetch outstanding and total amount for reference journal entry)
 				},
 				callback: function(r, rt) {
 					if(r.message) {
