@@ -397,7 +397,43 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+<<<<<<< HEAD
 	get_fiscal_year: function (date) {
+=======
+	pick_serial_and_batch_bundle(frm, cdt, cdn, type_of_transaction, warehouse_field) {
+		let item_row = frappe.get_doc(cdt, cdn);
+		item_row.type_of_transaction = type_of_transaction;
+
+		frappe.db.get_value("Item", item_row.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
+			item_row.has_batch_no = r.message.has_batch_no;
+			item_row.has_serial_no = r.message.has_serial_no;
+
+			new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
+				if (r) {
+					let update_values = {
+						serial_and_batch_bundle: r.name,
+						qty: Math.abs(r.total_qty),
+					};
+
+					if (!warehouse_field) {
+						warehouse_field = "warehouse";
+					}
+
+					if (r.warehouse) {
+						update_values[warehouse_field] = r.warehouse;
+					}
+
+					frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+				}
+			});
+		});
+	},
+
+	get_fiscal_year: function (date, with_dates = false, boolean = false) {
+		if (!frappe.boot.setup_complete) {
+			return;
+		}
+>>>>>>> c203fafb1b (fix: Don't call get_fiscal_year if setup is not done yet)
 		if (!date) {
 			date = frappe.datetime.get_today();
 		}
