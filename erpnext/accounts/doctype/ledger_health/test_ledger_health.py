@@ -32,7 +32,7 @@ class TestLedgerHealth(AccountsTestMixin, FrappeTestCase):
 		monitor_settings.save()
 
 	def clear_old_entries(self):
-		super(TestLedgerHealth, self).clear_old_entries()
+		super().clear_old_entries()
 		lh = qb.DocType("Ledger Health")
 		qb.from_(lh).delete().run()
 
