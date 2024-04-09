@@ -1087,7 +1087,9 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.source_exchange_rate = 50
 		pe.save()
 
-		ref_details = get_reference_details(so.doctype, so.name, pe.paid_from_account_currency)
+		ref_details = get_reference_details(
+			so.doctype, so.name, pe.paid_from_account_currency, "Customer", so.customer
+		)
 		expected_response = {
 			"total_amount": 5000.0,
 			"outstanding_amount": 5000.0,
