@@ -77,7 +77,7 @@
  "icon": "fa fa-money",
  "idx": 1,
  "links": [],
- "modified": "2024-01-30 13:08:09.537242",
+ "modified": "2024-03-27 13:10:26.945131",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges Template",
@@ -107,7 +107,7 @@
   }
  ],
  "show_title_field_in_link": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "title",

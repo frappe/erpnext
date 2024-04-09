@@ -70,7 +70,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-03-02 17:35:27.544259",
+ "modified": "2024-03-27 13:10:13.672028",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Plaid Settings",
@@ -87,7 +87,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

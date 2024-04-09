@@ -94,13 +94,14 @@
   }
  ],
  "links": [],
- "modified": "2021-04-24 10:33:12.250687",
+ "modified": "2024-03-27 13:09:50.384173",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Import Supplier Invoice",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

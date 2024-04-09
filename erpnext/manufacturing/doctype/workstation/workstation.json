@@ -252,7 +252,7 @@
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2023-11-30 12:43:35.808845",
+ "modified": "2024-03-27 13:11:00.760717",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",
@@ -273,7 +273,7 @@
  ],
  "quick_entry": 1,
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1

@@ -58,9 +58,7 @@ def _reorder_item():
 				item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse_group)
 			)
 		else:
-			projected_qty = flt(
-				item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse)
-			)
+			projected_qty = flt(item_warehouse_projected_qty.get(kwargs.item_code, {}).get(kwargs.warehouse))
 
 		if (reorder_level or reorder_qty) and projected_qty <= reorder_level:
 			deficiency = reorder_level - projected_qty
@@ -188,13 +186,12 @@ def get_item_warehouse_projected_qty(items_to_consider):
 
 	for item_code, warehouse, projected_qty in frappe.db.sql(
 		"""select item_code, warehouse, projected_qty
-		from tabBin where item_code in ({0})
+		from tabBin where item_code in ({})
 			and (warehouse != '' and warehouse is not null)""".format(
 			", ".join(["%s"] * len(items_to_consider))
 		),
 		items_to_consider,
 	):
-
 		if item_code not in item_warehouse_projected_qty:
 			item_warehouse_projected_qty.setdefault(item_code, {})
 
@@ -242,7 +239,9 @@ def create_material_request(material_requests):
 					{
 						"company": company,
 						"transaction_date": nowdate(),
-						"material_request_type": "Material Transfer" if request_type == "Transfer" else request_type,
+						"material_request_type": "Material Transfer"
+						if request_type == "Transfer"
+						else request_type,
 					}
 				)
 
@@ -257,7 +256,9 @@ def create_material_request(material_requests):
 						if uom != item.stock_uom:
 							conversion_factor = (
 								frappe.db.get_value(
-									"UOM Conversion Detail", {"parent": item.name, "uom": uom}, "conversion_factor"
+									"UOM Conversion Detail",
+									{"parent": item.name, "uom": uom},
+									"conversion_factor",
 								)
 								or 1.0
 							)
@@ -323,9 +324,7 @@ def send_email_notification(company_wise_mr):
 
 		msg = frappe.render_template("templates/emails/reorder_item.html", {"mr_list": mr_list})
 
-		frappe.sendmail(
-			recipients=email_list, subject=_("Auto Material Requests Generated"), message=msg
-		)
+		frappe.sendmail(recipients=email_list, subject=_("Auto Material Requests Generated"), message=msg)
 
 
 def get_email_list(company):
@@ -378,7 +377,7 @@ def notify_errors(exceptions_list):
 	for exception in exceptions_list:
 		try:
 			exception = json.loads(exception)
-			error_message = """<div class='small text-muted'>{0}</div><br>""".format(
+			error_message = """<div class='small text-muted'>{}</div><br>""".format(
 				_(exception.get("message"))
 			)
 			content += error_message

@@ -21,14 +21,10 @@ def execute():
 	rename_field("Timesheet", "production_order", "work_order")
 	rename_field("Stock Entry", "production_order", "work_order")
 
-	frappe.rename_doc(
-		"Report", "Production Orders in Progress", "Work Orders in Progress", force=True
-	)
+	frappe.rename_doc("Report", "Production Orders in Progress", "Work Orders in Progress", force=True)
 	frappe.rename_doc("Report", "Completed Production Orders", "Completed Work Orders", force=True)
 	frappe.rename_doc("Report", "Open Production Orders", "Open Work Orders", force=True)
 	frappe.rename_doc(
 		"Report", "Issued Items Against Production Order", "Issued Items Against Work Order", force=True
 	)
-	frappe.rename_doc(
-		"Report", "Production Order Stock Report", "Work Order Stock Report", force=True
-	)
+	frappe.rename_doc("Report", "Production Order Stock Report", "Work Order Stock Report", force=True)

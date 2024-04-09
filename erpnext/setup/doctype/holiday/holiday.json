@@ -49,12 +49,13 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-18 19:03:23.507845",
+ "modified": "2024-03-27 13:09:49.810408",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Holiday",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
 }

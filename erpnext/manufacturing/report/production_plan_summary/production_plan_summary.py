@@ -56,14 +56,10 @@ def get_production_plan_item_details(filters, data, order_details):
 			}
 		)
 
-		get_production_plan_sub_assembly_item_details(
-			filters, row, production_plan_doc, data, order_details
-		)
+		get_production_plan_sub_assembly_item_details(filters, row, production_plan_doc, data, order_details)
 
 
-def get_production_plan_sub_assembly_item_details(
-	filters, row, production_plan_doc, data, order_details
-):
+def get_production_plan_sub_assembly_item_details(filters, row, production_plan_doc, data, order_details):
 	for item in production_plan_doc.sub_assembly_items:
 		if row.name == item.production_plan_item:
 			subcontracted_item = item.type_of_manufacturing == "Subcontract"
@@ -76,7 +72,9 @@ def get_production_plan_sub_assembly_item_details(
 				)
 			else:
 				docname = frappe.get_value(
-					"Work Order", {"production_plan_sub_assembly_item": item.name, "docstatus": ("<", 2)}, "name"
+					"Work Order",
+					{"production_plan_sub_assembly_item": item.name, "docstatus": ("<", 2)},
+					"name",
 				)
 
 			data.append(
@@ -88,7 +86,9 @@ def get_production_plan_sub_assembly_item_details(
 					"document_type": "Work Order" if not subcontracted_item else "Purchase Order",
 					"document_name": docname or "",
 					"bom_level": item.bom_level,
-					"produced_qty": order_details.get((docname, item.production_item), {}).get("produced_qty", 0),
+					"produced_qty": order_details.get((docname, item.production_item), {}).get(
+						"produced_qty", 0
+					),
 					"pending_qty": flt(item.qty)
 					- flt(order_details.get((docname, item.production_item), {}).get("produced_qty", 0)),
 				}

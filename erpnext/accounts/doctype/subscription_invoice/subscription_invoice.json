@@ -15,9 +15,7 @@
    "label": "Document Type ",
    "no_copy": 1,
    "options": "DocType",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "invoice",
@@ -26,22 +24,21 @@
    "label": "Invoice",
    "no_copy": 1,
    "options": "document_type",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-09 15:43:32.026233",
+ "modified": "2024-03-27 13:10:47.880704",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Invoice",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

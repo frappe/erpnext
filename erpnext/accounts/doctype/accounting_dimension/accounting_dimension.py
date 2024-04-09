@@ -40,7 +40,8 @@ class AccountingDimension(Document):
 		self.set_fieldname_and_label()
 
 	def validate(self):
-		if self.document_type in core_doctypes_list + (
+		if self.document_type in (
+			*core_doctypes_list,
 			"Accounting Dimension",
 			"Project",
 			"Cost Center",
@@ -48,13 +49,10 @@ class AccountingDimension(Document):
 			"Company",
 			"Account",
 		):
-
 			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
 			frappe.throw(msg)
 
-		exists = frappe.db.get_value(
-			"Accounting Dimension", {"document_type": self.document_type}, ["name"]
-		)
+		exists = frappe.db.get_value("Accounting Dimension", {"document_type": self.document_type}, ["name"])
 
 		if exists and self.is_new():
 			frappe.throw(_("Document Type already used as a dimension"))
@@ -113,7 +111,6 @@ def make_dimension_in_accounting_doctypes(doc, doclist=None):
 	repostable_doctypes = get_allowed_types_from_settings()
 
 	for doctype in doclist:
-
 		if (doc_count + 1) % 2 == 0:
 			insert_after_field = "dimension_col_break"
 		else:
@@ -148,7 +145,7 @@ def add_dimension_to_budget_doctype(df, doc):
 	df.update(
 		{
 			"insert_after": "cost_center",
-			"depends_on": "eval:doc.budget_against == '{0}'".format(doc.document_type),
+			"depends_on": f"eval:doc.budget_against == '{doc.document_type}'",
 		}
 	)
 
@@ -182,19 +179,17 @@ def delete_accounting_dimension(doc):
 	frappe.db.sql(
 		"""
 		DELETE FROM `tabCustom Field`
-		WHERE fieldname = %s
-		AND dt IN (%s)"""
-		% ("%s", ", ".join(["%s"] * len(doclist))),  # nosec
-		tuple([doc.fieldname] + doclist),
+		WHERE fieldname = {}
+		AND dt IN ({})""".format("%s", ", ".join(["%s"] * len(doclist))),  # nosec
+		tuple([doc.fieldname, *doclist]),
 	)
 
 	frappe.db.sql(
 		"""
 		DELETE FROM `tabProperty Setter`
-		WHERE field_name = %s
-		AND doc_type IN (%s)"""
-		% ("%s", ", ".join(["%s"] * len(doclist))),  # nosec
-		tuple([doc.fieldname] + doclist),
+		WHERE field_name = {}
+		AND doc_type IN ({})""".format("%s", ", ".join(["%s"] * len(doclist))),  # nosec
+		tuple([doc.fieldname, *doclist]),
 	)
 
 	budget_against_property = frappe.get_doc("Property Setter", "Budget-budget_against-options")
@@ -243,7 +238,6 @@ def get_doctypes_with_dimensions():
 
 
 def get_accounting_dimensions(as_list=True, filters=None):
-
 	if not filters:
 		filters = {"disabled": 0}
 
@@ -261,18 +255,19 @@ def get_accounting_dimensions(as_list=True, filters=None):
 
 
 def get_checks_for_pl_and_bs_accounts():
-	dimensions = frappe.db.sql(
-		"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
-		FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
-		WHERE p.name = c.parent""",
-		as_dict=1,
-	)
+	if frappe.flags.accounting_dimensions_details is None:
+		# nosemgrep
+		frappe.flags.accounting_dimensions_details = frappe.db.sql(
+			"""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
+			FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
+			WHERE p.name = c.parent""",
+			as_dict=1,
+		)
 
-	return dimensions
+	return frappe.flags.accounting_dimensions_details
 
 
 def get_dimension_with_children(doctype, dimensions):
-
 	if isinstance(dimensions, str):
 		dimensions = [dimensions]
 
@@ -280,9 +275,7 @@ def get_dimension_with_children(doctype, dimensions):
 
 	for dimension in dimensions:
 		lft, rgt = frappe.db.get_value(doctype, dimension, ["lft", "rgt"])
-		children = frappe.get_all(
-			doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, order_by="lft"
-		)
+		children = frappe.get_all(doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, order_by="lft")
 		all_dimensions += [c.name for c in children]
 
 	return all_dimensions
@@ -290,14 +283,10 @@ def get_dimension_with_children(doctype, dimensions):
 
 @frappe.whitelist()
 def get_dimensions(with_cost_center_and_project=False):
-
 	c = frappe.qb.DocType("Accounting Dimension Detail")
 	p = frappe.qb.DocType("Accounting Dimension")
 	dimension_filters = (
-		frappe.qb.from_(p)
-		.select(p.label, p.fieldname, p.document_type)
-		.where(p.disabled == 0)
-		.run(as_dict=1)
+		frappe.qb.from_(p).select(p.label, p.fieldname, p.document_type).where(p.disabled == 0).run(as_dict=1)
 	)
 	default_dimensions = (
 		frappe.qb.from_(c)

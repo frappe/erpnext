@@ -421,7 +421,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		let { qty, based_on } = this.dialog.get_values();
 
 		if (this.item.serial_and_batch_bundle || this.item.rejected_serial_and_batch_bundle) {
-			if (qty === this.qty) {
+			if (this.qty && qty === Math.abs(this.qty)) {
 				return;
 			}
 		}

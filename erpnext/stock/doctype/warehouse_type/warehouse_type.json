@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "Prompt",
  "creation": "2019-05-21 15:27:06.514511",
  "doctype": "DocType",
@@ -13,7 +14,8 @@
    "label": "Description"
   }
  ],
- "modified": "2019-05-27 18:35:33.354571",
+ "links": [],
+ "modified": "2024-03-27 13:10:59.427114",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse Type",
@@ -102,7 +104,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

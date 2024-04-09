@@ -1,7 +1,7 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, TypedDict
 
 import frappe
 from frappe import _
@@ -9,12 +9,12 @@ from frappe.query_builder.functions import Sum
 
 
 class StockBalanceFilter(TypedDict):
-	company: Optional[str]
-	warehouse: Optional[str]
-	show_disabled_warehouses: Optional[int]
+	company: str | None
+	warehouse: str | None
+	show_disabled_warehouses: int | None
 
 
-SLEntry = Dict[str, Any]
+SLEntry = dict[str, Any]
 
 
 def execute(filters=None):
@@ -25,7 +25,7 @@ def execute(filters=None):
 	return columns, data
 
 
-def get_warehouse_wise_balance(filters: StockBalanceFilter) -> List[SLEntry]:
+def get_warehouse_wise_balance(filters: StockBalanceFilter) -> list[SLEntry]:
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
 	query = (
@@ -95,7 +95,7 @@ def set_balance_in_parent(warehouses):
 		update_balance(warehouse, warehouse.stock_balance)
 
 
-def get_columns(filters: StockBalanceFilter) -> List[Dict]:
+def get_columns(filters: StockBalanceFilter) -> list[dict]:
 	columns = [
 		{
 			"label": _("Warehouse"),

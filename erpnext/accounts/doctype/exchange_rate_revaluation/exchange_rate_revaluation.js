@@ -57,13 +57,13 @@ frappe.ui.form.on("Exchange Rate Revaluation", {
 	get_entries: function (frm, account) {
 		frappe.call({
 			method: "get_accounts_data",
-			doc: cur_frm.doc,
+			doc: frm.doc,
 			account: account,
 			callback: function (r) {
 				frappe.model.clear_table(frm.doc, "accounts");
 				if (r.message) {
 					r.message.forEach((d) => {
-						cur_frm.add_child("accounts", d);
+						frm.add_child("accounts", d);
 					});
 					frm.events.get_total_gain_loss(frm);
 					refresh_field("accounts");

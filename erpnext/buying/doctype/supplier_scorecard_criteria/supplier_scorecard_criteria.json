@@ -43,7 +43,7 @@
   }
  ],
  "links": [],
- "modified": "2021-11-11 18:34:58.477648",
+ "modified": "2024-03-27 13:10:49.920492",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Scorecard Criteria",
@@ -64,7 +64,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

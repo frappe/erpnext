@@ -61,7 +61,7 @@
    "link_fieldname": "feedback"
   }
  ],
- "modified": "2023-08-28 22:21:36.144820",
+ "modified": "2024-03-27 13:10:27.838693",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback",
@@ -92,7 +92,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
