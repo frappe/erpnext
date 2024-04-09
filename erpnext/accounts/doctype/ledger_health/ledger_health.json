@@ -40,9 +40,10 @@
    "label": "General and Payment Ledger mismatch"
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-26 19:59:41.180161",
+ "modified": "2024-04-09 11:16:07.044484",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Ledger Health",
@@ -62,6 +63,7 @@
    "write": 1
   }
  ],
+ "read_only": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
