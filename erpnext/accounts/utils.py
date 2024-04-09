@@ -2086,12 +2086,6 @@ def create_gain_loss_journal(
 	journal_entry.save()
 	journal_entry.submit()
 	return journal_entry.name
-<<<<<<< HEAD
-=======
-
-
-def get_party_types_from_account_type(account_type):
-	return frappe.db.get_all("Party Type", {"account_type": account_type}, pluck="name")
 
 
 def run_ledger_health_checks():
@@ -2118,40 +2112,6 @@ def run_ledger_health_checks():
 
 		# General Ledger and Payment Ledger discrepancy
 		if health_monitor_settings.general_and_payment_ledger_mismatch:
-<<<<<<< HEAD
-			gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
-			filters = {
-				"company": "நுண்ணறி",
-				"period_start_date": period_start,
-				"period_end_date": period_end,
-			}
-			res = gl_pl_comparison.execute_script_report(filters=filters)
-
-<<<<<<< HEAD
-	# General Ledger and Payment Ledger discrepancy
-	gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
-	# todo: company and dates should be configurable
-	filters = {"company": "நுண்ணறி", "period_start_date": period_start, "period_end_date": period_end}
-	res = gl_pl_comparison.execute_script_report(filters=filters)
-
-	for x in res[1]:
-		doc = frappe.new_doc("Ledger Health")
-		doc.voucher_type = x.voucher_type
-		doc.voucher_no = x.voucher_no
-		doc.general_and_payment_ledger_mismatch = True
-		doc.checked_on = run_date
-		doc.save()
->>>>>>> 8c8d9be810 (refactor: barebones method to run checks)
-=======
-			for x in res[1]:
-				doc = frappe.new_doc("Ledger Health")
-				doc.voucher_type = x.voucher_type
-				doc.voucher_no = x.voucher_no
-				doc.general_and_payment_ledger_mismatch = True
-				doc.checked_on = run_date
-				doc.save()
->>>>>>> a42482ce35 (refactor: control monitoring through settings page)
-=======
 			for x in health_monitor_settings.companies:
 				filters = {
 					"company": x.company,
@@ -2167,4 +2127,3 @@ def run_ledger_health_checks():
 					doc.general_and_payment_ledger_mismatch = True
 					doc.checked_on = run_date
 					doc.save()
->>>>>>> 00eeacd06a (refactor: only run checks on specified companies)
