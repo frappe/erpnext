@@ -117,34 +117,37 @@ def get_stock_ledger_entries(filters):
 		if filters.get(field):
 			query = query.where(sle[field] == filters.get(field))
 
-	return query.run(as_dict=True)
+	return query
 
 
 def get_item_warehouse_batch_map(filters, float_precision):
-	sle = get_stock_ledger_entries(filters)
-	iwb_map = {}
+	with frappe.db.unbuffered_cursor():
+		sle = get_stock_ledger_entries(filters)
+		sle = sle.run(as_dict=True, as_iterator=True)
 
-	from_date = getdate(filters["from_date"])
-	to_date = getdate(filters["to_date"])
+		iwb_map = {}
 
-	for d in sle:
-		iwb_map.setdefault(d.item_code, {}).setdefault(d.warehouse, {}).setdefault(
-			d.batch_no, frappe._dict({"opening_qty": 0.0, "in_qty": 0.0, "out_qty": 0.0, "bal_qty": 0.0})
-		)
-		qty_dict = iwb_map[d.item_code][d.warehouse][d.batch_no]
-		if d.posting_date < from_date:
-			qty_dict.opening_qty = flt(qty_dict.opening_qty, float_precision) + flt(
-				d.actual_qty, float_precision
+		from_date = getdate(filters["from_date"])
+		to_date = getdate(filters["to_date"])
+
+		for d in sle:
+			iwb_map.setdefault(d.item_code, {}).setdefault(d.warehouse, {}).setdefault(
+				d.batch_no, frappe._dict({"opening_qty": 0.0, "in_qty": 0.0, "out_qty": 0.0, "bal_qty": 0.0})
 			)
-		elif d.posting_date >= from_date and d.posting_date <= to_date:
-			if flt(d.actual_qty) > 0:
-				qty_dict.in_qty = flt(qty_dict.in_qty, float_precision) + flt(d.actual_qty, float_precision)
-			else:
-				qty_dict.out_qty = flt(qty_dict.out_qty, float_precision) + abs(
-					flt(d.actual_qty, float_precision)
+			qty_dict = iwb_map[d.item_code][d.warehouse][d.batch_no]
+			if d.posting_date < from_date:
+				qty_dict.opening_qty = flt(qty_dict.opening_qty, float_precision) + flt(
+					d.actual_qty, float_precision
 				)
+			elif d.posting_date >= from_date and d.posting_date <= to_date:
+				if flt(d.actual_qty) > 0:
+					qty_dict.in_qty = flt(qty_dict.in_qty, float_precision) + flt(d.actual_qty, float_precision)
+				else:
+					qty_dict.out_qty = flt(qty_dict.out_qty, float_precision) + abs(
+						flt(d.actual_qty, float_precision)
+					)
 
-		qty_dict.bal_qty = flt(qty_dict.bal_qty, float_precision) + flt(d.actual_qty, float_precision)
+			qty_dict.bal_qty = flt(qty_dict.bal_qty, float_precision) + flt(d.actual_qty, float_precision)
 
 	return iwb_map
 
