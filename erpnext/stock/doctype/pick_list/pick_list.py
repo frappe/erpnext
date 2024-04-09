@@ -568,9 +568,6 @@ class PickList(Document):
 
 		return picked_items
 
-<<<<<<< HEAD
-	def _get_product_bundles(self) -> Dict[str, str]:
-=======
 	def _get_pick_list_items(self, items):
 		pi = frappe.qb.DocType("Pick List")
 		pi_item = frappe.qb.DocType("Pick List Item")
@@ -603,7 +600,6 @@ class PickList(Document):
 		return query.run(as_dict=True)
 
 	def _get_product_bundles(self) -> dict[str, str]:
->>>>>>> 3bce4d92f6 (fix: pick list validation didn't consider existing draft pick list)
 		# Dict[so_item_row: item_code]
 		product_bundles = {}
 		for item in self.locations:
