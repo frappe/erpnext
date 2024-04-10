@@ -22,7 +22,6 @@ erpnext.accounts.dimensions = {
 				});
 				me.default_dimensions = r.message[1];
 				me.setup_filters(frm, doctype);
-				me.update_dimension(frm, doctype);
 			},
 		});
 	},
