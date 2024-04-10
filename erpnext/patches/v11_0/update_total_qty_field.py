@@ -24,16 +24,14 @@ def execute():
 
 	for doctype in doctypes:
 		total_qty = frappe.db.sql(
-			"""
+			f"""
 			SELECT
 				parent, SUM(qty) as qty
 			FROM
-				`tab{0} Item`
-			where parenttype = '{0}'
+				`tab{doctype} Item`
+			where parenttype = '{doctype}'
 			GROUP BY parent
-		""".format(
-				doctype
-			),
+		""",
 			as_dict=True,
 		)
 
@@ -53,13 +51,11 @@ def execute():
 			# This is probably never used anywhere else as of now, but should be
 			values = []
 			for d in batch_transactions:
-				values.append("({0}, {1})".format(frappe.db.escape(d.parent), d.qty))
+				values.append(f"({frappe.db.escape(d.parent)}, {d.qty})")
 			conditions = ",".join(values)
 			frappe.db.sql(
-				"""
-				INSERT INTO `tab{}` (name, total_qty) VALUES {}
+				f"""
+				INSERT INTO `tab{doctype}` (name, total_qty) VALUES {conditions}
 				ON DUPLICATE KEY UPDATE name = VALUES(name), total_qty = VALUES(total_qty)
-			""".format(
-					doctype, conditions
-				)
+			"""
 			)

@@ -81,9 +81,7 @@ class TestBOMUpdateLog(FrappeTestCase):
 		for item_code in items:
 			remove_bom(item_code)
 
-		bom_tree = {
-			"B-Item A": {"B-Item B": {"B-Item C": {}}, "B-Item D": {"B-Item E": {"B-Item F": {}}}}
-		}
+		bom_tree = {"B-Item A": {"B-Item B": {"B-Item C": {}}, "B-Item D": {"B-Item E": {"B-Item F": {}}}}}
 
 		root_bom = create_nested_bom(bom_tree, prefix="")
 

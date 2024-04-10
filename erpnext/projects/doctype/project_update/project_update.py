@@ -53,13 +53,8 @@ def daily_reminder():
 		email_sending(project_name, frequency, date_start, date_end, progress, number_of_drafts, update)
 
 
-def email_sending(
-	project_name, frequency, date_start, date_end, progress, number_of_drafts, update
-):
-
-	holiday = frappe.db.sql(
-		"""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURRENT_DATE;"""
-	)
+def email_sending(project_name, frequency, date_start, date_end, progress, number_of_drafts, update):
+	holiday = frappe.db.sql("""SELECT holiday_date FROM `tabHoliday` where holiday_date = CURRENT_DATE;""")
 	msg = (
 		"<p>Project Name: "
 		+ project_name
@@ -106,8 +101,6 @@ def email_sending(
 	if len(holiday) == 0:
 		email = frappe.db.sql("""SELECT user from `tabProject User` WHERE parent = %s;""", project_name)
 		for emails in email:
-			frappe.sendmail(
-				recipients=emails, subject=frappe._(project_name + " " + "Summary"), message=msg
-			)
+			frappe.sendmail(recipients=emails, subject=frappe._(project_name + " " + "Summary"), message=msg)
 	else:
 		pass

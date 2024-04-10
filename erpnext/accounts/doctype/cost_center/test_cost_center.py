@@ -10,7 +10,6 @@ test_records = frappe.get_test_records("Cost Center")
 
 class TestCostCenter(unittest.TestCase):
 	def test_cost_center_creation_against_child_node(self):
-
 		if not frappe.db.get_value("Cost Center", {"name": "_Test Cost Center 2 - _TC"}):
 			frappe.get_doc(test_records[1]).insert()
 

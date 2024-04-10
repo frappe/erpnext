@@ -32,9 +32,7 @@ def get_context(context):
 	)
 
 	# filter out homepage section which is used as hero section
-	homepage_hero_section = (
-		homepage.hero_section_based_on == "Homepage Section" and homepage.hero_section
-	)
+	homepage_hero_section = homepage.hero_section_based_on == "Homepage Section" and homepage.hero_section
 	homepage_sections = frappe.get_all(
 		"Homepage Section",
 		filters=[["name", "!=", homepage_hero_section]] if homepage_hero_section else None,

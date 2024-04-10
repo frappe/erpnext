@@ -129,7 +129,8 @@ def _execute(filters, additional_table_columns=None):
 			if tax_acc not in income_accounts:
 				tax_amount_precision = (
 					get_field_precision(
-						frappe.get_meta("Sales Taxes and Charges").get_field("tax_amount"), currency=company_currency
+						frappe.get_meta("Sales Taxes and Charges").get_field("tax_amount"),
+						currency=company_currency,
 					)
 					or 2
 				)
@@ -357,9 +358,7 @@ def get_account_columns(invoice_list, include_payments):
 		tax_accounts = sales_tax_accounts
 
 		if include_payments:
-			advance_taxes_query = get_taxes_query(
-				invoice_list, "Advance Taxes and Charges", "Payment Entry"
-			)
+			advance_taxes_query = get_taxes_query(invoice_list, "Advance Taxes and Charges", "Payment Entry")
 			advance_tax_accounts = advance_taxes_query.run(as_dict=True, pluck="account_head")
 			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
@@ -438,7 +437,7 @@ def get_invoices(filters, additional_query_columns):
 			si.represents_company,
 			si.company,
 		)
-		.where((si.docstatus == 1))
+		.where(si.docstatus == 1)
 		.orderby(si.posting_date, si.name, order=Order.desc)
 	)
 
@@ -480,9 +479,7 @@ def get_payments(filters):
 		account_fieldname="paid_from",
 		party="customer",
 		party_name="customer_name",
-		party_account=get_party_account(
-			"Customer", filters.customer, filters.company, include_advance=True
-		),
+		party_account=get_party_account("Customer", filters.customer, filters.company, include_advance=True),
 	)
 	payment_entries = get_payment_entries(filters, args)
 	journal_entries = get_journal_entries(filters, args)

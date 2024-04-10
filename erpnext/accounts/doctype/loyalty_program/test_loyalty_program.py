@@ -19,9 +19,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		create_records()
 
 	def test_loyalty_points_earned_single_tier(self):
-		frappe.db.set_value(
-			"Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty"
-		)
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
 		# create a new sales invoice
 		si_original = create_sales_invoice_record()
 		si_original.insert()
@@ -69,9 +67,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 			d.cancel()
 
 	def test_loyalty_points_earned_multiple_tier(self):
-		frappe.db.set_value(
-			"Customer", "Test Loyalty Customer", "loyalty_program", "Test Multiple Loyalty"
-		)
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Multiple Loyalty")
 		# assign multiple tier program to the customer
 		customer = frappe.get_doc("Customer", {"customer_name": "Test Loyalty Customer"})
 		customer.loyalty_program = frappe.get_doc(
@@ -128,9 +124,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 
 	def test_cancel_sales_invoice(self):
 		"""cancelling the sales invoice should cancel the earned points"""
-		frappe.db.set_value(
-			"Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty"
-		)
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
 		# create a new sales invoice
 		si = create_sales_invoice_record()
 		si.insert()
@@ -140,7 +134,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 			"Loyalty Point Entry",
 			{"invoice_type": "Sales Invoice", "invoice": si.name, "customer": si.customer},
 		)
-		self.assertEqual(True, not (lpe is None))
+		self.assertEqual(True, lpe is not None)
 
 		# cancelling sales invoice
 		si.cancel()
@@ -148,9 +142,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		self.assertEqual(True, (lpe is None))
 
 	def test_sales_invoice_return(self):
-		frappe.db.set_value(
-			"Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty"
-		)
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
 		# create a new sales invoice
 		si_original = create_sales_invoice_record(2)
 		si_original.conversion_rate = flt(1)
@@ -346,9 +338,7 @@ def create_records():
 		).insert()
 
 	# create item price
-	if not frappe.db.exists(
-		"Item Price", {"price_list": "Standard Selling", "item_code": "Loyal Item"}
-	):
+	if not frappe.db.exists("Item Price", {"price_list": "Standard Selling", "item_code": "Loyal Item"}):
 		frappe.get_doc(
 			{
 				"doctype": "Item Price",

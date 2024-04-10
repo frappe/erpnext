@@ -183,7 +183,7 @@ class POSInvoice(SalesInvoice):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(POSInvoice, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 	def validate(self):
 		if not cint(self.is_pos):
@@ -308,7 +308,9 @@ class POSInvoice(SalesInvoice):
 				)
 
 				if paid_amt and pay.amount != paid_amt:
-					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
+					return frappe.throw(
+						_("Payment related to {0} is not completed").format(pay.mode_of_payment)
+					)
 
 	def validate_stock_availablility(self):
 		if self.is_return:
@@ -328,7 +330,7 @@ class POSInvoice(SalesInvoice):
 
 				available_stock, is_stock_item = get_stock_availability(d.item_code, d.warehouse)
 
-				item_code, warehouse, qty = (
+				item_code, warehouse, _qty = (
 					frappe.bold(d.item_code),
 					frappe.bold(d.warehouse),
 					frappe.bold(d.qty),
@@ -408,8 +410,7 @@ class POSInvoice(SalesInvoice):
 		if (
 			self.change_amount
 			and self.account_for_change_amount
-			and frappe.get_cached_value("Account", self.account_for_change_amount, "company")
-			!= self.company
+			and frappe.get_cached_value("Account", self.account_for_change_amount, "company") != self.company
 		):
 			frappe.throw(
 				_("The selected change account {} doesn't belongs to Company {}.").format(

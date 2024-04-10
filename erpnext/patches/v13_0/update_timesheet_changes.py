@@ -20,12 +20,10 @@ def execute():
 	)
 
 	frappe.db.sql(
-		"""UPDATE `tabTimesheet`
-			SET currency = '{0}',
+		f"""UPDATE `tabTimesheet`
+			SET currency = '{base_currency}',
 			exchange_rate = 1.0,
 			base_total_billable_amount = total_billable_amount,
 			base_total_billed_amount = total_billed_amount,
-			base_total_costing_amount = total_costing_amount""".format(
-			base_currency
-		)
+			base_total_costing_amount = total_costing_amount"""
 	)

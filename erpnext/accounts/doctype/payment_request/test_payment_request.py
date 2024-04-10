@@ -93,7 +93,7 @@ class TestPaymentRequest(unittest.TestCase):
 			return_doc=1,
 		)
 
-		pe = pr.create_payment_entry()
+		pr.create_payment_entry()
 		pr.load_from_db()
 
 		self.assertEqual(pr.status, "Paid")
@@ -158,7 +158,7 @@ class TestPaymentRequest(unittest.TestCase):
 
 		self.assertTrue(gl_entries)
 
-		for i, gle in enumerate(gl_entries):
+		for _i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_gle[gle.account][0], gle.account)
 			self.assertEqual(expected_gle[gle.account][1], gle.debit)
 			self.assertEqual(expected_gle[gle.account][2], gle.credit)

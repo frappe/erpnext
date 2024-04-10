@@ -470,6 +470,9 @@ frappe.ui.form.on("Payment Entry", {
 							() => frm.events.set_dynamic_labels(frm),
 							() => {
 								frm.set_party_account_based_on_party = false;
+								if (r.message.party_bank_account) {
+									frm.set_value("party_bank_account", r.message.party_bank_account);
+								}
 								if (r.message.bank_account) {
 									frm.set_value("bank_account", r.message.bank_account);
 								}
