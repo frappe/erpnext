@@ -48,7 +48,7 @@ class CostCenterAllocation(Document):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(CostCenterAllocation, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self._skip_from_date_validation = False
 
 	def validate(self):
@@ -63,9 +63,7 @@ class CostCenterAllocation(Document):
 		total_percentage = sum([d.percentage for d in self.get("allocation_percentages", [])])
 
 		if total_percentage != 100:
-			frappe.throw(
-				_("Total percentage against cost centers should be 100"), WrongPercentageAllocation
-			)
+			frappe.throw(_("Total percentage against cost centers should be 100"), WrongPercentageAllocation)
 
 	def validate_from_date_based_on_existing_gle(self):
 		# Check if GLE exists against the main cost center

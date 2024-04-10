@@ -3,7 +3,6 @@ import frappe
 
 @frappe.whitelist()
 def get_last_interaction(contact=None, lead=None):
-
 	if not contact and not lead:
 		return
 
@@ -23,16 +22,14 @@ def get_last_interaction(contact=None, lead=None):
 			# remove extra appended 'OR'
 			query_condition = query_condition[:-2]
 			last_communication = frappe.db.sql(
-				"""
+				f"""
 				SELECT `name`, `content`
 				FROM `tabCommunication`
 				WHERE `sent_or_received`='Received'
-				AND ({})
+				AND ({query_condition})
 				ORDER BY `modified`
 				LIMIT 1
-			""".format(
-					query_condition
-				),
+			""",
 				values,
 				as_dict=1,
 			)  # nosec

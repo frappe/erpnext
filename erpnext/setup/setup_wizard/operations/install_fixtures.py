@@ -276,9 +276,7 @@ def install(country=None):
 		records += [{"doctype": doctype, title_field: title} for title in read_lines(filename)]
 
 	base_path = frappe.get_app_path("erpnext", "stock", "doctype")
-	response = frappe.read_file(
-		os.path.join(base_path, "delivery_trip/dispatch_notification_template.html")
-	)
+	response = frappe.read_file(os.path.join(base_path, "delivery_trip/dispatch_notification_template.html"))
 
 	records += [
 		{
@@ -477,9 +475,7 @@ def update_stock_settings():
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
 	stock_settings.valuation_method = "FIFO"
-	stock_settings.default_warehouse = frappe.db.get_value(
-		"Warehouse", {"warehouse_name": _("Stores")}
-	)
+	stock_settings.default_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores")})
 	stock_settings.stock_uom = _("Nos")
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1

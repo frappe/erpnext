@@ -51,7 +51,10 @@ def get_columns(filters=None):
 
 
 def fetch_item_prices(
-	customer: str = None, price_list: str = None, selling_price_list: str = None, items: list = None
+	customer: str | None = None,
+	price_list: str | None = None,
+	selling_price_list: str | None = None,
+	items: list | None = None,
 ):
 	price_list_map = frappe._dict()
 	ip = qb.DocType("Item Price")
@@ -59,10 +62,10 @@ def fetch_item_prices(
 	or_conditions = []
 	if items:
 		and_conditions.append(ip.item_code.isin([x.item_code for x in items]))
-		and_conditions.append(ip.selling == True)
+		and_conditions.append(ip.selling.eq(True))
 
-		or_conditions.append(ip.customer == None)
-		or_conditions.append(ip.price_list == None)
+		or_conditions.append(ip.customer.isnull())
+		or_conditions.append(ip.price_list.isnull())
 
 		if customer:
 			or_conditions.append(ip.customer == customer)

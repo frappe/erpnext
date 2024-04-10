@@ -228,7 +228,7 @@ def get_data(filters=None):
 	return data
 
 
-def get_item_warehouse_combinations(filters: dict = None) -> dict:
+def get_item_warehouse_combinations(filters: dict | None = None) -> dict:
 	filters = frappe._dict(filters or {})
 
 	bin = frappe.qb.DocType("Bin")
@@ -284,7 +284,5 @@ def has_difference(row, precision, difference_in, valuation_method):
 		return True
 	elif difference_in == "Valuation" and valuation_diff:
 		return True
-	elif difference_in not in ["Qty", "Value", "Valuation"] and (
-		qty_diff or value_diff or valuation_diff
-	):
+	elif difference_in not in ["Qty", "Value", "Valuation"] and (qty_diff or value_diff or valuation_diff):
 		return True

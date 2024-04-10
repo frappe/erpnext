@@ -146,9 +146,7 @@ def get_columns(filters, data):
 		)
 
 	if not item_details or item_details.get("has_serial_no"):
-		columns.append(
-			{"label": _("Serial No"), "fieldname": "serial_no", "fieldtype": "Data", "width": 120}
-		)
+		columns.append({"label": _("Serial No"), "fieldname": "serial_no", "fieldtype": "Data", "width": 120})
 
 	if not item_details or item_details.get("has_batch_no"):
 		columns.extend(
@@ -184,7 +182,7 @@ def get_voucher_type(doctype, txt, searchfield, start, page_len, filters):
 
 	query_filters = {"options": ["in", [d.parent for d in child_doctypes]]}
 	if txt:
-		query_filters["parent"] = ["like", "%{}%".format(txt)]
+		query_filters["parent"] = ["like", f"%{txt}%"]
 
 	return frappe.get_all("DocField", filters=query_filters, fields=["distinct parent"], as_list=True)
 

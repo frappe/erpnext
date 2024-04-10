@@ -57,9 +57,7 @@ def execute(filters=None):
 	if net_profit_loss:
 		data.append(net_profit_loss)
 
-	columns = get_columns(
-		filters.periodicity, period_list, filters.accumulated_values, filters.company
-	)
+	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 	chart = get_chart_data(filters, columns, income, expense, net_profit_loss)
 

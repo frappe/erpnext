@@ -186,7 +186,7 @@ def validate_against_blanket_order(order_doc):
 						allowed_qty = remaining_qty + (remaining_qty * (allowance / 100))
 						if allowed_qty < item_data[item.item_code]:
 							frappe.throw(
-								_("Item {0} cannot be ordered more than {1} against Blanket Order {2}.").format(
-									item.item_code, allowed_qty, bo_name
-								)
+								_(
+									"Item {0} cannot be ordered more than {1} against Blanket Order {2}."
+								).format(item.item_code, allowed_qty, bo_name)
 							)

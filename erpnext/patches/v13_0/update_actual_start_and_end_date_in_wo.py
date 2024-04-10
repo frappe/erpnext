@@ -29,7 +29,7 @@ def execute():
 			)
 
 			if not doc.planned_end_date:
-				planned_end_date = add_to_date(doc.planned_start_date, minutes=doc.lead_time)
+				add_to_date(doc.planned_start_date, minutes=doc.lead_time)
 				doc.db_set("planned_end_date", doc.actual_start_date, update_modified=False)
 
 	frappe.db.sql(

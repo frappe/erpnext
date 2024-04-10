@@ -23,9 +23,7 @@ def get_context(context):
 
 def get_supplier():
 	doctype = frappe.form_dict.doctype
-	parties_doctype = (
-		"Request for Quotation Supplier" if doctype == "Request for Quotation" else doctype
-	)
+	parties_doctype = "Request for Quotation Supplier" if doctype == "Request for Quotation" else doctype
 	customers, suppliers = get_customers_suppliers(parties_doctype, frappe.session.user)
 
 	return suppliers[0] if suppliers else ""
@@ -44,7 +42,7 @@ def check_supplier_has_docname_access(supplier):
 
 def unauthorized_user(supplier):
 	status = check_supplier_has_docname_access(supplier) or False
-	if status == False:
+	if status is False:
 		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
 
@@ -53,9 +51,7 @@ def update_supplier_details(context):
 	context.doc.currency = supplier_doc.default_currency or frappe.get_cached_value(
 		"Company", context.doc.company, "default_currency"
 	)
-	context.doc.currency_symbol = frappe.db.get_value(
-		"Currency", context.doc.currency, "symbol", cache=True
-	)
+	context.doc.currency_symbol = frappe.db.get_value("Currency", context.doc.currency, "symbol", cache=True)
 	context.doc.number_format = frappe.db.get_value(
 		"Currency", context.doc.currency, "number_format", cache=True
 	)

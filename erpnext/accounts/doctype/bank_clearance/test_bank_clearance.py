@@ -68,9 +68,7 @@ class TestBankClearance(unittest.TestCase):
 			)
 			loan.submit()
 			make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=getdate())
-			repayment_entry = create_repayment_entry(
-				loan.name, "_Test Customer", getdate(), loan.loan_amount
-			)
+			repayment_entry = create_repayment_entry(loan.name, "_Test Customer", getdate(), loan.loan_amount)
 			repayment_entry.save()
 			repayment_entry.submit()
 

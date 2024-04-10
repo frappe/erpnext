@@ -8,7 +8,6 @@ from frappe.query_builder.functions import Sum
 
 
 def execute(filters=None):
-
 	if not filters:
 		filters = {}
 	columns = get_columns(filters)
@@ -54,8 +53,8 @@ def get_total_stock(filters):
 	else:
 		query = query.select(wh.company).groupby(wh.company)
 
-	query = query.select(
-		item.item_code, item.description, Sum(bin.actual_qty).as_("actual_qty")
-	).groupby(item.item_code)
+	query = query.select(item.item_code, item.description, Sum(bin.actual_qty).as_("actual_qty")).groupby(
+		item.item_code
+	)
 
 	return query.run()

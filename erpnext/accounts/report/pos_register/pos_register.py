@@ -50,17 +50,19 @@ def get_pos_entries(filters, group_by_field):
 	order_by = "p.posting_date"
 	select_mop_field, from_sales_invoice_payment, group_by_mop_condition = "", "", ""
 	if group_by_field == "mode_of_payment":
-		select_mop_field = ", sip.mode_of_payment, sip.base_amount - IF(sip.type='Cash', p.change_amount, 0) as paid_amount"
+		select_mop_field = (
+			", sip.mode_of_payment, sip.base_amount - IF(sip.type='Cash', p.change_amount, 0) as paid_amount"
+		)
 		from_sales_invoice_payment = ", `tabSales Invoice Payment` sip"
 		group_by_mop_condition = "sip.parent = p.name AND ifnull(sip.base_amount - IF(sip.type='Cash', p.change_amount, 0), 0) != 0 AND"
 		order_by += ", sip.mode_of_payment"
 
 	elif group_by_field:
-		order_by += ", p.{}".format(group_by_field)
+		order_by += f", p.{group_by_field}"
 		select_mop_field = ", p.base_paid_amount - p.change_amount  as paid_amount "
 
 	return frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			p.posting_date, p.name as pos_invoice, p.pos_profile,
 			p.owner, p.customer, p.is_return, p.base_grand_total as grand_total {select_mop_field}
@@ -72,13 +74,7 @@ def get_pos_entries(filters, group_by_field):
 			{conditions}
 		ORDER BY
 			{order_by}
-		""".format(
-			select_mop_field=select_mop_field,
-			from_sales_invoice_payment=from_sales_invoice_payment,
-			group_by_mop_condition=group_by_mop_condition,
-			conditions=conditions,
-			order_by=order_by,
-		),
+		""",
 		filters,
 		as_dict=1,
 	)
@@ -131,9 +127,7 @@ def validate_filters(filters):
 
 
 def get_conditions(filters):
-	conditions = (
-		"company = %(company)s AND posting_date >= %(from_date)s AND posting_date <= %(to_date)s"
-	)
+	conditions = "company = %(company)s AND posting_date >= %(from_date)s AND posting_date <= %(to_date)s"
 
 	if filters.get("pos_profile"):
 		conditions += " AND pos_profile = %(pos_profile)s"
