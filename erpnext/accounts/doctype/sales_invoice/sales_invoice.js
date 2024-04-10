@@ -118,7 +118,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 			});
 
 			if (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				this.frm.add_custom_button(__("Return / Credit Note"), this.make_sales_return, __("Create"));
+				this.frm.add_custom_button(
+					__("Return / Credit Note"),
+					this.make_sales_return.bind(this),
+					__("Create")
+				);
 				this.frm.page.set_inner_btn_group_as_primary(__("Create"));
 			}
 
