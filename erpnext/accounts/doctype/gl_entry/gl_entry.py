@@ -135,6 +135,7 @@ class GLEntry(Document):
 				and self.company == dimension.company
 				and dimension.mandatory_for_pl
 				and not dimension.disabled
+				and not self.is_cancelled
 			):
 				if not self.get(dimension.fieldname):
 					frappe.throw(
@@ -148,6 +149,7 @@ class GLEntry(Document):
 				and self.company == dimension.company
 				and dimension.mandatory_for_bs
 				and not dimension.disabled
+				and not self.is_cancelled
 			):
 				if not self.get(dimension.fieldname):
 					frappe.throw(
