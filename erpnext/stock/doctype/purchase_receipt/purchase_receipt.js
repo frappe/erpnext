@@ -20,7 +20,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				lcv_receipt.receipt_document_type = "Purchase Receipt";
 				lcv_receipt.receipt_document = frm.doc.name;
 				lcv_receipt.supplier = frm.doc.supplier;
-				lcv_receipt.grand_total = frm.doc.grand_total;
+				lcv_receipt.grand_total = frm.doc.base_grand_total;
 				lcv.purchase_receipts = [lcv_receipt];
 
 				frappe.set_route("Form", lcv.doctype, lcv.name);
