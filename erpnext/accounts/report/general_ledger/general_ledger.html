@@ -55,10 +55,10 @@
 					</span>
 				</td>
 				<td style="text-align: right">
-					{%= format_currency(data[i].debit, filters.presentation_currency) %}
+					{%= format_currency(data[i].debit, filters.presentation_currency || data[i].account_currency) %}
 				</td>
 				<td style="text-align: right">
-					{%= format_currency(data[i].credit, filters.presentation_currency) %}
+					{%= format_currency(data[i].credit, filters.presentation_currency || data[i].account_currency) %}
 				</td>
 			{% } else { %}
 				<td></td>

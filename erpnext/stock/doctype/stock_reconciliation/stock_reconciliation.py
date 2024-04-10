@@ -744,7 +744,9 @@ def get_items(
 	warehouse, posting_date, posting_time, company, item_code=None, ignore_empty_stock=False
 ):
 	ignore_empty_stock = cint(ignore_empty_stock)
-	items = [frappe._dict({"item_code": item_code, "warehouse": warehouse})]
+	items = []
+	if item_code and warehouse:
+		items = get_item_and_warehouses(item_code, warehouse)
 
 	if not item_code:
 		items = get_items_for_stock_reco(warehouse, company)
@@ -789,6 +791,20 @@ def get_items(
 	return res
 
 
+def get_item_and_warehouses(item_code, warehouse):
+	from frappe.utils.nestedset import get_descendants_of
+
+	items = []
+	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
+		childrens = get_descendants_of("Warehouse", warehouse, ignore_permissions=True, order_by="lft")
+		for ch_warehouse in childrens:
+			items.append(frappe._dict({"item_code": item_code, "warehouse": ch_warehouse}))
+	else:
+		items = [frappe._dict({"item_code": item_code, "warehouse": warehouse})]
+
+	return items
+
+
 def get_items_for_stock_reco(warehouse, company):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
 	items = frappe.db.sql(
@@ -803,7 +819,7 @@ def get_items_for_stock_reco(warehouse, company):
 			and i.is_stock_item = 1
 			and i.has_variants = 0
 			and exists(
-				select name from `tabWarehouse` where lft >= {lft} and rgt <= {rgt} and name = bin.warehouse
+				select name from `tabWarehouse` where lft >= {lft} and rgt <= {rgt} and name = bin.warehouse and is_group = 0
 			)
 	""",
 		as_dict=1,
@@ -818,7 +834,7 @@ def get_items_for_stock_reco(warehouse, company):
 		where
 			i.name = id.parent
 			and exists(
-				select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse
+				select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=id.default_warehouse and is_group = 0
 			)
 			and i.is_stock_item = 1
 			and i.has_variants = 0
@@ -880,7 +896,7 @@ def get_itemwise_batch(warehouse, posting_date, company, item_code=None):
 			frappe._dict(
 				{
 					"item_code": row[0],
-					"warehouse": warehouse,
+					"warehouse": row[3],
 					"qty": row[8],
 					"item_name": row[1],
 					"batch_no": row[4],

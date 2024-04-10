@@ -13,11 +13,13 @@ from frappe.query_builder import AliasedQuery, Criterion, Table
 from frappe.query_builder.functions import Round, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
+	add_days,
 	cint,
 	create_batch,
 	cstr,
 	flt,
 	formatdate,
+	get_datetime,
 	get_number_format_info,
 	getdate,
 	now,
@@ -682,7 +684,19 @@ def update_reference_in_payment_entry(
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	if not skip_ref_details_update_for_pe:
-		payment_entry.set_missing_ref_details(ref_exchange_rate=d.exchange_rate or None)
+		reference_exchange_details = frappe._dict()
+		if d.against_voucher_type == "Journal Entry" and d.exchange_rate:
+			reference_exchange_details.update(
+				{
+					"reference_doctype": d.against_voucher_type,
+					"reference_name": d.against_voucher,
+					"exchange_rate": d.exchange_rate,
+				}
+			)
+		payment_entry.set_missing_ref_details(
+			update_ref_details_only_for=[(d.against_voucher_type, d.against_voucher)],
+			reference_exchange_details=reference_exchange_details,
+		)
 	payment_entry.set_amounts()
 
 	payment_entry.make_exchange_gain_loss_journal(
@@ -2072,3 +2086,44 @@ def create_gain_loss_journal(
 	journal_entry.save()
 	journal_entry.submit()
 	return journal_entry.name
+
+
+def run_ledger_health_checks():
+	health_monitor_settings = frappe.get_doc("Ledger Health Monitor")
+	if health_monitor_settings.enable_health_monitor:
+		period_end = getdate()
+		period_start = add_days(period_end, -abs(health_monitor_settings.monitor_for_last_x_days))
+
+		run_date = get_datetime()
+
+		# Debit-Credit mismatch report
+		if health_monitor_settings.debit_credit_mismatch:
+			for x in health_monitor_settings.companies:
+				filters = {"company": x.company, "from_date": period_start, "to_date": period_end}
+				voucher_wise = frappe.get_doc("Report", "Voucher-wise Balance")
+				res = voucher_wise.execute_script_report(filters=filters)
+				for x in res[1]:
+					doc = frappe.new_doc("Ledger Health")
+					doc.voucher_type = x.voucher_type
+					doc.voucher_no = x.voucher_no
+					doc.debit_credit_mismatch = True
+					doc.checked_on = run_date
+					doc.save()
+
+		# General Ledger and Payment Ledger discrepancy
+		if health_monitor_settings.general_and_payment_ledger_mismatch:
+			for x in health_monitor_settings.companies:
+				filters = {
+					"company": x.company,
+					"period_start_date": period_start,
+					"period_end_date": period_end,
+				}
+				gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
+				res = gl_pl_comparison.execute_script_report(filters=filters)
+				for x in res[1]:
+					doc = frappe.new_doc("Ledger Health")
+					doc.voucher_type = x.voucher_type
+					doc.voucher_no = x.voucher_no
+					doc.general_and_payment_ledger_mismatch = True
+					doc.checked_on = run_date
+					doc.save()
