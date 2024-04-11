@@ -27,8 +27,8 @@ def get_columns(filters):
 	party_type = filters.get("party_type")
 	party_type_value = get_party_group(party_type)
 	return [
-		"{party_type}:Link/{party_type}".format(party_type=party_type),
-		"{party_value_type}::150".format(party_value_type=frappe.unscrub(str(party_type_value))),
+		f"{party_type}:Link/{party_type}",
+		f"{frappe.unscrub(str(party_type_value))}::150",
 		"Address Line 1",
 		"Address Line 2",
 		"City",
@@ -109,7 +109,7 @@ def get_party_details(party_type, party_list, doctype, party_details):
 		["Dynamic Link", "link_doctype", "=", party_type],
 		["Dynamic Link", "link_name", "in", party_list],
 	]
-	fields = ["`tabDynamic Link`.link_name"] + field_map.get(doctype, [])
+	fields = ["`tabDynamic Link`.link_name", *field_map.get(doctype, [])]
 
 	records = frappe.get_list(doctype, filters=filters, fields=fields, as_list=True)
 	for d in records:

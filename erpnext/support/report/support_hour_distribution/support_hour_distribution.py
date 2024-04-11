@@ -37,8 +37,8 @@ def get_data(filters):
 		hours_count = {"date": start_date}
 		for key, value in time_slots.items():
 			start_time, end_time = value.split("-")
-			start_time = get_datetime("{0} {1}".format(start_date.strftime("%Y-%m-%d"), start_time))
-			end_time = get_datetime("{0} {1}".format(start_date.strftime("%Y-%m-%d"), end_time))
+			start_time = get_datetime("{} {}".format(start_date.strftime("%Y-%m-%d"), start_time))
+			end_time = get_datetime("{} {}".format(start_date.strftime("%Y-%m-%d"), end_time))
 			hours_count[key] = get_hours_count(start_time, end_time)
 			time_slot_wise_total_count[key] = time_slot_wise_total_count.get(key, 0) + hours_count[key]
 

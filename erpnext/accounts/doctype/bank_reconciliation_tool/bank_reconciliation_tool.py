@@ -81,9 +81,7 @@ def get_bank_transactions(bank_account, from_date=None, to_date=None):
 def get_account_balance(bank_account, till_date):
 	# returns account balance till the specified date
 	account = frappe.db.get_value("Bank Account", bank_account, "account")
-	filters = frappe._dict(
-		{"account": account, "report_date": till_date, "include_pos_transactions": 1}
-	)
+	filters = frappe._dict({"account": account, "report_date": till_date, "include_pos_transactions": 1})
 	data = get_entries(filters)
 
 	balance_as_per_system = get_balance_on(filters["account"], filters["report_date"])
@@ -96,10 +94,7 @@ def get_account_balance(bank_account, till_date):
 	amounts_not_reflected_in_system = get_amounts_not_reflected_in_system(filters)
 
 	bank_bal = (
-		flt(balance_as_per_system)
-		- flt(total_debit)
-		+ flt(total_credit)
-		+ amounts_not_reflected_in_system
+		flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
 	)
 
 	return bank_bal
@@ -538,9 +533,7 @@ def check_matching(
 	for query in queries:
 		matching_vouchers.extend(query.run(as_dict=True))
 
-	return (
-		sorted(matching_vouchers, key=lambda x: x["rank"], reverse=True) if matching_vouchers else []
-	)
+	return sorted(matching_vouchers, key=lambda x: x["rank"], reverse=True) if matching_vouchers else []
 
 
 def get_queries(
@@ -654,17 +647,13 @@ def get_bt_matching_query(exact_match, transaction):
 	amount_rank = frappe.qb.terms.Case().when(amount_equality, 1).else_(0)
 	amount_condition = amount_equality if exact_match else getattr(bt, field) > 0.0
 
-	ref_rank = (
-		frappe.qb.terms.Case().when(bt.reference_number == transaction.reference_number, 1).else_(0)
-	)
+	ref_rank = frappe.qb.terms.Case().when(bt.reference_number == transaction.reference_number, 1).else_(0)
 	unallocated_rank = (
 		frappe.qb.terms.Case().when(bt.unallocated_amount == transaction.unallocated_amount, 1).else_(0)
 	)
 
 	party_condition = (
-		(bt.party_type == transaction.party_type)
-		& (bt.party == transaction.party)
-		& bt.party.isnotnull()
+		(bt.party_type == transaction.party_type) & (bt.party == transaction.party) & bt.party.isnotnull()
 	)
 	party_rank = frappe.qb.terms.Case().when(party_condition, 1).else_(0)
 
@@ -716,9 +705,7 @@ def get_pe_matching_query(
 	amount_condition = amount_equality if exact_match else pe.paid_amount > 0.0
 
 	party_condition = (
-		(pe.party_type == transaction.party_type)
-		& (pe.party == transaction.party)
-		& pe.party.isnotnull()
+		(pe.party_type == transaction.party_type) & (pe.party == transaction.party) & pe.party.isnotnull()
 	)
 	party_rank = frappe.qb.terms.Case().when(party_condition, 1).else_(0)
 
@@ -749,7 +736,7 @@ def get_pe_matching_query(
 		.orderby(pe.reference_date if cint(filter_by_reference_date) else pe.posting_date)
 	)
 
-	if frappe.flags.auto_reconcile_vouchers == True:
+	if frappe.flags.auto_reconcile_vouchers is True:
 		query = query.where(ref_condition)
 
 	return query
@@ -810,7 +797,7 @@ def get_je_matching_query(
 		.orderby(je.cheque_date if cint(filter_by_reference_date) else je.posting_date)
 	)
 
-	if frappe.flags.auto_reconcile_vouchers == True:
+	if frappe.flags.auto_reconcile_vouchers is True:
 		query = query.where(ref_condition)
 
 	return query

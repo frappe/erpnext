@@ -54,6 +54,7 @@ class BankAccount(Document):
 		self.validate_company()
 		self.validate_iban()
 		self.validate_account()
+		self.update_default_bank_account()
 
 	def validate_account(self):
 		if self.account:
@@ -100,19 +101,51 @@ class BankAccount(Document):
 		if to_check % 97 != 1:
 			frappe.throw(_("IBAN is not valid"))
 
+	def update_default_bank_account(self):
+		if self.is_default and not self.disabled:
+			frappe.db.set_value(
+				"Bank Account",
+				{
+					"party_type": self.party_type,
+					"party": self.party,
+					"is_company_account": self.is_company_account,
+					"is_default": 1,
+					"disabled": 0,
+				},
+				"is_default",
+				0,
+			)
+
 
 @frappe.whitelist()
 def make_bank_account(doctype, docname):
 	doc = frappe.new_doc("Bank Account")
 	doc.party_type = doctype
 	doc.party = docname
-	doc.is_default = 1
 
 	return doc
 
 
 def get_party_bank_account(party_type, party):
-	return frappe.db.get_value(party_type, party, "default_bank_account")
+	return frappe.db.get_value(
+		"Bank Account",
+		{"party_type": party_type, "party": party, "is_default": 1, "disabled": 0},
+		"name",
+	)
+
+
+def get_default_company_bank_account(company, party_type, party):
+	default_company_bank_account = frappe.db.get_value(party_type, party, "default_bank_account")
+	if default_company_bank_account:
+		if company != frappe.get_cached_value("Bank Account", default_company_bank_account, "company"):
+			default_company_bank_account = None
+
+	if not default_company_bank_account:
+		default_company_bank_account = frappe.db.get_value(
+			"Bank Account", {"company": company, "is_company_account": 1, "is_default": 1}
+		)
+
+	return default_company_bank_account
 
 
 @frappe.whitelist()

@@ -81,9 +81,7 @@ def get_transaction_list(
 	filters["docstatus"] = ["<", "2"] if doctype in ["Supplier Quotation", "Purchase Invoice"] else 1
 
 	if (user != "Guest" and is_website_user()) or doctype == "Request for Quotation":
-		parties_doctype = (
-			"Request for Quotation Supplier" if doctype == "Request for Quotation" else doctype
-		)
+		parties_doctype = "Request for Quotation Supplier" if doctype == "Request for Quotation" else doctype
 		# find party for this contact
 		customers, suppliers = get_customers_suppliers(parties_doctype, user)
 
@@ -303,6 +301,4 @@ def add_role_for_portal_user(portal_user, role):
 		return
 
 	user_doc.add_roles(role)
-	frappe.msgprint(
-		_("Added {1} Role to User {0}.").format(frappe.bold(user_doc.name), role), alert=True
-	)
+	frappe.msgprint(_("Added {1} Role to User {0}.").format(frappe.bold(user_doc.name), role), alert=True)

@@ -275,9 +275,7 @@ class AssetDepreciationSchedule(Document):
 			row.depreciation_method in ("Written Down Value", "Double Declining Balance")
 			and cint(row.frequency_of_depreciation) != 12
 		):
-			has_wdv_or_dd_non_yearly_pro_rata = _check_is_pro_rata(
-				asset_doc, row, wdv_or_dd_non_yearly=True
-			)
+			has_wdv_or_dd_non_yearly_pro_rata = _check_is_pro_rata(asset_doc, row, wdv_or_dd_non_yearly=True)
 
 		skip_row = False
 		should_get_last_day = is_last_day_of_the_month(row.depreciation_start_date)
@@ -674,7 +672,9 @@ def get_straight_line_or_manual_depr_amount(
 			)
 			from_date = add_days(
 				get_last_day(
-					add_months(row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation)
+					add_months(
+						row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
+					)
 				),
 				1,
 			)
@@ -703,7 +703,9 @@ def get_straight_line_or_manual_depr_amount(
 						)
 					),
 					add_days(
-						get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)),
+						get_last_day(
+							add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)
+						),
 						1,
 					),
 				)
@@ -717,7 +719,9 @@ def get_straight_line_or_manual_depr_amount(
 			)
 			from_date = add_days(
 				get_last_day(
-					add_months(row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation)
+					add_months(
+						row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
+					)
 				),
 				1,
 			)
@@ -943,9 +947,7 @@ def get_temp_asset_depr_schedule_doc(
 	update_asset_finance_book_row=False,
 	new_depr_schedule=None,
 ):
-	current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
-		asset_doc.name, "Active", row.finance_book
-	)
+	current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset_doc.name, "Active", row.finance_book)
 
 	if not current_asset_depr_schedule_doc:
 		frappe.throw(
@@ -994,32 +996,35 @@ def get_depr_schedule(asset_name, status, finance_book=None):
 
 @frappe.whitelist()
 def get_asset_depr_schedule_doc(asset_name, status, finance_book=None):
-	asset_depr_schedule_name = get_asset_depr_schedule_name(asset_name, status, finance_book)
+	asset_depr_schedule = get_asset_depr_schedule_name(asset_name, status, finance_book)
 
-	if not asset_depr_schedule_name:
+	if not asset_depr_schedule:
 		return
 
-	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule[0].name)
 
 	return asset_depr_schedule_doc
 
 
 def get_asset_depr_schedule_name(asset_name, status, finance_book=None):
-	if finance_book is None:
-		finance_book_filter = ["finance_book", "is", "not set"]
-	else:
-		finance_book_filter = ["finance_book", "=", finance_book]
-
 	if isinstance(status, str):
 		status = [status]
 
-	return frappe.db.get_value(
+	filters = [
+		["asset", "=", asset_name],
+		["status", "in", status],
+		["docstatus", "<", 2],
+	]
+
+	if finance_book:
+		filters.append(["finance_book", "=", finance_book])
+	else:
+		filters.append(["finance_book", "is", "not set"])
+
+	return frappe.get_all(
 		doctype="Asset Depreciation Schedule",
-		filters=[
-			["asset", "=", asset_name],
-			finance_book_filter,
-			["status", "in", status],
-		],
+		filters=filters,
+		limit=1,
 	)
 
 

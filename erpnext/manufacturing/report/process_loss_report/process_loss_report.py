@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from typing import Dict, List, Tuple
 
 import frappe
 from frappe import _
@@ -9,12 +8,12 @@ from frappe.query_builder.functions import Sum
 
 Filters = frappe._dict
 Row = frappe._dict
-Data = List[Row]
-Columns = List[Dict[str, str]]
-QueryArgs = Dict[str, str]
+Data = list[Row]
+Columns = list[dict[str, str]]
+QueryArgs = dict[str, str]
 
 
-def execute(filters: Filters) -> Tuple[Columns, Data]:
+def execute(filters: Filters) -> tuple[Columns, Data]:
 	filters = frappe._dict(filters or {})
 	columns = get_columns()
 	data = get_data(filters)

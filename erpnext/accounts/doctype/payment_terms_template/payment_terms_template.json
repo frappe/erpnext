@@ -35,10 +35,11 @@
   }
  ],
  "links": [],
- "modified": "2020-04-01 15:35:18.112619",
+ "modified": "2024-04-07 11:26:42.021585",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -76,6 +77,15 @@
    "role": "Accounts Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "All",
+   "select": 1,
+   "share": 1
   }
  ],
  "sort_field": "modified",

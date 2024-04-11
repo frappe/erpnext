@@ -7,7 +7,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, cstr, flt, nowdate, nowtime, random_string
+from frappe.utils import add_days, cstr, flt, nowdate, nowtime
 
 from erpnext.accounts.utils import get_stock_and_account_balance
 from erpnext.stock.doctype.item.test_item import create_item
@@ -17,7 +17,6 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 	get_items,
@@ -106,7 +105,8 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 				# no gl entries
 				self.assertTrue(
 					frappe.db.get_value(
-						"Stock Ledger Entry", {"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}
+						"Stock Ledger Entry",
+						{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name},
 					)
 				)
 
@@ -152,7 +152,6 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 	def test_stock_reco_for_serialized_item(self):
 		to_delete_records = []
-		to_delete_serial_nos = []
 
 		# Add new serial nos
 		serial_item_code = "Stock-Reco-Serial-Item-1"
@@ -344,9 +343,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 	def test_customer_provided_items(self):
 		item_code = "Stock-Reco-customer-Item-100"
-		create_item(
-			item_code, is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0
-		)
+		create_item(item_code, is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
 
 		sr = create_stock_reconciliation(item_code=item_code, qty=10, rate=420)
 
@@ -529,18 +526,18 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		item_code = self.make_item().name
 		warehouse = "_Test Warehouse - _TC"
 
-		sr = create_stock_reconciliation(
+		create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), 10)
 		)
 
-		dn = create_delivery_note(
+		create_delivery_note(
 			item_code=item_code, warehouse=warehouse, qty=5, rate=120, posting_date=add_days(nowdate(), 12)
 		)
 		old_bin_qty = frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
 		)
 
-		sr2 = create_stock_reconciliation(
+		create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=11, rate=100, posting_date=add_days(nowdate(), 11)
 		)
 		new_bin_qty = frappe.db.get_value(
@@ -760,8 +757,6 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(flt(sle[0].actual_qty), flt(-100.0))
 
 	def test_backdated_stock_reco_entry_with_batch(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-
 		item_code = self.make_item(
 			"Test New Batch Item ABCVSD",
 			{
@@ -813,7 +808,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 
 		stock_reco1.reload()
-		new_batch_no = get_batch_from_bundle(stock_reco1.items[0].serial_and_batch_bundle)
+		get_batch_from_bundle(stock_reco1.items[0].serial_and_batch_bundle)
 
 		self.assertEqual(len(sles), 2)
 
@@ -828,7 +823,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		warehouse = "_Test Warehouse - _TC"
 
 		# Stock Value => 100 * 100 = 10000
-		se = make_stock_entry(
+		make_stock_entry(
 			item_code=item_code,
 			target=warehouse,
 			qty=100,
@@ -988,9 +983,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 				self.assertEqual(d.actual_qty, 5.0)
 				self.assertAlmostEqual(d.stock_value_difference, 500.0)
 
-		active_serial_no = frappe.get_all(
-			"Serial No", filters={"status": "Active", "item_code": item_code}
-		)
+		active_serial_no = frappe.get_all("Serial No", filters={"status": "Active", "item_code": item_code})
 		self.assertEqual(len(active_serial_no), 5)
 
 
@@ -1083,9 +1076,7 @@ def create_stock_reconciliation(**args):
 			)
 		)
 		if frappe.get_all("Stock Ledger Entry", {"company": sr.company})
-		else frappe.get_cached_value(
-			"Account", {"account_type": "Temporary", "company": sr.company}, "name"
-		)
+		else frappe.get_cached_value("Account", {"account_type": "Temporary", "company": sr.company}, "name")
 	)
 	sr.cost_center = (
 		args.cost_center

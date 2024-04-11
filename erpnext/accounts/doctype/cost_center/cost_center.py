@@ -34,9 +34,7 @@ class CostCenter(NestedSet):
 	def autoname(self):
 		from erpnext.accounts.utils import get_autoname_with_number
 
-		self.name = get_autoname_with_number(
-			self.cost_center_number, self.cost_center_name, self.company
-		)
+		self.name = get_autoname_with_number(self.cost_center_number, self.cost_center_name, self.company)
 
 	def validate(self):
 		self.validate_mandatory()
@@ -109,14 +107,14 @@ class CostCenter(NestedSet):
 		new_cost_center = get_name_with_abbr(newdn, self.company)
 
 		# Validate properties before merging
-		super(CostCenter, self).before_rename(olddn, new_cost_center, merge, "is_group")
+		super().before_rename(olddn, new_cost_center, merge, "is_group")
 		if not merge:
 			new_cost_center = get_name_with_number(new_cost_center, self.cost_center_number)
 
 		return new_cost_center
 
 	def after_rename(self, olddn, newdn, merge=False):
-		super(CostCenter, self).after_rename(olddn, newdn, merge)
+		super().after_rename(olddn, newdn, merge)
 
 		if not merge:
 			new_cost_center = frappe.db.get_value(
