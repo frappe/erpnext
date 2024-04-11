@@ -136,7 +136,11 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 		if (!doc.is_return && doc.docstatus == 1) {
 			if (doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
-				this.frm.add_custom_button(__("Return / Debit Note"), this.make_debit_note, __("Create"));
+				this.frm.add_custom_button(
+					__("Return / Debit Note"),
+					this.make_debit_note.bind(this),
+					__("Create")
+				);
 			}
 		}
 

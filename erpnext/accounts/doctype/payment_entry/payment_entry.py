@@ -496,7 +496,11 @@ class PaymentEntry(AccountsController):
 					continue
 
 				ref_details = get_reference_details(
-					d.reference_doctype, d.reference_name, self.party_account_currency
+					d.reference_doctype,
+					d.reference_name,
+					self.party_account_currency,
+					self.party_type,
+					self.party,
 				)
 
 				# Only update exchange rate when the reference is Journal Entry
@@ -1125,9 +1129,11 @@ class PaymentEntry(AccountsController):
 		else:
 			remarks = [
 				_("Amount {0} {1} {2} {3}").format(
-					_(self.party_account_currency),
+					_(self.paid_to_account_currency)
+					if self.payment_type == "Receive"
+					else _(self.paid_from_account_currency),
 					self.paid_amount if self.payment_type == "Receive" else self.received_amount,
-					_("received from") if self.payment_type == "Receive" else _("to"),
+					_("received from") if self.payment_type == "Receive" else _("paid to"),
 					self.party,
 				)
 			]
@@ -2132,8 +2138,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
 
-	bank_account = get_default_company_bank_account(company)
-
+	bank_account = get_default_company_bank_account(company, party_type, party)
 	return {
 		"party_account": party_account,
 		"party_name": party_name,
@@ -2174,33 +2179,42 @@ def get_company_defaults(company):
 	return frappe.get_cached_value("Company", company, fields, as_dict=1)
 
 
-def get_outstanding_on_journal_entry(name):
-	gl = frappe.qb.DocType("GL Entry")
-	res = (
-		frappe.qb.from_(gl)
-		.select(
-			Case()
-			.when(
-				gl.party_type == "Customer",
-				Coalesce(Sum(gl.debit_in_account_currency - gl.credit_in_account_currency), 0),
-			)
-			.else_(Coalesce(Sum(gl.credit_in_account_currency - gl.debit_in_account_currency), 0))
-			.as_("outstanding_amount")
-		)
+def get_outstanding_on_journal_entry(voucher_no, party_type, party):
+	ple = frappe.qb.DocType("Payment Ledger Entry")
+
+	outstanding = (
+		frappe.qb.from_(ple)
+		.select(Sum(ple.amount_in_account_currency))
 		.where(
-			(Coalesce(gl.party_type, "") != "")
-			& (gl.is_cancelled == 0)
-			& ((gl.voucher_no == name) | (gl.against_voucher == name))
+			(ple.against_voucher_no == voucher_no)
+			& (ple.party_type == party_type)
+			& (ple.party == party)
+			& (ple.delinked == 0)
 		)
-	).run(as_dict=True)
+	).run()
 
-	outstanding_amount = res[0].get("outstanding_amount", 0) if res else 0
+	outstanding_amount = outstanding[0][0] if outstanding else 0
 
-	return outstanding_amount
+	total = (
+		frappe.qb.from_(ple)
+		.select(Sum(ple.amount_in_account_currency))
+		.where(
+			(ple.voucher_no == voucher_no)
+			& (ple.party_type == party_type)
+			& (ple.party == party)
+			& (ple.delinked == 0)
+		)
+	).run()
+
+	total_amount = total[0][0] if total else 0
+
+	return outstanding_amount, total_amount
 
 
 @frappe.whitelist()
-def get_reference_details(reference_doctype, reference_name, party_account_currency):
+def get_reference_details(
+	reference_doctype, reference_name, party_account_currency, party_type=None, party=None
+):
 	total_amount = outstanding_amount = exchange_rate = account = None
 
 	ref_doc = frappe.get_doc(reference_doctype, reference_name)
@@ -2215,12 +2229,13 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		exchange_rate = 1
 
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
-		total_amount = ref_doc.get("total_amount")
 		if ref_doc.multi_currency:
 			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 		else:
 			exchange_rate = 1
-			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
+			outstanding_amount, total_amount = get_outstanding_on_journal_entry(
+				reference_name, party_type, party
+			)
 
 	elif reference_doctype == "Payment Entry":
 		if reverse_payment_details := frappe.db.get_all(
