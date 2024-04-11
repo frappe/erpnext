@@ -2130,13 +2130,12 @@ class TestSalesOrder(FrappeTestCase):
 
 	def test_discount_on_rate_greater_than_price_list(self):
 		item = make_item("_Discount Test")
-		so = make_sales_order(
-			item_code=item.name, qty=1, rate=200, price_list_rate=100, do_not_submit=True
-		)
+		so = make_sales_order(item_code=item.name, qty=1, rate=200, price_list_rate=100, do_not_submit=True)
 		so[0].rate = 120
 		so.save()
 		self.assertEqual(so[0].margin_rate_or_amount, 20)
 		self.assertEqual(so[0].discount_amount, 0)
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
