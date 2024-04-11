@@ -210,10 +210,12 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			});
 		}
 
-		frappe.db.get_single_value("Accounts Settings", "round_row_wise_tax")
-			.then((round_row_wise_tax) => {
-				frappe.flags.round_row_wise_tax = round_row_wise_tax;
-			})
+		frappe.call({
+			method: "erpnext.controllers.taxes_and_totals.get_rounding_tax_settings",
+			callback: function(r) {
+				frappe.flags.round_off_settings = r.message;
+			}
+		});
 	}
 
 	determine_exclusive_rate() {
