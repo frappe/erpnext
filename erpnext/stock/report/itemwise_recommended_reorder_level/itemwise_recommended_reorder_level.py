@@ -24,9 +24,7 @@ def execute(filters=None):
 
 	data = []
 	for item in items:
-		total_outgoing = flt(consumed_item_map.get(item.name, 0)) + flt(
-			delivered_item_map.get(item.name, 0)
-		)
+		total_outgoing = flt(consumed_item_map.get(item.name, 0)) + flt(delivered_item_map.get(item.name, 0))
 		avg_daily_outgoing = flt(total_outgoing / diff, float_precision)
 		reorder_level = (avg_daily_outgoing * flt(item.lead_time_days)) + flt(item.safety_stock)
 

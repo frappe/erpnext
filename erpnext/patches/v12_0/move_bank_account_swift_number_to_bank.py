@@ -16,7 +16,7 @@ def execute():
 				SET b.swift_number = ba.swift_number WHERE b.name = ba.bank
 			"""
 			)
-		except Exception as e:
+		except Exception:
 			frappe.log_error("Bank to Bank Account patch migration failed")
 
 	frappe.reload_doc("accounts", "doctype", "bank_account")

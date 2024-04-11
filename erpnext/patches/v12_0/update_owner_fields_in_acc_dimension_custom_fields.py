@@ -19,8 +19,7 @@ def execute():
 			"""
 			UPDATE `tabCustom Field`
 			SET owner = 'Administrator'
-			WHERE fieldname = %s
-			AND dt IN (%s)"""
-			% ("%s", ", ".join(["%s"] * len(doclist))),  # nosec
-			tuple([dimension.fieldname] + doclist),
+			WHERE fieldname = {}
+			AND dt IN ({})""".format("%s", ", ".join(["%s"] * len(doclist))),  # nosec
+			tuple([dimension.fieldname, *doclist]),
 		)

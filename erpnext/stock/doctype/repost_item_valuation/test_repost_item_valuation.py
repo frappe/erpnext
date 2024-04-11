@@ -179,7 +179,6 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		riv3.set_status("Skipped")
 
 	def test_stock_freeze_validation(self):
-
 		today = nowdate()
 
 		riv = frappe.get_doc(

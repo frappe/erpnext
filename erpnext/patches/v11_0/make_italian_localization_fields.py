@@ -20,19 +20,17 @@ def execute():
 	# Set state codes
 	condition = ""
 	for state, code in state_codes.items():
-		condition += " when {0} then {1}".format(frappe.db.escape(state), frappe.db.escape(code))
+		condition += f" when {frappe.db.escape(state)} then {frappe.db.escape(code)}"
 
 	if condition:
-		condition = "state_code = (case state {0} end),".format(condition)
+		condition = f"state_code = (case state {condition} end),"
 
 	frappe.db.sql(
-		"""
+		f"""
 		UPDATE tabAddress set {condition} country_code = UPPER(ifnull((select code
 			from `tabCountry` where name = `tabAddress`.country), ''))
 			where country_code is null and state_code is null
-	""".format(
-			condition=condition
-		)
+	"""
 	)
 
 	frappe.db.sql(

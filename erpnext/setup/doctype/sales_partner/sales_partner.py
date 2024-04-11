@@ -49,7 +49,7 @@ class SalesPartner(WebsiteGenerator):
 	def validate(self):
 		if not self.route:
 			self.route = "partners/" + self.scrub(self.partner_name)
-		super(SalesPartner, self).validate()
+		super().validate()
 		if self.partner_website and not self.partner_website.startswith("http"):
 			self.partner_website = "http://" + self.partner_website
 

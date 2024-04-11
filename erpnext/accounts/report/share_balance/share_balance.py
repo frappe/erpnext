@@ -15,7 +15,7 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 
-	date = filters.get("date")
+	filters.get("date")
 
 	data = []
 

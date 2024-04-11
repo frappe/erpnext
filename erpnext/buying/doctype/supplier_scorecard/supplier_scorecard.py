@@ -66,7 +66,11 @@ class SupplierScorecard(Document):
 			for c2 in self.standings:
 				if c1 != c2:
 					if c1.max_grade > c2.min_grade and c1.min_grade < c2.max_grade:
-						throw(_("Overlap in scoring between {0} and {1}").format(c1.standing_name, c2.standing_name))
+						throw(
+							_("Overlap in scoring between {0} and {1}").format(
+								c1.standing_name, c2.standing_name
+							)
+						)
 				if c2.min_grade == score:
 					score = c2.max_grade
 		if score < 100:
@@ -77,7 +81,6 @@ class SupplierScorecard(Document):
 			)
 
 	def validate_criteria_weights(self):
-
 		weight = 0
 		for c in self.criteria:
 			weight += c.weight
@@ -196,7 +199,6 @@ def refresh_scorecards():
 
 @frappe.whitelist()
 def make_all_scorecards(docname):
-
 	sc = frappe.get_doc("Supplier Scorecard", docname)
 	supplier = frappe.get_doc("Supplier", sc.supplier)
 

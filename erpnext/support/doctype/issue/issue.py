@@ -163,7 +163,7 @@ class Issue(Document):
 				"comment_type": "Info",
 				"reference_doctype": "Issue",
 				"reference_name": replicated_issue.name,
-				"content": " - Split the Issue from <a href='/app/Form/Issue/{0}'>{1}</a>".format(
+				"content": " - Split the Issue from <a href='/app/Form/Issue/{}'>{}</a>".format(
 					self.name, frappe.bold(self.name)
 				),
 			}
@@ -217,7 +217,6 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 
 @frappe.whitelist()
 def set_multiple_status(names, status):
-
 	for name in json.loads(names):
 		frappe.db.set_value("Issue", name, "status", status)
 
@@ -299,9 +298,7 @@ def set_first_response_time(communication, method):
 	if communication.get("reference_doctype") == "Issue":
 		issue = get_parent_doc(communication)
 		if is_first_response(issue) and issue.service_level_agreement:
-			first_response_time = calculate_first_response_time(
-				issue, get_datetime(issue.first_responded_on)
-			)
+			first_response_time = calculate_first_response_time(issue, get_datetime(issue.first_responded_on))
 			issue.db_set("first_response_time", first_response_time)
 
 

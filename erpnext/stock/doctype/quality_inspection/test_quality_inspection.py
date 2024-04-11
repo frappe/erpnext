@@ -159,9 +159,7 @@ class TestQualityInspection(FrappeTestCase):
 			do_not_submit=True,
 		)
 
-		readings = [
-			{"specification": "Iron Content", "min_value": 0.1, "max_value": 0.9, "reading_1": "1.0"}
-		]
+		readings = [{"specification": "Iron Content", "min_value": 0.1, "max_value": 0.9, "reading_1": "1.0"}]
 
 		qa = create_quality_inspection(
 			reference_type="Stock Entry", reference_name=se.name, readings=readings, status="Rejected"

@@ -8,6 +8,4 @@ from erpnext.selling.report.sales_partner_target_variance_based_on_item_group.it
 
 
 def execute(filters=None):
-	data = []
-
 	return get_data_column(filters, "Sales Partner")

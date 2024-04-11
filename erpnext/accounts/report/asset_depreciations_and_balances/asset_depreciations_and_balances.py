@@ -70,7 +70,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 	if filters.get("asset_category"):
 		condition += " and asset_category = %(asset_category)s"
 	return frappe.db.sql(
-		"""
+		f"""
 		SELECT asset_category,
 			   ifnull(sum(case when purchase_date < %(from_date)s then
 							   case when ifnull(disposal_date, 0) = 0 or disposal_date >= %(from_date)s then
@@ -109,11 +109,9 @@ def get_asset_categories_for_grouped_by_category(filters):
 								0
 						   end), 0) as cost_of_scrapped_asset
 		from `tabAsset`
-		where docstatus=1 and company=%(company)s and purchase_date <= %(to_date)s {}
+		where docstatus=1 and company=%(company)s and purchase_date <= %(to_date)s {condition}
 		group by asset_category
-	""".format(
-			condition
-		),
+	""",
 		{
 			"to_date": filters.to_date,
 			"from_date": filters.from_date,
@@ -129,7 +127,7 @@ def get_asset_details_for_grouped_by_category(filters):
 	if filters.get("asset"):
 		condition += " and name = %(asset)s"
 	return frappe.db.sql(
-		"""
+		f"""
 		SELECT name,
 			   ifnull(sum(case when purchase_date < %(from_date)s then
 							   case when ifnull(disposal_date, 0) = 0 or disposal_date >= %(from_date)s then
@@ -168,11 +166,9 @@ def get_asset_details_for_grouped_by_category(filters):
 								0
 						   end), 0) as cost_of_scrapped_asset
 		from `tabAsset`
-		where docstatus=1 and company=%(company)s and purchase_date <= %(to_date)s {}
+		where docstatus=1 and company=%(company)s and purchase_date <= %(to_date)s {condition}
 		group by name
-	""".format(
-			condition
-		),
+	""",
 		{
 			"to_date": filters.to_date,
 			"from_date": filters.from_date,
@@ -276,9 +272,7 @@ def get_assets_for_grouped_by_category(filters):
 			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {0}
 			group by a.asset_category) as results
 		group by results.asset_category
-		""".format(
-			condition
-		),
+		""".format(condition),
 		{"to_date": filters.to_date, "from_date": filters.from_date, "company": filters.company},
 		as_dict=1,
 	)
@@ -338,9 +332,7 @@ def get_assets_for_grouped_by_asset(filters):
 			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {0}
 			group by a.name) as results
 		group by results.name
-		""".format(
-			condition
-		),
+		""".format(condition),
 		{"to_date": filters.to_date, "from_date": filters.from_date, "company": filters.company},
 		as_dict=1,
 	)

@@ -10,6 +10,8 @@
   "due_date",
   "bill_no",
   "payment_term",
+  "account_type",
+  "payment_type",
   "column_break_4",
   "total_amount",
   "outstanding_amount",
@@ -108,12 +110,22 @@
    "fieldtype": "Link",
    "label": "Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "account_type",
+   "fieldtype": "Data",
+   "label": "Account Type"
+  },
+  {
+   "fieldname": "payment_type",
+   "fieldtype": "Data",
+   "label": "Payment Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-06-08 07:40:38.487874",
+ "modified": "2024-04-05 09:44:08.310593",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",

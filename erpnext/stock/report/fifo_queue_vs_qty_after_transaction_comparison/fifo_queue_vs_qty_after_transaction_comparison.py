@@ -40,19 +40,18 @@ def get_data(filters):
 
 
 def get_stock_ledger_entries(filters):
-
 	sle_filters = {"is_cancelled": 0}
 
 	if filters.warehouse:
 		children = get_descendants_of("Warehouse", filters.warehouse)
-		sle_filters["warehouse"] = ("in", children + [filters.warehouse])
+		sle_filters["warehouse"] = ("in", [*children, filters.warehouse])
 
 	if filters.item_code:
 		sle_filters["item_code"] = filters.item_code
 	elif filters.get("item_group"):
 		item_group = filters.get("item_group")
 		children = get_descendants_of("Item Group", item_group)
-		item_group_filter = {"item_group": ("in", children + [item_group])}
+		item_group_filter = {"item_group": ("in", [*children, item_group])}
 		sle_filters["item_code"] = (
 			"in",
 			frappe.get_all("Item", filters=item_group_filter, pluck="name", order_by=None),
