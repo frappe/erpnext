@@ -996,32 +996,35 @@ def get_depr_schedule(asset_name, status, finance_book=None):
 
 @frappe.whitelist()
 def get_asset_depr_schedule_doc(asset_name, status, finance_book=None):
-	asset_depr_schedule_name = get_asset_depr_schedule_name(asset_name, status, finance_book)
+	asset_depr_schedule = get_asset_depr_schedule_name(asset_name, status, finance_book)
 
-	if not asset_depr_schedule_name:
+	if not asset_depr_schedule:
 		return
 
-	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule_name)
+	asset_depr_schedule_doc = frappe.get_doc("Asset Depreciation Schedule", asset_depr_schedule[0].name)
 
 	return asset_depr_schedule_doc
 
 
 def get_asset_depr_schedule_name(asset_name, status, finance_book=None):
-	if finance_book is None:
-		finance_book_filter = ["finance_book", "is", "not set"]
-	else:
-		finance_book_filter = ["finance_book", "=", finance_book]
-
 	if isinstance(status, str):
 		status = [status]
 
-	return frappe.db.get_value(
+	filters = [
+		["asset", "=", asset_name],
+		["status", "in", status],
+		["docstatus", "<", 2],
+	]
+
+	if finance_book:
+		filters.append(["finance_book", "=", finance_book])
+	else:
+		filters.append(["finance_book", "is", "not set"])
+
+	return frappe.get_all(
 		doctype="Asset Depreciation Schedule",
-		filters=[
-			["asset", "=", asset_name],
-			finance_book_filter,
-			["status", "in", status],
-		],
+		filters=filters,
+		limit=1,
 	)
 
 
