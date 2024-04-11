@@ -264,7 +264,6 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				content: content ? content : __(frm.meta.name) + ": " + doc.name,
 				doctype: doc.doctype,
 				name: doc.name,
-				content: "",
 				send_email: 1,
 				print_format,
 				sender_full_name: frappe.user.full_name(),
