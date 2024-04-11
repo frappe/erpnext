@@ -1709,3 +1709,8 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 					)
 
 		return items
+
+
+@frappe.whitelist()
+def get_stock_reservation_status():
+	return frappe.db.get_single_value("Stock Settings", "enable_stock_reservation")
