@@ -2134,8 +2134,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
 
-	bank_account = get_default_company_bank_account(company)
-
+	bank_account = get_default_company_bank_account(company, party_type, party)
 	return {
 		"party_account": party_account,
 		"party_name": party_name,
