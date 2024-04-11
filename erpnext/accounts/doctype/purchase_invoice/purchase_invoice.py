@@ -68,21 +68,17 @@ class PurchaseInvoice(BuyingController):
 		from erpnext.accounts.doctype.purchase_invoice_advance.purchase_invoice_advance import (
 			PurchaseInvoiceAdvance,
 		)
-		from erpnext.accounts.doctype.purchase_invoice_item.purchase_invoice_item import (
-			PurchaseInvoiceItem,
-		)
+		from erpnext.accounts.doctype.purchase_invoice_item.purchase_invoice_item import PurchaseInvoiceItem
 		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
 		)
-		from erpnext.accounts.doctype.tax_withheld_vouchers.tax_withheld_vouchers import (
-			TaxWithheldVouchers,
-		)
+		from erpnext.accounts.doctype.tax_withheld_vouchers.tax_withheld_vouchers import TaxWithheldVouchers
 		from erpnext.buying.doctype.purchase_receipt_item_supplied.purchase_receipt_item_supplied import (
 			PurchaseReceiptItemSupplied,
 		)
 
 		additional_discount_percentage: DF.Float
-		address_display: DF.TextEditor | None
+		address_display: DF.SmallText | None
 		advance_tax: DF.Table[AdvanceTax]
 		advances: DF.Table[PurchaseInvoiceAdvance]
 		against_expense_account: DF.SmallText | None
@@ -107,7 +103,7 @@ class PurchaseInvoice(BuyingController):
 		bill_date: DF.Date | None
 		bill_no: DF.Data | None
 		billing_address: DF.Link | None
-		billing_address_display: DF.TextEditor | None
+		billing_address_display: DF.SmallText | None
 		buying_price_list: DF.Link | None
 		cash_bank_account: DF.Link | None
 		clearance_date: DF.Date | None
@@ -174,7 +170,7 @@ class PurchaseInvoice(BuyingController):
 		set_posting_time: DF.Check
 		set_warehouse: DF.Link | None
 		shipping_address: DF.Link | None
-		shipping_address_display: DF.TextEditor | None
+		shipping_address_display: DF.SmallText | None
 		shipping_rule: DF.Link | None
 		status: DF.Literal[
 			"",

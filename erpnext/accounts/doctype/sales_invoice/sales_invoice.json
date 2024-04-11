@@ -291,6 +291,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "project",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -356,6 +357,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -495,7 +497,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Text Editor",
+   "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Address",
@@ -566,7 +568,7 @@
   },
   {
    "fieldname": "shipping_address",
-   "fieldtype": "Text Editor",
+   "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Shipping Address",
@@ -584,7 +586,7 @@
   },
   {
    "fieldname": "company_address_display",
-   "fieldtype": "Text Editor",
+   "fieldtype": "Small Text",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Company Address",
@@ -1999,7 +2001,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "dispatch_address",
-   "fieldtype": "Text Editor",
+   "fieldtype": "Small Text",
    "label": "Dispatch Address",
    "read_only": 1
   },
@@ -2201,7 +2203,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-03-27 13:10:35.407256",
+ "modified": "2024-04-11 10:57:36.469136",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2249,7 +2251,7 @@
  "quick_entry": 1,
  "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",
  "show_name_in_global_search": 1,
- "sort_field": "creation",
+ "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",
