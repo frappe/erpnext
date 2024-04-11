@@ -35,11 +35,7 @@
   }
  ],
  "links": [],
-<<<<<<< HEAD
- "modified": "2020-04-01 15:35:18.112619",
-=======
  "modified": "2024-04-07 11:26:42.021585",
->>>>>>> f61faa85a1 (fix: Ignore permissions while fetching module settings properties)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template",
