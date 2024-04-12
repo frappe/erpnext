@@ -12,7 +12,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 
 class InstallationNote(TransactionBase):
 	def __init__(self, *args, **kwargs):
-		super(InstallationNote, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.status_updater = [
 			{
 				"source_dt": "Installation Note Item",

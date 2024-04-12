@@ -38,9 +38,7 @@ def get_context(context):
 		context["amount"] = flt(context["amount"])
 
 		gateway_controller = get_gateway_controller(context.reference_docname)
-		context["header_img"] = frappe.db.get_value(
-			"GoCardless Settings", gateway_controller, "header_img"
-		)
+		context["header_img"] = frappe.db.get_value("GoCardless Settings", gateway_controller, "header_img")
 
 	else:
 		frappe.redirect_to_message(
@@ -95,6 +93,6 @@ def check_mandate(data, reference_doctype, reference_docname):
 
 		return {"redirect_to": redirect_flow.redirect_url}
 
-	except Exception as e:
+	except Exception:
 		frappe.log_error("GoCardless Payment Error")
 		return {"redirect_to": "/integrations/payment-failed"}

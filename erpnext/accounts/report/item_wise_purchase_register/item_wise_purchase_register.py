@@ -140,7 +140,6 @@ def _execute(filters=None, additional_table_columns=None):
 
 
 def get_columns(additional_table_columns, filters):
-
 	columns = []
 
 	if filters.get("group_by") != ("Item"):
@@ -194,7 +193,12 @@ def get_columns(additional_table_columns, filters):
 					"options": "Supplier",
 					"width": 120,
 				},
-				{"label": _("Supplier Name"), "fieldname": "supplier_name", "fieldtype": "Data", "width": 120},
+				{
+					"label": _("Supplier Name"),
+					"fieldname": "supplier_name",
+					"fieldtype": "Data",
+					"width": 120,
+				},
 			]
 		)
 
@@ -326,14 +330,12 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
 			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
-			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {0}
+			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {}
 		from `tabPurchase Invoice`, `tabPurchase Invoice Item`, `tabItem`
 		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
 			`tabItem`.name = `tabPurchase Invoice Item`.`item_code` and
-			`tabPurchase Invoice`.docstatus = 1 {1}
-	""".format(
-			additional_query_columns, conditions
-		),
+			`tabPurchase Invoice`.docstatus = 1 {}
+	""".format(additional_query_columns, conditions),
 		filters,
 		as_dict=1,
 	)

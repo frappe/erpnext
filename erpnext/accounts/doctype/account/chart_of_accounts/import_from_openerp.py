@@ -26,7 +26,7 @@ def go():
 	default_account_types = get_default_account_types()
 
 	country_dirs = []
-	for basepath, folders, files in os.walk(path):
+	for basepath, _folders, _files in os.walk(path):
 		basename = os.path.basename(basepath)
 		if basename.startswith("l10n_"):
 			country_dirs.append(basename)
@@ -35,9 +35,7 @@ def go():
 		accounts, charts = {}, {}
 		country_path = os.path.join(path, country_dir)
 		manifest = ast.literal_eval(open(os.path.join(country_path, "__openerp__.py")).read())
-		data_files = (
-			manifest.get("data", []) + manifest.get("init_xml", []) + manifest.get("update_xml", [])
-		)
+		data_files = manifest.get("data", []) + manifest.get("init_xml", []) + manifest.get("update_xml", [])
 		files_path = [os.path.join(country_path, d) for d in data_files]
 		xml_roots = get_xml_roots(files_path)
 		csv_content = get_csv_contents(files_path)
@@ -90,10 +88,10 @@ def get_csv_contents(files_path):
 		fname = os.path.basename(filepath)
 		for file_type in ["account.account.template", "account.account.type", "account.chart.template"]:
 			if fname.startswith(file_type) and fname.endswith(".csv"):
-				with open(filepath, "r") as csvfile:
+				with open(filepath) as csvfile:
 					try:
 						csv_content.setdefault(file_type, []).append(read_csv_content(csvfile.read()))
-					except Exception as e:
+					except Exception:
 						continue
 	return csv_content
 
@@ -138,7 +136,7 @@ def get_account_types(root_list, csv_content, prefix=None):
 
 	if csv_content and csv_content[0][0] == "id":
 		for row in csv_content[1:]:
-			row_dict = dict(zip(csv_content[0], row))
+			row_dict = dict(zip(csv_content[0], row, strict=False))
 			data = {}
 			if row_dict.get("code") and account_type_map.get(row_dict["code"]):
 				data["account_type"] = account_type_map[row_dict["code"]]
@@ -150,7 +148,7 @@ def get_account_types(root_list, csv_content, prefix=None):
 
 def make_maps_for_xml(xml_roots, account_types, country_dir):
 	"""make maps for `charts` and `accounts`"""
-	for model, root_list in xml_roots.items():
+	for _model, root_list in xml_roots.items():
 		for root in root_list:
 			for node in root[0].findall("record"):
 				if node.get("model") == "account.account.template":
@@ -186,7 +184,7 @@ def make_maps_for_xml(xml_roots, account_types, country_dir):
 def make_maps_for_csv(csv_content, account_types, country_dir):
 	for content in csv_content.get("account.account.template", []):
 		for row in content[1:]:
-			data = dict(zip(content[0], row))
+			data = dict(zip(content[0], row, strict=False))
 			account = {
 				"name": data.get("name"),
 				"parent_id": data.get("parent_id:id") or data.get("parent_id/id"),
@@ -206,7 +204,7 @@ def make_maps_for_csv(csv_content, account_types, country_dir):
 	for content in csv_content.get("account.chart.template", []):
 		for row in content[1:]:
 			if row:
-				data = dict(zip(content[0], row))
+				data = dict(zip(content[0], row, strict=False))
 				charts.setdefault(data.get("id"), {}).update(
 					{
 						"account_root_id": data.get("account_root_id:id") or data.get("account_root_id/id"),
@@ -241,7 +239,7 @@ def make_charts():
 		if not src.get("name") or not src.get("account_root_id"):
 			continue
 
-		if not src["account_root_id"] in accounts:
+		if src["account_root_id"] not in accounts:
 			continue
 
 		filename = src["id"][5:] + "_" + chart_id
@@ -255,14 +253,20 @@ def make_charts():
 		for key, val in chart["tree"].items():
 			if key in ["name", "parent_id"]:
 				chart["tree"].pop(key)
-			if type(val) == dict:
+			if isinstance(val, dict):
 				val["root_type"] = ""
 		if chart:
 			fpath = os.path.join(
-				"erpnext", "erpnext", "accounts", "doctype", "account", "chart_of_accounts", filename + ".json"
+				"erpnext",
+				"erpnext",
+				"accounts",
+				"doctype",
+				"account",
+				"chart_of_accounts",
+				filename + ".json",
 			)
 
-			with open(fpath, "r") as chartfile:
+			with open(fpath) as chartfile:
 				old_content = chartfile.read()
 				if not old_content or (
 					json.loads(old_content).get("is_active", "No") == "No"

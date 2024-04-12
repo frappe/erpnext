@@ -163,10 +163,8 @@ def get_entries(filters):
 		"""select
 		voucher_type, voucher_no, party_type, party, posting_date, debit, credit, remarks, against_voucher
 		from `tabGL Entry`
-		where company=%(company)s and voucher_type in ('Journal Entry', 'Payment Entry') and is_cancelled = 0 {0}
-	""".format(
-			get_conditions(filters)
-		),
+		where company=%(company)s and voucher_type in ('Journal Entry', 'Payment Entry') and is_cancelled = 0 {}
+	""".format(get_conditions(filters)),
 		filters,
 		as_dict=1,
 	)
@@ -175,7 +173,7 @@ def get_entries(filters):
 def get_invoice_posting_date_map(filters):
 	invoice_details = {}
 	dt = "Sales Invoice" if filters.get("payment_type") == _("Incoming") else "Purchase Invoice"
-	for t in frappe.db.sql("select name, posting_date, due_date from `tab{0}`".format(dt), as_dict=1):
+	for t in frappe.db.sql(f"select name, posting_date, due_date from `tab{dt}`", as_dict=1):
 		invoice_details[t.name] = t
 
 	return invoice_details

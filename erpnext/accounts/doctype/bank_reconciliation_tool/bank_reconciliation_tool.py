@@ -61,9 +61,7 @@ def get_bank_transactions(bank_account, from_date=None, to_date=None):
 def get_account_balance(bank_account, till_date):
 	# returns account balance till the specified date
 	account = frappe.db.get_value("Bank Account", bank_account, "account")
-	filters = frappe._dict(
-		{"account": account, "report_date": till_date, "include_pos_transactions": 1}
-	)
+	filters = frappe._dict({"account": account, "report_date": till_date, "include_pos_transactions": 1})
 	data = get_entries(filters)
 
 	balance_as_per_system = get_balance_on(filters["account"], filters["report_date"])
@@ -76,10 +74,7 @@ def get_account_balance(bank_account, till_date):
 	amounts_not_reflected_in_system = get_amounts_not_reflected_in_system(filters)
 
 	bank_bal = (
-		flt(balance_as_per_system)
-		- flt(total_debit)
-		+ flt(total_credit)
-		+ amounts_not_reflected_in_system
+		flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
 	)
 
 	return bank_bal
@@ -377,12 +372,13 @@ def auto_reconcile_vouchers(
 			)
 		transaction = frappe.get_doc("Bank Transaction", transaction.name)
 		account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
-		matched_trans = 0
 		for voucher in vouchers:
 			gl_entry = frappe.db.get_value(
 				"GL Entry",
 				dict(
-					account=account, voucher_type=voucher["payment_doctype"], voucher_no=voucher["payment_name"]
+					account=account,
+					voucher_type=voucher["payment_doctype"],
+					voucher_no=voucher["payment_name"],
 				),
 				["credit", "debit"],
 				as_dict=1,
@@ -731,7 +727,7 @@ def get_lr_matching_query(bank_account, exact_match, filters):
 	)
 
 	if frappe.db.has_column("Loan Repayment", "repay_from_salary"):
-		query = query.where((loan_repayment.repay_from_salary == 0))
+		query = query.where(loan_repayment.repay_from_salary == 0)
 
 	if exact_match:
 		query.where(loan_repayment.amount_paid == filters.get("amount"))
@@ -764,7 +760,7 @@ def get_pe_matching_query(
 	if cint(filter_by_reference_date):
 		filter_by_date = f"AND reference_date between '{from_reference_date}' and '{to_reference_date}'"
 		order_by = " reference_date"
-	if frappe.flags.auto_reconcile_vouchers == True:
+	if frappe.flags.auto_reconcile_vouchers is True:
 		filter_by_reference_no = f"AND reference_no = '{transaction.reference_number}'"
 	return f"""
 		SELECT
@@ -815,7 +811,7 @@ def get_je_matching_query(
 	if cint(filter_by_reference_date):
 		filter_by_date = f"AND je.cheque_date between '{from_reference_date}' and '{to_reference_date}'"
 		order_by = " je.cheque_date"
-	if frappe.flags.auto_reconcile_vouchers == True:
+	if frappe.flags.auto_reconcile_vouchers is True:
 		filter_by_reference_no = f"AND je.cheque_no = '{transaction.reference_number}'"
 	return f"""
 		SELECT

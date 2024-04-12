@@ -31,7 +31,6 @@ def create_charts(
 					"tax_rate",
 					"account_currency",
 				]:
-
 					account_number = cstr(child.get("account_number")).strip()
 					account_name, account_name_in_db = add_suffix_if_duplicate(
 						account_name, account_number, accounts
@@ -39,7 +38,9 @@ def create_charts(
 
 					is_group = identify_is_group(child)
 					report_type = (
-						"Balance Sheet" if root_type in ["Asset", "Liability", "Equity"] else "Profit and Loss"
+						"Balance Sheet"
+						if root_type in ["Asset", "Liability", "Equity"]
+						else "Profit and Loss"
 					)
 
 					account = frappe.get_doc(
@@ -141,7 +142,7 @@ def get_chart(chart_template, existing_company=None):
 			for fname in os.listdir(path):
 				fname = frappe.as_unicode(fname)
 				if fname.endswith(".json"):
-					with open(os.path.join(path, fname), "r") as f:
+					with open(os.path.join(path, fname)) as f:
 						chart = f.read()
 						if chart and json.loads(chart).get("name") == chart_template:
 							return json.loads(chart).get("tree")
@@ -173,7 +174,7 @@ def get_charts_for_country(country, with_standard=False):
 			for fname in os.listdir(path):
 				fname = frappe.as_unicode(fname)
 				if (fname.startswith(country_code) or fname.startswith(country)) and fname.endswith(".json"):
-					with open(os.path.join(path, fname), "r") as f:
+					with open(os.path.join(path, fname)) as f:
 						_get_chart_name(f.read())
 
 	# if more than one charts, returned then add the standard
@@ -247,7 +248,13 @@ def validate_bank_account(coa, bank_account):
 
 		def _get_account_names(account_master):
 			for account_name, child in account_master.items():
-				if account_name not in ["account_number", "account_type", "root_type", "is_group", "tax_rate"]:
+				if account_name not in [
+					"account_number",
+					"account_type",
+					"root_type",
+					"is_group",
+					"tax_rate",
+				]:
 					accounts.append(account_name)
 
 					_get_account_names(child)

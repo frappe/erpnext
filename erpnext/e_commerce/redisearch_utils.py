@@ -38,7 +38,7 @@ def is_search_module_loaded():
 		out = cache.execute_command("MODULE LIST")
 
 		parsed_output = " ".join(
-			(" ".join([frappe.as_unicode(s) for s in o if not isinstance(s, int)]) for o in out)
+			" ".join([frappe.as_unicode(s) for s in o if not isinstance(s, int)]) for o in out
 		)
 		return "search" in parsed_output
 	except Exception:
@@ -58,7 +58,7 @@ def if_redisearch_enabled(function):
 
 
 def make_key(key):
-	return "{0}|{1}".format(frappe.conf.db_name, key).encode("utf-8")
+	return f"{frappe.conf.db_name}|{key}".encode()
 
 
 @if_redisearch_enabled
@@ -89,7 +89,7 @@ def create_website_items_index():
 	idx_fields = list(map(to_search_field, idx_fields))
 
 	client.create_index(
-		[TextField("web_item_name", sortable=True)] + idx_fields,
+		[TextField("web_item_name", sortable=True), *idx_fields],
 		definition=idx_def,
 	)
 
@@ -187,9 +187,7 @@ def define_autocomplete_dictionary():
 @if_redisearch_enabled
 def create_items_autocomplete_dict(autocompleter):
 	"Add items as suggestions in Autocompleter."
-	items = frappe.get_all(
-		"Website Item", fields=["web_item_name", "item_group"], filters={"published": 1}
-	)
+	items = frappe.get_all("Website Item", fields=["web_item_name", "item_group"], filters={"published": 1})
 
 	for item in items:
 		autocompleter.add_suggestions(Suggestion(item.web_item_name))
@@ -248,6 +246,4 @@ def raise_redisearch_error():
 	log = frappe.log_error("Redisearch Error")
 	log_link = frappe.utils.get_link_to_form("Error Log", log.name)
 
-	frappe.throw(
-		msg=_("Something went wrong. Check {0}").format(log_link), title=_("Redisearch Error")
-	)
+	frappe.throw(msg=_("Something went wrong. Check {0}").format(log_link), title=_("Redisearch Error"))

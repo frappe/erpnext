@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 import json
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Union
 
 if TYPE_CHECKING:
 	from erpnext.stock.doctype.item.item import Item
@@ -45,10 +44,10 @@ class WebsiteItem(WebsiteGenerator):
 			self.name = make_autoname(naming_series, doc=self)
 
 	def onload(self):
-		super(WebsiteItem, self).onload()
+		super().onload()
 
 	def validate(self):
-		super(WebsiteItem, self).validate()
+		super().validate()
 
 		if not self.item_code:
 			frappe.throw(_("Item Code is required"), title=_("Mandatory"))
@@ -78,7 +77,7 @@ class WebsiteItem(WebsiteGenerator):
 		self.update_template_item()
 
 	def on_trash(self):
-		super(WebsiteItem, self).on_trash()
+		super().on_trash()
 		delete_item_from_index(self)
 		self.publish_unpublish_desk_item(publish=False)
 
@@ -197,7 +196,7 @@ class WebsiteItem(WebsiteGenerator):
 						}
 					).save()
 
-				except IOError:
+				except OSError:
 					self.website_image = None
 
 			if file_doc:
@@ -234,9 +233,7 @@ class WebsiteItem(WebsiteGenerator):
 			context.reviews = context.reviews[:4]
 
 		context.wished = False
-		if frappe.db.exists(
-			"Wishlist Item", {"item_code": self.item_code, "parent": frappe.session.user}
-		):
+		if frappe.db.exists("Wishlist Item", {"item_code": self.item_code, "parent": frappe.session.user}):
 			context.wished = True
 
 		context.user_is_customer = check_if_user_is_customer()
@@ -256,9 +253,7 @@ class WebsiteItem(WebsiteGenerator):
 			)
 
 			# make an attribute-value map for easier access in templates
-			variant.attribute_map = frappe._dict(
-				{attr.attribute: attr.value for attr in variant.attributes}
-			)
+			variant.attribute_map = frappe._dict({attr.attribute: attr.value for attr in variant.attributes})
 
 			for attr in variant.attributes:
 				values = attribute_values_available.setdefault(attr.attribute, [])
@@ -283,7 +278,6 @@ class WebsiteItem(WebsiteGenerator):
 					filters={"parent": attr.attribute},
 					order_by="idx asc",
 				):
-
 					if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
 						values.append(attr_value.attribute_value)
 
@@ -311,9 +305,7 @@ class WebsiteItem(WebsiteGenerator):
 	def set_shopping_cart_data(self, context):
 		from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
 
-		context.shopping_cart = get_product_info_for_website(
-			self.item_code, skip_quotation_creation=True
-		)
+		context.shopping_cart = get_product_info_for_website(self.item_code, skip_quotation_creation=True)
 
 	@frappe.whitelist()
 	def copy_specification_from_item_group(self):
@@ -425,7 +417,7 @@ def check_if_user_is_customer(user=None):
 
 
 @frappe.whitelist()
-def make_website_item(doc: "Item", save: bool = True) -> Union["WebsiteItem", List[str]]:
+def make_website_item(doc: "Item", save: bool = True) -> Union["WebsiteItem", list[str]]:
 	"Make Website Item from Item. Used via Form UI or patch."
 
 	if not doc:

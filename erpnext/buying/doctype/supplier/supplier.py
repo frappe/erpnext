@@ -11,9 +11,8 @@ from frappe.contacts.address_and_contact import (
 )
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 
-from erpnext.accounts.party import (  # noqa
+from erpnext.accounts.party import (
 	get_dashboard_info,
-	get_timeline_data,
 	validate_party_accounts,
 )
 from erpnext.utilities.transaction_base import TransactionBase
@@ -154,6 +153,6 @@ def get_supplier_primary_contact(doctype, txt, searchfield, start, page_len, fil
 		.where(
 			(dynamic_link.link_name == supplier)
 			& (dynamic_link.link_doctype == "Supplier")
-			& (contact.name.like("%{0}%".format(txt)))
+			& (contact.name.like(f"%{txt}%"))
 		)
 	).run(as_dict=False)

@@ -188,16 +188,14 @@ def get_applicant_wise_total_loan_security_qty(filters, loan_security_details):
 		conditions = "AND company = %(company)s"
 
 	unpledges = frappe.db.sql(
-		"""
+		f"""
 		SELECT up.applicant, u.loan_security, sum(u.qty) as qty
 		FROM `tabLoan Security Unpledge` up, `tabUnpledge` u
 		WHERE u.parent = up.name
 		AND up.status = 'Approved'
 		{conditions}
 		GROUP BY up.applicant, u.loan_security
-	""".format(
-			conditions=conditions
-		),
+	""",
 		filters,
 		as_dict=1,
 	)
@@ -206,16 +204,14 @@ def get_applicant_wise_total_loan_security_qty(filters, loan_security_details):
 		applicant_wise_unpledges.setdefault((unpledge.applicant, unpledge.loan_security), unpledge.qty)
 
 	pledges = frappe.db.sql(
-		"""
+		f"""
 		SELECT lp.applicant_type, lp.applicant, p.loan_security, sum(p.qty) as qty
 		FROM `tabLoan Security Pledge` lp, `tabPledge`p
 		WHERE p.parent = lp.name
 		AND lp.status = 'Pledged'
 		{conditions}
 		GROUP BY lp.applicant, p.loan_security
-	""".format(
-			conditions=conditions
-		),
+	""",
 		filters,
 		as_dict=1,
 	)

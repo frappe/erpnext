@@ -2,7 +2,6 @@ import frappe
 
 
 def execute():
-
 	# Erase all default item manufacturers that dont exist.
 	item = frappe.qb.DocType("Item")
 	manufacturer = frappe.qb.DocType("Manufacturer")

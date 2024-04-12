@@ -81,9 +81,7 @@ class TestBatch(FrappeTestCase):
 		stock_entry.submit()
 
 		self.assertTrue(stock_entry.items[0].batch_no)
-		self.assertEqual(
-			get_batch_qty(stock_entry.items[0].batch_no, stock_entry.items[0].t_warehouse), 90
-		)
+		self.assertEqual(get_batch_qty(stock_entry.items[0].batch_no, stock_entry.items[0].t_warehouse), 90)
 
 	def test_delivery_note(self):
 		"""Test automatic batch selection for outgoing items"""
@@ -159,9 +157,7 @@ class TestBatch(FrappeTestCase):
 		receipt = self.test_purchase_receipt()
 		from erpnext.stock.doctype.batch.batch import split_batch
 
-		new_batch = split_batch(
-			receipt.items[0].batch_no, "ITEM-BATCH-1", receipt.items[0].warehouse, 22
-		)
+		new_batch = split_batch(receipt.items[0].batch_no, "ITEM-BATCH-1", receipt.items[0].warehouse, 22)
 
 		self.assertEqual(get_batch_qty(receipt.items[0].batch_no, receipt.items[0].warehouse), 78)
 		self.assertEqual(get_batch_qty(new_batch, receipt.items[0].warehouse), 22)
@@ -359,9 +355,7 @@ class TestBatch(FrappeTestCase):
 		self.make_batch_item(item_code)
 
 		def assertValuation(expected):
-			actual = get_valuation_rate(
-				item_code, warehouse, "voucher_type", "voucher_no", batch_no=batch_no
-			)
+			actual = get_valuation_rate(item_code, warehouse, "voucher_type", "voucher_no", batch_no=batch_no)
 			self.assertAlmostEqual(actual, expected)
 
 		se = make_stock_entry(item_code=item_code, qty=100, rate=10, target=warehouse)

@@ -94,8 +94,8 @@ def get_columns(filters, period_list, partner_doctype):
 	]
 
 	for period in period_list:
-		target_key = "target_{}".format(period.key)
-		variance_key = "variance_{}".format(period.key)
+		target_key = f"target_{period.key}"
+		variance_key = f"variance_{period.key}"
 
 		columns.extend(
 			[
@@ -169,9 +169,7 @@ def prepare_data(
 
 	for d in sales_users_data:
 		key = (d.parent, d.item_group)
-		dist_data = get_periodwise_distribution_data(
-			d.distribution_id, period_list, filters.get("period")
-		)
+		dist_data = get_periodwise_distribution_data(d.distribution_id, period_list, filters.get("period"))
 
 		if key not in rows:
 			rows.setdefault(key, {"total_target": 0, "total_achieved": 0, "total_variance": 0})
@@ -182,8 +180,8 @@ def prepare_data(
 			if p_key not in details:
 				details[p_key] = 0
 
-			target_key = "target_{}".format(p_key)
-			variance_key = "variance_{}".format(p_key)
+			target_key = f"target_{p_key}"
+			variance_key = f"variance_{p_key}"
 			details[target_key] = (d.get(target_qty_amt_field) * dist_data.get(p_key)) / 100
 			details[variance_key] = 0
 			details["total_target"] += details[target_key]

@@ -131,7 +131,12 @@ def setup_mappers(mappers):
 
 		account_types_labels = sorted(
 			set(
-				(d["label"], d["is_working_capital"], d["is_income_tax_liability"], d["is_income_tax_expense"])
+				(
+					d["label"],
+					d["is_working_capital"],
+					d["is_income_tax_liability"],
+					d["is_income_tax_expense"],
+				)
 				for d in account_types
 			),
 			key=lambda x: x[1],
@@ -319,14 +324,10 @@ def add_data_for_operating_activities(
 			data.append(interest_paid)
 			section_data.append(interest_paid)
 
-	_add_total_row_account(
-		data, section_data, mapper["section_footer"], period_list, company_currency
-	)
+	_add_total_row_account(data, section_data, mapper["section_footer"], period_list, company_currency)
 
 
-def calculate_adjustment(
-	filters, non_expense_mapper, expense_mapper, use_accumulated_values, period_list
-):
+def calculate_adjustment(filters, non_expense_mapper, expense_mapper, use_accumulated_values, period_list):
 	liability_accounts = [d["names"] for d in non_expense_mapper]
 	expense_accounts = [d["names"] for d in expense_mapper]
 
@@ -388,9 +389,7 @@ def add_data_for_other_activities(
 				data.append(account_data)
 				section_data.append(account_data)
 
-		_add_total_row_account(
-			data, section_data, mapper["section_footer"], period_list, company_currency
-		)
+		_add_total_row_account(data, section_data, mapper["section_footer"], period_list, company_currency)
 
 
 def compute_data(filters, company_currency, profit_data, period_list, light_mappers, full_mapper):
@@ -465,22 +464,16 @@ def execute(filters=None):
 
 	company_currency = frappe.get_cached_value("Company", filters.company, "default_currency")
 
-	data = compute_data(
-		filters, company_currency, net_profit_loss, period_list, mappers, cash_flow_accounts
-	)
+	data = compute_data(filters, company_currency, net_profit_loss, period_list, mappers, cash_flow_accounts)
 
 	_add_total_row_account(data, data, _("Net Change in Cash"), period_list, company_currency)
-	columns = get_columns(
-		filters.periodicity, period_list, filters.accumulated_values, filters.company
-	)
+	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 	return columns, data
 
 
-def _get_account_type_based_data(
-	filters, account_names, period_list, accumulated_values, opening_balances=0
-):
-	if not account_names or not account_names[0] or not type(account_names[0]) == str:
+def _get_account_type_based_data(filters, account_names, period_list, accumulated_values, opening_balances=0):
+	if not account_names or not account_names[0] or not isinstance(account_names[0], str):
 		# only proceed if account_names is a list of account names
 		return {}
 

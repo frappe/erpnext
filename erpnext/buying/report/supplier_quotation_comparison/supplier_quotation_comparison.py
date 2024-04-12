@@ -82,18 +82,14 @@ def prepare_data(supplier_quotation_data, filters):
 	group_wise_map = defaultdict(list)
 	supplier_qty_price_map = {}
 
-	group_by_field = (
-		"supplier_name" if filters.get("group_by") == "Group by Supplier" else "item_code"
-	)
+	group_by_field = "supplier_name" if filters.get("group_by") == "Group by Supplier" else "item_code"
 	company_currency = frappe.db.get_default("currency")
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 
 	for data in supplier_quotation_data:
 		group = data.get(group_by_field)  # get item or supplier value for this row
 
-		supplier_currency = frappe.db.get_value(
-			"Supplier", data.get("supplier_name"), "default_currency"
-		)
+		supplier_currency = frappe.db.get_value("Supplier", data.get("supplier_name"), "default_currency")
 
 		if supplier_currency:
 			exchange_rate = get_exchange_rate(supplier_currency, company_currency)
@@ -126,7 +122,7 @@ def prepare_data(supplier_quotation_data, filters):
 		# map for chart preparation of the form {'supplier1': {'qty': 'price'}}
 		supplier = data.get("supplier_name")
 		if filters.get("item_code"):
-			if not supplier in supplier_qty_price_map:
+			if supplier not in supplier_qty_price_map:
 				supplier_qty_price_map[supplier] = {}
 			supplier_qty_price_map[supplier][row["qty"]] = row["price"]
 
@@ -169,7 +165,7 @@ def prepare_chart_data(suppliers, qty_list, supplier_qty_price_map):
 	for supplier in suppliers:
 		entry = supplier_qty_price_map[supplier]
 		for qty in qty_list:
-			if not qty in data_points_map:
+			if qty not in data_points_map:
 				data_points_map[qty] = []
 			if qty in entry:
 				data_points_map[qty].append(entry[qty])

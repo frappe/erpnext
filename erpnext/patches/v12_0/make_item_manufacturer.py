@@ -30,8 +30,6 @@ def execute():
 			"""
 			INSERT INTO `tabItem Manufacturer`
 			(`name`, `item_code`, `manufacturer`, `manufacturer_part_no`, `creation`, `owner`)
-			VALUES {}""".format(
-				", ".join(["%s"] * len(item_manufacturer))
-			),
+			VALUES {}""".format(", ".join(["%s"] * len(item_manufacturer))),
 			tuple(item_manufacturer),
 		)

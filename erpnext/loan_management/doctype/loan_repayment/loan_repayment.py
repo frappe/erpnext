@@ -70,7 +70,9 @@ class LoanRepayment(AccountsController):
 
 		shortfall_amount = flt(
 			frappe.db.get_value(
-				"Loan Security Shortfall", {"loan": self.against_loan, "status": "Pending"}, "shortfall_amount"
+				"Loan Security Shortfall",
+				{"loan": self.against_loan, "status": "Pending"},
+				"shortfall_amount",
 			)
 		)
 
@@ -94,10 +96,10 @@ class LoanRepayment(AccountsController):
 		)
 
 		if future_repayment_date:
-			frappe.throw("Repayment already made till date {0}".format(get_datetime(future_repayment_date)))
+			frappe.throw(f"Repayment already made till date {get_datetime(future_repayment_date)}")
 
 	def validate_amount(self):
-		precision = cint(frappe.db.get_default("currency_precision")) or 2
+		cint(frappe.db.get_default("currency_precision")) or 2
 
 		if not self.amount_paid:
 			frappe.throw(_("Amount paid cannot be zero"))
@@ -115,7 +117,9 @@ class LoanRepayment(AccountsController):
 				)
 
 				no_of_days = (
-					flt(flt(self.total_interest_paid - self.interest_payable, precision) / per_day_interest, 0)
+					flt(
+						flt(self.total_interest_paid - self.interest_payable, precision) / per_day_interest, 0
+					)
 					- 1
 				)
 
@@ -139,7 +143,9 @@ class LoanRepayment(AccountsController):
 						"repayment_details",
 						{
 							"loan_interest_accrual": lia.name,
-							"paid_interest_amount": flt(self.total_interest_paid - self.interest_payable, precision),
+							"paid_interest_amount": flt(
+								self.total_interest_paid - self.interest_payable, precision
+							),
 							"paid_principal_amount": 0.0,
 							"accrual_type": "Repayment",
 						},
@@ -263,9 +269,7 @@ class LoanRepayment(AccountsController):
 
 		if future_accrual_date:
 			frappe.throw(
-				"Cannot cancel. Interest accruals already processed till {0}".format(
-					get_datetime(future_accrual_date)
-				)
+				f"Cannot cancel. Interest accruals already processed till {get_datetime(future_accrual_date)}"
 			)
 
 	def update_repayment_schedule(self, cancel=0):
@@ -337,9 +341,7 @@ class LoanRepayment(AccountsController):
 
 		return interest_paid, updated_entries
 
-	def allocate_principal_amount_for_term_loans(
-		self, interest_paid, repayment_details, updated_entries
-	):
+	def allocate_principal_amount_for_term_loans(self, interest_paid, repayment_details, updated_entries):
 		if interest_paid > 0:
 			for lia, amounts in repayment_details.get("pending_accrual_entries", []).items():
 				paid_principal = 0
@@ -396,18 +398,16 @@ class LoanRepayment(AccountsController):
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
 		if self.shortfall_amount and self.amount_paid > self.shortfall_amount:
-			remarks = "Shortfall repayment of {0}.<br>Repayment against loan {1}".format(
+			remarks = "Shortfall repayment of {}.<br>Repayment against loan {}".format(
 				self.shortfall_amount, self.against_loan
 			)
 		elif self.shortfall_amount:
-			remarks = "Shortfall repayment of {0} against loan {1}".format(
-				self.shortfall_amount, self.against_loan
-			)
+			remarks = f"Shortfall repayment of {self.shortfall_amount} against loan {self.against_loan}"
 		else:
 			remarks = "Repayment against loan " + self.against_loan
 
 		if self.reference_number:
-			remarks += "with reference no. {}".format(self.reference_number)
+			remarks += f"with reference no. {self.reference_number}"
 
 		if hasattr(self, "repay_from_salary") and self.repay_from_salary:
 			payment_account = self.payroll_payable_account
@@ -513,7 +513,6 @@ def create_repayment_entry(
 	payroll_payable_account=None,
 	process_payroll_accounting_entry_based_on_employee=0,
 ):
-
 	lr = frappe.get_doc(
 		{
 			"doctype": "Loan Repayment",
@@ -617,9 +616,7 @@ def regenerate_repayment_schedule(loan, cancel=0):
 	balance_amount = get_pending_principal_amount(loan_doc)
 
 	if loan_doc.repayment_method == "Repay Fixed Amount per Period":
-		monthly_repayment_amount = flt(
-			balance_amount / (original_repayment_schedule_len - accrued_entries)
-		)
+		monthly_repayment_amount = flt(balance_amount / (original_repayment_schedule_len - accrued_entries))
 	else:
 		repayment_period = loan_doc.repayment_periods - accrued_entries
 		if not cancel and repayment_period > 0:
@@ -718,9 +715,7 @@ def get_amounts(amounts, against_loan, posting_date):
 
 		if (
 			no_of_late_days > 0
-			and (
-				not (hasattr(against_loan_doc, "repay_from_salary") and against_loan_doc.repay_from_salary)
-			)
+			and (not (hasattr(against_loan_doc, "repay_from_salary") and against_loan_doc.repay_from_salary))
 			and entry.accrual_type == "Regular"
 		):
 			penalty_amount += (

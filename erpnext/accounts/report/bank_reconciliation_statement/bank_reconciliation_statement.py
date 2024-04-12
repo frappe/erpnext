@@ -35,10 +35,7 @@ def execute(filters=None):
 	amounts_not_reflected_in_system = get_amounts_not_reflected_in_system(filters)
 
 	bank_bal = (
-		flt(balance_as_per_system)
-		- flt(total_debit)
-		+ flt(total_credit)
-		+ amounts_not_reflected_in_system
+		flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
 	)
 
 	data += [
@@ -220,7 +217,7 @@ def get_loan_entries(filters):
 		)
 
 		if doctype == "Loan Repayment" and frappe.db.has_column("Loan Repayment", "repay_from_salary"):
-			query = query.where((loan_doc.repay_from_salary == 0))
+			query = query.where(loan_doc.repay_from_salary == 0)
 
 		entries = query.run(as_dict=1)
 		loan_docs.extend(entries)
@@ -282,7 +279,7 @@ def get_loan_amount(filters):
 		)
 
 		if doctype == "Loan Repayment" and frappe.db.has_column("Loan Repayment", "repay_from_salary"):
-			query = query.where((loan_doc.repay_from_salary == 0))
+			query = query.where(loan_doc.repay_from_salary == 0)
 
 		amount = query.run()[0][0]
 		total_amount += flt(amount)

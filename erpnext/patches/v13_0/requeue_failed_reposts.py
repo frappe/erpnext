@@ -3,7 +3,6 @@ from frappe.utils import cstr
 
 
 def execute():
-
 	reposts = frappe.get_all(
 		"Repost Item Valuation",
 		{"status": "Failed", "modified": [">", "2021-10-05"]},

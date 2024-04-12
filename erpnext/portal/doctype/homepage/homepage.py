@@ -20,7 +20,6 @@ class Homepage(Document):
 			filters={"published": 1},
 			limit=3,
 		):
-
 			doc = frappe.get_doc("Website Item", d.name)
 			if not doc.route:
 				# set missing route

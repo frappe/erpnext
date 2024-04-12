@@ -24,9 +24,7 @@ class ProductFiltersBuilder:
 
 		# filter valid field filters i.e. those that exist in Website Item
 		web_item_meta = frappe.get_meta("Website Item", cached=True)
-		fields = [
-			web_item_meta.get_field(field) for field in filter_fields if web_item_meta.has_field(field)
-		]
+		fields = [web_item_meta.get_field(field) for field in filter_fields if web_item_meta.has_field(field)]
 
 		for df in fields:
 			item_filters, item_or_filters = {"published": 1}, []
@@ -41,14 +39,24 @@ class ProductFiltersBuilder:
 						item_or_filters.extend(
 							[
 								["item_group", "in", include_groups],
-								["Website Item Group", "item_group", "=", self.item_group],  # consider website item groups
+								[
+									"Website Item Group",
+									"item_group",
+									"=",
+									self.item_group,
+								],  # consider website item groups
 							]
 						)
 					else:
 						item_or_filters.extend(
 							[
 								["item_group", "=", self.item_group],
-								["Website Item Group", "item_group", "=", self.item_group],  # consider website item groups
+								[
+									"Website Item Group",
+									"item_group",
+									"=",
+									self.item_group,
+								],  # consider website item groups
 							]
 						)
 
