@@ -10,6 +10,7 @@ from frappe.utils import add_days, cint, flt, nowtime, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
@@ -351,26 +352,15 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		self.assertEqual(cint(erpnext.is_perpetual_inventory_enabled(scr.company)), 1)
 
 		gl_entries = get_gl_entries("Subcontracting Receipt", scr.name)
-
 		self.assertTrue(gl_entries)
 
 		fg_warehouse_ac = get_inventory_account(scr.company, scr.items[0].warehouse)
-		supplier_warehouse_ac = get_inventory_account(scr.company, scr.supplier_warehouse)
 		expense_account = scr.items[0].expense_account
-
-		if fg_warehouse_ac == supplier_warehouse_ac:
-			expected_values = {
-				fg_warehouse_ac: [2100.0, 1000.0],  # FG Amount (D), RM Cost (C)
-				expense_account: [0.0, 1000.0],  # Service Cost (C)
-				additional_costs_expense_account: [0.0, 100.0],  # Additional Cost (C)
-			}
-		else:
-			expected_values = {
-				fg_warehouse_ac: [2100.0, 0.0],  # FG Amount (D)
-				supplier_warehouse_ac: [0.0, 1000.0],  # RM Cost (C)
-				expense_account: [0.0, 1000.0],  # Service Cost (C)
-				additional_costs_expense_account: [0.0, 100.0],  # Additional Cost (C)
-			}
+		expected_values = {
+			fg_warehouse_ac: [2100.0, 1000],
+			expense_account: [1100, 2100],
+			additional_costs_expense_account: [0.0, 100.0],
+		}
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
@@ -380,6 +370,53 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.cancel()
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+
+	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
+	def test_subcontracting_receipt_with_zero_service_cost(self):
+		warehouse = "Stores - TCP1"
+		service_items = [
+			{
+				"warehouse": warehouse,
+				"item_code": "Subcontracted Service Item 7",
+				"qty": 10,
+				"rate": 0,
+				"fg_item": "Subcontracted Item SA7",
+				"fg_item_qty": 10,
+			},
+		]
+		sco = get_subcontracting_order(
+			company="_Test Company with perpetual inventory",
+			warehouse=warehouse,
+			supplier_warehouse="Work In Progress - TCP1",
+			service_items=service_items,
+		)
+		rm_items = get_rm_items(sco.supplied_items)
+		itemwise_details = make_stock_in_entry(rm_items=rm_items)
+		make_stock_transfer_entry(
+			sco_no=sco.name,
+			rm_items=rm_items,
+			itemwise_details=copy.deepcopy(itemwise_details),
+		)
+		scr = make_subcontracting_receipt(sco.name)
+		scr.save()
+		scr.submit()
+
+		gl_entries = get_gl_entries("Subcontracting Receipt", scr.name)
+		self.assertTrue(gl_entries)
+
+		fg_warehouse_ac = get_inventory_account(scr.company, scr.items[0].warehouse)
+		expense_account = scr.items[0].expense_account
+		expected_values = {
+			fg_warehouse_ac: [1000, 1000],
+			expense_account: [1000, 1000],
+		}
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account][0], gle.debit)
+			self.assertEqual(expected_values[gle.account][1], gle.credit)
+
+		scr.reload()
+		scr.cancel()
 
 	def test_supplied_items_consumed_qty(self):
 		# Set Backflush Based On as "Material Transferred for Subcontracting" to transfer RM's more than the required qty
