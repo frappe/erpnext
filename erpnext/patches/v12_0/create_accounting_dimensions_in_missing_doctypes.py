@@ -3,7 +3,6 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 
 
 def execute():
-
 	frappe.reload_doc("accounts", "doctype", "accounting_dimension")
 
 	accounting_dimensions = frappe.db.sql(
@@ -17,7 +16,6 @@ def execute():
 
 	count = 1
 	for d in accounting_dimensions:
-
 		if count % 2 == 0:
 			insert_after_field = "dimension_col_break"
 		else:
@@ -31,7 +29,6 @@ def execute():
 			"Expense Claim Detail",
 			"Expense Taxes and Charges",
 		]:
-
 			field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": d.fieldname})
 
 			if field:

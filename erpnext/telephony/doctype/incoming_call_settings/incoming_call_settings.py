@@ -3,7 +3,6 @@
 
 
 from datetime import datetime
-from typing import Tuple
 
 import frappe
 from frappe import _
@@ -73,7 +72,7 @@ class IncomingCallSettings(Document):
 					frappe.throw(_("Please fix overlapping time slots for {0}.").format(day))
 
 	@staticmethod
-	def check_timeslots_overlap(ts1: Tuple[int, int], ts2: Tuple[int, int]) -> bool:
+	def check_timeslots_overlap(ts1: tuple[int, int], ts2: tuple[int, int]) -> bool:
 		if (ts1[0] < ts2[0] and ts1[1] <= ts2[0]) or (ts1[0] >= ts2[1] and ts1[1] > ts2[1]):
 			return False
 		return True

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "field:loyalty_program_name",
  "creation": "2018-01-23 06:23:05.731431",
  "doctype": "DocType",
@@ -145,7 +146,8 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-05-26 09:11:46.120251",
+ "links": [],
+ "modified": "2024-03-27 13:10:03.361383",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Loyalty Program",
@@ -165,7 +167,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

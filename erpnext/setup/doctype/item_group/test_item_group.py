@@ -124,9 +124,7 @@ class TestItem(unittest.TestCase):
 	def print_tree(self):
 		import json
 
-		print(
-			json.dumps(frappe.db.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1)
-		)
+		print(json.dumps(frappe.db.sql("select name, lft, rgt from `tabItem Group` order by lft"), indent=1))
 
 	def test_move_leaf_into_another_group(self):
 		# before move
@@ -156,17 +154,13 @@ class TestItem(unittest.TestCase):
 
 	def test_delete_leaf(self):
 		# for checking later
-		parent_item_group = frappe.db.get_value(
-			"Item Group", "_Test Item Group B - 3", "parent_item_group"
-		)
-		rgt = frappe.db.get_value("Item Group", parent_item_group, "rgt")
+		parent_item_group = frappe.db.get_value("Item Group", "_Test Item Group B - 3", "parent_item_group")
+		frappe.db.get_value("Item Group", parent_item_group, "rgt")
 
 		ancestors = get_ancestors_of("Item Group", "_Test Item Group B - 3")
 		ancestors = frappe.db.sql(
 			"""select name, rgt from `tabItem Group`
-			where name in ({})""".format(
-				", ".join(["%s"] * len(ancestors))
-			),
+			where name in ({})""".format(", ".join(["%s"] * len(ancestors))),
 			tuple(ancestors),
 			as_dict=True,
 		)
@@ -188,9 +182,7 @@ class TestItem(unittest.TestCase):
 
 	def test_delete_group(self):
 		# cannot delete group with child, but can delete leaf
-		self.assertRaises(
-			NestedSetChildExistsError, frappe.delete_doc, "Item Group", "_Test Item Group B"
-		)
+		self.assertRaises(NestedSetChildExistsError, frappe.delete_doc, "Item Group", "_Test Item Group B")
 
 	def test_merge_groups(self):
 		frappe.rename_doc("Item Group", "_Test Item Group B", "_Test Item Group C", merge=True)
@@ -207,7 +199,6 @@ class TestItem(unittest.TestCase):
 			"""select name from `tabItem Group`
 			where parent_item_group='_Test Item Group C'"""
 		):
-
 			doc = frappe.get_doc("Item Group", name)
 			doc.parent_item_group = "_Test Item Group B"
 			doc.save()

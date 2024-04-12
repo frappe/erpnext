@@ -71,7 +71,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-01-30 11:59:07.508535",
+ "modified": "2024-03-27 13:10:13.805390",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Plant Floor",
@@ -91,7 +91,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

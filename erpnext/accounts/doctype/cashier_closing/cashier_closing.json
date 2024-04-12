@@ -124,7 +124,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-28 13:15:46.858427",
+ "modified": "2024-03-27 13:06:44.260440",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cashier Closing",
@@ -145,7 +145,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

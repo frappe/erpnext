@@ -83,9 +83,7 @@ class InvoiceDiscounting(AccountsController):
 				frappe.throw(
 					_(
 						"Row({0}): Outstanding Amount cannot be greater than actual Outstanding Amount {1} in {2}"
-					).format(
-						record.idx, frappe.bold(actual_outstanding), frappe.bold(record.sales_invoice)
-					)
+					).format(record.idx, frappe.bold(actual_outstanding), frappe.bold(record.sales_invoice))
 				)
 
 	def calculate_total_amount(self):
@@ -105,7 +103,9 @@ class InvoiceDiscounting(AccountsController):
 			self.status = status
 			self.db_set("status", status)
 			for d in self.invoices:
-				frappe.get_doc("Sales Invoice", d.sales_invoice).set_status(update=True, update_modified=False)
+				frappe.get_doc("Sales Invoice", d.sales_invoice).set_status(
+					update=True, update_modified=False
+				)
 		else:
 			self.status = "Draft"
 			if self.docstatus == 1:

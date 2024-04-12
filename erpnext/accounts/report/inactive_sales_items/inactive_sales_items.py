@@ -92,7 +92,6 @@ def get_data(filters):
 
 
 def get_sales_details(filters):
-	data = []
 	item_details_map = {}
 
 	date_field = "s.transaction_date" if filters["based_on"] == "Sales Order" else "s.posting_date"
@@ -116,7 +115,6 @@ def get_sales_details(filters):
 
 
 def get_territories(filters):
-
 	filter_dict = {}
 	if filters.get("territory"):
 		filter_dict.update({"name": filters["territory"]})

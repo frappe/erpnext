@@ -16,6 +16,7 @@
   "col_break1",
   "account_head",
   "description",
+  "is_tax_withholding_account",
   "section_break_10",
   "rate",
   "accounting_dimensions_section",
@@ -225,18 +226,27 @@
    "label": "Account Currency",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_tax_withholding_account",
+   "fieldtype": "Check",
+   "label": "Is Tax Withholding Account",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-01-14 10:04:36.618240",
+ "modified": "2024-04-08 19:51:36.678551",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
+ "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

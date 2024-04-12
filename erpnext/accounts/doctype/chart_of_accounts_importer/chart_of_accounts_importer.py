@@ -38,9 +38,7 @@ class ChartofAccountsImporter(Document):
 
 	def validate(self):
 		if self.import_file:
-			get_coa(
-				"Chart of Accounts Importer", "All Accounts", file_name=self.import_file, for_validate=1
-			)
+			get_coa("Chart of Accounts Importer", "All Accounts", file_name=self.import_file, for_validate=1)
 
 
 def validate_columns(data):
@@ -116,7 +114,7 @@ def generate_data_from_csv(file_doc, as_dict=False):
 	file_path = file_doc.get_full_path()
 
 	data = []
-	with open(file_path, "r") as in_file:
+	with open(file_path) as in_file:
 		csv_reader = list(csv.reader(in_file))
 		headers = csv_reader[0]
 		del csv_reader[0]  # delete top row and headers row
@@ -215,10 +213,10 @@ def build_forest(data):
 		for row in data:
 			account_name, parent_account, account_number, parent_account_number = row[0:4]
 			if account_number:
-				account_name = "{} - {}".format(account_number, account_name)
+				account_name = f"{account_number} - {account_name}"
 			if parent_account_number:
 				parent_account_number = cstr(parent_account_number).strip()
-				parent_account = "{} - {}".format(parent_account_number, parent_account)
+				parent_account = f"{parent_account_number} - {parent_account}"
 
 			if parent_account == account_name == child:
 				return [parent_account]
@@ -230,7 +228,7 @@ def build_forest(data):
 							frappe.bold(parent_account)
 						)
 					)
-				return [child] + parent_account_list
+				return [child, *parent_account_list]
 
 	charts_map, paths = {}, []
 
@@ -250,12 +248,12 @@ def build_forest(data):
 		) = i
 
 		if not account_name:
-			error_messages.append("Row {0}: Please enter Account Name".format(line_no))
+			error_messages.append(f"Row {line_no}: Please enter Account Name")
 
 		name = account_name
 		if account_number:
 			account_number = cstr(account_number).strip()
-			account_name = "{} - {}".format(account_number, account_name)
+			account_name = f"{account_number} - {account_name}"
 
 		charts_map[account_name] = {}
 		charts_map[account_name]["account_name"] = name
@@ -352,9 +350,9 @@ def get_template(template_type, company):
 
 def get_sample_template(writer, company):
 	currency = frappe.db.get_value("Company", company, "default_currency")
-	with open(os.path.join(os.path.dirname(__file__), "coa_sample_template.csv"), "r") as f:
+	with open(os.path.join(os.path.dirname(__file__), "coa_sample_template.csv")) as f:
 		for row in f:
-			row = row.strip().split(",") + [currency]
+			row = [*row.strip().split(","), currency]
 			writer.writerow(row)
 
 	return writer
@@ -463,7 +461,7 @@ def unset_existing_data(company):
 		"Purchase Taxes and Charges Template",
 	]:
 		frappe.db.sql(
-			'''delete from `tab{0}` where `company`="%s"'''.format(doctype) % (company)  # nosec
+			f'''delete from `tab{doctype}` where `company`="%s"''' % (company)  # nosec
 		)
 
 

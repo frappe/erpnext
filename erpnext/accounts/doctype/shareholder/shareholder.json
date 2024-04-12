@@ -113,7 +113,7 @@
   }
  ],
  "links": [],
- "modified": "2023-04-10 22:02:20.406087",
+ "modified": "2024-03-27 13:10:40.356171",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Shareholder",
@@ -158,7 +158,7 @@
   }
  ],
  "search_fields": "folio_no",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "title",

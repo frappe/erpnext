@@ -103,16 +103,15 @@ def get_entries(filters):
 	entries = frappe.db.sql(
 		"""
 		select
-			dt.name, dt.customer, dt.territory, dt.%s as posting_date,dt.base_net_total as base_net_amount,
+			dt.name, dt.customer, dt.territory, dt.{} as posting_date,dt.base_net_total as base_net_amount,
 			st.commission_rate,st.sales_person, st.allocated_percentage, st.allocated_amount, st.incentives
 		from
-			`tab%s` dt, `tabSales Team` st
+			`tab{}` dt, `tabSales Team` st
 		where
-			st.parent = dt.name and st.parenttype = %s
-			and dt.docstatus = 1 %s order by dt.name desc,st.sales_person
-		"""
-		% (date_field, filters["doc_type"], "%s", conditions),
-		tuple([filters["doc_type"]] + values),
+			st.parent = dt.name and st.parenttype = {}
+			and dt.docstatus = 1 {} order by dt.name desc,st.sales_person
+		""".format(date_field, filters["doc_type"], "%s", conditions),
+		tuple([filters["doc_type"], *values]),
 		as_dict=1,
 	)
 
@@ -125,18 +124,18 @@ def get_conditions(filters, date_field):
 
 	for field in ["company", "customer", "territory"]:
 		if filters.get(field):
-			conditions.append("dt.{0}=%s".format(field))
+			conditions.append(f"dt.{field}=%s")
 			values.append(filters[field])
 
 	if filters.get("sales_person"):
-		conditions.append("st.sales_person = '{0}'".format(filters.get("sales_person")))
+		conditions.append("st.sales_person = '{}'".format(filters.get("sales_person")))
 
 	if filters.get("from_date"):
-		conditions.append("dt.{0}>=%s".format(date_field))
+		conditions.append(f"dt.{date_field}>=%s")
 		values.append(filters["from_date"])
 
 	if filters.get("to_date"):
-		conditions.append("dt.{0}<=%s".format(date_field))
+		conditions.append(f"dt.{date_field}<=%s")
 		values.append(filters["to_date"])
 
 	return " and ".join(conditions), values

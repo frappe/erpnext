@@ -46,9 +46,7 @@ class ProcessStatementOfAccounts(Document):
 		company: DF.Link
 		cost_center: DF.TableMultiSelect[PSOACostCenter]
 		currency: DF.Link | None
-		customer_collection: DF.Literal[
-			"", "Customer Group", "Territory", "Sales Partner", "Sales Person"
-		]
+		customer_collection: DF.Literal["", "Customer Group", "Territory", "Sales Partner", "Sales Person"]
 		customers: DF.Table[ProcessStatementOfAccountsCustomer]
 		enable_auto_email: DF.Check
 		filter_duration: DF.Int
@@ -406,9 +404,7 @@ def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=Tr
 			{mcond}
 		ORDER BY
 			contact.creation desc
-		""".format(
-			mcond=get_match_cond("Contact")
-		),
+		""".format(mcond=get_match_cond("Contact")),
 		customer_name,
 	)
 
@@ -481,9 +477,7 @@ def send_emails(document_name, from_scheduler=False, posting_date=None):
 			else:
 				new_to_date = add_months(new_to_date, 1 if doc.frequency == "Monthly" else 3)
 			new_from_date = add_months(new_to_date, -1 * doc.filter_duration)
-			doc.add_comment(
-				"Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now())
-			)
+			doc.add_comment("Comment", "Emails sent on: " + frappe.utils.format_datetime(frappe.utils.now()))
 			if doc.report == "General Ledger":
 				doc.db_set("to_date", new_to_date, commit=True)
 				doc.db_set("from_date", new_from_date, commit=True)

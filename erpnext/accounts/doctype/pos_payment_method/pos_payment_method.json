@@ -37,13 +37,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-20 12:58:46.114456",
+ "modified": "2024-03-27 13:10:16.345262",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Payment Method",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

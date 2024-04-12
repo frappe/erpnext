@@ -511,7 +511,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-28 19:23:14.345214",
+ "modified": "2024-03-27 13:09:56.634418",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
@@ -564,7 +564,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "operation",

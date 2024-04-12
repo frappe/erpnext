@@ -35,7 +35,7 @@
    "link_fieldname": "quality_inspection_template"
   }
  ],
- "modified": "2020-04-26 20:13:02.810132",
+ "modified": "2024-03-27 13:10:29.303619",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Template",
@@ -90,7 +90,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

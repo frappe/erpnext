@@ -67,7 +67,6 @@ def get_columns(period_list):
 
 
 def get_ratios_data(filters, period_list, years):
-
 	data = []
 	assets, liabilities, income, expense = get_gl_data(filters, period_list, years)
 
@@ -113,9 +112,7 @@ def get_ratios_data(filters, period_list, years):
 	add_solvency_ratios(
 		data, years, total_asset, total_liability, net_sales, cogs, total_income, total_expense
 	)
-	add_turnover_ratios(
-		data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense
-	)
+	add_turnover_ratios(data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense)
 
 	return data
 
@@ -180,9 +177,7 @@ def add_solvency_ratios(
 		profit_after_tax = flt(total_income.get(year)) + flt(total_expense.get(year))
 		share_holder_fund = flt(total_asset.get(year)) - flt(total_liability.get(year))
 
-		debt_equity_ratio[year] = calculate_ratio(
-			total_liability.get(year), share_holder_fund, precision
-		)
+		debt_equity_ratio[year] = calculate_ratio(total_liability.get(year), share_holder_fund, precision)
 		return_on_equity_ratio[year] = calculate_ratio(profit_after_tax, share_holder_fund, precision)
 
 		net_profit_ratio[year] = calculate_ratio(profit_after_tax, net_sales.get(year), precision)
@@ -198,9 +193,7 @@ def add_solvency_ratios(
 	data.append(return_on_equity_ratio)
 
 
-def add_turnover_ratios(
-	data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense
-):
+def add_turnover_ratios(data, years, period_list, filters, total_asset, net_sales, cogs, direct_expense):
 	precision = frappe.db.get_single_value("System Settings", "float_precision")
 	data.append({"ratio": "Turnover Ratios"})
 
@@ -240,7 +233,6 @@ def update_balances(
 	net_dict=None,
 	total_net=0,
 ):
-
 	for entry in root_type_data:
 		if not entry.get("parent_account") and entry.get("is_group"):
 			total_dict[year] = entry[year]
@@ -283,9 +275,7 @@ def avg_ratio_balance(account_type, period_list, precision, filters):
 			company=filters.company,
 			account_type=account_type,
 		)
-		avg_ratio[period["key"]] = flt(
-			(flt(closing_balance) + flt(opening_balance)) / 2, precision=precision
-		)
+		avg_ratio[period["key"]] = flt((flt(closing_balance) + flt(opening_balance)) / 2, precision=precision)
 
 	return avg_ratio
 

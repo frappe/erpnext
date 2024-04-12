@@ -96,7 +96,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-28 16:54:26.571083",
+ "modified": "2024-03-27 13:06:35.116228",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement",
@@ -149,7 +149,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

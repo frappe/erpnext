@@ -70,7 +70,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-12-01 17:46:12.437996",
+ "modified": "2024-03-27 13:06:39.766063",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bisect Nodes",
@@ -91,7 +91,7 @@
   }
  ],
  "read_only": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

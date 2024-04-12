@@ -228,7 +228,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "read_only": 1
   },
@@ -462,7 +462,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -865,7 +865,7 @@
   },
   {
    "fieldname": "shipping_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address Details",
    "print_hide": 1,
    "read_only": 1
@@ -897,7 +897,7 @@
   },
   {
    "fieldname": "billing_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Billing Address Details",
    "read_only": 1
   },
@@ -928,7 +928,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-17 12:34:30.083077",
+ "modified": "2024-03-28 10:20:30.231915",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
@@ -991,7 +991,7 @@
  ],
  "search_fields": "status, transaction_date, supplier,grand_total",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",

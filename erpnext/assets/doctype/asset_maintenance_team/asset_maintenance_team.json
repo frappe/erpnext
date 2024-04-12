@@ -61,7 +61,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-01-22 15:09:03.347345",
+ "modified": "2024-03-27 13:06:34.976117",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance Team",
@@ -81,7 +81,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

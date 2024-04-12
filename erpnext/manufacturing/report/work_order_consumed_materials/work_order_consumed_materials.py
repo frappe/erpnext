@@ -22,7 +22,7 @@ def get_data(report_filters):
 	wo_items = {}
 
 	work_orders = frappe.get_all("Work Order", filters=filters, fields=fields)
-	returned_materials = get_returned_materials(work_orders)
+	get_returned_materials(work_orders)
 
 	for d in work_orders:
 		d.extra_consumed_qty = 0.0
@@ -33,7 +33,7 @@ def get_data(report_filters):
 			wo_items.setdefault((d.name, d.production_item), []).append(d)
 
 	data = []
-	for key, wo_data in wo_items.items():
+	for _key, wo_data in wo_items.items():
 		for index, row in enumerate(wo_data):
 			if index != 0:
 				# If one work order has multiple raw materials then show parent data in the first row only
