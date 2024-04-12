@@ -324,18 +324,8 @@ class SubcontractingReceipt(SubcontractingController):
 						"stock_value_difference",
 					)
 
-<<<<<<< HEAD
-					warehouse_account_name = warehouse_account[item.warehouse]["account"]
-					warehouse_account_currency = warehouse_account[item.warehouse]["account_currency"]
-					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get("account")
-					supplier_warehouse_account_currency = warehouse_account.get(self.supplier_warehouse, {}).get(
-						"account_currency"
-=======
 					accepted_warehouse_account = warehouse_account[item.warehouse]["account"]
-					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get(
-						"account"
->>>>>>> c2c4548cc0 (fix: Subcontracting Receipt GL Entries (backport #40773) (#40978))
-					)
+					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get("account")
 					remarks = self.get("remarks") or _("Accounting Entry for Stock")
 
 					# Accepted Warehouse Account (Debit)
@@ -407,9 +397,7 @@ class SubcontractingReceipt(SubcontractingController):
 						)
 
 					if divisional_loss := flt(item.amount - stock_value_diff, item.precision("amount")):
-						loss_account = self.get_company_default(
-							"stock_adjustment_account", ignore_validation=True
-						)
+						loss_account = self.get_company_default("stock_adjustment_account", ignore_validation=True)
 
 						# Loss Account (Credit)
 						self.add_gl_entry(
