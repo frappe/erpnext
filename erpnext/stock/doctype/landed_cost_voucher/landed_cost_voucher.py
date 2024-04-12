@@ -253,7 +253,7 @@ class LandedCostVoucher(Document):
 			doc.make_bundle_using_old_serial_batch_fields(via_landed_cost_voucher=True)
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			doc.make_gl_entries()
-			doc.repost_future_sle_and_gle()
+			doc.repost_future_sle_and_gle(via_landed_cost_voucher=True)
 
 	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
 		for item in self.get("items"):
