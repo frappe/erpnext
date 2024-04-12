@@ -10,7 +10,6 @@ from frappe.utils import add_days, cint, flt, today
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.accounts.utils import get_company_default
 from erpnext.controllers.sales_and_purchase_return import make_return_doc
 from erpnext.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
@@ -453,7 +452,6 @@ class TestSubcontractingReceipt(FrappeTestCase):
 		scr.cancel()
 		self.assertTrue(get_gl_entries("Subcontracting Receipt", scr.name))
 
-	@change_settings("Stock Settings", {"use_serial_batch_fields": 0})
 	def test_subcontracting_receipt_with_zero_service_cost(self):
 		warehouse = "Stores - TCP1"
 		service_items = [
