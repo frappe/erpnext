@@ -111,7 +111,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-11-25 20:39:19.973437",
+ "modified": "2024-03-27 13:10:27.240606",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Putaway Rule",
@@ -153,8 +153,9 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "item_code",
  "track_changes": 1
 }

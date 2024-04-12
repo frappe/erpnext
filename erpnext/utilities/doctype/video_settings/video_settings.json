@@ -36,7 +36,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-07 16:09:00.360668",
+ "modified": "2024-03-27 13:10:58.942609",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Video Settings",
@@ -54,7 +54,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

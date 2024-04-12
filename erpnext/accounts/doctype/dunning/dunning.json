@@ -185,7 +185,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "read_only": 1
   },
@@ -204,7 +204,7 @@
   },
   {
    "fieldname": "company_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Company Address Display",
    "read_only": 1
   },
@@ -381,7 +381,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-15 15:46:53.865712",
+ "modified": "2024-03-27 13:08:19.176146",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Dunning",
@@ -430,7 +430,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "title_field": "customer_name",

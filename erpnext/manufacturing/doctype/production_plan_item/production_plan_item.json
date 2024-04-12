@@ -220,14 +220,14 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-27 13:24:43.571844",
+ "modified": "2024-03-27 13:10:20.252166",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": []
 }

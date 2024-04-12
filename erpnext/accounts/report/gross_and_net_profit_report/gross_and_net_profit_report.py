@@ -49,9 +49,7 @@ def execute(filters=None):
 		total=False,
 	)
 
-	columns = get_columns(
-		filters.periodicity, period_list, filters.accumulated_values, filters.company
-	)
+	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 	gross_income = get_revenue(income, period_list)
 	gross_expense = get_revenue(expense, period_list)
@@ -119,9 +117,7 @@ def execute(filters=None):
 
 
 def get_revenue(data, period_list, include_in_gross=1):
-	revenue = [
-		item for item in data if item["include_in_gross"] == include_in_gross or item["is_group"] == 1
-	]
+	revenue = [item for item in data if item["include_in_gross"] == include_in_gross or item["is_group"] == 1]
 
 	data_to_be_removed = True
 	while data_to_be_removed:

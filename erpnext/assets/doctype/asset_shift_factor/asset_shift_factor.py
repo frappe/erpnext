@@ -25,9 +25,7 @@ class AssetShiftFactor(Document):
 
 	def validate_default(self):
 		if self.default:
-			existing_default_shift_factor = frappe.db.get_value(
-				"Asset Shift Factor", {"default": 1}, "name"
-			)
+			existing_default_shift_factor = frappe.db.get_value("Asset Shift Factor", {"default": 1}, "name")
 
 			if existing_default_shift_factor:
 				frappe.throw(

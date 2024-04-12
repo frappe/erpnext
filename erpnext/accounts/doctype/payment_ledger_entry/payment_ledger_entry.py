@@ -137,9 +137,9 @@ class PaymentLedgerEntry(Document):
 			):
 				if not self.get(dimension.fieldname):
 					frappe.throw(
-						_("Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}.").format(
-							dimension.label, self.account
-						)
+						_(
+							"Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}."
+						).format(dimension.label, self.account)
 					)
 
 			if (
@@ -150,9 +150,9 @@ class PaymentLedgerEntry(Document):
 			):
 				if not self.get(dimension.fieldname):
 					frappe.throw(
-						_("Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}.").format(
-							dimension.label, self.account
-						)
+						_(
+							"Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}."
+						).format(dimension.label, self.account)
 					)
 
 	def validate(self):
@@ -161,11 +161,12 @@ class PaymentLedgerEntry(Document):
 	def on_update(self):
 		adv_adj = self.flags.adv_adj
 		if not self.flags.from_repost:
-			self.validate_account_details()
-			self.validate_dimensions_for_pl_and_bs()
-			self.validate_allowed_dimensions()
-			validate_balance_type(self.account, adv_adj)
 			validate_frozen_account(self.account, adv_adj)
+			if not self.delinked:
+				self.validate_account_details()
+				self.validate_dimensions_for_pl_and_bs()
+				self.validate_allowed_dimensions()
+				validate_balance_type(self.account, adv_adj)
 
 		# update outstanding amount
 		if (

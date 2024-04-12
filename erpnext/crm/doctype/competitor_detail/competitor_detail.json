@@ -21,13 +21,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-10-21 10:34:58.841689",
+ "modified": "2024-03-27 13:06:46.068798",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Competitor Detail",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

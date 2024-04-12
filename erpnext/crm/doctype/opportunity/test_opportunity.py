@@ -4,7 +4,7 @@
 import unittest
 
 import frappe
-from frappe.utils import add_days, now_datetime, random_string, today
+from frappe.utils import now_datetime, random_string, today
 
 from erpnext.crm.doctype.lead.lead import make_customer
 from erpnext.crm.doctype.lead.test_lead import make_lead
@@ -32,9 +32,7 @@ class TestOpportunity(unittest.TestCase):
 
 		self.assertTrue(opp_doc.party_name)
 		self.assertEqual(opp_doc.opportunity_from, "Lead")
-		self.assertEqual(
-			frappe.db.get_value("Lead", opp_doc.party_name, "email_id"), opp_doc.contact_email
-		)
+		self.assertEqual(frappe.db.get_value("Lead", opp_doc.party_name, "email_id"), opp_doc.contact_email)
 
 		# create new customer and create new contact against 'new.opportunity@example.com'
 		customer = make_customer(opp_doc.party_name).insert(ignore_permissions=True)
@@ -64,9 +62,7 @@ class TestOpportunity(unittest.TestCase):
 		opportunity_comment_count = frappe.db.count(
 			"Comment", {"reference_doctype": opp_doc.doctype, "reference_name": opp_doc.name}
 		)
-		opportunity_communication_count = len(
-			get_linked_communication_list(opp_doc.doctype, opp_doc.name)
-		)
+		opportunity_communication_count = len(get_linked_communication_list(opp_doc.doctype, opp_doc.name))
 		self.assertEqual(opportunity_comment_count, 2)
 		self.assertEqual(opportunity_communication_count, 2)
 
@@ -77,7 +73,7 @@ class TestOpportunity(unittest.TestCase):
 
 
 def make_opportunity_from_lead():
-	new_lead_email_id = "new{}@example.com".format(random_string(5))
+	new_lead_email_id = f"new{random_string(5)}@example.com"
 	args = {
 		"doctype": "Opportunity",
 		"contact_email": new_lead_email_id,
@@ -126,9 +122,7 @@ def make_opportunity(**args):
 	return opp_doc
 
 
-def create_communication(
-	reference_doctype, reference_name, sender, sent_or_received=None, creation=None
-):
+def create_communication(reference_doctype, reference_name, sender, sent_or_received=None, creation=None):
 	communication = frappe.get_doc(
 		{
 			"doctype": "Communication",

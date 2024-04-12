@@ -203,9 +203,7 @@ class TestGeneralLedger(FrappeTestCase):
 		revaluation.extend("accounts", accounts)
 		row = revaluation.accounts[0]
 		row.new_exchange_rate = 83
-		row.new_balance_in_base_currency = flt(
-			row.new_exchange_rate * flt(row.balance_in_account_currency)
-		)
+		row.new_balance_in_base_currency = flt(row.new_exchange_rate * flt(row.balance_in_account_currency))
 		row.gain_loss = row.new_balance_in_base_currency - flt(row.balance_in_base_currency)
 		revaluation.set_total_gain_loss()
 		revaluation = revaluation.save().submit()

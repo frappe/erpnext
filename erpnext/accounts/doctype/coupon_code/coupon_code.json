@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "field:coupon_name",
  "creation": "2018-01-22 14:34:39.701832",
@@ -115,7 +116,8 @@
    "read_only": 1
   }
  ],
- "modified": "2024-01-24 02:20:26.145996",
+ "links": [],
+ "modified": "2024-03-27 13:06:47.220931",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Coupon Code",
@@ -170,8 +172,9 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "coupon_name",
  "track_changes": 1
 }

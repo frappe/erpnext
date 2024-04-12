@@ -14,30 +14,27 @@
    "fieldtype": "Link",
    "label": "Accounting Dimension",
    "options": "DocType",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "dimension_value",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "options": "accounting_dimension",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "accounting_dimension"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-23 09:56:19.744200",
+ "modified": "2024-03-27 13:05:58.587487",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Allowed Dimension",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

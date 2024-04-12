@@ -176,7 +176,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-28 18:01:37.341619",
+ "modified": "2024-03-27 13:10:08.149919",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Packing Slip",
@@ -256,7 +256,7 @@
  ],
  "search_fields": "delivery_note",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

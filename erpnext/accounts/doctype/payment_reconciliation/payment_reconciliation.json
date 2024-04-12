@@ -230,7 +230,7 @@
  "is_virtual": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-01-18 11:56:20.234667",
+ "modified": "2024-03-27 13:10:10.488007",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
@@ -253,7 +253,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

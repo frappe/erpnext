@@ -169,9 +169,7 @@ class AssetRepair(AccountsController):
 
 	def check_for_stock_items_and_warehouse(self):
 		if not self.get("stock_items"):
-			frappe.throw(
-				_("Please enter Stock Items consumed during the Repair."), title=_("Missing Items")
-			)
+			frappe.throw(_("Please enter Stock Items consumed during the Repair."), title=_("Missing Items"))
 		if not self.warehouse:
 			frappe.throw(
 				_("Please enter Warehouse from which Stock Items consumed during the Repair were taken."),
@@ -263,9 +261,7 @@ class AssetRepair(AccountsController):
 	def get_gl_entries(self):
 		gl_entries = []
 
-		fixed_asset_account = get_asset_account(
-			"fixed_asset_account", asset=self.asset, company=self.company
-		)
+		fixed_asset_account = get_asset_account("fixed_asset_account", asset=self.asset, company=self.company)
 		self.get_gl_entries_for_repair_cost(gl_entries, fixed_asset_account)
 		self.get_gl_entries_for_consumed_items(gl_entries, fixed_asset_account)
 

@@ -28,7 +28,6 @@ def create_stock_entry_types():
 		"Repack",
 		"Send to Subcontractor",
 	]:
-
 		ste_type = frappe.get_doc({"doctype": "Stock Entry Type", "name": purpose, "purpose": purpose})
 
 		try:

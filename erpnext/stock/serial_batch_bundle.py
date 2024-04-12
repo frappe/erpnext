@@ -1,5 +1,4 @@
 from collections import defaultdict
-from typing import List
 
 import frappe
 from frappe import _, bold
@@ -130,13 +129,14 @@ class SerialBatchBundle:
 			frappe.throw(_(error_msg))
 
 	def set_serial_and_batch_bundle(self, sn_doc):
-		self.sle.db_set(
-			{"serial_and_batch_bundle": sn_doc.name, "auto_created_serial_and_batch_bundle": 1}
-		)
+		self.sle.db_set({"serial_and_batch_bundle": sn_doc.name, "auto_created_serial_and_batch_bundle": 1})
 
 		if sn_doc.is_rejected:
 			frappe.db.set_value(
-				self.child_doctype, self.sle.voucher_detail_no, "rejected_serial_and_batch_bundle", sn_doc.name
+				self.child_doctype,
+				self.sle.voucher_detail_no,
+				"rejected_serial_and_batch_bundle",
+				sn_doc.name,
 			)
 		else:
 			values_to_update = {
@@ -157,9 +157,7 @@ class SerialBatchBundle:
 	def child_doctype(self):
 		child_doctype = self.sle.voucher_type + " Item"
 
-		if (
-			self.sle.voucher_type == "Subcontracting Receipt" and self.sle.dependant_sle_voucher_detail_no
-		):
+		if self.sle.voucher_type == "Subcontracting Receipt" and self.sle.dependant_sle_voucher_detail_no:
 			child_doctype = "Subcontracting Receipt Supplied Item"
 
 		if self.sle.voucher_type == "Stock Entry":
@@ -343,9 +341,7 @@ def get_serial_nos(serial_and_batch_bundle, serial_nos=None):
 	if serial_nos:
 		filters["serial_no"] = ("in", serial_nos)
 
-	entries = frappe.get_all(
-		"Serial and Batch Entry", fields=["serial_no"], filters=filters, order_by="idx"
-	)
+	entries = frappe.get_all("Serial and Batch Entry", fields=["serial_no"], filters=filters, order_by="idx")
 	if not entries:
 		return []
 
@@ -497,9 +493,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 				# else it remains the same as that of previous entry
 				self.wh_data.valuation_rate = new_stock_value / new_stock_qty
 
-		if (
-			not self.wh_data.valuation_rate and self.sle.voucher_detail_no and not self.is_rejected_entry()
-		):
+		if not self.wh_data.valuation_rate and self.sle.voucher_detail_no and not self.is_rejected_entry():
 			allow_zero_rate = self.sle_self.check_if_allow_zero_valuation_rate(
 				self.sle.voucher_type, self.sle.voucher_detail_no
 			)
@@ -507,9 +501,7 @@ class SerialNoValuation(DeprecatedSerialNoValuation):
 				self.wh_data.valuation_rate = self.sle_self.get_fallback_rate(self.sle)
 
 		self.wh_data.qty_after_transaction += self.sle.actual_qty
-		self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(
-			self.wh_data.valuation_rate
-		)
+		self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(self.wh_data.valuation_rate)
 
 	def is_rejected_entry(self):
 		return is_rejected(self.sle.voucher_type, self.sle.voucher_detail_no, self.sle.warehouse)
@@ -560,7 +552,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			self.calculate_avg_rate_for_non_batchwise_valuation()
 			self.set_stock_value_difference()
 
-	def get_batch_no_ledgers(self) -> List[dict]:
+	def get_batch_no_ledgers(self) -> list[dict]:
 		if not self.batchwise_valuation_batches:
 			return []
 
@@ -620,9 +612,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		for batch in batches:
 			self.batchwise_valuation_batches.append(batch.name)
 
-		self.non_batchwise_valuation_batches = list(
-			set(self.batches) - set(self.batchwise_valuation_batches)
-		)
+		self.non_batchwise_valuation_batches = list(set(self.batches) - set(self.batchwise_valuation_batches))
 
 	def get_batch_nos(self) -> list:
 		if self.sle.get("batch_nos"):
@@ -659,9 +649,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 		if not hasattr(self, "wh_data"):
 			return
 
-		self.wh_data.stock_value = round_off_if_near_zero(
-			self.wh_data.stock_value + self.stock_value_change
-		)
+		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + self.stock_value_change)
 
 		self.wh_data.qty_after_transaction += self.sle.actual_qty
 		if self.wh_data.qty_after_transaction:
@@ -796,17 +784,17 @@ class SerialBatchCreation:
 
 	def set_other_details(self):
 		if not self.get("posting_date"):
-			setattr(self, "posting_date", today())
+			self.posting_date = today()
 			self.__dict__["posting_date"] = self.posting_date
 
 		if not self.get("actual_qty"):
 			qty = self.get("qty") or self.get("total_qty")
 
-			setattr(self, "actual_qty", qty)
+			self.actual_qty = qty
 			self.__dict__["actual_qty"] = self.actual_qty
 
 		if not hasattr(self, "use_serial_batch_fields"):
-			setattr(self, "use_serial_batch_fields", 0)
+			self.use_serial_batch_fields = 0
 
 	def duplicate_package(self):
 		if not self.serial_and_batch_bundle:
@@ -856,6 +844,9 @@ class SerialBatchCreation:
 		if not doc.get("entries"):
 			return frappe._dict({})
 
+		if doc.voucher_no and frappe.get_cached_value(doc.voucher_type, doc.voucher_no, "docstatus") == 2:
+			doc.voucher_no = ""
+
 		doc.save()
 		self.validate_qty(doc)
 
@@ -888,11 +879,11 @@ class SerialBatchCreation:
 		return doc
 
 	def validate_qty(self, doc):
-		if doc.type_of_transaction == "Outward":
+		if doc.type_of_transaction == "Outward" and self.actual_qty and doc.total_qty:
 			precision = doc.precision("total_qty")
 
-			total_qty = abs(flt(doc.total_qty, precision))
-			required_qty = abs(flt(self.actual_qty, precision))
+			total_qty = flt(abs(doc.total_qty), precision)
+			required_qty = flt(abs(self.actual_qty), precision)
 
 			if required_qty - total_qty > 0:
 				msg = f"For the item {bold(doc.item_code)}, the Avaliable qty {bold(total_qty)} is less than the Required Qty {bold(required_qty)} in the warehouse {bold(doc.warehouse)}. Please add sufficient qty in the warehouse."
@@ -920,9 +911,7 @@ class SerialBatchCreation:
 			self.batches = get_available_batches(kwargs)
 
 	def set_auto_serial_batch_entries_for_inward(self):
-		if (self.get("batches") and self.has_batch_no) or (
-			self.get("serial_nos") and self.has_serial_no
-		):
+		if (self.get("batches") and self.has_batch_no) or (self.get("serial_nos") and self.has_serial_no):
 			if self.use_serial_batch_fields and self.get("serial_nos"):
 				self.make_serial_no_if_not_exists()
 
@@ -950,7 +939,7 @@ class SerialBatchCreation:
 		serial_nos_details = []
 		batch_no = None
 		if self.batches:
-			batch_no = list(self.batches.keys())[0]
+			batch_no = next(iter(self.batches.keys()))
 
 		for serial_no in serial_nos:
 			serial_nos_details.append(
@@ -1040,7 +1029,7 @@ class SerialBatchCreation:
 			msg = f"Please set Serial No Series in the item {self.item_code} or create Serial and Batch Bundle manually."
 			frappe.throw(_(msg))
 
-		for i in range(abs(cint(self.actual_qty))):
+		for _i in range(abs(cint(self.actual_qty))):
 			serial_no = make_autoname(self.serial_no_series, "Serial No")
 			sr_nos.append(serial_no)
 			serial_nos_details.append(

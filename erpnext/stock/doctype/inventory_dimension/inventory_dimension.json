@@ -189,7 +189,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-10-05 12:52:18.705431",
+ "modified": "2024-03-27 13:09:52.561725",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",
@@ -233,7 +233,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

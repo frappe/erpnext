@@ -28,9 +28,7 @@ def execute():
 	results = query.run(as_dict=True)
 
 	for row in results:
-		so_item = frappe.get_value(
-			"Material Request Item", row.material_request_item, "sales_order_item"
-		)
+		so_item = frappe.get_value("Material Request Item", row.material_request_item, "sales_order_item")
 		frappe.db.set_value("Work Order", row.name, "sales_order_item", so_item)
 
 		if so_item:

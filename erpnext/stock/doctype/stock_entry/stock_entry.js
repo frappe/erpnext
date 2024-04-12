@@ -408,12 +408,26 @@ frappe.ui.form.on("Stock Entry", {
 			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 		}
 
+		frm.events.set_route_options_for_new_doc(frm);
+	},
+
+	set_route_options_for_new_doc(frm) {
+		let batch_no_field = frm.get_docfield("items", "batch_no");
+		if (batch_no_field) {
+			batch_no_field.get_route_options_for_new_doc = function (row) {
+				return {
+					item: row.doc.item_code,
+				};
+			};
+		}
+
 		let sbb_field = frm.get_docfield("items", "serial_and_batch_bundle");
 		if (sbb_field) {
 			sbb_field.get_route_options_for_new_doc = (row) => {
 				return {
 					item_code: row.doc.item_code,
 					voucher_type: frm.doc.doctype,
+					warehouse: row.doc.s_warehouse || row.doc.t_warehouse,
 				};
 			};
 		}
@@ -1081,7 +1095,9 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 			cint(frappe.user_defaults?.use_serial_batch_fields) === 1
 		) {
 			this.frm.doc.items.forEach((item) => {
-				frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
+				if (!item.serial_and_batch_bundle) {
+					frappe.model.set_value(item.doctype, item.name, "use_serial_batch_fields", 1);
+				}
 			});
 		}
 	}
@@ -1319,18 +1335,16 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 			item.has_batch_no = r.message.has_batch_no;
 			item.type_of_transaction = item.s_warehouse ? "Outward" : "Inward";
 
-			frappe.require(path, function () {
-				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
-					if (r) {
-						frappe.model.set_value(item.doctype, item.name, {
-							serial_and_batch_bundle: r.name,
-							use_serial_batch_fields: 0,
-							qty:
-								Math.abs(r.total_qty) /
-								flt(item.conversion_factor || 1, precision("conversion_factor", item)),
-						});
-					}
-				});
+			new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
+				if (r) {
+					frappe.model.set_value(item.doctype, item.name, {
+						serial_and_batch_bundle: r.name,
+						use_serial_batch_fields: 0,
+						qty:
+							Math.abs(r.total_qty) /
+							flt(item.conversion_factor || 1, precision("conversion_factor", item)),
+					});
+				}
 			});
 		}
 	});

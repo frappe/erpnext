@@ -59,7 +59,7 @@ class BOMCreator(Document):
 		qty: DF.Float
 		raw_material_cost: DF.Currency
 		remarks: DF.TextEditor | None
-		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List", "Manual"]
+		rm_cost_as_per: DF.Literal["Valuation Rate", "Last Purchase Rate", "Price List"]
 		set_rate_based_on_warehouse: DF.Check
 		status: DF.Literal["Draft", "Submitted", "In Progress", "Completed", "Failed", "Cancelled"]
 		uom: DF.Link | None
@@ -101,9 +101,7 @@ class BOMCreator(Document):
 				has_completed = False
 				break
 
-		if not frappe.get_cached_value(
-			"BOM", {"bom_creator": self.name, "item": self.item_code}, "name"
-		):
+		if not frappe.get_cached_value("BOM", {"bom_creator": self.name, "item": self.item_code}, "name"):
 			has_completed = False
 
 		if has_completed:
@@ -143,9 +141,6 @@ class BOMCreator(Document):
 		self.submit()
 
 	def set_rate_for_items(self):
-		if self.rm_cost_as_per == "Manual":
-			return
-
 		amount = self.get_raw_material_cost()
 		self.raw_material_cost = amount
 
@@ -237,8 +232,12 @@ class BOMCreator(Document):
 			if row.is_expandable:
 				if (row.item_code, row.name) not in production_item_wise_rm:
 					production_item_wise_rm.setdefault(
-						(row.item_code, row.name), frappe._dict({"items": [], "bom_no": "", "fg_item_data": row})
+						(row.item_code, row.name),
+						frappe._dict({"items": [], "bom_no": "", "fg_item_data": row}),
 					)
+
+			if not row.fg_reference_id and production_item_wise_rm.get((row.fg_item, row.fg_reference_id)):
+				frappe.throw(_("Please set Parent Row No for item {0}").format(row.fg_item))
 
 			production_item_wise_rm[(row.fg_item, row.fg_reference_id)]["items"].append(row)
 
@@ -283,7 +282,6 @@ class BOMCreator(Document):
 				"allow_alternative_item": 1,
 				"bom_creator": self.name,
 				"bom_creator_item": bom_creator_item,
-				"rm_cost_as_per": "Manual",
 			}
 		)
 
@@ -404,7 +402,6 @@ def add_sub_assembly(**kwargs):
 				"conversion_factor": 1,
 				"fg_reference_id": name,
 				"stock_qty": bom_item.qty,
-				"fg_reference_id": name,
 				"do_not_explode": 1,
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,

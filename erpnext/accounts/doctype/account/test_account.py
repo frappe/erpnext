@@ -261,28 +261,20 @@ class TestAccount(unittest.TestCase):
 		acc.insert()
 
 		self.assertTrue(
-			frappe.db.exists(
-				"Account", {"account_name": "Test Group Account", "company": "_Test Company 4"}
-			)
+			frappe.db.exists("Account", {"account_name": "Test Group Account", "company": "_Test Company 4"})
 		)
 		self.assertTrue(
-			frappe.db.exists(
-				"Account", {"account_name": "Test Group Account", "company": "_Test Company 5"}
-			)
+			frappe.db.exists("Account", {"account_name": "Test Group Account", "company": "_Test Company 5"})
 		)
 
 		# Try renaming child company account
 		acc_tc_5 = frappe.db.get_value(
 			"Account", {"account_name": "Test Group Account", "company": "_Test Company 5"}
 		)
-		self.assertRaises(
-			frappe.ValidationError, update_account_number, acc_tc_5, "Test Modified Account"
-		)
+		self.assertRaises(frappe.ValidationError, update_account_number, acc_tc_5, "Test Modified Account")
 
 		# Rename child company account with allow_account_creation_against_child_company enabled
-		frappe.db.set_value(
-			"Company", "_Test Company 5", "allow_account_creation_against_child_company", 1
-		)
+		frappe.db.set_value("Company", "_Test Company 5", "allow_account_creation_against_child_company", 1)
 
 		update_account_number(acc_tc_5, "Test Modified Account")
 		self.assertTrue(
@@ -291,9 +283,7 @@ class TestAccount(unittest.TestCase):
 			)
 		)
 
-		frappe.db.set_value(
-			"Company", "_Test Company 5", "allow_account_creation_against_child_company", 0
-		)
+		frappe.db.set_value("Company", "_Test Company 5", "allow_account_creation_against_child_company", 0)
 
 		to_delete = [
 			"Test Group Account - _TC3",
@@ -318,9 +308,7 @@ class TestAccount(unittest.TestCase):
 		self.assertEqual(acc.account_currency, "INR")
 
 		# Make a JV against this account
-		make_journal_entry(
-			"Test Currency Account - _TC", "Miscellaneous Expenses - _TC", 100, submit=True
-		)
+		make_journal_entry("Test Currency Account - _TC", "Miscellaneous Expenses - _TC", 100, submit=True)
 
 		acc.account_currency = "USD"
 		self.assertRaises(frappe.ValidationError, acc.save)

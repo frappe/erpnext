@@ -7,7 +7,7 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Sum
 
 
-class General_Payment_Ledger_Comparison(object):
+class General_Payment_Ledger_Comparison:
 	"""
 	A Utility report to compare Voucher-wise balance between General and Payment Ledger
 	"""
@@ -58,10 +58,9 @@ class General_Payment_Ledger_Comparison(object):
 
 		for acc_type, val in self.account_types.items():
 			if val.accounts:
-
 				filter_criterion = []
 				if self.filters.voucher_no:
-					filter_criterion.append((gle.voucher_no == self.filters.voucher_no))
+					filter_criterion.append(gle.voucher_no == self.filters.voucher_no)
 
 				if self.filters.period_start_date:
 					filter_criterion.append(gle.posting_date.gte(self.filters.period_start_date))
@@ -102,10 +101,9 @@ class General_Payment_Ledger_Comparison(object):
 
 		for acc_type, val in self.account_types.items():
 			if val.accounts:
-
 				filter_criterion = []
 				if self.filters.voucher_no:
-					filter_criterion.append((ple.voucher_no == self.filters.voucher_no))
+					filter_criterion.append(ple.voucher_no == self.filters.voucher_no)
 
 				if self.filters.period_start_date:
 					filter_criterion.append(ple.posting_date.gte(self.filters.period_start_date))
@@ -141,7 +139,7 @@ class General_Payment_Ledger_Comparison(object):
 		self.ple_balances = set()
 
 		# consolidate both receivable and payable balances in one set
-		for acc_type, val in self.account_types.items():
+		for _acc_type, val in self.account_types.items():
 			self.gle_balances = set(val.gle) | self.gle_balances
 			self.ple_balances = set(val.ple) | self.ple_balances
 
@@ -177,7 +175,6 @@ class General_Payment_Ledger_Comparison(object):
 
 	def get_columns(self):
 		self.columns = []
-		options = None
 		self.columns.append(
 			dict(
 				label=_("Company"),

@@ -63,7 +63,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.delete()
 
 	def test_reverse_purchase_receipt_sle(self):
-
 		pr = make_purchase_receipt(qty=0.5, item_code="_Test Item Home Desktop 200")
 
 		sl_entry = frappe.db.get_all(
@@ -150,9 +149,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pi.delete()  # draft PI
 		pr.cancel()
 		frappe.db.set_value("Supplier", "_Test Supplier", "payment_terms", old_template_in_supplier)
-		frappe.get_doc(
-			"Payment Terms Template", "_Test Payment Terms Template For Purchase Invoice"
-		).delete()
+		frappe.get_doc("Payment Terms Template", "_Test Payment Terms Template For Purchase Invoice").delete()
 
 	def test_purchase_receipt_no_gl_entry(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -220,7 +217,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_duplicate_serial_nos(self):
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 		item = frappe.db.exists("Item", {"item_name": "Test Serialized Item 123"})
 		if not item:
@@ -243,7 +239,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		serial_nos = get_serial_nos_from_bundle(bundle_id)
 
-		self.assertEquals(get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle), serial_nos)
+		self.assertEqual(get_serial_nos_from_bundle(pr.items[0].serial_and_batch_bundle), serial_nos)
 
 		bundle_id = make_serial_batch_bundle(
 			frappe._dict(
@@ -266,7 +262,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		# Then made delivery note to remove the serial nos from stock
 		dn = create_delivery_note(item_code=item.name, qty=2, rate=1500, serial_no=serial_nos)
 		dn.load_from_db()
-		self.assertEquals(get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), serial_nos)
+		self.assertEqual(get_serial_nos_from_bundle(dn.items[0].serial_and_batch_bundle), serial_nos)
 
 		posting_date = add_days(today(), -3)
 
@@ -393,13 +389,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 				frappe.db.get_value("Serial No", serial_no, "warehouse"), pr.get("items")[0].warehouse
 			)
 
-		rejected_serial_nos = get_serial_nos_from_bundle(
-			pr.get("items")[0].rejected_serial_and_batch_bundle
-		)
+		rejected_serial_nos = get_serial_nos_from_bundle(pr.get("items")[0].rejected_serial_and_batch_bundle)
 		self.assertEqual(len(rejected_serial_nos), 2)
 		for serial_no in rejected_serial_nos:
 			self.assertEqual(
-				frappe.db.get_value("Serial No", serial_no, "warehouse"), pr.get("items")[0].rejected_warehouse
+				frappe.db.get_value("Serial No", serial_no, "warehouse"),
+				pr.get("items")[0].rejected_warehouse,
 			)
 
 		pr.cancel()
@@ -614,8 +609,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 			for field, value in field_values.items():
 				self.assertEqual(cstr(serial_no.get(field)), value)
 
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
 
 		serial_no = get_serial_nos_from_bundle(pr.get("items")[0].serial_and_batch_bundle)[0]
@@ -733,7 +726,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		po.cancel()
 
 	def test_serial_no_against_purchase_receipt(self):
-
 		item_code = "Test Manual Created Serial No"
 		if not frappe.db.exists("Item", item_code):
 			make_item(item_code, dict(has_serial_no=1))
@@ -884,7 +876,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			"Stock Received But Not Billed - TCP1": {"cost_center": cost_center},
 			stock_in_hand_account: {"cost_center": cost_center},
 		}
-		for i, gle in enumerate(gl_entries):
+		for _i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		pr.cancel()
@@ -909,7 +901,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			"Stock Received But Not Billed - TCP1": {"cost_center": cost_center},
 			stock_in_hand_account: {"cost_center": cost_center},
 		}
-		for i, gle in enumerate(gl_entries):
+		for _i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 		pr.cancel()
@@ -1190,9 +1182,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.submit()
 
 		# Get exchnage gain and loss account
-		exchange_gain_loss_account = frappe.db.get_value(
-			"Company", pr.company, "exchange_gain_loss_account"
-		)
+		exchange_gain_loss_account = frappe.db.get_value("Company", pr.company, "exchange_gain_loss_account")
 
 		# fetching the latest GL Entry with exchange gain and loss account account
 		amount = frappe.db.get_value(
@@ -1249,9 +1239,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		account = "Stock Received But Not Billed - TCP1"
 
 		make_item(item_code)
-		se = make_stock_entry(
-			item_code=item_code, from_warehouse=warehouse, qty=50, do_not_save=True, rate=0
-		)
+		se = make_stock_entry(item_code=item_code, from_warehouse=warehouse, qty=50, do_not_save=True, rate=0)
 		se.items[0].allow_zero_valuation_rate = 1
 		se.save()
 		se.submit()
@@ -1697,7 +1685,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		# Step 4: Create Internal Purchase Receipt
-		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
@@ -1847,7 +1834,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		# Step 4: Create Internal Purchase Receipt
-		from erpnext.controllers.status_updater import OverAllowanceError
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
@@ -2200,9 +2186,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 		gl_entries = get_gl_entries(pr_return.doctype, pr_return.name)
 
 		# Test - 1: SLE Stock Value Difference should be equal to Qty * Average Rate
-		average_rate = (
-			(se.items[0].qty * se.items[0].basic_rate) + (pr.items[0].qty * pr.items[0].rate)
-		) / (se.items[0].qty + pr.items[0].qty)
+		average_rate = ((se.items[0].qty * se.items[0].basic_rate) + (pr.items[0].qty * pr.items[0].rate)) / (
+			se.items[0].qty + pr.items[0].qty
+		)
 		expected_stock_value_difference = pr_return.items[0].qty * average_rate
 		self.assertEqual(
 			flt(sl_entries[0].stock_value_difference, 2), flt(expected_stock_value_difference, 2)
@@ -2344,7 +2330,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			do_not_save=1,
 		)
 
-		for i in range(9):
+		for _i in range(9):
 			pr.append(
 				"items",
 				{
@@ -2384,7 +2370,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			do_not_save=1,
 		)
 
-		for i in range(9):
+		for _i in range(9):
 			pr.append(
 				"items",
 				{
@@ -2678,7 +2664,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 				self.assertEqual(row.rate, 250.0)
 				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 				for sn in serial_nos:
-					serial_no_details = frappe.db.get_value("Serial No", sn, ["status", "warehouse"], as_dict=1)
+					serial_no_details = frappe.db.get_value(
+						"Serial No", sn, ["status", "warehouse"], as_dict=1
+					)
 					self.assertTrue(serial_no_details.status == "Active")
 					self.assertEqual(serial_no_details.warehouse, "Work In Progress - TCP1")
 
@@ -2815,7 +2803,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 				self.assertEqual(row.rate, 250.0)
 				serial_nos = get_serial_nos_from_bundle(row.serial_and_batch_bundle)
 				for sn in serial_nos:
-					serial_no_details = frappe.db.get_value("Serial No", sn, ["status", "warehouse"], as_dict=1)
+					serial_no_details = frappe.db.get_value(
+						"Serial No", sn, ["status", "warehouse"], as_dict=1
+					)
 					self.assertTrue(serial_no_details.status == "Active")
 					self.assertEqual(serial_no_details.warehouse, "Work In Progress - TCP1")
 
@@ -2890,7 +2880,6 @@ def get_gl_entries(voucher_type, voucher_no):
 
 
 def get_taxes(**args):
-
 	args = frappe._dict(args)
 
 	return [
@@ -3035,14 +3024,13 @@ def make_purchase_receipt(**args):
 			"rejected_warehouse": args.rejected_warehouse or "_Test Rejected Warehouse - _TC"
 			if rejected_qty != 0
 			else "",
-			"rate": args.rate if args.rate != None else 50,
+			"rate": args.rate if args.rate is not None else 50,
 			"conversion_factor": args.conversion_factor or 1.0,
 			"stock_qty": flt(qty) * (flt(args.conversion_factor) or 1.0),
 			"serial_and_batch_bundle": bundle_id,
 			"stock_uom": args.stock_uom or "_Test UOM",
 			"uom": uom,
-			"cost_center": args.cost_center
-			or frappe.get_cached_value("Company", pr.company, "cost_center"),
+			"cost_center": args.cost_center or frappe.get_cached_value("Company", pr.company, "cost_center"),
 			"asset_location": args.location or "Test Location",
 			"use_serial_batch_fields": args.use_serial_batch_fields or 0,
 			"serial_no": args.serial_no if args.use_serial_batch_fields else "",

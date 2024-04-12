@@ -48,7 +48,7 @@ frappe.ui.form.on("Asset", {
 					method: "erpnext.assets.doctype.asset.asset.make_asset_movement",
 					freeze: true,
 					args: {
-						assets: [{ name: cur_frm.doc.name }],
+						assets: [{ name: frm.doc.name }],
 					},
 					callback: function (r) {
 						if (r.message) {
@@ -79,7 +79,7 @@ frappe.ui.form.on("Asset", {
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 
 		if (frm.doc.docstatus == 1) {
-			if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
+			if (["Submitted", "Partially Depreciated", "Fully Depreciated"].includes(frm.doc.status)) {
 				frm.add_custom_button(
 					__("Transfer Asset"),
 					function () {
@@ -365,7 +365,7 @@ frappe.ui.form.on("Asset", {
 				if (v.journal_entry) {
 					asset_values.push(asset_value);
 				} else {
-					if (in_list(["Scrapped", "Sold"], frm.doc.status)) {
+					if (["Scrapped", "Sold"].includes(frm.doc.status)) {
 						asset_values.push(null);
 					} else {
 						asset_values.push(asset_value);
@@ -400,7 +400,7 @@ frappe.ui.form.on("Asset", {
 			});
 		}
 
-		if (in_list(["Scrapped", "Sold"], frm.doc.status)) {
+		if (["Scrapped", "Sold"].includes(frm.doc.status)) {
 			x_intervals.push(frappe.format(frm.doc.disposal_date, { fieldtype: "Date" }));
 			asset_values.push(0);
 		}
@@ -791,9 +791,7 @@ erpnext.asset.scrap_asset = function (frm) {
 				asset_name: frm.doc.name,
 			},
 			method: "erpnext.assets.doctype.asset.depreciation.scrap_asset",
-			callback: function (r) {
-				cur_frm.reload_doc();
-			},
+			callback: (r) => frm.reload_doc(),
 		});
 	});
 };
@@ -805,19 +803,17 @@ erpnext.asset.restore_asset = function (frm) {
 				asset_name: frm.doc.name,
 			},
 			method: "erpnext.assets.doctype.asset.depreciation.restore_asset",
-			callback: function (r) {
-				cur_frm.reload_doc();
-			},
+			callback: (r) => frm.reload_doc(),
 		});
 	});
 };
 
-erpnext.asset.transfer_asset = function () {
+erpnext.asset.transfer_asset = function (frm) {
 	frappe.call({
 		method: "erpnext.assets.doctype.asset.asset.make_asset_movement",
 		freeze: true,
 		args: {
-			assets: [{ name: cur_frm.doc.name }],
+			assets: [{ name: frm.doc.name }],
 			purpose: "Transfer",
 		},
 		callback: function (r) {

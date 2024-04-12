@@ -48,7 +48,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-18 17:57:23.835236",
+ "modified": "2024-03-27 13:10:05.597711",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Mode of Payment",
@@ -72,6 +72,7 @@
  ],
  "quick_entry": 1,
  "show_name_in_global_search": 1,
- "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_field": "creation",
+ "sort_order": "ASC",
+ "states": []
 }

@@ -45,12 +45,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-25 10:27:51.712286",
+ "modified": "2024-03-27 13:05:58.308002",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Tax",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

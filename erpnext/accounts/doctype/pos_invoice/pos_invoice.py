@@ -47,7 +47,7 @@ class POSInvoice(SalesInvoice):
 
 		account_for_change_amount: DF.Link | None
 		additional_discount_percentage: DF.Float
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		advances: DF.Table[SalesInvoiceAdvance]
 		against_income_account: DF.SmallText | None
 		allocate_advances_automatically: DF.Check
@@ -72,7 +72,7 @@ class POSInvoice(SalesInvoice):
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
-		company_address_display: DF.SmallText | None
+		company_address_display: DF.TextEditor | None
 		consolidated_invoice: DF.Link | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
@@ -109,7 +109,7 @@ class POSInvoice(SalesInvoice):
 		loyalty_redemption_cost_center: DF.Link | None
 		naming_series: DF.Literal["ACC-PSINV-.YYYY.-"]
 		net_total: DF.Currency
-		other_charges_calculation: DF.LongText | None
+		other_charges_calculation: DF.TextEditor | None
 		outstanding_amount: DF.Currency
 		packed_items: DF.Table[PackedItem]
 		paid_amount: DF.Currency
@@ -138,7 +138,7 @@ class POSInvoice(SalesInvoice):
 		selling_price_list: DF.Link
 		set_posting_time: DF.Check
 		set_warehouse: DF.Link | None
-		shipping_address: DF.SmallText | None
+		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		source: DF.Link | None
@@ -183,7 +183,7 @@ class POSInvoice(SalesInvoice):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(POSInvoice, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 	def validate(self):
 		if not cint(self.is_pos):
@@ -308,7 +308,9 @@ class POSInvoice(SalesInvoice):
 				)
 
 				if paid_amt and pay.amount != paid_amt:
-					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
+					return frappe.throw(
+						_("Payment related to {0} is not completed").format(pay.mode_of_payment)
+					)
 
 	def validate_stock_availablility(self):
 		if self.is_return:
@@ -328,7 +330,7 @@ class POSInvoice(SalesInvoice):
 
 				available_stock, is_stock_item = get_stock_availability(d.item_code, d.warehouse)
 
-				item_code, warehouse, qty = (
+				item_code, warehouse, _qty = (
 					frappe.bold(d.item_code),
 					frappe.bold(d.warehouse),
 					frappe.bold(d.qty),
@@ -408,8 +410,7 @@ class POSInvoice(SalesInvoice):
 		if (
 			self.change_amount
 			and self.account_for_change_amount
-			and frappe.get_cached_value("Account", self.account_for_change_amount, "company")
-			!= self.company
+			and frappe.get_cached_value("Account", self.account_for_change_amount, "company") != self.company
 		):
 			frappe.throw(
 				_("The selected change account {} doesn't belongs to Company {}.").format(
@@ -440,6 +441,7 @@ class POSInvoice(SalesInvoice):
 
 		if self.is_return:
 			invoice_total = self.rounded_total or self.grand_total
+			total_amount_in_payments = flt(total_amount_in_payments, self.precision("grand_total"))
 			if total_amount_in_payments and total_amount_in_payments < invoice_total:
 				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 

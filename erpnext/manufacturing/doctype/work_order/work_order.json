@@ -593,7 +593,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-11 15:47:13.454422",
+ "modified": "2024-03-27 13:11:00.129434",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
@@ -623,7 +623,7 @@
    "role": "Stock User"
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "title_field": "production_item",

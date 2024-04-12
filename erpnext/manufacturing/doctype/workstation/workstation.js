@@ -182,6 +182,7 @@ class WorkstationDashboard {
 							me.job_cards = [r.message];
 							me.prepare_timer();
 							me.update_job_card_details();
+							me.frm.reload_doc();
 						}
 					},
 				});
@@ -229,6 +230,7 @@ class WorkstationDashboard {
 							me.job_cards = [r.message];
 							me.prepare_timer();
 							me.update_job_card_details();
+							me.frm.reload_doc();
 						}
 					},
 				});

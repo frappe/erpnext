@@ -123,11 +123,10 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-12-24 11:16:39.964956",
+ "modified": "2024-03-27 13:10:53.240951",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Territory",
- "name_case": "Title Case",
  "naming_rule": "By fieldname",
  "nsm_parent_field": "parent_territory",
  "owner": "Administrator",
@@ -142,7 +141,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales Master Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },
@@ -188,7 +186,7 @@
  ],
  "search_fields": "parent_territory,territory_manager",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

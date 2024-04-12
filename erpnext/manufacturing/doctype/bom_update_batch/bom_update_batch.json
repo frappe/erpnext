@@ -42,13 +42,13 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-06-06 14:50:35.161062",
+ "modified": "2024-03-27 13:06:41.529935",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Update Batch",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

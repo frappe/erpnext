@@ -1,5 +1,3 @@
-import unittest
-
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
@@ -40,9 +38,7 @@ class TestGeneralAndPaymentLedger(FrappeTestCase, AccountsTestMixin):
 		)
 
 		# manually edit the payment ledger entry
-		ple = frappe.db.get_all(
-			"Payment Ledger Entry", filters={"voucher_no": sinv.name, "delinked": 0}
-		)[0]
+		ple = frappe.db.get_all("Payment Ledger Entry", filters={"voucher_no": sinv.name, "delinked": 0})[0]
 		frappe.db.set_value("Payment Ledger Entry", ple.name, "amount", sinv.grand_total - 1)
 
 		filters = frappe._dict({"company": self.company})

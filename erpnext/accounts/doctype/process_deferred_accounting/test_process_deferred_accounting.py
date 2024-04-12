@@ -40,7 +40,7 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		si.save()
 		si.submit()
 
-		process_deferred_accounting = doc = frappe.get_doc(
+		process_deferred_accounting = frappe.get_doc(
 			dict(
 				doctype="Process Deferred Accounting",
 				posting_date="2023-07-01",
