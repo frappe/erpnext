@@ -1368,7 +1368,7 @@ class StockEntry(StockController):
 			frappe.throw(
 				_(
 					"The Serial and Batch Bundle {0} is not valid for this transaction. The 'Type of Transaction' should be 'Outward' instead of 'Inward' in Serial and Batch Bundle {0}"
-				).format(get_link_to_form(serial_and_batch_bundle)),
+				).format(get_link_to_form("Serial and Batch Bundle", serial_and_batch_bundle)),
 				title=_("Invalid Serial and Batch Bundle"),
 			)
 
