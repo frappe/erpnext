@@ -860,6 +860,12 @@ class SerialandBatchBundle(Document):
 		self.validate_batch_inventory()
 
 	def validate_batch_inventory(self):
+		if (
+			self.voucher_type in ["Purchase Invoice", "Purchase Receipt"]
+			and frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus") == 1
+		):
+			return
+
 		if not self.has_batch_no:
 			return
 
