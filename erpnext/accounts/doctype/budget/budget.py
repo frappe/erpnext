@@ -226,8 +226,7 @@ def validate_budget_records(args, budget_records, expense_amount):
 
 
 def compare_expense_with_budget(args, budget_amount, action_for, action, budget_against, amount=0):
-	args.actual_expense = get_actual_expense(args)
-	args.requested_amount, args.ordered_amount = 0, 0
+	args.actual_expense, args.requested_amount, args.ordered_amount = get_actual_expense(args), 0, 0
 	if not amount:
 		args.requested_amount, args.ordered_amount = get_requested_amount(args), get_ordered_amount(args)
 
@@ -343,10 +342,8 @@ def get_expense_breakup(args, currency, budget_against):
 		)
 		+ " - "
 		+ frappe.bold(fmt_money(args.ordered_amount, currency=currency))
-		+ "</li>"
+		+ "</li></ul>"
 	)
-
-	msg += "</ul>"
 
 	return msg
 
