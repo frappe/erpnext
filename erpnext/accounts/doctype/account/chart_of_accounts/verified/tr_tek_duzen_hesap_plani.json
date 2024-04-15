@@ -1,0 +1,1999 @@
+{
+    "country_code": "tr",
+    "name": "Turkey - Chart of Accounts",
+    "tree": {
+        "DÖNEN VARLIKLAR": {
+            "account_number": "1",
+            "root_type": "Asset",
+            "is_group": 1,
+            "HAZIR DEĞERLER": {
+                "account_number": "10",
+                "root_type": "Asset",
+                "is_group": 1,
+                "KASA": {
+                    "account_number": "100",
+                    "root_type": "Asset",
+                    "is_group": 1,
+                    "TL KASA": {
+                        "account_number": "100.01",
+                        "root_type": "Asset"
+                    }
+                },
+                "ALINAN ÇEKLER": {
+                    "account_number": "101",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BANKALAR": {
+                    "account_number": "102",
+                    "root_type": "Asset",
+                    "is_group": 1,
+                    "BANK. TL": {
+                        "account_number": "102.01",
+                        "root_type": "Asset"
+                    }
+                },
+                "VERİLEN ÇEKLER VE ÖDEME EMİRLERİ(-)": {
+                    "account_number": "103",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER HAZIR DEĞERLER": {
+                    "account_number": "108",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "MENKUL KIYMETLER": {
+                "account_number": "11",
+                "root_type": "Asset",
+                "is_group": 1,
+                "HİSSE SENETLERİ": {
+                    "account_number": "110",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ÖZEL KESİM TAHVİL SENET VE BONOLARI": {
+                    "account_number": "111",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "KAMU KESİMİ TAHVİL, SENET VE BONOLARI": {
+                    "account_number": "112",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER MENKUL KIYMETLER": {
+                    "account_number": "118",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "MENKUL KIYMETLER DEĞER DÜŞÜKLÜĞÜ KARŞILIĞI(-)": {
+                    "account_number": "119",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "TİCARİ ALACAKLAR": {
+                "account_number": "12",
+                "root_type": "Asset",
+                "is_group": 1,
+                "ALICILAR": {
+                    "account_number": "220",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ALACAK SENETLERİ": {
+                    "account_number": "221",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ALACAK SENETLERİ REESKONTU(-)": {
+                    "account_number": "222",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "KAZANILMAMIŞ FİNANSAL KİRALAMA FAİZ GELİRLERİ (-)": {
+                    "account_number": "124",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "VERİLEN DEPOZİTO VE TEMİNATLAR": {
+                    "account_number": "226",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER TİCARİ ALACAKLAR": {
+                    "account_number": "127",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ŞÜPHELİ TİCARİ ALACAKLAR": {
+                    "account_number": "128",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ŞÜPHELİ TİCARİ ALACAKLAR KARŞILIĞI(-)": {
+                    "account_number": "229",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "KAZANILMAMIŞ FİNANSAL KİRALAMA FAİZ GELİRLERİ (-)-": {
+                    "account_number": "224",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "DİĞER ALACAKLAR": {
+                "account_number": "13",
+                "root_type": "Asset",
+                "is_group": 1,
+                "ORTAKLARDAN ALACAKLAR": {
+                    "account_number": "231",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "İŞTİRAKLERDEN ALACAKLAR": {
+                    "account_number": "232",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BAĞLI ORTAKLIKLARDAN ALACAKLAR": {
+                    "account_number": "233",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "PERSONELDEN ALACAKLAR": {
+                    "account_number": "235",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER ÇEŞİTLİ ALACAKLAR": {
+                    "account_number": "236",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER ALACAK SENETLERİ REESKONTU(-)": {
+                    "account_number": "237",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ŞÜPHELİ DİĞER ALACAKLAR": {
+                    "account_number": "138",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ŞÜPHELİ DİĞER ALACAKLAR KARŞILIĞI(-)": {
+                    "account_number": "239",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "STOKLAR": {
+                "account_number": "15",
+                "root_type": "Asset",
+                "is_group": 1,
+                "İLK MADDE MALZEME": {
+                    "account_number": "150",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "YARI MAMULLER": {
+                    "account_number": "151",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "MAMULLER": {
+                    "account_number": "152",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "TİCARİ MALLAR": {
+                    "account_number": "153",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER STOKLAR": {
+                    "account_number": "157",
+                    "root_type": "Asset",
+                    "is_group": 1,
+                    "DİĞR. STOK.": {
+                        "account_number": "157.01",
+                        "root_type": "Asset"
+                    }
+                },
+                "STOK DEĞER DÜŞÜKLÜĞÜ KARŞILIĞI(-)": {
+                    "account_number": "158",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "VERİLEN SİPARİŞ AVANSLARI": {
+                    "account_number": "159",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "YILLARA YAYGIN İNŞAAT VE ONARIM MALİYETLERİ": {
+                "account_number": "17",
+                "root_type": "Asset",
+                "is_group": 1,
+                "YILLARA YAYGIN İNŞAAT VE ONARIM MALİYETLERİ": {
+                    "account_number": "170",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "(YILLARA YAYGIN İNŞAAT VE ONARIM MALİYETLERİ)": {
+                    "account_number": "177",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "(YILLARA YAYGIN İNŞAAT ENFLASYON DÜZELTME)": {
+                    "account_number": "178",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "TAŞERONLARA VERİLEN AVANSLAR": {
+                    "account_number": "179",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "GELECEK AYLARA AİT GİDERLER VE GELİR TAHAKKUKLARI": {
+                "account_number": "18",
+                "root_type": "Asset",
+                "is_group": 1,
+                "GELECEK AYLARA AİT GİDERLER": {
+                    "account_number": "180",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "GELİR TAHAKKUKLARI": {
+                    "account_number": "181",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "DİĞER DÖNEN VARLIKLAR": {
+                "account_number": "19",
+                "root_type": "Asset",
+                "is_group": 1,
+                "DEVREDEN KDV": {
+                    "account_number": "190",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "İNDİRİLECEK KDV": {
+                    "account_number": "191",
+                    "root_type": "Asset",
+                    "is_group": 1,
+                    "İNDİRİLECEK KDV": {
+                        "account_number": "191.01",
+                        "root_type": "Asset",
+                        "is_group": 1
+                    },
+                    "% 18'LİK İNDİRİLECEK KDV": {
+                        "account_number": "191.01.01",
+                        "root_type": "Asset"
+                    },
+                    "% 8'LİK İNDİRİLECEK KDV": {
+                        "account_number": "191.01.02",
+                        "root_type": "Asset"
+                    },
+                    "% 1'LİK İNDİRİLECEK KDV": {
+                        "account_number": "191.01.03",
+                        "root_type": "Asset"
+                    },
+                    "% 20'LİK İNDİRİLECEK KDV": {
+                        "account_number": "191.01.04",
+                        "root_type": "Asset"
+                    },
+                    "% 10'LİK İNDİRİLECEK KDV": {
+                        "account_number": "191.01.05",
+                        "root_type": "Asset"
+                    }
+                },
+                "DİĞER KDV": {
+                    "account_number": "192",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "PEŞİN ÖDENEN VERGİLER VE FONLAR": {
+                    "account_number": "193",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "İŞ AVANSLARI": {
+                    "account_number": "195",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "PERSONEL AVANSLARI": {
+                    "account_number": "196",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "SAYIM VE TESELLÜM NOKSANLARI": {
+                    "account_number": "197",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER ÇEŞİTLİ DÖNEN VARLIKLAR": {
+                    "account_number": "198",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER DÖNEN VARLIKLAR KARŞILIĞI(-)": {
+                    "account_number": "199",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            }
+        },
+        "DURAN VARLIKLAR": {
+            "account_number": "2",
+            "root_type": "Asset",
+            "is_group": 1,
+            "TİCARİ ALACAKLAR": {
+                "account_number": "22",
+                "root_type": "Asset",
+                "is_group": 1,
+                "ALICILAR": {
+                    "account_number": "220",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ALACAK SENETLERİ": {
+                    "account_number": "221",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ALACAK SENETLERİ REESKONTU(-)": {
+                    "account_number": "222",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "KAZANILMAMIŞ FİNANSAL KİRALAMA FAİZ GELİRLERİ (-)": {
+                    "account_number": "124",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "VERİLEN DEPOZİTO VE TEMİNATLAR": {
+                    "account_number": "226",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER TİCARİ ALACAKLAR": {
+                    "account_number": "127",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ŞÜPHELİ TİCARİ ALACAKLAR": {
+                    "account_number": "128",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ŞÜPHELİ TİCARİ ALACAKLAR KARŞILIĞI(-)": {
+                    "account_number": "229",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "KAZANILMAMIŞ FİNANSAL KİRALAMA FAİZ GELİRLERİ (-)-": {
+                    "account_number": "224",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "DİĞER ALACAKLAR": {
+                "account_number": "23",
+                "root_type": "Asset",
+                "is_group": 1,
+                "ORTAKLARDAN ALACAKLAR": {
+                    "account_number": "231",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "İŞTİRAKLERDEN ALACAKLAR": {
+                    "account_number": "232",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BAĞLI ORTAKLIKLARDAN ALACAKLAR": {
+                    "account_number": "233",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "PERSONELDEN ALACAKLAR": {
+                    "account_number": "235",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER ÇEŞİTLİ ALACAKLAR": {
+                    "account_number": "236",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER ALACAK SENETLERİ REESKONTU(-)": {
+                    "account_number": "237",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ŞÜPHELİ DİĞER ALACAKLAR": {
+                    "account_number": "138",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ŞÜPHELİ DİĞER ALACAKLAR KARŞILIĞI(-)": {
+                    "account_number": "239",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "MALİ DURAN VARLIKLAR": {
+                "account_number": "24",
+                "root_type": "Asset",
+                "is_group": 1,
+                "BAĞLI MENKUL KIYMETLER": {
+                    "account_number": "240",
+                    "root_type": "Asset",
+                    "is_group": 1,
+                    "BAĞL. MEKL. KIYM.": {
+                        "account_number": "240.01",
+                        "root_type": "Asset"
+                    }
+                },
+                "BAĞLI MENKUL KIYMETLER DEĞER DÜŞÜKLÜĞÜ KARŞILIĞI(-)": {
+                    "account_number": "241",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "İŞTİRAKLER": {
+                    "account_number": "242",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "İŞTİRAKLERE SERMAYE TAAHHÜTLERİ(-)": {
+                    "account_number": "243",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "İŞTİRAKLER SERMAYE PAYLARI DEĞER DÜŞÜKLÜĞÜ KARŞILIĞI(-)": {
+                    "account_number": "244",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BAĞLI ORTAKLIKLAR": {
+                    "account_number": "245",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BAĞLI ORTAKLIKLARA SERMAYE TAAHHÜTLERİ(-)": {
+                    "account_number": "246",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BAĞLI ORTAKLIKLAR SERMAYE PAYLARI DEĞER DÜŞÜKLÜĞÜ KARŞILIĞI(-)": {
+                    "account_number": "247",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER MALİ DURAN VARLIKLAR": {
+                    "account_number": "248",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER MALİ DURAN VARLIKLAR KARŞILIĞI(-)": {
+                    "account_number": "249",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "MADDİ DURAN VARLIKLAR": {
+                "account_number": "25",
+                "root_type": "Asset",
+                "is_group": 1,
+                "ARAZİ VE ARSALAR": {
+                    "account_number": "250",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "YER ALTI VE YER ÜSTÜ DÜZENLERİ": {
+                    "account_number": "251",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BİNALAR": {
+                    "account_number": "252",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "TESİS, MAKİNE VE CİHAZLAR": {
+                    "account_number": "253",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "TAŞITLAR": {
+                    "account_number": "254",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DEMİRBAŞLAR": {
+                    "account_number": "255",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER MADDİ DURAN VARLIKLAR": {
+                    "account_number": "256",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BİRİKMİŞ AMORTİSMANLAR(-)": {
+                    "account_number": "257",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "YAPILMAKTA OLAN YATIRIMLAR": {
+                    "account_number": "258",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "VERİLEN AVANSLAR": {
+                    "account_number": "259",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "MADDİ OLMAYAN DURAN VARLIKLAR": {
+                "account_number": "26",
+                "root_type": "Asset",
+                "is_group": 1,
+                "HAKLAR": {
+                    "account_number": "260",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ŞEREFİYE": {
+                    "account_number": "261",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "KURULUŞ VE ÖRGÜTLENME GİDERLERİ": {
+                    "account_number": "262",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ARAŞTIRMA VE GELİŞTİRME GİDERLERİ": {
+                    "account_number": "263",
+                    "root_type": "Asset",
+                    "is_group": 1,
+                    "ARAŞTIRMA VE GELİŞTİRME GİDERLERİ": {
+                        "account_number": "750",
+                        "root_type": "Expense",
+                        "is_group": 1
+                    },
+                    "ARAŞTIRMA VE GELİŞTİRME GİDERLERİ YANSITMA HESABI": {
+                        "account_number": "751",
+                        "root_type": "Expense",
+                        "is_group": 1
+                    },
+                    "ARAŞTIRMA VE GELİŞTİRME GİDER FARKLARI": {
+                        "account_number": "752",
+                        "root_type": "Expense",
+                        "is_group": 1
+                    }
+                },
+                "ÖZEL MALİYETLER": {
+                    "account_number": "264",
+                    "root_type": "Asset",
+                    "is_group": 1,
+                    "ÖZL. MALİYT.": {
+                        "account_number": "264.01",
+                        "root_type": "Asset"
+                    }
+                },
+                "DİĞER MADDİ OLMAYAN DURAN VARLIKLAR": {
+                    "account_number": "267",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BİRİKMİŞ AMORTİSMANLAR(-)": {
+                    "account_number": "268",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "VERİLEN AVANSLAR": {
+                    "account_number": "269",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "ÖZEL TÜKENMEYE TABİ VARLIKLAR": {
+                "account_number": "27",
+                "root_type": "Asset",
+                "is_group": 1,
+                "ARAMA GİDERLERİ": {
+                    "account_number": "271",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "HAZIRLIK VE GELİŞTİRME GİDERLERİ": {
+                    "account_number": "272",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER ÖZEL TÜKENMEYE TABİ VARLIKLAR": {
+                    "account_number": "277",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BİRİKMİŞ TÜKENME PAYLARI(-)": {
+                    "account_number": "278",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "VERİLEN AVANSLAR": {
+                    "account_number": "279",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "GELECEK YILLARA AİT GİDERLER VE GELİR TAHAKKUKLARI": {
+                "account_number": "28",
+                "root_type": "Asset",
+                "is_group": 1,
+                "GELECEK YILLARA AİT GİDERLER": {
+                    "account_number": "280",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "GELİR TAHAKKUKLARI": {
+                    "account_number": "281",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            },
+            "DİĞER DURAN VARLIKLAR": {
+                "account_number": "29",
+                "root_type": "Asset",
+                "is_group": 1,
+                "GELECEK YILLARDA İNDİRİLECEK KDV": {
+                    "account_number": "291",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER KDV": {
+                    "account_number": "292",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "GELECEK YILLAR İHTİYACI STOKLAR": {
+                    "account_number": "293",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "ELDEN ÇIKARILACAK STOKLAR VE MADDİ DURAN VARLIKLAR": {
+                    "account_number": "294",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "PEŞİN ÖDENEN VERGİ VE FONLAR": {
+                    "account_number": "295",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "DİĞER ÇEŞİTLİ DURAN VARLIKLAR": {
+                    "account_number": "297",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "STOK DEĞER DÜŞÜKLÜĞÜ KARŞILIĞI(-)": {
+                    "account_number": "298",
+                    "root_type": "Asset",
+                    "is_group": 1
+                },
+                "BİRİKMİŞ AMORTİSMANLAR(-)": {
+                    "account_number": "299",
+                    "root_type": "Asset",
+                    "is_group": 1
+                }
+            }
+        },
+        "KISA VADELİ YABANCI KAYNAKLAR": {
+            "account_number": "3",
+            "root_type": "Liability",
+            "is_group": 1,
+            "MALİ BORÇLAR": {
+                "account_number": "30",
+                "root_type": "Liability",
+                "is_group": 1,
+                "BANKA KREDİLERİ": {
+                    "account_number": "400",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "FİNANSAL KİRALAMA İŞLEMLERİNDEN BORÇLAR": {
+                    "account_number": "301",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ERTELENMİŞ FİNANSAL KİRALAMA BORÇLANMA MALİYETLERİ(-)": {
+                    "account_number": "302",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "UZUN VADELİ KREDİLERİN ANAPARA TAKSİTLERİ VE FAİZLERİ": {
+                    "account_number": "303",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "TAHVİL ANAPARA BORÇ, TAKSİT VE FAİZLERİ": {
+                    "account_number": "304",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ÇIKARILAN BONOLAR VE SENETLER": {
+                    "account_number": "305",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ÇIKARILMIŞ DİĞER MENKUL KIYMETLER": {
+                    "account_number": "407",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "MENKUL KIYMETLER İHRAÇ FARKI(-)": {
+                    "account_number": "408",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER MALİ BORÇLAR": {
+                    "account_number": "409",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "FİNANSAL KİRALAMA İŞLEMLERİNDEN BORÇLAR-": {
+                    "account_number": "401",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ERTELENMİŞ FİNANSAL KİRALAMA BORÇLANMA MALİYETLERİ (-)": {
+                    "account_number": "402",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ÇIKARILMIŞ TAHVİLLER": {
+                    "account_number": "405",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "TİCARİ BORÇLAR": {
+                "account_number": "32",
+                "root_type": "Liability",
+                "is_group": 1,
+                "SATICILAR": {
+                    "account_number": "420",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "BORÇ SENETLERİ": {
+                    "account_number": "421",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "BORÇ SENETLERİ REESKONTU(-)": {
+                    "account_number": "422",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ALINAN DEPOZİTO VE TEMİNATLAR": {
+                    "account_number": "426",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER TİCARİ BORÇLAR": {
+                    "account_number": "429",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "DİĞER BORÇLAR": {
+                "account_number": "33",
+                "root_type": "Liability",
+                "is_group": 1,
+                "ORTAKLARA BORÇLAR": {
+                    "account_number": "431",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "İŞTİRAKLERE BORÇLAR": {
+                    "account_number": "432",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "BAĞLI ORTAKLIKLARA BORÇLAR": {
+                    "account_number": "433",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "PERSONELE BORÇLAR": {
+                    "account_number": "335",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER ÇEŞİTLİ BORÇLAR": {
+                    "account_number": "436",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER BORÇ SENETLERİ REESKONTU(-)": {
+                    "account_number": "437",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "KAMUYA OLAN ERTELENMİŞ VEYA TAKSİTLENDİRİLMİŞ BORÇLAR": {
+                    "account_number": "438",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "ALINAN AVANSLAR": {
+                "account_number": "34",
+                "root_type": "Liability",
+                "is_group": 1,
+                "ALINAN SİPARİŞ AVANSLARI": {
+                    "account_number": "440",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ALINAN DİĞER AVANSLAR": {
+                    "account_number": "449",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "YILLARA YAYGIN İNŞAAT VE ONARIM HAKEDİŞLERİ": {
+                "account_number": "35",
+                "root_type": "Liability",
+                "is_group": 1,
+                "YILLARA YAYGIN İNŞAAT VE ONARIM HAKEDİŞ BEDELLERİ": {
+                    "account_number": "358",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "ÖDENECEK VERGİ VE DİĞER YÜKÜMLÜLÜKLER": {
+                "account_number": "36",
+                "root_type": "Liability",
+                "is_group": 1,
+                "ÖDENECEK VERGİ VE FONLAR": {
+                    "account_number": "360",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ÖDENECEK SOSYAL GÜVENLİK KESİNTİLERİ": {
+                    "account_number": "361",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "VADESİ GEÇMİŞ, ERTELENMİŞ VEYA TAKSİTLENDİRİLMİŞ VERGİ VE DİĞER YÜKÜMLÜLÜKLER": {
+                    "account_number": "368",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ÖDENECEK DİĞER YÜKÜMLÜLÜKLER": {
+                    "account_number": "369",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "BORÇ VE GİDER KARŞILIKLARI": {
+                "account_number": "37",
+                "root_type": "Liability",
+                "is_group": 1,
+                "DÖNEM KÂRI VERGİ VE DİĞER YASAL YÜKÜMLÜLÜK KARŞILIKLARI": {
+                    "account_number": "370",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DÖNEM KÂRININ PEŞİN ÖDENEN VERGİ VE DİĞER YÜKÜMLÜLÜKLERİ(-)": {
+                    "account_number": "371",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "KIDEM TAZMİNATI KARŞILIĞI": {
+                    "account_number": "472",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "MALİYET GİDERLERİ KARŞILIĞI": {
+                    "account_number": "373",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER BORÇ VE GİDER KARŞILIKLARI": {
+                    "account_number": "479",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "GELECEK AYLARA AİT GELİRLER VE GİDER TAHAKKUKLARI": {
+                "account_number": "38",
+                "root_type": "Liability",
+                "is_group": 1,
+                "GELECEK AYLARA AİT GELİRLER": {
+                    "account_number": "380",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "GİDER TAHAKKUKLARI": {
+                    "account_number": "381",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "DİĞER KISA VADELİ YABANCI KAYNAKLAR": {
+                "account_number": "39",
+                "root_type": "Liability",
+                "is_group": 1,
+                "HESAPLANAN KDV": {
+                    "account_number": "391",
+                    "root_type": "Liability",
+                    "is_group": 1,
+                    "HESAPL. KDV": {
+                        "account_number": "391.01",
+                        "root_type": "Liability",
+                        "is_group": 1,
+                        "% 18 HESAPLAN KDV": {
+                            "account_number": "391.01.01",
+                            "root_type": "Liability"
+                        },
+                        "% 8 HESAPLANAN KDV": {
+                            "account_number": "391.01.02",
+                            "root_type": "Liability"
+                        },
+                        "% 1 HESAPLANAN KDV": {
+                            "account_number": "391.01.03",
+                            "root_type": "Liability"
+                        },
+                        "% 20 HESAPLANAN KDV": {
+                            "account_number": "391.01.04",
+                            "root_type": "Liability"
+                        },
+                        "% 10 HESAPLANAN KDV": {
+                            "account_number": "391.01.05",
+                            "root_type": "Liability"
+                        }
+                    }
+                },
+                "DİĞER KDV": {
+                    "account_number": "392",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "MERKEZ VE ŞUBELER CARİ HESABI": {
+                    "account_number": "393",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "SAYIM VE TESELLÜM FAZLALARI": {
+                    "account_number": "397",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER ÇEŞİTLİ YABANCI KAYNAKLAR": {
+                    "account_number": "399",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            }
+        },
+        "UZUN VADELİ YABANCI KAYNAKLAR": {
+            "account_number": "4",
+            "root_type": "Liability",
+            "is_group": 1,
+            "MALİ BORÇLAR": {
+                "account_number": "40",
+                "root_type": "Liability",
+                "is_group": 1,
+                "BANKA KREDİLERİ": {
+                    "account_number": "400",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "FİNANSAL KİRALAMA İŞLEMLERİNDEN BORÇLAR": {
+                    "account_number": "301",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ERTELENMİŞ FİNANSAL KİRALAMA BORÇLANMA MALİYETLERİ(-)": {
+                    "account_number": "302",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "UZUN VADELİ KREDİLERİN ANAPARA TAKSİTLERİ VE FAİZLERİ": {
+                    "account_number": "303",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "TAHVİL ANAPARA BORÇ, TAKSİT VE FAİZLERİ": {
+                    "account_number": "304",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ÇIKARILAN BONOLAR VE SENETLER": {
+                    "account_number": "305",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ÇIKARILMIŞ DİĞER MENKUL KIYMETLER": {
+                    "account_number": "407",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "MENKUL KIYMETLER İHRAÇ FARKI(-)": {
+                    "account_number": "408",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER MALİ BORÇLAR": {
+                    "account_number": "409",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "FİNANSAL KİRALAMA İŞLEMLERİNDEN BORÇLAR-": {
+                    "account_number": "401",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ERTELENMİŞ FİNANSAL KİRALAMA BORÇLANMA MALİYETLERİ (-)": {
+                    "account_number": "402",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ÇIKARILMIŞ TAHVİLLER": {
+                    "account_number": "405",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "TİCARİ BORÇLAR": {
+                "account_number": "42",
+                "root_type": "Liability",
+                "is_group": 1,
+                "SATICILAR": {
+                    "account_number": "420",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "BORÇ SENETLERİ": {
+                    "account_number": "421",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "BORÇ SENETLERİ REESKONTU(-)": {
+                    "account_number": "422",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ALINAN DEPOZİTO VE TEMİNATLAR": {
+                    "account_number": "426",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER TİCARİ BORÇLAR": {
+                    "account_number": "429",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "DİĞER BORÇLAR": {
+                "account_number": "43",
+                "root_type": "Liability",
+                "is_group": 1,
+                "ORTAKLARA BORÇLAR": {
+                    "account_number": "431",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "İŞTİRAKLERE BORÇLAR": {
+                    "account_number": "432",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "BAĞLI ORTAKLIKLARA BORÇLAR": {
+                    "account_number": "433",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "PERSONELE BORÇLAR": {
+                    "account_number": "335",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER ÇEŞİTLİ BORÇLAR": {
+                    "account_number": "436",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER BORÇ SENETLERİ REESKONTU(-)": {
+                    "account_number": "437",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "KAMUYA OLAN ERTELENMİŞ VEYA TAKSİTLENDİRİLMİŞ BORÇLAR": {
+                    "account_number": "438",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "ALINAN AVANSLAR": {
+                "account_number": "44",
+                "root_type": "Liability",
+                "is_group": 1,
+                "ALINAN SİPARİŞ AVANSLARI": {
+                    "account_number": "440",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "ALINAN DİĞER AVANSLAR": {
+                    "account_number": "449",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "BORÇ VE GİDER KARŞILIKLARI": {
+                "account_number": "47",
+                "root_type": "Liability",
+                "is_group": 1,
+                "DÖNEM KÂRI VERGİ VE DİĞER YASAL YÜKÜMLÜLÜK KARŞILIKLARI": {
+                    "account_number": "370",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DÖNEM KÂRININ PEŞİN ÖDENEN VERGİ VE DİĞER YÜKÜMLÜLÜKLERİ(-)": {
+                    "account_number": "371",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "KIDEM TAZMİNATI KARŞILIĞI": {
+                    "account_number": "472",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "MALİYET GİDERLERİ KARŞILIĞI": {
+                    "account_number": "373",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER BORÇ VE GİDER KARŞILIKLARI": {
+                    "account_number": "479",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "GELECEK YILLARA AİT GELİRLER VE GİDER TAHAKKUKLARI": {
+                "account_number": "48",
+                "root_type": "Liability",
+                "is_group": 1,
+                "GELECEK YILLARA AİT GELİRLER": {
+                    "account_number": "480",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "GİDER TAHAKKUKLARI": {
+                    "account_number": "481",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            },
+            "DİĞER UZUN VADELİ YABANCI KAYNAKLAR": {
+                "account_number": "49",
+                "root_type": "Liability",
+                "is_group": 1,
+                "GELECEK YILLARA ERTELENMİŞ VEYA TERKİN EDİLECEK KDV": {
+                    "account_number": "492",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "TESİSE KATILMA PAYLARI": {
+                    "account_number": "493",
+                    "root_type": "Liability",
+                    "is_group": 1
+                },
+                "DİĞER ÇEŞİTLİ UZUN VADELİ YABANCI KAYNAKLAR": {
+                    "account_number": "499",
+                    "root_type": "Liability",
+                    "is_group": 1
+                }
+            }
+        },
+        "ÖZ KAYNAKLAR": {
+            "account_number": "5",
+            "root_type": "Equity",
+            "is_group": 1,
+            "ÖDENMİŞ SERMAYE": {
+                "account_number": "50",
+                "root_type": "Equity",
+                "is_group": 1,
+                "SERMAYE": {
+                    "account_number": "500",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "ÖDENMEMİŞ SERMAYE(-)": {
+                    "account_number": "501",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "SERMAYE DÜZELTMESİ OLUMLU FARKLARI": {
+                    "account_number": "502",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "SERMAYE DÜZELTMESİ OLUMSUZ FARKLARI (-)": {
+                    "account_number": "503",
+                    "root_type": "Equity",
+                    "is_group": 1
+                }
+            },
+            "SERMAYE YEDEKLERİ": {
+                "account_number": "52",
+                "root_type": "Equity",
+                "is_group": 1,
+                "HİSSE SENETLERİ İHRAÇ PRİMLERİ": {
+                    "account_number": "520",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "HİSSE SENEDİ İPTAL KÂRLARI": {
+                    "account_number": "521",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "MADDİ DURAN VARLIK YENİDEN DEĞERLEME ARTIŞLARI": {
+                    "account_number": "522",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "İŞTİRAKLER YENİDEN DEĞERLEME ARTIŞLARI": {
+                    "account_number": "523",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "DİĞER SERMAYE YEDEKLERİ": {
+                    "account_number": "529",
+                    "root_type": "Equity",
+                    "is_group": 1
+                }
+            },
+            "KÂR YEDEKLERİ": {
+                "account_number": "54",
+                "root_type": "Equity",
+                "is_group": 1,
+                "YASAL YEDEKLER": {
+                    "account_number": "540",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "STATÜ YEDEKLERİ": {
+                    "account_number": "541",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "OLAĞANÜSTÜ YEDEKLER": {
+                    "account_number": "542",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "DİĞER KÂR YEDEKLERİ": {
+                    "account_number": "548",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "ÖZEL FONLAR": {
+                    "account_number": "549",
+                    "root_type": "Equity",
+                    "is_group": 1
+                }
+            },
+            "GEÇMİŞ YILLAR KÂRLARI": {
+                "account_number": "57",
+                "root_type": "Equity",
+                "is_group": 1,
+                "GEÇMİŞ YILLAR KÂRLARI": {
+                    "account_number": "570",
+                    "root_type": "Equity",
+                    "is_group": 1
+                }
+            },
+            "GEÇMİŞ YILLAR ZARARLARI(-)": {
+                "account_number": "58",
+                "root_type": "Equity",
+                "is_group": 1,
+                "GEÇMİŞ YILLAR ZARARLARI(-)": {
+                    "account_number": "580",
+                    "root_type": "Equity",
+                    "is_group": 1
+                }
+            },
+            "DÖNEM NET KÂRI (ZARARI)": {
+                "account_number": "59",
+                "root_type": "Equity",
+                "is_group": 1,
+                "DÖNEM NET KÂRI": {
+                    "account_number": "590",
+                    "root_type": "Equity",
+                    "is_group": 1
+                },
+                "DÖNEM NET ZARARI(-)": {
+                    "account_number": "591",
+                    "root_type": "Equity",
+                    "is_group": 1
+                }
+            }
+        },
+        "GELİR TABLOSU HESAPLARI": {
+            "account_number": "6",
+            "root_type": "Income",
+            "is_group": 1,
+            "BRÜT SATIŞLAR": {
+                "account_number": "60",
+                "root_type": "Income",
+                "is_group": 1,
+                "YURT İÇİ SATIŞLAR": {
+                    "account_number": "600",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "YURT DIŞI SATIŞLAR": {
+                    "account_number": "601",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "DİĞER GELİRLER": {
+                    "account_number": "602",
+                    "root_type": "Income",
+                    "is_group": 1
+                }
+            },
+            "SATIŞ İNDİRİMLERİ(-)": {
+                "account_number": "61",
+                "root_type": "Income",
+                "is_group": 1,
+                "SATIŞTAN İADELER(-)": {
+                    "account_number": "610",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "SATIŞ İNDİRİMLERİ(-)": {
+                    "account_number": "611",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "DİĞER İNDİRİMLER(-)": {
+                    "account_number": "612",
+                    "root_type": "Income",
+                    "is_group": 1
+                }
+            },
+            "SATIŞLARIN MALİYETİ(-)": {
+                "account_number": "62",
+                "root_type": "Income",
+                "is_group": 1,
+                "SATILAN MAMULLER MALİYETİ(-)": {
+                    "account_number": "620",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "SATILAN TİCARİ MALLAR MALİYETİ(-)": {
+                    "account_number": "621",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "SATILAN HİZMET MALİYETİ(-)": {
+                    "account_number": "622",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "DİĞER SATIŞLARIN MALİYETİ(-)": {
+                    "account_number": "623",
+                    "root_type": "Income",
+                    "is_group": 1,
+                    "DİĞR. SATŞ. MALYT.": {
+                        "account_number": "623.01",
+                        "root_type": "Income"
+                    }
+                }
+            },
+            "FAALİYET GİDERLERİ(-)": {
+                "account_number": "63",
+                "root_type": "Income",
+                "is_group": 1,
+                "ARAŞTIRMA VE GELİŞTİRME GİDERLERİ(-)": {
+                    "account_number": "630",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "PAZARLAMA SATIŞ VE DAĞITIM GİDERLERİ(-)": {
+                    "account_number": "631",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "GENEL YÖNETİM GİDERLERİ(-)": {
+                    "account_number": "632",
+                    "root_type": "Income",
+                    "is_group": 1
+                }
+            },
+            "DİĞER FAALİYETLERDEN OLAĞAN GELİR VE KÂRLAR": {
+                "account_number": "64",
+                "root_type": "Income",
+                "is_group": 1,
+                "İŞTİRAKLERDEN TEMETTÜ GELİRLERİ": {
+                    "account_number": "640",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "BAĞLI ORTAKLIKLARDAN TEMETTÜ GELİRLERİ": {
+                    "account_number": "641",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "FAİZ GELİRLERİ": {
+                    "account_number": "642",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "KOMİSYON GELİRLERİ": {
+                    "account_number": "643",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "KONUSU KALMAYAN KARŞILIKLAR": {
+                    "account_number": "644",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "MENKUL KIYMET SATIŞ KÂRLARI": {
+                    "account_number": "645",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "KAMBİYO KÂRLARI": {
+                    "account_number": "646",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "REESKONT FAİZ GELİRLERİ": {
+                    "account_number": "647",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "ENFLASYON DÜZELTME KÂRLARI": {
+                    "account_number": "648",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "DİĞER OLAĞAN GELİR VE KÂRLAR": {
+                    "account_number": "649",
+                    "root_type": "Income",
+                    "is_group": 1
+                }
+            },
+            "DİĞER FAALİYETLERDEN OLAĞAN GİDER VE ZARARLAR(-)": {
+                "account_number": "65",
+                "root_type": "Income",
+                "is_group": 1,
+                "KOMİSYON GİDERLERİ(-)": {
+                    "account_number": "653",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "KARŞILIK GİDERLERİ(-)": {
+                    "account_number": "654",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "MENKUL KIYMET SATIŞ ZARARLARI(-)": {
+                    "account_number": "655",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "KAMBİYO ZARARLARI(-)": {
+                    "account_number": "656",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "REESKONT FAİZ GİDERLERİ(-)": {
+                    "account_number": "657",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "ENFLASYON DÜZELTMESİ ZARARLARI(-)": {
+                    "account_number": "658",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "DİĞER OLAĞAN GİDER VE ZARARLAR(-)": {
+                    "account_number": "659",
+                    "root_type": "Income",
+                    "is_group": 1
+                }
+            },
+            "FİNANSMAN GİDERLERİ(-)": {
+                "account_number": "66",
+                "root_type": "Income",
+                "is_group": 1,
+                "KISA VADELİ BORÇLANMA GİDERLERİ(-)": {
+                    "account_number": "660",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "UZUN VADELİ BORÇLANMA GİDERLERİ(-)": {
+                    "account_number": "661",
+                    "root_type": "Income",
+                    "is_group": 1
+                }
+            },
+            "OLAĞAN DIŞI GELİR VE KÂRLAR": {
+                "account_number": "67",
+                "root_type": "Income",
+                "is_group": 1,
+                "ÖNCEKİ DÖNEM GELİR VE KÂRLARI": {
+                    "account_number": "671",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "DİĞER OLAĞAN DIŞI GELİR VE KÂRLAR": {
+                    "account_number": "679",
+                    "root_type": "Income",
+                    "is_group": 1
+                }
+            },
+            "OLAĞAN DIŞI GİDER VE ZARARLAR(-)": {
+                "account_number": "68",
+                "root_type": "Income",
+                "is_group": 1,
+                "ÇALIŞMAYAN KISIM GİDER VE ZARARLARI(-)": {
+                    "account_number": "680",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "ÖNCEKİ DÖNEM GİDER VE ZARARLARI(-)": {
+                    "account_number": "681",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "DİĞER OLAĞAN DIŞI GİDER VE ZARARLAR(-)": {
+                    "account_number": "689",
+                    "root_type": "Income",
+                    "is_group": 1
+                }
+            },
+            "DÖNEM NET KÂRI VEYA ZARARI": {
+                "account_number": "69",
+                "root_type": "Income",
+                "is_group": 1,
+                "DÖNEM KÂRI VEYA ZARARI": {
+                    "account_number": "690",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "DÖNEM KÂRI VERGİ VE DİĞER YASAL YÜKÜMLÜLÜK KARŞILIKLARI(-)": {
+                    "account_number": "691",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "DÖNEM NET KÂRI VEYA ZARARI": {
+                    "account_number": "692",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "YILLARA YAYGIN İNŞAAT VE ENFLASYON DÜZELTME HESABI": {
+                    "account_number": "697",
+                    "root_type": "Income",
+                    "is_group": 1
+                },
+                "ENFLASYON DÜZELTME HESABI": {
+                    "account_number": "698",
+                    "root_type": "Income",
+                    "is_group": 1
+                }
+            }
+        },
+        "MALİYET HESAPLARI (7/A SEÇENEĞİ)": {
+            "account_number": "7",
+            "root_type": "Expense",
+            "is_group": 1,
+            "MALİYET MUHASEBESİ BAĞLANTI HESAPLARI": {
+                "account_number": "70",
+                "root_type": "Expense",
+                "is_group": 1,
+                "MALİYET MUHASEBESİ BAĞLANTI HESABI": {
+                    "account_number": "700",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "MALİYET MUHASEBESİ YANSITMA HESABI": {
+                    "account_number": "701",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            },
+            "DİREKT İLK MADDE VE MALZEME GİDERLERİ": {
+                "account_number": "71",
+                "root_type": "Expense",
+                "is_group": 1,
+                "DİREKT İLK MADDE VE MALZEME GİDERLERİ HESABI": {
+                    "account_number": "710",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "DİREKT İLK MADDE VE MALZEME YANSITMA HESABI": {
+                    "account_number": "711",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "DİREKT İLK MADDE VE MALZEME FİYAT FARKI": {
+                    "account_number": "712",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "DİREKT İLK MADDE VE MALZEME MİKTAR FARKI": {
+                    "account_number": "713",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            },
+            "DİREKT İŞÇİLİK GİDERLERİ": {
+                "account_number": "72",
+                "root_type": "Expense",
+                "is_group": 1,
+                "DİREKT İŞÇİLİK GİDERLERİ": {
+                    "account_number": "720",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "DİREKT İŞÇİLİK GİDERLERİ YANSITMA HESABI": {
+                    "account_number": "721",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "DİREKT İŞÇİLİK ÜCRET FARKLARI": {
+                    "account_number": "722",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "DİREKT İŞÇİLİK SÜRE FARKLARI": {
+                    "account_number": "723",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            },
+            "GENEL ÜRETİM GİDERLERİ": {
+                "account_number": "73",
+                "root_type": "Expense",
+                "is_group": 1,
+                "GENEL ÜRETİM GİDERLERİ": {
+                    "account_number": "730",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "GENEL ÜRETİM GİDERLERİ YANSITMA HESABI": {
+                    "account_number": "731",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "GENEL ÜRETİM GİDERLERİ BÜTÇE FARKLARI": {
+                    "account_number": "732",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "GENEL ÜRETİM GİDERLERİ VERİMLİLİK GİDERLERİ": {
+                    "account_number": "733",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "GENEL ÜRETİM GİDERLERİ KAPASİTE FARKLARI": {
+                    "account_number": "734",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            },
+            "HİZMET ÜRETİM MALİYETİ": {
+                "account_number": "74",
+                "root_type": "Expense",
+                "is_group": 1,
+                "HİZMET ÜRETİM MALİYETİ": {
+                    "account_number": "740",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "HİZMET ÜRETİM MALİYETİ YANSITMA HESABI": {
+                    "account_number": "741",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "HİZMET ÜRETİM MALİYETİ FARK HESAPLARI": {
+                    "account_number": "742",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            },
+            "ARAŞTIRMA VE GELİŞTİRME GİDERLERİ": {
+                "account_number": "75",
+                "root_type": "Expense",
+                "is_group": 1,
+                "ARAŞTIRMA VE GELİŞTİRME GİDERLERİ": {
+                    "account_number": "750",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "ARAŞTIRMA VE GELİŞTİRME GİDERLERİ YANSITMA HESABI": {
+                    "account_number": "751",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "ARAŞTIRMA VE GELİŞTİRME GİDER FARKLARI": {
+                    "account_number": "752",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            },
+            "PAZARLAMA SATIŞ VE DAĞITIM GİDERLERİ": {
+                "account_number": "76",
+                "root_type": "Expense",
+                "is_group": 1,
+                "PAZARLAMA SATIŞ VE DAĞITIM GİDERLERİ": {
+                    "account_number": "760",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "PAZARLAMA SATIŞ VE DAĞITIM GİDERLERİ YANSITMA HESABI": {
+                    "account_number": "761",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "PAZARLAMA SATIŞ VE DAĞITIM GİDERLERİ FARK HESABI": {
+                    "account_number": "762",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            },
+            "GENEL YÖNETİM GİDERLERİ": {
+                "account_number": "77",
+                "root_type": "Expense",
+                "is_group": 1,
+                "GENEL YÖNETİM GİDERLERİ": {
+                    "account_number": "770",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "GENEL YÖNETİM GİDERLERİ YANSITMA HESABI": {
+                    "account_number": "771",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "GENEL YÖNETİM GİDER FARKLARI HESABI": {
+                    "account_number": "772",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            },
+            "FİNANSMAN GİDERLERİ": {
+                "account_number": "78",
+                "root_type": "Expense",
+                "is_group": 1,
+                "FİNANSMAN GİDERLERİ": {
+                    "account_number": "780",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "FİNANSMAN GİDERLERİ YANSITMA HESABI": {
+                    "account_number": "781",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "FİNANSMAN GİDERLERİ FARK HESABI": {
+                    "account_number": "782",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            },
+            "GİDER ÇEŞİTLERİ": {
+                "account_number": "79",
+                "root_type": "Expense",
+                "is_group": 1,
+                "İLK MADDE VE MALZEME GİDERLERİ": {
+                    "account_number": "790",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "İŞÇİ ÜCRET VE GİDERLERİ": {
+                    "account_number": "791",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "MEMUR ÜCRET VE GİDERLERİ": {
+                    "account_number": "792",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "DIŞARIDAN SAĞLANAN FAYDA VE HİZMETLER": {
+                    "account_number": "793",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "ÇEŞİTLİ GİDERLER": {
+                    "account_number": "794",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "VERGİ, RESİM VE HARÇLAR": {
+                    "account_number": "795",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "AMORTİSMAN VE TÜKENME PAYLARI": {
+                    "account_number": "796",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "FİNANSMAN GİDERLERİ": {
+                    "account_number": "797",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "GİDER ÇEŞİTLERİ YANSITMA HESABI": {
+                    "account_number": "798",
+                    "root_type": "Expense",
+                    "is_group": 1
+                },
+                "ÜRETİM MALİYET HESABI": {
+                    "account_number": "799",
+                    "root_type": "Expense",
+                    "is_group": 1
+                }
+            }
+        },
+        "SERBEST HESAPLAR": {
+            "account_number": "8",
+            "root_type": "Asset",
+            "is_group": 1,
+            "BÜTÇE GELİRLERİ HESABI": {
+                "account_number": "800",
+                "root_type": "Asset",
+                "is_group": 1
+            },
+            "GELİR YANSITMA HESABI": {
+                "account_number": "805",
+                "root_type": "Asset",
+                "is_group": 1
+            },
+            "BÜTÇE GELİRLERİNDEN RET VE İADELER HESABI": {
+                "account_number": "810",
+                "root_type": "Asset",
+                "is_group": 1
+            },
+            "BÜTÇE GİDERLERİ HESABI": {
+                "account_number": "830",
+                "root_type": "Asset",
+                "is_group": 1
+            },
+            "BÜTÇEDEN MAHSUP EDİLECEK ÖDEMELER HESABI": {
+                "account_number": "833",
+                "root_type": "Asset",
+                "is_group": 1
+            },
+            "GEÇEN YIL BÜTÇE MAHSUPLARI HESABI": {
+                "account_number": "834",
+                "root_type": "Asset",
+                "is_group": 1
+            },
+            "GİDER YANSITMA HESABI": {
+                "account_number": "835",
+                "root_type": "Asset",
+                "is_group": 1
+            },
+            "BÜTÇE UYGULAMA SONUÇLARI HESABI": {
+                "account_number": "895",
+                "root_type": "Asset",
+                "is_group": 1
+            }
+        },
+        "NAZIM HESAPLAR": {
+            "account_number": "9",
+            "root_type": "Expense",
+            "is_group": 1,
+            "GÖNDERİLECEK BÜTÇE ÖDENEKLERİ HESABI": {
+                "account_number": "900",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "BÜTÇE ÖDENEKLERİ HESABI": {
+                "account_number": "901",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "BÜTÇE ÖDENEK HAREKETLERİ HESABI": {
+                "account_number": "902",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "KULLANILACAK ÖDENEKLER HESABI": {
+                "account_number": "903",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "ÖDENEKLER HESABI": {
+                "account_number": "904",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "ÖDENEKLİ GİDERLER HESABI": {
+                "account_number": "905",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "MAHSUP DÖNEMİNE AKTARILAN KULLANILACAK ÖDENEKLER HESABI": {
+                "account_number": "906",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "MAHSUP DÖNEMİNE AKTARILAN ÖDENEKLER HESABI": {
+                "account_number": "907",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "TEMİNAT MEKTUPLARI HESABI": {
+                "account_number": "910",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "TEMİNAT MEKTUPLARI EMANETLERİ HESABI": {
+                "account_number": "911",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "KİŞİLERE AİT MENKUL KIYMETLER HESABI": {
+                "account_number": "912",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "KİŞİLERE AİT MENKUL KIYMET EMANETLERİ HESABI": {
+                "account_number": "913",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "GİDER TAAHHÜTLERİ HESABI": {
+                "account_number": "920",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "GİDER TAAHHÜTLERİ KARŞILIĞI HESABI": {
+                "account_number": "921",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "VERİLEN GARANTİLER HESABI": {
+                "account_number": "930",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "VERİLEN GARANTİLER KARŞILIĞI HESABI": {
+                "account_number": "931",
+                "root_type": "Expense",
+                "is_group": 1
+            },
+            "STOK AYARLAMA": {
+                "account_number": "940",
+                "root_type": "Expense",
+                "is_group": 1,
+                "STOK SAYIM AYARLAMA": {
+                    "account_number": "940.01",
+                    "root_type": "Expense"
+                }
+            }
+        }
+    }
+}
