@@ -384,7 +384,6 @@ def _make_sales_order(source_name, target_doc=None, customer_group=None, ignore_
 				)
 
 		target.flags.ignore_permissions = ignore_permissions
-		target.delivery_date = nowdate()
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
