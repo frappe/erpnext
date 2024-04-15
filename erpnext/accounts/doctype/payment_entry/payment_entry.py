@@ -525,7 +525,7 @@ class PaymentEntry(AccountsController):
 		elif self.party_type == "Shareholder":
 			return ("Journal Entry",)
 		elif self.party_type == "Employee":
-			return ("Journal Entry",)
+			return ("Journal Entry", "Expense Claim")
 
 	def validate_paid_invoices(self):
 		no_oustanding_refs = {}
