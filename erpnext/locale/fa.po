@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-10 08:40\n"
+"PO-Revision-Date: 2024-04-15 13:59\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -24790,7 +24790,7 @@ msgstr "آیا می خواهید درخواست مواد را ارسال کنی�
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgctxt "Transaction Deletion Record Details"
 msgid "DocField"
-msgstr ""
+msgstr "DocField"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "DocType"
