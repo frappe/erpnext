@@ -37,7 +37,7 @@ class PaymentRequest(Document):
 			self.status = "Draft"
 		self.validate_reference_document()
 		self.validate_payment_request_amount()
-		self.validate_currency()
+		# self.validate_currency()
 		self.validate_subscription_details()
 
 	def validate_reference_document(self):
@@ -276,8 +276,13 @@ class PaymentRequest(Document):
 			}
 		)
 
-		payment_entry.received_amount = payment_entry.base_paid_amount
-		payment_entry.get("references")[0].allocated_amount = payment_entry.base_paid_amount
+		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
+			amount = payment_entry.base_paid_amount
+		else:
+			amount = self.grand_total
+
+		payment_entry.received_amount = amount
+		payment_entry.get("references")[0].allocated_amount = amount
 
 		for dimension in get_accounting_dimensions():
 			payment_entry.update({dimension: self.get(dimension)})
