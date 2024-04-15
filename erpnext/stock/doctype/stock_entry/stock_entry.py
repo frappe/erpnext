@@ -9,7 +9,17 @@ import frappe
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, comma_or, cstr, flt, format_time, formatdate, getdate, nowdate
+from frappe.utils import (
+	cint,
+	comma_or,
+	cstr,
+	flt,
+	format_time,
+	formatdate,
+	get_link_to_form,
+	getdate,
+	nowdate,
+)
 
 import erpnext
 from erpnext.accounts.general_ledger import process_gl_map
@@ -30,6 +40,7 @@ from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	OpeningEntryAccountError,
 )
 from erpnext.stock.get_item_details import (
+	get_barcode_data,
 	get_bin_details,
 	get_conversion_factor,
 	get_default_cost_center,
@@ -428,7 +439,14 @@ class StockEntry(StockController):
 			for field in reset_fields:
 				item.set(field, item_details.get(field))
 
-			update_fields = ("uom", "description", "expense_account", "cost_center", "conversion_factor")
+			update_fields = (
+				"uom",
+				"description",
+				"expense_account",
+				"cost_center",
+				"conversion_factor",
+				"barcode",
+			)
 
 			for field in update_fields:
 				if not item.get(field):
@@ -637,8 +655,8 @@ class StockEntry(StockController):
 						)
 					)
 
-				work_order_link = frappe.utils.get_link_to_form("Work Order", self.work_order)
-				job_card_link = frappe.utils.get_link_to_form("Job Card", job_card)
+				work_order_link = get_link_to_form("Work Order", self.work_order)
+				job_card_link = get_link_to_form("Job Card", job_card)
 				frappe.throw(
 					_(
 						"Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."
@@ -1347,9 +1365,24 @@ class StockEntry(StockController):
 
 		return finished_item_row
 
+	def validate_serial_batch_bundle_type(self, serial_and_batch_bundle):
+		if (
+			frappe.db.get_value("Serial and Batch Bundle", serial_and_batch_bundle, "type_of_transaction")
+			!= "Outward"
+		):
+			frappe.throw(
+				_(
+					"The Serial and Batch Bundle {0} is not valid for this transaction. The 'Type of Transaction' should be 'Outward' instead of 'Inward' in Serial and Batch Bundle {0}"
+				).format(get_link_to_form("Serial and Batch Bundle", serial_and_batch_bundle)),
+				title=_("Invalid Serial and Batch Bundle"),
+			)
+
 	def get_sle_for_source_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get("items"):
 			if cstr(d.s_warehouse):
+				if d.serial_and_batch_bundle and self.docstatus == 1:
+					self.validate_serial_batch_bundle_type(d.serial_and_batch_bundle)
+
 				sle = self.get_sl_entries(
 					d,
 					{
@@ -1365,6 +1398,21 @@ class StockEntry(StockController):
 					or finished_item_row.t_warehouse != d.s_warehouse
 				):
 					sle.dependant_sle_voucher_detail_no = finished_item_row.name
+
+				if sle.serial_and_batch_bundle and self.docstatus == 2:
+					bundle_id = frappe.get_cached_value(
+						"Serial and Batch Bundle",
+						{
+							"voucher_detail_no": d.name,
+							"voucher_no": self.name,
+							"is_cancelled": 0,
+							"type_of_transaction": "Outward",
+						},
+						"name",
+					)
+
+					if bundle_id:
+						sle.serial_and_batch_bundle = bundle_id
 
 				sl_entries.append(sle)
 
@@ -1633,6 +1681,10 @@ class StockEntry(StockController):
 
 			if subcontract_items and len(subcontract_items) == 1:
 				ret["subcontracted_item"] = subcontract_items[0].main_item_code
+
+		barcode_data = get_barcode_data(item_code=item.name)
+		if barcode_data and len(barcode_data.get(item.name)) == 1:
+			ret["barcode"] = barcode_data.get(item.name)[0]
 
 		return ret
 

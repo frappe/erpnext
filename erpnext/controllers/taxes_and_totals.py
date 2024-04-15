@@ -467,7 +467,16 @@ class calculate_taxes_and_totals:
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-			current_tax_amount = item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
+
+			if tax.get("is_tax_withholding_account") and item.meta.get_field("apply_tds"):
+				if not item.get("apply_tds") or not self.doc.tax_withholding_net_total:
+					current_tax_amount = 0.0
+				else:
+					current_tax_amount = item.net_amount * actual / self.doc.tax_withholding_net_total
+			else:
+				current_tax_amount = (
+					item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
+				)
 
 		elif tax.charge_type == "On Net Total":
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount
@@ -1089,6 +1098,11 @@ def get_rounded_tax_amount(itemised_tax, precision):
 		for row in taxes.values():
 			if isinstance(row, dict) and isinstance(row["tax_amount"], float):
 				row["tax_amount"] = flt(row["tax_amount"], precision)
+
+
+@frappe.whitelist()
+def get_rounding_tax_settings():
+	return frappe.db.get_single_value("Accounts Settings", "round_row_wise_tax")
 
 
 class init_landed_taxes_and_totals:
