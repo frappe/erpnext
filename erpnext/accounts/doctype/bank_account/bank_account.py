@@ -135,7 +135,7 @@ def get_party_bank_account(party_type, party):
 
 
 def get_default_company_bank_account(company, party_type, party):
-	if party_type not in ["Customer", "Supplier", "Company"]:
+	if party_type not in ["Customer", "Supplier"]:
 		return
 
 	default_company_bank_account = frappe.db.get_value(party_type, party, "default_bank_account")
