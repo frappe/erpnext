@@ -524,15 +524,9 @@ def update_barcode_value(out):
 		out["barcode"] = barcode_data.get(out.item_code)[0]
 
 
-<<<<<<< HEAD
-def get_barcode_data(items_list):
+def get_barcode_data(items_list, item_code=None):
 	# get itemwise batch no data
 	# exmaple: {'LED-GRE': [Batch001, Batch002]}
-=======
-def get_barcode_data(items_list=None, item_code=None):
-	# get item-wise batch no data
-	# example: {'LED-GRE': [Batch001, Batch002]}
->>>>>>> b0730293e2 (fix: barcode not fetched on selection of item)
 	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
 
 	itemwise_barcode = {}
