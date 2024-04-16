@@ -722,6 +722,7 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 						"purchase_order": item.purchase_order,
 						"purchase_order_item": item.purchase_order_item,
 						"subcontracting_receipt_item": item.name,
+						"project": po_item.project,
 					}
 					target_doc.append("items", item_row)
 
