@@ -1646,11 +1646,7 @@ class StockEntry(StockController):
 			ret.update(get_uom_details(args.get("item_code"), args.get("uom"), args.get("qty")))
 
 		if self.purpose == "Material Issue":
-			ret["expense_account"] = (
-				item.get("expense_account")
-				or item_group_defaults.get("expense_account")
-				or frappe.get_cached_value("Company", self.company, "default_expense_account")
-			)
+			ret["expense_account"] = item.get("expense_account") or item_group_defaults.get("expense_account")
 
 		for company_field, field in {
 			"stock_adjustment_account": "expense_account",
