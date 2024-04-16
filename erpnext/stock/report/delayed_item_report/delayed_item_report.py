@@ -86,7 +86,11 @@ class DelayedItemReport:
 			filters = {"parent": ("in", sales_orders), "name": ("in", sales_order_items)}
 
 		so_data = {}
-		for d in frappe.get_all(doctype, filters=filters, fields=["delivery_date", "parent", "name"]):
+		fields = ["delivery_date", "name"]
+		if frappe.db.has_column(doctype, "parent"):
+			fields.append("parent")
+
+		for d in frappe.get_all(doctype, filters=filters, fields=fields):
 			key = d.name if consolidated else (d.parent, d.name)
 			if key not in so_data:
 				so_data.setdefault(key, d.delivery_date)
