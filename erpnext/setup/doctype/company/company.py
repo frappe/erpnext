@@ -191,6 +191,13 @@ class Company(NestedSet):
 					).format(frappe.bold(account[0]))
 					frappe.throw(error_message)
 
+		if self.book_advance_payments_in_separate_party_account:
+			if not self.default_advance_paid_account:
+				frappe.throw(_("Set Default Advance Paid Account for advance payments"))
+
+			if not self.default_advance_received_account:
+				frappe.throw(_("Set Default Advance Received Account for advance payments"))
+
 	def validate_currency(self):
 		if self.is_new():
 			return
