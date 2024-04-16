@@ -1293,7 +1293,8 @@ class AccountsController(TransactionBase):
 
 						dr_or_cr = "debit" if d.exchange_gain_loss > 0 else "credit"
 
-						if d.reference_doctype == "Purchase Invoice":
+						# Inverse debit/credit for payable accounts
+						if self.is_payable_account(d.reference_doctype, party_account):
 							dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 						reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
@@ -1327,6 +1328,7 @@ class AccountsController(TransactionBase):
 							)
 						)
 
+<<<<<<< HEAD
 	def make_precision_loss_gl_entry(self, gl_entries):
 		round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
 			self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
@@ -1353,6 +1355,15 @@ class AccountsController(TransactionBase):
 					}
 				)
 			)
+=======
+	def is_payable_account(self, reference_doctype, account):
+		if reference_doctype == "Purchase Invoice" or (
+			reference_doctype == "Journal Entry"
+			and frappe.get_cached_value("Account", account, "account_type") == "Payable"
+		):
+			return True
+		return False
+>>>>>>> 81b574053f (fix: incorrect exc gain/loss for PE against JE for payable accounts)
 
 	def update_against_document_in_jv(self):
 		"""
