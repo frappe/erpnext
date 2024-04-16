@@ -89,11 +89,6 @@ frappe.ui.form.on("Sales Order", {
 		}, __('Get Items From'));
 	},
 
-<<<<<<< HEAD
-	onload: function(frm) {
-		if (!frm.doc.transaction_date){
-			frm.set_value('transaction_date', frappe.datetime.get_today())
-=======
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function (frm) {
 		if (frm.doc.company) {
@@ -115,10 +110,9 @@ frappe.ui.form.on("Sales Order", {
 		}
 	},
 
-	onload: function (frm) {
-		if (!frm.doc.transaction_date) {
-			frm.set_value("transaction_date", frappe.datetime.get_today());
->>>>>>> c6cf1bec76 (fix: get address if multiple companies)
+	onload: function(frm) {
+		if (!frm.doc.transaction_date){
+			frm.set_value('transaction_date', frappe.datetime.get_today())
 		}
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return {
