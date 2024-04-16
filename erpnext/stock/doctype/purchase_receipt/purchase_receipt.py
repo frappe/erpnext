@@ -670,8 +670,8 @@ class PurchaseReceipt(BuyingController):
 					else self.get_company_default("stock_received_but_not_billed")
 				)
 				landed_cost_entries = get_item_account_wise_additional_cost(self.name)
-
 				if d.is_fixed_asset:
+<<<<<<< HEAD
 					account_type = (
 						"capital_work_in_progress_account"
 						if is_cwip_accounting_enabled(d.asset_category)
@@ -682,6 +682,9 @@ class PurchaseReceipt(BuyingController):
 						account_type, asset_category=d.asset_category, company=self.company
 					)
 
+=======
+					stock_asset_account_name = d.expense_account
+>>>>>>> 651e4696fd (fix: expense account should be fetched from related asset category)
 					stock_value_diff = (
 						flt(d.base_net_amount) + flt(d.item_tax_amount) + flt(d.landed_cost_voucher_amount)
 					)
