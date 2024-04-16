@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-13 11:55\n"
+"PO-Revision-Date: 2024-04-16 14:14\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -34889,25 +34889,25 @@ msgstr ""
 
 #: projects/report/project_summary/project_summary.js:16
 msgid "Is Active"
-msgstr ""
+msgstr "Je aktivan"
 
 #. Label of a Check field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Is Active"
-msgstr ""
+msgstr "Je aktivan"
 
 #. Label of a Select field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Is Active"
-msgstr ""
+msgstr "Je aktivan"
 
 #. Label of a Check field in DocType 'Subcontracting BOM'
 #: subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
 msgctxt "Subcontracting BOM"
 msgid "Is Active"
-msgstr ""
+msgstr "Je aktivan"
 
 #. Label of a Check field in DocType 'Stock Ledger Entry'
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
@@ -43290,49 +43290,49 @@ msgstr ""
 #: public/js/utils/serial_no_batch_selector.js:413
 #: selling/doctype/quotation/quotation.js:273
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #. Label of a Data field in DocType 'Appointment'
 #: crm/doctype/appointment/appointment.json
 msgctxt "Appointment"
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #. Label of a Dynamic Link field in DocType 'Bulk Transaction Log Detail'
 #: bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
 msgctxt "Bulk Transaction Log Detail"
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #. Label of a Data field in DocType 'Employee Group'
 #: setup/doctype/employee_group/employee_group.json
 msgctxt "Employee Group"
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #. Label of a Data field in DocType 'Finance Book'
 #: accounts/doctype/finance_book/finance_book.json
 msgctxt "Finance Book"
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #. Label of a Data field in DocType 'Installation Note'
 #: selling/doctype/installation_note/installation_note.json
 msgctxt "Installation Note"
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #. Label of a Dynamic Link field in DocType 'Payment Entry Reference'
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 msgctxt "Payment Entry Reference"
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #. Label of a Dynamic Link field in DocType 'Payment Order Reference'
 #: accounts/doctype/payment_order_reference/payment_order_reference.json
 msgctxt "Payment Order Reference"
 msgid "Name"
-msgstr ""
+msgstr "Naziv"
 
 #. Label of a Section Break field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
@@ -43415,93 +43415,93 @@ msgstr ""
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Asset Depreciation Schedule'
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgctxt "Asset Depreciation Schedule"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Asset Shift Allocation'
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.json
 msgctxt "Asset Shift Allocation"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Option for the 'Supplier Naming By' (Select) field in DocType 'Buying
 #. Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Option for the 'Campaign Naming By' (Select) field in DocType 'CRM Settings'
 #: crm/doctype/crm_settings/crm_settings.json
 msgctxt "CRM Settings"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Campaign'
 #: crm/doctype/campaign/campaign.json
 msgctxt "Campaign"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Closing Stock Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Downtime Entry'
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
 msgctxt "Downtime Entry"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Option for the 'Customer Naming By' (Select) field in DocType 'Selling
 #. Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Serial and Batch Bundle'
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Option for the 'Item Naming By' (Select) field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Select field in DocType 'Supplier Scorecard Period'
 #: buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 msgctxt "Supplier Scorecard Period"
 msgid "Naming Series"
-msgstr ""
+msgstr "Imenovanje serije"
 
 #. Label of a Data field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -53113,137 +53113,137 @@ msgstr "Štampaj"
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Print Format"
-msgstr ""
+msgstr "Format za štampanje"
 
 #. Label of a Select field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Print Format"
-msgstr ""
+msgstr "Format za štampanje"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgctxt "Print Format"
 msgid "Print Format"
-msgstr ""
+msgstr "Format za štampanje"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgid "Print Format Builder"
-msgstr ""
+msgstr "Izrađivač formata za štampanje"
 
 #. Name of a DocType
 #: setup/doctype/print_heading/print_heading.json
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Data field in DocType 'Print Heading'
 #: setup/doctype/print_heading/print_heading.json
 msgctxt "Print Heading"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #. Label of a Link field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Print Heading"
-msgstr ""
+msgstr "Štampanje naslova"
 
 #: regional/report/irs_1099/irs_1099.js:36
 msgid "Print IRS 1099 Forms"
@@ -53353,62 +53353,62 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Print Settings"
-msgstr ""
+msgstr "Postavke štampanja"
 
 #. Label of a Section Break field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Print Settings"
-msgstr ""
+msgstr "Postavke štampanja"
 
 #. Label of a Section Break field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Print Settings"
-msgstr ""
+msgstr "Postavke štampanja"
 
 #. Label of a Section Break field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Print Settings"
-msgstr ""
+msgstr "Postavke štampanja"
 
 #. Label of a Link in the Settings Workspace
 #. Label of a shortcut in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgctxt "Print Settings"
 msgid "Print Settings"
-msgstr ""
+msgstr "Postavke štampanja"
 
 #. Label of a Section Break field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Print Settings"
-msgstr ""
+msgstr "Postavke štampanja"
 
 #. Label of a Section Break field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Print Settings"
-msgstr ""
+msgstr "Postavke štampanja"
 
 #. Label of a Section Break field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Print Settings"
-msgstr ""
+msgstr "Postavke štampanja"
 
 #. Label of a Section Break field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Print Settings"
-msgstr ""
+msgstr "Postavke štampanja"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgctxt "Print Style"
 msgid "Print Style"
-msgstr ""
+msgstr "Stil štampanja"
 
 #: setup/install.py:99
 msgid "Print UOM after Quantity"
@@ -53441,7 +53441,7 @@ msgstr ""
 #. Label of a Card Break in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgid "Printing"
-msgstr ""
+msgstr "Štampanje"
 
 #. Label of a Section Break field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
@@ -53520,61 +53520,61 @@ msgstr ""
 #: projects/report/project_summary/project_summary.js:36
 #: templates/pages/task_info.html:54
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #. Label of a Link field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #. Label of a Select field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #. Label of a Select field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #. Label of a Select field in DocType 'Promotional Scheme Price Discount'
 #: accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
 msgctxt "Promotional Scheme Price Discount"
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #. Label of a Select field in DocType 'Promotional Scheme Product Discount'
 #: accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgctxt "Promotional Scheme Product Discount"
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #. Label of a Int field in DocType 'Putaway Rule'
 #: stock/doctype/putaway_rule/putaway_rule.json
 msgctxt "Putaway Rule"
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #. Label of a Link field in DocType 'Service Level Priority'
 #: support/doctype/service_level_priority/service_level_priority.json
 msgctxt "Service Level Priority"
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #. Label of a Select field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #. Label of a Int field in DocType 'Tax Rule'
 #: accounts/doctype/tax_rule/tax_rule.json
 msgctxt "Tax Rule"
 msgid "Priority"
-msgstr ""
+msgstr "Prioritet"
 
 #: stock/doctype/putaway_rule/putaway_rule.py:60
 msgid "Priority cannot be lesser than 1."
@@ -54187,7 +54187,7 @@ msgstr ""
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Profile"
-msgstr ""
+msgstr "Profil"
 
 #. Label of a Column Break field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -54249,13 +54249,13 @@ msgstr ""
 
 #: projects/doctype/task/task_list.js:52 templates/pages/projects.html:25
 msgid "Progress"
-msgstr ""
+msgstr "Napredak"
 
 #. Label of a Section Break field in DocType 'BOM Update Log'
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 msgctxt "BOM Update Log"
 msgid "Progress"
-msgstr ""
+msgstr "Napredak"
 
 #: projects/doctype/task/task.py:143
 #, python-format
@@ -54304,304 +54304,304 @@ msgstr ""
 #: support/report/issue_summary/issue_summary.js:63
 #: templates/pages/task_info.html:39 templates/pages/timelog_info.html:22
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Account Closing Balance'
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
 msgctxt "Account Closing Balance"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgctxt "Bank Guarantee"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Option for the 'Budget Against' (Select) field in DocType 'Budget'
 #. Label of a Link field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Option for the 'Document Type' (Select) field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgctxt "Contract"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Installation Note'
 #: selling/doctype/installation_note/installation_note.json
 msgctxt "Installation Note"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Journal Entry Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'PSOA Project'
 #: accounts/doctype/psoa_project/psoa_project.json
 msgctxt "PSOA Project"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Table MultiSelect field in DocType 'Process Statement Of
 #. Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link in the Projects Workspace
 #. Label of a shortcut in the Projects Workspace
 #: projects/workspace/projects/projects.json
 msgctxt "Project"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Project Update'
 #: projects/doctype/project_update/project_update.json
 msgctxt "Project Update"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Request for Quotation Item'
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 msgctxt "Request for Quotation Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Stock Ledger Entry'
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgctxt "Stock Ledger Entry"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Text field in DocType 'Task Depends On'
 #: projects/doctype/task_depends_on/task_depends_on.json
 msgctxt "Task Depends On"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Timesheet Detail'
 #: projects/doctype/timesheet_detail/timesheet_detail.json
 msgctxt "Timesheet Detail"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #. Label of a Link field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Project"
-msgstr ""
+msgstr "Projekat"
 
 #: projects/doctype/project/project.py:350
 msgid "Project Collaboration Invitation"
@@ -54994,13 +54994,13 @@ msgstr ""
 #: communication/doctype/communication_medium/communication_medium.json
 msgctxt "Communication Medium"
 msgid "Provider"
-msgstr ""
+msgstr "Davatelj"
 
 #. Label of a Select field in DocType 'Video'
 #: utilities/doctype/video/video.json
 msgctxt "Video"
 msgid "Provider"
-msgstr ""
+msgstr "Davatelj"
 
 #. Option for the 'Bank Guarantee Type' (Select) field in DocType 'Bank
 #. Guarantee'
@@ -55296,7 +55296,7 @@ msgstr ""
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Purchase Manager"
-msgstr ""
+msgstr "Voditelj nabave"
 
 #. Name of a role
 #: accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.json
@@ -55305,7 +55305,7 @@ msgstr ""
 #: stock/doctype/item_price/item_price.json
 #: stock/doctype/price_list/price_list.json
 msgid "Purchase Master Manager"
-msgstr ""
+msgstr "Glavni voditelj nabave"
 
 #. Name of a DocType
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:155
@@ -55866,7 +55866,7 @@ msgstr ""
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Purchase User"
-msgstr ""
+msgstr "Korisnik nabave"
 
 #: buying/report/purchase_order_trends/purchase_order_trends.py:51
 msgid "Purchase Value"
@@ -55917,14 +55917,14 @@ msgstr ""
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgctxt "Supplier Scorecard Scoring Standing"
 msgid "Purple"
-msgstr ""
+msgstr "Ljubičasta"
 
 #. Option for the 'Color' (Select) field in DocType 'Supplier Scorecard
 #. Standing'
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 msgctxt "Supplier Scorecard Standing"
 msgid "Purple"
-msgstr ""
+msgstr "Ljubičasta"
 
 #: stock/doctype/stock_entry/stock_entry.js:329
 msgid "Purpose"
