@@ -45,8 +45,8 @@ frappe.ui.form.on('Quotation', {
 		frm.trigger("set_label");
 		frm.trigger("toggle_reqd_lead_customer");
 		frm.trigger("set_dynamic_field_label");
-		frm.set_value("party_name", '')
-		frm.set_value("customer_name", '')
+		frm.set_value("party_name", "")
+		frm.set_value("customer_name", "")
 	},
 
 	set_label: function(frm) {
