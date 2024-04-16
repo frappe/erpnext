@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-15 13:59\n"
+"PO-Revision-Date: 2024-04-16 14:14\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgstr ""
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "  "
-msgstr ""
+msgstr "  "
 
 #: selling/doctype/quotation/quotation.js:77
 msgid " Address"
@@ -66,7 +66,7 @@ msgstr "علامت \"دارایی ثابت است\" را نمی توان برد�
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "#"
-msgstr ""
+msgstr "#"
 
 #. Description of the Onboarding Step 'Accounts Settings'
 #: accounts/onboarding_step/accounts_settings/accounts_settings.json
@@ -658,7 +658,7 @@ msgstr ""
 
 #: stock/doctype/delivery_note/delivery_note.py:391
 msgid "'Sales Invoice' reference ({1}) is missing in row {0}"
-msgstr ""
+msgstr "مرجع «فاکتور فروش» ({1}) در ردیف {0} وجود ندارد"
 
 #: stock/doctype/delivery_note/delivery_note.py:374
 msgid "'Sales Order Item' reference ({1}) is missing in row {0}"
@@ -1228,12 +1228,12 @@ msgstr "یک برگه بسته بندی فقط می تواند برای پیش �
 #. Description of a DocType
 #: stock/doctype/price_list/price_list.json
 msgid "A Price List is a collection of Item Prices either Selling, Buying, or both"
-msgstr ""
+msgstr "لیست قیمت مجموعه ای از قیمت های آیتم‌های فروش، خرید یا هر دو است"
 
 #. Description of a DocType
 #: stock/doctype/item/item.json
 msgid "A Product or a Service that is bought, sold or kept in stock."
-msgstr ""
+msgstr "محصول یا خدماتی که خریداری، فروخته یا در انبار نگهداری می شود."
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:532
 msgid "A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
@@ -1247,12 +1247,12 @@ msgstr ""
 
 #: setup/doctype/company/company.py:898
 msgid "A Transaction Deletion Document: {0} is triggered for {0}"
-msgstr ""
+msgstr "یک سند حذف تراکنش: {0} برای {0} فعال می شود"
 
 #. Description of a DocType
 #: accounts/doctype/shipping_rule_condition/shipping_rule_condition.json
 msgid "A condition for a Shipping Rule"
-msgstr ""
+msgstr "یک شرط برای یک قانون حمل و نقل"
 
 #. Description of the 'Send To Primary Contact' (Check) field in DocType
 #. 'Process Statement Of Accounts'
@@ -1285,7 +1285,7 @@ msgstr "الگویی با دسته مالیاتی {0} از قبل وجود دا�
 #. Description of a DocType
 #: setup/doctype/sales_partner/sales_partner.json
 msgid "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission."
-msgstr ""
+msgstr "یک توزیع کننده شخص ثالث / فروشنده / نماینده کمیسیون / وابسته / فروشنده که محصولات شرکت را به صورت کمیسیون می فروشد."
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -1552,7 +1552,7 @@ msgstr "نشانه دسترسی"
 #: setup/doctype/uom/uom.json
 msgctxt "UOM"
 msgid "According to CEFACT/ICG/2010/IC013 or CEFACT/ICG/2010/IC010"
-msgstr ""
+msgstr "طبق CEFACT/ICG/2010/IC013 یا CEFACT/ICG/2010/IC010"
 
 #. Name of a DocType
 #: accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.js:16
@@ -3341,7 +3341,7 @@ msgstr "سرنخ های فعال"
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Active Status"
-msgstr ""
+msgstr "وضعیت فعال"
 
 #. Label of a Tab Break field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -79259,37 +79259,37 @@ msgstr "معتبر تا"
 #: accounts/doctype/coupon_code/coupon_code.json
 msgctxt "Coupon Code"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Item Price'
 #: stock/doctype/item_price/item_price.json
 msgctxt "Item Price"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Lower Deduction Certificate'
 #: regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
 msgctxt "Lower Deduction Certificate"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Promotional Scheme'
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #: regional/doctype/lower_deduction_certificate/lower_deduction_certificate.py:40
 msgid "Valid Up To date cannot be before Valid From date"
@@ -80592,7 +80592,7 @@ msgstr "انبار"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:4
 msgid "Warehouse Capacity Summary"
-msgstr ""
+msgstr "خلاصه ظرفیت انبار"
 
 #: stock/doctype/putaway_rule/putaway_rule.py:78
 msgid "Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} {2}."
@@ -83367,7 +83367,7 @@ msgstr ""
 
 #: public/js/utils/serial_no_batch_selector.js:206
 msgid "{0} {1} Manually"
-msgstr ""
+msgstr "{0} {1} به صورت دستی"
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:427
 msgid "{0} {1} Partially Reconciled"
