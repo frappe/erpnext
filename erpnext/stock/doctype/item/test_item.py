@@ -32,7 +32,7 @@ test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
 
 
-def make_item(item_code=None, properties=None, uoms=None):
+def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	if not item_code:
 		item_code = frappe.generate_hash(length=16)
 
@@ -60,6 +60,14 @@ def make_item(item_code=None, properties=None, uoms=None):
 	if uoms:
 		for uom in uoms:
 			item.append("uoms", uom)
+
+	if barcode:
+		item.append(
+			"barcodes",
+			{
+				"barcode": barcode,
+			},
+		)
 
 	item.insert()
 
