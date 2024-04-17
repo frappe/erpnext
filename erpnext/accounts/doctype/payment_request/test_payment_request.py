@@ -86,6 +86,8 @@ class TestPaymentRequest(unittest.TestCase):
 		pr = make_payment_request(
 			dt="Purchase Invoice",
 			dn=si_usd.name,
+			party_type="Supplier",
+			party="_Test Supplier USD",
 			recipient_id="user@example.com",
 			mute_email=1,
 			payment_gateway_account="_Test Gateway - USD",
@@ -97,6 +99,51 @@ class TestPaymentRequest(unittest.TestCase):
 		pr.load_from_db()
 
 		self.assertEqual(pr.status, "Paid")
+
+	def test_multiple_payment_entry_against_purchase_invoice(self):
+		purchase_invoice = make_purchase_invoice(
+			customer="_Test Supplier USD",
+			debit_to="_Test Payable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+		)
+
+		pr = make_payment_request(
+			dt="Purchase Invoice",
+			party_type="Supplier",
+			party="_Test Supplier USD",
+			dn=purchase_invoice.name,
+			recipient_id="user@example.com",
+			mute_email=1,
+			payment_gateway_account="_Test Gateway - USD",
+			return_doc=1,
+		)
+
+		pr.grand_total = pr.grand_total / 2
+
+		pr.submit()
+		pr.create_payment_entry()
+
+		purchase_invoice.load_from_db()
+		self.assertEqual(purchase_invoice.status, "Partly Paid")
+
+		pr = make_payment_request(
+			dt="Purchase Invoice",
+			party_type="Supplier",
+			party="_Test Supplier USD",
+			dn=purchase_invoice.name,
+			recipient_id="user@example.com",
+			mute_email=1,
+			payment_gateway_account="_Test Gateway - USD",
+			return_doc=1,
+		)
+
+		pr.save()
+		pr.submit()
+		pr.create_payment_entry()
+
+		purchase_invoice.load_from_db()
+		self.assertEqual(purchase_invoice.status, "Paid")
 
 	def test_payment_entry(self):
 		frappe.db.set_value(

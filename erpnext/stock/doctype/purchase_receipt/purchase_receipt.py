@@ -15,6 +15,7 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 
@@ -51,6 +52,7 @@ class PurchaseReceipt(BuyingController):
 		base_net_total: DF.Currency
 		base_rounded_total: DF.Currency
 		base_rounding_adjustment: DF.Currency
+		base_tax_withholding_net_total: DF.Currency
 		base_taxes_and_charges_added: DF.Currency
 		base_taxes_and_charges_deducted: DF.Currency
 		base_total: DF.Currency
@@ -120,6 +122,7 @@ class PurchaseReceipt(BuyingController):
 		supplier_name: DF.Data | None
 		supplier_warehouse: DF.Link | None
 		tax_category: DF.Link | None
+		tax_withholding_net_total: DF.Currency
 		taxes: DF.Table[PurchaseTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		taxes_and_charges_added: DF.Currency
@@ -1121,37 +1124,6 @@ def get_item_wise_returned_qty(pr_doc):
 			as_list=1,
 		)
 	)
-
-
-def merge_taxes(source_taxes, target_doc):
-	from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
-		update_item_wise_tax_detail,
-	)
-
-	existing_taxes = target_doc.get("taxes") or []
-	idx = 1
-	for tax in source_taxes:
-		found = False
-		for t in existing_taxes:
-			if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
-				t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
-				t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
-				update_item_wise_tax_detail(t, tax)
-				found = True
-
-		if not found:
-			tax.charge_type = "Actual"
-			tax.idx = idx
-			idx += 1
-			tax.included_in_print_rate = 0
-			tax.dont_recompute_tax = 1
-			tax.row_id = ""
-			tax.tax_amount = tax.tax_amount_after_discount_amount
-			tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
-			tax.item_wise_tax_detail = tax.item_wise_tax_detail
-			existing_taxes.append(tax)
-
-	target_doc.set("taxes", existing_taxes)
 
 
 @frappe.whitelist()

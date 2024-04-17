@@ -1127,10 +1127,17 @@ class TestPurchaseOrder(FrappeTestCase):
 		po = create_purchase_order()
 		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated")
 
-		pr = make_payment_request(dt=po.doctype, dn=po.name, submit_doc=True, return_doc=True)
+		pr = make_payment_request(
+			dt=po.doctype, dn=po.name, submit_doc=True, return_doc=True, payment_request_type="Outward"
+		)
+
+		po.reload()
 		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
 
 		pe = get_payment_entry(po.doctype, po.name).save().submit()
+
+		pr.reload()
+		self.assertEqual(pr.status, "Paid")
 		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Fully Paid")
 
 		pe.reload()

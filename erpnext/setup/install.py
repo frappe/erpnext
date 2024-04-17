@@ -142,6 +142,11 @@ def add_company_to_session_defaults():
 def add_standard_navbar_items():
 	navbar_settings = frappe.get_single("Navbar Settings")
 
+	# Translatable strings for below navbar items
+	__ = _("Documentation")
+	__ = _("User Forum")
+	__ = _("Report an Issue")
+
 	erpnext_navbar_items = [
 		{
 			"item_label": "Documentation",

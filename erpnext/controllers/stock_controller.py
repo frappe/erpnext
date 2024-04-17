@@ -166,7 +166,7 @@ class StockController(AccountsController):
 				# remove extra whitespace and store one serial no on each line
 				row.serial_no = clean_serial_no_string(row.serial_no)
 
-	def make_bundle_using_old_serial_batch_fields(self, table_name=None):
+	def make_bundle_using_old_serial_batch_fields(self, table_name=None, via_landed_cost_voucher=False):
 		if self.get("_action") == "update_after_submit":
 			return
 
@@ -205,7 +205,7 @@ class StockController(AccountsController):
 					"company": self.company,
 					"is_rejected": 1 if row.get("rejected_warehouse") else 0,
 					"use_serial_batch_fields": row.use_serial_batch_fields,
-					"do_not_submit": True,
+					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
 
 				if row.get("qty") or row.get("consumed_qty"):
@@ -1119,7 +1119,7 @@ class StockController(AccountsController):
 		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
 
-	def repost_future_sle_and_gle(self, force=False):
+	def repost_future_sle_and_gle(self, force=False, via_landed_cost_voucher=False):
 		args = frappe._dict(
 			{
 				"posting_date": self.posting_date,
@@ -1127,6 +1127,7 @@ class StockController(AccountsController):
 				"voucher_type": self.doctype,
 				"voucher_no": self.name,
 				"company": self.company,
+				"via_landed_cost_voucher": via_landed_cost_voucher,
 			}
 		)
 
@@ -1138,7 +1139,11 @@ class StockController(AccountsController):
 				frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting")
 			)
 			if item_based_reposting:
-				create_item_wise_repost_entries(voucher_type=self.doctype, voucher_no=self.name)
+				create_item_wise_repost_entries(
+					voucher_type=self.doctype,
+					voucher_no=self.name,
+					via_landed_cost_voucher=via_landed_cost_voucher,
+				)
 			else:
 				create_repost_item_valuation_entry(args)
 
@@ -1510,11 +1515,14 @@ def create_repost_item_valuation_entry(args):
 	repost_entry.allow_zero_rate = args.allow_zero_rate
 	repost_entry.flags.ignore_links = True
 	repost_entry.flags.ignore_permissions = True
+	repost_entry.via_landed_cost_voucher = args.via_landed_cost_voucher
 	repost_entry.save()
 	repost_entry.submit()
 
 
-def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=False):
+def create_item_wise_repost_entries(
+	voucher_type, voucher_no, allow_zero_rate=False, via_landed_cost_voucher=False
+):
 	"""Using a voucher create repost item valuation records for all item-warehouse pairs."""
 
 	stock_ledger_entries = get_items_to_be_repost(voucher_type, voucher_no)
@@ -1538,6 +1546,7 @@ def create_item_wise_repost_entries(voucher_type, voucher_no, allow_zero_rate=Fa
 		repost_entry.allow_zero_rate = allow_zero_rate
 		repost_entry.flags.ignore_links = True
 		repost_entry.flags.ignore_permissions = True
+		repost_entry.via_landed_cost_voucher = via_landed_cost_voucher
 		repost_entry.submit()
 		repost_entries.append(repost_entry)
 

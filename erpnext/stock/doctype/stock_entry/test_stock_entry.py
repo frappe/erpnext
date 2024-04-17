@@ -1754,6 +1754,41 @@ class TestStockEntry(FrappeTestCase):
 			self.assertTrue(frappe.db.exists("Serial No", serial_no))
 			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "status"), "Delivered")
 
+	def test_serial_batch_bundle_type_of_transaction(self):
+		item = make_item(
+			"Test Use Serial and Batch Item SN Item",
+			{
+				"has_batch_no": 1,
+				"is_stock_item": 1,
+				"create_new_batch": 1,
+				"batch_naming_series": "Test-SBBTYT-NNS.#####",
+			},
+		).name
+
+		se = make_stock_entry(
+			item_code=item,
+			qty=2,
+			target="_Test Warehouse - _TC",
+			use_serial_batch_fields=1,
+		)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		se = make_stock_entry(
+			item_code=item,
+			qty=2,
+			source="_Test Warehouse - _TC",
+			target="Stores - _TC",
+			use_serial_batch_fields=0,
+			batch_no=batch_no,
+			do_not_submit=True,
+		)
+
+		se.reload()
+		sbb = se.items[0].serial_and_batch_bundle
+		frappe.db.set_value("Serial and Batch Bundle", sbb, "type_of_transaction", "Inward")
+		self.assertRaises(frappe.ValidationError, se.submit)
+
 
 def make_serialized_item(**args):
 	args = frappe._dict(args)
