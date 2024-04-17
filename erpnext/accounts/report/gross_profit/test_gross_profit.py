@@ -1,7 +1,7 @@
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, flt, nowdate
+from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -86,11 +86,14 @@ class TestGrossProfit(FrappeTestCase):
 			self.customer = customer.name
 
 	def create_sales_invoice(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
@@ -115,11 +118,14 @@ class TestGrossProfit(FrappeTestCase):
 		return sinv
 
 	def create_delivery_note(
-		self, item=None, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, item=None, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in Delivery Note
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		dnote = create_delivery_note(
 			company=self.company,
 			customer=self.customer,

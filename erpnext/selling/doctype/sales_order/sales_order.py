@@ -42,10 +42,10 @@ class WarehouseRequired(frappe.ValidationError):
 
 class SalesOrder(SellingController):
 	def __init__(self, *args, **kwargs):
-		super(SalesOrder, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 	def validate(self):
-		super(SalesOrder, self).validate()
+		super().validate()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
 		self.validate_po()
@@ -85,7 +85,9 @@ class SalesOrder(SellingController):
 			for d in self.get("items"):
 				if d.delivery_date and getdate(self.po_date) > getdate(d.delivery_date):
 					frappe.throw(
-						_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date").format(d.idx)
+						_("Row #{0}: Expected Delivery Date cannot be before Purchase Order Date").format(
+							d.idx
+						)
 					)
 
 		if self.po_no and self.customer and not self.skip_delivery_note:
@@ -100,9 +102,9 @@ class SalesOrder(SellingController):
 					frappe.db.get_single_value("Selling Settings", "allow_against_multiple_purchase_orders")
 				):
 					frappe.msgprint(
-						_("Warning: Sales Order {0} already exists against Customer's Purchase Order {1}").format(
-							frappe.bold(so[0][0]), frappe.bold(self.po_no)
-						),
+						_(
+							"Warning: Sales Order {0} already exists against Customer's Purchase Order {1}"
+						).format(frappe.bold(so[0][0]), frappe.bold(self.po_no)),
 						alert=True,
 					)
 				else:
@@ -112,14 +114,15 @@ class SalesOrder(SellingController):
 						).format(
 							frappe.bold(so[0][0]),
 							frappe.bold(self.po_no),
-							frappe.bold(_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")),
+							frappe.bold(
+								_("'Allow Multiple Sales Orders Against a Customer's Purchase Order'")
+							),
 							get_link_to_form("Selling Settings", "Selling Settings"),
 						)
 					)
 
 	def validate_for_items(self):
 		for d in self.get("items"):
-
 			# used for production plan
 			d.transaction_date = self.transaction_date
 
@@ -149,7 +152,9 @@ class SalesOrder(SellingController):
 					(d.prevdoc_docname, self.order_type),
 				)
 				if not res:
-					frappe.msgprint(_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type))
+					frappe.msgprint(
+						_("Quotation {0} not of type {1}").format(d.prevdoc_docname, self.order_type)
+					)
 
 	def validate_delivery_date(self):
 		if self.order_type == "Sales" and not self.skip_delivery_note:
@@ -188,13 +193,16 @@ class SalesOrder(SellingController):
 				)
 
 	def validate_warehouse(self):
-		super(SalesOrder, self).validate_warehouse()
+		super().validate_warehouse()
 
 		for d in self.get("items"):
 			if (
 				(
 					frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1
-					or (self.has_product_bundle(d.item_code) and self.product_bundle_has_stock_item(d.item_code))
+					or (
+						self.has_product_bundle(d.item_code)
+						and self.product_bundle_has_stock_item(d.item_code)
+					)
 				)
 				and not d.warehouse
 				and not cint(d.delivered_by_supplier)
@@ -204,7 +212,7 @@ class SalesOrder(SellingController):
 				)
 
 	def validate_with_previous_doc(self):
-		super(SalesOrder, self).validate_with_previous_doc(
+		super().validate_with_previous_doc(
 			{
 				"Quotation": {"ref_dn_field": "prevdoc_docname", "compare_fields": [["company", "="]]},
 				"Quotation Item": {
@@ -262,7 +270,7 @@ class SalesOrder(SellingController):
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
-		super(SalesOrder, self).on_cancel()
+		super().on_cancel()
 
 		# Cannot cancel closed SO
 		if self.status == "Closed":
@@ -284,9 +292,7 @@ class SalesOrder(SellingController):
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
 	def update_project(self):
-		if (
-			frappe.db.get_single_value("Selling Settings", "sales_update_frequency") != "Each Transaction"
-		):
+		if frappe.db.get_single_value("Selling Settings", "sales_update_frequency") != "Each Transaction":
 			return
 
 		if self.project:
@@ -324,7 +330,7 @@ class SalesOrder(SellingController):
 
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
-		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" % (mod_db, cstr(self.modified)))
+		date_diff = frappe.db.sql(f"select TIMEDIFF('{mod_db}', '{cstr(self.modified)}')")
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(self.doctype, self.name))
 
@@ -499,9 +505,9 @@ class SalesOrder(SellingController):
 						)
 					if not frappe.db.exists("BOM", {"item": item.item_code, "is_active": 1}):
 						frappe.throw(
-							_("No active BOM found for item {0}. Delivery by Serial No cannot be ensured").format(
-								item.item_code
-							)
+							_(
+								"No active BOM found for item {0}. Delivery by Serial No cannot be ensured"
+							).format(item.item_code)
 						)
 				reserved_items.append(item.item_code)
 			else:
@@ -877,7 +883,7 @@ def get_events(start, end, filters=None):
 	conditions = get_event_conditions("Sales Order", filters)
 
 	data = frappe.db.sql(
-		"""
+		f"""
 		select
 			distinct `tabSales Order`.name, `tabSales Order`.customer_name, `tabSales Order`.status,
 			`tabSales Order`.delivery_status, `tabSales Order`.billing_status,
@@ -890,9 +896,7 @@ def get_events(start, end, filters=None):
 			and (`tabSales Order Item`.delivery_date between %(start)s and %(end)s)
 			and `tabSales Order`.docstatus < 2
 			{conditions}
-		""".format(
-			conditions=conditions
-		),
+		""",
 		{"start": start, "end": end},
 		as_dict=True,
 		update={"allDay": 0},
@@ -966,9 +970,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 	items_to_map = list(set(items_to_map))
 
 	if not suppliers:
-		frappe.throw(
-			_("Please set a Supplier against the Items to be considered in the Purchase Order.")
-		)
+		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
 
 	purchase_orders = []
 	for supplier in suppliers:
@@ -1034,9 +1036,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		selected_items = json.loads(selected_items)
 
 	items_to_map = [
-		item.get("item_code")
-		for item in selected_items
-		if item.get("item_code") and item.get("item_code")
+		item.get("item_code") for item in selected_items if item.get("item_code") and item.get("item_code")
 	]
 	items_to_map = list(set(items_to_map))
 
@@ -1219,17 +1219,13 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	for item in items.get("items"):
 		item["include_exploded_items"] = items.get("include_exploded_items")
 		item["ignore_existing_ordered_qty"] = items.get("ignore_existing_ordered_qty")
-		item["include_raw_materials_from_sales_order"] = items.get(
-			"include_raw_materials_from_sales_order"
-		)
+		item["include_raw_materials_from_sales_order"] = items.get("include_raw_materials_from_sales_order")
 
 	items.update({"company": company, "sales_order": sales_order})
 
 	raw_materials = get_items_for_material_requests(items)
 	if not raw_materials:
-		frappe.msgprint(
-			_("Material Request not created, as quantity for Raw Materials already available.")
-		)
+		frappe.msgprint(_("Material Request not created, as quantity for Raw Materials already available."))
 		return
 
 	material_request = frappe.new_doc("Material Request")

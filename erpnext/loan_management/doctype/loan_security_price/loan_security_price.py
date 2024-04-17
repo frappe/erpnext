@@ -13,7 +13,6 @@ class LoanSecurityPrice(Document):
 		self.validate_dates()
 
 	def validate_dates(self):
-
 		if self.valid_from > self.valid_upto:
 			frappe.throw(_("Valid From Time must be lesser than Valid Upto Time."))
 

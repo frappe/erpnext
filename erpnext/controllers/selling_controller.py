@@ -23,13 +23,13 @@ class SellingController(StockController):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency, self.grand_total)
 
 	def onload(self):
-		super(SellingController, self).onload()
+		super().onload()
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items") + (self.get("packed_items") or []):
 				item.update(get_bin_details(item.item_code, item.warehouse, include_child_warehouses=True))
 
 	def validate(self):
-		super(SellingController, self).validate()
+		super().validate()
 		self.validate_items()
 		if not self.get("is_debit_note"):
 			self.validate_max_discount()
@@ -44,7 +44,7 @@ class SellingController(StockController):
 		self.validate_auto_repeat_subscription_dates()
 
 	def set_missing_values(self, for_validate=False):
-		super(SellingController, self).set_missing_values(for_validate)
+		super().set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
 		self.set_missing_lead_customer_details(for_validate=for_validate)
@@ -284,7 +284,10 @@ class SellingController(StockController):
 
 			if flt(item.base_net_rate) < flt(last_valuation_rate_in_sales_uom):
 				throw_message(
-					item.idx, item.item_name, last_valuation_rate_in_sales_uom, "valuation rate (Moving Average)"
+					item.idx,
+					item.item_name,
+					last_valuation_rate_in_sales_uom,
+					"valuation rate (Moving Average)",
 				)
 
 	def get_item_list(self):
@@ -412,7 +415,8 @@ class SellingController(StockController):
 					"Cancelled"
 				]:
 					frappe.throw(
-						_("{0} {1} is cancelled or closed").format(_("Sales Order"), so), frappe.InvalidStatusError
+						_("{0} {1} is cancelled or closed").format(_("Sales Order"), so),
+						frappe.InvalidStatusError,
 					)
 
 				sales_order.update_reserved_qty(so_item_rows)
@@ -587,7 +591,8 @@ class SellingController(StockController):
 		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
 				item.gross_profit = flt(
-					((item.base_rate - flt(item.valuation_rate)) * item.stock_qty), self.precision("amount", item)
+					((item.base_rate - flt(item.valuation_rate)) * item.stock_qty),
+					self.precision("amount", item),
 				)
 
 	def set_customer_address(self):
@@ -664,9 +669,9 @@ class SellingController(StockController):
 			if d.get("target_warehouse") and d.get("warehouse") == d.get("target_warehouse"):
 				warehouse = frappe.bold(d.get("target_warehouse"))
 				frappe.throw(
-					_("Row {0}: Delivery Warehouse ({1}) and Customer Warehouse ({2}) can not be same").format(
-						d.idx, warehouse, warehouse
-					)
+					_(
+						"Row {0}: Delivery Warehouse ({1}) and Customer Warehouse ({2}) can not be same"
+					).format(d.idx, warehouse, warehouse)
 				)
 
 		if not self.get("is_internal_customer") and any(d.get("target_warehouse") for d in items):

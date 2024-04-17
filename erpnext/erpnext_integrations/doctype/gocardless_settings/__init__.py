@@ -34,7 +34,7 @@ def set_status(event):
 
 def set_mandate_status(event):
 	mandates = []
-	if isinstance(event["links"], (list,)):
+	if isinstance(event["links"], list):
 		for link in event["links"]:
 			mandates.append(link["mandate"])
 	else:

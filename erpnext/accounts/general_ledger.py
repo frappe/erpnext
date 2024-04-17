@@ -78,7 +78,7 @@ def make_acc_dimensions_offsetting_entry(gl_map):
 					"credit": credit,
 					"debit_in_account_currency": debit,
 					"credit_in_account_currency": credit,
-					"remarks": _("Offsetting for Accounting Dimension") + " - {0}".format(dimension.name),
+					"remarks": _("Offsetting for Accounting Dimension") + f" - {dimension.name}",
 					"against_voucher": None,
 				}
 			)
@@ -179,9 +179,7 @@ def process_gl_map(gl_map, merge_entries=True, precision=None):
 
 
 def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None):
-	cost_center_allocation = get_cost_center_allocation_data(
-		gl_map[0]["company"], gl_map[0]["posting_date"]
-	)
+	cost_center_allocation = get_cost_center_allocation_data(gl_map[0]["company"], gl_map[0]["posting_date"])
 	if not cost_center_allocation:
 		return gl_map
 
@@ -190,9 +188,7 @@ def distribute_gl_based_on_cost_center_allocation(gl_map, precision=None):
 		cost_center = d.get("cost_center")
 
 		# Validate budget against main cost center
-		validate_expense_against_budget(
-			d, expense_amount=flt(d.debit, precision) - flt(d.credit, precision)
-		)
+		validate_expense_against_budget(d, expense_amount=flt(d.debit, precision) - flt(d.credit, precision))
 
 		if cost_center and cost_center_allocation.get(cost_center):
 			for sub_cost_center, percentage in cost_center_allocation.get(cost_center, {}).items():
@@ -224,9 +220,7 @@ def get_cost_center_allocation_data(company, posting_date):
 
 	cc_allocation = frappe._dict()
 	for d in records:
-		cc_allocation.setdefault(d.main_cost_center, frappe._dict()).setdefault(
-			d.cost_center, d.percentage
-		)
+		cc_allocation.setdefault(d.main_cost_center, frappe._dict()).setdefault(d.cost_center, d.percentage)
 
 	return cc_allocation
 
@@ -540,9 +534,7 @@ def update_accounting_dimensions(round_off_gle):
 			round_off_gle[dimension] = dimension_values.get(dimension)
 
 
-def get_round_off_account_and_cost_center(
-	company, voucher_type, voucher_no, use_company_default=False
-):
+def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use_company_default=False):
 	round_off_account, round_off_cost_center = frappe.get_cached_value(
 		"Company", company, ["round_off_account", "round_off_cost_center"]
 	) or [None, None]
@@ -650,9 +642,7 @@ def check_freezing_date(posting_date, adv_adj=False):
 
 
 def validate_against_pcv(is_opening, posting_date, company):
-	if is_opening and frappe.db.exists(
-		"Period Closing Voucher", {"docstatus": 1, "company": company}
-	):
+	if is_opening and frappe.db.exists("Period Closing Voucher", {"docstatus": 1, "company": company}):
 		frappe.throw(
 			_("Opening Entry can not be created after Period Closing Voucher is created."),
 			title=_("Invalid Opening Entry"),
@@ -663,9 +653,7 @@ def validate_against_pcv(is_opening, posting_date, company):
 	)
 
 	if last_pcv_date and getdate(posting_date) <= getdate(last_pcv_date):
-		message = _("Books have been closed till the period ending on {0}").format(
-			formatdate(last_pcv_date)
-		)
+		message = _("Books have been closed till the period ending on {0}").format(formatdate(last_pcv_date))
 		message += "</br >"
 		message += _("You cannot create/amend any accounting entries till this date.")
 		frappe.throw(message, title=_("Period Closed"))

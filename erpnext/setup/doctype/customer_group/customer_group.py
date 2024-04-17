@@ -16,7 +16,7 @@ class CustomerGroup(NestedSet):
 
 	def on_update(self):
 		self.validate_name_with_customer()
-		super(CustomerGroup, self).on_update()
+		super().on_update()
 		self.validate_one_root()
 
 	def validate_name_with_customer(self):

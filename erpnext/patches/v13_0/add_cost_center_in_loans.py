@@ -7,6 +7,4 @@ def execute():
 
 	for company in frappe.get_all("Company", pluck="name"):
 		default_cost_center = frappe.db.get_value("Company", company, "cost_center")
-		frappe.qb.update(loan).set(loan.cost_center, default_cost_center).where(
-			loan.company == company
-		).run()
+		frappe.qb.update(loan).set(loan.cost_center, default_cost_center).where(loan.company == company).run()

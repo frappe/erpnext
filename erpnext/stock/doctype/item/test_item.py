@@ -32,7 +32,7 @@ test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
 
 
-def make_item(item_code=None, properties=None, uoms=None):
+def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	if not item_code:
 		item_code = frappe.generate_hash(length=16)
 
@@ -60,6 +60,14 @@ def make_item(item_code=None, properties=None, uoms=None):
 	if uoms:
 		for uom in uoms:
 			item.append("uoms", uom)
+
+	if barcode:
+		item.append(
+			"barcodes",
+			{
+				"barcode": barcode,
+			},
+		)
 
 	item.insert()
 
@@ -315,7 +323,6 @@ class TestItem(FrappeTestCase):
 			self.assertEqual(value, purchase_item_details.get(key))
 
 	def test_item_default_validations(self):
-
 		with self.assertRaises(frappe.ValidationError) as ve:
 			make_item(
 				"Bad Item defaults",
@@ -469,9 +476,7 @@ class TestItem(FrappeTestCase):
 
 		self.assertFalse(frappe.db.exists("Item", old))
 
-		self.assertTrue(
-			frappe.db.get_value("Bin", {"item_code": new, "warehouse": "_Test Warehouse - _TC"})
-		)
+		self.assertTrue(frappe.db.get_value("Bin", {"item_code": new, "warehouse": "_Test Warehouse - _TC"}))
 		self.assertTrue(
 			frappe.db.get_value("Bin", {"item_code": new, "warehouse": "_Test Warehouse 1 - _TC"})
 		)
@@ -715,9 +720,7 @@ class TestItem(FrappeTestCase):
 
 	@change_settings("Stock Settings", {"sample_retention_warehouse": "_Test Warehouse - _TC"})
 	def test_retain_sample(self):
-		item = make_item(
-			"_TestRetainSample", {"has_batch_no": 1, "retain_sample": 1, "sample_quantity": 1}
-		)
+		item = make_item("_TestRetainSample", {"has_batch_no": 1, "retain_sample": 1, "sample_quantity": 1})
 
 		self.assertEqual(item.has_batch_no, 1)
 		self.assertEqual(item.retain_sample, 1)
@@ -790,7 +793,7 @@ class TestItem(FrappeTestCase):
 	def test_customer_codes_length(self):
 		"""Check if item code with special characters are allowed."""
 		item = make_item(properties={"item_code": "Test Item Code With Special Characters"})
-		for row in range(3):
+		for _row in range(3):
 			item.append("customer_items", {"ref_code": frappe.generate_hash("", 120)})
 		item.save()
 		self.assertTrue(len(item.customer_code) > 140)
@@ -831,9 +834,7 @@ class TestItem(FrappeTestCase):
 		make_property_setter("Item", None, "search_fields", "item_name", "Data", for_doctype="Doctype")
 
 		item = make_item(properties={"item_name": "Test Item", "description": "Test Description"})
-		data = item_query(
-			"Item", "Test Item", "", 0, 20, filters={"item_name": "Test Item"}, as_dict=True
-		)
+		data = item_query("Item", "Test Item", "", 0, 20, filters={"item_name": "Test Item"}, as_dict=True)
 		self.assertEqual(data[0].name, item.name)
 		self.assertEqual(data[0].item_name, item.item_name)
 		self.assertTrue("description" not in data[0])
@@ -841,9 +842,7 @@ class TestItem(FrappeTestCase):
 		make_property_setter(
 			"Item", None, "search_fields", "item_name, description", "Data", for_doctype="Doctype"
 		)
-		data = item_query(
-			"Item", "Test Item", "", 0, 20, filters={"item_name": "Test Item"}, as_dict=True
-		)
+		data = item_query("Item", "Test Item", "", 0, 20, filters={"item_name": "Test Item"}, as_dict=True)
 		self.assertEqual(data[0].name, item.name)
 		self.assertEqual(data[0].item_name, item.item_name)
 		self.assertEqual(data[0].description, item.description)

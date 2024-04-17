@@ -37,7 +37,7 @@ def get(
 	filters = frappe.parse_json(filters) or frappe.parse_json(chart.filters_json)
 
 	account = filters.get("account")
-	company = filters.get("company")
+	filters.get("company")
 
 	if not account and chart_name:
 		frappe.throw(
@@ -83,7 +83,6 @@ def build_result(account, dates, gl_entries):
 
 	# get balances in debit
 	for entry in gl_entries:
-
 		# entry date is after the current pointer, so move the pointer forward
 		while getdate(entry.posting_date) > result[date_index][0]:
 			date_index += 1
@@ -133,8 +132,6 @@ def get_dates_from_timegrain(from_date, to_date, timegrain):
 
 	dates = [get_period_ending(from_date, timegrain)]
 	while getdate(dates[-1]) < getdate(to_date):
-		date = get_period_ending(
-			add_to_date(dates[-1], years=years, months=months, days=days), timegrain
-		)
+		date = get_period_ending(add_to_date(dates[-1], years=years, months=months, days=days), timegrain)
 		dates.append(date)
 	return dates

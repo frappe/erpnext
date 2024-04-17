@@ -97,9 +97,9 @@ class LoanBalanceAdjustment(AccountsController):
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
 		loan_account = frappe.db.get_value("Loan", self.loan, "loan_account")
-		remarks = "{} against loan {}".format(self.adjustment_type.capitalize(), self.loan)
+		remarks = f"{self.adjustment_type.capitalize()} against loan {self.loan}"
 		if self.reference_number:
-			remarks += "with reference no. {}".format(self.reference_number)
+			remarks += f"with reference no. {self.reference_number}"
 
 		loan_entry = {
 			"account": loan_account,

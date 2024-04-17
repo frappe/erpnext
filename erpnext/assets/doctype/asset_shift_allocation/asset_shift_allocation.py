@@ -108,9 +108,7 @@ class AssetShiftAllocation(Document):
 
 	def allocate_shift_diff_in_depr_schedule(self):
 		asset_shift_factors_map = get_asset_shift_factors_map()
-		reverse_asset_shift_factors_map = {
-			asset_shift_factors_map[k]: k for k in asset_shift_factors_map
-		}
+		reverse_asset_shift_factors_map = {asset_shift_factors_map[k]: k for k in asset_shift_factors_map}
 
 		original_shift_factors_sum = sum(
 			flt(asset_shift_factors_map.get(schedule.shift)) for schedule in self.asset_doc.schedules
@@ -139,9 +137,9 @@ class AssetShiftAllocation(Document):
 						)
 						diff = 0
 					except Exception:
-						frappe.throw(_("Could not auto update shifts. Shift with shift factor {0} needed.")).format(
-							shift_factor - diff
-						)
+						frappe.throw(
+							_("Could not auto update shifts. Shift with shift factor {0} needed.")
+						).format(shift_factor - diff)
 		elif diff < 0:
 			shift_factors = list(asset_shift_factors_map.values())
 			desc_shift_factors = sorted(shift_factors, reverse=True)
@@ -202,9 +200,9 @@ class AssetShiftAllocation(Document):
 							)
 							diff = 0
 						except Exception:
-							frappe.throw(_("Could not auto update shifts. Shift with shift factor {0} needed.")).format(
-								shift_factor + diff
-							)
+							frappe.throw(
+								_("Could not auto update shifts. Shift with shift factor {0} needed.")
+							).format(shift_factor + diff)
 
 	def update_asset_schedule(self):
 		self.asset_doc.flags.shift_allocation = True
@@ -239,9 +237,7 @@ def find_subsets_with_sum(numbers, k, target_sum, current_subset, result):
 		return
 
 	# Include the current number in the subset
-	find_subsets_with_sum(
-		numbers, k - 1, target_sum - numbers[0], current_subset + [numbers[0]], result
-	)
+	find_subsets_with_sum(numbers, k - 1, target_sum - numbers[0], [*current_subset, numbers[0]], result)
 
 	# Exclude the current number from the subset
 	find_subsets_with_sum(numbers[1:], k, target_sum, current_subset, result)

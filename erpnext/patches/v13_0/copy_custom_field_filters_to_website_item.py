@@ -84,11 +84,9 @@ def execute():
 				move_table_multiselect_data(df)
 			else:
 				frappe.db.sql(  # nosemgrep
-					"""
+					f"""
 						UPDATE `tabWebsite Item` wi, `tabItem` i
-						SET wi.{0} = i.{0}
+						SET wi.{row.fieldname} = i.{row.fieldname}
 						WHERE wi.item_code = i.item_code
-					""".format(
-						row.fieldname
-					)
+					"""
 				)

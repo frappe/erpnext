@@ -12,7 +12,6 @@ from erpnext.buying.dashboard_fixtures import get_company_for_dashboards
 
 
 def get_data():
-
 	fiscal_year = _get_fiscal_year(nowdate())
 
 	if not fiscal_year:
@@ -168,9 +167,7 @@ def get_number_cards(fiscal_year, year_start_date, year_end_date):
 			"is_public": 1,
 			"show_percentage_stats": 1,
 			"stats_time_interval": "Monthly",
-			"filters_json": json.dumps(
-				[["Asset", "creation", "between", [year_start_date, year_end_date]]]
-			),
+			"filters_json": json.dumps([["Asset", "creation", "between", [year_start_date, year_end_date]]]),
 			"doctype": "Number Card",
 		},
 		{

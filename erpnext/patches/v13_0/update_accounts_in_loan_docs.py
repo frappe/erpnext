@@ -14,6 +14,4 @@ def execute():
 		lr.payment_account, loan.payment_account
 	).set(lr.loan_account, loan.loan_account).set(
 		lr.penalty_income_account, loan.penalty_income_account
-	).where(
-		lr.docstatus < 2
-	).run()
+	).where(lr.docstatus < 2).run()

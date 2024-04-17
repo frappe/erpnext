@@ -58,7 +58,7 @@ def get_conditions(filters):
 
 def get_data(conditions, filters):
 	data = frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			so.transaction_date as date,
 			soi.delivery_date as delivery_date,
@@ -88,9 +88,7 @@ def get_data(conditions, filters):
 			{conditions}
 		GROUP BY soi.name
 		ORDER BY so.transaction_date ASC, soi.item_code ASC
-	""".format(
-			conditions=conditions
-		),
+	""",
 		filters,
 		as_dict=1,
 	)
@@ -164,7 +162,7 @@ def prepare_data(data, so_elapsed_time, filters):
 		if filters.get("group_by_so"):
 			so_name = row["sales_order"]
 
-			if not so_name in sales_order_map:
+			if so_name not in sales_order_map:
 				# create an entry
 				row_copy = copy.deepcopy(row)
 				sales_order_map[so_name] = row_copy

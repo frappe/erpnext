@@ -27,7 +27,7 @@ class BankClearance(Document):
 			condition = "and (clearance_date IS NULL or clearance_date='0000-00-00')"
 
 		journal_entries = frappe.db.sql(
-			"""
+			f"""
 			select
 				"Journal Entry" as payment_document, t1.name as payment_entry,
 				t1.cheque_no as cheque_number, t1.cheque_date,
@@ -41,9 +41,7 @@ class BankClearance(Document):
 				and ifnull(t1.is_opening, 'No') = 'No' {condition}
 			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
-		""".format(
-				condition=condition
-			),
+		""",
 			{"account": self.account, "from": self.from_date, "to": self.to_date},
 			as_dict=1,
 		)
@@ -52,7 +50,7 @@ class BankClearance(Document):
 			condition += "and bank_account = %(bank_account)s"
 
 		payment_entries = frappe.db.sql(
-			"""
+			f"""
 			select
 				"Payment Entry" as payment_document, name as payment_entry,
 				reference_no as cheque_number, reference_date as cheque_date,
@@ -67,9 +65,7 @@ class BankClearance(Document):
 				{condition}
 			order by
 				posting_date ASC, name DESC
-		""".format(
-				condition=condition
-			),
+		""",
 			{
 				"account": self.account,
 				"from": self.from_date,
@@ -132,11 +128,9 @@ class BankClearance(Document):
 			query = query.where(loan_repayment.clearance_date.isnull())
 
 		if frappe.db.has_column("Loan Repayment", "repay_from_salary"):
-			query = query.where((loan_repayment.repay_from_salary == 0))
+			query = query.where(loan_repayment.repay_from_salary == 0)
 
-		query = query.orderby(loan_repayment.posting_date).orderby(
-			loan_repayment.name, order=frappe.qb.desc
-		)
+		query = query.orderby(loan_repayment.posting_date).orderby(loan_repayment.name, order=frappe.qb.desc)
 
 		loan_repayments = query.run(as_dict=True)
 

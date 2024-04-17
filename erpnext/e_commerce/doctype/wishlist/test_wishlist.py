@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 import unittest
@@ -42,17 +41,13 @@ class TestWishlist(unittest.TestCase):
 
 		# add second item to wishlist
 		add_to_wishlist("Test Phone Series Y")
-		wishlist_length = frappe.db.get_value(
-			"Wishlist Item", {"parent": frappe.session.user}, "count(*)"
-		)
+		wishlist_length = frappe.db.get_value("Wishlist Item", {"parent": frappe.session.user}, "count(*)")
 		self.assertEqual(wishlist_length, 2)
 
 		remove_from_wishlist("Test Phone Series X")
 		remove_from_wishlist("Test Phone Series Y")
 
-		wishlist_length = frappe.db.get_value(
-			"Wishlist Item", {"parent": frappe.session.user}, "count(*)"
-		)
+		wishlist_length = frappe.db.get_value("Wishlist Item", {"parent": frappe.session.user}, "count(*)")
 		self.assertIsNone(frappe.db.exists("Wishlist Item", {"parent": frappe.session.user}))
 		self.assertEqual(wishlist_length, 0)
 
@@ -75,9 +70,7 @@ class TestWishlist(unittest.TestCase):
 		# check wishlist and its content for users
 		self.assertTrue(frappe.db.exists("Wishlist", {"user": test_user.name}))
 		self.assertTrue(
-			frappe.db.exists(
-				"Wishlist Item", {"item_code": "Test Phone Series X", "parent": test_user.name}
-			)
+			frappe.db.exists("Wishlist Item", {"item_code": "Test Phone Series X", "parent": test_user.name})
 		)
 
 		self.assertTrue(frappe.db.exists("Wishlist", {"user": test_user_1.name}))
@@ -97,18 +90,14 @@ class TestWishlist(unittest.TestCase):
 			)
 		)
 		self.assertTrue(
-			frappe.db.exists(
-				"Wishlist Item", {"item_code": "Test Phone Series X", "parent": test_user.name}
-			)
+			frappe.db.exists("Wishlist Item", {"item_code": "Test Phone Series X", "parent": test_user.name})
 		)
 
 		# remove item for first user
 		frappe.set_user(test_user.name)
 		remove_from_wishlist("Test Phone Series X")
 		self.assertFalse(
-			frappe.db.exists(
-				"Wishlist Item", {"item_code": "Test Phone Series X", "parent": test_user.name}
-			)
+			frappe.db.exists("Wishlist Item", {"item_code": "Test Phone Series X", "parent": test_user.name})
 		)
 
 		# tear down

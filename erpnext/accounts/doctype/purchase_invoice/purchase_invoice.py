@@ -55,7 +55,7 @@ form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
 class PurchaseInvoice(BuyingController):
 	def __init__(self, *args, **kwargs):
-		super(PurchaseInvoice, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.status_updater = [
 			{
 				"source_dt": "Purchase Invoice Item",
@@ -72,7 +72,7 @@ class PurchaseInvoice(BuyingController):
 		]
 
 	def onload(self):
-		super(PurchaseInvoice, self).onload()
+		super().onload()
 		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		self.set_onload("supplier_tds", supplier_tds)
 
@@ -92,7 +92,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.validate_posting_time()
 
-		super(PurchaseInvoice, self).validate()
+		super().validate()
 
 		if not self.is_return:
 			self.po_required()
@@ -155,7 +155,6 @@ class PurchaseInvoice(BuyingController):
 		if flt(self.paid_amount) + flt(self.write_off_amount) - flt(
 			self.get("rounded_total") or self.grand_total
 		) > 1 / (10 ** (self.precision("base_grand_total") + 1)):
-
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
 	def create_remarks(self):
@@ -184,7 +183,7 @@ class PurchaseInvoice(BuyingController):
 			self.tax_withholding_category = tds_category
 			self.set_onload("supplier_tds", tds_category)
 
-		super(PurchaseInvoice, self).set_missing_values(for_validate)
+		super().set_missing_values(for_validate)
 
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
@@ -218,12 +217,12 @@ class PurchaseInvoice(BuyingController):
 		check_list = []
 
 		for d in self.get("items"):
-			if d.purchase_order and not d.purchase_order in check_list and not d.purchase_receipt:
+			if d.purchase_order and d.purchase_order not in check_list and not d.purchase_receipt:
 				check_list.append(d.purchase_order)
 				check_on_hold_or_closed_status("Purchase Order", d.purchase_order)
 
 	def validate_with_previous_doc(self):
-		super(PurchaseInvoice, self).validate_with_previous_doc(
+		super().validate_with_previous_doc(
 			{
 				"Purchase Order": {
 					"ref_dn_field": "purchase_order",
@@ -271,7 +270,7 @@ class PurchaseInvoice(BuyingController):
 						exc=WarehouseMissingError,
 					)
 
-		super(PurchaseInvoice, self).validate_warehouse()
+		super().validate_warehouse()
 
 	def validate_item_code(self):
 		for d in self.get("items"):
@@ -307,7 +306,6 @@ class PurchaseInvoice(BuyingController):
 					or not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")
 				)
 			):
-
 				if self.update_stock and item.warehouse and (not item.from_warehouse):
 					if (
 						for_validate
@@ -335,12 +333,16 @@ class PurchaseInvoice(BuyingController):
 
 						if negative_expense_booked_in_pr:
 							if (
-								for_validate and item.expense_account and item.expense_account != stock_not_billed_account
+								for_validate
+								and item.expense_account
+								and item.expense_account != stock_not_billed_account
 							):
 								msg = _(
 									"Row {0}: Expense Head changed to {1} because expense is booked against this account in Purchase Receipt {2}"
 								).format(
-									item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.purchase_receipt)
+									item.idx,
+									frappe.bold(stock_not_billed_account),
+									frappe.bold(item.purchase_receipt),
 								)
 								frappe.msgprint(msg, title=_("Expense Head Changed"))
 
@@ -349,7 +351,9 @@ class PurchaseInvoice(BuyingController):
 						# If no purchase receipt present then book expense in 'Stock Received But Not Billed'
 						# This is done in cases when Purchase Invoice is created before Purchase Receipt
 						if (
-							for_validate and item.expense_account and item.expense_account != stock_not_billed_account
+							for_validate
+							and item.expense_account
+							and item.expense_account != stock_not_billed_account
 						):
 							msg = _(
 								"Row {0}: Expense Head changed to {1} as no Purchase Receipt is created against Item {2}."
@@ -400,7 +404,6 @@ class PurchaseInvoice(BuyingController):
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == "Yes":
-
 			if frappe.get_value(
 				"Supplier", self.supplier, "allow_purchase_invoice_creation_without_purchase_order"
 			):
@@ -410,7 +413,9 @@ class PurchaseInvoice(BuyingController):
 				if not d.purchase_order:
 					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
 					msg += "<br><br>"
-					msg += _("To submit the invoice without purchase order please set {0} as {1} in {2}").format(
+					msg += _(
+						"To submit the invoice without purchase order please set {0} as {1} in {2}"
+					).format(
 						frappe.bold(_("Purchase Order Required")),
 						frappe.bold("No"),
 						get_link_to_form("Buying Settings", "Buying Settings", "Buying Settings"),
@@ -420,7 +425,6 @@ class PurchaseInvoice(BuyingController):
 	def pr_required(self):
 		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == "Yes":
-
 			if frappe.get_value(
 				"Supplier", self.supplier, "allow_purchase_invoice_creation_without_purchase_receipt"
 			):
@@ -453,7 +457,8 @@ class PurchaseInvoice(BuyingController):
 					frappe.throw(_("Purchase Order {0} is not submitted").format(d.purchase_order))
 			if d.purchase_receipt:
 				submitted = frappe.db.sql(
-					"select name from `tabPurchase Receipt` where docstatus = 1 and name = %s", d.purchase_receipt
+					"select name from `tabPurchase Receipt` where docstatus = 1 and name = %s",
+					d.purchase_receipt,
 				)
 				if not submitted:
 					frappe.throw(_("Purchase Receipt {0} is not submitted").format(d.purchase_receipt))
@@ -501,7 +506,9 @@ class PurchaseInvoice(BuyingController):
 			for item in self.get("items"):
 				if item.purchase_receipt:
 					frappe.throw(
-						_("Stock cannot be updated against Purchase Receipt {0}").format(item.purchase_receipt)
+						_("Stock cannot be updated against Purchase Receipt {0}").format(
+							item.purchase_receipt
+						)
 					)
 
 	def validate_for_repost(self):
@@ -511,7 +518,7 @@ class PurchaseInvoice(BuyingController):
 		validate_docs_for_deferred_accounting([], [self.name])
 
 	def on_submit(self):
-		super(PurchaseInvoice, self).on_submit()
+		super().on_submit()
 
 		self.check_prev_docstatus()
 
@@ -551,9 +558,7 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		if (
-			frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction"
-		):
+		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction":
 			self.update_project()
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
@@ -733,9 +738,7 @@ class PurchaseInvoice(BuyingController):
 		exchange_rate_map, net_rate_map = get_purchase_document_details(self)
 
 		provisional_accounting_for_non_stock_items = cint(
-			frappe.db.get_value(
-				"Company", self.company, "enable_provisional_accounting_for_non_stock_items"
-			)
+			frappe.db.get_value("Company", self.company, "enable_provisional_accounting_for_non_stock_items")
 		)
 		if provisional_accounting_for_non_stock_items:
 			self.get_provisional_accounts()
@@ -744,7 +747,7 @@ class PurchaseInvoice(BuyingController):
 			if flt(item.base_net_amount):
 				account_currency = get_account_currency(item.expense_account)
 				if item.item_code:
-					asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
+					frappe.get_cached_value("Item", item.item_code, "asset_category")
 
 				if (
 					self.update_stock
@@ -849,7 +852,9 @@ class PurchaseInvoice(BuyingController):
 					if flt(item.rm_supp_cost):
 						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
 						if not supplier_warehouse_account:
-							frappe.throw(_("Please set account in Warehouse {0}").format(self.supplier_warehouse))
+							frappe.throw(
+								_("Please set account in Warehouse {0}").format(self.supplier_warehouse)
+							)
 						gl_entries.append(
 							self.get_gl_dict(
 								{
@@ -899,10 +904,9 @@ class PurchaseInvoice(BuyingController):
 								and self.conversion_rate != exchange_rate_map[item.purchase_receipt]
 								and item.net_rate == net_rate_map[item.pr_detail]
 							):
-
-								discrepancy_caused_by_exchange_rate_difference = (item.qty * item.net_rate) * (
-									exchange_rate_map[item.purchase_receipt] - self.conversion_rate
-								)
+								discrepancy_caused_by_exchange_rate_difference = (
+									item.qty * item.net_rate
+								) * (exchange_rate_map[item.purchase_receipt] - self.conversion_rate)
 
 								gl_entries.append(
 									self.get_gl_dict(
@@ -983,7 +987,9 @@ class PurchaseInvoice(BuyingController):
 		default_provisional_account = self.get_company_default("default_provisional_account")
 		provisional_accounts = set(
 			[
-				d.provisional_expense_account if d.provisional_expense_account else default_provisional_account
+				d.provisional_expense_account
+				if d.provisional_expense_account
+				else default_provisional_account
 				for d in pr_items
 			]
 		)
@@ -1040,9 +1046,7 @@ class PurchaseInvoice(BuyingController):
 				},
 			)
 
-	def make_stock_adjustment_entry(
-		self, gl_entries, item, voucher_wise_stock_value, account_currency
-	):
+	def make_stock_adjustment_entry(self, gl_entries, item, voucher_wise_stock_value, account_currency):
 		net_amt_precision = item.precision("base_net_amount")
 		val_rate_db_precision = 6 if cint(item.precision("valuation_rate")) <= 6 else 9
 
@@ -1058,7 +1062,6 @@ class PurchaseInvoice(BuyingController):
 			and warehouse_debit_amount
 			!= flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 		):
-
 			cost_of_goods_sold_account = self.get_company_default("default_expense_account")
 			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 			stock_adjustment_amt = warehouse_debit_amount - stock_amount
@@ -1281,9 +1284,7 @@ class PurchaseInvoice(BuyingController):
 		# base_rounding_adjustment may become zero due to small precision
 		# eg: rounding_adjustment = 0.01 and exchange rate = 0.05 and precision of base_rounding_adjustment is 2
 		# 	then base_rounding_adjustment becomes zero and error is thrown in GL Entry
-		if (
-			not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment
-		):
+		if not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment:
 			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
 				self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
 			)
@@ -1306,7 +1307,7 @@ class PurchaseInvoice(BuyingController):
 	def on_cancel(self):
 		check_if_return_invoice_linked_with_payment_entry(self)
 
-		super(PurchaseInvoice, self).on_cancel()
+		super().on_cancel()
 
 		self.check_on_hold_or_closed_status()
 
@@ -1337,9 +1338,7 @@ class PurchaseInvoice(BuyingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
-		if (
-			frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction"
-		):
+		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction":
 			self.update_project()
 		self.db_set("status", "Cancelled")
 
@@ -1370,9 +1369,7 @@ class PurchaseInvoice(BuyingController):
 
 		pj = frappe.qb.DocType("Project")
 		for proj, value in projects.items():
-			res = (
-				frappe.qb.from_(pj).select(pj.total_purchase_cost).where(pj.name == proj).for_update().run()
-			)
+			res = frappe.qb.from_(pj).select(pj.total_purchase_cost).where(pj.name == proj).for_update().run()
 			current_purchase_cost = res and res[0][0] or 0
 			frappe.db.set_value("Project", proj, "total_purchase_cost", current_purchase_cost + value)
 
@@ -1640,9 +1637,7 @@ def get_purchase_document_details(doc):
 	)
 
 	net_rate_map = frappe._dict(
-		frappe.get_all(
-			child_doctype, filters={"name": ("in", items)}, fields=["name", "net_rate"], as_list=1
-		)
+		frappe.get_all(child_doctype, filters={"name": ("in", items)}, fields=["name", "net_rate"], as_list=1)
 	)
 
 	return exchange_rate_map, net_rate_map

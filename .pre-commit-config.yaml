@@ -65,27 +65,15 @@ repos:
                 .*/loan_write_off.js
             )$
 
-  - repo: https://github.com/PyCQA/flake8
-    rev: 5.0.4
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.2.0
     hooks:
-      - id: flake8
-        additional_dependencies: [
-          'flake8-bugbear',
-        ]
-        args: ['--config', '.github/helper/.flake8_strict']
-        exclude: ".*setup.py$"
+      - id: ruff
+        name: "Run ruff linter and apply fixes"
+        args: ["--fix"]
 
-  - repo: https://github.com/adityahase/black
-    rev: 9cb0a69f4d0030cdf687eddf314468b39ed54119
-    hooks:
-      - id: black
-        additional_dependencies: ['click==8.0.4']
-
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
-    hooks:
-      - id: isort
-        exclude: ".*setup.py$"
+      - id: ruff-format
+        name: "Format Python code"
 
 
 ci:

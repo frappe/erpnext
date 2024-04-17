@@ -100,12 +100,11 @@ def get_data(filters, conditions):
 		else:
 			inc = 1
 		data1 = frappe.db.sql(
-			""" select %s from `tab%s` t1, `tab%s Item` t2 %s
-					where t2.parent = t1.name and t1.company = %s and %s between %s and %s and
-					t1.docstatus = 1 %s %s
-					group by %s
-				"""
-			% (
+			""" select {} from `tab{}` t1, `tab{} Item` t2 {}
+					where t2.parent = t1.name and t1.company = {} and {} between {} and {} and
+					t1.docstatus = 1 {} {}
+					group by {}
+				""".format(
 				query_details,
 				conditions["trans"],
 				conditions["trans"],
@@ -130,11 +129,10 @@ def get_data(filters, conditions):
 
 			# to get distinct value of col specified by group_by in filter
 			row = frappe.db.sql(
-				"""select DISTINCT(%s) from `tab%s` t1, `tab%s Item` t2 %s
-						where t2.parent = t1.name and t1.company = %s and %s between %s and %s
-						and t1.docstatus = 1 and %s = %s %s %s
-					"""
-				% (
+				"""select DISTINCT({}) from `tab{}` t1, `tab{} Item` t2 {}
+						where t2.parent = t1.name and t1.company = {} and {} between {} and {}
+						and t1.docstatus = 1 and {} = {} {} {}
+					""".format(
 					sel_col,
 					conditions["trans"],
 					conditions["trans"],
@@ -157,11 +155,10 @@ def get_data(filters, conditions):
 
 				# get data for group_by filter
 				row1 = frappe.db.sql(
-					""" select %s , %s from `tab%s` t1, `tab%s Item` t2 %s
-							where t2.parent = t1.name and t1.company = %s and %s between %s and %s
-							and t1.docstatus = 1 and %s = %s and %s = %s %s %s
-						"""
-					% (
+					""" select {} , {} from `tab{}` t1, `tab{} Item` t2 {}
+							where t2.parent = t1.name and t1.company = {} and {} between {} and {}
+							and t1.docstatus = 1 and {} = {} and {} = {} {} {}
+						""".format(
 						sel_col,
 						conditions["period_wise_select"],
 						conditions["trans"],
@@ -190,12 +187,11 @@ def get_data(filters, conditions):
 				data.append(des)
 	else:
 		data = frappe.db.sql(
-			""" select %s from `tab%s` t1, `tab%s Item` t2 %s
-					where t2.parent = t1.name and t1.company = %s and %s between %s and %s and
-					t1.docstatus = 1 %s %s
-					group by %s
-				"""
-			% (
+			""" select {} from `tab{}` t1, `tab{} Item` t2 {}
+					where t2.parent = t1.name and t1.company = {} and {} between {} and {} and
+					t1.docstatus = 1 {} {}
+					group by {}
+				""".format(
 				query_details,
 				conditions["trans"],
 				conditions["trans"],
@@ -260,13 +256,13 @@ def get_period_wise_columns(bet_dates, period, pwc):
 
 
 def get_period_wise_query(bet_dates, trans_date, query_details):
-	query_details += """SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.stock_qty, NULL)),
-					SUM(IF(t1.%(trans_date)s BETWEEN '%(sd)s' AND '%(ed)s', t2.base_net_amount, NULL)),
-				""" % {
-		"trans_date": trans_date,
-		"sd": bet_dates[0],
-		"ed": bet_dates[1],
-	}
+	query_details += """SUM(IF(t1.{trans_date} BETWEEN '{sd}' AND '{ed}', t2.stock_qty, NULL)),
+					SUM(IF(t1.{trans_date} BETWEEN '{sd}' AND '{ed}', t2.base_net_amount, NULL)),
+				""".format(
+		trans_date=trans_date,
+		sd=bet_dates[0],
+		ed=bet_dates[1],
+	)
 	return query_details
 
 
@@ -282,7 +278,7 @@ def get_period_date_ranges(period, fiscal_year=None, year_start_date=None):
 	increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(period)
 
 	period_date_ranges = []
-	for i in range(1, 13, increment):
+	for _i in range(1, 13, increment):
 		period_end_date = getdate(year_start_date) + relativedelta(months=increment, days=-1)
 		if period_end_date > getdate(year_end_date):
 			period_end_date = year_end_date
@@ -331,9 +327,7 @@ def based_wise_columns_query(based_on, trans):
 			"Territory:Link/Territory:120",
 		]
 		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
-		based_on_details["based_on_group_by"] = (
-			"t1.party_name" if trans == "Quotation" else "t1.customer"
-		)
+		based_on_details["based_on_group_by"] = "t1.party_name" if trans == "Quotation" else "t1.customer"
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Customer Group":
