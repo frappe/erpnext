@@ -403,9 +403,92 @@ class SubcontractingController(StockController):
 
 		self.__set_serial_nos(item_row, rm_obj)
 
+<<<<<<< HEAD
 	def __set_consumed_qty(self, rm_obj, consumed_qty, required_qty=0):
 		rm_obj.required_qty = required_qty
 		rm_obj.consumed_qty = consumed_qty
+=======
+	def __get_batch_nos_for_bundle(self, qty, key):
+		available_batches = defaultdict(float)
+
+		for batch_no, batch_qty in self.available_materials[key]["batch_no"].items():
+			qty_to_consumed = 0
+			if qty > 0:
+				if batch_qty >= qty:
+					qty_to_consumed = qty
+				else:
+					qty_to_consumed = batch_qty
+
+				qty -= qty_to_consumed
+				if qty_to_consumed > 0:
+					available_batches[batch_no] += qty_to_consumed
+					self.available_materials[key]["batch_no"][batch_no] -= qty_to_consumed
+
+		return available_batches
+
+	def __get_serial_nos_for_bundle(self, qty, key):
+		available_sns = sorted(self.available_materials[key]["serial_no"])[0 : cint(qty)]
+		serial_nos = []
+
+		for serial_no in available_sns:
+			serial_nos.append(serial_no)
+
+			self.available_materials[key]["serial_no"].remove(serial_no)
+
+		return serial_nos
+
+	def __add_supplied_item(self, item_row, bom_item, qty):
+		bom_item.conversion_factor = item_row.conversion_factor
+		rm_obj = self.append(self.raw_material_table, bom_item)
+		if rm_obj.get("qty"):
+			# Qty field not exists
+			rm_obj.qty = 0.0
+
+		rm_obj.reference_name = item_row.name
+
+		use_serial_batch_fields = frappe.db.get_single_value("Stock Settings", "use_serial_batch_fields")
+
+		if self.doctype == self.subcontract_data.order_doctype:
+			rm_obj.required_qty = qty
+			rm_obj.amount = rm_obj.required_qty * rm_obj.rate
+		else:
+			rm_obj.consumed_qty = qty
+			rm_obj.required_qty = bom_item.required_qty or qty
+			rm_obj.serial_and_batch_bundle = None
+			setattr(
+				rm_obj, self.subcontract_data.order_field, item_row.get(self.subcontract_data.order_field)
+			)
+
+			if use_serial_batch_fields:
+				rm_obj.use_serial_batch_fields = 1
+				self.__set_batch_nos(bom_item, item_row, rm_obj, qty)
+
+		if self.doctype == "Subcontracting Receipt" and not use_serial_batch_fields:
+			args = frappe._dict(
+				{
+					"item_code": rm_obj.rm_item_code,
+					"warehouse": self.supplier_warehouse,
+					"posting_date": self.posting_date,
+					"posting_time": self.posting_time,
+					"qty": -1 * flt(rm_obj.consumed_qty),
+					"actual_qty": -1 * flt(rm_obj.consumed_qty),
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"voucher_detail_no": item_row.name,
+					"company": self.company,
+					"allow_zero_valuation": 1,
+				}
+			)
+
+			rm_obj.serial_and_batch_bundle = self.__set_serial_and_batch_bundle(
+				item_row, rm_obj, rm_obj.consumed_qty
+			)
+
+			if rm_obj.serial_and_batch_bundle:
+				args["serial_and_batch_bundle"] = rm_obj.serial_and_batch_bundle
+
+			rm_obj.rate = get_incoming_rate(args)
+>>>>>>> 9a290fdfc9 (fix: validate uom is integer for PR item)
 
 	def __set_batch_nos(self, bom_item, item_row, rm_obj, qty):
 		key = (rm_obj.rm_item_code, item_row.item_code, item_row.get(self.subcontract_data.order_field))
