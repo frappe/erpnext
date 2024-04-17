@@ -3002,6 +3002,8 @@ def get_due_date(term, posting_date=None, bill_date=None):
 		due_date = add_days(get_last_day(date), term.credit_days)
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
 		due_date = get_last_day(add_months(date, term.credit_months))
+	elif term.due_date_based_on == "Month(s) after invoice date":
+		due_date = add_months(date, term.credit_months)
 	return due_date
 
 
@@ -3014,6 +3016,8 @@ def get_discount_date(term, posting_date=None, bill_date=None):
 		discount_validity = add_days(get_last_day(date), term.discount_validity)
 	elif term.discount_validity_based_on == "Month(s) after the end of the invoice month":
 		discount_validity = get_last_day(add_months(date, term.discount_validity))
+	elif term.due_date_based_on == "Month(s) after invoice date":
+		discount_validity = add_months(date, term.discount_validity)
 	return discount_validity
 
 

@@ -53,7 +53,7 @@
    "fieldname": "due_date_based_on",
    "fieldtype": "Select",
    "label": "Due Date Based On",
-   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
+   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month\nMonth(s) after invoice date"
   },
   {
    "bold": 1,
@@ -63,7 +63,7 @@
    "label": "Credit Days"
   },
   {
-   "depends_on": "eval:doc.due_date_based_on=='Month(s) after the end of the invoice month'",
+   "depends_on": "eval:in_list(['Month(s) after invoice date', 'Month(s) after the end of the invoice month'], doc.due_date_based_on)",
    "fieldname": "credit_months",
    "fieldtype": "Int",
    "label": "Credit Months"
@@ -101,7 +101,7 @@
    "fieldname": "discount_validity_based_on",
    "fieldtype": "Select",
    "label": "Discount Validity Based On",
-   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
+   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month\nMonth(s) after invoice date"
   },
   {
    "depends_on": "discount",
@@ -116,7 +116,7 @@
   }
  ],
  "links": [],
- "modified": "2024-03-27 13:10:11.511137",
+ "modified": "2024-04-16 18:10:50.815795",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Term",

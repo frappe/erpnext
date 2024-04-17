@@ -24,11 +24,13 @@ class PaymentTerm(Document):
 			"Day(s) after invoice date",
 			"Day(s) after the end of the invoice month",
 			"Month(s) after the end of the invoice month",
+			"Month(s) after invoice date",
 		]
 		due_date_based_on: DF.Literal[
 			"Day(s) after invoice date",
 			"Day(s) after the end of the invoice month",
 			"Month(s) after the end of the invoice month",
+			"Month(s) after invoice date",
 		]
 		invoice_portion: DF.Float
 		mode_of_payment: DF.Link | None
