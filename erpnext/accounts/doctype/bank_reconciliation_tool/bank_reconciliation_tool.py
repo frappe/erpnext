@@ -311,6 +311,7 @@ def create_payment_entry_bts(
 	payment_type = "Receive" if bank_transaction.deposit > 0.0 else "Pay"
 
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
+	bank_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "name")
 	company = frappe.get_value("Account", company_account, "company")
 	payment_entry_dict = {
 		"company": company,
@@ -322,6 +323,7 @@ def create_payment_entry_bts(
 		"posting_date": posting_date,
 		"paid_amount": paid_amount,
 		"received_amount": paid_amount,
+		"bank_account": bank_account,
 	}
 	payment_entry = frappe.new_doc("Payment Entry")
 
