@@ -655,13 +655,13 @@ class GrossProfitGenerator:
 			elif self.delivery_notes.get((row.parent, row.item_code), None):
 				#  check if Invoice has delivery notes
 				dn = self.delivery_notes.get((row.parent, row.item_code))
-				parenttype, parent, item_row, _warehouse = (
+				parenttype, parent, item_row, dn_warehouse = (
 					"Delivery Note",
 					dn["delivery_note"],
 					dn["item_row"],
 					dn["warehouse"],
 				)
-				my_sle = self.get_stock_ledger_entries(item_code, row.warehouse)
+				my_sle = self.get_stock_ledger_entries(item_code, dn_warehouse)
 				return self.calculate_buying_amount_from_sle(
 					row, my_sle, parenttype, parent, item_row, item_code
 				)
