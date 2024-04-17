@@ -182,18 +182,14 @@ def get_total_pledged_security_value(loan):
 		)
 	)
 
-	hair_cut_map = frappe._dict(
-		frappe.get_all("Loan Security", fields=["name", "haircut"], as_list=1)
-	)
+	hair_cut_map = frappe._dict(frappe.get_all("Loan Security", fields=["name", "haircut"], as_list=1))
 
 	security_value = 0.0
 	pledged_securities = get_pledged_security_qty(loan)
 
 	for security, qty in pledged_securities.items():
 		after_haircut_percentage = 100 - hair_cut_map.get(security)
-		security_value += (
-			loan_security_price_map.get(security, 0) * qty * after_haircut_percentage
-		) / 100
+		security_value += (loan_security_price_map.get(security, 0) * qty * after_haircut_percentage) / 100
 
 	return security_value
 
@@ -241,10 +237,7 @@ def get_disbursal_amount(loan, on_current_security_price=0):
 
 	disbursal_amount = flt(security_value) - flt(pending_principal_amount)
 
-	if (
-		loan_details.is_term_loan
-		and (disbursal_amount + loan_details.loan_amount) > loan_details.loan_amount
-	):
+	if loan_details.is_term_loan and (disbursal_amount + loan_details.loan_amount) > loan_details.loan_amount:
 		disbursal_amount = loan_details.loan_amount - loan_details.disbursed_amount
 
 	return disbursal_amount

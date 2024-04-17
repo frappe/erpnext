@@ -56,10 +56,7 @@ def get_product_data(search=None, start=0, limit=12):
 		search = "%" + cstr(search) + "%"
 
 	# order by
-	query += """ ORDER BY ranking desc, modified desc limit %s offset %s""" % (
-		cint(limit),
-		cint(start),
-	)
+	query += f""" ORDER BY ranking desc, modified desc limit {cint(limit)} offset {cint(start)}"""
 
 	return frappe.db.sql(query, {"search": search}, as_dict=1)  # nosemgrep
 
@@ -96,7 +93,9 @@ def product_search(query, limit=10, fuzzy_search=True):
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
 	suggestions = ac.get_suggestions(
-		query, num=limit, fuzzy=fuzzy_search and len(query) > 3  # Fuzzy on length < 3 can be real slow
+		query,
+		num=limit,
+		fuzzy=fuzzy_search and len(query) > 3,  # Fuzzy on length < 3 can be real slow
 	)
 
 	# Build a query
@@ -132,7 +131,7 @@ def get_category_suggestions(query):
 		# Redisearch module not enabled, query db
 		categories = frappe.db.get_all(
 			"Item Group",
-			filters={"name": ["like", "%{0}%".format(query)], "show_in_website": 1},
+			filters={"name": ["like", f"%{query}%"], "show_in_website": 1},
 			fields=["name", "route"],
 		)
 		search_results["results"] = categories

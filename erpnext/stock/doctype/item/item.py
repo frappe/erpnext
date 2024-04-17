@@ -3,7 +3,6 @@
 
 import copy
 import json
-from typing import Dict, List, Optional
 
 import frappe
 from frappe import _
@@ -300,9 +299,9 @@ class Item(Document):
 		for d in self.get("uoms"):
 			if cstr(d.uom) in check_list:
 				frappe.throw(
-					_("Unit of Measure {0} has been entered more than once in Conversion Factor Table").format(
-						d.uom
-					)
+					_(
+						"Unit of Measure {0} has been entered more than once in Conversion Factor Table"
+					).format(d.uom)
 				)
 			else:
 				check_list.append(cstr(d.uom))
@@ -354,7 +353,7 @@ class Item(Document):
 					frappe.throw(
 						_("{0} entered twice {1} in Item Taxes").format(
 							frappe.bold(d.item_tax_template),
-							"for tax category {0}".format(frappe.bold(d.tax_category)) if d.tax_category else "",
+							f"for tax category {frappe.bold(d.tax_category)}" if d.tax_category else "",
 						)
 					)
 				else:
@@ -373,7 +372,9 @@ class Item(Document):
 					)
 					if duplicate:
 						frappe.throw(
-							_("Barcode {0} already used in Item {1}").format(item_barcode.barcode, duplicate[0][0])
+							_("Barcode {0} already used in Item {1}").format(
+								item_barcode.barcode, duplicate[0][0]
+							)
 						)
 
 					item_barcode.barcode_type = (
@@ -403,9 +404,9 @@ class Item(Document):
 				warehouse_material_request_type += [(d.get("warehouse"), d.get("material_request_type"))]
 			else:
 				frappe.throw(
-					_("Row #{0}: A reorder entry already exists for warehouse {1} with reorder type {2}.").format(
-						d.idx, d.warehouse, d.material_request_type
-					),
+					_(
+						"Row #{0}: A reorder entry already exists for warehouse {1} with reorder type {2}."
+					).format(d.idx, d.warehouse, d.material_request_type),
 					DuplicateReorderRows,
 				)
 
@@ -477,20 +478,21 @@ class Item(Document):
 
 		for dt in ("Sales Taxes and Charges", "Purchase Taxes and Charges"):
 			for d in frappe.db.sql(
-				"""select name, item_wise_tax_detail from `tab{0}`
-					where ifnull(item_wise_tax_detail, '') != ''""".format(
-					dt
-				),
+				f"""select name, item_wise_tax_detail from `tab{dt}`
+					where ifnull(item_wise_tax_detail, '') != ''""",
 				as_dict=1,
 			):
-
 				item_wise_tax_detail = json.loads(d.item_wise_tax_detail)
 				if isinstance(item_wise_tax_detail, dict) and old_name in item_wise_tax_detail:
 					item_wise_tax_detail[new_name] = item_wise_tax_detail[old_name]
 					item_wise_tax_detail.pop(old_name)
 
 					frappe.db.set_value(
-						dt, d.name, "item_wise_tax_detail", json.dumps(item_wise_tax_detail), update_modified=False
+						dt,
+						d.name,
+						"item_wise_tax_detail",
+						json.dumps(item_wise_tax_detail),
+						update_modified=False,
 					)
 
 	def delete_old_bins(self, old_name):
@@ -517,9 +519,7 @@ class Item(Document):
 		)
 
 		msg += " <br>"
-		msg += (
-			", ".join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
-		)
+		msg += ", ".join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
 
 		msg += _(
 			"Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
@@ -542,12 +542,8 @@ class Item(Document):
 
 	def validate_duplicate_product_bundles_before_merge(self, old_name, new_name):
 		"Block merge if both old and new items have product bundles."
-		old_bundle = frappe.get_value(
-			"Product Bundle", filters={"new_item_code": old_name, "disabled": 0}
-		)
-		new_bundle = frappe.get_value(
-			"Product Bundle", filters={"new_item_code": new_name, "disabled": 0}
-		)
+		old_bundle = frappe.get_value("Product Bundle", filters={"new_item_code": old_name, "disabled": 0})
+		new_bundle = frappe.get_value("Product Bundle", filters={"new_item_code": new_name, "disabled": 0})
 
 		if old_bundle and new_bundle:
 			bundle_link = get_link_to_form("Product Bundle", old_bundle)
@@ -572,7 +568,7 @@ class Item(Document):
 		if len(web_items) <= 1:
 			return
 
-		old_web_item = [d.get("name") for d in web_items if d.get("item_code") == old_name][0]
+		old_web_item = next(d.get("name") for d in web_items if d.get("item_code") == old_name)
 		web_item_link = get_link_to_form("Website Item", old_web_item)
 		old_name, new_name = frappe.bold(old_name), frappe.bold(new_name)
 
@@ -586,9 +582,7 @@ class Item(Document):
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
 
-		existing_allow_negative_stock = frappe.db.get_value(
-			"Stock Settings", None, "allow_negative_stock"
-		)
+		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		repost_stock_for_warehouses = frappe.get_all(
@@ -605,9 +599,7 @@ class Item(Document):
 		for warehouse in repost_stock_for_warehouses:
 			repost_stock(new_name, warehouse)
 
-		frappe.db.set_value(
-			"Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock
-		)
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 
 	def update_bom_item_desc(self):
 		if self.is_new():
@@ -768,16 +760,14 @@ class Item(Document):
 			return "<br>".join(docnames)
 
 		def table_row(title, body):
-			return """<tr>
-				<td>{0}</td>
-				<td>{1}</td>
-			</tr>""".format(
-				title, body
-			)
+			return f"""<tr>
+				<td>{title}</td>
+				<td>{body}</td>
+			</tr>"""
 
 		rows = ""
 		for docname, attr_list in not_included.items():
-			link = "<a href='/app/Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
+			link = f"<a href='/app/Form/Item/{frappe.bold(_(docname))}'>{frappe.bold(_(docname))}</a>"
 			rows += table_row(link, body(attr_list))
 
 		error_description = _(
@@ -785,17 +775,15 @@ class Item(Document):
 		)
 
 		message = """
-			<div>{0}</div><br>
+			<div>{}</div><br>
 			<table class="table">
 				<thead>
-					<td>{1}</td>
-					<td>{2}</td>
+					<td>{}</td>
+					<td>{}</td>
 				</thead>
-				{3}
+				{}
 			</table>
-		""".format(
-			error_description, _("Variant Items"), _("Attributes"), rows
-		)
+		""".format(error_description, _("Variant Items"), _("Attributes"), rows)
 
 		frappe.throw(message, title=_("Variant Attribute Error"), is_minimizable=True, wide=True)
 
@@ -925,7 +913,7 @@ class Item(Document):
 
 			frappe.throw(msg, title=_("Linked with submitted documents"))
 
-	def _get_linked_submitted_documents(self, changed_fields: List[str]) -> Optional[Dict[str, str]]:
+	def _get_linked_submitted_documents(self, changed_fields: list[str]) -> dict[str, str] | None:
 		linked_doctypes = [
 			"Delivery Note Item",
 			"Sales Invoice Item",
@@ -1088,17 +1076,13 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		last_purchase_receipt and last_purchase_receipt[0].posting_date or "1900-01-01"
 	)
 
-	if last_purchase_order and (
-		purchase_order_date >= purchase_receipt_date or not last_purchase_receipt
-	):
+	if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
 		# use purchase order
 
 		last_purchase = last_purchase_order[0]
 		purchase_date = purchase_order_date
 
-	elif last_purchase_receipt and (
-		purchase_receipt_date > purchase_order_date or not last_purchase_order
-	):
+	elif last_purchase_receipt and (purchase_receipt_date > purchase_order_date or not last_purchase_order):
 		# use purchase receipt
 		last_purchase = last_purchase_receipt[0]
 		purchase_date = purchase_receipt_date
@@ -1305,7 +1289,7 @@ def set_item_tax_from_hsn_code(item):
 	pass
 
 
-def validate_item_default_company_links(item_defaults: List[ItemDefault]) -> None:
+def validate_item_default_company_links(item_defaults: list[ItemDefault]) -> None:
 	for item_default in item_defaults:
 		for doctype, field in [
 			["Warehouse", "default_warehouse"],

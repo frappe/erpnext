@@ -96,9 +96,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 
 	def test_tax_withholding_category_checks(self):
 		invoices = []
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier3", "tax_withholding_category", "New TDS Category"
-		)
+		frappe.db.set_value("Supplier", "Test TDS Supplier3", "tax_withholding_category", "New TDS Category")
 
 		# First Invoice with no tds check
 		pi = create_purchase_invoice(supplier="Test TDS Supplier3", rate=20000, do_not_save=True)
@@ -453,7 +451,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		pe3.save()
 		pe3.submit()
 
-		self.assertEquals(pe3.get("taxes")[0].tax_amount, 1200)
+		self.assertEqual(pe3.get("taxes")[0].tax_amount, 1200)
 		pe1.cancel()
 		pe2.cancel()
 		pe3.cancel()
@@ -850,9 +848,7 @@ def create_tax_withholding_category(
 		).insert()
 
 
-def create_lower_deduction_certificate(
-	supplier, tax_withholding_category, tax_rate, certificate_no, limit
-):
+def create_lower_deduction_certificate(supplier, tax_withholding_category, tax_rate, certificate_no, limit):
 	fiscal_year = get_fiscal_year(today(), company="_Test Company")
 	if not frappe.db.exists("Lower Deduction Certificate", certificate_no):
 		frappe.get_doc(

@@ -113,9 +113,7 @@ def get_client():
 
 
 def create_transaction(doc, method):
-	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value(
-		"TaxJar Settings", "taxjar_create_transactions"
-	)
+	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
 
 	"""Create an order transaction in TaxJar"""
 
@@ -156,9 +154,7 @@ def create_transaction(doc, method):
 
 def delete_transaction(doc, method):
 	"""Delete an existing TaxJar order transaction"""
-	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value(
-		"TaxJar Settings", "taxjar_create_transactions"
-	)
+	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
 
 	if not TAXJAR_CREATE_TRANSACTIONS:
 		return
@@ -258,7 +254,7 @@ def set_sales_tax(doc, method):
 
 	if not tax_dict:
 		# Remove existing tax rows if address is changed from a taxable state/country
-		setattr(doc, "taxes", [tax for tax in doc.taxes if tax.account_head != TAX_ACCOUNT_HEAD])
+		doc.taxes = [tax for tax in doc.taxes if tax.account_head != TAX_ACCOUNT_HEAD]
 		return
 
 	# check if delivering within a nexus
@@ -267,7 +263,7 @@ def set_sales_tax(doc, method):
 	tax_data = validate_tax_request(tax_dict)
 	if tax_data is not None:
 		if not tax_data.amount_to_collect:
-			setattr(doc, "taxes", [tax for tax in doc.taxes if tax.account_head != TAX_ACCOUNT_HEAD])
+			doc.taxes = [tax for tax in doc.taxes if tax.account_head != TAX_ACCOUNT_HEAD]
 		elif tax_data.amount_to_collect > 0:
 			# Loop through tax rows for existing Sales Tax entry
 			# If none are found, add a row with the tax amount

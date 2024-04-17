@@ -26,9 +26,7 @@ def validate_return(doc):
 
 def validate_return_against(doc):
 	if not frappe.db.exists(doc.doctype, doc.return_against):
-		frappe.throw(
-			_("Invalid {0}: {1}").format(doc.meta.get_label("return_against"), doc.return_against)
-		)
+		frappe.throw(_("Invalid {0}: {1}").format(doc.meta.get_label("return_against"), doc.return_against))
 	else:
 		ref_doc = frappe.get_doc(doc.doctype, doc.return_against)
 
@@ -40,8 +38,8 @@ def validate_return_against(doc):
 			and ref_doc.docstatus.is_submitted()
 		):
 			# validate posting date time
-			return_posting_datetime = "%s %s" % (doc.posting_date, doc.get("posting_time") or "00:00:00")
-			ref_posting_datetime = "%s %s" % (
+			return_posting_datetime = "{} {}".format(doc.posting_date, doc.get("posting_time") or "00:00:00")
+			ref_posting_datetime = "{} {}".format(
 				ref_doc.posting_date,
 				ref_doc.get("posting_time") or "00:00:00",
 			)
@@ -81,7 +79,7 @@ def validate_returned_items(doc):
 		select_fields += ",rejected_qty, received_qty"
 
 	for d in frappe.db.sql(
-		"""select {0} from `tab{1} Item` where parent = %s""".format(select_fields, doc.doctype),
+		f"""select {select_fields} from `tab{doc.doctype} Item` where parent = %s""",
 		doc.return_against,
 		as_dict=1,
 	):
@@ -249,17 +247,15 @@ def get_already_returned_items(doc):
 			sum(abs(child.received_qty) * child.conversion_factor) as received_qty"""
 
 	data = frappe.db.sql(
-		"""
-		select {0}
+		f"""
+		select {column}
 		from
-			`tab{1} Item` child, `tab{2}` par
+			`tab{doc.doctype} Item` child, `tab{doc.doctype}` par
 		where
 			child.parent = par.name and par.docstatus = 1
 			and par.is_return = 1 and par.return_against = %s
 		group by item_code
-	""".format(
-			column, doc.doctype, doc.doctype
-		),
+	""",
 		doc.return_against,
 		as_dict=1,
 	)
@@ -292,22 +288,22 @@ def get_returned_qty_map_for_row(return_against, party, row_name, doctype):
 		party_type = "customer"
 
 	fields = [
-		"sum(abs(`tab{0}`.qty)) as qty".format(child_doctype),
+		f"sum(abs(`tab{child_doctype}`.qty)) as qty",
 	]
 
 	if doctype != "Subcontracting Receipt":
 		fields += [
-			"sum(abs(`tab{0}`.stock_qty)) as stock_qty".format(child_doctype),
+			f"sum(abs(`tab{child_doctype}`.stock_qty)) as stock_qty",
 		]
 
 	if doctype in ("Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"):
 		fields += [
-			"sum(abs(`tab{0}`.rejected_qty)) as rejected_qty".format(child_doctype),
-			"sum(abs(`tab{0}`.received_qty)) as received_qty".format(child_doctype),
+			f"sum(abs(`tab{child_doctype}`.rejected_qty)) as rejected_qty",
+			f"sum(abs(`tab{child_doctype}`.received_qty)) as received_qty",
 		]
 
 		if doctype == "Purchase Receipt":
-			fields += ["sum(abs(`tab{0}`.received_stock_qty)) as received_stock_qty".format(child_doctype)]
+			fields += [f"sum(abs(`tab{child_doctype}`.received_stock_qty)) as received_stock_qty"]
 
 	# Used retrun against and supplier and is_retrun because there is an index added for it
 	data = frappe.get_all(
@@ -523,8 +519,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 					"docstatus": ["=", 1],
 				},
 			},
-			doctype
-			+ " Item": {
+			doctype + " Item": {
 				"doctype": doctype + " Item",
 				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no", "bom": "bom"},
 				"postprocess": update_item,
@@ -623,11 +618,7 @@ def get_filters(
 	if reference_voucher_detail_no:
 		filters["voucher_detail_no"] = reference_voucher_detail_no
 
-	if (
-		voucher_type in ["Purchase Receipt", "Purchase Invoice"]
-		and item_row
-		and item_row.get("warehouse")
-	):
+	if voucher_type in ["Purchase Receipt", "Purchase Invoice"] and item_row and item_row.get("warehouse"):
 		filters["warehouse"] = item_row.get("warehouse")
 
 	return filters

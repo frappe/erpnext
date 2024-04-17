@@ -26,7 +26,7 @@ class SocialMediaPost(Document):
 	def submit(self):
 		if self.scheduled_time:
 			self.post_status = "Scheduled"
-		super(SocialMediaPost, self).submit()
+		super().submit()
 
 	def on_cancel(self):
 		self.db_set("post_status", "Cancelled")

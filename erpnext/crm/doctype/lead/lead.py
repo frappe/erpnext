@@ -19,7 +19,7 @@ from erpnext.selling.doctype.customer.customer import parse_full_name
 
 class Lead(SellingController, CRMNote):
 	def get_feed(self):
-		return "{0}: {1}".format(_(self.status), self.lead_name)
+		return f"{_(self.status)}: {self.lead_name}"
 
 	def onload(self):
 		customer = frappe.db.get_value("Customer", {"lead_name": self.name})
@@ -122,9 +122,7 @@ class Lead(SellingController, CRMNote):
 			self.contact_doc.save()
 
 	def update_prospect(self):
-		lead_row_name = frappe.db.get_value(
-			"Prospect Lead", filters={"lead": self.name}, fieldname="name"
-		)
+		lead_row_name = frappe.db.get_value("Prospect Lead", filters={"lead": self.name}, fieldname="name")
 		if lead_row_name:
 			lead_row = frappe.get_doc("Prospect Lead", lead_row_name)
 			lead_row.update(
@@ -174,9 +172,7 @@ class Lead(SellingController, CRMNote):
 		)
 
 	def has_lost_quotation(self):
-		return frappe.db.get_value(
-			"Quotation", {"party_name": self.name, "docstatus": 1, "status": "Lost"}
-		)
+		return frappe.db.get_value("Quotation", {"party_name": self.name, "docstatus": 1, "status": "Lost"})
 
 	@frappe.whitelist()
 	def create_prospect_and_contact(self, data):
@@ -448,8 +444,8 @@ def get_lead_with_phone_number(number):
 	leads = frappe.get_all(
 		"Lead",
 		or_filters={
-			"phone": ["like", "%{}".format(number)],
-			"mobile_no": ["like", "%{}".format(number)],
+			"phone": ["like", f"%{number}"],
+			"mobile_no": ["like", f"%{number}"],
 		},
 		limit=1,
 		order_by="creation DESC",
@@ -476,9 +472,7 @@ def add_lead_to_prospect(lead, prospect):
 	link_open_events("Lead", lead, prospect)
 
 	frappe.msgprint(
-		_("Lead {0} has been added to prospect {1}.").format(
-			frappe.bold(lead), frappe.bold(prospect.name)
-		),
+		_("Lead {0} has been added to prospect {1}.").format(frappe.bold(lead), frappe.bold(prospect.name)),
 		title=_("Lead -> Prospect"),
 		indicator="green",
 	)

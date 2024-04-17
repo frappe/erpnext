@@ -193,9 +193,7 @@ class TestAssetRepair(unittest.TestCase):
 			self.assertEqual(expected_values[d.account][1], d.credit)
 
 	def test_gl_entries_with_periodical_inventory(self):
-		frappe.db.set_value(
-			"Company", "_Test Company", "default_expense_account", "Cost of Goods Sold - _TC"
-		)
+		frappe.db.set_value("Company", "_Test Company", "default_expense_account", "Cost of Goods Sold - _TC")
 		asset_repair = create_asset_repair(
 			capitalize_repair_cost=1,
 			stock_consumption=1,
@@ -275,9 +273,7 @@ def create_asset_repair(**args):
 
 	if args.stock_consumption:
 		asset_repair.stock_consumption = 1
-		asset_repair.warehouse = args.warehouse or create_warehouse(
-			"Test Warehouse", company=asset.company
-		)
+		asset_repair.warehouse = args.warehouse or create_warehouse("Test Warehouse", company=asset.company)
 		asset_repair.append(
 			"stock_items",
 			{

@@ -46,9 +46,7 @@ class TestPutawayRule(FrappeTestCase):
 
 	def test_putaway_rules_priority(self):
 		"""Test if rule is applied by priority, irrespective of free space."""
-		rule_1 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_1, capacity=200, uom="Kg"
-		)
+		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=200, uom="Kg")
 		rule_2 = create_putaway_rule(
 			item_code="_Rice", warehouse=self.warehouse_2, capacity=300, uom="Kg", priority=2
 		)
@@ -69,17 +67,11 @@ class TestPutawayRule(FrappeTestCase):
 	def test_putaway_rules_with_same_priority(self):
 		"""Test if rule with more free space is applied,
 		among two rules with same priority and capacity."""
-		rule_1 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_1, capacity=500, uom="Kg"
-		)
-		rule_2 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_2, capacity=500, uom="Kg"
-		)
+		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=500, uom="Kg")
+		rule_2 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_2, capacity=500, uom="Kg")
 
 		# out of 500 kg capacity, occupy 100 kg in warehouse_1
-		stock_receipt = make_stock_entry(
-			item_code="_Rice", target=self.warehouse_1, qty=100, basic_rate=50
-		)
+		stock_receipt = make_stock_entry(item_code="_Rice", target=self.warehouse_1, qty=100, basic_rate=50)
 
 		pr = make_purchase_receipt(item_code="_Rice", qty=700, apply_putaway_rule=1, do_not_submit=1)
 		self.assertEqual(len(pr.items), 2)
@@ -97,12 +89,8 @@ class TestPutawayRule(FrappeTestCase):
 
 	def test_putaway_rules_with_insufficient_capacity(self):
 		"""Test if qty exceeding capacity, is handled."""
-		rule_1 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_1, capacity=100, uom="Kg"
-		)
-		rule_2 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_2, capacity=200, uom="Kg"
-		)
+		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=100, uom="Kg")
+		rule_2 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_2, capacity=200, uom="Kg")
 
 		pr = make_purchase_receipt(item_code="_Rice", qty=350, apply_putaway_rule=1, do_not_submit=1)
 		self.assertEqual(len(pr.items), 2)
@@ -123,19 +111,13 @@ class TestPutawayRule(FrappeTestCase):
 			item.append("uoms", {"uom": "Bag", "conversion_factor": 1000})
 			item.save()
 
-		rule_1 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_1, capacity=3, uom="Bag"
-		)
+		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=3, uom="Bag")
 		self.assertEqual(rule_1.stock_capacity, 3000)
-		rule_2 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_2, capacity=4, uom="Bag"
-		)
+		rule_2 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_2, capacity=4, uom="Bag")
 		self.assertEqual(rule_2.stock_capacity, 4000)
 
 		# populate 'Rack 1' with 1 Bag, making the free space 2 Bags
-		stock_receipt = make_stock_entry(
-			item_code="_Rice", target=self.warehouse_1, qty=1000, basic_rate=50
-		)
+		stock_receipt = make_stock_entry(item_code="_Rice", target=self.warehouse_1, qty=1000, basic_rate=50)
 
 		pr = make_purchase_receipt(
 			item_code="_Rice",
@@ -167,9 +149,7 @@ class TestPutawayRule(FrappeTestCase):
 		frappe.db.set_value("UOM", "Bag", "must_be_whole_number", 1)
 
 		# Putaway Rule in different UOM
-		rule_1 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_1, capacity=1, uom="Bag"
-		)
+		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=1, uom="Bag")
 		self.assertEqual(rule_1.stock_capacity, 1000)
 		# Putaway Rule in Stock UOM
 		rule_2 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_2, capacity=500)
@@ -199,9 +179,7 @@ class TestPutawayRule(FrappeTestCase):
 
 	def test_putaway_rules_with_reoccurring_item(self):
 		"""Test rules on same item entered multiple times with different rate."""
-		rule_1 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_1, capacity=200, uom="Kg"
-		)
+		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=200, uom="Kg")
 		# total capacity is 200 Kg
 
 		pr = make_purchase_receipt(item_code="_Rice", qty=100, apply_putaway_rule=1, do_not_submit=1)
@@ -237,9 +215,7 @@ class TestPutawayRule(FrappeTestCase):
 
 	def test_validate_over_receipt_in_warehouse(self):
 		"""Test if overreceipt is blocked in the presence of putaway rules."""
-		rule_1 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_1, capacity=200, uom="Kg"
-		)
+		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=200, uom="Kg")
 
 		pr = make_purchase_receipt(item_code="_Rice", qty=300, apply_putaway_rule=1, do_not_submit=1)
 		self.assertEqual(len(pr.items), 1)
@@ -291,9 +267,7 @@ class TestPutawayRule(FrappeTestCase):
 
 	def test_putaway_rule_on_stock_entry_material_transfer_reoccuring_item(self):
 		"""Test if reoccuring item is correctly considered."""
-		rule_1 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_1, capacity=300, uom="Kg"
-		)
+		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_1, capacity=300, uom="Kg")
 		rule_2 = create_putaway_rule(
 			item_code="_Rice", warehouse=self.warehouse_2, capacity=600, uom="Kg", priority=2
 		)
@@ -428,9 +402,7 @@ class TestPutawayRule(FrappeTestCase):
 		rule_1 = create_putaway_rule(
 			item_code="_Rice", warehouse=self.warehouse_1, capacity=200, uom="Kg"
 		)  # more capacity
-		rule_2 = create_putaway_rule(
-			item_code="_Rice", warehouse=self.warehouse_2, capacity=100, uom="Kg"
-		)
+		rule_2 = create_putaway_rule(item_code="_Rice", warehouse=self.warehouse_2, capacity=100, uom="Kg")
 
 		stock_entry = make_stock_entry(
 			item_code="_Rice",
@@ -480,9 +452,7 @@ def create_putaway_rule(**args):
 	putaway.capacity = args.capacity or 1
 	putaway.stock_uom = frappe.db.get_value("Item", putaway.item_code, "stock_uom")
 	putaway.uom = args.uom or putaway.stock_uom
-	putaway.conversion_factor = get_conversion_factor(putaway.item_code, putaway.uom)[
-		"conversion_factor"
-	]
+	putaway.conversion_factor = get_conversion_factor(putaway.item_code, putaway.uom)["conversion_factor"]
 
 	if not args.do_not_save:
 		putaway.save()

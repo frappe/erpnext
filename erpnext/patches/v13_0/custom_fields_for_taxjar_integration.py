@@ -9,9 +9,7 @@ def execute():
 	if not company:
 		return
 
-	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value(
-		"TaxJar Settings", "taxjar_create_transactions"
-	)
+	TAXJAR_CREATE_TRANSACTIONS = frappe.db.get_single_value("TaxJar Settings", "taxjar_create_transactions")
 	TAXJAR_CALCULATE_TAX = frappe.db.get_single_value("TaxJar Settings", "taxjar_calculate_tax")
 	TAXJAR_SANDBOX_MODE = frappe.db.get_single_value("TaxJar Settings", "is_sandbox")
 

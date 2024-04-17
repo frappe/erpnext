@@ -52,7 +52,7 @@ class SalesPerson(NestedSet):
 		self.set_onload("dashboard_info", info)
 
 	def on_update(self):
-		super(SalesPerson, self).on_update()
+		super().on_update()
 		self.validate_one_root()
 
 	def get_email_id(self):
@@ -78,7 +78,6 @@ def on_doctype_update():
 
 
 def get_timeline_data(doctype, name):
-
 	out = {}
 
 	out.update(

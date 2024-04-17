@@ -1,5 +1,6 @@
 """Import Address Templates from ./templates directory."""
 import os
+
 import frappe
 
 
@@ -26,7 +27,7 @@ def get_address_templates():
 	def get_file_content(file_name):
 		"""Convert 'united_states.html' to '/path/to/united_states.html'."""
 		full_path = os.path.join(template_dir, file_name)
-		with open(full_path, "r") as f:
+		with open(full_path) as f:
 			content = f.read()
 		return content
 
@@ -41,7 +42,7 @@ def get_address_templates():
 def update_address_template(country, html, is_default=0):
 	"""Update existing Address Template or create a new one."""
 	if not frappe.db.exists("Country", country):
-		frappe.log_error("Country {} for regional Address Template does not exist.".format(country))
+		frappe.log_error(f"Country {country} for regional Address Template does not exist.")
 		return
 
 	if frappe.db.exists("Address Template", country):

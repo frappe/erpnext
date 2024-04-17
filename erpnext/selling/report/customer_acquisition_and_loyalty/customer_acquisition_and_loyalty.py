@@ -77,10 +77,8 @@ def get_data_by_time(filters, common_columns):
 
 	out = []
 	for year in range(from_year, to_year + 1):
-		for month in range(
-			from_month if year == from_year else 1, (to_month + 1) if year == to_year else 13
-		):
-			key = "{year}-{month:02d}".format(year=year, month=month)
+		for month in range(from_month if year == from_year else 1, (to_month + 1) if year == to_year else 13):
+			key = f"{year}-{month:02d}"
 			data = customers_in.get(key)
 			new = data["new"] if data else [0, 0.0]
 			repeat = data["repeat"] if data else [0, 0.0]
@@ -147,7 +145,7 @@ def get_data_by_territory(filters, common_columns):
 
 	for ld in loop_data:
 		if ld["parent_territory"]:
-			parent_data = [x for x in data if x["territory"] == ld["parent_territory"]][0]
+			parent_data = next(x for x in data if x["territory"] == ld["parent_territory"])
 			for key in parent_data.keys():
 				if key not in ["indent", "territory", "parent_territory", "bold"]:
 					parent_data[key] += ld[key]
@@ -165,15 +163,12 @@ def get_customer_stats(filters, tree_view=False):
 	customers_in = {}
 
 	for si in frappe.db.sql(
-		"""select territory, posting_date, customer, base_grand_total from `tabSales Invoice`
+		f"""select territory, posting_date, customer, base_grand_total from `tabSales Invoice`
 		where docstatus=1 and posting_date <= %(to_date)s
-		{company_condition} order by posting_date""".format(
-			company_condition=company_condition
-		),
+		{company_condition} order by posting_date""",
 		filters,
 		as_dict=1,
 	):
-
 		key = si.territory if tree_view else si.posting_date.strftime("%Y-%m")
 		new_or_repeat = "new" if si.customer not in customers else "repeat"
 		customers_in.setdefault(key, {"new": [0, 0.0], "repeat": [0, 0.0]})

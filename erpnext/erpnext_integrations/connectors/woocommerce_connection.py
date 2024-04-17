@@ -11,15 +11,10 @@ from frappe.utils import cstr
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	sig = base64.b64encode(
-		hmac.new(
-			woocommerce_settings.secret.encode("utf8"), frappe.request.data, hashlib.sha256
-		).digest()
+		hmac.new(woocommerce_settings.secret.encode("utf8"), frappe.request.data, hashlib.sha256).digest()
 	)
 
-	if (
-		frappe.request.data
-		and not sig == frappe.get_request_header("X-Wc-Webhook-Signature", "").encode()
-	):
+	if frappe.request.data and not sig == frappe.get_request_header("X-Wc-Webhook-Signature", "").encode():
 		frappe.throw(_("Unverified Webhook Data"))
 	frappe.set_user(woocommerce_settings.creation_user)
 

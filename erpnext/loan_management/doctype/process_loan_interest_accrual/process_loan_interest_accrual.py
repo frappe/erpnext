@@ -56,7 +56,6 @@ def process_loan_interest_accrual_for_demand_loans(
 
 
 def process_loan_interest_accrual_for_term_loans(posting_date=None, loan_type=None, loan=None):
-
 	if not term_loan_accrual_pending(posting_date or nowdate(), loan=loan):
 		return
 

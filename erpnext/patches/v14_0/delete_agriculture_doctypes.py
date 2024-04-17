@@ -13,9 +13,7 @@ def execute():
 	for report in reports:
 		frappe.delete_doc("Report", report, ignore_missing=True, force=True)
 
-	dashboards = frappe.get_all(
-		"Dashboard", {"module": "agriculture", "is_standard": 1}, pluck="name"
-	)
+	dashboards = frappe.get_all("Dashboard", {"module": "agriculture", "is_standard": 1}, pluck="name")
 	for dashboard in dashboards:
 		frappe.delete_doc("Dashboard", dashboard, ignore_missing=True, force=True)
 

@@ -346,9 +346,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		consumed_depreciation_schedule = [
 			d for d in consumed_asset.schedules if getdate(d.schedule_date) == getdate(capitalization_date)
 		]
-		self.assertTrue(
-			consumed_depreciation_schedule and consumed_depreciation_schedule[0].journal_entry
-		)
+		self.assertTrue(consumed_depreciation_schedule and consumed_depreciation_schedule[0].journal_entry)
 		self.assertEqual(
 			consumed_depreciation_schedule[0].depreciation_amount, depreciation_before_disposal_amount
 		)
@@ -371,15 +369,9 @@ class TestAssetCapitalization(unittest.TestCase):
 
 
 def create_asset_capitalization_data():
-	create_item(
-		"Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0
-	)
-	create_item(
-		"Capitalization Source Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0
-	)
-	create_item(
-		"Capitalization Source Service Item", is_stock_item=0, is_fixed_asset=0, is_purchase_item=0
-	)
+	create_item("Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)
+	create_item("Capitalization Source Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)
+	create_item("Capitalization Source Service Item", is_stock_item=0, is_fixed_asset=0, is_purchase_item=0)
 
 
 def create_asset_capitalization(**args):

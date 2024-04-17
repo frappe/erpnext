@@ -52,7 +52,6 @@ def drop_columns_from_subscription():
 		"status",
 		"amended_from",
 	]:
-
 		if field in frappe.db.get_table_columns("Subscription"):
 			fields_to_drop["Subscription"].append(field)
 

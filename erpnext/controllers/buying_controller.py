@@ -33,7 +33,7 @@ class BuyingController(SubcontractingController):
 	def validate(self):
 		self.set_rate_for_standalone_debit_note()
 
-		super(BuyingController, self).validate()
+		super().validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
 
@@ -49,9 +49,7 @@ class BuyingController(SubcontractingController):
 		if self.doctype == "Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
 
-		if self.doctype == "Purchase Receipt" or (
-			self.doctype == "Purchase Invoice" and self.update_stock
-		):
+		if self.doctype == "Purchase Receipt" or (self.doctype == "Purchase Invoice" and self.update_stock):
 			# self.validate_purchase_return()
 			self.validate_rejected_warehouse()
 			self.validate_accepted_rejected_qty()
@@ -67,12 +65,10 @@ class BuyingController(SubcontractingController):
 			self.update_valuation_rate()
 
 	def onload(self):
-		super(BuyingController, self).onload()
+		super().onload()
 		self.set_onload(
 			"backflush_based_on",
-			frappe.db.get_single_value(
-				"Buying Settings", "backflush_raw_materials_of_subcontract_based_on"
-			),
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on"),
 		)
 
 	def set_rate_for_standalone_debit_note(self):
@@ -101,7 +97,7 @@ class BuyingController(SubcontractingController):
 					row.margin_rate_or_amount = 0.0
 
 	def set_missing_values(self, for_validate=False):
-		super(BuyingController, self).set_missing_values(for_validate)
+		super().set_missing_values(for_validate)
 
 		self.set_supplier_from_item_default()
 		self.set_price_list_currency("Buying")
@@ -161,9 +157,7 @@ class BuyingController(SubcontractingController):
 		if self.doctype not in ["Purchase Receipt", "Purchase Invoice"] or not self.is_return:
 			return
 
-		purchase_doc_field = (
-			"purchase_receipt" if self.doctype == "Purchase Receipt" else "purchase_invoice"
-		)
+		purchase_doc_field = "purchase_receipt" if self.doctype == "Purchase Receipt" else "purchase_invoice"
 		not_cancelled_asset = []
 		if self.return_against:
 			not_cancelled_asset = [
@@ -494,7 +488,6 @@ class BuyingController(SubcontractingController):
 				pr_qty = flt(flt(d.qty) * flt(d.conversion_factor), d.precision("stock_qty"))
 
 				if pr_qty:
-
 					if d.from_warehouse and (
 						(not cint(self.is_return) and self.docstatus == 1)
 						or (cint(self.is_return) and self.docstatus == 2)
@@ -559,7 +552,8 @@ class BuyingController(SubcontractingController):
 						or (cint(self.is_return) and self.docstatus == 1)
 					):
 						from_warehouse_sle = self.get_sl_entries(
-							d, {"actual_qty": -1 * pr_qty, "warehouse": d.from_warehouse, "recalculate_rate": 1}
+							d,
+							{"actual_qty": -1 * pr_qty, "warehouse": d.from_warehouse, "recalculate_rate": 1},
 						)
 
 						if flt(rejected_qty) != 0:
@@ -631,7 +625,7 @@ class BuyingController(SubcontractingController):
 			update_last_purchase_rate(self, is_submit=1)
 
 	def on_cancel(self):
-		super(BuyingController, self).on_cancel()
+		super().on_cancel()
 
 		if self.get("is_return"):
 			return
@@ -656,7 +650,9 @@ class BuyingController(SubcontractingController):
 						"doctype": self.doctype,
 						"company": self.company,
 						"posting_date": (
-							self.schedule_date if self.doctype == "Material Request" else self.transaction_date
+							self.schedule_date
+							if self.doctype == "Material Request"
+							else self.transaction_date
 						),
 					}
 				)
@@ -688,17 +684,21 @@ class BuyingController(SubcontractingController):
 							asset = self.make_asset(d, is_grouped_asset=True)
 							created_assets.append(asset)
 						else:
-							for qty in range(cint(d.qty)):
+							for _qty in range(cint(d.qty)):
 								asset = self.make_asset(d)
 								created_assets.append(asset)
 
 						if len(created_assets) > 5:
 							# dont show asset form links if more than 5 assets are created
 							messages.append(
-								_("{} Assets created for {}").format(len(created_assets), frappe.bold(d.item_code))
+								_("{} Assets created for {}").format(
+									len(created_assets), frappe.bold(d.item_code)
+								)
 							)
 						else:
-							assets_link = list(map(lambda d: frappe.utils.get_link_to_form("Asset", d), created_assets))
+							assets_link = list(
+								map(lambda d: frappe.utils.get_link_to_form("Asset", d), created_assets)
+							)
 							assets_link = frappe.bold(",".join(assets_link))
 
 							is_plural = "s" if len(created_assets) != 1 else ""
@@ -709,9 +709,9 @@ class BuyingController(SubcontractingController):
 							)
 					else:
 						frappe.throw(
-							_("Row {}: Asset Naming Series is mandatory for the auto creation for item {}").format(
-								d.idx, frappe.bold(d.item_code)
-							)
+							_(
+								"Row {}: Asset Naming Series is mandatory for the auto creation for item {}"
+							).format(d.idx, frappe.bold(d.item_code))
 						)
 				else:
 					messages.append(
@@ -874,11 +874,9 @@ def validate_item_type(doc, fieldname, message):
 	invalid_items = [
 		d[0]
 		for d in frappe.db.sql(
-			"""
-		select item_code from tabItem where name in ({0}) and {1}=0
-		""".format(
-				item_list, fieldname
-			),
+			f"""
+		select item_code from tabItem where name in ({item_list}) and {fieldname}=0
+		""",
 			as_list=True,
 		)
 	]
