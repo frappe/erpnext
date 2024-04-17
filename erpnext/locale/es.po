@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-15 13:59\n"
+"PO-Revision-Date: 2024-04-17 15:05\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -3069,7 +3069,7 @@ msgstr "Configuración de cuentas"
 #: stock/doctype/warehouse_type/warehouse_type.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Accounts User"
-msgstr "Cuentas de Usuario"
+msgstr "Usuario de Cuentas"
 
 #: accounts/doctype/journal_entry/journal_entry.py:1182
 msgid "Accounts table cannot be blank."
