@@ -9,6 +9,7 @@ import erpnext
 
 
 def get_level():
+	print("lol")
 	activation_level = 0
 	sales_data = []
 	min_count = 0
