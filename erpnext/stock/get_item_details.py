@@ -127,19 +127,11 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		out.amount = flt(args.qty) * flt(out.rate)
 
 	out = remove_standard_fields(out)
-	out = remove_qty_fields(out)
-
 	return out
 
 
 def remove_standard_fields(details):
 	for key in child_table_fields + default_fields:
-		details.pop(key, None)
-	return details
-
-
-def remove_qty_fields(details):
-	for key in ["qty", "stock_qty"]:
 		details.pop(key, None)
 	return details
 
