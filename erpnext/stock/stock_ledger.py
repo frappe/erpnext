@@ -650,18 +650,16 @@ class update_entries_after:
 		)
 
 		if not dependant_sle:
-			return entries_to_fix
+			pass
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse == self.args.warehouse:
-			return entries_to_fix
+			pass
 		elif dependant_sle.item_code != self.item_code:
 			self.update_distinct_item_warehouses(dependant_sle)
-			return entries_to_fix
-		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse in self.data:
-			return entries_to_fix
-		else:
+		elif dependant_sle.warehouse not in self.data:
 			self.initialize_previous_data(dependant_sle)
 			self.update_distinct_item_warehouses(dependant_sle)
-			return entries_to_fix
+
+		return entries_to_fix
 
 	def update_distinct_item_warehouses(self, dependant_sle):
 		key = (dependant_sle.item_code, dependant_sle.warehouse)

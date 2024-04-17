@@ -976,16 +976,16 @@ class PaymentEntry(AccountsController):
 		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
 			"advance_payment_payable_doctypes"
 		)
+
+		exchange_rate = 1
+		if self.payment_type == "Receive":
+			exchange_rate = self.source_exchange_rate
+		elif self.payment_type == "Pay":
+			exchange_rate = self.target_exchange_rate
+
 		if d.reference_doctype in advance_payment_doctypes:
 			# When referencing Sales/Purchase Order, use the source/target exchange rate depending on payment type.
 			# This is so there are no Exchange Gain/Loss generated for such doctypes
-
-			exchange_rate = 1
-			if self.payment_type == "Receive":
-				exchange_rate = self.source_exchange_rate
-			elif self.payment_type == "Pay":
-				exchange_rate = self.target_exchange_rate
-
 			base_allocated_amount += flt(
 				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
 			)
@@ -993,13 +993,6 @@ class PaymentEntry(AccountsController):
 			# Use source/target exchange rate, so no difference amount is calculated.
 			# then update exchange gain/loss amount in reference table
 			# if there is an exchange gain/loss amount in reference table, submit a JE for that
-
-			exchange_rate = 1
-			if self.payment_type == "Receive":
-				exchange_rate = self.source_exchange_rate
-			elif self.payment_type == "Pay":
-				exchange_rate = self.target_exchange_rate
-
 			base_allocated_amount += flt(
 				flt(d.allocated_amount) * flt(exchange_rate), self.precision("base_paid_amount")
 			)

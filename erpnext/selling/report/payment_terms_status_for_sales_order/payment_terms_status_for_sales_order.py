@@ -248,16 +248,15 @@ def set_payment_terms_statuses(sales_orders, invoices, filters):
 		for inv in [x for x in invoices if x.sales_order == so.name and x.invoice_amount > 0]:
 			if so.base_payment_amount - so.paid_amount > 0:
 				amount = so.base_payment_amount - so.paid_amount
+				so.invoices += "," + inv.invoice
 				if inv.invoice_amount >= amount:
 					inv.invoice_amount -= amount
 					so.paid_amount += amount
-					so.invoices += "," + inv.invoice
 					so.status = "Completed"
 					break
 				else:
 					so.paid_amount += inv.invoice_amount
 					inv.invoice_amount = 0
-					so.invoices += "," + inv.invoice
 					so.status = "Partly Paid"
 
 	return sales_orders, invoices
