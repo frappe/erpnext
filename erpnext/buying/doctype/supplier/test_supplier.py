@@ -3,7 +3,6 @@
 
 
 import frappe
-from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_records
 
 from erpnext.accounts.party import get_due_date
@@ -183,7 +182,6 @@ def create_supplier(**args):
 
 class TestSupplierPortal(FrappeTestCase):
 	def test_portal_user_can_access_supplier_data(self):
-
 		supplier = create_supplier()
 
 		user = frappe.generate_hash() + "@example.com"

@@ -198,7 +198,9 @@ class Appointment(Document):
 				"starts_on": self.scheduled_time,
 				"status": "Open",
 				"type": "Public",
-				"send_reminder": frappe.db.get_single_value("Appointment Booking Settings", "email_reminders"),
+				"send_reminder": frappe.db.get_single_value(
+					"Appointment Booking Settings", "email_reminders"
+				),
 				"event_participants": [
 					dict(reference_doctype=self.appointment_with, reference_docname=self.party)
 				],
@@ -251,9 +253,7 @@ def _get_agent_list_as_strings():
 
 
 def _check_agent_availability(agent_email, scheduled_time):
-	appointemnts_at_scheduled_time = frappe.get_all(
-		"Appointment", filters={"scheduled_time": scheduled_time}
-	)
+	appointemnts_at_scheduled_time = frappe.get_all("Appointment", filters={"scheduled_time": scheduled_time})
 	for appointment in appointemnts_at_scheduled_time:
 		if appointment._assign == agent_email:
 			return False

@@ -122,11 +122,7 @@ def get_data(filters):
 	assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
 
 	for asset in assets_record:
-		if (
-			assets_linked_to_fb
-			and asset.calculate_depreciation
-			and asset.asset_id not in assets_linked_to_fb
-		):
+		if assets_linked_to_fb and asset.calculate_depreciation and asset.asset_id not in assets_linked_to_fb:
 			continue
 
 		asset_value = get_asset_value_after_depreciation(
@@ -149,6 +145,7 @@ def get_data(filters):
 			"asset_category": asset.asset_category,
 			"purchase_date": asset.purchase_date,
 			"asset_value": asset_value,
+			"company": asset.company,
 		}
 		data.append(row)
 
@@ -240,9 +237,7 @@ def get_assets_linked_to_fb(filters):
 
 
 def get_asset_depreciation_amount_map(filters, finance_book):
-	start_date = (
-		filters.from_date if filters.filter_based_on == "Date Range" else filters.year_start_date
-	)
+	start_date = filters.from_date if filters.filter_based_on == "Date Range" else filters.year_start_date
 	end_date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
 
 	asset = frappe.qb.DocType("Asset")
@@ -259,9 +254,7 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 		.join(company)
 		.on(company.name == asset.company)
 		.select(asset.name.as_("asset"), Sum(gle.debit).as_("depreciation_amount"))
-		.where(
-			gle.account == IfNull(aca.depreciation_expense_account, company.depreciation_expense_account)
-		)
+		.where(gle.account == IfNull(aca.depreciation_expense_account, company.depreciation_expense_account))
 		.where(gle.debit != 0)
 		.where(gle.is_cancelled == 0)
 		.where(company.name == filters.company)
@@ -280,9 +273,7 @@ def get_asset_depreciation_amount_map(filters, finance_book):
 		else:
 			query = query.where(asset.status.isin(["Sold", "Scrapped", "Capitalized", "Decapitalized"]))
 	if finance_book:
-		query = query.where(
-			(gle.finance_book.isin([cstr(finance_book), ""])) | (gle.finance_book.isnull())
-		)
+		query = query.where((gle.finance_book.isin([cstr(finance_book), ""])) | (gle.finance_book.isnull()))
 	else:
 		query = query.where((gle.finance_book.isin([""])) | (gle.finance_book.isnull()))
 	if filters.filter_based_on in ("Date Range", "Fiscal Year"):
@@ -379,29 +370,36 @@ def get_columns(filters):
 				"label": _("Gross Purchase Amount"),
 				"fieldname": "gross_purchase_amount",
 				"fieldtype": "Currency",
-				"options": "company:currency",
+				"options": "Company:company:default_currency",
 				"width": 250,
 			},
 			{
 				"label": _("Opening Accumulated Depreciation"),
 				"fieldname": "opening_accumulated_depreciation",
 				"fieldtype": "Currency",
-				"options": "company:currency",
+				"options": "Company:company:default_currency",
 				"width": 250,
 			},
 			{
 				"label": _("Depreciated Amount"),
 				"fieldname": "depreciated_amount",
 				"fieldtype": "Currency",
-				"options": "company:currency",
+				"options": "Company:company:default_currency",
 				"width": 250,
 			},
 			{
 				"label": _("Asset Value"),
 				"fieldname": "asset_value",
 				"fieldtype": "Currency",
-				"options": "company:currency",
+				"options": "Company:company:default_currency",
 				"width": 250,
+			},
+			{
+				"label": _("Company"),
+				"fieldname": "company",
+				"fieldtype": "Link",
+				"options": "Company",
+				"width": 120,
 			},
 		]
 
@@ -433,28 +431,28 @@ def get_columns(filters):
 			"label": _("Gross Purchase Amount"),
 			"fieldname": "gross_purchase_amount",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 100,
 		},
 		{
 			"label": _("Asset Value"),
 			"fieldname": "asset_value",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 100,
 		},
 		{
 			"label": _("Opening Accumulated Depreciation"),
 			"fieldname": "opening_accumulated_depreciation",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 90,
 		},
 		{
 			"label": _("Depreciated Amount"),
 			"fieldname": "depreciated_amount",
 			"fieldtype": "Currency",
-			"options": "company:currency",
+			"options": "Company:company:default_currency",
 			"width": 100,
 		},
 		{
@@ -478,5 +476,12 @@ def get_columns(filters):
 			"fieldname": "location",
 			"options": "Location",
 			"width": 100,
+		},
+		{
+			"label": _("Company"),
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"options": "Company",
+			"width": 120,
 		},
 	]

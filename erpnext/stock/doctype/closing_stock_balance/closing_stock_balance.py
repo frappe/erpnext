@@ -65,7 +65,7 @@ class ClosingStockBalance(Document):
 				& (
 					(table.from_date.between(self.from_date, self.to_date))
 					| (table.to_date.between(self.from_date, self.to_date))
-					| (table.from_date >= self.from_date and table.to_date >= self.to_date)
+					| ((table.from_date >= self.from_date) & (table.to_date >= self.to_date))
 				)
 			)
 		)
@@ -149,6 +149,6 @@ def prepare_closing_stock_balance(name):
 	try:
 		doc.create_closing_stock_balance_entries()
 		doc.db_set("status", "Completed")
-	except Exception as e:
+	except Exception:
 		doc.db_set("status", "Failed")
 		doc.log_error(title="Closing Stock Balance Failed")

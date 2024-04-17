@@ -45,7 +45,8 @@ def add_calendar_event_for_leads():
 				"owner": d.lead_owner,
 				"subject": ("Contact " + cstr(d.lead_name)),
 				"description": (
-					("Contact " + cstr(d.lead_name)) + (("<br>By: " + cstr(d.contact_by)) if d.contact_by else "")
+					("Contact " + cstr(d.lead_name))
+					+ (("<br>By: " + cstr(d.contact_by)) if d.contact_by else "")
 				),
 				"starts_on": d.contact_date,
 				"ends_on": d.ends_on,
@@ -87,8 +88,6 @@ def add_calendar_event_for_opportunities():
 			}
 		)
 
-		event.append(
-			"event_participants", {"reference_doctype": "Opportunity", "reference_docname": d.name}
-		)
+		event.append("event_participants", {"reference_doctype": "Opportunity", "reference_docname": d.name})
 
 		event.insert(ignore_permissions=True)

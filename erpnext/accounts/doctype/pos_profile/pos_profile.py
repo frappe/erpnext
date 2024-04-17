@@ -180,10 +180,8 @@ class POSProfile(Document):
 			condition = " where pfu.default = 1 "
 
 		pos_view_users = frappe.db.sql_list(
-			"""select pfu.user
-			from `tabPOS Profile User` as pfu {0}""".format(
-				condition
-			)
+			f"""select pfu.user
+			from `tabPOS Profile User` as pfu {condition}"""
 		)
 
 		for user in pos_view_users:
@@ -210,16 +208,13 @@ def get_item_groups(pos_profile):
 def get_child_nodes(group_type, root):
 	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
 	return frappe.db.sql(
-		""" Select name, lft, rgt from `tab{tab}` where
-			lft >= {lft} and rgt <= {rgt} order by lft""".format(
-			tab=group_type, lft=lft, rgt=rgt
-		),
+		f""" Select name, lft, rgt from `tab{group_type}` where
+			lft >= {lft} and rgt <= {rgt} order by lft""",
 		as_dict=1,
 	)
 
 
 def required_accounting_dimensions():
-
 	p = frappe.qb.DocType("Accounting Dimension")
 	c = frappe.qb.DocType("Accounting Dimension Detail")
 

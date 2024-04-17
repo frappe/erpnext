@@ -16,9 +16,7 @@ class IncomingCallHandlingSchedule(Document):
 		from frappe.types import DF
 
 		agent_group: DF.Link
-		day_of_week: DF.Literal[
-			"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-		]
+		day_of_week: DF.Literal["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 		from_time: DF.Time
 		parent: DF.Data
 		parentfield: DF.Data

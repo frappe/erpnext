@@ -83,9 +83,7 @@ class Bin(Document):
 			get_reserved_qty_for_sub_assembly,
 		)
 
-		reserved_qty_for_production_plan = get_reserved_qty_for_sub_assembly(
-			self.item_code, self.warehouse
-		)
+		reserved_qty_for_production_plan = get_reserved_qty_for_sub_assembly(self.item_code, self.warehouse)
 
 		if reserved_qty_for_production_plan is None and not self.reserved_qty_for_production_plan:
 			return
@@ -106,9 +104,7 @@ class Bin(Document):
 		in open work orders"""
 		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 
-		self.reserved_qty_for_production = get_reserved_qty_for_production(
-			self.item_code, self.warehouse
-		)
+		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
 
 		self.db_set(
 			"reserved_qty_for_production", flt(self.reserved_qty_for_production), update_modified=True
@@ -156,9 +152,7 @@ class Bin(Document):
 		se_item = frappe.qb.DocType("Stock Entry Detail")
 
 		if frappe.db.field_exists("Stock Entry", "is_return"):
-			qty_field = (
-				Case().when(se.is_return == 1, se_item.transfer_qty * -1).else_(se_item.transfer_qty)
-			)
+			qty_field = Case().when(se.is_return == 1, se_item.transfer_qty * -1).else_(se_item.transfer_qty)
 		else:
 			qty_field = se_item.transfer_qty
 

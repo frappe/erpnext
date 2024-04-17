@@ -131,9 +131,7 @@ def create_task(
 		task.exp_start_date = start or nowdate()
 		task.exp_end_date = end or nowdate()
 		task.project = (
-			project or None
-			if is_template
-			else frappe.get_value("Project", {"project_name": "_Test Project"})
+			project or None if is_template else frappe.get_value("Project", {"project_name": "_Test Project"})
 		)
 		task.is_template = is_template
 		task.start = begin

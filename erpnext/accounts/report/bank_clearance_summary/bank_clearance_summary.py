@@ -83,31 +83,27 @@ def get_entries_for_bank_clearance_summary(filters):
 	conditions = get_conditions(filters)
 
 	journal_entries = frappe.db.sql(
-		"""SELECT
+		f"""SELECT
 			"Journal Entry", jv.name, jv.posting_date, jv.cheque_no,
 			jv.clearance_date, jvd.against_account, jvd.debit - jvd.credit
 		FROM
 			`tabJournal Entry Account` jvd, `tabJournal Entry` jv
 		WHERE
-			jvd.parent = jv.name and jv.docstatus=1 and jvd.account = %(account)s {0}
-			order by posting_date DESC, jv.name DESC""".format(
-			conditions
-		),
+			jvd.parent = jv.name and jv.docstatus=1 and jvd.account = %(account)s {conditions}
+			order by posting_date DESC, jv.name DESC""",
 		filters,
 		as_list=1,
 	)
 
 	payment_entries = frappe.db.sql(
-		"""SELECT
+		f"""SELECT
 			"Payment Entry", name, posting_date, reference_no, clearance_date, party,
 			if(paid_from=%(account)s, ((paid_amount * -1) - total_taxes_and_charges) , received_amount)
 		FROM
 			`tabPayment Entry`
 		WHERE
-			docstatus=1 and (paid_from = %(account)s or paid_to = %(account)s) {0}
-			order by posting_date DESC, name DESC""".format(
-			conditions
-		),
+			docstatus=1 and (paid_from = %(account)s or paid_to = %(account)s) {conditions}
+			order by posting_date DESC, name DESC""",
 		filters,
 		as_list=1,
 	)

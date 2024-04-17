@@ -6,9 +6,7 @@ def execute():
 
 	frappe.delete_doc("Workspace", "Non Profit", ignore_missing=True, force=True)
 
-	print_formats = frappe.get_all(
-		"Print Format", {"module": "Non Profit", "standard": "Yes"}, pluck="name"
-	)
+	print_formats = frappe.get_all("Print Format", {"module": "Non Profit", "standard": "Yes"}, pluck="name")
 	for print_format in print_formats:
 		frappe.delete_doc("Print Format", print_format, ignore_missing=True, force=True)
 

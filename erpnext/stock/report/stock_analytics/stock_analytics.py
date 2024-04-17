@@ -1,7 +1,6 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import datetime
-from typing import List
 
 import frappe
 from frappe import _, scrub
@@ -48,12 +47,10 @@ def get_columns(filters):
 
 	ranges = get_period_date_ranges(filters)
 
-	for dummy, end_date in ranges:
+	for _dummy, end_date in ranges:
 		period = get_period(end_date, filters)
 
-		columns.append(
-			{"label": _(period), "fieldname": scrub(period), "fieldtype": "Float", "width": 120}
-		)
+		columns.append({"label": _(period), "fieldname": scrub(period), "fieldtype": "Float", "width": 120})
 
 	return columns
 
@@ -67,7 +64,7 @@ def get_period_date_ranges(filters):
 	increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(filters.range, 1)
 
 	periodic_daterange = []
-	for dummy in range(1, 53, increment):
+	for _dummy in range(1, 53, increment):
 		if filters.range == "Weekly":
 			period_end_date = from_date + relativedelta(days=6)
 		else:
@@ -116,9 +113,7 @@ def get_period(posting_date, filters):
 	elif filters.range == "Monthly":
 		period = _(str(months[posting_date.month - 1])) + " " + str(posting_date.year)
 	elif filters.range == "Quarterly":
-		period = _("Quarter {0} {1}").format(
-			str(((posting_date.month - 1) // 3) + 1), str(posting_date.year)
-		)
+		period = _("Quarter {0} {1}").format(str(((posting_date.month - 1) // 3) + 1), str(posting_date.year))
 	else:
 		year = get_fiscal_year(posting_date, company=filters.company)
 		period = str(year[2])
@@ -188,15 +183,13 @@ def get_periodic_data(entry, filters):
 		periodic_data.setdefault(d.item_code, {}).setdefault(period, {}).setdefault(d.warehouse, 0.0)
 
 		periodic_data[d.item_code]["balance"][d.warehouse] += value
-		periodic_data[d.item_code][period][d.warehouse] = periodic_data[d.item_code]["balance"][
-			d.warehouse
-		]
+		periodic_data[d.item_code][period][d.warehouse] = periodic_data[d.item_code]["balance"][d.warehouse]
 
 	return periodic_data
 
 
 def fill_intermediate_periods(
-	periodic_data, item_code: str, current_period: str, all_periods: List[str]
+	periodic_data, item_code: str, current_period: str, all_periods: list[str]
 ) -> None:
 	"""There might be intermediate periods where no stock ledger entry exists, copy previous previous data.
 
@@ -235,7 +228,7 @@ def get_data(filters):
 
 	today = getdate()
 
-	for dummy, item_data in item_details.items():
+	for _dummy, item_data in item_details.items():
 		row = {
 			"name": item_data.name,
 			"item_name": item_data.item_name,
@@ -273,7 +266,7 @@ def get_items(filters):
 		item_filters = {"is_stock_item": 1}
 		if item_group := filters.get("item_group"):
 			children = get_descendants_of("Item Group", item_group, ignore_permissions=True)
-			item_filters["item_group"] = ("in", children + [item_group])
+			item_filters["item_group"] = ("in", [*children, item_group])
 		if brand := filters.get("brand"):
 			item_filters["brand"] = brand
 

@@ -44,7 +44,7 @@ class InstallationNote(TransactionBase):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(InstallationNote, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.status_updater = [
 			{
 				"source_dt": "Installation Note Item",

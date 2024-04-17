@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod, abstractproperty
-from typing import Callable, List, NewType, Optional, Tuple
+from collections.abc import Callable
+from typing import NewType
 
 from frappe.utils import flt
 
-StockBin = NewType("StockBin", List[float])  # [[qty, rate], ...]
+StockBin = NewType("StockBin", list[float])  # [[qty, rate], ...]
 
 # Indexes of values inside FIFO bin 2-tuple
 QTY = 0
@@ -17,15 +18,15 @@ class BinWiseValuation(ABC):
 
 	@abstractmethod
 	def remove_stock(
-		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] = None
-	) -> List[StockBin]:
+		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] | None = None
+	) -> list[StockBin]:
 		pass
 
 	@abstractproperty
-	def state(self) -> List[StockBin]:
+	def state(self) -> list[StockBin]:
 		pass
 
-	def get_total_stock_and_value(self) -> Tuple[float, float]:
+	def get_total_stock_and_value(self) -> tuple[float, float]:
 		total_qty = 0.0
 		total_value = 0.0
 
@@ -62,11 +63,11 @@ class FIFOValuation(BinWiseValuation):
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
 	__slots__ = ["queue"]
 
-	def __init__(self, state: Optional[List[StockBin]]):
-		self.queue: List[StockBin] = state if state is not None else []
+	def __init__(self, state: list[StockBin] | None):
+		self.queue: list[StockBin] = state if state is not None else []
 
 	@property
-	def state(self) -> List[StockBin]:
+	def state(self) -> list[StockBin]:
 		"""Get current state of queue."""
 		return self.queue
 
@@ -95,8 +96,8 @@ class FIFOValuation(BinWiseValuation):
 					self.queue[-1][QTY] = qty
 
 	def remove_stock(
-		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] = None
-	) -> List[StockBin]:
+		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] | None = None
+	) -> list[StockBin]:
 		"""Remove stock from the queue and return popped bins.
 
 		args:
@@ -166,11 +167,11 @@ class LIFOValuation(BinWiseValuation):
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
 	__slots__ = ["stack"]
 
-	def __init__(self, state: Optional[List[StockBin]]):
-		self.stack: List[StockBin] = state if state is not None else []
+	def __init__(self, state: list[StockBin] | None):
+		self.stack: list[StockBin] = state if state is not None else []
 
 	@property
-	def state(self) -> List[StockBin]:
+	def state(self) -> list[StockBin]:
 		"""Get current state of stack."""
 		return self.stack
 
@@ -201,8 +202,8 @@ class LIFOValuation(BinWiseValuation):
 					self.stack[-1][QTY] = qty
 
 	def remove_stock(
-		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] = None
-	) -> List[StockBin]:
+		self, qty: float, outgoing_rate: float = 0.0, rate_generator: Callable[[], float] | None = None
+	) -> list[StockBin]:
 		"""Remove stock from the stack and return popped bins.
 
 		args:

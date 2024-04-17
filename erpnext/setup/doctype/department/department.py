@@ -44,17 +44,17 @@ class Department(NestedSet):
 
 	def before_rename(self, old, new, merge=False):
 		# renaming consistency with abbreviation
-		if not frappe.get_cached_value("Company", self.company, "abbr") in new:
+		if frappe.get_cached_value("Company", self.company, "abbr") not in new:
 			new = get_abbreviated_name(new, self.company)
 
 		return new
 
 	def on_update(self):
 		if not (frappe.local.flags.ignore_update_nsm or frappe.flags.in_setup_wizard):
-			super(Department, self).on_update()
+			super().on_update()
 
 	def on_trash(self):
-		super(Department, self).on_trash()
+		super().on_trash()
 		delete_events(self.doctype, self.name)
 
 
@@ -64,7 +64,7 @@ def on_doctype_update():
 
 def get_abbreviated_name(name, company):
 	abbr = frappe.get_cached_value("Company", company, "abbr")
-	new_name = "{0} - {1}".format(name, abbr)
+	new_name = f"{name} - {abbr}"
 	return new_name
 
 

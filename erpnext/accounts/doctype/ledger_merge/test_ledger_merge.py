@@ -83,7 +83,10 @@ class TestLedgerMerge(unittest.TestCase):
 				"account": "Indirect Income - _TC",
 				"merge_accounts": [
 					{"account": "Indirect Test Income - _TC", "account_name": "Indirect Test Income"},
-					{"account": "Administrative Test Income - _TC", "account_name": "Administrative Test Income"},
+					{
+						"account": "Administrative Test Income - _TC",
+						"account_name": "Administrative Test Income",
+					},
 				],
 			}
 		).insert(ignore_permissions=True)

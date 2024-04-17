@@ -4,7 +4,6 @@ from frappe.model.workflow import get_workflow_name
 
 def execute():
 	for doctype in ["Expense Claim", "Leave Application"]:
-
 		active_workflow = get_workflow_name(doctype)
 		if not active_workflow:
 			continue

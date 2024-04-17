@@ -470,6 +470,9 @@ frappe.ui.form.on("Payment Entry", {
 							() => frm.events.set_dynamic_labels(frm),
 							() => {
 								frm.set_party_account_based_on_party = false;
+								if (r.message.party_bank_account) {
+									frm.set_value("party_bank_account", r.message.party_bank_account);
+								}
 								if (r.message.bank_account) {
 									frm.set_value("bank_account", r.message.bank_account);
 								}
@@ -1662,6 +1665,8 @@ frappe.ui.form.on("Payment Entry Reference", {
 						frm.doc.payment_type == "Receive"
 							? frm.doc.paid_from_account_currency
 							: frm.doc.paid_to_account_currency,
+					party_type: frm.doc.party_type,
+					party: frm.doc.party,
 				},
 				callback: function (r, rt) {
 					if (r.message) {
