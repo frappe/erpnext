@@ -778,11 +778,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
-<<<<<<< HEAD
- "modified": "2024-01-03 12:46:41.759121",
-=======
  "modified": "2024-04-11 11:25:07.366347",
->>>>>>> c3845ac0f1 (fix: Allow updating cost center and project for repostable doctypes)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
