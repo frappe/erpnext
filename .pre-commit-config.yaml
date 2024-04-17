@@ -69,8 +69,7 @@ repos:
     rev: v0.2.0
     hooks:
       - id: ruff
-        name: "Run ruff linter and apply fixes"
-        args: ["--fix"]
+        name: "Run ruff linter"
 
       - id: ruff-format
         name: "Format Python code"
