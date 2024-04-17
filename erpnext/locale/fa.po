@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-16 14:14\n"
+"PO-Revision-Date: 2024-04-17 15:05\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -5355,7 +5355,7 @@ msgstr "تمام روز"
 #: setup/doctype/company/company.py:369 setup/doctype/company/company.py:375
 #: setup/doctype/company/company.py:381
 msgid "All Departments"
-msgstr "همه بخش ها"
+msgstr "همه دپارتمان ها"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
@@ -11166,7 +11166,7 @@ msgstr "صندوقچه"
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Bio / Cover Letter"
-msgstr "بیو / جلد نامه"
+msgstr "بیو / معرفی نامه"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -22688,67 +22688,67 @@ msgstr "داده‌های نمایشی پاک شد"
 #: assets/report/fixed_asset_register/fixed_asset_register.py:466
 #: setup/doctype/department/department.json
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Activity Cost'
 #: projects/doctype/activity_cost/activity_cost.json
 msgctxt "Activity Cost"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Data field in DocType 'Department'
 #: setup/doctype/department/department.json
 msgctxt "Department"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Employee Internal Work History'
 #: setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 msgctxt "Employee Internal Work History"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
 msgctxt "SMS Center"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
 msgctxt "Sales Person"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Datetime field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
@@ -23555,31 +23555,31 @@ msgstr "شرح مطالب"
 #. Name of a DocType
 #: setup/doctype/designation/designation.json
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Label of a Data field in DocType 'Designation'
 #: setup/doctype/designation/designation.json
 msgctxt "Designation"
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Label of a Link field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Label of a Data field in DocType 'Employee External Work History'
 #: setup/doctype/employee_external_work_history/employee_external_work_history.json
 msgctxt "Employee External Work History"
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Label of a Link field in DocType 'Employee Internal Work History'
 #: setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 msgctxt "Employee Internal Work History"
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Name of a role
 #: crm/doctype/lead/lead.json projects/doctype/project/project.json
@@ -44139,7 +44139,7 @@ msgstr "مشتریان جدید"
 
 #: setup/doctype/department/department_tree.js:18
 msgid "New Department"
-msgstr "بخش جدید"
+msgstr "دپارتمان جدید"
 
 #: setup/doctype/employee/employee_tree.js:29
 msgid "New Employee"
@@ -48046,7 +48046,7 @@ msgstr "گروه مشتریان والدین"
 #: setup/doctype/department/department.json
 msgctxt "Department"
 msgid "Parent Department"
-msgstr "بخش والدین"
+msgstr "دپارتمان والدین"
 
 #. Label of a Data field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
@@ -61158,7 +61158,7 @@ msgstr "فیلد عنوان نتیجه"
 #: buying/doctype/purchase_order/purchase_order.js:321
 #: selling/doctype/sales_order/sales_order.js:549
 msgid "Resume"
-msgstr "از سرگیری"
+msgstr "رزومه"
 
 #: manufacturing/doctype/job_card/job_card.js:288
 msgid "Resume Job"
@@ -64159,19 +64159,19 @@ msgstr "سفارشات فروش برای تولید موجود نیست"
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Salutation"
-msgstr "سلام"
+msgstr "عنوان پیشوند"
 
 #. Label of a Link field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Salutation"
-msgstr "سلام"
+msgstr "عنوان پیشوند"
 
 #. Label of a Link field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Salutation"
-msgstr "سلام"
+msgstr "عنوان پیشوند"
 
 #. Label of a Percent field in DocType 'Asset Finance Book'
 #: assets/doctype/asset_finance_book/asset_finance_book.json
@@ -74344,7 +74344,7 @@ msgstr "این یک گروه مشتری ریشه است و قابل ویرایش
 
 #: setup/doctype/department/department.js:14
 msgid "This is a root department and cannot be edited."
-msgstr "این بخش ریشه است و قابل ویرایش نیست."
+msgstr "این دپارتمان ریشه است و قابل ویرایش نیست."
 
 #: setup/doctype/item_group/item_group.js:98
 msgid "This is a root item group and cannot be edited."
