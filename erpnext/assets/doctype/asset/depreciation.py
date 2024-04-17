@@ -353,10 +353,10 @@ def get_depreciation_accounts(asset_category, company):
 			"Company", company, ["accumulated_depreciation_account", "depreciation_expense_account"]
 		)
 
-		if not accumulated_depreciation_account:
-			accumulated_depreciation_account = accounts[0]
-		if not depreciation_expense_account:
-			depreciation_expense_account = accounts[1]
+	if not accumulated_depreciation_account:
+		accumulated_depreciation_account = accounts[0]
+	if not depreciation_expense_account:
+		depreciation_expense_account = accounts[1]
 
 	if not fixed_asset_account or not accumulated_depreciation_account or not depreciation_expense_account:
 		frappe.throw(

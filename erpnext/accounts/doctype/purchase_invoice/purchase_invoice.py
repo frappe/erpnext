@@ -353,8 +353,8 @@ class PurchaseInvoice(BuyingController):
 	def validate_credit_to_acc(self):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
-			if not self.credit_to:
-				self.raise_missing_debit_credit_account_error("Supplier", self.supplier)
+		if not self.credit_to:
+			self.raise_missing_debit_credit_account_error("Supplier", self.supplier)
 
 		account = frappe.get_cached_value(
 			"Account", self.credit_to, ["account_type", "report_type", "account_currency"], as_dict=True

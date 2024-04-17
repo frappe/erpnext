@@ -64,6 +64,6 @@ class TestRequestedItemsToOrderAndReceive(FrappeTestCase):
 			po = make_purchase_order(mr.name)
 			po.supplier = "_Test Supplier"
 			po.submit()
-			if receive:
-				pr = make_purchase_receipt(po.name)
-				pr.submit()
+		if receive:
+			pr = make_purchase_receipt(po.name)
+			pr.submit()

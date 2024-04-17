@@ -1641,11 +1641,11 @@ def get_valuation_rate(
 		# try Item Standard rate
 		valuation_rate = frappe.db.get_value("Item", item_code, "standard_rate")
 
-		if not valuation_rate:
-			# try in price list
-			valuation_rate = frappe.db.get_value(
-				"Item Price", dict(item_code=item_code, buying=1, currency=currency), "price_list_rate"
-			)
+	if not valuation_rate:
+		# try in price list
+		valuation_rate = frappe.db.get_value(
+			"Item Price", dict(item_code=item_code, buying=1, currency=currency), "price_list_rate"
+		)
 
 	if (
 		not allow_zero_rate

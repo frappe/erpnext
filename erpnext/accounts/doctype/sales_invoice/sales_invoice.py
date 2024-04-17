@@ -861,8 +861,8 @@ class SalesInvoice(SellingController):
 	def validate_debit_to_acc(self):
 		if not self.debit_to:
 			self.debit_to = get_party_account("Customer", self.customer, self.company)
-			if not self.debit_to:
-				self.raise_missing_debit_credit_account_error("Customer", self.customer)
+		if not self.debit_to:
+			self.raise_missing_debit_credit_account_error("Customer", self.customer)
 
 		account = frappe.get_cached_value(
 			"Account", self.debit_to, ["account_type", "report_type", "account_currency"], as_dict=True

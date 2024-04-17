@@ -829,8 +829,8 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 			item_code,
 		)
 
-		if not warehouse_list:
-			warehouse_list.append("_Test Warehouse - _TC")
+	if not warehouse_list:
+		warehouse_list.append("_Test Warehouse - _TC")
 
 	for warehouse in warehouse_list:
 		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=qty, rate=rate)

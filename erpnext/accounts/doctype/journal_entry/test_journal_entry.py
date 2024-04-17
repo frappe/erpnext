@@ -525,8 +525,8 @@ def make_journal_entry(
 	if save or submit:
 		jv.insert()
 
-		if submit:
-			jv.submit()
+	if submit:
+		jv.submit()
 
 	return jv
 

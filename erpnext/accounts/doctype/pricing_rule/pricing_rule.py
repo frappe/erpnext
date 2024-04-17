@@ -501,8 +501,8 @@ def update_args_for_pricing_rule(args):
 
 		args.item_group, args.brand = item
 
-		if not args.item_group:
-			frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
+	if not args.item_group:
+		frappe.throw(_("Item Group not mentioned in item master for item {0}").format(args.item_code))
 
 	if args.transaction_type == "selling":
 		if args.customer and not (args.customer_group and args.territory):

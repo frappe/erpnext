@@ -1416,8 +1416,8 @@ def future_sle_exists(args, sl_entries=None):
 
 	if not sl_entries:
 		sl_entries = get_sle_entries_against_voucher(args)
-		if not sl_entries:
-			return
+	if not sl_entries:
+		return
 
 	or_conditions = get_conditions_to_validate_future_sle(sl_entries)
 
