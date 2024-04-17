@@ -687,14 +687,12 @@ class StockReconciliation(StockController):
 				data.valuation_rate = flt(row.current_valuation_rate)
 				data.serial_and_batch_bundle = row.current_serial_and_batch_bundle
 				data.stock_value = data.qty_after_transaction * data.valuation_rate
-				data.stock_value_difference = -1 * flt(row.amount_difference)
 			else:
 				data.actual_qty = row.qty
 				data.qty_after_transaction = 0.0
 				data.serial_and_batch_bundle = row.serial_and_batch_bundle
 				data.valuation_rate = flt(row.valuation_rate)
-				data.stock_value_difference = -1 * flt(row.amount_difference)
-
+			data.stock_value_difference = -1 * flt(row.amount_difference)
 		elif self.docstatus == 1 and has_dimensions and (not row.batch_no or not row.serial_and_batch_bundle):
 			data.actual_qty = row.qty
 			data.qty_after_transaction = 0.0

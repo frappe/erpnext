@@ -129,9 +129,7 @@ def get_columns(filters):
 				{"label": label, "fieldtype": "Float", "fieldname": frappe.scrub(label), "width": 150}
 			)
 
-		return columns
-	else:
-		return columns
+	return columns
 
 
 def get_cost_centers(filters):
@@ -355,11 +353,9 @@ def get_chart_data(filters, columns, data):
 						+ "-"
 						+ formatdate(to_date, format_string="MMM")
 					)
-					labels.append(label)
 				else:
 					label = formatdate(from_date, format_string="MMM")
-					labels.append(label)
-
+				labels.append(label)
 	no_of_columns = len(labels)
 
 	budget_values, actual_values = [0] * no_of_columns, [0] * no_of_columns

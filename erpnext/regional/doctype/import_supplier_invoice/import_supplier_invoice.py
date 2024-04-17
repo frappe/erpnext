@@ -64,11 +64,9 @@ class ImportSupplierInvoice(Document):
 
 		if self.purchase_invoices_count == self.file_count:
 			self.status = "File Import Completed"
-			self.publish("File Import", _("XML Files Processed"), 2, 3)
 		else:
 			self.status = "Partially Completed - Check Error Log"
-			self.publish("File Import", _("XML Files Processed"), 2, 3)
-
+		self.publish("File Import", _("XML Files Processed"), 2, 3)
 		self.save()
 		self.publish("File Import", _("XML Files Processed"), 3, 3)
 

@@ -387,12 +387,11 @@ def _get_fifo_lifo_rate(previous_stock_queue, qty, method):
 	stock_queue = ValuationKlass(previous_stock_queue)
 	if flt(qty) >= 0:
 		total_qty, total_value = stock_queue.get_total_stock_and_value()
-		return total_value / total_qty if total_qty else 0.0
 	else:
 		popped_bins = stock_queue.remove_stock(abs(flt(qty)))
 
 		total_qty, total_value = ValuationKlass(popped_bins).get_total_stock_and_value()
-		return total_value / total_qty if total_qty else 0.0
+	return total_value / total_qty if total_qty else 0.0
 
 
 def get_valid_serial_nos(sr_nos, qty=0, item_code=""):

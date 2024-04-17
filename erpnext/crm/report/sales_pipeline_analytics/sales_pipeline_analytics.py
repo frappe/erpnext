@@ -278,13 +278,10 @@ class SalesPipelineAnalytics:
 	def get_currency_rate(self, from_currency, to_currency):
 		cacheobj = frappe.cache()
 
-		if cacheobj.get(from_currency):
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
-		else:
+		if not cacheobj.get(from_currency):
 			value = get_exchange_rate(from_currency, to_currency)
 			cacheobj.set(from_currency, value)
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
+		return flt(str(cacheobj.get(from_currency), "UTF-8"))
 
 	def convert_to_base_currency(self):
 		default_currency = self.get_default_currency()

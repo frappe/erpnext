@@ -950,13 +950,9 @@ class ReceivablePayableReport:
 						self.filters[dimension.fieldname] = get_dimension_with_children(
 							dimension.document_type, self.filters.get(dimension.fieldname)
 						)
-						self.qb_selection_filter.append(
-							self.ple[dimension.fieldname].isin(self.filters[dimension.fieldname])
-						)
-					else:
-						self.qb_selection_filter.append(
-							self.ple[dimension.fieldname].isin(self.filters[dimension.fieldname])
-						)
+					self.qb_selection_filter.append(
+						self.ple[dimension.fieldname].isin(self.filters[dimension.fieldname])
+					)
 
 	def is_invoice(self, ple):
 		if ple.voucher_type in ("Sales Invoice", "Purchase Invoice"):

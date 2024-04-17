@@ -194,10 +194,7 @@ def prepare_data(
 					and (not sales_user_wise_item_groups.get(d.parent) or r.item_group == d.item_group)
 				):
 					details[p_key] += r.get(qty_or_amount_field, 0)
-					details[variance_key] = details.get(p_key) - details.get(target_key)
-				else:
-					details[variance_key] = details.get(p_key) - details.get(target_key)
-
+				details[variance_key] = details.get(p_key) - details.get(target_key)
 			details["total_achieved"] += details.get(p_key)
 			details["total_variance"] = details.get("total_achieved") - details.get("total_target")
 

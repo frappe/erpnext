@@ -58,10 +58,9 @@ class SupplierScorecardPeriod(Document):
 		for var in self.variables:
 			if "." in var.path:
 				method_to_call = import_string_path(var.path)
-				var.value = method_to_call(self)
 			else:
 				method_to_call = getattr(variable_functions, var.path)
-				var.value = method_to_call(self)
+			var.value = method_to_call(self)
 
 	def calculate_criteria(self):
 		for crit in self.criteria:
@@ -107,13 +106,12 @@ class SupplierScorecardPeriod(Document):
 		my_eval_statement = formula.replace("\r", "").replace("\n", "")
 
 		for var in self.variables:
-			if var.value:
-				if var.param_name in my_eval_statement:
+			if var.param_name in my_eval_statement:
+				if var.value:
 					my_eval_statement = my_eval_statement.replace(
 						"{" + var.param_name + "}", f"{var.value:.2f}"
 					)
-			else:
-				if var.param_name in my_eval_statement:
+				else:
 					my_eval_statement = my_eval_statement.replace("{" + var.param_name + "}", "0.0")
 
 		return my_eval_statement

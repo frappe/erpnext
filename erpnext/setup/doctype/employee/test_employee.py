@@ -73,10 +73,9 @@ def make_employee(user, company=None, **kwargs):
 		if kwargs:
 			employee.update(kwargs)
 		employee.insert()
-		return employee.name
 	else:
 		employee = frappe.get_doc("Employee", {"employee_name": user})
 		employee.update(kwargs)
 		employee.status = "Active"
 		employee.save()
-		return employee.name
+	return employee.name

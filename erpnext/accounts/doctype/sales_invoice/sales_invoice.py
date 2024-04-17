@@ -2519,9 +2519,7 @@ def get_loyalty_programs(customer):
 
 	if len(lp_details) == 1:
 		customer.db_set("loyalty_program", lp_details[0])
-		return lp_details
-	else:
-		return lp_details
+	return lp_details
 
 
 @frappe.whitelist()

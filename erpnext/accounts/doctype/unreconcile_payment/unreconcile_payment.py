@@ -134,7 +134,6 @@ def get_linked_payments_for_doc(
 				.having(qb.Field("allocated_amount") > 0)
 				.run(as_dict=True)
 			)
-			return res
 		else:
 			criteria = [
 				(ple.company == company),
@@ -156,7 +155,7 @@ def get_linked_payments_for_doc(
 				.groupby(ple.against_voucher_no)
 			)
 			res = query.run(as_dict=True)
-			return res
+		return res
 	return []
 
 

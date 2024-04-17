@@ -415,8 +415,6 @@ def create_account(**kwargs):
 				parent_account=kwargs.get("parent_account"),
 			)
 		)
-		account.save()
-		return account.name
 	else:
 		account = frappe.get_doc(
 			dict(
@@ -430,5 +428,5 @@ def create_account(**kwargs):
 			)
 		)
 
-		account.save()
-		return account.name
+	account.save()
+	return account.name

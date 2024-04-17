@@ -214,13 +214,10 @@ class OpportunitySummaryBySalesStage:
 
 	def get_exchange_rate(self, from_currency, to_currency):
 		cacheobj = frappe.cache()
-		if cacheobj and cacheobj.get(from_currency):
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
-
-		else:
+		if not cacheobj or not cacheobj.get(from_currency):
 			value = get_exchange_rate(from_currency, to_currency)
 			cacheobj.set(from_currency, value)
-			return flt(str(cacheobj.get(from_currency), "UTF-8"))
+		return flt(str(cacheobj.get(from_currency), "UTF-8"))
 
 	def get_default_currency(self):
 		company = self.filters.get("company")

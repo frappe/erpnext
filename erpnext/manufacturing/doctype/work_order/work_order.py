@@ -1368,12 +1368,10 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 
 	if purpose == "Material Transfer for Manufacture":
 		stock_entry.to_warehouse = wip_warehouse
-		stock_entry.project = work_order.project
 	else:
 		stock_entry.from_warehouse = wip_warehouse
 		stock_entry.to_warehouse = work_order.fg_warehouse
-		stock_entry.project = work_order.project
-
+	stock_entry.project = work_order.project
 	stock_entry.set_stock_entry_type()
 	stock_entry.get_items()
 	stock_entry.set_serial_no_batch_for_finished_good()

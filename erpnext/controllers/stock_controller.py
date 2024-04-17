@@ -469,7 +469,6 @@ class StockController(AccountsController):
 						}
 					)
 				)
-			return details
 		else:
 			details = self.get("items")
 
@@ -480,7 +479,7 @@ class StockController(AccountsController):
 					if default_cost_center and not d.get("cost_center"):
 						d.cost_center = default_cost_center
 
-			return details
+		return details
 
 	def get_items_and_warehouses(self) -> tuple[list[str], list[str]]:
 		"""Get list of items and warehouses affected by a transaction"""

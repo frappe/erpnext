@@ -288,14 +288,9 @@ def get_opening_balance(
 					filters[dimension.fieldname] = get_dimension_with_children(
 						dimension.document_type, filters.get(dimension.fieldname)
 					)
-					opening_balance = opening_balance.where(
-						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
-					)
-				else:
-					opening_balance = opening_balance.where(
-						closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
-					)
-
+				opening_balance = opening_balance.where(
+					closing_balance[dimension.fieldname].isin(filters[dimension.fieldname])
+				)
 	gle = opening_balance.run(as_dict=1)
 
 	if filters and filters.get("presentation_currency"):

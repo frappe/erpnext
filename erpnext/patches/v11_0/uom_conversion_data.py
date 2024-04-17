@@ -8,9 +8,7 @@ def execute():
 	frappe.reload_doc("setup", "doctype", "UOM")
 	frappe.reload_doc("stock", "doctype", "UOM Category")
 
-	if not frappe.db.a_row_exists("UOM Conversion Factor"):
-		add_uom_data()
-	else:
+	if frappe.db.a_row_exists("UOM Conversion Factor"):
 		# delete conversion data and insert again
 		frappe.db.sql("delete from `tabUOM Conversion Factor`")
 		try:
@@ -19,4 +17,4 @@ def execute():
 		except frappe.LinkExistsError:
 			pass
 
-		add_uom_data()
+	add_uom_data()

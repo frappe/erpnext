@@ -629,9 +629,6 @@ class EmailDigest(Document):
 					"report_date": self.future_to_date,
 					"company": self.company,
 				}
-				label = get_link_to_report(
-					"Account Balance", label=self.meta.get_label(fieldname), filters=filters
-				)
 			else:
 				filters = {
 					"root_type": "Liability",
@@ -639,10 +636,9 @@ class EmailDigest(Document):
 					"report_date": self.future_to_date,
 					"company": self.company,
 				}
-				label = get_link_to_report(
-					"Account Balance", label=self.meta.get_label(fieldname), filters=filters
-				)
-
+			label = get_link_to_report(
+				"Account Balance", label=self.meta.get_label(fieldname), filters=filters
+			)
 			return {"label": label, "value": balance, "last_value": prev_balance}
 		else:
 			if account_type == "Payable":
