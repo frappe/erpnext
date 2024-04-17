@@ -194,16 +194,15 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 	def set_items_bom(self):
-		if self.is_return:
-			for item in self.items:
+		for item in self.items:
+			if self.is_return:
 				if not item.bom:
 					item.bom = frappe.db.get_value(
 						"Subcontracting Receipt Item",
 						{"name": item.subcontracting_receipt_item, "parent": self.return_against},
 						"bom",
 					)
-		else:
-			for item in self.items:
+			else:
 				if not item.bom:
 					item.bom = frappe.db.get_value(
 						"Subcontracting Order Item",
