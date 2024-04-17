@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-09 07:49\n"
+"PO-Revision-Date: 2024-04-17 15:05\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -18083,7 +18083,7 @@ msgstr "Coupon-Typ"
 #: accounts/doctype/bank_clearance/bank_clearance.py:81
 #: templates/form_grid/bank_reconciliation_grid.html:16
 msgid "Cr"
-msgstr "Cr"
+msgstr "H"
 
 #: accounts/doctype/account/account_tree.js:209
 #: accounts/doctype/account/account_tree.js:216
@@ -29017,7 +29017,7 @@ msgstr "Feste Zeit"
 #. Name of a role
 #: setup/doctype/driver/driver.json setup/doctype/vehicle/vehicle.json
 msgid "Fleet Manager"
-msgstr "Flottenverwalter"
+msgstr "Fuhrparkverwalter"
 
 #. Label of a Tab Break field in DocType 'Plant Floor'
 #: manufacturing/doctype/plant_floor/plant_floor.json
