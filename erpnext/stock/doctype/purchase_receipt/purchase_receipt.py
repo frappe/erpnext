@@ -126,8 +126,7 @@ class PurchaseReceipt(BuyingController):
 		self.po_required()
 		self.validate_items_quality_inspection()
 		self.validate_with_previous_doc()
-		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
-		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		self.validate_uom_is_integer()
 		self.validate_cwip_accounts()
 		self.validate_provisional_expense_account()
 
@@ -140,6 +139,10 @@ class PurchaseReceipt(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+
+	def validate_uom_is_integer(self):
+		super().validate_uom_is_integer("uom", ["qty", "received_qty"], "Purchase Receipt Item")
+		super().validate_uom_is_integer("stock_uom", "stock_qty", "Purchase Receipt Item")
 
 	def validate_cwip_accounts(self):
 		for item in self.get("items"):
