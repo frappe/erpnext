@@ -294,6 +294,8 @@ class StockBalanceReport:
 				sle.stock_value,
 				sle.batch_no,
 				sle.serial_no,
+				sle.serial_and_batch_bundle,
+				sle.has_serial_no,
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,

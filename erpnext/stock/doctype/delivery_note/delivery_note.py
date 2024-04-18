@@ -10,7 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, flt
 
-from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from erpnext.controllers.accounts_controller import get_taxes_and_charges, merge_taxes
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
 
@@ -960,7 +960,7 @@ def get_returned_qty_map(delivery_note):
 
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, target_doc=None):
+def make_sales_invoice(source_name, target_doc=None, args=None):
 	doc = frappe.get_doc("Delivery Note", source_name)
 
 	to_make_invoice_qty_map = {}
@@ -973,6 +973,9 @@ def make_sales_invoice(source_name, target_doc=None):
 
 		if len(target.get("items")) == 0:
 			frappe.throw(_("All these items have already been Invoiced/Returned"))
+
+		if args and args.get("merge_taxes"):
+			merge_taxes(source.get("taxes") or [], target)
 
 		target.run_method("calculate_taxes_and_totals")
 
@@ -1038,7 +1041,11 @@ def make_sales_invoice(source_name, target_doc=None):
 				if not doc.get("is_return")
 				else get_pending_qty(d) > 0,
 			},
-			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"add_if_empty": True,
+				"ignore": args.get("merge_taxes") if args else 0,
+			},
 			"Sales Team": {
 				"doctype": "Sales Team",
 				"field_map": {"incentives": "incentives"},
@@ -1060,32 +1067,26 @@ def make_sales_invoice(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_trip(source_name, target_doc=None):
-	def update_stop_details(source_doc, target_doc, source_parent):
-		target_doc.customer = source_parent.customer
-		target_doc.address = source_parent.shipping_address_name
-		target_doc.customer_address = source_parent.shipping_address
-		target_doc.contact = source_parent.contact_person
-		target_doc.customer_contact = source_parent.contact_display
-		target_doc.grand_total = source_parent.grand_total
-
-		# Append unique Delivery Notes in Delivery Trip
-		delivery_notes.append(target_doc.delivery_note)
-
-	delivery_notes = []
-
+	if not target_doc:
+		target_doc = frappe.new_doc("Delivery Trip")
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
 		{
-			"Delivery Note": {"doctype": "Delivery Trip", "validation": {"docstatus": ["=", 1]}},
-			"Delivery Note Item": {
+			"Delivery Note": {
 				"doctype": "Delivery Stop",
-				"field_map": {"parent": "delivery_note"},
-				"condition": lambda item: item.parent not in delivery_notes,
-				"postprocess": update_stop_details,
+				"validation": {"docstatus": ["=", 1]},
+				"on_parent": target_doc,
+				"field_map": {
+					"name": "delivery_note",
+					"shipping_address_name": "address",
+					"shipping_address": "customer_address",
+					"contact_person": "contact",
+					"contact_display": "customer_contact",
+				},
 			},
 		},
-		target_doc,
+		ignore_child_tables=True,
 	)
 
 	return doclist
@@ -1302,6 +1303,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			for tax in get_taxes_and_charges(master_doctype, target.get("taxes_and_charges")):
 				target.append("taxes", tax)
 
+		if not target.get("items"):
+			frappe.throw(_("All items have already been received"))
+
 	def update_details(source_doc, target_doc, source_parent):
 		target_doc.inter_company_invoice_reference = source_doc.name
 		if target_doc.doctype == "Purchase Receipt":
@@ -1357,6 +1361,10 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				shipping_address_name=target_doc.shipping_address_name,
 			)
 
+	def update_item(source, target, source_parent):
+		if source_parent.doctype == "Delivery Note" and source.received_qty:
+			target.qty = flt(source.qty) + flt(source.returned_qty) - flt(source.received_qty)
+
 	doclist = get_mapped_doc(
 		doctype,
 		source_name,
@@ -1377,6 +1385,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 					"Material_request_item": "material_request_item",
 				},
 				"field_no_map": ["warehouse"],
+				"condition": lambda item: item.received_qty < item.qty + item.returned_qty,
+				"postprocess": update_item,
 			},
 		},
 		target_doc,

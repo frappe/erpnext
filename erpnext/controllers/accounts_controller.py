@@ -3,6 +3,7 @@
 
 
 import json
+from collections import defaultdict
 
 import frappe
 from frappe import _, bold, qb, throw
@@ -1031,10 +1032,10 @@ class AccountsController(TransactionBase):
 				"transaction_currency": self.get("currency") or self.company_currency,
 				"transaction_exchange_rate": self.get("conversion_rate", 1),
 				"debit_in_transaction_currency": self.get_value_in_transaction_currency(
-					account_currency, args, "debit"
+					account_currency, gl_dict, "debit"
 				),
 				"credit_in_transaction_currency": self.get_value_in_transaction_currency(
-					account_currency, args, "credit"
+					account_currency, gl_dict, "credit"
 				),
 			}
 		)
@@ -1066,11 +1067,11 @@ class AccountsController(TransactionBase):
 			return "Debit Note"
 		return self.doctype
 
-	def get_value_in_transaction_currency(self, account_currency, args, field):
+	def get_value_in_transaction_currency(self, account_currency, gl_dict, field):
 		if account_currency == self.get("currency"):
-			return args.get(field + "_in_account_currency")
+			return gl_dict.get(field + "_in_account_currency")
 		else:
-			return flt(args.get(field, 0) / self.get("conversion_rate", 1))
+			return flt(gl_dict.get(field, 0) / self.get("conversion_rate", 1))
 
 	def validate_zero_qty_for_return_invoices_with_stock(self):
 		rows = []
@@ -1438,7 +1439,8 @@ class AccountsController(TransactionBase):
 
 						dr_or_cr = "debit" if d.exchange_gain_loss > 0 else "credit"
 
-						if d.reference_doctype == "Purchase Invoice":
+						# Inverse debit/credit for payable accounts
+						if self.is_payable_account(d.reference_doctype, party_account):
 							dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 						reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
@@ -1471,6 +1473,14 @@ class AccountsController(TransactionBase):
 								get_link_to_form("Journal Entry", je)
 							)
 						)
+
+	def is_payable_account(self, reference_doctype, account):
+		if reference_doctype == "Purchase Invoice" or (
+			reference_doctype == "Journal Entry"
+			and frappe.get_cached_value("Account", account, "account_type") == "Payable"
+		):
+			return True
+		return False
 
 	def update_against_document_in_jv(self):
 		"""
@@ -1924,32 +1934,43 @@ class AccountsController(TransactionBase):
 
 			self.db_set("advance_paid", advance_paid)
 
-		self.set_advance_payment_status(advance_paid, order_total)
+		self.set_advance_payment_status()
 
-	def set_advance_payment_status(self, advance_paid: float | None = None, order_total: float | None = None):
+	def set_advance_payment_status(self):
 		new_status = None
-		# if money is paid set the paid states
-		if advance_paid:
-			new_status = "Partially Paid" if advance_paid < order_total else "Fully Paid"
 
-		if not new_status:
-			prs = frappe.db.count(
-				"Payment Request",
-				{
-					"reference_doctype": self.doctype,
-					"reference_name": self.name,
-					"docstatus": 1,
-				},
-			)
-			if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
-				new_status = "Requested" if prs else "Not Requested"
-			if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
-				new_status = "Initiated" if prs else "Not Initiated"
+		stati = frappe.get_list(
+			"Payment Request",
+			{
+				"reference_doctype": self.doctype,
+				"reference_name": self.name,
+				"docstatus": 1,
+			},
+			pluck="status",
+		)
+		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
+			if not stati:
+				new_status = "Not Requested"
+			elif "Requested" in stati or "Failed" in stati:
+				new_status = "Requested"
+			elif "Partially Paid" in stati:
+				new_status = "Partially Paid"
+			elif "Paid" in stati:
+				new_status = "Fully Paid"
+		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
+			if not stati:
+				new_status = "Not Initiated"
+			elif "Initiated" in stati or "Failed" in stati or "Payment Ordered" in stati:
+				new_status = "Initiated"
+			elif "Partially Paid" in stati:
+				new_status = "Partially Paid"
+			elif "Paid" in stati:
+				new_status = "Fully Paid"
 
 		if new_status == self.advance_payment_status:
 			return
 
-		self.db_set("advance_payment_status", new_status)
+		self.db_set("advance_payment_status", new_status, update_modified=False)
 		self.set_status(update=True)
 		self.notify_update()
 
@@ -2078,21 +2099,26 @@ class AccountsController(TransactionBase):
 		)
 
 	def group_similar_items(self):
-		group_item_qty = {}
-		group_item_amount = {}
+		grouped_items = {}
 		# to update serial number in print
 		count = 0
 
+		fields_to_group = frappe.get_hooks("fields_for_group_similar_items")
+		fields_to_group = set(fields_to_group)
+
 		for item in self.items:
-			group_item_qty[item.item_code] = group_item_qty.get(item.item_code, 0) + item.qty
-			group_item_amount[item.item_code] = group_item_amount.get(item.item_code, 0) + item.amount
+			item_values = grouped_items.setdefault(item.item_code, defaultdict(int))
+
+			for field in fields_to_group:
+				item_values[field] += item.get(field, 0)
 
 		duplicate_list = []
 		for item in self.items:
-			if item.item_code in group_item_qty:
+			if item.item_code in grouped_items:
 				count += 1
-				item.qty = group_item_qty[item.item_code]
-				item.amount = group_item_amount[item.item_code]
+
+				for field in fields_to_group:
+					item.set(field, grouped_items[item.item_code][field])
 
 				if item.qty:
 					item.rate = flt(flt(item.amount) / flt(item.qty), item.precision("rate"))
@@ -2100,7 +2126,7 @@ class AccountsController(TransactionBase):
 					item.rate = 0
 
 				item.idx = count
-				del group_item_qty[item.item_code]
+				del grouped_items[item.item_code]
 			else:
 				duplicate_list.append(item)
 		for item in duplicate_list:
@@ -3508,6 +3534,37 @@ def check_if_child_table_updated(child_table_before_update, child_table_after_up
 				return True
 
 	return False
+
+
+def merge_taxes(source_taxes, target_doc):
+	from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+		update_item_wise_tax_detail,
+	)
+
+	existing_taxes = target_doc.get("taxes") or []
+	idx = 1
+	for tax in source_taxes:
+		found = False
+		for t in existing_taxes:
+			if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
+				t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
+				t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
+				update_item_wise_tax_detail(t, tax)
+				found = True
+
+		if not found:
+			tax.charge_type = "Actual"
+			tax.idx = idx
+			idx += 1
+			tax.included_in_print_rate = 0
+			tax.dont_recompute_tax = 1
+			tax.row_id = ""
+			tax.tax_amount = tax.tax_amount_after_discount_amount
+			tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
+			tax.item_wise_tax_detail = tax.item_wise_tax_detail
+			existing_taxes.append(tax)
+
+	target_doc.set("taxes", existing_taxes)
 
 
 @erpnext.allow_regional

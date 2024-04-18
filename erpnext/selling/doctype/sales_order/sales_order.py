@@ -525,6 +525,8 @@ class SalesOrder(SellingController):
 		pass
 
 	def on_update_after_submit(self):
+		self.calculate_commission()
+		self.calculate_contribution()
 		self.check_credit_limit()
 
 	def before_update_after_submit(self):
@@ -1722,3 +1724,8 @@ def get_work_order_items(sales_order, for_raw_material_request=0):
 					)
 
 		return items
+
+
+@frappe.whitelist()
+def get_stock_reservation_status():
+	return frappe.db.get_single_value("Stock Settings", "enable_stock_reservation")

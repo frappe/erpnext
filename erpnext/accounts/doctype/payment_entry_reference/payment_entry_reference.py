@@ -15,6 +15,7 @@ class PaymentEntryReference(Document):
 		from frappe.types import DF
 
 		account: DF.Link | None
+		account_type: DF.Data | None
 		allocated_amount: DF.Float
 		bill_no: DF.Data | None
 		due_date: DF.Date | None
@@ -25,6 +26,7 @@ class PaymentEntryReference(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		payment_term: DF.Link | None
+		payment_type: DF.Data | None
 		reference_doctype: DF.Link
 		reference_name: DF.DynamicLink
 		total_amount: DF.Float
