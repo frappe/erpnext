@@ -539,9 +539,6 @@ class SubcontractingController(StockController):
 		return serial_nos
 
 	def __add_supplied_item(self, item_row, bom_item, qty):
-		if bom_item.get("qty"):
-			bom_item.pop("qty")
-
 		bom_item.conversion_factor = item_row.conversion_factor
 		rm_obj = self.append(self.raw_material_table, bom_item)
 		if rm_obj.get("qty"):
