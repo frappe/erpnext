@@ -76,6 +76,7 @@ class PaymentEntry(AccountsController):
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.set_liability_account()
+		self.validate_advance_account_currency()
 		self.set_missing_ref_details(force=True)
 		self.validate_payment_type()
 		self.validate_party_details()
@@ -156,6 +157,22 @@ class PaymentEntry(AccountsController):
 			),
 			alert=True,
 		)
+
+	def validate_advance_account_currency(self):
+		if self.book_advance_payments_in_separate_party_account is True:
+			company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
+			if self.payment_type == "Receive" and self.paid_from_account_currency != company_currency:
+				frappe.throw(
+					_("Booking advances in foreign currency account: {0} ({1}) is not yet supported.").format(
+						frappe.bold(self.paid_from), frappe.bold(self.paid_from_account_currency)
+					)
+				)
+			if self.payment_type == "Pay" and self.paid_to_account_currency != company_currency:
+				frappe.throw(
+					_("Booking advances in foreign currency account: {0} ({1}) is not yet supported.").format(
+						frappe.bold(self.paid_to), frappe.bold(self.paid_to_account_currency)
+					)
+				)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
