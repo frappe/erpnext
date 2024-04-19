@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-17 15:05\n"
+"PO-Revision-Date: 2024-04-19 15:12\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -152,7 +152,8 @@ msgstr "# Configuración de CRM\n\n"
 #: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "# Chart Of Accounts\n\n"
 "ERPNext sets up a simple chart of accounts for each Company you create, but you can modify it according to business and legal requirements."
-msgstr ""
+msgstr "# Plan de Cuentas\n\n"
+"ERPNext configura un plan de cuentas sencillo para cada Empresa que cree, pero puede modificarlo según los requisitos empresariales y legales."
 
 #. Description of the Onboarding Step 'Check Stock Ledger'
 #. Description of the Onboarding Step 'Check Stock Projected Qty'
@@ -229,13 +230,19 @@ msgid "# Create a Supplier\n\n"
 " - Supplier’s multiple address and contacts\n"
 " - Account Receivables\n"
 " - Credit Limit and Credit Period\n"
-msgstr ""
+msgstr "# Crear un Proveedor\n\n"
+"También conocido como Proveedor, es un maestro en el centro de sus transacciones de compra. Los proveedores están vinculados en las Solicitudes de Cotización, los Pedidos de Compra, los Recibos y los Pagos. Los proveedores pueden estar numerados o identificados por su nombre.\n\n"
+"A través del maestro de Proveedores, puede realizar un seguimiento eficaz de aspectos esenciales como:\n"
+" - Dirección y contactos múltiples del proveedor\n"
+" - Cuentas por cobrar\n"
+" - Límite de crédito y período de crédito\n"
 
 #. Description of the Onboarding Step 'Create a Supplier'
 #: stock/onboarding_step/create_a_supplier/create_a_supplier.json
 msgid "# Create a Supplier\n"
 "In this step we will create a **Supplier**. If you have already created a **Supplier** you can skip this step."
-msgstr ""
+msgstr "# Crear un Proveedor\n"
+"En este paso crearemos un **Proveedor**. Si ya ha creado un **Proveedor** puede saltarse este paso."
 
 #. Description of the Onboarding Step 'Work Order'
 #: manufacturing/onboarding_step/work_order/work_order.json
@@ -439,7 +446,10 @@ msgid "## Who is a Customer?\n\n"
 "A customer, who is sometimes known as a client, buyer, or purchaser is the one who receives goods, services, products, or ideas, from a seller for a monetary consideration.\n\n"
 "Every customer needs to be assigned a unique id. Customer name itself can be the id or you can set a naming series for ids to be generated in Selling Settings.\n\n"
 "Just like the supplier, let's quickly create a customer."
-msgstr ""
+msgstr "## ¿Quién es un cliente?\n\n"
+"Un cliente, que a veces se conoce como cliente, comprador o adquirente es aquel que recibe bienes, servicios, productos o ideas, de un vendedor a cambio de una contraprestación monetaria.\n\n"
+"A cada cliente hay que asignarle un id único. El propio Nombre del Cliente puede ser el id o puede establecer una serie de nombres para los id que se generen en Configuración de Venta.\n\n"
+"Al igual que el proveedor, vamos a crear rápidamente un cliente."
 
 #. Description of the Onboarding Step 'Create a Supplier'
 #: accounts/onboarding_step/create_a_supplier/create_a_supplier.json
@@ -658,7 +668,7 @@ msgstr ""
 
 #: stock/doctype/delivery_note/delivery_note.py:367
 msgid "'Sales Order' reference ({1}) is missing in row {0}"
-msgstr ""
+msgstr "Falta la referencia 'Orden de venta' ({1}) en la fila {0}"
 
 #: stock/report/batch_item_expiry_status/batch_item_expiry_status.py:27
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:101
@@ -680,7 +690,7 @@ msgstr "'Actualización de Inventario' no se puede comprobar en venta de activos
 
 #: accounts/doctype/bank_account/bank_account.py:64
 msgid "'{0}' account is already used by {1}. Use another account."
-msgstr ""
+msgstr "La cuenta de '{0}' ya está siendo utilizada por {1}. Utilice otra cuenta."
 
 #: controllers/accounts_controller.py:395
 msgid "'{0}' account: '{1}' should match the Return Against Invoice"
@@ -1011,7 +1021,7 @@ msgstr ""
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:262
 msgid "<div class=\"text-muted text-center\">{0}</div>"
-msgstr ""
+msgstr "<div class=\"text-muted text-center\">{0}</div>"
 
 #. Content of the 'settings' (HTML) field in DocType 'Cheque Print Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
@@ -1019,7 +1029,9 @@ msgctxt "Cheque Print Template"
 msgid "<div>\n"
 "<h3> All dimensions in centimeter only </h3>\n"
 "</div>"
-msgstr ""
+msgstr "<div>\n"
+"<h3> Todas las dimensiones solo en centímetros </h3>\n"
+"</div>"
 
 #. Content of the 'about' (HTML) field in DocType 'Product Bundle'
 #: selling/doctype/product_bundle/product_bundle.json
@@ -1153,7 +1165,11 @@ msgid "<pre><h5>Message Example</h5>\n\n"
 "&lt;p&gt;Requesting payment for {{ doc.doctype }}, {{ doc.name }} for {{ doc.grand_total }}.&lt;/p&gt;\n\n"
 "&lt;a href=\"{{ payment_url }}\"&gt; click here to pay &lt;/a&gt;\n\n"
 "</pre>\n"
-msgstr ""
+msgstr "<pre><h5>Ejemplo de mensaje</h5>\n\n"
+"&lt;p&gt;Estimado {{ doc.contact_person }},&lt;/p&gt;\n\n"
+"&lt;p&gt;Solicitando pago por {{ doc.doctype }}, {{ doc.name }} por {{ doc.grand_total }}.&lt;/p&gt;\n\n"
+"&lt;a href=\"{{ payment_url }}\"&gt; Haga clic aquí para pagar &lt;/a&gt;\n\n"
+"</pre>\n"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
@@ -8837,22 +8853,22 @@ msgstr "Auto Opt In (para todos los clientes)"
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.js:61
 msgid "Auto Reconcile"
-msgstr ""
+msgstr "Reconciliación Automática"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Auto Reconcile Payments"
-msgstr ""
+msgstr "Reconciliación Automática de Pagos"
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:408
 msgid "Auto Reconciliation"
-msgstr ""
+msgstr "Reconciliación Automática"
 
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:143
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:191
 msgid "Auto Reconciliation of Payments has been disabled. Enable it through {0}"
-msgstr ""
+msgstr "Reconciliación automática de pagos ha sido desactivada. Habilítelo a través de {0}"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -10791,7 +10807,7 @@ msgstr "Historial de Saldo por Lotes"
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:160
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:84
 msgid "Batchwise Valuation"
-msgstr ""
+msgstr "Valoración por lotes"
 
 #. Label of a Section Break field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
@@ -11791,12 +11807,12 @@ msgstr "Edificios"
 #. Name of a DocType
 #: bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.json
 msgid "Bulk Transaction Log"
-msgstr ""
+msgstr "Registro de transacciones masivas"
 
 #. Name of a DocType
 #: bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
 msgid "Bulk Transaction Log Detail"
-msgstr ""
+msgstr "Detalle del registro de transacciones masivas"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
@@ -11951,7 +11967,7 @@ msgstr "Evitar el control de límite de crédito en la Orden de Venta"
 
 #: selling/report/customer_credit_balance/customer_credit_balance.py:68
 msgid "Bypass credit check at Sales Order"
-msgstr ""
+msgstr "Omitir verificación de crédito en Orden de Venta"
 
 #. Label of a Link field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
@@ -11983,7 +11999,7 @@ msgstr "CRM"
 #. Name of a DocType
 #: crm/doctype/crm_note/crm_note.json
 msgid "CRM Note"
-msgstr ""
+msgstr "Nota CRM"
 
 #. Name of a DocType
 #. Title of an Onboarding Step
@@ -13684,7 +13700,7 @@ msgstr "Cláusulas y Condiciones"
 
 #: public/js/utils/demo.js:11
 msgid "Clear Demo Data"
-msgstr ""
+msgstr "Borrar datos de demostración"
 
 #. Label of a Check field in DocType 'Transaction Deletion Record'
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
@@ -13751,7 +13767,7 @@ msgstr "Fecha de liquidación actualizada"
 
 #: public/js/utils/demo.js:24
 msgid "Clearing Demo Data..."
-msgstr ""
+msgstr "Borrando datos de demostración..."
 
 #: manufacturing/doctype/production_plan/production_plan.js:577
 msgid "Click on 'Get Finished Goods for Manufacture' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
