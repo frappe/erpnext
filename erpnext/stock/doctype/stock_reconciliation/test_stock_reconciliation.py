@@ -986,6 +986,108 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		active_serial_no = frappe.get_all("Serial No", filters={"status": "Active", "item_code": item_code})
 		self.assertEqual(len(active_serial_no), 5)
 
+	def test_balance_qty_for_batch_with_backdated_stock_reco_and_future_entries(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = self.make_item(
+			"Test Batch Item Original Test",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TEST-BATCH-SRWFEE-.###",
+			},
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+		se1 = make_stock_entry(
+			item_code=item.name,
+			target=warehouse,
+			qty=50,
+			basic_rate=100,
+			posting_date=add_days(nowdate(), -2),
+		)
+		batch1 = get_batch_from_bundle(se1.items[0].serial_and_batch_bundle)
+
+		se2 = make_stock_entry(
+			item_code=item.name,
+			target=warehouse,
+			qty=50,
+			basic_rate=100,
+			posting_date=add_days(nowdate(), -2),
+		)
+		batch2 = get_batch_from_bundle(se2.items[0].serial_and_batch_bundle)
+
+		se3 = make_stock_entry(
+			item_code=item.name,
+			target=warehouse,
+			qty=100,
+			basic_rate=100,
+			posting_date=add_days(nowdate(), -2),
+		)
+		batch3 = get_batch_from_bundle(se3.items[0].serial_and_batch_bundle)
+
+		se3 = make_stock_entry(
+			item_code=item.name,
+			target=warehouse,
+			qty=100,
+			basic_rate=100,
+			posting_date=nowdate(),
+		)
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={
+				"item_code": item.name,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+				"voucher_no": se3.name,
+			},
+			fields=["qty_after_transaction"],
+			order_by="posting_time desc, creation desc",
+		)
+
+		self.assertEqual(flt(sle[0].qty_after_transaction), flt(300.0))
+
+		sr = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=warehouse,
+			qty=0,
+			batch_no=batch1,
+			posting_date=add_days(nowdate(), -1),
+			use_serial_batch_fields=1,
+			do_not_save=1,
+		)
+
+		for batch in [batch2, batch3]:
+			sr.append(
+				"items",
+				{
+					"item_code": item.name,
+					"warehouse": warehouse,
+					"qty": 0,
+					"batch_no": batch,
+					"use_serial_batch_fields": 1,
+				},
+			)
+
+		sr.save()
+		sr.submit()
+
+		sle = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={
+				"item_code": item.name,
+				"warehouse": warehouse,
+				"is_cancelled": 0,
+				"voucher_no": se3.name,
+			},
+			fields=["qty_after_transaction"],
+			order_by="posting_time desc, creation desc",
+		)
+
+		self.assertEqual(flt(sle[0].qty_after_transaction), flt(100.0))
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
