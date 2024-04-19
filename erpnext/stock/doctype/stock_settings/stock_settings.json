@@ -31,6 +31,7 @@
   "allow_negative_stock",
   "show_barcode_field",
   "clean_description_html",
+  "do_not_repost_valuations_when_merging_items",
   "quality_inspection_settings_section",
   "action_if_quality_inspection_is_not_submitted",
   "column_break_23",
@@ -437,6 +438,13 @@
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
    "label": "Do Not Update Serial / Batch on Creation of Auto Bundle"
+  },
+  {
+   "default": "0",
+   "description": "Valuation rate will no longer be strictly accurate but avoids issues reposting valuations for transactions before a closing voucher",
+   "fieldname": "do_not_repost_valuations_when_merging_items",
+   "fieldtype": "Check",
+   "label": "Do Not Repost Valuations When Merging Items"
   }
  ],
  "icon": "icon-cog",
@@ -444,7 +452,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:10:45.423987",
+ "modified": "2024-04-19 12:15:02.098334",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

@@ -631,7 +631,11 @@ class Item(Document):
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
 
-		existing_allow_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
+		# better to get multiple values in one db query
+		# nosemgrep: frappe-semgrep-rules.rules.frappe-single-value-type-safety
+		existing_allow_negative_stock, ignore_valuations = frappe.db.get_value(
+			"Stock Settings", None, ["allow_negative_stock", "do_not_repost_valuations_when_merging_items"]
+		)
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
 		repost_stock_for_warehouses = frappe.get_all(
@@ -646,7 +650,7 @@ class Item(Document):
 		frappe.db.delete("Bin", {"item_code": new_name})
 
 		for warehouse in repost_stock_for_warehouses:
-			repost_stock(new_name, warehouse)
+			repost_stock(new_name, warehouse, only_bin=ignore_valuations)
 
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", existing_allow_negative_stock)
 
