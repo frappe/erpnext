@@ -61,6 +61,8 @@ def execute(filters=None):
 			actual_qty += flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
 			batch_balance_dict[sle.batch_no] += sle.actual_qty
+			if filters.get("segregate_serial_batch_bundle"):
+				actual_qty = batch_balance_dict[sle.batch_no]
 
 			if sle.voucher_type == "Stock Reconciliation" and not sle.actual_qty:
 				actual_qty = sle.qty_after_transaction
