@@ -1046,9 +1046,12 @@
    "report_hide": 1
   },
   {
+   "fetch_from": "customer.language",
+   "fetch_if_empty": 1,
    "fieldname": "language",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Print Language",
+   "options": "Language",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1397,7 +1400,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:06:49.519676",
+ "modified": "2024-04-20 01:18:20.679692",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
