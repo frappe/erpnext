@@ -86,12 +86,7 @@
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
-<<<<<<< HEAD
  "owner": "Administrator",
-=======
- "naming_rule": "By fieldname",
-  "owner": "Administrator",
->>>>>>> 572e844a91 (fix: account and stock manager read perm)
  "permissions": [
   {
    "create": 1,
