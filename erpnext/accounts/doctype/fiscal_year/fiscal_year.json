@@ -118,6 +118,14 @@
   {
    "read": 1,
    "role": "Employee"
+  },
+  {
+   "read": 1,
+   "role": "Accounts Manager"
+  },
+  {
+   "read": 1,
+   "role": "Stock Manager"
   }
  ],
  "show_name_in_global_search": 1,
