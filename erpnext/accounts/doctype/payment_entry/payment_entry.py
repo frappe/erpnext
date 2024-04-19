@@ -1831,6 +1831,8 @@ def get_negative_outstanding_invoices(
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date, cost_center=None):
 	bank_account = ""
+	party_bank_account = ""
+
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
@@ -1842,7 +1844,12 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	party_name = frappe.db.get_value(party_type, party, _party_name)
 	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
 	if party_type in ["Customer", "Supplier"]:
+<<<<<<< HEAD
 		bank_account = get_party_bank_account(party_type, party)
+=======
+		party_bank_account = get_party_bank_account(party_type, party)
+		bank_account = get_default_company_bank_account(company, party_type, party)
+>>>>>>> 93e6c6ccab (fix: Payment entry against employee)
 
 	return {
 		"party_account": party_account,

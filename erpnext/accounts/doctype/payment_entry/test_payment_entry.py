@@ -11,6 +11,7 @@ from frappe.utils import add_days, flt, nowdate
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	InvalidPaymentEntry,
 	get_outstanding_reference_documents,
+	get_party_details,
 	get_payment_entry,
 	get_reference_details,
 )
@@ -1380,6 +1381,10 @@ def create_payment_entry(**args):
 	payment_entry.received_amount = payment_entry.paid_amount / payment_entry.target_exchange_rate
 	payment_entry.reference_no = "Test001"
 	payment_entry.reference_date = nowdate()
+
+	get_party_details(
+		payment_entry.company, payment_entry.party_type, payment_entry.party, payment_entry.posting_date
+	)
 
 	if args.get("save"):
 		payment_entry.save()
