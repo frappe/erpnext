@@ -1085,7 +1085,7 @@ def create_stock_reconciliation(**args):
 	)
 
 	bundle_id = None
-	if not args.use_serial_batch_fields and (args.batch_no or args.serial_no):
+	if not args.use_serial_batch_fields and (args.batch_no or args.serial_no) and args.qty:
 		batches = frappe._dict({})
 		if args.batch_no:
 			batches[args.batch_no] = args.qty
