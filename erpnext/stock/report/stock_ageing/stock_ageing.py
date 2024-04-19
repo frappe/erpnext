@@ -229,7 +229,15 @@ class FIFOSlots:
 		}
 		"""
 
+		from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+			get_serial_nos_from_bundle,
+		)
+
 		stock_ledger_entries = self.sle
+
+		bundle_wise_serial_nos = frappe._dict({})
+		if stock_ledger_entries is None:
+			bundle_wise_serial_nos = self.__get_bundle_wise_serial_nos()
 
 		with frappe.db.unbuffered_cursor():
 			if stock_ledger_entries is None:
@@ -244,6 +252,11 @@ class FIFOSlots:
 					d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
 				serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
+				if d.serial_and_batch_bundle and d.has_serial_no:
+					if bundle_wise_serial_nos:
+						serial_nos = bundle_wise_serial_nos.get(d.serial_and_batch_bundle) or []
+					else:
+						serial_nos = get_serial_nos_from_bundle(d.serial_and_batch_bundle) or []
 
 				if d.actual_qty > 0:
 					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
@@ -408,6 +421,7 @@ class FIFOSlots:
 				sle.serial_no,
 				sle.batch_no,
 				sle.qty_after_transaction,
+				sle.serial_and_batch_bundle,
 				sle.warehouse,
 			)
 			.where(
@@ -424,6 +438,33 @@ class FIFOSlots:
 		sle_query = sle_query.orderby(sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty)
 
 		return sle_query.run(as_dict=True, as_iterator=True)
+
+	def __get_bundle_wise_serial_nos(self) -> dict:
+		bundle = frappe.qb.DocType("Serial and Batch Bundle")
+		entry = frappe.qb.DocType("Serial and Batch Entry")
+
+		query = (
+			frappe.qb.from_(bundle)
+			.join(entry)
+			.on(bundle.name == entry.parent)
+			.select(bundle.name, entry.serial_no)
+			.where(
+				(bundle.docstatus == 1)
+				& (entry.serial_no.isnotnull())
+				& (bundle.company == self.filters.get("company"))
+				& (bundle.posting_date <= self.filters.get("to_date"))
+			)
+		)
+
+		for field in ["item_code", "warehouse"]:
+			if self.filters.get(field):
+				query = query.where(bundle[field] == self.filters.get(field))
+
+		bundle_wise_serial_nos = frappe._dict({})
+		for bundle_name, serial_no in query.run():
+			bundle_wise_serial_nos.setdefault(bundle_name, []).append(serial_no)
+
+		return bundle_wise_serial_nos
 
 	def __get_item_query(self) -> str:
 		item_table = frappe.qb.DocType("Item")

@@ -308,3 +308,13 @@ def clean_all_descriptions():
 			clean_description = clean_html(item.description)
 		if item.description != clean_description:
 			frappe.db.set_value("Item", item.name, "description", clean_description)
+
+
+@frappe.whitelist()
+def get_enable_stock_uom_editing():
+	return frappe.get_cached_value(
+		"Stock Settings",
+		None,
+		["allow_to_edit_stock_uom_qty_for_sales", "allow_to_edit_stock_uom_qty_for_purchase"],
+		as_dict=1,
+	)

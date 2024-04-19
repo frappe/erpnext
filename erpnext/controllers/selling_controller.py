@@ -139,7 +139,7 @@ class SellingController(StockController):
 			self.in_words = money_in_words(amount, self.currency)
 
 	def calculate_commission(self):
-		if not self.meta.get_field("commission_rate") or self.docstatus.is_submitted():
+		if not self.meta.get_field("commission_rate"):
 			return
 
 		self.round_floats_in(self, ("amount_eligible_for_commission", "commission_rate"))
@@ -441,7 +441,7 @@ class SellingController(StockController):
 				get_valuation_method(d.item_code) == "Moving Average" and self.get("is_return")
 			):
 				# Get incoming rate based on original item cost based on valuation method
-				qty = flt(d.get("stock_qty") or d.get("actual_qty"))
+				qty = flt(d.get("stock_qty") or d.get("actual_qty") or d.get("qty"))
 
 				if (
 					not d.incoming_rate
@@ -748,12 +748,12 @@ def get_serial_and_batch_bundle(child, parent):
 			"item_code": child.item_code,
 			"warehouse": child.warehouse,
 			"voucher_type": parent.doctype,
-			"voucher_no": parent.name,
+			"voucher_no": parent.name if parent.docstatus < 2 else None,
 			"voucher_detail_no": child.name,
 			"posting_date": parent.posting_date,
 			"posting_time": parent.posting_time,
 			"qty": child.qty,
-			"type_of_transaction": "Outward" if child.qty > 0 else "Inward",
+			"type_of_transaction": "Outward" if child.qty > 0 and parent.docstatus < 2 else "Inward",
 			"company": parent.company,
 			"do_not_submit": "True",
 		}

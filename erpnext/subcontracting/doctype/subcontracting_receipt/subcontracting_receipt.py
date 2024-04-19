@@ -498,8 +498,6 @@ class SubcontractingReceipt(SubcontractingController):
 		return process_gl_map(gl_entries)
 
 	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
-		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
-
 		warehouse_with_no_account = []
 
 		for item in self.items:
@@ -517,31 +515,41 @@ class SubcontractingReceipt(SubcontractingController):
 						"stock_value_difference",
 					)
 
-					warehouse_account_name = warehouse_account[item.warehouse]["account"]
-					warehouse_account_currency = warehouse_account[item.warehouse]["account_currency"]
+					accepted_warehouse_account = warehouse_account[item.warehouse]["account"]
 					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get(
 						"account"
 					)
-					supplier_warehouse_account_currency = warehouse_account.get(
-						self.supplier_warehouse, {}
-					).get("account_currency")
 					remarks = self.get("remarks") or _("Accounting Entry for Stock")
 
-					# FG Warehouse Account (Debit)
+					# Accepted Warehouse Account (Debit)
 					self.add_gl_entry(
 						gl_entries=gl_entries,
-						account=warehouse_account_name,
+						account=accepted_warehouse_account,
 						cost_center=item.cost_center,
 						debit=stock_value_diff,
 						credit=0.0,
 						remarks=remarks,
-						against_account=stock_rbnb,
-						account_currency=warehouse_account_currency,
+						against_account=item.expense_account,
+						account_currency=get_account_currency(accepted_warehouse_account),
+						project=item.project,
+						item=item,
+					)
+					# Expense Account (Credit)
+					self.add_gl_entry(
+						gl_entries=gl_entries,
+						account=item.expense_account,
+						cost_center=item.cost_center,
+						debit=0.0,
+						credit=stock_value_diff,
+						remarks=remarks,
+						against_account=accepted_warehouse_account,
+						account_currency=get_account_currency(item.expense_account),
+						project=item.project,
 						item=item,
 					)
 
-					# Supplier Warehouse Account (Credit)
-					if flt(item.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
+					if flt(item.rm_supp_cost) and supplier_warehouse_account:
+						# Supplier Warehouse Account (Credit)
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=supplier_warehouse_account,
@@ -549,40 +557,66 @@ class SubcontractingReceipt(SubcontractingController):
 							debit=0.0,
 							credit=flt(item.rm_supp_cost),
 							remarks=remarks,
-							against_account=warehouse_account_name,
-							account_currency=supplier_warehouse_account_currency,
+							against_account=item.expense_account,
+							account_currency=get_account_currency(supplier_warehouse_account),
+							project=item.project,
 							item=item,
 						)
-
-					# Expense Account (Credit)
-					if flt(item.service_cost_per_qty):
+						# Expense Account (Debit)
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=item.expense_account,
 							cost_center=item.cost_center,
-							debit=0.0,
-							credit=flt(item.service_cost_per_qty) * flt(item.qty),
+							debit=flt(item.rm_supp_cost),
+							credit=0.0,
 							remarks=remarks,
-							against_account=warehouse_account_name,
+							against_account=supplier_warehouse_account,
 							account_currency=get_account_currency(item.expense_account),
+							project=item.project,
 							item=item,
 						)
 
-					# Loss Account (Credit)
-					divisional_loss = flt(item.amount - stock_value_diff, item.precision("amount"))
+					# Expense Account (Debit)
+					if item.additional_cost_per_qty:
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=item.expense_account,
+							cost_center=self.cost_center or self.get_company_default("cost_center"),
+							debit=item.qty * item.additional_cost_per_qty,
+							credit=0.0,
+							remarks=remarks,
+							against_account=None,
+							account_currency=get_account_currency(item.expense_account),
+						)
 
-					if divisional_loss:
-						loss_account = item.expense_account
+					if divisional_loss := flt(item.amount - stock_value_diff, item.precision("amount")):
+						loss_account = self.get_company_default(
+							"stock_adjustment_account", ignore_validation=True
+						)
 
+						# Loss Account (Credit)
 						self.add_gl_entry(
 							gl_entries=gl_entries,
 							account=loss_account,
 							cost_center=item.cost_center,
+							debit=0.0,
+							credit=divisional_loss,
+							remarks=remarks,
+							against_account=item.expense_account,
+							account_currency=get_account_currency(loss_account),
+							project=item.project,
+							item=item,
+						)
+						# Expense Account (Debit)
+						self.add_gl_entry(
+							gl_entries=gl_entries,
+							account=item.expense_account,
+							cost_center=item.cost_center,
 							debit=divisional_loss,
 							credit=0.0,
 							remarks=remarks,
-							against_account=warehouse_account_name,
-							account_currency=get_account_currency(loss_account),
+							against_account=loss_account,
+							account_currency=get_account_currency(item.expense_account),
 							project=item.project,
 							item=item,
 						)
@@ -592,7 +626,6 @@ class SubcontractingReceipt(SubcontractingController):
 				):
 					warehouse_with_no_account.append(item.warehouse)
 
-		# Additional Costs Expense Accounts (Credit)
 		for row in self.additional_costs:
 			credit_amount = (
 				flt(row.base_amount)
@@ -600,6 +633,7 @@ class SubcontractingReceipt(SubcontractingController):
 				else flt(row.amount)
 			)
 
+			# Additional Cost Expense Account (Credit)
 			self.add_gl_entry(
 				gl_entries=gl_entries,
 				account=row.expense_account,
@@ -608,6 +642,7 @@ class SubcontractingReceipt(SubcontractingController):
 				credit=credit_amount,
 				remarks=remarks,
 				against_account=None,
+				account_currency=get_account_currency(row.expense_account),
 			)
 
 		if warehouse_with_no_account:
@@ -687,6 +722,7 @@ def make_purchase_receipt(source_name, target_doc=None, save=False, submit=False
 						"purchase_order": item.purchase_order,
 						"purchase_order_item": item.purchase_order_item,
 						"subcontracting_receipt_item": item.name,
+						"project": po_item.project,
 					}
 					target_doc.append("items", item_row)
 

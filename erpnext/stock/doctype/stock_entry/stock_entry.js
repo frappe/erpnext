@@ -1335,18 +1335,16 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 			item.has_batch_no = r.message.has_batch_no;
 			item.type_of_transaction = item.s_warehouse ? "Outward" : "Inward";
 
-			frappe.require(path, function () {
-				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
-					if (r) {
-						frappe.model.set_value(item.doctype, item.name, {
-							serial_and_batch_bundle: r.name,
-							use_serial_batch_fields: 0,
-							qty:
-								Math.abs(r.total_qty) /
-								flt(item.conversion_factor || 1, precision("conversion_factor", item)),
-						});
-					}
-				});
+			new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
+				if (r) {
+					frappe.model.set_value(item.doctype, item.name, {
+						serial_and_batch_bundle: r.name,
+						use_serial_batch_fields: 0,
+						qty:
+							Math.abs(r.total_qty) /
+							flt(item.conversion_factor || 1, precision("conversion_factor", item)),
+					});
+				}
 			});
 		}
 	});

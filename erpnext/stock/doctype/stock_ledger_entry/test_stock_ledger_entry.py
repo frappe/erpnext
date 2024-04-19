@@ -1483,7 +1483,7 @@ def create_delivery_note_entries_for_batchwise_item_valuation_test(dn_entry_list
 					"posting_date": dn.posting_date,
 					"posting_time": dn.posting_time,
 					"voucher_type": "Delivery Note",
-					"do_not_submit": dn.name,
+					"do_not_submit": 1,
 				}
 			)
 		).name

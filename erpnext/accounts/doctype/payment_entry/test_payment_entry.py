@@ -1074,9 +1074,13 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.source_exchange_rate = 50
 		pe.save()
 
-		ref_details = get_reference_details(so.doctype, so.name, pe.paid_from_account_currency)
+		ref_details = get_reference_details(
+			so.doctype, so.name, pe.paid_from_account_currency, "Customer", so.customer
+		)
 		expected_response = {
 			"account": get_party_account("Customer", so.customer, so.company),
+			"account_type": None,  # only applies for Reverse Payment Entry
+			"payment_type": None,  # only applies for Reverse Payment Entry
 			"total_amount": 5000.0,
 			"outstanding_amount": 5000.0,
 			"exchange_rate": 1.0,
@@ -1543,7 +1547,7 @@ class TestPaymentEntry(FrappeTestCase):
 		company = "_Test Company"
 		customer = create_customer(frappe.generate_hash(length=10), "INR")
 		advance_account = create_account(
-			parent_account="Current Assets - _TC",
+			parent_account="Current Liabilities - _TC",
 			account_name="Advances Received",
 			company=company,
 			account_type="Receivable",
@@ -1599,9 +1603,9 @@ class TestPaymentEntry(FrappeTestCase):
 
 		# assert General and Payment Ledger entries post partial reconciliation
 		self.expected_gle = [
-			{"account": "Debtors - _TC", "debit": 0.0, "credit": 400.0},
 			{"account": advance_account, "debit": 400.0, "credit": 0.0},
 			{"account": advance_account, "debit": 0.0, "credit": 1000.0},
+			{"account": advance_account, "debit": 0.0, "credit": 400.0},
 			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
 		]
 		self.expected_ple = [
@@ -1612,7 +1616,7 @@ class TestPaymentEntry(FrappeTestCase):
 				"amount": -1000.0,
 			},
 			{
-				"account": "Debtors - _TC",
+				"account": advance_account,
 				"voucher_no": pe.name,
 				"against_voucher_no": reverse_pe.name,
 				"amount": -400.0,

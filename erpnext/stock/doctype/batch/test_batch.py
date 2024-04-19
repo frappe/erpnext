@@ -86,6 +86,7 @@ class TestBatch(FrappeTestCase):
 					"batches": frappe._dict({batch_no: 20}),
 					"type_of_transaction": "Inward",
 					"company": receipt.company,
+					"do_not_submit": 1,
 				}
 			)
 			.make_serial_and_batch_bundle()
@@ -176,6 +177,7 @@ class TestBatch(FrappeTestCase):
 					"batches": frappe._dict({batch_no: batch_qty}),
 					"type_of_transaction": "Outward",
 					"company": receipt.company,
+					"do_not_submit": 1,
 				}
 			)
 			.make_serial_and_batch_bundle()
@@ -249,6 +251,7 @@ class TestBatch(FrappeTestCase):
 					"batches": frappe._dict({batch_no: batch_qty}),
 					"type_of_transaction": "Outward",
 					"company": receipt.company,
+					"do_not_submit": 1,
 				}
 			)
 			.make_serial_and_batch_bundle()
@@ -341,6 +344,7 @@ class TestBatch(FrappeTestCase):
 				"batches": frappe._dict({batch_name: 90}),
 				"type_of_transaction": "Inward",
 				"company": "_Test Company",
+				"do_not_submit": 1,
 			}
 		).make_serial_and_batch_bundle()
 
