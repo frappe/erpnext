@@ -148,14 +148,14 @@ $.extend(erpnext.utils, {
 				info.company +
 				"</h6></div>" +
 				'<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">' +
-				"Annual Billing: " +
-				format_currency(info.billing_this_year, info.currency) +
+				__('Annual Billing: {0}',[format_currency(info.billing_this_year, info.currency)])+
+ 
 				"</span></div>" +
 				'<div class="badge-link small" style="margin-bottom:10px">' +
 				'<span class="indicator ' +
 				color +
-				'">Total Unpaid: ' +
-				format_currency(info.total_unpaid, info.currency) +
+				'">' +
+				__("Total Unpaid: {0}",[format_currency(info.total_unpaid, info.currency)])+
 				"</span></div>" +
 				"</div>"
 		).appendTo(frm.dashboard.stats_area_row);
@@ -163,7 +163,7 @@ $.extend(erpnext.utils, {
 		if (info.loyalty_points) {
 			$(
 				'<div class="badge-link small" style="margin-bottom:10px"><span class="indicator blue">' +
-					"Loyalty Points: " +
+					__("Loyalty Points: ") +
 					info.loyalty_points +
 					"</span></div>"
 			).appendTo(indicator);
