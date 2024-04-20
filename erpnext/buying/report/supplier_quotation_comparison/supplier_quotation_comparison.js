@@ -133,6 +133,13 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			return row.supplier_name;
 		});
 
+		let items = [];
+		report.data.forEach((d) => {
+			if (!items.includes(d.item_code)) {
+				items.push(d.item_code);
+			}
+		});
+
 		// Create a dialog window for the user to pick their supplier
 		let dialog = new frappe.ui.Dialog({
 			title: __("Select Default Supplier"),
@@ -151,20 +158,34 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 						};
 					},
 				},
+				{
+					reqd: 1,
+					label: "Item",
+					fieldtype: "Link",
+					options: "Item",
+					fieldname: "item_code",
+					get_query: () => {
+						return {
+							filters: {
+								name: ["in", items],
+							},
+						};
+					},
+				},
 			],
 		});
 
 		dialog.set_primary_action(__("Set Default Supplier"), () => {
 			let values = dialog.get_values();
+
 			if (values) {
 				// Set the default_supplier field of the appropriate Item to the selected supplier
 				frappe.call({
-					method: "frappe.client.set_value",
+					method: "erpnext.buying.report.supplier_quotation_comparison.supplier_quotation_comparison.set_default_supplier",
 					args: {
-						doctype: "Item",
-						name: item_code,
-						fieldname: "default_supplier",
-						value: values.supplier,
+						item_code: values.item_code,
+						supplier: values.supplier,
+						company: filters.company,
 					},
 					freeze: true,
 					callback: (r) => {
