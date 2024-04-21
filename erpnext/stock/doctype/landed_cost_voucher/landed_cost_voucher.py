@@ -263,9 +263,13 @@ class LandedCostVoucher(Document):
 				doc.make_gl_entries(via_landed_cost_voucher=True)
 			else:
 				doc.make_gl_entries()
+<<<<<<< HEAD
 >>>>>>> 8b3d46610e (fix: parameters for PI references)
 			doc.repost_future_sle_and_gle()
 >>>>>>> baa3fee1bf (fix: add LCV flag to determine negative expenses)
+=======
+			doc.repost_future_sle_and_gle(via_landed_cost_voucher=True)
+>>>>>>> 54a58e9205 (chore: resolve conflicts)
 
 	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
 		for item in self.get("items"):
