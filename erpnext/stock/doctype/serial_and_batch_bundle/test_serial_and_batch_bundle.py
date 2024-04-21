@@ -494,13 +494,13 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		item_code = make_item(properties={"has_batch_no": 1}).name
 
 		batch_id = "TEST-BATTCCH-VAL-00001"
-		batch_nos = [{"batch_no": batch_id, "qty": 1}]
+		batch_nos = [{"batch_no": batch_id, "manufacturing_date": "21/04/2024", "qty": 1}]
 
 		make_batch_nos(item_code, batch_nos)
 		self.assertTrue(frappe.db.exists("Batch", batch_id))
 
 		batch_id = "TEST-BATTCCH-VAL-00001"
-		batch_nos = [{"batch_no": batch_id, "qty": 1}]
+		batch_nos = [{"batch_no": batch_id, "manufacturing_date": "21/04/2024", "qty": 1}]
 
 		# Shouldn't throw duplicate entry error
 		make_batch_nos(item_code, batch_nos)

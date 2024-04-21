@@ -14,12 +14,12 @@ from frappe.utils import (
 	cint,
 	cstr,
 	flt,
+	format_date,
 	get_link_to_form,
 	now,
 	nowtime,
 	parse_json,
 	today,
-	format_date,
 )
 from frappe.utils.csvutils import build_csv_response
 
@@ -1046,7 +1046,7 @@ def parse_csv_file_to_get_serial_batch(reader):
 				{
 					"batch_no": row[0],
 					"manufacturing_date": format_date(row[1], "yyyy-mm-dd"),
-                    "qty": row[2],
+					"qty": row[2],
 				}
 			)
 
@@ -1139,7 +1139,6 @@ def make_batch_nos(item_code, batch_nos):
 	existing_batches = frappe.get_all("Batch", filters={"name": ("in", batch_nos_to_update)})
 
 	existing_batches = [d.get("name") for d in existing_batches if d.get("name")]
-
 	batch_nos_to_update = list(set(batch_nos_to_update) - set(existing_batches))
 
 	if not batch_nos_to_update:
