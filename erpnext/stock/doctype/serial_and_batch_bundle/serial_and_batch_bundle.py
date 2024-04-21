@@ -1150,7 +1150,18 @@ def make_batch_nos(item_code, batch_nos):
 		batch_no = batch.get("batch_no")
 
 		batch_nos_details.append(
-			(batch_no, batch_no, now(), now(), user, user, format_date(batch.get('manufacturing_date'), 'yyyy-mm-dd'), item.item_code, item.item_name, item.description)
+			(
+				batch_no,
+				batch_no,
+				now(),
+				now(),
+				user,
+				user,
+				format_date(batch.get('manufacturing_date'), 'yyyy-mm-dd'),
+				item.item_code,
+				item.item_name,
+				item.description
+			)
 		)
 
 	fields = [
