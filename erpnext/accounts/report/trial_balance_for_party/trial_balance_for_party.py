@@ -22,7 +22,7 @@ def execute(filters=None):
 
 def get_data(filters, show_party_name):
 	if filters.get("party_type") in ("Customer", "Supplier", "Employee", "Member"):
-		party_name_field = "{0}_name".format(frappe.scrub(filters.get("party_type")))
+		party_name_field = "{}_name".format(frappe.scrub(filters.get("party_type")))
 	elif filters.get("party_type") == "Shareholder":
 		party_name_field = "title"
 	else:
@@ -65,9 +65,7 @@ def get_data(filters, show_party_name):
 		row.update({"debit": debit, "credit": credit})
 
 		# closing
-		closing_debit, closing_credit = toggle_debit_credit(
-			opening_debit + debit, opening_credit + credit
-		)
+		closing_debit, closing_credit = toggle_debit_credit(opening_debit + debit, opening_credit + credit)
 		row.update({"closing_debit": closing_debit, "closing_credit": closing_credit})
 
 		# totals
@@ -92,13 +90,12 @@ def get_data(filters, show_party_name):
 
 
 def get_opening_balances(filters):
-
 	account_filter = ""
 	if filters.get("account"):
 		account_filter = "and account = %s" % (frappe.db.escape(filters.get("account")))
 
 	gle = frappe.db.sql(
-		"""
+		f"""
 		select party, sum(debit) as opening_debit, sum(credit) as opening_credit
 		from `tabGL Entry`
 		where company=%(company)s
@@ -106,9 +103,7 @@ def get_opening_balances(filters):
 			and ifnull(party_type, '') = %(party_type)s and ifnull(party, '') != ''
 			and (posting_date < %(from_date)s or (ifnull(is_opening, 'No') = 'Yes' and posting_date <= %(to_date)s))
 			{account_filter}
-		group by party""".format(
-			account_filter=account_filter
-		),
+		group by party""",
 		{
 			"company": filters.company,
 			"from_date": filters.from_date,
@@ -127,13 +122,12 @@ def get_opening_balances(filters):
 
 
 def get_balances_within_period(filters):
-
 	account_filter = ""
 	if filters.get("account"):
 		account_filter = "and account = %s" % (frappe.db.escape(filters.get("account")))
 
 	gle = frappe.db.sql(
-		"""
+		f"""
 		select party, sum(debit) as debit, sum(credit) as credit
 		from `tabGL Entry`
 		where company=%(company)s
@@ -142,9 +136,7 @@ def get_balances_within_period(filters):
 			and posting_date >= %(from_date)s and posting_date <= %(to_date)s
 			and ifnull(is_opening, 'No') = 'No'
 			{account_filter}
-		group by party""".format(
-			account_filter=account_filter
-		),
+		group by party""",
 		{
 			"company": filters.company,
 			"from_date": filters.from_date,

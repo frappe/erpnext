@@ -196,7 +196,7 @@ frappe.ui.form.on("Journal Entry", {
 			!(frm.doc.accounts || []).length ||
 			((frm.doc.accounts || []).length === 1 && !frm.doc.accounts[0].account)
 		) {
-			if (in_list(["Bank Entry", "Cash Entry"], frm.doc.voucher_type)) {
+			if (["Bank Entry", "Cash Entry"].includes(frm.doc.voucher_type)) {
 				return frappe.call({
 					type: "GET",
 					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
@@ -255,7 +255,7 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 	}
 
 	onload_post_render() {
-		cur_frm.get_field("accounts").grid.set_multiple_add("account");
+		this.frm.get_field("accounts").grid.set_multiple_add("account");
 	}
 
 	load_defaults() {
@@ -308,7 +308,7 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				filters: [[jvd.reference_type, "docstatus", "=", 1]],
 			};
 
-			if (in_list(["Sales Invoice", "Purchase Invoice"], jvd.reference_type)) {
+			if (["Sales Invoice", "Purchase Invoice"].includes(jvd.reference_type)) {
 				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
 				// Filter by cost center
 				if (jvd.cost_center) {
@@ -320,7 +320,7 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				out.filters.push([jvd.reference_type, party_account_field, "=", jvd.account]);
 			}
 
-			if (in_list(["Sales Order", "Purchase Order"], jvd.reference_type)) {
+			if (["Sales Order", "Purchase Order"].includes(jvd.reference_type)) {
 				// party_type and party mandatory
 				frappe.model.validate_missing(jvd, "party_type");
 				frappe.model.validate_missing(jvd, "party");
@@ -402,7 +402,7 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 				row.debit = -doc.difference;
 			}
 		}
-		cur_frm.cscript.update_totals(doc);
+		this.frm.cscript.update_totals(doc);
 
 		erpnext.accounts.dimensions.copy_dimension_from_first_row(this.frm, cdt, cdn, "accounts");
 	}
@@ -453,7 +453,10 @@ frappe.ui.form.on("Journal Entry Account", {
 		}
 	},
 	cost_center: function (frm, dt, dn) {
-		erpnext.journal_entry.set_account_details(frm, dt, dn);
+		// Don't reset for Gain/Loss type journals, as it will make Debit and Credit values '0'
+		if (frm.doc.voucher_type != "Exchange Gain Or Loss") {
+			erpnext.journal_entry.set_account_details(frm, dt, dn);
+		}
 	},
 
 	account: function (frm, dt, dn) {
@@ -469,11 +472,11 @@ frappe.ui.form.on("Journal Entry Account", {
 	},
 
 	debit: function (frm, dt, dn) {
-		cur_frm.cscript.update_totals(frm.doc);
+		frm.cscript.update_totals(frm.doc);
 	},
 
 	credit: function (frm, dt, dn) {
-		cur_frm.cscript.update_totals(frm.doc);
+		frm.cscript.update_totals(frm.doc);
 	},
 
 	exchange_rate: function (frm, cdt, cdn) {
@@ -489,7 +492,7 @@ frappe.ui.form.on("Journal Entry Account", {
 });
 
 frappe.ui.form.on("Journal Entry Account", "accounts_remove", function (frm) {
-	cur_frm.cscript.update_totals(frm.doc);
+	frm.cscript.update_totals(frm.doc);
 });
 
 $.extend(erpnext.journal_entry, {
@@ -531,7 +534,7 @@ $.extend(erpnext.journal_entry, {
 			flt(flt(row.credit_in_account_currency) * row.exchange_rate, precision("credit", row))
 		);
 
-		cur_frm.cscript.update_totals(frm.doc);
+		frm.cscript.update_totals(frm.doc);
 	},
 
 	set_exchange_rate: function (frm, cdt, cdn) {
@@ -673,10 +676,10 @@ $.extend(erpnext.journal_entry, {
 		return { filters: filters };
 	},
 
-	reverse_journal_entry: function () {
+	reverse_journal_entry: function (frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_reverse_journal_entry",
-			frm: cur_frm,
+			frm: frm,
 		});
 	},
 });

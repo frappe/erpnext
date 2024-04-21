@@ -29,14 +29,15 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-25 20:20:22.342426",
+ "modified": "2024-03-27 13:10:55.812173",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "UAE VAT Settings",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

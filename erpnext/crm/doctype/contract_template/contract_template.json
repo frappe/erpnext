@@ -56,7 +56,7 @@
   }
  ],
  "links": [],
- "modified": "2020-12-07 10:44:22.587047",
+ "modified": "2024-03-27 13:06:46.495091",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract Template",
@@ -111,7 +111,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

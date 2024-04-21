@@ -26,7 +26,7 @@ class MaintenanceSchedule(TransactionBase):
 			MaintenanceScheduleItem,
 		)
 
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		company: DF.Link
 		contact_display: DF.SmallText | None
@@ -163,7 +163,7 @@ class MaintenanceSchedule(TransactionBase):
 		date_diff = (getdate(end_date) - getdate(start_date)).days
 		add_by = date_diff / no_of_visit
 
-		for visit in range(cint(no_of_visit)):
+		for _visit in range(cint(no_of_visit)):
 			if getdate(start_date_copy) < getdate(end_date):
 				start_date_copy = add_days(start_date_copy, add_by)
 				if len(schedule_list) < no_of_visit:
@@ -190,9 +190,8 @@ class MaintenanceSchedule(TransactionBase):
 		)
 
 		if not validated and holidays:
-
 			# max iterations = len(holidays)
-			for i in range(len(holidays)):
+			for _i in range(len(holidays)):
 				if schedule_date in holidays:
 					schedule_date = add_days(schedule_date, -1)
 				else:
@@ -251,7 +250,7 @@ class MaintenanceSchedule(TransactionBase):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save:
 			return
-		for prev_item, item in zip(doc_before_save.items, self.items):
+		for prev_item, item in zip(doc_before_save.items, self.items, strict=False):
 			fields = [
 				"item_code",
 				"start_date",
@@ -334,9 +333,7 @@ class MaintenanceSchedule(TransactionBase):
 					)
 				)
 
-			if sr_details.amc_expiry_date and getdate(sr_details.amc_expiry_date) >= getdate(
-				amc_start_date
-			):
+			if sr_details.amc_expiry_date and getdate(sr_details.amc_expiry_date) >= getdate(amc_start_date):
 				throw(
 					_("Serial No {0} is under maintenance contract upto {1}").format(
 						serial_no, sr_details.amc_expiry_date

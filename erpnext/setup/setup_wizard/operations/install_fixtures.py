@@ -276,9 +276,7 @@ def install(country=None):
 		records += [{"doctype": doctype, title_field: title} for title in read_lines(filename)]
 
 	base_path = frappe.get_app_path("erpnext", "stock", "doctype")
-	response = frappe.read_file(
-		os.path.join(base_path, "delivery_trip/dispatch_notification_template.html")
-	)
+	response = frappe.read_file(os.path.join(base_path, "delivery_trip/dispatch_notification_template.html"))
 
 	records += [
 		{
@@ -336,16 +334,10 @@ def add_uom_data():
 		open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_data.json")).read()
 	)
 	for d in uoms:
-		if not frappe.db.exists("UOM", _(d.get("uom_name"))):
-			frappe.get_doc(
-				{
-					"doctype": "UOM",
-					"uom_name": _(d.get("uom_name")),
-					"name": _(d.get("uom_name")),
-					"must_be_whole_number": d.get("must_be_whole_number"),
-					"enabled": 1,
-				}
-			).db_insert()
+		if not frappe.db.exists("UOM", d.get("uom_name")):
+			doc = frappe.new_doc("UOM")
+			doc.update(d)
+			doc.save()
 
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(
@@ -359,14 +351,14 @@ def add_uom_data():
 
 		if not frappe.db.exists(
 			"UOM Conversion Factor",
-			{"from_uom": _(d.get("from_uom")), "to_uom": _(d.get("to_uom"))},
+			{"from_uom": d.get("from_uom"), "to_uom": d.get("to_uom")},
 		):
 			frappe.get_doc(
 				{
 					"doctype": "UOM Conversion Factor",
 					"category": _(d.get("category")),
-					"from_uom": _(d.get("from_uom")),
-					"to_uom": _(d.get("to_uom")),
+					"from_uom": d.get("from_uom"),
+					"to_uom": d.get("to_uom"),
 					"value": d.get("value"),
 				}
 			).db_insert()
@@ -477,10 +469,9 @@ def update_stock_settings():
 	stock_settings = frappe.get_doc("Stock Settings")
 	stock_settings.item_naming_by = "Item Code"
 	stock_settings.valuation_method = "FIFO"
-	stock_settings.default_warehouse = frappe.db.get_value(
-		"Warehouse", {"warehouse_name": _("Stores")}
-	)
+	stock_settings.default_warehouse = frappe.db.get_value("Warehouse", {"warehouse_name": _("Stores")})
 	stock_settings.stock_uom = _("Nos")
+	stock_settings.stock_uom = "Nos"
 	stock_settings.auto_indent = 1
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
 	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1

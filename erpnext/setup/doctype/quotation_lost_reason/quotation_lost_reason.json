@@ -32,7 +32,7 @@
    "table_fieldname": "lost_reasons"
   }
  ],
- "modified": "2023-11-23 19:31:02.743353",
+ "modified": "2024-03-27 13:10:31.419151",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Quotation Lost Reason",
@@ -52,7 +52,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

@@ -70,7 +70,7 @@ class POSClosingEntry(StatusUpdater):
 		for key, value in pos_occurences.items():
 			if len(value) > 1:
 				error_list.append(
-					_("{} is added multiple times on rows: {}".format(frappe.bold(key), frappe.bold(value)))
+					_(f"{frappe.bold(key)} is added multiple times on rows: {frappe.bold(value)}")
 				)
 
 		if error_list:
@@ -165,9 +165,7 @@ def get_pos_invoices(start, end, pos_profile, user):
 		as_dict=1,
 	)
 
-	data = list(
-		filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data)
-	)
+	data = list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))
 	# need to get taxes and payments so can't avoid get_doc
 	data = [frappe.get_doc("POS Invoice", d.name).as_dict() for d in data]
 
@@ -238,7 +236,11 @@ def make_closing_entry_from_opening(opening_entry):
 			else:
 				payments.append(
 					frappe._dict(
-						{"mode_of_payment": p.mode_of_payment, "opening_amount": 0, "expected_amount": p.amount}
+						{
+							"mode_of_payment": p.mode_of_payment,
+							"opening_amount": 0,
+							"expected_amount": p.amount,
+						}
 					)
 				)
 

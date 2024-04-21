@@ -94,7 +94,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hidden": 1,
    "label": "Address",
    "read_only": 1
@@ -238,7 +238,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-04 18:20:12.020313",
+ "modified": "2024-03-27 13:09:51.216007",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Installation Note",
@@ -266,7 +266,7 @@
    "role": "Sales User"
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",

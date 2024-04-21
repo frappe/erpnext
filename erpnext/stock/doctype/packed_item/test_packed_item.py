@@ -1,7 +1,6 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from typing import List, Optional, Tuple
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
@@ -15,8 +14,8 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 def create_product_bundle(
-	quantities: Optional[List[int]] = None, warehouse: Optional[str] = None
-) -> Tuple[str, List[str]]:
+	quantities: list[int] | None = None, warehouse: str | None = None
+) -> tuple[str, list[str]]:
 	"""Get a new product_bundle for use in tests.
 
 	Create 10x required stock if warehouse is specified.
@@ -169,9 +168,7 @@ class TestPackedItem(FrappeTestCase):
 
 		# backdated stock entry
 		for item in self.bundle_items:
-			make_stock_entry(
-				item_code=item, to_warehouse=warehouse, qty=10, rate=200, posting_date=yesterday
-			)
+			make_stock_entry(item_code=item, to_warehouse=warehouse, qty=10, rate=200, posting_date=yesterday)
 
 		# assert correct reposting
 		gles = get_gl_entries(dn.doctype, dn.name)
@@ -182,14 +179,15 @@ class TestPackedItem(FrappeTestCase):
 	def assertReturns(self, original, returned):
 		self.assertEqual(len(original), len(returned))
 
-		sort_function = lambda p: (p.parent_item, p.item_code, p.qty)
+		def sort_function(p):
+			return p.parent_item, p.item_code, p.qty
 
-		for sent, returned in zip(
-			sorted(original, key=sort_function), sorted(returned, key=sort_function)
+		for sent_item, returned_item in zip(
+			sorted(original, key=sort_function), sorted(returned, key=sort_function), strict=False
 		):
-			self.assertEqual(sent.item_code, returned.item_code)
-			self.assertEqual(sent.parent_item, returned.parent_item)
-			self.assertEqual(sent.qty, -1 * returned.qty)
+			self.assertEqual(sent_item.item_code, returned_item.item_code)
+			self.assertEqual(sent_item.parent_item, returned_item.parent_item)
+			self.assertEqual(sent_item.qty, -1 * returned_item.qty)
 
 	def test_returning_full_bundles(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return

@@ -112,7 +112,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-11 20:19:11.810533",
+ "modified": "2024-03-27 13:10:13.013336",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Period Closing Voucher",
@@ -149,7 +149,7 @@
   }
  ],
  "search_fields": "posting_date, fiscal_year",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "closing_account_head"

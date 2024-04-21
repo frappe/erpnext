@@ -70,10 +70,11 @@ class Budget(Document):
 			select
 				b.name, ba.account from `tabBudget` b, `tabBudget Account` ba
 			where
-				ba.parent = b.name and b.docstatus < 2 and b.company = %s and %s=%s and
-				b.fiscal_year=%s and b.name != %s and ba.account in (%s) """
-			% ("%s", budget_against_field, "%s", "%s", "%s", ",".join(["%s"] * len(accounts))),
-			(self.company, budget_against, self.fiscal_year, self.name) + tuple(accounts),
+				ba.parent = b.name and b.docstatus < 2 and b.company = {} and {}={} and
+				b.fiscal_year={} and b.name != {} and ba.account in ({}) """.format(
+				"%s", budget_against_field, "%s", "%s", "%s", ",".join(["%s"] * len(accounts))
+			),
+			(self.company, budget_against, self.fiscal_year, self.name, *tuple(accounts)),
 			as_dict=1,
 		)
 
@@ -96,12 +97,14 @@ class Budget(Document):
 				if account_details.is_group:
 					frappe.throw(_("Budget cannot be assigned against Group Account {0}").format(d.account))
 				elif account_details.company != self.company:
-					frappe.throw(_("Account {0} does not belongs to company {1}").format(d.account, self.company))
+					frappe.throw(
+						_("Account {0} does not belongs to company {1}").format(d.account, self.company)
+					)
 				elif account_details.report_type != "Profit and Loss":
 					frappe.throw(
-						_("Budget cannot be assigned against {0}, as it's not an Income or Expense account").format(
-							d.account
-						)
+						_(
+							"Budget cannot be assigned against {0}, as it's not an Income or Expense account"
+						).format(d.account)
 					)
 
 				if d.account in account_list:
@@ -139,12 +142,17 @@ class Budget(Document):
 
 def validate_expense_against_budget(args, expense_amount=0):
 	args = frappe._dict(args)
+	if not frappe.get_all("Budget", limit=1):
+		return
 
 	if args.get("company") and not args.fiscal_year:
 		args.fiscal_year = get_fiscal_year(args.get("posting_date"), company=args.get("company"))[0]
 		frappe.flags.exception_approver_role = frappe.get_cached_value(
 			"Company", args.get("company"), "exception_budget_approver_role"
 		)
+
+	if not frappe.get_cached_value("Budget", {"fiscal_year": args.fiscal_year, "company": args.company}):  # nosec
+		return
 
 	if not args.account:
 		args.account = args.get("expense_account")
@@ -172,32 +180,26 @@ def validate_expense_against_budget(args, expense_amount=0):
 		if (
 			args.get(budget_against)
 			and args.account
-			and frappe.db.get_value("Account", {"name": args.account, "root_type": "Expense"})
+			and (frappe.get_cached_value("Account", args.account, "root_type") == "Expense")
 		):
-
 			doctype = dimension.get("document_type")
 
 			if frappe.get_cached_value("DocType", doctype, "is_tree"):
-				lft, rgt = frappe.db.get_value(doctype, args.get(budget_against), ["lft", "rgt"])
-				condition = """and exists(select name from `tab%s`
-					where lft<=%s and rgt>=%s and name=b.%s)""" % (
-					doctype,
-					lft,
-					rgt,
-					budget_against,
-				)  # nosec
+				lft, rgt = frappe.get_cached_value(doctype, args.get(budget_against), ["lft", "rgt"])
+				condition = f"""and exists(select name from `tab{doctype}`
+					where lft<={lft} and rgt>={rgt} and name=b.{budget_against})"""  # nosec
 				args.is_tree = True
 			else:
-				condition = "and b.%s=%s" % (budget_against, frappe.db.escape(args.get(budget_against)))
+				condition = f"and b.{budget_against}={frappe.db.escape(args.get(budget_against))}"
 				args.is_tree = False
 
 			args.budget_against_field = budget_against
 			args.budget_against_doctype = doctype
 
 			budget_records = frappe.db.sql(
-				"""
+				f"""
 				select
-					b.{budget_against_field} as budget_against, ba.budget_amount, b.monthly_distribution,
+					b.{budget_against} as budget_against, ba.budget_amount, b.monthly_distribution,
 					ifnull(b.applicable_on_material_request, 0) as for_material_request,
 					ifnull(applicable_on_purchase_order, 0) as for_purchase_order,
 					ifnull(applicable_on_booking_actual_expenses,0) as for_actual_expenses,
@@ -210,9 +212,7 @@ def validate_expense_against_budget(args, expense_amount=0):
 					b.name=ba.parent and b.fiscal_year=%s
 					and ba.account=%s and b.docstatus=1
 					{condition}
-			""".format(
-					condition=condition, budget_against_field=budget_against
-				),
+			""",
 				(args.fiscal_year, args.account),
 				as_dict=True,
 			)  # nosec
@@ -224,12 +224,18 @@ def validate_expense_against_budget(args, expense_amount=0):
 def validate_budget_records(args, budget_records, expense_amount):
 	for budget in budget_records:
 		if flt(budget.budget_amount):
-			amount = expense_amount or get_amount(args, budget)
 			yearly_action, monthly_action = get_actions(args, budget)
+			args["for_material_request"] = budget.for_material_request
+			args["for_purchase_order"] = budget.for_purchase_order
 
 			if yearly_action in ("Stop", "Warn"):
 				compare_expense_with_budget(
-					args, flt(budget.budget_amount), _("Annual"), yearly_action, budget.budget_against, amount
+					args,
+					flt(budget.budget_amount),
+					_("Annual"),
+					yearly_action,
+					budget.budget_against,
+					expense_amount,
 				)
 
 			if monthly_action in ["Stop", "Warn"]:
@@ -240,18 +246,32 @@ def validate_budget_records(args, budget_records, expense_amount):
 				args["month_end_date"] = get_last_day(args.posting_date)
 
 				compare_expense_with_budget(
-					args, budget_amount, _("Accumulated Monthly"), monthly_action, budget.budget_against, amount
+					args,
+					budget_amount,
+					_("Accumulated Monthly"),
+					monthly_action,
+					budget.budget_against,
+					expense_amount,
 				)
 
 
 def compare_expense_with_budget(args, budget_amount, action_for, action, budget_against, amount=0):
-	actual_expense = get_actual_expense(args)
-	total_expense = actual_expense + amount
+	args.actual_expense, args.requested_amount, args.ordered_amount = get_actual_expense(args), 0, 0
+	if not amount:
+		args.requested_amount, args.ordered_amount = get_requested_amount(args), get_ordered_amount(args)
+
+		if args.get("doctype") == "Material Request" and args.for_material_request:
+			amount = args.requested_amount + args.ordered_amount
+
+		elif args.get("doctype") == "Purchase Order" and args.for_purchase_order:
+			amount = args.ordered_amount
+
+	total_expense = args.actual_expense + amount
 
 	if total_expense > budget_amount:
-		if actual_expense > budget_amount:
+		if args.actual_expense > budget_amount:
 			error_tense = _("is already")
-			diff = actual_expense - budget_amount
+			diff = args.actual_expense - budget_amount
 		else:
 			error_tense = _("will be")
 			diff = total_expense - budget_amount
@@ -268,9 +288,10 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 			frappe.bold(fmt_money(diff, currency=currency)),
 		)
 
-		if (
-			frappe.flags.exception_approver_role
-			and frappe.flags.exception_approver_role in frappe.get_roles(frappe.session.user)
+		msg += get_expense_breakup(args, currency, budget_against)
+
+		if frappe.flags.exception_approver_role and frappe.flags.exception_approver_role in frappe.get_roles(
+			frappe.session.user
 		):
 			action = "Warn"
 
@@ -278,6 +299,83 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 			frappe.throw(msg, BudgetError, title=_("Budget Exceeded"))
 		else:
 			frappe.msgprint(msg, indicator="orange", title=_("Budget Exceeded"))
+
+
+def get_expense_breakup(args, currency, budget_against):
+	msg = "<hr>Total Expenses booked through - <ul>"
+
+	common_filters = frappe._dict(
+		{
+			args.budget_against_field: budget_against,
+			"account": args.account,
+			"company": args.company,
+		}
+	)
+
+	msg += (
+		"<li>"
+		+ frappe.utils.get_link_to_report(
+			"General Ledger",
+			label="Actual Expenses",
+			filters=common_filters.copy().update(
+				{
+					"from_date": frappe.get_cached_value("Fiscal Year", args.fiscal_year, "year_start_date"),
+					"to_date": frappe.get_cached_value("Fiscal Year", args.fiscal_year, "year_end_date"),
+					"is_cancelled": 0,
+				}
+			),
+		)
+		+ " - "
+		+ frappe.bold(fmt_money(args.actual_expense, currency=currency))
+		+ "</li>"
+	)
+
+	msg += (
+		"<li>"
+		+ frappe.utils.get_link_to_report(
+			"Material Request",
+			label="Material Requests",
+			report_type="Report Builder",
+			doctype="Material Request",
+			filters=common_filters.copy().update(
+				{
+					"status": [["!=", "Stopped"]],
+					"docstatus": 1,
+					"material_request_type": "Purchase",
+					"schedule_date": [["fiscal year", "2023-2024"]],
+					"item_code": args.item_code,
+					"per_ordered": [["<", 100]],
+				}
+			),
+		)
+		+ " - "
+		+ frappe.bold(fmt_money(args.requested_amount, currency=currency))
+		+ "</li>"
+	)
+
+	msg += (
+		"<li>"
+		+ frappe.utils.get_link_to_report(
+			"Purchase Order",
+			label="Unbilled Orders",
+			report_type="Report Builder",
+			doctype="Purchase Order",
+			filters=common_filters.copy().update(
+				{
+					"status": [["!=", "Closed"]],
+					"docstatus": 1,
+					"transaction_date": [["fiscal year", "2023-2024"]],
+					"item_code": args.item_code,
+					"per_billed": [["<", 100]],
+				}
+			),
+		)
+		+ " - "
+		+ frappe.bold(fmt_money(args.ordered_amount, currency=currency))
+		+ "</li></ul>"
+	)
+
+	return msg
 
 
 def get_actions(args, budget):
@@ -295,31 +393,15 @@ def get_actions(args, budget):
 	return yearly_action, monthly_action
 
 
-def get_amount(args, budget):
-	amount = 0
-
-	if args.get("doctype") == "Material Request" and budget.for_material_request:
-		amount = (
-			get_requested_amount(args, budget) + get_ordered_amount(args, budget) + get_actual_expense(args)
-		)
-
-	elif args.get("doctype") == "Purchase Order" and budget.for_purchase_order:
-		amount = get_ordered_amount(args, budget) + get_actual_expense(args)
-
-	return amount
-
-
-def get_requested_amount(args, budget):
+def get_requested_amount(args):
 	item_code = args.get("item_code")
-	condition = get_other_condition(args, budget, "Material Request")
+	condition = get_other_condition(args, "Material Request")
 
 	data = frappe.db.sql(
 		""" select ifnull((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
 		from `tabMaterial Request Item` child, `tabMaterial Request` parent where parent.name = child.parent and
-		child.item_code = %s and parent.docstatus = 1 and child.stock_qty > child.ordered_qty and {0} and
-		parent.material_request_type = 'Purchase' and parent.status != 'Stopped'""".format(
-			condition
-		),
+		child.item_code = %s and parent.docstatus = 1 and child.stock_qty > child.ordered_qty and {} and
+		parent.material_request_type = 'Purchase' and parent.status != 'Stopped'""".format(condition),
 		item_code,
 		as_list=1,
 	)
@@ -327,17 +409,15 @@ def get_requested_amount(args, budget):
 	return data[0][0] if data else 0
 
 
-def get_ordered_amount(args, budget):
+def get_ordered_amount(args):
 	item_code = args.get("item_code")
-	condition = get_other_condition(args, budget, "Purchase Order")
+	condition = get_other_condition(args, "Purchase Order")
 
 	data = frappe.db.sql(
-		""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
+		f""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
 		from `tabPurchase Order Item` child, `tabPurchase Order` parent where
 		parent.name = child.parent and child.item_code = %s and parent.docstatus = 1 and child.amount > child.billed_amt
-		and parent.status != 'Closed' and {0}""".format(
-			condition
-		),
+		and parent.status != 'Closed' and {condition}""",
 		item_code,
 		as_list=1,
 	)
@@ -345,12 +425,12 @@ def get_ordered_amount(args, budget):
 	return data[0][0] if data else 0
 
 
-def get_other_condition(args, budget, for_doc):
+def get_other_condition(args, for_doc):
 	condition = "expense_account = '%s'" % (args.expense_account)
 	budget_against_field = args.get("budget_against_field")
 
 	if budget_against_field and args.get(budget_against_field):
-		condition += " and child.%s = '%s'" % (budget_against_field, args.get(budget_against_field))
+		condition += f" and child.{budget_against_field} = '{args.get(budget_against_field)}'"
 
 	if args.get("fiscal_year"):
 		date_field = "schedule_date" if for_doc == "Material Request" else "transaction_date"
@@ -358,12 +438,8 @@ def get_other_condition(args, budget, for_doc):
 			"Fiscal Year", args.get("fiscal_year"), ["year_start_date", "year_end_date"]
 		)
 
-		condition += """ and parent.%s
-			between '%s' and '%s' """ % (
-			date_field,
-			start_date,
-			end_date,
-		)
+		condition += f""" and parent.{date_field}
+			between '{start_date}' and '{end_date}' """
 
 	return condition
 
@@ -382,21 +458,17 @@ def get_actual_expense(args):
 
 		args.update(lft_rgt)
 
-		condition2 = """and exists(select name from `tab{doctype}`
+		condition2 = f"""and exists(select name from `tab{args.budget_against_doctype}`
 			where lft>=%(lft)s and rgt<=%(rgt)s
-			and name=gle.{budget_against_field})""".format(
-			doctype=args.budget_against_doctype, budget_against_field=budget_against_field  # nosec
-		)
+			and name=gle.{budget_against_field})"""
 	else:
-		condition2 = """and exists(select name from `tab{doctype}`
-		where name=gle.{budget_against} and
-		gle.{budget_against} = %({budget_against})s)""".format(
-			doctype=args.budget_against_doctype, budget_against=budget_against_field
-		)
+		condition2 = f"""and exists(select name from `tab{args.budget_against_doctype}`
+		where name=gle.{budget_against_field} and
+		gle.{budget_against_field} = %({budget_against_field})s)"""
 
 	amount = flt(
 		frappe.db.sql(
-			"""
+			f"""
 		select sum(gle.debit) - sum(gle.credit)
 		from `tabGL Entry` gle
 		where
@@ -407,9 +479,7 @@ def get_actual_expense(args):
 			and gle.company=%(company)s
 			and gle.docstatus=1
 			{condition2}
-	""".format(
-				condition1=condition1, condition2=condition2
-			),
+	""",
 			(args),
 		)[0][0]
 	)  # nosec

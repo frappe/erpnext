@@ -20,7 +20,7 @@ frappe.ui.form.on("Communication", {
 			);
 		}
 
-		if (!in_list(["Lead", "Opportunity"], frm.doc.reference_doctype)) {
+		if (!["Lead", "Opportunity"].includes(frm.doc.reference_doctype)) {
 			frm.add_custom_button(
 				__("Lead"),
 				() => {

@@ -67,7 +67,7 @@ class PaymentReconciliation(Document):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(PaymentReconciliation, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self.common_filter_conditions = []
 		self.accounting_dimension_filter_conditions = []
 		self.ple_posting_date_filter = []
@@ -286,7 +286,6 @@ class PaymentReconciliation(Document):
 		self.return_invoices = self.return_invoices_query.run(as_dict=True)
 
 	def get_dr_or_cr_notes(self):
-
 		self.build_qb_filter_conditions(get_return_invoices=True)
 
 		ple = qb.DocType("Payment Ledger Entry")
@@ -340,10 +339,15 @@ class PaymentReconciliation(Document):
 
 		self.build_qb_filter_conditions(get_invoices=True)
 
+		accounts = [self.receivable_payable_account]
+
+		if self.default_advance_account:
+			accounts.append(self.default_advance_account)
+
 		non_reconciled_invoices = get_outstanding_invoices(
 			self.party_type,
 			self.party,
-			self.receivable_payable_account,
+			accounts,
 			common_filter=self.common_filter_conditions,
 			posting_date=self.ple_posting_date_filter,
 			min_outstanding=self.minimum_invoice_amount if self.minimum_invoice_amount else None,
@@ -407,9 +411,7 @@ class PaymentReconciliation(Document):
 				payment_entry[0].get("reference_name")
 			)
 
-		new_difference_amount = self.get_difference_amount(
-			payment_entry[0], invoice[0], allocated_amount
-		)
+		new_difference_amount = self.get_difference_amount(payment_entry[0], invoice[0], allocated_amount)
 		return new_difference_amount
 
 	@frappe.whitelist()
@@ -527,9 +529,9 @@ class PaymentReconciliation(Document):
 
 			if running_doc:
 				frappe.throw(
-					_("A Reconciliation Job {0} is running for the same filters. Cannot reconcile now").format(
-						get_link_to_form("Auto Reconcile", running_doc)
-					)
+					_(
+						"A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
+					).format(get_link_to_form("Auto Reconcile", running_doc))
 				)
 				return
 
@@ -622,9 +624,7 @@ class PaymentReconciliation(Document):
 
 			invoice_exchange_map.update(purchase_invoice_map)
 
-		journals = [
-			d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Journal Entry"
-		]
+		journals = [d.get("invoice_number") for d in invoices if d.get("invoice_type") == "Journal Entry"]
 		journals.extend(
 			[d.get("reference_name") for d in payments if d.get("reference_type") == "Journal Entry"]
 		)
@@ -716,7 +716,7 @@ class PaymentReconciliation(Document):
 	def get_journal_filter_conditions(self):
 		conditions = []
 		je = qb.DocType("Journal Entry")
-		jea = qb.DocType("Journal Entry Account")
+		qb.DocType("Journal Entry Account")
 		conditions.append(je.company == self.company)
 
 		if self.from_payment_date:
@@ -836,7 +836,7 @@ def adjust_allocations_for_taxes(doc):
 
 
 @frappe.whitelist()
-def get_queries_for_dimension_filters(company: str = None):
+def get_queries_for_dimension_filters(company: str | None = None):
 	dimensions_with_filters = []
 	for d in get_dimensions()[0]:
 		filters = {}

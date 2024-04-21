@@ -40,7 +40,7 @@ class Territory(NestedSet):
 				frappe.throw(_("Either target qty or target amount is mandatory"))
 
 	def on_update(self):
-		super(Territory, self).on_update()
+		super().on_update()
 		self.validate_one_root()
 
 

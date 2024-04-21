@@ -107,7 +107,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-12-24 11:16:12.486719",
+ "modified": "2024-03-27 13:10:48.734325",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Supplier Group",
@@ -139,7 +139,6 @@
    "read": 1,
    "report": 1,
    "role": "Purchase Master Manager",
-   "set_user_permissions": 1,
    "share": 1,
    "write": 1
   },
@@ -169,7 +168,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": []
 }

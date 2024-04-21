@@ -29,7 +29,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-07-14 02:17:52.476762",
+ "modified": "2024-03-27 13:10:43.257718",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "South Africa VAT Settings",
@@ -70,7 +70,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

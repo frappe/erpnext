@@ -80,7 +80,7 @@ class SalesPerson(NestedSet):
 		self.set_onload("dashboard_info", info)
 
 	def on_update(self):
-		super(SalesPerson, self).on_update()
+		super().on_update()
 		self.validate_one_root()
 
 	def get_email_id(self):

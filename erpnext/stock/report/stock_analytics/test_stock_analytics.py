@@ -3,7 +3,7 @@ import datetime
 import frappe
 from frappe import _dict
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils.data import add_to_date, get_datetime, getdate, nowdate
+from frappe.utils.data import add_to_date, getdate
 
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.stock.doctype.item.test_item import make_item
@@ -55,7 +55,6 @@ class TestStockAnalyticsReport(FrappeTestCase):
 		self.assertEqual(actual_buckets, expected_buckets)
 
 	def test_get_period_date_ranges(self):
-
 		filters = _dict(range="Monthly", from_date="2020-12-28", to_date="2021-02-06")
 
 		ranges = get_period_date_ranges(filters)
@@ -69,7 +68,6 @@ class TestStockAnalyticsReport(FrappeTestCase):
 		self.assertEqual(ranges, expected_ranges)
 
 	def test_get_period_date_ranges_yearly(self):
-
 		filters = _dict(range="Yearly", from_date="2021-01-28", to_date="2021-02-06")
 
 		ranges = get_period_date_ranges(filters)

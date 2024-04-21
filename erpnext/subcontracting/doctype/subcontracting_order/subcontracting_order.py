@@ -36,10 +36,10 @@ class SubcontractingOrder(SubcontractingController):
 		)
 
 		additional_costs: DF.Table[LandedCostTaxesandCharges]
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		billing_address: DF.Link | None
-		billing_address_display: DF.SmallText | None
+		billing_address_display: DF.TextEditor | None
 		company: DF.Link
 		contact_display: DF.SmallText | None
 		contact_email: DF.SmallText | None
@@ -59,7 +59,7 @@ class SubcontractingOrder(SubcontractingController):
 		set_reserve_warehouse: DF.Link | None
 		set_warehouse: DF.Link | None
 		shipping_address: DF.Link | None
-		shipping_address_display: DF.SmallText | None
+		shipping_address_display: DF.TextEditor | None
 		status: DF.Literal[
 			"Draft",
 			"Open",
@@ -83,7 +83,7 @@ class SubcontractingOrder(SubcontractingController):
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
-		super(SubcontractingOrder, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 		self.status_updater = [
 			{
@@ -100,10 +100,10 @@ class SubcontractingOrder(SubcontractingController):
 		]
 
 	def before_validate(self):
-		super(SubcontractingOrder, self).before_validate()
+		super().before_validate()
 
 	def validate(self):
-		super(SubcontractingOrder, self).validate()
+		super().validate()
 		self.validate_purchase_order_for_subcontracting()
 		self.validate_items()
 		self.validate_service_items()
@@ -198,9 +198,7 @@ class SubcontractingOrder(SubcontractingController):
 			):
 				item_wh_list.append([item.item_code, item.warehouse])
 		for item_code, warehouse in item_wh_list:
-			update_bin_qty(
-				item_code, warehouse, {"ordered_qty": self.get_ordered_qty(item_code, warehouse)}
-			)
+			update_bin_qty(item_code, warehouse, {"ordered_qty": self.get_ordered_qty(item_code, warehouse)})
 
 	@staticmethod
 	def get_ordered_qty(item_code, warehouse):
@@ -239,7 +237,9 @@ class SubcontractingOrder(SubcontractingController):
 				item = frappe.get_doc("Item", si.fg_item)
 				bom = (
 					frappe.db.get_value(
-						"Subcontracting BOM", {"finished_good": item.item_code, "is_active": 1}, "finished_good_bom"
+						"Subcontracting BOM",
+						{"finished_good": item.item_code, "is_active": 1},
+						"finished_good_bom",
 					)
 					or item.default_bom
 				)

@@ -48,7 +48,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-08-28 22:33:57.447634",
+ "modified": "2024-03-27 13:10:29.470120",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",
@@ -80,7 +80,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

@@ -48,7 +48,9 @@ class TestSubcontractedItemToBeTransferred(FrappeTestCase):
 					"from_date": frappe.utils.get_datetime(
 						frappe.utils.add_to_date(sco.transaction_date, days=-10)
 					),
-					"to_date": frappe.utils.get_datetime(frappe.utils.add_to_date(sco.transaction_date, days=10)),
+					"to_date": frappe.utils.get_datetime(
+						frappe.utils.add_to_date(sco.transaction_date, days=10)
+					),
 				}
 			)
 		)

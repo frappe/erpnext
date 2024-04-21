@@ -38,7 +38,7 @@
    "table_fieldname": "competitors"
   }
  ],
- "modified": "2023-11-23 19:33:54.284279",
+ "modified": "2024-03-27 13:06:45.911065",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Competitor",
@@ -70,7 +70,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

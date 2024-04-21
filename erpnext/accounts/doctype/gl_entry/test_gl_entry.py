@@ -14,9 +14,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 class TestGLEntry(unittest.TestCase):
 	def test_round_off_entry(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "_Test Write Off - _TC")
-		frappe.db.set_value(
-			"Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC"
-		)
+		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")
 
 		jv = make_journal_entry(
 			"_Test Account Cost for Goods Sold - _TC",
@@ -73,7 +71,9 @@ class TestGLEntry(unittest.TestCase):
 		)
 		self.assertTrue(all(entry.to_rename == 0 for entry in new_gl_entries))
 
-		self.assertTrue(all(new.name != old.name for new, old in zip(gl_entries, new_gl_entries)))
+		self.assertTrue(
+			all(new.name != old.name for new, old in zip(gl_entries, new_gl_entries, strict=False))
+		)
 
 		new_naming_series_current_value = frappe.db.sql(
 			"SELECT current from tabSeries where name = %s", naming_series

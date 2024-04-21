@@ -56,17 +56,19 @@ class BankTransaction(Document):
 		Bank Transaction should be on the same currency as the Bank Account.
 		"""
 		if self.currency and self.bank_account:
-			account = frappe.get_cached_value("Bank Account", self.bank_account, "account")
-			account_currency = frappe.get_cached_value("Account", account, "account_currency")
+			if account := frappe.get_cached_value("Bank Account", self.bank_account, "account"):
+				account_currency = frappe.get_cached_value("Account", account, "account_currency")
 
-			if self.currency != account_currency:
-				frappe.throw(
-					_(
-						"Transaction currency: {0} cannot be different from Bank Account({1}) currency: {2}"
-					).format(
-						frappe.bold(self.currency), frappe.bold(self.bank_account), frappe.bold(account_currency)
+				if self.currency != account_currency:
+					frappe.throw(
+						_(
+							"Transaction currency: {0} cannot be different from Bank Account({1}) currency: {2}"
+						).format(
+							frappe.bold(self.currency),
+							frappe.bold(self.bank_account),
+							frappe.bold(account_currency),
+						)
 					)
-				)
 
 	def set_status(self):
 		if self.docstatus == 2:
@@ -180,7 +182,7 @@ class BankTransaction(Document):
 					frappe.throw(_("Voucher {0} is over-allocated by {1}").format(unallocated_amount))
 
 		for payment_entry in to_remove:
-			self.remove(to_remove)
+			self.remove(payment_entry)
 
 	@frappe.whitelist()
 	def remove_payment_entries(self):
@@ -235,9 +237,7 @@ def get_clearance_details(transaction, payment_entry):
 	"""
 	gl_bank_account = frappe.db.get_value("Bank Account", transaction.bank_account, "account")
 	gles = get_related_bank_gl_entries(payment_entry.payment_document, payment_entry.payment_entry)
-	bt_allocations = get_total_allocated_amount(
-		payment_entry.payment_document, payment_entry.payment_entry
-	)
+	bt_allocations = get_total_allocated_amount(payment_entry.payment_document, payment_entry.payment_entry)
 
 	unallocated_amount = min(
 		transaction.unallocated_amount,
@@ -332,7 +332,6 @@ def get_total_allocated_amount(doctype, docname):
 
 def get_paid_amount(payment_entry, currency, gl_bank_account):
 	if payment_entry.payment_document in ["Payment Entry", "Sales Invoice", "Purchase Invoice"]:
-
 		paid_amount_field = "paid_amount"
 		if payment_entry.payment_document == "Payment Entry":
 			doc = frappe.get_doc("Payment Entry", payment_entry.payment_entry)
@@ -371,9 +370,7 @@ def get_paid_amount(payment_entry, currency, gl_bank_account):
 		)
 
 	elif payment_entry.payment_document == "Loan Repayment":
-		return frappe.db.get_value(
-			payment_entry.payment_document, payment_entry.payment_entry, "amount_paid"
-		)
+		return frappe.db.get_value(payment_entry.payment_document, payment_entry.payment_entry, "amount_paid")
 
 	elif payment_entry.payment_document == "Bank Transaction":
 		dep, wth = frappe.db.get_value(
@@ -383,9 +380,7 @@ def get_paid_amount(payment_entry, currency, gl_bank_account):
 
 	else:
 		frappe.throw(
-			"Please reconcile {0}: {1} manually".format(
-				payment_entry.payment_document, payment_entry.payment_entry
-			)
+			f"Please reconcile {payment_entry.payment_document}: {payment_entry.payment_entry} manually"
 		)
 
 

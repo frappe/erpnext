@@ -14,32 +14,20 @@ def execute():
 
 			frappe.qb.update(purchase_invoice).set(
 				purchase_invoice.tax_withholding_net_total, purchase_invoice.net_total
-			).set(
-				purchase_invoice.base_tax_withholding_net_total, purchase_invoice.base_net_total
-			).where(
+			).set(purchase_invoice.base_tax_withholding_net_total, purchase_invoice.base_net_total).where(
 				purchase_invoice.company == company.name
-			).where(
-				purchase_invoice.apply_tds == 1
-			).where(
+			).where(purchase_invoice.apply_tds == 1).where(
 				purchase_invoice.posting_date >= fiscal_year_details.year_start_date
-			).where(
-				purchase_invoice.docstatus == 1
-			).run()
+			).where(purchase_invoice.docstatus == 1).run()
 
 			purchase_order = frappe.qb.DocType("Purchase Order")
 
 			frappe.qb.update(purchase_order).set(
 				purchase_order.tax_withholding_net_total, purchase_order.net_total
-			).set(
-				purchase_order.base_tax_withholding_net_total, purchase_order.base_net_total
-			).where(
+			).set(purchase_order.base_tax_withholding_net_total, purchase_order.base_net_total).where(
 				purchase_order.company == company.name
-			).where(
-				purchase_order.apply_tds == 1
-			).where(
+			).where(purchase_order.apply_tds == 1).where(
 				purchase_order.transaction_date >= fiscal_year_details.year_start_date
-			).where(
-				purchase_order.docstatus == 1
-			).run()
+			).where(purchase_order.docstatus == 1).run()
 		except FiscalYearError:
 			pass

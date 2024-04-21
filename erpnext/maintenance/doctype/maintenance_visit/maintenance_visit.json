@@ -83,7 +83,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hidden": 1,
    "label": "Address",
    "read_only": 1
@@ -295,7 +295,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-03 16:19:07.902723",
+ "modified": "2024-03-27 13:10:04.257508",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit",
@@ -319,7 +319,7 @@
  ],
  "search_fields": "status,maintenance_type,customer,customer_name,mntc_date,company",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",

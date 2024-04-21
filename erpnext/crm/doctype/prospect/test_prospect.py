@@ -34,7 +34,7 @@ def make_prospect(**args):
 	prospect_doc = frappe.get_doc(
 		{
 			"doctype": "Prospect",
-			"company_name": args.company_name or "_Test Company {}".format(random_string(3)),
+			"company_name": args.company_name or f"_Test Company {random_string(3)}",
 		}
 	).insert()
 

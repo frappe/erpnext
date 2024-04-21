@@ -18,7 +18,7 @@ class WarrantyClaim(TransactionBase):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amc_expiry_date: DF.Date | None
 		amended_from: DF.Link | None
 		company: DF.Link
@@ -45,9 +45,7 @@ class WarrantyClaim(TransactionBase):
 		service_address: DF.SmallText | None
 		status: DF.Literal["", "Open", "Closed", "Work In Progress", "Cancelled"]
 		territory: DF.Link | None
-		warranty_amc_status: DF.Literal[
-			"", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"
-		]
+		warranty_amc_status: DF.Literal["", "Under Warranty", "Out of Warranty", "Under AMC", "Out of AMC"]
 		warranty_expiry_date: DF.Date | None
 	# end: auto-generated types
 

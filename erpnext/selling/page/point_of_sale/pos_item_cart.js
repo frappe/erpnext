@@ -295,10 +295,10 @@ erpnext.PointOfSale.ItemCart = class {
 			<div class="customer-field"></div>
 		`);
 		const me = this;
-		const query = { query: "erpnext.controllers.queries.customer_query" };
 		const allowed_customer_group = this.allowed_customer_groups || [];
+		let filters = {};
 		if (allowed_customer_group.length) {
-			query.filters = {
+			filters = {
 				customer_group: ["in", allowed_customer_group],
 			};
 		}
@@ -308,7 +308,11 @@ erpnext.PointOfSale.ItemCart = class {
 				fieldtype: "Link",
 				options: "Customer",
 				placeholder: __("Search by customer name, phone, email."),
-				get_query: () => query,
+				get_query: function () {
+					return {
+						filters: filters,
+					};
+				},
 				onchange: function () {
 					if (this.value) {
 						const frm = me.events.get_frm();

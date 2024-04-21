@@ -150,6 +150,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -477,6 +478,7 @@
    "label": "More Information"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -580,6 +582,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Payment Order Status",
+   "no_copy": 1,
    "options": "Initiated\nPayment Ordered",
    "read_only": 1
   },
@@ -776,7 +779,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2024-01-08 13:17:15.744754",
+ "modified": "2024-04-11 11:25:07.366347",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
@@ -817,7 +820,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "title",

@@ -26,9 +26,9 @@ def execute(filters=None):
 		for transfer in transfers:
 			if transfer.transfer_type == "Transfer":
 				if transfer.from_shareholder == filters.get("shareholder"):
-					transfer.transfer_type += " to {}".format(transfer.to_shareholder)
+					transfer.transfer_type += f" to {transfer.to_shareholder}"
 				else:
-					transfer.transfer_type += " from {}".format(transfer.from_shareholder)
+					transfer.transfer_type += f" from {transfer.from_shareholder}"
 			row = [
 				filters.get("shareholder"),
 				transfer.date,
@@ -66,13 +66,11 @@ def get_all_transfers(date, shareholder):
 	# if company:
 	# 	condition = 'AND company = %(company)s '
 	return frappe.db.sql(
-		"""SELECT * FROM `tabShare Transfer`
+		f"""SELECT * FROM `tabShare Transfer`
 		WHERE ((DATE(date) <= %(date)s AND from_shareholder = %(shareholder)s {condition})
 		OR (DATE(date) <= %(date)s AND to_shareholder = %(shareholder)s {condition}))
 		AND docstatus = 1
-		ORDER BY date""".format(
-			condition=condition
-		),
+		ORDER BY date""",
 		{"date": date, "shareholder": shareholder},
 		as_dict=1,
 	)

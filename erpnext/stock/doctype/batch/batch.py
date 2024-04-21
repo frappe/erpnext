@@ -240,17 +240,13 @@ def get_batch_qty(
 def get_batches_by_oldest(item_code, warehouse):
 	"""Returns the oldest batch and qty for the given item_code and warehouse"""
 	batches = get_batch_qty(item_code=item_code, warehouse=warehouse)
-	batches_dates = [
-		[batch, frappe.get_value("Batch", batch.batch_no, "expiry_date")] for batch in batches
-	]
+	batches_dates = [[batch, frappe.get_value("Batch", batch.batch_no, "expiry_date")] for batch in batches]
 	batches_dates.sort(key=lambda tup: tup[1])
 	return batches_dates
 
 
 @frappe.whitelist()
-def split_batch(
-	batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None
-):
+def split_batch(batch_no: str, item_code: str, warehouse: str, qty: float, new_batch_id: str | None = None):
 	"""Split the batch into a new batch"""
 	batch = frappe.get_doc(dict(doctype="Batch", item=item_code, batch_id=new_batch_id)).insert()
 	qty = flt(qty)
@@ -282,7 +278,10 @@ def split_batch(
 			company=company,
 			items=[
 				dict(
-					item_code=item_code, qty=qty, s_warehouse=warehouse, serial_and_batch_bundle=from_bundle_id
+					item_code=item_code,
+					qty=qty,
+					s_warehouse=warehouse,
+					serial_and_batch_bundle=from_bundle_id,
 				),
 				dict(
 					item_code=item_code, qty=qty, t_warehouse=warehouse, serial_and_batch_bundle=to_bundle_id
