@@ -1157,10 +1157,10 @@ def make_batch_nos(item_code, batch_nos):
 				now(),
 				user,
 				user,
-				format_date(batch.get('manufacturing_date'), 'yyyy-mm-dd'),
+				format_date(batch.get("manufacturing_date"), "yyyy-mm-dd"),
 				item.item_code,
 				item.item_name,
-				item.description
+				item.description,
 			)
 		)
 
