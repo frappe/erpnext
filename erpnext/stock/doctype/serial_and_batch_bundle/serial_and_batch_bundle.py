@@ -19,6 +19,7 @@ from frappe.utils import (
 	nowtime,
 	parse_json,
 	today,
+	format_date,
 )
 from frappe.utils.csvutils import build_csv_response
 
@@ -1044,7 +1045,8 @@ def parse_csv_file_to_get_serial_batch(reader):
 			batch_nos.append(
 				{
 					"batch_no": row[0],
-					"qty": row[1],
+					"manufacturing_date": format_date(row[1], "yyyy-mm-dd"),
+                    "qty": row[2],
 				}
 			)
 
@@ -1132,24 +1134,24 @@ def make_serial_nos(item_code, serial_nos):
 
 def make_batch_nos(item_code, batch_nos):
 	item = frappe.get_cached_value("Item", item_code, ["description", "item_code"], as_dict=1)
-	batch_nos = [d.get("batch_no") for d in batch_nos if d.get("batch_no")]
+	batch_nos_to_update = [d.get("batch_no") for d in batch_nos if d.get("batch_no")]
 
-	existing_batches = frappe.get_all("Batch", filters={"name": ("in", batch_nos)})
+	existing_batches = frappe.get_all("Batch", filters={"name": ("in", batch_nos_to_update)})
 
 	existing_batches = [d.get("name") for d in existing_batches if d.get("name")]
 
-	batch_nos = list(set(batch_nos) - set(existing_batches))
-	if not batch_nos:
+	batch_nos_to_update = list(set(batch_nos_to_update) - set(existing_batches))
+
+	if not batch_nos_to_update:
 		return
 
 	batch_nos_details = []
 	user = frappe.session.user
-	for batch_no in batch_nos:
-		if frappe.db.exists("Batch", batch_no):
-			continue
+	for batch in batch_nos:
+		batch_no = batch.get("batch_no")
 
 		batch_nos_details.append(
-			(batch_no, batch_no, now(), now(), user, user, item.item_code, item.item_name, item.description)
+			(batch_no, batch_no, now(), now(), user, user, format_date(batch.get('manufacturing_date'), 'yyyy-mm-dd'), item.item_code, item.item_name, item.description)
 		)
 
 	fields = [
@@ -1159,6 +1161,7 @@ def make_batch_nos(item_code, batch_nos):
 		"modified",
 		"owner",
 		"modified_by",
+		"manufacturing_date",
 		"item",
 		"item_name",
 		"description",

@@ -284,7 +284,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		if (this.item.has_serial_no && this.item.has_batch_no) {
 			csvFileData = ["Serial No", "Batch No", "Quantity"];
 		} else if (this.item.has_batch_no) {
-			csvFileData = ["Batch No", "Quantity"];
+			csvFileData = ["Batch No", "Manufacturing Date", "Quantity"];
 		}
 
 		const method = `/api/method/erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.download_blank_csv_template?content=${encodeURIComponent(
@@ -392,6 +392,12 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 							},
 						};
 					},
+				},
+				{
+					fieldtype: "Date",
+					fieldname: "manufacturing_date",
+					label: __("Manufacturing Date"),
+					in_list_view: 1,
 				},
 			];
 
