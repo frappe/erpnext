@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-19 15:12\n"
+"PO-Revision-Date: 2024-04-21 15:05\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -14116,7 +14116,7 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:389
 msgid "Column {0}"
-msgstr ""
+msgstr "Kolona {0}"
 
 #: accounts/doctype/payment_terms_template/payment_terms_template.py:39
 msgid "Combined invoice portion must equal 100%"
@@ -66838,7 +66838,7 @@ msgstr ""
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Setup"
-msgstr ""
+msgstr "Postavljanja"
 
 #. Title of an Onboarding Step
 #: setup/onboarding_step/letterhead/letterhead.json
@@ -67389,7 +67389,7 @@ msgstr ""
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:306
 msgid "Show Document"
-msgstr ""
+msgstr "Prikaži dokument"
 
 #. Label of a Check field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
@@ -67512,7 +67512,7 @@ msgstr ""
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:456
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:296
 msgid "Show Traceback"
-msgstr ""
+msgstr "Prikaži Traceback"
 
 #: stock/report/stock_balance/stock_balance.js:90
 msgid "Show Variant Attributes"
@@ -71741,7 +71741,7 @@ msgstr ""
 #: setup/doctype/uom/uom.json
 msgctxt "UOM"
 msgid "Symbol"
-msgstr ""
+msgstr "Simbol"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
