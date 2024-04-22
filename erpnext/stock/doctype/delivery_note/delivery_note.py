@@ -772,7 +772,7 @@ def make_delivery_trip(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_installation_note(source_name, target_doc=None):
+def make_installation_note(source_name, target_doc=None, kwargs=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
 		target.serial_no = obj.serial_no
