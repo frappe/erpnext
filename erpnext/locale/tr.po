@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-17 15:05\n"
+"PO-Revision-Date: 2024-04-22 15:26\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -3576,7 +3576,7 @@ msgstr ""
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:37
 #: stock/dashboard/item_dashboard_list.html:28
 msgid "Actual Qty {0} / Waiting Qty {1}"
-msgstr ""
+msgstr "Gerçek Miktar {0} / Bekleyen Miktar {1}"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Actual Qty: Quantity available in the warehouse."
@@ -3835,7 +3835,7 @@ msgstr ""
 
 #: manufacturing/doctype/plant_floor/plant_floor.js:172
 msgid "Add Stock"
-msgstr ""
+msgstr "Stok Ekle"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:238
 #: public/js/bom_configurator/bom_configurator.bundle.js:318
@@ -3865,7 +3865,7 @@ msgstr ""
 
 #: public/js/utils/crm_activities.js:142
 msgid "Add a Note"
-msgstr ""
+msgstr "Not Ekle"
 
 #. Title of an Onboarding Step
 #: assets/onboarding_step/existing_asset/existing_asset.json
@@ -3875,7 +3875,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Add an Existing Asset'
 #: assets/onboarding_step/existing_asset/existing_asset.json
 msgid "Add an existing Asset"
-msgstr ""
+msgstr "Mevcut Bir Varlık Ekle"
 
 #: www/book_appointment/index.html:42
 msgid "Add details"
@@ -3924,23 +3924,23 @@ msgstr ""
 
 #: templates/includes/footer/footer_extension.html:26
 msgid "Added"
-msgstr ""
+msgstr "Eklendi"
 
 #. Label of a Link field in DocType 'CRM Note'
 #: crm/doctype/crm_note/crm_note.json
 msgctxt "CRM Note"
 msgid "Added By"
-msgstr ""
+msgstr "Ekleyen"
 
 #. Label of a Datetime field in DocType 'CRM Note'
 #: crm/doctype/crm_note/crm_note.json
 msgctxt "CRM Note"
 msgid "Added On"
-msgstr ""
+msgstr "Eklenme Tarihi"
 
 #: buying/doctype/supplier/supplier.py:128
 msgid "Added Supplier Role to User {0}."
-msgstr ""
+msgstr "{0} Kullanıcısına Tedarikçi Rolü eklendi."
 
 #: public/js/utils/item_selector.js:70 public/js/utils/item_selector.js:86
 msgid "Added {0} ({1})"
@@ -5109,7 +5109,7 @@ msgstr ""
 
 #: stock/report/stock_ageing/stock_ageing.py:204
 msgid "Age ({0})"
-msgstr ""
+msgstr "Yaş ({0})"
 
 #: accounts/report/accounts_payable/accounts_payable.js:58
 #: accounts/report/accounts_payable_summary/accounts_payable_summary.js:21
@@ -5158,7 +5158,7 @@ msgstr ""
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:86
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:337
 msgid "Ageing Report based on "
-msgstr ""
+msgstr "Yaşlanma Raporuna Göre "
 
 #. Label of a Table field in DocType 'Quality Meeting'
 #: quality_management/doctype/quality_meeting/quality_meeting.json
@@ -5357,7 +5357,7 @@ msgstr ""
 
 #: selling/page/point_of_sale/pos_item_selector.js:25
 msgid "All Items"
-msgstr ""
+msgstr "Tüm Ürünler"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
@@ -12067,7 +12067,7 @@ msgstr ""
 
 #: telephony/doctype/call_log/call_log.js:8
 msgid "Call Again"
-msgstr ""
+msgstr "Tekrar Ara"
 
 #: public/js/call_popup/call_popup.js:41
 msgid "Call Connected"
@@ -12087,7 +12087,7 @@ msgstr ""
 
 #: public/js/call_popup/call_popup.js:48
 msgid "Call Ended"
-msgstr ""
+msgstr "Görüşme Sonlandı"
 
 #. Label of a Table field in DocType 'Incoming Call Settings'
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.json
@@ -13523,7 +13523,7 @@ msgstr ""
 #: selling/page/point_of_sale/pos_item_cart.js:92
 #: selling/page/point_of_sale/pos_item_cart.js:148
 msgid "Checkout"
-msgstr ""
+msgstr "Ödeme"
 
 #: selling/page/point_of_sale/pos_item_cart.js:250
 msgid "Checkout Order / Submit Order / New Order"
@@ -25714,7 +25714,7 @@ msgstr ""
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.html:37
 msgid "Edit Capacity"
-msgstr ""
+msgstr "Kapasiteyi Düzenle"
 
 #: selling/page/point_of_sale/pos_item_cart.js:92
 msgid "Edit Cart"
@@ -28200,7 +28200,7 @@ msgstr ""
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:72
 msgid "Fetching..."
-msgstr ""
+msgstr "Veriler Alınıyor..."
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:106
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:155
@@ -83184,7 +83184,7 @@ msgstr ""
 
 #: projects/doctype/project/project_dashboard.html:15
 msgid "{0} hours"
-msgstr ""
+msgstr "{0} saat"
 
 #: controllers/accounts_controller.py:2296
 msgid "{0} in row {1}"
