@@ -1088,7 +1088,9 @@ frappe.ui.form.on('Payment Entry', {
 				},
 				callback: function(r) {
 					if (r.message) {
-						frm.set_value(field, r.message.account);
+						if (!frm.doc.mode_of_payment) {
+							frm.set_value(field, r.message.account);
+						}
 						frm.set_value('bank', r.message.bank);
 						frm.set_value('bank_account_no', r.message.bank_account_no);
 					}
