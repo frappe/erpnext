@@ -43,6 +43,7 @@ def execute(filters=None):
 				"gross_profit",
 				"gross_profit_percent",
 				"project",
+				"branch",
 			],
 			"item_code": [
 				"item_code",
@@ -245,6 +246,12 @@ def get_columns(group_wise_columns, filters):
 				"fieldtype": "Data",
 				"width": 100,
 			},
+			"branch": {
+				"label": _("Branch"),
+				"fieldtype": "Link",
+				"options": "Branch",
+				"width": 100,
+			},
 			"warehouse": {
 				"label": _("Warehouse"),
 				"fieldname": "warehouse",
@@ -389,6 +396,7 @@ def get_column_names():
 			"gross_profit": "gross_profit",
 			"gross_profit_percent": "gross_profit_%",
 			"project": "project",
+			"branch" : "Branch",
 		}
 	)
 
@@ -740,6 +748,8 @@ class GrossProfitGenerator:
 
 	def load_invoice_items(self):
 		conditions = ""
+		if self.filters.branch:
+			conditions += " and `tabSales Invoice`.branch = %(branch)s"
 		if self.filters.company:
 			conditions += " and `tabSales Invoice`.company = %(company)s"
 		if self.filters.from_date:
@@ -808,6 +818,7 @@ class GrossProfitGenerator:
 				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
 				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return,
 				`tabSales Invoice Item`.cost_center, `tabSales Invoice Item`.serial_and_batch_bundle
+				`tabSales Invoice`.branch as branch
 				{sales_person_cols}
 				{payment_term_cols}
 			from
@@ -908,6 +919,7 @@ class GrossProfitGenerator:
 				"is_return": row.is_return,
 				"cost_center": row.cost_center,
 				"base_net_amount": frappe.db.get_value("Sales Invoice", row.parent, "base_net_total"),
+				"branch": row.branch,
 			}
 		)
 

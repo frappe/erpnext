@@ -216,7 +216,8 @@
   "is_discounted",
   "remarks",
   "repost_required",
-  "connections_tab"
+  "connections_tab",
+  "branch"
  ],
  "fields": [
   {
@@ -2191,7 +2192,13 @@
    "label": "Update Outstanding for Self",
    "no_copy": 1,
    "print_hide": 1
-  }
+  },
+  {
+    "fieldname": "branch",
+    "fieldtype": "Link",
+    "label": "branch",
+    "options": "Branch"
+   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,

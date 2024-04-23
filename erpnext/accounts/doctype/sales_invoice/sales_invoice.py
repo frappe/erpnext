@@ -92,6 +92,7 @@ class SalesInvoice(SellingController):
 		base_total: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		base_write_off_amount: DF.Currency
+		branch: DF.Link | None
 		campaign: DF.Link | None
 		cash_bank_account: DF.Link | None
 		change_amount: DF.Currency
