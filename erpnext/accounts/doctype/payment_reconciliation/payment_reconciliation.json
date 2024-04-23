@@ -196,6 +196,8 @@
   },
   {
    "depends_on": "eval:doc.party",
+   "description": "Only 'Payment Entries' made against this advance account are supported.",
+   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
    "fieldname": "default_advance_account",
    "fieldtype": "Link",
    "label": "Default Advance Account",
@@ -230,7 +232,7 @@
  "is_virtual": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:10:10.488007",
+ "modified": "2024-04-23 12:38:29.557315",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Reconciliation",
