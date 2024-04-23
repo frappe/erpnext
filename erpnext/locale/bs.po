@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-22 15:26\n"
+"PO-Revision-Date: 2024-04-23 15:26\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -62466,11 +62466,11 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:491
 msgid "Row Number"
-msgstr ""
+msgstr "Broj reda"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:376
 msgid "Row {0}"
-msgstr ""
+msgstr "Red {0}"
 
 #: manufacturing/doctype/job_card/job_card.py:606
 msgid "Row {0} : Operation is required against the raw material item {1}"
