@@ -786,11 +786,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-09-10 21:53:13.860791",
-=======
  "modified": "2024-04-23 12:38:33.173938",
->>>>>>> de9c8fc9d6 (refactor: better description for advance account)
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
