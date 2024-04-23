@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-22 15:26\n"
+"PO-Revision-Date: 2024-04-23 15:26\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -54,19 +54,19 @@ msgstr ""
 
 #: stock/doctype/item/item.py:234
 msgid "\"Customer Provided Item\" cannot be Purchase Item also"
-msgstr ""
+msgstr "\"Müşterinin Tedarik Ettiği Ürün\" aynı zamanda Satın Alma Ürünü olamaz."
 
 #: stock/doctype/item/item.py:236
 msgid "\"Customer Provided Item\" cannot have Valuation Rate"
-msgstr ""
+msgstr "\"Müşterinin Tedarik Ettiği Ürün\" Değerleme Oranına sahip olamaz."
 
 #: stock/doctype/item/item.py:312
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
-msgstr ""
+msgstr "Varlık kaydı yapıldığından, 'Sabit Varlık' seçimi kaldırılamaz."
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "#"
-msgstr ""
+msgstr "#"
 
 #. Description of the Onboarding Step 'Accounts Settings'
 #: accounts/onboarding_step/accounts_settings/accounts_settings.json
@@ -75,7 +75,11 @@ msgid "# Account Settings\n\n"
 " - Credit Limit and over billing settings\n"
 " - Taxation preferences\n"
 " - Deferred accounting preferences\n"
-msgstr ""
+msgstr "# Muhasebe Ayarları\n\n"
+"ERPNext'te Muhasebe özellikleri işinize göre özel olarak yapılandırılabilir. Muhasebe Ayarları, aşağıdaki yapılandırmaları tanımlayabileceğiniz yerdir:\n\n"
+" - Kredi Limiti ve Üzeri Faturalandırma Ayarları\n"
+" - Vergi Ayarları\n"
+" - Ertelenmiş Muhasebe Tercihleri\n"
 
 #. Description of the Onboarding Step 'Configure Account Settings'
 #: accounts/onboarding_step/configure_account_settings/configure_account_settings.json
@@ -295,7 +299,7 @@ msgstr ""
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:148
 msgid "# In Stock"
-msgstr ""
+msgstr "# Stokta"
 
 #. Description of the Onboarding Step 'Introduction to Stock Entry'
 #: stock/onboarding_step/introduction_to_stock_entry/introduction_to_stock_entry.json
@@ -441,7 +445,7 @@ msgstr ""
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "%  Delivered"
-msgstr ""
+msgstr "%  Teslim Edildi"
 
 #. Label of a Percent field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -477,18 +481,18 @@ msgstr ""
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "% Complete Method"
-msgstr ""
+msgstr "Tamamlanma Yüzdesi Yöntemi"
 
 #. Label of a Percent field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "% Completed"
-msgstr ""
+msgstr "% Tamamlandı"
 
 #: manufacturing/doctype/bom/bom.js:788
 #, python-format
 msgid "% Finished Item Quantity"
-msgstr ""
+msgstr "% Bitmiş Ürün Miktarı"
 
 #. Label of a Percent field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -510,7 +514,7 @@ msgstr ""
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "% Ordered"
-msgstr ""
+msgstr "% Sipariş Verildi"
 
 #. Label of a Percent field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
@@ -558,19 +562,19 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "% Returned"
-msgstr ""
+msgstr "% İade Edildi"
 
 #. Label of a Percent field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "% Returned"
-msgstr ""
+msgstr "% İade Edildi"
 
 #. Label of a Percent field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "% Returned"
-msgstr ""
+msgstr "% İade Edildi"
 
 #. Description of the '% Amount Billed' (Percent) field in DocType 'Sales
 #. Order'
@@ -772,24 +776,24 @@ msgstr ""
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:118
 msgid "0-30"
-msgstr ""
+msgstr "0-30"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "0-30 Days"
-msgstr ""
+msgstr "0-30 Gün"
 
 #. Description of the 'Conversion Factor' (Float) field in DocType 'Loyalty
 #. Program'
 #: accounts/doctype/loyalty_program/loyalty_program.json
 msgctxt "Loyalty Program"
 msgid "1 Loyalty Points = How much base currency?"
-msgstr ""
+msgstr "1 Sadakat Puanı = Ne kadar para birimi?"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: utilities/doctype/video_settings/video_settings.json
 msgctxt "Video Settings"
 msgid "1 hr"
-msgstr ""
+msgstr "1 sa"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -855,7 +859,7 @@ msgstr ""
 #: assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgctxt "Asset Maintenance Task"
 msgid "2 Yearly"
-msgstr ""
+msgstr "2 Yıllık"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -894,7 +898,7 @@ msgstr ""
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "30-60 Days"
-msgstr ""
+msgstr "30-60 Gün"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -936,20 +940,20 @@ msgstr ""
 #: utilities/doctype/video_settings/video_settings.json
 msgctxt "Video Settings"
 msgid "6 hrs"
-msgstr ""
+msgstr "6 Saat"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:120
 msgid "60-90"
-msgstr ""
+msgstr "60-90"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "60-90 Days"
-msgstr ""
+msgstr "60-90 Gün"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:121
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "90 Above"
-msgstr ""
+msgstr "90 Üstü"
 
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.py:61
 msgid "<b>From Time</b> cannot be later than <b>To Time</b> for {0}"
@@ -1330,7 +1334,7 @@ msgstr ""
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "API Details"
-msgstr ""
+msgstr "API Ayrıntıları"
 
 #. Label of a Data field in DocType 'Currency Exchange Settings'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -1469,49 +1473,49 @@ msgstr ""
 
 #: public/js/controllers/transaction.js:2167
 msgid "Accepted Quantity"
-msgstr ""
+msgstr "Kabul Edilen Miktar"
 
 #. Label of a Float field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Accepted Quantity"
-msgstr ""
+msgstr "Kabul Edilen Miktar"
 
 #. Label of a Float field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Accepted Quantity"
-msgstr ""
+msgstr "Kabul Edilen Miktar"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Accepted Warehouse"
-msgstr ""
+msgstr "Kabul Deposu"
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Accepted Warehouse"
-msgstr ""
+msgstr "Kabul Deposu"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Accepted Warehouse"
-msgstr ""
+msgstr "Kabul Deposu"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Accepted Warehouse"
-msgstr ""
+msgstr "Kabul Deposu"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Accepted Warehouse"
-msgstr ""
+msgstr "Kabul Deposu"
 
 #. Label of a Data field in DocType 'Currency Exchange Settings'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -1555,151 +1559,151 @@ msgstr ""
 #: stock/report/incorrect_stock_value_report/incorrect_stock_value_report.js:15
 #: stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:15
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Account Closing Balance'
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
 msgctxt "Account Closing Balance"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Bank Clearance'
 #: accounts/doctype/bank_clearance/bank_clearance.json
 msgctxt "Bank Clearance"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgctxt "Bank Guarantee"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Budget Account'
 #: accounts/doctype/budget_account/budget_account.json
 msgctxt "Budget Account"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
 msgctxt "Exchange Rate Revaluation Account"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Journal Entry Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Journal Entry Template Account'
 #: accounts/doctype/journal_entry_template_account/journal_entry_template_account.json
 msgctxt "Journal Entry Template Account"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Ledger Merge'
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgctxt "Ledger Merge"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Ledger Merge Accounts'
 #: accounts/doctype/ledger_merge_accounts/ledger_merge_accounts.json
 msgctxt "Ledger Merge Accounts"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Payment Entry Deduction'
 #: accounts/doctype/payment_entry_deduction/payment_entry_deduction.json
 msgctxt "Payment Entry Deduction"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Payment Entry Reference'
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 msgctxt "Payment Entry Reference"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Payment Ledger Entry'
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Data field in DocType 'Payment Order'
 #: accounts/doctype/payment_order/payment_order.json
 msgctxt "Payment Order"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Payment Order Reference'
 #: accounts/doctype/payment_order_reference/payment_order_reference.json
 msgctxt "Payment Order Reference"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Read Only field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Process Deferred Accounting'
 #: accounts/doctype/process_deferred_accounting/process_deferred_accounting.json
 msgctxt "Process Deferred Accounting"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Sales Invoice Payment'
 #: accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
 msgctxt "Sales Invoice Payment"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'South Africa VAT Account'
 #: accounts/doctype/south_africa_vat_account/south_africa_vat_account.json
 msgctxt "South Africa VAT Account"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Tax Withholding Account'
 #: accounts/doctype/tax_withholding_account/tax_withholding_account.json
 msgctxt "Tax Withholding Account"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'UAE VAT Account'
 #: regional/doctype/uae_vat_account/uae_vat_account.json
 msgctxt "UAE VAT Account"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Data field in DocType 'Unreconcile Payment Entries'
 #: accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
 msgctxt "Unreconcile Payment Entries"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Label of a Link field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "Account"
-msgstr ""
+msgstr "Hesap"
 
 #. Name of a report
 #: accounts/report/account_balance/account_balance.json
@@ -2011,7 +2015,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:675
 msgid "Account not Found"
-msgstr ""
+msgstr "Hesap bulunamadı"
 
 #: accounts/doctype/account/account.py:375
 msgid "Account with child nodes cannot be converted to ledger"
@@ -2076,7 +2080,7 @@ msgstr ""
 
 #: accounts/doctype/gl_entry/gl_entry.py:396
 msgid "Account {0} is frozen"
-msgstr ""
+msgstr "{0} Hesabı donduruldu"
 
 #: controllers/accounts_controller.py:1108
 msgid "Account {0} is invalid. Account Currency must be {1}"
@@ -2108,7 +2112,7 @@ msgstr ""
 
 #: accounts/report/general_ledger/general_ledger.py:330
 msgid "Account: {0} does not exist"
-msgstr ""
+msgstr "{0} Hesabı bulunamadı"
 
 #: accounts/doctype/payment_entry/payment_entry.py:2146
 msgid "Account: {0} is not permitted under Payment Entry"
@@ -3646,7 +3650,7 @@ msgstr ""
 
 #: stock/page/stock_balance/stock_balance.js:55
 msgid "Actual qty in stock"
-msgstr ""
+msgstr "Güncel Stok Miktarı"
 
 #: accounts/doctype/payment_entry/payment_entry.js:1473
 #: public/js/controllers/accounts.js:176
@@ -5261,19 +5265,19 @@ msgstr ""
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "All Activities"
-msgstr ""
+msgstr "Tüm Aktiviteler"
 
 #. Label of a Section Break field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "All Activities"
-msgstr ""
+msgstr "Tüm Aktiviteler"
 
 #. Label of a Section Break field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "All Activities"
-msgstr ""
+msgstr "Tüm Aktiviteler"
 
 #. Label of a HTML field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -5918,7 +5922,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Allow multi-currency invoices against single party account "
-msgstr ""
+msgstr "Tek bir Taraf Hesabı İçin Faturalarda Çoklu Para Birimine İzin Ver"
 
 #. Label of a Check field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -10193,7 +10197,7 @@ msgstr ""
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Bank/Cash Account"
-msgstr ""
+msgstr "Banka / Kasa Hesabı"
 
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:54
 msgid "Bank/Cash Account {0} doesn't belong to company {1}"
@@ -25734,61 +25738,61 @@ msgstr ""
 
 #: stock/doctype/delivery_note/delivery_note.js:418
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #. Label of a Check field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #. Label of a Check field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #. Label of a Check field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #. Label of a Check field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #. Label of a Check field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #. Label of a Check field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #. Label of a Check field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #. Label of a Check field in DocType 'Stock Reconciliation'
 #: stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgctxt "Stock Reconciliation"
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #. Label of a Check field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Edit Posting Date and Time"
-msgstr ""
+msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:405
 msgid "Edit Qty"
@@ -26545,7 +26549,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Enabling this will allow creation of multi-currency invoices against single party account in company currency"
-msgstr ""
+msgstr "Bu özelliğin etkinleştirilmesi, şirket para biriminde tek taraf hesabı için çoklu para birimi faturalarının oluşturulmasına izin verir."
 
 #. Label of a Date field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -44183,7 +44187,7 @@ msgstr ""
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "New Sales Invoice"
-msgstr ""
+msgstr "Yeni Satış Faturası"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -44691,7 +44695,7 @@ msgstr ""
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:581
 msgid "No records found in the Invoices table"
-msgstr ""
+msgstr "Fatura tablosunda kayıt bulunamadı"
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:584
 msgid "No records found in the Payments table"
@@ -45962,7 +45966,7 @@ msgstr ""
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html:8
 msgid "Opening Invoices"
-msgstr ""
+msgstr "Açılış Faturaları"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:128
 msgid "Opening Invoices Summary"
@@ -46006,7 +46010,7 @@ msgstr ""
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:31
 msgid "Opening {0} Invoices created"
-msgstr ""
+msgstr "{0} Açılış Faturası Oluşturuldu"
 
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:124
 msgid "Operating Cost"
@@ -48524,7 +48528,7 @@ msgstr ""
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Party Bank Account"
-msgstr ""
+msgstr "Taraf Banka Hesabı"
 
 #. Label of a Section Break field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
@@ -48633,103 +48637,103 @@ msgstr ""
 #: selling/report/address_and_contacts/address_and_contacts.js:9
 #: setup/doctype/party_type/party_type.json
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Select field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgctxt "Contract"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
 msgctxt "Exchange Rate Revaluation Account"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Journal Entry Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Opening Invoice Creation Tool Item'
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgctxt "Opening Invoice Creation Tool Item"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Select field in DocType 'Party Specific Item'
 #: selling/doctype/party_specific_item/party_specific_item.json
 msgctxt "Party Specific Item"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Party Type'
 #: setup/doctype/party_type/party_type.json
 msgctxt "Party Type"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Payment Ledger Entry'
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Process Payment Reconciliation'
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Link field in DocType 'Subscription'
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #. Label of a Data field in DocType 'Unreconcile Payment Entries'
 #: accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
 msgctxt "Unreconcile Payment Entries"
 msgid "Party Type"
-msgstr ""
+msgstr "Taraf Seçimi"
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:612
 msgid "Party Type and Party is mandatory for {0} account"
@@ -50905,7 +50909,7 @@ msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:369
 msgid "Please ensure {} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
-msgstr ""
+msgstr "Lütfen {} hesabının bir Bilanço hesabı olduğundan emin olun. Ana hesabı bir Bilanço hesabı olarak değiştirebilir veya farklı bir hesap seçebilirsiniz."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:377
 msgid "Please ensure {} account {} is a Payable account. Change the account type to Payable or select a different account."
@@ -51874,127 +51878,127 @@ msgstr ""
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:34
 #: templates/form_grid/bank_reconciliation_grid.html:6
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Bank Clearance Detail'
 #: accounts/doctype/bank_clearance_detail/bank_clearance_detail.json
 msgctxt "Bank Clearance Detail"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Exchange Rate Revaluation'
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.json
 msgctxt "Exchange Rate Revaluation"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Invoice Discounting'
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 msgctxt "Invoice Discounting"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Landed Cost Purchase Receipt'
 #: stock/doctype/landed_cost_purchase_receipt/landed_cost_purchase_receipt.json
 msgctxt "Landed Cost Purchase Receipt"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Landed Cost Voucher'
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgctxt "Landed Cost Voucher"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Loyalty Point Entry'
 #: accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
 msgctxt "Loyalty Point Entry"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Opening Invoice Creation Tool Item'
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgctxt "Opening Invoice Creation Tool Item"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'POS Closing Entry'
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgctxt "POS Closing Entry"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'POS Invoice Merge Log'
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.json
 msgctxt "POS Invoice Merge Log"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'POS Opening Entry'
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
 msgctxt "POS Opening Entry"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Payment Ledger Entry'
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Payment Order'
 #: accounts/doctype/payment_order/payment_order.json
 msgctxt "Payment Order"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Payment Reconciliation Payment'
 #: accounts/doctype/payment_reconciliation_payment/payment_reconciliation_payment.json
 msgctxt "Payment Reconciliation Payment"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
 msgctxt "Period Closing Voucher"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Process Deferred Accounting'
 #: accounts/doctype/process_deferred_accounting/process_deferred_accounting.json
 msgctxt "Process Deferred Accounting"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Option for the 'Ageing Based On' (Select) field in DocType 'Process
 #. Statement Of Accounts'
@@ -52002,55 +52006,55 @@ msgstr ""
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Process Subscription'
 #: accounts/doctype/process_subscription/process_subscription.json
 msgctxt "Process Subscription"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Repost Payment Ledger'
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgctxt "Repost Payment Ledger"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Serial and Batch Bundle'
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Stock Ledger Entry'
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgctxt "Stock Ledger Entry"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #. Label of a Date field in DocType 'Stock Reconciliation'
 #: stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgctxt "Stock Reconciliation"
 msgid "Posting Date"
-msgstr ""
+msgstr "Tarih"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.py:247
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:125
@@ -54760,49 +54764,49 @@ msgstr ""
 #: stock/report/stock_projected_qty/stock_projected_qty.py:199
 #: templates/emails/reorder_item.html:12
 msgid "Projected Qty"
-msgstr ""
+msgstr "Öngörülen Miktar"
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Projected Qty"
-msgstr ""
+msgstr "Öngörülen Miktar"
 
 #. Label of a Float field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Projected Qty"
-msgstr ""
+msgstr "Öngörülen Miktar"
 
 #. Label of a Float field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Projected Qty"
-msgstr ""
+msgstr "Öngörülen Miktar"
 
 #. Label of a Float field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Projected Qty"
-msgstr ""
+msgstr "Öngörülen Miktar"
 
 #. Label of a Float field in DocType 'Production Plan Sub Assembly Item'
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgctxt "Production Plan Sub Assembly Item"
 msgid "Projected Qty"
-msgstr ""
+msgstr "Öngörülen Miktar"
 
 #. Label of a Float field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Projected Qty"
-msgstr ""
+msgstr "Öngörülen Miktar"
 
 #. Label of a Float field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Projected Qty"
-msgstr ""
+msgstr "Öngörülen Miktar"
 
 #: stock/report/item_shortage_report/item_shortage_report.py:130
 msgid "Projected Quantity"
@@ -59990,7 +59994,7 @@ msgstr ""
 
 #: stock/report/stock_projected_qty/stock_projected_qty.py:213
 msgid "Reorder Qty"
-msgstr ""
+msgstr "Yeniden Sipariş Miktarı"
 
 #. Label of a Table field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -63107,64 +63111,64 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note.js:266
 #: stock/doctype/delivery_note/delivery_note_list.js:70
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Option for the 'Transaction' (Select) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgctxt "Authorization Rule"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Option for the 'Document Type' (Select) field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgctxt "Contract"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Linked DocType in Incoterm's connections
 #: setup/doctype/incoterm/incoterm.json
 msgctxt "Incoterm"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Label of a Data field in DocType 'Loyalty Point Entry Redemption'
 #: accounts/doctype/loyalty_point_entry_redemption/loyalty_point_entry_redemption.json
 msgctxt "Loyalty Point Entry Redemption"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Label of a Link field in DocType 'Overdue Payment'
 #: accounts/doctype/overdue_payment/overdue_payment.json
 msgctxt "Overdue Payment"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Linked DocType in POS Profile's connections
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Option for the 'Invoice Type' (Select) field in DocType 'Payment
 #. Reconciliation Invoice'
 #: accounts/doctype/payment_reconciliation_invoice/payment_reconciliation_invoice.json
 msgctxt "Payment Reconciliation Invoice"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Quality
 #. Inspection'
 #: stock/doctype/quality_inspection/quality_inspection.json
 msgctxt "Quality Inspection"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Label of a shortcut in the Accounting Workspace
 #. Label of a Link in the Receivables Workspace
@@ -63176,53 +63180,53 @@ msgstr ""
 #: selling/workspace/selling/selling.json setup/workspace/home/home.json
 msgctxt "Sales Invoice"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Linked DocType in Subscription's connections
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Label of a Link field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Label of a Link field in DocType 'Timesheet Detail'
 #: projects/doctype/timesheet_detail/timesheet_detail.json
 msgctxt "Timesheet Detail"
 msgid "Sales Invoice"
-msgstr ""
+msgstr "Satış Faturası"
 
 #. Name of a DocType
 #: accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
 msgid "Sales Invoice Advance"
-msgstr ""
+msgstr "Satış Faturası Peşinatı"
 
 #. Name of a DocType
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgid "Sales Invoice Item"
-msgstr ""
+msgstr "Satış Faturası Ürünü"
 
 #. Label of a Data field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Sales Invoice Item"
-msgstr ""
+msgstr "Satış Faturası Ürünü"
 
 #. Label of a Data field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Sales Invoice Item"
-msgstr ""
+msgstr "Satış Faturası Ürünü"
 
 #. Label of a Link field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Sales Invoice No"
-msgstr ""
+msgstr "Satış Fatura No"
 
 #. Name of a DocType
 #: accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
@@ -65000,7 +65004,7 @@ msgstr ""
 
 #: stock/doctype/item/item.js:590
 msgid "Select at least one value from each of the attributes."
-msgstr ""
+msgstr "Tüm özelliklerden en az bir değer seçin."
 
 #: public/js/utils/party.js:352
 msgid "Select company first"
@@ -70322,7 +70326,7 @@ msgstr ""
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Submit Generated Invoices"
-msgstr ""
+msgstr "Oluşturulan Faturaları Gönder"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -76476,7 +76480,7 @@ msgstr ""
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Total Projected Qty"
-msgstr ""
+msgstr "Tahmini Toplam Miktar"
 
 #. Label of a Currency field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -83180,7 +83184,7 @@ msgstr ""
 
 #: setup/default_success_action.py:14
 msgid "{0} has been submitted successfully"
-msgstr ""
+msgstr "{0} Başarıyla Gönderildi"
 
 #: projects/doctype/project/project_dashboard.html:15
 msgid "{0} hours"
