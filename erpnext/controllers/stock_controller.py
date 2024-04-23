@@ -1361,7 +1361,7 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 
 @frappe.whitelist()
-def make_quality_inspections(doctype, docname, items):
+def make_quality_inspections(doctype, docname, items, inspection_type):
 	if isinstance(items, str):
 		items = json.loads(items)
 
@@ -1381,7 +1381,7 @@ def make_quality_inspections(doctype, docname, items):
 		quality_inspection = frappe.get_doc(
 			{
 				"doctype": "Quality Inspection",
-				"inspection_type": "Incoming",
+				"inspection_type": inspection_type,
 				"inspected_by": frappe.session.user,
 				"reference_type": doctype,
 				"reference_name": docname,
