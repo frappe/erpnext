@@ -1803,9 +1803,6 @@ def get_datetime_limit_condition(detail):
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 	if allow_negative_stock or is_negative_stock_allowed(item_code=args.item_code):
 		return
-<<<<<<< HEAD
-	if not (args.actual_qty < 0 or args.voucher_type == "Stock Reconciliation"):
-=======
 
 	if (
 		args.voucher_type == "Stock Reconciliation"
@@ -1816,7 +1813,6 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=False):
 		return
 
 	if args.actual_qty >= 0 and args.voucher_type != "Stock Reconciliation":
->>>>>>> 289495c308 (fix: stock reco negative qty validation)
 		return
 
 	neg_sle = get_future_sle_with_negative_qty(args)
