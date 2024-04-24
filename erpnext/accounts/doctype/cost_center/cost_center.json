@@ -125,11 +125,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2022-01-31 13:22:58.916273",
-=======
  "modified": "2024-04-24 10:55:54.083042",
->>>>>>> d0d496a515 (fix: allow Employee role to select cost center & project (accounting dimensions))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",
