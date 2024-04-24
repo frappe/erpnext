@@ -452,11 +452,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
-<<<<<<< HEAD
- "modified": "2023-02-14 04:54:25.819620",
-=======
  "modified": "2024-04-24 10:56:16.001032",
->>>>>>> d0d496a515 (fix: allow Employee role to select cost center & project (accounting dimensions))
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
