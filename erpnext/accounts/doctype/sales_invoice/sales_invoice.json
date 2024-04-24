@@ -289,6 +289,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "project",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -354,6 +355,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -2185,7 +2187,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-03-22 17:50:34.395602",
+ "modified": "2024-04-11 11:30:26.272441",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
