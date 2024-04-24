@@ -125,7 +125,11 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2022-01-31 13:22:58.916273",
+=======
+ "modified": "2024-04-24 10:55:54.083042",
+>>>>>>> d0d496a515 (fix: allow Employee role to select cost center & project (accounting dimensions))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",
@@ -163,6 +167,15 @@
   {
    "read": 1,
    "role": "Purchase User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Employee",
+   "select": 1,
+   "share": 1
   }
  ],
  "search_fields": "parent_cost_center, is_group",
