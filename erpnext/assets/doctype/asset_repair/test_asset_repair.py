@@ -305,6 +305,7 @@ def create_asset_repair(**args):
 						"serial_nos": args.serial_no,
 						"posting_date": today(),
 						"posting_time": nowtime(),
+						"do_not_submit": 1,
 					}
 				)
 			).name

@@ -292,3 +292,13 @@ def get_message():
 		<span class="indicator red">
 		Expires today / Already Expired
 		</span>"""
+
+
+@frappe.whitelist()
+def set_default_supplier(item_code, supplier, company):
+	frappe.db.set_value(
+		"Item Default",
+		{"parent": item_code, "company": company},
+		"default_supplier",
+		supplier,
+	)
