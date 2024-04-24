@@ -35,7 +35,7 @@ class Company(NestedSet):
 		auto_exchange_rate_revaluation: DF.Check
 		book_advance_payments_in_separate_party_account: DF.Check
 		capital_work_in_progress_account: DF.Link | None
-		chart_of_accounts: DF.Literal
+		chart_of_accounts: DF.Literal[None]
 		company_description: DF.TextEditor | None
 		company_logo: DF.AttachImage | None
 		company_name: DF.Data
@@ -139,6 +139,7 @@ class Company(NestedSet):
 		self.validate_abbr()
 		self.validate_default_accounts()
 		self.validate_currency()
+		self.validate_advance_account_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
 		self.validate_provisional_account_for_non_stock_items()
@@ -197,6 +198,29 @@ class Company(NestedSet):
 
 			if not self.default_advance_received_account:
 				frappe.throw(_("Set Default Advance Received Account for advance payments"))
+
+	def validate_advance_account_currency(self):
+		if (
+			self.default_advance_received_account
+			and frappe.get_cached_value("Account", self.default_advance_received_account, "account_currency")
+			!= self.default_currency
+		):
+			frappe.throw(
+				_("'{0}' should be in company currency {1}.").format(
+					frappe.bold("Default Advance Received Account"), frappe.bold(self.default_currency)
+				)
+			)
+
+		if (
+			self.default_advance_paid_account
+			and frappe.get_cached_value("Account", self.default_advance_paid_account, "account_currency")
+			!= self.default_currency
+		):
+			frappe.throw(
+				_("'{0}' should be in company currency {1}.").format(
+					frappe.bold("Default Advance Paid Account"), frappe.bold(self.default_currency)
+				)
+			)
 
 	def validate_currency(self):
 		if self.is_new():
