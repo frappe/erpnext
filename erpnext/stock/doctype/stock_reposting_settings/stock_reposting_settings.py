@@ -8,8 +8,34 @@ from frappe.utils import add_to_date, get_datetime, get_time_str, time_diff_in_h
 
 
 class StockRepostingSettings(Document):
+<<<<<<< HEAD
+=======
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		do_reposting_for_each_stock_transaction: DF.Check
+		end_time: DF.Time | None
+		item_based_reposting: DF.Check
+		limit_reposting_timeslot: DF.Check
+		limits_dont_apply_on: DF.Literal[
+			"", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+		]
+		notify_reposting_error_to_role: DF.Link | None
+		start_time: DF.Time | None
+	# end: auto-generated types
+
+>>>>>>> aefbe21b46 (feat: allow to do reposting for all transactions (audit))
 	def validate(self):
 		self.set_minimum_reposting_time_slot()
+
+	def before_save(self):
+		if self.do_reposting_for_each_stock_transaction:
+			self.item_based_reposting = 1
 
 	def set_minimum_reposting_time_slot(self):
 		"""Ensure that timeslot for reposting is at least 12 hours."""

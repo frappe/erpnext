@@ -202,7 +202,7 @@ def update_qty(bin_name, args):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
 	# actual qty is not up to date in case of backdated transaction
-	if future_sle_exists(args):
+	if future_sle_exists(args, allow_force_reposting=False):
 		last_sle_qty = (
 			frappe.qb.from_(sle)
 			.select(sle.qty_after_transaction)
