@@ -707,6 +707,8 @@
   },
   {
    "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "description": "Only 'Payment Entries' made against this advance account are supported.",
+   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
    "fieldname": "default_advance_received_account",
    "fieldtype": "Link",
    "label": "Default Advance Received Account",
@@ -715,6 +717,8 @@
   },
   {
    "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "description": "Only 'Payment Entries' made against this advance account are supported.",
+   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
    "fieldname": "default_advance_paid_account",
    "fieldtype": "Link",
    "label": "Default Advance Paid Account",
@@ -782,7 +786,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2023-09-10 21:53:13.860791",
+ "modified": "2024-04-23 12:38:33.173938",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
