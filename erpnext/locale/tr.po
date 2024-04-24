@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-23 15:26\n"
+"PO-Revision-Date: 2024-04-24 15:23\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -42,7 +42,7 @@ msgstr " Alt Tablo"
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:107
 #: selling/report/sales_analytics/sales_analytics.py:66
 msgid " Name"
-msgstr ""
+msgstr "İsim"
 
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:605
 msgid " Rate"
@@ -631,7 +631,7 @@ msgstr ""
 
 #: stock/doctype/item/item.py:391
 msgid "'Has Serial No' can not be 'Yes' for non-stock item"
-msgstr ""
+msgstr "Stokta olmayan ürünün 'Seri No' değeri 'Evet' olamaz."
 
 #: stock/report/stock_ledger/stock_ledger.py:538
 msgid "'Opening'"
@@ -665,7 +665,7 @@ msgstr ""
 
 #: controllers/sales_and_purchase_return.py:65
 msgid "'Update Stock' can not be checked because items are not delivered via {0}"
-msgstr ""
+msgstr "'Stok Güncelle' seçilemez çünkü ürünler {0} ile teslim edilmemiş."
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:380
 msgid "'Update Stock' cannot be checked for fixed asset sale"
@@ -799,19 +799,19 @@ msgstr "1 sa"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "1-10"
-msgstr ""
+msgstr "1-10"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "1-10"
-msgstr ""
+msgstr "1-10"
 
 #. Option for the 'No. of Employees' (Select) field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "1-10"
-msgstr ""
+msgstr "1-10"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -3689,7 +3689,7 @@ msgstr ""
 
 #: accounts/doctype/account/account_tree.js:256
 msgid "Add Child"
-msgstr ""
+msgstr "Alt Öğe Ekle"
 
 #: accounts/report/general_ledger/general_ledger.js:199
 msgid "Add Columns in Transaction Currency"
@@ -3703,7 +3703,7 @@ msgstr ""
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgctxt "Manufacturing Settings"
 msgid "Add Corrective Operation Cost in Finished Good Valuation"
-msgstr ""
+msgstr "Bitmiş Ürün Değerlemesinde Düzeltici Operasyon Maliyeti Ekle"
 
 #: public/js/event.js:24
 msgid "Add Customers"
@@ -3722,11 +3722,11 @@ msgstr ""
 #: selling/doctype/sales_order/sales_order.js:228
 #: stock/dashboard/item_dashboard.js:212
 msgid "Add Item"
-msgstr ""
+msgstr "Ürün Ekle"
 
 #: public/js/utils/item_selector.js:20 public/js/utils/item_selector.js:35
 msgid "Add Items"
-msgstr ""
+msgstr "Ürünler Ekle"
 
 #: maintenance/doctype/maintenance_visit/maintenance_visit.py:56
 msgid "Add Items in the Purpose Table"
@@ -3855,7 +3855,7 @@ msgstr ""
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Add Template"
-msgstr ""
+msgstr "Şablon Ekle"
 
 #: utilities/activation.py:123
 msgid "Add Timesheets"
@@ -5299,7 +5299,7 @@ msgstr ""
 
 #: manufacturing/doctype/bom/bom.py:265
 msgid "All BOMs"
-msgstr ""
+msgstr "Tüm Ürün Ağaçları"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
@@ -5357,7 +5357,7 @@ msgstr ""
 #: setup/setup_wizard/operations/install_fixtures.py:60
 #: setup/setup_wizard/operations/install_fixtures.py:66
 msgid "All Item Groups"
-msgstr ""
+msgstr "Tüm Ürün Grupları"
 
 #: selling/page/point_of_sale/pos_item_selector.js:25
 msgid "All Items"
@@ -5633,43 +5633,43 @@ msgstr ""
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Alternatif Ürüne İzin Ver"
 
 #. Label of a Check field in DocType 'BOM Item'
 #: manufacturing/doctype/bom_item/bom_item.json
 msgctxt "BOM Item"
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Alternatif Ürüne İzin Ver"
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Alternatif Ürüne İzin Ver"
 
 #. Label of a Check field in DocType 'Job Card Item'
 #: manufacturing/doctype/job_card_item/job_card_item.json
 msgctxt "Job Card Item"
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Alternatif Ürüne İzin Ver"
 
 #. Label of a Check field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Alternatif Ürüne İzin Ver"
 
 #. Label of a Check field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Alternatif Ürüne İzin Ver"
 
 #. Label of a Check field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgctxt "Work Order Item"
 msgid "Allow Alternative Item"
-msgstr ""
+msgstr "Alternatif Ürüne İzin Ver"
 
 #: stock/doctype/item_alternative/item_alternative.py:65
 msgid "Allow Alternative Item must be checked on Item {}"
@@ -5916,7 +5916,7 @@ msgstr ""
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgctxt "Manufacturing Settings"
 msgid "Allow material consumptions without immediately manufacturing finished goods against a Work Order"
-msgstr ""
+msgstr "Bir İş Emrine göre bitmiş ürünleri hemen üretmeden malzeme tüketimine izin verin."
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -6016,19 +6016,19 @@ msgstr ""
 #: manufacturing/doctype/work_order/work_order.js:169 public/js/utils.js:517
 #: stock/doctype/stock_entry/stock_entry.js:245
 msgid "Alternate Item"
-msgstr ""
+msgstr "Alternatif Ürün"
 
 #. Label of a Link field in DocType 'Item Alternative'
 #: stock/doctype/item_alternative/item_alternative.json
 msgctxt "Item Alternative"
 msgid "Alternative Item Code"
-msgstr ""
+msgstr "Alternatif Ürün Kodu"
 
 #. Label of a Read Only field in DocType 'Item Alternative'
 #: stock/doctype/item_alternative/item_alternative.json
 msgctxt "Item Alternative"
 msgid "Alternative Item Name"
-msgstr ""
+msgstr "Alternatif Ürün Adı"
 
 #: selling/doctype/quotation/quotation.js:360
 msgid "Alternative Items"
@@ -6036,7 +6036,7 @@ msgstr ""
 
 #: stock/doctype/item_alternative/item_alternative.py:37
 msgid "Alternative item must not be same as item code"
-msgstr ""
+msgstr "Alternatif Ürün, asıl ürün koduyla aynı olmamalıdır"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:376
 msgid "Alternatively, you can download the template and fill your data in."
@@ -7261,7 +7261,7 @@ msgstr ""
 #: stock/doctype/price_list/price_list.json
 msgctxt "Price List"
 msgid "Applicable for Countries"
-msgstr ""
+msgstr "Geçerli Olduğu Ülkeler"
 
 #. Label of a Section Break field in DocType 'POS Profile'
 #. Label of a Table field in DocType 'POS Profile'
@@ -7298,7 +7298,7 @@ msgstr ""
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Applicable on Purchase Order"
-msgstr ""
+msgstr "Satın Almada Uygula"
 
 #. Label of a Check field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
@@ -7398,19 +7398,19 @@ msgstr ""
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Apply Discount On"
-msgstr ""
+msgstr "İndirim Uygula"
 
 #. Label of a Select field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Apply Discount On"
-msgstr ""
+msgstr "İndirim Uygula"
 
 #. Label of a Check field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Apply Discount on Discounted Rate"
-msgstr ""
+msgstr "İndirimli Fiyat Üzerinden İndirim Uygula"
 
 #. Label of a Check field in DocType 'Promotional Scheme Price Discount'
 #: accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
@@ -7488,13 +7488,13 @@ msgstr ""
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Apply Rule On Item Code"
-msgstr ""
+msgstr "Ürün Koduna Kural Uygula"
 
 #. Label of a Table field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Apply Rule On Item Group"
-msgstr ""
+msgstr "Ürün Grubuna Kural Uygula"
 
 #. Label of a Select field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -7571,13 +7571,13 @@ msgstr ""
 #. Name of a DocType
 #: crm/doctype/appointment/appointment.json
 msgid "Appointment"
-msgstr ""
+msgstr "Randevu"
 
 #. Label of a Link in the CRM Workspace
 #: crm/workspace/crm/crm.json
 msgctxt "Appointment"
 msgid "Appointment"
-msgstr ""
+msgstr "Randevu"
 
 #. Name of a DocType
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.json
@@ -7751,7 +7751,7 @@ msgstr ""
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Assembly Items"
-msgstr ""
+msgstr "Montaj Ürünleri"
 
 #. Name of a DocType
 #: accounts/report/account_balance/account_balance.js:25
@@ -7762,99 +7762,99 @@ msgstr ""
 #: assets/doctype/asset/asset.json
 #: stock/doctype/purchase_receipt/purchase_receipt.js:200
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Option for the 'Root Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link in the Assets Workspace
 #. Label of a shortcut in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Asset Activity'
 #: assets/doctype/asset_activity/asset_activity.json
 msgctxt "Asset Activity"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Asset Capitalization Asset Item'
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgctxt "Asset Capitalization Asset Item"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Asset Depreciation Schedule'
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgctxt "Asset Depreciation Schedule"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Asset Movement Item'
 #: assets/doctype/asset_movement_item/asset_movement_item.json
 msgctxt "Asset Movement Item"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Asset Shift Allocation'
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.json
 msgctxt "Asset Shift Allocation"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Option for the 'Root Type' (Select) field in DocType 'Ledger Merge'
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgctxt "Ledger Merge"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
 msgctxt "Serial No"
 msgid "Asset"
-msgstr ""
+msgstr "Varlık"
 
 #. Label of a Link field in DocType 'Share Transfer'
 #: accounts/doctype/share_transfer/share_transfer.json
 msgctxt "Share Transfer"
 msgid "Asset Account"
-msgstr ""
+msgstr "Varlık Hesabı"
 
 #. Name of a DocType
 #. Name of a report
@@ -7913,61 +7913,61 @@ msgstr ""
 #: assets/report/fixed_asset_register/fixed_asset_register.js:23
 #: assets/report/fixed_asset_register/fixed_asset_register.py:416
 msgid "Asset Category"
-msgstr ""
+msgstr "Varlık Kategorisi"
 
 #. Label of a Link field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Category"
-msgstr ""
+msgstr "Varlık Kategorisi"
 
 #. Label of a Link in the Assets Workspace
 #. Label of a shortcut in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Category"
 msgid "Asset Category"
-msgstr ""
+msgstr "Varlık Kategorisi"
 
 #. Label of a Read Only field in DocType 'Asset Maintenance'
 #: assets/doctype/asset_maintenance/asset_maintenance.json
 msgctxt "Asset Maintenance"
 msgid "Asset Category"
-msgstr ""
+msgstr "Varlık Kategorisi"
 
 #. Label of a Read Only field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Asset Category"
-msgstr ""
+msgstr "Varlık Kategorisi"
 
 #. Label of a Link field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Asset Category"
-msgstr ""
+msgstr "Varlık Kategorisi"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Asset Category"
-msgstr ""
+msgstr "Varlık Kategorisi"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Asset Category"
-msgstr ""
+msgstr "Varlık Kategorisi"
 
 #. Name of a DocType
 #: assets/doctype/asset_category_account/asset_category_account.json
 msgid "Asset Category Account"
-msgstr ""
+msgstr "Varlık Kategorisi Hesabı"
 
 #. Label of a Data field in DocType 'Asset Category'
 #: assets/doctype/asset_category/asset_category.json
 msgctxt "Asset Category"
 msgid "Asset Category Name"
-msgstr ""
+msgstr "Varlık Kategorisi Adı"
 
 #: stock/doctype/item/item.py:303
 msgid "Asset Category is mandatory for Fixed Asset item"
@@ -8036,12 +8036,12 @@ msgstr ""
 #: stock/doctype/serial_no/serial_no.json
 msgctxt "Serial No"
 msgid "Asset Details"
-msgstr ""
+msgstr "Varlık Ayrıntıları"
 
 #. Name of a DocType
 #: assets/doctype/asset_finance_book/asset_finance_book.json
 msgid "Asset Finance Book"
-msgstr ""
+msgstr "Varlık Finans Defteri"
 
 #: assets/report/fixed_asset_register/fixed_asset_register.py:408
 msgid "Asset ID"
@@ -8051,13 +8051,13 @@ msgstr ""
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Asset Location"
-msgstr ""
+msgstr "Varlık Konumu"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Asset Location"
-msgstr ""
+msgstr "Varlık Konumu"
 
 #. Name of a DocType
 #. Name of a report
@@ -8090,18 +8090,18 @@ msgstr ""
 #. Name of a DocType
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
 msgid "Asset Maintenance Log"
-msgstr ""
+msgstr "Varlık Bakım Günlüğü"
 
 #. Label of a Link in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Maintenance Log"
 msgid "Asset Maintenance Log"
-msgstr ""
+msgstr "Varlık Bakım Günlüğü"
 
 #. Name of a DocType
 #: assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "Asset Maintenance Task"
-msgstr ""
+msgstr "Varlık Bakım Görevi"
 
 #. Name of a DocType
 #: assets/doctype/asset_maintenance_team/asset_maintenance_team.json
@@ -8129,7 +8129,7 @@ msgstr ""
 #. Name of a DocType
 #: assets/doctype/asset_movement_item/asset_movement_item.json
 msgid "Asset Movement Item"
-msgstr ""
+msgstr "Varlık Hareketi Ürünü"
 
 #: assets/doctype/asset/asset.py:897
 msgid "Asset Movement record {0} created"
@@ -8185,7 +8185,7 @@ msgstr ""
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Asset Naming Series"
-msgstr ""
+msgstr "Varlık İsimlendirme Serisi"
 
 #. Label of a Select field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -8387,7 +8387,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:161
 msgid "Asset submitted"
-msgstr ""
+msgstr "Varlık Kaydedildi"
 
 #: assets/doctype/asset_movement/asset_movement.py:173
 msgid "Asset transferred to Location {0}"
@@ -8464,25 +8464,25 @@ msgstr ""
 #: accounts/report/balance_sheet/balance_sheet.py:237
 #: assets/workspace/assets/assets.json
 msgid "Assets"
-msgstr ""
+msgstr "Varlıklar"
 
 #. Label of a Tab Break field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Assets"
-msgstr ""
+msgstr "Varlıklar"
 
 #. Label of a Table field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Assets"
-msgstr ""
+msgstr "Varlıklar"
 
 #. Label of a Table field in DocType 'Asset Movement'
 #: assets/doctype/asset_movement/asset_movement.json
 msgctxt "Asset Movement"
 msgid "Assets"
-msgstr ""
+msgstr "Varlıklar"
 
 #: controllers/buying_controller.py:760
 msgid "Assets not created for {0}. You will have to create asset manually."
@@ -8594,7 +8594,7 @@ msgstr ""
 #: public/js/utils/serial_no_batch_selector.js:250
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:69
 msgid "Attach CSV File"
-msgstr ""
+msgstr "CSV Dosyası Ekle"
 
 #. Label of a Attach field in DocType 'Chart of Accounts Importer'
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
@@ -8640,23 +8640,23 @@ msgstr ""
 #: stock/doctype/item_attribute/item_attribute.json
 msgctxt "Item Attribute"
 msgid "Attribute Name"
-msgstr ""
+msgstr "Özellik İsmi"
 
 #. Label of a Data field in DocType 'Item Attribute Value'
 #: stock/doctype/item_attribute_value/item_attribute_value.json
 msgctxt "Item Attribute Value"
 msgid "Attribute Value"
-msgstr ""
+msgstr "Özellik Değeri"
 
 #. Label of a Data field in DocType 'Item Variant Attribute'
 #: stock/doctype/item_variant_attribute/item_variant_attribute.json
 msgctxt "Item Variant Attribute"
 msgid "Attribute Value"
-msgstr ""
+msgstr "Özellik Değeri"
 
 #: stock/doctype/item/item.py:899
 msgid "Attribute table is mandatory"
-msgstr ""
+msgstr "Özellik tablosu zorunludur"
 
 #: stock/doctype/item_attribute/item_attribute.py:97
 msgid "Attribute value: {0} must appear only once"
@@ -8668,7 +8668,7 @@ msgstr ""
 
 #: stock/doctype/item/item.py:835
 msgid "Attributes"
-msgstr ""
+msgstr "Özellikler"
 
 #. Name of a role
 #: accounts/doctype/account/account.json
@@ -8683,23 +8683,23 @@ msgstr ""
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 #: regional/doctype/south_africa_vat_settings/south_africa_vat_settings.json
 msgid "Auditor"
-msgstr ""
+msgstr "Denetçi"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:68
 #: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:85
 msgid "Authentication Failed"
-msgstr ""
+msgstr "Kimlik Doğrulama Başarısız"
 
 #. Label of a Section Break field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgctxt "Contract"
 msgid "Authorised By"
-msgstr ""
+msgstr "Yetkilendiren"
 
 #. Name of a DocType
 #: setup/doctype/authorization_control/authorization_control.json
 msgid "Authorization Control"
-msgstr ""
+msgstr "Yetkilendirme Kontrolü"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
@@ -8851,84 +8851,84 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Link field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Section Break field in DocType 'Purchase Order'
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Section Break field in DocType 'Purchase Receipt'
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Section Break field in DocType 'Quotation'
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Section Break field in DocType 'Sales Order'
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Section Break field in DocType 'Supplier Quotation'
 #. Label of a Link field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Auto Repeat"
-msgstr ""
+msgstr "Otomatik Tekrar"
 
 #. Label of a Section Break field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Auto Repeat Detail"
-msgstr ""
+msgstr "Otomatik Tekrarlama Detayı"
 
 #. Label of a Check field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -8960,11 +8960,11 @@ msgstr ""
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Auto re-order"
-msgstr ""
+msgstr "Otomatik Yeniden Sipariş"
 
 #: public/js/controllers/buying.js:290 public/js/utils/sales_common.js:400
 msgid "Auto repeat document updated"
-msgstr ""
+msgstr "Otomatik tekrar dokümanı güncellendi"
 
 #. Description of the 'Write Off Limit' (Currency) field in DocType 'POS
 #. Profile'
@@ -8983,7 +8983,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Automatically Add Taxes and Charges from Item Tax Template"
-msgstr ""
+msgstr "Ürün Vergi Şablonundan Vergileri ve Giderleri Otomatik Olarak Ekle"
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -9022,7 +9022,7 @@ msgstr ""
 
 #: manufacturing/report/production_planning_report/production_planning_report.py:372
 msgid "Available"
-msgstr ""
+msgstr "Mevcut"
 
 #. Label of a Float field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -9136,7 +9136,7 @@ msgstr ""
 #: selling/report/available_stock_for_packing_items/available_stock_for_packing_items.json
 #: selling/workspace/selling/selling.json
 msgid "Available Stock for Packing Items"
-msgstr ""
+msgstr "Paketlenecek Ürünlerin Stok Durumu"
 
 #: assets/doctype/asset/asset.py:270
 msgid "Available for use date is required"
@@ -9255,73 +9255,73 @@ msgstr ""
 #: stock/doctype/stock_entry/stock_entry.js:631
 #: stock/report/bom_search/bom_search.py:38
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Label of a shortcut in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgctxt "BOM"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Linked DocType in BOM Creator's connections
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Option for the 'Backflush Raw Materials of Subcontract Based On' (Select)
 #. field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Option for the 'Backflush Raw Materials Based On' (Select) field in DocType
 #. 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgctxt "Manufacturing Settings"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Label of a Link field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Label of a Link field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #. Label of a Link field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "BOM"
-msgstr ""
+msgstr "Ürün Ağacı"
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:21
 msgid "BOM 1"
-msgstr ""
+msgstr "Ürün Ağacı 1"
 
 #: manufacturing/doctype/bom/bom.py:1337
 msgid "BOM 1 {0} and BOM 2 {1} should not be same"
@@ -9329,13 +9329,13 @@ msgstr ""
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:38
 msgid "BOM 2"
-msgstr ""
+msgstr "Ürün Ağacı 2"
 
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:4
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgid "BOM Comparison Tool"
-msgstr ""
+msgstr "Ürün Ağacı Karşılaştırma Aracı"
 
 #. Label of a Check field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -9346,30 +9346,30 @@ msgstr ""
 #. Name of a DocType
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgid "BOM Creator"
-msgstr ""
+msgstr "Ürün Ağacı Oluşturucu"
 
 #. Label of a Link field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "BOM Creator"
-msgstr ""
+msgstr "Ürün Ağacı Oluşturucu"
 
 #. Label of a shortcut in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgctxt "BOM Creator"
 msgid "BOM Creator"
-msgstr ""
+msgstr "Ürün Ağacı Oluşturucu"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "BOM Creator Item"
-msgstr ""
+msgstr "Ürün Ağacı Oluşturucu Ürünü"
 
 #. Label of a Data field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "BOM Creator Item"
-msgstr ""
+msgstr "Ürün Ağacı Oluşturucu Ürünü"
 
 #. Label of a Data field in DocType 'Purchase Order Item Supplied'
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
@@ -9403,115 +9403,115 @@ msgstr ""
 #. Name of a DocType
 #: manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
 msgid "BOM Explosion Item"
-msgstr ""
+msgstr "Ürün Ağacı Patlatılmış Malzemeler"
 
 #: manufacturing/report/bom_operations_time/bom_operations_time.js:20
 #: manufacturing/report/bom_operations_time/bom_operations_time.py:101
 msgid "BOM ID"
-msgstr ""
+msgstr "Ürün Ağacı ID"
 
 #. Label of a Section Break field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "BOM Info"
-msgstr ""
+msgstr "Ürün Ağacı Bilgisi"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_item/bom_item.json
 msgid "BOM Item"
-msgstr ""
+msgstr "Ürün Ağacı Ürünü"
 
 #: manufacturing/report/bom_explorer/bom_explorer.py:59
 #: manufacturing/report/production_plan_summary/production_plan_summary.py:147
 msgid "BOM Level"
-msgstr ""
+msgstr "Ürün Ağacı Seviyesi"
 
 #: manufacturing/report/bom_variance_report/bom_variance_report.js:8
 #: manufacturing/report/bom_variance_report/bom_variance_report.py:31
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Label of a Link field in DocType 'BOM Item'
 #: manufacturing/doctype/bom_item/bom_item.json
 msgctxt "BOM Item"
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Label of a Link field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Label of a Link field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Label of a Link field in DocType 'Production Plan Item'
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 msgctxt "Production Plan Item"
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Label of a Link field in DocType 'Quality Inspection'
 #: stock/doctype/quality_inspection/quality_inspection.json
 msgctxt "Quality Inspection"
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Label of a Link field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Label of a Link field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Label of a Link field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Label of a Link field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "BOM No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #. Description of the 'BOM No' (Link) field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "BOM No. for a Finished Good Item"
-msgstr ""
+msgstr "Bitmiş Ürün İçin Ürün Ağacı No"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_operation/bom_operation.json
 msgid "BOM Operation"
-msgstr ""
+msgstr "Ürün Ağacı Operasyonu"
 
 #. Label of a Table field in DocType 'Routing'
 #: manufacturing/doctype/routing/routing.json
 msgctxt "Routing"
 msgid "BOM Operation"
-msgstr ""
+msgstr "Ürün Ağacı Operasyonu"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/report/bom_operations_time/bom_operations_time.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgid "BOM Operations Time"
-msgstr ""
+msgstr "Ürün Ağacı Operasyon Süresi"
 
 #: manufacturing/report/bom_stock_report/bom_stock_report.py:27
 msgid "BOM Qty"
-msgstr ""
+msgstr "Ürün Ağacı Miktarı"
 
 #: stock/report/item_prices/item_prices.py:60
 msgid "BOM Rate"
@@ -9520,14 +9520,14 @@ msgstr ""
 #. Name of a DocType
 #: manufacturing/doctype/bom_scrap_item/bom_scrap_item.json
 msgid "BOM Scrap Item"
-msgstr ""
+msgstr "Ürün Ağacı Hurda Ürün"
 
 #. Label of a Link in the Manufacturing Workspace
 #. Name of a report
 #: manufacturing/workspace/manufacturing/manufacturing.json
 #: stock/report/bom_search/bom_search.json
 msgid "BOM Search"
-msgstr ""
+msgstr "Ürün Ağacı Arama"
 
 #. Name of a report
 #: manufacturing/report/bom_stock_calculated/bom_stock_calculated.json
@@ -9541,22 +9541,22 @@ msgstr ""
 #: manufacturing/report/bom_stock_report/bom_stock_report.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgid "BOM Stock Report"
-msgstr ""
+msgstr "Ürün Ağacı Stok Raporu"
 
 #. Label of a Tab Break field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "BOM Tree"
-msgstr ""
+msgstr "Ürün Ağacı Yapısı"
 
 #: manufacturing/report/bom_stock_report/bom_stock_report.py:28
 msgid "BOM UoM"
-msgstr ""
+msgstr "Ürün Ağacı Ölçü Birimi"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_update_batch/bom_update_batch.json
 msgid "BOM Update Batch"
-msgstr ""
+msgstr "Ürün Ağacı Toplu Güncelleme"
 
 #: manufacturing/doctype/bom_update_tool/bom_update_tool.js:84
 msgid "BOM Update Initiated"
@@ -9570,13 +9570,13 @@ msgstr ""
 #. Name of a DocType
 #: manufacturing/doctype/bom_update_tool/bom_update_tool.json
 msgid "BOM Update Tool"
-msgstr ""
+msgstr "Ürün Ağacı Güncelleme Aracı"
 
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgctxt "BOM Update Tool"
 msgid "BOM Update Tool"
-msgstr ""
+msgstr "Ürün Ağacı Güncelleme Aracı"
 
 #. Description of a DocType
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
@@ -9684,16 +9684,16 @@ msgstr ""
 #: accounts/report/sales_register/sales_register.py:277
 #: stock/report/incorrect_serial_no_valuation/incorrect_serial_no_valuation.py:46
 msgid "Balance"
-msgstr ""
+msgstr "Bakiye"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:41
 #: accounts/report/general_ledger/general_ledger.html:32
 msgid "Balance (Dr - Cr)"
-msgstr ""
+msgstr "Bakiye (Borç - Alacak)"
 
 #: accounts/report/general_ledger/general_ledger.py:588
 msgid "Balance ({0})"
-msgstr ""
+msgstr "Bakiye ({0})"
 
 #. Label of a Currency field in DocType 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
@@ -9711,7 +9711,7 @@ msgstr ""
 #: stock/report/stock_balance/stock_balance.py:414
 #: stock/report/stock_ledger/stock_ledger.py:226
 msgid "Balance Qty"
-msgstr ""
+msgstr "Bakiya Miktarı"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:71
 msgid "Balance Qty (Stock)"
@@ -9723,19 +9723,19 @@ msgstr ""
 #: accounts/workspace/financial_reports/financial_reports.json
 #: public/js/financial_statements.js:131
 msgid "Balance Sheet"
-msgstr ""
+msgstr "Bilanço"
 
 #. Option for the 'Report Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Balance Sheet"
-msgstr ""
+msgstr "Bilanço"
 
 #. Label of a Column Break field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Balance Sheet"
-msgstr ""
+msgstr "Bilanço"
 
 #. Label of a Heading field in DocType 'Bisect Accounting Statements'
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
@@ -9778,67 +9778,67 @@ msgstr ""
 #: accounts/doctype/bank/bank.json
 #: accounts/report/account_balance/account_balance.js:39
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Label of a Link in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgctxt "Bank"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Label of a Link field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Label of a Link field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgctxt "Bank Guarantee"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Label of a Link field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Option for the 'Salary Mode' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Option for the 'Type' (Select) field in DocType 'Mode of Payment'
 #: accounts/doctype/mode_of_payment/mode_of_payment.json
 msgctxt "Mode of Payment"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Label of a Read Only field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Label of a Link field in DocType 'Payment Order'
 #: accounts/doctype/payment_order/payment_order.json
 msgctxt "Payment Order"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Label of a Link field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Bank"
-msgstr ""
+msgstr "Banka"
 
 #. Label of a Link field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
@@ -10025,19 +10025,19 @@ msgstr ""
 
 #: accounts/doctype/bank/bank_dashboard.py:7
 msgid "Bank Details"
-msgstr ""
+msgstr "Banka Detayları"
 
 #. Label of a Section Break field in DocType 'Bank'
 #: accounts/doctype/bank/bank.json
 msgctxt "Bank"
 msgid "Bank Details"
-msgstr ""
+msgstr "Banka Detayları"
 
 #. Label of a Section Break field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Bank Details"
-msgstr ""
+msgstr "Banka Detayları"
 
 #: setup/setup_wizard/operations/install_fixtures.py:211
 msgid "Bank Draft"
@@ -10077,19 +10077,19 @@ msgstr ""
 #: accounts/doctype/bank/bank.json
 msgctxt "Bank"
 msgid "Bank Name"
-msgstr ""
+msgstr "Banka Adı"
 
 #. Label of a Data field in DocType 'Cheque Print Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
 msgid "Bank Name"
-msgstr ""
+msgstr "Banka Adı"
 
 #. Label of a Data field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Bank Name"
-msgstr ""
+msgstr "Banka Adı"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:97
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:142
@@ -10127,7 +10127,7 @@ msgstr ""
 #. Name of a DocType
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgid "Bank Transaction"
-msgstr ""
+msgstr "Banka İşlemi"
 
 #. Name of a DocType
 #: accounts/doctype/bank_transaction_mapping/bank_transaction_mapping.json
@@ -10206,13 +10206,13 @@ msgstr ""
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Banking"
-msgstr ""
+msgstr "Banka İşlemleri"
 
 #. Label of a Tab Break field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Banking"
-msgstr ""
+msgstr "Banka İşlemleri"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -10221,55 +10221,55 @@ msgstr "Çubuk"
 
 #: public/js/utils/barcode_scanner.js:282
 msgid "Barcode"
-msgstr ""
+msgstr "Barkod"
 
 #. Label of a Data field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Barcode"
-msgstr ""
+msgstr "Barkod"
 
 #. Label of a Data field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "Barcode"
-msgstr ""
+msgstr "Barkod"
 
 #. Label of a Barcode field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Barcode"
-msgstr ""
+msgstr "Barkod"
 
 #. Label of a Data field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Barcode"
-msgstr ""
+msgstr "Barkod"
 
 #. Label of a Data field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Barcode"
-msgstr ""
+msgstr "Barkod"
 
 #. Label of a Data field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Barcode"
-msgstr ""
+msgstr "Barkod"
 
 #. Label of a Data field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Barcode"
-msgstr ""
+msgstr "Barkod"
 
 #. Label of a Data field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Barcode"
-msgstr ""
+msgstr "Barkod"
 
 #. Label of a Select field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -10829,19 +10829,19 @@ msgstr ""
 #: accounts/report/accounts_receivable/accounts_receivable.py:1058
 #: accounts/report/purchase_register/purchase_register.py:213
 msgid "Bill No"
-msgstr ""
+msgstr "Fatura No"
 
 #. Label of a Data field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Bill No"
-msgstr ""
+msgstr "Fatura No"
 
 #. Label of a Data field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Bill No"
-msgstr ""
+msgstr "Fatura No"
 
 #. Label of a Check field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
@@ -11971,7 +11971,7 @@ msgstr ""
 #. Label of a Card Break in the Home Workspace
 #: crm/workspace/crm/crm.json setup/workspace/home/home.json
 msgid "CRM"
-msgstr ""
+msgstr "Müşteri Yönetimi"
 
 #. Name of a DocType
 #: crm/doctype/crm_note/crm_note.json
@@ -11983,14 +11983,14 @@ msgstr ""
 #: crm/doctype/crm_settings/crm_settings.json
 #: crm/onboarding_step/crm_settings/crm_settings.json
 msgid "CRM Settings"
-msgstr ""
+msgstr "Müşteri Yönetimi Ayarları"
 
 #. Label of a Link in the CRM Workspace
 #. Label of a Link in the Settings Workspace
 #: crm/workspace/crm/crm.json setup/workspace/settings/settings.json
 msgctxt "CRM Settings"
 msgid "CRM Settings"
-msgstr ""
+msgstr "Müşteri Yönetimi Ayarları"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:34
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:50
@@ -12418,277 +12418,277 @@ msgstr ""
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle_list.js:8
 #: templates/pages/task_info.html:77
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset Depreciation
 #. Schedule'
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgctxt "Asset Depreciation Schedule"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Maintenance Status' (Select) field in DocType 'Asset
 #. Maintenance Log'
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
 msgctxt "Asset Maintenance Log"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Maintenance Status' (Select) field in DocType 'Asset
 #. Maintenance Task'
 #: assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgctxt "Asset Maintenance Task"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Repair Status' (Select) field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
 msgctxt "Delivery Trip"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Installation Note'
 #: selling/doctype/installation_note/installation_note.json
 msgctxt "Installation Note"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Invoice Discounting'
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 msgctxt "Invoice Discounting"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgctxt "Maintenance Schedule"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Maintenance Visit'
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgctxt "Maintenance Visit"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Non Conformance'
 #: quality_management/doctype/non_conformance/non_conformance.json
 msgctxt "Non Conformance"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Closing Entry'
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgctxt "POS Closing Entry"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Opening Entry'
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
 msgctxt "POS Opening Entry"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
 #. Reconciliation'
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
 #. Reconciliation Log'
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Subscription'
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Transaction Deletion
 #. Record'
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgctxt "Transaction Deletion Record"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
 msgctxt "Warranty Claim"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Cancelled"
-msgstr ""
+msgstr "İptal edildi"
 
 #: stock/doctype/delivery_trip/delivery_trip.js:89
 #: stock/doctype/delivery_trip/delivery_trip.py:187
@@ -14434,176 +14434,176 @@ msgstr ""
 #: support/report/issue_analytics/issue_analytics.js:8
 #: support/report/issue_summary/issue_summary.js:8
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Account Closing Balance'
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
 msgctxt "Account Closing Balance"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Accounting Dimension Detail'
 #: accounts/doctype/accounting_dimension_detail/accounting_dimension_detail.json
 msgctxt "Accounting Dimension Detail"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Accounting Dimension Filter'
 #: accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgctxt "Accounting Dimension Filter"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Accounting Period'
 #: accounts/doctype/accounting_period/accounting_period.json
 msgctxt "Accounting Period"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Allowed To Transact With'
 #: accounts/doctype/allowed_to_transact_with/allowed_to_transact_with.json
 msgctxt "Allowed To Transact With"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Option for the 'Asset Owner' (Select) field in DocType 'Asset'
 #. Label of a Link field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Asset Category Account'
 #: assets/doctype/asset_category_account/asset_category_account.json
 msgctxt "Asset Category Account"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Asset Depreciation Schedule'
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgctxt "Asset Depreciation Schedule"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Asset Maintenance'
 #: assets/doctype/asset_maintenance/asset_maintenance.json
 msgctxt "Asset Maintenance"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Asset Maintenance Team'
 #: assets/doctype/asset_maintenance_team/asset_maintenance_team.json
 msgctxt "Asset Maintenance Team"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Asset Movement'
 #: assets/doctype/asset_movement/asset_movement.json
 msgctxt "Asset Movement"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Asset Movement Item'
 #: assets/doctype/asset_movement_item/asset_movement_item.json
 msgctxt "Asset Movement Item"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgctxt "Authorization Rule"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Bank Reconciliation Tool'
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 msgctxt "Bank Reconciliation Tool"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Bisect Accounting Statements'
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Blanket Order'
 #: manufacturing/doctype/blanket_order/blanket_order.json
 msgctxt "Blanket Order"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Chart of Accounts Importer'
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
 msgctxt "Chart of Accounts Importer"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Closing Stock Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link in the Accounting Workspace
 #. Label of a Data field in DocType 'Company'
@@ -14612,445 +14612,445 @@ msgstr ""
 #: setup/doctype/company/company.json setup/workspace/home/home.json
 msgctxt "Company"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Cost Center'
 #: accounts/doctype/cost_center/cost_center.json
 msgctxt "Cost Center"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Cost Center Allocation'
 #: accounts/doctype/cost_center_allocation/cost_center_allocation.json
 msgctxt "Cost Center Allocation"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Option for the 'Customer Type' (Select) field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Customer Credit Limit'
 #: selling/doctype/customer_credit_limit/customer_credit_limit.json
 msgctxt "Customer Credit Limit"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
 msgctxt "Delivery Trip"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Department'
 #: setup/doctype/department/department.json
 msgctxt "Department"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Dunning Type'
 #: accounts/doctype/dunning_type/dunning_type.json
 msgctxt "Dunning Type"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Data field in DocType 'Employee External Work History'
 #: setup/doctype/employee_external_work_history/employee_external_work_history.json
 msgctxt "Employee External Work History"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Exchange Rate Revaluation'
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.json
 msgctxt "Exchange Rate Revaluation"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Fiscal Year Company'
 #: accounts/doctype/fiscal_year_company/fiscal_year_company.json
 msgctxt "Fiscal Year Company"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Import Supplier Invoice'
 #: regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgctxt "Import Supplier Invoice"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Installation Note'
 #: selling/doctype/installation_note/installation_note.json
 msgctxt "Installation Note"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Invoice Discounting'
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 msgctxt "Invoice Discounting"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Item Default'
 #: stock/doctype/item_default/item_default.json
 msgctxt "Item Default"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Item Tax Template'
 #: accounts/doctype/item_tax_template/item_tax_template.json
 msgctxt "Item Tax Template"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Journal Entry Template'
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgctxt "Journal Entry Template"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Landed Cost Voucher'
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgctxt "Landed Cost Voucher"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Ledger Merge'
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgctxt "Ledger Merge"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Lower Deduction Certificate'
 #: regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
 msgctxt "Lower Deduction Certificate"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Loyalty Point Entry'
 #: accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
 msgctxt "Loyalty Point Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Loyalty Program'
 #: accounts/doctype/loyalty_program/loyalty_program.json
 msgctxt "Loyalty Program"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgctxt "Maintenance Schedule"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Maintenance Visit'
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgctxt "Maintenance Visit"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Mode of Payment Account'
 #: accounts/doctype/mode_of_payment_account/mode_of_payment_account.json
 msgctxt "Mode of Payment Account"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Opening Invoice Creation Tool'
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
 msgctxt "Opening Invoice Creation Tool"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'POS Closing Entry'
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgctxt "POS Closing Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'POS Opening Entry'
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
 msgctxt "POS Opening Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Party Account'
 #: accounts/doctype/party_account/party_account.json
 msgctxt "Party Account"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Payment Ledger Entry'
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Payment Order'
 #: accounts/doctype/payment_order/payment_order.json
 msgctxt "Payment Order"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
 msgctxt "Period Closing Voucher"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Plant Floor'
 #: manufacturing/doctype/plant_floor/plant_floor.json
 msgctxt "Plant Floor"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Process Deferred Accounting'
 #: accounts/doctype/process_deferred_accounting/process_deferred_accounting.json
 msgctxt "Process Deferred Accounting"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Process Payment Reconciliation'
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Promotional Scheme'
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Purchase Taxes and Charges Template'
 #: accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.json
 msgctxt "Purchase Taxes and Charges Template"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Putaway Rule'
 #: stock/doctype/putaway_rule/putaway_rule.json
 msgctxt "Putaway Rule"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Repost Accounting Ledger'
 #: accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.json
 msgctxt "Repost Accounting Ledger"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Repost Payment Ledger'
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgctxt "Repost Payment Ledger"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Sales Taxes and Charges Template'
 #: accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.json
 msgctxt "Sales Taxes and Charges Template"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
 msgctxt "Serial No"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Serial and Batch Bundle'
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Share Transfer'
 #: accounts/doctype/share_transfer/share_transfer.json
 msgctxt "Share Transfer"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Shareholder'
 #: accounts/doctype/shareholder/shareholder.json
 msgctxt "Shareholder"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Option for the 'Pickup from' (Select) field in DocType 'Shipment'
 #. Label of a Link field in DocType 'Shipment'
@@ -15058,133 +15058,133 @@ msgstr ""
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Shipping Rule'
 #: accounts/doctype/shipping_rule/shipping_rule.json
 msgctxt "Shipping Rule"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'South Africa VAT Settings'
 #: regional/doctype/south_africa_vat_settings/south_africa_vat_settings.json
 msgctxt "South Africa VAT Settings"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Stock Ledger Entry'
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgctxt "Stock Ledger Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Stock Reconciliation'
 #: stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgctxt "Stock Reconciliation"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Subscription'
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Option for the 'Supplier Type' (Select) field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Tax Rule'
 #: accounts/doctype/tax_rule/tax_rule.json
 msgctxt "Tax Rule"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Tax Withholding Account'
 #: accounts/doctype/tax_withholding_account/tax_withholding_account.json
 msgctxt "Tax Withholding Account"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Transaction Deletion Record'
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgctxt "Transaction Deletion Record"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'UAE VAT Settings'
 #: regional/doctype/uae_vat_settings/uae_vat_settings.json
 msgctxt "UAE VAT Settings"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Unreconcile Payment'
 #: accounts/doctype/unreconcile_payment/unreconcile_payment.json
 msgctxt "Unreconcile Payment"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
 msgctxt "Warranty Claim"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #. Label of a Link field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Company"
-msgstr ""
+msgstr "Şirket"
 
 #: public/js/setup_wizard.js:30
 msgid "Company Abbreviation"
@@ -15572,218 +15572,218 @@ msgstr ""
 #: stock/doctype/material_request/material_request_list.js:13
 #: stock/doctype/purchase_receipt/purchase_receipt_list.js:25
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Maintenance Status' (Select) field in DocType 'Asset
 #. Maintenance Log'
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
 msgctxt "Asset Maintenance Log"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Repair Status' (Select) field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'BOM Update Batch'
 #: manufacturing/doctype/bom_update_batch/bom_update_batch.json
 msgctxt "BOM Update Batch"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'BOM Update Log'
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 msgctxt "BOM Update Log"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
 msgctxt "Call Log"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Closing Stock Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
 msgctxt "Delivery Trip"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Email Campaign'
 #: crm/doctype/email_campaign/email_campaign.json
 msgctxt "Email Campaign"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Transfer Status' (Select) field in DocType 'Material
 #. Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'GL Entry Processing Status' (Select) field in DocType
 #. 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
 msgctxt "Period Closing Voucher"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
 #. Reconciliation'
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Action'
 #: quality_management/doctype/quality_action/quality_action.json
 msgctxt "Quality Action"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Action
 #. Resolution'
 #: quality_management/doctype/quality_action_resolution/quality_action_resolution.json
 msgctxt "Quality Action Resolution"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Repost Status' (Select) field in DocType 'Repost Payment
 #. Ledger'
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgctxt "Repost Payment Ledger"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Subscription'
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Label of a Check field in DocType 'Timesheet Detail'
 #: projects/doctype/timesheet_detail/timesheet_detail.json
 msgctxt "Timesheet Detail"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Transaction Deletion
 #. Record'
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgctxt "Transaction Deletion Record"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "Completed"
-msgstr ""
+msgstr "Tamamlandı"
 
 #. Label of a Link field in DocType 'Task'
 #: projects/doctype/task/task.json
@@ -18896,7 +18896,7 @@ msgstr ""
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgctxt "Supplier Scorecard"
 msgid "Criteria Setup"
-msgstr ""
+msgstr "Kriter Ayarlaması"
 
 #. Label of a Percent field in DocType 'Supplier Scorecard Criteria'
 #: buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.json
@@ -21706,7 +21706,7 @@ msgstr ""
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Default Item Group"
-msgstr ""
+msgstr "Varsayılan Ürün Grubu"
 
 #. Label of a Link field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -22220,7 +22220,7 @@ msgstr ""
 #. Name of a report
 #: stock/report/delayed_item_report/delayed_item_report.json
 msgid "Delayed Item Report"
-msgstr ""
+msgstr "Gecikmiş Ürün Raporu"
 
 #. Name of a report
 #: stock/report/delayed_order_report/delayed_order_report.json
@@ -22346,7 +22346,7 @@ msgstr ""
 #: accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.json
 #: accounts/workspace/receivables/receivables.json
 msgid "Delivered Items To Be Billed"
-msgstr ""
+msgstr "Teslim Edilmiş Faturalandırılacak Ürünler"
 
 #: selling/report/sales_order_analysis/sales_order_analysis.py:262
 #: stock/report/reserved_stock/reserved_stock.py:131
@@ -22514,37 +22514,37 @@ msgstr ""
 #. Name of a DocType
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgid "Delivery Note Item"
-msgstr ""
+msgstr "İrsaliye Ürünleri"
 
 #. Label of a Table field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Delivery Note Item"
-msgstr ""
+msgstr "İrsaliye Ürünleri"
 
 #. Label of a Data field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Delivery Note Item"
-msgstr ""
+msgstr "İrsaliye Ürünleri"
 
 #. Label of a Data field in DocType 'Packing Slip Item'
 #: stock/doctype/packing_slip_item/packing_slip_item.json
 msgctxt "Packing Slip Item"
 msgid "Delivery Note Item"
-msgstr ""
+msgstr "İrsaliye Ürünleri"
 
 #. Label of a Data field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Delivery Note Item"
-msgstr ""
+msgstr "İrsaliye Ürünleri"
 
 #. Label of a Data field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Delivery Note Item"
-msgstr ""
+msgstr "İrsaliye Ürünleri"
 
 #. Label of a Link field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -27901,122 +27901,122 @@ msgstr ""
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:68
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:13
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Depreciation Entry Posting Status' (Select) field in DocType
 #. 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'BOM Update Log'
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 msgctxt "BOM Update Log"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Label of a Int field in DocType 'Bulk Transaction Log'
 #: bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.json
 msgctxt "Bulk Transaction Log"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
 msgctxt "Call Log"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'Closing Stock Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Service Level Agreement Status' (Select) field in DocType
 #. 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Closing Entry'
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgctxt "POS Closing Entry"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'GL Entry Processing Status' (Select) field in DocType
 #. 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
 msgctxt "Period Closing Voucher"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
 #. Reconciliation'
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
 #. Reconciliation Log'
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Review'
 #: quality_management/doctype/quality_review/quality_review.json
 msgctxt "Quality Review"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Review Objective'
 #: quality_management/doctype/quality_review_objective/quality_review_objective.json
 msgctxt "Quality Review Objective"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Repost Status' (Select) field in DocType 'Repost Payment
 #. Ledger'
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgctxt "Repost Payment Ledger"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #. Option for the 'Status' (Select) field in DocType 'Transaction Deletion
 #. Record'
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgctxt "Transaction Deletion Record"
 msgid "Failed"
-msgstr ""
+msgstr "Başarısız Oldu"
 
 #: bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.js:17
 msgid "Failed Entries"
@@ -29365,7 +29365,7 @@ msgstr ""
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "From BOM"
-msgstr ""
+msgstr "Ürün Ağacından Getir"
 
 #. Label of a Data field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
@@ -30427,13 +30427,13 @@ msgstr ""
 #: stock/doctype/pick_list/pick_list.js:236
 #: stock/doctype/stock_reconciliation/stock_reconciliation.js:178
 msgid "Get Items"
-msgstr ""
+msgstr "Ürünleri Getir"
 
 #. Label of a Button field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Get Items"
-msgstr ""
+msgstr "Ürünleri Getir"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:173
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:195
@@ -30467,25 +30467,25 @@ msgstr ""
 #: stock/doctype/stock_entry/stock_entry.js:617
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:119
 msgid "Get Items From"
-msgstr ""
+msgstr "Ürünleri Getir"
 
 #. Label of a Select field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Get Items From"
-msgstr ""
+msgstr "Ürünleri Getir"
 
 #. Label of a Button field in DocType 'Landed Cost Voucher'
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgctxt "Landed Cost Voucher"
 msgid "Get Items From Purchase Receipts"
-msgstr ""
+msgstr "Ürünleri Satın Alma İrsaliyesinden Getir"
 
 #: stock/doctype/material_request/material_request.js:295
 #: stock/doctype/stock_entry/stock_entry.js:657
 #: stock/doctype/stock_entry/stock_entry.js:670
 msgid "Get Items from BOM"
-msgstr ""
+msgstr "Ürün Ağacından Getir"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:374
 msgid "Get Items from Material Requests against this Supplier"
@@ -30671,19 +30671,19 @@ msgstr "{0} Listesine Git"
 #: quality_management/doctype/quality_action/quality_action.json
 msgctxt "Quality Action"
 msgid "Goal"
-msgstr ""
+msgstr "Hedef"
 
 #. Label of a Data field in DocType 'Quality Goal'
 #: quality_management/doctype/quality_goal/quality_goal.json
 msgctxt "Quality Goal"
 msgid "Goal"
-msgstr ""
+msgstr "Hedef"
 
 #. Label of a Link field in DocType 'Quality Review'
 #: quality_management/doctype/quality_review/quality_review.json
 msgctxt "Quality Review"
 msgid "Goal"
-msgstr ""
+msgstr "Hedef"
 
 #. Label of a Card Break in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
@@ -32993,62 +32993,62 @@ msgstr ""
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:66
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:7
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #. Option for the 'Status' (Select) field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #. Option for the 'Status' (Select) field in DocType 'BOM Update Log'
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 msgctxt "BOM Update Log"
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
 msgctxt "Call Log"
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #. Option for the 'Status' (Select) field in DocType 'Closing Stock Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #. Option for the 'Status' (Select) field in DocType 'Email Campaign'
 #: crm/doctype/email_campaign/email_campaign.json
 msgctxt "Email Campaign"
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #. Option for the 'GL Entry Processing Status' (Select) field in DocType
 #. 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
 msgctxt "Period Closing Voucher"
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #. Option for the 'Status' (Select) field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #. Option for the 'Tracking Status' (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "In Progress"
-msgstr ""
+msgstr "Devam Ediyor"
 
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:80
 #: stock/report/stock_balance/stock_balance.py:442
@@ -33981,7 +33981,7 @@ msgstr ""
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Insert New Records"
-msgstr ""
+msgstr "Yeni Kayıt Ekle"
 
 #: manufacturing/report/quality_inspection_summary/quality_inspection_summary.js:33
 #: manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:109
@@ -35138,7 +35138,7 @@ msgstr ""
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Is Finished Item"
-msgstr ""
+msgstr "Bitmiş Ürün"
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -35186,55 +35186,55 @@ msgstr ""
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Is Free Item"
-msgstr ""
+msgstr "Bedelsiz Ürün"
 
 #. Label of a Check field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Is Free Item"
-msgstr ""
+msgstr "Bedelsiz Ürün"
 
 #. Label of a Check field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Is Free Item"
-msgstr ""
+msgstr "Bedelsiz Ürün"
 
 #. Label of a Check field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Is Free Item"
-msgstr ""
+msgstr "Bedelsiz Ürün"
 
 #. Label of a Check field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Is Free Item"
-msgstr ""
+msgstr "Bedelsiz Ürün"
 
 #. Label of a Check field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Is Free Item"
-msgstr ""
+msgstr "Bedelsiz Ürün"
 
 #. Label of a Check field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Is Free Item"
-msgstr ""
+msgstr "Bedelsiz Ürün"
 
 #. Label of a Check field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Is Free Item"
-msgstr ""
+msgstr "Bedelsiz Ürün"
 
 #. Label of a Check field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Is Free Item"
-msgstr ""
+msgstr "Bedelsiz Ürün"
 
 #: selling/report/customer_credit_balance/customer_credit_balance.py:69
 msgid "Is Frozen"
@@ -35937,38 +35937,38 @@ msgstr ""
 #: templates/form_grid/stock_entry_grid.html:8 templates/generators/bom.html:19
 #: templates/pages/material_request_info.html:42 templates/pages/order.html:95
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'Asset Repair Consumed Item'
 #: assets/doctype/asset_repair_consumed_item/asset_repair_consumed_item.json
 msgctxt "Asset Repair Consumed Item"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Option for the 'Customer or Item' (Select) field in DocType 'Authorization
 #. Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgctxt "Authorization Rule"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'Batch'
 #: stock/doctype/batch/batch.json
 msgctxt "Batch"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Table field in DocType 'Blanket Order'
 #: manufacturing/doctype/blanket_order/blanket_order.json
 msgctxt "Blanket Order"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link in the Buying Workspace
 #. Label of a shortcut in the Buying Workspace
@@ -35985,66 +35985,66 @@ msgstr ""
 #: stock/workspace/stock/stock.json
 msgctxt "Item"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Option for the 'Restrict Items Based On' (Select) field in DocType 'Party
 #. Specific Item'
 #: selling/doctype/party_specific_item/party_specific_item.json
 msgctxt "Party Specific Item"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'Pick List Item'
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgctxt "Pick List Item"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'Product Bundle Item'
 #: selling/doctype/product_bundle_item/product_bundle_item.json
 msgctxt "Product Bundle Item"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'Putaway Rule'
 #: stock/doctype/putaway_rule/putaway_rule.json
 msgctxt "Putaway Rule"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'Subscription Plan'
 #: accounts/doctype/subscription_plan/subscription_plan.json
 msgctxt "Subscription Plan"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #. Label of a Link field in DocType 'Tax Rule'
 #: accounts/doctype/tax_rule/tax_rule.json
 msgctxt "Tax Rule"
 msgid "Item"
-msgstr ""
+msgstr "Ürün"
 
 #: stock/report/bom_search/bom_search.js:8
 msgid "Item 1"
-msgstr ""
+msgstr "Ürün 1"
 
 #: stock/report/bom_search/bom_search.js:14
 msgid "Item 2"
@@ -39224,7 +39224,7 @@ msgstr ""
 #. Title of the Module Onboarding 'CRM'
 #: crm/module_onboarding/crm/crm.json
 msgid "Let's Set Up Your CRM."
-msgstr ""
+msgstr "Müşteri Yönetimi Modülünüzü Kuralım"
 
 #. Title of the Module Onboarding 'Assets'
 #: assets/module_onboarding/assets/assets.json
@@ -39706,7 +39706,7 @@ msgstr ""
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgctxt "Supplier Scorecard"
 msgid "Load All Criteria"
-msgstr ""
+msgstr "Tüm Kriterleri Yükle"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:276
 msgid "Loading import file..."
@@ -41826,13 +41826,13 @@ msgstr ""
 #: buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.json
 msgctxt "Supplier Scorecard Criteria"
 msgid "Max Score"
-msgstr ""
+msgstr "Maksimum Puan"
 
 #. Label of a Float field in DocType 'Supplier Scorecard Scoring Criteria'
 #: buying/doctype/supplier_scorecard_scoring_criteria/supplier_scorecard_scoring_criteria.json
 msgctxt "Supplier Scorecard Scoring Criteria"
 msgid "Max Score"
-msgstr ""
+msgstr "Maksimum Puan"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:284
 msgid "Max discount allowed for item: {0} is {1}%"
@@ -42424,7 +42424,7 @@ msgstr ""
 
 #: accounts/doctype/gl_entry/gl_entry.py:174 assets/doctype/asset/asset.py:265
 msgid "Missing Cost Center"
-msgstr ""
+msgstr "Maliyet Merkezi Eksik"
 
 #: assets/doctype/asset/asset.py:307
 msgid "Missing Finance Book"
@@ -44070,19 +44070,19 @@ msgstr ""
 
 #: manufacturing/doctype/bom/bom_tree.js:55
 msgid "New BOM"
-msgstr ""
+msgstr "Yeni Ürün Ağacı"
 
 #. Label of a Link field in DocType 'BOM Update Log'
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 msgctxt "BOM Update Log"
 msgid "New BOM"
-msgstr ""
+msgstr "Yeni Ürün Ağacı"
 
 #. Label of a Link field in DocType 'BOM Update Tool'
 #: manufacturing/doctype/bom_update_tool/bom_update_tool.json
 msgctxt "BOM Update Tool"
 msgid "New BOM"
-msgstr ""
+msgstr "Yeni Ürün Ağacı"
 
 #. Label of a Currency field in DocType 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
@@ -44133,7 +44133,7 @@ msgstr ""
 #: public/js/templates/crm_activities.html:14
 #: public/js/utils/crm_activities.js:85
 msgid "New Event"
-msgstr ""
+msgstr "Yeni Etkinlik"
 
 #. Label of a Float field in DocType 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
@@ -49037,26 +49037,26 @@ msgstr ""
 #: accounts/report/bank_clearance_summary/bank_clearance_summary.py:29
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.html:11
 msgid "Payment Entry"
-msgstr ""
+msgstr "Ödeme Girişi"
 
 #. Label of a Dynamic Link field in DocType 'Bank Clearance Detail'
 #: accounts/doctype/bank_clearance_detail/bank_clearance_detail.json
 msgctxt "Bank Clearance Detail"
 msgid "Payment Entry"
-msgstr ""
+msgstr "Ödeme Girişi"
 
 #. Label of a Dynamic Link field in DocType 'Bank Transaction Payments'
 #: accounts/doctype/bank_transaction_payments/bank_transaction_payments.json
 msgctxt "Bank Transaction Payments"
 msgid "Payment Entry"
-msgstr ""
+msgstr "Ödeme Girişi"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Payment Entry"
-msgstr ""
+msgstr "Ödeme Girişi"
 
 #. Label of a Link in the Accounting Workspace
 #. Label of a shortcut in the Accounting Workspace
@@ -49069,14 +49069,14 @@ msgstr ""
 #: accounts/workspace/receivables/receivables.json
 msgctxt "Payment Entry"
 msgid "Payment Entry"
-msgstr ""
+msgstr "Ödeme Girişi"
 
 #. Option for the 'Payment Order Type' (Select) field in DocType 'Payment
 #. Order'
 #: accounts/doctype/payment_order/payment_order.json
 msgctxt "Payment Order"
 msgid "Payment Entry"
-msgstr ""
+msgstr "Ödeme Girişi"
 
 #. Name of a DocType
 #: accounts/doctype/payment_entry_deduction/payment_entry_deduction.json
@@ -52812,19 +52812,19 @@ msgstr ""
 #: selling/doctype/customer/customer_dashboard.py:28
 #: stock/doctype/item/item_dashboard.py:19
 msgid "Pricing"
-msgstr ""
+msgstr "Fiyatlandırma"
 
 #. Name of a DocType
 #: accounts/doctype/pricing_rule/pricing_rule.json
 #: buying/doctype/supplier/supplier.js:116
 msgid "Pricing Rule"
-msgstr ""
+msgstr "Fiyatlandırma Kuralı"
 
 #. Label of a Link field in DocType 'Coupon Code'
 #: accounts/doctype/coupon_code/coupon_code.json
 msgctxt "Coupon Code"
 msgid "Pricing Rule"
-msgstr ""
+msgstr "Fiyatlandırma Kuralı"
 
 #. Label of a Link in the Buying Workspace
 #. Label of a Link in the Selling Workspace
@@ -52833,13 +52833,13 @@ msgstr ""
 #: stock/workspace/stock/stock.json
 msgctxt "Pricing Rule"
 msgid "Pricing Rule"
-msgstr ""
+msgstr "Fiyatlandırma Kuralı"
 
 #. Label of a Link field in DocType 'Pricing Rule Detail'
 #: accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
 msgctxt "Pricing Rule Detail"
 msgid "Pricing Rule"
-msgstr ""
+msgstr "Fiyatlandırma Kuralı"
 
 #. Name of a DocType
 #: accounts/doctype/pricing_rule_brand/pricing_rule_brand.json
@@ -55149,65 +55149,65 @@ msgstr ""
 #: stock/doctype/purchase_receipt/purchase_receipt_list.js:30
 #: stock/doctype/stock_entry/stock_entry.js:294
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Label of a Link field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Label of a Link field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Option for the 'Transaction' (Select) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgctxt "Authorization Rule"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Option for the 'Document Type' (Select) field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgctxt "Contract"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Linked DocType in Incoterm's connections
 #: setup/doctype/incoterm/incoterm.json
 msgctxt "Incoterm"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Option for the 'Receipt Document Type' (Select) field in DocType 'Landed
 #. Cost Item'
 #: stock/doctype/landed_cost_item/landed_cost_item.json
 msgctxt "Landed Cost Item"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Option for the 'Receipt Document Type' (Select) field in DocType 'Landed
 #. Cost Purchase Receipt'
 #: stock/doctype/landed_cost_purchase_receipt/landed_cost_purchase_receipt.json
 msgctxt "Landed Cost Purchase Receipt"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Option for the 'Invoice Type' (Select) field in DocType 'Payment
 #. Reconciliation Invoice'
 #: accounts/doctype/payment_reconciliation_invoice/payment_reconciliation_invoice.json
 msgctxt "Payment Reconciliation Invoice"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Label of a shortcut in the Accounting Workspace
 #. Label of a Link in the Payables Workspace
@@ -55218,48 +55218,48 @@ msgstr ""
 #: buying/workspace/buying/buying.json
 msgctxt "Purchase Invoice"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Quality
 #. Inspection'
 #: stock/doctype/quality_inspection/quality_inspection.json
 msgctxt "Quality Inspection"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Linked DocType in Subscription's connections
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Purchase Invoice"
-msgstr ""
+msgstr "Alış Faturası"
 
 #. Name of a DocType
 #: accounts/doctype/purchase_invoice_advance/purchase_invoice_advance.json
 msgid "Purchase Invoice Advance"
-msgstr ""
+msgstr "Alış Faturası Peşinatı"
 
 #. Name of a DocType
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgid "Purchase Invoice Item"
-msgstr ""
+msgstr "Alış Faturası Ürünü"
 
 #. Label of a Data field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Purchase Invoice Item"
-msgstr ""
+msgstr "Alış Faturası Ürünü"
 
 #. Label of a Data field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Purchase Invoice Item"
-msgstr ""
+msgstr "Alış Faturası Ürünü"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -55268,7 +55268,7 @@ msgstr ""
 #: accounts/workspace/financial_reports/financial_reports.json
 #: buying/workspace/buying/buying.json
 msgid "Purchase Invoice Trends"
-msgstr ""
+msgstr "Alış Faturası Trend Grafikleri"
 
 #: assets/doctype/asset/asset.py:214
 msgid "Purchase Invoice cannot be made against an existing asset {0}"
@@ -55281,7 +55281,7 @@ msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1825
 msgid "Purchase Invoices"
-msgstr ""
+msgstr "Alış Faturaları"
 
 #. Name of a role
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -55328,93 +55328,93 @@ msgstr ""
 #: stock/doctype/material_request/material_request.js:154
 #: stock/doctype/purchase_receipt/purchase_receipt.js:225
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Option for the 'Transaction' (Select) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgctxt "Authorization Rule"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Option for the 'Document Type' (Select) field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgctxt "Contract"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Linked DocType in Incoterm's connections
 #: setup/doctype/incoterm/incoterm.json
 msgctxt "Incoterm"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link field in DocType 'Production Plan Sub Assembly Item'
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgctxt "Production Plan Sub Assembly Item"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link in the Buying Workspace
 #. Label of a shortcut in the Buying Workspace
 #: buying/workspace/buying/buying.json
 msgctxt "Purchase Order"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item Supplied'
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 msgctxt "Purchase Receipt Item Supplied"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Purchase Order"
-msgstr ""
+msgstr "Satın Alma Emri"
 
 #: buying/report/procurement_tracker/procurement_tracker.py:103
 msgid "Purchase Order Amount"
@@ -60804,7 +60804,7 @@ msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Reserved Qty for Production: Raw materials quantity to make manufacturing items."
-msgstr ""
+msgstr "Üretim İçin Ayrılan Miktar: Ürünleri üretmek için gereken hammadde miktarı."
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
@@ -60814,7 +60814,7 @@ msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items."
-msgstr ""
+msgstr "Alt Yüklenici İçin Ayrılan Miktar: Alt yükleniciye yapılan ürünler için gerekli hammadde miktarı."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:491
 msgid "Reserved Qty should be greater than Delivered Qty."
@@ -60822,7 +60822,7 @@ msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Reserved Qty: Quantity ordered for sale, but not delivered."
-msgstr ""
+msgstr "Ayrılan Miktar: Satış için sipariş edilmiş ancak henüz teslim edilmemiş ürün miktarı."
 
 #: stock/report/item_shortage_report/item_shortage_report.py:116
 msgid "Reserved Quantity"
@@ -61202,31 +61202,31 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note_list.js:16
 #: stock/doctype/purchase_receipt/purchase_receipt_list.js:15
 msgid "Return"
-msgstr ""
+msgstr "İade"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Return"
-msgstr ""
+msgstr "İade"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Return"
-msgstr ""
+msgstr "İade"
 
 #. Option for the 'Status' (Select) field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Return"
-msgstr ""
+msgstr "İade"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Return"
-msgstr ""
+msgstr "İade"
 
 #: accounts/doctype/sales_invoice/sales_invoice.js:121
 msgid "Return / Credit Note"
@@ -61404,13 +61404,13 @@ msgstr ""
 #: stock/doctype/purchase_receipt/purchase_receipt_dashboard.py:30
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt_dashboard.py:27
 msgid "Returns"
-msgstr ""
+msgstr "İadeler"
 
 #. Label of a Float field in DocType 'Cashier Closing'
 #: accounts/doctype/cashier_closing/cashier_closing.json
 msgctxt "Cashier Closing"
 msgid "Returns"
-msgstr ""
+msgstr "İadeler"
 
 #: accounts/report/accounts_payable/accounts_payable.js:157
 #: accounts/report/accounts_payable_summary/accounts_payable_summary.js:119
@@ -64301,7 +64301,7 @@ msgstr ""
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:325
 #: public/js/call_popup/call_popup.js:169
 msgid "Save"
-msgstr ""
+msgstr "Kaydet"
 
 #: selling/page/point_of_sale/pos_controller.js:198
 msgid "Save as Draft"
@@ -64439,7 +64439,7 @@ msgstr ""
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgctxt "Maintenance Schedule"
 msgid "Schedule"
-msgstr ""
+msgstr "Planla"
 
 #: assets/doctype/asset/asset.js:275
 msgid "Schedule Date"
@@ -64461,20 +64461,20 @@ msgstr ""
 #: stock/doctype/delivery_trip/delivery_trip.json
 msgctxt "Delivery Trip"
 msgid "Scheduled"
-msgstr ""
+msgstr "Planlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'Email Campaign'
 #: crm/doctype/email_campaign/email_campaign.json
 msgctxt "Email Campaign"
 msgid "Scheduled"
-msgstr ""
+msgstr "Planlandı"
 
 #. Option for the 'Maintenance Type' (Select) field in DocType 'Maintenance
 #. Visit'
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgctxt "Maintenance Visit"
 msgid "Scheduled"
-msgstr ""
+msgstr "Planlandı"
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.js:118
 msgid "Scheduled Date"
@@ -64554,13 +64554,13 @@ msgstr ""
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Scope"
-msgstr ""
+msgstr "Kapsam"
 
 #. Label of a Percent field in DocType 'Supplier Scorecard Scoring Criteria'
 #: buying/doctype/supplier_scorecard_scoring_criteria/supplier_scorecard_scoring_criteria.json
 msgctxt "Supplier Scorecard Scoring Criteria"
 msgid "Score"
-msgstr ""
+msgstr "Puan"
 
 #. Label of a Section Break field in DocType 'Supplier Scorecard'
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
@@ -69312,7 +69312,7 @@ msgstr ""
 #: stock/doctype/warehouse_type/warehouse_type.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Stock Manager"
-msgstr ""
+msgstr "Stok Yöneticisi"
 
 #: stock/doctype/item/item_dashboard.py:34
 msgid "Stock Movement"
@@ -69797,7 +69797,7 @@ msgstr ""
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Stock User"
-msgstr ""
+msgstr "Stok Kullanıcısı"
 
 #. Label of a Tab Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -71896,7 +71896,7 @@ msgstr ""
 #: utilities/doctype/video/video.json
 #: utilities/doctype/video_settings/video_settings.json
 msgid "System Manager"
-msgstr ""
+msgstr "Sistem Yöneticisi"
 
 #. Label of a Link in the Settings Workspace
 #. Label of a shortcut in the Settings Workspace
@@ -73821,7 +73821,7 @@ msgstr ""
 #. Success message of the Module Onboarding 'CRM'
 #: crm/module_onboarding/crm/crm.json
 msgid "The CRM Module is all set up!"
-msgstr ""
+msgstr "Müşteri Yönetimi Modülünün kurulumu tamamlandı!"
 
 #: crm/doctype/email_campaign/email_campaign.py:71
 msgid "The Campaign '{0}' already exists for the {1} '{2}'"
