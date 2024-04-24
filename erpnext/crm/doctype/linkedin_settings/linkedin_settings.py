@@ -19,14 +19,14 @@ class LinkedInSettings(Document):
 			{
 				"response_type": "code",
 				"client_id": self.consumer_key,
-				"redirect_uri": "{0}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(
+				"redirect_uri": "{}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(
 					frappe.utils.get_url()
 				),
 				"scope": "r_emailaddress w_organization_social r_basicprofile r_liteprofile r_organization_social rw_organization_admin w_member_social",
 			}
 		)
 
-		url = "https://www.linkedin.com/oauth/v2/authorization?{}".format(params)
+		url = f"https://www.linkedin.com/oauth/v2/authorization?{params}"
 
 		return url
 
@@ -37,7 +37,7 @@ class LinkedInSettings(Document):
 			"code": code,
 			"client_id": self.consumer_key,
 			"client_secret": self.get_password(fieldname="consumer_secret"),
-			"redirect_uri": "{0}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(
+			"redirect_uri": "{}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(
 				frappe.utils.get_url()
 			),
 		}
@@ -80,7 +80,7 @@ class LinkedInSettings(Document):
 		body = {
 			"registerUploadRequest": {
 				"recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
-				"owner": "urn:li:organization:{0}".format(self.company_id),
+				"owner": f"urn:li:organization:{self.company_id}",
 				"serviceRelationships": [
 					{"relationshipType": "OWNER", "identifier": "urn:li:userGeneratedContent"}
 				],
@@ -100,7 +100,7 @@ class LinkedInSettings(Document):
 			if response.status_code < 200 and response.status_code > 299:
 				frappe.throw(
 					_("Error While Uploading Image"),
-					title="{0} {1}".format(response.status_code, response.reason),
+					title=f"{response.status_code} {response.reason}",
 				)
 				return None
 			return asset
@@ -115,7 +115,7 @@ class LinkedInSettings(Document):
 
 		body = {
 			"distribution": {"linkedInDistributionTarget": {}},
-			"owner": "urn:li:organization:{0}".format(self.company_id),
+			"owner": f"urn:li:organization:{self.company_id}",
 			"subject": title,
 			"text": {"text": text},
 		}
@@ -136,13 +136,13 @@ class LinkedInSettings(Document):
 			if response.status_code not in [201, 200]:
 				raise
 
-		except Exception as e:
+		except Exception:
 			self.api_error(response)
 
 		return response
 
 	def get_headers(self):
-		return {"Authorization": "Bearer {}".format(self.access_token)}
+		return {"Authorization": f"Bearer {self.access_token}"}
 
 	def get_reference_url(self, text):
 		import re
@@ -155,7 +155,7 @@ class LinkedInSettings(Document):
 	def delete_post(self, post_id):
 		try:
 			response = requests.delete(
-				url="https://api.linkedin.com/v2/shares/urn:li:share:{0}".format(post_id),
+				url=f"https://api.linkedin.com/v2/shares/urn:li:share:{post_id}",
 				headers=self.get_headers(),
 			)
 			if response.status_code != 200:
@@ -164,7 +164,7 @@ class LinkedInSettings(Document):
 			self.api_error(response)
 
 	def get_post(self, post_id):
-		url = "https://api.linkedin.com/v2/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity=urn:li:organization:{0}&shares[0]=urn:li:share:{1}".format(
+		url = "https://api.linkedin.com/v2/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity=urn:li:organization:{}&shares[0]=urn:li:share:{}".format(
 			self.company_id, post_id
 		)
 

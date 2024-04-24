@@ -10,7 +10,6 @@ from frappe.tests.utils import FrappeTestCase, timeout
 from frappe.utils import cstr, flt
 
 from erpnext.controllers.tests.test_subcontracting_controller import (
-	make_stock_in_entry,
 	set_backflush_based_on,
 )
 from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
@@ -200,9 +199,7 @@ class TestBOM(FrappeTestCase):
 
 		reset_item_valuation_rate(
 			item_code="_Test Item",
-			warehouse_list=frappe.get_all(
-				"Warehouse", {"is_group": 0, "company": bom.company}, pluck="name"
-			),
+			warehouse_list=frappe.get_all("Warehouse", {"is_group": 0, "company": bom.company}, pluck="name"),
 			qty=200,
 			rate=200,
 		)
@@ -344,7 +341,7 @@ class TestBOM(FrappeTestCase):
 
 		self.assertEqual(len(reqd_order), len(created_order))
 
-		for reqd_item, created_item in zip(reqd_order, created_order):
+		for reqd_item, created_item in zip(reqd_order, created_order, strict=False):
 			self.assertEqual(reqd_item, created_item.item_code)
 
 	@timeout
@@ -383,7 +380,7 @@ class TestBOM(FrappeTestCase):
 
 		self.assertEqual(len(reqd_order), len(created_order))
 
-		for reqd_item, created_item in zip(reqd_order, created_order):
+		for reqd_item, created_item in zip(reqd_order, created_order, strict=False):
 			self.assertEqual(reqd_item.item_code, created_item.item_code)
 			self.assertEqual(reqd_item.qty, created_item.qty)
 			self.assertEqual(reqd_item.exploded_qty, created_item.exploded_qty)
@@ -452,9 +449,7 @@ class TestBOM(FrappeTestCase):
 		test_items = query(txt="_Test")
 		filtered = query(txt="_Test Item 2")
 
-		self.assertNotEqual(
-			len(test_items), len(filtered), msg="Item filtering showing excessive results"
-		)
+		self.assertNotEqual(len(test_items), len(filtered), msg="Item filtering showing excessive results")
 		self.assertTrue(0 < len(filtered) <= 3, msg="Item filtering showing excessive results")
 
 	@timeout
@@ -516,7 +511,6 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_version_index(self):
-
 		bom = frappe.new_doc("BOM")
 
 		version_index_test_cases = [
@@ -571,7 +565,6 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_clear_inpection_quality(self):
-
 		bom = frappe.copy_doc(test_records[2], ignore_no_copy=True)
 		bom.docstatus = 0
 		bom.is_default = 0
@@ -686,9 +679,7 @@ class TestBOM(FrappeTestCase):
 
 		bom = make_bom(item=fg_item, raw_materials=[rm_item])
 
-		create_stock_reconciliation(
-			item_code=rm_item, warehouse="_Test Warehouse - _TC", qty=100, rate=600
-		)
+		create_stock_reconciliation(item_code=rm_item, warehouse="_Test Warehouse - _TC", qty=100, rate=600)
 
 		bom.load_from_db()
 		bom.update_cost()
@@ -697,6 +688,33 @@ class TestBOM(FrappeTestCase):
 		bom.load_from_db()
 		bom.update_cost()
 		self.assertFalse(bom.flags.cost_updated)
+
+	def test_bom_with_service_item_cost(self):
+		rm_item = make_item(properties={"is_stock_item": 1, "valuation_rate": 1000.0}).name
+
+		service_item = make_item(properties={"is_stock_item": 0}).name
+
+		fg_item = make_item(properties={"is_stock_item": 1}).name
+
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		bom = make_bom(item=fg_item, raw_materials=[rm_item, service_item], do_not_save=True)
+		bom.rm_cost_as_per = "Valuation Rate"
+
+		for row in bom.items:
+			if row.item_code == service_item:
+				row.rate = 566.00
+			else:
+				row.rate = 800.00
+
+		bom.save()
+
+		for row in bom.items:
+			if row.item_code == service_item:
+				self.assertEqual(row.is_stock_item, 0)
+				self.assertEqual(row.rate, 566.00)
+			else:
+				self.assertEqual(row.is_stock_item, 1)
 
 	def test_do_not_include_manufacturing_and_fixed_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import item_query
@@ -764,7 +782,9 @@ def create_nested_bom(tree, prefix="_Test bom "):
 		for item_code, subtree in bom_tree.items():
 			bom_item_code = prefix + item_code
 			if not frappe.db.exists("Item", bom_item_code):
-				frappe.get_doc(doctype="Item", item_code=bom_item_code, item_group="_Test Item Group").insert()
+				frappe.get_doc(
+					doctype="Item", item_code=bom_item_code, item_group="_Test Item Group"
+				).insert()
 			create_items(subtree)
 
 	create_items(tree)

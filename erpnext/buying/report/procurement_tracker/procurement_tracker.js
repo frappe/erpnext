@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 frappe.query_reports["Procurement Tracker"] = {
-	"filters": [
+	filters: [
 		{
 			fieldname: "company",
 			label: __("Company"),
@@ -30,10 +30,10 @@ frappe.query_reports["Procurement Tracker"] = {
 			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 		},
 		{
-			fieldname:"to_date",
+			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
 			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 		},
-	]
-}
+	],
+};

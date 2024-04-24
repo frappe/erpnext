@@ -248,16 +248,12 @@ class TestSerialNo(FrappeTestCase):
 		warehouse = "_Test Warehouse - _TC"
 		serial_nos = ["LOWVALUATION", "HIGHVALUATION"]
 
-		in1 = make_stock_entry(
-			item_code=item_code, to_warehouse=warehouse, qty=1, rate=42, serial_no=serial_nos[0]
-		)
-		in2 = make_stock_entry(
+		make_stock_entry(item_code=item_code, to_warehouse=warehouse, qty=1, rate=42, serial_no=serial_nos[0])
+		make_stock_entry(
 			item_code=item_code, to_warehouse=warehouse, qty=1, rate=113, serial_no=serial_nos[1]
 		)
 
-		out = create_delivery_note(
-			item_code=item_code, qty=1, serial_no=serial_nos[0], do_not_submit=True
-		)
+		out = create_delivery_note(item_code=item_code, qty=1, serial_no=serial_nos[0], do_not_submit=True)
 
 		# change serial no
 		out.items[0].serial_no = serial_nos[1]

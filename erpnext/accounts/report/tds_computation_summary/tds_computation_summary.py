@@ -67,13 +67,13 @@ def group_by_party_and_category(data, filters):
 			},
 		)
 
-		party_category_wise_map.get((row.get("party"), row.get("section_code")))[
-			"total_amount"
-		] += row.get("total_amount", 0.0)
+		party_category_wise_map.get((row.get("party"), row.get("section_code")))["total_amount"] += row.get(
+			"total_amount", 0.0
+		)
 
-		party_category_wise_map.get((row.get("party"), row.get("section_code")))[
-			"tax_amount"
-		] += row.get("tax_amount", 0.0)
+		party_category_wise_map.get((row.get("party"), row.get("section_code")))["tax_amount"] += row.get(
+			"tax_amount", 0.0
+		)
 
 	final_result = get_final_result(party_category_wise_map)
 
@@ -82,7 +82,7 @@ def group_by_party_and_category(data, filters):
 
 def get_final_result(party_category_wise_map):
 	out = []
-	for key, value in party_category_wise_map.items():
+	for _key, value in party_category_wise_map.items():
 		out.append(value)
 
 	return out

@@ -28,9 +28,7 @@ class TestFIFOValuation(unittest.TestCase):
 		self.assertAlmostEqual(sum(q for q, _ in self.queue), qty, msg=f"queue: {self.queue}", places=4)
 
 	def assertTotalValue(self, value):
-		self.assertAlmostEqual(
-			sum(q * r for q, r in self.queue), value, msg=f"queue: {self.queue}", places=2
-		)
+		self.assertAlmostEqual(sum(q * r for q, r in self.queue), value, msg=f"queue: {self.queue}", places=2)
 
 	def test_simple_addition(self):
 		self.queue.add_stock(1, 10)
@@ -195,7 +193,6 @@ class TestFIFOValuation(unittest.TestCase):
 				total_value -= sum(q * r for q, r in consumed)
 			self.assertTotalQty(total_qty)
 			self.assertTotalValue(total_value)
-			self.assertGreaterEqual(total_value, 0)
 
 
 class TestLIFOValuation(unittest.TestCase):
@@ -211,9 +208,7 @@ class TestLIFOValuation(unittest.TestCase):
 		self.assertAlmostEqual(sum(q for q, _ in self.stack), qty, msg=f"stack: {self.stack}", places=4)
 
 	def assertTotalValue(self, value):
-		self.assertAlmostEqual(
-			sum(q * r for q, r in self.stack), value, msg=f"stack: {self.stack}", places=2
-		)
+		self.assertAlmostEqual(sum(q * r for q, r in self.stack), value, msg=f"stack: {self.stack}", places=2)
 
 	def test_simple_addition(self):
 		self.stack.add_stock(1, 10)
@@ -356,7 +351,6 @@ class TestLIFOValuationSLE(FrappeTestCase):
 			self.assertEqual(stock_queue, expected_queue)
 
 	def test_lifo_values(self):
-
 		in1 = self._make_stock_entry(1, 1)
 		self.assertStockQueue(in1, [[1, 1]])
 

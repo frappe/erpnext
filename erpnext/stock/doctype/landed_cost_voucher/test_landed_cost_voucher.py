@@ -62,9 +62,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			as_dict=1,
 		)
 
-		self.assertEqual(
-			last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction
-		)
+		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 25.0)
 
 		# assert after submit
@@ -87,7 +85,6 @@ class TestLandedCostVoucher(FrappeTestCase):
 		self.assertPurchaseReceiptLCVGLEntries(pr)
 
 	def assertPurchaseReceiptLCVGLEntries(self, pr):
-
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 
 		self.assertTrue(gl_entries)
@@ -170,9 +167,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			as_dict=1,
 		)
 
-		self.assertEqual(
-			last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction
-		)
+		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
 
 	def test_landed_cost_voucher_for_zero_purchase_rate(self):
@@ -229,7 +224,6 @@ class TestLandedCostVoucher(FrappeTestCase):
 		)
 
 	def test_landed_cost_voucher_against_purchase_invoice(self):
-
 		pi = make_purchase_invoice(
 			update_stock=1,
 			posting_date=frappe.utils.nowdate(),
@@ -274,9 +268,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			as_dict=1,
 		)
 
-		self.assertEqual(
-			last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction
-		)
+		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
 
@@ -365,9 +357,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 
 		new_purchase_rate = serial_no_rate + charges
 
-		serial_no = frappe.db.get_value(
-			"Serial No", serial_no, ["warehouse", "purchase_rate"], as_dict=1
-		)
+		serial_no = frappe.db.get_value("Serial No", serial_no, ["warehouse", "purchase_rate"], as_dict=1)
 
 		self.assertEqual(serial_no.purchase_rate, new_purchase_rate)
 
@@ -392,7 +382,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			do_not_save=True,
 		)
 		pr.items[0].cost_center = "Main - TCP1"
-		for x in range(2):
+		for _x in range(2):
 			pr.append(
 				"items",
 				{

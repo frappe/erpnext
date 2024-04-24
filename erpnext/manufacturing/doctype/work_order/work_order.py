@@ -154,9 +154,7 @@ class WorkOrder(Document):
 
 	def set_default_warehouse(self):
 		if not self.wip_warehouse and not self.skip_transfer:
-			self.wip_warehouse = frappe.db.get_single_value(
-				"Manufacturing Settings", "default_wip_warehouse"
-			)
+			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 		if not self.fg_warehouse:
 			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
 
@@ -172,8 +170,12 @@ class WorkOrder(Document):
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
-			d.planned_operating_cost = flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0)
-			d.actual_operating_cost = flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0)
+			d.planned_operating_cost = flt(
+				flt(d.hour_rate) * (flt(d.time_in_mins) / 60.0), d.precision("planned_operating_cost")
+			)
+			d.actual_operating_cost = flt(
+				flt(d.hour_rate) * (flt(d.actual_operation_time) / 60.0), d.precision("actual_operating_cost")
+			)
 
 			self.planned_operating_cost += flt(d.planned_operating_cost)
 			self.actual_operating_cost += flt(d.actual_operating_cost)
@@ -212,9 +214,7 @@ class WorkOrder(Document):
 		so_qty = flt(so_item_qty) + flt(dnpi_qty)
 
 		allowance_percentage = flt(
-			frappe.db.get_single_value(
-				"Manufacturing Settings", "overproduction_percentage_for_sales_order"
-			)
+			frappe.db.get_single_value("Manufacturing Settings", "overproduction_percentage_for_sales_order")
 		)
 
 		if total_qty > so_qty + (allowance_percentage / 100 * so_qty):
@@ -255,6 +255,13 @@ class WorkOrder(Document):
 					status = "Completed"
 		else:
 			status = "Cancelled"
+
+		if (
+			self.skip_transfer
+			and self.produced_qty
+			and self.qty > (flt(self.produced_qty) + flt(self.process_loss_qty))
+		):
+			status = "In Process"
 
 		return status
 
@@ -343,9 +350,7 @@ class WorkOrder(Document):
 			produced_qty = total_qty[0][0] if total_qty else 0
 
 		self.update_status()
-		production_plan.run_method(
-			"update_produced_pending_qty", produced_qty, self.production_plan_item
-		)
+		production_plan.run_method("update_produced_pending_qty", produced_qty, self.production_plan_item)
 
 	def before_submit(self):
 		self.create_serial_no_batch_no()
@@ -489,7 +494,6 @@ class WorkOrder(Document):
 	def prepare_data_for_job_card(self, row, index, plan_days, enable_capacity_planning):
 		self.set_operation_start_end_time(index, row)
 
-		original_start_time = row.planned_start_time
 		job_card_doc = create_job_card(
 			self, row, auto_create=True, enable_capacity_planning=enable_capacity_planning
 		)
@@ -498,11 +502,15 @@ class WorkOrder(Document):
 			row.planned_start_time = job_card_doc.time_logs[-1].from_time
 			row.planned_end_time = job_card_doc.time_logs[-1].to_time
 
-			if date_diff(row.planned_start_time, original_start_time) > plan_days:
+			if date_diff(row.planned_end_time, self.planned_start_date) > plan_days:
 				frappe.message_log.pop()
 				frappe.throw(
-					_("Unable to find the time slot in the next {0} days for the operation {1}.").format(
-						plan_days, row.operation
+					_(
+						"Unable to find the time slot in the next {0} days for the operation {1}. Please increase the 'Capacity Planning For (Days)' in the {2}."
+					).format(
+						plan_days,
+						row.operation,
+						get_link_to_form("Manufacturing Settings", "Manufacturing Settings"),
 					),
 					CapacityError,
 				)
@@ -520,9 +528,7 @@ class WorkOrder(Document):
 				get_datetime(self.operations[idx - 1].planned_end_time) + get_mins_between_operations()
 			)
 
-		row.planned_end_time = get_datetime(row.planned_start_time) + relativedelta(
-			minutes=row.time_in_mins
-		)
+		row.planned_end_time = get_datetime(row.planned_start_time) + relativedelta(minutes=row.time_in_mins)
 
 		if row.planned_start_time == row.planned_end_time:
 			frappe.throw(_("Capacity Planning Error, planned start time can not be same as end time"))
@@ -589,11 +595,7 @@ class WorkOrder(Document):
 		)
 
 	def update_ordered_qty(self):
-		if (
-			self.production_plan
-			and self.production_plan_item
-			and not self.production_plan_sub_assembly_item
-		):
+		if self.production_plan and self.production_plan_item and not self.production_plan_sub_assembly_item:
 			table = frappe.qb.DocType("Work Order")
 
 			query = (
@@ -633,11 +635,9 @@ class WorkOrder(Document):
 		cond = "product_bundle_item = %s" if self.product_bundle_item else "production_item = %s"
 
 		qty = frappe.db.sql(
-			""" select sum(qty) from
-			`tabWork Order` where sales_order = %s and docstatus = 1 and {0}
-			""".format(
-				cond
-			),
+			f""" select sum(qty) from
+			`tabWork Order` where sales_order = %s and docstatus = 1 and {cond}
+			""",
 			(self.sales_order, (self.product_bundle_item or self.production_item)),
 			as_list=1,
 		)
@@ -787,9 +787,7 @@ class WorkOrder(Document):
 
 	def set_actual_dates(self):
 		if self.get("operations"):
-			actual_start_dates = [
-				d.actual_start_time for d in self.get("operations") if d.actual_start_time
-			]
+			actual_start_dates = [d.actual_start_time for d in self.get("operations") if d.actual_start_time]
 			if actual_start_dates:
 				self.actual_start_date = min(actual_start_dates)
 
@@ -834,11 +832,7 @@ class WorkOrder(Document):
 		if not self.qty > 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
 
-		if (
-			self.production_plan
-			and self.production_plan_item
-			and not self.production_plan_sub_assembly_item
-		):
+		if self.production_plan and self.production_plan_item and not self.production_plan_sub_assembly_item:
 			qty_dict = frappe.db.get_value(
 				"Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1
 			)
@@ -974,7 +968,7 @@ class WorkOrder(Document):
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
-			.on((ste_child.parent == ste.name))
+			.on(ste_child.parent == ste.name)
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
@@ -1004,7 +998,7 @@ class WorkOrder(Document):
 		query = (
 			frappe.qb.from_(ste)
 			.inner_join(ste_child)
-			.on((ste_child.parent == ste.name))
+			.on(ste_child.parent == ste.name)
 			.select(
 				ste_child.item_code,
 				ste_child.original_item,
@@ -1272,9 +1266,7 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 	)
 
 	if work_order.bom_no:
-		stock_entry.inspection_required = frappe.db.get_value(
-			"BOM", work_order.bom_no, "inspection_required"
-		)
+		stock_entry.inspection_required = frappe.db.get_value("BOM", work_order.bom_no, "inspection_required")
 
 	if purpose == "Material Transfer for Manufacture":
 		stock_entry.to_warehouse = wip_warehouse
@@ -1380,9 +1372,7 @@ def close_work_order(work_order, status):
 
 
 def split_qty_based_on_batch_size(wo_doc, row, qty):
-	if not cint(
-		frappe.db.get_value("Operation", row.operation, "create_job_card_based_on_batch_size")
-	):
+	if not cint(frappe.db.get_value("Operation", row.operation, "create_job_card_based_on_batch_size")):
 		row.batch_size = row.get("qty") or wo_doc.qty
 
 	row.job_card_qty = row.batch_size
@@ -1462,9 +1452,7 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 			doc.schedule_time_logs(row)
 
 		doc.insert()
-		frappe.msgprint(
-			_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True
-		)
+		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True)
 
 	if enable_capacity_planning:
 		# automatically added scheduling rows shouldn't change status to WIP
@@ -1527,7 +1515,7 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 def get_reserved_qty_for_production(
 	item_code: str,
 	warehouse: str,
-	non_completed_production_plans: list = None,
+	non_completed_production_plans: list | None = None,
 	check_production_plan: bool = False,
 ) -> float:
 	"""Get total reserved quantity for any item in specified warehouse"""

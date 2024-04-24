@@ -44,9 +44,7 @@ def get_bom_stock(filters):
 	else:
 		bom_item_table = "BOM Item"
 
-	warehouse_details = frappe.db.get_value(
-		"Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1
-	)
+	warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
 
 	BOM = frappe.qb.DocType("BOM")
 	BOM_ITEM = frappe.qb.DocType(bom_item_table)

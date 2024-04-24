@@ -51,8 +51,7 @@
    "oldfieldtype": "Link",
    "options": "Item",
    "read_only": 1,
-   "reqd": 1,
-   "search_index": 1
+   "reqd": 1
   },
   {
    "default": "0.00",

@@ -10,10 +10,8 @@
 
 	<h2 class="text-center" style="margin-top:0">{%= __(report.report_name) %}</h2>
 	<h4 class="text-center">
-		{% if (filters.customer_name) { %}
-			{%= filters.customer_name %}
-		{% } else { %}
-			{%= filters.customer || filters.supplier %}
+		{% if (filters.party) { %}
+			{%= __(filters.party) %}
 		{% } %}
 	</h4>
 	<h6 class="text-center">
@@ -141,7 +139,7 @@
 						<th style="width: 24%">{%= __("Reference") %}</th>
 					{% } %}
 					{% if(!filters.show_future_payments) { %}
-						<th style="width: 20%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
+						<th style="width: 20%">{%= (filters.party) ? __("Remarks"): __("Party") %}</th>
 					{% } %}
 					<th style="width: 10%; text-align: right">{%= __("Invoiced Amount") %}</th>
 					{% if(!filters.show_future_payments) { %}
@@ -158,7 +156,7 @@
 						<th style="width: 10%">{%= __("Remaining Balance") %}</th>
 					{% } %}
 				{% } else { %}
-					<th style="width: 40%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
+					<th style="width: 40%">{%= (filters.party) ? __("Remarks"): __("Party") %}</th>
 					<th style="width: 15%">{%= __("Total Invoiced Amount") %}</th>
 					<th style="width: 15%">{%= __("Total Paid Amount") %}</th>
 					<th style="width: 15%">{%= report.report_name === "Accounts Receivable Summary" ? __('Credit Note Amount') : __('Debit Note Amount') %}</th>
@@ -187,7 +185,7 @@
 
 						{% if(!filters.show_future_payments) { %}
 						<td>
-							{% if(!(filters.customer || filters.supplier)) { %}
+							{% if(!(filters.party)) { %}
 								{%= data[i]["party"] %}
 								{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
 									<br> {%= data[i]["customer_name"] %}
@@ -260,7 +258,7 @@
 					{% if(data[i]["party"]|| "&nbsp;") { %}
 						{% if(!data[i]["is_total_row"]) { %}
 							<td>
-								{% if(!(filters.customer || filters.supplier)) { %}
+								{% if(!(filters.party)) { %}
 									{%= data[i]["party"] %}
 									{% if(data[i]["customer_name"] && data[i]["customer_name"] != data[i]["party"]) { %}
 										<br> {%= data[i]["customer_name"] %}

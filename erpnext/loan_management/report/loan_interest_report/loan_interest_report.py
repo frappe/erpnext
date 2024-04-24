@@ -219,9 +219,7 @@ def get_active_loan_details(filters):
 
 def get_sanctioned_amount_map():
 	return frappe._dict(
-		frappe.get_all(
-			"Sanctioned Loan Amount", fields=["applicant", "sanctioned_amount_limit"], as_list=1
-		)
+		frappe.get_all("Sanctioned Loan Amount", fields=["applicant", "sanctioned_amount_limit"], as_list=1)
 	)
 
 
@@ -309,9 +307,7 @@ def get_interest_accruals(loans, filters):
 
 
 def get_penal_interest_rate_map():
-	return frappe._dict(
-		frappe.get_all("Loan Type", fields=["name", "penalty_interest_rate"], as_list=1)
-	)
+	return frappe._dict(frappe.get_all("Loan Type", fields=["name", "penalty_interest_rate"], as_list=1))
 
 
 def get_loan_wise_pledges(filters):
@@ -324,16 +320,14 @@ def get_loan_wise_pledges(filters):
 		conditions = "AND company = %(company)s"
 
 	unpledges = frappe.db.sql(
-		"""
+		f"""
 		SELECT up.loan, u.loan_security, sum(u.qty) as qty
 		FROM `tabLoan Security Unpledge` up, `tabUnpledge` u
 		WHERE u.parent = up.name
 		AND up.status = 'Approved'
 		{conditions}
 		GROUP BY up.loan, u.loan_security
-	""".format(
-			conditions=conditions
-		),
+	""",
 		filters,
 		as_dict=1,
 	)
@@ -342,16 +336,14 @@ def get_loan_wise_pledges(filters):
 		loan_wise_unpledges.setdefault((unpledge.loan, unpledge.loan_security), unpledge.qty)
 
 	pledges = frappe.db.sql(
-		"""
+		f"""
 		SELECT lp.loan, p.loan_security, sum(p.qty) as qty
 		FROM `tabLoan Security Pledge` lp, `tabPledge`p
 		WHERE p.parent = lp.name
 		AND lp.status = 'Pledged'
 		{conditions}
 		GROUP BY lp.loan, p.loan_security
-	""".format(
-			conditions=conditions
-		),
+	""",
 		filters,
 		as_dict=1,
 	)

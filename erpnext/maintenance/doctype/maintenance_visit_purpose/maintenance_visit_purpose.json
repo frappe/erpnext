@@ -17,7 +17,8 @@
   "work_details",
   "work_done",
   "prevdoc_doctype",
-  "prevdoc_docname"
+  "prevdoc_docname",
+  "maintenance_schedule_detail"
  ],
  "fields": [
   {
@@ -49,6 +50,8 @@
    "options": "Serial No"
   },
   {
+   "fetch_from": "item_code.description",
+   "fetch_if_empty": 1,
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -56,7 +59,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -103,12 +105,19 @@
   {
    "fieldname": "section_break_6",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "maintenance_schedule_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Maintenance Schedule Detail",
+   "options": "Maintenance Schedule Detail"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-02-27 11:09:33.114458",
+ "modified": "2024-01-05 21:46:53.239830",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Visit Purpose",

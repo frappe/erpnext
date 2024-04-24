@@ -744,9 +744,7 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(mr.per_ordered, 100)
 
 	def test_customer_provided_parts_mr(self):
-		create_item(
-			"CUST-0987", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0
-		)
+		create_item("CUST-0987", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
 		existing_requested_qty = self._get_requested_qty("_Test Customer", "_Test Warehouse - _TC")
 
 		mr = make_material_request(item_code="CUST-0987", material_request_type="Customer Provided")
@@ -762,6 +760,62 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(mr.per_ordered, 100)
 		self.assertEqual(existing_requested_qty, current_requested_qty)
 
+	def test_auto_email_users_with_company_user_permissions(self):
+		from erpnext.stock.reorder_item import get_email_list
+
+		comapnywise_users = {
+			"_Test Company": "test_auto_email_@example.com",
+			"_Test Company 1": "test_auto_email_1@example.com",
+		}
+
+		permissions = []
+
+		for company, user in comapnywise_users.items():
+			if not frappe.db.exists("User", user):
+				frappe.get_doc(
+					{
+						"doctype": "User",
+						"email": user,
+						"first_name": user,
+						"send_notifications": 0,
+						"enabled": 1,
+						"user_type": "System User",
+						"roles": [{"role": "Purchase Manager"}],
+					}
+				).insert(ignore_permissions=True)
+
+			if not frappe.db.exists(
+				"User Permission", {"user": user, "allow": "Company", "for_value": company}
+			):
+				perm_doc = frappe.get_doc(
+					{
+						"doctype": "User Permission",
+						"user": user,
+						"allow": "Company",
+						"for_value": company,
+						"apply_to_all_doctypes": 1,
+					}
+				).insert(ignore_permissions=True)
+
+				permissions.append(perm_doc)
+
+		comapnywise_mr_list = frappe._dict({})
+		mr1 = make_material_request()
+		comapnywise_mr_list.setdefault(mr1.company, []).append(mr1.name)
+
+		mr2 = make_material_request(
+			company="_Test Company 1", warehouse="Stores - _TC1", cost_center="Main - _TC1"
+		)
+		comapnywise_mr_list.setdefault(mr2.company, []).append(mr2.name)
+
+		for company, _mr_list in comapnywise_mr_list.items():
+			emails = get_email_list(company)
+
+			self.assertTrue(comapnywise_users[company] in emails)
+
+		for perm in permissions:
+			perm.delete()
+
 
 def get_in_transit_warehouse(company):
 	if not frappe.db.exists("Warehouse Type", "Transit"):
@@ -772,9 +826,7 @@ def get_in_transit_warehouse(company):
 			}
 		).insert()
 
-	in_transit_warehouse = frappe.db.exists(
-		"Warehouse", {"warehouse_type": "Transit", "company": company}
-	)
+	in_transit_warehouse = frappe.db.exists("Warehouse", {"warehouse_type": "Transit", "company": company})
 
 	if not in_transit_warehouse:
 		in_transit_warehouse = (

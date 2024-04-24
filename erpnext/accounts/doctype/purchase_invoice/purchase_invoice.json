@@ -22,6 +22,9 @@
   "is_paid",
   "is_return",
   "return_against",
+  "update_outstanding_for_self",
+  "update_billed_amount_in_purchase_order",
+  "update_billed_amount_in_purchase_receipt",
   "apply_tds",
   "tax_withholding_category",
   "amended_from",
@@ -411,6 +414,20 @@
    "search_index": 1
   },
   {
+   "default": "0",
+   "depends_on": "eval: doc.is_return",
+   "fieldname": "update_billed_amount_in_purchase_order",
+   "fieldtype": "Check",
+   "label": "Update Billed Amount in Purchase Order"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: doc.is_return",
+   "fieldname": "update_billed_amount_in_purchase_receipt",
+   "fieldtype": "Check",
+   "label": "Update Billed Amount in Purchase Receipt"
+  },
+  {
    "fieldname": "section_addresses",
    "fieldtype": "Section Break",
    "label": "Supplier Address"
@@ -739,7 +756,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1588,13 +1605,21 @@
    "fieldtype": "Check",
    "label": "Use Transaction Date Exchange Rate",
    "read_only": 1
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: doc.is_return && doc.return_against",
+   "description": "Debit Note will update it's own outstanding amount, even if \"Return Against\" is specified.",
+   "fieldname": "update_outstanding_for_self",
+   "fieldtype": "Check",
+   "label": "Update Outstanding for Self"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-03 15:47:30.319200",
+ "modified": "2024-03-20 15:57:00.736868",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

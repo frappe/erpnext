@@ -21,7 +21,7 @@ class TestTaxDetail(unittest.TestCase):
 		from erpnext.accounts.utils import FiscalYearError, get_fiscal_year
 
 		datapath, _ = os.path.splitext(os.path.realpath(__file__))
-		with open(datapath + ".json", "r") as fp:
+		with open(datapath + ".json") as fp:
 			docs = json.load(fp)
 
 		now = getdate()
@@ -45,8 +45,9 @@ class TestTaxDetail(unittest.TestCase):
 					"year": "_Test Fiscal",
 					"year_end_date": get_year_ending(now),
 					"year_start_date": get_year_start(now),
-				}
-			] + docs
+				},
+				*docs,
+			]
 
 		docs = [
 			{
@@ -56,8 +57,9 @@ class TestTaxDetail(unittest.TestCase):
 				"default_currency": "GBP",
 				"doctype": "Company",
 				"name": "_T",
-			}
-		] + docs
+			},
+			*docs,
+		]
 
 		for doc in docs:
 			try:
@@ -109,9 +111,14 @@ class TestTaxDetail(unittest.TestCase):
 						"Box5": {"Box3": {"type": "section"}, "Box4": {"type": "section"}},
 						"Box6": {"Filter0": {"type": "filter", "filters": {"3": "!=Tax", "4": "Sales"}}},
 						"Box7": {"Filter0": {"type": "filter", "filters": {"2": "Expense", "3": "!=Tax"}}},
-						"Box8": {"Filter0": {"type": "filter", "filters": {"3": "!=Tax", "4": "Sales", "12": "EU"}}},
+						"Box8": {
+							"Filter0": {"type": "filter", "filters": {"3": "!=Tax", "4": "Sales", "12": "EU"}}
+						},
 						"Box9": {
-							"Filter0": {"type": "filter", "filters": {"2": "Expense", "3": "!=Tax", "12": "EU"}}
+							"Filter0": {
+								"type": "filter",
+								"filters": {"2": "Expense", "3": "!=Tax", "12": "EU"},
+							}
 						},
 					},
 					"show_detail": 1,

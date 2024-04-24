@@ -211,7 +211,7 @@ class TestSubcontractingOrder(FrappeTestCase):
 			item["qty"] -= 1
 			itemwise_transfer_qty[item["item_code"]] += item["qty"]
 
-		ste = make_stock_transfer_entry(
+		make_stock_transfer_entry(
 			sco_no=sco.name,
 			rm_items=rm_items,
 			itemwise_details=copy.deepcopy(itemwise_details),

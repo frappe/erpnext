@@ -16,9 +16,7 @@ def execute():
 	for report in reports:
 		frappe.delete_doc("Report", report, ignore_missing=True, force=True)
 
-	print_formats = frappe.get_all(
-		"Print Format", {"module": "education", "standard": "Yes"}, pluck="name"
-	)
+	print_formats = frappe.get_all("Print Format", {"module": "education", "standard": "Yes"}, pluck="name")
 	for print_format in print_formats:
 		frappe.delete_doc("Print Format", print_format, ignore_missing=True, force=True)
 
@@ -31,9 +29,7 @@ def execute():
 	for dashboard in dashboards:
 		frappe.delete_doc("Dashboard", dashboard, ignore_missing=True, force=True)
 
-	dashboards = frappe.get_all(
-		"Dashboard Chart", {"module": "education", "is_standard": 1}, pluck="name"
-	)
+	dashboards = frappe.get_all("Dashboard Chart", {"module": "education", "is_standard": 1}, pluck="name")
 	for dashboard in dashboards:
 		frappe.delete_doc("Dashboard Chart", dashboard, ignore_missing=True, force=True)
 

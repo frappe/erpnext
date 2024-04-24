@@ -69,10 +69,8 @@ class TestJournalEntry(unittest.TestCase):
 
 		self.assertTrue(
 			frappe.db.sql(
-				"""select name from `tabJournal Entry Account`
-			where reference_type = %s and reference_name = %s and {0}=400""".format(
-					dr_or_cr
-				),
+				f"""select name from `tabJournal Entry Account`
+			where reference_type = %s and reference_name = %s and {dr_or_cr}=400""",
 				(submitted_voucher.doctype, submitted_voucher.name),
 			)
 		)
@@ -84,9 +82,8 @@ class TestJournalEntry(unittest.TestCase):
 	def advance_paid_testcase(self, base_jv, test_voucher, dr_or_cr):
 		# Test advance paid field
 		advance_paid = frappe.db.sql(
-			"""select advance_paid from `tab%s`
-					where name=%s"""
-			% (test_voucher.doctype, "%s"),
+			"""select advance_paid from `tab{}`
+					where name={}""".format(test_voucher.doctype, "%s"),
 			(test_voucher.name),
 		)
 		payment_against_order = base_jv.get("accounts")[0].get(dr_or_cr)
@@ -159,9 +156,7 @@ class TestJournalEntry(unittest.TestCase):
 			jv.cancel()
 
 	def test_multi_currency(self):
-		jv = make_journal_entry(
-			"_Test Bank USD - _TC", "_Test Bank - _TC", 100, exchange_rate=50, save=False
-		)
+		jv = make_journal_entry("_Test Bank USD - _TC", "_Test Bank - _TC", 100, exchange_rate=50, save=False)
 
 		jv.get("accounts")[1].credit_in_account_currency = 5000
 		jv.submit()
@@ -201,7 +196,7 @@ class TestJournalEntry(unittest.TestCase):
 			"credit",
 			"credit_in_account_currency",
 		):
-			for i, gle in enumerate(gl_entries):
+			for _i, gle in enumerate(gl_entries):
 				self.assertEqual(expected_values[gle.account][field], gle[field])
 
 		# cancel
@@ -263,7 +258,7 @@ class TestJournalEntry(unittest.TestCase):
 			"credit",
 			"credit_in_account_currency",
 		):
-			for i, gle in enumerate(gl_entries):
+			for _i, gle in enumerate(gl_entries):
 				self.assertEqual(expected_values[gle.account][field], gle[field])
 
 	def test_disallow_change_in_account_currency_for_a_party(self):

@@ -57,7 +57,11 @@ def execute():
 		for entry in opportunities:
 			mins_to_first_response = convert_to_seconds(entry.mins_to_first_response, "Minutes")
 			frappe.db.set_value(
-				"Opportunity", entry.name, "first_response_time", mins_to_first_response, update_modified=False
+				"Opportunity",
+				entry.name,
+				"first_response_time",
+				mins_to_first_response,
+				update_modified=False,
 			)
 			# commit after every 100 updates
 			count += 1

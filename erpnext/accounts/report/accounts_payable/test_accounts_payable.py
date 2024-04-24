@@ -1,16 +1,10 @@
-import unittest
-
 import frappe
-from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, getdate, today
+from frappe.tests.utils import FrappeTestCase
+from frappe.utils import today
 
-from erpnext import get_default_cost_center
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.accounts_payable.accounts_payable import execute
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 
 class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
@@ -40,6 +34,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"range2": 60,
 			"range3": 90,
 			"range4": 120,
+			"in_party_currency": 1,
 		}
 
 		data = execute(filters)

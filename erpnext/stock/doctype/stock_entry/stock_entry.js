@@ -517,7 +517,12 @@ frappe.ui.form.on('Stock Entry', {
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						["actual_qty", "basic_rate"].forEach((field) => {
+						let fields = ["actual_qty", "basic_rate"];
+						if (frm.doc.purpose == "Material Receipt") {
+							fields = ["actual_qty"];
+						}
+
+						fields.forEach((field) => {
 							frappe.model.set_value(cdt, cdn, field, (r.message[field] || 0.0));
 						});
 						frm.events.calculate_basic_amount(frm, child);
@@ -543,7 +548,9 @@ frappe.ui.form.on('Stock Entry', {
 
 		let fields = [
 			{"fieldname":"bom", "fieldtype":"Link", "label":__("BOM"),
-			options:"BOM", reqd: 1, get_query: filters()},
+			options:"BOM", reqd: 1, get_query: () => {
+				return {filters: { docstatus:1, "is_active": 1 }};
+			}},
 			{"fieldname":"source_warehouse", "fieldtype":"Link", "label":__("Source Warehouse"),
 			options:"Warehouse"},
 			{"fieldname":"target_warehouse", "fieldtype":"Link", "label":__("Target Warehouse"),

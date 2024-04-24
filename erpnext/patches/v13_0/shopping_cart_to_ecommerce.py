@@ -3,7 +3,6 @@ import frappe
 
 
 def execute():
-
 	frappe.delete_doc("DocType", "Shopping Cart Settings", ignore_missing=True)
 	frappe.delete_doc("DocType", "Products Settings", ignore_missing=True)
 	frappe.delete_doc("DocType", "Supplier Item Group", ignore_missing=True)
@@ -13,7 +12,6 @@ def execute():
 
 
 def notify_users():
-
 	click.secho(
 		"Shopping cart and Product settings are merged into E-commerce settings.\n"
 		"Checkout the documentation to learn more:"

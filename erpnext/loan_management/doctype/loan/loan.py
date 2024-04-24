@@ -336,7 +336,6 @@ def get_sanctioned_amount_limit(applicant_type, applicant, company):
 def validate_repayment_method(
 	repayment_method, loan_amount, monthly_repayment_amount, repayment_periods, is_term_loan
 ):
-
 	if is_term_loan and not repayment_method:
 		frappe.throw(_("Repayment Method is mandatory for term loans"))
 

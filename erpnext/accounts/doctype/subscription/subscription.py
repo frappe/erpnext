@@ -349,15 +349,15 @@ class Subscription(Document):
 		company = self.get("company") or get_default_company()
 		if not company:
 			frappe.throw(
-				_("Company is mandatory was generating invoice. Please set default company in Global Defaults")
+				_(
+					"Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
+				)
 			)
 
 		invoice.company = company
 		invoice.set_posting_time = 1
 		invoice.posting_date = (
-			self.current_invoice_start
-			if self.generate_invoice_at_period_start
-			else self.current_invoice_end
+			self.current_invoice_start if self.generate_invoice_at_period_start else self.current_invoice_end
 		)
 
 		invoice.cost_center = self.cost_center
@@ -559,10 +559,9 @@ class Subscription(Document):
 		3. Change the `Subscription` status to 'Cancelled'
 		"""
 
-		if not self.is_current_invoice_generated(
-			self.current_invoice_start, self.current_invoice_end
-		) and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
-
+		if not self.is_current_invoice_generated(self.current_invoice_start, self.current_invoice_end) and (
+			self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()
+		):
 			prorate = frappe.db.get_single_value("Subscription Settings", "prorate")
 			self.generate_invoice(prorate)
 
@@ -594,7 +593,7 @@ class Subscription(Document):
 		"""
 		current_invoice = self.get_current_invoice()
 		if not current_invoice:
-			frappe.throw(_("Current invoice {0} is missing").format(current_invoice.invoice))
+			frappe.throw(_("Subscription {0}: Current invoice is missing.").format(frappe.bold(self.name)))
 		else:
 			if not self.has_outstanding_invoice():
 				self.status = "Active"
@@ -607,10 +606,11 @@ class Subscription(Document):
 			# Generate invoices periodically even if current invoice are unpaid
 			if (
 				self.generate_new_invoices_past_due_date
-				and not self.is_current_invoice_generated(self.current_invoice_start, self.current_invoice_end)
+				and not self.is_current_invoice_generated(
+					self.current_invoice_start, self.current_invoice_end
+				)
 				and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice())
 			):
-
 				prorate = frappe.db.get_single_value("Subscription Settings", "prorate")
 				self.generate_invoice(prorate)
 
@@ -626,7 +626,7 @@ class Subscription(Document):
 		Returns `True` if the most recent invoice for the `Subscription` is not paid
 		"""
 		doctype = "Sales Invoice" if self.party_type == "Customer" else "Purchase Invoice"
-		current_invoice = self.get_current_invoice()
+		self.get_current_invoice()
 		invoice_list = [d.invoice for d in self.invoices]
 
 		outstanding_invoices = frappe.get_all(

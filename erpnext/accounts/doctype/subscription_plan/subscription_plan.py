@@ -21,9 +21,7 @@ class SubscriptionPlan(Document):
 
 
 @frappe.whitelist()
-def get_plan_rate(
-	plan, quantity=1, customer=None, start_date=None, end_date=None, prorate_factor=1
-):
+def get_plan_rate(plan, quantity=1, customer=None, start_date=None, end_date=None, prorate_factor=1):
 	plan = frappe.get_doc("Subscription Plan", plan)
 	if plan.price_determination == "Fixed Rate":
 		return plan.cost * prorate_factor

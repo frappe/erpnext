@@ -7,7 +7,7 @@ cur_frm.cscript.tax_table = "Advance Taxes and Charges";
 
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
-		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger','Repost Accounting Ledger', 'Unreconcile Payment', 'Unreconcile Payment Entries'];
+		frm.ignore_doctypes_on_cancel_all = ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'Repost Payment Ledger', 'Repost Accounting Ledger', 'Unreconcile Payment', 'Unreconcile Payment Entries', 'Bank Transaction'];
 
 		if(frm.doc.__islocal) {
 			if (!frm.doc.paid_from) frm.set_value("paid_from_account_currency", null);
@@ -631,7 +631,7 @@ frappe.ui.form.on('Payment Entry', {
 
 	get_outstanding_invoices_or_orders: function(frm, get_outstanding_invoices, get_orders_to_be_billed) {
 		const today = frappe.datetime.get_today();
-		const fields = [
+		let fields = [
 			{fieldtype:"Section Break", label: __("Posting Date")},
 			{fieldtype:"Date", label: __("From Date"),
 				fieldname:"from_posting_date", default:frappe.datetime.add_days(today, -30)},
@@ -646,18 +646,29 @@ frappe.ui.form.on('Payment Entry', {
 				fieldname:"outstanding_amt_greater_than", default: 0},
 			{fieldtype:"Column Break"},
 			{fieldtype:"Float", label: __("Less Than Amount"), fieldname:"outstanding_amt_less_than"},
-			{fieldtype:"Section Break"},
-			{fieldtype:"Link", label:__("Cost Center"), fieldname:"cost_center", options:"Cost Center",
-				"get_query": function() {
-					return {
-						"filters": {"company": frm.doc.company}
-					}
+		];
+
+		if (frm.dimension_filters) {
+			let column_break_insertion_point = Math.ceil((frm.dimension_filters.length)/2);
+
+			fields.push({fieldtype:"Section Break"});
+			frm.dimension_filters.map((elem, idx)=>{
+				fields.push({
+					fieldtype: "Link",
+					label: elem.document_type == "Cost Center" ? "Cost Center" : elem.label,
+					options: elem.document_type,
+					fieldname: elem.fieldname || elem.document_type
+				});
+				if(idx+1 == column_break_insertion_point) {
+					fields.push({fieldtype:"Column Break"});
 				}
-			},
-			{fieldtype:"Column Break"},
+			});
+		}
+
+		fields = fields.concat([
 			{fieldtype:"Section Break"},
 			{fieldtype:"Check", label: __("Allocate Payment Amount"), fieldname:"allocate_payment_amount", default:1},
-		];
+		]);
 
 		let btn_text = "";
 
@@ -919,7 +930,7 @@ frappe.ui.form.on('Payment Entry', {
 			if(frm.doc.payment_type == "Receive"
 				&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions
 				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
-					unallocated_amount = (frm.doc.base_received_amount + total_deductions + flt(frm.doc.base_total_taxes_and_charges)
+					unallocated_amount = (frm.doc.base_received_amount + total_deductions - flt(frm.doc.base_total_taxes_and_charges)
 						- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
 			} else if (frm.doc.payment_type == "Pay"
 				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions

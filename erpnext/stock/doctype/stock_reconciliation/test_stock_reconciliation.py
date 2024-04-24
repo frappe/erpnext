@@ -101,7 +101,8 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 				# no gl entries
 				self.assertTrue(
 					frappe.db.get_value(
-						"Stock Ledger Entry", {"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}
+						"Stock Ledger Entry",
+						{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name},
 					)
 				)
 
@@ -147,7 +148,6 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 	def test_stock_reco_for_serialized_item(self):
 		to_delete_records = []
-		to_delete_serial_nos = []
 
 		# Add new serial nos
 		serial_item_code = "Stock-Reco-Serial-Item-1"
@@ -215,7 +215,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			purpose="Opening Stock",
 		)
 
-		for i in range(3):
+		for _i in range(3):
 			sr.append(
 				"items",
 				{
@@ -312,7 +312,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		sr.cancel()
 
 		self.assertEqual(frappe.db.get_value("Serial No", serial_nos[0], "status"), "Inactive")
-		self.assertEqual(frappe.db.exists("Batch", batch_no), None)
+		self.assertTrue(frappe.db.exists("Batch", batch_no))
 
 	def test_stock_reco_balance_qty_for_serial_and_batch_item(self):
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -394,9 +394,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 	def test_customer_provided_items(self):
 		item_code = "Stock-Reco-customer-Item-100"
-		create_item(
-			item_code, is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0
-		)
+		create_item(item_code, is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
 
 		sr = create_stock_reconciliation(item_code=item_code, qty=10, rate=420)
 
@@ -579,18 +577,18 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		item_code = self.make_item().name
 		warehouse = "_Test Warehouse - _TC"
 
-		sr = create_stock_reconciliation(
+		create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), 10)
 		)
 
-		dn = create_delivery_note(
+		create_delivery_note(
 			item_code=item_code, warehouse=warehouse, qty=5, rate=120, posting_date=add_days(nowdate(), 12)
 		)
 		old_bin_qty = frappe.db.get_value(
 			"Bin", {"item_code": item_code, "warehouse": warehouse}, "actual_qty"
 		)
 
-		sr2 = create_stock_reconciliation(
+		create_stock_reconciliation(
 			item_code=item_code, warehouse=warehouse, qty=11, rate=100, posting_date=add_days(nowdate(), 11)
 		)
 		new_bin_qty = frappe.db.get_value(
@@ -830,7 +828,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		warehouse = "_Test Warehouse - _TC"
 
 		# Stock Value => 100 * 100 = 10000
-		se = make_stock_entry(
+		make_stock_entry(
 			item_code=item_code,
 			target=warehouse,
 			qty=100,
@@ -1055,6 +1053,72 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(sr.items[0].current_qty, se2.items[0].qty)
 		self.assertEqual(len(sr.items[0].current_serial_no.split("\n")), sr.items[0].current_qty)
 
+	def test_backdated_purchase_receipt_with_stock_reco(self):
+		item_code = self.make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "TEST-SERIAL-.###",
+			}
+		).name
+
+		warehouse = "_Test Warehouse - _TC"
+
+		# Step - 1: Create a Backdated Purchase Receipt
+
+		pr1 = make_purchase_receipt(
+			item_code=item_code, warehouse=warehouse, qty=10, rate=100, posting_date=add_days(nowdate(), -3)
+		)
+		pr1.reload()
+
+		serial_nos = sorted(get_serial_nos(pr1.items[0].serial_no))[:5]
+
+		# Step - 2: Create a Stock Reconciliation
+		sr1 = create_stock_reconciliation(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=5,
+			serial_no="\n".join(serial_nos),
+		)
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["serial_no", "actual_qty", "stock_value_difference"],
+			filters={"voucher_no": sr1.name, "is_cancelled": 0},
+			order_by="creation",
+		)
+
+		for d in data:
+			if d.actual_qty < 0:
+				self.assertEqual(d.actual_qty, -10.0)
+				self.assertAlmostEqual(d.stock_value_difference, -1000.0)
+			else:
+				self.assertEqual(d.actual_qty, 5.0)
+				self.assertAlmostEqual(d.stock_value_difference, 500.0)
+
+		# Step - 3: Create a Purchase Receipt before the first Purchase Receipt
+		make_purchase_receipt(
+			item_code=item_code, warehouse=warehouse, qty=10, rate=200, posting_date=add_days(nowdate(), -5)
+		)
+
+		data = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=["serial_no", "actual_qty", "stock_value_difference"],
+			filters={"voucher_no": sr1.name, "is_cancelled": 0},
+			order_by="creation",
+		)
+
+		for d in data:
+			if d.actual_qty < 0:
+				self.assertEqual(d.actual_qty, -20.0)
+				self.assertAlmostEqual(d.stock_value_difference, -3000.0)
+			else:
+				self.assertEqual(d.actual_qty, 5.0)
+				self.assertAlmostEqual(d.stock_value_difference, 500.0)
+
+		active_serial_no = frappe.get_all("Serial No", filters={"status": "Active", "item_code": item_code})
+		self.assertEqual(len(active_serial_no), 5)
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
@@ -1145,9 +1209,7 @@ def create_stock_reconciliation(**args):
 			)
 		)
 		if frappe.get_all("Stock Ledger Entry", {"company": sr.company})
-		else frappe.get_cached_value(
-			"Account", {"account_type": "Temporary", "company": sr.company}, "name"
-		)
+		else frappe.get_cached_value("Account", {"account_type": "Temporary", "company": sr.company}, "name")
 	)
 	sr.cost_center = (
 		args.cost_center

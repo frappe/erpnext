@@ -60,9 +60,7 @@ class TestLoanInterestAccrual(unittest.TestCase):
 	def test_loan_interest_accural(self):
 		pledge = [{"loan_security": "Test Security 1", "qty": 4000.00}]
 
-		loan_application = create_loan_application(
-			"_Test Company", self.applicant, "Demand Loan", pledge
-		)
+		loan_application = create_loan_application("_Test Company", self.applicant, "Demand Loan", pledge)
 		create_pledge(loan_application)
 		loan = create_demand_loan(
 			self.applicant, "Demand Loan", loan_application, posting_date=get_first_day(nowdate())
@@ -86,9 +84,7 @@ class TestLoanInterestAccrual(unittest.TestCase):
 	def test_accumulated_amounts(self):
 		pledge = [{"loan_security": "Test Security 1", "qty": 4000.00}]
 
-		loan_application = create_loan_application(
-			"_Test Company", self.applicant, "Demand Loan", pledge
-		)
+		loan_application = create_loan_application("_Test Company", self.applicant, "Demand Loan", pledge)
 		create_pledge(loan_application)
 		loan = create_demand_loan(
 			self.applicant, "Demand Loan", loan_application, posting_date=get_first_day(nowdate())

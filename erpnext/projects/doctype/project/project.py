@@ -17,7 +17,7 @@ from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
 
 class Project(Document):
 	def get_feed(self):
-		return "{0}: {1}".format(_(self.status), frappe.safe_decode(self.project_name))
+		return f"{_(self.status)}: {frappe.safe_decode(self.project_name)}"
 
 	def onload(self):
 		self.set_onload(
@@ -49,7 +49,6 @@ class Project(Document):
 		Copy tasks from template
 		"""
 		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
-
 			# has a template, and no loaded tasks, so lets create
 			if not self.expected_start_date:
 				# project starts today
@@ -87,6 +86,7 @@ class Project(Document):
 				is_group=task_details.is_group,
 				color=task_details.color,
 				template_task=task_details.name,
+				priority=task_details.priority,
 			)
 		).insert()
 
@@ -119,7 +119,9 @@ class Project(Document):
 			for child_task in template_task.get("depends_on"):
 				if project_template_map and project_template_map.get(child_task.task):
 					project_task.reload()  # reload, as it might have been updated in the previous iteration
-					project_task.append("depends_on", {"task": project_template_map.get(child_task.task).name})
+					project_task.append(
+						"depends_on", {"task": project_template_map.get(child_task.task).name}
+					)
 					project_task.save()
 
 	def check_for_parent_tasks(self, template_task, project_task, project_tasks):
@@ -273,7 +275,7 @@ class Project(Document):
 			frappe.db.set_value("Project", new_name, "copied_from", new_name)
 
 	def send_welcome_email(self):
-		url = get_url("/project/?name={0}".format(self.name))
+		url = get_url(f"/project/?name={self.name}")
 		messages = (
 			_("You have been invited to collaborate on the project: {0}").format(self.name),
 			url,
@@ -288,7 +290,9 @@ class Project(Document):
 		for user in self.users:
 			if user.welcome_email_sent == 0:
 				frappe.sendmail(
-					user.user, subject=_("Project Collaboration Invitation"), content=content.format(*messages)
+					user.user,
+					subject=_("Project Collaboration Invitation"),
+					content=content.format(*messages),
 				)
 				user.welcome_email_sent = 1
 
@@ -307,9 +311,7 @@ def get_timeline_data(doctype, name):
 	)
 
 
-def get_project_list(
-	doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"
-):
+def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, order_by="modified"):
 	meta = frappe.get_meta(doctype)
 	if not filters:
 		filters = []
@@ -593,9 +595,7 @@ def update_project_sales_billing():
 		return
 
 	# Else simply fallback to Daily
-	exists_query = (
-		"(SELECT 1 from `tab{doctype}` where docstatus = 1 and project = `tabProject`.name)"
-	)
+	exists_query = "(SELECT 1 from `tab{doctype}` where docstatus = 1 and project = `tabProject`.name)"
 	project_map = {}
 	for project_details in frappe.db.sql(
 		"""
@@ -638,7 +638,7 @@ def set_project_status(project, status):
 	"""
 	set status for project and all related tasks
 	"""
-	if not status in ("Completed", "Cancelled"):
+	if status not in ("Completed", "Cancelled"):
 		frappe.throw(_("Status must be Cancelled or Completed"))
 
 	project = frappe.get_doc("Project", project)
@@ -658,9 +658,7 @@ def get_holiday_list(company=None):
 	holiday_list = frappe.get_cached_value("Company", company, "default_holiday_list")
 	if not holiday_list:
 		frappe.throw(
-			_("Please set a default Holiday List for Company {0}").format(
-				frappe.bold(get_default_company())
-			)
+			_("Please set a default Holiday List for Company {0}").format(frappe.bold(get_default_company()))
 		)
 	return holiday_list
 

@@ -32,7 +32,7 @@ class TestRegionalAddressTemplate(TestCase):
 		"""Update an existing Address Template."""
 		country = ensure_country("Germany")
 		if not frappe.db.exists("Address Template", country.name):
-			template = frappe.get_doc(
+			frappe.get_doc(
 				{"doctype": "Address Template", "country": country.name, "template": "EXISTING"}
 			).insert()
 

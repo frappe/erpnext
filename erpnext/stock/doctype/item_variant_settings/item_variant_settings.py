@@ -1,6 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
-
+import typing
 
 import frappe
 from frappe import _
@@ -8,7 +8,7 @@ from frappe.model.document import Document
 
 
 class ItemVariantSettings(Document):
-	invalid_fields_for_copy_fields_in_variants = ["barcodes"]
+	invalid_fields_for_copy_fields_in_variants: typing.ClassVar[list] = ["barcodes"]
 
 	def set_default_fields(self):
 		self.fields = []
@@ -24,7 +24,6 @@ class ItemVariantSettings(Document):
 			"description",
 			"variant_of",
 			"valuation_rate",
-			"description",
 			"barcodes",
 			"has_variants",
 			"attributes",
@@ -50,4 +49,6 @@ class ItemVariantSettings(Document):
 	def validate(self):
 		for d in self.fields:
 			if d.field_name in self.invalid_fields_for_copy_fields_in_variants:
-				frappe.throw(_("Cannot set the field <b>{0}</b> for copying in variants").format(d.field_name))
+				frappe.throw(
+					_("Cannot set the field <b>{0}</b> for copying in variants").format(d.field_name)
+				)

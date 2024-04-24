@@ -53,8 +53,13 @@
 				},
 				"II. Forderungen und sonstige Vermögensgegenstände": {
 					"is_group": 1,
-					"Ford. a. Lieferungen und Leistungen": {
+					"Forderungen aus Lieferungen und Leistungen mit Kontokorrent": {
 						"account_number": "1400",
+						"account_type": "Receivable",
+						"is_group": 1
+					},
+					"Forderungen aus Lieferungen und Leistungen ohne Kontokorrent": {
+						"account_number": "1410",
 						"account_type": "Receivable"
 					},
 					"Durchlaufende Posten": {
@@ -180,8 +185,13 @@
 				},
 				"IV. Verbindlichkeiten aus Lieferungen und Leistungen": {
 					"is_group": 1,
-					"Verbindlichkeiten aus Lieferungen u. Leistungen": {
+					"Verbindlichkeiten aus Lieferungen und Leistungen mit Kontokorrent": {
 						"account_number": "1600",
+						"account_type": "Payable",
+						"is_group": 1
+					},
+					"Verbindlichkeiten aus Lieferungen und Leistungen ohne Kontokorrent": {
+						"account_number": "1610",
 						"account_type": "Payable"
 					}
 				},

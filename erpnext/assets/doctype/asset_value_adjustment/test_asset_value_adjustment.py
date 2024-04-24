@@ -20,9 +20,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		)
 
 	def test_current_asset_value(self):
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)
@@ -49,9 +47,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		self.assertEqual(current_value, 100000.0)
 
 	def test_asset_depreciation_value_adjustment(self):
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)

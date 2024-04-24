@@ -3,11 +3,11 @@
 
 
 import frappe
-from frappe import _
+from frappe import _, qb
+from frappe.query_builder import Criterion
 
 from erpnext import get_default_company
 from erpnext.accounts.party import get_party_details
-from erpnext.stock.get_item_details import get_price_list_rate_for
 
 
 def execute(filters=None):
@@ -50,6 +50,45 @@ def get_columns(filters=None):
 	]
 
 
+def fetch_item_prices(
+	customer: str | None = None,
+	price_list: str | None = None,
+	selling_price_list: str | None = None,
+	items: list | None = None,
+):
+	price_list_map = frappe._dict()
+	ip = qb.DocType("Item Price")
+	and_conditions = []
+	or_conditions = []
+	if items:
+		and_conditions.append(ip.item_code.isin([x.item_code for x in items]))
+		and_conditions.append(ip.selling.eq(True))
+
+		or_conditions.append(ip.customer.isnull())
+		or_conditions.append(ip.price_list.isnull())
+
+		if customer:
+			or_conditions.append(ip.customer == customer)
+
+		if price_list:
+			or_conditions.append(ip.price_list == price_list)
+
+		if selling_price_list:
+			or_conditions.append(ip.price_list == selling_price_list)
+
+		res = (
+			qb.from_(ip)
+			.select(ip.item_code, ip.price_list, ip.price_list_rate)
+			.where(Criterion.all(and_conditions))
+			.where(Criterion.any(or_conditions))
+			.run(as_dict=True)
+		)
+		for x in res:
+			price_list_map.update({(x.item_code, x.price_list): x.price_list_rate})
+
+	return price_list_map
+
+
 def get_data(filters=None):
 	data = []
 	customer_details = get_customer_details(filters)
@@ -59,9 +98,17 @@ def get_data(filters=None):
 		"Bin", fields=["item_code", "sum(actual_qty) AS available"], group_by="item_code"
 	)
 	item_stock_map = {item.item_code: item.available for item in item_stock_map}
+	price_list_map = fetch_item_prices(
+		customer_details.customer,
+		customer_details.price_list,
+		customer_details.selling_price_list,
+		items,
+	)
 
 	for item in items:
-		price_list_rate = get_price_list_rate_for(customer_details, item.item_code) or 0.0
+		price_list_rate = price_list_map.get(
+			(item.item_code, customer_details.price_list or customer_details.selling_price_list), 0.0
+		)
 		available_stock = item_stock_map.get(item.item_code)
 
 		data.append(

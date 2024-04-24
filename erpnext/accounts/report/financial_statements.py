@@ -8,17 +8,7 @@ import re
 
 import frappe
 from frappe import _
-from frappe.utils import (
-	add_days,
-	add_months,
-	cint,
-	cstr,
-	flt,
-	formatdate,
-	get_first_day,
-	getdate,
-	today,
-)
+from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
 
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
@@ -52,8 +42,6 @@ def get_period_list(
 		validate_dates(period_start_date, period_end_date)
 		year_start_date = getdate(period_start_date)
 		year_end_date = getdate(period_end_date)
-
-	year_end_date = getdate(today()) if year_end_date > getdate(today()) else year_end_date
 
 	months_to_add = {"Yearly": 12, "Half-Yearly": 6, "Quarterly": 3, "Monthly": 1}[periodicity]
 
@@ -174,7 +162,6 @@ def get_data(
 	ignore_accumulated_values_for_fy=False,
 	total=True,
 ):
-
 	accounts = get_accounts(company, root_type)
 	if not accounts:
 		return None
@@ -190,7 +177,6 @@ def get_data(
 		root_type,
 		as_dict=1,
 	):
-
 		set_gl_entries_by_account(
 			company,
 			period_list[0]["year_start_date"] if only_current_fiscal_year else None,
@@ -248,7 +234,8 @@ def calculate_values(
 
 				if entry.posting_date <= period.to_date:
 					if (accumulated_values or entry.posting_date >= period.from_date) and (
-						not ignore_accumulated_values_for_fy or entry.fiscal_year == period.to_date_fiscal_year
+						not ignore_accumulated_values_for_fy
+						or entry.fiscal_year == period.to_date_fiscal_year
 					):
 						d[period.key] = d.get(period.key, 0.0) + flt(entry.debit) - flt(entry.credit)
 
@@ -292,9 +279,7 @@ def prepare_data(accounts, balance_must_be, period_list, company_currency):
 				"is_group": d.is_group,
 				"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be == "Debit" else -1),
 				"account_name": (
-					"%s - %s" % (_(d.account_number), _(d.account_name))
-					if d.account_number
-					else _(d.account_name)
+					f"{_(d.account_number)} - {_(d.account_name)}" if d.account_number else _(d.account_name)
 				),
 			}
 		)
@@ -382,7 +367,7 @@ def filter_accounts(accounts, depth=20):
 	def add_to_list(parent, level):
 		if level < depth:
 			children = parent_children_map.get(parent) or []
-			sort_accounts(children, is_root=True if parent == None else False)
+			sort_accounts(children, is_root=True if parent is None else False)
 
 			for child in children:
 				child.indent = level
@@ -573,7 +558,9 @@ def apply_additional_conditions(doctype, query, from_date, ignore_closing_entrie
 			company_fb = frappe.get_cached_value("Company", filters.company, "default_finance_book")
 
 			if filters.finance_book and company_fb and cstr(filters.finance_book) != cstr(company_fb):
-				frappe.throw(_("To use a different finance book, please uncheck 'Include Default FB Entries'"))
+				frappe.throw(
+					_("To use a different finance book, please uncheck 'Include Default FB Entries'")
+				)
 
 			query = query.where(
 				(gl_entry.finance_book.isin([cstr(filters.finance_book), cstr(company_fb), ""]))

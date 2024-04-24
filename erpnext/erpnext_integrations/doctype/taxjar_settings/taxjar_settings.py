@@ -23,9 +23,7 @@ class TaxJarSettings(Document):
 			"Custom Field",
 			{"dt": ("in", ["Item", "Sales Invoice Item"]), "fieldname": "product_tax_category"},
 		)
-		fields_hidden = frappe.get_value(
-			"Custom Field", {"dt": ("in", ["Sales Invoice Item"])}, "hidden"
-		)
+		fields_hidden = frappe.get_value("Custom Field", {"dt": ("in", ["Sales Invoice Item"])}, "hidden")
 
 		if TAXJAR_CREATE_TRANSACTIONS or TAXJAR_CALCULATE_TAX or TAXJAR_SANDBOX_MODE:
 			if not fields_already_exist:
@@ -70,13 +68,11 @@ def toggle_tax_category_fields(hidden):
 		"hidden",
 		hidden,
 	)
-	frappe.set_value(
-		"Custom Field", {"dt": "Item", "fieldname": "product_tax_category"}, "hidden", hidden
-	)
+	frappe.set_value("Custom Field", {"dt": "Item", "fieldname": "product_tax_category"}, "hidden", hidden)
 
 
 def add_product_tax_categories():
-	with open(os.path.join(os.path.dirname(__file__), "product_tax_category_data.json"), "r") as f:
+	with open(os.path.join(os.path.dirname(__file__), "product_tax_category_data.json")) as f:
 		tax_categories = json.loads(f.read())
 	create_tax_categories(tax_categories["categories"])
 

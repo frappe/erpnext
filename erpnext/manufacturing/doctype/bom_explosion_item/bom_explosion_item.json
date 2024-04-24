@@ -37,7 +37,8 @@
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
    "options": "Item",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "item_name",
@@ -170,7 +171,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-14 18:35:40.856895",
+ "modified": "2024-01-02 13:49:36.211586",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Explosion Item",

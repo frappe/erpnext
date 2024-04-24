@@ -14,8 +14,7 @@ class ManufacturingSettings(Document):
 
 def get_mins_between_operations():
 	return relativedelta(
-		minutes=cint(frappe.db.get_single_value("Manufacturing Settings", "mins_between_operations"))
-		or 10
+		minutes=cint(frappe.db.get_single_value("Manufacturing Settings", "mins_between_operations")) or 10
 	)
 
 

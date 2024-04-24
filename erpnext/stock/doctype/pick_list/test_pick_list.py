@@ -139,7 +139,6 @@ class TestPickList(FrappeTestCase):
 		self.assertEqual(pick_list.locations[1].qty, 10)
 
 	def test_pick_list_shows_serial_no_for_serialized_item(self):
-
 		stock_reconciliation = frappe.get_doc(
 			{
 				"doctype": "Stock Reconciliation",
@@ -274,7 +273,6 @@ class TestPickList(FrappeTestCase):
 		pr2.cancel()
 
 	def test_pick_list_for_items_from_multiple_sales_orders(self):
-
 		item_code = make_item().name
 		try:
 			frappe.get_doc(
@@ -418,9 +416,7 @@ class TestPickList(FrappeTestCase):
 
 		self.assertEqual(pick_list.locations[0].qty, delivery_note.items[0].qty)
 		self.assertEqual(pick_list.locations[1].qty, delivery_note.items[1].qty)
-		self.assertEqual(
-			sales_order.items[0].conversion_factor, delivery_note.items[0].conversion_factor
-		)
+		self.assertEqual(sales_order.items[0].conversion_factor, delivery_note.items[0].conversion_factor)
 
 		pick_list.cancel()
 		sales_order.cancel()
@@ -469,7 +465,7 @@ class TestPickList(FrappeTestCase):
 			_dict(item_code="A", warehouse="X", qty=8, picked_qty=3),
 			_dict(item_code="B", warehouse="Y", qty=6, picked_qty=4),
 		]
-		for expected_item, created_item in zip(expected_items, pl.locations):
+		for expected_item, created_item in zip(expected_items, pl.locations, strict=False):
 			_compare_dicts(expected_item, created_item)
 
 	def test_multiple_dn_creation(self):
@@ -579,9 +575,7 @@ class TestPickList(FrappeTestCase):
 		pick_list_1.set_item_locations()
 		pick_list_1.submit()
 		create_delivery_note(pick_list_1.name)
-		for dn in frappe.get_all(
-			"Delivery Note", filters={"pick_list": pick_list_1.name}, fields={"name"}
-		):
+		for dn in frappe.get_all("Delivery Note", filters={"pick_list": pick_list_1.name}, fields={"name"}):
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				if dn_item.item_code == "_Test Item":
 					self.assertEqual(dn_item.qty, 1)
@@ -609,7 +603,7 @@ class TestPickList(FrappeTestCase):
 
 		quantities = [5, 2]
 		bundle, components = create_product_bundle(quantities, warehouse=warehouse)
-		bundle_items = dict(zip(components, quantities))
+		bundle_items = dict(zip(components, quantities, strict=False))
 
 		so = make_sales_order(item_code=bundle, qty=3, rate=42)
 
@@ -715,7 +709,7 @@ class TestPickList(FrappeTestCase):
 
 			for item in items:
 				for warehouse in warehouses:
-					se = make_stock_entry(
+					make_stock_entry(
 						item=item.get("item_code"),
 						to_warehouse=warehouse,
 						qty=5,

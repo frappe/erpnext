@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_group_name",
@@ -227,13 +228,14 @@
    "label": "Include Descendants"
   }
  ],
+ "has_web_view": 1,
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2023-01-05 12:21:30.458628",
+ "modified": "2024-02-22 16:23:46.936496",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

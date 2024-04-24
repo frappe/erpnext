@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
 
 import frappe
 
@@ -24,10 +22,11 @@ WEBITEM_PRICE_TESTS = (
 	"test_website_item_price_for_guest_user",
 )
 
+from frappe.tests.utils import FrappeTestCase
 
-class TestWebsiteItem(unittest.TestCase):
-	@classmethod
-	def setUpClass(cls):
+
+class TestWebsiteItem(FrappeTestCase):
+	def setUp(self):
 		setup_e_commerce_settings(
 			{
 				"company": "_Test Company",
@@ -37,11 +36,6 @@ class TestWebsiteItem(unittest.TestCase):
 			}
 		)
 
-	@classmethod
-	def tearDownClass(cls):
-		frappe.db.rollback()
-
-	def setUp(self):
 		if self._testMethodName in WEBITEM_DESK_TESTS:
 			make_item(
 				"Test Web Item",
@@ -74,6 +68,9 @@ class TestWebsiteItem(unittest.TestCase):
 				applicable_for="Customer",
 				customer="_Test Customer",
 			)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_index_creation(self):
 		"Check if index is getting created in db."
@@ -348,9 +345,7 @@ class TestWebsiteItem(unittest.TestCase):
 		)
 
 		# stock up item
-		stock_entry = make_stock_entry(
-			item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100
-		)
+		stock_entry = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=2, rate=100)
 
 		# check if stock details are fetched and item is in stock with warehouse set
 		data = get_product_info_for_website(item_code, skip_quotation_creation=True)
@@ -430,9 +425,7 @@ class TestWebsiteItem(unittest.TestCase):
 		web_item = create_regular_web_item(item_code)
 
 		# price visible to guests
-		setup_e_commerce_settings(
-			{"enable_recommendations": 1, "show_price": 1, "hide_price_for_guest": 0}
-		)
+		setup_e_commerce_settings({"enable_recommendations": 1, "show_price": 1, "hide_price_for_guest": 0})
 
 		# create recommended web item and price for it
 		recommended_web_item = create_regular_web_item("Test Mobile Phone 1")

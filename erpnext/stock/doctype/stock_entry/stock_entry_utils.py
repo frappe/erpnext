@@ -2,7 +2,7 @@
 # See license.txt
 
 
-from typing import TYPE_CHECKING, Optional, overload
+from typing import TYPE_CHECKING, overload
 
 import frappe
 from frappe.utils import cint, flt
@@ -18,15 +18,15 @@ def make_stock_entry(
 	*,
 	item_code: str,
 	qty: float,
-	company: Optional[str] = None,
-	from_warehouse: Optional[str] = None,
-	to_warehouse: Optional[str] = None,
-	rate: Optional[float] = None,
-	serial_no: Optional[str] = None,
-	batch_no: Optional[str] = None,
-	posting_date: Optional[str] = None,
-	posting_time: Optional[str] = None,
-	purpose: Optional[str] = None,
+	company: str | None = None,
+	from_warehouse: str | None = None,
+	to_warehouse: str | None = None,
+	rate: float | None = None,
+	serial_no: str | None = None,
+	batch_no: str | None = None,
+	posting_date: str | None = None,
+	posting_time: str | None = None,
+	purpose: str | None = None,
 	do_not_save: bool = False,
 	do_not_submit: bool = False,
 	inspection_required: bool = False,

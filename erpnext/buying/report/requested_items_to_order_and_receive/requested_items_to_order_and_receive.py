@@ -57,9 +57,7 @@ def get_data(filters):
 				"qty_to_receive"
 			),
 			Sum(Coalesce(mr_item.received_qty, 0)).as_("received_qty"),
-			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.ordered_qty, 0))).as_(
-				"qty_to_order"
-			),
+			(Sum(Coalesce(mr_item.stock_qty, 0)) - Sum(Coalesce(mr_item.ordered_qty, 0))).as_("qty_to_order"),
 			mr_item.item_name,
 			mr_item.description,
 			mr.company,
@@ -110,7 +108,7 @@ def prepare_data(data, filters):
 
 	for row in data:
 		# item wise map for charts
-		if not row["item_code"] in item_qty_map:
+		if row["item_code"] not in item_qty_map:
 			item_qty_map[row["item_code"]] = {
 				"qty": flt(row["stock_qty"], precision),
 				"stock_qty": flt(row["stock_qty"], precision),
@@ -127,7 +125,7 @@ def prepare_data(data, filters):
 
 		if filters.get("group_by_mr"):
 			# consolidated material request map for group by filter
-			if not row["material_request"] in material_request_map:
+			if row["material_request"] not in material_request_map:
 				# create an entry with mr as key
 				row_copy = copy.deepcopy(row)
 				material_request_map[row["material_request"]] = row_copy

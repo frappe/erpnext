@@ -48,9 +48,7 @@ def get_chart_data(data, conditions, filters):
 	return {
 		"data": {
 			"labels": labels,
-			"datasets": [
-				{"name": _(filters.get("period")) + " " + _("Quoted Amount"), "values": datapoints}
-			],
+			"datasets": [{"name": _(filters.get("period")) + " " + _("Quoted Amount"), "values": datapoints}],
 		},
 		"type": "line",
 		"lineOptions": {"regionFill": 1},

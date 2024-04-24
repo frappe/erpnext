@@ -5,7 +5,6 @@ import functools
 import re
 from collections import deque
 from operator import itemgetter
-from typing import Dict, List
 
 import frappe
 from frappe import _
@@ -33,11 +32,9 @@ class BOMTree:
 	# ref: https://docs.python.org/3/reference/datamodel.html#slots
 	__slots__ = ["name", "child_items", "is_bom", "item_code", "qty", "exploded_qty", "bom_qty"]
 
-	def __init__(
-		self, name: str, is_bom: bool = True, exploded_qty: float = 1.0, qty: float = 1
-	) -> None:
+	def __init__(self, name: str, is_bom: bool = True, exploded_qty: float = 1.0, qty: float = 1) -> None:
 		self.name = name  # name of node, BOM number if is_bom else item_code
-		self.child_items: List["BOMTree"] = []  # list of child items
+		self.child_items: list["BOMTree"] = []  # list of child items
 		self.is_bom = is_bom  # true if the node is a BOM and not a leaf item
 		self.item_code: str = None  # item_code associated with node
 		self.qty = qty  # required unit quantity to make one unit of parent item.
@@ -63,7 +60,7 @@ class BOMTree:
 					BOMTree(item.item_code, is_bom=False, exploded_qty=exploded_qty, qty=qty)
 				)
 
-	def level_order_traversal(self) -> List["BOMTree"]:
+	def level_order_traversal(self) -> list["BOMTree"]:
 		"""Get level order traversal of tree.
 		E.g. for following tree the traversal will return list of nodes in order from top to bottom.
 		BOM:
@@ -152,7 +149,7 @@ class BOM(WebsiteGenerator):
 		self.name = name
 
 	@staticmethod
-	def get_next_version_index(existing_boms: List[str]) -> int:
+	def get_next_version_index(existing_boms: list[str]) -> int:
 		# split by "/" and "-"
 		delimiters = ["/", "-"]
 		pattern = "|".join(map(re.escape, delimiters))
@@ -341,10 +338,7 @@ class BOM(WebsiteGenerator):
 		return ret_item
 
 	def validate_bom_currency(self, item):
-		if (
-			item.get("bom_no")
-			and frappe.db.get_value("BOM", item.get("bom_no"), "currency") != self.currency
-		):
+		if item.get("bom_no") and frappe.db.get_value("BOM", item.get("bom_no"), "currency") != self.currency:
 			frappe.throw(
 				_("Row {0}: Currency of the BOM #{1} should be equal to the selected currency {2}").format(
 					item.idx, item.bom_no, self.currency
@@ -361,9 +355,9 @@ class BOM(WebsiteGenerator):
 			rate = get_valuation_rate(arg)
 		elif arg:
 			# Customer Provided parts and Supplier sourced parts will have zero rate
-			if not frappe.db.get_value(
-				"Item", arg["item_code"], "is_customer_provided_item"
-			) and not arg.get("sourced_by_supplier"):
+			if not frappe.db.get_value("Item", arg["item_code"], "is_customer_provided_item") and not arg.get(
+				"sourced_by_supplier"
+			):
 				if arg.get("bom_no") and self.set_rate_of_sub_assembly_item_based_on_bom:
 					rate = flt(self.get_bom_unitcost(arg["bom_no"])) * (arg.get("conversion_factor") or 1)
 				else:
@@ -379,7 +373,8 @@ class BOM(WebsiteGenerator):
 							)
 						else:
 							frappe.msgprint(
-								_("{0} not found for item {1}").format(self.rm_cost_as_per, arg["item_code"]), alert=True
+								_("{0} not found for item {1}").format(self.rm_cost_as_per, arg["item_code"]),
+								alert=True,
 							)
 		return flt(rate) * flt(self.plc_conversion_rate or 1) / (self.conversion_rate or 1)
 
@@ -661,6 +656,9 @@ class BOM(WebsiteGenerator):
 		base_total_rm_cost = 0
 
 		for d in self.get("items"):
+			if not d.is_stock_item and self.rm_cost_as_per == "Valuation Rate":
+				continue
+
 			old_rate = d.rate
 			d.rate = self.get_rm_rate(
 				{
@@ -724,7 +722,7 @@ class BOM(WebsiteGenerator):
 				# Only db_update if changed
 				row.db_update()
 
-	def get_rm_rate_map(self) -> Dict[str, float]:
+	def get_rm_rate_map(self) -> dict[str, float]:
 		"Create Raw Material-Rate map for Exploded Items. Fetch rate from Items table or Subassembly BOM."
 		rm_rate_map = {}
 
@@ -975,8 +973,7 @@ def get_valuation_rate(data):
 			frappe.qb.from_(sle)
 			.select(sle.valuation_rate)
 			.where((sle.item_code == item_code) & (sle.valuation_rate > 0) & (sle.is_cancelled == 0))
-			.orderby(sle.posting_date, order=frappe.qb.desc)
-			.orderby(sle.posting_time, order=frappe.qb.desc)
+			.orderby(sle.posting_datetime, order=frappe.qb.desc)
 			.orderby(sle.creation, order=frappe.qb.desc)
 			.limit(1)
 		).run(as_dict=True)
@@ -1094,9 +1091,7 @@ def get_bom_items_as_dict(
 
 @frappe.whitelist()
 def get_bom_items(bom, company, qty=1, fetch_exploded=1):
-	items = get_bom_items_as_dict(
-		bom, company, qty, fetch_exploded, include_non_stock_items=True
-	).values()
+	items = get_bom_items_as_dict(bom, company, qty, fetch_exploded, include_non_stock_items=True).values()
 	items = list(items)
 	items.sort(key=functools.cmp_to_key(lambda a, b: a.item_code > b.item_code and 1 or -1))
 	return items
@@ -1228,9 +1223,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 		)
 
 	if work_order and work_order.additional_operating_cost and work_order.qty:
-		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(
-			work_order.qty
-		)
+		additional_operating_cost_per_unit = flt(work_order.additional_operating_cost) / flt(work_order.qty)
 
 		if additional_operating_cost_per_unit:
 			stock_entry.append(
@@ -1292,7 +1285,7 @@ def get_bom_diff(bom1, bom2):
 
 			# check for deletions
 			for d in old_value:
-				if not d.get(identifier) in new_row_by_identifier:
+				if d.get(identifier) not in new_row_by_identifier:
 					out.removed.append([df.fieldname, d.as_dict()])
 
 	return out
@@ -1307,14 +1300,12 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 	order_by = "idx desc, name, item_name"
 
 	fields = ["name", "item_name", "item_group", "description"]
-	fields.extend(
-		[field for field in searchfields if not field in ["name", "item_group", "description"]]
-	)
+	fields.extend([field for field in searchfields if field not in ["name", "item_group", "description"]])
 
 	searchfields = searchfields + [
 		field
 		for field in [searchfield or "name", "item_code", "item_group", "item_name"]
-		if not field in searchfields
+		if field not in searchfields
 	]
 
 	query_filters = {"disabled": 0, "ifnull(end_of_life, '3099-12-31')": (">", today())}
@@ -1322,12 +1313,12 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 	or_cond_filters = {}
 	if txt:
 		for s_field in searchfields:
-			or_cond_filters[s_field] = ("like", "%{0}%".format(txt))
+			or_cond_filters[s_field] = ("like", f"%{txt}%")
 
 		barcodes = frappe.get_all(
 			"Item Barcode",
 			fields=["distinct parent as item_code"],
-			filters={"barcode": ("like", "%{0}%".format(txt))},
+			filters={"barcode": ("like", f"%{txt}%")},
 		)
 
 		barcodes = [d.item_code for d in barcodes]
@@ -1392,3 +1383,45 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 	)
 
 	return doc
+
+
+def get_op_cost_from_sub_assemblies(bom_no, op_cost=0):
+	# Get operating cost from sub-assemblies
+
+	bom_items = frappe.get_all(
+		"BOM Item", filters={"parent": bom_no, "docstatus": 1}, fields=["bom_no"], order_by="idx asc"
+	)
+
+	for row in bom_items:
+		if not row.bom_no:
+			continue
+
+		if cost := frappe.get_cached_value("BOM", row.bom_no, "operating_cost_per_bom_quantity"):
+			op_cost += flt(cost)
+			get_op_cost_from_sub_assemblies(row.bom_no, op_cost)
+
+	return op_cost
+
+
+def get_scrap_items_from_sub_assemblies(bom_no, company, qty, scrap_items=None):
+	if not scrap_items:
+		scrap_items = {}
+
+	bom_items = frappe.get_all(
+		"BOM Item",
+		filters={"parent": bom_no, "docstatus": 1},
+		fields=["bom_no", "qty"],
+		order_by="idx asc",
+	)
+
+	for row in bom_items:
+		if not row.bom_no:
+			continue
+
+		qty = flt(row.qty) * flt(qty)
+		items = get_bom_items_as_dict(row.bom_no, company, qty=qty, fetch_exploded=0, fetch_scrap_items=1)
+		scrap_items.update(items)
+
+		get_scrap_items_from_sub_assemblies(row.bom_no, company, qty, scrap_items)
+
+	return scrap_items

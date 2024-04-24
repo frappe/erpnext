@@ -138,8 +138,7 @@
    "label": "Against Voucher Type",
    "oldfieldname": "against_voucher_type",
    "oldfieldtype": "Data",
-   "options": "DocType",
-   "search_index": 1
+   "options": "DocType"
   },
   {
    "fieldname": "against_voucher",
@@ -158,8 +157,7 @@
    "label": "Voucher Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
-   "options": "DocType",
-   "search_index": 1
+   "options": "DocType"
   },
   {
    "fieldname": "voucher_no",
@@ -176,7 +174,8 @@
    "fieldname": "voucher_detail_no",
    "fieldtype": "Data",
    "label": "Voucher Detail No",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "project",
@@ -258,7 +257,8 @@
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-04-07 16:22:33.766994",
+ "links": [],
+ "modified": "2024-03-19 18:30:49.613401",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
@@ -290,5 +290,6 @@
  "quick_entry": 1,
  "search_fields": "voucher_no,account,posting_date,against_voucher",
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "states": []
 }

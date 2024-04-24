@@ -4,7 +4,7 @@
 import copy
 import json
 from collections import defaultdict
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
 	from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import BOMUpdateLog
@@ -13,7 +13,7 @@ import frappe
 from frappe import _
 
 
-def replace_bom(boms: Dict, log_name: str) -> None:
+def replace_bom(boms: dict, log_name: str) -> None:
 	"Replace current BOM with new BOM in parent BOMs."
 
 	current_bom = boms.get("current_bom")
@@ -43,9 +43,7 @@ def replace_bom(boms: Dict, log_name: str) -> None:
 		bom_obj.save_version()
 
 
-def update_cost_in_level(
-	doc: "BOMUpdateLog", bom_list: List[str], batch_name: Union[int, str]
-) -> None:
+def update_cost_in_level(doc: "BOMUpdateLog", bom_list: list[str], batch_name: int | str) -> None:
 	"Updates Cost for BOMs within a given level. Runs via background jobs."
 
 	try:
@@ -69,7 +67,7 @@ def update_cost_in_level(
 			frappe.db.commit()  # nosemgrep
 
 
-def get_ancestor_boms(new_bom: str, bom_list: Optional[List] = None) -> List:
+def get_ancestor_boms(new_bom: str, bom_list: list | None = None) -> list:
 	"Recursively get all ancestors of BOM."
 
 	bom_list = bom_list or []
@@ -86,10 +84,12 @@ def get_ancestor_boms(new_bom: str, bom_list: Optional[List] = None) -> List:
 		if new_bom == d.parent:
 			frappe.throw(_("BOM recursion: {0} cannot be child of {1}").format(new_bom, d.parent))
 
-		bom_list.append(d.parent)
+		if d.parent not in tuple(bom_list):
+			bom_list.append(d.parent)
+
 		get_ancestor_boms(d.parent, bom_list)
 
-	return list(set(bom_list))
+	return bom_list
 
 
 def update_new_bom_in_bom_items(unit_cost: float, current_bom: str, new_bom: str) -> None:
@@ -99,9 +99,7 @@ def update_new_bom_in_bom_items(unit_cost: float, current_bom: str, new_bom: str
 		.set(bom_item.bom_no, new_bom)
 		.set(bom_item.rate, unit_cost)
 		.set(bom_item.amount, (bom_item.stock_qty * unit_cost))
-		.where(
-			(bom_item.bom_no == current_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM")
-		)
+		.where((bom_item.bom_no == current_bom) & (bom_item.docstatus < 2) & (bom_item.parenttype == "BOM"))
 	).run()
 
 
@@ -114,7 +112,7 @@ def get_bom_unit_cost(bom_name: str) -> float:
 	return frappe.utils.flt(new_bom_unitcost[0][0])
 
 
-def update_cost_in_boms(bom_list: List[str]) -> None:
+def update_cost_in_boms(bom_list: list[str]) -> None:
 	"Updates cost in given BOMs. Returns current and total updated BOMs."
 
 	for index, bom in enumerate(bom_list):
@@ -126,9 +124,7 @@ def update_cost_in_boms(bom_list: List[str]) -> None:
 			frappe.db.commit()  # nosemgrep
 
 
-def get_next_higher_level_boms(
-	child_boms: List[str], processed_boms: Dict[str, bool]
-) -> List[str]:
+def get_next_higher_level_boms(child_boms: list[str], processed_boms: dict[str, bool]) -> list[str]:
 	"Generate immediate higher level dependants with no unresolved dependencies (children)."
 
 	def _all_children_are_processed(parent_bom):
@@ -154,7 +150,7 @@ def get_next_higher_level_boms(
 	return list(resolved_dependants)
 
 
-def get_leaf_boms() -> List[str]:
+def get_leaf_boms() -> list[str]:
 	"Get BOMs that have no dependencies."
 
 	bom = frappe.qb.DocType("BOM")
@@ -207,7 +203,7 @@ def _generate_dependence_map() -> defaultdict:
 	return child_parent_map, parent_child_map
 
 
-def set_values_in_log(log_name: str, values: Dict[str, Any], commit: bool = False) -> None:
+def set_values_in_log(log_name: str, values: dict[str, Any], commit: bool = False) -> None:
 	"Update BOM Update Log record."
 
 	if not values:

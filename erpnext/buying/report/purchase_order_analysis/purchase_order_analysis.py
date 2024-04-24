@@ -68,9 +68,7 @@ def get_data(filters):
 			po.company,
 			po_item.name,
 		)
-		.where(
-			(po_item.parent == po.name) & (po.status.notin(("Stopped", "Closed"))) & (po.docstatus == 1)
-		)
+		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "Closed"))) & (po.docstatus == 1))
 		.groupby(po_item.name)
 		.orderby(po.transaction_date)
 	)
@@ -80,9 +78,7 @@ def get_data(filters):
 			query = query.where(po[field] == filters.get(field))
 
 	if filters.get("from_date") and filters.get("to_date"):
-		query = query.where(
-			po.transaction_date.between(filters.get("from_date"), filters.get("to_date"))
-		)
+		query = query.where(po.transaction_date.between(filters.get("from_date"), filters.get("to_date")))
 
 	if filters.get("status"):
 		query = query.where(po.status.isin(filters.get("status")))
@@ -114,7 +110,7 @@ def prepare_data(data, filters):
 		if filters.get("group_by_po"):
 			po_name = row["purchase_order"]
 
-			if not po_name in purchase_order_map:
+			if po_name not in purchase_order_map:
 				# create an entry
 				row_copy = copy.deepcopy(row)
 				purchase_order_map[po_name] = row_copy

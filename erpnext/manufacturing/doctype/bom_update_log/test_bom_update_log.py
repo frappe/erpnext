@@ -57,6 +57,66 @@ class TestBOMUpdateLog(FrappeTestCase):
 		log.reload()
 		self.assertEqual(log.status, "Completed")
 
+	def test_bom_replace_for_root_bom(self):
+		"""
+		- B-Item A (Root Item)
+		        - B-Item B
+		                - B-Item C
+		        - B-Item D
+		                - B-Item E
+		                        - B-Item F
+
+		Create New BOM for B-Item E with B-Item G and replace it in the above BOM.
+		"""
+
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		items = ["B-Item A", "B-Item B", "B-Item C", "B-Item D", "B-Item E", "B-Item F", "B-Item G"]
+
+		for item_code in items:
+			if not frappe.db.exists("Item", item_code):
+				make_item(item_code)
+
+		for item_code in items:
+			remove_bom(item_code)
+
+		bom_tree = {"B-Item A": {"B-Item B": {"B-Item C": {}}, "B-Item D": {"B-Item E": {"B-Item F": {}}}}}
+
+		root_bom = create_nested_bom(bom_tree, prefix="")
+
+		exploded_items = frappe.get_all(
+			"BOM Explosion Item", filters={"parent": root_bom.name}, fields=["item_code"]
+		)
+
+		exploded_items = [item.item_code for item in exploded_items]
+		expected_exploded_items = ["B-Item C", "B-Item F"]
+		self.assertEqual(sorted(exploded_items), sorted(expected_exploded_items))
+
+		old_bom = frappe.db.get_value("BOM", {"item": "B-Item E"}, "name")
+		bom_tree = {"B-Item E": {"B-Item G": {}}}
+
+		new_bom = create_nested_bom(bom_tree, prefix="")
+		enqueue_replace_bom(boms=frappe._dict(current_bom=old_bom, new_bom=new_bom.name))
+
+		exploded_items = frappe.get_all(
+			"BOM Explosion Item", filters={"parent": root_bom.name}, fields=["item_code"]
+		)
+
+		exploded_items = [item.item_code for item in exploded_items]
+		expected_exploded_items = ["B-Item C", "B-Item G"]
+		self.assertEqual(sorted(exploded_items), sorted(expected_exploded_items))
+
+
+def remove_bom(item_code):
+	boms = frappe.get_all("BOM", fields=["docstatus", "name"], filters={"item": item_code})
+
+	for row in boms:
+		if row.docstatus == 1:
+			frappe.get_doc("BOM", row.name).cancel()
+
+		frappe.delete_doc("BOM", row.name)
+
 
 def update_cost_in_all_boms_in_test():
 	"""

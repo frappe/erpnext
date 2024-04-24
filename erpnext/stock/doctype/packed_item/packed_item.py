@@ -23,9 +23,7 @@ def make_packing_list(doc):
 		return
 
 	parent_items_price, reset = {}, False
-	set_price_from_children = frappe.db.get_single_value(
-		"Selling Settings", "editable_bundle_item_rates"
-	)
+	set_price_from_children = frappe.db.get_single_value("Selling Settings", "editable_bundle_item_rates")
 
 	stale_packed_items_table = get_indexed_packed_items_table(doc)
 
@@ -244,9 +242,7 @@ def get_packed_item_bin_qty(item, warehouse):
 def get_cancelled_doc_packed_item_details(old_packed_items):
 	prev_doc_packed_items_map = {}
 	for items in old_packed_items:
-		prev_doc_packed_items_map.setdefault((items.item_code, items.parent_item), []).append(
-			items.as_dict()
-		)
+		prev_doc_packed_items_map.setdefault((items.item_code, items.parent_item), []).append(items.as_dict())
 	return prev_doc_packed_items_map
 
 

@@ -774,7 +774,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Taxes and Charges Calculation",
@@ -1631,7 +1631,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-10-18 12:41:54.813462",
+ "modified": "2024-03-20 16:04:43.627183",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

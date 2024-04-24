@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.query_builder.functions import IfNull
 from frappe.utils import cint, flt, fmt_money, getdate, nowdate
 
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
@@ -10,7 +11,6 @@ from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
-	in_stock, stock_qty = 0, ""
 	template_item_code, is_stock_item = frappe.db.get_value(
 		"Item", item_code, ["variant_of", "is_stock_item"]
 	)
@@ -30,42 +30,47 @@ def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 
 	total_stock = 0.0
 	if warehouses:
+		qty_field = (
+			"actual_qty"
+			if frappe.db.get_single_value("E Commerce Settings", "show_actual_qty")
+			else "projected_qty"
+		)
+
+		BIN = frappe.qb.DocType("Bin")
+		ITEM = frappe.qb.DocType("Item")
+		UOM = frappe.qb.DocType("UOM Conversion Detail")
+
 		for warehouse in warehouses:
-			stock_qty = frappe.db.sql(
-				"""
-				select S.actual_qty / IFNULL(C.conversion_factor, 1)
-				from tabBin S
-				inner join `tabItem` I on S.item_code = I.Item_code
-				left join `tabUOM Conversion Detail` C on I.sales_uom = C.uom and C.parent = I.Item_code
-				where S.item_code=%s and S.warehouse=%s""",
-				(item_code, warehouse),
-			)
+			stock_qty = (
+				frappe.qb.from_(BIN)
+				.select(BIN[qty_field] / IfNull(UOM.conversion_factor, 1))
+				.inner_join(ITEM)
+				.on(BIN.item_code == ITEM.item_code)
+				.left_join(UOM)
+				.on((ITEM.sales_uom == UOM.uom) & (UOM.parent == ITEM.item_code))
+				.where((BIN.item_code == item_code) & (BIN.warehouse == warehouse))
+			).run()
 
 			if stock_qty:
+				stock_qty = flt(stock_qty[0][0])
 				total_stock += adjust_qty_for_expired_items(item_code, stock_qty, warehouse)
 
-		in_stock = total_stock > 0 and 1 or 0
+	in_stock = int(total_stock > 0)
 
-	return frappe._dict(
-		{"in_stock": in_stock, "stock_qty": total_stock, "is_stock_item": is_stock_item}
-	)
+	return frappe._dict({"in_stock": in_stock, "stock_qty": total_stock, "is_stock_item": is_stock_item})
 
 
 def adjust_qty_for_expired_items(item_code, stock_qty, warehouse):
-	batches = frappe.get_all("Batch", filters=[{"item": item_code}], fields=["expiry_date", "name"])
+	batches = frappe.get_all("Batch", filters={"item": item_code}, fields=["expiry_date", "name"])
 	expired_batches = get_expired_batches(batches)
-	stock_qty = [list(item) for item in stock_qty]
 
 	for batch in expired_batches:
 		if warehouse:
-			stock_qty[0][0] = max(0, stock_qty[0][0] - get_batch_qty(batch, warehouse))
+			stock_qty = max(0, stock_qty - get_batch_qty(batch, warehouse))
 		else:
-			stock_qty[0][0] = max(0, stock_qty[0][0] - qty_from_all_warehouses(get_batch_qty(batch)))
+			stock_qty = max(0, stock_qty - qty_from_all_warehouses(get_batch_qty(batch)))
 
-		if not stock_qty[0][0]:
-			break
-
-	return stock_qty[0][0] if stock_qty else 0
+	return stock_qty
 
 
 def get_expired_batches(batches):
@@ -143,7 +148,9 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 				if pricing_rule.pricing_rule_for == "Rate":
 					rate_discount = flt(mrp) - flt(pricing_rule.price_list_rate)
 					if rate_discount > 0:
-						price_obj.formatted_discount_rate = fmt_money(rate_discount, currency=price_obj["currency"])
+						price_obj.formatted_discount_rate = fmt_money(
+							rate_discount, currency=price_obj["currency"]
+						)
 					price_obj.price_list_rate = pricing_rule.price_list_rate or 0
 
 			if price_obj:
@@ -191,9 +198,7 @@ def get_non_stock_item_status(item_code, item_warehouse_field):
 	# if item is a product bundle, check if its bundle items are in stock
 	if frappe.db.exists("Product Bundle", item_code):
 		items = frappe.get_doc("Product Bundle", item_code).get_all_children()
-		bundle_warehouse = frappe.db.get_value(
-			"Website Item", {"item_code": item_code}, item_warehouse_field
-		)
+		bundle_warehouse = frappe.db.get_value("Website Item", {"item_code": item_code}, item_warehouse_field)
 		return all(
 			get_web_item_qty_in_stock(d.item_code, item_warehouse_field, bundle_warehouse).in_stock
 			for d in items

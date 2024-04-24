@@ -9,12 +9,8 @@ class TestWebsite(unittest.TestCase):
 	def test_permission_for_custom_doctype(self):
 		create_user("Supplier 1", "supplier1@gmail.com")
 		create_user("Supplier 2", "supplier2@gmail.com")
-		create_supplier_with_contact(
-			"Supplier1", "All Supplier Groups", "Supplier 1", "supplier1@gmail.com"
-		)
-		create_supplier_with_contact(
-			"Supplier2", "All Supplier Groups", "Supplier 2", "supplier2@gmail.com"
-		)
+		create_supplier_with_contact("Supplier1", "All Supplier Groups", "Supplier 1", "supplier1@gmail.com")
+		create_supplier_with_contact("Supplier2", "All Supplier Groups", "Supplier 2", "supplier2@gmail.com")
 		po1 = create_purchase_order(supplier="Supplier1")
 		po2 = create_purchase_order(supplier="Supplier2")
 
@@ -62,9 +58,9 @@ def create_user(name, email):
 
 
 def create_supplier_with_contact(name, group, contact_name, contact_email):
-	supplier = frappe.get_doc(
-		{"doctype": "Supplier", "supplier_name": name, "supplier_group": group}
-	).insert(ignore_if_duplicate=True)
+	supplier = frappe.get_doc({"doctype": "Supplier", "supplier_name": name, "supplier_group": group}).insert(
+		ignore_if_duplicate=True
+	)
 
 	if not frappe.db.exists("Contact", contact_name + "-1-" + name):
 		new_contact = frappe.new_doc("Contact")

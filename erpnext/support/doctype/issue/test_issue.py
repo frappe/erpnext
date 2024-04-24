@@ -29,23 +29,21 @@ class TestIssue(TestSetUp):
 		creation = get_datetime("2019-03-04 12:00")
 
 		# make issue with customer specific SLA
-		customer = create_customer("_Test Customer", "__Test SLA Customer Group", "__Test SLA Territory")
+		create_customer("_Test Customer", "__Test SLA Customer Group", "__Test SLA Territory")
 		issue = make_issue(creation, "_Test Customer", 1)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
 		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 15:00"))
 
 		# make issue with customer_group specific SLA
-		customer = create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+		create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
 		issue = make_issue(creation, "__Test Customer", 2)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
 		self.assertEqual(issue.resolution_by, get_datetime("2019-03-04 15:00"))
 
 		# make issue with territory specific SLA
-		customer = create_customer(
-			"___Test Customer", "__Test SLA Customer Group", "_Test SLA Territory"
-		)
+		create_customer("___Test Customer", "__Test SLA Customer Group", "_Test SLA Territory")
 		issue = make_issue(creation, "___Test Customer", 3)
 
 		self.assertEqual(issue.response_by, get_datetime("2019-03-04 14:00"))
@@ -147,16 +145,15 @@ class TestIssue(TestSetUp):
 		self.assertEqual(issue.agreement_status, "Fulfilled")
 
 	def test_issue_open_after_closed(self):
-
 		# Created on -> 1 pm, Response Time -> 4 hrs, Resolution Time -> 6 hrs
 		frappe.flags.current_time = get_datetime("2021-11-01 13:00")
 		issue = make_issue(
 			frappe.flags.current_time, index=1, issue_type="Critical"
 		)  # Applies 24hr working time SLA
 		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
-		self.assertEquals(issue.agreement_status, "First Response Due")
-		self.assertEquals(issue.response_by, get_datetime("2021-11-01 17:00"))
-		self.assertEquals(issue.resolution_by, get_datetime("2021-11-01 19:00"))
+		self.assertEqual(issue.agreement_status, "First Response Due")
+		self.assertEqual(issue.response_by, get_datetime("2021-11-01 17:00"))
+		self.assertEqual(issue.resolution_by, get_datetime("2021-11-01 19:00"))
 
 		# Replied on → 2 pm
 		frappe.flags.current_time = get_datetime("2021-11-01 14:00")
@@ -164,19 +161,19 @@ class TestIssue(TestSetUp):
 		issue.reload()
 		issue.status = "Replied"
 		issue.save()
-		self.assertEquals(issue.agreement_status, "Resolution Due")
-		self.assertEquals(issue.on_hold_since, frappe.flags.current_time)
-		self.assertEquals(issue.first_responded_on, frappe.flags.current_time)
+		self.assertEqual(issue.agreement_status, "Resolution Due")
+		self.assertEqual(issue.on_hold_since, frappe.flags.current_time)
+		self.assertEqual(issue.first_responded_on, frappe.flags.current_time)
 
 		# Customer Replied → 3 pm
 		frappe.flags.current_time = get_datetime("2021-11-01 15:00")
 		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
 		issue.reload()
-		self.assertEquals(issue.status, "Open")
+		self.assertEqual(issue.status, "Open")
 		# Hold Time + 1 Hrs
-		self.assertEquals(issue.total_hold_time, 3600)
+		self.assertEqual(issue.total_hold_time, 3600)
 		# Resolution By should increase by one hrs
-		self.assertEquals(issue.resolution_by, get_datetime("2021-11-01 20:00"))
+		self.assertEqual(issue.resolution_by, get_datetime("2021-11-01 20:00"))
 
 		# Replied on → 4 pm, Open → 1 hr, Resolution Due → 8 pm
 		frappe.flags.current_time = get_datetime("2021-11-01 16:00")
@@ -184,37 +181,37 @@ class TestIssue(TestSetUp):
 		issue.reload()
 		issue.status = "Replied"
 		issue.save()
-		self.assertEquals(issue.agreement_status, "Resolution Due")
+		self.assertEqual(issue.agreement_status, "Resolution Due")
 
 		# Customer Closed → 10 pm
 		frappe.flags.current_time = get_datetime("2021-11-01 22:00")
 		issue.status = "Closed"
 		issue.save()
 		# Hold Time + 6 Hrs
-		self.assertEquals(issue.total_hold_time, 3600 + 21600)
+		self.assertEqual(issue.total_hold_time, 3600 + 21600)
 		# Resolution By should increase by 6 hrs
-		self.assertEquals(issue.resolution_by, get_datetime("2021-11-02 02:00"))
-		self.assertEquals(issue.agreement_status, "Fulfilled")
-		self.assertEquals(issue.resolution_date, frappe.flags.current_time)
+		self.assertEqual(issue.resolution_by, get_datetime("2021-11-02 02:00"))
+		self.assertEqual(issue.agreement_status, "Fulfilled")
+		self.assertEqual(issue.resolution_date, frappe.flags.current_time)
 
 		# Customer Open → 3 am i.e after resolution by is crossed
 		frappe.flags.current_time = get_datetime("2021-11-02 03:00")
 		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
 		issue.reload()
 		# Since issue was Resolved, Resolution By should be increased by 5 hrs (3am - 10pm)
-		self.assertEquals(issue.total_hold_time, 3600 + 21600 + 18000)
+		self.assertEqual(issue.total_hold_time, 3600 + 21600 + 18000)
 		# Resolution By should increase by 5 hrs
-		self.assertEquals(issue.resolution_by, get_datetime("2021-11-02 07:00"))
-		self.assertEquals(issue.agreement_status, "Resolution Due")
+		self.assertEqual(issue.resolution_by, get_datetime("2021-11-02 07:00"))
+		self.assertEqual(issue.agreement_status, "Resolution Due")
 		self.assertFalse(issue.resolution_date)
 
 		# We Closed → 4 am, SLA should be Fulfilled
 		frappe.flags.current_time = get_datetime("2021-11-02 04:00")
 		issue.status = "Closed"
 		issue.save()
-		self.assertEquals(issue.resolution_by, get_datetime("2021-11-02 07:00"))
-		self.assertEquals(issue.agreement_status, "Fulfilled")
-		self.assertEquals(issue.resolution_date, frappe.flags.current_time)
+		self.assertEqual(issue.resolution_by, get_datetime("2021-11-02 07:00"))
+		self.assertEqual(issue.agreement_status, "Fulfilled")
+		self.assertEqual(issue.resolution_date, frappe.flags.current_time)
 
 	def test_recording_of_assignment_on_first_reponse_failure(self):
 		from frappe.desk.form.assign_to import add as add_assignment
@@ -255,8 +252,8 @@ class TestIssue(TestSetUp):
 		create_communication(issue.name, "test@admin.com", "Sent", frappe.flags.current_time)
 
 		issue.reload()
-		self.assertEquals(issue.first_responded_on, frappe.flags.current_time)
-		self.assertEquals(issue.agreement_status, "Resolution Due")
+		self.assertEqual(issue.first_responded_on, frappe.flags.current_time)
+		self.assertEqual(issue.agreement_status, "Resolution Due")
 
 
 class TestFirstResponseTime(TestSetUp):
@@ -547,7 +544,7 @@ def make_issue(creation=None, customer=None, index=0, priority=None, issue_type=
 	issue = frappe.get_doc(
 		{
 			"doctype": "Issue",
-			"subject": "Service Level Agreement Issue {0}".format(index),
+			"subject": f"Service Level Agreement Issue {index}",
 			"customer": customer,
 			"raised_by": "test@example.com",
 			"description": "Service Level Agreement Issue",
@@ -564,7 +561,6 @@ def make_issue(creation=None, customer=None, index=0, priority=None, issue_type=
 
 
 def create_customer(name, customer_group, territory):
-
 	create_customer_group(customer_group)
 	create_territory(territory)
 
@@ -580,7 +576,6 @@ def create_customer(name, customer_group, territory):
 
 
 def create_customer_group(customer_group):
-
 	if not frappe.db.exists("Customer Group", {"customer_group_name": customer_group}):
 		frappe.get_doc({"doctype": "Customer Group", "customer_group_name": customer_group}).insert(
 			ignore_permissions=True
@@ -588,7 +583,6 @@ def create_customer_group(customer_group):
 
 
 def create_territory(territory):
-
 	if not frappe.db.exists("Territory", {"territory_name": territory}):
 		frappe.get_doc(
 			{

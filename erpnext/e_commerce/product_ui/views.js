@@ -1,4 +1,4 @@
-erpnext.ProductView =  class {
+erpnext.ProductView = class {
 	/* Options:
 		- View Type
 		- Products Section Wrapper,
@@ -10,7 +10,7 @@ erpnext.ProductView =  class {
 		this.make();
 	}
 
-	make(from_filters=false) {
+	make(from_filters = false) {
 		this.products_section.empty();
 		this.prepare_toolbar();
 		this.get_item_filter_data(from_filters);
@@ -28,7 +28,6 @@ erpnext.ProductView =  class {
 	}
 
 	prepare_view_toggler() {
-
 		if (!$("#list").length || !$("#image-view").length) {
 			this.render_view_toggler();
 			this.bind_view_toggler_actions();
@@ -36,7 +35,7 @@ erpnext.ProductView =  class {
 		}
 	}
 
-	get_item_filter_data(from_filters=false) {
+	get_item_filter_data(from_filters = false) {
 		// Get and render all Product related views
 		let me = this;
 		this.from_filters = from_filters;
@@ -47,9 +46,9 @@ erpnext.ProductView =  class {
 		frappe.call({
 			method: "erpnext.e_commerce.api.get_product_filter_data",
 			args: {
-				query_args: args
+				query_args: args,
 			},
-			callback: function(result) {
+			callback: function (result) {
 				if (!result || result.exc || !result.message || result.message.exc) {
 					me.render_no_products_section(true);
 				} else {
@@ -87,13 +86,13 @@ erpnext.ProductView =  class {
 				}
 
 				me.disable_view_toggler(false);
-			}
+			},
 		});
 	}
 
-	disable_view_toggler(disable=false) {
-		$('#list').prop('disabled', disable);
-		$('#image-view').prop('disabled', disable);
+	disable_view_toggler(disable = false) {
+		$("#list").prop("disabled", disable);
+		$("#image-view").prop("disabled", disable);
 	}
 
 	render_grid_view(items, settings) {
@@ -105,7 +104,7 @@ erpnext.ProductView =  class {
 			items: items,
 			products_section: $("#products-grid-area"),
 			settings: settings,
-			preference: me.preference
+			preference: me.preference,
 		});
 	}
 
@@ -117,7 +116,7 @@ erpnext.ProductView =  class {
 			items: items,
 			products_section: $("#products-list-area"),
 			settings: settings,
-			preference: me.preference
+			preference: me.preference,
 		});
 	}
 
@@ -126,13 +125,13 @@ erpnext.ProductView =  class {
 		let top_margin = view == "list" ? "mt-6" : "mt-minus-1";
 		return this.products_section.append(`
 			<br>
-			<div id="products-${view}-area" class="row products-list ${ top_margin } ${ left_margin }"></div>
+			<div id="products-${view}-area" class="row products-list ${top_margin} ${left_margin}"></div>
 		`);
 	}
 
 	get_query_filters() {
 		const filters = frappe.utils.get_query_params();
-		let {field_filters, attribute_filters} = filters;
+		let { field_filters, attribute_filters } = filters;
 
 		field_filters = field_filters ? JSON.parse(field_filters) : {};
 		attribute_filters = attribute_filters ? JSON.parse(attribute_filters) : {};
@@ -142,7 +141,7 @@ erpnext.ProductView =  class {
 			attribute_filters: attribute_filters,
 			item_group: this.item_group,
 			start: filters.start || null,
-			from_filters: this.from_filters || false
+			from_filters: this.from_filters || false,
 		};
 	}
 
@@ -161,18 +160,18 @@ erpnext.ProductView =  class {
 			let page_length = settings.products_per_page || 0;
 
 			let prev_disable = start > 0 ? "" : "disabled";
-			let next_disable = (this.product_count > page_length) ? "" : "disabled";
+			let next_disable = this.product_count > page_length ? "" : "disabled";
 
 			paging_html += `
-				<button class="btn btn-default btn-prev" data-start="${ start - page_length }"
+				<button class="btn btn-default btn-prev" data-start="${start - page_length}"
 					style="float: left" ${prev_disable}>
-					${ __("Prev") }
+					${__("Prev")}
 				</button>`;
 
 			paging_html += `
-				<button class="btn btn-default btn-next" data-start="${ start + page_length }"
+				<button class="btn btn-default btn-next" data-start="${start + page_length}"
 					${next_disable}>
-					${ __("Next") }
+					${__("Next")}
 				</button>
 			`;
 
@@ -209,14 +208,14 @@ erpnext.ProductView =  class {
 	render_view_toggler() {
 		$(".toolbar").append(`<div class="toggle-container col-4 p-0"></div>`);
 
-		["btn-list-view", "btn-grid-view"].forEach(view => {
+		["btn-list-view", "btn-grid-view"].forEach((view) => {
 			let icon = view === "btn-list-view" ? "list" : "image-view";
 			$(".toggle-container").append(`
 				<div class="form-group mb-0" id="toggle-view">
-					<button id="${ icon }" class="btn ${ view } mr-2">
+					<button id="${icon}" class="btn ${view} mr-2">
 						<span>
 							<svg class="icon icon-md">
-								<use href="#icon-${ icon }"></use>
+								<use href="#icon-${icon}"></use>
 							</svg>
 						</span>
 					</button>
@@ -226,22 +225,22 @@ erpnext.ProductView =  class {
 	}
 
 	bind_view_toggler_actions() {
-		$("#list").click(function() {
+		$("#list").click(function () {
 			let $btn = $(this);
-			$btn.removeClass('btn-primary');
-			$btn.addClass('btn-primary');
-			$(".btn-grid-view").removeClass('btn-primary');
+			$btn.removeClass("btn-primary");
+			$btn.addClass("btn-primary");
+			$(".btn-grid-view").removeClass("btn-primary");
 
 			$("#products-grid-area").addClass("hidden");
 			$("#products-list-area").removeClass("hidden");
 			localStorage.setItem("product_view", "List View");
 		});
 
-		$("#image-view").click(function() {
+		$("#image-view").click(function () {
 			let $btn = $(this);
-			$btn.removeClass('btn-primary');
-			$btn.addClass('btn-primary');
-			$(".btn-list-view").removeClass('btn-primary');
+			$btn.removeClass("btn-primary");
+			$btn.addClass("btn-primary");
+			$(".btn-list-view").removeClass("btn-primary");
 
 			$("#products-list-area").addClass("hidden");
 			$("#products-grid-area").removeClass("hidden");
@@ -251,26 +250,26 @@ erpnext.ProductView =  class {
 
 	set_view_state() {
 		if (this.preference === "List View") {
-			$("#list").addClass('btn-primary');
-			$("#image-view").removeClass('btn-primary');
+			$("#list").addClass("btn-primary");
+			$("#image-view").removeClass("btn-primary");
 		} else {
-			$("#image-view").addClass('btn-primary');
-			$("#list").removeClass('btn-primary');
+			$("#image-view").addClass("btn-primary");
+			$("#list").removeClass("btn-primary");
 		}
 	}
 
 	bind_paging_action() {
 		let me = this;
-		$('.btn-prev, .btn-next').click((e) => {
+		$(".btn-prev, .btn-next").click((e) => {
 			const $btn = $(e.target);
 			me.from_filters = false;
 
-			$btn.prop('disabled', true);
-			const start = $btn.data('start');
+			$btn.prop("disabled", true);
+			const start = $btn.data("start");
 
 			let query_params = frappe.utils.get_query_params();
 			query_params.start = start;
-			let path = window.location.pathname + '?' + frappe.utils.get_url_from_dict(query_params);
+			let path = window.location.pathname + "?" + frappe.utils.get_url_from_dict(query_params);
 			window.location.href = path;
 		});
 	}
@@ -292,24 +291,24 @@ erpnext.ProductView =  class {
 		if (filter_data) {
 			$("#product-filters").append(`
 				<div id="discount-filters" class="mb-4 filter-block pb-5">
-					<div class="filter-label mb-3">${ __("Discounts") }</div>
+					<div class="filter-label mb-3">${__("Discounts")}</div>
 				</div>
 			`);
 
 			let html = `<div class="filter-options">`;
-			filter_data.forEach(filter => {
+			filter_data.forEach((filter) => {
 				html += `
 					<div class="checkbox">
-						<label data-value="${ filter[0] }">
+						<label data-value="${filter[0]}">
 							<input type="radio"
 								class="product-filter discount-filter"
-								name="discount" id="${ filter[0] }"
+								name="discount" id="${filter[0]}"
 								data-filter-name="discount"
-								data-filter-value="${ filter[0] }"
+								data-filter-value="${filter[0]}"
 								style="width: 14px !important"
 							>
-								<span class="label-area" for="${ filter[0] }">
-									${ filter[1] }
+								<span class="label-area" for="${filter[0]}">
+									${filter[1]}
 								</span>
 						</label>
 					</div>
@@ -330,23 +329,23 @@ erpnext.ProductView =  class {
 
 		if (field_filters && field_filters["discount"]) {
 			const values = field_filters["discount"];
-			const selector = values.map(value => {
-				return `input[data-filter-name="discount"][data-filter-value="${value}"]`;
-			}).join(',');
-			$(selector).prop('checked', true);
+			const selector = values
+				.map((value) => {
+					return `input[data-filter-name="discount"][data-filter-value="${value}"]`;
+				})
+				.join(",");
+			$(selector).prop("checked", true);
 			this.field_filters = field_filters;
 		}
 	}
 
 	bind_discount_filter_action() {
 		let me = this;
-		$('.discount-filter').on('change', (e) => {
+		$(".discount-filter").on("change", (e) => {
 			const $checkbox = $(e.target);
-			const is_checked = $checkbox.is(':checked');
+			const is_checked = $checkbox.is(":checked");
 
-			const {
-				filterValue: filter_value
-			} = $checkbox.data();
+			const { filterValue: filter_value } = $checkbox.data();
 
 			delete this.field_filters["discount"];
 
@@ -368,36 +367,32 @@ erpnext.ProductView =  class {
 		this.field_filters = {};
 		this.attribute_filters = {};
 
-		$('.product-filter').on('change', (e) => {
+		$(".product-filter").on("change", (e) => {
 			me.from_filters = true;
 
 			const $checkbox = $(e.target);
-			const is_checked = $checkbox.is(':checked');
+			const is_checked = $checkbox.is(":checked");
 
-			if ($checkbox.is('.attribute-filter')) {
-				const {
-					attributeName: attribute_name,
-					attributeValue: attribute_value
-				} = $checkbox.data();
+			if ($checkbox.is(".attribute-filter")) {
+				const { attributeName: attribute_name, attributeValue: attribute_value } = $checkbox.data();
 
 				if (is_checked) {
 					this.attribute_filters[attribute_name] = this.attribute_filters[attribute_name] || [];
 					this.attribute_filters[attribute_name].push(attribute_value);
 				} else {
 					this.attribute_filters[attribute_name] = this.attribute_filters[attribute_name] || [];
-					this.attribute_filters[attribute_name] = this.attribute_filters[attribute_name].filter(v => v !== attribute_value);
+					this.attribute_filters[attribute_name] = this.attribute_filters[attribute_name].filter(
+						(v) => v !== attribute_value
+					);
 				}
 
 				if (this.attribute_filters[attribute_name].length === 0) {
 					delete this.attribute_filters[attribute_name];
 				}
-			} else if ($checkbox.is('.field-filter') || $checkbox.is('.discount-filter')) {
-				const {
-					filterName: filter_name,
-					filterValue: filter_value
-				} = $checkbox.data();
+			} else if ($checkbox.is(".field-filter") || $checkbox.is(".discount-filter")) {
+				const { filterName: filter_name, filterValue: filter_value } = $checkbox.data();
 
-				if ($checkbox.is('.discount-filter')) {
+				if ($checkbox.is(".discount-filter")) {
 					// clear previous discount filter to accomodate new
 					delete this.field_filters["discount"];
 				}
@@ -408,7 +403,9 @@ erpnext.ProductView =  class {
 					}
 				} else {
 					this.field_filters[filter_name] = this.field_filters[filter_name] || [];
-					this.field_filters[filter_name] = this.field_filters[filter_name].filter(v => v !== filter_value);
+					this.field_filters[filter_name] = this.field_filters[filter_name].filter(
+						(v) => v !== filter_value
+					);
 				}
 
 				if (this.field_filters[filter_name].length === 0) {
@@ -420,20 +417,23 @@ erpnext.ProductView =  class {
 		});
 
 		// bind filter lookup input box
-		$('.filter-lookup-input').on('keydown', frappe.utils.debounce((e) => {
-			const $input = $(e.target);
-			const keyword = ($input.val() || '').toLowerCase();
-			const $filter_options = $input.next('.filter-options');
+		$(".filter-lookup-input").on(
+			"keydown",
+			frappe.utils.debounce((e) => {
+				const $input = $(e.target);
+				const keyword = ($input.val() || "").toLowerCase();
+				const $filter_options = $input.next(".filter-options");
 
-			$filter_options.find('.filter-lookup-wrapper').show();
-			$filter_options.find('.filter-lookup-wrapper').each((i, el) => {
-				const $el = $(el);
-				const value = $el.data('value').toLowerCase();
-				if (!value.includes(keyword)) {
-					$el.hide();
-				}
-			});
-		}, 300));
+				$filter_options.find(".filter-lookup-wrapper").show();
+				$filter_options.find(".filter-lookup-wrapper").each((i, el) => {
+					const $el = $(el);
+					const value = $el.data("value").toLowerCase();
+					if (!value.includes(keyword)) {
+						$el.hide();
+					}
+				});
+			}, 300)
+		);
 	}
 
 	change_route_with_filters() {
@@ -449,26 +449,28 @@ erpnext.ProductView =  class {
 			field_filters: JSON.stringify(this.if_key_exists(this.field_filters)),
 			attribute_filters: JSON.stringify(this.if_key_exists(this.attribute_filters)),
 		});
-		window.history.pushState('filters', '', `${location.pathname}?` + query_string);
+		window.history.pushState("filters", "", `${location.pathname}?` + query_string);
 
-		$('.page_content input').prop('disabled', true);
+		$(".page_content input").prop("disabled", true);
 
 		this.make(true);
-		$('.page_content input').prop('disabled', false);
+		$(".page_content input").prop("disabled", false);
 	}
 
 	restore_filters_state() {
 		const filters = frappe.utils.get_query_params();
-		let {field_filters, attribute_filters} = filters;
+		let { field_filters, attribute_filters } = filters;
 
 		if (field_filters) {
 			field_filters = JSON.parse(field_filters);
 			for (let fieldname in field_filters) {
 				const values = field_filters[fieldname];
-				const selector = values.map(value => {
-					return `input[data-filter-name="${fieldname}"][data-filter-value="${value}"]`;
-				}).join(',');
-				$(selector).prop('checked', true);
+				const selector = values
+					.map((value) => {
+						return `input[data-filter-name="${fieldname}"][data-filter-value="${value}"]`;
+					})
+					.join(",");
+				$(selector).prop("checked", true);
 			}
 			this.field_filters = field_filters;
 		}
@@ -476,16 +478,18 @@ erpnext.ProductView =  class {
 			attribute_filters = JSON.parse(attribute_filters);
 			for (let attribute in attribute_filters) {
 				const values = attribute_filters[attribute];
-				const selector = values.map(value => {
-					return `input[data-attribute-name="${attribute}"][data-attribute-value="${value}"]`;
-				}).join(',');
-				$(selector).prop('checked', true);
+				const selector = values
+					.map((value) => {
+						return `input[data-attribute-name="${attribute}"][data-attribute-value="${value}"]`;
+					})
+					.join(",");
+				$(selector).prop("checked", true);
 			}
 			this.attribute_filters = attribute_filters;
 		}
 	}
 
-	render_no_products_section(error=false) {
+	render_no_products_section(error = false) {
 		let error_section = `
 			<div class="mt-4 w-100 alert alert-error font-md">
 				Something went wrong. Please refresh or contact us.
@@ -496,7 +500,7 @@ erpnext.ProductView =  class {
 				<div class="cart-empty-state">
 					<img src="/assets/erpnext/images/ui-states/cart-empty-state.png" alt="Empty Cart">
 				</div>
-				<div class="cart-empty-message mt-4">${ __('No products found') }</p>
+				<div class="cart-empty-message mt-4">${__("No products found")}</p>
 			</div>
 		`;
 
@@ -509,11 +513,11 @@ erpnext.ProductView =  class {
 				<div class="sub-category-container scroll-categories">
 			`;
 
-			categories.forEach(category => {
+			categories.forEach((category) => {
 				sub_group_html += `
-					<a href="/${ category.route || '#' }" style="text-decoration: none;">
+					<a href="/${category.route || "#"}" style="text-decoration: none;">
 						<div class="category-pill">
-							${ category.name }
+							${category.name}
 						</div>
 					</a>
 				`;

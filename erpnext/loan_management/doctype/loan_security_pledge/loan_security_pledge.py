@@ -74,7 +74,6 @@ class LoanSecurityPledge(Document):
 		maximum_loan_value = 0
 
 		for pledge in self.securities:
-
 			if not pledge.qty and not pledge.amount:
 				frappe.throw(_("Qty or Amount is mandatory for loan security!"))
 

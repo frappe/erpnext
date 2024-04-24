@@ -9,7 +9,7 @@ frappe.ui.form.on("Dunning", {
 					docstatus: 1,
 					company: frm.doc.company,
 					outstanding_amount: [">", 0],
-					status: "Overdue"
+					status: "Overdue",
 				},
 			};
 		});
@@ -18,18 +18,14 @@ frappe.ui.form.on("Dunning", {
 				filters: {
 					company: frm.doc.company,
 					root_type: "Income",
-					is_group: 0
-				}
+					is_group: 0,
+				},
 			};
 		});
 	},
 	refresh: function (frm) {
 		frm.set_df_property("company", "read_only", frm.doc.__islocal ? 0 : 1);
-		frm.set_df_property(
-			"sales_invoice",
-			"read_only",
-			frm.doc.__islocal ? 0 : 1
-		);
+		frm.set_df_property("sales_invoice", "read_only", frm.doc.__islocal ? 0 : 1);
 		if (frm.doc.docstatus === 1 && frm.doc.status === "Unresolved") {
 			frm.add_custom_button(__("Resolve"), () => {
 				frm.set_value("status", "Resolved");
@@ -40,22 +36,27 @@ frappe.ui.form.on("Dunning", {
 				__("Payment"),
 				function () {
 					frm.events.make_payment_entry(frm);
-				},__("Create")
+				},
+				__("Create")
 			);
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
-		if(frm.doc.docstatus > 0) {
-			frm.add_custom_button(__('Ledger'), function() {
-				frappe.route_options = {
-					"voucher_no": frm.doc.name,
-					"from_date": frm.doc.posting_date,
-					"to_date": frm.doc.posting_date,
-					"company": frm.doc.company,
-					"show_cancelled_entries": frm.doc.docstatus === 2
-				};
-				frappe.set_route("query-report", "General Ledger");
-			}, __('View'));
+		if (frm.doc.docstatus > 0) {
+			frm.add_custom_button(
+				__("Ledger"),
+				function () {
+					frappe.route_options = {
+						voucher_no: frm.doc.name,
+						from_date: frm.doc.posting_date,
+						to_date: frm.doc.posting_date,
+						company: frm.doc.company,
+						show_cancelled_entries: frm.doc.docstatus === 2,
+					};
+					frappe.set_route("query-report", "General Ledger");
+				},
+				__("View")
+			);
 		}
 	},
 	overdue_days: function (frm) {
@@ -86,8 +87,7 @@ frappe.ui.form.on("Dunning", {
 	get_dunning_letter_text: function (frm) {
 		if (frm.doc.dunning_type) {
 			frappe.call({
-				method:
-				"erpnext.accounts.doctype.dunning.dunning.get_dunning_letter_text",
+				method: "erpnext.accounts.doctype.dunning.dunning.get_dunning_letter_text",
 				args: {
 					dunning_type: frm.doc.dunning_type,
 					language: frm.doc.language,
@@ -129,26 +129,25 @@ frappe.ui.form.on("Dunning", {
 	},
 	calculate_overdue_days: function (frm) {
 		if (frm.doc.posting_date && frm.doc.due_date) {
-			const overdue_days = moment(frm.doc.posting_date).diff(
-				frm.doc.due_date,
-				"days"
-			);
+			const overdue_days = moment(frm.doc.posting_date).diff(frm.doc.due_date, "days");
 			frm.set_value("overdue_days", overdue_days);
 		}
 	},
 	calculate_interest_and_amount: function (frm) {
-		const interest_per_year = frm.doc.outstanding_amount * frm.doc.rate_of_interest / 100;
-		const interest_amount = flt((interest_per_year * cint(frm.doc.overdue_days)) / 365 || 0, precision('interest_amount'));
-		const dunning_amount = flt(interest_amount + frm.doc.dunning_fee, precision('dunning_amount'));
-		const grand_total = flt(frm.doc.outstanding_amount + dunning_amount, precision('grand_total'));
+		const interest_per_year = (frm.doc.outstanding_amount * frm.doc.rate_of_interest) / 100;
+		const interest_amount = flt(
+			(interest_per_year * cint(frm.doc.overdue_days)) / 365 || 0,
+			precision("interest_amount")
+		);
+		const dunning_amount = flt(interest_amount + frm.doc.dunning_fee, precision("dunning_amount"));
+		const grand_total = flt(frm.doc.outstanding_amount + dunning_amount, precision("grand_total"));
 		frm.set_value("interest_amount", interest_amount);
 		frm.set_value("dunning_amount", dunning_amount);
 		frm.set_value("grand_total", grand_total);
 	},
 	make_payment_entry: function (frm) {
 		return frappe.call({
-			method:
-			"erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
 			args: {
 				dt: frm.doc.doctype,
 				dn: frm.doc.name,

@@ -18,9 +18,7 @@ def execute():
             WHERE
                 `tab{child_doc}`.parent = `tab{parent_doc}`.name
                 and `tab{parent_doc}`.distribution_id is not null and `tab{parent_doc}`.distribution_id != ''
-        """.format(
-				parent_doc=d, child_doc="Target Detail"
-			)
+        """.format(parent_doc=d, child_doc="Target Detail")
 		)
 
 	frappe.delete_doc("Report", "Sales Partner-wise Transaction Summary")

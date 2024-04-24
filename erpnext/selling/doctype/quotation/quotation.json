@@ -556,7 +556,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1072,7 +1072,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-04-14 16:50:44.550098",
+ "modified": "2024-03-20 16:04:21.567847",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

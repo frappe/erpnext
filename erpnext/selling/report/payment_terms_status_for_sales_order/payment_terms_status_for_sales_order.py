@@ -82,9 +82,7 @@ def get_descendants_of(doctype, group_name):
 	).run()[0]
 
 	# get all children of group node
-	query = (
-		qb.from_(group_doc).select(group_doc.name).where((group_doc.lft >= lft) & (group_doc.rgt <= rgt))
-	)
+	query = qb.from_(group_doc).select(group_doc.name).where((group_doc.lft >= lft) & (group_doc.rgt <= rgt))
 
 	child_nodes = []
 	for x in query.run():
@@ -108,7 +106,9 @@ def get_customers_or_items(doctype, txt, searchfield, start, page_len, filters):
 					)
 			elif item[0] == "Item Group":
 				if item[3] != "":
-					filter_list.append([doctype, "item_group", "in", get_descendants_of("Item Group", item[3])])
+					filter_list.append(
+						[doctype, "item_group", "in", get_descendants_of("Item Group", item[3])]
+					)
 
 	if searchfield and txt:
 		filter_list.append([doctype, searchfield, "like", "%%%s%%" % txt])
@@ -132,9 +132,7 @@ def get_conditions(filters):
 
 	conditions.company = filters.company or frappe.defaults.get_user_default("company")
 	conditions.end_date = filters.period_end_date or frappe.utils.today()
-	conditions.start_date = filters.period_start_date or frappe.utils.add_months(
-		conditions.end_date, -1
-	)
+	conditions.start_date = filters.period_start_date or frappe.utils.add_months(conditions.end_date, -1)
 
 	return conditions
 
@@ -210,7 +208,6 @@ def get_so_with_invoices(filters):
 		.where(
 			(so.docstatus == 1)
 			& (so.status.isin(["To Deliver and Bill", "To Bill"]))
-			& (so.payment_terms_template != "NULL")
 			& (so.company == conditions.company)
 			& (so.transaction_date[conditions.start_date : conditions.end_date])
 		)

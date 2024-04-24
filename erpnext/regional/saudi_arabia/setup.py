@@ -2,11 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import add_permission, update_permission_property
+
 from erpnext.regional.saudi_arabia.wizard.operations.setup_ksa_vat_setting import (
 	create_ksa_vat_setting,
 )
-from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 
 def setup(company=None, patch=True):

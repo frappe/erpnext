@@ -20,7 +20,7 @@ class DelayedOrderReport(DelayedItemReport):
 		return self.get_columns(), self.get_data(consolidated=True) or []
 
 	def get_data(self, consolidated=False):
-		data = super(DelayedOrderReport, self).get_data(consolidated) or []
+		data = super().get_data(consolidated) or []
 
 		so_list = []
 		result = []

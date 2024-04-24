@@ -94,9 +94,7 @@ def get_linked_prospect(reference_doctype, reference_name):
 			"Opportunity", reference_name, ["opportunity_from", "party_name"]
 		)
 		if opportunity_from == "Lead":
-			prospect = frappe.db.get_value(
-				"Prospect Opportunity", {"opportunity": reference_name}, "parent"
-			)
+			prospect = frappe.db.get_value("Prospect Opportunity", {"opportunity": reference_name}, "parent")
 		if opportunity_from == "Prospect":
 			prospect = party_name
 

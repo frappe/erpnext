@@ -17,7 +17,7 @@ def execute(filters=None):
 	return SalesPipelineAnalytics(filters).run()
 
 
-class SalesPipelineAnalytics(object):
+class SalesPipelineAnalytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 
@@ -41,7 +41,9 @@ class SalesPipelineAnalytics(object):
 			month_list = self.get_month_list()
 
 			for month in month_list:
-				self.columns.append({"fieldname": month, "fieldtype": based_on, "label": month, "width": 200})
+				self.columns.append(
+					{"fieldname": month, "fieldtype": based_on, "label": _(month), "width": 200}
+				)
 
 		elif self.filters.get("range") == "Quarterly":
 			for quarter in range(1, 5):
@@ -96,7 +98,7 @@ class SalesPipelineAnalytics(object):
 				"Opportunity",
 				filters=self.get_conditions(),
 				fields=[self.based_on, self.data_based_on, self.duration],
-				group_by="{},{}".format(self.group_by_based_on, self.group_by_period),
+				group_by=f"{self.group_by_based_on},{self.group_by_period}",
 				order_by=self.group_by_period,
 			)
 
@@ -156,7 +158,7 @@ class SalesPipelineAnalytics(object):
 
 		for column in self.columns:
 			if column["fieldname"] != "opportunity_owner" and column["fieldname"] != "sales_stage":
-				labels.append(column["fieldname"])
+				labels.append(_(column["fieldname"]))
 
 		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
 
@@ -228,7 +230,7 @@ class SalesPipelineAnalytics(object):
 		current_date = date.today()
 		month_number = date.today().month
 
-		for month in range(month_number, 13):
+		for _month in range(month_number, 13):
 			month_list.append(current_date.strftime("%B"))
 			current_date = current_date + relativedelta(months=1)
 

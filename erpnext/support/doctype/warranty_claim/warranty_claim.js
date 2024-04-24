@@ -43,10 +43,7 @@ frappe.ui.form.on("Warranty Claim", {
 			doctype: "Customer",
 		};
 
-		if (
-			!frm.doc.__islocal &&
-			["Open", "Work In Progress"].includes(frm.doc.status)
-		) {
+		if (!frm.doc.__islocal && ["Open", "Work In Progress"].includes(frm.doc.status)) {
 			frm.add_custom_button(__("Maintenance Visit"), () => {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",

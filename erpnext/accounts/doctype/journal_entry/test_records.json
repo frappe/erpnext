@@ -81,7 +81,6 @@
    },
    {
     "account": "Sales - _TC",
-    "cost_center": "_Test Cost Center - _TC",
     "credit_in_account_currency": 400.0,
     "debit_in_account_currency": 0.0,
     "doctype": "Journal Entry Account",

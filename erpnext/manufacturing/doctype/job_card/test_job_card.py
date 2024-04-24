@@ -59,7 +59,6 @@ class TestJobCard(FrappeTestCase):
 		frappe.db.rollback()
 
 	def test_job_card_operations(self):
-
 		job_cards = frappe.get_all(
 			"Job Card", filters={"work_order": self.work_order.name}, fields=["operation_id", "name"]
 		)
@@ -252,7 +251,6 @@ class TestJobCard(FrappeTestCase):
 
 	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_job_card_excess_material_transfer_block(self):
-
 		self.transfer_material_against = "Job Card"
 		self.source_warehouse = "Stores - _TC"
 
@@ -276,7 +274,6 @@ class TestJobCard(FrappeTestCase):
 
 	@change_settings("Manufacturing Settings", {"job_card_excess_transfer": 0})
 	def test_job_card_excess_material_transfer_with_no_reference(self):
-
 		self.transfer_material_against = "Job Card"
 		self.source_warehouse = "Stores - _TC"
 

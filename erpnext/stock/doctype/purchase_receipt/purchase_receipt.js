@@ -78,6 +78,20 @@ frappe.ui.form.on("Purchase Receipt", {
 			}, __('Create'));
 		}
 
+		if (frm.doc.docstatus === 0) {
+			if (!frm.doc.is_return) {
+				frappe.db.get_single_value("Buying Settings", "maintain_same_rate").then((value) => {
+					if (value) {
+						frm.doc.items.forEach((item) => {
+							frm.fields_dict.items.grid.update_docfield_property(
+								"rate", "read_only", (item.purchase_order && item.purchase_order_item)
+							);
+						});
+					}
+				});
+			}
+		}
+
 		frm.events.add_custom_buttons(frm);
 	},
 

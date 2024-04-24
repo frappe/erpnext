@@ -9,7 +9,6 @@ from frappe.utils import add_days, nowdate, today
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
-from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import start_repost
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.accounts.utils import get_fiscal_year

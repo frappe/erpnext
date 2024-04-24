@@ -7,13 +7,10 @@ from erpnext.controllers import queries
 
 
 def add_default_params(func, doctype):
-	return partial(
-		func, doctype=doctype, txt="", searchfield="name", start=0, page_len=20, filters=None
-	)
+	return partial(func, doctype=doctype, txt="", searchfield="name", start=0, page_len=20, filters=None)
 
 
 class TestQueries(unittest.TestCase):
-
 	# All tests are based on doctype/test_records.json
 
 	def assert_nested_in(self, item, container):
@@ -68,7 +65,7 @@ class TestQueries(unittest.TestCase):
 		self.assertGreaterEqual(len(query(txt="_Test Item Home Desktop Manufactured")), 1)
 
 	def test_project_query(self):
-		query = add_default_params(queries.get_project_name, "BOM")
+		query = add_default_params(queries.get_project_name, "Project")
 
 		self.assertGreaterEqual(len(query(txt="_Test Project")), 1)
 
