@@ -318,7 +318,7 @@ class Deferred_Revenue_and_Expense_Report:
 			.groupby(inv.name, inv_item.name, gle.posting_date)
 			.orderby(gle.posting_date)
 		)
-		self.invoices = query.run(as_dict=True, debug=1)
+		self.invoices = query.run(as_dict=True)
 
 		uniq_invoice = set([x.doc for x in self.invoices])
 		for inv in uniq_invoice:
