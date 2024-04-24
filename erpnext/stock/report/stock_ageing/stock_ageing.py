@@ -227,25 +227,30 @@ class FIFOSlots:
 		                consumed/updated and maintained via FIFO. **
 		}
 		"""
-		if self.sle is None:
-			self.sle = self.__get_stock_ledger_entries()
+		stock_ledger_entries = self.sle
 
-		for d in self.sle:
-			key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
+		with frappe.db.unbuffered_cursor():
+			if self.sle is None:
+				self.sle = self.__get_stock_ledger_entries()
 
-			if d.voucher_type == "Stock Reconciliation":
-				# get difference in qty shift as actual qty
-				prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
-				d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
+			for d in self.sle:
+				key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
 
-			serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
+				if d.voucher_type == "Stock Reconciliation":
+					# get difference in qty shift as actual qty
+					prev_balance_qty = self.item_details[key].get("qty_after_transaction", 0)
+					d.actual_qty = flt(d.qty_after_transaction) - flt(prev_balance_qty)
 
-			if d.actual_qty > 0:
-				self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
-			else:
-				self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
+				serial_nos = get_serial_nos(d.serial_no) if d.serial_no else []
 
-			self.__update_balances(d, key)
+				if d.actual_qty > 0:
+					self.__compute_incoming_stock(d, fifo_queue, transferred_item_key, serial_nos)
+				else:
+					self.__compute_outgoing_stock(d, fifo_queue, transferred_item_key, serial_nos)
+
+				self.__update_balances(d, key)
+
+		del stock_ledger_entries
 
 		if not self.filters.get("show_warehouse_wise_stock"):
 			# (Item 1, WH 1), (Item 1, WH 2) => (Item 1)
@@ -412,10 +417,19 @@ class FIFOSlots:
 
 		if self.filters.get("warehouse"):
 			sle_query = self.__get_warehouse_conditions(sle, sle_query)
+		elif self.filters.get("warehouse_type"):
+			warehouses = frappe.get_all(
+				"Warehouse",
+				filters={"warehouse_type": self.filters.get("warehouse_type"), "is_group": 0},
+				pluck="name",
+			)
+
+			if warehouses:
+				sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
 		sle_query = sle_query.orderby(sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty)
 
-		return sle_query.run(as_dict=True)
+		return sle_query.run(as_dict=True, as_iterator=True)
 
 	def __get_item_query(self) -> str:
 		item_table = frappe.qb.DocType("Item")

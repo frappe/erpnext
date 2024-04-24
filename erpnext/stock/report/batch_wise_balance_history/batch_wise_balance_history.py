@@ -113,6 +113,16 @@ def get_stock_ledger_entries(filters):
 	)
 
 	query = apply_warehouse_filter(query, sle, filters)
+	if filters.warehouse_type and not filters.warehouse:
+		warehouses = frappe.get_all(
+			"Warehouse",
+			filters={"warehouse_type": filters.warehouse_type, "is_group": 0},
+			pluck="name",
+		)
+
+		if warehouses:
+			query = query.where(sle.warehouse.isin(warehouses))
+
 	for field in ["item_code", "batch_no", "company"]:
 		if filters.get(field):
 			query = query.where(sle[field] == filters.get(field))

@@ -71,6 +71,7 @@ frappe.ui.form.on("Payment Order", {
 			target: frm,
 			date_field: "posting_date",
 			setters: {
+				party_type: "Supplier",
 				party: frm.doc.supplier || "",
 			},
 			get_query_filters: {
@@ -91,6 +92,7 @@ frappe.ui.form.on("Payment Order", {
 			source_doctype: "Payment Request",
 			target: frm,
 			setters: {
+				party_type: "Supplier",
 				party: frm.doc.supplier || "",
 			},
 			get_query_filters: {
