@@ -41,15 +41,24 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 			},
 		},
 		{
+			fieldname: "warehouse_type",
+			label: __("Warehouse Type"),
+			fieldtype: "Link",
+			width: "80",
+			options: "Warehouse Type",
+		},
+		{
 			fieldname: "warehouse",
 			label: __("Warehouse"),
 			fieldtype: "Link",
 			options: "Warehouse",
 			get_query: function () {
+				let warehouse_type = frappe.query_report.get_filter_value("warehouse_type");
 				let company = frappe.query_report.get_filter_value("company");
 				return {
 					filters: {
-						company: company,
+						...(warehouse_type && { warehouse_type }),
+						...(company && { company }),
 					},
 				};
 			},
