@@ -1210,19 +1210,20 @@ class TestSalesOrder(FrappeTestCase):
 		so = make_sales_order(item_code="_Test Item", qty=1, do_not_submit=True)
 		so.items[0].price_list_rate = price_list_rate = 100
 		so.items[0].margin_type = "Percentage"
-		so.items[0].margin_rate_or_amount = 25
+		so.items[0].margin_percentage = 25
+		so.items[0].rate = 0.0
 		so.save()
 
 		new_so = frappe.copy_doc(so)
 		new_so.save(ignore_permissions=True)
 
-		self.assertEqual(new_so.get("items")[0].rate, flt((price_list_rate * 25) / 100 + price_list_rate))
+		self.assertEqual(new_so.get("items")[0].rate, flt((price_list_rate * 125) / 100))
 		new_so.items[0].margin_rate_or_amount = 25
 		new_so.payment_schedule = []
 		new_so.save()
 		new_so.submit()
 
-		self.assertEqual(new_so.get("items")[0].rate, flt((price_list_rate * 25) / 100 + price_list_rate))
+		self.assertEqual(new_so.get("items")[0].rate, flt((price_list_rate * 125) / 100))
 
 	def test_terms_auto_added(self):
 		so = make_sales_order(do_not_save=1)

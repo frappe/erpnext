@@ -151,22 +151,6 @@ erpnext.sales_common = {
 				this.set_dynamic_labels();
 			}
 
-			discount_percentage(doc, cdt, cdn) {
-				var item = frappe.get_doc(cdt, cdn);
-				item.discount_amount = 0.0;
-				this.apply_discount_on_item(doc, cdt, cdn, "discount_percentage");
-			}
-
-			discount_amount(doc, cdt, cdn) {
-				if (doc.name === cdn) {
-					return;
-				}
-
-				var item = frappe.get_doc(cdt, cdn);
-				item.discount_percentage = 0.0;
-				this.apply_discount_on_item(doc, cdt, cdn, "discount_amount");
-			}
-
 			commission_rate() {
 				this.calculate_commission();
 			}

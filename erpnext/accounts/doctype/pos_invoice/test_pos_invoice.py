@@ -873,12 +873,12 @@ class TestPOSInvoice(unittest.TestCase):
 		pr.save()
 
 		try:
-			pos_inv = create_pos_invoice(qty=1, do_not_submit=1)
+			pos_inv = create_pos_invoice(qty=1, do_not_submit=1, rate=0.0)
+			self.assertEqual(pos_inv.items[0].discount_percentage, 10)
 			pos_inv.items[0].rate = 300
 			pos_inv.save()
-			self.assertEqual(pos_inv.items[0].discount_percentage, 10)
 			# rate shouldn't change
-			self.assertEqual(pos_inv.items[0].rate, 405)
+			self.assertEqual(pos_inv.items[0].rate, 300)
 
 			pos_inv.ignore_pricing_rule = 1
 			pos_inv.save()

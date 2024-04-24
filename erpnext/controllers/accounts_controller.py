@@ -721,8 +721,6 @@ class AccountsController(TransactionBase):
 			):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
-			self.pricing_rules = []
-
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -743,6 +741,16 @@ class AccountsController(TransactionBase):
 						args["is_subcontracted"] = self.is_subcontracted
 
 					ret = get_item_details(args, self, for_validate=for_validate, overwrite_warehouse=False)
+
+					# apply pricing rules before pricing_rules is set
+					if ret.get("pricing_rules"):
+						if item.get("pricing_rules") == ret.get("pricing_rules"):
+							ret.validate_applied_rule = 1
+							self.apply_pricing_rule_on_items(item, ret)
+						else:
+							self.pricing_rules = []
+							self.apply_pricing_rule_on_items(item, ret)
+							self.set_pricing_rule_details(item, ret)
 
 					for fieldname, value in ret.items():
 						if item.meta.get_field(fieldname) and value is not None:
@@ -790,10 +798,6 @@ class AccountsController(TransactionBase):
 							"cost_center",
 							self.get("cost_center") or erpnext.get_default_cost_center(self.company),
 						)
-
-					if ret.get("pricing_rules"):
-						self.apply_pricing_rule_on_items(item, ret)
-						self.set_pricing_rule_details(item, ret)
 				else:
 					# Transactions line item without item code
 
@@ -822,19 +826,18 @@ class AccountsController(TransactionBase):
 					if other_items and item.item_code not in other_items:
 						return
 
+				item.set("margin_type", pricing_rule_args.get("margin_type"))
+				item.set("margin_percentage", pricing_rule_args.get("margin_percentage"))
+				item.set("margin_rate_or_amount", pricing_rule_args.get("margin_rate_or_amount"))
+
 				item.set("discount_percentage", pricing_rule_args.get("discount_percentage"))
 				item.set("discount_amount", pricing_rule_args.get("discount_amount"))
+
 				if pricing_rule_args.get("pricing_rule_for") == "Rate":
 					item.set("price_list_rate", pricing_rule_args.get("price_list_rate"))
 
-				if item.get("price_list_rate"):
-					item.rate = flt(
-						item.price_list_rate * (1.0 - (flt(item.discount_percentage) / 100.0)),
-						item.precision("rate"),
-					)
-
-					if item.get("discount_amount"):
-						item.rate = item.price_list_rate - item.discount_amount
+				if item.price_list_rate:
+					item.set("rate", 0.0)  # allow new rate to be calculated
 
 				if item.get("apply_discount_on_discounted_rate") and pricing_rule_args.get("rate"):
 					item.rate = pricing_rule_args.get("rate")

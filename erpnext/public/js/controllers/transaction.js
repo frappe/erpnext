@@ -12,37 +12,27 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
+			// back-calculate values using assumptions if rate is changed
 			var item = frappe.get_doc(cdt, cdn);
-			var has_margin_field = frappe.meta.has_field(cdt, 'margin_type');
+			const has_margin_field = frappe.meta.has_field(cdt, 'margin_rate_or_amount');
 
 			frappe.model.round_floats_in(item, ["rate", "price_list_rate"]);
 
+			frm.cscript.remove_pricing_rule(item, {clear_modifier_values: true});
 			if(item.price_list_rate && !item.blanket_order_rate) {
 				if(item.rate > item.price_list_rate && has_margin_field) {
 					// if rate is greater than price_list_rate, set margin
 					// or set discount
-					item.discount_percentage = 0;
 					item.margin_type = 'Amount';
 					item.margin_rate_or_amount = flt(item.rate - item.price_list_rate,
 						precision("margin_rate_or_amount", item));
-					item.rate_with_margin = item.rate;
 				} else {
-					item.discount_percentage = flt((1 - item.rate / item.price_list_rate) * 100.0,
-						precision("discount_percentage", item));
-					item.discount_amount = flt(item.price_list_rate) - flt(item.rate);
-					item.margin_type = '';
-					item.margin_rate_or_amount = 0;
-					item.rate_with_margin = 0;
+					item.discount_amount = flt(item.price_list_rate - item.rate,
+						precision("discount_amount", item));
 				}
-			} else {
-				item.discount_percentage = 0.0;
-				item.margin_type = '';
-				item.margin_rate_or_amount = 0;
-				item.rate_with_margin = 0;
+				frm.cscript.apply_pricing_rule_on_item(item);
 			}
-			item.base_rate_with_margin = item.rate_with_margin * flt(frm.doc.conversion_rate);
 
-			cur_frm.cscript.set_gross_profit(item);
 			cur_frm.cscript.calculate_taxes_and_totals();
 			cur_frm.cscript.calculate_stock_uom_rate(frm, cdt, cdn);
 		});
@@ -638,7 +628,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 									}
 								},
 								() => me.conversion_factor(doc, cdt, cdn, true),
-								() => me.remove_pricing_rule(item),
+								() => me.remove_pricing_rule(item, {}),
 								() => {
 									if (item.apply_rule_on_other_items) {
 										let key = item.name;
@@ -671,24 +661,42 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.calculate_taxes_and_totals();
 	}
 
+	margin_percentage(doc, cdt, cdn) {
+		// trigger update below
+		const item = frappe.get_doc(cdt, cdn);
+		frappe.model.round_floats_in(item, ["margin_percentage"]);
+		item.margin_rate_or_amount = 0.0;
+		this.frm.trigger("margin_rate_or_amount", cdt, cdn);
+	}
+
 	margin_rate_or_amount(doc, cdt, cdn) {
 		// calculated the revised total margin and rate on margin rate changes
-		let item = frappe.get_doc(cdt, cdn);
+		const item = frappe.get_doc(cdt, cdn);
+		if (item.margin_rate_or_amount)
+			item.margin_percentage = 0.0;
+		this.remove_pricing_rule(item, {});
+		// calculate rate here:
 		this.apply_pricing_rule_on_item(item);
 		this.calculate_taxes_and_totals();
 		cur_frm.refresh_fields();
 	}
 
-	margin_type(doc, cdt, cdn) {
-		// calculate the revised total margin and rate on margin type changes
-		let item = frappe.get_doc(cdt, cdn);
-		if (!item.margin_type) {
-			frappe.model.set_value(cdt, cdn, "margin_rate_or_amount", 0);
-		} else {
-			this.apply_pricing_rule_on_item(item, doc, cdt, cdn);
-			this.calculate_taxes_and_totals();
-			cur_frm.refresh_fields();
-		}
+	discount_percentage(doc, cdt, cdn) {
+		// trigger update below
+		const item = frappe.get_doc(cdt, cdn);
+		frappe.model.round_floats_in(item, ["discount_percentage"]);
+		item.discount_amount = 0.0;
+		this.frm.trigger("discount_amount", cdt, cdn);
+	}
+
+	discount_amount(doc, cdt, cdn) {
+		const item = frappe.get_doc(cdt, cdn);
+		if (item.discount_amount)
+			item.discount_percentage = 0.0;
+		this.remove_pricing_rule(item, {});
+		this.apply_pricing_rule_on_item(item);
+		this.calculate_taxes_and_totals();
+		cur_frm.refresh_fields();
 	}
 
 	get_incoming_rate(item, posting_date, posting_time, voucher_type, company) {
@@ -1531,7 +1539,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				callback: function(r) {
 					if (!r.exc && r.message) {
 						r.message.forEach(row_item => {
-							me.remove_pricing_rule(row_item);
+							me.remove_pricing_rule(row_item, {});
 						});
 						me._set_values_for_item_list(r.message);
 						me.calculate_taxes_and_totals();
@@ -1567,7 +1575,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				},
 				callback: function(r) {
 					if (!r.exc && r.message) {
-						me.remove_pricing_rule(r.message, removed_pricing_rule);
+						me.remove_pricing_rule(r.message, {removed_pricing_rule: removed_pricing_rule});
 						me.calculate_taxes_and_totals();
 						if(me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
 					}
@@ -1598,7 +1606,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			callback: function(r) {
 				if (!r.exc && r.message) {
 					me._set_values_for_item_list(r.message);
-					if(item) me.set_gross_profit(item);
+					const itm = frappe.get_doc(item.doctype, item.name);
+					me.apply_pricing_rule_on_item(itm);
+					for (const row of (me.frm.doc.pricing_rules || [])) {
+						if (itm.pricing_rules && JSON.parse(itm.pricing_rules).includes(row.pricing_rule) && itm.item_code == row.item_code) {
+							row.rule_applied = true;
+						}
+					}
+					if (item) me.set_gross_profit(itm);
 					if (me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on")
 				}
 			}
@@ -1716,7 +1731,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			if (!this.frm.doc.ignore_pricing_rule && existing_pricing_rule && !child.pricing_rules) {
 				this.apply_price_list(frappe.get_doc(child.doctype, child.name));
 			} else if (!child.pricing_rules) {
-				this.remove_pricing_rule(frappe.get_doc(child.doctype, child.name));
+				this.remove_pricing_rule(frappe.get_doc(child.doctype, child.name), {});
 			}
 
 			if (child.free_item_data && child.free_item_data.length > 0) {
@@ -1825,10 +1840,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		});
 	}
 
-	remove_pricing_rule(item, removed_pricing_rule) {
+	remove_pricing_rule(item, {removed_pricing_rule=[], clear_modifier_values=false}) {
 		let me = this;
-		const fields = ["discount_percentage",
-			"discount_amount", "margin_rate_or_amount", "rate_with_margin"];
+		const fields = ["discount_percentage", "discount_amount",
+			"margin_rate_or_amount", "margin_percentage", "rate_with_margin"];
 
 		if(item.remove_free_item) {
 			let items = [];
@@ -1842,6 +1857,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 			me.frm.doc.items = items;
 			refresh_field('items');
+
 		} else if(item.applied_on_items && item.apply_on) {
 			const applied_on_items = item.applied_on_items.split(',');
 			me.frm.doc.items.forEach(row => {
@@ -1859,6 +1875,18 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			});
 
 			me.trigger_price_list_rate();
+		}
+
+		if (clear_modifier_values) {
+			fields.forEach(f => {
+				item[f] = 0;
+			});
+		}
+
+		for (const row of (me.frm.doc.pricing_rules || [])) {
+			if (item.pricing_rules && JSON.parse(item.pricing_rules).includes(row.pricing_rule) && item.item_code == row.item_code) {
+				row.rule_applied = false;
+			}
 		}
 	}
 
@@ -2051,10 +2079,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	set_gross_profit(item) {
-		if (["Sales Order", "Quotation"].includes(this.frm.doc.doctype) && item.valuation_rate) {
-			var rate = flt(item.rate) * flt(this.frm.doc.conversion_rate || 1);
-			item.gross_profit = flt(((rate - item.valuation_rate) * item.stock_qty), precision("amount", item));
-		}
+		item.gross_profit = flt(((item.base_rate - (item.valuation_rate || 0.0)) * item.stock_qty),
+			precision("amount", item));
 	}
 
 	setup_item_selector() {

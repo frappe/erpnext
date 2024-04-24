@@ -7,31 +7,28 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 	}
 
 	apply_pricing_rule_on_item(item) {
-		let effective_item_rate = item.price_list_rate;
-		let item_rate = item.rate;
-		if (["Sales Order", "Quotation"].includes(item.parenttype) && item.blanket_order_rate) {
-			effective_item_rate = item.blanket_order_rate;
-		}
-		if (item.margin_type == "Percentage") {
-			item.rate_with_margin = flt(effective_item_rate)
-				+ flt(effective_item_rate) * ( flt(item.margin_rate_or_amount) / 100);
-		} else {
-			item.rate_with_margin = flt(effective_item_rate) + flt(item.margin_rate_or_amount);
-		}
-		item.base_rate_with_margin = flt(item.rate_with_margin) * flt(this.frm.doc.conversion_rate);
-
-		item_rate = flt(item.rate_with_margin , precision("rate", item));
-
-		if (item.discount_percentage && !item.discount_amount) {
-			item.discount_amount = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
+		let effective_item_rate = flt(item.price_list_rate);
+		const has_blanket_order_rate = frappe.meta.has_field(item.doctype, "blanket_order_rate");
+		if (has_blanket_order_rate && item.blanket_order_rate) {
+			effective_item_rate = flt(item.blanket_order_rate);
 		}
 
-		if (item.discount_amount > 0) {
-			item_rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
-			item.discount_percentage = 100 * flt(item.discount_amount) / flt(item.rate_with_margin);
-		}
+		if (effective_item_rate) {
+			if (item?.margin_percentage) {
+				item.margin_rate_or_amount = effective_item_rate * flt(item.margin_percentage) / 100;
+			}
+			item.margin_percentage = 100 * flt(item.margin_rate_or_amount) / effective_item_rate;
 
-		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);
+			item.rate_with_margin = effective_item_rate + flt(item.margin_rate_or_amount);
+			item.base_rate_with_margin = item.rate_with_margin * flt(this.frm.doc.conversion_rate);
+
+			if (item.discount_percentage) {
+				item.discount_amount = effective_item_rate * flt(item.discount_percentage) / 100;
+			}
+			item.discount_percentage = 100 * flt(item.discount_amount) / effective_item_rate;
+
+			item.rate = flt(item.rate_with_margin - flt(item.discount_amount), precision('rate', item));
+		}
 	}
 
 	async calculate_taxes_and_totals(update_paid_amount) {
@@ -915,7 +912,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			&& this.frm.doc.paid_amount > this.frm.doc.grand_total && !this.frm.doc.is_return) {
 
 			var payment_types = $.map(this.frm.doc.payments, function(d) { return d.type; });
-			if (in_list(payment_types, 'Cash')) {
+			if (payment_types.includes('Cash')) {
 				var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 				var base_grand_total = this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total;
 

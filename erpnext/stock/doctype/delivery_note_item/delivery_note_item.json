@@ -35,6 +35,7 @@
   "base_price_list_rate",
   "discount_and_margin",
   "margin_type",
+  "margin_percentage",
   "margin_rate_or_amount",
   "rate_with_margin",
   "column_break_19",
@@ -274,28 +275,29 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
+   "collapsible_depends_on": "eval: doc.margin_rate_or_amount || doc.discount_amount",
+   "depends_on": "price_list_rate",
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
   },
   {
-   "depends_on": "price_list_rate",
    "fieldname": "margin_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Margin Type",
    "options": "\nPercentage\nAmount",
    "print_hide": 1
   },
   {
-   "depends_on": "eval:doc.margin_type && doc.price_list_rate",
+   "description": "On price list rate",
    "fieldname": "margin_rate_or_amount",
-   "fieldtype": "Float",
-   "label": "Margin Rate or Amount",
+   "fieldtype": "Currency",
+   "label": "Margin Amount",
+   "options": "currency",
    "print_hide": 1
   },
   {
-   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
    "fieldname": "rate_with_margin",
    "fieldtype": "Currency",
    "label": "Rate With Margin",
@@ -308,10 +310,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "price_list_rate",
    "fieldname": "discount_percentage",
    "fieldtype": "Float",
-   "label": "Discount (%) on Price List Rate with Margin",
+   "label": "Discount (%)",
    "oldfieldname": "adj_rate",
    "oldfieldtype": "Float",
    "print_hide": 1,
@@ -319,14 +320,13 @@
    "width": "100px"
   },
   {
-   "depends_on": "price_list_rate",
+   "description": "On price list rate",
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "label": "Discount Amount",
    "options": "currency"
   },
   {
-   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
    "fieldname": "base_rate_with_margin",
    "fieldtype": "Currency",
    "label": "Rate With Margin (Company Currency)",
@@ -907,13 +907,20 @@
   {
    "fieldname": "column_break_rxvc",
    "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "margin_percentage",
+   "fieldtype": "Percent",
+   "label": "Margin (%)",
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:06:50.061877",
+ "modified": "2024-04-24 23:33:13.596212",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

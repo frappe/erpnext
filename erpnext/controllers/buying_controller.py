@@ -122,6 +122,7 @@ class BuyingController(SubcontractingController):
 					row.discount_percentage = 0.0
 					row.discount_amount = 0.0
 					row.margin_rate_or_amount = 0.0
+					row.margin_percentage = 0.0
 
 	def set_missing_values(self, for_validate=False):
 		super().set_missing_values(for_validate)
@@ -399,6 +400,7 @@ class BuyingController(SubcontractingController):
 						d.discount_percentage = 0.0
 						d.discount_amount = 0.0
 						d.margin_rate_or_amount = 0.0
+						d.margin_percentage = 0.0
 
 	def validate_for_subcontracting(self):
 		if self.is_subcontracted and self.get("is_old_subcontracting_flow"):

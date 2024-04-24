@@ -734,7 +734,7 @@ class TestSalesInvoice(FrappeTestCase):
 			{
 				"item_code": "_Test Item Home Desktop 100",
 				"price_list_rate": 55.56,
-				"discount_percentage": 10,
+				"discount_amount": 5.56,
 				"rate": 50,
 				"amount": 500,
 				"base_price_list_rate": 2778,
@@ -748,7 +748,7 @@ class TestSalesInvoice(FrappeTestCase):
 			{
 				"item_code": "_Test Item Home Desktop 200",
 				"price_list_rate": 187.5,
-				"discount_percentage": 20,
+				"discount_amount": 37.5,
 				"rate": 150,
 				"amount": 750,
 				"base_price_list_rate": 9375,
@@ -1852,11 +1852,12 @@ class TestSalesInvoice(FrappeTestCase):
 		price_list_rate = flt(100) * flt(si.plc_conversion_rate)
 		si.items[0].price_list_rate = price_list_rate
 		si.items[0].margin_type = "Percentage"
-		si.items[0].margin_rate_or_amount = 25
+		si.items[0].margin_percentage = 25
 		si.items[0].discount_amount = 0.0
 		si.items[0].discount_percentage = 0.0
+		si.items[0].rate = 0.0
 		si.save()
-		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate * 25) / 100 + price_list_rate))
+		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate * 125) / 100))
 
 	def test_outstanding_amount_after_advance_jv_cancellation(self):
 		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (

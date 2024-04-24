@@ -9,6 +9,7 @@ import frappe
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
 from erpnext.stock.get_item_details import get_item_details
 
 
@@ -152,7 +153,7 @@ class TestPricingRule(unittest.TestCase):
 		)
 		details = get_item_details(args)
 		self.assertEqual(details.get("margin_type"), "Percentage")
-		self.assertEqual(details.get("margin_rate_or_amount"), 10)
+		self.assertEqual(details.get("margin_percentage"), 10)
 
 	def test_mixed_conditions_for_item_group(self):
 		for item in ["Mixed Cond Item 1", "Mixed Cond Item 2"]:
@@ -310,37 +311,35 @@ class TestPricingRule(unittest.TestCase):
 			item.save(ignore_permissions=True)
 
 		# With pricing rule
-		so = make_sales_order(item_code="_Test Item", qty=1, uom="Box", do_not_submit=True)
-		so.items[0].price_list_rate = 100
-		so.submit()
-		so = frappe.get_doc("Sales Order", so.name)
+		so = make_sales_order(item_code="_Test Item", qty=1, uom="Box", price_list_rate=888)
 		self.assertEqual(so.items[0].discount_percentage, 17.5)
-		self.assertEqual(so.items[0].rate, 82.5)
+		self.assertEqual(so.items[0].rate, 732.6)
 
 		# Without pricing rule
-		so = make_sales_order(item_code="_Test Item", qty=2, uom="Box", do_not_submit=True)
-		so.items[0].price_list_rate = 100
-		so.submit()
-		so = frappe.get_doc("Sales Order", so.name)
+		so = make_sales_order(item_code="_Test Item", qty=2, uom="Box", price_list_rate=444)
 		self.assertEqual(so.items[0].discount_percentage, 0)
-		self.assertEqual(so.items[0].rate, 100)
+		self.assertEqual(so.items[0].rate, 444)
 
 	def test_pricing_rule_with_margin_and_discount(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
 		make_pricing_rule(
-			selling=1, margin_type="Percentage", margin_rate_or_amount=10, discount_percentage=10
+			selling=1,
+			margin_type="Percentage",
+			margin_rate_or_amount=10,
+			discount_percentage=10,
 		)
 		si = create_sales_invoice(do_not_save=True)
 		si.items[0].price_list_rate = 1000
+		si.items[0].rate = 0.0
 		si.payment_schedule = []
 		si.insert(ignore_permissions=True)
 
 		item = si.items[0]
-		self.assertEqual(item.margin_rate_or_amount, 10)
-		self.assertEqual(item.rate_with_margin, 1100)
-		self.assertEqual(item.discount_percentage, 10)
-		self.assertEqual(item.discount_amount, 110)
-		self.assertEqual(item.rate, 990)
+		self.assertEqual(item.margin_rate_or_amount, 100.0)
+		self.assertEqual(item.rate_with_margin, 1100.0)
+		self.assertEqual(item.discount_percentage, 10.0)
+		self.assertEqual(item.discount_amount, 100.0)
+		self.assertEqual(item.rate, 1000.0)
 
 	def test_pricing_rule_with_margin_and_discount_amount(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
@@ -353,14 +352,16 @@ class TestPricingRule(unittest.TestCase):
 		)
 		si = create_sales_invoice(do_not_save=True)
 		si.items[0].price_list_rate = 1000
+		si.items[0].rate = 0.0
 		si.payment_schedule = []
 		si.insert(ignore_permissions=True)
 
 		item = si.items[0]
-		self.assertEqual(item.margin_rate_or_amount, 10)
-		self.assertEqual(item.rate_with_margin, 1100)
-		self.assertEqual(item.discount_amount, 110)
-		self.assertEqual(item.rate, 990)
+		self.assertEqual(item.margin_rate_or_amount, 100.0)  # 1000 * 10%
+		self.assertEqual(item.rate_with_margin, 1100.0)  # 1000 + 100
+		self.assertEqual(item.discount_percentage, 11.0)  # 100% * 110 / 1000
+		self.assertEqual(item.discount_amount, 110.0)
+		self.assertEqual(item.rate, 990.0)  # 1000 + 100 - 110
 
 	def test_pricing_rule_for_product_discount_on_same_item(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
@@ -478,29 +479,22 @@ class TestPricingRule(unittest.TestCase):
 
 		make_pricing_rule(
 			selling=1,
-			margin_type="Percentage",
 			condition="customer=='_Test Customer 1' and is_return==0",
 			discount_percentage=10,
 		)
 
 		# Incorrect Customer and Correct is_return value
-		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 2", is_return=0)
-		si.items[0].price_list_rate = 1000
-		si.submit()
+		si = create_sales_invoice(customer="_Test Customer 2", is_return=0)
 		item = si.items[0]
 		self.assertEqual(item.rate, 100)
 
 		# Correct Customer and Incorrect is_return value
-		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", is_return=1, qty=-1)
-		si.items[0].price_list_rate = 1000
-		si.submit()
+		si = create_sales_invoice(customer="_Test Customer 1", is_return=1, qty=-1)
 		item = si.items[0]
 		self.assertEqual(item.rate, 100)
 
 		# Correct Customer and correct is_return value
-		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", is_return=0)
-		si.items[0].price_list_rate = 1000
-		si.submit()
+		si = create_sales_invoice(price_list_rate=1000, customer="_Test Customer 1", is_return=0)
 		item = si.items[0]
 		self.assertEqual(item.rate, 900)
 
@@ -545,16 +539,19 @@ class TestPricingRule(unittest.TestCase):
 			apply_multiple_pricing_rules=1,
 		)
 
-		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", qty=1)
-		self.assertEqual(si.items[0].discount_percentage, 28)
-		si.delete()
+		# 80% * 100 * 10% = 8
+		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", qty=1, rate=0.0)
 
-		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
-		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
+		try:
+			self.assertEqual(si.items[0].discount_percentage, 28)
+		finally:
+			si.delete()
+			frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
+			frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
 
 	def test_item_price_with_pricing_rule(self):
 		item = make_item("Water Flask")
-		make_item_price("Water Flask", "_Test Price List", 100)
+		make_item_price("Water Flask", "_Test Price List", 1000)
 
 		pricing_rule_record = {
 			"doctype": "Pricing Rule",
@@ -580,16 +577,17 @@ class TestPricingRule(unittest.TestCase):
 		si.selling_price_list = "_Test Price List"
 		si.save()
 
-		# If rate in Rule is 0, give preference to Item Price if it exists
-		self.assertEqual(si.items[0].price_list_rate, 100)
-		self.assertEqual(si.items[0].margin_rate_or_amount, 2)
-		self.assertEqual(si.items[0].rate_with_margin, 102)
-		self.assertEqual(si.items[0].rate, 102)
-
-		si.delete()
-		rule.delete()
-		frappe.get_doc("Item Price", {"item_code": "Water Flask"}).delete()
-		item.delete()
+		try:
+			# If rate in Rule is 0, give preference to Item Price if it exists
+			self.assertEqual(si.items[0].price_list_rate, 1000)
+			self.assertEqual(si.items[0].margin_rate_or_amount, 20)
+			self.assertEqual(si.items[0].rate_with_margin, 1020)
+			self.assertEqual(si.items[0].rate, 1020)
+		finally:
+			si.delete()
+			rule.delete()
+			frappe.get_doc("Item Price", {"item_code": "Water Flask"}).delete()
+			item.delete()
 
 	def test_item_price_with_blank_uom_pricing_rule(self):
 		properties = {
@@ -1006,8 +1004,8 @@ class TestPricingRule(unittest.TestCase):
 	def test_pricing_rule_for_other_items_cond_with_amount(self):
 		item = make_item("Water Flask New")
 		other_item = make_item("Other Water Flask New")
-		make_item_price(item.name, "_Test Price List", 100)
-		make_item_price(other_item.name, "_Test Price List", 100)
+		item_price = make_item_price(item.name, "_Test Price List", 666)
+		other_item_price = make_item_price(other_item.name, "_Test Price List", 777)
 
 		pricing_rule_record = {
 			"doctype": "Pricing Rule",
@@ -1024,7 +1022,7 @@ class TestPricingRule(unittest.TestCase):
 			],
 			"selling": 1,
 			"currency": "INR",
-			"min_amt": 200,
+			"min_amt": 1000,
 			"discount_percentage": 10,
 			"company": "_Test Company",
 		}
@@ -1032,38 +1030,53 @@ class TestPricingRule(unittest.TestCase):
 		rule.insert()
 
 		si = create_sales_invoice(do_not_save=True, item_code=item.name)
-		si.append(
+		si.set(
 			"items",
-			{
-				"item_code": other_item.name,
-				"item_name": other_item.item_name,
-				"description": other_item.description,
-				"stock_uom": other_item.stock_uom,
-				"uom": other_item.stock_uom,
-				"cost_center": si.items[0].cost_center,
-				"expense_account": si.items[0].expense_account,
-				"warehouse": si.items[0].warehouse,
-				"conversion_factor": 1,
-				"qty": 1,
-			},
+			[
+				{
+					"item_code": item.name,
+					"cost_center": si.items[0].cost_center,
+					"expense_account": si.items[0].expense_account,
+					"warehouse": si.items[0].warehouse,
+					"conversion_factor": 1,
+					"qty": 1,
+					"rate": 0.0,
+				},
+				{
+					"item_code": other_item.name,
+					"cost_center": si.items[0].cost_center,
+					"expense_account": si.items[0].expense_account,
+					"warehouse": si.items[0].warehouse,
+					"conversion_factor": 1,
+					"qty": 1,
+					"rate": 0.0,
+				},
+			],
 		)
 		si.selling_price_list = "_Test Price List"
 		si.save()
 
-		self.assertEqual(si.items[0].discount_percentage, 0)
-		self.assertEqual(si.items[1].discount_percentage, 0)
+		try:
+			self.assertEqual(si.items[0].discount_percentage, 0)
+			self.assertEqual(si.items[1].discount_percentage, 0)
 
-		si.items[0].qty = 2
-		si.save()
+			si.items[0].qty = 2
+			si.save()
 
-		self.assertEqual(si.items[0].discount_percentage, 0)
-		self.assertEqual(si.items[0].stock_qty, 2)
-		self.assertEqual(si.items[0].amount, 200)
-		self.assertEqual(si.items[0].price_list_rate, 100)
-		self.assertEqual(si.items[1].discount_percentage, 10)
-
-		si.delete()
-		rule.delete()
+			self.assertEqual(si.items[0].discount_percentage, 0)
+			self.assertEqual(si.items[0].stock_qty, 2)
+			self.assertEqual(si.items[0].amount, 1332)
+			self.assertEqual(si.items[0].price_list_rate, 666)
+			self.assertEqual(si.items[1].discount_percentage, 10)
+			self.assertEqual(si.items[1].price_list_rate, 777)
+			self.assertEqual(si.items[1].rate, 699.3)
+		finally:
+			si.delete()
+			rule.delete()
+			item_price.delete()
+			other_item_price.delete()
+			item.delete()
+			other_item.delete()
 
 	def test_pricing_rule_for_product_free_item_rounded_qty_and_recursion(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
@@ -1234,11 +1247,15 @@ def delete_existing_pricing_rules():
 
 
 def make_item_price(item, price_list_name, item_price):
-	frappe.get_doc(
-		{
-			"doctype": "Item Price",
-			"price_list": price_list_name,
-			"item_code": item,
-			"price_list_rate": item_price,
-		}
-	).insert(ignore_permissions=True, ignore_mandatory=True)
+	try:
+		doc = frappe.get_doc(
+			{
+				"doctype": "Item Price",
+				"price_list": price_list_name,
+				"item_code": item,
+				"price_list_rate": item_price,
+			}
+		).insert(ignore_permissions=True, ignore_mandatory=True)
+	except ItemPriceDuplicateItem:
+		pass
+	return doc

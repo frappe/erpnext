@@ -150,9 +150,11 @@ class TestQuotation(FrappeTestCase):
 		quotation.save()
 		quotation.submit()
 
-		self.assertEqual(quotation.payment_schedule[0].payment_amount, 8906.00)
+		# Payment schedule is 50% twice of 10 * 1781.25 = 8906.25
+		# however, rounding depends on currency which is INR by default in github?
+		self.assertEqual(quotation.payment_schedule[0].payment_amount, 8906.0)
 		self.assertEqual(quotation.payment_schedule[0].due_date, quotation.transaction_date)
-		self.assertEqual(quotation.payment_schedule[1].payment_amount, 8906.00)
+		self.assertEqual(quotation.payment_schedule[1].payment_amount, 8906.0)
 		self.assertEqual(quotation.payment_schedule[1].due_date, add_days(quotation.transaction_date, 30))
 
 		sales_order = make_sales_order(quotation.name)
@@ -172,9 +174,9 @@ class TestQuotation(FrappeTestCase):
 		sales_order.set("taxes", [])
 		sales_order.save()
 
-		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.00)
+		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.0)
 		self.assertEqual(sales_order.payment_schedule[0].due_date, getdate(quotation.transaction_date))
-		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.00)
+		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.0)
 		self.assertEqual(
 			sales_order.payment_schedule[1].due_date, getdate(add_days(quotation.transaction_date, 30))
 		)
@@ -207,11 +209,13 @@ class TestQuotation(FrappeTestCase):
 			make_sales_invoice,
 		)
 
-		rate_with_margin = flt((1500 * 18.75) / 100 + 1500)
+		# 1781.25
+		rate_with_margin = flt((1500 * 118.75) / 100)
 
 		test_records[0]["items"][0]["price_list_rate"] = 1500
 		test_records[0]["items"][0]["margin_type"] = "Percentage"
-		test_records[0]["items"][0]["margin_rate_or_amount"] = 18.75
+		test_records[0]["items"][0]["margin_percentage"] = 18.75
+		test_records[0]["items"][0]["rate"] = 0.0
 
 		quotation = frappe.copy_doc(test_records[0])
 		quotation.transaction_date = nowdate()
