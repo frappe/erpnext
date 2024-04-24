@@ -351,26 +351,31 @@ $.extend(erpnext.utils, {
 
 	},
 
-	get_fiscal_year: function(date) {
-		if(!date) {
+	get_fiscal_year: function (date, with_dates = false, boolean = false) {
+		if (!frappe.boot.setup_complete) {
+			return;
+		}
+		if (!date) {
 			date = frappe.datetime.get_today();
 		}
 
-		let fiscal_year = '';
+		let fiscal_year = "";
 		frappe.call({
 			method: "erpnext.accounts.utils.get_fiscal_year",
 			args: {
-				date: date
+				date: date,
+				boolean: boolean,
 			},
 			async: false,
-			callback: function(r) {
+			callback: function (r) {
 				if (r.message) {
-					fiscal_year = r.message[0];
+					if (with_dates) fiscal_year = r.message;
+					else fiscal_year = r.message[0];
 				}
-			}
+			},
 		});
 		return fiscal_year;
-	}
+	},
 });
 
 erpnext.utils.select_alternate_items = function(opts) {
