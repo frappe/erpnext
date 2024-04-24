@@ -135,20 +135,12 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-04-18 08:25:35.302081",
-=======
  "modified": "2024-04-18 15:25:25.808355",
->>>>>>> f6f118855b (fix: Permission for lower dedcution certificate)
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Lower Deduction Certificate",
  "naming_rule": "By fieldname",
  "owner": "Administrator",
-<<<<<<< HEAD
- "permissions": [],
- "sort_field": "modified",
-=======
  "permissions": [
   {
    "create": 1,
@@ -188,7 +180,6 @@
   }
  ],
  "sort_field": "creation",
->>>>>>> f6f118855b (fix: Permission for lower dedcution certificate)
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1
