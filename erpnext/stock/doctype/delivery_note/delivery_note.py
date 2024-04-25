@@ -1066,7 +1066,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
-def make_delivery_trip(source_name, target_doc=None):
+def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
 	doclist = get_mapped_doc(
