@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-19 15:12\n"
+"PO-Revision-Date: 2024-04-25 15:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -537,19 +537,19 @@ msgstr "% Ordenado"
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "% Picked"
-msgstr ""
+msgstr "% Seleccionado"
 
 #. Label of a Percent field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "% Process Loss"
-msgstr ""
+msgstr "% Pérdida por Proceso"
 
 #. Label of a Percent field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "% Process Loss"
-msgstr ""
+msgstr "% Pérdida por Proceso"
 
 #. Label of a Percent field in DocType 'Task'
 #: projects/doctype/task/task.json
@@ -630,7 +630,7 @@ msgstr "'Días desde la última orden' debe ser mayor que o igual a cero"
 
 #: controllers/accounts_controller.py:1991
 msgid "'Default {0} Account' in Company {1}"
-msgstr ""
+msgstr "'Cuenta {0} Predeterminada' en la Compañía {1}"
 
 #: accounts/doctype/journal_entry/journal_entry.py:1083
 msgid "'Entries' cannot be empty"
@@ -656,7 +656,7 @@ msgstr "'Apertura'"
 
 #: stock/doctype/delivery_note/delivery_note.py:398
 msgid "'Sales Invoice Item' reference ({1}) is missing in row {0}"
-msgstr ""
+msgstr "Falta la referencia 'Artículo de Factura de Venta' ({1}) en la fila {0}"
 
 #: stock/doctype/delivery_note/delivery_note.py:391
 msgid "'Sales Invoice' reference ({1}) is missing in row {0}"
@@ -694,7 +694,7 @@ msgstr "La cuenta de '{0}' ya está siendo utilizada por {1}. Utilice otra cuent
 
 #: controllers/accounts_controller.py:395
 msgid "'{0}' account: '{1}' should match the Return Against Invoice"
-msgstr ""
+msgstr "Cuenta '{0}': '{1}' debe coincidir con la Devolución Contra la Factura"
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:174
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:180
@@ -2901,14 +2901,14 @@ msgstr ""
 #: accounts/workspace/payables/payables.json
 #: buying/doctype/supplier/supplier.js:97
 msgid "Accounts Payable"
-msgstr "Cuentas por pagar"
+msgstr "Cuentas por Pagar"
 
 #. Option for the 'Write Off Based On' (Select) field in DocType 'Journal
 #. Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Accounts Payable"
-msgstr "Cuentas por pagar"
+msgstr "Cuentas por Pagar"
 
 #. Name of a report
 #. Label of a Link in the Payables Workspace
@@ -52401,7 +52401,7 @@ msgstr "Precio"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:242
 msgid "Price ({0})"
-msgstr ""
+msgstr "Precio ({0})"
 
 #. Label of a Section Break field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -52807,7 +52807,7 @@ msgstr "Precio no dependiente de UOM"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:249
 msgid "Price Per Unit ({0})"
-msgstr ""
+msgstr "Precio por Unidad ({0})"
 
 #: selling/page/point_of_sale/pos_controller.js:583
 msgid "Price is not set for the item."
@@ -54954,13 +54954,13 @@ msgstr "Propuesta / Presupuesto"
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Proprietorship"
-msgstr ""
+msgstr "Propietario"
 
 #. Option for the 'Supplier Type' (Select) field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Proprietorship"
-msgstr ""
+msgstr "Propietario"
 
 #. Label of a Check field in DocType 'Subscription Settings'
 #: accounts/doctype/subscription_settings/subscription_settings.json
@@ -57489,7 +57489,7 @@ msgstr "Estado de la Cotización"
 
 #: selling/report/quotation_trends/quotation_trends.py:51
 msgid "Quoted Amount"
-msgstr ""
+msgstr "Importe Cotizado"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:87
 msgid "RFQs are not allowed for {0} due to a scorecard standing of {1}"
@@ -65252,13 +65252,13 @@ msgstr "Enviar después (días)"
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Send Attached Files"
-msgstr ""
+msgstr "Enviar Archivos Adjuntos"
 
 #. Label of a Check field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Send Document Print"
-msgstr ""
+msgstr "Enviar Impresión de Documento"
 
 #. Label of a Check field in DocType 'Request for Quotation Supplier'
 #: buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
@@ -66477,7 +66477,7 @@ msgstr "Establecer tarifa básica manualmente"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:157
 msgid "Set Default Supplier"
-msgstr ""
+msgstr "Establecer Proveedor Predeterminado"
 
 #. Label of a Button field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -67515,7 +67515,7 @@ msgstr "Mostrar Vista Previa"
 #: accounts/report/accounts_receivable/accounts_receivable.js:179
 #: accounts/report/general_ledger/general_ledger.js:204
 msgid "Show Remarks"
-msgstr ""
+msgstr "Mostrar Observaciones"
 
 #: selling/report/sales_partner_transaction_summary/sales_partner_transaction_summary.js:65
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.js:65
@@ -73466,7 +73466,7 @@ msgstr ""
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Terms Template"
-msgstr ""
+msgstr "Plantilla de Términos"
 
 #. Name of a DocType
 #: setup/doctype/terms_and_conditions/terms_and_conditions.json
