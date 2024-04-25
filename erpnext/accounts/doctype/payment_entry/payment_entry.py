@@ -197,6 +197,7 @@ class PaymentEntry(AccountsController):
 		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
 			return
 
+		self.book_advance_payments_in_separate_party_account = False
 		if self.party_type not in ("Customer", "Supplier"):
 			return
 
