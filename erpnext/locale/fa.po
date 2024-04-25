@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-23 15:26\n"
+"PO-Revision-Date: 2024-04-25 15:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -612,7 +612,7 @@ msgstr "حساب در بخش حسابداری مشتری {0}"
 
 #: selling/doctype/sales_order/sales_order.py:269
 msgid "'Allow Multiple Sales Orders Against a Customer's Purchase Order'"
-msgstr "اجازه دادن سفارشات فروش چندگانه در برابر سفارش خرید مشتری"
+msgstr ""
 
 #: controllers/trends.py:56
 msgid "'Based On' and 'Group By' can not be same"
@@ -1429,7 +1429,7 @@ msgstr "در بالا"
 #. Name of a role
 #: setup/doctype/department/department.json
 msgid "Academics User"
-msgstr "کاربر دانشگاهیان"
+msgstr "کاربر دانشگاهی"
 
 #. Label of a Code field in DocType 'Item Quality Inspection Parameter'
 #: stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
@@ -2877,7 +2877,7 @@ msgstr "حساب‌ها تا تاریخ مسدود شده‌اند"
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "Accounts Manager"
-msgstr "مدیر حساب ها"
+msgstr ""
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:339
 msgid "Accounts Missing Error"
@@ -3077,7 +3077,7 @@ msgstr "تنظیمات حساب ها"
 #: stock/doctype/warehouse_type/warehouse_type.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Accounts User"
-msgstr "کاربر حساب ها"
+msgstr ""
 
 #: accounts/doctype/journal_entry/journal_entry.py:1182
 msgid "Accounts table cannot be blank."
@@ -5746,7 +5746,7 @@ msgstr "اجازه مصرف مواد متعدد"
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Allow Multiple Sales Orders Against a Customer's Purchase Order"
-msgstr "سفارشات فروش چندگانه را در مقابل سفارش خرید مشتری مجاز کنید"
+msgstr ""
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -7684,7 +7684,7 @@ msgstr "آیا مطمئن هستید که میخواهید این مورد را 
 
 #: accounts/doctype/subscription/subscription.js:69
 msgid "Are you sure you want to restart this subscription?"
-msgstr "آیا مطمئن هستید که می خواهید این اشتراک را مجدداً راه اندازی کنید؟"
+msgstr "آیا مطمئن هستید که می خواهید این اشتراک را مجدداً راه‌اندازی کنید؟"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -13763,7 +13763,7 @@ msgstr "در حال پاک کردن داده های نمایشی..."
 
 #: manufacturing/doctype/production_plan/production_plan.js:577
 msgid "Click on 'Get Finished Goods for Manufacture' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
-msgstr "برای دریافت اقلام از سفارشات فروش فوق، روی \"دریافت کالاهای تمام شده برای ساخت\" کلیک کنید. فقط مواردی که BOM برای آنها وجود دارد واکشی می شوند."
+msgstr ""
 
 #: setup/doctype/holiday_list/holiday_list.js:70
 msgid "Click on Add to Holidays. This will populate the holidays table with all the dates that fall on the selected weekly off. Repeat the process for populating the dates for all your weekly holidays"
@@ -13771,7 +13771,7 @@ msgstr "روی افزودن به تعطیلات کلیک کنید. با این �
 
 #: manufacturing/doctype/production_plan/production_plan.js:572
 msgid "Click on Get Sales Orders to fetch sales orders based on the above filters."
-msgstr "برای دریافت سفارشات فروش بر اساس فیلترهای بالا، روی دریافت سفارشات فروش کلیک کنید."
+msgstr ""
 
 #. Description of the 'Import Invoices' (Button) field in DocType 'Import
 #. Supplier Invoice'
@@ -15866,7 +15866,7 @@ msgstr "زمان تکمیل شده"
 #. Name of a report
 #: manufacturing/report/completed_work_orders/completed_work_orders.json
 msgid "Completed Work Orders"
-msgstr "سفارشات کاری تکمیل شده"
+msgstr ""
 
 #: projects/report/project_summary/project_summary.py:67
 msgid "Completion"
@@ -18268,7 +18268,7 @@ msgstr "ایجاد سفارش خرید"
 
 #: utilities/activation.py:103
 msgid "Create Purchase Orders"
-msgstr "ایجاد سفارشات خرید"
+msgstr ""
 
 #: utilities/activation.py:87
 msgid "Create Quotation"
@@ -27104,7 +27104,7 @@ msgstr "انتقال مازاد"
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
 msgctxt "Downtime Entry"
 msgid "Excessive machine set up time"
-msgstr "زمان راه اندازی بیش از حد دستگاه"
+msgstr "زمان راه‌اندازی بیش از حد دستگاه"
 
 #. Label of a Link field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -28062,7 +28062,7 @@ msgstr "ورود ناموفق بود"
 
 #: setup/setup_wizard/setup_wizard.py:30 setup/setup_wizard/setup_wizard.py:31
 msgid "Failed to setup company"
-msgstr "راه اندازی شرکت ناموفق بود"
+msgstr "راه‌اندازی شرکت ناموفق بود"
 
 #: setup/setup_wizard/setup_wizard.py:37
 msgid "Failed to setup defaults"
@@ -30544,7 +30544,7 @@ msgstr "فاکتورهای معوق دریافت کنید"
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Get Outstanding Orders"
-msgstr "دریافت سفارشات برجسته"
+msgstr ""
 
 #: accounts/doctype/bank_clearance/bank_clearance.js:38
 #: accounts/doctype/bank_clearance/bank_clearance.js:40
@@ -30580,7 +30580,7 @@ msgstr "دریافت مواد اولیه برای انتقال"
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Get Sales Orders"
-msgstr "دریافت سفارشات فروش"
+msgstr ""
 
 #. Label of a Button field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
@@ -31345,7 +31345,7 @@ msgstr ""
 #: setup/doctype/driver/driver.json setup/doctype/employee/employee.json
 #: setup/doctype/holiday_list/holiday_list.json
 msgid "HR Manager"
-msgstr "مدیریت منابع انسانی"
+msgstr "مدیر منابع انسانی"
 
 #. Name of a role
 #: projects/doctype/timesheet/timesheet.json setup/doctype/branch/branch.json
@@ -32278,7 +32278,7 @@ msgstr "اگر این امر نامطلوب است، لطفاً ورودی پر�
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "If this item has variants, then it cannot be selected in sales orders etc."
-msgstr "اگر این کالا دارای انواع باشد، نمی توان آن را در سفارشات فروش و غیره انتخاب کرد."
+msgstr ""
 
 #: buying/doctype/buying_settings/buying_settings.js:27
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
@@ -40588,7 +40588,7 @@ msgstr "مدیریت هزینه عملیات"
 
 #: utilities/activation.py:94
 msgid "Manage your orders"
-msgstr "سفارشات خود را مدیریت کنید"
+msgstr ""
 
 #: setup/doctype/company/company.py:362
 msgid "Management"
@@ -42932,7 +42932,7 @@ msgstr "ماهانه"
 
 #: manufacturing/dashboard_fixtures.py:215
 msgid "Monthly Completed Work Orders"
-msgstr "سفارشات کار ماهانه تکمیل شده"
+msgstr ""
 
 #. Name of a DocType
 #: accounts/doctype/cost_center/cost_center_tree.js:69
@@ -42982,7 +42982,7 @@ msgstr "هدف فروش ماهانه"
 
 #: manufacturing/dashboard_fixtures.py:198
 msgid "Monthly Total Work Orders"
-msgstr "کل سفارشات کاری ماهانه"
+msgstr ""
 
 #. Option for the 'Book Deferred Entries Based On' (Select) field in DocType
 #. 'Accounts Settings'
@@ -44186,7 +44186,7 @@ msgstr "فاکتور خرید جدید"
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "New Purchase Orders"
-msgstr "سفارشات خرید جدید"
+msgstr ""
 
 #: quality_management/doctype/quality_procedure/quality_procedure_tree.js:24
 msgid "New Quality Procedure"
@@ -44208,7 +44208,7 @@ msgstr "فاکتور فروش جدید"
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "New Sales Orders"
-msgstr "سفارشات فروش جدید"
+msgstr ""
 
 #: setup/doctype/sales_person/sales_person_tree.js:3
 msgid "New Sales Person Name"
@@ -44574,7 +44574,7 @@ msgstr "هیچ موردی برای انتقال موجود نیست"
 
 #: manufacturing/doctype/production_plan/production_plan.py:142
 msgid "No items are available in sales orders {0} for production"
-msgstr "هیچ موردی در سفارشات فروش {0} برای تولید موجود نیست"
+msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.py:139
 #: manufacturing/doctype/production_plan/production_plan.py:151
@@ -45827,7 +45827,7 @@ msgstr "باز کردن نقل قول ها"
 
 #: stock/report/item_variant_details/item_variant_details.py:110
 msgid "Open Sales Orders"
-msgstr "باز کردن سفارشات فروش"
+msgstr ""
 
 #: public/js/templates/crm_activities.html:33
 msgid "Open Task"
@@ -45854,7 +45854,7 @@ msgstr ""
 #. Name of a report
 #: manufacturing/report/open_work_orders/open_work_orders.json
 msgid "Open Work Orders"
-msgstr "باز کردن سفارشات کاری"
+msgstr ""
 
 #: templates/pages/help.html:60
 msgid "Open a new ticket"
@@ -46670,7 +46670,7 @@ msgstr "مقدار سفارش داده شده"
 #: selling/doctype/sales_order/sales_order.py:753
 #: setup/doctype/company/company_dashboard.py:23
 msgid "Orders"
-msgstr "سفارشات"
+msgstr ""
 
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py:30
 msgid "Organization"
@@ -49609,7 +49609,7 @@ msgstr "جزئیات الگوی شرایط پرداخت"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Payment Terms from orders will be fetched into the invoices as is"
-msgstr "شرایط پرداخت از سفارشات همانطور که هست در فاکتورها آورده می شود"
+msgstr ""
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.js:28
 msgid "Payment Type"
@@ -50822,7 +50822,7 @@ msgstr "لطفاً با عملیات یا هزینه عملیاتی مبتنی �
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.py:409
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
-msgstr "لطفاً پیام خطا را بررسی کنید و اقدامات لازم را برای رفع خطا انجام دهید و سپس ارسال مجدد را مجدداً راه اندازی کنید."
+msgstr "لطفاً پیام خطا را بررسی کنید و اقدامات لازم را برای رفع خطا انجام دهید و سپس ارسال مجدد را مجدداً راه‌اندازی کنید."
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:65
 msgid "Please check your Plaid client ID and secret values"
@@ -51103,7 +51103,7 @@ msgstr "لطفا جدول درخواست مواد را پر کنید"
 
 #: manufacturing/doctype/production_plan/production_plan.py:301
 msgid "Please fill the Sales Orders table"
-msgstr "لطفا جدول سفارشات فروش را پر کنید"
+msgstr ""
 
 #: stock/doctype/shipment/shipment.js:277
 msgid "Please first set Last Name, Email and Phone for the user"
@@ -52287,13 +52287,13 @@ msgstr "جلوگیری از POs"
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgctxt "Supplier Scorecard Scoring Standing"
 msgid "Prevent Purchase Orders"
-msgstr "جلوگیری از سفارشات خرید"
+msgstr ""
 
 #. Label of a Check field in DocType 'Supplier Scorecard Standing'
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 msgctxt "Supplier Scorecard Standing"
 msgid "Prevent Purchase Orders"
-msgstr "جلوگیری از سفارشات خرید"
+msgstr ""
 
 #. Label of a Check field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -55324,7 +55324,7 @@ msgstr "مدیر خرید"
 #: stock/doctype/item_price/item_price.json
 #: stock/doctype/price_list/price_list.json
 msgid "Purchase Master Manager"
-msgstr "مدیر ارشد را خریداری کنید"
+msgstr ""
 
 #. Name of a DocType
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:155
@@ -55556,23 +55556,23 @@ msgstr "سفارش خرید {0} ارسال نشده است"
 
 #: buying/doctype/purchase_order/purchase_order.py:830
 msgid "Purchase Orders"
-msgstr "سفارشات خرید"
+msgstr ""
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Purchase Orders Items Overdue"
-msgstr "سفارشات خرید اقلام عقب افتاده"
+msgstr ""
 
 #: buying/doctype/purchase_order/purchase_order.py:302
 msgid "Purchase Orders are not allowed for {0} due to a scorecard standing of {1}."
-msgstr "سفارشات خرید برای {0} به دلیل امتیاز کارت امتیازی {1} مجاز نیستند."
+msgstr ""
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Purchase Orders to Bill"
-msgstr "سفارشات خرید به صورت حساب"
+msgstr ""
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -55582,7 +55582,7 @@ msgstr "سفارش خرید برای دریافت"
 
 #: controllers/accounts_controller.py:1615
 msgid "Purchase Orders {0} are un-linked"
-msgstr "سفارشات خرید {0} لغو پیوند هستند"
+msgstr ""
 
 #: stock/report/item_prices/item_prices.py:59
 msgid "Purchase Price List"
@@ -55885,7 +55885,7 @@ msgstr "الگوی مالیات و هزینه‌های خرید"
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Purchase User"
-msgstr "خرید کاربر"
+msgstr "کاربر خرید"
 
 #: buying/report/purchase_order_trends/purchase_order_trends.py:51
 msgid "Purchase Value"
@@ -55903,7 +55903,7 @@ msgstr ""
 
 #: utilities/activation.py:104
 msgid "Purchase orders help you plan and follow up on your purchases"
-msgstr "سفارشات خرید به شما کمک می کند تا خریدهای خود را برنامه ریزی و پیگیری کنید"
+msgstr ""
 
 #. Option for the 'Current State' (Select) field in DocType 'Share Balance'
 #: accounts/doctype/share_balance/share_balance.json
@@ -61102,7 +61102,7 @@ msgstr "بقیه دنیا"
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.js:82
 msgid "Restart"
-msgstr "راه اندازی مجدد"
+msgstr "راه‌اندازی مجدد"
 
 #: accounts/doctype/subscription/subscription.js:48
 msgid "Restart Subscription"
@@ -62266,7 +62266,7 @@ msgstr "ردیف #{0}: نوع سند مرجع باید یکی از سفارش خ
 
 #: accounts/doctype/payment_entry/payment_entry.js:1223
 msgid "Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning"
-msgstr "ردیف #{0}: نوع سند مرجع باید یکی از سفارشات فروش، فاکتور فروش، ورودی دفتر روزنامه یا Dunning باشد."
+msgstr ""
 
 #: controllers/buying_controller.py:449
 msgid "Row #{0}: Rejected Qty can not be entered in Purchase Return"
@@ -63507,7 +63507,7 @@ msgstr "سفارش فروش"
 #: selling/report/sales_order_analysis/sales_order_analysis.json
 #: selling/workspace/selling/selling.json stock/workspace/stock/stock.json
 msgid "Sales Order Analysis"
-msgstr "تجزیه و تحلیل سفارشات فروش"
+msgstr ""
 
 #. Label of a Date field in DocType 'Production Plan Sales Order'
 #: manufacturing/doctype/production_plan_sales_order/production_plan_sales_order.json
@@ -63642,19 +63642,19 @@ msgstr "سفارش های فروش"
 
 #: manufacturing/doctype/production_plan/production_plan.py:301
 msgid "Sales Orders Required"
-msgstr "سفارشات فروش الزامی است"
+msgstr ""
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Sales Orders to Bill"
-msgstr "سفارشات فروش به بیل"
+msgstr ""
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Sales Orders to Deliver"
-msgstr "سفارشات فروش برای تحویل"
+msgstr ""
 
 #. Name of a DocType
 #: accounts/report/accounts_receivable/accounts_receivable.js:136
@@ -64153,7 +64153,7 @@ msgstr "فروش و بازده"
 
 #: manufacturing/doctype/production_plan/production_plan.py:199
 msgid "Sales orders are not available for production"
-msgstr "سفارشات فروش برای تولید موجود نیست"
+msgstr ""
 
 #. Label of a Link field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
@@ -66795,7 +66795,7 @@ msgstr ""
 
 #: setup/setup_wizard/setup_wizard.py:29
 msgid "Setting up company"
-msgstr "راه اندازی شرکت"
+msgstr "راه‌اندازی شرکت"
 
 #: manufacturing/doctype/bom/bom.py:952
 #: manufacturing/doctype/work_order/work_order.py:989
@@ -66871,7 +66871,7 @@ msgstr ""
 
 #: public/js/setup_wizard.js:18
 msgid "Setup your organization"
-msgstr "سازمان خود را راه اندازی کنید"
+msgstr "سازمان خود را راه‌اندازی کنید"
 
 #. Name of a DocType
 #. Name of a report
@@ -71587,7 +71587,7 @@ msgstr "متغیر امتیازدهی کارت امتیازی تامین کنن�
 #: buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 msgctxt "Supplier Scorecard Period"
 msgid "Supplier Scorecard Setup"
-msgstr "راه اندازی کارت امتیازی تامین کننده"
+msgstr "راه‌اندازی کارت امتیازی تامین کننده"
 
 #. Name of a DocType
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
@@ -74272,7 +74272,7 @@ msgstr "این انبار به طور خودکار در قسمت Target Warehous
 
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:24
 msgid "This Warehouse will be auto-updated in the Work In Progress Warehouse field of Work Orders."
-msgstr "این انبار به طور خودکار در قسمت Work In Progress Warehouse سفارشات کاری به روز می شود."
+msgstr ""
 
 #: setup/doctype/email_digest/email_digest.py:184
 msgid "This Week's Summary"
@@ -74288,7 +74288,7 @@ msgstr "این عمل پیوند این حساب را با هر سرویس خا�
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
-msgstr "این همه کارت های امتیازی مرتبط با این راه اندازی را پوشش می دهد"
+msgstr "این همه کارت های امتیازی مرتبط با این راه‌اندازی را پوشش می دهد"
 
 #: controllers/status_updater.py:346
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
@@ -75635,7 +75635,7 @@ msgstr "برای استفاده از یک کتاب مالی متفاوت، لط�
 
 #: selling/page/point_of_sale/pos_controller.js:192
 msgid "Toggle Recent Orders"
-msgstr "تغییر سفارشات اخیر"
+msgstr ""
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
@@ -76154,7 +76154,7 @@ msgstr "مجموع مبلغ مشارکت در برابر فاکتورها: {0}"
 
 #: setup/doctype/sales_person/sales_person.js:10
 msgid "Total Contribution Amount Against Orders: {0}"
-msgstr "کل مبلغ مشارکت در برابر سفارشات: {0}"
+msgstr ""
 
 #. Label of a Currency field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -79139,7 +79139,7 @@ msgstr "کاربرانی که این نقش را دارند مجاز به پرد
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Users with this role are allowed to over deliver/receive against orders above the allowance percentage"
-msgstr "کاربرانی که این نقش را دارند مجاز به تحویل/دریافت بیش از سفارشات در مقابل درصد مجاز هستند"
+msgstr ""
 
 #. Description of the 'Role Allowed to Set Frozen Accounts and Edit Frozen
 #. Entries' (Link) field in DocType 'Accounts Settings'
@@ -80830,13 +80830,13 @@ msgstr "هشدار به PO ها"
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgctxt "Supplier Scorecard Scoring Standing"
 msgid "Warn Purchase Orders"
-msgstr "هشدار به سفارشات خرید"
+msgstr ""
 
 #. Label of a Check field in DocType 'Supplier Scorecard Standing'
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 msgctxt "Supplier Scorecard Standing"
 msgid "Warn Purchase Orders"
-msgstr "هشدار به سفارشات خرید"
+msgstr ""
 
 #. Label of a Check field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -81730,7 +81730,7 @@ msgstr "سفارش‌های کاری ایجاد شده: {0}"
 #. Name of a report
 #: manufacturing/report/work_orders_in_progress/work_orders_in_progress.json
 msgid "Work Orders in Progress"
-msgstr "سفارشات کاری در حال انجام"
+msgstr ""
 
 #. Label of a Column Break field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -82459,7 +82459,7 @@ msgstr "شما نمی توانید ارزیابی مورد را قبل از {} �
 
 #: accounts/doctype/subscription/subscription.py:725
 msgid "You cannot restart a Subscription that is not cancelled."
-msgstr "نمی توانید اشتراکی را که لغو نشده است راه اندازی مجدد کنید."
+msgstr "نمی توانید اشتراکی را که لغو نشده است راه‌اندازی مجدد کنید."
 
 #: selling/page/point_of_sale/pos_payment.js:210
 msgid "You cannot submit empty order."
