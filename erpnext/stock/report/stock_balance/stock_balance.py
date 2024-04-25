@@ -141,6 +141,8 @@ class StockBalanceReport:
 		if self.filters.get("show_stock_ageing_data"):
 			self.sle_entries = self.sle_query.run(as_dict=True)
 
+		# HACK: This is required to avoid causing db query in flt
+		_system_settings = frappe.get_cached_doc("System Settings")
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
 				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
