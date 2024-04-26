@@ -8,16 +8,7 @@ import frappe
 from frappe import ValidationError, _
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
-from frappe.utils import (
-	add_days,
-	cint,
-	cstr,
-	flt,
-	get_link_to_form,
-	getdate,
-	nowdate,
-	safe_json_loads,
-)
+from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, now, nowdate, safe_json_loads
 
 from erpnext.controllers.stock_controller import StockController
 from erpnext.stock.get_item_details import get_reserved_qty_for_so
@@ -618,16 +609,14 @@ def auto_make_serial_nos(args):
 	voucher_type = args.get("voucher_type")
 	item_code = args.get("item_code")
 	for serial_no in serial_nos:
-		is_new = False
 		if frappe.db.exists("Serial No", serial_no):
 			sr = frappe.get_cached_doc("Serial No", serial_no)
-		elif args.get("actual_qty", 0) > 0:
-			sr = frappe.new_doc("Serial No")
-			is_new = True
+			sr = update_args_for_serial_no(sr, serial_no, args)
+		elif args.get("actual_qty", 0) > 0 and serial_no:
+			created_numbers.append(serial_no)
 
-		sr = update_args_for_serial_no(sr, serial_no, args, is_new=is_new)
-		if is_new:
-			created_numbers.append(sr.name)
+	if created_numbers:
+		make_bulk_serial_nos(args, created_numbers)
 
 	form_links = list(map(lambda d: get_link_to_form("Serial No", d), created_numbers))
 
@@ -645,6 +634,72 @@ def auto_make_serial_nos(args):
 			get_items_html(form_links, item_code)
 		)
 		frappe.msgprint(message, multiple_title)
+
+
+def make_bulk_serial_nos(args, serial_nos):
+	# for field in ["item_code", "work_order", "company", "batch_no", "supplier", "location"]:
+
+	if isinstance(args, dict):
+		args = frappe._dict(args)
+
+	serial_nos_details = []
+	item_details = frappe.get_cached_value("Item", args.item_code, ["item_name", "description"], as_dict=1)
+
+	supplier = None
+	if args.voucher_type in ["Purchase Receipt", "Purchase Invoice"]:
+		supplier = frappe.get_cached_value(args.voucher_type, args.voucher_no, "supplier")
+
+	for serial_no in serial_nos:
+		serial_nos_details.append(
+			(
+				serial_no,
+				serial_no,
+				now(),
+				now(),
+				frappe.session.user,
+				frappe.session.user,
+				args.warehouse,
+				args.company,
+				args.item_code,
+				item_details.item_name,
+				item_details.description,
+				"Active",
+				args.batch_no,
+				args.get("work_order"),
+				supplier,
+				args.voucher_type,
+				args.voucher_no,
+				args.posting_date,
+				args.posting_time,
+				flt(args.incoming_rate),
+			)
+		)
+
+	if serial_nos_details:
+		fields = [
+			"name",
+			"serial_no",
+			"creation",
+			"modified",
+			"owner",
+			"modified_by",
+			"warehouse",
+			"company",
+			"item_code",
+			"item_name",
+			"description",
+			"status",
+			"batch_no",
+			"work_order",
+			"supplier",
+			"purchase_document_type",
+			"purchase_document_no",
+			"purchase_date",
+			"purchase_time",
+			"purchase_rate",
+		]
+
+		frappe.db.bulk_insert("Serial No", fields=fields, values=set(serial_nos_details))
 
 
 def get_items_html(serial_nos, item_code):
