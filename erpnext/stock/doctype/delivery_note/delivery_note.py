@@ -739,8 +739,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
-<<<<<<< HEAD
-def make_delivery_trip(source_name, target_doc=None):
+def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 	def update_stop_details(source_doc, target_doc, source_parent):
 		target_doc.customer = source_parent.customer
 		target_doc.address = source_parent.shipping_address_name
@@ -754,11 +753,6 @@ def make_delivery_trip(source_name, target_doc=None):
 
 	delivery_notes = []
 
-=======
-def make_delivery_trip(source_name, target_doc=None, kwargs=None):
-	if not target_doc:
-		target_doc = frappe.new_doc("Delivery Trip")
->>>>>>> 2f359e201d (fix: args when get the delivery note in delivery trip)
 	doclist = get_mapped_doc(
 		"Delivery Note",
 		source_name,
