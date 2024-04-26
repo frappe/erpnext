@@ -739,7 +739,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
-def make_delivery_trip(source_name, target_doc=None):
+def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 	def update_stop_details(source_doc, target_doc, source_parent):
 		target_doc.customer = source_parent.customer
 		target_doc.address = source_parent.shipping_address_name
