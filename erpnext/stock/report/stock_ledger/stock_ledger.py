@@ -157,13 +157,6 @@ def get_columns(filters):
 				"convertible": "qty",
 			},
 			{
-				"label": _("Voucher #"),
-				"fieldname": "voucher_no",
-				"fieldtype": "Dynamic Link",
-				"options": "voucher_type",
-				"width": 150,
-			},
-			{
 				"label": _("Warehouse"),
 				"fieldname": "warehouse",
 				"fieldtype": "Link",
