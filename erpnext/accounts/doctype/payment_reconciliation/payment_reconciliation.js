@@ -176,8 +176,12 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
-						this.frm.set_value("receivable_payable_account", r.message[0]);
-						this.frm.set_value("default_advance_account", r.message[1]);
+						if (typeof r.message === "string") {
+							this.frm.set_value("receivable_payable_account", r.message);
+						} else if (Array.isArray(r.message)) {
+							this.frm.set_value("receivable_payable_account", r.message[0]);
+							this.frm.set_value("default_advance_account", r.message[1]);
+						}
 					}
 					this.frm.refresh();
 				},
