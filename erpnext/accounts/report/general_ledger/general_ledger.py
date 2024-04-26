@@ -460,7 +460,6 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 
 	for gle in gl_entries:
 		group_by_value = gle.get(group_by)
-		gle.voucher_type = gle.voucher_type
 		gle.voucher_subtype = _(gle.voucher_subtype)
 		gle.against_voucher_type = _(gle.against_voucher_type)
 		gle.remarks = _(gle.remarks)
