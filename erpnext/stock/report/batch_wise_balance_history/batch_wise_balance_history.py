@@ -131,6 +131,7 @@ def get_stock_ledger_entries(filters):
 
 
 def get_item_warehouse_batch_map(filters, float_precision):
+	_system_settings = frappe.get_cached_doc("System Settings")
 	with frappe.db.unbuffered_cursor():
 		sle = get_stock_ledger_entries(filters)
 		sle = sle.run(as_dict=True, as_iterator=True)
