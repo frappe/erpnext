@@ -41,14 +41,17 @@ class ShippingRule(Document):
 		)
 
 		account: DF.Link
-		calculate_based_on: DF.Literal["Fixed", "Net Total", "Net Weight"]
+		calculate_based_on: DF.Literal["Fixed", "Net Total", "Net Weight", "Quantity"]
 		company: DF.Link
 		conditions: DF.Table[ShippingRuleCondition]
 		cost_center: DF.Link
 		countries: DF.Table[ShippingRuleCountry]
 		disabled: DF.Check
+		discount_per_item: DF.Percent
 		label: DF.Data
 		shipping_amount: DF.Currency
+		shipping_amount_per_item: DF.Currency
+		shipping_limit: DF.Currency
 		shipping_rule_type: DF.Literal["Selling", "Buying"]
 	# end: auto-generated types
 
@@ -103,6 +106,10 @@ class ShippingRule(Document):
 		elif self.calculate_based_on == "Fixed":
 			shipping_amount = self.shipping_amount
 
+		elif self.calculate_based_on == "Quantity":
+			qty = doc.total_qty
+			shipping_amount = self.get_shipping_amount_from_quantity(qty)
+
 		# shipping amount by value, apply conditions
 		if by_value:
 			shipping_amount = self.get_shipping_amount_from_rules(value)
@@ -119,6 +126,30 @@ class ShippingRule(Document):
 				return condition.shipping_amount
 
 		return 0.0
+		
+	def get_shipping_amount_from_quantity(self, qty):
+		# If quantity is not provided, return 0.0 as shipping amount
+		if qty is None:
+			return 0.0
+
+		shipping_amount = 0.0
+
+		# Calculate shipping amount based on quantity and parameters
+		if self.shipping_amount_per_item:
+			shipping_amount = self.shipping_amount_per_item * qty
+
+		# Apply discount if applicable
+		if self.discount_per_item:
+			# Limit discount to maximum 100%
+			discount = min(self.discount_per_item * (qty - 1) * 0.01, 1)
+			shipping_amount *= (1 - discount)
+
+		# Apply shipping limit if set
+		if self.shipping_limit:
+			shipping_amount = min(shipping_amount, self.shipping_limit)
+
+		return shipping_amount
+
 
 	def validate_countries(self, doc):
 		# validate applicable countries

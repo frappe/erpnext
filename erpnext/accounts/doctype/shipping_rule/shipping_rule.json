@@ -24,6 +24,11 @@
   "shipping_amount",
   "rule_conditions_section",
   "conditions",
+  "shipping_rule_quantity_section",
+  "shipping_amount_per_item",
+  "column_break_6",
+  "shipping_limit",
+  "discount_per_item",
   "section_break_6",
   "countries"
  ],
@@ -95,7 +100,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Calculate Based On",
-   "options": "Fixed\nNet Total\nNet Weight"
+   "options": "Fixed\nNet Total\nNet Weight\nQuantity"
   },
   {
    "fieldname": "column_break_8",
@@ -108,7 +113,7 @@
    "label": "Shipping Amount"
   },
   {
-   "depends_on": "eval:doc.calculate_based_on!=='Fixed'",
+   "depends_on": "eval:doc.calculate_based_on!=='Fixed' && doc.calculate_based_on !== 'Quantity'",
    "fieldname": "rule_conditions_section",
    "fieldtype": "Section Break",
    "label": "Shipping Rule Conditions"
@@ -138,12 +143,32 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
-  }
+  },
+  {
+    "fieldname": "shipping_amount_per_item",
+    "fieldtype": "Currency",
+    "label": "Shipping Amount Per Item",
+    "mandatory_depends_on": "eval: doc.calculate_based_on === 'Quantity'"
+   },
+   {
+    "fieldname": "shipping_limit",
+    "fieldtype": "Currency",
+    "label": "Shipping Limit"
+   },
+   {
+    "fieldname": "discount_per_item",
+    "fieldtype": "Percent",
+    "label": "Discount Per Item"
+   },
+   {
+    "fieldname": "column_break_6",
+    "fieldtype": "Column Break"
+   }
  ],
  "icon": "fa fa-truck",
  "idx": 1,
  "links": [],
- "modified": "2024-03-27 13:10:41.653314",
+ "modified": "2024-04-26 19:08:50.915833",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Shipping Rule",
