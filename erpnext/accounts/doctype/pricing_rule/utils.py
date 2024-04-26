@@ -103,6 +103,8 @@ def _get_pricing_rules(apply_on, args, values):
 		item_conditions = "{child_doc}.{apply_on_field}= %({apply_on_field})s".format(child_doc=child_doc,
 			apply_on_field = apply_on_field)
 
+		conditions += " and {child_doc}.uom = {uom}".format(child_doc=child_doc, uom=frappe.db.escape(args.get('uom')))
+
 		if apply_on_field == 'item_code':
 			if "variant_of" not in args:
 				args.variant_of = frappe.get_cached_value("Item", args.item_code, "variant_of")
@@ -111,6 +113,7 @@ def _get_pricing_rules(apply_on, args, values):
 				item_variant_condition = ' or {child_doc}.item_code=%(variant_of)s '.format(child_doc=child_doc)
 				values['variant_of'] = args.variant_of
 	elif apply_on_field == 'item_group':
+		conditions += " and {child_doc}.uom = {uom}".format(child_doc=child_doc, uom=frappe.db.escape(args.get('uom')))
 		item_conditions = _get_tree_conditions(args, "Item Group", child_doc, False)
 
 	conditions += get_other_conditions(conditions, values, args)
@@ -140,7 +143,7 @@ def _get_pricing_rules(apply_on, args, values):
 			transaction_type = args.transaction_type,
 			warehouse_cond = warehouse_conditions,
 			apply_on_other_field = "other_{0}".format(apply_on_field),
-			conditions = conditions), values, as_dict=1) or []
+			conditions = conditions), values, as_dict=1, debug=1) or []
 
 	return pricing_rules
 
