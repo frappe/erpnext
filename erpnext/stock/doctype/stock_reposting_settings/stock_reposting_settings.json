@@ -77,11 +77,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-11-01 16:14:29.080697",
-=======
  "modified": "2024-04-24 12:19:40.204888",
->>>>>>> aefbe21b46 (feat: allow to do reposting for all transactions (audit))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reposting Settings",
