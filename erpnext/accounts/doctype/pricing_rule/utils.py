@@ -339,6 +339,9 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 		else:
 			status = False
 
+		if rule.get("uom") and args and rule.get("uom") != args.get("uom"):
+			status = False
+
 		if status:
 			rules.append(rule)
 
