@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-25 15:33\n"
+"PO-Revision-Date: 2024-04-27 08:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -1236,12 +1236,12 @@ msgstr ""
 #. Description of a DocType
 #: stock/doctype/price_list/price_list.json
 msgid "A Price List is a collection of Item Prices either Selling, Buying, or both"
-msgstr ""
+msgstr "Una lista de precios es una colección de Precios de Productos, ya sea de Venta, de Compra o ambos"
 
 #. Description of a DocType
 #: stock/doctype/item/item.json
 msgid "A Product or a Service that is bought, sold or kept in stock."
-msgstr ""
+msgstr "Un Producto o Servicio que se compra, vende o mantiene en stock."
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:532
 msgid "A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
@@ -1260,7 +1260,7 @@ msgstr ""
 #. Description of a DocType
 #: accounts/doctype/shipping_rule_condition/shipping_rule_condition.json
 msgid "A condition for a Shipping Rule"
-msgstr ""
+msgstr "Una condición para una regla de envío"
 
 #. Description of the 'Send To Primary Contact' (Check) field in DocType
 #. 'Process Statement Of Accounts'
@@ -1280,7 +1280,7 @@ msgstr ""
 #. Description of a DocType
 #: stock/doctype/warehouse/warehouse.json
 msgid "A logical Warehouse against which stock entries are made."
-msgstr ""
+msgstr "Almacén lógico contra el que se realizan las entradas de existencias."
 
 #: templates/emails/confirm_appointment.html:2
 msgid "A new appointment has been created for you with {0}"
@@ -7116,7 +7116,7 @@ msgstr "Monto"
 #. Description of a DocType
 #: setup/doctype/item_group/item_group.json
 msgid "An Item Group is a way to classify items based on types."
-msgstr ""
+msgstr "Un Grupo de Producto es una forma de clasificar Productos según sus tipos."
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.py:405
 msgid "An error has been appeared while reposting item valuation via {0}"
@@ -11855,7 +11855,7 @@ msgstr "Comprar"
 #. Description of a DocType
 #: selling/doctype/customer/customer.json
 msgid "Buyer of Goods and Services."
-msgstr ""
+msgstr "Comprador de Bienes y Servicios."
 
 #. Name of a Workspace
 #. Label of a Card Break in the Buying Workspace
@@ -13690,7 +13690,7 @@ msgstr "Clase / Porcentaje"
 #. Description of a DocType
 #: setup/doctype/territory/territory.json
 msgid "Classification of Customers by region"
-msgstr ""
+msgstr "Clasificación de Clientes por región"
 
 #. Label of a Text Editor field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -22069,7 +22069,7 @@ msgstr "La Cuenta predeterminada se actualizará automáticamente en Factura de 
 #. Description of a DocType
 #: stock/doctype/stock_settings/stock_settings.json
 msgid "Default settings for your stock-related transactions"
-msgstr ""
+msgstr "Configuración predeterminada para sus transacciones relacionadas con acciones"
 
 #: setup/doctype/company/company.js:160
 msgid "Default tax templates for sales, purchase and items are created."
@@ -24685,7 +24685,7 @@ msgstr ""
 #. Description of a DocType
 #: stock/doctype/serial_no/serial_no.json
 msgid "Distinct unit of an Item"
-msgstr ""
+msgstr "Unidad distinta de un artículo"
 
 #. Label of a Select field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -31544,7 +31544,7 @@ msgstr ""
 #. Description of a DocType
 #: accounts/doctype/account/account.json
 msgid "Heads (or groups) against which Accounting Entries are made and balances are maintained."
-msgstr ""
+msgstr "Encabezados (o grupos) contra los cuales se realizan los Asientos Contables y se mantienen los saldos."
 
 #. Label of a Small Text field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -31627,7 +31627,7 @@ msgstr "Texto de Ayuda"
 #. Description of a DocType
 #: accounts/doctype/monthly_distribution/monthly_distribution.json
 msgid "Helps you distribute the Budget/Target across months if you have seasonality in your business."
-msgstr ""
+msgstr "Le ayuda a distribuir el Presupuesto/Objetivo a lo largo de los meses si tiene estacionalidad en su negocio."
 
 #: assets/doctype/asset/depreciation.py:410
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
@@ -32805,7 +32805,7 @@ msgstr "Importar / Exportar"
 #. Description of a DocType
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
 msgid "Import Chart of Accounts from a csv file"
-msgstr ""
+msgstr "Importar el Plan General de Contabilidad desde un archivo csv"
 
 #. Label of a Link in the Home Workspace
 #. Label of a Link in the Settings Workspace
@@ -39202,7 +39202,7 @@ msgstr "Legal"
 #. Description of a DocType
 #: setup/doctype/company/company.json
 msgid "Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Organization."
-msgstr ""
+msgstr "Entidad Legal / Subsidiaria con un Plan de Cuentas separado perteneciente a la Organización."
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:59
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:84
@@ -39843,7 +39843,7 @@ msgstr ""
 #. Description of a DocType
 #: stock/doctype/item_price/item_price.json
 msgid "Log the selling and buying rate of an Item"
-msgstr ""
+msgstr "Registra la tasa de venta y compra de un artículo"
 
 #. Label of a Attach Image field in DocType 'Manufacturer'
 #: stock/doctype/manufacturer/manufacturer.json
@@ -52203,7 +52203,7 @@ msgstr "Fecha y hora de contabilización deberá ser posterior a {0}"
 #. Description of a DocType
 #: crm/doctype/opportunity/opportunity.json
 msgid "Potential Sales Deal"
-msgstr ""
+msgstr "Posible Acuerdo de Venta"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -66843,7 +66843,7 @@ msgstr "Configuración"
 #: crm/doctype/crm_settings/crm_settings.json
 #: selling/doctype/selling_settings/selling_settings.json
 msgid "Settings for Selling Module"
-msgstr ""
+msgstr "Configuración para el Módulo de Venta"
 
 #: accounts/doctype/invoice_discounting/invoice_discounting_list.js:11
 msgid "Settled"
@@ -68042,7 +68042,7 @@ msgstr ""
 #. Description of a DocType
 #: setup/doctype/currency_exchange/currency_exchange.json
 msgid "Specify Exchange Rate to convert one currency into another"
-msgstr "Especifique el tipo de cambio para convertir una moneda en otra"
+msgstr "Especifica el tipo de cambio para convertir una moneda en otra"
 
 #. Description of a DocType
 #: accounts/doctype/shipping_rule/shipping_rule.json
@@ -71668,7 +71668,7 @@ msgstr "Proveedor entrega al Cliente"
 #. Description of a DocType
 #: buying/doctype/supplier/supplier.json
 msgid "Supplier of Goods or Services."
-msgstr ""
+msgstr "Proveedor de Bienes o Servicios."
 
 #: buying/doctype/supplier_quotation/supplier_quotation.py:167
 msgid "Supplier {0} not found in {1}"
