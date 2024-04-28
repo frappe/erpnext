@@ -126,7 +126,7 @@ class ShippingRule(Document):
 				return condition.shipping_amount
 
 		return 0.0
-		
+
 	def get_shipping_amount_from_quantity(self, qty):
 		# If quantity is not provided, return 0.0 as shipping amount
 		if qty is None:
@@ -142,14 +142,13 @@ class ShippingRule(Document):
 		if self.discount_per_item:
 			# Limit discount to maximum 100%
 			discount = min(self.discount_per_item * (qty - 1) * 0.01, 1)
-			shipping_amount *= (1 - discount)
+			shipping_amount *= 1 - discount
 
 		# Apply shipping limit if set
 		if self.shipping_limit:
 			shipping_amount = min(shipping_amount, self.shipping_limit)
 
 		return shipping_amount
-
 
 	def validate_countries(self, doc):
 		# validate applicable countries
