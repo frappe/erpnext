@@ -302,7 +302,6 @@ class AssetDepreciationSchedule(Document):
 				prev_depreciation_amount = self.get("depreciation_schedule")[n - 1].depreciation_amount
 			else:
 				prev_depreciation_amount = 0
-
 			depreciation_amount, prev_per_day_depr = get_depreciation_amount(
 				self,
 				asset_doc,
@@ -353,7 +352,13 @@ class AssetDepreciationSchedule(Document):
 				and (has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata)
 				and not self.opening_accumulated_depreciation
 				and not self.flags.wdv_it_act_applied
-				and not self.daily_prorata_based
+				and (
+					row.depreciation_method in ("Straight Line", "Manual")
+					or (
+						row.depreciation_method in ("Written Down Value", "Double Declining Balance")
+						and not row.daily_prorata_based
+					)
+				)
 			):
 				from_date = add_days(
 					asset_doc.available_for_use_date, -1
@@ -768,30 +773,27 @@ def get_default_wdv_or_dd_depr_amount(
 	asset_depr_schedule,
 	prev_per_day_depr,
 ):
-	if cint(fb_row.frequency_of_depreciation) == 12:
-		return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100)
+	if not fb_row.daily_prorata_based:
+		return _get_default_wdv_or_dd_depr_amount(
+			asset,
+			fb_row,
+			depreciable_value,
+			schedule_idx,
+			prev_depreciation_amount,
+			has_wdv_or_dd_non_yearly_pro_rata,
+			asset_depr_schedule,
+		), None
 	else:
-		if not fb_row.daily_prorata_based:
-			return _get_default_wdv_or_dd_depr_amount(
-				asset,
-				fb_row,
-				depreciable_value,
-				schedule_idx,
-				prev_depreciation_amount,
-				has_wdv_or_dd_non_yearly_pro_rata,
-				asset_depr_schedule,
-			), None
-		else:
-			return _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
-				asset,
-				fb_row,
-				depreciable_value,
-				schedule_idx,
-				prev_depreciation_amount,
-				has_wdv_or_dd_non_yearly_pro_rata,
-				asset_depr_schedule,
-				prev_per_day_depr,
-			)
+		return _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
+			asset,
+			fb_row,
+			depreciable_value,
+			schedule_idx,
+			prev_depreciation_amount,
+			has_wdv_or_dd_non_yearly_pro_rata,
+			asset_depr_schedule,
+			prev_per_day_depr,
+		)
 
 
 def _get_default_wdv_or_dd_depr_amount(
@@ -838,14 +840,27 @@ def _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
 	asset_depr_schedule,
 	prev_per_day_depr,
 ):
-	if has_wdv_or_dd_non_yearly_pro_rata:
+	if cint(fb_row.frequency_of_depreciation) == 12:
 		if schedule_idx == 0:
-			print(">>>>>", depreciable_value)
 			per_day_depr = get_per_day_depr(fb_row, depreciable_value, fb_row.depreciation_start_date)
 			from_date = asset.available_for_use_date
 			to_date = add_days(fb_row.depreciation_start_date, -1)
 			total_days = date_diff(to_date, from_date) + 1
-			print("892", per_day_depr, from_date, to_date, total_days)
+			return (per_day_depr * total_days), per_day_depr
+		else:
+			from_date, to_date = get_dates(
+				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
+			)
+			days_in_month = date_diff(to_date, from_date) + 1
+			return (prev_per_day_depr * days_in_month), prev_per_day_depr
+
+	if has_wdv_or_dd_non_yearly_pro_rata:
+		if schedule_idx == 0:
+			per_day_depr = get_per_day_depr(fb_row, depreciable_value, fb_row.depreciation_start_date)
+			from_date = asset.available_for_use_date
+			to_date = add_days(fb_row.depreciation_start_date, -1)
+			total_days = date_diff(to_date, from_date) + 1
+
 			return (per_day_depr * total_days), per_day_depr
 
 		elif schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 1:
