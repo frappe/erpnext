@@ -2158,7 +2158,7 @@ def get_bank_cash_account(doc, bank_account):
 def set_party_type(dt):
 	if dt in ("Sales Invoice", "Sales Order", "Dunning"):
 		party_type = "Customer"
-	elif dt in ("Purchase Invoice", "Purchase Order"):
+	elif dt in ("Purchase Invoice", "Purchase Order", "Purchase Request"):
 		party_type = "Supplier"
 	return party_type
 
