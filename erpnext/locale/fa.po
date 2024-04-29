@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-10 08:40\n"
+"PO-Revision-Date: 2024-04-29 09:29\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +22,7 @@ msgstr ""
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "  "
-msgstr ""
+msgstr "  "
 
 #: selling/doctype/quotation/quotation.js:77
 msgid " Address"
@@ -66,7 +66,7 @@ msgstr "علامت \"دارایی ثابت است\" را نمی توان برد�
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "#"
-msgstr ""
+msgstr "#"
 
 #. Description of the Onboarding Step 'Accounts Settings'
 #: accounts/onboarding_step/accounts_settings/accounts_settings.json
@@ -490,19 +490,19 @@ msgstr "% مبلغ صورتحساب"
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "% Billed"
-msgstr ""
+msgstr "% صورتحساب شده"
 
 #. Label of a Select field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "% Complete Method"
-msgstr ""
+msgstr "روش ٪ تکمیل"
 
 #. Label of a Percent field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "% Completed"
-msgstr ""
+msgstr "% تکمیل شده"
 
 #: manufacturing/doctype/bom/bom.js:788
 #, python-format
@@ -513,17 +513,17 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "% Installed"
-msgstr ""
+msgstr "٪ نصب شده است"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:70
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html:16
 msgid "% Occupied"
-msgstr ""
+msgstr "٪ مشغول"
 
 #: accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:284
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:337
 msgid "% Of Grand Total"
-msgstr ""
+msgstr "% از کل بزرگ"
 
 #. Label of a Percent field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
@@ -565,31 +565,31 @@ msgstr ""
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "% Received"
-msgstr ""
+msgstr "% دریافت شده"
 
 #. Label of a Percent field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "% Received"
-msgstr ""
+msgstr "% دریافت شده"
 
 #. Label of a Percent field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "% Returned"
-msgstr ""
+msgstr "٪ برگردانده شده"
 
 #. Label of a Percent field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "% Returned"
-msgstr ""
+msgstr "٪ برگردانده شده"
 
 #. Label of a Percent field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "% Returned"
-msgstr ""
+msgstr "٪ برگردانده شده"
 
 #. Description of the '% Amount Billed' (Percent) field in DocType 'Sales
 #. Order'
@@ -612,7 +612,7 @@ msgstr "حساب در بخش حسابداری مشتری {0}"
 
 #: selling/doctype/sales_order/sales_order.py:269
 msgid "'Allow Multiple Sales Orders Against a Customer's Purchase Order'"
-msgstr "اجازه دادن سفارشات فروش چندگانه در برابر سفارش خرید مشتری"
+msgstr "اجازه دادن سفارش‌های فروش چندگانه در برابر سفارش خرید مشتری"
 
 #: controllers/trends.py:56
 msgid "'Based On' and 'Group By' can not be same"
@@ -658,7 +658,7 @@ msgstr ""
 
 #: stock/doctype/delivery_note/delivery_note.py:391
 msgid "'Sales Invoice' reference ({1}) is missing in row {0}"
-msgstr ""
+msgstr "مرجع «فاکتور فروش» ({1}) در ردیف {0} وجود ندارد"
 
 #: stock/doctype/delivery_note/delivery_note.py:374
 msgid "'Sales Order Item' reference ({1}) is missing in row {0}"
@@ -832,42 +832,42 @@ msgstr "1-10"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "1000+"
-msgstr ""
+msgstr "1000+"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "1000+"
-msgstr ""
+msgstr "1000+"
 
 #. Option for the 'No. of Employees' (Select) field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "1000+"
-msgstr ""
+msgstr "1000+"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "11-50"
-msgstr ""
+msgstr "11-50"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "11-50"
-msgstr ""
+msgstr "11-50"
 
 #. Option for the 'No. of Employees' (Select) field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "11-50"
-msgstr ""
+msgstr "11-50"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:95
 #: regional/report/uae_vat_201/uae_vat_201.py:101
 msgid "1{0}"
-msgstr ""
+msgstr "1{0}"
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Asset Maintenance
 #. Task'
@@ -886,13 +886,13 @@ msgstr ""
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "201-500"
-msgstr ""
+msgstr "201-500"
 
 #. Option for the 'No. of Employees' (Select) field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "201-500"
-msgstr ""
+msgstr "201-500"
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Asset Maintenance
 #. Task'
@@ -919,19 +919,19 @@ msgstr "30-60 روز"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "501-1000"
-msgstr ""
+msgstr "501-1000"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "501-1000"
-msgstr ""
+msgstr "501-1000"
 
 #. Option for the 'No. of Employees' (Select) field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "501-1000"
-msgstr ""
+msgstr "501-1000"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -943,13 +943,13 @@ msgstr ""
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "51-200"
-msgstr ""
+msgstr "51-200"
 
 #. Option for the 'No. of Employees' (Select) field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "51-200"
-msgstr ""
+msgstr "51-200"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: utilities/doctype/video_settings/video_settings.json
@@ -1228,16 +1228,16 @@ msgstr "یک برگه بسته بندی فقط می تواند برای پیش �
 #. Description of a DocType
 #: stock/doctype/price_list/price_list.json
 msgid "A Price List is a collection of Item Prices either Selling, Buying, or both"
-msgstr ""
+msgstr "لیست قیمت مجموعه ای از قیمت های آیتم‌های فروش، خرید یا هر دو است"
 
 #. Description of a DocType
 #: stock/doctype/item/item.json
 msgid "A Product or a Service that is bought, sold or kept in stock."
-msgstr ""
+msgstr "محصول یا خدماتی که خریداری، فروخته یا در انبار نگهداری می شود."
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:532
 msgid "A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
-msgstr "یک کار آشتی {0} برای همین فیلترها در حال اجرا است. الان نمیشه آشتی کرد"
+msgstr "یک کار تطبیق {0} برای همین فیلترها در حال اجرا است. الان نمیشه تطبیق کرد"
 
 #. Description of the Onboarding Step 'Create a Sales Order'
 #: selling/onboarding_step/create_a_sales_order/create_a_sales_order.json
@@ -1247,12 +1247,12 @@ msgstr ""
 
 #: setup/doctype/company/company.py:898
 msgid "A Transaction Deletion Document: {0} is triggered for {0}"
-msgstr ""
+msgstr "یک سند حذف تراکنش: {0} برای {0} فعال می شود"
 
 #. Description of a DocType
 #: accounts/doctype/shipping_rule_condition/shipping_rule_condition.json
 msgid "A condition for a Shipping Rule"
-msgstr ""
+msgstr "یک شرط برای یک قانون حمل و نقل"
 
 #. Description of the 'Send To Primary Contact' (Check) field in DocType
 #. 'Process Statement Of Accounts'
@@ -1285,7 +1285,7 @@ msgstr "الگویی با دسته مالیاتی {0} از قبل وجود دا�
 #. Description of a DocType
 #: setup/doctype/sales_partner/sales_partner.json
 msgid "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission."
-msgstr ""
+msgstr "یک توزیع کننده شخص ثالث / فروشنده / نماینده کمیسیون / وابسته / فروشنده که محصولات شرکت را به صورت کمیسیون می فروشد."
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -1429,7 +1429,7 @@ msgstr "در بالا"
 #. Name of a role
 #: setup/doctype/department/department.json
 msgid "Academics User"
-msgstr "کاربر دانشگاهیان"
+msgstr "کاربر دانشگاهی"
 
 #. Label of a Code field in DocType 'Item Quality Inspection Parameter'
 #: stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
@@ -1552,7 +1552,7 @@ msgstr "نشانه دسترسی"
 #: setup/doctype/uom/uom.json
 msgctxt "UOM"
 msgid "According to CEFACT/ICG/2010/IC013 or CEFACT/ICG/2010/IC010"
-msgstr ""
+msgstr "طبق CEFACT/ICG/2010/IC013 یا CEFACT/ICG/2010/IC010"
 
 #. Name of a DocType
 #: accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.js:16
@@ -2119,7 +2119,7 @@ msgstr "حساب {0}: شما نمی توانید خود را به عنوان ح�
 
 #: accounts/general_ledger.py:406
 msgid "Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry"
-msgstr "حساب: <b>{0}</b> یک کار سرمایه ای در حال انجام است و نمی توان آن را با ورود مجله به روز کرد"
+msgstr "حساب: <b>{0}</b> یک کار سرمایه ای در حال انجام است و نمی توان آن را با ورود دفتر روزنامه به روز کرد"
 
 #: accounts/doctype/journal_entry/journal_entry.py:256
 msgid "Account: {0} can only be updated via Stock Transactions"
@@ -2663,7 +2663,7 @@ msgstr "ورودی حسابداری برای {0}: {1} فقط به ارز قاب�
 #: public/js/utils/ledger_preview.js:8 selling/doctype/customer/customer.js:164
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:48
 msgid "Accounting Ledger"
-msgstr "دفتر حسابداری"
+msgstr "دفتر کل حسابداری"
 
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
@@ -2877,7 +2877,7 @@ msgstr "حساب‌ها تا تاریخ مسدود شده‌اند"
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "Accounts Manager"
-msgstr "مدیر حساب ها"
+msgstr "مدیر حسابداری"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:339
 msgid "Accounts Missing Error"
@@ -3077,7 +3077,7 @@ msgstr "تنظیمات حساب ها"
 #: stock/doctype/warehouse_type/warehouse_type.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Accounts User"
-msgstr "کاربر حساب ها"
+msgstr "کاربر حسابداری"
 
 #: accounts/doctype/journal_entry/journal_entry.py:1182
 msgid "Accounts table cannot be blank."
@@ -3341,7 +3341,7 @@ msgstr "سرنخ های فعال"
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Active Status"
-msgstr ""
+msgstr "وضعیت فعال"
 
 #. Label of a Tab Break field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -3595,11 +3595,11 @@ msgstr "مقدار واقعی اجباری است"
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:37
 #: stock/dashboard/item_dashboard_list.html:28
 msgid "Actual Qty {0} / Waiting Qty {1}"
-msgstr ""
+msgstr "مقدار واقعی {0} / مقدار انتظار {1}"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Actual Qty: Quantity available in the warehouse."
-msgstr ""
+msgstr "مقدار واقعی: مقدار موجود در انبار."
 
 #: stock/report/item_shortage_report/item_shortage_report.py:95
 msgid "Actual Quantity"
@@ -3712,7 +3712,7 @@ msgstr "اضافه کردن ستون به ارز تراکنش"
 
 #: templates/pages/task_info.html:94 templates/pages/task_info.html:96
 msgid "Add Comment"
-msgstr ""
+msgstr "افزودن نظر"
 
 #. Label of a Check field in DocType 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
@@ -3727,7 +3727,7 @@ msgstr "مشتریان را اضافه کنید"
 #: selling/page/point_of_sale/pos_item_cart.js:92
 #: selling/page/point_of_sale/pos_item_cart.js:411
 msgid "Add Discount"
-msgstr ""
+msgstr "افزودن تخفیف"
 
 #: public/js/event.js:40
 msgid "Add Employees"
@@ -3854,7 +3854,7 @@ msgstr "اضافه کردن شماره سریال"
 
 #: manufacturing/doctype/plant_floor/plant_floor.js:172
 msgid "Add Stock"
-msgstr ""
+msgstr "افزودن موجودی"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:238
 #: public/js/bom_configurator/bom_configurator.bundle.js:318
@@ -3943,7 +3943,7 @@ msgstr "افزودن/ویرایش شرایط کوپن"
 
 #: templates/includes/footer/footer_extension.html:26
 msgid "Added"
-msgstr ""
+msgstr "اضافه شد"
 
 #. Label of a Link field in DocType 'CRM Note'
 #: crm/doctype/crm_note/crm_note.json
@@ -3975,7 +3975,7 @@ msgstr "افزودن سرنخ به Prospect..."
 
 #: selling/page/point_of_sale/pos_item_cart.js:433
 msgid "Additional"
-msgstr ""
+msgstr "اضافی"
 
 #. Label of a Currency field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -5034,11 +5034,11 @@ msgstr "در مقابل حساب درآمد"
 #: accounts/doctype/journal_entry/journal_entry.py:637
 #: accounts/doctype/payment_entry/payment_entry.py:699
 msgid "Against Journal Entry {0} does not have any unmatched {1} entry"
-msgstr "در مقابل ورودی مجله {0} هیچ ورودی {1} بی همتا ندارد"
+msgstr "در مقابل ورودی دفتر روزنامه {0} هیچ ورودی {1} بی همتا ندارد"
 
 #: accounts/doctype/gl_entry/gl_entry.py:361
 msgid "Against Journal Entry {0} is already adjusted against some other voucher"
-msgstr "در مقابل ورود مجله {0} قبلاً با کوپن دیگری تنظیم شده است"
+msgstr "در مقابل ورود دفتر روزنامه {0} قبلاً با کوپن دیگری تنظیم شده است"
 
 #. Label of a Link field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -5355,7 +5355,7 @@ msgstr "تمام روز"
 #: setup/doctype/company/company.py:369 setup/doctype/company/company.py:375
 #: setup/doctype/company/company.py:381
 msgid "All Departments"
-msgstr "همه بخش ها"
+msgstr "همه دپارتمان ها"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
@@ -5376,7 +5376,7 @@ msgstr "همه گروه های آیتم"
 
 #: selling/page/point_of_sale/pos_item_selector.js:25
 msgid "All Items"
-msgstr ""
+msgstr "همه آیتم ها"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
@@ -5451,7 +5451,7 @@ msgstr "همه اقلام قبلاً صورتحساب/بازگردانده شد�
 
 #: stock/doctype/delivery_note/delivery_note.py:1300
 msgid "All items have already been received"
-msgstr ""
+msgstr "همه آیتم‌ها قبلاً دریافت شده است"
 
 #: stock/doctype/stock_entry/stock_entry.py:2264
 msgid "All items have already been transferred for this Work Order."
@@ -5578,7 +5578,7 @@ msgstr "ورودی های اختصاص داده شده"
 
 #: public/js/templates/crm_activities.html:49
 msgid "Allocated To:"
-msgstr ""
+msgstr "اختصاص داده شده به:"
 
 #. Label of a Currency field in DocType 'Sales Invoice Advance'
 #: accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
@@ -5746,7 +5746,7 @@ msgstr "اجازه مصرف مواد متعدد"
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Allow Multiple Sales Orders Against a Customer's Purchase Order"
-msgstr "سفارشات فروش چندگانه را در مقابل سفارش خرید مشتری مجاز کنید"
+msgstr "سفارش‌های فروش چندگانه را در مقابل سفارش خرید مشتری مجاز کنید"
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -6047,7 +6047,7 @@ msgstr "نام آیتم جایگزین"
 
 #: selling/doctype/quotation/quotation.js:360
 msgid "Alternative Items"
-msgstr ""
+msgstr "آیتم‌های جایگزین"
 
 #: stock/doctype/item_alternative/item_alternative.py:37
 msgid "Alternative item must not be same as item code"
@@ -7083,22 +7083,22 @@ msgstr "مبلغ {0} {1} {2} {3}"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere"
-msgstr ""
+msgstr "آمپر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Hour"
-msgstr ""
+msgstr "آمپر-ساعت"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Minute"
-msgstr ""
+msgstr "آمپر-دقیقه"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Second"
-msgstr ""
+msgstr "آمپر-ثانیه"
 
 #: controllers/trends.py:237 controllers/trends.py:249
 #: controllers/trends.py:254
@@ -7684,7 +7684,7 @@ msgstr "آیا مطمئن هستید که میخواهید این مورد را 
 
 #: accounts/doctype/subscription/subscription.js:69
 msgid "Are you sure you want to restart this subscription?"
-msgstr "آیا مطمئن هستید که می خواهید این اشتراک را مجدداً راه اندازی کنید؟"
+msgstr "آیا مطمئن هستید که می خواهید این اشتراک را مجدداً راه‌اندازی کنید؟"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -8005,7 +8005,7 @@ msgstr "جزئیات استهلاک دارایی"
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.json
 #: assets/workspace/assets/assets.json
 msgid "Asset Depreciation Ledger"
-msgstr "دفتر استهلاک دارایی"
+msgstr "دفتر کل استهلاک دارایی"
 
 #. Name of a DocType
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
@@ -8394,7 +8394,7 @@ msgstr "دارایی از بین رفته است"
 
 #: assets/doctype/asset/depreciation.py:472
 msgid "Asset scrapped via Journal Entry {0}"
-msgstr "دارایی از طریق ورود مجله {0} کنار گذاشته شد"
+msgstr "دارایی از طریق ورود دفتر روزنامه {0} کنار گذاشته شد"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1371
 msgid "Asset sold"
@@ -8556,11 +8556,11 @@ msgstr "حداقل یک دارایی باید انتخاب شود."
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:790
 msgid "At least one invoice has to be selected."
-msgstr ""
+msgstr "حداقل یک فاکتور باید انتخاب شود."
 
 #: controllers/sales_and_purchase_return.py:142
 msgid "At least one item should be entered with negative quantity in return document"
-msgstr ""
+msgstr "حداقل یک مورد باید با مقدار منفی در سند برگشت وارد شود"
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:407
 #: accounts/doctype/sales_invoice/sales_invoice.py:518
@@ -8573,11 +8573,11 @@ msgstr "حداقل یکی از ماژول های کاربردی باید انت�
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:196
 msgid "At least one of the Selling or Buying must be selected"
-msgstr ""
+msgstr "حداقل یکی از موارد فروش یا خرید باید انتخاب شود"
 
 #: stock/doctype/stock_entry/stock_entry.py:607
 msgid "At least one warehouse is mandatory"
-msgstr ""
+msgstr "حداقل یک انبار اجباری است"
 
 #: manufacturing/doctype/routing/routing.py:50
 msgid "At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2}"
@@ -8598,7 +8598,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Atmosphere"
-msgstr ""
+msgstr "اتمسفر"
 
 #. Description of the 'File to Rename' (Attach) field in DocType 'Rename Tool'
 #: utilities/doctype/rename_tool/rename_tool.json
@@ -8845,7 +8845,7 @@ msgstr "شرکت خودکار (برای همه مشتریان)"
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.js:61
 msgid "Auto Reconcile"
-msgstr "آشتی خودکار"
+msgstr "تطبیق خودکار"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -8855,7 +8855,7 @@ msgstr "تطبیق خودکار پرداخت ها"
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:408
 msgid "Auto Reconciliation"
-msgstr "آشتی خودکار"
+msgstr "تطبیق خودکار"
 
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:143
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:191
@@ -9250,7 +9250,7 @@ msgstr "B-"
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "BFS"
-msgstr ""
+msgstr "BFS"
 
 #. Label of a Section Break field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
@@ -9336,7 +9336,7 @@ msgstr "BOM"
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:21
 msgid "BOM 1"
-msgstr ""
+msgstr "BOM 1"
 
 #: manufacturing/doctype/bom/bom.py:1337
 msgid "BOM 1 {0} and BOM 2 {1} should not be same"
@@ -9344,7 +9344,7 @@ msgstr "BOM 1 {0} و BOM 2 {1} نباید یکسان باشند"
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:38
 msgid "BOM 2"
-msgstr ""
+msgstr "BOM 2"
 
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:4
@@ -10122,13 +10122,13 @@ msgstr "صورت توافق بانکی"
 #. Name of a DocType
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 msgid "Bank Reconciliation Tool"
-msgstr "ابزار آشتی بانکی"
+msgstr "ابزار تطبیق بانکی"
 
 #. Label of a Link in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgctxt "Bank Reconciliation Tool"
 msgid "Bank Reconciliation Tool"
-msgstr "ابزار آشتی بانکی"
+msgstr "ابزار تطبیق بانکی"
 
 #. Name of a DocType
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
@@ -10178,7 +10178,7 @@ msgstr "تراکنش بانکی {0} مطابقت دارد"
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:533
 msgid "Bank Transaction {0} added as Journal Entry"
-msgstr "تراکنش بانکی {0} به عنوان ورودی مجله اضافه شد"
+msgstr "تراکنش بانکی {0} به عنوان ورودی دفتر روزنامه اضافه شد"
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:508
 msgid "Bank Transaction {0} added as Payment Entry"
@@ -10693,7 +10693,7 @@ msgstr "شماره دسته اجباری است"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2163
 msgid "Batch No {0} does not exists"
-msgstr ""
+msgstr "شماره دسته {0} وجود ندارد"
 
 #: stock/utils.py:623
 msgid "Batch No {0} is linked with Item {1} which has serial no. Please scan serial no instead."
@@ -10805,7 +10805,7 @@ msgstr "ارزش گذاری دسته ای"
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Before reconciliation"
-msgstr "قبل از آشتی"
+msgstr "قبل از تطبیق"
 
 #. Label of a Int field in DocType 'Task'
 #: projects/doctype/task/task.json
@@ -11166,7 +11166,7 @@ msgstr "صندوقچه"
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Bio / Cover Letter"
-msgstr "بیو / جلد نامه"
+msgstr "بیو / معرفی نامه"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -11387,7 +11387,7 @@ msgstr "کتاب ورودی های معوق بر اساس"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Book Deferred Entries Via Journal Entry"
-msgstr "کتاب ورودی های معوق از طریق ورود مجله"
+msgstr "کتاب ورودی های معوق از طریق ورود دفتر روزنامه"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -11437,7 +11437,7 @@ msgstr "هم تاریخ شروع دوره آزمایشی و هم تاریخ پا
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Box"
-msgstr ""
+msgstr "جعبه"
 
 #. Name of a DocType
 #: setup/doctype/branch/branch.json
@@ -11986,7 +11986,7 @@ msgstr ""
 #. Label of a Card Break in the Home Workspace
 #: crm/workspace/crm/crm.json setup/workspace/home/home.json
 msgid "CRM"
-msgstr ""
+msgstr "CRM"
 
 #. Name of a DocType
 #: crm/doctype/crm_note/crm_note.json
@@ -12159,7 +12159,7 @@ msgstr "خلاصه تماس"
 
 #: public/js/call_popup/call_popup.js:186
 msgid "Call Summary Saved"
-msgstr ""
+msgstr "خلاصه تماس ذخیره شد"
 
 #. Label of a Data field in DocType 'Telephony Call Type'
 #: telephony/doctype/telephony_call_type/telephony_call_type.json
@@ -12174,7 +12174,7 @@ msgstr "پاسخ به تماس"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calorie (Food)"
-msgstr ""
+msgstr "کالری (غذا)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -12194,7 +12194,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calorie/Seconds"
-msgstr ""
+msgstr "کالری/ثانیه"
 
 #. Name of a DocType
 #. Label of a Card Break in the CRM Workspace
@@ -12839,7 +12839,7 @@ msgstr "نمی توان شماره سریال {0} را حذف کرد، زیرا 
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:101
 msgid "Cannot enqueue multi docs for one company. {0} is already queued/running for company: {1}"
-msgstr ""
+msgstr "نمی توان چند سند را برای یک شرکت در صف قرار داد. {0} قبلاً برای شرکت: {1} در صف/در حال اجراست"
 
 #: selling/doctype/sales_order/sales_order.py:652
 #: selling/doctype/sales_order/sales_order.py:675
@@ -13221,7 +13221,7 @@ msgstr "شماره تلفن همراه"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Celsius"
-msgstr ""
+msgstr "درجه سانتیگراد"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -13236,7 +13236,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Centigram/Litre"
-msgstr ""
+msgstr "سانتی گرم / لیتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -13246,7 +13246,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Centimeter"
-msgstr ""
+msgstr "سانتیمتر"
 
 #. Label of a Attach field in DocType 'Asset Maintenance Log'
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
@@ -13281,7 +13281,7 @@ msgstr "گواهی مورد نیاز است"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Chain"
-msgstr ""
+msgstr "زنجیره"
 
 #: selling/page/point_of_sale/pos_payment.js:587
 msgid "Change"
@@ -13342,7 +13342,7 @@ msgstr "تغییرات"
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:155
 msgid "Changes in {0}"
-msgstr ""
+msgstr "تغییرات در {0}"
 
 #: stock/doctype/item/item.js:277
 msgid "Changing Customer Group for the selected Customer is not allowed."
@@ -13682,7 +13682,7 @@ msgstr "کلاس / درصد"
 #. Description of a DocType
 #: setup/doctype/territory/territory.json
 msgid "Classification of Customers by region"
-msgstr ""
+msgstr "طبقه‌بندی مشتریان بر اساس منطقه"
 
 #. Label of a Text Editor field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -13692,13 +13692,13 @@ msgstr "بندها و شرایط"
 
 #: public/js/utils/demo.js:11
 msgid "Clear Demo Data"
-msgstr ""
+msgstr "پاک کردن داده های نمایشی"
 
 #. Label of a Check field in DocType 'Transaction Deletion Record'
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgctxt "Transaction Deletion Record"
 msgid "Clear Notifications"
-msgstr ""
+msgstr "پاک کردن اعلان ها"
 
 #. Label of a Button field in DocType 'Holiday List'
 #: setup/doctype/holiday_list/holiday_list.json
@@ -13763,7 +13763,7 @@ msgstr "در حال پاک کردن داده های نمایشی..."
 
 #: manufacturing/doctype/production_plan/production_plan.js:577
 msgid "Click on 'Get Finished Goods for Manufacture' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
-msgstr "برای دریافت اقلام از سفارشات فروش فوق، روی \"دریافت کالاهای تمام شده برای ساخت\" کلیک کنید. فقط مواردی که BOM برای آنها وجود دارد واکشی می شوند."
+msgstr "برای دریافت اقلام از سفارش‌های فروش فوق، روی \"دریافت کالاهای تمام شده برای ساخت\" کلیک کنید. فقط مواردی که BOM برای آنها وجود دارد واکشی می شوند."
 
 #: setup/doctype/holiday_list/holiday_list.js:70
 msgid "Click on Add to Holidays. This will populate the holidays table with all the dates that fall on the selected weekly off. Repeat the process for populating the dates for all your weekly holidays"
@@ -13771,7 +13771,7 @@ msgstr "روی افزودن به تعطیلات کلیک کنید. با این �
 
 #: manufacturing/doctype/production_plan/production_plan.js:572
 msgid "Click on Get Sales Orders to fetch sales orders based on the above filters."
-msgstr "برای دریافت سفارشات فروش بر اساس فیلترهای بالا، روی دریافت سفارشات فروش کلیک کنید."
+msgstr "برای دریافت سفارش‌های فروش بر اساس فیلترهای بالا، روی دریافت سفارش‌های فروش کلیک کنید."
 
 #. Description of the 'Import Invoices' (Button) field in DocType 'Import
 #. Supplier Invoice'
@@ -13786,7 +13786,7 @@ msgstr "برای تایید ایمیل خود و تایید قرار ملاقا�
 
 #: selling/page/point_of_sale/pos_item_cart.js:468
 msgid "Click to add email / phone"
-msgstr ""
+msgstr "برای افزودن ایمیل / تلفن کلیک کنید"
 
 #. Option for the 'Lead Type' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -14248,13 +14248,13 @@ msgstr ""
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Commission Rate (%)"
-msgstr ""
+msgstr "نرخ کمیسیون (%)"
 
 #. Label of a Float field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Commission Rate (%)"
-msgstr ""
+msgstr "نرخ کمیسیون (%)"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:55
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:80
@@ -15446,7 +15446,7 @@ msgstr ""
 
 #: accounts/doctype/subscription/subscription.py:404
 msgid "Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
-msgstr ""
+msgstr "شرکت برای تهیه فاکتور الزامی است. لطفاً یک شرکت پیش‌فرض را در پیش‌فرض‌های سراسری تنظیم کنید."
 
 #: setup/doctype/company/company.js:191
 msgid "Company name not same"
@@ -15866,7 +15866,7 @@ msgstr "زمان تکمیل شده"
 #. Name of a report
 #: manufacturing/report/completed_work_orders/completed_work_orders.json
 msgid "Completed Work Orders"
-msgstr "سفارشات کاری تکمیل شده"
+msgstr "سفارش‌های کاری تکمیل شده"
 
 #: projects/report/project_summary/project_summary.py:67
 msgid "Completion"
@@ -16951,7 +16951,7 @@ msgstr "مبلغ مشارکت"
 
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:124
 msgid "Contribution Qty"
-msgstr ""
+msgstr "مقدار مشارکت"
 
 #. Label of a Currency field in DocType 'Sales Team'
 #: selling/doctype/sales_team/sales_team.json
@@ -17124,7 +17124,7 @@ msgstr "تبدیل به ارسال مجدد بر اساس آیتم"
 #: stock/doctype/warehouse/warehouse.js:58
 msgctxt "Warehouse"
 msgid "Convert to Ledger"
-msgstr "تبدیل به لجر"
+msgstr "تبدیل به دفتر کل"
 
 #: accounts/doctype/account/account.js:79
 #: accounts/doctype/cost_center/cost_center.js:121
@@ -17990,7 +17990,7 @@ msgstr "نوع کوپن"
 #: accounts/doctype/bank_clearance/bank_clearance.py:81
 #: templates/form_grid/bank_reconciliation_grid.html:16
 msgid "Cr"
-msgstr ""
+msgstr "Cr"
 
 #: accounts/doctype/account/account_tree.js:209
 #: accounts/doctype/account/account_tree.js:216
@@ -18148,7 +18148,7 @@ msgstr "ایجاد ورودی استهلاک"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:316
 msgid "Create Document"
-msgstr ""
+msgstr "ایجاد سند"
 
 #: utilities/activation.py:136
 msgid "Create Employee"
@@ -18170,7 +18170,7 @@ msgstr "ایجاد دارایی گروهی"
 
 #: accounts/doctype/journal_entry/journal_entry.js:96
 msgid "Create Inter Company Journal Entry"
-msgstr "ورود مجله Inter Company را ایجاد کنید"
+msgstr "ورود دفتر روزنامه Inter Company را ایجاد کنید"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:49
 msgid "Create Invoices"
@@ -18188,7 +18188,7 @@ msgstr "ایجاد کارت شغلی بر اساس اندازه دسته ای"
 
 #: accounts/doctype/share_transfer/share_transfer.js:18
 msgid "Create Journal Entry"
-msgstr "ایجاد ورودی مجله"
+msgstr "ایجاد ورودی دفتر روزنامه"
 
 #. Title of an Onboarding Step
 #: crm/onboarding_step/create_lead/create_lead.json utilities/activation.py:78
@@ -18268,7 +18268,7 @@ msgstr "ایجاد سفارش خرید"
 
 #: utilities/activation.py:103
 msgid "Create Purchase Orders"
-msgstr "ایجاد سفارشات خرید"
+msgstr "ایجاد سفارش‌های خرید"
 
 #: utilities/activation.py:87
 msgid "Create Quotation"
@@ -18389,7 +18389,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: assets/onboarding_step/create_a_fixed_asset_item/create_a_fixed_asset_item.json
 msgid "Create a Fixed Asset Item"
-msgstr ""
+msgstr "ایجاد یک آیتم دارایی ثابت"
 
 #. Label of an action in the Onboarding Step 'Manage Stock Movements'
 #: stock/onboarding_step/create_a_stock_entry/create_a_stock_entry.json
@@ -18451,7 +18451,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: assets/onboarding_step/create_an_asset_category/create_an_asset_category.json
 msgid "Create an Asset Category"
-msgstr ""
+msgstr "یک دسته دارایی ایجاد کنید"
 
 #. Title of an Onboarding Step
 #: assets/onboarding_step/asset_item/asset_item.json
@@ -18473,7 +18473,7 @@ msgstr "یک معامله موجودی ورودی برای آیتم ایجاد �
 #. Title of an Onboarding Step
 #: crm/onboarding_step/create_and_send_quotation/create_and_send_quotation.json
 msgid "Create and Send Quotation"
-msgstr ""
+msgstr "ایجاد و ارسال پیش فاکتور"
 
 #: utilities/activation.py:85
 msgid "Create customer quotes"
@@ -18504,7 +18504,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: selling/onboarding_step/create_your_first_sales_order/create_your_first_sales_order.json
 msgid "Create your first Sales Order"
-msgstr ""
+msgstr "اولین سفارش فروش خود را ایجاد کنید"
 
 #. Label of an action in the Onboarding Step 'Work Order'
 #: manufacturing/onboarding_step/work_order/work_order.json
@@ -18938,37 +18938,37 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Centimeter"
-msgstr ""
+msgstr "سانتیمتر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Decimeter"
-msgstr ""
+msgstr "دسی متر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Foot"
-msgstr ""
+msgstr "فوت مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Inch"
-msgstr ""
+msgstr "اینچ مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Meter"
-msgstr ""
+msgstr "متر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Millimeter"
-msgstr ""
+msgstr "میلیمتر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Yard"
-msgstr ""
+msgstr "یارد مکعب"
 
 #. Label of a Float field in DocType 'Tax Withholding Rate'
 #: accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
@@ -20642,7 +20642,7 @@ msgstr "د - ای"
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "DFS"
-msgstr ""
+msgstr "DFS"
 
 #: public/js/stock_analytics.js:81
 msgid "Daily"
@@ -20766,7 +20766,7 @@ msgstr "پیکربندی واردات داده"
 #. Label of a Card Break in the Home Workspace
 #: setup/workspace/home/home.json
 msgid "Data Import and Settings"
-msgstr ""
+msgstr "وارد کردن داده ها و تنظیمات"
 
 #. Description of the 'Master Data' (Attach) field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -22061,7 +22061,7 @@ msgstr "با انتخاب این حالت، حساب پیش‌فرض به‌طو
 #. Description of a DocType
 #: stock/doctype/stock_settings/stock_settings.json
 msgid "Default settings for your stock-related transactions"
-msgstr ""
+msgstr "تنظیمات پیش‌فرض برای تراکنش‌های مربوط به موجودی شما"
 
 #: setup/doctype/company/company.js:160
 msgid "Default tax templates for sales, purchase and items are created."
@@ -22257,7 +22257,7 @@ msgstr "حذف"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Delete Accounting and Stock Ledger Entries on deletion of Transaction"
-msgstr "حذف ورودی های حسابداری و دفتر موجودی در حذف تراکنش"
+msgstr "حذف ورودی های حسابداری و دفتر کل موجودی در حذف تراکنش"
 
 #. Label of a Check field in DocType 'Transaction Deletion Record'
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
@@ -22269,7 +22269,7 @@ msgstr ""
 #: accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.json
 msgctxt "Repost Accounting Ledger"
 msgid "Delete Cancelled Ledger Entries"
-msgstr "ورودی های لغو شده در دفتر را حذف کنید"
+msgstr "ورودی های لغو شده در دفتر کل را حذف کنید"
 
 #: stock/doctype/inventory_dimension/inventory_dimension.js:66
 msgid "Delete Dimension"
@@ -22279,7 +22279,7 @@ msgstr "حذف ابعاد"
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgctxt "Transaction Deletion Record"
 msgid "Delete Leads and Addresses"
-msgstr ""
+msgstr "سرنخ ها و آدرس ها را حذف کنید"
 
 #: setup/doctype/company/company.js:141
 msgid "Delete Transactions"
@@ -22303,7 +22303,7 @@ msgstr "اسناد حذف شده"
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:479
 msgid "Deletion in Progress!"
-msgstr ""
+msgstr "حذف در حال انجام است!"
 
 #: regional/__init__.py:14
 msgid "Deletion is not permitted for country {0}"
@@ -22688,67 +22688,67 @@ msgstr "داده‌های نمایشی پاک شد"
 #: assets/report/fixed_asset_register/fixed_asset_register.py:466
 #: setup/doctype/department/department.json
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Activity Cost'
 #: projects/doctype/activity_cost/activity_cost.json
 msgctxt "Activity Cost"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Data field in DocType 'Department'
 #: setup/doctype/department/department.json
 msgctxt "Department"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Employee Internal Work History'
 #: setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 msgctxt "Employee Internal Work History"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
 msgctxt "SMS Center"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
 msgctxt "Sales Person"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Link field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Department"
-msgstr "بخش"
+msgstr "دپارتمان"
 
 #. Label of a Datetime field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
@@ -23555,31 +23555,31 @@ msgstr "شرح مطالب"
 #. Name of a DocType
 #: setup/doctype/designation/designation.json
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Label of a Data field in DocType 'Designation'
 #: setup/doctype/designation/designation.json
 msgctxt "Designation"
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Label of a Link field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Label of a Data field in DocType 'Employee External Work History'
 #: setup/doctype/employee_external_work_history/employee_external_work_history.json
 msgctxt "Employee External Work History"
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Label of a Link field in DocType 'Employee Internal Work History'
 #: setup/doctype/employee_internal_work_history/employee_internal_work_history.json
 msgctxt "Employee Internal Work History"
 msgid "Designation"
-msgstr "تعیین"
+msgstr "نقش سازمانی"
 
 #. Name of a role
 #: crm/doctype/lead/lead.json projects/doctype/project/project.json
@@ -24506,19 +24506,19 @@ msgstr ""
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Discount on Price List Rate (%)"
-msgstr ""
+msgstr "تخفیف در نرخ لیست قیمت (%)"
 
 #. Label of a Percent field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Discount on Price List Rate (%)"
-msgstr ""
+msgstr "تخفیف در نرخ لیست قیمت (%)"
 
 #. Label of a Percent field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Discount on Price List Rate (%)"
-msgstr ""
+msgstr "تخفیف در نرخ لیست قیمت (%)"
 
 #. Label of a Currency field in DocType 'Overdue Payment'
 #: accounts/doctype/overdue_payment/overdue_payment.json
@@ -24618,7 +24618,7 @@ msgstr "اطلاعات اعزام"
 #: setup/setup_wizard/operations/defaults_setup.py:57
 #: setup/setup_wizard/operations/install_fixtures.py:284
 msgid "Dispatch Notification"
-msgstr "اطلاعیه اعزام"
+msgstr "اعلان اعزام"
 
 #. Label of a Link field in DocType 'Delivery Settings'
 #: stock/doctype/delivery_settings/delivery_settings.json
@@ -24790,7 +24790,7 @@ msgstr "آیا می خواهید درخواست مواد را ارسال کنی�
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgctxt "Transaction Deletion Record Details"
 msgid "DocField"
-msgstr ""
+msgstr "DocField"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "DocType"
@@ -25663,7 +25663,7 @@ msgstr "اطلاعات صورتحساب الکترونیکی وجود ندارد
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "EAN"
-msgstr ""
+msgstr "EAN"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -26266,12 +26266,12 @@ msgstr " کارمند"
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Employee Advance"
-msgstr "پیشبرد کارمندان"
+msgstr "پیش پرداخت کارمند"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:16
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:23
 msgid "Employee Advances"
-msgstr "پیشرفت کارمندان"
+msgstr "پیش پرداخت‌ های کارمند"
 
 #. Label of a Section Break field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
@@ -27104,7 +27104,7 @@ msgstr "انتقال مازاد"
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
 msgctxt "Downtime Entry"
 msgid "Excessive machine set up time"
-msgstr "زمان راه اندازی بیش از حد دستگاه"
+msgstr "زمان راه‌اندازی بیش از حد دستگاه"
 
 #. Label of a Link field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -27658,7 +27658,7 @@ msgstr "حساب هزینه گم شده است"
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Expense Claim"
-msgstr "ادعای هزینه"
+msgstr "مطالبه هزینه"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -27873,7 +27873,7 @@ msgstr "هزینه عملیاتی مبتنی بر FG"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "FIFO"
-msgstr ""
+msgstr "FIFO"
 
 #. Option for the 'Default Valuation Method' (Select) field in DocType 'Stock
 #. Settings'
@@ -27882,7 +27882,7 @@ msgstr ""
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "FIFO"
-msgstr ""
+msgstr "FIFO"
 
 #. Name of a report
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.json
@@ -27910,7 +27910,7 @@ msgstr "صف FIFO/LIFO"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fahrenheit"
-msgstr ""
+msgstr "فارنهایت"
 
 #: accounts/doctype/payment_request/payment_request_list.js:16
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:68
@@ -28062,7 +28062,7 @@ msgstr "ورود ناموفق بود"
 
 #: setup/setup_wizard/setup_wizard.py:30 setup/setup_wizard/setup_wizard.py:31
 msgid "Failed to setup company"
-msgstr "راه اندازی شرکت ناموفق بود"
+msgstr "راه‌اندازی شرکت ناموفق بود"
 
 #: setup/setup_wizard/setup_wizard.py:37
 msgid "Failed to setup defaults"
@@ -28090,7 +28090,7 @@ msgstr "شرح شکست"
 
 #: accounts/doctype/payment_request/payment_request.js:29
 msgid "Failure: {0}"
-msgstr ""
+msgstr "شکست: {0}"
 
 #. Label of a Small Text field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -28101,7 +28101,7 @@ msgstr "سابقه خانواده"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Faraday"
-msgstr ""
+msgstr "فارادی"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -28983,7 +28983,7 @@ msgstr "موارد زیر {0} به عنوان {1} مورد علامت گذاری
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Foot"
-msgstr ""
+msgstr "فوت"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -30181,7 +30181,7 @@ msgstr "نمایه ارسال مجدد GL"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "GS1"
-msgstr ""
+msgstr "GS1"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -30293,25 +30293,25 @@ msgstr "عمومی"
 #: accounts/workspace/accounting/accounting.json
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "General Ledger"
-msgstr "دفتر کل"
+msgstr "دفتر کل مرکزی"
 
 #. Label of a Int field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "General Ledger"
-msgstr "دفتر کل"
+msgstr "دفتر کل مرکزی"
 
 #. Option for the 'Report' (Select) field in DocType 'Process Statement Of
 #. Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "General Ledger"
-msgstr "دفتر کل"
+msgstr "دفتر کل مرکزی"
 
 #: stock/doctype/warehouse/warehouse.js:69
 msgctxt "Warehouse"
 msgid "General Ledger"
-msgstr "دفتر کل"
+msgstr "دفتر کل مرکزی"
 
 #. Label of a Section Break field in DocType 'Item Group'
 #: setup/doctype/item_group/item_group.json
@@ -30322,7 +30322,7 @@ msgstr "تنظیمات عمومی"
 #. Name of a report
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.json
 msgid "General and Payment Ledger Comparison"
-msgstr "مقایسه دفتر کل و پرداخت"
+msgstr "مقایسه دفتر کل مرکزی و پرداخت"
 
 #: stock/doctype/closing_stock_balance/closing_stock_balance.js:12
 msgid "Generate Closing Stock Balance"
@@ -30544,7 +30544,7 @@ msgstr "فاکتورهای معوق دریافت کنید"
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Get Outstanding Orders"
-msgstr "دریافت سفارشات برجسته"
+msgstr "دریافت سفارش‌های برجسته"
 
 #: accounts/doctype/bank_clearance/bank_clearance.js:38
 #: accounts/doctype/bank_clearance/bank_clearance.js:40
@@ -30580,7 +30580,7 @@ msgstr "دریافت مواد اولیه برای انتقال"
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Get Sales Orders"
-msgstr "دریافت سفارشات فروش"
+msgstr "دریافت سفارش‌های فروش"
 
 #. Label of a Button field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
@@ -30769,7 +30769,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram"
-msgstr ""
+msgstr "گرم"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -30794,7 +30794,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Litre"
-msgstr ""
+msgstr "گرم/لیتر"
 
 #: accounts/doctype/pos_closing_entry/closing_voucher_details.html:15
 #: accounts/report/pos_register/pos_register.py:202
@@ -31345,7 +31345,7 @@ msgstr ""
 #: setup/doctype/driver/driver.json setup/doctype/employee/employee.json
 #: setup/doctype/holiday_list/holiday_list.json
 msgid "HR Manager"
-msgstr "مدیریت منابع انسانی"
+msgstr "مدیر منابع انسانی"
 
 #. Name of a role
 #: projects/doctype/timesheet/timesheet.json setup/doctype/branch/branch.json
@@ -31553,7 +31553,7 @@ msgstr "نقشه حرارت"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectare"
-msgstr ""
+msgstr "هکتار"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -31653,7 +31653,7 @@ msgstr "در اینجا، تخفیف‌های هفتگی شما بر اساس ا
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hertz"
-msgstr ""
+msgstr "هرتز"
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.py:403
 msgid "Hi,"
@@ -31815,7 +31815,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hour"
-msgstr ""
+msgstr "ساعت"
 
 #. Label of a Currency field in DocType 'BOM Operation'
 #: manufacturing/doctype/bom_operation/bom_operation.json
@@ -31985,7 +31985,7 @@ msgstr ""
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "ISSN"
-msgstr ""
+msgstr "ISSN"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -32157,7 +32157,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "If enabled, ledger entries will be posted for change amount in POS transactions"
-msgstr "در صورت فعال بودن، ورودی‌های دفتر برای مبلغ تغییر در تراکنش‌های POS پست می‌شوند"
+msgstr "در صورت فعال بودن، ورودی‌های دفتر کل برای مبلغ تغییر در تراکنش‌های POS پست می‌شوند"
 
 #. Description of the 'Disable Rounded Total' (Check) field in DocType 'POS
 #. Profile'
@@ -32261,7 +32261,7 @@ msgstr "اگر این مورد بررسی شود، فاکتورهای جدید �
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "If this is unchecked Journal Entries will be saved in a Draft state and will have to be submitted manually"
-msgstr "اگر این علامت را بردارید، ورودی های مجله در حالت پیش نویس ذخیره می شوند و باید به صورت دستی ارسال شوند."
+msgstr "اگر این علامت را بردارید، ورودی های دفتر روزنامه در حالت پیش نویس ذخیره می شوند و باید به صورت دستی ارسال شوند."
 
 #. Description of the 'Book Deferred Entries Via Journal Entry' (Check) field
 #. in DocType 'Accounts Settings'
@@ -32278,7 +32278,7 @@ msgstr "اگر این امر نامطلوب است، لطفاً ورودی پر�
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "If this item has variants, then it cannot be selected in sales orders etc."
-msgstr "اگر این کالا دارای انواع باشد، نمی توان آن را در سفارشات فروش و غیره انتخاب کرد."
+msgstr "اگر این کالا دارای انواع باشد، نمی توان آن را در سفارش‌های فروش و غیره انتخاب کرد."
 
 #: buying/doctype/buying_settings/buying_settings.js:27
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
@@ -32391,13 +32391,13 @@ msgstr "موجودی خالی را نادیده بگیرید"
 
 #: accounts/report/general_ledger/general_ledger.js:209
 msgid "Ignore Exchange Rate Revaluation Journals"
-msgstr "مجلات تجدید ارزیابی نرخ ارز را نادیده بگیرید"
+msgstr "دفتر روزنامه های تجدید ارزیابی نرخ ارز را نادیده بگیرید"
 
 #. Label of a Check field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Ignore Exchange Rate Revaluation Journals"
-msgstr "مجلات تجدید ارزیابی نرخ ارز را نادیده بگیرید"
+msgstr "دفتر روزنامه های تجدید ارزیابی نرخ ارز را نادیده بگیرید"
 
 #: selling/doctype/sales_order/sales_order.js:916
 msgid "Ignore Existing Ordered Qty"
@@ -33365,7 +33365,7 @@ msgstr "مشوق ها"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Inch"
-msgstr ""
+msgstr "اینچ"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -33375,12 +33375,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Inch/Minute"
-msgstr ""
+msgstr "اینچ/دقیقه"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Inch/Second"
-msgstr ""
+msgstr "اینچ/ثانیه"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -33763,7 +33763,7 @@ msgstr "انبار نادرست"
 
 #: accounts/general_ledger.py:51
 msgid "Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction."
-msgstr "تعداد اشتباهی از ورودی های دفتر کل پیدا شد. ممکن است حساب اشتباهی را در تراکنش انتخاب کرده باشید."
+msgstr "تعداد اشتباهی از ورودی های دفتر کل مرکزی پیدا شد. ممکن است حساب اشتباهی را در تراکنش انتخاب کرده باشید."
 
 #. Name of a DocType
 #: setup/doctype/incoterm/incoterm.json
@@ -34235,20 +34235,20 @@ msgstr "مرجع فاکتور بین شرکتی"
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Inter Company Journal Entry"
-msgstr "مدخل مجله بین شرکتی"
+msgstr "مدخل دفتر روزنامه بین شرکتی"
 
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
 #. Template'
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgctxt "Journal Entry Template"
 msgid "Inter Company Journal Entry"
-msgstr "مدخل مجله بین شرکتی"
+msgstr "مدخل دفتر روزنامه بین شرکتی"
 
 #. Label of a Link field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Inter Company Journal Entry Reference"
-msgstr "مرجع ورود مجله بین شرکتی"
+msgstr "مرجع ورود دفتر روزنامه بین شرکتی"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
@@ -37939,7 +37939,7 @@ msgstr "مورد {} وجود ندارد."
 #. Subtitle of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
 msgid "Item, Customer, Supplier and Quotation"
-msgstr ""
+msgstr "آیتم، مشتری، تامین کننده و پیش فاکتور"
 
 #. Name of a report
 #: stock/report/item_wise_price_list_rate/item_wise_price_list_rate.json
@@ -38400,15 +38400,15 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Joule/Meter"
-msgstr ""
+msgstr "ژول/متر"
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:30
 msgid "Journal Entries"
-msgstr "نوشته های مجله"
+msgstr "ورودی های دفتر روزنامه"
 
 #: accounts/utils.py:871
 msgid "Journal Entries {0} are un-linked"
-msgstr "ورودی های مجله {0} لغو پیوند هستند"
+msgstr "ورودی های دفتر روزنامه {0} لغو پیوند هستند"
 
 #. Name of a DocType
 #: accounts/doctype/account/account_tree.js:205
@@ -38417,26 +38417,26 @@ msgstr "ورودی های مجله {0} لغو پیوند هستند"
 #: assets/doctype/asset/asset.js:282 assets/doctype/asset/asset.js:291
 #: templates/form_grid/bank_reconciliation_grid.html:3
 msgid "Journal Entry"
-msgstr "مطلب ثبت شده در دفتر وقایع روزانه"
+msgstr "مطلب ثبت شده در دفتر روزنامه"
 
 #. Group in Asset's connections
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Journal Entry"
-msgstr "مطلب ثبت شده در دفتر وقایع روزانه"
+msgstr "مطلب ثبت شده در دفتر روزنامه"
 
 #. Label of a Link field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Journal Entry"
-msgstr "مطلب ثبت شده در دفتر وقایع روزانه"
+msgstr "مطلب ثبت شده در دفتر روزنامه"
 
 #. Label of a Link field in DocType 'Depreciation Schedule'
 #: assets/doctype/depreciation_schedule/depreciation_schedule.json
 msgctxt "Depreciation Schedule"
 msgid "Journal Entry"
-msgstr "مطلب ثبت شده در دفتر وقایع روزانه"
+msgstr "مطلب ثبت شده در دفتر روزنامه"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #. Label of a Link in the Accounting Workspace
@@ -38450,97 +38450,97 @@ msgstr "مطلب ثبت شده در دفتر وقایع روزانه"
 #: accounts/workspace/receivables/receivables.json
 msgctxt "Journal Entry"
 msgid "Journal Entry"
-msgstr "مطلب ثبت شده در دفتر وقایع روزانه"
+msgstr "مطلب ثبت شده در دفتر روزنامه"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Journal Entry"
-msgstr "مطلب ثبت شده در دفتر وقایع روزانه"
+msgstr "مطلب ثبت شده در دفتر روزنامه"
 
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
 #. Template'
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgctxt "Journal Entry Template"
 msgid "Journal Entry"
-msgstr "مطلب ثبت شده در دفتر وقایع روزانه"
+msgstr "مطلب ثبت شده در دفتر روزنامه"
 
 #. Option for the 'Invoice Type' (Select) field in DocType 'Payment
 #. Reconciliation Invoice'
 #: accounts/doctype/payment_reconciliation_invoice/payment_reconciliation_invoice.json
 msgctxt "Payment Reconciliation Invoice"
 msgid "Journal Entry"
-msgstr "مطلب ثبت شده در دفتر وقایع روزانه"
+msgstr "مطلب ثبت شده در دفتر روزنامه"
 
 #. Name of a DocType
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "Journal Entry Account"
-msgstr "حساب ورودی مجله"
+msgstr "حساب ورودی دفتر روزنامه"
 
 #. Name of a DocType
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgid "Journal Entry Template"
-msgstr "الگوی ورود به مجله"
+msgstr "الگوی ورود به دفتر روزنامه"
 
 #. Label of a Link in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgctxt "Journal Entry Template"
 msgid "Journal Entry Template"
-msgstr "الگوی ورود به مجله"
+msgstr "الگوی ورود به دفتر روزنامه"
 
 #. Name of a DocType
 #: accounts/doctype/journal_entry_template_account/journal_entry_template_account.json
 msgid "Journal Entry Template Account"
-msgstr "حساب الگوی ورودی مجله"
+msgstr "حساب الگوی ورودی دفتر روزنامه"
 
 #. Label of a Select field in DocType 'Journal Entry Template'
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgctxt "Journal Entry Template"
 msgid "Journal Entry Type"
-msgstr "نوع ورودی مجله"
+msgstr "نوع ورودی دفتر روزنامه"
 
 #: accounts/doctype/journal_entry/journal_entry.py:489
 msgid "Journal Entry for Asset scrapping cannot be cancelled. Please restore the Asset."
-msgstr "ورود مجله برای حذف دارایی را نمی توان لغو کرد. لطفا دارایی را بازیابی کنید."
+msgstr "ورود دفتر روزنامه برای حذف دارایی را نمی توان لغو کرد. لطفا دارایی را بازیابی کنید."
 
 #. Label of a Link field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Journal Entry for Scrap"
-msgstr "ورودی مجله برای قراضه"
+msgstr "ورودی دفتر روزنامه برای قراضه"
 
 #: accounts/doctype/journal_entry/journal_entry.py:245
 msgid "Journal Entry type should be set as Depreciation Entry for asset depreciation"
-msgstr "نوع ورود مجله باید به عنوان ورودی استهلاک برای استهلاک دارایی تنظیم شود"
+msgstr "نوع ورود دفتر روزنامه باید به عنوان ورودی استهلاک برای استهلاک دارایی تنظیم شود"
 
 #: accounts/doctype/journal_entry/journal_entry.py:625
 msgid "Journal Entry {0} does not have account {1} or already matched against other voucher"
-msgstr "ورودی مجله {0} دارای حساب {1} نیست یا قبلاً با سایر کوپن مطابقت دارد"
+msgstr "ورودی دفتر روزنامه {0} دارای حساب {1} نیست یا قبلاً با سایر کوپن مطابقت دارد"
 
 #. Label of a Section Break field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Journals"
-msgstr "مجلات"
+msgstr "دفترهای روزنامه"
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:99
 msgid "Journals have been created"
-msgstr "مجلات ایجاد شده است"
+msgstr "دفترهای روزنامه ایجاد شده است"
 
 #: projects/doctype/project/project.js:104
 msgid "Kanban Board"
-msgstr "هیئت کانبان"
+msgstr "نمودار کانبان"
 
 #. Description of a DocType
 #: crm/doctype/campaign/campaign.json
 msgid "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. "
-msgstr ""
+msgstr "کمپین های فروش را پیگیری کنید. سرنخ ها، پیش فاکتور ها، سفارش فروش و غیره را از کمپین ها پیگیری کنید تا بازده سرمایه گذاری را اندازه گیری کنید. "
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kelvin"
-msgstr ""
+msgstr "کلوین"
 
 #. Label of a Data field in DocType 'Currency Exchange Settings Details'
 #: accounts/doctype/currency_exchange_settings_details/currency_exchange_settings_details.json
@@ -38565,7 +38565,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kg"
-msgstr ""
+msgstr "کیلوگرم"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -38590,7 +38590,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilogram/Cubic Centimeter"
-msgstr ""
+msgstr "کیلوگرم/سانتی متر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -38678,7 +38678,7 @@ msgstr ""
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "LIFO"
-msgstr ""
+msgstr "LIFO"
 
 #. Label of a Data field in DocType 'Item Website Specification'
 #: stock/doctype/item_website_specification/item_website_specification.json
@@ -39035,7 +39035,7 @@ msgstr "سرنخ {0} به بالقوه {1} اضافه شده است."
 #. Subtitle of the Module Onboarding 'CRM'
 #: crm/module_onboarding/crm/crm.json
 msgid "Lead, Opportunity, Customer, and more."
-msgstr ""
+msgstr "سرنخ، فرصت، مشتری و موارد دیگر."
 
 #. Label of a shortcut in the Home Workspace
 #: setup/workspace/home/home.json
@@ -39075,7 +39075,7 @@ msgstr ""
 #. Label of a shortcut in the Projects Workspace
 #: projects/workspace/projects/projects.json
 msgid "Learn Project Management"
-msgstr ""
+msgstr "مدیریت پروژه را یاد بگیرید"
 
 #. Label of a shortcut in the Selling Workspace
 #: selling/workspace/selling/selling.json
@@ -39108,12 +39108,12 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Production Planning'
 #: manufacturing/onboarding_step/production_planning/production_planning.json
 msgid "Learn more about Production Planning"
-msgstr ""
+msgstr "درباره برنامه ریزی تولید بیشتر بدانید"
 
 #. Label of an action in the Onboarding Step 'Import Data from Spreadsheet'
 #: setup/onboarding_step/data_import/data_import.json
 msgid "Learn more about data migration"
-msgstr ""
+msgstr "درباره مهاجرت داده بیشتر بیاموزید"
 
 #. Label of a Select field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -39151,7 +39151,7 @@ msgstr "دفتر کل"
 #. Name of a DocType
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgid "Ledger Merge"
-msgstr "لجر ادغام"
+msgstr "ادغام دفتر کل"
 
 #. Name of a DocType
 #: accounts/doctype/ledger_merge_accounts/ledger_merge_accounts.json
@@ -39234,7 +39234,7 @@ msgstr "کمتر از 12 ماه."
 #. Title of the Module Onboarding 'Accounts'
 #: accounts/module_onboarding/accounts/accounts.json
 msgid "Let's Set Up Your Accounts and Taxes."
-msgstr ""
+msgstr "بیایید حساب ها و مالیات های خود را راه‌اندازی کنیم."
 
 #. Title of the Module Onboarding 'CRM'
 #: crm/module_onboarding/crm/crm.json
@@ -39244,17 +39244,17 @@ msgstr ""
 #. Title of the Module Onboarding 'Assets'
 #: assets/module_onboarding/assets/assets.json
 msgid "Let's Set Up the Assets Module."
-msgstr ""
+msgstr "بیایید ماژول دارایی ها را راه‌اندازی کنیم."
 
 #. Title of the Module Onboarding 'Buying'
 #: buying/module_onboarding/buying/buying.json
 msgid "Let's Set Up the Buying Module."
-msgstr ""
+msgstr "بیایید ماژول خرید را راه‌اندازی کنیم."
 
 #. Title of the Module Onboarding 'Manufacturing'
 #: manufacturing/module_onboarding/manufacturing/manufacturing.json
 msgid "Let's Set Up the Manufacturing Module."
-msgstr ""
+msgstr "بیایید ماژول تولید را راه‌اندازی کنیم."
 
 #. Title of the Module Onboarding 'Selling'
 #: selling/module_onboarding/selling/selling.json
@@ -39264,32 +39264,32 @@ msgstr ""
 #. Title of the Module Onboarding 'Stock'
 #: stock/module_onboarding/stock/stock.json
 msgid "Let's Set Up the Stock Module."
-msgstr ""
+msgstr "بیایید ماژول موجودی را راه‌اندازی کنیم."
 
 #. Title of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
 msgid "Let's begin your journey with ERPNext"
-msgstr ""
+msgstr "بیایید سفر خود را با ERPNext آغاز کنیم"
 
 #. Label of an action in the Onboarding Step 'Purchase an Asset'
 #: assets/onboarding_step/asset_purchase/asset_purchase.json
 msgid "Let's create a Purchase Receipt"
-msgstr ""
+msgstr "بیایید یک رسید خرید ایجاد کنیم"
 
 #. Label of an action in the Onboarding Step 'Create an Asset Item'
 #: assets/onboarding_step/asset_item/asset_item.json
 msgid "Let's create a new Asset item"
-msgstr ""
+msgstr "بیایید یک آیتم دارایی جدید ایجاد کنیم"
 
 #. Label of an action in the Onboarding Step 'Define Asset Category'
 #: assets/onboarding_step/asset_category/asset_category.json
 msgid "Let's review existing Asset Category"
-msgstr ""
+msgstr "بیایید دسته دارایی موجود را مرور کنیم"
 
 #. Label of an action in the Onboarding Step 'Set Up a Company'
 #: setup/onboarding_step/company_set_up/company_set_up.json
 msgid "Let's review your Company"
-msgstr ""
+msgstr "بیایید شرکت شما را بررسی کنیم"
 
 #. Label of an action in the Onboarding Step 'Review Fixed Asset Accounts'
 #: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
@@ -39455,7 +39455,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Operation'
 #: manufacturing/onboarding_step/operation/operation.json
 msgid "Let’s create an Operation"
-msgstr ""
+msgstr "بیایید یک عملیات ایجاد کنیم"
 
 #. Label of an action in the Onboarding Step 'Setup a Warehouse'
 #: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
@@ -39465,7 +39465,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create a Customer'
 #: setup/onboarding_step/create_a_customer/create_a_customer.json
 msgid "Let’s create your first Customer"
-msgstr ""
+msgstr "بیایید اولین مشتری شما را ایجاد کنیم"
 
 #. Label of an action in the Onboarding Step 'Track Material Request'
 #: buying/onboarding_step/create_a_material_request/create_a_material_request.json
@@ -39491,7 +39491,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create a Supplier'
 #: setup/onboarding_step/create_a_supplier/create_a_supplier.json
 msgid "Let’s create your first Supplier"
-msgstr ""
+msgstr "بیایید اولین تامین کننده شما را ایجاد کنیم"
 
 #. Label of an action in the Onboarding Step 'Setup Your Letterhead'
 #: setup/onboarding_step/letterhead/letterhead.json
@@ -39536,7 +39536,7 @@ msgstr ""
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Lft"
-msgstr ""
+msgstr "Lft"
 
 #: accounts/report/balance_sheet/balance_sheet.py:239
 msgid "Liabilities"
@@ -40519,7 +40519,7 @@ msgstr "تفاوت را وارد کنید"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Make Payment via Journal Entry"
-msgstr "پرداخت را از طریق ورود مجله انجام دهید"
+msgstr "پرداخت را از طریق ورود دفتر روزنامه انجام دهید"
 
 #: templates/pages/order.html:27
 msgid "Make Purchase Invoice"
@@ -40588,7 +40588,7 @@ msgstr "مدیریت هزینه عملیات"
 
 #: utilities/activation.py:94
 msgid "Manage your orders"
-msgstr "سفارشات خود را مدیریت کنید"
+msgstr "سفارش‌های خود را مدیریت کنید"
 
 #: setup/doctype/company/company.py:362
 msgid "Management"
@@ -40669,34 +40669,34 @@ msgstr "بخش اجباری"
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Manual"
-msgstr "کتابچه راهنمای"
+msgstr "دستی"
 
 #. Option for the 'Depreciation Method' (Select) field in DocType 'Asset
 #. Depreciation Schedule'
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgctxt "Asset Depreciation Schedule"
 msgid "Manual"
-msgstr "کتابچه راهنمای"
+msgstr "دستی"
 
 #. Option for the 'Depreciation Method' (Select) field in DocType 'Asset
 #. Finance Book'
 #: assets/doctype/asset_finance_book/asset_finance_book.json
 msgctxt "Asset Finance Book"
 msgid "Manual"
-msgstr "کتابچه راهنمای"
+msgstr "دستی"
 
 #. Option for the 'Update frequency of Project' (Select) field in DocType
 #. 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Manual"
-msgstr "کتابچه راهنمای"
+msgstr "دستی"
 
 #. Option for the '% Complete Method' (Select) field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Manual"
-msgstr "کتابچه راهنمای"
+msgstr "دستی"
 
 #. Label of a Check field in DocType 'Quality Inspection'
 #: stock/doctype/quality_inspection/quality_inspection.json
@@ -42184,7 +42184,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Mile/Hour"
-msgstr ""
+msgstr "مایل/ساعت"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -42194,7 +42194,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Mile/Second"
-msgstr ""
+msgstr "مایل/ثانیه"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -42204,7 +42204,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milliampere"
-msgstr ""
+msgstr "میلی آمپر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -42214,17 +42214,17 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milligram"
-msgstr ""
+msgstr "میلی گرم"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Cubic Centimeter"
-msgstr ""
+msgstr "میلی گرم/سانتی متر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Cubic Meter"
-msgstr ""
+msgstr "میلی گرم / متر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -42234,22 +42234,22 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Litre"
-msgstr ""
+msgstr "میلی گرم/لیتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millihertz"
-msgstr ""
+msgstr "میلی هرتز"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millilitre"
-msgstr ""
+msgstr "میلی لیتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millimeter"
-msgstr ""
+msgstr "میلی‌متر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -42259,12 +42259,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millimeter Of Water"
-msgstr ""
+msgstr "میلیمتر آب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millisecond"
-msgstr ""
+msgstr "میلی ثانیه"
 
 #. Label of a Currency field in DocType 'Promotional Scheme Price Discount'
 #: accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
@@ -42932,7 +42932,7 @@ msgstr "ماهانه"
 
 #: manufacturing/dashboard_fixtures.py:215
 msgid "Monthly Completed Work Orders"
-msgstr "سفارشات کار ماهانه تکمیل شده"
+msgstr "سفارش‌های کار ماهانه تکمیل شده"
 
 #. Name of a DocType
 #: accounts/doctype/cost_center/cost_center_tree.js:69
@@ -42982,7 +42982,7 @@ msgstr "هدف فروش ماهانه"
 
 #: manufacturing/dashboard_fixtures.py:198
 msgid "Monthly Total Work Orders"
-msgstr "کل سفارشات کاری ماهانه"
+msgstr "کل سفارش‌های کاری ماهانه"
 
 #. Option for the 'Book Deferred Entries Based On' (Select) field in DocType
 #. 'Accounts Settings'
@@ -43193,7 +43193,7 @@ msgstr "انتقال آیتم"
 
 #: manufacturing/doctype/plant_floor/plant_floor.js:211
 msgid "Move Stock"
-msgstr ""
+msgstr "انتقال موجودی"
 
 #: templates/includes/macros.html:169
 msgid "Move to Cart"
@@ -43223,19 +43223,19 @@ msgstr ""
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Multi Currency"
-msgstr "چنذ ارزی"
+msgstr "چند ارزی"
 
 #. Label of a Check field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Multi Currency"
-msgstr "چنذ ارزی"
+msgstr "چند ارزی"
 
 #. Label of a Check field in DocType 'Journal Entry Template'
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgctxt "Journal Entry Template"
 msgid "Multi Currency"
-msgstr "چنذ ارزی"
+msgstr "چند ارزی"
 
 #: manufacturing/doctype/bom_creator/bom_creator.js:41
 msgid "Multi-level BOM Creator"
@@ -43542,22 +43542,22 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanogram/Litre"
-msgstr ""
+msgstr "نانوگرم/لیتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanohertz"
-msgstr ""
+msgstr "نانوهرتز"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanometer"
-msgstr ""
+msgstr "نانومتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanosecond"
-msgstr ""
+msgstr "نانوثانیه"
 
 #. Option for the 'Fuel Type' (Select) field in DocType 'Vehicle'
 #: setup/doctype/vehicle/vehicle.json
@@ -44139,7 +44139,7 @@ msgstr "مشتریان جدید"
 
 #: setup/doctype/department/department_tree.js:18
 msgid "New Department"
-msgstr "بخش جدید"
+msgstr "دپارتمان جدید"
 
 #: setup/doctype/employee/employee_tree.js:29
 msgid "New Employee"
@@ -44174,7 +44174,7 @@ msgstr "مکان جدید"
 
 #: public/js/templates/crm_notes.html:7
 msgid "New Note"
-msgstr ""
+msgstr "یادداشت جدید"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -44186,7 +44186,7 @@ msgstr "فاکتور خرید جدید"
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "New Purchase Orders"
-msgstr "سفارشات خرید جدید"
+msgstr "سفارش‌های خرید جدید"
 
 #: quality_management/doctype/quality_procedure/quality_procedure_tree.js:24
 msgid "New Quality Procedure"
@@ -44208,7 +44208,7 @@ msgstr "فاکتور فروش جدید"
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "New Sales Orders"
-msgstr "سفارشات فروش جدید"
+msgstr "سفارش‌های فروش جدید"
 
 #: setup/doctype/sales_person/sales_person_tree.js:3
 msgid "New Sales Person Name"
@@ -44243,7 +44243,7 @@ msgstr "سقف اعتبار جدید کمتر از مبلغ معوقه فعلی 
 
 #: accounts/notification/notification_for_new_fiscal_year/notification_for_new_fiscal_year.html:3
 msgid "New fiscal year created :- "
-msgstr ""
+msgstr "سال مالی جدید ایجاد شد: - "
 
 #. Description of the 'Generate New Invoices Past Due Date' (Check) field in
 #. DocType 'Subscription'
@@ -44274,7 +44274,7 @@ msgstr "خبرنامه"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Newton"
-msgstr ""
+msgstr "نیوتن"
 
 #: www/book_appointment/index.html:34
 msgid "Next"
@@ -44460,7 +44460,7 @@ msgstr ""
 
 #: public/js/templates/crm_notes.html:44
 msgid "No Notes"
-msgstr ""
+msgstr "بدون یادداشت"
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.js:219
 msgid "No Outstanding Invoices found for this party"
@@ -44493,7 +44493,7 @@ msgstr "موجودی در حال حاضر موجود نیست"
 
 #: public/js/templates/call_link.html:30
 msgid "No Summary"
-msgstr ""
+msgstr "بدون خلاصه"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2109
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
@@ -44574,7 +44574,7 @@ msgstr "هیچ موردی برای انتقال موجود نیست"
 
 #: manufacturing/doctype/production_plan/production_plan.py:142
 msgid "No items are available in sales orders {0} for production"
-msgstr "هیچ موردی در سفارشات فروش {0} برای تولید موجود نیست"
+msgstr "هیچ موردی در سفار‌ش‌های فروش {0} برای تولید موجود نیست"
 
 #: manufacturing/doctype/production_plan/production_plan.py:139
 #: manufacturing/doctype/production_plan/production_plan.py:151
@@ -44595,7 +44595,7 @@ msgstr "هیچ موردی که باید دریافت شود دیر نشده اس
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:418
 msgid "No matches occurred via auto reconciliation"
-msgstr "هیچ مسابقه ای از طریق آشتی خودکار رخ نداد"
+msgstr "هیچ همخوانی ای از طریق تطبیق خودکار رخ نداد"
 
 #: manufacturing/doctype/production_plan/production_plan.py:889
 msgid "No material request created"
@@ -44603,11 +44603,11 @@ msgstr "هیچ درخواست موادی ایجاد نشد"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.py:199
 msgid "No more children on Left"
-msgstr ""
+msgstr "دیگر هیچ فرزندی در سمت چپ وجود ندارد"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.py:213
 msgid "No more children on Right"
-msgstr ""
+msgstr "دیگر هیچ فرزندی در سمت راست وجود ندارد"
 
 #. Label of a Int field in DocType 'Transaction Deletion Record Details'
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
@@ -44913,7 +44913,7 @@ msgstr "مجاز به ویرایش حساب ثابت {0} نیست"
 
 #: templates/form_grid/stock_entry_grid.html:26
 msgid "Not in Stock"
-msgstr ""
+msgstr "موجود نیست"
 
 #: templates/includes/products_as_grid.html:20
 msgid "Not in stock"
@@ -45090,7 +45090,7 @@ msgstr "اطلاعیه (روزها)"
 #: setup/workspace/settings/settings.json
 msgctxt "Notification"
 msgid "Notification"
-msgstr "اطلاع"
+msgstr "اعلان"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
@@ -45761,7 +45761,7 @@ msgstr ""
 
 #: public/js/templates/call_link.html:11
 msgid "Open Call Log"
-msgstr ""
+msgstr "گزارش تماس را باز کنید"
 
 #: public/js/call_popup/call_popup.js:116
 msgid "Open Contact"
@@ -45827,7 +45827,7 @@ msgstr "باز کردن نقل قول ها"
 
 #: stock/report/item_variant_details/item_variant_details.py:110
 msgid "Open Sales Orders"
-msgstr "باز کردن سفارشات فروش"
+msgstr "باز کردن سفارش‌های فروش"
 
 #: public/js/templates/crm_activities.html:33
 msgid "Open Task"
@@ -45854,7 +45854,7 @@ msgstr ""
 #. Name of a report
 #: manufacturing/report/open_work_orders/open_work_orders.json
 msgid "Open Work Orders"
-msgstr "باز کردن سفارشات کاری"
+msgstr "باز کردن سفارش‌های کاری"
 
 #: templates/pages/help.html:60
 msgid "Open a new ticket"
@@ -46560,7 +46560,7 @@ msgstr "وضعیت سفارش"
 
 #: manufacturing/notification/material_request_receipt_notification/material_request_receipt_notification.html:4
 msgid "Order Summary"
-msgstr ""
+msgstr "خلاصه سفارش"
 
 #: buying/report/subcontract_order_summary/subcontract_order_summary.js:29
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.js:7
@@ -46670,7 +46670,7 @@ msgstr "مقدار سفارش داده شده"
 #: selling/doctype/sales_order/sales_order.py:753
 #: setup/doctype/company/company_dashboard.py:23
 msgid "Orders"
-msgstr "سفارشات"
+msgstr "سفارش‌ها"
 
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py:30
 msgid "Organization"
@@ -46801,7 +46801,7 @@ msgstr "تنظیمات دیگر"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce"
-msgstr ""
+msgstr "اونس"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -46811,12 +46811,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Cubic Foot"
-msgstr ""
+msgstr "اونس/فوت مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Cubic Inch"
-msgstr ""
+msgstr "اونس/اینچ مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -48046,7 +48046,7 @@ msgstr "گروه مشتریان والدین"
 #: setup/doctype/department/department.json
 msgctxt "Department"
 msgid "Parent Department"
-msgstr "بخش والدین"
+msgstr "دپارتمان والدین"
 
 #. Label of a Data field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
@@ -48268,14 +48268,14 @@ msgstr "تا حدی دریافت شد"
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Partially Reconciled"
-msgstr "تا حدی آشتی کرد"
+msgstr "تا حدی تطبیق کرد"
 
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
 #. Reconciliation Log'
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "Partially Reconciled"
-msgstr "تا حدی آشتی کرد"
+msgstr "تا حدی تطبیق کرد"
 
 #. Option for the 'Status' (Select) field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
@@ -48779,7 +48779,7 @@ msgstr "طرف اجباری است"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pascal"
-msgstr ""
+msgstr "پاسکال"
 
 #. Option for the 'Status' (Select) field in DocType 'Quality Review'
 #: quality_management/doctype/quality_review/quality_review.json
@@ -49184,16 +49184,16 @@ msgstr "جزئیات درگاه پرداخت"
 #. Name of a report
 #: accounts/report/payment_ledger/payment_ledger.json
 msgid "Payment Ledger"
-msgstr "دفتر پرداخت"
+msgstr "دفتر کل پرداخت"
 
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:250
 msgid "Payment Ledger Balance"
-msgstr "موجودی دفتر پرداخت"
+msgstr "تراز دفتر کل پرداخت"
 
 #. Name of a DocType
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgid "Payment Ledger Entry"
-msgstr "ورودی دفتر پرداخت"
+msgstr "ورودی دفتر کل پرداخت"
 
 #. Label of a Int field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
@@ -49331,7 +49331,7 @@ msgstr "فاکتور تطبیق پرداخت"
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.js:123
 msgid "Payment Reconciliation Job: {0} is running for this party. Can't reconcile now."
-msgstr "کار تطبیق پرداخت: {0} برای این طرف اجرا می شود. الان نمیشه آشتی کرد"
+msgstr "کار تطبیق پرداخت: {0} برای این طرف اجرا می شود. الان نمیشه تطبیق کرد"
 
 #. Name of a DocType
 #: accounts/doctype/payment_reconciliation_payment/payment_reconciliation_payment.json
@@ -49401,7 +49401,7 @@ msgstr "پاسخ درخواست پرداخت خیلی طول کشید. لطفا�
 
 #: accounts/doctype/payment_request/payment_request.py:443
 msgid "Payment Requests cannot be created against: {0}"
-msgstr ""
+msgstr "درخواست های پرداخت را نمی توان در مقابل: {0} ایجاد کرد"
 
 #. Name of a DocType
 #: accounts/doctype/payment_schedule/payment_schedule.json
@@ -49609,7 +49609,7 @@ msgstr "جزئیات الگوی شرایط پرداخت"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Payment Terms from orders will be fetched into the invoices as is"
-msgstr "شرایط پرداخت از سفارشات همانطور که هست در فاکتورها آورده می شود"
+msgstr "شرایط پرداخت از سفارش‌ها همانطور که هست در فاکتورها آورده می شود"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.js:28
 msgid "Payment Type"
@@ -49850,13 +49850,13 @@ msgstr "مقدار معلق"
 
 #: templates/pages/task_info.html:74
 msgid "Pending Review"
-msgstr "بررسی در انتظار"
+msgstr "در انتظار بررسی"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Pending Review"
-msgstr "بررسی در انتظار"
+msgstr "در انتظار بررسی"
 
 #. Name of a report
 #. Label of a Link in the Selling Workspace
@@ -50822,7 +50822,7 @@ msgstr "لطفاً با عملیات یا هزینه عملیاتی مبتنی �
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.py:409
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
-msgstr "لطفاً پیام خطا را بررسی کنید و اقدامات لازم را برای رفع خطا انجام دهید و سپس ارسال مجدد را مجدداً راه اندازی کنید."
+msgstr "لطفاً پیام خطا را بررسی کنید و اقدامات لازم را برای رفع خطا انجام دهید و سپس ارسال مجدد را مجدداً راه‌اندازی کنید."
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:65
 msgid "Please check your Plaid client ID and secret values"
@@ -50978,7 +50978,7 @@ msgstr "لطفا ابتدا مورد را وارد کنید"
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.py:224
 msgid "Please enter Maintenance Details first"
-msgstr ""
+msgstr "لطفاً ابتدا جزئیات تعمیر و نگهداری را وارد کنید"
 
 #: manufacturing/doctype/production_plan/production_plan.py:177
 msgid "Please enter Planned Qty for Item {0} at row {1}"
@@ -51087,7 +51087,7 @@ msgstr "لطفاً تاریخ شروع و پایان سال مالی معتبر 
 
 #: templates/includes/footer/footer_extension.html:37
 msgid "Please enter valid email address"
-msgstr ""
+msgstr "لطفا آدرس ایمیل معتبر وارد کنید"
 
 #: setup/doctype/employee/employee.py:225
 msgid "Please enter {0}"
@@ -51103,7 +51103,7 @@ msgstr "لطفا جدول درخواست مواد را پر کنید"
 
 #: manufacturing/doctype/production_plan/production_plan.py:301
 msgid "Please fill the Sales Orders table"
-msgstr "لطفا جدول سفارشات فروش را پر کنید"
+msgstr "لطفا جدول سفارش‌های فروش را پر کنید"
 
 #: stock/doctype/shipment/shipment.js:277
 msgid "Please first set Last Name, Email and Phone for the user"
@@ -51324,7 +51324,7 @@ msgstr "لطفا یک تامین کننده انتخاب کنید"
 
 #: public/js/utils/serial_no_batch_selector.js:546
 msgid "Please select a Warehouse"
-msgstr ""
+msgstr "لطفاً یک انبار انتخاب کنید"
 
 #: manufacturing/doctype/job_card/job_card.py:1072
 msgid "Please select a Work Order first."
@@ -52287,13 +52287,13 @@ msgstr "جلوگیری از POs"
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgctxt "Supplier Scorecard Scoring Standing"
 msgid "Prevent Purchase Orders"
-msgstr "جلوگیری از سفارشات خرید"
+msgstr "جلوگیری از سفارش‌های خرید"
 
 #. Label of a Check field in DocType 'Supplier Scorecard Standing'
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 msgctxt "Supplier Scorecard Standing"
 msgid "Prevent Purchase Orders"
-msgstr "جلوگیری از سفارشات خرید"
+msgstr "جلوگیری از سفارش‌های خرید"
 
 #. Label of a Check field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -54200,7 +54200,7 @@ msgstr ""
 #. Subtitle of the Module Onboarding 'Selling'
 #: selling/module_onboarding/selling/selling.json
 msgid "Products, Sales, Analysis, and more."
-msgstr ""
+msgstr "محصولات، فروش، تجزیه و تحلیل، و بیشتر."
 
 #. Label of a Tab Break field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -54247,7 +54247,7 @@ msgstr ""
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
 msgctxt "Bisect Nodes"
 msgid "Profit and Loss Summary"
-msgstr ""
+msgstr "خلاصه سود و زیان"
 
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:130
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:131
@@ -55324,7 +55324,7 @@ msgstr "مدیر خرید"
 #: stock/doctype/item_price/item_price.json
 #: stock/doctype/price_list/price_list.json
 msgid "Purchase Master Manager"
-msgstr "مدیر ارشد را خریداری کنید"
+msgstr "مدیر ارشد خرید"
 
 #. Name of a DocType
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:155
@@ -55556,23 +55556,23 @@ msgstr "سفارش خرید {0} ارسال نشده است"
 
 #: buying/doctype/purchase_order/purchase_order.py:830
 msgid "Purchase Orders"
-msgstr "سفارشات خرید"
+msgstr "سفارش‌های خرید"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Purchase Orders Items Overdue"
-msgstr "سفارشات خرید اقلام عقب افتاده"
+msgstr "سفارش‌های خرید اقلام عقب افتاده"
 
 #: buying/doctype/purchase_order/purchase_order.py:302
 msgid "Purchase Orders are not allowed for {0} due to a scorecard standing of {1}."
-msgstr "سفارشات خرید برای {0} به دلیل امتیاز کارت امتیازی {1} مجاز نیستند."
+msgstr ""
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Purchase Orders to Bill"
-msgstr "سفارشات خرید به صورت حساب"
+msgstr "سفارش‌های خرید به صورت حساب"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -55582,7 +55582,7 @@ msgstr "سفارش خرید برای دریافت"
 
 #: controllers/accounts_controller.py:1615
 msgid "Purchase Orders {0} are un-linked"
-msgstr "سفارشات خرید {0} لغو پیوند هستند"
+msgstr "سفارش‌های خرید {0} لغو پیوند هستند"
 
 #: stock/report/item_prices/item_prices.py:59
 msgid "Purchase Price List"
@@ -55810,31 +55810,31 @@ msgstr "خرید مالیات و هزینه ها"
 #. Name of a DocType
 #: accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.json
 msgid "Purchase Taxes and Charges Template"
-msgstr "خرید الگوی مالیات و هزینه"
+msgstr "الگوی مالیات و هزینه‌های خرید"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Purchase Taxes and Charges Template"
-msgstr "خرید الگوی مالیات و هزینه"
+msgstr "الگوی مالیات و هزینه‌های خرید"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Purchase Taxes and Charges Template"
-msgstr "خرید الگوی مالیات و هزینه"
+msgstr "الگوی مالیات و هزینه‌های خرید"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Purchase Taxes and Charges Template"
-msgstr "خرید الگوی مالیات و هزینه"
+msgstr "الگوی مالیات و هزینه‌های خرید"
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Purchase Taxes and Charges Template"
-msgstr "خرید الگوی مالیات و هزینه"
+msgstr "الگوی مالیات و هزینه‌های خرید"
 
 #. Label of a Link in the Accounting Workspace
 #. Label of a Link in the Buying Workspace
@@ -55842,19 +55842,19 @@ msgstr "خرید الگوی مالیات و هزینه"
 #: buying/workspace/buying/buying.json
 msgctxt "Purchase Taxes and Charges Template"
 msgid "Purchase Taxes and Charges Template"
-msgstr "خرید الگوی مالیات و هزینه"
+msgstr "الگوی مالیات و هزینه‌های خرید"
 
 #. Label of a Link field in DocType 'Subscription'
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Purchase Taxes and Charges Template"
-msgstr "خرید الگوی مالیات و هزینه"
+msgstr "الگوی مالیات و هزینه‌های خرید"
 
 #. Label of a Link field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Purchase Taxes and Charges Template"
-msgstr "خرید الگوی مالیات و هزینه"
+msgstr "الگوی مالیات و هزینه‌های خرید"
 
 #. Name of a role
 #: accounts/doctype/account/account.json
@@ -55885,7 +55885,7 @@ msgstr "خرید الگوی مالیات و هزینه"
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Purchase User"
-msgstr "خرید کاربر"
+msgstr "کاربر خرید"
 
 #: buying/report/purchase_order_trends/purchase_order_trends.py:51
 msgid "Purchase Value"
@@ -55903,7 +55903,7 @@ msgstr ""
 
 #: utilities/activation.py:104
 msgid "Purchase orders help you plan and follow up on your purchases"
-msgstr "سفارشات خرید به شما کمک می کند تا خریدهای خود را برنامه ریزی و پیگیری کنید"
+msgstr ""
 
 #. Option for the 'Current State' (Select) field in DocType 'Share Balance'
 #: accounts/doctype/share_balance/share_balance.json
@@ -57297,7 +57297,7 @@ msgstr "ورود سریع"
 
 #: accounts/doctype/journal_entry/journal_entry.js:580
 msgid "Quick Journal Entry"
-msgstr "ورود سریع مجله"
+msgstr "ورود سریع دفتر روزنامه"
 
 #. Name of a DocType
 #: stock/doctype/quick_stock_balance/quick_stock_balance.json
@@ -58809,13 +58809,13 @@ msgstr "معامله بانکی را تطبیق دهید"
 
 #: accounts/doctype/bank_transaction/bank_transaction_list.js:10
 msgid "Reconciled"
-msgstr "آشتی کرد"
+msgstr "تطبیق کرد"
 
 #. Option for the 'Status' (Select) field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Reconciled"
-msgstr "آشتی کرد"
+msgstr "تطبیق کرد"
 
 #. Label of a Check field in DocType 'Process Payment Reconciliation Log'
 #. Option for the 'Status' (Select) field in DocType 'Process Payment
@@ -58823,34 +58823,34 @@ msgstr "آشتی کرد"
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "Reconciled"
-msgstr "آشتی کرد"
+msgstr "تطبیق کرد"
 
 #. Label of a Check field in DocType 'Process Payment Reconciliation Log
 #. Allocations'
 #: accounts/doctype/process_payment_reconciliation_log_allocations/process_payment_reconciliation_log_allocations.json
 msgctxt "Process Payment Reconciliation Log Allocations"
 msgid "Reconciled"
-msgstr "آشتی کرد"
+msgstr "تطبیق کرد"
 
 #. Label of a Int field in DocType 'Process Payment Reconciliation Log'
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "Reconciled Entries"
-msgstr "مدخل های آشتی شده"
+msgstr "مدخل های تطبیق شده"
 
 #. Label of a Long Text field in DocType 'Process Payment Reconciliation Log'
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
 msgctxt "Process Payment Reconciliation Log"
 msgid "Reconciliation Error Log"
-msgstr "گزارش خطای آشتی"
+msgstr "گزارش خطای تطبیق"
 
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation_dashboard.py:9
 msgid "Reconciliation Logs"
-msgstr "سیاهههای مربوط به آشتی"
+msgstr "لاگ‌های مربوط به تطبیق"
 
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.js:13
 msgid "Reconciliation Progress"
-msgstr "پیشرفت آشتی"
+msgstr "پیشرفت تطبیق"
 
 #. Label of a HTML field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
@@ -60204,17 +60204,17 @@ msgstr "ارسال مجدد ورودی های حسابداری"
 #. Name of a DocType
 #: accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.json
 msgid "Repost Accounting Ledger"
-msgstr "بازنشر دفتر حسابداری"
+msgstr "بازنشر دفتر کل حسابداری"
 
 #. Name of a DocType
 #: accounts/doctype/repost_accounting_ledger_items/repost_accounting_ledger_items.json
 msgid "Repost Accounting Ledger Items"
-msgstr "بازنشر اقلام دفتر حسابداری"
+msgstr "بازنشر اقلام دفتر کل حسابداری"
 
 #. Name of a DocType
 #: accounts/doctype/repost_accounting_ledger_settings/repost_accounting_ledger_settings.json
 msgid "Repost Accounting Ledger Settings"
-msgstr "بازنشر تنظیمات دفتر حسابداری"
+msgstr "بازنشر تنظیمات دفتر کل حسابداری"
 
 #. Name of a DocType
 #: accounts/doctype/repost_allowed_types/repost_allowed_types.json
@@ -60235,12 +60235,12 @@ msgstr "ارسال مجدد ارزش گذاری مورد"
 #. Name of a DocType
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgid "Repost Payment Ledger"
-msgstr "ارسال مجدد دفتر پرداخت"
+msgstr "ارسال مجدد دفتر کل پرداخت"
 
 #. Name of a DocType
 #: accounts/doctype/repost_payment_ledger_items/repost_payment_ledger_items.json
 msgid "Repost Payment Ledger Items"
-msgstr "ارسال مجدد اقلام دفتر پرداخت"
+msgstr "ارسال مجدد اقلام دفتر کل پرداخت"
 
 #. Label of a Check field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
@@ -61102,7 +61102,7 @@ msgstr "بقیه دنیا"
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.js:82
 msgid "Restart"
-msgstr "راه اندازی مجدد"
+msgstr "راه‌اندازی مجدد"
 
 #: accounts/doctype/subscription/subscription.js:48
 msgid "Restart Subscription"
@@ -61158,7 +61158,7 @@ msgstr "فیلد عنوان نتیجه"
 #: buying/doctype/purchase_order/purchase_order.js:321
 #: selling/doctype/sales_order/sales_order.js:549
 msgid "Resume"
-msgstr "از سرگیری"
+msgstr "رزومه"
 
 #: manufacturing/doctype/job_card/job_card.js:288
 msgid "Resume Job"
@@ -61432,7 +61432,7 @@ msgstr "برمی گرداند"
 #: accounts/report/accounts_receivable/accounts_receivable.js:189
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:147
 msgid "Revaluation Journals"
-msgstr "مجلات تجدید ارزیابی"
+msgstr "دفترهای روزنامه تجدید ارزیابی"
 
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:88
 msgid "Revenue"
@@ -61446,7 +61446,7 @@ msgstr "معکوس شدن"
 
 #: accounts/doctype/journal_entry/journal_entry.js:73
 msgid "Reverse Journal Entry"
-msgstr "ورود معکوس مجله"
+msgstr "ورود معکوس دفتر روزنامه"
 
 #. Name of a report
 #: quality_management/report/review/review.json
@@ -61527,7 +61527,7 @@ msgstr ""
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Rgt"
-msgstr ""
+msgstr "Rgt"
 
 #. Label of a Link field in DocType 'Bisect Nodes'
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -62188,7 +62188,7 @@ msgstr "ردیف #{0}: مورد {1} یک کالای موجودی نیست"
 
 #: accounts/doctype/payment_entry/payment_entry.py:687
 msgid "Row #{0}: Journal Entry {1} does not have account {2} or already matched against another voucher"
-msgstr "ردیف #{0}: ورودی مجله {1} دارای حساب {2} نیست یا قبلاً با کوپن دیگری مطابقت دارد"
+msgstr "ردیف #{0}: ورودی دفتر روزنامه {1} دارای حساب {2} نیست یا قبلاً با کوپن دیگری مطابقت دارد"
 
 #: stock/doctype/item/item.py:350
 msgid "Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"
@@ -62266,7 +62266,7 @@ msgstr "ردیف #{0}: نوع سند مرجع باید یکی از سفارش خ
 
 #: accounts/doctype/payment_entry/payment_entry.js:1223
 msgid "Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning"
-msgstr "ردیف #{0}: نوع سند مرجع باید یکی از سفارشات فروش، فاکتور فروش، ورودی مجله یا Dunning باشد."
+msgstr ""
 
 #: controllers/buying_controller.py:449
 msgid "Row #{0}: Rejected Qty can not be entered in Purchase Return"
@@ -62826,7 +62826,7 @@ msgstr "ردیف‌ها در {0} حذف شدند"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Rows with Same Account heads will be merged on Ledger"
-msgstr "ردیف هایی با سرهای حساب یکسان در لجر ادغام می شوند"
+msgstr "ردیف هایی با سرهای حساب یکسان در دفتر کل ادغام می شوند"
 
 #: controllers/accounts_controller.py:2301
 msgid "Rows with duplicate due dates in other rows were found: {0}"
@@ -62838,7 +62838,7 @@ msgstr "ردیف‌ها: {0} دارای \"ورودی پرداخت\" به عنو�
 
 #: controllers/accounts_controller.py:219
 msgid "Rows: {0} in {1} section are Invalid. Reference Name should point to a valid Payment Entry or Journal Entry."
-msgstr "ردیف‌ها: {0} در بخش {1} نامعتبر است. نام مرجع باید به یک ورودی پرداخت معتبر یا ورودی مجله اشاره کند."
+msgstr "ردیف‌ها: {0} در بخش {1} نامعتبر است. نام مرجع باید به یک ورودی پرداخت معتبر یا ورودی دفتر روزنامه اشاره کند."
 
 #. Label of a Check field in DocType 'Pricing Rule Detail'
 #: accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -63507,7 +63507,7 @@ msgstr "سفارش فروش"
 #: selling/report/sales_order_analysis/sales_order_analysis.json
 #: selling/workspace/selling/selling.json stock/workspace/stock/stock.json
 msgid "Sales Order Analysis"
-msgstr "تجزیه و تحلیل سفارشات فروش"
+msgstr "تجزیه و تحلیل سفارش‌های فروش"
 
 #. Label of a Date field in DocType 'Production Plan Sales Order'
 #: manufacturing/doctype/production_plan_sales_order/production_plan_sales_order.json
@@ -63642,19 +63642,19 @@ msgstr "سفارش های فروش"
 
 #: manufacturing/doctype/production_plan/production_plan.py:301
 msgid "Sales Orders Required"
-msgstr "سفارشات فروش الزامی است"
+msgstr "سفارش‌های فروش الزامی است"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Sales Orders to Bill"
-msgstr "سفارشات فروش به بیل"
+msgstr "سفارش‌ها برای صورتحساب"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Sales Orders to Deliver"
-msgstr "سفارشات فروش برای تحویل"
+msgstr "سفارش‌های فروش برای تحویل"
 
 #. Name of a DocType
 #: accounts/report/accounts_receivable/accounts_receivable.js:136
@@ -64153,25 +64153,25 @@ msgstr "فروش و بازده"
 
 #: manufacturing/doctype/production_plan/production_plan.py:199
 msgid "Sales orders are not available for production"
-msgstr "سفارشات فروش برای تولید موجود نیست"
+msgstr ""
 
 #. Label of a Link field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Salutation"
-msgstr "سلام"
+msgstr "عنوان پیشوند"
 
 #. Label of a Link field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Salutation"
-msgstr "سلام"
+msgstr "عنوان پیشوند"
 
 #. Label of a Link field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Salutation"
-msgstr "سلام"
+msgstr "عنوان پیشوند"
 
 #. Label of a Percent field in DocType 'Asset Finance Book'
 #: assets/doctype/asset_finance_book/asset_finance_book.json
@@ -65573,7 +65573,7 @@ msgstr "سریال بدون شمارش"
 #. Name of a report
 #: stock/report/serial_no_ledger/serial_no_ledger.json
 msgid "Serial No Ledger"
-msgstr "سریال No Ledger"
+msgstr "دفتر کل شماره سریال"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -66795,7 +66795,7 @@ msgstr ""
 
 #: setup/setup_wizard/setup_wizard.py:29
 msgid "Setting up company"
-msgstr "راه اندازی شرکت"
+msgstr "راه‌اندازی شرکت"
 
 #: manufacturing/doctype/bom/bom.py:952
 #: manufacturing/doctype/work_order/work_order.py:989
@@ -66857,7 +66857,7 @@ msgstr "مستقر شده"
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Setup"
-msgstr "برپایی"
+msgstr "تنظیمات"
 
 #. Title of an Onboarding Step
 #: setup/onboarding_step/letterhead/letterhead.json
@@ -66871,7 +66871,7 @@ msgstr ""
 
 #: public/js/setup_wizard.js:18
 msgid "Setup your organization"
-msgstr "سازمان خود را راه اندازی کنید"
+msgstr "سازمان خود را راه‌اندازی کنید"
 
 #. Name of a DocType
 #. Name of a report
@@ -66896,7 +66896,7 @@ msgstr "موجودی را به اشتراک بگذارید"
 #: accounts/report/share_ledger/share_ledger.json
 #: accounts/workspace/accounting/accounting.json
 msgid "Share Ledger"
-msgstr "دفتر کل را به اشتراک بگذارید"
+msgstr "اشتراک دفتر کل"
 
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
@@ -67453,7 +67453,7 @@ msgstr "نمایش آخرین پست های انجمن"
 #: accounts/report/purchase_register/purchase_register.js:64
 #: accounts/report/sales_register/sales_register.js:76
 msgid "Show Ledger View"
-msgstr "نمایش لجر نمای"
+msgstr "نمایش نمای دفتر کل"
 
 #: accounts/report/accounts_receivable/accounts_receivable.js:169
 msgid "Show Linked Delivery Notes"
@@ -67761,7 +67761,7 @@ msgstr "صاف کردن ثابت"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:32
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:45
 msgid "Software"
-msgstr ""
+msgstr "نرم‌افزار"
 
 #: assets/doctype/asset/asset_list.js:9
 msgid "Sold"
@@ -67775,7 +67775,7 @@ msgstr "فروخته شد"
 
 #: selling/page/point_of_sale/pos_past_order_summary.js:80
 msgid "Sold by"
-msgstr ""
+msgstr "فروخته شده توسط"
 
 #: www/book_appointment/index.js:248
 msgid "Something went wrong please try again"
@@ -68086,12 +68086,12 @@ msgstr "تقسیم {0} {1} به ردیف‌های {2} طبق شرایط پردا
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Square Centimeter"
-msgstr ""
+msgstr "سانتی متر مربع"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Square Foot"
-msgstr ""
+msgstr "فوت مربع"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -70019,7 +70019,7 @@ msgstr "مجموعه های فرعی و مواد اولیه"
 #: public/js/bom_configurator/bom_configurator.bundle.js:129
 #: public/js/bom_configurator/bom_configurator.bundle.js:159
 msgid "Sub Assembly"
-msgstr ""
+msgstr "زیر مونتاژ"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:271
 msgid "Sub Assembly Item"
@@ -70335,7 +70335,7 @@ msgstr "ارسال پس از واردات"
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Submit ERR Journals?"
-msgstr "مجلات ERR ارسال شود؟"
+msgstr "دفترهای روزنامه ERR ارسال شود؟"
 
 #. Label of a Check field in DocType 'Subscription'
 #: accounts/doctype/subscription/subscription.json
@@ -70347,7 +70347,7 @@ msgstr "فاکتورهای تولید شده را ارسال کنید"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Submit Journal Entries"
-msgstr "ارسال مطالب مجله"
+msgstr "ارسال مطالب دفتر روزنامه"
 
 #: manufacturing/doctype/work_order/work_order.js:139
 msgid "Submit this Work Order for further processing."
@@ -70355,7 +70355,7 @@ msgstr "این سفارش کاری را برای پردازش بیشتر ارس�
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:264
 msgid "Submit your Quotation"
-msgstr ""
+msgstr "پیش فاکتور خود را ارسال کنید"
 
 #: assets/doctype/asset/asset_list.js:23
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:15
@@ -70665,7 +70665,7 @@ msgstr "موفقیت آمیز"
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:540
 msgid "Successfully Reconciled"
-msgstr "با موفقیت آشتی کرد"
+msgstr "با موفقیت تطبیق کرد"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:171
 msgid "Successfully Set Supplier"
@@ -71333,7 +71333,7 @@ msgstr "زمان عرضه کننده (روز)"
 #: accounts/workspace/financial_reports/financial_reports.json
 #: accounts/workspace/payables/payables.json
 msgid "Supplier Ledger Summary"
-msgstr "خلاصه کتاب تامین کننده"
+msgstr "خلاصه دفتر کل تامین کننده"
 
 #: accounts/report/accounts_receivable/accounts_receivable.py:1039
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:158
@@ -71587,7 +71587,7 @@ msgstr "متغیر امتیازدهی کارت امتیازی تامین کنن�
 #: buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 msgctxt "Supplier Scorecard Period"
 msgid "Supplier Scorecard Setup"
-msgstr "راه اندازی کارت امتیازی تامین کننده"
+msgstr "راه‌اندازی کارت امتیازی تامین کننده"
 
 #. Name of a DocType
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
@@ -73802,7 +73802,7 @@ msgstr "فروش از نظر منطقه"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tesla"
-msgstr ""
+msgstr "تسلا"
 
 #: stock/doctype/packing_slip/packing_slip.py:90
 msgid "The 'From Package No.' field must neither be empty nor it's value less than 1."
@@ -74144,7 +74144,7 @@ msgstr "{0} ({1}) باید برابر با {2} ({3}) باشد"
 
 #: stock/doctype/material_request/material_request.py:786
 msgid "The {0} {1} created successfully"
-msgstr ""
+msgstr "{0} {1} با موفقیت ایجاد شد"
 
 #: manufacturing/doctype/job_card/job_card.py:763
 msgid "The {0} {1} is used to calculate the valuation cost for the finished good {2}."
@@ -74272,7 +74272,7 @@ msgstr "این انبار به طور خودکار در قسمت Target Warehous
 
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:24
 msgid "This Warehouse will be auto-updated in the Work In Progress Warehouse field of Work Orders."
-msgstr "این انبار به طور خودکار در قسمت Work In Progress Warehouse سفارشات کاری به روز می شود."
+msgstr ""
 
 #: setup/doctype/email_digest/email_digest.py:184
 msgid "This Week's Summary"
@@ -74288,7 +74288,7 @@ msgstr "این عمل پیوند این حساب را با هر سرویس خا�
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
-msgstr "این همه کارت های امتیازی مرتبط با این راه اندازی را پوشش می دهد"
+msgstr "این همه کارت های امتیازی مرتبط با این راه‌اندازی را پوشش می دهد"
 
 #: controllers/status_updater.py:346
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
@@ -74303,7 +74303,7 @@ msgstr "این فیلد برای تنظیم \"مشتری\" استفاده می �
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "This filter will be applied to Journal Entry."
-msgstr "این فیلتر برای ورود مجله اعمال خواهد شد."
+msgstr "این فیلتر برای ورود دفتر روزنامه اعمال خواهد شد."
 
 #: manufacturing/doctype/bom/bom.js:171
 msgid "This is a Template BOM and will be used to make the work order for {0} of the item {1}"
@@ -74344,7 +74344,7 @@ msgstr "این یک گروه مشتری ریشه است و قابل ویرایش
 
 #: setup/doctype/department/department.js:14
 msgid "This is a root department and cannot be edited."
-msgstr "این بخش ریشه است و قابل ویرایش نیست."
+msgstr "این دپارتمان ریشه است و قابل ویرایش نیست."
 
 #: setup/doctype/item_group/item_group.js:98
 msgid "This is a root item group and cannot be edited."
@@ -75457,73 +75457,73 @@ msgstr "به سهامدار"
 #: manufacturing/report/job_card_summary/job_card_summary.py:180
 #: templates/pages/timelog_info.html:34
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Time field in DocType 'Appointment Booking Slots'
 #: crm/doctype/appointment_booking_slots/appointment_booking_slots.json
 msgctxt "Appointment Booking Slots"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Time field in DocType 'Availability Of Slots'
 #: crm/doctype/availability_of_slots/availability_of_slots.json
 msgctxt "Availability Of Slots"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Time field in DocType 'Cashier Closing'
 #: accounts/doctype/cashier_closing/cashier_closing.json
 msgctxt "Cashier Closing"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Time field in DocType 'Communication Medium Timeslot'
 #: communication/doctype/communication_medium_timeslot/communication_medium_timeslot.json
 msgctxt "Communication Medium Timeslot"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Datetime field in DocType 'Downtime Entry'
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
 msgctxt "Downtime Entry"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Time field in DocType 'Incoming Call Handling Schedule'
 #: telephony/doctype/incoming_call_handling_schedule/incoming_call_handling_schedule.json
 msgctxt "Incoming Call Handling Schedule"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Datetime field in DocType 'Job Card Scheduled Time'
 #: manufacturing/doctype/job_card_scheduled_time/job_card_scheduled_time.json
 msgctxt "Job Card Scheduled Time"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Datetime field in DocType 'Job Card Time Log'
 #: manufacturing/doctype/job_card_time_log/job_card_time_log.json
 msgctxt "Job Card Time Log"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Time field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Datetime field in DocType 'Sales Invoice Timesheet'
 #: accounts/doctype/sales_invoice_timesheet/sales_invoice_timesheet.json
 msgctxt "Sales Invoice Timesheet"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Label of a Datetime field in DocType 'Timesheet Detail'
 #: projects/doctype/timesheet_detail/timesheet_detail.json
 msgctxt "Timesheet Detail"
 msgid "To Time"
-msgstr "به زمان"
+msgstr "تا زمان"
 
 #. Description of the 'Referral Code' (Data) field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
@@ -75635,7 +75635,7 @@ msgstr "برای استفاده از یک کتاب مالی متفاوت، لط�
 
 #: selling/page/point_of_sale/pos_controller.js:192
 msgid "Toggle Recent Orders"
-msgstr "تغییر سفارشات اخیر"
+msgstr "تغییر سفارش‌های اخیر"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
@@ -76154,7 +76154,7 @@ msgstr "مجموع مبلغ مشارکت در برابر فاکتورها: {0}"
 
 #: setup/doctype/sales_person/sales_person.js:10
 msgid "Total Contribution Amount Against Orders: {0}"
-msgstr "کل مبلغ مشارکت در برابر سفارشات: {0}"
+msgstr ""
 
 #. Label of a Currency field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -76200,7 +76200,7 @@ msgstr "کل اعتبار"
 
 #: accounts/doctype/journal_entry/journal_entry.py:238
 msgid "Total Credit/ Debit Amount should be same as linked Journal Entry"
-msgstr "مجموع مبلغ اعتبار/ بدهی باید مانند ورودی مجله مرتبط باشد"
+msgstr "مجموع مبلغ اعتبار/ بدهی باید مانند ورودی دفتر روزنامه مرتبط باشد"
 
 #. Label of a Currency field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
@@ -77584,79 +77584,79 @@ msgstr "دو طرفه"
 #: projects/report/project_summary/project_summary.py:53
 #: stock/report/bom_search/bom_search.py:43
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Select field in DocType 'Advance Taxes and Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Select field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
 msgctxt "Call Log"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Select field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Select field in DocType 'Mode of Payment'
 #: accounts/doctype/mode_of_payment/mode_of_payment.json
 msgctxt "Mode of Payment"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Link field in DocType 'Payment Entry Reference'
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 msgctxt "Payment Entry Reference"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Link field in DocType 'Payment Order Reference'
 #: accounts/doctype/payment_order_reference/payment_order_reference.json
 msgctxt "Payment Order Reference"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Select field in DocType 'Process Deferred Accounting'
 #: accounts/doctype/process_deferred_accounting/process_deferred_accounting.json
 msgctxt "Process Deferred Accounting"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Select field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Select field in DocType 'Quality Feedback'
 #: quality_management/doctype/quality_feedback/quality_feedback.json
 msgctxt "Quality Feedback"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Read Only field in DocType 'Sales Invoice Payment'
 #: accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
 msgctxt "Sales Invoice Payment"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Select field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Link field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Type"
-msgstr "تایپ کنید"
+msgstr "نوع"
 
 #. Label of a Link field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
@@ -78118,7 +78118,7 @@ msgstr "URL فقط می تواند یک رشته باشد"
 
 #: public/js/utils/unreconcile.js:24
 msgid "UnReconcile"
-msgstr "آشتی نکردن"
+msgstr "تطبیق نکردن"
 
 #: setup/utils.py:115
 msgid "Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually"
@@ -78379,13 +78379,13 @@ msgstr "معامله ناسازگار"
 
 #: accounts/doctype/bank_transaction/bank_transaction_list.js:12
 msgid "Unreconciled"
-msgstr "آشتی نکردن"
+msgstr "تطبیق نکردن"
 
 #. Option for the 'Status' (Select) field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Unreconciled"
-msgstr "آشتی نکردن"
+msgstr "تطبیق نکردن"
 
 #. Label of a Currency field in DocType 'Payment Reconciliation Allocation'
 #: accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
@@ -78404,7 +78404,7 @@ msgstr "مبلغ ناسازگار"
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "Unreconciled Entries"
-msgstr "ورودی های آشتی نگرفته"
+msgstr "ورودی های تطبیق نگرفته"
 
 #: selling/doctype/sales_order/sales_order.js:90
 #: stock/doctype/pick_list/pick_list.js:134
@@ -78879,67 +78879,67 @@ msgstr ""
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Pick List Item'
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgctxt "Pick List Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Subcontracting Receipt Supplied Item'
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgctxt "Subcontracting Receipt Supplied Item"
 msgid "Use Serial No / Batch Fields"
-msgstr ""
+msgstr "از فیلدهای شماره سریال / دسته استفاده کنید"
 
 #. Label of a Check field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
@@ -79139,7 +79139,7 @@ msgstr "کاربرانی که این نقش را دارند مجاز به پرد
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Users with this role are allowed to over deliver/receive against orders above the allowance percentage"
-msgstr "کاربرانی که این نقش را دارند مجاز به تحویل/دریافت بیش از سفارشات در مقابل درصد مجاز هستند"
+msgstr ""
 
 #. Description of the 'Role Allowed to Set Frozen Accounts and Edit Frozen
 #. Entries' (Link) field in DocType 'Accounts Settings'
@@ -79259,37 +79259,37 @@ msgstr "معتبر تا"
 #: accounts/doctype/coupon_code/coupon_code.json
 msgctxt "Coupon Code"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Item Price'
 #: stock/doctype/item_price/item_price.json
 msgctxt "Item Price"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Lower Deduction Certificate'
 #: regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
 msgctxt "Lower Deduction Certificate"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #. Label of a Date field in DocType 'Promotional Scheme'
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Valid Up To"
-msgstr ""
+msgstr "اعتبار دارد تا"
 
 #: regional/doctype/lower_deduction_certificate/lower_deduction_certificate.py:40
 msgid "Valid Up To date cannot be before Valid From date"
@@ -79886,12 +79886,12 @@ msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.js:183
 msgid "View Exchange Gain/Loss Journals"
-msgstr "مشاهده مجلات سود/زیان تبادل"
+msgstr "مشاهده دفترهای روزنامه سود/زیان تبادل"
 
 #: assets/doctype/asset/asset.js:164
 #: assets/doctype/asset_repair/asset_repair.js:47
 msgid "View General Ledger"
-msgstr "مشاهده دفتر کل"
+msgstr "مشاهده دفتر کل مرکزی"
 
 #: crm/doctype/campaign/campaign.js:15
 msgid "View Leads"
@@ -79899,11 +79899,11 @@ msgstr "مشاهده سرنخ ها"
 
 #: accounts/doctype/account/account_tree.js:278 stock/doctype/batch/batch.js:18
 msgid "View Ledger"
-msgstr "مشاهده لجر"
+msgstr "مشاهده دفتر کل"
 
 #: stock/doctype/serial_no/serial_no.js:28
 msgid "View Ledgers"
-msgstr "مشاهده دفتر کل"
+msgstr "مشاهده دفتر کل ها"
 
 #: setup/doctype/email_digest/email_digest.js:7
 msgid "View Now"
@@ -80592,7 +80592,7 @@ msgstr "انبار"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:4
 msgid "Warehouse Capacity Summary"
-msgstr ""
+msgstr "خلاصه ظرفیت انبار"
 
 #: stock/doctype/putaway_rule/putaway_rule.py:78
 msgid "Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} {2}."
@@ -80830,13 +80830,13 @@ msgstr "هشدار به PO ها"
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgctxt "Supplier Scorecard Scoring Standing"
 msgid "Warn Purchase Orders"
-msgstr "هشدار به سفارشات خرید"
+msgstr "هشدار به سفارش‌های خرید"
 
 #. Label of a Check field in DocType 'Supplier Scorecard Standing'
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 msgctxt "Supplier Scorecard Standing"
 msgid "Warn Purchase Orders"
-msgstr "هشدار به سفارشات خرید"
+msgstr "هشدار به سفارش‌های خرید"
 
 #. Label of a Check field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -81730,7 +81730,7 @@ msgstr "سفارش‌های کاری ایجاد شده: {0}"
 #. Name of a report
 #: manufacturing/report/work_orders_in_progress/work_orders_in_progress.json
 msgid "Work Orders in Progress"
-msgstr "سفارشات کاری در حال انجام"
+msgstr "سفارش‌های کاری در حال انجام"
 
 #. Label of a Column Break field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -81789,13 +81789,13 @@ msgstr "وضعیت گردش کار"
 
 #: templates/pages/task_info.html:73
 msgid "Working"
-msgstr "کار کردن"
+msgstr "در حال انجام"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Working"
-msgstr "کار کردن"
+msgstr "در حال انجام"
 
 #: projects/report/timesheet_billing_summary/timesheet_billing_summary.py:65
 msgid "Working Hours"
@@ -82385,7 +82385,7 @@ msgstr "شما نمی توانید این کوپن بسته شدن دوره را
 
 #: accounts/doctype/journal_entry/journal_entry.py:611
 msgid "You can not enter current voucher in 'Against Journal Entry' column"
-msgstr "شما نمی توانید کوپن فعلی را در ستون \"علیه ورود مجله\" وارد کنید"
+msgstr "شما نمی توانید کوپن فعلی را در ستون \"علیه ورود دفتر روزنامه\" وارد کنید"
 
 #: accounts/doctype/subscription/subscription.py:178
 msgid "You can only have Plans with the same billing cycle in a Subscription"
@@ -82459,7 +82459,7 @@ msgstr "شما نمی توانید ارزیابی مورد را قبل از {} �
 
 #: accounts/doctype/subscription/subscription.py:725
 msgid "You cannot restart a Subscription that is not cancelled."
-msgstr "نمی توانید اشتراکی را که لغو نشده است راه اندازی مجدد کنید."
+msgstr "نمی توانید اشتراکی را که لغو نشده است راه‌اندازی مجدد کنید."
 
 #: selling/page/point_of_sale/pos_payment.js:210
 msgid "You cannot submit empty order."
@@ -82929,61 +82929,61 @@ msgstr ""
 #: setup/doctype/customer_group/customer_group.json
 msgctxt "Customer Group"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Label of a Int field in DocType 'Department'
 #: setup/doctype/department/department.json
 msgctxt "Department"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Label of a Int field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Label of a Int field in DocType 'Item Group'
 #: setup/doctype/item_group/item_group.json
 msgctxt "Item Group"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Label of a Int field in DocType 'Location'
 #: assets/doctype/location/location.json
 msgctxt "Location"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Label of a Int field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
 msgctxt "Sales Person"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Label of a Int field in DocType 'Supplier Group'
 #: setup/doctype/supplier_group/supplier_group.json
 msgctxt "Supplier Group"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Label of a Int field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Label of a Int field in DocType 'Territory'
 #: setup/doctype/territory/territory.json
 msgctxt "Territory"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Label of a Int field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "rgt"
-msgstr ""
+msgstr "rgt"
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
@@ -83215,7 +83215,7 @@ msgstr "{0} یک بعد حسابداری اجباری است. <br>لطفاً ی�
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "{0} is already running for {1}"
-msgstr ""
+msgstr "{0} در حال حاضر برای {1} در حال اجرا است"
 
 #: controllers/accounts_controller.py:164
 msgid "{0} is blocked so this transaction cannot proceed"
@@ -83367,11 +83367,11 @@ msgstr ""
 
 #: public/js/utils/serial_no_batch_selector.js:206
 msgid "{0} {1} Manually"
-msgstr ""
+msgstr "{0} {1} به صورت دستی"
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:427
 msgid "{0} {1} Partially Reconciled"
-msgstr "{0} {1} تا حدی آشتی کرد"
+msgstr "{0} {1} تا حدی تطبیق کرد"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:413
 msgid "{0} {1} cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
@@ -83585,7 +83585,7 @@ msgstr "{range4}-بالا"
 
 #: assets/report/fixed_asset_register/fixed_asset_register.py:363
 msgid "{}"
-msgstr ""
+msgstr "{}"
 
 #: controllers/buying_controller.py:736
 msgid "{} Assets created for {}"

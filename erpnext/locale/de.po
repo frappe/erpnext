@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-09 07:49\n"
+"PO-Revision-Date: 2024-04-25 15:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -3805,7 +3805,7 @@ msgstr "Spalten in Transaktionswährung hinzufügen"
 
 #: templates/pages/task_info.html:94 templates/pages/task_info.html:96
 msgid "Add Comment"
-msgstr ""
+msgstr "Kommentar hinzufügen"
 
 #. Label of a Check field in DocType 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
@@ -3820,7 +3820,7 @@ msgstr "Kunden hinzufügen"
 #: selling/page/point_of_sale/pos_item_cart.js:92
 #: selling/page/point_of_sale/pos_item_cart.js:411
 msgid "Add Discount"
-msgstr ""
+msgstr "Rabatt hinzufügen"
 
 #: public/js/event.js:40
 msgid "Add Employees"
@@ -3947,7 +3947,7 @@ msgstr "Seriennummer hinzufügen"
 
 #: manufacturing/doctype/plant_floor/plant_floor.js:172
 msgid "Add Stock"
-msgstr ""
+msgstr "Bestand hinzufügen"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:238
 #: public/js/bom_configurator/bom_configurator.bundle.js:318
@@ -4036,7 +4036,7 @@ msgstr "Gutscheinbedingungen hinzufügen / bearbeiten"
 
 #: templates/includes/footer/footer_extension.html:26
 msgid "Added"
-msgstr ""
+msgstr "Hinzugefügt"
 
 #. Label of a Link field in DocType 'CRM Note'
 #: crm/doctype/crm_note/crm_note.json
@@ -4068,7 +4068,7 @@ msgstr "Interessent wird zu Potenziellem Kunden hinzugefügt..."
 
 #: selling/page/point_of_sale/pos_item_cart.js:433
 msgid "Additional"
-msgstr ""
+msgstr "Zusätzlich"
 
 #. Label of a Currency field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -5469,7 +5469,7 @@ msgstr "Alle Artikelgruppen"
 
 #: selling/page/point_of_sale/pos_item_selector.js:25
 msgid "All Items"
-msgstr ""
+msgstr "Alle Artikel"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
@@ -5492,7 +5492,7 @@ msgstr "Alle Vertriebsmitarbeiter"
 #. Description of a DocType
 #: setup/doctype/sales_person/sales_person.json
 msgid "All Sales Transactions can be tagged against multiple Sales Persons so that you can set and monitor targets."
-msgstr ""
+msgstr "Alle Verkaufstransaktionen können mehreren Verkäufern zugeordnet werden, so dass Sie Ziele festlegen und überwachen können."
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
@@ -5544,7 +5544,7 @@ msgstr "Alle Artikel wurden bereits in Rechnung gestellt / zurückgesandt"
 
 #: stock/doctype/delivery_note/delivery_note.py:1300
 msgid "All items have already been received"
-msgstr ""
+msgstr "Alle Artikel sind bereits eingegangen"
 
 #: stock/doctype/stock_entry/stock_entry.py:2264
 msgid "All items have already been transferred for this Work Order."
@@ -5671,7 +5671,7 @@ msgstr "Zugeordnete Einträge"
 
 #: public/js/templates/crm_activities.html:49
 msgid "Allocated To:"
-msgstr ""
+msgstr "Zugewiesen zu:"
 
 #. Label of a Currency field in DocType 'Sales Invoice Advance'
 #: accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
@@ -6140,7 +6140,7 @@ msgstr "Alternativer Artikelname"
 
 #: selling/doctype/quotation/quotation.js:360
 msgid "Alternative Items"
-msgstr ""
+msgstr "Alternativpositionen"
 
 #: stock/doctype/item_alternative/item_alternative.py:37
 msgid "Alternative item must not be same as item code"
@@ -7176,22 +7176,22 @@ msgstr "Betrag {0} {1} {2} {3}"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere"
-msgstr ""
+msgstr "Ampere"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Hour"
-msgstr ""
+msgstr "Amperestunde"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Minute"
-msgstr ""
+msgstr "Ampereminute"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ampere-Second"
-msgstr ""
+msgstr "Amperesekunde"
 
 #: controllers/trends.py:237 controllers/trends.py:249
 #: controllers/trends.py:254
@@ -14358,7 +14358,7 @@ msgstr "Provision auf den Umsatz"
 #: setup/doctype/uom/uom.json
 msgctxt "UOM"
 msgid "Common Code"
-msgstr ""
+msgstr "Gemeinsamer Code"
 
 #: setup/setup_wizard/operations/install_fixtures.py:217
 msgid "Communication"
@@ -18083,7 +18083,7 @@ msgstr "Coupon-Typ"
 #: accounts/doctype/bank_clearance/bank_clearance.py:81
 #: templates/form_grid/bank_reconciliation_grid.html:16
 msgid "Cr"
-msgstr "Cr"
+msgstr "H"
 
 #: accounts/doctype/account/account_tree.js:209
 #: accounts/doctype/account/account_tree.js:216
@@ -19033,37 +19033,37 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Centimeter"
-msgstr ""
+msgstr "Kubikzentimeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Decimeter"
-msgstr ""
+msgstr "Kubikdezimeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Foot"
-msgstr ""
+msgstr "Kubikfuß"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Inch"
-msgstr ""
+msgstr "Kubikzoll"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Meter"
-msgstr ""
+msgstr "Kubikmeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Millimeter"
-msgstr ""
+msgstr "Kubikmillimeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cubic Yard"
-msgstr ""
+msgstr "Kubikyard"
 
 #. Label of a Float field in DocType 'Tax Withholding Rate'
 #: accounts/doctype/tax_withholding_rate/tax_withholding_rate.json
@@ -21452,17 +21452,17 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Decigram/Litre"
-msgstr ""
+msgstr "Dezigramm/Liter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Decilitre"
-msgstr ""
+msgstr "Deziliter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Decimeter"
-msgstr ""
+msgstr "Dezimeter"
 
 #: public/js/utils/sales_common.js:500
 msgid "Declare Lost"
@@ -22398,7 +22398,7 @@ msgstr "Gelöschte Dokumente"
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:479
 msgid "Deletion in Progress!"
-msgstr ""
+msgstr "Löschung im Gange!"
 
 #: regional/__init__.py:14
 msgid "Deletion is not permitted for country {0}"
@@ -24261,19 +24261,19 @@ msgstr "Deaktiviert"
 
 #: accounts/general_ledger.py:132
 msgid "Disabled Account Selected"
-msgstr ""
+msgstr "Deaktiviertes Konto ausgewählt"
 
 #: stock/utils.py:435
 msgid "Disabled Warehouse {0} cannot be used for this transaction."
-msgstr ""
+msgstr "Deaktiviertes Lager {0} kann für diese Transaktion nicht verwendet werden."
 
 #: controllers/accounts_controller.py:603
 msgid "Disabled pricing rules since this {} is an internal transfer"
-msgstr ""
+msgstr "Preisregeln deaktiviert, da es sich bei {} um eine interne Übertragung handelt"
 
 #: controllers/accounts_controller.py:617
 msgid "Disabled tax included prices since this {} is an internal transfer"
-msgstr ""
+msgstr "Bruttopreise deaktiviert, da es sich bei {} um eine interne Übertragung handelt"
 
 #: accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py:79
 msgid "Disabled template must not be default template"
@@ -25914,7 +25914,7 @@ msgstr "Beleg bearbeiten"
 
 #: selling/page/point_of_sale/pos_item_cart.js:745
 msgid "Editing {0} is not allowed as per POS Profile settings"
-msgstr ""
+msgstr "Das Bearbeiten von {0} ist gemäß den POS-Profileinstellungen nicht zulässig"
 
 #. Label of a Table field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -28007,7 +28007,7 @@ msgstr "FIFO/LIFO-Warteschlange"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fahrenheit"
-msgstr ""
+msgstr "Fahrenheit"
 
 #: accounts/doctype/payment_request/payment_request_list.js:16
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:68
@@ -28132,7 +28132,7 @@ msgstr "Fehlgeschlagen"
 
 #: bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.js:17
 msgid "Failed Entries"
-msgstr ""
+msgstr "Fehlgeschlagene Einträge"
 
 #. Label of a HTML field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -28167,7 +28167,7 @@ msgstr "Standardwerte konnten nicht gesetzt werden"
 
 #: setup/doctype/company/company.py:690
 msgid "Failed to setup defaults for country {0}. Please contact support."
-msgstr ""
+msgstr "Die Standardeinstellungen für das Land {0} konnten nicht eingerichtet werden. Bitte kontaktieren Sie den Support."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:467
 msgid "Failure"
@@ -28183,11 +28183,11 @@ msgstr "Fehlerdatum"
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgctxt "POS Closing Entry"
 msgid "Failure Description"
-msgstr ""
+msgstr "Fehlerbeschreibung"
 
 #: accounts/doctype/payment_request/payment_request.js:29
 msgid "Failure: {0}"
-msgstr ""
+msgstr "Fehler: {0}"
 
 #. Label of a Small Text field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -28198,7 +28198,7 @@ msgstr "Familiärer Hintergrund"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Faraday"
-msgstr ""
+msgstr "Faraday"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -28316,7 +28316,7 @@ msgstr "Wechselkurse werden abgerufen ..."
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:72
 msgid "Fetching..."
-msgstr ""
+msgstr "Abrufen..."
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:106
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:155
@@ -28642,7 +28642,7 @@ msgstr "Das Geschäftsjahr beginnt am"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) "
-msgstr ""
+msgstr "Finanzberichte werden unter Verwendung von Hauptbucheinträgen erstellt (sollte aktiviert werden, wenn der Beleg für den Periodenabschluss nicht für alle Jahre nacheinander gebucht wird oder fehlt) "
 
 #: manufacturing/doctype/work_order/work_order.js:675
 #: manufacturing/doctype/work_order/work_order.js:690
@@ -29017,7 +29017,7 @@ msgstr "Feste Zeit"
 #. Name of a role
 #: setup/doctype/driver/driver.json setup/doctype/vehicle/vehicle.json
 msgid "Fleet Manager"
-msgstr "Flottenverwalter"
+msgstr "Fuhrparkverwalter"
 
 #. Label of a Tab Break field in DocType 'Plant Floor'
 #: manufacturing/doctype/plant_floor/plant_floor.json
@@ -29034,12 +29034,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fluid Ounce (UK)"
-msgstr ""
+msgstr "Flüssigunze (GB)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fluid Ounce (US)"
-msgstr ""
+msgstr "Flüssigunze (US)"
 
 #: selling/page/point_of_sale/pos_item_selector.js:300
 msgid "Focus on Item Group filter"
@@ -29080,22 +29080,22 @@ msgstr "Die folgenden Elemente {0} sind nicht als Element {1} markiert. Sie kön
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Foot"
-msgstr ""
+msgstr "Fuß"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Foot Of Water"
-msgstr ""
+msgstr "Fuß Wasser"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Foot/Minute"
-msgstr ""
+msgstr "Fuß/Minute"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Foot/Second"
-msgstr ""
+msgstr "Fuß/Sekunde"
 
 #: accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html:23
 msgid "For"
@@ -29124,7 +29124,7 @@ msgstr "Für Standardlieferanten (optional)"
 #: manufacturing/doctype/plant_floor/plant_floor.js:159
 #: manufacturing/doctype/plant_floor/plant_floor.js:183
 msgid "For Item"
-msgstr ""
+msgstr "Für Artikel"
 
 #: controllers/stock_controller.py:977
 msgid "For Item {0} cannot be received more than {1} qty against the {2} {3}"
@@ -29248,7 +29248,7 @@ msgstr "Für den Vorgang {0}: Die Menge ({1}) darf nicht größer sein als die a
 
 #: stock/doctype/stock_entry/stock_entry.py:1328
 msgid "For quantity {0} should not be greater than allowed quantity {1}"
-msgstr ""
+msgstr "Denn die Menge {0} darf nicht größer sein als die zulässige Menge {1}"
 
 #. Description of the 'Territory Manager' (Link) field in DocType 'Territory'
 #: setup/doctype/territory/territory.json
@@ -29272,7 +29272,7 @@ msgstr "Für die Bedingung &#39;Regel auf andere anwenden&#39; ist das Feld {0} 
 #. Description of a DocType
 #: stock/doctype/item_customer_detail/item_customer_detail.json
 msgid "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes"
-msgstr ""
+msgstr "Zur Vereinfachung für Kunden können diese Codes in Druckformaten wie Rechnungen und Lieferscheinen verwendet werden"
 
 #. Label of a shortcut in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
@@ -29704,7 +29704,7 @@ msgstr "Von Datum und Bis Datum sind obligatorisch"
 
 #: accounts/report/financial_statements.py:130
 msgid "From Date and To Date are mandatory"
-msgstr ""
+msgstr "Von-Datum und Bis-Datum sind obligatorisch"
 
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:46
 msgid "From Date and To Date lie in different Fiscal Year"
@@ -30154,7 +30154,7 @@ msgstr "Vollständiger Name"
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Full and Final Statement"
-msgstr ""
+msgstr "Schlussabrechnung"
 
 #. Option for the 'Billing Status' (Select) field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
@@ -30326,22 +30326,22 @@ msgstr "Gewinn / Verlust aus der Veräußerung von Vermögenswerten"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon (UK)"
-msgstr ""
+msgstr "Gallone (GB)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon Dry (US)"
-msgstr ""
+msgstr "Gallone Trocken (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon Liquid (US)"
-msgstr ""
+msgstr "Gallone Flüssig (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gamma"
-msgstr ""
+msgstr "Gamma"
 
 #: projects/doctype/project/project.js:93
 msgid "Gantt Chart"
@@ -30354,7 +30354,7 @@ msgstr "Gantt-Diagramm aller Aufgaben"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gauss"
-msgstr ""
+msgstr "Gauss"
 
 #. Label of a Link field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
@@ -30419,7 +30419,7 @@ msgstr "Grundeinstellungen"
 #. Name of a report
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.json
 msgid "General and Payment Ledger Comparison"
-msgstr ""
+msgstr "Vergleich Hauptbuch und Zahlungsbuch"
 
 #: stock/doctype/closing_stock_balance/closing_stock_balance.js:12
 msgid "Generate Closing Stock Balance"
@@ -30866,32 +30866,32 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram"
-msgstr ""
+msgstr "Gramm"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram-Force"
-msgstr ""
+msgstr "Gramm-Kraft"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Centimeter"
-msgstr ""
+msgstr "Gramm/Kubikzentimeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Meter"
-msgstr ""
+msgstr "Gramm/Kubikmeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Millimeter"
-msgstr ""
+msgstr "Gramm/Kubikmillimeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Litre"
-msgstr ""
+msgstr "Gramm/Liter"
 
 #: accounts/doctype/pos_closing_entry/closing_voucher_details.html:15
 #: accounts/report/pos_register/pos_register.py:202
@@ -31239,7 +31239,7 @@ msgstr "Bruttokaufbetrag ist erforderlich"
 
 #: assets/doctype/asset/asset.py:360
 msgid "Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
-msgstr ""
+msgstr "Der Brutto-Kaufbetrag sollte dem Kaufbetrag eines einzelnen Vermögensgegenstandes <b>entsprechen</b>."
 
 #. Label of a Float field in DocType 'Packing Slip'
 #: stock/doctype/packing_slip/packing_slip.json
@@ -31650,22 +31650,22 @@ msgstr "Heatmap"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectare"
-msgstr ""
+msgstr "Hektar"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectogram/Litre"
-msgstr ""
+msgstr "Hektogramm/Liter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectometer"
-msgstr ""
+msgstr "Hektometer"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectopascal"
-msgstr ""
+msgstr "Hectopascal"
 
 #. Label of a Int field in DocType 'Shipment Parcel'
 #: stock/doctype/shipment_parcel/shipment_parcel.json
@@ -31716,7 +31716,7 @@ msgstr "Hilfe Text"
 #. Description of a DocType
 #: accounts/doctype/monthly_distribution/monthly_distribution.json
 msgid "Helps you distribute the Budget/Target across months if you have seasonality in your business."
-msgstr ""
+msgstr "Hilft Ihnen, das Budget/Ziel über die Monate zu verteilen, wenn Sie in Ihrem Geschäft saisonale Schwankungen haben."
 
 #: assets/doctype/asset/depreciation.py:410
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
@@ -31750,7 +31750,7 @@ msgstr "Hier werden Ihre wöchentlichen freien Tage auf der Grundlage der zuvor 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hertz"
-msgstr ""
+msgstr "Hertz"
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.py:403
 msgid "Hi,"
@@ -31902,17 +31902,17 @@ msgstr "Startseite"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Horsepower"
-msgstr ""
+msgstr "Pferdestärken"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Horsepower-Hours"
-msgstr ""
+msgstr "Pferdestärken-Stunden"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hour"
-msgstr ""
+msgstr "Stunde"
 
 #. Label of a Currency field in DocType 'BOM Operation'
 #: manufacturing/doctype/bom_operation/bom_operation.json
@@ -31992,12 +31992,12 @@ msgstr "Personalwesen"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hundredweight (UK)"
-msgstr ""
+msgstr "Zentner (GB)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hundredweight (US)"
-msgstr ""
+msgstr "Zentner (US)"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:260
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:184
@@ -32087,7 +32087,7 @@ msgstr "ISSN"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Iches Of Water"
-msgstr ""
+msgstr "Zoll Wassersäule"
 
 #: manufacturing/report/job_card_summary/job_card_summary.py:128
 #: manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:69
@@ -32112,7 +32112,7 @@ msgstr "Entscheidungsträger identifizieren"
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Idle"
-msgstr ""
+msgstr "Leerlauf"
 
 #. Description of the 'Book Deferred Entries Based On' (Select) field in
 #. DocType 'Accounts Settings'
@@ -32123,7 +32123,7 @@ msgstr "Wenn &quot;Monate&quot; ausgewählt ist, wird ein fester Betrag als abge
 
 #: accounts/doctype/loyalty_program/loyalty_program.js:14
 msgid "If Auto Opt In is checked, then the customers will be automatically linked with the concerned Loyalty Program (on save)"
-msgstr ""
+msgstr "Falls Auto Opt In aktiviert ist, werden die Kunden automatisch mit dem betreffenden Treueprogramm verknüpft (beim Speichern)"
 
 #. Description of the 'Cost Center' (Link) field in DocType 'Journal Entry
 #. Account'
@@ -32218,7 +32218,7 @@ msgstr "Wenn deaktiviert, wird das Feld \"Gerundeter Gesamtbetrag\" in keiner Tr
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "If enabled then system won't override the picked qty / batches / serial numbers."
-msgstr ""
+msgstr "Falls aktiviert, wird das System die kommissionierten Mengen/Chargen/Seriennummern nicht überschreiben."
 
 #. Description of the 'Send Document Print' (Check) field in DocType 'Request
 #. for Quotation'
@@ -32395,25 +32395,25 @@ msgstr "Wenn dieses Kontrollkästchen aktiviert ist, werden die Stücklistenkost
 
 #: accounts/doctype/loyalty_program/loyalty_program.js:14
 msgid "If unlimited expiry for the Loyalty Points, keep the Expiry Duration empty or 0."
-msgstr ""
+msgstr "Wenn die Gültigkeit der Treuepunkte unbegrenzt ist, lassen Sie die Ablaufdauer leer oder auf 0."
 
 #. Description of the 'Is Rejected Warehouse' (Check) field in DocType
 #. 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "If yes, then this warehouse will be used to store rejected materials"
-msgstr ""
+msgstr "Falls aktiviert, wird dieses Lager für zurückgewiesenes Material verwendet"
 
 #: stock/doctype/item/item.js:894
 msgid "If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item."
-msgstr ""
+msgstr "Wenn Sie diesen Artikel in Ihrem Inventar führen, nimmt ERPNext für jede Transaktion dieses Artikels einen Lagerbuch-Eintrag vor."
 
 #. Description of the 'Unreconciled Entries' (Section Break) field in DocType
 #. 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "If you need to reconcile particular transactions against each other, then please select accordingly. If not, all the transactions will be allocated in FIFO order."
-msgstr ""
+msgstr "Wenn Sie bestimmte Transaktionen gegeneinander abgleichen müssen, wählen Sie bitte entsprechend aus. Wenn nicht, werden alle Transaktionen in der FIFO-Reihenfolge zugeordnet."
 
 #: manufacturing/doctype/production_plan/production_plan.py:921
 msgid "If you still want to proceed, please disable 'Skip Available Sub Assembly Items' checkbox."
@@ -33170,7 +33170,7 @@ msgstr "In Menge"
 
 #: templates/form_grid/stock_entry_grid.html:26
 msgid "In Stock"
-msgstr ""
+msgstr "Auf Lager"
 
 #: manufacturing/report/bom_stock_report/bom_stock_report.html:12
 #: manufacturing/report/bom_stock_report/bom_stock_report.html:22
@@ -33390,7 +33390,7 @@ msgstr "In Minuten"
 
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.js:8
 msgid "In row {0} of Appointment Booking Slots: \"To Time\" must be later than \"From Time\"."
-msgstr ""
+msgstr "In der Zeile {0} der Terminbuchungsplätze: \"Bis-Zeit\" muss später sein als \"Von-Zeit\"."
 
 #: templates/includes/products_as_grid.html:18
 msgid "In stock"
@@ -36243,7 +36243,7 @@ msgstr "Artikelbarcode"
 
 #: selling/page/point_of_sale/pos_item_cart.js:46
 msgid "Item Cart"
-msgstr ""
+msgstr "Artikel-Warenkorb"
 
 #: accounts/report/billed_items_to_be_received/billed_items_to_be_received.py:67
 #: accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:36
@@ -38492,12 +38492,12 @@ msgstr "Eintritt"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Joule"
-msgstr ""
+msgstr "Joule"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Joule/Meter"
-msgstr ""
+msgstr "Joule/Meter"
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:30
 msgid "Journal Entries"
@@ -38637,7 +38637,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kelvin"
-msgstr ""
+msgstr "Kelvin"
 
 #. Label of a Data field in DocType 'Currency Exchange Settings Details'
 #: accounts/doctype/currency_exchange_settings_details/currency_exchange_settings_details.json
@@ -38662,67 +38662,67 @@ msgstr "Wichtige Berichte"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kg"
-msgstr ""
+msgstr "Kg"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kiloampere"
-msgstr ""
+msgstr "Kiloampere"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilocalorie"
-msgstr ""
+msgstr "Kilokalorie"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilocoulomb"
-msgstr ""
+msgstr "Kilocoulomb"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilogram-Force"
-msgstr ""
+msgstr "Kilogramm-Kraft"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilogram/Cubic Centimeter"
-msgstr ""
+msgstr "Kilogramm/Kubikzentimeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilogram/Cubic Meter"
-msgstr ""
+msgstr "Kilogramm/Kubikmeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilogram/Litre"
-msgstr ""
+msgstr "Kilogramm/Liter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilohertz"
-msgstr ""
+msgstr "Kilohertz"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilojoule"
-msgstr ""
+msgstr "Kilojoule"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilometer"
-msgstr ""
+msgstr "Kilometer"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilometer/Hour"
-msgstr ""
+msgstr "Kilometer/Stunde"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilopascal"
-msgstr ""
+msgstr "Kilopascal"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -38737,12 +38737,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilowatt"
-msgstr ""
+msgstr "Kilowatt"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilowatt-Hour"
-msgstr ""
+msgstr "Kilowattstunde"
 
 #: manufacturing/doctype/job_card/job_card.py:767
 msgid "Kindly cancel the Manufacturing Entries first against the work order {0}."
@@ -38760,7 +38760,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Knot"
-msgstr ""
+msgstr "Knoten"
 
 #. Option for the 'Valuation Method' (Select) field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -40254,7 +40254,7 @@ msgstr "Maschine"
 
 #: public/js/plant_floor_visual/visual_plant.js:70
 msgid "Machine Type"
-msgstr ""
+msgstr "Maschinentyp"
 
 #. Option for the 'Stop Reason' (Select) field in DocType 'Downtime Entry'
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
@@ -41311,11 +41311,11 @@ msgstr "Familienstand"
 #: public/js/templates/crm_activities.html:39
 #: public/js/templates/crm_activities.html:82
 msgid "Mark As Closed"
-msgstr ""
+msgstr "Als geschlossen markieren"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:323
 msgid "Mark as unresolved"
-msgstr ""
+msgstr "Als ungeklärt markieren"
 
 #. Name of a DocType
 #: crm/doctype/market_segment/market_segment.json
@@ -41757,7 +41757,7 @@ msgstr "Materialanfragen, für die keine Lieferantenangebote erstellt werden"
 
 #: stock/doctype/stock_entry/stock_entry_list.js:13
 msgid "Material Returned from WIP"
-msgstr ""
+msgstr "Aus WIP zurückgegebenes Material"
 
 #: manufacturing/doctype/job_card/job_card.js:64
 #: stock/doctype/material_request/material_request.js:124
@@ -41868,7 +41868,7 @@ msgstr "Benötigte Materialien (erweitert)"
 
 #: controllers/subcontracting_controller.py:1251
 msgid "Materials are already received against the {0} {1}"
-msgstr ""
+msgstr "Materialien sind bereits gegen {0} {1} eingegangen"
 
 #: manufacturing/doctype/job_card/job_card.py:643
 msgid "Materials needs to be transferred to the work in progress warehouse for the job card {0}"
@@ -42044,27 +42044,27 @@ msgstr "Treffen"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Megacoulomb"
-msgstr ""
+msgstr "Megacoulomb"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Megagram/Litre"
-msgstr ""
+msgstr "Megagramm/Liter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Megahertz"
-msgstr ""
+msgstr "Megahertz"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Megajoule"
-msgstr ""
+msgstr "Megajoule"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Megawatt"
-msgstr ""
+msgstr "Megawatt"
 
 #: stock/stock_ledger.py:1677
 msgid "Mention Valuation Rate in the Item master."
@@ -42110,7 +42110,7 @@ msgstr "Rechnungen zusammenführen auf Basis von"
 
 #: accounts/doctype/ledger_merge/ledger_merge.js:18
 msgid "Merge Progress"
-msgstr ""
+msgstr "Fortschritt der Zusammenführung"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -42214,42 +42214,42 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Meter"
-msgstr ""
+msgstr "Meter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Meter Of Water"
-msgstr ""
+msgstr "Meter Wasser"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Meter/Second"
-msgstr ""
+msgstr "Meter/Sekunde"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Microbar"
-msgstr ""
+msgstr "Mikrobar"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Microgram"
-msgstr ""
+msgstr "Mikrogramm"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Microgram/Litre"
-msgstr ""
+msgstr "Kilogramm/Liter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Micrometer"
-msgstr ""
+msgstr "Mikrometer"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Microsecond"
-msgstr ""
+msgstr "Mikrosekunde"
 
 #: setup/setup_wizard/operations/install_fixtures.py:263
 #: setup/setup_wizard/operations/install_fixtures.py:371
@@ -42271,97 +42271,97 @@ msgstr "Zweiter Vorname"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Mile"
-msgstr ""
+msgstr "Meile"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Mile (Nautical)"
-msgstr ""
+msgstr "Meile (nautisch)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Mile/Hour"
-msgstr ""
+msgstr "Meile/Stunde"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Mile/Minute"
-msgstr ""
+msgstr "Meile/Minute"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Mile/Second"
-msgstr ""
+msgstr "Meile/Sekunde"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milibar"
-msgstr ""
+msgstr "Milibar"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milliampere"
-msgstr ""
+msgstr "Milliampere"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millicoulomb"
-msgstr ""
+msgstr "Millicoulomb"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milligram"
-msgstr ""
+msgstr "Milligramm"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Cubic Centimeter"
-msgstr ""
+msgstr "Milligramm/Kubikzentimeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Cubic Meter"
-msgstr ""
+msgstr "Milligramm/Kubikmeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Cubic Millimeter"
-msgstr ""
+msgstr "Milligramm/Kubikmillimeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milligram/Litre"
-msgstr ""
+msgstr "Milligramm/Liter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millihertz"
-msgstr ""
+msgstr "Millihertz"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millilitre"
-msgstr ""
+msgstr "Milliliter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millimeter"
-msgstr ""
+msgstr "Millimeter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millimeter Of Mercury"
-msgstr ""
+msgstr "Millimeter Quecksilbersäule"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millimeter Of Water"
-msgstr ""
+msgstr "Millimeter Wassersäule"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millisecond"
-msgstr ""
+msgstr "Millisekunde"
 
 #. Label of a Currency field in DocType 'Promotional Scheme Price Discount'
 #: accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
@@ -42443,7 +42443,7 @@ msgstr "Mindestalter Interessent (in Tagen)"
 #: stock/doctype/item_tax/item_tax.json
 msgctxt "Item Tax"
 msgid "Minimum Net Rate"
-msgstr ""
+msgstr "Mindestnettopreis"
 
 #. Label of a Float field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -43290,7 +43290,7 @@ msgstr "Element verschieben"
 
 #: manufacturing/doctype/plant_floor/plant_floor.js:211
 msgid "Move Stock"
-msgstr ""
+msgstr "Lagerbestand verschieben"
 
 #: templates/includes/macros.html:169
 msgid "Move to Cart"
@@ -43634,27 +43634,27 @@ msgstr "Nummernkreis und Preisvorgaben"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanocoulomb"
-msgstr ""
+msgstr "Nanocoulomb"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanogram/Litre"
-msgstr ""
+msgstr "Nanogramm/Liter"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanohertz"
-msgstr ""
+msgstr "Nanohertz"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanometer"
-msgstr ""
+msgstr "Nanometer"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanosecond"
-msgstr ""
+msgstr "Nanosekunde"
 
 #. Option for the 'Fuel Type' (Select) field in DocType 'Vehicle'
 #: setup/doctype/vehicle/vehicle.json
@@ -44271,7 +44271,7 @@ msgstr "Neuer Ort"
 
 #: public/js/templates/crm_notes.html:7
 msgid "New Note"
-msgstr ""
+msgstr "Neue Notiz"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -44557,7 +44557,7 @@ msgstr ""
 
 #: public/js/templates/crm_notes.html:44
 msgid "No Notes"
-msgstr ""
+msgstr "Keine Notizen"
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.js:219
 msgid "No Outstanding Invoices found for this party"
@@ -44590,7 +44590,7 @@ msgstr "Derzeit kein Lagerbestand verfügbar"
 
 #: public/js/templates/call_link.html:30
 msgid "No Summary"
-msgstr ""
+msgstr "Keine Zusammenfassung"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2109
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
@@ -44684,7 +44684,7 @@ msgstr "Keine Elemente gefunden. Scannen Sie den Barcode erneut."
 
 #: selling/page/point_of_sale/pos_item_cart.js:76
 msgid "No items in cart"
-msgstr ""
+msgstr "Keine Artikel im Warenkorb"
 
 #: setup/doctype/email_digest/email_digest.py:166
 msgid "No items to be received are overdue"
@@ -44710,7 +44710,7 @@ msgstr "Keine Unterpunkte auf der rechten Seite"
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgctxt "Transaction Deletion Record Details"
 msgid "No of Docs"
-msgstr ""
+msgstr "Anzahl der Dokumente"
 
 #. Label of a Select field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -44765,11 +44765,11 @@ msgstr "Anzahl der Besuche"
 
 #: public/js/templates/crm_activities.html:104
 msgid "No open event"
-msgstr ""
+msgstr "Kein offenes Ereignis"
 
 #: public/js/templates/crm_activities.html:57
 msgid "No open task"
-msgstr ""
+msgstr "Keine offene Aufgabe"
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:315
 msgid "No outstanding invoices found"
@@ -45010,7 +45010,7 @@ msgstr "Keine Berechtigung gesperrtes Konto {0} zu bearbeiten"
 
 #: templates/form_grid/stock_entry_grid.html:26
 msgid "Not in Stock"
-msgstr ""
+msgstr "Nicht auf Lager"
 
 #: templates/includes/products_as_grid.html:20
 msgid "Not in stock"
@@ -45932,7 +45932,7 @@ msgstr ""
 
 #: public/js/templates/crm_activities.html:21
 msgid "Open Tasks"
-msgstr ""
+msgstr "Offene Aufgaben"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -46078,7 +46078,7 @@ msgstr "Rechnungsposition öffnen"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html:8
 msgid "Opening Invoices"
-msgstr ""
+msgstr "Eröffnungsrechnungen"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:128
 msgid "Opening Invoices Summary"
@@ -46657,7 +46657,7 @@ msgstr "Bestellstatus"
 
 #: manufacturing/notification/material_request_receipt_notification/material_request_receipt_notification.html:4
 msgid "Order Summary"
-msgstr ""
+msgstr "Bestellübersicht"
 
 #: buying/report/subcontract_order_summary/subcontract_order_summary.js:29
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.js:7
@@ -46750,7 +46750,7 @@ msgstr "Bestellte Menge"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Ordered Qty: Quantity ordered for purchase, but not received."
-msgstr ""
+msgstr "Bestellte Menge: Zum Kauf bestellte, aber nicht erhaltene Menge."
 
 #: stock/report/item_shortage_report/item_shortage_report.py:102
 msgid "Ordered Quantity"
@@ -46898,7 +46898,7 @@ msgstr "Weitere Einstellungen"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce"
-msgstr ""
+msgstr "Unze"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -46908,22 +46908,22 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Cubic Foot"
-msgstr ""
+msgstr "Unze/Kubikfuß"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Cubic Inch"
-msgstr ""
+msgstr "Unze/Kubikzoll"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (UK)"
-msgstr ""
+msgstr "Unze/Gallone (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (US)"
-msgstr ""
+msgstr "Unze/Gallone (US)"
 
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:81
 #: stock/report/stock_balance/stock_balance.py:450
@@ -47981,13 +47981,13 @@ msgstr "Summe aus gezahltem Betrag + ausgebuchter Betrag darf nicht größer der
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pair"
-msgstr ""
+msgstr "Paar"
 
 #. Label of a Select field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Pallets"
-msgstr ""
+msgstr "Paletten"
 
 #. Label of a Link field in DocType 'Item Quality Inspection Parameter'
 #: stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
@@ -48023,25 +48023,25 @@ msgstr "Parameter"
 #: stock/doctype/item_quality_inspection_parameter/item_quality_inspection_parameter.json
 msgctxt "Item Quality Inspection Parameter"
 msgid "Parameter Group"
-msgstr ""
+msgstr "Parametergruppe"
 
 #. Label of a Link field in DocType 'Quality Inspection Parameter'
 #: stock/doctype/quality_inspection_parameter/quality_inspection_parameter.json
 msgctxt "Quality Inspection Parameter"
 msgid "Parameter Group"
-msgstr ""
+msgstr "Parametergruppe"
 
 #. Label of a Link field in DocType 'Quality Inspection Reading'
 #: stock/doctype/quality_inspection_reading/quality_inspection_reading.json
 msgctxt "Quality Inspection Reading"
 msgid "Parameter Group"
-msgstr ""
+msgstr "Parametergruppe"
 
 #. Label of a Data field in DocType 'Quality Inspection Parameter Group'
 #: stock/doctype/quality_inspection_parameter_group/quality_inspection_parameter_group.json
 msgctxt "Quality Inspection Parameter Group"
 msgid "Parameter Group Name"
-msgstr ""
+msgstr "Name der Parametergruppe"
 
 #. Label of a Data field in DocType 'Supplier Scorecard Scoring Variable'
 #: buying/doctype/supplier_scorecard_scoring_variable/supplier_scorecard_scoring_variable.json
@@ -48440,19 +48440,19 @@ msgstr "Partner-Website"
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Partnership"
-msgstr ""
+msgstr "Partnerschaft"
 
 #. Option for the 'Supplier Type' (Select) field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Partnership"
-msgstr ""
+msgstr "Partnerschaft"
 
 #. Label of a Float field in DocType 'Workstation'
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Parts Per Hour"
-msgstr ""
+msgstr "Teile pro Stunde"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -48628,7 +48628,7 @@ msgstr "Konto-Nr. der Partei (Kontoauszug)"
 
 #: controllers/accounts_controller.py:2067
 msgid "Party Account {0} currency ({1}) and document currency ({2}) should be same"
-msgstr ""
+msgstr "Die Währung des Kontos {0} ({1}) und die des Dokuments ({2}) müssen identisch sein"
 
 #. Label of a Currency field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -48658,7 +48658,7 @@ msgstr "Details der Partei"
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Party IBAN (Bank Statement)"
-msgstr ""
+msgstr "IBAN der Partei (Kontoauszug)"
 
 #. Label of a Section Break field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -50142,7 +50142,7 @@ msgstr "Zeitraum basierend auf"
 
 #: accounts/general_ledger.py:687
 msgid "Period Closed"
-msgstr ""
+msgstr "Zeitraum geschlossen"
 
 #: accounts/report/trial_balance/trial_balance.js:88
 msgid "Period Closing Entry For Current Period"
@@ -50971,7 +50971,7 @@ msgstr "Bitte erstellen Sie bei Bedarf eine neue Buchhaltungsdimension."
 
 #: controllers/accounts_controller.py:587
 msgid "Please create purchase from internal sale or delivery document itself"
-msgstr ""
+msgstr "Bitte erstellen Sie den Kauf aus dem internen Verkaufs- oder Lieferbeleg selbst"
 
 #: assets/doctype/asset/asset.py:325
 msgid "Please create purchase receipt or purchase invoice for the item {0}"
@@ -50979,11 +50979,11 @@ msgstr "Bitte erstellen Sie eine Kaufquittung oder eine Eingangsrechnungen für 
 
 #: stock/doctype/item/item.py:622
 msgid "Please delete Product Bundle {0}, before merging {1} into {2}"
-msgstr ""
+msgstr "Bitte löschen Sie das Produktbündel {0}, bevor Sie {1} mit {2} zusammenführen"
 
 #: assets/doctype/asset/asset.py:364
 msgid "Please do not book expense of multiple assets against one single Asset."
-msgstr ""
+msgstr "Bitte buchen Sie die Ausgaben für mehrere Vermögensgegenstände nicht auf einen einzigen Vermögensgegenstand."
 
 #: controllers/item_variant.py:228
 msgid "Please do not create more than 500 items at a time"
@@ -51009,7 +51009,7 @@ msgstr "Bitte Pop-ups aktivieren"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:499
 msgid "Please enable {0} in the {1}."
-msgstr ""
+msgstr "Bitte aktivieren Sie {0} in {1}."
 
 #: controllers/selling_controller.py:686
 msgid "Please enable {} in {} to allow same item in multiple rows"
@@ -51184,7 +51184,7 @@ msgstr "Bitte geben Sie für das Geschäftsjahr einen gültigen Start- und Endte
 
 #: templates/includes/footer/footer_extension.html:37
 msgid "Please enter valid email address"
-msgstr ""
+msgstr "Geben Sie eine gültige E-Mail-Adresse an"
 
 #: setup/doctype/employee/employee.py:225
 msgid "Please enter {0}"
@@ -51216,7 +51216,7 @@ msgstr "Bitte korrigieren Sie sich überschneidende Zeitfenster für {0}."
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:65
 msgid "Please import accounts against parent company or enable {} in company master."
-msgstr ""
+msgstr "Bitte importieren Sie Konten gegen die Muttergesellschaft oder aktivieren Sie {} in den Unternehmensstammdaten."
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:176
 msgid "Please keep one Applicable Charges, when 'Distribute Charges Based On' is 'Distribute Manually'. For more charges, please create another Landed Cost Voucher."
@@ -51421,7 +51421,7 @@ msgstr "Bitte wählen Sie einen Lieferanten aus"
 
 #: public/js/utils/serial_no_batch_selector.js:546
 msgid "Please select a Warehouse"
-msgstr ""
+msgstr "Bitte wählen Sie ein Lager"
 
 #: manufacturing/doctype/job_card/job_card.py:1072
 msgid "Please select a Work Order first."
@@ -51461,11 +51461,11 @@ msgstr "Bitte wählen Sie einen Lieferanten aus, um Zahlungen abzurufen."
 
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.py:137
 msgid "Please select a valid Purchase Order that has Service Items."
-msgstr ""
+msgstr "Bitte wählen Sie einen gültigen Lieferantenauftrag mit Serviceartikeln."
 
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.py:134
 msgid "Please select a valid Purchase Order that is configured for Subcontracting."
-msgstr ""
+msgstr "Bitte wählen Sie einen gültigen Lieferantenauftrag, der für die Vergabe von Unteraufträgen konfiguriert ist."
 
 #: selling/doctype/quotation/quotation.js:229
 msgid "Please select a value for {0} quotation_to {1}"
@@ -51556,7 +51556,7 @@ msgstr "Bitte legen Sie ein Konto fest"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1532
 msgid "Please set Account for Change Amount"
-msgstr ""
+msgstr "Bitte Konto für Wechselgeldbetrag festlegen"
 
 #: stock/__init__.py:88
 msgid "Please set Account in Warehouse {0} or Default Inventory Account in Company {1}"
@@ -52312,22 +52312,22 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Cubic Inch"
-msgstr ""
+msgstr "Pfund/Kubikzoll"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Cubic Yard"
-msgstr ""
+msgstr "Pfund/Kubikyard"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Gallon (UK)"
-msgstr ""
+msgstr "Pfund/Gallone (GB)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Gallon (US)"
-msgstr ""
+msgstr "Pfund/Gallone (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -58540,7 +58540,7 @@ msgstr "Grund für das auf Eis legen"
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Reason for Failure"
-msgstr ""
+msgstr "Grund des Fehlers"
 
 #: buying/doctype/purchase_order/purchase_order.js:667
 #: selling/doctype/sales_order/sales_order.js:1274
@@ -58555,7 +58555,7 @@ msgstr "Grund für den Austritt"
 
 #: selling/doctype/sales_order/sales_order.js:1289
 msgid "Reason for hold:"
-msgstr ""
+msgstr "Grund für die Sperre:"
 
 #: manufacturing/doctype/bom_creator/bom_creator.js:140
 msgid "Rebuild Tree"
@@ -58853,7 +58853,7 @@ msgstr "Empfang"
 
 #: selling/page/point_of_sale/pos_past_order_list.js:17
 msgid "Recent Orders"
-msgstr ""
+msgstr "Letzte Bestellungen"
 
 #. Label of a Dynamic Link field in DocType 'Email Campaign'
 #: crm/doctype/email_campaign/email_campaign.json
@@ -58902,7 +58902,7 @@ msgstr "Einträge abgleichen"
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:221
 msgid "Reconcile the Bank Transaction"
-msgstr ""
+msgstr "Banktransaktion abgleichen"
 
 #: accounts/doctype/bank_transaction/bank_transaction_list.js:10
 msgid "Reconciled"
@@ -59611,7 +59611,7 @@ msgstr "Referenz-Typ"
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgctxt "Opening Invoice Creation Tool Item"
 msgid "Reference number of the invoice from the previous system"
-msgstr ""
+msgstr "Referenznummer der Rechnung aus dem vorherigen System"
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.py:142
 msgid "Reference: {0}, Item Code: {1} and Customer: {2}"
@@ -59658,11 +59658,11 @@ msgstr "Referenzen"
 
 #: stock/doctype/delivery_note/delivery_note.py:405
 msgid "References to Sales Invoices are Incomplete"
-msgstr ""
+msgstr "Verweise auf Ausgangsrechnungen sind unvollständig"
 
 #: stock/doctype/delivery_note/delivery_note.py:381
 msgid "References to Sales Orders are Incomplete"
-msgstr ""
+msgstr "Referenzen zu Kundenaufträgen sind unvollständig"
 
 #: accounts/doctype/payment_entry/payment_entry.py:661
 msgid "References {0} of type {1} had no outstanding amount left before submitting the Payment Entry. Now they have a negative outstanding amount."
@@ -59693,7 +59693,7 @@ msgstr "Google Sheet aktualisieren"
 
 #: accounts/doctype/bank/bank.js:21
 msgid "Refresh Plaid Link"
-msgstr ""
+msgstr "Plaid Link aktualisieren"
 
 #. Label of a Small Text field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
@@ -59707,7 +59707,7 @@ msgstr "Grüße,"
 
 #: stock/doctype/closing_stock_balance/closing_stock_balance.js:27
 msgid "Regenerate Closing Stock Balance"
-msgstr ""
+msgstr "Schlussbestand neu generieren"
 
 #. Label of a Card Break in the Buying Workspace
 #: buying/workspace/buying/buying.json
@@ -60475,7 +60475,7 @@ msgstr ""
 
 #: templates/form_grid/material_request_grid.html:25
 msgid "Reqd By Date"
-msgstr ""
+msgstr "Benötigt bis Datum"
 
 #: public/js/utils.js:740
 msgid "Reqd by date"
@@ -60615,7 +60615,7 @@ msgstr "Angeforderte Menge"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Requested Qty: Quantity requested for purchase, but not ordered."
-msgstr ""
+msgstr "Angefragte Menge: Zum Kauf angefragte, aber nicht bestellte Menge."
 
 #: buying/report/procurement_tracker/procurement_tracker.py:46
 msgid "Requesting Site"
@@ -60705,7 +60705,7 @@ msgstr "Erforderliche Elemente"
 
 #: templates/form_grid/material_request_grid.html:7
 msgid "Required On"
-msgstr ""
+msgstr "Benötigt am"
 
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:151
 #: manufacturing/doctype/workstation/workstation_job_card.html:95
@@ -61091,7 +61091,7 @@ msgstr "Details zur Entscheidung"
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Resolution Due"
-msgstr ""
+msgstr "Auflösung fällig"
 
 #. Label of a Duration field in DocType 'Issue'
 #: support/doctype/issue/issue.json
@@ -61184,7 +61184,7 @@ msgstr "Die Antwortzeit für die Priorität {0} in Zeile {1} darf nicht größer
 #: support/doctype/service_level_agreement/service_level_agreement.json
 msgctxt "Service Level Agreement"
 msgid "Response and Resolution"
-msgstr ""
+msgstr "Antwort und Auflösung"
 
 #. Label of a Link field in DocType 'Quality Action Resolution'
 #: quality_management/doctype/quality_action_resolution/quality_action_resolution.json
@@ -61397,25 +61397,25 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note_list.js:20
 #: stock/doctype/purchase_receipt/purchase_receipt_list.js:19
 msgid "Return Issued"
-msgstr ""
+msgstr "Rückgabe ausgestellt"
 
 #. Option for the 'Status' (Select) field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Return Issued"
-msgstr ""
+msgstr "Rückgabe ausgestellt"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Return Issued"
-msgstr ""
+msgstr "Rückgabe ausgestellt"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Return Issued"
-msgstr ""
+msgstr "Rückgabe ausgestellt"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:334
 msgid "Return Qty"
