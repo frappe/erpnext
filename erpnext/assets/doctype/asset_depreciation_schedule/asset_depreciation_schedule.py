@@ -848,11 +848,10 @@ def _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
 			total_days = date_diff(to_date, from_date) + 1
 			return (per_day_depr * total_days), per_day_depr
 		else:
-			from_date, to_date = get_dates(
+			from_date, days_in_month = _get_total_days(
 				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
 			)
-			days_in_month = date_diff(to_date, from_date) + 1
-			return (prev_per_day_depr * days_in_month), prev_per_day_depr
+			return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100), None
 
 	if has_wdv_or_dd_non_yearly_pro_rata:
 		if schedule_idx == 0:
@@ -860,36 +859,31 @@ def _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
 			from_date = asset.available_for_use_date
 			to_date = add_days(fb_row.depreciation_start_date, -1)
 			total_days = date_diff(to_date, from_date) + 1
-
 			return (per_day_depr * total_days), per_day_depr
 
 		elif schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 1:
-			from_date, to_date = get_dates(
+			from_date, days_in_month = _get_total_days(
 				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
 			)
 			per_day_depr = get_per_day_depr(fb_row, depreciable_value, from_date)
-			days_in_month = date_diff(to_date, from_date) + 1
 			return (per_day_depr * days_in_month), per_day_depr
 
 		else:
-			from_date, to_date = get_dates(
+			from_date, days_in_month = _get_total_days(
 				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
 			)
-			days_in_month = date_diff(to_date, from_date) + 1
 			return (prev_per_day_depr * days_in_month), prev_per_day_depr
 	else:
 		if schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 0:
-			from_date, to_date = get_dates(
+			from_date, days_in_month = _get_total_days(
 				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
 			)
 			per_day_depr = get_per_day_depr(fb_row, depreciable_value, from_date)
-			days_in_month = date_diff(to_date, from_date) + 1
 			return (per_day_depr * days_in_month), per_day_depr
 		else:
-			from_date, to_date = get_dates(
+			from_date, days_in_month = _get_total_days(
 				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
 			)
-			days_in_month = date_diff(to_date, from_date) + 1
 			return (prev_per_day_depr * days_in_month), prev_per_day_depr
 
 
@@ -904,10 +898,13 @@ def get_per_day_depr(
 	return per_day_depr
 
 
-def get_dates(depreciation_start_date, schedule_idx, frequency_of_depreciation):
+def _get_total_days(depreciation_start_date, schedule_idx, frequency_of_depreciation):
 	from_date = add_months(depreciation_start_date, (schedule_idx - 1) * frequency_of_depreciation)
-	to_date = add_days(add_months(from_date, frequency_of_depreciation), -1)
-	return from_date, to_date
+	to_date = add_months(from_date, frequency_of_depreciation)
+	if is_last_day_of_the_month(depreciation_start_date):
+		to_date = get_last_day(to_date)
+		from_date = get_last_day(from_date)
+	return from_date, date_diff(to_date, from_date)
 
 
 def make_draft_asset_depr_schedules_if_not_present(asset_doc):
