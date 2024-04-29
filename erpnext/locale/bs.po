@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-07 09:35+0000\n"
-"PO-Revision-Date: 2024-04-28 09:23\n"
+"PO-Revision-Date: 2024-04-29 09:29\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -1257,7 +1257,7 @@ msgstr ""
 
 #: crm/doctype/lead/lead.py:140
 msgid "A Lead requires either a person's name or an organization's name"
-msgstr ""
+msgstr "Potencijalni kupac zahtijeva ili ime osobe ili ime organizacije"
 
 #: stock/doctype/packing_slip/packing_slip.py:83
 msgid "A Packing Slip can only be created for Draft Delivery Note."
@@ -3373,7 +3373,7 @@ msgstr "Aktivan"
 
 #: selling/page/sales_funnel/sales_funnel.py:55
 msgid "Active Leads"
-msgstr ""
+msgstr "Aktivni tragovi"
 
 #. Label of a Attach Image field in DocType 'Workstation'
 #: manufacturing/doctype/workstation/workstation.json
@@ -3787,11 +3787,11 @@ msgstr "Dodajte stavke u tabelu svrha"
 
 #: crm/doctype/lead/lead.js:84
 msgid "Add Lead to Prospect"
-msgstr ""
+msgstr "Dodaj potencijalnog u izglednog kupca"
 
 #: public/js/event.js:16
 msgid "Add Leads"
-msgstr ""
+msgstr "Dodaj tragove"
 
 #. Label of a Section Break field in DocType 'Holiday List'
 #: setup/doctype/holiday_list/holiday_list.json
@@ -3961,7 +3961,7 @@ msgstr ""
 
 #: crm/doctype/lead/lead.js:42
 msgid "Add to Prospect"
-msgstr ""
+msgstr "Dodaj u Potencijal"
 
 #. Label of a Check field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -4009,7 +4009,7 @@ msgstr ""
 
 #: crm/doctype/lead/lead.js:81
 msgid "Adding Lead to Prospect..."
-msgstr ""
+msgstr "Dodavanje potencijalnog u izgledne kupce..."
 
 #: selling/page/point_of_sale/pos_item_cart.js:433
 msgid "Additional"
@@ -5420,7 +5420,7 @@ msgstr "Sve stavke"
 #: selling/doctype/sms_center/sms_center.json
 msgctxt "SMS Center"
 msgid "All Lead (Open)"
-msgstr ""
+msgstr "Svi potencijalni kupci (otvoreno)"
 
 #. Option for the 'Send To' (Select) field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
@@ -5856,65 +5856,65 @@ msgstr ""
 #: stock/doctype/item_variant_settings/item_variant_settings.json
 msgctxt "Item Variant Settings"
 msgid "Allow Rename Attribute Value"
-msgstr ""
+msgstr "Dopusti preimenovanje vrijednosti atributa"
 
 #. Label of a Check field in DocType 'Support Settings'
 #: support/doctype/support_settings/support_settings.json
 msgctxt "Support Settings"
 msgid "Allow Resetting Service Level Agreement"
-msgstr ""
+msgstr "Dozvoli ponovno postavljanje ugovora o nivou usluge"
 
 #: support/doctype/service_level_agreement/service_level_agreement.py:775
 msgid "Allow Resetting Service Level Agreement from Support Settings."
-msgstr ""
+msgstr "Dozvoli ponovno postavljanje ugovora o nivou usluge iz postavki podrške."
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Allow Sales"
-msgstr ""
+msgstr "Dozvoli prodaju"
 
 #. Label of a Check field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Allow Sales Invoice Creation Without Delivery Note"
-msgstr ""
+msgstr "Dozvoli kreiranje prodajnih faktura bez otpremnice"
 
 #. Label of a Check field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Allow Sales Invoice Creation Without Sales Order"
-msgstr ""
+msgstr "Dozvoli kreiranje prodajnih faktura bez prodajnog naloga"
 
 #. Label of a Check field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Allow Sales Order Creation For Expired Quotation"
-msgstr ""
+msgstr "Dozvoli kreiranje prodajnog naloga za istekle ponude"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Allow Stale Exchange Rates"
-msgstr ""
+msgstr "Dozvoli zastarjele devizne kurseve"
 
 #. Label of a Check field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Allow User to Edit Discount"
-msgstr ""
+msgstr "Dozvoli korisniku da uređuje popust"
 
 #. Label of a Check field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Allow User to Edit Price List Rate in Transactions"
-msgstr ""
+msgstr "Dozvoli korisniku da uređuje cijenu cjenovnika u transakcijama"
 
 #. Label of a Check field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Allow User to Edit Rate"
-msgstr ""
+msgstr "Dozvolite korisniku da uređuje cijenu"
 
 #. Label of a Check field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
@@ -5926,75 +5926,75 @@ msgstr ""
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Allow Zero Valuation Rate"
-msgstr ""
+msgstr "Dozvoli nultu procijenjenu vrijednost"
 
 #. Label of a Check field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Allow Zero Valuation Rate"
-msgstr ""
+msgstr "Dozvoli nultu procijenjenu vrijednost"
 
 #. Label of a Check field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Allow Zero Valuation Rate"
-msgstr ""
+msgstr "Dozvoli nultu procijenjenu vrijednost"
 
 #. Label of a Check field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Allow Zero Valuation Rate"
-msgstr ""
+msgstr "Dozvoli nultu procijenjenu vrijednost"
 
 #. Label of a Check field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Allow Zero Valuation Rate"
-msgstr ""
+msgstr "Dozvoli nultu procijenjenu vrijednost"
 
 #. Label of a Check field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Allow Zero Valuation Rate"
-msgstr ""
+msgstr "Dozvoli nultu procijenjenu vrijednost"
 
 #. Label of a Check field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Allow Zero Valuation Rate"
-msgstr ""
+msgstr "Dozvoli nultu procijenjenu vrijednost"
 
 #. Description of the 'Allow Continuous Material Consumption' (Check) field in
 #. DocType 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgctxt "Manufacturing Settings"
 msgid "Allow material consumptions without immediately manufacturing finished goods against a Work Order"
-msgstr ""
+msgstr "Dozvolite potrošnju materijala bez trenutne proizvodnje gotove robe prema radnom nalogu"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Allow multi-currency invoices against single party account "
-msgstr ""
+msgstr "Dozvolite viševalutne fakture na račun jedne strane "
 
 #. Label of a Check field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Allow to Edit Stock UOM Qty for Purchase Documents"
-msgstr ""
+msgstr "Dozvoli uređivanje količine jedinice mjere na zalihama za dokumente nabavke"
 
 #. Label of a Check field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Allow to Edit Stock UOM Qty for Sales Documents"
-msgstr ""
+msgstr "Dozvoli uređivanje količine jedinice mjere na zalihama za dokumente prodaje"
 
 #. Description of the 'Allow Excess Material Transfer' (Check) field in DocType
 #. 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgctxt "Manufacturing Settings"
 msgid "Allow transferring raw materials even after the Required Quantity is fulfilled"
-msgstr ""
+msgstr "Dozvolite transfer sirovina i nakon što je ispunjena potrebna količina"
 
 #. Label of a Check field in DocType 'Repost Allowed Types'
 #: accounts/doctype/repost_allowed_types/repost_allowed_types.json
@@ -6005,71 +6005,71 @@ msgstr "Dozvoljeno"
 #. Name of a DocType
 #: accounts/doctype/allowed_dimension/allowed_dimension.json
 msgid "Allowed Dimension"
-msgstr ""
+msgstr "Dozvoljena dimenzija"
 
 #. Label of a Table field in DocType 'Repost Accounting Ledger Settings'
 #: accounts/doctype/repost_accounting_ledger_settings/repost_accounting_ledger_settings.json
 msgctxt "Repost Accounting Ledger Settings"
 msgid "Allowed Doctypes"
-msgstr ""
+msgstr "Dozvoljeni tipovi dokumenata"
 
 #. Group in Customer's connections
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Allowed Items"
-msgstr ""
+msgstr "Dozvoljene stavke"
 
 #. Group in Supplier's connections
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Allowed Items"
-msgstr ""
+msgstr "Dozvoljene stavke"
 
 #. Name of a DocType
 #: accounts/doctype/allowed_to_transact_with/allowed_to_transact_with.json
 msgid "Allowed To Transact With"
-msgstr ""
+msgstr "Dozvoljena transakcija sa"
 
 #. Label of a Table field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Allowed To Transact With"
-msgstr ""
+msgstr "Dozvoljena transakcija sa"
 
 #. Label of a Table field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Allowed To Transact With"
-msgstr ""
+msgstr "Dozvoljena transakcija sa"
 
 #: accounts/doctype/party_link/party_link.py:27
 msgid "Allowed primary roles are 'Customer' and 'Supplier'. Please select one of these roles only."
-msgstr ""
+msgstr "Dozvoljene primarne uloge su 'Kupac' i 'Dobavljač'. Molimo odaberite samo jednu od ovih uloga."
 
 #. Description of the 'Enable Stock Reservation' (Check) field in DocType
 #. 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Allows to keep aside a specific quantity of inventory for a particular order."
-msgstr ""
+msgstr "Omogućava zadržavanje određene količine zaliha za određenu narudžbu."
 
 #: stock/doctype/pick_list/pick_list.py:788
 msgid "Already Picked"
-msgstr ""
+msgstr "Već odabrano"
 
 #: stock/doctype/item_alternative/item_alternative.py:81
 msgid "Already record exists for the item {0}"
-msgstr ""
+msgstr "Već postoji zapis za stavku {0}"
 
 #: accounts/doctype/pos_profile/pos_profile.py:98
 msgid "Already set default in pos profile {0} for user {1}, kindly disabled default"
-msgstr ""
+msgstr "Već postavljeno zadano u pos profilu {0} za korisnika {1}, ljubazno onemogućeno zadano"
 
 #: manufacturing/doctype/bom/bom.js:152
 #: manufacturing/doctype/work_order/work_order.js:169 public/js/utils.js:517
 #: stock/doctype/stock_entry/stock_entry.js:245
 msgid "Alternate Item"
-msgstr ""
+msgstr "Alternativna stavka"
 
 #. Label of a Link field in DocType 'Item Alternative'
 #: stock/doctype/item_alternative/item_alternative.json
@@ -6085,7 +6085,7 @@ msgstr ""
 
 #: selling/doctype/quotation/quotation.js:360
 msgid "Alternative Items"
-msgstr ""
+msgstr "Alternativne stavke"
 
 #: stock/doctype/item_alternative/item_alternative.py:37
 msgid "Alternative item must not be same as item code"
@@ -6586,211 +6586,211 @@ msgstr "Izmijenjeno od"
 #: templates/form_grid/stock_entry_grid.html:11 templates/pages/order.html:104
 #: templates/pages/rfq.html:46
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Advance Taxes and Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Asset Capitalization Service Item'
 #: assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 msgctxt "Asset Capitalization Service Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Asset Capitalization Stock Item'
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgctxt "Asset Capitalization Stock Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Section Break field in DocType 'BOM Creator Item'
 #. Label of a Currency field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'BOM Explosion Item'
 #: manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
 msgctxt "BOM Explosion Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'BOM Item'
 #: manufacturing/doctype/bom_item/bom_item.json
 msgctxt "BOM Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'BOM Scrap Item'
 #: manufacturing/doctype/bom_scrap_item/bom_scrap_item.json
 msgctxt "BOM Scrap Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Data field in DocType 'Bank Clearance Detail'
 #: accounts/doctype/bank_clearance_detail/bank_clearance_detail.json
 msgctxt "Bank Clearance Detail"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgctxt "Bank Guarantee"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Float field in DocType 'Cashier Closing Payments'
 #: accounts/doctype/cashier_closing_payments/cashier_closing_payments.json
 msgctxt "Cashier Closing Payments"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Margin Type' (Select) field in DocType 'Delivery Note Item'
 #. Label of a Currency field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Section Break field in DocType 'Journal Entry Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Landed Cost Item'
 #: stock/doctype/landed_cost_item/landed_cost_item.json
 msgctxt "Landed Cost Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Landed Cost Taxes and Charges'
 #: stock/doctype/landed_cost_taxes_and_charges/landed_cost_taxes_and_charges.json
 msgctxt "Landed Cost Taxes and Charges"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Distribute Charges Based On' (Select) field in DocType
 #. 'Landed Cost Voucher'
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgctxt "Landed Cost Voucher"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Opportunity Item'
 #: crm/doctype/opportunity_item/opportunity_item.json
 msgctxt "Opportunity Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'POS Closing Entry Taxes'
 #: accounts/doctype/pos_closing_entry_taxes/pos_closing_entry_taxes.json
 msgctxt "POS Closing Entry Taxes"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Margin Type' (Select) field in DocType 'POS Invoice Item'
 #. Label of a Currency field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'POS Invoice Reference'
 #: accounts/doctype/pos_invoice_reference/pos_invoice_reference.json
 msgctxt "POS Invoice Reference"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Section Break field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Payment Ledger Entry'
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Payment Order Reference'
 #: accounts/doctype/payment_order_reference/payment_order_reference.json
 msgctxt "Payment Order Reference"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Payment Reconciliation Allocation'
 #: accounts/doctype/payment_reconciliation_allocation/payment_reconciliation_allocation.json
 msgctxt "Payment Reconciliation Allocation"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Payment Reconciliation Invoice'
 #: accounts/doctype/payment_reconciliation_invoice/payment_reconciliation_invoice.json
 msgctxt "Payment Reconciliation Invoice"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Payment Reconciliation Payment'
 #: accounts/doctype/payment_reconciliation_payment/payment_reconciliation_payment.json
 msgctxt "Payment Reconciliation Payment"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Discount Type' (Select) field in DocType 'Payment Schedule'
 #: accounts/doctype/payment_schedule/payment_schedule.json
 msgctxt "Payment Schedule"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Discount Type' (Select) field in DocType 'Payment Term'
 #: accounts/doctype/payment_term/payment_term.json
 msgctxt "Payment Term"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Discount Type' (Select) field in DocType 'Payment Terms
 #. Template Detail'
 #: accounts/doctype/payment_terms_template_detail/payment_terms_template_detail.json
 msgctxt "Payment Terms Template Detail"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Margin Type' (Select) field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Process Payment Reconciliation Log
 #. Allocations'
 #: accounts/doctype/process_payment_reconciliation_log_allocations/process_payment_reconciliation_log_allocations.json
 msgctxt "Process Payment Reconciliation Log Allocations"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Prospect Opportunity'
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
 msgctxt "Prospect Opportunity"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Purchase Invoice Item'
 #. Option for the 'Margin Type' (Select) field in DocType 'Purchase Invoice
@@ -6798,20 +6798,20 @@ msgstr ""
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Purchase Order Item'
 #. Option for the 'Margin Type' (Select) field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Purchase Order Item Supplied'
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
 msgctxt "Purchase Order Item Supplied"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Purchase Receipt Item'
 #. Option for the 'Margin Type' (Select) field in DocType 'Purchase Receipt
@@ -6819,132 +6819,132 @@ msgstr ""
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Purchase Receipt Item Supplied'
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 msgctxt "Purchase Receipt Item Supplied"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Margin Type' (Select) field in DocType 'Quotation Item'
 #. Label of a Currency field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Margin Type' (Select) field in DocType 'Sales Invoice Item'
 #. Label of a Currency field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Sales Invoice Payment'
 #: accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
 msgctxt "Sales Invoice Payment"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Margin Type' (Select) field in DocType 'Sales Order Item'
 #. Label of a Currency field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Int field in DocType 'Share Balance'
 #: accounts/doctype/share_balance/share_balance.json
 msgctxt "Share Balance"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Share Transfer'
 #: accounts/doctype/share_transfer/share_transfer.json
 msgctxt "Share Transfer"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Distribute Additional Costs Based On ' (Select) field in
 #. DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Subcontracting Order Service Item'
 #: subcontracting/doctype/subcontracting_order_service_item/subcontracting_order_service_item.json
 msgctxt "Subcontracting Order Service Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Subcontracting Order Supplied Item'
 #: subcontracting/doctype/subcontracting_order_supplied_item/subcontracting_order_supplied_item.json
 msgctxt "Subcontracting Order Supplied Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Option for the 'Distribute Additional Costs Based On ' (Select) field in
 #. DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Subcontracting Receipt Supplied Item'
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgctxt "Subcontracting Receipt Supplied Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #. Label of a Currency field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgctxt "Work Order Item"
 msgid "Amount"
-msgstr ""
+msgstr "Iznos"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:22
 msgid "Amount (AED)"
@@ -7451,13 +7451,13 @@ msgstr ""
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Apply Discount On"
-msgstr ""
+msgstr "Primijeni popust na"
 
 #. Label of a Select field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Apply Discount On"
-msgstr ""
+msgstr "Primijeni popust na"
 
 #. Label of a Check field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -7678,7 +7678,7 @@ msgstr ""
 
 #: crm/doctype/appointment/appointment.py:101
 msgid "Appointment was created. But no lead was found. Please check the email to confirm"
-msgstr ""
+msgstr "Sastanak je kreiran. Ali trag nije pronađen. Molimo provjerite e-poštu da potvrdite"
 
 #. Label of a Link field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
@@ -7714,15 +7714,15 @@ msgstr ""
 
 #: public/js/utils/demo.js:20
 msgid "Are you sure you want to clear all demo data?"
-msgstr ""
+msgstr "Jeste li sigurni da želite izbrisati sve demo podatke?"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:363
 msgid "Are you sure you want to delete this Item?"
-msgstr ""
+msgstr "Jeste li sigurni da želite izbrisati ovu stavku?"
 
 #: accounts/doctype/subscription/subscription.js:69
 msgid "Are you sure you want to restart this subscription?"
-msgstr ""
+msgstr "Jeste li sigurni da želite ponovo pokrenuti ovu pretplatu?"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -7815,99 +7815,99 @@ msgstr ""
 #: assets/doctype/asset/asset.json
 #: stock/doctype/purchase_receipt/purchase_receipt.js:200
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Option for the 'Root Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link in the Assets Workspace
 #. Label of a shortcut in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Asset Activity'
 #: assets/doctype/asset_activity/asset_activity.json
 msgctxt "Asset Activity"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Asset Capitalization Asset Item'
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgctxt "Asset Capitalization Asset Item"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Asset Depreciation Schedule'
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
 msgctxt "Asset Depreciation Schedule"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Asset Movement Item'
 #: assets/doctype/asset_movement_item/asset_movement_item.json
 msgctxt "Asset Movement Item"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Asset Shift Allocation'
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.json
 msgctxt "Asset Shift Allocation"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Option for the 'Root Type' (Select) field in DocType 'Ledger Merge'
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgctxt "Ledger Merge"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
 msgctxt "Serial No"
 msgid "Asset"
-msgstr ""
+msgstr "Imovina"
 
 #. Label of a Link field in DocType 'Share Transfer'
 #: accounts/doctype/share_transfer/share_transfer.json
 msgctxt "Share Transfer"
 msgid "Asset Account"
-msgstr ""
+msgstr "Račun imovine"
 
 #. Name of a DocType
 #. Name of a report
@@ -7916,46 +7916,46 @@ msgstr ""
 #: assets/report/asset_activity/asset_activity.json
 #: assets/workspace/assets/assets.json
 msgid "Asset Activity"
-msgstr ""
+msgstr "Aktivnost imovine"
 
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Activity"
-msgstr ""
+msgstr "Aktivnost imovine"
 
 #. Name of a DocType
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Asset Capitalization"
-msgstr ""
+msgstr "Kapitalizacija imovine"
 
 #. Group in Asset's connections
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Capitalization"
-msgstr ""
+msgstr "Kapitalizacija imovine"
 
 #. Label of a Link in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Capitalization"
 msgid "Asset Capitalization"
-msgstr ""
+msgstr "Kapitalizacija imovine"
 
 #. Name of a DocType
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgid "Asset Capitalization Asset Item"
-msgstr ""
+msgstr "Kapitalizacija imovine Stavka imovine"
 
 #. Name of a DocType
 #: assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 msgid "Asset Capitalization Service Item"
-msgstr ""
+msgstr "Stavka usluge kapitalizacije imovine"
 
 #. Name of a DocType
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgid "Asset Capitalization Stock Item"
-msgstr ""
+msgstr "Kapitalizacija imovine Stavka zalihe"
 
 #. Name of a DocType
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.js:36
@@ -7966,65 +7966,65 @@ msgstr ""
 #: assets/report/fixed_asset_register/fixed_asset_register.js:23
 #: assets/report/fixed_asset_register/fixed_asset_register.py:416
 msgid "Asset Category"
-msgstr ""
+msgstr "Kategorija imovine"
 
 #. Label of a Link field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Category"
-msgstr ""
+msgstr "Kategorija imovine"
 
 #. Label of a Link in the Assets Workspace
 #. Label of a shortcut in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Category"
 msgid "Asset Category"
-msgstr ""
+msgstr "Kategorija imovine"
 
 #. Label of a Read Only field in DocType 'Asset Maintenance'
 #: assets/doctype/asset_maintenance/asset_maintenance.json
 msgctxt "Asset Maintenance"
 msgid "Asset Category"
-msgstr ""
+msgstr "Kategorija imovine"
 
 #. Label of a Read Only field in DocType 'Asset Value Adjustment'
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgctxt "Asset Value Adjustment"
 msgid "Asset Category"
-msgstr ""
+msgstr "Kategorija imovine"
 
 #. Label of a Link field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Asset Category"
-msgstr ""
+msgstr "Kategorija imovine"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Asset Category"
-msgstr ""
+msgstr "Kategorija imovine"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Asset Category"
-msgstr ""
+msgstr "Kategorija imovine"
 
 #. Name of a DocType
 #: assets/doctype/asset_category_account/asset_category_account.json
 msgid "Asset Category Account"
-msgstr ""
+msgstr "Račun kategorije imovine"
 
 #. Label of a Data field in DocType 'Asset Category'
 #: assets/doctype/asset_category/asset_category.json
 msgctxt "Asset Category"
 msgid "Asset Category Name"
-msgstr ""
+msgstr "Naziv kategorije imovine"
 
 #: stock/doctype/item/item.py:303
 msgid "Asset Category is mandatory for Fixed Asset item"
-msgstr ""
+msgstr "Kategorija imovine je obavezna za stavku osnovnih sredstava"
 
 #. Label of a Link field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -8647,13 +8647,13 @@ msgstr ""
 #: public/js/utils/serial_no_batch_selector.js:250
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:69
 msgid "Attach CSV File"
-msgstr ""
+msgstr "Priloži CSV datoteku"
 
 #. Label of a Attach field in DocType 'Chart of Accounts Importer'
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
 msgctxt "Chart of Accounts Importer"
 msgid "Attach custom Chart of Accounts file"
-msgstr ""
+msgstr "Priloži datoteku prilagođenog kontnog plana"
 
 #. Label of a Attach field in DocType 'Issue'
 #: support/doctype/issue/issue.json
@@ -8669,13 +8669,13 @@ msgstr "Prilozi"
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Attendance & Leaves"
-msgstr ""
+msgstr "Prisustvo i odsustvo"
 
 #. Label of a Data field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Attendance Device ID (Biometric/RF tag ID)"
-msgstr ""
+msgstr "ID uređaja za praćenje prisutnosti (ID biometrijske/RF oznake)"
 
 #. Label of a Link field in DocType 'Item Variant Attribute'
 #: stock/doctype/item_variant_attribute/item_variant_attribute.json
@@ -18231,11 +18231,11 @@ msgstr ""
 #. Title of an Onboarding Step
 #: crm/onboarding_step/create_lead/create_lead.json utilities/activation.py:78
 msgid "Create Lead"
-msgstr ""
+msgstr "Kreiraj potencijalnog kupca"
 
 #: utilities/activation.py:76
 msgid "Create Leads"
-msgstr ""
+msgstr "Kreiraj tragove"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -18268,7 +18268,7 @@ msgstr ""
 
 #: public/js/call_popup/call_popup.js:134
 msgid "Create New Lead"
-msgstr ""
+msgstr "Kreiraj novi trag"
 
 #. Title of an Onboarding Step
 #: crm/doctype/lead/lead.js:208
@@ -18298,7 +18298,7 @@ msgstr ""
 
 #: crm/doctype/lead/lead_list.js:4
 msgid "Create Prospect"
-msgstr ""
+msgstr "Kreiraj potencijal"
 
 #: utilities/activation.py:105
 msgid "Create Purchase Order"
@@ -19891,7 +19891,7 @@ msgstr ""
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Customer / Lead Address"
-msgstr ""
+msgstr "Adresa klijenta/traga"
 
 #. Name of a report
 #. Label of a Link in the Selling Workspace
@@ -20616,7 +20616,7 @@ msgstr ""
 
 #: crm/report/lost_opportunity/lost_opportunity.py:38
 msgid "Customer/Lead Name"
-msgstr ""
+msgstr "Naziv klijenta/traga"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:19
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:21
@@ -22317,7 +22317,7 @@ msgstr ""
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgctxt "Transaction Deletion Record"
 msgid "Delete Leads and Addresses"
-msgstr ""
+msgstr "Obriši tragove i adrese"
 
 #: setup/doctype/company/company.js:141
 msgid "Delete Transactions"
@@ -29731,7 +29731,7 @@ msgstr ""
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "From Lead"
-msgstr ""
+msgstr "Od traga"
 
 #. Label of a Int field in DocType 'Share Balance'
 #: accounts/doctype/share_balance/share_balance.json
@@ -38573,7 +38573,7 @@ msgstr "Kanban ploča"
 #. Description of a DocType
 #: crm/doctype/campaign/campaign.json
 msgid "Keep Track of Sales Campaigns. Keep track of Leads, Quotations, Sales Order etc from Campaigns to gauge Return on Investment. "
-msgstr ""
+msgstr "Pratite prodajne kampanje. Pratite tragove, ponude, prodajne narudžbe itd. iz kampanja kako biste procijenili povrat ulaganja. "
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -38917,26 +38917,26 @@ msgstr ""
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py:28
 #: public/js/communication.js:25
 msgid "Lead"
-msgstr ""
+msgstr "Trag"
 
 #. Label of a Section Break field in DocType 'CRM Settings'
 #: crm/doctype/crm_settings/crm_settings.json
 msgctxt "CRM Settings"
 msgid "Lead"
-msgstr ""
+msgstr "Trag"
 
 #. Option for the 'Email Campaign For ' (Select) field in DocType 'Email
 #. Campaign'
 #: crm/doctype/email_campaign/email_campaign.json
 msgctxt "Email Campaign"
 msgid "Lead"
-msgstr ""
+msgstr "Trag"
 
 #. Label of a Link field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Lead"
-msgstr ""
+msgstr "Trag"
 
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #. Label of a Link in the CRM Workspace
@@ -38946,134 +38946,134 @@ msgstr ""
 #: setup/workspace/home/home.json
 msgctxt "Lead"
 msgid "Lead"
-msgstr ""
+msgstr "Trag"
 
 #. Label of a Link field in DocType 'Prospect Lead'
 #: crm/doctype/prospect_lead/prospect_lead.json
 msgctxt "Prospect Lead"
 msgid "Lead"
-msgstr ""
+msgstr "Trag"
 
 #: crm/doctype/lead/lead.py:547
 msgid "Lead -> Prospect"
-msgstr ""
+msgstr "Trag-> Potencijal"
 
 #. Name of a report
 #: crm/report/lead_conversion_time/lead_conversion_time.json
 msgid "Lead Conversion Time"
-msgstr ""
+msgstr "Vrijeme konverzije traga"
 
 #: crm/report/campaign_efficiency/campaign_efficiency.py:20
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:26
 msgid "Lead Count"
-msgstr ""
+msgstr "Broj tragova"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
 #: crm/report/lead_details/lead_details.json crm/workspace/crm/crm.json
 msgid "Lead Details"
-msgstr ""
+msgstr "Detalji traga"
 
 #: crm/report/lead_details/lead_details.py:24
 msgid "Lead Name"
-msgstr ""
+msgstr "Naziv traga"
 
 #. Label of a Data field in DocType 'Prospect Lead'
 #: crm/doctype/prospect_lead/prospect_lead.json
 msgctxt "Prospect Lead"
 msgid "Lead Name"
-msgstr ""
+msgstr "Naziv traga"
 
 #: crm/report/lead_details/lead_details.py:28
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:21
 msgid "Lead Owner"
-msgstr ""
+msgstr "Vlasnik traga"
 
 #. Label of a Link field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Lead Owner"
-msgstr ""
+msgstr "Vlasnik traga"
 
 #. Label of a Data field in DocType 'Prospect Lead'
 #: crm/doctype/prospect_lead/prospect_lead.json
 msgctxt "Prospect Lead"
 msgid "Lead Owner"
-msgstr ""
+msgstr "Vlasnik traga"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.json
 #: crm/workspace/crm/crm.json
 msgid "Lead Owner Efficiency"
-msgstr ""
+msgstr "Efikasnost vlasnika traga"
 
 #: crm/doctype/lead/lead.py:174
 msgid "Lead Owner cannot be same as the Lead Email Address"
-msgstr ""
+msgstr "Vlasnik traga ne može biti isti kao i adresa e-pošte traga"
 
 #. Name of a DocType
 #: crm/doctype/lead_source/lead_source.json
 msgid "Lead Source"
-msgstr ""
+msgstr "Izvor traga"
 
 #. Label of a Link in the CRM Workspace
 #. Label of a Link in the Selling Workspace
 #: crm/workspace/crm/crm.json selling/workspace/selling/selling.json
 msgctxt "Lead Source"
 msgid "Lead Source"
-msgstr ""
+msgstr "Izvor traga"
 
 #. Label of a Float field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Lead Time"
-msgstr ""
+msgstr "Vrijeme isporuke"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:264
 msgid "Lead Time (Days)"
-msgstr ""
+msgstr "Vrijeme isporuke (dana)"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:267
 msgid "Lead Time (in mins)"
-msgstr ""
+msgstr "Vrijeme isporuke (u minutama)"
 
 #. Label of a Date field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Lead Time Date"
-msgstr ""
+msgstr "Vrijeme isporuke datum"
 
 #: stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py:59
 msgid "Lead Time Days"
-msgstr ""
+msgstr "Vrijeme isporuke dana"
 
 #. Label of a Int field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Lead Time in days"
-msgstr ""
+msgstr "Vrijeme isporuke u danima"
 
 #. Label of a Int field in DocType 'Item Price'
 #: stock/doctype/item_price/item_price.json
 msgctxt "Item Price"
 msgid "Lead Time in days"
-msgstr ""
+msgstr "Vrijeme isporuke u danima"
 
 #. Label of a Select field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Lead Type"
-msgstr ""
+msgstr "Vrsta traga"
 
 #: crm/doctype/lead/lead.py:546
 msgid "Lead {0} has been added to prospect {1}."
-msgstr ""
+msgstr "Trag {0} je dodat potencijalu {1}."
 
 #. Subtitle of the Module Onboarding 'CRM'
 #: crm/module_onboarding/crm/crm.json
 msgid "Lead, Opportunity, Customer, and more."
-msgstr ""
+msgstr "Trag, prilika, kupac i još mnogo toga."
 
 #. Label of a shortcut in the Home Workspace
 #: setup/workspace/home/home.json
@@ -39084,11 +39084,11 @@ msgstr "Poredak"
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "Leads"
-msgstr ""
+msgstr "Tragovi"
 
 #: utilities/activation.py:77
 msgid "Leads help you get business, add all your contacts and more as your leads"
-msgstr ""
+msgstr "Tragovi vam pomažu da započnete posao, dodate sve svoje kontakte i još mnogo toga kao tragove"
 
 #. Label of a shortcut in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
@@ -42378,7 +42378,7 @@ msgstr ""
 
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.js:20
 msgid "Minimum Lead Age (Days)"
-msgstr ""
+msgstr "Minimalna starost traga (dana)"
 
 #. Label of a Float field in DocType 'Item Tax'
 #: stock/doctype/item_tax/item_tax.json
@@ -46326,7 +46326,7 @@ msgstr ""
 #: crm/report/campaign_efficiency/campaign_efficiency.py:25
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:31
 msgid "Opp/Lead %"
-msgstr ""
+msgstr "Pril/Trag %"
 
 #: selling/page/sales_funnel/sales_funnel.py:56
 msgid "Opportunities"
@@ -46341,7 +46341,7 @@ msgstr ""
 
 #: selling/page/sales_funnel/sales_funnel.js:48
 msgid "Opportunities by lead source"
-msgstr ""
+msgstr "Prilike prema izvoru traga"
 
 #. Name of a DocType
 #: buying/doctype/request_for_quotation/request_for_quotation.js:340
@@ -50900,7 +50900,7 @@ msgstr ""
 
 #: selling/doctype/quotation/quotation.py:549
 msgid "Please create Customer from Lead {0}."
-msgstr ""
+msgstr "Molimo kreirajte kupca od traga {0}."
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:117
 msgid "Please create Landed Cost Vouchers against Invoices that have 'Update Stock' enabled."
@@ -51608,7 +51608,7 @@ msgstr ""
 
 #: crm/doctype/email_campaign/email_campaign.py:57
 msgid "Please set an email id for the Lead {0}"
-msgstr ""
+msgstr "Molimo postavite Id e-pošte za trag {0}"
 
 #: regional/italy/utils.py:303
 msgid "Please set at least one row in the Taxes and Charges Table"
@@ -55002,44 +55002,44 @@ msgstr ""
 #: crm/doctype/lead/lead.js:41 crm/doctype/lead/lead.js:62
 #: crm/doctype/prospect/prospect.json
 msgid "Prospect"
-msgstr ""
+msgstr "Potencijal"
 
 #. Label of a Link in the CRM Workspace
 #: crm/workspace/crm/crm.json
 msgctxt "Prospect"
 msgid "Prospect"
-msgstr ""
+msgstr "Potencijal"
 
 #. Name of a DocType
 #: crm/doctype/prospect_lead/prospect_lead.json
 msgid "Prospect Lead"
-msgstr ""
+msgstr "Potencijal Trag"
 
 #. Name of a DocType
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
 msgid "Prospect Opportunity"
-msgstr ""
+msgstr "Potencijal Prilika"
 
 #. Label of a Link field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "Prospect Owner"
-msgstr ""
+msgstr "Potencijal vlasnik"
 
 #: crm/doctype/lead/lead.py:311
 msgid "Prospect {0} already exists"
-msgstr ""
+msgstr "Potencijal {0} već postoji"
 
 #: setup/setup_wizard/operations/install_fixtures.py:381
 msgid "Prospecting"
-msgstr ""
+msgstr "Istraživanje"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.json
 #: crm/workspace/crm/crm.json
 msgid "Prospects Engaged But Not Converted"
-msgstr ""
+msgstr "Prospekti su angažovani, ali nisu preobraženi"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -57372,7 +57372,7 @@ msgstr ""
 #: crm/report/campaign_efficiency/campaign_efficiency.py:26
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:32
 msgid "Quot/Lead %"
-msgstr ""
+msgstr "Pon/Trag %"
 
 #. Name of a DocType
 #: accounts/doctype/sales_invoice/sales_invoice.js:287
@@ -71362,7 +71362,7 @@ msgstr ""
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Supplier Lead Time (days)"
-msgstr ""
+msgstr "Vrijeme isporuke dobavljača (dana)"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -79933,7 +79933,7 @@ msgstr ""
 
 #: crm/doctype/campaign/campaign.js:15
 msgid "View Leads"
-msgstr ""
+msgstr "Pregledaj tragove"
 
 #: accounts/doctype/account/account_tree.js:278 stock/doctype/batch/batch.js:18
 msgid "View Ledger"
