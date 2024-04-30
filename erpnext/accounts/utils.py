@@ -1112,7 +1112,7 @@ def get_children(doctype, parent, company, is_root=False, include_disabled=False
 		include_disabled = frappe.json.loads(include_disabled)
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
-	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
+	parent_fieldname = "parent_" + frappe.scrub(doctype)
 	fields = ["name as value", "is_group as expandable"]
 	filters = [["docstatus", "<", 2]]
 	if frappe.db.has_column(doctype, "disabled") and not include_disabled:
