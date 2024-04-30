@@ -1094,7 +1094,7 @@ def get_companies():
 def get_children(doctype, parent, company, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
-	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
+	parent_fieldname = "parent_" + frappe.scrub(doctype)
 	fields = ["name as value", "is_group as expandable"]
 	filters = [["docstatus", "<", 2]]
 
