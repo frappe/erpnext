@@ -135,10 +135,12 @@ def get_party_bank_account(party_type, party):
 
 
 def get_default_company_bank_account(company, party_type, party):
-	default_company_bank_account = frappe.db.get_value(party_type, party, "default_bank_account")
-	if default_company_bank_account:
-		if company != frappe.get_cached_value("Bank Account", default_company_bank_account, "company"):
-			default_company_bank_account = None
+	default_company_bank_account = None
+	if frappe.get_meta(party_type).has_field("default_bank_account"):
+		default_company_bank_account = frappe.db.get_value(party_type, party, "default_bank_account")
+		if default_company_bank_account:
+			if company != frappe.get_cached_value("Bank Account", default_company_bank_account, "company"):
+				default_company_bank_account = None
 
 	if not default_company_bank_account:
 		default_company_bank_account = frappe.db.get_value(
