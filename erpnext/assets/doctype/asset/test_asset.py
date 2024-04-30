@@ -1723,7 +1723,7 @@ def create_asset(**args):
 				"depreciation_start_date": args.depreciation_start_date,
 				"daily_prorata_based": args.daily_prorata_based or 0,
 				"shift_based": args.shift_based or 0,
-				"rate_of_depreciation": args.rate_of_depreciation or 40,
+				"rate_of_depreciation": args.rate_of_depreciation or 0,
 			},
 		)
 
