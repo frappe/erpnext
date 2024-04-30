@@ -91,6 +91,7 @@ force_item_fields = (
 	"weight_uom",
 	"total_weight",
 	"valuation_rate",
+
 )
 
 
