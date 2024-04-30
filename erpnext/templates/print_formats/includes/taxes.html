@@ -11,8 +11,7 @@
 {%- endmacro -%}
 
 <div class="row">
-	<div class="col-xs-6"></div>
-	<div class="col-xs-6">
+	<div class="col-xs-12">
 		{%- if doc.apply_discount_on == "Net Total" -%}
 			{{ render_discount_amount(doc) }}
 		{%- endif -%}
