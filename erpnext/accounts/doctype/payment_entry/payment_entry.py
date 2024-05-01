@@ -1227,7 +1227,7 @@ class PaymentEntry(AccountsController):
 
 	def add_advance_gl_entries(self, gl_entries: list, entry: object | dict | None):
 		"""
-		If 'entry' is passed, GL enties only for that reference is added.
+		If 'entry' is passed, GL entries only for that reference is added.
 		"""
 		if self.book_advance_payments_in_separate_party_account:
 			references = [x for x in self.get("references")]
@@ -1239,8 +1239,6 @@ class PaymentEntry(AccountsController):
 					"Sales Invoice",
 					"Purchase Invoice",
 					"Journal Entry",
-					"Sales Order",
-					"Purchase Order",
 					"Payment Entry",
 				):
 					self.add_advance_gl_for_reference(gl_entries, ref)
