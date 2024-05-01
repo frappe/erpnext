@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-04-30 09:29\n"
+"PO-Revision-Date: 2024-05-01 09:40\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -3804,7 +3804,7 @@ msgstr "شرکت کنندگان اضافه کردن"
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Add Quote"
-msgstr "اضافه کردن نقل قول"
+msgstr "افزودن نقل قول"
 
 #: public/js/event.js:48
 msgid "Add Sales Partners"
@@ -57573,50 +57573,50 @@ msgstr "نقل قول"
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Quotation"
-msgstr "نقل قول"
+msgstr "پیش فاکتور"
 
 #: selling/report/territory_wise_sales/territory_wise_sales.py:36
 msgid "Quotation Amount"
-msgstr "مبلغ نقل قول"
+msgstr "مبلغ پیش فاکتور"
 
 #. Name of a DocType
 #: selling/doctype/quotation_item/quotation_item.json
 msgid "Quotation Item"
-msgstr "مورد نقل قول"
+msgstr "آیتم پیش فاکتور"
 
 #. Name of a DocType
 #: setup/doctype/quotation_lost_reason/quotation_lost_reason.json
 msgid "Quotation Lost Reason"
-msgstr "دلیل از دست رفتن نقل قول"
+msgstr "دلیل از دست رفتن پیش فاکتور"
 
 #. Label of a Data field in DocType 'Quotation Lost Reason'
 #: setup/doctype/quotation_lost_reason/quotation_lost_reason.json
 msgctxt "Quotation Lost Reason"
 msgid "Quotation Lost Reason"
-msgstr "دلیل از دست رفتن نقل قول"
+msgstr "دلیل از دست رفتن پیش فاکتور"
 
 #. Label of a Link field in DocType 'Quotation Lost Reason Detail'
 #: setup/doctype/quotation_lost_reason_detail/quotation_lost_reason_detail.json
 msgctxt "Quotation Lost Reason Detail"
 msgid "Quotation Lost Reason"
-msgstr "دلیل از دست رفتن نقل قول"
+msgstr "دلیل از دست رفتن پیش فاکتور"
 
 #. Name of a DocType
 #: setup/doctype/quotation_lost_reason_detail/quotation_lost_reason_detail.json
 msgid "Quotation Lost Reason Detail"
-msgstr "جزئیات دلیل از دست رفتن نقل قول"
+msgstr "جزئیات دلیل از دست رفتن پیش فاکتور"
 
 #. Linked DocType in Quotation Lost Reason's connections
 #: setup/doctype/quotation_lost_reason/quotation_lost_reason.json
 msgctxt "Quotation Lost Reason"
 msgid "Quotation Lost Reason Detail"
-msgstr "جزئیات دلیل از دست رفتن نقل قول"
+msgstr "جزئیات دلیل از دست رفتن پیش فاکتور"
 
 #. Label of a Data field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Quotation Number"
-msgstr "شماره نقل قول"
+msgstr "شماره پیش فاکتور"
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
@@ -57629,15 +57629,15 @@ msgstr "نقل قول به"
 #: selling/report/quotation_trends/quotation_trends.json
 #: selling/workspace/selling/selling.json
 msgid "Quotation Trends"
-msgstr "روند نقل قول"
+msgstr "روند پیش فاکتور"
 
 #: selling/doctype/sales_order/sales_order.py:394
 msgid "Quotation {0} is cancelled"
-msgstr "نقل قول {0} لغو شده است"
+msgstr "پیش فاکتور {0} لغو شده است"
 
 #: selling/doctype/sales_order/sales_order.py:307
 msgid "Quotation {0} not of type {1}"
-msgstr "نقل قول {0} از نوع {1} نیست"
+msgstr "پیش فاکتور {0} از نوع {1} نیست"
 
 #: selling/doctype/quotation/quotation.py:327
 #: selling/page/sales_funnel/sales_funnel.py:57
@@ -57650,7 +57650,7 @@ msgstr "پیشنهادها، پیشنهادهایی هستند که شما بر�
 
 #: templates/pages/rfq.html:73
 msgid "Quotations: "
-msgstr " نقل قول ها:"
+msgstr "پیش فاکتور ها: "
 
 #. Label of a Select field in DocType 'Request for Quotation Supplier'
 #: buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
@@ -60619,13 +60619,13 @@ msgstr "درخواست برای نقل قول"
 #: buying/workspace/buying/buying.json
 msgctxt "Request for Quotation"
 msgid "Request for Quotation"
-msgstr "درخواست برای نقل قول"
+msgstr "درخواست برای پیش فاکتور"
 
 #. Label of a Link field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Request for Quotation"
-msgstr "درخواست برای نقل قول"
+msgstr "درخواست برای پیش فاکتور"
 
 #. Name of a DocType
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
@@ -60636,7 +60636,7 @@ msgstr "درخواست برای آیتم نقل قول"
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Request for Quotation Item"
-msgstr "درخواست برای آیتم نقل قول"
+msgstr "درخواست برای آیتم پیش فاکتور"
 
 #. Name of a DocType
 #: buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
@@ -71672,31 +71672,31 @@ msgstr "نقل قول تامین کننده"
 #: setup/doctype/incoterm/incoterm.json
 msgctxt "Incoterm"
 msgid "Supplier Quotation"
-msgstr "نقل قول تامین کننده"
+msgstr "پیش فاکتور تامین کننده"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Supplier Quotation"
-msgstr "نقل قول تامین کننده"
+msgstr "پیش فاکتور تامین کننده"
 
 #. Label of a Link field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Supplier Quotation"
-msgstr "نقل قول تامین کننده"
+msgstr "پیش فاکتور تامین کننده"
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Supplier Quotation"
-msgstr "نقل قول تامین کننده"
+msgstr "پیش فاکتور تامین کننده"
 
 #. Label of a Link in the Buying Workspace
 #: buying/workspace/buying/buying.json
 msgctxt "Supplier Quotation"
 msgid "Supplier Quotation"
-msgstr "نقل قول تامین کننده"
+msgstr "پیش فاکتور تامین کننده"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -71714,7 +71714,7 @@ msgstr "مورد نقل قول تامین کننده"
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Supplier Quotation Item"
-msgstr "مورد نقل قول تامین کننده"
+msgstr "آیتم پیش فاکتور تامین کننده"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:430
 msgid "Supplier Quotation {0} Created"
