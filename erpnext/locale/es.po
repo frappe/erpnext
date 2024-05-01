@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-04-30 09:29\n"
+"PO-Revision-Date: 2024-05-01 09:40\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -62151,11 +62151,11 @@ msgstr "Nombre de Enrutamiento"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:492
 msgid "Row #"
-msgstr ""
+msgstr "Fila #"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:392
 msgid "Row # {0}:"
-msgstr ""
+msgstr "Fila # {0}:"
 
 #: controllers/sales_and_purchase_return.py:179
 msgid "Row # {0}: Cannot return more than {1} for Item {2}"
@@ -62185,16 +62185,16 @@ msgstr ""
 
 #: stock/doctype/quality_inspection/quality_inspection.py:233
 msgid "Row #{0}: Acceptance Criteria Formula is incorrect."
-msgstr ""
+msgstr "Fila #{0}: La fórmula de los criterios de aceptación es incorrecta."
 
 #: stock/doctype/quality_inspection/quality_inspection.py:213
 msgid "Row #{0}: Acceptance Criteria Formula is required."
-msgstr ""
+msgstr "Fila #{0}: Se requiere la fórmula de criterios de aceptación."
 
 #: controllers/subcontracting_controller.py:72
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:420
 msgid "Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same"
-msgstr ""
+msgstr "Fila #{0}: Almacén Aceptado y Almacén Rechazado no puede ser el mismo"
 
 #: controllers/buying_controller.py:225
 msgid "Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same"
@@ -66825,7 +66825,7 @@ msgstr ""
 
 #: selling/doctype/sales_order/sales_order.js:238
 msgid "Set Warehouse"
-msgstr ""
+msgstr "Establecer Almacén"
 
 #: crm/doctype/opportunity/opportunity_list.js:17
 #: support/doctype/issue/issue_list.js:12
@@ -70241,20 +70241,20 @@ msgstr ""
 #. Name of a DocType
 #: manufacturing/doctype/sub_operation/sub_operation.json
 msgid "Sub Operation"
-msgstr ""
+msgstr "Sub operación"
 
 #. Label of a Table field in DocType 'Job Card'
 #. Label of a Tab Break field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Sub Operations"
-msgstr ""
+msgstr "Sub operaciones"
 
 #. Label of a Section Break field in DocType 'Operation'
 #: manufacturing/doctype/operation/operation.json
 msgctxt "Operation"
 msgid "Sub Operations"
-msgstr ""
+msgstr "Sub operaciones"
 
 #. Label of a Link field in DocType 'Quality Procedure Process'
 #: quality_management/doctype/quality_procedure_process/quality_procedure_process.json
@@ -70450,7 +70450,7 @@ msgstr "Configuración de Subcontratación"
 #: setup/doctype/holiday_list/holiday_list.json
 msgctxt "Holiday List"
 msgid "Subdivision"
-msgstr ""
+msgstr "Subdivisión"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:237
 #: projects/doctype/task/task_tree.js:65
@@ -70880,7 +70880,7 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:145
 msgid "Successfully imported {0} record."
-msgstr ""
+msgstr "Importado correctamente {0} registro."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:157
 msgid "Successfully imported {0} records out of {1}. Click on Export Errored Rows, fix the errors and import again."
@@ -70888,19 +70888,19 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:144
 msgid "Successfully imported {0} records."
-msgstr ""
+msgstr "Importado correctamente {0} registros."
 
 #: buying/doctype/supplier/supplier.js:210
 msgid "Successfully linked to Customer"
-msgstr ""
+msgstr "Vinculado exitosamente al Cliente"
 
 #: selling/doctype/customer/customer.js:243
 msgid "Successfully linked to Supplier"
-msgstr ""
+msgstr "Vinculado exitosamente al Proveedor"
 
 #: accounts/doctype/ledger_merge/ledger_merge.js:99
 msgid "Successfully merged {0} out of {1}."
-msgstr ""
+msgstr "Fusionado satisfactoriamente {0} de {1}."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:438
 msgid "Successfully updated {0}"
@@ -70908,19 +70908,19 @@ msgstr "Actualizado exitosamente {0}"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:172
 msgid "Successfully updated {0} record out of {1}. Click on Export Errored Rows, fix the errors and import again."
-msgstr ""
+msgstr "Registro {0} actualizado correctamente de {1}. Haga clic en Exportar filas con errores, corrija los errores e importe nuevamente."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:150
 msgid "Successfully updated {0} record."
-msgstr ""
+msgstr "Registro {0} actualizado correctamente."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:168
 msgid "Successfully updated {0} records out of {1}. Click on Export Errored Rows, fix the errors and import again."
-msgstr ""
+msgstr "Actualizado correctamente los registros {0} de {1}. Haga clic en Exportar filas Erroradas, corrija los errores e importe de nuevo."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:149
 msgid "Successfully updated {0} records."
-msgstr ""
+msgstr "Registros {0} actualizados correctamente."
 
 #. Option for the 'Request Type' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -71010,7 +71010,7 @@ msgstr "Domingo"
 
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:145
 msgid "Supplied Item"
-msgstr ""
+msgstr "Producto suministrado"
 
 #. Label of a Table field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -71321,13 +71321,13 @@ msgstr "Dirección de proveedor"
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Supplier Address Details"
-msgstr ""
+msgstr "Detalles de Dirección del Proveedor"
 
 #. Label of a Text Editor field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Supplier Address Details"
-msgstr ""
+msgstr "Detalles de Dirección del Proveedor"
 
 #. Label of a Link in the Buying Workspace
 #: buying/workspace/buying/buying.json
@@ -71459,7 +71459,7 @@ msgstr "Nombre del Grupo de Proveedores"
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Supplier Info"
-msgstr ""
+msgstr "Info. Proveedor"
 
 #. Label of a Section Break field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -71507,7 +71507,7 @@ msgstr "Factura de proveedor No existe en la factura de compra {0}"
 #. Name of a DocType
 #: accounts/doctype/supplier_item/supplier_item.json
 msgid "Supplier Item"
-msgstr ""
+msgstr "Producto del Proveedor"
 
 #. Label of a Table field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -71959,11 +71959,11 @@ msgstr "Símbolo."
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
-msgstr ""
+msgstr "Sincronizar ahora"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:31
 msgid "Sync Started"
-msgstr ""
+msgstr "Sincronización Iniciada"
 
 #. Label of a Check field in DocType 'Plaid Settings'
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
@@ -72692,7 +72692,7 @@ msgstr "Cuenta de Impuestos"
 
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:137
 msgid "Tax Amount"
-msgstr ""
+msgstr "Importe de Impuestos"
 
 #. Label of a Currency field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
@@ -73012,7 +73012,7 @@ msgstr "Conflicto de impuestos con {0}"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Tax Settings"
-msgstr ""
+msgstr "Configuración de Impuestos"
 
 #: accounts/doctype/tax_rule/tax_rule.py:86
 msgid "Tax Template is mandatory."
@@ -73442,7 +73442,7 @@ msgstr "Impuestos y gastos deducibles (Divisa por defecto)"
 #: assets/doctype/asset_maintenance_team/asset_maintenance_team.json
 msgctxt "Asset Maintenance Team"
 msgid "Team"
-msgstr ""
+msgstr "Equipo"
 
 #. Label of a Link field in DocType 'Maintenance Team Member'
 #: assets/doctype/maintenance_team_member/maintenance_team_member.json
@@ -73650,13 +73650,13 @@ msgstr "Términos."
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Terms & Conditions"
-msgstr ""
+msgstr "Términos y Condiciones"
 
 #. Label of a Section Break field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Terms & Conditions"
-msgstr ""
+msgstr "Términos y Condiciones"
 
 #. Label of a Link field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
@@ -74006,7 +74006,7 @@ msgstr "Ventas por territorio"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tesla"
-msgstr ""
+msgstr "Tesla"
 
 #: stock/doctype/packing_slip/packing_slip.py:90
 msgid "The 'From Package No.' field must neither be empty nor it's value less than 1."
@@ -74905,14 +74905,14 @@ msgstr "Hora en que se recibieron los materiales"
 #: manufacturing/doctype/sub_operation/sub_operation.json
 msgctxt "Sub Operation"
 msgid "Time in mins"
-msgstr ""
+msgstr "Tiempo en min"
 
 #. Description of the 'Total Operation Time' (Float) field in DocType
 #. 'Operation'
 #: manufacturing/doctype/operation/operation.json
 msgctxt "Operation"
 msgid "Time in mins."
-msgstr ""
+msgstr "Tiempo en min."
 
 #: manufacturing/doctype/job_card/job_card.py:658
 msgid "Time logs are required for {0} {1}"
@@ -74920,7 +74920,7 @@ msgstr "Se requieren registros de tiempo para {0} {1}"
 
 #: crm/doctype/appointment/appointment.py:60
 msgid "Time slot is not available"
-msgstr ""
+msgstr "La franja horaria no está disponible"
 
 #: templates/generators/bom.html:71
 msgid "Time(in mins)"
@@ -75517,7 +75517,7 @@ msgstr ""
 #: bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
 msgctxt "Bulk Transaction Log Detail"
 msgid "To Doctype"
-msgstr ""
+msgstr "A Doctype"
 
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.js:83
 msgid "To Due Date"
@@ -75866,7 +75866,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tonne"
-msgstr ""
+msgstr "Tonelada"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -75875,7 +75875,7 @@ msgstr ""
 
 #: accounts/report/financial_statements.html:6
 msgid "Too many columns. Export the report and print it using a spreadsheet application."
-msgstr ""
+msgstr "Demasiadas columnas. Exporte el informe e imprímalo utilizando una aplicación de hoja de cálculo."
 
 #. Label of a Card Break in the Manufacturing Workspace
 #. Label of a Card Break in the Stock Workspace
@@ -76507,7 +76507,7 @@ msgstr "Total Facturado"
 
 #: support/report/issue_summary/issue_summary.py:82
 msgid "Total Issues"
-msgstr ""
+msgstr "Total de Incidencias"
 
 #: selling/page/point_of_sale/pos_item_cart.js:92
 msgid "Total Items"
@@ -76991,7 +76991,7 @@ msgstr "Total impuestos y cargos (Divisa por defecto)"
 
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:130
 msgid "Total Time (in Mins)"
-msgstr ""
+msgstr "Tiempo total (en minutos)"
 
 #. Label of a Float field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
@@ -77019,7 +77019,7 @@ msgstr "Valor Total"
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Total Value Difference (Incoming - Outgoing)"
-msgstr ""
+msgstr "Diferencia de valor total (entrante - saliente)"
 
 #: accounts/report/budget_variance_report/budget_variance_report.py:127
 #: selling/report/sales_partner_target_variance_based_on_item_group/item_group_wise_sales_target_variance.py:144
@@ -77111,7 +77111,7 @@ msgstr "Porcentaje del total asignado para el equipo de ventas debe ser de 100"
 
 #: manufacturing/doctype/workstation/workstation.py:230
 msgid "Total completed quantity: {0}"
-msgstr ""
+msgstr "Cantidad total completada: {0}"
 
 #: selling/doctype/customer/customer.py:156
 msgid "Total contribution percentage should be equal to 100"
@@ -77119,7 +77119,7 @@ msgstr "El porcentaje de contribución total debe ser igual a 100"
 
 #: projects/doctype/project/project_dashboard.html:2
 msgid "Total hours: {0}"
-msgstr ""
+msgstr "Horas totales: {0}"
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:446
 #: accounts/doctype/sales_invoice/sales_invoice.py:510
@@ -77244,13 +77244,13 @@ msgstr ""
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Tracking Status"
-msgstr ""
+msgstr "Estado de seguimiento"
 
 #. Label of a Data field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgctxt "Shipment"
 msgid "Tracking Status Info"
-msgstr ""
+msgstr "Información de estado de seguimiento"
 
 #. Label of a Small Text field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -77555,11 +77555,11 @@ msgstr ""
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "Transit"
-msgstr ""
+msgstr "Tránsito"
 
 #: stock/doctype/stock_entry/stock_entry.js:439
 msgid "Transit Entry"
-msgstr ""
+msgstr "Entrada de Tránsito"
 
 #. Label of a Date field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -77874,13 +77874,13 @@ msgstr "Tipo de Pago"
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgctxt "Inventory Dimension"
 msgid "Type of Transaction"
-msgstr ""
+msgstr "Tipo de Transacción"
 
 #. Label of a Select field in DocType 'Serial and Batch Bundle'
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Type of Transaction"
-msgstr ""
+msgstr "Tipo de Transacción"
 
 #. Description of the 'Select DocType' (Select) field in DocType 'Rename Tool'
 #: utilities/doctype/rename_tool/rename_tool.json
@@ -78280,7 +78280,7 @@ msgstr "UOM en caso no especificado en los datos importados"
 
 #: stock/doctype/item_price/item_price.py:61
 msgid "UOM {0} not found in Item {1}"
-msgstr ""
+msgstr "UdM {0} no encontrado en el Producto {1}"
 
 #. Label of a Table field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -78298,13 +78298,13 @@ msgstr "UdM"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "UPC"
-msgstr ""
+msgstr "UPC"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "UPC-A"
-msgstr ""
+msgstr "UPC-A"
 
 #. Label of a Data field in DocType 'Video'
 #: utilities/doctype/video/video.json
@@ -78334,7 +78334,7 @@ msgstr ""
 
 #: buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.py:98
 msgid "Unable to find variable:"
-msgstr ""
+msgstr "No se puede encontrar la variable:"
 
 #: public/js/bank_reconciliation_tool/data_table_manager.js:74
 msgid "Unallocated Amount"
@@ -78470,7 +78470,7 @@ msgstr "Desvincular integraciones externas"
 #: accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
 msgctxt "Unreconcile Payment Entries"
 msgid "Unlinked"
-msgstr ""
+msgstr "Desvincular"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:259
 #: accounts/doctype/subscription/subscription_list.js:12
@@ -78523,7 +78523,7 @@ msgstr "Mantenimiento no planificado de la máquina"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Unqualified"
-msgstr ""
+msgstr "No calificada"
 
 #. Label of a Link field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -78897,7 +78897,7 @@ msgstr "Actualización de tarifas y disponibilidad"
 
 #: buying/doctype/purchase_order/purchase_order.js:555
 msgid "Update Rate as per Last Purchase"
-msgstr ""
+msgstr "Actualizar tasa según la última compra"
 
 #. Label of a Check field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -78926,7 +78926,7 @@ msgstr "Actualizar el Inventario"
 #. Title of an Onboarding Step
 #: stock/onboarding_step/stock_opening_balance/stock_opening_balance.json
 msgid "Update Stock Opening Balance"
-msgstr ""
+msgstr "Actualizar el saldo inicial de existencias"
 
 #: projects/doctype/project/project.js:82
 msgid "Update Total Purchase Cost"
@@ -78968,7 +78968,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/updating_opening_balances/updating_opening_balances.json
 msgid "Updating Opening Balances"
-msgstr ""
+msgstr "Actualizando Saldos de Apertura"
 
 #: stock/doctype/item/item.py:1333
 msgid "Updating Variants..."
@@ -78976,7 +78976,7 @@ msgstr "Actualizando Variantes ..."
 
 #: manufacturing/doctype/work_order/work_order.js:847
 msgid "Updating Work Order status"
-msgstr ""
+msgstr "Actualizando estado de la Orden de Trabajo"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:46
 msgid "Updating {0} of {1}, {2}"
@@ -79696,7 +79696,7 @@ msgstr "Tasa de valoración"
 
 #: stock/report/incorrect_serial_no_valuation/incorrect_serial_no_valuation.py:166
 msgid "Valuation Rate (In / Out)"
-msgstr ""
+msgstr "Tasa de Valoración (Entrada/Salida)"
 
 #: stock/stock_ledger.py:1680
 msgid "Valuation Rate Missing"
@@ -80527,7 +80527,7 @@ msgstr "Salarios por hora"
 
 #: accounts/doctype/pos_invoice/pos_invoice.js:270
 msgid "Waiting for payment..."
-msgstr ""
+msgstr "Esperando Pago..."
 
 #. Name of a DocType
 #: accounts/report/gross_profit/gross_profit.js:56
@@ -80817,7 +80817,7 @@ msgstr "Resumen de capacidad del Almacén"
 
 #: stock/doctype/putaway_rule/putaway_rule.py:78
 msgid "Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} {2}."
-msgstr ""
+msgstr "Capacidad del Almacén para el Producto '{0}' debe ser mayor que el nivel de stock existente de {1} {2}."
 
 #. Label of a Section Break field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
@@ -80835,7 +80835,7 @@ msgstr "Detalles del Almacén"
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Warehouse Details"
-msgstr ""
+msgstr "Detalle del Almacén"
 
 #: stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.py:113
 msgid "Warehouse Disabled?"
@@ -80851,7 +80851,7 @@ msgstr "Nombre del Almacén"
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Warehouse Settings"
-msgstr ""
+msgstr "Configuración del Almacén"
 
 #. Name of a DocType
 #: stock/doctype/warehouse_type/warehouse_type.json
@@ -80964,7 +80964,7 @@ msgstr "El almacén {0} no se puede eliminar ya que existen elementos para el Pr
 
 #: stock/doctype/putaway_rule/putaway_rule.py:66
 msgid "Warehouse {0} does not belong to Company {1}."
-msgstr ""
+msgstr "Almacén {0} no pertenece a la Compañía {1}."
 
 #: stock/utils.py:422
 msgid "Warehouse {0} does not belong to company {1}"
@@ -81180,7 +81180,7 @@ msgstr "Ver video"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Watt"
-msgstr ""
+msgstr "Watt"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -82766,7 +82766,7 @@ msgstr "Su empresa en ERPNext"
 
 #: www/book_appointment/index.html:49
 msgid "Your Name (required)"
-msgstr ""
+msgstr "Su nombre (requerido)"
 
 #: templates/includes/footer/footer_extension.html:5
 #: templates/includes/footer/footer_extension.html:6
