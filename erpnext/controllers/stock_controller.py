@@ -1008,7 +1008,12 @@ def is_reposting_pending():
 	)
 
 
-def future_sle_exists(args, sl_entries=None):
+def future_sle_exists(args, sl_entries=None, allow_force_reposting=True):
+	if allow_force_reposting and frappe.db.get_single_value(
+		"Stock Reposting Settings", "do_reposting_for_each_stock_transaction"
+	):
+		return True
+
 	key = (args.voucher_type, args.voucher_no)
 	if not hasattr(frappe.local, "future_sle"):
 		frappe.local.future_sle = {}

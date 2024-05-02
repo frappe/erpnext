@@ -229,11 +229,12 @@ class FIFOSlots:
 		"""
 		stock_ledger_entries = self.sle
 
+		_system_settings = frappe.get_cached_doc("System Settings")
 		with frappe.db.unbuffered_cursor():
-			if self.sle is None:
-				self.sle = self.__get_stock_ledger_entries()
+			if stock_ledger_entries is None:
+				stock_ledger_entries = self.__get_stock_ledger_entries()
 
-			for d in self.sle:
+			for d in stock_ledger_entries:
 				key, fifo_queue, transferred_item_key = self.__init_key_stores(d)
 
 				if d.voucher_type == "Stock Reconciliation":
