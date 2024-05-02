@@ -116,7 +116,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 					function () {
 						me.unblock_invoice();
 					},
-					__("Create")
 				);
 			} else if (!doc.on_hold) {
 				this.frm.add_custom_button(
@@ -124,7 +123,6 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 					function () {
 						me.block_invoice();
 					},
-					__("Create")
 				);
 			}
 		}
