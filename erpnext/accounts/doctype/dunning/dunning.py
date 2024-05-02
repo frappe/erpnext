@@ -146,6 +146,10 @@ class Dunning(AccountsController):
 			)
 			row.dunning_level = len(past_dunnings) + 1
 
+	def on_cancel(self):
+		super().on_cancel()
+		self.ignore_linked_doctypes = ["GL Entry"]
+
 
 def resolve_dunning(doc, state):
 	"""

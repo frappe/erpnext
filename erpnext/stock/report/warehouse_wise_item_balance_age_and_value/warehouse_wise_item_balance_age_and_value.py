@@ -56,13 +56,14 @@ def execute(filters=None):
 		item_value.setdefault((item, item_map[item]["item_group"]), [])
 		item_value[(item, item_map[item]["item_group"])].append(total_stock_value)
 
+	itemwise_brand = frappe._dict(get_itemwise_brand(items))
 	# sum bal_qty by item
 	for (item, item_group), wh_balance in item_balance.items():
 		if not item_ageing.get(item):
 			continue
 
 		total_stock_value = sum(item_value[(item, item_group)])
-		row = [item, item_map[item]["item_name"], item_group, total_stock_value]
+		row = [item, item_map[item]["item_name"], item_group, itemwise_brand.get(item), total_stock_value]
 
 		fifo_queue = item_ageing[item]["fifo_queue"]
 		average_age = 0.00
@@ -85,6 +86,10 @@ def execute(filters=None):
 	return columns, data
 
 
+def get_itemwise_brand(items):
+	return frappe.get_all("Item", filters={"name": ("in", items)}, fields=["name", "brand"], as_list=1)
+
+
 def get_columns(filters):
 	"""return columns"""
 
@@ -92,6 +97,7 @@ def get_columns(filters):
 		_("Item") + ":Link/Item:150",
 		_("Item Name") + ":Link/Item:150",
 		_("Item Group") + "::120",
+		_("Brand") + ":Link/Brand:120",
 		_("Value") + ":Currency:120",
 		_("Age") + ":Float:120",
 	]

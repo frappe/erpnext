@@ -158,6 +158,7 @@ class PaymentEntry(AccountsController):
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.set_liability_account()
+		self.validate_advance_account_currency()
 		self.set_missing_ref_details(force=True)
 		self.validate_payment_type()
 		self.validate_party_details()
@@ -196,6 +197,7 @@ class PaymentEntry(AccountsController):
 		if self.docstatus > 0 or self.payment_type == "Internal Transfer":
 			return
 
+		self.book_advance_payments_in_separate_party_account = False
 		if self.party_type not in ("Customer", "Supplier"):
 			return
 
@@ -239,6 +241,22 @@ class PaymentEntry(AccountsController):
 			),
 			alert=True,
 		)
+
+	def validate_advance_account_currency(self):
+		if self.book_advance_payments_in_separate_party_account is True:
+			company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
+			if self.payment_type == "Receive" and self.paid_from_account_currency != company_currency:
+				frappe.throw(
+					_("Booking advances in foreign currency account: {0} ({1}) is not yet supported.").format(
+						frappe.bold(self.paid_from), frappe.bold(self.paid_from_account_currency)
+					)
+				)
+			if self.payment_type == "Pay" and self.paid_to_account_currency != company_currency:
+				frappe.throw(
+					_("Booking advances in foreign currency account: {0} ({1}) is not yet supported.").format(
+						frappe.bold(self.paid_to), frappe.bold(self.paid_to_account_currency)
+					)
+				)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -2126,6 +2144,8 @@ def get_negative_outstanding_invoices(
 @frappe.whitelist()
 def get_party_details(company, party_type, party, date, cost_center=None):
 	bank_account = ""
+	party_bank_account = ""
+
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0} {1} does not exist").format(_(party_type), party))
 
@@ -2137,8 +2157,8 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
 	if party_type in ["Customer", "Supplier"]:
 		party_bank_account = get_party_bank_account(party_type, party)
+		bank_account = get_default_company_bank_account(company, party_type, party)
 
-	bank_account = get_default_company_bank_account(company, party_type, party)
 	return {
 		"party_account": party_account,
 		"party_name": party_name,

@@ -434,6 +434,15 @@ class FIFOSlots:
 
 		if self.filters.get("warehouse"):
 			sle_query = self.__get_warehouse_conditions(sle, sle_query)
+		elif self.filters.get("warehouse_type"):
+			warehouses = frappe.get_all(
+				"Warehouse",
+				filters={"warehouse_type": self.filters.get("warehouse_type"), "is_group": 0},
+				pluck="name",
+			)
+
+			if warehouses:
+				sle_query = sle_query.where(sle.warehouse.isin(warehouses))
 
 		sle_query = sle_query.orderby(sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty)
 

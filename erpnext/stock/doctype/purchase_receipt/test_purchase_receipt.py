@@ -3009,6 +3009,7 @@ def make_purchase_receipt(**args):
 					"serial_nos": serial_nos,
 					"posting_date": args.posting_date or today(),
 					"posting_time": args.posting_time,
+					"do_not_submit": 1,
 				}
 			)
 		).name
