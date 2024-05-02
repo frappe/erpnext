@@ -8,6 +8,7 @@ from frappe.utils import cint, flt, getdate, nowdate
 import erpnext
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.subcontracting_controller import SubcontractingController
+from erpnext.stock.utils import get_incoming_rate
 
 
 class SubcontractingReceipt(SubcontractingController):
@@ -67,6 +68,7 @@ class SubcontractingReceipt(SubcontractingController):
 		self.set_items_bom()
 		self.set_items_cost_center()
 		self.set_items_expense_account()
+		self.reset_rate_for_serial_batch_supplied_items()
 
 	def validate(self):
 		if (
@@ -123,6 +125,26 @@ class SubcontractingReceipt(SubcontractingController):
 		self.calculate_additional_costs()
 		self.calculate_supplied_items_qty_and_amount()
 		self.calculate_items_qty_and_amount()
+
+	def reset_rate_for_serial_batch_supplied_items(self):
+		for item in self.supplied_items:
+			if item.serial_no or item.batch_no:
+				args = frappe._dict(
+					{
+						"item_code": item.rm_item_code,
+						"warehouse": self.supplier_warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"qty": flt(item.consumed_qty),
+						"serial_no": item.serial_no,
+						"batch_no": item.batch_no,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"company": self.company,
+						"allow_zero_valuation": 1,
+					}
+				)
+				item.rate = get_incoming_rate(args)
 
 	def has_serial_batch_items(self):
 		if not self.get("supplied_items"):
