@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-01 09:40\n"
+"PO-Revision-Date: 2024-05-02 09:40\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -5473,7 +5473,7 @@ msgstr "همه موارد در این سند قبلاً دارای یک بازر
 #: crm/doctype/crm_settings/crm_settings.json
 msgctxt "CRM Settings"
 msgid "All the Comments and Emails will be copied from one document to another newly created document(Lead -> Opportunity -> Quotation) throughout the CRM documents."
-msgstr "تمام نظرات و ایمیل ها از یک سند به سند جدید ایجاد شده دیگر (سرنخ -> فرصت -> نقل قول) در سراسر اسناد CRM کپی می شوند."
+msgstr "تمام نظرات و ایمیل ها از یک سند به سند جدید ایجاد شده دیگر (سرنخ -> فرصت -> پیش فاکتور) در سراسر اسناد CRM کپی می شوند."
 
 #: manufacturing/doctype/work_order/work_order.js:916
 msgid "All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table."
@@ -12862,7 +12862,7 @@ msgstr "نمی توان BOM را غیرفعال یا لغو کرد زیرا با
 
 #: crm/doctype/opportunity/opportunity.py:254
 msgid "Cannot declare as lost, because Quotation has been made."
-msgstr "نمی توان به عنوان گمشده اعلام کرد، زیرا نقل قول انجام شده است."
+msgstr "نمی توان به عنوان از دست رفته علام کرد، زیرا پیش فاکتور ساخته شده است."
 
 #: accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js:16
 #: accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.js:26
@@ -18333,7 +18333,7 @@ msgstr "ایجاد سفارش‌های خرید"
 
 #: utilities/activation.py:87
 msgid "Create Quotation"
-msgstr "نقل قول ایجاد کنید"
+msgstr "پیش فاکتور ایجاد کنید"
 
 #. Title of an Onboarding Step
 #: manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
@@ -18386,7 +18386,7 @@ msgstr "ورود موجودی ایجاد کنید"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:163
 msgid "Create Supplier Quotation"
-msgstr "ایجاد نقل قول تامین کننده"
+msgstr "ایجاد پیش فاکتور تامین کننده"
 
 #: setup/doctype/company/company.js:130
 msgid "Create Tax Template"
@@ -18538,7 +18538,7 @@ msgstr "ایجاد و ارسال پیش فاکتور"
 
 #: utilities/activation.py:85
 msgid "Create customer quotes"
-msgstr "نقل قول های مشتری ایجاد کنید"
+msgstr "ایجاد پیش فاکتور های مشتری"
 
 #. Title of an Onboarding Step
 #: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
@@ -40025,19 +40025,19 @@ msgstr "فرصت از دست رفته"
 
 #: crm/report/lead_details/lead_details.js:38
 msgid "Lost Quotation"
-msgstr "نقل قول از دست رفته"
+msgstr "پیش فاکتور از دست رفته"
 
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Lost Quotation"
-msgstr "نقل قول از دست رفته"
+msgstr "پیش فاکتور از دست رفته"
 
 #. Name of a report
 #: selling/report/lost_quotations/lost_quotations.json
 #: selling/report/lost_quotations/lost_quotations.py:31
 msgid "Lost Quotations"
-msgstr "نقل قول های از دست رفته"
+msgstr "پیش فاکتور های از دست رفته"
 
 #: selling/report/lost_quotations/lost_quotations.py:37
 msgid "Lost Quotations %"
@@ -40661,7 +40661,7 @@ msgstr "فاکتور خرید تهیه کنید"
 
 #: templates/pages/rfq.html:19
 msgid "Make Quotation"
-msgstr "نقل قول انجام دهید"
+msgstr "پیش فاکتور ایجاد کنید"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:335
 msgid "Make Return Entry"
@@ -41794,7 +41794,7 @@ msgstr "درخواست مواد مورد نیاز است"
 #: buying/workspace/buying/buying.json
 #: stock/report/material_requests_for_which_supplier_quotations_are_not_created/material_requests_for_which_supplier_quotations_are_not_created.json
 msgid "Material Requests for which Supplier Quotations are not created"
-msgstr "درخواست‌های موادی که برای آنها نقل‌قول‌های تامین‌کننده ایجاد نشده است"
+msgstr "درخواست‌های موادی که برای آنها پیش فاکتور های تامین‌کننده ایجاد نشده است"
 
 #: stock/doctype/stock_entry/stock_entry_list.js:13
 msgid "Material Returned from WIP"
@@ -44341,7 +44341,7 @@ msgstr "رویه کیفیت جدید"
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "New Quotations"
-msgstr "نقل قول های جدید"
+msgstr "پیش فاکتور های جدید"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -45988,7 +45988,7 @@ msgstr " پروژه ها را باز کنید"
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Open Quotations"
-msgstr "باز کردن نقل قول ها"
+msgstr "پیش فاکتور های باز"
 
 #: stock/report/item_variant_details/item_variant_details.py:110
 msgid "Open Sales Orders"
@@ -50924,7 +50924,7 @@ msgstr "لطفا نحوه پرداخت و جزئیات موجودی افتتاح
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:168
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
-msgstr "لطفاً درخواست برای نقل قول را به نوار کناری در تنظیمات پورتال اضافه کنید."
+msgstr "لطفاً درخواست برای پیش فاکتور را به نوار کناری در تنظیمات پورتال اضافه کنید."
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:414
 msgid "Please add Root Account for - {0}"
@@ -54946,7 +54946,7 @@ msgstr ""
 
 #: controllers/trends.py:374
 msgid "Project-wise data is not available for Quotation"
-msgstr "داده های پروژه عاقلانه برای نقل قول در دسترس نیست"
+msgstr "داده های پروژه محور برای پیش فاکتور در دسترس نیست"
 
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:46
 #: stock/dashboard/item_dashboard_list.html:37
@@ -57508,7 +57508,7 @@ msgstr ""
 #: crm/report/campaign_efficiency/campaign_efficiency.py:22
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:28
 msgid "Quot Count"
-msgstr "تعداد نقل قول"
+msgstr "تعداد پیش فاکتور"
 
 #: crm/report/campaign_efficiency/campaign_efficiency.py:26
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:32
@@ -57525,49 +57525,49 @@ msgstr ""
 #: selling/doctype/quotation/quotation.json
 #: selling/doctype/sales_order/sales_order.js:759
 msgid "Quotation"
-msgstr "نقل قول"
+msgstr "پیش فاکتور"
 
 #. Option for the 'Transaction' (Select) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgctxt "Authorization Rule"
 msgid "Quotation"
-msgstr "نقل قول"
+msgstr "پیش فاکتور"
 
 #. Label of a Section Break field in DocType 'CRM Settings'
 #: crm/doctype/crm_settings/crm_settings.json
 msgctxt "CRM Settings"
 msgid "Quotation"
-msgstr "نقل قول"
+msgstr "پیش فاکتور"
 
 #. Option for the 'Document Type' (Select) field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgctxt "Contract"
 msgid "Quotation"
-msgstr "نقل قول"
+msgstr "پیش فاکتور"
 
 #. Linked DocType in Incoterm's connections
 #: setup/doctype/incoterm/incoterm.json
 msgctxt "Incoterm"
 msgid "Quotation"
-msgstr "نقل قول"
+msgstr "پیش فاکتور"
 
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Quotation"
-msgstr "نقل قول"
+msgstr "پیش فاکتور"
 
 #. Option for the 'Status' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Quotation"
-msgstr "نقل قول"
+msgstr "پیش فاکتور"
 
 #. Label of a Link in the Selling Workspace
 #: selling/workspace/selling/selling.json
 msgctxt "Quotation"
 msgid "Quotation"
-msgstr "نقل قول"
+msgstr "پیش فاکتور"
 
 #. Label of a Link field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
@@ -57622,7 +57622,7 @@ msgstr "شماره پیش فاکتور"
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Quotation To"
-msgstr "نقل قول به"
+msgstr "پیش فاکتور به"
 
 #. Name of a report
 #. Label of a Link in the Selling Workspace
@@ -57642,7 +57642,7 @@ msgstr "پیش فاکتور {0} از نوع {1} نیست"
 #: selling/doctype/quotation/quotation.py:327
 #: selling/page/sales_funnel/sales_funnel.py:57
 msgid "Quotations"
-msgstr "نقل قول ها"
+msgstr "پیش فاکتور ها"
 
 #: utilities/activation.py:86
 msgid "Quotations are proposals, bids you have sent to your customers"
@@ -57656,7 +57656,7 @@ msgstr "پیش فاکتور ها: "
 #: buying/doctype/request_for_quotation_supplier/request_for_quotation_supplier.json
 msgctxt "Request for Quotation Supplier"
 msgid "Quote Status"
-msgstr "وضعیت نقل قول"
+msgstr "وضعیت پیش فاکتور"
 
 #: selling/report/quotation_trends/quotation_trends.py:51
 msgid "Quoted Amount"
@@ -60569,7 +60569,7 @@ msgstr "درخواست بر اساس تاریخ"
 
 #: crm/doctype/opportunity/opportunity.js:89
 msgid "Request For Quotation"
-msgstr "درخواست برای نقل قول"
+msgstr "درخواست برای پیش فاکتور"
 
 #. Label of a Section Break field in DocType 'Currency Exchange Settings'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -60607,13 +60607,13 @@ msgstr "درخواست اطلاعات"
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:270
 #: stock/doctype/material_request/material_request.js:162
 msgid "Request for Quotation"
-msgstr "درخواست برای نقل قول"
+msgstr "درخواست برای پیش فاکتور"
 
 #. Linked DocType in Incoterm's connections
 #: setup/doctype/incoterm/incoterm.json
 msgctxt "Incoterm"
 msgid "Request for Quotation"
-msgstr "درخواست برای نقل قول"
+msgstr "درخواست برای پیش فاکتور"
 
 #. Label of a Link in the Buying Workspace
 #: buying/workspace/buying/buying.json
@@ -60630,7 +60630,7 @@ msgstr "درخواست برای پیش فاکتور"
 #. Name of a DocType
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 msgid "Request for Quotation Item"
-msgstr "درخواست برای آیتم نقل قول"
+msgstr "درخواست برای آیتم پیش فاکتور"
 
 #. Label of a Data field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
@@ -71666,7 +71666,7 @@ msgstr "تماس اصلی تامین کننده"
 #: crm/doctype/opportunity/opportunity.js:81
 #: stock/doctype/material_request/material_request.js:170
 msgid "Supplier Quotation"
-msgstr "نقل قول تامین کننده"
+msgstr "پیش فاکتور تامین کننده"
 
 #. Linked DocType in Incoterm's connections
 #: setup/doctype/incoterm/incoterm.json
@@ -71708,7 +71708,7 @@ msgstr "مقایسه قیمت عرضه کننده"
 #. Name of a DocType
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgid "Supplier Quotation Item"
-msgstr "مورد نقل قول تامین کننده"
+msgstr "آیتم پیش فاکتور تامین کننده"
 
 #. Label of a Link field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
@@ -71718,7 +71718,7 @@ msgstr "آیتم پیش فاکتور تامین کننده"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:430
 msgid "Supplier Quotation {0} Created"
-msgstr "نقل قول تامین کننده {0} ایجاد شد"
+msgstr "پیش فاکتور تامین کننده {0} ایجاد شد"
 
 #. Label of a Data field in DocType 'Supplier Scorecard'
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
@@ -74006,7 +74006,7 @@ msgstr "از بسته شماره. فیلد نه باید خالی باشد و ن
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:352
 msgid "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."
-msgstr "دسترسی به درخواست نقل قول از پورتال غیرفعال است. برای اجازه دسترسی، آن را در تنظیمات پورتال فعال کنید."
+msgstr "دسترسی به درخواست پیش فاکتور از پورتال غیرفعال است. برای اجازه دسترسی، آن را در تنظیمات پورتال فعال کنید."
 
 #. Success message of the Module Onboarding 'Accounts'
 #: accounts/module_onboarding/accounts/accounts.json
@@ -79569,7 +79569,7 @@ msgstr "اعتبار در روز"
 
 #: selling/doctype/quotation/quotation.py:345
 msgid "Validity period of this quotation has ended."
-msgstr "مدت اعتبار این نقل قول به پایان رسیده است."
+msgstr "مدت اعتبار این پیش فاکتور به پایان رسیده است."
 
 #. Option for the 'Consider Tax or Charge for' (Select) field in DocType
 #. 'Purchase Taxes and Charges'
@@ -81082,7 +81082,7 @@ msgstr "برای سفارش های خرید جدید هشدار دهید"
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgctxt "Supplier Scorecard"
 msgid "Warn for new Request for Quotations"
-msgstr "هشدار برای درخواست جدید برای نقل قول"
+msgstr "هشدار برای درخواست جدید برای پیش فاکتور"
 
 #: accounts/doctype/payment_entry/payment_entry.py:691
 #: controllers/accounts_controller.py:1765
