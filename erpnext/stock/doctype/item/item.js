@@ -15,7 +15,7 @@ frappe.ui.form.on("Item", {
 		frm.add_fetch("tax_type", "tax_rate", "tax_rate");
 
 		frm.make_methods = {
-			"Quotation": () => {
+			Quotation: () => {
 				open_form(frm, "Quotation", "Quotation Item", "items");
 			},
 			"Sales Order": () => {
