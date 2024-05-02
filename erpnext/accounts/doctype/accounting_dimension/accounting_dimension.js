@@ -32,7 +32,7 @@ frappe.ui.form.on("Accounting Dimension", {
 		});
 
 		if (!frm.is_new()) {
-			frm.add_custom_button(__("Show {0}", [frm.doc.document_type]), function () {
+			frm.add_custom_button(__("Show {0}", [__(frm.doc.document_type)]), function () {
 				frappe.set_route("List", frm.doc.document_type);
 			});
 
