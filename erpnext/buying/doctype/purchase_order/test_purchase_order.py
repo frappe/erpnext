@@ -1321,6 +1321,7 @@ def create_purchase_order(**args):
 				"against_blanket": args.against_blanket,
 				"material_request": args.material_request,
 				"material_request_item": args.material_request_item,
+				"project": args.project,
 			},
 		)
 
