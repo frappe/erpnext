@@ -64,6 +64,7 @@ class DeliveryNote(SellingController):
 		customer_address: DF.Link | None
 		customer_group: DF.Link | None
 		customer_name: DF.Data | None
+		delivery_trip: DF.Link | None
 		disable_rounded_total: DF.Check
 		discount_amount: DF.Currency
 		dispatch_address: DF.SmallText | None
@@ -76,7 +77,7 @@ class DeliveryNote(SellingController):
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
-		installation_status: DF.Literal[None]
+		installation_status: DF.LiteralNone
 		instructions: DF.Text | None
 		inter_company_reference: DF.Link | None
 		is_internal_customer: DF.Check
@@ -1087,9 +1088,20 @@ def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 			"Delivery Note": {"doctype": "Delivery Trip", "validation": {"docstatus": ["=", 1]}},
 			"Delivery Note Item": {
 				"doctype": "Delivery Stop",
+<<<<<<< HEAD
 				"field_map": {"parent": "delivery_note"},
 				"condition": lambda item: item.parent not in delivery_notes,
 				"postprocess": update_stop_details,
+=======
+				"on_parent": target_doc,
+				"field_map": {
+					"name": "delivery_note",
+					"shipping_address_name": "address",
+					"shipping_address": "customer_address",
+					"contact_person": "contact",
+					"contact_display": "customer_contact",
+				},
+>>>>>>> 61f5ebd2dd (feat: create delivery trip on draft notes (#38559))
 			},
 		},
 		target_doc,
