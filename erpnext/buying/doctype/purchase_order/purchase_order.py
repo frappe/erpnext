@@ -483,6 +483,9 @@ class PurchaseOrder(BuyingController):
 
 		self.update_blanket_order()
 
+		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction":
+			self.update_project()
+
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 
 		self.auto_create_subcontracting_order()
@@ -499,6 +502,9 @@ class PurchaseOrder(BuyingController):
 
 		self.update_reserved_qty_for_subcontract()
 		self.check_on_hold_or_closed_status()
+
+		if frappe.db.get_single_value("Buying Settings", "project_update_frequency") == "Each Transaction":
+			self.update_project()
 
 		self.db_set("status", "Cancelled")
 
@@ -645,6 +651,21 @@ class PurchaseOrder(BuyingController):
 
 			if sco:
 				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
+
+	def update_project(self):
+		projects = frappe._dict()
+		for d in self.items:
+			if d.project:
+				if self.docstatus == 1:
+					projects[d.project] = projects.get(d.project, 0) + d.base_net_amount
+				elif self.docstatus == 2:
+					projects[d.project] = projects.get(d.project, 0) - d.base_net_amount
+
+		pj = frappe.qb.DocType("Project")
+		for proj, value in projects.items():
+			res = frappe.qb.from_(pj).select(pj.total_ordered_cost).where(pj.name == proj).for_update().run()
+			current_ordered_cost = res and res[0][0] or 0
+			frappe.db.set_value("Project", proj, "total_ordered_cost", current_ordered_cost + value)
 
 
 @frappe.request_cache

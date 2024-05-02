@@ -20,6 +20,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import (
 )
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.material_request.test_material_request import make_material_request
@@ -1179,6 +1180,43 @@ class TestPurchaseOrder(FrappeTestCase):
 		# Check if the billed amount stayed the same
 		po.reload()
 		self.assertEqual(po.per_billed, 100)
+
+	def test_total_ordered_cost_for_project(self):
+		if not frappe.db.exists("Project", {"project_name": "_Test Project for Ordered"}):
+			project = make_project({"project_name": "_Test Project for Ordered"})
+		else:
+			project = frappe.get_doc("Project", {"project_name": "_Test Project for Ordered"})
+
+		existing_ordered_cost = frappe.db.sql(
+			f"""select sum(base_net_amount)
+			from `tabPurchase Order Item`
+			where project = '{project.name}'
+			and docstatus=1"""
+		)
+		existing_ordered_cost = existing_ordered_cost and existing_ordered_cost[0][0] or 0
+
+		pi = make_purchase_order(currency="USD", conversion_rate=60, project=project.name)
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
+			existing_ordered_cost + 15000,
+		)
+
+		pi1 = make_purchase_order(qty=10, project=project.name)
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
+			existing_ordered_cost + 15500,
+		)
+
+		pi1.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
+			existing_ordered_cost + 15000,
+		)
+
+		pi.cancel()
+		self.assertEqual(
+			frappe.db.get_value("Project", project.name, "total_ordered_cost"), existing_ordered_cost
+		)
 
 
 def prepare_data_for_internal_transfer():
