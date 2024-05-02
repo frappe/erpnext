@@ -15,8 +15,13 @@ from erpnext.accounts.party import (
 	get_dashboard_info,
 	validate_party_accounts,
 )
+from erpnext.accounts.party import (
+	get_timeline_data as get_party_timeline_data,
+)
 from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
 from erpnext.utilities.transaction_base import TransactionBase
+
+get_timeline_data = get_party_timeline_data
 
 
 class Supplier(TransactionBase):
