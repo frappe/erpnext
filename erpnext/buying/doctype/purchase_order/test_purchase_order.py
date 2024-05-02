@@ -1195,13 +1195,13 @@ class TestPurchaseOrder(FrappeTestCase):
 		)
 		existing_ordered_cost = existing_ordered_cost and existing_ordered_cost[0][0] or 0
 
-		pi = make_purchase_order(currency="USD", conversion_rate=60, project=project.name)
+		pi = create_purchase_order(currency="USD", conversion_rate=60, project=project.name)
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
 			existing_ordered_cost + 15000,
 		)
 
-		pi1 = make_purchase_order(qty=10, project=project.name)
+		pi1 = create_purchase_order(qty=10, project=project.name)
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
 			existing_ordered_cost + 15500,
