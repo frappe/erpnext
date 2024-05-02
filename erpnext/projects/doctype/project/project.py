@@ -105,15 +105,20 @@ class Project(Document):
 		Copy tasks from template
 		"""
 		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
+			# this method is called by after_insert, so if data is set it need to be persisted
+			need_save = False
+
 			# has a template, and no loaded tasks, so lets create
 			if not self.expected_start_date:
 				# project starts today
 				self.expected_start_date = today()
+				need_save = True
 
 			template = frappe.get_doc("Project Template", self.project_template)
 
 			if not self.project_type:
 				self.project_type = template.project_type
+				need_save = True
 
 			# create tasks from template
 			project_tasks = []
@@ -123,6 +128,9 @@ class Project(Document):
 				tmp_task_details.append(template_task_details)
 				task = self.create_task_from_template(template_task_details)
 				project_tasks.append(task)
+
+			if need_save:
+				self.save(ignore_permissions=True, ignore_version=True)
 
 			self.dependency_mapping(tmp_task_details, project_tasks)
 
