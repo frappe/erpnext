@@ -79,17 +79,17 @@ frappe.ui.form.on("Project", {
 			);
 
 			frm.add_custom_button(
-				__("Update Total Purchase Cost"),
+				__("Update Total Ordered Cost"),
 				() => {
-					frm.events.update_total_purchase_cost(frm);
+					frm.events.update_total_ordered_cost(frm);
 				},
 				__("Actions")
 			);
 
 			frm.add_custom_button(
-				__("Update Total Ordered Cost"),
+				__("Update Total Purchase Cost"),
 				() => {
-					frm.events.update_total_ordered_cost(frm);
+					frm.events.update_total_purchase_cost(frm);
 				},
 				__("Actions")
 			);
