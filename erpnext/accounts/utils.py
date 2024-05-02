@@ -516,6 +516,10 @@ def reconcile_against_document(
 			doc.make_advance_gl_entries()
 		else:
 			gl_map = doc.build_gl_map()
+			# Make sure there is no overallocation
+			from erpnext.accounts.general_ledger import process_debit_credit_difference
+
+			process_debit_credit_difference(gl_map)
 			create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
 
 		# Only update outstanding for newly linked vouchers
@@ -1094,7 +1098,7 @@ def get_companies():
 def get_children(doctype, parent, company, is_root=False):
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
-	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
+	parent_fieldname = "parent_" + frappe.scrub(doctype)
 	fields = ["name as value", "is_group as expandable"]
 	filters = [["docstatus", "<", 2]]
 
