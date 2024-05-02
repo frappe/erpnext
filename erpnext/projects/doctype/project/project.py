@@ -298,7 +298,7 @@ class Project(Document):
 	def calculate_gross_margin(self):
 		expense_amount = (
 			flt(self.total_costing_amount)
-			- flt(self.total_purchase_cost)
+			+ flt(self.total_purchase_cost)
 			+ flt(self.get("total_consumed_material_cost", 0))
 		)
 
