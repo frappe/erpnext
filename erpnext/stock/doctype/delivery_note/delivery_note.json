@@ -1405,11 +1405,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-03-20 16:05:02.854990",
-=======
  "modified": "2024-03-29 19:03:55.374173",
->>>>>>> 61f5ebd2dd (feat: create delivery trip on draft notes (#38559))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
