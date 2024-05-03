@@ -21,7 +21,7 @@ def make_project_template(project_template_name, project_tasks=None):
 			create_task(subject="_Test Template Task 2", is_template=1, begin=0, duration=2),
 		]
 		doc = frappe.get_doc(
-			{"doctype": "Project Template", "name": "project_template_name", "project_type": "Internal"}
+			{"doctype": "Project Template", "name": project_template_name, "project_type": "Internal"}
 		)
 		for task in project_tasks:
 			doc.append("tasks", {"task": task.name})
