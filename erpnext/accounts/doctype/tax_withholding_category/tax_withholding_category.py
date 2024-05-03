@@ -9,6 +9,8 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, getdate
 
+from erpnext.controllers.accounts_controller import validate_account_head
+
 
 class TaxWithholdingCategory(Document):
 	# begin: auto-generated types
@@ -53,6 +55,7 @@ class TaxWithholdingCategory(Document):
 			if d.get("account") in existing_accounts:
 				frappe.throw(_("Account {0} added multiple times").format(frappe.bold(d.get("account"))))
 
+			validate_account_head(d.idx, d.get("account"), d.get("company"))
 			existing_accounts.append(d.get("account"))
 
 	def validate_thresholds(self):
