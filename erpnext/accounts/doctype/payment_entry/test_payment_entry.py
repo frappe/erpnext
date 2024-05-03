@@ -1502,12 +1502,12 @@ class TestPaymentEntry(FrappeTestCase):
 		)
 
 		po = create_purchase_order(supplier="_Test Supplier")
-		pe = get_payment_entry("Purchase Order", po.name)
+		pe = get_payment_entry("Purchase Order", po.name, bank_account="Cash - _TC")
 		pe.save().submit()
 
 		pre_reconciliation_gle = [
+			{"account": "Cash - _TC", "debit": 0.0, "credit": 5000.0},
 			{"account": advance_account, "debit": 5000.0, "credit": 0.0},
-			{"account": "_Test Bank 2 - _TC", "debit": 0.0, "credit": 5000.0},
 		]
 
 		self.voucher_no = pe.name
@@ -1531,9 +1531,9 @@ class TestPaymentEntry(FrappeTestCase):
 		# # assert General and Payment Ledger entries post partial reconciliation
 		self.expected_gle = [
 			{"account": pi.credit_to, "debit": 5000.0, "credit": 0.0},
+			{"account": "Cash - _TC", "debit": 0.0, "credit": 5000.0},
 			{"account": advance_account, "debit": 5000.0, "credit": 0.0},
 			{"account": advance_account, "debit": 0.0, "credit": 5000.0},
-			{"account": "_Test Bank 2 - _TC", "debit": 0.0, "credit": 5000.0},
 		]
 
 		self.voucher_no = pe.name
