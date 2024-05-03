@@ -216,7 +216,7 @@ class Project(Document):
 		self.copy_from_template_data()
 
 	def after_insert(self):
-		self.copy_from_template()
+		self.copy_from_template_task()
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
