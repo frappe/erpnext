@@ -93,33 +93,21 @@ class Project(Document):
 
 	def validate(self):
 		if not self.is_new():
-			self.copy_from_template()
+			self.copy_from_template_data()
+			self.copy_from_template_task()
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
 		self.validate_from_to_dates("expected_start_date", "expected_end_date")
 		self.validate_from_to_dates("actual_start_date", "actual_end_date")
 
-	def copy_from_template(self):
+	def copy_from_template_task(self):
 		"""
 		Copy tasks from template
 		"""
+		# has a template, and no loaded tasks, so lets create
 		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
-			# this method is called by after_insert, so if data is set it need to be persisted
-			need_save = False
-
-			# has a template, and no loaded tasks, so lets create
-			if not self.expected_start_date:
-				# project starts today
-				self.expected_start_date = today()
-				need_save = True
-
-			template = frappe.get_doc("Project Template", self.project_template)
-
-			if not self.project_type:
-				self.project_type = template.project_type
-				need_save = True
-
+			template = frappe.get_cached_doc("Project Template", self.project_template)
 			# create tasks from template
 			project_tasks = []
 			tmp_task_details = []
@@ -128,9 +116,6 @@ class Project(Document):
 				tmp_task_details.append(template_task_details)
 				task = self.create_task_from_template(template_task_details)
 				project_tasks.append(task)
-
-			if need_save:
-				self.save(ignore_permissions=True, ignore_version=True)
 
 			self.dependency_mapping(tmp_task_details, project_tasks)
 
@@ -153,6 +138,21 @@ class Project(Document):
 				priority=task_details.priority,
 			)
 		).insert()
+
+	def copy_from_template_data(self):
+		"""
+		Copy data from template
+		"""
+		if self.project_template and not frappe.db.get_all("Task", dict(project=self.name), limit=1):
+			# has a template, and no loaded tasks, so lets create
+			if not self.expected_start_date:
+				# project starts today
+				self.expected_start_date = today()
+
+			template = frappe.get_doc("Project Template", self.project_template)
+
+			if not self.project_type:
+				self.project_type = template.project_type
 
 	def calculate_start_date(self, task_details):
 		self.start_date = add_days(self.expected_start_date, task_details.start)
@@ -211,6 +211,9 @@ class Project(Document):
 		self.update_percent_complete()
 		self.update_costing()
 		self.db_update()
+
+	def before_insert(self):
+		self.copy_from_template_data()
 
 	def after_insert(self):
 		self.copy_from_template()
