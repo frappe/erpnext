@@ -593,7 +593,7 @@ $.extend(erpnext.item, {
 								label: __("Create a variant with the template image."),
 								fieldname: "use_same_image",
 								default: 0,
-						}
+						  }
 						: null,
 					{
 						fieldtype: "HTML",
