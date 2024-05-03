@@ -1269,27 +1269,27 @@ class PaymentEntry(AccountsController):
 				)
 				gl_entries.append(gle)
 
-				if self.unallocated_amount:
-					dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
-					exchange_rate = self.get_exchange_rate()
-					base_unallocated_amount = self.unallocated_amount * exchange_rate
+			if self.unallocated_amount:
+				dr_or_cr = "credit" if self.payment_type == "Receive" else "debit"
+				exchange_rate = self.get_exchange_rate()
+				base_unallocated_amount = self.unallocated_amount * exchange_rate
 
-					gle = party_gl_dict.copy()
+				gle = party_gl_dict.copy()
+				gle.update(
+					{
+						dr_or_cr + "_in_account_currency": self.unallocated_amount,
+						dr_or_cr: base_unallocated_amount,
+					}
+				)
+
+				if self.book_advance_payments_in_separate_party_account:
 					gle.update(
 						{
-							dr_or_cr + "_in_account_currency": self.unallocated_amount,
-							dr_or_cr: base_unallocated_amount,
+							"against_voucher_type": "Payment Entry",
+							"against_voucher": self.name,
 						}
 					)
-
-					if self.book_advance_payments_in_separate_party_account:
-						gle.update(
-							{
-								"against_voucher_type": "Payment Entry",
-								"against_voucher": self.name,
-							}
-						)
-					gl_entries.append(gle)
+				gl_entries.append(gle)
 
 	def make_advance_gl_entries(
 		self, entry: object | dict = None, cancel: bool = 0, update_outstanding: str = "Yes"
