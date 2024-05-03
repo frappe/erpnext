@@ -588,13 +588,13 @@ $.extend(erpnext.item, {
 				title: __("Select Attribute Values"),
 				fields: [
 					frm.doc.image
-					? {
-						fieldtype: "Check",
-						label: __("Create a variant with the template image."),
-						fieldname: "use_same_image",
-						default: 0,
-					}
-					: null,
+						? {
+							fieldtype: "Check",
+							label: __("Create a variant with the template image."),
+							fieldname: "use_same_image",
+							default: 0,
+						}
+						: null,
 					{
 						fieldtype: "HTML",
 						fieldname: "help",
@@ -602,8 +602,9 @@ $.extend(erpnext.item, {
 							${__("Select at least one value from each of the attributes.")}
 						</label>`,
 					},
-				].concat(fields)
-				.filter(Boolean),
+				]
+					.concat(fields)
+					.filter(Boolean),
 			});
 
 			me.multiple_variant_dialog.set_primary_action(__("Create Variants"), () => {
