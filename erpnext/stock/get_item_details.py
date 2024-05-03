@@ -840,7 +840,12 @@ def insert_item_price(args):
 
 			item_price = frappe.db.get_value(
 				"Item Price",
-				{"item_code": args.item_code, "price_list": args.price_list, "currency": args.currency},
+				{
+					"item_code": args.item_code,
+					"price_list": args.price_list,
+					"currency": args.currency,
+					"uom": args.stock_uom,
+				},
 				["name", "price_list_rate"],
 				as_dict=1,
 			)
