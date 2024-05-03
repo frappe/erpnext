@@ -388,6 +388,9 @@ class SalesInvoice(SellingController):
 			validate_account_head(item.idx, item.income_account, self.company, "Income")
 
 	def set_tax_withholding(self):
+		if self.get("is_opening") == "Yes":
+			return
+
 		tax_withholding_details = get_party_tax_withholding_details(self)
 
 		if not tax_withholding_details:
