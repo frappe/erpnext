@@ -41,7 +41,7 @@ def get_variant(template, args=None, variant=None, manufacturer=None, manufactur
 	if isinstance(args, str):
 		args = json.loads(args)
 
-	attribute_args = {k: v for k, v in args.items() if k != 'use_same_image'}
+	attribute_args = {k: v for k, v in args.items() if k != "use_same_image"}
 	if not attribute_args:
 		frappe.throw(_("Please specify at least one attribute in the Attributes table"))
 
