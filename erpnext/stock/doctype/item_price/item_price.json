@@ -223,11 +223,7 @@
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-01-30 14:02:19.304854",
-=======
  "modified": "2024-04-02 22:18:00.450641",
->>>>>>> a61148c464 (feat(Item Price): make UOM mandatory (#40588))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
