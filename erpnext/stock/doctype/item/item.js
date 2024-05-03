@@ -587,6 +587,12 @@ $.extend(erpnext.item, {
 			me.multiple_variant_dialog = new frappe.ui.Dialog({
 				title: __("Select Attribute Values"),
 				fields: [
+					frm.doc.image ? {
+						fieldtype: "Check",
+						label: __("Create a variant with the template image."),
+						fieldname: "use_same_image",
+						default: 0
+					} : null,
 					{
 						fieldtype: "HTML",
 						fieldname: "help",
@@ -594,11 +600,12 @@ $.extend(erpnext.item, {
 							${__("Select at least one value from each of the attributes.")}
 						</label>`,
 					},
-				].concat(fields),
+				].concat(fields).filter(Boolean),
 			});
 
 			me.multiple_variant_dialog.set_primary_action(__("Create Variants"), () => {
 				let selected_attributes = get_selected_attributes();
+				let use_same_image = me.multiple_variant_dialog.get_value('use_same_image');
 
 				me.multiple_variant_dialog.hide();
 				frappe.call({
@@ -606,6 +613,7 @@ $.extend(erpnext.item, {
 					args: {
 						item: frm.doc.name,
 						args: selected_attributes,
+						use_same_image: use_same_image
 					},
 					callback: function (r) {
 						if (r.message === "queued") {
@@ -720,6 +728,15 @@ $.extend(erpnext.item, {
 			});
 		}
 
+		if (frm.doc.image) {
+			fields.push({
+				fieldtype: 'Check',
+				label: __('Create a variant with the template image.'),
+				fieldname: 'use_same_image',
+				default: 0
+			});
+		}
+
 		var d = new frappe.ui.Dialog({
 			title: __("Create Variant"),
 			fields: fields,
@@ -761,6 +778,7 @@ $.extend(erpnext.item, {
 							args: {
 								item: frm.doc.name,
 								args: d.get_values(),
+								use_same_image: args.use_same_image
 							},
 							callback: function (r) {
 								var doclist = frappe.model.sync(r.message);
