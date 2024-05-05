@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-03 09:40\n"
+"PO-Revision-Date: 2024-05-05 10:14\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -1966,49 +1966,49 @@ msgstr ""
 #: accounts/doctype/account/account_tree.js:152
 #: accounts/report/account_balance/account_balance.js:34
 msgid "Account Type"
-msgstr ""
+msgstr "Hesap Türü"
 
 #. Label of a Select field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Account Type"
-msgstr ""
+msgstr "Hesap Türü"
 
 #. Label of a Link field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "Account Type"
-msgstr ""
+msgstr "Hesap Türü"
 
 #. Label of a Data field in DocType 'Bank Account Type'
 #: accounts/doctype/bank_account_type/bank_account_type.json
 msgctxt "Bank Account Type"
 msgid "Account Type"
-msgstr ""
+msgstr "Hesap Türü"
 
 #. Label of a Data field in DocType 'Journal Entry Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Account Type"
-msgstr ""
+msgstr "Hesap Türü"
 
 #. Label of a Select field in DocType 'Party Type'
 #: setup/doctype/party_type/party_type.json
 msgctxt "Party Type"
 msgid "Account Type"
-msgstr ""
+msgstr "Hesap Türü"
 
 #. Label of a Data field in DocType 'Payment Entry Reference'
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 msgctxt "Payment Entry Reference"
 msgid "Account Type"
-msgstr ""
+msgstr "Hesap Türü"
 
 #. Label of a Select field in DocType 'Payment Ledger Entry'
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Account Type"
-msgstr ""
+msgstr "Hesap Türü"
 
 #: stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:124
 msgid "Account Value"
@@ -7554,19 +7554,19 @@ msgstr ""
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Apply TDS"
-msgstr ""
+msgstr "TDS Uygula"
 
 #. Label of a Check field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Apply TDS"
-msgstr ""
+msgstr "TDS Uygula"
 
 #. Label of a Check field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Apply TDS"
-msgstr ""
+msgstr "TDS Uygula"
 
 #. Label of a Check field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -14363,13 +14363,13 @@ msgstr ""
 #: accounts/doctype/fiscal_year/fiscal_year.json
 msgctxt "Fiscal Year"
 msgid "Companies"
-msgstr ""
+msgstr "Şirketler"
 
 #. Label of a Section Break field in DocType 'Ledger Health Monitor'
 #: accounts/doctype/ledger_health_monitor/ledger_health_monitor.json
 msgctxt "Ledger Health Monitor"
 msgid "Companies"
-msgstr ""
+msgstr "Şirketler"
 
 #. Name of a DocType
 #: accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.js:8
@@ -16023,19 +16023,19 @@ msgstr ""
 #: accounts/doctype/ledger_health_monitor/ledger_health_monitor.json
 msgctxt "Ledger Health Monitor"
 msgid "Configuration"
-msgstr ""
+msgstr "Yapılandırma"
 
 #. Label of a Section Break field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Configuration"
-msgstr ""
+msgstr "Yapılandırma"
 
 #. Label of a Tab Break field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Configuration"
-msgstr ""
+msgstr "Yapılandırma"
 
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/configure_account_settings/configure_account_settings.json
@@ -49792,19 +49792,19 @@ msgstr ""
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.js:28
 msgid "Payment Type"
-msgstr ""
+msgstr "Ödeme Türü"
 
 #. Label of a Select field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Payment Type"
-msgstr ""
+msgstr "Ödeme Türü"
 
 #. Label of a Data field in DocType 'Payment Entry Reference'
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 msgctxt "Payment Entry Reference"
 msgid "Payment Type"
-msgstr ""
+msgstr "Ödeme Türü"
 
 #: accounts/doctype/payment_entry/payment_entry.py:545
 msgid "Payment Type must be one of Receive, Pay and Internal Transfer"
