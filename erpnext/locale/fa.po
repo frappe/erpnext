@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-02 09:40\n"
+"PO-Revision-Date: 2024-05-05 10:14\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -20272,7 +20272,7 @@ msgstr "مورد مشتری"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Customer Items"
-msgstr "اقلام مشتری"
+msgstr "آیتم‌های مشتری"
 
 #: accounts/report/accounts_receivable/accounts_receivable.py:1086
 msgid "Customer LPO"
@@ -20833,7 +20833,7 @@ msgstr "وارد کردن داده ها و تنظیمات"
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Data exported from Tally that consists of the Chart of Accounts, Customers, Suppliers, Addresses, Items and UOMs"
-msgstr "داده های صادر شده از Tally که شامل نمودار حساب ها، مشتریان، تامین کنندگان، آدرس ها، اقلام و UOM است."
+msgstr "داده های صادر شده از Tally که شامل نمودار حساب ها، مشتریان، تامین کنندگان، آدرس ها، آیتم‌ها و UOM است."
 
 #: accounts/doctype/journal_entry/journal_entry.js:606
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:36
@@ -35179,7 +35179,7 @@ msgstr "تجمعی است"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Is Customer Provided Item"
-msgstr "آیا مورد ارائه شده توسط مشتری"
+msgstr "آیتم ارائه شده توسط مشتری است"
 
 #. Label of a Check field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -69532,7 +69532,7 @@ msgstr "برنامه ریزی موجودی"
 #: stock/report/stock_projected_qty/stock_projected_qty.json
 #: stock/workspace/stock/stock.json
 msgid "Stock Projected Qty"
-msgstr "موجودی پیش بینی شده تعداد"
+msgstr "مقدار موجودی پیش بینی شده"
 
 #: accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:258
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:311
@@ -72484,7 +72484,7 @@ msgstr "انبار هدف برای کاهش سرمایه اجباری است"
 
 #: controllers/selling_controller.py:714
 msgid "Target Warehouse is set for some items but the customer is not an internal customer."
-msgstr "انبار هدف برای برخی اقلام تنظیم شده است اما مشتری مشتری داخلی نیست."
+msgstr "انبار هدف برای برخی آیتم‌ها تنظیم شده است اما مشتری، یک مشتری داخلی نیست."
 
 #: stock/doctype/stock_entry/stock_entry.py:598
 #: stock/doctype/stock_entry/stock_entry.py:605
@@ -79715,7 +79715,7 @@ msgstr "ارزش گذاری و کل"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:784
 msgid "Valuation rate for customer provided items has been set to zero."
-msgstr "نرخ ارزش گذاری برای اقلام ارائه شده توسط مشتری صفر تعیین شده است."
+msgstr "نرخ ارزش گذاری برای آیتم‌های ارائه شده توسط مشتری صفر تعیین شده است."
 
 #: accounts/doctype/payment_entry/payment_entry.py:1733
 #: controllers/accounts_controller.py:2669
