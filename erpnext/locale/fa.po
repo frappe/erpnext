@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-05 10:14\n"
+"PO-Revision-Date: 2024-05-06 11:46\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -18440,7 +18440,7 @@ msgstr "اولین فاکتور فروش خود را ایجاد کنید "
 #: selling/onboarding_step/create_a_customer/create_a_customer.json
 #: setup/onboarding_step/create_a_customer/create_a_customer.json
 msgid "Create a Customer"
-msgstr ""
+msgstr "یک مشتری ایجاد کنید"
 
 #. Title of an Onboarding Step
 #: selling/onboarding_step/create_product/create_product.json
@@ -18472,7 +18472,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_a_product/create_a_product.json
 msgid "Create a Sales Item"
-msgstr ""
+msgstr "یک آیتم فروش ایجاد کنید"
 
 #. Title of an Onboarding Step
 #: selling/onboarding_step/create_a_sales_order/create_a_sales_order.json
@@ -18517,7 +18517,7 @@ msgstr "یک دسته دارایی ایجاد کنید"
 #. Title of an Onboarding Step
 #: assets/onboarding_step/asset_item/asset_item.json
 msgid "Create an Asset Item"
-msgstr ""
+msgstr "یک آیتم دارایی ایجاد کنید"
 
 #. Label of an action in the Onboarding Step 'Finished Items'
 #. Title of an Onboarding Step
@@ -18525,7 +18525,7 @@ msgstr ""
 #: setup/onboarding_step/create_an_item/create_an_item.json
 #: stock/onboarding_step/create_an_item/create_an_item.json
 msgid "Create an Item"
-msgstr ""
+msgstr "یک آیتم ایجاد کنید"
 
 #: stock/stock_ledger.py:1676
 msgid "Create an incoming stock transaction for the Item."
@@ -18543,7 +18543,7 @@ msgstr "ایجاد پیش فاکتور های مشتری"
 #. Title of an Onboarding Step
 #: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
 msgid "Create first Purchase Order"
-msgstr ""
+msgstr "اولین سفارش خرید را ایجاد کنید"
 
 #. Description of the 'Create Missing Party' (Check) field in DocType 'Opening
 #. Invoice Creation Tool'
@@ -28777,7 +28777,7 @@ msgstr "مورد تمام شده {0} با دستور کار {1} مطابقت ن�
 #. Title of an Onboarding Step
 #: manufacturing/onboarding_step/create_product/create_product.json
 msgid "Finished Items"
-msgstr ""
+msgstr "آیتم‌های تمام شده"
 
 #. Label of a Time field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -39594,7 +39594,7 @@ msgstr "بیایید یک عملیات ایجاد کنیم"
 #. Label of an action in the Onboarding Step 'Setup a Warehouse'
 #: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
 msgid "Let’s create your first  warehouse "
-msgstr ""
+msgstr "بیایید اولین انبار شما را ایجاد کنیم "
 
 #. Label of an action in the Onboarding Step 'Create a Customer'
 #: setup/onboarding_step/create_a_customer/create_a_customer.json
@@ -39615,7 +39615,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Create first Purchase Order'
 #: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
 msgid "Let’s create your first Purchase Order"
-msgstr ""
+msgstr "بیایید اولین سفارش خرید شما را ایجاد کنیم"
 
 #. Label of an action in the Onboarding Step 'Create your first Quotation'
 #: setup/onboarding_step/create_a_quotation/create_a_quotation.json
@@ -61681,7 +61681,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: stock/onboarding_step/stock_settings/stock_settings.json
 msgid "Review Stock Settings"
-msgstr ""
+msgstr "تنظیمات موجودی را مرور کنید"
 
 #. Label of a Card Break in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
@@ -66890,7 +66890,7 @@ msgstr "اگر مشتری یک شرکت مدیریت دولتی است، این 
 #: selling/onboarding_step/setup_your_warehouse/setup_your_warehouse.json
 #: stock/onboarding_step/setup_your_warehouse/setup_your_warehouse.json
 msgid "Set up your Warehouse"
-msgstr ""
+msgstr "انبار خود را راه‌اندازی کنید"
 
 #: assets/doctype/asset/asset.py:670
 msgid "Set {0} in asset category {1} for company {2}"
@@ -67050,7 +67050,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
 msgid "Setup a Warehouse"
-msgstr ""
+msgstr "راه‌اندازی یک انبار"
 
 #: public/js/setup_wizard.js:18
 msgid "Setup your organization"
@@ -77219,7 +77219,7 @@ msgstr "قابلیت ردیابی"
 #. Title of an Onboarding Step
 #: buying/onboarding_step/create_a_material_request/create_a_material_request.json
 msgid "Track Material Request"
-msgstr ""
+msgstr "پیگیری درخواست مواد"
 
 #. Label of a Check field in DocType 'Support Settings'
 #: support/doctype/support_settings/support_settings.json
@@ -78421,7 +78421,7 @@ msgstr "واحد اندازه گیری"
 #: setup/workspace/home/home.json stock/workspace/stock/stock.json
 msgctxt "UOM"
 msgid "Unit of Measure (UOM)"
-msgstr ""
+msgstr "واحد اندازه گیری (UOM)"
 
 #: stock/doctype/item/item.py:377
 msgid "Unit of Measure {0} has been entered more than once in Conversion Factor Table"
