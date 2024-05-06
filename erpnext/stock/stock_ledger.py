@@ -642,7 +642,7 @@ class update_entries_after:
 			{"item_code": self.item_code, "warehouse": self.args.warehouse}
 		)
 
-		return list(self.get_sle_after_datetime(args))
+		return list(self.get_sle_after_datetime(args, ">="))
 
 	def get_dependent_entries_to_fix(self, entries_to_fix, sle):
 		dependant_sle = get_sle_by_voucher_detail_no(
@@ -1326,9 +1326,12 @@ class update_entries_after:
 		sle = sle[0] if sle else frappe._dict()
 		return sle
 
-	def get_sle_after_datetime(self, args):
+	def get_sle_after_datetime(self, args, operator=None):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
-		return get_stock_ledger_entries(args, ">", "asc", for_update=True, check_serial_no=False)
+		if not operator:
+			operator = ">"
+
+		return get_stock_ledger_entries(args, operator, "asc", for_update=True, check_serial_no=False)
 
 	def raise_exceptions(self):
 		msg_list = []
