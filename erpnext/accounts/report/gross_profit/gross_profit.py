@@ -717,20 +717,22 @@ class GrossProfitGenerator:
 			frappe.qb.from_(purchase_invoice_item)
 			.inner_join(purchase_invoice)
 			.on(purchase_invoice.name == purchase_invoice_item.parent)
-			.select(purchase_invoice_item.base_rate / purchase_invoice_item.conversion_factor)
+			.select(
+				purchase_invoice.name,
+				purchase_invoice_item.base_rate / purchase_invoice_item.conversion_factor,
+			)
 			.where(purchase_invoice.docstatus == 1)
 			.where(purchase_invoice.posting_date <= self.filters.to_date)
 			.where(purchase_invoice_item.item_code == item_code)
 		)
 
 		if row.project:
-			query.where(purchase_invoice_item.project == row.project)
+			query = query.where(purchase_invoice_item.project == row.project)
 
 		if row.cost_center:
-			query.where(purchase_invoice_item.cost_center == row.cost_center)
+			query = query.where(purchase_invoice_item.cost_center == row.cost_center)
 
-		query.orderby(purchase_invoice.posting_date, order=frappe.qb.desc)
-		query.limit(1)
+		query = query.orderby(purchase_invoice.posting_date, order=frappe.qb.desc).limit(1)
 		last_purchase_rate = query.run()
 
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
