@@ -977,3 +977,39 @@ class TestPickList(FrappeTestCase):
 		so = make_sales_order(item_code=item, qty=4, rate=100)
 		pl = create_pick_list(so.name)
 		self.assertFalse(hasattr(pl, "locations"))
+
+	def test_pick_list_validation_for_multiple_batches_and_sales_order(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Batch Pick List Item For Multiple Batches",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "SN-BT-BATCH-SPLIMBATCH-.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=5)
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=5)
+
+		so = make_sales_order(item_code=item, qty=6, rate=100)
+
+		pl1 = create_pick_list(so.name)
+		pl1.save()
+		self.assertEqual(pl1.locations[0].qty, 5.0)
+		self.assertEqual(pl1.locations[1].qty, 1.0)
+
+		so = make_sales_order(item_code=item, qty=4, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(pl.locations[0].qty, 4.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		pl1.submit()
+
+		pl.reload()
+		pl.submit()
+		self.assertEqual(pl.locations[0].qty, 4.0)
+		self.assertTrue(hasattr(pl, "locations"))
