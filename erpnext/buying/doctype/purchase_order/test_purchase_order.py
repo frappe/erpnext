@@ -1166,22 +1166,22 @@ class TestPurchaseOrder(FrappeTestCase):
 		else:
 			project = frappe.get_doc("Project", "_Test Project for Ordered")
 
-		pi = create_purchase_order(rate=500, project=project.name)
+		pi = create_purchase_order(qty=1, rate=500, project=project.name)
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
-			5000.0,
+			500.0,
 		)
 
 		pi1 = create_purchase_order(qty=10, rate=500, project=project.name)
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
-			50000.0,
+			5500.0,
 		)
 
 		pi1.cancel()
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
-			5000.0,
+			500.0,
 		)
 
 		pi.cancel()
