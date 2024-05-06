@@ -1115,7 +1115,11 @@ class WorkOrder(Document):
 		)
 
 		data = query.run(as_dict=1) or []
-		transferred_items = frappe._dict({d.original_item or d.item_code: d.qty for d in data})
+		transferred_items = {}
+		for d in data:
+			item_to_update = d.original_item or d.item_code
+			transferred_items[item_to_update] = transferred_items.get(item_to_update,0) + d.qty
+
 
 		for row in self.required_items:
 			row.db_set(
