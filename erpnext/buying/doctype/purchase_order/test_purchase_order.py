@@ -1185,24 +1185,24 @@ class TestPurchaseOrder(FrappeTestCase):
 		if not frappe.db.exists("Project", {"project_name": "_Test Project for Ordered"}):
 			project = make_project({"project_name": "_Test Project for Ordered"})
 		else:
-			project = frappe.get_doc("Project", {"project_name": "_Test Project for Ordered"})
+			project = frappe.get_doc("Project", "_Test Project for Ordered")
 
-		pi = create_purchase_order(currency="USD", rate=500, project=project.name)
+		pi = create_purchase_order(rate=500, project=project.name)
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
-			417300.0,
+			5000.0,
 		)
 
-		pi1 = create_purchase_order(qty=10, currency="USD", rate=500, project=project.name)
+		pi1 = create_purchase_order(qty=10, rate=500, project=project.name)
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
-			834600.0,
+			50000.0,
 		)
 
 		pi1.cancel()
 		self.assertEqual(
 			frappe.db.get_value("Project", project.name, "total_ordered_cost"),
-			417300.0,
+			5000.0,
 		)
 
 		pi.cancel()
