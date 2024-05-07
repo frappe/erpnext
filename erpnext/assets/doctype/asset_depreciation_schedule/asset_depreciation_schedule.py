@@ -352,13 +352,6 @@ class AssetDepreciationSchedule(Document):
 				and (has_pro_rata or has_wdv_or_dd_non_yearly_pro_rata)
 				and not self.opening_accumulated_depreciation
 				and not self.flags.wdv_it_act_applied
-				and (
-					row.depreciation_method in ("Straight Line", "Manual")
-					or (
-						row.depreciation_method in ("Written Down Value", "Double Declining Balance")
-						and not row.daily_prorata_based
-					)
-				)
 			):
 				from_date = add_days(
 					asset_doc.available_for_use_date, -1
@@ -842,11 +835,7 @@ def _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
 ):
 	if cint(fb_row.frequency_of_depreciation) == 12:
 		if schedule_idx == 0:
-			per_day_depr = get_per_day_depr(fb_row, depreciable_value, fb_row.depreciation_start_date)
-			from_date = asset.available_for_use_date
-			to_date = add_days(fb_row.depreciation_start_date, -1)
-			total_days = date_diff(to_date, from_date) + 1
-			return (per_day_depr * total_days), per_day_depr
+			return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100), None
 		else:
 			from_date, days_in_month = _get_total_days(
 				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
@@ -855,11 +844,7 @@ def _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
 
 	if has_wdv_or_dd_non_yearly_pro_rata:
 		if schedule_idx == 0:
-			per_day_depr = get_per_day_depr(fb_row, depreciable_value, fb_row.depreciation_start_date)
-			from_date = asset.available_for_use_date
-			to_date = add_days(fb_row.depreciation_start_date, -1)
-			total_days = date_diff(to_date, from_date) + 1
-			return (per_day_depr * total_days), per_day_depr
+			return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100), None
 
 		elif schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 1:
 			from_date, days_in_month = _get_total_days(
@@ -892,7 +877,7 @@ def get_per_day_depr(
 	depreciable_value,
 	from_date,
 ):
-	to_date = add_years(from_date, 1)
+	to_date = add_days(add_years(from_date, 1), -1)
 	total_days = date_diff(to_date, from_date) + 1
 	per_day_depr = (flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100)) / total_days
 	return per_day_depr
