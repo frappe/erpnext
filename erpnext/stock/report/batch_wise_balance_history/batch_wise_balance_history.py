@@ -29,8 +29,15 @@ def execute(filters=None):
 
 	sle_count = _estimate_table_row_count("Stock Ledger Entry")
 
-	if sle_count > SLE_COUNT_LIMIT and not filters.get("item_code") and not filters.get("warehouse"):
-		frappe.throw(_("Please select either the Item or Warehouse filter to generate the report."))
+	if (
+		sle_count > SLE_COUNT_LIMIT
+		and not filters.get("item_code")
+		and not filters.get("warehouse")
+		and not filters.get("warehouse_type")
+	):
+		frappe.throw(
+			_("Please select either the Item or Warehouse or Warehouse Type filter to generate the report.")
+		)
 
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
