@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-05 10:14\n"
+"PO-Revision-Date: 2024-05-07 11:54\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -38276,7 +38276,7 @@ msgstr ""
 #. Label of a Card Break in the Buying Workspace
 #: buying/workspace/buying/buying.json
 msgid "Items & Pricing"
-msgstr ""
+msgstr "Ürünler & Fiyatlar"
 
 #. Label of a Card Break in the Stock Workspace
 #: stock/workspace/stock/stock.json
@@ -38693,7 +38693,7 @@ msgstr ""
 #: buying/workspace/buying/buying.json selling/workspace/selling/selling.json
 #: stock/workspace/stock/stock.json
 msgid "Key Reports"
-msgstr ""
+msgstr "Anahtar Raporlar"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -39188,7 +39188,7 @@ msgstr ""
 #. Label of a shortcut in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Learn Accounting"
-msgstr ""
+msgstr "Muhasebeyi Öğrenin"
 
 #. Label of a shortcut in the Stock Workspace
 #: stock/workspace/stock/stock.json
@@ -39203,7 +39203,7 @@ msgstr ""
 #. Label of a shortcut in the Buying Workspace
 #: buying/workspace/buying/buying.json
 msgid "Learn Procurement"
-msgstr ""
+msgstr "Satın Almayı Öğrenin"
 
 #. Label of a shortcut in the Projects Workspace
 #: projects/workspace/projects/projects.json
@@ -46963,7 +46963,7 @@ msgstr ""
 #: buying/workspace/buying/buying.json selling/workspace/selling/selling.json
 #: stock/workspace/stock/stock.json
 msgid "Other Reports"
-msgstr ""
+msgstr "Diğer Raporlar"
 
 #. Label of a Section Break field in DocType 'CRM Settings'
 #: crm/doctype/crm_settings/crm_settings.json
@@ -57374,7 +57374,7 @@ msgstr ""
 #: selling/report/sales_analytics/sales_analytics.py:311
 #: stock/report/stock_analytics/stock_analytics.py:116
 msgid "Quarter {0} {1}"
-msgstr ""
+msgstr "{0}. Çeyrek  {1}"
 
 #: accounts/report/budget_variance_report/budget_variance_report.js:63
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:76
@@ -73804,7 +73804,7 @@ msgstr ""
 #: buying/workspace/buying/buying.json selling/workspace/selling/selling.json
 msgctxt "Terms and Conditions"
 msgid "Terms and Conditions Template"
-msgstr ""
+msgstr "Şartlar ve Koşullar Şablonu"
 
 #. Name of a DocType
 #: accounts/report/accounts_receivable/accounts_receivable.js:148
