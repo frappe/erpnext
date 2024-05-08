@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-04-30 09:30\n"
+"PO-Revision-Date: 2024-05-08 12:02\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -202,7 +202,8 @@ msgstr "# CTroškovni centri za proračun i analizu\n\n"
 #: manufacturing/onboarding_step/create_product/create_product.json
 msgid "# Create Items for Bill of Materials\n\n"
 "One of the prerequisites of a BOM is the creation of raw materials, sub-assembly, and finished items. Once these items are created, you will be able to proceed to the Bill of Materials master, which is composed of items and routing.\n"
-msgstr ""
+msgstr "# Kreirajte stavke za popis materijala\n\n"
+"Jedan od preuslova sastavnice je izrada sirovina, podsklopova i gotovih stavki. Nakon što se te stavke kreiraju, moći ćete nastaviti do glavnog popisa materijala koji se sastoji od stavki i usmjeravanja.\n"
 
 #. Description of the Onboarding Step 'Operation'
 #: manufacturing/onboarding_step/operation/operation.json
@@ -223,7 +224,9 @@ msgstr "# Kreirajte radne stanice\n\n"
 msgid "# Create a Bill of Materials\n\n"
 "A Bill of Materials (BOM) is a list of items and sub-assemblies with quantities required to manufacture an Item.\n\n"
 "BOM also provides cost estimation for the production of the item. It takes raw-materials cost based on valuation and operations to cost based on routing, which gives total costing for a BOM."
-msgstr ""
+msgstr "# Napravite popis materijala\n\n"
+"Popis materijala (BOM) je popis stavki i podsklopova s količinama potrebnim za proizvodnju stavke.\n\n"
+"BOM također pruža procjenu troškova za proizvodnju predmeta. Uzima trošak sirovina na temelju procjene i operacije na trošak na temelju usmjeravanja, što daje ukupne troškove za BOM."
 
 #. Description of the Onboarding Step 'Create a Customer'
 #: setup/onboarding_step/create_a_customer/create_a_customer.json
@@ -233,19 +236,26 @@ msgid "# Create a Customer\n\n"
 " - Customer’s multiple address and contacts\n"
 " - Account Receivables\n"
 " - Credit Limit and Credit Period\n"
-msgstr ""
+msgstr "# Kreirajte kupca\n\n"
+"Master kupca je u središtu vaših prodajnih transakcija. Kupci su povezani u ponudama, prodajnim nalozima, fakturama i plaćanjima. Kupci se mogu numerisati ili identificirati imenom (to biste obično učinili na temelju broja kupaca koje imate).\n\n"
+"Putem mastera kupaca možete efikasno pratiti bitne stvari kao što su:\n"
+" - Više adresa i kontakata kupca\n"
+" - Potraživanja\n"
+" - Kreditni limit i kreditni period\n"
 
 #. Description of the Onboarding Step 'Setup Your Letterhead'
 #: setup/onboarding_step/letterhead/letterhead.json
 msgid "# Create a Letter Head\n\n"
 "A Letter Head contains your organization's name, logo, address, etc which appears at the header and footer portion in documents. You can learn more about Setting up Letter Head in ERPNext here.\n"
-msgstr ""
+msgstr "# Kreirajte memorandum\n\n"
+"Memorandum sadrži naziv vaše organizacije, logotip, adresu itd. koji se pojavljuje u dijelu zaglavlja i podnožja dokumenata. Ovdje možete saznati više o postavljanju memoranduma u ERPNext.\n"
 
 #. Description of the Onboarding Step 'Create your first Quotation'
 #: setup/onboarding_step/create_a_quotation/create_a_quotation.json
 msgid "# Create a Quotation\n\n"
 "Let’s get started with business transactions by creating your first Quotation. You can create a Quotation for an existing customer or a prospect. It will be an approved document, with items you sell and the proposed price + taxes applied. After completing the instructions, you will get a Quotation in a ready to share print format."
-msgstr ""
+msgstr "# Napravite ponudu\n\n"
+"Započnimo s poslovnim transakcijama stvaranjem vaše prve ponude. Možete izraditi ponudu za postojećeg kupca ili potencijalnog klijenta. To će biti odobreni dokument s primijenjenim artiklima koje prodajete i predloženom cijenom + porezi. Nakon ispunjavanja uputa, dobit ćete ponudu u formatu spremnom za ispis."
 
 #. Description of the Onboarding Step 'Create a Supplier'
 #: setup/onboarding_step/create_a_supplier/create_a_supplier.json
@@ -255,13 +265,19 @@ msgid "# Create a Supplier\n\n"
 " - Supplier’s multiple address and contacts\n"
 " - Account Receivables\n"
 " - Credit Limit and Credit Period\n"
-msgstr ""
+msgstr "# Kreirajte dobavljača\n\n"
+"Poznat i kao dobavljač, glavni je u središtu vaših kupovnih transakcija. Dobavljači su povezani u Zahtjevu za ponudu, Narudžbenicama, Potvrdama i Plaćanjima. Dobavljači mogu biti numerisani ili identificirani imenom.\n\n"
+"Putem glavnog dobavljača možete efikasno pratiti bitne stvari kao što su:\n"
+" - Višestruke adrese i kontakti dobavljača\n"
+" - Potraživanja\n"
+" - Kreditni limit i kreditni period\n"
 
 #. Description of the Onboarding Step 'Create a Supplier'
 #: stock/onboarding_step/create_a_supplier/create_a_supplier.json
 msgid "# Create a Supplier\n"
 "In this step we will create a **Supplier**. If you have already created a **Supplier** you can skip this step."
-msgstr ""
+msgstr "# Kreirajte dobavljača\n"
+"U ovom koraku izradit ćemo **Dobavljača**. Ako ste već izradili **Dobavljača** možete preskočiti ovaj korak."
 
 #. Description of the Onboarding Step 'Work Order'
 #: manufacturing/onboarding_step/work_order/work_order.json
@@ -271,34 +287,46 @@ msgid "# Create a Work Order\n\n"
 "- Issue of raw-material to shop material\n"
 "- Progress on each Workstation via Job Card\n"
 "- Manufactured Quantity against Work Order\n"
-msgstr ""
+msgstr "# Kreirajte radni nalog\n\n"
+"Voditelj proizvodnje daje radni nalog ili radni nalog proizvodnoj radionici kako bi se pokrenula proizvodnja određene količine artikla. Radni nalog sadrži pojedinosti proizvodnog artikla, njegovu sastavnicu, količine koje treba proizvesti i operacije.\n\n"
+"Putem radnog naloga možete pratiti različite statuse proizvodnje kao što su:\n\n"
+"- Izdavanje repromaterijala u prodajni materijal\n"
+"- Napredak na svakoj radnoj stanici putem kartice posla\n"
+"- Proizvedena količina prema radnom nalogu\n"
 
 #. Description of the Onboarding Step 'Create an Item'
 #: setup/onboarding_step/create_an_item/create_an_item.json
 msgid "# Create an Item\n\n"
 "Item is a product or a service offered by your company, or something you buy as a part of your supplies or raw materials.\n\n"
 "Items are integral to everything you do in ERPNext - from billing, purchasing to managing inventory. Everything you buy or sell, whether it is a physical product or a service is an Item. Items can be stock, non-stock, variants, serialized, batched, assets, etc.\n"
-msgstr ""
+msgstr "# Kreirajte stavku\n\n"
+"Stavka je proizvod ili usluga koju nudi vaša firma ili nešto što kupujete kao dio svojih zaliha ili sirovina.\n\n"
+"Stavke su sastavni dio svega što radite u ERPNextu - od naplate, kupovine do upravljanja zalihama. Sve što kupite ili prodate, bilo da se radi o fizičkom proizvodu ili usluzi, jeste stavka. Stavke mogu biti na zalihama, koje nisu na zalihama, varijante, serijalizirane, šaržne, sredstva itd.\n"
 
 #. Description of the Onboarding Step 'Create an Item'
 #: stock/onboarding_step/create_an_item/create_an_item.json
 msgid "# Create an Item\n"
 "The Stock module deals with the movement of items.\n\n"
 "In this step we will create an  [**Item**](https://docs.erpnext.com/docs/user/manual/en/stock/item)."
-msgstr ""
+msgstr "# Kreirajte stavku\n"
+"Modul Zaliha se bavi kretanjem stavki.\n\n"
+"U ovom koraku izradit ćemo [**Stavka**](https://docs.erpnext.com/docs/user/manual/en/stock/item)."
 
 #. Description of the Onboarding Step 'Create first Purchase Order'
 #: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
 msgid "# Create first Purchase Order\n\n"
 "Purchase Order is at the heart of your buying transactions. In ERPNext, Purchase Order can can be created against a Purchase Material Request (indent) and Supplier Quotation as well.  Purchase Orders is also linked to Purchase Receipt and Purchase Invoices, allowing you to keep a birds-eye view on your purchase deals.\n\n"
-msgstr ""
+msgstr "# Kreirajte prvu narudžbenicu\n\n"
+"Narudžbenica je središte vaših kupovnih transakcija. U ERPNext-u, Narudžbenica se može kreirati i prema Zahtjevu za nabavni materijal (narudžbenica) i Ponudi dobavljača. Narudžbenice su također povezane s potvrdom o kupovini i kupovnim fakturama, što vam omogućuje da zadržite pogled iz ptičje perspektive na svoje poslove kupovine.\n\n"
 
 #. Description of the Onboarding Step 'Create Your First Purchase Invoice '
 #: accounts/onboarding_step/create_your_first_purchase_invoice/create_your_first_purchase_invoice.json
 msgid "# Create your first Purchase Invoice\n\n"
 "A Purchase Invoice is a bill received from a Supplier for a product(s) or service(s) delivery to your company. You can track payables through Purchase Invoice and process Payment Entries against it.\n\n"
 "Purchase Invoices can also be created against a Purchase Order or Purchase Receipt."
-msgstr ""
+msgstr "# Izradite svoju prvu kupovnu fakturu\n\n"
+"Kupovna faktura je faktura primljena od dobavljača za isporuku proizvoda ili usluga vašoj firmi. Možete pratiti obveze putem kupovne fakture i obraditi unose plaćanja prema njoj.\n\n"
+"Kupovne fakture također se mogu izraditi uz narudžbenicu ili potvrdu o kupovini."
 
 #. Description of the Onboarding Step 'Financial Statements'
 #: accounts/onboarding_step/financial_statements/financial_statements.json
@@ -321,17 +349,19 @@ msgstr ""
 #: manufacturing/onboarding_step/production_planning/production_planning.json
 msgid "# How Production Planning Works\n\n"
 "Production Plan helps in production and material planning for the Items planned for manufacturing. These production items can be committed via Sales Order (to Customers) or Material Requests (internally).\n"
-msgstr ""
+msgstr "# Kako funkcionira planiranje proizvodnje\n\n"
+"Plan proizvodnje pomaže u planiranju proizvodnje i materijala za artikle planirane za proizvodnju. Ove proizvodne stavke mogu se angažovati putem prodajnog naloga (kupcima) ili zahtjeva za materijal (interno).\n"
 
 #. Description of the Onboarding Step 'Import Data from Spreadsheet'
 #: setup/onboarding_step/data_import/data_import.json
 msgid "# Import Data from Spreadsheet\n\n"
 "In ERPNext, you can easily migrate your historical data using spreadsheets. You can use it for migrating not just masters (like Customer, Supplier, Items), but also for transactions like (outstanding invoices, opening stock and accounting entries, etc)."
-msgstr ""
+msgstr "# Uvoz podataka iz proračunske (Excel) tabele\n\n"
+"U ERPNextu možete jednostavno migrirati svoje povijesne podatke pomoću proračunskih (Excel) tabela. Možete ga koristiti za migraciju ne samo matičnih podataka (kao što su kupac, dobavljač, stavke), već i za transakcije kao što su (nepodmirene fakture, početna zaliha i računovodstveni unosi itd.)."
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:148
 msgid "# In Stock"
-msgstr ""
+msgstr "# Na zalihama"
 
 #. Description of the Onboarding Step 'Introduction to Stock Entry'
 #: stock/onboarding_step/introduction_to_stock_entry/introduction_to_stock_entry.json
@@ -413,7 +443,8 @@ msgstr ""
 #: manufacturing/onboarding_step/routing/routing.json
 msgid "# Setup Routing\n\n"
 "A Routing stores all Operations along with the description, hourly rate, operation time, batch size, etc. Click below to learn how the Routing template can be created, for quick selection in the BOM."
-msgstr ""
+msgstr "# Postavljanje usmjeravanja\n\n"
+"Rutiranje pohranjuje sve operacije zajedno s opisom, satnicom, radnim vremenom, veličinom serije, itd. Kliknite ispod da saznate kako se može stvoriti šablon rutiranja za brzi odabir u popisu materijala."
 
 #. Description of the Onboarding Step 'Setup a Warehouse'
 #: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
@@ -8632,7 +8663,7 @@ msgstr ""
 
 #: manufacturing/doctype/routing/routing.py:50
 msgid "At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2}"
-msgstr ""
+msgstr "U redu #{0}: id sekvence {1} ne može biti manji od id-a sekvence prethodnog reda {2}"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:616
 msgid "At row {0}: Batch No is mandatory for Item {1}"
@@ -12060,7 +12091,7 @@ msgstr ""
 #. Label of a Card Break in the Home Workspace
 #: crm/workspace/crm/crm.json setup/workspace/home/home.json
 msgid "CRM"
-msgstr ""
+msgstr "CRM"
 
 #. Name of a DocType
 #: crm/doctype/crm_note/crm_note.json
@@ -12213,7 +12244,7 @@ msgstr ""
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.json
 msgctxt "Incoming Call Settings"
 msgid "Call Routing"
-msgstr ""
+msgstr "Usmjeravanje poziva"
 
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.js:58
 #: telephony/doctype/incoming_call_settings/incoming_call_settings.py:48
@@ -13573,7 +13604,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Routing'
 #: manufacturing/onboarding_step/routing/routing.json
 msgid "Check help to setup Routing"
-msgstr ""
+msgstr "Provjerite pomoć za postavljanje usmjeravanja"
 
 #. Description of the 'Maintenance Required' (Check) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -20865,7 +20896,7 @@ msgstr ""
 #. Label of a Card Break in the Home Workspace
 #: setup/workspace/home/home.json
 msgid "Data Import and Settings"
-msgstr ""
+msgstr "Uvoz podataka i postavke"
 
 #. Description of the 'Master Data' (Attach) field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -21844,7 +21875,7 @@ msgstr ""
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Default Letter Head"
-msgstr "Zadano zaglavlje pisma"
+msgstr "Zadani memorandum"
 
 #. Label of a Data field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -26891,7 +26922,7 @@ msgstr ""
 
 #: manufacturing/doctype/routing/routing.js:78
 msgid "Enter a name for Routing."
-msgstr ""
+msgstr "Unesi naziv za Usmjeravanje."
 
 #: manufacturing/doctype/operation/operation.js:20
 msgid "Enter a name for the Operation, for example, Cutting."
@@ -26942,7 +26973,8 @@ msgstr ""
 #: manufacturing/doctype/routing/routing.js:83
 msgid "Enter the Operation, the table will fetch the Operation details like Hourly Rate, Workstation automatically.\n\n"
 " After that, set the Operation Time in minutes and the table will calculate the Operation Costs based on the Hourly Rate and Operation Time."
-msgstr ""
+msgstr "Unesite operaciju, tablica će automatski dohvatiti detalje operacije kao što su satnica, radna stanica.\n\n"
+" Nakon toga postavite vrijeme rada u minutama i tablica će izračunati troškove rada na temelju satnice i vremena rada."
 
 #: accounts/doctype/bank_guarantee/bank_guarantee.py:53
 msgid "Enter the name of the Beneficiary before submitting."
@@ -38096,7 +38128,7 @@ msgstr ""
 #. Subtitle of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
 msgid "Item, Customer, Supplier and Quotation"
-msgstr ""
+msgstr "Stavka, kupac, dobavljač i ponuda"
 
 #. Name of a report
 #: stock/report/item_wise_price_list_rate/item_wise_price_list_rate.json
@@ -39284,7 +39316,7 @@ msgstr ""
 msgctxt "Appointment Booking Settings"
 msgid "Leave blank for home.\n"
 "This is relative to site URL, for example \"about\" will redirect to \"https://yoursitename.com/about\""
-msgstr ""
+msgstr "Ostavite prazno za Početna. Ovo se odnosi na URL web-lokacije, na primjer \"o\" će preusmjeriti na \"https://yoursitename.com/about\""
 
 #. Description of the 'Release Date' (Date) field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -39441,7 +39473,7 @@ msgstr ""
 #. Title of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
 msgid "Let's begin your journey with ERPNext"
-msgstr ""
+msgstr "Započnimo vaše putovanje sa ERPNext-om"
 
 #. Label of an action in the Onboarding Step 'Purchase an Asset'
 #: assets/onboarding_step/asset_purchase/asset_purchase.json
@@ -39472,128 +39504,128 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link in the Home Workspace
 #: setup/workspace/home/home.json
 msgctxt "Letter Head"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Section Break field in DocType 'Packing Slip'
 #. Label of a Link field in DocType 'Packing Slip'
 #: stock/doctype/packing_slip/packing_slip.json
 msgctxt "Packing Slip"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 msgctxt "Request for Quotation"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Label of a Link field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Letter Head"
-msgstr "Zaglavlje pisma"
+msgstr ""
 
 #. Description of the 'Body Text' (Text Editor) field in DocType 'Dunning
 #. Letter Text'
@@ -39668,7 +39700,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Setup Your Letterhead'
 #: setup/onboarding_step/letterhead/letterhead.json
 msgid "Let’s setup your first Letter Head"
-msgstr ""
+msgstr "Postavimo vaš prvi memorandum"
 
 #. Label of an action in the Onboarding Step 'Selling Settings'
 #: selling/onboarding_step/selling_settings/selling_settings.json
@@ -62159,25 +62191,25 @@ msgstr ""
 #: manufacturing/doctype/routing/routing.json
 #: manufacturing/onboarding_step/routing/routing.json
 msgid "Routing"
-msgstr ""
+msgstr "Usmjeravanje"
 
 #. Label of a Link field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Routing"
-msgstr ""
+msgstr "Usmjeravanje"
 
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgctxt "Routing"
 msgid "Routing"
-msgstr ""
+msgstr "Usmjeravanje"
 
 #. Label of a Data field in DocType 'Routing'
 #: manufacturing/doctype/routing/routing.json
 msgctxt "Routing"
 msgid "Routing Name"
-msgstr ""
+msgstr "Naziv usmjeravanja"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:492
 msgid "Row #"
@@ -67083,7 +67115,7 @@ msgstr "Postavljanja"
 #. Title of an Onboarding Step
 #: setup/onboarding_step/letterhead/letterhead.json
 msgid "Setup Your Letterhead"
-msgstr ""
+msgstr "Postavite svoj memorandum"
 
 #. Title of an Onboarding Step
 #: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
@@ -69243,25 +69275,25 @@ msgstr ""
 #: stock/doctype/material_request/material_request_dashboard.py:17
 #: stock/workspace/stock/stock.json
 msgid "Stock"
-msgstr ""
+msgstr "Zaliha"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Stock"
-msgstr ""
+msgstr "Zaliha"
 
 #. Label of a Tab Break field in DocType 'Company'
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Stock"
-msgstr ""
+msgstr "Zaliha"
 
 #. Group in Incoterm's connections
 #: setup/doctype/incoterm/incoterm.json
 msgctxt "Incoterm"
 msgid "Stock"
-msgstr ""
+msgstr "Zaliha"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:50
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:73
@@ -78459,7 +78491,7 @@ msgstr ""
 #: setup/workspace/home/home.json stock/workspace/stock/stock.json
 msgctxt "UOM"
 msgid "Unit of Measure (UOM)"
-msgstr ""
+msgstr "Jedinica mjere (JM)"
 
 #: stock/doctype/item/item.py:377
 msgid "Unit of Measure {0} has been entered more than once in Conversion Factor Table"
@@ -82774,7 +82806,7 @@ msgstr ""
 #. Success message of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
 msgid "You're ready to start your journey with ERPNext"
-msgstr ""
+msgstr "Spremni ste da započnete svoje putovanje sa ERPNext-om"
 
 #. Option for the 'Provider' (Select) field in DocType 'Video'
 #: utilities/doctype/video/video.json
