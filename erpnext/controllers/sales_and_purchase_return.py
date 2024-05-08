@@ -486,6 +486,9 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 					source_doc.rejected_qty - (returned_qty_map.get("rejected_qty") or 0)
 				)
 
+				if source_parent.get("is_internal_supplier") and source_doc.get("delivery_note_item"):
+					target_doc.delivery_note_item = source_doc.delivery_note_item
+
 			target_doc.qty = -1 * flt(source_doc.qty - (returned_qty_map.get("qty") or 0))
 
 			if hasattr(target_doc, "stock_qty") and not return_against_rejected_qty:
@@ -549,6 +552,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			target_doc.dn_detail = source_doc.name
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
+
 		elif doctype == "Sales Invoice" or doctype == "POS Invoice":
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.customer, source_doc.name, doctype
@@ -569,6 +573,18 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
+
+		if doctype in ["Sales Invoice", "POS Invoice", "Delivery Note"]:
+			if source_parent.get("is_internal_customer"):
+				target_doc.qty = (
+					(flt(source_doc.stock_qty) - flt(source_doc.received_qty) - flt(source_doc.returned_qty))
+					/ (source_doc.conversion_factor or 1.0) * -1
+				)
+
+				if not target_doc.qty or target_doc.qty > 0:
+					frappe.throw(
+						_("The stock has not available for return. Please create the purchase return entry first.")
+					)
 
 		if source_doc.item_code:
 			item_details = frappe.get_cached_value(
