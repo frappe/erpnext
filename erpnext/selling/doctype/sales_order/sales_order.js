@@ -47,6 +47,7 @@ frappe.ui.form.on("Sales Order", {
 		frm.set_df_property('packed_items', 'cannot_add_rows', true);
 		frm.set_df_property('packed_items', 'cannot_delete_rows', true);
 	},
+<<<<<<< HEAD
 	refresh: function(frm) {
 		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
 			&& flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
@@ -57,6 +58,64 @@ frappe.ui.form.on("Sales Order", {
 					child_doctype: "Sales Order Detail",
 					cannot_add_row: false,
 				})
+=======
+
+	refresh: function (frm) {
+		if (frm.doc.docstatus === 1) {
+			if (
+				frm.doc.status !== "Closed" &&
+				flt(frm.doc.per_delivered, 2) < 100 &&
+				flt(frm.doc.per_billed, 2) < 100 &&
+				frm.has_perm("write")
+			) {
+				frm.add_custom_button(__("Update Items"), () => {
+					erpnext.utils.update_child_items({
+						frm: frm,
+						child_docname: "items",
+						child_doctype: "Sales Order Detail",
+						cannot_add_row: false,
+						has_reserved_stock: frm.doc.__onload && frm.doc.__onload.has_reserved_stock,
+					});
+				});
+
+				// Stock Reservation > Reserve button should only be visible if the SO has unreserved stock and no Pick List is created against the SO.
+				if (
+					frm.doc.__onload &&
+					frm.doc.__onload.has_unreserved_stock &&
+					flt(frm.doc.per_picked) === 0 &&
+					frappe.model.can_create("Stock Reservation Entry")
+				) {
+					frm.add_custom_button(
+						__("Reserve"),
+						() => frm.events.create_stock_reservation_entries(frm),
+						__("Stock Reservation")
+					);
+				}
+			}
+
+			// Stock Reservation > Unreserve button will be only visible if the SO has un-delivered reserved stock.
+			if (
+				frm.doc.__onload &&
+				frm.doc.__onload.has_reserved_stock &&
+				frappe.model.can_cancel("Stock Reservation Entry")
+			) {
+				frm.add_custom_button(
+					__("Unreserve"),
+					() => frm.events.cancel_stock_reservation_entries(frm),
+					__("Stock Reservation")
+				);
+			}
+
+			frm.doc.items.forEach((item) => {
+				if (flt(item.stock_reserved_qty) > 0 && frappe.model.can_read("Stock Reservation Entry")) {
+					frm.add_custom_button(
+						__("Reserved Stock"),
+						() => frm.events.show_reserved_stock(frm),
+						__("Stock Reservation")
+					);
+					return;
+				}
+>>>>>>> c29d955371 (fix(Sales Order): only show permitted actions)
 			});
 		}
 
@@ -66,6 +125,7 @@ frappe.ui.form.on("Sales Order", {
 	},
 
 	get_items_from_internal_purchase_order(frm) {
+<<<<<<< HEAD
 		frm.add_custom_button(__('Purchase Order'), () => {
 			erpnext.utils.map_current_doc({
 				method: 'erpnext.buying.doctype.purchase_order.purchase_order.make_inter_company_sales_order',
@@ -87,6 +147,37 @@ frappe.ui.form.on("Sales Order", {
 				}
 			});
 		}, __('Get Items From'));
+=======
+		if (!frappe.model.can_read("Purchase Order")) {
+			return;
+		}
+
+		frm.add_custom_button(
+			__("Purchase Order"),
+			() => {
+				erpnext.utils.map_current_doc({
+					method: "erpnext.buying.doctype.purchase_order.purchase_order.make_inter_company_sales_order",
+					source_doctype: "Purchase Order",
+					target: frm,
+					setters: [
+						{
+							label: "Supplier",
+							fieldname: "supplier",
+							fieldtype: "Link",
+							options: "Supplier",
+						},
+					],
+					get_query_filters: {
+						company: frm.doc.company,
+						is_internal_supplier: 1,
+						docstatus: 1,
+						status: ["!=", "Completed"],
+					},
+				});
+			},
+			__("Get Items From")
+		);
+>>>>>>> c29d955371 (fix(Sales Order): only show permitted actions)
 	},
 
 	// When multiple companies are set up. in case company name is changed set default company address
@@ -223,8 +314,22 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						}
 					}
 
+<<<<<<< HEAD
 					if (flt(doc.per_picked, 6) < 100 && flt(doc.per_delivered, 6) < 100) {
 						this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+=======
+					if (
+						(!doc.__onload || !doc.__onload.has_reserved_stock) &&
+						flt(doc.per_picked, 2) < 100 &&
+						flt(doc.per_delivered, 2) < 100 &&
+						frappe.model.can_create("Pick List")
+					) {
+						this.frm.add_custom_button(
+							__("Pick List"),
+							() => this.create_pick_list(),
+							__("Create")
+						);
+>>>>>>> c29d955371 (fix(Sales Order): only show permitted actions)
 					}
 
 					const order_is_a_sale = ["Sales", "Shopping Cart"].indexOf(doc.order_type) !== -1;
@@ -233,6 +338,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					const order_is_a_custom_sale = ["Sales", "Shopping Cart", "Maintenance"].indexOf(doc.order_type) === -1;
 
 					// delivery note
+<<<<<<< HEAD
 					if(flt(doc.per_delivered, 6) < 100 && (order_is_a_sale || order_is_a_custom_sale) && allow_delivery) {
 						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
@@ -269,9 +375,95 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						this.frm.add_custom_button(__('Subscription'), function() {
 							erpnext.utils.make_subscription(doc.doctype, doc.name)
 						}, __('Create'))
+=======
+					if (
+						flt(doc.per_delivered, 2) < 100 &&
+						(order_is_a_sale || order_is_a_custom_sale) &&
+						allow_delivery
+					) {
+						if (frappe.model.can_create("Delivery Note")) {
+							this.frm.add_custom_button(
+								__("Delivery Note"),
+								() => this.make_delivery_note_based_on_delivery_date(true),
+								__("Create")
+							);
+						}
+
+						if (frappe.model.can_create("Work Order")) {
+							this.frm.add_custom_button(
+								__("Work Order"),
+								() => this.make_work_order(),
+								__("Create")
+							);
+						}
 					}
 
-					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
+					// sales invoice
+					if (flt(doc.per_billed, 2) < 100 && frappe.model.can_create("Sales Invoice")) {
+						this.frm.add_custom_button(
+							__("Sales Invoice"),
+							() => me.make_sales_invoice(),
+							__("Create")
+						);
+					}
+
+					// material request
+					if (
+						(!doc.order_type ||
+							((order_is_a_sale || order_is_a_custom_sale) &&
+								flt(doc.per_delivered, 2) < 100)) &&
+						frappe.model.can_create("Material Request")
+					) {
+						this.frm.add_custom_button(
+							__("Material Request"),
+							() => this.make_material_request(),
+							__("Create")
+						);
+						this.frm.add_custom_button(
+							__("Request for Raw Materials"),
+							() => this.make_raw_material_request(),
+							__("Create")
+						);
+					}
+
+					// Make Purchase Order
+					if (!this.frm.doc.is_internal_customer && frappe.model.can_create("Purchase Order")) {
+						this.frm.add_custom_button(
+							__("Purchase Order"),
+							() => this.make_purchase_order(),
+							__("Create")
+						);
+					}
+
+					// maintenance
+					if (flt(doc.per_delivered, 2) < 100 && (order_is_maintenance || order_is_a_custom_sale)) {
+						if (frappe.model.can_create("Maintenance Visit")) {
+							this.frm.add_custom_button(
+								__("Maintenance Visit"),
+								() => this.make_maintenance_visit(),
+								__("Create")
+							);
+						}
+						if (frappe.model.can_create("Maintenance Schedule")) {
+							this.frm.add_custom_button(
+								__("Maintenance Schedule"),
+								() => this.make_maintenance_schedule(),
+								__("Create")
+							);
+						}
+					}
+
+					// project
+					if (flt(doc.per_delivered, 2) < 100 && frappe.model.can_create("Project")) {
+						this.frm.add_custom_button(__("Project"), () => this.make_project(), __("Create"));
+>>>>>>> c29d955371 (fix(Sales Order): only show permitted actions)
+					}
+
+					if (
+						doc.docstatus === 1 &&
+						!doc.inter_company_order_reference &&
+						frappe.model.can_create("Purchase Order")
+					) {
 						let me = this;
 						let internal = me.frm.doc.is_internal_customer;
 						if (internal) {
@@ -285,17 +477,46 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 				}
 				// payment request
+<<<<<<< HEAD
 				if(flt(doc.per_billed, precision('per_billed', doc)) < 100 + frappe.boot.sysdefaults.over_billing_allowance) {
 					this.frm.add_custom_button(__('Payment Request'), () => this.make_payment_request(), __('Create'));
 					this.frm.add_custom_button(__('Payment'), () => this.make_payment_entry(), __('Create'));
+=======
+				if (
+					flt(doc.per_billed, precision("per_billed", doc)) <
+					100 + frappe.boot.sysdefaults.over_billing_allowance
+				) {
+					if (frappe.model.can_create("Payment Request")) {
+						this.frm.add_custom_button(
+							__("Payment Request"),
+							() => this.make_payment_request(),
+							__("Create")
+						);
+					}
+
+					if (frappe.model.can_create("Payment Entry")) {
+						this.frm.add_custom_button(
+							__("Payment"),
+							() => this.make_payment_entry(),
+							__("Create")
+						);
+					}
+>>>>>>> c29d955371 (fix(Sales Order): only show permitted actions)
 				}
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 		}
 
+<<<<<<< HEAD
 		if (this.frm.doc.docstatus===0) {
 			this.frm.add_custom_button(__('Quotation'),
 				function() {
+=======
+		if (this.frm.doc.docstatus === 0 && frappe.model.can_read("Quotation")) {
+			this.frm.add_custom_button(
+				__("Quotation"),
+				function () {
+>>>>>>> c29d955371 (fix(Sales Order): only show permitted actions)
 					let d = erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.quotation.quotation.make_sales_order",
 						source_doctype: "Quotation",
