@@ -583,11 +583,7 @@
    "link_fieldname": "party"
   }
  ],
-<<<<<<< HEAD
- "modified": "2024-03-16 19:41:47.971815",
-=======
  "modified": "2024-05-08 18:03:20.716169",
->>>>>>> 9c3a105f85 (fix: consistent use of "Address & Contact" (#41386))
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
