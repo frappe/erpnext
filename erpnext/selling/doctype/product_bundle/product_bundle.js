@@ -12,8 +12,8 @@ frappe.ui.form.on("Product Bundle", {
 
 		frm.set_query("item_code", "items", () => {
 			return {
-				"filters": {
-				  "has_variants": 0
+				filters: {
+					has_variants: 0
 				},
 			};
 		});
