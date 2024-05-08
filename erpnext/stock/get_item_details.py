@@ -299,11 +299,11 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 				asset_category=item.asset_category,
 				company=args.company,
 			)
-		elif (
-			args.get("doctype") == "Purchase Invoice"
-			or args.get("doctype") == "Purchase Receipt"
-			or args.get("doctype") == "Purchase Order"
-			or args.get("doctype") == "Material Request"
+		elif args.get("doctype") in (
+			"Purchase Invoice",
+			"Purchase Receipt",
+			"Purchase Order",
+			"Material Request",
 		):
 			from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 
