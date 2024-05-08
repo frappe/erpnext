@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-06 11:46\n"
+"PO-Revision-Date: 2024-05-08 12:01\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -460,7 +460,7 @@ msgstr ""
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "%  Delivered"
-msgstr ""
+msgstr "%  تحویل داده شده"
 
 #. Label of a Percent field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -529,13 +529,13 @@ msgstr "% از کل بزرگ"
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "% Ordered"
-msgstr ""
+msgstr "% سفارش داده شده"
 
 #. Label of a Percent field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "% Picked"
-msgstr ""
+msgstr "% انتخاب شده"
 
 #. Label of a Percent field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -553,13 +553,13 @@ msgstr ""
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "% Progress"
-msgstr ""
+msgstr "% پیشرفت"
 
 #. Label of a Percent field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "% Received"
-msgstr ""
+msgstr "% دریافت شده"
 
 #. Label of a Percent field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
@@ -884,7 +884,7 @@ msgstr "2 سالانه"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "201-500"
-msgstr ""
+msgstr "201-500"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
@@ -913,7 +913,7 @@ msgstr "30 دقیقه"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:119
 msgid "30-60"
-msgstr ""
+msgstr "30-60"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "30-60 Days"
@@ -941,7 +941,7 @@ msgstr "501-1000"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "51-200"
-msgstr ""
+msgstr "51-200"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
@@ -963,7 +963,7 @@ msgstr "6 ساعت"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:120
 msgid "60-90"
-msgstr ""
+msgstr "60-90"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "60-90 Days"
@@ -1323,7 +1323,7 @@ msgstr "AB-"
 #: regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgctxt "Import Supplier Invoice"
 msgid "ACC-PINV-.YYYY.-"
-msgstr ""
+msgstr "ACC-PINV-.YYYY.-"
 
 #. Label of a Date field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
@@ -1384,7 +1384,7 @@ msgstr ""
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Abbr"
-msgstr ""
+msgstr "مخفف"
 
 #. Label of a Data field in DocType 'Item Attribute Value'
 #: stock/doctype/item_attribute_value/item_attribute_value.json
@@ -3895,12 +3895,12 @@ msgstr "یک یادداشت اضافه کنید"
 #. Title of an Onboarding Step
 #: assets/onboarding_step/existing_asset/existing_asset.json
 msgid "Add an Existing Asset"
-msgstr ""
+msgstr "افزودن یک دارایی موجود"
 
 #. Label of an action in the Onboarding Step 'Add an Existing Asset'
 #: assets/onboarding_step/existing_asset/existing_asset.json
 msgid "Add an existing Asset"
-msgstr ""
+msgstr "افزودن یک دارایی موجود"
 
 #: www/book_appointment/index.html:42
 msgid "Add details"
@@ -8519,7 +8519,7 @@ msgstr "دارایی برای {0} ایجاد نشده است. شما باید د
 #. Subtitle of the Module Onboarding 'Assets'
 #: assets/module_onboarding/assets/assets.json
 msgid "Assets, Depreciations, Repairs, and more."
-msgstr ""
+msgstr "دارایی ها، استهلاک ها، تعمیرات و موارد دیگر."
 
 #: controllers/buying_controller.py:748
 msgid "Asset{} {assets_link} created for {}"
@@ -10338,12 +10338,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Barrel (Oil)"
-msgstr ""
+msgstr "بشکه (نفت)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Barrel(Beer)"
-msgstr ""
+msgstr "بشکه (آبجو)"
 
 #. Label of a Currency field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -12056,7 +12056,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cable Length"
-msgstr ""
+msgstr "طول کابل"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -13518,7 +13518,7 @@ msgstr "چت کنید"
 #. Label of an action in the Onboarding Step 'Check Stock Ledger'
 #: stock/onboarding_step/check_stock_ledger_report/check_stock_ledger_report.json
 msgid "Check Stock Ledger"
-msgstr ""
+msgstr "دفتر کل موجودی را چک کنید"
 
 #. Title of an Onboarding Step
 #. Label of an action in the Onboarding Step 'Check Stock Projected Qty'
@@ -18338,7 +18338,7 @@ msgstr "پیش فاکتور ایجاد کنید"
 #. Title of an Onboarding Step
 #: manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
 msgid "Create Raw Materials"
-msgstr ""
+msgstr "ایجاد مواد خام"
 
 #. Label of a Button field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
@@ -21435,12 +21435,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Decilitre"
-msgstr ""
+msgstr "دسی لیتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Decimeter"
-msgstr ""
+msgstr "دسی متر"
 
 #: public/js/utils/sales_common.js:501
 msgid "Declare Lost"
@@ -24303,7 +24303,7 @@ msgstr "تخفیف"
 
 #: selling/page/point_of_sale/pos_item_details.js:173
 msgid "Discount (%)"
-msgstr ""
+msgstr "تخفیف (%)"
 
 #. Label of a Float field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -24547,7 +24547,7 @@ msgstr "تخفیف و حاشیه"
 
 #: selling/page/point_of_sale/pos_item_cart.js:791
 msgid "Discount cannot be greater than 100%"
-msgstr ""
+msgstr "تخفیف نمی تواند بیشتر از 100% باشد"
 
 #: setup/doctype/authorization_rule/authorization_rule.py:93
 msgid "Discount must be less than 100"
@@ -24996,7 +24996,7 @@ msgstr "سند {0} با موفقیت پاک نشد"
 
 #: setup/install.py:146
 msgid "Documentation"
-msgstr ""
+msgstr "مستندات"
 
 #. Option for the 'Shipment Type' (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -25024,7 +25024,7 @@ msgstr "تنظیمات دامنه"
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Don't Create Loyalty Points"
-msgstr ""
+msgstr "امتیاز وفاداری ایجاد نکنید"
 
 #. Label of a Check field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
@@ -25758,13 +25758,13 @@ msgstr "EAN"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "EAN-12"
-msgstr ""
+msgstr "EAN-12"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "EAN-8"
-msgstr ""
+msgstr "EAN-8"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -30249,7 +30249,7 @@ msgstr "پرداخت های آینده"
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:235
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:159
 msgid "G - D"
-msgstr ""
+msgstr "G - D"
 
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:172
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:240
@@ -31438,7 +31438,7 @@ msgstr "نمای رشد"
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:245
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:169
 msgid "H - F"
-msgstr ""
+msgstr "H - F"
 
 #. Name of a role
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.json
@@ -31486,7 +31486,7 @@ msgstr "نیم سال"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hand"
-msgstr ""
+msgstr "دست"
 
 #: setup/setup_wizard/operations/install_fixtures.py:179
 msgid "Hardware"
@@ -31666,12 +31666,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectometer"
-msgstr ""
+msgstr "هکتومتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectopascal"
-msgstr ""
+msgstr "هکتوپاسکال"
 
 #. Label of a Int field in DocType 'Shipment Parcel'
 #: stock/doctype/shipment_parcel/shipment_parcel.json
@@ -31983,7 +31983,7 @@ msgstr "هر چند وقت یکبار پروژه باید از هزینه کل �
 #. Title of an Onboarding Step
 #: setup/onboarding_step/navigation_help/navigation_help.json
 msgid "How to Navigate in ERPNext"
-msgstr ""
+msgstr "نحوه پیمایش در ERPNext"
 
 #. Label of a Float field in DocType 'Timesheet Detail'
 #: projects/doctype/timesheet_detail/timesheet_detail.json
@@ -32019,25 +32019,25 @@ msgstr "من - ک"
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "IBAN"
-msgstr ""
+msgstr "شماره حساب بین‌المللی (IBAN)"
 
 #. Label of a Data field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgctxt "Bank Guarantee"
 msgid "IBAN"
-msgstr ""
+msgstr "شماره حساب بین‌المللی (IBAN)"
 
 #. Label of a Data field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "IBAN"
-msgstr ""
+msgstr "شماره حساب بین‌المللی (IBAN)"
 
 #. Label of a Read Only field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "IBAN"
-msgstr ""
+msgstr "شماره حساب بین‌المللی (IBAN)"
 
 #: accounts/doctype/bank_account/bank_account.py:99
 #: accounts/doctype/bank_account/bank_account.py:102
@@ -32064,7 +32064,7 @@ msgstr "آدرس آی پی"
 #. Name of a report
 #: regional/report/irs_1099/irs_1099.json
 msgid "IRS 1099"
-msgstr ""
+msgstr "IRS 1099"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -32076,13 +32076,13 @@ msgstr "شابک"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "ISBN-10"
-msgstr ""
+msgstr "ISBN-10"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "ISBN-13"
-msgstr ""
+msgstr "ISBN-13"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -32118,7 +32118,7 @@ msgstr "شناسایی تصمیم گیرندگان"
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Idle"
-msgstr ""
+msgstr "بیکار (Idle)"
 
 #. Description of the 'Book Deferred Entries Based On' (Select) field in
 #. DocType 'Accounts Settings'
@@ -32912,7 +32912,7 @@ msgstr "وارد کردن داده‌ها"
 #. Title of an Onboarding Step
 #: setup/onboarding_step/data_import/data_import.json
 msgid "Import Data from Spreadsheet"
-msgstr ""
+msgstr "وارد کردن داده ها از صفحه گسترده"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:71
 msgid "Import Day Book Data"
@@ -34506,17 +34506,17 @@ msgstr "معرفی"
 #. Title of an Onboarding Step
 #: assets/onboarding_step/introduction_to_assets/introduction_to_assets.json
 msgid "Introduction to Assets"
-msgstr ""
+msgstr "مقدمه ای بر دارایی ها"
 
 #. Title of an Onboarding Step
 #: crm/onboarding_step/introduction_to_crm/introduction_to_crm.json
 msgid "Introduction to CRM"
-msgstr ""
+msgstr "مقدمه ای بر CRM"
 
 #. Title of an Onboarding Step
 #: selling/onboarding_step/introduction_to_selling/introduction_to_selling.json
 msgid "Introduction to Selling"
-msgstr ""
+msgstr "مقدمه ای بر فروش"
 
 #. Title of an Onboarding Step
 #: stock/onboarding_step/introduction_to_stock_entry/introduction_to_stock_entry.json
@@ -38262,7 +38262,7 @@ msgstr "آیتم‌ها"
 #. Label of a Card Break in the Buying Workspace
 #: buying/workspace/buying/buying.json
 msgid "Items & Pricing"
-msgstr ""
+msgstr "آیتم‌ها و قیمت"
 
 #. Label of a Card Break in the Stock Workspace
 #: stock/workspace/stock/stock.json
@@ -38788,7 +38788,7 @@ msgstr ""
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "LIFO"
-msgstr ""
+msgstr "LIFO"
 
 #. Option for the 'Default Valuation Method' (Select) field in DocType 'Stock
 #. Settings'
@@ -39174,7 +39174,7 @@ msgstr "سرنخ‌ها به شما کمک می‌کنند کسب‌وکار د�
 #. Label of a shortcut in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Learn Accounting"
-msgstr ""
+msgstr "حسابداری یاد بگیرید"
 
 #. Label of a shortcut in the Stock Workspace
 #: stock/workspace/stock/stock.json
@@ -39199,7 +39199,7 @@ msgstr "مدیریت پروژه را یاد بگیرید"
 #. Label of a shortcut in the Selling Workspace
 #: selling/workspace/selling/selling.json
 msgid "Learn Sales Management"
-msgstr ""
+msgstr "مدیریت فروش را یاد بگیرید"
 
 #. Label of an action in the Onboarding Step 'How to Navigate in ERPNext'
 #: setup/onboarding_step/navigation_help/navigation_help.json
@@ -39373,7 +39373,7 @@ msgstr "بیایید حساب ها و مالیات های خود را راه‌�
 #. Title of the Module Onboarding 'CRM'
 #: crm/module_onboarding/crm/crm.json
 msgid "Let's Set Up Your CRM."
-msgstr ""
+msgstr "بیایید CRM خود را راه‌اندازی کنیم."
 
 #. Title of the Module Onboarding 'Assets'
 #: assets/module_onboarding/assets/assets.json
@@ -39393,7 +39393,7 @@ msgstr "بیایید ماژول تولید را راه‌اندازی کنیم."
 #. Title of the Module Onboarding 'Selling'
 #: selling/module_onboarding/selling/selling.json
 msgid "Let's Set Up the Selling Module."
-msgstr ""
+msgstr "بیایید ماژول فروش را راه‌اندازی کنیم."
 
 #. Title of the Module Onboarding 'Stock'
 #: stock/module_onboarding/stock/stock.json
