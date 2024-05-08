@@ -163,22 +163,6 @@ class PaymentEntry(AccountsController):
 			alert=True,
 		)
 
-	def validate_advance_account_currency(self):
-		if self.book_advance_payments_in_separate_party_account is True:
-			company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
-			if self.payment_type == "Receive" and self.paid_from_account_currency != company_currency:
-				frappe.throw(
-					_("Booking advances in foreign currency account: {0} ({1}) is not yet supported.").format(
-						frappe.bold(self.paid_from), frappe.bold(self.paid_from_account_currency)
-					)
-				)
-			if self.payment_type == "Pay" and self.paid_to_account_currency != company_currency:
-				frappe.throw(
-					_("Booking advances in foreign currency account: {0} ({1}) is not yet supported.").format(
-						frappe.bold(self.paid_to), frappe.bold(self.paid_to_account_currency)
-					)
-				)
-
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
