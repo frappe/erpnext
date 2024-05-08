@@ -240,9 +240,15 @@ def merge_similar_entries(gl_map, precision=None):
 			same_head.debit_in_account_currency = flt(same_head.debit_in_account_currency) + flt(
 				entry.debit_in_account_currency
 			)
+			same_head.debit_in_transaction_currency = flt(same_head.debit_in_transaction_currency) + flt(
+				entry.debit_in_transaction_currency
+			)
 			same_head.credit = flt(same_head.credit) + flt(entry.credit)
 			same_head.credit_in_account_currency = flt(same_head.credit_in_account_currency) + flt(
 				entry.credit_in_account_currency
+			)
+			same_head.credit_in_transaction_currency = flt(same_head.credit_in_transaction_currency) + flt(
+				entry.credit_in_transaction_currency
 			)
 		else:
 			merged_gl_map.append(entry)
