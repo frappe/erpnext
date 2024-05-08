@@ -1241,8 +1241,6 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		target.shipping_rule = ""
 		target.tc_name = ""
 		target.terms = ""
-		target.payment_terms_template = ""
-		target.payment_schedule = ""
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:
@@ -1373,7 +1371,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.tc_name = ""
 		target.terms = ""
 		target.payment_terms_template = ""
-		target.payment_schedule = ""
+		target.payment_schedule = []
 
 		if is_drop_ship_order(target):
 			target.customer = source.customer
