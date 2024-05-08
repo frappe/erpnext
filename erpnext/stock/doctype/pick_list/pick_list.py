@@ -845,6 +845,7 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 
 		picked_qty = picked_item_details.get(key, {}).get("picked_qty", 0)
 		if not picked_qty:
+			filterd_locations.append(row)
 			continue
 		if picked_qty > row.qty:
 			row.qty = 0
