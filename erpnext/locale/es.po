@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-01 09:40\n"
+"PO-Revision-Date: 2024-05-09 12:03\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -614,7 +614,7 @@ msgstr "'Cuenta' en la sección Contabilidad de Cliente {0}"
 
 #: selling/doctype/sales_order/sales_order.py:269
 msgid "'Allow Multiple Sales Orders Against a Customer's Purchase Order'"
-msgstr ""
+msgstr "'Permitir múltiples órdenes de venta contra la orden de compra de un cliente'"
 
 #: controllers/trends.py:56
 msgid "'Based On' and 'Group By' can not be same"
@@ -6062,7 +6062,7 @@ msgstr "Nombre Alternativo del Artículo"
 
 #: selling/doctype/quotation/quotation.js:360
 msgid "Alternative Items"
-msgstr ""
+msgstr "Ítems Alternativos"
 
 #: stock/doctype/item_alternative/item_alternative.py:37
 msgid "Alternative item must not be same as item code"
@@ -12841,7 +12841,7 @@ msgstr ""
 
 #: accounts/doctype/account/account.py:388
 msgid "Cannot convert to Group because Account Type is selected."
-msgstr ""
+msgstr "No se puede convertir a Grupo porque Tipo de Cuenta está seleccionado."
 
 #: accounts/doctype/account/account.py:265
 msgid "Cannot covert to Group because Account Type is selected."
@@ -31504,7 +31504,7 @@ msgstr ""
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Has Alternative Item"
-msgstr ""
+msgstr "Tiene Ítem Alternativo"
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -62801,11 +62801,11 @@ msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:480
 msgid "Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account"
-msgstr ""
+msgstr "Fila {0}: Cabecera de Gasto cambiada a {1} porque la cuenta {2} no está vinculada al almacén {3} o no es la cuenta de inventario por defecto"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:505
 msgid "Row {0}: Expense Head changed to {1} because expense is booked against this account in Purchase Receipt {2}"
-msgstr ""
+msgstr "Fila {0}: Cabecera de Gasto cambiada a {1} porque el gasto se contabiliza contra esta cuenta en el Recibo de Compra {2}"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:110
 msgid "Row {0}: For Supplier {1}, Email Address is Required to send an email"
