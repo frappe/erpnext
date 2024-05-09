@@ -1341,7 +1341,7 @@ class PaymentEntry(AccountsController):
 
 		dr_or_cr, account = self.get_dr_and_account_for_advances(invoice)
 		args_dict["account"] = account
-		args_dict[dr_or_cr] = invoice.allocated_amount
+		args_dict[dr_or_cr] = self.calculate_base_allocated_amount_for_reference(invoice)
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
 		args_dict.update(
 			{
@@ -1360,7 +1360,7 @@ class PaymentEntry(AccountsController):
 		args_dict[dr_or_cr + "_in_account_currency"] = 0
 		dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 		args_dict["account"] = self.party_account
-		args_dict[dr_or_cr] = invoice.allocated_amount
+		args_dict[dr_or_cr] = self.calculate_base_allocated_amount_for_reference(invoice)
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
 		args_dict.update(
 			{
