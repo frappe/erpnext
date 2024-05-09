@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-08 12:02\n"
+"PO-Revision-Date: 2024-05-09 12:03\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -428,7 +428,9 @@ msgstr ""
 msgid "# Update Stock Opening Balance\n"
 "It’s an entry to update the stock balance of an item, in a warehouse, on a date and time you are going live on ERPNext.\n\n"
 "Once opening stocks are updated, you can create transactions like manufacturing and stock deliveries, where this opening stock will be consumed."
-msgstr ""
+msgstr "# Stok Açılış Bakiyesini Güncelle\n"
+"ERPNext'te canlıya geçtiğiniz tarih ve saatte, bir ürünün bir depodaki stok bakiyesini güncellemek için yapılan bir kayıttır.\n\n"
+"Açılış stokları güncellendiğinde, bu açılış stokunun tüketileceği üretim ve stok teslimatları gibi işlemleri oluşturabilirsiniz."
 
 #. Description of the Onboarding Step 'Updating Opening Balances'
 #: accounts/onboarding_step/updating_opening_balances/updating_opening_balances.json
@@ -1286,7 +1288,7 @@ msgstr "Göndermek için bir sürücü ayarlanmalıdır."
 #. Description of a DocType
 #: stock/doctype/warehouse/warehouse.json
 msgid "A logical Warehouse against which stock entries are made."
-msgstr ""
+msgstr "Stok girişlerinin yapıldığı mantıksal bir Depo."
 
 #: templates/emails/confirm_appointment.html:2
 msgid "A new appointment has been created for you with {0}"
@@ -3623,7 +3625,7 @@ msgstr "Gerçek Miktar {0} / Bekleyen Miktar {1}"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Actual Qty: Quantity available in the warehouse."
-msgstr ""
+msgstr "Gerçek Miktar: Depoda mevcut olan miktar."
 
 #: stock/report/item_shortage_report/item_shortage_report.py:95
 msgid "Actual Quantity"
@@ -5491,7 +5493,7 @@ msgstr ""
 
 #: manufacturing/doctype/work_order/work_order.js:916
 msgid "All the required items (raw materials) will be fetched from BOM and populated in this table. Here you can also change the Source Warehouse for any item. And during the production, you can track transferred raw materials from this table."
-msgstr ""
+msgstr "Tüm gerekli malzemeler (hammadde) Ürün Ağacı'ndan alınarak bu tabloya eklenir. Burada herhangi bir ürün için Kaynak Depo'yu da değiştirebilirsiniz. Üretim sırasında, bu tablodan transfer edilen hammaddeleri takip edebilirsiniz."
 
 #: stock/doctype/delivery_note/delivery_note.py:975
 msgid "All these items have already been Invoiced/Returned"
@@ -7204,7 +7206,7 @@ msgstr ""
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:37
 msgid "Any one of following filters required: warehouse, Item Code, Item Group"
-msgstr ""
+msgstr "Aşağıdaki filtrelerden herhangi biri gereklidir: Depo, Ürün Kodu, Ürün Grubu"
 
 #. Label of a Currency field in DocType 'Landed Cost Item'
 #: stock/doctype/landed_cost_item/landed_cost_item.json
@@ -7778,7 +7780,7 @@ msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.py:916
 msgid "As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
-msgstr ""
+msgstr "Yeterli Alt Montaj Ürünleri mevcut olduğundan, {0} Deposu için İş Emri gerekli değildir."
 
 #: manufacturing/doctype/production_plan/production_plan.py:1614
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
@@ -8425,7 +8427,7 @@ msgstr ""
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1367
 msgid "Asset sold"
-msgstr ""
+msgstr "Satılan Varlık"
 
 #: assets/doctype/asset/asset.py:161
 msgid "Asset submitted"
@@ -8604,7 +8606,7 @@ msgstr ""
 
 #: stock/doctype/stock_entry/stock_entry.py:618
 msgid "At least one warehouse is mandatory"
-msgstr ""
+msgstr "En az bir Depo zorunludur"
 
 #: manufacturing/doctype/routing/routing.py:50
 msgid "At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2}"
@@ -9690,15 +9692,15 @@ msgstr ""
 #: manufacturing/doctype/bom_update_batch/bom_update_batch.json
 msgctxt "BOM Update Batch"
 msgid "BOMs Updated"
-msgstr ""
+msgstr "Ürün Ağaçları Güncellendi"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:251
 msgid "BOMs created successfully"
-msgstr ""
+msgstr "Ürün Ağaçları Başarıyla Oluşturuldu"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:261
 msgid "BOMs creation failed"
-msgstr ""
+msgstr "Ürün Ağaçları Oluşturma Başarısız Oldu"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:210
 msgid "BOMs creation has been enqueued, kindly check the status after some time"
@@ -10822,7 +10824,7 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:254
 msgid "Batch {0} and Warehouse"
-msgstr ""
+msgstr "Parti {0} ve Depo"
 
 #: stock/doctype/stock_entry/stock_entry.py:2459
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:284
@@ -11394,7 +11396,7 @@ msgstr ""
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgctxt "Production Plan Sub Assembly Item"
 msgid "Bom No"
-msgstr ""
+msgstr "Ürün Ağacı No"
 
 #: accounts/doctype/payment_entry/payment_entry.py:236
 msgid "Book Advance Payments as Liability option is chosen. Paid From account changed from {0} to {1}."
@@ -18283,7 +18285,7 @@ msgstr ""
 #: buying/doctype/supplier/supplier.js:224
 #: selling/doctype/customer/customer.js:257
 msgid "Create Link"
-msgstr ""
+msgstr "Bağlantı Oluştur"
 
 #. Label of a Check field in DocType 'Opening Invoice Creation Tool'
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
@@ -18301,7 +18303,7 @@ msgstr ""
 
 #: public/js/call_popup/call_popup.js:128
 msgid "Create New Customer"
-msgstr ""
+msgstr "Yeni Müşteri Oluştur"
 
 #: public/js/call_popup/call_popup.js:134
 msgid "Create New Lead"
@@ -18491,7 +18493,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: selling/onboarding_step/create_a_sales_order/create_a_sales_order.json
 msgid "Create a Sales Order"
-msgstr ""
+msgstr "Satış Siparişi Oluştur"
 
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_a_supplier/create_a_supplier.json
@@ -18643,7 +18645,7 @@ msgstr ""
 
 #: setup/doctype/employee/employee.js:75
 msgid "Creating User..."
-msgstr ""
+msgstr "Kullanıcı Oluşturuluyor..."
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:56
 msgid "Creating {0} Invoice"
@@ -24765,7 +24767,7 @@ msgstr ""
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Distinct Item and Warehouse"
-msgstr ""
+msgstr "Farklı Ürün ve Depo"
 
 #. Description of a DocType
 #: stock/doctype/serial_no/serial_no.json
@@ -26079,7 +26081,7 @@ msgstr ""
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "Email Address"
-msgstr ""
+msgstr "E-posta Adresi"
 
 #: www/book_appointment/index.html:52
 msgid "Email Address (required)"
@@ -32288,7 +32290,7 @@ msgstr ""
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "If enabled, the system will create material requests even if the stock exists in the 'Raw Materials Warehouse'."
-msgstr ""
+msgstr "Sistem, 'Ham Maddeler Deposu'nda stok bulunsa bile malzeme talebi oluşturur."
 
 #. Description of the 'Variant Of' (Link) field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -32301,7 +32303,7 @@ msgstr ""
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions."
-msgstr ""
+msgstr "Sistem, bu Roldeki kullanıcılara belirli bir ürün ve depo için en son stok işleminden daha eski tarihli stok işlemlerini oluşturma veya değiştirme izni verir. Boş bırakılırsa, tüm kullanıcılara geriye dönük işlemleri oluşturma ve düzenleme yetkisi verilir."
 
 #. Description of the 'To Package No.' (Int) field in DocType 'Packing Slip'
 #: stock/doctype/packing_slip/packing_slip.json
@@ -33221,7 +33223,7 @@ msgstr ""
 
 #: stock/doctype/material_request/material_request.js:414
 msgid "In Transit Warehouse"
-msgstr ""
+msgstr "Taşıma Deposu"
 
 #: stock/report/stock_balance/stock_balance.py:450
 msgid "In Value"
@@ -33429,7 +33431,7 @@ msgstr ""
 
 #: stock/doctype/item/item.js:927
 msgid "In this section, you can define Company-wide transaction-related defaults for this Item. Eg. Default Warehouse, Default Price List, Supplier, etc."
-msgstr ""
+msgstr "Bu bölümde, bu ürün için Şirket Genelinde yapılacak işlemlerle ilgili varsayılanları tanımlayabilirsiniz. Örneğin; Varsayılan Depo, Varsayılan Fiyat Listesi, Tedarikçi vb."
 
 #. Option for the 'Status' (Select) field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
@@ -35401,85 +35403,85 @@ msgstr ""
 #: accounts/doctype/cost_center/cost_center_tree.js:30
 #: stock/doctype/warehouse/warehouse_tree.js:20
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Company'
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Cost Center'
 #: accounts/doctype/cost_center/cost_center.json
 msgctxt "Cost Center"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Customer Group'
 #: setup/doctype/customer_group/customer_group.json
 msgctxt "Customer Group"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Department'
 #: setup/doctype/department/department.json
 msgctxt "Department"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Item Group'
 #: setup/doctype/item_group/item_group.json
 msgctxt "Item Group"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Ledger Merge'
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgctxt "Ledger Merge"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Location'
 #: assets/doctype/location/location.json
 msgctxt "Location"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Quality Procedure'
 #: quality_management/doctype/quality_procedure/quality_procedure.json
 msgctxt "Quality Procedure"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
 msgctxt "Sales Person"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Supplier Group'
 #: setup/doctype/supplier_group/supplier_group.json
 msgctxt "Supplier Group"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Territory'
 #: setup/doctype/territory/territory.json
 msgctxt "Territory"
 msgid "Is Group"
-msgstr ""
+msgstr "Grup"
 
 #. Label of a Check field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
@@ -36852,44 +36854,44 @@ msgstr ""
 #: stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.js:24
 #: stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.py:94
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Option for the 'Customer or Item' (Select) field in DocType 'Authorization
 #. Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgctxt "Authorization Rule"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Closing Stock Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link in the Buying Workspace
 #. Label of a Link in the Selling Workspace
@@ -36898,50 +36900,50 @@ msgstr ""
 #: stock/workspace/stock/stock.json
 msgctxt "Item Group"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Job Card Item'
 #: manufacturing/doctype/job_card_item/job_card_item.json
 msgctxt "Job Card Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Opportunity Item'
 #: crm/doctype/opportunity_item/opportunity_item.json
 msgctxt "Opportunity Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'POS Item Group'
 #: accounts/doctype/pos_item_group/pos_item_group.json
 msgctxt "POS Item Group"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Option for the 'Restrict Items Based On' (Select) field in DocType 'Party
 #. Specific Item'
 #: selling/doctype/party_specific_item/party_specific_item.json
 msgctxt "Party Specific Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Data field in DocType 'Pick List Item'
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgctxt "Pick List Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Option for the 'Apply On' (Select) field in DocType 'Pricing Rule'
 #. Option for the 'Apply Rule On Other' (Select) field in DocType 'Pricing
@@ -36950,13 +36952,13 @@ msgstr ""
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Pricing Rule Item Group'
 #: accounts/doctype/pricing_rule_item_group/pricing_rule_item_group.json
 msgctxt "Pricing Rule Item Group"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Option for the 'Apply On' (Select) field in DocType 'Promotional Scheme'
 #. Option for the 'Apply Rule On Other' (Select) field in DocType 'Promotional
@@ -36965,97 +36967,97 @@ msgstr ""
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Request for Quotation Item'
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 msgctxt "Request for Quotation Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
 msgctxt "Serial No"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Serial and Batch Bundle'
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Data field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Target Detail'
 #: setup/doctype/target_detail/target_detail.json
 msgctxt "Target Detail"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Tax Rule'
 #: accounts/doctype/tax_rule/tax_rule.json
 msgctxt "Tax Rule"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Link field in DocType 'Website Item Group'
 #: setup/doctype/website_item_group/website_item_group.json
 msgctxt "Website Item Group"
 msgid "Item Group"
-msgstr ""
+msgstr "Ürün Grubu"
 
 #. Label of a Table field in DocType 'Item Group'
 #: setup/doctype/item_group/item_group.json
@@ -37114,7 +37116,7 @@ msgstr ""
 #: stock/doctype/warehouse/warehouse.json
 #: stock/doctype/warehouse_type/warehouse_type.json
 msgid "Item Manager"
-msgstr ""
+msgstr "Ürün Yöneticisi"
 
 #. Name of a DocType
 #: stock/doctype/item_manufacturer/item_manufacturer.json
@@ -41927,7 +41929,7 @@ msgstr ""
 
 #: manufacturing/doctype/job_card/job_card.py:643
 msgid "Materials needs to be transferred to the work in progress warehouse for the job card {0}"
-msgstr ""
+msgstr "{0} nolu İş Kartı için malzemelerin devam eden işler deposuna aktarılması gerekiyor"
 
 #. Label of a Currency field in DocType 'Promotional Scheme Price Discount'
 #: accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
@@ -51167,7 +51169,7 @@ msgstr ""
 
 #: setup/doctype/employee/employee.js:66
 msgid "Please enter Preferred Contact Email"
-msgstr ""
+msgstr "Lütfen Tercih Edilen E-posta adresini girin"
 
 #: manufacturing/doctype/work_order/work_order.js:73
 msgid "Please enter Production Item first"
@@ -51211,7 +51213,7 @@ msgstr "Lütfen Depo ve Tarihi giriniz"
 
 #: assets/doctype/asset_repair/asset_repair.py:175
 msgid "Please enter Warehouse from which Stock Items consumed during the Repair were taken."
-msgstr ""
+msgstr "Lütfen Onarım sırasında tüketilen Malzemelerin alındığı Depoyu girin."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:613
 #: accounts/doctype/sales_invoice/sales_invoice.py:1042
@@ -51566,7 +51568,7 @@ msgstr ""
 
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:34
 msgid "Please select either the Item or Warehouse filter to generate the report."
-msgstr ""
+msgstr "Raporu oluşturmak için lütfen Ürün veya Depo filtresini seçin."
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.py:228
 msgid "Please select item code"
@@ -56074,7 +56076,7 @@ msgstr ""
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Purchase User"
-msgstr ""
+msgstr "Satın Alma Kullanıcısı"
 
 #: buying/report/purchase_order_trends/purchase_order_trends.py:51
 msgid "Purchase Value"
@@ -56207,7 +56209,7 @@ msgstr ""
 
 #: stock/doctype/putaway_rule/putaway_rule.py:52
 msgid "Putaway Rule already exists for Item {0} in Warehouse {1}."
-msgstr ""
+msgstr "{1} Deposundaki {0} Ürünü için zaten bir Paketten Çıkarma Kuralı mevcuttur."
 
 #: accounts/report/gross_profit/gross_profit.py:255
 #: buying/report/purchase_order_analysis/purchase_order_analysis.py:200
@@ -57294,7 +57296,7 @@ msgstr ""
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Quantity and Warehouse"
-msgstr ""
+msgstr "Miktar ve Depo"
 
 #: stock/doctype/stock_entry/stock_entry.py:1307
 msgid "Quantity in row {0} ({1}) must be same as manufactured quantity {2}"
@@ -57522,7 +57524,7 @@ msgstr ""
 #: crm/report/campaign_efficiency/campaign_efficiency.py:22
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:28
 msgid "Quot Count"
-msgstr ""
+msgstr "Teklif Sayısı"
 
 #: crm/report/campaign_efficiency/campaign_efficiency.py:26
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:32
@@ -61523,7 +61525,7 @@ msgstr ""
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:310
 msgid "Return Qty from Rejected Warehouse"
-msgstr ""
+msgstr "Reddedilen Depodan İade Miktarı"
 
 #: buying/doctype/purchase_order/purchase_order.js:80
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.js:150
@@ -62187,7 +62189,7 @@ msgstr ""
 
 #: stock/doctype/item/item.py:481
 msgid "Row #{0}: A reorder entry already exists for warehouse {1} with reorder type {2}."
-msgstr ""
+msgstr "Satır #{0}: {1} deposu için {2} yeniden sipariş türüyle zaten yeniden bir sipariş girişi mevcut."
 
 #: stock/doctype/quality_inspection/quality_inspection.py:233
 msgid "Row #{0}: Acceptance Criteria Formula is incorrect."
@@ -62200,7 +62202,7 @@ msgstr ""
 #: controllers/subcontracting_controller.py:72
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:420
 msgid "Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same"
-msgstr ""
+msgstr "Satır #{0}: Kabul Deposu ve Red Deposu aynı olamaz"
 
 #: controllers/buying_controller.py:225
 msgid "Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same"
@@ -62208,7 +62210,7 @@ msgstr ""
 
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:413
 msgid "Row #{0}: Accepted Warehouse is mandatory for the accepted Item {1}"
-msgstr ""
+msgstr "Satır #{0}: Kabul Deposu, kabul edilen {1} Ürünü için zorunludur"
 
 #: controllers/accounts_controller.py:952
 msgid "Row #{0}: Account {1} does not belong to company {2}"
@@ -62417,7 +62419,7 @@ msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.py:899
 msgid "Row #{0}: Please select the Sub Assembly Warehouse"
-msgstr ""
+msgstr "Satır #{0}: Lütfen Alt Montaj Deposunu seçin"
 
 #: stock/doctype/item/item.py:488
 msgid "Row #{0}: Please set reorder quantity"
@@ -62438,7 +62440,7 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:299
 msgid "Row #{0}: Qty should be less than or equal to Available Qty to Reserve (Actual Qty - Reserved Qty) {1} for Iem {2} against Batch {3} in Warehouse {4}."
-msgstr ""
+msgstr "Satır #{0}: Miktar, {4} deposunda {3} Partisi için {2} ürününe karşı Rezerve Edilebilir Miktar'dan (Gerçek Miktar - Rezerve Edilen Miktar) {1} küçük veya eşit olmalıdır."
 
 #: controllers/accounts_controller.py:1095
 #: controllers/accounts_controller.py:3245
@@ -62546,7 +62548,7 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:963
 msgid "Row #{0}: Stock cannot be reserved in group warehouse {1}."
-msgstr ""
+msgstr "Satır #{0}: {1} deposu bir Grup Deposu olduğundan, stok rezerve edilemez."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:977
 msgid "Row #{0}: Stock is already reserved for the Item {1}."
@@ -62554,15 +62556,15 @@ msgstr ""
 
 #: stock/doctype/delivery_note/delivery_note.py:680
 msgid "Row #{0}: Stock is reserved for item {1} in warehouse {2}."
-msgstr ""
+msgstr "Satır #{0}: Stok, {2} Deposunda bulunan {1} Ürünü için ayrılmıştır."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:283
 msgid "Row #{0}: Stock not available to reserve for Item {1} against Batch {2} in Warehouse {3}."
-msgstr ""
+msgstr "Satır #{0}: {3} Deposunda, {2} Partisi için {1} ürününe ayrılacak stok bulunmamaktadır."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:991
 msgid "Row #{0}: Stock not available to reserve for the Item {1} in Warehouse {2}."
-msgstr ""
+msgstr "Satır #{0}: {2} Deposundaki {1} Ürünü için rezerve edilecek stok mevcut değil."
 
 #: controllers/stock_controller.py:150
 msgid "Row #{0}: The batch {1} has already expired."
@@ -62606,7 +62608,7 @@ msgstr ""
 
 #: buying/utils.py:100
 msgid "Row #{1}: Warehouse is mandatory for stock Item {0}"
-msgstr ""
+msgstr "Satır #{1}: {0} Stok Ürünü için Depo zorunludur"
 
 #: assets/doctype/asset_category/asset_category.py:67
 msgid "Row #{}: Currency of {} - {} doesn't matches company currency."
@@ -62678,7 +62680,7 @@ msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:432
 msgid "Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}"
-msgstr ""
+msgstr "Satır No {0}: Depo gereklidir. Lütfen {1} ürünü ve {2} Şirketi için Varsayılan Depoyu ayarlayın."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:491
 msgid "Row Number"
@@ -62807,7 +62809,7 @@ msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:480
 msgid "Row {0}: Expense Head changed to {1} because account {2} is not linked to warehouse {3} or it is not the default inventory account"
-msgstr ""
+msgstr "Satır {0}: {2} hesabı {3} deposu ile bağlantılı değil veya varsayılan stok hesabı değil, bu yüzden Gider Hesabı {1} olarak değiştirildi."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:505
 msgid "Row {0}: Expense Head changed to {1} because expense is booked against this account in Purchase Receipt {2}"
@@ -62828,7 +62830,7 @@ msgstr ""
 
 #: controllers/stock_controller.py:937
 msgid "Row {0}: From Warehouse is mandatory for internal transfers"
-msgstr ""
+msgstr "Satır {0}: İç transferler için Gönderen Depo zorunludur."
 
 #: manufacturing/doctype/job_card/job_card.py:215
 msgid "Row {0}: From time must be less than to time"
@@ -62948,7 +62950,7 @@ msgstr ""
 
 #: controllers/stock_controller.py:928
 msgid "Row {0}: Target Warehouse is mandatory for internal transfers"
-msgstr ""
+msgstr "Satır {0}: İç transferler için Hedef Depo zorunludur."
 
 #: stock/doctype/stock_entry/stock_entry.py:418
 msgid "Row {0}: The item {1}, quantity must be positive number"
@@ -64337,7 +64339,7 @@ msgstr ""
 #: stock/doctype/warehouse/warehouse.json
 #: stock/doctype/warehouse_type/warehouse_type.json
 msgid "Sales User"
-msgstr ""
+msgstr "Satış Kullanıcısı"
 
 #: selling/report/sales_order_trends/sales_order_trends.py:50
 msgid "Sales Value"
@@ -64394,7 +64396,7 @@ msgstr ""
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:408
 msgid "Same item and warehouse combination already entered."
-msgstr ""
+msgstr "Aynı Ürün ve Depo kombinasyonu zaten girilmiş."
 
 #: buying/utils.py:58
 msgid "Same item cannot be entered multiple times."
@@ -64420,7 +64422,7 @@ msgstr ""
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Sample Retention Warehouse"
-msgstr ""
+msgstr "Numune Saklama Deposu"
 
 #: manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:93
 #: public/js/controllers/transaction.js:2179
@@ -65147,7 +65149,7 @@ msgstr ""
 
 #: stock/doctype/batch/batch.js:127
 msgid "Select Target Warehouse"
-msgstr ""
+msgstr "Hedef Depo"
 
 #: www/book_appointment/index.js:73
 msgid "Select Time"
@@ -65164,7 +65166,7 @@ msgstr ""
 
 #: public/js/stock_analytics.js:72
 msgid "Select Warehouse..."
-msgstr ""
+msgstr "Depo Seçimi..."
 
 #: manufacturing/doctype/production_plan/production_plan.js:431
 msgid "Select Warehouses to get Stock for Materials Planning"
@@ -66774,19 +66776,19 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Set Source Warehouse"
-msgstr ""
+msgstr "Kaynak Depo"
 
 #. Label of a Link field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Set Source Warehouse"
-msgstr ""
+msgstr "Kaynak Depo"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Set Source Warehouse"
-msgstr ""
+msgstr "Kaynak Depo"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -66923,21 +66925,21 @@ msgstr ""
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Sets 'Accepted Warehouse' in each row of the Items table."
-msgstr ""
+msgstr "Ürünler tablosunun her satırında Hedef Depoyu ayarlar."
 
 #. Description of the 'Rejected Warehouse' (Link) field in DocType
 #. 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Sets 'Rejected Warehouse' in each row of the Items table."
-msgstr ""
+msgstr "Ürünler tablosunun her satırında Red Deposunu ayarlar."
 
 #. Description of the 'Set Reserve Warehouse' (Link) field in DocType
 #. 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Sets 'Reserve Warehouse' in each row of the Supplied Items table."
-msgstr ""
+msgstr "Ürünler tablosunun her satırında Rezerv Deposunu ayarlar."
 
 #. Description of the 'Default Source Warehouse' (Link) field in DocType 'Stock
 #. Entry'
@@ -67601,7 +67603,7 @@ msgstr ""
 
 #: stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.js:16
 msgid "Show Disabled Warehouses"
-msgstr ""
+msgstr "Kapalı Depolarını Göster"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:306
 msgid "Show Document"
@@ -69691,7 +69693,7 @@ msgstr ""
 
 #: stock/doctype/delivery_note/delivery_note.py:690
 msgid "Stock Reservation Warehouse Mismatch"
-msgstr ""
+msgstr "Rezerv Stok Depo Uyuşmazlığı"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:508
 msgid "Stock Reservation can only be created against {0}."
@@ -70046,11 +70048,11 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:125
 msgid "Stock cannot be reserved in group warehouse {0}."
-msgstr ""
+msgstr "{0} Grup Deposunda Stok Rezerve edilemez."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:898
 msgid "Stock cannot be reserved in the group warehouse {0}."
-msgstr ""
+msgstr "{0} Grup Deposunda Stok Rezerve edilemez."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:674
 msgid "Stock cannot be updated against Purchase Receipt {0}"
@@ -70066,11 +70068,11 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:229
 msgid "Stock not available for Item {0} in Warehouse {1}."
-msgstr ""
+msgstr "{1} Deposunda {0} Ürünü için stok mevcut değil."
 
 #: selling/page/point_of_sale/pos_controller.js:716
 msgid "Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2} {3}."
-msgstr ""
+msgstr "{0} koduna sahip Ürün için {1} Deposundaki stok miktarı yetersiz. Mevcut miktar {2} {3}."
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:250
 msgid "Stock transactions before {0} are frozen"
@@ -71850,7 +71852,7 @@ msgstr "Tedarikçi Deposu"
 
 #: controllers/buying_controller.py:406
 msgid "Supplier Warehouse mandatory for sub-contracted {0}"
-msgstr ""
+msgstr "Alt Yüklecini firmalar için Tedarikçi Deposu zorunludur {0}"
 
 #. Label of a Check field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
@@ -72494,11 +72496,11 @@ msgstr "Hedef Depo Adresi"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:228
 msgid "Target Warehouse is mandatory for Decapitalization"
-msgstr ""
+msgstr "Amortisman için Hedef Depo zorunludur"
 
 #: controllers/selling_controller.py:714
 msgid "Target Warehouse is set for some items but the customer is not an internal customer."
-msgstr ""
+msgstr "Bazı ürünler için Hedef Depo ayarlanmış ancak Müşteri İç Müşteri değil."
 
 #: stock/doctype/stock_entry/stock_entry.py:598
 #: stock/doctype/stock_entry/stock_entry.py:605
@@ -74342,15 +74344,15 @@ msgstr ""
 
 #: manufacturing/doctype/work_order/work_order.js:899
 msgid "The warehouse where you store finished Items before they are shipped."
-msgstr ""
+msgstr "Ürünler sevk edilmeden önce bitmiş ürünlerin saklandığı depo."
 
 #: manufacturing/doctype/work_order/work_order.js:892
 msgid "The warehouse where you store your raw materials. Each required item can have a separate source warehouse. Group warehouse also can be selected as source warehouse. On submission of the Work Order, the raw materials will be reserved in these warehouses for production usage."
-msgstr ""
+msgstr "Hammaddeleri depoladığınız depo. Gereken her bir ürün için ayrı bir kaynak depo belirlenebilir. Grup deposu da kaynak depo olarak seçilebilir. İş Emri gönderildiğinde, hammadde üretim kullanımı için bu depolarda rezerve edilecektir."
 
 #: manufacturing/doctype/work_order/work_order.js:904
 msgid "The warehouse where your Items will be transferred when you begin production. Group Warehouse can also be selected as a Work in Progress warehouse."
-msgstr ""
+msgstr "Üretim başladığında ürünlerinizin aktarılacağı depo. Grup Deposu aynı zamanda Devam Eden İşler Deposu olarak da seçilebilir."
 
 #: manufacturing/doctype/job_card/job_card.py:673
 msgid "The {0} ({1}) must be equal to {2} ({3})"
@@ -74678,7 +74680,7 @@ msgstr ""
 #. Description of a DocType
 #: stock/doctype/stock_reconciliation/stock_reconciliation.json
 msgid "This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses."
-msgstr ""
+msgstr "Bu araç, sisteminizdeki stok miktarını ve değerlemesini güncellemenize veya düzeltmenize yardımcı olur. Genellikle sistemdeki değerler ile depolarınızdaki gerçek değerleri senkronize etmek için kullanılır."
 
 #. Description of the 'Abbreviation' (Data) field in DocType 'Item Attribute
 #. Value'
@@ -79746,43 +79748,43 @@ msgstr ""
 #: stock/report/stock_analytics/stock_analytics.js:26
 #: stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.py:95
 msgid "Value"
-msgstr ""
+msgstr "Değer"
 
 #. Group in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Value"
-msgstr ""
+msgstr "Değer"
 
 #. Label of a Section Break field in DocType 'Asset Capitalization Asset Item'
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgctxt "Asset Capitalization Asset Item"
 msgid "Value"
-msgstr ""
+msgstr "Değer"
 
 #. Label of a Data field in DocType 'Currency Exchange Settings Details'
 #: accounts/doctype/currency_exchange_settings_details/currency_exchange_settings_details.json
 msgctxt "Currency Exchange Settings Details"
 msgid "Value"
-msgstr ""
+msgstr "Değer"
 
 #. Label of a Currency field in DocType 'Shipment Delivery Note'
 #: stock/doctype/shipment_delivery_note/shipment_delivery_note.json
 msgctxt "Shipment Delivery Note"
 msgid "Value"
-msgstr ""
+msgstr "Değer"
 
 #. Label of a Float field in DocType 'Supplier Scorecard Scoring Variable'
 #: buying/doctype/supplier_scorecard_scoring_variable/supplier_scorecard_scoring_variable.json
 msgctxt "Supplier Scorecard Scoring Variable"
 msgid "Value"
-msgstr ""
+msgstr "Değer"
 
 #. Label of a Float field in DocType 'UOM Conversion Factor'
 #: setup/doctype/uom_conversion_factor/uom_conversion_factor.json
 msgctxt "UOM Conversion Factor"
 msgid "Value"
-msgstr ""
+msgstr "Değer"
 
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:161
 msgid "Value After Depreciation"
@@ -80845,7 +80847,7 @@ msgstr "Depo Detayları"
 
 #: stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.py:113
 msgid "Warehouse Disabled?"
-msgstr ""
+msgstr "Depo Kapalı"
 
 #. Label of a Data field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
@@ -80970,7 +80972,7 @@ msgstr ""
 
 #: stock/doctype/putaway_rule/putaway_rule.py:66
 msgid "Warehouse {0} does not belong to Company {1}."
-msgstr ""
+msgstr "{0} Deposu, {1} şirketine ait değil."
 
 #: stock/utils.py:422
 msgid "Warehouse {0} does not belong to company {1}"
@@ -80978,11 +80980,11 @@ msgstr ""
 
 #: controllers/stock_controller.py:443
 msgid "Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}."
-msgstr ""
+msgstr "{0} Deposu herhangi bir hesaba bağlı değil, lütfen depo kaydında hesabı belirtin veya {1} Şirketinde varsayılan stok hesabını ayarlayın."
 
 #: stock/doctype/warehouse/warehouse.py:137
 msgid "Warehouse's Stock Value has already been booked in the following accounts:"
-msgstr ""
+msgstr "Deponun Stok Değeri zaten aşağıdaki hesaplara kaydedilmiş:"
 
 #: stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:20
 msgid "Warehouse: {0} does not belong to {1}"
@@ -81000,7 +81002,7 @@ msgstr "Depolar"
 
 #: stock/doctype/warehouse/warehouse.py:163
 msgid "Warehouses with child nodes cannot be converted to ledger"
-msgstr ""
+msgstr "Alt kırılımları olan depolar, deftere dönüştürülemez."
 
 #: stock/doctype/warehouse/warehouse.py:173
 msgid "Warehouses with existing transaction can not be converted to group."
@@ -81008,7 +81010,7 @@ msgstr "Önceden stok hareketi olan depolar grubuna dönüştürülemez."
 
 #: stock/doctype/warehouse/warehouse.py:165
 msgid "Warehouses with existing transaction can not be converted to ledger."
-msgstr ""
+msgstr "Mevcut işlemi olan depolar deftere dönüştürülemez."
 
 #. Option for the 'Action if Annual Budget Exceeded on MR' (Select) field in
 #. DocType 'Budget'
