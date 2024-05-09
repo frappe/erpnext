@@ -96,18 +96,10 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	}
 	refresh(doc, dt, dn) {
 		super.refresh(doc, dt, dn);
-		let doctype = "";
-		if (doc.quotation_to == "Customer") {
-			doctype = "Customer";
-		} else if (doc.quotation_to == "Lead") {
-			doctype = "Lead";
-		} else if (doc.quotation_to == "Prospect") {
-			doctype = "Prospect";
-		}
 		frappe.dynamic_link = {
 			doc: this.frm.doc,
 			fieldname: "party_name",
-			doctype: doctype,
+			doctype: doc.quotation_to,
 		};
 
 		var me = this;
