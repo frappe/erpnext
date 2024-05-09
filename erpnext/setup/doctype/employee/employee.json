@@ -824,14 +824,12 @@
    "fieldname": "country",
    "fieldtype": "Link",
    "label": "Country",
-   "options": "Country",
-   "reqd": 1
+   "options": "Country"
   },
   {
    "fieldname": "state",
    "fieldtype": "Data",
-   "label": "State",
-   "mandatory_depends_on": "eval:doc.country==\"United States\""
+   "label": "State"
   }
  ],
  "icon": "fa fa-user",
@@ -839,7 +837,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2024-05-08 14:52:59.536017",
+ "modified": "2024-05-09 13:04:26.792523",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
