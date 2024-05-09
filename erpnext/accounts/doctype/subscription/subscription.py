@@ -112,11 +112,7 @@ class Subscription(Document):
 		"""
 		_current_invoice_start = None
 
-		if (
-			self.is_new_subscription()
-			and self.trial_period_end
-			and getdate(self.trial_period_end) > getdate(self.start_date)
-		):
+		if self.trial_period_end and getdate(self.trial_period_end) > getdate(self.start_date):
 			_current_invoice_start = add_days(self.trial_period_end, 1)
 		elif self.trial_period_start and self.is_trialling():
 			_current_invoice_start = self.trial_period_start
@@ -143,7 +139,7 @@ class Subscription(Document):
 		else:
 			billing_cycle_info = self.get_billing_cycle_data()
 			if billing_cycle_info:
-				if self.is_new_subscription() and getdate(self.start_date) < getdate(date):
+				if getdate(self.start_date) < getdate(date):
 					_current_invoice_end = add_to_date(self.start_date, **billing_cycle_info)
 
 					# For cases where trial period is for an entire billing interval
@@ -234,14 +230,14 @@ class Subscription(Document):
 			self.cancelation_date = getdate(posting_date) if self.status == "Cancelled" else None
 		elif self.current_invoice_is_past_due() and not self.is_past_grace_period():
 			self.status = "Past Due Date"
-		elif not self.has_outstanding_invoice() or self.is_new_subscription():
+		elif not self.has_outstanding_invoice():
 			self.status = "Active"
 
 	def is_trialling(self) -> bool:
 		"""
 		Returns `True` if the `Subscription` is in trial period.
 		"""
-		return not self.period_has_passed(self.trial_period_end) and self.is_new_subscription()
+		return not self.period_has_passed(self.trial_period_end)
 
 	@staticmethod
 	def period_has_passed(
@@ -287,14 +283,6 @@ class Subscription(Document):
 	@property
 	def invoice_document_type(self) -> str:
 		return "Sales Invoice" if self.party_type == "Customer" else "Purchase Invoice"
-
-	def is_new_subscription(self) -> bool:
-		"""
-		Returns `True` if `Subscription` has never generated an invoice
-		"""
-		return self.is_new() or not frappe.db.exists(
-			{"doctype": self.invoice_document_type, "subscription": self.name}
-		)
 
 	def validate(self) -> None:
 		self.validate_trial_period()
@@ -604,7 +592,7 @@ class Subscription(Document):
 			return False
 
 		if self.generate_invoice_at == "Beginning of the current subscription period" and (
-			getdate(posting_date) == getdate(self.current_invoice_start) or self.is_new_subscription()
+			getdate(posting_date) == getdate(self.current_invoice_start)
 		):
 			return True
 		elif self.generate_invoice_at == "Days before the current subscription period" and (
