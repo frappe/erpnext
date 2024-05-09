@@ -59,9 +59,11 @@
   "address_section",
   "current_address",
   "current_accommodation_type",
+  "country",
   "column_break_46",
   "permanent_address",
   "permanent_accommodation_type",
+  "state",
   "emergency_contact_details",
   "person_to_be_contacted",
   "column_break_55",
@@ -817,6 +819,17 @@
    "fieldname": "iban",
    "fieldtype": "Data",
    "label": "IBAN"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State"
   }
  ],
  "icon": "fa fa-user",
@@ -824,7 +837,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2024-03-27 13:09:36.900706",
+ "modified": "2024-05-09 09:50:04.781717",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",
