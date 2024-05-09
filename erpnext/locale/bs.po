@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-08 12:02\n"
+"PO-Revision-Date: 2024-05-09 12:03\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -374,13 +374,16 @@ msgstr ""
 msgid "# Manage Stock Movements\n"
 "Stock entry allows you to register the movement of stock for various purposes like transfer, received, issues, repacked, etc. To address issues related to theft and pilferages,  you can always ensure that the movement of goods happens against a document reference Stock Entry in ERPNext.\n\n"
 "Let’s get a quick walk-through on the various scenarios covered in Stock Entry by watching [*this video*](https://www.youtube.com/watch?v=Njt107hlY3I)."
-msgstr ""
+msgstr "# Upravljajte kretanjem zaliha\n"
+"Unos zaliha omogućuje vam da registrujete kretanje zaliha u razne svrhe kao što su prijenos, primanje, izdavanje, prepakiranje itd. Za rješavanje problema povezanih s krađom i otuđenjem, uvijek možete osigurati da se kretanje robe odvija prema referenci dokumenta Unos zaliha u ERPNext.\n\n"
+"Idemo brzo prošetati kroz različite scenarije pokrivene u Unosu zaliha gledajući [*ovaj video*](https://www.youtube.com/watch?v=Njt107hlY3I)."
 
 #. Description of the Onboarding Step 'How to Navigate in ERPNext'
 #: setup/onboarding_step/navigation_help/navigation_help.json
 msgid "# Navigation in ERPNext\n\n"
 "Ease of navigating and browsing around the ERPNext is one of our core strengths. In the following video, you will learn how to reach a specific feature in ERPNext via module page or AwesomeBar."
-msgstr ""
+msgstr "# Navigacija u ERPNext\n\n"
+"Lakoća navigacije i pregledavanja ERPNext-a jedna je od naših ključnih prednosti. U sljedećem videu naučit ćete kako doći do određene značajke u ERPNext putem stranice modula ili AwesomeBar-a."
 
 #. Description of the Onboarding Step 'Purchase an Asset'
 #: assets/onboarding_step/asset_purchase/asset_purchase.json
@@ -409,14 +412,21 @@ msgid "# Review Stock Settings\n\n"
 "- Default valuation method for inventory valuation\n"
 "- Set preference for serialization and batching of item\n"
 "- Set tolerance for over-receipt and delivery of items"
-msgstr ""
+msgstr "# Pregledajte postavke zaliha\n\n"
+"U ERPNextu, značajke modula Zalihe mogu se konfigurirati prema vašim poslovnim potrebama. Postavke zaliha su mjesto gdje možete postaviti svoje postavke za:\n"
+"- Zadane vrijednosti za stavke i cijene\n"
+"- Zadana metoda vrednovanja za vrednovanje zaliha\n"
+"- Postavite postavke za serijalizaciju i grupiranje stavki\n"
+"- Postavite toleranciju za prekomjerni prijem i otpremu stavki"
 
 #. Description of the Onboarding Step 'Sales Order'
 #: selling/onboarding_step/sales_order/sales_order.json
 msgid "# Sales Order\n\n"
 "A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.\n\n"
 "Sales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer."
-msgstr ""
+msgstr "# Prodajni nalog\n\n"
+"Prodajni nalog je potvrda narudžbe vašeg kupca. Također se naziva i proforma faktura.\n\n"
+"Prodajni nalog u središtu vaših prodajnih i kupovnih transakcija. Prodajni nalozi povezani su u transakcijama otpremnice, prodajnih faktura, zahtjeva za materijal i održavanja. Putem prodajnog naloga možete pratiti ispunjenje cjelokupnog posla prema kupcu."
 
 #. Description of the Onboarding Step 'Selling Settings'
 #: selling/onboarding_step/selling_settings/selling_settings.json
