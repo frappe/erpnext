@@ -70,14 +70,6 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 	}
 	refresh(doc, dt, dn) {
 		super.refresh(doc, dt, dn);
-		let doctype = "";
-		if (doc.quotation_to == "Customer") {
-			doctype = "Customer";
-		} else if (doc.quotation_to == "Lead") {
-			doctype = "Lead";
-		} else if (doc.quotation_to == "Prospect") {
-			doctype = "Prospect";
-		}
 		frappe.dynamic_link = {
 			doc: this.frm.doc,
 <<<<<<< HEAD
@@ -85,8 +77,12 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			doctype: doc.quotation_to == 'Customer' ? 'Customer' : 'Lead',
 =======
 			fieldname: "party_name",
+<<<<<<< HEAD
 			doctype: doctype,
 >>>>>>> fe5b88522e (fix: address filter and quotation to for prospect)
+=======
+			doctype: doc.quotation_to,
+>>>>>>> 754c7f6d1c (refactor: make use of doc.quotation_to)
 		};
 
 		var me = this;
