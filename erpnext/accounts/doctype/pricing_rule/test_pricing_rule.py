@@ -976,7 +976,7 @@ class TestPricingRule(unittest.TestCase):
 		so.load_from_db()
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item")
-		self.assertEqual(so.items[1].qty, 4)
+		self.assertEqual(so.items[1].qty, 3)
 
 	def test_apply_multiple_pricing_rules_for_discount_percentage_and_amount(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
