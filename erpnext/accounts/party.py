@@ -188,7 +188,9 @@ def set_address_details(
 	*,
 	ignore_permissions=False,
 ):
-	billing_address_field = "customer_address" if party_type == "Lead" else party_type.lower() + "_address"
+	billing_address_field = (
+		"customer_address" if party_type in ["Lead", "Prospect"] else party_type.lower() + "_address"
+	)
 	party_details[billing_address_field] = party_address or get_default_address(party_type, party.name)
 	if doctype:
 		party_details.update(
