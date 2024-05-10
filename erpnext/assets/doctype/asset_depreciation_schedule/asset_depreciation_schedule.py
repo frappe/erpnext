@@ -637,49 +637,18 @@ def get_straight_line_or_manual_depr_amount(
 	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment:
 		if row.daily_prorata_based:
 			amount = flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
-			total_days = (
-				date_diff(
-					get_last_day(
-						add_months(
-							row.depreciation_start_date,
-							flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
-							* row.frequency_of_depreciation,
-						)
-					),
-					add_days(
-						get_last_day(
-							add_months(
-								row.depreciation_start_date,
-								flt(
-									row.total_number_of_depreciations
-									- asset.number_of_depreciations_booked
-									- number_of_pending_depreciations
-									- 1
-								)
-								* row.frequency_of_depreciation,
-							)
-						),
-						1,
-					),
-				)
-				+ 1
-			)
+			total_years = flt(number_of_pending_depreciations * row.frequency_of_depreciation) / 12
+			every_year_depr = amount / total_years
 
-			daily_depr_amount = amount / total_days
-
-			to_date = get_last_day(
-				add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
+			year_start_date = add_years(
+				row.depreciation_start_date, (row.frequency_of_depreciation * schedule_idx) // 12
 			)
-			from_date = add_days(
-				get_last_day(
-					add_months(
-						row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
-					)
-				),
-				1,
+			year_end_date = add_days(add_years(year_start_date, 1), -1)
+			daily_depr_amount = every_year_depr / (date_diff(year_end_date, year_start_date) + 1)
+			total_depreciable_days = _get_total_days(
+				row.depreciation_start_date, schedule_idx, row.frequency_of_depreciation
 			)
-
-			return daily_depr_amount * (date_diff(to_date, from_date) + 1)
+			return daily_depr_amount * total_depreciable_days
 		else:
 			return (
 				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
@@ -692,46 +661,39 @@ def get_straight_line_or_manual_depr_amount(
 				- flt(asset.opening_accumulated_depreciation)
 				- flt(row.expected_value_after_useful_life)
 			)
-
-			total_days = (
-				date_diff(
-					get_last_day(
-						add_months(
-							row.depreciation_start_date,
-							flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked - 1)
-							* row.frequency_of_depreciation,
-						)
-					),
-					add_days(
-						get_last_day(
-							add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)
-						),
-						1,
-					),
+			total_years = (
+				flt(
+					(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
+					* row.frequency_of_depreciation
 				)
-				+ 1
+				/ 12
 			)
+			every_year_depr = amount / total_years
 
-			daily_depr_amount = amount / total_days
-
-			to_date = get_last_day(
-				add_months(row.depreciation_start_date, schedule_idx * row.frequency_of_depreciation)
+			year_start_date = add_years(
+				row.depreciation_start_date, (row.frequency_of_depreciation * schedule_idx) // 12
 			)
-			from_date = add_days(
-				get_last_day(
-					add_months(
-						row.depreciation_start_date, (schedule_idx - 1) * row.frequency_of_depreciation
-					)
-				),
-				1,
+			year_end_date = add_days(add_years(year_start_date, 1), -1)
+			daily_depr_amount = every_year_depr / (date_diff(year_end_date, year_start_date) + 1)
+			total_depreciable_days = _get_total_days(
+				row.depreciation_start_date, schedule_idx, row.frequency_of_depreciation
 			)
-			return daily_depr_amount * (date_diff(to_date, from_date) + 1)
+			return daily_depr_amount * total_depreciable_days
 		else:
 			return (
 				flt(asset.gross_purchase_amount)
 				- flt(asset.opening_accumulated_depreciation)
 				- flt(row.expected_value_after_useful_life)
 			) / flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
+
+
+def _get_total_days(depreciation_start_date, schedule_idx, frequency_of_depreciation):
+	from_date = add_months(depreciation_start_date, (schedule_idx - 1) * frequency_of_depreciation)
+	to_date = add_months(from_date, frequency_of_depreciation)
+	if is_last_day_of_the_month(depreciation_start_date):
+		to_date = get_last_day(to_date)
+		from_date = add_days(get_last_day(from_date), 1)
+	return date_diff(to_date, from_date) + 1
 
 
 def get_shift_depr_amount(asset_depr_schedule, asset, row, schedule_idx):
