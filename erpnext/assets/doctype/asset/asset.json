@@ -15,7 +15,6 @@
   "asset_owner_company",
   "is_existing_asset",
   "is_composite_asset",
-  "is_composite_component",
   "supplier",
   "customer",
   "image",
@@ -203,7 +202,8 @@
    "fieldname": "purchase_date",
    "fieldtype": "Date",
    "label": "Purchase Date",
-   "mandatory_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset"
+   "mandatory_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset",
+   "read_only_depends_on": "eval:!doc.is_existing_asset && !doc.is_composite_asset"
   },
   {
    "fieldname": "disposal_date",
@@ -234,7 +234,7 @@
    "fieldname": "available_for_use_date",
    "fieldtype": "Date",
    "label": "Available-for-use Date",
-   "mandatory_depends_on": "eval:(!doc.is_composite_component && doc.docstatus==1)"
+   "mandatory_depends_on": "eval:(!doc.is_composite_asset || doc.docstatus==1)"
   },
   {
    "default": "0",
@@ -509,7 +509,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:(!doc.is_existing_asset && !doc.is_composite_component)",
+   "depends_on": "eval:!doc.is_existing_asset",
    "fieldname": "is_composite_asset",
    "fieldtype": "Check",
    "label": "Is Composite Asset"
@@ -537,13 +537,6 @@
    "label": "Additional Asset Cost",
    "options": "Company:company:default_currency",
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:(!doc.is_existing_asset && !doc.is_composite_asset)",
-   "fieldname": "is_composite_component",
-   "fieldtype": "Check",
-   "label": "Is Composite Component"
   },
   {
    "fieldname": "purchase_amount",

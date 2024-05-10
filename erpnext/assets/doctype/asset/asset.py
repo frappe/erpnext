@@ -80,7 +80,6 @@ class Asset(AccountsController):
 		insured_value: DF.Data | None
 		insurer: DF.Data | None
 		is_composite_asset: DF.Check
-		is_composite_component: DF.Check
 		is_existing_asset: DF.Check
 		is_fully_depreciated: DF.Check
 		item_code: DF.Link

@@ -617,7 +617,6 @@ class AssetCapitalization(StockController):
 		asset_doc.purchase_date = self.posting_date
 		asset_doc.gross_purchase_amount = total_target_asset_value
 		asset_doc.purchase_amount = total_target_asset_value
-		asset_doc.purchase_amount = total_target_asset_value
 		asset_doc.capitalized_in = self.name
 		asset_doc.flags.ignore_validate = True
 		asset_doc.flags.asset_created_via_asset_capitalization = True
