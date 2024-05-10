@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-04-28 09:35+0000\n"
-"PO-Revision-Date: 2024-05-09 12:03\n"
+"PO-Revision-Date: 2024-05-10 12:13\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -532,7 +532,7 @@ msgstr ""
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:70
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html:16
 msgid "% Occupied"
-msgstr ""
+msgstr "% Dolu"
 
 #: accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:284
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:337
@@ -698,7 +698,7 @@ msgstr "'Stok Güncelle' seçilemez çünkü ürünler {0} ile teslim edilmemiş
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:376
 msgid "'Update Stock' cannot be checked for fixed asset sale"
-msgstr ""
+msgstr "'Stoğu Güncelle' sabit varlık satışları için kullanılamaz"
 
 #: accounts/doctype/bank_account/bank_account.py:65
 msgid "'{0}' account is already used by {1}. Use another account."
@@ -751,7 +751,7 @@ msgstr ""
 
 #: manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.py:192
 msgid "(Forecast)"
-msgstr ""
+msgstr "(Tahmin)"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:230
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:154
@@ -927,7 +927,7 @@ msgstr "30 dakika"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:119
 msgid "30-60"
-msgstr ""
+msgstr "30-60"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
 msgid "30-60 Days"
@@ -937,19 +937,19 @@ msgstr "30-60 Gün"
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "501-1000"
-msgstr ""
+msgstr "501-1000"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "501-1000"
-msgstr ""
+msgstr "501-1000"
 
 #. Option for the 'No. of Employees' (Select) field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "501-1000"
-msgstr ""
+msgstr "501-1000"
 
 #. Option for the 'No of Employees' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -1057,7 +1057,11 @@ msgid "<h3>About Product Bundle</h3>\n\n"
 "<p>The package <b>Item</b> will have <code>Is Stock Item</code> as <b>No</b> and <code>Is Sales Item</code> as <b>Yes</b>.</p>\n"
 "<h4>Example:</h4>\n"
 "<p>If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.</p>"
-msgstr ""
+msgstr "<h3>Ürün Paketi Hakkında</h3>\n\n"
+"<p>Bir grup <b>Ürünü</b> başka bir Üründe toplar. Bu, belirli <b>Ürünleri</b> bir pakette topluyorsanız ve toplu <b>Ürünün</b> değil paketlenmiş <b>Ürünlerin</b> stokunu tutuyorsanız kullanışlıdır.</p>\n"
+"<p>Paket <b>Ürünü</b> <code>Stok</code> Ürünü mü <b>Hayır</b> ve <code>Satış</code> Ürünü mü <b>Evet</b> olarak ayarlanacaktır.</p>\n"
+"<h4>Örnek:</h4>\n"
+"<p>Dizüstü Bilgisayarları ve Sırt Çantalarını ayrı ayrı satıyorsanız ve müşteri her ikisini de satın alırsa özel bir fiyatınız varsa, Dizüstü Bilgisayar + Sırt Çantası yeni bir Ürün Paketinin Ürünü olacaktır.</p>"
 
 #. Content of the 'Help' (HTML) field in DocType 'Currency Exchange Settings'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -1253,7 +1257,7 @@ msgstr ""
 #. Description of a DocType
 #: stock/doctype/item/item.json
 msgid "A Product or a Service that is bought, sold or kept in stock."
-msgstr ""
+msgstr "Alınan, satılan veya stokta tutulan bir Ürün veya Hizmet."
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:532
 msgid "A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
@@ -1292,47 +1296,47 @@ msgstr "Stok girişlerinin yapıldığı mantıksal bir Depo."
 
 #: templates/emails/confirm_appointment.html:2
 msgid "A new appointment has been created for you with {0}"
-msgstr ""
+msgstr "{0} ile sizin için yeni bir randevu oluşturuldu"
 
 #: accounts/doctype/sales_taxes_and_charges_template/sales_taxes_and_charges_template.py:96
 msgid "A template with tax category {0} already exists. Only one template is allowed with each tax category"
-msgstr ""
+msgstr "{0} vergi kategorisiyle zaten bir şablon mevcut. Her vergi kategorisi için yalnızca bir şablona izin verilir"
 
 #. Description of a DocType
 #: setup/doctype/sales_partner/sales_partner.json
 msgid "A third party distributor / dealer / commission agent / affiliate / reseller who sells the companies products for a commission."
-msgstr ""
+msgstr "Şirketin ürünlerini komisyon karşılığında satan üçüncü parti bir distribütör / bayi / bağlı kuruluş / ortak."
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "A+"
-msgstr ""
+msgstr "A+"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "A-"
-msgstr ""
+msgstr "A-"
 
 #. Option for the 'Cheque Size' (Select) field in DocType 'Cheque Print
 #. Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
 msgid "A4"
-msgstr ""
+msgstr "A4"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "AB+"
-msgstr ""
+msgstr "AB+"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "AB-"
-msgstr ""
+msgstr "AB-"
 
 #. Option for the 'Invoice Series' (Select) field in DocType 'Import Supplier
 #. Invoice'
@@ -1406,19 +1410,19 @@ msgstr "Kısaltma"
 #: stock/doctype/item_attribute_value/item_attribute_value.json
 msgctxt "Item Attribute Value"
 msgid "Abbreviation"
-msgstr ""
+msgstr "Kısaltma"
 
 #: setup/doctype/company/company.py:161
 msgid "Abbreviation already used for another company"
-msgstr ""
+msgstr "Kısaltma zaten başka bir şirket için kullanılıyor"
 
 #: setup/doctype/company/company.py:158
 msgid "Abbreviation is mandatory"
-msgstr ""
+msgstr "Kısaltma zorunludur"
 
 #: stock/doctype/item_attribute/item_attribute.py:102
 msgid "Abbreviation: {0} must appear only once"
-msgstr ""
+msgstr "Kısaltma: {0} yalnızca bir kez görünmelidir"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
@@ -1828,13 +1832,13 @@ msgstr ""
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Account Currency (From)"
-msgstr ""
+msgstr "Hesap Para Birimi (Borç)"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Account Currency (To)"
-msgstr ""
+msgstr "Hesap Para Birimi (Alacak)"
 
 #. Label of a Section Break field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
@@ -1852,66 +1856,66 @@ msgstr "Hesap Detayları"
 #: accounts/doctype/advance_tax/advance_tax.json
 msgctxt "Advance Tax"
 msgid "Account Head"
-msgstr ""
+msgstr "Ana Hesap"
 
 #. Label of a Link field in DocType 'Advance Taxes and Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "Account Head"
-msgstr ""
+msgstr "Ana Hesap"
 
 #. Label of a Link field in DocType 'POS Closing Entry Taxes'
 #: accounts/doctype/pos_closing_entry_taxes/pos_closing_entry_taxes.json
 msgctxt "POS Closing Entry Taxes"
 msgid "Account Head"
-msgstr ""
+msgstr "Ana Hesap"
 
 #. Label of a Link field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Account Head"
-msgstr ""
+msgstr "Ana Hesap"
 
 #. Label of a Link field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "Account Head"
-msgstr ""
+msgstr "Ana Hesap"
 
 #. Label of a Link field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Account Manager"
-msgstr ""
+msgstr "Muhasebe Müdürü"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:872
 #: controllers/accounts_controller.py:2005
 msgid "Account Missing"
-msgstr ""
+msgstr "Hesap Eksik"
 
 #. Label of a Data field in DocType 'Account'
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Account Name"
-msgstr ""
+msgstr "Hesap İsmi"
 
 #. Label of a Data field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "Account Name"
-msgstr ""
+msgstr "Hesap İsmi"
 
 #. Label of a Data field in DocType 'Ledger Merge'
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgctxt "Ledger Merge"
 msgid "Account Name"
-msgstr ""
+msgstr "Hesap İsmi"
 
 #. Label of a Data field in DocType 'Ledger Merge Accounts'
 #: accounts/doctype/ledger_merge_accounts/ledger_merge_accounts.json
 msgctxt "Ledger Merge Accounts"
 msgid "Account Name"
-msgstr ""
+msgstr "Hesap İsmi"
 
 #: accounts/doctype/account/account.py:321
 msgid "Account Not Found"
@@ -1941,29 +1945,29 @@ msgstr "Hesap Açılış Bakiyesi"
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Account Paid From"
-msgstr ""
+msgstr "Ödemenin Yapıldığı Hesap"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Account Paid To"
-msgstr ""
+msgstr "Ödemenin Yapılacağı Hesap"
 
 #: accounts/doctype/cheque_print_template/cheque_print_template.py:118
 msgid "Account Pay Only"
-msgstr ""
+msgstr "Sadece Ödeme Hesabı"
 
 #. Label of a Link field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "Account Subtype"
-msgstr ""
+msgstr "Hesap Alt Türü"
 
 #. Label of a Data field in DocType 'Bank Account Subtype'
 #: accounts/doctype/bank_account_subtype/bank_account_subtype.json
 msgctxt "Bank Account Subtype"
 msgid "Account Subtype"
-msgstr ""
+msgstr "Hesap Alt Türü"
 
 #: accounts/doctype/account/account_tree.js:152
 #: accounts/report/account_balance/account_balance.js:34
@@ -2014,7 +2018,7 @@ msgstr "Hesap Türü"
 
 #: stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:124
 msgid "Account Value"
-msgstr ""
+msgstr "Hesap Değeri"
 
 #: accounts/doctype/account/account.py:294
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
@@ -2163,157 +2167,157 @@ msgstr ""
 #. Label of a Card Break in the Home Workspace
 #: accounts/workspace/accounting/accounting.json setup/workspace/home/home.json
 msgid "Accounting"
-msgstr ""
+msgstr "Muhasebe"
 
 #. Label of a Tab Break field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Accounting"
-msgstr ""
+msgstr "Muhasebe"
 
 #. Label of a Tab Break field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Accounting"
-msgstr ""
+msgstr "Muhasebe"
 
 #. Label of a Section Break field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Accounting"
-msgstr ""
+msgstr "Muhasebe"
 
 #. Label of a Section Break field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Accounting"
-msgstr ""
+msgstr "Muhasebe"
 
 #. Label of a Section Break field in DocType 'Shipping Rule'
 #: accounts/doctype/shipping_rule/shipping_rule.json
 msgctxt "Shipping Rule"
 msgid "Accounting"
-msgstr ""
+msgstr "Muhasebe"
 
 #. Label of a Section Break field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Accounting"
-msgstr ""
+msgstr "Muhasebe"
 
 #. Label of a Tab Break field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
 msgctxt "Supplier"
 msgid "Accounting"
-msgstr ""
+msgstr "Muhasebe"
 
 #. Label of a Section Break field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
 msgctxt "Dunning"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Dunning Type'
 #: accounts/doctype/dunning_type/dunning_type.json
 msgctxt "Dunning Type"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Label of a Section Break field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Accounting Details"
-msgstr ""
+msgstr "Muhasebe Detayları"
 
 #. Name of a DocType
 #: accounts/doctype/accounting_dimension/accounting_dimension.json
 #: accounts/report/profitability_analysis/profitability_analysis.js:32
 msgid "Accounting Dimension"
-msgstr ""
+msgstr "Muhasebe Boyutları"
 
 #. Label of a Link in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgctxt "Accounting Dimension"
 msgid "Accounting Dimension"
-msgstr ""
+msgstr "Muhasebe Boyutları"
 
 #. Label of a Select field in DocType 'Accounting Dimension Filter'
 #: accounts/doctype/accounting_dimension_filter/accounting_dimension_filter.json
 msgctxt "Accounting Dimension Filter"
 msgid "Accounting Dimension"
-msgstr ""
+msgstr "Muhasebe Boyutları"
 
 #. Label of a Link field in DocType 'Allowed Dimension'
 #: accounts/doctype/allowed_dimension/allowed_dimension.json
 msgctxt "Allowed Dimension"
 msgid "Accounting Dimension"
-msgstr ""
+msgstr "Muhasebe Boyutları"
 
 #: accounts/doctype/gl_entry/gl_entry.py:203
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:153
@@ -2917,14 +2921,14 @@ msgstr ""
 #: accounts/workspace/payables/payables.json
 #: buying/doctype/supplier/supplier.js:97
 msgid "Accounts Payable"
-msgstr ""
+msgstr "Borç Hesabı"
 
 #. Option for the 'Write Off Based On' (Select) field in DocType 'Journal
 #. Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Accounts Payable"
-msgstr ""
+msgstr "Borç Hesabı"
 
 #. Name of a report
 #. Label of a Link in the Payables Workspace
@@ -3197,7 +3201,7 @@ msgstr ""
 #: crm/doctype/lead/lead.js:42
 #: public/js/bank_reconciliation_tool/dialog_manager.js:175
 msgid "Action"
-msgstr ""
+msgstr "İşlem"
 
 #. Label of a Select field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -3485,13 +3489,13 @@ msgstr ""
 
 #: buying/report/procurement_tracker/procurement_tracker.py:101
 msgid "Actual Cost"
-msgstr ""
+msgstr "Gerçek Maliyet"
 
 #. Label of a Date field in DocType 'Maintenance Schedule Detail'
 #: maintenance/doctype/maintenance_schedule_detail/maintenance_schedule_detail.json
 msgctxt "Maintenance Schedule Detail"
 msgid "Actual Date"
-msgstr ""
+msgstr "Gerçekleşen Tarih"
 
 #: buying/report/procurement_tracker/procurement_tracker.py:121
 #: stock/report/delayed_item_report/delayed_item_report.py:141
@@ -3606,7 +3610,7 @@ msgstr "Gerçek Miktar"
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Actual Qty (at source/target)"
-msgstr ""
+msgstr "Gerçek Miktar (Kaynak/Hedef)"
 
 #. Label of a Float field in DocType 'Asset Capitalization Stock Item'
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
@@ -3616,7 +3620,7 @@ msgstr "Depodaki Gerçek Miktar"
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:196
 msgid "Actual Qty is mandatory"
-msgstr ""
+msgstr "Gerçek Miktar zorunludur"
 
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:37
 #: stock/dashboard/item_dashboard_list.html:28
@@ -5258,7 +5262,7 @@ msgstr ""
 #. Description of a DocType
 #: selling/doctype/product_bundle/product_bundle.json
 msgid "Aggregate a group of Items into another Item. This is useful if you are maintaining the stock of the packed items and not the bundled item"
-msgstr ""
+msgstr "Bir grup Ürünü başka bir Ürün altında birleştirin. Bu, paketlenmiş ürünlerin stoklarını yönetirken, paketlenmemiş ürünün stoğu yönetilmek istendiği durumlarda faydalıdır."
 
 #. Name of a role
 #: assets/doctype/location/location.json
@@ -7348,7 +7352,7 @@ msgstr ""
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Application Settings"
-msgstr ""
+msgstr "Uygulama Ayarları"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:10
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:10
@@ -8111,25 +8115,25 @@ msgstr "Varlık Konumu"
 #: assets/report/asset_maintenance/asset_maintenance.json
 #: assets/workspace/assets/assets.json
 msgid "Asset Maintenance"
-msgstr ""
+msgstr "Varlık Bakımı"
 
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Maintenance"
-msgstr ""
+msgstr "Varlık Bakımı"
 
 #. Label of a Link in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Maintenance"
 msgid "Asset Maintenance"
-msgstr ""
+msgstr "Varlık Bakımı"
 
 #. Label of a Link field in DocType 'Asset Maintenance Log'
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
 msgctxt "Asset Maintenance Log"
 msgid "Asset Maintenance"
-msgstr ""
+msgstr "Varlık Bakımı"
 
 #. Name of a DocType
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
@@ -8181,49 +8185,49 @@ msgstr ""
 
 #: assets/report/fixed_asset_register/fixed_asset_register.py:414
 msgid "Asset Name"
-msgstr ""
+msgstr "Varlık İsmi"
 
 #. Label of a Data field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Name"
-msgstr ""
+msgstr "Varlık İsmi"
 
 #. Label of a Data field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Asset Name"
-msgstr ""
+msgstr "Varlık İsmi"
 
 #. Label of a Data field in DocType 'Asset Capitalization Asset Item'
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgctxt "Asset Capitalization Asset Item"
 msgid "Asset Name"
-msgstr ""
+msgstr "Varlık İsmi"
 
 #. Label of a Link field in DocType 'Asset Maintenance'
 #: assets/doctype/asset_maintenance/asset_maintenance.json
 msgctxt "Asset Maintenance"
 msgid "Asset Name"
-msgstr ""
+msgstr "Varlık İsmi"
 
 #. Label of a Read Only field in DocType 'Asset Maintenance Log'
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
 msgctxt "Asset Maintenance Log"
 msgid "Asset Name"
-msgstr ""
+msgstr "Varlık İsmi"
 
 #. Label of a Data field in DocType 'Asset Movement Item'
 #: assets/doctype/asset_movement_item/asset_movement_item.json
 msgctxt "Asset Movement Item"
 msgid "Asset Name"
-msgstr ""
+msgstr "Varlık İsmi"
 
 #. Label of a Read Only field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Asset Name"
-msgstr ""
+msgstr "Varlık İsmi"
 
 #. Label of a Select field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -8270,26 +8274,26 @@ msgstr ""
 #. Name of a DocType
 #: assets/doctype/asset_repair/asset_repair.json
 msgid "Asset Repair"
-msgstr ""
+msgstr "Varlık Onarımı"
 
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Repair"
-msgstr ""
+msgstr "Varlık Onarımı"
 
 #. Label of a Link in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Repair"
 msgid "Asset Repair"
-msgstr ""
+msgstr "Varlık Onarımı"
 
 #. Option for the 'Type of Transaction' (Select) field in DocType 'Serial and
 #. Batch Bundle'
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Asset Repair"
-msgstr ""
+msgstr "Varlık Onarımı"
 
 #. Name of a DocType
 #: assets/doctype/asset_repair_consumed_item/asset_repair_consumed_item.json
@@ -9811,7 +9815,7 @@ msgstr "Bakiye Stok Miktarı"
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgctxt "Stock Ledger Entry"
 msgid "Balance Stock Value"
-msgstr ""
+msgstr "Stok Değeri Bakiyesi"
 
 #: stock/report/stock_balance/stock_balance.py:423
 #: stock/report/stock_ledger/stock_ledger.py:285
@@ -10329,7 +10333,7 @@ msgstr "Barkod"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "Barcode Type"
-msgstr ""
+msgstr "Barkod Türü"
 
 #: stock/doctype/item/item.py:450
 msgid "Barcode {0} already used in Item {1}"
@@ -11469,7 +11473,7 @@ msgstr ""
 
 #: stock/doctype/warehouse/warehouse.py:139
 msgid "Booking stock value across multiple accounts will make it harder to track stock and account value."
-msgstr ""
+msgstr "Stok değerinin birden fazla hesaba kaydedilmesi, stok ve hesap değerinin izlenmesini zorlaştıracaktır."
 
 #: accounts/general_ledger.py:684
 msgid "Books have been closed till the period ending on {0}"
@@ -12988,7 +12992,7 @@ msgstr ""
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:69
 msgid "Capacity (Stock UOM)"
-msgstr ""
+msgstr "Kapasite (Stok Birimi)"
 
 #. Label of a Section Break field in DocType 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
@@ -13010,7 +13014,7 @@ msgstr "Kapasite Planlama (Gün)"
 #: stock/doctype/putaway_rule/putaway_rule.json
 msgctxt "Putaway Rule"
 msgid "Capacity in Stock UOM"
-msgstr ""
+msgstr "Stok Birimindeki Kapasite"
 
 #: stock/doctype/putaway_rule/putaway_rule.py:85
 msgid "Capacity must be greater than 0"
@@ -32162,7 +32166,7 @@ msgstr ""
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "If blank, parent Warehouse Account or company default will be considered in transactions"
-msgstr ""
+msgstr "Boş bırakılırsa, işlemlerde Ana Depo Hesabı veya Şirket Varsayılanı dikkate alınacaktır."
 
 #. Description of the 'Bill for Rejected Quantity in Purchase Invoice' (Check)
 #. field in DocType 'Buying Settings'
@@ -38341,7 +38345,7 @@ msgstr ""
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Items under this warehouse will be suggested"
-msgstr ""
+msgstr "Bu depodaki ürünler önerilecek"
 
 #. Option for the 'Based On' (Select) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
@@ -45074,7 +45078,7 @@ msgstr ""
 
 #: templates/form_grid/stock_entry_grid.html:26
 msgid "Not in Stock"
-msgstr ""
+msgstr "Stokta Yok"
 
 #: templates/includes/products_as_grid.html:20
 msgid "Not in stock"
@@ -51646,7 +51650,7 @@ msgstr ""
 
 #: accounts/doctype/ledger_merge/ledger_merge.js:36
 msgid "Please set Account"
-msgstr ""
+msgstr "Lütfen Hesabı Ayarlayın"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1528
 msgid "Please set Account for Change Amount"
@@ -56472,7 +56476,7 @@ msgstr ""
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Qty as Per Stock UOM"
-msgstr ""
+msgstr "Stok Birimine Göre Miktar"
 
 #. Label of a Float field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
@@ -59805,7 +59809,7 @@ msgstr ""
 
 #: stock/doctype/closing_stock_balance/closing_stock_balance.js:27
 msgid "Regenerate Closing Stock Balance"
-msgstr ""
+msgstr "Stok Kapanış Bakiyesini Yeniden Oluştur"
 
 #. Label of a Card Break in the Buying Workspace
 #: buying/workspace/buying/buying.json
@@ -81756,7 +81760,7 @@ msgstr ""
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Will also apply for variants unless overridden"
-msgstr ""
+msgstr "Geçersiz kılınmadığı sürece varyantlar için de geçerli olacaktır"
 
 #: setup/setup_wizard/operations/install_fixtures.py:210
 msgid "Wire Transfer"
@@ -82585,7 +82589,7 @@ msgstr ""
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:332
 msgid "You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
-msgstr ""
+msgstr "Bu zamandan önce, {1} deposu altında {0} ürünü için Stok İşlemleri yapmaya/yapılanı düzenlemeye yetkiniz yok."
 
 #: accounts/doctype/account/account.py:278
 msgid "You are not authorized to set Frozen value"
@@ -83553,11 +83557,11 @@ msgstr ""
 
 #: controllers/stock_controller.py:1111
 msgid "{0} qty of Item {1} is being received into Warehouse {2} with capacity {3}."
-msgstr ""
+msgstr "{1} ürününden {0} miktarı, {3} kapasiteli {2} deposuna alınmaktadır."
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:515
 msgid "{0} units are reserved for Item {1} in Warehouse {2}, please un-reserve the same to {3} the Stock Reconciliation."
-msgstr ""
+msgstr "{0} birim {1} Ürünü için {2} Deposunda rezerve edilmiştir, lütfen Stok Doğrulamasını {3} yapabilmek için stok rezevini kaldırın."
 
 #: stock/doctype/pick_list/pick_list.py:823
 msgid "{0} units of Item {1} is picked in another Pick List."
