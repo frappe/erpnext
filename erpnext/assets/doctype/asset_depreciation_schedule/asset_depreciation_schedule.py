@@ -637,18 +637,14 @@ def get_straight_line_or_manual_depr_amount(
 	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment:
 		if row.daily_prorata_based:
 			amount = flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
-			total_years = flt(number_of_pending_depreciations * row.frequency_of_depreciation) / 12
-			every_year_depr = amount / total_years
 
-			year_start_date = add_years(
-				row.depreciation_start_date, (row.frequency_of_depreciation * schedule_idx) // 12
+			return get_daily_prorata_based_straight_line_depr(
+				asset,
+				row,
+				schedule_idx,
+				number_of_pending_depreciations,
+				amount,
 			)
-			year_end_date = add_days(add_years(year_start_date, 1), -1)
-			daily_depr_amount = every_year_depr / (date_diff(year_end_date, year_start_date) + 1)
-			total_depreciable_days = _get_total_days(
-				row.depreciation_start_date, schedule_idx, row.frequency_of_depreciation
-			)
-			return daily_depr_amount * total_depreciable_days
 		else:
 			return (
 				flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)
@@ -661,30 +657,32 @@ def get_straight_line_or_manual_depr_amount(
 				- flt(asset.opening_accumulated_depreciation)
 				- flt(row.expected_value_after_useful_life)
 			)
-			total_years = (
-				flt(
-					(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
-					* row.frequency_of_depreciation
-				)
-				/ 12
+			return get_daily_prorata_based_straight_line_depr(
+				asset, row, schedule_idx, number_of_pending_depreciations, amount
 			)
-			every_year_depr = amount / total_years
-
-			year_start_date = add_years(
-				row.depreciation_start_date, (row.frequency_of_depreciation * schedule_idx) // 12
-			)
-			year_end_date = add_days(add_years(year_start_date, 1), -1)
-			daily_depr_amount = every_year_depr / (date_diff(year_end_date, year_start_date) + 1)
-			total_depreciable_days = _get_total_days(
-				row.depreciation_start_date, schedule_idx, row.frequency_of_depreciation
-			)
-			return daily_depr_amount * total_depreciable_days
 		else:
 			return (
 				flt(asset.gross_purchase_amount)
 				- flt(asset.opening_accumulated_depreciation)
 				- flt(row.expected_value_after_useful_life)
 			) / flt(row.total_number_of_depreciations - asset.number_of_depreciations_booked)
+
+
+def get_daily_prorata_based_straight_line_depr(
+	asset, row, schedule_idx, number_of_pending_depreciations, amount, total_years
+):
+	total_years = flt(number_of_pending_depreciations * row.frequency_of_depreciation) / 12
+	every_year_depr = amount / total_years
+
+	year_start_date = add_years(
+		row.depreciation_start_date, (row.frequency_of_depreciation * schedule_idx) // 12
+	)
+	year_end_date = add_days(add_years(year_start_date, 1), -1)
+	daily_depr_amount = every_year_depr / (date_diff(year_end_date, year_start_date) + 1)
+	total_depreciable_days = _get_total_days(
+		row.depreciation_start_date, schedule_idx, row.frequency_of_depreciation
+	)
+	return daily_depr_amount * total_depreciable_days
 
 
 def _get_total_days(depreciation_start_date, schedule_idx, frequency_of_depreciation):
