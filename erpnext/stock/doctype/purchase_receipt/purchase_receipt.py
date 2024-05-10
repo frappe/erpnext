@@ -1,13 +1,5 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# License: GNU General Public License v3. See license.txt
 
-
-import frappe
-from frappe import _, throw
-from frappe.desk.notifications import clear_doctype_notifications
-from frappe.model.mapper import get_mapped_doc
-from frappe.query_builder.functions import CombineDatetime
-from frappe.utils import cint, flt, get_datetime, getdate, nowdate
+int, flt, get_datetime, getdate, nowdate
 from pypika import functions as fn
 
 import erpnext
@@ -671,20 +663,7 @@ class PurchaseReceipt(BuyingController):
 				)
 				landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 				if d.is_fixed_asset:
-<<<<<<< HEAD
-					account_type = (
-						"capital_work_in_progress_account"
-						if is_cwip_accounting_enabled(d.asset_category)
-						else "fixed_asset_account"
-					)
-
-					stock_asset_account_name = get_asset_account(
-						account_type, asset_category=d.asset_category, company=self.company
-					)
-
-=======
 					stock_asset_account_name = d.expense_account
->>>>>>> 651e4696fd (fix: expense account should be fetched from related asset category)
 					stock_value_diff = (
 						flt(d.base_net_amount) + flt(d.item_tax_amount) + flt(d.landed_cost_voucher_amount)
 					)
