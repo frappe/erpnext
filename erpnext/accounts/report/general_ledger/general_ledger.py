@@ -501,10 +501,17 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 				else:
 					update_value_in_dict(consolidated_gle, key, gle)
 
-	for value in consolidated_gle.values():
-		update_value_in_dict(totals, "total", value)
-		update_value_in_dict(totals, "closing", value)
-		entries.append(value)
+	if filters.get("show_net_values_in_party_account"):
+		for value in consolidated_gle.values():
+			if value.get("debit") or value.get("credit"):
+				update_value_in_dict(totals, "total", value)
+				update_value_in_dict(totals, "closing", value)
+				entries.append(value)
+	else:
+		for value in consolidated_gle.values():
+			update_value_in_dict(totals, "total", value)
+			update_value_in_dict(totals, "closing", value)
+			entries.append(value)
 
 	return totals, entries
 
