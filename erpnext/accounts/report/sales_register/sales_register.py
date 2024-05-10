@@ -414,9 +414,11 @@ def get_account_columns(invoice_list, include_payments):
 
 def get_invoices(filters, additional_query_columns):
 	si = frappe.qb.DocType("Sales Invoice")
+	sii = frappe.qb.DocType("Sales Invoice Item")
 	query = (
 		frappe.qb.from_(si)
-		.select(
+		.left_join(sii).on(si.name == sii.parent)
+		.select(	
 			ConstantColumn("Sales Invoice").as_("doctype"),
 			si.name,
 			si.posting_date,
@@ -437,7 +439,7 @@ def get_invoices(filters, additional_query_columns):
 			si.represents_company,
 			si.company,
 		)
-		.where(si.docstatus == 1)
+		.where((si.docstatus == 1) & sii.item_code.isnotnull())
 		.orderby(si.posting_date, si.name, order=Order.desc)
 	)
 
