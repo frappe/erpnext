@@ -418,7 +418,7 @@
   {
    "default": "0",
    "depends_on": "eval: doc.enable_stock_reservation",
-   "description": "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Receipt for Sales Order.",
+   "description": "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Request for Sales Order.",
    "fieldname": "auto_reserve_stock_for_sales_order_on_purchase",
    "fieldtype": "Check",
    "label": "Auto Reserve Stock for Sales Order on Purchase"
