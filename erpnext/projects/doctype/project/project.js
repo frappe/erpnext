@@ -63,7 +63,7 @@ frappe.ui.form.on("Project", {
 				filters: {
 					company: frm.doc.company,
 				},
-			},
+			};
 		});
 	},
 
