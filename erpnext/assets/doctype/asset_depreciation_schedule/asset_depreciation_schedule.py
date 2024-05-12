@@ -669,7 +669,7 @@ def get_straight_line_or_manual_depr_amount(
 
 
 def get_daily_prorata_based_straight_line_depr(
-	asset, row, schedule_idx, number_of_pending_depreciations, amount, total_years
+	asset, row, schedule_idx, number_of_pending_depreciations, amount
 ):
 	total_years = flt(number_of_pending_depreciations * row.frequency_of_depreciation) / 12
 	every_year_depr = amount / total_years
