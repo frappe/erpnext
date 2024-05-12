@@ -1,8 +1,8 @@
 {{ address_line1 }}<br>
-{% if address_line2 %}{{ address_line2 }}<br>{% endif -%}
-{% if country in ["Germany", "Deutschland"] %}
+{%- if address_line2 -%}{{ address_line2 }}<br>{%- endif -%}
+{%- if country in ["Germany", "Deutschland"] -%}
     {{ pincode }} {{ city }}
-{% else %}
+{%- else -%}
     {{ pincode }} {{ city | upper }}<br>
-    {{ country | upper }}
-{% endif %}
+    {{- country | upper -}}
+{%- endif -%}
