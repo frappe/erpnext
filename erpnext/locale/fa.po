@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-05 09:35+0000\n"
-"PO-Revision-Date: 2024-05-11 12:57\n"
+"PO-Revision-Date: 2024-05-12 13:07\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -28328,7 +28328,7 @@ msgstr ""
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:106
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:155
 msgid "Field"
-msgstr "رشته"
+msgstr "فیلد"
 
 #. Label of a Select field in DocType 'POS Search Fields'
 #: accounts/doctype/pos_search_fields/pos_search_fields.json
@@ -36791,7 +36791,7 @@ msgstr "توضیحات مورد"
 
 #: selling/page/point_of_sale/pos_item_details.js:28
 msgid "Item Details"
-msgstr "جزئیات مورد"
+msgstr "جزئیات آیتم"
 
 #. Label of a Section Break field in DocType 'Production Plan Sub Assembly
 #. Item'
@@ -39611,7 +39611,7 @@ msgstr "بیایید اولین مشتری شما را ایجاد کنیم"
 #. Label of an action in the Onboarding Step 'Track Material Request'
 #: buying/onboarding_step/create_a_material_request/create_a_material_request.json
 msgid "Let’s create your first Material Request"
-msgstr ""
+msgstr "بیایید اولین درخواست مواد شما را ایجاد کنیم"
 
 #. Label of an action in the Onboarding Step 'Create Your First Purchase
 #. Invoice '
@@ -54461,7 +54461,7 @@ msgstr "پیش رفتن"
 #: projects/doctype/task/task.py:143
 #, python-format
 msgid "Progress % for a task cannot be more than 100."
-msgstr ""
+msgstr "% پیشرفت برای یک وظیفه نمی تواند بیشتر از 100 باشد."
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:94
 msgid "Progress (%)"
@@ -63079,7 +63079,7 @@ msgstr "در حال دویدن"
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgctxt "Transaction Deletion Record"
 msgid "Running"
-msgstr "در حال دویدن"
+msgstr "در حال اجرا"
 
 #: selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:28
 msgid "S.O. No."
@@ -66720,7 +66720,7 @@ msgstr "هزینه عملیاتی را بر اساس مقدار BOM تنظیم �
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:263
 msgid "Set Password"
-msgstr "قراردادن رمز عبور"
+msgstr "تنظیم رمز عبور"
 
 #. Label of a Check field in DocType 'POS Opening Entry'
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
@@ -81189,17 +81189,17 @@ msgstr "وات-ساعت"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Wavelength In Gigametres"
-msgstr ""
+msgstr "طول موج بر حسب گیگا متر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Wavelength In Kilometres"
-msgstr ""
+msgstr "طول موج بر حسب کیلومتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Wavelength In Megametres"
-msgstr ""
+msgstr "طول موج بر حسب مگا متر"
 
 #: controllers/accounts_controller.py:232
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck '{2}' checkbox. <br><br> Or you can use {3} tool to reconcile against {1} later."
