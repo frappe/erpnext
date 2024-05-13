@@ -311,34 +311,39 @@ def get_conditions(filters):
 
 	return conditions
 
-
 def get_items(filters, additional_query_columns):
-	conditions = get_conditions(filters)
-	if additional_query_columns:
-		additional_query_columns = "," + ",".join(additional_query_columns)
-	return frappe.db.sql(
-		f"""
-		select
-			`tabPurchase Invoice Item`.`name`, `tabPurchase Invoice Item`.`parent`,
-			`tabPurchase Invoice`.posting_date, `tabPurchase Invoice`.credit_to, `tabPurchase Invoice`.company,
-			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total,
-			`tabPurchase Invoice`.unrealized_profit_loss_account,
-			`tabPurchase Invoice Item`.`item_code`, `tabPurchase Invoice Item`.description, `tabPurchase Invoice Item`.`item_group`,
-			`tabPurchase Invoice Item`.`item_name` as pi_item_name, `tabPurchase Invoice Item`.`item_group` as pi_item_group,
-			`tabItem`.`item_name` as i_item_name, `tabItem`.`item_group` as i_item_group,
-			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
-			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
-			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
-			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
-			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {additional_query_columns}
-		from `tabPurchase Invoice`, `tabPurchase Invoice Item`, `tabItem`
-		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
-			`tabItem`.name = `tabPurchase Invoice Item`.`item_code` and
-			`tabPurchase Invoice`.docstatus = 1 {conditions}
-	""",
-		filters,
-		as_dict=1,
-	)
+    pi = frappe.qb.DocType('Purchase Invoice')
+    pii = frappe.qb.DocType('Purchase Invoice Item')
+    Item = frappe.qb.DocType('Item')
+    query = (frappe.qb.from_(pi)
+             .join(pii).on(pi.name == pii.parent)  
+             .left_join(Item).on(pii.item_code == Item.name) 
+             .select(
+                 pii.name.as_('pii_name'), pii.parent,
+                 pi.posting_date, pi.credit_to, pi.company,
+                 pi.supplier, pi.remarks, pi.base_net_total,
+                 pi.unrealized_profit_loss_account,
+                 pii.item_code, pii.description, pii.item_group,
+                 pii.item_name.as_('pi_item_name'), pii.item_group.as_('pi_item_group'),
+                 Item.item_name.as_('i_item_name'), Item.item_group.as_('i_item_group'),
+                 pii.project, pii.purchase_order,
+                 pii.purchase_receipt, pii.po_detail,
+                 pii.expense_account, pii.stock_qty,
+                 pii.stock_uom, pii.base_net_amount,
+                 pi.supplier_name, pi.mode_of_payment
+             )
+             .where(pi.docstatus == 1))
+
+    if additional_query_columns:
+        query = query.select(*additional_query_columns)
+
+    if filters.get("supplier"):
+        query = query.where(pi.supplier == filters['supplier'])
+    if filters.get("company"):
+        query = query.where(pi.company == filters['company'])
+
+    return query.run(as_dict=True)
+
 
 
 def get_aii_accounts():
