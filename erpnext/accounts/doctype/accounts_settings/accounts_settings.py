@@ -39,6 +39,7 @@ class AccountsSettings(Document):
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
 		enable_common_party_accounting: DF.Check
 		enable_fuzzy_matching: DF.Check
+		enable_immutable_ledger: DF.Check
 		enable_party_matching: DF.Check
 		frozen_accounts_modifier: DF.Link | None
 		general_ledger_remarks_length: DF.Int
