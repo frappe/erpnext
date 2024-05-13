@@ -1942,7 +1942,7 @@ class AccountsController(TransactionBase):
 	def set_advance_payment_status(self):
 		new_status = None
 
-		stati = frappe.get_list(
+		stati = frappe.get_all(
 			"Payment Request",
 			{
 				"reference_doctype": self.doctype,
