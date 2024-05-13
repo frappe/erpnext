@@ -3,7 +3,6 @@
 
 
 import json
-from typing import Dict, Optional
 
 import frappe
 from frappe import _
@@ -18,7 +17,7 @@ from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
 from erpnext.stock.valuation import FIFOValuation, LIFOValuation
 
-BarcodeScanResult = Dict[str, Optional[str]]
+BarcodeScanResult = dict[str, str | None]
 
 
 class InvalidWarehouseCompany(frappe.ValidationError):
@@ -59,7 +58,7 @@ def get_stock_value_from_bin(warehouse=None, item_code=None):
 
 
 def get_stock_value_on(
-	warehouses: list | str = None, posting_date: str = None, item_code: str = None
+	warehouses: list | str | None = None, posting_date: str | None = None, item_code: str | None = None
 ) -> float:
 	if not posting_date:
 		posting_date = nowdate()
@@ -150,9 +149,7 @@ def get_stock_balance(
 				else (0.0, 0.0, None)
 			)
 		else:
-			return (
-				(last_entry.qty_after_transaction, last_entry.valuation_rate) if last_entry else (0.0, 0.0)
-			)
+			return (last_entry.qty_after_transaction, last_entry.valuation_rate) if last_entry else (0.0, 0.0)
 	else:
 		return last_entry.qty_after_transaction if last_entry else 0.0
 
@@ -180,10 +177,8 @@ def get_latest_stock_qty(item_code, warehouse=None):
 			condition += " AND warehouse = %s"
 
 	actual_qty = frappe.db.sql(
-		"""select sum(actual_qty) from tabBin
-		where item_code=%s {0}""".format(
-			condition
-		),
+		f"""select sum(actual_qty) from tabBin
+		where item_code=%s {condition}""",
 		values,
 	)[0][0]
 
@@ -278,9 +273,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 		args.actual_qty = args.qty
 		args.serial_nos = get_serial_nos_data(args.get("serial_no"))
 
-		sn_obj = SerialNoValuation(
-			sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code")
-		)
+		sn_obj = SerialNoValuation(sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code"))
 
 		return sn_obj.get_incoming_rate()
 	elif (
@@ -288,7 +281,6 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 		and frappe.db.get_value("Batch", args.get("batch_no"), "use_batchwise_valuation", cache=True)
 		and not args.get("serial_and_batch_bundle")
 	):
-
 		args.actual_qty = args.qty
 		args.batch_nos = frappe._dict({args.batch_no: args})
 
@@ -329,10 +321,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 	return flt(in_rate)
 
 
-def get_batch_incoming_rate(
-	item_code, warehouse, batch_no, posting_date, posting_time, creation=None
-):
-
+def get_batch_incoming_rate(item_code, warehouse, batch_no, posting_date, posting_time, creation=None):
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 
 	timestamp_condition = CombineDatetime(sle.posting_date, sle.posting_time) < CombineDatetime(
@@ -340,8 +329,7 @@ def get_batch_incoming_rate(
 	)
 	if creation:
 		timestamp_condition |= (
-			CombineDatetime(sle.posting_date, sle.posting_time)
-			== CombineDatetime(posting_date, posting_time)
+			CombineDatetime(sle.posting_date, sle.posting_time) == CombineDatetime(posting_date, posting_time)
 		) & (sle.creation < creation)
 
 	batch_details = (
@@ -379,9 +367,7 @@ def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
 	val_method = frappe.db.get_value("Item", item_code, "valuation_method", cache=True)
 	if not val_method:
-		val_method = (
-			frappe.db.get_single_value("Stock Settings", "valuation_method", cache=True) or "FIFO"
-		)
+		val_method = frappe.db.get_single_value("Stock Settings", "valuation_method", cache=True) or "FIFO"
 	return val_method
 
 
@@ -456,7 +442,6 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 	if not include_uom or not conversion_factors:
 		return
 
-	convertible_cols = {}
 	is_dict_obj = False
 	if isinstance(result[0], dict):
 		is_dict_obj = True
@@ -471,8 +456,8 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 			columns.insert(
 				idx + 1,
 				{
-					"label": "{0} (per {1})".format(d.get("label"), include_uom),
-					"fieldname": "{0}_{1}".format(d.get("fieldname"), frappe.scrub(include_uom)),
+					"label": "{} (per {})".format(d.get("label"), include_uom),
+					"fieldname": "{}_{}".format(d.get("fieldname"), frappe.scrub(include_uom)),
 					"fieldtype": "Currency" if d.get("convertible") == "rate" else "Float",
 				},
 			)
@@ -495,7 +480,7 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 			if not is_dict_obj:
 				row.insert(key + 1, new_value)
 			else:
-				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom))
+				new_key = f"{key}_{frappe.scrub(include_uom)}"
 				update_dict_values.append([row, new_key, new_value])
 
 	for data in update_dict_values:
@@ -518,9 +503,9 @@ def add_additional_uom_columns(columns, result, include_uom, conversion_factors)
 				{"converted_col": columns[next_col]["fieldname"], "for_type": col.get("convertible")}
 			)
 			if col.get("convertible") == "rate":
-				columns[next_col]["label"] += " (per {})".format(include_uom)
+				columns[next_col]["label"] += f" (per {include_uom})"
 			else:
-				columns[next_col]["label"] += " ({})".format(include_uom)
+				columns[next_col]["label"] += f" ({include_uom})"
 
 	for row_idx, row in enumerate(result):
 		for convertible_col, data in convertible_column_map.items():
@@ -594,7 +579,7 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 	def set_cache(data: BarcodeScanResult):
 		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
 
-	def get_cache() -> Optional[BarcodeScanResult]:
+	def get_cache() -> BarcodeScanResult | None:
 		if data := frappe.cache().get_value(f"erpnext:barcode_scan:{search_value}"):
 			return data
 
@@ -647,7 +632,7 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 	return {}
 
 
-def _update_item_info(scan_result: Dict[str, Optional[str]]) -> Dict[str, Optional[str]]:
+def _update_item_info(scan_result: dict[str, str | None]) -> dict[str, str | None]:
 	if item_code := scan_result.get("item_code"):
 		if item_info := frappe.get_cached_value(
 			"Item",

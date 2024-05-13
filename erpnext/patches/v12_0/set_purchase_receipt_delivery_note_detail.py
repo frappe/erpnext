@@ -4,7 +4,6 @@ import frappe
 
 
 def execute():
-
 	frappe.reload_doc("stock", "doctype", "delivery_note_item", force=True)
 	frappe.reload_doc("stock", "doctype", "purchase_receipt_item", force=True)
 
@@ -50,14 +49,12 @@ def execute():
 		Format => { 'document' : ['return_document_1','return_document_2'] }"""
 
 		return_against_documents = frappe.db.sql(
-			"""
+			f"""
 			SELECT
 				return_against as document, name as return_document
 			FROM `tab{doctype}`
 			WHERE
-				is_return = 1 and docstatus = 1""".format(
-				doctype=doctype
-			),
+				is_return = 1 and docstatus = 1""",
 			as_dict=1,
 		)  # nosec
 
@@ -72,7 +69,7 @@ def execute():
 		return_document_map = defaultdict(list)
 		detail_field = "purchase_receipt_item" if doctype == "Purchase Receipt" else "dn_detail"
 
-		child_doc = frappe.scrub("{0} Item".format(doctype))
+		child_doc = frappe.scrub(f"{doctype} Item")
 		frappe.reload_doc("stock", "doctype", child_doc)
 
 		return_document_map = make_return_document_map(doctype, return_document_map)
@@ -89,7 +86,8 @@ def execute():
 				for return_item in return_doc_items:
 					for doc_item in doc_items:
 						if (
-							row_is_mappable(doc_item, return_item, detail_field) and doc_item.get("name") not in mapped
+							row_is_mappable(doc_item, return_item, detail_field)
+							and doc_item.get("name") not in mapped
 						):
 							map_rows(doc_item, return_item, detail_field, doctype)
 							mapped.append(doc_item.get("name"))

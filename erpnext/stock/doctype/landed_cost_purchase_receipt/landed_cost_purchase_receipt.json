@@ -65,13 +65,13 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-26 18:41:06.281750",
+ "modified": "2024-03-27 13:09:59.363367",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Purchase Receipt",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": []
 }

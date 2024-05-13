@@ -52,13 +52,11 @@ def get_loyalty_details(
 		condition += " and expiry_date>='%s' " % expiry_date
 
 	loyalty_point_details = frappe.db.sql(
-		"""select sum(loyalty_points) as loyalty_points,
+		f"""select sum(loyalty_points) as loyalty_points,
 		sum(purchase_amount) as total_spent from `tabLoyalty Point Entry`
 		where customer=%s and loyalty_program=%s and posting_date <= %s
 		{condition}
-		group by customer""".format(
-			condition=condition
-		),
+		group by customer""",
 		(customer, loyalty_program, expiry_date),
 		as_dict=1,
 	)
@@ -79,9 +77,7 @@ def get_loyalty_program_details_with_points(
 	include_expired_entry=False,
 	current_transaction_amount=0,
 ):
-	lp_details = get_loyalty_program_details(
-		customer, loyalty_program, company=company, silent=silent
-	)
+	lp_details = get_loyalty_program_details(customer, loyalty_program, company=company, silent=silent)
 	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
 	lp_details.update(
 		get_loyalty_details(customer, loyalty_program.name, expiry_date, company, include_expired_entry)

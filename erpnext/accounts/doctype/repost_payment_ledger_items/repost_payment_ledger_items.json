@@ -23,13 +23,13 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-10-28 14:47:11.838109",
+ "modified": "2024-03-27 13:10:32.915489",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Payment Ledger Items",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

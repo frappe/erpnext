@@ -75,7 +75,7 @@
  "icon": "fa fa-edit",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-02 12:03:02.359202",
+ "modified": "2024-03-27 13:09:53.963494",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Attribute",
@@ -91,7 +91,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

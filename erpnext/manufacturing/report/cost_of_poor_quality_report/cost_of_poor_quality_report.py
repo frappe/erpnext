@@ -20,9 +20,7 @@ def get_data(report_filters):
 
 		job_card = frappe.qb.DocType("Job Card")
 
-		operating_cost = ((job_card.hour_rate) * (job_card.total_time_in_mins) / 60.0).as_(
-			"operating_cost"
-		)
+		operating_cost = ((job_card.hour_rate) * (job_card.total_time_in_mins) / 60.0).as_("operating_cost")
 		item_code = (job_card.production_item).as_("item_code")
 
 		query = (
@@ -64,7 +62,7 @@ def append_filters(query, report_filters, operations, job_card):
 	):
 		if report_filters.get(field):
 			if field == "serial_no":
-				query = query.where(job_card[field].like("%{}%".format(report_filters.get(field))))
+				query = query.where(job_card[field].like(f"%{report_filters.get(field)}%"))
 			elif field == "operation":
 				query = query.where(job_card[field].isin(operations))
 			else:

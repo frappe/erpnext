@@ -25,6 +25,7 @@
   "consumed_qty",
   "current_stock",
   "secbreak_3",
+  "add_serial_batch_bundle",
   "serial_and_batch_bundle",
   "use_serial_batch_fields",
   "col_break4",
@@ -224,12 +225,18 @@
   {
    "fieldname": "column_break_qibi",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.use_serial_batch_fields === 0",
+   "fieldname": "add_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch Bundle"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-04 16:32:17.534162",
+ "modified": "2024-03-30 10:26:27.237371",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Supplied Item",

@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, flt, get_datetime_str, nowdate
 from frappe.utils.data import now_datetime
-from frappe.utils.nestedset import get_ancestors_of, get_root_of  # noqa
+from frappe.utils.nestedset import get_root_of
 
 from erpnext import get_default_company
 
@@ -81,14 +81,12 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 	if entries:
 		return flt(entries[0].exchange_rate)
 
-	if frappe.get_cached_value(
-		"Currency Exchange Settings", "Currency Exchange Settings", "disabled"
-	):
+	if frappe.get_cached_value("Currency Exchange Settings", "Currency Exchange Settings", "disabled"):
 		return 0.00
 
 	try:
 		cache = frappe.cache()
-		key = "currency_exchange_rate_{0}:{1}:{2}".format(transaction_date, from_currency, to_currency)
+		key = f"currency_exchange_rate_{transaction_date}:{from_currency}:{to_currency}"
 		value = cache.get(key)
 
 		if not value:

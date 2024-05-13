@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2018-01-23 05:40:18.117583",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -84,7 +85,8 @@
   }
  ],
  "in_create": 1,
- "modified": "2020-01-30 17:27:55.964242",
+ "links": [],
+ "modified": "2024-03-27 13:10:03.015035",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Loyalty Point Entry",
@@ -116,8 +118,9 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "customer",
  "track_changes": 1
 }

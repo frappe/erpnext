@@ -143,7 +143,9 @@ def add_bank_accounts(response, bank, company):
 				result.append(new_account.name)
 			except frappe.UniqueValidationError:
 				frappe.msgprint(
-					_("Bank account {0} already exists and could not be created again").format(account["name"])
+					_("Bank account {0} already exists and could not be created again").format(
+						account["name"]
+					)
 				)
 			except Exception:
 				frappe.log_error("Plaid Link Error")
@@ -220,9 +222,7 @@ def sync_transactions(bank, bank_account):
 				f"Plaid added {len(result)} new Bank Transactions from '{bank_account}' between {start_date} and {end_date}"
 			)
 
-			frappe.db.set_value(
-				"Bank Account", bank_account, "last_integration_date", last_transaction_date
-			)
+			frappe.db.set_value("Bank Account", bank_account, "last_integration_date", last_transaction_date)
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), _("Plaid transactions sync error"))
 
@@ -244,9 +244,7 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 
 	transactions = []
 	try:
-		transactions = plaid.get_transactions(
-			start_date=start_date, end_date=end_date, account_id=account_id
-		)
+		transactions = plaid.get_transactions(start_date=start_date, end_date=end_date, account_id=account_id)
 	except ItemError as e:
 		if e.code == "ITEM_LOGIN_REQUIRED":
 			msg = _("There was an error syncing transactions.") + " "

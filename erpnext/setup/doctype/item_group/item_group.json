@@ -135,7 +135,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2024-01-30 14:08:38.485616",
+ "modified": "2024-03-27 13:09:54.588785",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
@@ -204,7 +204,7 @@
  ],
  "search_fields": "parent_item_group",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

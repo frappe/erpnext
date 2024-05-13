@@ -35,14 +35,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-06-04 16:29:07.807252",
+ "modified": "2024-03-27 13:06:47.394005",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Note",
  "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

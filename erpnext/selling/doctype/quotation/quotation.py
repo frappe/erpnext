@@ -34,7 +34,7 @@ class Quotation(SellingController):
 		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
 
 		additional_discount_percentage: DF.Float
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		apply_discount_on: DF.Literal["", "Grand Total", "Net Total"]
 		auto_repeat: DF.Link | None
@@ -49,7 +49,7 @@ class Quotation(SellingController):
 		campaign: DF.Link | None
 		company: DF.Link
 		company_address: DF.Link | None
-		company_address_display: DF.SmallText | None
+		company_address_display: DF.TextEditor | None
 		competitors: DF.TableMultiSelect[CompetitorDetail]
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
@@ -78,7 +78,7 @@ class Quotation(SellingController):
 		opportunity: DF.Link | None
 		order_lost_reason: DF.SmallText | None
 		order_type: DF.Literal["", "Sales", "Maintenance", "Shopping Cart"]
-		other_charges_calculation: DF.LongText | None
+		other_charges_calculation: DF.TextEditor | None
 		packed_items: DF.Table[PackedItem]
 		party_name: DF.DynamicLink | None
 		payment_schedule: DF.Table[PaymentSchedule]
@@ -93,7 +93,7 @@ class Quotation(SellingController):
 		scan_barcode: DF.Data | None
 		select_print_heading: DF.Link | None
 		selling_price_list: DF.Link
-		shipping_address: DF.SmallText | None
+		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		source: DF.Link | None
@@ -125,7 +125,7 @@ class Quotation(SellingController):
 			self.indicator_title = "Expired"
 
 	def validate(self):
-		super(Quotation, self).validate()
+		super().validate()
 		self.set_status()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
@@ -188,7 +188,8 @@ class Quotation(SellingController):
 		def is_in_sales_order(row):
 			in_sales_order = bool(
 				frappe.db.exists(
-					"Sales Order Item", {"quotation_item": row.name, "item_code": row.item_code, "docstatus": 1}
+					"Sales Order Item",
+					{"quotation_item": row.name, "item_code": row.item_code, "docstatus": 1},
 				)
 			)
 			return in_sales_order
@@ -278,7 +279,7 @@ class Quotation(SellingController):
 	def on_cancel(self):
 		if self.lost_reasons:
 			self.lost_reasons = []
-		super(Quotation, self).on_cancel()
+		super().on_cancel()
 
 		# update enquiry status
 		self.set_status(update=True)
@@ -383,7 +384,6 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				)
 
 		target.flags.ignore_permissions = ignore_permissions
-		target.delivery_date = nowdate()
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
@@ -453,12 +453,8 @@ def set_expired_status():
 	# if not exists any SO, set status as Expired
 	frappe.db.multisql(
 		{
-			"mariadb": """UPDATE `tabQuotation`  SET `tabQuotation`.status = 'Expired' WHERE {cond} and not exists({so_against_quo})""".format(
-				cond=cond, so_against_quo=so_against_quo
-			),
-			"postgres": """UPDATE `tabQuotation` SET status = 'Expired' FROM `tabSales Order`, `tabSales Order Item` WHERE {cond} and not exists({so_against_quo})""".format(
-				cond=cond, so_against_quo=so_against_quo
-			),
+			"mariadb": f"""UPDATE `tabQuotation`  SET `tabQuotation`.status = 'Expired' WHERE {cond} and not exists({so_against_quo})""",
+			"postgres": f"""UPDATE `tabQuotation` SET status = 'Expired' FROM `tabSales Order`, `tabSales Order Item` WHERE {cond} and not exists({so_against_quo})""",
 		},
 		(nowdate()),
 	)
@@ -547,9 +543,7 @@ def handle_mandatory_error(e, customer, lead_name):
 	mandatory_fields = [customer.meta.get_label(field.strip()) for field in mandatory_fields]
 
 	frappe.local.message_log = []
-	message = (
-		_("Could not auto create Customer due to the following missing mandatory field(s):") + "<br>"
-	)
+	message = _("Could not auto create Customer due to the following missing mandatory field(s):") + "<br>"
 	message += "<br><ul><li>" + "</li><li>".join(mandatory_fields) + "</li></ul>"
 	message += _("Please create Customer from Lead {0}.").format(get_link_to_form("Lead", lead_name))
 

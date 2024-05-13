@@ -95,13 +95,13 @@ class ImportSupplierInvoice(Document):
 			invoices_args["terms"] = get_payment_terms_from_file(file_content)
 
 			supplier_name = create_supplier(self.supplier_group, supp_dict)
-			address = create_address(supplier_name, supp_dict)
+			create_address(supplier_name, supp_dict)
 			pi_name = create_purchase_invoice(supplier_name, file_name, invoices_args, self.name)
 
 			self.file_count += 1
 			if pi_name:
 				self.purchase_invoices_count += 1
-				file_save = save_file(
+				save_file(
 					file_name,
 					encoded_content,
 					"Purchase Invoice",
@@ -179,7 +179,7 @@ def get_file_content(file_name, zip_file_object):
 	except UnicodeDecodeError:
 		try:
 			content = encoded_content.decode("utf-16")
-		except UnicodeDecodeError as e:
+		except UnicodeDecodeError:
 			frappe.log_error("UTF-16 encoding error for File Name: " + file_name)
 
 	return content
@@ -297,7 +297,6 @@ def create_supplier(supplier_group, args):
 
 		return existing_supplier_name
 	else:
-
 		new_supplier = frappe.new_doc("Supplier")
 		new_supplier.supplier_name = re.sub("&amp", "&", args.supplier)
 		new_supplier.supplier_group = supplier_group
@@ -408,7 +407,7 @@ def create_purchase_invoice(supplier_name, file_name, args, name):
 		pi.imported_grand_total = calc_total
 		pi.save()
 		return pi.name
-	except Exception as e:
+	except Exception:
 		frappe.db.set_value("Import Supplier Invoice", name, "status", "Error")
 		pi.log_error("Unable to create Puchase Invoice")
 		return None

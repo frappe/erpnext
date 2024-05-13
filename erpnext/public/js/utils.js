@@ -51,38 +51,7 @@ $.extend(erpnext, {
 	},
 
 	setup_serial_or_batch_no: function () {
-		let grid_row = cur_frm.open_grid_row();
-		if (
-			!grid_row ||
-			!grid_row.grid_form.fields_dict.serial_no ||
-			grid_row.grid_form.fields_dict.serial_no.get_status() !== "Write"
-		)
-			return;
-
-		frappe.model.get_value(
-			"Item",
-			{ name: grid_row.doc.item_code },
-			["has_serial_no", "has_batch_no"],
-			({ has_serial_no, has_batch_no }) => {
-				Object.assign(grid_row.doc, { has_serial_no, has_batch_no });
-
-				if (has_serial_no) {
-					attach_selector_button(
-						__("Add Serial No"),
-						grid_row.grid_form.fields_dict.serial_no.$wrapper,
-						this,
-						grid_row
-					);
-				} else if (has_batch_no) {
-					attach_selector_button(
-						__("Pick Batch No"),
-						grid_row.grid_form.fields_dict.batch_no.$wrapper,
-						this,
-						grid_row
-					);
-				}
-			}
-		);
+		// Deprecated in v15
 	},
 
 	route_to_adjustment_jv: (args) => {
@@ -430,30 +399,31 @@ $.extend(erpnext.utils, {
 			item_row.has_batch_no = r.message.has_batch_no;
 			item_row.has_serial_no = r.message.has_serial_no;
 
-			frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function () {
-				new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
-					if (r) {
-						let update_values = {
-							serial_and_batch_bundle: r.name,
-							qty: Math.abs(r.total_qty),
-						};
+			new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
+				if (r) {
+					let update_values = {
+						serial_and_batch_bundle: r.name,
+						qty: Math.abs(r.total_qty),
+					};
 
-						if (!warehouse_field) {
-							warehouse_field = "warehouse";
-						}
-
-						if (r.warehouse) {
-							update_values[warehouse_field] = r.warehouse;
-						}
-
-						frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+					if (!warehouse_field) {
+						warehouse_field = "warehouse";
 					}
-				});
+
+					if (r.warehouse) {
+						update_values[warehouse_field] = r.warehouse;
+					}
+
+					frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+				}
 			});
 		});
 	},
 
 	get_fiscal_year: function (date, with_dates = false, boolean = false) {
+		if (!frappe.boot.setup_complete) {
+			return;
+		}
 		if (!date) {
 			date = frappe.datetime.get_today();
 		}
@@ -936,12 +906,15 @@ erpnext.utils.map_current_doc = function (opts) {
 
 	if (opts.source_doctype) {
 		let data_fields = [];
-		if (opts.source_doctype == "Purchase Receipt") {
-			data_fields.push({
-				fieldname: "merge_taxes",
-				fieldtype: "Check",
-				label: __("Merge taxes from multiple documents"),
-			});
+		if (["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)) {
+			let target_meta = frappe.get_meta(cur_frm.doc.doctype);
+			if (target_meta.fields.find((f) => f.fieldname === "taxes")) {
+				data_fields.push({
+					fieldname: "merge_taxes",
+					fieldtype: "Check",
+					label: __("Merge taxes from multiple documents"),
+				});
+			}
 		}
 		const d = new frappe.ui.form.MultiSelectDialog({
 			doctype: opts.source_doctype,
@@ -962,7 +935,10 @@ erpnext.utils.map_current_doc = function (opts) {
 					return;
 				}
 				opts.source_name = values;
-				if (opts.allow_child_item_selection || opts.source_doctype == "Purchase Receipt") {
+				if (
+					opts.allow_child_item_selection ||
+					["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)
+				) {
 					// args contains filtered child docnames
 					opts.args = args;
 				}

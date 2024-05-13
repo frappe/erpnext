@@ -94,8 +94,8 @@ def get_columns(filters, period_list, partner_doctype):
 	]
 
 	for period in period_list:
-		target_key = "target_{}".format(period.key)
-		variance_key = "variance_{}".format(period.key)
+		target_key = f"target_{period.key}"
+		variance_key = f"variance_{period.key}"
 
 		columns.extend(
 			[
@@ -169,9 +169,7 @@ def prepare_data(
 
 	for d in sales_users_data:
 		key = (d.parent, d.item_group)
-		dist_data = get_periodwise_distribution_data(
-			d.distribution_id, period_list, filters.get("period")
-		)
+		dist_data = get_periodwise_distribution_data(d.distribution_id, period_list, filters.get("period"))
 
 		if key not in rows:
 			rows.setdefault(key, {"total_target": 0, "total_achieved": 0, "total_variance": 0})
@@ -182,8 +180,8 @@ def prepare_data(
 			if p_key not in details:
 				details[p_key] = 0
 
-			target_key = "target_{}".format(p_key)
-			variance_key = "variance_{}".format(p_key)
+			target_key = f"target_{p_key}"
+			variance_key = f"variance_{p_key}"
 			details[target_key] = (d.get(target_qty_amt_field) * dist_data.get(p_key)) / 100
 			details[variance_key] = 0
 			details["total_target"] += details[target_key]
@@ -197,6 +195,8 @@ def prepare_data(
 				):
 					details[p_key] += r.get(qty_or_amount_field, 0)
 					details[variance_key] = details.get(p_key) - details.get(target_key)
+				else:
+					details[variance_key] = details.get(p_key) - details.get(target_key)
 
 			details["total_achieved"] += details.get(p_key)
 			details["total_variance"] = details.get("total_achieved") - details.get("total_target")
@@ -209,31 +209,32 @@ def get_actual_data(filters, sales_users_or_territory_data, date_field, sales_fi
 
 	parent_doc = frappe.qb.DocType(filters.get("doctype"))
 	child_doc = frappe.qb.DocType(filters.get("doctype") + " Item")
-	sales_team = frappe.qb.DocType("Sales Team")
 
-	query = (
-		frappe.qb.from_(parent_doc)
-		.inner_join(child_doc)
-		.on(child_doc.parent == parent_doc.name)
-		.inner_join(sales_team)
-		.on(sales_team.parent == parent_doc.name)
-		.select(
-			child_doc.item_group,
-			(child_doc.stock_qty * sales_team.allocated_percentage / 100).as_("stock_qty"),
-			(child_doc.base_net_amount * sales_team.allocated_percentage / 100).as_("base_net_amount"),
-			sales_team.sales_person,
-			parent_doc[date_field],
-		)
-		.where(
-			(parent_doc.docstatus == 1)
-			& (parent_doc[date_field].between(fiscal_year.year_start_date, fiscal_year.year_end_date))
-		)
-	)
+	query = frappe.qb.from_(parent_doc).inner_join(child_doc).on(child_doc.parent == parent_doc.name)
 
 	if sales_field == "sales_person":
-		query = query.where(sales_team.sales_person.isin(sales_users_or_territory_data))
+		sales_team = frappe.qb.DocType("Sales Team")
+		stock_qty = child_doc.stock_qty * sales_team.allocated_percentage / 100
+		net_amount = child_doc.base_net_amount * sales_team.allocated_percentage / 100
+		sales_field_col = sales_team[sales_field]
+
+		query = query.inner_join(sales_team).on(sales_team.parent == parent_doc.name)
 	else:
-		query = query.where(parent_doc[sales_field].isin(sales_users_or_territory_data))
+		stock_qty = child_doc.stock_qty
+		net_amount = child_doc.base_net_amount
+		sales_field_col = parent_doc[sales_field]
+
+	query = query.select(
+		child_doc.item_group,
+		parent_doc[date_field],
+		(stock_qty).as_("stock_qty"),
+		(net_amount).as_("base_net_amount"),
+		sales_field_col,
+	).where(
+		(parent_doc.docstatus == 1)
+		& (parent_doc[date_field].between(fiscal_year.year_start_date, fiscal_year.year_end_date))
+		& (sales_field_col.isin(sales_users_or_territory_data))
+	)
 
 	return query.run(as_dict=True)
 

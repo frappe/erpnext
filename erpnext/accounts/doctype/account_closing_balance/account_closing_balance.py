@@ -40,16 +40,12 @@ class AccountClosingBalance(Document):
 def make_closing_entries(closing_entries, voucher_name, company, closing_date):
 	accounting_dimensions = get_accounting_dimensions()
 
-	previous_closing_entries = get_previous_closing_entries(
-		company, closing_date, accounting_dimensions
-	)
+	previous_closing_entries = get_previous_closing_entries(company, closing_date, accounting_dimensions)
 	combined_entries = closing_entries + previous_closing_entries
 
-	merged_entries = aggregate_with_last_account_closing_balance(
-		combined_entries, accounting_dimensions
-	)
+	merged_entries = aggregate_with_last_account_closing_balance(combined_entries, accounting_dimensions)
 
-	for key, value in merged_entries.items():
+	for _key, value in merged_entries.items():
 		cle = frappe.new_doc("Account Closing Balance")
 		cle.update(value)
 		cle.update(value["dimensions"])

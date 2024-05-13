@@ -183,12 +183,13 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-09 15:17:58.128242",
+ "modified": "2024-03-27 13:10:25.280016",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item Supplied",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

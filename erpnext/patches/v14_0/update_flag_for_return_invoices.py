@@ -12,13 +12,17 @@ def execute():
 	creation_date = "2024-01-25"
 
 	si = qb.DocType("Sales Invoice")
+
+	# unset flag, as migration would have set it for all records, as the field was introduced with default '1'
+	qb.update(si).set(si.update_outstanding_for_self, False).run()
+
 	if cr_notes := (
 		qb.from_(si)
 		.select(si.name)
 		.where(
 			(si.creation.gte(creation_date))
 			& (si.docstatus == 1)
-			& (si.is_return == True)
+			& (si.is_return.eq(True))
 			& (si.return_against.notnull())
 		)
 		.run()
@@ -37,13 +41,17 @@ def execute():
 			).run()
 
 	pi = qb.DocType("Purchase Invoice")
+
+	# unset flag, as migration would have set it for all records, as the field was introduced with default '1'
+	qb.update(pi).set(pi.update_outstanding_for_self, False).run()
+
 	if dr_notes := (
 		qb.from_(pi)
 		.select(pi.name)
 		.where(
 			(pi.creation.gte(creation_date))
 			& (pi.docstatus == 1)
-			& (pi.is_return == True)
+			& (pi.is_return.eq(True))
 			& (pi.return_against.notnull())
 		)
 		.run()

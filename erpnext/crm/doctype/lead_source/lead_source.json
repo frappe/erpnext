@@ -26,7 +26,7 @@
   }
  ],
  "links": [],
- "modified": "2023-02-10 00:51:44.973957",
+ "modified": "2024-03-27 13:10:00.097850",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead Source",
@@ -58,7 +58,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "translated_doctype": 1

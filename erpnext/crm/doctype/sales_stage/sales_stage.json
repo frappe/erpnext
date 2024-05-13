@@ -18,7 +18,7 @@
   }
  ],
  "links": [],
- "modified": "2023-02-10 01:40:23.713390",
+ "modified": "2024-03-27 13:10:38.067960",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Sales Stage",
@@ -39,7 +39,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1,

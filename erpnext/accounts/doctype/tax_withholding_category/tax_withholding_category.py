@@ -9,6 +9,8 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, getdate
 
+from erpnext.controllers.accounts_controller import validate_account_head
+
 
 class TaxWithholdingCategory(Document):
 	# begin: auto-generated types
@@ -53,17 +55,16 @@ class TaxWithholdingCategory(Document):
 			if d.get("account") in existing_accounts:
 				frappe.throw(_("Account {0} added multiple times").format(frappe.bold(d.get("account"))))
 
+			validate_account_head(d.idx, d.get("account"), d.get("company"))
 			existing_accounts.append(d.get("account"))
 
 	def validate_thresholds(self):
 		for d in self.get("rates"):
-			if (
-				d.cumulative_threshold and d.single_threshold and d.cumulative_threshold < d.single_threshold
-			):
+			if d.cumulative_threshold and d.single_threshold and d.cumulative_threshold < d.single_threshold:
 				frappe.throw(
-					_("Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold").format(
-						d.idx
-					)
+					_(
+						"Row #{0}: Cumulative threshold cannot be less than Single Transaction threshold"
+					).format(d.idx)
 				)
 
 
@@ -148,7 +149,12 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 		tax_row = get_tax_row_for_tcs(inv, tax_details, tax_amount, tax_deducted)
 
 	cost_center = get_cost_center(inv)
-	tax_row.update({"cost_center": cost_center})
+	tax_row.update(
+		{
+			"cost_center": cost_center,
+			"is_tax_withholding_account": 1,
+		}
+	)
 
 	if inv.doctype == "Purchase Invoice":
 		return tax_row, tax_deducted_on_advances, voucher_wise_amount
@@ -279,6 +285,14 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	if taxable_vouchers:
 		tax_deducted = get_deducted_tax(taxable_vouchers, tax_details)
 
+	# If advance is outside the current tax withholding period (usually a fiscal year), `get_deducted_tax` won't fetch it.
+	# updating `tax_deducted` with correct advance tax value (from current and previous previous withholding periods), will allow the
+	# rest of the below logic to function properly
+	# ---FY 2023-------------||---------------------FY 2024-----------------------||--
+	# ---Advance-------------||---------Inv_1--------Inv_2------------------------||--
+	if tax_deducted_on_advances:
+		tax_deducted += get_advance_tax_across_fiscal_year(tax_deducted_on_advances, tax_details)
+
 	tax_amount = 0
 
 	if party_type == "Supplier":
@@ -319,9 +333,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	doctype = "Purchase Invoice" if party_type == "Supplier" else "Sales Invoice"
 	field = (
-		"base_tax_withholding_net_total as base_net_total"
-		if party_type == "Supplier"
-		else "base_net_total"
+		"base_tax_withholding_net_total as base_net_total" if party_type == "Supplier" else "base_net_total"
 	)
 	voucher_wise_amount = {}
 	vouchers = []
@@ -375,9 +387,7 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	return vouchers, voucher_wise_amount
 
 
-def get_advance_vouchers(
-	parties, company=None, from_date=None, to_date=None, party_type="Supplier"
-):
+def get_advance_vouchers(parties, company=None, from_date=None, to_date=None, party_type="Supplier"):
 	"""
 	Use Payment Ledger to fetch unallocated Advance Payments
 	"""
@@ -398,9 +408,7 @@ def get_advance_vouchers(
 	if from_date and to_date:
 		conditions.append(ple.posting_date[from_date:to_date])
 
-	advances = (
-		qb.from_(ple).select(ple.voucher_no).distinct().where(Criterion.all(conditions)).run(as_list=1)
-	)
+	advances = qb.from_(ple).select(ple.voucher_no).distinct().where(Criterion.all(conditions)).run(as_list=1)
 	if advances:
 		advances = [x[0] for x in advances]
 
@@ -421,7 +429,7 @@ def get_taxes_deducted_on_advances_allocated(inv, tax_details):
 				frappe.qb.from_(at)
 				.inner_join(pe)
 				.on(pe.name == at.parent)
-				.select(at.parent, at.name, at.tax_amount, at.allocated_amount)
+				.select(pe.posting_date, at.parent, at.name, at.tax_amount, at.allocated_amount)
 				.where(pe.tax_withholding_category == tax_details.get("tax_withholding_category"))
 				.where(at.parent.isin(advances))
 				.where(at.account_head == tax_details.account_head)
@@ -444,6 +452,16 @@ def get_deducted_tax(taxable_vouchers, tax_details):
 
 	entries = frappe.db.get_all("GL Entry", filters, pluck=field)
 	return sum(entries)
+
+
+def get_advance_tax_across_fiscal_year(tax_deducted_on_advances, tax_details):
+	"""
+	Only applies for Taxes deducted on Advance Payments
+	"""
+	advance_tax_from_across_fiscal_year = sum(
+		[adv.tax_amount for adv in tax_deducted_on_advances if adv.posting_date < tax_details.from_date]
+	)
+	return advance_tax_from_across_fiscal_year
 
 
 def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
@@ -566,9 +584,7 @@ def get_tcs_amount(parties, inv, tax_details, vouchers, adv_vouchers):
 	conditions.append(ple.voucher_no == ple.against_voucher_no)
 	conditions.append(ple.company == inv.company)
 
-	advances = (
-		qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run(as_list=1)
-	)
+	qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run(as_list=1)
 
 	advance_amt = (
 		qb.from_(ple).select(Abs(Sum(ple.amount))).where(Criterion.all(conditions)).run()[0][0] or 0.0
@@ -627,9 +643,7 @@ def get_limit_consumed(ldc, parties):
 	return limit_consumed
 
 
-def get_lower_deduction_amount(
-	current_amount, limit_consumed, certificate_limit, rate, tax_details
-):
+def get_lower_deduction_amount(current_amount, limit_consumed, certificate_limit, rate, tax_details):
 	if certificate_limit - flt(limit_consumed) - flt(current_amount) >= 0:
 		return current_amount * rate / 100
 	else:
@@ -641,9 +655,7 @@ def get_lower_deduction_amount(
 
 def is_valid_certificate(ldc, posting_date, limit_consumed):
 	available_amount = flt(ldc.certificate_limit) - flt(limit_consumed)
-	if (
-		getdate(ldc.valid_from) <= getdate(posting_date) <= getdate(ldc.valid_upto)
-	) and available_amount > 0:
+	if (getdate(ldc.valid_from) <= getdate(posting_date) <= getdate(ldc.valid_upto)) and available_amount > 0:
 		return True
 
 	return False

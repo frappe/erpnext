@@ -34,7 +34,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-19 20:33:30.657406",
+ "modified": "2024-03-27 13:10:28.861722",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Parameter",
@@ -90,7 +90,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

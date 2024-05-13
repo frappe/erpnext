@@ -24,3 +24,10 @@ frappe.query_reports["Profit and Loss Statement"]["filters"].push({
 	fieldtype: "Check",
 	default: 1,
 });
+
+frappe.query_reports["Profit and Loss Statement"]["filters"].push({
+	fieldname: "include_default_book_entries",
+	label: __("Include Default FB Entries"),
+	fieldtype: "Check",
+	default: 1,
+});

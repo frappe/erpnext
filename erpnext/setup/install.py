@@ -122,7 +122,6 @@ def create_default_success_action():
 
 
 def create_default_energy_point_rules():
-
 	for rule in get_default_energy_point_rules():
 		# check if any rule for ref. doctype exists
 		rule_exists = frappe.db.exists(
@@ -142,6 +141,11 @@ def add_company_to_session_defaults():
 
 def add_standard_navbar_items():
 	navbar_settings = frappe.get_single("Navbar Settings")
+
+	# Translatable strings for below navbar items
+	__ = _("Documentation")
+	__ = _("User Forum")
+	__ = _("Report an Issue")
 
 	erpnext_navbar_items = [
 		{

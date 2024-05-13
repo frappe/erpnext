@@ -30,8 +30,8 @@ class TransactionBase(StatusUpdater):
 			except ValueError:
 				frappe.throw(_("Invalid Posting Time"))
 
-	def validate_uom_is_integer(self, uom_field, qty_fields):
-		validate_uom_is_integer(self, uom_field, qty_fields)
+	def validate_uom_is_integer(self, uom_field, qty_fields, child_dt=None):
+		validate_uom_is_integer(self, uom_field, qty_fields, child_dt)
 
 	def validate_with_previous_doc(self, ref):
 		self.exclude_fields = ["conversion_factor", "uom"] if self.get("is_return") else []
@@ -58,9 +58,7 @@ class TransactionBase(StatusUpdater):
 
 	def compare_values(self, ref_doc, fields, doc=None):
 		for reference_doctype, ref_dn_list in ref_doc.items():
-			prev_doc_detail_map = self.get_prev_doc_reference_details(
-				ref_dn_list, reference_doctype, fields
-			)
+			prev_doc_detail_map = self.get_prev_doc_reference_details(ref_dn_list, reference_doctype, fields)
 			for reference_name in ref_dn_list:
 				prevdoc_values = prev_doc_detail_map.get(reference_name)
 				if not prevdoc_values:
@@ -212,12 +210,13 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 			for f in qty_fields:
 				qty = d.get(f)
 				if qty:
-					if abs(cint(qty) - flt(qty, d.precision(f))) > 0.0000001:
+					precision = d.precision(f)
+					if abs(cint(qty) - flt(qty, precision)) > 0.0000001:
 						frappe.throw(
 							_(
 								"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
 							).format(
-								flt(qty, d.precision(f)),
+								flt(qty, precision),
 								d.idx,
 								frappe.bold(_("Must be Whole Number")),
 								frappe.bold(d.get(uom_field)),

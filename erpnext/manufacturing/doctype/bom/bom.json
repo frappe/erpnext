@@ -238,7 +238,7 @@
    "fieldname": "rm_cost_as_per",
    "fieldtype": "Select",
    "label": "Rate Of Materials Based On",
-   "options": "Valuation Rate\nLast Purchase Rate\nPrice List\nManual"
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List"
   },
   {
    "allow_on_submit": 1,
@@ -637,7 +637,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-26 19:34:08.159312",
+ "modified": "2024-04-02 16:22:47.518411",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -672,7 +672,7 @@
  ],
  "search_fields": "item, item_name",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

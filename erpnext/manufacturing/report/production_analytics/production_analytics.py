@@ -20,13 +20,10 @@ def get_columns(filters):
 
 	ranges = get_period_date_ranges(filters)
 
-	for dummy, end_date in ranges:
-
+	for _dummy, end_date in ranges:
 		period = get_period(end_date, filters)
 
-		columns.append(
-			{"label": _(period), "fieldname": scrub(period), "fieldtype": "Float", "width": 120}
-		)
+		columns.append({"label": _(period), "fieldname": scrub(period), "fieldtype": "Float", "width": 120})
 
 	return columns
 
@@ -110,7 +107,7 @@ def get_data(filters, columns):
 	for label in labels:
 		work = {}
 		work["Status"] = label
-		for dummy, end_date in ranges:
+		for _dummy, end_date in ranges:
 			period = get_period(end_date, filters)
 			if periodic_data.get(label).get(period):
 				work[scrub(period)] = periodic_data.get(label).get(period)

@@ -589,7 +589,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2024-01-15 17:35:49.226603",
+ "modified": "2024-03-27 13:06:32.494326",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
@@ -628,7 +628,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "asset_name",

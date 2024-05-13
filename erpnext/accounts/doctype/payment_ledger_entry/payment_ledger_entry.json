@@ -159,7 +159,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-03 16:39:58.904113",
+ "modified": "2024-03-27 13:10:09.967095",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Ledger Entry",
@@ -194,7 +194,7 @@
   }
  ],
  "search_fields": "voucher_no, against_voucher_no",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

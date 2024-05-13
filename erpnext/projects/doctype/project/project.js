@@ -27,8 +27,6 @@ frappe.ui.form.on("Project", {
 			};
 		};
 
-		frm.set_query("customer", "erpnext.controllers.queries.customer_query");
-
 		frm.set_query("user", "users", function () {
 			return {
 				query: "erpnext.projects.doctype.project.project.get_users_for_project",

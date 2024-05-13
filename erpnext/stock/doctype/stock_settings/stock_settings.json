@@ -418,7 +418,7 @@
   {
    "default": "0",
    "depends_on": "eval: doc.enable_stock_reservation",
-   "description": "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Receipt for Sales Order.",
+   "description": "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Request for Sales Order.",
    "fieldname": "auto_reserve_stock_for_sales_order_on_purchase",
    "fieldtype": "Check",
    "label": "Auto Reserve Stock for Sales Order on Purchase"
@@ -444,7 +444,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-02-25 16:32:01.084453",
+ "modified": "2024-03-27 13:10:45.423987",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -465,7 +465,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1

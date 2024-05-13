@@ -15,6 +15,9 @@ frappe.ui.form.on("Item", {
 		frm.add_fetch("tax_type", "tax_rate", "tax_rate");
 
 		frm.make_methods = {
+			Quotation: () => {
+				open_form(frm, "Quotation", "Quotation Item", "items");
+			},
 			"Sales Order": () => {
 				open_form(frm, "Sales Order", "Sales Order Item", "items");
 			},
@@ -404,14 +407,6 @@ $.extend(erpnext.item, {
 					is_group: 0,
 				},
 			};
-		};
-
-		frm.fields_dict.customer_items.grid.get_field("customer_name").get_query = function (doc, cdt, cdn) {
-			return { query: "erpnext.controllers.queries.customer_query" };
-		};
-
-		frm.fields_dict.supplier_items.grid.get_field("supplier").get_query = function (doc, cdt, cdn) {
-			return { query: "erpnext.controllers.queries.supplier_query" };
 		};
 
 		frm.fields_dict["item_defaults"].grid.get_field("default_warehouse").get_query = function (

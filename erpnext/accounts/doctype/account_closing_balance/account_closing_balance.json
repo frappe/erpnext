@@ -129,7 +129,7 @@
  "icon": "fa fa-list",
  "in_create": 1,
  "links": [],
- "modified": "2023-03-06 08:56:36.393237",
+ "modified": "2024-03-27 13:05:56.710541",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Closing Balance",
@@ -158,7 +158,7 @@
    "role": "Auditor"
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

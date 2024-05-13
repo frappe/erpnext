@@ -265,7 +265,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "oldfieldname": "customer_address",
    "oldfieldtype": "Small Text",
@@ -318,7 +318,7 @@
   },
   {
    "fieldname": "shipping_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address",
    "print_hide": 1,
    "read_only": 1
@@ -557,7 +557,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -965,7 +965,7 @@
   },
   {
    "fieldname": "company_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Company Address",
    "read_only": 1
   },
@@ -1073,7 +1073,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-06-03 16:21:04.980033",
+ "modified": "2024-03-27 13:10:30.774058",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
@@ -1166,7 +1166,7 @@
  ],
  "search_fields": "status,transaction_date,party_name,order_type",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "party_name",

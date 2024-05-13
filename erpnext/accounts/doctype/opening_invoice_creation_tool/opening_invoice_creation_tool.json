@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_copy": 1,
  "beta": 1,
  "creation": "2017-08-29 02:22:54.947711",
@@ -75,7 +76,8 @@
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2022-01-04 15:25:06.053187",
+ "links": [],
+ "modified": "2024-03-27 13:10:06.564397",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",
@@ -92,7 +94,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

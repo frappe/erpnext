@@ -65,6 +65,8 @@
    "label": "Is Group"
   },
   {
+   "fetch_from": "parent_account.company",
+   "fetch_if_empty": 1,
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -193,7 +195,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2024-01-10 04:57:33.681676",
+ "modified": "2024-03-27 13:05:55.866034",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
@@ -251,7 +253,7 @@
  "search_fields": "account_number",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1

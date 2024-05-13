@@ -39,14 +39,15 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-15 16:39:41.635362",
+ "modified": "2024-03-27 13:10:45.777866",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Sub Operation",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

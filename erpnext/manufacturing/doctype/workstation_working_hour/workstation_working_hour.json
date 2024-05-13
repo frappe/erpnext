@@ -46,13 +46,13 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2023-10-25 14:48:29.697498",
+ "modified": "2024-03-27 13:11:01.081988",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation Working Hour",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

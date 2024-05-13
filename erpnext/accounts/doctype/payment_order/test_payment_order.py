@@ -1,7 +1,6 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -41,9 +40,7 @@ class TestPaymentOrder(FrappeTestCase):
 		payment_entry.insert()
 		payment_entry.submit()
 
-		doc = create_payment_order_against_payment_entry(
-			payment_entry, "Payment Entry", self.bank_account
-		)
+		doc = create_payment_order_against_payment_entry(payment_entry, "Payment Entry", self.bank_account)
 		reference_doc = doc.get("references")[0]
 		self.assertEqual(reference_doc.reference_name, payment_entry.name)
 		self.assertEqual(reference_doc.reference_doctype, "Payment Entry")

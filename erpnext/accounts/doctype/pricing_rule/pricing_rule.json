@@ -608,7 +608,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2024-01-24 02:20:26.145996",
+ "modified": "2024-03-27 13:10:17.521896",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
@@ -666,7 +666,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "title"
