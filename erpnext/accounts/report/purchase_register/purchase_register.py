@@ -376,10 +376,8 @@ def get_account_columns(invoice_list, include_payments):
 
 def get_invoices(filters, additional_query_columns):
 	pi = frappe.qb.DocType("Purchase Invoice")
-	pii = frappe.qb.DocType("Purchase Invoice Item") 
 	query = (
 		frappe.qb.from_(pi)
-		.left_join(pii).on(pi.name == pii.parent)
 		.select(
 			ConstantColumn("Purchase Invoice").as_("doctype"),
 			pi.name,
@@ -397,7 +395,7 @@ def get_invoices(filters, additional_query_columns):
 			pi.outstanding_amount,
 			pi.mode_of_payment,
 		)
-		.where((pi.docstatus == 1) & pii.item_code.isnotnull())
+		.where((pi.docstatus == 1))
 		.orderby(pi.posting_date, pi.name, order=Order.desc)
 	)
 
