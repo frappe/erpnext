@@ -29,7 +29,8 @@ class PickList(Document):
 
 	def before_save(self):
 		self.update_status()
-		self.set_item_locations()
+		if not self.pick_manually:
+			self.set_item_locations()
 
 		if self.get("locations"):
 			self.validate_sales_order_percentage()
