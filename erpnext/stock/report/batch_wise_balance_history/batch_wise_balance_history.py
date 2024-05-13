@@ -30,8 +30,15 @@ def execute(filters=None):
 
 	sle_count = _estimate_table_row_count("Stock Ledger Entry")
 
-	if sle_count > SLE_COUNT_LIMIT and not filters.get("item_code") and not filters.get("warehouse"):
-		frappe.throw(_("Please select either the Item or Warehouse filter to generate the report."))
+	if (
+		sle_count > SLE_COUNT_LIMIT
+		and not filters.get("item_code")
+		and not filters.get("warehouse")
+		and not filters.get("warehouse_type")
+	):
+		frappe.throw(
+			_("Please select either the Item or Warehouse or Warehouse Type filter to generate the report.")
+		)
 
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
@@ -121,6 +128,16 @@ def get_stock_ledger_entries_for_batch_no(filters):
 	)
 
 	query = apply_warehouse_filter(query, sle, filters)
+	if filters.warehouse_type and not filters.warehouse:
+		warehouses = frappe.get_all(
+			"Warehouse",
+			filters={"warehouse_type": filters.warehouse_type, "is_group": 0},
+			pluck="name",
+		)
+
+		if warehouses:
+			query = query.where(sle.warehouse.isin(warehouses))
+
 	for field in ["item_code", "batch_no", "company"]:
 		if filters.get(field):
 			query = query.where(sle[field] == filters.get(field))
@@ -154,6 +171,16 @@ def get_stock_ledger_entries_for_batch_bundle(filters):
 	)
 
 	query = apply_warehouse_filter(query, sle, filters)
+	if filters.warehouse_type and not filters.warehouse:
+		warehouses = frappe.get_all(
+			"Warehouse",
+			filters={"warehouse_type": filters.warehouse_type, "is_group": 0},
+			pluck="name",
+		)
+
+		if warehouses:
+			query = query.where(sle.warehouse.isin(warehouses))
+
 	for field in ["item_code", "batch_no", "company"]:
 		if filters.get(field):
 			if field == "batch_no":

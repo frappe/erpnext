@@ -22,6 +22,7 @@ from erpnext.stock.doctype.delivery_note.delivery_note import (
 	make_delivery_trip,
 	make_sales_invoice,
 )
+from erpnext.stock.doctype.delivery_trip.test_delivery_trip import create_driver
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
@@ -1064,6 +1065,21 @@ class TestDeliveryNote(FrappeTestCase):
 		dn = create_delivery_note()
 		dt = make_delivery_trip(dn.name)
 		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
+		dt.delivery_stops[0].customer_address = "fake string"
+		dt.flags.ignore_mandatory = True
+		dt.save()
+		dn.reload()
+		self.assertEqual(dn.delivery_trip, dt.name)
+
+		dn = create_delivery_note(do_not_submit=True)
+		dt = make_delivery_trip(dn.name)
+		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
+		dt.driver = create_driver()
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			r"^Delivery Notes should not be in draft state when submitting a Delivery Trip.*",
+			dt.submit,
+		)
 
 	def test_delivery_note_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center

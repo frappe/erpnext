@@ -1149,7 +1149,18 @@ def make_batch_nos(item_code, batch_nos):
 			continue
 
 		batch_nos_details.append(
-			(batch_no, batch_no, now(), now(), user, user, item.item_code, item.item_name, item.description)
+			(
+				batch_no,
+				batch_no,
+				now(),
+				now(),
+				user,
+				user,
+				item.item_code,
+				item.item_name,
+				item.description,
+				1,
+			)
 		)
 
 	fields = [
@@ -1162,6 +1173,7 @@ def make_batch_nos(item_code, batch_nos):
 		"item",
 		"item_name",
 		"description",
+		"use_batchwise_valuation",
 	]
 
 	frappe.db.bulk_insert("Batch", fields=fields, values=set(batch_nos_details))

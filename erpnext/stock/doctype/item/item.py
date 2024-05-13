@@ -65,15 +65,13 @@ class Item(Document):
 		from erpnext.stock.doctype.item_reorder.item_reorder import ItemReorder
 		from erpnext.stock.doctype.item_supplier.item_supplier import ItemSupplier
 		from erpnext.stock.doctype.item_tax.item_tax import ItemTax
-		from erpnext.stock.doctype.item_variant_attribute.item_variant_attribute import (
-			ItemVariantAttribute,
-		)
+		from erpnext.stock.doctype.item_variant_attribute.item_variant_attribute import ItemVariantAttribute
 		from erpnext.stock.doctype.uom_conversion_detail.uom_conversion_detail import UOMConversionDetail
 
 		allow_alternative_item: DF.Check
 		allow_negative_stock: DF.Check
 		asset_category: DF.Link | None
-		asset_naming_series: DF.Literal
+		asset_naming_series: DF.Literal[None]
 		attributes: DF.Table[ItemVariantAttribute]
 		auto_create_assets: DF.Check
 		barcodes: DF.Table[ItemBarcode]
