@@ -51,7 +51,6 @@ frappe.ui.form.on("Delivery Trip", {
 			frm.add_custom_button(
 				__("Delivery Note"),
 				() => {
-					frm.clear_table("delivery_stops");
 					erpnext.utils.map_current_doc({
 						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_delivery_trip",
 						source_doctype: "Delivery Note",
