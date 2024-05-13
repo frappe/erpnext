@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-05 09:35+0000\n"
-"PO-Revision-Date: 2024-05-12 13:07\n"
+"PO-Revision-Date: 2024-05-13 10:52\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -46003,11 +46003,11 @@ msgstr "باز کردن سفارش‌های فروش"
 
 #: public/js/templates/crm_activities.html:33
 msgid "Open Task"
-msgstr ""
+msgstr "وظیفه باز"
 
 #: public/js/templates/crm_activities.html:21
 msgid "Open Tasks"
-msgstr ""
+msgstr "وظایف باز"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -66637,7 +66637,7 @@ msgstr "خدمات"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Set"
-msgstr "تنظیم"
+msgstr ""
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -83865,31 +83865,31 @@ msgstr ""
 #: crm/workspace/crm/crm.json
 msgctxt "Lead"
 msgid "{} Open"
-msgstr ""
+msgstr "{} باز"
 
 #. Count format of shortcut in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
 msgctxt "Non Conformance"
 msgid "{} Open"
-msgstr ""
+msgstr "{} باز"
 
 #. Count format of shortcut in the Projects Workspace
 #: projects/workspace/projects/projects.json
 msgctxt "Project"
 msgid "{} Open"
-msgstr ""
+msgstr "{} باز"
 
 #. Count format of shortcut in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
 msgctxt "Quality Action"
 msgid "{} Open"
-msgstr ""
+msgstr "{} باز"
 
 #. Count format of shortcut in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
 msgctxt "Quality Review"
 msgid "{} Open"
-msgstr ""
+msgstr "{} باز"
 
 #. Count format of shortcut in the Buying Workspace
 #. Count format of shortcut in the Stock Workspace
