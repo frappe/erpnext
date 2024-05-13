@@ -65,6 +65,8 @@
    "label": "Is Group"
   },
   {
+   "fetch_from": "parent_account.company",
+   "fetch_if_empty": 1,
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,

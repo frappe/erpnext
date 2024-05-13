@@ -169,6 +169,27 @@ frappe.ui.form.on("Sales Order", {
 		);
 	},
 
+	// When multiple companies are set up. in case company name is changed set default company address
+	company: function (frm) {
+		if (frm.doc.company) {
+			frappe.call({
+				method: "erpnext.setup.doctype.company.company.get_default_company_address",
+				args: {
+					name: frm.doc.company,
+					existing_address: frm.doc.company_address || "",
+				},
+				debounce: 2000,
+				callback: function (r) {
+					if (r.message) {
+						frm.set_value("company_address", r.message);
+					} else {
+						frm.set_value("company_address", "");
+					}
+				},
+			});
+		}
+	},
+
 	onload: function (frm) {
 		if (!frm.doc.transaction_date) {
 			frm.set_value("transaction_date", frappe.datetime.get_today());
@@ -288,6 +309,7 @@ frappe.ui.form.on("Sales Order", {
 					label: __("Items to Reserve"),
 					allow_bulk_edit: false,
 					cannot_add_rows: true,
+					cannot_delete_rows: true,
 					data: [],
 					fields: [
 						{
@@ -356,7 +378,7 @@ frappe.ui.form.on("Sales Order", {
 			],
 			primary_action_label: __("Reserve Stock"),
 			primary_action: () => {
-				var data = { items: dialog.fields_dict.items.grid.data };
+				var data = { items: dialog.fields_dict.items.grid.get_selected_children() };
 
 				if (data.items && data.items.length > 0) {
 					frappe.call({
@@ -373,9 +395,11 @@ frappe.ui.form.on("Sales Order", {
 							frm.reload_doc();
 						},
 					});
-				}
 
-				dialog.hide();
+					dialog.hide();
+				} else {
+					frappe.msgprint(__("Please select items to reserve."));
+				}
 			},
 		});
 
@@ -390,6 +414,7 @@ frappe.ui.form.on("Sales Order", {
 
 				if (unreserved_qty > 0) {
 					dialog.fields_dict.items.df.data.push({
+						__checked: 1,
 						sales_order_item: item.name,
 						item_code: item.item_code,
 						warehouse: item.warehouse,
@@ -414,6 +439,7 @@ frappe.ui.form.on("Sales Order", {
 					label: __("Reserved Stock"),
 					allow_bulk_edit: false,
 					cannot_add_rows: true,
+					cannot_delete_rows: true,
 					in_place_edit: true,
 					data: [],
 					fields: [
@@ -457,7 +483,7 @@ frappe.ui.form.on("Sales Order", {
 			],
 			primary_action_label: __("Unreserve Stock"),
 			primary_action: () => {
-				var data = { sr_entries: dialog.fields_dict.sr_entries.grid.data };
+				var data = { sr_entries: dialog.fields_dict.sr_entries.grid.get_selected_children() };
 
 				if (data.sr_entries && data.sr_entries.length > 0) {
 					frappe.call({
@@ -473,9 +499,11 @@ frappe.ui.form.on("Sales Order", {
 							frm.reload_doc();
 						},
 					});
-				}
 
-				dialog.hide();
+					dialog.hide();
+				} else {
+					frappe.msgprint(__("Please select items to unreserve."));
+				}
 			},
 		});
 

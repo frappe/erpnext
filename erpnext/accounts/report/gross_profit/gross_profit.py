@@ -655,13 +655,13 @@ class GrossProfitGenerator:
 			elif self.delivery_notes.get((row.parent, row.item_code), None):
 				#  check if Invoice has delivery notes
 				dn = self.delivery_notes.get((row.parent, row.item_code))
-				parenttype, parent, item_row, _warehouse = (
+				parenttype, parent, item_row, dn_warehouse = (
 					"Delivery Note",
 					dn["delivery_note"],
 					dn["item_row"],
 					dn["warehouse"],
 				)
-				my_sle = self.get_stock_ledger_entries(item_code, _warehouse)
+				my_sle = self.get_stock_ledger_entries(item_code, dn_warehouse)
 				return self.calculate_buying_amount_from_sle(
 					row, my_sle, parenttype, parent, item_row, item_code
 				)
@@ -720,20 +720,22 @@ class GrossProfitGenerator:
 			frappe.qb.from_(purchase_invoice_item)
 			.inner_join(purchase_invoice)
 			.on(purchase_invoice.name == purchase_invoice_item.parent)
-			.select(purchase_invoice_item.base_rate / purchase_invoice_item.conversion_factor)
+			.select(
+				purchase_invoice.name,
+				purchase_invoice_item.base_rate / purchase_invoice_item.conversion_factor,
+			)
 			.where(purchase_invoice.docstatus == 1)
 			.where(purchase_invoice.posting_date <= self.filters.to_date)
 			.where(purchase_invoice_item.item_code == item_code)
 		)
 
 		if row.project:
-			query.where(purchase_invoice_item.project == row.project)
+			query = query.where(purchase_invoice_item.project == row.project)
 
 		if row.cost_center:
-			query.where(purchase_invoice_item.cost_center == row.cost_center)
+			query = query.where(purchase_invoice_item.cost_center == row.cost_center)
 
-		query.orderby(purchase_invoice.posting_date, order=frappe.qb.desc)
-		query.limit(1)
+		query = query.orderby(purchase_invoice.posting_date, order=frappe.qb.desc).limit(1)
 		last_purchase_rate = query.run()
 
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0

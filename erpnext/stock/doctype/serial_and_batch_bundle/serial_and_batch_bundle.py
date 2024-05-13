@@ -596,6 +596,13 @@ class SerialandBatchBundle(Document):
 
 		serial_batches = {}
 		for row in self.entries:
+			if not row.qty and row.batch_no and not row.serial_no:
+				frappe.throw(
+					_("At row {0}: Qty is mandatory for the batch {1}").format(
+						bold(row.idx), bold(row.batch_no)
+					)
+				)
+
 			if self.has_serial_no and not row.serial_no:
 				frappe.throw(
 					_("At row {0}: Serial No is mandatory for Item {1}").format(
@@ -831,7 +838,12 @@ class SerialandBatchBundle(Document):
 		for batch in batches:
 			frappe.db.set_value("Batch", batch.name, {"reference_name": None, "reference_doctype": None})
 
+	def validate_serial_and_batch_data(self):
+		if not self.voucher_no:
+			frappe.throw(_("Voucher No is mandatory"))
+
 	def before_submit(self):
+		self.validate_serial_and_batch_data()
 		self.validate_serial_and_batch_no_for_returned()
 		self.set_purchase_document_no()
 
@@ -860,6 +872,12 @@ class SerialandBatchBundle(Document):
 		self.validate_batch_inventory()
 
 	def validate_batch_inventory(self):
+		if (
+			self.voucher_type in ["Purchase Invoice", "Purchase Receipt"]
+			and frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus") == 1
+		):
+			return
+
 		if not self.has_batch_no:
 			return
 

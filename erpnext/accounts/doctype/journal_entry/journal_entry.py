@@ -6,7 +6,7 @@ import json
 
 import frappe
 from frappe import _, msgprint, scrub
-from frappe.utils import cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from frappe.utils import comma_and, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -146,12 +146,27 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.validate_inter_company_accounts()
 		self.validate_depr_entry_voucher_type()
+		self.validate_advance_accounts()
 
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
 
 		if not self.title:
 			self.title = self.get_title()
+
+	def validate_advance_accounts(self):
+		journal_accounts = set([x.account for x in self.accounts])
+		advance_accounts = set()
+		advance_accounts.add(
+			frappe.get_cached_value("Company", self.company, "default_advance_received_account")
+		)
+		advance_accounts.add(frappe.get_cached_value("Company", self.company, "default_advance_paid_account"))
+		if advance_accounts_used := journal_accounts & advance_accounts:
+			frappe.msgprint(
+				_(
+					"Making Journal Entries against advance accounts: {0} is not recommended. These Journals won't be available for Reconciliation."
+				).format(frappe.bold(comma_and(advance_accounts_used)))
+			)
 
 	def validate_for_repost(self):
 		validate_docs_for_voucher_types(["Journal Entry"])
