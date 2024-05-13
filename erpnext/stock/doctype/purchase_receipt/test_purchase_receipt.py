@@ -2820,6 +2820,50 @@ class TestPurchaseReceipt(FrappeTestCase):
 			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", old_value
 		)
 
+	def test_zero_valuation_rate_for_batched_item(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = make_item(
+			"_Test Zero Valuation Rate For the Batch Item",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TZVRFORBATCH.#####",
+				"valuation_rate": 200,
+			},
+		)
+
+		pi = make_purchase_receipt(
+			qty=10,
+			rate=0,
+			item_code=item.name,
+		)
+
+		pi.reload()
+		batch_no = get_batch_from_bundle(pi.items[0].serial_and_batch_bundle)
+
+		se = make_stock_entry(
+			purpose="Material Issue",
+			item_code=item.name,
+			source=pi.items[0].warehouse,
+			qty=10,
+			batch_no=batch_no,
+			use_serial_batch_fields=0,
+		)
+
+		se.submit()
+
+		se.reload()
+
+		self.assertEqual(se.items[0].valuation_rate, 0)
+		self.assertEqual(se.items[0].basic_rate, 0)
+
+		sabb_doc = frappe.get_doc("Serial and Batch Bundle", se.items[0].serial_and_batch_bundle)
+		for row in sabb_doc.entries:
+			self.assertEqual(row.incoming_rate, 0)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
