@@ -895,6 +895,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 			create_purchase_order,
 		)
 
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
+
 		po = create_purchase_order()
 		pr = create_pr_against_po(po.name)
 
@@ -914,6 +916,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		po.cancel()
 
 	def test_make_purchase_invoice_from_pr_with_returned_qty_duplicate_items(self):
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
 		pr1 = make_purchase_receipt(qty=8, do_not_submit=True)
 		pr1.append(
 			"items",
@@ -2782,6 +2785,40 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertTrue(row.serial_and_batch_bundle)
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+
+	def test_purchase_receipt_bill_for_rejected_quantity_in_purchase_invoice(self):
+		item_code = make_item(
+			"_Test Purchase Receipt Bill For Rejected Quantity",
+			properties={"is_stock_item": 1},
+		).name
+
+		pr = make_purchase_receipt(item_code=item_code, qty=5, rate=100)
+
+		return_pr = make_purchase_receipt(
+			item_code=item_code,
+			is_return=1,
+			return_against=pr.name,
+			qty=-2,
+			do_not_submit=1,
+		)
+		return_pr.items[0].purchase_receipt_item = pr.items[0].name
+		return_pr.submit()
+		old_value = frappe.db.get_single_value(
+			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+		)
+
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
+		pi = make_purchase_invoice(pr.name)
+		self.assertEqual(pi.items[0].qty, 3)
+
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 1)
+		pi = make_purchase_invoice(pr.name)
+		pi.submit()
+		self.assertEqual(pi.items[0].qty, 5)
+
+		frappe.db.set_single_value(
+			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", old_value
+		)
 
 
 def prepare_data_for_internal_transfer():
