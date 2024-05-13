@@ -498,6 +498,8 @@ class TestSerialandBatchBundle(FrappeTestCase):
 
 		make_batch_nos(item_code, batch_nos)
 		self.assertTrue(frappe.db.exists("Batch", batch_id))
+		use_batchwise_valuation = frappe.db.get_value("Batch", batch_id, "use_batchwise_valuation")
+		self.assertEqual(use_batchwise_valuation, 1)
 
 		batch_id = "TEST-BATTCCH-VAL-00001"
 		batch_nos = [{"batch_no": batch_id, "qty": 1}]
