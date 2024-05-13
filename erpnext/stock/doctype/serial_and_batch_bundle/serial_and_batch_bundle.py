@@ -249,8 +249,7 @@ class SerialandBatchBundle(Document):
 			if self.has_serial_no:
 				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
 			else:
-				if sn_obj.batch_avg_rate.get(d.batch_no):
-					d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
+				d.incoming_rate = abs(flt(sn_obj.batch_avg_rate.get(d.batch_no)))
 
 				available_qty = flt(sn_obj.available_qty.get(d.batch_no), d.precision("qty"))
 				if self.docstatus == 1:
