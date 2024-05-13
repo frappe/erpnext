@@ -204,11 +204,7 @@
  ],
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-01-24 17:05:20.317180",
-=======
  "modified": "2024-03-27 22:49:16.954637",
->>>>>>> 50dd9fa8a3 (feat: allow to pick manually qty / batches / serial nos)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",
