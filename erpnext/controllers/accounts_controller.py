@@ -1947,7 +1947,51 @@ class AccountsController(TransactionBase):
 					).format(formatted_advance_paid, self.name, formatted_order_total)
 				)
 
+<<<<<<< HEAD
 			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+=======
+			self.db_set("advance_paid", advance_paid)
+
+		self.set_advance_payment_status()
+
+	def set_advance_payment_status(self):
+		new_status = None
+
+		stati = frappe.get_all(
+			"Payment Request",
+			{
+				"reference_doctype": self.doctype,
+				"reference_name": self.name,
+				"docstatus": 1,
+			},
+			pluck="status",
+		)
+		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
+			if not stati:
+				new_status = "Not Requested"
+			elif "Requested" in stati or "Failed" in stati:
+				new_status = "Requested"
+			elif "Partially Paid" in stati:
+				new_status = "Partially Paid"
+			elif "Paid" in stati:
+				new_status = "Fully Paid"
+		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
+			if not stati:
+				new_status = "Not Initiated"
+			elif "Initiated" in stati or "Failed" in stati or "Payment Ordered" in stati:
+				new_status = "Initiated"
+			elif "Partially Paid" in stati:
+				new_status = "Partially Paid"
+			elif "Paid" in stati:
+				new_status = "Fully Paid"
+
+		if new_status == self.advance_payment_status:
+			return
+
+		self.db_set("advance_payment_status", new_status, update_modified=False)
+		self.set_status(update=True)
+		self.notify_update()
+>>>>>>> 13a3a6a82e (fix(AccountsController): Use get_all to get payment requests when updating advance payment status)
 
 	@property
 	def company_abbr(self):
