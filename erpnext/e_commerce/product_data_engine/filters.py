@@ -84,7 +84,7 @@ class ProductFiltersBuilder:
 				values.remove(None)
 
 			if values:
-				filter_data.append([df, values])
+				filter_data.append([df, sorted(values)])
 
 		return filter_data
 
@@ -140,7 +140,7 @@ class ProductFiltersBuilder:
 
 		out = []
 		for name, values in attribute_value_map.items():
-			out.append(frappe._dict(name=name, item_attribute_values=values))
+			out.append(frappe._dict(name=name, item_attribute_values=sorted(values)))
 		return out
 
 	def get_discount_filters(self, discounts):
