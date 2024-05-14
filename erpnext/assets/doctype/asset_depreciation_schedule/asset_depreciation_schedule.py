@@ -842,34 +842,43 @@ def _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
 			)
 			return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100), None
 
-	if has_wdv_or_dd_non_yearly_pro_rata:
+	if has_wdv_or_dd_non_yearly_pro_rata:  # If applicable days for ther first month is less than full month
 		if schedule_idx == 0:
 			return flt(depreciable_value) * (flt(fb_row.rate_of_depreciation) / 100), None
 
-		elif schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 1:
-			from_date, days_in_month = _get_total_days(
-				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
-			)
-			per_day_depr = get_per_day_depr(fb_row, depreciable_value, from_date)
-			return (per_day_depr * days_in_month), per_day_depr
-
+		elif schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 1:  # Year changes
+			return get_monthly_depr_amount(fb_row, schedule_idx, depreciable_value)
 		else:
-			from_date, days_in_month = _get_total_days(
-				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
-			)
-			return (prev_per_day_depr * days_in_month), prev_per_day_depr
+			return get_monthly_depr_amount_based_on_prev_per_day_depr(fb_row, schedule_idx, prev_per_day_depr)
 	else:
-		if schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 0:
-			from_date, days_in_month = _get_total_days(
-				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
-			)
-			per_day_depr = get_per_day_depr(fb_row, depreciable_value, from_date)
-			return (per_day_depr * days_in_month), per_day_depr
+		if schedule_idx % (12 / cint(fb_row.frequency_of_depreciation)) == 0:  # year changes
+			return get_monthly_depr_amount(fb_row, schedule_idx, depreciable_value)
 		else:
-			from_date, days_in_month = _get_total_days(
-				fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
-			)
-			return (prev_per_day_depr * days_in_month), prev_per_day_depr
+			return get_monthly_depr_amount_based_on_prev_per_day_depr(fb_row, schedule_idx, prev_per_day_depr)
+
+
+def get_monthly_depr_amount(fb_row, schedule_idx, depreciable_value):
+	""" "
+	Returns monthly depreciation amount when year changes
+	1. Calculate per day depr based on new year
+	2. Calculate monthly amount based on new per day amount
+	"""
+	from_date, days_in_month = _get_total_days(
+		fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
+	)
+	per_day_depr = get_per_day_depr(fb_row, depreciable_value, from_date)
+	return (per_day_depr * days_in_month), per_day_depr
+
+
+def get_monthly_depr_amount_based_on_prev_per_day_depr(fb_row, schedule_idx, prev_per_day_depr):
+	""" "
+	Returns monthly depreciation amount based on prev per day depr
+	Calculate per day depr only for the first month
+	"""
+	from_date, days_in_month = _get_total_days(
+		fb_row.depreciation_start_date, schedule_idx, cint(fb_row.frequency_of_depreciation)
+	)
+	return (prev_per_day_depr * days_in_month), prev_per_day_depr
 
 
 def get_per_day_depr(
