@@ -1698,7 +1698,7 @@ def create_asset(**args):
 			"opening_accumulated_depreciation": args.opening_accumulated_depreciation or 0,
 			"number_of_depreciations_booked": args.number_of_depreciations_booked or 0,
 			"gross_purchase_amount": args.gross_purchase_amount or 100000,
-			"purchase_receipt_amount": args.purchase_receipt_amount or 100000,
+			"purchase_amount": args.purchase_amount or 100000,
 			"maintenance_required": args.maintenance_required or 0,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"available_for_use_date": args.available_for_use_date or "2020-06-06",
