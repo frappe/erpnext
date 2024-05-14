@@ -1,9 +1,9 @@
 [project]
-name = "erpnext"
+name = "RAFNAV-ERP"
 authors = [
-    { name = "Frappe Technologies Pvt Ltd", email = "developers@frappe.io"}
+    { name = "Cronos Capital IT", email = "support@steed.co.za"}
 ]
-description = "Open Source ERP"
+description = "RAFNAV ERP System"
 requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]
