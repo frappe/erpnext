@@ -453,11 +453,12 @@ class JournalEntry(AccountsController):
 
 	def unlink_asset_reference(self):
 		for d in self.get("accounts"):
+			root_type = frappe.get_value("Account", d.account, "root_type")
 			if (
 				self.voucher_type == "Depreciation Entry"
 				and d.reference_type == "Asset"
 				and d.reference_name
-				and d.account_type == "Depreciation"
+				and root_type == "Expense"
 				and d.debit
 			):
 				asset = frappe.get_doc("Asset", d.reference_name)
