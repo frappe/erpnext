@@ -589,11 +589,7 @@
    "link_fieldname": "target_asset"
   }
  ],
-<<<<<<< HEAD
- "modified": "2024-01-15 17:35:49.226603",
-=======
  "modified": "2024-04-18 16:45:47.306032",
->>>>>>> 31841b4ab2 (refactor: renamed purchase receipt amount field to purchase amount)
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
