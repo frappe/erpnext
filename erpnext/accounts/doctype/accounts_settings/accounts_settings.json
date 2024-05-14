@@ -43,6 +43,8 @@
   "section_break_jpd0",
   "auto_reconcile_payments",
   "stale_days",
+  "database_performance_optimizations_section",
+  "deferred_naming_for_stock_ledger_entry_and_gl_entry",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -462,6 +464,18 @@
    "fieldname": "enable_immutable_ledger",
    "fieldtype": "Check",
    "label": "Enable Immutable Ledger"
+  },
+  {
+   "fieldname": "database_performance_optimizations_section",
+   "fieldtype": "Section Break",
+   "label": "Database Performance Optimizations"
+  },
+  {
+   "default": "0",
+   "description": "If selected the names of Stock Ledger and General Ledger entries will be generated via a hourly scheduled job, instead of being generated on creation. This improves performance of creation and submission of accounting documents, but makes names inconsistent. Consistent names may be needed for custom applications.",
+   "fieldname": "deferred_naming_for_stock_ledger_entry_and_gl_entry",
+   "fieldtype": "Check",
+   "label": "Deferred naming for Stock Ledger Entry and GL Entry"
   }
  ],
  "icon": "icon-cog",

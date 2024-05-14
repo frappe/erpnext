@@ -67,9 +67,14 @@ class GLEntry(Document):
 		"""
 		Temporarily name doc for fast insertion
 		name will be changed using autoname options (in a scheduled job)
+		This feature is enabled in Accounts Settings by setting the corresponding checkbox
+		This method does nothing if the checkbox is not checked. By default the name is generated using the given naming scheme
 		"""
-		self.name = frappe.generate_hash(txt="", length=10)
-		if self.meta.autoname == "hash":
+		if frappe.db.get_single_value("Accounts Settings", "deferred_naming_for_stock_ledger_entry_and_gl_entry"):
+			self.name = frappe.generate_hash(txt="", length=10)
+			if self.meta.autoname == "hash":
+				self.to_rename = 0
+		else:
 			self.to_rename = 0
 
 	def validate(self):

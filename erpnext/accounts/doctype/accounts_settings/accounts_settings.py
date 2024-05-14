@@ -35,6 +35,7 @@ class AccountsSettings(Document):
 		book_tax_discount_loss: DF.Check
 		check_supplier_invoice_uniqueness: DF.Check
 		credit_controller: DF.Link | None
+		deferred_naming_for_stock_ledger_entry_and_gl_entry: DF.Check
 		delete_linked_ledger_entries: DF.Check
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
 		enable_common_party_accounting: DF.Check
