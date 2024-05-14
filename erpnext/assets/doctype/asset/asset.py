@@ -92,10 +92,10 @@ class Asset(AccountsController):
 		number_of_depreciations_booked: DF.Int
 		opening_accumulated_depreciation: DF.Currency
 		policy_number: DF.Data | None
+		purchase_amount: DF.Currency
 		purchase_date: DF.Date | None
 		purchase_invoice: DF.Link | None
 		purchase_receipt: DF.Link | None
-		purchase_receipt_amount: DF.Currency
 		split_from: DF.Link | None
 		status: DF.Literal[
 			"Draft",
@@ -354,7 +354,7 @@ class Asset(AccountsController):
 		if self.is_existing_asset:
 			return
 
-		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_receipt_amount:
+		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_amount:
 			error_message = _(
 				"Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
 			)
@@ -696,7 +696,7 @@ class Asset(AccountsController):
 		purchase_document = self.get_purchase_document()
 		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
-		if purchase_document and self.purchase_receipt_amount and self.available_for_use_date <= nowdate():
+		if purchase_document and self.purchase_amount and getdate(self.available_for_use_date) <= getdate():
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -704,8 +704,8 @@ class Asset(AccountsController):
 						"against": fixed_asset_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
-						"credit": self.purchase_receipt_amount,
-						"credit_in_account_currency": self.purchase_receipt_amount,
+						"credit": self.purchase_amount,
+						"credit_in_account_currency": self.purchase_amount,
 						"cost_center": self.cost_center,
 					},
 					item=self,
@@ -719,8 +719,8 @@ class Asset(AccountsController):
 						"against": cwip_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
-						"debit": self.purchase_receipt_amount,
-						"debit_in_account_currency": self.purchase_receipt_amount,
+						"debit": self.purchase_amount,
+						"debit_in_account_currency": self.purchase_amount,
 						"cost_center": self.cost_center,
 					},
 					item=self,
@@ -1116,8 +1116,8 @@ def create_new_asset_after_split(asset, split_qty):
 	)
 
 	new_asset.gross_purchase_amount = new_gross_purchase_amount
-	if asset.purchase_receipt_amount:
-		new_asset.purchase_receipt_amount = new_gross_purchase_amount
+	if asset.purchase_amount:
+		new_asset.purchase_amount = new_gross_purchase_amount
 	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
 	new_asset.asset_quantity = split_qty
 	new_asset.split_from = asset.name

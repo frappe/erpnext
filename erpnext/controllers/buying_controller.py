@@ -787,7 +787,7 @@ class BuyingController(SubcontractingController):
 				"supplier": self.supplier,
 				"purchase_date": self.posting_date,
 				"calculate_depreciation": 0,
-				"purchase_receipt_amount": purchase_amount,
+				"purchase_amount": purchase_amount,
 				"gross_purchase_amount": purchase_amount,
 				"asset_quantity": asset_quantity,
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,
