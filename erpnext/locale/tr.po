@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-05 09:35+0000\n"
-"PO-Revision-Date: 2024-05-11 12:57\n"
+"PO-Revision-Date: 2024-05-14 10:53\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -18723,25 +18723,25 @@ msgstr ""
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
 msgctxt "Account Closing Balance"
 msgid "Credit Amount"
-msgstr ""
+msgstr "Alacak Tutarı"
 
 #. Label of a Currency field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Credit Amount"
-msgstr ""
+msgstr "Alacak Tutarı"
 
 #. Label of a Currency field in DocType 'Account Closing Balance'
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
 msgctxt "Account Closing Balance"
 msgid "Credit Amount in Account Currency"
-msgstr ""
+msgstr "Hesap Para Biriminde Alacak"
 
 #. Label of a Currency field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Credit Amount in Account Currency"
-msgstr ""
+msgstr "Hesap Para Biriminde Alacak"
 
 #. Label of a Currency field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
@@ -18751,7 +18751,7 @@ msgstr ""
 
 #: selling/report/customer_credit_balance/customer_credit_balance.py:67
 msgid "Credit Balance"
-msgstr ""
+msgstr "Alacak Bakiyesi"
 
 #: setup/setup_wizard/operations/install_fixtures.py:209
 msgid "Credit Card"
@@ -18928,7 +18928,7 @@ msgstr ""
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Credit in Company Currency"
-msgstr ""
+msgstr "Şirket Para Biriminde Alacak"
 
 #: selling/doctype/customer/customer.py:519
 #: selling/doctype/customer/customer.py:574
@@ -21400,7 +21400,7 @@ msgstr ""
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Debit in Company Currency"
-msgstr ""
+msgstr "Şirket Para Biriminde Borç"
 
 #. Label of a Link field in DocType 'Discounted Invoice'
 #: accounts/doctype/discounted_invoice/discounted_invoice.json
@@ -45345,7 +45345,7 @@ msgstr ""
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Number of Days"
-msgstr ""
+msgstr "Gün Sayısı"
 
 #. Label of a Int field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -76415,7 +76415,7 @@ msgstr ""
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Total Credit"
-msgstr ""
+msgstr "Toplam Alacak"
 
 #: accounts/doctype/journal_entry/journal_entry.py:253
 msgid "Total Credit/ Debit Amount should be same as linked Journal Entry"
