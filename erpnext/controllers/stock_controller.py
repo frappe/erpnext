@@ -205,6 +205,7 @@ class StockController(AccountsController):
 					"company": self.company,
 					"is_rejected": 1 if row.get("rejected_warehouse") else 0,
 					"use_serial_batch_fields": row.use_serial_batch_fields,
+					"via_landed_cost_voucher": via_landed_cost_voucher,
 					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
 
