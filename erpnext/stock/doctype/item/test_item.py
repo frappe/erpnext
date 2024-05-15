@@ -862,6 +862,27 @@ class TestItem(FrappeTestCase):
 		self.assertEqual(data[0].description, item.description)
 		self.assertTrue("description" in data[0])
 
+	def test_group_warehouse_for_reorder_item(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item_doc = make_item("_Test Group Warehouse For Reorder Item", {"is_stock_item": 1})
+		warehouse = create_warehouse("_Test Warehouse - _TC")
+		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
+		warehouse_doc.db_set("parent_warehouse", "")
+
+		item_doc.append(
+			"reorder_levels",
+			{
+				"warehouse": warehouse,
+				"warehouse_reorder_level": 10,
+				"warehouse_reorder_qty": 100,
+				"material_request_type": "Purchase",
+				"warehouse_group": "_Test Warehouse Group - _TC",
+			},
+		)
+
+		self.assertRaises(frappe.ValidationError, item_doc.save)
+
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc("Item Variant Settings")
