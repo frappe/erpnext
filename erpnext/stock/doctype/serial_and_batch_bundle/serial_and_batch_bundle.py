@@ -428,6 +428,9 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} should be submit first.")
 
 	def check_future_entries_exists(self):
+		if self.flags and self.flags.via_landed_cost_voucher:
+			return
+
 		if not self.has_serial_no:
 			return
 
