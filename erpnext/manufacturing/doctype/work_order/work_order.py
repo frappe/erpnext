@@ -948,6 +948,21 @@ class WorkOrder(Document):
 		if self.qty <= 0:
 			frappe.throw(_("Quantity to Manufacture must be greater than 0."))
 
+		if (
+			self.stock_uom
+			and frappe.get_cached_value("UOM", self.stock_uom, "must_be_whole_number")
+			and abs(cint(self.qty) - flt(self.qty, self.precision("qty"))) > 0.0000001
+		):
+			frappe.throw(
+				_(
+					"Qty To Manufacture ({0}) cannot be a fraction for the UOM {2}. To allow this, disable '{1}' in the UOM {2}."
+				).format(
+					flt(self.qty, self.precision("qty")),
+					frappe.bold(_("Must be Whole Number")),
+					frappe.bold(self.stock_uom),
+				),
+			)
+
 		if self.production_plan and self.production_plan_item and not self.production_plan_sub_assembly_item:
 			qty_dict = frappe.db.get_value(
 				"Production Plan Item", self.production_plan_item, ["planned_qty", "ordered_qty"], as_dict=1

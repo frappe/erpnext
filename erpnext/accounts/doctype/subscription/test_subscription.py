@@ -445,11 +445,11 @@ class TestSubscription(FrappeTestCase):
 
 		# Process subscription and create first invoice
 		# Subscription status will be unpaid since due date has already passed
-		subscription.process()
+		subscription.process(posting_date="2018-01-01")
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, "Unpaid")
 
-		subscription.process()
+		subscription.process(posting_date="2018-04-01")
 		self.assertEqual(len(subscription.invoices), 1)
 
 	def test_multi_currency_subscription(self):
@@ -462,7 +462,7 @@ class TestSubscription(FrappeTestCase):
 			party=party,
 		)
 
-		subscription.process()
+		subscription.process(posting_date="2018-01-01")
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, "Unpaid")
 

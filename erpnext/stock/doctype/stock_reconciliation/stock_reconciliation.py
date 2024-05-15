@@ -70,6 +70,7 @@ class StockReconciliation(StockController):
 		self.validate_posting_time()
 		self.set_current_serial_and_batch_bundle()
 		self.set_new_serial_and_batch_bundle()
+		self.validate_duplicate_serial_and_batch_bundle("items")
 		self.remove_items_with_no_change()
 		self.validate_data()
 		self.validate_expense_account()
@@ -822,10 +823,8 @@ class StockReconciliation(StockController):
 		else:
 			self._cancel()
 
-	def recalculate_current_qty(self, voucher_detail_no, sle_creation, add_new_sle=False):
+	def recalculate_current_qty(self, voucher_detail_no):
 		from erpnext.stock.stock_ledger import get_valuation_rate
-
-		sl_entries = []
 
 		for row in self.items:
 			if voucher_detail_no != row.name:
@@ -879,32 +878,6 @@ class StockReconciliation(StockController):
 						"current_amount": flt(row.current_qty * row.current_valuation_rate),
 					}
 				)
-
-			if (
-				add_new_sle
-				and not frappe.db.get_value(
-					"Stock Ledger Entry",
-					{"voucher_detail_no": row.name, "actual_qty": ("<", 0), "is_cancelled": 0},
-					"name",
-				)
-				and (not row.current_serial_and_batch_bundle)
-			):
-				self.set_current_serial_and_batch_bundle(voucher_detail_no, save=True)
-				row.reload()
-
-				if row.current_qty > 0 and row.current_serial_and_batch_bundle:
-					new_sle = self.get_sle_for_items(row)
-					new_sle.actual_qty = row.current_qty * -1
-					new_sle.valuation_rate = row.current_valuation_rate
-					new_sle.creation_time = add_to_date(sle_creation, seconds=-1)
-					new_sle.serial_and_batch_bundle = row.current_serial_and_batch_bundle
-					new_sle.qty_after_transaction = 0.0
-					sl_entries.append(new_sle)
-
-		if sl_entries:
-			self.make_sl_entries(sl_entries, allow_negative_stock=self.has_negative_stock_allowed())
-			if not frappe.db.exists("Repost Item Valuation", {"voucher_no": self.name, "status": "Queued"}):
-				self.repost_future_sle_and_gle(force=True)
 
 	def has_negative_stock_allowed(self):
 		allow_negative_stock = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))

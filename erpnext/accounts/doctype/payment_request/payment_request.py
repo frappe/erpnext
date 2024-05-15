@@ -92,7 +92,7 @@ class PaymentRequest(Document):
 			self.status = "Draft"
 		self.validate_reference_document()
 		self.validate_payment_request_amount()
-		self.validate_currency()
+		# self.validate_currency()
 		self.validate_subscription_details()
 
 	def validate_reference_document(self):
@@ -335,20 +335,16 @@ class PaymentRequest(Document):
 			}
 		)
 
+		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
+			amount = payment_entry.base_paid_amount
+		else:
+			amount = self.grand_total
+
+		payment_entry.received_amount = amount
+		payment_entry.get("references")[0].allocated_amount = amount
+
 		for dimension in get_accounting_dimensions():
 			payment_entry.update({dimension: self.get(dimension)})
-
-		if payment_entry.difference_amount:
-			company_details = get_company_defaults(ref_doc.company)
-
-			payment_entry.append(
-				"deductions",
-				{
-					"account": company_details.exchange_gain_loss_account,
-					"cost_center": company_details.cost_center,
-					"amount": payment_entry.difference_amount,
-				},
-			)
 
 		if submit:
 			payment_entry.insert(ignore_permissions=True)
@@ -479,6 +475,12 @@ def make_payment_request(**args):
 		pr = frappe.get_doc("Payment Request", draft_payment_request)
 	else:
 		pr = frappe.new_doc("Payment Request")
+
+		if not args.get("payment_request_type"):
+			args["payment_request_type"] = (
+				"Outward" if args.get("dt") in ["Purchase Order", "Purchase Invoice"] else "Inward"
+			)
+
 		pr.update(
 			{
 				"payment_gateway_account": gateway_account.get("name"),
@@ -538,9 +540,9 @@ def get_amount(ref_doc, payment_account=None):
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
 		if not ref_doc.get("is_pos"):
 			if ref_doc.party_account_currency == ref_doc.currency:
-				grand_total = flt(ref_doc.outstanding_amount)
+				grand_total = flt(ref_doc.grand_total)
 			else:
-				grand_total = flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate
+				grand_total = flt(ref_doc.base_grand_total) / ref_doc.conversion_rate
 		elif dt == "Sales Invoice":
 			for pay in ref_doc.payments:
 				if pay.type == "Phone" and pay.account == payment_account:

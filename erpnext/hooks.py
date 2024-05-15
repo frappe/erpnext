@@ -534,6 +534,7 @@ accounting_dimension_doctypes = [
 	"Supplier Quotation Item",
 	"Payment Reconciliation",
 	"Payment Reconciliation Allocation",
+	"Payment Request",
 ]
 
 get_matching_queries = (

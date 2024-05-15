@@ -778,6 +778,9 @@ class AccountsController(TransactionBase):
 								# reset pricing rule fields if pricing_rule_removed
 								item.set(fieldname, value)
 
+							elif fieldname == "expense_account" and not item.get("expense_account"):
+								item.expense_account = value
+
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field(
 						"is_fixed_asset"
 					):
@@ -1439,7 +1442,8 @@ class AccountsController(TransactionBase):
 
 						dr_or_cr = "debit" if d.exchange_gain_loss > 0 else "credit"
 
-						if d.reference_doctype == "Purchase Invoice":
+						# Inverse debit/credit for payable accounts
+						if self.is_payable_account(d.reference_doctype, party_account):
 							dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 						reverse_dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
@@ -1472,6 +1476,14 @@ class AccountsController(TransactionBase):
 								get_link_to_form("Journal Entry", je)
 							)
 						)
+
+	def is_payable_account(self, reference_doctype, account):
+		if reference_doctype == "Purchase Invoice" or (
+			reference_doctype == "Journal Entry"
+			and frappe.get_cached_value("Account", account, "account_type") == "Payable"
+		):
+			return True
+		return False
 
 	def update_against_document_in_jv(self):
 		"""

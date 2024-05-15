@@ -134,6 +134,7 @@ class TestQuotation(FrappeTestCase):
 
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
+		sales_order.delivery_date = nowdate()
 		sales_order.insert()
 
 	def test_make_sales_order_with_terms(self):
@@ -164,6 +165,7 @@ class TestQuotation(FrappeTestCase):
 
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
+		sales_order.delivery_date = nowdate()
 		sales_order.insert()
 
 		# Remove any unknown taxes if applied

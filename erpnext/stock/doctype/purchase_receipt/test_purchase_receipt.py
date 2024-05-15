@@ -912,6 +912,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 			create_purchase_order,
 		)
 
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
+
 		po = create_purchase_order()
 		pr = create_pr_against_po(po.name)
 
@@ -931,6 +933,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		po.cancel()
 
 	def test_make_purchase_invoice_from_pr_with_returned_qty_duplicate_items(self):
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
 		pr1 = make_purchase_receipt(qty=8, do_not_submit=True)
 		pr1.append(
 			"items",
@@ -2823,6 +2826,84 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
+	def test_purchase_receipt_bill_for_rejected_quantity_in_purchase_invoice(self):
+		item_code = make_item(
+			"_Test Purchase Receipt Bill For Rejected Quantity",
+			properties={"is_stock_item": 1},
+		).name
+
+		pr = make_purchase_receipt(item_code=item_code, qty=5, rate=100)
+
+		return_pr = make_purchase_receipt(
+			item_code=item_code,
+			is_return=1,
+			return_against=pr.name,
+			qty=-2,
+			do_not_submit=1,
+		)
+		return_pr.items[0].purchase_receipt_item = pr.items[0].name
+		return_pr.submit()
+		old_value = frappe.db.get_single_value(
+			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"
+		)
+
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 0)
+		pi = make_purchase_invoice(pr.name)
+		self.assertEqual(pi.items[0].qty, 3)
+
+		frappe.db.set_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", 1)
+		pi = make_purchase_invoice(pr.name)
+		pi.submit()
+		self.assertEqual(pi.items[0].qty, 5)
+
+		frappe.db.set_single_value(
+			"Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice", old_value
+		)
+
+	def test_zero_valuation_rate_for_batched_item(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = make_item(
+			"_Test Zero Valuation Rate For the Batch Item",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TZVRFORBATCH.#####",
+				"valuation_rate": 200,
+			},
+		)
+
+		pi = make_purchase_receipt(
+			qty=10,
+			rate=0,
+			item_code=item.name,
+		)
+
+		pi.reload()
+		batch_no = get_batch_from_bundle(pi.items[0].serial_and_batch_bundle)
+
+		se = make_stock_entry(
+			purpose="Material Issue",
+			item_code=item.name,
+			source=pi.items[0].warehouse,
+			qty=10,
+			batch_no=batch_no,
+			use_serial_batch_fields=0,
+		)
+
+		se.submit()
+
+		se.reload()
+
+		self.assertEqual(se.items[0].valuation_rate, 0)
+		self.assertEqual(se.items[0].basic_rate, 0)
+
+		sabb_doc = frappe.get_doc("Serial and Batch Bundle", se.items[0].serial_and_batch_bundle)
+		for row in sabb_doc.entries:
+			self.assertEqual(row.incoming_rate, 0)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -3009,6 +3090,7 @@ def make_purchase_receipt(**args):
 					"serial_nos": serial_nos,
 					"posting_date": args.posting_date or today(),
 					"posting_time": args.posting_time,
+					"do_not_submit": 1,
 				}
 			)
 		).name

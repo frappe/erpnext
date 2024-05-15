@@ -790,7 +790,7 @@ def get_available_item_locations(
 		locations = get_locations_based_on_required_qty(locations, required_qty)
 
 	if not ignore_validation:
-		validate_picked_materials(item_code, required_qty, locations)
+		validate_picked_materials(item_code, required_qty, locations, picked_item_details)
 
 	return locations
 
@@ -810,7 +810,7 @@ def get_locations_based_on_required_qty(locations, required_qty):
 	return filtered_locations
 
 
-def validate_picked_materials(item_code, required_qty, locations):
+def validate_picked_materials(item_code, required_qty, locations, picked_item_details=None):
 	for location in list(locations):
 		if location["qty"] < 0:
 			locations.remove(location)
@@ -819,15 +819,25 @@ def validate_picked_materials(item_code, required_qty, locations):
 	remaining_qty = required_qty - total_qty_available
 
 	if remaining_qty > 0:
-		frappe.msgprint(
-			_("{0} units of Item {1} is picked in another Pick List.").format(
-				remaining_qty, get_link_to_form("Item", item_code)
-			),
-			title=_("Already Picked"),
-		)
+		if picked_item_details:
+			frappe.msgprint(
+				_("{0} units of Item {1} is picked in another Pick List.").format(
+					remaining_qty, get_link_to_form("Item", item_code)
+				),
+				title=_("Already Picked"),
+			)
+
+		else:
+			frappe.msgprint(
+				_("{0} units of Item {1} is not available in any of the warehouses.").format(
+					remaining_qty, get_link_to_form("Item", item_code)
+				),
+				title=_("Insufficient Stock"),
+			)
 
 
 def filter_locations_by_picked_materials(locations, picked_item_details) -> list[dict]:
+	filterd_locations = []
 	for row in locations:
 		key = row.warehouse
 		if row.batch_no:
@@ -835,6 +845,7 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 
 		picked_qty = picked_item_details.get(key, {}).get("picked_qty", 0)
 		if not picked_qty:
+			filterd_locations.append(row)
 			continue
 		if picked_qty > row.qty:
 			row.qty = 0
@@ -845,7 +856,10 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 			if row.serial_nos:
 				row.serial_nos = list(set(row.serial_nos) - set(picked_item_details[key].get("serial_no")))
 
-	return locations
+		if row.qty > 0:
+			filterd_locations.append(row)
+
+	return filterd_locations
 
 
 def get_available_item_locations_for_serial_and_batched_item(
