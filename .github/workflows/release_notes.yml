@@ -29,7 +29,11 @@ jobs:
     steps:
     - name: Update notes
       run: |
-        NEW_NOTES=$(gh api --method POST -H "Accept: application/vnd.github+json"  /repos/frappe/erpnext/releases/generate-notes  -f tag_name=$RELEASE_TAG | jq -r '.body' | sed  -E '/^\* (chore|ci|test|docs|style)/d' )
+        NEW_NOTES=$(gh api --method POST -H "Accept: application/vnd.github+json"  /repos/frappe/erpnext/releases/generate-notes  -f tag_name=$RELEASE_TAG \
+          | jq -r '.body' \
+          | sed -E '/^\* (chore|ci|test|docs|style)/d' \
+          | sed -E 's/by @mergify //'
+        )
         RELEASE_ID=$(gh api -H "Accept: application/vnd.github+json" /repos/frappe/erpnext/releases/tags/$RELEASE_TAG | jq -r '.id')
         gh api --method PATCH -H "Accept: application/vnd.github+json" /repos/frappe/erpnext/releases/$RELEASE_ID -f body="$NEW_NOTES"
 
