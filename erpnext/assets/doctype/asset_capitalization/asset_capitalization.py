@@ -145,7 +145,7 @@ class AssetCapitalization(StockController):
 
 	def on_trash(self):
 		frappe.db.set_value("Asset", self.target_asset, "capitalized_in", None)
-		super(AssetCapitalization, self).on_trash()
+		super().on_trash()
 
 	def cancel_target_asset(self):
 		if self.entry_type == "Capitalization" and self.target_asset:
