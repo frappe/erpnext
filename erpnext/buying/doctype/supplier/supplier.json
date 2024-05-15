@@ -406,7 +406,7 @@
   {
    "fieldname": "contact_and_address_tab",
    "fieldtype": "Tab Break",
-   "label": "Contact & Address"
+   "label": "Address & Contact"
   },
   {
    "fieldname": "accounting_tab",
@@ -485,7 +485,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2024-03-13 11:14:06.516519",
+ "modified": "2024-05-08 18:02:57.342931",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
