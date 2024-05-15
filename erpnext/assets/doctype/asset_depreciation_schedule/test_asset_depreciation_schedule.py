@@ -71,6 +71,7 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
 		self.assertEqual(schedules, expected_schedules)
+
 	# Test for Written Down Value Method
 	# Frequency of deprciation = 3
 	def test_for_daily_prorata_based_depreciation_wdv_method_frequency_3_months(self):
