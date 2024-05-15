@@ -3,7 +3,7 @@ import inspect
 
 import frappe
 
-__version__ = "14.69.1"
+__version__ = "14.70.0"
 
 
 def get_default_company(user=None):
