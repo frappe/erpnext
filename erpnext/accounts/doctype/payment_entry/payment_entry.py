@@ -1249,13 +1249,16 @@ class PaymentEntry(AccountsController):
 			"voucher_detail_no": invoice.name,
 		}
 
-		date_field = "posting_date"
-		if invoice.reference_doctype in ["Sales Order", "Purchase Order"]:
-			date_field = "transaction_date"
-		posting_date = frappe.db.get_value(invoice.reference_doctype, invoice.reference_name, date_field)
-
-		if getdate(posting_date) < getdate(self.posting_date):
+		if self.reconcile_on_advance_payment_date:
 			posting_date = self.posting_date
+		else:
+			date_field = "posting_date"
+			if invoice.reference_doctype in ["Sales Order", "Purchase Order"]:
+				date_field = "transaction_date"
+			posting_date = frappe.db.get_value(invoice.reference_doctype, invoice.reference_name, date_field)
+
+			if getdate(posting_date) < getdate(self.posting_date):
+				posting_date = self.posting_date
 
 		dr_or_cr, account = self.get_dr_and_account_for_advances(invoice)
 		args_dict["account"] = account
