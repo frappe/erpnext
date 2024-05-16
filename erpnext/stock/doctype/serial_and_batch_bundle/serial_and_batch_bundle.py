@@ -1865,13 +1865,13 @@ def get_available_batches(kwargs):
 			batch_ledger.warehouse,
 			Sum(batch_ledger.qty).as_("qty"),
 		)
-		.where(
-			(batch_table.disabled == 0)
-			& ((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull()))
-		)
+		.where(batch_table.disabled == 0)
 		.where(stock_ledger_entry.is_cancelled == 0)
 		.groupby(batch_ledger.batch_no, batch_ledger.warehouse)
 	)
+
+	if not kwargs.get("for_stock_levels"):
+		query = query.where((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull()))
 
 	if kwargs.get("posting_date"):
 		if kwargs.get("posting_time") is None:

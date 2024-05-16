@@ -47,9 +47,14 @@ frappe.ui.form.on("Batch", {
 	},
 	make_dashboard: (frm) => {
 		if (!frm.is_new()) {
+			let for_stock_levels = 0;
+			if (!frm.doc.batch_qty && frm.doc.expiry_date) {
+				for_stock_levels = 1;
+			}
+
 			frappe.call({
 				method: "erpnext.stock.doctype.batch.batch.get_batch_qty",
-				args: { batch_no: frm.doc.name, item_code: frm.doc.item },
+				args: { batch_no: frm.doc.name, item_code: frm.doc.item, for_stock_levels: for_stock_levels },
 				callback: (r) => {
 					if (!r.message) {
 						return;
