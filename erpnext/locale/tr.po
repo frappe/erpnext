@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-05 09:35+0000\n"
-"PO-Revision-Date: 2024-05-15 10:53\n"
+"PO-Revision-Date: 2024-05-16 10:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -23129,522 +23129,522 @@ msgstr ""
 #: stock/report/total_stock_summary/total_stock_summary.py:22
 #: templates/generators/bom.html:83
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Advance Taxes and Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Read Only field in DocType 'Asset Maintenance Log'
 #: assets/doctype/asset_maintenance_log/asset_maintenance_log.json
 msgctxt "Asset Maintenance Log"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Asset Maintenance Task'
 #: assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgctxt "Asset Maintenance Task"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgctxt "Asset Repair"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'BOM Explosion Item'
 #: manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
 msgctxt "BOM Explosion Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'BOM Item'
 #: manufacturing/doctype/bom_item/bom_item.json
 msgctxt "BOM Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'BOM Operation'
 #: manufacturing/doctype/bom_operation/bom_operation.json
 msgctxt "BOM Operation"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Brand'
 #: setup/doctype/brand/brand.json
 msgctxt "Brand"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Campaign'
 #: crm/doctype/campaign/campaign.json
 msgctxt "Campaign"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Data field in DocType 'Customs Tariff Number'
 #: stock/doctype/customs_tariff_number/customs_tariff_number.json
 msgctxt "Customs Tariff Number"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Delivery Note Item'
 #. Label of a Text Editor field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Designation'
 #: setup/doctype/designation/designation.json
 msgctxt "Designation"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Data field in DocType 'Driving License Category'
 #: setup/doctype/driving_license_category/driving_license_category.json
 msgctxt "Driving License Category"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Holiday'
 #: setup/doctype/holiday/holiday.json
 msgctxt "Holiday"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Long Text field in DocType 'Incoterm'
 #: setup/doctype/incoterm/incoterm.json
 msgctxt "Incoterm"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Installation Note Item'
 #: selling/doctype/installation_note_item/installation_note_item.json
 msgctxt "Installation Note Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Issue Priority'
 #: support/doctype/issue_priority/issue_priority.json
 msgctxt "Issue Priority"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Issue Type'
 #: support/doctype/issue_type/issue_type.json
 msgctxt "Issue Type"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Item'
 #. Label of a Text Editor field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Item Manufacturer'
 #: stock/doctype/item_manufacturer/item_manufacturer.json
 msgctxt "Item Manufacturer"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Item Website Specification'
 #: stock/doctype/item_website_specification/item_website_specification.json
 msgctxt "Item Website Specification"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Job Card Item'
 #: manufacturing/doctype/job_card_item/job_card_item.json
 msgctxt "Job Card Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Job Card Scrap Item'
 #: manufacturing/doctype/job_card_scrap_item/job_card_scrap_item.json
 msgctxt "Job Card Scrap Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Landed Cost Item'
 #: stock/doctype/landed_cost_item/landed_cost_item.json
 msgctxt "Landed Cost Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Landed Cost Taxes and Charges'
 #: stock/doctype/landed_cost_taxes_and_charges/landed_cost_taxes_and_charges.json
 msgctxt "Landed Cost Taxes and Charges"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Maintenance Schedule Item'
 #: maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
 msgctxt "Maintenance Schedule Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Maintenance Visit Purpose'
 #: maintenance/doctype/maintenance_visit_purpose/maintenance_visit_purpose.json
 msgctxt "Maintenance Visit Purpose"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Material Request Item'
 #. Label of a Text Editor field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Operation'
 #: manufacturing/doctype/operation/operation.json
 msgctxt "Operation"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Opportunity Item'
 #. Label of a Text Editor field in DocType 'Opportunity Item'
 #: crm/doctype/opportunity_item/opportunity_item.json
 msgctxt "Opportunity Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Opportunity Type'
 #: crm/doctype/opportunity_type/opportunity_type.json
 msgctxt "Opportunity Type"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Overdue Payment'
 #. Label of a Small Text field in DocType 'Overdue Payment'
 #: accounts/doctype/overdue_payment/overdue_payment.json
 msgctxt "Overdue Payment"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'POS Invoice Item'
 #. Label of a Text Editor field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Packing Slip Item'
 #. Label of a Text Editor field in DocType 'Packing Slip Item'
 #: stock/doctype/packing_slip_item/packing_slip_item.json
 msgctxt "Packing Slip Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Payment Entry Deduction'
 #: accounts/doctype/payment_entry_deduction/payment_entry_deduction.json
 msgctxt "Payment Entry Deduction"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Payment Schedule'
 #. Label of a Section Break field in DocType 'Payment Schedule'
 #: accounts/doctype/payment_schedule/payment_schedule.json
 msgctxt "Payment Schedule"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Payment Term'
 #: accounts/doctype/payment_term/payment_term.json
 msgctxt "Payment Term"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Payment Terms Template Detail'
 #. Label of a Section Break field in DocType 'Payment Terms Template Detail'
 #: accounts/doctype/payment_terms_template_detail/payment_terms_template_detail.json
 msgctxt "Payment Terms Template Detail"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Pick List Item'
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgctxt "Pick List Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Print Heading'
 #: setup/doctype/print_heading/print_heading.json
 msgctxt "Print Heading"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Data field in DocType 'Product Bundle'
 #: selling/doctype/product_bundle/product_bundle.json
 msgctxt "Product Bundle"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Product Bundle Item'
 #: selling/doctype/product_bundle_item/product_bundle_item.json
 msgctxt "Product Bundle Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Production Plan Item'
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 msgctxt "Production Plan Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Project Type'
 #: projects/doctype/project_type/project_type.json
 msgctxt "Project Type"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Purchase Invoice Item'
 #. Label of a Text Editor field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Purchase Order Item'
 #. Label of a Text Editor field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Purchase Receipt Item'
 #. Label of a Text Editor field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Purchase Receipt Item Supplied'
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 msgctxt "Purchase Receipt Item Supplied"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Quality Inspection'
 #: stock/doctype/quality_inspection/quality_inspection.json
 msgctxt "Quality Inspection"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Quality Inspection Parameter'
 #: stock/doctype/quality_inspection_parameter/quality_inspection_parameter.json
 msgctxt "Quality Inspection Parameter"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Quotation Item'
 #. Label of a Text Editor field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Request for Quotation Item'
 #. Label of a Text Editor field in DocType 'Request for Quotation Item'
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 msgctxt "Request for Quotation Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Sales Invoice Item'
 #. Label of a Section Break field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Sales Invoice Timesheet'
 #: accounts/doctype/sales_invoice_timesheet/sales_invoice_timesheet.json
 msgctxt "Sales Invoice Timesheet"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Sales Order Item'
 #. Label of a Text Editor field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
 msgctxt "Sales Partner"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
 msgctxt "Serial No"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Long Text field in DocType 'Share Type'
 #: accounts/doctype/share_type/share_type.json
 msgctxt "Share Type"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Stock Entry Detail'
 #. Label of a Text Editor field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Sub Operation'
 #: manufacturing/doctype/sub_operation/sub_operation.json
 msgctxt "Sub Operation"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Subcontracting Order Item'
 #. Label of a Text Editor field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Subcontracting Receipt Item'
 #. Label of a Text Editor field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Subcontracting Receipt Supplied
 #. Item'
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgctxt "Subcontracting Receipt Supplied Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Section Break field in DocType 'Supplier Quotation Item'
 #. Label of a Text Editor field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Supplier Scorecard Scoring Variable'
 #: buying/doctype/supplier_scorecard_scoring_variable/supplier_scorecard_scoring_variable.json
 msgctxt "Supplier Scorecard Scoring Variable"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Supplier Scorecard Variable'
 #: buying/doctype/supplier_scorecard_variable/supplier_scorecard_variable.json
 msgctxt "Supplier Scorecard Variable"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Task Type'
 #: projects/doctype/task_type/task_type.json
 msgctxt "Task Type"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Timesheet Detail'
 #: projects/doctype/timesheet_detail/timesheet_detail.json
 msgctxt "Timesheet Detail"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'UOM'
 #: setup/doctype/uom/uom.json
 msgctxt "UOM"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text Editor field in DocType 'Video'
 #: utilities/doctype/video/video.json
 msgctxt "Video"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Warehouse Type'
 #: stock/doctype/warehouse_type/warehouse_type.json
 msgctxt "Warehouse Type"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
 msgctxt "Warranty Claim"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgctxt "Work Order Item"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Text field in DocType 'Workstation'
 #. Label of a Tab Break field in DocType 'Workstation'
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Workstation Type'
 #. Label of a Tab Break field in DocType 'Workstation Type'
 #: manufacturing/doctype/workstation_type/workstation_type.json
 msgctxt "Workstation Type"
 msgid "Description"
-msgstr ""
+msgstr "Açıklama"
 
 #. Label of a Small Text field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -50065,7 +50065,7 @@ msgstr ""
 
 #: manufacturing/dashboard_fixtures.py:123
 msgid "Pending Work Order"
-msgstr ""
+msgstr "Bekleyen İş Emri"
 
 #: setup/doctype/email_digest/email_digest.py:182
 msgid "Pending activities for today"
@@ -60706,25 +60706,25 @@ msgstr ""
 #: selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:44
 #: stock/report/stock_projected_qty/stock_projected_qty.py:150
 msgid "Requested Qty"
-msgstr ""
+msgstr "İstenen Miktar"
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Requested Qty"
-msgstr ""
+msgstr "İstenen Miktar"
 
 #. Label of a Float field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Requested Qty"
-msgstr ""
+msgstr "İstenen Miktar"
 
 #. Label of a Float field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Requested Qty"
-msgstr ""
+msgstr "İstenen Miktar"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Requested Qty: Quantity requested for purchase, but not ordered."
@@ -63103,7 +63103,7 @@ msgstr ""
 
 #: selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:28
 msgid "S.O. No."
-msgstr ""
+msgstr "Sipariş No"
 
 #. Label of a Data field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -63165,7 +63165,7 @@ msgstr "SMS Ayarları"
 
 #: selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:43
 msgid "SO Qty"
-msgstr ""
+msgstr "Siparişi Miktarı"
 
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:107
 msgid "SO Total Qty"
@@ -73851,62 +73851,62 @@ msgstr "Şartlar ve Koşullar Şablonu"
 #: selling/report/territory_wise_sales/territory_wise_sales.py:22
 #: setup/doctype/territory/territory.json
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
 msgctxt "Customer"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Installation Note'
 #: selling/doctype/installation_note/installation_note.json
 msgctxt "Installation Note"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Maintenance Schedule'
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgctxt "Maintenance Schedule"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Maintenance Visit'
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 msgctxt "Maintenance Visit"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Option for the 'Applicable For' (Select) field in DocType 'Pricing Rule'
 #. Label of a Link field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Option for the 'Select Customers By' (Select) field in DocType 'Process
 #. Statement Of Accounts'
@@ -73914,7 +73914,7 @@ msgstr ""
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Option for the 'Applicable For' (Select) field in DocType 'Promotional
 #. Scheme'
@@ -73922,44 +73922,44 @@ msgstr ""
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
 msgctxt "Sales Partner"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Option for the 'Entity Type' (Select) field in DocType 'Service Level
 #. Agreement'
 #: support/doctype/service_level_agreement/service_level_agreement.json
 msgctxt "Service Level Agreement"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link in the CRM Workspace
 #. Label of a Link in the Selling Workspace
@@ -73968,19 +73968,19 @@ msgstr ""
 #: setup/workspace/home/home.json
 msgctxt "Territory"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Territory Item'
 #: accounts/doctype/territory_item/territory_item.json
 msgctxt "Territory Item"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Label of a Link field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
 msgctxt "Warranty Claim"
 msgid "Territory"
-msgstr ""
+msgstr "Bölge"
 
 #. Name of a DocType
 #: accounts/doctype/territory_item/territory_item.json
