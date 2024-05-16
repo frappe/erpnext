@@ -470,6 +470,7 @@
  "issingle": 1,
  "links": [],
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2024-03-15 12:11:36.085158",
 =======
 <<<<<<< HEAD
@@ -478,6 +479,9 @@
  "modified": "2024-05-11 23:19:44.673975",
 >>>>>>> d56f52b0ba (feat: Config to enable immutable ledger)
 >>>>>>> 32c935bc30 (feat: Config to enable immutable ledger)
+=======
+ "modified": "2024-05-11 23:19:44.673975",
+>>>>>>> 9315607ee7 (chore: Resolve conflicts)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
