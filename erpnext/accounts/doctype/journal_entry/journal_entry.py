@@ -991,36 +991,46 @@ class JournalEntry(AccountsController):
 		if r:
 			self.remark = ("\n").join(r)  # User Remarks is not mandatory
 
-	def set_print_format_fields(self):
-		bank_amount = party_amount = total_amount = 0.0
-		currency = bank_account_currency = party_account_currency = pay_to_recd_from = None
-		party_type = None
-		for d in self.get("accounts"):
-			if d.party_type in ["Customer", "Supplier"] and d.party:
-				party_type = d.party_type
-				if not pay_to_recd_from:
-					pay_to_recd_from = d.party
+def set_print_format_fields(self):
+    bank_amount = party_amount = total_amount = 0.0
+    currency = bank_account_currency = party_account_currency = pay_to_recd_from = None
+    party_type = None
 
-				if pay_to_recd_from and pay_to_recd_from == d.party:
-					party_amount += flt(d.debit_in_account_currency) or flt(d.credit_in_account_currency)
-					party_account_currency = d.account_currency
+    for d in self.get("accounts"):
+        if d.party_type in ["Customer", "Supplier"] and d.party:
+            party_type = d.party_type
+            if not pay_to_recd_from:
+                pay_to_recd_from = d.party
 
-			elif frappe.get_cached_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
-				bank_amount += flt(d.debit_in_account_currency) or flt(d.credit_in_account_currency)
-				bank_account_currency = d.account_currency
+            if pay_to_recd_from and pay_to_recd_from == d.party:
+                party_amount += flt(d.debit_in_account_currency, 0.0) + flt(d.credit_in_account_currency, 0.0)
+                party_account_currency = d.account_currency
 
-		if party_type and pay_to_recd_from:
-			self.pay_to_recd_from = frappe.db.get_value(
-				party_type, pay_to_recd_from, "customer_name" if party_type == "Customer" else "supplier_name"
-			)
-			if bank_amount:
-				total_amount = bank_amount
-				currency = bank_account_currency
-			else:
-				total_amount = party_amount
-				currency = party_account_currency
+        elif frappe.get_cached_value("Account", d.account, "account_type") in ["Bank", "Cash"]:
+            bank_amount += flt(d.debit_in_account_currency, 0.0) + flt(d.credit_in_account_currency, 0.0)
+            bank_account_currency = d.account_currency
 
-		self.set_total_amount(total_amount, currency)
+    if party_type and pay_to_recd_from:
+        self.pay_to_recd_from = frappe.db.get_value(
+            party_type, pay_to_recd_from, "customer_name" if party_type == "Customer" else "supplier_name"
+        )
+        if bank_amount:
+            total_amount = bank_amount
+            currency = bank_account_currency
+        else:
+            total_amount = party_amount
+            currency = party_account_currency
+
+    self.set_total_amount(total_amount, currency)
+
+def flt(value, default=0.0):
+    """Convert to float (ignore commas)"""
+    if value is None:
+        return default
+    try:
+        return float(str(value).replace(",", ""))
+    except ValueError:
+        return default
 
 	def set_total_amount(self, amt, currency):
 		self.total_amount = amt
