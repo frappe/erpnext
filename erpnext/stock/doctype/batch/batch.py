@@ -199,6 +199,7 @@ def get_batch_qty(
 	posting_date=None,
 	posting_time=None,
 	ignore_voucher_nos=None,
+	for_stock_levels=False,
 ):
 	"""Returns batch actual qty if warehouse is passed,
 	        or returns dict of qty by warehouse if warehouse is None
@@ -222,6 +223,7 @@ def get_batch_qty(
 			"posting_time": posting_time,
 			"batch_no": batch_no,
 			"ignore_voucher_nos": ignore_voucher_nos,
+			"for_stock_levels": for_stock_levels,
 		}
 	)
 
