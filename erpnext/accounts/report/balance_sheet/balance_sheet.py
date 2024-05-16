@@ -109,7 +109,7 @@ def get_provisional_profit_loss(
 ):
 	provisional_profit_loss = {}
 	total_row = {}
-	if asset and (liability or equity):
+	if asset:
 		total = total_row_total = 0
 		currency = currency or frappe.get_cached_value("Company", company, "default_currency")
 		total_row = {
@@ -122,14 +122,20 @@ def get_provisional_profit_loss(
 
 		for period in period_list:
 			key = period if consolidated else period.key
-			effective_liability = 0.0
-			if liability:
-				effective_liability += flt(liability[0].get(key))
-			if equity:
-				effective_liability += flt(equity[0].get(key))
+			total_assets = flt(asset[-2].get(key))
 
-			provisional_profit_loss[key] = flt(asset[0].get(key)) - effective_liability
-			total_row[key] = effective_liability + provisional_profit_loss[key]
+			if liability or equity:
+				effective_liability = 0.0
+				if liability:
+					effective_liability += flt(liability[-2].get(key))
+				if equity:
+					effective_liability += flt(equity[-2].get(key))
+
+				provisional_profit_loss[key] = total_assets - effective_liability
+			else:
+				provisional_profit_loss[key] = total_assets
+
+			total_row[key] = provisional_profit_loss[key]
 
 			if provisional_profit_loss[key]:
 				has_value = True
@@ -192,11 +198,11 @@ def get_report_summary(
 	for period in period_list:
 		key = period if consolidated else period.key
 		if asset:
-			net_asset += asset[0].get(key)
+			net_asset += asset[-2].get(key)
 		if liability:
-			net_liability += liability[0].get(key)
+			net_liability += liability[-2].get(key)
 		if equity:
-			net_equity += equity[0].get(key)
+			net_equity += equity[-2].get(key)
 		if provisional_profit_loss:
 			net_provisional_profit_loss += provisional_profit_loss.get(key)
 
