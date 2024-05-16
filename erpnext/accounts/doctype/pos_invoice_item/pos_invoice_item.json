@@ -654,7 +654,7 @@
   {
    "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "serial_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text",
    "hidden": 1,
    "in_list_view": 1,
    "label": "Serial No",
@@ -853,14 +853,14 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-02-04 16:36:25.665743",
+ "modified": "2024-03-27 13:10:15.336778",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

@@ -17,8 +17,6 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 )
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
-	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
 
@@ -91,7 +89,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Test Target Asset values
 		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
 		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
-		self.assertEqual(target_asset.purchase_receipt_amount, total_amount)
+		self.assertEqual(target_asset.purchase_amount, total_amount)
 
 		# Test Consumed Asset values
 		self.assertEqual(consumed_asset.db_get("status"), "Capitalized")
@@ -181,7 +179,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Test Target Asset values
 		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
 		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
-		self.assertEqual(target_asset.purchase_receipt_amount, total_amount)
+		self.assertEqual(target_asset.purchase_amount, total_amount)
 
 		# Test Consumed Asset values
 		self.assertEqual(consumed_asset.db_get("status"), "Capitalized")
@@ -258,7 +256,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Test Target Asset values
 		target_asset = frappe.get_doc("Asset", asset_capitalization.target_asset)
 		self.assertEqual(target_asset.gross_purchase_amount, total_amount)
-		self.assertEqual(target_asset.purchase_receipt_amount, total_amount)
+		self.assertEqual(target_asset.purchase_amount, total_amount)
 
 		# Test General Ledger Entries
 		expected_gle = {
@@ -323,7 +321,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		)
 
 		first_asset_depr_schedule = get_asset_depr_schedule_doc(consumed_asset.name, "Active")
-		self.assertEquals(first_asset_depr_schedule.status, "Active")
+		self.assertEqual(first_asset_depr_schedule.status, "Active")
 
 		# Create and submit Asset Captitalization
 		asset_capitalization = create_asset_capitalization(
@@ -357,8 +355,8 @@ class TestAssetCapitalization(unittest.TestCase):
 		first_asset_depr_schedule.load_from_db()
 
 		second_asset_depr_schedule = get_asset_depr_schedule_doc(consumed_asset.name, "Active")
-		self.assertEquals(second_asset_depr_schedule.status, "Active")
-		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
+		self.assertEqual(second_asset_depr_schedule.status, "Active")
+		self.assertEqual(first_asset_depr_schedule.status, "Cancelled")
 
 		depr_schedule_of_consumed_asset = second_asset_depr_schedule.get("depreciation_schedule")
 
@@ -367,9 +365,7 @@ class TestAssetCapitalization(unittest.TestCase):
 			for d in depr_schedule_of_consumed_asset
 			if getdate(d.schedule_date) == getdate(capitalization_date)
 		]
-		self.assertTrue(
-			consumed_depreciation_schedule and consumed_depreciation_schedule[0].journal_entry
-		)
+		self.assertTrue(consumed_depreciation_schedule and consumed_depreciation_schedule[0].journal_entry)
 		self.assertEqual(
 			consumed_depreciation_schedule[0].depreciation_amount, depreciation_before_disposal_amount
 		)
@@ -392,15 +388,9 @@ class TestAssetCapitalization(unittest.TestCase):
 
 
 def create_asset_capitalization_data():
-	create_item(
-		"Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0
-	)
-	create_item(
-		"Capitalization Source Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0
-	)
-	create_item(
-		"Capitalization Source Service Item", is_stock_item=0, is_fixed_asset=0, is_purchase_item=0
-	)
+	create_item("Capitalization Target Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)
+	create_item("Capitalization Source Stock Item", is_stock_item=1, is_fixed_asset=0, is_purchase_item=0)
+	create_item("Capitalization Source Service Item", is_stock_item=0, is_fixed_asset=0, is_purchase_item=0)
 
 
 def create_asset_capitalization(**args):
@@ -536,7 +526,7 @@ def create_depreciation_asset(**args):
 	asset.available_for_use_date = args.available_for_use_date or asset.purchase_date
 
 	asset.gross_purchase_amount = args.asset_value or 100000
-	asset.purchase_receipt_amount = asset.gross_purchase_amount
+	asset.purchase_amount = asset.gross_purchase_amount
 
 	finance_book = asset.append("finance_books")
 	finance_book.depreciation_start_date = args.depreciation_start_date or "2020-12-31"

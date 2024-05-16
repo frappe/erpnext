@@ -57,7 +57,9 @@ class AssetCategory(Document):
 					account_currency = frappe.get_value("Account", d.get(type_of_account), "account_currency")
 					if account_currency != company_currency:
 						invalid_accounts.append(
-							frappe._dict({"type": type_of_account, "idx": d.idx, "account": d.get(type_of_account)})
+							frappe._dict(
+								{"type": type_of_account, "idx": d.idx, "account": d.get(type_of_account)}
+							)
 						)
 
 		for d in invalid_accounts:

@@ -319,7 +319,6 @@ class TestPickList(FrappeTestCase):
 		pr2.cancel()
 
 	def test_pick_list_for_items_from_multiple_sales_orders(self):
-
 		item_code = make_item().name
 		try:
 			frappe.get_doc(
@@ -463,9 +462,7 @@ class TestPickList(FrappeTestCase):
 
 		self.assertEqual(pick_list.locations[0].qty, delivery_note.items[0].qty)
 		self.assertEqual(pick_list.locations[1].qty, delivery_note.items[1].qty)
-		self.assertEqual(
-			sales_order.items[0].conversion_factor, delivery_note.items[0].conversion_factor
-		)
+		self.assertEqual(sales_order.items[0].conversion_factor, delivery_note.items[0].conversion_factor)
 
 		pick_list.cancel()
 		sales_order.cancel()
@@ -514,7 +511,7 @@ class TestPickList(FrappeTestCase):
 			_dict(item_code="A", warehouse="X", qty=8, picked_qty=3),
 			_dict(item_code="B", warehouse="Y", qty=6, picked_qty=4),
 		]
-		for expected_item, created_item in zip(expected_items, pl.locations):
+		for expected_item, created_item in zip(expected_items, pl.locations, strict=False):
 			_compare_dicts(expected_item, created_item)
 
 	def test_multiple_dn_creation(self):
@@ -624,9 +621,7 @@ class TestPickList(FrappeTestCase):
 		pick_list_1.set_item_locations()
 		pick_list_1.submit()
 		create_delivery_note(pick_list_1.name)
-		for dn in frappe.get_all(
-			"Delivery Note", filters={"pick_list": pick_list_1.name}, fields={"name"}
-		):
+		for dn in frappe.get_all("Delivery Note", filters={"pick_list": pick_list_1.name}, fields={"name"}):
 			for dn_item in frappe.get_doc("Delivery Note", dn.name).get("items"):
 				if dn_item.item_code == "_Test Item":
 					self.assertEqual(dn_item.qty, 1)
@@ -728,7 +723,9 @@ class TestPickList(FrappeTestCase):
 			self.assertTrue(loc.serial_and_batch_bundle)
 
 			data = frappe.get_all(
-				"Serial and Batch Entry", fields=["serial_no"], filters={"parent": loc.serial_and_batch_bundle}
+				"Serial and Batch Entry",
+				fields=["serial_no"],
+				filters={"parent": loc.serial_and_batch_bundle},
 			)
 
 			picked_serial_nos = [d.serial_no for d in data]
@@ -760,7 +757,7 @@ class TestPickList(FrappeTestCase):
 
 		quantities = [5, 2]
 		bundle, components = create_product_bundle(quantities, warehouse=warehouse)
-		bundle_items = dict(zip(components, quantities))
+		bundle_items = dict(zip(components, quantities, strict=False))
 
 		so = make_sales_order(item_code=bundle, qty=3, rate=42)
 
@@ -818,7 +815,7 @@ class TestPickList(FrappeTestCase):
 
 	def test_pick_list_status(self):
 		warehouse = "_Test Warehouse - _TC"
-		item = make_item(properties={"maintain_stock": 1}).name
+		item = make_item(properties={"is_stock_item": 1}).name
 		make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
 
 		so = make_sales_order(item_code=item, qty=10, rate=100)
@@ -848,3 +845,289 @@ class TestPickList(FrappeTestCase):
 		pl.cancel()
 		pl.reload()
 		self.assertEqual(pl.status, "Cancelled")
+
+	def test_pick_list_validation(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item("Test Non Serialized Pick List Item", properties={"is_stock_item": 1}).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		pl.submit()
+		self.assertEqual(pl.locations[0].qty, 5.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(pl.locations[0].qty, 5.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=4, rate=100)
+		pl = create_pick_list(so.name)
+		self.assertFalse(hasattr(pl, "locations"))
+
+	def test_pick_list_validation_for_serial_no(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Serialized Pick List Item",
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SN-SPLI-.####"},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.locations[0].qty = 5
+		pl.save()
+		pl.submit()
+		self.assertTrue(pl.locations[0].serial_no)
+		self.assertEqual(pl.locations[0].qty, 5.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertTrue(pl.locations[0].serial_no)
+		self.assertEqual(pl.locations[0].qty, 5.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=4, rate=100)
+		pl = create_pick_list(so.name)
+		self.assertFalse(hasattr(pl, "locations"))
+
+	def test_pick_list_validation_for_batch_no(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Batch Pick List Item",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-SPLI-.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.locations[0].qty = 5
+		pl.save()
+		pl.submit()
+		self.assertTrue(pl.locations[0].batch_no)
+		self.assertEqual(pl.locations[0].qty, 5.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertTrue(pl.locations[0].batch_no)
+		self.assertEqual(pl.locations[0].qty, 5.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=4, rate=100)
+		pl = create_pick_list(so.name)
+		self.assertFalse(hasattr(pl, "locations"))
+
+	def test_pick_list_validation_for_batch_no_and_serial_item(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Serialized Batch Pick List Item",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "SN-BT-BATCH-SPLI-.####",
+				"create_new_batch": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SN-BT-SPLI-.####",
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=10)
+
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.locations[0].qty = 5
+		pl.save()
+		pl.submit()
+		self.assertTrue(pl.locations[0].batch_no)
+		self.assertTrue(pl.locations[0].serial_no)
+		self.assertEqual(pl.locations[0].qty, 5.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=5, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertTrue(pl.locations[0].batch_no)
+		self.assertTrue(pl.locations[0].serial_no)
+		self.assertEqual(pl.locations[0].qty, 5.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=4, rate=100)
+		pl = create_pick_list(so.name)
+		self.assertFalse(hasattr(pl, "locations"))
+
+	def test_pick_list_validation_for_multiple_batches_and_sales_order(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Batch Pick List Item For Multiple Batches",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "SN-BT-BATCH-SPLIMBATCH-.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=5)
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=5)
+
+		so = make_sales_order(item_code=item, qty=6, rate=100)
+
+		pl1 = create_pick_list(so.name)
+		pl1.save()
+		self.assertEqual(pl1.locations[0].qty, 5.0)
+		self.assertEqual(pl1.locations[1].qty, 1.0)
+
+		so = make_sales_order(item_code=item, qty=4, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(pl.locations[0].qty, 4.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		pl1.submit()
+
+		pl.reload()
+		pl.submit()
+		self.assertEqual(pl.locations[0].qty, 4.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+	def test_pick_list_for_multiple_sales_order_with_multiple_batches(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Batch Pick List Item For Multiple Batches and Sales Order",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "SN-SOO-BT-SPLIMBATCH-.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl1 = create_pick_list(so.name)
+		pl1.save()
+		self.assertEqual(pl1.locations[0].qty, 10)
+
+		so = make_sales_order(item_code=item, qty=110, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(pl.locations[0].qty, 90.0)
+		self.assertEqual(pl.locations[1].qty, 20.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		pl1.submit()
+
+		pl.reload()
+		pl.submit()
+		self.assertEqual(pl.locations[0].qty, 90.0)
+		self.assertEqual(pl.locations[1].qty, 20.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+	def test_pick_list_for_multiple_sales_order_with_multiple_serial_nos(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Serial No Pick List Item For Multiple Batches and Sales Order",
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SNNN-SOO-BT-SPLIMBATCH-.####",
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl1 = create_pick_list(so.name)
+		pl1.save()
+		self.assertEqual(pl1.locations[0].qty, 10)
+
+		serial_nos = pl1.locations[0].serial_no.split("\n")
+		self.assertEqual(len(serial_nos), 10)
+
+		so = make_sales_order(item_code=item, qty=110, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(pl.locations[0].qty, 110.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		new_serial_nos = pl.locations[0].serial_no.split("\n")
+		self.assertEqual(len(new_serial_nos), 110)
+
+		for sn in serial_nos:
+			self.assertFalse(sn in new_serial_nos)
+
+		pl1.submit()
+
+		pl.reload()
+		pl.submit()
+		self.assertEqual(pl.locations[0].qty, 110.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+	def test_pick_list_for_multiple_sales_orders_for_non_serialized_item(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Non Serialized Pick List Item For Multiple Batches and Sales Order",
+			properties={
+				"is_stock_item": 1,
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl1 = create_pick_list(so.name)
+		pl1.save()
+		self.assertEqual(pl1.locations[0].qty, 10)
+
+		so = make_sales_order(item_code=item, qty=110, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(pl.locations[0].qty, 110.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		pl1.submit()
+
+		pl.reload()
+		pl.submit()
+		self.assertEqual(pl.locations[0].qty, 110.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=110, rate=100)
+		pl = create_pick_list(so.name)
+		pl.save()
+
+		self.assertEqual(pl.locations[0].qty, 80.0)

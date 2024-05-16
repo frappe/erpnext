@@ -27,9 +27,7 @@ def get(
 	if filters and filters.get("company"):
 		warehouse_filters.append(["company", "=", filters.get("company")])
 
-	warehouses = frappe.get_list(
-		"Warehouse", pluck="name", filters=warehouse_filters, order_by="name"
-	)
+	warehouses = frappe.get_list("Warehouse", pluck="name", filters=warehouse_filters, order_by="name")
 
 	warehouses = frappe.get_list(
 		"Bin",

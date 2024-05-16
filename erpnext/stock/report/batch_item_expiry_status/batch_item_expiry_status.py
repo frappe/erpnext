@@ -28,15 +28,15 @@ def validate_filters(filters):
 
 
 def get_columns():
-	return (
-		[_("Item") + ":Link/Item:150"]
-		+ [_("Item Name") + "::150"]
-		+ [_("Batch") + ":Link/Batch:150"]
-		+ [_("Stock UOM") + ":Link/UOM:100"]
-		+ [_("Quantity") + ":Float:100"]
-		+ [_("Expires On") + ":Date:100"]
-		+ [_("Expiry (In Days)") + ":Int:130"]
-	)
+	return [
+		_("Item") + ":Link/Item:150",
+		_("Item Name") + "::150",
+		_("Batch") + ":Link/Batch:150",
+		_("Stock UOM") + ":Link/UOM:100",
+		_("Quantity") + ":Float:100",
+		_("Expires On") + ":Date:100",
+		_("Expiry (In Days)") + ":Int:130",
+	]
 
 
 def get_data(filters):
@@ -76,9 +76,7 @@ def get_batch_details(filters):
 		.where(
 			(batch.disabled == 0)
 			& (batch.batch_qty > 0)
-			& (
-				(Date(batch.creation) >= filters["from_date"]) & (Date(batch.creation) <= filters["to_date"])
-			)
+			& ((Date(batch.creation) >= filters["from_date"]) & (Date(batch.creation) <= filters["to_date"]))
 		)
 		.orderby(batch.creation)
 	)

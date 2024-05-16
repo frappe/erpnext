@@ -18,6 +18,7 @@
   "parent_warehouse",
   "consider_rejected_warehouses",
   "get_item_locations",
+  "pick_manually",
   "section_break_6",
   "scan_barcode",
   "column_break_13",
@@ -192,11 +193,18 @@
    "fieldname": "consider_rejected_warehouses",
    "fieldtype": "Check",
    "label": "Consider Rejected Warehouses"
+  },
+  {
+   "default": "0",
+   "description": "If enabled then system won't override the picked qty / batches / serial numbers.",
+   "fieldname": "pick_manually",
+   "fieldtype": "Check",
+   "label": "Pick Manually"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2024-02-02 16:17:44.877426",
+ "modified": "2024-03-27 22:49:16.954637",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

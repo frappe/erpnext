@@ -13,7 +13,7 @@ def get_default_company(user=None):
 	if not user:
 		user = frappe.session.user
 
-	companies = get_user_default_as_list(user, "company")
+	companies = get_user_default_as_list("company", user)
 	if companies:
 		default_company = companies[0]
 	else:
@@ -37,9 +37,7 @@ def get_default_cost_center(company):
 	if not frappe.flags.company_cost_center:
 		frappe.flags.company_cost_center = {}
 	if company not in frappe.flags.company_cost_center:
-		frappe.flags.company_cost_center[company] = frappe.get_cached_value(
-			"Company", company, "cost_center"
-		)
+		frappe.flags.company_cost_center[company] = frappe.get_cached_value("Company", company, "cost_center")
 	return frappe.flags.company_cost_center[company]
 
 

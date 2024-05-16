@@ -1,18 +1,22 @@
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+import datetime
 import unittest
 
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from frappe.utils import today
+from frappe.tests.utils import FrappeTestCase, change_settings
+from frappe.utils import add_days, today
 
+from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
 test_dependencies = ["Supplier Group", "Customer Group"]
 
 
-class TestTaxWithholdingCategory(unittest.TestCase):
+class TestTaxWithholdingCategory(FrappeTestCase):
 	@classmethod
 	def setUpClass(self):
 		# create relevant supplier, etc
@@ -21,7 +25,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		make_pan_no_field()
 
 	def tearDown(self):
-		cancel_invoices()
+		frappe.db.rollback()
 
 	def test_cumulative_threshold_tds(self):
 		frappe.db.set_value(
@@ -95,9 +99,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 
 	def test_tax_withholding_category_checks(self):
 		invoices = []
-		frappe.db.set_value(
-			"Supplier", "Test TDS Supplier3", "tax_withholding_category", "New TDS Category"
-		)
+		frappe.db.set_value("Supplier", "Test TDS Supplier3", "tax_withholding_category", "New TDS Category")
 
 		# First Invoice with no tds check
 		pi = create_purchase_invoice(supplier="Test TDS Supplier3", rate=20000, do_not_save=True)
@@ -319,8 +321,6 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 			d.cancel()
 
 	def test_tds_deduction_for_po_via_payment_entry(self):
-		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-
 		frappe.db.set_value(
 			"Supplier", "Test TDS Supplier8", "tax_withholding_category", "Cumulative Threshold TDS"
 		)
@@ -448,7 +448,7 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		pe3.save()
 		pe3.submit()
 
-		self.assertEquals(pe3.get("taxes")[0].tax_amount, 1200)
+		self.assertEqual(pe3.get("taxes")[0].tax_amount, 1200)
 		pe1.cancel()
 		pe2.cancel()
 		pe3.cancel()
@@ -486,6 +486,133 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		pi1.cancel()
 		pi2.cancel()
 		pi3.cancel()
+
+	def set_previous_fy_and_tax_category(self):
+		test_company = "_Test Company"
+		category = "Cumulative Threshold TDS"
+
+		def add_company_to_fy(fy, company):
+			if not [x.company for x in fy.companies if x.company == company]:
+				fy.append("companies", {"company": company})
+				fy.save()
+
+		# setup previous fiscal year
+		fiscal_year = get_fiscal_year(today(), company=test_company)
+		if prev_fiscal_year := get_fiscal_year(add_days(fiscal_year[1], -10)):
+			self.prev_fy = frappe.get_doc("Fiscal Year", prev_fiscal_year[0])
+			add_company_to_fy(self.prev_fy, test_company)
+		else:
+			# make previous fiscal year
+			start = datetime.date(fiscal_year[1].year - 1, fiscal_year[1].month, fiscal_year[1].day)
+			end = datetime.date(fiscal_year[2].year - 1, fiscal_year[2].month, fiscal_year[2].day)
+			self.prev_fy = frappe.get_doc(
+				{
+					"doctype": "Fiscal Year",
+					"year_start_date": start,
+					"year_end_date": end,
+					"companies": [{"company": test_company}],
+				}
+			)
+			self.prev_fy.save()
+
+		# setup tax withholding category for previous fiscal year
+		cat = frappe.get_doc("Tax Withholding Category", category)
+		cat.append(
+			"rates",
+			{
+				"from_date": self.prev_fy.year_start_date,
+				"to_date": self.prev_fy.year_end_date,
+				"tax_withholding_rate": 10,
+				"single_threshold": 0,
+				"cumulative_threshold": 30000,
+			},
+		)
+		cat.save()
+
+	def test_tds_across_fiscal_year(self):
+		"""
+		Advance TDS on previous fiscal year should be properly allocated on Invoices in upcoming fiscal year
+		--||-----FY 2023-----||-----FY 2024-----||--
+		--||-----Advance-----||---Inv1---Inv2---||--
+		"""
+		self.set_previous_fy_and_tax_category()
+		supplier = "Test TDS Supplier"
+		# Cumulative threshold 30000 and tax rate 10%
+		category = "Cumulative Threshold TDS"
+		frappe.db.set_value(
+			"Supplier",
+			supplier,
+			{
+				"tax_withholding_category": category,
+				"pan": "ABCTY1234D",
+			},
+		)
+		po_and_advance_posting_date = add_days(self.prev_fy.year_end_date, -10)
+		po = create_purchase_order(supplier=supplier, qty=10, rate=10000)
+		po.transaction_date = po_and_advance_posting_date
+		po.taxes = []
+		po.apply_tds = False
+		po.tax_withholding_category = None
+		po.save().submit()
+
+		# Partial advance
+		payment = get_payment_entry(po.doctype, po.name)
+		payment.posting_date = po_and_advance_posting_date
+		payment.paid_amount = 60000
+		payment.apply_tax_withholding_amount = 1
+		payment.tax_withholding_category = category
+		payment.references = []
+		payment.taxes = []
+		payment.save().submit()
+
+		self.assertEqual(len(payment.taxes), 1)
+		self.assertEqual(payment.taxes[0].tax_amount, 6000)
+
+		# Multiple partial invoices
+		payment.reload()
+		pi1 = make_purchase_invoice(source_name=po.name)
+		pi1.apply_tds = True
+		pi1.tax_withholding_category = category
+		pi1.items[0].qty = 3
+		pi1.items[0].rate = 10000
+		advances = pi1.get_advance_entries()
+		pi1.append(
+			"advances",
+			{
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
+				"advance_amount": advances[0].amount,
+				"allocated_amount": 30000,
+			},
+		)
+		pi1.save().submit()
+		pi1.reload()
+		payment.reload()
+		self.assertEqual(pi1.taxes, [])
+		self.assertEqual(payment.taxes[0].tax_amount, 6000)
+		self.assertEqual(payment.taxes[0].allocated_amount, 3000)
+
+		pi2 = make_purchase_invoice(source_name=po.name)
+		pi2.apply_tds = True
+		pi2.tax_withholding_category = category
+		pi2.items[0].qty = 3
+		pi2.items[0].rate = 10000
+		advances = pi2.get_advance_entries()
+		pi2.append(
+			"advances",
+			{
+				"reference_type": advances[0].reference_type,
+				"reference_name": advances[0].reference_name,
+				"advance_amount": advances[0].amount,
+				"allocated_amount": 30000,
+			},
+		)
+		pi2.save().submit()
+		pi2.reload()
+		payment.reload()
+		self.assertEqual(pi2.taxes, [])
+		self.assertEqual(payment.taxes[0].tax_amount, 6000)
+		self.assertEqual(payment.taxes[0].allocated_amount, 6000)
 
 
 def cancel_invoices():
@@ -845,9 +972,7 @@ def create_tax_withholding_category(
 		).insert()
 
 
-def create_lower_deduction_certificate(
-	supplier, tax_withholding_category, tax_rate, certificate_no, limit
-):
+def create_lower_deduction_certificate(supplier, tax_withholding_category, tax_rate, certificate_no, limit):
 	fiscal_year = get_fiscal_year(today(), company="_Test Company")
 	if not frappe.db.exists("Lower Deduction Certificate", certificate_no):
 		frappe.get_doc(

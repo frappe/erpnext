@@ -51,6 +51,7 @@
   "use_naming_series",
   "naming_series_prefix",
   "use_serial_batch_fields",
+  "do_not_update_serial_batch_on_creation_of_auto_bundle",
   "stock_planning_tab",
   "auto_material_request",
   "auto_indent",
@@ -417,16 +418,25 @@
   {
    "default": "0",
    "depends_on": "eval: doc.enable_stock_reservation",
-   "description": "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Receipt for Sales Order.",
+   "description": "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Request for Sales Order.",
    "fieldname": "auto_reserve_stock_for_sales_order_on_purchase",
    "fieldtype": "Check",
    "label": "Auto Reserve Stock for Sales Order on Purchase"
   },
   {
    "default": "1",
+   "description": "On submission of the stock transaction, system will auto create the Serial and Batch Bundle based on the Serial No / Batch fields.",
    "fieldname": "use_serial_batch_fields",
    "fieldtype": "Check",
    "label": "Use Serial / Batch Fields"
+  },
+  {
+   "default": "1",
+   "depends_on": "use_serial_batch_fields",
+   "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
+   "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
+   "fieldtype": "Check",
+   "label": "Do Not Update Serial / Batch on Creation of Auto Bundle"
   }
  ],
  "icon": "icon-cog",
@@ -434,7 +444,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-02-04 12:01:31.931864",
+ "modified": "2024-03-27 13:10:45.423987",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -455,7 +465,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1

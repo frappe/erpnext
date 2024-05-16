@@ -199,9 +199,7 @@ class TestAssetRepair(unittest.TestCase):
 			self.assertEqual(expected_values[d.account][1], d.credit)
 
 	def test_gl_entries_with_periodical_inventory(self):
-		frappe.db.set_value(
-			"Company", "_Test Company", "default_expense_account", "Cost of Goods Sold - _TC"
-		)
+		frappe.db.set_value("Company", "_Test Company", "default_expense_account", "Cost of Goods Sold - _TC")
 		asset_repair = create_asset_repair(
 			capitalize_repair_cost=1,
 			stock_consumption=1,
@@ -244,7 +242,7 @@ class TestAssetRepair(unittest.TestCase):
 		asset = create_asset(calculate_depreciation=1, submit=1)
 
 		first_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")
-		self.assertEquals(first_asset_depr_schedule.status, "Active")
+		self.assertEqual(first_asset_depr_schedule.status, "Active")
 
 		initial_num_of_depreciations = num_of_depreciations(asset)
 		create_asset_repair(asset=asset, capitalize_repair_cost=1, submit=1)
@@ -253,8 +251,8 @@ class TestAssetRepair(unittest.TestCase):
 		first_asset_depr_schedule.load_from_db()
 
 		second_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")
-		self.assertEquals(second_asset_depr_schedule.status, "Active")
-		self.assertEquals(first_asset_depr_schedule.status, "Cancelled")
+		self.assertEqual(second_asset_depr_schedule.status, "Active")
+		self.assertEqual(first_asset_depr_schedule.status, "Cancelled")
 
 		self.assertEqual((initial_num_of_depreciations + 1), num_of_depreciations(asset))
 		self.assertEqual(
@@ -291,9 +289,7 @@ def create_asset_repair(**args):
 
 	if args.stock_consumption:
 		asset_repair.stock_consumption = 1
-		asset_repair.warehouse = args.warehouse or create_warehouse(
-			"Test Warehouse", company=asset.company
-		)
+		asset_repair.warehouse = args.warehouse or create_warehouse("Test Warehouse", company=asset.company)
 
 		bundle = None
 		if args.serial_no:
@@ -309,6 +305,7 @@ def create_asset_repair(**args):
 						"serial_nos": args.serial_no,
 						"posting_date": today(),
 						"posting_time": nowtime(),
+						"do_not_submit": 1,
 					}
 				)
 			).name

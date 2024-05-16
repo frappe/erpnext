@@ -63,7 +63,7 @@ class RepostItemValuation(Document):
 		frappe.db.delete(
 			table,
 			filters=(
-				(table.modified < (Now() - Interval(days=days)))
+				(table.creation < (Now() - Interval(days=days)))
 				& (table.status.isin(["Completed", "Skipped"]))
 			),
 		)
@@ -144,15 +144,12 @@ class RepostItemValuation(Document):
 		if not acc_settings.acc_frozen_upto:
 			return
 		if getdate(self.posting_date) <= getdate(acc_settings.acc_frozen_upto):
-			if (
+			if acc_settings.frozen_accounts_modifier and frappe.session.user in get_users_with_role(
 				acc_settings.frozen_accounts_modifier
-				and frappe.session.user in get_users_with_role(acc_settings.frozen_accounts_modifier)
 			):
 				frappe.msgprint(_("Caution: This might alter frozen accounts."))
 				return
-			frappe.throw(
-				_("You cannot repost item valuation before {}").format(acc_settings.acc_frozen_upto)
-			)
+			frappe.throw(_("You cannot repost item valuation before {}").format(acc_settings.acc_frozen_upto))
 
 	def reset_field_values(self):
 		if self.based_on == "Transaction":
@@ -214,14 +211,9 @@ class RepostItemValuation(Document):
 		if self.status not in ("Queued", "In Progress"):
 			return
 
-		if not (self.voucher_no and self.voucher_no):
-			return
-
-		transaction_status = frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus")
-		if transaction_status == 2:
-			msg = _("Cannot cancel as processing of cancelled documents is pending.")
-			msg += "<br>" + _("Please try again in an hour.")
-			frappe.throw(msg, title=_("Pending processing"))
+		msg = _("Cannot cancel as processing of cancelled documents is pending.")
+		msg += "<br>" + _("Please try again in an hour.")
+		frappe.throw(msg, title=_("Pending processing"))
 
 	@frappe.whitelist()
 	def restart_reposting(self):
@@ -267,6 +259,7 @@ def on_doctype_update():
 
 def repost(doc):
 	try:
+		frappe.flags.through_repost_item_valuation = True
 		if not frappe.db.exists("Repost Item Valuation", doc.name):
 			return
 

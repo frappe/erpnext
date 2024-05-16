@@ -44,8 +44,6 @@ def get_existing_cost_center_allocations():
 
 	cc_allocations = frappe._dict()
 	for d in records:
-		cc_allocations.setdefault(d.name, frappe._dict()).setdefault(
-			d.cost_center, d.percentage_allocation
-		)
+		cc_allocations.setdefault(d.name, frappe._dict()).setdefault(d.cost_center, d.percentage_allocation)
 
 	return cc_allocations

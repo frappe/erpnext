@@ -306,7 +306,7 @@
   },
   {
    "fieldname": "source_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Source Warehouse Address",
    "read_only": 1
   },
@@ -336,7 +336,7 @@
   },
   {
    "fieldname": "target_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Target Warehouse Address",
    "read_only": 1
   },
@@ -464,7 +464,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address"
   },
   {
@@ -681,7 +681,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-12 11:56:58.644882",
+ "modified": "2024-03-27 13:10:43.701839",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
@@ -749,7 +749,7 @@
  ],
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "stock_entry_type",

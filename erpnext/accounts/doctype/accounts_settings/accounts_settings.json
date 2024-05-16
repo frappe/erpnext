@@ -12,6 +12,7 @@
   "unlink_advance_payment_on_cancelation_of_order",
   "column_break_13",
   "delete_linked_ledger_entries",
+  "enable_immutable_ledger",
   "invoicing_features_section",
   "check_supplier_invoice_uniqueness",
   "automatically_fetch_payment_terms",
@@ -105,7 +106,7 @@
   },
   {
    "default": "0",
-   "description": "Enabling ensure each Purchase Invoice has a unique value in Supplier Invoice No. field",
+   "description": "Enabling this ensures each Purchase Invoice has a unique value in Supplier Invoice No. field within a particular fiscal year",
    "fieldname": "check_supplier_invoice_uniqueness",
    "fieldtype": "Check",
    "label": "Check Supplier Invoice Number Uniqueness"
@@ -454,6 +455,13 @@
    "fieldname": "remarks_section",
    "fieldtype": "Section Break",
    "label": "Remarks Column Length"
+  },
+  {
+   "default": "0",
+   "description": "On enabling this cancellation entries will be posted on the actual cancellation date and reports will consider cancelled entries as well",
+   "fieldname": "enable_immutable_ledger",
+   "fieldtype": "Check",
+   "label": "Enable Immutable Ledger"
   }
  ],
  "icon": "icon-cog",
@@ -461,7 +469,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-01-30 14:04:26.553554",
+ "modified": "2024-05-11 23:19:44.673975",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
@@ -486,7 +494,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1

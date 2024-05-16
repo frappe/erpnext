@@ -22,7 +22,7 @@ class MaintenanceVisit(TransactionBase):
 			MaintenanceVisitPurpose,
 		)
 
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		company: DF.Link
 		completion_status: DF.Literal["", "Partially Completed", "Fully Completed"]
@@ -69,13 +69,17 @@ class MaintenanceVisit(TransactionBase):
 						self.mntc_date
 					) > get_datetime(end_date):
 						frappe.throw(
-							_("Date must be between {0} and {1}").format(format_date(start_date), format_date(end_date))
+							_("Date must be between {0} and {1}").format(
+								format_date(start_date), format_date(end_date)
+							)
 						)
 			else:
 				for purpose in self.purposes:
 					if purpose.maintenance_schedule_detail:
 						item_ref = frappe.db.get_value(
-							"Maintenance Schedule Detail", purpose.maintenance_schedule_detail, "item_reference"
+							"Maintenance Schedule Detail",
+							purpose.maintenance_schedule_detail,
+							"item_reference",
 						)
 						if item_ref:
 							start_date, end_date = frappe.db.get_value(

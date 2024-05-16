@@ -14,16 +14,16 @@ frappe.ui.form.on("Plant Floor", {
 
 			return {
 				filters: {
-					"is_group": 0,
-					"company": doc.company
-				}
-			}
+					is_group: 0,
+					company: doc.company,
+				},
+			};
 		});
 	},
 
 	refresh(frm) {
-		frm.trigger('prepare_stock_dashboard')
-		frm.trigger('prepare_workstation_dashboard')
+		frm.trigger("prepare_stock_dashboard");
+		frm.trigger("prepare_workstation_dashboard");
 	},
 
 	prepare_workstation_dashboard(frm) {
@@ -52,7 +52,6 @@ frappe.ui.form.on("Plant Floor", {
 	},
 });
 
-
 class VisualStock {
 	constructor(opts) {
 		Object.assign(this, opts);
@@ -62,7 +61,7 @@ class VisualStock {
 	make() {
 		this.prepare_filters();
 		this.prepare_stock_summary({
-			start:0
+			start: 0,
 		});
 	}
 
@@ -81,17 +80,18 @@ class VisualStock {
 				fieldname: "item_code",
 				placeholder: __("Item"),
 				options: "Item",
-				onchange: () => this.prepare_stock_summary({
-					start:0,
-					item_code: this.item_filter.value
-				})
+				onchange: () =>
+					this.prepare_stock_summary({
+						start: 0,
+						item_code: this.item_filter.value,
+					}),
 			},
-			parent: this.wrapper.find('.filter-section'),
+			parent: this.wrapper.find(".filter-section"),
 			render_input: true,
 		});
 
-		this.item_filter.$wrapper.addClass('form-column col-sm-3');
-		this.item_filter.$wrapper.find('.clearfix').hide();
+		this.item_filter.$wrapper.addClass("form-column col-sm-3");
+		this.item_filter.$wrapper.find(".clearfix").hide();
 
 		this.item_group_filter = frappe.ui.form.make_control({
 			df: {
@@ -99,25 +99,28 @@ class VisualStock {
 				fieldname: "item_group",
 				placeholder: __("Item Group"),
 				options: "Item Group",
-				change: () => this.prepare_stock_summary({
-					start:0,
-					item_group: this.item_group_filter.value
-				})
+				change: () =>
+					this.prepare_stock_summary({
+						start: 0,
+						item_group: this.item_group_filter.value,
+					}),
 			},
-			parent: this.wrapper.find('.filter-section'),
+			parent: this.wrapper.find(".filter-section"),
 			render_input: true,
 		});
 
-		this.item_group_filter.$wrapper.addClass('form-column col-sm-3');
-		this.item_group_filter.$wrapper.find('.clearfix').hide();
+		this.item_group_filter.$wrapper.addClass("form-column col-sm-3");
+		this.item_group_filter.$wrapper.find(".clearfix").hide();
 	}
 
 	prepare_stock_summary(args) {
-		let {start, item_code, item_group} = args;
+		let { start, item_code, item_group } = args;
 
-		this.get_stock_summary(start, item_code, item_group).then(stock_summary => {
-			this.wrapper.find('.stock-summary-container').remove();
-			this.wrapper.append(`<div class="col-sm-12 stock-summary-container" style="margin-bottom:20px"></div>`);
+		this.get_stock_summary(start, item_code, item_group).then((stock_summary) => {
+			this.wrapper.find(".stock-summary-container").remove();
+			this.wrapper.append(
+				`<div class="col-sm-12 stock-summary-container" style="margin-bottom:20px"></div>`
+			);
 			this.stock_summary = stock_summary.message;
 			this.render_stock_summary();
 			this.bind_events();
@@ -131,8 +134,8 @@ class VisualStock {
 				warehouse: this.frm.doc.warehouse,
 				start: start,
 				item_code: item_code,
-				item_group: item_group
-			}
+				item_group: item_group,
+			},
 		});
 
 		return stock_summary;
@@ -140,71 +143,80 @@ class VisualStock {
 
 	render_stock_summary() {
 		let template = frappe.render_template("stock_summary_template", {
-			stock_summary: this.stock_summary
+			stock_summary: this.stock_summary,
 		});
 
-		this.wrapper.find('.stock-summary-container').append(template);
+		this.wrapper.find(".stock-summary-container").append(template);
 	}
 
 	bind_events() {
-		this.wrapper.find('.btn-add').click((e) => {
-			this.item_code = decodeURI($(e.currentTarget).attr('data-item-code'));
+		this.wrapper.find(".btn-add").click((e) => {
+			this.item_code = decodeURI($(e.currentTarget).attr("data-item-code"));
 
-			this.make_stock_entry([
-				{
-					label: __("For Item"),
-					fieldname: "item_code",
-					fieldtype: "Data",
-					read_only: 1,
-					default: this.item_code
-				},
-				{
-					label: __("Quantity"),
-					fieldname: "qty",
-					fieldtype: "Float",
-					reqd: 1
-				}
-			], __("Add Stock"), "Material Receipt")
+			this.make_stock_entry(
+				[
+					{
+						label: __("For Item"),
+						fieldname: "item_code",
+						fieldtype: "Data",
+						read_only: 1,
+						default: this.item_code,
+					},
+					{
+						label: __("Quantity"),
+						fieldname: "qty",
+						fieldtype: "Float",
+						reqd: 1,
+					},
+				],
+				__("Add Stock"),
+				"Material Receipt"
+			);
 		});
 
-		this.wrapper.find('.btn-move').click((e) => {
-			this.item_code = decodeURI($(e.currentTarget).attr('data-item-code'));
+		this.wrapper.find(".btn-move").click((e) => {
+			this.item_code = decodeURI($(e.currentTarget).attr("data-item-code"));
 
-			this.make_stock_entry([
-				{
-					label: __("For Item"),
-					fieldname: "item_code",
-					fieldtype: "Data",
-					read_only: 1,
-					default: this.item_code
-				},
-				{
-					label: __("Quantity"),
-					fieldname: "qty",
-					fieldtype: "Float",
-					reqd: 1
-				},
-				{
-					label: __("To Warehouse"),
-					fieldname: "to_warehouse",
-					fieldtype: "Link",
-					options: "Warehouse",
-					reqd: 1,
-					get_query: () => {
-						return {
-							filters: {
-								"is_group": 0,
-								"company": this.frm.doc.company
-							}
-						}
-					}
-				}
-			], __("Move Stock"), "Material Transfer")
+			this.make_stock_entry(
+				[
+					{
+						label: __("For Item"),
+						fieldname: "item_code",
+						fieldtype: "Data",
+						read_only: 1,
+						default: this.item_code,
+					},
+					{
+						label: __("Quantity"),
+						fieldname: "qty",
+						fieldtype: "Float",
+						reqd: 1,
+					},
+					{
+						label: __("To Warehouse"),
+						fieldname: "to_warehouse",
+						fieldtype: "Link",
+						options: "Warehouse",
+						reqd: 1,
+						get_query: () => {
+							return {
+								filters: {
+									is_group: 0,
+									company: this.frm.doc.company,
+								},
+							};
+						},
+					},
+				],
+				__("Move Stock"),
+				"Material Transfer"
+			);
 		});
 	}
 
 	make_stock_entry(fields, title, stock_entry_type) {
-		frappe.prompt(fields,
+		frappe.prompt(
+			fields,
 			(values) => {
 				this.values = values;
 				this.stock_entry_type = stock_entry_type;
@@ -221,9 +233,11 @@ class VisualStock {
 							var doc = frappe.model.sync(r.message);
 							frappe.set_route("Form", r.message.doctype, r.message.name);
 						}
-					}
-				})
-			}, __(title), __("Create")
+					},
+				});
+			},
+			__(title),
+			__("Create")
 		);
 	}
 
@@ -245,12 +259,12 @@ class VisualStock {
 		this.values = {
 			...this.values,
 			...{
-				"company": this.frm.doc.company,
-				"item_code": this.item_code,
-				"from_warehouse": from_warehouse,
-				"to_warehouse": to_warehouse,
-				"purpose": this.stock_entry_type,
-			}
-		}
+				company: this.frm.doc.company,
+				item_code: this.item_code,
+				from_warehouse: from_warehouse,
+				to_warehouse: to_warehouse,
+				purpose: this.stock_entry_type,
+			},
+		};
 	}
 }

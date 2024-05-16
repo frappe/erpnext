@@ -6,139 +6,150 @@ frappe.provide("erpnext.bom");
 frappe.ui.form.on("BOM", {
 	setup(frm) {
 		frm.custom_make_buttons = {
-			'Work Order': 'Work Order',
-			'Quality Inspection': 'Quality Inspection'
+			"Work Order": "Work Order",
+			"Quality Inspection": "Quality Inspection",
 		};
 
-		frm.set_query("bom_no", "items", function() {
+		frm.set_query("bom_no", "items", function () {
 			return {
 				filters: {
-					'currency': frm.doc.currency,
-					'company': frm.doc.company
-				}
+					currency: frm.doc.currency,
+					company: frm.doc.company,
+				},
 			};
 		});
 
-		frm.set_query("source_warehouse", "items", function() {
+		frm.set_query("source_warehouse", "items", function () {
 			return {
 				filters: {
-					'company': frm.doc.company
-				}
+					company: frm.doc.company,
+				},
 			};
 		});
 
-		frm.set_query("item", function() {
-			return {
-				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
-				filters: {
-					"is_stock_item": 1
-				}
-			};
-		});
-
-		frm.set_query("project", function() {
-			return{
-				filters:[
-					['Project', 'status', 'not in', 'Completed, Cancelled']
-				]
-			};
-		});
-
-		frm.set_query("item_code", "items", function(doc) {
+		frm.set_query("item", function () {
 			return {
 				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
 				filters: {
-					"include_item_in_manufacturing": 1,
-					"is_fixed_asset": 0
-				}
+					is_stock_item: 1,
+				},
 			};
 		});
 
-		frm.set_query("bom_no", "items", function(doc, cdt, cdn) {
+		frm.set_query("project", function () {
+			return {
+				filters: [["Project", "status", "not in", "Completed, Cancelled"]],
+			};
+		});
+
+		frm.set_query("item_code", "items", function (doc) {
+			return {
+				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
+				filters: {
+					include_item_in_manufacturing: 1,
+					is_fixed_asset: 0,
+				},
+			};
+		});
+
+		frm.set_query("bom_no", "items", function (doc, cdt, cdn) {
 			var d = locals[cdt][cdn];
 			return {
 				filters: {
-					'item': d.item_code,
-					'is_active': 1,
-					'docstatus': 1
-				}
+					item: d.item_code,
+					is_active: 1,
+					docstatus: 1,
+				},
 			};
 		});
 	},
 
-	validate: function(frm) {
+	validate: function (frm) {
 		if (frm.doc.fg_based_operating_cost && frm.doc.with_operations) {
-			frappe.throw({message: __("Please check either with operations or FG Based Operating Cost."), title: __("Mandatory")});
+			frappe.throw({
+				message: __("Please check either with operations or FG Based Operating Cost."),
+				title: __("Mandatory"),
+			});
 		}
 	},
 
-	with_operations: function(frm) {
+	with_operations: function (frm) {
 		frm.set_df_property("fg_based_operating_cost", "hidden", frm.doc.with_operations ? 1 : 0);
 	},
 
-	fg_based_operating_cost: function(frm) {
+	fg_based_operating_cost: function (frm) {
 		frm.set_df_property("with_operations", "hidden", frm.doc.fg_based_operating_cost ? 1 : 0);
 	},
 
-	onload_post_render: function(frm) {
+	onload_post_render: function (frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
 
 	refresh(frm) {
 		frm.toggle_enable("item", frm.doc.__islocal);
 
-		frm.set_indicator_formatter('item_code',
-			function(doc) {
-				if (doc.original_item){
-					return (doc.item_code != doc.original_item) ? "orange" : ""
-				}
-				return ""
+		frm.set_indicator_formatter("item_code", function (doc) {
+			if (doc.original_item) {
+				return doc.item_code != doc.original_item ? "orange" : "";
 			}
-		)
+			return "";
+		});
 
-		if (!frm.is_new() && frm.doc.docstatus<2) {
-			frm.add_custom_button(__("Update Cost"), function() {
+		if (!frm.is_new() && frm.doc.docstatus < 2) {
+			frm.add_custom_button(__("Update Cost"), function () {
 				frm.events.update_cost(frm, true);
 			});
-			frm.add_custom_button(__("Browse BOM"), function() {
+			frm.add_custom_button(__("Browse BOM"), function () {
 				frappe.route_options = {
-					"bom": frm.doc.name
+					bom: frm.doc.name,
 				};
 				frappe.set_route("Tree", "BOM");
 			});
 		}
 
 		if (!frm.is_new() && !frm.doc.docstatus == 0) {
-			frm.add_custom_button(__("New Version"), function() {
+			frm.add_custom_button(__("New Version"), function () {
 				let new_bom = frappe.model.copy_doc(frm.doc);
 				frappe.set_route("Form", "BOM", new_bom.name);
 			});
 		}
 
-		if(frm.doc.docstatus==1) {
-			frm.add_custom_button(__("Work Order"), function() {
-				frm.trigger("make_work_order");
-			}, __("Create"));
+		if (frm.doc.docstatus == 1) {
+			frm.add_custom_button(
+				__("Work Order"),
+				function () {
+					frm.trigger("make_work_order");
+				},
+				__("Create")
+			);
 
 			if (frm.doc.has_variants) {
-				frm.add_custom_button(__("Variant BOM"), function() {
-					frm.trigger("make_variant_bom");
-				}, __("Create"));
+				frm.add_custom_button(
+					__("Variant BOM"),
+					function () {
+						frm.trigger("make_variant_bom");
+					},
+					__("Create")
+				);
 			}
 
 			if (frm.doc.inspection_required) {
-				frm.add_custom_button(__("Quality Inspection"), function() {
-					frm.trigger("make_quality_inspection");
-				}, __("Create"));
+				frm.add_custom_button(
+					__("Quality Inspection"),
+					function () {
+						frm.trigger("make_quality_inspection");
+					},
+					__("Create")
+				);
 			}
 
-			frm.page.set_inner_btn_group_as_primary(__('Create'));
+			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 
-		if(frm.doc.items && frm.doc.allow_alternative_item) {
-			const has_alternative = frm.doc.items.find(i => i.allow_alternative_item === 1);
+		if (frm.doc.items && frm.doc.allow_alternative_item) {
+			const has_alternative = frm.doc.items.find((i) => i.allow_alternative_item === 1);
 			if (frm.doc.docstatus == 0 && has_alternative) {
-				frm.add_custom_button(__('Alternate Item'), () => {
+				frm.add_custom_button(__("Alternate Item"), () => {
 					erpnext.utils.select_alternate_items({
 						frm: frm,
 						child_docname: "items",
@@ -146,23 +157,26 @@ frappe.ui.form.on("BOM", {
 						child_doctype: "BOM Item",
 						original_item_field: "original_item",
 						condition: (d) => {
-							if (d.allow_alternative_item) {return true;}
-						}
-					})
+							if (d.allow_alternative_item) {
+								return true;
+							}
+						},
+					});
 				});
 			}
 		}
 
-
 		if (frm.doc.has_variants) {
-			frm.set_intro(__('This is a Template BOM and will be used to make the work order for {0} of the item {1}',
-				[
+			frm.set_intro(
+				__("This is a Template BOM and will be used to make the work order for {0} of the item {1}", [
 					`<a class="variants-intro">variants</a>`,
 					`<a href="/app/item/${frm.doc.item}">${frm.doc.item}</a>`,
-				]), true);
+				]),
+				true
+			);
 
 			frm.$wrapper.find(".variants-intro").on("click", () => {
-				frappe.set_route("List", "Item", {"variant_of": frm.doc.item});
+				frappe.set_route("List", "Item", { variant_of: frm.doc.item });
 			});
 		}
 	},
@@ -176,38 +190,43 @@ frappe.ui.form.on("BOM", {
 					item: item,
 					qty: data.qty || 0.0,
 					project: frm.doc.project,
-					variant_items: variant_items
+					variant_items: variant_items,
 				},
 				freeze: true,
 				callback(r) {
-					if(r.message) {
+					if (r.message) {
 						let doc = frappe.model.sync(r.message)[0];
 						frappe.set_route("Form", doc.doctype, doc.name);
 					}
-				}
+				},
 			});
 		});
 	},
 
 	make_variant_bom(frm) {
-		frm.events.setup_variant_prompt(frm, "Variant BOM", (frm, item, data, variant_items) => {
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom.bom.make_variant_bom",
-				args: {
-					source_name: frm.doc.name,
-					bom_no: frm.doc.name,
-					item: item,
-					variant_items: variant_items
-				},
-				freeze: true,
-				callback(r) {
-					if(r.message) {
-						let doc = frappe.model.sync(r.message)[0];
-						frappe.set_route("Form", doc.doctype, doc.name);
-					}
-				}
-			});
-		}, true);
+		frm.events.setup_variant_prompt(
+			frm,
+			"Variant BOM",
+			(frm, item, data, variant_items) => {
+				frappe.call({
+					method: "erpnext.manufacturing.doctype.bom.bom.make_variant_bom",
+					args: {
+						source_name: frm.doc.name,
+						bom_no: frm.doc.name,
+						item: item,
+						variant_items: variant_items,
+					},
+					freeze: true,
+					callback(r) {
+						if (r.message) {
+							let doc = frappe.model.sync(r.message)[0];
+							frappe.set_route("Form", doc.doctype, doc.name);
+						}
+					},
+				});
+			},
+			true
+		);
 	},
 
 	setup_variant_prompt(frm, title, callback, skip_qty_field) {
@@ -215,27 +234,27 @@ frappe.ui.form.on("BOM", {
 
 		if (frm.doc.has_variants) {
 			fields.push({
-				fieldtype: 'Link',
-				label: __('Variant Item'),
-				fieldname: 'item',
+				fieldtype: "Link",
+				label: __("Variant Item"),
+				fieldname: "item",
 				options: "Item",
 				reqd: 1,
 				get_query() {
 					return {
 						query: "erpnext.controllers.queries.item_query",
 						filters: {
-							"variant_of": frm.doc.item
-						}
+							variant_of: frm.doc.item,
+						},
 					};
-				}
+				},
 			});
 		}
 
 		if (!skip_qty_field) {
 			fields.push({
-				fieldtype: 'Float',
-				label: __('Qty To Manufacture'),
-				fieldname: 'qty',
+				fieldtype: "Float",
+				label: __("Qty To Manufacture"),
+				fieldname: "qty",
 				reqd: 1,
 				default: 1,
 				onchange: () => {
@@ -244,29 +263,23 @@ frappe.ui.form.on("BOM", {
 						acc[item.item_code] = item.qty;
 						return acc;
 					}, {});
-					const mf_qty = cur_dialog.fields_list.filter(
-						(f) => f.df.fieldname === "qty"
-					)[0]?.value;
-					const items = cur_dialog.fields.filter(
-						(f) => f.fieldname === "items"
-					)[0]?.data;
+					const mf_qty = cur_dialog.fields_list.filter((f) => f.df.fieldname === "qty")[0]?.value;
+					const items = cur_dialog.fields.filter((f) => f.fieldname === "items")[0]?.data;
 
 					if (!items) {
 						return;
 					}
 
 					items.forEach((item) => {
-						item.qty =
-							(variant_items_map[item.item_code] * mf_qty) /
-							quantity;
+						item.qty = (variant_items_map[item.item_code] * mf_qty) / quantity;
 					});
 
 					cur_dialog.refresh();
-				}
+				},
 			});
 		}
 
-		var has_template_rm = frm.doc.items.filter(d => d.has_variants === 1) || [];
+		var has_template_rm = frm.doc.items.filter((d) => d.has_variants === 1) || [];
 		if (has_template_rm && has_template_rm.length > 0) {
 			fields.push({
 				fieldname: "items",
@@ -296,10 +309,10 @@ frappe.ui.form.on("BOM", {
 							return {
 								query: "erpnext.controllers.queries.item_query",
 								filters: {
-									"variant_of": data.item_code
-								}
+									variant_of: data.item_code,
+								},
 							};
-						}
+						},
 					},
 					{
 						fieldname: "qty",
@@ -312,44 +325,48 @@ frappe.ui.form.on("BOM", {
 						fieldname: "source_warehouse",
 						label: __("Source Warehouse"),
 						fieldtype: "Link",
-						options: "Warehouse"
+						options: "Warehouse",
 					},
 					{
 						fieldname: "operation",
 						label: __("Operation"),
 						fieldtype: "Data",
 						hidden: 1,
-					}
+					},
 				],
 				in_place_edit: true,
 				data: [],
-				get_data () {
+				get_data() {
 					return [];
 				},
 			});
 		}
 
-		let dialog = frappe.prompt(fields, data => {
-			let item = data.item || frm.doc.item;
-			let variant_items = data.items || [];
+		let dialog = frappe.prompt(
+			fields,
+			(data) => {
+				let item = data.item || frm.doc.item;
+				let variant_items = data.items || [];
 
-			variant_items.forEach(d => {
-				if (!d.variant_item_code) {
-					frappe.throw(__("Select variant item code for the template item {0}", [d.item_code]));
-				}
-			})
+				variant_items.forEach((d) => {
+					if (!d.variant_item_code) {
+						frappe.throw(__("Select variant item code for the template item {0}", [d.item_code]));
+					}
+				});
 
-			callback(frm, item, data, variant_items);
+				callback(frm, item, data, variant_items);
+			},
+			__(title),
+			__("Create")
+		);
 
-		}, __(title), __("Create"));
-
-		has_template_rm.forEach(d => {
+		has_template_rm.forEach((d) => {
 			dialog.fields_dict.items.df.data.push({
-				"item_code": d.item_code,
-				"variant_item_code": "",
-				"qty": d.qty,
-				"source_warehouse": d.source_warehouse,
-				"operation": d.operation
+				item_code: d.item_code,
+				variant_item_code: "",
+				qty: d.qty,
+				source_warehouse: d.source_warehouse,
+				operation: d.operation,
 			});
 		});
 
@@ -361,11 +378,11 @@ frappe.ui.form.on("BOM", {
 	make_quality_inspection(frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.quality_inspection.quality_inspection.make_quality_inspection",
-			frm: frm
-		})
+			frm: frm,
+		});
 	},
 
-	update_cost(frm, save_doc=false) {
+	update_cost(frm, save_doc = false) {
 		return frappe.call({
 			doc: frm.doc,
 			method: "update_cost",
@@ -373,17 +390,17 @@ frappe.ui.form.on("BOM", {
 			args: {
 				update_parent: true,
 				save: save_doc,
-				from_child_bom: false
+				from_child_bom: false,
 			},
 			callback(r) {
 				refresh_field("items");
-				if(!r.exc) frm.refresh_fields();
-			}
+				if (!r.exc) frm.refresh_fields();
+			},
 		});
 	},
 
 	rm_cost_as_per(frm) {
-		if (in_list(["Valuation Rate", "Last Purchase Rate"], frm.doc.rm_cost_as_per)) {
+		if (["Valuation Rate", "Last Purchase Rate"].includes(frm.doc.rm_cost_as_per)) {
 			frm.set_value("plc_conversion_rate", 1.0);
 		}
 	},
@@ -400,39 +417,39 @@ frappe.ui.form.on("BOM", {
 						erpnext.bom.calculate_op_cost(frm.doc);
 						erpnext.bom.calculate_total(frm.doc);
 					}
-				}
+				},
 			});
 		}
 	},
 
 	process_loss_percentage(frm) {
-		let qty = 0.0
+		let qty = 0.0;
 		if (frm.doc.process_loss_percentage) {
 			qty = (frm.doc.quantity * frm.doc.process_loss_percentage) / 100;
 		}
 
 		frm.set_value("process_loss_qty", qty);
-	}
+	},
 });
 
 erpnext.bom.BomController = class BomController extends erpnext.TransactionController {
 	conversion_rate(doc) {
-		if(this.frm.doc.currency === this.get_company_currency()) {
+		if (this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		} else {
 			erpnext.bom.update_cost(doc);
 		}
 	}
 
-	item_code(doc, cdt, cdn){
+	item_code(doc, cdt, cdn) {
 		var scrap_items = false;
 		var child = locals[cdt][cdn];
-		if (child.doctype == 'BOM Scrap Item') {
+		if (child.doctype == "BOM Scrap Item") {
 			scrap_items = true;
 		}
 
 		if (child.bom_no) {
-			child.bom_no = '';
+			child.bom_no = "";
 		}
 
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
@@ -460,26 +477,26 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.bom.BomController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.bom.BomController({ frm: cur_frm }));
 
-cur_frm.cscript.hour_rate = function(doc) {
+cur_frm.cscript.hour_rate = function (doc) {
 	erpnext.bom.calculate_op_cost(doc);
 	erpnext.bom.calculate_total(doc);
 };
 
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
 
-cur_frm.cscript.bom_no = function(doc, cdt, cdn) {
+cur_frm.cscript.bom_no = function (doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn, false);
 };
 
-cur_frm.cscript.is_default = function(doc) {
+cur_frm.cscript.is_default = function (doc) {
 	if (doc.is_default) cur_frm.set_value("is_active", 1);
 };
 
-var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
+var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
 	if (!doc.company) {
-		frappe.throw({message: __("Please select a Company first."), title: __("Mandatory")});
+		frappe.throw({ message: __("Please select a Company first."), title: __("Mandatory") });
 	}
 
 	var d = locals[cdt][cdn];
@@ -488,20 +505,20 @@ var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
 			doc: doc,
 			method: "get_bom_material_detail",
 			args: {
-				"company": doc.company,
-				"item_code": d.item_code,
-				"bom_no": d.bom_no != null ? d.bom_no: '',
-				"scrap_items": scrap_items,
-				"qty": d.qty,
-				"stock_qty": d.stock_qty,
-				"include_item_in_manufacturing": d.include_item_in_manufacturing,
-				"uom": d.uom,
-				"stock_uom": d.stock_uom,
-				"conversion_factor": d.conversion_factor,
-				"sourced_by_supplier": d.sourced_by_supplier,
-				"do_not_explode": d.do_not_explode
+				company: doc.company,
+				item_code: d.item_code,
+				bom_no: d.bom_no != null ? d.bom_no : "",
+				scrap_items: scrap_items,
+				qty: d.qty,
+				stock_qty: d.stock_qty,
+				include_item_in_manufacturing: d.include_item_in_manufacturing,
+				uom: d.uom,
+				stock_uom: d.stock_uom,
+				conversion_factor: d.conversion_factor,
+				sourced_by_supplier: d.sourced_by_supplier,
+				do_not_explode: d.do_not_explode,
 			},
-			callback: function(r) {
+			callback: function (r) {
 				d = locals[cdt][cdn];
 
 				$.extend(d, r.message);
@@ -513,18 +530,18 @@ var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
 				erpnext.bom.calculate_scrap_materials_cost(doc);
 				erpnext.bom.calculate_total(doc);
 			},
-			freeze: true
+			freeze: true,
 		});
 	}
 };
 
-cur_frm.cscript.qty = function(doc) {
+cur_frm.cscript.qty = function (doc) {
 	erpnext.bom.calculate_rm_cost(doc);
 	erpnext.bom.calculate_scrap_materials_cost(doc);
 	erpnext.bom.calculate_total(doc);
 };
 
-cur_frm.cscript.rate = function(doc, cdt, cdn) {
+cur_frm.cscript.rate = function (doc, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	const is_scrap_item = cdt == "BOM Scrap Item";
 
@@ -538,52 +555,60 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	}
 };
 
-erpnext.bom.update_cost = function(doc) {
+erpnext.bom.update_cost = function (doc) {
 	erpnext.bom.calculate_op_cost(doc);
 	erpnext.bom.calculate_rm_cost(doc);
 	erpnext.bom.calculate_scrap_materials_cost(doc);
 	erpnext.bom.calculate_total(doc);
 };
 
-erpnext.bom.calculate_op_cost = function(doc) {
+erpnext.bom.calculate_op_cost = function (doc) {
 	doc.operating_cost = 0.0;
 	doc.base_operating_cost = 0.0;
 
-	if(doc.with_operations) {
+	if (doc.with_operations) {
 		doc.operations.forEach((item) => {
-			let operating_cost = flt(flt(item.hour_rate) * flt(item.time_in_mins) / 60, 2);
+			let operating_cost = flt((flt(item.hour_rate) * flt(item.time_in_mins)) / 60, 2);
 			let base_operating_cost = flt(operating_cost * doc.conversion_rate, 2);
-			frappe.model.set_value('BOM Operation',item.name, {
-				"operating_cost": operating_cost,
-				"base_operating_cost": base_operating_cost
+			frappe.model.set_value("BOM Operation", item.name, {
+				operating_cost: operating_cost,
+				base_operating_cost: base_operating_cost,
 			});
 
 			doc.operating_cost += operating_cost;
 			doc.base_operating_cost += base_operating_cost;
 		});
-	} else if(doc.fg_based_operating_cost) {
+	} else if (doc.fg_based_operating_cost) {
 		let total_operating_cost = doc.quantity * flt(doc.operating_cost_per_bom_quantity);
 		doc.operating_cost = total_operating_cost;
 		doc.base_operating_cost = flt(total_operating_cost * doc.conversion_rate, 2);
 	}
-	refresh_field(['operating_cost', 'base_operating_cost']);
+	refresh_field(["operating_cost", "base_operating_cost"]);
 };
 
 // rm : raw material
-erpnext.bom.calculate_rm_cost = function(doc) {
+erpnext.bom.calculate_rm_cost = function (doc) {
 	var rm = doc.items || [];
 	var total_rm_cost = 0;
 	var base_total_rm_cost = 0;
-	for(var i=0;i<rm.length;i++) {
+	for (var i = 0; i < rm.length; i++) {
 		var amount = flt(rm[i].rate) * flt(rm[i].qty);
 		var base_amount = amount * flt(doc.conversion_rate);
 
-		frappe.model.set_value('BOM Item', rm[i].name, 'base_rate',
-			flt(rm[i].rate) * flt(doc.conversion_rate));
-		frappe.model.set_value('BOM Item', rm[i].name, 'amount', amount);
-		frappe.model.set_value('BOM Item', rm[i].name, 'base_amount', base_amount);
-		frappe.model.set_value('BOM Item', rm[i].name,
-			'qty_consumed_per_unit', flt(rm[i].stock_qty)/flt(doc.quantity));
+		frappe.model.set_value(
+			"BOM Item",
+			rm[i].name,
+			"base_rate",
+			flt(rm[i].rate) * flt(doc.conversion_rate)
+		);
+		frappe.model.set_value("BOM Item", rm[i].name, "amount", amount);
+		frappe.model.set_value("BOM Item", rm[i].name, "base_amount", base_amount);
+		frappe.model.set_value(
+			"BOM Item",
+			rm[i].name,
+			"qty_consumed_per_unit",
+			flt(rm[i].stock_qty) / flt(doc.quantity)
+		);
 
 		total_rm_cost += amount;
 		base_total_rm_cost += base_amount;
@@ -593,19 +618,19 @@ erpnext.bom.calculate_rm_cost = function(doc) {
 };
 
 // sm : scrap material
-erpnext.bom.calculate_scrap_materials_cost = function(doc) {
+erpnext.bom.calculate_scrap_materials_cost = function (doc) {
 	var sm = doc.scrap_items || [];
 	var total_sm_cost = 0;
 	var base_total_sm_cost = 0;
 
-	for(var i=0;i<sm.length;i++) {
+	for (var i = 0; i < sm.length; i++) {
 		var base_rate = flt(sm[i].rate) * flt(doc.conversion_rate);
 		var amount = flt(sm[i].rate) * flt(sm[i].stock_qty);
 		var base_amount = amount * flt(doc.conversion_rate);
 
-		frappe.model.set_value('BOM Scrap Item',sm[i].name, 'base_rate', base_rate);
-		frappe.model.set_value('BOM Scrap Item',sm[i].name, 'amount', amount);
-		frappe.model.set_value('BOM Scrap Item',sm[i].name, 'base_amount', base_amount);
+		frappe.model.set_value("BOM Scrap Item", sm[i].name, "base_rate", base_rate);
+		frappe.model.set_value("BOM Scrap Item", sm[i].name, "amount", amount);
+		frappe.model.set_value("BOM Scrap Item", sm[i].name, "base_amount", base_amount);
 
 		total_sm_cost += amount;
 		base_total_sm_cost += base_amount;
@@ -616,83 +641,87 @@ erpnext.bom.calculate_scrap_materials_cost = function(doc) {
 };
 
 // Calculate Total Cost
-erpnext.bom.calculate_total = function(doc) {
+erpnext.bom.calculate_total = function (doc) {
 	var total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.scrap_material_cost);
-	var base_total_cost = flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost)
-		- flt(doc.base_scrap_material_cost);
+	var base_total_cost =
+		flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_scrap_material_cost);
 
 	cur_frm.set_value("total_cost", total_cost);
 	cur_frm.set_value("base_total_cost", base_total_cost);
 };
 
-cur_frm.cscript.validate = function(doc) {
+cur_frm.cscript.validate = function (doc) {
 	erpnext.bom.update_cost(doc);
 };
 
-frappe.ui.form.on("BOM Operation", "operation", function(frm, cdt, cdn) {
+frappe.ui.form.on("BOM Operation", "operation", function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 
-	if(!d.operation) return;
+	if (!d.operation) return;
 
 	frappe.call({
-		"method": "frappe.client.get",
+		method: "frappe.client.get",
 		args: {
 			doctype: "Operation",
-			name: d.operation
+			name: d.operation,
 		},
 		callback: function (data) {
-			if(data.message.description) {
+			if (data.message.description) {
 				frappe.model.set_value(d.doctype, d.name, "description", data.message.description);
 			}
-			if(data.message.workstation) {
+			if (data.message.workstation) {
 				frappe.model.set_value(d.doctype, d.name, "workstation", data.message.workstation);
 			}
-		}
+		},
 	});
 });
 
-frappe.ui.form.on("BOM Operation", "workstation", function(frm, cdt, cdn) {
+frappe.ui.form.on("BOM Operation", "workstation", function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	if(!d.workstation) return;
+	if (!d.workstation) return;
 	frappe.call({
-		"method": "frappe.client.get",
+		method: "frappe.client.get",
 		args: {
 			doctype: "Workstation",
-			name: d.workstation
+			name: d.workstation,
 		},
 		callback: function (data) {
 			frappe.model.set_value(d.doctype, d.name, "base_hour_rate", data.message.hour_rate);
-			frappe.model.set_value(d.doctype, d.name, "hour_rate",
-				flt(flt(data.message.hour_rate) / flt(frm.doc.conversion_rate)), 2);
+			frappe.model.set_value(
+				d.doctype,
+				d.name,
+				"hour_rate",
+				flt(flt(data.message.hour_rate) / flt(frm.doc.conversion_rate)),
+				2
+			);
 
 			erpnext.bom.calculate_op_cost(frm.doc);
 			erpnext.bom.calculate_total(frm.doc);
-		}
+		},
 	});
 });
 
 frappe.ui.form.on("BOM Item", {
-	do_not_explode: function(frm, cdt, cdn) {
+	do_not_explode: function (frm, cdt, cdn) {
 		get_bom_material_detail(frm.doc, cdt, cdn, false);
-	}
-})
+	},
+});
 
-
-frappe.ui.form.on("BOM Item", "qty", function(frm, cdt, cdn) {
+frappe.ui.form.on("BOM Item", "qty", function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	d.stock_qty = d.qty * d.conversion_factor;
 	refresh_field("stock_qty", d.name, d.parentfield);
 });
 
-frappe.ui.form.on("BOM Item", "item_code", function(frm, cdt, cdn) {
+frappe.ui.form.on("BOM Item", "item_code", function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
-	frappe.db.get_value('Item', {name: d.item_code}, 'allow_alternative_item', (r) => {
-		d.allow_alternative_item = r.allow_alternative_item
-	})
+	frappe.db.get_value("Item", { name: d.item_code }, "allow_alternative_item", (r) => {
+		d.allow_alternative_item = r.allow_alternative_item;
+	});
 	refresh_field("allow_alternative_item", d.name, d.parentfield);
 });
 
-frappe.ui.form.on("BOM Item", "sourced_by_supplier", function(frm, cdt, cdn) {
+frappe.ui.form.on("BOM Item", "sourced_by_supplier", function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sourced_by_supplier) {
 		d.rate = 0;
@@ -700,7 +729,7 @@ frappe.ui.form.on("BOM Item", "sourced_by_supplier", function(frm, cdt, cdn) {
 	}
 });
 
-frappe.ui.form.on("BOM Item", "rate", function(frm, cdt, cdn) {
+frappe.ui.form.on("BOM Item", "rate", function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.sourced_by_supplier) {
 		d.rate = 0;
@@ -708,37 +737,41 @@ frappe.ui.form.on("BOM Item", "rate", function(frm, cdt, cdn) {
 	}
 });
 
-frappe.ui.form.on("BOM Operation", "operations_remove", function(frm) {
+frappe.ui.form.on("BOM Operation", "operations_remove", function (frm) {
 	erpnext.bom.calculate_op_cost(frm.doc);
 	erpnext.bom.calculate_total(frm.doc);
 });
 
-frappe.ui.form.on("BOM Item", "items_remove", function(frm) {
+frappe.ui.form.on("BOM Item", "items_remove", function (frm) {
 	erpnext.bom.calculate_rm_cost(frm.doc);
 	erpnext.bom.calculate_total(frm.doc);
 });
 
-frappe.tour['BOM'] = [
+frappe.tour["BOM"] = [
 	{
 		fieldname: "item",
 		title: "Item",
-		description: __("Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically.")
+		description: __(
+			"Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically."
+		),
 	},
 	{
 		fieldname: "quantity",
 		title: "Quantity",
-		description: __("Enter the quantity of the Item that will be manufactured from this Bill of Materials.")
+		description: __(
+			"Enter the quantity of the Item that will be manufactured from this Bill of Materials."
+		),
 	},
 	{
 		fieldname: "with_operations",
 		title: "With Operations",
-		description: __("To add Operations tick the 'With Operations' checkbox.")
+		description: __("To add Operations tick the 'With Operations' checkbox."),
 	},
 	{
 		fieldname: "items",
 		title: "Raw Materials",
-		description: __("Select the raw materials (Items) required to manufacture the Item")
-	}
+		description: __("Select the raw materials (Items) required to manufacture the Item"),
+	},
 ];
 
 frappe.ui.form.on("BOM Scrap Item", {

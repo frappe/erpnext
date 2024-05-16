@@ -112,7 +112,9 @@ def get_columns(filters):
 				]:
 					if group_months:
 						label = label % (
-							formatdate(from_date, format_string="MMM") + "-" + formatdate(to_date, format_string="MMM")
+							formatdate(from_date, format_string="MMM")
+							+ "-"
+							+ formatdate(to_date, format_string="MMM")
 						)
 					else:
 						label = label % formatdate(from_date, format_string="MMM")
@@ -147,9 +149,7 @@ def get_cost_centers(filters):
 				where
 					company = %s
 				{order_by}
-			""".format(
-				tab=filters.get("budget_against"), order_by=order_by
-			),
+			""".format(tab=filters.get("budget_against"), order_by=order_by),
 			filters.get("company"),
 		)
 	else:
@@ -159,9 +159,7 @@ def get_cost_centers(filters):
 					name
 				from
 					`tab{tab}`
-			""".format(
-				tab=filters.get("budget_against")
-			)
+			""".format(tab=filters.get("budget_against"))
 		)  # nosec
 
 
@@ -170,12 +168,12 @@ def get_dimension_target_details(filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
 	cond = ""
 	if filters.get("budget_against_filter"):
-		cond += """ and b.{budget_against} in (%s)""".format(budget_against=budget_against) % ", ".join(
+		cond += f""" and b.{budget_against} in (%s)""" % ", ".join(
 			["%s"] * len(filters.get("budget_against_filter"))
 		)
 
 	return frappe.db.sql(
-		"""
+		f"""
 			select
 				b.{budget_against} as budget_against,
 				b.monthly_distribution,
@@ -194,10 +192,7 @@ def get_dimension_target_details(filters):
 				{cond}
 			order by
 				b.fiscal_year
-		""".format(
-			budget_against=budget_against,
-			cond=cond,
-		),
+		""",
 		tuple(
 			[
 				filters.from_fiscal_year,
@@ -244,15 +239,13 @@ def get_actual_details(name, filters):
 
 	if filters.get("budget_against") == "Cost Center":
 		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", name, ["lft", "rgt"])
-		cond = """
-				and lft >= "{lft}"
-				and rgt <= "{rgt}"
-			""".format(
-			lft=cc_lft, rgt=cc_rgt
-		)
+		cond = f"""
+				and lft >= "{cc_lft}"
+				and rgt <= "{cc_rgt}"
+			"""
 
 	ac_details = frappe.db.sql(
-		"""
+		f"""
 			select
 				gl.account,
 				gl.debit,
@@ -275,7 +268,7 @@ def get_actual_details(name, filters):
 					select
 						name
 					from
-						`tab{tab}`
+						`tab{filters.budget_against}`
 					where
 						name = gl.{budget_against}
 						{cond}
@@ -283,9 +276,7 @@ def get_actual_details(name, filters):
 				group by
 					gl.name
 				order by gl.fiscal_year
-		""".format(
-			tab=filters.budget_against, budget_against=budget_against, cond=cond
-		),
+		""",
 		(filters.from_fiscal_year, filters.to_fiscal_year, name),
 		as_dict=1,
 	)
@@ -314,7 +305,9 @@ def get_dimension_account_month_map(filters):
 
 			tav_dict = cam_map[ccd.budget_against][ccd.account][ccd.fiscal_year][month]
 			month_percentage = (
-				tdd.get(ccd.monthly_distribution, {}).get(month, 0) if ccd.monthly_distribution else 100.0 / 12
+				tdd.get(ccd.monthly_distribution, {}).get(month, 0)
+				if ccd.monthly_distribution
+				else 100.0 / 12
 			)
 
 			tav_dict.target = flt(ccd.budget_amount) * month_percentage / 100
@@ -327,7 +320,6 @@ def get_dimension_account_month_map(filters):
 
 
 def get_fiscal_years(filters):
-
 	fiscal_year = frappe.db.sql(
 		"""
 			select
@@ -344,7 +336,6 @@ def get_fiscal_years(filters):
 
 
 def get_chart_data(filters, columns, data):
-
 	if not data:
 		return None
 
@@ -360,7 +351,9 @@ def get_chart_data(filters, columns, data):
 			else:
 				if group_months:
 					label = (
-						formatdate(from_date, format_string="MMM") + "-" + formatdate(to_date, format_string="MMM")
+						formatdate(from_date, format_string="MMM")
+						+ "-"
+						+ formatdate(to_date, format_string="MMM")
 					)
 					labels.append(label)
 				else:

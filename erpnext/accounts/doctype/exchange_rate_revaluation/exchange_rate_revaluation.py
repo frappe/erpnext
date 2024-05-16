@@ -268,7 +268,6 @@ class ExchangeRateRevaluation(Document):
 
 			# Handle Accounts with '0' balance in Account/Base Currency
 			for d in [x for x in account_details if x.zero_balance]:
-
 				if d.balance != 0:
 					current_exchange_rate = new_exchange_rate = 0
 
@@ -281,7 +280,8 @@ class ExchangeRateRevaluation(Document):
 					new_balance_in_account_currency = 0
 
 					current_exchange_rate = (
-						calculate_exchange_rate_using_last_gle(company, d.account, d.party_type, d.party) or 0.0
+						calculate_exchange_rate_using_last_gle(company, d.account, d.party_type, d.party)
+						or 0.0
 					)
 
 					gain_loss = new_balance_in_account_currency - (
@@ -335,9 +335,7 @@ class ExchangeRateRevaluation(Document):
 
 		revaluation_jv = self.make_jv_for_revaluation()
 		if revaluation_jv:
-			frappe.msgprint(
-				f"Revaluation Journal: {get_link_to_form('Journal Entry', revaluation_jv.name)}"
-			)
+			frappe.msgprint(f"Revaluation Journal: {get_link_to_form('Journal Entry', revaluation_jv.name)}")
 
 		return {
 			"revaluation_jv": revaluation_jv.name if revaluation_jv else None,
@@ -394,7 +392,8 @@ class ExchangeRateRevaluation(Document):
 				journal_account.update(
 					{
 						dr_or_cr: flt(
-							abs(d.get("balance_in_account_currency")), d.precision("balance_in_account_currency")
+							abs(d.get("balance_in_account_currency")),
+							d.precision("balance_in_account_currency"),
 						),
 						reverse_dr_or_cr: 0,
 						"debit": 0,
@@ -520,7 +519,9 @@ class ExchangeRateRevaluation(Document):
 						abs(d.get("balance_in_account_currency")), d.precision("balance_in_account_currency")
 					),
 					"cost_center": erpnext.get_default_cost_center(self.company),
-					"exchange_rate": flt(d.get("current_exchange_rate"), d.precision("current_exchange_rate")),
+					"exchange_rate": flt(
+						d.get("current_exchange_rate"), d.precision("current_exchange_rate")
+					),
 					"reference_type": "Exchange Rate Revaluation",
 					"reference_name": self.name,
 				}
@@ -598,7 +599,7 @@ def calculate_exchange_rate_using_last_gle(company, account, party_type, party):
 
 @frappe.whitelist()
 def get_account_details(
-	company, posting_date, account, party_type=None, party=None, rounding_loss_allowance: float = None
+	company, posting_date, account, party_type=None, party=None, rounding_loss_allowance: float | None = None
 ):
 	if not (company and posting_date):
 		frappe.throw(_("Company and Posting Date is mandatory"))
@@ -611,7 +612,7 @@ def get_account_details(
 		frappe.throw(_("Party Type and Party is mandatory for {0} account").format(account_type))
 
 	account_details = {}
-	company_currency = erpnext.get_company_currency(company)
+	erpnext.get_company_currency(company)
 
 	account_details = {
 		"account_currency": account_currency,
@@ -625,24 +626,22 @@ def get_account_details(
 		rounding_loss_allowance=rounding_loss_allowance,
 	)
 
-	if account_balance and (
-		account_balance[0].balance or account_balance[0].balance_in_account_currency
-	):
-		account_with_new_balance = ExchangeRateRevaluation.calculate_new_account_balance(
+	if account_balance and (account_balance[0].balance or account_balance[0].balance_in_account_currency):
+		if account_with_new_balance := ExchangeRateRevaluation.calculate_new_account_balance(
 			company, posting_date, account_balance
-		)
-		row = account_with_new_balance[0]
-		account_details.update(
-			{
-				"balance_in_base_currency": row["balance_in_base_currency"],
-				"balance_in_account_currency": row["balance_in_account_currency"],
-				"current_exchange_rate": row["current_exchange_rate"],
-				"new_exchange_rate": row["new_exchange_rate"],
-				"new_balance_in_base_currency": row["new_balance_in_base_currency"],
-				"new_balance_in_account_currency": row["new_balance_in_account_currency"],
-				"zero_balance": row["zero_balance"],
-				"gain_loss": row["gain_loss"],
-			}
-		)
+		):
+			row = account_with_new_balance[0]
+			account_details.update(
+				{
+					"balance_in_base_currency": row["balance_in_base_currency"],
+					"balance_in_account_currency": row["balance_in_account_currency"],
+					"current_exchange_rate": row["current_exchange_rate"],
+					"new_exchange_rate": row["new_exchange_rate"],
+					"new_balance_in_base_currency": row["new_balance_in_base_currency"],
+					"new_balance_in_account_currency": row["new_balance_in_account_currency"],
+					"zero_balance": row["zero_balance"],
+					"gain_loss": row["gain_loss"],
+				}
+			)
 
 	return account_details

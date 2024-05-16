@@ -104,7 +104,7 @@
  "icon": "fa fa-wrench",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-11-24 19:15:24.357187",
+ "modified": "2024-03-27 13:10:06.841479",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Operation",
@@ -134,7 +134,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -17,7 +17,7 @@ class TestFormLoads(FrappeTestCase):
 		)
 
 		for doctype in doctypes:
-			last_doc = frappe.db.get_value(doctype, {}, "name", order_by="modified desc")
+			last_doc = frappe.db.get_value(doctype, {}, "name", order_by="creation desc")
 			if not last_doc:
 				continue
 			with self.subTest(msg=f"Loading {doctype} - {last_doc}", doctype=doctype, last_doc=last_doc):

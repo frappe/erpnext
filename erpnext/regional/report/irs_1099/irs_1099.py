@@ -34,7 +34,7 @@ def execute(filters=None):
 		conditions += "AND s.supplier_group = %s" % frappe.db.escape(filters.get("supplier_group"))
 
 	data = frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			s.supplier_group as "supplier_group",
 			gl.party AS "supplier",
@@ -55,9 +55,7 @@ def execute(filters=None):
 			gl.party
 
 		ORDER BY
-			gl.party DESC""".format(
-			conditions=conditions
-		),
+			gl.party DESC""",
 		{"fiscal_year": filters.fiscal_year, "company": filters.company},
 		as_dict=True,
 	)
@@ -117,7 +115,7 @@ def irs_1099_print(filters):
 			"Supplier", row.supplier
 		)
 		row["payments"] = fmt_money(row["payments"], precision=0, currency="USD")
-		pdf = get_pdf(render_template(template, row), output=output if output else None)
+		get_pdf(render_template(template, row), output=output if output else None)
 
 	frappe.local.response.filename = (
 		f"{filters.fiscal_year} {filters.company} IRS 1099 Forms{IRS_1099_FORMS_FILE_EXTENSION}"

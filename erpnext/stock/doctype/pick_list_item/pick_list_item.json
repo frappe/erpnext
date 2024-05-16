@@ -132,7 +132,8 @@
    "in_list_view": 1,
    "label": "Item",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "quantity_section",
@@ -240,14 +241,14 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-02-04 16:12:16.257951",
+ "modified": "2024-05-07 15:32:42.905446",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

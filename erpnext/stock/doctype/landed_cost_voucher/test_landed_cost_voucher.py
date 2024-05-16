@@ -16,9 +16,7 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	make_purchase_receipt,
 )
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
-	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
 )
 from erpnext.stock.serial_batch_bundle import SerialNoValuation
 
@@ -68,9 +66,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			as_dict=1,
 		)
 
-		self.assertEqual(
-			last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction
-		)
+		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 25.0)
 
 		# assert after submit
@@ -93,7 +89,6 @@ class TestLandedCostVoucher(FrappeTestCase):
 		self.assertPurchaseReceiptLCVGLEntries(pr)
 
 	def assertPurchaseReceiptLCVGLEntries(self, pr):
-
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 
 		self.assertTrue(gl_entries)
@@ -176,9 +171,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			as_dict=1,
 		)
 
-		self.assertEqual(
-			last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction
-		)
+		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
 
 	def test_landed_cost_voucher_for_zero_purchase_rate(self):
@@ -235,7 +228,6 @@ class TestLandedCostVoucher(FrappeTestCase):
 		)
 
 	def test_landed_cost_voucher_against_purchase_invoice(self):
-
 		pi = make_purchase_invoice(
 			update_stock=1,
 			posting_date=frappe.utils.nowdate(),
@@ -280,9 +272,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			as_dict=1,
 		)
 
-		self.assertEqual(
-			last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction
-		)
+		self.assertEqual(last_sle.qty_after_transaction, last_sle_after_landed_cost.qty_after_transaction)
 
 		self.assertEqual(last_sle_after_landed_cost.stock_value - last_sle.stock_value, 50.0)
 
@@ -415,23 +405,6 @@ class TestLandedCostVoucher(FrappeTestCase):
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, charges=charges)
 		new_purchase_rate = serial_no_rate + charges
 
-		sn_obj = SerialNoValuation(
-			sle=frappe._dict(
-				{
-					"posting_date": today(),
-					"posting_time": nowtime(),
-					"item_code": "_Test Serialized Item",
-					"warehouse": "Stores - TCP1",
-					"serial_nos": [serial_no],
-				}
-			)
-		)
-
-		new_serial_no_rate = sn_obj.get_incoming_rate_of_serial_no(serial_no)
-
-		# Since the serial no is already delivered the rate must be zero
-		self.assertFalse(new_serial_no_rate)
-
 		stock_value_difference = frappe.db.get_value(
 			"Stock Ledger Entry",
 			filters={
@@ -453,7 +426,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 			do_not_save=True,
 		)
 		pr.items[0].cost_center = "Main - TCP1"
-		for x in range(2):
+		for _x in range(2):
 			pr.append(
 				"items",
 				{
@@ -622,6 +595,478 @@ class TestLandedCostVoucher(FrappeTestCase):
 		# tear down
 		lcv.cancel()
 		pr.cancel()
+
+	def test_landed_cost_voucher_with_serial_batch_for_legacy_pr(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
+		sn_item = "Test Landed Cost Voucher Serial NO for Legacy PR"
+		batch_item = "Test Landed Cost Voucher Batch NO for Legacy PR"
+		sn_item_doc = make_item(
+			sn_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "SN-TLCVSNO-.####",
+				"is_stock_item": 1,
+			},
+		)
+
+		batch_item_doc = make_item(
+			batch_item,
+			{
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-TLCVSNO-.####",
+				"create_new_batch": 1,
+				"is_stock_item": 1,
+			},
+		)
+
+		serial_nos = [
+			"SN-TLCVSNO-0001",
+			"SN-TLCVSNO-0002",
+			"SN-TLCVSNO-0003",
+			"SN-TLCVSNO-0004",
+			"SN-TLCVSNO-0005",
+		]
+
+		for sn in serial_nos:
+			if not frappe.db.exists("Serial No", sn):
+				sn_doc = frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"item_code": sn_item,
+						"serial_no": sn,
+					}
+				)
+				sn_doc.insert()
+
+		if not frappe.db.exists("Batch", "BATCH-TLCVSNO-0001"):
+			batch_doc = frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"item": batch_item,
+					"batch_id": "BATCH-TLCVSNO-0001",
+				}
+			)
+			batch_doc.insert()
+
+		warehouse = "_Test Warehouse - _TC"
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+		pr = make_purchase_receipt(
+			company=company,
+			warehouse=warehouse,
+			item_code=sn_item,
+			qty=5,
+			rate=100,
+			uom=sn_item_doc.stock_uom,
+			stock_uom=sn_item_doc.stock_uom,
+			do_not_submit=True,
+		)
+
+		pr.append(
+			"items",
+			{
+				"item_code": batch_item,
+				"item_name": batch_item,
+				"description": "Test Batch Item",
+				"uom": batch_item_doc.stock_uom,
+				"stock_uom": batch_item_doc.stock_uom,
+				"qty": 5,
+				"rate": 100,
+				"warehouse": warehouse,
+			},
+		)
+
+		pr.submit()
+		pr.reload()
+
+		for row in pr.items:
+			self.assertEqual(row.valuation_rate, 100)
+			self.assertFalse(row.serial_no)
+			self.assertFalse(row.batch_no)
+			self.assertFalse(row.serial_and_batch_bundle)
+
+			if row.item_code == sn_item:
+				row.db_set("serial_no", ", ".join(serial_nos))
+			else:
+				row.db_set("batch_no", "BATCH-TLCVSNO-0001")
+
+		for sn in serial_nos:
+			sn_doc = frappe.get_doc("Serial No", sn)
+			sn_doc.db_set(
+				{
+					"warehouse": warehouse,
+					"status": "Active",
+				}
+			)
+
+		batch_doc.db_set(
+			{
+				"batch_qty": 5,
+			}
+		)
+
+		frappe.flags.ignore_serial_batch_bundle_validation = False
+		frappe.flags.use_serial_and_batch_fields = False
+
+		lcv = make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=20,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+
+		lcv.get_items_from_purchase_receipts()
+		lcv.save()
+		lcv.submit()
+
+		pr.reload()
+
+		for row in pr.items:
+			self.assertEqual(row.valuation_rate, 102)
+			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertEqual(
+				row.valuation_rate,
+				frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"),
+			)
+
+		lcv.cancel()
+		pr.reload()
+
+		for row in pr.items:
+			self.assertEqual(row.valuation_rate, 100)
+			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertEqual(
+				row.valuation_rate,
+				frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"),
+			)
+
+	def test_do_not_validate_landed_cost_voucher_with_serial_batch_for_legacy_pr(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
+		sn_item = "Test Don't Validate Landed Cost Voucher Serial NO for Legacy PR"
+		batch_item = "Test Don't Validate Landed Cost Voucher Batch NO for Legacy PR"
+		sn_item_doc = make_item(
+			sn_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "SN-TDVLCVSNO-.####",
+				"is_stock_item": 1,
+			},
+		)
+
+		batch_item_doc = make_item(
+			batch_item,
+			{
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-TDVLCVSNO-.####",
+				"create_new_batch": 1,
+				"is_stock_item": 1,
+			},
+		)
+
+		serial_nos = [
+			"SN-TDVLCVSNO-0001",
+			"SN-TDVLCVSNO-0002",
+			"SN-TDVLCVSNO-0003",
+			"SN-TDVLCVSNO-0004",
+			"SN-TDVLCVSNO-0005",
+		]
+
+		for sn in serial_nos:
+			if not frappe.db.exists("Serial No", sn):
+				sn_doc = frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"item_code": sn_item,
+						"serial_no": sn,
+					}
+				)
+				sn_doc.insert()
+
+		if not frappe.db.exists("Batch", "BATCH-TDVLCVSNO-0001"):
+			batch_doc = frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"item": batch_item,
+					"batch_id": "BATCH-TDVLCVSNO-0001",
+				}
+			)
+			batch_doc.insert()
+
+		warehouse = "_Test Warehouse - _TC"
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+		pr = make_purchase_receipt(
+			company=company,
+			warehouse=warehouse,
+			item_code=sn_item,
+			qty=5,
+			rate=100,
+			uom=sn_item_doc.stock_uom,
+			stock_uom=sn_item_doc.stock_uom,
+			do_not_submit=True,
+		)
+
+		pr.append(
+			"items",
+			{
+				"item_code": batch_item,
+				"item_name": batch_item,
+				"description": "Test Batch Item",
+				"uom": batch_item_doc.stock_uom,
+				"stock_uom": batch_item_doc.stock_uom,
+				"qty": 5,
+				"rate": 100,
+				"warehouse": warehouse,
+			},
+		)
+
+		pr.submit()
+		pr.reload()
+
+		for sn in serial_nos:
+			sn_doc = frappe.get_doc("Serial No", sn)
+			sn_doc.db_set(
+				{
+					"warehouse": warehouse,
+					"status": "Active",
+				}
+			)
+
+		batch_doc.db_set(
+			{
+				"batch_qty": 5,
+			}
+		)
+
+		for row in pr.items:
+			if row.item_code == sn_item:
+				row.db_set("serial_no", ", ".join(serial_nos))
+			else:
+				row.db_set("batch_no", "BATCH-TDVLCVSNO-0001")
+
+		stock_ledger_entries = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": pr.name})
+		for sle in stock_ledger_entries:
+			doc = frappe.get_doc("Stock Ledger Entry", sle.name)
+			if doc.item_code == sn_item:
+				doc.db_set("serial_no", ", ".join(serial_nos))
+			else:
+				doc.db_set("batch_no", "BATCH-TDVLCVSNO-0001")
+
+		dn = create_delivery_note(
+			company=company,
+			warehouse=warehouse,
+			item_code=sn_item,
+			qty=5,
+			rate=100,
+			uom=sn_item_doc.stock_uom,
+			stock_uom=sn_item_doc.stock_uom,
+			do_not_submit=True,
+		)
+
+		dn.append(
+			"items",
+			{
+				"item_code": batch_item,
+				"item_name": batch_item,
+				"description": "Test Batch Item",
+				"uom": batch_item_doc.stock_uom,
+				"stock_uom": batch_item_doc.stock_uom,
+				"qty": 5,
+				"rate": 100,
+				"warehouse": warehouse,
+			},
+		)
+
+		dn.submit()
+
+		stock_ledger_entries = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": dn.name})
+		for sle in stock_ledger_entries:
+			doc = frappe.get_doc("Stock Ledger Entry", sle.name)
+			if doc.item_code == sn_item:
+				doc.db_set("serial_no", ", ".join(serial_nos))
+			else:
+				doc.db_set("batch_no", "BATCH-TDVLCVSNO-0001")
+
+		available_batches = get_auto_batch_nos(
+			frappe._dict(
+				{
+					"item_code": batch_item,
+					"warehouse": warehouse,
+					"batch_no": ["BATCH-TDVLCVSNO-0001"],
+					"consider_negative_batches": True,
+				}
+			)
+		)[0]
+
+		self.assertFalse(available_batches.get("qty"))
+
+		frappe.flags.ignore_serial_batch_bundle_validation = False
+		frappe.flags.use_serial_and_batch_fields = False
+
+		lcv = make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=20,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+
+		lcv.get_items_from_purchase_receipts()
+		lcv.save()
+		lcv.submit()
+
+		pr.reload()
+
+		for row in pr.items:
+			self.assertEqual(row.valuation_rate, 102)
+			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertEqual(
+				row.valuation_rate,
+				frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"),
+			)
+
+		lcv.cancel()
+		pr.reload()
+
+		for row in pr.items:
+			self.assertEqual(row.valuation_rate, 100)
+			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertEqual(
+				row.valuation_rate,
+				frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"),
+			)
+
+	def test_do_not_validate_against_landed_cost_voucher_for_serial_for_legacy_pr(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		frappe.flags.use_serial_and_batch_fields = True
+		sn_item = "Test Don't Validate Against LCV For Serial NO for Legacy PR"
+		sn_item_doc = make_item(
+			sn_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "SN-ALCVTDVLCVSNO-.####",
+				"is_stock_item": 1,
+			},
+		)
+
+		serial_nos = [
+			"SN-ALCVTDVLCVSNO-0001",
+			"SN-ALCVTDVLCVSNO-0002",
+			"SN-ALCVTDVLCVSNO-0003",
+			"SN-ALCVTDVLCVSNO-0004",
+			"SN-ALCVTDVLCVSNO-0005",
+		]
+
+		for sn in serial_nos:
+			if not frappe.db.exists("Serial No", sn):
+				sn_doc = frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"item_code": sn_item,
+						"serial_no": sn,
+					}
+				)
+				sn_doc.insert()
+
+		warehouse = "_Test Warehouse - _TC"
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+
+		pr = make_purchase_receipt(
+			company=company,
+			warehouse=warehouse,
+			item_code=sn_item,
+			qty=5,
+			rate=100,
+			uom=sn_item_doc.stock_uom,
+			stock_uom=sn_item_doc.stock_uom,
+		)
+
+		pr.reload()
+
+		for sn in serial_nos:
+			sn_doc = frappe.get_doc("Serial No", sn)
+			sn_doc.db_set(
+				{
+					"warehouse": warehouse,
+					"status": "Active",
+				}
+			)
+
+		for row in pr.items:
+			if row.item_code == sn_item:
+				row.db_set("serial_no", ", ".join(serial_nos))
+
+		stock_ledger_entries = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": pr.name})
+		for sle in stock_ledger_entries:
+			doc = frappe.get_doc("Stock Ledger Entry", sle.name)
+			if doc.item_code == sn_item:
+				doc.db_set("serial_no", ", ".join(serial_nos))
+
+		dn = create_delivery_note(
+			company=company,
+			warehouse=warehouse,
+			item_code=sn_item,
+			qty=5,
+			rate=100,
+			uom=sn_item_doc.stock_uom,
+			stock_uom=sn_item_doc.stock_uom,
+		)
+
+		stock_ledger_entries = frappe.get_all("Stock Ledger Entry", filters={"voucher_no": dn.name})
+		for sle in stock_ledger_entries:
+			doc = frappe.get_doc("Stock Ledger Entry", sle.name)
+			if doc.item_code == sn_item:
+				doc.db_set("serial_no", ", ".join(serial_nos))
+
+		frappe.flags.ignore_serial_batch_bundle_validation = False
+		frappe.flags.use_serial_and_batch_fields = False
+
+		lcv = make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=20,
+			distribute_charges_based_on="Qty",
+			do_not_save=True,
+		)
+
+		lcv.get_items_from_purchase_receipts()
+		lcv.save()
+		lcv.submit()
+
+		pr.reload()
+
+		for row in pr.items:
+			self.assertEqual(row.valuation_rate, 104)
+			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertEqual(
+				row.valuation_rate,
+				frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"),
+			)
+
+		lcv.cancel()
+		pr.reload()
+
+		for row in pr.items:
+			self.assertEqual(row.valuation_rate, 100)
+			self.assertTrue(row.serial_and_batch_bundle)
+			self.assertEqual(
+				row.valuation_rate,
+				frappe.db.get_value("Serial and Batch Bundle", row.serial_and_batch_bundle, "avg_rate"),
+			)
 
 
 def make_landed_cost_voucher(**args):

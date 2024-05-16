@@ -42,7 +42,7 @@ class SalesTaxesandChargesTemplate(Document):
 	def autoname(self):
 		if self.company and self.title:
 			abbr = frappe.get_cached_value("Company", self.company, "abbr")
-			self.name = "{0} - {1}".format(self.title, abbr)
+			self.name = f"{self.title} - {abbr}"
 
 	def set_missing_values(self):
 		for data in self.taxes:
@@ -57,10 +57,8 @@ def valdiate_taxes_and_charges_template(doc):
 
 	if doc.is_default == 1:
 		frappe.db.sql(
-			"""update `tab{0}` set is_default = 0
-			where is_default = 1 and name != %s and company = %s""".format(
-				doc.doctype
-			),
+			f"""update `tab{doc.doctype}` set is_default = 0
+			where is_default = 1 and name != %s and company = %s""",
 			(doc.name, doc.company),
 		)
 

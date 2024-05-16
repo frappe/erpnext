@@ -109,9 +109,7 @@ def execute(filters=None):
 	add_total_row_account(
 		data, data, _("Net Change in Cash"), period_list, company_currency, summary_data, filters
 	)
-	columns = get_columns(
-		filters.periodicity, period_list, filters.accumulated_values, filters.company
-	)
+	columns = get_columns(filters.periodicity, period_list, filters.accumulated_values, filters.company)
 
 	chart = get_chart_data(columns, data)
 
@@ -178,8 +176,8 @@ def get_account_type_based_gl_data(company, filters=None):
 
 	if filters.include_default_book_entries:
 		company_fb = frappe.get_cached_value("Company", company, "default_finance_book")
-		cond = """ AND (finance_book in (%s, %s, '') OR finance_book IS NULL)
-			""" % (
+		cond = """ AND (finance_book in ({}, {}, '') OR finance_book IS NULL)
+			""".format(
 			frappe.db.escape(filters.finance_book),
 			frappe.db.escape(company_fb),
 		)
@@ -193,15 +191,13 @@ def get_account_type_based_gl_data(company, filters=None):
 		cond += " and cost_center in %(cost_center)s"
 
 	gl_sum = frappe.db.sql_list(
-		"""
+		f"""
 		select sum(credit) - sum(debit)
 		from `tabGL Entry`
 		where company=%(company)s and posting_date >= %(start_date)s and posting_date <= %(end_date)s
 			and voucher_type != 'Period Closing Voucher'
 			and account in ( SELECT name FROM tabAccount WHERE account_type = %(account_type)s) {cond}
-	""".format(
-			cond=cond
-		),
+	""",
 		filters,
 	)
 
@@ -219,9 +215,7 @@ def get_start_date(period, accumulated_values, company):
 	return start_date
 
 
-def add_total_row_account(
-	out, data, label, period_list, currency, summary_data, filters, consolidated=False
-):
+def add_total_row_account(out, data, label, period_list, currency, summary_data, filters, consolidated=False):
 	total_row = {
 		"account_name": "'" + _("{0}").format(label) + "'",
 		"account": "'" + _("{0}").format(label) + "'",
@@ -253,9 +247,7 @@ def get_report_summary(summary_data, currency):
 	report_summary = []
 
 	for label, value in summary_data.items():
-		report_summary.append(
-			{"value": value, "label": label, "datatype": "Currency", "currency": currency}
-		)
+		report_summary.append({"value": value, "label": label, "datatype": "Currency", "currency": currency})
 
 	return report_summary
 
@@ -268,7 +260,7 @@ def get_chart_data(columns, data):
 			"values": [account.get(d.get("fieldname")) for d in columns[2:]],
 		}
 		for account in data
-		if account.get("parent_account") == None and account.get("currency")
+		if account.get("parent_account") is None and account.get("currency")
 	]
 	datasets = datasets[:-1]
 

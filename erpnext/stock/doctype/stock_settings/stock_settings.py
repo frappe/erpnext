@@ -39,6 +39,7 @@ class StockSettings(Document):
 		clean_description_html: DF.Check
 		default_warehouse: DF.Link | None
 		disable_serial_no_and_batch_selector: DF.Check
+		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
 		item_naming_by: DF.Literal["Item Code", "Naming Series"]
@@ -111,9 +112,9 @@ class StockSettings(Document):
 		for field in warehouse_fields:
 			if frappe.db.get_value("Warehouse", self.get(field), "is_group"):
 				frappe.throw(
-					_("Group Warehouses cannot be used in transactions. Please change the value of {0}").format(
-						frappe.bold(self.meta.get_field(field).label)
-					),
+					_(
+						"Group Warehouses cannot be used in transactions. Please change the value of {0}"
+					).format(frappe.bold(self.meta.get_field(field).label)),
 					title=_("Incorrect Warehouse"),
 				)
 
@@ -159,7 +160,6 @@ class StockSettings(Document):
 
 		# Change in value of `Allow Negative Stock`
 		if self.has_value_changed("allow_negative_stock"):
-
 			# Disable -> Enable: Don't allow if `Stock Reservation` is enabled
 			if self.allow_negative_stock and self.enable_stock_reservation:
 				frappe.throw(
@@ -170,10 +170,8 @@ class StockSettings(Document):
 
 		# Change in value of `Enable Stock Reservation`
 		if self.has_value_changed("enable_stock_reservation"):
-
 			# Disable -> Enable
 			if self.enable_stock_reservation:
-
 				# Don't allow if `Allow Negative Stock` is enabled
 				if self.allow_negative_stock:
 					frappe.throw(
@@ -189,7 +187,10 @@ class StockSettings(Document):
 					precision = frappe.db.get_single_value("System Settings", "float_precision") or 3
 					bin = frappe.qb.DocType("Bin")
 					bin_with_negative_stock = (
-						frappe.qb.from_(bin).select(bin.name).where(Round(bin.actual_qty, precision) < 0).limit(1)
+						frappe.qb.from_(bin)
+						.select(bin.name)
+						.where(Round(bin.actual_qty, precision) < 0)
+						.limit(1)
 					).run()
 
 					if bin_with_negative_stock:
@@ -307,3 +308,13 @@ def clean_all_descriptions():
 			clean_description = clean_html(item.description)
 		if item.description != clean_description:
 			frappe.db.set_value("Item", item.name, "description", clean_description)
+
+
+@frappe.whitelist()
+def get_enable_stock_uom_editing():
+	return frappe.get_cached_value(
+		"Stock Settings",
+		None,
+		["allow_to_edit_stock_uom_qty_for_sales", "allow_to_edit_stock_uom_qty_for_purchase"],
+		as_dict=1,
+	)

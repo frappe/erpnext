@@ -186,9 +186,9 @@ class PricingRule(Document):
 
 			if self.priority and cint(self.priority) == 1:
 				throw(
-					_("As the field {0} is enabled, the value of the field {1} should be more than 1.").format(
-						frappe.bold("Apply Discount on Discounted Rate"), frappe.bold("Priority")
-					)
+					_(
+						"As the field {0} is enabled, the value of the field {1} should be more than 1."
+					).format(frappe.bold("Apply Discount on Discounted Rate"), frappe.bold("Priority"))
 				)
 
 	def validate_applicable_for_selling_or_buying(self):
@@ -458,9 +458,11 @@ def get_pricing_rule_for_item(args, doc=None, for_validate=False):
 				)
 
 				if pricing_rule.apply_rule_on_other_items:
-					item_details["apply_rule_on_other_items"] = json.dumps(pricing_rule.apply_rule_on_other_items)
+					item_details["apply_rule_on_other_items"] = json.dumps(
+						pricing_rule.apply_rule_on_other_items
+					)
 
-			if pricing_rule.coupon_code_based == 1 and args.coupon_code == None:
+			if pricing_rule.coupon_code_based == 1 and args.coupon_code is None:
 				return item_details
 
 			if not pricing_rule.validate_applied_rule:
@@ -504,7 +506,6 @@ def update_args_for_pricing_rule(args):
 
 	if args.transaction_type == "selling":
 		if args.customer and not (args.customer_group and args.territory):
-
 			if args.quotation_to and args.quotation_to != "Customer":
 				customer = frappe._dict()
 			else:
@@ -535,9 +536,9 @@ def get_pricing_rule_details(args, pricing_rule):
 def apply_price_discount_rule(pricing_rule, item_details, args):
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
-	if (
-		pricing_rule.margin_type in ["Amount", "Percentage"] and pricing_rule.currency == args.currency
-	) or (pricing_rule.margin_type == "Percentage"):
+	if (pricing_rule.margin_type in ["Amount", "Percentage"] and pricing_rule.currency == args.currency) or (
+		pricing_rule.margin_type == "Percentage"
+	):
 		item_details.margin_type = pricing_rule.margin_type
 		item_details.has_margin = True
 
@@ -572,6 +573,22 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 		if pricing_rule.apply_discount_on_rate and item_details.get("discount_percentage"):
 			# Apply discount on discounted rate
 			item_details[field] += (100 - item_details[field]) * (pricing_rule.get(field, 0) / 100)
+		elif args.price_list_rate:
+			value = pricing_rule.get(field, 0)
+			calculate_discount_percentage = False
+			if field == "discount_percentage":
+				field = "discount_amount"
+				value = args.price_list_rate * (value / 100)
+				calculate_discount_percentage = True
+
+			if field not in item_details:
+				item_details.setdefault(field, 0)
+
+			item_details[field] += value if pricing_rule else args.get(field, 0)
+			if calculate_discount_percentage and args.price_list_rate and item_details.discount_amount:
+				item_details.discount_percentage = flt(
+					(flt(item_details.discount_amount) / flt(args.price_list_rate)) * 100
+				)
 		else:
 			if field not in item_details:
 				item_details.setdefault(field, 0)
@@ -685,7 +702,7 @@ def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.get_all(
 		"UOM Conversion Detail",
-		filters={"parent": ("in", items), "uom": ("like", "{0}%".format(txt))},
+		filters={"parent": ("in", items), "uom": ("like", f"{txt}%")},
 		fields=["distinct uom"],
 		as_list=1,
 	)

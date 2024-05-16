@@ -39,14 +39,14 @@ class BOMConfigurator {
 			edit_qty: this.edit_qty,
 			load_tree: this.load_tree,
 			set_default_qty: this.set_default_qty,
-		}
+		};
 	}
 
 	tree_options() {
 		return {
 			parent: this.$wrapper.get(0),
 			body: this.$wrapper.get(0),
-			doctype: 'BOM Configurator',
+			doctype: "BOM Configurator",
 			page: this.page,
 			expandable: true,
 			title: __("Configure Product Assembly"),
@@ -59,7 +59,7 @@ class BOMConfigurator {
 			extend_toolbar: false,
 			do_not_make_page: true,
 			do_not_setup_menu: true,
-		}
+		};
 	}
 
 	tree_methods() {
@@ -67,7 +67,7 @@ class BOMConfigurator {
 		let view = frappe.views.trees["BOM Configurator"];
 
 		return {
-			onload: function(me) {
+			onload: function (me) {
 				me.args["parent_id"] = frm_obj.frm.doc.name;
 				me.args["parent"] = frm_obj.frm.doc.item_code;
 				me.parent = frm_obj.$wrapper.get(0);
@@ -103,126 +103,133 @@ class BOMConfigurator {
 
 				`).insertBefore(node.$ul);
 			},
-			toolbar: this.frm?.doc.docstatus === 0 ? [
-				{
-					label:__(frappe.utils.icon('edit', 'sm') + " Qty"),
-					click: function(node) {
-						let view = frappe.views.trees["BOM Configurator"];
-						view.events.edit_qty(node, view);
-					},
-					btnClass: "hidden-xs"
-				},
-				{
-					label:__(frappe.utils.icon('add', 'sm') + " Raw Material"),
-					click: function(node) {
-						let view = frappe.views.trees["BOM Configurator"];
-						view.events.add_item(node, view);
-					},
-					condition: function(node) {
-						return node.expandable;
-					},
-					btnClass: "hidden-xs"
-				},
-				{
-					label:__(frappe.utils.icon('add', 'sm') + " Sub Assembly"),
-					click: function(node) {
-						let view = frappe.views.trees["BOM Configurator"];
-						view.events.add_sub_assembly(node, view);
-					},
-					condition: function(node) {
-						return node.expandable;
-					},
-					btnClass: "hidden-xs"
-				},
-				{
-					label:__("Expand All"),
-					click: function(node) {
-						let view = frappe.views.trees["BOM Configurator"];
+			toolbar:
+				this.frm?.doc.docstatus === 0
+					? [
+							{
+								label: `${frappe.utils.icon("edit", "sm")} ${__("Qty")}`,
+								click: function (node) {
+									let view = frappe.views.trees["BOM Configurator"];
+									view.events.edit_qty(node, view);
+								},
+								btnClass: "hidden-xs",
+							},
+							{
+								label: `${frappe.utils.icon("add", "sm")} ${__("Raw Material")}`,
+								click: function (node) {
+									let view = frappe.views.trees["BOM Configurator"];
+									view.events.add_item(node, view);
+								},
+								condition: function (node) {
+									return node.expandable;
+								},
+								btnClass: "hidden-xs",
+							},
+							{
+								label: `${frappe.utils.icon("add", "sm")} ${__("Sub Assembly")}`,
+								click: function (node) {
+									let view = frappe.views.trees["BOM Configurator"];
+									view.events.add_sub_assembly(node, view);
+								},
+								condition: function (node) {
+									return node.expandable;
+								},
+								btnClass: "hidden-xs",
+							},
+							{
+								label: __("Expand All"),
+								click: function (node) {
+									let view = frappe.views.trees["BOM Configurator"];
 
-						if (!node.expanded) {
-							view.tree.load_children(node, true);
-							$(node.parent[0]).find(".tree-children").show();
-							node.$toolbar.find(".expand-all-btn").html("Collapse All");
-						} else {
-							node.$tree_link.trigger("click");
-							node.$toolbar.find(".expand-all-btn").html("Expand All");
-						}
-					},
-					condition: function(node) {
-						return node.expandable && node.is_root;
-					},
-					btnClass: "hidden-xs expand-all-btn"
-				},
-				{
-					label:__(frappe.utils.icon('move', 'sm') + " Sub Assembly"),
-					click: function(node) {
-						let view = frappe.views.trees["BOM Configurator"];
-						view.events.convert_to_sub_assembly(node, view);
-					},
-					condition: function(node) {
-						return !node.expandable;
-					},
-					btnClass: "hidden-xs"
-				},
-				{
-					label:__(frappe.utils.icon('delete', 'sm') + __(" Item")),
-					click: function(node) {
-						let view = frappe.views.trees["BOM Configurator"];
-						view.events.delete_node(node, view);
-					},
-					condition: function(node) {
-						return !node.is_root;
-					},
-					btnClass: "hidden-xs"
-				},
-			] : [{
-				label:__("Expand All"),
-				click: function(node) {
-					let view = frappe.views.trees["BOM Configurator"];
+									if (!node.expanded) {
+										view.tree.load_children(node, true);
+										$(node.parent[0]).find(".tree-children").show();
+										node.$toolbar.find(".expand-all-btn").html("Collapse All");
+									} else {
+										node.$tree_link.trigger("click");
+										node.$toolbar.find(".expand-all-btn").html("Expand All");
+									}
+								},
+								condition: function (node) {
+									return node.expandable && node.is_root;
+								},
+								btnClass: "hidden-xs expand-all-btn",
+							},
+							{
+								label: `${frappe.utils.icon("move", "sm")} ${__("Sub Assembly")}`,
+								click: function (node) {
+									let view = frappe.views.trees["BOM Configurator"];
+									view.events.convert_to_sub_assembly(node, view);
+								},
+								condition: function (node) {
+									return !node.expandable;
+								},
+								btnClass: "hidden-xs",
+							},
+							{
+								label: `${frappe.utils.icon("delete", "sm")} ${__("Item")}`,
+								click: function (node) {
+									let view = frappe.views.trees["BOM Configurator"];
+									view.events.delete_node(node, view);
+								},
+								condition: function (node) {
+									return !node.is_root;
+								},
+								btnClass: "hidden-xs",
+							},
+					  ]
+					: [
+							{
+								label: __("Expand All"),
+								click: function (node) {
+									let view = frappe.views.trees["BOM Configurator"];
 
-					if (!node.expanded) {
-						view.tree.load_children(node, true);
-						$(node.parent[0]).find(".tree-children").show();
-						node.$toolbar.find(".expand-all-btn").html("Collapse All");
-					} else {
-						node.$tree_link.trigger("click");
-						node.$toolbar.find(".expand-all-btn").html("Expand All");
-					}
-				},
-				condition: function(node) {
-					return node.expandable && node.is_root;
-				},
-				btnClass: "hidden-xs expand-all-btn"
-			}],
-		}
+									if (!node.expanded) {
+										view.tree.load_children(node, true);
+										$(node.parent[0]).find(".tree-children").show();
+										node.$toolbar.find(".expand-all-btn").html("Collapse All");
+									} else {
+										node.$tree_link.trigger("click");
+										node.$toolbar.find(".expand-all-btn").html("Expand All");
+									}
+								},
+								condition: function (node) {
+									return node.expandable && node.is_root;
+								},
+								btnClass: "hidden-xs expand-all-btn",
+							},
+					  ],
+		};
 	}
 
 	add_item(node, view) {
-		frappe.prompt([
-			{ label: __("Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1 },
-			{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1 },
-		],
-		(data) => {
-			if (!node.data.parent_id) {
-				node.data.parent_id = this.frm.doc.name;
-			}
-
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_item",
-				args: {
-					parent: node.data.parent_id,
-					fg_item: node.data.value,
-					item_code: data.item_code,
-					fg_reference_id: node.data.name || this.frm.doc.name,
-					qty: data.qty,
-				},
-				callback: (r) => {
-					view.events.load_tree(r, node);
+		frappe.prompt(
+			[
+				{ label: __("Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1 },
+				{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1 },
+			],
+			(data) => {
+				if (!node.data.parent_id) {
+					node.data.parent_id = this.frm.doc.name;
 				}
-			});
-		},
-		__("Add Item"),
-		__("Add"));
+
+				frappe.call({
+					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_item",
+					args: {
+						parent: node.data.parent_id,
+						fg_item: node.data.value,
+						item_code: data.item_code,
+						fg_reference_id: node.data.name || this.frm.doc.name,
+						qty: data.qty,
+					},
+					callback: (r) => {
+						view.events.load_tree(r, node);
+					},
+				});
+			},
+			__("Add Item"),
+			__("Add")
+		);
 	}
 
 	add_sub_assembly(node, view) {
@@ -251,27 +258,58 @@ class BOMConfigurator {
 				},
 				callback: (r) => {
 					view.events.load_tree(r, node);
-				}
+				},
 			});
 
 			dialog.hide();
 		});
-
 	}
 
-	get_sub_assembly_modal_fields(read_only=false) {
+	get_sub_assembly_modal_fields(read_only = false) {
 		return [
-			{ label: __("Sub Assembly Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1, read_only: read_only },
-			{ fieldtype: "Column Break" },
-			{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1, read_only: read_only },
-			{ fieldtype: "Section Break" },
-			{ label: __("Raw Materials"), fieldname: "items", fieldtype: "Table", reqd: 1,
-				fields: [
-					{ label: __("Item"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1, in_list_view: 1 },
-					{ label: __("Qty"), fieldname: "qty", default: 1.0, fieldtype: "Float", reqd: 1, in_list_view: 1 },
-				]
+			{
+				label: __("Sub Assembly Item"),
+				fieldname: "item_code",
+				fieldtype: "Link",
+				options: "Item",
+				reqd: 1,
+				read_only: read_only,
 			},
-		]
+			{ fieldtype: "Column Break" },
+			{
+				label: __("Qty"),
+				fieldname: "qty",
+				default: 1.0,
+				fieldtype: "Float",
+				reqd: 1,
+				read_only: read_only,
+			},
+			{ fieldtype: "Section Break" },
+			{
+				label: __("Raw Materials"),
+				fieldname: "items",
+				fieldtype: "Table",
+				reqd: 1,
+				fields: [
+					{
+						label: __("Item"),
+						fieldname: "item_code",
+						fieldtype: "Link",
+						options: "Item",
+						reqd: 1,
+						in_list_view: 1,
+					},
+					{
+						label: __("Qty"),
+						fieldname: "qty",
+						default: 1.0,
+						fieldtype: "Float",
+						reqd: 1,
+						in_list_view: 1,
+					},
+				],
+			},
+		];
 	}
 
 	convert_to_sub_assembly(node, view) {
@@ -303,7 +341,7 @@ class BOMConfigurator {
 				callback: (r) => {
 					node.expandable = true;
 					view.events.load_tree(r, node);
-				}
+				},
 			});
 
 			dialog.hide();
@@ -313,12 +351,12 @@ class BOMConfigurator {
 	set_default_qty(dialog) {
 		dialog.fields_dict.items.grid.fields_map.item_code.onchange = function (event) {
 			if (event) {
-				let name = $(event.currentTarget).closest('.grid-row').attr("data-name")
+				let name = $(event.currentTarget).closest(".grid-row").attr("data-name");
 				let item_row = dialog.fields_dict.items.grid.grid_rows_by_docname[name].doc;
 				item_row.qty = 1;
-				dialog.fields_dict.items.grid.refresh()
+				dialog.fields_dict.items.grid.refresh();
 			}
-		}
+		};
 	}
 
 	delete_node(node, view) {
@@ -333,38 +371,40 @@ class BOMConfigurator {
 				},
 				callback: (r) => {
 					view.events.load_tree(r, node.parent_node);
-				}
+				},
 			});
 		});
 	}
 
 	edit_qty(node, view) {
 		let qty = node.data.qty || this.frm.doc.qty;
-		frappe.prompt([
-			{ label: __("Qty"), fieldname: "qty", default: qty, fieldtype: "Float", reqd: 1 },
-		],
-		(data) => {
-			let doctype = node.data.doctype || this.frm.doc.doctype;
-			let docname = node.data.name || this.frm.doc.name;
+		frappe.prompt(
+			[{ label: __("Qty"), fieldname: "qty", default: qty, fieldtype: "Float", reqd: 1 }],
+			(data) => {
+				let doctype = node.data.doctype || this.frm.doc.doctype;
+				let docname = node.data.name || this.frm.doc.name;
 
-			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.edit_qty",
-				args: {
-					doctype: doctype,
-					docname: docname,
-					qty: data.qty,
-					parent: node.data.parent_id,
-				},
-				callback: (r) => {
-					node.data.qty = data.qty;
-					let uom = node.data.uom || this.frm.doc.uom;
-					$(node.parent.get(0)).find(`[data-bom-qty-docname='${docname}']`).html(data.qty + " " + uom);
-					view.events.load_tree(r, node);
-				}
-			});
-		},
-		__("Edit Qty"),
-		__("Update"));
+				frappe.call({
+					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.edit_qty",
+					args: {
+						doctype: doctype,
+						docname: docname,
+						qty: data.qty,
+						parent: node.data.parent_id,
+					},
+					callback: (r) => {
+						node.data.qty = data.qty;
+						let uom = node.data.uom || this.frm.doc.uom;
+						$(node.parent.get(0))
+							.find(`[data-bom-qty-docname='${docname}']`)
+							.html(data.qty + " " + uom);
+						view.events.load_tree(r, node);
+					},
+				});
+			},
+			__("Edit Qty"),
+			__("Update")
+		);
 	}
 
 	prepare_layout() {
@@ -378,34 +418,30 @@ class BOMConfigurator {
 
 	load_tree(response, node) {
 		let item_row = "";
-		let parent_dom = ""
+		let parent_dom = "";
 		let total_amount = response.message.raw_material_cost;
 
 		frappe.views.trees["BOM Configurator"].tree.load_children(node);
 
 		while (node) {
-			item_row = response.message.items.filter(item => item.name === node.data.name);
+			item_row = response.message.items.filter((item) => item.name === node.data.name);
 
 			if (item_row?.length) {
 				node.data.amount = item_row[0].amount;
-				total_amount = node.data.amount
+				total_amount = node.data.amount;
 			} else {
 				total_amount = response.message.raw_material_cost;
 			}
 
 			parent_dom = $(node.parent.get(0));
-			total_amount = frappe.format(
-				total_amount, {
-					fieldtype: "Currency",
-					currency: this.frm.doc.currency
-				}
-			);
+			total_amount = frappe.format(total_amount, {
+				fieldtype: "Currency",
+				currency: this.frm.doc.currency,
+			});
 
 			$($(parent_dom).find(".fg-item-amt")[0]).html(total_amount);
 			node = node.parent_node;
-
 		}
-
 	}
 }
 

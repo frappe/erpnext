@@ -17,7 +17,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-07 14:24:13.321522",
+ "modified": "2024-03-27 13:10:32.287007",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger Settings",
@@ -39,7 +39,7 @@
    "select": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

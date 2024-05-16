@@ -10,7 +10,6 @@ from frappe.model.document import Document
 from frappe.utils import add_months, formatdate, getdate, sbool, today
 from plaid.errors import ItemError
 
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
 
 
@@ -90,9 +89,15 @@ def add_bank_accounts(response, bank, company):
 		bank = json.loads(bank)
 	result = []
 
-	default_gl_account = get_default_bank_cash_account(company, "Bank")
-	if not default_gl_account:
-		frappe.throw(_("Please setup a default bank account for company {0}").format(company))
+	parent_gl_account = frappe.db.get_all(
+		"Account", {"company": company, "account_type": "Bank", "is_group": 1, "disabled": 0}
+	)
+	if not parent_gl_account:
+		frappe.throw(
+			_(
+				"Please setup and enable a group account with the Account Type - {0} for the company {1}"
+			).format(frappe.bold("Bank"), company)
+		)
 
 	for account in response["accounts"]:
 		acc_type = frappe.db.get_value("Bank Account Type", account["type"])
@@ -108,11 +113,22 @@ def add_bank_accounts(response, bank, company):
 
 		if not existing_bank_account:
 			try:
+				gl_account = frappe.get_doc(
+					{
+						"doctype": "Account",
+						"account_name": account["name"] + " - " + response["institution"]["name"],
+						"parent_account": parent_gl_account[0].name,
+						"account_type": "Bank",
+						"company": company,
+					}
+				)
+				gl_account.insert(ignore_if_duplicate=True)
+
 				new_account = frappe.get_doc(
 					{
 						"doctype": "Bank Account",
 						"bank": bank["bank_name"],
-						"account": default_gl_account.account,
+						"account": gl_account.name,
 						"account_name": account["name"],
 						"account_type": account.get("type", ""),
 						"account_subtype": account.get("subtype", ""),
@@ -127,7 +143,9 @@ def add_bank_accounts(response, bank, company):
 				result.append(new_account.name)
 			except frappe.UniqueValidationError:
 				frappe.msgprint(
-					_("Bank account {0} already exists and could not be created again").format(account["name"])
+					_("Bank account {0} already exists and could not be created again").format(
+						account["name"]
+					)
 				)
 			except Exception:
 				frappe.log_error("Plaid Link Error")
@@ -204,9 +222,7 @@ def sync_transactions(bank, bank_account):
 				f"Plaid added {len(result)} new Bank Transactions from '{bank_account}' between {start_date} and {end_date}"
 			)
 
-			frappe.db.set_value(
-				"Bank Account", bank_account, "last_integration_date", last_transaction_date
-			)
+			frappe.db.set_value("Bank Account", bank_account, "last_integration_date", last_transaction_date)
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), _("Plaid transactions sync error"))
 
@@ -228,9 +244,7 @@ def get_transactions(bank, bank_account=None, start_date=None, end_date=None):
 
 	transactions = []
 	try:
-		transactions = plaid.get_transactions(
-			start_date=start_date, end_date=end_date, account_id=account_id
-		)
+		transactions = plaid.get_transactions(start_date=start_date, end_date=end_date, account_id=account_id)
 	except ItemError as e:
 		if e.code == "ITEM_LOGIN_REQUIRED":
 			msg = _("There was an error syncing transactions.") + " "

@@ -112,7 +112,7 @@ def prepare_subcontracted_data(orders, supplied_items):
 
 
 def get_subcontracted_data(order_details, data):
-	for key, details in order_details.items():
+	for _key, details in order_details.items():
 		res = details.order_item
 		for index, row in enumerate(details.supplied_items):
 			if index != 0:

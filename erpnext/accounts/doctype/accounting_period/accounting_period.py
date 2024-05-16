@@ -84,7 +84,10 @@ class AccountingPeriod(Document):
 			for doctype_for_closing in self.get_doctypes_for_closing():
 				self.append(
 					"closed_documents",
-					{"document_type": doctype_for_closing.document_type, "closed": doctype_for_closing.closed},
+					{
+						"document_type": doctype_for_closing.document_type,
+						"closed": doctype_for_closing.closed,
+					},
 				)
 
 

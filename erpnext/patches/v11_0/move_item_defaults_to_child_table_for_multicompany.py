@@ -106,8 +106,6 @@ def execute():
 					`expense_account`, `income_account`, `buying_cost_center`, `selling_cost_center`
 				)
 				VALUES {}
-			""".format(
-					", ".join(["%s"] * len(to_insert_data))
-				),
+			""".format(", ".join(["%s"] * len(to_insert_data))),
 				tuple(to_insert_data),
 			)

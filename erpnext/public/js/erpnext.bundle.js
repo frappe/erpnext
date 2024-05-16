@@ -4,6 +4,7 @@ import "./queries";
 import "./sms_manager";
 import "./utils/party";
 import "./controllers/stock_controller";
+import "./utils/serial_no_batch_selector";
 import "./payment/payments";
 import "./templates/visual_plant_floor_template.html";
 import "./plant_floor_visual/visual_plant";
@@ -27,11 +28,13 @@ import "./bulk_transaction_processing";
 import "./utils/crm_activities";
 import "./templates/crm_activities.html";
 import "./templates/crm_notes.html";
-import "./controllers/accounts.js"
+import "./controllers/accounts.js";
 import "./utils/landed_taxes_and_charges_common.js";
 import "./utils/sales_common.js";
 import "./controllers/buying.js";
 import "./utils/demo.js";
 import "./financial_statements.js";
+import "./sales_trends_filters.js";
+import "./purchase_trends_filters.js";
 
 // import { sum } from 'frappe/public/utils/util.js'

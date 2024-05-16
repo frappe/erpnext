@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_import": 1,
+ "allow_rename": 1,
  "autoname": "ACC-TAX-RULE-.YYYY.-.#####",
  "creation": "2015-08-07 02:33:52.670866",
  "doctype": "DocType",
@@ -225,7 +226,7 @@
   }
  ],
  "links": [],
- "modified": "2021-06-04 23:14:27.186879",
+ "modified": "2024-03-27 13:10:52.121252",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Rule",
@@ -245,6 +246,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

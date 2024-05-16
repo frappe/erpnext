@@ -1,3 +1,3 @@
 frappe.treeview_settings["Territory"] = {
-	ignore_fields:["parent_territory"]
-}
+	ignore_fields: ["parent_territory"],
+};

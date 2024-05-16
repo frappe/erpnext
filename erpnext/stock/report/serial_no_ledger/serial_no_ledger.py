@@ -84,9 +84,7 @@ def get_data(filters):
 		return []
 
 	data = []
-	serial_bundle_ids = [
-		d.serial_and_batch_bundle for d in stock_ledgers if d.serial_and_batch_bundle
-	]
+	serial_bundle_ids = [d.serial_and_batch_bundle for d in stock_ledgers if d.serial_and_batch_bundle]
 
 	bundle_wise_serial_nos = get_serial_nos(filters, serial_bundle_ids)
 

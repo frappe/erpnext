@@ -29,9 +29,9 @@ def execute():
 		rename_field("Linked Location", "land_unit", "location")
 
 	if not frappe.db.exists("Location", "All Land Units"):
-		frappe.get_doc(
-			{"doctype": "Location", "is_group": True, "location_name": "All Land Units"}
-		).insert(ignore_permissions=True)
+		frappe.get_doc({"doctype": "Location", "is_group": True, "location_name": "All Land Units"}).insert(
+			ignore_permissions=True
+		)
 
 	if frappe.db.table_exists("Land Unit"):
 		land_units = frappe.get_all("Land Unit", fields=["*"], order_by="lft")

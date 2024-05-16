@@ -180,7 +180,6 @@ def get_report_summary(
 	filters,
 	consolidated=False,
 ):
-
 	net_asset, net_liability, net_equity, net_provisional_profit_loss = 0.0, 0.0, 0.0, 0.0
 
 	if filters.get("accumulated_values"):

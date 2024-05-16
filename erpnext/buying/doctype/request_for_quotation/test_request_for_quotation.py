@@ -75,9 +75,7 @@ class TestRequestforQuotation(FrappeTestCase):
 
 		rfq = make_request_for_quotation(supplier_data=supplier_wt_appos)
 
-		sq = make_supplier_quotation_from_rfq(
-			rfq.name, for_supplier=supplier_wt_appos[0].get("supplier")
-		)
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier_wt_appos[0].get("supplier"))
 		sq.submit()
 
 		frappe.form_dict.name = rfq.name
@@ -108,9 +106,7 @@ class TestRequestforQuotation(FrappeTestCase):
 			row = item.append("uoms", {"uom": "Kg", "conversion_factor": 2})
 			row.db_update()
 
-		rfq = make_request_for_quotation(
-			item_code="_Test Multi UOM RFQ Item", uom="Kg", conversion_factor=2
-		)
+		rfq = make_request_for_quotation(item_code="_Test Multi UOM RFQ Item", uom="Kg", conversion_factor=2)
 		rfq.get("items")[0].rate = 100
 		rfq.supplier = rfq.suppliers[0].supplier
 
@@ -148,6 +144,33 @@ class TestRequestforQuotation(FrappeTestCase):
 		rfq = make_request_for_quotation()
 		get_pdf(rfq.name, rfq.get("suppliers")[0].supplier)
 		self.assertEqual(frappe.local.response.type, "pdf")
+
+	def test_portal_user_with_new_supplier(self):
+		supplier_doc = frappe.get_doc(
+			{
+				"doctype": "Supplier",
+				"supplier_name": "Test Supplier for RFQ",
+				"supplier_group": "_Test Supplier Group",
+			}
+		).insert()
+
+		self.assertFalse(supplier_doc.portal_users)
+
+		rfq = make_request_for_quotation(
+			supplier_data=[
+				{
+					"supplier": supplier_doc.name,
+					"supplier_name": supplier_doc.supplier_name,
+					"email_id": "123_testrfquser@example.com",
+				}
+			],
+			do_not_submit=True,
+		)
+		for rfq_supplier in rfq.suppliers:
+			rfq.update_supplier_contact(rfq_supplier, rfq.get_link())
+
+		supplier_doc.reload()
+		self.assertTrue(supplier_doc.portal_users[0].user)
 
 
 def make_request_for_quotation(**args) -> "RequestforQuotation":
