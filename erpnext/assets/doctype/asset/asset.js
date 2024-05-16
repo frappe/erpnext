@@ -652,7 +652,7 @@ frappe.ui.form.on("Asset", {
 			);
 
 			frm.set_value("gross_purchase_amount", purchase_amount);
-			frm.set_value("purchase_receipt_amount", purchase_amount);
+			frm.set_value("purchase_amount", purchase_amount);
 			frm.set_value("asset_quantity", asset_quantity);
 			frm.set_value("cost_center", item.cost_center || purchase_doc.cost_center);
 			if (item.asset_location) {

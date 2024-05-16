@@ -1028,20 +1028,6 @@ class ReceivablePayableReport:
 				fieldtype="Link",
 				options="Contact",
 			)
-		if self.filters.party_type == "Customer":
-			self.add_column(
-				_("Customer Name"),
-				fieldname="customer_name",
-				fieldtype="Link",
-				options="Customer",
-			)
-		elif self.filters.party_type == "Supplier":
-			self.add_column(
-				_("Supplier Name"),
-				fieldname="supplier_name",
-				fieldtype="Link",
-				options="Supplier",
-			)
 
 		self.add_column(label=_("Cost Center"), fieldname="cost_center", fieldtype="Data")
 		self.add_column(label=_("Voucher Type"), fieldname="voucher_type", fieldtype="Data")
