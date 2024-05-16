@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-05 09:35+0000\n"
-"PO-Revision-Date: 2024-05-11 12:57\n"
+"PO-Revision-Date: 2024-05-16 10:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -35486,7 +35486,7 @@ msgstr "Es un grupo"
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "Is Group Warehouse"
-msgstr ""
+msgstr "Es Almacén de Grupo"
 
 #. Label of a Check field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
