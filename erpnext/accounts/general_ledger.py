@@ -7,12 +7,7 @@ import copy
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-<<<<<<< HEAD
 from frappe.utils import cint, cstr, flt, formatdate, getdate, now
-=======
-from frappe.utils import cint, flt, formatdate, getdate, now
-from frappe.utils.dashboard import cache_source
->>>>>>> d56f52b0ba (feat: Config to enable immutable ledger)
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
