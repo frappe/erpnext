@@ -647,11 +647,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-02-14 04:53:34.887358",
-=======
  "modified": "2024-05-17 13:16:34.496704",
->>>>>>> 5cf5b18aea (fix: priority not working for multiple pricing rules (#41516))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
