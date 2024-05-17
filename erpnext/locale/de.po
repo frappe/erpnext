@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-05 09:35+0000\n"
-"PO-Revision-Date: 2024-05-11 12:57\n"
+"PO-Revision-Date: 2024-05-17 10:41\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -18987,7 +18987,7 @@ msgstr "Gutschrift ausgelöst"
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Credit Note will update it's own outstanding amount, even if \"Return Against\" is specified."
-msgstr ""
+msgstr "Den ausstehenden Betrag dieser Rechnungskorrektur separat buchen, statt den der korrigierten Rechnung zu verringern."
 
 #: stock/doctype/delivery_note/delivery_note.py:811
 msgid "Credit Note {0} has been created automatically"
@@ -21449,7 +21449,7 @@ msgstr "Lastschrift ausgestellt am"
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Debit Note will update it's own outstanding amount, even if \"Return Against\" is specified."
-msgstr ""
+msgstr "Den ausstehenden Betrag dieser Rechnungskorrektur separat buchen, statt den der korrigierten Rechnung zu verringern."
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -78882,13 +78882,13 @@ msgstr "Aktualisieren Sie die Stücklistenkosten automatisch über den Planer, b
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Update Billed Amount in Delivery Note"
-msgstr ""
+msgstr "Abgerechneten Betrag im Lieferschein aktualisieren"
 
 #. Label of a Check field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Update Billed Amount in Delivery Note"
-msgstr ""
+msgstr "Abgerechneten Betrag im Lieferschein aktualisieren"
 
 #. Label of a Check field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -78973,13 +78973,13 @@ msgstr "Artikel aktualisieren"
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Update Outstanding for Self"
-msgstr ""
+msgstr "Ausstehenden Betrag für dieses Dokument aktualisieren"
 
 #. Label of a Check field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Update Outstanding for Self"
-msgstr ""
+msgstr "Ausstehenden Betrag für dieses Dokument aktualisieren"
 
 #: accounts/doctype/cheque_print_template/cheque_print_template.js:10
 msgid "Update Print Format"
