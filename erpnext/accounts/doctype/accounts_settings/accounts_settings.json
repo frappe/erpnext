@@ -12,6 +12,7 @@
   "unlink_advance_payment_on_cancelation_of_order",
   "column_break_13",
   "delete_linked_ledger_entries",
+  "enable_immutable_ledger",
   "invoicing_features_section",
   "check_supplier_invoice_uniqueness",
   "automatically_fetch_payment_terms",
@@ -454,6 +455,13 @@
    "fieldname": "remarks_section",
    "fieldtype": "Section Break",
    "label": "Remarks Column Length"
+  },
+  {
+   "default": "0",
+   "description": "On enabling this cancellation entries will be posted on the actual cancellation date and reports will consider cancelled entries as well",
+   "fieldname": "enable_immutable_ledger",
+   "fieldtype": "Check",
+   "label": "Enable Immutable Ledger"
   }
  ],
  "icon": "icon-cog",
