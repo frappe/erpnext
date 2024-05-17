@@ -89,8 +89,8 @@ class Asset(AccountsController):
 		maintenance_required: DF.Check
 		naming_series: DF.Literal["ACC-ASS-.YYYY.-"]
 		next_depreciation_date: DF.Date | None
-		number_of_depreciations_booked: DF.Int
 		opening_accumulated_depreciation: DF.Currency
+		opening_booked_depreciations: DF.Int
 		policy_number: DF.Data | None
 		purchase_amount: DF.Currency
 		purchase_date: DF.Date | None
@@ -419,7 +419,7 @@ class Asset(AccountsController):
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
-			self.number_of_depreciations_booked = 0
+			self.opening_booked_depreciations = 0
 		else:
 			depreciable_amount = flt(self.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
 			if flt(self.opening_accumulated_depreciation) > depreciable_amount:
@@ -430,12 +430,12 @@ class Asset(AccountsController):
 				)
 
 			if self.opening_accumulated_depreciation:
-				if not self.number_of_depreciations_booked:
+				if not self.opening_booked_depreciations:
 					frappe.throw(_("Please set Number of Depreciations Booked"))
 			else:
-				self.number_of_depreciations_booked = 0
+				self.opening_booked_depreciations = 0
 
-			if flt(row.total_number_of_depreciations) <= cint(self.number_of_depreciations_booked):
+			if flt(row.total_number_of_depreciations) <= cint(self.opening_booked_depreciations):
 				frappe.throw(
 					_(
 						"Row {0}: Total Number of Depreciations cannot be less than or equal to Number of Depreciations Booked"
