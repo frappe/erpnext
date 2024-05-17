@@ -923,6 +923,15 @@ class PurchaseReceipt(BuyingController):
 					notify=True,
 				)
 
+	def enable_recalculate_rate_in_sles(self):
+		sle_table = frappe.qb.DocType("Stock Ledger Entry")
+		(
+			frappe.qb.update(sle_table)
+			.set(sle_table.recalculate_rate, 1)
+			.where(sle_table.voucher_no == self.name)
+			.where(sle_table.voucher_type == "Purchase Receipt")
+		).run()
+
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
 	return frappe.db.get_value(
@@ -1095,15 +1104,10 @@ def adjust_incoming_rate_for_pr(doc):
 	for item in doc.get("items"):
 		item.db_update()
 
-	doc.docstatus = 2
-	doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-	doc.make_gl_entries_on_cancel()
+	if doc.doctype == "Purchase Receipt":
+		doc.enable_recalculate_rate_in_sles()
 
-	# update stock & gl entries for submit state of PR
-	doc.docstatus = 1
-	doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-	doc.make_gl_entries()
-	doc.repost_future_sle_and_gle()
+	doc.repost_future_sle_and_gle(force=True)
 
 
 def get_item_wise_returned_qty(pr_doc):
