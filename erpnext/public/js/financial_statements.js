@@ -1,7 +1,12 @@
 frappe.provide("erpnext.financial_statements");
 
 erpnext.financial_statements = {
-	filters: get_filters(),
+	get filters() {
+		return (this._filters ??= get_filters());
+	},
+	set filters(filters) {
+		this._filters = filters;
+	},
 	baseData: null,
 	formatter: function (value, row, column, data, default_formatter, filter) {
 		if (
