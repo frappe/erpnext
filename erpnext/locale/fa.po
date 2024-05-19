@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-05 09:35+0000\n"
-"PO-Revision-Date: 2024-05-13 10:52\n"
+"PO-Revision-Date: 2024-05-19 11:04\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -21577,7 +21577,7 @@ msgstr "BOM پیش‌فرض برای {0} یافت نشد"
 
 #: controllers/accounts_controller.py:3293
 msgid "Default BOM not found for FG Item {0}"
-msgstr "BOM پیش فرض برای FG مورد {0} یافت نشد"
+msgstr "BOM پیش فرض برای آیتم کالای تمام شده {0} یافت نشد"
 
 #: manufacturing/doctype/work_order/work_order.py:1257
 msgid "Default BOM not found for Item {0} and Project {1}"
@@ -27943,7 +27943,7 @@ msgstr "بخش هزینه عملیاتی مبتنی بر FG"
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "FG Item"
-msgstr "مورد FG"
+msgstr "آیتم کالای تمام شده"
 
 #. Label of a Float field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
@@ -27955,7 +27955,7 @@ msgstr "تعداد FG از مواد خام انتقال یافته"
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "FG Reference"
-msgstr "مرجع FG"
+msgstr "مرجع کالای تمام شده"
 
 #: manufacturing/report/process_loss_report/process_loss_report.py:105
 msgid "FG Value"
@@ -27965,7 +27965,7 @@ msgstr "مقدار FG"
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 msgctxt "Production Plan Item"
 msgid "FG Warehouse"
-msgstr "انبار FG"
+msgstr "انبار کالاهای تمام شده"
 
 #. Label of a Check field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -28346,7 +28346,7 @@ msgstr "نگاشت فیلد"
 #: stock/doctype/variant_field/variant_field.json
 msgctxt "Variant Field"
 msgid "Field Name"
-msgstr "نام زمینه"
+msgstr "نام فیلد"
 
 #. Label of a Select field in DocType 'Bank Transaction Mapping'
 #: accounts/doctype/bank_transaction_mapping/bank_transaction_mapping.json
@@ -28358,25 +28358,25 @@ msgstr "زمینه در معاملات بانکی"
 #: accounts/doctype/accounting_dimension/accounting_dimension.json
 msgctxt "Accounting Dimension"
 msgid "Fieldname"
-msgstr "نام زمینه"
+msgstr "Fieldname"
 
 #. Label of a Select field in DocType 'POS Field'
 #: accounts/doctype/pos_field/pos_field.json
 msgctxt "POS Field"
 msgid "Fieldname"
-msgstr "نام زمینه"
+msgstr "Fieldname"
 
 #. Label of a Data field in DocType 'POS Search Fields'
 #: accounts/doctype/pos_search_fields/pos_search_fields.json
 msgctxt "POS Search Fields"
 msgid "Fieldname"
-msgstr "نام زمینه"
+msgstr "Fieldname"
 
 #. Label of a Autocomplete field in DocType 'Website Filter Field'
 #: portal/doctype/website_filter_field/website_filter_field.json
 msgctxt "Website Filter Field"
 msgid "Fieldname"
-msgstr "نام زمینه"
+msgstr "Fieldname"
 
 #. Label of a Table field in DocType 'Item Variant Settings'
 #: stock/doctype/item_variant_settings/item_variant_settings.json
@@ -28395,7 +28395,7 @@ msgstr "فیلدها فقط در زمان ایجاد کپی می شوند."
 #: accounts/doctype/pos_field/pos_field.json
 msgctxt "POS Field"
 msgid "Fieldtype"
-msgstr "نوع میدان"
+msgstr "Fieldtype"
 
 #. Label of a Attach field in DocType 'Rename Tool'
 #: utilities/doctype/rename_tool/rename_tool.json
@@ -30763,14 +30763,14 @@ msgstr "کارت هدیه"
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Give free item for every N quantity"
-msgstr "برای هر N مقدار مورد رایگان بدهید"
+msgstr "برای هر N مقدار آیتم رایگان بدهید"
 
 #. Description of the 'Recurse Every (As Per Transaction UOM)' (Float) field in
 #. DocType 'Promotional Scheme Product Discount'
 #: accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgctxt "Promotional Scheme Product Discount"
 msgid "Give free item for every N quantity"
-msgstr "برای هر N مقدار مورد رایگان بدهید"
+msgstr "برای هر N مقدار آیتم رایگان بدهید"
 
 #. Name of a DocType
 #: setup/doctype/global_defaults/global_defaults.json
@@ -32947,7 +32947,7 @@ msgstr "واردات فاکتورها"
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Import Log"
-msgstr "ورود به سیستم"
+msgstr "لاگ واردات"
 
 #. Label of a Section Break field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -32959,7 +32959,7 @@ msgstr "ورود به سیستم"
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "Import Log Preview"
-msgstr "پیش نمایش ورود به سیستم"
+msgstr "پیش نمایش لاگ واردات"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:59
 msgid "Import Master Data"
@@ -37778,7 +37778,7 @@ msgstr "آیتم برای ساخت"
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Item UOM"
-msgstr "مورد UOM"
+msgstr "واحد اندازه گیری آیتم"
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:343
 #: accounts/doctype/pos_invoice/pos_invoice.py:350
@@ -39971,7 +39971,7 @@ msgstr "قفل شده است"
 #: bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.json
 msgctxt "Bulk Transaction Log"
 msgid "Log Entries"
-msgstr "ورودی های ورود"
+msgstr "ورودی های لاگ"
 
 #. Description of a DocType
 #: stock/doctype/item_price/item_price.json
@@ -40404,7 +40404,7 @@ msgstr "جزئیات تعمیر و نگهداری"
 
 #: assets/doctype/asset_maintenance/asset_maintenance.js:41
 msgid "Maintenance Log"
-msgstr "گزارش تعمیر و نگهداری"
+msgstr "لاگ تعمیر و نگهداری"
 
 #. Name of a role
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
@@ -45113,7 +45113,7 @@ msgstr "یادداشت"
 
 #: manufacturing/doctype/bom_update_log/bom_update_log_list.js:21
 msgid "Note: Automatic log deletion only applies to logs of type <i>Update Cost</i>"
-msgstr "توجه: حذف خودکار گزارش فقط برای گزارش‌هایی از نوع <i>هزینه به‌روزرسانی</i> اعمال می‌شود"
+msgstr "توجه: حذف خودکار لاگ فقط برای گزارش‌هایی از نوع <i>به‌روزرسانی هزینه</i> اعمال می‌شود"
 
 #: accounts/party.py:634
 msgid "Note: Due / Reference Date exceeds allowed customer credit days by {0} day(s)"
@@ -45933,7 +45933,7 @@ msgstr ""
 
 #: public/js/templates/call_link.html:11
 msgid "Open Call Log"
-msgstr "گزارش تماس را باز کنید"
+msgstr "لاگ تماس را باز کنید"
 
 #: public/js/call_popup/call_popup.js:116
 msgid "Open Contact"
@@ -60146,7 +60146,7 @@ msgstr "تغییر نام مقدار ویژگی در ویژگی آیتم."
 #: utilities/doctype/rename_tool/rename_tool.json
 msgctxt "Rename Tool"
 msgid "Rename Log"
-msgstr "تغییر نام گزارش"
+msgstr "لاگ تغییر نام"
 
 #: accounts/doctype/account/account.py:516
 msgid "Rename Not Allowed"
@@ -62310,7 +62310,7 @@ msgstr "ردیف #{0}: تاریخ ها با ردیف دیگر همپوشانی �
 
 #: buying/doctype/purchase_order/purchase_order.py:374
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
-msgstr "ردیف #{0}: BOM پیش‌فرض برای مورد FG {1} یافت نشد"
+msgstr "ردیف #{0}: BOM پیش‌فرض برای آیتم کالای تمام شده {1} یافت نشد"
 
 #: accounts/doctype/payment_entry/payment_entry.py:295
 msgid "Row #{0}: Duplicate entry in References {1} {2}"
@@ -63135,7 +63135,7 @@ msgstr "مرکز پیامک"
 #: crm/workspace/crm/crm.json
 msgctxt "SMS Log"
 msgid "SMS Log"
-msgstr "گزارش پیامک"
+msgstr "لاگ پیامک"
 
 #. Label of a Link in the CRM Workspace
 #: crm/workspace/crm/crm.json
@@ -78831,19 +78831,19 @@ msgstr "به روز رسانی هزینه مواد مصرفی در پروژه"
 
 #: manufacturing/doctype/bom/bom.js:99
 msgid "Update Cost"
-msgstr "هزینه به روز رسانی"
+msgstr "به روز رسانی هزینه"
 
 #. Option for the 'Update Type' (Select) field in DocType 'BOM Update Log'
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 msgctxt "BOM Update Log"
 msgid "Update Cost"
-msgstr "هزینه به روز رسانی"
+msgstr "به روز رسانی هزینه"
 
 #. Label of a Section Break field in DocType 'BOM Update Tool'
 #: manufacturing/doctype/bom_update_tool/bom_update_tool.json
 msgctxt "BOM Update Tool"
 msgid "Update Cost"
-msgstr "هزینه به روز رسانی"
+msgstr "به روز رسانی هزینه"
 
 #: accounts/doctype/cost_center/cost_center.js:19
 #: accounts/doctype/cost_center/cost_center.js:52
@@ -81886,7 +81886,7 @@ msgstr "تجزیه و تحلیل سفارش کار"
 #: manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Work Order Consumed Materials"
-msgstr "سفارش کار مواد مصرفی"
+msgstr "مواد مصرفی سفارش کار"
 
 #. Name of a DocType
 #: manufacturing/doctype/work_order_item/work_order_item.json
