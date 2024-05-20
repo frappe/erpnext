@@ -1697,6 +1697,132 @@ class TestDeliveryNote(FrappeTestCase):
 			if row.serial_no:
 				self.assertEqual(row.serial_no, serial_no)
 
+	def test_delivery_note_legacy_serial_no_valuation(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		frappe.flags.ignore_serial_batch_bundle_validation = True
+		sn_item = "Old Serial NO Item Valuation Test - 2"
+		make_item(
+			sn_item,
+			{
+				"has_serial_no": 1,
+				"serial_no_series": "SN-SOVOSN-.####",
+				"is_stock_item": 1,
+			},
+		)
+
+		serial_nos = [
+			"SN-SOVOSN-1234",
+			"SN-SOVOSN-2234",
+		]
+
+		for sn in serial_nos:
+			if not frappe.db.exists("Serial No", sn):
+				sn_doc = frappe.get_doc(
+					{
+						"doctype": "Serial No",
+						"item_code": sn_item,
+						"serial_no": sn,
+					}
+				)
+				sn_doc.insert()
+
+		warehouse = "_Test Warehouse - _TC"
+		company = frappe.db.get_value("Warehouse", warehouse, "company")
+		se_doc = make_stock_entry(
+			item_code=sn_item,
+			company=company,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=150,
+			do_not_submit=1,
+			use_serial_batch_fields=0,
+		)
+		se_doc.submit()
+
+		se_doc.items[0].db_set("serial_no", "\n".join(serial_nos))
+
+		sle_data = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": se_doc.name, "voucher_type": "Stock Entry"},
+		)[0]
+
+		sle_doc = frappe.get_doc("Stock Ledger Entry", sle_data.name)
+		self.assertFalse(sle_doc.serial_no)
+		sle_doc.db_set("serial_no", "\n".join(serial_nos))
+		sle_doc.reload()
+		self.assertTrue(sle_doc.serial_no)
+		self.assertFalse(sle_doc.is_cancelled)
+
+		for sn in serial_nos:
+			sn_doc = frappe.get_doc("Serial No", sn)
+			sn_doc.db_set(
+				{
+					"status": "Active",
+					"warehouse": warehouse,
+				}
+			)
+
+		self.assertEqual(sorted(get_serial_nos(se_doc.items[0].serial_no)), sorted(serial_nos))
+		frappe.flags.ignore_serial_batch_bundle_validation = False
+
+		se_doc = make_stock_entry(
+			item_code=sn_item,
+			company=company,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=200,
+		)
+
+		serial_nos.extend(get_serial_nos_from_bundle(se_doc.items[0].serial_and_batch_bundle))
+
+		dn = create_delivery_note(
+			item_code=sn_item,
+			qty=3,
+			rate=500,
+			warehouse=warehouse,
+			company=company,
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			use_serial_batch_fields=1,
+			serial_no="\n".join(serial_nos[0:3]),
+		)
+
+		dn.reload()
+
+		sle_data = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": dn.name, "voucher_type": "Delivery Note"},
+			fields=["stock_value_difference", "actual_qty"],
+		)[0]
+
+		self.assertEqual(sle_data.actual_qty, 3 * -1)
+		self.assertEqual(sle_data.stock_value_difference, 500.0 * -1)
+
+		dn = create_delivery_note(
+			item_code=sn_item,
+			qty=1,
+			rate=500,
+			warehouse=warehouse,
+			company=company,
+			expense_account="Cost of Goods Sold - _TC",
+			cost_center="Main - _TC",
+			use_serial_batch_fields=1,
+			serial_no=serial_nos[-1],
+		)
+
+		dn.reload()
+
+		sle_data = frappe.get_all(
+			"Stock Ledger Entry",
+			filters={"voucher_no": dn.name, "voucher_type": "Delivery Note"},
+			fields=["stock_value_difference", "actual_qty"],
+		)[0]
+
+		self.assertEqual(sle_data.actual_qty, 1 * -1)
+		self.assertEqual(sle_data.stock_value_difference, 200.0 * -1)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

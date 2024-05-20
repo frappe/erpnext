@@ -17,15 +17,11 @@ class DeprecatedSerialNoValuation:
 		if not serial_nos:
 			return
 
-		actual_qty = flt(self.sle.actual_qty)
-
 		stock_value_change = 0
-		if actual_qty < 0:
-			if not self.sle.is_cancelled:
-				outgoing_value = self.get_incoming_value_for_serial_nos(serial_nos)
-				stock_value_change = -1 * outgoing_value
+		if not self.sle.is_cancelled:
+			stock_value_change = self.get_incoming_value_for_serial_nos(serial_nos)
 
-		self.stock_value_change += stock_value_change
+		self.stock_value_change += flt(stock_value_change)
 
 	def get_filterd_serial_nos(self):
 		serial_nos = []
@@ -141,7 +137,14 @@ class DeprecatedBatchNoValuation:
 			if not self.non_batchwise_balance_qty:
 				continue
 
-			self.batch_avg_rate[batch_no] = self.non_batchwise_balance_value / self.non_batchwise_balance_qty
+			if self.non_batchwise_balance_value == 0:
+				self.batch_avg_rate[batch_no] = 0.0
+				self.stock_value_differece[batch_no] = 0.0
+			else:
+				self.batch_avg_rate[batch_no] = (
+					self.non_batchwise_balance_value / self.non_batchwise_balance_qty
+				)
+				self.stock_value_differece[batch_no] = self.non_batchwise_balance_value
 
 			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change

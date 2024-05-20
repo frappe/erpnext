@@ -553,7 +553,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 			self.set_stock_value_difference()
 
 	def get_batch_no_ledgers(self) -> list[dict]:
-		if not self.batches:
+		if not self.batchwise_valuation_batches:
 			return []
 
 		parent = frappe.qb.DocType("Serial and Batch Bundle")
@@ -575,7 +575,7 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 				Sum(child.qty).as_("qty"),
 			)
 			.where(
-				(child.batch_no.isin(self.batches))
+				(child.batch_no.isin(self.batchwise_valuation_batches))
 				& (parent.warehouse == self.sle.warehouse)
 				& (parent.item_code == self.sle.item_code)
 				& (parent.docstatus == 1)
