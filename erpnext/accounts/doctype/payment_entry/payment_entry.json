@@ -20,6 +20,7 @@
   "party",
   "party_name",
   "book_advance_payments_in_separate_party_account",
+  "reconcile_on_advance_payment_date",
   "column_break_11",
   "bank_account",
   "party_bank_account",
@@ -750,6 +751,7 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Book Advance Payments in Separate Party Account",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -765,6 +767,16 @@
    "label": "In Words",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "company.reconcile_on_advance_payment_date",
+   "fieldname": "reconcile_on_advance_payment_date",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Reconcile on Advance Payment Date",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -778,7 +790,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2024-04-11 11:25:07.366347",
+ "modified": "2024-05-17 10:21:11.199445",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
