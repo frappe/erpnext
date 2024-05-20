@@ -1035,10 +1035,10 @@ class PurchaseInvoice(BuyingController):
 
 					if provisional_accounting_for_non_stock_items:
 						if item.purchase_receipt:
-							provisional_account, pr_qty, pr_base_rate = frappe.get_cached_value(
+							provisional_account, pr_qty, pr_base_rate, pr_rate = frappe.get_cached_value(
 								"Purchase Receipt Item",
 								item.pr_detail,
-								["provisional_expense_account", "qty", "base_rate"],
+								["provisional_expense_account", "qty", "base_rate", "rate"],
 							)
 							provisional_account = provisional_account or self.get_company_default(
 								"default_provisional_account"
@@ -1072,7 +1072,10 @@ class PurchaseInvoice(BuyingController):
 									self.posting_date,
 									provisional_account,
 									reverse=1,
-									item_amount=(min(item.qty, pr_qty) * pr_base_rate),
+									item_amount=(
+										(min(item.qty, pr_qty) * pr_rate)
+										* purchase_receipt_doc.get("conversion_rate")
+									),
 								)
 
 					if not self.is_internal_transfer():
