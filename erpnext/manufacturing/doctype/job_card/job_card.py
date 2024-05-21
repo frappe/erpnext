@@ -214,7 +214,11 @@ class JobCard(Document):
 				if d.to_time and get_datetime(d.from_time) > get_datetime(d.to_time):
 					frappe.throw(_("Row {0}: From time must be less than to time").format(d.idx))
 
-				data = self.get_overlap_for(d)
+				open_job_cards = []
+				if d.get("employee"):
+					open_job_cards = self.get_open_job_cards(d.get("employee"))
+
+				data = self.get_overlap_for(d, open_job_cards=open_job_cards)
 				if data:
 					frappe.throw(
 						_("Row {0}: From Time and To Time of {1} is overlapping with {2}").format(
@@ -235,12 +239,12 @@ class JobCard(Document):
 		for row in self.sub_operations:
 			self.total_completed_qty += row.completed_qty
 
-	def get_overlap_for(self, args):
+	def get_overlap_for(self, args, open_job_cards=None):
 		time_logs = []
 
 		time_logs.extend(self.get_time_logs(args, "Job Card Time Log"))
 
-		time_logs.extend(self.get_time_logs(args, "Job Card Scheduled Time"))
+		time_logs.extend(self.get_time_logs(args, "Job Card Scheduled Time", open_job_cards=open_job_cards))
 
 		if not time_logs:
 			return {}
@@ -304,7 +308,7 @@ class JobCard(Document):
 			return True
 		return overlap
 
-	def get_time_logs(self, args, doctype):
+	def get_time_logs(self, args, doctype, open_job_cards=None):
 		jc = frappe.qb.DocType("Job Card")
 		jctl = frappe.qb.DocType(doctype)
 
@@ -341,8 +345,14 @@ class JobCard(Document):
 		if self.workstation:
 			query = query.where(jc.workstation == self.workstation)
 
-		if args.get("employee") and doctype == "Job Card Time Log":
-			query = query.where(jctl.employee == args.get("employee"))
+		if args.get("employee"):
+			if not open_job_cards and doctype == "Job Card Scheduled Time":
+				return []
+
+			if doctype == "Job Card Time Log":
+				query = query.where(jctl.employee == args.get("employee"))
+			else:
+				query = query.where(jc.name.isin(open_job_cards))
 
 		if doctype != "Job Card Time Log":
 			query = query.where(jc.total_time_in_mins == 0)
@@ -350,6 +360,27 @@ class JobCard(Document):
 		time_logs = query.run(as_dict=True)
 
 		return time_logs
+
+	def get_open_job_cards(self, employee):
+		jc = frappe.qb.DocType("Job Card")
+		jctl = frappe.qb.DocType("Job Card Time Log")
+
+		query = (
+			frappe.qb.from_(jc)
+			.left_join(jctl)
+			.on(jc.name == jctl.parent)
+			.select(jc.name)
+			.where(
+				(jctl.parent == jc.name)
+				& (jc.workstation == self.workstation)
+				& (jctl.employee == employee)
+				& (jc.docstatus < 1)
+				& (jc.name != self.name)
+			)
+		)
+
+		jobs = query.run(as_dict=True)
+		return [job.get("name") for job in jobs] if jobs else []
 
 	def get_workstation_based_on_available_slot(self, existing_time_logs) -> dict:
 		workstations = get_workstations(self.workstation_type)
