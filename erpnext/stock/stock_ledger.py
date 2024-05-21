@@ -220,6 +220,7 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.flags.ignore_permissions = 1
 	sle.allow_negative_stock = allow_negative_stock
 	sle.via_landed_cost_voucher = via_landed_cost_voucher
+	sle.set_posting_datetime()
 	sle.submit()
 
 	# Added to handle the case when the stock ledger entry is created from the repostig
