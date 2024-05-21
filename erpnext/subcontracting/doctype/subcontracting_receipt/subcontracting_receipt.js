@@ -332,7 +332,7 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 		set_missing_values(frm);
 	},
 
-	items_remove: (frm) => {
+	items_delete: (frm) => {
 		set_missing_values(frm);
 	},
 
