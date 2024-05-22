@@ -1087,7 +1087,6 @@ class TestPaymentEntry(FrappeTestCase):
 			"exchange_rate": 1.0,
 			"due_date": None,
 			"bill_no": None,
-			"bill_date": None,
 		}
 		self.assertDictEqual(ref_details, expected_response)
 
