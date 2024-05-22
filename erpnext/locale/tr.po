@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-20 11:21\n"
+"PO-Revision-Date: 2024-05-22 11:47\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -28493,49 +28493,49 @@ msgstr ""
 #: accounts/doctype/payment_entry/payment_entry.js:861
 #: public/js/bank_reconciliation_tool/dialog_manager.js:196
 msgid "Filters"
-msgstr ""
+msgstr "Filtreler"
 
 #. Label of a Section Break field in DocType 'Closing Stock Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "Filters"
-msgstr ""
+msgstr "Filtreler"
 
 #. Label of a Section Break field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Filters"
-msgstr ""
+msgstr "Filtreler"
 
 #. Label of a Section Break field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "Filters"
-msgstr ""
+msgstr "Filtreler"
 
 #. Label of a Section Break field in DocType 'Process Payment Reconciliation'
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Filters"
-msgstr ""
+msgstr "Filtreler"
 
 #. Label of a Section Break field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Filters"
-msgstr ""
+msgstr "Filtreler"
 
 #. Label of a Section Break field in DocType 'Repost Payment Ledger'
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgctxt "Repost Payment Ledger"
 msgid "Filters"
-msgstr ""
+msgstr "Filtreler"
 
 #. Label of a Section Break field in DocType 'Tax Rule'
 #: accounts/doctype/tax_rule/tax_rule.json
 msgctxt "Tax Rule"
 msgid "Filters"
-msgstr ""
+msgstr "Filtreler"
 
 #. Label of a Tab Break field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
@@ -66734,7 +66734,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Set"
-msgstr ""
+msgstr "Ayarla"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
