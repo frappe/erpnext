@@ -52,32 +52,32 @@ def get_plaid_configuration():
 
 @frappe.whitelist()
 def add_institution(token, response):
-    response = json.loads(response)
+	response = json.loads(response)
 
-    plaid = PlaidConnector()
-    access_token = plaid.get_access_token(token)
+	plaid = PlaidConnector()
+	access_token = plaid.get_access_token(token)
 
-    try:
-        bank_name = response.get("institution").get("name")
+	try:
+		bank_name = response.get("institution").get("name")
 
-        if not frappe.db.exists("Bank", bank_name):
-            frappe.get_doc(
+		if not frappe.db.exists("Bank", bank_name):
+			frappe.get_doc(
 				{
 					"doctype": "Bank",
 					"bank_name": response["institution"]["name"],
 					"plaid_access_token": access_token,
 				}
 			).insert()
-        else:
-            frappe.db.set_value("Bank", bank_name, "plaid_access_token", access_token)
+		else:
+			frappe.db.set_value("Bank", bank_name, "plaid_access_token", access_token)
 
-    except Exception:
-        frappe.log_error("Plaid Link Error")
+	except Exception:
+		frappe.log_error("Plaid Link Error")
 
-    if bank_name:
-        return bank_name
-    else:
-        frappe.throw(_("Bank name not found in the response"))
+	if bank_name:
+		return bank_name
+	else:
+		frappe.throw(_("Bank name not found in the response"))
 
 
 @frappe.whitelist()
