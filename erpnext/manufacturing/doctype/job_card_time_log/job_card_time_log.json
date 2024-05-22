@@ -42,8 +42,7 @@
    "fieldname": "completed_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Completed Qty",
-   "reqd": 1
+   "label": "Completed Qty"
   },
   {
    "fieldname": "employee",
@@ -64,7 +63,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-12-23 14:30:00.970916",
+ "modified": "2024-05-21 12:40:55.765860",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card Time Log",

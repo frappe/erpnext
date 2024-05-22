@@ -74,15 +74,21 @@
   "discount_amount",
   "discount_percentage",
   "for_price_list",
-  "section_break_13",
-  "threshold_percentage",
-  "priority",
+  "dynamic_condition_tab",
   "condition",
-  "column_break_66",
+  "section_break_13",
   "apply_multiple_pricing_rules",
   "apply_discount_on_rate",
+  "column_break_66",
+  "threshold_percentage",
+  "validate_pricing_rule_section",
   "validate_applied_rule",
+  "column_break_texp",
   "rule_description",
+  "priority_section",
+  "has_priority",
+  "column_break_sayg",
+  "priority",
   "help_section",
   "pricing_rule_help",
   "reference_section",
@@ -477,7 +483,7 @@
   {
    "collapsible": 1,
    "fieldname": "section_break_13",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
    "label": "Advanced Settings"
   },
   {
@@ -487,6 +493,7 @@
    "label": "Threshold for Suggestion (In Percentage)"
   },
   {
+   "depends_on": "has_priority",
    "description": "Higher the number, higher the priority",
    "fieldname": "priority",
    "fieldtype": "Select",
@@ -513,6 +520,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.price_or_product_discount == 'Price'",
+   "description": "If enabled, then system will only validate the pricing rule and not apply automatically. User has to manually set the discount percentage / margin / free items to validate the pricing rule",
    "fieldname": "validate_applied_rule",
    "fieldtype": "Check",
    "label": "Validate Applied Rule"
@@ -525,7 +533,8 @@
   },
   {
    "fieldname": "help_section",
-   "fieldtype": "Section Break",
+   "fieldtype": "Tab Break",
+   "label": "Help Article",
    "options": "Simple"
   },
   {
@@ -603,12 +612,42 @@
    "fieldname": "apply_recursion_over",
    "fieldtype": "Float",
    "label": "Apply Recursion Over (As Per Transaction UOM)"
+  },
+  {
+   "fieldname": "priority_section",
+   "fieldtype": "Section Break",
+   "label": "Priority"
+  },
+  {
+   "fieldname": "dynamic_condition_tab",
+   "fieldtype": "Tab Break",
+   "label": "Dynamic Condition"
+  },
+  {
+   "fieldname": "validate_pricing_rule_section",
+   "fieldtype": "Section Break",
+   "label": "Validate Pricing Rule"
+  },
+  {
+   "fieldname": "column_break_texp",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_sayg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enable this checkbox even if you want to set the zero priority",
+   "fieldname": "has_priority",
+   "fieldtype": "Check",
+   "label": "Has Priority"
   }
  ],
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2023-02-14 04:53:34.887358",
+ "modified": "2024-05-17 13:16:34.496704",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",

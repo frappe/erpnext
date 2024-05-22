@@ -141,7 +141,19 @@ class Dunning(AccountsController):
 
 	def on_cancel(self):
 		super().on_cancel()
-		self.ignore_linked_doctypes = ["GL Entry"]
+		self.ignore_linked_doctypes = [
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+			"Payment Ledger Entry",
+			"Serial and Batch Bundle",
+		]
 
 
 def resolve_dunning(doc, state):

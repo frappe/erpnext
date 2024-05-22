@@ -1157,6 +1157,62 @@ class TestPricingRule(unittest.TestCase):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
 
+	def test_priority_of_multiple_pricing_rules(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
+
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule 1",
+			"name": "_Test Pricing Rule 1",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			"discount_percentage": 10,
+			"has_priority": 1,
+			"priority": 1,
+			"company": "_Test Company",
+		}
+
+		frappe.get_doc(test_record.copy()).insert()
+
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule 2",
+			"name": "_Test Pricing Rule 2",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			"discount_percentage": 20,
+			"has_priority": 1,
+			"priority": 3,
+			"company": "_Test Company",
+		}
+
+		frappe.get_doc(test_record.copy()).insert()
+
+		so = make_sales_order(item_code="_Test Item", qty=1, price_list_rate=1000, do_not_submit=True)
+		self.assertEqual(so.items[0].discount_percentage, 20)
+		self.assertEqual(so.items[0].rate, 800)
+
+		frappe.delete_doc_if_exists("Sales Order", so.name)
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
+
 
 test_dependencies = ["Campaign"]
 
@@ -1185,6 +1241,7 @@ def make_pricing_rule(**args):
 			"priority": args.priority or 1,
 			"discount_amount": args.discount_amount or 0.0,
 			"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0,
+			"has_priority": args.has_priority or 0,
 		}
 	)
 

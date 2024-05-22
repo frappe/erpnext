@@ -1183,4 +1183,39 @@ $.extend(erpnext.stock.utils, {
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: frm });
 		barcode_scanner.scan_api_call(child_row.barcode, callback);
 	},
+
+	get_serial_range(range_string, separator) {
+		/* Return an array of serial numbers generated from a range string.
+
+		Examples (using separator "::"):
+			- "1::5" => ["1", "2", "3", "4", "5"]
+			- "SN0009::12" => ["SN0009", "SN0010", "SN0011", "SN0012"]
+			- "ABC//05::8" => ["ABC//05", "ABC//06", "ABC//07", "ABC//08"]
+		*/
+		if (!range_string) {
+			return;
+		}
+
+		const [start_str, end_str] = range_string.trim().split(separator);
+
+		if (!start_str || !end_str) {
+			return;
+		}
+
+		const end_int = parseInt(end_str);
+		const length_difference = start_str.length - end_str.length;
+		const start_int = parseInt(start_str.substring(length_difference));
+
+		if (isNaN(start_int) || isNaN(end_int)) {
+			return;
+		}
+
+		const serial_numbers = Array(end_int - start_int + 1)
+			.fill(1)
+			.map((x, y) => x + y)
+			.map((x) => x + start_int - 1);
+		return serial_numbers.map((val) => {
+			return start_str.substring(0, length_difference) + val.toString().padStart(end_str.length, "0");
+		});
+	},
 });
