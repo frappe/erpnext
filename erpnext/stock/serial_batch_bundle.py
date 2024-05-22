@@ -840,6 +840,9 @@ class SerialBatchCreation:
 			self.set_auto_serial_batch_entries_for_inward()
 			self.add_serial_nos_for_batch_item()
 
+		if hasattr(self, "via_landed_cost_voucher") and self.via_landed_cost_voucher:
+			doc.flags.via_landed_cost_voucher = self.via_landed_cost_voucher
+
 		self.set_serial_batch_entries(doc)
 		if not doc.get("entries"):
 			return frappe._dict({})

@@ -71,6 +71,8 @@ frappe.ui.form.on("Quotation", {
 		frm.trigger("set_label");
 		frm.trigger("toggle_reqd_lead_customer");
 		frm.trigger("set_dynamic_field_label");
+		frm.set_value("party_name", "");
+		frm.set_value("customer_name", "");
 	},
 
 	set_label: function (frm) {
@@ -97,7 +99,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 		frappe.dynamic_link = {
 			doc: this.frm.doc,
 			fieldname: "party_name",
-			doctype: doc.quotation_to == "Customer" ? "Customer" : "Lead",
+			doctype: doc.quotation_to,
 		};
 
 		var me = this;
@@ -197,6 +199,7 @@ erpnext.selling.QuotationController = class QuotationController extends erpnext.
 			};
 		} else if (this.frm.doc.quotation_to == "Prospect") {
 			this.frm.set_df_property("party_name", "label", "Prospect");
+			this.frm.fields_dict.party_name.get_query = null;
 		}
 	}
 

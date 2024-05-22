@@ -85,6 +85,7 @@ class Company(NestedSet):
 		parent_company: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
+		reconcile_on_advance_payment_date: DF.Check
 		registration_details: DF.Code | None
 		rgt: DF.Int
 		round_off_account: DF.Link | None

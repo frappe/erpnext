@@ -27,7 +27,11 @@ def execute(filters=None):
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
-	opening_row = get_opening_balance(filters, columns, sl_entries)
+	if filters.get("batch_no"):
+		opening_row = get_opening_balance_from_batch(filters, columns, sl_entries)
+	else:
+		opening_row = get_opening_balance(filters, columns, sl_entries)
+
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 	bundle_details = {}
 
@@ -48,13 +52,16 @@ def execute(filters=None):
 	available_serial_nos = {}
 	inventory_dimension_filters_applied = check_inventory_dimension_filters_applied(filters)
 
-	batch_balance_dict = defaultdict(float)
+	batch_balance_dict = frappe._dict({})
+	if actual_qty and filters.get("batch_no"):
+		batch_balance_dict[filters.batch_no] = [actual_qty, stock_value]
+
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 
 		sle.update(item_detail)
 		if bundle_info := bundle_details.get(sle.serial_and_batch_bundle):
-			data.extend(get_segregated_bundle_entries(sle, bundle_info, batch_balance_dict))
+			data.extend(get_segregated_bundle_entries(sle, bundle_info, batch_balance_dict, filters))
 			continue
 
 		if filters.get("batch_no") or inventory_dimension_filters_applied:
@@ -90,7 +97,7 @@ def execute(filters=None):
 	return columns, data
 
 
-def get_segregated_bundle_entries(sle, bundle_details, batch_balance_dict):
+def get_segregated_bundle_entries(sle, bundle_details, batch_balance_dict, filters):
 	segregated_entries = []
 	qty_before_transaction = sle.qty_after_transaction - sle.actual_qty
 	stock_value_before_transaction = sle.stock_value - sle.stock_value_difference
@@ -109,9 +116,19 @@ def get_segregated_bundle_entries(sle, bundle_details, batch_balance_dict):
 			}
 		)
 
-		if row.batch_no:
-			batch_balance_dict[row.batch_no] += row.qty
-			new_sle.update({"qty_after_transaction": batch_balance_dict[row.batch_no]})
+		if filters.get("batch_no") and row.batch_no:
+			if not batch_balance_dict.get(row.batch_no):
+				batch_balance_dict[row.batch_no] = [0, 0]
+
+			batch_balance_dict[row.batch_no][0] += row.qty
+			batch_balance_dict[row.batch_no][1] += row.stock_value_difference
+
+			new_sle.update(
+				{
+					"qty_after_transaction": batch_balance_dict[row.batch_no][0],
+					"stock_value": batch_balance_dict[row.batch_no][1],
+				}
+			)
 
 		qty_before_transaction += row.qty
 		stock_value_before_transaction += new_sle.stock_value_difference
@@ -502,6 +519,62 @@ def get_sle_conditions(filters):
 			conditions.append(f"{dimension.fieldname} in %({dimension.fieldname})s")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+
+def get_opening_balance_from_batch(filters, columns, sl_entries):
+	query_filters = {
+		"batch_no": filters.batch_no,
+		"docstatus": 1,
+		"posting_date": ("<", filters.from_date),
+	}
+
+	for fields in ["item_code", "warehouse"]:
+		if filters.get(fields):
+			query_filters[fields] = filters.get(fields)
+
+	opening_data = frappe.get_all(
+		"Stock Ledger Entry",
+		fields=["sum(actual_qty) as qty_after_transaction", "sum(stock_value_difference) as stock_value"],
+		filters=query_filters,
+	)[0]
+
+	for field in ["qty_after_transaction", "stock_value", "valuation_rate"]:
+		if opening_data.get(field) is None:
+			opening_data[field] = 0.0
+
+	query_filters = [
+		["Serial and Batch Entry", "batch_no", "=", filters.batch_no],
+		["Serial and Batch Bundle", "docstatus", "=", 1],
+		["Serial and Batch Bundle", "posting_date", "<", filters.from_date],
+	]
+
+	for fields in ["item_code", "warehouse"]:
+		if filters.get(fields):
+			query_filters.append(["Serial and Batch Bundle", fields, "=", filters.get(fields)])
+
+	bundle_data = frappe.get_all(
+		"Serial and Batch Bundle",
+		fields=[
+			"sum(`tabSerial and Batch Entry`.`qty`) as qty",
+			"sum(`tabSerial and Batch Entry`.`stock_value_difference`) as stock_value",
+		],
+		filters=query_filters,
+	)
+
+	if bundle_data:
+		opening_data.qty_after_transaction += flt(bundle_data[0].qty)
+		opening_data.stock_value += flt(bundle_data[0].stock_value)
+		if opening_data.qty_after_transaction:
+			opening_data.valuation_rate = flt(opening_data.stock_value) / flt(
+				opening_data.qty_after_transaction
+			)
+
+	return {
+		"item_code": _("'Opening'"),
+		"qty_after_transaction": opening_data.qty_after_transaction,
+		"valuation_rate": opening_data.valuation_rate,
+		"stock_value": opening_data.stock_value,
+	}
 
 
 def get_opening_balance(filters, columns, sl_entries):

@@ -13,8 +13,9 @@ def execute():
 	for d in accounting_dimensions:
 		doctype = "Asset Repair"
 		field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": d.fieldname})
+		docfield = frappe.db.get_value("DocField", {"parent": doctype, "fieldname": d.fieldname})
 
-		if field:
+		if field or docfield:
 			continue
 
 		df = {
