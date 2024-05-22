@@ -311,7 +311,9 @@ def get_conditions(filters):
 
 	return conditions
 
+
 def get_items(filters, additional_query_columns):
+<<<<<<< HEAD
 <<<<<<< HEAD
 	conditions = get_conditions(filters)
 	if additional_query_columns:
@@ -361,18 +363,62 @@ def get_items(filters, additional_query_columns):
                  pi.supplier_name, pi.mode_of_payment
              )
              .where(pi.docstatus == 1))
+=======
+	pi = frappe.qb.DocType("Purchase Invoice")
+	pii = frappe.qb.DocType("Purchase Invoice Item")
+	Item = frappe.qb.DocType("Item")
+	query = (
+		frappe.qb.from_(pi)
+		.join(pii)
+		.on(pi.name == pii.parent)
+		# added left join
+		.left_join(Item)
+		.on(pii.item_code == Item.name)
+		.select(
+			pii.name.as_("pii_name"),
+			pii.parent,
+			pi.posting_date,
+			pi.credit_to,
+			pi.company,
+			pi.supplier,
+			pi.remarks,
+			pi.base_net_total,
+			pi.unrealized_profit_loss_account,
+			pii.item_code,
+			pii.description,
+			pii.item_group,
+			pii.item_name.as_("pi_item_name"),
+			pii.item_group.as_("pi_item_group"),
+			Item.item_name.as_("i_item_name"),
+			Item.item_group.as_("i_item_group"),
+			pii.project,
+			pii.purchase_order,
+			pii.purchase_receipt,
+			pii.po_detail,
+			pii.expense_account,
+			pii.stock_qty,
+			pii.stock_uom,
+			pii.base_net_amount,
+			pi.supplier_name,
+			pi.mode_of_payment,
+		)
+		.where(pi.docstatus == 1)
+	)
+>>>>>>> 76073ae228 (fix: fixing Item-wise sales register and purchase register #41373)
 
-    if additional_query_columns:
-        query = query.select(*additional_query_columns)
+	if additional_query_columns:
+		query = query.select(*additional_query_columns)
 
-    if filters.get("supplier"):
-        query = query.where(pi.supplier == filters['supplier'])
-    if filters.get("company"):
-        query = query.where(pi.company == filters['company'])
+	if filters.get("supplier"):
+		query = query.where(pi.supplier == filters["supplier"])
+	if filters.get("company"):
+		query = query.where(pi.company == filters["company"])
 
-    return query.run(as_dict=True)
-
+<<<<<<< HEAD
 >>>>>>> 1b45ecfcae (fix: Item-wise Sales and Purchase register with no item codes #41373)
+=======
+	return query.run(as_dict=True)
+>>>>>>> 76073ae228 (fix: fixing Item-wise sales register and purchase register #41373)
 
 
 def get_aii_accounts():
