@@ -18,6 +18,7 @@ class PaymentEntryReference(Document):
 		account_type: DF.Data | None
 		allocated_amount: DF.Float
 		bill_no: DF.Data | None
+		bill_date: DF.Date | None
 		due_date: DF.Date | None
 		exchange_gain_loss: DF.Currency
 		exchange_rate: DF.Float

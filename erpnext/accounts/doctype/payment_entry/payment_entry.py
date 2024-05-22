@@ -1830,6 +1830,7 @@ def get_outstanding_reference_documents(args, validate=False):
 					)
 			if d.voucher_type in ("Purchase Invoice"):
 				d["bill_no"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "bill_no")
+				d["bill_date"] = frappe.db.get_value(d.voucher_type, d.voucher_no, "bill_date")
 
 		# Get negative outstanding sales /purchase invoices
 		if args.get("party_type") != "Employee" and not args.get("voucher_no"):

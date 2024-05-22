@@ -949,6 +949,7 @@ frappe.ui.form.on("Payment Entry", {
 						c.total_amount = d.invoice_amount;
 						c.outstanding_amount = d.outstanding_amount;
 						c.bill_no = d.bill_no;
+						c.bill_date = d.bill_date;
 						c.payment_term = d.payment_term;
 						c.allocated_amount = d.allocated_amount;
 						c.account = d.account;
