@@ -222,7 +222,7 @@ frappe.treeview_settings["Account"] = {
 			"General Ledger",
 			"Balance Sheet",
 			"Profit and Loss Statement",
-			"Cash Flow Statement",
+			"Cash Flow",
 			"Accounts Payable",
 			"Accounts Receivable",
 		]) {

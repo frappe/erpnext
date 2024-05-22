@@ -712,6 +712,7 @@ class BuyingController(SubcontractingController):
 	def auto_make_assets(self, asset_items):
 		items_data = get_asset_item_details(asset_items)
 		messages = []
+		alert = False
 
 		for d in self.items:
 			if d.is_fixed_asset:
@@ -761,9 +762,10 @@ class BuyingController(SubcontractingController):
 							frappe.bold(d.item_code)
 						)
 					)
+					alert = True
 
 		for message in messages:
-			frappe.msgprint(message, title="Success", indicator="green")
+			frappe.msgprint(message, title="Success", indicator="green", alert=alert)
 
 	def make_asset(self, row, is_grouped_asset=False):
 		if not row.asset_location:
@@ -787,7 +789,7 @@ class BuyingController(SubcontractingController):
 				"supplier": self.supplier,
 				"purchase_date": self.posting_date,
 				"calculate_depreciation": 0,
-				"purchase_receipt_amount": purchase_amount,
+				"purchase_amount": purchase_amount,
 				"gross_purchase_amount": purchase_amount,
 				"asset_quantity": asset_quantity,
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,

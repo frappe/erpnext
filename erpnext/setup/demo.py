@@ -205,8 +205,11 @@ def clear_demo_record(document):
 		if key not in valid_columns:
 			filters.pop(key, None)
 
-	doc = frappe.get_doc(document_type, filters)
-	doc.delete(ignore_permissions=True)
+	try:
+		doc = frappe.get_doc(document_type, filters)
+		doc.delete(ignore_permissions=True)
+	except frappe.exceptions.DoesNotExistError:
+		pass
 
 
 def delete_company(company):
