@@ -389,6 +389,7 @@ def get_group_by_conditions(filters, doctype):
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 def get_items(filters, additional_query_columns, additional_conditions=None):
 	conditions = get_conditions(filters, additional_conditions)
 	if additional_query_columns:
@@ -455,14 +456,71 @@ def get_items(filters, additional_query_columns,additional_conditions=None):
     )
     if filters.get("customer"):
         query = query.where(si.customer == filters['customer'])
+=======
+def get_items(filters, additional_query_columns, additional_conditions=None):
+	si = frappe.qb.DocType("Sales Invoice")
+	sii = frappe.qb.DocType("Sales Invoice Item")
+	Item = frappe.qb.DocType("Item")
+>>>>>>> eafa88b8e9 (fix: fixing Item-wise sales register #41373)
 
-    if filters.get("customer_group"):
-        query = query.where(si.customer_group == filters['customer_group'])
-    
-    return query.run(as_dict=True)
+	query = (
+		frappe.qb.from_(si)
+		.join(sii)
+		.on(si.name == sii.parent)
+		# added left join
+		.left_join(Item)
+		.on(sii.item_code == Item.name)
+		.select(
+			sii.name,
+			sii.parent,
+			si.posting_date,
+			si.debit_to,
+			si.unrealized_profit_loss_account,
+			si.is_internal_customer,
+			si.customer,
+			si.remarks,
+			si.territory,
+			si.company,
+			si.base_net_total,
+			sii.project,
+			sii.item_code,
+			sii.description,
+			sii.item_name,
+			sii.item_group,
+			sii.item_name.as_("si_item_name"),
+			sii.item_group.as_("si_item_group"),
+			Item.item_name.as_("i_item_name"),
+			Item.item_group.as_("i_item_group"),
+			sii.sales_order,
+			sii.delivery_note,
+			sii.income_account,
+			sii.cost_center,
+			sii.enable_deferred_revenue,
+			sii.deferred_revenue_account,
+			sii.stock_qty,
+			sii.stock_uom,
+			sii.base_net_rate,
+			sii.base_net_amount,
+			si.customer_name,
+			si.customer_group,
+			sii.so_detail,
+			si.update_stock,
+			sii.uom,
+			sii.qty,
+		)
+		.where(si.docstatus == 1)
+	)
+	if filters.get("customer"):
+		query = query.where(si.customer == filters["customer"])
 
+	if filters.get("customer_group"):
+		query = query.where(si.customer_group == filters["customer_group"])
 
+<<<<<<< HEAD
 >>>>>>> 1b45ecfcae (fix: Item-wise Sales and Purchase register with no item codes #41373)
+=======
+	return query.run(as_dict=True)
+>>>>>>> eafa88b8e9 (fix: fixing Item-wise sales register #41373)
 
 
 def get_delivery_notes_against_sales_order(item_list):

@@ -371,7 +371,6 @@ def get_items(filters, additional_query_columns):
 		frappe.qb.from_(pi)
 		.join(pii)
 		.on(pi.name == pii.parent)
-		# added left join
 		.left_join(Item)
 		.on(pii.item_code == Item.name)
 		.select(
