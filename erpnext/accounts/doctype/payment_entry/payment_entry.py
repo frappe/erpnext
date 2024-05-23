@@ -9,8 +9,7 @@ import frappe
 from frappe import ValidationError, _, qb, scrub, throw
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 from frappe.utils.data import comma_and, fmt_money
-from pypika import Case
-from pypika.functions import Coalesce, Sum
+from pypika.functions import Sum
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_dimensions
