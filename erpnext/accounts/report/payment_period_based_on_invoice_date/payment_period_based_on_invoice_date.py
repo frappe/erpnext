@@ -23,11 +23,7 @@ def execute(filters=None):
 	data = []
 	for d in entries:
 		invoice = invoice_details.get(d.against_voucher) or frappe._dict()
-
-		if d.reference_type == "Purchase Invoice":
-			payment_amount = flt(d.debit) or -1 * flt(d.credit)
-		else:
-			payment_amount = flt(d.credit) or -1 * flt(d.debit)
+		payment_amount = d.amount
 
 		d.update({"range1": 0, "range2": 0, "range3": 0, "range4": 0, "outstanding": payment_amount})
 
@@ -43,8 +39,7 @@ def execute(filters=None):
 			d.against_voucher,
 			invoice.posting_date,
 			invoice.due_date,
-			d.debit,
-			d.credit,
+			d.amount,
 			d.remarks,
 			d.age,
 			d.range1,
@@ -112,8 +107,7 @@ def get_columns(filters):
 			"width": 100,
 		},
 		{"fieldname": "due_date", "label": _("Payment Due Date"), "fieldtype": "Date", "width": 100},
-		{"fieldname": "debit", "label": _("Debit"), "fieldtype": "Currency", "width": 140},
-		{"fieldname": "credit", "label": _("Credit"), "fieldtype": "Currency", "width": 140},
+		{"fieldname": "amount", "label": _("Amount"), "fieldtype": "Currency", "width": 140},
 		{"fieldname": "remarks", "label": _("Remarks"), "fieldtype": "Data", "width": 200},
 		{"fieldname": "age", "label": _("Age"), "fieldtype": "Int", "width": 50},
 		{"fieldname": "range1", "label": _("0-30"), "fieldtype": "Currency", "width": 140},
