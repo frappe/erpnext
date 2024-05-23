@@ -56,7 +56,7 @@ def get_fiscal_year(
 	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False, boolean=False
 ):
 	if isinstance(boolean, str):
-		boolean = frappe.json.loads(boolean)
+		boolean = loads(boolean)
 
 	fiscal_years = get_fiscal_years(
 		date, fiscal_year, label, verbose, company, as_dict=as_dict, boolean=boolean
