@@ -441,7 +441,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Failed")
 			if isinstance(error_message, list):
-				error_message = frappe.json.dumps(error_message)
+				error_message = json.dumps(error_message)
 			closing_entry.db_set("error_message", error_message)
 		raise
 
