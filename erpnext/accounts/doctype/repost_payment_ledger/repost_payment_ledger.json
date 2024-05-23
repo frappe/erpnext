@@ -98,11 +98,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-09-26 14:21:35.719727",
-=======
  "modified": "2024-05-23 17:00:31.540640",
->>>>>>> e2ec3e453a (refactor: remove 'format:' based naming in internal doctypes)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Payment Ledger",
