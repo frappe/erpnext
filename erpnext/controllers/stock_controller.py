@@ -205,6 +205,7 @@ class StockController(AccountsController):
 					"company": self.company,
 					"is_rejected": 1 if row.get("rejected_warehouse") else 0,
 					"use_serial_batch_fields": row.use_serial_batch_fields,
+					"via_landed_cost_voucher": via_landed_cost_voucher,
 					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
 
@@ -1227,8 +1228,8 @@ def get_accounting_ledger_preview(doc, filters):
 		"debit",
 		"credit",
 		"against",
-		"party",
 		"party_type",
+		"party",
 		"cost_center",
 		"against_voucher_type",
 		"against_voucher",
@@ -1361,7 +1362,7 @@ def repost_required_for_queue(doc: StockController) -> bool:
 
 
 @frappe.whitelist()
-def make_quality_inspections(doctype, docname, items):
+def make_quality_inspections(doctype, docname, items, inspection_type):
 	if isinstance(items, str):
 		items = json.loads(items)
 
@@ -1381,7 +1382,7 @@ def make_quality_inspections(doctype, docname, items):
 		quality_inspection = frappe.get_doc(
 			{
 				"doctype": "Quality Inspection",
-				"inspection_type": "Incoming",
+				"inspection_type": inspection_type,
 				"inspected_by": frappe.session.user,
 				"reference_type": doctype,
 				"reference_name": docname,
@@ -1404,7 +1405,12 @@ def is_reposting_pending():
 	)
 
 
-def future_sle_exists(args, sl_entries=None):
+def future_sle_exists(args, sl_entries=None, allow_force_reposting=True):
+	if allow_force_reposting and frappe.db.get_single_value(
+		"Stock Reposting Settings", "do_reposting_for_each_stock_transaction"
+	):
+		return True
+
 	key = (args.voucher_type, args.voucher_no)
 	if not hasattr(frappe.local, "future_sle"):
 		frappe.local.future_sle = {}

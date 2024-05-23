@@ -10,6 +10,7 @@ from frappe.utils import add_days, flt, nowdate
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_outstanding_reference_documents,
+	get_party_details,
 	get_payment_entry,
 	get_reference_details,
 )
@@ -1476,6 +1477,68 @@ class TestPaymentEntry(FrappeTestCase):
 		self.check_gl_entries()
 		self.check_pl_entries()
 
+	def test_advance_as_liability_against_order(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_invoice as _make_purchase_invoice,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		company = "_Test Company"
+
+		advance_account = create_account(
+			parent_account="Current Liabilities - _TC",
+			account_name="Advances Paid",
+			company=company,
+			account_type="Liability",
+		)
+
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_paid_account": advance_account,
+			},
+		)
+
+		po = create_purchase_order(supplier="_Test Supplier")
+		pe = get_payment_entry("Purchase Order", po.name, bank_account="Cash - _TC")
+		pe.save().submit()
+
+		pre_reconciliation_gle = [
+			{"account": "Cash - _TC", "debit": 0.0, "credit": 5000.0},
+			{"account": advance_account, "debit": 5000.0, "credit": 0.0},
+		]
+
+		self.voucher_no = pe.name
+		self.expected_gle = pre_reconciliation_gle
+		self.check_gl_entries()
+
+		# Make Purchase Invoice against the order
+		pi = _make_purchase_invoice(po.name)
+		pi.append(
+			"advances",
+			{
+				"reference_type": pe.doctype,
+				"reference_name": pe.name,
+				"reference_row": pe.references[0].name,
+				"advance_amount": 5000,
+				"allocated_amount": 5000,
+			},
+		)
+		pi.save().submit()
+
+		# # assert General and Payment Ledger entries post partial reconciliation
+		self.expected_gle = [
+			{"account": pi.credit_to, "debit": 5000.0, "credit": 0.0},
+			{"account": "Cash - _TC", "debit": 0.0, "credit": 5000.0},
+			{"account": advance_account, "debit": 5000.0, "credit": 0.0},
+			{"account": advance_account, "debit": 0.0, "credit": 5000.0},
+		]
+
+		self.voucher_no = pe.name
+		self.check_gl_entries()
+
 	def check_pl_entries(self):
 		ple = frappe.qb.DocType("Payment Ledger Entry")
 		pl_entries = (
@@ -1683,6 +1746,10 @@ def create_payment_entry(**args):
 	payment_entry.received_amount = payment_entry.paid_amount / payment_entry.target_exchange_rate
 	payment_entry.reference_no = "Test001"
 	payment_entry.reference_date = nowdate()
+
+	get_party_details(
+		payment_entry.company, payment_entry.party_type, payment_entry.party, payment_entry.posting_date
+	)
 
 	if args.get("save"):
 		payment_entry.save()

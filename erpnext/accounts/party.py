@@ -188,7 +188,9 @@ def set_address_details(
 	*,
 	ignore_permissions=False,
 ):
-	billing_address_field = "customer_address" if party_type == "Lead" else party_type.lower() + "_address"
+	billing_address_field = (
+		"customer_address" if party_type in ["Lead", "Prospect"] else party_type.lower() + "_address"
+	)
 	party_details[billing_address_field] = party_address or get_default_address(party_type, party.name)
 	if doctype:
 		party_details.update(
@@ -752,52 +754,6 @@ def validate_party_frozen_disabled(party_type, party_name):
 		elif party_type == "Employee":
 			if frappe.db.get_value("Employee", party_name, "status") != "Active":
 				frappe.msgprint(_("{0} {1} is not active").format(party_type, party_name), alert=True)
-
-
-def get_timeline_data(doctype, name):
-	"""returns timeline data for the past one year"""
-	from frappe.desk.form.load import get_communication_data
-
-	out = {}
-	after = add_years(None, -1).strftime("%Y-%m-%d")
-
-	data = get_communication_data(
-		doctype,
-		name,
-		after=after,
-		group_by="group by communication_date",
-		fields="C.communication_date as communication_date, count(C.name)",
-		as_dict=False,
-	)
-
-	# fetch and append data from Activity Log
-	activity_log = frappe.qb.DocType("Activity Log")
-	data += (
-		frappe.qb.from_(activity_log)
-		.select(activity_log.communication_date, Count(activity_log.name))
-		.where(
-			(
-				((activity_log.reference_doctype == doctype) & (activity_log.reference_name == name))
-				| ((activity_log.timeline_doctype == doctype) & (activity_log.timeline_name == name))
-				| (
-					(activity_log.reference_doctype.isin(["Quotation", "Opportunity"]))
-					& (activity_log.timeline_name == name)
-				)
-			)
-			& (activity_log.status != "Success")
-			& (activity_log.creation > after)
-		)
-		.groupby(activity_log.communication_date)
-		.orderby(activity_log.communication_date, order=frappe.qb.desc)
-	).run()
-
-	timeline_items = dict(data)
-
-	for date, count in timeline_items.items():
-		timestamp = get_timestamp(date)
-		out.update({timestamp: count})
-
-	return out
 
 
 def get_dashboard_info(party_type, party, loyalty_program=None):

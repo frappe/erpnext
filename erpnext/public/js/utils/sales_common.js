@@ -373,6 +373,7 @@ erpnext.sales_common = {
 								frappe.model.set_value(item.doctype, item.name, {
 									serial_and_batch_bundle: r.name,
 									use_serial_batch_fields: 0,
+									incoming_rate: r.avg_rate,
 									qty:
 										qty /
 										flt(

@@ -80,6 +80,18 @@ class BOMCreator(Document):
 			if row.is_expandable and row.item_code == self.item_code:
 				frappe.throw(_("Item {0} cannot be added as a sub-assembly of itself").format(row.item_code))
 
+			if not row.parent_row_no and row.fg_item and row.fg_item != self.item_code:
+				frappe.throw(
+					_("At row {0}: set Parent Row No for item {1}").format(row.idx, row.item_code),
+					title=_("Set Parent Row No in Items Table"),
+				)
+
+			elif row.parent_row_no and row.fg_item == self.item_code:
+				frappe.throw(
+					_("At row {0}: Parent Row No cannot be set for item {1}").format(row.idx, row.item_code),
+					title=_("Remove Parent Row No in Items Table"),
+				)
+
 	def set_status(self, save=False):
 		self.status = {
 			0: "Draft",
@@ -410,6 +422,10 @@ def add_sub_assembly(**kwargs):
 
 		parent_row_no = item_row.idx
 		name = ""
+	else:
+		parent_row_no = [row.idx for row in doc.items if row.name == kwargs.fg_reference_id]
+		if parent_row_no:
+			parent_row_no = parent_row_no[0]
 
 	for row in bom_item.get("items"):
 		row = frappe._dict(row)

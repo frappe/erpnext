@@ -27,9 +27,7 @@ class PricingRule(Document):
 		from frappe.types import DF
 
 		from erpnext.accounts.doctype.pricing_rule_brand.pricing_rule_brand import PricingRuleBrand
-		from erpnext.accounts.doctype.pricing_rule_item_code.pricing_rule_item_code import (
-			PricingRuleItemCode,
-		)
+		from erpnext.accounts.doctype.pricing_rule_item_code.pricing_rule_item_code import PricingRuleItemCode
 		from erpnext.accounts.doctype.pricing_rule_item_group.pricing_rule_item_group import (
 			PricingRuleItemGroup,
 		)
@@ -67,6 +65,7 @@ class PricingRule(Document):
 		free_item_rate: DF.Currency
 		free_item_uom: DF.Link | None
 		free_qty: DF.Float
+		has_priority: DF.Check
 		is_cumulative: DF.Check
 		is_recursive: DF.Check
 		item_groups: DF.Table[PricingRuleItemGroup]
@@ -156,6 +155,12 @@ class PricingRule(Document):
 				frappe.throw(_("Duplicate {0} found in the table").format(self.apply_on))
 
 	def validate_mandatory(self):
+		if self.has_priority and not self.priority:
+			throw(_("Priority is mandatory"), frappe.MandatoryError, _("Please Set Priority"))
+
+		if self.priority and not self.has_priority:
+			self.has_priority = 1
+
 		for apply_on, field in apply_on_dict.items():
 			if self.apply_on == apply_on and len(self.get(field) or []) < 1:
 				throw(_("{0} is not added in the table").format(apply_on), frappe.MandatoryError)
@@ -573,6 +578,22 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 		if pricing_rule.apply_discount_on_rate and item_details.get("discount_percentage"):
 			# Apply discount on discounted rate
 			item_details[field] += (100 - item_details[field]) * (pricing_rule.get(field, 0) / 100)
+		elif args.price_list_rate:
+			value = pricing_rule.get(field, 0)
+			calculate_discount_percentage = False
+			if field == "discount_percentage":
+				field = "discount_amount"
+				value = args.price_list_rate * (value / 100)
+				calculate_discount_percentage = True
+
+			if field not in item_details:
+				item_details.setdefault(field, 0)
+
+			item_details[field] += value if pricing_rule else args.get(field, 0)
+			if calculate_discount_percentage and args.price_list_rate and item_details.discount_amount:
+				item_details.discount_percentage = flt(
+					(flt(item_details.discount_amount) / flt(args.price_list_rate)) * 100
+				)
 		else:
 			if field not in item_details:
 				item_details.setdefault(field, 0)

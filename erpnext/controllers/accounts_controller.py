@@ -778,6 +778,9 @@ class AccountsController(TransactionBase):
 								# reset pricing rule fields if pricing_rule_removed
 								item.set(fieldname, value)
 
+							elif fieldname == "expense_account" and not item.get("expense_account"):
+								item.expense_account = value
+
 					if self.doctype in ["Purchase Invoice", "Sales Invoice"] and item.meta.get_field(
 						"is_fixed_asset"
 					):
@@ -2208,10 +2211,10 @@ class AccountsController(TransactionBase):
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(
-						grand_total * flt(d.invoice_portion / 100), d.precision("payment_amount")
+						grand_total * flt(d.invoice_portion) / 100, d.precision("payment_amount")
 					)
 					d.base_payment_amount = flt(
-						base_grand_total * flt(d.invoice_portion / 100), d.precision("base_payment_amount")
+						base_grand_total * flt(d.invoice_portion) / 100, d.precision("base_payment_amount")
 					)
 					d.outstanding = d.payment_amount
 				elif not d.invoice_portion:

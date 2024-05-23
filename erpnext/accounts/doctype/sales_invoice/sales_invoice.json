@@ -2044,7 +2044,7 @@
   {
    "fieldname": "contact_and_address_tab",
    "fieldtype": "Tab Break",
-   "label": "Contact & Address"
+   "label": "Address & Contact"
   },
   {
    "fieldname": "payments_tab",
@@ -2205,7 +2205,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-04-20 01:21:44.055127",
+ "modified": "2024-05-23 14:02:28.549041",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

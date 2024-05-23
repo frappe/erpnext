@@ -121,7 +121,7 @@ def send_mail(entry, email_campaign):
 		doctype="Email Campaign",
 		name=email_campaign.name,
 		subject=frappe.render_template(email_template.get("subject"), context),
-		content=frappe.render_template(email_template.get("response"), context),
+		content=frappe.render_template(email_template.response_, context),
 		sender=sender,
 		recipients=recipient_list,
 		communication_medium="Email",
