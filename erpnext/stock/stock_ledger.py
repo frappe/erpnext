@@ -1196,7 +1196,11 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		order by posting_datetime desc, creation desc
 		limit 1
 		for update""",
-		args,
+		{
+			"item_code": args.get("item_code"),
+			"warehouse": args.get("warehouse"),
+			"posting_datetime": args.get("posting_datetime"),
+		},
 		as_dict=1,
 	)
 
