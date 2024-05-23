@@ -552,32 +552,34 @@ def _check_is_pro_rata(asset_doc, row, wdv_or_dd_non_yearly=False):
 	# if not existing asset, from_date = available_for_use_date
 	# otherwise, if opening_number_of_booked_depreciations = 2, available_for_use_date = 01/01/2020 and frequency_of_depreciation = 12
 	# from_date = 01/01/2022
-	from_date = _get_modified_available_for_use_date(asset_doc, row, wdv_or_dd_non_yearly)
+	from_date = _get_modified_available_for_use_date(asset_doc, row, wdv_or_dd_non_yearly=False)
 	days = date_diff(row.depreciation_start_date, from_date) + 1
-
-	if wdv_or_dd_non_yearly:
-		total_days = get_total_days(row.depreciation_start_date, 12)
-	else:
-		# if frequency_of_depreciation is 12 months, total_days = 365
-		total_days = get_total_days(row.depreciation_start_date, row.frequency_of_depreciation)
-
+	total_days = get_total_days(row.depreciation_start_date, row.frequency_of_depreciation)
 	if days < total_days:
 		has_pro_rata = True
-
 	return has_pro_rata
 
 
 def _get_modified_available_for_use_date(asset_doc, row, wdv_or_dd_non_yearly=False):
-	if wdv_or_dd_non_yearly:
-		return add_months(
+	"""
+	if Asset has opening booked depreciations = 9,
+	available for use date = 17-07-2023,
+	depreciation start date = 30-04-2024
+	then from date should be 01-04-2024
+	"""
+	if asset_doc.number_of_depreciations_booked > 0:
+		from_date = add_months(
 			asset_doc.available_for_use_date,
-			(asset_doc.opening_number_of_booked_depreciations * 12),
+			(asset_doc.number_of_depreciations_booked * row.frequency_of_depreciation) - 1,
 		)
+		if is_last_day_of_the_month(row.depreciation_start_date):
+			return add_days(get_last_day(from_date), 1)
+
+		# get from date when depreciation start date is not last day of the month
+		months_difference = month_diff(row.depreciation_start_date, from_date) - 1
+		return add_days(add_months(row.depreciation_start_date, -1 * months_difference), 1)
 	else:
-		return add_months(
-			asset_doc.available_for_use_date,
-			(asset_doc.opening_number_of_booked_depreciations * row.frequency_of_depreciation),
-		)
+		return asset_doc.available_for_use_date
 
 
 def _get_pro_rata_amt(
