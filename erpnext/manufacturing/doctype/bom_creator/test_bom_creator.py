@@ -168,15 +168,15 @@ class TestBOMCreator(FrappeTestCase):
 		doc.reload()
 		self.assertEqual(doc.items[0].is_expandable, 1)
 
-		fg_valuation_rate = 0
+		rates = []
 		for row in doc.items:
 			if not row.is_expandable:
-				fg_valuation_rate += row.amount
+				rates.append(row.rate)
 				self.assertEqual(row.fg_item, "Pedal Assembly")
 				self.assertEqual(row.qty, 2.0)
 				self.assertEqual(row.fg_reference_id, doc.items[0].name)
 
-		self.assertEqual(doc.raw_material_cost, fg_valuation_rate)
+		self.assertEqual(doc.raw_material_cost, 2.0 * sum(2.0 * r for r in rates))
 
 	def test_make_boms_from_bom_creator(self):
 		final_product = "Bicycle Test"
