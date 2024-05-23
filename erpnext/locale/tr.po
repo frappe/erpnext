@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-22 11:47\n"
+"PO-Revision-Date: 2024-05-23 12:23\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -166,7 +166,12 @@ msgid "# CRM Settings\n\n"
 "- Lead\n"
 "- Opportunity\n"
 "- Quotation"
-msgstr ""
+msgstr "# Müşteri Yönetimi Ayarları\n\n"
+"Müşteri Yönetimi modülünün özellikleri iş ihtiyaçlarınıza göre yapılandırılabilir. Ayarlarınızı tercihlerinize göre yapılandırabilirsiniz:\n"
+"- Kampanya\n"
+"- Potansiyel Müşteri\n"
+"- Fırsat\n"
+"- Teklif"
 
 #. Description of the Onboarding Step 'Review Chart of Accounts'
 #: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
@@ -537,7 +542,7 @@ msgstr "% Dolu"
 #: accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:284
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:337
 msgid "% Of Grand Total"
-msgstr ""
+msgstr "% Genel Toplam"
 
 #. Label of a Percent field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
@@ -6092,7 +6097,7 @@ msgstr "Alternatif Ürün Adı"
 
 #: selling/doctype/quotation/quotation.js:363
 msgid "Alternative Items"
-msgstr ""
+msgstr "Alternatif Ürünler"
 
 #: stock/doctype/item_alternative/item_alternative.py:37
 msgid "Alternative item must not be same as item code"
@@ -12927,7 +12932,7 @@ msgstr ""
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:491
 msgid "Cannot make any transactions until the deletion job is completed"
-msgstr ""
+msgstr "Silme işi tamamlanana kadar herhangi bir işlem yapılamaz"
 
 #: controllers/accounts_controller.py:1866
 msgid "Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings"
@@ -22392,7 +22397,7 @@ msgstr ""
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:479
 msgid "Deletion in Progress!"
-msgstr ""
+msgstr "Silme İşlemi Devam Ediyor!"
 
 #: regional/__init__.py:14
 msgid "Deletion is not permitted for country {0}"
@@ -31334,13 +31339,13 @@ msgstr ""
 #: selling/report/lost_quotations/lost_quotations.js:33
 #: stock/report/total_stock_summary/total_stock_summary.js:8
 msgid "Group By"
-msgstr ""
+msgstr "Gruplama"
 
 #. Label of a Select field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Group By"
-msgstr ""
+msgstr "Gruplama"
 
 #: accounts/report/accounts_receivable/accounts_receivable.js:154
 msgid "Group By Customer"
@@ -41874,7 +41879,7 @@ msgstr ""
 #: buying/workspace/buying/buying.json
 #: stock/report/material_requests_for_which_supplier_quotations_are_not_created/material_requests_for_which_supplier_quotations_are_not_created.json
 msgid "Material Requests for which Supplier Quotations are not created"
-msgstr ""
+msgstr "Tedarikçi Tekliflerinin oluşturulmadığı Malzeme Talepleri"
 
 #: stock/doctype/stock_entry/stock_entry_list.js:13
 msgid "Material Returned from WIP"
@@ -44421,7 +44426,7 @@ msgstr ""
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "New Quotations"
-msgstr ""
+msgstr "Yeni Fiyat Teklifi"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -44640,7 +44645,7 @@ msgstr ""
 #: telephony/doctype/call_log/call_log.json
 msgctxt "Call Log"
 msgid "No Answer"
-msgstr ""
+msgstr "Cevap Yok"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2124
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
@@ -44838,7 +44843,7 @@ msgstr ""
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgctxt "Transaction Deletion Record Details"
 msgid "No of Docs"
-msgstr ""
+msgstr "Doküman Sayısı"
 
 #. Label of a Select field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -45085,7 +45090,7 @@ msgstr ""
 #: support/report/issue_summary/issue_summary.py:206
 #: support/report/issue_summary/issue_summary.py:287
 msgid "Not Specified"
-msgstr ""
+msgstr "Belirtilmemiş"
 
 #: manufacturing/doctype/production_plan/production_plan_list.js:7
 #: manufacturing/doctype/work_order/work_order_list.js:15
@@ -46025,7 +46030,7 @@ msgstr ""
 
 #: public/js/templates/crm_activities.html:63
 msgid "Open Events"
-msgstr ""
+msgstr "Açık Etkinlikler"
 
 #: selling/page/point_of_sale/pos_controller.js:189
 msgid "Open Form View"
@@ -46075,7 +46080,7 @@ msgstr ""
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Open Quotations"
-msgstr ""
+msgstr "Açık Teklifler"
 
 #: stock/report/item_variant_details/item_variant_details.py:110
 msgid "Open Sales Orders"
@@ -57742,7 +57747,7 @@ msgstr ""
 #: selling/doctype/quotation/quotation.py:327
 #: selling/page/sales_funnel/sales_funnel.py:57
 msgid "Quotations"
-msgstr ""
+msgstr "Fiyat Teklifleri"
 
 #: utilities/activation.py:86
 msgid "Quotations are proposals, bids you have sent to your customers"
@@ -61197,7 +61202,7 @@ msgstr ""
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgctxt "Transaction Deletion Record"
 msgid "Reset Company Default Values"
-msgstr ""
+msgstr "Şirket Varsayılan Değerlerini Sıfırla"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:19
 msgid "Reset Plaid Link"
@@ -61489,7 +61494,7 @@ msgstr ""
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.js:66
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.js:21
 msgid "Retry"
-msgstr ""
+msgstr "Yeniden Dene"
 
 #: bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.js:27
 msgid "Retry Failed Transactions"
@@ -68594,7 +68599,7 @@ msgstr ""
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.js:21
 msgid "Start Deletion"
-msgstr ""
+msgstr "Silme İşlemini Başlat"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:115
 msgid "Start Import"
@@ -74886,31 +74891,31 @@ msgstr ""
 #: bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
 msgctxt "Bulk Transaction Log Detail"
 msgid "Time"
-msgstr ""
+msgstr "Zaman"
 
 #. Label of a Time field in DocType 'Project Update'
 #: projects/doctype/project_update/project_update.json
 msgctxt "Project Update"
 msgid "Time"
-msgstr ""
+msgstr "Zaman"
 
 #. Label of a Section Break field in DocType 'Sales Invoice Timesheet'
 #: accounts/doctype/sales_invoice_timesheet/sales_invoice_timesheet.json
 msgctxt "Sales Invoice Timesheet"
 msgid "Time"
-msgstr ""
+msgstr "Zaman"
 
 #. Label of a Section Break field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Time"
-msgstr ""
+msgstr "Zaman"
 
 #. Label of a Float field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "Time"
-msgstr ""
+msgstr "Zaman"
 
 #: manufacturing/report/bom_operations_time/bom_operations_time.py:125
 msgid "Time (In Mins)"
@@ -77443,17 +77448,17 @@ msgstr ""
 #. Name of a DocType
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Transaction Deletion Record"
-msgstr ""
+msgstr "İşlem Silme Kaydı"
 
 #. Name of a DocType
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
 msgid "Transaction Deletion Record Details"
-msgstr ""
+msgstr "İşlem Silme Kaydı Detayları"
 
 #. Name of a DocType
 #: setup/doctype/transaction_deletion_record_item/transaction_deletion_record_item.json
 msgid "Transaction Deletion Record Item"
-msgstr ""
+msgstr "İşlem Silme Kayıt Öğesi"
 
 #. Label of a Section Break field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
@@ -81192,7 +81197,7 @@ msgstr ""
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgctxt "Supplier Scorecard"
 msgid "Warn for new Request for Quotations"
-msgstr ""
+msgstr "Yeni Fiyat Teklifi Talebi için Uyar"
 
 #: accounts/doctype/payment_entry/payment_entry.py:691
 #: controllers/accounts_controller.py:1768
@@ -83544,7 +83549,7 @@ msgstr ""
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "{0} is already running for {1}"
-msgstr ""
+msgstr "{0} zaten {1} için çalışıyor"
 
 #: controllers/accounts_controller.py:165
 msgid "{0} is blocked so this transaction cannot proceed"
