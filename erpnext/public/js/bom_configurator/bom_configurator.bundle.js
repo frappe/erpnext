@@ -78,11 +78,14 @@ class BOMConfigurator {
 				const qty = node.data.qty || frm_obj.frm.doc.qty;
 				const uom = node.data.uom || frm_obj.frm.doc.uom;
 				const docname = node.data.name || frm_obj.frm.doc.name;
+				let rate = node.data.rate;
 				let amount = node.data.amount;
 				if (node.data.value === frm_obj.frm.doc.item_code) {
+					rate = frm_obj.frm.doc.raw_material_cost / frm_obj.frm.doc.qty;
 					amount = frm_obj.frm.doc.raw_material_cost;
 				}
 
+				rate = frappe.format(rate, { fieldtype: "Currency", currency: frm_obj.frm.doc.currency });
 				amount = frappe.format(amount, { fieldtype: "Currency", currency: frm_obj.frm.doc.currency });
 
 				$(`
@@ -96,6 +99,9 @@ class BOMConfigurator {
 							border: 1px solid var(--bg-gray);
 						">
 							<div style="padding-right:5px" data-bom-qty-docname="${docname}">${qty} ${uom}</div>
+						<div class="fg-item-amt" style="padding: 0px 5px; border-left:1px solid var(--bg-gray)">
+							${rate}
+						</div>
 							<div class="fg-item-amt" style="padding-left:12px; border-left:1px solid var(--bg-gray)">
 								${amount}
 							</div>
