@@ -5,6 +5,7 @@
 import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
+from frappe.query_builder.functions import Abs
 from frappe.utils import flt, getdate
 
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
@@ -22,12 +23,12 @@ def execute(filters=None):
 
 	data = []
 	for d in entries:
-		invoice = invoice_details.get(d.against_voucher) or frappe._dict()
+		invoice = invoice_details.get(d.against_voucher_no) or frappe._dict()
 		payment_amount = d.amount
 
 		d.update({"range1": 0, "range2": 0, "range3": 0, "range4": 0, "outstanding": payment_amount})
 
-		if d.against_voucher:
+		if d.against_voucher_no:
 			ReceivablePayableReport(filters).get_ageing_data(invoice.posting_date, d)
 
 		row = [
@@ -36,7 +37,7 @@ def execute(filters=None):
 			d.party_type,
 			d.party,
 			d.posting_date,
-			d.against_voucher,
+			d.against_voucher_no,
 			invoice.posting_date,
 			invoice.due_date,
 			d.amount,
@@ -162,7 +163,7 @@ def get_entries(filters):
 			ple.party_type,
 			ple.party,
 			ple.posting_date,
-			ple.amount,
+			Abs(ple.amount).as_("amount"),
 			ple.remarks,
 			ple.against_voucher_no,
 		)
