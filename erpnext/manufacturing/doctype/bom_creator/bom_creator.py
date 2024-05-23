@@ -343,6 +343,7 @@ def get_children(doctype=None, parent=None, **kwargs):
 
 	fields = [
 		"item_code as value",
+		"item_name as title",
 		"is_expandable as expandable",
 		"parent as parent_id",
 		"qty",
