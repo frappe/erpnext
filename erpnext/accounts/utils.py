@@ -56,7 +56,7 @@ def get_fiscal_year(
 	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False, boolean=False
 ):
 	if isinstance(boolean, str):
-		boolean = frappe.json.loads(boolean)
+		boolean = loads(boolean)
 
 	fiscal_years = get_fiscal_years(
 		date, fiscal_year, label, verbose, company, as_dict=as_dict, boolean=boolean
@@ -1109,7 +1109,7 @@ def get_companies():
 @frappe.whitelist()
 def get_children(doctype, parent, company, is_root=False, include_disabled=False):
 	if isinstance(include_disabled, str):
-		include_disabled = frappe.json.loads(include_disabled)
+		include_disabled = loads(include_disabled)
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
 	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
