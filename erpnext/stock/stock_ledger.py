@@ -308,7 +308,11 @@ def get_reposting_data(file_path) -> dict:
 
 	attached_file = frappe.get_doc("File", file_name)
 
-	data = gzip.decompress(attached_file.get_content())
+	content = attached_file.get_content()
+	if isinstance(content, str):
+		content = content.encode("utf-8")
+
+	data = gzip.decompress(content)
 	if data := json.loads(data.decode("utf-8")):
 		data = data
 
