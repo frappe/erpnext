@@ -210,7 +210,7 @@ def get_or_create_account(company_name, account):
 
 	existing_accounts = frappe.get_all(
 		"Account",
-		filters={"company": company_name, "root_type": root_type},
+		filters={"company": company_name},
 		or_filters={
 			"account_name": account.get("account_name"),
 			"account_number": account.get("account_number"),
