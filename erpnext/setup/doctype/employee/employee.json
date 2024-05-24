@@ -76,6 +76,7 @@
   "ctc",
   "salary_currency",
   "salary_mode",
+  "salary_extension_point_column",
   "bank_details_section",
   "bank_name",
   "column_break_heye",
@@ -817,6 +818,10 @@
    "fieldname": "iban",
    "fieldtype": "Data",
    "label": "IBAN"
+  },
+  {
+   "fieldname": "salary_extension_point_column",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
@@ -824,7 +829,7 @@
  "image_field": "image",
  "is_tree": 1,
  "links": [],
- "modified": "2024-03-27 13:09:36.900706",
+ "modified": "2024-05-24 05:59:06.161193",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Employee",

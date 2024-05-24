@@ -24,6 +24,92 @@ class InactiveEmployeeStatusError(frappe.ValidationError):
 
 
 class Employee(NestedSet):
+	# begin: auto-generated types
+	# This code is auto-generated. Do not modify anything in this block.
+
+	from typing import TYPE_CHECKING
+
+	if TYPE_CHECKING:
+		from frappe.types import DF
+
+		from erpnext.setup.doctype.employee_education.employee_education import EmployeeEducation
+		from erpnext.setup.doctype.employee_external_work_history.employee_external_work_history import (
+			EmployeeExternalWorkHistory,
+		)
+		from erpnext.setup.doctype.employee_internal_work_history.employee_internal_work_history import (
+			EmployeeInternalWorkHistory,
+		)
+
+		attendance_device_id: DF.Data | None
+		bank_ac_no: DF.Data | None
+		bank_name: DF.Data | None
+		bio: DF.TextEditor | None
+		blood_group: DF.Literal["", "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+		branch: DF.Link | None
+		cell_number: DF.Data | None
+		company: DF.Link
+		company_email: DF.Data | None
+		contract_end_date: DF.Date | None
+		create_user_permission: DF.Check
+		ctc: DF.Currency
+		current_accommodation_type: DF.Literal["", "Rented", "Owned"]
+		current_address: DF.SmallText | None
+		date_of_birth: DF.Date
+		date_of_issue: DF.Date | None
+		date_of_joining: DF.Date
+		date_of_retirement: DF.Date | None
+		department: DF.Link | None
+		designation: DF.Link | None
+		education: DF.Table[EmployeeEducation]
+		emergency_phone_number: DF.Data | None
+		employee: DF.Data | None
+		employee_name: DF.Data | None
+		employee_number: DF.Data | None
+		encashment_date: DF.Date | None
+		external_work_history: DF.Table[EmployeeExternalWorkHistory]
+		family_background: DF.SmallText | None
+		feedback: DF.SmallText | None
+		final_confirmation_date: DF.Date | None
+		first_name: DF.Data
+		gender: DF.Link
+		health_details: DF.SmallText | None
+		held_on: DF.Date | None
+		holiday_list: DF.Link | None
+		iban: DF.Data | None
+		image: DF.AttachImage | None
+		internal_work_history: DF.Table[EmployeeInternalWorkHistory]
+		last_name: DF.Data | None
+		leave_encashed: DF.Literal["", "Yes", "No"]
+		lft: DF.Int
+		marital_status: DF.Literal["", "Single", "Married", "Divorced", "Widowed"]
+		middle_name: DF.Data | None
+		naming_series: DF.Literal["HR-EMP-"]
+		new_workplace: DF.Data | None
+		notice_number_of_days: DF.Int
+		old_parent: DF.Data | None
+		passport_number: DF.Data | None
+		permanent_accommodation_type: DF.Literal["", "Rented", "Owned"]
+		permanent_address: DF.SmallText | None
+		person_to_be_contacted: DF.Data | None
+		personal_email: DF.Data | None
+		place_of_issue: DF.Data | None
+		prefered_contact_email: DF.Literal["", "Company Email", "Personal Email", "User ID"]
+		prefered_email: DF.Data | None
+		reason_for_leaving: DF.SmallText | None
+		relation: DF.Data | None
+		relieving_date: DF.Date | None
+		reports_to: DF.Link | None
+		resignation_letter_date: DF.Date | None
+		rgt: DF.Int
+		salary_currency: DF.Link | None
+		salary_mode: DF.Literal["", "Bank", "Cash", "Cheque"]
+		salutation: DF.Link | None
+		scheduled_confirmation_date: DF.Date | None
+		status: DF.Literal["Active", "Inactive", "Suspended", "Left"]
+		unsubscribed: DF.Check
+		user_id: DF.Link | None
+		valid_upto: DF.Date | None
+	# end: auto-generated types
 	nsm_parent_field = "reports_to"
 
 	def autoname(self):
