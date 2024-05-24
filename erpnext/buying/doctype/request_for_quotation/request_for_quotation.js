@@ -513,7 +513,7 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 						method: "frappe.desk.doctype.tag.tag.get_tagged_docs",
 						args: {
 							doctype: "Supplier",
-							tag: args.tag,
+							tag: "%" + args.tag + "%",
 						},
 						callback: load_suppliers,
 					});
