@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-23 12:23\n"
+"PO-Revision-Date: 2024-05-24 12:26\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -194,7 +194,9 @@ msgstr "# Stok Raporlarını Kontrol Edin\n"
 msgid "# Cost Centers for Budgeting and Analysis\n\n"
 "While your Books of Accounts are framed to fulfill statutory requirements, you can set up Cost Center and Accounting Dimensions to address your companies reporting and budgeting requirements.\n\n"
 "Click here to learn more about how  <b>[Cost Center](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/cost-center)</b> and <b> [Dimensions](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-dimensions)</b> allow you to get advanced financial analytics reports from ERPNext."
-msgstr ""
+msgstr "# Bütçeleme ve Analiz için Maliyet Merkezleri\n\n"
+"Muhasebe kayıtlarınız yasal gereklilikleri karşılayacak şekilde düzenlenirken, şirketinizin raporlama ve bütçeleme ihtiyaçlarını karşılamak için Maliyet Merkezleri ve Muhasebe Boyutları oluşturabilirsiniz.\n\n"
+"<b> Maliyet Merkezi](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/cost-center)</b> ve <b> [Muhasebe Boyutları](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-dimensions</b> ) için ERPNext'ten gelişmiş finansal analiz raporları almanızı nasıl sağladığı hakkında daha fazla bilgi edinmek için buraya tıklayın."
 
 #. Description of the Onboarding Step 'Finished Items'
 #: manufacturing/onboarding_step/create_product/create_product.json
@@ -1497,19 +1499,19 @@ msgstr "Kabul Edildi"
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Accepted Qty"
-msgstr ""
+msgstr "Kabul Edilen Miktar"
 
 #. Label of a Float field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Accepted Qty in Stock UOM"
-msgstr ""
+msgstr "Stok Biriminde Kabul Edilen Miktar"
 
 #. Label of a Float field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Accepted Qty in Stock UOM"
-msgstr ""
+msgstr "Stok Biriminde Kabul Edilen Miktar"
 
 #: public/js/controllers/transaction.js:2172
 msgid "Accepted Quantity"
@@ -2910,7 +2912,7 @@ msgstr ""
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgid "Accounts Manager"
-msgstr ""
+msgstr "Muhasebe Yöneticisi"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:339
 msgid "Accounts Missing Error"
@@ -3112,7 +3114,7 @@ msgstr ""
 #: stock/doctype/warehouse_type/warehouse_type.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Accounts User"
-msgstr ""
+msgstr "Muhasebe Kullanıcısı"
 
 #: accounts/doctype/journal_entry/journal_entry.py:1197
 msgid "Accounts table cannot be blank."
@@ -3890,7 +3892,7 @@ msgstr "Stok Ekle"
 #: public/js/bom_configurator/bom_configurator.bundle.js:238
 #: public/js/bom_configurator/bom_configurator.bundle.js:318
 msgid "Add Sub Assembly"
-msgstr ""
+msgstr "Alt Montaj Ekle"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:472
 #: public/js/event.js:32
@@ -3929,7 +3931,7 @@ msgstr "Mevcut Bir Varlık Ekle"
 
 #: www/book_appointment/index.html:42
 msgid "Add details"
-msgstr ""
+msgstr "Detayları Ekle"
 
 #: stock/doctype/pick_list/pick_list.js:71
 #: stock/doctype/pick_list/pick_list.py:686
@@ -3954,7 +3956,7 @@ msgstr "Tatillere Ekle"
 
 #: crm/doctype/lead/lead.js:42
 msgid "Add to Prospect"
-msgstr ""
+msgstr "Potansiyel Müşteriye Ekle"
 
 #. Label of a Check field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -3998,15 +4000,15 @@ msgstr ""
 
 #: controllers/website_list_for_contact.py:304
 msgid "Added {1} Role to User {0}."
-msgstr ""
+msgstr "{1} Rolü {0} Kullanıcısına Eklendi."
 
 #: crm/doctype/lead/lead.js:81
 msgid "Adding Lead to Prospect..."
-msgstr ""
+msgstr "Müşteri Adayı Potansiyel Müşteriye Ekleniyor..."
 
 #: selling/page/point_of_sale/pos_item_cart.js:433
 msgid "Additional"
-msgstr ""
+msgstr "Ek Olarak"
 
 #. Label of a Currency field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -9103,19 +9105,19 @@ msgstr "Mevcut"
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Available Batch Qty at From Warehouse"
-msgstr ""
+msgstr "Kaynak Depodaki Mevcut Parti Miktarı"
 
 #. Label of a Float field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Available Batch Qty at Warehouse"
-msgstr ""
+msgstr "Depodaki Mevcut Parti Miktarı"
 
 #. Label of a Float field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Available Batch Qty at Warehouse"
-msgstr ""
+msgstr "Depodaki Mevcut Parti Miktarı"
 
 #. Name of a report
 #: stock/report/available_batch_report/available_batch_report.json
@@ -9129,67 +9131,67 @@ msgstr ""
 #: manufacturing/report/bom_stock_calculated/bom_stock_calculated.py:80
 #: public/js/utils.js:549 stock/report/stock_ageing/stock_ageing.py:155
 msgid "Available Qty"
-msgstr ""
+msgstr "Mevcut Miktar"
 
 #. Label of a Section Break field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Available Qty"
-msgstr ""
+msgstr "Mevcut Miktar"
 
 #. Label of a Float field in DocType 'Purchase Receipt Item Supplied'
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 msgctxt "Purchase Receipt Item Supplied"
 msgid "Available Qty For Consumption"
-msgstr ""
+msgstr "Tüketim İçin Kullanılabilir Miktar"
 
 #. Label of a Float field in DocType 'Subcontracting Receipt Supplied Item'
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgctxt "Subcontracting Receipt Supplied Item"
 msgid "Available Qty For Consumption"
-msgstr ""
+msgstr "Tüketim İçin Kullanılabilir Miktar"
 
 #. Label of a Float field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Available Qty at Company"
-msgstr ""
+msgstr "Şirketteki Mevcut Miktar"
 
 #. Label of a Float field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Available Qty at From Warehouse"
-msgstr ""
+msgstr "Kaynak Depodaki Mevcut Miktar"
 
 #. Label of a Float field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgctxt "Work Order Item"
 msgid "Available Qty at Source Warehouse"
-msgstr ""
+msgstr "Kaynak Depodaki Mevcut Miktar"
 
 #. Label of a Float field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Available Qty at Target Warehouse"
-msgstr ""
+msgstr "Hedef Depodaki Mevcut Miktar"
 
 #. Label of a Float field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgctxt "Work Order Item"
 msgid "Available Qty at WIP Warehouse"
-msgstr ""
+msgstr "Devam Eden İş Deposundaki Mevcut Miktar"
 
 #. Label of a Float field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Available Qty at Warehouse"
-msgstr ""
+msgstr "Depodaki Mevcut Miktar"
 
 #. Label of a Float field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Available Qty at Warehouse"
-msgstr ""
+msgstr "Depodaki Mevcut Miktar"
 
 #: stock/report/reserved_stock/reserved_stock.py:138
 msgid "Available Qty to Reserve"
@@ -9661,7 +9663,7 @@ msgstr "Ürün Ağacı Güncelleme Aracı"
 #. Description of a DocType
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 msgid "BOM Update Tool Log with job status maintained"
-msgstr ""
+msgstr "İş durumunun korunduğu Ürün Ağacı Güncelleme Aracı Günlüğü"
 
 #: manufacturing/doctype/bom_update_log/bom_update_log.py:97
 msgid "BOM Updation already in progress. Please wait until {0} is complete."
@@ -10462,7 +10464,7 @@ msgstr ""
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Base Total Billed Amount"
-msgstr ""
+msgstr "Toplam Fatura Tutarı"
 
 #. Label of a Currency field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
@@ -10797,7 +10799,7 @@ msgstr ""
 
 #: stock/report/serial_and_batch_summary/serial_and_batch_summary.py:155
 msgid "Batch Qty"
-msgstr ""
+msgstr "Parti Miktarı"
 
 #. Label of a Float field in DocType 'Batch'
 #: stock/doctype/batch/batch.json
@@ -10896,7 +10898,7 @@ msgstr ""
 
 #: accounts/doctype/subscription/subscription.py:320
 msgid "Below Subscription Plans are of different currency to the party default billing currency/Company currency: {0}"
-msgstr ""
+msgstr "Aşağıdaki Abonelik Planları, carinin varsayılan Fatura Para Birimi / Şirket Para Birimi {0} ile farklı para birimindedir."
 
 #: accounts/report/accounts_receivable/accounts_receivable.py:1046
 #: accounts/report/purchase_register/purchase_register.py:214
@@ -10971,13 +10973,13 @@ msgstr ""
 #: selling/report/item_wise_sales_history/item_wise_sales_history.py:107
 #: selling/report/sales_order_analysis/sales_order_analysis.py:298
 msgid "Billed Amount"
-msgstr ""
+msgstr "Fatura Tutarı"
 
 #. Label of a Currency field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Billed Amount"
-msgstr ""
+msgstr "Fatura Tutarı"
 
 #. Label of a Currency field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -11005,7 +11007,7 @@ msgstr ""
 #: buying/report/purchase_order_analysis/purchase_order_analysis.py:221
 #: selling/report/sales_order_analysis/sales_order_analysis.py:276
 msgid "Billed Qty"
-msgstr ""
+msgstr "Faturalanan Miktar"
 
 #. Label of a Section Break field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
@@ -11229,7 +11231,7 @@ msgstr ""
 
 #: accounts/party.py:559
 msgid "Billing currency must be equal to either default company's currency or party account currency"
-msgstr ""
+msgstr "Fatura para birimi, şirketin varsayılan para birimi veya carinin hesap para birimi ile aynı olmalıdır."
 
 #. Name of a DocType
 #: stock/doctype/bin/bin.json
@@ -11901,7 +11903,7 @@ msgstr ""
 
 #: stock/report/product_bundle_balance/product_bundle_balance.py:95
 msgid "Bundle Qty"
-msgstr ""
+msgstr "Paket Miktarı"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -12491,19 +12493,19 @@ msgstr ""
 #: accounts/doctype/invoice_discounting/invoice_discounting_list.js:13
 #: stock/doctype/stock_entry/stock_entry_list.js:25
 msgid "Canceled"
-msgstr ""
+msgstr "İptal Edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
 msgctxt "Call Log"
 msgid "Canceled"
-msgstr ""
+msgstr "İptal Edildi"
 
 #. Option for the 'Status' (Select) field in DocType 'Closing Stock Balance'
 #: stock/doctype/closing_stock_balance/closing_stock_balance.json
 msgctxt "Closing Stock Balance"
 msgid "Canceled"
-msgstr ""
+msgstr "İptal Edildi"
 
 #: accounts/doctype/bank_transaction/bank_transaction_list.js:8
 #: accounts/doctype/payment_request/payment_request_list.js:18
@@ -13457,7 +13459,7 @@ msgstr ""
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.js:38
 msgid "Charges will be distributed proportionately based on item qty or amount, as per your selection"
-msgstr ""
+msgstr "Seçiminize göre, masraflar ürün miktarına veya tutarına göre orantılı olarak dağıtılacaktır."
 
 #: selling/page/sales_funnel/sales_funnel.js:45
 msgid "Chart"
@@ -13564,7 +13566,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Check Stock Projected Qty'
 #: stock/onboarding_step/view_stock_projected_qty/view_stock_projected_qty.json
 msgid "Check Stock Projected Qty"
-msgstr ""
+msgstr "Öngörülen Stok Miktarını Kontrol et"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -15919,29 +15921,29 @@ msgstr "Tamamlanan Operasyon"
 #: manufacturing/doctype/job_card_operation/job_card_operation.json
 msgctxt "Job Card Operation"
 msgid "Completed Qty"
-msgstr ""
+msgstr "Tamamlanan Miktar"
 
 #. Label of a Float field in DocType 'Job Card Time Log'
 #: manufacturing/doctype/job_card_time_log/job_card_time_log.json
 msgctxt "Job Card Time Log"
 msgid "Completed Qty"
-msgstr ""
+msgstr "Tamamlanan Miktar"
 
 #. Label of a Float field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Completed Qty"
-msgstr ""
+msgstr "Tamamlanan Miktar"
 
 #. Label of a Float field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "Completed Qty"
-msgstr ""
+msgstr "Tamamlanan Miktar"
 
 #: manufacturing/doctype/work_order/work_order.py:902
 msgid "Completed Qty cannot be greater than 'Qty to Manufacture'"
-msgstr ""
+msgstr "Tamamlanan Miktar, Üretilecek Miktardan fazla olamaz."
 
 #: manufacturing/doctype/job_card/job_card.js:313
 #: manufacturing/doctype/workstation/workstation.js:200
@@ -16374,31 +16376,31 @@ msgstr ""
 #: manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:136
 #: stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py:61
 msgid "Consumed Qty"
-msgstr ""
+msgstr "Tüketilen Miktar"
 
 #. Label of a Float field in DocType 'Purchase Order Item Supplied'
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
 msgctxt "Purchase Order Item Supplied"
 msgid "Consumed Qty"
-msgstr ""
+msgstr "Tüketilen Miktar"
 
 #. Label of a Float field in DocType 'Subcontracting Order Supplied Item'
 #: subcontracting/doctype/subcontracting_order_supplied_item/subcontracting_order_supplied_item.json
 msgctxt "Subcontracting Order Supplied Item"
 msgid "Consumed Qty"
-msgstr ""
+msgstr "Tüketilen Miktar"
 
 #. Label of a Float field in DocType 'Subcontracting Receipt Supplied Item'
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgctxt "Subcontracting Receipt Supplied Item"
 msgid "Consumed Qty"
-msgstr ""
+msgstr "Tüketilen Miktar"
 
 #. Label of a Float field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgctxt "Work Order Item"
 msgid "Consumed Qty"
-msgstr ""
+msgstr "Tüketilen Miktar"
 
 #. Label of a Data field in DocType 'Asset Repair Consumed Item'
 #: assets/doctype/asset_repair_consumed_item/asset_repair_consumed_item.json
@@ -18752,7 +18754,7 @@ msgstr "Hesap Para Biriminde Alacak"
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Credit Amount in Transaction Currency"
-msgstr ""
+msgstr "Hesap Para Biriminde Alacak"
 
 #: selling/report/customer_credit_balance/customer_credit_balance.py:67
 msgid "Credit Balance"
@@ -19506,13 +19508,13 @@ msgstr ""
 
 #: stock/report/total_stock_summary/total_stock_summary.py:23
 msgid "Current Qty"
-msgstr ""
+msgstr "Mevcut Miktar"
 
 #. Label of a Float field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Current Qty"
-msgstr ""
+msgstr "Mevcut Miktar"
 
 #. Label of a Link field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
@@ -21314,25 +21316,25 @@ msgstr ""
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
 msgctxt "Account Closing Balance"
 msgid "Debit Amount"
-msgstr ""
+msgstr "Borç Tutarı"
 
 #. Label of a Currency field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Debit Amount"
-msgstr ""
+msgstr "Borç Tutarı"
 
 #. Label of a Currency field in DocType 'Account Closing Balance'
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
 msgctxt "Account Closing Balance"
 msgid "Debit Amount in Account Currency"
-msgstr ""
+msgstr "Hesap Para Biriminde Borç"
 
 #. Label of a Currency field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Debit Amount in Account Currency"
-msgstr ""
+msgstr "Hesap Para Biriminde Borç"
 
 #. Label of a Currency field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
@@ -22461,37 +22463,37 @@ msgstr "Teslim Edilmiş Faturalandırılacak Ürünler"
 #: stock/report/reserved_stock/reserved_stock.py:131
 #: stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py:63
 msgid "Delivered Qty"
-msgstr ""
+msgstr "Teslim Edilen Miktar"
 
 #. Label of a Float field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Delivered Qty"
-msgstr ""
+msgstr "Teslim Edilen Miktar"
 
 #. Label of a Float field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Delivered Qty"
-msgstr ""
+msgstr "Teslim Edilen Miktar"
 
 #. Label of a Float field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Delivered Qty"
-msgstr ""
+msgstr "Teslim Edilen Miktar"
 
 #. Label of a Float field in DocType 'Serial and Batch Entry'
 #: stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgctxt "Serial and Batch Entry"
 msgid "Delivered Qty"
-msgstr ""
+msgstr "Teslim Edilen Miktar"
 
 #. Label of a Float field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Delivered Qty"
-msgstr ""
+msgstr "Teslim Edilen Miktar"
 
 #: selling/report/item_wise_sales_history/item_wise_sales_history.py:101
 msgid "Delivered Quantity"
@@ -25027,7 +25029,7 @@ msgstr ""
 
 #: setup/install.py:146
 msgid "Documentation"
-msgstr ""
+msgstr "Dökümantasyon"
 
 #. Option for the 'Shipment Type' (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -25061,7 +25063,7 @@ msgstr ""
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Don't Reserve Sales Order Qty on Sales Return"
-msgstr ""
+msgstr "Satış İadesindeki Siparişi Miktarını Ayırma"
 
 #. Label of a Check field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
@@ -25126,7 +25128,7 @@ msgstr "Yedekleri İndir"
 
 #: public/js/utils/serial_no_batch_selector.js:251
 msgid "Download CSV Template"
-msgstr ""
+msgstr "CSV Şablonunu İndir"
 
 #. Label of a Button field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
@@ -25937,7 +25939,7 @@ msgstr "İşlem Tarihi ve Saatini Düzenle"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:405
 msgid "Edit Qty"
-msgstr ""
+msgstr "Miktarı Düzenle"
 
 #: selling/page/point_of_sale/pos_past_order_summary.js:247
 msgid "Edit Receipt"
@@ -25969,11 +25971,11 @@ msgstr ""
 
 #: setup/doctype/territory/territory.py:40
 msgid "Either target qty or target amount is mandatory"
-msgstr ""
+msgstr "Hedef miktar veya hedef tutarından biri zorunludur"
 
 #: setup/doctype/sales_person/sales_person.py:50
 msgid "Either target qty or target amount is mandatory."
-msgstr ""
+msgstr "Hedef miktar veya hedef tutarından biri zorunludur."
 
 #. Option for the 'Fuel Type' (Select) field in DocType 'Vehicle'
 #: setup/doctype/vehicle/vehicle.json
@@ -27973,7 +27975,7 @@ msgstr ""
 
 #: manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:138
 msgid "Extra Consumed Qty"
-msgstr ""
+msgstr "Ekstra Tüketilen Miktar"
 
 #: manufacturing/doctype/job_card/job_card.py:193
 msgid "Extra Job Card Quantity"
@@ -28003,7 +28005,7 @@ msgstr ""
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "FG Qty from Transferred Raw Materials"
-msgstr ""
+msgstr "Aktarılan Hammaddelerden Elde Edilen Bitmiş Ürün Miktarı"
 
 #. Label of a Data field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -28051,13 +28053,13 @@ msgstr "FIFO Sırası ve İşlem Sonrası Adet Karşılaştırması"
 #: stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgctxt "Serial and Batch Entry"
 msgid "FIFO Stock Queue (qty, rate)"
-msgstr ""
+msgstr "FIFO Stok Kuyruğu (miktar, oran)"
 
 #. Label of a Long Text field in DocType 'Stock Ledger Entry'
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgctxt "Stock Ledger Entry"
 msgid "FIFO Stock Queue (qty, rate)"
-msgstr ""
+msgstr "FIFO Stok Kuyruğu (miktar, oran)"
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:179
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:195
@@ -28471,7 +28473,7 @@ msgstr ""
 
 #: stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.js:45
 msgid "Filter Total Zero Qty"
-msgstr ""
+msgstr "Toplam Sıfır Miktarı Filtrele"
 
 #. Label of a Check field in DocType 'Bank Reconciliation Tool'
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
@@ -28777,7 +28779,7 @@ msgstr ""
 
 #: controllers/accounts_controller.py:3299
 msgid "Finished Good Item {0} Qty can not be zero"
-msgstr ""
+msgstr "Bitmiş Ürün {0} Miktarı sıfır olamaz"
 
 #: controllers/accounts_controller.py:3293
 msgid "Finished Good Item {0} must be a sub-contracted item"
@@ -29189,7 +29191,7 @@ msgstr "Ürün için"
 
 #: controllers/stock_controller.py:978
 msgid "For Item {0} cannot be received more than {1} qty against the {2} {3}"
-msgstr ""
+msgstr "{0} Ürünü için {2} {3} karşılığında {1} miktarından fazla alınamaz."
 
 #. Label of a Link field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
@@ -29224,7 +29226,7 @@ msgstr ""
 
 #: stock/doctype/stock_entry/stock_entry.py:632
 msgid "For Quantity (Manufactured Qty) is mandatory"
-msgstr ""
+msgstr "Üretim Miktarı zorunludur"
 
 #: controllers/accounts_controller.py:1086
 msgid "For Return Invoices with Stock effect, '0' qty Items are not allowed. Following rows are affected: {0}"
@@ -29324,7 +29326,7 @@ msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.py:1509
 msgid "For row {0}: Enter Planned Qty"
-msgstr ""
+msgstr "Satır {0}: Planlanan Miktarı Girin"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:176
 msgid "For the 'Apply Rule On Other' condition the field {0} is mandatory"
@@ -33140,7 +33142,7 @@ msgstr "Dakika"
 #: accounts/report/accounts_payable/accounts_payable.js:152
 #: accounts/report/accounts_receivable/accounts_receivable.js:184
 msgid "In Party Currency"
-msgstr ""
+msgstr "Cari Para Birimi"
 
 #. Description of the 'Rate of Depreciation' (Percent) field in DocType 'Asset
 #. Depreciation Schedule'
@@ -33898,7 +33900,7 @@ msgstr ""
 #. Name of a report
 #: stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.json
 msgid "Incorrect Balance Qty After Transaction"
-msgstr ""
+msgstr "İşlem Sonrası Yanlış Bakiye Miktarı"
 
 #: controllers/subcontracting_controller.py:787
 msgid "Incorrect Batch Consumed"
@@ -35017,7 +35019,7 @@ msgstr ""
 
 #: accounts/report/billed_items_to_be_received/billed_items_to_be_received.py:75
 msgid "Invoiced Qty"
-msgstr ""
+msgstr "Faturalanan Miktar"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2006
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:62
@@ -37621,7 +37623,7 @@ msgstr ""
 
 #: stock/doctype/item_price/item_price.py:140
 msgid "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
-msgstr ""
+msgstr "Ürün Fiyatı, Fiyat Listesi, Tedarikçi/Müşteri, Para Birimi, Ürün, Parti, Birim, Miktar ve Tarihlere göre birden fazla kez görünür."
 
 #: stock/get_item_details.py:871
 msgid "Item Price updated for {0} in Price List {1}"
@@ -38016,7 +38018,7 @@ msgstr ""
 
 #: controllers/accounts_controller.py:3274
 msgid "Item qty can not be updated as raw materials are already processed."
-msgstr ""
+msgstr "Ürün miktarı güncellenemez çünkü hammaddeler zaten işlenmiş durumda."
 
 #: stock/doctype/stock_entry/stock_entry.py:830
 msgid "Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
@@ -41953,13 +41955,13 @@ msgstr ""
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Material Transferred"
-msgstr ""
+msgstr "Aktarılan Malzeme"
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Material Transferred"
-msgstr ""
+msgstr "Aktarılan Malzeme"
 
 #. Option for the 'Backflush Raw Materials Based On' (Select) field in DocType
 #. 'Manufacturing Settings'
@@ -42533,13 +42535,13 @@ msgstr ""
 #: accounts/doctype/promotional_scheme_price_discount/promotional_scheme_price_discount.json
 msgctxt "Promotional Scheme Price Discount"
 msgid "Min Qty"
-msgstr ""
+msgstr "Min Miktar"
 
 #. Label of a Float field in DocType 'Promotional Scheme Product Discount'
 #: accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgctxt "Promotional Scheme Product Discount"
 msgid "Min Qty"
-msgstr ""
+msgstr "Min Miktar"
 
 #. Label of a Float field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -42553,7 +42555,7 @@ msgstr ""
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:235
 msgid "Min Qty should be greater than Recurse Over Qty"
-msgstr ""
+msgstr "Minimum Miktar, Yeniden İşlenecek Miktardan büyük olmalıdır."
 
 #. Label of a Currency field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
@@ -46876,37 +46878,37 @@ msgstr ""
 #: manufacturing/report/bom_variance_report/bom_variance_report.py:49
 #: stock/report/stock_projected_qty/stock_projected_qty.py:157
 msgid "Ordered Qty"
-msgstr ""
+msgstr "Sipariş Miktarı"
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Ordered Qty"
-msgstr ""
+msgstr "Sipariş Miktarı"
 
 #. Label of a Float field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Ordered Qty"
-msgstr ""
+msgstr "Sipariş Miktarı"
 
 #. Label of a Float field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Ordered Qty"
-msgstr ""
+msgstr "Sipariş Miktarı"
 
 #. Label of a Float field in DocType 'Production Plan Item'
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 msgctxt "Production Plan Item"
 msgid "Ordered Qty"
-msgstr ""
+msgstr "Sipariş Miktarı"
 
 #. Label of a Float field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Ordered Qty"
-msgstr ""
+msgstr "Sipariş Miktarı"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Ordered Qty: Quantity ordered for purchase, but not received."
@@ -47840,13 +47842,13 @@ msgstr ""
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Packed Qty"
-msgstr ""
+msgstr "Paketlenen Miktar"
 
 #. Label of a Float field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Packed Qty"
-msgstr ""
+msgstr "Paketlenen Miktar"
 
 #. Label of a Section Break field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -48103,13 +48105,13 @@ msgstr ""
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Paid Amount After Tax"
-msgstr ""
+msgstr "Vergi Sonrası Ödenen Tutar"
 
 #. Label of a Currency field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Paid Amount After Tax (Company Currency)"
-msgstr ""
+msgstr "Vergi Sonrası Ödenen Tutar (Şirket Para Birimi)"
 
 #: accounts/doctype/payment_entry/payment_entry.js:1062
 msgid "Paid Amount cannot be greater than total negative outstanding amount {0}"
@@ -48136,7 +48138,7 @@ msgstr ""
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:323
 #: accounts/doctype/sales_invoice/sales_invoice.py:1014
 msgid "Paid amount + Write Off Amount can not be greater than Grand Total"
-msgstr ""
+msgstr "Ödenen Tutar + Kapatılan Tutar, Genel Toplamdan büyük olamaz."
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -48754,31 +48756,31 @@ msgstr ""
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Party Account Currency"
-msgstr ""
+msgstr "Cari Hesabı Para Birimi"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Party Account Currency"
-msgstr ""
+msgstr "Cari Hesabı Para Birimi"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Party Account Currency"
-msgstr ""
+msgstr "Cari Hesabı Para Birimi"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Party Account Currency"
-msgstr ""
+msgstr "Cari Hesabı Para Birimi"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Party Account Currency"
-msgstr ""
+msgstr "Cari Hesabı Para Birimi"
 
 #. Label of a Data field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
@@ -48794,7 +48796,7 @@ msgstr ""
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Party Balance"
-msgstr ""
+msgstr "Cari Bakiyesi"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -50090,7 +50092,7 @@ msgstr ""
 #: buying/report/purchase_order_analysis/purchase_order_analysis.py:251
 #: selling/report/sales_order_analysis/sales_order_analysis.py:306
 msgid "Pending Amount"
-msgstr ""
+msgstr "Bekleyen Tutar"
 
 #: buying/report/purchase_order_analysis/purchase_order_analysis.py:214
 #: manufacturing/doctype/work_order/work_order.js:259
@@ -50874,23 +50876,23 @@ msgstr ""
 
 #: stock/report/stock_projected_qty/stock_projected_qty.py:143
 msgid "Planned Qty"
-msgstr ""
+msgstr "Planlanan Miktar"
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Planned Qty"
-msgstr ""
+msgstr "Planlanan Miktar"
 
 #. Label of a Float field in DocType 'Production Plan Item'
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 msgctxt "Production Plan Item"
 msgid "Planned Qty"
-msgstr ""
+msgstr "Planlanan Miktar"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Planned Qty: Quantity, for which, Work Order has been raised, but is pending to be manufactured."
-msgstr ""
+msgstr "Planlanan Miktar: İş Emri verilen, ancak henüz üretilmemiş olan miktar."
 
 #: stock/report/item_shortage_report/item_shortage_report.py:109
 msgid "Planned Quantity"
@@ -51734,7 +51736,7 @@ msgstr "Lütfen Hesabı Ayarlayın"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1531
 msgid "Please set Account for Change Amount"
-msgstr ""
+msgstr "Lütfen Tutar Değişikliği için Hesap ayarlayın"
 
 #: stock/__init__.py:88
 msgid "Please set Account in Warehouse {0} or Default Inventory Account in Company {1}"
@@ -54138,7 +54140,7 @@ msgstr ""
 
 #: manufacturing/report/production_plan_summary/production_plan_summary.py:150
 msgid "Produced / Received Qty"
-msgstr ""
+msgstr "Üretilen / Alınan Miktar"
 
 #: manufacturing/report/bom_variance_report/bom_variance_report.py:50
 #: manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:120
@@ -56469,13 +56471,13 @@ msgstr ""
 
 #: templates/pages/order.html:179
 msgid "Qty "
-msgstr ""
+msgstr "Miktar "
 
 #. Label of a Float field in DocType 'Stock Ledger Entry'
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgctxt "Stock Ledger Entry"
 msgid "Qty After Transaction"
-msgstr ""
+msgstr "İşlem Sonrası Miktar"
 
 #. Label of a Float field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
@@ -56511,11 +56513,11 @@ msgstr ""
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Qty In Stock"
-msgstr ""
+msgstr "Stok Miktarı"
 
 #: manufacturing/report/bom_stock_calculated/bom_stock_calculated.py:74
 msgid "Qty Per Unit"
-msgstr ""
+msgstr "Birim Başına Miktar"
 
 #: manufacturing/doctype/bom/bom.js:256
 #: manufacturing/report/process_loss_report/process_loss_report.py:82
@@ -56536,26 +56538,26 @@ msgstr ""
 
 #: manufacturing/doctype/work_order/work_order.py:957
 msgid "Qty To Manufacture ({0}) cannot be a fraction for the UOM {2}. To allow this, disable '{1}' in the UOM {2}."
-msgstr ""
+msgstr "Üretim Miktarı ({0}), {2} için kesirli olamaz. Bunu sağlamak için, {2} içindeki '{1}' seçeneğini devre dışı bırakın."
 
 #. Label of a Float field in DocType 'Batch'
 #: stock/doctype/batch/batch.json
 msgctxt "Batch"
 msgid "Qty To Produce"
-msgstr ""
+msgstr "Üretilecek Miktar"
 
 #. Label of a Section Break field in DocType 'Asset Capitalization Service
 #. Item'
 #: assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 msgctxt "Asset Capitalization Service Item"
 msgid "Qty and Rate"
-msgstr ""
+msgstr "Miktar ve Oran"
 
 #. Label of a Section Break field in DocType 'Asset Capitalization Stock Item'
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgctxt "Asset Capitalization Stock Item"
 msgid "Qty and Rate"
-msgstr ""
+msgstr "Miktar ve Oran"
 
 #. Label of a Section Break field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -56610,14 +56612,14 @@ msgstr ""
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Qty for which recursion isn't applicable."
-msgstr ""
+msgstr "Yinelemenin uygulanamadığı miktar."
 
 #. Description of the 'Apply Recursion Over (As Per Transaction UOM)' (Float)
 #. field in DocType 'Promotional Scheme Product Discount'
 #: accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgctxt "Promotional Scheme Product Discount"
 msgid "Qty for which recursion isn't applicable."
-msgstr ""
+msgstr "Yinelemenin uygulanamadığı miktar."
 
 #: manufacturing/doctype/work_order/work_order.js:766
 msgid "Qty for {0}"
@@ -56625,40 +56627,40 @@ msgstr ""
 
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:231
 msgid "Qty in Stock UOM"
-msgstr ""
+msgstr "Stok Birimindeki Miktar"
 
 #. Label of a Float field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Qty in Stock UOM"
-msgstr ""
+msgstr "Stok Birimindeki Miktar"
 
 #. Label of a Float field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Qty in Stock UOM"
-msgstr ""
+msgstr "Stok Birimindeki Miktar"
 
 #: stock/doctype/pick_list/pick_list.js:174
 msgid "Qty of Finished Goods Item"
-msgstr ""
+msgstr "Bitmiş Ürün Miktarı"
 
 #. Label of a Float field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Qty of Finished Goods Item"
-msgstr ""
+msgstr "Bitmiş Ürün Miktarı"
 
 #: stock/doctype/pick_list/pick_list.py:473
 msgid "Qty of Finished Goods Item should be greater than 0."
-msgstr ""
+msgstr "Bitmiş Ürün Miktarı 0'dan büyük olmalıdır."
 
 #. Description of the 'Qty of Finished Goods Item' (Float) field in DocType
 #. 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Qty of raw materials will be decided based on the qty of the Finished Goods Item"
-msgstr ""
+msgstr "Hammadde Miktarı, Bitmiş Ürün Miktarına göre belirlenecektir."
 
 #. Label of a Float field in DocType 'Purchase Receipt Item Supplied'
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
@@ -56681,7 +56683,7 @@ msgstr ""
 
 #: public/js/utils/serial_no_batch_selector.js:351
 msgid "Qty to Fetch"
-msgstr ""
+msgstr "Getirilecek Miktar"
 
 #: manufacturing/doctype/job_card/job_card.py:670
 #: manufacturing/doctype/workstation/workstation_job_card.html:56
@@ -56695,7 +56697,7 @@ msgstr ""
 
 #: manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:119
 msgid "Qty to Produce"
-msgstr ""
+msgstr "Üretilecek Miktar"
 
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:171
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:252
@@ -58464,13 +58466,13 @@ msgstr ""
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Raw Material Cost Per Qty"
-msgstr ""
+msgstr "Birim Başına Hammadde Maliyeti"
 
 #. Label of a Currency field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Raw Material Cost Per Qty"
-msgstr ""
+msgstr "Birim Başına Hammadde Maliyeti"
 
 #: manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:122
 msgid "Raw Material Item"
@@ -59172,7 +59174,7 @@ msgstr ""
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:237
 msgid "Recurse Over Qty cannot be less than 0"
-msgstr ""
+msgstr "Yineleme Miktarı 0'dan küçük olamaz."
 
 #: setup/setup_wizard/operations/install_fixtures.py:233
 msgid "Red"
@@ -60806,7 +60808,7 @@ msgstr "İstenen Miktar"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Requested Qty: Quantity requested for purchase, but not ordered."
-msgstr ""
+msgstr "Talep Edilen Miktar: Satın alma için talep edilen, ancak sipariş edilmemiş miktar."
 
 #: buying/report/procurement_tracker/procurement_tracker.py:46
 msgid "Requesting Site"
@@ -61069,19 +61071,19 @@ msgstr ""
 #: stock/report/reserved_stock/reserved_stock.py:124
 #: stock/report/stock_projected_qty/stock_projected_qty.py:164
 msgid "Reserved Qty"
-msgstr ""
+msgstr "Ayrılan Miktar"
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Reserved Qty"
-msgstr ""
+msgstr "Ayrılan Miktar"
 
 #. Label of a Float field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Reserved Qty"
-msgstr ""
+msgstr "Ayrılan Miktar"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:133
 msgid "Reserved Qty ({0}) cannot be a fraction. To allow this, disable '{1}' in UOM {3}."
@@ -61610,7 +61612,7 @@ msgstr ""
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:334
 msgid "Return Qty"
-msgstr ""
+msgstr "İade Miktarı"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:310
 msgid "Return Qty from Rejected Warehouse"
@@ -61636,7 +61638,7 @@ msgstr ""
 #: accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:57
 #: accounts/report/received_items_to_be_billed/received_items_to_be_billed.py:57
 msgid "Returned Amount"
-msgstr ""
+msgstr "İade Edilen Tutar"
 
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:154
 #: manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:144
@@ -61689,13 +61691,13 @@ msgstr ""
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Returned Qty in Stock UOM"
-msgstr ""
+msgstr "Stok Biriminde İade Edilen Miktar"
 
 #. Label of a Float field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Returned Qty in Stock UOM"
-msgstr ""
+msgstr "Stok Biriminde İade Edilen Miktar"
 
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:101
 msgid "Returned exchange rate is neither integer not float."
@@ -61935,7 +61937,7 @@ msgstr ""
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Round Free Qty"
-msgstr ""
+msgstr "Bedelsiz Miktarı Yuvarla"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:66
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:90
@@ -62364,7 +62366,7 @@ msgstr ""
 
 #: manufacturing/doctype/job_card/job_card.py:861
 msgid "Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
-msgstr ""
+msgstr "Satır #{0}: İş Kartı {3} için {2} Ürünü için Gerekli Olan {1} Miktardan fazlasını aktaramazsınız."
 
 #: selling/doctype/product_bundle/product_bundle.py:85
 msgid "Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save"
@@ -62424,7 +62426,7 @@ msgstr ""
 
 #: buying/doctype/purchase_order/purchase_order.py:379
 msgid "Row #{0}: Finished Good Item Qty can not be zero"
-msgstr ""
+msgstr "Satır #{0}: Bitmiş Ürün Miktarı sıfır olamaz."
 
 #: buying/doctype/purchase_order/purchase_order.py:361
 msgid "Row #{0}: Finished Good Item is not specified for service item {1}"
@@ -62492,7 +62494,7 @@ msgstr ""
 
 #: stock/doctype/stock_entry/stock_entry.py:662
 msgid "Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."
-msgstr ""
+msgstr "Satır #{0}: {1} Operasyonu {3} İş Emrindeki {2} adet için tamamlanamadı. Lütfen önce {4} İş Kartındaki operasyon durumunu güncelleyin."
 
 #: accounts/doctype/bank_clearance/bank_clearance.py:95
 msgid "Row #{0}: Payment document is required to complete the transaction"
@@ -67668,7 +67670,7 @@ msgstr ""
 
 #: stock/report/stock_projected_qty/stock_projected_qty.py:220
 msgid "Shortage Qty"
-msgstr ""
+msgstr "Eksik Miktar"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -69557,7 +69559,7 @@ msgstr ""
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:115
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:28
 msgid "Stock Ledger Entry"
-msgstr ""
+msgstr "Stok Defteri Girişi"
 
 #: stock/report/incorrect_stock_value_report/incorrect_stock_value_report.py:98
 #: stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:106
@@ -69641,48 +69643,48 @@ msgstr ""
 #: stock/report/stock_projected_qty/stock_projected_qty.json
 #: stock/workspace/stock/stock.json
 msgid "Stock Projected Qty"
-msgstr ""
+msgstr "Öngörülen Stok Miktarı"
 
 #: accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:258
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:311
 #: stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:34
 msgid "Stock Qty"
-msgstr ""
+msgstr "Stok Miktarı"
 
 #. Label of a Float field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "Stock Qty"
-msgstr ""
+msgstr "Stok Miktarı"
 
 #. Label of a Float field in DocType 'BOM Explosion Item'
 #: manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
 msgctxt "BOM Explosion Item"
 msgid "Stock Qty"
-msgstr ""
+msgstr "Stok Miktarı"
 
 #. Label of a Float field in DocType 'BOM Item'
 #: manufacturing/doctype/bom_item/bom_item.json
 msgctxt "BOM Item"
 msgid "Stock Qty"
-msgstr ""
+msgstr "Stok Miktarı"
 
 #. Label of a Float field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Stock Qty"
-msgstr ""
+msgstr "Stok Miktarı"
 
 #. Label of a Float field in DocType 'Pick List Item'
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgctxt "Pick List Item"
 msgid "Stock Qty"
-msgstr ""
+msgstr "Stok Miktarı"
 
 #. Name of a report
 #: stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.json
 msgid "Stock Qty vs Serial No Count"
-msgstr ""
+msgstr "Stok Miktarı ve Seri No Sayısı"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:90
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:123
@@ -76277,31 +76279,31 @@ msgstr ""
 #: stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py:66
 #: templates/includes/order/order_taxes.html:54
 msgid "Total Amount"
-msgstr ""
+msgstr "Toplam Tutar"
 
 #. Label of a Currency field in DocType 'Invoice Discounting'
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 msgctxt "Invoice Discounting"
 msgid "Total Amount"
-msgstr ""
+msgstr "Toplam Tutar"
 
 #. Label of a Currency field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Total Amount"
-msgstr ""
+msgstr "Toplam Tutar"
 
 #. Label of a Float field in DocType 'Serial and Batch Bundle'
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 msgctxt "Serial and Batch Bundle"
 msgid "Total Amount"
-msgstr ""
+msgstr "Toplam Tutar"
 
 #. Label of a Currency field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Total Amount"
-msgstr ""
+msgstr "Toplam Tutar"
 
 #. Label of a Link field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
@@ -76361,13 +76363,13 @@ msgstr ""
 #: projects/doctype/timesheet/timesheet.json
 msgctxt "Timesheet"
 msgid "Total Billed Amount"
-msgstr ""
+msgstr "Toplam Fatura Tutarı"
 
 #. Label of a Currency field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Total Billed Amount (via Sales Invoice)"
-msgstr ""
+msgstr "Toplam Fatura Tutarı (Satış Faturası)"
 
 #. Label of a Float field in DocType 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
@@ -76506,7 +76508,7 @@ msgstr ""
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Total Debit"
-msgstr ""
+msgstr "Toplam Borç"
 
 #: accounts/doctype/journal_entry/journal_entry.py:851
 msgid "Total Debit must be equal to Total Credit. The difference is {0}"
@@ -76919,13 +76921,13 @@ msgstr ""
 
 #: selling/report/item_wise_sales_history/item_wise_sales_history.py:256
 msgid "Total Sales Amount"
-msgstr ""
+msgstr "Toplam Satış Tutarı"
 
 #. Label of a Currency field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Total Sales Amount (via Sales Order)"
-msgstr ""
+msgstr "Toplam Satış Tutarı (Satış Siparişi)"
 
 #. Name of a report
 #: stock/report/total_stock_summary/total_stock_summary.json
@@ -77225,7 +77227,7 @@ msgstr "Toplam saat: {0}"
 #: accounts/doctype/pos_invoice/pos_invoice.py:446
 #: accounts/doctype/sales_invoice/sales_invoice.py:513
 msgid "Total payments amount can't be greater than {}"
-msgstr ""
+msgstr "Toplam ödeme tutarı {} miktarından büyük olamaz."
 
 #: accounts/doctype/cost_center_allocation/cost_center_allocation.py:66
 msgid "Total percentage against cost centers should be 100"
@@ -78899,25 +78901,25 @@ msgstr "İrsaliyedeki Fatura Tutarını Güncelle"
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Update Billed Amount in Purchase Order"
-msgstr ""
+msgstr "Satış Siparişindeki Fatura Tutarını Güncelle"
 
 #. Label of a Check field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Update Billed Amount in Purchase Receipt"
-msgstr ""
+msgstr "Satın Alma Emrindeki Fatura Tutarını Güncelle"
 
 #. Label of a Check field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Update Billed Amount in Sales Order"
-msgstr ""
+msgstr "Satış Emrindeki Tutarı Güncelle"
 
 #. Label of a Check field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Update Billed Amount in Sales Order"
-msgstr ""
+msgstr "Satış Emrindeki Tutarı Güncelle"
 
 #: accounts/doctype/bank_clearance/bank_clearance.js:53
 #: accounts/doctype/bank_clearance/bank_clearance.js:67
@@ -79106,7 +79108,7 @@ msgstr ""
 
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.js:36
 msgid "Use 'Repost in background' button to trigger background job. Job can only be triggered when document is in Queued or Failed status."
-msgstr ""
+msgstr "Arka plan işini başlatmak için 'Arka planda yeniden gönder' düğmesini kullanın. İş yalnızca belge Kuyrukta veya Başarısız durumda olduğunda başlatılabilir."
 
 #. Label of a Check field in DocType 'Batch'
 #: stock/doctype/batch/batch.json
@@ -83723,7 +83725,7 @@ msgstr ""
 
 #: accounts/party.py:517
 msgid "{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}."
-msgstr ""
+msgstr "{0} {1}, {3} Şirketi için {2} Para Biriminde muhasebe kayıtlarına sahiptir. Lütfen {2} Para Biriminde bir Alacak veya Borç Hesabı seçin."
 
 #: accounts/doctype/payment_entry/payment_entry.py:395
 msgid "{0} {1} has already been fully paid."
