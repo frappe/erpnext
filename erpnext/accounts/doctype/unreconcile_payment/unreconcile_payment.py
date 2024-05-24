@@ -1,6 +1,8 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe import _, qb
 from frappe.model.document import Document
@@ -161,7 +163,7 @@ def get_linked_payments_for_doc(
 @frappe.whitelist()
 def create_unreconcile_doc_for_selection(selections=None):
 	if selections:
-		selections = frappe.json.loads(selections)
+		selections = json.loads(selections)
 		# assuming each row is a unique voucher
 		for row in selections:
 			unrecon = frappe.new_doc("Unreconcile Payment")
