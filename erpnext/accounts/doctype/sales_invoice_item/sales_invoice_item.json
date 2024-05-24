@@ -927,11 +927,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-02-25 15:56:44.828634",
-=======
  "modified": "2024-05-23 16:36:18.970862",
->>>>>>> 0303d7dbdc (fix: add in some indices to speed up Purchase Order deletion)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
