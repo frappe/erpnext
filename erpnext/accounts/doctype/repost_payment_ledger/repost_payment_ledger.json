@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_rename": 1,
  "creation": "2022-10-19 21:59:33.553852",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -99,7 +98,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-26 14:21:35.719727",
+ "modified": "2024-05-23 17:00:31.540640",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Payment Ledger",
