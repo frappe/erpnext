@@ -348,8 +348,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 	# 			MultiplePricingRuleConflict,
 	# 		)
 
-	if pricing_rules:
-		return pricing_rules
+	return pricing_rules or []
 
 
 def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, transaction_type):
