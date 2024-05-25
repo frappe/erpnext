@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-20 11:20\n"
+"PO-Revision-Date: 2024-05-25 12:26\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -3780,7 +3780,7 @@ msgstr "دستی اضافه کن"
 
 #: projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr "چندگانه اضافه کنید"
+msgstr ""
 
 #: projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -11724,7 +11724,7 @@ msgstr "درهم شکستن"
 
 #: manufacturing/doctype/bom/bom.js:102
 msgid "Browse BOM"
-msgstr "BOM را مرور کنید"
+msgstr "مرور BOM"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -27166,13 +27166,13 @@ msgstr "زمان تقریبی رسیدن به مقصد"
 
 #: buying/report/procurement_tracker/procurement_tracker.py:96
 msgid "Estimated Cost"
-msgstr "هزینه تخمین زده شده"
+msgstr "هزینه تخمینی"
 
 #. Label of a Currency field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Estimated Cost"
-msgstr "هزینه تخمین زده شده"
+msgstr "هزینه تخمینی"
 
 #. Label of a Section Break field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
@@ -27920,7 +27920,7 @@ msgstr "مدت انقضا (بر حسب روز)"
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Exploded Items"
-msgstr "موارد منفجر شده"
+msgstr "آیتم‌های گسترده شده"
 
 #. Name of a report
 #: manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.json
@@ -28364,7 +28364,7 @@ msgstr "فیلد"
 #: accounts/doctype/pos_search_fields/pos_search_fields.json
 msgctxt "POS Search Fields"
 msgid "Field"
-msgstr "رشته"
+msgstr "فیلد"
 
 #. Label of a Section Break field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
@@ -35628,25 +35628,25 @@ msgstr "جریان پیمانکاری فرعی قدیمی است"
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Is Opening"
-msgstr "در حال باز شدن است"
+msgstr "افتتاحیه است"
 
 #. Label of a Select field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Is Opening"
-msgstr "در حال باز شدن است"
+msgstr "افتتاحیه است"
 
 #. Label of a Select field in DocType 'Journal Entry Template'
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgctxt "Journal Entry Template"
 msgid "Is Opening"
-msgstr "در حال باز شدن است"
+msgstr "افتتاحیه است"
 
 #. Label of a Select field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Is Opening"
-msgstr "در حال باز شدن است"
+msgstr "افتتاحیه است"
 
 #. Label of a Select field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -41966,7 +41966,7 @@ msgstr "مواد به تامین کننده"
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Materials Required (Exploded)"
-msgstr "مواد مورد نیاز (منفجر شده)"
+msgstr "مواد مورد نیاز (گسترده شده)"
 
 #: controllers/subcontracting_controller.py:1251
 msgid "Materials are already received against the {0} {1}"
@@ -45723,7 +45723,7 @@ msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.js:584
 msgid "On expanding a row in the Items to Manufacture table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
-msgstr "با گسترش یک ردیف در جدول Items to Manufacture، گزینه ای برای \"شامل آیتم‌های گسترده شده\" را مشاهده خواهید کرد. تیک زدن این شامل مواد اولیه اقلام زیر مجموعه در فرآیند تولید می شود."
+msgstr "با گسترش یک ردیف در جدول Items to Manufacture، گزینه ای برای \"شامل آیتم‌های گسترده شده\" را مشاهده خواهید کرد. تیک زدن این شامل مواد اولیه آیتم‌های زیر مونتاژ در فرآیند تولید می شود."
 
 #. Description of the 'Use Serial / Batch Fields' (Check) field in DocType
 #. 'Stock Settings'
@@ -46194,19 +46194,19 @@ msgstr "افتتاح فاکتور ایجاد در حال انجام است"
 #: accounts/doctype/account/account_tree.js:189
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
 msgid "Opening Invoice Creation Tool"
-msgstr "باز کردن ابزار ایجاد فاکتور"
+msgstr "ابزار ایجاد فاکتور افتتاحیه"
 
 #. Label of a Link in the Accounting Workspace
 #. Label of a Link in the Home Workspace
 #: accounts/workspace/accounting/accounting.json setup/workspace/home/home.json
 msgctxt "Opening Invoice Creation Tool"
 msgid "Opening Invoice Creation Tool"
-msgstr "باز کردن ابزار ایجاد فاکتور"
+msgstr "ابزار ایجاد فاکتور افتتاحیه"
 
 #. Name of a DocType
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgid "Opening Invoice Creation Tool Item"
-msgstr "باز کردن مورد ابزار ایجاد فاکتور"
+msgstr "آیتم ابزار ایجاد فاکتور افتتاحیه"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:99
 msgid "Opening Invoice Item"
@@ -49107,7 +49107,7 @@ msgstr "پرداخت"
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Pay To / Recd From"
-msgstr "پرداخت به / ضبط از"
+msgstr "پرداخت به / دریافت از"
 
 #: accounts/report/account_balance/account_balance.js:54
 msgid "Payable"
@@ -54497,7 +54497,7 @@ msgstr "صورت سود و زیان"
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 msgctxt "Bisect Accounting Statements"
 msgid "Profit and Loss Summary"
-msgstr ""
+msgstr "خلاصه سود و زیان"
 
 #. Label of a Float field in DocType 'Bisect Nodes'
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -58845,7 +58845,7 @@ msgstr "مطالبات"
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Receive"
-msgstr "دریافت کردن"
+msgstr "دریافت"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:320
 #: buying/doctype/supplier_quotation/supplier_quotation.py:175
@@ -61762,7 +61762,7 @@ msgstr "بررسی حساب های دارایی ثابت"
 #. Title of an Onboarding Step
 #: stock/onboarding_step/stock_settings/stock_settings.json
 msgid "Review Stock Settings"
-msgstr "تنظیمات موجودی را مرور کنید"
+msgstr "مرور تنظیمات موجودی"
 
 #. Label of a Card Break in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
@@ -68452,7 +68452,7 @@ msgstr "الگوی استاندارد"
 #. Description of a DocType
 #: setup/doctype/terms_and_conditions/terms_and_conditions.json
 msgid "Standard Terms and Conditions that can be added to Sales and Purchases. Examples: Validity of the offer, Payment Terms, Safety and Usage, etc."
-msgstr ""
+msgstr "شرایط و ضوابط استاندارد که می تواند به خرید و فروش اضافه شود. مثال: اعتبار پیشنهاد، شرایط پرداخت، ایمنی و استفاده و غیره."
 
 #: regional/report/uae_vat_201/uae_vat_201.py:96
 #: regional/report/uae_vat_201/uae_vat_201.py:102
@@ -75830,7 +75830,7 @@ msgstr "برای افزودن عملیات، کادر \"با عملیات\" را
 
 #: manufacturing/doctype/production_plan/production_plan.js:598
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
-msgstr "افزودن مواد خام قراردادی فرعی در صورت وجود موارد منفجر شده غیرفعال است."
+msgstr "افزودن مواد خام قراردادی فرعی در صورت وجود آیتم‌های گسترده شده غیرفعال است."
 
 #: controllers/status_updater.py:341
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
@@ -76562,7 +76562,7 @@ msgstr ""
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Incoming Payment"
-msgstr ""
+msgstr "کل پرداخت ورودی"
 
 #. Label of a Currency field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -76708,12 +76708,12 @@ msgstr "کل خروجی"
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Outgoing Bills"
-msgstr ""
+msgstr "مجموع صورتحساب خروجی"
 
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Outgoing Payment"
-msgstr ""
+msgstr "کل پرداخت خروجی"
 
 #. Label of a Currency field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
