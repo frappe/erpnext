@@ -892,7 +892,7 @@ class AccountsController(TransactionBase):
 				frappe.throw(
 					_(
 						"Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority or selecting it manually in item. Price Rules: {0}"
-					).format("\n".join(d.name for d in pricing_rules)),
+					).format("\n".join(d for d in pricing_rules)),
 					MultiplePricingRuleConflict,
 				)
 
