@@ -45,6 +45,7 @@ class AccountsSettings(Document):
 		general_ledger_remarks_length: DF.Int
 		ignore_account_closing_balance: DF.Check
 		make_payment_via_journal_entry: DF.Check
+		max_pricing_rules_per_item: DF.Int
 		merge_similar_account_heads: DF.Check
 		over_billing_allowance: DF.Currency
 		post_change_gl_entries: DF.Check

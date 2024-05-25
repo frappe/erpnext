@@ -169,6 +169,7 @@ class AccountsController(TransactionBase):
 	def validate(self):
 		if not self.get("is_return") and not self.get("is_debit_note"):
 			self.validate_qty_is_not_zero()
+			self.validate_max_pricing_rule_per_item()
 
 		if (
 			self.doctype in ["Sales Invoice", "Purchase Invoice"]
@@ -873,6 +874,27 @@ class AccountsController(TransactionBase):
 					"rule_applied": True,
 				},
 			)
+
+	def validate_max_pricing_rule_per_item(self):
+		max_pricing_rules_per_item = cint(
+			frappe.db.get_single_value("Accounts Settings", "max_pricing_rules_per_item")
+		)
+		if not max_pricing_rules_per_item:
+			return
+
+		for item in self.get("items"):
+			if not item.get("pricing_rules"):
+				continue
+			pricing_rules = get_applied_pricing_rules(item.get("pricing_rules"))
+			if len(pricing_rules) > max_pricing_rules_per_item:
+				from erpnext.accounts.doctype.pricing_rule.utils import MultiplePricingRuleConflict
+
+				frappe.throw(
+					_(
+						"Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority or selecting it manually in item. Price Rules: {0}"
+					).format("\n".join(d.name for d in pricing_rules)),
+					MultiplePricingRuleConflict,
+				)
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):

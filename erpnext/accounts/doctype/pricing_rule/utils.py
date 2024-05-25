@@ -56,7 +56,7 @@ def get_pricing_rules(args, doc=None):
 	else:
 		pricing_rule = filter_pricing_rules(args, pricing_rules, doc)
 		if pricing_rule:
-			rules.append(pricing_rule)
+			rules.extend(pricing_rule)
 
 	return rules
 
@@ -67,13 +67,15 @@ def sorted_by_priority(pricing_rules, args, doc=None):
 	pricing_rule_dict = {}
 
 	for pricing_rule in pricing_rules:
-		pricing_rule = filter_pricing_rules(args, pricing_rule, doc)
-		if pricing_rule:
-			if not pricing_rule.get("priority"):
-				pricing_rule["priority"] = 1
+		for filtered_rule in filter_pricing_rules(args, pricing_rule, doc):
+			if filtered_rule:
+				if not filtered_rule.get("priority"):
+					filtered_rule["priority"] = 1
 
-			if pricing_rule.get("apply_multiple_pricing_rules"):
-				pricing_rule_dict.setdefault(cint(pricing_rule.get("priority")), []).append(pricing_rule)
+				if filtered_rule.get("apply_multiple_pricing_rules"):
+					pricing_rule_dict.setdefault(cint(filtered_rule.get("priority")), []).append(
+						filtered_rule
+					)
 
 	for key in sorted(pricing_rule_dict):
 		pricing_rules_list.extend(pricing_rule_dict.get(key))
@@ -337,15 +339,17 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 				list(filter(lambda x: x.for_price_list == args.price_list, pricing_rules)) or pricing_rules
 			)
 
-	if len(pricing_rules) > 1 and not args.for_shopping_cart:
-		frappe.throw(
-			_(
-				"Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}"
-			).format("\n".join(d.name for d in pricing_rules)),
-			MultiplePricingRuleConflict,
-		)
-	elif pricing_rules:
-		return pricing_rules[0]
+	# if len(pricing_rules) > 1 and not args.for_shopping_cart:
+	# 	if cint(frappe.db.get_single_value("Accounts Settings", "max_pricing_rules_per_item") or 1) < len(pricing_rules):
+	# 		frappe.throw(
+	# 			_(
+	# 				"Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}"
+	# 			).format("\n".join(d.name for d in pricing_rules)),
+	# 			MultiplePricingRuleConflict,
+	# 		)
+
+	if pricing_rules:
+		return pricing_rules
 
 
 def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, transaction_type):

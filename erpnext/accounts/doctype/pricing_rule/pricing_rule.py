@@ -612,6 +612,7 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 		item_details = json.loads(item_details)
 		item_details = frappe._dict(item_details)
 
+	item_details.remove_free_item = []
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d):
 			continue
@@ -629,8 +630,8 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 			if pricing_rule.margin_type in ["Percentage", "Amount"]:
 				item_details.margin_rate_or_amount = 0.0
 				item_details.margin_type = None
-		elif pricing_rule.get("free_item"):
-			item_details.remove_free_item = (
+		elif pricing_rule.get("same_item") or pricing_rule.get("free_item"):
+			item_details.remove_free_item.append(
 				item_code if pricing_rule.get("same_item") else pricing_rule.get("free_item")
 			)
 

@@ -43,6 +43,8 @@
   "section_break_jpd0",
   "auto_reconcile_payments",
   "stale_days",
+  "section_break_tjhu",
+  "max_pricing_rules_per_item",
   "invoicing_settings_tab",
   "accounts_transactions_settings_section",
   "over_billing_allowance",
@@ -462,6 +464,18 @@
    "fieldname": "enable_immutable_ledger",
    "fieldtype": "Check",
    "label": "Enable Immutable Ledger"
+  },
+  {
+   "fieldname": "section_break_tjhu",
+   "fieldtype": "Section Break",
+   "label": "Pricing Rules"
+  },
+  {
+   "default": "1",
+   "description": "Maximum number of pricing rules applicable for a line item in a transaction",
+   "fieldname": "max_pricing_rules_per_item",
+   "fieldtype": "Int",
+   "label": "Maximum Pricing Rules per Item"
   }
  ],
  "icon": "icon-cog",
@@ -469,7 +483,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-05-11 23:19:44.673975",
+ "modified": "2024-05-25 15:24:16.639610",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

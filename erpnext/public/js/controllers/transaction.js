@@ -1255,6 +1255,86 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 	}
 
+	form_render(doc, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (!row.pricing_rules) return;
+		if (JSON.parse(row.pricing_rules).length <= 1) return;
+		this.frm.get_field("items").grid.toggle_display("select_pricing_rule", 1)
+	}
+
+	select_pricing_rule(doc, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		let me = this;
+
+		if (!row.pricing_rules) {
+			frappe.show_alert({
+				message: __("No valid pricing rule found."),
+				indicator: "orange",
+			});
+			return;
+		}
+
+		let rules = JSON.parse(row.pricing_rules)
+		if (rules.length <= 1) {
+			frappe.show_alert({
+				message: __("Only one pricing rule found."),
+				indicator: "orange",
+			});
+			return;
+		}
+
+		let data = rules.map((d) => {
+			return {
+				pricing_rule: d
+			};
+		});
+
+		let dialog = new frappe.ui.Dialog({
+			title: __("Select Pricing Rule"),
+			fields: [
+				{
+					fieldname: "rules",
+					fieldtype: "Table",
+					label: "Pricing Rules",
+					cannot_add_rows: 1,
+					in_place_edit: false,
+					reqd: 1,
+					data: data,
+					get_data: () => {
+						return data;
+					},
+					fields: [
+						{
+							"fieldtype": "Link",
+							"fieldname": "pricing_rule",
+							"options": "Pricing Rule",
+							"label": __("Rule"),
+							"read_only": 1,
+							"in_list_view": 1
+						},
+					],
+				},
+			],
+			primary_action: function (values) {
+				if (values.rules.length > 0) {
+					frappe.run_serially([
+						() => frappe.dom.freeze(),
+						() => dialog.hide(),
+						() => me.remove_pricing_rule_for_item(row),
+						() => frappe.model.set_value(
+							cdt, cdn, "pricing_rules",
+							JSON.stringify(values.rules.map(v => v.pricing_rule))
+						),
+						() => me.frm.save(),
+						() => frappe.dom.unfreeze()
+					]);
+				}
+			},
+			primary_action_label: __("Select"),
+		});
+		dialog.show();
+	}
+
 	qty(doc, cdt, cdn) {
 		if (!this.frm.doc.__onload?.load_after_mapping) {
 			let item = frappe.get_doc(cdt, cdn);
@@ -1835,7 +1915,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 			me.frm.doc.items.forEach(d => {
 				// if same item was added as free item through a different pricing rule, keep it
-				if(d.item_code != item.remove_free_item || !d.is_free_item || !removed_pricing_rule?.includes(d.pricing_rules)) {
+				if (!item.remove_free_item.includes(d.item_code) || !d.is_free_item || !removed_pricing_rule?.includes(d.pricing_rules)) {
 					items.push(d);
 				}
 			});
