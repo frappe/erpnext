@@ -47,7 +47,6 @@
   "base_rate",
   "base_amount",
   "stock_uom_rate",
-  "select_pricing_rule",
   "is_free_item",
   "grant_commission",
   "section_break_21",
@@ -923,18 +922,12 @@
   {
    "fieldname": "column_break_ytgd",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "select_pricing_rule",
-   "fieldtype": "Button",
-   "hidden": 1,
-   "label": "Select Pricing Rule"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-05-25 15:59:23.259961",
+ "modified": "2024-05-25 21:50:54.955044",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

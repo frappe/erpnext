@@ -99,6 +99,7 @@
   "sec_tax_breakup",
   "other_charges_calculation",
   "pricing_rule_details",
+  "select_pricing_rule",
   "pricing_rules",
   "packing_list",
   "packed_items",
@@ -2191,6 +2192,12 @@
    "label": "Update Outstanding for Self",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "select_pricing_rule",
+   "fieldtype": "Button",
+   "hidden": 1,
+   "label": "Select Pricing Rule"
   }
  ],
  "icon": "fa fa-file-text",
@@ -2203,7 +2210,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-05-08 18:02:28.549041",
+ "modified": "2024-05-25 21:50:24.014492",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

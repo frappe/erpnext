@@ -408,6 +408,119 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		this.setup_quality_inspection();
 		this.validate_has_items();
 		erpnext.utils.view_serial_batch_nos(this.frm);
+		this.setup_pricing_rule_selector();
+	}
+
+	setup_pricing_rule_selector() {
+		if (this.frm.doc.docstatus != 0) return;
+		if (!this.frm.doc.pricing_rules) return;
+		if (this.frm.doc.pricing_rules.length <= 1) return;
+		this.frm.set_df_property("select_pricing_rule", "hidden", 0);
+	}
+
+	select_pricing_rule() {
+		let me = this;
+		if (me.frm.doc.docstatus != 0) return;
+		if (!me.frm.doc.pricing_rules) {
+			frappe.show_alert({
+				message: __("No valid pricing rule found."),
+				indicator: "orange",
+			});
+			return;
+		}
+
+		if (me.frm.doc.pricing_rules.length <= 1) {
+			frappe.show_alert({
+				message: __("Only one pricing rule found."),
+				indicator: "orange",
+			});
+			return;
+		}
+
+		let data = me.frm.doc.pricing_rules.map((d) => {
+			return {
+				pricing_rule: d.pricing_rule
+			};
+		});
+
+		let dialog = new frappe.ui.Dialog({
+			title: __("Select Pricing Rule"),
+			fields: [
+				{
+					fieldname: "rules",
+					fieldtype: "Table",
+					label: "Pricing Rules",
+					cannot_add_rows: 1,
+					in_place_edit: false,
+					reqd: 1,
+					data: data,
+					get_data: () => {
+						return data;
+					},
+					fields: [
+						{
+							"fieldtype": "Link",
+							"fieldname": "pricing_rule",
+							"options": "Pricing Rule",
+							"label": __("Rule"),
+							"read_only": 1,
+							"in_list_view": 1
+						},
+					],
+				},
+			],
+			primary_action: function (values) {
+				if (values.rules.length > 0) {
+					frappe.run_serially([
+						() => frappe.dom.freeze(),
+						() => dialog.hide(),
+						() => me.update_items_with_selected_pricing_rules(values.rules.map(d => d.pricing_rule)),
+						() => me.frm.save(),
+						() => frappe.dom.unfreeze()
+					]);
+				}
+			},
+			primary_action_label: __("Select"),
+		});
+		dialog.show();
+	}
+
+	update_items_with_selected_pricing_rules(pricing_rules) {
+		let me = this;
+		let item_list = [];
+
+		$.each(me.frm.doc["items"] || [], function (i, d) {
+			if (d.item_code) {
+				if (d.is_free_item) {
+					// Simply remove free items
+					me.frm.get_field("items").grid.grid_rows[i].remove();
+				} else {
+					item_list.push({
+						"doctype": d.doctype,
+						"name": d.name,
+						"item_code": d.item_code,
+						"pricing_rules": d.pricing_rules,
+						"parenttype": d.parenttype,
+						"parent": d.parent,
+						"price_list_rate": d.price_list_rate
+					})
+				}
+			}
+		});
+		return me.frm.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_unselected_pricing_rules",
+			args: { item_list: item_list, pricing_rules: pricing_rules },
+			callback: function (r) {
+				if (!r.exc && r.message) {
+					r.message.forEach(row_item => {
+						me.remove_pricing_rule(row_item);
+					});
+					me._set_values_for_item_list(r.message);
+					me.calculate_taxes_and_totals();
+					if (me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
+				}
+			}
+		});
 	}
 
 	scan_barcode() {
@@ -1253,86 +1366,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.fields_dict.items.grid.toggle_enable("conversion_factor",
 				((item.uom != item.stock_uom) && !frappe.meta.get_docfield(cur_frm.fields_dict.items.grid.doctype, "conversion_factor").read_only)? true: false);
 		}
-	}
-
-	form_render(doc, cdt, cdn) {
-		let row = locals[cdt][cdn];
-		if (!row.pricing_rules) return;
-		if (JSON.parse(row.pricing_rules).length <= 1) return;
-		this.frm.get_field("items").grid.toggle_display("select_pricing_rule", 1)
-	}
-
-	select_pricing_rule(doc, cdt, cdn) {
-		let row = locals[cdt][cdn];
-		let me = this;
-
-		if (!row.pricing_rules) {
-			frappe.show_alert({
-				message: __("No valid pricing rule found."),
-				indicator: "orange",
-			});
-			return;
-		}
-
-		let rules = JSON.parse(row.pricing_rules)
-		if (rules.length <= 1) {
-			frappe.show_alert({
-				message: __("Only one pricing rule found."),
-				indicator: "orange",
-			});
-			return;
-		}
-
-		let data = rules.map((d) => {
-			return {
-				pricing_rule: d
-			};
-		});
-
-		let dialog = new frappe.ui.Dialog({
-			title: __("Select Pricing Rule"),
-			fields: [
-				{
-					fieldname: "rules",
-					fieldtype: "Table",
-					label: "Pricing Rules",
-					cannot_add_rows: 1,
-					in_place_edit: false,
-					reqd: 1,
-					data: data,
-					get_data: () => {
-						return data;
-					},
-					fields: [
-						{
-							"fieldtype": "Link",
-							"fieldname": "pricing_rule",
-							"options": "Pricing Rule",
-							"label": __("Rule"),
-							"read_only": 1,
-							"in_list_view": 1
-						},
-					],
-				},
-			],
-			primary_action: function (values) {
-				if (values.rules.length > 0) {
-					frappe.run_serially([
-						() => frappe.dom.freeze(),
-						() => dialog.hide(),
-						() => me.remove_pricing_rule_for_item(row),
-						() => frappe.model.set_value(
-							cdt, cdn, "pricing_rules",
-							JSON.stringify(values.rules.map(v => v.pricing_rule))
-						),
-						() => me.frm.save(),
-						() => frappe.dom.unfreeze()
-					]);
-				}
-			},
-			primary_action_label: __("Select"),
-		});
-		dialog.show();
 	}
 
 	qty(doc, cdt, cdn) {

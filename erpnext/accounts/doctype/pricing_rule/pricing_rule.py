@@ -651,6 +651,79 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, ra
 
 
 @frappe.whitelist()
+def remove_unselected_pricing_rules(item_list, pricing_rules):
+	if isinstance(item_list, str):
+		item_list = json.loads(item_list)
+
+	out = []
+	for item in item_list:
+		item = frappe._dict(item)
+		if item.get("pricing_rules"):
+			out.append(
+				remove_unselected_pricing_rule_for_item(
+					pricing_rules, item, item.item_code, item.get("price_list_rate")
+				)
+			)
+
+	return out
+
+
+@frappe.whitelist()
+def remove_unselected_pricing_rule_for_item(pricing_rules, item_details, item_code=None, rate=None):
+	from erpnext.accounts.doctype.pricing_rule.utils import (
+		get_applied_pricing_rules,
+		get_pricing_rule_items,
+	)
+
+	if isinstance(item_details, str):
+		item_details = json.loads(item_details)
+		item_details = frappe._dict(item_details)
+
+	item_details.remove_free_item = []
+	_pricing_rules = []
+	for d in get_applied_pricing_rules(item_details.pricing_rules):
+		if not d or not frappe.db.exists("Pricing Rule", d):
+			continue
+
+		if d in pricing_rules:
+			_pricing_rules.append(d)
+			continue
+
+		pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
+
+		if pricing_rule.price_or_product_discount == "Price":
+			if pricing_rule.rate_or_discount == "Discount Percentage":
+				item_details.discount_percentage = 0.0
+				item_details.discount_amount = 0.0
+				item_details.rate = rate or 0.0
+
+			if pricing_rule.rate_or_discount == "Discount Amount":
+				item_details.discount_amount = 0.0
+
+			if pricing_rule.margin_type in ["Percentage", "Amount"]:
+				item_details.margin_rate_or_amount = 0.0
+				item_details.margin_type = None
+		elif pricing_rule.get("same_item") or pricing_rule.get("free_item"):
+			item_details.remove_free_item.append(
+				item_code if pricing_rule.get("same_item") else pricing_rule.get("free_item")
+			)
+
+		if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
+			items = get_pricing_rule_items(pricing_rule, other_items=True)
+			item_details.apply_on = (
+				frappe.scrub(pricing_rule.apply_rule_on_other)
+				if pricing_rule.apply_rule_on_other
+				else frappe.scrub(pricing_rule.get("apply_on"))
+			)
+			item_details.applied_on_items = ",".join(items)
+
+	item_details.pricing_rules = json.dumps(_pricing_rules)
+	item_details.pricing_rule_removed = True
+
+	return item_details
+
+
+@frappe.whitelist()
 def remove_pricing_rules(item_list):
 	if isinstance(item_list, str):
 		item_list = json.loads(item_list)
