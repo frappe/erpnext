@@ -59,6 +59,7 @@ class Budget(Document):
 		self.validate_accounts()
 		self.set_null_value()
 		self.validate_applicable_for()
+		self.validate_monthly_distribution()
 
 	def validate_duplicate(self):
 		budget_against_field = frappe.scrub(self.budget_against)
@@ -138,6 +139,12 @@ class Budget(Document):
 
 	def before_naming(self):
 		self.naming_series = f"{{{frappe.scrub(self.budget_against)}}}./.{self.fiscal_year}/.###"
+
+	def validate_monthly_distribution(self):
+		if self.monthly_distribution:
+			md_fy = frappe.db.get_value("Monthly Distribution", self.monthly_distribution, "fiscal_year")
+			if md_fy != self.fiscal_year:
+				frappe.throw(_("Fiscal Year in Monthly Distribution should be same as Budget Fiscal Year"))
 
 
 def validate_expense_against_budget(args, expense_amount=0):
