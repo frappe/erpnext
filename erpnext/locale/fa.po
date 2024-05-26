@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-25 12:26\n"
+"PO-Revision-Date: 2024-05-26 12:37\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -7798,7 +7798,7 @@ msgstr "از آنجایی که {0} فعال است، نمی توانید {1} ر�
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Assembly Items"
-msgstr "اقلام مونتاژ"
+msgstr "آیتم‌های مونتاژ"
 
 #. Name of a DocType
 #: accounts/report/account_balance/account_balance.js:25
@@ -8256,7 +8256,7 @@ msgstr "مقدار دارایی"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:127
 #: accounts/report/account_balance/account_balance.js:38
 msgid "Asset Received But Not Billed"
-msgstr "دارایی دریافت شده اما صورتحساب نشده است"
+msgstr "دارایی دریافت شده اما صورتحساب نشده"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
@@ -12066,7 +12066,7 @@ msgstr "تنظیمات CRM"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:34
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:50
 msgid "CWIP Account"
-msgstr "حساب CWIP"
+msgstr "حساب کارهای سرمایه‌ای در دست اجرا"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -24803,7 +24803,7 @@ msgstr "پخش کننده"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:104
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:152
 msgid "Dividends Paid"
-msgstr "سود موجودی پرداخت شده"
+msgstr "سود سهام پرداخت شده"
 
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -27008,7 +27008,7 @@ msgstr "نوع ورودی"
 #: accounts/report/balance_sheet/balance_sheet.py:241
 #: setup/setup_wizard/operations/install_fixtures.py:259
 msgid "Equity"
-msgstr "انصاف"
+msgstr "حقوق صاحبان سهام"
 
 #. Option for the 'Root Type' (Select) field in DocType 'Account'
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
@@ -46161,7 +46161,7 @@ msgstr "جزئیات موجودی باز کردن"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:105
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:153
 msgid "Opening Balance Equity"
-msgstr "دارایی موجودی افتتاحیه"
+msgstr "حقوق صاحبان سهام افتتاحیه"
 
 #. Label of a Date field in DocType 'Issue'
 #: support/doctype/issue/issue.json
