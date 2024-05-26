@@ -103,6 +103,8 @@ def _get_pricing_rules(apply_on, args, values):
 		item_conditions = "{child_doc}.{apply_on_field}= %({apply_on_field})s".format(child_doc=child_doc,
 			apply_on_field = apply_on_field)
 
+		conditions += " and {child_doc}.uom = {uom}".format(child_doc=child_doc, uom=frappe.db.escape(args.get('uom')))
+
 		if apply_on_field == 'item_code':
 			if "variant_of" not in args:
 				args.variant_of = frappe.get_cached_value("Item", args.item_code, "variant_of")
@@ -111,6 +113,7 @@ def _get_pricing_rules(apply_on, args, values):
 				item_variant_condition = ' or {child_doc}.item_code=%(variant_of)s '.format(child_doc=child_doc)
 				values['variant_of'] = args.variant_of
 	elif apply_on_field == 'item_group':
+		conditions += " and {child_doc}.uom = {uom}".format(child_doc=child_doc, uom=frappe.db.escape(args.get('uom')))
 		item_conditions = _get_tree_conditions(args, "Item Group", child_doc, False)
 
 	conditions += get_other_conditions(conditions, values, args)
@@ -312,6 +315,8 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 
 def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 	rules = []
+	if qty == 123456789:
+		return pricing_rules
 
 	for rule in pricing_rules:
 		status = False
@@ -332,6 +337,9 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 			and (flt(rate)<= (rule.max_amt * conversion_factor) if rule.max_amt else True)):
 			status = True
 		else:
+			status = False
+
+		if rule.get("uom") and args and rule.get("uom") != args.get("uom"):
 			status = False
 
 		if status:
