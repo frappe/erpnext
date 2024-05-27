@@ -285,9 +285,29 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					}
 				}
 				// payment request
+<<<<<<< HEAD
 				if(flt(doc.per_billed, precision('per_billed', doc)) < 100 + frappe.boot.sysdefaults.over_billing_allowance) {
 					this.frm.add_custom_button(__('Payment Request'), () => this.make_payment_request(), __('Create'));
 					this.frm.add_custom_button(__('Payment'), () => this.make_payment_entry(), __('Create'));
+=======
+				if (
+					flt(doc.per_billed, precision("per_billed", doc)) <
+					100 + frappe.boot.sysdefaults.over_billing_allowance
+				) {
+					this.frm.add_custom_button(
+						__("Payment Request"),
+						() => this.make_payment_request(),
+						__("Create")
+					);
+
+					if (frappe.model.can_create("Payment Entry")) {
+						this.frm.add_custom_button(
+							__("Payment"),
+							() => this.make_payment_entry(),
+							__("Create")
+						);
+					}
+>>>>>>> 47bc5691a1 (refactor: remove use of `can_create` for Payment Request (#41647))
 				}
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
