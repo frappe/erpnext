@@ -2681,6 +2681,7 @@ class StockEntry(StockController):
 						_(f"Row #{row.idx}: Source Warehouse and Target Warehouse can't be the same.")
 					)
 
+
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
 	from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
