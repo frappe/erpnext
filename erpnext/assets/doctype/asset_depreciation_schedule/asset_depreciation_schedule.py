@@ -555,6 +555,15 @@ def _check_is_pro_rata(asset_doc, row, wdv_or_dd_non_yearly=False):
 	from_date = _get_modified_available_for_use_date(asset_doc, row, wdv_or_dd_non_yearly=False)
 	days = date_diff(row.depreciation_start_date, from_date) + 1
 	total_days = get_total_days(row.depreciation_start_date, row.frequency_of_depreciation)
+	if days <= 0:
+		frappe.throw(
+			_(
+				"""
+			Error: This asset already has {0} depreciation periods booked.
+			The 'depreciation start' date must be at least {1} periods after the 'available for use' date. Please correct the dates accordingly.
+			"""
+			).format(asset_doc.number_of_depreciations_booked, asset_doc.number_of_depreciations_booked)
+		)
 	if days < total_days:
 		has_pro_rata = True
 	return has_pro_rata
