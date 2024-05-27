@@ -2677,7 +2677,9 @@ class StockEntry(StockController):
 		for row in self.get("items"):
 			if row.s_warehouse and row.t_warehouse:
 				if row.s_warehouse == row.t_warehouse:
-					frappe.throw(_(f"Row #{row.idx}: Source Warehouse and Target Warehouse can't be the same."))
+					frappe.throw(
+						_(f"Row #{row.idx}: Source Warehouse and Target Warehouse can't be the same.")
+					)
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
