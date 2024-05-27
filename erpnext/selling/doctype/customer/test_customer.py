@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.test_runner import make_test_records
@@ -322,7 +324,7 @@ class TestCustomer(FrappeTestCase):
 			frappe.ValidationError,
 			update_child_qty_rate,
 			so.doctype,
-			frappe.json.dumps([modified_item]),
+			json.dumps([modified_item]),
 			so.name,
 		)
 
