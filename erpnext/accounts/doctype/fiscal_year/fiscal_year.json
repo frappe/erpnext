@@ -82,11 +82,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2020-11-05 12:16:53.081573",
-=======
  "modified": "2024-05-27 17:29:55.560840",
->>>>>>> eaa4efbc45 (fix: allow Auditor to read a Fiscal Year)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
