@@ -75,8 +75,17 @@ def get_data(filters):
 		asset_data = assets_details.get(d.against_voucher)
 		if asset_data:
 			if not asset_data.get("accumulated_depreciation_amount"):
-				asset_data.accumulated_depreciation_amount = d.debit + asset_data.get(
-					"opening_accumulated_depreciation"
+				asset_depreciation_schedule = frappe.get_doc(
+					"Asset Depreciation Schedule", {"asset": d.against_voucher}
+				)
+				asset_data.accumulated_depreciation_amount = frappe.get_value(
+					"Depreciation Schedule",
+					{
+						"parent": asset_depreciation_schedule.name,
+						"parenttype": "Asset Depreciation Schedule",
+						"schedule_date": d.posting_date,
+					},
+					"accumulated_depreciation_amount",
 				)
 			else:
 				asset_data.accumulated_depreciation_amount += d.debit
