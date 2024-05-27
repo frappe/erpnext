@@ -564,6 +564,7 @@ def apply_pricing_rule_on_transaction(doc):
 
 	if pricing_rules:
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty, doc.total, pricing_rules)
+		pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
 		if not pricing_rules:
 			remove_free_item(doc)
