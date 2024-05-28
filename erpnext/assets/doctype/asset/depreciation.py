@@ -323,6 +323,7 @@ def _make_journal_entry_for_depreciation(
 
 	if not je.meta.get_workflow():
 		je.submit()
+		asset.reload()
 		idx = cint(asset_depr_schedule_doc.finance_book_id)
 		row = asset.get("finance_books")[idx - 1]
 		row.value_after_depreciation -= depr_schedule.depreciation_amount
