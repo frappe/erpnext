@@ -173,6 +173,8 @@ def validate_loyalty_points(ref_doc, points_to_redeem):
 
 		if not ref_doc.loyalty_amount and ref_doc.loyalty_amount != loyalty_amount:
 			ref_doc.loyalty_amount = loyalty_amount
+		if not ref_doc.loyalty_points and ref_doc.loyalty_points != points_to_redeem:
+			ref_doc.loyalty_points = points_to_redeem
 
 		if ref_doc.doctype == "Sales Invoice":
 			ref_doc.loyalty_program = loyalty_program
