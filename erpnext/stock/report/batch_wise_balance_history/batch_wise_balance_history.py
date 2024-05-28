@@ -4,7 +4,7 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, get_table_name, getdate
+from frappe.utils import add_to_date, cint, flt, get_datetime, get_table_name, getdate
 from pypika import functions as fn
 
 from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
@@ -99,6 +99,8 @@ def get_stock_ledger_entries(filters):
 	if not filters.get("to_date"):
 		frappe.throw(_("'To Date' is required"))
 
+	posting_datetime = get_datetime(add_to_date(filters["to_date"], days=1))
+
 	sle = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
 		frappe.qb.from_(sle)
@@ -112,8 +114,9 @@ def get_stock_ledger_entries(filters):
 		.where(
 			(sle.docstatus < 2)
 			& (sle.is_cancelled == 0)
-			& (fn.IfNull(sle.batch_no, "") != "")
-			& (sle.posting_date <= filters["to_date"])
+			& (sle.batch_no.isnotnull())
+			& (sle.batch_no != "")
+			& (sle.posting_datetime < posting_datetime)
 		)
 		.groupby(sle.voucher_no, sle.batch_no, sle.item_code, sle.warehouse)
 		.orderby(sle.item_code, sle.warehouse)
