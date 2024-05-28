@@ -137,7 +137,7 @@ class TestAccountsController(FrappeTestCase):
 			# Advance accounts under Asset and Liability header
 			frappe._dict(
 				{
-					"attribute_name": "debtors_advance_usd",
+					"attribute_name": "advance_received_usd",
 					"name": "Advance Received USD",
 					"account_type": "Receivable",
 					"account_currency": "USD",
@@ -146,7 +146,7 @@ class TestAccountsController(FrappeTestCase):
 			),
 			frappe._dict(
 				{
-					"attribute_name": "creditors_advance_usd",
+					"attribute_name": "advance_paid_usd",
 					"name": "Advance Paid USD",
 					"account_type": "Payable",
 					"account_currency": "USD",
@@ -173,6 +173,18 @@ class TestAccountsController(FrappeTestCase):
 				)
 				acc = frappe.get_doc("Account", name)
 			setattr(self, x.attribute_name, acc.name)
+
+	def enable_advances_under_asset_and_liability(self):
+		company = frappe.get_doc("Company", self.company)
+		company.book_advance_payments_in_separate_party_account = 1
+		company.default_advance_received_account = self.advance_received_usd
+		company.default_advance_paid_account = self.advance_paid_usd
+		company.save()
+
+	def disable_advances_under_asset_and_liability(self):
+		company = frappe.get_doc("Company", self.company)
+		company.book_advance_payments_in_separate_party_account = 0
+		company.save()
 
 	def create_sales_invoice(
 		self,
@@ -1716,3 +1728,54 @@ class TestAccountsController(FrappeTestCase):
 		# Exchange Gain/Loss Journal should've been cancelled
 		exc_je_for_je1 = self.get_journals_for(je1.doctype, je1.name)
 		self.assertEqual(exc_je_for_je1, [])
+
+	def test_70_advance_payment_against_sales_invoice_in_foreign_currency(self):
+		"""
+		Customer advance booked under Liability
+		"""
+		self.enable_advances_under_asset_and_liability()
+
+		adv = self.create_payment_entry(amount=1, source_exc_rate=83)
+		adv.save()  # explicit 'save' is needed to trigger set_liability_account()
+		self.assertEqual(adv.paid_from, self.advance_received_usd)
+		adv.submit()
+
+		si = self.create_sales_invoice(qty=1, conversion_rate=80, rate=1, do_not_submit=True)
+		si.debit_to = self.debtors_usd
+		si.save().submit()
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
+
+		pr = self.create_payment_reconciliation()
+		pr.receivable_payable_account = self.debtors_usd
+		pr.default_advance_account = self.advance_received_usd
+		pr.get_unreconciled_entries()
+		self.assertEqual(pr.invoices[0].invoice_number, si.name)
+		self.assertEqual(pr.payments[0].reference_name, adv.name)
+
+		# Allocate and Reconcile
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
+
+		# Exc Gain/Loss journal should've been creatad
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(len(exc_je_for_adv), 1)
+		self.assertEqual(exc_je_for_si, exc_je_for_adv)
+
+		adv.reload()
+		adv.cancel()
+		si.reload()
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
+		# Exc Gain/Loss journal should've been cancelled
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_si), 0)
+		self.assertEqual(len(exc_je_for_adv), 0)
+
+		self.disable_advances_under_asset_and_liability()
