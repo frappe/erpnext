@@ -55,6 +55,7 @@ class TestAccountsController(FrappeTestCase):
 	40 series - Company default Cost center is unset
 	50 series - Journals against Journals
 	60 series - Journals against Payment Entries
+	70 series - Advances in Separate party account. Both Party and Advance account are in Foreign currency.
 	90 series - Dimension inheritence
 	"""
 
@@ -114,47 +115,64 @@ class TestAccountsController(FrappeTestCase):
 		self.supplier = make_supplier("_Test MC Supplier USD", "USD")
 
 	def create_account(self):
-		account_name = "Debtors USD"
-		if not frappe.db.get_value(
-			"Account", filters={"account_name": account_name, "company": self.company}
-		):
-			acc = frappe.new_doc("Account")
-			acc.account_name = account_name
-			acc.parent_account = "Accounts Receivable - " + self.company_abbr
-			acc.company = self.company
-			acc.account_currency = "USD"
-			acc.account_type = "Receivable"
-			acc.insert()
-		else:
-			name = frappe.db.get_value(
-				"Account",
-				filters={"account_name": account_name, "company": self.company},
-				fieldname="name",
-				pluck=True,
-			)
-			acc = frappe.get_doc("Account", name)
-		self.debtors_usd = acc.name
+		accounts = [
+			frappe._dict(
+				{
+					"attribute_name": "debtors_usd",
+					"name": "Debtors USD",
+					"account_type": "Receivable",
+					"account_currency": "USD",
+					"parent_account": "Accounts Receivable - " + self.company_abbr,
+				}
+			),
+			frappe._dict(
+				{
+					"attribute_name": "creditors_usd",
+					"name": "Creditors USD",
+					"account_type": "Payable",
+					"account_currency": "USD",
+					"parent_account": "Accounts Payable - " + self.company_abbr,
+				}
+			),
+			# Advance accounts under Asset and Liability header
+			frappe._dict(
+				{
+					"attribute_name": "debtors_advance_usd",
+					"name": "Advance Received USD",
+					"account_type": "Receivable",
+					"account_currency": "USD",
+					"parent_account": "Current Liabilities - " + self.company_abbr,
+				}
+			),
+			frappe._dict(
+				{
+					"attribute_name": "creditors_advance_usd",
+					"name": "Advance Paid USD",
+					"account_type": "Payable",
+					"account_currency": "USD",
+					"parent_account": "Current Assets - " + self.company_abbr,
+				}
+			),
+		]
 
-		account_name = "Creditors USD"
-		if not frappe.db.get_value(
-			"Account", filters={"account_name": account_name, "company": self.company}
-		):
-			acc = frappe.new_doc("Account")
-			acc.account_name = account_name
-			acc.parent_account = "Accounts Payable - " + self.company_abbr
-			acc.company = self.company
-			acc.account_currency = "USD"
-			acc.account_type = "Payable"
-			acc.insert()
-		else:
-			name = frappe.db.get_value(
-				"Account",
-				filters={"account_name": account_name, "company": self.company},
-				fieldname="name",
-				pluck=True,
-			)
-			acc = frappe.get_doc("Account", name)
-		self.creditors_usd = acc.name
+		for x in accounts:
+			if not frappe.db.get_value("Account", filters={"account_name": x.name, "company": self.company}):
+				acc = frappe.new_doc("Account")
+				acc.account_name = x.name
+				acc.parent_account = x.parent_account
+				acc.company = self.company
+				acc.account_currency = x.account_currency
+				acc.account_type = x.account_type
+				acc.insert()
+			else:
+				name = frappe.db.get_value(
+					"Account",
+					filters={"account_name": x.name, "company": self.company},
+					fieldname="name",
+					pluck=True,
+				)
+				acc = frappe.get_doc("Account", name)
+			setattr(self, x.attribute_name, acc.name)
 
 	def create_sales_invoice(
 		self,
