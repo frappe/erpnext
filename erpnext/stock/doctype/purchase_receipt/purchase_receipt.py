@@ -370,6 +370,7 @@ class PurchaseReceipt(BuyingController):
 		else:
 			self.db_set("status", "Completed")
 
+		self.make_bundle_for_sales_purchase_return()
 		self.make_bundle_using_old_serial_batch_fields()
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin

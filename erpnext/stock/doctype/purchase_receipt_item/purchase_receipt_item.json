@@ -81,6 +81,7 @@
   "purchase_invoice",
   "column_break_40",
   "allow_zero_valuation_rate",
+  "return_qty_from_rejected_warehouse",
   "is_fixed_asset",
   "asset_location",
   "asset_category",
@@ -1116,12 +1117,19 @@
    "hidden": 1,
    "label": "Apply TDS",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "return_qty_from_rejected_warehouse",
+   "fieldtype": "Check",
+   "label": "Return Qty from Rejected Warehouse",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-08 20:00:16.278292",
+ "modified": "2024-05-28 09:48:24.448815",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

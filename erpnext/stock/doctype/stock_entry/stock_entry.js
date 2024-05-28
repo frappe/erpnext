@@ -111,6 +111,8 @@ frappe.ui.form.on("Stock Entry", {
 				// or a pre-existing batch
 				if (frm.doc.purpose != "Material Receipt") {
 					filters["warehouse"] = item.s_warehouse || item.t_warehouse;
+				} else {
+					filters["is_inward"] = 1;
 				}
 
 				return {
@@ -1110,6 +1112,13 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 	on_submit() {
 		this.clean_up();
+		this.refresh_serial_batch_bundle_field();
+	}
+
+	refresh_serial_batch_bundle_field() {
+		frappe.route_hooks.after_submit = (frm_obj) => {
+			frm_obj.reload_doc();
+		};
 	}
 
 	after_cancel() {

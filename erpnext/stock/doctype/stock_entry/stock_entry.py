@@ -226,6 +226,7 @@ class StockEntry(StockController):
 		if not self.from_bom:
 			self.fg_completed_qty = 0.0
 
+		self.make_serial_and_batch_bundle_for_outward()
 		self.validate_serialized_batch()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
@@ -288,9 +289,6 @@ class StockEntry(StockController):
 			self.set_material_request_transfer_status("Not Started")
 		if self.purpose == "Material Transfer" and self.outgoing_stock_entry:
 			self.set_material_request_transfer_status("In Transit")
-
-	def before_save(self):
-		self.make_serial_and_batch_bundle_for_outward()
 
 	def on_update(self):
 		self.set_serial_and_batch_bundle()
@@ -992,7 +990,7 @@ class StockEntry(StockController):
 			self.purpose = frappe.get_cached_value("Stock Entry Type", self.stock_entry_type, "purpose")
 
 	def make_serial_and_batch_bundle_for_outward(self):
-		if self.docstatus == 1:
+		if self.docstatus == 0:
 			return
 
 		serial_or_batch_items = get_serial_or_batch_items(self.items)
@@ -1045,12 +1043,11 @@ class StockEntry(StockController):
 			if not bundle_doc:
 				continue
 
-			if self.docstatus == 0:
-				for entry in bundle_doc.entries:
-					if not entry.serial_no:
-						continue
+			for entry in bundle_doc.entries:
+				if not entry.serial_no:
+					continue
 
-					already_picked_serial_nos.append(entry.serial_no)
+				already_picked_serial_nos.append(entry.serial_no)
 
 			row.serial_and_batch_bundle = bundle_doc.name
 

@@ -228,6 +228,7 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
+		self.make_bundle_for_sales_purchase_return()
 		self.submit_serial_batch_bundle()
 
 		if self.coupon_code:

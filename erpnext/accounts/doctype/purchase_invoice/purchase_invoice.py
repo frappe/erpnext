@@ -707,6 +707,7 @@ class PurchaseInvoice(BuyingController):
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		if self.update_stock == 1:
+			self.make_bundle_for_sales_purchase_return()
 			self.make_bundle_using_old_serial_batch_fields()
 			self.update_stock_ledger()
 
