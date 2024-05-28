@@ -2645,7 +2645,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for row in inter_transfer_dn_return.items:
 			self.assertTrue(row.serial_and_batch_bundle)
 
-	def test_internal_transfer_with_serial_batch_items_without_user_serial_batch_fields(self):
+	def test_internal_transfer_with_serial_batch_items_without_use_serial_batch_fields(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
