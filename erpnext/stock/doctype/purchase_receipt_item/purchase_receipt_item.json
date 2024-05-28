@@ -1129,11 +1129,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-04-08 20:00:16.278292",
-=======
  "modified": "2024-05-28 09:48:24.448815",
->>>>>>> ce834f5dba (fix: multiple issues related to serial and batch bundle (#41662))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
