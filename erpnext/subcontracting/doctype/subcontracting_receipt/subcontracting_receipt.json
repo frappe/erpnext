@@ -663,11 +663,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-11-16 13:04:00.710534",
-=======
- "modified": "2024-05-27 15:02:13.517969",
->>>>>>> ce834f5dba (fix: multiple issues related to serial and batch bundle (#41662))
+ "modified": "2024-05-28 15:02:13.517969",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",
