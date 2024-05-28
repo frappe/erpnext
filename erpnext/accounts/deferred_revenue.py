@@ -221,12 +221,13 @@ def calculate_monthly_amount(
 				amount = item.net_amount - already_booked_amount_in_account_currency
 
 		if get_first_day(start_date) != start_date or get_last_day(end_date) != end_date:
-			partial_month = flt(date_diff(end_date, start_date)) / flt(
+			partial_month = (flt(date_diff(end_date, start_date)) + 1) / flt(
 				date_diff(get_last_day(end_date), get_first_day(start_date))
 			)
 
-			base_amount = rounded(partial_month, 1) * base_amount
-			amount = rounded(partial_month, 1) * amount
+			precision = frappe.get_system_settings("float_precision") or 2
+			base_amount = rounded(partial_month, precision) * base_amount
+			amount = rounded(partial_month, precision) * amount
 	else:
 		already_booked_amount, already_booked_amount_in_account_currency = get_already_booked_amount(
 			doc, item
