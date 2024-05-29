@@ -867,6 +867,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						fields: fields,
 						primary_action: function () {
 							var data = { items: d.fields_dict.items.grid.get_selected_children() };
+							if (!data) {
+								frappe.throw(__("Please select items"));
+							}
 							me.frm.call({
 								method: "make_work_orders",
 								args: {
