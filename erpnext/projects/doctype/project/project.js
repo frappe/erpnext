@@ -57,6 +57,14 @@ frappe.ui.form.on("Project", {
 				filters: filters,
 			};
 		});
+
+		frm.set_query("cost_center", () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+				},
+			};
+		});
 	},
 
 	refresh: function (frm) {

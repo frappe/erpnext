@@ -1355,9 +1355,9 @@ class TestDepreciationBasics(AssetSetup):
 
 		for schedule in asset.schedules:
 			if schedule.idx <= 3:
-				self.assertEqual(schedule.finance_book_id, 1)
+				self.assertEqual(schedule.finance_book_id, "1")
 			else:
-				self.assertEqual(schedule.finance_book_id, 2)
+				self.assertEqual(schedule.finance_book_id, "2")
 
 	def test_depreciation_entry_cancellation(self):
 		asset = create_asset(

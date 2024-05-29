@@ -867,7 +867,8 @@
    "label": "Purchase Order",
    "options": "Purchase Order",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_92",
@@ -892,7 +893,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-14 18:34:10.479329",
+ "modified": "2024-05-23 16:36:18.970862",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
