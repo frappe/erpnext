@@ -10,6 +10,7 @@ from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
 from erpnext.stock.doctype.item.test_item import create_item
@@ -247,6 +248,48 @@ class TestAccountsController(FrappeTestCase):
 		payment.received_amount = source_exc_rate * amount
 		payment.posting_date = posting_date
 		return payment
+
+	def create_purchase_invoice(
+		self,
+		qty=1,
+		rate=1,
+		conversion_rate=80,
+		posting_date=None,
+		do_not_save=False,
+		do_not_submit=False,
+	):
+		"""
+		Helper function to populate default values in purchase invoice
+		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
+		pinv = make_purchase_invoice(
+			posting_date=posting_date,
+			qty=qty,
+			rate=rate,
+			company=self.company,
+			supplier=self.supplier,
+			item_code=self.item,
+			item_name=self.item,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			parent_cost_center=self.cost_center,
+			update_stock=0,
+			currency="USD",
+			conversion_rate=conversion_rate,
+			is_pos=0,
+			is_return=0,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			do_not_save=True,
+		)
+		pinv.credit_to = self.creditors_usd
+		if not do_not_save:
+			pinv.save()
+			if not do_not_submit:
+				pinv.submit()
+		return pinv
 
 	def clear_old_entries(self):
 		doctype_list = [
@@ -1776,6 +1819,75 @@ class TestAccountsController(FrappeTestCase):
 		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
 		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
 		self.assertEqual(len(exc_je_for_si), 0)
+		self.assertEqual(len(exc_je_for_adv), 0)
+
+		self.disable_advances_under_asset_and_liability()
+
+	def test_71_advance_payment_against_purchase_invoice_in_foreign_currency(self):
+		"""
+		Supplier advance booked under Asset
+		"""
+		self.enable_advances_under_asset_and_liability()
+
+		usd_amount = 1
+		inr_amount = 85
+		exc_rate = 85
+		adv = create_payment_entry(
+			company=self.company,
+			payment_type="Pay",
+			party_type="Supplier",
+			party=self.supplier,
+			paid_from=self.cash,
+			paid_to=self.advance_paid_usd,
+			paid_amount=inr_amount,
+		)
+		adv.source_exchange_rate = 1
+		adv.target_exchange_rate = exc_rate
+		adv.received_amount = usd_amount
+		adv.paid_amount = exc_rate * usd_amount
+		adv.posting_date = nowdate()
+		adv.save()
+		# Make sure that advance account is still set
+		self.assertEqual(adv.paid_to, self.advance_paid_usd)
+		adv.submit()
+
+		pi = self.create_purchase_invoice(qty=1, conversion_rate=83, rate=1)
+		self.assertEqual(pi.credit_to, self.creditors_usd)
+		self.assert_ledger_outstanding(pi.doctype, pi.name, 83.0, 1.0)
+
+		pr = self.create_payment_reconciliation()
+		pr.party_type = "Supplier"
+		pr.party = self.supplier
+		pr.receivable_payable_account = self.creditors_usd
+		pr.default_advance_account = self.advance_paid_usd
+		pr.get_unreconciled_entries()
+		self.assertEqual(pr.invoices[0].invoice_number, pi.name)
+		self.assertEqual(pr.payments[0].reference_name, adv.name)
+
+		# Allocate and Reconcile
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+		self.assert_ledger_outstanding(pi.doctype, pi.name, 0.0, 0.0)
+
+		# Exc Gain/Loss journal should've been creatad
+		exc_je_for_pi = self.get_journals_for(pi.doctype, pi.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_pi), 1)
+		self.assertEqual(len(exc_je_for_adv), 1)
+		self.assertEqual(exc_je_for_pi, exc_je_for_adv)
+
+		adv.reload()
+		adv.cancel()
+		pi.reload()
+		self.assert_ledger_outstanding(pi.doctype, pi.name, 83.0, 1.0)
+		# Exc Gain/Loss journal should've been cancelled
+		exc_je_for_pi = self.get_journals_for(pi.doctype, pi.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_pi), 0)
 		self.assertEqual(len(exc_je_for_adv), 0)
 
 		self.disable_advances_under_asset_and_liability()
