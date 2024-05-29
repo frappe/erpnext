@@ -126,6 +126,12 @@ class Timesheet(Document):
 			if data.task and data.task not in tasks:
 				task = frappe.get_doc("Task", data.task)
 				task.update_time_and_costing()
+				time_logs_completed = all(tl.completed for tl in self.time_logs if tl.task == task.name)
+
+				if time_logs_completed:
+					task.status = "Completed"
+				else:
+					task.status = "Working"
 				task.save()
 				tasks.append(data.task)
 
