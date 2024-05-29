@@ -138,6 +138,7 @@ class Supplier(TransactionBase):
 		validate_party_accounts(self)
 		self.validate_internal_supplier()
 		self.add_role_for_user()
+		self.validate_currency_for_receivable_payable_and_advance_account()
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
