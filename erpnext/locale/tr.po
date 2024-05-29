@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-28 12:36\n"
+"PO-Revision-Date: 2024-05-29 12:31\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -333,7 +333,8 @@ msgstr ""
 #: manufacturing/onboarding_step/production_planning/production_planning.json
 msgid "# How Production Planning Works\n\n"
 "Production Plan helps in production and material planning for the Items planned for manufacturing. These production items can be committed via Sales Order (to Customers) or Material Requests (internally).\n"
-msgstr ""
+msgstr "# Üretim Planlama Nasıl Çalışır\n\n"
+"Üretim Planı, üretim için planlanan Kalemler için üretim ve malzeme planlamasına yardımcı olur. Bu üretim kalemleri Satış Siparişi (Müşterilere) veya Malzeme Talepleri (dahili olarak) yoluyla taahhüt edilebilir.\n"
 
 #. Description of the Onboarding Step 'Import Data from Spreadsheet'
 #: setup/onboarding_step/data_import/data_import.json
@@ -654,7 +655,7 @@ msgstr ""
 
 #: stock/report/product_bundle_balance/product_bundle_balance.py:230
 msgid "'Date' is required"
-msgstr ""
+msgstr "'Tarih' gerekli"
 
 #: selling/report/inactive_customers/inactive_customers.py:18
 msgid "'Days Since Last Order' must be greater than or equal to zero"
@@ -2652,13 +2653,13 @@ msgstr "Muhasebe Boyutları Filtresi"
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Accounting Entries"
-msgstr ""
+msgstr "Muhasebe Girişleri"
 
 #. Label of a Table field in DocType 'Journal Entry Template'
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgctxt "Journal Entry Template"
 msgid "Accounting Entries"
-msgstr ""
+msgstr "Muhasebe Girişleri"
 
 #: accounts/doctype/sales_invoice/sales_invoice.js:86
 msgid "Accounting Entries are reposted"
@@ -4803,11 +4804,11 @@ msgstr ""
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Addresses"
-msgstr ""
+msgstr "Adresler"
 
 #: assets/doctype/asset/asset.js:144
 msgid "Adjust Asset Value"
-msgstr ""
+msgstr "Varlık Değerini Ayarla"
 
 #: accounts/doctype/sales_invoice/sales_invoice.js:1076
 msgid "Adjustment Against"
@@ -4820,7 +4821,7 @@ msgstr ""
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:54
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:79
 msgid "Administrative Expenses"
-msgstr ""
+msgstr "Yönetim Giderleri"
 
 #. Name of a role
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
@@ -4832,13 +4833,13 @@ msgstr ""
 #: accounts/doctype/repost_accounting_ledger_settings/repost_accounting_ledger_settings.json
 #: stock/reorder_item.py:387
 msgid "Administrator"
-msgstr ""
+msgstr "Yönetici"
 
 #. Label of a Link field in DocType 'Party Account'
 #: accounts/doctype/party_account/party_account.json
 msgctxt "Party Account"
 msgid "Advance Account"
-msgstr ""
+msgstr "Avans Hesabı"
 
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:165
 msgid "Advance Amount"
@@ -4854,13 +4855,13 @@ msgstr "Peşinat Tutarı"
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Advance Paid"
-msgstr ""
+msgstr "Avans Ödemesi"
 
 #. Label of a Currency field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Advance Paid"
-msgstr ""
+msgstr "Avans Ödemesi"
 
 #: buying/doctype/purchase_order/purchase_order_list.js:65
 #: selling/doctype/sales_order/sales_order_list.js:105
@@ -30775,7 +30776,7 @@ msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.js:432
 msgid "Get Stock"
-msgstr ""
+msgstr "Stok Getir"
 
 #. Label of a Button field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
@@ -38149,7 +38150,7 @@ msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.js:453
 msgid "Item {0}: {1} qty produced. "
-msgstr "{0}: {1} adet üretildi."
+msgstr "{0} Ürünü {1} adet üretildi. "
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:1176
 msgid "Item {} does not exist."
@@ -54356,32 +54357,32 @@ msgstr ""
 #: manufacturing/doctype/production_plan/production_plan.json
 #: manufacturing/report/production_plan_summary/production_plan_summary.js:8
 msgid "Production Plan"
-msgstr ""
+msgstr "Üretim Planı"
 
 #. Label of a Link field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Production Plan"
-msgstr ""
+msgstr "Üretim Planı"
 
 #. Label of a Link in the Manufacturing Workspace
 #. Label of a shortcut in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgctxt "Production Plan"
 msgid "Production Plan"
-msgstr ""
+msgstr "Üretim Planı"
 
 #. Label of a Link field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Production Plan"
-msgstr ""
+msgstr "Üretim Planı"
 
 #. Label of a Link field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Production Plan"
-msgstr ""
+msgstr "Üretim Planı"
 
 #: manufacturing/doctype/production_plan/production_plan.py:137
 msgid "Production Plan Already Submitted"
@@ -54390,36 +54391,36 @@ msgstr ""
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 msgid "Production Plan Item"
-msgstr ""
+msgstr "Üretim Planı Ürünü"
 
 #. Label of a Data field in DocType 'Production Plan Sub Assembly Item'
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgctxt "Production Plan Sub Assembly Item"
 msgid "Production Plan Item"
-msgstr ""
+msgstr "Üretim Planı Ürünü"
 
 #. Label of a Data field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Production Plan Item"
-msgstr ""
+msgstr "Üretim Planı Ürünü"
 
 #. Label of a Data field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Production Plan Item"
-msgstr ""
+msgstr "Üretim Planı Ürünü"
 
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_item_reference/production_plan_item_reference.json
 msgid "Production Plan Item Reference"
-msgstr ""
+msgstr "Üretim Planı Ürün Referansı"
 
 #. Label of a Table field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Production Plan Item Reference"
-msgstr ""
+msgstr "Üretim Planı Ürün Referansı"
 
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_material_request/production_plan_material_request.json
@@ -54435,12 +54436,12 @@ msgstr ""
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Production Plan Qty"
-msgstr ""
+msgstr "Planlanan Üretim Miktarı"
 
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_sales_order/production_plan_sales_order.json
 msgid "Production Plan Sales Order"
-msgstr ""
+msgstr "Üretim Planı Satış Siparişi"
 
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
