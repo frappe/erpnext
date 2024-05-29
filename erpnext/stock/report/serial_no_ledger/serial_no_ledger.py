@@ -9,6 +9,9 @@ from frappe import _
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_serial_nos_from_sle
 from erpnext.stock.stock_ledger import get_stock_ledger_entries
 
+BUYING_VOUCHER_TYPES = ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]
+SELLING_VOUCHER_TYPES = ["Sales Invoice", "Delivery Note"]
+
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -72,6 +75,20 @@ def get_columns(filters):
 			"fieldname": "qty",
 			"width": 150,
 		},
+		{
+			"label": _("Party Type"),
+			"fieldtype": "Link",
+			"fieldname": "party_type",
+			"options": "DocType",
+			"width": 90,
+		},
+		{
+			"label": _("Party"),
+			"fieldtype": "Dynamic Link",
+			"fieldname": "party",
+			"options": "party_type",
+			"width": 120,
+		},
 	]
 
 	return columns
@@ -100,6 +117,17 @@ def get_data(filters):
 				"warehouse": row.warehouse,
 				"qty": 1 if row.actual_qty > 0 else -1,
 			}
+		)
+
+		# get party details depending on the voucher type
+		party_field = (
+			"supplier"
+			if row.voucher_type in BUYING_VOUCHER_TYPES
+			else ("customer" if row.voucher_type in SELLING_VOUCHER_TYPES else None)
+		)
+		args.party_type = party_field.title() if party_field else None
+		args.party = (
+			frappe.db.get_value(row.voucher_type, row.voucher_no, party_field) if party_field else None
 		)
 
 		serial_nos = []

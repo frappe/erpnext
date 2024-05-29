@@ -308,7 +308,15 @@ def get_reposting_data(file_path) -> dict:
 
 	attached_file = frappe.get_doc("File", file_name)
 
-	data = gzip.decompress(attached_file.get_content())
+	content = attached_file.get_content()
+	if isinstance(content, str):
+		content = content.encode("utf-8")
+
+	try:
+		data = gzip.decompress(content)
+	except Exception:
+		return frappe._dict()
+
 	if data := json.loads(data.decode("utf-8")):
 		data = data
 
@@ -1428,7 +1436,11 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		order by posting_datetime desc, creation desc
 		limit 1
 		for update""",
-		args,
+		{
+			"item_code": args.get("item_code"),
+			"warehouse": args.get("warehouse"),
+			"posting_datetime": args.get("posting_datetime"),
+		},
 		as_dict=1,
 	)
 

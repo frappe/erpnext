@@ -47,8 +47,11 @@
   "total_qty",
   "column_break_27",
   "total",
-  "raw_material_details",
+  "raw_materials_consumed_section",
+  "reset_raw_materials_table",
+  "column_break_uinr",
   "get_current_stock",
+  "raw_material_details",
   "supplied_items",
   "additional_costs_section",
   "distribute_additional_costs_based_on",
@@ -300,6 +303,7 @@
    "depends_on": "supplied_items",
    "fieldname": "raw_material_details",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Raw Materials Consumed",
    "options": "fa fa-table",
    "print_hide": 1,
@@ -640,12 +644,26 @@
    "fieldname": "supplier_delivery_note",
    "fieldtype": "Data",
    "label": "Supplier Delivery Note"
+  },
+  {
+   "fieldname": "raw_materials_consumed_section",
+   "fieldtype": "Section Break",
+   "label": "Raw Materials Actions"
+  },
+  {
+   "fieldname": "reset_raw_materials_table",
+   "fieldtype": "Button",
+   "label": "Reset Raw Materials Table"
+  },
+  {
+   "fieldname": "column_break_uinr",
+   "fieldtype": "Column Break"
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-16 13:04:00.710534",
+ "modified": "2024-05-28 15:02:13.517969",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",

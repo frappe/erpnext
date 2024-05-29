@@ -1,11 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+from collections import defaultdict
 
 import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
-from frappe.utils import flt, format_datetime, get_datetime
+from frappe.utils import cint, flt, format_datetime, get_datetime
 
 import erpnext
 from erpnext.stock.serial_batch_bundle import get_batches_from_bundle
@@ -513,6 +514,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				target_doc.rejected_warehouse = ""
 				target_doc.warehouse = source_doc.rejected_warehouse
 				target_doc.received_qty = target_doc.qty
+				target_doc.return_qty_from_rejected_warehouse = 1
 
 		elif doctype == "Purchase Invoice":
 			returned_qty_map = get_returned_qty_map_for_row(
@@ -570,7 +572,14 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 
-		if source_doc.item_code:
+		if (
+			(source_doc.serial_no or source_doc.batch_no)
+			and not source_doc.serial_and_batch_bundle
+			and not source_doc.use_serial_batch_fields
+		):
+			target_doc.set("use_serial_batch_fields", 1)
+
+		if source_doc.item_code and target_doc.get("use_serial_batch_fields"):
 			item_details = frappe.get_cached_value(
 				"Item", source_doc.item_code, ["has_batch_no", "has_serial_no"], as_dict=1
 			)
@@ -578,14 +587,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 			if not item_details.has_batch_no and not item_details.has_serial_no:
 				return
 
-			if not target_doc.get("use_serial_batch_fields"):
-				for qty_field in ["stock_qty", "rejected_qty"]:
-					if not target_doc.get(qty_field):
-						continue
-
-					update_serial_batch_no(source_doc, target_doc, source_parent, item_details, qty_field)
-			elif target_doc.get("use_serial_batch_fields"):
-				update_non_bundled_serial_nos(source_doc, target_doc, source_parent)
+			update_non_bundled_serial_nos(source_doc, target_doc, source_parent)
 
 	def update_non_bundled_serial_nos(source_doc, target_doc, source_parent):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -839,3 +841,229 @@ def get_returned_batches(child_doc, parent_doc, batch_no_field=None, ignore_vouc
 		batches.update(get_batches_from_bundle(ids))
 
 	return batches
+
+
+def available_serial_batch_for_return(field, doctype, reference_ids, is_rejected=False):
+	available_dict = get_available_serial_batches(field, doctype, reference_ids, is_rejected=is_rejected)
+	if not available_dict:
+		frappe.throw(_("No Serial / Batches are available for return"))
+
+	return available_dict
+
+
+def get_available_serial_batches(field, doctype, reference_ids, is_rejected=False):
+	_bundle_ids = get_serial_and_batch_bundle(field, doctype, reference_ids, is_rejected=is_rejected)
+	if not _bundle_ids:
+		return frappe._dict({})
+
+	return get_serial_batches_based_on_bundle(field, _bundle_ids)
+
+
+def get_serial_batches_based_on_bundle(field, _bundle_ids):
+	available_dict = frappe._dict({})
+	batch_serial_nos = frappe.get_all(
+		"Serial and Batch Bundle",
+		fields=[
+			"`tabSerial and Batch Entry`.`serial_no`",
+			"`tabSerial and Batch Entry`.`batch_no`",
+			"`tabSerial and Batch Entry`.`qty`",
+			"`tabSerial and Batch Bundle`.`voucher_detail_no`",
+			"`tabSerial and Batch Bundle`.`voucher_type`",
+			"`tabSerial and Batch Bundle`.`voucher_no`",
+		],
+		filters=[
+			["Serial and Batch Bundle", "name", "in", _bundle_ids],
+			["Serial and Batch Entry", "docstatus", "=", 1],
+		],
+		order_by="`tabSerial and Batch Bundle`.`creation`, `tabSerial and Batch Entry`.`idx`",
+	)
+
+	for row in batch_serial_nos:
+		key = row.voucher_detail_no
+		if frappe.get_cached_value(row.voucher_type, row.voucher_no, "is_return"):
+			key = frappe.get_cached_value(row.voucher_type + " Item", row.voucher_detail_no, field)
+
+		if key not in available_dict:
+			available_dict[key] = frappe._dict(
+				{"qty": 0.0, "serial_nos": defaultdict(float), "batches": defaultdict(float)}
+			)
+
+		available_dict[key]["qty"] += row.qty
+
+		if row.serial_no:
+			available_dict[key]["serial_nos"][row.serial_no] += row.qty
+		elif row.batch_no:
+			available_dict[key]["batches"][row.batch_no] += row.qty
+
+	return available_dict
+
+
+def get_serial_and_batch_bundle(field, doctype, reference_ids, is_rejected=False):
+	filters = {"docstatus": 1, "name": ("in", reference_ids), "serial_and_batch_bundle": ("is", "set")}
+
+	pluck_field = "serial_and_batch_bundle"
+	if is_rejected:
+		del filters["serial_and_batch_bundle"]
+		filters["rejected_serial_and_batch_bundle"] = ("is", "set")
+		pluck_field = "rejected_serial_and_batch_bundle"
+
+	_bundle_ids = frappe.get_all(
+		doctype,
+		filters=filters,
+		pluck=pluck_field,
+	)
+
+	if not _bundle_ids:
+		return {}
+
+	del filters["name"]
+
+	filters[field] = ("in", reference_ids)
+
+	if not is_rejected:
+		_bundle_ids.extend(
+			frappe.get_all(
+				doctype,
+				filters=filters,
+				pluck="serial_and_batch_bundle",
+			)
+		)
+	else:
+		fields = [
+			"serial_and_batch_bundle",
+		]
+
+		if is_rejected:
+			fields.extend(["rejected_serial_and_batch_bundle", "return_qty_from_rejected_warehouse"])
+
+		data = frappe.get_all(
+			doctype,
+			fields=fields,
+			filters=filters,
+		)
+
+		for d in data:
+			if is_rejected:
+				if d.get("return_qty_from_rejected_warehouse"):
+					_bundle_ids.append(d.get("serial_and_batch_bundle"))
+				else:
+					_bundle_ids.append(d.get("rejected_serial_and_batch_bundle"))
+			else:
+				_bundle_ids.append(d.get("serial_and_batch_bundle"))
+
+	return _bundle_ids
+
+
+def filter_serial_batches(parent_doc, data, row, warehouse_field=None, qty_field=None):
+	if not qty_field:
+		qty_field = "qty"
+
+	if not warehouse_field:
+		warehouse_field = "warehouse"
+
+	warehouse = row.get(warehouse_field)
+	qty = abs(row.get(qty_field))
+
+	filterd_serial_batch = frappe._dict({"serial_nos": [], "batches": defaultdict(float)})
+
+	if data.serial_nos:
+		available_serial_nos = []
+		for serial_no, sn_qty in data.serial_nos.items():
+			if sn_qty != 0:
+				available_serial_nos.append(serial_no)
+
+		if available_serial_nos:
+			if parent_doc.doctype in ["Purchase Invoice", "Purchase Reecipt"]:
+				available_serial_nos = get_available_serial_nos(available_serial_nos)
+
+			if len(available_serial_nos) > qty:
+				filterd_serial_batch["serial_nos"] = sorted(available_serial_nos[0 : cint(qty)])
+			else:
+				filterd_serial_batch["serial_nos"] = available_serial_nos
+
+	elif data.batches:
+		for batch_no, batch_qty in data.batches.items():
+			if parent_doc.get("is_internal_customer"):
+				batch_qty = batch_qty * -1
+
+			if batch_qty <= 0:
+				continue
+
+			if parent_doc.doctype in ["Purchase Invoice", "Purchase Reecipt"]:
+				batch_qty = get_available_batch_qty(
+					parent_doc,
+					batch_no,
+					warehouse,
+				)
+
+				if batch_qty <= 0:
+					frappe.throw(
+						_("Batch {0} is not available in warehouse {1}").format(batch_no, warehouse),
+						title=_("Batch Not Available for Return"),
+					)
+
+			if qty <= 0:
+				break
+
+			if batch_qty > qty:
+				filterd_serial_batch["batches"][batch_no] = qty
+				qty = 0
+			else:
+				filterd_serial_batch["batches"][batch_no] += batch_qty
+				qty -= batch_qty
+
+	return filterd_serial_batch
+
+
+def get_available_batch_qty(parent_doc, batch_no, warehouse):
+	from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+	return get_batch_qty(
+		batch_no,
+		warehouse,
+		posting_date=parent_doc.posting_date,
+		posting_time=parent_doc.posting_time,
+		for_stock_levels=True,
+	)
+
+
+def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_field=None):
+	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+
+	type_of_transaction = "Outward"
+	if parent_doc.doctype in ["Sales Invoice", "Delivery Note", "POS Invoice"]:
+		type_of_transaction = "Inward"
+
+	if not warehouse_field:
+		warehouse_field = "warehouse"
+
+	warehouse = child_doc.get(warehouse_field)
+	if parent_doc.get("is_internal_customer"):
+		warehouse = child_doc.get("target_warehouse")
+		type_of_transaction = "Outward"
+
+	cls_obj = SerialBatchCreation(
+		{
+			"type_of_transaction": type_of_transaction,
+			"item_code": child_doc.item_code,
+			"warehouse": warehouse,
+			"serial_nos": data.get("serial_nos"),
+			"batches": data.get("batches"),
+			"posting_date": parent_doc.posting_date,
+			"posting_time": parent_doc.posting_time,
+			"voucher_type": parent_doc.doctype,
+			"voucher_no": parent_doc.name,
+			"voucher_detail_no": child_doc.name,
+			"qty": child_doc.qty,
+			"company": parent_doc.company,
+			"do_not_submit": True,
+		}
+	).make_serial_and_batch_bundle()
+
+	return cls_obj.name
+
+
+def get_available_serial_nos(serial_nos, warehouse):
+	return frappe.get_all(
+		"Serial No", filters={"warehouse": warehouse, "name": ("in", serial_nos)}, pluck="name"
+	)

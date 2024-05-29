@@ -249,18 +249,15 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertTrue(dn.items[0].serial_no)
 
 		frappe.flags.ignore_serial_batch_bundle_validation = False
+		frappe.flags.use_serial_and_batch_fields = False
 
 		# return entry
 		dn1 = make_sales_return(dn.name)
 
 		dn1.items[0].qty = -2
-
-		bundle_doc = frappe.get_doc("Serial and Batch Bundle", dn1.items[0].serial_and_batch_bundle)
-		bundle_doc.set("entries", bundle_doc.entries[:2])
-		bundle_doc.save()
-
-		dn1.save()
+		dn1.items[0].serial_no = "\n".join(get_serial_nos(serial_nos)[0:2])
 		dn1.submit()
+		dn1.reload()
 
 		returned_serial_nos1 = get_serial_nos_from_bundle(dn1.items[0].serial_and_batch_bundle)
 		for serial_no in returned_serial_nos1:
@@ -269,20 +266,14 @@ class TestDeliveryNote(FrappeTestCase):
 		dn2 = make_sales_return(dn.name)
 
 		dn2.items[0].qty = -2
-
-		bundle_doc = frappe.get_doc("Serial and Batch Bundle", dn2.items[0].serial_and_batch_bundle)
-		bundle_doc.set("entries", bundle_doc.entries[:2])
-		bundle_doc.save()
-
-		dn2.save()
+		dn2.items[0].serial_no = "\n".join(get_serial_nos(serial_nos)[2:4])
 		dn2.submit()
+		dn2.reload()
 
 		returned_serial_nos2 = get_serial_nos_from_bundle(dn2.items[0].serial_and_batch_bundle)
 		for serial_no in returned_serial_nos2:
 			self.assertTrue(serial_no in serial_nos)
 			self.assertFalse(serial_no in returned_serial_nos1)
-
-		frappe.flags.use_serial_and_batch_fields = False
 
 	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")
@@ -428,7 +419,7 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(dn.per_returned, 100)
 		self.assertEqual(dn.status, "Return Issued")
 
-	def test_delivery_note_return_valuation_on_different_warehuose(self):
+	def test_delivery_note_return_valuation_on_different_warehouse(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		company = frappe.db.get_value("Warehouse", "Stores - TCP1", "company")

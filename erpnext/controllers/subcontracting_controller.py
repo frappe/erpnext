@@ -327,13 +327,13 @@ class SubcontractingController(StockController):
 						consumed_bundles.batch_nos[batch_no] += abs(qty)
 
 			# Will be deprecated in v16
-			if row.serial_no:
+			if row.serial_no and not consumed_bundles.serial_nos:
 				self.available_materials[key]["serial_no"] = list(
 					set(self.available_materials[key]["serial_no"]) - set(get_serial_nos(row.serial_no))
 				)
 
 			# Will be deprecated in v16
-			if row.batch_no:
+			if row.batch_no and not consumed_bundles.batch_nos:
 				self.available_materials[key]["batch_no"][row.batch_no] -= row.consumed_qty
 
 	def get_available_materials(self):
