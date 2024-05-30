@@ -199,6 +199,7 @@ def get_batch_qty(
 	posting_date=None,
 	posting_time=None,
 	ignore_voucher_nos=None,
+	for_stock_levels=False,
 ):
 	"""Returns batch actual qty if warehouse is passed,
 	        or returns dict of qty by warehouse if warehouse is None
@@ -207,7 +208,8 @@ def get_batch_qty(
 
 	:param batch_no: Optional - give qty for this batch no
 	:param warehouse: Optional - give qty for this warehouse
-	:param item_code: Optional - give qty for this item"""
+	:param item_code: Optional - give qty for this item
+	:param for_stock_levels: True consider expired batches"""
 
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 		get_auto_batch_nos,
@@ -222,6 +224,7 @@ def get_batch_qty(
 			"posting_time": posting_time,
 			"batch_no": batch_no,
 			"ignore_voucher_nos": ignore_voucher_nos,
+			"for_stock_levels": for_stock_levels,
 		}
 	)
 

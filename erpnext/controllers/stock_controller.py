@@ -16,6 +16,11 @@ from erpnext.accounts.general_ledger import (
 )
 from erpnext.accounts.utils import cancel_exchange_gain_loss_journal, get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.controllers.sales_and_purchase_return import (
+	available_serial_batch_for_return,
+	filter_serial_batches,
+	make_serial_batch_bundle_for_return,
+)
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import (
 	get_evaluated_inventory_dimension,
@@ -205,6 +210,7 @@ class StockController(AccountsController):
 					"company": self.company,
 					"is_rejected": 1 if row.get("rejected_warehouse") else 0,
 					"use_serial_batch_fields": row.use_serial_batch_fields,
+					"via_landed_cost_voucher": via_landed_cost_voucher,
 					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
 
@@ -215,6 +221,125 @@ class StockController(AccountsController):
 				if row.get("rejected_qty"):
 					self.update_bundle_details(bundle_details, table_name, row, is_rejected=True)
 					self.create_serial_batch_bundle(bundle_details, row)
+
+	def make_bundle_for_sales_purchase_return(self, table_name=None):
+		if not self.get("is_return"):
+			return
+
+		if not table_name:
+			table_name = "items"
+
+		self.make_bundle_for_non_rejected_qty(table_name)
+
+		if self.doctype in ["Purchase Invoice", "Purchase Receipt"]:
+			self.make_bundle_for_rejected_qty(table_name)
+
+	def make_bundle_for_rejected_qty(self, table_name=None):
+		field, reference_ids = self.get_reference_ids(
+			table_name, "rejected_qty", "rejected_serial_and_batch_bundle"
+		)
+
+		if not reference_ids:
+			return
+
+		child_doctype = self.doctype + " Item"
+		available_dict = available_serial_batch_for_return(
+			field, child_doctype, reference_ids, is_rejected=True
+		)
+
+		for row in self.get(table_name):
+			if data := available_dict.get(row.get(field)):
+				qty_field = "rejected_qty"
+				warehouse_field = "rejected_warehouse"
+				if row.get("return_qty_from_rejected_warehouse"):
+					qty_field = "qty"
+					warehouse_field = "warehouse"
+
+				data = filter_serial_batches(
+					self, data, row, warehouse_field=warehouse_field, qty_field=qty_field
+				)
+				bundle = make_serial_batch_bundle_for_return(data, row, self, warehouse_field)
+				if row.get("return_qty_from_rejected_warehouse"):
+					row.db_set(
+						{
+							"serial_and_batch_bundle": bundle,
+							"batch_no": "",
+							"serial_no": "",
+						}
+					)
+				else:
+					row.db_set(
+						{
+							"rejected_serial_and_batch_bundle": bundle,
+							"batch_no": "",
+							"rejected_serial_no": "",
+						}
+					)
+
+	def make_bundle_for_non_rejected_qty(self, table_name):
+		field, reference_ids = self.get_reference_ids(table_name)
+		if not reference_ids:
+			return
+
+		child_doctype = self.doctype + " Item"
+		available_dict = available_serial_batch_for_return(field, child_doctype, reference_ids)
+
+		for row in self.get(table_name):
+			if data := available_dict.get(row.get(field)):
+				data = filter_serial_batches(self, data, row)
+				bundle = make_serial_batch_bundle_for_return(data, row, self)
+				row.db_set(
+					{
+						"serial_and_batch_bundle": bundle,
+						"batch_no": "",
+						"serial_no": "",
+					}
+				)
+
+	def get_reference_ids(self, table_name, qty_field=None, bundle_field=None) -> tuple[str, list[str]]:
+		field = {
+			"Sales Invoice": "sales_invoice_item",
+			"Delivery Note": "dn_detail",
+			"Purchase Receipt": "purchase_receipt_item",
+			"Purchase Invoice": "purchase_invoice_item",
+			"POS Invoice": "pos_invoice_item",
+		}.get(self.doctype)
+
+		if not bundle_field:
+			bundle_field = "serial_and_batch_bundle"
+
+		if not qty_field:
+			qty_field = "qty"
+
+		reference_ids = []
+
+		for row in self.get(table_name):
+			if not self.is_serial_batch_item(row.item_code):
+				continue
+
+			if (
+				row.get(field)
+				and (
+					qty_field == "qty"
+					and not row.get("return_qty_from_rejected_warehouse")
+					or qty_field == "rejected_qty"
+					and (row.get("return_qty_from_rejected_warehouse") or row.get("rejected_warehouse"))
+				)
+				and not row.get("use_serial_batch_fields")
+				and not row.get(bundle_field)
+			):
+				reference_ids.append(row.get(field))
+
+		return field, reference_ids
+
+	@frappe.request_cache
+	def is_serial_batch_item(self, item_code) -> bool:
+		item_details = frappe.db.get_value("Item", item_code, ["has_serial_no", "has_batch_no"], as_dict=1)
+
+		if item_details.has_serial_no or item_details.has_batch_no:
+			return True
+
+		return False
 
 	def update_bundle_details(self, bundle_details, table_name, row, is_rejected=False):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -610,35 +735,16 @@ class StockController(AccountsController):
 	def make_package_for_transfer(
 		self, serial_and_batch_bundle, warehouse, type_of_transaction=None, do_not_submit=None
 	):
-		bundle_doc = frappe.get_doc("Serial and Batch Bundle", serial_and_batch_bundle)
-
-		if not type_of_transaction:
-			type_of_transaction = "Inward"
-
-		bundle_doc = frappe.copy_doc(bundle_doc)
-		bundle_doc.warehouse = warehouse
-		bundle_doc.type_of_transaction = type_of_transaction
-		bundle_doc.voucher_type = self.doctype
-		bundle_doc.voucher_no = "" if self.is_new() or self.docstatus == 2 else self.name
-		bundle_doc.is_cancelled = 0
-
-		for row in bundle_doc.entries:
-			row.is_outward = 0
-			row.qty = abs(row.qty)
-			row.stock_value_difference = abs(row.stock_value_difference)
-			if type_of_transaction == "Outward":
-				row.qty *= -1
-				row.stock_value_difference *= row.stock_value_difference
-				row.is_outward = 1
-
-			row.warehouse = warehouse
-
-		bundle_doc.calculate_qty_and_amount()
-		bundle_doc.flags.ignore_permissions = True
-		bundle_doc.flags.ignore_validate = True
-		bundle_doc.save(ignore_permissions=True)
-
-		return bundle_doc.name
+		return make_bundle_for_material_transfer(
+			is_new=self.is_new(),
+			docstatus=self.docstatus,
+			voucher_type=self.doctype,
+			voucher_no=self.name,
+			serial_and_batch_bundle=serial_and_batch_bundle,
+			warehouse=warehouse,
+			type_of_transaction=type_of_transaction,
+			do_not_submit=do_not_submit,
+		)
 
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict(
@@ -1556,3 +1662,38 @@ def create_item_wise_repost_entries(
 		repost_entries.append(repost_entry)
 
 	return repost_entries
+
+
+def make_bundle_for_material_transfer(**kwargs):
+	if isinstance(kwargs, dict):
+		kwargs = frappe._dict(kwargs)
+
+	bundle_doc = frappe.get_doc("Serial and Batch Bundle", kwargs.serial_and_batch_bundle)
+
+	if not kwargs.type_of_transaction:
+		kwargs.type_of_transaction = "Inward"
+
+	bundle_doc = frappe.copy_doc(bundle_doc)
+	bundle_doc.warehouse = kwargs.warehouse
+	bundle_doc.type_of_transaction = kwargs.type_of_transaction
+	bundle_doc.voucher_type = kwargs.voucher_type
+	bundle_doc.voucher_no = "" if kwargs.is_new or kwargs.docstatus == 2 else kwargs.voucher_no
+	bundle_doc.is_cancelled = 0
+
+	for row in bundle_doc.entries:
+		row.is_outward = 0
+		row.qty = abs(row.qty)
+		row.stock_value_difference = abs(row.stock_value_difference)
+		if kwargs.type_of_transaction == "Outward":
+			row.qty *= -1
+			row.stock_value_difference *= row.stock_value_difference
+			row.is_outward = 1
+
+		row.warehouse = kwargs.warehouse
+
+	bundle_doc.calculate_qty_and_amount()
+	bundle_doc.flags.ignore_permissions = True
+	bundle_doc.flags.ignore_validate = True
+	bundle_doc.save(ignore_permissions=True)
+
+	return bundle_doc.name

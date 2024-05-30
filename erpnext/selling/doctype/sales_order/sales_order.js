@@ -770,13 +770,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					flt(doc.per_billed, precision("per_billed", doc)) <
 					100 + frappe.boot.sysdefaults.over_billing_allowance
 				) {
-					if (frappe.model.can_create("Payment Request")) {
-						this.frm.add_custom_button(
-							__("Payment Request"),
-							() => this.make_payment_request(),
-							__("Create")
-						);
-					}
+					this.frm.add_custom_button(
+						__("Payment Request"),
+						() => this.make_payment_request(),
+						__("Create")
+					);
 
 					if (frappe.model.can_create("Payment Entry")) {
 						this.frm.add_custom_button(
@@ -895,6 +893,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						fields: fields,
 						primary_action: function () {
 							var data = { items: d.fields_dict.items.grid.get_selected_children() };
+							if (!data) {
+								frappe.throw(__("Please select items"));
+							}
 							me.frm.call({
 								method: "make_work_orders",
 								args: {

@@ -199,8 +199,6 @@ class Task(NestedSet):
 			self.name,
 			as_dict=1,
 		)[0]
-		if self.status == "Open":
-			self.status = "Working"
 		self.total_costing_amount = tl.total_costing_amount
 		self.total_billing_amount = tl.total_billing_amount
 		self.actual_time = tl.time

@@ -302,6 +302,21 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			};
 		}
 	},
+
+	reset_raw_materials_table: (frm) => {
+		frm.clear_table("supplied_items");
+
+		frm.call({
+			method: "reset_raw_materials",
+			doc: frm.doc,
+			freeze: true,
+			callback: (r) => {
+				if (!r.exc) {
+					frm.save();
+				}
+			},
+		});
+	},
 });
 
 frappe.ui.form.on("Landed Cost Taxes and Charges", {
@@ -332,7 +347,7 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 		set_missing_values(frm);
 	},
 
-	items_remove: (frm) => {
+	items_delete: (frm) => {
 		set_missing_values(frm);
 	},
 

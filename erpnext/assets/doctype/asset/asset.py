@@ -89,13 +89,13 @@ class Asset(AccountsController):
 		maintenance_required: DF.Check
 		naming_series: DF.Literal["ACC-ASS-.YYYY.-"]
 		next_depreciation_date: DF.Date | None
-		number_of_depreciations_booked: DF.Int
 		opening_accumulated_depreciation: DF.Currency
+		opening_number_of_booked_depreciations: DF.Int
 		policy_number: DF.Data | None
+		purchase_amount: DF.Currency
 		purchase_date: DF.Date | None
 		purchase_invoice: DF.Link | None
 		purchase_receipt: DF.Link | None
-		purchase_receipt_amount: DF.Currency
 		split_from: DF.Link | None
 		status: DF.Literal[
 			"Draft",
@@ -145,7 +145,7 @@ class Asset(AccountsController):
 								"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 							).format(asset_depr_schedules_links)
 						)
-
+		self.set_total_booked_depreciations()
 		self.total_asset_cost = self.gross_purchase_amount
 		self.status = self.get_status()
 
@@ -356,7 +356,7 @@ class Asset(AccountsController):
 		if self.is_existing_asset:
 			return
 
-		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_receipt_amount:
+		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_amount:
 			error_message = _(
 				"Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
 			)
@@ -419,7 +419,7 @@ class Asset(AccountsController):
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
-			self.number_of_depreciations_booked = 0
+			self.opening_number_of_booked_depreciations = 0
 		else:
 			depreciable_amount = flt(self.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
 			if flt(self.opening_accumulated_depreciation) > depreciable_amount:
@@ -430,15 +430,15 @@ class Asset(AccountsController):
 				)
 
 			if self.opening_accumulated_depreciation:
-				if not self.number_of_depreciations_booked:
-					frappe.throw(_("Please set Number of Depreciations Booked"))
+				if not self.opening_number_of_booked_depreciations:
+					frappe.throw(_("Please set Opening Number of Booked Depreciations"))
 			else:
-				self.number_of_depreciations_booked = 0
+				self.opening_number_of_booked_depreciations = 0
 
-			if flt(row.total_number_of_depreciations) <= cint(self.number_of_depreciations_booked):
+			if flt(row.total_number_of_depreciations) <= cint(self.opening_number_of_booked_depreciations):
 				frappe.throw(
 					_(
-						"Row {0}: Total Number of Depreciations cannot be less than or equal to Number of Depreciations Booked"
+						"Row {0}: Total Number of Depreciations cannot be less than or equal to Opening Number of Booked Depreciations"
 					).format(row.idx),
 					title=_("Invalid Schedule"),
 				)
@@ -458,6 +458,17 @@ class Asset(AccountsController):
 					"Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date"
 				).format(row.idx)
 			)
+
+	def set_total_booked_depreciations(self):
+		# set value of total number of booked depreciations field
+		for fb_row in self.get("finance_books"):
+			total_number_of_booked_depreciations = self.opening_number_of_booked_depreciations
+			depr_schedule = get_depr_schedule(self.name, "Active", fb_row.finance_book)
+			if depr_schedule:
+				for je in depr_schedule:
+					if je.journal_entry:
+						total_number_of_booked_depreciations += 1
+			fb_row.db_set("total_number_of_booked_depreciations", total_number_of_booked_depreciations)
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
@@ -695,11 +706,7 @@ class Asset(AccountsController):
 		purchase_document = self.get_purchase_document()
 		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
-		if (
-			purchase_document
-			and self.purchase_receipt_amount
-			and getdate(self.available_for_use_date) <= getdate()
-		):
+		if purchase_document and self.purchase_amount and getdate(self.available_for_use_date) <= getdate():
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -707,8 +714,8 @@ class Asset(AccountsController):
 						"against": fixed_asset_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
-						"credit": self.purchase_receipt_amount,
-						"credit_in_account_currency": self.purchase_receipt_amount,
+						"credit": self.purchase_amount,
+						"credit_in_account_currency": self.purchase_amount,
 						"cost_center": self.cost_center,
 					},
 					item=self,
@@ -722,8 +729,8 @@ class Asset(AccountsController):
 						"against": cwip_account,
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"posting_date": self.available_for_use_date,
-						"debit": self.purchase_receipt_amount,
-						"debit_in_account_currency": self.purchase_receipt_amount,
+						"debit": self.purchase_amount,
+						"debit_in_account_currency": self.purchase_amount,
 						"cost_center": self.cost_center,
 					},
 					item=self,
@@ -1119,8 +1126,8 @@ def create_new_asset_after_split(asset, split_qty):
 	)
 
 	new_asset.gross_purchase_amount = new_gross_purchase_amount
-	if asset.purchase_receipt_amount:
-		new_asset.purchase_receipt_amount = new_gross_purchase_amount
+	if asset.purchase_amount:
+		new_asset.purchase_amount = new_gross_purchase_amount
 	new_asset.opening_accumulated_depreciation = opening_accumulated_depreciation
 	new_asset.asset_quantity = split_qty
 	new_asset.split_from = asset.name
