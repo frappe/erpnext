@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-29 12:31\n"
+"PO-Revision-Date: 2024-05-30 12:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -7169,7 +7169,7 @@ msgstr "Amper-Saniye"
 #: controllers/trends.py:237 controllers/trends.py:249
 #: controllers/trends.py:254
 msgid "Amt"
-msgstr ""
+msgstr "Tutar"
 
 #. Description of a DocType
 #: setup/doctype/item_group/item_group.json
@@ -9225,7 +9225,7 @@ msgstr ""
 
 #: selling/report/customer_wise_item_price/customer_wise_item_price.py:38
 msgid "Available Stock"
-msgstr ""
+msgstr "Mevcut Stok"
 
 #. Name of a report
 #. Label of a Link in the Selling Workspace
@@ -10034,64 +10034,64 @@ msgstr ""
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgctxt "Bank Guarantee"
 msgid "Bank Account Info"
-msgstr ""
+msgstr "Banka Hesap Bilgisi"
 
 #. Label of a Data field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "Bank Account No"
-msgstr ""
+msgstr "Banka Hesap Numarası"
 
 #. Label of a Data field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgctxt "Bank Guarantee"
 msgid "Bank Account No"
-msgstr ""
+msgstr "Banka Hesap Numarası"
 
 #. Label of a Read Only field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Bank Account No"
-msgstr ""
+msgstr "Banka Hesap Numarası"
 
 #. Label of a Read Only field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Bank Account No"
-msgstr ""
+msgstr "Banka Hesap Numarası"
 
 #. Name of a DocType
 #: accounts/doctype/bank_account_subtype/bank_account_subtype.json
 msgid "Bank Account Subtype"
-msgstr ""
+msgstr "Banka Hesabı Alt Türü"
 
 #. Name of a DocType
 #: accounts/doctype/bank_account_type/bank_account_type.json
 msgid "Bank Account Type"
-msgstr ""
+msgstr "Banka Hesap Türü"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:13
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:16
 msgid "Bank Accounts"
-msgstr ""
+msgstr "Banka Hesapları"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Bank Balance"
-msgstr ""
+msgstr "Banka Hesap Bakiyesi"
 
 #. Label of a Currency field in DocType 'Invoice Discounting'
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 msgctxt "Invoice Discounting"
 msgid "Bank Charges"
-msgstr ""
+msgstr "Banka Masrafları"
 
 #. Label of a Link field in DocType 'Invoice Discounting'
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 msgctxt "Invoice Discounting"
 msgid "Bank Charges Account"
-msgstr ""
+msgstr "Banka Masrafları Hesabı"
 
 #. Name of a DocType
 #: accounts/doctype/bank_clearance/bank_clearance.json
