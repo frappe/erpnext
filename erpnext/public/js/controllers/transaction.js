@@ -2295,6 +2295,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 			if (doc.is_return) {
 				filters["is_return"] = 1;
+				if (["Sales Invoice", "Delivery Note"].includes(doc.doctype)) {
+					filters["is_inward"] = 1;
+				}
 			}
 
 			if (item.warehouse) filters["warehouse"] = item.warehouse;
