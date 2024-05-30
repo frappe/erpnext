@@ -9,7 +9,6 @@ from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, flt, formatdate, getdate, now
 from frappe.utils.dashboard import cache_source
-from frappe.utils.nestedset import get_descendants_of
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -722,12 +721,7 @@ def validate_allowed_dimensions(gl_entry, dimension_filter_map):
 		dimension = key[0]
 		account = key[1]
 
-		if frappe.get_cached_value("Account", account, "is_group"):
-			accounts = get_descendants_of("Account", account)
-		else:
-			accounts = [account]
-
-		if gl_entry.account in accounts:
+		if gl_entry.account == account:
 			if value["is_mandatory"] and not gl_entry.get(dimension):
 				frappe.throw(
 					_("{0} is mandatory for account {1}").format(
