@@ -235,9 +235,11 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 	}
 
 	has_unsupplied_items() {
-		return this.frm.doc["supplied_items"].some(
-			(item) => item.required_qty > item.supplied_qty - item.returned_qty
-		);
+		let over_transfer_allowance = this.frm.doc.__onload.over_transfer_allowance;
+		return this.frm.doc["supplied_items"].some((item) => {
+			let required_qty = item.required_qty + (item.required_qty * over_transfer_allowance) / 100;
+			return required_qty > item.supplied_qty - item.returned_qty;
+		});
 	}
 
 	make_subcontracting_receipt() {
