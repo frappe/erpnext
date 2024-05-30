@@ -4,8 +4,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import cstr, flt
 from frappe.query_builder import DocType
+from frappe.utils import cstr, flt
 
 
 def execute(filters=None):
@@ -76,7 +76,6 @@ def get_data(filters):
 		asset_data = assets_details.get(d.against_voucher)
 		if asset_data:
 			if not asset_data.get("accumulated_depreciation_amount"):
-
 				AssetDepreciationSchedule = DocType("Asset Depreciation Schedule")
 				DepreciationSchedule = DocType("Depreciation Schedule")
 				query = (
@@ -91,7 +90,7 @@ def get_data(filters):
 					)
 				).run(as_dict=True)
 				asset_data.accumulated_depreciation_amount = query[0]["accumulated_depreciation_amount"]
-				
+
 			else:
 				asset_data.accumulated_depreciation_amount += d.debit
 			asset_data.opening_accumulated_depreciation = asset_data.accumulated_depreciation_amount - d.debit
