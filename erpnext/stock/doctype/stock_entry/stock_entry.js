@@ -111,7 +111,9 @@ frappe.ui.form.on("Stock Entry", {
 				// or a pre-existing batch
 				if (frm.doc.purpose != "Material Receipt") {
 					filters["warehouse"] = item.s_warehouse || item.t_warehouse;
-				} else {
+				}
+
+				if (!item.s_warehouse && item.t_warehouse) {
 					filters["is_inward"] = 1;
 				}
 
