@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-30 12:33\n"
+"PO-Revision-Date: 2024-05-31 13:04\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -548,7 +548,7 @@ msgstr "% Bitmiş Ürün Miktarı"
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "% Installed"
-msgstr ""
+msgstr "% Kuruldu"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:70
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html:16
@@ -10229,13 +10229,13 @@ msgstr "Banka İşlemi"
 #. Name of a DocType
 #: accounts/doctype/bank_transaction_mapping/bank_transaction_mapping.json
 msgid "Bank Transaction Mapping"
-msgstr ""
+msgstr "Banka İşlem Eşleştirmesi"
 
 #. Label of a Table field in DocType 'Bank'
 #: accounts/doctype/bank/bank.json
 msgctxt "Bank"
 msgid "Bank Transaction Mapping"
-msgstr ""
+msgstr "Banka İşlem Eşleştirmesi"
 
 #. Name of a DocType
 #: accounts/doctype/bank_transaction_payments/bank_transaction_payments.json
@@ -11027,7 +11027,7 @@ msgstr "Faturalanan Miktar"
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Billed, Received & Returned"
-msgstr ""
+msgstr "Faturalandı, Teslim Alındı & İade Edildi"
 
 #. Option for the 'Determine Address Tax Category From' (Select) field in
 #. DocType 'Accounts Settings'
@@ -13188,7 +13188,7 @@ msgstr ""
 #: accounts/report/cash_flow/cash_flow.json
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Cash Flow"
-msgstr ""
+msgstr "Nakit Akışı"
 
 #: public/js/financial_statements.js:141
 msgid "Cash Flow Statement"
@@ -14229,7 +14229,7 @@ msgstr ""
 #: accounts/doctype/bank_transaction_mapping/bank_transaction_mapping.json
 msgctxt "Bank Transaction Mapping"
 msgid "Column in Bank File"
-msgstr ""
+msgstr "Banka Ekstresindeki Sütun"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:389
 msgid "Column {0}"
@@ -16313,7 +16313,7 @@ msgstr ""
 #: accounts/report/consolidated_financial_statement/consolidated_financial_statement.json
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Consolidated Financial Statement"
-msgstr ""
+msgstr "Konsolide Finansal Tablolar"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -22409,7 +22409,7 @@ msgstr ""
 #: setup/workspace/settings/settings.json
 msgctxt "Deleted Document"
 msgid "Deleted Documents"
-msgstr ""
+msgstr "Silinen Belgeler"
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:479
 msgid "Deletion in Progress!"
@@ -25739,7 +25739,7 @@ msgstr ""
 
 #: projects/doctype/project/project.js:174
 msgid "Duplicate project has been created"
-msgstr ""
+msgstr "Projenin yeni bir kopyası oluşturuldu"
 
 #: utilities/transaction_base.py:51
 msgid "Duplicate row {0} with same {1}"
@@ -28410,7 +28410,7 @@ msgstr "Alan"
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgctxt "Inventory Dimension"
 msgid "Field Mapping"
-msgstr ""
+msgstr "Alan Eşleştirme"
 
 #. Label of a Autocomplete field in DocType 'Variant Field'
 #: stock/doctype/variant_field/variant_field.json
@@ -28422,7 +28422,7 @@ msgstr ""
 #: accounts/doctype/bank_transaction_mapping/bank_transaction_mapping.json
 msgctxt "Bank Transaction Mapping"
 msgid "Field in Bank Transaction"
-msgstr ""
+msgstr "Banka İşlemindeki Alan"
 
 #. Label of a Data field in DocType 'Accounting Dimension'
 #: accounts/doctype/accounting_dimension/accounting_dimension.json
@@ -28708,7 +28708,7 @@ msgstr "Finansal Raporlar"
 #: accounts/workspace/financial_reports/financial_reports.json
 #: public/js/financial_statements.js:129
 msgid "Financial Statements"
-msgstr ""
+msgstr "Finansal Tablolar"
 
 #: public/js/setup_wizard.js:42
 msgid "Financial Year Begins On"
@@ -30467,25 +30467,25 @@ msgstr ""
 #: accounts/workspace/accounting/accounting.json
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "General Ledger"
-msgstr ""
+msgstr "Genel Muhasebe"
 
 #. Label of a Int field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "General Ledger"
-msgstr ""
+msgstr "Genel Muhasebe"
 
 #. Option for the 'Report' (Select) field in DocType 'Process Statement Of
 #. Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "General Ledger"
-msgstr ""
+msgstr "Genel Muhasebe"
 
 #: stock/doctype/warehouse/warehouse.js:69
 msgctxt "Warehouse"
 msgid "General Ledger"
-msgstr ""
+msgstr "Genel Muhasebe"
 
 #. Label of a Section Break field in DocType 'Item Group'
 #: setup/doctype/item_group/item_group.json
@@ -35082,7 +35082,7 @@ msgstr ""
 #: accounts/workspace/payables/payables.json
 #: accounts/workspace/receivables/receivables.json
 msgid "Invoicing"
-msgstr ""
+msgstr "Faturalandırma"
 
 #. Label of a Section Break field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -41306,7 +41306,7 @@ msgstr ""
 
 #: public/js/utils.js:883
 msgid "Mapping {0} ..."
-msgstr ""
+msgstr "Eşleştiriliyor {0} ..."
 
 #. Label of a Section Break field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -54553,7 +54553,7 @@ msgstr ""
 #. Label of a Card Break in the Financial Reports Workspace
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Profitability"
-msgstr ""
+msgstr "Kârlılık"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -61553,7 +61553,7 @@ msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:140
 msgid "Return / Debit Note"
-msgstr ""
+msgstr "İade Faturası"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -76597,12 +76597,12 @@ msgstr ""
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Incoming Bills"
-msgstr ""
+msgstr "Toplam Gelen Faturalar"
 
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Incoming Payment"
-msgstr ""
+msgstr "Toplam Gelen Ödeme"
 
 #. Label of a Currency field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -76748,12 +76748,12 @@ msgstr ""
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Outgoing Bills"
-msgstr ""
+msgstr "Toplam Giden Faturalar"
 
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Outgoing Payment"
-msgstr ""
+msgstr "Toplam Giden Ödeme"
 
 #. Label of a Currency field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -76951,7 +76951,7 @@ msgstr ""
 #. Label of a number card in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Total Stock Value"
-msgstr ""
+msgstr "Toplam Stok Değeri"
 
 #. Label of a Float field in DocType 'Purchase Order Item Supplied'
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
@@ -77773,7 +77773,7 @@ msgstr "Prosedürler"
 #: accounts/workspace/accounting/accounting.json
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Trial Balance"
-msgstr ""
+msgstr "Geçici Mizan"
 
 #. Name of a report
 #: accounts/report/trial_balance_simple/trial_balance_simple.json
@@ -80230,7 +80230,7 @@ msgstr ""
 
 #: stock/doctype/serial_no/serial_no.js:28
 msgid "View Ledgers"
-msgstr ""
+msgstr "Defterleri Görüntüle"
 
 #: setup/doctype/email_digest/email_digest.js:7
 msgid "View Now"
@@ -83941,19 +83941,19 @@ msgstr ""
 #: stock/workspace/stock/stock.json
 msgctxt "Item"
 msgid "{}  Available"
-msgstr ""
+msgstr "{}  Mevcut"
 
 #. Count format of shortcut in the Selling Workspace
 #: selling/workspace/selling/selling.json
 msgctxt "Sales Order"
 msgid "{}  To Deliver"
-msgstr ""
+msgstr "{}  Teslim Edilecek"
 
 #. Count format of shortcut in the Buying Workspace
 #: buying/workspace/buying/buying.json
 msgctxt "Purchase Order"
 msgid "{}  To Receive"
-msgstr ""
+msgstr "{}  Teslim Alınacak"
 
 #: controllers/buying_controller.py:737
 msgid "{} Assets created for {}"
@@ -83963,61 +83963,61 @@ msgstr ""
 #: support/workspace/support/support.json
 msgctxt "Issue"
 msgid "{} Assigned"
-msgstr ""
+msgstr "{} Atanan"
 
 #. Count format of shortcut in the CRM Workspace
 #: crm/workspace/crm/crm.json
 msgctxt "Opportunity"
 msgid "{} Assigned"
-msgstr ""
+msgstr "{} Atanan"
 
 #. Count format of shortcut in the Projects Workspace
 #: projects/workspace/projects/projects.json
 msgctxt "Task"
 msgid "{} Assigned"
-msgstr ""
+msgstr "{} Atanan"
 
 #. Count format of shortcut in the Buying Workspace
 #. Count format of shortcut in the Selling Workspace
 #: buying/workspace/buying/buying.json selling/workspace/selling/selling.json
 msgctxt "Item"
 msgid "{} Available"
-msgstr ""
+msgstr "{} Mevcut"
 
 #. Count format of shortcut in the Selling Workspace
 #: selling/workspace/selling/selling.json
 msgid "{} Open"
-msgstr ""
+msgstr "{} Açık"
 
 #. Count format of shortcut in the CRM Workspace
 #: crm/workspace/crm/crm.json
 msgctxt "Lead"
 msgid "{} Open"
-msgstr ""
+msgstr "{} Açık"
 
 #. Count format of shortcut in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
 msgctxt "Non Conformance"
 msgid "{} Open"
-msgstr ""
+msgstr "{} Açık"
 
 #. Count format of shortcut in the Projects Workspace
 #: projects/workspace/projects/projects.json
 msgctxt "Project"
 msgid "{} Open"
-msgstr ""
+msgstr "{} Açık"
 
 #. Count format of shortcut in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
 msgctxt "Quality Action"
 msgid "{} Open"
-msgstr ""
+msgstr "{} Açık"
 
 #. Count format of shortcut in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
 msgctxt "Quality Review"
 msgid "{} Open"
-msgstr ""
+msgstr "{} Açık"
 
 #. Count format of shortcut in the Buying Workspace
 #. Count format of shortcut in the Stock Workspace
@@ -84030,13 +84030,13 @@ msgstr "{} Bekliyor"
 #: stock/workspace/stock/stock.json
 msgctxt "Delivery Note"
 msgid "{} To Bill"
-msgstr ""
+msgstr "{} Faturalanacak"
 
 #. Count format of shortcut in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgctxt "Purchase Receipt"
 msgid "{} To Bill"
-msgstr ""
+msgstr "{} Faturalanacak"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1755
 msgid "{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}"
