@@ -3,6 +3,9 @@ from uuid import uuid4 as _uuid4
 
 import frappe
 
+from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
+from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
 
 def uuid4():
 	return str(_uuid4())
@@ -133,3 +136,15 @@ class TestTaxes(unittest.TestCase):
 		self.item_tax_template.delete()
 		self.account.delete()
 		self.company.delete()
+
+	def test_shipping_charges_with_discount(self):
+		sr = create_shipping_rule(
+			shipping_rule_type="Selling", shipping_rule_name="Shipping Rule - Taxes and Totals Test1"
+		)
+
+		dn = create_delivery_note(qty=1, rate=100, do_not_save=True)
+		dn.shipping_rule = sr.name
+		dn.additional_discount_percentage = 10
+		dn.insert()
+
+		self.assertEqual(dn.grand_total, 135)
