@@ -67,7 +67,12 @@ def execute(filters=None):
 		if filters.get("batch_no") or inventory_dimension_filters_applied:
 			actual_qty += flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
-			batch_balance_dict[sle.batch_no] += sle.actual_qty
+			if sle.batch_no:
+				if not batch_balance_dict.get(sle.batch_no):
+					batch_balance_dict[sle.batch_no] = 0
+
+				batch_balance_dict[sle.batch_no] += sle.actual_qty
+
 			if filters.get("segregate_serial_batch_bundle"):
 				actual_qty = batch_balance_dict[sle.batch_no]
 
