@@ -1896,7 +1896,7 @@ def sales_order_query(doctype=None, txt=None, searchfield=None, start=None, page
 		query = query.where(so_table.name.isin(filters.get("sales_orders")))
 
 	if txt:
-		query = query.where(table.item_code.like(f"{txt}%"))
+		query = query.where(table.parent.like(f"%{txt}%"))
 
 	if page_len:
 		query = query.limit(page_len)

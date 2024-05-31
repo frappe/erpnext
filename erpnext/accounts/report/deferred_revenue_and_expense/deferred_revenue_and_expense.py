@@ -58,9 +58,9 @@ class Deferred_Item:
 		For a given GL/Journal posting, get balance based on item type
 		"""
 		if self.type == "Deferred Sale Item":
-			return entry.debit - entry.credit
+			return flt(entry.debit) - flt(entry.credit)
 		elif self.type == "Deferred Purchase Item":
-			return -(entry.credit - entry.debit)
+			return -(flt(entry.credit) - flt(entry.debit))
 		return 0
 
 	def get_item_total(self):
@@ -147,7 +147,7 @@ class Deferred_Item:
 			actual = 0
 			for posting in self.gle_entries:
 				# if period.from_date <= posting.posting_date <= period.to_date:
-				if period.from_date <= posting.gle_posting_date <= period.to_date:
+				if period.from_date <= getdate(posting.gle_posting_date) <= period.to_date:
 					period_sum += self.get_amount(posting)
 					if posting.posted == "posted":
 						actual += self.get_amount(posting)
@@ -285,7 +285,7 @@ class Deferred_Revenue_and_Expense_Report:
 			qb.from_(inv_item)
 			.join(inv)
 			.on(inv.name == inv_item.parent)
-			.join(gle)
+			.left_join(gle)
 			.on((inv_item.name == gle.voucher_detail_no) & (deferred_account_field == gle.account))
 			.select(
 				inv.name.as_("doc"),

@@ -10,17 +10,58 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
-	return Analytics(filters).run()
+	filters = frappe._dict(filters or {})
+	# Special report showing all doctype totals on a single chart; overrides some filters
+	if filters.doc_type == "All":
+		filters.tree_type = "Customer"
+		filters.value_quantity = "Value"
+		filters.curves = "total"
+		output = None
+		for dt in [
+			"Quotation",
+			"Sales Order",
+			"Delivery Note",
+			"Sales Invoice",
+			"Sales Invoice (due)",
+			"Payment Entry",
+		]:
+			filters.doc_type = dt
+			output = append_report(dt, output, Analytics(filters).run())
+		return output
+	else:
+		return Analytics(filters).run()
+
+
+def append_report(dt, org, new):
+	# idx 1 is data, 3 is chart
+	new[1].insert(0, {"entity": dt})  # heading
+	new[1].append({})  # empty row
+	# datasets can be an empty list if no dates are supplied by the Dashboard Chart
+	if not new[3]["data"]["datasets"]:
+		new[3]["data"]["datasets"].append({"name": None, "values": []})
+	new[3]["data"]["datasets"][0]["name"] = dt  # override curve name
+	if org:
+		org[1].extend(new[1])
+		org[3]["data"]["datasets"].extend(new[3]["data"]["datasets"])
+		return org
+	else:
+		return new
 
 
 class Analytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+		if self.filters.doc_type == "Payment Entry" and self.filters.value_quantity == "Quantity":
+			frappe.throw(_("Only Value available for Payment Entry"))
 		self.date_field = (
 			"transaction_date"
-			if self.filters.doc_type in ["Sales Order", "Purchase Order"]
+			if self.filters.doc_type in ["Quotation", "Sales Order", "Purchase Order"]
+			else "due_date"
+			if self.filters.doc_type == "Sales Invoice (due)"
 			else "posting_date"
 		)
+		if self.filters.doc_type.startswith("Sales Invoice"):
+			self.filters.doc_type = "Sales Invoice"
 		self.months = [
 			"Jan",
 			"Feb",
@@ -95,25 +136,37 @@ class Analytics:
 			self.get_rows()
 
 		elif self.filters.tree_type == "Item":
+			if self.filters.doc_type == "Payment Entry":
+				self.data = []
+				return
 			self.get_sales_transactions_based_on_items()
 			self.get_rows()
 
 		elif self.filters.tree_type in ["Customer Group", "Supplier Group", "Territory"]:
+			if self.filters.doc_type == "Payment Entry":
+				self.data = []
+				return
 			self.get_sales_transactions_based_on_customer_or_territory_group()
 			self.get_rows_by_group()
 
 		elif self.filters.tree_type == "Item Group":
+			if self.filters.doc_type == "Payment Entry":
+				self.data = []
+				return
 			self.get_sales_transactions_based_on_item_group()
 			self.get_rows_by_group()
 
 		elif self.filters.tree_type == "Order Type":
-			if self.filters.doc_type != "Sales Order":
+			if self.filters.doc_type not in ["Quotation", "Sales Order"]:
 				self.data = []
 				return
 			self.get_sales_transactions_based_on_order_type()
 			self.get_rows_by_group()
 
 		elif self.filters.tree_type == "Project":
+			if self.filters.doc_type == "Quotation":
+				self.data = []
+				return
 			self.get_sales_transactions_based_on_project()
 			self.get_rows()
 
@@ -141,11 +194,22 @@ class Analytics:
 			value_field = "total_qty as value_field"
 
 		if self.filters.tree_type == "Customer":
-			entity = "customer as entity"
 			entity_name = "customer_name as entity_name"
+			if self.filters.doc_type == "Quotation":
+				entity = "party_name as entity"
+			elif self.filters.doc_type == "Payment Entry":
+				entity = "party as entity"
+				entity_name = "party_name as entity_name"
+				value_field = "base_received_amount as value_field"
+			else:
+				entity = "customer as entity"
 		else:
 			entity = "supplier as entity"
 			entity_name = "supplier_name as entity_name"
+			if self.filters.doc_type == "Payment Entry":
+				entity = "party as entity"
+				entity_name = "party_name as entity_name"
+				value_field = "base_paid_amount as value_field"
 
 		self.entries = frappe.get_all(
 			self.filters.doc_type,
@@ -231,6 +295,9 @@ class Analytics:
 			value_field = "base_net_total as value_field"
 		else:
 			value_field = "total_qty as value_field"
+
+		if self.filters.doc_type == "Payment Entry":
+			value_field = "base_received_amount as value_field"
 
 		entity = "project as entity"
 
@@ -401,7 +468,33 @@ class Analytics:
 			labels = [d.get("label") for d in self.columns[3 : length - 1]]
 		else:
 			labels = [d.get("label") for d in self.columns[1 : length - 1]]
-		self.chart = {"data": {"labels": labels, "datasets": []}, "type": "line"}
+
+		datasets = []
+		if self.filters.curves != "select":
+			for curve in self.data:
+				data = {
+					"name": curve.get("entity_name", curve["entity"]),
+					"values": [curve[scrub(label)] for label in labels],
+				}
+				if self.filters.curves == "non-zeros" and not sum(data["values"]):
+					continue
+				elif self.filters.curves == "total" and "indent" in curve:
+					if curve["indent"] == 0:
+						datasets.append(data)
+				elif self.filters.curves == "total":
+					if datasets:
+						a = [
+							data["values"][idx] + datasets[0]["values"][idx]
+							for idx in range(len(data["values"]))
+						]
+						datasets[0]["values"] = a
+					else:
+						datasets.append(data)
+						datasets[0]["name"] = _("Total")
+				else:
+					datasets.append(data)
+
+		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
 
 		if self.filters["value_quantity"] == "Value":
 			self.chart["fieldtype"] = "Currency"

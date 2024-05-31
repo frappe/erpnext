@@ -6,7 +6,7 @@ import json
 
 import frappe
 from frappe import _, msgprint, scrub
-from frappe.utils import cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
+from frappe.utils import comma_and, cstr, flt, fmt_money, formatdate, get_link_to_form, nowdate
 
 import erpnext
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -146,12 +146,27 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.validate_inter_company_accounts()
 		self.validate_depr_entry_voucher_type()
+		self.validate_advance_accounts()
 
 		if self.docstatus == 0:
 			self.apply_tax_withholding()
 
 		if not self.title:
 			self.title = self.get_title()
+
+	def validate_advance_accounts(self):
+		journal_accounts = set([x.account for x in self.accounts])
+		advance_accounts = set()
+		advance_accounts.add(
+			frappe.get_cached_value("Company", self.company, "default_advance_received_account")
+		)
+		advance_accounts.add(frappe.get_cached_value("Company", self.company, "default_advance_paid_account"))
+		if advance_accounts_used := journal_accounts & advance_accounts:
+			frappe.msgprint(
+				_(
+					"Making Journal Entries against advance accounts: {0} is not recommended. These Journals won't be available for Reconciliation."
+				).format(frappe.bold(comma_and(advance_accounts_used)))
+			)
 
 	def validate_for_repost(self):
 		validate_docs_for_voucher_types(["Journal Entry"])
@@ -179,6 +194,7 @@ class JournalEntry(AccountsController):
 		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		self.update_booked_depreciation()
 
 	def on_update_after_submit(self):
 		if hasattr(self, "repost_required"):
@@ -210,6 +226,7 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+		self.update_booked_depreciation()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -427,6 +444,28 @@ class JournalEntry(AccountsController):
 			if status:
 				inv_disc_doc.set_status(status=status)
 
+	def update_booked_depreciation(self):
+		for d in self.get("accounts"):
+			if (
+				self.voucher_type == "Depreciation Entry"
+				and d.reference_type == "Asset"
+				and d.reference_name
+				and frappe.get_cached_value("Account", d.account, "root_type") == "Expense"
+				and d.debit
+			):
+				asset = frappe.get_doc("Asset", d.reference_name)
+				for fb_row in asset.get("finance_books"):
+					if fb_row.finance_book == self.finance_book:
+						depr_schedule = get_depr_schedule(asset.name, "Active", fb_row.finance_book)
+						total_number_of_booked_depreciations = asset.opening_number_of_booked_depreciations
+						for je in depr_schedule:
+							if je.journal_entry:
+								total_number_of_booked_depreciations += 1
+						fb_row.db_set(
+							"total_number_of_booked_depreciations", total_number_of_booked_depreciations
+						)
+						break
+
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
 			if d.is_advance == "Yes" and d.reference_type in ("Sales Invoice", "Purchase Invoice"):
@@ -442,7 +481,7 @@ class JournalEntry(AccountsController):
 				self.voucher_type == "Depreciation Entry"
 				and d.reference_type == "Asset"
 				and d.reference_name
-				and d.account_type == "Depreciation"
+				and frappe.get_cached_value("Account", d.account, "root_type") == "Expense"
 				and d.debit
 			):
 				asset = frappe.get_doc("Asset", d.reference_name)

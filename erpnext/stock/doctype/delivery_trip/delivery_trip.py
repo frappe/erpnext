@@ -54,11 +54,18 @@ class DeliveryTrip(Document):
 		if self._action == "submit" and not self.driver:
 			frappe.throw(_("A driver must be set to submit."))
 
+		if self._action == "submit":
+			self.validate_delivery_note_not_draft()
 		self.validate_stop_addresses()
+
+	def on_update(self):
+		self.update_delivery_notes()
+
+	def on_trash(self):
+		self.update_delivery_notes(delete=True)
 
 	def on_submit(self):
 		self.update_status()
-		self.update_delivery_notes()
 
 	def on_update_after_submit(self):
 		self.update_status()
@@ -71,6 +78,20 @@ class DeliveryTrip(Document):
 		for stop in self.delivery_stops:
 			if not stop.customer_address:
 				stop.customer_address = get_address_display(frappe.get_doc("Address", stop.address).as_dict())
+
+	def validate_delivery_note_not_draft(self):
+		delivery_notes = list(set(stop.delivery_note for stop in self.delivery_stops if stop.delivery_note))
+		draft_delivery_notes = frappe.get_all(
+			"Delivery Note",
+			{"docstatus": 0, "name": ["in", delivery_notes]},
+			pluck="name",
+		)
+		if draft_delivery_notes:
+			frappe.throw(
+				_(
+					"Delivery Notes should not be in draft state when submitting a Delivery Trip. The following Delivery Notes are still in draft state: {0}. Please submit them first."
+				).format(", ".join(draft_delivery_notes))
+			)
 
 	def update_status(self):
 		status = {0: "Draft", 1: "Scheduled", 2: "Cancelled"}[self.docstatus]
@@ -100,22 +121,29 @@ class DeliveryTrip(Document):
 			"driver": self.driver,
 			"driver_name": self.driver_name,
 			"vehicle_no": self.vehicle,
+			"delivery_trip": self.name,
 			"lr_no": self.name,
 			"lr_date": self.departure_time,
 		}
+
+		delivery_notes_updated = set()
 
 		for delivery_note in delivery_notes:
 			note_doc = frappe.get_doc("Delivery Note", delivery_note)
 
 			for field, value in update_fields.items():
+				prev_value = getattr(note_doc, field)
 				value = None if delete else value
+				if prev_value != value:
+					delivery_notes_updated.add(delivery_note)
 				setattr(note_doc, field, value)
 
-			note_doc.flags.ignore_validate_update_after_submit = True
-			note_doc.save()
+			if delivery_note in delivery_notes_updated:
+				note_doc.flags.ignore_validate_update_after_submit = True
+				note_doc.save()
 
-		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
-		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes)))
+		delivery_notes_updated = [get_link_to_form("Delivery Note", note) for note in delivery_notes_updated]
+		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes_updated)))
 
 	@frappe.whitelist()
 	def process_route(self, optimize):

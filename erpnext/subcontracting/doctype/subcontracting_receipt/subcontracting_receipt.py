@@ -179,6 +179,11 @@ class SubcontractingReceipt(SubcontractingController):
 		self.update_status()
 		self.delete_auto_created_batches()
 
+	@frappe.whitelist()
+	def reset_raw_materials(self):
+		self.supplied_items = []
+		self.create_raw_materials_supplied()
+
 	def validate_closed_subcontracting_order(self):
 		for item in self.items:
 			if item.subcontracting_order:

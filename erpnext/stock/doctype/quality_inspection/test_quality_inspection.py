@@ -138,9 +138,13 @@ class TestQualityInspection(FrappeTestCase):
 
 	def test_make_quality_inspections_from_linked_document(self):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		if dn.doctype in ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"]:
+			inspection_type = "Incoming"
+		else:
+			inspection_type = "Outgoing"
 		for item in dn.items:
 			item.sample_size = item.qty
-		quality_inspections = make_quality_inspections(dn.doctype, dn.name, dn.items)
+		quality_inspections = make_quality_inspections(dn.doctype, dn.name, dn.items, inspection_type)
 		self.assertEqual(len(dn.items), len(quality_inspections))
 
 		# cleanup

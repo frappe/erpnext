@@ -64,6 +64,7 @@ class DeliveryNote(SellingController):
 		customer_address: DF.Link | None
 		customer_group: DF.Link | None
 		customer_name: DF.Data | None
+		delivery_trip: DF.Link | None
 		disable_rounded_total: DF.Check
 		discount_amount: DF.Currency
 		dispatch_address: DF.TextEditor | None
@@ -76,7 +77,7 @@ class DeliveryNote(SellingController):
 		ignore_pricing_rule: DF.Check
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
-		installation_status: DF.Literal[None]
+		installation_status: DF.LiteralNone
 		instructions: DF.Text | None
 		inter_company_reference: DF.Link | None
 		is_internal_customer: DF.Check
@@ -467,6 +468,7 @@ class DeliveryNote(SellingController):
 			if not self.get(table_name):
 				continue
 
+			self.make_bundle_for_sales_purchase_return(table_name)
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -1066,7 +1068,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 
 
 @frappe.whitelist()
-def make_delivery_trip(source_name, target_doc=None):
+def make_delivery_trip(source_name, target_doc=None, kwargs=None):
 	if not target_doc:
 		target_doc = frappe.new_doc("Delivery Trip")
 	doclist = get_mapped_doc(
@@ -1075,7 +1077,6 @@ def make_delivery_trip(source_name, target_doc=None):
 		{
 			"Delivery Note": {
 				"doctype": "Delivery Stop",
-				"validation": {"docstatus": ["=", 1]},
 				"on_parent": target_doc,
 				"field_map": {
 					"name": "delivery_note",
@@ -1093,7 +1094,7 @@ def make_delivery_trip(source_name, target_doc=None):
 
 
 @frappe.whitelist()
-def make_installation_note(source_name, target_doc=None):
+def make_installation_note(source_name, target_doc=None, kwargs=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.installed_qty)
 		target.serial_no = obj.serial_no
@@ -1364,6 +1365,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	def update_item(source, target, source_parent):
 		if source_parent.doctype == "Delivery Note" and source.received_qty:
 			target.qty = flt(source.qty) + flt(source.returned_qty) - flt(source.received_qty)
+
+		if source.get("use_serial_batch_fields"):
+			target.set("use_serial_batch_fields", 1)
 
 	doclist = get_mapped_doc(
 		doctype,

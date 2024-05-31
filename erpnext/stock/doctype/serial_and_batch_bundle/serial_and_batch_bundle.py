@@ -156,6 +156,8 @@ class SerialandBatchBundle(Document):
 
 	def validate_serial_nos_duplicate(self):
 		# Don't inward same serial number multiple times
+		if self.voucher_type in ["POS Invoice", "Pick List"]:
+			return
 
 		if not self.warehouse:
 			return
@@ -249,8 +251,7 @@ class SerialandBatchBundle(Document):
 			if self.has_serial_no:
 				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
 			else:
-				if sn_obj.batch_avg_rate.get(d.batch_no):
-					d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
+				d.incoming_rate = abs(flt(sn_obj.batch_avg_rate.get(d.batch_no)))
 
 				available_qty = flt(sn_obj.available_qty.get(d.batch_no), d.precision("qty"))
 				if self.docstatus == 1:
@@ -429,6 +430,9 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} should be submit first.")
 
 	def check_future_entries_exists(self):
+		if self.flags and self.flags.via_landed_cost_voucher:
+			return
+
 		if not self.has_serial_no:
 			return
 
@@ -596,6 +600,13 @@ class SerialandBatchBundle(Document):
 
 		serial_batches = {}
 		for row in self.entries:
+			if not row.qty and row.batch_no and not row.serial_no:
+				frappe.throw(
+					_("At row {0}: Qty is mandatory for the batch {1}").format(
+						bold(row.idx), bold(row.batch_no)
+					)
+				)
+
 			if self.has_serial_no and not row.serial_no:
 				frappe.throw(
 					_("At row {0}: Serial No is mandatory for Item {1}").format(
@@ -831,7 +842,12 @@ class SerialandBatchBundle(Document):
 		for batch in batches:
 			frappe.db.set_value("Batch", batch.name, {"reference_name": None, "reference_doctype": None})
 
+	def validate_serial_and_batch_data(self):
+		if not self.voucher_no:
+			frappe.throw(_("Voucher No is mandatory"))
+
 	def before_submit(self):
+		self.validate_serial_and_batch_data()
 		self.validate_serial_and_batch_no_for_returned()
 		self.set_purchase_document_no()
 
@@ -1137,7 +1153,18 @@ def make_batch_nos(item_code, batch_nos):
 			continue
 
 		batch_nos_details.append(
-			(batch_no, batch_no, now(), now(), user, user, item.item_code, item.item_name, item.description)
+			(
+				batch_no,
+				batch_no,
+				now(),
+				now(),
+				user,
+				user,
+				item.item_code,
+				item.item_name,
+				item.description,
+				1,
+			)
 		)
 
 	fields = [
@@ -1150,6 +1177,7 @@ def make_batch_nos(item_code, batch_nos):
 		"item",
 		"item_name",
 		"description",
+		"use_batchwise_valuation",
 	]
 
 	frappe.db.bulk_insert("Batch", fields=fields, values=set(batch_nos_details))
@@ -1839,13 +1867,13 @@ def get_available_batches(kwargs):
 			batch_ledger.warehouse,
 			Sum(batch_ledger.qty).as_("qty"),
 		)
-		.where(
-			(batch_table.disabled == 0)
-			& ((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull()))
-		)
+		.where(batch_table.disabled == 0)
 		.where(stock_ledger_entry.is_cancelled == 0)
 		.groupby(batch_ledger.batch_no, batch_ledger.warehouse)
 	)
+
+	if not kwargs.get("for_stock_levels"):
+		query = query.where((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull()))
 
 	if kwargs.get("posting_date"):
 		if kwargs.get("posting_time") is None:

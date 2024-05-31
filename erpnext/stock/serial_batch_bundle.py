@@ -55,8 +55,45 @@ class SerialBatchBundle:
 		elif not self.sle.is_cancelled:
 			self.validate_item_and_warehouse()
 
+	def is_material_transfer(self):
+		allowed_types = [
+			"Material Transfer",
+			"Send to Subcontractor",
+			"Material Transfer for Manufacture",
+		]
+
+		if (
+			self.sle.voucher_type == "Stock Entry"
+			and not self.sle.is_cancelled
+			and frappe.get_cached_value("Stock Entry", self.sle.voucher_no, "purpose") in allowed_types
+		):
+			return True
+
+	def make_serial_batch_no_bundle_for_material_transfer(self):
+		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
+
+		bundle = frappe.db.get_value(
+			"Stock Entry Detail", self.sle.voucher_detail_no, "serial_and_batch_bundle"
+		)
+
+		if bundle:
+			new_bundle_id = make_bundle_for_material_transfer(
+				is_new=False,
+				docstatus=1,
+				voucher_type=self.sle.voucher_type,
+				voucher_no=self.sle.voucher_no,
+				serial_and_batch_bundle=bundle,
+				warehouse=self.sle.warehouse,
+				type_of_transaction="Inward" if self.sle.actual_qty > 0 else "Outward",
+				do_not_submit=0,
+			)
+			self.sle.db_set({"serial_and_batch_bundle": new_bundle_id})
+
 	def make_serial_batch_no_bundle(self):
 		self.validate_item()
+		if self.sle.actual_qty > 0 and self.is_material_transfer():
+			self.make_serial_batch_no_bundle_for_material_transfer()
+			return
 
 		sn_doc = SerialBatchCreation(
 			{
@@ -142,6 +179,9 @@ class SerialBatchBundle:
 			values_to_update = {
 				"serial_and_batch_bundle": sn_doc.name,
 			}
+
+			if self.sle.actual_qty < 0 and self.is_material_transfer():
+				values_to_update["valuation_rate"] = sn_doc.avg_rate
 
 			if not frappe.db.get_single_value(
 				"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle"
@@ -341,11 +381,9 @@ def get_serial_nos(serial_and_batch_bundle, serial_nos=None):
 	if serial_nos:
 		filters["serial_no"] = ("in", serial_nos)
 
-	entries = frappe.get_all("Serial and Batch Entry", fields=["serial_no"], filters=filters, order_by="idx")
-	if not entries:
-		return []
+	serial_nos = frappe.get_all("Serial and Batch Entry", filters=filters, order_by="idx", pluck="serial_no")
 
-	return [d.serial_no for d in entries if d.serial_no]
+	return serial_nos
 
 
 def get_batches_from_bundle(serial_and_batch_bundle, batches=None):
@@ -839,6 +877,9 @@ class SerialBatchCreation:
 		elif self.type_of_transaction == "Inward":
 			self.set_auto_serial_batch_entries_for_inward()
 			self.add_serial_nos_for_batch_item()
+
+		if hasattr(self, "via_landed_cost_voucher") and self.via_landed_cost_voucher:
+			doc.flags.via_landed_cost_voucher = self.via_landed_cost_voucher
 
 		self.set_serial_batch_entries(doc)
 		if not doc.get("entries"):

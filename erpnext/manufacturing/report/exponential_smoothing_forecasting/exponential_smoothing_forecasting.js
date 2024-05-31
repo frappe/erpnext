@@ -93,4 +93,11 @@ frappe.query_reports["Exponential Smoothing Forecasting"] = {
 			},
 		},
 	],
+	formatter: function (value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+		if (column.fieldname === "item_code" && value.includes("Total Quantity")) {
+			value = "<strong>" + value + "</strong>";
+		}
+		return value;
+	},
 };

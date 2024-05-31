@@ -113,6 +113,10 @@ frappe.ui.form.on("Stock Entry", {
 					filters["warehouse"] = item.s_warehouse || item.t_warehouse;
 				}
 
+				if (!item.s_warehouse && item.t_warehouse) {
+					filters["is_inward"] = 1;
+				}
+
 				return {
 					query: "erpnext.controllers.queries.get_batch_no",
 					filters: filters,
@@ -1110,6 +1114,13 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 	on_submit() {
 		this.clean_up();
+		this.refresh_serial_batch_bundle_field();
+	}
+
+	refresh_serial_batch_bundle_field() {
+		frappe.route_hooks.after_submit = (frm_obj) => {
+			frm_obj.reload_doc();
+		};
 	}
 
 	after_cancel() {
@@ -1340,6 +1351,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 					frappe.model.set_value(item.doctype, item.name, {
 						serial_and_batch_bundle: r.name,
 						use_serial_batch_fields: 0,
+						basic_rate: r.avg_rate,
 						qty:
 							Math.abs(r.total_qty) /
 							flt(item.conversion_factor || 1, precision("conversion_factor", item)),

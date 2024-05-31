@@ -501,8 +501,9 @@ class ReceivablePayableReport:
 		# Deduct that from paid amount pre allocation
 		row.paid -= flt(payment_terms_details[0].total_advance)
 
-		# If no or single payment terms, no need to split the row
-		if len(payment_terms_details) <= 1:
+		# If single payment terms, no need to split the row
+		if len(payment_terms_details) == 1 and payment_terms_details[0].payment_term:
+			self.append_payment_term(row, payment_terms_details[0], original_row)
 			return
 
 		for d in payment_terms_details:
@@ -1026,20 +1027,6 @@ class ReceivablePayableReport:
 				fieldname="customer_primary_contact",
 				fieldtype="Link",
 				options="Contact",
-			)
-		if self.filters.party_type == "Customer":
-			self.add_column(
-				_("Customer Name"),
-				fieldname="customer_name",
-				fieldtype="Link",
-				options="Customer",
-			)
-		elif self.filters.party_type == "Supplier":
-			self.add_column(
-				_("Supplier Name"),
-				fieldname="supplier_name",
-				fieldtype="Link",
-				options="Supplier",
 			)
 
 		self.add_column(label=_("Cost Center"), fieldname="cost_center", fieldtype="Data")
