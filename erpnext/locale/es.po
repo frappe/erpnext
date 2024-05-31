@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-20 11:20\n"
+"PO-Revision-Date: 2024-05-31 13:04\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -75,7 +75,11 @@ msgid "# Account Settings\n\n"
 " - Credit Limit and over billing settings\n"
 " - Taxation preferences\n"
 " - Deferred accounting preferences\n"
-msgstr ""
+msgstr "# Configuración de Cuentas\n\n"
+"En ERPNext, las funciones de Contabilidad son configurables según las necesidades de su negocio. Configuración de Cuentas es el lugar para definir algunas de sus preferencias contables como:\n\n"
+" - Ajustes de límite de crédito y sobrefacturación\n"
+" - Preferencias de impuestos\n"
+" - Preferencias de contabilidad diferida\n"
 
 #. Description of the Onboarding Step 'Configure Account Settings'
 #: accounts/onboarding_step/configure_account_settings/configure_account_settings.json
@@ -342,7 +346,7 @@ msgstr ""
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:141
 msgid "# Req'd Items"
-msgstr ""
+msgstr "# Artículos Requeridos"
 
 #. Description of the Onboarding Step 'Manufacturing Settings'
 #: manufacturing/onboarding_step/explore_manufacturing_settings/explore_manufacturing_settings.json
@@ -509,7 +513,7 @@ msgstr "% Completado"
 #: manufacturing/doctype/bom/bom.js:788
 #, python-format
 msgid "% Finished Item Quantity"
-msgstr ""
+msgstr "% Cantidad de Artículos Terminados"
 
 #. Label of a Percent field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -5915,7 +5919,7 @@ msgstr "Permitir al usuario editar la tarifa"
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Allow Zero Rate"
-msgstr ""
+msgstr "Permitir Tarifa Cero"
 
 #. Label of a Check field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -15503,7 +15507,7 @@ msgstr ""
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Company Tax ID"
-msgstr ""
+msgstr "Número de Identificación Fiscal de la Compañía"
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:605
 msgid "Company and Posting Date is mandatory"
@@ -79107,7 +79111,7 @@ msgstr "Utilizar el Centro de Costes de redondeo por defecto de la Compañía"
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Use Company default Cost Center for Round off"
-msgstr ""
+msgstr "Utilizar el Centro de Costos por defecto de la compañía para el redondeo"
 
 #. Description of the 'Calculate Estimated Arrival Times' (Button) field in
 #. DocType 'Delivery Trip'
