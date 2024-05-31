@@ -89,6 +89,7 @@
   "custom_remarks",
   "remarks",
   "base_in_words",
+  "is_opening",
   "column_break_16",
   "letter_head",
   "print_heading",
@@ -777,6 +778,15 @@
    "label": "Reconcile on Advance Payment Date",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "No",
+   "fieldname": "is_opening",
+   "fieldtype": "Select",
+   "label": "Is Opening",
+   "options": "No\nYes",
+   "print_hide": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -790,7 +800,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2024-05-17 10:21:11.199445",
+ "modified": "2024-05-31 16:54:59.618516",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
