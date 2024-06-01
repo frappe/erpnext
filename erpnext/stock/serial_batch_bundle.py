@@ -848,10 +848,14 @@ class SerialBatchCreation:
 		new_package.docstatus = 0
 		new_package.warehouse = self.warehouse
 		new_package.voucher_no = ""
-		new_package.posting_date = today()
-		new_package.posting_time = nowtime()
+		new_package.posting_date = self.posting_date if hasattr(self, "posting_date") else today()
+		new_package.posting_time = self.posting_time if hasattr(self, "posting_time") else nowtime()
 		new_package.type_of_transaction = self.type_of_transaction
 		new_package.returned_against = self.get("returned_against")
+
+		if self.get("do_not_save"):
+			return new_package
+
 		new_package.save()
 
 		self.serial_and_batch_bundle = new_package.name
