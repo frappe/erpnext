@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-28 12:36\n"
+"PO-Revision-Date: 2024-06-01 13:26\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -13821,7 +13821,7 @@ msgstr "در حال پاک کردن داده های نمایشی..."
 
 #: manufacturing/doctype/production_plan/production_plan.js:577
 msgid "Click on 'Get Finished Goods for Manufacture' to fetch the items from the above Sales Orders. Items only for which a BOM is present will be fetched."
-msgstr "برای دریافت اقلام از سفارش‌های فروش فوق، روی \"دریافت کالاهای تمام شده برای ساخت\" کلیک کنید. فقط مواردی که BOM برای آنها وجود دارد واکشی می شوند."
+msgstr "برای دریافت آیتم‌ها از سفارش‌های فروش فوق، روی \"دریافت کالاهای تمام شده برای ساخت\" کلیک کنید. فقط مواردی که BOM برای آنها وجود دارد واکشی می شوند."
 
 #: setup/doctype/holiday_list/holiday_list.js:70
 msgid "Click on Add to Holidays. This will populate the holidays table with all the dates that fall on the selected weekly off. Repeat the process for populating the dates for all your weekly holidays"
@@ -28775,7 +28775,7 @@ msgstr "آیتم کالای تمام شده"
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Finished Good Quantity "
-msgstr " به پایان رسید مقدار خوب"
+msgstr "تعداد کالای تمام شده "
 
 #. Label of a Link field in DocType 'Subcontracting BOM'
 #: subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
@@ -28980,7 +28980,7 @@ msgstr "سال مالی {0} الزامی است"
 #: accounts/doctype/shipping_rule/shipping_rule.json
 msgctxt "Shipping Rule"
 msgid "Fixed"
-msgstr "درست شد"
+msgstr "ثابت"
 
 #: accounts/report/account_balance/account_balance.js:52
 msgid "Fixed Asset"
@@ -30582,13 +30582,13 @@ msgstr "مکان های آیتم را دریافت کنید"
 #: stock/doctype/pick_list/pick_list.js:236
 #: stock/doctype/stock_reconciliation/stock_reconciliation.js:178
 msgid "Get Items"
-msgstr "موارد را دریافت کنید"
+msgstr "دریافت آیتم‌ها"
 
 #. Label of a Button field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Get Items"
-msgstr "موارد را دریافت کنید"
+msgstr "دریافت آیتم‌ها"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:177
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:199
@@ -30640,7 +30640,7 @@ msgstr "اقلام را از رسید خرید دریافت کنید"
 #: stock/doctype/stock_entry/stock_entry.js:657
 #: stock/doctype/stock_entry/stock_entry.js:670
 msgid "Get Items from BOM"
-msgstr "آیتم‌ها را از BOM دریافت کنید"
+msgstr "دریافت آیتم‌ها از BOM"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:374
 msgid "Get Items from Material Requests against this Supplier"
@@ -30650,11 +30650,11 @@ msgstr "اقلام را از درخواست های مواد در برابر ای
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Get Items from Open Material Requests"
-msgstr "آیتم‌ها را از درخواست‌های Open Material دریافت کنید"
+msgstr "دریافت آیتم‌ها از درخواست‌های مواد باز"
 
 #: public/js/controllers/buying.js:498
 msgid "Get Items from Product Bundle"
-msgstr "آیتم‌ها را از Product Bundle دریافت کنید"
+msgstr "دریافت آیتم‌ها از Product Bundle"
 
 #. Label of a Data field in DocType 'Support Settings'
 #: support/doctype/support_settings/support_settings.json
@@ -32464,7 +32464,7 @@ msgstr ""
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "If yes, then this warehouse will be used to store rejected materials"
-msgstr ""
+msgstr "اگر بله، پس از این انبار برای نگهداری مواد رد شده استفاده می شود"
 
 #: stock/doctype/item/item.js:897
 msgid "If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item."
@@ -33909,7 +33909,7 @@ msgstr ""
 #. Name of a report
 #: stock/report/incorrect_serial_no_valuation/incorrect_serial_no_valuation.json
 msgid "Incorrect Serial No Valuation"
-msgstr "ارزش گذاری بدون سریال نادرست است"
+msgstr "ارزش گذاری شماره سریال نادرست است"
 
 #: controllers/subcontracting_controller.py:800
 msgid "Incorrect Serial Number Consumed"
@@ -35724,7 +35724,7 @@ msgstr "رد شده است"
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "Is Rejected Warehouse"
-msgstr ""
+msgstr "انبار رد شده است"
 
 #: accounts/report/pos_register/pos_register.js:63
 #: accounts/report/pos_register/pos_register.py:221
@@ -37943,13 +37943,13 @@ msgstr "جزئیات وزن آیتم"
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "Item Wise Tax Detail"
-msgstr "جزئیات مالیاتی مورد عاقلانه"
+msgstr "جزئیات مالیاتی مبتنی بر آیتم"
 
 #. Label of a Code field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Item Wise Tax Detail "
-msgstr " جزئیات مالیاتی مورد عاقلانه"
+msgstr "جزئیات مالیاتی مبتنی بر آیتم "
 
 #. Option for the 'Based On' (Select) field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
@@ -55018,7 +55018,7 @@ msgstr "پروژه در وب سایت برای این کاربران قابل د
 #. Label of a Link in the Projects Workspace
 #: projects/workspace/projects/projects.json
 msgid "Project wise Stock Tracking"
-msgstr "ردیابی موجودی عاقلانه پروژه"
+msgstr "ردیابی موجودی مبتنی بر پروژه"
 
 #. Name of a report
 #: projects/report/project_wise_stock_tracking/project_wise_stock_tracking.json
@@ -57562,13 +57562,13 @@ msgstr "ورود سریع دفتر روزنامه"
 #. Name of a DocType
 #: stock/doctype/quick_stock_balance/quick_stock_balance.json
 msgid "Quick Stock Balance"
-msgstr "موجودی سریع موجودی"
+msgstr "تراز موجودی سریع"
 
 #. Label of a Link in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgctxt "Quick Stock Balance"
 msgid "Quick Stock Balance"
-msgstr "موجودی سریع موجودی"
+msgstr "تراز موجودی سریع"
 
 #. Name of a DocType
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
@@ -61947,7 +61947,7 @@ msgstr "دور کردن مبلغ مالیات"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Round Tax Amount Row-wise"
-msgstr "دور مقدار مالیات ردیف عاقلانه"
+msgstr "گرد کردن مقدار مالیات مبتنی بر ردیف"
 
 #: accounts/report/purchase_register/purchase_register.py:282
 #: accounts/report/sales_register/sales_register.py:311
@@ -65836,7 +65836,7 @@ msgstr "شماره سریال / دسته"
 
 #: stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:33
 msgid "Serial No Count"
-msgstr "سریال بدون شمارش"
+msgstr "شمارش شماره سریال"
 
 #. Name of a report
 #: stock/report/serial_no_ledger/serial_no_ledger.json
@@ -65848,21 +65848,21 @@ msgstr "دفتر کل شماره سریال"
 #: stock/report/serial_no_service_contract_expiry/serial_no_service_contract_expiry.json
 #: stock/workspace/stock/stock.json
 msgid "Serial No Service Contract Expiry"
-msgstr "انقضای قرارداد سریال بدون سرویس"
+msgstr "انقضای قرارداد سرویس شماره سریال"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
 #: stock/report/serial_no_status/serial_no_status.json
 #: stock/workspace/stock/stock.json
 msgid "Serial No Status"
-msgstr "وضعیت بدون سریال"
+msgstr "وضعیت شماره سریال"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
 #: stock/report/serial_no_warranty_expiry/serial_no_warranty_expiry.json
 #: stock/workspace/stock/stock.json
 msgid "Serial No Warranty Expiry"
-msgstr "سریال بدون گارانتی انقضا"
+msgstr "انقضا گارانتی شماره سریال"
 
 #. Label of a Card Break in the Stock Workspace
 #: stock/workspace/stock/stock.json
@@ -69658,7 +69658,7 @@ msgstr "تعداد موجودی"
 #. Name of a report
 #: stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.json
 msgid "Stock Qty vs Serial No Count"
-msgstr "تعداد موجودی در مقابل سریال بدون شمارش"
+msgstr "تعداد موجودی در مقابل شمارش شماره سریال"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:90
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:123
@@ -71946,7 +71946,7 @@ msgstr "تامین کننده(های)"
 #: buying/workspace/buying/buying.json
 #: stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.json
 msgid "Supplier-Wise Sales Analytics"
-msgstr "تجزیه و تحلیل فروش عاقلانه تامین کننده"
+msgstr "تجزیه و تحلیل فروش مبتنی بر تامین کننده"
 
 #. Label of a Table field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
@@ -76187,7 +76187,7 @@ msgstr "کل به دست آمده است"
 #. Label of a number card in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Total Active Items"
-msgstr ""
+msgstr "مجموع آیتم‌های فعال"
 
 #: accounts/report/budget_variance_report/budget_variance_report.py:127
 msgid "Total Actual"
@@ -80962,7 +80962,7 @@ msgstr "نوع انبار"
 #: stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.json
 #: stock/workspace/stock/stock.json
 msgid "Warehouse Wise Stock Balance"
-msgstr "موجودی انبار عاقلانه"
+msgstr "تراز موجودی مبتنی بر انبار"
 
 #. Label of a Section Break field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -81034,7 +81034,7 @@ msgstr "انبار مورد نیاز برای موجودی مورد {0}"
 #. Name of a report
 #: stock/report/warehouse_wise_item_balance_age_and_value/warehouse_wise_item_balance_age_and_value.json
 msgid "Warehouse wise Item Balance Age and Value"
-msgstr "انبار عاقلانه موجودی اقلام سن و ارزش"
+msgstr "تراز سن و ارزش آیتم مبتنی بر انبار"
 
 #. Label of a chart in the Stock Workspace
 #: stock/workspace/stock/stock.json
