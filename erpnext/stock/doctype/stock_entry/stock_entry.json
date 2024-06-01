@@ -14,6 +14,7 @@
   "purpose",
   "add_to_transit",
   "work_order",
+  "job_card",
   "purchase_order",
   "subcontracting_order",
   "delivery_note_no",
@@ -79,7 +80,6 @@
   "col5",
   "per_transferred",
   "total_amount",
-  "job_card",
   "amended_from",
   "credit_note",
   "is_return"
