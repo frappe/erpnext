@@ -929,6 +929,30 @@ class TestPricingRule(unittest.TestCase):
 		for doc in [si, si1]:
 			doc.delete()
 
+	def test_pricing_rule_for_transaction_with_condition(self):
+		make_item("PR Transaction Condition")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		make_pricing_rule(
+			selling=1,
+			min_qty=0,
+			price_or_product_discount="Product",
+			apply_on="Transaction",
+			free_item="PR Transaction Condition",
+			free_qty=1,
+			free_item_rate=10,
+			condition="customer=='_Test Customer 1'",
+		)
+
+		si = create_sales_invoice(qty=5, customer="_Test Customer 1", do_not_submit=True)
+		self.assertEqual(len(si.items), 2)
+		self.assertEqual(si.items[1].rate, 10)
+
+		si1 = create_sales_invoice(qty=5, customer="_Test Customer 2", do_not_submit=True)
+		self.assertEqual(len(si1.items), 1)
+
+		for doc in [si, si1]:
+			doc.delete()
+
 	def test_remove_pricing_rule(self):
 		item = make_item("Water Flask")
 		make_item_price("Water Flask", "_Test Price List", 100)
