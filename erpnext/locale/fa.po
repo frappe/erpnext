@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-01 13:26\n"
+"PO-Revision-Date: 2024-06-02 13:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -173,7 +173,8 @@ msgstr ""
 #: stock/onboarding_step/view_stock_projected_qty/view_stock_projected_qty.json
 msgid "# Check Stock Reports\n"
 "Based on the various stock transactions, you can get a host of one-click Stock Reports in ERPNext like Stock Ledger, Stock Balance, Projected Quantity, and Ageing analysis."
-msgstr ""
+msgstr "# بررسی گزارش های موجودی\n"
+"بر اساس تراکنش‌های مختلف موجودی، می توانید مجموعه ای از گزارش های سهام را با یک کلیک در ERPNext مانند دفتر کل موجودی، تراز موجودی، مقدار پیش بینی شده و تجزیه و تحلیل سالخوردگی دریافت کنید."
 
 #. Description of the Onboarding Step 'Cost Centers for Budgeting and Analysis'
 #: accounts/onboarding_step/cost_centers_for_report_and_budgeting/cost_centers_for_report_and_budgeting.json
@@ -5160,13 +5161,13 @@ msgstr "سن ({0})"
 #: accounts/report/accounts_receivable/accounts_receivable.js:86
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:21
 msgid "Ageing Based On"
-msgstr "پیری بر اساس"
+msgstr "سالخوردگی بر اساس"
 
 #. Label of a Select field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Ageing Based On"
-msgstr "پیری بر اساس"
+msgstr "سالخوردگی بر اساس"
 
 #: accounts/report/accounts_payable/accounts_payable.js:65
 #: accounts/report/accounts_payable_summary/accounts_payable_summary.js:28
@@ -5174,7 +5175,7 @@ msgstr "پیری بر اساس"
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:28
 #: stock/report/stock_ageing/stock_ageing.js:58
 msgid "Ageing Range 1"
-msgstr "محدوده پیری 1"
+msgstr "محدوده سالخوردگی 1"
 
 #: accounts/report/accounts_payable/accounts_payable.js:72
 #: accounts/report/accounts_payable_summary/accounts_payable_summary.js:35
@@ -5182,7 +5183,7 @@ msgstr "محدوده پیری 1"
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:35
 #: stock/report/stock_ageing/stock_ageing.js:65
 msgid "Ageing Range 2"
-msgstr "محدوده پیری 2"
+msgstr "محدوده سالخوردگی 2"
 
 #: accounts/report/accounts_payable/accounts_payable.js:79
 #: accounts/report/accounts_payable_summary/accounts_payable_summary.js:42
@@ -5190,19 +5191,19 @@ msgstr "محدوده پیری 2"
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:42
 #: stock/report/stock_ageing/stock_ageing.js:72
 msgid "Ageing Range 3"
-msgstr "محدوده پیری 3"
+msgstr "محدوده سالخوردگی 3"
 
 #: accounts/report/accounts_payable/accounts_payable.js:86
 #: accounts/report/accounts_payable_summary/accounts_payable_summary.js:49
 #: accounts/report/accounts_receivable/accounts_receivable.js:114
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:49
 msgid "Ageing Range 4"
-msgstr "محدوده پیری 4"
+msgstr "محدوده سالخوردگی 4"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:86
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:337
 msgid "Ageing Report based on "
-msgstr " گزارش سالمندی بر اساس"
+msgstr "گزارش سالخوردگی بر اساس "
 
 #. Label of a Table field in DocType 'Quality Meeting'
 #: quality_management/doctype/quality_meeting/quality_meeting.json
@@ -5261,7 +5262,7 @@ msgstr "عوامل"
 #. Description of a DocType
 #: selling/doctype/product_bundle/product_bundle.json
 msgid "Aggregate a group of Items into another Item. This is useful if you are maintaining the stock of the packed items and not the bundled item"
-msgstr ""
+msgstr "گروهی از آیتم‌ها را در یک آیتم دیگر جمع کنید. اگر موجودی آیتم‌های بسته بندی شده را نگهداری می کنید و نه آیتم همراه، مفید است"
 
 #. Name of a role
 #: assets/doctype/location/location.json
@@ -7499,13 +7500,13 @@ msgstr "درخواست روشن"
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Apply Putaway Rule"
-msgstr "قانون Putaway را اعمال کنید"
+msgstr "اعمال قانون Putaway"
 
 #. Label of a Check field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Apply Putaway Rule"
-msgstr "قانون Putaway را اعمال کنید"
+msgstr "اعمال قانون Putaway"
 
 #. Label of a Float field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -8847,7 +8848,7 @@ msgstr "واکشی خودکار"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Auto Insert Item Price If Missing"
-msgstr "درج خودکار قیمت مورد در صورت گم شدن"
+msgstr "درج خودکار قیمت آیتم در صورت فراموش شدن"
 
 #. Label of a Section Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -10601,7 +10602,7 @@ msgstr "Batch ID اجباری است"
 #: stock/report/batch_item_expiry_status/batch_item_expiry_status.json
 #: stock/workspace/stock/stock.json
 msgid "Batch Item Expiry Status"
-msgstr "وضعیت انقضای دسته دسته"
+msgstr "وضعیت انقضای آیتم دسته"
 
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.js:89
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:115
@@ -10843,7 +10844,7 @@ msgstr "دسته {0} مورد {1} غیرفعال است."
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.json
 #: stock/workspace/stock/stock.json
 msgid "Batch-Wise Balance History"
-msgstr "تاریخچه تعادل دسته ای"
+msgstr "تاریخچه تراز مبتنی بر دسته"
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:164
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:160
@@ -12833,7 +12834,7 @@ msgstr "نمی توان تاریخ توقف سرویس را برای مورد د
 
 #: stock/doctype/item/item.py:864
 msgid "Cannot change Variant properties after stock transaction. You will have to make a new Item to do this."
-msgstr "پس از معامله موجودی نمی توان ویژگی های متغیر را تغییر داد. برای این کار باید یک آیتم جدید بسازید."
+msgstr "پس از تراکنش موجودی نمی‌توان ویژگی های گونه را تغییر داد. برای این کار باید یک آیتم جدید بسازید."
 
 #: setup/doctype/company/company.py:229
 msgid "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."
@@ -12974,7 +12975,7 @@ msgstr "نمی توان مقدار کمتر از مقدار دریافتی را 
 
 #: stock/doctype/item_variant_settings/item_variant_settings.py:68
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
-msgstr "نمی توان فیلد <b>{0}</b> را برای کپی در انواع مختلف تنظیم کرد"
+msgstr "نمی توان فیلد <b>{0}</b> را برای کپی در گونه‌ها تنظیم کرد"
 
 #: accounts/doctype/payment_entry/payment_entry.js:1053
 msgid "Cannot {0} {1} {2} without any negative outstanding invoice"
@@ -16218,7 +16219,7 @@ msgstr "حداقل تعداد سفارش را در نظر بگیرید"
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Consider Rejected Warehouses"
-msgstr ""
+msgstr "در نظر گرفتن انبارهای مرجوعی"
 
 #. Label of a Select field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
@@ -17217,7 +17218,7 @@ msgstr "کپی شده از"
 #: stock/doctype/item_variant_settings/item_variant_settings.json
 msgctxt "Item Variant Settings"
 msgid "Copy Fields to Variant"
-msgstr "کپی فیلدها به متغیر"
+msgstr "کپی فیلدها به گونه"
 
 #. Label of a Card Break in the Settings Workspace
 #: setup/workspace/settings/settings.json
@@ -18380,7 +18381,7 @@ msgstr "ایجاد شماره‌های سریال"
 #: stock/dashboard/item_dashboard.js:279
 #: stock/doctype/material_request/material_request.js:446
 msgid "Create Stock Entry"
-msgstr "ورود موجودی ایجاد کنید"
+msgstr "ایجاد ورود موجودی"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:163
 msgid "Create Supplier Quotation"
@@ -18416,11 +18417,11 @@ msgstr "کاربران ایجاد کنید"
 
 #: stock/doctype/item/item.js:724
 msgid "Create Variant"
-msgstr "ایجاد متغیر"
+msgstr "ایجاد گونه"
 
 #: stock/doctype/item/item.js:566 stock/doctype/item/item.js:600
 msgid "Create Variants"
-msgstr "ایجاد انواع"
+msgstr "ایجاد گونه‌ها"
 
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_your_first_purchase_invoice/create_your_first_purchase_invoice.json
@@ -21791,7 +21792,7 @@ msgstr "حساب موجودی پیش فرض"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Default Item Group"
-msgstr "گروه مورد پیش فرض"
+msgstr "گروه آیتم پیش فرض"
 
 #. Label of a Link field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -21999,7 +22000,7 @@ msgstr "انبار منبع پیش فرض"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Default Stock UOM"
-msgstr "موجودی پیش فرض UOM"
+msgstr "UOM پیش فرض موجودی"
 
 #. Label of a Link field in DocType 'Item Default'
 #: stock/doctype/item_default/item_default.json
@@ -22047,7 +22048,7 @@ msgstr "واحد اندازه گیری پیش فرض برای مورد {0} را 
 
 #: stock/doctype/item/item.py:895
 msgid "Default Unit of Measure for Variant '{0}' must be same as in Template '{1}'"
-msgstr "واحد اندازه گیری پیش فرض برای نوع «{0}» باید مانند الگوی «{1}» باشد."
+msgstr "واحد اندازه گیری پیش فرض برای گونه «{0}» باید مانند الگوی «{1}» باشد"
 
 #. Label of a Select field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -24850,7 +24851,7 @@ msgstr "هیچ نمواد مانند $ و غیره را در کنار ارزها
 #: stock/doctype/item_variant_settings/item_variant_settings.json
 msgctxt "Item Variant Settings"
 msgid "Do not update variants on save"
-msgstr "نسخه ها را در ذخیره به روز نکنید"
+msgstr "گونه‌ها را در ذخیره به روز نکنید"
 
 #. Label of a Check field in DocType 'Stock Reposting Settings'
 #: stock/doctype/stock_reposting_settings/stock_reposting_settings.json
@@ -31141,31 +31142,31 @@ msgstr "کل کل (ارز شرکت)"
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Grant Commission"
-msgstr "کمیسیون کمک هزینه"
+msgstr "اعطاء کمیسیون"
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Grant Commission"
-msgstr "کمیسیون کمک هزینه"
+msgstr "اعطاء کمیسیون"
 
 #. Label of a Check field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Grant Commission"
-msgstr "کمیسیون کمک هزینه"
+msgstr "اعطاء کمیسیون"
 
 #. Label of a Check field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Grant Commission"
-msgstr "کمیسیون کمک هزینه"
+msgstr "اعطاء کمیسیون"
 
 #. Label of a Check field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Grant Commission"
-msgstr "کمیسیون کمک هزینه"
+msgstr "اعطاء کمیسیون"
 
 #: accounts/doctype/payment_entry/payment_entry.js:805
 msgid "Greater Than Amount"
@@ -31659,19 +31660,19 @@ msgstr "دارای شماره سریال"
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Has Variants"
-msgstr "دارای انواع"
+msgstr "دارای گونه‌ها"
 
 #. Label of a Check field in DocType 'BOM Item'
 #: manufacturing/doctype/bom_item/bom_item.json
 msgctxt "BOM Item"
 msgid "Has Variants"
-msgstr "دارای انواع"
+msgstr "دارای گونه‌ها"
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Has Variants"
-msgstr "دارای انواع"
+msgstr "دارای گونه‌ها"
 
 #. Label of a Check field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -32273,7 +32274,7 @@ msgstr "در صورت غیرفعال کردن، فیلد Rounded Total در هی
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "If enabled then system won't override the picked qty / batches / serial numbers."
-msgstr ""
+msgstr "اگر فعال باشد، سیستم تعداد / دسته / شماره سریال انتخاب شده را بازنویسی نمی کند."
 
 #. Description of the 'Send Document Print' (Check) field in DocType 'Request
 #. for Quotation'
@@ -32336,7 +32337,7 @@ msgstr ""
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "If item is a variant of another item then description, image, pricing, taxes etc will be set from the template unless explicitly specified"
-msgstr "اگر مورد گونه‌ای از یک مورد دیگر باشد، توضیحات، تصویر، قیمت‌گذاری، مالیات و غیره از الگو تنظیم می‌شود مگر اینکه به صراحت مشخص شده باشد."
+msgstr "اگر آیتم گونه‌ای از یک آیتم دیگر باشد، توضیحات، تصویر، قیمت‌گذاری، مالیات و غیره از الگو تنظیم می‌شود مگر اینکه به صراحت مشخص شده باشد"
 
 #. Description of the 'Role Allowed to Create/Edit Back-dated Transactions'
 #. (Link) field in DocType 'Stock Settings'
@@ -32437,7 +32438,7 @@ msgstr "اگر این امر نامطلوب است، لطفاً ورودی پر�
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "If this item has variants, then it cannot be selected in sales orders etc."
-msgstr "اگر این کالا دارای انواع باشد، نمی توان آن را در سفارش‌های فروش و غیره انتخاب کرد."
+msgstr "اگر این آیتم دارای گونه باشد، نمی توان آن را در سفارش‌های فروش و غیره انتخاب کرد."
 
 #: buying/doctype/buying_settings/buying_settings.js:27
 msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
@@ -32524,7 +32525,7 @@ msgstr "نادیده گرفتن موجودی موجود"
 
 #: stock/report/stock_balance/stock_balance.js:100
 msgid "Ignore Closing Balance"
-msgstr "تراز پایانی را نادیده بگیرید"
+msgstr "نادیده گرفتن تراز اختتامیه"
 
 #. Label of a Check field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -33554,7 +33555,7 @@ msgstr "شامل ارز حساب"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Include Ageing Summary"
-msgstr "شامل خلاصه پیری"
+msgstr "شامل خلاصه سالخوردگی"
 
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.js:54
 #: assets/report/fixed_asset_register/fixed_asset_register.js:54
@@ -33896,7 +33897,7 @@ msgstr "فاکتور نادرست"
 #: assets/doctype/asset_movement/asset_movement.py:70
 #: assets/doctype/asset_movement/asset_movement.py:81
 msgid "Incorrect Movement Purpose"
-msgstr "هدف حرکتی نادرست"
+msgstr "هدف جابجایی نادرست"
 
 #: accounts/doctype/payment_entry/payment_entry.py:318
 msgid "Incorrect Payment Type"
@@ -35724,7 +35725,7 @@ msgstr "رد شده است"
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "Is Rejected Warehouse"
-msgstr "انبار رد شده است"
+msgstr "انبار مرجوعی است"
 
 #: accounts/report/pos_register/pos_register.js:63
 #: accounts/report/pos_register/pos_register.py:221
@@ -37562,7 +37563,7 @@ msgstr "نام آیتم"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Item Naming By"
-msgstr "نام گذاری مورد توسط"
+msgstr ""
 
 #. Name of a DocType
 #: stock/doctype/item_price/item_price.json
@@ -37842,39 +37843,39 @@ msgstr "مورد در دسترس نیست"
 #. Name of a DocType
 #: stock/doctype/item_variant/item_variant.json
 msgid "Item Variant"
-msgstr "نوع مورد"
+msgstr "گونه آیتم"
 
 #. Name of a DocType
 #: stock/doctype/item_variant_attribute/item_variant_attribute.json
 msgid "Item Variant Attribute"
-msgstr "ویژگی متغیر مورد"
+msgstr "ویژگی گونه آیتم"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
 #: stock/report/item_variant_details/item_variant_details.json
 #: stock/workspace/stock/stock.json
 msgid "Item Variant Details"
-msgstr "جزئیات نوع مورد"
+msgstr "جزئیات گونه آیتم"
 
 #. Name of a DocType
 #: stock/doctype/item/item.js:117
 #: stock/doctype/item_variant_settings/item_variant_settings.json
 msgid "Item Variant Settings"
-msgstr "تنظیمات متغیر مورد"
+msgstr "تنظیمات گونه آیتم"
 
 #. Label of a Link in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgctxt "Item Variant Settings"
 msgid "Item Variant Settings"
-msgstr "تنظیمات متغیر مورد"
+msgstr "تنظیمات گونه آیتم"
 
 #: stock/doctype/item/item.js:747
 msgid "Item Variant {0} already exists with same attributes"
-msgstr "نوع مورد {0} در حال حاضر با همان ویژگی ها وجود دارد"
+msgstr "گونه آیتم {0} در حال حاضر با همان ویژگی ها وجود دارد"
 
 #: stock/doctype/item/item.py:772
 msgid "Item Variants updated"
-msgstr "انواع مورد به روز شد"
+msgstr "گونه‌های آیتم به روز شد"
 
 #: stock/doctype/stock_reposting_settings/stock_reposting_settings.py:78
 msgid "Item Warehouse based reposting has been enabled."
@@ -37969,7 +37970,7 @@ msgstr "مورد ردیف {0} با درخواست مواد مطابقت ندار
 
 #: stock/doctype/item/item.py:786
 msgid "Item has variants."
-msgstr "مورد دارای انواع است."
+msgstr "آیتم دارای گونه است."
 
 #: selling/page/point_of_sale/pos_item_details.js:108
 msgid "Item is removed since no serial / batch no selected."
@@ -38014,7 +38015,7 @@ msgstr "ارسال مجدد ارزیابی آیتم در حال انجام اس�
 
 #: stock/doctype/item/item.py:939
 msgid "Item variant {0} exists with same attributes"
-msgstr "نوع مورد {0} با همان ویژگی ها وجود دارد"
+msgstr "گونه آیتم {0} با همان ویژگی ها وجود دارد"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:81
 msgid "Item {0} cannot be added as a sub-assembly of itself"
@@ -38399,7 +38400,7 @@ msgstr "تخفیف موردی"
 #: stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.json
 #: stock/workspace/stock/stock.json
 msgid "Itemwise Recommended Reorder Level"
-msgstr "سطح سفارش مجدد توصیه شده توسط Itemwise"
+msgstr "سطح سفارش مجدد توصیه شده مبتنی بر آیتم"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -38876,45 +38877,45 @@ msgstr "برچسب"
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgctxt "Landed Cost Voucher"
 msgid "Landed Cost Help"
-msgstr "کمک هزینه زمین"
+msgstr "راهنمای هزینه تمام شده تا درب انبار"
 
 #. Name of a DocType
 #: stock/doctype/landed_cost_item/landed_cost_item.json
 msgid "Landed Cost Item"
-msgstr "مورد بهای تمام شده زمین"
+msgstr "آیتم هزینه تمام شده تا درب انبار"
 
 #. Name of a DocType
 #: stock/doctype/landed_cost_purchase_receipt/landed_cost_purchase_receipt.json
 msgid "Landed Cost Purchase Receipt"
-msgstr "رسید خرید هزینه زمین"
+msgstr "رسید خرید هزینه تمام شده تا درب انبار"
 
 #. Name of a DocType
 #: stock/doctype/landed_cost_taxes_and_charges/landed_cost_taxes_and_charges.json
 msgid "Landed Cost Taxes and Charges"
-msgstr "مالیات بر هزینه زمین و هزینه ها"
+msgstr "مالیات و عوارض هزینه تمام شده تا درب انبار"
 
 #. Name of a DocType
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.json
 msgid "Landed Cost Voucher"
-msgstr "کوپن هزینه زمین"
+msgstr "کوپن هزینه تمام شده تا درب انبار"
 
 #. Label of a Link in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgctxt "Landed Cost Voucher"
 msgid "Landed Cost Voucher"
-msgstr "کوپن هزینه زمین"
+msgstr "کوپن هزینه تمام شده تا درب انبار"
 
 #. Label of a Currency field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Landed Cost Voucher Amount"
-msgstr "مبلغ کوپن هزینه زمین"
+msgstr "مبلغ کوپن هزینه تمام شده تا درب انبار"
 
 #. Label of a Currency field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Landed Cost Voucher Amount"
-msgstr "مبلغ کوپن هزینه زمین"
+msgstr "مبلغ کوپن هزینه تمام شده تا درب انبار"
 
 #. Option for the 'Orientation' (Select) field in DocType 'Process Statement Of
 #. Accounts'
@@ -40750,11 +40751,11 @@ msgstr "پروژه را از یک الگو بسازید."
 
 #: stock/doctype/item/item.js:572
 msgid "Make {0} Variant"
-msgstr "{0} را تغییر دهید"
+msgstr "ایجاد {0} گونه"
 
 #: stock/doctype/item/item.js:574
 msgid "Make {0} Variants"
-msgstr "ایجاد {0} Variants"
+msgstr "ایجاد {0} گونه"
 
 #: accounts/doctype/journal_entry/journal_entry.py:166
 msgid "Making Journal Entries against advance accounts: {0} is not recommended. These Journals won't be available for Reconciliation."
@@ -43402,7 +43403,7 @@ msgstr "انتقال موجودی"
 
 #: templates/includes/macros.html:169
 msgid "Move to Cart"
-msgstr "حرکت به سبد خرید"
+msgstr "جابجایی به سبد خرید"
 
 #: assets/doctype/asset/asset_dashboard.py:7
 msgid "Movement"
@@ -43463,7 +43464,7 @@ msgstr "برنامه چند لایه"
 
 #: stock/doctype/item/item.js:141
 msgid "Multiple Variants"
-msgstr "انواع مختلف"
+msgstr "چندین گونه"
 
 #: stock/doctype/warehouse/warehouse.py:145
 msgid "Multiple Warehouse Accounts"
@@ -47286,7 +47287,7 @@ msgstr "بیش از رسید/تحویل {0} {1} برای مورد {2} نادید
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Over Transfer Allowance"
-msgstr "بیش از کمک هزینه انتقال"
+msgstr "مجاز به انتقال بیش از حد"
 
 #. Label of a Float field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
@@ -50264,7 +50265,7 @@ msgstr "درصدی که مجاز به فروش آن هستید فراتر از �
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Percentage you are allowed to transfer more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to transfer 110 units."
-msgstr ""
+msgstr "درصدی که مجاز به انتقال بیشتر نسبت به مقدار سفارش شده هستید. به عنوان مثال: اگر 100 عدد سفارش داده اید. و کمک هزینه شما 10٪ است، سپس شما مجاز به انتقال 110 واحد هستید."
 
 #: setup/setup_wizard/operations/install_fixtures.py:386
 msgid "Perception Analysis"
@@ -50583,7 +50584,7 @@ msgstr "مورد فهرست انتخابی"
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Pick Manually"
-msgstr ""
+msgstr "انتخاب دستی"
 
 #. Label of a Select field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -51105,7 +51106,7 @@ msgstr "لطفاً مشتری از سرنخ {0} ایجاد کنید."
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:117
 msgid "Please create Landed Cost Vouchers against Invoices that have 'Update Stock' enabled."
-msgstr "لطفاً در برابر فاکتورهایی که «به‌روزرسانی موجودی» را فعال کرده‌اند، کوپن‌های هزینه‌ای ایجاد کنید."
+msgstr "لطفاً در برابر فاکتورهایی که «به‌روزرسانی موجودی» را فعال کرده‌اند، کوپن‌های هزینه تمام شده تا درب انبار ایجاد کنید."
 
 #: accounts/doctype/accounting_dimension/accounting_dimension.py:69
 msgid "Please create a new Accounting Dimension if required."
@@ -59961,37 +59962,37 @@ msgstr "سری و دسته ای رد شده"
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Rejected Warehouse"
-msgstr "انبار رد شده"
+msgstr "انبار مرجوعی"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Rejected Warehouse"
-msgstr "انبار رد شده"
+msgstr "انبار مرجوعی"
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Rejected Warehouse"
-msgstr "انبار رد شده"
+msgstr "انبار مرجوعی"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Rejected Warehouse"
-msgstr "انبار رد شده"
+msgstr "انبار مرجوعی"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Rejected Warehouse"
-msgstr "انبار رد شده"
+msgstr "انبار مرجوعی"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Rejected Warehouse"
-msgstr "انبار رد شده"
+msgstr "انبار مرجوعی"
 
 #: buying/doctype/purchase_order/purchase_order_dashboard.py:19
 #: buying/doctype/supplier_quotation/supplier_quotation_dashboard.py:14
@@ -61590,7 +61591,7 @@ msgstr "تعداد برگشت"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:310
 msgid "Return Qty from Rejected Warehouse"
-msgstr "تعداد بازگرداندن از انبار رد شده"
+msgstr "تعداد بازگرداندن از انبار مرجوعی"
 
 #: buying/doctype/purchase_order/purchase_order.js:80
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.js:150
@@ -61838,7 +61839,7 @@ msgstr " نقش مجاز به Over Bill"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Role Allowed to Over Deliver/Receive"
-msgstr "نقش مجاز به بیش از تحویل / دریافت"
+msgstr ""
 
 #. Label of a Link field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
@@ -62267,7 +62268,7 @@ msgstr "ردیف #{0}: فرمول معیارهای پذیرش الزامی اس�
 #: controllers/subcontracting_controller.py:72
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:420
 msgid "Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same"
-msgstr "ردیف #{0}: انبار پذیرفته شده و انبار رد شده نمی توانند یکسان باشند"
+msgstr "ردیف #{0}: انبار پذیرفته شده و انبار مرجوعی نمی توانند یکسان باشند"
 
 #: controllers/buying_controller.py:225
 msgid "Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same"
@@ -62542,7 +62543,7 @@ msgstr "سطر #{0}: تعداد رد شده را نمی توان برای ضای
 
 #: controllers/subcontracting_controller.py:65
 msgid "Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}"
-msgstr "ردیف #{0}: انبار رد شده برای مورد رد شده اجباری است {1}"
+msgstr "ردیف #{0}: انبار مرجوعی برای مورد رد شده اجباری است {1}"
 
 #: controllers/buying_controller.py:880
 msgid "Row #{0}: Reqd by Date cannot be before Transaction Date"
@@ -65349,7 +65350,7 @@ msgstr "مواد خام (اقلام) مورد نیاز برای تولید کا�
 
 #: manufacturing/doctype/bom/bom.js:353
 msgid "Select variant item code for the template item {0}"
-msgstr "کد نوع مورد را برای مورد الگو انتخاب کنید {0}"
+msgstr "کد آیتم گونه را برای آیتم الگو انتخاب کنید {0}"
 
 #: manufacturing/doctype/production_plan/production_plan.js:565
 msgid "Select whether to get items from a Sales Order or a Material Request. For now select <b>Sales Order</b>.\n"
@@ -66774,7 +66775,7 @@ msgstr "بودجه های گروهی مورد را در این منطقه تنظ
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Set Landed Cost Based on Purchase Invoice Rate"
-msgstr "هزینه زمین را بر اساس نرخ فاکتور خرید تنظیم کنید"
+msgstr "تنظیم هزینه تمام شده تا درب انبار بر اساس نرخ فاکتور خرید"
 
 #: accounts/doctype/sales_invoice/sales_invoice.js:1130
 msgid "Set Loyalty Program"
@@ -67001,7 +67002,7 @@ msgstr "انبار پذیرفته شده را در هر ردیف از جدول �
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Sets 'Rejected Warehouse' in each row of the Items table."
-msgstr "انبار رد شده را در هر ردیف از جدول آیتم ها تنظیم می کند."
+msgstr "انبار مرجوعی را در هر ردیف از جدول آیتم ها تنظیم می کند."
 
 #. Description of the 'Set Reserve Warehouse' (Link) field in DocType
 #. 'Subcontracting Order'
@@ -67022,7 +67023,7 @@ msgstr "انبار منبع را در هر ردیف از جدول موارد ت�
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Sets 'Target Warehouse' in each row of the items table."
-msgstr "انبار هدف را در هر ردیف از جدول موارد تنظیم می کند."
+msgstr "«انبار هدف» را در هر ردیف از جدول آیتم‌ها تنظیم می کند."
 
 #. Description of the 'Set Target Warehouse' (Link) field in DocType
 #. 'Subcontracting Order'
@@ -67792,7 +67793,7 @@ msgstr "نمایش فروشنده"
 
 #: stock/report/stock_balance/stock_balance.js:95
 msgid "Show Stock Ageing Data"
-msgstr "نمایش داده های پیری موجودی"
+msgstr "نمایش داده های سالخوردگی موجودی"
 
 #. Label of a Check field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -67807,11 +67808,11 @@ msgstr "نمایش ردیابی"
 
 #: stock/report/stock_balance/stock_balance.js:90
 msgid "Show Variant Attributes"
-msgstr "نمایش ویژگی های متغیر"
+msgstr "نمایش ویژگی های گونه"
 
 #: stock/doctype/item/item.js:109
 msgid "Show Variants"
-msgstr "نمایش انواع"
+msgstr "نمایش گونه‌ها"
 
 #: stock/report/stock_ageing/stock_ageing.js:79
 msgid "Show Warehouse-wise Stock"
@@ -67968,7 +67969,7 @@ msgstr "آستانه معامله واحد"
 
 #: stock/doctype/item/item.js:134
 msgid "Single Variant"
-msgstr "تک نوع"
+msgstr "تک گونه"
 
 #: setup/setup_wizard/operations/install_fixtures.py:220
 msgid "Size"
@@ -69333,7 +69334,7 @@ msgstr "حساب تعدیل موجودی"
 #. Label of a Link in the Stock Workspace
 #: stock/report/stock_ageing/stock_ageing.json stock/workspace/stock/stock.json
 msgid "Stock Ageing"
-msgstr "پیری موجودی"
+msgstr "سالخوردگی موجودی"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -74241,7 +74242,7 @@ msgstr "دارایی های زیر به طور خودکار ورودی های ا
 
 #: stock/doctype/item/item.py:840
 msgid "The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template."
-msgstr "ویژگی های حذف شده زیر در Variants وجود دارد اما در قالب وجود ندارد. می‌توانید متغیرها را حذف کنید یا ویژگی (ها) را در قالب نگه دارید."
+msgstr "ویژگی های حذف شده زیر در گونه‌ها وجود دارد اما در قالب وجود ندارد. می‌توانید گونه‌ها را حذف کنید یا ویژگی(ها) را در قالب نگه دارید."
 
 #: setup/doctype/employee/employee.py:179
 msgid "The following employees are currently still reporting to {0}:"
@@ -74468,7 +74469,7 @@ msgstr "دو گزینه برای حفظ ارزش موجودی وجود دارد.
 
 #: stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
-msgstr "هیچ نوع موردی برای مورد انتخابی وجود ندارد"
+msgstr "هیچ گونه آیتمی برای آیتم انتخابی وجود ندارد"
 
 #: accounts/doctype/loyalty_program/loyalty_program.js:10
 msgid "There can be multiple tiered collection factor based on the total spent. But the conversion factor for redemption will always be same for all the tier."
@@ -74540,7 +74541,7 @@ msgstr "این حساب دارای موجودی '0' به ارز پایه یا ا
 
 #: stock/doctype/item/item.js:102
 msgid "This Item is a Template and cannot be used in transactions. Item attributes will be copied over into the variants unless 'No Copy' is set"
-msgstr "این مورد یک الگو است و نمی توان از آن در معاملات استفاده کرد. ویژگی‌های مورد در انواع مختلف کپی می‌شوند مگر اینکه «بدون کپی» تنظیم شده باشد"
+msgstr "این آیتم یک الگو است و نمی توان از آن در تراکنش ها استفاده کرد. ویژگی‌های آیتم در گونه‌ها کپی می‌شوند مگر اینکه «بدون کپی» تنظیم شده باشد"
 
 #: stock/doctype/item/item.js:161
 msgid "This Item is a Variant of {0} (Template)."
@@ -74648,7 +74649,7 @@ msgstr "این یک منطقه ریشه است و قابل ویرایش نیست
 
 #: stock/doctype/item/item_dashboard.py:7
 msgid "This is based on stock movement. See {0} for details"
-msgstr "این بر اساس حرکت موجودی است. برای جزئیات بیشتر به {0} مراجعه کنید"
+msgstr "این بر اساس جابجایی موجودی است. برای جزئیات بیشتر به {0} مراجعه کنید"
 
 #: projects/doctype/project/project_dashboard.py:7
 msgid "This is based on the Time Sheets created against this project"
@@ -79049,7 +79050,7 @@ msgstr "به روز رسانی ترازهای افتتاحیه"
 
 #: stock/doctype/item/item.py:1351
 msgid "Updating Variants..."
-msgstr "به روز رسانی انواع..."
+msgstr "به روز رسانی گونه‌ها..."
 
 #: manufacturing/doctype/work_order/work_order.js:847
 msgid "Updating Work Order status"
@@ -79088,7 +79089,7 @@ msgstr "برای فعال کردن کار پس‌زمینه از دکمه «با
 #: stock/doctype/batch/batch.json
 msgctxt "Batch"
 msgid "Use Batch-wise Valuation"
-msgstr "از ارزش گذاری دسته ای استفاده کنید"
+msgstr "استفاده از ارزش گذاری دسته ای"
 
 #. Label of a Check field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -79964,70 +79965,70 @@ msgstr "گونه"
 
 #: stock/doctype/item/item.py:855
 msgid "Variant Attribute Error"
-msgstr "خطای ویژگی متغیر"
+msgstr "خطای ویژگی گونه"
 
 #: public/js/templates/item_quick_entry.html:1
 msgid "Variant Attributes"
-msgstr "ویژگی های متفاوت"
+msgstr "ویژگی های گونه"
 
 #. Label of a Table field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Variant Attributes"
-msgstr "ویژگی های متفاوت"
+msgstr "ویژگی های گونه"
 
 #: manufacturing/doctype/bom/bom.js:128
 msgid "Variant BOM"
-msgstr "نوع BOM"
+msgstr "BOM گونه"
 
 #. Label of a Select field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Variant Based On"
-msgstr "نوع بر اساس"
+msgstr "گونه بر اساس"
 
 #: stock/doctype/item/item.py:883
 msgid "Variant Based On cannot be changed"
-msgstr "متغیر بر اساس قابل تغییر نیست"
+msgstr "گونه بر اساس قابل تغییر نیست"
 
 #: stock/doctype/item/item.js:125
 msgid "Variant Details Report"
-msgstr "گزارش جزئیات متغیر"
+msgstr "گزارش جزئیات گونه"
 
 #. Name of a DocType
 #: stock/doctype/variant_field/variant_field.json
 msgid "Variant Field"
-msgstr "فیلد متغیر"
+msgstr "فیلد گونه"
 
 #: manufacturing/doctype/bom/bom.js:238 manufacturing/doctype/bom/bom.js:300
 msgid "Variant Item"
-msgstr "مورد متفاوت"
+msgstr "آیتم گونه"
 
 #: stock/doctype/item/item.py:853
 msgid "Variant Items"
-msgstr "موارد مختلف"
+msgstr "آیتم‌های گونه"
 
 #. Label of a Link field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Variant Of"
-msgstr "نوع از"
+msgstr "گونه‌ای از"
 
 #. Label of a Link field in DocType 'Item Variant Attribute'
 #: stock/doctype/item_variant_attribute/item_variant_attribute.json
 msgctxt "Item Variant Attribute"
 msgid "Variant Of"
-msgstr "نوع از"
+msgstr "گونه‌ای از"
 
 #: stock/doctype/item/item.js:613
 msgid "Variant creation has been queued."
-msgstr "ایجاد نوع در صف قرار گرفته است."
+msgstr "ایجاد گونه در صف قرار گرفته است."
 
 #. Label of a Tab Break field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Variants"
-msgstr "انواع"
+msgstr "گونه‌ها"
 
 #. Name of a DocType
 #: setup/doctype/vehicle/vehicle.json
@@ -80110,7 +80111,7 @@ msgstr "از طریق پورتال مشتری"
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Via Landed Cost Voucher"
-msgstr "از طریق کوپن هزینه زمینی"
+msgstr "از طریق کوپن هزینه تمام شده تا درب انبار"
 
 #. Name of a DocType
 #: utilities/doctype/video/video.json
@@ -81824,14 +81825,14 @@ msgstr "عرض مقدار در کلمه"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Will also apply for variants"
-msgstr "برای انواع نیز اعمال خواهد شد"
+msgstr "برای گونه‌ها نیز اعمال خواهد شد"
 
 #. Description of the 'Reorder level based on Warehouse' (Table) field in
 #. DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Will also apply for variants unless overridden"
-msgstr ""
+msgstr "برای گونه‌ها نیز اعمال خواهد شد مگر اینکه بازنویسی شود"
 
 #: setup/setup_wizard/operations/install_fixtures.py:210
 msgid "Wire Transfer"
@@ -83099,43 +83100,43 @@ msgstr "باید بین 0 تا 100 باشد"
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "old_parent"
-msgstr "پیر_والد"
+msgstr "old_parent"
 
 #. Label of a Link field in DocType 'Cost Center'
 #: accounts/doctype/cost_center/cost_center.json
 msgctxt "Cost Center"
 msgid "old_parent"
-msgstr "پیر_والد"
+msgstr "old_parent"
 
 #. Label of a Link field in DocType 'Customer Group'
 #: setup/doctype/customer_group/customer_group.json
 msgctxt "Customer Group"
 msgid "old_parent"
-msgstr "پیر_والد"
+msgstr "old_parent"
 
 #. Label of a Link field in DocType 'Item Group'
 #: setup/doctype/item_group/item_group.json
 msgctxt "Item Group"
 msgid "old_parent"
-msgstr "پیر_والد"
+msgstr "old_parent"
 
 #. Label of a Data field in DocType 'Quality Procedure'
 #: quality_management/doctype/quality_procedure/quality_procedure.json
 msgctxt "Quality Procedure"
 msgid "old_parent"
-msgstr "پیر_والد"
+msgstr "old_parent"
 
 #. Label of a Data field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
 msgctxt "Sales Person"
 msgid "old_parent"
-msgstr "پیر_والد"
+msgstr "old_parent"
 
 #. Label of a Link field in DocType 'Territory'
 #: setup/doctype/territory/territory.json
 msgctxt "Territory"
 msgid "old_parent"
-msgstr "پیر_والد"
+msgstr "old_parent"
 
 #: templates/pages/task_info.html:90
 msgid "on"
