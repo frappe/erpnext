@@ -5,14 +5,15 @@
 import frappe
 from frappe import _
 from frappe.utils import flt
+from pypika import Order
 
 import erpnext
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
 	add_sub_total_row,
 	add_total_row,
+	apply_group_by_conditions,
 	get_grand_total,
 	get_group_by_and_display_fields,
-	get_group_by_conditions,
 	get_tax_accounts,
 )
 from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
@@ -287,9 +288,12 @@ def get_columns(additional_table_columns, filters):
 	return columns
 
 
-def get_conditions(filters):
-	conditions = ""
+def apply_conditions(query, pi, pii, filters):
+	for opts in ("company", "supplier", "item_code", "mode_of_payment"):
+		if filters.get(opts):
+			query = query.where(pi[opts] == filters[opts])
 
+<<<<<<< HEAD
 	for opts in (
 		("company", " and `tabPurchase Invoice`.company=%(company)s"),
 		("supplier", " and `tabPurchase Invoice`.supplier = %(supplier)s"),
@@ -300,15 +304,24 @@ def get_conditions(filters):
 	):
 		if filters.get(opts[0]):
 			conditions += opts[1]
+=======
+	if filters.get("from_date"):
+		query = query.where(pi.posting_date >= filters.get("from_date"))
+
+	if filters.get("to_date"):
+		query = query.where(pi.posting_date <= filters.get("to_date"))
+
+	if filters.get("item_group"):
+		query = query.where(pii.item_group == filters.get("item_group"))
+>>>>>>> d2af36e1eb (chore: update condition queries in qb)
 
 	if not filters.get("group_by"):
-		conditions += (
-			"ORDER BY `tabPurchase Invoice`.posting_date desc, `tabPurchase Invoice Item`.item_code desc"
-		)
+		query = query.orderby(pi.posting_date, order=Order.desc)
+		query = query.orderby(pii.item_group, order=Order.desc)
 	else:
-		conditions += get_group_by_conditions(filters, "Purchase Invoice")
+		query = apply_group_by_conditions(filters, "Purchase Invoice")
 
-	return conditions
+	return query
 
 
 def get_items(filters, additional_query_columns):
@@ -414,8 +427,13 @@ def get_items(filters, additional_query_columns):
 		query = query.where(pi.company == filters["company"])
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 1b45ecfcae (fix: Item-wise Sales and Purchase register with no item codes #41373)
 =======
+=======
+	query = apply_conditions(query, pi, pii, filters)
+
+>>>>>>> d2af36e1eb (chore: update condition queries in qb)
 	return query.run(as_dict=True)
 >>>>>>> 76073ae228 (fix: fixing Item-wise sales register and purchase register #41373)
 
