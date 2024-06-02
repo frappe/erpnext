@@ -7,6 +7,7 @@ from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cstr, flt
 from frappe.utils.xlsxutils import handle_html
+from pypika import Order
 
 from erpnext.accounts.report.sales_register.sales_register import get_mode_of_payments
 from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
@@ -333,59 +334,69 @@ def get_columns(additional_table_columns, filters):
 	return columns
 
 
-def get_conditions(filters, additional_conditions=None):
-	conditions = ""
+def apply_conditions(query, si, sii, filters, additional_conditions=None):
+	for opts in ("company", "customer", "item_code"):
+		if filters.get(opts):
+			query = query.where(si[opts] == filters[opts])
 
-	for opts in (
-		("company", " and `tabSales Invoice`.company=%(company)s"),
-		("customer", " and `tabSales Invoice`.customer = %(customer)s"),
-		("item_code", " and `tabSales Invoice Item`.item_code = %(item_code)s"),
-		("from_date", " and `tabSales Invoice`.posting_date>=%(from_date)s"),
-		("to_date", " and `tabSales Invoice`.posting_date<=%(to_date)s"),
-	):
-		if filters.get(opts[0]):
-			conditions += opts[1]
+	if filters.get("from_date"):
+		query = query.where(si.posting_date >= filters.get("from_date"))
 
-	if additional_conditions:
-		conditions += additional_conditions
+	if filters.get("to_date"):
+		query = query.where(si.posting_date <= filters.get("to_date"))
 
 	if filters.get("mode_of_payment"):
-		conditions += """ and exists(select name from `tabSales Invoice Payment`
-			where parent=`tabSales Invoice`.name
-				and ifnull(`tabSales Invoice Payment`.mode_of_payment, '') = %(mode_of_payment)s)"""
+		sales_invoice = frappe.db.get_all(
+			"Sales Invoice Payment", {"mode_of_payment": filters.get("mode_of_payment")}, pluck="parent"
+		)
+		query = query.where(si.name.isin(sales_invoice))
 
 	if filters.get("warehouse"):
 		if frappe.db.get_value("Warehouse", filters.get("warehouse"), "is_group"):
 			lft, rgt = frappe.db.get_all(
 				"Warehouse", filters={"name": filters.get("warehouse")}, fields=["lft", "rgt"], as_list=True
 			)[0]
-			conditions += f"and ifnull(`tabSales Invoice Item`.warehouse, '') in (select name from `tabWarehouse` where lft > {lft} and rgt < {rgt}) "
+			warehouses = frappe.db.get_all("Warehouse", {"lft": (">", lft), "rgt": ("<", rgt)}, pluck="name")
+			query = query.where(sii.warehouse.isin(warehouses))
 		else:
-			conditions += """and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s"""
+			query = query.where(sii.warehouse == filters.get("warehouse"))
 
 	if filters.get("brand"):
-		conditions += """and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s"""
+		query = query.where(sii.brand == filters.get("brand"))
 
 	if filters.get("item_group"):
-		conditions += """and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s"""
+		query = query.where(sii.item_group == filters.get("item_group"))
 
+<<<<<<< HEAD
+=======
+	if filters.get("income_account"):
+		query = query.where(
+			(sii.income_account == filters.get("income_account"))
+			| (sii.deferred_revenue_account == filters.get("income_account"))
+			| (si.unrealized_profit_loss_account == filters.get("income_account"))
+		)
+
+>>>>>>> d2af36e1eb (chore: update condition queries in qb)
 	if not filters.get("group_by"):
-		conditions += "ORDER BY `tabSales Invoice`.posting_date desc, `tabSales Invoice Item`.item_group desc"
+		query = query.orderby(si.posting_date, order=Order.desc)
+		query = query.orderby(sii.item_group, order=Order.desc)
 	else:
-		conditions += get_group_by_conditions(filters, "Sales Invoice")
+		query = apply_group_by_conditions(query, si, sii, filters)
 
-	return conditions
+	return query
 
 
-def get_group_by_conditions(filters, doctype):
+def apply_group_by_conditions(query, si, ii, filters):
 	if filters.get("group_by") == "Invoice":
-		return f"ORDER BY `tab{doctype} Item`.parent desc"
+		query = query.orderby(ii.parent, order=Order.desc)
 	elif filters.get("group_by") == "Item":
-		return f"ORDER BY `tab{doctype} Item`.`item_code`"
+		query = query.orderby(ii.item_code)
 	elif filters.get("group_by") == "Item Group":
-		return "ORDER BY `tab{} Item`.{}".format(doctype, frappe.scrub(filters.get("group_by")))
+		query = query.orderby(ii.item_group)
 	elif filters.get("group_by") in ("Customer", "Customer Group", "Territory", "Supplier"):
-		return "ORDER BY `tab{}`.{}".format(doctype, frappe.scrub(filters.get("group_by")))
+		query = query.orderby(si[frappe.scrub(filters.get("group_by"))])
+
+	return query
 
 
 <<<<<<< HEAD
@@ -460,16 +471,19 @@ def get_items(filters, additional_query_columns,additional_conditions=None):
 def get_items(filters, additional_query_columns, additional_conditions=None):
 	si = frappe.qb.DocType("Sales Invoice")
 	sii = frappe.qb.DocType("Sales Invoice Item")
+<<<<<<< HEAD
 	Item = frappe.qb.DocType("Item")
 >>>>>>> eafa88b8e9 (fix: fixing Item-wise sales register #41373)
+=======
+	item = frappe.qb.DocType("Item")
+>>>>>>> d2af36e1eb (chore: update condition queries in qb)
 
 	query = (
 		frappe.qb.from_(si)
 		.join(sii)
 		.on(si.name == sii.parent)
-		# added left join
-		.left_join(Item)
-		.on(sii.item_code == Item.name)
+		.left_join(item)
+		.on(sii.item_code == item.name)
 		.select(
 			sii.name,
 			sii.parent,
@@ -489,8 +503,8 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 			sii.item_group,
 			sii.item_name.as_("si_item_name"),
 			sii.item_group.as_("si_item_group"),
-			Item.item_name.as_("i_item_name"),
-			Item.item_group.as_("i_item_group"),
+			item.item_name.as_("i_item_name"),
+			item.item_group.as_("i_item_group"),
 			sii.sales_order,
 			sii.delivery_note,
 			sii.income_account,
@@ -510,6 +524,10 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 		)
 		.where(si.docstatus == 1)
 	)
+
+	if additional_query_columns:
+		query = query.select(*additional_query_columns)
+
 	if filters.get("customer"):
 		query = query.where(si.customer == filters["customer"])
 
@@ -517,8 +535,13 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 		query = query.where(si.customer_group == filters["customer_group"])
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 1b45ecfcae (fix: Item-wise Sales and Purchase register with no item codes #41373)
 =======
+=======
+	query = apply_conditions(query, si, sii, filters, additional_conditions)
+
+>>>>>>> d2af36e1eb (chore: update condition queries in qb)
 	return query.run(as_dict=True)
 >>>>>>> eafa88b8e9 (fix: fixing Item-wise sales register #41373)
 
@@ -528,16 +551,14 @@ def get_delivery_notes_against_sales_order(item_list):
 	so_item_rows = list(set([d.so_detail for d in item_list]))
 
 	if so_item_rows:
-		delivery_notes = frappe.db.sql(
-			"""
-			select parent, so_detail
-			from `tabDelivery Note Item`
-			where docstatus=1 and so_detail in (%s)
-			group by so_detail, parent
-		"""
-			% (", ".join(["%s"] * len(so_item_rows))),
-			tuple(so_item_rows),
-			as_dict=1,
+		dn_item = frappe.qb.DocType("Delivery Note Item")
+		delivery_notes = (
+			frappe.qb.from_(dn_item)
+			.select(dn_item.parent, dn_item.so_detail)
+			.where(dn_item.docstatus == 1)
+			.where(dn_item.so_detail.isin(so_item_rows))
+			.groupby(dn_item.so_detail, dn_item.parent)
+			.run(as_dict=True)
 		)
 
 		for dn in delivery_notes:
@@ -547,15 +568,16 @@ def get_delivery_notes_against_sales_order(item_list):
 
 
 def get_grand_total(filters, doctype):
-	return frappe.db.sql(
-		f""" SELECT
-		SUM(`tab{doctype}`.base_grand_total)
-		FROM `tab{doctype}`
-		WHERE `tab{doctype}`.docstatus = 1
-		and posting_date between %s and %s
-	""",
-		(filters.get("from_date"), filters.get("to_date")),
-	)[0][0]  # nosec
+	return flt(
+		frappe.db.get_value(
+			doctype,
+			{
+				"docstatus": 1,
+				"posting_date": ("between", [filters.get("from_date"), filters.get("to_date")]),
+			},
+			"sum(base_grand_total)",
+		)
+	)
 
 
 def get_tax_accounts(
