@@ -205,7 +205,11 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 				);
 			}
 
+<<<<<<< HEAD
 			if (doc.docstatus == 1) {
+=======
+			if (doc.docstatus == 1 && doc.status != "Completed" && frappe.model.can_create("Delivery Trip")) {
+>>>>>>> 4f0214d00e (fix: completed DC will not appear in a delivery trip (#41655))
 				this.frm.add_custom_button(
 					__("Delivery Trip"),
 					function () {
