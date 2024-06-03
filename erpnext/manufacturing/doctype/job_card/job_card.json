@@ -555,7 +555,7 @@
   {
    "fieldname": "semi_fg_bom",
    "fieldtype": "Link",
-   "label": "Semi FG BOM",
+   "label": "Semi Finished Goods BOM",
    "options": "BOM",
    "read_only": 1
   },
@@ -614,7 +614,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2024-05-26 17:44:18.324743",
+ "modified": "2024-06-03 17:44:18.324743",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
