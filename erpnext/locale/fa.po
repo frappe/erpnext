@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-02 13:33\n"
+"PO-Revision-Date: 2024-06-03 13:45\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -38125,7 +38125,7 @@ msgstr "آیتم، مشتری، تامین کننده و پیش فاکتور"
 #. Name of a report
 #: stock/report/item_wise_price_list_rate/item_wise_price_list_rate.json
 msgid "Item-wise Price List Rate"
-msgstr "نرخ لیست قیمت بر حسب مورد"
+msgstr "نرخ لیست قیمت بر حسب آیتم"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -38139,21 +38139,21 @@ msgstr "تاریخچه خرید از نظر آیتم"
 #: accounts/report/item_wise_purchase_register/item_wise_purchase_register.json
 #: accounts/workspace/payables/payables.json
 msgid "Item-wise Purchase Register"
-msgstr "ثبت خرید بر حسب مورد"
+msgstr "ثبت خرید بر حسب آیتم"
 
 #. Name of a report
 #. Label of a Link in the Selling Workspace
 #: selling/report/item_wise_sales_history/item_wise_sales_history.json
 #: selling/workspace/selling/selling.json
 msgid "Item-wise Sales History"
-msgstr "تاریخچه فروش بر حسب مورد"
+msgstr "تاریخچه فروش بر حسب آیتم"
 
 #. Name of a report
 #. Label of a Link in the Receivables Workspace
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.json
 #: accounts/workspace/receivables/receivables.json
 msgid "Item-wise Sales Register"
-msgstr "ثبت فروش بر حسب مورد"
+msgstr "ثبت فروش بر حسب آیتم"
 
 #: manufacturing/doctype/bom/bom.py:308
 msgid "Item: {0} does not exist in the system"
@@ -73875,7 +73875,7 @@ msgstr "شرایط و ضوابط راهنما"
 #: buying/workspace/buying/buying.json selling/workspace/selling/selling.json
 msgctxt "Terms and Conditions"
 msgid "Terms and Conditions Template"
-msgstr ""
+msgstr "الگوی شرایط و ضوابط"
 
 #. Name of a DocType
 #: accounts/report/accounts_receivable/accounts_receivable.js:148
