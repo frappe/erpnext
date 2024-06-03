@@ -125,6 +125,13 @@ def execute(filters=None):
 				"gross_profit_percent",
 			],
 			"project": ["project", "base_amount", "buying_amount", "gross_profit", "gross_profit_percent"],
+			"cost_center": [
+				"cost_center",
+				"base_amount",
+				"buying_amount",
+				"gross_profit",
+				"gross_profit_percent",
+			],
 			"territory": [
 				"territory",
 				"base_amount",
@@ -304,7 +311,14 @@ def get_columns(group_wise_columns, filters):
 				"fieldname": "project",
 				"fieldtype": "Link",
 				"options": "Project",
-				"width": 100,
+				"width": 140,
+			},
+			"cost_center": {
+				"label": _("Cost Center"),
+				"fieldname": "cost_center",
+				"fieldtype": "Link",
+				"options": "Cost Center",
+				"width": 140,
 			},
 			"sales_person": {
 				"label": _("Sales Person"),
