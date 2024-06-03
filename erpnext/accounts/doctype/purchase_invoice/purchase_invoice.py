@@ -284,7 +284,7 @@ class PurchaseInvoice(BuyingController):
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 			stock_items = self.get_stock_items()
 
-		asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
+		self.asset_received_but_not_billed = None
 
 		if self.update_stock:
 			self.validate_item_code()
@@ -370,18 +370,23 @@ class PurchaseInvoice(BuyingController):
 			elif item.is_fixed_asset:
 				account = None
 				if item.pr_detail:
+					if not self.asset_received_but_not_billed:
+						self.asset_received_but_not_billed = self.get_company_default(
+							"asset_received_but_not_billed"
+						)
+
 					# check if 'Asset Received But Not Billed' account is credited in Purchase receipt or not
 					arbnb_booked_in_pr = frappe.db.get_value(
 						"GL Entry",
 						{
 							"voucher_type": "Purchase Receipt",
 							"voucher_no": item.purchase_receipt,
-							"account": asset_received_but_not_billed,
+							"account": self.asset_received_but_not_billed,
 						},
 						"name",
 					)
 					if arbnb_booked_in_pr:
-						account = asset_received_but_not_billed
+						account = self.asset_received_but_not_billed
 
 				if not account:
 					account_type = (
