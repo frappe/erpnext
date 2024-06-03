@@ -1239,10 +1239,18 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
+		target.tc_name = ""
+		target.terms = ""
+		target.payment_terms_template = ""
+		target.payment_schedule = []
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:
 			target.buying_price_list = default_price_list
+
+		default_payment_terms = frappe.get_value("Supplier", supplier, "payment_terms")
+		if default_payment_terms:
+			target.payment_terms_template = default_payment_terms
 
 		if any(item.delivered_by_supplier == 1 for item in source.items):
 			if source.shipping_address_name:
@@ -1295,7 +1303,6 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 						"contact_person",
 						"taxes_and_charges",
 						"shipping_address",
-						"terms",
 					],
 					"validation": {"docstatus": ["=", 1]},
 				},
@@ -1363,6 +1370,10 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
+		target.tc_name = ""
+		target.terms = ""
+		target.payment_terms_template = ""
+		target.payment_schedule = []
 
 		if is_drop_ship_order(target):
 			target.customer = source.customer
@@ -1398,7 +1409,6 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 					"contact_person",
 					"taxes_and_charges",
 					"shipping_address",
-					"terms",
 				],
 				"validation": {"docstatus": ["=", 1]},
 			},
