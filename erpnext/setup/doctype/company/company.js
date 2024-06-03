@@ -251,7 +251,10 @@ erpnext.company.setup_queries = function (frm) {
 			["discount_allowed_account", { root_type: "Expense" }],
 			["discount_received_account", { root_type: "Income" }],
 			["exchange_gain_loss_account", { root_type: ["in", ["Expense", "Income"]] }],
-			["unrealized_exchange_gain_loss_account", { root_type: ["in", ["Expense", "Income"]] }],
+			[
+				"unrealized_exchange_gain_loss_account",
+				{ root_type: ["in", ["Expense", "Income", "Equity", "Liability"]] },
+			],
 			[
 				"accumulated_depreciation_account",
 				{ root_type: "Asset", account_type: "Accumulated Depreciation" },
