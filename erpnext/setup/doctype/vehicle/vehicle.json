@@ -1,8 +1,13 @@
 {
+<<<<<<< HEAD
  "allow_copy": 0,
  "allow_guest_to_view": 0,
  "allow_import": 0,
  "allow_rename": 0,
+=======
+ "actions": [],
+ "allow_rename": 1,
+>>>>>>> c76f466528 (fix(Vehicle): allow doc renaming and add test (#41729))
  "autoname": "field:license_plate",
  "beta": 0,
  "creation": "2016-09-03 03:33:27.680331",
@@ -824,6 +829,7 @@
    "unique": 0
   }
  ],
+<<<<<<< HEAD
  "has_web_view": 0,
  "hide_heading": 0,
  "hide_toolbar": 0,
@@ -835,6 +841,10 @@
  "istable": 0,
  "max_attachments": 0,
  "modified": "2022-06-27 14:48:30.813359",
+=======
+ "links": [],
+ "modified": "2024-05-31 06:38:15.399283",
+>>>>>>> c76f466528 (fix(Vehicle): allow doc renaming and add test (#41729))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Vehicle",
