@@ -906,12 +906,12 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 	)
 
 	target_doc.populate_items_table()
+	source_doc = frappe.get_doc("Purchase Order", source_name)
 
 	if target_doc.set_warehouse:
 		for item in target_doc.items:
 			item.warehouse = target_doc.set_warehouse
 	else:
-		source_doc = frappe.get_doc("Purchase Order", source_name)
 		if source_doc.set_warehouse:
 			for item in target_doc.items:
 				item.warehouse = source_doc.set_warehouse
