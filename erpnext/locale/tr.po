@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-31 13:04\n"
+"PO-Revision-Date: 2024-06-04 14:59\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -7739,7 +7739,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Approximately match the description/party name against parties"
-msgstr ""
+msgstr "Açıklama/cari adını carilerle yaklaşık olarak eşleştirin"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -26604,7 +26604,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Enable Fuzzy Matching"
-msgstr ""
+msgstr "Bulanık Eşleştirmeyi Etkinleştir"
 
 #. Label of a Check field in DocType 'Ledger Health Monitor'
 #: accounts/doctype/ledger_health_monitor/ledger_health_monitor.json
@@ -27486,7 +27486,7 @@ msgstr ""
 
 #: controllers/sales_and_purchase_return.py:57
 msgid "Exchange Rate must be same as {0} {1} ({2})"
-msgstr ""
+msgstr "Döviz Kuru aynı olmalıdır {0} {1} ({2})"
 
 #. Option for the 'Entry Type' (Select) field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
@@ -47294,13 +47294,13 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Over Billing Allowance (%)"
-msgstr ""
+msgstr "Fazla Fatura Ödeneği (%)"
 
 #. Label of a Float field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Over Billing Allowance (%)"
-msgstr ""
+msgstr "Fazla Fatura Ödeneği (%)"
 
 #. Label of a Float field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -62558,7 +62558,7 @@ msgstr ""
 
 #: utilities/transaction_base.py:111 utilities/transaction_base.py:117
 msgid "Row #{0}: Rate must be same as {1}: {2} ({3} / {4})"
-msgstr ""
+msgstr "Satır #{0}: {1} işlemindeki fiyat ile aynı olmalıdır: {2} ({3} / {4})"
 
 #: controllers/buying_controller.py:464
 msgid "Row #{0}: Received Qty must be equal to Accepted + Rejected Qty for Item {1}"
@@ -78577,7 +78577,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Unlink Payment on Cancellation of Invoice"
-msgstr ""
+msgstr "Fatura İptalinde Ödeme Bağlantısını Kaldır"
 
 #: accounts/doctype/bank_account/bank_account.js:33
 msgid "Unlink external integrations"
