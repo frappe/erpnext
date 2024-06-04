@@ -1031,6 +1031,17 @@ class JournalEntry(AccountsController):
 
 	def build_gl_map(self):
 		gl_map = []
+
+		company_currency = erpnext.get_company_currency(self.company)
+		if self.multi_currency:
+			for row in self.get("accounts"):
+				if row.account_currency != company_currency:
+					self.currency = row.account_currency
+					self.conversion_rate = row.exchange_rate
+					break
+		else:
+			self.currency = company_currency
+
 		for d in self.get("accounts"):
 			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
 				r = [d.user_remark, self.remark]

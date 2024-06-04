@@ -118,6 +118,8 @@ class Opportunity(TransactionBase, CRMNote):
 			self.title = self.customer_name
 
 		self.calculate_totals()
+
+	def on_update(self):
 		self.update_prospect()
 
 	def map_fields(self):
