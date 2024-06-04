@@ -417,18 +417,6 @@ def add_sub_assembly(**kwargs):
 				"do_not_explode": 1,
 				"is_expandable": 1,
 				"stock_uom": item_info.stock_uom,
-<<<<<<< HEAD
-=======
-				"operation": bom_item.operation,
-				"workstation_type": bom_item.workstation_type,
-				"operation_time": bom_item.operation_time,
-				"is_subcontracted": bom_item.is_subcontracted,
-				"workstation": bom_item.workstation,
-				"source_warehouse": bom_item.source_warehouse,
-				"wip_warehouse": bom_item.wip_warehouse,
-				"fg_warehouse": bom_item.fg_warehouse,
-				"skip_material_transfer": bom_item.skip_material_transfer,
->>>>>>> cf508ce1ed (fix: TypeError: 'float' object is not iterable (#41758))
 			},
 		)
 
