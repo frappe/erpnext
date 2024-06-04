@@ -591,13 +591,13 @@
    "default": "0",
    "fieldname": "fg_based_operating_cost",
    "fieldtype": "Check",
-   "label": "FG based Operating Cost"
+   "label": "Finished Goods based Operating Cost"
   },
   {
    "depends_on": "fg_based_operating_cost",
    "fieldname": "fg_based_section_section",
    "fieldtype": "Section Break",
-   "label": "FG Based Operating Cost Section"
+   "label": "Finished Goods Based Operating Cost"
   },
   {
    "depends_on": "fg_based_operating_cost",
@@ -637,7 +637,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-04-02 16:22:47.518411",
+ "modified": "2024-06-03 16:24:47.518411",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
