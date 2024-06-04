@@ -159,7 +159,7 @@ def prepare_chart_data(data, filters):
 	if filters.filter_based_on not in ("Date Range", "Fiscal Year"):
 		filters_filter_based_on = "Date Range"
 		date_field = "purchase_date"
-		filtered_data = [d for d in data if not d.get(date_field)]
+		filtered_data = [d for d in data if d.get(date_field)]
 		filters_from_date = min(filtered_data, key=lambda a: a.get(date_field)).get(date_field)
 		filters_to_date = max(filtered_data, key=lambda a: a.get(date_field)).get(date_field)
 	else:
