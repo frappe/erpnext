@@ -1150,6 +1150,8 @@ def create_new_asset_after_split(asset, split_qty):
 
 	for row in new_asset.get("finance_books"):
 		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active", row.finance_book)
+		if not current_asset_depr_schedule_doc:
+			continue
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
 		new_asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(new_asset, row)
