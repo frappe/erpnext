@@ -180,7 +180,34 @@ frappe.ui.form.on("Job Card", {
 					}
 
 					frm.add_custom_button(__("Complete Job"), () => {
-						frm.trigger("complete_job_card");
+						frappe.prompt(
+							{
+								fieldname: "qty",
+								label: __("Completed Quantity"),
+								fieldtype: "Float",
+								reqd: 1,
+								default: flt(frm.doc.for_quantity || 0),
+							},
+							(data) => {
+								if (flt(data.qty) <= 0) {
+									frappe.throw(__("Quantity should be greater than 0"));
+								}
+								frm.call({
+									method: "complete_job_card",
+									doc: frm.doc,
+									args: {
+										end_time: frappe.datetime.now_datetime(),
+										qty: data.qty,
+										employee: frm.doc.employee,
+									},
+									callback() {
+										frm.reload_doc();
+									},
+								});
+
+							},
+							__("Enter Value"),
+							__("Submit")
 					});
 				}
 
