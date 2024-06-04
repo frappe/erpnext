@@ -378,8 +378,132 @@ class BOMConfigurator {
 
 	edit_qty(node, view) {
 		let qty = node.data.qty || this.frm.doc.qty;
+<<<<<<< HEAD
 		frappe.prompt(
 			[{ label: __("Qty"), fieldname: "qty", default: qty, fieldtype: "Float", reqd: 1 }],
+=======
+		let fields = [{ label: __("Qty"), fieldname: "qty", default: qty, fieldtype: "Float", reqd: 1 }];
+
+		if (node.expandable && this.frm.doc.track_operations) {
+			let data = node.data.operation ? node.data : this.frm.doc;
+
+			fields = [
+				...fields,
+				...[
+					{ fieldtype: "Section Break" },
+					{
+						label: __("Operation"),
+						fieldname: "operation",
+						fieldtype: "Link",
+						options: "Operation",
+						default: data.operation,
+					},
+					{
+						label: __("Operation Time"),
+						fieldname: "operation_time",
+						fieldtype: "Float",
+						default: data.operation_time,
+					},
+					{
+						label: __("Is Subcontracted"),
+						fieldname: "is_subcontracted",
+						fieldtype: "Check",
+						hidden: node?.is_root || 0,
+						default: data.is_subcontracted,
+					},
+					{ fieldtype: "Column Break" },
+					{
+						label: __("Workstation Type"),
+						fieldname: "workstation_type",
+						fieldtype: "Link",
+						options: "Workstation Type",
+						default: data.workstation_type,
+					},
+					{
+						label: __("Workstation"),
+						fieldname: "workstation",
+						fieldtype: "Link",
+						options: "Workstation",
+						default: data.workstation,
+						get_query() {
+							let dialog = me.frm.edit_bom_dialog;
+							let workstation_type = dialog.get_value("workstation_type");
+
+							if (workstation_type) {
+								return {
+									filters: {
+										workstation_type: dialog.get_value("workstation_type"),
+									},
+								};
+							}
+						},
+					},
+					{ fieldtype: "Section Break" },
+					{
+						label: __("Skip Material Transfer"),
+						fieldname: "skip_material_transfer",
+						fieldtype: "Check",
+						default: data.skip_material_transfer,
+					},
+					{
+						label: __("Backflush Materials From WIP"),
+						fieldname: "backflush_from_wip_warehouse",
+						fieldtype: "Check",
+						depends_on: "eval:doc.skip_material_transfer",
+						default: data.backflush_from_wip_warehouse,
+					},
+					{
+						label: __("Source Warehouse"),
+						fieldname: "source_warehouse",
+						fieldtype: "Link",
+						options: "Warehouse",
+						default: data.source_warehouse,
+						depends_on: "eval:!doc.backflush_from_wip_warehouse",
+						get_query() {
+							return {
+								filters: {
+									company: me.frm.doc.company,
+								},
+							};
+						},
+					},
+					{ fieldtype: "Column Break" },
+					{
+						label: __("Work In Progress Warehouse"),
+						fieldname: "wip_warehouse",
+						fieldtype: "Link",
+						options: "Warehouse",
+						default: data.wip_warehouse,
+						depends_on: "eval:!doc.skip_material_transfer || doc.backflush_from_wip_warehouse",
+						get_query() {
+							return {
+								filters: {
+									company: me.frm.doc.company,
+								},
+							};
+						},
+					},
+					{
+						label: __("Finished Good Warehouse"),
+						fieldname: "fg_warehouse",
+						fieldtype: "Link",
+						options: "Warehouse",
+						default: data.fg_warehouse,
+						get_query() {
+							return {
+								filters: {
+									company: me.frm.doc.company,
+								},
+							};
+						},
+					},
+				],
+			];
+		}
+
+		this.frm.edit_bom_dialog = frappe.prompt(
+			fields,
+>>>>>>> cf508ce1ed (fix: TypeError: 'float' object is not iterable (#41758))
 			(data) => {
 				let doctype = node.data.doctype || this.frm.doc.doctype;
 				let docname = node.data.name || this.frm.doc.name;
