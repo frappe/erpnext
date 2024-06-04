@@ -548,6 +548,7 @@ class BOMConfigurator {
 						label: __("Is Subcontracted"),
 						fieldname: "is_subcontracted",
 						fieldtype: "Check",
+						hidden: node?.is_root || 0,
 						default: data.is_subcontracted,
 					},
 					{ fieldtype: "Column Break" },

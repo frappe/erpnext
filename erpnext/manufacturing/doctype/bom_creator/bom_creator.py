@@ -562,6 +562,7 @@ def add_sub_assembly(**kwargs):
 				"source_warehouse": bom_item.source_warehouse,
 				"wip_warehouse": bom_item.wip_warehouse,
 				"fg_warehouse": bom_item.fg_warehouse,
+				"skip_material_transfer": bom_item.skip_material_transfer,
 			},
 		)
 
