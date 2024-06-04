@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-20 11:21\n"
+"PO-Revision-Date: 2024-06-04 14:59\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -333,7 +333,9 @@ msgstr "# Izradite svoju prvu kupovnu fakturu\n\n"
 msgid "# Financial Statements\n\n"
 "In ERPNext, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.\n\n"
 "<b>[Check Accounting reports](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
-msgstr ""
+msgstr "# Finansijski izvještaji\n\n"
+"U ERPNext-u, jednim klikom na dugme možete dobiti ključne finansijske izvještaje kao što su [Bilans stanja] i [Dobit i gubitak]. Možete pokrenuti izvještaj za drugi period i nacrtati analitičke grafikone zasnovane na podacima iz izvoda. Za više izvještaja, provjerite odjeljke kao što su finansijski izvještaji, glavna knjiga i izvještaji o profitabilnosti.\n\n"
+"<b>[Provjerite računovodstvene izvještaje](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
 
 #. Description of the Onboarding Step 'Review Fixed Asset Accounts'
 #: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
@@ -754,7 +756,7 @@ msgstr "Račun '{0}': '{1}' treba odgovarati povratu prema fakturi"
 
 #: setup/doctype/company/company.py:202 setup/doctype/company/company.py:213
 msgid "'{0}' should be in company currency {1}."
-msgstr ""
+msgstr "'{0}' bi trebao biti u valuti kompanije {1}."
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:174
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:180
@@ -1171,33 +1173,41 @@ msgid "<h4>Standard Terms and Conditions Example</h4>\n\n"
 "<p>The fieldnames you can use in your email template are the fields in the document from which you are sending the email. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Sales Invoice)</p>\n\n"
 "<h4>Templating</h4>\n\n"
 "<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">read this documentation.</a></p>"
-msgstr ""
+msgstr "<h4>Primjer standardnih odredbi i uvjeta</h4>\n\n"
+"<pre>Uvjeti isporuke za broj narudžbe {{ name }}\n\n"
+"- Datum narudžbe: {{ transaction_date }}\n"
+"- Očekivani datum isporuke: {{ delivery_date }}\n"
+"</pre>\n\n"
+"<h4>Kako dobiti nazive polja</h4>\n\n"
+"<p>Imena polja koja možete koristiti u svom predlošku e-pošte su polja u dokumentu iz kojeg šaljete e-poštu. Polja bilo kojeg dokumenta možete pronaći preko Postavljanje &gt; Prilagodite prikaz obrasca i odaberite vrstu dokumenta (npr. prodajna faktura)</p>\n\n"
+"<h4>Izrada šablona</h4>\n\n"
+"<p>Predlošci su sastavljeni pomoću Jinja Templating Language. Da biste saznali više o Jinji, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">pročitajte ovu dokumentaciju.</a></p>"
 
 #. Content of the 'html_5' (HTML) field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgctxt "Bank Statement Import"
 msgid "<h5 class=\"text-muted uppercase\">Or</h5>"
-msgstr ""
+msgstr "<h5 class=\"text-muted uppercase\">Ili</h5>"
 
 #. Content of the 'account_no_settings' (HTML) field in DocType 'Cheque Print
 #. Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Account Number Settings</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Postavke broja računa</label>"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Cheque Print Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Amount In Words</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Iznos u riječima</label>"
 
 #. Content of the 'Date Settings' (HTML) field in DocType 'Cheque Print
 #. Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgctxt "Cheque Print Template"
 msgid "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Date Settings</label>"
-msgstr ""
+msgstr "<label class=\"control-label\" style=\"margin-bottom: 0px;\">Postavke datuma</label>"
 
 #. Content of the 'html_llwp' (HTML) field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
@@ -1222,7 +1232,26 @@ msgid "<p>In your <b>Email Template</b>, you can use the following special varia
 "    </ul>\n"
 "<p></p>\n"
 "<p>Apart from these, you can access all values in this RFQ, like <code>{{ message_for_supplier }}</code> or <code>{{ terms }}</code>.</p>"
-msgstr ""
+msgstr "<p>U vašem <b>Predlošku e-pošte</b> možete koristiti sljedeće posebne varijable:\n"
+"</p>\n"
+"<ul>\n"
+" <li>\n"
+" <code>{{ update_password_link }}</code>: Veza na kojoj vaš dobavljač može postaviti novu lozinku za prijavu na vaš portal.\n"
+" </li>\n"
+" <li>\n"
+" <code>{{ portal_link }}</code>: Veza na ovaj Zahtjev za ponudu na portalu vašeg dobavljača.\n"
+" </li>\n"
+" <li>\n"
+" <code>{{ supplier_name }}</code>: naziv firme vašeg dobavljača.\n"
+" </li>\n"
+" <li>\n"
+" <code>{{ contact.salutation }} {{ contact.last_name }}</code>: Kontakt osoba vašeg dobavljača.\n"
+" </li><li>\n"
+" <code>{{ user_fullname }}</code>: Vaše puno ime.\n"
+" </li>\n"
+" </ul>\n"
+"<p></p>\n"
+"<p>Osim ovih, možete pristupiti svim vrijednostima u ovom Zahtjevu za ponudu, kao što su <code>{{ message_for_supplier }}</code> ili <code>{{ terms }}</code>.</p>"
 
 #. Content of the 'Message Examples' (HTML) field in DocType 'Payment Gateway
 #. Account'
@@ -2152,15 +2181,15 @@ msgstr ""
 
 #: accounts/doctype/account/account.py:546
 msgid "Account {0} does not exist"
-msgstr ""
+msgstr "Račun {0} ne postoji"
 
 #: accounts/report/general_ledger/general_ledger.py:73
 msgid "Account {0} does not exists"
-msgstr ""
+msgstr "Račun {0} ne postoji"
 
 #: accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:51
 msgid "Account {0} does not exists in the dashboard chart {1}"
-msgstr ""
+msgstr "Račun {0} ne postoji na grafikonu nadzorne ploče {1}"
 
 #: accounts/doctype/mode_of_payment/mode_of_payment.py:48
 msgid "Account {0} does not match with Company {1} in Mode of Account: {2}"
@@ -3278,7 +3307,7 @@ msgstr "Radnja ako je inspekcija kvaliteta odbijena"
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Action If Same Rate is Not Maintained"
-msgstr ""
+msgstr "Radnja ako se ista stopa ne održava"
 
 #: quality_management/doctype/quality_review/quality_review_list.js:7
 msgid "Action Initialised"
@@ -3288,7 +3317,7 @@ msgstr "Radnja je pokrenuta"
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Action if Accumulated Monthly Budget Exceeded on Actual"
-msgstr ""
+msgstr "Radnja ako je akumulirani mjesečni budžet premašio stvarni"
 
 #. Label of a Select field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
@@ -3300,13 +3329,13 @@ msgstr ""
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Action if Accumulated Monthly Budget Exceeded on PO"
-msgstr ""
+msgstr "Radnja ako je prekoračen akumulirani mjesečni budžet na narudžbenici"
 
 #. Label of a Select field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
 msgctxt "Budget"
 msgid "Action if Annual Budget Exceeded on Actual"
-msgstr ""
+msgstr "Radnja ako je godišnji budžet premašio stvarni"
 
 #. Label of a Select field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
@@ -3430,7 +3459,7 @@ msgstr "Aktivni tragovi"
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Active Status"
-msgstr ""
+msgstr "Aktivan status"
 
 #. Label of a Tab Break field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
@@ -3516,199 +3545,199 @@ msgstr "Vrsta aktivnosti"
 #: accounts/report/budget_variance_report/budget_variance_report.py:100
 #: accounts/report/budget_variance_report/budget_variance_report.py:110
 msgid "Actual"
-msgstr ""
+msgstr "Stvarno"
 
 #. Option for the 'Type' (Select) field in DocType 'Advance Taxes and Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "Actual"
-msgstr ""
+msgstr "Stvarno"
 
 #. Option for the 'Type' (Select) field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Actual"
-msgstr ""
+msgstr "Stvarno"
 
 #. Option for the 'Type' (Select) field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "Actual"
-msgstr ""
+msgstr "Stvarno"
 
 #: stock/report/incorrect_balance_qty_after_transaction/incorrect_balance_qty_after_transaction.py:125
 msgid "Actual Balance Qty"
-msgstr ""
+msgstr "Stvarni saldo Kol"
 
 #. Label of a Float field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Actual Batch Quantity"
-msgstr ""
+msgstr "Stvarna količina serije"
 
 #: buying/report/procurement_tracker/procurement_tracker.py:101
 msgid "Actual Cost"
-msgstr ""
+msgstr "Stvarni trošak"
 
 #. Label of a Date field in DocType 'Maintenance Schedule Detail'
 #: maintenance/doctype/maintenance_schedule_detail/maintenance_schedule_detail.json
 msgctxt "Maintenance Schedule Detail"
 msgid "Actual Date"
-msgstr ""
+msgstr "Stvarni datum"
 
 #: buying/report/procurement_tracker/procurement_tracker.py:121
 #: stock/report/delayed_item_report/delayed_item_report.py:141
 #: stock/report/delayed_order_report/delayed_order_report.py:66
 msgid "Actual Delivery Date"
-msgstr ""
+msgstr "Stvarni datum isporuke"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:254
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:107
 msgid "Actual End Date"
-msgstr ""
+msgstr "Stvarni datum završetka"
 
 #. Label of a Datetime field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Actual End Date"
-msgstr ""
+msgstr "Stvarni datum završetka"
 
 #. Label of a Datetime field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Actual End Date"
-msgstr ""
+msgstr "Stvarni datum završetka"
 
 #. Label of a Date field in DocType 'Project'
 #: projects/doctype/project/project.json
 msgctxt "Project"
 msgid "Actual End Date (via Timesheet)"
-msgstr ""
+msgstr "Stvarni datum završetka (preko rasporeda)"
 
 #. Label of a Date field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Actual End Date (via Timesheet)"
-msgstr ""
+msgstr "Stvarni datum završetka (preko rasporeda)"
 
 #. Label of a Datetime field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "Actual End Time"
-msgstr ""
+msgstr "Stvarno vrijeme završetka"
 
 #: accounts/report/budget_variance_report/budget_variance_report.py:380
 msgid "Actual Expense"
-msgstr ""
+msgstr "Stvarni trošak"
 
 #. Label of a Currency field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Actual Operating Cost"
-msgstr ""
+msgstr "Stvarni operativni troškovi"
 
 #. Label of a Currency field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "Actual Operating Cost"
-msgstr ""
+msgstr "Stvarni operativni troškovi"
 
 #. Label of a Float field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "Actual Operation Time"
-msgstr ""
+msgstr "Stvarno vrijeme rada"
 
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.py:397
 msgid "Actual Posting"
-msgstr ""
+msgstr "Stvarno knjiženje"
 
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:21
 #: stock/report/product_bundle_balance/product_bundle_balance.py:96
 #: stock/report/stock_projected_qty/stock_projected_qty.py:136
 msgid "Actual Qty"
-msgstr ""
+msgstr "Stvarna količina"
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Actual Qty"
-msgstr ""
+msgstr "Stvarna količina"
 
 #. Label of a Float field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Actual Qty"
-msgstr ""
+msgstr "Stvarna količina"
 
 #. Label of a Float field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Actual Qty"
-msgstr ""
+msgstr "Stvarna količina"
 
 #. Label of a Float field in DocType 'Production Plan Sub Assembly Item'
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgctxt "Production Plan Sub Assembly Item"
 msgid "Actual Qty"
-msgstr ""
+msgstr "Stvarna količina"
 
 #. Label of a Float field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Actual Qty"
-msgstr ""
+msgstr "Stvarna količina"
 
 #. Label of a Float field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Actual Qty"
-msgstr ""
+msgstr "Stvarna količina"
 
 #. Label of a Float field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Actual Qty (at source/target)"
-msgstr ""
+msgstr "Stvarna količina (na izvoru/cilju)"
 
 #. Label of a Float field in DocType 'Asset Capitalization Stock Item'
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
 msgctxt "Asset Capitalization Stock Item"
 msgid "Actual Qty in Warehouse"
-msgstr ""
+msgstr "Stvarna količina u skladištu"
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:196
 msgid "Actual Qty is mandatory"
-msgstr ""
+msgstr "Stvarna količina je obavezna"
 
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:37
 #: stock/dashboard/item_dashboard_list.html:28
 msgid "Actual Qty {0} / Waiting Qty {1}"
-msgstr ""
+msgstr "Stvarna količina {0} / Količina na čekanju {1}"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Actual Qty: Quantity available in the warehouse."
-msgstr ""
+msgstr "Stvarna količina: Količina dostupna u skladištu."
 
 #: stock/report/item_shortage_report/item_shortage_report.py:95
 msgid "Actual Quantity"
-msgstr ""
+msgstr "Stvarna količina"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:248
 msgid "Actual Start Date"
-msgstr ""
+msgstr "Stvarni datum početka"
 
 #. Label of a Datetime field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Actual Start Date"
-msgstr ""
+msgstr "Stvarni datum početka"
 
 #. Label of a Datetime field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Actual Start Date"
-msgstr ""
+msgstr "Stvarni datum početka"
 
 #. Label of a Date field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -3759,7 +3788,7 @@ msgstr "Stvarna količina na zalihama"
 #: accounts/doctype/payment_entry/payment_entry.js:1475
 #: public/js/controllers/accounts.js:176
 msgid "Actual type tax cannot be included in Item rate in row {0}"
-msgstr ""
+msgstr "Stvarni tip poreza ne može se uključiti u stopu stavke u redu {0}"
 
 #: crm/doctype/lead/lead.js:85
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:55
@@ -3848,7 +3877,7 @@ msgstr "Dodaj tragove"
 #: setup/doctype/holiday_list/holiday_list.json
 msgctxt "Holiday List"
 msgid "Add Local Holidays"
-msgstr ""
+msgstr "Dodaj lokalne praznike"
 
 #. Label of a Check field in DocType 'Repost Payment Ledger'
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
@@ -3893,53 +3922,53 @@ msgstr "Dodaj prodajne partnere"
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Add Serial / Batch Bundle"
-msgstr ""
+msgstr "Dodajte serijski/serijski paketa"
 
 #. Label of a Button field in DocType 'Subcontracting Receipt Supplied Item'
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgctxt "Subcontracting Receipt Supplied Item"
 msgid "Add Serial / Batch Bundle"
-msgstr ""
+msgstr "Dodajte serijski/serijski paketa"
 
 #. Label of a Button field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Add Serial / Batch No"
-msgstr ""
+msgstr "Dodajte serijski / Broj serije"
 
 #. Label of a Button field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Add Serial / Batch No"
-msgstr ""
+msgstr "Dodajte serijski / Broj serije"
 
 #. Label of a Button field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Add Serial / Batch No"
-msgstr ""
+msgstr "Dodajte serijski / Broj serije"
 
 #. Label of a Button field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Add Serial / Batch No"
-msgstr ""
+msgstr "Dodajte serijski / Broj serije"
 
 #. Label of a Button field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Add Serial / Batch No (Rejected Qty)"
-msgstr ""
+msgstr "Dodaj serijski / Broj serije (Odbačena količina)"
 
 #. Label of a Button field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Add Serial / Batch No (Rejected Qty)"
-msgstr ""
+msgstr "Dodaj serijski / Broj serije (Odbačena količina)"
 
 #: manufacturing/doctype/plant_floor/plant_floor.js:172
 msgid "Add Stock"
-msgstr ""
+msgstr "Dodaj zalihe"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:238
 #: public/js/bom_configurator/bom_configurator.bundle.js:318
