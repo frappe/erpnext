@@ -49,7 +49,6 @@ def get_conditions(filters):
 
 	if filters.account_type:
 		conditions["account_type"] = filters.account_type
-		return conditions
 
 	if filters.company:
 		conditions["company"] = filters.company

@@ -1209,30 +1209,43 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 
 @frappe.whitelist()
-def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None):
+def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
 	filters = get_filters_for_bundle(
-		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name
+		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
 	)
+
+	fields = [
+		"`tabSerial and Batch Bundle`.`item_code`",
+		"`tabSerial and Batch Entry`.`qty`",
+		"`tabSerial and Batch Entry`.`warehouse`",
+		"`tabSerial and Batch Entry`.`batch_no`",
+		"`tabSerial and Batch Entry`.`serial_no`",
+	]
+
+	if not child_row:
+		fields.append("`tabSerial and Batch Bundle`.`name`")
 
 	return frappe.get_all(
 		"Serial and Batch Bundle",
-		fields=[
-			"`tabSerial and Batch Bundle`.`name`",
-			"`tabSerial and Batch Bundle`.`item_code`",
-			"`tabSerial and Batch Entry`.`qty`",
-			"`tabSerial and Batch Entry`.`warehouse`",
-			"`tabSerial and Batch Entry`.`batch_no`",
-			"`tabSerial and Batch Entry`.`serial_no`",
-		],
+		fields=fields,
 		filters=filters,
 		order_by="`tabSerial and Batch Entry`.`idx`",
 	)
 
 
-def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name=None):
+def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
 	filters = [
 		["Serial and Batch Bundle", "is_cancelled", "=", 0],
 	]
+
+	if child_row and isinstance(child_row, str):
+		child_row = parse_json(child_row)
+
+	if not name and child_row and child_row.get("qty") < 0:
+		bundle = get_reference_serial_and_batch_bundle(child_row)
+		if bundle:
+			voucher_no = None
+			filters.append(["Serial and Batch Bundle", "name", "=", bundle])
 
 	if item_code:
 		filters.append(["Serial and Batch Bundle", "item_code", "=", item_code])
@@ -1255,6 +1268,19 @@ def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name
 			filters.append(["Serial and Batch Entry", "parent", "=", name])
 
 	return filters
+
+
+def get_reference_serial_and_batch_bundle(child_row):
+	field = {
+		"Sales Invoice Item": "sales_invoice_item",
+		"Delivery Note Item": "dn_detail",
+		"Purchase Receipt Item": "purchase_receipt_item",
+		"Purchase Invoice Item": "purchase_invoice_item",
+		"POS Invoice Item": "pos_invoice_item",
+	}.get(child_row.doctype)
+
+	if field:
+		return frappe.get_cached_value(child_row.doctype, child_row.get(field), "serial_and_batch_bundle")
 
 
 @frappe.whitelist()
@@ -1334,15 +1360,20 @@ def get_type_of_transaction(parent_doc, child_row):
 		if parent_doc.get("doctype") in ["Purchase Receipt", "Purchase Invoice"]:
 			type_of_transaction = "Inward"
 
-	if parent_doc.get("is_return"):
-		type_of_transaction = "Inward" if type_of_transaction == "Outward" else "Outward"
-
 	if parent_doc.get("doctype") == "Subcontracting Receipt":
 		type_of_transaction = "Outward"
 		if child_row.get("doctype") == "Subcontracting Receipt Item":
 			type_of_transaction = "Inward"
 	elif parent_doc.get("doctype") == "Stock Reconciliation":
 		type_of_transaction = "Inward"
+
+	if parent_doc.get("is_return"):
+		type_of_transaction = "Inward"
+		if (
+			parent_doc.get("doctype") in ["Purchase Receipt", "Purchase Invoice"]
+			or child_row.get("doctype") == "Subcontracting Receipt Item"
+		):
+			type_of_transaction = "Outward"
 
 	return type_of_transaction
 
