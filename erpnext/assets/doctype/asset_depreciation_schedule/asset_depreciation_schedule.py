@@ -562,7 +562,10 @@ def _check_is_pro_rata(asset_doc, row, wdv_or_dd_non_yearly=False):
 			Error: This asset already has {0} depreciation periods booked.
 			The 'depreciation start' date must be at least {1} periods after the 'available for use' date. Please correct the dates accordingly.
 			"""
-			).format(asset_doc.number_of_depreciations_booked, asset_doc.number_of_depreciations_booked)
+			).format(
+				asset_doc.opening_number_of_booked_depreciations,
+				asset_doc.opening_number_of_booked_depreciations,
+			)
 		)
 	if days < total_days:
 		has_pro_rata = True
@@ -576,10 +579,10 @@ def _get_modified_available_for_use_date(asset_doc, row, wdv_or_dd_non_yearly=Fa
 	depreciation start date = 30-04-2024
 	then from date should be 01-04-2024
 	"""
-	if asset_doc.number_of_depreciations_booked > 0:
+	if asset_doc.opening_number_of_booked_depreciations > 0:
 		from_date = add_months(
 			asset_doc.available_for_use_date,
-			(asset_doc.number_of_depreciations_booked * row.frequency_of_depreciation) - 1,
+			(asset_doc.opening_number_of_booked_depreciations * row.frequency_of_depreciation) - 1,
 		)
 		if is_last_day_of_the_month(row.depreciation_start_date):
 			return add_days(get_last_day(from_date), 1)

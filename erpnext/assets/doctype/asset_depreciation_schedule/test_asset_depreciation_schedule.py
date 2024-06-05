@@ -201,7 +201,7 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 			depreciation_method="Written Down Value",
 			available_for_use_date="2020-07-17",
 			is_existing_asset=1,
-			number_of_depreciations_booked=2,
+			opening_number_of_booked_depreciations=2,
 			opening_accumulated_depreciation=11666.67,
 			depreciation_start_date="2021-04-30",
 			total_number_of_depreciations=12,
@@ -228,3 +228,4 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
 		self.assertEqual(schedules, expected_schedules)
+
