@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-03 13:45\n"
+"PO-Revision-Date: 2024-06-05 14:57\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -668,7 +668,7 @@ msgstr ""
 
 #: stock/doctype/delivery_note/delivery_note.py:368
 msgid "'Sales Order' reference ({1}) is missing in row {0}"
-msgstr ""
+msgstr "مرجع «سفارش فروش» ({1}) در ردیف {0} وجود ندارد"
 
 #: stock/report/batch_item_expiry_status/batch_item_expiry_status.py:27
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:108
@@ -698,7 +698,7 @@ msgstr ""
 
 #: setup/doctype/company/company.py:202 setup/doctype/company/company.py:213
 msgid "'{0}' should be in company currency {1}."
-msgstr ""
+msgstr "\"{0}\" باید به ارز شرکت {1} باشد."
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:174
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:180
@@ -1033,7 +1033,9 @@ msgctxt "Cheque Print Template"
 msgid "<div>\n"
 "<h3> All dimensions in centimeter only </h3>\n"
 "</div>"
-msgstr ""
+msgstr "<div>\n"
+"<h3> همه ابعاد فقط به سانتی‌متر </h3>\n"
+"</div>"
 
 #. Content of the 'about' (HTML) field in DocType 'Product Bundle'
 #: selling/doctype/product_bundle/product_bundle.json
@@ -3781,7 +3783,7 @@ msgstr "دستی اضافه کن"
 
 #: projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "افزودن چندگانه"
 
 #: projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -9622,7 +9624,7 @@ msgstr "به روز رسانی BOM آغاز شد"
 #. Name of a DocType
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 msgid "BOM Update Log"
-msgstr ""
+msgstr "لاگ به روز رسانی BOM"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom_update_tool/bom_update_tool.json
@@ -11299,13 +11301,13 @@ msgstr "سفارش کلی"
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Blanket Order Allowance (%)"
-msgstr ""
+msgstr "سفارش کلی مجاز (%)"
 
 #. Label of a Float field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Blanket Order Allowance (%)"
-msgstr ""
+msgstr "سفارش کلی مجاز (%)"
 
 #. Name of a DocType
 #: manufacturing/doctype/blanket_order_item/blanket_order_item.json
@@ -14301,7 +14303,7 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Commission Rate (%)"
-msgstr ""
+msgstr "نرخ کمیسیون (%)"
 
 #. Label of a Float field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -16996,13 +16998,13 @@ msgstr "شرایط و ضوابط قرارداد"
 #: selling/report/sales_person_commission_summary/sales_person_commission_summary.py:76
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:122
 msgid "Contribution %"
-msgstr ""
+msgstr "% مشارکت"
 
 #. Label of a Float field in DocType 'Sales Team'
 #: selling/doctype/sales_team/sales_team.json
 msgctxt "Sales Team"
 msgid "Contribution (%)"
-msgstr ""
+msgstr "مشارکت (%)"
 
 #: selling/report/sales_person_commission_summary/sales_person_commission_summary.py:88
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:130
@@ -26060,7 +26062,7 @@ msgstr "پست الکترونیک"
 #. Label of a Card Break in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgid "Email / Notifications"
-msgstr ""
+msgstr "ایمیل / اعلان ها"
 
 #. Label of a Link in the Home Workspace
 #. Label of a Link in the Settings Workspace
@@ -31958,12 +31960,12 @@ msgstr "صفحه اصلی"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Horsepower"
-msgstr ""
+msgstr "اسب بخار"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Horsepower-Hours"
-msgstr ""
+msgstr "اسب بخار-ساعت"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -34583,7 +34585,7 @@ msgstr "مقدمه ای بر فروش"
 #. Title of an Onboarding Step
 #: stock/onboarding_step/introduction_to_stock_entry/introduction_to_stock_entry.json
 msgid "Introduction to Stock Entry"
-msgstr ""
+msgstr "مقدمه ای بر ورود موجودی"
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.py:324
 #: stock/doctype/putaway_rule/putaway_rule.py:85
@@ -37563,7 +37565,7 @@ msgstr "نام آیتم"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Item Naming By"
-msgstr ""
+msgstr "نام گذاری آیتم توسط"
 
 #. Name of a DocType
 #: stock/doctype/item_price/item_price.json
@@ -38350,7 +38352,7 @@ msgstr "موارد مورد درخواست"
 #. Label of a Card Break in the Selling Workspace
 #: selling/workspace/selling/selling.json
 msgid "Items and Pricing"
-msgstr ""
+msgstr "آیتم‌ها و قیمت"
 
 #: controllers/accounts_controller.py:3498
 msgid "Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
@@ -38751,12 +38753,12 @@ msgstr "کیلوگرم"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kiloampere"
-msgstr ""
+msgstr "کیلو آمپر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilocalorie"
-msgstr ""
+msgstr "کیلو کالری"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -39246,7 +39248,7 @@ msgstr "مدیریت لیست موجودی را یاد بگیرید"
 #. Label of a shortcut in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Learn Manufacturing"
-msgstr ""
+msgstr "یادگیری تولید"
 
 #. Label of a shortcut in the Buying Workspace
 #: buying/workspace/buying/buying.json
@@ -39284,7 +39286,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Review Chart of Accounts'
 #: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Learn more about Chart of Accounts"
-msgstr ""
+msgstr "درباره نمودار حساب ها بیشتر بدانید"
 
 #. Label of an action in the Onboarding Step 'Production Planning'
 #: manufacturing/onboarding_step/production_planning/production_planning.json
@@ -42399,7 +42401,7 @@ msgstr "مایل/ثانیه"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Milibar"
-msgstr ""
+msgstr "میلی بار"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -42454,7 +42456,7 @@ msgstr "میلی‌متر"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millimeter Of Mercury"
-msgstr ""
+msgstr "میلیمتر جیوه"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -44984,7 +44986,7 @@ msgstr "غیر انتفاعی"
 
 #: manufacturing/doctype/bom/bom.py:1296
 msgid "Non stock items"
-msgstr ""
+msgstr "آیتم‌های غیر موجودی"
 
 #. Option for the 'Monitoring Frequency' (Select) field in DocType 'Quality
 #. Goal'
@@ -46007,7 +46009,7 @@ msgstr ""
 
 #: public/js/templates/crm_activities.html:63
 msgid "Open Events"
-msgstr ""
+msgstr "رویدادهای باز"
 
 #: selling/page/point_of_sale/pos_controller.js:189
 msgid "Open Form View"
@@ -46103,7 +46105,7 @@ msgstr "افتتاح"
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Opening & Closing"
-msgstr ""
+msgstr "افتتاحیه و اختتامیه"
 
 #: accounts/report/trial_balance/trial_balance.py:430
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.py:185
@@ -46255,7 +46257,7 @@ msgstr "ارزش افتتاحیه"
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Opening and Closing"
-msgstr ""
+msgstr "افتتاحیه و اختتامیه"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:31
 msgid "Opening {0} Invoices created"
@@ -46522,7 +46524,7 @@ msgstr "تعداد OPP"
 #: crm/report/campaign_efficiency/campaign_efficiency.py:25
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:31
 msgid "Opp/Lead %"
-msgstr ""
+msgstr "% فرصت/سرنخ"
 
 #: selling/page/sales_funnel/sales_funnel.py:56
 msgid "Opportunities"
@@ -46828,7 +46830,7 @@ msgstr "ارزش سفارش"
 #: crm/report/campaign_efficiency/campaign_efficiency.py:27
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:33
 msgid "Order/Quot %"
-msgstr ""
+msgstr "% سفارش/پیش فاکتور"
 
 #: buying/doctype/supplier_quotation/supplier_quotation_list.js:5
 #: selling/doctype/quotation/quotation_list.js:30
@@ -47018,7 +47020,7 @@ msgstr "سایر اطلاعات"
 #: buying/workspace/buying/buying.json selling/workspace/selling/selling.json
 #: stock/workspace/stock/stock.json
 msgid "Other Reports"
-msgstr ""
+msgstr "سایر گزارش ها"
 
 #. Label of a Section Break field in DocType 'CRM Settings'
 #: crm/doctype/crm_settings/crm_settings.json
@@ -48118,7 +48120,7 @@ msgstr "مبلغ پرداخت شده + مبلغ بازنویسی نمی توان
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pair"
-msgstr ""
+msgstr "جفت"
 
 #. Label of a Select field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -48589,7 +48591,7 @@ msgstr "شراکت"
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Parts Per Hour"
-msgstr ""
+msgstr "قطعات در ساعت"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -48813,7 +48815,7 @@ msgstr "اطلاعات طرف"
 #: manufacturing/doctype/blanket_order_item/blanket_order_item.json
 msgctxt "Blanket Order Item"
 msgid "Party Item Code"
-msgstr ""
+msgstr "کد آیتم طرف"
 
 #. Name of a DocType
 #: accounts/doctype/party_link/party_link.json
@@ -50234,7 +50236,7 @@ msgstr "درصد"
 #: accounts/doctype/cost_center_allocation_percentage/cost_center_allocation_percentage.json
 msgctxt "Cost Center Allocation Percentage"
 msgid "Percentage (%)"
-msgstr ""
+msgstr "درصد (%)"
 
 #. Label of a Float field in DocType 'Monthly Distribution Percentage'
 #: accounts/doctype/monthly_distribution_percentage/monthly_distribution_percentage.json
@@ -50383,7 +50385,7 @@ msgstr "دوره بر اساس"
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
 msgctxt "Bisect Nodes"
 msgid "Period_from_date"
-msgstr ""
+msgstr "Period_from_date"
 
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:72
 #: accounts/report/financial_ratios/financial_ratios.js:33
@@ -50977,7 +50979,7 @@ msgstr "لطفا یک تامین کننده انتخاب کنید"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:159
 msgid "Please Set Priority"
-msgstr ""
+msgstr "لطفا اولویت را تعیین کنید"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:154
 msgid "Please Set Supplier Group in Buying Settings."
@@ -52462,17 +52464,17 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Cubic Foot"
-msgstr ""
+msgstr "پوند/فوت مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Cubic Inch"
-msgstr ""
+msgstr "پوند/اینچ مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Cubic Yard"
-msgstr ""
+msgstr "پوند/یارد مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -53874,7 +53876,7 @@ msgstr "احتمال"
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Probability (%)"
-msgstr ""
+msgstr "احتمال (%)"
 
 #. Label of a Long Text field in DocType 'Quality Action Resolution'
 #: quality_management/doctype/quality_action_resolution/quality_action_resolution.json
@@ -54514,7 +54516,7 @@ msgstr "سود سال"
 #. Label of a Card Break in the Financial Reports Workspace
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Profitability"
-msgstr ""
+msgstr "سودآوری"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
@@ -54540,7 +54542,7 @@ msgstr "% پیشرفت برای یک وظیفه نمی تواند بیشتر ا�
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:94
 msgid "Progress (%)"
-msgstr ""
+msgstr "پیشرفت (%)"
 
 #. Name of a DocType
 #: accounts/doctype/sales_invoice/sales_invoice.js:1053
@@ -58704,7 +58706,7 @@ msgstr "دلیل تعلیق"
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Reason for Failure"
-msgstr ""
+msgstr "دلیل شکست"
 
 #: buying/doctype/purchase_order/purchase_order.js:667
 #: selling/doctype/sales_order/sales_order.js:1348
@@ -58834,7 +58836,7 @@ msgstr "حساب دریافتنی/پرداختنی: {0} به شرکت {1} تعل
 #. Name of a Workspace
 #: accounts/workspace/receivables/receivables.json
 msgid "Receivables"
-msgstr "مطالبات"
+msgstr "دریافتنی ها"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -59625,7 +59627,7 @@ msgstr "نام مرجع"
 #: accounts/doctype/sales_invoice_payment/sales_invoice_payment.json
 msgctxt "Sales Invoice Payment"
 msgid "Reference No"
-msgstr ""
+msgstr "شماره مرجع"
 
 #: accounts/doctype/journal_entry/journal_entry.py:562
 msgid "Reference No & Reference Date is required for {0}"
@@ -60294,7 +60296,7 @@ msgstr "بسته بندی مجدد"
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Repair"
-msgstr ""
+msgstr "تعمیر"
 
 #: assets/doctype/asset/asset.js:127
 msgid "Repair Asset"
@@ -61747,7 +61749,7 @@ msgstr "مرور"
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
 msgid "Review Chart of Accounts"
-msgstr ""
+msgstr "بررسی نمودار حساب ها"
 
 #. Label of a Date field in DocType 'Task'
 #: projects/doctype/task/task.json
@@ -68369,27 +68371,27 @@ msgstr "فوت مربع"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Square Inch"
-msgstr ""
+msgstr "اینچ مربع"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Square Kilometer"
-msgstr ""
+msgstr "کیلومتر مربع"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Square Meter"
-msgstr ""
+msgstr "متر مربع"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Square Mile"
-msgstr ""
+msgstr "مایل مربع"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Square Yard"
-msgstr ""
+msgstr "یارد مربع"
 
 #: accounts/print_format/sales_invoice_return/sales_invoice_return.html:52
 #: templates/print_formats/includes/items.html:8
@@ -69707,7 +69709,7 @@ msgstr "توافقات موجودی"
 #. Label of a Card Break in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Stock Reports"
-msgstr ""
+msgstr "گزارش‌های موجودی"
 
 #. Name of a DocType
 #: stock/doctype/stock_reposting_settings/stock_reposting_settings.json
@@ -73530,7 +73532,7 @@ msgstr "عضو تیم"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Teaspoon"
-msgstr ""
+msgstr "قاشق چایخوری"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -79121,7 +79123,7 @@ msgstr "از Google Maps Direction API برای بهینه سازی مسیر ا�
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "Use HTTP Protocol"
-msgstr ""
+msgstr "استفاده از پروتکل HTTP"
 
 #. Label of a Check field in DocType 'Stock Reposting Settings'
 #: stock/doctype/stock_reposting_settings/stock_reposting_settings.json
@@ -81264,7 +81266,7 @@ msgstr "تماشای ویدیو"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Watt"
-msgstr ""
+msgstr "وات"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -82969,7 +82971,7 @@ msgstr "نوع_doc"
 #: selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:25
 #: selling/report/sales_partner_transaction_summary/sales_partner_transaction_summary.py:25
 msgid "doctype"
-msgstr ""
+msgstr "doctype"
 
 #. Description of the 'Coupon Name' (Data) field in DocType 'Coupon Code'
 #: accounts/doctype/coupon_code/coupon_code.json
@@ -83674,7 +83676,7 @@ msgstr "{0} به عنوان تخفیف داده می شود."
 
 #: manufacturing/doctype/job_card/job_card.py:772
 msgid "{0} {1}"
-msgstr ""
+msgstr "{0} {1}"
 
 #: public/js/utils/serial_no_batch_selector.js:206
 msgid "{0} {1} Manually"
@@ -83851,7 +83853,7 @@ msgstr "{0} {1}: تامین‌کننده در برابر حساب پرداختن
 
 #: projects/doctype/project/project_list.js:6
 msgid "{0}%"
-msgstr ""
+msgstr "{0}%"
 
 #: controllers/website_list_for_contact.py:203
 msgid "{0}% Billed"
@@ -83902,7 +83904,7 @@ msgstr "{}"
 #: stock/workspace/stock/stock.json
 msgctxt "Item"
 msgid "{}  Available"
-msgstr ""
+msgstr "{} در دسترس"
 
 #. Count format of shortcut in the Selling Workspace
 #: selling/workspace/selling/selling.json
@@ -83943,7 +83945,7 @@ msgstr ""
 #: buying/workspace/buying/buying.json selling/workspace/selling/selling.json
 msgctxt "Item"
 msgid "{} Available"
-msgstr ""
+msgstr "{} در دسترس"
 
 #. Count format of shortcut in the Selling Workspace
 #: selling/workspace/selling/selling.json
