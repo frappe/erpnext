@@ -12,7 +12,7 @@ frappe.ui.form.on("Accounts Settings", {
 		msg += " ";
 		msg += __("Please enable only if the understand the effects of enabling this.");
 		msg += "<br>";
-		msg += "Do you still want to enable immutable ledger?";
+		msg += __("Do you still want to enable immutable ledger?");
 
 		frappe.confirm(
 			msg,
