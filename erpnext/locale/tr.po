@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-04 14:59\n"
+"PO-Revision-Date: 2024-06-05 14:57\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -2930,7 +2930,7 @@ msgstr "Muhasebe Yöneticisi"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:339
 msgid "Accounts Missing Error"
-msgstr ""
+msgstr "Hesap Eksik Hatası"
 
 #. Name of a report
 #. Label of a Link in the Payables Workspace
@@ -3733,21 +3733,21 @@ msgstr ""
 #: public/js/utils/serial_no_batch_selector.js:182
 #: stock/dashboard/item_dashboard_list.html:59
 msgid "Add"
-msgstr "Ekle"
+msgstr "Yeni"
 
 #. Option for the 'Add Or Deduct' (Select) field in DocType 'Advance Taxes and
 #. Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "Add"
-msgstr "Ekle"
+msgstr "Yeni"
 
 #. Option for the 'Add or Deduct' (Select) field in DocType 'Purchase Taxes and
 #. Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Add"
-msgstr "Ekle"
+msgstr "Yeni"
 
 #: stock/doctype/item/item.js:485 stock/doctype/price_list/price_list.js:8
 msgid "Add / Edit Prices"
@@ -13495,7 +13495,7 @@ msgstr ""
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
 msgctxt "Chart of Accounts Importer"
 msgid "Chart Preview"
-msgstr ""
+msgstr "Grafik Önizleme"
 
 #. Label of a HTML field in DocType 'Chart of Accounts Importer'
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
@@ -16088,7 +16088,7 @@ msgstr ""
 #: buying/onboarding_step/buying_settings/buying_settings.json
 #: stock/onboarding_step/buying_settings/buying_settings.json
 msgid "Configure Buying Settings."
-msgstr ""
+msgstr "Satın Alma Ayarlarını Yapılandırın."
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:52
 msgid "Configure Product Assembly"
@@ -19330,7 +19330,7 @@ msgstr ""
 #. Name of a DocType
 #: accounts/doctype/currency_exchange_settings_details/currency_exchange_settings_details.json
 msgid "Currency Exchange Settings Details"
-msgstr ""
+msgstr "Döviz Kuru Ayarları Detayları"
 
 #. Name of a DocType
 #: accounts/doctype/currency_exchange_settings_result/currency_exchange_settings_result.json
@@ -27148,7 +27148,7 @@ msgstr "Hata Günlüğü"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:127
 msgid "Error Message"
-msgstr ""
+msgstr "Hata Mesajı"
 
 #. Label of a Text field in DocType 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
@@ -42661,7 +42661,7 @@ msgstr ""
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:1177
 msgid "Missing"
-msgstr ""
+msgstr "Eksik"
 
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.py:69
 #: accounts/doctype/pos_profile/pos_profile.py:166
@@ -42670,11 +42670,11 @@ msgstr ""
 #: accounts/doctype/sales_invoice/sales_invoice.py:2575
 #: assets/doctype/asset_category/asset_category.py:117
 msgid "Missing Account"
-msgstr ""
+msgstr "Eksik Hesap"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1421
 msgid "Missing Asset"
-msgstr ""
+msgstr "Kayıp Varlık"
 
 #: accounts/doctype/gl_entry/gl_entry.py:174 assets/doctype/asset/asset.py:265
 msgid "Missing Cost Center"
@@ -42682,7 +42682,7 @@ msgstr "Maliyet Merkezi Eksik"
 
 #: assets/doctype/asset/asset.py:307
 msgid "Missing Finance Book"
-msgstr ""
+msgstr "Kayıp Finans Kitabı"
 
 #: stock/doctype/stock_entry/stock_entry.py:1317
 msgid "Missing Finished Good"
@@ -42690,11 +42690,11 @@ msgstr "Eksik Bitmiş Ürün"
 
 #: stock/doctype/quality_inspection/quality_inspection.py:214
 msgid "Missing Formula"
-msgstr ""
+msgstr "Eksik Formül"
 
 #: assets/doctype/asset_repair/asset_repair.py:172
 msgid "Missing Items"
-msgstr ""
+msgstr "Eksik Ürünler"
 
 #: utilities/__init__.py:53
 msgid "Missing Payments App"
@@ -82867,7 +82867,7 @@ msgstr ""
 #. Success message of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
 msgid "You're ready to start your journey with ERPNext"
-msgstr ""
+msgstr "ERPNext ile yolculuğunuza başlamaya hazırsınız"
 
 #. Option for the 'Provider' (Select) field in DocType 'Video'
 #: utilities/doctype/video/video.json
@@ -83183,7 +83183,7 @@ msgstr ""
 
 #: controllers/accounts_controller.py:1113
 msgid "or"
-msgstr ""
+msgstr "veya"
 
 #: support/doctype/service_level_agreement/service_level_agreement.js:50
 msgid "or its descendants"
