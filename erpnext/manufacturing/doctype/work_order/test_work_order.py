@@ -1677,6 +1677,11 @@ class TestWorkOrder(FrappeTestCase):
 		)
 		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
 
+		bundle = manufacture_ste_doc.items[0].serial_and_batch_bundle
+		bundle_doc = frappe.get_doc("Serial and Batch Bundle", bundle)
+		sabb_entries = [e.as_dict() for e in bundle_doc.entries]
+		throw Error("Temp")
+
 	###
 	def test_non_consumed_material_return_against_work_order(self):
 		frappe.db.set_single_value(
