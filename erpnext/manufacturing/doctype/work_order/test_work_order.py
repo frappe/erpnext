@@ -1573,12 +1573,12 @@ class TestWorkOrder(FrappeTestCase):
 			item_code="Test Batch Battery Consumable",
 			target="Stores - _TC",
 			qty=8,
-			basic_rate=3.33,
+			basic_rate=2.33,
 		)
 		consume_use_doc = test_stock_entry.make_stock_entry(
 			item_code="Test Batch Battery Consumable",  # consumable not linked to BOM
-			qty=1,
-			from_warehouse="Stores - _TC",
+			source="Stores - _TC",
+			qty=4,
 			purpose="Material Consumption for Manufacture",
 			do_not_save=True,
 		)
@@ -1588,10 +1588,10 @@ class TestWorkOrder(FrappeTestCase):
 		consume_use_doc.reload()
 
 		manufacture_ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 4))
+		mfr_items = [i.as_dict() for i in manufacture_ste_doc.items]
 		manufacture_ste_doc.submit()
 		manufacture_ste_doc.reload()
 
-		mfr_items = [i.as_dict() for i in manufacture_ste_doc.items]
 		self.assertTrue(len(mfr_items), 2)
 		self.assertTrue(manufacture_ste_doc.items[0].serial_and_batch_bundle)
 		self.assertEqual(
@@ -1634,11 +1634,31 @@ class TestWorkOrder(FrappeTestCase):
 		)
 		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
 
+		# Make additional consumption and link to WO
+		consume_add_doc = test_stock_entry.make_stock_entry(
+			item_code="Test Serial Battery Consumable",
+			target="Stores - _TC",
+			qty=8,
+			basic_rate=3.33,
+		)
+		consume_use_doc = test_stock_entry.make_stock_entry(
+			item_code="Test Serial Battery Consumable",  # consumable not linked to BOM
+			source="Stores - _TC",
+			qty=4,
+			purpose="Material Consumption for Manufacture",
+			do_not_save=True,
+		)
+		consume_use_doc.work_order = wo_doc.name
+		consume_use_doc.fg_completed_qty = 4
+		consume_use_doc.submit()
+		consume_use_doc.reload()
+
 		manufacture_ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 4))
+		mfr_items = [i.as_dict() for i in manufacture_ste_doc.items]
 		manufacture_ste_doc.submit()
 		manufacture_ste_doc.reload()
 
-		# Serial nos should be same as transferred Serial nos
+		self.assertTrue(len(mfr_items), 2)
 		self.assertTrue(manufacture_ste_doc.items[0].serial_and_batch_bundle)
 		self.assertEqual(
 			sorted(get_serial_nos_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle)),
@@ -2508,14 +2528,24 @@ def prepare_data_for_backflush_based_on_materials_transferred():
 
 	make_bom(item=item.name, source_warehouse="Stores - _TC", raw_materials=[batch_item_doc.name])
 
-	# Make additional item not attached to a BOM
-	consumable_item_doc = make_item(
+	# Make additional items not attached to a BOM
+	consumable_batch_item_doc = make_item(
 		"Test Batch Battery Consumable",
 		{
 			"is_stock_item": 1,
 			"has_batch_no": 1,
 			"create_new_batch": 1,
 			"batch_number_series": "TBMK.#####",
+			"valuation_rate": 2.33,
+			"stock_uom": "Nos",
+		},
+	)
+	consumable_serial_item_doc = make_item(
+		"Test Serial Battery Consumable",
+		{
+			"is_stock_item": 1,
+			"has_serial_no": 1,
+			"serial_no_series": "TSBH.#####",
 			"valuation_rate": 3.33,
 			"stock_uom": "Nos",
 		},
