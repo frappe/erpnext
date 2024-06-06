@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-04 14:59\n"
+"PO-Revision-Date: 2024-06-06 14:57\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Bosnian\n"
 "MIME-Version: 1.0\n"
@@ -6015,7 +6015,7 @@ msgstr "Dozvolite korisniku da uređuje cijenu"
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Allow Zero Rate"
-msgstr ""
+msgstr "Dozvoli nultu vrijednost"
 
 #. Label of a Check field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -39603,7 +39603,7 @@ msgstr ""
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
@@ -39615,7 +39615,7 @@ msgstr "Memorandum"
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link in the Home Workspace
 #: setup/workspace/home/home.json
@@ -39627,19 +39627,19 @@ msgstr "Memorandum"
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Section Break field in DocType 'Packing Slip'
 #. Label of a Link field in DocType 'Packing Slip'
@@ -39652,37 +39652,37 @@ msgstr "Memorandum"
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgctxt "Process Statement Of Accounts"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Request for Quotation'
 #: buying/doctype/request_for_quotation/request_for_quotation.json
@@ -39694,19 +39694,19 @@ msgstr "Memorandum"
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -39718,13 +39718,13 @@ msgstr "Memorandum"
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgctxt "Subcontracting Receipt"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Label of a Link field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Letter Head"
-msgstr ""
+msgstr "Memorandum"
 
 #. Description of the 'Body Text' (Text Editor) field in DocType 'Dunning
 #. Letter Text'
