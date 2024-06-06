@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-05 14:57\n"
+"PO-Revision-Date: 2024-06-06 14:57\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -2113,15 +2113,15 @@ msgstr "حساب {0} نامعتبر است. ارز حساب باید {1} باش�
 
 #: accounts/doctype/account/account.py:149
 msgid "Account {0}: Parent account {1} can not be a ledger"
-msgstr "حساب {0}: حساب والدین {1} نمی تواند دفتر کل باشد"
+msgstr "حساب {0}: حساب والد {1} نمی تواند دفتر کل باشد"
 
 #: accounts/doctype/account/account.py:155
 msgid "Account {0}: Parent account {1} does not belong to company: {2}"
-msgstr "حساب {0}: حساب والدین {1} متعلق به شرکت نیست: {2}"
+msgstr ""
 
 #: accounts/doctype/account/account.py:143
 msgid "Account {0}: Parent account {1} does not exist"
-msgstr "حساب {0}: حساب والدین {1} وجود ندارد"
+msgstr "حساب {0}: حساب والد {1} وجود ندارد"
 
 #: accounts/doctype/account/account.py:146
 msgid "Account {0}: You can not assign itself as parent account"
@@ -12915,7 +12915,7 @@ msgstr ""
 
 #: controllers/accounts_controller.py:1866
 msgid "Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings"
-msgstr "نمی توان برای مورد {0} در ردیف {1} بیش از {2} صورت حساب اضافه کرد. برای مجاز کردن صورت‌حساب بیش از حد، لطفاً در تنظیمات حساب‌ها مقدار مجاز را تنظیم کنید"
+msgstr ""
 
 #: manufacturing/doctype/work_order/work_order.py:292
 msgid "Cannot produce more Item {0} than Sales Order quantity {1}"
@@ -14043,7 +14043,7 @@ msgstr "اختتامیه (بدهی)"
 
 #: accounts/report/general_ledger/general_ledger.py:56
 msgid "Closing (Opening + Total)"
-msgstr "بسته شدن (باز شدن + کل)"
+msgstr ""
 
 #. Label of a Link field in DocType 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
@@ -14059,7 +14059,7 @@ msgstr "بسته شدن حساب {0} باید از نوع بدهی / حقوق ص
 #: accounts/doctype/pos_closing_entry_detail/pos_closing_entry_detail.json
 msgctxt "POS Closing Entry Detail"
 msgid "Closing Amount"
-msgstr "مبلغ بسته شدن"
+msgstr ""
 
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.py:138
 msgid "Closing Balance"
@@ -27603,7 +27603,7 @@ msgstr "تاریخ پایان مورد انتظار"
 
 #: projects/doctype/task/task.py:103
 msgid "Expected End Date should be less than or equal to parent task's Expected End Date {0}."
-msgstr "تاریخ پایان مورد انتظار باید کمتر یا مساوی با تاریخ پایان مورد انتظار کار والدین {0} باشد."
+msgstr ""
 
 #: public/js/projects/timer.js:16
 msgid "Expected Hrs"
@@ -31789,7 +31789,7 @@ msgstr "در اینجا گزینه هایی برای ادامه وجود دار�
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Here you can maintain family details like name and occupation of parent, spouse and children"
-msgstr "در اینجا می توانید مشخصات خانوادگی مانند نام و شغل والدین، همسر و فرزندان را حفظ کنید"
+msgstr ""
 
 #. Description of the 'Health Details' (Small Text) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -34680,7 +34680,7 @@ msgstr "فاکتورهای POS نامعتبر"
 
 #: accounts/doctype/account/account.py:335
 msgid "Invalid Parent Account"
-msgstr "حساب والدین نامعتبر است"
+msgstr "حساب والد نامعتبر"
 
 #: public/js/controllers/buying.js:333
 msgid "Invalid Part Number"
@@ -45803,7 +45803,7 @@ msgstr "فقط شامل پرداخت های اختصاص داده شده است"
 
 #: accounts/doctype/account/account.py:133
 msgid "Only Parent can be of type {0}"
-msgstr "فقط والدین می توانند از نوع {0} باشند"
+msgstr ""
 
 #: assets/report/fixed_asset_register/fixed_asset_register.js:43
 msgid "Only existing assets"
@@ -47257,25 +47257,25 @@ msgstr "بیرونی"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Over Billing Allowance (%)"
-msgstr ""
+msgstr "اضافه صورتحساب مجاز (%)"
 
 #. Label of a Float field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Over Billing Allowance (%)"
-msgstr ""
+msgstr "اضافه صورتحساب مجاز (%)"
 
 #. Label of a Float field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Over Delivery/Receipt Allowance (%)"
-msgstr ""
+msgstr "اضافه تحویل/دریافت مجاز (%)"
 
 #. Label of a Float field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Over Delivery/Receipt Allowance (%)"
-msgstr ""
+msgstr "اضافه تحویل/دریافت مجاز (%)"
 
 #: controllers/stock_controller.py:1109
 msgid "Over Receipt"
@@ -47470,41 +47470,41 @@ msgstr ""
 #. Name of a DocType
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 msgid "POS Closing Entry"
-msgstr "ورودی بسته شدن POS"
+msgstr "ورودی اختتامیه POS"
 
 #. Label of a Link in the Selling Workspace
 #: selling/workspace/selling/selling.json
 msgctxt "POS Closing Entry"
 msgid "POS Closing Entry"
-msgstr "ورودی بسته شدن POS"
+msgstr "ورودی اختتامیه POS"
 
 #. Label of a Link field in DocType 'POS Invoice Merge Log'
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.json
 msgctxt "POS Invoice Merge Log"
 msgid "POS Closing Entry"
-msgstr "ورودی بسته شدن POS"
+msgstr "ورودی اختتامیه POS"
 
 #. Label of a Data field in DocType 'POS Opening Entry'
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
 msgctxt "POS Opening Entry"
 msgid "POS Closing Entry"
-msgstr "ورودی بسته شدن POS"
+msgstr "ورودی اختتامیه POS"
 
 #. Linked DocType in POS Profile's connections
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "POS Closing Entry"
-msgstr "ورودی بسته شدن POS"
+msgstr "ورودی اختتامیه POS"
 
 #. Name of a DocType
 #: accounts/doctype/pos_closing_entry_detail/pos_closing_entry_detail.json
 msgid "POS Closing Entry Detail"
-msgstr "جزئیات ورودی بسته شدن POS"
+msgstr "جزئیات ورودی اختتامیه POS"
 
 #. Name of a DocType
 #: accounts/doctype/pos_closing_entry_taxes/pos_closing_entry_taxes.json
 msgid "POS Closing Entry Taxes"
-msgstr "مالیات ورودی بسته شدن POS"
+msgstr "مالیات ورودی اختتامیه POS"
 
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.js:31
 msgid "POS Closing Failed"
@@ -47620,7 +47620,7 @@ msgstr "فاکتورهای POS در یک فرآیند پس زمینه تجمیع
 #. Name of a DocType
 #: accounts/doctype/pos_item_group/pos_item_group.json
 msgid "POS Item Group"
-msgstr "گروه اقلام POS"
+msgstr "گروه آیتم POS"
 
 #. Name of a DocType
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
@@ -48244,7 +48244,7 @@ msgstr "والدین"
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Parent Account"
-msgstr "حساب والدین"
+msgstr ""
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:377
 msgid "Parent Account Missing"
@@ -48270,25 +48270,25 @@ msgstr "شرکت مادر باید یک شرکت گروهی باشد"
 #: accounts/doctype/cost_center/cost_center.json
 msgctxt "Cost Center"
 msgid "Parent Cost Center"
-msgstr "مرکز هزینه والدین"
+msgstr ""
 
 #. Label of a Link field in DocType 'Customer Group'
 #: setup/doctype/customer_group/customer_group.json
 msgctxt "Customer Group"
 msgid "Parent Customer Group"
-msgstr "گروه مشتریان والدین"
+msgstr ""
 
 #. Label of a Link field in DocType 'Department'
 #: setup/doctype/department/department.json
 msgctxt "Department"
 msgid "Parent Department"
-msgstr "دپارتمان والدین"
+msgstr ""
 
 #. Label of a Data field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Parent Detail docname"
-msgstr "نام سند جزئیات والدین"
+msgstr ""
 
 #. Label of a Link field in DocType 'Process Payment Reconciliation Log'
 #: accounts/doctype/process_payment_reconciliation_log/process_payment_reconciliation_log.json
@@ -48300,19 +48300,19 @@ msgstr "سند والد"
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Parent Item"
-msgstr "مورد والدین"
+msgstr "آیتم والد"
 
 #. Label of a Link field in DocType 'Product Bundle'
 #: selling/doctype/product_bundle/product_bundle.json
 msgctxt "Product Bundle"
 msgid "Parent Item"
-msgstr "آیتم والدین"
+msgstr "آیتم والد"
 
 #. Label of a Link field in DocType 'Item Group'
 #: setup/doctype/item_group/item_group.json
 msgctxt "Item Group"
 msgid "Parent Item Group"
-msgstr "گروه اقلام والد"
+msgstr "گروه آیتم والد"
 
 #: selling/doctype/product_bundle/product_bundle.py:79
 msgid "Parent Item {0} must not be a Fixed Asset"
@@ -48326,13 +48326,13 @@ msgstr "مورد والد {0} نباید یک مورد موجودی باشد"
 #: assets/doctype/location/location.json
 msgctxt "Location"
 msgid "Parent Location"
-msgstr "مکان والدین"
+msgstr ""
 
 #. Label of a Link field in DocType 'Quality Procedure'
 #: quality_management/doctype/quality_procedure/quality_procedure.json
 msgctxt "Quality Procedure"
 msgid "Parent Procedure"
-msgstr "رویه والدین"
+msgstr ""
 
 #. Label of a Data field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -48344,23 +48344,23 @@ msgstr "شماره ردیف والد"
 #: setup/doctype/sales_person/sales_person.json
 msgctxt "Sales Person"
 msgid "Parent Sales Person"
-msgstr "فروشنده والدین"
+msgstr ""
 
 #. Label of a Link field in DocType 'Supplier Group'
 #: setup/doctype/supplier_group/supplier_group.json
 msgctxt "Supplier Group"
 msgid "Parent Supplier Group"
-msgstr "گروه تامین کننده والدین"
+msgstr ""
 
 #. Label of a Link field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgctxt "Task"
 msgid "Parent Task"
-msgstr "وظیفه والدین"
+msgstr ""
 
 #: projects/doctype/task/task.py:157
 msgid "Parent Task {0} is not a Template Task"
-msgstr "وظیفه والدین {0} یک کار الگو نیست"
+msgstr ""
 
 #. Label of a Link field in DocType 'Territory'
 #: setup/doctype/territory/territory.json
@@ -48370,13 +48370,13 @@ msgstr "قلمرو پدر و مادر"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:47
 msgid "Parent Warehouse"
-msgstr "انبار والدین"
+msgstr ""
 
 #. Label of a Link field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "Parent Warehouse"
-msgstr "انبار والدین"
+msgstr ""
 
 #. Option for the 'Status' (Select) field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -50267,7 +50267,7 @@ msgstr "درصدی که مجاز به فروش آن هستید فراتر از �
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Percentage you are allowed to transfer more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to transfer 110 units."
-msgstr "درصدی که مجاز به انتقال بیشتر نسبت به مقدار سفارش شده هستید. به عنوان مثال: اگر 100 عدد سفارش داده اید. و کمک هزینه شما 10٪ است، سپس شما مجاز به انتقال 110 واحد هستید."
+msgstr "درصدی که مجاز به انتقال بیشتر نسبت به مقدار سفارش شده هستید. به عنوان مثال: اگر 100 عدد سفارش داده اید. و مقدار مجاز شما 10٪ است، سپس شما مجاز به انتقال 110 واحد هستید."
 
 #: setup/setup_wizard/operations/install_fixtures.py:386
 msgid "Perception Analysis"
@@ -50297,7 +50297,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Period Closing Settings"
-msgstr "تنظیمات بسته شدن دوره"
+msgstr ""
 
 #. Name of a DocType
 #: accounts/doctype/account/account_tree.js:197
@@ -61908,7 +61908,7 @@ msgstr "Root قابل ویرایش نیست."
 
 #: accounts/doctype/cost_center/cost_center.py:47
 msgid "Root cannot have a parent cost center"
-msgstr "Root نمی تواند مرکز هزینه والدین داشته باشد"
+msgstr ""
 
 #. Label of a Check field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -62177,12 +62177,12 @@ msgstr "تنظیم گرد (ارز شرکت)"
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.json
 msgctxt "Exchange Rate Revaluation"
 msgid "Rounding Loss Allowance"
-msgstr "کمک هزینه از دست دادن گرد"
+msgstr "زیان گرد کردن مجاز"
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:45
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:48
 msgid "Rounding Loss Allowance should be between 0 and 1"
-msgstr "کمک هزینه زیان گرد باید بین 0 و 1 باشد"
+msgstr "زیان گرد کردن مجاز باید بین 0 و 1 باشد"
 
 #: controllers/stock_controller.py:416 controllers/stock_controller.py:431
 msgid "Rounding gain/loss Entry for Stock Transfer"
@@ -64149,7 +64149,7 @@ msgstr "نام شخص فروشنده"
 #: selling/report/sales_person_target_variance_based_on_item_group/sales_person_target_variance_based_on_item_group.json
 #: selling/workspace/selling/selling.json
 msgid "Sales Person Target Variance Based On Item Group"
-msgstr "واریانس هدف فرد فروش بر اساس گروه اقلام"
+msgstr "واریانس هدف فرد فروش بر اساس گروه آیتم"
 
 #. Label of a Section Break field in DocType 'Sales Person'
 #: setup/doctype/sales_person/sales_person.json
@@ -66831,13 +66831,13 @@ msgstr "مقدار را تنظیم کنید"
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Set Reserve Warehouse"
-msgstr "انبار ذخیره را تنظیم کنید"
+msgstr "تنظیم انبار ذخیره"
 
 #. Label of a Link field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Set Reserve Warehouse"
-msgstr "انبار ذخیره را تنظیم کنید"
+msgstr "تنظیم انبار ذخیره"
 
 #: support/doctype/service_level_agreement/service_level_agreement.py:82
 #: support/doctype/service_level_agreement/service_level_agreement.py:90
@@ -66848,49 +66848,49 @@ msgstr "زمان پاسخ را برای اولویت {0} در ردیف {1} تن�
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Set Source Warehouse"
-msgstr "انبار منبع را تنظیم کنید"
+msgstr "تنظیم انبار منبع"
 
 #. Label of a Link field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Set Source Warehouse"
-msgstr "انبار منبع را تنظیم کنید"
+msgstr "تنظیم انبار منبع"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Set Source Warehouse"
-msgstr "انبار منبع را تنظیم کنید"
+msgstr "تنظیم انبار منبع"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Set Target Warehouse"
-msgstr "انبار هدف را تنظیم کنید"
+msgstr "تنظیم انبار هدف"
 
 #. Label of a Link field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Set Target Warehouse"
-msgstr "انبار هدف را تنظیم کنید"
+msgstr "تنظیم انبار هدف"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Set Target Warehouse"
-msgstr "انبار هدف را تنظیم کنید"
+msgstr "تنظیم انبار هدف"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Set Target Warehouse"
-msgstr "انبار هدف را تنظیم کنید"
+msgstr "تنظیم انبار هدف"
 
 #. Label of a Link field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgctxt "Subcontracting Order"
 msgid "Set Target Warehouse"
-msgstr "انبار هدف را تنظیم کنید"
+msgstr "تنظیم انبار هدف"
 
 #. Title of an Onboarding Step
 #: setup/onboarding_step/company_set_up/company_set_up.json
@@ -69383,7 +69383,7 @@ msgstr ""
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Stock Closing"
-msgstr "بسته شدن موجودی"
+msgstr ""
 
 #. Label of a Check field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
@@ -73840,31 +73840,31 @@ msgstr "شرایط و ضوابط محتوا"
 #: manufacturing/doctype/blanket_order/blanket_order.json
 msgctxt "Blanket Order"
 msgid "Terms and Conditions Details"
-msgstr "شرایط و ضوابط جزئیات"
+msgstr "جرئیات شرایط و ضوابط"
 
 #. Label of a Text Editor field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Terms and Conditions Details"
-msgstr "شرایط و ضوابط جزئیات"
+msgstr "جرئیات شرایط و ضوابط"
 
 #. Label of a Text Editor field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Terms and Conditions Details"
-msgstr "شرایط و ضوابط جزئیات"
+msgstr "جرئیات شرایط و ضوابط"
 
 #. Label of a Text Editor field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Terms and Conditions Details"
-msgstr "شرایط و ضوابط جزئیات"
+msgstr "جرئیات شرایط و ضوابط"
 
 #. Label of a Text Editor field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Terms and Conditions Details"
-msgstr "شرایط و ضوابط جزئیات"
+msgstr "جرئیات شرایط و ضوابط"
 
 #. Label of a HTML field in DocType 'Terms and Conditions'
 #: setup/doctype/terms_and_conditions/terms_and_conditions.json
@@ -75837,11 +75837,11 @@ msgstr "افزودن مواد خام قراردادی فرعی در صورت و�
 
 #: controllers/status_updater.py:341
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
-msgstr "برای مجاز کردن صدور صورت‌حساب، «بیش از هزینه صورت‌حساب» را در تنظیمات حساب‌ها یا مورد به‌روزرسانی کنید."
+msgstr "برای مجاز کردن اضافه صورت‌حساب، «اضافه صورت‌حساب مجاز» را در تنظیمات حساب‌ها یا آیتم به‌روزرسانی کنید."
 
 #: controllers/status_updater.py:337
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
-msgstr "برای اجازه دادن به بیش از دریافت / تحویل، \"بیش از دریافت / کمک هزینه تحویل\" را در تنظیمات موجودی یا مورد به روز کنید."
+msgstr "برای اجازه دادن به اضافه دریافت / تحویل، \"اضافه دریافت / تحویل مجاز\" را در تنظیمات موجودی یا آیتم به روز کنید."
 
 #. Description of the 'Mandatory Depends On' (Small Text) field in DocType
 #. 'Inventory Dimension'
@@ -75858,7 +75858,7 @@ msgstr "برای تحویل به مشتری"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:529
 msgid "To cancel a {} you need to cancel the POS Closing Entry {}."
-msgstr "برای لغو یک {}، باید ورودی بسته شدن POS {} را لغو کنید."
+msgstr "برای لغو یک {}، باید ورودی اختتامیه POS {} را لغو کنید."
 
 #: accounts/doctype/payment_request/payment_request.py:100
 msgid "To create a Payment Request reference document is required"
@@ -79416,14 +79416,14 @@ msgstr "اگر کاربران بخواهند نرخ ورودی (تنظیم با 
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Users with this role are allowed to over bill above the allowance percentage"
-msgstr "کاربرانی که این نقش را دارند مجاز به پرداخت بیش از درصدی هستند"
+msgstr "کاربرانی که این نقش را دارند مجاز به اضافه صورتحساب بالاتر از درصد مجاز هستند"
 
 #. Description of the 'Role Allowed to Over Deliver/Receive' (Link) field in
 #. DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Users with this role are allowed to over deliver/receive against orders above the allowance percentage"
-msgstr ""
+msgstr "کاربرانی که این نقش را دارند مجاز به بیش تحویل/دریافت سفارش‌ها بالاتر از درصد مجاز هستند"
 
 #. Description of the 'Role Allowed to Set Frozen Accounts and Edit Frozen
 #. Entries' (Link) field in DocType 'Accounts Settings'
@@ -82825,7 +82825,7 @@ msgstr "قبل از افزودن یک مورد باید مشتری را انتخ
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:251
 msgid "You need to cancel POS Closing Entry {} to be able to cancel this document."
-msgstr "برای اینکه بتوانید این سند را لغو کنید، باید ورودی بسته شدن POS {} را لغو کنید."
+msgstr "برای اینکه بتوانید این سند را لغو کنید، باید ورودی اختتامیه POS {} را لغو کنید."
 
 #. Success message of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
