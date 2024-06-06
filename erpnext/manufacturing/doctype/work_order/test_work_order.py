@@ -1576,13 +1576,14 @@ class TestWorkOrder(FrappeTestCase):
 			basic_rate=3.33,
 		)
 		consume_use_doc = test_stock_entry.make_stock_entry(
-			item_code="Test Batch Battery Consumable", # consumable not linked to BOM
+			item_code="Test Batch Battery Consumable",  # consumable not linked to BOM
 			qty=1,
 			from_warehouse="Stores - _TC",
 			purpose="Material Consumption for Manufacture",
-			do_not_submit=True,
+			do_not_save=True,
 		)
 		consume_use_doc.work_order = wo_doc.name
+		consume_use_doc.fg_completed_qty = 4
 		consume_use_doc.submit()
 		consume_use_doc.reload()
 
