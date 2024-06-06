@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-05 14:57\n"
+"PO-Revision-Date: 2024-06-06 14:57\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -1787,67 +1787,67 @@ msgstr "Hesap Kapanış Bakiyesi"
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
 msgctxt "Account Closing Balance"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Advance Taxes and Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Bank Clearance'
 #: accounts/doctype/bank_clearance/bank_clearance.json
 msgctxt "Bank Clearance"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Bank Reconciliation Tool'
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 msgctxt "Bank Reconciliation Tool"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
 msgctxt "Exchange Rate Revaluation Account"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Journal Entry Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Landed Cost Taxes and Charges'
 #: stock/doctype/landed_cost_taxes_and_charges/landed_cost_taxes_and_charges.json
 msgctxt "Landed Cost Taxes and Charges"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Unreconcile Payment Entries'
 #: accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
 msgctxt "Unreconcile Payment Entries"
 msgid "Account Currency"
-msgstr ""
+msgstr "Hesap Para Birimi"
 
 #. Label of a Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -2118,7 +2118,7 @@ msgstr ""
 
 #: accounts/report/general_ledger/general_ledger.py:73
 msgid "Account {0} does not exists"
-msgstr ""
+msgstr "{0} Hesabı bulunamadı"
 
 #: accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:51
 msgid "Account {0} does not exists in the dashboard chart {1}"
@@ -17030,7 +17030,7 @@ msgstr ""
 #: crm/doctype/contract_template/contract_template.json
 msgctxt "Contract Template"
 msgid "Contract Terms and Conditions"
-msgstr ""
+msgstr "Sözleşme Şartları ve Koşulları"
 
 #: selling/report/sales_person_commission_summary/sales_person_commission_summary.py:76
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:122
@@ -61549,7 +61549,7 @@ msgstr "İade"
 
 #: accounts/doctype/sales_invoice/sales_invoice.js:122
 msgid "Return / Credit Note"
-msgstr ""
+msgstr "İade Faturası"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:140
 msgid "Return / Debit Note"
@@ -63642,7 +63642,7 @@ msgstr ""
 #: stock/doctype/item_price/item_price.json
 #: stock/doctype/price_list/price_list.json
 msgid "Sales Master Manager"
-msgstr ""
+msgstr "Satış Kayıtları Yöneticisi"
 
 #. Label of a Small Text field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -71449,7 +71449,7 @@ msgstr ""
 #. Label of a Link in the Buying Workspace
 #: buying/workspace/buying/buying.json
 msgid "Supplier Addresses And Contacts"
-msgstr ""
+msgstr "Tedarikçi Adresleri ve Kişiler"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
