@@ -1569,7 +1569,7 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
 
 		# Make additional consumption and link to WO
-		consume_add_doc = test_stock_entry.make_stock_entry(
+		test_stock_entry.make_stock_entry(
 			item_code="Test Batch Battery Consumable",
 			target="Stores - _TC",
 			qty=8,
@@ -1635,7 +1635,7 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
 
 		# Make additional consumption and link to WO
-		consume_add_doc = test_stock_entry.make_stock_entry(
+		test_stock_entry.make_stock_entry(
 			item_code="Test Serial Battery Consumable",
 			target="Stores - _TC",
 			qty=8,
@@ -2529,7 +2529,7 @@ def prepare_data_for_backflush_based_on_materials_transferred():
 	make_bom(item=item.name, source_warehouse="Stores - _TC", raw_materials=[batch_item_doc.name])
 
 	# Make additional items not attached to a BOM
-	consumable_batch_item_doc = make_item(
+	make_item(
 		"Test Batch Battery Consumable",
 		{
 			"is_stock_item": 1,
@@ -2540,7 +2540,7 @@ def prepare_data_for_backflush_based_on_materials_transferred():
 			"stock_uom": "Nos",
 		},
 	)
-	consumable_serial_item_doc = make_item(
+	make_item(
 		"Test Serial Battery Consumable",
 		{
 			"is_stock_item": 1,
