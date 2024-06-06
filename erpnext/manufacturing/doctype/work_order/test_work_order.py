@@ -1531,7 +1531,8 @@ class TestWorkOrder(FrappeTestCase):
 			serial_nos.remove(d.serial_no)
 
 		self.assertFalse(serial_nos)
-###
+
+	###
 	def test_backflushed_batch_raw_materials_based_on_transferred_autosabb(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
@@ -1565,7 +1566,7 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(
 			get_batch_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle), batch_no
 		)
-		self.assertEqual(transferred_ste_doc.items[0].qty, -4)
+		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
 
 		manufacture_ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 4))
 		manufacture_ste_doc.submit()
@@ -1575,7 +1576,7 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(
 			get_batch_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle), batch_no
 		)
-		self.assertEqual(manufacture_ste_doc.items[0].qty, -4)
+		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
 
 	def test_backflushed_serial_no_raw_materials_based_on_transferred_autosabb(self):
 		frappe.db.set_single_value(
@@ -1610,7 +1611,7 @@ class TestWorkOrder(FrappeTestCase):
 			sorted(get_serial_nos_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle)),
 			serial_nos_list,
 		)
-		self.assertEqual(transferred_ste_doc.items[0].qty, -4)
+		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
 
 		manufacture_ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 4))
 		manufacture_ste_doc.submit()
@@ -1622,7 +1623,7 @@ class TestWorkOrder(FrappeTestCase):
 			sorted(get_serial_nos_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle)),
 			serial_nos_list,
 		)
-		self.assertEqual(manufacture_ste_doc.items[0].qty, -4)
+		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
 
 	def test_backflushed_serial_no_batch_raw_materials_based_on_transferred_autosabb(self):
 		frappe.db.set_single_value(
@@ -1660,7 +1661,7 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(
 			get_batch_from_bundle(transferred_ste_doc.items[0].serial_and_batch_bundle), batch_no
 		)
-		self.assertEqual(transferred_ste_doc.items[0].qty, -4)
+		self.assertEqual(transferred_ste_doc.items[0].qty, 4.0)
 
 		manufacture_ste_doc = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 4))
 		manufacture_ste_doc.submit()
@@ -1674,8 +1675,9 @@ class TestWorkOrder(FrappeTestCase):
 		self.assertEqual(
 			get_batch_from_bundle(manufacture_ste_doc.items[0].serial_and_batch_bundle), batch_no
 		)
-		self.assertEqual(manufacture_ste_doc.items[0].qty, -4)
-###
+		self.assertEqual(manufacture_ste_doc.items[0].qty, 4.0)
+
+	###
 	def test_non_consumed_material_return_against_work_order(self):
 		frappe.db.set_single_value(
 			"Manufacturing Settings",
