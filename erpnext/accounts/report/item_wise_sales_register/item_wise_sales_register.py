@@ -27,7 +27,7 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 
 	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
 
-	item_list = get_items(filters, get_query_columns(additional_table_columns), additional_conditions)
+	item_list = get_items(filters, additional_table_columns, additional_conditions)
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(item_list, columns, company_currency)
 
@@ -383,6 +383,9 @@ def apply_conditions(query, si, sii, filters, additional_conditions=None):
 	else:
 		query = apply_group_by_conditions(query, si, sii, filters)
 
+	for key, value in (additional_conditions or {}).items():
+		query = query.where(si[key] == value)
+
 	return query
 
 
@@ -526,7 +529,12 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 	)
 
 	if additional_query_columns:
-		query = query.select(*additional_query_columns)
+		for column in additional_query_columns:
+			if column.get("_doctype"):
+				table = frappe.qb.DocType(column.get("_doctype"))
+				query = query.select(table[column.get("fieldname")])
+			else:
+				query = query.select(si[column.get("fieldname")])
 
 	if filters.get("customer"):
 		query = query.where(si.customer == filters["customer"])
