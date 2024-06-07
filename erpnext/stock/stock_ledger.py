@@ -36,6 +36,7 @@ from erpnext.stock.utils import (
 	get_incoming_outgoing_rate_for_cancel,
 	get_incoming_rate,
 	get_or_make_bin,
+	get_serial_nos_data,
 	get_stock_balance,
 	get_valuation_method,
 )
@@ -811,9 +812,10 @@ class update_entries_after:
 			self.update_outgoing_rate_on_transaction(sle)
 
 	def get_serialized_values(self, sle):
+		from erpnext.stock.serial_batch_bundle import SerialNoValuation
+
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
-		serial_nos = cstr(sle.serial_no).split("\n")
 
 		if incoming_rate < 0:
 			# wrong incoming rate
@@ -826,7 +828,15 @@ class update_entries_after:
 			# In case of delivery/stock issue, get average purchase rate
 			# of serial nos of current entry
 			if not sle.is_cancelled:
-				outgoing_value = self.get_incoming_value_for_serial_nos(sle, serial_nos)
+				new_sle = copy.deepcopy(sle)
+				new_sle.qty = new_sle.actual_qty
+				new_sle.serial_nos = get_serial_nos_data(new_sle.get("serial_no"))
+
+				sn_obj = SerialNoValuation(
+					sle=new_sle, warehouse=new_sle.get("warehouse"), item_code=new_sle.get("item_code")
+				)
+
+				outgoing_value = sn_obj.get_incoming_rate()
 				stock_value_change = -1 * outgoing_value
 			else:
 				stock_value_change = actual_qty * sle.outgoing_rate
@@ -1272,6 +1282,8 @@ class update_entries_after:
 			self.wh_data.valuation_rate = self.wh_data.stock_value / self.wh_data.qty_after_transaction
 
 	def update_batched_values(self, sle):
+		from erpnext.stock.serial_batch_bundle import BatchNoValuation
+
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
 
@@ -1282,14 +1294,17 @@ class update_entries_after:
 		if actual_qty > 0:
 			stock_value_difference = incoming_rate * actual_qty
 		else:
-			outgoing_rate = get_batch_incoming_rate(
-				item_code=sle.item_code,
-				warehouse=sle.warehouse,
-				batch_no=sle.batch_no,
-				posting_date=sle.posting_date,
-				posting_time=sle.posting_time,
-				creation=sle.creation,
+			new_sle = copy.deepcopy(sle)
+
+			new_sle.qty = new_sle.actual_qty
+			new_sle.batch_nos = frappe._dict({new_sle.batch_no: new_sle})
+			batch_obj = BatchNoValuation(
+				sle=new_sle,
+				warehouse=new_sle.get("warehouse"),
+				item_code=new_sle.get("item_code"),
 			)
+
+			outgoing_rate = batch_obj.get_incoming_rate()
 
 			if outgoing_rate is None:
 				# This can *only* happen if qty available for the batch is zero.
