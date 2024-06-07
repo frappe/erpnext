@@ -837,7 +837,7 @@ class update_entries_after:
 				)
 
 				outgoing_value = sn_obj.get_incoming_rate()
-				stock_value_change = -1 * outgoing_value
+				stock_value_change = actual_qty * outgoing_value
 			else:
 				stock_value_change = actual_qty * sle.outgoing_rate
 
@@ -1312,6 +1312,7 @@ class update_entries_after:
 				# future entries will correct the overall accounting as each
 				# batch individually uses moving average rates.
 				outgoing_rate = self.get_fallback_rate(sle)
+
 			stock_value_difference = outgoing_rate * actual_qty
 
 		self.wh_data.stock_value = round_off_if_near_zero(self.wh_data.stock_value + stock_value_difference)
