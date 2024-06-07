@@ -30,7 +30,7 @@ def _execute(filters=None, additional_table_columns=None):
 
 	company_currency = erpnext.get_company_currency(filters.company)
 
-	item_list = get_items(filters, get_query_columns(additional_table_columns))
+	item_list = get_items(filters, additional_table_columns)
 	aii_account_map = get_aii_accounts()
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(
@@ -311,7 +311,7 @@ def apply_conditions(query, pi, pii, filters):
 	return query
 
 
-def get_items(filters, additional_query_columns):
+def get_items(filters, additional_table_columns):
 	pi = frappe.qb.DocType("Purchase Invoice")
 	pii = frappe.qb.DocType("Purchase Invoice Item")
 	Item = frappe.qb.DocType("Item")
@@ -352,13 +352,18 @@ def get_items(filters, additional_query_columns):
 		.where(pi.docstatus == 1)
 	)
 
-	if additional_query_columns:
-		query = query.select(*additional_query_columns)
-
 	if filters.get("supplier"):
 		query = query.where(pi.supplier == filters["supplier"])
 	if filters.get("company"):
 		query = query.where(pi.company == filters["company"])
+
+	if additional_table_columns:
+		for column in additional_table_columns:
+			if column.get("_doctype"):
+				table = frappe.qb.DocType(column.get("_doctype"))
+				query = query.select(table[column.get("fieldname")])
+			else:
+				query = query.select(pi[column.get("fieldname")])
 
 	query = apply_conditions(query, pi, pii, filters)
 
