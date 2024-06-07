@@ -30,7 +30,7 @@ def _execute(filters=None, additional_table_columns=None):
 
 	company_currency = erpnext.get_company_currency(filters.company)
 
-	item_list = get_items(filters, get_query_columns(additional_table_columns))
+	item_list = get_items(filters, additional_table_columns)
 	aii_account_map = get_aii_accounts()
 	if item_list:
 		itemised_tax, tax_columns = get_tax_accounts(
@@ -311,6 +311,7 @@ def apply_conditions(query, pi, pii, filters):
 	return query
 
 
+<<<<<<< HEAD
 def get_items(filters, additional_query_columns):
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -363,6 +364,9 @@ def get_items(filters, additional_query_columns):
              )
              .where(pi.docstatus == 1))
 =======
+=======
+def get_items(filters, additional_table_columns):
+>>>>>>> 8ec364df6f (fix: Add additional condition application)
 	pi = frappe.qb.DocType("Purchase Invoice")
 	pii = frappe.qb.DocType("Purchase Invoice Item")
 	Item = frappe.qb.DocType("Item")
@@ -404,9 +408,6 @@ def get_items(filters, additional_query_columns):
 	)
 >>>>>>> 76073ae228 (fix: fixing Item-wise sales register and purchase register #41373)
 
-	if additional_query_columns:
-		query = query.select(*additional_query_columns)
-
 	if filters.get("supplier"):
 		query = query.where(pi.supplier == filters["supplier"])
 	if filters.get("company"):
@@ -414,9 +415,20 @@ def get_items(filters, additional_query_columns):
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 1b45ecfcae (fix: Item-wise Sales and Purchase register with no item codes #41373)
 =======
 =======
+=======
+	if additional_table_columns:
+		for column in additional_table_columns:
+			if column.get("_doctype"):
+				table = frappe.qb.DocType(column.get("_doctype"))
+				query = query.select(table[column.get("fieldname")])
+			else:
+				query = query.select(pi[column.get("fieldname")])
+
+>>>>>>> 8ec364df6f (fix: Add additional condition application)
 	query = apply_conditions(query, pi, pii, filters)
 
 >>>>>>> d2af36e1eb (chore: update condition queries in qb)
