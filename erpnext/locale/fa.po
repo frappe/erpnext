@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-06 14:57\n"
+"PO-Revision-Date: 2024-06-08 16:12\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -54,11 +54,11 @@ msgstr " خلاصه"
 
 #: stock/doctype/item/item.py:232
 msgid "\"Customer Provided Item\" cannot be Purchase Item also"
-msgstr "\"آیتم ارائه شده توسط مشتری\" نمی تواند آیتم خرید هم باشد"
+msgstr "\"آیتم تأمین شده توسط مشتری\" نمی تواند آیتم خرید هم باشد"
 
 #: stock/doctype/item/item.py:234
 msgid "\"Customer Provided Item\" cannot have Valuation Rate"
-msgstr "\"آیتم ارائه شده توسط مشتری\" نمی تواند دارای نرخ ارزیابی باشد"
+msgstr "\"آیتم تأمین شده توسط مشتری\" نمی تواند دارای نرخ ارزیابی باشد"
 
 #: stock/doctype/item/item.py:310
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
@@ -9001,7 +9001,7 @@ msgstr "ذخیره خودکار موجودی برای سفارش فروش در �
 #: crm/doctype/crm_settings/crm_settings.json
 msgctxt "CRM Settings"
 msgid "Auto close Opportunity Replied after the no. of days mentioned above"
-msgstr "فرصت بسته شدن خودکار پس از خیر پاسخ داده شد. از روزهای ذکر شده در بالا"
+msgstr ""
 
 #. Description of the 'Enable Automatic Party Matching' (Check) field in
 #. DocType 'Accounts Settings'
@@ -9832,7 +9832,7 @@ msgstr "موجودی حساب {0} باید همیشه {1} باشد"
 #: accounts/doctype/account/account.json
 msgctxt "Account"
 msgid "Balance must be"
-msgstr "تعادل باید باشد"
+msgstr "تراز باید"
 
 #. Name of a DocType
 #: accounts/doctype/bank/bank.json
@@ -12030,7 +12030,7 @@ msgstr "CC به"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "CODE-39"
-msgstr "کد-39"
+msgstr "CODE-39"
 
 #. Name of a report
 #: stock/report/cogs_by_item_group/cogs_by_item_group.json
@@ -12259,7 +12259,7 @@ msgstr "کالری/ثانیه"
 #. Label of a Card Break in the CRM Workspace
 #: crm/doctype/campaign/campaign.json crm/workspace/crm/crm.json
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Section Break field in DocType 'Campaign'
 #. Label of a Link in the CRM Workspace
@@ -12268,50 +12268,50 @@ msgstr "پویش"
 #: selling/workspace/selling/selling.json
 msgctxt "Campaign"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Link field in DocType 'Campaign Item'
 #: accounts/doctype/campaign_item/campaign_item.json
 msgctxt "Campaign Item"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Link field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Link field in DocType 'Email Campaign'
 #: crm/doctype/email_campaign/email_campaign.json
 msgctxt "Email Campaign"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Link field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Link field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Link field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgctxt "POS Profile"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Option for the 'Applicable For' (Select) field in DocType 'Pricing Rule'
 #. Label of a Link field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Option for the 'Applicable For' (Select) field in DocType 'Promotional
 #. Scheme'
@@ -12319,25 +12319,25 @@ msgstr "پویش"
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Link field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Label of a Link field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Campaign"
-msgstr "پویش"
+msgstr "کمپین"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
@@ -17196,19 +17196,19 @@ msgstr "تبدیل به غیر گروهی"
 #: crm/report/lead_details/lead_details.js:40
 #: selling/page/sales_funnel/sales_funnel.py:58
 msgid "Converted"
-msgstr "تبدیل شده است"
+msgstr "برنده"
 
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Converted"
-msgstr "تبدیل شده است"
+msgstr "برنده"
 
 #. Option for the 'Status' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Converted"
-msgstr "تبدیل شده است"
+msgstr "برنده"
 
 #. Label of a Data field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -20483,19 +20483,19 @@ msgstr "مخاطب اصلی مشتری"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Customer Provided"
-msgstr "مشتری ارائه شده است"
+msgstr "تأمین شده توسط مشتری"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Customer Provided"
-msgstr "مشتری ارائه شده است"
+msgstr "تأمین شده توسط مشتری"
 
 #. Option for the 'Type' (Select) field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Customer Provided"
-msgstr "مشتری ارائه شده است"
+msgstr "تأمین شده توسط مشتری"
 
 #: setup/doctype/company/company.py:374
 msgid "Customer Service"
@@ -23914,7 +23914,7 @@ msgstr "برای هر ردیف می توان «انبار منبع» و «انب
 
 #: stock/doctype/packing_slip/packing_slip.py:192
 msgid "Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM."
-msgstr "UOM های مختلف برای اقلام منجر به نادرست (کل) ارزش خالص وزن می شود. مطمئن شوید که وزن خالص هر کالا در همان UOM باشد."
+msgstr "UOM های مختلف برای آیتم‌ها منجر به مقدار نادرست (کل) خالص وزن می شود. مطمئن شوید که وزن خالص هر آیتم در همان UOM باشد."
 
 #. Label of a Table field in DocType 'Accounting Dimension'
 #: accounts/doctype/accounting_dimension/accounting_dimension.json
@@ -30324,7 +30324,7 @@ msgstr "GS1"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "GTIN"
-msgstr ""
+msgstr "GTIN"
 
 #. Label of a Currency field in DocType 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
@@ -32122,7 +32122,7 @@ msgstr "IRS 1099"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "ISBN"
-msgstr "شابک"
+msgstr "ISBN"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -35243,7 +35243,7 @@ msgstr "تجمعی است"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Is Customer Provided Item"
-msgstr "آیتم ارائه شده توسط مشتری است"
+msgstr ""
 
 #. Label of a Check field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -38408,7 +38408,7 @@ msgstr "سطح سفارش مجدد توصیه شده مبتنی بر آیتم"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "JAN"
-msgstr "ژان"
+msgstr "JAN"
 
 #. Label of a Int field in DocType 'Workstation'
 #: manufacturing/doctype/workstation/workstation.json
@@ -39229,7 +39229,7 @@ msgstr "تابلوی امتیازات"
 #: crm/doctype/prospect/prospect.json
 msgctxt "Prospect"
 msgid "Leads"
-msgstr "منجر می شود"
+msgstr "سرنخ ها"
 
 #: utilities/activation.py:77
 msgid "Leads help you get business, add all your contacts and more as your leads"
@@ -47766,7 +47766,7 @@ msgstr "پروژه PSOA"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "PZN"
-msgstr ""
+msgstr "PZN"
 
 #: stock/doctype/packing_slip/packing_slip.py:115
 msgid "Package No(s) already in use. Try from Package No {0}"
@@ -55260,7 +55260,7 @@ msgstr "اکتشاف"
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.json
 #: crm/workspace/crm/crm.json
 msgid "Prospects Engaged But Not Converted"
-msgstr "بالقوه درگیر شد اما تبدیل نشد"
+msgstr "چشم‌اندازهای مورد توجه قرار گرفته اما تبدیل نشده"
 
 #. Description of the 'Company Email' (Data) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -60357,31 +60357,31 @@ msgstr ""
 #: support/report/issue_summary/issue_summary.js:43
 #: support/report/issue_summary/issue_summary.py:366
 msgid "Replied"
-msgstr "پاسخ داد"
+msgstr "پاسخ داده شده"
 
 #. Option for the 'Status' (Select) field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgctxt "Issue"
 msgid "Replied"
-msgstr "پاسخ داد"
+msgstr "پاسخ داده شده"
 
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgctxt "Lead"
 msgid "Replied"
-msgstr "پاسخ داد"
+msgstr "پاسخ داده شده"
 
 #. Option for the 'Status' (Select) field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Replied"
-msgstr "پاسخ داد"
+msgstr "پاسخ داده شده"
 
 #. Option for the 'Status' (Select) field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Replied"
-msgstr "پاسخ داد"
+msgstr "پاسخ داده شده"
 
 #: accounts/report/consolidated_financial_statement/consolidated_financial_statement.js:110
 msgid "Report"
@@ -78378,13 +78378,13 @@ msgstr "UOM ها"
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "UPC"
-msgstr ""
+msgstr "UPC"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgctxt "Item Barcode"
 msgid "UPC-A"
-msgstr ""
+msgstr "UPC-A"
 
 #. Label of a Data field in DocType 'Video'
 #: utilities/doctype/video/video.json
@@ -81781,11 +81781,11 @@ msgstr "هنگام ایجاد یک آیتم، با وارد کردن یک مقد
 
 #: accounts/doctype/account/account.py:328
 msgid "While creating account for Child Company {0}, parent account {1} found as a ledger account."
-msgstr "هنگام ایجاد حساب برای Child Company {0}، حساب والدین {1} به عنوان یک حساب دفتر کل یافت شد."
+msgstr "هنگام ایجاد حساب برای شرکت فرزند {0}، حساب والد {1} به عنوان یک حساب دفتر کل یافت شد."
 
 #: accounts/doctype/account/account.py:318
 msgid "While creating account for Child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA"
-msgstr "هنگام ایجاد حساب برای شرکت فرزند {0}، حساب والدین {1} یافت نشد. لطفاً حساب والد را در COA مربوطه ایجاد کنید"
+msgstr "هنگام ایجاد حساب برای شرکت فرزند {0}، حساب والد {1} یافت نشد. لطفاً حساب والد را در نمودار حساب های مربوط ایجاد کنید"
 
 #. Description of the 'Use Transaction Date Exchange Rate' (Check) field in
 #. DocType 'Buying Settings'
