@@ -293,18 +293,6 @@ def apply_conditions(query, pi, pii, filters):
 		if filters.get(opts):
 			query = query.where(pi[opts] == filters[opts])
 
-<<<<<<< HEAD
-	for opts in (
-		("company", " and `tabPurchase Invoice`.company=%(company)s"),
-		("supplier", " and `tabPurchase Invoice`.supplier = %(supplier)s"),
-		("item_code", " and `tabPurchase Invoice Item`.item_code = %(item_code)s"),
-		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
-		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s"),
-		("mode_of_payment", " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"),
-	):
-		if filters.get(opts[0]):
-			conditions += opts[1]
-=======
 	if filters.get("from_date"):
 		query = query.where(pi.posting_date >= filters.get("from_date"))
 
@@ -313,7 +301,6 @@ def apply_conditions(query, pi, pii, filters):
 
 	if filters.get("item_group"):
 		query = query.where(pii.item_group == filters.get("item_group"))
->>>>>>> d2af36e1eb (chore: update condition queries in qb)
 
 	if not filters.get("group_by"):
 		query = query.orderby(pi.posting_date, order=Order.desc)
@@ -324,63 +311,7 @@ def apply_conditions(query, pi, pii, filters):
 	return query
 
 
-<<<<<<< HEAD
-def get_items(filters, additional_query_columns):
-<<<<<<< HEAD
-<<<<<<< HEAD
-	conditions = get_conditions(filters)
-	if additional_query_columns:
-		additional_query_columns = "," + ",".join(additional_query_columns)
-	return frappe.db.sql(
-		"""
-		select
-			`tabPurchase Invoice Item`.`name`, `tabPurchase Invoice Item`.`parent`,
-			`tabPurchase Invoice`.posting_date, `tabPurchase Invoice`.credit_to, `tabPurchase Invoice`.company,
-			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total,
-			`tabPurchase Invoice`.unrealized_profit_loss_account,
-			`tabPurchase Invoice Item`.`item_code`, `tabPurchase Invoice Item`.description,
-			`tabPurchase Invoice Item`.`item_name` as pi_item_name, `tabPurchase Invoice Item`.`item_group`
-			,`tabPurchase Invoice Item`.`item_group` as pi_item_group,
-			`tabItem`.`item_name` as i_item_name, `tabItem`.`item_group` as i_item_group,
-			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
-			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
-			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
-			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
-			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {}
-		from `tabPurchase Invoice`, `tabPurchase Invoice Item`, `tabItem`
-		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
-			`tabItem`.name = `tabPurchase Invoice Item`.`item_code` and
-			`tabPurchase Invoice`.docstatus = 1 {}
-	""".format(additional_query_columns, conditions),
-		filters,
-		as_dict=1,
-	)
-=======
-    pi = frappe.qb.DocType('Purchase Invoice')
-    pii = frappe.qb.DocType('Purchase Invoice Item')
-    Item = frappe.qb.DocType('Item')
-    query = (frappe.qb.from_(pi)
-             .join(pii).on(pi.name == pii.parent)  
-             .left_join(Item).on(pii.item_code == Item.name) 
-             .select(
-                 pii.name.as_('pii_name'), pii.parent,
-                 pi.posting_date, pi.credit_to, pi.company,
-                 pi.supplier, pi.remarks, pi.base_net_total,
-                 pi.unrealized_profit_loss_account,
-                 pii.item_code, pii.description, pii.item_group,
-                 pii.item_name.as_('pi_item_name'), pii.item_group.as_('pi_item_group'),
-                 Item.item_name.as_('i_item_name'), Item.item_group.as_('i_item_group'),
-                 pii.project, pii.purchase_order,
-                 pii.purchase_receipt, pii.po_detail,
-                 pii.expense_account, pii.stock_qty,
-                 pii.stock_uom, pii.base_net_amount,
-                 pi.supplier_name, pi.mode_of_payment
-             )
-             .where(pi.docstatus == 1))
-=======
-=======
 def get_items(filters, additional_table_columns):
->>>>>>> 8ec364df6f (fix: Add additional condition application)
 	pi = frappe.qb.DocType("Purchase Invoice")
 	pii = frappe.qb.DocType("Purchase Invoice Item")
 	Item = frappe.qb.DocType("Item")
@@ -420,20 +351,12 @@ def get_items(filters, additional_table_columns):
 		)
 		.where(pi.docstatus == 1)
 	)
->>>>>>> 76073ae228 (fix: fixing Item-wise sales register and purchase register #41373)
 
 	if filters.get("supplier"):
 		query = query.where(pi.supplier == filters["supplier"])
 	if filters.get("company"):
 		query = query.where(pi.company == filters["company"])
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 1b45ecfcae (fix: Item-wise Sales and Purchase register with no item codes #41373)
-=======
-=======
-=======
 	if additional_table_columns:
 		for column in additional_table_columns:
 			if column.get("_doctype"):
@@ -442,12 +365,9 @@ def get_items(filters, additional_table_columns):
 			else:
 				query = query.select(pi[column.get("fieldname")])
 
->>>>>>> 8ec364df6f (fix: Add additional condition application)
 	query = apply_conditions(query, pi, pii, filters)
 
->>>>>>> d2af36e1eb (chore: update condition queries in qb)
 	return query.run(as_dict=True)
->>>>>>> 76073ae228 (fix: fixing Item-wise sales register and purchase register #41373)
 
 
 def get_aii_accounts():

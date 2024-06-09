@@ -84,9 +84,7 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 			"company": d.company,
 			"sales_order": d.sales_order,
 			"delivery_note": d.delivery_note,
-			"income_account": d.unrealized_profit_loss_account
-			if d.is_internal_customer == 1
-			else d.income_account,
+			"income_account": get_income_account(d),
 			"cost_center": d.cost_center,
 			"stock_qty": d.stock_qty,
 			"stock_uom": d.stock_uom,
@@ -149,6 +147,15 @@ def _execute(filters=None, additional_table_columns=None, additional_conditions=
 		skip_total_row = 1
 
 	return columns, data, None, None, None, skip_total_row
+
+
+def get_income_account(row):
+	if row.enable_deferred_revenue:
+		return row.deferred_revenue_account
+	elif row.is_internal_customer == 1:
+		return row.unrealized_profit_loss_account
+	else:
+		return row.income_account
 
 
 def get_columns(additional_table_columns, filters):
@@ -367,8 +374,6 @@ def apply_conditions(query, si, sii, filters, additional_conditions=None):
 	if filters.get("item_group"):
 		query = query.where(sii.item_group == filters.get("item_group"))
 
-<<<<<<< HEAD
-=======
 	if filters.get("income_account"):
 		query = query.where(
 			(sii.income_account == filters.get("income_account"))
@@ -376,7 +381,6 @@ def apply_conditions(query, si, sii, filters, additional_conditions=None):
 			| (si.unrealized_profit_loss_account == filters.get("income_account"))
 		)
 
->>>>>>> d2af36e1eb (chore: update condition queries in qb)
 	if not filters.get("group_by"):
 		query = query.orderby(si.posting_date, order=Order.desc)
 		query = query.orderby(sii.item_group, order=Order.desc)
@@ -402,84 +406,10 @@ def apply_group_by_conditions(query, si, ii, filters):
 	return query
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-def get_items(filters, additional_query_columns, additional_conditions=None):
-	conditions = get_conditions(filters, additional_conditions)
-	if additional_query_columns:
-		additional_query_columns = "," + ",".join(additional_query_columns)
-	return frappe.db.sql(
-		"""
-		select
-			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
-			`tabSales Invoice`.posting_date, `tabSales Invoice`.debit_to,
-			`tabSales Invoice`.unrealized_profit_loss_account,
-			`tabSales Invoice`.is_internal_customer,
-			`tabSales Invoice`.customer, `tabSales Invoice`.remarks,
-			`tabSales Invoice`.territory, `tabSales Invoice`.company, `tabSales Invoice`.base_net_total,
-			`tabSales Invoice Item`.project,
-			`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.description,
-			`tabSales Invoice Item`.`item_name`, `tabSales Invoice Item`.`item_group`,
-			`tabSales Invoice Item`.`item_name` as si_item_name, `tabSales Invoice Item`.`item_group` as si_item_group,
-			`tabItem`.`item_name` as i_item_name, `tabItem`.`item_group` as i_item_group,
-			`tabSales Invoice Item`.sales_order, `tabSales Invoice Item`.delivery_note,
-			`tabSales Invoice Item`.income_account, `tabSales Invoice Item`.cost_center,
-			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,
-			`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
-			`tabSales Invoice`.customer_name, `tabSales Invoice`.customer_group, `tabSales Invoice Item`.so_detail,
-			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {}
-		from `tabSales Invoice`, `tabSales Invoice Item`, `tabItem`
-		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent and
-			`tabItem`.name = `tabSales Invoice Item`.`item_code` and
-			`tabSales Invoice`.docstatus = 1 {}
-		""".format(additional_query_columns, conditions),
-		filters,
-		as_dict=1,
-	)  # nosec
-=======
-def get_items(filters, additional_query_columns,additional_conditions=None):
-    si = frappe.qb.DocType('Sales Invoice')
-    sii = frappe.qb.DocType('Sales Invoice Item')
-    Item = frappe.qb.DocType('Item')
-    
-    query = (
-        frappe.qb.from_(si)
-        .join(sii).on(si.name == sii.parent)  
-        .left_join(Item).on(sii.item_code == Item.name) 
-        .select(
-            sii.name, sii.parent,
-            si.posting_date, si.debit_to,
-            si.unrealized_profit_loss_account,
-            si.is_internal_customer,
-            si.customer, si.remarks,
-            si.territory, si.company, si.base_net_total,
-            sii.project,
-            sii.item_code, sii.description,
-            sii.item_name, sii.item_group,
-            sii.item_name.as_('si_item_name'), sii.item_group.as_('si_item_group'),
-            Item.item_name.as_('i_item_name'), Item.item_group.as_('i_item_group'),
-            sii.sales_order, sii.delivery_note,
-            sii.income_account, sii.cost_center,
-            sii.enable_deferred_revenue, sii.deferred_revenue_account,
-            sii.stock_qty, sii.stock_uom,
-            sii.base_net_rate, sii.base_net_amount,
-            si.customer_name, si.customer_group, sii.so_detail,
-            si.update_stock, sii.uom, sii.qty
-        )
-        .where(si.docstatus == 1)
-    )
-    if filters.get("customer"):
-        query = query.where(si.customer == filters['customer'])
-=======
 def get_items(filters, additional_query_columns, additional_conditions=None):
 	si = frappe.qb.DocType("Sales Invoice")
 	sii = frappe.qb.DocType("Sales Invoice Item")
-<<<<<<< HEAD
-	Item = frappe.qb.DocType("Item")
->>>>>>> eafa88b8e9 (fix: fixing Item-wise sales register #41373)
-=======
 	item = frappe.qb.DocType("Item")
->>>>>>> d2af36e1eb (chore: update condition queries in qb)
 
 	query = (
 		frappe.qb.from_(si)
@@ -542,16 +472,9 @@ def get_items(filters, additional_query_columns, additional_conditions=None):
 	if filters.get("customer_group"):
 		query = query.where(si.customer_group == filters["customer_group"])
 
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 1b45ecfcae (fix: Item-wise Sales and Purchase register with no item codes #41373)
-=======
-=======
 	query = apply_conditions(query, si, sii, filters, additional_conditions)
 
->>>>>>> d2af36e1eb (chore: update condition queries in qb)
 	return query.run(as_dict=True)
->>>>>>> eafa88b8e9 (fix: fixing Item-wise sales register #41373)
 
 
 def get_delivery_notes_against_sales_order(item_list):
