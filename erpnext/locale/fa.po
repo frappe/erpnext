@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-08 16:12\n"
+"PO-Revision-Date: 2024-06-09 16:23\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -46043,17 +46043,17 @@ msgstr "اعلان ها را باز کنید"
 #. Label of a chart in the Projects Workspace
 #: projects/workspace/projects/projects.json
 msgid "Open Projects"
-msgstr "پروژه ها را باز کنید"
+msgstr "پروژه‌های باز"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Open Projects"
-msgstr "پروژه ها را باز کنید"
+msgstr "پروژه‌های باز"
 
 #: setup/doctype/email_digest/templates/default.html:70
 msgid "Open Projects "
-msgstr " پروژه ها را باز کنید"
+msgstr " پروژه‌های باز"
 
 #. Label of a Check field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -58842,7 +58842,7 @@ msgstr "دریافتنی ها"
 #: setup/doctype/email_digest/email_digest.json
 msgctxt "Email Digest"
 msgid "Receivables"
-msgstr "مطالبات"
+msgstr "دریافتنی ها"
 
 #. Option for the 'Payment Type' (Select) field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
@@ -62479,11 +62479,11 @@ msgstr "ردیف #{0}: برای تکمیل تراکنش، سند پرداخت ل
 
 #: manufacturing/doctype/production_plan/production_plan.py:902
 msgid "Row #{0}: Please select Item Code in Assembly Items"
-msgstr "ردیف #{0}: لطفاً کد مورد را در موارد اسمبلی انتخاب کنید"
+msgstr "ردیف #{0}: لطفاً کد آیتم را در آیتم‌های اسمبلی انتخاب کنید"
 
 #: manufacturing/doctype/production_plan/production_plan.py:905
 msgid "Row #{0}: Please select the BOM No in Assembly Items"
-msgstr "ردیف #{0}: لطفاً شماره BOM را در موارد اسمبلی انتخاب کنید"
+msgstr ""
 
 #: manufacturing/doctype/production_plan/production_plan.py:899
 msgid "Row #{0}: Please select the Sub Assembly Warehouse"
@@ -66924,7 +66924,7 @@ msgstr "به عنوان از دست رفته ست کنید"
 #: crm/doctype/opportunity/opportunity_list.js:13
 #: projects/doctype/task/task_list.js:16 support/doctype/issue/issue_list.js:8
 msgid "Set as Open"
-msgstr "به عنوان Open تنظیم کنید"
+msgstr "تنظیم به عنوان باز"
 
 #: setup/doctype/company/company.py:434
 msgid "Set default inventory account for perpetual inventory"
@@ -76560,7 +76560,7 @@ msgstr "کل درآمد امسال"
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Incoming Bills"
-msgstr ""
+msgstr "مجموع صورتحساب های دریافتی"
 
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
