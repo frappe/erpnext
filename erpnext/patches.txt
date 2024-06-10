@@ -369,3 +369,4 @@ erpnext.patches.v15_0.rename_purchase_receipt_amount_to_purchase_amount
 erpnext.patches.v14_0.enable_set_priority_for_pricing_rules #1
 erpnext.patches.v15_0.rename_number_of_depreciations_booked_to_opening_booked_depreciations
 erpnext.patches.v15_0.add_default_operations
+erpnext.patches.v15_0.enable_old_serial_batch_fields
