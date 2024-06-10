@@ -69,6 +69,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset_category"):
 		condition += " and asset_category = %(asset_category)s"
+	# nosemgrep
 	return frappe.db.sql(
 		f"""
 		SELECT a.asset_category,
