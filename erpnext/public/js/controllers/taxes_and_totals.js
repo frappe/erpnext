@@ -83,7 +83,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			this.frm.doc.paid_amount = flt(this.frm.doc.grand_total, precision("grand_total"));
 		}
 
-		this.frm.refresh_field("taxes");
+		this.frm.refresh_fields();
 	}
 
 	calculate_discount_amount() {
@@ -841,7 +841,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			});
 		}
 
-		this.frm.refresh_field("taxes");
+		this.frm.refresh_fields();
 	}
 
 	set_default_payment(total_amount_to_pay, update_paid_amount) {
