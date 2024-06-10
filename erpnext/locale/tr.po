@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-06 14:57\n"
+"PO-Revision-Date: 2024-06-10 16:34\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -685,7 +685,7 @@ msgstr "Stokta olmayan ürünün 'Seri No' değeri 'Evet' olamaz."
 
 #: stock/report/stock_ledger/stock_ledger.py:533
 msgid "'Opening'"
-msgstr ""
+msgstr "'Açılış'"
 
 #: stock/doctype/delivery_note/delivery_note.py:399
 msgid "'Sales Invoice Item' reference ({1}) is missing in row {0}"
@@ -1587,7 +1587,7 @@ msgstr "Servis Sağlayıcı için Erişim Anahtarı gereklidir: {0}"
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Access Token"
-msgstr ""
+msgstr "Erişim Anahtarı"
 
 #. Description of the 'Common Code' (Data) field in DocType 'UOM'
 #: setup/doctype/uom/uom.json
@@ -1764,19 +1764,19 @@ msgstr "Hesap"
 #. Name of a report
 #: accounts/report/account_balance/account_balance.json
 msgid "Account Balance"
-msgstr ""
+msgstr "Hesap Bakiyesi"
 
 #. Label of a Currency field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Account Balance (From)"
-msgstr ""
+msgstr "Borç Hesabı"
 
 #. Label of a Currency field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Account Balance (To)"
-msgstr ""
+msgstr "Alacak Hesabı"
 
 #. Name of a DocType
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
@@ -2114,7 +2114,7 @@ msgstr ""
 
 #: accounts/doctype/account/account.py:546
 msgid "Account {0} does not exist"
-msgstr ""
+msgstr "{0} Hesabı bulunamadı"
 
 #: accounts/report/general_ledger/general_ledger.py:73
 msgid "Account {0} does not exists"
@@ -3820,7 +3820,7 @@ msgstr "Manuel Olarak Ekle"
 
 #: projects/doctype/task/task_tree.js:42
 msgid "Add Multiple"
-msgstr ""
+msgstr "Çoklu Ekle"
 
 #: projects/doctype/task/task_tree.js:49
 msgid "Add Multiple Tasks"
@@ -5866,7 +5866,7 @@ msgstr "Tatillerde Üretime İzin Ver"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Allow Purchase"
-msgstr ""
+msgstr "Satın Almaya İzin Ver"
 
 #. Label of a Check field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -8278,19 +8278,19 @@ msgstr "Varlık İsimlendirme Serisi"
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Owner"
-msgstr ""
+msgstr "Varlık Sahibi"
 
 #. Label of a Link field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Owner Company"
-msgstr ""
+msgstr "Varlık Sahibi Şirket"
 
 #. Label of a Int field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Quantity"
-msgstr ""
+msgstr "Varlık Miktarı"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:91
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:127
@@ -8370,30 +8370,30 @@ msgstr "Varlık Durumu"
 #: assets/report/fixed_asset_register/fixed_asset_register.py:392
 #: assets/report/fixed_asset_register/fixed_asset_register.py:439
 msgid "Asset Value"
-msgstr ""
+msgstr "Varlık Değeri"
 
 #. Label of a Currency field in DocType 'Asset Capitalization Asset Item'
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 msgctxt "Asset Capitalization Asset Item"
 msgid "Asset Value"
-msgstr ""
+msgstr "Varlık Değeri"
 
 #. Name of a DocType
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 msgid "Asset Value Adjustment"
-msgstr ""
+msgstr "Varlık Değeri Ayarlaması"
 
 #. Linked DocType in Asset's connections
 #: assets/doctype/asset/asset.json
 msgctxt "Asset"
 msgid "Asset Value Adjustment"
-msgstr ""
+msgstr "Varlık Değeri Ayarlaması"
 
 #. Label of a Link in the Assets Workspace
 #: assets/workspace/assets/assets.json
 msgctxt "Asset Value Adjustment"
 msgid "Asset Value Adjustment"
-msgstr ""
+msgstr "Varlık Değeri Ayarlaması"
 
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.py:71
 msgid "Asset Value Adjustment cannot be posted before Asset's purchase date <b>{0}</b>."
@@ -8402,7 +8402,7 @@ msgstr ""
 #. Label of a chart in the Assets Workspace
 #: assets/dashboard_fixtures.py:56 assets/workspace/assets/assets.json
 msgid "Asset Value Analytics"
-msgstr ""
+msgstr "Varlık Değeri Analitiği"
 
 #: assets/doctype/asset/asset.py:174
 msgid "Asset cancelled"
@@ -9318,13 +9318,13 @@ msgstr ""
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "B+"
-msgstr ""
+msgstr "B+"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "B-"
-msgstr ""
+msgstr "B-"
 
 #. Option for the 'Algorithm' (Select) field in DocType 'Bisect Accounting
 #. Statements'
@@ -10144,14 +10144,14 @@ msgstr ""
 #: accounts/doctype/journal_entry/journal_entry.json
 msgctxt "Journal Entry"
 msgid "Bank Entry"
-msgstr ""
+msgstr "Banka Girişi"
 
 #. Option for the 'Journal Entry Type' (Select) field in DocType 'Journal Entry
 #. Template'
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgctxt "Journal Entry Template"
 msgid "Bank Entry"
-msgstr ""
+msgstr "Banka Girişi"
 
 #. Name of a DocType
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -11303,7 +11303,7 @@ msgstr ""
 
 #: setup/setup_wizard/operations/install_fixtures.py:236
 msgid "Black"
-msgstr ""
+msgstr "Siyah"
 
 #. Name of a DocType
 #: manufacturing/doctype/blanket_order/blanket_order.json
@@ -11395,21 +11395,21 @@ msgstr ""
 
 #: setup/setup_wizard/operations/install_fixtures.py:235
 msgid "Blue"
-msgstr ""
+msgstr "Mavi"
 
 #. Option for the 'Color' (Select) field in DocType 'Supplier Scorecard Scoring
 #. Standing'
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 msgctxt "Supplier Scorecard Scoring Standing"
 msgid "Blue"
-msgstr ""
+msgstr "Mavi"
 
 #. Option for the 'Color' (Select) field in DocType 'Supplier Scorecard
 #. Standing'
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 msgctxt "Supplier Scorecard Standing"
 msgid "Blue"
-msgstr ""
+msgstr "Mavi"
 
 #. Label of a Text Editor field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
@@ -11806,18 +11806,18 @@ msgstr ""
 #: accounts/report/budget_variance_report/budget_variance_report.py:109
 #: accounts/report/budget_variance_report/budget_variance_report.py:379
 msgid "Budget"
-msgstr ""
+msgstr "Bütçe"
 
 #. Label of a Link in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgctxt "Budget"
 msgid "Budget"
-msgstr ""
+msgstr "Bütçe"
 
 #. Name of a DocType
 #: accounts/doctype/budget_account/budget_account.json
 msgid "Budget Account"
-msgstr ""
+msgstr "Bütçe Hesabı"
 
 #. Label of a Table field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
@@ -13277,7 +13277,7 @@ msgstr ""
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgctxt "Tax Withholding Category"
 msgid "Category Details"
-msgstr ""
+msgstr "Kategori Detayları"
 
 #. Label of a Data field in DocType 'Tax Withholding Category'
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.json
@@ -21144,7 +21144,7 @@ msgstr "İşe Başlama Tarihi"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:263
 msgid "Date of Transaction"
-msgstr ""
+msgstr "İşlem Tarihi"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:25
 msgid "Date: "
@@ -29801,7 +29801,7 @@ msgstr ""
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:44
 #: stock/report/cogs_by_item_group/cogs_by_item_group.py:38
 msgid "From Date must be before To Date"
-msgstr ""
+msgstr "Başlangıç Tarihi Bitiş Tarihinden önce olmalıdır"
 
 #: accounts/report/trial_balance/trial_balance.py:66
 msgid "From Date should be within the Fiscal Year. Assuming From Date = {0}"
@@ -30883,7 +30883,7 @@ msgstr "Hedef"
 #. Label of a Card Break in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
 msgid "Goal and Procedure"
-msgstr ""
+msgstr "Hedef ve Prosedür"
 
 #. Group in Quality Procedure's connections
 #: quality_management/doctype/quality_procedure/quality_procedure.json
@@ -31815,7 +31815,7 @@ msgstr ""
 
 #: assets/doctype/asset/depreciation.py:410
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
-msgstr ""
+msgstr "Yukarıda bahsedilen başarısız amortisman girişleri için hata günlükleri şunlardır: {0}"
 
 #: stock/stock_ledger.py:1661
 msgid "Here are the options to proceed:"
@@ -33003,7 +33003,7 @@ msgstr ""
 #: setup/workspace/home/home.json setup/workspace/settings/settings.json
 msgctxt "Data Import"
 msgid "Import Data"
-msgstr ""
+msgstr "Verileri İçe Aktar"
 
 #. Title of an Onboarding Step
 #: setup/onboarding_step/data_import/data_import.json
@@ -35889,7 +35889,7 @@ msgstr ""
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Is Tax Withholding Account"
-msgstr ""
+msgstr "Tevkifatlı Fatura"
 
 #. Label of a Check field in DocType 'Task'
 #: projects/doctype/task/task.json
@@ -40423,7 +40423,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.js:118
 msgid "Maintain Asset"
-msgstr ""
+msgstr "Varlık Bakımı"
 
 #. Label of a Check field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
@@ -48662,104 +48662,104 @@ msgstr ""
 #: public/js/bank_reconciliation_tool/data_table_manager.js:50
 #: public/js/bank_reconciliation_tool/dialog_manager.js:135
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Appointment'
 #: crm/doctype/appointment/appointment.json
 msgctxt "Appointment"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Bank Account'
 #: accounts/doctype/bank_account/bank_account.json
 msgctxt "Bank Account"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
 msgctxt "Exchange Rate Revaluation Account"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
 msgctxt "GL Entry"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Journal Entry Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgctxt "Journal Entry Account"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Opening Invoice Creation Tool
 #. Item'
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgctxt "Opening Invoice Creation Tool Item"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Opportunity'
 #: crm/doctype/opportunity/opportunity.json
 msgctxt "Opportunity"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgctxt "Payment Entry"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Payment Ledger Entry'
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgctxt "Payment Reconciliation"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgctxt "Payment Request"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Process Payment Reconciliation'
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgctxt "Process Payment Reconciliation"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Dynamic Link field in DocType 'Subscription'
 #: accounts/doctype/subscription/subscription.json
 msgctxt "Subscription"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Label of a Data field in DocType 'Unreconcile Payment Entries'
 #: accounts/doctype/unreconcile_payment_entries/unreconcile_payment_entries.json
 msgctxt "Unreconcile Payment Entries"
 msgid "Party"
-msgstr ""
+msgstr "Taraf"
 
 #. Name of a DocType
 #: accounts/doctype/party_account/party_account.json
@@ -51536,7 +51536,7 @@ msgstr ""
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.js:63
 #: selling/report/address_and_contacts/address_and_contacts.js:27
 msgid "Please select Party Type first"
-msgstr ""
+msgstr "Lütfen önce Cari Türünü Seçin"
 
 #: accounts/doctype/payment_entry/payment_entry.js:429
 msgid "Please select Posting Date before selecting Party"
@@ -51971,7 +51971,7 @@ msgstr ""
 
 #: assets/doctype/asset/depreciation.py:415
 msgid "Please share this email with your support team so that they can find and fix the issue."
-msgstr ""
+msgstr "Sorunu bulup çözebilmeleri için lütfen bu e-postayı destek ekibinizle paylaşın."
 
 #: public/js/controllers/transaction.js:1885
 msgid "Please specify"
@@ -59680,7 +59680,7 @@ msgstr ""
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:256
 msgid "Reference No."
-msgstr ""
+msgstr "Referans No."
 
 #: public/js/bank_reconciliation_tool/data_table_manager.js:83
 #: public/js/bank_reconciliation_tool/dialog_manager.js:130
@@ -62797,7 +62797,7 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:376
 msgid "Row {0}"
-msgstr ""
+msgstr "Satır {0}"
 
 #: manufacturing/doctype/job_card/job_card.py:606
 msgid "Row {0} : Operation is required against the raw material item {1}"
@@ -65053,7 +65053,7 @@ msgstr ""
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:170
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:117
 msgid "Section Code"
-msgstr ""
+msgstr "Bölüm Kodu"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:95
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:140
@@ -65176,7 +65176,7 @@ msgstr ""
 
 #: manufacturing/doctype/job_card/job_card.js:274
 msgid "Select Employees"
-msgstr ""
+msgstr "Personel Seçin"
 
 #: buying/doctype/purchase_order/purchase_order.js:176
 msgid "Select Finished Good"
@@ -69746,7 +69746,7 @@ msgstr ""
 #. Label of a Card Break in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Stock Reports"
-msgstr ""
+msgstr "Stok Raporları"
 
 #. Name of a DocType
 #: stock/doctype/stock_reposting_settings/stock_reposting_settings.json
@@ -69858,7 +69858,7 @@ msgstr ""
 #. Label of a Card Break in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Stock Transactions"
-msgstr ""
+msgstr "Stok Hareketleri"
 
 #. Label of a Section Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -71586,13 +71586,13 @@ msgstr ""
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:214
 msgid "Supplier Invoice Date"
-msgstr ""
+msgstr "Tedarikçi Fatura Tarihi"
 
 #. Label of a Date field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Supplier Invoice Date"
-msgstr ""
+msgstr "Tedarikçi Fatura Tarihi"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1549
 msgid "Supplier Invoice Date cannot be greater than Posting Date"
@@ -71603,19 +71603,19 @@ msgstr ""
 #: accounts/report/general_ledger/general_ledger.py:667
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:208
 msgid "Supplier Invoice No"
-msgstr ""
+msgstr "Tedarikçi Fatura No"
 
 #. Label of a Data field in DocType 'Payment Entry Reference'
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 msgctxt "Payment Entry Reference"
 msgid "Supplier Invoice No"
-msgstr ""
+msgstr "Tedarikçi Fatura No"
 
 #. Label of a Data field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Supplier Invoice No"
-msgstr ""
+msgstr "Tedarikçi Fatura No"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1574
 msgid "Supplier Invoice No exists in Purchase Invoice {0}"
@@ -74277,7 +74277,7 @@ msgstr ""
 
 #: assets/doctype/asset/depreciation.py:405
 msgid "The following assets have failed to automatically post depreciation entries: {0}"
-msgstr ""
+msgstr "Aşağıdaki varlıklar amortisman girişlerini otomatik olarak kaydedemedi: {0}"
 
 #: stock/doctype/item/item.py:840
 msgid "The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template."
@@ -77514,13 +77514,13 @@ msgstr "İşlem Ayarları"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:254
 msgid "Transaction Type"
-msgstr ""
+msgstr "İşlem Türü"
 
 #. Label of a Data field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
 msgctxt "Bank Transaction"
 msgid "Transaction Type"
-msgstr ""
+msgstr "İşlem Türü"
 
 #: accounts/doctype/payment_request/payment_request.py:125
 msgid "Transaction currency must be same as Payment Gateway currency"
@@ -83806,7 +83806,7 @@ msgstr ""
 
 #: accounts/utils.py:133
 msgid "{0} {1} is not in any active Fiscal Year"
-msgstr ""
+msgstr "{0} {1} herhangi bir aktif Mali Yılda değil."
 
 #: accounts/doctype/journal_entry/journal_entry.py:768
 #: accounts/doctype/journal_entry/journal_entry.py:809
