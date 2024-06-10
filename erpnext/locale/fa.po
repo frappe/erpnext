@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-09 16:23\n"
+"PO-Revision-Date: 2024-06-10 16:34\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -3869,7 +3869,7 @@ msgstr "افزودن موجودی"
 #: public/js/bom_configurator/bom_configurator.bundle.js:238
 #: public/js/bom_configurator/bom_configurator.bundle.js:318
 msgid "Add Sub Assembly"
-msgstr "اضافه کردن Sub Assembly"
+msgstr ""
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:472
 #: public/js/event.js:32
@@ -5122,7 +5122,7 @@ msgstr "در مقابل کوپن شماره"
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgctxt "Payment Ledger Entry"
 msgid "Against Voucher No"
-msgstr "در مقابل کوپن شماره"
+msgstr "در مقابل شماره کوپن"
 
 #: accounts/report/general_ledger/general_ledger.py:659
 #: accounts/report/payment_ledger/payment_ledger.py:176
@@ -5847,7 +5847,7 @@ msgstr "اجازه ایجاد فاکتور خرید بدون رسید خرید"
 #: stock/doctype/item_variant_settings/item_variant_settings.json
 msgctxt "Item Variant Settings"
 msgid "Allow Rename Attribute Value"
-msgstr "اجازه تغییر نام مقدار مشخصه"
+msgstr "اجازه تغییر نام مقدار ویژگی"
 
 #. Label of a Check field in DocType 'Support Settings'
 #: support/doctype/support_settings/support_settings.json
@@ -8682,31 +8682,31 @@ msgstr "شناسه دستگاه حضور و غیاب (شناسه تگ بیومت
 #: stock/doctype/item_variant_attribute/item_variant_attribute.json
 msgctxt "Item Variant Attribute"
 msgid "Attribute"
-msgstr "صفت"
+msgstr "ویژگی"
 
 #. Label of a Link field in DocType 'Website Attribute'
 #: portal/doctype/website_attribute/website_attribute.json
 msgctxt "Website Attribute"
 msgid "Attribute"
-msgstr "صفت"
+msgstr "ویژگی"
 
 #. Label of a Data field in DocType 'Item Attribute'
 #: stock/doctype/item_attribute/item_attribute.json
 msgctxt "Item Attribute"
 msgid "Attribute Name"
-msgstr "نام مشخصه"
+msgstr "نام ویژگی"
 
 #. Label of a Data field in DocType 'Item Attribute Value'
 #: stock/doctype/item_attribute_value/item_attribute_value.json
 msgctxt "Item Attribute Value"
 msgid "Attribute Value"
-msgstr "ارزش صفت"
+msgstr "مقدار ویژگی"
 
 #. Label of a Data field in DocType 'Item Variant Attribute'
 #: stock/doctype/item_variant_attribute/item_variant_attribute.json
 msgctxt "Item Variant Attribute"
 msgid "Attribute Value"
-msgstr "ارزش صفت"
+msgstr "مقدار ویژگی"
 
 #: stock/doctype/item/item.py:917
 msgid "Attribute table is mandatory"
@@ -16055,7 +16055,7 @@ msgstr "تنظیمات خرید را پیکربندی کنید."
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:52
 msgid "Configure Product Assembly"
-msgstr "پیکربندی مجموعه محصول"
+msgstr "پیکربندی اسمبلی محصول"
 
 #. Description of the 'Action If Same Rate is Not Maintained' (Select) field in
 #. DocType 'Buying Settings'
@@ -28415,7 +28415,7 @@ msgstr "Fieldname"
 #: stock/doctype/item_variant_settings/item_variant_settings.json
 msgctxt "Item Variant Settings"
 msgid "Fields"
-msgstr "زمینه های"
+msgstr ""
 
 #. Description of the 'Do not update variants on save' (Check) field in DocType
 #. 'Item Variant Settings'
@@ -28682,7 +28682,7 @@ msgstr "سال مالی شروع می شود"
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) "
-msgstr "گزارش‌های مالی با استفاده از اسناد ورودی GL ایجاد می‌شوند (اگر کوپن پایان دوره برای همه سال‌ها به‌طور متوالی پست نشده باشد یا مفقود شده باشد، باید فعال شود)"
+msgstr "گزارش‌های مالی با استفاده از اسناد ورودی دفتر کل ایجاد می‌شوند (اگر کوپن پایان دوره برای همه سال‌ها به‌طور متوالی پست نشده باشد یا مفقود شده باشد، باید فعال شود) "
 
 #: manufacturing/doctype/work_order/work_order.js:675
 #: manufacturing/doctype/work_order/work_order.js:690
@@ -30294,25 +30294,25 @@ msgstr "G - D"
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:172
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:240
 msgid "GL Balance"
-msgstr "تعادل GL"
+msgstr ""
 
 #. Name of a DocType
 #: accounts/doctype/gl_entry/gl_entry.json
 #: accounts/report/general_ledger/general_ledger.py:568
 msgid "GL Entry"
-msgstr "ورودی GL"
+msgstr ""
 
 #. Label of a Select field in DocType 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
 msgctxt "Period Closing Voucher"
 msgid "GL Entry Processing Status"
-msgstr "وضعیت پردازش ورودی GL"
+msgstr "وضعیت پردازش ورودی دفتر کل"
 
 #. Label of a Int field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "GL reposting index"
-msgstr "نمایه ارسال مجدد GL"
+msgstr "فهرست ارسال مجدد دفتر کل"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -30745,7 +30745,7 @@ msgstr "موجودی دریافت کنید"
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Get Sub Assembly Items"
-msgstr "آیتم‌های زیر مونتاژ را دریافت کنید"
+msgstr "دریافت آیتم‌های زیر مونتاژ"
 
 #: buying/doctype/supplier/supplier.js:124
 msgid "Get Supplier Group Details"
@@ -32409,7 +32409,7 @@ msgstr "اگر این چک باکس علامت زده شود، مبلغ پردا
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "If this checkbox is enabled, then the system won’t run the MRP for the available sub-assembly items."
-msgstr "اگر این چک باکس فعال باشد، سیستم MRP را برای موارد زیر مجموعه موجود اجرا نمی کند."
+msgstr "اگر این چک باکس فعال باشد، سیستم MRP را برای آیتم‌های زیر مونتاژ موجود اجرا نمی کند."
 
 #. Description of the 'Follow Calendar Months' (Check) field in DocType
 #. 'Subscription'
@@ -32430,7 +32430,7 @@ msgstr "اگر این علامت را بردارید، ورودی های دفت�
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "If this is unchecked, direct GL entries will be created to book deferred revenue or expense"
-msgstr "اگر این علامت را بردارید، ورودی‌های مستقیم GL برای رزرو درآمد یا هزینه معوق ایجاد می‌شوند"
+msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.py:690
 msgid "If this is undesirable please cancel the corresponding Payment Entry."
@@ -33691,7 +33691,7 @@ msgstr "موجودی ایمنی را در محاسبه مقدار مورد نی�
 
 #: manufacturing/report/production_planning_report/production_planning_report.js:87
 msgid "Include Sub-assembly Raw Materials"
-msgstr "شامل مواد اولیه زیر مجموعه"
+msgstr ""
 
 #. Label of a Check field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
@@ -34084,7 +34084,7 @@ msgstr "شخصی"
 
 #: accounts/doctype/gl_entry/gl_entry.py:295
 msgid "Individual GL Entry cannot be cancelled."
-msgstr "ورود انفرادی GL را نمی توان لغو کرد."
+msgstr "ورود انفرادی دفتر کل را نمی توان لغو کرد."
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:341
 msgid "Individual Stock Ledger Entry cannot be cancelled."
@@ -38021,7 +38021,7 @@ msgstr "گونه آیتم {0} با همان ویژگی ها وجود دارد"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:81
 msgid "Item {0} cannot be added as a sub-assembly of itself"
-msgstr "مورد {0} را نمی توان به عنوان یک زیر مونتاژ از خودش اضافه کرد"
+msgstr ""
 
 #: manufacturing/doctype/blanket_order/blanket_order.py:189
 msgid "Item {0} cannot be ordered more than {1} against Blanket Order {2}."
@@ -45197,7 +45197,7 @@ msgstr "توجه: این مرکز هزینه یک گروه است. نمی توا
 
 #: stock/doctype/item/item.py:612
 msgid "Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
-msgstr "توجه: برای ادغام موارد، یک تطبیق موجودی جداگانه برای اقلام قدیمی {0} ایجاد کنید."
+msgstr "توجه: برای ادغام آیتم‌ها، یک تطبیق موجودی جداگانه برای آیتم قدیمی {0} ایجاد کنید"
 
 #: accounts/doctype/journal_entry/journal_entry.py:945
 msgid "Note: {0}"
@@ -51120,7 +51120,7 @@ msgstr "لطفا خرید را از فروش داخلی یا سند تحویل �
 
 #: assets/doctype/asset/asset.py:325
 msgid "Please create purchase receipt or purchase invoice for the item {0}"
-msgstr "لطفاً رسید خرید یا فاکتور خرید برای مورد {0} ایجاد کنید"
+msgstr "لطفاً رسید خرید یا فاکتور خرید برای آیتم {0} ایجاد کنید"
 
 #: stock/doctype/item/item.py:640
 msgid "Please delete Product Bundle {0}, before merging {1} into {2}"
@@ -65038,7 +65038,7 @@ msgstr "همه بلیط های باز را ببینید"
 
 #: stock/report/stock_ledger/stock_ledger.js:104
 msgid "Segregate Serial / Batch Bundle"
-msgstr ""
+msgstr "جداسازی سریال / دسته"
 
 #: buying/doctype/purchase_order/purchase_order.js:186
 #: selling/doctype/sales_order/sales_order.js:1117
@@ -67695,7 +67695,7 @@ msgstr "نمایش پرداخت های آینده"
 
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:142
 msgid "Show GL Balance"
-msgstr "نمایش موجودی GL"
+msgstr "نمایش تراز دفتر کل"
 
 #. Label of a Check field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
@@ -67981,7 +67981,7 @@ msgstr "اندازه"
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Skip Available Sub Assembly Items"
-msgstr "موارد زیر مجموعه موجود را رد کنید"
+msgstr ""
 
 #. Label of a Check field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
@@ -70283,7 +70283,7 @@ msgstr "خط مستقیم"
 
 #: setup/setup_wizard/operations/install_fixtures.py:58
 msgid "Sub Assemblies"
-msgstr "مجامع فرعی"
+msgstr ""
 
 #. Label of a Tab Break field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
@@ -70344,7 +70344,7 @@ msgstr "رویه فرعی"
 
 #: manufacturing/report/bom_operations_time/bom_operations_time.py:127
 msgid "Sub-assembly BOM Count"
-msgstr "تعداد BOM زیر مجموعه"
+msgstr "تعداد BOM زیر مونتاژ"
 
 #: buying/doctype/purchase_order/purchase_order_dashboard.py:26
 msgid "Sub-contracting"
@@ -74135,11 +74135,11 @@ msgstr "نوع سند {0} باید دارای یک فیلد وضعیت برای 
 
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.py:70
 msgid "The GL Entries will be cancelled in the background, it can take a few minutes."
-msgstr "ورودی‌های GL در پس‌زمینه لغو می‌شوند، ممکن است چند دقیقه طول بکشد."
+msgstr "ورودی‌های دفتر کل در پس‌زمینه لغو می‌شوند، ممکن است چند دقیقه طول بکشد."
 
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.py:176
 msgid "The GL Entries will be processed in the background, it can take a few minutes."
-msgstr "ورودی‌های GL در پس‌زمینه پردازش می‌شوند، ممکن است چند دقیقه طول بکشد."
+msgstr "ورودی‌های دفتر کل در پس‌زمینه پردازش می‌شوند، ممکن است چند دقیقه طول بکشد."
 
 #: accounts/doctype/loyalty_program/loyalty_program.py:159
 msgid "The Loyalty Program isn't valid for the selected company"
@@ -74547,7 +74547,7 @@ msgstr "این آیتم یک الگو است و نمی توان از آن در �
 
 #: stock/doctype/item/item.js:161
 msgid "This Item is a Variant of {0} (Template)."
-msgstr "این مورد یک نوع {0} (الگو) است."
+msgstr "این آیتم یک گونه {0} (الگو) است."
 
 #: setup/doctype/email_digest/email_digest.py:187
 msgid "This Month's Summary"
@@ -75891,7 +75891,7 @@ msgstr "برای لغو این مورد، \"{0}\" را در شرکت {1} فعا�
 
 #: controllers/item_variant.py:150
 msgid "To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings."
-msgstr "برای ادامه ویرایش این مقدار مشخصه، {0} را در تنظیمات نوع مورد فعال کنید."
+msgstr "برای ادامه ویرایش این مقدار ویژگی، {0} را در تنظیمات گونه آیتم فعال کنید."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:581
 msgid "To submit the invoice without purchase order please set {0} as {1} in {2}"
@@ -79520,7 +79520,7 @@ msgstr "معتبر از تاریخ غیر در سال مالی {0}"
 
 #: accounts/doctype/cost_center_allocation/cost_center_allocation.py:82
 msgid "Valid From must be after {0} as last GL Entry against the cost center {1} posted on this date"
-msgstr "معتبر از باید بعد از {0} به عنوان آخرین ورودی GL در برابر مرکز هزینه {1} پست شده در این تاریخ باشد"
+msgstr "معتبر از باید بعد از {0} به عنوان آخرین ورودی دفتر کل در برابر مرکز هزینه {1} پست شده در این تاریخ باشد"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:261
 #: templates/pages/order.html:59
@@ -79908,7 +79908,7 @@ msgstr "گزاره ارزش"
 
 #: controllers/item_variant.py:123
 msgid "Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {4}"
-msgstr "مقدار مشخصه {0} باید در محدوده {1} تا {2} با افزایش {3} برای مورد {4} باشد."
+msgstr "مقدار ویژگی {0} باید در محدوده {1} تا {2} با افزایش {3} برای آیتم{4} باشد"
 
 #. Label of a Currency field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -80275,7 +80275,7 @@ msgstr "کوپن"
 #: stock/report/stock_ledger/stock_ledger.js:79
 #: stock/report/stock_ledger/stock_ledger.py:300
 msgid "Voucher #"
-msgstr "کوپن شماره"
+msgstr "# کوپن"
 
 #. Label of a Data field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
