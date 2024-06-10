@@ -38,6 +38,53 @@ class CustomerGroup(NestedSet):
 	def validate(self):
 		if not self.parent_customer_group:
 			self.parent_customer_group = get_root_of("Customer Group")
+		self.validate_currency_for_receivable_and_advance_account()
+
+	def validate_currency_for_receivable_and_advance_account(self):
+		for x in self.accounts:
+			company_default_currency = frappe.get_cached_value("Company", x.company, "default_currency")
+			receivable_account_currency = None
+			advance_account_currency = None
+
+			if x.account:
+				receivable_account_currency = frappe.get_cached_value(
+					"Account", x.account, "account_currency"
+				)
+
+			if x.advance_account:
+				advance_account_currency = frappe.get_cached_value(
+					"Account", x.advance_account, "account_currency"
+				)
+
+			if receivable_account_currency and receivable_account_currency != company_default_currency:
+				frappe.throw(
+					_("Receivable Account: {0} must be in Company default currency: {1}").format(
+						frappe.bold(x.account),
+						frappe.bold(company_default_currency),
+					)
+				)
+
+			if advance_account_currency and advance_account_currency != company_default_currency:
+				frappe.throw(
+					_("Advance Account: {0} must be in Company default currency: {1}").format(
+						frappe.bold(x.advance_account), frappe.bold(company_default_currency)
+					)
+				)
+
+			if (
+				receivable_account_currency
+				and advance_account_currency
+				and receivable_account_currency != advance_account_currency
+			):
+				frappe.throw(
+					_(
+						"Both Receivable Account: {0} and Advance Account: {1} must be of same currency for company: {2}"
+					).format(
+						frappe.bold(x.account),
+						frappe.bold(x.advance_account),
+						frappe.bold(x.company),
+					)
+				)
 
 	def on_update(self):
 		self.validate_name_with_customer()
