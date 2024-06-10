@@ -794,6 +794,11 @@ def get_requested_item_qty(sales_order):
 def make_material_request(source_name, target_doc=None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
+	def postprocess(source, target):
+		if source.tc_name and frappe.db.get_value("Terms and Conditions", source.tc_name, "buying") != 1:
+			target.tc_name = None
+			target.terms = None
+
 	def get_remaining_qty(so_item):
 		return flt(
 			flt(so_item.qty)
@@ -849,6 +854,7 @@ def make_material_request(source_name, target_doc=None):
 			},
 		},
 		target_doc,
+		postprocess,
 	)
 
 	return doc
