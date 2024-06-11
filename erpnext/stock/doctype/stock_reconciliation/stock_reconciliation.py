@@ -164,7 +164,11 @@ class StockReconciliation(StockController):
 		for item in self.items:
 			if not item.reconcile_all_serial_batch and item.serial_and_batch_bundle:
 				bundle = self.get_bundle_for_specific_serial_batch(item)
-				item.current_serial_and_batch_bundle = bundle
+				item.current_serial_and_batch_bundle = bundle.name
+				item.current_valuation_rate = abs(bundle.avg_rate)
+
+				if not item.valuation_rate:
+					item.valuation_rate = item.current_valuation_rate
 				continue
 
 			if not save and item.use_serial_batch_fields:
@@ -282,7 +286,12 @@ class StockReconciliation(StockController):
 		from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 		if row.current_serial_and_batch_bundle and not self.has_change_in_serial_batch(row):
-			return row.current_serial_and_batch_bundle
+			return frappe._dict(
+				{
+					"name": row.current_serial_and_batch_bundle,
+					"avg_rate": row.current_valuation_rate,
+				}
+			)
 
 		cls_obj = SerialBatchCreation(
 			{
@@ -316,12 +325,11 @@ class StockReconciliation(StockController):
 			total_current_qty += current_qty
 			entry.qty = current_qty * -1
 
-		reco_obj.flags.ignore_validate = True
 		reco_obj.save()
 
 		row.current_qty = total_current_qty
 
-		return reco_obj.name
+		return reco_obj
 
 	def has_change_in_serial_batch(self, row) -> bool:
 		bundles = {row.serial_and_batch_bundle: [], row.current_serial_and_batch_bundle: []}
@@ -721,7 +729,7 @@ class StockReconciliation(StockController):
 		for d in serial_nos:
 			frappe.db.set_value("Serial No", d, "purchase_rate", valuation_rate)
 
-	def get_sle_for_items(self, row, serial_nos=None):
+	def get_sle_for_items(self, row, serial_nos=None, current_bundle=True):
 		"""Insert Stock Ledger Entries"""
 
 		if not serial_nos and row.serial_no:
@@ -755,7 +763,7 @@ class StockReconciliation(StockController):
 				has_dimensions = True
 
 		if self.docstatus == 2 and (not row.batch_no or not row.serial_and_batch_bundle):
-			if row.current_qty:
+			if row.current_qty and current_bundle:
 				data.actual_qty = -1 * row.current_qty
 				data.qty_after_transaction = flt(row.current_qty)
 				data.previous_qty_after_transaction = flt(row.qty)
@@ -785,6 +793,8 @@ class StockReconciliation(StockController):
 		has_serial_no = False
 		for row in self.items:
 			sl_entries.append(self.get_sle_for_items(row))
+			if row.serial_and_batch_bundle and row.current_serial_and_batch_bundle:
+				sl_entries.append(self.get_sle_for_items(row, current_bundle=False))
 
 		if sl_entries:
 			if has_serial_no:
