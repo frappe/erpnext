@@ -191,9 +191,11 @@ class TransactionBase(StatusUpdater):
 				):
 					frappe.throw(
 						_(
-							"{0} Account must be in either customer billing currency: {1} or Company default currency: {2}"
+							"{0} Account: {1} ({2}) must be in either customer billing currency: {3} or Company default currency: {4}"
 						).format(
 							account_type,
+							frappe.bold(x.account),
+							frappe.bold(receivable_payable_account_currency),
 							frappe.bold(self.default_currency),
 							frappe.bold(company_default_currency),
 						)
@@ -205,8 +207,12 @@ class TransactionBase(StatusUpdater):
 				):
 					frappe.throw(
 						_(
-							"Advance Account must be in either customer billing currency: {0} or Company default currency: {1}"
-						).format(frappe.bold(self.default_currency), frappe.bold(company_default_currency))
+							"Advance Account: {0} must be in either customer billing currency: {1} or Company default currency: {2}"
+						).format(
+							frappe.bold(x.advance_account),
+							frappe.bold(self.default_currency),
+							frappe.bold(company_default_currency),
+						)
 					)
 
 				if (
