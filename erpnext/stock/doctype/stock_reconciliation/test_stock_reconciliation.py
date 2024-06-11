@@ -1109,6 +1109,8 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 
 		sr.reload()
+
+		self.assertTrue(sr.items[0].current_valuation_rate)
 		current_sabb = sr.items[0].current_serial_and_batch_bundle
 		doc = frappe.get_doc("Serial and Batch Bundle", current_sabb)
 		for row in doc.entries:
@@ -1117,6 +1119,18 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 		batch_qty = get_batch_qty(batches[0].batch_no, warehouse, item.name)
 		self.assertEqual(batch_qty, 100)
+
+		for row in frappe.get_all("Repost Item Valuation", filters={"voucher_no": sr.name}):
+			rdoc = frappe.get_doc("Repost Item Valuation", row.name)
+			rdoc.cancel()
+			rdoc.delete()
+
+		sr.cancel()
+
+		for row in frappe.get_all(
+			"Serial and Batch Bundle", fields=["docstatus"], filters={"voucher_no": sr.name}
+		):
+			self.assertEqual(row.docstatus, 2)
 
 	def test_not_reconcile_all_serial_nos(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
