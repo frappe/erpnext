@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-10 16:34\n"
+"PO-Revision-Date: 2024-06-11 16:39\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -9771,7 +9771,7 @@ msgstr "موجودی در ارز پایه"
 #: stock/report/stock_balance/stock_balance.py:416
 #: stock/report/stock_ledger/stock_ledger.py:228
 msgid "Balance Qty"
-msgstr "تعداد موجودی"
+msgstr "مقدار تراز"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:71
 msgid "Balance Qty (Stock)"
@@ -9822,7 +9822,7 @@ msgstr "موجودی ارزش موجودی"
 #: stock/report/stock_balance/stock_balance.py:423
 #: stock/report/stock_ledger/stock_ledger.py:285
 msgid "Balance Value"
-msgstr "ارزش موجودی"
+msgstr "ارزش تراز"
 
 #: accounts/doctype/gl_entry/gl_entry.py:314
 msgid "Balance for Account {0} must always be {1}"
@@ -11901,7 +11901,7 @@ msgstr "مشغول"
 #: stock/doctype/batch/batch_dashboard.py:8
 #: stock/doctype/item/item_dashboard.py:22
 msgid "Buy"
-msgstr "خرید کنید"
+msgstr "خرید"
 
 #. Description of a DocType
 #: selling/doctype/customer/customer.json
@@ -25661,7 +25661,7 @@ msgstr "تکرار کردن"
 
 #: stock/doctype/closing_stock_balance/closing_stock_balance.py:82
 msgid "Duplicate Closing Stock Balance"
-msgstr "موجودی پایانی تکراری"
+msgstr "تکرار کردن تراز موجودی اختتامیه"
 
 #: accounts/doctype/pos_profile/pos_profile.py:136
 msgid "Duplicate Customer Group"
@@ -25824,7 +25824,7 @@ msgstr "اولین"
 
 #: stock/report/stock_balance/stock_balance.py:489
 msgid "Earliest Age"
-msgstr "اولین سن"
+msgstr "قدیمی ترین سن"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:18
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:27
@@ -28800,7 +28800,7 @@ msgstr "کالای تمام شده {0} باید یک آیتم موجودی با�
 
 #: subcontracting/doctype/subcontracting_bom/subcontracting_bom.py:55
 msgid "Finished Good {0} must be a sub-contracted item."
-msgstr "کالای تمام شده {0} باید یک مورد قرارداد فرعی باشد."
+msgstr "کالای تمام شده {0} باید یک آیتم قرارداد فرعی باشد."
 
 #: setup/doctype/company/company.py:282
 msgid "Finished Goods"
@@ -30469,7 +30469,7 @@ msgstr ""
 
 #: stock/doctype/closing_stock_balance/closing_stock_balance.js:12
 msgid "Generate Closing Stock Balance"
-msgstr "ایجاد مانده موجودی پایانی"
+msgstr "ایجاد تراز موجودی اختتامیه"
 
 #: public/js/setup_wizard.js:48
 msgid "Generate Demo Data for Exploration"
@@ -32523,7 +32523,7 @@ msgstr "نادیده گرفتن موجودی بسته شدن حساب"
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Ignore Available Stock"
-msgstr "نادیده گرفتن موجودی موجود"
+msgstr "نادیده گرفتن موجودی در دسترس"
 
 #: stock/report/stock_balance/stock_balance.js:100
 msgid "Ignore Closing Balance"
@@ -33231,7 +33231,7 @@ msgstr "در حال پیش رفت"
 #: stock/report/stock_balance/stock_balance.py:444
 #: stock/report/stock_ledger/stock_ledger.py:214
 msgid "In Qty"
-msgstr "در تعداد"
+msgstr "مقدار ورودی"
 
 #: templates/form_grid/stock_entry_grid.html:26
 msgid "In Stock"
@@ -33270,7 +33270,7 @@ msgstr "در انبار ترانزیت"
 
 #: stock/report/stock_balance/stock_balance.py:450
 msgid "In Value"
-msgstr "در ارزش"
+msgstr "ارزش ورودی"
 
 #. Label of a Data field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -38093,7 +38093,7 @@ msgstr "مورد {0} باید یک کالای غیر موجودی باشد"
 
 #: stock/get_item_details.py:224
 msgid "Item {0} must be a Sub-contracted Item"
-msgstr "مورد {0} باید یک مورد قرارداد فرعی باشد"
+msgstr "مورد {0} باید یک آیتم قرارداد فرعی باشد"
 
 #: assets/doctype/asset/asset.py:237
 msgid "Item {0} must be a non-stock item"
@@ -43409,7 +43409,7 @@ msgstr "جابجایی به سبد خرید"
 
 #: assets/doctype/asset/asset_dashboard.py:7
 msgid "Movement"
-msgstr "جنبش"
+msgstr "جابجایی"
 
 #. Option for the 'Valuation Method' (Select) field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -45003,7 +45003,7 @@ msgstr "هیچ یک از اقلام هیچ تغییری در کمیت یا ار�
 #: setup/setup_wizard/data/uom_data.json
 #: setup/setup_wizard/operations/install_fixtures.py:473
 msgid "Nos"
-msgstr "شماره"
+msgstr ""
 
 #: accounts/doctype/mode_of_payment/mode_of_payment.py:66
 #: accounts/doctype/pos_invoice/pos_invoice.py:254
@@ -46226,7 +46226,7 @@ msgstr "خلاصه فاکتورهای افتتاحیه"
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:86
 #: stock/report/stock_balance/stock_balance.py:430
 msgid "Opening Qty"
-msgstr "باز کردن تعداد"
+msgstr "مقدار افتتاحیه"
 
 #: stock/doctype/item/item.py:293
 msgid "Opening Stock"
@@ -47068,11 +47068,11 @@ msgstr ""
 #: stock/report/stock_balance/stock_balance.py:452
 #: stock/report/stock_ledger/stock_ledger.py:221
 msgid "Out Qty"
-msgstr "خارج از تعداد"
+msgstr "مقدار خروجی"
 
 #: stock/report/stock_balance/stock_balance.py:458
 msgid "Out Value"
-msgstr "خارج از ارزش"
+msgstr "ارزش خروجی"
 
 #. Option for the 'Maintenance Status' (Select) field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
@@ -48405,7 +48405,7 @@ msgstr "موفقیت جزئی"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Partial stock can be reserved. For example, If you have a Sales Order of 100 units and the Available Stock is 90 units then a Stock Reservation Entry will be created for 90 units. "
-msgstr "موجودی جزئی قابل رزرو است. به عنوان مثال، اگر شما یک سفارش فروش 100 واحدی دارید و موجودی موجود 90 واحد است، یک ورودی رزرو موجودی برای 90 واحد ایجاد می شود."
+msgstr "موجودی جزئی قابل رزرو است. به عنوان مثال، اگر شما یک سفارش فروش 100 واحدی دارید و موجودی در دسترس 90 واحد است، یک ورودی رزرو موجودی برای 90 واحد ایجاد می شود. "
 
 #. Option for the 'Completion Status' (Select) field in DocType 'Maintenance
 #. Schedule Detail'
@@ -56648,7 +56648,7 @@ msgstr "مقدار قابل مصرف"
 #: buying/report/purchase_order_analysis/purchase_order_analysis.py:228
 #: selling/report/sales_order_analysis/sales_order_analysis.py:283
 msgid "Qty to Bill"
-msgstr "مقدار به بیل"
+msgstr "مقدار برای صورتحساب"
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:133
 msgid "Qty to Build"
@@ -59873,7 +59873,7 @@ msgstr "با احترام،"
 
 #: stock/doctype/closing_stock_balance/closing_stock_balance.js:27
 msgid "Regenerate Closing Stock Balance"
-msgstr "بازسازی موجودی پایانی"
+msgstr "بازسازی تراز موجودی اختتامیه"
 
 #. Label of a Card Break in the Buying Workspace
 #: buying/workspace/buying/buying.json
@@ -61157,7 +61157,7 @@ msgstr "برای پیمانکاری فرعی محفوظ است"
 
 #: stock/page/stock_balance/stock_balance.js:53
 msgid "Reserved for manufacturing"
-msgstr "برای ساخت محفوظ است"
+msgstr "رزرو شده برای تولید"
 
 #: stock/page/stock_balance/stock_balance.js:52
 msgid "Reserved for sale"
@@ -61165,7 +61165,7 @@ msgstr "برای فروش رزرو شده است"
 
 #: stock/page/stock_balance/stock_balance.js:54
 msgid "Reserved for sub contracting"
-msgstr "برای قرارداد فرعی محفوظ است"
+msgstr "برای قرارداد فرعی رزرو شده است"
 
 #: selling/doctype/sales_order/sales_order.js:402
 #: stock/doctype/pick_list/pick_list.js:271
@@ -62930,7 +62930,7 @@ msgstr "ردیف {0}: مورد {1} باید یک کالای موجودی باش�
 
 #: controllers/subcontracting_controller.py:103
 msgid "Row {0}: Item {1} must be a subcontracted item."
-msgstr "ردیف {0}: مورد {1} باید یک مورد قرارداد فرعی باشد."
+msgstr "ردیف {0}: مورد {1} باید یک آیتم قرارداد فرعی باشد."
 
 #: stock/doctype/delivery_note/delivery_note.py:738
 msgid "Row {0}: Packed Qty must be equal to {1} Qty."
@@ -63018,7 +63018,7 @@ msgstr "ردیف {0}: Shift را نمی توان تغییر داد زیرا اس
 
 #: stock/doctype/stock_entry/stock_entry.py:1207
 msgid "Row {0}: Subcontracted Item is mandatory for the raw material {1}"
-msgstr "ردیف {0}: مورد قرارداد فرعی برای مواد خام اجباری است {1}"
+msgstr "ردیف {0}: آیتم قرارداد فرعی برای مواد خام اجباری است {1}"
 
 #: controllers/stock_controller.py:929
 msgid "Row {0}: Target Warehouse is mandatory for internal transfers"
@@ -69353,7 +69353,7 @@ msgstr "دارایی های موجودی"
 
 #: stock/report/item_price_stock/item_price_stock.py:34
 msgid "Stock Available"
-msgstr "موجودی موجود"
+msgstr "موجودی در دسترس"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -69606,7 +69606,7 @@ msgstr "مدیر موجودی"
 
 #: stock/doctype/item/item_dashboard.py:34
 msgid "Stock Movement"
-msgstr "جنبش موجودی"
+msgstr "جابه‌جایی موجودی"
 
 #. Label of a Tab Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -69838,7 +69838,7 @@ msgstr "تنظیمات معاملات موجودی"
 #: stock/report/stock_balance/stock_balance.py:409
 #: stock/report/stock_ledger/stock_ledger.py:192
 msgid "Stock UOM"
-msgstr "موجودی UOM"
+msgstr "UOM موجودی"
 
 #. Label of a Link field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
@@ -70386,13 +70386,13 @@ msgstr "بازگشت قرارداد فرعی"
 
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:136
 msgid "Subcontracted Item"
-msgstr "مورد قرارداد فرعی"
+msgstr "آیتم قرارداد فرعی"
 
 #. Label of a Link field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Subcontracted Item"
-msgstr "مورد قرارداد فرعی"
+msgstr "آیتم قرارداد فرعی"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -70400,7 +70400,7 @@ msgstr "مورد قرارداد فرعی"
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.json
 #: buying/workspace/buying/buying.json stock/workspace/stock/stock.json
 msgid "Subcontracted Item To Be Received"
-msgstr "مورد قرارداد فرعی برای دریافت"
+msgstr "آیتم قرارداد فرعی برای دریافت"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -75294,38 +75294,38 @@ msgstr "پرداخت می شود"
 #: stock/doctype/delivery_note/delivery_note_list.js:22
 #: stock/doctype/purchase_receipt/purchase_receipt_list.js:21
 msgid "To Bill"
-msgstr "به بیل"
+msgstr "برای صورتحساب"
 
 #. Option for the 'Status' (Select) field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "To Bill"
-msgstr "به بیل"
+msgstr "برای صورتحساب"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "To Bill"
-msgstr "به بیل"
+msgstr "برای صورتحساب"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "To Bill"
-msgstr "به بیل"
+msgstr "برای صورتحساب"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "To Bill"
-msgstr "به بیل"
+msgstr "برای صورتحساب"
 
 #. Option for the 'Status' (Select) field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "To Bill"
-msgstr "به بیل"
+msgstr "برای صورتحساب"
 
 #. Label of a Link field in DocType 'Currency Exchange'
 #: setup/doctype/currency_exchange/currency_exchange.json
@@ -80925,7 +80925,7 @@ msgstr "جزئیات انبار"
 
 #: stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.py:113
 msgid "Warehouse Disabled?"
-msgstr "انبار از کار افتاده؟"
+msgstr "انبار غیر فعال است؟"
 
 #. Label of a Data field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
