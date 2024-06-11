@@ -3,7 +3,7 @@
 
 
 import frappe
-from frappe import _, throw
+from frappe import _, qb, throw
 from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, formatdate, get_link_to_form, getdate, nowdate
@@ -346,6 +346,22 @@ class PurchaseInvoice(BuyingController):
 			self.apply_tds = 1
 			self.tax_withholding_category = tds_category
 			self.set_onload("supplier_tds", tds_category)
+
+		# If Linked Purchase Order has TDS applied, enable 'apply_tds' checkbox
+		if purchase_orders := [x.purchase_order for x in self.items if x.purchase_order]:
+			po = qb.DocType("Purchase Order")
+			po_with_tds = (
+				qb.from_(po)
+				.select(po.name)
+				.where(
+					po.docstatus.eq(1)
+					& (po.name.isin(purchase_orders))
+					& (po.apply_tds.eq(1))
+					& (po.tax_withholding_category.notnull())
+				)
+				.run()
+			)
+			self.set_onload("enable_apply_tds", True if po_with_tds else False)
 
 		super().set_missing_values(for_validate)
 
