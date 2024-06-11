@@ -166,8 +166,8 @@ class ShippingRule(Document):
 
 	def sort_shipping_rule_conditions(self):
 		"""Sort Shipping Rule Conditions based on increasing From Value"""
-		self.shipping_rules_conditions = sorted(self.conditions, key=lambda d: flt(d.from_value))
-		for i, d in enumerate(self.conditions):
+		sorted_shipping_rules_conditions = sorted(self.conditions, key=lambda d: flt(d.from_value))
+		for i, d in enumerate(sorted_shipping_rules_conditions):
 			d.idx = i + 1
 
 	def validate_overlapping_shipping_rule_conditions(self):
