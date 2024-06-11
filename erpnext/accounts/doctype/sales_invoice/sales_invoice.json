@@ -787,6 +787,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Time Sheets",
+   "no_copy": 1,
    "options": "Sales Invoice Timesheet",
    "print_hide": 1
   },
@@ -2187,7 +2188,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-05-08 18:02:28.549041",
+ "modified": "2024-06-07 16:49:32.458402",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

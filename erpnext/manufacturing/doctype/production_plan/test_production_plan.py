@@ -328,6 +328,28 @@ class TestProductionPlan(FrappeTestCase):
 
 		self.assertEqual(pln2.po_items[0].bom_no, bom2.name)
 
+	def test_production_plan_with_non_active_bom_item(self):
+		item = make_item("Test Production Item 1 for Non Active BOM", {"is_stock_item": 1}).name
+
+		so1 = make_sales_order(item_code=item, qty=1)
+
+		pln = frappe.new_doc("Production Plan")
+		pln.company = so1.company
+		pln.get_items_from = "Sales Order"
+		pln.append(
+			"sales_orders",
+			{
+				"sales_order": so1.name,
+				"sales_order_date": so1.transaction_date,
+				"customer": so1.customer,
+				"grand_total": so1.grand_total,
+			},
+		)
+
+		pln.get_items()
+
+		self.assertFalse(pln.po_items)
+
 	def test_production_plan_combine_items(self):
 		"Test combining FG items in Production Plan."
 		item = "Test Production Item 1"
