@@ -39,6 +39,12 @@ frappe.ui.form.on("Purchase Receipt", {
 			};
 		});
 
+		frm.set_query("provisional_expense_account", "items", function () {
+			return {
+				filters: { company: frm.doc.company, is_group: 0},
+			};
+		});
+
 		frm.set_query("wip_composite_asset", "items", function () {
 			return {
 				filters: { is_composite_asset: 1, docstatus: 0 },
