@@ -255,10 +255,17 @@ class StockController(AccountsController):
 					qty_field = "qty"
 					warehouse_field = "warehouse"
 
+				if not data.get("qty"):
+					frappe.throw(
+						_("For the {0}, no stock is available for the return in the warehouse {1}.").format(
+							frappe.bold(row.item_code), row.get(warehouse_field)
+						)
+					)
+
 				data = filter_serial_batches(
 					self, data, row, warehouse_field=warehouse_field, qty_field=qty_field
 				)
-				bundle = make_serial_batch_bundle_for_return(data, row, self, warehouse_field)
+				bundle = make_serial_batch_bundle_for_return(data, row, self, warehouse_field, qty_field)
 				if row.get("return_qty_from_rejected_warehouse"):
 					row.db_set(
 						{
