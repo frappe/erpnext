@@ -400,9 +400,11 @@ frappe.ui.form.on("Production Plan", {
 	},
 
 	download_materials_required(frm) {
-		const warehouses_data = [{
-			warehouse: frm.doc.for_warehouse
-		}];
+		const warehouses_data = [
+			{
+				warehouse: frm.doc.for_warehouse
+			},
+		];
 		const fields = [
 			{
 				fieldname: "warehouses",
