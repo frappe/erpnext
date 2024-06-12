@@ -936,6 +936,7 @@ def get_serial_and_batch_bundle(field, doctype, reference_ids, is_rejected=False
 		if is_rejected:
 			fields.extend(["rejected_serial_and_batch_bundle", "return_qty_from_rejected_warehouse"])
 
+		del filters["rejected_serial_and_batch_bundle"]
 		data = frappe.get_all(
 			doctype,
 			fields=fields,
@@ -943,6 +944,9 @@ def get_serial_and_batch_bundle(field, doctype, reference_ids, is_rejected=False
 		)
 
 		for d in data:
+			if not d.get("serial_and_batch_bundle") and not d.get("rejected_serial_and_batch_bundle"):
+				continue
+
 			if is_rejected:
 				if d.get("return_qty_from_rejected_warehouse"):
 					_bundle_ids.append(d.get("serial_and_batch_bundle"))
@@ -1027,7 +1031,7 @@ def get_available_batch_qty(parent_doc, batch_no, warehouse):
 	)
 
 
-def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_field=None):
+def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_field=None, qty_field=None):
 	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
 
 	type_of_transaction = "Outward"
@@ -1037,10 +1041,20 @@ def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_f
 	if not warehouse_field:
 		warehouse_field = "warehouse"
 
+	if not qty_field:
+		qty_field = "qty"
+
 	warehouse = child_doc.get(warehouse_field)
 	if parent_doc.get("is_internal_customer"):
 		warehouse = child_doc.get("target_warehouse")
 		type_of_transaction = "Outward"
+
+	if not child_doc.get(qty_field):
+		frappe.throw(
+			_("For the {0}, the quantity is required to make the return entry").format(
+				frappe.bold(child_doc.item_code)
+			)
+		)
 
 	cls_obj = SerialBatchCreation(
 		{
@@ -1054,7 +1068,7 @@ def make_serial_batch_bundle_for_return(data, child_doc, parent_doc, warehouse_f
 			"voucher_type": parent_doc.doctype,
 			"voucher_no": parent_doc.name,
 			"voucher_detail_no": child_doc.name,
-			"qty": child_doc.qty,
+			"qty": child_doc.get(qty_field),
 			"company": parent_doc.company,
 			"do_not_submit": True,
 		}
