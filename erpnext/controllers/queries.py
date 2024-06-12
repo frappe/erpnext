@@ -352,6 +352,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	doctype = "Batch"
 	meta = frappe.get_meta(doctype, cached=True)
 	searchfields = meta.get_search_fields()
+	page_len = 30
 
 	batches = get_batches_from_stock_ledger_entries(searchfields, txt, filters, start, page_len)
 	batches.extend(get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start, page_len))
@@ -422,7 +423,7 @@ def get_batches_from_stock_ledger_entries(searchfields, txt, filters, start=0, p
 			& (stock_ledger_entry.batch_no.isnotnull())
 		)
 		.groupby(stock_ledger_entry.batch_no, stock_ledger_entry.warehouse)
-		.having(Sum(stock_ledger_entry.actual_qty) > 0)
+		.having(Sum(stock_ledger_entry.actual_qty) != 0)
 		.offset(start)
 		.limit(page_len)
 	)
@@ -473,7 +474,7 @@ def get_batches_from_serial_and_batch_bundle(searchfields, txt, filters, start=0
 			& (stock_ledger_entry.serial_and_batch_bundle.isnotnull())
 		)
 		.groupby(bundle.batch_no, bundle.warehouse)
-		.having(Sum(bundle.qty) > 0)
+		.having(Sum(bundle.qty) != 0)
 		.offset(start)
 		.limit(page_len)
 	)
