@@ -90,11 +90,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-08-28 17:26:46.826501",
-=======
  "modified": "2024-06-12 16:10:31.451257",
->>>>>>> 56082f5a29 (fix: allow Employee role to select Department (#41877))
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Department",
