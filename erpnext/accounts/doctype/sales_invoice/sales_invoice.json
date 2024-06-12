@@ -1575,12 +1575,14 @@
    "print_hide": 1
   },
   {
+   "fetch_from": "customer.language",
+   "fetch_if_empty": 1,
    "fieldname": "language",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Print Language",
-   "length": 6,
+   "options": "Language",
    "print_hide": 1,
    "read_only": 1
   },
@@ -2203,7 +2205,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-05-08 18:02:28.549041",
+ "modified": "2024-05-23 14:02:28.549041",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

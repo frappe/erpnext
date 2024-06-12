@@ -115,7 +115,7 @@ class SalesOrder(SellingController):
 		inter_company_order_reference: DF.Link | None
 		is_internal_customer: DF.Check
 		items: DF.Table[SalesOrderItem]
-		language: DF.Data | None
+		language: DF.Link | None
 		letter_head: DF.Link | None
 		loyalty_amount: DF.Currency
 		loyalty_points: DF.Int

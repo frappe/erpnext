@@ -136,7 +136,7 @@ class SalesInvoice(SellingController):
 		is_pos: DF.Check
 		is_return: DF.Check
 		items: DF.Table[SalesInvoiceItem]
-		language: DF.Data | None
+		language: DF.Link | None
 		letter_head: DF.Link | None
 		loyalty_amount: DF.Currency
 		loyalty_points: DF.Int
