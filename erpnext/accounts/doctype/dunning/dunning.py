@@ -196,7 +196,7 @@ def resolve_dunning(doc, state):
 					resolve = resolve and (False if (outstanding_ps > 0 and outstanding_inv > 0) else True)
 
 				new_status = "Resolved" if resolve else "Unresolved"
-				
+
 				if dunning.status != new_status:
 					dunning.status = new_status
 					dunning.save()
