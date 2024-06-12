@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-11 16:39\n"
+"PO-Revision-Date: 2024-06-12 16:38\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -7154,7 +7154,7 @@ msgstr "در طول فرآیند به روز رسانی خطایی رخ داد"
 
 #: stock/reorder_item.py:371
 msgid "An error occurred for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
-msgstr "هنگام ایجاد درخواست‌های مواد بر اساس سطح سفارش مجدد، برای موارد خاصی خطایی رخ داد. لطفا این مشکلات را اصلاح کنید:"
+msgstr "هنگام ایجاد درخواست‌های مواد بر اساس سطح سفارش مجدد، برای آیتم‌های خاصی خطایی رخ داد. لطفا این مشکلات را اصلاح کنید:"
 
 #: accounts/doctype/budget/budget.py:235
 msgid "Annual"
@@ -22706,7 +22706,7 @@ msgstr "توقف تحویل"
 #: stock/doctype/delivery_trip/delivery_trip.json
 msgctxt "Delivery Trip"
 msgid "Delivery Stops"
-msgstr "تحویل متوقف می شود"
+msgstr "توقف‌های تحویل"
 
 #. Label of a Data field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -35952,7 +35952,7 @@ msgstr "تاریخ صدور"
 
 #: stock/doctype/material_request/material_request.js:138
 msgid "Issue Material"
-msgstr "موضوع موضوع"
+msgstr "حواله مواد"
 
 #. Name of a DocType
 #: support/doctype/issue_priority/issue_priority.json
@@ -40920,87 +40920,87 @@ msgstr "ورود دستی ایجاد نمی شود! ورود خودکار برا
 #: manufacturing/doctype/operation/operation_dashboard.py:7
 #: stock/doctype/item/item_dashboard.py:32
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Option for the 'Default Material Request Type' (Select) field in DocType
 #. 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Option for the 'Material Request Type' (Select) field in DocType 'Item
 #. Reorder'
 #: stock/doctype/item_reorder/item_reorder.json
 msgctxt "Item Reorder"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Label of a Section Break field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Option for the 'Type' (Select) field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Label of a Section Break field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Label of a Section Break field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Label of a Section Break field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
 #: stock/doctype/stock_entry_type/stock_entry_type.json
 msgctxt "Stock Entry Type"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Label of a Section Break field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Label of a Section Break field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Label of a Section Break field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Manufacture"
-msgstr "ساخت"
+msgstr "تولید"
 
 #. Description of the 'Material Request' (Link) field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
@@ -41505,13 +41505,13 @@ msgstr "مصرف مواد"
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Material Consumption for Manufacture"
-msgstr "مصرف مواد برای ساخت"
+msgstr "مصرف مواد برای تولید"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
 #: stock/doctype/stock_entry_type/stock_entry_type.json
 msgctxt "Stock Entry Type"
 msgid "Material Consumption for Manufacture"
-msgstr "مصرف مواد برای ساخت"
+msgstr "مصرف مواد برای تولید"
 
 #: stock/doctype/stock_entry/stock_entry.js:494
 msgid "Material Consumption is not set in Manufacturing Settings."
@@ -41522,38 +41522,38 @@ msgstr "مصرف مواد در تنظیمات تولید تنظیم نشده ا�
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Material Issue"
-msgstr "مسئله مواد"
+msgstr "حواله مواد"
 
 #. Option for the 'Material Request Type' (Select) field in DocType 'Item
 #. Reorder'
 #: stock/doctype/item_reorder/item_reorder.json
 msgctxt "Item Reorder"
 msgid "Material Issue"
-msgstr "مسئله مواد"
+msgstr "حواله مواد"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Material Request'
 #: stock/doctype/material_request/material_request.json
 msgctxt "Material Request"
 msgid "Material Issue"
-msgstr "مسئله مواد"
+msgstr "حواله مواد"
 
 #. Option for the 'Type' (Select) field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Material Issue"
-msgstr "مسئله مواد"
+msgstr "حواله مواد"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Material Issue"
-msgstr "مسئله مواد"
+msgstr "حواله مواد"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
 #: stock/doctype/stock_entry_type/stock_entry_type.json
 msgctxt "Stock Entry Type"
 msgid "Material Issue"
-msgstr "مسئله مواد"
+msgstr "حواله مواد"
 
 #: stock/doctype/material_request/material_request.js:146
 msgid "Material Receipt"
@@ -41914,19 +41914,19 @@ msgstr "انتقال مواد (در حال حمل و نقل)"
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Material Transfer for Manufacture"
-msgstr "انتقال مواد برای ساخت"
+msgstr "انتقال مواد برای تولید"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Material Transfer for Manufacture"
-msgstr "انتقال مواد برای ساخت"
+msgstr "انتقال مواد برای تولید"
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
 #: stock/doctype/stock_entry_type/stock_entry_type.json
 msgctxt "Stock Entry Type"
 msgid "Material Transfer for Manufacture"
-msgstr "انتقال مواد برای ساخت"
+msgstr "انتقال مواد برای تولید"
 
 #. Option for the 'Status' (Select) field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
@@ -48366,7 +48366,7 @@ msgstr ""
 #: setup/doctype/territory/territory.json
 msgctxt "Territory"
 msgid "Parent Territory"
-msgstr "قلمرو پدر و مادر"
+msgstr "قلمرو والد"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.js:47
 msgid "Parent Warehouse"
@@ -74392,11 +74392,11 @@ msgstr "وظیفه به عنوان یک کار پس زمینه در نوبت ق�
 
 #: stock/doctype/material_request/material_request.py:281
 msgid "The total Issue / Transfer quantity {0} in Material Request {1}  cannot be greater than allowed requested quantity {2} for Item {3}"
-msgstr "مجموع شماره / مقدار انتقال {0} در درخواست مواد {1} نمی تواند بیشتر از مقدار مجاز درخواستی {2} برای مورد {3} باشد"
+msgstr "مجموع مقدار حواله / انتقال {0} در درخواست مواد {1} نمی تواند بیشتر از مقدار مجاز درخواستی {2} برای آیتم {3} باشد"
 
 #: stock/doctype/material_request/material_request.py:288
 msgid "The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than requested quantity {2} for Item {3}"
-msgstr "مجموع مقدار مشکل / انتقال {0} در درخواست مواد {1} نمی تواند بیشتر از مقدار درخواستی {2} برای مورد {3} باشد."
+msgstr "مجموع مقدار حواله / انتقال {0} در درخواست مواد {1} نمی تواند بیشتر از مقدار درخواستی {2} برای آیتم {3} باشد"
 
 #. Description of the 'Role Allowed to Edit Frozen Stock' (Link) field in
 #. DocType 'Stock Settings'
