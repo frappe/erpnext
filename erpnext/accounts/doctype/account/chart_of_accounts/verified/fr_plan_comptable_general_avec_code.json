@@ -1525,7 +1525,8 @@
             "41-Clients et comptes rattach\u00e9s (PASSIF)": {
                 "Clients cr\u00e9diteurs": {
                     "Clients - Avances et acomptes re\u00e7us sur commandes": {
-                        "account_number": "4191"
+                        "account_number": "4191",
+                        "account_type": "Income Account"
                     },
                     "Clients - Dettes pour emballages et mat\u00e9riels consign\u00e9s": {
                         "account_number": "4196"

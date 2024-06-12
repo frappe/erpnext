@@ -377,7 +377,7 @@ class AssetRepair(AccountsController):
 	def calculate_last_schedule_date(self, asset, row, extra_months):
 		asset.flags.increase_in_asset_life = True
 		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - cint(
-			asset.number_of_depreciations_booked
+			asset.opening_number_of_booked_depreciations
 		)
 
 		depr_schedule = get_depr_schedule(asset.name, "Active", row.finance_book)
@@ -410,7 +410,7 @@ class AssetRepair(AccountsController):
 	def calculate_last_schedule_date_before_modification(self, asset, row, extra_months):
 		asset.flags.increase_in_asset_life = True
 		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - cint(
-			asset.number_of_depreciations_booked
+			asset.opening_number_of_booked_depreciations
 		)
 
 		depr_schedule = get_depr_schedule(asset.name, "Active", row.finance_book)

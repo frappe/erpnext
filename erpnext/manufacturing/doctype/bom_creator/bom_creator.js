@@ -88,9 +88,77 @@ frappe.ui.form.on("BOM Creator", {
 					reqd: 1,
 					default: 1.0,
 				},
+				{ fieldtype: "Section Break" },
+				{
+					label: __("Track Operations"),
+					fieldtype: "Check",
+					fieldname: "track_operations",
+					onchange: (r) => {
+						let track_operations = dialog.get_value("track_operations");
+						if (r.type === "input" && !track_operations) {
+							dialog.set_value("track_semi_finished_goods", 0);
+						}
+					},
+				},
+				{ fieldtype: "Column Break" },
+				{
+					label: __("Track Semi Finished Goods"),
+					fieldtype: "Check",
+					fieldname: "track_semi_finished_goods",
+					depends_on: "eval:doc.track_operations",
+				},
+				{
+					fieldtype: "Section Break",
+					label: __("Final Product Operation"),
+					depends_on: "eval:doc.track_semi_finished_goods",
+				},
+				{
+					label: __("Operation"),
+					fieldtype: "Link",
+					fieldname: "operation",
+					options: "Operation",
+					default: "Assembly",
+					mandatory_depends_on: "eval:doc.track_semi_finished_goods",
+					depends_on: "eval:doc.track_semi_finished_goods",
+				},
+				{
+					label: __("Operation Time (in mins)"),
+					fieldtype: "Float",
+					fieldname: "operation_time",
+					mandatory_depends_on: "eval:doc.track_semi_finished_goods",
+					depends_on: "eval:doc.track_semi_finished_goods",
+				},
+				{ fieldtype: "Column Break" },
+				{
+					label: __("Workstation Type"),
+					fieldtype: "Link",
+					fieldname: "workstation_type",
+					options: "Workstation",
+					depends_on: "eval:doc.track_semi_finished_goods",
+				},
+				{
+					label: __("Workstation"),
+					fieldtype: "Link",
+					fieldname: "workstation",
+					options: "Workstation",
+					depends_on: "eval:doc.track_semi_finished_goods",
+					get_query() {
+						let workstation_type = dialog.get_value("workstation_type");
+
+						if (workstation_type) {
+							return {
+								filters: {
+									workstation_type: dialog.get_value("workstation_type"),
+								},
+							};
+						}
+					},
+				},
 			],
 			primary_action_label: __("Create"),
 			primary_action: (values) => {
+				frm.events.validate_dialog_values(frm, values);
+
 				values.doctype = frm.doc.doctype;
 				frappe.db.insert(values).then((doc) => {
 					frappe.set_route("Form", doc.doctype, doc.name);
@@ -100,6 +168,18 @@ frappe.ui.form.on("BOM Creator", {
 
 		dialog.fields_dict.item_code.get_query = "erpnext.controllers.queries.item_query";
 		dialog.show();
+	},
+
+	validate_dialog_values(frm, values) {
+		if (values.track_semi_finished_goods) {
+			if (values.final_operation_time <= 0) {
+				frappe.throw(__("Operation Time must be greater than 0"));
+			}
+
+			if (!values.workstation && !values.workstation_type) {
+				frappe.throw(__("Either Workstation or Workstation Type is mandatory"));
+			}
+		}
 	},
 
 	set_queries(frm) {
@@ -120,6 +200,16 @@ frappe.ui.form.on("BOM Creator", {
 			return {
 				query: "erpnext.controllers.queries.item_query",
 			};
+		});
+
+		frm.set_query("workstation", (doc) => {
+			if (doc.workstation_type) {
+				return {
+					filters: {
+						workstation_type: doc.workstation_type,
+					},
+				};
+			}
 		});
 	},
 

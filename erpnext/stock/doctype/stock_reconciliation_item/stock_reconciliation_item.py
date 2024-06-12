@@ -33,6 +33,7 @@ class StockReconciliationItem(Document):
 		parenttype: DF.Data
 		qty: DF.Float
 		quantity_difference: DF.ReadOnly | None
+		reconcile_all_serial_batch: DF.Check
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.LongText | None
 		use_serial_batch_fields: DF.Check

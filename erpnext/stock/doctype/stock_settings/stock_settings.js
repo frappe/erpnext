@@ -14,6 +14,22 @@ frappe.ui.form.on("Stock Settings", {
 		frm.set_query("default_warehouse", filters);
 		frm.set_query("sample_retention_warehouse", filters);
 	},
+
+	use_serial_batch_fields(frm) {
+		if (frm.doc.use_serial_batch_fields && !frm.doc.disable_serial_no_and_batch_selector) {
+			frm.set_value("disable_serial_no_and_batch_selector", 1);
+		}
+	},
+
+	disable_serial_no_and_batch_selector(frm) {
+		if (!frm.doc.disable_serial_no_and_batch_selector && frm.doc.use_serial_batch_fields) {
+			frm.set_value("disable_serial_no_and_batch_selector", 1);
+			frappe.msgprint(
+				__("Serial No and Batch Selector cannot be use when Use Serial / Batch Fields is enabled.")
+			);
+		}
+	},
+
 	allow_negative_stock: function (frm) {
 		if (!frm.doc.allow_negative_stock) {
 			return;

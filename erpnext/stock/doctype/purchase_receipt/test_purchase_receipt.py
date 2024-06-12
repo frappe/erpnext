@@ -2685,7 +2685,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for row in inter_transfer_dn_return.items:
 			self.assertTrue(row.serial_and_batch_bundle)
 
-	def test_internal_transfer_with_serial_batch_items_without_user_serial_batch_fields(self):
+	def test_internal_transfer_with_serial_batch_items_without_use_serial_batch_fields(self):
 		from erpnext.controllers.sales_and_purchase_return import make_return_doc
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -2903,6 +2903,55 @@ class TestPurchaseReceipt(FrappeTestCase):
 		sabb_doc = frappe.get_doc("Serial and Batch Bundle", se.items[0].serial_and_batch_bundle)
 		for row in sabb_doc.entries:
 			self.assertEqual(row.incoming_rate, 0)
+
+	def test_purchase_return_from_accepted_and_rejected_warehouse(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
+		)
+
+		item = make_item(
+			"_Test PR Item With Return From Accepted and Rejected WH",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SD-TZVRFORBATCH.#####",
+				"valuation_rate": 200,
+			},
+		)
+
+		pr = make_purchase_receipt(
+			qty=10,
+			rejected_qty=5,
+			rate=100,
+			item_code=item.name,
+		)
+
+		pr.reload()
+		self.assertTrue(pr.items[0].serial_and_batch_bundle)
+		self.assertTrue(pr.items[0].rejected_serial_and_batch_bundle)
+
+		return_pr = make_purchase_return(pr.name)
+		return_pr.submit()
+
+		return_pr.reload()
+		self.assertTrue(return_pr.items[0].serial_and_batch_bundle)
+		self.assertTrue(return_pr.items[0].rejected_serial_and_batch_bundle)
+
+		self.assertEqual(
+			return_pr.items[0].qty,
+			frappe.db.get_value(
+				"Serial and Batch Bundle", return_pr.items[0].serial_and_batch_bundle, "total_qty"
+			),
+		)
+
+		self.assertEqual(
+			return_pr.items[0].rejected_qty,
+			frappe.db.get_value(
+				"Serial and Batch Bundle", return_pr.items[0].rejected_serial_and_batch_bundle, "total_qty"
+			),
+		)
 
 
 def prepare_data_for_internal_transfer():

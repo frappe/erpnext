@@ -42,7 +42,7 @@ class HolidayList(Document):
 	def validate(self):
 		self.validate_days()
 		self.total_holidays = len(self.holidays)
-		self.validate_dupliacte_date()
+		self.validate_duplicate_date()
 
 	@frappe.whitelist()
 	def get_weekly_off_dates(self):
@@ -148,7 +148,7 @@ class HolidayList(Document):
 	def clear_table(self):
 		self.set("holidays", [])
 
-	def validate_dupliacte_date(self):
+	def validate_duplicate_date(self):
 		unique_dates = []
 		for row in self.holidays:
 			if row.holiday_date in unique_dates:

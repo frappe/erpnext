@@ -1070,6 +1070,117 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertTrue(sr.items[0].serial_and_batch_bundle)
 		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
 
+	def test_not_reconcile_all_batch(self):
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		item = self.make_item(
+			"Test Batch Item Not Reconcile All Serial Batch",
+			{
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "TEST-BATCH-NRALL-SRCOSRWFEE-.###",
+			},
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		batches = []
+		for qty in [10, 20, 30]:
+			se = make_stock_entry(
+				item_code=item.name,
+				target=warehouse,
+				qty=qty,
+				basic_rate=100 + qty,
+				posting_date=nowdate(),
+			)
+
+			batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+			batches.append(frappe._dict({"batch_no": batch_no, "qty": qty}))
+
+		sr = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=warehouse,
+			qty=100,
+			rate=1000,
+			reconcile_all_serial_batch=0,
+			batch_no=batches[0].batch_no,
+		)
+
+		sr.reload()
+
+		self.assertTrue(sr.items[0].current_valuation_rate)
+		current_sabb = sr.items[0].current_serial_and_batch_bundle
+		doc = frappe.get_doc("Serial and Batch Bundle", current_sabb)
+		for row in doc.entries:
+			self.assertEqual(row.batch_no, batches[0].batch_no)
+			self.assertEqual(row.qty, batches[0].qty * -1)
+
+		batch_qty = get_batch_qty(batches[0].batch_no, warehouse, item.name)
+		self.assertEqual(batch_qty, 100)
+
+		for row in frappe.get_all("Repost Item Valuation", filters={"voucher_no": sr.name}):
+			rdoc = frappe.get_doc("Repost Item Valuation", row.name)
+			rdoc.cancel()
+			rdoc.delete()
+
+		sr.cancel()
+
+		for row in frappe.get_all(
+			"Serial and Batch Bundle", fields=["docstatus"], filters={"voucher_no": sr.name}
+		):
+			self.assertEqual(row.docstatus, 2)
+
+	def test_not_reconcile_all_serial_nos(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.utils import get_incoming_rate
+
+		item = self.make_item(
+			"Test Serial NO Item Not Reconcile All Serial Batch",
+			{
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SNN-TEST-BATCH-NRALL-S-.###",
+			},
+		)
+
+		warehouse = "_Test Warehouse - _TC"
+
+		serial_nos = []
+		for qty in [5, 5, 5]:
+			se = make_stock_entry(
+				item_code=item.name,
+				target=warehouse,
+				qty=qty,
+				basic_rate=100 + qty,
+				posting_date=nowdate(),
+			)
+
+			serial_nos.extend(get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle))
+
+		sr = create_stock_reconciliation(
+			item_code=item.name,
+			warehouse=warehouse,
+			qty=5,
+			rate=1000,
+			reconcile_all_serial_batch=0,
+			serial_no=serial_nos[0:5],
+		)
+
+		sr.reload()
+		current_sabb = sr.items[0].current_serial_and_batch_bundle
+		doc = frappe.get_doc("Serial and Batch Bundle", current_sabb)
+		for row in doc.entries:
+			self.assertEqual(row.serial_no, serial_nos[row.idx - 1])
+
+		sabb = sr.items[0].serial_and_batch_bundle
+		doc = frappe.get_doc("Serial and Batch Bundle", sabb)
+		for row in doc.entries:
+			self.assertEqual(row.qty, 1)
+			self.assertAlmostEqual(row.incoming_rate, 1000.00)
+			self.assertEqual(row.serial_no, serial_nos[row.idx - 1])
+
 
 def create_batch_item_with_batch(item_name, batch_id):
 	batch_item_doc = create_item(item_name, is_stock_item=1)
@@ -1193,12 +1304,16 @@ def create_stock_reconciliation(**args):
 			)
 		).name
 
+	if args.reconcile_all_serial_batch is None:
+		args.reconcile_all_serial_batch = 1
+
 	sr.append(
 		"items",
 		{
 			"item_code": args.item_code or "_Test Item",
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"qty": args.qty,
+			"reconcile_all_serial_batch": args.reconcile_all_serial_batch,
 			"valuation_rate": args.rate,
 			"serial_no": args.serial_no if args.use_serial_batch_fields else None,
 			"batch_no": args.batch_no if args.use_serial_batch_fields else None,

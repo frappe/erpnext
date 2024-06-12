@@ -8,8 +8,11 @@ from pypika import Order
 class DeprecatedSerialNoValuation:
 	@deprecated
 	def calculate_stock_value_from_deprecarated_ledgers(self):
-		if not frappe.db.get_value(
-			"Stock Ledger Entry", {"serial_no": ("is", "set"), "is_cancelled": 0}, "name"
+		if not frappe.db.get_all(
+			"Stock Ledger Entry",
+			fields=["name"],
+			filters={"serial_no": ("is", "set"), "is_cancelled": 0, "item_code": self.sle.item_code},
+			limit=1,
 		):
 			return
 
@@ -41,6 +44,12 @@ class DeprecatedSerialNoValuation:
 		# get rate from serial nos within same company
 		incoming_values = 0.0
 		for serial_no in serial_nos:
+			sn_details = frappe.db.get_value("Serial No", serial_no, ["purchase_rate", "company"], as_dict=1)
+			if sn_details and sn_details.purchase_rate and sn_details.company == self.sle.company:
+				self.serial_no_incoming_rate[serial_no] += flt(sn_details.purchase_rate)
+				incoming_values += self.serial_no_incoming_rate[serial_no]
+				continue
+
 			table = frappe.qb.DocType("Stock Ledger Entry")
 			stock_ledgers = (
 				frappe.qb.from_(table)
