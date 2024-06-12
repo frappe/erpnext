@@ -90,7 +90,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2023-08-28 17:26:46.826501",
+ "modified": "2024-06-12 16:10:31.451257",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Department",
@@ -132,6 +132,10 @@
    "role": "HR Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Employee",
+   "select": 1
   }
  ],
  "show_name_in_global_search": 1,
