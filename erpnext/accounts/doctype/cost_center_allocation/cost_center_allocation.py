@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import add_days, format_date, getdate
+from frappe.utils import add_days, flt, format_date, getdate
 
 
 class MainCostCenterCantBeChild(frappe.ValidationError):
@@ -60,7 +60,7 @@ class CostCenterAllocation(Document):
 		self.validate_child_cost_centers()
 
 	def validate_total_allocation_percentage(self):
-		total_percentage = sum([d.percentage for d in self.get("allocation_percentages", [])])
+		total_percentage = sum([flt(d.percentage) for d in self.get("allocation_percentages", [])])
 
 		if total_percentage != 100:
 			frappe.throw(_("Total percentage against cost centers should be 100"), WrongPercentageAllocation)

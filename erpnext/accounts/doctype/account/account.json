@@ -55,8 +55,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Account Number",
-   "read_only": 1
+   "label": "Account Number"
   },
   {
    "default": "0",
@@ -74,7 +73,6 @@
    "oldfieldname": "company",
    "oldfieldtype": "Link",
    "options": "Company",
-   "read_only": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
   },

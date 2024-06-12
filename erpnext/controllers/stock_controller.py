@@ -715,6 +715,9 @@ class StockController(AccountsController):
 
 					row.db_set("rejected_serial_and_batch_bundle", None)
 
+				if row.get("current_serial_and_batch_bundle"):
+					row.db_set("current_serial_and_batch_bundle", None)
+
 	def set_serial_and_batch_bundle(self, table_name=None, ignore_validate=False):
 		if not table_name:
 			table_name = "items"
