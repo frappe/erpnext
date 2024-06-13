@@ -171,12 +171,19 @@ class PartyLedgerSummaryReport:
 		else:
 			columns += [
 				{
+					"label": _("GL Balance"),
+					"fieldname": "gl_balance",
+					"fieldtype": "Currency",
+					"options": "currency",
+					"width": 120,
+				},
+				{
 					"label": _("Supplier Group"),
 					"fieldname": "supplier_group",
 					"fieldtype": "Link",
 					"options": "Supplier Group",
 					"hidden": 1,
-				}
+				},
 			]
 
 		return columns
@@ -199,6 +206,7 @@ class PartyLedgerSummaryReport:
 						"paid_amount": 0,
 						"return_amount": 0,
 						"closing_balance": 0,
+						"gl_balance": 0,
 						"currency": company_currency,
 					}
 				),
@@ -224,6 +232,7 @@ class PartyLedgerSummaryReport:
 					self.party_data[gle.party].paid_amount -= amount
 
 		out = []
+		gl_factor = 1 if self.filters.party_type == "Customer" else -1
 		for party, row in self.party_data.items():
 			if (
 				row.opening_balance
@@ -241,6 +250,7 @@ class PartyLedgerSummaryReport:
 				for account in self.party_adjustment_accounts:
 					row["adj_" + scrub(account)] = adjustments.get(account, 0)
 
+				row.gl_balance = gl_factor * row.closing_balance
 				out.append(row)
 
 		return out
