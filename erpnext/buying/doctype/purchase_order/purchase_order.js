@@ -6,8 +6,13 @@ frappe.provide("erpnext.accounts.dimensions");
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
 frappe.ui.form.on("Purchase Order", {
+<<<<<<< HEAD
 	setup: function(frm) {
 
+=======
+	setup: function (frm) {
+		frm.ignore_doctypes_on_cancel_all = ["Unreconcile Payment", "Unreconcile Payment Entries"];
+>>>>>>> b618d685c6 (refactor: ignore unreconcile doc for PO and SO on cancel/delete)
 		if (frm.doc.is_old_subcontracting_flow) {
 			frm.set_query("reserve_warehouse", "supplied_items", function() {
 				return {
