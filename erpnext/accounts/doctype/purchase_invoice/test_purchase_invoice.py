@@ -93,7 +93,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		mr = make_material_request(item_code="_Test Item", qty=10)
 		mr.save()
 		mr.submit()
-		frappe.db.commit()
 		po = make_purchase_order(mr.name)
 		po.supplier = "_Test Supplier"
 		po.save()
@@ -104,7 +103,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.update_stock = True
 		pi.insert()
 		pi.submit()
-		frappe.db.commit()
 
 		# Check if the received quantity is updated in Material Request
 		mr.reload()
