@@ -161,7 +161,7 @@ frappe.ui.form.on("Sales Order", {
 					target: frm,
 					setters: [
 						{
-							label: "Supplier",
+							label: __("Supplier"),
 							fieldname: "supplier",
 							fieldtype: "Link",
 							options: "Supplier",
@@ -798,7 +798,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						target: me.frm,
 						setters: [
 							{
-								label: "Customer",
+								label: __("Customer"),
 								fieldname: "party_name",
 								fieldtype: "Link",
 								options: "Customer",
@@ -845,7 +845,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				} else {
 					const fields = [
 						{
-							label: "Items",
+							label: __("Items"),
 							fieldtype: "Table",
 							fieldname: "items",
 							description: __("Select BOM and Qty for Production"),
@@ -1206,7 +1206,7 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 				{
 					fieldname: "items_for_po",
 					fieldtype: "Table",
-					label: "Select Items",
+					label: __("Select Items"),
 					fields: [
 						{
 							fieldtype: "Data",
@@ -1246,14 +1246,14 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					],
 				},
 			],
-			primary_action_label: "Create Purchase Order",
+			primary_action_label: __("Create Purchase Order"),
 			primary_action(args) {
 				if (!args) return;
 
 				let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children();
 				if (selected_items.length == 0) {
 					frappe.throw({
-						message: "Please select Items from the Table",
+						message: __("Please select Items from the Table"),
 						title: __("Items Required"),
 						indicator: "blue",
 					});
