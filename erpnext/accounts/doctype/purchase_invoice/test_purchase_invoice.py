@@ -31,6 +31,8 @@ from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle 
 )
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.stock.tests.test_utils import StockTestMixin
+from erpnext.stock.doctype.material_request.test_material_request import make_material_request
+from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -71,6 +73,32 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		# teardown
 		pi.delete()
+
+	def test_update_received_qty_in_material_request(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+		"""
+		Test if the received_qty in Material Request is updated correctly when
+		a Purchase Invoice with update_stock=True is submitted.
+		"""
+		mr = make_material_request(item_code="_Test Item", qty=10)
+		mr.save()
+		mr.submit()
+		frappe.db.commit()
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.save()
+		po.submit()
+
+		# Create a Purchase Invoice with update_stock=True
+		pi = make_purchase_invoice(po.name)
+		pi.update_stock = True
+		pi.insert()
+		pi.submit()
+		frappe.db.commit()
+
+		# Check if the received quantity is updated in Material Request
+		mr.reload()
+		self.assertEqual(mr.items[0].received_qty, 10)
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
