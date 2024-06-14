@@ -86,6 +86,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 	def test_update_received_qty_in_material_request(self):
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+
 		"""
 		Test if the received_qty in Material Request is updated correctly when
 		a Purchase Invoice with update_stock=True is submitted.
