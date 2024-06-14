@@ -217,7 +217,11 @@ frappe.ui.form.on("Sales Order", {
 			frm.set_value("advance_paid", 0);
 		}
 
-		frm.ignore_doctypes_on_cancel_all = ["Purchase Order"];
+		frm.ignore_doctypes_on_cancel_all = [
+			"Purchase Order",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+		];
 	},
 
 	delivery_date: function (frm) {
