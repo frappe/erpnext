@@ -428,6 +428,12 @@ $.extend(erpnext.utils, {
 			date = frappe.datetime.get_today();
 		}
 
+		const cacheKey = JSON.stringify({ date, with_dates, boolean });
+		erpnext.utils._get_fiscal_year_cache ??= {};
+		if (erpnext.utils._get_fiscal_year_cache[cacheKey] !== undefined) {
+			return erpnext.utils._get_fiscal_year_cache[cacheKey];
+		}
+
 		let fiscal_year = "";
 		frappe.call({
 			method: "erpnext.accounts.utils.get_fiscal_year",
@@ -443,6 +449,7 @@ $.extend(erpnext.utils, {
 				}
 			},
 		});
+		erpnext.utils._get_fiscal_year_cache[cacheKey] = fiscal_year;
 		return fiscal_year;
 	},
 });
