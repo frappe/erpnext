@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-12 16:38\n"
+"PO-Revision-Date: 2024-06-15 15:16\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -509,7 +509,7 @@ msgstr "% تکمیل شده"
 #: manufacturing/doctype/bom/bom.js:788
 #, python-format
 msgid "% Finished Item Quantity"
-msgstr ""
+msgstr "% مقدار آیتم تمام شده"
 
 #. Label of a Percent field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -3552,43 +3552,43 @@ msgstr "ارسال واقعی"
 #: stock/report/product_bundle_balance/product_bundle_balance.py:96
 #: stock/report/stock_projected_qty/stock_projected_qty.py:136
 msgid "Actual Qty"
-msgstr "تعداد واقعی"
+msgstr "مقدار واقعی"
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Actual Qty"
-msgstr "تعداد واقعی"
+msgstr "مقدار واقعی"
 
 #. Label of a Float field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Actual Qty"
-msgstr "تعداد واقعی"
+msgstr "مقدار واقعی"
 
 #. Label of a Float field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Actual Qty"
-msgstr "تعداد واقعی"
+msgstr "مقدار واقعی"
 
 #. Label of a Float field in DocType 'Production Plan Sub Assembly Item'
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgctxt "Production Plan Sub Assembly Item"
 msgid "Actual Qty"
-msgstr "تعداد واقعی"
+msgstr "مقدار واقعی"
 
 #. Label of a Float field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Actual Qty"
-msgstr "تعداد واقعی"
+msgstr "مقدار واقعی"
 
 #. Label of a Float field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Actual Qty"
-msgstr "تعداد واقعی"
+msgstr "مقدار واقعی"
 
 #. Label of a Float field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -9156,19 +9156,19 @@ msgstr "تعداد موجود در انبار هدف"
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgctxt "Work Order Item"
 msgid "Available Qty at WIP Warehouse"
-msgstr "تعداد در انبار WIP موجود است"
+msgstr "مقدار موجود در انبار «کار در حال انجام»"
 
 #. Label of a Float field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Available Qty at Warehouse"
-msgstr "تعداد در انبار موجود است"
+msgstr "مقدار موجود در انبار"
 
 #. Label of a Float field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Available Qty at Warehouse"
-msgstr "تعداد در انبار موجود است"
+msgstr "مقدار موجود در انبار"
 
 #: stock/report/reserved_stock/reserved_stock.py:138
 msgid "Available Qty to Reserve"
@@ -9570,7 +9570,7 @@ msgstr "زمان عملیات BOM"
 
 #: manufacturing/report/bom_stock_report/bom_stock_report.py:27
 msgid "BOM Qty"
-msgstr ""
+msgstr "مقدار BOM"
 
 #: stock/report/item_prices/item_prices.py:60
 msgid "BOM Rate"
@@ -13706,7 +13706,7 @@ msgstr "انبار فرزند برای این انبار وجود دارد. شم
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgctxt "Asset Capitalization"
 msgid "Choose a WIP composite asset"
-msgstr "یک دارایی ترکیبی WIP را انتخاب کنید"
+msgstr "یک دارایی ترکیبی «کار در حال انجام» را انتخاب کنید"
 
 #: projects/doctype/task/task.py:228
 msgid "Circular Reference Error"
@@ -13865,7 +13865,7 @@ msgstr "شناسه مشتری"
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Client Secret"
-msgstr "راز مشتری"
+msgstr ""
 
 #: buying/doctype/purchase_order/purchase_order.js:327
 #: buying/doctype/purchase_order/purchase_order_list.js:49
@@ -15898,25 +15898,25 @@ msgstr "عملیات تکمیل شده"
 #: manufacturing/doctype/job_card_operation/job_card_operation.json
 msgctxt "Job Card Operation"
 msgid "Completed Qty"
-msgstr "تعداد تکمیل شده"
+msgstr "مقدار تکمیل شده"
 
 #. Label of a Float field in DocType 'Job Card Time Log'
 #: manufacturing/doctype/job_card_time_log/job_card_time_log.json
 msgctxt "Job Card Time Log"
 msgid "Completed Qty"
-msgstr "تعداد تکمیل شده"
+msgstr "مقدار تکمیل شده"
 
 #. Label of a Float field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Completed Qty"
-msgstr "تعداد تکمیل شده"
+msgstr "مقدار تکمیل شده"
 
 #. Label of a Float field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgctxt "Work Order Operation"
 msgid "Completed Qty"
-msgstr "تعداد تکمیل شده"
+msgstr "مقدار تکمیل شده"
 
 #: manufacturing/doctype/work_order/work_order.py:902
 msgid "Completed Qty cannot be greater than 'Qty to Manufacture'"
@@ -22440,37 +22440,37 @@ msgstr "اقلام تحویل شده برای صدور صورت حساب"
 #: stock/report/reserved_stock/reserved_stock.py:131
 #: stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py:63
 msgid "Delivered Qty"
-msgstr "تعداد تحویل داده شد"
+msgstr "مقدار تحویل داده شد"
 
 #. Label of a Float field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Delivered Qty"
-msgstr "تعداد تحویل داده شد"
+msgstr "مقدار تحویل داده شد"
 
 #. Label of a Float field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Delivered Qty"
-msgstr "تعداد تحویل داده شد"
+msgstr "مقدار تحویل داده شد"
 
 #. Label of a Float field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Delivered Qty"
-msgstr "تعداد تحویل داده شد"
+msgstr "مقدار تحویل داده شد"
 
 #. Label of a Float field in DocType 'Serial and Batch Entry'
 #: stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
 msgctxt "Serial and Batch Entry"
 msgid "Delivered Qty"
-msgstr "تعداد تحویل داده شد"
+msgstr "مقدار تحویل داده شد"
 
 #. Label of a Float field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Delivered Qty"
-msgstr "تعداد تحویل داده شد"
+msgstr "مقدار تحویل داده شد"
 
 #: selling/report/item_wise_sales_history/item_wise_sales_history.py:101
 msgid "Delivered Quantity"
@@ -26964,7 +26964,7 @@ msgstr "مقدار کالایی را که از این صورتحساب مواد 
 
 #: manufacturing/doctype/work_order/work_order.js:878
 msgid "Enter the quantity to manufacture. Raw material Items will be fetched only when this is set."
-msgstr "مقدار تولید را وارد کنید اقلام مواد خام فقط زمانی واکشی می شوند که این تنظیم شود."
+msgstr ""
 
 #: selling/page/point_of_sale/pos_payment.js:411
 msgid "Enter {0} amount."
@@ -27956,7 +27956,7 @@ msgstr "مقدار مصرف اضافی"
 
 #: manufacturing/doctype/job_card/job_card.py:193
 msgid "Extra Job Card Quantity"
-msgstr "تعداد کارت شغلی اضافی"
+msgstr "مقدار کارت شغلی اضافی"
 
 #: setup/setup_wizard/operations/install_fixtures.py:226
 msgid "Extra Large"
@@ -27982,7 +27982,7 @@ msgstr "آیتم کالای تمام شده"
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "FG Qty from Transferred Raw Materials"
-msgstr "تعداد FG از مواد خام انتقال یافته"
+msgstr "مقدار کالای تمام شده از مواد خام انتقال یافته"
 
 #. Label of a Data field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -28748,7 +28748,7 @@ msgstr "تعداد آیتم کالای تمام شده"
 #: subcontracting/doctype/subcontracting_order_service_item/subcontracting_order_service_item.json
 msgctxt "Subcontracting Order Service Item"
 msgid "Finished Good Item Quantity"
-msgstr "تعداد آیتم کالای تمام شده"
+msgstr ""
 
 #: controllers/accounts_controller.py:3282
 msgid "Finished Good Item is not specified for service item {0}"
@@ -28772,13 +28772,13 @@ msgstr "تعداد کالای تمام شده"
 #: subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
 msgctxt "Subcontracting BOM"
 msgid "Finished Good Qty"
-msgstr "آیتم کالای تمام شده"
+msgstr "تعداد کالای تمام شده"
 
 #. Label of a Float field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgctxt "Stock Entry"
 msgid "Finished Good Quantity "
-msgstr "تعداد کالای تمام شده "
+msgstr ""
 
 #. Label of a Link field in DocType 'Subcontracting BOM'
 #: subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
@@ -29164,7 +29164,7 @@ msgstr "برای تامین کننده پیش فرض (اختیاری)"
 #: manufacturing/doctype/plant_floor/plant_floor.js:159
 #: manufacturing/doctype/plant_floor/plant_floor.js:183
 msgid "For Item"
-msgstr ""
+msgstr "برای آیتم"
 
 #: controllers/stock_controller.py:978
 msgid "For Item {0} cannot be received more than {1} qty against the {2} {3}"
@@ -32567,7 +32567,7 @@ msgstr "نادیده گرفتن تعداد سفارش شده موجود"
 
 #: manufacturing/doctype/production_plan/production_plan.py:1611
 msgid "Ignore Existing Projected Quantity"
-msgstr "کمیت پیش بینی شده موجود را نادیده بگیرید"
+msgstr ""
 
 #. Label of a Check field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -33512,7 +33512,7 @@ msgstr "اقلام غیر فعال فروش"
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Inactive Status"
-msgstr ""
+msgstr "وضعیت غیر فعال"
 
 #: selling/report/sales_person_commission_summary/sales_person_commission_summary.py:93
 msgid "Incentives"
@@ -33691,7 +33691,7 @@ msgstr "موجودی ایمنی را در محاسبه مقدار مورد نی�
 
 #: manufacturing/report/production_planning_report/production_planning_report.js:87
 msgid "Include Sub-assembly Raw Materials"
-msgstr ""
+msgstr "شامل مواد اولیه زیر مونتاژ"
 
 #. Label of a Check field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
@@ -36064,7 +36064,7 @@ msgstr "برای واکشی جزئیات مورد نیاز است."
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:156
 msgid "It's not possible to distribute charges equally when total amount is zero, please set 'Distribute Charges Based On' as 'Quantity'"
-msgstr "وقتی مبلغ کل صفر است، نمی توان هزینه ها را به طور مساوی تقسیم کرد، لطفاً «توزیع هزینه ها بر اساس» را به عنوان «تعداد» تنظیم کنید."
+msgstr ""
 
 #. Name of a DocType
 #: accounts/report/inactive_sales_items/inactive_sales_items.js:15
@@ -38021,7 +38021,7 @@ msgstr "گونه آیتم {0} با همان ویژگی ها وجود دارد"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:81
 msgid "Item {0} cannot be added as a sub-assembly of itself"
-msgstr ""
+msgstr "آیتم {0} را نمی توان به عنوان یک زیر مونتاژ از خودش اضافه کرد"
 
 #: manufacturing/doctype/blanket_order/blanket_order.py:189
 msgid "Item {0} cannot be ordered more than {1} against Blanket Order {2}."
@@ -39643,7 +39643,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Workstation'
 #: manufacturing/onboarding_step/workstation/workstation.json
 msgid "Let’s create a Workstation"
-msgstr ""
+msgstr "بیایید یک ایستگاه کار ایجاد کنیم"
 
 #. Label of an action in the Onboarding Step 'Update Stock Opening Balance'
 #: stock/onboarding_step/stock_opening_balance/stock_opening_balance.json
@@ -41862,7 +41862,7 @@ msgstr "درخواست‌های موادی که برای آنها پیش فاک�
 
 #: stock/doctype/stock_entry/stock_entry_list.js:13
 msgid "Material Returned from WIP"
-msgstr "مواد از WIP برگردانده شد"
+msgstr "مواد برگردانده شده از «کار در حال انجام»"
 
 #: manufacturing/doctype/job_card/job_card.js:64
 #: stock/doctype/material_request/material_request.js:124
@@ -42037,7 +42037,7 @@ msgstr "حداکثر تعداد (بر اساس موجودی UOM)"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Max Sample Quantity"
-msgstr "حداکثر تعداد نمونه"
+msgstr "حداکثر مقدار نمونه"
 
 #. Label of a Float field in DocType 'Supplier Scorecard Criteria'
 #: buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.json
@@ -44997,7 +44997,7 @@ msgstr "هیچ کدام"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:373
 msgid "None of the items have any change in quantity or value."
-msgstr "هیچ یک از اقلام هیچ تغییری در کمیت یا ارزش ندارند."
+msgstr "هیچ یک از آیتم‌ها هیچ تغییری در مقدار یا ارزش ندارند."
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -50260,7 +50260,7 @@ msgstr "درصدی که مجاز به سفارش آن هستید فراتر از
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Percentage you are allowed to sell beyond the Blanket Order quantity."
-msgstr "درصدی که مجاز به فروش آن هستید فراتر از مقدار سفارش بلانکت."
+msgstr "درصدی که مجاز به فروش آن هستید فراتر از مقدار سفارش کلی."
 
 #. Description of the 'Over Transfer Allowance (%)' (Float) field in DocType
 #. 'Buying Settings'
@@ -54432,7 +54432,7 @@ msgstr "خلاصه برنامه تولید"
 #. Title of an Onboarding Step
 #: manufacturing/onboarding_step/production_planning/production_planning.json
 msgid "Production Planning"
-msgstr ""
+msgstr "برنامه ریزی تولید"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
@@ -55038,49 +55038,49 @@ msgstr "داده های پروژه محور برای پیش فاکتور در د
 #: stock/report/stock_projected_qty/stock_projected_qty.py:199
 #: templates/emails/reorder_item.html:12
 msgid "Projected Qty"
-msgstr "تعداد پیش بینی شده"
+msgstr "مقدار پیش بینی شده"
 
 #. Label of a Float field in DocType 'Bin'
 #: stock/doctype/bin/bin.json
 msgctxt "Bin"
 msgid "Projected Qty"
-msgstr "تعداد پیش بینی شده"
+msgstr "مقدار پیش بینی شده"
 
 #. Label of a Float field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Projected Qty"
-msgstr "تعداد پیش بینی شده"
+msgstr "مقدار پیش بینی شده"
 
 #. Label of a Float field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "Projected Qty"
-msgstr "تعداد پیش بینی شده"
+msgstr "مقدار پیش بینی شده"
 
 #. Label of a Float field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
 msgctxt "Packed Item"
 msgid "Projected Qty"
-msgstr "تعداد پیش بینی شده"
+msgstr "مقدار پیش بینی شده"
 
 #. Label of a Float field in DocType 'Production Plan Sub Assembly Item'
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgctxt "Production Plan Sub Assembly Item"
 msgid "Projected Qty"
-msgstr "تعداد پیش بینی شده"
+msgstr "مقدار پیش بینی شده"
 
 #. Label of a Float field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Projected Qty"
-msgstr "تعداد پیش بینی شده"
+msgstr "مقدار پیش بینی شده"
 
 #. Label of a Float field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Projected Qty"
-msgstr "تعداد پیش بینی شده"
+msgstr "مقدار پیش بینی شده"
 
 #: stock/report/item_shortage_report/item_shortage_report.py:130
 msgid "Projected Quantity"
@@ -55092,7 +55092,7 @@ msgstr ""
 
 #: stock/page/stock_balance/stock_balance.js:51
 msgid "Projected qty"
-msgstr "تعداد پیش بینی شده"
+msgstr "مقدار پیش بینی شده"
 
 #. Name of a Workspace
 #. Label of a Card Break in the Projects Workspace
@@ -57129,128 +57129,128 @@ msgstr "هدف بررسی کیفیت"
 #: templates/emails/reorder_item.html:10 templates/generators/bom.html:30
 #: templates/pages/material_request_info.html:48 templates/pages/order.html:98
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'BOM Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgctxt "BOM Creator"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Blanket Order Item'
 #: manufacturing/doctype/blanket_order_item/blanket_order_item.json
 msgctxt "Blanket Order Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 msgctxt "Delivery Note Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Data field in DocType 'Opening Invoice Creation Tool Item'
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 msgctxt "Opening Invoice Creation Tool Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'POS Invoice Item'
 #: accounts/doctype/pos_invoice_item/pos_invoice_item.json
 msgctxt "POS Invoice Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Section Break field in DocType 'Packing Slip Item'
 #. Label of a Float field in DocType 'Packing Slip Item'
 #: stock/doctype/packing_slip_item/packing_slip_item.json
 msgctxt "Packing Slip Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Section Break field in DocType 'Pick List Item'
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgctxt "Pick List Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Quotation Item'
 #: selling/doctype/quotation_item/quotation_item.json
 msgctxt "Quotation Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Request for Quotation Item'
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 msgctxt "Request for Quotation Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Sales Invoice Item'
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 msgctxt "Sales Invoice Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 msgctxt "Sales Order Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Section Break field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Stock Reconciliation Item'
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Subcontracting Order Service Item'
 #: subcontracting/doctype/subcontracting_order_service_item/subcontracting_order_service_item.json
 msgctxt "Subcontracting Order Service Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Int field in DocType 'Subscription Plan Detail'
 #: accounts/doctype/subscription_plan_detail/subscription_plan_detail.json
 msgctxt "Subscription Plan Detail"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Label of a Float field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Quantity"
-msgstr "تعداد"
+msgstr "مقدار"
 
 #. Description of the 'Packing Unit' (Int) field in DocType 'Item Price'
 #: stock/doctype/item_price/item_price.json
@@ -57268,13 +57268,13 @@ msgstr "مقدار و موجودی"
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 msgctxt "Stock Reconciliation Item"
 msgid "Quantity Difference"
-msgstr "تفاوت کمیت"
+msgstr "تفاوت مقدار"
 
 #. Label of a Section Break field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Quantity and Amount"
-msgstr "مقدار و مقدار"
+msgstr "مقدار و میزان"
 
 #. Label of a Section Break field in DocType 'Production Plan Item'
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
@@ -57372,7 +57372,7 @@ msgstr "مقدار در ردیف {0} ({1}) باید با مقدار تولید �
 
 #: manufacturing/doctype/plant_floor/plant_floor.js:246
 msgid "Quantity is required"
-msgstr ""
+msgstr "مقدار مورد نیاز است"
 
 #: stock/dashboard/item_dashboard.js:281
 msgid "Quantity must be greater than zero, and less or equal to {0}"
@@ -60206,7 +60206,7 @@ msgstr ""
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:381
 msgid "Removed items with no change in quantity or value."
-msgstr "موارد حذف شده بدون تغییر در کمیت یا ارزش."
+msgstr "آیتم‌های حذف شده بدون تغییر در مقدار یا ارزش."
 
 #: utilities/doctype/rename_tool/rename_tool.js:24
 msgid "Rename"
@@ -64482,13 +64482,13 @@ msgstr "همان تامین کننده چندین بار وارد شده است"
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Sample Quantity"
-msgstr "تعداد نمونه"
+msgstr "مقدار نمونه"
 
 #. Label of a Int field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgctxt "Stock Entry Detail"
 msgid "Sample Quantity"
-msgstr "تعداد نمونه"
+msgstr "مقدار نمونه"
 
 #. Label of a Link field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -65183,7 +65183,7 @@ msgstr "تامین کننده احتمالی را انتخاب کنید"
 #: manufacturing/doctype/work_order/work_order.js:781
 #: stock/doctype/pick_list/pick_list.js:192
 msgid "Select Quantity"
-msgstr "تعداد را انتخاب کنید"
+msgstr "مقدار را انتخاب کنید"
 
 #: public/js/utils/sales_common.js:360
 #: selling/page/point_of_sale/pos_item_details.js:212
@@ -66825,7 +66825,7 @@ msgstr "پروژه و همه وظایف روی وضعیت {0} تنظیم شود�
 
 #: manufacturing/doctype/bom/bom.js:801
 msgid "Set Quantity"
-msgstr "مقدار را تنظیم کنید"
+msgstr "تنظیم مقدار"
 
 #. Label of a Link field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
@@ -67993,7 +67993,7 @@ msgstr "از یادداشت تحویل صرف نظر کنید"
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Skip Material Transfer to WIP Warehouse"
-msgstr "از انتقال مواد به انبار WIP پرش کنید"
+msgstr "از انتقال مواد به انبار «کار در حال انجام» پرش کنید"
 
 #. Option for the 'Status' (Select) field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
@@ -69265,7 +69265,7 @@ msgstr "جزئیات وضعیت"
 #: manufacturing/doctype/workstation/workstation.json
 msgctxt "Workstation"
 msgid "Status Illustration"
-msgstr ""
+msgstr "مصور سازی وضعیت"
 
 #: projects/doctype/project/project.py:717
 msgid "Status must be Cancelled or Completed"
@@ -69626,37 +69626,37 @@ msgstr "مقدار موجودی پیش بینی شده"
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:311
 #: stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:34
 msgid "Stock Qty"
-msgstr "تعداد موجودی"
+msgstr "مقدار موجودی"
 
 #. Label of a Float field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "Stock Qty"
-msgstr "تعداد موجودی"
+msgstr "مقدار موجودی"
 
 #. Label of a Float field in DocType 'BOM Explosion Item'
 #: manufacturing/doctype/bom_explosion_item/bom_explosion_item.json
 msgctxt "BOM Explosion Item"
 msgid "Stock Qty"
-msgstr "تعداد موجودی"
+msgstr "مقدار موجودی"
 
 #. Label of a Float field in DocType 'BOM Item'
 #: manufacturing/doctype/bom_item/bom_item.json
 msgctxt "BOM Item"
 msgid "Stock Qty"
-msgstr "تعداد موجودی"
+msgstr "مقدار موجودی"
 
 #. Label of a Float field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Stock Qty"
-msgstr "تعداد موجودی"
+msgstr "مقدار موجودی"
 
 #. Label of a Float field in DocType 'Pick List Item'
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgctxt "Pick List Item"
 msgid "Stock Qty"
-msgstr "تعداد موجودی"
+msgstr "مقدار موجودی"
 
 #. Name of a report
 #: stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.json
@@ -71112,19 +71112,19 @@ msgstr "آیتم‌های عرضه شده"
 
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:152
 msgid "Supplied Qty"
-msgstr "تعداد عرضه شده"
+msgstr "مقدار عرضه شده"
 
 #. Label of a Float field in DocType 'Purchase Order Item Supplied'
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
 msgctxt "Purchase Order Item Supplied"
 msgid "Supplied Qty"
-msgstr "تعداد عرضه شده"
+msgstr "مقدار عرضه شده"
 
 #. Label of a Float field in DocType 'Subcontracting Order Supplied Item'
 #: subcontracting/doctype/subcontracting_order_supplied_item/subcontracting_order_supplied_item.json
 msgctxt "Subcontracting Order Supplied Item"
 msgid "Supplied Qty"
-msgstr "تعداد عرضه شده"
+msgstr "مقدار عرضه شده"
 
 #. Name of a DocType
 #. Label of a Card Break in the Buying Workspace
@@ -80404,13 +80404,13 @@ msgstr ""
 
 #: stock/report/reserved_stock/reserved_stock.py:117
 msgid "Voucher Qty"
-msgstr "تعداد کوپن"
+msgstr "مقدار کوپن"
 
 #. Label of a Float field in DocType 'Stock Reservation Entry'
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
 msgctxt "Stock Reservation Entry"
 msgid "Voucher Qty"
-msgstr "تعداد کوپن"
+msgstr "مقدار کوپن"
 
 #: accounts/report/general_ledger/general_ledger.py:630
 msgid "Voucher Subtype"
@@ -80557,35 +80557,35 @@ msgstr "هشدار: برنامه Exotel از ERPNext جدا شده است، لط
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "WIP Composite Asset"
-msgstr "دارایی ترکیبی WIP"
+msgstr "دارایی ترکیبی «کار در حال انجام»"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "WIP Composite Asset"
-msgstr "دارایی ترکیبی WIP"
+msgstr "دارایی ترکیبی «کار در حال انجام»"
 
 #. Label of a Link field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "WIP Composite Asset"
-msgstr "دارایی ترکیبی WIP"
+msgstr "دارایی ترکیبی «کار در حال انجام»"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "WIP Composite Asset"
-msgstr "دارایی ترکیبی WIP"
+msgstr "دارایی ترکیبی «کار در حال انجام»"
 
 #: manufacturing/doctype/work_order/work_order_calendar.js:44
 msgid "WIP Warehouse"
-msgstr "انبار WIP"
+msgstr "انبار «کار در حال انجام»"
 
 #. Label of a Link field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "WIP Warehouse"
-msgstr "انبار WIP"
+msgstr "انبار «کار در حال انجام»"
 
 #. Label of a Currency field in DocType 'Workstation'
 #: manufacturing/doctype/workstation/workstation.json
