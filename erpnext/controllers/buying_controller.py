@@ -8,6 +8,7 @@ from frappe.contacts.doctype.address.address import render_address
 from frappe.utils import cint, flt, getdate
 from frappe.utils.data import nowtime
 
+import erpnext
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.party import get_party_details
 from erpnext.buying.utils import update_last_purchase_rate, validate_for_items
@@ -331,6 +332,8 @@ class BuyingController(SubcontractingController):
 					) / qty_in_stock_uom
 			else:
 				item.valuation_rate = 0.0
+
+		update_regional_item_valuation_rate(self)
 
 	def set_incoming_rate(self):
 		if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Purchase Order"):
@@ -935,3 +938,8 @@ def validate_item_type(doc, fieldname, message):
 			).format(items, message)
 
 		frappe.throw(error_message)
+
+
+@erpnext.allow_regional
+def update_regional_item_valuation_rate(doc):
+	pass
