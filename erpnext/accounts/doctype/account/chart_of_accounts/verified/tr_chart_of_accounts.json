@@ -9,7 +9,20 @@
                 "account_number": "10",
                 "KASA": {
                     "account_number": "100",
-                    "is_group": 1
+                    "is_group": 1,
+                    "account_type": "Cash",
+                    "TL KASA": {
+                        "account_number": "100.01",
+                        "account_type": "Cash"
+                    },
+                    "EUR KASA": {
+                        "account_number": "100.02",
+                        "account_type": "Cash"
+                    },
+                    "USD KASA": {
+                        "account_number": "100.03",
+                        "account_type": "Cash"
+                    }
                 },
                 "ALINAN \u00c7EKLER": {
                     "account_number": "101",
@@ -17,7 +30,8 @@
                 },
                 "BANKALAR": {
                     "account_number": "102",
-                    "is_group": 1
+                    "is_group": 1,
+                    "account_type": "Bank"
                 },
                 "VER\u0130LEN \u00c7EKLER VE \u00d6DEME EM\u0130RLER\u0130(-)": {
                     "account_number": "103",
@@ -55,9 +69,9 @@
                 "account_number": "12",
                 "ALICILAR": {
                     "account_number": "120",
-
                     "ALICILAR": {
-                        "account_number": "120.01"
+                        "account_number": "120.01",
+                        "account_type": "Receivable"
                     }
                 },
                 "ALACAK SENETLER\u0130": {
@@ -145,7 +159,8 @@
                 "D\u0130\u011eER STOKLAR": {
                     "account_number": "157",
                     "D\u0130\u011eR. STOK.": {
-                        "account_number": "157.01"
+                        "account_number": "157.01",
+                        "account_type": "Stock"
                     }
                 },
                 "STOK DE\u011eER D\u00dc\u015e\u00dcKL\u00dc\u011e\u00dc KAR\u015eILI\u011eI(-)": {
@@ -198,19 +213,24 @@
                     "\u0130ND\u0130R\u0130LECEK KDV": {
                         "account_number": "191.01",
                         "% 18'L\u0130K \u0130ND\u0130R\u0130LECEK KDV": {
-                            "account_number": "191.01.01"
+                            "account_number": "191.01.01",
+                            "account_type": "Tax"
                         },
                         "% 8'L\u0130K \u0130ND\u0130R\u0130LECEK KDV": {
-                            "account_number": "191.01.02"
+                            "account_number": "191.01.02",
+                            "account_type": "Tax"
                         },
                         "% 1'L\u0130K \u0130ND\u0130R\u0130LECEK KDV": {
-                            "account_number": "191.01.03"
+                            "account_number": "191.01.03",
+                            "account_type": "Tax"
                         },
                         "% 20'L\u0130K \u0130ND\u0130R\u0130LECEK KDV": {
-                            "account_number": "191.01.04"
+                            "account_number": "191.01.04",
+                            "account_type": "Tax"
                         },
                         "% 10'L\u0130K \u0130ND\u0130R\u0130LECEK KDV": {
-                            "account_number": "191.01.05"
+                            "account_number": "191.01.05",
+                            "account_type": "Tax"
                         }
                     }
                 },
@@ -310,7 +330,8 @@
                 "BA\u011eLI MENKUL KIYMETLER": {
                     "account_number": "240",
                     "BA\u011eL. MEKL. KIYM.": {
-                        "account_number": "240.01"
+                        "account_number": "240.01",
+                        "account_type": "Fixed Asset"
                     }
                 },
                 "BA\u011eLI MENKUL KIYMETLER DE\u011eER D\u00dc\u015e\u00dcKL\u00dc\u011e\u00dc KAR\u015eILI\u011eI(-)": {
@@ -414,7 +435,8 @@
                 "\u00d6ZEL MAL\u0130YETLER": {
                     "account_number": "264",
                     "\u00d6ZL. MAL\u0130YT.": {
-                        "account_number": "264.01"
+                        "account_number": "264.01",
+                        "account_type": "Depreciation"
                     }
                 },
                 "D\u0130\u011eER MADD\u0130 OLMAYAN DURAN VARLIKLAR": {
@@ -672,19 +694,24 @@
                     "HESAPL. KDV": {
                         "account_number": "391.01",
                         "% 18 HESAPLAN KDV": {
-                            "account_number": "391.01.01"
+                            "account_number": "391.01.01",
+                            "account_type": "Tax"
                         },
                         "% 8 HESAPLANAN KDV": {
-                            "account_number": "391.01.02"
+                            "account_number": "391.01.02",
+                            "account_type": "Tax"
                         },
                         "% 1 HESAPLANAN KDV": {
-                            "account_number": "391.01.03"
+                            "account_number": "391.01.03",
+                            "account_type": "Tax"
                         },
                         "% 20 HESAPLANAN KDV": {
-                            "account_number": "391.01.04"
+                            "account_number": "391.01.04",
+                            "account_type": "Tax"
                         },
                         "% 10 HESAPLANAN KDV": {
-                            "account_number": "391.01.05"
+                            "account_number": "391.01.05",
+                            "account_type": "Tax"
                         }
                     }
                 },
@@ -982,7 +1009,6 @@
                 },
                 "D\u0130\u011eER SATI\u015eLARIN MAL\u0130YET\u0130(-)": {
                     "account_number": "623",
-
                     "D\u0130\u011eR. SAT\u015e. MALYT.": {
                         "account_number": "623.01"
                     }
@@ -1438,7 +1464,8 @@
             "STOK AYARLAMA": {
                 "account_number": "940",
                 "STOK SAYIM AYARLAMA": {
-                    "account_number": "940.01"
+                    "account_number": "940.01",
+                    "account_type": "Stock Adjustment"
                 }
             }
         }
