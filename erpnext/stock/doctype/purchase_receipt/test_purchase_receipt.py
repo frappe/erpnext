@@ -2426,7 +2426,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.reload()
 		self.assertEqual(pr.per_billed, 100)
 
-<<<<<<< HEAD
 	def test_purchase_receipt_with_use_serial_batch_field_for_rejected_qty(self):
 		batch_item = make_item(
 			"_Test Purchase Receipt Batch Item For Rejected Qty",
@@ -2913,7 +2912,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 				"Serial and Batch Bundle", return_pr.items[0].rejected_serial_and_batch_bundle, "total_qty"
 			),
 		)
-=======
+
 	def test_valuation_taxes_lcv_repost_after_billing(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			make_landed_cost_voucher,
@@ -2960,15 +2959,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			(warehouse_account[pr.items[0].warehouse]["account"], 14000, 0, "Main - _TC"),
 		)
 		self.assertSequenceEqual(expected_gle, gl_entries)
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> 53642e7417 (test: LCV entries after billing)
-=======
-		frappe.db.rollback()
->>>>>>> 8b3d46610e (fix: parameters for PI references)
-=======
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
->>>>>>> 0b36cbe307 (fix: reset perpetual inventory flag after test)
 
 
 def prepare_data_for_internal_transfer():
