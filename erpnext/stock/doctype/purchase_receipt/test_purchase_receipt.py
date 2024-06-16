@@ -2301,71 +2301,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for index, d in enumerate(data):
 			self.assertEqual(d.qty_after_transaction, 11 + index)
 
-<<<<<<< HEAD
-=======
-	def test_auto_set_batch_based_on_bundle(self):
-		item_code = make_item(
-			"_Test Auto Set Batch Based on Bundle",
-			properties={
-				"has_batch_no": 1,
-				"batch_number_series": "BATCH-BNU-TASBBB-.#####",
-				"create_new_batch": 1,
-			},
-		).name
-
-		frappe.db.set_single_value(
-			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 0
-		)
-
-		pr = make_purchase_receipt(
-			item_code=item_code,
-			qty=5,
-			rate=100,
-		)
-
-		self.assertTrue(pr.items[0].batch_no)
-		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
-		self.assertEqual(pr.items[0].batch_no, batch_no)
-
-		frappe.db.set_single_value(
-			"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle", 1
-		)
-
-	def test_pr_billed_amount_against_return_entry(self):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
-			make_purchase_invoice as make_pi_from_pr,
-		)
-
-		# Create a Purchase Receipt and Fully Bill it
-		pr = make_purchase_receipt(qty=10)
-		pi = make_pi_from_pr(pr.name)
-		pi.insert()
-		pi.submit()
-
-		# Debit Note - 50% Qty & enable updating PR billed amount
-		pi_return = make_debit_note(pi.name)
-		pi_return.items[0].qty = -5
-		pi_return.update_billed_amount_in_purchase_receipt = 1
-		pi_return.submit()
-
-		# Check if the billed amount reduced
-		pr.reload()
-		self.assertEqual(pr.per_billed, 50)
-
-		pi_return.reload()
-		pi_return.cancel()
-
-		# Debit Note - 50% Qty & disable updating PR billed amount
-		pi_return = make_debit_note(pi.name)
-		pi_return.items[0].qty = -5
-		pi_return.update_billed_amount_in_purchase_receipt = 0
-		pi_return.submit()
-
-		# Check if the billed amount stayed the same
-		pr.reload()
-		self.assertEqual(pr.per_billed, 100)
-
 	def test_valuation_taxes_lcv_repost_after_billing(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			make_landed_cost_voucher,
@@ -2414,7 +2349,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertSequenceEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
 
->>>>>>> 53642e7417 (test: LCV entries after billing)
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
