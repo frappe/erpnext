@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-15 15:16\n"
+"PO-Revision-Date: 2024-06-16 15:18\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -7657,7 +7657,7 @@ msgstr "جزئیات قرار ملاقات"
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.json
 msgctxt "Appointment Booking Settings"
 msgid "Appointment Duration (In Minutes)"
-msgstr "مدت قرار (در چند دقیقه)"
+msgstr ""
 
 #: www/book_appointment/index.py:20
 msgid "Appointment Scheduling Disabled"
@@ -12435,7 +12435,7 @@ msgstr "نمی توان روش ارزش گذاری را تغییر داد، زی
 
 #: templates/pages/task_info.html:24
 msgid "Cancel"
-msgstr "لغو کنید"
+msgstr "لغو"
 
 #. Label of a Check field in DocType 'Subscription'
 #: accounts/doctype/subscription/subscription.json
@@ -18314,7 +18314,7 @@ msgstr "ایجاد ورودی پرداخت"
 
 #: manufacturing/doctype/work_order/work_order.js:627
 msgid "Create Pick List"
-msgstr "لیست انتخاب ایجاد کنید"
+msgstr "ایجاد لیست انتخاب"
 
 #: accounts/doctype/cheque_print_template/cheque_print_template.js:10
 msgid "Create Print Format"
@@ -21800,7 +21800,7 @@ msgstr "گروه آیتم پیش فرض"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Default Item Manufacturer"
-msgstr "سازنده مورد پیش فرض"
+msgstr "تولید کننده مورد پیش فرض"
 
 #. Label of a Link field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -21812,7 +21812,7 @@ msgstr "سر حرف پیش فرض"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Default Manufacturer Part No"
-msgstr "شماره قطعه سازنده پیش فرض"
+msgstr "شماره قطعه تولید کننده پیش فرض"
 
 #. Label of a Select field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -25694,7 +25694,7 @@ msgstr "گروه مشتری تکراری در جدول گروه مشتری یا�
 
 #: stock/doctype/item_manufacturer/item_manufacturer.py:44
 msgid "Duplicate entry against the item code {0} and manufacturer {1}"
-msgstr "ورودی تکراری در برابر کد مورد {0} و سازنده {1}"
+msgstr "ورودی تکراری در برابر کد مورد {0} و تولید کننده {1}"
 
 #: accounts/doctype/pos_profile/pos_profile.py:130
 msgid "Duplicate item group found in the item group table"
@@ -27653,7 +27653,7 @@ msgstr "زمان مورد انتظار (به ساعت)"
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Expected Time Required (In Mins)"
-msgstr "زمان مورد نیاز مورد انتظار (در دقیقه)"
+msgstr "زمان مورد نیاز مورد انتظار (به دقیقه)"
 
 #. Label of a Currency field in DocType 'Asset Depreciation Schedule'
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
@@ -31416,55 +31416,55 @@ msgstr "انبار گره گروه مجاز به انتخاب برای تراک�
 #: stock/doctype/delivery_note/delivery_note.json
 msgctxt "Delivery Note"
 msgid "Group same items"
-msgstr "موارد مشابه را گروه بندی کنید"
+msgstr "گروه بندی آیتم‌های مشابه"
 
 #. Label of a Check field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 msgctxt "POS Invoice"
 msgid "Group same items"
-msgstr "موارد مشابه را گروه بندی کنید"
+msgstr "گروه بندی آیتم‌های مشابه"
 
 #. Label of a Check field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgctxt "Purchase Invoice"
 msgid "Group same items"
-msgstr "موارد مشابه را گروه بندی کنید"
+msgstr "گروه بندی آیتم‌های مشابه"
 
 #. Label of a Check field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgctxt "Purchase Order"
 msgid "Group same items"
-msgstr "موارد مشابه را گروه بندی کنید"
+msgstr "گروه بندی آیتم‌های مشابه"
 
 #. Label of a Check field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgctxt "Purchase Receipt"
 msgid "Group same items"
-msgstr "موارد مشابه را گروه بندی کنید"
+msgstr "گروه بندی آیتم‌های مشابه"
 
 #. Label of a Check field in DocType 'Quotation'
 #: selling/doctype/quotation/quotation.json
 msgctxt "Quotation"
 msgid "Group same items"
-msgstr "موارد مشابه را گروه بندی کنید"
+msgstr "گروه بندی آیتم‌های مشابه"
 
 #. Label of a Check field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgctxt "Sales Invoice"
 msgid "Group same items"
-msgstr "موارد مشابه را گروه بندی کنید"
+msgstr "گروه بندی آیتم‌های مشابه"
 
 #. Label of a Check field in DocType 'Sales Order'
 #: selling/doctype/sales_order/sales_order.json
 msgctxt "Sales Order"
 msgid "Group same items"
-msgstr "موارد مشابه را گروه بندی کنید"
+msgstr "گروه بندی آیتم‌های مشابه"
 
 #. Label of a Check field in DocType 'Supplier Quotation'
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 msgctxt "Supplier Quotation"
 msgid "Group same items"
-msgstr "موارد مشابه را گروه بندی کنید"
+msgstr "گروه بندی آیتم‌های مشابه"
 
 #: stock/doctype/item/item_dashboard.py:18
 msgid "Groups"
@@ -36796,13 +36796,13 @@ msgstr "مورد پیش فرض"
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Item Defaults"
-msgstr "موارد پیش فرض"
+msgstr ""
 
 #. Label of a Section Break field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Item Defaults"
-msgstr "موارد پیش فرض"
+msgstr "پیش‌فرض‌های آیتم"
 
 #. Label of a Small Text field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -37169,13 +37169,13 @@ msgstr "مدیر آیتم"
 #. Name of a DocType
 #: stock/doctype/item_manufacturer/item_manufacturer.json
 msgid "Item Manufacturer"
-msgstr "سازنده آیتم"
+msgstr "تولید کننده آیتم"
 
 #. Label of a Link in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgctxt "Item Manufacturer"
 msgid "Item Manufacturer"
-msgstr "سازنده آیتم"
+msgstr "تولید کننده آیتم"
 
 #: accounts/report/billed_items_to_be_received/billed_items_to_be_received.py:73
 #: accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:70
@@ -38347,7 +38347,7 @@ msgstr "موارد مورد نیاز"
 #: buying/workspace/buying/buying.json
 #: stock/report/items_to_be_requested/items_to_be_requested.json
 msgid "Items To Be Requested"
-msgstr "موارد مورد درخواست"
+msgstr ""
 
 #. Label of a Card Break in the Selling Workspace
 #: selling/workspace/selling/selling.json
@@ -41026,123 +41026,123 @@ msgstr "تعداد تولید شده"
 #: manufacturing/report/bom_stock_calculated/bom_stock_calculated.py:62
 #: stock/doctype/manufacturer/manufacturer.json
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Option for the 'Variant Based On' (Select) field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgctxt "Item"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Label of a Link field in DocType 'Item Manufacturer'
 #: stock/doctype/item_manufacturer/item_manufacturer.json
 msgctxt "Item Manufacturer"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Label of a Link field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Label of a Link field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Label of a Link field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Label of a Link field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Label of a Link field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Label of a Link field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Label of a Link field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #. Label of a Data field in DocType 'Vehicle'
 #: setup/doctype/vehicle/vehicle.json
 msgctxt "Vehicle"
 msgid "Manufacturer"
-msgstr "سازنده"
+msgstr "تولید کننده"
 
 #: manufacturing/report/bom_stock_calculated/bom_stock_calculated.py:68
 msgid "Manufacturer Part Number"
-msgstr "شماره قطعه سازنده"
+msgstr "شماره قطعه تولید کننده"
 
 #. Label of a Data field in DocType 'Item Manufacturer'
 #: stock/doctype/item_manufacturer/item_manufacturer.json
 msgctxt "Item Manufacturer"
 msgid "Manufacturer Part Number"
-msgstr "شماره قطعه سازنده"
+msgstr "شماره قطعه تولید کننده"
 
 #. Label of a Data field in DocType 'Material Request Item'
 #: stock/doctype/material_request_item/material_request_item.json
 msgctxt "Material Request Item"
 msgid "Manufacturer Part Number"
-msgstr "شماره قطعه سازنده"
+msgstr "شماره قطعه تولید کننده"
 
 #. Label of a Data field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 msgctxt "Purchase Invoice Item"
 msgid "Manufacturer Part Number"
-msgstr "شماره قطعه سازنده"
+msgstr "شماره قطعه تولید کننده"
 
 #. Label of a Data field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Manufacturer Part Number"
-msgstr "شماره قطعه سازنده"
+msgstr "شماره قطعه تولید کننده"
 
 #. Label of a Data field in DocType 'Purchase Receipt Item'
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgctxt "Purchase Receipt Item"
 msgid "Manufacturer Part Number"
-msgstr "شماره قطعه سازنده"
+msgstr "شماره قطعه تولید کننده"
 
 #. Label of a Data field in DocType 'Subcontracting Order Item'
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 msgctxt "Subcontracting Order Item"
 msgid "Manufacturer Part Number"
-msgstr "شماره قطعه سازنده"
+msgstr "شماره قطعه تولید کننده"
 
 #. Label of a Data field in DocType 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Manufacturer Part Number"
-msgstr "شماره قطعه سازنده"
+msgstr "شماره قطعه تولید کننده"
 
 #. Label of a Data field in DocType 'Supplier Quotation Item'
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 msgctxt "Supplier Quotation Item"
 msgid "Manufacturer Part Number"
-msgstr "شماره قطعه سازنده"
+msgstr "شماره قطعه تولید کننده"
 
 #: public/js/controllers/buying.js:332
 msgid "Manufacturer Part Number <b>{0}</b> is invalid"
-msgstr "شماره قطعه سازنده <b>{0}</b> نامعتبر است"
+msgstr "شماره قطعه تولید کننده <b>{0}</b> نامعتبر است"
 
 #. Description of a DocType
 #: stock/doctype/manufacturer/manufacturer.json
@@ -41480,7 +41480,7 @@ msgstr "ماسک"
 
 #: manufacturing/doctype/workstation/workstation_dashboard.py:8
 msgid "Master"
-msgstr "استاد"
+msgstr "مستر"
 
 #. Label of a Attach field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -51820,7 +51820,7 @@ msgstr ""
 
 #: controllers/stock_controller.py:532
 msgid "Please set an Expense Account in the Items table"
-msgstr "لطفاً یک حساب هزینه در جدول موارد تنظیم کنید"
+msgstr "لطفاً یک حساب هزینه در جدول آیتم‌ها تنظیم کنید"
 
 #: crm/doctype/email_campaign/email_campaign.py:57
 msgid "Please set an email id for the Lead {0}"
@@ -62483,7 +62483,7 @@ msgstr "ردیف #{0}: لطفاً کد آیتم را در آیتم‌های اس
 
 #: manufacturing/doctype/production_plan/production_plan.py:905
 msgid "Row #{0}: Please select the BOM No in Assembly Items"
-msgstr ""
+msgstr "ردیف #{0}: لطفاً شماره BOM را در آیتم‌های اسمبلی انتخاب کنید"
 
 #: manufacturing/doctype/production_plan/production_plan.py:899
 msgid "Row #{0}: Please select the Sub Assembly Warehouse"
@@ -68488,7 +68488,7 @@ msgstr "نام ایستاده"
 #: manufacturing/doctype/workstation/workstation_job_card.html:67
 #: public/js/projects/timer.js:32
 msgid "Start"
-msgstr "شروع کنید"
+msgstr "شروع"
 
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:43
 msgid "Start / Resume"
@@ -68582,7 +68582,7 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:115
 msgid "Start Import"
-msgstr "واردات را شروع کنید"
+msgstr "شروع واردات"
 
 #: manufacturing/doctype/job_card/job_card.js:269
 #: manufacturing/doctype/workstation/workstation.js:191
@@ -74898,13 +74898,13 @@ msgstr "زمان"
 
 #: manufacturing/report/bom_operations_time/bom_operations_time.py:125
 msgid "Time (In Mins)"
-msgstr "زمان (در دقیقه)"
+msgstr "زمان (به دقیقه)"
 
 #. Label of a Float field in DocType 'Job Card Scheduled Time'
 #: manufacturing/doctype/job_card_scheduled_time/job_card_scheduled_time.json
 msgctxt "Job Card Scheduled Time"
 msgid "Time (In Mins)"
-msgstr "زمان (در دقیقه)"
+msgstr "زمان (به دقیقه)"
 
 #. Label of a Int field in DocType 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
@@ -74926,7 +74926,7 @@ msgstr "ثبت زمان"
 
 #: manufacturing/report/job_card_summary/job_card_summary.py:182
 msgid "Time Required (In Mins)"
-msgstr "زمان مورد نیاز (در دقیقه)"
+msgstr "زمان مورد نیاز (به دقیقه)"
 
 #. Label of a Link field in DocType 'Sales Invoice Timesheet'
 #: accounts/doctype/sales_invoice_timesheet/sales_invoice_timesheet.json
@@ -75003,7 +75003,7 @@ msgstr "بازه زمانی در دسترس نیست"
 
 #: templates/generators/bom.html:71
 msgid "Time(in mins)"
-msgstr "زمان (در دقیقه)"
+msgstr "زمان (به دقیقه)"
 
 #. Label of a Section Break field in DocType 'Task'
 #: projects/doctype/task/task.json
@@ -77071,7 +77071,7 @@ msgstr "کل مالیات ها و هزینه ها (ارز شرکت)"
 
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:130
 msgid "Total Time (in Mins)"
-msgstr "زمان کل (در دقیقه)"
+msgstr "زمان کل (به دقیقه)"
 
 #. Label of a Float field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
@@ -77341,31 +77341,31 @@ msgstr "URL پیگیری"
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:429
 #: manufacturing/doctype/workstation/workstation_dashboard.py:10
 msgid "Transaction"
-msgstr "معامله"
+msgstr "تراکنش"
 
 #. Label of a Select field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgctxt "Authorization Rule"
 msgid "Transaction"
-msgstr "معامله"
+msgstr "تراکنش"
 
 #. Option for the 'Apply On' (Select) field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Transaction"
-msgstr "معامله"
+msgstr "تراکنش"
 
 #. Option for the 'Apply On' (Select) field in DocType 'Promotional Scheme'
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Transaction"
-msgstr "معامله"
+msgstr "تراکنش"
 
 #. Option for the 'Based On' (Select) field in DocType 'Repost Item Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgctxt "Repost Item Valuation"
 msgid "Transaction"
-msgstr "معامله"
+msgstr "تراکنش"
 
 #. Label of a Link field in DocType 'GL Entry'
 #: accounts/doctype/gl_entry/gl_entry.json
@@ -77508,7 +77508,7 @@ msgstr "شماره مرجع تراکنش {0} به تاریخ {1}"
 #: manufacturing/doctype/production_plan/production_plan_dashboard.py:8
 #: manufacturing/doctype/work_order/work_order_dashboard.py:9
 msgid "Transactions"
-msgstr "معاملات"
+msgstr "تراکنش‌ها"
 
 #. Label of a Code field in DocType 'Company'
 #: setup/doctype/company/company.json
