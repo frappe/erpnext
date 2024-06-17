@@ -20,15 +20,6 @@ frappe.ui.form.on("Asset Repair", {
 			};
 		};
 
-		frm.fields_dict.warehouse.get_query = function (doc) {
-			return {
-				filters: {
-					is_group: 0,
-					company: doc.company,
-				},
-			};
-		};
-
 		frm.set_query("serial_and_batch_bundle", "stock_items", (doc, cdt, cdn) => {
 			let row = locals[cdt][cdn];
 			return {
@@ -79,7 +70,7 @@ frappe.ui.form.on("Asset Repair", {
 			});
 		}
 
-		if (frm.doc.repair_status == "Completed") {
+		if (frm.doc.repair_status == "Completed" && !frm.doc.completion_date) {
 			frm.set_value("completion_date", frappe.datetime.now_datetime());
 		}
 	},
@@ -87,15 +78,47 @@ frappe.ui.form.on("Asset Repair", {
 	stock_items_on_form_rendered() {
 		erpnext.setup_serial_or_batch_no();
 	},
+
+	stock_consumption: function (frm) {
+		if (!frm.doc.stock_consumption) {
+			frm.clear_table("stock_items");
+			frm.refresh_field("stock_items");
+		}
+	},
+
+	purchase_invoice: function (frm) {
+		if (frm.doc.purchase_invoice) {
+			frappe.call({
+				method: "frappe.client.get",
+				args: {
+					doctype: "Purchase Invoice",
+					name: frm.doc.purchase_invoice,
+				},
+				callback: function (r) {
+					if (r.message) {
+						frm.set_value("repair_cost", r.message.total);
+					}
+				},
+			});
+		} else {
+			frm.set_value("repair_cost", 0);
+		}
+	},
 });
 
 frappe.ui.form.on("Asset Repair Consumed Item", {
-	item_code: function (frm, cdt, cdn) {
+	warehouse: function (frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
+
+		if (!item.item_code) {
+			frappe.msgprint(__("Please select an item code before setting the warehouse."));
+			frappe.model.set_value(cdt, cdn, "warehouse", "");
+			return;
+		}
 
 		let item_args = {
 			item_code: item.item_code,
-			warehouse: frm.doc.warehouse,
+			warehouse: item.warehouse,
 			qty: item.consumed_quantity,
 			serial_no: item.serial_no,
 			company: frm.doc.company,
