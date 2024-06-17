@@ -325,7 +325,7 @@ def get_items(filters, additional_table_columns):
 		.left_join(Item)
 		.on(pii.item_code == Item.name)
 		.select(
-			pii.name.as_("pii_name"),
+			pii.name,
 			pii.parent,
 			pi.posting_date,
 			pi.credit_to,
