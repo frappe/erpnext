@@ -77,7 +77,7 @@ class RepostItemValuation(Document):
 
 	def validate_period_closing_voucher(self):
 		# Period Closing Voucher
-		year_end_date = self.get_max_year_end_date(self.company)
+		year_end_date = self.get_max_period_closing_date(self.company)
 		if year_end_date and getdate(self.posting_date) <= getdate(year_end_date):
 			date = frappe.format(year_end_date, "Date")
 			msg = f"Due to period closing, you cannot repost item valuation before {date}"
@@ -120,24 +120,16 @@ class RepostItemValuation(Document):
 		return frappe.get_all("Closing Stock Balance", fields=["name", "to_date"], filters=filters)
 
 	@staticmethod
-	def get_max_year_end_date(company):
-		data = frappe.get_all(
-			"Period Closing Voucher", fields=["fiscal_year"], filters={"docstatus": 1, "company": company}
-		)
-
-		if not data:
-			return
-
-		fiscal_years = [d.fiscal_year for d in data]
-		table = frappe.qb.DocType("Fiscal Year")
+	def get_max_period_closing_date(company):
+		table = frappe.qb.DocType("Period Closing Voucher")
 
 		query = (
 			frappe.qb.from_(table)
-			.select(Max(table.year_end_date))
-			.where((table.name.isin(fiscal_years)) & (table.disabled == 0))
+			.select(Max(table.posting_date))
+			.where((table.company == company) & (table.docstatus == 1))
 		).run()
 
-		return query[0][0] if query else None
+		return query[0][0] if query and query[0][0] else None
 
 	def validate_accounts_freeze(self):
 		acc_settings = frappe.db.get_value(
