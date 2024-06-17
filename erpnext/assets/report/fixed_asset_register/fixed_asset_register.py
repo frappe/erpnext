@@ -185,12 +185,11 @@ def prepare_chart_data(data, filters):
 		)
 
 	for d in data:
-		if d.get(date_field):
-			date = d.get(date_field)
-			belongs_to_month = formatdate(date, "MMM YYYY")
+		date = d.get(date_field)
+		belongs_to_month = formatdate(date, "MMM YYYY")
 
-			labels_values_map[belongs_to_month].asset_value += d.get("asset_value")
-			labels_values_map[belongs_to_month].depreciated_amount += d.get("depreciated_amount")
+		labels_values_map[belongs_to_month].asset_value += d.get("asset_value")
+		labels_values_map[belongs_to_month].depreciated_amount += d.get("depreciated_amount")
 
 	return {
 		"data": {
