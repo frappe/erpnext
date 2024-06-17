@@ -1399,9 +1399,7 @@ class TestProductionPlan(FrappeTestCase):
 		stock_warehouse = create_warehouse("Stock Warehouse", company="_Test Company")
 		plan.for_warehouse = stock_warehouse
 
-		items = get_items_for_material_requests(
-			plan.as_dict(), warehouses=[]
-		)
+		items = get_items_for_material_requests(plan.as_dict(), warehouses=[])
 
 		for row in items:
 			self.assertEqual(row["quantity"], test_qtys[row["item_code"]] * 3)
