@@ -467,6 +467,7 @@ class DeliveryNote(SellingController):
 			if not self.get(table_name):
 				continue
 
+			self.make_bundle_for_sales_purchase_return(table_name)
 			self.make_bundle_using_old_serial_batch_fields(table_name)
 
 		# Updating stock ledger should always be called after updating prevdoc status,
@@ -1370,6 +1371,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	def update_item(source, target, source_parent):
 		if source_parent.doctype == "Delivery Note" and source.received_qty:
 			target.qty = flt(source.qty) + flt(source.returned_qty) - flt(source.received_qty)
+
+		if source.get("use_serial_batch_fields"):
+			target.set("use_serial_batch_fields", 1)
 
 	doclist = get_mapped_doc(
 		doctype,

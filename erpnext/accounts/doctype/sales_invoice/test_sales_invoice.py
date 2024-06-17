@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import json
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
@@ -3720,9 +3721,9 @@ class TestSalesInvoice(FrappeTestCase):
 
 		map_docs(
 			method="erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
-			source_names=frappe.json.dumps([dn1.name, dn2.name]),
+			source_names=json.dumps([dn1.name, dn2.name]),
 			target_doc=si,
-			args=frappe.json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
+			args=json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
 		)
 		si.save().submit()
 

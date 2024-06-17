@@ -156,6 +156,8 @@ class SerialandBatchBundle(Document):
 
 	def validate_serial_nos_duplicate(self):
 		# Don't inward same serial number multiple times
+		if self.voucher_type in ["POS Invoice", "Pick List"]:
+			return
 
 		if not self.warehouse:
 			return
@@ -249,8 +251,7 @@ class SerialandBatchBundle(Document):
 			if self.has_serial_no:
 				d.incoming_rate = abs(sn_obj.serial_no_incoming_rate.get(d.serial_no, 0.0))
 			else:
-				if sn_obj.batch_avg_rate.get(d.batch_no):
-					d.incoming_rate = abs(sn_obj.batch_avg_rate.get(d.batch_no))
+				d.incoming_rate = abs(flt(sn_obj.batch_avg_rate.get(d.batch_no)))
 
 				available_qty = flt(sn_obj.available_qty.get(d.batch_no), d.precision("qty"))
 				if self.docstatus == 1:
@@ -429,6 +430,9 @@ class SerialandBatchBundle(Document):
 			self.throw_error_message(f"The {self.voucher_type} # {self.voucher_no} should be submit first.")
 
 	def check_future_entries_exists(self):
+		if self.flags and self.flags.via_landed_cost_voucher:
+			return
+
 		if not self.has_serial_no:
 			return
 
@@ -1205,30 +1209,43 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 
 @frappe.whitelist()
-def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None):
+def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
 	filters = get_filters_for_bundle(
-		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name
+		item_code=item_code, docstatus=docstatus, voucher_no=voucher_no, name=name, child_row=child_row
 	)
+
+	fields = [
+		"`tabSerial and Batch Bundle`.`item_code`",
+		"`tabSerial and Batch Entry`.`qty`",
+		"`tabSerial and Batch Entry`.`warehouse`",
+		"`tabSerial and Batch Entry`.`batch_no`",
+		"`tabSerial and Batch Entry`.`serial_no`",
+	]
+
+	if not child_row:
+		fields.append("`tabSerial and Batch Bundle`.`name`")
 
 	return frappe.get_all(
 		"Serial and Batch Bundle",
-		fields=[
-			"`tabSerial and Batch Bundle`.`name`",
-			"`tabSerial and Batch Bundle`.`item_code`",
-			"`tabSerial and Batch Entry`.`qty`",
-			"`tabSerial and Batch Entry`.`warehouse`",
-			"`tabSerial and Batch Entry`.`batch_no`",
-			"`tabSerial and Batch Entry`.`serial_no`",
-		],
+		fields=fields,
 		filters=filters,
 		order_by="`tabSerial and Batch Entry`.`idx`",
 	)
 
 
-def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name=None):
+def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name=None, child_row=None):
 	filters = [
 		["Serial and Batch Bundle", "is_cancelled", "=", 0],
 	]
+
+	if child_row and isinstance(child_row, str):
+		child_row = parse_json(child_row)
+
+	if not name and child_row and child_row.get("qty") < 0:
+		bundle = get_reference_serial_and_batch_bundle(child_row)
+		if bundle:
+			voucher_no = None
+			filters.append(["Serial and Batch Bundle", "name", "=", bundle])
 
 	if item_code:
 		filters.append(["Serial and Batch Bundle", "item_code", "=", item_code])
@@ -1251,6 +1268,19 @@ def get_filters_for_bundle(item_code=None, docstatus=None, voucher_no=None, name
 			filters.append(["Serial and Batch Entry", "parent", "=", name])
 
 	return filters
+
+
+def get_reference_serial_and_batch_bundle(child_row):
+	field = {
+		"Sales Invoice Item": "sales_invoice_item",
+		"Delivery Note Item": "dn_detail",
+		"Purchase Receipt Item": "purchase_receipt_item",
+		"Purchase Invoice Item": "purchase_invoice_item",
+		"POS Invoice Item": "pos_invoice_item",
+	}.get(child_row.doctype)
+
+	if field:
+		return frappe.get_cached_value(child_row.doctype, child_row.get(field), "serial_and_batch_bundle")
 
 
 @frappe.whitelist()
@@ -1330,15 +1360,20 @@ def get_type_of_transaction(parent_doc, child_row):
 		if parent_doc.get("doctype") in ["Purchase Receipt", "Purchase Invoice"]:
 			type_of_transaction = "Inward"
 
-	if parent_doc.get("is_return"):
-		type_of_transaction = "Inward" if type_of_transaction == "Outward" else "Outward"
-
 	if parent_doc.get("doctype") == "Subcontracting Receipt":
 		type_of_transaction = "Outward"
 		if child_row.get("doctype") == "Subcontracting Receipt Item":
 			type_of_transaction = "Inward"
 	elif parent_doc.get("doctype") == "Stock Reconciliation":
 		type_of_transaction = "Inward"
+
+	if parent_doc.get("is_return"):
+		type_of_transaction = "Inward"
+		if (
+			parent_doc.get("doctype") in ["Purchase Receipt", "Purchase Invoice"]
+			or child_row.get("doctype") == "Subcontracting Receipt Item"
+		):
+			type_of_transaction = "Outward"
 
 	return type_of_transaction
 
@@ -1863,13 +1898,13 @@ def get_available_batches(kwargs):
 			batch_ledger.warehouse,
 			Sum(batch_ledger.qty).as_("qty"),
 		)
-		.where(
-			(batch_table.disabled == 0)
-			& ((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull()))
-		)
+		.where(batch_table.disabled == 0)
 		.where(stock_ledger_entry.is_cancelled == 0)
 		.groupby(batch_ledger.batch_no, batch_ledger.warehouse)
 	)
+
+	if not kwargs.get("for_stock_levels"):
+		query = query.where((batch_table.expiry_date >= today()) | (batch_table.expiry_date.isnull()))
 
 	if kwargs.get("posting_date"):
 		if kwargs.get("posting_time") is None:

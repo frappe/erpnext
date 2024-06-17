@@ -794,6 +794,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"field_map": {
 				"name": "po_detail",
 				"parent": "purchase_order",
+				"material_request": "material_request",
+				"material_request_item": "material_request_item",
 				"wip_composite_asset": "wip_composite_asset",
 			},
 			"postprocess": update_item,
@@ -902,12 +904,12 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 	)
 
 	target_doc.populate_items_table()
+	source_doc = frappe.get_doc("Purchase Order", source_name)
 
 	if target_doc.set_warehouse:
 		for item in target_doc.items:
 			item.warehouse = target_doc.set_warehouse
 	else:
-		source_doc = frappe.get_doc("Purchase Order", source_name)
 		if source_doc.set_warehouse:
 			for item in target_doc.items:
 				item.warehouse = source_doc.set_warehouse

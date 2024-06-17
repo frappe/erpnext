@@ -5,7 +5,7 @@ import copy
 import json
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.query_builder import Interval
 from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
@@ -469,6 +469,13 @@ class Item(Document):
 	def validate_warehouse_for_reorder(self):
 		"""Validate Reorder level table for duplicate and conditional mandatory"""
 		warehouse_material_request_type: list[tuple[str, str]] = []
+
+		_warehouse_before_save = frappe._dict()
+		if not self.is_new() and self._doc_before_save:
+			_warehouse_before_save = {
+				d.name: d.warehouse for d in self._doc_before_save.get("reorder_levels") or []
+			}
+
 		for d in self.get("reorder_levels"):
 			if not d.warehouse_group:
 				d.warehouse_group = d.warehouse
@@ -484,6 +491,19 @@ class Item(Document):
 
 			if d.warehouse_reorder_level and not d.warehouse_reorder_qty:
 				frappe.throw(_("Row #{0}: Please set reorder quantity").format(d.idx))
+
+			if d.warehouse_group and d.warehouse:
+				if _warehouse_before_save.get(d.name) == d.warehouse:
+					continue
+
+				child_warehouses = get_child_warehouses(d.warehouse_group)
+				if d.warehouse not in child_warehouses:
+					frappe.throw(
+						_(
+							"Row #{0}: The warehouse {1} is not a child warehouse of a group warehouse {2}"
+						).format(d.idx, bold(d.warehouse), bold(d.warehouse_group)),
+						title=_("Incorrect Check in (group) Warehouse for Reorder"),
+					)
 
 	def stock_ledger_created(self):
 		if not hasattr(self, "_stock_ledger_created"):
@@ -1360,3 +1380,10 @@ def get_asset_naming_series():
 	from erpnext.assets.doctype.asset.asset import get_asset_naming_series
 
 	return get_asset_naming_series()
+
+
+@frappe.request_cache
+def get_child_warehouses(warehouse):
+	from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+
+	return get_child_warehouses(warehouse)

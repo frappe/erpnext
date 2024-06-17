@@ -116,11 +116,13 @@ class PaymentEntry(AccountsController):
 
 		self.book_advance_payments_in_separate_party_account = False
 		if self.party_type not in ("Customer", "Supplier"):
+			self.is_opening = "No"
 			return
 
 		if not frappe.db.get_value(
 			"Company", self.company, "book_advance_payments_in_separate_party_account"
 		):
+			self.is_opening = "No"
 			return
 
 		# Important to set this flag for the gl building logic to work properly
@@ -132,6 +134,7 @@ class PaymentEntry(AccountsController):
 		if (account_type == "Payable" and self.party_type == "Customer") or (
 			account_type == "Receivable" and self.party_type == "Supplier"
 		):
+			self.is_opening = "No"
 			return
 
 		if self.references:
@@ -141,6 +144,7 @@ class PaymentEntry(AccountsController):
 			# If there are referencers other than `allowed_types`, treat this as a normal payment entry
 			if reference_types - allowed_types:
 				self.book_advance_payments_in_separate_party_account = False
+				self.is_opening = "No"
 				return
 
 		liability_account = get_party_account(
@@ -1249,13 +1253,16 @@ class PaymentEntry(AccountsController):
 			"voucher_detail_no": invoice.name,
 		}
 
-		date_field = "posting_date"
-		if invoice.reference_doctype in ["Sales Order", "Purchase Order"]:
-			date_field = "transaction_date"
-		posting_date = frappe.db.get_value(invoice.reference_doctype, invoice.reference_name, date_field)
-
-		if getdate(posting_date) < getdate(self.posting_date):
+		if self.reconcile_on_advance_payment_date:
 			posting_date = self.posting_date
+		else:
+			date_field = "posting_date"
+			if invoice.reference_doctype in ["Sales Order", "Purchase Order"]:
+				date_field = "transaction_date"
+			posting_date = frappe.db.get_value(invoice.reference_doctype, invoice.reference_name, date_field)
+
+			if getdate(posting_date) < getdate(self.posting_date):
+				posting_date = self.posting_date
 
 		dr_or_cr, account = self.get_dr_and_account_for_advances(invoice)
 		args_dict["account"] = account

@@ -1000,7 +1000,7 @@ class TestDepreciationBasics(AssetSetup):
 
 		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active")
 
-		depreciation_amount = get_depreciation_amount(
+		depreciation_amount, prev_per_day_depr = get_depreciation_amount(
 			asset_depr_schedule_doc, asset, 100000, 100000, asset.finance_books[0]
 		)
 		self.assertEqual(depreciation_amount, 30000)
@@ -1698,7 +1698,7 @@ def create_asset(**args):
 			"opening_accumulated_depreciation": args.opening_accumulated_depreciation or 0,
 			"number_of_depreciations_booked": args.number_of_depreciations_booked or 0,
 			"gross_purchase_amount": args.gross_purchase_amount or 100000,
-			"purchase_receipt_amount": args.purchase_receipt_amount or 100000,
+			"purchase_amount": args.purchase_amount or 100000,
 			"maintenance_required": args.maintenance_required or 0,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"available_for_use_date": args.available_for_use_date or "2020-06-06",
@@ -1723,6 +1723,7 @@ def create_asset(**args):
 				"depreciation_start_date": args.depreciation_start_date,
 				"daily_prorata_based": args.daily_prorata_based or 0,
 				"shift_based": args.shift_based or 0,
+				"rate_of_depreciation": args.rate_of_depreciation or 0,
 			},
 		)
 

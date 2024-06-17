@@ -1525,6 +1525,55 @@ class TestPaymentReconciliation(FrappeTestCase):
 		]
 		self.assertEqual(pl_entries, expected_ple)
 
+	def test_advance_payment_reconciliation_date(self):
+		frappe.db.set_value(
+			"Company",
+			self.company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_paid_account": self.advance_payable_account,
+				"reconcile_on_advance_payment_date": 1,
+			},
+		)
+
+		self.supplier = "_Test Supplier"
+		amount = 1500
+
+		pe = self.create_payment_entry(amount=amount)
+		pe.posting_date = add_days(nowdate(), -1)
+		pe.party_type = "Supplier"
+		pe.party = self.supplier
+		pe.payment_type = "Pay"
+		pe.paid_from = self.cash
+		pe.paid_to = self.advance_payable_account
+		pe.save().submit()
+
+		pi = self.create_purchase_invoice(qty=10, rate=100)
+		self.assertNotEqual(pe.posting_date, pi.posting_date)
+
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.default_advance_account = self.advance_payable_account
+		pr.from_payment_date = pe.posting_date
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [invoice.as_dict() for invoice in pr.invoices]
+		payments = [payment.as_dict() for payment in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		# Assert Ledger Entries
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "is_cancelled": 0, "posting_date": pe.posting_date},
+		)
+		self.assertEqual(len(gl_entries), 4)
+		pl_entries = frappe.db.get_all(
+			"Payment Ledger Entry",
+			filters={"voucher_no": pe.name, "delinked": 0, "posting_date": pe.posting_date},
+		)
+		self.assertEqual(len(pl_entries), 3)
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):

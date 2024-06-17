@@ -450,6 +450,7 @@ class SalesInvoice(SellingController):
 				if not self.get(table_name):
 					continue
 
+				self.make_bundle_for_sales_purchase_return(table_name)
 				self.make_bundle_using_old_serial_batch_fields(table_name)
 			self.update_stock_ledger()
 
@@ -2676,6 +2677,10 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 				target.body_text = letter_text.get("body_text")
 				target.closing_text = letter_text.get("closing_text")
 				target.language = letter_text.get("language")
+
+		# update outstanding
+		if source.payment_schedule and len(source.payment_schedule) == 1:
+			target.overdue_payments[0].outstanding = source.get("outstanding_amount")
 
 		target.validate()
 

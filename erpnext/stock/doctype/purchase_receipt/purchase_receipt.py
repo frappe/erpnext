@@ -370,6 +370,7 @@ class PurchaseReceipt(BuyingController):
 		else:
 			self.db_set("status", "Completed")
 
+		self.make_bundle_for_sales_purchase_return()
 		self.make_bundle_using_old_serial_batch_fields()
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
@@ -421,13 +422,13 @@ class PurchaseReceipt(BuyingController):
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self, warehouse_account=None, via_landed_cost_voucher=False):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		gl_entries = []
 
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
-		self.make_tax_gl_entries(gl_entries)
+		self.make_tax_gl_entries(gl_entries, via_landed_cost_voucher)
 		update_regional_gl_entries(gl_entries, self)
 
 		return process_gl_map(gl_entries)
@@ -775,7 +776,7 @@ class PurchaseReceipt(BuyingController):
 			posting_date=posting_date,
 		)
 
-	def make_tax_gl_entries(self, gl_entries):
+	def make_tax_gl_entries(self, gl_entries, via_landed_cost_voucher=False):
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in self.get("items")])
 		is_asset_pr = any(d.is_fixed_asset for d in self.get("items"))
 		# Cost center-wise amount breakup for other charges included for valuation
@@ -810,18 +811,17 @@ class PurchaseReceipt(BuyingController):
 			i = 1
 			for tax in self.get("taxes"):
 				if valuation_tax.get(tax.name):
-					negative_expense_booked_in_pi = frappe.db.sql(
-						"""select name from `tabPurchase Invoice Item` pi
-						where docstatus = 1 and purchase_receipt=%s
-						and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
-							and voucher_no=pi.parent and account=%s)""",
-						(self.name, tax.account_head),
-					)
-
-					if negative_expense_booked_in_pi:
-						account = stock_rbnb
-					else:
+					if via_landed_cost_voucher:
 						account = tax.account_head
+					else:
+						negative_expense_booked_in_pi = frappe.db.sql(
+							"""select name from `tabPurchase Invoice Item` pi
+							where docstatus = 1 and purchase_receipt=%s
+							and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
+								and voucher_no=pi.parent and account=%s)""",
+							(self.name, tax.account_head),
+						)
+						account = stock_rbnb if negative_expense_booked_in_pi else tax.account_head
 
 					if i == len(valuation_tax):
 						applicable_amount = amount_including_divisional_loss
@@ -858,7 +858,7 @@ class PurchaseReceipt(BuyingController):
 				asset.name,
 				{
 					"gross_purchase_amount": purchase_amount,
-					"purchase_receipt_amount": purchase_amount,
+					"purchase_amount": purchase_amount,
 				},
 			)
 
@@ -922,6 +922,15 @@ class PurchaseReceipt(BuyingController):
 					from_voucher_type="Purchase Receipt",
 					notify=True,
 				)
+
+	def enable_recalculate_rate_in_sles(self):
+		sle_table = frappe.qb.DocType("Stock Ledger Entry")
+		(
+			frappe.qb.update(sle_table)
+			.set(sle_table.recalculate_rate, 1)
+			.where(sle_table.voucher_no == self.name)
+			.where(sle_table.voucher_type == "Purchase Receipt")
+		).run()
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
@@ -1095,15 +1104,10 @@ def adjust_incoming_rate_for_pr(doc):
 	for item in doc.get("items"):
 		item.db_update()
 
-	doc.docstatus = 2
-	doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-	doc.make_gl_entries_on_cancel()
+	if doc.doctype == "Purchase Receipt":
+		doc.enable_recalculate_rate_in_sles()
 
-	# update stock & gl entries for submit state of PR
-	doc.docstatus = 1
-	doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-	doc.make_gl_entries()
-	doc.repost_future_sle_and_gle()
+	doc.repost_future_sle_and_gle(force=True)
 
 
 def get_item_wise_returned_qty(pr_doc):
@@ -1163,7 +1167,12 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 		qty = item_row.qty
 		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
 			qty = item_row.received_qty
+
 		pending_qty = qty - invoiced_qty_map.get(item_row.name, 0)
+
+		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
+			return pending_qty, 0
+
 		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
 		if returned_qty:
 			if returned_qty >= pending_qty:
@@ -1172,6 +1181,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 			else:
 				pending_qty -= returned_qty
 				returned_qty = 0
+
 		return pending_qty, returned_qty
 
 	doclist = get_mapped_doc(

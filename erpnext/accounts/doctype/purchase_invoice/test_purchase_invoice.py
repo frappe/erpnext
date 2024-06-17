@@ -17,6 +17,8 @@ from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as create_purchase_invoice_from_receipt,
 )
@@ -71,6 +73,31 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		# teardown
 		pi.delete()
+
+	def test_update_received_qty_in_material_request(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+
+		"""
+		Test if the received_qty in Material Request is updated correctly when
+		a Purchase Invoice with update_stock=True is submitted.
+		"""
+		mr = make_material_request(item_code="_Test Item", qty=10)
+		mr.save()
+		mr.submit()
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.save()
+		po.submit()
+
+		# Create a Purchase Invoice with update_stock=True
+		pi = make_purchase_invoice(po.name)
+		pi.update_stock = True
+		pi.insert()
+		pi.submit()
+
+		# Check if the received quantity is updated in Material Request
+		mr.reload()
+		self.assertEqual(mr.items[0].received_qty, 10)
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")

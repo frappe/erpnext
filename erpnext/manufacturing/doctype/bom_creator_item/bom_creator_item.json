@@ -70,7 +70,7 @@
    "fieldname": "fg_item",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "FG Item",
+   "label": "Finished Goods Item",
    "options": "Item",
    "reqd": 1
   },
@@ -203,7 +203,7 @@
   {
    "fieldname": "fg_reference_id",
    "fieldtype": "Data",
-   "label": "FG Reference",
+   "label": "Finished Goods Reference",
    "no_copy": 1,
    "read_only": 1
   },
@@ -230,7 +230,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-16 13:34:06.321061",
+ "modified": "2024-06-03 18:45:24.339532",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator Item",

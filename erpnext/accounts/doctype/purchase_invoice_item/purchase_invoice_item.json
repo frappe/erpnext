@@ -105,6 +105,8 @@
   "purchase_receipt",
   "pr_detail",
   "sales_invoice_item",
+  "material_request",
+  "material_request_item",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -934,12 +936,34 @@
   {
    "fieldname": "column_break_vbbb",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "no_copy": 1,
+   "options": "Material Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Material Request Item",
+   "no_copy": 1,
+   "oldfieldname": "pr_detail",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-19 19:09:47.210965",
+ "modified": "2024-06-14 11:57:07.171700",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

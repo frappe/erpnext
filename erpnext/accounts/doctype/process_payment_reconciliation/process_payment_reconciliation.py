@@ -1,6 +1,8 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe import _, qb
 from frappe.model.document import Document
@@ -504,7 +506,7 @@ def is_any_doc_running(for_filter: str | dict | None = None) -> str | None:
 	running_doc = None
 	if for_filter:
 		if isinstance(for_filter, str):
-			for_filter = frappe.json.loads(for_filter)
+			for_filter = json.loads(for_filter)
 
 		running_doc = frappe.db.get_value(
 			"Process Payment Reconciliation",

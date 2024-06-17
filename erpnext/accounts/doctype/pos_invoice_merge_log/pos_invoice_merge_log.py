@@ -54,7 +54,7 @@ class POSInvoiceMergeLog(Document):
 		for key, value in pos_occurences.items():
 			if len(value) > 1:
 				error_list.append(
-					_(f"{frappe.bold(key)} is added multiple times on rows: {frappe.bold(value)}")
+					_("{0} is added multiple times on rows: {1}").format(frappe.bold(key), frappe.bold(value))
 				)
 
 		if error_list:
@@ -481,7 +481,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Failed")
 			if isinstance(error_message, list):
-				error_message = frappe.json.dumps(error_message)
+				error_message = json.dumps(error_message)
 			closing_entry.db_set("error_message", error_message)
 		raise
 

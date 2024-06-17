@@ -8,8 +8,11 @@ from pypika import Order
 class DeprecatedSerialNoValuation:
 	@deprecated
 	def calculate_stock_value_from_deprecarated_ledgers(self):
-		if not frappe.db.get_value(
-			"Stock Ledger Entry", {"serial_no": ("is", "set"), "is_cancelled": 0}, "name"
+		if not frappe.db.get_all(
+			"Stock Ledger Entry",
+			fields=["name"],
+			filters={"serial_no": ("is", "set"), "is_cancelled": 0, "item_code": self.sle.item_code},
+			limit=1,
 		):
 			return
 
@@ -17,15 +20,11 @@ class DeprecatedSerialNoValuation:
 		if not serial_nos:
 			return
 
-		actual_qty = flt(self.sle.actual_qty)
-
 		stock_value_change = 0
-		if actual_qty < 0:
-			if not self.sle.is_cancelled:
-				outgoing_value = self.get_incoming_value_for_serial_nos(serial_nos)
-				stock_value_change = -1 * outgoing_value
+		if not self.sle.is_cancelled:
+			stock_value_change = self.get_incoming_value_for_serial_nos(serial_nos)
 
-		self.stock_value_change += stock_value_change
+		self.stock_value_change += flt(stock_value_change)
 
 	def get_filterd_serial_nos(self):
 		serial_nos = []
@@ -45,6 +44,12 @@ class DeprecatedSerialNoValuation:
 		# get rate from serial nos within same company
 		incoming_values = 0.0
 		for serial_no in serial_nos:
+			sn_details = frappe.db.get_value("Serial No", serial_no, ["purchase_rate", "company"], as_dict=1)
+			if sn_details and sn_details.purchase_rate and sn_details.company == self.sle.company:
+				self.serial_no_incoming_rate[serial_no] += flt(sn_details.purchase_rate)
+				incoming_values += self.serial_no_incoming_rate[serial_no]
+				continue
+
 			table = frappe.qb.DocType("Stock Ledger Entry")
 			stock_ledgers = (
 				frappe.qb.from_(table)
@@ -141,7 +146,14 @@ class DeprecatedBatchNoValuation:
 			if not self.non_batchwise_balance_qty:
 				continue
 
-			self.batch_avg_rate[batch_no] = self.non_batchwise_balance_value / self.non_batchwise_balance_qty
+			if self.non_batchwise_balance_value == 0:
+				self.batch_avg_rate[batch_no] = 0.0
+				self.stock_value_differece[batch_no] = 0.0
+			else:
+				self.batch_avg_rate[batch_no] = (
+					self.non_batchwise_balance_value / self.non_batchwise_balance_qty
+				)
+				self.stock_value_differece[batch_no] = self.non_batchwise_balance_value
 
 			stock_value_change = self.batch_avg_rate[batch_no] * ledger.qty
 			self.stock_value_change += stock_value_change

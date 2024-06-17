@@ -144,7 +144,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 		if not self.data:
 			return
 
-		total_row = {"item_code": _(frappe.bold("Total Quantity"))}
+		total_row = {"item_code": _("Total Quantity")}
 
 		for value in self.data:
 			for period in self.period_list:

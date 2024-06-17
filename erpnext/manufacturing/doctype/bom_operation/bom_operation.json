@@ -77,7 +77,7 @@
    "fieldname": "time_in_mins",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Operation Time ",
+   "label": "Operation Time",
    "oldfieldname": "time_in_mins",
    "oldfieldtype": "Currency",
    "reqd": 1

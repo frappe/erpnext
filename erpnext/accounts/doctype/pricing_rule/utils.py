@@ -33,6 +33,9 @@ def get_pricing_rules(args, doc=None):
 
 	for apply_on in ["Item Code", "Item Group", "Brand"]:
 		pricing_rules.extend(_get_pricing_rules(apply_on, args, values))
+		if pricing_rules and pricing_rules[0].has_priority:
+			continue
+
 		if pricing_rules and not apply_multiple_pricing_rules(pricing_rules):
 			break
 
@@ -561,6 +564,7 @@ def apply_pricing_rule_on_transaction(doc):
 
 	if pricing_rules:
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty, doc.total, pricing_rules)
+		pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
 		if not pricing_rules:
 			remove_free_item(doc)

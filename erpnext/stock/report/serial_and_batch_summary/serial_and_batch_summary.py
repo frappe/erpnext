@@ -220,7 +220,7 @@ def get_serial_nos(doctype, txt, searchfield, start, page_len, filters):
 def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
 	query_filters = {}
 
-	if txt:
+	if filters.get("voucher_no") and txt:
 		query_filters["batch_no"] = ["like", f"%{txt}%"]
 
 	if filters.get("voucher_no"):
@@ -239,5 +239,8 @@ def get_batch_nos(doctype, txt, searchfield, start, page_len, filters):
 		)
 
 	else:
+		if txt:
+			query_filters["name"] = ["like", f"%{txt}%"]
+
 		query_filters["item"] = filters.get("item_code")
 		return frappe.get_all("Batch", filters=query_filters, as_list=True)

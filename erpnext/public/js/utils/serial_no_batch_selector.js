@@ -207,6 +207,16 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					depends_on: "eval:doc.import_using_csv_file === 0",
 				},
 				{
+					fieldtype: "Data",
+					label: __("Enter Serial No Range"),
+					fieldname: "serial_no_range",
+					depends_on: "eval:doc.import_using_csv_file === 0",
+					description: __('Enter "ABC-001::100" for serial nos "ABC-001" to "ABC-100".'),
+					onchange: () => {
+						this.set_serial_nos_from_range();
+					},
+				},
+				{
 					fieldtype: "Small Text",
 					label: __("Enter Serial Nos"),
 					fieldname: "upload_serial_nos",
@@ -253,6 +263,20 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		];
 
 		return fields;
+	}
+
+	set_serial_nos_from_range() {
+		const serial_no_range = this.dialog.get_value("serial_no_range");
+
+		if (!serial_no_range) {
+			return;
+		}
+
+		const serial_nos = erpnext.stock.utils.get_serial_range(serial_no_range, "::");
+
+		if (serial_nos) {
+			this.dialog.set_value("upload_serial_nos", serial_nos.join("\n"));
+		}
 	}
 
 	create_serial_nos() {
@@ -589,7 +613,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	render_data() {
-		if (this.bundle) {
+		if (this.bundle || this.frm.doc.is_return) {
 			frappe
 				.call({
 					method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers",
@@ -597,6 +621,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 						item_code: this.item.item_code,
 						name: this.bundle,
 						voucher_no: !this.frm.is_new() ? this.item.parent : "",
+						child_row: this.frm.doc.is_return ? this.item : "",
 					},
 				})
 				.then((r) => {

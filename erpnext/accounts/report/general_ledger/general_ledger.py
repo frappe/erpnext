@@ -219,7 +219,8 @@ def get_conditions(filters):
 
 	if filters.get("account"):
 		filters.account = get_accounts_with_children(filters.account)
-		conditions.append("account in %(account)s")
+		if filters.account:
+			conditions.append("account in %(account)s")
 
 	if filters.get("cost_center"):
 		filters.cost_center = get_cost_centers_with_children(filters.cost_center)
@@ -329,7 +330,7 @@ def get_accounts_with_children(accounts):
 		else:
 			frappe.throw(_("Account: {0} does not exist").format(d))
 
-	return list(set(all_accounts))
+	return list(set(all_accounts)) if all_accounts else None
 
 
 def get_data_with_opening_closing(filters, account_details, accounting_dimensions, gl_entries):
@@ -420,6 +421,8 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	if filters.get("show_net_values_in_party_account"):
 		account_type_map = get_account_type_map(filters.get("company"))
 
+	immutable_ledger = frappe.db.get_single_value("Accounts Settings", "enable_immutable_ledger")
+
 	def update_value_in_dict(data, key, gle):
 		data[key].debit += gle.debit
 		data[key].credit += gle.credit
@@ -481,12 +484,17 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 
 			elif group_by_voucher_consolidated:
 				keylist = [
+					gle.get("posting_date"),
 					gle.get("voucher_type"),
 					gle.get("voucher_no"),
 					gle.get("account"),
 					gle.get("party_type"),
 					gle.get("party"),
 				]
+
+				if immutable_ledger:
+					keylist.append(gle.get("creation"))
+
 				if filters.get("include_dimensions"):
 					for dim in accounting_dimensions:
 						keylist.append(gle.get(dim))

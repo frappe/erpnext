@@ -70,7 +70,7 @@ class POSClosingEntry(StatusUpdater):
 		for key, value in pos_occurences.items():
 			if len(value) > 1:
 				error_list.append(
-					_(f"{frappe.bold(key)} is added multiple times on rows: {frappe.bold(value)}")
+					_("{0} is added multiple times on rows: {1}").format(frappe.bold(key), frappe.bold(value))
 				)
 
 		if error_list:
