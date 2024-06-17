@@ -683,6 +683,19 @@ class PurchaseInvoice(BuyingController):
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
 				}
 			)
+			self.status_updater.append(
+				{
+					"source_dt": "Purchase Invoice Item",
+					"target_dt": "Material Request Item",
+					"join_field": "material_request_item",
+					"target_field": "received_qty",
+					"target_parent_dt": "Material Request",
+					"target_parent_field": "per_received",
+					"target_ref_field": "stock_qty",
+					"source_field": "stock_qty",
+					"percent_join_field": "material_request",
+				}
+			)
 			if cint(self.is_return):
 				self.status_updater.append(
 					{
