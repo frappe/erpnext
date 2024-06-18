@@ -6,7 +6,7 @@ from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_sched
 
 
 def execute():
-	if frappe.db.has_column("total_number_of_booked_depreciations"):
+	if frappe.db.has_column("Asset Finance Book", "total_number_of_booked_depreciations"):
 		assets = frappe.get_all(
 			"Asset", filters={"docstatus": 1}, fields=["name", "opening_number_of_booked_depreciations"]
 		)
