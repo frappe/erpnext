@@ -9,7 +9,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 	setup: function(frm) {
 		// set conditional display for rate column in taxes
 		$(frm.wrapper).on('grid-row-render', function(e, grid_row) {
-			if(in_list(['Sales Taxes and Charges', 'Purchase Taxes and Charges'], grid_row.doc.doctype)) {
+			if(['Sales Taxes and Charges', 'Purchase Taxes and Charges'].includes(grid_row.doc.doctype)) {
 				erpnext.taxes.set_conditional_mandatory_rate_or_amount(grid_row);
 			}
 		});
