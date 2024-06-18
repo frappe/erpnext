@@ -41,12 +41,24 @@ frappe.query_reports["Item-wise Sales Register"] = {
 			label: __("Warehouse"),
 			fieldtype: "Link",
 			options: "Warehouse",
+			get_query: function () {
+				const company = frappe.query_report.get_filter_value("company");
+				return {
+					filters: { company: company },
+				};
+			},
 		},
 		{
 			fieldname: "brand",
 			label: __("Brand"),
 			fieldtype: "Link",
 			options: "Brand",
+		},
+		{
+			fieldname: "item_code",
+			label: __("Item"),
+			fieldtype: "Link",
+			options: "Item",
 		},
 		{
 			fieldname: "item_group",

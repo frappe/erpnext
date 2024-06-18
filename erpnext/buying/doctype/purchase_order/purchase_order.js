@@ -12,6 +12,7 @@ erpnext.buying.setup_buying_controller();
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function (frm) {
+		frm.ignore_doctypes_on_cancel_all = ["Unreconcile Payment", "Unreconcile Payment Entries"];
 		if (frm.doc.is_old_subcontracting_flow) {
 			frm.set_query("reserve_warehouse", "supplied_items", function () {
 				return {

@@ -1196,11 +1196,14 @@
    "label": "Print Settings"
   },
   {
+   "fetch_from": "customer.language",
+   "fetch_if_empty": 1,
    "fieldname": "language",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Print Language",
+   "options": "Language",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1659,7 +1662,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-05-23 16:35:54.905804",
+ "modified": "2024-05-27 18:51:54.905804",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

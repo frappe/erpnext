@@ -97,7 +97,7 @@ class StockController(AccountsController):
 					)
 				)
 
-	def make_gl_entries(self, gl_entries=None, from_repost=False):
+	def make_gl_entries(self, gl_entries=None, from_repost=False, via_landed_cost_voucher=False):
 		if self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -118,7 +118,11 @@ class StockController(AccountsController):
 
 			if self.docstatus == 1:
 				if not gl_entries:
-					gl_entries = self.get_gl_entries(warehouse_account)
+					gl_entries = (
+						self.get_gl_entries(warehouse_account, via_landed_cost_voucher)
+						if self.doctype == "Purchase Receipt"
+						else self.get_gl_entries(warehouse_account)
+					)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
 	def validate_serialized_batch(self):
@@ -255,10 +259,17 @@ class StockController(AccountsController):
 					qty_field = "qty"
 					warehouse_field = "warehouse"
 
+				if not data.get("qty"):
+					frappe.throw(
+						_("For the {0}, no stock is available for the return in the warehouse {1}.").format(
+							frappe.bold(row.item_code), row.get(warehouse_field)
+						)
+					)
+
 				data = filter_serial_batches(
 					self, data, row, warehouse_field=warehouse_field, qty_field=qty_field
 				)
-				bundle = make_serial_batch_bundle_for_return(data, row, self, warehouse_field)
+				bundle = make_serial_batch_bundle_for_return(data, row, self, warehouse_field, qty_field)
 				if row.get("return_qty_from_rejected_warehouse"):
 					row.db_set(
 						{
@@ -714,6 +725,9 @@ class StockController(AccountsController):
 					)
 
 					row.db_set("rejected_serial_and_batch_bundle", None)
+
+				if row.get("current_serial_and_batch_bundle"):
+					row.db_set("current_serial_and_batch_bundle", None)
 
 	def set_serial_and_batch_bundle(self, table_name=None, ignore_validate=False):
 		if not table_name:

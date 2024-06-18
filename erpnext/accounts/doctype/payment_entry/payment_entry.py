@@ -199,11 +199,13 @@ class PaymentEntry(AccountsController):
 
 		self.book_advance_payments_in_separate_party_account = False
 		if self.party_type not in ("Customer", "Supplier"):
+			self.is_opening = "No"
 			return
 
 		if not frappe.db.get_value(
 			"Company", self.company, "book_advance_payments_in_separate_party_account"
 		):
+			self.is_opening = "No"
 			return
 
 		# Important to set this flag for the gl building logic to work properly
@@ -215,6 +217,7 @@ class PaymentEntry(AccountsController):
 		if (account_type == "Payable" and self.party_type == "Customer") or (
 			account_type == "Receivable" and self.party_type == "Supplier"
 		):
+			self.is_opening = "No"
 			return
 
 		if self.references:
@@ -224,6 +227,7 @@ class PaymentEntry(AccountsController):
 			# If there are referencers other than `allowed_types`, treat this as a normal payment entry
 			if reference_types - allowed_types:
 				self.book_advance_payments_in_separate_party_account = False
+				self.is_opening = "No"
 				return
 
 		liability_account = get_party_account(

@@ -40,6 +40,7 @@
   {
    "fieldname": "description",
    "fieldtype": "Text",
+   "in_preview": 1,
    "label": "Description"
   },
   {
@@ -104,7 +105,7 @@
  "icon": "fa fa-wrench",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:10:06.841479",
+ "modified": "2024-05-26 17:59:44.338741",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Operation",
@@ -134,6 +135,7 @@
   }
  ],
  "quick_entry": 1,
+ "show_preview_popup": 1,
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
