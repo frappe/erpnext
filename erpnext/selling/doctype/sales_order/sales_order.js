@@ -150,15 +150,11 @@ frappe.ui.form.on("Sales Order", {
 			frm.set_value("advance_paid", 0)
 		}
 
-<<<<<<< HEAD
-		frm.ignore_doctypes_on_cancel_all = ['Purchase Order'];
-=======
 		frm.ignore_doctypes_on_cancel_all = [
 			"Purchase Order",
 			"Unreconcile Payment",
 			"Unreconcile Payment Entries",
 		];
->>>>>>> b618d685c6 (refactor: ignore unreconcile doc for PO and SO on cancel/delete)
 	},
 
 	delivery_date: function(frm) {
