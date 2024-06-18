@@ -175,17 +175,43 @@ class TestAccountsController(FrappeTestCase):
 				acc = frappe.get_doc("Account", name)
 			setattr(self, x.attribute_name, acc.name)
 
-	def enable_advances_under_asset_and_liability(self):
+	def setup_advance_accounts_in_party_master(self):
 		company = frappe.get_doc("Company", self.company)
 		company.book_advance_payments_in_separate_party_account = 1
-		company.default_advance_received_account = self.advance_received_usd
-		company.default_advance_paid_account = self.advance_paid_usd
 		company.save()
 
-	def disable_advances_under_asset_and_liability(self):
+		customer = frappe.get_doc("Customer", self.customer)
+		customer.append(
+			"accounts",
+			{
+				"company": self.company,
+				"account": self.debtors_usd,
+				"advance_account": self.advance_received_usd,
+			},
+		)
+		customer.save()
+
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		supplier.append(
+			"accounts",
+			{
+				"company": self.company,
+				"account": self.creditors_usd,
+				"advance_account": self.advance_paid_usd,
+			},
+		)
+		supplier.save()
+
+	def remove_advance_accounts_from_party_master(self):
 		company = frappe.get_doc("Company", self.company)
 		company.book_advance_payments_in_separate_party_account = 0
 		company.save()
+		customer = frappe.get_doc("Customer", self.customer)
+		customer.accounts = []
+		customer.save()
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		supplier.accounts = []
+		supplier.save()
 
 	def create_sales_invoice(
 		self,
@@ -1776,7 +1802,7 @@ class TestAccountsController(FrappeTestCase):
 		"""
 		Customer advance booked under Liability
 		"""
-		self.enable_advances_under_asset_and_liability()
+		self.setup_advance_accounts_in_party_master()
 
 		adv = self.create_payment_entry(amount=1, source_exc_rate=83)
 		adv.save()  # explicit 'save' is needed to trigger set_liability_account()
@@ -1821,13 +1847,13 @@ class TestAccountsController(FrappeTestCase):
 		self.assertEqual(len(exc_je_for_si), 0)
 		self.assertEqual(len(exc_je_for_adv), 0)
 
-		self.disable_advances_under_asset_and_liability()
+		self.remove_advance_accounts_from_party_master()
 
 	def test_71_advance_payment_against_purchase_invoice_in_foreign_currency(self):
 		"""
 		Supplier advance booked under Asset
 		"""
-		self.enable_advances_under_asset_and_liability()
+		self.setup_advance_accounts_in_party_master()
 
 		usd_amount = 1
 		inr_amount = 85
@@ -1890,4 +1916,4 @@ class TestAccountsController(FrappeTestCase):
 		self.assertEqual(len(exc_je_for_pi), 0)
 		self.assertEqual(len(exc_je_for_adv), 0)
 
-		self.disable_advances_under_asset_and_liability()
+		self.remove_advance_accounts_from_party_master()
