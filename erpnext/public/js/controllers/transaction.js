@@ -260,7 +260,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	setup_quality_inspection() {
-		if(!in_list(["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)) {
+		if(!["Delivery Note", "Sales Invoice", "Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype)) {
 			return;
 		}
 
@@ -272,7 +272,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
-		const inspection_type = in_list(["Purchase Receipt", "Purchase Invoice"], this.frm.doc.doctype)
+		const inspection_type = ["Purchase Receipt", "Purchase Invoice"].includes(this.frm.doc.doctype)
 			? "Incoming" : "Outgoing";
 
 		let quality_inspection_field = this.frm.get_docfield("items", "quality_inspection");
@@ -304,7 +304,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	make_payment_request() {
 		let me = this;
-		const payment_request_type = (in_list(['Sales Order', 'Sales Invoice'], this.frm.doc.doctype))
+		const payment_request_type = (['Sales Order', 'Sales Invoice'].includes(this.frm.doc.doctype))
 			? "Inward" : "Outward";
 
 		frappe.call({
@@ -417,7 +417,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	setup_sms() {
 		var me = this;
 		let blacklist = ['Purchase Invoice', 'BOM'];
-		if(this.frm.doc.docstatus===1 && !in_list(["Lost", "Stopped", "Closed"], this.frm.doc.status)
+		if(this.frm.doc.docstatus===1 && !["Lost", "Stopped", "Closed"].includes(this.frm.doc.status)
 			&& !blacklist.includes(this.frm.doctype)) {
 			this.frm.page.add_menu_item(__('Send SMS'), function() { me.send_sms(); });
 		}
@@ -780,7 +780,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		var set_party_account = function(set_pricing) {
-			if (in_list(["Sales Invoice", "Purchase Invoice"], me.frm.doc.doctype)) {
+			if (["Sales Invoice", "Purchase Invoice"].includes(me.frm.doc.doctype)) {
 				if(me.frm.doc.doctype=="Sales Invoice") {
 					var party_type = "Customer";
 					var party_account_field = 'debit_to';
@@ -815,7 +815,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
-			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)) {
+			['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'].includes(this.frm.doctype)) {
 			erpnext.utils.get_shipping_address(this.frm, function() {
 				set_party_account(set_pricing);
 			});
@@ -1482,7 +1482,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"doctype": me.frm.doc.doctype,
 			"name": me.frm.doc.name,
 			"is_return": cint(me.frm.doc.is_return),
-			"update_stock": in_list(['Sales Invoice', 'Purchase Invoice'], me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
+			"update_stock": ['Sales Invoice', 'Purchase Invoice'].includes(me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
 			"conversion_factor": me.frm.doc.conversion_factor,
 			"pos_profile": me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
 			"coupon_code": me.frm.doc.coupon_code
@@ -2126,7 +2126,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	get_method_for_payment() {
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
 		if(cur_frm.doc.__onload && cur_frm.doc.__onload.make_payment_via_journal_entry){
-			if(in_list(['Sales Invoice', 'Purchase Invoice'],  cur_frm.doc.doctype)){
+			if(['Sales Invoice', 'Purchase Invoice'].includes( cur_frm.doc.doctype)){
 				method = "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_invoice";
 			}else {
 				method= "erpnext.accounts.doctype.journal_entry.journal_entry.get_payment_entry_against_order";

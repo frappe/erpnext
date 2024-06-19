@@ -219,7 +219,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 						serial_no: item.serial_no || "",
 					},
 					callback:function(r){
-						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+						if (['Delivery Note', 'Sales Invoice'].includes(doc.doctype)) {
 							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
 							if (has_batch_no) {
 								me.set_batch_number(cdt, cdn);
@@ -332,7 +332,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 		if ((doc.packed_items || []).length) {
 			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(true);
 
-			if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			if (['Delivery Note', 'Sales Invoice'].includes(doc.doctype)) {
 				var help_msg = "<div class='alert alert-warning'>" +
 					__("For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table.")+
 				"</div>";
@@ -340,7 +340,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 			}
 		} else {
 			$(cur_frm.fields_dict.packing_list.row.wrapper).toggle(false);
-			if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			if (['Delivery Note', 'Sales Invoice'].includes(doc.doctype)) {
 				frappe.meta.get_docfield(doc.doctype, 'product_bundle_help', doc.name).options = '';
 			}
 		}
@@ -367,7 +367,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	conversion_factor(doc, cdt, cdn, dont_fetch_price_list_rate) {
 	    super.conversion_factor(doc, cdt, cdn, dont_fetch_price_list_rate);
 		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn) &&
-			in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			['Delivery Note', 'Sales Invoice'].includes(doc.doctype)) {
 				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
 				this.set_batch_number(cdt, cdn);
 			}
@@ -376,7 +376,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 	qty(doc, cdt, cdn) {
 		super.qty(doc, cdt, cdn);
 
-		if(in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
+		if(['Delivery Note', 'Sales Invoice'].includes(doc.doctype)) {
 			if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
 			this.set_batch_number(cdt, cdn);
 		}
@@ -440,7 +440,7 @@ erpnext.selling.SellingController = class SellingController extends erpnext.Tran
 };
 
 frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
-	if(in_list(["Delivery Note", "Sales Invoice"], frm.doc.doctype)) {
+	if(["Delivery Note", "Sales Invoice"].includes(frm.doc.doctype)) {
 		if(frm.doc.project) {
 			frappe.call({
 				method:'erpnext.projects.doctype.project.project.get_cost_center_name' ,

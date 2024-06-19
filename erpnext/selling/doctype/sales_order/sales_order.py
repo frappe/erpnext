@@ -269,7 +269,13 @@ class SalesOrder(SellingController):
 			update_coupon_code_count(self.coupon_code, "used")
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Payment Ledger Entry",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+		)
 		super().on_cancel()
 
 		# Cannot cancel closed SO
