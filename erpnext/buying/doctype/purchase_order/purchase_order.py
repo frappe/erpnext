@@ -484,7 +484,13 @@ class PurchaseOrder(BuyingController):
 		self.auto_create_subcontracting_order()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Payment Ledger Entry")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Payment Ledger Entry",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+		)
+
 		super().on_cancel()
 
 		if self.is_against_so():
@@ -794,6 +800,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"field_map": {
 				"name": "po_detail",
 				"parent": "purchase_order",
+				"material_request": "material_request",
+				"material_request_item": "material_request_item",
 				"wip_composite_asset": "wip_composite_asset",
 			},
 			"postprocess": update_item,

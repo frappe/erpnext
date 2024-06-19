@@ -1814,6 +1814,110 @@ class TestDeliveryNote(FrappeTestCase):
 		self.assertEqual(sle_data.actual_qty, 1 * -1)
 		self.assertEqual(sle_data.stock_value_difference, 200.0 * -1)
 
+	def test_sales_return_batch_no_for_batched_item_in_dn(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(
+			"Test Batched Item for Sales Return 11",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "B11-TESTBATCH.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			use_serial_batch_fields=0,
+			batch_no=batch_no,
+		)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.save().submit()
+		returned_batch_no = get_batch_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(batch_no, returned_batch_no)
+
+	def test_partial_sales_return_batch_no_for_batched_item_in_dn(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(
+			"Test Partial Batched Item for Sales Return 11",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "BPART11-TESTBATCH.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			use_serial_batch_fields=0,
+			batch_no=batch_no,
+		)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].qty = 3 * -1
+		dn_return.save().submit()
+
+		returned_batch_no = get_batch_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(batch_no, returned_batch_no)
+		sabb_qty = frappe.db.get_value(
+			"Serial and Batch Bundle", dn_return.items[0].serial_and_batch_bundle, "total_qty"
+		)
+		self.assertEqual(sabb_qty, 3)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.items[0].qty = 2 * -1
+		dn_return.save().submit()
+
+		returned_batch_no = get_batch_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(batch_no, returned_batch_no)
+
+		sabb_qty = frappe.db.get_value(
+			"Serial and Batch Bundle", dn_return.items[0].serial_and_batch_bundle, "total_qty"
+		)
+		self.assertEqual(sabb_qty, 2)
+
+	def test_sales_return_serial_no_for_serial_item_in_dn(self):
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+
+		item_code = make_item(
+			"Test Serial Item for Sales Return 11",
+			properties={
+				"has_serial_no": 1,
+				"serial_no_series": "SNN11-TESTBATCH.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=5, basic_rate=100)
+
+		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+		dn = create_delivery_note(
+			item_code=item_code,
+			qty=5,
+			rate=500,
+			use_serial_batch_fields=0,
+			serial_no=serial_nos,
+		)
+
+		dn_return = make_sales_return(dn.name)
+		dn_return.save().submit()
+		returned_serial_nos = get_serial_nos_from_bundle(dn_return.items[0].serial_and_batch_bundle)
+		self.assertEqual(serial_nos, returned_serial_nos)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
