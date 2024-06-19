@@ -16,10 +16,7 @@ frappe.query_reports["Item-wise Purchase History"] = {
 			reqd: 1,
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.datetime.add_months(
-				frappe.datetime.get_today(),
-				-1,
-			),
+			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 		},
 		{
 			fieldname: "to_date",
