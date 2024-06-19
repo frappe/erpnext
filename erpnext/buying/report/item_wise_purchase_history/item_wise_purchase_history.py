@@ -177,25 +177,19 @@ def get_data(filters):
 			"billed_amt": flt(record.get("billed_amt")),
 			"company": record.get("company"),
 		}
-		row["currency"] = frappe.get_cached_value(
-			"Company", row["company"], "default_currency"
-		)
+		row["currency"] = frappe.get_cached_value("Company", row["company"], "default_currency")
 		data.append(row)
 
 	return data
 
 
 def get_supplier_details():
-	details = frappe.get_all(
-		"Supplier", fields=["name", "supplier_name", "supplier_group"]
-	)
+	details = frappe.get_all("Supplier", fields=["name", "supplier_name", "supplier_group"])
 	supplier_details = {}
 	for d in details:
 		supplier_details.setdefault(
 			d.name,
-			frappe._dict(
-				{"supplier_name": d.supplier_name, "supplier_group": d.supplier_group}
-			),
+			frappe._dict({"supplier_name": d.supplier_name, "supplier_group": d.supplier_group}),
 		)
 	return supplier_details
 
@@ -204,9 +198,7 @@ def get_item_details():
 	details = frappe.db.get_all("Item", fields=["name", "item_name", "item_group"])
 	item_details = {}
 	for d in details:
-		item_details.setdefault(
-			d.name, frappe._dict({"item_name": d.item_name, "item_group": d.item_group})
-		)
+		item_details.setdefault(d.name, frappe._dict({"item_name": d.item_name, "item_group": d.item_group}))
 	return item_details
 
 
@@ -265,15 +257,11 @@ def get_chart_data(data):
 		if item_key not in item_wise_purchase_map:
 			item_wise_purchase_map[item_key] = 0
 
-		item_wise_purchase_map[item_key] = flt(item_wise_purchase_map[item_key]) + flt(
-			row.get("amount")
-		)
+		item_wise_purchase_map[item_key] = flt(item_wise_purchase_map[item_key]) + flt(row.get("amount"))
 
 	item_wise_purchase_map = {
 		item: value
-		for item, value in (
-			sorted(item_wise_purchase_map.items(), key=lambda i: i[1], reverse=True)
-		)
+		for item, value in (sorted(item_wise_purchase_map.items(), key=lambda i: i[1], reverse=True))
 	}
 
 	for key in item_wise_purchase_map:
@@ -283,9 +271,7 @@ def get_chart_data(data):
 	return {
 		"data": {
 			"labels": labels[:30],  # show max of 30 items in chart
-			"datasets": [
-				{"name": _("Total Purchase Amount"), "values": datapoints[:30]}
-			],
+			"datasets": [{"name": _("Total Purchase Amount"), "values": datapoints[:30]}],
 		},
 		"type": "bar",
 		"fieldtype": "Currency",
