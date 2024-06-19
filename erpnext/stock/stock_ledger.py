@@ -745,7 +745,7 @@ class update_entries_after:
 				if sle.get(dimension.get("fieldname")):
 					has_dimensions = True
 
-		if sle.serial_and_batch_bundle:
+		if sle.serial_and_batch_bundle and self.valuation_method != "Moving Average":
 			self.calculate_valuation_for_serial_batch_bundle(sle)
 		elif sle.serial_no and not self.args.get("sle_id"):
 			# Only run in reposting
