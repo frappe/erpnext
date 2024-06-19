@@ -558,10 +558,9 @@ def _check_is_pro_rata(asset_doc, row, wdv_or_dd_non_yearly=False):
 	if days <= 0:
 		frappe.throw(
 			_(
-				"""
-				Error: This asset already has {0} depreciation periods booked.
-				The `depreciation start` date must be at least {1} periods after the `available for use` date. Please correct the dates accordingly.
-				"""
+				"""Error: This asset already has {0} depreciation periods booked.
+				The `depreciation start` date must be at least {1} periods after the `available for use` date.
+				Please correct the dates accordingly."""
 			).format(
 				asset_doc.opening_number_of_booked_depreciations,
 				asset_doc.opening_number_of_booked_depreciations,

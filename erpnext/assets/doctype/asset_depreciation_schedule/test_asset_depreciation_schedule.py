@@ -195,6 +195,7 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 		asset.reload()
 
 		self.assertEqual(asset.finance_books[0].total_number_of_booked_depreciations, 14)
+
 	def test_schedule_for_wdv_method_for_existing_asset(self):
 		asset = create_asset(
 			calculate_depreciation=1,
@@ -228,4 +229,3 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
 		self.assertEqual(schedules, expected_schedules)
-
