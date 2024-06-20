@@ -172,7 +172,7 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 			opening_accumulated_depreciation=2000,
 			opening_number_of_booked_depreciations=2,
 			depreciation_method="Straight Line",
-			available_for_use_date="2020-03-01",
+			available_for_use_date="2020-01-01",
 			depreciation_start_date="2020-03-31",
 			frequency_of_depreciation=1,
 			total_number_of_depreciations=24,
