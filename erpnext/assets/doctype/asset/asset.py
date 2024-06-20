@@ -12,6 +12,7 @@ from frappe.utils import (
 	add_months,
 	add_years,
 	cint,
+	cstr,
 	date_diff,
 	flt,
 	get_datetime,
@@ -361,9 +362,11 @@ class Asset(AccountsController):
 		final_number_of_depreciations = cint(finance_book.total_number_of_depreciations) - cint(
 			self.number_of_depreciations_booked
 		)
-
 		has_pro_rata = self.check_is_pro_rata(finance_book)
-		if has_pro_rata:
+		depr_already_booked = any(
+			[d.journal_entry for d in self.get("schedules") if d.finance_book == finance_book.finance_book]
+		)
+		if has_pro_rata and not depr_already_booked:
 			final_number_of_depreciations += 1
 
 		has_wdv_or_dd_non_yearly_pro_rata = False
@@ -543,7 +546,7 @@ class Asset(AccountsController):
 				"depreciation_amount": depreciation_amount,
 				"depreciation_method": finance_book.depreciation_method,
 				"finance_book": finance_book.finance_book,
-				"finance_book_id": finance_book.idx,
+				"finance_book_id": cstr(finance_book.idx),
 				"shift": shift,
 			},
 		)
@@ -749,7 +752,6 @@ class Asset(AccountsController):
 	):
 		straight_line_idx = []
 		finance_books = []
-
 		for i, d in enumerate(self.get("schedules")):
 			if ignore_booked_entry and d.journal_entry:
 				continue
@@ -771,7 +773,10 @@ class Asset(AccountsController):
 				finance_books.append(int(d.finance_book_id))
 
 			depreciation_amount = flt(d.depreciation_amount, d.precision("depreciation_amount"))
-			value_after_depreciation -= flt(depreciation_amount)
+			if not d.journal_entry:
+				value_after_depreciation = flt(
+					flt(value_after_depreciation) - depreciation_amount, d.precision("depreciation_amount")
+				)
 
 			# for the last row, if depreciation method = Straight Line
 			if (
@@ -783,9 +788,12 @@ class Asset(AccountsController):
 				book = self.get("finance_books")[cint(d.finance_book_id) - 1]
 
 				if not book.shift_based:
-					depreciation_amount += flt(
+					adjustment_amount = flt(
 						value_after_depreciation - flt(book.expected_value_after_useful_life),
 						d.precision("depreciation_amount"),
+					)
+					depreciation_amount = flt(
+						depreciation_amount + adjustment_amount, d.precision("depreciation_amount")
 					)
 
 			d.depreciation_amount = depreciation_amount
@@ -1433,7 +1441,7 @@ def get_straight_line_or_manual_depr_amount(asset, row, schedule_idx, number_of_
 	# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset value
 	elif asset.flags.increase_in_asset_value_due_to_repair:
 		return (flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)) / flt(
-			row.total_number_of_depreciations
+			number_of_pending_depreciations
 		)
 	# if the Depreciation Schedule is being modified after Asset Value Adjustment due to decrease in asset value
 	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment:

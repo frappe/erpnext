@@ -596,7 +596,11 @@ def update_payment_req_status(doc, method):
 
 		if payment_request_name:
 			ref_details = get_reference_details(
-				ref.reference_doctype, ref.reference_name, doc.party_account_currency
+				ref.reference_doctype,
+				ref.reference_name,
+				doc.party_account_currency,
+				doc.party_type,
+				doc.party,
 			)
 			pay_req_doc = frappe.get_doc("Payment Request", payment_request_name)
 			status = pay_req_doc.status

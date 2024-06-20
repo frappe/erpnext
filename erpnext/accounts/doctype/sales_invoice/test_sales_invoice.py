@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import json
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
@@ -2978,10 +2979,8 @@ class TestSalesInvoice(FrappeTestCase):
 			["2021-06-30", 20000.0, 21366.12, True],
 			["2022-06-30", 20000.0, 41366.12, False],
 			["2023-06-30", 20000.0, 61366.12, False],
-			["2024-06-30", 20000.0, 81366.12, False],
-			["2025-06-06", 18633.88, 100000.0, False],
+			["2024-06-06", 38633.88, 100000.0, False],
 		]
-
 		for i, schedule in enumerate(asset.schedules):
 			self.assertEqual(getdate(expected_values[i][0]), schedule.schedule_date)
 			self.assertEqual(expected_values[i][1], schedule.depreciation_amount)
@@ -3479,9 +3478,9 @@ class TestSalesInvoice(FrappeTestCase):
 
 		map_docs(
 			method="erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
-			source_names=frappe.json.dumps([dn1.name, dn2.name]),
+			source_names=json.dumps([dn1.name, dn2.name]),
 			target_doc=si,
-			args=frappe.json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
+			args=json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
 		)
 		si.save().submit()
 

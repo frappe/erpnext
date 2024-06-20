@@ -410,11 +410,13 @@ $.extend(erpnext.utils, {
 			method: "erpnext.accounts.utils.get_fiscal_year",
 			args: {
 				date: date,
+				boolean: boolean,
 			},
 			async: false,
 			callback: function (r) {
 				if (r.message) {
-					fiscal_year = r.message[0];
+					if (with_dates) fiscal_year = r.message;
+					else fiscal_year = r.message[0];
 				}
 			},
 		});

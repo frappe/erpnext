@@ -1138,7 +1138,8 @@
    "hide_seconds": 1,
    "label": "Inter Company Order Reference",
    "options": "Purchase Order",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "project",
@@ -1631,7 +1632,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-20 16:04:43.627183",
+ "modified": "2024-05-23 16:35:54.905804",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

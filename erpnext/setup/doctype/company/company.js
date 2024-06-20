@@ -12,10 +12,11 @@ frappe.ui.form.on("Company", {
 				}
 			});
 		}
-
-		frm.call("check_if_transactions_exist").then((r) => {
-			frm.toggle_enable("default_currency", !r.message);
-		});
+		if (!frm.doc.__islocal) {
+			frm.call("check_if_transactions_exist").then((r) => {
+				frm.toggle_enable("default_currency", !r.message);
+			});
+		}
 	},
 	setup: function (frm) {
 		frm.__rename_queue = "long";

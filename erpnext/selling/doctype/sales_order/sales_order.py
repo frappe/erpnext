@@ -269,7 +269,13 @@ class SalesOrder(SellingController):
 			update_coupon_code_count(self.coupon_code, "used")
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Payment Ledger Entry",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+		)
 		super().on_cancel()
 
 		# Cannot cancel closed SO
@@ -576,6 +582,11 @@ def get_requested_item_qty(sales_order):
 def make_material_request(source_name, target_doc=None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
+	def postprocess(source, target):
+		if source.tc_name and frappe.db.get_value("Terms and Conditions", source.tc_name, "buying") != 1:
+			target.tc_name = None
+			target.terms = None
+
 	def get_remaining_qty(so_item):
 		return flt(
 			flt(so_item.qty)
@@ -631,6 +642,7 @@ def make_material_request(source_name, target_doc=None):
 			},
 		},
 		target_doc,
+		postprocess,
 	)
 
 	return doc
@@ -932,10 +944,18 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
+		target.tc_name = ""
+		target.terms = ""
+		target.payment_terms_template = ""
+		target.payment_schedule = []
 
 		default_price_list = frappe.get_value("Supplier", supplier, "default_price_list")
 		if default_price_list:
 			target.buying_price_list = default_price_list
+
+		default_payment_terms = frappe.get_value("Supplier", supplier, "payment_terms")
+		if default_payment_terms:
+			target.payment_terms_template = default_payment_terms
 
 		if any(item.delivered_by_supplier == 1 for item in source.items):
 			if source.shipping_address_name:
@@ -988,7 +1008,6 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 						"contact_person",
 						"taxes_and_charges",
 						"shipping_address",
-						"terms",
 					],
 					"validation": {"docstatus": ["=", 1]},
 				},
@@ -1056,6 +1075,10 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.discount_amount = 0.0
 		target.inter_company_order_reference = ""
 		target.shipping_rule = ""
+		target.tc_name = ""
+		target.terms = ""
+		target.payment_terms_template = ""
+		target.payment_schedule = []
 
 		if is_drop_ship_order(target):
 			target.customer = source.customer
@@ -1091,7 +1114,6 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 					"contact_person",
 					"taxes_and_charges",
 					"shipping_address",
-					"terms",
 				],
 				"validation": {"docstatus": ["=", 1]},
 			},
