@@ -188,8 +188,8 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 			);
 		}
 
-		if (!doc.is_return && doc.status != "Closed" && frappe.model.can_create("Shipment")) {
-			if (doc.docstatus == 1) {
+		if (!doc.is_return && doc.status != "Closed") {
+			if (doc.docstatus == 1 && frappe.model.can_create("Shipment")) {
 				this.frm.add_custom_button(
 					__("Shipment"),
 					function () {
