@@ -167,6 +167,10 @@ def start_repost(account_repost_doc=str) -> None:
 						doc.make_gl_entries_on_cancel()
 
 					doc.docstatus = 1
+					if doc.doctype == "Sales Invoice":
+						doc.force_set_against_income_account()
+					else:
+						doc.force_set_against_expense_account()
 					doc.make_gl_entries()
 
 				elif doc.doctype in ["Payment Entry", "Journal Entry", "Expense Claim"]:
