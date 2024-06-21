@@ -943,6 +943,10 @@ class SalesInvoice(SellingController):
 				against_acc.append(d.income_account)
 		self.against_income_account = ",".join(against_acc)
 
+	def force_set_against_income_account(self):
+		self.set_against_income_account()
+		frappe.db.set_value(self.doctype, self.name, "against_income_account", self.against_income_account)
+
 	def add_remarks(self):
 		if not self.remarks:
 			if self.po_no and self.po_date:

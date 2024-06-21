@@ -593,13 +593,17 @@ class PurchaseInvoice(BuyingController):
 		for item in self.get("items"):
 			validate_account_head(item.idx, item.expense_account, self.company, "Expense")
 
-	def set_against_expense_account(self):
+	def set_against_expense_account(self, force=False):
 		against_accounts = []
 		for item in self.get("items"):
 			if item.expense_account and (item.expense_account not in against_accounts):
 				against_accounts.append(item.expense_account)
 
 		self.against_expense_account = ",".join(against_accounts)
+
+	def force_set_against_expense_account(self):
+		self.set_against_expense_account()
+		frappe.db.set_value(self.doctype, self.name, "against_expense_account", self.against_expense_account)
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == "Yes":
