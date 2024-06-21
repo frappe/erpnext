@@ -166,7 +166,7 @@ class PaymentLedgerEntry(Document):
 				self.validate_account_details()
 				self.validate_dimensions_for_pl_and_bs()
 				self.validate_allowed_dimensions()
-				validate_balance_type(self.account, adv_adj)
+				validate_balance_type(self.account, adv_adj, self.finance_book)
 
 		# update outstanding amount
 		if (
