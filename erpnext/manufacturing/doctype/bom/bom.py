@@ -1259,27 +1259,18 @@ def get_children(parent=None, is_root=False, **filters):
 def add_additional_cost(stock_entry, work_order):
 	# Add non stock items cost in the additional cost
 	stock_entry.additional_costs = []
-<<<<<<< HEAD
-	expenses_included_in_valuation = frappe.get_cached_value(
-		"Company", work_order.company, "expenses_included_in_valuation"
-	)
-
-	add_non_stock_items_cost(stock_entry, work_order, expenses_included_in_valuation)
-	add_operations_cost(stock_entry, work_order, expenses_included_in_valuation)
-=======
 	company_account = frappe.db.get_value(
 		"Company",
 		work_order.company,
-		["default_expense_account", "default_operating_cost_account"],
+		["expenses_included_in_valuation", "default_operating_cost_account"],
 		as_dict=1,
 	)
 
 	expecnse_account = (
-		company_account.default_operating_cost_account or company_account.default_expense_account
+		company_account.default_operating_cost_account or company_account.expenses_included_in_valuation
 	)
 	add_non_stock_items_cost(stock_entry, work_order, expecnse_account)
 	add_operations_cost(stock_entry, work_order, expecnse_account)
->>>>>>> fd7666a029 (feat: default account head for operating cost (#41985))
 
 
 def add_non_stock_items_cost(stock_entry, work_order, expense_account):
