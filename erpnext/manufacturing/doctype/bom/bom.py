@@ -1266,11 +1266,11 @@ def add_additional_cost(stock_entry, work_order):
 		as_dict=1,
 	)
 
-	expecnse_account = (
+	expense_account = (
 		company_account.default_operating_cost_account or company_account.expenses_included_in_valuation
 	)
-	add_non_stock_items_cost(stock_entry, work_order, expecnse_account)
-	add_operations_cost(stock_entry, work_order, expecnse_account)
+	add_non_stock_items_cost(stock_entry, work_order, expense_account)
+	add_operations_cost(stock_entry, work_order, expense_account)
 
 
 def add_non_stock_items_cost(stock_entry, work_order, expense_account):
