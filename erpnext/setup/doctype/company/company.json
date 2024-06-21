@@ -109,7 +109,6 @@
   "stock_received_but_not_billed",
   "default_provisional_account",
   "expenses_included_in_valuation",
-  "default_in_transit_warehouse",
   "manufacturing_section",
   "default_operating_cost_account",
   "dashboard_tab"
