@@ -1748,6 +1748,81 @@ class TestWorkOrder(FrappeTestCase):
 		job_card2.time_logs = []
 		job_card2.save()
 
+	def test_operating_cost_account(self):
+		operating_cost_account = "Test Operating Cost Account - _TC"
+		company = "_Test Company"
+		if not frappe.db.exists("Account", operating_cost_account):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "Test Operating Cost Account",
+					"account_type": "Expense Account",
+					"company": company,
+					"parent_account": "Expenses - _TC",
+					"root_type": "Expense",
+				}
+			).insert()
+
+		frappe.db.set_value("Company", company, "default_operating_cost_account", operating_cost_account)
+
+		for item in ["TEST RM OP COST Item 1", "TEST FG OP COST Item"]:
+			if not frappe.db.exists("Item", item):
+				make_item(item_code=item, properties={"is_stock_item": 1})
+
+		fg_item = "TEST FG OP COST Item"
+		bom_doc = make_bom(
+			item=fg_item,
+			raw_materials=["TEST RM OP COST Item 1"],
+			rate=150,
+			with_operations=1,
+			do_not_save=True,
+		)
+
+		workstation = "Test Workstation For Capacity Planning 1"
+		if not frappe.db.exists("Workstation", workstation):
+			make_workstation(workstation=workstation, production_capacity=1)
+
+		operation = "Test Operation For Capacity Planning 1"
+		if not frappe.db.exists("Operation", operation):
+			make_operation(operation=operation, workstation=workstation)
+
+		bom_doc.append(
+			"operations",
+			{"operation": operation, "time_in_mins": 60, "hour_rate": 100, "workstation": workstation},
+		)
+
+		bom_doc.save()
+		bom_doc.submit()
+
+		wo = make_wo_order_test_record(
+			production_item=fg_item,
+			bom_no=bom_doc.name,
+			qty=1,
+			skip_transfer=1,
+		)
+
+		job_cards = frappe.get_all("Job Card", filters={"work_order": wo.name})
+		for job_card in job_cards:
+			job_card_doc = frappe.get_doc("Job Card", job_card.name)
+			job_card_doc.time_logs = []
+			job_card_doc.append(
+				"time_logs",
+				{
+					"from_time": now(),
+					"to_time": add_to_date(now(), minutes=60),
+					"time_in_mins": 60,
+					"completed_qty": 1,
+				},
+			)
+
+			job_card_doc.submit()
+
+		se_doc = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+		se_doc.save()
+
+		for row in se_doc.additional_costs:
+			self.assertEqual(row.expense_account, operating_cost_account)
+
 	def test_op_cost_and_scrap_based_on_sub_assemblies(self):
 		# Make Sub Assembly BOM 1
 
