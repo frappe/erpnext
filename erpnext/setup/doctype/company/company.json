@@ -108,13 +108,10 @@
   "column_break_32",
   "stock_received_but_not_billed",
   "default_provisional_account",
-<<<<<<< HEAD
   "expenses_included_in_valuation",
-=======
   "default_in_transit_warehouse",
   "manufacturing_section",
   "default_operating_cost_account",
->>>>>>> fd7666a029 (feat: default account head for operating cost (#41985))
   "dashboard_tab"
  ],
  "fields": [
