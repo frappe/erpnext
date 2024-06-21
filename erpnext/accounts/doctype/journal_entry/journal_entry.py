@@ -194,6 +194,7 @@ class JournalEntry(AccountsController):
 		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		self.update_booked_depreciation()
 
 	def on_update_after_submit(self):
 		if hasattr(self, "repost_required"):
@@ -225,6 +226,7 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+		self.update_booked_depreciation()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -438,6 +440,28 @@ class JournalEntry(AccountsController):
 					break
 			if status:
 				inv_disc_doc.set_status(status=status)
+
+	def update_booked_depreciation(self):
+		for d in self.get("accounts"):
+			if (
+				self.voucher_type == "Depreciation Entry"
+				and d.reference_type == "Asset"
+				and d.reference_name
+				and frappe.get_cached_value("Account", d.account, "root_type") == "Expense"
+				and d.debit
+			):
+				asset = frappe.get_doc("Asset", d.reference_name)
+				for fb_row in asset.get("finance_books"):
+					if fb_row.finance_book == self.finance_book:
+						depr_schedule = get_depr_schedule(asset.name, "Active", fb_row.finance_book)
+						total_number_of_booked_depreciations = asset.opening_number_of_booked_depreciations
+						for je in depr_schedule:
+							if je.journal_entry:
+								total_number_of_booked_depreciations += 1
+						fb_row.db_set(
+							"total_number_of_booked_depreciations", total_number_of_booked_depreciations
+						)
+						break
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):

@@ -45,7 +45,7 @@
   "calculate_depreciation",
   "column_break_33",
   "opening_accumulated_depreciation",
-  "number_of_depreciations_booked",
+  "opening_number_of_booked_depreciations",
   "is_fully_depreciated",
   "section_break_36",
   "finance_books",
@@ -256,12 +256,6 @@
    "fieldtype": "Currency",
    "label": "Opening Accumulated Depreciation",
    "options": "Company:company:default_currency"
-  },
-  {
-   "depends_on": "eval:(doc.is_existing_asset)",
-   "fieldname": "number_of_depreciations_booked",
-   "fieldtype": "Int",
-   "label": "Number of Depreciations Booked"
   },
   {
    "collapsible": 1,
@@ -546,6 +540,12 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:(doc.is_existing_asset)",
+   "fieldname": "opening_number_of_booked_depreciations",
+   "fieldtype": "Int",
+   "label": "Opening Number of Booked Depreciations"
   }
  ],
  "idx": 72,
@@ -589,7 +589,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2024-04-18 16:45:47.306032",
+ "modified": "2024-05-21 13:46:21.066483",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
