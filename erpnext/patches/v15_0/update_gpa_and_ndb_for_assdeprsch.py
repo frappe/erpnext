@@ -3,6 +3,7 @@ import frappe
 
 def execute():
 	# not using frappe.qb because https://github.com/frappe/frappe/issues/20292
+	# nosemgrep
 	frappe.db.sql(
 		"""UPDATE `tabAsset Depreciation Schedule`
         JOIN `tabAsset`
