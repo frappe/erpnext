@@ -109,6 +109,8 @@
   "stock_received_but_not_billed",
   "default_provisional_account",
   "expenses_included_in_valuation",
+  "manufacturing_section",
+  "default_operating_cost_account",
   "dashboard_tab"
  ],
  "fields": [
@@ -773,7 +775,7 @@
   {
    "fieldname": "stock_tab",
    "fieldtype": "Tab Break",
-   "label": "Stock"
+   "label": "Stock and Manufacturing"
   },
   {
    "fieldname": "dashboard_tab",
@@ -788,6 +790,17 @@
    "fieldname": "reconcile_on_advance_payment_date",
    "fieldtype": "Check",
    "label": "Reconcile on Advance Payment Date"
+  },
+  {
+   "fieldname": "manufacturing_section",
+   "fieldtype": "Section Break",
+   "label": "Manufacturing"
+  },
+  {
+   "fieldname": "default_operating_cost_account",
+   "fieldtype": "Link",
+   "label": "Default Operating Cost Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -795,7 +808,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2024-05-27 17:32:49.057386",
+ "modified": "2024-06-21 17:46:25.567565",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
