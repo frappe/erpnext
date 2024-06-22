@@ -1090,6 +1090,20 @@ frappe.ui.form.on("Sales Invoice", {
 			frm: frm,
 		});
 	},
+
+	validate: async function (frm) {
+		if (!frm.doc.set_posting_time && frappe.datetime.get_today() != frm.doc.posting_date) {
+			await new Promise((resolve, reject) => {
+				frappe.confirm(
+					__(
+						"Posting Date will change to today's date as Edit Posting Date and Time is unchecked. Are you sure want to proceed?"
+					),
+					() => resolve(),
+					() => reject()
+				);
+			});
+		}
+	},
 });
 
 frappe.ui.form.on("Sales Invoice Timesheet", {
