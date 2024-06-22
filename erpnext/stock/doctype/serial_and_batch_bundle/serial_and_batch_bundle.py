@@ -2107,6 +2107,9 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> list[frappe._dict]:
 		if val is None:
 			continue
 
+		if not val and isinstance(val, list):
+			return []
+
 		if key == "get_subcontracted_item":
 			continue
 
