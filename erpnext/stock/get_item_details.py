@@ -1325,13 +1325,11 @@ def get_default_bom(item_code=None):
 
 @frappe.whitelist()
 def get_valuation_rate(item_code, company, warehouse=None):
-	if frappe.get_cached_value("Warehouse", warehouse, "is_group"):
-		return {"valuation_rate": 0.0}
-
+	valuation_rate = 0.0
 	item = get_item_defaults(item_code, company)
 	item_group = get_item_group_defaults(item_code, company)
 	brand = get_brand_defaults(item_code, company)
-	# item = frappe.get_doc("Item", item_code)
+
 	if item.get("is_stock_item"):
 		if not warehouse:
 			warehouse = (
@@ -1340,11 +1338,12 @@ def get_valuation_rate(item_code, company, warehouse=None):
 				or brand.get("default_warehouse")
 			)
 
-		return frappe.db.get_value(
-			"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"], as_dict=True
-		) or {"valuation_rate": 0}
-
-	elif not item.get("is_stock_item"):
+		if warehouse:
+			if not frappe.get_cached_value("Warehouse", warehouse, "is_group"):
+				valuation_rate = frappe.db.get_value(
+					"Bin", {"item_code": item_code, "warehouse": warehouse}, ["valuation_rate"]
+				)
+	else:
 		pi_item = frappe.qb.DocType("Purchase Invoice Item")
 		valuation_rate = (
 			frappe.qb.from_(pi_item)
@@ -1353,9 +1352,12 @@ def get_valuation_rate(item_code, company, warehouse=None):
 		).run()
 
 		if valuation_rate:
-			return {"valuation_rate": valuation_rate[0][0] or 0.0}
-	else:
-		return {"valuation_rate": 0.0}
+			valuation_rate = valuation_rate[0][0] or 0.0
+
+	if not valuation_rate:
+		valuation_rate = item.get("valuation_rate", 0.0)
+
+	return {"valuation_rate": valuation_rate}
 
 
 def get_gross_profit(out):
