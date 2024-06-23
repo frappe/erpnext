@@ -20,7 +20,7 @@
           </div>
         {% else %}
           <span class="indicator-pill {{ " red" if doc.status=="Open" else "darkgrey" }}">
-            {{ doc.status }}</span>
+            {{ _(doc.status) }}</span>
         {% endif %}
       </div>
       {% if doc["_assign"] %}
