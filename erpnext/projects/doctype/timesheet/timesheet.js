@@ -58,10 +58,10 @@ frappe.ui.form.on("Timesheet", {
 		}
 
 		if (frm.doc.docstatus < 1) {
-			let button = "Start Timer";
+			let button = __("Start Timer");
 			$.each(frm.doc.time_logs || [], function (i, row) {
 				if (row.from_time <= frappe.datetime.now_datetime() && !row.completed) {
-					button = "Resume Timer";
+					button = __("Resume Timer");
 				}
 			});
 
