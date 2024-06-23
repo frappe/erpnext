@@ -146,8 +146,8 @@ frappe.ui.form.on("Request for Quotation", {
 								return;
 							}
 						},
-						"Download PDF for Supplier",
-						"Download"
+						__("Download PDF for Supplier"),
+						__("Download")
 					);
 				},
 				__("Tools")
