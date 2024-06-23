@@ -77,7 +77,7 @@ def get_chart_data(data):
 	charts = {
 		"data": {
 			"labels": [_("On Track"), _("Delayed")],
-			"datasets": [{"name": "Delayed", "values": [on_track, delay]}],
+			"datasets": [{"name": _("Delayed"), "values": [on_track, delay]}],
 		},
 		"type": "percentage",
 		"colors": ["#84D5BA", "#CB4B5F"],
