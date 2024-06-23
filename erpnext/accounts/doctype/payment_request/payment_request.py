@@ -210,6 +210,8 @@ class PaymentRequest(Document):
 				"currency": self.currency,
 				"reference_doctype": self.doctype,
 				"reference_docname": self.name,
+				"display_reference_doctype": ref_doc.doctype,
+				"display_reference_docname": ref_doc.name,
 				"payer_contact": contact,
 				"payer_address": address,
 				"loyalty_points": loyalty_points,
