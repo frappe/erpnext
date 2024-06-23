@@ -46,7 +46,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 	init_email_print_dialog() {
 		const email_dialog = new frappe.ui.Dialog({
-			title: "Email Receipt",
+			title: __("Email Receipt"),
 			fields: [
 				{ fieldname: "email_id", fieldtype: "Data", options: "Email", label: "Email ID", reqd: 1 },
 				{ fieldname: "content", fieldtype: "Small Text", label: "Message (if any)" },
@@ -85,7 +85,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				<div class="right-section">
 					<div class="paid-amount">${format_currency(doc.paid_amount, doc.currency)}</div>
 					<div class="invoice-name">${doc.name}</div>
-					<span class="indicator-pill whitespace-nowrap ${indicator_color}"><span>${doc.status}</span></span>
+					<span class="indicator-pill whitespace-nowrap ${indicator_color}"><span>${__(doc.status)}</span></span>
 				</div>`;
 	}
 
@@ -112,7 +112,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	get_discount_html(doc) {
 		if (doc.discount_amount) {
 			return `<div class="summary-row-wrapper">
-						<div>Discount (${doc.additional_discount_percentage} %)</div>
+						<div>${__("Discount")} (${doc.additional_discount_percentage} %)</div>
 						<div>${format_currency(doc.discount_amount, doc.currency)}</div>
 					</div>`;
 		} else {
