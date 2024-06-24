@@ -1,7 +1,7 @@
 # Copyright, (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from typing import Any
+from typing import Any, Literal
 
 import frappe
 from frappe import _, scrub
@@ -101,6 +101,7 @@ def get_dimension_filter_map() -> dict[tuple[str, str], dict[str, Any]]:
 			accounts = get_descendants_of("Account", f.applicable_on_account)
 		else:
 			accounts = [f.applicable_on_account]
+
 		for account in accounts:
 			build_map(
 				dimension_filter_map,
@@ -120,7 +121,7 @@ def build_map(
 	dimension: str,
 	account: str,
 	filter_value: str,
-	allow_or_restrict: str,
+	allow_or_restrict: Literal["Allow", "Restrict"],
 	is_mandatory: bool,
 ):
 	map_object.setdefault(
@@ -131,4 +132,6 @@ def build_map(
 			"allow_or_restrict": allow_or_restrict,
 		},
 	)
-	map_object[(dimension, account)]["allowed_dimensions"].append(filter_value)
+
+	if filter_value:
+		map_object[(dimension, account)]["allowed_dimensions"].append(filter_value)
