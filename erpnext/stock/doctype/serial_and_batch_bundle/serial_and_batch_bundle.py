@@ -1220,6 +1220,7 @@ def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, na
 		"`tabSerial and Batch Entry`.`warehouse`",
 		"`tabSerial and Batch Entry`.`batch_no`",
 		"`tabSerial and Batch Entry`.`serial_no`",
+		"`tabSerial and Batch Entry`.`name` as `child_row`",
 	]
 
 	if not child_row:
