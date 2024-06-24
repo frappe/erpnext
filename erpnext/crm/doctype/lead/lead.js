@@ -28,27 +28,11 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		erpnext.toggle_naming_series();
 
 		if (!this.frm.is_new() && doc.__onload && !doc.__onload.is_customer) {
-			this.frm.add_custom_button(
-				__("Customer"),
-				this.make_customer.bind(this),
-				__("Create")
-			);
-			this.frm.add_custom_button(
-				__("Opportunity"),
-				this.make_opportunity.bind(this),
-				__("Create")
-			);
-			this.frm.add_custom_button(
-				__("Quotation"),
-				this.make_quotation.bind(this),
-				__("Create")
-			);
+			this.frm.add_custom_button(__("Customer"), this.make_customer.bind(this), __("Create"));
+			this.frm.add_custom_button(__("Opportunity"), this.make_opportunity.bind(this), __("Create"));
+			this.frm.add_custom_button(__("Quotation"), this.make_quotation.bind(this), __("Create"));
 			if (!doc.__onload.linked_prospects.length) {
-				this.frm.add_custom_button(
-					__("Prospect"),
-					this.make_prospect.bind(this),
-					__("Create")
-				);
+				this.frm.add_custom_button(__("Prospect"), this.make_prospect.bind(this), __("Create"));
 				this.frm.add_custom_button(__("Add to Prospect"), this.add_lead_to_prospect, __("Action"));
 			}
 		}
@@ -170,7 +154,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			const d = new frappe.ui.Dialog({
 				title: __("Create Opportunity"),
 				fields: fields,
-				primary_action: function(data) {
+				primary_action: function (data) {
 					frappe.call({
 						method: "create_prospect_and_contact",
 						doc: frm.doc,
@@ -178,7 +162,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 							data: data,
 						},
 						freeze: true,
-						callback: function(r) {
+						callback: function (r) {
 							if (!r.exc) {
 								frappe.model.open_mapped_doc({
 									method: "erpnext.crm.doctype.lead.lead.make_opportunity",
