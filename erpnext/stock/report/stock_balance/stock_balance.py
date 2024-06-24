@@ -137,6 +137,10 @@ class StockBalanceReport:
 			report_data.update(
 				{"reserved_stock": sre_details.get((report_data.item_code, report_data.warehouse), 0.0)}
 			)
+
+			if report_data and report_data.bal_qty == 0 and report_data.bal_val == 0:
+				continue
+
 			self.data.append(report_data)
 
 	def get_item_warehouse_map(self):
