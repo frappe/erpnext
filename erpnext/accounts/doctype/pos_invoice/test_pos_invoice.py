@@ -318,29 +318,28 @@ class TestPOSInvoice(unittest.TestCase):
 
 		pos.insert()
 		pos.submit()
+		pos.reload()
 
 		pos_return1 = make_sales_return(pos.name)
 
 		# partial return 1
 		pos_return1.get("items")[0].qty = -1
+		pos_return1.submit()
+		pos_return1.reload()
 
 		bundle_id = frappe.get_doc(
 			"Serial and Batch Bundle", pos_return1.get("items")[0].serial_and_batch_bundle
 		)
-
-		bundle_id.remove(bundle_id.entries[1])
-		bundle_id.save()
 
 		bundle_id.load_from_db()
 
 		serial_no = bundle_id.entries[0].serial_no
 		self.assertEqual(serial_no, serial_nos[0])
 
-		pos_return1.insert()
-		pos_return1.submit()
-
 		# partial return 2
 		pos_return2 = make_sales_return(pos.name)
+		pos_return2.submit()
+
 		self.assertEqual(pos_return2.get("items")[0].qty, -1)
 		serial_no = get_serial_nos_from_bundle(pos_return2.get("items")[0].serial_and_batch_bundle)[0]
 		self.assertEqual(serial_no, serial_nos[1])

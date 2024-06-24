@@ -69,7 +69,7 @@ class Quotation(SellingController):
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		items: DF.Table[QuotationItem]
-		language: DF.Data | None
+		language: DF.Link | None
 		letter_head: DF.Link | None
 		lost_reasons: DF.TableMultiSelect[QuotationLostReasonDetail]
 		named_place: DF.Data | None

@@ -174,12 +174,9 @@ def _get_pricing_rules(apply_on, args, values):
 
 
 def apply_multiple_pricing_rules(pricing_rules):
-	apply_multiple_rule = [
-		d.apply_multiple_pricing_rules for d in pricing_rules if d.apply_multiple_pricing_rules
-	]
-
-	if not apply_multiple_rule:
-		return False
+	for d in pricing_rules:
+		if not d.apply_multiple_pricing_rules:
+			return False
 
 	return True
 
@@ -564,6 +561,7 @@ def apply_pricing_rule_on_transaction(doc):
 
 	if pricing_rules:
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty, doc.total, pricing_rules)
+		pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
 		if not pricing_rules:
 			remove_free_item(doc)

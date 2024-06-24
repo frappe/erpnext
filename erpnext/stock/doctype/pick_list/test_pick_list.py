@@ -167,6 +167,7 @@ class TestPickList(FrappeTestCase):
 						"item_code": "_Test Serialized Item",
 						"warehouse": "_Test Warehouse - _TC",
 						"valuation_rate": 100,
+						"reconcile_all_serial_batch": 1,
 						"qty": 5,
 						"serial_and_batch_bundle": make_serial_batch_bundle(
 							frappe._dict(
