@@ -1109,6 +1109,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 
 		sr.reload()
+		self.assertEqual(sr.difference_amount, 98900.0)
 
 		self.assertTrue(sr.items[0].current_valuation_rate)
 		current_sabb = sr.items[0].current_serial_and_batch_bundle
