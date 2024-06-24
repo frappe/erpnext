@@ -158,7 +158,6 @@ class PaymentEntry(AccountsController):
 		self.setup_party_account_field()
 		self.set_missing_values()
 		self.set_liability_account()
-		self.validate_advance_account_currency()
 		self.set_missing_ref_details(force=True)
 		self.validate_payment_type()
 		self.validate_party_details()
@@ -199,11 +198,13 @@ class PaymentEntry(AccountsController):
 
 		self.book_advance_payments_in_separate_party_account = False
 		if self.party_type not in ("Customer", "Supplier"):
+			self.is_opening = "No"
 			return
 
 		if not frappe.db.get_value(
 			"Company", self.company, "book_advance_payments_in_separate_party_account"
 		):
+			self.is_opening = "No"
 			return
 
 		# Important to set this flag for the gl building logic to work properly
@@ -215,6 +216,7 @@ class PaymentEntry(AccountsController):
 		if (account_type == "Payable" and self.party_type == "Customer") or (
 			account_type == "Receivable" and self.party_type == "Supplier"
 		):
+			self.is_opening = "No"
 			return
 
 		if self.references:
@@ -224,6 +226,7 @@ class PaymentEntry(AccountsController):
 			# If there are referencers other than `allowed_types`, treat this as a normal payment entry
 			if reference_types - allowed_types:
 				self.book_advance_payments_in_separate_party_account = False
+				self.is_opening = "No"
 				return
 
 		liability_account = get_party_account(
@@ -241,22 +244,6 @@ class PaymentEntry(AccountsController):
 			),
 			alert=True,
 		)
-
-	def validate_advance_account_currency(self):
-		if self.book_advance_payments_in_separate_party_account is True:
-			company_currency = frappe.get_cached_value("Company", self.company, "default_currency")
-			if self.payment_type == "Receive" and self.paid_from_account_currency != company_currency:
-				frappe.throw(
-					_("Booking advances in foreign currency account: {0} ({1}) is not yet supported.").format(
-						frappe.bold(self.paid_from), frappe.bold(self.paid_from_account_currency)
-					)
-				)
-			if self.payment_type == "Pay" and self.paid_to_account_currency != company_currency:
-				frappe.throw(
-					_("Booking advances in foreign currency account: {0} ({1}) is not yet supported.").format(
-						frappe.bold(self.paid_to), frappe.bold(self.paid_to_account_currency)
-					)
-				)
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
@@ -1357,7 +1344,7 @@ class PaymentEntry(AccountsController):
 
 		dr_or_cr, account = self.get_dr_and_account_for_advances(invoice)
 		args_dict["account"] = account
-		args_dict[dr_or_cr] = invoice.allocated_amount
+		args_dict[dr_or_cr] = self.calculate_base_allocated_amount_for_reference(invoice)
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
 		args_dict.update(
 			{
@@ -1376,7 +1363,7 @@ class PaymentEntry(AccountsController):
 		args_dict[dr_or_cr + "_in_account_currency"] = 0
 		dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 		args_dict["account"] = self.party_account
-		args_dict[dr_or_cr] = invoice.allocated_amount
+		args_dict[dr_or_cr] = self.calculate_base_allocated_amount_for_reference(invoice)
 		args_dict[dr_or_cr + "_in_account_currency"] = invoice.allocated_amount
 		args_dict.update(
 			{

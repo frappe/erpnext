@@ -1256,8 +1256,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	qty(doc, cdt, cdn) {
-		if (!this.frm.doc.__onload?.load_after_mapping) {
-			let item = frappe.get_doc(cdt, cdn);
+		let item = frappe.get_doc(cdt, cdn);
+		if (!this.is_a_mapped_document(item)) {
 			// item.pricing_rules = ''
 			frappe.run_serially([
 				() => this.remove_pricing_rule_for_item(item),
@@ -1743,6 +1743,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				me.frm.doc.items.forEach(d => {
 					if (in_list(JSON.parse(data.apply_rule_on_other_items), d[data.apply_rule_on])) {
 						for(var k in data) {
+							if (data.pricing_rule_for == "Discount Percentage" && data.apply_rule_on_other_items && k == "discount_amount") {
+								continue;
+							}
+
 							if (in_list(fields, k) && data[k] && (data.price_or_product_discount === 'Price' || k === 'pricing_rules')) {
 								frappe.model.set_value(d.doctype, d.name, k, data[k]);
 							}
@@ -2308,6 +2312,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 			if (doc.is_return) {
 				filters["is_return"] = 1;
+				if (["Sales Invoice", "Delivery Note"].includes(doc.doctype)) {
+					filters["is_inward"] = 1;
+				}
 			}
 
 			if (item.warehouse) filters["warehouse"] = item.warehouse;

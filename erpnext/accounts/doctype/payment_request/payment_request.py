@@ -166,14 +166,7 @@ class PaymentRequest(Document):
 
 		if self.payment_request_type == "Inward":
 			send_mail = self.payment_gateway_validation() if self.payment_gateway else None
-			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-
-			if (
-				hasattr(ref_doc, "order_type") and ref_doc.order_type == "Shopping Cart"
-			) or self.flags.mute_email:
-				send_mail = False
-
-			if send_mail and self.payment_channel != "Phone":
+			if send_mail and not (self.mute_email or self.flags.mute_email):
 				self.set_payment_request_url()
 				self.send_email()
 				self.make_communication_entry()
@@ -220,14 +213,12 @@ class PaymentRequest(Document):
 		self.set_as_cancelled()
 
 	def make_invoice(self):
-		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		if hasattr(ref_doc, "order_type") and ref_doc.order_type == "Shopping Cart":
-			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
-			si = make_sales_invoice(self.reference_name, ignore_permissions=True)
-			si.allocate_advances_automatically = True
-			si = si.insert(ignore_permissions=True)
-			si.submit()
+		si = make_sales_invoice(self.reference_name, ignore_permissions=True)
+		si.allocate_advances_automatically = True
+		si = si.insert(ignore_permissions=True)
+		si.submit()
 
 	def payment_gateway_validation(self):
 		try:
@@ -283,7 +274,8 @@ class PaymentRequest(Document):
 
 		else:
 			payment_entry = self.create_payment_entry()
-			self.make_invoice()
+			if self.make_sales_invoice:
+				self.make_invoice()
 
 			return payment_entry
 
@@ -412,9 +404,6 @@ class PaymentRequest(Document):
 		)
 		comm.insert(ignore_permissions=True)
 
-	def get_payment_success_url(self):
-		return self.payment_success_url
-
 	def create_subscription(self, payment_provider, gateway_controller, data):
 		if payment_provider == "stripe":
 			with payment_app_import_guard():
@@ -499,6 +488,10 @@ def make_payment_request(**args):
 				"party_type": args.get("party_type") or "Customer",
 				"party": args.get("party") or ref_doc.get("customer"),
 				"bank_account": bank_account,
+				"make_sales_invoice": args.order_type == "Shopping Cart",
+				"mute_email": args.mute_email
+				or args.order_type == "Shopping Cart"
+				or gateway_account.get("payment_channel", "Email") != "Email",
 			}
 		)
 
@@ -512,9 +505,6 @@ def make_payment_request(**args):
 
 		for dimension in get_accounting_dimensions():
 			pr.update({dimension: ref_doc.get(dimension)})
-
-		if args.order_type == "Shopping Cart" or args.mute_email:
-			pr.flags.mute_email = True
 
 		pr.insert(ignore_permissions=True)
 		if args.submit_doc:
@@ -586,19 +576,14 @@ def get_gateway_details(args):  # nosemgrep
 	Return gateway and payment account of default payment gateway
 	"""
 	gateway_account = args.get("payment_gateway_account", {"is_default": 1})
-	if gateway_account:
-		return get_payment_gateway_account(gateway_account)
-
-	gateway_account = get_payment_gateway_account({"is_default": 1})
-
-	return gateway_account
+	return get_payment_gateway_account(gateway_account)
 
 
-def get_payment_gateway_account(args):
+def get_payment_gateway_account(filter):
 	return frappe.db.get_value(
 		"Payment Gateway Account",
-		args,
-		["name", "payment_gateway", "payment_account", "message"],
+		filter,
+		["name", "payment_gateway", "payment_account", "payment_channel", "message"],
 		as_dict=1,
 	)
 

@@ -80,6 +80,7 @@ def _execute(filters, additional_table_columns=None):
 		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
 		cost_center = list(set(invoice_cc_wh_map.get(inv.name, {}).get("cost_center", [])))
 		warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
+		inv_customer_details = customer_details.get(inv.customer, {})
 
 		row = {
 			"voucher_type": inv.doctype,
@@ -88,9 +89,9 @@ def _execute(filters, additional_table_columns=None):
 			"customer": inv.customer,
 			"customer_name": inv.customer_name,
 			**get_values_for_columns(additional_table_columns, inv),
-			"customer_group": customer_details.get(inv.customer).get("customer_group"),
-			"territory": customer_details.get(inv.customer).get("territory"),
-			"tax_id": customer_details.get(inv.customer).get("tax_id"),
+			"customer_group": inv_customer_details.get("customer_group"),
+			"territory": inv_customer_details.get("territory"),
+			"tax_id": inv_customer_details.get("tax_id"),
 			"receivable_account": inv.debit_to,
 			"mode_of_payment": ", ".join(mode_of_payments.get(inv.name, [])),
 			"project": inv.project,

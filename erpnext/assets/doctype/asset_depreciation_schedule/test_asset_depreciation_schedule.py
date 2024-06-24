@@ -5,6 +5,9 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr
 
+from erpnext.assets.doctype.asset.depreciation import (
+	post_depreciation_entries,
+)
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
@@ -28,7 +31,7 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, second_asset_depr_schedule.insert)
 
-	def test_daily_prorata_based_depr_on_sl_methond(self):
+	def test_daily_prorata_based_depr_on_sl_method(self):
 		asset = create_asset(
 			calculate_depreciation=1,
 			depreciation_method="Straight Line",
@@ -160,3 +163,35 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
 		self.assertEqual(schedules, expected_schedules)
+
+	def test_update_total_number_of_booked_depreciations(self):
+		# check if updates total number of booked depreciations when depreciation gets booked
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			opening_accumulated_depreciation=2000,
+			opening_number_of_booked_depreciations=2,
+			depreciation_method="Straight Line",
+			available_for_use_date="2020-03-01",
+			depreciation_start_date="2020-03-31",
+			frequency_of_depreciation=1,
+			total_number_of_depreciations=24,
+			submit=1,
+		)
+
+		post_depreciation_entries(date="2021-03-31")
+		asset.reload()
+		"""
+		opening_number_of_booked_depreciations = 2
+		number_of_booked_depreciations till 2021-03-31 = 13
+		total_number_of_booked_depreciations = 15
+		"""
+		self.assertEqual(asset.finance_books[0].total_number_of_booked_depreciations, 15)
+
+		# cancel depreciation entry
+		depr_entry = get_depr_schedule(asset.name, "Active")[0].journal_entry
+
+		frappe.get_doc("Journal Entry", depr_entry).cancel()
+		asset.reload()
+
+		self.assertEqual(asset.finance_books[0].total_number_of_booked_depreciations, 14)
