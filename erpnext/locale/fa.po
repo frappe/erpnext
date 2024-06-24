@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-16 15:18\n"
+"PO-Revision-Date: 2024-06-24 16:15\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1840,31 +1840,31 @@ msgstr "جزئیات حساب"
 #: accounts/doctype/advance_tax/advance_tax.json
 msgctxt "Advance Tax"
 msgid "Account Head"
-msgstr "رئیس حساب"
+msgstr "سرفصل حساب"
 
 #. Label of a Link field in DocType 'Advance Taxes and Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "Account Head"
-msgstr "رئیس حساب"
+msgstr "سرفصل حساب"
 
 #. Label of a Link field in DocType 'POS Closing Entry Taxes'
 #: accounts/doctype/pos_closing_entry_taxes/pos_closing_entry_taxes.json
 msgctxt "POS Closing Entry Taxes"
 msgid "Account Head"
-msgstr "رئیس حساب"
+msgstr "سرفصل حساب"
 
 #. Label of a Link field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "Account Head"
-msgstr "رئیس حساب"
+msgstr "سرفصل حساب"
 
 #. Label of a Link field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "Account Head"
-msgstr "رئیس حساب"
+msgstr "سرفصل حساب"
 
 #. Label of a Link field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
@@ -7484,19 +7484,19 @@ msgstr "قوانین قیمت گذاری چندگانه را اعمال کنید
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "Apply On"
-msgstr "درخواست روشن"
+msgstr "اعمال روی"
 
 #. Label of a Select field in DocType 'Promotional Scheme'
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 msgctxt "Promotional Scheme"
 msgid "Apply On"
-msgstr "درخواست روشن"
+msgstr "اعمال روی"
 
 #. Label of a Link field in DocType 'Service Level Agreement'
 #: support/doctype/service_level_agreement/service_level_agreement.json
 msgctxt "Service Level Agreement"
 msgid "Apply On"
-msgstr "درخواست روشن"
+msgstr "اعمال روی"
 
 #. Label of a Check field in DocType 'Purchase Receipt'
 #: stock/doctype/purchase_receipt/purchase_receipt.json
@@ -12427,7 +12427,7 @@ msgstr "فقط می‌توانید با {0} پرداخت نشده انجام د�
 #: accounts/doctype/payment_entry/payment_entry.js:1443
 #: controllers/accounts_controller.py:2589 public/js/controllers/accounts.js:90
 msgid "Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"
-msgstr "فقط در صورتی می‌توان ردیف را ارجاع داد که نوع شارژ «در مقدار ردیف قبلی» یا «مجموع ردیف قبلی» باشد"
+msgstr "فقط در صورتی می‌توان ردیف را ارجاع داد که نوع شارژ «بر مقدار ردیف قبلی» یا «مجموع ردیف قبلی» باشد"
 
 #: stock/doctype/stock_settings/stock_settings.py:136
 msgid "Can't change the valuation method, as there are transactions against some items which do not have its own valuation method"
@@ -12953,7 +12953,7 @@ msgstr "رمز پیوند بازیابی نمی شود. برای اطلاعات 
 #: controllers/accounts_controller.py:2594 public/js/controllers/accounts.js:94
 #: public/js/controllers/taxes_and_totals.js:455
 msgid "Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"
-msgstr "نمی توان نوع شارژ را به عنوان «در مقدار ردیف قبلی» یا «در مجموع ردیف قبلی» برای ردیف اول انتخاب کرد"
+msgstr "نمی توان نوع شارژ را به عنوان «بر مقدار ردیف قبلی» یا «بر مجموع ردیف قبلی» برای ردیف اول انتخاب کرد"
 
 #: selling/doctype/quotation/quotation.py:267
 msgid "Cannot set as Lost as Sales Order is made."
@@ -45635,25 +45635,25 @@ msgstr "در انتظار از آنجایی که"
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "On Item Quantity"
-msgstr "در مورد مقدار"
+msgstr "بر مقدار آیتم"
 
 #. Option for the 'Type' (Select) field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "On Item Quantity"
-msgstr "در مورد مقدار"
+msgstr "بر مقدار آیتم"
 
 #. Option for the 'Type' (Select) field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "On Net Total"
-msgstr "در کل خالص"
+msgstr "بر کل خالص"
 
 #. Option for the 'Type' (Select) field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "On Net Total"
-msgstr "در کل خالص"
+msgstr "بر کل خالص"
 
 #. Option for the 'Type' (Select) field in DocType 'Advance Taxes and Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
@@ -45665,37 +45665,37 @@ msgstr "با مبلغ پرداخت شده"
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "On Previous Row Amount"
-msgstr "در مقدار ردیف قبلی"
+msgstr "بر مقدار ردیف قبلی"
 
 #. Option for the 'Type' (Select) field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "On Previous Row Amount"
-msgstr "در مقدار ردیف قبلی"
+msgstr "بر مقدار ردیف قبلی"
 
 #. Option for the 'Type' (Select) field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "On Previous Row Amount"
-msgstr "در مقدار ردیف قبلی"
+msgstr "بر مقدار ردیف قبلی"
 
 #. Option for the 'Type' (Select) field in DocType 'Advance Taxes and Charges'
 #: accounts/doctype/advance_taxes_and_charges/advance_taxes_and_charges.json
 msgctxt "Advance Taxes and Charges"
 msgid "On Previous Row Total"
-msgstr "در مجموع ردیف قبلی"
+msgstr "بر مجموع ردیف قبلی"
 
 #. Option for the 'Type' (Select) field in DocType 'Purchase Taxes and Charges'
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 msgctxt "Purchase Taxes and Charges"
 msgid "On Previous Row Total"
-msgstr "در مجموع ردیف قبلی"
+msgstr "بر مجموع ردیف قبلی"
 
 #. Option for the 'Type' (Select) field in DocType 'Sales Taxes and Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgctxt "Sales Taxes and Charges"
 msgid "On Previous Row Total"
-msgstr "در مجموع ردیف قبلی"
+msgstr "بر مجموع ردیف قبلی"
 
 #: setup/default_energy_point_rules.py:24
 msgid "On Purchase Order Submission"
