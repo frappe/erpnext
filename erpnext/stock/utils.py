@@ -276,11 +276,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 		sn_obj = SerialNoValuation(sle=args, warehouse=args.get("warehouse"), item_code=args.get("item_code"))
 
 		return sn_obj.get_incoming_rate()
-	elif (
-		args.get("batch_no")
-		and frappe.db.get_value("Batch", args.get("batch_no"), "use_batchwise_valuation", cache=True)
-		and not args.get("serial_and_batch_bundle")
-	):
+	elif args.get("batch_no") and not args.get("serial_and_batch_bundle"):
 		args.actual_qty = args.qty
 		args.batch_nos = frappe._dict({args.batch_no: args})
 
