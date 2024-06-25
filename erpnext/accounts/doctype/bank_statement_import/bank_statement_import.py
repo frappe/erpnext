@@ -31,6 +31,8 @@ class BankStatementImport(DataImport):
 		bank: DF.Link | None
 		bank_account: DF.Link
 		company: DF.Link
+		custom_delimiters: DF.Check
+		delimiter_options: DF.Data | None
 		google_sheets_url: DF.Data | None
 		import_file: DF.Attach | None
 		import_type: DF.Literal["", "Insert New Records", "Update Existing Records"]
