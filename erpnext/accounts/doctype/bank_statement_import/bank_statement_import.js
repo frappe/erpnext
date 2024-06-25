@@ -338,6 +338,15 @@ frappe.ui.form.on("Bank Statement Import", {
 		);
 	},
 
+	export_import_log(frm) {
+		open_url_post(
+			"/api/method/erpnext.accounts.doctype.bank_statement_import.bank_statement_import.download_import_log",
+			{
+				data_import_name: frm.doc.name,
+			}
+		);
+	},
+
 	show_import_warnings(frm, preview_data) {
 		let columns = preview_data.columns;
 		let warnings = JSON.parse(frm.doc.template_warnings || "[]");

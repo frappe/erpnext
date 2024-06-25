@@ -121,6 +121,11 @@ def download_errored_template(data_import_name):
 	data_import.export_errored_rows()
 
 
+@frappe.whitelist()
+def download_import_log(data_import_name):
+	return frappe.get_doc("Bank Statement Import", data_import_name).download_import_log()
+
+
 def parse_data_from_template(raw_data):
 	data = []
 
