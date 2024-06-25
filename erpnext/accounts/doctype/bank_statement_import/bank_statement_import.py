@@ -272,6 +272,19 @@ def get_import_status(docname):
 
 
 @frappe.whitelist()
+def get_import_logs(docname: str):
+	frappe.has_permission("Bank Statement Import")
+
+	return frappe.get_all(
+		"Data Import Log",
+		fields=["success", "docname", "messages", "exception", "row_indexes"],
+		filters={"data_import": docname},
+		limit_page_length=5000,
+		order_by="log_index",
+	)
+
+
+@frappe.whitelist()
 def upload_bank_statement(**args):
 	args = frappe._dict(args)
 	bsi = frappe.new_doc("Bank Statement Import")
