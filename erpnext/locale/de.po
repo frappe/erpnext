@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-06-19 15:47\n"
+"PO-Revision-Date: 2024-06-25 16:20\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -3920,13 +3920,13 @@ msgstr "Verkaufspartner hinzufügen"
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Add Serial / Batch Bundle"
-msgstr ""
+msgstr "Serien-/Chargenbündel hinzufügen"
 
 #. Label of a Button field in DocType 'Subcontracting Receipt Supplied Item'
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgctxt "Subcontracting Receipt Supplied Item"
 msgid "Add Serial / Batch Bundle"
-msgstr ""
+msgstr "Serien-/Chargenbündel hinzufügen"
 
 #. Label of a Button field in DocType 'Purchase Invoice Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
@@ -32411,7 +32411,8 @@ msgstr "Falls aktiviert, werden alle Dateien, die an dieses Dokument angehängt 
 msgctxt "Stock Settings"
 msgid "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n"
 " / Batch Bundle. "
-msgstr ""
+msgstr "Wenn diese Option aktiviert ist, werden die Serien-/Chargenwerte in den Bestandstransaktionen bei der Erstellung eines automatischen Serien- \n"
+" / Chargenbündels nicht aktualisiert. "
 
 #. Description of the 'Create Ledger Entries for Change Amount' (Check) field
 #. in DocType 'Accounts Settings'
@@ -32439,7 +32440,7 @@ msgstr "Falls aktiviert, erstellt das System auch dann Materialanforderungen, we
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgctxt "Pricing Rule"
 msgid "If enabled, then system will only validate the pricing rule and not apply automatically. User has to manually set the discount percentage / margin / free items to validate the pricing rule"
-msgstr ""
+msgstr "Wenn diese Option aktiviert ist, validiert das System die Preisregel nur und wendet sie nicht automatisch an. Der Benutzer muss den Rabattprozentsatz / die Marge / die Gratisartikel manuell festlegen, um die Preisregel zu validieren"
 
 #. Description of the 'Variant Of' (Link) field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -32588,7 +32589,7 @@ msgstr "Wenn Sie bestimmte Transaktionen gegeneinander abgleichen müssen, wähl
 
 #: manufacturing/doctype/production_plan/production_plan.py:921
 msgid "If you still want to proceed, please disable 'Skip Available Sub Assembly Items' checkbox."
-msgstr ""
+msgstr "Wenn Sie trotzdem fortfahren möchten, deaktivieren Sie bitte das Kontrollkästchen 'Verfügbare Unterbaugruppenartikel überspringen'."
 
 #: manufacturing/doctype/production_plan/production_plan.py:1619
 msgid "If you still want to proceed, please enable {0}."
@@ -33065,7 +33066,7 @@ msgstr "Importieren"
 #. Description of a DocType
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
 msgid "Import Chart of Accounts from a csv file"
-msgstr ""
+msgstr "Kontenplan aus einer CSV-Datei importieren"
 
 #. Label of a Link in the Home Workspace
 #. Label of a Link in the Settings Workspace
@@ -34390,7 +34391,7 @@ msgstr "Voreinstellungen installieren"
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "Instruction"
-msgstr ""
+msgstr "Anweisung"
 
 #. Label of a Text field in DocType 'Delivery Note'
 #: stock/doctype/delivery_note/delivery_note.json
@@ -35427,7 +35428,7 @@ msgstr "Vermögenswert existiert bereits."
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgctxt "BOM Creator Item"
 msgid "Is Expandable"
-msgstr ""
+msgstr "Ist erweiterbar"
 
 #. Label of a Check field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -37733,19 +37734,19 @@ msgstr "Parameter der Artikel-Qualitätsprüfung"
 #: maintenance/doctype/maintenance_schedule_detail/maintenance_schedule_detail.json
 msgctxt "Maintenance Schedule Detail"
 msgid "Item Reference"
-msgstr ""
+msgstr "Artikel-Referenz"
 
 #. Label of a Data field in DocType 'Production Plan Item'
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 msgctxt "Production Plan Item"
 msgid "Item Reference"
-msgstr ""
+msgstr "Artikel-Referenz"
 
 #. Label of a Data field in DocType 'Production Plan Item Reference'
 #: manufacturing/doctype/production_plan_item_reference/production_plan_item_reference.json
 msgctxt "Production Plan Item Reference"
 msgid "Item Reference"
-msgstr ""
+msgstr "Artikel-Referenz"
 
 #. Name of a DocType
 #: stock/doctype/item_reorder/item_reorder.json
@@ -43143,7 +43144,7 @@ msgstr "Überwachung der Fortschritte"
 #: accounts/doctype/ledger_health_monitor/ledger_health_monitor.json
 msgctxt "Ledger Health Monitor"
 msgid "Monitor for Last 'X' days"
-msgstr ""
+msgstr "Letzte 'X' Tage überwachen"
 
 #. Label of a Select field in DocType 'Quality Goal'
 #: quality_management/doctype/quality_goal/quality_goal.json
@@ -50692,7 +50693,7 @@ msgstr "Picklistenposition"
 #: stock/doctype/pick_list/pick_list.json
 msgctxt "Pick List"
 msgid "Pick Manually"
-msgstr ""
+msgstr "Manuell auswählen"
 
 #. Label of a Select field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -51085,7 +51086,7 @@ msgstr "Bitte wählen Sie einen Lieferanten"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:159
 msgid "Please Set Priority"
-msgstr ""
+msgstr "Bitte Priorität festlegen"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:154
 msgid "Please Set Supplier Group in Buying Settings."
@@ -52036,7 +52037,7 @@ msgstr ""
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:97
 msgid "Please setup and enable a group account with the Account Type - {0} for the company {1}"
-msgstr ""
+msgstr "Bitte richten Sie ein Gruppenkonto mit dem Kontotyp - {0} für die Firma {1} ein und aktivieren Sie es"
 
 #: assets/doctype/asset/depreciation.py:415
 msgid "Please share this email with your support team so that they can find and fix the issue."
@@ -52440,7 +52441,7 @@ msgstr "Buchungsdatum darf nicht in der Zukunft liegen"
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
 msgctxt "Stock Ledger Entry"
 msgid "Posting Datetime"
-msgstr ""
+msgstr "Buchungszeitpunkt"
 
 #: accounts/report/gross_profit/gross_profit.py:216
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:136
@@ -52560,7 +52561,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound"
-msgstr ""
+msgstr "Pfund"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -52570,7 +52571,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Cubic Foot"
-msgstr ""
+msgstr "Pfund/Kubikfuß"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -52599,7 +52600,7 @@ msgstr ""
 
 #: templates/includes/footer/footer_powered.html:1
 msgid "Powered by {0}"
-msgstr ""
+msgstr "Powered by {0}"
 
 #: accounts/doctype/item_tax_template/item_tax_template_dashboard.py:8
 #: accounts/doctype/shipping_rule/shipping_rule_dashboard.py:9
@@ -52955,7 +52956,7 @@ msgstr "Preislistenwährung nicht ausgewählt"
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Price List Defaults"
-msgstr ""
+msgstr "Preislistenvorgaben"
 
 #. Label of a Float field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -53966,7 +53967,7 @@ msgstr "Die Priorität wurde in {0} geändert."
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:159
 msgid "Priority is mandatory"
-msgstr ""
+msgstr "Priorität ist erforderlich"
 
 #: support/doctype/service_level_agreement/service_level_agreement.py:109
 msgid "Priority {0} has been repeated."
@@ -54223,7 +54224,7 @@ msgstr "Menge produzieren"
 
 #: manufacturing/report/production_plan_summary/production_plan_summary.py:150
 msgid "Produced / Received Qty"
-msgstr ""
+msgstr "Produziert / Erhaltene Menge"
 
 #: manufacturing/report/bom_variance_report/bom_variance_report.py:50
 #: manufacturing/report/work_order_consumed_materials/work_order_consumed_materials.py:120
@@ -54483,13 +54484,13 @@ msgstr "Artikel auf dem Produktionsplan"
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_item_reference/production_plan_item_reference.json
 msgid "Production Plan Item Reference"
-msgstr ""
+msgstr "Produktionsplanartikelreferenz"
 
 #. Label of a Table field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgctxt "Production Plan"
 msgid "Production Plan Item Reference"
-msgstr ""
+msgstr "Produktionsplanartikelreferenz"
 
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_material_request/production_plan_material_request.json
@@ -54515,25 +54516,25 @@ msgstr "Produktionsplan für Auftrag"
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgid "Production Plan Sub Assembly Item"
-msgstr ""
+msgstr "Produktionsplan-Unterbaugruppenartikel"
 
 #. Label of a Data field in DocType 'Purchase Order Item'
 #: buying/doctype/purchase_order_item/purchase_order_item.json
 msgctxt "Purchase Order Item"
 msgid "Production Plan Sub Assembly Item"
-msgstr ""
+msgstr "Produktionsplan-Unterbaugruppenartikel"
 
 #. Label of a Data field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgctxt "Work Order"
 msgid "Production Plan Sub-assembly Item"
-msgstr ""
+msgstr "Produktionsplan-Unterbaugruppenartikel"
 
 #. Name of a report
 #: manufacturing/doctype/production_plan/production_plan.js:92
 #: manufacturing/report/production_plan_summary/production_plan_summary.json
 msgid "Production Plan Summary"
-msgstr ""
+msgstr "Produktionsplan Zusammenfassung"
 
 #. Title of an Onboarding Step
 #: manufacturing/onboarding_step/production_planning/production_planning.json
@@ -55194,7 +55195,7 @@ msgstr "Projizierte Menge"
 
 #: manufacturing/doctype/production_plan/production_plan.js:150
 msgid "Projected Quantity Formula"
-msgstr ""
+msgstr "Formel für die prognostizierte Menge"
 
 #: stock/page/stock_balance/stock_balance.js:51
 msgid "Projected qty"
@@ -56254,7 +56255,7 @@ msgstr "Nutzer Einkauf"
 
 #: buying/report/purchase_order_trends/purchase_order_trends.py:51
 msgid "Purchase Value"
-msgstr ""
+msgstr "Einkaufswert"
 
 #. Title of an Onboarding Step
 #: assets/onboarding_step/asset_purchase/asset_purchase.json
@@ -57478,7 +57479,7 @@ msgstr "Menge in Zeile {0} ({1}) muss die gleiche sein wie die hergestellte Meng
 
 #: manufacturing/doctype/plant_floor/plant_floor.js:246
 msgid "Quantity is required"
-msgstr ""
+msgstr "Menge ist erforderlich"
 
 #: stock/dashboard/item_dashboard.js:281
 msgid "Quantity must be greater than zero, and less or equal to {0}"
@@ -60511,7 +60512,7 @@ msgstr "Berichtsdatum"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:192
 msgid "Report Error"
-msgstr ""
+msgstr "Fehler melden"
 
 #. Label of a Section Break field in DocType 'Process Statement Of Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
@@ -60536,7 +60537,7 @@ msgstr "Berichtsansicht"
 
 #: setup/install.py:148
 msgid "Report an Issue"
-msgstr ""
+msgstr "Ein Problem melden"
 
 #. Label of a Card Break in the Payables Workspace
 #. Label of a Card Break in the Receivables Workspace
@@ -61508,7 +61509,7 @@ msgstr "Auf Länder beschränken"
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "Result Key"
-msgstr ""
+msgstr "Ergebnisschlüssel"
 
 #. Label of a Data field in DocType 'Support Search Source'
 #: support/doctype/support_search_source/support_search_source.json
@@ -61535,7 +61536,7 @@ msgstr "Fortsetzen"
 
 #: manufacturing/doctype/job_card/job_card.js:288
 msgid "Resume Job"
-msgstr ""
+msgstr "Auftrag fortsetzen"
 
 #. Label of a Check field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -61871,7 +61872,7 @@ msgstr "Konten für Vermögensgegenstände überprüfen"
 #. Title of an Onboarding Step
 #: stock/onboarding_step/stock_settings/stock_settings.json
 msgid "Review Stock Settings"
-msgstr ""
+msgstr "Lagereinstellungen überprüfen"
 
 #. Label of a Card Break in the Quality Workspace
 #: quality_management/workspace/quality/quality.json
@@ -61929,7 +61930,7 @@ msgstr ""
 #: stock/doctype/stock_settings/stock_settings.json
 msgctxt "Stock Settings"
 msgid "Role Allowed to Create/Edit Back-dated Transactions"
-msgstr ""
+msgstr "Rolle, die rückdatierte Transaktionen erstellen/bearbeiten darf"
 
 #. Label of a Link field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -61953,13 +61954,13 @@ msgstr ""
 #: buying/doctype/buying_settings/buying_settings.json
 msgctxt "Buying Settings"
 msgid "Role Allowed to Override Stop Action"
-msgstr ""
+msgstr "Rolle, die die Stopp-Aktion übergehen darf"
 
 #. Label of a Link field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgctxt "Selling Settings"
 msgid "Role Allowed to Override Stop Action"
-msgstr ""
+msgstr "Rolle, die die Stopp-Aktion übergehen darf"
 
 #. Label of a Link field in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
@@ -62376,7 +62377,7 @@ msgstr "Zeile #{0}: Die Formel für die Akzeptanzkriterien ist erforderlich."
 #: controllers/subcontracting_controller.py:72
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:420
 msgid "Row #{0}: Accepted Warehouse and Rejected Warehouse cannot be same"
-msgstr ""
+msgstr "Zeile #{0}: Annahme- und Ablehnungslager dürfen nicht identisch sein"
 
 #: controllers/buying_controller.py:225
 msgid "Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same"
@@ -62384,7 +62385,7 @@ msgstr "Zeile {0}: Akzeptiertes Lager und Lieferantenlager können nicht identis
 
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:413
 msgid "Row #{0}: Accepted Warehouse is mandatory for the accepted Item {1}"
-msgstr ""
+msgstr "Zeile #{0}: Annahmelager ist obligatorisch für den angenommenen Artikel {1}"
 
 #: controllers/accounts_controller.py:955
 msgid "Row #{0}: Account {1} does not belong to company {2}"
@@ -62413,7 +62414,7 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:311
 msgid "Row #{0}: Batch No {1} is already selected."
-msgstr ""
+msgstr "Zeile #{0}: Die Chargennummer {1} ist bereits ausgewählt."
 
 #: accounts/doctype/payment_entry/payment_entry.py:788
 msgid "Row #{0}: Cannot allocate more than {1} against payment term {2}"
@@ -62493,7 +62494,7 @@ msgstr "Zeile #{0}: Daten überlappen sich mit anderen Zeilen"
 
 #: buying/doctype/purchase_order/purchase_order.py:374
 msgid "Row #{0}: Default BOM not found for FG Item {1}"
-msgstr ""
+msgstr "Zeile #{0}: Standard-Stückliste für Fertigerzeugnis {1} nicht gefunden"
 
 #: accounts/doctype/payment_entry/payment_entry.py:295
 msgid "Row #{0}: Duplicate entry in References {1} {2}"
@@ -62509,7 +62510,7 @@ msgstr "Zeile #{0}: Aufwandskonto für den Artikel nicht festgelegt {1}. {2}"
 
 #: buying/doctype/purchase_order/purchase_order.py:379
 msgid "Row #{0}: Finished Good Item Qty can not be zero"
-msgstr ""
+msgstr "Zeile #{0}: Menge für Fertigerzeugnis darf nicht Null sein"
 
 #: buying/doctype/purchase_order/purchase_order.py:361
 msgid "Row #{0}: Finished Good Item is not specified for service item {1}"
@@ -62541,7 +62542,7 @@ msgstr "Zeile {0}: Element hinzugefügt"
 
 #: buying/utils.py:92
 msgid "Row #{0}: Item {1} does not exist"
-msgstr ""
+msgstr "Zeile #{0}: Artikel {1} existiert nicht"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:937
 msgid "Row #{0}: Item {1} has been picked, please reserve stock from the Pick List."
@@ -64995,7 +64996,7 @@ msgstr "Punkte zählen"
 #: manufacturing/doctype/bom/bom.json
 msgctxt "BOM"
 msgid "Scrap & Process Loss"
-msgstr ""
+msgstr "Schrott & Prozessverluste"
 
 #: assets/doctype/asset/asset.js:92
 msgid "Scrap Asset"
@@ -65005,19 +65006,19 @@ msgstr "Vermögensgegenstand verschrotten"
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgctxt "Subcontracting Receipt Item"
 msgid "Scrap Cost Per Qty"
-msgstr ""
+msgstr "Schrottkosten pro Menge"
 
 #. Label of a Link field in DocType 'Job Card Scrap Item'
 #: manufacturing/doctype/job_card_scrap_item/job_card_scrap_item.json
 msgctxt "Job Card Scrap Item"
 msgid "Scrap Item Code"
-msgstr ""
+msgstr "Code für Schrottartikel"
 
 #. Label of a Data field in DocType 'Job Card Scrap Item'
 #: manufacturing/doctype/job_card_scrap_item/job_card_scrap_item.json
 msgctxt "Job Card Scrap Item"
 msgid "Scrap Item Name"
-msgstr ""
+msgstr "Name des Schrottartikels"
 
 #. Label of a Table field in DocType 'BOM'
 #. Label of a Section Break field in DocType 'BOM'
@@ -65094,12 +65095,12 @@ msgstr "Suche nach Rechnungs-ID oder Kundenname"
 
 #: selling/page/point_of_sale/pos_item_selector.js:149
 msgid "Search by item code, serial number or barcode"
-msgstr ""
+msgstr "Suche nach Artikelcode, Seriennummer oder Barcode"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Second"
-msgstr ""
+msgstr "Sekunde"
 
 #. Label of a Time field in DocType 'Project'
 #: projects/doctype/project/project.json
