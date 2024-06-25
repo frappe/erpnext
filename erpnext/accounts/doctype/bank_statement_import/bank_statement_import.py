@@ -39,7 +39,6 @@ class BankStatementImport(DataImport):
 		mute_emails: DF.Check
 		reference_doctype: DF.Link
 		show_failed_logs: DF.Check
-		statement_import_log: DF.Code | None
 		status: DF.Literal["Pending", "Success", "Partial Success", "Error"]
 		submit_after_import: DF.Check
 		template_options: DF.Code | None
