@@ -11,13 +11,13 @@
   "bank_account",
   "bank",
   "column_break_4",
+  "custom_delimiters",
+  "delimiter_options",
   "google_sheets_url",
   "refresh_google_sheet",
   "html_5",
   "import_file",
   "download_template",
-  "custom_delimiters",
-  "delimiter_options",
   "status",
   "template_options",
   "import_warnings_section",
@@ -213,6 +213,7 @@
  "links": [],
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
  "modified": "2022-09-07 11:11:40.293317",
 =======
  "modified": "2024-06-25 15:34:35.214946",
@@ -220,6 +221,9 @@
 =======
  "modified": "2024-06-25 16:33:50.675848",
 >>>>>>> b202409428 (fix: remove deprecated field "statement_import_log")
+=======
+ "modified": "2024-06-25 17:32:07.658250",
+>>>>>>> 98ad01c736 (fix: field position)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Statement Import",
