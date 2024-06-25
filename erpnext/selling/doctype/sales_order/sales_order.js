@@ -75,8 +75,7 @@ frappe.ui.form.on("Sales Order", {
 				if (
 					frm.doc.__onload &&
 					frm.doc.__onload.has_unreserved_stock &&
-					flt(frm.doc.per_picked) === 0 &&
-					frappe.model.can_create("Stock Reservation Entry")
+					flt(frm.doc.per_picked) === 0
 				) {
 					frm.add_custom_button(
 						__("Reserve"),
