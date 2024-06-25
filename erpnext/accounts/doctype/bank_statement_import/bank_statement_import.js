@@ -130,6 +130,8 @@ frappe.ui.form.on("Bank Statement Import", {
 	},
 
 	show_import_status(frm) {
+		if (frm.doc.status == "Pending") return;
+
 		frappe.call({
 			method: "erpnext.accounts.doctype.bank_statement_import.bank_statement_import.get_import_status",
 			args: {
