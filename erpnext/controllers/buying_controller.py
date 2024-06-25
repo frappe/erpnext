@@ -659,10 +659,7 @@ class BuyingController(SubcontractingController):
 			return
 
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
-			field = "purchase_invoice" if self.doctype == "Purchase Invoice" else "purchase_receipt"
-
 			self.process_fixed_asset()
-			self.update_fixed_asset(field)
 
 		if self.doctype in ["Purchase Order", "Purchase Receipt"] and not frappe.db.get_single_value(
 			"Buying Settings", "disable_last_purchase_rate"
@@ -772,7 +769,7 @@ class BuyingController(SubcontractingController):
 		if not row.asset_location:
 			frappe.throw(_("Row {0}: Enter location for the asset item {1}").format(row.idx, row.item_code))
 
-		item_data = frappe.db.get_value(
+		item_data = frappe.get_cached_value(
 			"Item", row.item_code, ["asset_naming_series", "asset_category"], as_dict=1
 		)
 		asset_quantity = row.qty if is_grouped_asset else 1
@@ -801,7 +798,7 @@ class BuyingController(SubcontractingController):
 		asset.flags.ignore_validate = True
 		asset.flags.ignore_mandatory = True
 		asset.set_missing_values()
-		asset.insert()
+		asset.db_insert()
 
 		return asset.name
 
@@ -827,11 +824,7 @@ class BuyingController(SubcontractingController):
 						frappe.delete_doc("Asset", asset.name, force=1)
 						continue
 
-					if self.docstatus in [0, 1] and not asset.get(field):
-						asset.set(field, self.name)
-						asset.purchase_date = self.posting_date
-						asset.supplier = self.supplier
-					elif self.docstatus == 2:
+					if self.docstatus == 2:
 						if asset.docstatus == 2:
 							continue
 						if asset.docstatus == 0:
