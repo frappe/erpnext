@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-31 13:04\n"
+"PO-Revision-Date: 2024-06-25 16:20\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -3781,7 +3781,7 @@ msgstr "Añadir Prospectos"
 #: setup/doctype/holiday_list/holiday_list.json
 msgctxt "Holiday List"
 msgid "Add Local Holidays"
-msgstr ""
+msgstr "Agregar días festivos locales"
 
 #. Label of a Check field in DocType 'Repost Payment Ledger'
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
@@ -4779,7 +4779,7 @@ msgstr "Direcciones"
 
 #: assets/doctype/asset/asset.js:144
 msgid "Adjust Asset Value"
-msgstr ""
+msgstr "Ajustar el valor del activo"
 
 #: accounts/doctype/sales_invoice/sales_invoice.js:1076
 msgid "Adjustment Against"
@@ -8490,15 +8490,15 @@ msgstr "El activo {0} no pertenece a la ubicación {1}"
 #: assets/doctype/asset_capitalization/asset_capitalization.py:759
 #: assets/doctype/asset_capitalization/asset_capitalization.py:857
 msgid "Asset {0} does not exist"
-msgstr ""
+msgstr "Activo {0} no existe"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:639
 msgid "Asset {0} has been created. Please set the depreciation details if any and submit it."
-msgstr ""
+msgstr "Se ha creado el activo {0}. Por favor, establezca los detalles de depreciación si los hay y envíelo."
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:661
 msgid "Asset {0} has been updated. Please set the depreciation details if any and submit it."
-msgstr ""
+msgstr "El activo {0} ha sido actualizado. Por favor, establezca los detalles de depreciación si los hay y envíelo."
 
 #: assets/doctype/asset/depreciation.py:437
 msgid "Asset {0} must be submitted"
@@ -8678,7 +8678,7 @@ msgstr "Adjuntos"
 #: setup/doctype/employee/employee.json
 msgctxt "Employee"
 msgid "Attendance & Leaves"
-msgstr ""
+msgstr "Asistencia y Salidas"
 
 #. Label of a Data field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -9308,7 +9308,7 @@ msgstr ""
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgctxt "Material Request Plan Item"
 msgid "BIN Qty"
-msgstr ""
+msgstr "Cant. BIN"
 
 #. Name of a DocType
 #: manufacturing/doctype/bom/bom.json manufacturing/doctype/bom/bom_tree.js:8
@@ -12082,22 +12082,22 @@ msgstr "Cuenta CWIP"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Caballeria"
-msgstr ""
+msgstr "Caballería"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cable Length"
-msgstr ""
+msgstr "Longitud de cable"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cable Length (UK)"
-msgstr ""
+msgstr "Longitud de cable (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cable Length (US)"
-msgstr ""
+msgstr "Longitud de cable (US)"
 
 #. Label of a Select field in DocType 'Shipping Rule'
 #: accounts/doctype/shipping_rule/shipping_rule.json
@@ -14037,7 +14037,7 @@ msgstr "Orden cerrada no se puede cancelar. Abrir para cancelar."
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
 msgctxt "Prospect Opportunity"
 msgid "Closing"
-msgstr ""
+msgstr "Cierre"
 
 #: accounts/report/trial_balance/trial_balance.py:458
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.py:213
@@ -15575,15 +15575,15 @@ msgstr "Compañía {0} no existe"
 
 #: accounts/doctype/accounting_dimension/accounting_dimension.py:78
 msgid "Company {0} is added more than once"
-msgstr ""
+msgstr "La empresa {0} se agrega más de una vez"
 
 #: setup/setup_wizard/operations/taxes_setup.py:14
 msgid "Company {} does not exist yet. Taxes setup aborted."
-msgstr ""
+msgstr "La empresa {} aún no existe. Configuración de impuestos abortada."
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:451
 msgid "Company {} does not match with POS Profile Company {}"
-msgstr ""
+msgstr "La empresa {} no coincide con el perfil de POS {}"
 
 #. Name of a DocType
 #: crm/doctype/competitor/competitor.json
@@ -17254,13 +17254,13 @@ msgstr ""
 
 #: manufacturing/doctype/job_card/job_card.js:162
 msgid "Corrective Operation"
-msgstr ""
+msgstr "Operación correctiva"
 
 #. Label of a Tab Break field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgctxt "Job Card"
 msgid "Corrective Operation"
-msgstr ""
+msgstr "Operación correctiva"
 
 #. Label of a Currency field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
@@ -17669,13 +17669,13 @@ msgstr ""
 #. Name of a DocType
 #: accounts/doctype/cost_center_allocation_percentage/cost_center_allocation_percentage.json
 msgid "Cost Center Allocation Percentage"
-msgstr ""
+msgstr "Porcentaje de Asignación del Centro de Costos"
 
 #. Label of a Table field in DocType 'Cost Center Allocation'
 #: accounts/doctype/cost_center_allocation/cost_center_allocation.json
 msgctxt "Cost Center Allocation"
 msgid "Cost Center Allocation Percentages"
-msgstr ""
+msgstr "Porcentajes de Asignación del Centro de Costo"
 
 #: public/js/utils/sales_common.js:433
 msgid "Cost Center For Item with Item Code {0} has been Changed to {1}"
@@ -17729,7 +17729,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:246
 msgid "Cost Center {} doesn't belong to Company {}"
-msgstr ""
+msgstr "Centro de costos {} no pertenece a la empresa {}"
 
 #: assets/doctype/asset/asset.py:253
 msgid "Cost Center {} is a group cost center and group cost centers cannot be used in transactions"
@@ -18481,12 +18481,12 @@ msgstr "Crear un Presupuesto"
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_a_product/create_a_product.json
 msgid "Create a Sales Item"
-msgstr ""
+msgstr "Crear un artículo de venta"
 
 #. Title of an Onboarding Step
 #: selling/onboarding_step/create_a_sales_order/create_a_sales_order.json
 msgid "Create a Sales Order"
-msgstr ""
+msgstr "Crear un pedido de ventas"
 
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/create_a_supplier/create_a_supplier.json
@@ -18516,7 +18516,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: assets/onboarding_step/create_an_asset/create_an_asset.json
 msgid "Create an Asset"
-msgstr ""
+msgstr "Crear un Activo"
 
 #. Title of an Onboarding Step
 #: assets/onboarding_step/create_an_asset_category/create_an_asset_category.json
@@ -18583,7 +18583,7 @@ msgstr ""
 
 #: public/js/bulk_transaction_processing.js:14
 msgid "Create {0} {1} ?"
-msgstr ""
+msgstr "¿Crear {0} {1} ?"
 
 #: manufacturing/report/work_order_summary/work_order_summary.py:224
 msgid "Created On"
@@ -18638,7 +18638,7 @@ msgstr ""
 
 #: setup/doctype/employee/employee.js:75
 msgid "Creating User..."
-msgstr ""
+msgstr "Creando usuario..."
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:56
 msgid "Creating {0} Invoice"
@@ -18662,7 +18662,7 @@ msgstr "Creación del documento No"
 
 #: utilities/bulk_transaction.py:181
 msgid "Creation of <b><a href='/app/{0}'>{1}(s)</a></b> successful"
-msgstr ""
+msgstr "Creación de <b><a href='/app/{0}'>{1}(s)</a></b> exitosa"
 
 #: utilities/bulk_transaction.py:198
 msgid "Creation of {0} failed.\n"
@@ -18818,7 +18818,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgctxt "Accounts Settings"
 msgid "Credit Limit Settings"
-msgstr ""
+msgstr "Configuración del límite de crédito"
 
 #. Label of a Section Break field in DocType 'Customer'
 #: selling/doctype/customer/customer.json
@@ -20275,7 +20275,7 @@ msgstr "Grupos de Clientes"
 #. Name of a DocType
 #: accounts/doctype/customer_item/customer_item.json
 msgid "Customer Item"
-msgstr ""
+msgstr "Artículo del cliente"
 
 #. Label of a Table field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -20427,7 +20427,7 @@ msgstr "Nombre del cliente"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:22
 msgid "Customer Name: "
-msgstr ""
+msgstr "Nombre del cliente: "
 
 #. Label of a Select field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
@@ -20652,7 +20652,7 @@ msgstr "Nombre del cliente / cliente potencial"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:19
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:21
 msgid "Customer: "
-msgstr ""
+msgstr "Cliente: "
 
 #. Label of a Section Break field in DocType 'Process Statement Of Accounts'
 #. Label of a Table field in DocType 'Process Statement Of Accounts'
@@ -21046,7 +21046,7 @@ msgstr "Fecha"
 #: bulk_transaction/doctype/bulk_transaction_log_detail/bulk_transaction_log_detail.json
 msgctxt "Bulk Transaction Log Detail"
 msgid "Date "
-msgstr ""
+msgstr "Fecha "
 
 #: assets/report/fixed_asset_register/fixed_asset_register.js:97
 msgid "Date Based On"
@@ -21067,7 +21067,7 @@ msgstr "Ajustes de Fecha"
 #: maintenance/doctype/maintenance_visit/maintenance_visit.py:72
 #: maintenance/doctype/maintenance_visit/maintenance_visit.py:92
 msgid "Date must be between {0} and {1}"
-msgstr ""
+msgstr "La fecha debe estar entre {0} y {1}"
 
 #. Label of a Date field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -21403,13 +21403,13 @@ msgstr "Débito a"
 #: accounts/doctype/ledger_health_monitor/ledger_health_monitor.json
 msgctxt "Ledger Health Monitor"
 msgid "Debit-Credit Mismatch"
-msgstr ""
+msgstr "Desajuste débito-crédito"
 
 #. Label of a Check field in DocType 'Ledger Health'
 #: accounts/doctype/ledger_health/ledger_health.json
 msgctxt "Ledger Health"
 msgid "Debit-Credit mismatch"
-msgstr ""
+msgstr "Desajuste débito-crédito"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:12
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:13
@@ -21730,7 +21730,7 @@ msgstr "Dimensión predeterminada"
 #: stock/doctype/item_default/item_default.json
 msgctxt "Item Default"
 msgid "Default Discount Account"
-msgstr ""
+msgstr "Cuenta de descuento predeterminada"
 
 #. Label of a Link field in DocType 'Global Defaults'
 #: setup/doctype/global_defaults/global_defaults.json
@@ -21772,13 +21772,13 @@ msgstr "Lista de vacaciones / festividades predeterminadas"
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Default In-Transit Warehouse"
-msgstr ""
+msgstr "Almacén en tránsito predeterminado"
 
 #. Label of a Link field in DocType 'Warehouse'
 #: stock/doctype/warehouse/warehouse.json
 msgctxt "Warehouse"
 msgid "Default In-Transit Warehouse"
-msgstr ""
+msgstr "Almacén en tránsito predeterminado"
 
 #. Label of a Link field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -25804,7 +25804,7 @@ msgstr ""
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "ERPNext Company"
-msgstr ""
+msgstr "Compañía ERPNext"
 
 #. Label of a Data field in DocType 'Employee Group Table'
 #: setup/doctype/employee_group_table/employee_group_table.json
@@ -27208,7 +27208,7 @@ msgstr ""
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 msgctxt "Currency Exchange Settings"
 msgid "Example URL"
-msgstr ""
+msgstr "URL de ejemplo"
 
 #: stock/doctype/item/item.py:977
 msgid "Example of a linked document: {0}"
@@ -27529,7 +27529,7 @@ msgstr "Expandir todo"
 
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.py:411
 msgid "Expected"
-msgstr ""
+msgstr "Esperado"
 
 #. Label of a Currency field in DocType 'POS Closing Entry Detail'
 #: accounts/doctype/pos_closing_entry_detail/pos_closing_entry_detail.json
@@ -28055,7 +28055,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fahrenheit"
-msgstr ""
+msgstr "Fahrenheit"
 
 #: accounts/doctype/payment_request/payment_request_list.js:16
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:68
@@ -28328,7 +28328,7 @@ msgstr "Obtener artículos del almacén"
 
 #: accounts/doctype/dunning/dunning.js:61
 msgid "Fetch Overdue Payments"
-msgstr ""
+msgstr "Recuperar pagos atrasados"
 
 #: accounts/doctype/subscription/subscription.js:36
 msgid "Fetch Subscription Updates"
@@ -29071,13 +29071,13 @@ msgstr "Gerente de Fota"
 #: manufacturing/doctype/plant_floor/plant_floor.json
 msgctxt "Plant Floor"
 msgid "Floor"
-msgstr ""
+msgstr "Piso"
 
 #. Label of a Data field in DocType 'Plant Floor'
 #: manufacturing/doctype/plant_floor/plant_floor.json
 msgctxt "Plant Floor"
 msgid "Floor Name"
-msgstr ""
+msgstr "Nombre del Piso"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -29172,7 +29172,7 @@ msgstr "Para el proveedor predeterminado (opcional)"
 #: manufacturing/doctype/plant_floor/plant_floor.js:159
 #: manufacturing/doctype/plant_floor/plant_floor.js:183
 msgid "For Item"
-msgstr ""
+msgstr "Para artículo"
 
 #: controllers/stock_controller.py:978
 msgid "For Item {0} cannot be received more than {1} qty against the {2} {3}"
