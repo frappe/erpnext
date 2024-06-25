@@ -120,52 +120,64 @@ frappe.ui.form.on("Bank Statement Import", {
 	},
 
 	show_import_status(frm) {
-		let import_log = JSON.parse(frm.doc.statement_import_log || "[]");
-		let successful_records = import_log.filter((log) => log.success);
-		let failed_records = import_log.filter((log) => !log.success);
-		if (successful_records.length === 0) return;
+		frappe.call({
+			method: "erpnext.accounts.doctype.bank_statement_import.bank_statement_import.get_import_status",
+			args: {
+				docname: frm.doc.name,
+			},
+			callback: function (r) {
+				let successful_records = cint(r.message.success);
+				let failed_records = cint(r.message.failed);
+				let total_records = cint(r.message.total_records);
 
-		let message;
-		if (failed_records.length === 0) {
-			let message_args = [successful_records.length];
-			if (frm.doc.import_type === "Insert New Records") {
-				message =
-					successful_records.length > 1
-						? __("Successfully imported {0} records.", message_args)
-						: __("Successfully imported {0} record.", message_args);
-			} else {
-				message =
-					successful_records.length > 1
-						? __("Successfully updated {0} records.", message_args)
-						: __("Successfully updated {0} record.", message_args);
-			}
-		} else {
-			let message_args = [successful_records.length, import_log.length];
-			if (frm.doc.import_type === "Insert New Records") {
-				message =
-					successful_records.length > 1
-						? __(
-								"Successfully imported {0} records out of {1}. Click on Export Errored Rows, fix the errors and import again.",
-								message_args
-						  )
-						: __(
-								"Successfully imported {0} record out of {1}. Click on Export Errored Rows, fix the errors and import again.",
-								message_args
-						  );
-			} else {
-				message =
-					successful_records.length > 1
-						? __(
-								"Successfully updated {0} records out of {1}. Click on Export Errored Rows, fix the errors and import again.",
-								message_args
-						  )
-						: __(
-								"Successfully updated {0} record out of {1}. Click on Export Errored Rows, fix the errors and import again.",
-								message_args
-						  );
-			}
-		}
-		frm.dashboard.set_headline(message);
+				if (!total_records) {
+					return;
+				}
+
+				let message;
+				if (failed_records === 0) {
+					let message_args = [successful_records];
+					if (frm.doc.import_type === "Insert New Records") {
+						message =
+							successful_records > 1
+								? __("Successfully imported {0} records.", message_args)
+								: __("Successfully imported {0} record.", message_args);
+					} else {
+						message =
+							successful_records > 1
+								? __("Successfully updated {0} records.", message_args)
+								: __("Successfully updated {0} record.", message_args);
+					}
+				} else {
+					let message_args = [successful_records, total_records];
+					if (frm.doc.import_type === "Insert New Records") {
+						message =
+							successful_records > 1
+								? __(
+										"Successfully imported {0} records out of {1}. Click on Export Errored Rows, fix the errors and import again.",
+										message_args
+								  )
+								: __(
+										"Successfully imported {0} record out of {1}. Click on Export Errored Rows, fix the errors and import again.",
+										message_args
+								  );
+					} else {
+						message =
+							successful_records > 1
+								? __(
+										"Successfully updated {0} records out of {1}. Click on Export Errored Rows, fix the errors and import again.",
+										message_args
+								  )
+								: __(
+										"Successfully updated {0} record out of {1}. Click on Export Errored Rows, fix the errors and import again.",
+										message_args
+								  );
+					}
+				}
+
+				frm.dashboard.set_headline(message);
+			},
+		});
 	},
 
 	show_report_error_button(frm) {
