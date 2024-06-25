@@ -1529,6 +1529,7 @@ def get_next_stock_reco(kwargs):
 			sle.batch_no,
 			sle.actual_qty,
 		)
+		.force_index("item_warehouse")
 		.where(
 			(sle.item_code == kwargs.get("item_code"))
 			& (sle.warehouse == kwargs.get("warehouse"))
