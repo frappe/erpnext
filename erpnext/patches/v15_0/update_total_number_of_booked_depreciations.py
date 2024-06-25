@@ -21,6 +21,9 @@ def execute():
 				for je in depr_schedule:
 					if je.journal_entry:
 						total_number_of_booked_depreciations += 1
-				fb_row.db_set("total_number_of_booked_depreciations", total_number_of_booked_depreciations)
-			asset_doc.save
-		frappe.db.commit()
+				frappe.db.set_value(
+					"Asset Finance Book",
+					fb_row.name,
+					"total_number_of_booked_depreciations",
+					total_number_of_booked_depreciations,
+				)
