@@ -125,9 +125,10 @@ def get_data(filters):
 		if assets_linked_to_fb and asset.calculate_depreciation and asset.asset_id not in assets_linked_to_fb:
 			continue
 
-		asset_value = get_asset_value_after_depreciation(
-			asset.asset_id, finance_book
-		) or get_asset_value_after_depreciation(asset.asset_id)
+		depreciation_amount = depreciation_amount_map.get(asset.asset_id) or 0.0
+		asset_value = (
+			asset.gross_purchase_amount - asset.opening_accumulated_depreciation - depreciation_amount
+		)
 
 		row = {
 			"asset_id": asset.asset_id,
@@ -139,7 +140,7 @@ def get_data(filters):
 			or pi_supplier_map.get(asset.purchase_invoice),
 			"gross_purchase_amount": asset.gross_purchase_amount,
 			"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
-			"depreciated_amount": depreciation_amount_map.get(asset.asset_id) or 0.0,
+			"depreciated_amount": depreciation_amount,
 			"available_for_use_date": asset.available_for_use_date,
 			"location": asset.location,
 			"asset_category": asset.asset_category,
@@ -185,11 +186,12 @@ def prepare_chart_data(data, filters):
 		)
 
 	for d in data:
-		date = d.get(date_field)
-		belongs_to_month = formatdate(date, "MMM YYYY")
+		if d.get(date_field):
+			date = d.get(date_field)
+			belongs_to_month = formatdate(date, "MMM YYYY")
 
-		labels_values_map[belongs_to_month].asset_value += d.get("asset_value")
-		labels_values_map[belongs_to_month].depreciated_amount += d.get("depreciated_amount")
+			labels_values_map[belongs_to_month].asset_value += d.get("asset_value")
+			labels_values_map[belongs_to_month].depreciated_amount += d.get("depreciated_amount")
 
 	return {
 		"data": {
