@@ -2913,7 +2913,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 			),
 		)
 
-<<<<<<< HEAD
 	def test_valuation_taxes_lcv_repost_after_billing(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			make_landed_cost_voucher,
@@ -2961,7 +2960,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		self.assertSequenceEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
-=======
+
 	def test_manufacturing_and_expiry_date_for_batch(self):
 		item = make_item(
 			"_Test Manufacturing and Expiry Date For Batch",
@@ -2990,7 +2989,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		batch = frappe.get_doc("Batch", batch_no)
 		self.assertEqual(batch.manufacturing_date, getdate(today()))
 		self.assertEqual(batch.expiry_date, getdate(add_days(today(), 5)))
->>>>>>> eca3e02f8d (fix: manufacturing date issue in the batch (#42034))
 
 
 def prepare_data_for_internal_transfer():
