@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, cint, cstr, flt, nowtime, today
+from frappe.utils import add_days, cint, cstr, flt, getdate, nowtime, today
 from pypika import functions as fn
 
 import erpnext
@@ -2913,6 +2913,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			),
 		)
 
+<<<<<<< HEAD
 	def test_valuation_taxes_lcv_repost_after_billing(self):
 		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			make_landed_cost_voucher,
@@ -2960,6 +2961,36 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 		self.assertSequenceEqual(expected_gle, gl_entries)
 		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+=======
+	def test_manufacturing_and_expiry_date_for_batch(self):
+		item = make_item(
+			"_Test Manufacturing and Expiry Date For Batch",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "B-MEBATCH.#####",
+				"has_expiry_date": 1,
+				"shelf_life_in_days": 5,
+			},
+		)
+
+		pr = make_purchase_receipt(
+			qty=10,
+			rate=100,
+			item_code=item.name,
+			posting_date=today(),
+		)
+
+		pr.reload()
+		self.assertTrue(pr.items[0].serial_and_batch_bundle)
+
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		batch = frappe.get_doc("Batch", batch_no)
+		self.assertEqual(batch.manufacturing_date, getdate(today()))
+		self.assertEqual(batch.expiry_date, getdate(add_days(today(), 5)))
+>>>>>>> eca3e02f8d (fix: manufacturing date issue in the batch (#42034))
 
 
 def prepare_data_for_internal_transfer():
