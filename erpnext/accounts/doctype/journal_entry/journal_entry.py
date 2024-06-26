@@ -226,7 +226,7 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
-		self.update_booked_depreciation()
+		self.update_booked_depreciation(1)
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -441,7 +441,7 @@ class JournalEntry(AccountsController):
 			if status:
 				inv_disc_doc.set_status(status=status)
 
-	def update_booked_depreciation(self):
+	def update_booked_depreciation(self, cancel=0):
 		for d in self.get("accounts"):
 			if (
 				self.voucher_type == "Depreciation Entry"
@@ -453,14 +453,11 @@ class JournalEntry(AccountsController):
 				asset = frappe.get_doc("Asset", d.reference_name)
 				for fb_row in asset.get("finance_books"):
 					if fb_row.finance_book == self.finance_book:
-						depr_schedule = get_depr_schedule(asset.name, "Active", fb_row.finance_book)
-						total_number_of_booked_depreciations = asset.opening_number_of_booked_depreciations
-						for je in depr_schedule:
-							if je.journal_entry:
-								total_number_of_booked_depreciations += 1
-						fb_row.db_set(
-							"total_number_of_booked_depreciations", total_number_of_booked_depreciations
-						)
+						if cancel:
+							fb_row.total_number_of_booked_depreciations -= 1
+						else:
+							fb_row.total_number_of_booked_depreciations += 1
+						fb_row.db_update()
 						break
 
 	def unlink_advance_entry_reference(self):
