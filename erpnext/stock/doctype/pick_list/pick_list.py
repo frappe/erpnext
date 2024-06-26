@@ -693,7 +693,8 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 	# if stock qty is zero on submitted entry, show positive remaining qty to recalculate in case of restock.
 	remaining_stock_qty = item_doc.qty if (docstatus == 1 and item_doc.stock_qty == 0) else item_doc.stock_qty
 
-	while flt(remaining_stock_qty) > 0 and available_locations:
+	precision = frappe.get_precision("Pick List Item", "qty")
+	while flt(remaining_stock_qty, precision) > 0 and available_locations:
 		item_location = available_locations.pop(0)
 		item_location = frappe._dict(item_location)
 
@@ -838,6 +839,7 @@ def validate_picked_materials(item_code, required_qty, locations, picked_item_de
 
 def filter_locations_by_picked_materials(locations, picked_item_details) -> list[dict]:
 	filterd_locations = []
+	precision = frappe.get_precision("Pick List Item", "qty")
 	for row in locations:
 		key = row.warehouse
 		if row.batch_no:
@@ -856,7 +858,7 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 			if row.serial_nos:
 				row.serial_nos = list(set(row.serial_nos) - set(picked_item_details[key].get("serial_no")))
 
-		if row.qty > 0:
+		if flt(row.qty, precision) > 0:
 			filterd_locations.append(row)
 
 	return filterd_locations

@@ -144,6 +144,7 @@ class Customer(TransactionBase):
 		self.validate_default_bank_account()
 		self.validate_internal_customer()
 		self.add_role_for_user()
+		self.validate_currency_for_receivable_payable_and_advance_account()
 
 		# set loyalty program tier
 		if frappe.db.exists("Customer", self.name):
