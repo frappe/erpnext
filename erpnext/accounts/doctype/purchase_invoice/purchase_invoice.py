@@ -804,35 +804,7 @@ class PurchaseInvoice(BuyingController):
 					from_repost=from_repost,
 				)
 				self.make_exchange_gain_loss_journal()
-<<<<<<< HEAD
-			elif self.docstatus == 2:
-				provisional_entries = [a for a in gl_entries if a.voucher_type == "Purchase Receipt"]
-				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
-				if provisional_entries:
-					for entry in provisional_entries:
-						frappe.db.set_value(
-							"GL Entry",
-							{
-								"voucher_type": "Purchase Receipt",
-								"voucher_detail_no": entry.voucher_detail_no,
-							},
-							"is_cancelled",
-							1,
-						)
-
-			if update_outstanding == "No":
-				update_outstanding_amt(
-					self.credit_to,
-					"Supplier",
-					self.supplier,
-					self.doctype,
-					self.return_against if cint(self.is_return) and self.return_against else self.name,
-				)
-
-		elif self.docstatus == 2 and cint(self.update_stock) and self.auto_accounting_for_stock:
-=======
 		elif self.docstatus == 2:
->>>>>>> 49c74369a5 (perf: refactored handling provisional gl entries for non-stock items)
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 			self.cancel_provisional_entries()
 
@@ -1122,72 +1094,7 @@ class PurchaseInvoice(BuyingController):
 					dummy, amount = self.get_amount_and_base_amount(item, None)
 
 					if provisional_accounting_for_non_stock_items:
-<<<<<<< HEAD
-						if item.purchase_receipt:
-<<<<<<< HEAD
-							provisional_account, pr_qty, pr_base_rate, pr_rate = frappe.get_cached_value(
-								"Purchase Receipt Item",
-								item.pr_detail,
-								["provisional_expense_account", "qty", "base_rate", "rate"],
-							)
-							provisional_account = provisional_account or self.get_company_default(
-								"default_provisional_account"
-							)
-							purchase_receipt_doc = purchase_receipt_doc_map.get(item.purchase_receipt)
-
-							if not purchase_receipt_doc:
-								purchase_receipt_doc = frappe.get_doc(
-									"Purchase Receipt", item.purchase_receipt
-								)
-								purchase_receipt_doc_map[item.purchase_receipt] = purchase_receipt_doc
-=======
-							if not provisional_enpenses_booked_in_pr:
-								provisional_account, pr_qty, pr_base_rate = frappe.get_cached_value(
-									"Purchase Receipt Item",
-									item.pr_detail,
-									["provisional_expense_account", "qty", "base_rate"],
-								)
-								provisional_account = provisional_account or self.get_company_default(
-									"default_provisional_account"
-								)
-								# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-								provision_gle_against_pr = frappe.db.get_value(
-									"GL Entry",
-									{
-										"is_cancelled": 0,
-										"voucher_type": "Purchase Receipt",
-										"voucher_no": item.purchase_receipt,
-										"voucher_detail_no": item.pr_detail,
-										"account": provisional_account,
-									},
-									["name"],
-								)
-								if provision_gle_against_pr:
-									provisional_enpenses_booked_in_pr = True
-
-							if provisional_enpenses_booked_in_pr:
-								purchase_receipt_doc = purchase_receipt_doc_map.get(item.purchase_receipt)
->>>>>>> d7b738ff61 (perf: Optimization for providional gl entries)
-
-								if not purchase_receipt_doc:
-									purchase_receipt_doc = frappe.get_doc("Purchase Receipt", item.purchase_receipt)
-									purchase_receipt_doc_map[item.purchase_receipt] = purchase_receipt_doc
-
-								# Intentionally passing purchase invoice item to handle partial billing
-								purchase_receipt_doc.add_provisional_gl_entry(
-									item,
-									gl_entries,
-									self.posting_date,
-									provisional_account,
-									reverse=1,
-									item_amount=(
-										(min(item.qty, pr_qty) * pr_rate)
-										* purchase_receipt_doc.get("conversion_rate")
-									),
-								)
-=======
 						self.make_provisional_gl_entry(gl_entries, item)
->>>>>>> 49c74369a5 (perf: refactored handling provisional gl entries for non-stock items)
 
 					if not self.is_internal_transfer():
 						gl_entries.append(
