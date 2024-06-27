@@ -1,12 +1,16 @@
 import frappe
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import IfNull
 
 
 def execute():
 	if frappe.db.has_column("Asset Repair", "warehouse"):
-		items = frappe.get_all("Asset Repair Consumed Item", fields=["name", "parent"])
-
-		for item in items:
-			warehouse = frappe.db.get_value("Asset Repair", item.parent, "warehouse")
-			if warehouse:
-				frappe.db.set_value("Asset Repair Consumed Item", item.name, "warehouse", warehouse)
-		frappe.db.commit()
+		ar_item = DocType("Asset Repair Consumed Item")
+		ar = DocType("Asset Repair")
+		(
+			frappe.qb.update(ar_item)
+			.join(ar)
+			.on(ar.name == ar_item.parent)
+			.set(ar_item.warehouse, ar.warehouse)
+			.where(IfNull(ar.warehouse, "") != "")
+		).run()

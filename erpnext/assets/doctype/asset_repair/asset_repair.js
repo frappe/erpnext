@@ -20,6 +20,15 @@ frappe.ui.form.on("Asset Repair", {
 			};
 		};
 
+		frm.set_query("warehouse", "stock_items", function () {
+			return {
+				filters: {
+					is_group: 0,
+					company: frm.doc.company,
+				},
+			};
+		});
+
 		frm.set_query("serial_and_batch_bundle", "stock_items", (doc, cdt, cdn) => {
 			let row = locals[cdt][cdn];
 			return {
@@ -89,14 +98,15 @@ frappe.ui.form.on("Asset Repair", {
 	purchase_invoice: function (frm) {
 		if (frm.doc.purchase_invoice) {
 			frappe.call({
-				method: "frappe.client.get",
+				method: "frappe.client.get_value",
 				args: {
 					doctype: "Purchase Invoice",
-					name: frm.doc.purchase_invoice,
+					fieldname: "base_net_total",
+					filters: { name: frm.doc.purchase_invoice },
 				},
 				callback: function (r) {
 					if (r.message) {
-						frm.set_value("repair_cost", r.message.total);
+						frm.set_value("repair_cost", r.message.base_net_total);
 					}
 				},
 			});

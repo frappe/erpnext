@@ -1,13 +1,15 @@
 import frappe
+from frappe.query_builder import DocType
 
 
 def execute():
 	if frappe.db.has_column("Asset Repair", "stock_entry"):
-		asset_repairs = frappe.get_all("Asset Repair", fields=["name", "stock_entry"])
+		AssetRepair = DocType("Asset Repair")
+		StockEntry = DocType("Stock Entry")
 
-		for asset_repair in asset_repairs:
-			if asset_repair.stock_entry:
-				frappe.db.set_value(
-					"Stock Entry", asset_repair.stock_entry, "asset_repair", asset_repair.name
-				)
-		frappe.db.commit()
+		(
+			frappe.qb.update(StockEntry)
+			.join(AssetRepair)
+			.on(StockEntry.name == AssetRepair.stock_entry)
+			.set(StockEntry.asset_repair, AssetRepair.name)
+		).run()

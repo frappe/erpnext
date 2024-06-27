@@ -141,8 +141,6 @@ class AssetRepair(AccountsController):
 				self.asset_doc.total_asset_cost -= self.repair_cost
 				self.asset_doc.additional_asset_cost -= self.repair_cost
 
-			if self.get("stock_consumption"):
-				self.increase_stock_quantity()
 			if self.get("capitalize_repair_cost"):
 				self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 				self.make_gl_entries(cancel=True)
@@ -246,12 +244,6 @@ class AssetRepair(AccountsController):
 			frappe.db.set_value(
 				"Serial and Batch Bundle", stock_item.serial_and_batch_bundle, values_to_update
 			)
-
-	def increase_stock_quantity(self):
-		stock_entry = frappe.get_doc("Stock Entry", {"asset_repair": self.name})
-		if stock_entry:
-			stock_entry.flags.ignore_links = True
-			stock_entry.cancel()
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.total_repair_cost) > 0:

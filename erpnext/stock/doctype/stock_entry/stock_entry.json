@@ -681,7 +681,8 @@
    "fieldname": "asset_repair",
    "fieldtype": "Link",
    "label": "Asset Repair",
-   "options": "Asset Repair"
+   "options": "Asset Repair",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -689,7 +690,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-13 16:37:33.292736",
+ "modified": "2024-06-26 19:12:17.937088",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
