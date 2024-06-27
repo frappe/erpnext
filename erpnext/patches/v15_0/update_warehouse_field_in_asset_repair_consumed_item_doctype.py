@@ -1,16 +1,14 @@
 import frappe
-from frappe.query_builder import DocType
-from frappe.query_builder.functions import IfNull
 
 
+# not able to use frappe.qb because of this bug https://github.com/frappe/frappe/issues/20292
+# nosemgrep
 def execute():
 	if frappe.db.has_column("Asset Repair", "warehouse"):
-		ar_item = DocType("Asset Repair Consumed Item")
-		ar = DocType("Asset Repair")
-		(
-			frappe.qb.update(ar_item)
-			.join(ar)
-			.on(ar.name == ar_item.parent)
-			.set(ar_item.warehouse, ar.warehouse)
-			.where(IfNull(ar.warehouse, "") != "")
-		).run()
+		frappe.db.sql(
+			"""UPDATE `tabAsset Repair Consumed Item` ar_item
+			JOIN `tabAsset Repair` ar
+			ON ar.name = ar_item.parent
+			SET ar_item.warehouse = ar.warehouse
+			WHERE ifnull(ar.warehouse, '') != ''"""
+		)
