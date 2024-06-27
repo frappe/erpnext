@@ -444,7 +444,7 @@
    "description": "If enabled, the item rate will be automatically updated to match the valuation rate during internal transfers. Accounting will still be done based on the valuation rate, regardless of whether this setting is enabled or disabled.",
    "fieldname": "update_item_rate",
    "fieldtype": "Check",
-   "label": "Update Item Rate as per Valuation Rate for Internal Transfers"
+   "label": "Allow Internal Transfers at Arm's Length Price"
   }
  ],
  "icon": "icon-cog",
