@@ -31,6 +31,7 @@
   "allow_negative_stock",
   "show_barcode_field",
   "clean_description_html",
+  "update_item_rate",
   "quality_inspection_settings_section",
   "action_if_quality_inspection_is_not_submitted",
   "column_break_23",
@@ -437,6 +438,13 @@
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
    "label": "Do Not Update Serial / Batch on Creation of Auto Bundle"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the item rate will be automatically updated to match the valuation rate during internal transfers. Accounting will still be done based on the valuation rate, regardless of whether this setting is enabled or disabled.",
+   "fieldname": "update_item_rate",
+   "fieldtype": "Check",
+   "label": "Update Item Rate as per Valuation Rate for Internal Transfers"
   }
  ],
  "icon": "icon-cog",
@@ -444,7 +452,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:10:45.423987",
+ "modified": "2024-06-26 12:50:27.834101",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

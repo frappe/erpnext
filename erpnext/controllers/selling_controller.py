@@ -432,6 +432,7 @@ class SellingController(StockController):
 		if self.doctype not in ("Delivery Note", "Sales Invoice"):
 			return
 
+		should_update_item_rate = frappe.db.get_single_value("Stock Settings", "update_item_rate")
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:
 			if not frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
@@ -483,17 +484,21 @@ class SellingController(StockController):
 								d.precision("rate"),
 							)
 							if d.rate != rate:
-								d.rate = rate
-								frappe.msgprint(
-									_(
-										"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-									).format(d.idx),
-									alert=1,
-								)
-
-							d.discount_percentage = 0.0
-							d.discount_amount = 0.0
-							d.margin_rate_or_amount = 0.0
+								if should_update_item_rate:
+									d.rate = rate
+									frappe.msgprint(
+										_(
+											"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+										).format(d.idx),
+										alert=1,
+									)
+								else:
+									frappe.msgprint(
+										_(
+											"Row {0}: Item rate has not been updated as per valuation rate since for internal stock transfer since setting is disabled."
+										).format(d.idx),
+										alert=1,
+									)
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
