@@ -440,6 +440,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
 	payment_entry_filters = {
 		"party_type": "Supplier",
 		"party": ("in", parties),
+		"company": inv.company,
 		"docstatus": 1,
 		"apply_tax_withholding_amount": 1,
 		"unallocated_amount": (">", 0),
