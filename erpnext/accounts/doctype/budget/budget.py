@@ -151,9 +151,7 @@ def validate_expense_against_budget(args, expense_amount=0):
 			"Company", args.get("company"), "exception_budget_approver_role"
 		)
 
-	if not frappe.get_cached_value(
-		"Budget", {"fiscal_year": args.fiscal_year, "company": args.company}
-	):  # nosec
+	if not frappe.get_cached_value("Budget", {"fiscal_year": args.fiscal_year, "company": args.company}):  # nosec
 		return
 
 	if not args.account:
