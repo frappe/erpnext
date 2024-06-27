@@ -76,14 +76,14 @@ class TestAssetRepair(unittest.TestCase):
 	def test_warehouse(self):
 		asset_repair = create_asset_repair(stock_consumption=1)
 		self.assertTrue(asset_repair.stock_consumption)
-		self.assertTrue(asset_repair.warehouse)
+		self.assertTrue(asset_repair.stock_items[0].warehouse)
 
 	def test_decrease_stock_quantity(self):
 		asset_repair = create_asset_repair(stock_consumption=1, submit=1)
 		stock_entry = frappe.get_last_doc("Stock Entry")
 
 		self.assertEqual(stock_entry.stock_entry_type, "Material Issue")
-		self.assertEqual(stock_entry.items[0].s_warehouse, asset_repair.warehouse)
+		self.assertEqual(stock_entry.items[0].s_warehouse, asset_repair.stock_items[0].warehouse)
 		self.assertEqual(stock_entry.items[0].item_code, asset_repair.stock_items[0].item_code)
 		self.assertEqual(stock_entry.items[0].qty, asset_repair.stock_items[0].consumed_quantity)
 
@@ -114,14 +114,14 @@ class TestAssetRepair(unittest.TestCase):
 		asset_repair.repair_status = "Completed"
 		self.assertRaises(frappe.ValidationError, asset_repair.submit)
 
-	def test_increase_in_asset_value_due_to_stock_consumption(self):
+	def test_no_increase_in_asset_value_when_not_capitalized(self):
 		asset = create_asset(calculate_depreciation=1, submit=1)
 		initial_asset_value = get_asset_value_after_depreciation(asset.name)
-		asset_repair = create_asset_repair(asset=asset, stock_consumption=1, submit=1)
+		create_asset_repair(asset=asset, stock_consumption=1, submit=1)
 		asset.reload()
 
 		increase_in_asset_value = get_asset_value_after_depreciation(asset.name) - initial_asset_value
-		self.assertEqual(asset_repair.stock_items[0].total_value, increase_in_asset_value)
+		self.assertEqual(increase_in_asset_value, 0)
 
 	def test_increase_in_asset_value_due_to_repair_cost_capitalisation(self):
 		asset = create_asset(calculate_depreciation=1, submit=1)
@@ -185,7 +185,7 @@ class TestAssetRepair(unittest.TestCase):
 			frappe.get_doc("Purchase Invoice", asset_repair.purchase_invoice).items[0].expense_account
 		)
 		stock_entry_expense_account = (
-			frappe.get_doc("Stock Entry", asset_repair.stock_entry).get("items")[0].expense_account
+			frappe.get_doc("Stock Entry", {"asset_repair": asset_repair.name}).get("items")[0].expense_account
 		)
 
 		expected_values = {
@@ -260,6 +260,12 @@ class TestAssetRepair(unittest.TestCase):
 			asset.finance_books[0].value_after_depreciation,
 		)
 
+	def test_asset_repiar_link_in_stock_entry(self):
+		asset = create_asset(calculate_depreciation=1, submit=1)
+		asset_repair = create_asset_repair(asset=asset, stock_consumption=1, submit=1)
+		stock_entry = frappe.get_last_doc("Stock Entry")
+		self.assertEqual(stock_entry.asset_repair, asset_repair.name)
+
 
 def num_of_depreciations(asset):
 	return asset.finance_books[0].total_number_of_depreciations
@@ -289,7 +295,7 @@ def create_asset_repair(**args):
 
 	if args.stock_consumption:
 		asset_repair.stock_consumption = 1
-		asset_repair.warehouse = args.warehouse or create_warehouse("Test Warehouse", company=asset.company)
+		warehouse = args.warehouse or create_warehouse("Test Warehouse", company=asset.company)
 
 		bundle = None
 		if args.serial_no:
@@ -297,8 +303,8 @@ def create_asset_repair(**args):
 				frappe._dict(
 					{
 						"item_code": args.item_code,
-						"warehouse": asset_repair.warehouse,
-						"company": frappe.get_cached_value("Warehouse", asset_repair.warehouse, "company"),
+						"warehouse": warehouse,
+						"company": frappe.get_cached_value("Warehouse", warehouse, "company"),
 						"qty": (flt(args.stock_qty) or 1) * -1,
 						"voucher_type": "Asset Repair",
 						"type_of_transaction": "Asset Repair",
@@ -314,6 +320,7 @@ def create_asset_repair(**args):
 			"stock_items",
 			{
 				"item_code": args.item_code or "_Test Stock Item",
+				"warehouse": warehouse,
 				"valuation_rate": args.rate if args.get("rate") is not None else 100,
 				"consumed_quantity": args.qty or 1,
 				"serial_and_batch_bundle": bundle,
@@ -333,7 +340,7 @@ def create_asset_repair(**args):
 			stock_entry.append(
 				"items",
 				{
-					"t_warehouse": asset_repair.warehouse,
+					"t_warehouse": asset_repair.stock_items[0].warehouse,
 					"item_code": asset_repair.stock_items[0].item_code,
 					"qty": asset_repair.stock_items[0].consumed_quantity,
 					"basic_rate": args.rate if args.get("rate") is not None else 100,
@@ -351,7 +358,7 @@ def create_asset_repair(**args):
 				company=asset.company,
 				expense_account=frappe.db.get_value("Company", asset.company, "default_expense_account"),
 				cost_center=asset_repair.cost_center,
-				warehouse=asset_repair.warehouse,
+				warehouse=args.warehouse or create_warehouse("Test Warehouse", company=asset.company),
 			)
 			asset_repair.purchase_invoice = pi.name
 
