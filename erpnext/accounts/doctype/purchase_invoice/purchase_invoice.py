@@ -594,13 +594,17 @@ class PurchaseInvoice(BuyingController):
 		for item in self.get("items"):
 			validate_account_head(item.idx, item.expense_account, self.company, "Expense")
 
-	def set_against_expense_account(self):
+	def set_against_expense_account(self, force=False):
 		against_accounts = []
 		for item in self.get("items"):
 			if item.expense_account and (item.expense_account not in against_accounts):
 				against_accounts.append(item.expense_account)
 
 		self.against_expense_account = ",".join(against_accounts)
+
+	def force_set_against_expense_account(self):
+		self.set_against_expense_account()
+		frappe.db.set_value(self.doctype, self.name, "against_expense_account", self.against_expense_account)
 
 	def po_required(self):
 		if frappe.db.get_single_value("Buying Settings", "po_required") == "Yes":
@@ -682,6 +686,19 @@ class PurchaseInvoice(BuyingController):
 					"overflow_type": "receipt",
 					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
+				}
+			)
+			self.status_updater.append(
+				{
+					"source_dt": "Purchase Invoice Item",
+					"target_dt": "Material Request Item",
+					"join_field": "material_request_item",
+					"target_field": "received_qty",
+					"target_parent_dt": "Material Request",
+					"target_parent_field": "per_received",
+					"target_ref_field": "stock_qty",
+					"source_field": "stock_qty",
+					"percent_join_field": "material_request",
 				}
 			)
 			if cint(self.is_return):

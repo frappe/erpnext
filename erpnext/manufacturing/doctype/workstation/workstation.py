@@ -57,7 +57,6 @@ class Workstation(Document):
 		hour_rate_rent: DF.Currency
 		off_status_image: DF.AttachImage | None
 		on_status_image: DF.AttachImage | None
-		parts_per_hour: DF.Float
 		plant_floor: DF.Link | None
 		production_capacity: DF.Int
 		status: DF.Literal["Production", "Off", "Idle", "Problem", "Maintenance", "Setup"]

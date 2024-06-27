@@ -883,6 +883,9 @@ def get_serial_batches_based_on_bundle(field, _bundle_ids):
 		if frappe.get_cached_value(row.voucher_type, row.voucher_no, "is_return"):
 			key = frappe.get_cached_value(row.voucher_type + " Item", row.voucher_detail_no, field)
 
+		if row.voucher_type in ["Sales Invoice", "Delivery Note"]:
+			row.qty = -1 * row.qty
+
 		if key not in available_dict:
 			available_dict[key] = frappe._dict(
 				{"qty": 0.0, "serial_nos": defaultdict(float), "batches": defaultdict(float)}
