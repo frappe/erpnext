@@ -1220,6 +1220,7 @@ def get_serial_batch_ledgers(item_code=None, docstatus=None, voucher_no=None, na
 		"`tabSerial and Batch Entry`.`warehouse`",
 		"`tabSerial and Batch Entry`.`batch_no`",
 		"`tabSerial and Batch Entry`.`serial_no`",
+		"`tabSerial and Batch Entry`.`name` as `child_row`",
 	]
 
 	if not child_row:
@@ -2104,10 +2105,13 @@ def get_ledgers_from_serial_batch_bundle(**kwargs) -> list[frappe._dict]:
 	)
 
 	for key, val in kwargs.items():
-		if not val:
+		if val is None:
 			continue
 
-		if key in ["get_subcontracted_item"]:
+		if not val and isinstance(val, list):
+			return []
+
+		if key == "get_subcontracted_item":
 			continue
 
 		if key in ["name", "item_code", "warehouse", "voucher_no", "company", "voucher_detail_no"]:
