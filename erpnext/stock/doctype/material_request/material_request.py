@@ -739,7 +739,7 @@ def raise_work_orders(material_request):
 
 	for d in mr.items:
 		if (d.stock_qty - d.ordered_qty) > 0:
-			if get_item_details(d.item_code).bom:
+			if get_item_details(d.item_code).bom_no:
 				wo_order = frappe.new_doc("Work Order")
 				wo_order.update(
 					{
