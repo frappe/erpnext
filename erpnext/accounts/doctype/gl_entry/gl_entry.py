@@ -328,8 +328,10 @@ def update_outstanding_amt(
 		party_condition = ""
 
 	if against_voucher_type == "Sales Invoice":
-		party_account = frappe.db.get_value(against_voucher_type, against_voucher, "debit_to")
-		account_condition = f"and account in ({frappe.db.escape(account)}, {frappe.db.escape(party_account)})"
+		party_account = frappe.get_cached_value(against_voucher_type, against_voucher, "debit_to")
+		account_condition = "and account in ({0}, {1})".format(
+			frappe.db.escape(account), frappe.db.escape(party_account)
+		)
 	else:
 		account_condition = f" and account = {frappe.db.escape(account)}"
 
@@ -392,7 +394,9 @@ def update_outstanding_amt(
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.get_cached_value("Account", account, "freeze_account")
 	if frozen_account == "Yes" and not adv_adj:
-		frozen_accounts_modifier = frappe.db.get_value("Accounts Settings", None, "frozen_accounts_modifier")
+		frozen_accounts_modifier = frappe.get_cached_value(
+			"Accounts Settings", None, "frozen_accounts_modifier"
+		)
 
 		if not frozen_accounts_modifier:
 			frappe.throw(_("Account {0} is frozen").format(account))
