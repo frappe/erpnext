@@ -1217,6 +1217,9 @@ class PaymentEntry(AccountsController):
 		if reference.reference_doctype == "Sales Invoice":
 			return "credit", reference.account
 
+		if reference.reference_doctype == "Purchase Invoice":
+			return "debit", reference.account
+
 		if reference.reference_doctype == "Payment Entry":
 			# reference.account_type and reference.payment_type is only available for Reverse payments
 			if reference.account_type == "Receivable" and reference.payment_type == "Pay":
