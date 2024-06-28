@@ -156,11 +156,13 @@
   "more_information",
   "inter_company_invoice_reference",
   "customer_group",
-  "campaign",
   "is_discounted",
   "col_break23",
+  "utm_source",
+  "utm_campaign",
+  "utm_medium",
+  "column_break_gpiw",
   "status",
-  "source",
   "more_info",
   "debit_to",
   "party_account_currency",
@@ -1319,15 +1321,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "campaign",
-   "fieldtype": "Link",
-   "label": "Campaign",
-   "oldfieldname": "campaign",
-   "oldfieldtype": "Link",
-   "options": "Campaign",
-   "print_hide": 1
-  },
-  {
    "default": "0",
    "fieldname": "is_discounted",
    "fieldtype": "Check",
@@ -1350,15 +1343,6 @@
    "options": "\nDraft\nReturn\nCredit Note Issued\nConsolidated\nSubmitted\nPaid\nUnpaid\nUnpaid and Discounted\nOverdue and Discounted\nOverdue\nCancelled",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "source",
-   "fieldtype": "Link",
-   "label": "Source",
-   "oldfieldname": "source",
-   "oldfieldtype": "Select",
-   "options": "Lead Source",
-   "print_hide": 1
   },
   {
    "collapsible": 1,
@@ -1558,12 +1542,41 @@
    "fieldname": "update_billed_amount_in_delivery_note",
    "fieldtype": "Check",
    "label": "Update Billed Amount in Delivery Note"
+  },
+  {
+   "fieldname": "column_break_gpiw",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "utm_medium",
+   "print_hide": 1,
+   "fieldtype": "Link",
+   "label": "Medium",
+   "options": "UTM Medium"
+  },
+  {
+   "fieldname": "utm_campaign",
+   "fieldtype": "Link",
+   "label": "Campaign",
+   "oldfieldname": "campaign",
+   "oldfieldtype": "Link",
+   "options": "UTM Campaign",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "utm_source",
+   "fieldtype": "Link",
+   "label": "Source",
+   "oldfieldname": "source",
+   "oldfieldtype": "Select",
+   "options": "UTM Source",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:14.787999",
+ "modified": "2024-06-28 10:55:34.941200",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
