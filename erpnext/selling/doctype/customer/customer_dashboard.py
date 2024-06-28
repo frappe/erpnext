@@ -15,7 +15,10 @@ def get_data():
 			"Bank Account": "party",
 			"Subscription": "party",
 		},
-		"dynamic_links": {"party_name": ["Customer", "quotation_to"]},
+		"dynamic_links": {
+			"party_name": ["Customer", "quotation_to"],
+			"party": ["Customer", "party_type"],
+		},
 		"transactions": [
 			{"label": _("Pre Sales"), "items": ["Opportunity", "Quotation"]},
 			{"label": _("Orders"), "items": ["Sales Order", "Delivery Note", "Sales Invoice"]},

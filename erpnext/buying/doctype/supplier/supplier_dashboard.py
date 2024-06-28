@@ -9,6 +9,7 @@ def get_data():
 		),
 		"fieldname": "supplier",
 		"non_standard_fieldnames": {"Payment Entry": "party", "Bank Account": "party"},
+		"dynamic_links": {"party": ["Supplier", "party_type"]},
 		"transactions": [
 			{"label": _("Procurement"), "items": ["Request for Quotation", "Supplier Quotation"]},
 			{"label": _("Orders"), "items": ["Purchase Order", "Purchase Receipt", "Purchase Invoice"]},
