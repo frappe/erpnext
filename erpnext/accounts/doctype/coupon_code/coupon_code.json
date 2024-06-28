@@ -12,6 +12,7 @@
   "customer",
   "column_break_4",
   "coupon_code",
+  "from_external_ecomm_platform",
   "pricing_rule",
   "uses",
   "valid_from",
@@ -60,11 +61,12 @@
    "unique": 1
   },
   {
+   "depends_on": "eval !doc.from_external_ecomm_platform",
    "fieldname": "pricing_rule",
    "fieldtype": "Link",
    "label": "Pricing Rule",
-   "options": "Pricing Rule",
-   "reqd": 1
+   "mandatory_depends_on": "eval: !doc.from_external_ecomm_platform",
+   "options": "Pricing Rule"
   },
   {
    "fieldname": "uses",
@@ -113,12 +115,24 @@
    "options": "Coupon Code",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "from_external_ecomm_platform",
+   "fieldtype": "Check",
+   "label": "From External Ecomm Platform"
   }
  ],
+<<<<<<< HEAD
  "modified": "2019-10-19 14:48:14.602481",
+=======
+ "links": [],
+ "modified": "2024-06-28 06:17:01.833399",
+>>>>>>> 70ed75a397 (fix: coupon code limits and add external plaftorm code)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Coupon Code",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
