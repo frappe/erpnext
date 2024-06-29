@@ -361,11 +361,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-03-13 09:56:13.021696",
-=======
  "modified": "2024-06-27 16:23:18.820049",
->>>>>>> 32bdcdb08f (fix: timeout error while submitting JV (#42040))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
