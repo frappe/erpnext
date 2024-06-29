@@ -191,11 +191,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-07-20 18:18:44.405723",
-=======
  "modified": "2024-06-27 16:23:04.444354",
->>>>>>> 32bdcdb08f (fix: timeout error while submitting JV (#42040))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
