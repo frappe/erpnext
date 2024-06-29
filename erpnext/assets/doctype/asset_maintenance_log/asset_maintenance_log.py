@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate, nowdate, today
 
 from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 
@@ -73,6 +73,15 @@ class AssetMaintenanceLog(Document):
 			asset_maintenance_doc.save()
 		asset_maintenance_doc = frappe.get_doc("Asset Maintenance", self.asset_maintenance)
 		asset_maintenance_doc.save()
+
+
+def update_asset_maintenance_log_status():
+	maintenance_log = frappe.get_all(
+		"Asset Maintenance Log", {"maintenance_status": "Planned", "due_date": ["<", today()]}
+	)
+	for ml in maintenance_log:
+		ml = frappe.get_doc("Asset Maintenance Log", ml.name)
+		frappe.db.set_value("Asset Maintenance Log", ml.name, "maintenance_status", "Overdue")
 
 
 @frappe.whitelist()
