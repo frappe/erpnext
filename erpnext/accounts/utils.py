@@ -10,11 +10,7 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import AliasedQuery, Criterion, Table
-<<<<<<< HEAD
-from frappe.query_builder.functions import Sum
-=======
-from frappe.query_builder.functions import Count, Round, Sum
->>>>>>> 32bdcdb08f (fix: timeout error while submitting JV (#42040))
+from frappe.query_builder.functions import Count, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
 	add_days,
