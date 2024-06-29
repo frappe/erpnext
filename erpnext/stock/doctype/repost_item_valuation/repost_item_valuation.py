@@ -179,7 +179,7 @@ class RepostItemValuation(Document):
 	def clear_attachment(self):
 		if attachments := get_attachments(self.doctype, self.name):
 			attachment = attachments[0]
-			frappe.delete_doc("File", attachment.name)
+			frappe.delete_doc("File", attachment.name, ignore_permissions=True)
 
 		if self.reposting_data_file:
 			self.db_set("reposting_data_file", None)
@@ -219,6 +219,7 @@ class RepostItemValuation(Document):
 		self.distinct_item_and_warehouse = None
 		self.items_to_be_repost = None
 		self.gl_reposting_index = 0
+		self.clear_attachment()
 		self.db_update()
 
 	def deduplicate_similar_repost(self):
@@ -271,6 +272,7 @@ def repost(doc):
 		repost_gl_entries(doc)
 
 		doc.set_status("Completed")
+		doc.db_set("reposting_data_file", None)
 		remove_attached_file(doc.name)
 
 	except Exception as e:
@@ -315,7 +317,7 @@ def remove_attached_file(docname):
 	if file_name := frappe.db.get_value(
 		"File", {"attached_to_name": docname, "attached_to_doctype": "Repost Item Valuation"}, "name"
 	):
-		frappe.delete_doc("File", file_name, delete_permanently=True)
+		frappe.delete_doc("File", file_name, ignore_permissions=True, delete_permanently=True)
 
 
 def repost_sl_entries(doc):
