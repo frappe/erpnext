@@ -2202,24 +2202,14 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.total_taxes_and_charges, 228.82)
 		self.assertEqual(si.rounding_adjustment, -0.01)
 
-<<<<<<< HEAD
-		expected_values = [
-			["_Test Account Service Tax - _TC", 0.0, 114.41],
-			["_Test Account VAT - _TC", 0.0, 114.41],
-			[si.debit_to, 1500, 0.0],
-			["Round Off - _TC", 0.01, 0.01],
-			["Sales - _TC", 0.0, 1271.18],
-		]
-=======
 		round_off_account = frappe.get_cached_value("Company", "_Test Company", "round_off_account")
 		expected_values = {
-			"_Test Account Service Tax - _TC": [0.0, 114.50],
-			"_Test Account VAT - _TC": [0.0, 114.50],
-			si.debit_to: [1501, 0.0],
-			round_off_account: [0.20, 0.0],
-			"Sales - _TC": [0.0, 1272.20],
+			"_Test Account Service Tax - _TC": [0.0, 114.41],
+			"_Test Account VAT - _TC": [0.0, 114.41],
+			si.debit_to: [1500, 0.0],
+			round_off_account: [0.01, 0.01],
+			"Sales - _TC": [0.0, 1271.18],
 		}
->>>>>>> 32bdcdb08f (fix: timeout error while submitting JV (#42040))
 
 		gl_entries = frappe.db.sql(
 			"""select account, sum(debit) as debit, sum(credit) as credit
@@ -2289,11 +2279,7 @@ class TestSalesInvoice(FrappeTestCase):
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
 				["Sales - _TC", 0.0, 4007.15],
-<<<<<<< HEAD
-				["Round Off - _TC", 0.02, 0.01],
-=======
-				[round_off_account, 0.01, 0.0],
->>>>>>> 32bdcdb08f (fix: timeout error while submitting JV (#42040))
+				[round_off_account, 0.02, 0.01],
 			]
 		)
 
