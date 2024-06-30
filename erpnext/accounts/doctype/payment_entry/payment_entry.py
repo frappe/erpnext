@@ -1217,13 +1217,21 @@ class PaymentEntry(AccountsController):
 		if reference.reference_doctype == "Sales Invoice":
 			return "credit", reference.account
 
+		if reference.reference_doctype == "Purchase Invoice":
+			return "debit", reference.account
+
 		if reference.reference_doctype == "Payment Entry":
+			# reference.account_type and reference.payment_type is only available for Reverse payments
 			if reference.account_type == "Receivable" and reference.payment_type == "Pay":
 				return "credit", self.party_account
 			else:
 				return "debit", self.party_account
 
-		return "debit", reference.account
+		if reference.reference_doctype == "Journal Entry":
+			if self.party_type == "Customer" and self.payment_type == "Receive":
+				return "credit", reference.account
+			else:
+				return "debit", reference.account
 
 	def add_advance_gl_for_reference(self, gl_entries, invoice):
 		args_dict = {
