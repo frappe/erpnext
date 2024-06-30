@@ -10,6 +10,7 @@
   "level",
   "year_of_passing",
   "class_per",
+  "upload_certificate",
   "maj_opt_subj"
  ],
  "fields": [
@@ -63,6 +64,12 @@
    "label": "Major/Optional Subjects",
    "oldfieldname": "maj_opt_subj",
    "oldfieldtype": "Text"
+  },
+  {
+   "fieldname": "upload_certificate",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "Upload Certificate"
   }
  ],
  "idx": 1,
