@@ -950,7 +950,17 @@ class SerialBatchCreation:
 		if self.get("ignore_serial_nos"):
 			kwargs["ignore_serial_nos"] = self.ignore_serial_nos
 
-		if self.has_serial_no and not self.get("serial_nos"):
+		if (
+			self.has_serial_no
+			and self.has_batch_no
+			and not self.get("serial_nos")
+			and self.get("batches")
+			and len(self.get("batches")) == 1
+		):
+			# If only one batch is available and no serial no is available
+			kwargs["batches"] = next(iter(self.get("batches").keys()))
+			self.serial_nos = get_serial_nos_for_outward(kwargs)
+		elif self.has_serial_no and not self.get("serial_nos"):
 			self.serial_nos = get_serial_nos_for_outward(kwargs)
 		elif not self.has_serial_no and self.has_batch_no and not self.get("batches"):
 			self.batches = get_available_batches(kwargs)
