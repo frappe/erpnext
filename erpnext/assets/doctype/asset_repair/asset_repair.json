@@ -22,16 +22,14 @@
   "column_break_14",
   "project",
   "accounting_details",
-  "repair_cost",
+  "purchase_invoice",
   "capitalize_repair_cost",
   "stock_consumption",
   "column_break_8",
-  "purchase_invoice",
+  "repair_cost",
   "stock_consumption_details_section",
-  "warehouse",
   "stock_items",
   "total_repair_cost",
-  "stock_entry",
   "asset_depreciation_details_section",
   "increase_in_asset_life",
   "section_break_9",
@@ -122,7 +120,8 @@
    "default": "0",
    "fieldname": "repair_cost",
    "fieldtype": "Currency",
-   "label": "Repair Cost"
+   "label": "Repair Cost",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -219,13 +218,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "stock_consumption",
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "label": "Warehouse",
-   "options": "Warehouse"
-  },
-  {
    "depends_on": "capitalize_repair_cost",
    "fieldname": "asset_depreciation_details_section",
    "fieldtype": "Section Break",
@@ -251,20 +243,12 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company"
-  },
-  {
-   "fieldname": "stock_entry",
-   "fieldtype": "Link",
-   "label": "Stock Entry",
-   "no_copy": 1,
-   "options": "Stock Entry",
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2022-08-16 15:55:25.023471",
+ "modified": "2024-06-13 16:14:14.398356",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
