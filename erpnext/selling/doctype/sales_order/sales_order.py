@@ -496,6 +496,10 @@ class SalesOrder(SellingController):
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
+		# Upon Sales Order Re-open, check for credit limit.
+		# Limit should be checked after the 'Hold/Closed' status is reset.
+		if status == "Draft" and self.docstatus == 1:
+			self.check_credit_limit()
 		self.update_reserved_qty()
 		self.notify_update()
 		clear_doctype_notifications(self)
