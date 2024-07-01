@@ -329,9 +329,7 @@ def update_outstanding_amt(
 
 	if against_voucher_type == "Sales Invoice":
 		party_account = frappe.get_cached_value(against_voucher_type, against_voucher, "debit_to")
-		account_condition = "and account in ({0}, {1})".format(
-			frappe.db.escape(account), frappe.db.escape(party_account)
-		)
+		account_condition = f"and account in ({frappe.db.escape(account)}, {frappe.db.escape(party_account)})"
 	else:
 		account_condition = f" and account = {frappe.db.escape(account)}"
 

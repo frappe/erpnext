@@ -186,13 +186,8 @@ def validate_expense_against_budget(args, expense_amount=0):
 
 			if frappe.get_cached_value("DocType", doctype, "is_tree"):
 				lft, rgt = frappe.get_cached_value(doctype, args.get(budget_against), ["lft", "rgt"])
-				condition = """and exists(select name from `tab%s`
-					where lft<=%s and rgt>=%s and name=b.%s)""" % (
-					doctype,
-					lft,
-					rgt,
-					budget_against,
-				)  # nosec
+				condition = f"""and exists(select name from `tab{doctype}`
+					where lft<={lft} and rgt>={rgt} and name=b.{budget_against})"""  # nosec
 				args.is_tree = True
 			else:
 				condition = f"and b.{budget_against}={frappe.db.escape(args.get(budget_against))}"
