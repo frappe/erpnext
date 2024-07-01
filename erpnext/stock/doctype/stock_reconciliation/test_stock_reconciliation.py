@@ -647,7 +647,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 				"has_serial_no": 1,
 				"has_batch_no": 1,
 				"serial_no_series": "SRS9.####",
-				"batch_number_series": "BNS9.####",
+				"batch_number_series": "BNS90.####",
 				"create_new_batch": 1,
 			},
 		)
@@ -680,7 +680,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			{
 				"is_stock_item": 1,
 				"has_batch_no": 1,
-				"batch_number_series": "BNS9.####",
+				"batch_number_series": "BNS91.####",
 				"create_new_batch": 1,
 			},
 		).name
@@ -1109,6 +1109,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		)
 
 		sr.reload()
+		self.assertEqual(sr.difference_amount, 98900.0)
 
 		self.assertTrue(sr.items[0].current_valuation_rate)
 		current_sabb = sr.items[0].current_serial_and_batch_bundle

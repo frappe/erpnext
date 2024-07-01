@@ -550,6 +550,21 @@ class PurchaseInvoice(BuyingController):
 						item.expense_account = stock_not_billed_account
 			elif item.is_fixed_asset:
 				account = None
+				if not item.pr_detail and item.po_detail:
+					receipt_item = frappe.get_cached_value(
+						"Purchase Receipt Item",
+						{
+							"purchase_order": item.purchase_order,
+							"purchase_order_item": item.po_detail,
+							"docstatus": 1,
+						},
+						["name", "parent"],
+						as_dict=1,
+					)
+					if receipt_item:
+						item.pr_detail = receipt_item.name
+						item.purchase_receipt = receipt_item.parent
+
 				if item.pr_detail:
 					if not self.asset_received_but_not_billed:
 						self.asset_received_but_not_billed = self.get_company_default(
@@ -594,13 +609,17 @@ class PurchaseInvoice(BuyingController):
 		for item in self.get("items"):
 			validate_account_head(item.idx, item.expense_account, self.company, "Expense")
 
-	def set_against_expense_account(self):
+	def set_against_expense_account(self, force=False):
 		against_accounts = []
 		for item in self.get("items"):
 			if item.expense_account and (item.expense_account not in against_accounts):
 				against_accounts.append(item.expense_account)
 
 		self.against_expense_account = ",".join(against_accounts)
+
+	def force_set_against_expense_account(self):
+		self.set_against_expense_account()
+		frappe.db.set_value(self.doctype, self.name, "against_expense_account", self.against_expense_account)
 
 	def po_required(self):
 		if frappe.db.get_single_value("Buying Settings", "po_required") == "Yes":
