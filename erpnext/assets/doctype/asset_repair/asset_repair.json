@@ -19,7 +19,7 @@
   "completion_date",
   "accounting_dimensions_section",
   "cost_center",
-  "column_break_14",
+  "dimension_col_break",
   "project",
   "accounting_details",
   "purchase_invoice",
@@ -193,7 +193,7 @@
    "options": "Project"
   },
   {
-   "fieldname": "column_break_14",
+   "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
