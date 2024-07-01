@@ -22,20 +22,14 @@ class QtyMismatchError(ValidationError):
 	pass
 
 
-ref_doctype_map = {
-	"Purchase Order": "Sales Order Item",
-	"Purchase Receipt": "Delivery Note Item",
-	"Purchase Invoice": "Sales Invoice Item",
-}
-
-
 class BuyingController(SubcontractingController):
 	def __setup__(self):
 		self.flags.ignore_permlevel_for_fields = ["buying_price_list", "price_list_currency"]
 
 	def validate(self):
 		self.set_rate_for_standalone_debit_note()
-
+		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
+			self.set_sales_incoming_rate_for_internal_transfer()
 		super().validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
@@ -322,17 +316,22 @@ class BuyingController(SubcontractingController):
 					)
 
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
+
+				net_rate = item.base_net_amount
+				if self.is_internal_transfer():
+					net_rate = qty_in_stock_uom * item.sales_incoming_rate
+
 				if self.get("is_old_subcontracting_flow"):
 					item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
 					item.valuation_rate = (
-						item.base_net_amount
+						net_rate
 						+ item.item_tax_amount
 						+ item.rm_supp_cost
 						+ flt(item.landed_cost_voucher_amount)
 					) / qty_in_stock_uom
 				else:
 					item.valuation_rate = (
-						item.base_net_amount
+						net_rate
 						+ item.item_tax_amount
 						+ flt(item.landed_cost_voucher_amount)
 						+ flt(item.get("rate_difference_with_purchase_invoice"))
@@ -343,77 +342,71 @@ class BuyingController(SubcontractingController):
 		update_regional_item_valuation_rate(self)
 
 	def set_incoming_rate(self):
-		if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Purchase Order"):
+		if self.doctype not in ("Purchase Receipt", "Purchase Invoice"):
 			return
 
 		if not self.is_internal_transfer():
 			return
 
-		ref_doctype = ref_doctype_map.get(self.doctype)
+		allow_at_arms_length_price = frappe.db.get_single_value(
+			"Stock Settings", "allow_internal_transfer_at_arms_length_price"
+		)
+		if allow_at_arms_length_price:
+			return
 
-		should_update_item_rate = frappe.db.get_single_value("Stock Settings", "update_item_rate")
 		for d in self.get("items"):
-			if not cint(self.get("is_return")):
-				# Get outgoing rate based on original item cost based on valuation method
+			if not cint(self.get("is_return")) and (
+				self.doctype == "Purchase Receipt" or self.get("update_stock")
+			):
+				if d.rate != d.sales_incoming_rate:
+					d.rate = d.sales_incoming_rate
+					frappe.msgprint(
+						_(
+							"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+						).format(d.idx),
+						alert=1,
+					)
 
-				rate = self.get_rate_for_internal_transfer(d, ref_doctype)
-				if self.is_internal_transfer() and (
-					self.doctype == "Purchase Receipt" or self.get("update_stock")
-				):
-					if rate != d.rate:
-						if should_update_item_rate:
-							d.rate = rate
-							frappe.msgprint(
-								_(
-									"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-								).format(d.idx),
-								alert=1,
-							)
-						else:
-							frappe.msgprint(
-								_(
-									"Row {0}: Item rate has not been updated as per the valuation rate for the internal stock transfer because the setting for this update is currently disabled."
-								).format(d.idx),
-								alert=1,
-							)
+	def set_sales_incoming_rate_for_internal_transfer(self):
+		ref_doctype_map = {
+			"Purchase Receipt": "Delivery Note Item",
+			"Purchase Invoice": "Sales Invoice Item",
+		}
+		if self.doctype not in ref_doctype_map:
+			return
 
-	def get_rate_for_internal_transfer(self, item, ref_doctype):
-		if not item.get(frappe.scrub(ref_doctype)):
-			posting_time = self.get("posting_time")
-			if not posting_time and self.doctype == "Purchase Order":
-				posting_time = nowtime()
+		for d in self.get("items"):
+			ref_doctype = ref_doctype_map.get(self.doctype)
+			if not d.get(frappe.scrub(ref_doctype)):
+				posting_time = self.get("posting_time")
+				if not posting_time:
+					posting_time = nowtime()
 
-			outgoing_rate = get_incoming_rate(
-				{
-					"item_code": item.item_code,
-					"warehouse": item.get("from_warehouse"),
-					"posting_date": self.get("posting_date") or self.get("transaction_date"),
-					"posting_time": posting_time,
-					"qty": -1 * flt(item.get("stock_qty")),
-					"serial_and_batch_bundle": item.get("serial_and_batch_bundle"),
-					"company": self.company,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"allow_zero_valuation": item.get("allow_zero_valuation"),
-					"voucher_detail_no": item.name,
-				},
-				raise_error_if_no_rate=False,
-			)
+				outgoing_rate = get_incoming_rate(
+					{
+						"item_code": d.item_code,
+						"warehouse": d.get("from_warehouse"),
+						"posting_date": self.get("posting_date") or self.get("transaction_date"),
+						"posting_time": posting_time,
+						"qty": -1 * flt(d.get("stock_qty")),
+						"serial_and_batch_bundle": d.get("serial_and_batch_bundle"),
+						"company": self.company,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"allow_zero_valuation": d.get("allow_zero_valuation"),
+						"voucher_detail_no": d.name,
+					},
+					raise_error_if_no_rate=False,
+				)
 
-			rate = flt(outgoing_rate * (item.conversion_factor or 1), item.precision("rate"))
-		else:
-			field = (
-				"incoming_rate"
-				if self.get("is_internal_supplier") and not self.doctype == "Purchase Order"
-				else "rate"
-			)
-			rate = flt(
-				frappe.db.get_value(ref_doctype, item.get(frappe.scrub(ref_doctype)), field)
-				* (item.conversion_factor or 1),
-				item.precision("rate"),
-			)
-
-		return rate
+				d.sales_incoming_rate = flt(outgoing_rate * (d.conversion_factor or 1), d.precision("rate"))
+			else:
+				field = "incoming_rate" if self.get("is_internal_supplier") else "rate"
+				d.sales_incoming_rate = flt(
+					frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), field)
+					* (d.conversion_factor or 1),
+					d.precision("rate"),
+				)
 
 	def validate_for_subcontracting(self):
 		if self.is_subcontracted and self.get("is_old_subcontracting_flow"):
@@ -509,7 +502,6 @@ class BuyingController(SubcontractingController):
 		sl_entries = []
 		stock_items = self.get_stock_items()
 
-		ref_doctype = ref_doctype_map.get(self.doctype)
 		for d in self.get("items"):
 			if d.item_code not in stock_items:
 				continue
@@ -577,10 +569,9 @@ class BuyingController(SubcontractingController):
 						if d.from_warehouse:
 							sle.dependant_sle_voucher_detail_no = d.name
 					else:
-						incoming_rate = self.get_rate_for_internal_transfer(d, ref_doctype)
 						sle.update(
 							{
-								"incoming_rate": incoming_rate,
+								"incoming_rate": d.valuation_rate,
 								"recalculate_rate": 1
 								if (self.is_subcontracted and (d.bom or d.get("fg_item"))) or d.from_warehouse
 								else 0,
