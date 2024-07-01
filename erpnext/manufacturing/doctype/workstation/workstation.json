@@ -240,11 +240,7 @@
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-11-30 12:43:35.808845",
-=======
  "modified": "2024-06-20 14:17:13.806609",
->>>>>>> d5ed4582c3 (fix: this.frm.events.update_cost is not a function (#41960))
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",
