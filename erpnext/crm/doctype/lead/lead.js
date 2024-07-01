@@ -33,7 +33,13 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			this.frm.add_custom_button(__("Quotation"), this.make_quotation.bind(this), __("Create"));
 			if (!doc.__onload.linked_prospects.length) {
 				this.frm.add_custom_button(__("Prospect"), this.make_prospect.bind(this), __("Create"));
-				this.frm.add_custom_button(__("Add to Prospect"), this.add_lead_to_prospect, __("Action"));
+				this.frm.add_custom_button(
+					__("Add to Prospect"),
+					() => {
+						this.add_lead_to_prospect(this.frm);
+					},
+					__("Action")
+				);
 			}
 		}
 
@@ -47,8 +53,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 		this.show_activities();
 	}
 
-	add_lead_to_prospect() {
-		let me = this;
+	add_lead_to_prospect(frm) {
 		frappe.prompt(
 			[
 				{
@@ -63,12 +68,12 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 				frappe.call({
 					method: "erpnext.crm.doctype.lead.lead.add_lead_to_prospect",
 					args: {
-						lead: me.frm.doc.name,
+						lead: frm.doc.name,
 						prospect: data.prospect,
 					},
 					callback: function (r) {
 						if (!r.exc) {
-							me.frm.reload_doc();
+							frm.reload_doc();
 						}
 					},
 					freeze: true,
