@@ -9,12 +9,8 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
-<<<<<<< HEAD
-from erpnext.controllers.accounts_controller import update_child_qty_rate
-=======
 from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
-from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
->>>>>>> 60694e09c4 (test: credit check on Sales Order re-open)
+from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
 	make_maintenance_schedule,
 )
