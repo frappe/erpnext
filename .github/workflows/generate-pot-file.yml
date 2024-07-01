@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  regeneratee-pot-file:
-    name: Release
+  regenerate-pot-file:
+    name: Regenerate POT file
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

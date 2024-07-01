@@ -115,7 +115,7 @@ class SalesOrder(SellingController):
 		inter_company_order_reference: DF.Link | None
 		is_internal_customer: DF.Check
 		items: DF.Table[SalesOrderItem]
-		language: DF.Data | None
+		language: DF.Link | None
 		letter_head: DF.Link | None
 		loyalty_amount: DF.Currency
 		loyalty_points: DF.Int
@@ -423,7 +423,13 @@ class SalesOrder(SellingController):
 			self.create_stock_reservation_entries()
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
+		self.ignore_linked_doctypes = (
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Payment Ledger Entry",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+		)
 		super().on_cancel()
 
 		# Cannot cancel closed SO
@@ -541,9 +547,7 @@ class SalesOrder(SellingController):
 
 		for item in self.items:
 			if item.supplier:
-				supplier = frappe.db.get_value(
-					"Sales Order Item", {"parent": self.name, "item_code": item.item_code}, "supplier"
-				)
+				supplier = frappe.db.get_value("Sales Order Item", item.name, "supplier")
 				if item.ordered_qty > 0.0 and item.supplier != supplier:
 					exc_list.append(
 						_("Row #{0}: Not allowed to change Supplier as Purchase Order already exists").format(

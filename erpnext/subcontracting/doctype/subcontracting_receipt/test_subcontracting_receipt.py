@@ -623,8 +623,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 				"has_batch_no": 1,
 				"has_serial_no": 1,
 				"create_new_batch": 1,
-				"batch_number_series": "BNGS-.####",
-				"serial_no_series": "BNSS-.####",
+				"batch_number_series": "BNGS0-.####",
+				"serial_no_series": "BNSS90-.####",
 			}
 		).name
 
@@ -715,8 +715,8 @@ class TestSubcontractingReceipt(FrappeTestCase):
 				"has_batch_no": 1,
 				"has_serial_no": 1,
 				"create_new_batch": 1,
-				"batch_number_series": "BNGS-.####",
-				"serial_no_series": "BNSS-.####",
+				"batch_number_series": "BNGS91-.####",
+				"serial_no_series": "BNSS91-.####",
 			}
 		).name
 

@@ -294,15 +294,22 @@ class SubcontractingController(StockController):
 		receipt_items = {item.name: item.get(self.subcontract_data.order_field) for item in receipt_items}
 		consumed_materials = self.__get_consumed_items(doctype, receipt_items.keys())
 
-		voucher_nos = [d.voucher_no for d in consumed_materials if d.voucher_no]
-		voucher_bundle_data = get_voucher_wise_serial_batch_from_bundle(
-			voucher_no=voucher_nos,
-			is_outward=1,
-			get_subcontracted_item=("Subcontracting Receipt Supplied Item", "main_item_code"),
-		)
-
 		if return_consumed_items:
 			return (consumed_materials, receipt_items)
+
+		if not consumed_materials:
+			return
+
+		voucher_nos = [d.voucher_no for d in consumed_materials if d.voucher_no]
+		voucher_bundle_data = (
+			get_voucher_wise_serial_batch_from_bundle(
+				voucher_no=voucher_nos,
+				is_outward=1,
+				get_subcontracted_item=("Subcontracting Receipt Supplied Item", "main_item_code"),
+			)
+			if voucher_nos
+			else {}
+		)
 
 		for row in consumed_materials:
 			key = (row.rm_item_code, row.main_item_code, receipt_items.get(row.reference_name))
@@ -350,10 +357,14 @@ class SubcontractingController(StockController):
 		transferred_items = self.__get_transferred_items()
 
 		voucher_nos = [row.voucher_no for row in transferred_items]
-		voucher_bundle_data = get_voucher_wise_serial_batch_from_bundle(
-			voucher_no=voucher_nos,
-			is_outward=0,
-			get_subcontracted_item=("Stock Entry Detail", "subcontracted_item"),
+		voucher_bundle_data = (
+			get_voucher_wise_serial_batch_from_bundle(
+				voucher_no=voucher_nos,
+				is_outward=0,
+				get_subcontracted_item=("Stock Entry Detail", "subcontracted_item"),
+			)
+			if voucher_nos
+			else {}
 		)
 
 		for row in transferred_items:

@@ -289,7 +289,7 @@ def get_columns(additional_table_columns, filters):
 
 
 def apply_conditions(query, pi, pii, filters):
-	for opts in ("company", "supplier", "item_code", "mode_of_payment"):
+	for opts in ("company", "supplier", "mode_of_payment"):
 		if filters.get(opts):
 			query = query.where(pi[opts] == filters[opts])
 
@@ -298,6 +298,9 @@ def apply_conditions(query, pi, pii, filters):
 
 	if filters.get("to_date"):
 		query = query.where(pi.posting_date <= filters.get("to_date"))
+
+	if filters.get("item_code"):
+		query = query.where(pii.item_code == filters.get("item_code"))
 
 	if filters.get("item_group"):
 		query = query.where(pii.item_group == filters.get("item_group"))
@@ -322,7 +325,7 @@ def get_items(filters, additional_table_columns):
 		.left_join(Item)
 		.on(pii.item_code == Item.name)
 		.select(
-			pii.name.as_("pii_name"),
+			pii.name,
 			pii.parent,
 			pi.posting_date,
 			pi.credit_to,
