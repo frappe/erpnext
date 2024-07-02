@@ -3127,7 +3127,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		]
 		self.assertEqual(expected_pi_gles, pi_gl_entries)
 
-		self.create_lcv(pr.doctype, pr.name, test_company, lcv_expense_account)
+		lcv = self.create_lcv(pr.doctype, pr.name, test_company, lcv_expense_account)
 		pr_gles_after_lcv = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
 		expected_pr_gles_after_lcv = [
 			{"account": stock_rbnb, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
@@ -3163,6 +3163,18 @@ class TestPurchaseReceipt(FrappeTestCase):
 		]
 		self.assertEqual(len(pr_gles_after_repost), len(expected_pr_gles_after_repost))
 		self.assertEqual(expected_pr_gles_after_repost, pr_gles_after_repost)
+
+		# teardown
+		lcv.reload()
+		lcv.cancel()
+		pi.reload()
+		pi.cancel()
+		pr.reload()
+		pr.cancel()
+
+		company_doc.enable_perpetual_inventory = False
+		company_doc.stock_received_but_not_billed = None
+		company_doc.save()
 
 	def create_lcv(self, receipt_document_type, receipt_document, company, expense_account, charges=50):
 		ref_doc = frappe.get_doc(receipt_document_type, receipt_document)
