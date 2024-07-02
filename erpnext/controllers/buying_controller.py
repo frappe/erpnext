@@ -315,12 +315,11 @@ class BuyingController(SubcontractingController):
 						get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 					)
 
-				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-
 				net_rate = item.base_net_amount
 				if self.is_internal_transfer():
-					net_rate = qty_in_stock_uom * item.sales_incoming_rate
+					net_rate = item.qty * item.sales_incoming_rate
 
+				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
 				if self.get("is_old_subcontracting_flow"):
 					item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
 					item.valuation_rate = (
