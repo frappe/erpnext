@@ -3083,6 +3083,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		company_doc = frappe.get_doc("Company", test_company)
 		company_doc.enable_perpetual_inventory = True
 		company_doc.stock_received_but_not_billed = stock_rbnb
+		company_doc.default_inventory_account = stock_in_hand
 		company_doc.save()
 
 		packaging_charges_account = create_account(
@@ -3174,6 +3175,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		company_doc.enable_perpetual_inventory = False
 		company_doc.stock_received_but_not_billed = None
+		company_doc.default_inventory_account = None
 		company_doc.save()
 
 	def create_lcv(self, receipt_document_type, receipt_document, company, expense_account, charges=50):
