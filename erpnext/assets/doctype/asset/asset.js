@@ -511,6 +511,8 @@ frappe.ui.form.on("Asset", {
 		frappe.call({
 			args: {
 				asset: frm.doc.name,
+				asset_name: frm.doc.asset_name,
+				item_code: frm.doc.item_code,
 			},
 			method: "erpnext.assets.doctype.asset.asset.create_asset_capitalization",
 			callback: function (r) {

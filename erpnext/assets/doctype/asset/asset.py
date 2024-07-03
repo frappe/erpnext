@@ -871,10 +871,15 @@ def create_asset_repair(asset, asset_name):
 
 
 @frappe.whitelist()
-def create_asset_capitalization(asset):
+def create_asset_capitalization(asset, asset_name, item_code):
 	asset_capitalization = frappe.new_doc("Asset Capitalization")
 	asset_capitalization.update(
-		{"target_asset": asset, "capitalization_method": "Choose a WIP composite asset"}
+		{
+			"target_asset": asset,
+			"capitalization_method": "Choose a WIP composite asset",
+			"target_asset_name": asset_name,
+			"target_item_code": item_code,
+		}
 	)
 	return asset_capitalization
 
