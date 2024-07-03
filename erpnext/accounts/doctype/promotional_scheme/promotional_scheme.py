@@ -164,7 +164,7 @@ class PromotionalScheme(Document):
 		docnames = []
 
 		# If user has changed applicable for
-		if self._doc_before_save.applicable_for == self.applicable_for:
+		if self.get_doc_before_save() and self.get_doc_before_save().applicable_for == self.applicable_for:
 			return
 
 		docnames = frappe.get_all("Pricing Rule", filters={"promotional_scheme": self.name})
