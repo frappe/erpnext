@@ -68,8 +68,6 @@ def get_stock_value_on(
 		frappe.qb.from_(sle)
 		.select(IfNull(Sum(sle.stock_value_difference), 0))
 		.where((sle.posting_date <= posting_date) & (sle.is_cancelled == 0))
-		.orderby(CombineDatetime(sle.posting_date, sle.posting_time), order=frappe.qb.desc)
-		.orderby(sle.creation, order=frappe.qb.desc)
 	)
 
 	if warehouses:

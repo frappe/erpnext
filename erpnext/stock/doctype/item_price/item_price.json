@@ -107,7 +107,8 @@
    "in_standard_filter": 1,
    "label": "Price List",
    "options": "Price List",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "bold": 1,

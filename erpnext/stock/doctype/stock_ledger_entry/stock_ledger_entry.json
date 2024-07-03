@@ -101,6 +101,7 @@
    "oldfieldtype": "Date",
    "print_width": "100px",
    "read_only": 1,
+   "search_index": 1,
    "width": "100px"
   },
   {
@@ -360,7 +361,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-13 09:56:13.021696",
+ "modified": "2024-06-27 16:23:18.820049",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

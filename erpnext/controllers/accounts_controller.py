@@ -1764,8 +1764,8 @@ class AccountsController(TransactionBase):
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
 
-		role_allowed_to_over_bill = frappe.db.get_single_value(
-			"Accounts Settings", "role_allowed_to_over_bill"
+		role_allowed_to_over_bill = frappe.get_cached_value(
+			"Accounts Settings", None, "role_allowed_to_over_bill"
 		)
 		user_roles = frappe.get_roles()
 

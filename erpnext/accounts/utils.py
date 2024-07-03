@@ -10,7 +10,7 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import AliasedQuery, Criterion, Table
-from frappe.query_builder.functions import Sum
+from frappe.query_builder.functions import Count, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
 	add_days,
@@ -1492,24 +1492,39 @@ def get_stock_accounts(company, voucher_type=None, voucher_no=None):
 				)
 			]
 
-	return stock_accounts
+	return list(set(stock_accounts))
 
 
 def get_stock_and_account_balance(account=None, posting_date=None, company=None):
 	if not posting_date:
 		posting_date = nowdate()
 
-	warehouse_account = get_warehouse_account_map(company)
-
 	account_balance = get_balance_on(
 		account, posting_date, in_account_currency=False, ignore_account_permission=True
 	)
 
-	related_warehouses = [
-		wh
-		for wh, wh_details in warehouse_account.items()
-		if wh_details.account == account and not wh_details.is_group
-	]
+	account_table = frappe.qb.DocType("Account")
+	query = (
+		frappe.qb.from_(account_table)
+		.select(Count(account_table.name))
+		.where(
+			(account_table.account_type == "Stock")
+			& (account_table.company == company)
+			& (account_table.is_group == 0)
+		)
+	)
+
+	no_of_stock_accounts = cint(query.run()[0][0])
+
+	related_warehouses = []
+	if no_of_stock_accounts > 1:
+		warehouse_account = get_warehouse_account_map(company)
+
+		related_warehouses = [
+			wh
+			for wh, wh_details in warehouse_account.items()
+			if wh_details.account == account and not wh_details.is_group
+		]
 
 	total_stock_value = get_stock_value_on(related_warehouses, posting_date)
 

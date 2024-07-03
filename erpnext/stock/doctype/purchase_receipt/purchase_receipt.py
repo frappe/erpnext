@@ -661,7 +661,7 @@ class PurchaseReceipt(BuyingController):
 
 				if not (
 					(erpnext.is_perpetual_inventory_enabled(self.company) and d.item_code in stock_items)
-					or d.is_fixed_asset
+					or (d.is_fixed_asset and not d.purchase_invoice)
 				):
 					continue
 
@@ -776,6 +776,13 @@ class PurchaseReceipt(BuyingController):
 			posting_date=posting_date,
 		)
 
+	def is_landed_cost_booked_for_any_item(self) -> bool:
+		for x in self.items:
+			if x.landed_cost_voucher_amount != 0:
+				return True
+
+		return False
+
 	def make_tax_gl_entries(self, gl_entries, via_landed_cost_voucher=False):
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in self.get("items")])
 		is_asset_pr = any(d.is_fixed_asset for d in self.get("items"))
@@ -811,7 +818,7 @@ class PurchaseReceipt(BuyingController):
 			i = 1
 			for tax in self.get("taxes"):
 				if valuation_tax.get(tax.name):
-					if via_landed_cost_voucher:
+					if via_landed_cost_voucher or self.is_landed_cost_booked_for_any_item():
 						account = tax.account_head
 					else:
 						negative_expense_booked_in_pi = frappe.db.sql(

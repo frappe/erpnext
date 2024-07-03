@@ -17,8 +17,6 @@
   "column_break_3",
   "production_capacity",
   "warehouse",
-  "production_capacity_section",
-  "parts_per_hour",
   "workstation_status_tab",
   "status",
   "column_break_glcv",
@@ -211,16 +209,6 @@
    "options": "Warehouse"
   },
   {
-   "fieldname": "production_capacity_section",
-   "fieldtype": "Section Break",
-   "label": "Production Capacity"
-  },
-  {
-   "fieldname": "parts_per_hour",
-   "fieldtype": "Float",
-   "label": "Parts Per Hour"
-  },
-  {
    "fieldname": "total_working_hours",
    "fieldtype": "Float",
    "label": "Total Working Hours"
@@ -252,7 +240,7 @@
  "idx": 1,
  "image_field": "on_status_image",
  "links": [],
- "modified": "2023-11-30 12:43:35.808845",
+ "modified": "2024-06-20 14:17:13.806609",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Workstation",

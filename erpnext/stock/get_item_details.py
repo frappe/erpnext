@@ -103,19 +103,8 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
 
-	if args.get("doctype") == "Material Request" and args.get("material_request_type") == "Material Transfer":
-		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
-
-	elif out.get("warehouse"):
-		if doc and doc.get("doctype") == "Purchase Order":
-			# calculate company_total_stock only for po
-			bin_details = get_bin_details(
-				args.item_code, out.warehouse, args.company, include_child_warehouses=True
-			)
-		else:
-			bin_details = get_bin_details(args.item_code, out.warehouse, include_child_warehouses=True)
-
-		out.update(bin_details)
+	if item.is_stock_item:
+		update_bin_details(args, out, doc)
 
 	# update args with out, if key or value not exists
 	for key, value in out.items():
@@ -164,6 +153,19 @@ def set_valuation_rate(out, args):
 
 	else:
 		out.update(get_valuation_rate(args.item_code, args.company, out.get("warehouse")))
+
+
+def update_bin_details(args, out, doc):
+	if args.get("doctype") == "Material Request" and args.get("material_request_type") == "Material Transfer":
+		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
+
+	elif out.get("warehouse"):
+		company = args.company if (doc and doc.get("doctype") == "Purchase Order") else None
+
+		# calculate company_total_stock only for po
+		bin_details = get_bin_details(args.item_code, out.warehouse, company, include_child_warehouses=True)
+
+		out.update(bin_details)
 
 
 def process_args(args):
