@@ -138,7 +138,12 @@ class StockBalanceReport:
 				{"reserved_stock": sre_details.get((report_data.item_code, report_data.warehouse), 0.0)}
 			)
 
-			if report_data and report_data.bal_qty == 0 and report_data.bal_val == 0:
+			if (
+				not self.filters.get("include_zero_stock_items")
+				and report_data
+				and report_data.bal_qty == 0
+				and report_data.bal_val == 0
+			):
 				continue
 
 			self.data.append(report_data)
