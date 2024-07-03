@@ -1750,12 +1750,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	apply_product_discount(args) {
 		const items = this.frm.doc.items.filter(d => (d.is_free_item)) || [];
 
-		const exist_items = items.map(row => (row.item_code, row.pricing_rules));
+		const exist_items = items.map(row => { return {item_code: row.item_code, pricing_rules: row.pricing_rules};});
 
 		args.free_item_data.forEach(pr_row => {
 			let row_to_modify = {};
-			if (!items || !in_list(exist_items, (pr_row.item_code, pr_row.pricing_rules))) {
 
+			// If there are no free items, or if the current free item doesn't exist in the table, add it
+			if (!items || !exist_items.filter(e_row => {
+				return e_row.item_code == pr_row.item_code && e_row.pricing_rules == pr_row.pricing_rules;
+			}).length) {
 				row_to_modify = frappe.model.add_child(this.frm.doc,
 					this.frm.doc.doctype + ' Item', 'items');
 
