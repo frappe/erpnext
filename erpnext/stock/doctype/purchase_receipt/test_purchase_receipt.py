@@ -3020,6 +3020,156 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr_return.items[0].rejected_qty, 0.0)
 		self.assertEqual(pr_return.items[0].rejected_warehouse, "")
 
+	def test_tax_account_heads_on_lcv_and_item_repost(self):
+		"""
+		PO -> PR -> PI
+		PR -> LCV
+		Backdated `Repost Item valuation` should not merge tax account heads into stock_rbnb
+		"""
+		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+			create_purchase_order,
+			make_pr_against_po,
+		)
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+
+		stock_rbnb = "Stock Received But Not Billed - _TC"
+		stock_in_hand = "Stock In Hand - _TC"
+		test_cc = "_Test Cost Center - _TC"
+		test_company = "_Test Company"
+		creditors = "Creditors - _TC"
+		lcv_expense_account = "Expenses Included In Valuation - _TC"
+
+		company_doc = frappe.get_doc("Company", test_company)
+		company_doc.enable_perpetual_inventory = True
+		company_doc.stock_received_but_not_billed = stock_rbnb
+		company_doc.default_inventory_account = stock_in_hand
+		company_doc.save()
+
+		packaging_charges_account = create_account(
+			account_name="Packaging Charges",
+			parent_account="Indirect Expenses - _TC",
+			company=test_company,
+			account_type="Tax",
+		)
+
+		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
+		po.taxes = []
+		po.append(
+			"taxes",
+			{
+				"category": "Valuation and Total",
+				"account_head": packaging_charges_account,
+				"cost_center": test_cc,
+				"description": "Test",
+				"add_deduct_tax": "Add",
+				"charge_type": "Actual",
+				"tax_amount": 250,
+			},
+		)
+		po.save().submit()
+
+		pr = make_pr_against_po(po.name, received_qty=10)
+		pr_gl_entries = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
+		expected_pr_gles = [
+			{"account": stock_rbnb, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
+			{"account": stock_in_hand, "debit": 1250.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": packaging_charges_account, "debit": 0.0, "credit": 250.0, "cost_center": test_cc},
+		]
+		self.assertEqual(expected_pr_gles, pr_gl_entries)
+
+		# Make PI against Purchase Receipt
+		pi = make_purchase_invoice(pr.name).save().submit()
+		pi_gl_entries = get_gl_entries(pi.doctype, pi.name, skip_cancelled=True)
+		expected_pi_gles = [
+			{"account": stock_rbnb, "debit": 1000.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": packaging_charges_account, "debit": 250.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": creditors, "debit": 0.0, "credit": 1250.0, "cost_center": None},
+		]
+		self.assertEqual(expected_pi_gles, pi_gl_entries)
+
+		lcv = self.create_lcv(pr.doctype, pr.name, test_company, lcv_expense_account)
+		pr_gles_after_lcv = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
+		expected_pr_gles_after_lcv = [
+			{"account": stock_rbnb, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
+			{"account": stock_in_hand, "debit": 1300.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": packaging_charges_account, "debit": 0.0, "credit": 250.0, "cost_center": test_cc},
+			{"account": lcv_expense_account, "debit": 0.0, "credit": 50.0, "cost_center": test_cc},
+		]
+		self.assertEqual(expected_pr_gles_after_lcv, pr_gles_after_lcv)
+
+		# Trigger Repost Item Valudation on a older date
+		repost_doc = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": pr.items[0].item_code,
+				"warehouse": pr.items[0].warehouse,
+				"posting_date": add_days(pr.posting_date, -1),
+				"posting_time": "00:00:00",
+				"company": pr.company,
+				"allow_negative_stock": 1,
+				"via_landed_cost_voucher": 0,
+				"allow_zero_rate": 0,
+			}
+		)
+		repost_doc.save().submit()
+
+		pr_gles_after_repost = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
+		expected_pr_gles_after_repost = [
+			{"account": stock_rbnb, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
+			{"account": stock_in_hand, "debit": 1300.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": packaging_charges_account, "debit": 0.0, "credit": 250.0, "cost_center": test_cc},
+			{"account": lcv_expense_account, "debit": 0.0, "credit": 50.0, "cost_center": test_cc},
+		]
+		self.assertEqual(len(pr_gles_after_repost), len(expected_pr_gles_after_repost))
+		self.assertEqual(expected_pr_gles_after_repost, pr_gles_after_repost)
+
+		# teardown
+		lcv.reload()
+		lcv.cancel()
+		pi.reload()
+		pi.cancel()
+		pr.reload()
+		pr.cancel()
+
+		company_doc.enable_perpetual_inventory = False
+		company_doc.stock_received_but_not_billed = None
+		company_doc.default_inventory_account = None
+		company_doc.save()
+
+	def create_lcv(self, receipt_document_type, receipt_document, company, expense_account, charges=50):
+		ref_doc = frappe.get_doc(receipt_document_type, receipt_document)
+
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = company
+		lcv.distribute_charges_based_on = "Qty"
+		lcv.set(
+			"purchase_receipts",
+			[
+				{
+					"receipt_document_type": receipt_document_type,
+					"receipt_document": receipt_document,
+					"supplier": ref_doc.supplier,
+					"posting_date": ref_doc.posting_date,
+					"grand_total": ref_doc.base_grand_total,
+				}
+			],
+		)
+
+		lcv.set(
+			"taxes",
+			[
+				{
+					"description": "Testing",
+					"expense_account": expense_account,
+					"amount": charges,
+				}
+			],
+		)
+		lcv.save().submit()
+		return lcv
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
