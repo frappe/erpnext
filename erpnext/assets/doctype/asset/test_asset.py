@@ -1689,12 +1689,12 @@ def create_asset(**args):
 	return asset
 
 
-def create_asset_category():
+def create_asset_category(enable_cwip=1):
 	asset_category = frappe.new_doc("Asset Category")
 	asset_category.asset_category_name = "Computers"
 	asset_category.total_number_of_depreciations = 3
 	asset_category.frequency_of_depreciation = 3
-	asset_category.enable_cwip_accounting = 1
+	asset_category.enable_cwip_accounting = enable_cwip
 	asset_category.append(
 		"accounts",
 		{
