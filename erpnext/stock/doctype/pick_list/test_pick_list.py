@@ -797,8 +797,149 @@ class TestPickList(FrappeTestCase):
 			# Available Qty to pick should be equal to [Actual Qty - Picked Qty]
 			self.assertEqual(location.stock_qty, bin_actual_qty - picked_qty)
 
+<<<<<<< HEAD
 			# Serial No should not be in the Picked Serial No list
 			if location.serial_no:
 				a = set(picked_serial_no)
 				b = set([x for x in location.serial_no.split("\n") if x])
 				self.assertSetEqual(b, b.difference(a))
+=======
+		so = make_sales_order(item_code=item, qty=110, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(pl.locations[0].qty, 90.0)
+		self.assertEqual(pl.locations[1].qty, 20.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		pl1.submit()
+
+		pl.reload()
+		pl.submit()
+		self.assertEqual(pl.locations[0].qty, 90.0)
+		self.assertEqual(pl.locations[1].qty, 20.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+	def test_pick_list_for_multiple_sales_order_with_multiple_serial_nos(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Serial No Pick List Item For Multiple Batches and Sales Order",
+			properties={
+				"is_stock_item": 1,
+				"has_serial_no": 1,
+				"serial_no_series": "SNNN-SOO-BT-SPLIMBATCH-.####",
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl1 = create_pick_list(so.name)
+		pl1.save()
+		self.assertEqual(pl1.locations[0].qty, 10)
+
+		serial_nos = pl1.locations[0].serial_no.split("\n")
+		self.assertEqual(len(serial_nos), 10)
+
+		so = make_sales_order(item_code=item, qty=110, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(pl.locations[0].qty, 110.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		new_serial_nos = pl.locations[0].serial_no.split("\n")
+		self.assertEqual(len(new_serial_nos), 110)
+
+		for sn in serial_nos:
+			self.assertFalse(sn in new_serial_nos)
+
+		pl1.submit()
+
+		pl.reload()
+		pl.submit()
+		self.assertEqual(pl.locations[0].qty, 110.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+	def test_pick_list_for_multiple_sales_orders_for_non_serialized_item(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Non Serialized Pick List Item For Multiple Batches and Sales Order",
+			properties={
+				"is_stock_item": 1,
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl1 = create_pick_list(so.name)
+		pl1.save()
+		self.assertEqual(pl1.locations[0].qty, 10)
+
+		so = make_sales_order(item_code=item, qty=110, rate=100)
+
+		pl = create_pick_list(so.name)
+		pl.save()
+		self.assertEqual(pl.locations[0].qty, 110.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		pl1.submit()
+
+		pl.reload()
+		pl.submit()
+		self.assertEqual(pl.locations[0].qty, 110.0)
+		self.assertTrue(hasattr(pl, "locations"))
+
+		so = make_sales_order(item_code=item, qty=110, rate=100)
+		pl = create_pick_list(so.name)
+		pl.save()
+
+		self.assertEqual(pl.locations[0].qty, 80.0)
+
+	def test_validate_picked_qty_with_manual_option(self):
+		warehouse = "_Test Warehouse - _TC"
+		non_serialized_item = make_item(
+			"Test Non Serialized Pick List Item For Manual Option", properties={"is_stock_item": 1}
+		).name
+
+		serialized_item = make_item(
+			"Test Serialized Pick List Item For Manual Option",
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SN-HSNMSPLI-.####"},
+		).name
+
+		batched_item = make_item(
+			"Test Batched Pick List Item For Manual Option",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "SN-HBNMSPLI-.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		make_stock_entry(item=non_serialized_item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		make_stock_entry(item=serialized_item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		make_stock_entry(item=batched_item, to_warehouse=warehouse, qty=10, basic_rate=100)
+
+		so = make_sales_order(
+			item_code=non_serialized_item, qty=10, rate=100, do_not_save=True, warehouse=warehouse
+		)
+		so.append("items", {"item_code": serialized_item, "qty": 10, "rate": 100, "warehouse": warehouse})
+		so.append("items", {"item_code": batched_item, "qty": 10, "rate": 100, "warehouse": warehouse})
+		so.set_missing_values()
+		so.save()
+		so.submit()
+
+		pl = create_pick_list(so.name)
+		pl.pick_manually = 1
+
+		for row in pl.locations:
+			row.qty = row.qty + 10
+
+		self.assertRaises(frappe.ValidationError, pl.save)
+>>>>>>> 938dd4b2aa (fix: manual pick allow to pick more than available stock (#42155))
