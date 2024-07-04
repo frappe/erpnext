@@ -89,11 +89,10 @@ class PaymentReconciliation(Document):
 	def get_nonreconciled_payment_entries(self):
 		self.check_mandatory_to_fetch()
 
-		payment_entries = self.get_payment_entries()
-		journal_entries = self.get_jv_entries()
-
+		payment_entries = self.get_payment_entries() or []
+		journal_entries = self.get_jv_entries() or []
 		if self.party_type in ["Customer", "Supplier"]:
-			dr_or_cr_notes = self.get_dr_or_cr_notes()
+			dr_or_cr_notes = self.get_dr_or_cr_notes() or []
 		else:
 			dr_or_cr_notes = []
 
