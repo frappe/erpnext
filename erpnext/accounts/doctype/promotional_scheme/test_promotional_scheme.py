@@ -107,6 +107,25 @@ class TestPromotionalScheme(unittest.TestCase):
 		price_rules = frappe.get_all("Pricing Rule", filters={"promotional_scheme": ps.name})
 		self.assertEqual(price_rules, [])
 
+	def test_validation_on_recurse_with_mixed_condition(self):
+		ps = make_promotional_scheme()
+		ps.set("price_discount_slabs", [])
+		ps.set(
+			"product_discount_slabs",
+			[
+				{
+					"rule_description": "12+1",
+					"min_qty": 12,
+					"free_item": "_Test Item 2",
+					"free_qty": 1,
+					"is_recursive": 1,
+					"recurse_for": 12,
+				}
+			],
+		)
+		ps.mixed_conditions = True
+		self.assertRaises(frappe.ValidationError, ps.save)
+
 
 def make_promotional_scheme(**args):
 	args = frappe._dict(args)
