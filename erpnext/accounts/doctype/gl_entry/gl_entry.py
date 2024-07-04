@@ -14,10 +14,7 @@ import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.accounts.party import (
-	validate_party_frozen_disabled,
-	validate_party_gle_currency,
-)
+from erpnext.accounts.party import validate_party_frozen_disabled, validate_party_gle_currency
 from erpnext.accounts.utils import get_account_currency, get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 
@@ -226,7 +223,7 @@ class GLEntry(Document):
 
 		ret = frappe.db.sql(
 			"""select is_group, docstatus, company
-            from tabAccount where name=%s""",
+			from tabAccount where name=%s""",
 			self.account,
 			as_dict=1,
 		)[0]
@@ -283,10 +280,7 @@ class GLEntry(Document):
 		if account_currency != self.account_currency:
 			frappe.throw(
 				_("{0} {1}: Accounting Entry for {2} can only be made in currency: {3}").format(
-					self.voucher_type,
-					self.voucher_no,
-					self.account,
-					(account_currency or company_currency),
+					self.voucher_type, self.voucher_no, self.account, (account_currency or company_currency)
 				),
 				InvalidAccountCurrency,
 			)
@@ -337,14 +331,15 @@ def validate_balance_type(account, adv_adj=False, finance_book=None):
 
 	for finance_book, balance in balances.items():
 		_validate_balance_must_be(
-			balance_must_be, default_balance + balance, account, precision, finance_book
+			balance_must_be, flt(default_balance + balance, precision), account, precision, finance_book
 		)
 
 
-def _validate_balance_must_be(balance_must_be, balance, account, precision, finance_book=None):
-	if (balance_must_be == "Debit" and flt(balance, precision) < 0) or (
-		balance_must_be == "Credit" and flt(balance, precision) > 0
-	):
+def _validate_balance_must_be(balance_must_be, balance, account, finance_book=None):
+	if balance_must_be == "Credit":
+		balance = -balance
+
+	if balance < 0:
 		error_message = _("Balance for Account {0} must always be {1}").format(account, _(balance_must_be))
 		if finance_book:
 			error_message += _(" (Finance Book {0})").format(finance_book)
@@ -372,11 +367,11 @@ def update_outstanding_amt(
 	bal = flt(
 		frappe.db.sql(
 			f"""
-        select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-        from `tabGL Entry`
-        where against_voucher_type=%s and against_voucher=%s
-        and voucher_type != 'Invoice Discounting'
-        {party_condition} {account_condition}""",
+		select sum(debit_in_account_currency) - sum(credit_in_account_currency)
+		from `tabGL Entry`
+		where against_voucher_type=%s and against_voucher=%s
+		and voucher_type != 'Invoice Discounting'
+		{party_condition} {account_condition}""",
 			(against_voucher_type, against_voucher),
 		)[0][0]
 		or 0.0
@@ -388,9 +383,9 @@ def update_outstanding_amt(
 		against_voucher_amount = flt(
 			frappe.db.sql(
 				f"""
-            select sum(debit_in_account_currency) - sum(credit_in_account_currency)
-            from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
-            and account = %s and (against_voucher is null or against_voucher='') {party_condition}""",
+			select sum(debit_in_account_currency) - sum(credit_in_account_currency)
+			from `tabGL Entry` where voucher_type = 'Journal Entry' and voucher_no = %s
+			and account = %s and (against_voucher is null or against_voucher='') {party_condition}""",
 				(against_voucher, account),
 			)[0][0]
 		)
