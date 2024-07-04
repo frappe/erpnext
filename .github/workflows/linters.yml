@@ -33,7 +33,7 @@ jobs:
           cache: pip
 
       - name: Download Semgrep rules
-        run: git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules
+        run: git clone --depth 1 https://github.com/blaggacao/semgrep-rules.git frappe-semgrep-rules
 
       - name: Download semgrep
         run: pip install semgrep

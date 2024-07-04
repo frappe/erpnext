@@ -96,6 +96,8 @@ jobs:
         env:
           DB: mariadb
           TYPE: server
+          FRAPPE_USER: blaggacao
+          FRAPPE_BRANCH: feat/document-caster
 
       - name: Run Patch Tests
         run: |

@@ -116,8 +116,8 @@ jobs:
         env:
           DB: mariadb
           TYPE: server
-          FRAPPE_USER: ${{ github.event.inputs.user }}
-          FRAPPE_BRANCH: ${{ github.event.inputs.branch }}
+          FRAPPE_USER: blaggacao
+          FRAPPE_BRANCH: feat/document-caster
 
       - name: Run Tests
         run: 'cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --total-builds 4 --build-number ${{ matrix.container }}'
