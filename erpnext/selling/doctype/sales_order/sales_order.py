@@ -741,8 +741,8 @@ class SalesOrder(SellingController):
 			voucher_type=self.doctype, voucher_no=self.name, sre_list=sre_list, notify=notify
 		)
 
-	def make_sales_invoice(self, target_doc=None, ignore_permissions=False):
-		make_sales_invoice(self.name, target_doc, ignore_permissions)
+	def _into_sales_invoice(self):
+		make_sales_invoice(self.name)
 
 
 def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:

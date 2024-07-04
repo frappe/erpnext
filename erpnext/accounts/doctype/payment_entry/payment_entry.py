@@ -1170,28 +1170,25 @@ class PaymentEntry(AccountsController):
 
 		self.set("remarks", "\n".join(remarks))
 
-	def make_payment_entry(
-		self,
-		dt,
-		dn,
-		party_amount=None,
-		bank_account=None,
-		bank_amount=None,
-		party_type=None,
-		payment_type=None,
-		reference_date=None,
-	):
+	def _from_sales_order(self, so):
 		frappe.flags.new_payment_entry = self
-		return get_payment_entry(
-			dt,
-			dn,
-			party_amount=None,
-			bank_account=None,
-			bank_amount=None,
-			party_type=None,
-			payment_type=None,
-			reference_date=None,
-		)
+		return get_payment_entry(so.doctype, so.name)
+
+	def _from_sales_invoice(self, si):
+		frappe.flags.new_payment_entry = self
+		return get_payment_entry(si.doctype, si.name)
+
+	def _from_purchase_order(self, po):
+		frappe.flags.new_payment_entry = self
+		return get_payment_entry(po.doctype, po.name)
+
+	def _from_purchase_invoice(self, pi):
+		frappe.flags.new_payment_entry = self
+		return get_payment_entry(pi.doctype, pi.name)
+
+	def _from_dunning(self, d):
+		frappe.flags.new_payment_entry = self
+		return get_payment_entry(d.doctype, d.name)
 
 	def build_gl_map(self):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
