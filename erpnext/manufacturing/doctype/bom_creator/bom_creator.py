@@ -156,12 +156,12 @@ class BOMCreator(Document):
 		amount = self.get_raw_material_cost()
 		self.raw_material_cost = amount
 
-	def get_raw_material_cost(self, fg_reference_id=None, amount=0):
-		if not fg_reference_id:
-			fg_reference_id = self.name
+	def get_raw_material_cost(self, fg_item=None, amount=0):
+		if not fg_item:
+			fg_item = self.item_code
 
 		for row in self.items:
-			if row.fg_reference_id != fg_reference_id:
+			if row.fg_item != fg_item:
 				continue
 
 			if not row.is_expandable:
@@ -183,7 +183,7 @@ class BOMCreator(Document):
 
 			else:
 				row.amount = 0.0
-				row.amount = self.get_raw_material_cost(row.name, row.amount)
+				row.amount = self.get_raw_material_cost(row.item_code, row.amount)
 				row.rate = flt(row.amount) / (flt(row.qty) * flt(row.conversion_factor))
 
 			amount += flt(row.amount)
