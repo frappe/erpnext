@@ -1170,6 +1170,29 @@ class PaymentEntry(AccountsController):
 
 		self.set("remarks", "\n".join(remarks))
 
+	def make_payment_entry(
+		self,
+		dt,
+		dn,
+		party_amount=None,
+		bank_account=None,
+		bank_amount=None,
+		party_type=None,
+		payment_type=None,
+		reference_date=None,
+	):
+		frappe.flags.new_payment_entry = self
+		return get_payment_entry(
+			dt,
+			dn,
+			party_amount=None,
+			bank_account=None,
+			bank_amount=None,
+			party_type=None,
+			payment_type=None,
+			reference_date=None,
+		)
+
 	def build_gl_map(self):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
 			self.setup_party_account_field()
@@ -2350,7 +2373,7 @@ def get_payment_entry(
 		paid_amount, received_amount, doc, party_account_currency, reference_date
 	)
 
-	pe = frappe.new_doc("Payment Entry")
+	pe = frappe.flags.new_payment_entry or frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
 	pe.company = doc.company
 	pe.cost_center = doc.get("cost_center")
