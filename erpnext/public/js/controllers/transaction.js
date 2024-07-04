@@ -325,7 +325,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		const me = this;
-		if (!this.frm.is_new() && this.frm.doc.docstatus === 0) {
+		if (!this.frm.is_new() && this.frm.doc.docstatus === 0 && frappe.model.can_create("Quality Inspection")) {
 			this.frm.add_custom_button(__("Quality Inspection(s)"), () => {
 				me.make_quality_inspection();
 			}, __("Create"));
@@ -1246,8 +1246,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	qty(doc, cdt, cdn) {
-		if (!this.frm.doc.__onload?.load_after_mapping) {
-			let item = frappe.get_doc(cdt, cdn);
+		let item = frappe.get_doc(cdt, cdn);
+		if (!this.is_a_mapped_document(item)) {
 			// item.pricing_rules = ''
 			frappe.run_serially([
 				() => this.remove_pricing_rule_for_item(item),
@@ -1733,6 +1733,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				me.frm.doc.items.forEach(d => {
 					if (in_list(JSON.parse(data.apply_rule_on_other_items), d[data.apply_rule_on])) {
 						for(var k in data) {
+							if (data.pricing_rule_for == "Discount Percentage" && data.apply_rule_on_other_items && k == "discount_amount") {
+								continue;
+							}
+
 							if (in_list(fields, k) && data[k] && (data.price_or_product_discount === 'Price' || k === 'pricing_rules')) {
 								frappe.model.set_value(d.doctype, d.name, k, data[k]);
 							}
@@ -1746,12 +1750,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	apply_product_discount(args) {
 		const items = this.frm.doc.items.filter(d => (d.is_free_item)) || [];
 
-		const exist_items = items.map(row => (row.item_code, row.pricing_rules));
+		const exist_items = items.map(row => { return {item_code: row.item_code, pricing_rules: row.pricing_rules};});
 
 		args.free_item_data.forEach(pr_row => {
 			let row_to_modify = {};
-			if (!items || !in_list(exist_items, (pr_row.item_code, pr_row.pricing_rules))) {
 
+			// If there are no free items, or if the current free item doesn't exist in the table, add it
+			if (!items || !exist_items.filter(e_row => {
+				return e_row.item_code == pr_row.item_code && e_row.pricing_rules == pr_row.pricing_rules;
+			}).length) {
 				row_to_modify = frappe.model.add_child(this.frm.doc,
 					this.frm.doc.doctype + ' Item', 'items');
 

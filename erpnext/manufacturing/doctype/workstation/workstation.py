@@ -55,6 +55,9 @@ class Workstation(Document):
 		hour_rate_electricity: DF.Currency
 		hour_rate_labour: DF.Currency
 		hour_rate_rent: DF.Currency
+		off_status_image: DF.AttachImage | None
+		on_status_image: DF.AttachImage | None
+		plant_floor: DF.Link | None
 		production_capacity: DF.Int
 		working_hours: DF.Table[WorkstationWorkingHour]
 		workstation_name: DF.Data

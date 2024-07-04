@@ -613,7 +613,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	}
 
 	render_data() {
-		if (this.bundle) {
+		if (this.bundle || this.frm.doc.is_return) {
 			frappe
 				.call({
 					method: "erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle.get_serial_batch_ledgers",
@@ -621,6 +621,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 						item_code: this.item.item_code,
 						name: this.bundle,
 						voucher_no: !this.frm.is_new() ? this.item.parent : "",
+						child_row: this.frm.doc.is_return ? this.item : "",
 					},
 				})
 				.then((r) => {
@@ -634,6 +635,7 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 	set_data(data) {
 		data.forEach((d) => {
 			d.qty = Math.abs(d.qty);
+			d.name = d.child_row || d.name;
 			this.dialog.fields_dict.entries.df.data.push(d);
 		});
 

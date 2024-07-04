@@ -422,13 +422,13 @@ class PurchaseReceipt(BuyingController):
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self, warehouse_account=None, via_landed_cost_voucher=False):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		gl_entries = []
 
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
-		self.make_tax_gl_entries(gl_entries)
+		self.make_tax_gl_entries(gl_entries, via_landed_cost_voucher)
 		update_regional_gl_entries(gl_entries, self)
 
 		return process_gl_map(gl_entries)
@@ -661,7 +661,7 @@ class PurchaseReceipt(BuyingController):
 
 				if not (
 					(erpnext.is_perpetual_inventory_enabled(self.company) and d.item_code in stock_items)
-					or d.is_fixed_asset
+					or (d.is_fixed_asset and not d.purchase_invoice)
 				):
 					continue
 
@@ -776,7 +776,14 @@ class PurchaseReceipt(BuyingController):
 			posting_date=posting_date,
 		)
 
-	def make_tax_gl_entries(self, gl_entries):
+	def is_landed_cost_booked_for_any_item(self) -> bool:
+		for x in self.items:
+			if x.landed_cost_voucher_amount != 0:
+				return True
+
+		return False
+
+	def make_tax_gl_entries(self, gl_entries, via_landed_cost_voucher=False):
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in self.get("items")])
 		is_asset_pr = any(d.is_fixed_asset for d in self.get("items"))
 		# Cost center-wise amount breakup for other charges included for valuation
@@ -811,18 +818,17 @@ class PurchaseReceipt(BuyingController):
 			i = 1
 			for tax in self.get("taxes"):
 				if valuation_tax.get(tax.name):
-					negative_expense_booked_in_pi = frappe.db.sql(
-						"""select name from `tabPurchase Invoice Item` pi
-						where docstatus = 1 and purchase_receipt=%s
-						and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
-							and voucher_no=pi.parent and account=%s)""",
-						(self.name, tax.account_head),
-					)
-
-					if negative_expense_booked_in_pi:
-						account = stock_rbnb
-					else:
+					if via_landed_cost_voucher or self.is_landed_cost_booked_for_any_item():
 						account = tax.account_head
+					else:
+						negative_expense_booked_in_pi = frappe.db.sql(
+							"""select name from `tabPurchase Invoice Item` pi
+							where docstatus = 1 and purchase_receipt=%s
+							and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
+								and voucher_no=pi.parent and account=%s)""",
+							(self.name, tax.account_head),
+						)
+						account = stock_rbnb if negative_expense_booked_in_pi else tax.account_head
 
 					if i == len(valuation_tax):
 						applicable_amount = amount_including_divisional_loss

@@ -400,13 +400,20 @@ frappe.ui.form.on("Production Plan", {
 	},
 
 	download_materials_required(frm) {
+		const warehouses_data = [];
+
+		if (frm.doc.for_warehouse) {
+			warehouses_data.push({ warehouse: frm.doc.for_warehouse });
+		}
+
 		const fields = [
 			{
 				fieldname: "warehouses",
 				fieldtype: "Table MultiSelect",
 				label: __("Warehouses"),
-				default: frm.doc.from_warehouse,
+				default: warehouses_data,
 				options: "Production Plan Material Request Warehouse",
+				reqd: 1,
 				get_query: function () {
 					return {
 						filters: {

@@ -194,6 +194,7 @@ class JournalEntry(AccountsController):
 		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		self.update_booked_depreciation()
 
 	def on_update_after_submit(self):
 		if hasattr(self, "repost_required"):
@@ -225,6 +226,7 @@ class JournalEntry(AccountsController):
 		self.unlink_inter_company_jv()
 		self.unlink_asset_adjustment_entry()
 		self.update_invoice_discounting()
+		self.update_booked_depreciation(1)
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -438,6 +440,25 @@ class JournalEntry(AccountsController):
 					break
 			if status:
 				inv_disc_doc.set_status(status=status)
+
+	def update_booked_depreciation(self, cancel=0):
+		for d in self.get("accounts"):
+			if (
+				self.voucher_type == "Depreciation Entry"
+				and d.reference_type == "Asset"
+				and d.reference_name
+				and frappe.get_cached_value("Account", d.account, "root_type") == "Expense"
+				and d.debit
+			):
+				asset = frappe.get_doc("Asset", d.reference_name)
+				for fb_row in asset.get("finance_books"):
+					if fb_row.finance_book == self.finance_book:
+						if cancel:
+							fb_row.total_number_of_booked_depreciations -= 1
+						else:
+							fb_row.total_number_of_booked_depreciations += 1
+						fb_row.db_update()
+						break
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
@@ -1031,6 +1052,17 @@ class JournalEntry(AccountsController):
 
 	def build_gl_map(self):
 		gl_map = []
+
+		company_currency = erpnext.get_company_currency(self.company)
+		if self.multi_currency:
+			for row in self.get("accounts"):
+				if row.account_currency != company_currency:
+					self.currency = row.account_currency
+					self.conversion_rate = row.exchange_rate
+					break
+		else:
+			self.currency = company_currency
+
 		for d in self.get("accounts"):
 			if d.debit or d.credit or (self.voucher_type == "Exchange Gain Or Loss"):
 				r = [d.user_remark, self.remark]

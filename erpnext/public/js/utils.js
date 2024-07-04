@@ -933,7 +933,13 @@ erpnext.utils.map_current_doc = function (opts) {
 					frappe.msgprint(__("Please select {0}", [opts.source_doctype]));
 					return;
 				}
-				opts.source_name = values;
+
+				if (values.constructor === Array) {
+					opts.source_name = [...new Set(values)];
+				} else {
+					opts.source_name = values;
+				}
+
 				if (
 					opts.allow_child_item_selection ||
 					["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)

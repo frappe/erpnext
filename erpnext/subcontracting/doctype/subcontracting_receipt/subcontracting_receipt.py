@@ -426,6 +426,12 @@ class SubcontractingReceipt(SubcontractingController):
 				)
 
 	def validate_available_qty_for_consumption(self):
+		if (
+			frappe.db.get_single_value("Buying Settings", "backflush_raw_materials_of_subcontract_based_on")
+			== "BOM"
+		):
+			return
+
 		for item in self.get("supplied_items"):
 			precision = item.precision("consumed_qty")
 			if (

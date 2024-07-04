@@ -9,6 +9,7 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
+from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
 	make_maintenance_schedule,
@@ -31,7 +32,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
-class TestSalesOrder(FrappeTestCase):
+class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -48,6 +49,9 @@ class TestSalesOrder(FrappeTestCase):
 			"Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", cls.unlink_setting
 		)
 		super().tearDownClass()
+
+	def setUp(self):
+		self.create_customer("_Test Customer Credit")
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -2085,6 +2089,28 @@ class TestSalesOrder(FrappeTestCase):
 
 		frappe.db.set_single_value("Stock Settings", "update_existing_price_list_rate", 0)
 		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
+
+	def test_credit_limit_on_so_reopning(self):
+		# set credit limit
+		company = "_Test Company"
+		customer = frappe.get_doc("Customer", self.customer)
+		customer.credit_limits = []
+		customer.append(
+			"credit_limits", {"company": company, "credit_limit": 1000, "bypass_credit_limit_check": False}
+		)
+		customer.save()
+
+		so1 = make_sales_order(qty=9, rate=100, do_not_submit=True)
+		so1.customer = self.customer
+		so1.save().submit()
+
+		so1.update_status("Closed")
+
+		so2 = make_sales_order(qty=9, rate=100, do_not_submit=True)
+		so2.customer = self.customer
+		so2.save().submit()
+
+		self.assertRaises(frappe.ValidationError, so1.update_status, "Draft")
 
 
 def automatically_fetch_payment_terms(enable=1):

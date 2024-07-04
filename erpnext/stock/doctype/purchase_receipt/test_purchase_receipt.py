@@ -3,12 +3,13 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, cint, cstr, flt, nowtime, today
+from frappe.utils import add_days, cint, cstr, flt, getdate, nowtime, today
 from pypika import functions as fn
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.controllers.buying_controller import QtyMismatchError
+from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.item.test_item import create_item, make_item
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
@@ -1681,7 +1682,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
 
 	def test_internal_pr_gl_entries(self):
-		from erpnext.stock import get_warehouse_account_map
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -2864,6 +2864,312 @@ class TestPurchaseReceipt(FrappeTestCase):
 		for row in sabb_doc.entries:
 			self.assertEqual(row.incoming_rate, 0)
 
+	def test_purchase_return_from_accepted_and_rejected_warehouse(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return,
+		)
+
+		item = make_item(
+			"_Test PR Item With Return From Accepted and Rejected WH",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SD-TZVRFORBATCH.#####",
+				"valuation_rate": 200,
+			},
+		)
+
+		pr = make_purchase_receipt(
+			qty=10,
+			rejected_qty=5,
+			rate=100,
+			item_code=item.name,
+		)
+
+		pr.reload()
+		self.assertTrue(pr.items[0].serial_and_batch_bundle)
+		self.assertTrue(pr.items[0].rejected_serial_and_batch_bundle)
+
+		return_pr = make_purchase_return(pr.name)
+		return_pr.submit()
+
+		return_pr.reload()
+		self.assertTrue(return_pr.items[0].serial_and_batch_bundle)
+		self.assertTrue(return_pr.items[0].rejected_serial_and_batch_bundle)
+
+		self.assertEqual(
+			return_pr.items[0].qty,
+			frappe.db.get_value(
+				"Serial and Batch Bundle", return_pr.items[0].serial_and_batch_bundle, "total_qty"
+			),
+		)
+
+		self.assertEqual(
+			return_pr.items[0].rejected_qty,
+			frappe.db.get_value(
+				"Serial and Batch Bundle", return_pr.items[0].rejected_serial_and_batch_bundle, "total_qty"
+			),
+		)
+
+	def test_valuation_taxes_lcv_repost_after_billing(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
+		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
+		frappe.db.set_value(
+			"Company",
+			"_Test Company",
+			"stock_received_but_not_billed",
+			"Stock Received But Not Billed - _TC",
+		)
+
+		pr = make_purchase_receipt(qty=10, rate=1000, do_not_submit=1)
+		pr.append(
+			"taxes",
+			{
+				"category": "Valuation and Total",
+				"charge_type": "Actual",
+				"account_head": "Freight and Forwarding Charges - _TC",
+				"tax_amount": 2000,
+				"description": "Test",
+			},
+		)
+		pr.submit()
+		pi = make_purchase_invoice(pr.name)
+		pi.submit()
+		make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=2000,
+			distribute_charges_based_on="Qty",
+			expense_account="Expenses Included In Valuation - _TC",
+		)
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name, skip_cancelled=True, as_dict=False)
+		warehouse_account = get_warehouse_account_map("_Test Company")
+		expected_gle = (
+			("Stock Received But Not Billed - _TC", 0, 10000, "Main - _TC"),
+			("Freight and Forwarding Charges - _TC", 0, 2000, "Main - _TC"),
+			("Expenses Included In Valuation - _TC", 0, 2000, "Main - _TC"),
+			(warehouse_account[pr.items[0].warehouse]["account"], 14000, 0, "Main - _TC"),
+		)
+		self.assertSequenceEqual(expected_gle, gl_entries)
+		frappe.local.enable_perpetual_inventory["_Test Company"] = old_perpetual_inventory
+
+	def test_manufacturing_and_expiry_date_for_batch(self):
+		item = make_item(
+			"_Test Manufacturing and Expiry Date For Batch",
+			{
+				"is_purchase_item": 1,
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "B-MEBATCH.#####",
+				"has_expiry_date": 1,
+				"shelf_life_in_days": 5,
+			},
+		)
+
+		pr = make_purchase_receipt(
+			qty=10,
+			rate=100,
+			item_code=item.name,
+			posting_date=today(),
+		)
+
+		pr.reload()
+		self.assertTrue(pr.items[0].serial_and_batch_bundle)
+
+		batch_no = get_batch_from_bundle(pr.items[0].serial_and_batch_bundle)
+		batch = frappe.get_doc("Batch", batch_no)
+		self.assertEqual(batch.manufacturing_date, getdate(today()))
+		self.assertEqual(batch.expiry_date, getdate(add_days(today(), 5)))
+
+	def test_purchase_return_from_rejected_warehouse(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+			make_purchase_return_against_rejected_warehouse,
+		)
+
+		item_code = "_Test Item Return from Rejected Warehouse 11"
+		create_item(item_code)
+
+		warehouse = create_warehouse("_Test Warehouse Return Qty Warehouse 11")
+		rejected_warehouse = create_warehouse("_Test Rejected Warehouse Return Qty Warehouse 11")
+
+		# Step 1: Create Purchase Receipt with valuation rate 100
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=24,
+			rate=100,
+			rejected_qty=31,
+			rejected_warehouse=rejected_warehouse,
+		)
+
+		pr_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		pr_return.save()
+		pr_return.submit()
+
+		self.assertEqual(pr_return.items[0].warehouse, rejected_warehouse)
+		self.assertEqual(pr_return.items[0].qty, 31 * -1)
+		self.assertEqual(pr_return.items[0].rejected_qty, 0.0)
+		self.assertEqual(pr_return.items[0].rejected_warehouse, "")
+
+	def test_tax_account_heads_on_lcv_and_item_repost(self):
+		"""
+		PO -> PR -> PI
+		PR -> LCV
+		Backdated `Repost Item valuation` should not merge tax account heads into stock_rbnb
+		"""
+		from erpnext.accounts.doctype.account.test_account import create_account
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+			create_purchase_order,
+			make_pr_against_po,
+		)
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+
+		stock_rbnb = "Stock Received But Not Billed - _TC"
+		stock_in_hand = "Stock In Hand - _TC"
+		test_cc = "_Test Cost Center - _TC"
+		test_company = "_Test Company"
+		creditors = "Creditors - _TC"
+		lcv_expense_account = "Expenses Included In Valuation - _TC"
+
+		company_doc = frappe.get_doc("Company", test_company)
+		company_doc.enable_perpetual_inventory = True
+		company_doc.stock_received_but_not_billed = stock_rbnb
+		company_doc.default_inventory_account = stock_in_hand
+		company_doc.save()
+
+		packaging_charges_account = create_account(
+			account_name="Packaging Charges",
+			parent_account="Indirect Expenses - _TC",
+			company=test_company,
+			account_type="Tax",
+		)
+
+		po = create_purchase_order(qty=10, rate=100, do_not_save=1)
+		po.taxes = []
+		po.append(
+			"taxes",
+			{
+				"category": "Valuation and Total",
+				"account_head": packaging_charges_account,
+				"cost_center": test_cc,
+				"description": "Test",
+				"add_deduct_tax": "Add",
+				"charge_type": "Actual",
+				"tax_amount": 250,
+			},
+		)
+		po.save().submit()
+
+		pr = make_pr_against_po(po.name, received_qty=10)
+		pr_gl_entries = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
+		expected_pr_gles = [
+			{"account": stock_rbnb, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
+			{"account": stock_in_hand, "debit": 1250.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": packaging_charges_account, "debit": 0.0, "credit": 250.0, "cost_center": test_cc},
+		]
+		self.assertEqual(expected_pr_gles, pr_gl_entries)
+
+		# Make PI against Purchase Receipt
+		pi = make_purchase_invoice(pr.name).save().submit()
+		pi_gl_entries = get_gl_entries(pi.doctype, pi.name, skip_cancelled=True)
+		expected_pi_gles = [
+			{"account": stock_rbnb, "debit": 1000.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": packaging_charges_account, "debit": 250.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": creditors, "debit": 0.0, "credit": 1250.0, "cost_center": None},
+		]
+		self.assertEqual(expected_pi_gles, pi_gl_entries)
+
+		lcv = self.create_lcv(pr.doctype, pr.name, test_company, lcv_expense_account)
+		pr_gles_after_lcv = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
+		expected_pr_gles_after_lcv = [
+			{"account": stock_rbnb, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
+			{"account": stock_in_hand, "debit": 1300.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": packaging_charges_account, "debit": 0.0, "credit": 250.0, "cost_center": test_cc},
+			{"account": lcv_expense_account, "debit": 0.0, "credit": 50.0, "cost_center": test_cc},
+		]
+		self.assertEqual(expected_pr_gles_after_lcv, pr_gles_after_lcv)
+
+		# Trigger Repost Item Valudation on a older date
+		repost_doc = frappe.get_doc(
+			{
+				"doctype": "Repost Item Valuation",
+				"based_on": "Item and Warehouse",
+				"item_code": pr.items[0].item_code,
+				"warehouse": pr.items[0].warehouse,
+				"posting_date": add_days(pr.posting_date, -1),
+				"posting_time": "00:00:00",
+				"company": pr.company,
+				"allow_negative_stock": 1,
+				"via_landed_cost_voucher": 0,
+				"allow_zero_rate": 0,
+			}
+		)
+		repost_doc.save().submit()
+
+		pr_gles_after_repost = get_gl_entries(pr.doctype, pr.name, skip_cancelled=True)
+		expected_pr_gles_after_repost = [
+			{"account": stock_rbnb, "debit": 0.0, "credit": 1000.0, "cost_center": test_cc},
+			{"account": stock_in_hand, "debit": 1300.0, "credit": 0.0, "cost_center": test_cc},
+			{"account": packaging_charges_account, "debit": 0.0, "credit": 250.0, "cost_center": test_cc},
+			{"account": lcv_expense_account, "debit": 0.0, "credit": 50.0, "cost_center": test_cc},
+		]
+		self.assertEqual(len(pr_gles_after_repost), len(expected_pr_gles_after_repost))
+		self.assertEqual(expected_pr_gles_after_repost, pr_gles_after_repost)
+
+		# teardown
+		lcv.reload()
+		lcv.cancel()
+		pi.reload()
+		pi.cancel()
+		pr.reload()
+		pr.cancel()
+
+		company_doc.enable_perpetual_inventory = False
+		company_doc.stock_received_but_not_billed = None
+		company_doc.default_inventory_account = None
+		company_doc.save()
+
+	def create_lcv(self, receipt_document_type, receipt_document, company, expense_account, charges=50):
+		ref_doc = frappe.get_doc(receipt_document_type, receipt_document)
+
+		lcv = frappe.new_doc("Landed Cost Voucher")
+		lcv.company = company
+		lcv.distribute_charges_based_on = "Qty"
+		lcv.set(
+			"purchase_receipts",
+			[
+				{
+					"receipt_document_type": receipt_document_type,
+					"receipt_document": receipt_document,
+					"supplier": ref_doc.supplier,
+					"posting_date": ref_doc.posting_date,
+					"grand_total": ref_doc.base_grand_total,
+				}
+			],
+		)
+
+		lcv.set(
+			"taxes",
+			[
+				{
+					"description": "Testing",
+					"expense_account": expense_account,
+					"amount": charges,
+				}
+			],
+		)
+		lcv.save().submit()
+		return lcv
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -2910,14 +3216,24 @@ def get_sl_entries(voucher_type, voucher_no):
 	)
 
 
-def get_gl_entries(voucher_type, voucher_no):
-	return frappe.db.sql(
-		"""select account, debit, credit, cost_center, is_cancelled
-		from `tabGL Entry` where voucher_type=%s and voucher_no=%s
-		order by account desc""",
-		(voucher_type, voucher_no),
-		as_dict=1,
+def get_gl_entries(voucher_type, voucher_no, skip_cancelled=False, as_dict=True):
+	gl = frappe.qb.DocType("GL Entry")
+	gl_query = (
+		frappe.qb.from_(gl)
+		.select(
+			gl.account,
+			gl.debit,
+			gl.credit,
+			gl.cost_center,
+		)
+		.where((gl.voucher_type == voucher_type) & (gl.voucher_no == voucher_no))
+		.orderby(gl.account, order=frappe.qb.desc)
 	)
+	if skip_cancelled:
+		gl_query = gl_query.where(gl.is_cancelled == 0)
+	else:
+		gl_query = gl_query.select(gl.is_cancelled)
+	return gl_query.run(as_dict=as_dict)
 
 
 def get_taxes(**args):

@@ -943,6 +943,10 @@ class SalesInvoice(SellingController):
 				against_acc.append(d.income_account)
 		self.against_income_account = ",".join(against_acc)
 
+	def force_set_against_income_account(self):
+		self.set_against_income_account()
+		frappe.db.set_value(self.doctype, self.name, "against_income_account", self.against_income_account)
+
 	def add_remarks(self):
 		if not self.remarks:
 			if self.po_no and self.po_date:
@@ -2677,6 +2681,10 @@ def create_dunning(source_name, target_doc=None, ignore_permissions=False):
 				target.body_text = letter_text.get("body_text")
 				target.closing_text = letter_text.get("closing_text")
 				target.language = letter_text.get("language")
+
+		# update outstanding
+		if source.payment_schedule and len(source.payment_schedule) == 1:
+			target.overdue_payments[0].outstanding = source.get("outstanding_amount")
 
 		target.validate()
 
