@@ -52,7 +52,7 @@ frappe.query_reports["Item-wise Purchase Register"] = {
 			label: __("Group By"),
 			fieldname: "group_by",
 			fieldtype: "Select",
-			options: ["Supplier", "Item Group", "Item", "Invoice"],
+			options: ["", "Supplier", "Item Group", "Item", "Invoice"],
 		},
 	],
 	formatter: function (value, row, column, data, default_formatter) {
