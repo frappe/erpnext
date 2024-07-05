@@ -51,7 +51,7 @@ class TestItemWiseSalesRegister(AccountsTestMixin, FrappeTestCase):
 			"company": self.company,
 			"income_account": si.items[0].income_account,
 			"stock_qty": 1.0,
-			"stock_uom": "Nos",
+			"stock_uom": si.items[0].stock_uom,
 			"rate": 100.0,
 			"amount": 100.0,
 			"total_tax": 0,
