@@ -8,7 +8,7 @@ from itertools import groupby
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.model.mapper import map_child_doc
+from frappe.model.mapper import map_child_doc, map_doc
 from frappe.query_builder import Case
 from frappe.query_builder.custom import GROUP_CONCAT
 from frappe.query_builder.functions import Coalesce, Locate, Replace, Sum
@@ -1173,11 +1173,15 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 		dn_item = map_child_doc(source_doc, delivery_note, item_mapper)
 
 		if dn_item:
-			dn_item.pick_list_item = location.name
-			dn_item.warehouse = location.warehouse
+			if sales_order_item:
+				pick_list_table_mapper = {
+					"doctype": "Delivery Note Item",
+					"field_map": {
+						"name": "pick_list_item",
+					}
+				}
+				map_doc(location, dn_item, pick_list_table_mapper)
 			dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
-			dn_item.batch_no = location.batch_no
-			dn_item.serial_no = location.serial_no
 
 			update_delivery_note_item(source_doc, dn_item, delivery_note)
 
