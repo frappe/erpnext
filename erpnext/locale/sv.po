@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-06-27 10:15+0000\n"
-"PO-Revision-Date: 2024-07-02 17:47\n"
+"PO-Revision-Date: 2024-07-06 18:59\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -9616,7 +9616,7 @@ msgstr "Chain"
 
 #: selling/page/point_of_sale/pos_payment.js:587
 msgid "Change"
-msgstr "Växel"
+msgstr "Ändra"
 
 #. Label of a Currency field in DocType 'POS Invoice'
 #. Label of a Currency field in DocType 'Sales Invoice'
@@ -26833,7 +26833,7 @@ msgstr "Bokföring Register"
 #. Option for the 'Status' (Select) field in DocType 'Employee'
 #: setup/doctype/driver/driver.json setup/doctype/employee/employee.json
 msgid "Left"
-msgstr "Vänster"
+msgstr "Slutat"
 
 #. Label of a Link field in DocType 'Bisect Nodes'
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
