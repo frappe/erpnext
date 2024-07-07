@@ -60,7 +60,6 @@ class Asset(AccountsController):
 		available_for_use_date: DF.Date | None
 		booked_fixed_asset: DF.Check
 		calculate_depreciation: DF.Check
-		capitalized_in: DF.Link | None
 		company: DF.Link
 		comprehensive_insurance: DF.Data | None
 		cost_center: DF.Link | None
@@ -163,7 +162,6 @@ class Asset(AccountsController):
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
-		self.cancel_capitalization()
 		self.reload()
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
@@ -525,13 +523,6 @@ class Asset(AccountsController):
 		for movement in movements:
 			movement = frappe.get_doc("Asset Movement", movement.get("name"))
 			movement.cancel()
-
-	def cancel_capitalization(self):
-		if self.capitalized_in:
-			self.db_set("capitalized_in", None)
-			asset_capitalization = frappe.get_doc("Asset Capitalization", self.capitalized_in)
-			if asset_capitalization.docstatus == 1:
-				asset_capitalization.cancel()
 
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
