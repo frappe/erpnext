@@ -648,7 +648,7 @@ class TestPickList(FrappeTestCase):
 	def test_picklist_for_batch_item(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(
-			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_no_series": "PICKLT-.######"}
+			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_number_series": "PICKLT-.######"}
 		).name
 
 		# create batch

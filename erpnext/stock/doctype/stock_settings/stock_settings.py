@@ -40,6 +40,7 @@ class StockSettings(Document):
 		default_warehouse: DF.Link | None
 		disable_serial_no_and_batch_selector: DF.Check
 		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
+		do_not_use_batchwise_valuation: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
 		item_naming_by: DF.Literal["Item Code", "Naming Series"]
@@ -98,6 +99,22 @@ class StockSettings(Document):
 		self.validate_stock_reservation()
 		self.change_precision_for_for_sales()
 		self.change_precision_for_purchase()
+		self.validate_use_batch_wise_valuation()
+
+	def validate_use_batch_wise_valuation(self):
+		if not self.do_not_use_batchwise_valuation:
+			return
+
+		if self.valuation_method == "FIFO":
+			frappe.throw(_("Cannot disable batch wise valuation for FIFO valuation method."))
+
+		if frappe.get_all(
+			"Item", filters={"valuation_method": "FIFO", "is_stock_item": 1, "has_batch_no": 1}, limit=1
+		):
+			frappe.throw(_("Can't disable batch wise valuation for items with FIFO valuation method."))
+
+		if frappe.get_all("Batch", filters={"use_batchwise_valuation": 1}, limit=1):
+			frappe.throw(_("Can't disable batch wise valuation for active batches."))
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
