@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-06-27 10:15+0000\n"
-"PO-Revision-Date: 2024-07-06 18:59\n"
+"PO-Revision-Date: 2024-07-07 19:21\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -8054,7 +8054,7 @@ msgstr "Halvera Bokföring Rapporter"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:9
 msgid "Bisect Left"
-msgstr "Halvera Vänster"
+msgstr "Bisekt Vänster"
 
 #. Name of a DocType
 #: accounts/doctype/bisect_nodes/bisect_nodes.json
@@ -9616,7 +9616,7 @@ msgstr "Chain"
 
 #: selling/page/point_of_sale/pos_payment.js:587
 msgid "Change"
-msgstr "Ändra"
+msgstr "Växel Belopp"
 
 #. Label of a Currency field in DocType 'POS Invoice'
 #. Label of a Currency field in DocType 'Sales Invoice'
