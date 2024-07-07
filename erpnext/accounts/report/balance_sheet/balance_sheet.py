@@ -164,11 +164,11 @@ def check_opening_balance(asset, liability, equity):
 	opening_balance = 0
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 	if asset:
-		opening_balance = flt(asset[-1].get("opening_balance", 0), float_precision)
+		opening_balance = flt(asset[-2].get("opening_balance", 0), float_precision)
 	if liability:
-		opening_balance -= flt(liability[-1].get("opening_balance", 0), float_precision)
+		opening_balance -= flt(liability[-2].get("opening_balance", 0), float_precision)
 	if equity:
-		opening_balance -= flt(equity[-1].get("opening_balance", 0), float_precision)
+		opening_balance -= flt(equity[-2].get("opening_balance", 0), float_precision)
 
 	opening_balance = flt(opening_balance, float_precision)
 	if opening_balance:
