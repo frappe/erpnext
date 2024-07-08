@@ -22,6 +22,7 @@
   "sample_size",
   "column_break1",
   "item_name",
+  "rowname",
   "description",
   "bom_no",
   "specification_details",
@@ -238,6 +239,13 @@
    "fieldname": "manual_inspection",
    "fieldtype": "Check",
    "label": "Manual Inspection"
+  },
+  {
+   "fieldname": "rowname",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Rowname",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-search",
@@ -245,7 +253,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:28.680815",
+ "modified": "2024-07-08 12:08:50.904016",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

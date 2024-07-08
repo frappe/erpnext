@@ -134,7 +134,7 @@ class QualityInspection(Document):
 				)
 
 		else:
-			args = [quality_inspection, self.modified, self.reference_name, self.item_code]
+			args = [quality_inspection, self.modified, self.reference_name, self.item_code, self.rowname]
 			doctype = self.reference_type + " Item"
 
 			if self.reference_type == "Stock Entry":
@@ -160,6 +160,7 @@ class QualityInspection(Document):
 						t1.parent = %s
 						and t1.item_code = %s
 						and t1.parent = t2.name
+						and t1.name = %s
 						{conditions}
 				""",
 					args,
