@@ -40,8 +40,8 @@ class AbnAmroAPI:
 		}
 
 		# Define the path to the certificates
-		cert_path = ('/Users/nkilicarslan/Downloads/CertificateCommercial (1).crt',
-					 '/Users/nkilicarslan/Downloads/PrivateKeyCommercial (1).key')
+		cert_path = (self.cert_path,
+					 self.key_path)
 		# Send the POST request
 		response = requests.post(self.api_url, headers=headers, data=payload, cert=cert_path)
 
