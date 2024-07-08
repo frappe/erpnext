@@ -316,7 +316,7 @@ def validate_balance_type(account, adv_adj=False, finance_book=None):
 			IfNull(gl_entry.finance_book, "").isin(("", finance_book))
 		)
 		balance = query.run()[0][0]
-		return _validate_balance_must_be(balance_must_be, balance, account, precision)
+		return _validate_balance_must_be(balance_must_be, balance, account)
 
 	balances = dict(
 		query.select(IfNull(gl_entry.finance_book, "").as_("fb"))
@@ -327,11 +327,11 @@ def validate_balance_type(account, adv_adj=False, finance_book=None):
 
 	default_balance = balances.pop("", 0)
 	if not balances:
-		return _validate_balance_must_be(balance_must_be, default_balance, account, precision)
+		return _validate_balance_must_be(balance_must_be, default_balance, account)
 
 	for finance_book, balance in balances.items():
 		_validate_balance_must_be(
-			balance_must_be, flt(default_balance + balance, precision), account, precision, finance_book
+			balance_must_be, flt(default_balance + balance, precision), account, finance_book
 		)
 
 
