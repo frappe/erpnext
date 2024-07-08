@@ -52,6 +52,7 @@ class QualityInspection(Document):
 		]
 		remarks: DF.Text | None
 		report_date: DF.Date
+		rowname: DF.Data | None
 		sample_size: DF.Float
 		status: DF.Literal["", "Accepted", "Rejected"]
 		verified_by: DF.Data | None

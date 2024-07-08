@@ -270,6 +270,10 @@ class TestQualityInspection(FrappeTestCase):
 		se.items[0].quality_inspection = qa.name
 		se.save()
 
+		# Unlink the quality inspection from stock entry item
+		se.items[0].quality_inspection = None
+		se.save()
+
 		qa.delete()
 
 		se.reload()
