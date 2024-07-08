@@ -6,6 +6,7 @@ from frappe import _
 from frappe.model.docstatus import DocStatus
 from frappe.model.document import Document
 from frappe.utils import flt
+from erpnext.utilities.abn_amro_api import abn_amro_api
 
 
 class BankTransaction(Document):
@@ -221,6 +222,68 @@ class BankTransaction(Document):
 
 		self.party_type, self.party = result
 
+
+def create_new_transaction(bank_account_name, transaction_dict):
+	# first check if the transaction already exists
+	if frappe.db.exists('Bank Transaction', {'transaction_id': transaction_dict['transactionId']}):
+		return
+	# Create a new Bank Transaction document
+	new_transaction = frappe.new_doc('Bank Transaction')
+
+	# Set the fields of the new Bank Transaction document
+	new_transaction.bank_account = bank_account_name
+	new_transaction.transaction_id = transaction_dict['transactionId']
+	new_transaction.transaction_type = transaction_dict['mutationCode']
+	new_transaction.date = transaction_dict['bookDate']
+	new_transaction.deposit = transaction_dict['amount'] if transaction_dict['amount'] > 0 else 0
+	new_transaction.withdrawal = transaction_dict['amount'] if transaction_dict['amount'] < 0 else 0
+	new_transaction.currency = transaction_dict['currency']
+	new_transaction.bank_party_account_number = transaction_dict['counterPartyAccountNumber']
+	new_transaction.bank_party_name = transaction_dict['counterPartyName']
+	new_transaction.description = '\n'.join(transaction_dict['descriptionLines'])
+	new_transaction.reference_number = transaction_dict['transactionId']
+	new_transaction.status = 'Settled' if transaction_dict['status'] == 'Executed' else ''
+	new_transaction.allocated_amount = abs(transaction_dict['amount'])
+	new_transaction.unallocated_amount = abs(transaction_dict['amount'])
+
+
+	# Save the new Bank Transaction document
+	new_transaction.save()
+
+	# Submit the new Bank Transaction document
+	new_transaction.submit()
+
+	# Return the name of the new Bank Transaction document
+	return new_transaction.name
+
+@frappe.whitelist()
+def get_latest_transactions():
+	# Get the username of the current user
+	current_user = frappe.session.user
+
+	# Get all Bank Account documents where the current user is the owner
+	bank_accounts = frappe.get_all('Bank Account', filters={'owner': current_user}, fields=['name', 'iban'])
+
+	# Now, bank_accounts is a list of dictionaries where each dictionary represents a Bank Account document
+	# and contains the name, bank account number, and IBAN of the bank account.
+
+	access_token = abn_amro_api.get_access_token()
+
+	for bank_account in bank_accounts:
+		account_number = bank_account['iban']
+		response = abn_amro_api.get_todays_first_set_of_transactions(account_number, access_token, '2024-07-01')
+		if not response:
+			continue
+		transaction_list = response['transactions']
+		for transaction in transaction_list:
+			create_new_transaction( bank_account['name'], transaction)
+		while response['nextPageKey']:
+			response = abn_amro_api.get_next_set_of_todays_transactions(account_number, access_token, '2024-07-01', response['nextPageKey'])
+			transaction_list = response['transactions']
+			for transaction in transaction_list:
+				create_new_transaction( bank_account['name'], transaction)
+
+	return "Operation completed successfully"
 
 @frappe.whitelist()
 def get_doctypes_for_bank_reconciliation():

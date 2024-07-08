@@ -14,6 +14,8 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
+from erpnext.utilities.abn_amro_api import abn_amro_api
+
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
@@ -786,7 +788,6 @@ def close_or_unclose_sales_orders(names, status):
 
 	frappe.local.message_log = []
 
-
 def get_requested_item_qty(sales_order):
 	result = {}
 	for d in frappe.db.get_all(
@@ -798,6 +799,34 @@ def get_requested_item_qty(sales_order):
 		result[d.sales_order_item] = frappe._dict({"qty": d.qty, "received_qty": d.received_qty})
 
 	return result
+
+@frappe.whitelist()
+def get_abn_amro_token():
+	# Get the access token
+	access_token = abn_amro_api.get_access_token()
+	if access_token:
+		return access_token
+	else:
+		frappe.throw(_("Unable to get ABN AMRO token"))
+
+@frappe.whitelist()
+def get_abn_amro_account_details():
+	access_token = abn_amro_api.get_access_token()
+	account_details = abn_amro_api.get_account_details('NL62ABNA9999841479', access_token)
+	if account_details:
+		return account_details
+	else:
+		frappe.throw(_("Unable to get ABN AMRO account details"))
+
+
+@frappe.whitelist()
+def get_abn_amro_account_balance():
+	access_token = abn_amro_api.get_access_token()
+	account_balance = abn_amro_api.get_account_balance('NL62ABNA9999841479', access_token)
+	if account_balance:
+		return account_balance
+	else:
+		frappe.throw(_("Unable to get ABN AMRO account balance"))
 
 
 @frappe.whitelist()
