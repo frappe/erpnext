@@ -8,6 +8,11 @@ from pypika import functions as fn
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+<<<<<<< HEAD
+=======
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from erpnext.controllers.accounts_controller import InvalidQtyError
+>>>>>>> 623b4c21cd (fix: corrected mismatch in the Purchase Receipt Status #15620 (#42138))
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.item.test_item import create_item, make_item
@@ -3229,6 +3234,22 @@ class TestPurchaseReceipt(FrappeTestCase):
 		doc.flags.ignore_validate = True
 		doc.save()
 
+	def test_status_mapping(self):
+		item_code = "item_for_status"
+		create_item(item_code)
+		create_item("item_for_status")
+		warehouse = create_warehouse("Stores")
+		supplier = "Test Supplier"
+		create_supplier(supplier_name=supplier)
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			warehouse=warehouse,
+			qty=1,
+			rate=0,
+		)
+		self.assertEqual(pr.grand_total, 0.0)
+		self.assertEqual(pr.status, "Completed")
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
@@ -3471,7 +3492,6 @@ def make_purchase_receipt(**args):
 		pr.insert()
 		if not args.do_not_submit:
 			pr.submit()
-
 		pr.load_from_db()
 
 	return pr
