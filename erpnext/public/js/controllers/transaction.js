@@ -1032,7 +1032,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let company_currency = this.get_company_currency();
 		// Added `load_after_mapping` to determine if document is loading after mapping from another doc
 		if(this.frm.doc.currency && this.frm.doc.currency !== company_currency
-				&& !this.frm.doc.__onload?.load_after_mapping) {
+				&& !(this.frm.doc.__onload?.load_after_mapping && this.frm.cscript.is_onload) ) {
 
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
