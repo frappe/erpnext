@@ -2,6 +2,8 @@ name: ci
 
 on:
   push:
+    branches:
+      - version-15-prod
 
 jobs:
   docker:
