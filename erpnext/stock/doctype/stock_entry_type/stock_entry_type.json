@@ -29,11 +29,7 @@
   }
  ],
  "links": [],
-<<<<<<< HEAD
- "modified": "2021-05-21 11:27:01.144110",
-=======
  "modified": "2024-07-08 08:41:19.385020",
->>>>>>> 4936514c8d (fix(Stock Entry Type): reduce perms for Stock User (#42225))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
