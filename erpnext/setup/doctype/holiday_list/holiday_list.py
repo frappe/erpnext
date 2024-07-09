@@ -19,11 +19,7 @@ class HolidayList(Document):
 	def validate(self):
 		self.validate_days()
 		self.total_holidays = len(self.holidays)
-<<<<<<< HEAD
-=======
-		self.validate_duplicate_date()
 		self.sort_holidays()
->>>>>>> ad137250fc (fix(Holiday List): sort holidays on save to avoid disorienting the user (#42236))
 
 	@frappe.whitelist()
 	def get_weekly_off_dates(self):
