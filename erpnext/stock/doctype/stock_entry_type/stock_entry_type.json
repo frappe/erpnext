@@ -29,7 +29,7 @@
   }
  ],
  "links": [],
- "modified": "2021-05-21 11:27:01.144110",
+ "modified": "2024-07-08 08:41:19.385020",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
@@ -72,16 +72,8 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
    "read": 1,
-   "report": 1,
-   "role": "Stock User",
-   "share": 1,
-   "write": 1
+   "role": "Stock User"
   }
  ],
  "quick_entry": 1,
