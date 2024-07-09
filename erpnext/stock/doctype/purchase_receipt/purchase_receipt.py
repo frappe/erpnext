@@ -785,7 +785,6 @@ class PurchaseReceipt(BuyingController):
 
 	def make_tax_gl_entries(self, gl_entries, via_landed_cost_voucher=False):
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in self.get("items")])
-		is_asset_pr = any(d.is_fixed_asset for d in self.get("items"))
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -810,26 +809,10 @@ class PurchaseReceipt(BuyingController):
 			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
-			stock_rbnb = (
-				self.get("asset_received_but_not_billed")
-				if is_asset_pr
-				else self.get_company_default("stock_received_but_not_billed")
-			)
 			i = 1
 			for tax in self.get("taxes"):
 				if valuation_tax.get(tax.name):
-					if via_landed_cost_voucher or self.is_landed_cost_booked_for_any_item():
-						account = tax.account_head
-					else:
-						negative_expense_booked_in_pi = frappe.db.sql(
-							"""select name from `tabPurchase Invoice Item` pi
-							where docstatus = 1 and purchase_receipt=%s
-							and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
-								and voucher_no=pi.parent and account=%s)""",
-							(self.name, tax.account_head),
-						)
-						account = stock_rbnb if negative_expense_booked_in_pi else tax.account_head
-
+					account = tax.account_head
 					if i == len(valuation_tax):
 						applicable_amount = amount_including_divisional_loss
 					else:
