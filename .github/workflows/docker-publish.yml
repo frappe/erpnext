@@ -26,3 +26,5 @@ jobs:
           push: true
           tags: nxmaydogdu/erpnext-nx:latest
           file: ./Containerfile
+          build-args: APPS_JSON_BASE64=${{ secrets.APPS_JSON_BASE64 }}
+          no-cache: true
