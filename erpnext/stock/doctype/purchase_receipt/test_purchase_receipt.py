@@ -8,11 +8,7 @@ from pypika import functions as fn
 
 import erpnext
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
-<<<<<<< HEAD
-=======
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
-from erpnext.controllers.accounts_controller import InvalidQtyError
->>>>>>> 623b4c21cd (fix: corrected mismatch in the Purchase Receipt Status #15620 (#42138))
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.stock import get_warehouse_account_map
 from erpnext.stock.doctype.item.test_item import create_item, make_item
