@@ -20,6 +20,15 @@ frappe.ui.form.on("Asset Repair", {
 			};
 		};
 
+		frm.set_query("asset", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					docstatus: 1,
+				},
+			};
+		});
+
 		frm.set_query("warehouse", "stock_items", function () {
 			return {
 				filters: {
