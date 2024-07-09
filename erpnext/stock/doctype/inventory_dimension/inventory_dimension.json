@@ -189,11 +189,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-10-05 12:52:18.705431",
-=======
  "modified": "2024-07-08 08:58:50.228211",
->>>>>>> edc1f84250 (fix(Inventory Dimension): reduce perms for Stock User (#42226))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Inventory Dimension",
