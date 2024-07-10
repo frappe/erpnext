@@ -82,7 +82,6 @@ class PaymentEntry(AccountsController):
 		self.set_exchange_rate()
 		self.validate_mandatory()
 		self.validate_reference_documents()
-		self.set_tax_withholding()
 		self.set_amounts()
 		self.validate_amounts()
 		self.apply_taxes()
@@ -96,6 +95,7 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
+		self.set_tax_withholding()
 		self.set_status()
 		self.set_total_in_words()
 
@@ -756,9 +756,7 @@ class PaymentEntry(AccountsController):
 		if not self.apply_tax_withholding_amount:
 			return
 
-		order_amount = self.get_order_net_total()
-
-		net_total = flt(order_amount) + flt(self.unallocated_amount)
+		net_total = self.calculate_tax_withholding_net_total()
 
 		# Adding args as purchase invoice to get TDS amount
 		args = frappe._dict(
@@ -802,7 +800,26 @@ class PaymentEntry(AccountsController):
 		for d in to_remove:
 			self.remove(d)
 
-	def get_order_net_total(self):
+	def calculate_tax_withholding_net_total(self):
+		net_total = 0
+		order_details = self.get_order_wise_tax_withholding_net_total()
+
+		for d in self.references:
+			tax_withholding_net_total = order_details.get(d.reference_name)
+			if not tax_withholding_net_total:
+				continue
+
+			net_taxable_outstanding = max(
+				0, d.outstanding_amount - (d.total_amount - tax_withholding_net_total)
+			)
+
+			net_total += min(net_taxable_outstanding, d.allocated_amount)
+
+		net_total += self.unallocated_amount
+
+		return net_total
+
+	def get_order_wise_tax_withholding_net_total(self):
 		if self.party_type == "Supplier":
 			doctype = "Purchase Order"
 		else:
@@ -810,11 +827,14 @@ class PaymentEntry(AccountsController):
 
 		docnames = [d.reference_name for d in self.references if d.reference_doctype == doctype]
 
-		tax_withholding_net_total = frappe.db.get_value(
-			doctype, {"name": ["in", docnames]}, ["sum(base_tax_withholding_net_total)"]
+		return frappe._dict(
+			frappe.db.get_all(
+				doctype,
+				filters={"name": ["in", docnames]},
+				fields=["name", "base_tax_withholding_net_total"],
+				as_list=True,
+			)
 		)
-
-		return tax_withholding_net_total
 
 	def apply_taxes(self):
 		self.initialize_taxes()
