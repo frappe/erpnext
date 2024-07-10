@@ -2499,8 +2499,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		lcv.save().submit()
 		return lcv
 
-<<<<<<< HEAD
-=======
 	def test_tax_account_heads_on_item_repost_without_lcv(self):
 		"""
 		PO -> PR -> PI
@@ -2605,66 +2603,6 @@ class TestPurchaseReceipt(FrappeTestCase):
 		company_doc.default_inventory_account = None
 		company_doc.save()
 
-	def test_do_not_use_batchwise_valuation_rate(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-
-		item_code = "Test Item for Do Not Use Batchwise Valuation"
-		make_item(
-			item_code,
-			properties={
-				"is_stock_item": 1,
-				"has_batch_no": 1,
-				"create_new_batch": 1,
-				"batch_number_series": "TIDNBV-.#####",
-				"valuation_method": "Moving Average",
-			},
-		)
-
-		# 1st pr for 100 rate
-		pr = make_purchase_receipt(
-			item_code=item_code,
-			qty=1,
-			rate=100,
-			posting_date=add_days(today(), -2),
-		)
-
-		make_purchase_receipt(
-			item_code=item_code,
-			qty=1,
-			rate=200,
-			posting_date=add_days(today(), -1),
-		)
-
-		dn = create_delivery_note(
-			item_code=item_code,
-			qty=1,
-			rate=300,
-			posting_date=today(),
-			use_serial_batch_fields=1,
-			batch_no=get_batch_from_bundle(pr.items[0].serial_and_batch_bundle),
-		)
-		dn.reload()
-		bundle = dn.items[0].serial_and_batch_bundle
-
-		valuation_rate = frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
-		self.assertEqual(valuation_rate, 100)
-
-		doc = frappe.get_doc("Stock Settings")
-		doc.do_not_use_batchwise_valuation = 1
-		doc.flags.ignore_validate = True
-		doc.save()
-
-		pr.repost_future_sle_and_gle(force=True)
-
-		valuation_rate = frappe.db.get_value("Serial and Batch Bundle", bundle, "avg_rate")
-		self.assertEqual(valuation_rate, 150)
-
-		doc = frappe.get_doc("Stock Settings")
-		doc.do_not_use_batchwise_valuation = 0
-		doc.flags.ignore_validate = True
-		doc.save()
-
->>>>>>> 9562628ed6 (test: tax account heads on PR report without LCV)
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
