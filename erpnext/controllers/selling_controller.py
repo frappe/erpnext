@@ -31,7 +31,7 @@ class SellingController(StockController):
 	def validate(self):
 		super().validate()
 		self.validate_items()
-		if not self.get("is_debit_note"):
+		if not (self.get("is_debit_note") or self.get("is_return")):
 			self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()

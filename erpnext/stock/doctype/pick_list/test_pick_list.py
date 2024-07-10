@@ -802,3 +802,45 @@ class TestPickList(FrappeTestCase):
 				a = set(picked_serial_no)
 				b = set([x for x in location.serial_no.split("\n") if x])
 				self.assertSetEqual(b, b.difference(a))
+
+	def test_validate_picked_qty_with_manual_option(self):
+		warehouse = "_Test Warehouse - _TC"
+		non_serialized_item = make_item(
+			"Test Non Serialized Pick List Item For Manual Option", properties={"is_stock_item": 1}
+		).name
+
+		serialized_item = make_item(
+			"Test Serialized Pick List Item For Manual Option",
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SN-HSNMSPLI-.####"},
+		).name
+
+		batched_item = make_item(
+			"Test Batched Pick List Item For Manual Option",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "SN-HBNMSPLI-.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		make_stock_entry(item=non_serialized_item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		make_stock_entry(item=serialized_item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		make_stock_entry(item=batched_item, to_warehouse=warehouse, qty=10, basic_rate=100)
+
+		so = make_sales_order(
+			item_code=non_serialized_item, qty=10, rate=100, do_not_save=True, warehouse=warehouse
+		)
+		so.append("items", {"item_code": serialized_item, "qty": 10, "rate": 100, "warehouse": warehouse})
+		so.append("items", {"item_code": batched_item, "qty": 10, "rate": 100, "warehouse": warehouse})
+		so.set_missing_values()
+		so.save()
+		so.submit()
+
+		pl = create_pick_list(so.name)
+		pl.pick_manually = 1
+
+		for row in pl.locations:
+			row.qty = row.qty + 10
+
+		self.assertRaises(frappe.ValidationError, pl.save)
