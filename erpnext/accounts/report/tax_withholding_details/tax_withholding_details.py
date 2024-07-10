@@ -69,13 +69,8 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 					tax_withholding_category = party_map.get(party, {}).get("tax_withholding_category")
 
 				rate = tax_rate_map.get(tax_withholding_category)
-<<<<<<< HEAD
-			if net_total_map.get(name):
-				if voucher_type == "Journal Entry":
-=======
 			if net_total_map.get((voucher_type, name)):
-				if voucher_type == "Journal Entry" and tax_amount and rate:
->>>>>>> 5c0d52f783 (fix(tds): use doctype reference when mapping keys across multiple doctypes (#42258))
+				if voucher_type == "Journal Entry":
 					# back calcalute total amount from rate and tax_amount
 					if rate:
 						total_amount = grand_total = base_total = tax_amount / (rate / 100)
