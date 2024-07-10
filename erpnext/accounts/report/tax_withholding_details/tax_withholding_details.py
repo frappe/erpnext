@@ -12,7 +12,7 @@ def execute(filters=None):
 	else:
 		party_naming_by = frappe.db.get_single_value("Buying Settings", "supp_master_name")
 
-	filters.update({"naming_series": party_naming_by})
+	filters["naming_series"] = party_naming_by
 
 	validate_filters(filters)
 	(
@@ -99,7 +99,7 @@ def get_result(filters, tds_docs, tds_accounts, tax_category_map, journal_entry_
 				}
 
 				if filters.naming_series == "Naming Series":
-					row.update({"party_name": party_map.get(party, {}).get(party_name)})
+					row["party_name"] = party_map.get(party, {}).get(party_name)
 
 				row.update(
 					{
@@ -281,7 +281,6 @@ def get_tds_docs(filters):
 	journal_entries = []
 	tax_category_map = frappe._dict()
 	net_total_map = frappe._dict()
-	frappe._dict()
 	journal_entry_party_map = frappe._dict()
 	bank_accounts = frappe.get_all("Account", {"is_group": 0, "account_type": "Bank"}, pluck="name")
 
@@ -418,7 +417,7 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 	)
 
 	for entry in entries:
-		tax_category_map.update({(doctype, entry.name): entry.tax_withholding_category})
+		tax_category_map[(doctype, entry.name)] = entry.tax_withholding_category
 		if doctype == "Purchase Invoice":
 			value = [
 				entry.base_tax_withholding_net_total,
@@ -434,7 +433,7 @@ def get_doc_info(vouchers, doctype, tax_category_map, net_total_map=None):
 		else:
 			value = [entry.total_amount] * 3
 
-		net_total_map.update({(doctype, entry.name): value})
+		net_total_map[(doctype, entry.name)] = value
 
 
 def get_tax_rate_map(filters):
