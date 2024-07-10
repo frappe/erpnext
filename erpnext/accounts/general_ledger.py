@@ -22,6 +22,7 @@ from erpnext.accounts.doctype.budget.budget import validate_expense_against_budg
 from erpnext.accounts.utils import create_payment_ledger_entry
 from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
+
 @erpnext.allow_regional
 def make_gl_entries(
 	gl_map,
@@ -566,6 +567,7 @@ def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use
 		frappe.throw(_("Please mention Round Off Cost Center in Company"))
 
 	return round_off_account, round_off_cost_center
+
 
 @erpnext.allow_regional
 def make_reverse_gl_entries(
