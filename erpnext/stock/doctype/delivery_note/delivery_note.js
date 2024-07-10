@@ -223,7 +223,7 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends (
 				);
 			}
 
-			if (doc.docstatus == 1 && frappe.model.can_create("Delivery Trip")) {
+			if (doc.docstatus == 1 && doc.status != "Completed" && frappe.model.can_create("Delivery Trip")) {
 				this.frm.add_custom_button(
 					__("Delivery Trip"),
 					function () {
