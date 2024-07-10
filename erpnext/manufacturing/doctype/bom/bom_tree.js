@@ -1,12 +1,12 @@
 frappe.treeview_settings["BOM"] = {
-	get_tree_nodes: 'erpnext.manufacturing.doctype.bom.bom.get_children',
+	get_tree_nodes: "erpnext.manufacturing.doctype.bom.bom.get_children",
 	filters: [
 		{
 			fieldname: "bom",
-			fieldtype:"Link",
+			fieldtype: "Link",
 			options: "BOM",
-			label: __("BOM")
-		}
+			label: __("BOM"),
+		},
 	],
 	title: "BOM",
 	breadcrumb: "Manufacturing",
@@ -14,21 +14,21 @@ frappe.treeview_settings["BOM"] = {
 	root_label: "BOM", //fieldname from filters
 	get_tree_root: false,
 	show_expand_all: false,
-	get_label: function(node) {
-		if(node.data.qty) {
+	get_label: function (node) {
+		if (node.data.qty) {
 			return node.data.qty + " x " + node.data.item_code;
 		} else {
 			return node.data.item_code || node.data.value;
 		}
 	},
-	onload: function(me) {
+	onload: function (me) {
 		var label = frappe.get_route()[0] + "/" + frappe.get_route()[1];
-		if(frappe.pages[label]) {
+		if (frappe.pages[label]) {
 			delete frappe.pages[label];
 		}
 
 		var filter = me.opts.filters[0];
-		if(frappe.route_options && frappe.route_options[filter.fieldname]) {
+		if (frappe.route_options && frappe.route_options[filter.fieldname]) {
 			var val = frappe.route_options[filter.fieldname];
 			delete frappe.route_options[filter.fieldname];
 			filter.default = "";
@@ -41,28 +41,27 @@ frappe.treeview_settings["BOM"] = {
 	toolbar: [
 		{ toggle_btn: true },
 		{
-			label:__("Edit"),
-			condition: function(node) {
+			label: __("Edit"),
+			condition: function (node) {
 				return node.expandable;
 			},
-			click: function(node) {
-
+			click: function (node) {
 				frappe.set_route("Form", "BOM", node.data.value);
-			}
-		}
+			},
+		},
 	],
 	menu_items: [
 		{
 			label: __("New BOM"),
-			action: function() {
-				frappe.new_doc("BOM", true)
+			action: function () {
+				frappe.new_doc("BOM", true);
 			},
-			condition: 'frappe.boot.user.can_create.indexOf("BOM") !== -1'
-		}
+			condition: 'frappe.boot.user.can_create.indexOf("BOM") !== -1',
+		},
 	],
-	onrender: function(node) {
-		if(node.is_root && node.data.value!="BOM") {
-			frappe.model.with_doc("BOM", node.data.value, function() {
+	onrender: function (node) {
+		if (node.is_root && node.data.value != "BOM") {
+			frappe.model.with_doc("BOM", node.data.value, function () {
 				var bom = frappe.model.get_doc("BOM", node.data.value);
 				node.data.image = escape(bom.image) || "";
 				node.data.description = bom.description || "";
@@ -70,5 +69,5 @@ frappe.treeview_settings["BOM"] = {
 			});
 		}
 	},
-	view_template: 'bom_item_preview'
-}
+	view_template: "bom_item_preview",
+};

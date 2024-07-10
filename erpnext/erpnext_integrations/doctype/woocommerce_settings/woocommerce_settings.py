@@ -67,7 +67,7 @@ class WoocommerceSettings(Document):
 			# for CI Test to work
 			url = "http://localhost:8000"
 
-		server_url = "{uri.scheme}://{uri.netloc}".format(uri=urlparse(url))
+		server_url = f"{urlparse(url).scheme}://{urlparse(url).netloc}"
 
 		delivery_url = server_url + endpoint
 		self.endpoint = delivery_url

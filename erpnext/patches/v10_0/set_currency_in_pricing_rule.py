@@ -9,6 +9,4 @@ def execute():
 		if doc.company:
 			currency = frappe.get_cached_value("Company", doc.company, "default_currency")
 
-		frappe.db.sql(
-			"""update `tabPricing Rule` set currency = %s where name = %s""", (currency, doc.name)
-		)
+		frappe.db.sql("""update `tabPricing Rule` set currency = %s where name = %s""", (currency, doc.name))

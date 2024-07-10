@@ -15,7 +15,7 @@ form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
 class SupplierQuotation(BuyingController):
 	def validate(self):
-		super(SupplierQuotation, self).validate()
+		super().validate()
 
 		if not self.status:
 			self.status = "Draft"
@@ -41,7 +41,7 @@ class SupplierQuotation(BuyingController):
 		pass
 
 	def validate_with_previous_doc(self):
-		super(SupplierQuotation, self).validate_with_previous_doc(
+		super().validate_with_previous_doc(
 			{
 				"Material Request": {
 					"ref_dn_field": "prevdoc_docname",

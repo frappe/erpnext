@@ -35,7 +35,7 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 		else:
 			variant_of_query = ""
 
-		query = """
+		query = f"""
 			SELECT
 				t1.parent
 			FROM
@@ -58,9 +58,7 @@ def get_item_codes_by_attributes(attribute_filters, template_item_code=None):
 				t1.parent
 			ORDER BY
 				NULL
-		""".format(
-			attribute_query=attribute_query, variant_of_query=variant_of_query
-		)
+		"""
 
 		item_codes = set([r[0] for r in frappe.db.sql(query, query_values)])  # nosemgrep
 		items.append(item_codes)
@@ -82,7 +80,7 @@ def get_attributes_and_values(item_code):
 	attribute_list = [a.attribute for a in attributes]
 
 	valid_options = {}
-	for item_code, attribute, attribute_value in item_variants_data:
+	for _, attribute, attribute_value in item_variants_data:
 		if attribute in attribute_list:
 			valid_options.setdefault(attribute, set()).add(attribute_value)
 
@@ -175,12 +173,10 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 		if exact_match and len(exact_match) == 1:
 			product_id = exact_match[0]
 		elif filtered_items_count == 1:
-			product_id = list(filtered_items)[0]
+			product_id = next(iter(filtered_items))
 
 	if product_id:
-		warehouse = frappe.get_cached_value(
-			"Website Item", {"item_code": product_id}, "website_warehouse"
-		)
+		warehouse = frappe.get_cached_value("Website Item", {"item_code": product_id}, "website_warehouse")
 
 	available_qty = 0.0
 	if warehouse and frappe.get_cached_value("Warehouse", warehouse, "is_group") == 1:

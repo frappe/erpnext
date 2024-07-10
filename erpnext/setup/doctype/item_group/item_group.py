@@ -25,7 +25,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	)
 
 	def validate(self):
-		super(ItemGroup, self).validate()
+		super().validate()
 
 		if not self.parent_item_group and not frappe.flags.in_test:
 			if frappe.db.exists("Item Group", _("All Item Groups")):
@@ -45,7 +45,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 					frappe.throw(
 						_("{0} entered twice {1} in Item Taxes").format(
 							frappe.bold(d.item_tax_template),
-							"for tax category {0}".format(frappe.bold(d.tax_category)) if d.tax_category else "",
+							f"for tax category {frappe.bold(d.tax_category)}" if d.tax_category else "",
 						)
 					)
 				else:

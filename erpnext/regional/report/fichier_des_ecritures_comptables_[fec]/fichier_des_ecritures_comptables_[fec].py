@@ -149,12 +149,8 @@ def get_gl_entries(company, fiscal_year):
 
 	debit = frappe.query_builder.functions.Sum(gle.debit).as_("debit")
 	credit = frappe.query_builder.functions.Sum(gle.credit).as_("credit")
-	debit_currency = frappe.query_builder.functions.Sum(gle.debit_in_account_currency).as_(
-		"debitCurr"
-	)
-	credit_currency = frappe.query_builder.functions.Sum(gle.credit_in_account_currency).as_(
-		"creditCurr"
-	)
+	debit_currency = frappe.query_builder.functions.Sum(gle.debit_in_account_currency).as_("debitCurr")
+	credit_currency = frappe.query_builder.functions.Sum(gle.credit_in_account_currency).as_("creditCurr")
 
 	query = (
 		frappe.qb.from_(gle)
@@ -222,25 +218,21 @@ def get_result(company, fiscal_year):
 	result = []
 
 	company_currency = frappe.get_cached_value("Company", company, "default_currency")
-	accounts = frappe.get_all(
-		"Account", filters={"Company": company}, fields=["name", "account_number"]
-	)
+	accounts = frappe.get_all("Account", filters={"Company": company}, fields=["name", "account_number"])
 
 	for d in data:
 		JournalCode = re.split("-|/|[0-9]", d.get("voucher_no"))[0]
 
-		if d.get("voucher_no").startswith("{0}-".format(JournalCode)) or d.get("voucher_no").startswith(
-			"{0}/".format(JournalCode)
+		if d.get("voucher_no").startswith(f"{JournalCode}-") or d.get("voucher_no").startswith(
+			f"{JournalCode}/"
 		):
 			EcritureNum = re.split("-|/", d.get("voucher_no"))[1]
 		else:
-			EcritureNum = re.search(r"{0}(\d+)".format(JournalCode), d.get("voucher_no"), re.IGNORECASE)[1]
+			EcritureNum = re.search(rf"{JournalCode}(\d+)", d.get("voucher_no"), re.IGNORECASE)[1]
 
 		EcritureDate = format_datetime(d.get("GlPostDate"), "yyyyMMdd")
 
-		account_number = [
-			account.account_number for account in accounts if account.name == d.get("account")
-		]
+		account_number = [account.account_number for account in accounts if account.name == d.get("account")]
 		if account_number[0] is not None:
 			CompteNum = account_number[0]
 		else:

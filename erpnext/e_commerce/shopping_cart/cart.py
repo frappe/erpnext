@@ -150,9 +150,7 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 			empty_card = True
 
 	else:
-		warehouse = frappe.get_cached_value(
-			"Website Item", {"item_code": item_code}, "website_warehouse"
-		)
+		warehouse = frappe.get_cached_value("Website Item", {"item_code": item_code}, "website_warehouse")
 
 		quotation_items = quotation.get("items", {"item_code": item_code})
 		if not quotation_items:
@@ -243,14 +241,12 @@ def create_lead_for_item_inquiry(lead, subject, message):
 
 	lead_doc.add_comment(
 		"Comment",
-		text="""
+		text=f"""
 		<div>
 			<h5>{subject}</h5>
 			<p>{message}</p>
 		</div>
-	""".format(
-			subject=subject, message=message
-		),
+	""",
 	)
 
 	return lead_doc
@@ -276,9 +272,7 @@ def update_cart_address(address_type, address_name):
 		quotation.shipping_address_name = address_name
 		quotation.shipping_address = address_display
 		quotation.customer_address = quotation.customer_address or address_name
-		address_doc = next(
-			(doc for doc in get_shipping_addresses() if doc["name"] == address_name), None
-		)
+		address_doc = next((doc for doc in get_shipping_addresses() if doc["name"] == address_name), None)
 	apply_cart_settings(quotation=quotation)
 
 	quotation.flags.ignore_permissions = True
@@ -300,9 +294,7 @@ def guess_territory():
 		territory = frappe.db.get_value("Territory", geoip_country)
 
 	return (
-		territory
-		or frappe.db.get_value("E Commerce Settings", None, "territory")
-		or get_root_of("Territory")
+		territory or frappe.db.get_value("E Commerce Settings", None, "territory") or get_root_of("Territory")
 	)
 
 
@@ -591,9 +583,7 @@ def get_debtors_account(cart_settings):
 		return debtors_account_name
 
 
-def get_address_docs(
-	doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None
-):
+def get_address_docs(doctype=None, txt=None, filters=None, limit_start=0, limit_page_length=20, party=None):
 	if not party:
 		party = get_party()
 

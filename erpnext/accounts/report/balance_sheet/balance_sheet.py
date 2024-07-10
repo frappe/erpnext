@@ -97,11 +97,11 @@ def execute(filters=None):
 
 	chart = get_chart_data(filters, columns, asset, liability, equity)
 
-	report_summary = get_report_summary(
+	report_summary, primitive_summary = get_report_summary(
 		period_list, asset, liability, equity, provisional_profit_loss, currency, filters
 	)
 
-	return columns, data, message, chart, report_summary
+	return columns, data, message, chart, report_summary, primitive_summary
 
 
 def get_provisional_profit_loss(
@@ -180,7 +180,6 @@ def get_report_summary(
 	filters,
 	consolidated=False,
 ):
-
 	net_asset, net_liability, net_equity, net_provisional_profit_loss = 0.0, 0.0, 0.0, 0.0
 
 	if filters.get("accumulated_values"):
@@ -217,7 +216,7 @@ def get_report_summary(
 			"datatype": "Currency",
 			"currency": currency,
 		},
-	]
+	], (net_asset - net_liability + net_equity)
 
 
 def get_chart_data(filters, columns, asset, liability, equity):

@@ -32,7 +32,7 @@ class MpesaConnector:
 		        access_token (str): This token is to be used with the Bearer header for further API calls to Mpesa.
 		"""
 		authenticate_uri = "/oauth/v1/generate?grant_type=client_credentials"
-		authenticate_url = "{0}{1}".format(self.base_url, authenticate_uri)
+		authenticate_url = f"{self.base_url}{authenticate_uri}"
 		r = requests.get(authenticate_url, auth=HTTPBasicAuth(self.app_key, self.app_secret))
 		self.authentication_token = r.json()["access_token"]
 		return r.json()["access_token"]
@@ -77,10 +77,10 @@ class MpesaConnector:
 			"ResultURL": result_url,
 		}
 		headers = {
-			"Authorization": "Bearer {0}".format(self.authentication_token),
+			"Authorization": f"Bearer {self.authentication_token}",
 			"Content-Type": "application/json",
 		}
-		saf_url = "{0}{1}".format(self.base_url, "/mpesa/accountbalance/v1/query")
+		saf_url = "{}{}".format(self.base_url, "/mpesa/accountbalance/v1/query")
 		r = requests.post(saf_url, headers=headers, json=payload)
 		return r.json()
 
@@ -119,10 +119,8 @@ class MpesaConnector:
 		        errorMessage(str): This is a predefined code that indicates the reason for request failure.
 		"""
 
-		time = (
-			str(datetime.datetime.now()).split(".")[0].replace("-", "").replace(" ", "").replace(":", "")
-		)
-		password = "{0}{1}{2}".format(str(business_shortcode), str(passcode), time)
+		time = str(datetime.datetime.now()).split(".")[0].replace("-", "").replace(" ", "").replace(":", "")
+		password = f"{business_shortcode!s}{passcode!s}{time}"
 		encoded = base64.b64encode(bytes(password, encoding="utf8"))
 		payload = {
 			"BusinessShortCode": business_shortcode,
@@ -135,15 +133,13 @@ class MpesaConnector:
 			"CallBackURL": callback_url,
 			"AccountReference": reference_code,
 			"TransactionDesc": description,
-			"TransactionType": "CustomerPayBillOnline"
-			if self.env == "sandbox"
-			else "CustomerBuyGoodsOnline",
+			"TransactionType": "CustomerPayBillOnline" if self.env == "sandbox" else "CustomerBuyGoodsOnline",
 		}
 		headers = {
-			"Authorization": "Bearer {0}".format(self.authentication_token),
+			"Authorization": f"Bearer {self.authentication_token}",
 			"Content-Type": "application/json",
 		}
 
-		saf_url = "{0}{1}".format(self.base_url, "/mpesa/stkpush/v1/processrequest")
+		saf_url = "{}{}".format(self.base_url, "/mpesa/stkpush/v1/processrequest")
 		r = requests.post(saf_url, headers=headers, json=payload)
 		return r.json()

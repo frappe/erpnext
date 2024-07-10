@@ -13,7 +13,7 @@ def execute(filters=None):
 	return ProductionPlanReport(filters).execute_report()
 
 
-class ProductionPlanReport(object):
+class ProductionPlanReport:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.raw_materials_dict = {}
@@ -79,7 +79,10 @@ class ProductionPlanReport(object):
 				query = query.where(child.parent.isin(self.filters.docnames))
 
 			if doctype == "Sales Order":
-				query = query.select(child.delivery_date, parent.base_grand_total,).where(
+				query = query.select(
+					child.delivery_date,
+					parent.base_grand_total,
+				).where(
 					(child.stock_qty > child.produced_qty)
 					& (parent.per_delivered < 100.0)
 					& (parent.status.notin(["Completed", "Closed"]))
@@ -91,7 +94,9 @@ class ProductionPlanReport(object):
 					query = query.orderby(parent.base_grand_total, order=Order.desc)
 
 			elif doctype == "Material Request":
-				query = query.select(child.schedule_date,).where(
+				query = query.select(
+					child.schedule_date,
+				).where(
 					(parent.per_ordered < 100)
 					& (parent.material_request_type == "Manufacture")
 					& (parent.status != "Stopped")
@@ -280,9 +285,7 @@ class ProductionPlanReport(object):
 			d.remaining_qty = d.required_qty
 			self.pick_materials_from_warehouses(d, data, warehouses)
 
-			if (
-				d.remaining_qty and self.filters.raw_material_warehouse and d.remaining_qty != d.required_qty
-			):
+			if d.remaining_qty and self.filters.raw_material_warehouse and d.remaining_qty != d.required_qty:
 				row = self.get_args()
 				d.warehouse = self.filters.raw_material_warehouse
 				d.required_qty = d.remaining_qty

@@ -3,13 +3,13 @@
 /* eslint-disable */
 
 frappe.query_reports["BOM Explorer"] = {
-	"filters": [
+	filters: [
 		{
 			fieldname: "bom",
 			label: __("BOM"),
 			fieldtype: "Link",
 			options: "BOM",
-			reqd: 1
+			reqd: 1,
 		},
-	]
+	],
 };

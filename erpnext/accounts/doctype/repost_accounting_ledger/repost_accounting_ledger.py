@@ -9,7 +9,7 @@ from frappe.utils.data import comma_and
 
 class RepostAccountingLedger(Document):
 	def __init__(self, *args, **kwargs):
-		super(RepostAccountingLedger, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 		self._allowed_types = get_allowed_types_from_settings()
 
 	def validate(self):
@@ -136,7 +136,9 @@ def start_repost(account_repost_doc=str) -> None:
 				doc = frappe.get_doc(x.voucher_type, x.voucher_no)
 
 				if repost_doc.delete_cancelled_entries:
-					frappe.db.delete("GL Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name})
+					frappe.db.delete(
+						"GL Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
+					)
 					frappe.db.delete(
 						"Payment Ledger Entry", filters={"voucher_type": doc.doctype, "voucher_no": doc.name}
 					)
@@ -147,6 +149,10 @@ def start_repost(account_repost_doc=str) -> None:
 						doc.make_gl_entries_on_cancel()
 
 					doc.docstatus = 1
+					if doc.doctype == "Sales Invoice":
+						doc.force_set_against_income_account()
+					else:
+						doc.force_set_against_expense_account()
 					doc.make_gl_entries()
 
 				elif doc.doctype in ["Payment Entry", "Journal Entry", "Expense Claim"]:
@@ -182,7 +188,9 @@ def validate_docs_for_deferred_accounting(sales_docs, purchase_docs):
 	if docs_with_deferred_revenue or docs_with_deferred_expense:
 		frappe.throw(
 			_("Documents: {0} have deferred revenue/expense enabled for them. Cannot repost.").format(
-				frappe.bold(comma_and([x[0] for x in docs_with_deferred_expense + docs_with_deferred_revenue]))
+				frappe.bold(
+					comma_and([x[0] for x in docs_with_deferred_expense + docs_with_deferred_revenue])
+				)
 			)
 		)
 

@@ -1,6 +1,8 @@
 # Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
+import json
+
 import frappe
 from frappe import _, qb
 from frappe.model.document import Document
@@ -41,9 +43,7 @@ class ProcessPaymentReconciliation(Document):
 
 	def on_cancel(self):
 		self.db_set("status", "Cancelled")
-		log = frappe.db.get_value(
-			"Process Payment Reconciliation Log", filters={"process_pr": self.name}
-		)
+		log = frappe.db.get_value("Process Payment Reconciliation Log", filters={"process_pr": self.name})
 		if log:
 			frappe.db.set_value("Process Payment Reconciliation Log", log, "status", "Cancelled")
 
@@ -129,7 +129,7 @@ def trigger_job_for_doc(docname: str | None = None):
 			frappe.db.set_value("Process Payment Reconciliation", docname, "status", "Running")
 			job_name = f"start_processing_{docname}"
 			if not is_job_running(job_name):
-				job = frappe.enqueue(
+				frappe.enqueue(
 					method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile_based_on_filters",
 					queue="long",
 					is_async=True,
@@ -147,7 +147,7 @@ def trigger_job_for_doc(docname: str | None = None):
 			# Resume tasks for running doc
 			job_name = f"start_processing_{docname}"
 			if not is_job_running(job_name):
-				job = frappe.enqueue(
+				frappe.enqueue(
 					method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile_based_on_filters",
 					queue="long",
 					is_async=True,
@@ -224,7 +224,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 
 			job_name = f"process_{doc}_fetch_and_allocate"
 			if not is_job_running(job_name):
-				job = frappe.enqueue(
+				frappe.enqueue(
 					method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.fetch_and_allocate",
 					queue="long",
 					timeout="3600",
@@ -245,7 +245,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 			if not allocated:
 				job_name = f"process__{doc}_fetch_and_allocate"
 				if not is_job_running(job_name):
-					job = frappe.enqueue(
+					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.fetch_and_allocate",
 						queue="long",
 						timeout="3600",
@@ -263,7 +263,7 @@ def reconcile_based_on_filters(doc: None | str = None) -> None:
 				else:
 					reconcile_job_name = f"process_{doc}_reconcile"
 				if not is_job_running(reconcile_job_name):
-					job = frappe.enqueue(
+					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile",
 						queue="long",
 						timeout="3600",
@@ -350,7 +350,7 @@ def fetch_and_allocate(doc: str) -> None:
 					reconcile_job_name = f"process_{doc}_reconcile"
 
 				if not is_job_running(reconcile_job_name):
-					job = frappe.enqueue(
+					frappe.enqueue(
 						method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile",
 						queue="long",
 						timeout="3600",
@@ -391,7 +391,6 @@ def reconcile(doc: None | str = None) -> None:
 					# If Payment Entry, update details only for newly linked references
 					# This is for performance
 					if allocations[0].reference_type == "Payment Entry":
-
 						references = [(x.invoice_type, x.invoice_number) for x in allocations]
 						pe = frappe.get_doc(allocations[0].reference_type, allocations[0].reference_name)
 						pe.flags.ignore_validate_update_after_submit = True
@@ -405,13 +404,14 @@ def reconcile(doc: None | str = None) -> None:
 
 					# Update reconciled count
 					reconciled_count = frappe.db.count(
-						"Process Payment Reconciliation Log Allocations", filters={"parent": log, "reconciled": True}
+						"Process Payment Reconciliation Log Allocations",
+						filters={"parent": log, "reconciled": True},
 					)
 					frappe.db.set_value(
 						"Process Payment Reconciliation Log", log, "reconciled_entries", reconciled_count
 					)
 
-				except Exception as err:
+				except Exception:
 					# Update the parent doc about the exception
 					frappe.db.rollback()
 
@@ -449,20 +449,19 @@ def reconcile(doc: None | str = None) -> None:
 						frappe.db.set_value("Process Payment Reconciliation Log", log, "reconciled", True)
 						frappe.db.set_value("Process Payment Reconciliation", doc, "status", "Completed")
 					else:
-
-						if not (frappe.db.get_value("Process Payment Reconciliation", doc, "status") == "Paused"):
+						if not (
+							frappe.db.get_value("Process Payment Reconciliation", doc, "status") == "Paused"
+						):
 							# trigger next batch in job
 							# generate reconcile job name
 							allocation = get_next_allocation(log)
 							if allocation:
-								reconcile_job_name = (
-									f"process_{doc}_reconcile_allocation_{allocation[0].idx}_{allocation[-1].idx}"
-								)
+								reconcile_job_name = f"process_{doc}_reconcile_allocation_{allocation[0].idx}_{allocation[-1].idx}"
 							else:
 								reconcile_job_name = f"process_{doc}_reconcile"
 
 							if not is_job_running(reconcile_job_name):
-								job = frappe.enqueue(
+								frappe.enqueue(
 									method="erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.reconcile",
 									queue="long",
 									timeout="3600",
@@ -481,8 +480,8 @@ def reconcile(doc: None | str = None) -> None:
 def is_any_doc_running(for_filter: str | dict | None = None) -> str | None:
 	running_doc = None
 	if for_filter:
-		if type(for_filter) == str:
-			for_filter = frappe.json.loads(for_filter)
+		if isinstance(for_filter, str):
+			for_filter = json.loads(for_filter)
 
 		running_doc = frappe.db.get_value(
 			"Process Payment Reconciliation",

@@ -21,7 +21,7 @@ INVALID_VALUES = ("", None)
 
 class BankStatementImport(DataImport):
 	def __init__(self, *args, **kwargs):
-		super(BankStatementImport, self).__init__(*args, **kwargs)
+		super().__init__(*args, **kwargs)
 
 	def validate(self):
 		doc_before_save = self.get_doc_before_save()
@@ -30,7 +30,6 @@ class BankStatementImport(DataImport):
 			or (doc_before_save and doc_before_save.import_file != self.import_file)
 			or (doc_before_save and doc_before_save.google_sheets_url != self.google_sheets_url)
 		):
-
 			template_options_dict = {}
 			column_to_field_map = {}
 			bank = frappe.get_doc("Bank", self.bank)
@@ -45,7 +44,6 @@ class BankStatementImport(DataImport):
 		self.validate_google_sheets_url()
 
 	def start_import(self):
-
 		preview = frappe.get_doc("Bank Statement Import", self.name).get_preview_from_template(
 			self.import_file, self.google_sheets_url
 		)
@@ -102,7 +100,7 @@ def download_errored_template(data_import_name):
 def parse_data_from_template(raw_data):
 	data = []
 
-	for i, row in enumerate(raw_data):
+	for _i, row in enumerate(raw_data):
 		if all(v in INVALID_VALUES for v in row):
 			# empty row
 			continue
@@ -112,9 +110,7 @@ def parse_data_from_template(raw_data):
 	return data
 
 
-def start_import(
-	data_import, bank_account, import_file_path, google_sheets_url, bank, template_options
-):
+def start_import(data_import, bank_account, import_file_path, google_sheets_url, bank, template_options):
 	"""This method runs in background job"""
 
 	update_mapping_db(bank, template_options)

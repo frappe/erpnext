@@ -1,7 +1,7 @@
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, flt, nowdate
+from frappe.utils import flt, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_delivery_note
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -86,11 +86,14 @@ class TestGrossProfit(FrappeTestCase):
 			self.customer = customer.name
 
 	def create_sales_invoice(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
@@ -115,11 +118,14 @@ class TestGrossProfit(FrappeTestCase):
 		return sinv
 
 	def create_delivery_note(
-		self, item=None, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, item=None, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in Delivery Note
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		dnote = create_delivery_note(
 			company=self.company,
 			customer=self.customer,
@@ -457,6 +463,98 @@ class TestGrossProfit(FrappeTestCase):
 			"buying_amount": 0.0,
 			"gross_profit": -100.0,
 			"gross_profit_%": 100.0,
+		}
+		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
+		self.assertDictContainsSubset(expected_entry, gp_entry[0])
+
+	def test_different_rates_in_si_and_dn(self):
+		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+
+		"""
+			Test gp calculation when invoice and delivery note differ in qty and aren't connected
+			SO -- INV
+			|
+			DN
+		"""
+		se = make_stock_entry(
+			company=self.company,
+			item_code=self.item,
+			target=self.warehouse,
+			qty=3,
+			basic_rate=700,
+			do_not_submit=True,
+		)
+		item = se.items[0]
+		se.append(
+			"items",
+			{
+				"item_code": item.item_code,
+				"s_warehouse": item.s_warehouse,
+				"t_warehouse": item.t_warehouse,
+				"qty": 10,
+				"basic_rate": 700,
+				"conversion_factor": item.conversion_factor or 1.0,
+				"transfer_qty": flt(item.qty) * (flt(item.conversion_factor) or 1.0),
+				"serial_no": item.serial_no,
+				"batch_no": item.batch_no,
+				"cost_center": item.cost_center,
+				"expense_account": item.expense_account,
+			},
+		)
+		se = se.save().submit()
+
+		so = make_sales_order(
+			customer=self.customer,
+			company=self.company,
+			warehouse=self.warehouse,
+			item=self.item,
+			rate=800,
+			qty=10,
+			do_not_save=False,
+			do_not_submit=False,
+		)
+
+		from erpnext.selling.doctype.sales_order.sales_order import (
+			make_delivery_note,
+			make_sales_invoice,
+		)
+
+		dn1 = make_delivery_note(so.name)
+		dn1.items[0].qty = 4
+		dn1.items[0].rate = 800
+		dn1.save().submit()
+
+		dn2 = make_delivery_note(so.name)
+		dn2.items[0].qty = 6
+		dn2.items[0].rate = 800
+		dn2.save().submit()
+
+		sinv = make_sales_invoice(so.name)
+		sinv.items[0].qty = 4
+		sinv.items[0].rate = 800
+		sinv.save().submit()
+
+		filters = frappe._dict(
+			company=self.company, from_date=nowdate(), to_date=nowdate(), group_by="Invoice"
+		)
+
+		columns, data = execute(filters=filters)
+		expected_entry = {
+			"parent_invoice": sinv.name,
+			"currency": "INR",
+			"sales_invoice": self.item,
+			"customer": self.customer,
+			"posting_date": frappe.utils.datetime.date.fromisoformat(nowdate()),
+			"item_code": self.item,
+			"item_name": self.item,
+			"warehouse": "Stores - _GP",
+			"qty": 4.0,
+			"avg._selling_rate": 800.0,
+			"valuation_rate": 700.0,
+			"selling_amount": 3200.0,
+			"buying_amount": 2800.0,
+			"gross_profit": 400.0,
+			"gross_profit_%": 12.5,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
 		self.assertDictContainsSubset(expected_entry, gp_entry[0])

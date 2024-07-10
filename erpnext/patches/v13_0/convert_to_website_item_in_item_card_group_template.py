@@ -1,5 +1,4 @@
 import json
-from typing import List, Union
 
 import frappe
 
@@ -42,7 +41,7 @@ def execute():
 		)
 
 
-def generate_fields_to_edit() -> List:
+def generate_fields_to_edit() -> list:
 	fields = []
 	for i in range(1, 13):
 		fields.append(f"card_{i}_item")  # fields like 'card_1_item', etc.
@@ -50,7 +49,7 @@ def generate_fields_to_edit() -> List:
 	return fields
 
 
-def make_new_website_item(item: str) -> Union[str, None]:
+def make_new_website_item(item: str) -> str | None:
 	try:
 		doc = frappe.get_doc("Item", item)
 		web_item = make_website_item(doc)  # returns [website_item.name, item_name]

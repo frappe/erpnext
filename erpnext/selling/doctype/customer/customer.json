@@ -481,7 +481,7 @@
   {
    "fieldname": "contact_and_address_tab",
    "fieldtype": "Tab Break",
-   "label": "Contact & Address"
+   "label": "Address & Contact"
   },
   {
    "fieldname": "defaults_tab",
@@ -567,7 +567,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-12-28 13:15:36.298369",
+ "modified": "2024-05-08 18:03:20.716169",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

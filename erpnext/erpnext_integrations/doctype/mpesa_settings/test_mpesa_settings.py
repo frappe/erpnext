@@ -90,9 +90,7 @@ class TestMpesaSettings(unittest.TestCase):
 			pluck="name",
 		)
 
-		callback_response = get_payment_callback_payload(
-			Amount=500, CheckoutRequestID=integration_req_ids[0]
-		)
+		callback_response = get_payment_callback_payload(Amount=500, CheckoutRequestID=integration_req_ids[0])
 		verify_transaction(**callback_response)
 		# test creation of integration request
 		integration_request = frappe.get_doc("Integration Request", integration_req_ids[0])

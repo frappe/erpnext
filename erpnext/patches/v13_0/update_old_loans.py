@@ -13,7 +13,6 @@ from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_
 
 
 def execute():
-
 	# Create a penalty account for loan types
 
 	frappe.reload_doc("loan_management", "doctype", "loan_type")
@@ -111,9 +110,7 @@ def execute():
 				loan_type_name = create_loan_type(loan, loan_type_name, penalty_account)
 
 			# update loan type in loan
-			frappe.db.sql(
-				"UPDATE `tabLoan` set loan_type = %s where name = %s", (loan_type_name, loan.name)
-			)
+			frappe.db.sql("UPDATE `tabLoan` set loan_type = %s where name = %s", (loan_type_name, loan.name))
 
 			loan_type = loan_type_name
 			if loan_type_name not in updated_loan_types:

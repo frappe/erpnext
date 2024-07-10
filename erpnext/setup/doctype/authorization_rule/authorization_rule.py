@@ -48,15 +48,11 @@ class AuthorizationRule(Document):
 			"Customerwise Discount",
 			"Itemwise Discount",
 		]:
-			frappe.throw(
-				_("Cannot set authorization on basis of Discount for {0}").format(self.transaction)
-			)
+			frappe.throw(_("Cannot set authorization on basis of Discount for {0}").format(self.transaction))
 		elif self.based_on == "Average Discount" and flt(self.value) > 100.00:
 			frappe.throw(_("Discount must be less than 100"))
 		elif self.based_on == "Customerwise Discount" and not self.master_name:
 			frappe.throw(_("Customer required for 'Customerwise Discount'"))
-		else:
-			self.based_on = "Not Applicable"
 
 	def validate(self):
 		self.check_duplicate_entry()

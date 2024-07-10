@@ -1,44 +1,43 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.ui.form.on('Pricing Rule', {
-	setup: function(frm) {
-		frm.fields_dict["for_price_list"].get_query = function(doc){
+frappe.ui.form.on("Pricing Rule", {
+	setup: function (frm) {
+		frm.fields_dict["for_price_list"].get_query = function (doc) {
 			return {
 				filters: {
-					'selling': doc.selling,
-					'buying': doc.buying,
-					'currency': doc.currency
-				}
+					selling: doc.selling,
+					buying: doc.buying,
+					currency: doc.currency,
+				},
 			};
 		};
 
-		['items', 'item_groups', 'brands'].forEach(d => {
-			frm.fields_dict[d].grid.get_field('uom').get_query = function(doc, cdt, cdn){
+		["items", "item_groups", "brands"].forEach((d) => {
+			frm.fields_dict[d].grid.get_field("uom").get_query = function (doc, cdt, cdn) {
 				var row = locals[cdt][cdn];
 				return {
-					query:"erpnext.accounts.doctype.pricing_rule.pricing_rule.get_item_uoms",
-					filters: {'value': row[frappe.scrub(doc.apply_on)], apply_on: doc.apply_on}
-				}
+					query: "erpnext.accounts.doctype.pricing_rule.pricing_rule.get_item_uoms",
+					filters: { value: row[frappe.scrub(doc.apply_on)], apply_on: doc.apply_on },
+				};
 			};
-		})
+		});
 	},
 
-	onload: function(frm) {
-		if(frm.doc.__islocal && !frm.doc.applicable_for && (frm.doc.customer || frm.doc.supplier)) {
-			if(frm.doc.customer) {
+	onload: function (frm) {
+		if (frm.doc.__islocal && !frm.doc.applicable_for && (frm.doc.customer || frm.doc.supplier)) {
+			if (frm.doc.customer) {
 				frm.doc.applicable_for = "Customer";
-				frm.doc.selling = 1
+				frm.doc.selling = 1;
 			} else {
 				frm.doc.applicable_for = "Supplier";
-				frm.doc.buying = 1
+				frm.doc.buying = 1;
 			}
 		}
 	},
 
-	refresh: function(frm) {
-		var help_content =
-			`<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
+	refresh: function (frm) {
+		var help_content = `<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
 					<h4>
 						<i class="fa fa-hand-right"></i>
@@ -97,61 +96,70 @@ frappe.ui.form.on('Pricing Rule', {
 				</td></tr>
 			</table>`;
 
-		frm.set_df_property('pricing_rule_help', 'options', help_content);
+		frm.set_df_property("pricing_rule_help", "options", help_content);
 		frm.events.set_options_for_applicable_for(frm);
 		frm.trigger("toggle_reqd_apply_on");
 	},
 
-	apply_on: function(frm) {
+	apply_on: function (frm) {
 		frm.trigger("toggle_reqd_apply_on");
 	},
 
-	toggle_reqd_apply_on: function(frm) {
+	toggle_reqd_apply_on: function (frm) {
 		const fields = {
-			'Item Code': 'items',
-			'Item Group': 'item_groups',
-			'Brand': 'brands'
-		}
+			"Item Code": "items",
+			"Item Group": "item_groups",
+			Brand: "brands",
+		};
 
 		for (var key in fields) {
-			frm.toggle_reqd(fields[key],
-				frm.doc.apply_on === key ? 1 : 0);
+			frm.toggle_reqd(fields[key], frm.doc.apply_on === key ? 1 : 0);
 		}
 	},
 
-	rate_or_discount: function(frm) {
-		if(frm.doc.rate_or_discount == 'Rate') {
-			frm.set_value('for_price_list', "");
+	rate_or_discount: function (frm) {
+		if (frm.doc.rate_or_discount == "Rate") {
+			frm.set_value("for_price_list", "");
 		}
 	},
 
-	selling: function(frm) {
+	selling: function (frm) {
 		frm.events.set_options_for_applicable_for(frm);
 	},
 
-	buying: function(frm) {
+	buying: function (frm) {
 		frm.events.set_options_for_applicable_for(frm);
 	},
 
 	//Dynamically change the description based on type of margin
-	margin_type: function(frm){
-		frm.set_df_property('margin_rate_or_amount', 'description', frm.doc.margin_type=='Percentage'?'In Percentage %':'In Amount');
+	margin_type: function (frm) {
+		frm.set_df_property(
+			"margin_rate_or_amount",
+			"description",
+			frm.doc.margin_type == "Percentage" ? "In Percentage %" : "In Amount"
+		);
 	},
 
-	set_options_for_applicable_for: function(frm) {
+	set_options_for_applicable_for: function (frm) {
 		var options = [""];
 		var applicable_for = frm.doc.applicable_for;
 
-		if(frm.doc.selling) {
-			options = $.merge(options, ["Customer", "Customer Group", "Territory", "Sales Partner", "Campaign"]);
+		if (frm.doc.selling) {
+			options = $.merge(options, [
+				"Customer",
+				"Customer Group",
+				"Territory",
+				"Sales Partner",
+				"Campaign",
+			]);
 		}
-		if(frm.doc.buying) {
+		if (frm.doc.buying) {
 			$.merge(options, ["Supplier", "Supplier Group"]);
 		}
 
 		set_field_options("applicable_for", options.join("\n"));
 
-		if(!in_list(options, applicable_for)) applicable_for = null;
+		if (!in_list(options, applicable_for)) applicable_for = null;
 		frm.set_value("applicable_for", applicable_for);
-	}
+	},
 });

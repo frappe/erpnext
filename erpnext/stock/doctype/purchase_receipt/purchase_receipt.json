@@ -649,7 +649,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1242,7 +1242,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-18 17:26:41.279663",
+ "modified": "2024-03-20 16:05:31.713453",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

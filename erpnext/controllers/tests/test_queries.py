@@ -7,13 +7,10 @@ from erpnext.controllers import queries
 
 
 def add_default_params(func, doctype):
-	return partial(
-		func, doctype=doctype, txt="", searchfield="name", start=0, page_len=20, filters=None
-	)
+	return partial(func, doctype=doctype, txt="", searchfield="name", start=0, page_len=20, filters=None)
 
 
 class TestQueries(unittest.TestCase):
-
 	# All tests are based on doctype/test_records.json
 
 	def assert_nested_in(self, item, container):

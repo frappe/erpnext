@@ -14,9 +14,7 @@ frappe.help.help_links["Form/Rename Tool"] = [
 frappe.help.help_links["List/User"] = [
 	{
 		label: "New User",
-		url:
-			docsUrl +
-			"user/manual/en/setting-up/users-and-permissions/adding-users",
+		url: docsUrl + "user/manual/en/setting-up/users-and-permissions/adding-users",
 	},
 	{
 		label: "Rename User",
@@ -27,9 +25,7 @@ frappe.help.help_links["List/User"] = [
 frappe.help.help_links["permission-manager"] = [
 	{
 		label: "Role Permissions Manager",
-		url:
-			docsUrl +
-			"user/manual/en/setting-up/users-and-permissions/role-based-permissions",
+		url: docsUrl + "user/manual/en/setting-up/users-and-permissions/role-based-permissions",
 	},
 	{
 		label: "Managing Perm Level in Permissions Manager",
@@ -37,14 +33,11 @@ frappe.help.help_links["permission-manager"] = [
 	},
 	{
 		label: "User Permissions",
-		url:
-			docsUrl +
-			"user/manual/en/setting-up/users-and-permissions/user-permissions",
+		url: docsUrl + "user/manual/en/setting-up/users-and-permissions/user-permissions",
 	},
 	{
 		label: "Sharing",
-		url:
-			docsUrl + "user/manual/en/setting-up/users-and-permissions/sharing",
+		url: docsUrl + "user/manual/en/setting-up/users-and-permissions/sharing",
 	},
 	{
 		label: "Password",
@@ -66,9 +59,7 @@ frappe.help.help_links["Form/Data Import"] = [
 	},
 	{
 		label: "Overwriting Data from Data Import Tool",
-		url:
-			docsUrl +
-			"user/manual/en/setting-up/articles/overwriting-data-from-data-import-tool",
+		url: docsUrl + "user/manual/en/setting-up/articles/overwriting-data-from-data-import-tool",
 	},
 ];
 
@@ -79,18 +70,14 @@ frappe.help.help_links["List/Data Import"] = [
 	},
 	{
 		label: "Overwriting Data from Data Import Tool",
-		url:
-			docsUrl +
-			"user/manual/en/setting-up/articles/overwriting-data-from-data-import-tool",
+		url: docsUrl + "user/manual/en/setting-up/articles/overwriting-data-from-data-import-tool",
 	},
 ];
 
 frappe.help.help_links["module_setup"] = [
 	{
 		label: "Role Permissions Manager",
-		url:
-			docsUrl +
-			"user/manual/en/setting-up/users-and-permissions/role-based-permissions",
+		url: docsUrl + "user/manual/en/setting-up/users-and-permissions/role-based-permissions",
 	},
 ];
 
@@ -101,9 +88,7 @@ frappe.help.help_links["Form/Naming Series"] = [
 	},
 	{
 		label: "Setting the Current Value for Naming Series",
-		url:
-			docsUrl +
-			"user/manual/en/setting-up/articles/naming-series-current-value",
+		url: docsUrl + "user/manual/en/setting-up/articles/naming-series-current-value",
 	},
 ];
 
@@ -217,18 +202,14 @@ frappe.help.help_links["print-format-builder"] = [
 frappe.help.help_links["Form/PayPal Settings"] = [
 	{
 		label: "PayPal Settings",
-		url:
-			docsUrl +
-			"user/manual/en/erpnext_integration/paypal-integration",
+		url: docsUrl + "user/manual/en/erpnext_integration/paypal-integration",
 	},
 ];
 
 frappe.help.help_links["Form/Razorpay Settings"] = [
 	{
 		label: "Razorpay Settings",
-		url:
-			docsUrl +
-			"user/manual/en/erpnext_integration/razorpay-integration",
+		url: docsUrl + "user/manual/en/erpnext_integration/razorpay-integration",
 	},
 ];
 
@@ -242,17 +223,14 @@ frappe.help.help_links["Form/Dropbox Settings"] = [
 frappe.help.help_links["Form/LDAP Settings"] = [
 	{
 		label: "LDAP Settings",
-		url:
-			docsUrl + "user/manual/en/erpnext_integration/ldap-integration",
+		url: docsUrl + "user/manual/en/erpnext_integration/ldap-integration",
 	},
 ];
 
 frappe.help.help_links["Form/Stripe Settings"] = [
 	{
 		label: "Stripe Settings",
-		url:
-			docsUrl +
-			"user/manual/en/erpnext_integration/stripe-integration",
+		url: docsUrl + "user/manual/en/erpnext_integration/stripe-integration",
 	},
 ];
 
@@ -266,9 +244,7 @@ frappe.help.help_links["Form/Quotation"] = [
 	},
 	{
 		label: "Sales Person",
-		url:
-			docsUrl +
-			"user/manual/en/selling/articles/sales-persons-in-the-sales-transactions",
+		url: docsUrl + "user/manual/en/selling/articles/sales-persons-in-the-sales-transactions",
 	},
 	{
 		label: "Applying Margin",
@@ -340,9 +316,7 @@ frappe.help.help_links["Form/Sales Order"] = [
 	},
 	{
 		label: "Sales Person",
-		url:
-			docsUrl +
-			"user/manual/en/selling/articles/sales-persons-in-the-sales-transactions",
+		url: docsUrl + "user/manual/en/selling/articles/sales-persons-in-the-sales-transactions",
 	},
 	{
 		label: "Close Sales Order",
@@ -421,15 +395,11 @@ frappe.help.help_links["Form/Purchase Order"] = [
 	},
 	{
 		label: "Item UoM",
-		url:
-			docsUrl +
-			"user/manual/en/buying/articles/purchasing-in-different-unit",
+		url: docsUrl + "user/manual/en/buying/articles/purchasing-in-different-unit",
 	},
 	{
 		label: "Supplier Item Code",
-		url:
-			docsUrl +
-			"user/manual/en/buying/articles/maintaining-suppliers-part-no-in-item",
+		url: docsUrl + "user/manual/en/buying/articles/maintaining-suppliers-part-no-in-item",
 	},
 	{
 		label: "Recurring Purchase Order",
@@ -472,9 +442,7 @@ frappe.help.help_links["Form/SMS Settings"] = [
 frappe.help.help_links["List/Stock Reconciliation"] = [
 	{
 		label: "Stock Reconciliation",
-		url:
-			docsUrl +
-			"user/manual/en/stock/stock-reconciliation",
+		url: docsUrl + "user/manual/en/stock/stock-reconciliation",
 	},
 ];
 
@@ -496,9 +464,7 @@ frappe.help.help_links["List/Company"] = [
 	},
 	{
 		label: "Delete All Related Transactions for a Company",
-		url:
-			docsUrl +
-			"user/manual/en/setting-up/articles/delete-a-company-and-all-related-transactions",
+		url: docsUrl + "user/manual/en/setting-up/articles/delete-a-company-and-all-related-transactions",
 	},
 ];
 
@@ -511,9 +477,7 @@ frappe.help.help_links["Tree/Account"] = [
 	},
 	{
 		label: "Managing Tree Mastes",
-		url:
-			docsUrl +
-			"user/manual/en/setting-up/articles/managing-tree-structure-masters",
+		url: docsUrl + "user/manual/en/setting-up/articles/managing-tree-structure-masters",
 	},
 ];
 
@@ -648,8 +612,7 @@ frappe.help.help_links["List/Item"] = [
 	},
 	{
 		label: "Barcode",
-		url:
-			docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
+		url: docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
 	},
 	{
 		label: "Item Wise Taxation",
@@ -669,9 +632,7 @@ frappe.help.help_links["List/Item"] = [
 	},
 	{
 		label: "Item Valuation",
-		url:
-			docsUrl +
-			"user/manual/en/stock/articles/item-valuation-fifo-and-moving-average",
+		url: docsUrl + "user/manual/en/stock/articles/item-valuation-fifo-and-moving-average",
 	},
 ];
 
@@ -683,8 +644,7 @@ frappe.help.help_links["Form/Item"] = [
 	},
 	{
 		label: "Barcode",
-		url:
-			docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
+		url: docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
 	},
 	{
 		label: "Item Wise Taxation",
@@ -704,9 +664,7 @@ frappe.help.help_links["Form/Item"] = [
 	},
 	{
 		label: "Item Valuation",
-		url:
-			docsUrl +
-			"user/manual/en/stock/item/item-valuation-fifo-and-moving-average",
+		url: docsUrl + "user/manual/en/stock/item/item-valuation-fifo-and-moving-average",
 	},
 ];
 
@@ -717,8 +675,7 @@ frappe.help.help_links["List/Purchase Receipt"] = [
 	},
 	{
 		label: "Barcode",
-		url:
-			docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
+		url: docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
 	},
 ];
 
@@ -729,8 +686,7 @@ frappe.help.help_links["List/Delivery Note"] = [
 	},
 	{
 		label: "Barcode",
-		url:
-			docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
+		url: docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
 	},
 	{
 		label: "Sales Return",
@@ -749,8 +705,7 @@ frappe.help.help_links["Form/Delivery Note"] = [
 	},
 	{
 		label: "Barcode",
-		url:
-			docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
+		url: docsUrl + "user/manual/en/stock/articles/track-items-using-barcode",
 	},
 ];
 
@@ -772,9 +727,7 @@ frappe.help.help_links["List/Material Request"] = [
 	},
 	{
 		label: "Auto-creation of Material Request",
-		url:
-			docsUrl +
-			"user/manual/en/stock/articles/auto-creation-of-material-request",
+		url: docsUrl + "user/manual/en/stock/articles/auto-creation-of-material-request",
 	},
 ];
 
@@ -785,9 +738,7 @@ frappe.help.help_links["Form/Material Request"] = [
 	},
 	{
 		label: "Auto-creation of Material Request",
-		url:
-			docsUrl +
-			"user/manual/en/stock/articles/auto-creation-of-material-request",
+		url: docsUrl + "user/manual/en/stock/articles/auto-creation-of-material-request",
 	},
 ];
 
@@ -827,13 +778,9 @@ frappe.help.help_links["Form/Serial No"] = [
 	{ label: "Serial No", url: docsUrl + "user/manual/en/stock/serial-no" },
 ];
 
-frappe.help.help_links["List/Batch"] = [
-	{ label: "Batch", url: docsUrl + "user/manual/en/stock/batch" },
-];
+frappe.help.help_links["List/Batch"] = [{ label: "Batch", url: docsUrl + "user/manual/en/stock/batch" }];
 
-frappe.help.help_links["Form/Batch"] = [
-	{ label: "Batch", url: docsUrl + "user/manual/en/stock/batch" },
-];
+frappe.help.help_links["Form/Batch"] = [{ label: "Batch", url: docsUrl + "user/manual/en/stock/batch" }];
 
 frappe.help.help_links["Form/Packing Slip"] = [
 	{
@@ -873,8 +820,7 @@ frappe.help.help_links["Form/Item Attribute"] = [
 frappe.help.help_links["Form/UOM"] = [
 	{
 		label: "Fractions in UOM",
-		url:
-			docsUrl + "user/manual/en/stock/articles/managing-fractions-in-uom",
+		url: docsUrl + "user/manual/en/stock/articles/managing-fractions-in-uom",
 	},
 ];
 
@@ -887,21 +833,15 @@ frappe.help.help_links["Form/Stock Reconciliation"] = [
 
 //CRM
 
-frappe.help.help_links["Form/Lead"] = [
-	{ label: "Lead", url: docsUrl + "user/manual/en/CRM/lead" },
-];
+frappe.help.help_links["Form/Lead"] = [{ label: "Lead", url: docsUrl + "user/manual/en/CRM/lead" }];
 
 frappe.help.help_links["Form/Opportunity"] = [
 	{ label: "Opportunity", url: docsUrl + "user/manual/en/CRM/opportunity" },
 ];
 
-frappe.help.help_links["Form/Address"] = [
-	{ label: "Address", url: docsUrl + "user/manual/en/CRM/address" },
-];
+frappe.help.help_links["Form/Address"] = [{ label: "Address", url: docsUrl + "user/manual/en/CRM/address" }];
 
-frappe.help.help_links["Form/Contact"] = [
-	{ label: "Contact", url: docsUrl + "user/manual/en/CRM/contact" },
-];
+frappe.help.help_links["Form/Contact"] = [{ label: "Contact", url: docsUrl + "user/manual/en/CRM/contact" }];
 
 frappe.help.help_links["Form/Newsletter"] = [
 	{ label: "Newsletter", url: docsUrl + "user/manual/en/CRM/newsletter" },
@@ -921,15 +861,11 @@ frappe.help.help_links["Tree/Sales Person"] = [
 frappe.help.help_links["Form/Sales Person"] = [
 	{
 		label: "Sales Person Target",
-		url:
-			docsUrl +
-			"user/manual/en/selling/sales-person-target-allocation",
+		url: docsUrl + "user/manual/en/selling/sales-person-target-allocation",
 	},
 	{
 		label: "Sales Person in Transactions",
-		url:
-			docsUrl +
-			"user/manual/en/selling/articles/sales-persons-in-the-sales-transactions",
+		url: docsUrl + "user/manual/en/selling/articles/sales-persons-in-the-sales-transactions",
 	},
 ];
 
@@ -942,9 +878,7 @@ frappe.help.help_links["Form/BOM"] = [
 	},
 	{
 		label: "Nested BOM Structure",
-		url:
-			docsUrl +
-			"user/manual/en/manufacturing/articles/managing-multi-level-bom",
+		url: docsUrl + "user/manual/en/manufacturing/articles/managing-multi-level-bom",
 	},
 ];
 

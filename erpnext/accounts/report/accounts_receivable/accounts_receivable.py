@@ -40,24 +40,20 @@ def execute(filters=None):
 	return ReceivablePayableReport(filters).run(args)
 
 
-class ReceivablePayableReport(object):
+class ReceivablePayableReport:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.qb_selection_filter = []
 		self.ple = qb.DocType("Payment Ledger Entry")
 		self.filters.report_date = getdate(self.filters.report_date or nowdate())
 		self.age_as_on = (
-			getdate(nowdate())
-			if self.filters.report_date > getdate(nowdate())
-			else self.filters.report_date
+			getdate(nowdate()) if self.filters.report_date > getdate(nowdate()) else self.filters.report_date
 		)
 
 	def run(self, args):
 		self.filters.update(args)
 		self.set_defaults()
-		self.party_naming_by = frappe.db.get_value(
-			args.get("naming_by")[0], None, args.get("naming_by")[1]
-		)
+		self.party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
@@ -72,9 +68,7 @@ class ReceivablePayableReport(object):
 		self.currency_precision = get_currency_precision() or 2
 		self.dr_or_cr = "debit" if self.filters.account_type == "Receivable" else "credit"
 		self.account_type = self.filters.account_type
-		self.party_type = frappe.db.get_all(
-			"Party Type", {"account_type": self.account_type}, pluck="name"
-		)
+		self.party_type = frappe.db.get_all("Party Type", {"account_type": self.account_type}, pluck="name")
 		self.party_details = {}
 		self.invoices = set()
 		self.skip_total_row = 0
@@ -128,7 +122,7 @@ class ReceivablePayableReport(object):
 			else:
 				key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party)
 
-			if not key in self.voucher_balance:
+			if key not in self.voucher_balance:
 				self.voucher_balance[key] = frappe._dict(
 					voucher_type=ple.voucher_type,
 					voucher_no=ple.voucher_no,
@@ -281,7 +275,7 @@ class ReceivablePayableReport(object):
 	def build_data(self):
 		# set outstanding for all the accumulated balances
 		# as we can use this to filter out invoices without outstanding
-		for key, row in self.voucher_balance.items():
+		for _key, row in self.voucher_balance.items():
 			row.outstanding = flt(row.invoiced - row.paid - row.credit_note, self.currency_precision)
 			row.outstanding_in_account_currency = flt(
 				row.invoiced_in_account_currency
@@ -295,7 +289,7 @@ class ReceivablePayableReport(object):
 			must_consider = False
 			if self.filters.get("for_revaluation_journals"):
 				if (abs(row.outstanding) > 0.0 / 10**self.currency_precision) or (
-					(abs(row.outstanding_in_account_currency) > 0.0 / 10**self.currency_precision)
+					abs(row.outstanding_in_account_currency) > 0.0 / 10**self.currency_precision
 				):
 					must_consider = True
 			else:
@@ -481,19 +475,17 @@ class ReceivablePayableReport(object):
 	def get_payment_terms(self, row):
 		# build payment_terms for row
 		payment_terms_details = frappe.db.sql(
-			"""
+			f"""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
 				si.total_advance, ps.due_date, ps.payment_term, ps.payment_amount, ps.base_payment_amount,
 				ps.description, ps.paid_amount, ps.discounted_amount
-			from `tab{0}` si, `tabPayment Schedule` ps
+			from `tab{row.voucher_type}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
 				si.name = %s
 			order by ps.paid_amount desc, due_date
-		""".format(
-				row.voucher_type
-			),
+		""",
 			row.voucher_no,
 			as_dict=1,
 		)
@@ -509,8 +501,9 @@ class ReceivablePayableReport(object):
 		# Deduct that from paid amount pre allocation
 		row.paid -= flt(payment_terms_details[0].total_advance)
 
-		# If no or single payment terms, no need to split the row
-		if len(payment_terms_details) <= 1:
+		# If single payment terms, no need to split the row
+		if len(payment_terms_details) == 1 and payment_terms_details[0].payment_term:
+			self.append_payment_term(row, payment_terms_details[0], original_row)
 			return
 
 		for d in payment_terms_details:
@@ -673,7 +666,7 @@ class ReceivablePayableReport(object):
 			else:
 				future_amount_field = "future_amount_in_base_currency"
 
-			if row.remaining_balance > 0 and future.get(future_amount_field):
+			if row.remaining_balance != 0 and future.get(future_amount_field):
 				if future.get(future_amount_field) > row.outstanding:
 					row.future_amount = row.outstanding
 					future[future_amount_field] = future.get(future_amount_field) - row.outstanding
@@ -692,7 +685,12 @@ class ReceivablePayableReport(object):
 
 	def get_return_entries(self):
 		doctype = "Sales Invoice" if self.account_type == "Receivable" else "Purchase Invoice"
-		filters = {"is_return": 1, "docstatus": 1, "company": self.filters.company}
+		filters = {
+			"is_return": 1,
+			"docstatus": 1,
+			"company": self.filters.company,
+			"update_outstanding_for_self": 0,
+		}
 		or_filters = {}
 		for party_type in self.party_type:
 			party_field = scrub(party_type)
@@ -732,9 +730,7 @@ class ReceivablePayableReport(object):
 		row.age = (getdate(self.age_as_on) - getdate(entry_date)).days or 0
 		index = None
 
-		if not (
-			self.filters.range1 and self.filters.range2 and self.filters.range3 and self.filters.range4
-		):
+		if not (self.filters.range1 and self.filters.range2 and self.filters.range3 and self.filters.range4):
 			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = (
 				30,
 				60,
@@ -760,12 +756,10 @@ class ReceivablePayableReport(object):
 
 		if self.filters.show_future_payments:
 			self.qb_selection_filter.append(
-				(
-					self.ple.posting_date.lte(self.filters.report_date)
-					| (
-						(self.ple.voucher_no == self.ple.against_voucher_no)
-						& (Date(self.ple.creation).lte(self.filters.report_date))
-					)
+				self.ple.posting_date.lte(self.filters.report_date)
+				| (
+					(self.ple.voucher_no == self.ple.against_voucher_no)
+					& (Date(self.ple.creation).lte(self.filters.report_date))
 				)
 			)
 		else:
@@ -833,7 +827,7 @@ class ReceivablePayableReport(object):
 		self.qb_selection_filter = []
 		self.or_filters = []
 
-		for party_type in self.party_type:
+		for _party_type in self.party_type:
 			self.add_common_filters()
 
 			if self.account_type == "Receivable":
@@ -970,7 +964,7 @@ class ReceivablePayableReport(object):
 			return True
 
 	def get_party_details(self, party):
-		if not party in self.party_details:
+		if party not in self.party_details:
 			if self.account_type == "Receivable":
 				fields = ["customer_name", "territory", "customer_group", "customer_primary_contact"]
 
@@ -1033,20 +1027,6 @@ class ReceivablePayableReport(object):
 				fieldname="customer_primary_contact",
 				fieldtype="Link",
 				options="Contact",
-			)
-		if self.filters.party_type == "Customer":
-			self.add_column(
-				_("Customer Name"),
-				fieldname="customer_name",
-				fieldtype="Link",
-				options="Customer",
-			)
-		elif self.filters.party_type == "Supplier":
-			self.add_column(
-				_("Supplier Name"),
-				fieldname="supplier_name",
-				fieldtype="Link",
-				options="Supplier",
 			)
 
 		self.add_column(label=_("Cost Center"), fieldname="cost_center", fieldtype="Data")

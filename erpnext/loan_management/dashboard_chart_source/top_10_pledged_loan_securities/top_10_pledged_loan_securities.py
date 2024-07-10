@@ -45,16 +45,14 @@ def get_data(
 
 	unpledges = frappe._dict(
 		frappe.db.sql(
-			"""
+			f"""
 		SELECT u.loan_security, sum(u.qty) as qty
 		FROM `tabLoan Security Unpledge` up, `tabUnpledge` u
 		WHERE u.parent = up.name
 		AND up.status = 'Approved'
 		{conditions}
 		GROUP BY u.loan_security
-	""".format(
-				conditions=conditions
-			),
+	""",
 			filters,
 			as_list=1,
 		)
@@ -62,16 +60,14 @@ def get_data(
 
 	pledges = frappe._dict(
 		frappe.db.sql(
-			"""
+			f"""
 		SELECT p.loan_security, sum(p.qty) as qty
 		FROM `tabLoan Security Pledge` lp, `tabPledge`p
 		WHERE p.parent = lp.name
 		AND lp.status = 'Pledged'
 		{conditions}
 		GROUP BY p.loan_security
-	""".format(
-				conditions=conditions
-			),
+	""",
 			filters,
 			as_list=1,
 		)

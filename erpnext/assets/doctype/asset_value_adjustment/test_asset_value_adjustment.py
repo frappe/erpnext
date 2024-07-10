@@ -20,9 +20,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		)
 
 	def test_current_asset_value(self):
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=100000.0, location="Test Location")
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)
@@ -49,9 +47,7 @@ class TestAssetValueAdjustment(unittest.TestCase):
 		self.assertEqual(current_value, 100000.0)
 
 	def test_asset_depreciation_value_adjustment(self):
-		pr = make_purchase_receipt(
-			item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location"
-		)
+		pr = make_purchase_receipt(item_code="Macbook Pro", qty=1, rate=120000.0, location="Test Location")
 
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, "name")
 		asset_doc = frappe.get_doc("Asset", asset_name)
@@ -107,12 +103,11 @@ class TestAssetValueAdjustment(unittest.TestCase):
 			["2023-05-31", 9983.33, 45408.05],
 			["2023-06-30", 9983.33, 55391.38],
 			["2023-07-31", 9983.33, 65374.71],
-			["2023-08-31", 8300.0, 73674.71],
-			["2023-09-30", 8300.0, 81974.71],
-			["2023-10-31", 8300.0, 90274.71],
-			["2023-11-30", 8300.0, 98574.71],
-			["2023-12-31", 8300.0, 106874.71],
-			["2024-01-15", 8300.0, 115174.71],
+			["2023-08-31", 9960.0, 75334.71],
+			["2023-09-30", 9960.0, 85294.71],
+			["2023-10-31", 9960.0, 95254.71],
+			["2023-11-30", 9960.0, 105214.71],
+			["2023-12-15", 9960.0, 115174.71],
 		]
 
 		schedules = [

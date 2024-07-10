@@ -30,7 +30,9 @@ class BankAccount(Document):
 
 	def validate_account(self):
 		if self.account:
-			if accounts := frappe.db.get_all("Bank Account", filters={"account": self.account}, as_list=1):
+			if accounts := frappe.db.get_all(
+				"Bank Account", filters={"account": self.account, "name": ["!=", self.name]}, as_list=1
+			):
 				frappe.throw(
 					_("'{0}' account is already used by {1}. Use another account.").format(
 						frappe.bold(self.account),

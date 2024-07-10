@@ -47,9 +47,7 @@ def update_shortfall_status(loan, security_value, on_cancel=0):
 
 @frappe.whitelist()
 def add_security(loan):
-	loan_details = frappe.db.get_value(
-		"Loan", loan, ["applicant", "company", "applicant_type"], as_dict=1
-	)
+	loan_details = frappe.db.get_value("Loan", loan, ["applicant", "company", "applicant_type"], as_dict=1)
 
 	loan_security_pledge = frappe.new_doc("Loan Security Pledge")
 	loan_security_pledge.loan = loan
@@ -61,7 +59,6 @@ def add_security(loan):
 
 
 def check_for_ltv_shortfall(process_loan_security_shortfall):
-
 	update_time = get_datetime()
 
 	loan_security_price_map = frappe._dict(
@@ -92,8 +89,6 @@ def check_for_ltv_shortfall(process_loan_security_shortfall):
 			"Loan Security Shortfall", fields=["loan", "name"], filters={"status": "Pending"}, as_list=1
 		)
 	)
-
-	loan_security_map = {}
 
 	for loan in loans:
 		if loan.status == "Disbursed":

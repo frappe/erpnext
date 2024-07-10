@@ -53,9 +53,7 @@ class LoanApplication(Document):
 
 		maximum_loan_limit = frappe.db.get_value("Loan Type", self.loan_type, "maximum_loan_amount")
 		if maximum_loan_limit and self.loan_amount > maximum_loan_limit:
-			frappe.throw(
-				_("Loan Amount cannot exceed Maximum Loan Amount of {0}").format(maximum_loan_limit)
-			)
+			frappe.throw(_("Loan Amount cannot exceed Maximum Loan Amount of {0}").format(maximum_loan_limit))
 
 		if self.maximum_loan_amount and self.loan_amount > self.maximum_loan_amount:
 			frappe.throw(
@@ -83,7 +81,6 @@ class LoanApplication(Document):
 
 	def set_pledge_amount(self):
 		for proposed_pledge in self.proposed_pledges:
-
 			if not proposed_pledge.qty and not proposed_pledge.amount:
 				frappe.throw(_("Qty or Amount is mandatroy for loan security"))
 
@@ -98,7 +95,6 @@ class LoanApplication(Document):
 			)
 
 	def get_repayment_details(self):
-
 		if self.is_term_loan:
 			if self.repayment_method == "Repay Over Number of Periods":
 				self.repayment_amount = get_monthly_repayment_amount(
@@ -110,9 +106,14 @@ class LoanApplication(Document):
 				if monthly_interest_rate:
 					min_repayment_amount = self.loan_amount * monthly_interest_rate
 					if self.repayment_amount - min_repayment_amount <= 0:
-						frappe.throw(_("Repayment Amount must be greater than " + str(flt(min_repayment_amount, 2))))
+						frappe.throw(
+							_("Repayment Amount must be greater than " + str(flt(min_repayment_amount, 2)))
+						)
 					self.repayment_periods = math.ceil(
-						(math.log(self.repayment_amount) - math.log(self.repayment_amount - min_repayment_amount))
+						(
+							math.log(self.repayment_amount)
+							- math.log(self.repayment_amount - min_repayment_amount)
+						)
 						/ (math.log(1 + monthly_interest_rate))
 					)
 				else:
@@ -206,7 +207,6 @@ def create_pledge(loan_application, loan=None):
 		lsp.loan = loan
 
 	for pledge in loan_application_doc.proposed_pledges:
-
 		lsp.append(
 			"securities",
 			{

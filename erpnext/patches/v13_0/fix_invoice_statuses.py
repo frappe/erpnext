@@ -41,7 +41,7 @@ def execute():
 					("Overdue", "Overdue and Discounted", "Partly Paid", "Partly Paid and Discounted"),
 				),
 				"outstanding_amount": (">", 0),
-				"modified": (">", "2021-01-01")
+				"modified": (">", "2021-01-01"),
 				# an assumption is being made that only invoices modified
 				# after 2021 got affected as incorrectly overdue.
 				# required for performance reasons.

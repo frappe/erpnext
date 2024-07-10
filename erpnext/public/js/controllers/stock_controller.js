@@ -11,6 +11,18 @@ erpnext.stock.StockController = class StockController extends frappe.ui.form.Con
 		}
 	}
 
+	barcode(doc, cdt, cdn)  {
+		let row = locals[cdt][cdn];
+		if (row.barcode) {
+			erpnext.stock.utils.set_item_details_using_barcode(this.frm, row, (r) => {
+				frappe.model.set_value(cdt, cdn, {
+					"item_code": r.message.item_code,
+					"qty": 1,
+				});
+			});
+		}
+	}
+
 	setup_warehouse_query() {
 		var me = this;
 		erpnext.queries.setup_queries(this.frm, "Warehouse", function() {
