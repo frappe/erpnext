@@ -591,7 +591,7 @@ $.extend(erpnext.item, {
 						? {
 								fieldtype: "Check",
 								label: __("Create a variant with the template image."),
-								fieldname: "use_same_image",
+								fieldname: "use_template_image",
 								default: 0,
 						  }
 						: null,
@@ -609,7 +609,7 @@ $.extend(erpnext.item, {
 
 			me.multiple_variant_dialog.set_primary_action(__("Create Variants"), () => {
 				let selected_attributes = get_selected_attributes();
-				let use_same_image = me.multiple_variant_dialog.get_value("use_same_image");
+				let use_template_image = me.multiple_variant_dialog.get_value("use_template_image");
 
 				me.multiple_variant_dialog.hide();
 				frappe.call({
@@ -617,7 +617,7 @@ $.extend(erpnext.item, {
 					args: {
 						item: frm.doc.name,
 						args: selected_attributes,
-						use_same_image: use_same_image,
+						use_template_image: use_template_image,
 					},
 					callback: function (r) {
 						if (r.message === "queued") {
@@ -736,7 +736,7 @@ $.extend(erpnext.item, {
 			fields.push({
 				fieldtype: "Check",
 				label: __("Create a variant with the template image."),
-				fieldname: "use_same_image",
+				fieldname: "use_template_image",
 				default: 0,
 			});
 		}
@@ -782,7 +782,7 @@ $.extend(erpnext.item, {
 							args: {
 								item: frm.doc.name,
 								args: d.get_values(),
-								use_same_image: args.use_same_image,
+								use_template_image: args.use_template_image,
 							},
 							callback: function (r) {
 								var doclist = frappe.model.sync(r.message);
