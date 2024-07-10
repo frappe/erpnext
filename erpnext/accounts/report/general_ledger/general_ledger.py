@@ -2,10 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import copy
 from collections import OrderedDict
 
 import frappe
 from frappe import _, _dict
+from frappe.query_builder import Criterion
 from frappe.utils import cstr, getdate
 
 from erpnext import get_company_currency, get_default_company
@@ -16,9 +18,6 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
 from erpnext.accounts.utils import get_account_currency
-
-# to cache translations
-TRANSLATIONS = frappe._dict()
 
 
 def execute(filters=None):
@@ -44,17 +43,9 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 
-	update_translations()
-
 	res = get_result(filters, account_details)
 
 	return columns, res
-
-
-def update_translations():
-	TRANSLATIONS.update(
-		dict(OPENING=_("Opening"), TOTAL=_("Total"), CLOSING_TOTAL=_("Closing (Opening + Total)"))
-	)
 
 
 def validate_filters(filters, account_details):
@@ -319,26 +310,31 @@ def get_accounts_with_children(accounts):
 	if not isinstance(accounts, list):
 		accounts = [d.strip() for d in accounts.strip().split(",") if d]
 
-	all_accounts = []
-	for d in accounts:
-		account = frappe.get_cached_doc("Account", d)
-		if account:
-			children = frappe.get_all(
-				"Account", filters={"lft": [">=", account.lft], "rgt": ["<=", account.rgt]}
-			)
-			all_accounts += [c.name for c in children]
-		else:
-			frappe.throw(_("Account: {0} does not exist").format(d))
+	if not accounts:
+		return
 
-	return list(set(all_accounts)) if all_accounts else None
+	doctype = frappe.qb.DocType("Account")
+	accounts_data = (
+		frappe.qb.from_(doctype)
+		.select(doctype.lft, doctype.rgt)
+		.where(doctype.name.isin(accounts))
+		.run(as_dict=True)
+	)
+
+	conditions = []
+	for account in accounts_data:
+		conditions.append((doctype.lft >= account.lft) & (doctype.rgt <= account.rgt))
+
+	return frappe.qb.from_(doctype).select(doctype.name).where(Criterion.any(conditions)).run(pluck=True)
 
 
 def get_data_with_opening_closing(filters, account_details, accounting_dimensions, gl_entries):
 	data = []
+	totals_dict = get_totals_dict()
 
-	gle_map = initialize_gle_map(gl_entries, filters)
+	gle_map = initialize_gle_map(gl_entries, filters, totals_dict)
 
-	totals, entries = get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map)
+	totals, entries = get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, totals_dict)
 
 	# Opening for filtered account
 	data.append(totals.opening)
@@ -387,9 +383,9 @@ def get_totals_dict():
 		)
 
 	return _dict(
-		opening=_get_debit_credit_dict(TRANSLATIONS.OPENING),
-		total=_get_debit_credit_dict(TRANSLATIONS.TOTAL),
-		closing=_get_debit_credit_dict(TRANSLATIONS.CLOSING_TOTAL),
+		opening=_get_debit_credit_dict(_("Opening")),
+		total=_get_debit_credit_dict(_("Total")),
+		closing=_get_debit_credit_dict(_("Closing (Opening + Total)")),
 	)
 
 
@@ -402,17 +398,16 @@ def group_by_field(group_by):
 		return "voucher_no"
 
 
-def initialize_gle_map(gl_entries, filters):
+def initialize_gle_map(gl_entries, filters, totals_dict):
 	gle_map = OrderedDict()
 	group_by = group_by_field(filters.get("group_by"))
 
 	for gle in gl_entries:
-		gle_map.setdefault(gle.get(group_by), _dict(totals=get_totals_dict(), entries=[]))
+		gle_map.setdefault(gle.get(group_by), _dict(totals=copy.deepcopy(totals_dict), entries=[]))
 	return gle_map
 
 
-def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
-	totals = get_totals_dict()
+def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map, totals):
 	entries = []
 	consolidated_gle = OrderedDict()
 	group_by = group_by_field(filters.get("group_by"))

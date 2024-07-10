@@ -653,7 +653,7 @@ class TestSerialandBatchBundle(FrappeTestCase):
 				"is_stock_item": 1,
 				"has_batch_no": 1,
 				"create_new_batch": 1,
-				"batch_no_series": "PSNBI-TSNVL-.#####",
+				"batch_number_series": "PSNBI-TSNVL-.#####",
 				"has_serial_no": 1,
 				"serial_no_series": "SN-PSNBI-TSNVL-.#####",
 			},

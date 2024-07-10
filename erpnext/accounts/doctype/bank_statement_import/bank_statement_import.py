@@ -31,13 +31,14 @@ class BankStatementImport(DataImport):
 		bank: DF.Link | None
 		bank_account: DF.Link
 		company: DF.Link
+		custom_delimiters: DF.Check
+		delimiter_options: DF.Data | None
 		google_sheets_url: DF.Data | None
 		import_file: DF.Attach | None
 		import_type: DF.Literal["", "Insert New Records", "Update Existing Records"]
 		mute_emails: DF.Check
 		reference_doctype: DF.Link
 		show_failed_logs: DF.Check
-		statement_import_log: DF.Code | None
 		status: DF.Literal["Pending", "Success", "Partial Success", "Error"]
 		submit_after_import: DF.Check
 		template_options: DF.Code | None
@@ -118,6 +119,11 @@ def form_start_import(data_import):
 def download_errored_template(data_import_name):
 	data_import = frappe.get_doc("Bank Statement Import", data_import_name)
 	data_import.export_errored_rows()
+
+
+@frappe.whitelist()
+def download_import_log(data_import_name):
+	return frappe.get_doc("Bank Statement Import", data_import_name).download_import_log()
 
 
 def parse_data_from_template(raw_data):
@@ -239,6 +245,47 @@ def write_xlsx(data, sheet_name, wb=None, column_widths=None, file_path=None):
 
 	wb.save(file_path)
 	return True
+
+
+@frappe.whitelist()
+def get_import_status(docname):
+	import_status = {}
+
+	data_import = frappe.get_doc("Bank Statement Import", docname)
+	import_status["status"] = data_import.status
+
+	logs = frappe.get_all(
+		"Data Import Log",
+		fields=["count(*) as count", "success"],
+		filters={"data_import": docname},
+		group_by="success",
+	)
+
+	total_payload_count = 0
+
+	for log in logs:
+		total_payload_count += log.get("count", 0)
+		if log.get("success"):
+			import_status["success"] = log.get("count")
+		else:
+			import_status["failed"] = log.get("count")
+
+	import_status["total_records"] = total_payload_count
+
+	return import_status
+
+
+@frappe.whitelist()
+def get_import_logs(docname: str):
+	frappe.has_permission("Bank Statement Import")
+
+	return frappe.get_all(
+		"Data Import Log",
+		fields=["success", "docname", "messages", "exception", "row_indexes"],
+		filters={"data_import": docname},
+		limit_page_length=5000,
+		order_by="log_index",
+	)
 
 
 @frappe.whitelist()

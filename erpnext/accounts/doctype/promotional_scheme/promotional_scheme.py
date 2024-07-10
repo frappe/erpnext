@@ -146,6 +146,7 @@ class PromotionalScheme(Document):
 
 		self.validate_applicable_for()
 		self.validate_pricing_rules()
+		self.validate_mixed_with_recursion()
 
 	def validate_applicable_for(self):
 		if self.applicable_for:
@@ -163,7 +164,7 @@ class PromotionalScheme(Document):
 		docnames = []
 
 		# If user has changed applicable for
-		if self._doc_before_save.applicable_for == self.applicable_for:
+		if self.get_doc_before_save() and self.get_doc_before_save().applicable_for == self.applicable_for:
 			return
 
 		docnames = frappe.get_all("Pricing Rule", filters={"promotional_scheme": self.name})
@@ -177,6 +178,7 @@ class PromotionalScheme(Document):
 				frappe.delete_doc("Pricing Rule", docname.name)
 
 	def on_update(self):
+		self.validate()
 		pricing_rules = (
 			frappe.get_all(
 				"Pricing Rule",
@@ -187,6 +189,15 @@ class PromotionalScheme(Document):
 			or {}
 		)
 		self.update_pricing_rules(pricing_rules)
+
+	def validate_mixed_with_recursion(self):
+		if self.mixed_conditions:
+			if self.product_discount_slabs:
+				for slab in self.product_discount_slabs:
+					if slab.is_recursive:
+						frappe.throw(
+							_("Recursive Discounts with Mixed condition is not supported by the system")
+						)
 
 	def update_pricing_rules(self, pricing_rules):
 		rules = {}

@@ -1299,6 +1299,18 @@ class TestPricingRule(unittest.TestCase):
 			item_group_rule.delete()
 			item_code_rule.delete()
 
+	def test_validation_on_mixed_condition_with_recursion(self):
+		pricing_rule = make_pricing_rule(
+			discount_percentage=10,
+			selling=1,
+			priority=2,
+			min_qty=4,
+			title="_Test Pricing Rule with Min Qty - 2",
+		)
+		pricing_rule.mixed_conditions = True
+		pricing_rule.is_recursive = True
+		self.assertRaises(frappe.ValidationError, pricing_rule.save)
+
 
 test_dependencies = ["Campaign"]
 
