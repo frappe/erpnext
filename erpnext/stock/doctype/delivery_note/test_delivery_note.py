@@ -1681,7 +1681,7 @@ class TestDeliveryNote(FrappeTestCase):
 			{
 				"is_stock_item": 1,
 				"has_batch_no": 1,
-				"batch_no_series": "BATCH-TESTSERIAL-.#####",
+				"batch_number_series": "BATCH-TESTSERIAL-.#####",
 				"create_new_batch": 1,
 			},
 		)

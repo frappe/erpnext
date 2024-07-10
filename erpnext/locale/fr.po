@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-05-19 09:35+0000\n"
-"PO-Revision-Date: 2024-05-20 11:21\n"
+"PO-Revision-Date: 2024-06-19 15:47\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -30768,7 +30768,7 @@ msgstr "Obtenir les Écritures non Réconcilliées"
 
 #: templates/includes/footer/footer_extension.html:10
 msgid "Get Updates"
-msgstr "Obtenir les mises à jour"
+msgstr "Recevoir des nouvelles"
 
 #: stock/doctype/delivery_trip/delivery_trip.js:67
 msgid "Get stops from"
@@ -69323,7 +69323,7 @@ msgstr "Ajustement du Stock"
 #: setup/doctype/company/company.json
 msgctxt "Company"
 msgid "Stock Adjustment Account"
-msgstr "Compte d'Ajustement du Stock"
+msgstr "Compte d'ajustement des stocks"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
