@@ -125,10 +125,10 @@ class QualityInspection(Document):
 
 		if self.reference_type == "Job Card":
 			if self.reference_name:
-				frappe.db.set_value(self.reference_type, self.reference_name,
-									"quality_inspection", quality_inspection)
-				frappe.db.set_value(self.reference_type, self.reference_name,
-									"modified", self.modified)
+				frappe.db.set_value(
+					self.reference_type, self.reference_name, "quality_inspection", quality_inspection
+				)
+				frappe.db.set_value(self.reference_type, self.reference_name, "modified", self.modified)
 
 		else:
 			conditions = {"parent": self.reference_name, "item_code": self.item_code}
@@ -138,7 +138,7 @@ class QualityInspection(Document):
 			if self.docstatus == 2:  # if cancel, then remove qi link wherever same name
 				conditions["quality_inspection"] = self.name
 
-			if hasattr(self, 'rowname') and self.rowname:
+			if hasattr(self, "rowname") and self.rowname:
 				conditions["name"] = self.rowname
 
 			if self.reference_type == "Stock Entry":
@@ -146,11 +146,9 @@ class QualityInspection(Document):
 			else:
 				doctype = self.reference_type + " Item"
 
-			frappe.db.set_value(doctype, conditions,
-								"quality_inspection", quality_inspection)
+			frappe.db.set_value(doctype, conditions, "quality_inspection", quality_inspection)
 
-			frappe.db.set_value(self.reference_type, self.reference_name,
-								"modified", self.modified)
+			frappe.db.set_value(self.reference_type, self.reference_name, "modified", self.modified)
 
 	def inspect_and_set_status(self):
 		for reading in self.readings:
