@@ -44,6 +44,7 @@
   "auto_reserve_serial_and_batch",
   "serial_and_batch_item_settings_tab",
   "section_break_7",
+  "do_not_use_batchwise_valuation",
   "auto_create_serial_and_batch_bundle_for_outward",
   "pick_serial_and_batch_based_on",
   "column_break_mhzc",
@@ -437,6 +438,14 @@
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
    "label": "Do Not Update Serial / Batch on Creation of Auto Bundle"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.valuation_method === \"Moving Average\"",
+   "description": "If enabled, the system will use the moving average valuation method to calculate the valuation rate for the batched items and will not consider the individual batch-wise incoming rate.",
+   "fieldname": "do_not_use_batchwise_valuation",
+   "fieldtype": "Check",
+   "label": "Do Not Use Batch-wise Valuation"
   }
  ],
  "icon": "icon-cog",
@@ -444,7 +453,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:10:45.423987",
+ "modified": "2024-07-04 12:45:09.811280",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

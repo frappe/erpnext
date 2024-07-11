@@ -218,7 +218,7 @@ class StockController(AccountsController):
 					"do_not_submit": True if not via_landed_cost_voucher else False,
 				}
 
-				if row.get("qty") or row.get("consumed_qty"):
+				if row.get("qty") or row.get("consumed_qty") or row.get("stock_qty"):
 					self.update_bundle_details(bundle_details, table_name, row)
 					self.create_serial_batch_bundle(bundle_details, row)
 

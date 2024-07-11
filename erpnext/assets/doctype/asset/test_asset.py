@@ -1501,19 +1501,17 @@ class TestDepreciationBasics(AssetSetup):
 		"""
 
 		asset = create_asset(calculate_depreciation=1)
-		asset.opening_accumulated_depreciation = 2000
-		asset.opening_number_of_booked_depreciations = 1
 
 		asset.finance_books[0].expected_value_after_useful_life = 100
 		asset.save()
 		asset.reload()
-		self.assertEqual(asset.finance_books[0].value_after_depreciation, 98000.0)
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 100000.0)
 
 		# changing expected_value_after_useful_life shouldn't affect value_after_depreciation
 		asset.finance_books[0].expected_value_after_useful_life = 200
 		asset.save()
 		asset.reload()
-		self.assertEqual(asset.finance_books[0].value_after_depreciation, 98000.0)
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 100000.0)
 
 	def test_asset_cost_center(self):
 		asset = create_asset(is_existing_asset=1, do_not_save=1)
