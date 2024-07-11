@@ -1,10 +1,11 @@
 import base64
+import os
 import requests
 
 class MyPontoAPI:
-	def __init__(self, client_id, client_secret, base_url):
-		self.client_id = client_id
-		self.client_secret = client_secret
+	def __init__(self, base_url, client_id=None, client_secret=None):
+		self.client_id = client_id or os.getenv('MYPONTO_CLIENT_ID')
+		self.client_secret = client_secret or os.getenv('MYPONTO_CLIENT_SECRET')
 		self.encoded_secret = self.encode_credentials()
 		self.base_url = base_url
 
@@ -70,3 +71,6 @@ class MyPontoAPI:
 			return response.json()
 		else:
 			return None
+
+
+myponto_api = MyPontoAPI(base_url='https://api.myponto.com')

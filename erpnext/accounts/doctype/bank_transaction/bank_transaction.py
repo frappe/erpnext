@@ -9,6 +9,8 @@ from frappe.utils import flt
 from erpnext.utilities.abn_amro_api import abn_amro_api
 import datetime
 
+from erpnext.utilities.myponto_api import myponto_api
+
 
 class BankTransaction(Document):
 	# begin: auto-generated types
@@ -287,6 +289,75 @@ def get_latest_transactions():
 				create_new_transaction( bank_account['name'], transaction)
 
 	return "Operation completed successfully"
+
+def create_new_myponto_transaction(account_iban, transaction):
+	# first check if the transaction already exists
+	if frappe.db.exists('Bank Transaction', {'transaction_id': transaction['id']}):
+		return
+	transaction_attributes = transaction.get('attributes', {})
+	# get the existing bank account with the given IBAN
+	filtered_bank_account = frappe.get_all('Bank Account', filters={'iban': account_iban}, fields=['name'])
+
+	if not filtered_bank_account:
+		return
+	# Create a new Bank Transaction document
+	new_transaction = frappe.new_doc('Bank Transaction')
+
+	# Assuming transaction_attributes['createdAt'] contains the ISO 8601 formatted date
+	iso_formatted_date = transaction_attributes['createdAt']
+
+	# Parse the ISO 8601 formatted date
+	parsed_date = datetime.datetime.strptime(iso_formatted_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+
+
+
+	# Set the fields of the new Bank Transaction document
+	new_transaction.bank_account = filtered_bank_account[0]['name']
+	new_transaction.transaction_id = transaction['id']
+	new_transaction.transaction_type = transaction_attributes['proprietaryBankTransactionCode']
+	new_transaction.date = parsed_date
+	new_transaction.deposit = transaction_attributes['amount'] if transaction_attributes['amount'] > 0 else 0
+	new_transaction.withdrawal = transaction_attributes['amount'] if transaction_attributes['amount'] < 0 else 0
+	new_transaction.currency = transaction_attributes['currency']
+	new_transaction.bank_party_account_number = transaction_attributes['counterpartReference']
+	new_transaction.bank_party_name = transaction_attributes['counterpartName']
+	new_transaction.description = transaction_attributes['description']
+	new_transaction.reference_number = transaction_attributes['internalReference']
+	new_transaction.allocated_amount = abs(transaction_attributes['amount'])
+	new_transaction.unallocated_amount = abs(transaction_attributes['amount'])
+
+
+	# Save the new Bank Transaction document
+	new_transaction.save()
+
+	# Submit the new Bank Transaction document
+	new_transaction.submit()
+
+	# Return the name of the new Bank Transaction document
+	return new_transaction.name
+
+@frappe.whitelist()
+def get_myponto_transactions():
+	# get the bank accounts from myponto accounts function
+	access_token = myponto_api.get_access_token()
+	accounts = myponto_api.get_list_of_accounts(access_token)
+	if not accounts:
+		return "No accounts found"
+
+	account_ibans = []
+	accounts_data = accounts.get('data', None)
+	for accounts in accounts_data:
+		account_attributes = accounts.get('attributes', None)
+		if account_attributes.get('referenceType', None) == 'IBAN':
+			account_ibans.append((account_attributes.get('reference', None), accounts.get('id', None)))
+
+	for account_iban, account_id in account_ibans:
+		transactions = myponto_api.get_list_of_transactions(access_token, account_id)
+		if not transactions:
+			continue
+		for transaction in transactions.get('data', None):
+			create_new_myponto_transaction(account_iban, transaction)
+
 
 @frappe.whitelist()
 def get_doctypes_for_bank_reconciliation():
