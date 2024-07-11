@@ -505,6 +505,9 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 				return this.frm.call({
 					doc: me.frm.doc,
 					method: "set_missing_values",
+					args: {
+						for_validate: true,
+					},
 					callback: function (r) {
 						if (!r.exc) {
 							if (r.message && r.message.print_format) {
