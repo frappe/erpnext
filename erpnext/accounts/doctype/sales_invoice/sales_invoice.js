@@ -431,18 +431,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				return this.frm.call({
 					doc: me.frm.doc,
 					method: "set_missing_values",
-<<<<<<< HEAD
-					callback: function(r) {
-						if(!r.exc) {
-							if(r.message && r.message.print_format) {
-=======
 					args: {
 						for_validate: true,
 					},
 					callback: function (r) {
 						if (!r.exc) {
 							if (r.message && r.message.print_format) {
->>>>>>> 1049550951 (fix: missing discount on POS Credit Notes)
 								me.frm.pos_print_format = r.message.print_format;
 							}
 							me.frm.trigger("update_stock");
