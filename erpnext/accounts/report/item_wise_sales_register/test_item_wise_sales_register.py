@@ -12,6 +12,7 @@ class TestItemWiseSalesRegister(AccountsTestMixin, FrappeTestCase):
 		self.create_company()
 		self.create_customer()
 		self.create_item()
+		self.clear_old_entries()
 
 	def tearDown(self):
 		frappe.db.rollback()
