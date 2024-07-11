@@ -7,6 +7,7 @@ from frappe.model.docstatus import DocStatus
 from frappe.model.document import Document
 from frappe.utils import flt
 from erpnext.utilities.abn_amro_api import abn_amro_api
+import datetime
 
 
 class BankTransaction(Document):
@@ -269,16 +270,18 @@ def get_latest_transactions():
 
 	access_token = abn_amro_api.get_access_token()
 
+	today_date = datetime.datetime.now().strftime('%Y-%m-%d')
+
 	for bank_account in bank_accounts:
 		account_number = bank_account['iban']
-		response = abn_amro_api.get_todays_first_set_of_transactions(account_number, access_token, '2024-07-01')
+		response = abn_amro_api.get_todays_first_set_of_transactions(account_number, access_token, today_date)
 		if not response:
 			continue
 		transaction_list = response['transactions']
 		for transaction in transaction_list:
 			create_new_transaction( bank_account['name'], transaction)
 		while response['nextPageKey']:
-			response = abn_amro_api.get_next_set_of_todays_transactions(account_number, access_token, '2024-07-01', response['nextPageKey'])
+			response = abn_amro_api.get_next_set_of_todays_transactions(account_number, access_token, today_date, response['nextPageKey'])
 			transaction_list = response['transactions']
 			for transaction in transaction_list:
 				create_new_transaction( bank_account['name'], transaction)
