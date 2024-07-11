@@ -309,7 +309,6 @@
    "label": "Credit Limits"
   },
   {
-   "description": "Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, including leap years..",
    "fieldname": "assets_tab",
    "fieldtype": "Tab Break",
    "label": "Assets"
@@ -472,10 +471,10 @@
   },
   {
    "default": "0",
-   "description": "Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, including leap years",
+   "description": "Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, (including leap years) while using daily pro-rata based depreciation",
    "fieldname": "calculate_depr_using_total_days",
    "fieldtype": "Check",
-   "label": "Calculate depreciation using total days in depreciation period"
+   "label": "Calculate daily depreciation using total days in depreciation period"
   }
  ],
  "icon": "icon-cog",
@@ -483,7 +482,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-10 18:12:16.225069",
+ "modified": "2024-07-12 00:24:20.957726",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
