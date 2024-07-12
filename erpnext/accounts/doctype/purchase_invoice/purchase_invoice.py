@@ -808,6 +808,7 @@ class PurchaseInvoice(BuyingController):
 			if self.needs_repost:
 				self.validate_for_repost()
 				self.db_set("repost_required", self.needs_repost)
+				self.repost_accounting_entries()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
