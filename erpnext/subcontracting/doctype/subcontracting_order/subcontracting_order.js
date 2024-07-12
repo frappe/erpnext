@@ -32,7 +32,27 @@ frappe.ui.form.on('Subcontracting Order', {
 			};
 		});
 
+<<<<<<< HEAD
 		frm.set_query('set_warehouse', () => {
+=======
+		frm.set_query("cost_center", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", "items", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("set_warehouse", () => {
+>>>>>>> 9838f7e6ba (fix: cost center filter by company (#42297))
 			return {
 				filters: {
 					company: frm.doc.company,

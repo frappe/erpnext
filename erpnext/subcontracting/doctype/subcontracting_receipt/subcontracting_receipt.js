@@ -155,7 +155,207 @@ frappe.ui.form.on('Subcontracting Receipt', {
 	},
 
 	rejected_warehouse: (frm) => {
+<<<<<<< HEAD
 		set_warehouse_in_children(frm.doc.items, 'rejected_warehouse', frm.doc.rejected_warehouse);
+=======
+		set_warehouse_in_children(frm.doc.items, "rejected_warehouse", frm.doc.rejected_warehouse);
+	},
+
+	get_scrap_items: (frm) => {
+		frappe.call({
+			doc: frm.doc,
+			method: "get_scrap_items",
+			args: {
+				recalculate_rate: true,
+			},
+			freeze: true,
+			freeze_message: __("Getting Scrap Items"),
+			callback: (r) => {
+				if (!r.exc) {
+					frm.refresh();
+				}
+			},
+		});
+	},
+
+	set_queries: (frm) => {
+		frm.set_query("set_warehouse", () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+				},
+			};
+		});
+
+		frm.set_query("rejected_warehouse", () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", "items", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("supplier_warehouse", () => {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+				},
+			};
+		});
+
+		frm.set_query("warehouse", "items", () => ({
+			filters: {
+				company: frm.doc.company,
+				is_group: 0,
+			},
+		}));
+
+		frm.set_query("rejected_warehouse", "items", () => ({
+			filters: {
+				company: frm.doc.company,
+				is_group: 0,
+			},
+		}));
+
+		frm.set_query("expense_account", "items", () => {
+			return {
+				query: "erpnext.controllers.queries.get_expense_account",
+				filters: { company: frm.doc.company },
+			};
+		});
+
+		frm.set_query("batch_no", "items", (doc, cdt, cdn) => {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					item: row.item_code,
+				},
+			};
+		});
+
+		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
+			return frm.events.get_serial_and_batch_bundle_filters(doc, cdt, cdn);
+		});
+
+		frm.set_query("rejected_serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
+			return frm.events.get_serial_and_batch_bundle_filters(doc, cdt, cdn);
+		});
+
+		frm.set_query("batch_no", "supplied_items", (doc, cdt, cdn) => {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					item: row.rm_item_code,
+				},
+			};
+		});
+
+		frm.set_query("serial_and_batch_bundle", "supplied_items", (doc, cdt, cdn) => {
+			let row = locals[cdt][cdn];
+			return {
+				filters: {
+					item_code: row.rm_item_code,
+					voucher_type: doc.doctype,
+					voucher_no: ["in", [doc.name, ""]],
+					is_cancelled: 0,
+				},
+			};
+		});
+	},
+
+	get_serial_and_batch_bundle_filters: (doc, cdt, cdn) => {
+		let row = locals[cdt][cdn];
+		return {
+			filters: {
+				item_code: row.item_code,
+				voucher_type: doc.doctype,
+				voucher_no: ["in", [doc.name, ""]],
+				is_cancelled: 0,
+			},
+		};
+	},
+
+	setup_quality_inspection: (frm) => {
+		if (!frm.is_new() && frm.doc.docstatus === 0 && !frm.doc.is_return) {
+			let transaction_controller = new erpnext.TransactionController({ frm: frm });
+			transaction_controller.setup_quality_inspection();
+		}
+	},
+
+	set_route_options_for_new_doc: (frm) => {
+		let batch_no_field = frm.get_docfield("items", "batch_no");
+		if (batch_no_field) {
+			batch_no_field.get_route_options_for_new_doc = (row) => {
+				return {
+					item: row.doc.item_code,
+				};
+			};
+		}
+
+		let item_sbb_field = frm.get_docfield("items", "serial_and_batch_bundle");
+		if (item_sbb_field) {
+			item_sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					item_code: row.doc.item_code,
+					voucher_type: frm.doc.doctype,
+				};
+			};
+		}
+
+		let rejected_item_sbb_field = frm.get_docfield("items", "rejected_serial_and_batch_bundle");
+		if (rejected_item_sbb_field) {
+			rejected_item_sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					item_code: row.doc.item_code,
+					voucher_type: frm.doc.doctype,
+				};
+			};
+		}
+
+		let rm_sbb_field = frm.get_docfield("supplied_items", "serial_and_batch_bundle");
+		if (rm_sbb_field) {
+			rm_sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					item_code: row.doc.rm_item_code,
+					voucher_type: frm.doc.doctype,
+				};
+			};
+		}
+	},
+
+	reset_raw_materials_table: (frm) => {
+		frm.clear_table("supplied_items");
+
+		frm.call({
+			method: "reset_raw_materials",
+			doc: frm.doc,
+			freeze: true,
+			callback: (r) => {
+				if (!r.exc) {
+					frm.save();
+				}
+			},
+		});
+>>>>>>> 9838f7e6ba (fix: cost center filter by company (#42297))
 	},
 });
 
