@@ -310,6 +310,18 @@ def check_if_in_list(gle, gl_map):
 def toggle_debit_credit_if_negative(gl_map):
 	for entry in gl_map:
 		# toggle debit, credit if negative entry
+		if flt(entry.debit) < 0 and flt(entry.credit) < 0 and flt(entry.debit) == flt(entry.credit):
+			entry.credit *= -1
+			entry.debit *= -1
+
+		if (
+			flt(entry.debit_in_account_currency) < 0
+			and flt(entry.credit_in_account_currency) < 0
+			and flt(entry.debit_in_account_currency) == flt(entry.credit_in_account_currency)
+		):
+			entry.credit_in_account_currency *= -1
+			entry.debit_in_account_currency *= -1
+
 		if flt(entry.debit) < 0:
 			entry.credit = flt(entry.credit) - flt(entry.debit)
 			entry.debit = 0.0
