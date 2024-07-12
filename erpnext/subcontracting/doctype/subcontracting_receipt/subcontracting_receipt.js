@@ -174,6 +174,22 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			};
 		});
 
+		frm.set_query("cost_center", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", "items", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
 		frm.set_query("supplier_warehouse", () => {
 			return {
 				filters: {
