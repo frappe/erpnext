@@ -136,18 +136,28 @@ class PeriodClosingVoucher(AccountsController):
 
 	def check_if_previous_year_closed(self):
 		last_year_closing = add_days(self.year_start_date, -1)
-
 		previous_fiscal_year = get_fiscal_year(last_year_closing, company=self.company, boolean=True)
+		if not previous_fiscal_year:
+			return
 
-		if previous_fiscal_year and not frappe.db.exists(
+		previous_fiscal_year_start_date = previous_fiscal_year[0][1]
+		if not frappe.db.exists(
 			"GL Entry",
-			{"posting_date": ("<=", last_year_closing), "company": self.company, "is_cancelled": 0},
+			{
+				"posting_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
+				"company": self.company,
+				"is_cancelled": 0,
+			},
 		):
 			return
 
-		if previous_fiscal_year and not frappe.db.exists(
+		if not frappe.db.exists(
 			"Period Closing Voucher",
-			{"posting_date": ("<=", last_year_closing), "docstatus": 1, "company": self.company},
+			{
+				"posting_date": ("between", [previous_fiscal_year_start_date, last_year_closing]),
+				"docstatus": 1,
+				"company": self.company,
+			},
 		):
 			frappe.throw(_("Previous Year is not closed, please close it first"))
 
