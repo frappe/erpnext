@@ -54,64 +54,6 @@ frappe.ui.form.on("Sales Order", {
 	},
 
 	refresh: function (frm) {
-		frm.add_custom_button(__('Get ABN AMRO Token'), function() {
-            frappe.call({
-                method: 'erpnext.selling.doctype.sales_order.sales_order.get_abn_amro_token',
-				freeze: true,
-				freeze_message: __("This may take a few seconds..."),
-                callback: function(r) {
-                    if (r.message) {
-                        frappe.msgprint({
-                            title: __('ABN AMRO Token'),
-                            message: __('The token is: ') + r.message,
-                            indicator: 'green'
-                        });
-                    }
-                }
-            });
-        });
-
-		frm.add_custom_button(__('Get Account Details'), function () {
-			frappe.call({
-				method: 'erpnext.selling.doctype.sales_order.sales_order.get_abn_amro_account_details',
-				freeze: true,
-				freeze_message: __("This may take a few seconds..."),
-				callback: function (r) {
-					if (r.message) {
-						let accountDetails = r.message;
-						let message = '';
-						for (let key in accountDetails) {
-							message += `${key}: ${accountDetails[key]}<br>`;
-						}
-						frappe.msgprint({
-							title: __('Get ABN AMRO Account Details'),
-							message: message,
-						});
-					}
-				}
-			});
-		});
-
-		frm.add_custom_button(__('Get Account Balance'), function () {
-			frappe.call({
-				method: 'erpnext.selling.doctype.sales_order.sales_order.get_abn_amro_account_balance',
-				freeze: true,
-				freeze_message: __("This may take a few seconds..."),
-				callback: function (r) {
-					if (r.message) {
-						let accountDetails = r.message;
-						let message = '';
-						for (let key in accountDetails) {
-							message += `${key}: ${accountDetails[key]}<br>`;
-						}
-						frappe.msgprint({
-							title: __('Get ABN AMRO Account Balance'),
-							message: message,
-						});
-					}
-				}
-			});
-		});
 		if (frm.doc.docstatus === 1) {
 			if (
 				frm.doc.status !== "Closed" &&

@@ -800,34 +800,6 @@ def get_requested_item_qty(sales_order):
 
 	return result
 
-@frappe.whitelist()
-def get_abn_amro_token():
-	# Get the access token
-	access_token = abn_amro_api.get_access_token()
-	if access_token:
-		return access_token
-	else:
-		frappe.throw(_("Unable to get ABN AMRO token"))
-
-@frappe.whitelist()
-def get_abn_amro_account_details():
-	access_token = abn_amro_api.get_access_token()
-	account_details = abn_amro_api.get_account_details('NL62ABNA9999841479', access_token)
-	if account_details:
-		return account_details
-	else:
-		frappe.throw(_("Unable to get ABN AMRO account details"))
-
-
-@frappe.whitelist()
-def get_abn_amro_account_balance():
-	access_token = abn_amro_api.get_access_token()
-	account_balance = abn_amro_api.get_account_balance('NL62ABNA9999841479', access_token)
-	if account_balance:
-		return account_balance
-	else:
-		frappe.throw(_("Unable to get ABN AMRO account balance"))
-
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
