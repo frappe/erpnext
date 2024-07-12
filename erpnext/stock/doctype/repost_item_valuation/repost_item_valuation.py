@@ -284,6 +284,11 @@ def repost(doc):
 		if isinstance(message, dict):
 			message = message.get("message")
 
+		status = "Failed"
+		# If failed because of timeout, set status to In Progress
+		if traceback and "timeout" in traceback.lower():
+			status = "In Progress"
+
 		if traceback:
 			message += "<br><br>" + "<b>Traceback:</b> <br>" + traceback
 
@@ -292,7 +297,7 @@ def repost(doc):
 			doc.name,
 			{
 				"error_log": message,
-				"status": "Failed",
+				"status": status,
 			},
 		)
 
