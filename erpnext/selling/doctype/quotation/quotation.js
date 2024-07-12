@@ -65,6 +65,12 @@ frappe.ui.form.on("Quotation", {
 				};
 			};
 		}
+
+        if (frm.doc.docstatus == 1) {
+            frm.add_custom_button(__('Project'), function() {
+                frm.trigger('create_project');
+            }, __('Create'));
+        }
 	},
 
 	quotation_to: function (frm) {
@@ -78,6 +84,13 @@ frappe.ui.form.on("Quotation", {
 	set_label: function (frm) {
 		frm.fields_dict.customer_address.set_label(__(frm.doc.quotation_to + " Address"));
 	},
+
+	create_project: function(frm) {
+        frappe.model.open_mapped_doc({
+            method: "erpnext.selling.doctype.quotation.quotation.make_project",
+            frm: frm
+        });
+    },
 });
 
 erpnext.selling.QuotationController = class QuotationController extends erpnext.selling.SellingController {
