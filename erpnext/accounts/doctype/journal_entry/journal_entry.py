@@ -99,6 +99,20 @@ class JournalEntry(AccountsController):
 		self.update_asset_value()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+<<<<<<< HEAD
+=======
+		self.update_booked_depreciation()
+
+	def on_update_after_submit(self):
+		if hasattr(self, "repost_required"):
+			self.needs_repost = self.check_if_fields_updated(
+				fields_to_check=[], child_tables={"accounts": []}
+			)
+			if self.needs_repost:
+				self.validate_for_repost()
+				self.db_set("repost_required", self.needs_repost)
+				self.repost_accounting_entries()
+>>>>>>> 722ef92324 (refactor: make reposting implicit)
 
 	def on_cancel(self):
 		# References for this Journal are removed on the `on_cancel` event in accounts_controller
