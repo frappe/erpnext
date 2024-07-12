@@ -461,6 +461,33 @@ def set_expired_status():
 
 
 @frappe.whitelist()
+def make_project(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		target.project_name = source.title or source.name
+		target.customer = source.party_name
+		target.expected_start_date = source.transaction_date
+		target.expected_end_date = source.valid_till
+
+	doclist = get_mapped_doc("Quotation", source_name, {
+		"Quotation": {
+			"doctype": "Project",
+			"field_map": {
+				"name": "quotation"
+			}
+		},
+		"Quotation Item": {
+			"doctype": "Project Items",
+			"field_map": {
+				"parent": "quotation",
+				"parentfield": "itemss",
+				"parenttype": "Project"
+			},
+		}
+	}, target_doc, set_missing_values)
+
+	return doclist
+
+@frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
 	return _make_sales_invoice(source_name, target_doc)
 
