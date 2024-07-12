@@ -290,6 +290,26 @@ def get_latest_transactions():
 
 	return "Operation completed successfully"
 
+def create_description(transaction_attributes, account_iban):
+	description_lines = []
+	original_description = transaction_attributes.get('description')
+	if original_description:
+		description_lines.append(original_description)
+	fields_to_check = ['fee', 'counterpartName', 'counterpartReference', 'remittanceInformation', 'remittanceInformationType', 'mandateId']
+
+	for field in fields_to_check:
+		if field in transaction_attributes and transaction_attributes[field] is not None:
+			description_lines.append(f"{field}: {transaction_attributes[field]}")
+
+	# Check and format executionDate
+	if 'executionDate' in transaction_attributes and transaction_attributes['executionDate'] is not None:
+		# Adjusted to parse the full datetime string including time and timezone
+		user_friendly_date = datetime.datetime.strptime(transaction_attributes['executionDate'],
+														"%Y-%m-%dT%H:%M:%S.%fZ").strftime("%B %d, %Y")
+		description_lines.append(f"executionDate: {user_friendly_date}")
+
+	return '\n'.join(description_lines)
+
 def create_new_myponto_transaction(account_iban, transaction):
 	# first check if the transaction already exists
 	if frappe.db.exists('Bank Transaction', {'transaction_id': transaction['id']}):
@@ -310,7 +330,6 @@ def create_new_myponto_transaction(account_iban, transaction):
 	parsed_date = datetime.datetime.strptime(iso_formatted_date, "%Y-%m-%dT%H:%M:%S.%fZ")
 
 
-
 	# Set the fields of the new Bank Transaction document
 	new_transaction.bank_account = filtered_bank_account[0]['name']
 	new_transaction.transaction_id = transaction['id']
@@ -321,7 +340,7 @@ def create_new_myponto_transaction(account_iban, transaction):
 	new_transaction.currency = transaction_attributes['currency']
 	new_transaction.bank_party_account_number = transaction_attributes['counterpartReference']
 	new_transaction.bank_party_name = transaction_attributes['counterpartName']
-	new_transaction.description = transaction_attributes['description']
+	new_transaction.description = create_description(transaction_attributes, account_iban)
 	new_transaction.reference_number = transaction_attributes['internalReference']
 	new_transaction.allocated_amount = abs(transaction_attributes['amount'])
 	new_transaction.unallocated_amount = abs(transaction_attributes['amount'])
@@ -357,6 +376,8 @@ def get_myponto_transactions():
 			continue
 		for transaction in transactions.get('data', None):
 			create_new_myponto_transaction(account_iban, transaction)
+
+	return "Operation completed successfully"
 
 
 @frappe.whitelist()
