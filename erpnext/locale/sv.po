@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-07-07 09:35+0000\n"
-"PO-Revision-Date: 2024-07-10 20:07\n"
+"PO-Revision-Date: 2024-07-13 20:39\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -361,7 +361,7 @@ msgid "# Financial Statements\n\n"
 "In ERPNext, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.\n\n"
 "<b>[Check Accounting reports](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
 msgstr "# Bokslut\n\n"
-"Man kan få viktiga finansiella rapporter som [Balans Rapport] och [Resultat Rapport] med en klick. Man kan skapa rapport för en annan period och skapa analytiska diagram utifrån data. För fler rapporter, kolla avsnitt som bokslut, register och lönsamhet rapporter.\n\n"
+"Hämta viktiga finansiella rapporter som [Balans Rapport] och [Resultat Rapport] med en klick. Man kan skapa rapport för en annan period och skapa analytiska diagram från hämtad data. För fler rapporter, kolla avsnitt som bokslut, register och lönsamhet rapporter.\n\n"
 "<b>[Läs mer om Redovisning Rapporter](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
 
 #. Description of the Onboarding Step 'Review Fixed Asset Accounts'
@@ -409,9 +409,9 @@ msgstr "# Introduktion till Lager Post\n"
 msgid "# Manage Stock Movements\n"
 "Stock entry allows you to register the movement of stock for various purposes like transfer, received, issues, repacked, etc. To address issues related to theft and pilferages,  you can always ensure that the movement of goods happens against a document reference Stock Entry in ERPNext.\n\n"
 "Let’s get a quick walk-through on the various scenarios covered in Stock Entry by watching [*this video*](https://www.youtube.com/watch?v=Njt107hlY3I)."
-msgstr "# Styra Lager Hantering\n"
+msgstr "# Lager Hantering\n"
 "Lager Post registrerar lager överföring för olika ändamål som överföring, mottagning, produktion, ompackning, etc. För att lösa problem relaterade till stöld och snatterier kan man alltid se till att förflyttning av varor sker mot Lager Inventering.\n\n"
-"En snabb genomgång av de olika scenarierna som behandlas i Lager Post genom att titta på [*video*](https://www.youtube.com/watch?v=Njt107hlY3I)."
+"Snabb genomgång av de olika scenarierna som behandlas i Lager Post genom att titta på [*video*](https://www.youtube.com/watch?v=Njt107hlY3I)."
 
 #. Description of the Onboarding Step 'How to Navigate in ERPNext'
 #: setup/onboarding_step/navigation_help/navigation_help.json
@@ -501,7 +501,7 @@ msgstr "# Konfigurera Moms och Avgifter\n\n"
 msgid "# Setup Routing\n\n"
 "A Routing stores all Operations along with the description, hourly rate, operation time, batch size, etc. Click below to learn how the Routing template can be created, for quick selection in the BOM."
 msgstr "# Konfigurera Åtgärd Följd\n\n"
-"Åtgärd Ffljd lagrar alla åtgärder tillsammans med beskrivning, timpris, drifttid, partistorlek, osv. Klicka nedan för att lära dig hur följdmall kan skapas, för snabbval i stycklista."
+"Åtgärd Följd lagrar alla åtgärder tillsammans med beskrivning, timpris, drifttid, partistorlek, osv. Klicka nedan för att lära dig hur följdmall kan skapas, för snabbval i stycklista."
 
 #. Description of the Onboarding Step 'Setup a Warehouse'
 #: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
@@ -516,8 +516,8 @@ msgstr "# Skapa Lager\n"
 #: buying/onboarding_step/create_a_material_request/create_a_material_request.json
 msgid "# Track Material Request\n\n\n"
 "Also known as Purchase Request or an Indent, is a document identifying a requirement of a set of items (products or services) for various purposes like procurement, transfer, issue, or manufacturing. Once the Material Request is validated, a purchase manager can take the next actions for purchasing items like requesting RFQ from a supplier or directly placing an order with an identified Supplier.\n\n"
-msgstr "# Spåra Inköp Förslag\n\n\n"
-"Även känt som Material Begäran, är dokument som identifierar krav på uppsättning artiklar (produkter eller tjänster) för olika ändamål som upphandling, överföring, utfärdande eller produktion. När Inköp Förslag validerats kan inköp ansvarig vidta åtgärder för att köpa in artiklar som t.ex. att begära offertförfråga från leverantör eller direkt skapa order till leverantör.\n\n"
+msgstr "# Spåra Material Begäran\n\n"
+"Även känt som Material Begäran, är dokument som identifierar krav på uppsättning artiklar (produkter eller tjänster) för olika ändamål som upphandling, överföring, utfärdande eller produktion. När Inköp Förslag validerats kan inköp ansvarig vidta åtgärder för att köpa in artiklar som t. ex. att begära offertförfråga från leverantör eller direkt skapa order till leverantör.\n\n"
 
 #. Description of the Onboarding Step 'Update Stock Opening Balance'
 #: stock/onboarding_step/stock_opening_balance/stock_opening_balance.json
@@ -1651,19 +1651,19 @@ msgstr "Konto"
 #. Name of a report
 #: accounts/report/account_balance/account_balance.json
 msgid "Account Balance"
-msgstr "Konto Balans"
+msgstr "Konto Saldo"
 
 #. Label of the paid_from_account_balance (Currency) field in DocType 'Payment
 #. Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Balance (From)"
-msgstr "Konto Balans (Från)"
+msgstr "Konto Saldo (Från)"
 
 #. Label of the paid_to_account_balance (Currency) field in DocType 'Payment
 #. Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgid "Account Balance (To)"
-msgstr "Konto Balans (Till)"
+msgstr "Konto Saldo (Till)"
 
 #. Name of a DocType
 #: accounts/doctype/account_closing_balance/account_closing_balance.json
@@ -1826,11 +1826,11 @@ msgstr "Konto Värde"
 
 #: accounts/doctype/account/account.py:294
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
-msgstr "Konto Balans är redan i Kredit, Ej Tillåtet att ange \"Balans måste vara\" som \"Debet\""
+msgstr "Konto Saldo är redan i Kredit, Ej Tillåtet att ange \"Balans måste vara\" som \"Debet\""
 
 #: accounts/doctype/account/account.py:288
 msgid "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"
-msgstr "Konto Balans är redan i Debet, Ej Tillåtet att ange \"Balans måste vara\" som \"Kredit\""
+msgstr "Konto Saldo är redan i Debet, Ej Tillåtet att ange \"Balans måste vara\" som \"Kredit\""
 
 #. Label of the account_for_change_amount (Link) field in DocType 'POS Invoice'
 #. Label of the account_for_change_amount (Link) field in DocType 'POS Profile'
@@ -1873,7 +1873,7 @@ msgstr "Konto med befintlig transaktion kan inte tas bort"
 #: accounts/doctype/account/account.py:262
 #: accounts/doctype/account/account.py:377
 msgid "Account with existing transaction cannot be converted to ledger"
-msgstr "Konto med befintlig transaktion kan inte omvandlas till Register"
+msgstr "Konto med befintlig transaktion kan inte omvandlas till register"
 
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.py:56
 msgid "Account {0} added multiple times"
@@ -1925,7 +1925,7 @@ msgstr "Konto {0} är ogiltig. Konto Valuta måste vara {1}"
 
 #: accounts/doctype/account/account.py:149
 msgid "Account {0}: Parent account {1} can not be a ledger"
-msgstr "Konto {0}: Överordnad Konto {1} kan inte vara Bokföring Register"
+msgstr "Konto {0}: Överordnad Konto {1} kan inte vara register"
 
 #: accounts/doctype/account/account.py:155
 msgid "Account {0}: Parent account {1} does not belong to company: {2}"
@@ -2730,7 +2730,7 @@ msgstr "Åtgärd om Ackumulerad Månad Budget överskrider Verklig"
 #. field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
 msgid "Action if Accumulated Monthly Budget Exceeded on MR"
-msgstr "Åtgärd om Ackumulerad Månad Budget överskrider Inköp Förslag"
+msgstr "Åtgärd om Ackumulerad Månad Budget överskrider Material Begäran"
 
 #. Label of the action_if_accumulated_monthly_budget_exceeded_on_po (Select)
 #. field in DocType 'Budget'
@@ -2748,7 +2748,7 @@ msgstr "Åtgärd om Årlig Budget överskrider Verklig"
 #. DocType 'Budget'
 #: accounts/doctype/budget/budget.json
 msgid "Action if Annual Budget Exceeded on MR"
-msgstr "Åtgärd om Årlig Budget överskrider Inköp Förslag"
+msgstr "Åtgärd om Årlig Budget överskrider Material Begäran"
 
 #. Label of the action_if_annual_budget_exceeded_on_po (Select) field in
 #. DocType 'Budget'
@@ -5436,7 +5436,7 @@ msgstr "Tillämpligt om bolag är en individ eller ett Privat Bolag"
 #. 'Budget'
 #: accounts/doctype/budget/budget.json
 msgid "Applicable on Material Request"
-msgstr "Tillämpligt på Inköp Förslag"
+msgstr "Tillämpligt på Material Begäran"
 
 #. Label of the applicable_on_purchase_order (Check) field in DocType 'Budget'
 #: accounts/doctype/budget/budget.json
@@ -5786,7 +5786,7 @@ msgstr "Eftersom det finns tillräckligt med Undermontering Artiklar erfodras in
 
 #: manufacturing/doctype/production_plan/production_plan.py:1618
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
-msgstr "Eftersom det finns tillräckligt med Råmaterial erfodras inte Inköp Förslag för Lager {0}."
+msgstr "Eftersom det finns tillräckligt med Råmaterial erfodras inte Material Begäran för Lager {0}."
 
 #: stock/doctype/stock_settings/stock_settings.py:175
 #: stock/doctype/stock_settings/stock_settings.py:187
@@ -5946,7 +5946,7 @@ msgstr "Tillgång Avskrivning Detaljer"
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.json
 #: assets/workspace/assets/assets.json
 msgid "Asset Depreciation Ledger"
-msgstr "Tillgång Avskrivningar Register"
+msgstr "Tillgång Avskrivning Register"
 
 #. Name of a DocType
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.json
@@ -6670,11 +6670,11 @@ msgstr "Automatiskt Infoga Artikel Pris om det saknas"
 #. Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgid "Auto Material Request"
-msgstr "Automatisk Inköp Förslag"
+msgstr "Automatisk Material Begäran"
 
 #: stock/reorder_item.py:327
 msgid "Auto Material Requests Generated"
-msgstr "Automatisk Inköp Förslag Skapad"
+msgstr "Automatisk Material Begäran Skapad"
 
 #. Option for the 'Supplier Naming By' (Select) field in DocType 'Buying
 #. Settings'
@@ -6683,7 +6683,7 @@ msgstr "Automatisk Inköp Förslag Skapad"
 #: buying/doctype/buying_settings/buying_settings.json
 #: selling/doctype/selling_settings/selling_settings.json
 msgid "Auto Name"
-msgstr "Automatisk Namnge "
+msgstr "Automatiskt"
 
 #. Label of the auto_opt_in (Check) field in DocType 'Loyalty Program'
 #: accounts/doctype/loyalty_program/loyalty_program.json
@@ -9165,7 +9165,7 @@ msgstr "Beräkna Artikel Paket Pris baserat på Underordnade Artiklar priser"
 
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:53
 msgid "Calculated Bank Statement balance"
-msgstr "Beräknad Bank Konto Redogörelse Balans"
+msgstr "Beräknad Bank Konto Redogörelse Saldo"
 
 #. Label of the section_break_11 (Section Break) field in DocType 'Supplier
 #. Scorecard Period'
@@ -9361,7 +9361,7 @@ msgstr "Kampanj Namn"
 #. Label of the campaign_naming_by (Select) field in DocType 'CRM Settings'
 #: crm/doctype/crm_settings/crm_settings.json
 msgid "Campaign Naming By"
-msgstr "Kampanj Namn efter"
+msgstr "Kampanj Namngivning efter"
 
 #. Label of the campaign_schedules_section (Section Break) field in DocType
 #. 'Campaign'
@@ -12442,7 +12442,7 @@ msgstr "Konvertera till Artikel Baserad Ompostering"
 #: stock/doctype/warehouse/warehouse.js:58
 msgctxt "Warehouse"
 msgid "Convert to Ledger"
-msgstr "Konvertera till Bokföring Register"
+msgstr "Konvertera till Register"
 
 #: accounts/doctype/account/account.js:78
 #: accounts/doctype/cost_center/cost_center.js:121
@@ -12734,7 +12734,7 @@ msgstr "Resultat Enhet med befintliga transaktioner kan inte omvandlas till Grup
 
 #: accounts/doctype/cost_center/cost_center.py:63
 msgid "Cost Center with existing transactions can not be converted to ledger"
-msgstr "Resultat Enhet med befintliga transaktioner kan inte omvandlas till Bokföring Register"
+msgstr "Resultat Enhet med befintliga transaktioner kan inte omvandlas till Register"
 
 #: accounts/doctype/cost_center_allocation/cost_center_allocation.py:152
 msgid "Cost Center {0} cannot be used for allocation as it is used as main cost center in other allocation record."
@@ -13198,7 +13198,7 @@ msgstr "Skapa Potentiella Kunder"
 #. Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Create Ledger Entries for Change Amount"
-msgstr "Skapa Bokföring Register Poster för Växel Belopp"
+msgstr "Skapa Register Poster för Växel Belopp"
 
 #: buying/doctype/supplier/supplier.js:224
 #: selling/doctype/customer/customer.js:257
@@ -13644,7 +13644,7 @@ msgstr "Kredit Belopp i Transaktion Valuta"
 
 #: selling/report/customer_credit_balance/customer_credit_balance.py:67
 msgid "Credit Balance"
-msgstr "Kredit Balans"
+msgstr "Kredit Saldo"
 
 #: setup/setup_wizard/operations/install_fixtures.py:209
 msgid "Credit Card"
@@ -14482,7 +14482,7 @@ msgstr "Kund Kontakt E-post"
 #: selling/report/customer_credit_balance/customer_credit_balance.json
 #: selling/workspace/selling/selling.json
 msgid "Customer Credit Balance"
-msgstr "Kund Kredit Balans"
+msgstr "Kund Kredit Saldo"
 
 #. Name of a DocType
 #: selling/doctype/customer_credit_limit/customer_credit_limit.json
@@ -14700,7 +14700,7 @@ msgstr "Kund Namn:"
 #. Label of the cust_master_name (Select) field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgid "Customer Naming By"
-msgstr "Kund Namn efter"
+msgstr "Kund Namngivning efter"
 
 #: stock/report/delayed_item_report/delayed_item_report.py:165
 #: stock/report/delayed_order_report/delayed_order_report.py:80
@@ -15684,7 +15684,7 @@ msgstr "Standard Producent Artikel Nummer"
 #. Label of the default_material_request_type (Select) field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgid "Default Material Request Type"
-msgstr "Standard Inköp Förslag Typ"
+msgstr "Standard Material Begäran Typ"
 
 #. Label of the default_operating_cost_account (Link) field in DocType
 #. 'Company'
@@ -17078,7 +17078,7 @@ msgstr "Dimension Namn"
 #. Name of a report
 #: accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.json
 msgid "Dimension-wise Accounts Balance Report"
-msgstr "Bokföring Balans Rapport per Dimension"
+msgstr "Bokföring Saldo Rapport per Dimension"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
@@ -17477,7 +17477,7 @@ msgstr "Rabatter som ska tillämpas i sekventiella intervall som köp 1 få 1, k
 #. 'Ledger Health Monitor'
 #: accounts/doctype/ledger_health_monitor/ledger_health_monitor.json
 msgid "Discrepancy between General and Payment Ledger"
-msgstr "Avvikelse mellan huvudbok och betalningbok"
+msgstr "Avvikelse mellan Bökföring Register och Betalning Register"
 
 #. Label of the dislike_count (Float) field in DocType 'Video'
 #: utilities/doctype/video/video.json
@@ -17691,7 +17691,7 @@ msgstr "Ska alla kunder meddelas via E-post?"
 
 #: manufacturing/doctype/production_plan/production_plan.js:221
 msgid "Do you want to submit the material request"
-msgstr "Ska Inköp Förslag godkännas?"
+msgstr "Ska Material Begäran godkännas"
 
 #. Label of the docfield_name (Data) field in DocType 'Transaction Deletion
 #. Record Details'
@@ -20348,7 +20348,7 @@ msgstr "Finansiell Nyckeltal"
 #. Name of a Workspace
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Financial Reports"
-msgstr "Finans Rapporter"
+msgstr "Rapporter"
 
 #. Title of an Onboarding Step
 #. Label of a Card Break in the Financial Reports Workspace
@@ -21634,7 +21634,7 @@ msgstr "G - D"
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:172
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:240
 msgid "GL Balance"
-msgstr "Bokföring Register Balans"
+msgstr "Bokföring Register Saldo"
 
 #. Name of a DocType
 #: accounts/doctype/gl_entry/gl_entry.json
@@ -21679,7 +21679,7 @@ msgstr "Tillgång Avskrivning Resultat Konto"
 #. 'Exchange Rate Revaluation'
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.json
 msgid "Gain/Loss accumulated in foreign currency account. Accounts with '0' balance in either Base or Account currency"
-msgstr "Resultat ackumulerad på konto i utländsk valuta.Konto med '0' balans i antingen Bas eller Konto valuta"
+msgstr "Resultat ackumulerad på konto i utländsk valuta. Konto med '0' saldo i antingen Bas eller Konto valuta"
 
 #. Label of the gain_loss_booked (Currency) field in DocType 'Exchange Rate
 #. Revaluation'
@@ -21962,7 +21962,7 @@ msgstr "Hämta Senaste Dataförfrågning"
 #. Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Get Material Request"
-msgstr "Hämta Inköp Förslag"
+msgstr "Hämta Material Begäran"
 
 #. Label of the get_outstanding_invoices (Button) field in DocType 'Journal
 #. Entry'
@@ -22475,7 +22475,7 @@ msgstr "Gruppera efter Artikel"
 
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.js:61
 msgid "Group by Material Request"
-msgstr "Gruppera efter Inköp Förslag"
+msgstr "Gruppera efter Material Begäran"
 
 #: accounts/report/general_ledger/general_ledger.js:132
 #: accounts/report/payment_ledger/payment_ledger.js:82
@@ -26006,7 +26006,7 @@ msgstr "Artikel Egenskap Värden"
 #. Name of a report
 #: stock/report/item_balance/item_balance.json
 msgid "Item Balance (Simple)"
-msgstr "Artikel Balans (Enkel)"
+msgstr "Artikel Saldo (Enkel)"
 
 #. Name of a DocType
 #. Label of the item_barcode (Data) field in DocType 'Quick Stock Balance'
@@ -26920,7 +26920,7 @@ msgstr "Artikel och Garanti Information"
 
 #: stock/doctype/stock_entry/stock_entry.py:2454
 msgid "Item for row {0} does not match Material Request"
-msgstr "Artikel för rad {0} matchar inte Inköp Förslag"
+msgstr "Artikel för rad {0} matchar inte Material Begäran"
 
 #: stock/doctype/item/item.py:786
 msgid "Item has variants."
@@ -27977,7 +27977,7 @@ msgstr "Lär dig om <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/a
 #. Label of an action in the Onboarding Step 'Updating Opening Balances'
 #: accounts/onboarding_step/updating_opening_balances/updating_opening_balances.json
 msgid "Learn how to update opening balances"
-msgstr "Lär dig om Ingående Balans"
+msgstr "Lär dig om Ingående Saldo"
 
 #. Label of an action in the Onboarding Step 'Review Chart of Accounts'
 #: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
@@ -28046,7 +28046,7 @@ msgstr "Bokgöring Register Sammanslagning"
 #. Name of a DocType
 #: accounts/doctype/ledger_merge_accounts/ledger_merge_accounts.json
 msgid "Ledger Merge Accounts"
-msgstr "Bokgöring Register Sammanslagning Konton"
+msgstr "Register Sammanslagning Konton"
 
 #. Label of a Card Break in the Financial Reports Workspace
 #: accounts/workspace/financial_reports/financial_reports.json
@@ -28269,7 +28269,7 @@ msgstr "Skapa Kund"
 #. Label of an action in the Onboarding Step 'Track Material Request'
 #: buying/onboarding_step/create_a_material_request/create_a_material_request.json
 msgid "Let’s create your first Material Request"
-msgstr "Skapa Inköp Förslag"
+msgstr "Skapa Material Begäran"
 
 #. Label of an action in the Onboarding Step 'Create Your First Purchase
 #. Invoice '
@@ -28413,12 +28413,12 @@ msgstr "Länka befintlig Kvalitet Procedur."
 
 #: buying/doctype/purchase_order/purchase_order.js:571
 msgid "Link to Material Request"
-msgstr "Länk till Inköp Förslag"
+msgstr "Länk till Material Begäran"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:407
 #: buying/doctype/supplier_quotation/supplier_quotation.js:58
 msgid "Link to Material Requests"
-msgstr "Länk till Inköp Förslag"
+msgstr "Länk till Material Begäran"
 
 #: buying/doctype/supplier/supplier.js:133
 msgid "Link with Customer"
@@ -29729,7 +29729,7 @@ msgstr "Inköp Faktura."
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: subcontracting/doctype/subcontracting_order_service_item/subcontracting_order_service_item.json
 msgid "Material Request"
-msgstr "Inköp Förslag."
+msgstr "Material Begäran"
 
 #. Label of a Link in the Buying Workspace
 #. Label of a shortcut in the Buying Workspace
@@ -29745,13 +29745,13 @@ msgstr "Inköp Förslag."
 #: buying/report/procurement_tracker/procurement_tracker.py:19
 #: manufacturing/doctype/production_plan_material_request/production_plan_material_request.json
 msgid "Material Request Date"
-msgstr "Inköp Förslag Datum."
+msgstr "Material Begäran Datum"
 
 #. Label of the material_request_detail (Section Break) field in DocType
 #. 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Material Request Detail"
-msgstr "Inköp Förslag Detalj."
+msgstr "Material Begäran Detalj"
 
 #. Label of the material_request_item (Data) field in DocType 'Purchase Invoice
 #. Item'
@@ -29790,11 +29790,11 @@ msgstr "Inköp Förslag Detalj."
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: subcontracting/doctype/subcontracting_order_service_item/subcontracting_order_service_item.json
 msgid "Material Request Item"
-msgstr "Inköp Förslag Post."
+msgstr "Material Begäran Post"
 
 #: buying/report/procurement_tracker/procurement_tracker.py:25
 msgid "Material Request No"
-msgstr "Inköp Förslag Nummer."
+msgstr "Material Begäran Nummer"
 
 #. Name of a DocType
 #. Label of the material_request_plan_item (Data) field in DocType 'Material
@@ -29802,27 +29802,27 @@ msgstr "Inköp Förslag Nummer."
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 #: stock/doctype/material_request_item/material_request_item.json
 msgid "Material Request Plan Item"
-msgstr "Inköp Förslag Plan Artikel."
+msgstr "Material Begäran Plan Artikel"
 
 #. Label of the material_request_planning (Section Break) field in DocType
 #. 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Material Request Planning"
-msgstr "Inköp Förslag Planering."
+msgstr "Material Begäran Planering"
 
 #. Label of the material_request_type (Select) field in DocType 'Item Reorder'
 #: manufacturing/notification/material_request_receipt_notification/material_request_receipt_notification.html:1
 #: stock/doctype/item_reorder/item_reorder.json
 msgid "Material Request Type"
-msgstr "Inköp Förslag Typ "
+msgstr "Material Begäran Typ"
 
 #: selling/doctype/sales_order/sales_order.py:1559
 msgid "Material Request not created, as quantity for Raw Materials already available."
-msgstr "Inköp Förslag är inte skapad eftersom kvantitet för Råmaterial är redan tillgänglig."
+msgstr "Material Begäran är inte skapad eftersom kvantitet för Råmaterial är redan tillgänglig."
 
 #: stock/doctype/material_request/material_request.py:110
 msgid "Material Request of maximum {0} can be made for Item {1} against Sales Order {2}"
-msgstr "Inköp Förslag om maximum {0} kan skapas för Artikel {1} mot Försäljning Order {2}"
+msgstr "Material Begäran för maximum {0} kan skapas för Artikel {1} mot Försäljning Order {2}"
 
 #. Description of the 'Material Request' (Link) field in DocType 'Stock Entry
 #. Detail'
@@ -29832,11 +29832,11 @@ msgstr "Inköp Förslag användes för att skapa detta Lager Post"
 
 #: controllers/subcontracting_controller.py:1063
 msgid "Material Request {0} is cancelled or stopped"
-msgstr "Inköp Förslag {0} avbruten eller stoppad"
+msgstr "Material Begäran {0} avbruten eller stoppad"
 
 #: selling/doctype/sales_order/sales_order.js:1056
 msgid "Material Request {0} submitted."
-msgstr "Inköp Förslag {0} godkänd."
+msgstr "Material Begäran {0} godkänd."
 
 #. Option for the 'Status' (Select) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
@@ -29846,18 +29846,18 @@ msgstr "Material Begärd"
 #. Label of the material_requests (Table) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Material Requests"
-msgstr "Inköp Förslag"
+msgstr "Material Begäran"
 
 #: manufacturing/doctype/production_plan/production_plan.py:390
 msgid "Material Requests Required"
-msgstr "Inköp Förslag Erfordras"
+msgstr "Material Begäran Erfordras"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a report
 #: buying/workspace/buying/buying.json
 #: stock/report/material_requests_for_which_supplier_quotations_are_not_created/material_requests_for_which_supplier_quotations_are_not_created.json
 msgid "Material Requests for which Supplier Quotations are not created"
-msgstr "Inköp Förslag för vilka Inköp Offerter inte är skapade"
+msgstr "Material Begäran för vilka Inköp Offerter inte är skapade"
 
 #: stock/doctype/stock_entry/stock_entry_list.js:13
 msgid "Material Returned from WIP"
@@ -31481,7 +31481,7 @@ msgstr "Ny Saldo i Konto Valuta"
 #. 'Exchange Rate Revaluation Account'
 #: accounts/doctype/exchange_rate_revaluation_account/exchange_rate_revaluation_account.json
 msgid "New Balance In Base Currency"
-msgstr "Ny Balans i Bas Valuta"
+msgstr "Ny Saldo i Bas Valuta"
 
 #: stock/doctype/batch/batch.js:151
 msgid "New Batch ID (Optional)"
@@ -33847,7 +33847,7 @@ msgstr "Överproduktion för Försäljning och Arbetsorder"
 #. Label of the basic_details_tab (Tab Break) field in DocType 'Employee'
 #: crm/doctype/prospect/prospect.json setup/doctype/employee/employee.json
 msgid "Overview"
-msgstr "Recension "
+msgstr "Översikt"
 
 #. Option for the 'Permanent Address Is' (Select) field in DocType 'Employee'
 #. Option for the 'Current Address Is' (Select) field in DocType 'Employee'
@@ -34271,7 +34271,7 @@ msgstr "Betald"
 #: selling/page/point_of_sale/pos_payment.js:590
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:56
 msgid "Paid Amount"
-msgstr "Att Betala"
+msgstr "Betald Belopp"
 
 #. Label of the base_paid_amount (Currency) field in DocType 'Payment Entry'
 #. Label of the base_paid_amount (Currency) field in DocType 'POS Invoice'
@@ -35681,7 +35681,7 @@ msgstr "Väntar på Recension "
 #: selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.json
 #: selling/workspace/selling/selling.json
 msgid "Pending SO Items For Purchase Request"
-msgstr "Väntar på Försäljning Order Artiklar för Inköp Förslag"
+msgstr "Försäljning Order Artiklar i kö för Inköp Begäran"
 
 #: manufacturing/dashboard_fixtures.py:123
 msgid "Pending Work Order"
@@ -35926,7 +35926,7 @@ msgstr "Kontinuerlig Lager Hantering erfodras för bolag{0} om man ska kunna se 
 #. Label of the personal_details (Tab Break) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgid "Personal"
-msgstr "Personligt"
+msgstr "Personal"
 
 #. Option for the 'Preferred Contact Email' (Select) field in DocType
 #. 'Employee'
@@ -36292,13 +36292,13 @@ msgstr "Fabrik Översikt Panel"
 #: manufacturing/doctype/workstation/workstation.json
 #: public/js/plant_floor_visual/visual_plant.js:53
 msgid "Plant Floor"
-msgstr "Fabrik Golv"
+msgstr "Produktion Yta"
 
 #. Label of a shortcut in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgctxt "Plant Floor"
 msgid "Plant Floor"
-msgstr "Fabrik Golv"
+msgstr "Produktion Yta"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:30
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:43
@@ -36345,7 +36345,7 @@ msgstr "Lägg till Roll \"Leverantör\" till användare {0}."
 
 #: selling/page/point_of_sale/pos_controller.js:101
 msgid "Please add Mode of payments and opening balance details."
-msgstr "Lägg till Betalning Sätt och Öppning Balans Information."
+msgstr "Lägg till Betalning Sätt och Öppning Saldo Information."
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:168
 msgid "Please add Request for Quotation to the sidebar in Portal Settings."
@@ -36691,7 +36691,7 @@ msgstr "Ange {0}"
 
 #: manufacturing/doctype/production_plan/production_plan.py:390
 msgid "Please fill the Material Requests table"
-msgstr "Fyll i Inköp Förslag Tabell"
+msgstr "Fyll i Material Begäran Tabell"
 
 #: manufacturing/doctype/production_plan/production_plan.py:301
 msgid "Please fill the Sales Orders table"
@@ -38706,7 +38706,7 @@ msgstr "Artikel Paket"
 #. Name of a report
 #: stock/report/product_bundle_balance/product_bundle_balance.json
 msgid "Product Bundle Balance"
-msgstr "Artikel Paket Balans"
+msgstr "Artikel Paket Saldo"
 
 #. Label of the product_bundle_help (HTML) field in DocType 'POS Invoice'
 #. Label of the product_bundle_help (HTML) field in DocType 'Sales Invoice'
@@ -38826,12 +38826,12 @@ msgstr "Produktion Plan Post Referens"
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_material_request/production_plan_material_request.json
 msgid "Production Plan Material Request"
-msgstr "Produktion Plan Inköp Förslag"
+msgstr "Produktion Plan Material Begäran"
 
 #. Name of a DocType
 #: manufacturing/doctype/production_plan_material_request_warehouse/production_plan_material_request_warehouse.json
 msgid "Production Plan Material Request Warehouse"
-msgstr "Produktion Plan Inköp Förslag Lager"
+msgstr "Produktion Plan Material Begäran Lager"
 
 #. Label of the production_plan_qty (Float) field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
@@ -41098,7 +41098,7 @@ msgstr "Offert Förslag är inte tillåtna för {0} på grund av Resultat Kort v
 #. Label of the auto_indent (Check) field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgid "Raise Material Request When Stock Reaches Re-order Level"
-msgstr "Skapa Inköp Förslag när Lager når ombeställning nivå"
+msgstr "Skapa Material Begäran när Lager når ombeställning nivå"
 
 #. Label of the complaint_raised_by (Data) field in DocType 'Warranty Claim'
 #: support/doctype/warranty_claim/warranty_claim.json
@@ -42630,7 +42630,7 @@ msgstr "Återstående"
 #: accounts/report/accounts_receivable/accounts_receivable.py:1070
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:179
 msgid "Remaining Balance"
-msgstr "Återstående Balans"
+msgstr "Återstående Saldo"
 
 #. Label of the remark (Small Text) field in DocType 'Journal Entry'
 #. Label of the remark (Small Text) field in DocType 'Payment Reconciliation
@@ -42959,7 +42959,7 @@ msgstr "Posta om Artikel Värdering"
 #. Name of a DocType
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 msgid "Repost Payment Ledger"
-msgstr "Posta om Betalning Bok"
+msgstr "Posta om Betalning Register"
 
 #. Name of a DocType
 #: accounts/doctype/repost_payment_ledger_items/repost_payment_ledger_items.json
@@ -43673,7 +43673,7 @@ msgstr "Bevara Prov"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:106
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:154
 msgid "Retained Earnings"
-msgstr "Balanserad Resultat Konto"
+msgstr "Balanserad Resultat"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:274
 msgid "Retention Stock Entry"
@@ -48063,7 +48063,7 @@ msgstr "Bolag Inställningar"
 #: accounts/report/share_balance/share_balance.json
 #: accounts/workspace/accounting/accounting.json
 msgid "Share Balance"
-msgstr "Aktie Balans"
+msgstr "Aktie Saldo"
 
 #. Name of a report
 #. Label of a Link in the Accounting Workspace
@@ -48453,7 +48453,7 @@ msgstr "Visa Framtida Betalningar"
 
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:142
 msgid "Show GL Balance"
-msgstr "Visa Bokföring Register Balans"
+msgstr "Visa Bokföring Register Saldo"
 
 #. Label of the show_in_website (Check) field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
@@ -48599,7 +48599,7 @@ msgstr "Visa väntande poster"
 
 #: accounts/report/trial_balance/trial_balance.js:99
 msgid "Show unclosed fiscal year's P&L balances"
-msgstr "Visa oavslutad Bokföringsår Resultat Balans"
+msgstr "Visa oavslutad Bokföringsår Resultat Saldo"
 
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:96
 msgid "Show with upcoming revenue/expense"
@@ -49775,7 +49775,7 @@ msgstr "Lager Register ID"
 #. Name of a report
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.json
 msgid "Stock Ledger Invariant Check"
-msgstr "Lager Register Ständig Kontroll"
+msgstr "Lager Register Oföränderlig Kontroll"
 
 #. Name of a report
 #: stock/report/stock_ledger_variance/stock_ledger_variance.json
@@ -49785,7 +49785,7 @@ msgstr "Lager Register Avvikelse"
 #. Description of a report in the Onboarding Step 'Check Stock Ledger'
 #: stock/onboarding_step/check_stock_ledger_report/check_stock_ledger_report.json
 msgid "Stock Ledger report contains every submitted stock transaction. You can use filter to narrow down ledger entries."
-msgstr "Lager Reskontra innehåller alla inlämnade lager transaktioner. Man kan använda filter för att begränsa reskontraposter."
+msgstr "Lager Register innehåller alla godkända lager transaktioner. Använd filter för att begränsa register poster."
 
 #: stock/doctype/batch/batch.js:63 stock/doctype/item/item.js:470
 msgid "Stock Levels"
@@ -51222,7 +51222,7 @@ msgstr "Leverantör Namn"
 #. Label of the supp_master_name (Select) field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgid "Supplier Naming By"
-msgstr "Leverantör Nummer Serie efter"
+msgstr "Leverantör Namngivning efter"
 
 #. Label of the supplier_part_no (Data) field in DocType 'Request for Quotation
 #. Item'
@@ -56878,7 +56878,7 @@ msgstr "Giltig Till"
 #: setup/doctype/employee/employee.json
 #: stock/doctype/item_price/item_price.json
 msgid "Valid Up To"
-msgstr "Giltig Upp Till"
+msgstr "Giltig Till"
 
 #: regional/doctype/lower_deduction_certificate/lower_deduction_certificate.py:40
 msgid "Valid Up To date cannot be before Valid From date"
