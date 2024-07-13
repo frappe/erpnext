@@ -88,14 +88,14 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	make_customer() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_customer",
-			frm: this.frm,
+			frm: cur_frm,
 		});
 	}
 
 	make_quotation() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_quotation",
-			frm: this.frm,
+			frm: cur_frm,
 		});
 	}
 
@@ -105,7 +105,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			await frappe.db.get_value(
 				"Prospect Lead",
 				{
-					lead: frm.doc.name,
+					lead: cur_frm.doc.name,
 				},
 				"name",
 				null,
@@ -126,7 +126,7 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 					label: "Prospect Name",
 					fieldname: "prospect_name",
 					fieldtype: "Data",
-					default: frm.doc.company_name,
+					default: cur_frm.doc.company_name,
 					reqd: 1,
 					depends_on: "create_prospect",
 				}
@@ -139,8 +139,8 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 			await frappe.db.get_value(
 				"Contact",
 				{
-					first_name: frm.doc.first_name || frm.doc.lead_name,
-					last_name: frm.doc.last_name,
+					first_name: cur_frm.doc.first_name || cur_frm.doc.lead_name,
+					last_name: cur_frm.doc.last_name,
 				},
 				"name"
 			)
@@ -211,29 +211,29 @@ erpnext.LeadController = class LeadController extends frappe.ui.form.Controller 
 	}
 
 	company_name() {
-		if (!this.frm.doc.lead_name) {
-			this.frm.set_value("lead_name", this.frm.doc.company_name);
+		if (!cur_frm.doc.lead_name) {
+			this.frm.set_value("lead_name", cur_frm.doc.company_name);
 		}
 	}
 
 	show_notes() {
-		if (this.frm.doc.docstatus == 1) return;
+		if (cur_frm.doc.docstatus == 1) return;
 
 		const crm_notes = new erpnext.utils.CRMNotes({
-			frm: this.frm,
-			notes_wrapper: $(this.frm.fields_dict.notes_html.wrapper),
+			frm: cur_frm,
+			notes_wrapper: $(cur_frm.fields_dict.notes_html.wrapper),
 		});
 		crm_notes.refresh();
 	}
 
 	show_activities() {
-		if (this.frm.doc.docstatus == 1) return;
+		if (cur_frm.doc.docstatus == 1) return;
 
 		const crm_activities = new erpnext.utils.CRMActivities({
-			frm: this.frm,
-			open_activities_wrapper: $(this.frm.fields_dict.open_activities_html.wrapper),
-			all_activities_wrapper: $(this.frm.fields_dict.all_activities_html.wrapper),
-			form_wrapper: $(this.frm.wrapper),
+			frm: cur_frm,
+			open_activities_wrapper: $(cur_frm.fields_dict.open_activities_html.wrapper),
+			all_activities_wrapper: $(cur_frm.fields_dict.all_activities_html.wrapper),
+			form_wrapper: $(cur_frm.wrapper),
 		});
 		crm_activities.refresh();
 	}
