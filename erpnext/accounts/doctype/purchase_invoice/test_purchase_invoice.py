@@ -2005,6 +2005,7 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
 
 		pi.items[0].expense_account = "Service - _TC"
+		# Ledger reposted implicitly upon 'Update After Submit'
 		pi.save()
 		pi.load_from_db()
 
