@@ -227,7 +227,8 @@ class TestGrossProfit(FrappeTestCase):
 			"gross_profit_%": -50.0,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
-		self.assertEqual(gp_entry[0], gp_entry[0] | expected_entry_without_dn)
+		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry_without_dn}
+		self.assertEqual(report_output, expected_entry_without_dn)
 
 		# make delivery note
 		dn = make_delivery_note(sinv.name)
@@ -255,7 +256,8 @@ class TestGrossProfit(FrappeTestCase):
 			"gross_profit_%": 0.0,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
-		self.assertEqual(gp_entry[0], gp_entry[0] | expected_entry_with_dn)
+		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry_with_dn}
+		self.assertEqual(report_output, expected_entry_with_dn)
 
 	def test_bundled_delivery_note_with_different_warehouses(self):
 		"""
@@ -386,7 +388,8 @@ class TestGrossProfit(FrappeTestCase):
 			"gross_profit_%": -25.0,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
-		self.assertEqual(gp_entry[0], gp_entry[0] | expected_entry)
+		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry}
+		self.assertEqual(report_output, expected_entry)
 
 	def test_crnote_against_invoice_with_multiple_instances_of_same_item(self):
 		"""
@@ -428,8 +431,10 @@ class TestGrossProfit(FrappeTestCase):
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
 		# Both items of Invoice should have '0' qty
 		self.assertEqual(len(gp_entry), 2)
-		self.assertEqual(gp_entry[0], gp_entry[0] | expected_entry)
-		self.assertEqual(gp_entry[1], gp_entry[1] | expected_entry)
+		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry}
+		self.assertEqual(report_output, expected_entry)
+		report_output = {k: v for k, v in gp_entry[1].items() if k in expected_entry}
+		self.assertEqual(report_output, expected_entry)
 
 	def test_standalone_cr_notes(self):
 		"""
@@ -465,7 +470,8 @@ class TestGrossProfit(FrappeTestCase):
 			"gross_profit_%": 100.0,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
-		self.assertEqual(gp_entry[0], gp_entry[0] | expected_entry)
+		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry}
+		self.assertEqual(report_output, expected_entry)
 
 	def test_different_rates_in_si_and_dn(self):
 		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -557,7 +563,8 @@ class TestGrossProfit(FrappeTestCase):
 			"gross_profit_%": 12.5,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
-		self.assertEqual(gp_entry[0], gp_entry[0] | expected_entry)
+		report_output = {k: v for k, v in gp_entry[0].items() if k in expected_entry}
+		self.assertEqual(report_output, expected_entry)
 
 	def test_valuation_rate_without_previous_sle(self):
 		"""
