@@ -421,6 +421,76 @@ class TestJournalEntry(unittest.TestCase):
 		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=cost_center)
 		self.assertEqual(expected_account_balance, account_balance)
 
+<<<<<<< HEAD
+=======
+	def test_repost_accounting_entries(self):
+		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+
+		# Configure Repost Accounting Ledger for JVs
+		settings = frappe.get_doc("Repost Accounting Ledger Settings")
+		if not [x for x in settings.allowed_types if x.document_type == "Journal Entry"]:
+			settings.append("allowed_types", {"document_type": "Journal Entry", "allowed": True})
+		settings.save()
+
+		# Create JV with defaut cost center - _Test Cost Center
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
+		jv.multi_currency = 0
+		jv.submit()
+
+		# Check GL entries before reposting
+		self.voucher_no = jv.name
+
+		self.fields = [
+			"account",
+			"debit_in_account_currency",
+			"credit_in_account_currency",
+			"cost_center",
+		]
+
+		self.expected_gle = [
+			{
+				"account": "_Test Bank - _TC",
+				"debit_in_account_currency": 0,
+				"credit_in_account_currency": 100,
+				"cost_center": "_Test Cost Center - _TC",
+			},
+			{
+				"account": "_Test Cash - _TC",
+				"debit_in_account_currency": 100,
+				"credit_in_account_currency": 0,
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		]
+
+		self.check_gl_entries()
+
+		# Change cost center for bank account - _Test Cost Center for BS Account
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		jv.accounts[1].cost_center = "_Test Cost Center for BS Account - _TC"
+		jv.save()
+
+		# Check GL entries after reposting
+		jv.load_from_db()
+		self.expected_gle[0]["cost_center"] = "_Test Cost Center for BS Account - _TC"
+		self.check_gl_entries()
+
+	def check_gl_entries(self):
+		gl = frappe.qb.DocType("GL Entry")
+		query = frappe.qb.from_(gl)
+		for field in self.fields:
+			query = query.select(gl[field])
+
+		query = query.where(
+			(gl.voucher_type == "Journal Entry") & (gl.voucher_no == self.voucher_no) & (gl.is_cancelled == 0)
+		).orderby(gl.account)
+
+		gl_entries = query.run(as_dict=True)
+
+		for i in range(len(self.expected_gle)):
+			for field in self.fields:
+				self.assertEqual(self.expected_gle[i][field], gl_entries[i][field])
+
+>>>>>>> 8f135e9859 (refactor(test): no need to assert repost_required flag)
 
 def make_journal_entry(
 	account1,
