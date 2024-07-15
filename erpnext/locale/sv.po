@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-07-07 09:35+0000\n"
-"PO-Revision-Date: 2024-07-13 20:39\n"
+"PO-Revision-Date: 2024-07-15 21:01\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -32621,7 +32621,7 @@ msgstr "Press Kontroll"
 #. Description of the 'Release Date' (Date) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 msgid "Once set, this invoice will be on hold till the set date"
-msgstr "Om vald,kommer faktura parkeras tills angiven datum"
+msgstr "Om vald, kommer faktura spärras tills angiven datum"
 
 #: manufacturing/doctype/work_order/work_order.js:599
 msgid "Once the Work Order is Closed. It can't be resumed."
@@ -50178,7 +50178,7 @@ msgstr "Lager och Konto Värde Jämförelse"
 #. Label of the stock_tab (Tab Break) field in DocType 'Company'
 #: setup/doctype/company/company.json
 msgid "Stock and Manufacturing"
-msgstr "Lager och Produktion"
+msgstr "Lager & Produktion"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:125
 msgid "Stock cannot be reserved in group warehouse {0}."
