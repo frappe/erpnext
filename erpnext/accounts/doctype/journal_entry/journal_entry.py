@@ -204,6 +204,7 @@ class JournalEntry(AccountsController):
 			if self.needs_repost:
 				self.validate_for_repost()
 				self.db_set("repost_required", self.needs_repost)
+				self.repost_accounting_entries()
 
 	def on_cancel(self):
 		# References for this Journal are removed on the `on_cancel` event in accounts_controller

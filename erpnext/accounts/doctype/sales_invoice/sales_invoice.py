@@ -724,6 +724,7 @@ class SalesInvoice(SellingController):
 			if self.needs_repost:
 				self.validate_for_repost()
 				self.db_set("repost_required", self.needs_repost)
+				self.repost_accounting_entries()
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
