@@ -26,6 +26,7 @@
   "section_break_9",
   "over_delivery_receipt_allowance",
   "mr_qty_allowance",
+  "over_picking_allowance",
   "column_break_121",
   "role_allowed_to_over_deliver_receive",
   "allow_negative_stock",
@@ -446,6 +447,12 @@
    "fieldname": "do_not_use_batchwise_valuation",
    "fieldtype": "Check",
    "label": "Do Not Use Batch-wise Valuation"
+  },
+  {
+   "description": "The percentage you are allowed to pick more items in the pick list than the ordered quantity.",
+   "fieldname": "over_picking_allowance",
+   "fieldtype": "Percent",
+   "label": "Over Picking Allowance"
   }
  ],
  "icon": "icon-cog",
@@ -453,7 +460,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-04 12:45:09.811280",
+ "modified": "2024-07-15 17:18:23.872161",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
