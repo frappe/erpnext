@@ -557,10 +557,7 @@ class TestGrossProfit(FrappeTestCase):
 			"gross_profit_%": 12.5,
 		}
 		gp_entry = [x for x in data if x.parent_invoice == sinv.name]
-<<<<<<< HEAD
 		self.assertDictContainsSubset(expected_entry, gp_entry[0])
-=======
-		self.assertEqual(gp_entry[0], gp_entry[0] | expected_entry)
 
 	def test_valuation_rate_without_previous_sle(self):
 		"""
@@ -608,4 +605,3 @@ class TestGrossProfit(FrappeTestCase):
 		item_from_sinv2 = [x for x in data if x.parent_invoice == sinv2.name]
 		self.assertEqual(len(item_from_sinv2), 1)
 		self.assertEqual(1800, item_from_sinv2[0].valuation_rate)
->>>>>>> 577ce5ccd4 (test(gross profit): valuation rate from different warehouse)
