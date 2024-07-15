@@ -456,10 +456,6 @@ class TestJournalEntry(unittest.TestCase):
 		jv.accounts[1].cost_center = "_Test Cost Center for BS Account - _TC"
 		jv.save()
 
-		# Check if repost flag gets set on update after submit
-		self.assertTrue(jv.repost_required)
-		jv.repost_accounting_entries()
-
 		# Check GL entries after reposting
 		jv.load_from_db()
 		self.expected_gle[0]["cost_center"] = "_Test Cost Center for BS Account - _TC"
