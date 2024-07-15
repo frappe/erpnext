@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-
+import json
 import frappe
 from frappe import ValidationError, _, msgprint
 from frappe.contacts.doctype.address.address import render_address
@@ -297,16 +297,32 @@ class BuyingController(SubcontractingController):
 					if stock_and_asset_items_amount
 					else flt(item.qty) / stock_and_asset_items_qty
 				)
-
-				if i == (last_item_idx - 1):
-					item.item_tax_amount = flt(
-						valuation_amount_adjustment, self.precision("item_tax_amount", item)
-					)
+				item_tax_data = json.loads(item.item_tax_rate)
+				if self.taxes_and_charges:
+					item.item_tax_template = ""
+					item.item_tax_amount = 0.0
+					if i == (last_item_idx - 1):
+						item.item_tax_amount = flt(
+							valuation_amount_adjustment, self.precision("item_tax_amount", item)
+						)
+					else:
+						item.item_tax_amount = flt(
+							item_proportion * total_valuation_amount, self.precision("item_tax_amount", item)
+						)
+						valuation_amount_adjustment -= item.item_tax_amount
 				else:
-					item.item_tax_amount = flt(
-						item_proportion * total_valuation_amount, self.precision("item_tax_amount", item)
-					)
-					valuation_amount_adjustment -= item.item_tax_amount
+					"""
+					Update the valuation rate of items based on tax.
+					"""
+					item_tax_rate = 0.0
+					for key, value in item_tax_data.items():
+						for d in self.get("taxes"):
+							if d.category in ["Valuation", "Valuation and Total"] and d.account_head == key:
+								item_tax_rate += value
+								item.item_tax_amount = flt(
+									((item_tax_rate / 100) * item.rate),
+									self.precision("item_tax_amount", item),
+								)
 
 				self.round_floats_in(item)
 				if flt(item.conversion_factor) == 0.0:
