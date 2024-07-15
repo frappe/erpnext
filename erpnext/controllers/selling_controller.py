@@ -538,7 +538,9 @@ class SellingController(StockController):
 		self.make_sl_entries(sl_entries)
 
 	def get_sle_for_source_warehouse(self, item_row):
-		serial_and_batch_bundle = item_row.serial_and_batch_bundle
+		serial_and_batch_bundle = (
+			item_row.serial_and_batch_bundle if not self.is_internal_transfer() else None
+		)
 		if serial_and_batch_bundle and self.is_internal_transfer() and self.is_return:
 			if self.docstatus == 1:
 				serial_and_batch_bundle = self.make_package_for_transfer(
