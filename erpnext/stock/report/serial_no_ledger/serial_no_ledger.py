@@ -77,16 +77,14 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Party Type"),
-			"fieldtype": "Link",
+			"fieldtype": "Data",
 			"fieldname": "party_type",
-			"options": "DocType",
 			"width": 90,
 		},
 		{
 			"label": _("Party"),
-			"fieldtype": "Dynamic Link",
+			"fieldtype": "Data",
 			"fieldname": "party",
-			"options": "party_type",
 			"width": 120,
 		},
 	]
