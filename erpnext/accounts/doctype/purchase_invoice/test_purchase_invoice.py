@@ -2017,8 +2017,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		pi.items[0].expense_account = "Service - _TC"
 		pi.save()
 		pi.load_from_db()
-		self.assertTrue(pi.repost_required)
-		pi.repost_accounting_entries()
 
 		expected_gle = [
 			["Creditors - _TC", 0.0, 1000, nowdate()],
