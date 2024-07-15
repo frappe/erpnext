@@ -41,7 +41,8 @@ def get_variant(template, args=None, variant=None, manufacturer=None, manufactur
 	if isinstance(args, str):
 		args = json.loads(args)
 
-	if not args:
+	attribute_args = {k: v for k, v in args.items() if k != "use_template_image"}
+	if not attribute_args:
 		frappe.throw(_("Please specify at least one attribute in the Attributes table"))
 
 	return find_variant(template, args, variant)
@@ -197,7 +198,8 @@ def find_variant(template, args, variant_item_code=None):
 
 
 @frappe.whitelist()
-def create_variant(item, args):
+def create_variant(item, args, use_template_image=False):
+	use_template_image = frappe.parse_json(use_template_image)
 	if isinstance(args, str):
 		args = json.loads(args)
 
@@ -211,13 +213,18 @@ def create_variant(item, args):
 
 	variant.set("attributes", variant_attributes)
 	copy_attributes_to_variant(template, variant)
+
+	if use_template_image and template.image:
+		variant.image = template.image
+
 	make_variant_item_code(template.item_code, template.item_name, variant)
 
 	return variant
 
 
 @frappe.whitelist()
-def enqueue_multiple_variant_creation(item, args):
+def enqueue_multiple_variant_creation(item, args, use_template_image=False):
+	use_template_image = frappe.parse_json(use_template_image)
 	# There can be innumerable attribute combinations, enqueue
 	if isinstance(args, str):
 		variants = json.loads(args)
@@ -228,27 +235,31 @@ def enqueue_multiple_variant_creation(item, args):
 		frappe.throw(_("Please do not create more than 500 items at a time"))
 		return
 	if total_variants < 10:
-		return create_multiple_variants(item, args)
+		return create_multiple_variants(item, args, use_template_image)
 	else:
 		frappe.enqueue(
 			"erpnext.controllers.item_variant.create_multiple_variants",
 			item=item,
 			args=args,
+			use_template_image=use_template_image,
 			now=frappe.flags.in_test,
 		)
 		return "queued"
 
 
-def create_multiple_variants(item, args):
+def create_multiple_variants(item, args, use_template_image=False):
 	count = 0
 	if isinstance(args, str):
 		args = json.loads(args)
 
+	template_item = frappe.get_doc("Item", item)
 	args_set = generate_keyed_value_combinations(args)
 
 	for attribute_values in args_set:
 		if not get_variant(item, args=attribute_values):
 			variant = create_variant(item, attribute_values)
+			if use_template_image and template_item.image:
+				variant.image = template_item.image
 			variant.save()
 			count += 1
 
