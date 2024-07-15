@@ -454,11 +454,8 @@ class TestJournalEntry(unittest.TestCase):
 		# Change cost center for bank account - _Test Cost Center for BS Account
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 		jv.accounts[1].cost_center = "_Test Cost Center for BS Account - _TC"
+		# Ledger reposted implicitly upon 'Update After Submit'
 		jv.save()
-
-		# Check if repost flag gets set on update after submit
-		self.assertTrue(jv.repost_required)
-		jv.repost_accounting_entries()
 
 		# Check GL entries after reposting
 		jv.load_from_db()
