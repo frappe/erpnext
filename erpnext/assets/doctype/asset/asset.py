@@ -60,7 +60,6 @@ class Asset(AccountsController):
 		available_for_use_date: DF.Date | None
 		booked_fixed_asset: DF.Check
 		calculate_depreciation: DF.Check
-		capitalized_in: DF.Link | None
 		company: DF.Link
 		comprehensive_insurance: DF.Data | None
 		cost_center: DF.Link | None
@@ -162,7 +161,11 @@ class Asset(AccountsController):
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
+<<<<<<< HEAD
 		self.cancel_capitalization()
+=======
+		self.reload()
+>>>>>>> 81e0b96c30 (fix: service item capitalization (#42188))
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
 		self.set_status()
@@ -524,6 +527,7 @@ class Asset(AccountsController):
 			movement = frappe.get_doc("Asset Movement", movement.get("name"))
 			movement.cancel()
 
+<<<<<<< HEAD
 	def cancel_capitalization(self):
 		asset_capitalization = frappe.db.get_value(
 			"Asset Capitalization",
@@ -534,6 +538,8 @@ class Asset(AccountsController):
 			asset_capitalization = frappe.get_doc("Asset Capitalization", asset_capitalization)
 			asset_capitalization.cancel()
 
+=======
+>>>>>>> 81e0b96c30 (fix: service item capitalization (#42188))
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
 			for row in self.get("finance_books"):
@@ -872,10 +878,15 @@ def create_asset_repair(asset, asset_name):
 
 
 @frappe.whitelist()
-def create_asset_capitalization(asset):
+def create_asset_capitalization(asset, asset_name, item_code):
 	asset_capitalization = frappe.new_doc("Asset Capitalization")
 	asset_capitalization.update(
-		{"target_asset": asset, "capitalization_method": "Choose a WIP composite asset"}
+		{
+			"target_asset": asset,
+			"capitalization_method": "Choose a WIP composite asset",
+			"target_asset_name": asset_name,
+			"target_item_code": item_code,
+		}
 	)
 	return asset_capitalization
 
