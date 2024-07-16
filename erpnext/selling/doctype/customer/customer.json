@@ -25,6 +25,7 @@
   "image",
   "column_break0",
   "account_manager",
+  "category",
   "contact",
   "customer_group",
   "territory",
@@ -587,6 +588,14 @@
    "fieldtype": "Select",
    "label": "Customer Types",
    "options": "\nPrivate Sales\nGovt Sales"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "Customer Category"
   }
  ],
  "hide_toolbar": 1,
@@ -601,7 +610,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-11-04 02:21:42.055122",
+ "modified": "2024-07-08 07:49:09.527242",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
