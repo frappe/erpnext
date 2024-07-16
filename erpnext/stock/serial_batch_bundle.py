@@ -599,9 +599,15 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 		timestamp_condition = ""
 		if self.sle.posting_date and self.sle.posting_time:
-			timestamp_condition = CombineDatetime(
-				parent.posting_date, parent.posting_time
-			) <= CombineDatetime(self.sle.posting_date, self.sle.posting_time)
+			timestamp_condition = CombineDatetime(parent.posting_date, parent.posting_time) < CombineDatetime(
+				self.sle.posting_date, self.sle.posting_time
+			)
+
+			if self.sle.creation:
+				timestamp_condition |= (
+					CombineDatetime(parent.posting_date, parent.posting_time)
+					== CombineDatetime(self.sle.posting_date, self.sle.posting_time)
+				) & (parent.creation < self.sle.creation)
 
 		query = (
 			frappe.qb.from_(parent)
