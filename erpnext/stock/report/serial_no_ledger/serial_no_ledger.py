@@ -77,9 +77,8 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Party Type"),
-			"fieldtype": "Link",
+			"fieldtype": "Data",
 			"fieldname": "party_type",
-			"options": "DocType",
 			"width": 90,
 		},
 		{
