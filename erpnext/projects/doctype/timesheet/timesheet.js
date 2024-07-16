@@ -99,6 +99,7 @@ frappe.ui.form.on("Timesheet", {
 
 		let filters = {
 			status: "Open",
+			user: frappe.session.user,
 		};
 
 		if (frm.doc.customer) {
