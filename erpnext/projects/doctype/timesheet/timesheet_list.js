@@ -13,4 +13,13 @@ frappe.listview_settings["Timesheet"] = {
 			return [__("Completed"), "green", "status,=," + "Completed"];
 		}
 	},
+	refresh: function (listview) {
+		$('span[title^="Project:"]').on('click', function () {
+			let projectName = $(this).find('a').text();
+			console.log("asdasdsad");
+			var projectUrl = 'projects/' + projectName;
+			window.location.href = projectUrl;
+		});
+	}
 };
+
