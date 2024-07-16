@@ -161,11 +161,7 @@ class Asset(AccountsController):
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
-<<<<<<< HEAD
-		self.cancel_capitalization()
-=======
 		self.reload()
->>>>>>> 81e0b96c30 (fix: service item capitalization (#42188))
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
 		self.set_status()
@@ -527,19 +523,6 @@ class Asset(AccountsController):
 			movement = frappe.get_doc("Asset Movement", movement.get("name"))
 			movement.cancel()
 
-<<<<<<< HEAD
-	def cancel_capitalization(self):
-		asset_capitalization = frappe.db.get_value(
-			"Asset Capitalization",
-			{"target_asset": self.name, "docstatus": 1, "entry_type": "Capitalization"},
-		)
-
-		if asset_capitalization:
-			asset_capitalization = frappe.get_doc("Asset Capitalization", asset_capitalization)
-			asset_capitalization.cancel()
-
-=======
->>>>>>> 81e0b96c30 (fix: service item capitalization (#42188))
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
 			for row in self.get("finance_books"):
