@@ -645,3 +645,7 @@ default_log_clearing_doctypes = {
 export_python_type_annotations = True
 
 fields_for_group_similar_items = ["qty", "amount"]
+
+permission_query_conditions = {
+    "Project": "erpnext.permission.project_query",
+}
