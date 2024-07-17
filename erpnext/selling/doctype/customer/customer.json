@@ -26,6 +26,7 @@
   "column_break0",
   "account_manager",
   "contact",
+  "disable_sdm",
   "customer_group",
   "territory",
   "tax_id",
@@ -587,6 +588,12 @@
    "fieldtype": "Select",
    "label": "Customer Types",
    "options": "\nPrivate Sales\nGovt Sales"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_sdm",
+   "fieldtype": "Check",
+   "label": "Disable Sales Data Module?"
   }
  ],
  "hide_toolbar": 1,
@@ -601,7 +608,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2022-11-04 02:21:42.055122",
+ "modified": "2023-10-06 08:29:35.547007",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -701,12 +701,12 @@ def update_status(status, name):
 	po = frappe.get_doc("Purchase Order", name)
 	po.update_status(status)
 	po.update_delivered_qty_in_sales_order()
-	if po.status == "Ready":
-		total_received_amt = 0
-		for d in po.get("items"):
-			total_received_amt += d.rate
-			# Update Ammount in Account Payble DocType
-		frappe.db.set_value("Account Payable", po.name, 'total_payable_after_revision', 0)
+	# if po.status == "Ready":
+	# 	total_received_amt = 0
+	# 	for d in po.get("items"):
+	# 		total_received_amt += d.rate
+	# 		# Update Ammount in Account Payble DocType
+	# 	frappe.db.set_value("Account Payable", po.name, 'total_payable_after_revision', 0)
 
 
 @frappe.whitelist()

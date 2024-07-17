@@ -976,7 +976,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nOpen\nProposed Ready Date\nPartially Ready\nReady\nShipped\nCancelled",
+   "options": "\nOpen\nProposed Ready Date\nPartially Ready\nReady and Short Close\nReady\nShipped\nShipped and Short Close\nCancelled",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1,
@@ -1245,7 +1245,7 @@
    "fieldname": "po_status",
    "fieldtype": "Select",
    "label": "PO Status",
-   "options": "Open\nProposed Ready Date\nPartially Ready\nReady\nShipped\nCancelled"
+   "options": "Open\nProposed Ready Date\nPartially Ready\nReady and Short\nReady\nShipped\nCancelled"
   },
   {
    "allow_on_submit": 1,
@@ -1271,7 +1271,7 @@
   {
    "fieldname": "section_break_142",
    "fieldtype": "Section Break",
-   "hidden": 1
+   "hidden": 0
   },
   {
    "allow_on_submit": 1,
@@ -1287,7 +1287,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-02-14 05:35:29.939784",
+ "modified": "2023-12-06 05:39:06.601927",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

@@ -231,7 +231,7 @@ def get_ordered_qty(item_code, warehouse):
 		from `tabPurchase Order Item` po_item, `tabPurchase Order` po
 		where po_item.item_code=%s and po_item.warehouse=%s
 		and po_item.qty > po_item.received_qty and po_item.parent=po.name
-		and po.status not in ('Closed', 'Delivered') and po.docstatus=1
+		and po.status not in ('Closed', 'Delivered', 'Ready and Short Close','Shipped and Short Close') and po.docstatus=1
 		and po_item.delivered_by_supplier = 0""",
 		(item_code, warehouse),
 	)
