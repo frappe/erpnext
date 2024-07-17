@@ -271,6 +271,7 @@ erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
 erpnext.patches.v14_0.france_depreciation_warning
 erpnext.patches.v14_0.clear_reconciliation_values_from_singles
+erpnext.patches.v14_0.update_proprietorship_to_individual
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
