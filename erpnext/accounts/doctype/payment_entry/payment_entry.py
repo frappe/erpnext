@@ -1248,7 +1248,7 @@ class PaymentEntry(AccountsController):
 
 			if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
 				if d.allocated_amount < 0:
-					if (party_account_type == "Receievable" and self.payment_type == "Pay") or (
+					if (party_account_type == "Receivable" and self.payment_type == "Pay") or (
 						party_account_type == "Payable" and self.payment_type == "Receive"
 					):
 						# reversing dr_cr because because it will get reversed in gl processing due to negative amount
