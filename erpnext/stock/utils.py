@@ -200,7 +200,7 @@ def get_bin(item_code, warehouse):
 	if not bin:
 		bin_obj = _create_bin(item_code, warehouse)
 	else:
-		bin_obj = frappe.get_doc("Bin", bin, for_update=True)
+		bin_obj = frappe.get_doc("Bin", bin)
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 

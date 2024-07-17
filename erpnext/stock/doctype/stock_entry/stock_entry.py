@@ -2756,7 +2756,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 					"batch_no": "batch_no",
 				},
 				"postprocess": update_item,
-				"condition": lambda doc: flt(doc.qty) - flt(doc.transferred_qty) > 0.01,
+				"condition": lambda doc: flt(doc.qty) - flt(doc.transferred_qty) > 0.00001,
 			},
 		},
 		target_doc,

@@ -187,7 +187,7 @@ frappe.ui.form.on("Asset", {
 		if (frm.doc.docstatus == 0) {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 
-			if (frm.doc.is_composite_asset && !frm.doc.capitalized_in) {
+			if (frm.doc.is_composite_asset) {
 				$(".primary-action").prop("hidden", true);
 				$(".form-message").text("Capitalize this asset to confirm");
 
@@ -511,6 +511,8 @@ frappe.ui.form.on("Asset", {
 		frappe.call({
 			args: {
 				asset: frm.doc.name,
+				asset_name: frm.doc.asset_name,
+				item_code: frm.doc.item_code,
 			},
 			method: "erpnext.assets.doctype.asset.asset.create_asset_capitalization",
 			callback: function (r) {

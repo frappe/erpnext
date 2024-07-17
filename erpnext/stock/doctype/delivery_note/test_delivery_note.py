@@ -1918,6 +1918,93 @@ class TestDeliveryNote(FrappeTestCase):
 		returned_serial_nos = get_serial_nos_from_bundle(dn_return.items[0].serial_and_batch_bundle)
 		self.assertEqual(serial_nos, returned_serial_nos)
 
+	def test_same_posting_date_and_posting_time(self):
+		item_code = make_item(
+			"Test Same Posting Datetime Item",
+			properties={
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "SS-ART11-TESTBATCH.#####",
+				"is_stock_item": 1,
+			},
+		).name
+
+		se = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=100,
+			basic_rate=50,
+			posting_date=add_days(nowdate(), -1),
+		)
+
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		posting_date = today()
+		posting_time = nowtime()
+		dn1 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		dn2 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		dn3 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		dn4 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+		)
+
+		for dn in [dn1, dn2, dn3, dn4]:
+			sles = frappe.get_all(
+				"Stock Ledger Entry",
+				fields=["stock_value_difference", "actual_qty"],
+				filters={"is_cancelled": 0, "voucher_no": dn.name, "docstatus": 1},
+			)
+
+			for sle in sles:
+				self.assertEqual(sle.actual_qty, 25.0 * -1)
+				self.assertEqual(sle.stock_value_difference, 25.0 * 50 * -1)
+
+		dn5 = create_delivery_note(
+			posting_date=posting_date,
+			posting_time=posting_time,
+			item_code=item_code,
+			rate=300,
+			qty=25,
+			batch_no=batch_no,
+			use_serial_batch_fields=1,
+			do_not_submit=True,
+		)
+
+		self.assertRaises(frappe.ValidationError, dn5.submit)
+
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")
