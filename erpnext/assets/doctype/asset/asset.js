@@ -775,11 +775,8 @@ frappe.ui.form.on("Asset Finance Book", {
 
 	depreciation_start_date: function (frm, cdt, cdn) {
 		const book = locals[cdt][cdn];
-		if (
-			frm.doc.available_for_use_date &&
-			book.depreciation_start_date == frm.doc.available_for_use_date
-		) {
-			frappe.msgprint(__("Depreciation Posting Date should not be equal to Available for Use Date."));
+		if (frm.doc.available_for_use_date && book.depreciation_start_date < frm.doc.available_for_use_date) {
+			frappe.msgprint(__("Depreciation Posting Date cannot be before Available-for-use Date"));
 			book.depreciation_start_date = "";
 			frm.refresh_field("finance_books");
 		}
