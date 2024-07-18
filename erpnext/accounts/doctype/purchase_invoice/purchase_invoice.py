@@ -795,19 +795,17 @@ class PurchaseInvoice(BuyingController):
 		self.process_common_party_accounting()
 
 	def on_update_after_submit(self):
-		if hasattr(self, "repost_required"):
-			fields_to_check = [
-				"cash_bank_account",
-				"write_off_account",
-				"unrealized_profit_loss_account",
-				"is_opening",
-			]
-			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
-			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-			if self.needs_repost:
-				self.validate_for_repost()
-				self.db_set("repost_required", self.needs_repost)
-				self.repost_accounting_entries()
+		fields_to_check = [
+			"cash_bank_account",
+			"write_off_account",
+			"unrealized_profit_loss_account",
+			"is_opening",
+		]
+		child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
+		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if self.needs_repost:
+			self.validate_for_repost()
+			self.repost_accounting_entries()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
