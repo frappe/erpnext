@@ -428,11 +428,12 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 				frappe.msgprint(__("Please specify Company to proceed"));
 			} else {
 				var me = this;
+				const for_validate = me.frm.doc.is_return ? true : false;
 				return this.frm.call({
 					doc: me.frm.doc,
 					method: "set_missing_values",
 					args: {
-						for_validate: true,
+						for_validate: for_validate,
 					},
 					callback: function (r) {
 						if (!r.exc) {
