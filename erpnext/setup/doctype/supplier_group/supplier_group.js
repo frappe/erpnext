@@ -40,7 +40,7 @@ frappe.ui.form.on("Supplier Group", {
 	},
 	set_root_readonly: function (frm) {
 		if (!frm.doc.parent_supplier_group && !frm.doc.__islocal) {
-			frm.trigger("set_read_only");
+			frm.set_read_only();
 			frm.set_intro(__("This is a root supplier group and cannot be edited."));
 		} else {
 			frm.set_intro(null);
