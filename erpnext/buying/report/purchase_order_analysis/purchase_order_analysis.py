@@ -46,9 +46,9 @@ def get_data(filters):
 		frappe.qb.from_(po)
 		.from_(po_item)
 		.left_join(pi_item)
-		.on(pi_item.po_detail == po_item.name)
+		.on(pi_item.po_detail == po_item.name & pi_item.docstatus == 1)
 		.left_join(pi)
-		.on(pi.name == pi_item.parent)
+		.on(pi.name == pi_item.parent & pi.docstatus == 1)
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
@@ -72,7 +72,6 @@ def get_data(filters):
 			po_item.name,
 		)
 		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "Closed"))) & (po.docstatus == 1))
-		.where(pi.docstatus == 1)
 		.groupby(po_item.name)
 		.orderby(po.transaction_date)
 	)
