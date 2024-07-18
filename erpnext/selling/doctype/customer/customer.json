@@ -21,6 +21,7 @@
   "gender",
   "lead_name",
   "opportunity_name",
+  "prospect_name",
   "account_manager",
   "image",
   "defaults_tab",
@@ -570,6 +571,14 @@
   {
    "fieldname": "column_break_nwor",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "prospect_name",
+   "fieldtype": "Link",
+   "label": "From Prospect",
+   "no_copy": 1,
+   "options": "Prospect",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-user",
