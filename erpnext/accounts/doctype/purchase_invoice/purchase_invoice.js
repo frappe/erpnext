@@ -59,6 +59,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			this.show_stock_ledger();
 		}
 
+<<<<<<< HEAD
 		if (this.frm.doc.repost_required && this.frm.doc.docstatus===1) {
 			this.frm.set_intro(__("Accounting entries for this invoice need to be reposted. Please click on 'Repost' button to update."));
 			this.frm.add_custom_button(__('Repost Accounting Entries'),
@@ -80,6 +81,10 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 		if(!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0){
 			if(doc.on_hold) {
+=======
+		if (!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0) {
+			if (doc.on_hold) {
+>>>>>>> fe46e1d089 (chore: remove stale UI code related to repost)
 				this.frm.add_custom_button(
 					__('Change Release Date'),
 					function() {me.change_release_date()},
