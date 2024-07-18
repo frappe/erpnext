@@ -32,11 +32,13 @@ class TestProspect(unittest.TestCase):
 
 		frappe.delete_doc_if_exists("Customer", "_Test Prospect")
 
-		prospect = frappe.get_doc({
-			"doctype": "Prospect",
-			"company_name": "_Test Prospect",
-			"customer_group": "_Test Customer Group",
-		})
+		prospect = frappe.get_doc(
+			{
+				"doctype": "Prospect",
+				"company_name": "_Test Prospect",
+				"customer_group": "_Test Customer Group",
+			}
+		)
 		prospect.insert()
 
 		customer = make_customer_from_prospect("_Test Prospect")
