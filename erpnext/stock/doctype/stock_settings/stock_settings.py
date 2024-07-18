@@ -40,12 +40,14 @@ class StockSettings(Document):
 		default_warehouse: DF.Link | None
 		disable_serial_no_and_batch_selector: DF.Check
 		do_not_update_serial_batch_on_creation_of_auto_bundle: DF.Check
+		do_not_use_batchwise_valuation: DF.Check
 		enable_stock_reservation: DF.Check
 		item_group: DF.Link | None
 		item_naming_by: DF.Literal["Item Code", "Naming Series"]
 		mr_qty_allowance: DF.Float
 		naming_series_prefix: DF.Data | None
 		over_delivery_receipt_allowance: DF.Float
+		over_picking_allowance: DF.Percent
 		pick_serial_and_batch_based_on: DF.Literal["FIFO", "LIFO", "Expiry"]
 		reorder_email_notify: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None
@@ -84,14 +86,6 @@ class StockSettings(Document):
 			make_mandatory=0,
 		)
 
-		stock_frozen_limit = 356
-		submitted_stock_frozen = self.stock_frozen_upto_days or 0
-		if submitted_stock_frozen > stock_frozen_limit:
-			self.stock_frozen_upto_days = stock_frozen_limit
-			frappe.msgprint(
-				_("`Freeze Stocks Older Than` should be smaller than %d days.") % stock_frozen_limit
-			)
-
 		# show/hide barcode field
 		for name in ["barcode", "barcodes", "scan_barcode"]:
 			frappe.make_property_setter(
@@ -106,6 +100,22 @@ class StockSettings(Document):
 		self.validate_stock_reservation()
 		self.change_precision_for_for_sales()
 		self.change_precision_for_purchase()
+		self.validate_use_batch_wise_valuation()
+
+	def validate_use_batch_wise_valuation(self):
+		if not self.do_not_use_batchwise_valuation:
+			return
+
+		if self.valuation_method == "FIFO":
+			frappe.throw(_("Cannot disable batch wise valuation for FIFO valuation method."))
+
+		if frappe.get_all(
+			"Item", filters={"valuation_method": "FIFO", "is_stock_item": 1, "has_batch_no": 1}, limit=1
+		):
+			frappe.throw(_("Can't disable batch wise valuation for items with FIFO valuation method."))
+
+		if frappe.get_all("Batch", filters={"use_batchwise_valuation": 1}, limit=1):
+			frappe.throw(_("Can't disable batch wise valuation for active batches."))
 
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]

@@ -62,6 +62,7 @@ class Company(NestedSet):
 		default_income_account: DF.Link | None
 		default_inventory_account: DF.Link | None
 		default_letter_head: DF.Link | None
+		default_operating_cost_account: DF.Link | None
 		default_payable_account: DF.Link | None
 		default_provisional_account: DF.Link | None
 		default_receivable_account: DF.Link | None
@@ -85,6 +86,7 @@ class Company(NestedSet):
 		parent_company: DF.Link | None
 		payment_terms: DF.Link | None
 		phone_no: DF.Data | None
+		reconcile_on_advance_payment_date: DF.Check
 		registration_details: DF.Code | None
 		rgt: DF.Int
 		round_off_account: DF.Link | None

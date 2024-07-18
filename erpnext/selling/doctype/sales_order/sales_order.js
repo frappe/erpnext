@@ -75,8 +75,7 @@ frappe.ui.form.on("Sales Order", {
 				if (
 					frm.doc.__onload &&
 					frm.doc.__onload.has_unreserved_stock &&
-					flt(frm.doc.per_picked) === 0 &&
-					frappe.model.can_create("Stock Reservation Entry")
+					flt(frm.doc.per_picked) === 0
 				) {
 					frm.add_custom_button(
 						__("Reserve"),
@@ -227,7 +226,11 @@ frappe.ui.form.on("Sales Order", {
 			frm.set_value("advance_paid", 0);
 		}
 
-		frm.ignore_doctypes_on_cancel_all = ["Purchase Order"];
+		frm.ignore_doctypes_on_cancel_all = [
+			"Purchase Order",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+		];
 	},
 
 	delivery_date: function (frm) {
@@ -770,13 +773,11 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 					flt(doc.per_billed, precision("per_billed", doc)) <
 					100 + frappe.boot.sysdefaults.over_billing_allowance
 				) {
-					if (frappe.model.can_create("Payment Request")) {
-						this.frm.add_custom_button(
-							__("Payment Request"),
-							() => this.make_payment_request(),
-							__("Create")
-						);
-					}
+					this.frm.add_custom_button(
+						__("Payment Request"),
+						() => this.make_payment_request(),
+						__("Create")
+					);
 
 					if (frappe.model.can_create("Payment Entry")) {
 						this.frm.add_custom_button(
@@ -895,6 +896,9 @@ erpnext.selling.SalesOrderController = class SalesOrderController extends erpnex
 						fields: fields,
 						primary_action: function () {
 							var data = { items: d.fields_dict.items.grid.get_selected_children() };
+							if (!data) {
+								frappe.throw(__("Please select items"));
+							}
 							me.frm.call({
 								method: "make_work_orders",
 								args: {

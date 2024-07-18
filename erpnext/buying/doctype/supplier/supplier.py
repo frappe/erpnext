@@ -65,7 +65,7 @@ class Supplier(TransactionBase):
 		supplier_name: DF.Data
 		supplier_primary_address: DF.Link | None
 		supplier_primary_contact: DF.Link | None
-		supplier_type: DF.Literal["Company", "Individual", "Proprietorship", "Partnership"]
+		supplier_type: DF.Literal["Company", "Individual", "Partnership"]
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
 		tax_withholding_category: DF.Link | None
@@ -138,6 +138,7 @@ class Supplier(TransactionBase):
 		validate_party_accounts(self)
 		self.validate_internal_supplier()
 		self.add_role_for_user()
+		self.validate_currency_for_receivable_payable_and_advance_account()
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):

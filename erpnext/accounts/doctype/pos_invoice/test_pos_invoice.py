@@ -318,29 +318,28 @@ class TestPOSInvoice(unittest.TestCase):
 
 		pos.insert()
 		pos.submit()
+		pos.reload()
 
 		pos_return1 = make_sales_return(pos.name)
 
 		# partial return 1
 		pos_return1.get("items")[0].qty = -1
+		pos_return1.submit()
+		pos_return1.reload()
 
 		bundle_id = frappe.get_doc(
 			"Serial and Batch Bundle", pos_return1.get("items")[0].serial_and_batch_bundle
 		)
-
-		bundle_id.remove(bundle_id.entries[1])
-		bundle_id.save()
 
 		bundle_id.load_from_db()
 
 		serial_no = bundle_id.entries[0].serial_no
 		self.assertEqual(serial_no, serial_nos[0])
 
-		pos_return1.insert()
-		pos_return1.submit()
-
 		# partial return 2
 		pos_return2 = make_sales_return(pos.name)
+		pos_return2.submit()
+
 		self.assertEqual(pos_return2.get("items")[0].qty, -1)
 		serial_no = get_serial_nos_from_bundle(pos_return2.get("items")[0].serial_and_batch_bundle)[0]
 		self.assertEqual(serial_no, serial_nos[1])
@@ -781,8 +780,6 @@ class TestPOSInvoice(unittest.TestCase):
 		pos_inv1.submit()
 		pos_inv1.reload()
 
-		self.assertFalse(pos_inv1.items[0].serial_and_batch_bundle)
-
 		batches = get_auto_batch_nos(
 			frappe._dict({"item_code": "_BATCH ITEM Test For Reserve", "warehouse": "_Test Warehouse - _TC"})
 		)
@@ -958,7 +955,7 @@ def create_pos_invoice(**args):
 	pos_inv.set_missing_values()
 
 	bundle_id = None
-	if args.get("batch_no") or args.get("serial_no"):
+	if not args.use_serial_batch_fields and (args.get("batch_no") or args.get("serial_no")):
 		type_of_transaction = args.type_of_transaction or "Outward"
 
 		if pos_inv.is_return:
@@ -999,6 +996,9 @@ def create_pos_invoice(**args):
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"serial_and_batch_bundle": bundle_id,
+		"use_serial_batch_fields": args.use_serial_batch_fields,
+		"serial_no": args.serial_no if args.use_serial_batch_fields else None,
+		"batch_no": args.batch_no if args.use_serial_batch_fields else None,
 	}
 	# append in pos invoice items without item_code by checking flag without_item_code
 	if args.without_item_code:
@@ -1024,6 +1024,8 @@ def create_pos_invoice(**args):
 		pos_inv.insert()
 		if not args.do_not_submit:
 			pos_inv.submit()
+			if args.use_serial_batch_fields:
+				pos_inv.reload()
 		else:
 			pos_inv.payment_schedule = []
 	else:

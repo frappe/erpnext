@@ -3,8 +3,11 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import cstr
+from frappe.utils import cstr, flt
 
+from erpnext.assets.doctype.asset.depreciation import (
+	post_depreciation_entries,
+)
 from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
 from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
@@ -28,7 +31,7 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, second_asset_depr_schedule.insert)
 
-	def test_daily_prorata_based_depr_on_sl_methond(self):
+	def test_daily_prorata_based_depr_on_sl_method(self):
 		asset = create_asset(
 			calculate_depreciation=1,
 			depreciation_method="Straight Line",
@@ -71,6 +74,68 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
 		self.assertEqual(schedules, expected_schedules)
+
+	# Enable Checkbox to Calculate depreciation using total days in depreciation period
+	def test_daily_prorata_based_depr_after_enabling_configuration(self):
+		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 1)
+
+		asset = create_asset(
+			calculate_depreciation=1,
+			depreciation_method="Straight Line",
+			daily_prorata_based=1,
+			gross_purchase_amount=1096,
+			available_for_use_date="2020-01-15",
+			depreciation_start_date="2020-01-31",
+			frequency_of_depreciation=1,
+			total_number_of_depreciations=36,
+		)
+
+		expected_schedule = [
+			["2020-01-31", 17.0, 17.0],
+			["2020-02-29", 29.0, 46.0],
+			["2020-03-31", 31.0, 77.0],
+			["2020-04-30", 30.0, 107.0],
+			["2020-05-31", 31.0, 138.0],
+			["2020-06-30", 30.0, 168.0],
+			["2020-07-31", 31.0, 199.0],
+			["2020-08-31", 31.0, 230.0],
+			["2020-09-30", 30.0, 260.0],
+			["2020-10-31", 31.0, 291.0],
+			["2020-11-30", 30.0, 321.0],
+			["2020-12-31", 31.0, 352.0],
+			["2021-01-31", 31.0, 383.0],
+			["2021-02-28", 28.0, 411.0],
+			["2021-03-31", 31.0, 442.0],
+			["2021-04-30", 30.0, 472.0],
+			["2021-05-31", 31.0, 503.0],
+			["2021-06-30", 30.0, 533.0],
+			["2021-07-31", 31.0, 564.0],
+			["2021-08-31", 31.0, 595.0],
+			["2021-09-30", 30.0, 625.0],
+			["2021-10-31", 31.0, 656.0],
+			["2021-11-30", 30.0, 686.0],
+			["2021-12-31", 31.0, 717.0],
+			["2022-01-31", 31.0, 748.0],
+			["2022-02-28", 28.0, 776.0],
+			["2022-03-31", 31.0, 807.0],
+			["2022-04-30", 30.0, 837.0],
+			["2022-05-31", 31.0, 868.0],
+			["2022-06-30", 30.0, 898.0],
+			["2022-07-31", 31.0, 929.0],
+			["2022-08-31", 31.0, 960.0],
+			["2022-09-30", 30.0, 990.0],
+			["2022-10-31", 31.0, 1021.0],
+			["2022-11-30", 30.0, 1051.0],
+			["2022-12-31", 31.0, 1082.0],
+			["2023-01-15", 14.0, 1096.0],
+		]
+
+		schedules = [
+			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in get_depr_schedule(asset.name, "Draft")
+		]
+		self.assertEqual(schedules, expected_schedule)
+		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 0)
 
 	# Test for Written Down Value Method
 	# Frequency of deprciation = 3
@@ -157,6 +222,72 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 
 		schedules = [
 			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in get_depr_schedule(asset.name, "Draft")
+		]
+		self.assertEqual(schedules, expected_schedules)
+
+	def test_update_total_number_of_booked_depreciations(self):
+		# check if updates total number of booked depreciations when depreciation gets booked
+		asset = create_asset(
+			item_code="Macbook Pro",
+			calculate_depreciation=1,
+			opening_accumulated_depreciation=2000,
+			opening_number_of_booked_depreciations=2,
+			depreciation_method="Straight Line",
+			available_for_use_date="2020-01-01",
+			depreciation_start_date="2020-03-31",
+			frequency_of_depreciation=1,
+			total_number_of_depreciations=24,
+			submit=1,
+		)
+
+		post_depreciation_entries(date="2021-03-31")
+		asset.reload()
+		"""
+		opening_number_of_booked_depreciations = 2
+		number_of_booked_depreciations till 2021-03-31 = 13
+		total_number_of_booked_depreciations = 15
+		"""
+		self.assertEqual(asset.finance_books[0].total_number_of_booked_depreciations, 15)
+
+		# cancel depreciation entry
+		depr_entry = get_depr_schedule(asset.name, "Active")[0].journal_entry
+
+		frappe.get_doc("Journal Entry", depr_entry).cancel()
+		asset.reload()
+
+		self.assertEqual(asset.finance_books[0].total_number_of_booked_depreciations, 14)
+
+	def test_schedule_for_wdv_method_for_existing_asset(self):
+		asset = create_asset(
+			calculate_depreciation=1,
+			depreciation_method="Written Down Value",
+			available_for_use_date="2020-07-17",
+			is_existing_asset=1,
+			opening_number_of_booked_depreciations=2,
+			opening_accumulated_depreciation=11666.67,
+			depreciation_start_date="2021-04-30",
+			total_number_of_depreciations=12,
+			frequency_of_depreciation=3,
+			gross_purchase_amount=50000,
+			rate_of_depreciation=40,
+		)
+
+		self.assertEqual(asset.status, "Draft")
+		expected_schedules = [
+			["2021-04-30", 3833.33, 15500.0],
+			["2021-07-31", 3833.33, 19333.33],
+			["2021-10-31", 3833.33, 23166.66],
+			["2022-01-31", 3833.33, 26999.99],
+			["2022-04-30", 2300.0, 29299.99],
+			["2022-07-31", 2300.0, 31599.99],
+			["2022-10-31", 2300.0, 33899.99],
+			["2023-01-31", 2300.0, 36199.99],
+			["2023-04-30", 1380.0, 37579.99],
+			["2023-07-31", 12420.01, 50000.0],
+		]
+		schedules = [
+			[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
 		self.assertEqual(schedules, expected_schedules)

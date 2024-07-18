@@ -14,12 +14,14 @@
   "purpose",
   "add_to_transit",
   "work_order",
+  "job_card",
   "purchase_order",
   "subcontracting_order",
   "delivery_note_no",
   "sales_invoice_no",
   "pick_list",
   "purchase_receipt_no",
+  "asset_repair",
   "col2",
   "company",
   "posting_date",
@@ -79,7 +81,6 @@
   "col5",
   "per_transferred",
   "total_amount",
-  "job_card",
   "amended_from",
   "credit_note",
   "is_return"
@@ -674,6 +675,14 @@
   {
    "fieldname": "column_break_eaoa",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.asset_repair",
+   "fieldname": "asset_repair",
+   "fieldtype": "Link",
+   "label": "Asset Repair",
+   "options": "Asset Repair",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -681,7 +690,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:43.701839",
+ "modified": "2024-06-26 19:12:17.937088",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

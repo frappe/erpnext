@@ -511,6 +511,10 @@ body[data-route="pos"] {
 	padding-bottom: 25px;
 }
 
+.workstation-image-cls {
+	height: 9rem;
+}
+
 .plant-floor-filter {
 	padding-top: 10px;
 	display: flex;
@@ -519,8 +523,8 @@ body[data-route="pos"] {
 
 .plant-floor-container {
 	display: grid;
-	grid-template-columns: repeat(6, minmax(0, 1fr));
-	gap: var(--margin-xl);
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: var(--margin-lg);
 }
 
 @media screen and (max-width: 620px) {
@@ -536,7 +540,7 @@ body[data-route="pos"] {
 .plant-floor-container .workstation-image-link {
 	width: 100%;
 	font-size: 50px;
-	margin: var(--margin-sm);
+	margin: var(--margin-xs);
 	min-height: 9rem;
 }
 

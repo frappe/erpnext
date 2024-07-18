@@ -355,7 +355,7 @@ class TestAsset(AssetSetup):
 			purchase_date="2020-04-01",
 			expected_value_after_useful_life=0,
 			total_number_of_depreciations=5,
-			number_of_depreciations_booked=2,
+			opening_number_of_booked_depreciations=2,
 			frequency_of_depreciation=12,
 			depreciation_start_date="2023-03-31",
 			opening_accumulated_depreciation=24000,
@@ -453,7 +453,7 @@ class TestAsset(AssetSetup):
 			purchase_date="2020-01-01",
 			expected_value_after_useful_life=0,
 			total_number_of_depreciations=6,
-			number_of_depreciations_booked=1,
+			opening_number_of_booked_depreciations=1,
 			frequency_of_depreciation=10,
 			depreciation_start_date="2021-01-01",
 			opening_accumulated_depreciation=20000,
@@ -739,7 +739,7 @@ class TestDepreciationMethods(AssetSetup):
 			calculate_depreciation=1,
 			available_for_use_date="2030-06-06",
 			is_existing_asset=1,
-			number_of_depreciations_booked=2,
+			opening_number_of_booked_depreciations=2,
 			opening_accumulated_depreciation=47095.89,
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2032-12-31",
@@ -789,7 +789,7 @@ class TestDepreciationMethods(AssetSetup):
 			available_for_use_date="2030-01-01",
 			is_existing_asset=1,
 			depreciation_method="Double Declining Balance",
-			number_of_depreciations_booked=1,
+			opening_number_of_booked_depreciations=1,
 			opening_accumulated_depreciation=50000,
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2031-12-31",
@@ -1123,8 +1123,8 @@ class TestDepreciationBasics(AssetSetup):
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
-	def test_number_of_depreciations_booked(self):
-		"""Tests if an error is raised when number_of_depreciations_booked is not specified when opening_accumulated_depreciation is."""
+	def test_opening_booked_depreciations(self):
+		"""Tests if an error is raised when opening_number_of_booked_depreciations is not specified when opening_accumulated_depreciation is."""
 
 		asset = create_asset(
 			item_code="Macbook Pro",
@@ -1140,9 +1140,9 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_number_of_depreciations(self):
-		"""Tests if an error is raised when number_of_depreciations_booked >= total_number_of_depreciations."""
+		"""Tests if an error is raised when opening_number_of_booked_depreciations >= total_number_of_depreciations."""
 
-		# number_of_depreciations_booked > total_number_of_depreciations
+		# opening_number_of_booked_depreciations > total_number_of_depreciations
 		asset = create_asset(
 			item_code="Macbook Pro",
 			calculate_depreciation=1,
@@ -1151,13 +1151,13 @@ class TestDepreciationBasics(AssetSetup):
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2020-07-01",
 			opening_accumulated_depreciation=10000,
-			number_of_depreciations_booked=5,
+			opening_number_of_booked_depreciations=5,
 			do_not_save=1,
 		)
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
-		# number_of_depreciations_booked = total_number_of_depreciations
+		# opening_number_of_booked_depreciations = total_number_of_depreciations
 		asset_2 = create_asset(
 			item_code="Macbook Pro",
 			calculate_depreciation=1,
@@ -1166,7 +1166,7 @@ class TestDepreciationBasics(AssetSetup):
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2020-07-01",
 			opening_accumulated_depreciation=10000,
-			number_of_depreciations_booked=5,
+			opening_number_of_booked_depreciations=5,
 			do_not_save=1,
 		)
 
@@ -1501,19 +1501,17 @@ class TestDepreciationBasics(AssetSetup):
 		"""
 
 		asset = create_asset(calculate_depreciation=1)
-		asset.opening_accumulated_depreciation = 2000
-		asset.number_of_depreciations_booked = 1
 
 		asset.finance_books[0].expected_value_after_useful_life = 100
 		asset.save()
 		asset.reload()
-		self.assertEqual(asset.finance_books[0].value_after_depreciation, 98000.0)
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 100000.0)
 
 		# changing expected_value_after_useful_life shouldn't affect value_after_depreciation
 		asset.finance_books[0].expected_value_after_useful_life = 200
 		asset.save()
 		asset.reload()
-		self.assertEqual(asset.finance_books[0].value_after_depreciation, 98000.0)
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 100000.0)
 
 	def test_asset_cost_center(self):
 		asset = create_asset(is_existing_asset=1, do_not_save=1)
@@ -1696,7 +1694,7 @@ def create_asset(**args):
 			"purchase_date": args.purchase_date or "2015-01-01",
 			"calculate_depreciation": args.calculate_depreciation or 0,
 			"opening_accumulated_depreciation": args.opening_accumulated_depreciation or 0,
-			"number_of_depreciations_booked": args.number_of_depreciations_booked or 0,
+			"opening_number_of_booked_depreciations": args.opening_number_of_booked_depreciations or 0,
 			"gross_purchase_amount": args.gross_purchase_amount or 100000,
 			"purchase_amount": args.purchase_amount or 100000,
 			"maintenance_required": args.maintenance_required or 0,

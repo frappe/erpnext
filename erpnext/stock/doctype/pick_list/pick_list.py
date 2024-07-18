@@ -6,7 +6,7 @@ from collections import OrderedDict, defaultdict
 from itertools import groupby
 
 import frappe
-from frappe import _
+from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.mapper import map_child_doc
 from frappe.query_builder import Case
@@ -73,6 +73,9 @@ class PickList(Document):
 
 	def validate(self):
 		self.validate_for_qty()
+		if self.pick_manually and self.get("locations"):
+			self.validate_stock_qty()
+			self.check_serial_no_status()
 
 	def before_save(self):
 		self.update_status()
@@ -81,6 +84,60 @@ class PickList(Document):
 
 		if self.get("locations"):
 			self.validate_sales_order_percentage()
+
+	def validate_stock_qty(self):
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		for row in self.get("locations"):
+			if row.batch_no and not row.qty:
+				batch_qty = get_batch_qty(row.batch_no, row.warehouse, row.item_code)
+
+				if row.qty > batch_qty:
+					frappe.throw(
+						_(
+							"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}."
+						).format(row.idx, row.item_code, batch_qty, row.batch_no, bold(row.warehouse)),
+						title=_("Insufficient Stock"),
+					)
+
+				continue
+
+			bin_qty = frappe.db.get_value(
+				"Bin",
+				{"item_code": row.item_code, "warehouse": row.warehouse},
+				"actual_qty",
+			)
+
+			if row.qty > bin_qty:
+				frappe.throw(
+					_(
+						"At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
+					).format(row.idx, row.qty, bold(row.item_code), bin_qty, bold(row.warehouse)),
+					title=_("Insufficient Stock"),
+				)
+
+	def check_serial_no_status(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		for row in self.get("locations"):
+			if not row.serial_no:
+				continue
+
+			picked_serial_nos = get_serial_nos(row.serial_no)
+			validated_serial_nos = frappe.get_all(
+				"Serial No",
+				filters={"name": ("in", picked_serial_nos), "warehouse": row.warehouse},
+				pluck="name",
+			)
+
+			incorrect_serial_nos = set(picked_serial_nos) - set(validated_serial_nos)
+			if incorrect_serial_nos:
+				frappe.throw(
+					_("The Serial No at Row #{0}: {1} is not available in warehouse {2}.").format(
+						row.idx, ", ".join(incorrect_serial_nos), row.warehouse
+					),
+					title=_("Incorrect Warehouse"),
+				)
 
 	def validate_sales_order_percentage(self):
 		# set percentage picked in SO
@@ -693,7 +750,8 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 	# if stock qty is zero on submitted entry, show positive remaining qty to recalculate in case of restock.
 	remaining_stock_qty = item_doc.qty if (docstatus == 1 and item_doc.stock_qty == 0) else item_doc.stock_qty
 
-	while flt(remaining_stock_qty) > 0 and available_locations:
+	precision = frappe.get_precision("Pick List Item", "qty")
+	while flt(remaining_stock_qty, precision) > 0 and available_locations:
 		item_location = available_locations.pop(0)
 		item_location = frappe._dict(item_location)
 
@@ -838,6 +896,7 @@ def validate_picked_materials(item_code, required_qty, locations, picked_item_de
 
 def filter_locations_by_picked_materials(locations, picked_item_details) -> list[dict]:
 	filterd_locations = []
+	precision = frappe.get_precision("Pick List Item", "qty")
 	for row in locations:
 		key = row.warehouse
 		if row.batch_no:
@@ -856,7 +915,7 @@ def filter_locations_by_picked_materials(locations, picked_item_details) -> list
 			if row.serial_nos:
 				row.serial_nos = list(set(row.serial_nos) - set(picked_item_details[key].get("serial_no")))
 
-		if row.qty > 0:
+		if flt(row.qty, precision) > 0:
 			filterd_locations.append(row)
 
 	return filterd_locations
@@ -961,6 +1020,7 @@ def get_available_item_locations_for_batched_item(
 			{
 				"item_code": item_code,
 				"warehouse": from_warehouses,
+				"based_on": frappe.db.get_single_value("Stock Settings", "pick_serial_and_batch_based_on"),
 			}
 		)
 	)

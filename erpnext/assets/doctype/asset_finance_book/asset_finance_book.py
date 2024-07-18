@@ -28,6 +28,7 @@ class AssetFinanceBook(Document):
 		rate_of_depreciation: DF.Percent
 		salvage_value_percentage: DF.Percent
 		shift_based: DF.Check
+		total_number_of_booked_depreciations: DF.Int
 		total_number_of_depreciations: DF.Int
 		value_after_depreciation: DF.Currency
 	# end: auto-generated types

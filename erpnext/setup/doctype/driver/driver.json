@@ -17,6 +17,7 @@
   "employee",
   "cell_number",
   "address",
+  "user",
   "license_details",
   "license_number",
   "column_break_8",
@@ -116,6 +117,14 @@
    "fieldtype": "Link",
    "label": "Address",
    "options": "Address"
+  },
+  {
+   "fieldname": "user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "User",
+   "options": "User",
+   "read_only_depends_on": "employee"
   }
  ],
  "icon": "fa fa-user",
