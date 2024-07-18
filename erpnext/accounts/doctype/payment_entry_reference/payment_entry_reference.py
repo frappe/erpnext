@@ -25,6 +25,7 @@ class PaymentEntryReference(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
+		payment_request: DF.Link | None
 		payment_term: DF.Link | None
 		payment_type: DF.Data | None
 		reference_doctype: DF.Link

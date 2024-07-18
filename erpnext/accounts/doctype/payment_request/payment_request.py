@@ -11,7 +11,6 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
-	get_company_defaults,
 	get_payment_entry,
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
@@ -49,6 +48,7 @@ class PaymentRequest(Document):
 		cost_center: DF.Link | None
 		currency: DF.Link | None
 		email_to: DF.Data | None
+		failed_reason: DF.Data | None
 		grand_total: DF.Currency
 		iban: DF.ReadOnly | None
 		is_a_subscription: DF.Check
@@ -57,6 +57,7 @@ class PaymentRequest(Document):
 		mode_of_payment: DF.Link | None
 		mute_email: DF.Check
 		naming_series: DF.Literal["ACC-PRQ-.YYYY.-"]
+		outstanding_amount: DF.Currency
 		party: DF.DynamicLink | None
 		party_type: DF.Link | None
 		payment_account: DF.ReadOnly | None
@@ -100,6 +101,9 @@ class PaymentRequest(Document):
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
 	def validate_payment_request_amount(self):
+		if self.grand_total <= 0:
+			frappe.throw(_("Total Payment Request amount must be greater than zero"))
+
 		existing_payment_request_amount = flt(
 			get_existing_payment_request_amount(self.reference_doctype, self.reference_name)
 		)
@@ -159,6 +163,8 @@ class PaymentRequest(Document):
 			ref_doc.set_advance_payment_status()
 
 	def before_submit(self):
+		self.outstanding_amount = self.grand_total
+
 		if self.payment_request_type == "Outward":
 			self.status = "Initiated"
 		elif self.payment_request_type == "Inward":
@@ -290,11 +296,14 @@ class PaymentRequest(Document):
 
 		party_account_currency = ref_doc.get("party_account_currency") or get_account_currency(party_account)
 
-		bank_amount = self.grand_total
+		# !  Verify this
+		bank_amount = self.outstanding_amount
+		# !  Verify this
+		# todo: there is a bug here, the amount is not being set correctly
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
 			party_amount = ref_doc.get("base_rounded_total") or ref_doc.get("base_grand_total")
 		else:
-			party_amount = self.grand_total
+			party_amount = self.outstanding_amount
 
 		payment_entry = get_payment_entry(
 			self.reference_doctype,
@@ -315,6 +324,9 @@ class PaymentRequest(Document):
 			}
 		)
 
+		# Add reference of Payment Request
+		payment_entry.get("references")[0].payment_request = self.name
+
 		# Update dimensions
 		payment_entry.update(
 			{
@@ -323,10 +335,11 @@ class PaymentRequest(Document):
 			}
 		)
 
+		# ! Verify this
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
 			amount = payment_entry.base_paid_amount
 		else:
-			amount = self.grand_total
+			amount = self.outstanding_amount
 
 		payment_entry.received_amount = amount
 		payment_entry.get("references")[0].allocated_amount = amount
@@ -482,6 +495,7 @@ def make_payment_request(**args):
 				"payment_request_type": args.get("payment_request_type"),
 				"currency": ref_doc.currency,
 				"grand_total": grand_total,
+				"outstanding_amount": grand_total,
 				"mode_of_payment": args.mode_of_payment,
 				"email_to": args.recipient_id or ref_doc.owner,
 				"subject": _("Payment Request for {0}").format(args.dn),
@@ -529,7 +543,6 @@ def get_amount(ref_doc, payment_account=None):
 	dt = ref_doc.doctype
 	if dt in ["Sales Order", "Purchase Order"]:
 		grand_total = flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)
-		grand_total -= get_paid_amount_against_order(dt, ref_doc.name)
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
 		if not ref_doc.get("is_pos"):
 			if ref_doc.party_account_currency == ref_doc.currency:
@@ -552,26 +565,24 @@ def get_amount(ref_doc, payment_account=None):
 	return grand_total
 
 
+# ! previous filter: (payment_channel = 'Phone'and status = 'Paid')) ??
 def get_existing_payment_request_amount(ref_dt, ref_dn):
 	"""
-	Get the existing payment request which are unpaid or partially paid for payment channel other than Phone
-	and get the summation of existing paid payment request for Phone payment channel.
+	Get the total amount of `Paid` / `Partially Paid` payment requests against a document.
 	"""
-	existing_payment_request_amount = frappe.db.sql(
-		"""
-		select sum(grand_total)
-		from `tabPayment Request`
-		where
-			reference_doctype = %s
-			and reference_name = %s
-			and docstatus = 1
-			and (status != 'Paid'
-			or (payment_channel = 'Phone'
-				and status = 'Paid'))
-	""",
-		(ref_dt, ref_dn),
+	PR = frappe.qb.DocType("Payment Request")
+
+	response = (
+		frappe.qb.from_(PR)
+		.select(Sum(PR.grand_total - PR.outstanding_amount))
+		.where(PR.reference_doctype == ref_dt)
+		.where(PR.reference_name == ref_dn)
+		.where(PR.docstatus == 1)
+		.where((PR.status == "Paid") | (PR.status == "Partially Paid"))
+		.run()
 	)
-	return flt(existing_payment_request_amount[0][0]) if existing_payment_request_amount else 0
+
+	return response[0][0] or 0
 
 
 def get_gateway_details(args):  # nosemgrep
@@ -613,39 +624,53 @@ def make_payment_entry(docname):
 	return doc.create_payment_entry(submit=False).as_dict()
 
 
-def update_payment_req_status(doc, method):
-	from erpnext.accounts.doctype.payment_entry.payment_entry import get_reference_details
-
+def update_payment_req_outstanding_amount(doc, cancel=False):
 	for ref in doc.references:
-		payment_request_name = frappe.db.get_value(
-			"Payment Request",
-			{
-				"reference_doctype": ref.reference_doctype,
-				"reference_name": ref.reference_name,
-				"docstatus": 1,
-			},
-		)
+		payment_request_name = ref.payment_request
 
 		if payment_request_name:
-			ref_details = get_reference_details(
-				ref.reference_doctype,
-				ref.reference_name,
-				doc.party_account_currency,
-				doc.party_type,
-				doc.party,
+			old_outstanding_amount = frappe.db.get_value(
+				"Payment Request", payment_request_name, "outstanding_amount"
 			)
+
+			new_outstanding_amount = (
+				old_outstanding_amount + ref.allocated_amount
+				if cancel
+				else old_outstanding_amount - ref.allocated_amount
+			)
+
+			if new_outstanding_amount < 0:
+				frappe.throw(
+					_(
+						"The allocated amount is greater than the outstanding amount of Payment Request {0}"
+					).format(payment_request_name)
+				)
+
+			frappe.db.set_value(
+				"Payment Request",
+				payment_request_name,
+				"outstanding_amount",
+				new_outstanding_amount,
+			)
+
+
+def update_payment_req_status(doc, method):
+	for ref in doc.references:
+		payment_request_name = ref.payment_request
+
+		if payment_request_name:
 			pay_req_doc = frappe.get_doc("Payment Request", payment_request_name)
 			status = pay_req_doc.status
 
-			if status != "Paid" and not ref_details.outstanding_amount:
+			if pay_req_doc.outstanding_amount == 0:
 				status = "Paid"
-			elif status != "Partially Paid" and ref_details.outstanding_amount != ref_details.total_amount:
-				status = "Partially Paid"
-			elif ref_details.outstanding_amount == ref_details.total_amount:
+			elif pay_req_doc.outstanding_amount == pay_req_doc.grand_total:
 				if pay_req_doc.payment_request_type == "Outward":
 					status = "Initiated"
 				elif pay_req_doc.payment_request_type == "Inward":
 					status = "Requested"
+			elif pay_req_doc.outstanding_amount > 0:
+				status = "Partially Paid"
 
 			pay_req_doc.db_set("status", status)
 

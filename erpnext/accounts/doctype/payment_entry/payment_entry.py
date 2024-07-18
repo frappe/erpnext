@@ -188,6 +188,7 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_payment_schedule()
+		self.set_payment_req_outstanding_amount()
 		self.set_payment_req_status()
 		self.set_status()
 
@@ -263,8 +264,16 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.delink_advance_entry_references()
 		self.update_payment_schedule(cancel=1)
+		self.set_payment_req_outstanding_amount(cancel=True)
 		self.set_payment_req_status()
 		self.set_status()
+
+	def set_payment_req_outstanding_amount(self, cancel=False):
+		from erpnext.accounts.doctype.payment_request.payment_request import (
+			update_payment_req_outstanding_amount,
+		)
+
+		update_payment_req_outstanding_amount(self, cancel=cancel)
 
 	def set_payment_req_status(self):
 		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
@@ -684,9 +693,9 @@ class PaymentEntry(AccountsController):
 			if d.allocated_amount and d.reference_doctype == "Journal Entry":
 				je_accounts = frappe.db.sql(
 					"""select debit, credit from `tabJournal Entry Account`
-					where account = %s and party=%s and docstatus = 1 and parent = %s
-					and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
-					""",
+                    where account = %s and party=%s and docstatus = 1 and parent = %s
+                    and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
+                    """,
 					(self.party_account, self.party, d.reference_name),
 					as_dict=True,
 				)
@@ -761,12 +770,12 @@ class PaymentEntry(AccountsController):
 			if cancel:
 				frappe.db.sql(
 					"""
-					UPDATE `tabPayment Schedule`
-					SET
-						paid_amount = `paid_amount` - %s,
-						discounted_amount = `discounted_amount` - %s,
-						outstanding = `outstanding` + %s
-					WHERE parent = %s and payment_term = %s""",
+                    UPDATE `tabPayment Schedule`
+                    SET
+                        paid_amount = `paid_amount` - %s,
+                        discounted_amount = `discounted_amount` - %s,
+                        outstanding = `outstanding` + %s
+                    WHERE parent = %s and payment_term = %s""",
 					(allocated_amount - discounted_amt, discounted_amt, allocated_amount, key[1], key[0]),
 				)
 			else:
@@ -780,12 +789,12 @@ class PaymentEntry(AccountsController):
 				if allocated_amount and outstanding:
 					frappe.db.sql(
 						"""
-						UPDATE `tabPayment Schedule`
-						SET
-							paid_amount = `paid_amount` + %s,
-							discounted_amount = `discounted_amount` + %s,
-							outstanding = `outstanding` - %s
-						WHERE parent = %s and payment_term = %s""",
+                        UPDATE `tabPayment Schedule`
+                        SET
+                            paid_amount = `paid_amount` + %s,
+                            discounted_amount = `discounted_amount` + %s,
+                            outstanding = `outstanding` - %s
+                        WHERE parent = %s and payment_term = %s""",
 						(allocated_amount - discounted_amt, discounted_amt, allocated_amount, key[1], key[0]),
 					)
 
@@ -940,11 +949,23 @@ class PaymentEntry(AccountsController):
 
 	def validate_amounts(self):
 		self.validate_received_amount()
+		self.validate_paid_amount()
 
 	def validate_received_amount(self):
 		if self.paid_from_account_currency == self.paid_to_account_currency:
 			if self.paid_amount < self.received_amount:
 				frappe.throw(_("Received Amount cannot be greater than Paid Amount"))
+
+	# ! ErpNext also handles this, but if this not check outstanding amount will be negative , it throws error
+	def validate_paid_amount(self):
+		for ref in self.references:
+			if ref.payment_request:
+				outstanding_amount = frappe.db.get_value(
+					"Payment Request", ref.payment_request, "outstanding_amount"
+				)
+
+				if ref.allocated_amount > outstanding_amount:
+					frappe.throw(_("Allocated Amount cannot be greater than Outstanding Amount"))
 
 	def set_received_amount(self):
 		self.base_received_amount = self.base_paid_amount
@@ -1119,7 +1140,7 @@ class PaymentEntry(AccountsController):
 		self.set("references", self.get("references", {"allocated_amount": ["not in", [0, None, ""]]}))
 		frappe.db.sql(
 			"""delete from `tabPayment Entry Reference`
-			where parent = %s and allocated_amount = 0""",
+            where parent = %s and allocated_amount = 0""",
 			self.name,
 		)
 
@@ -2031,24 +2052,24 @@ def get_orders_to_be_billed(
 
 	orders = frappe.db.sql(
 		"""
-		select
-			name as voucher_no,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
-			(if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) - advance_paid) as outstanding_amount,
-			transaction_date as posting_date
-		from
-			`tab{voucher_type}`
-		where
-			{party_type} = %s
-			and docstatus = 1
-			and company = %s
-			and status != "Closed"
-			and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
-			and abs(100 - per_billed) > 0.01
-			{condition}
-		order by
-			transaction_date, name
-	""".format(
+        select
+            name as voucher_no,
+            if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
+            (if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) - advance_paid) as outstanding_amount,
+            transaction_date as posting_date
+        from
+            `tab{voucher_type}`
+        where
+            {party_type} = %s
+            and docstatus = 1
+            and company = %s
+            and status != "Closed"
+            and if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) > advance_paid
+            and abs(100 - per_billed) > 0.01
+            {condition}
+        order by
+            transaction_date, name
+    """.format(
 			**{
 				"rounded_total_field": rounded_total_field,
 				"grand_total_field": grand_total_field,
@@ -2108,21 +2129,21 @@ def get_negative_outstanding_invoices(
 
 	return frappe.db.sql(
 		"""
-		select
-			"{voucher_type}" as voucher_type, name as voucher_no, {account} as account,
-			if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
-			outstanding_amount, posting_date,
-			due_date, conversion_rate as exchange_rate
-		from
-			`tab{voucher_type}`
-		where
-			{party_type} = %s and {party_account} = %s and docstatus = 1 and
-			outstanding_amount < 0
-			{supplier_condition}
-			{condition}
-		order by
-			posting_date, name
-		""".format(
+        select
+            "{voucher_type}" as voucher_type, name as voucher_no, {account} as account,
+            if({rounded_total_field}, {rounded_total_field}, {grand_total_field}) as invoice_amount,
+            outstanding_amount, posting_date,
+            due_date, conversion_rate as exchange_rate
+        from
+            `tab{voucher_type}`
+        where
+            {party_type} = %s and {party_account} = %s and docstatus = 1 and
+            outstanding_amount < 0
+            {supplier_condition}
+            {condition}
+        order by
+            posting_date, name
+        """.format(
 			**{
 				"supplier_condition": supplier_condition,
 				"condition": condition,
@@ -2800,16 +2821,16 @@ def get_paid_amount(dt, dn, party_type, party, account, due_date):
 
 	paid_amount = frappe.db.sql(
 		f"""
-		select ifnull(sum({dr_or_cr}), 0) as paid_amount
-		from `tabGL Entry`
-		where against_voucher_type = %s
-			and against_voucher = %s
-			and party_type = %s
-			and party = %s
-			and account = %s
-			and due_date = %s
-			and {dr_or_cr} > 0
-	""",
+        select ifnull(sum({dr_or_cr}), 0) as paid_amount
+        from `tabGL Entry`
+        where against_voucher_type = %s
+            and against_voucher = %s
+            and party_type = %s
+            and party = %s
+            and account = %s
+            and due_date = %s
+            and {dr_or_cr} > 0
+    """,
 		(dt, dn, party_type, party, account, due_date),
 	)
 
