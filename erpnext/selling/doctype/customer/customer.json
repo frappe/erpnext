@@ -21,6 +21,7 @@
   "gender",
   "lead_name",
   "opportunity_name",
+  "prospect_name",
   "account_manager",
   "image",
   "defaults_tab",
@@ -554,6 +555,32 @@
   {
    "fieldname": "column_break_54",
    "fieldtype": "Column Break"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "fieldname": "portal_users_tab",
+   "fieldtype": "Tab Break",
+   "label": "Portal Users"
+  },
+  {
+   "fieldname": "portal_users",
+   "fieldtype": "Table",
+   "label": "Customer Portal Users",
+   "options": "Portal User"
+  },
+  {
+   "fieldname": "column_break_nwor",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "prospect_name",
+   "fieldtype": "Link",
+   "label": "From Prospect",
+   "no_copy": 1,
+   "options": "Prospect",
+   "print_hide": 1
+>>>>>>> 2f63fae31d (fix: Create Sales Order from Quotation for Prospect)
   }
  ],
  "icon": "fa fa-user",
