@@ -569,7 +569,6 @@ class SalesInvoice(SellingController):
 			self.repost_future_sle_and_gle()
 
 		self.db_set("status", "Cancelled")
-		self.db_set("repost_required", 0)
 
 		if frappe.db.get_single_value("Selling Settings", "sales_update_frequency") == "Each Transaction":
 			update_company_current_month_sales(self.company)
@@ -716,6 +715,7 @@ class SalesInvoice(SellingController):
 				data.sales_invoice = sales_invoice
 
 	def on_update_after_submit(self):
+<<<<<<< HEAD
 		if hasattr(self, "repost_required"):
 			fields_to_check = [
 				"additional_discount_account",
@@ -734,6 +734,25 @@ class SalesInvoice(SellingController):
 				self.validate_for_repost()
 				self.db_set("repost_required", self.needs_repost)
 				self.repost_accounting_entries()
+=======
+		fields_to_check = [
+			"additional_discount_account",
+			"cash_bank_account",
+			"account_for_change_amount",
+			"write_off_account",
+			"loyalty_redemption_account",
+			"unrealized_profit_loss_account",
+			"is_opening",
+		]
+		child_tables = {
+			"items": ("income_account", "expense_account", "discount_account"),
+			"taxes": ("account_head",),
+		}
+		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if self.needs_repost:
+			self.validate_for_repost()
+			self.repost_accounting_entries()
+>>>>>>> 07fc952a43 (refactor: remove attribute check on 'repost_required')
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
