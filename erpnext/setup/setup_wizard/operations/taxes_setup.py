@@ -163,7 +163,7 @@ def make_taxes_and_charges_template(company_name, doctype, template):
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True
 	doc.flags.ignore_mandatory = True
-	doc.insert(ignore_permissions=True)
+	doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
 	return doc
 
 
@@ -196,7 +196,7 @@ def make_item_tax_template(company_name, template):
 	# Ingone validations to make doctypes faster
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True
-	doc.insert(ignore_permissions=True)
+	doc.insert(ignore_permissions=True, ignore_if_duplicate=True)
 	return doc
 
 
@@ -233,7 +233,7 @@ def get_or_create_account(company_name, account):
 	doc = frappe.get_doc(account)
 	doc.flags.ignore_links = True
 	doc.flags.ignore_validate = True
-	doc.insert(ignore_permissions=True, ignore_mandatory=True)
+	doc.insert(ignore_permissions=True, ignore_mandatory=True, ignore_if_duplicate=True)
 	return doc
 
 
