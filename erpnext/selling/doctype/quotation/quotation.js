@@ -67,9 +67,23 @@ frappe.ui.form.on("Quotation", {
 		}
 
         if (frm.doc.docstatus == 1) {
-            frm.add_custom_button(__('Project'), function() {
-                frm.trigger('create_project');
-            }, __('Create'));
+            frappe.call({
+                method: "frappe.client.get_list",
+                args: {
+                    doctype: "Project",
+                    filters: {
+                        "custom_from_quotation": frm.doc.name
+                    },
+                    limit: 1
+                },
+                callback: function(r) {
+                    if (r && r.message && r.message.length === 0) {
+                        frm.add_custom_button(__('Project'), function() {
+                            frm.trigger('create_project');
+                        }, __('Create'));
+                    }
+                }
+            });
         }
 	},
 
