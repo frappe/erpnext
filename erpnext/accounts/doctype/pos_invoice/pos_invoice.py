@@ -229,7 +229,9 @@ class POSInvoice(SalesInvoice):
 		self.check_phone_payments()
 		self.set_status(update=True)
 		self.make_bundle_for_sales_purchase_return()
-		self.submit_serial_batch_bundle()
+		for table_name in ["items", "packed_items"]:
+			self.make_bundle_using_old_serial_batch_fields(table_name)
+			self.submit_serial_batch_bundle(table_name)
 
 		if self.coupon_code:
 			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
@@ -283,10 +285,11 @@ class POSInvoice(SalesInvoice):
 						{"is_cancelled": 1, "voucher_no": ""},
 					)
 
+				frappe.get_doc("Serial and Batch Bundle", row.serial_and_batch_bundle).cancel()
 				row.db_set("serial_and_batch_bundle", None)
 
-	def submit_serial_batch_bundle(self):
-		for item in self.items:
+	def submit_serial_batch_bundle(self, table_name):
+		for item in self.get(table_name):
 			if item.serial_and_batch_bundle:
 				doc = frappe.get_doc("Serial and Batch Bundle", item.serial_and_batch_bundle)
 
@@ -355,10 +358,16 @@ class POSInvoice(SalesInvoice):
 		error_msg = []
 		for d in self.get("items"):
 			error_msg = ""
-			if d.get("has_serial_no") and not d.serial_and_batch_bundle:
+			if d.get("has_serial_no") and (
+				(not d.use_serial_batch_fields and not d.serial_and_batch_bundle)
+				or (d.use_serial_batch_fields and not d.serial_no)
+			):
 				error_msg = f"Row #{d.idx}: Please select Serial No. for item {bold(d.item_code)}"
 
-			elif d.get("has_batch_no") and not d.serial_and_batch_bundle:
+			elif d.get("has_batch_no") and (
+				(not d.use_serial_batch_fields and not d.serial_and_batch_bundle)
+				or (d.use_serial_batch_fields and not d.batch_no)
+			):
 				error_msg = f"Row #{d.idx}: Please select Batch No. for item {bold(d.item_code)}"
 
 		if error_msg:

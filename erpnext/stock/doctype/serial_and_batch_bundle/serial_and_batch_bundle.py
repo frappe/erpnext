@@ -935,6 +935,9 @@ class SerialandBatchBundle(Document):
 		self.validate_voucher_no_docstatus()
 
 	def validate_voucher_no_docstatus(self):
+		if self.voucher_type == "POS Invoice":
+			return
+
 		if frappe.db.get_value(self.voucher_type, self.voucher_no, "docstatus") == 1:
 			msg = f"""The {self.voucher_type} {bold(self.voucher_no)}
 				is in submitted state, please cancel it first"""
@@ -1718,6 +1721,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 			"`tabPOS Invoice Item`.warehouse",
 			"`tabPOS Invoice Item`.name as child_docname",
 			"`tabPOS Invoice`.name as parent_docname",
+			"`tabPOS Invoice Item`.use_serial_batch_fields",
 			"`tabPOS Invoice Item`.serial_and_batch_bundle",
 		],
 		filters=[
@@ -1731,7 +1735,7 @@ def get_reserved_batches_for_pos(kwargs) -> dict:
 	ids = [
 		pos_invoice.serial_and_batch_bundle
 		for pos_invoice in pos_invoices
-		if pos_invoice.serial_and_batch_bundle
+		if pos_invoice.serial_and_batch_bundle and not pos_invoice.use_serial_batch_fields
 	]
 
 	if ids:
