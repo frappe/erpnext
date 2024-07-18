@@ -541,7 +541,9 @@ class BuyingController(SubcontractingController):
 							"actual_qty": flt(pr_qty),
 							"serial_and_batch_bundle": (
 								d.serial_and_batch_bundle
-								if not self.is_internal_transfer() or self.is_return
+								if not self.is_internal_transfer()
+								or self.is_return
+								or (self.is_internal_transfer() and self.docstatus == 2)
 								else self.get_package_for_target_warehouse(
 									d, type_of_transaction=type_of_transaction
 								)
@@ -580,6 +582,14 @@ class BuyingController(SubcontractingController):
 						(not cint(self.is_return) and self.docstatus == 2)
 						or (cint(self.is_return) and self.docstatus == 1)
 					):
+						serial_and_batch_bundle = None
+						if self.is_internal_transfer() and self.docstatus == 2:
+							serial_and_batch_bundle = frappe.db.get_value(
+								"Stock Ledger Entry",
+								{"voucher_detail_no": d.name, "warehouse": d.warehouse},
+								"serial_and_batch_bundle",
+							)
+
 						from_warehouse_sle = self.get_sl_entries(
 							d,
 							{
@@ -589,7 +599,7 @@ class BuyingController(SubcontractingController):
 								"serial_and_batch_bundle": (
 									self.get_package_for_target_warehouse(d, d.from_warehouse, "Inward")
 									if self.is_internal_transfer() and self.is_return
-									else None
+									else serial_and_batch_bundle
 								),
 							},
 						)

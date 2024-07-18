@@ -603,6 +603,17 @@ class SalesOrder(SellingController):
 		if total_picked_qty and total_qty:
 			per_picked = total_picked_qty / total_qty * 100
 
+			pick_percentage = frappe.db.get_single_value("Stock Settings", "over_picking_allowance")
+			if pick_percentage:
+				total_qty += flt(total_qty) * (pick_percentage / 100)
+
+			if total_picked_qty > total_qty:
+				frappe.throw(
+					_(
+						"Total Picked Quantity {0} is more than ordered qty {1}. You can set the Over Picking Allowance in Stock Settings."
+					).format(total_picked_qty, total_qty)
+				)
+
 		self.db_set("per_picked", flt(per_picked), update_modified=False)
 
 	def set_indicator(self):

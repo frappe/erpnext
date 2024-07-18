@@ -260,6 +260,7 @@ erpnext.patches.v15_0.delete_saudi_doctypes
 erpnext.patches.v14_0.show_loan_management_deprecation_warning
 erpnext.patches.v14_0.clear_reconciliation_values_from_singles
 execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Details", force=True)
+erpnext.patches.v14_0.update_proprietorship_to_individual
 
 [post_model_sync]
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
@@ -363,7 +364,6 @@ erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index # 2023-12-20
 erpnext.patches.v14_0.set_maintain_stock_for_bom_item
 erpnext.patches.v15_0.delete_orphaned_asset_movement_item_records
-erpnext.patches.v15_0.remove_cancelled_asset_capitalization_from_asset
 erpnext.patches.v15_0.fix_debit_credit_in_transaction_currency
 erpnext.patches.v15_0.rename_purchase_receipt_amount_to_purchase_amount
 erpnext.patches.v14_0.enable_set_priority_for_pricing_rules #1
