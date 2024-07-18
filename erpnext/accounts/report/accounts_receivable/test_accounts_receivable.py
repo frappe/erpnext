@@ -955,3 +955,32 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(
 			expected_data, [row.invoiced, row.outstanding, row.remaining_balance, row.future_amount]
 		)
+
+	def test_accounts_receivable_output_for_minor_outstanding(self):
+		"""
+		AR/AP should report miniscule outstanding of 0.01. Or else there will be slight difference with General Ledger/Trial Balance
+		"""
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+		}
+
+		# check invoice grand total and invoiced column's value for 3 payment terms
+		si = self.create_sales_invoice(no_payment_schedule=True)
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account=self.cash, party_amount=99.99)
+		pe.paid_from = self.debit_to
+		pe.save().submit()
+		report = execute(filters)
+
+		expected_data_after_payment = [100, 100, 99.99, 0.01]
+		self.assertEqual(len(report[1]), 1)
+		row = report[1][0]
+		self.assertEqual(
+			expected_data_after_payment,
+			[row.invoice_grand_total, row.invoiced, row.paid, row.outstanding],
+		)
