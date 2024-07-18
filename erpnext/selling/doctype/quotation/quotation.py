@@ -516,6 +516,7 @@ def _make_customer(source_name, ignore_permissions=False, customer_group=None):
 			if not customer_name:
 				from erpnext.crm.doctype.lead.lead import _make_customer
 
+<<<<<<< HEAD
 				customer_doclist = _make_customer(lead_name, ignore_permissions=ignore_permissions)
 				customer = frappe.get_doc(customer_doclist)
 				customer.flags.ignore_permissions = ignore_permissions
@@ -535,6 +536,25 @@ def _make_customer(source_name, ignore_permissions=False, customer_group=None):
 				except frappe.MandatoryError as e:
 					mandatory_fields = e.args[0].split(":")[1].split(",")
 					mandatory_fields = [customer.meta.get_label(field.strip()) for field in mandatory_fields]
+=======
+	# Check if a Customer already exists for the Lead or Prospect.
+	existing_customer = None
+	if quotation.quotation_to == "Lead":
+		existing_customer = frappe.db.get_value("Customer", {"lead_name": quotation.party_name})
+	elif quotation.quotation_to == "Prospect":
+		existing_customer = frappe.db.get_value("Customer", {"prospect_name": quotation.party_name})
+
+	if existing_customer:
+		return frappe.get_doc("Customer", existing_customer)
+
+	# If no Customer exists, create a new Customer or Prospect.
+	if quotation.quotation_to == "Lead":
+		return create_customer_from_lead(quotation.party_name, ignore_permissions=ignore_permissions)
+	elif quotation.quotation_to == "Prospect":
+		return create_customer_from_prospect(quotation.party_name, ignore_permissions=ignore_permissions)
+
+	return None
+>>>>>>> 2f63fae31d (fix: Create Sales Order from Quotation for Prospect)
 
 					frappe.local.message_log = []
 					lead_link = frappe.utils.get_link_to_form("Lead", lead_name)
@@ -545,8 +565,49 @@ def _make_customer(source_name, ignore_permissions=False, customer_group=None):
 					message += "<br><ul><li>" + "</li><li>".join(mandatory_fields) + "</li></ul>"
 					message += _("Please create Customer from Lead {0}.").format(lead_link)
 
+<<<<<<< HEAD
 					frappe.throw(message, title=_("Mandatory Missing"))
 			else:
 				return customer_name
 		else:
 			return frappe.get_doc("Customer", quotation.get("party_name"))
+=======
+def create_customer_from_lead(lead_name, ignore_permissions=False):
+	from erpnext.crm.doctype.lead.lead import _make_customer
+
+	customer = _make_customer(lead_name, ignore_permissions=ignore_permissions)
+	customer.flags.ignore_permissions = ignore_permissions
+
+	try:
+		customer.insert()
+		return customer
+	except frappe.MandatoryError as e:
+		handle_mandatory_error(e, customer, lead_name)
+
+
+def create_customer_from_prospect(prospect_name, ignore_permissions=False):
+	from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
+
+	customer = make_customer_from_prospect(prospect_name)
+	customer.flags.ignore_permissions = ignore_permissions
+
+	try:
+		customer.insert()
+		return customer
+	except frappe.MandatoryError as e:
+		handle_mandatory_error(e, customer, prospect_name)
+
+
+def handle_mandatory_error(e, customer, lead_name):
+	from frappe.utils import get_link_to_form
+
+	mandatory_fields = e.args[0].split(":")[1].split(",")
+	mandatory_fields = [customer.meta.get_label(field.strip()) for field in mandatory_fields]
+
+	frappe.local.message_log = []
+	message = _("Could not auto create Customer due to the following missing mandatory field(s):") + "<br>"
+	message += "<br><ul><li>" + "</li><li>".join(mandatory_fields) + "</li></ul>"
+	message += _("Please create Customer from Lead {0}.").format(get_link_to_form("Lead", lead_name))
+
+	frappe.throw(message, title=_("Mandatory Missing"))
+>>>>>>> 2f63fae31d (fix: Create Sales Order from Quotation for Prospect)
