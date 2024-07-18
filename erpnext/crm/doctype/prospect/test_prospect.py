@@ -50,6 +50,7 @@ class TestProspect(unittest.TestCase):
 		customer.company = "_Test Company"
 		customer.insert()
 
+
 def make_prospect(**args):
 	args = frappe._dict(args)
 
