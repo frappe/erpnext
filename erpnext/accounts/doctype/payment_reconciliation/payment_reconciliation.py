@@ -267,6 +267,7 @@ class PaymentReconciliation(Document):
 		conditions.append(doc.docstatus == 1)
 		conditions.append(doc[frappe.scrub(self.party_type)] == self.party)
 		conditions.append(doc.is_return == 1)
+		conditions.append(doc.outstanding_amount != 0)
 
 		if self.payment_name:
 			conditions.append(doc.name.like(f"%{self.payment_name}%"))
