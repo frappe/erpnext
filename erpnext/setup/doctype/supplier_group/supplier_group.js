@@ -35,7 +35,6 @@ frappe.ui.form.on("Supplier Group", {
 		});
 	},
 	refresh: function (frm) {
-		frm.set_intro(frm.doc.__islocal ? "" : __("There is nothing to edit."));
 		frm.trigger("set_root_readonly");
 	},
 	set_root_readonly: function (frm) {
