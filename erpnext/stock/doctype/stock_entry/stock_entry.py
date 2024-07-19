@@ -2354,17 +2354,22 @@ class StockEntry(StockController):
 		return [d.item_code for d in job_card_items]
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
 		for d in item_dict:
 			item_row = item_dict[d]
-			stock_uom = item_row.get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
+
+			child_qty = flt(item_row["qty"], precision)
+			if not self.is_return and child_qty <= 0:
+				continue
 
 			se_child = self.append("items")
+			stock_uom = item_row.get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
 			se_child.s_warehouse = item_row.get("from_warehouse")
 			se_child.t_warehouse = item_row.get("to_warehouse")
 			se_child.item_code = item_row.get("item_code") or cstr(d)
 			se_child.uom = item_row["uom"] if item_row.get("uom") else stock_uom
 			se_child.stock_uom = stock_uom
-			se_child.qty = flt(item_row["qty"], se_child.precision("qty"))
+			se_child.qty = child_qty
 			se_child.allow_alternative_item = item_row.get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_row.get("main_item_code")
 			se_child.cost_center = item_row.get("cost_center") or get_default_cost_center(
