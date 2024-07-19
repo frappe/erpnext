@@ -144,6 +144,7 @@
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "label": "Amount",
+   "non_negative": 1,
    "options": "currency"
   },
   {
@@ -395,7 +396,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-09-27 09:51:42.277638",
+ "modified": "2024-06-20 13:54:55.245774",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
