@@ -157,7 +157,7 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends (
 
 				const payment_is_overdue = doc.payment_schedule
 					.map((row) => Date.parse(row.due_date) < Date.now())
-					.reduce((prev, current) => prev || current);
+					.reduce((prev, current) => prev || current, false);
 
 				if (payment_is_overdue) {
 					this.frm.add_custom_button(
