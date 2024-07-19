@@ -581,8 +581,6 @@ class StockController(AccountsController):
 						).format(wh, self.company)
 					)
 
-		gl_list = make_regional_gl_entries(gl_list, self)
-
 		return process_gl_map(gl_list, precision=precision)
 
 	def get_debit_field_precision(self):
@@ -1713,8 +1711,3 @@ def make_bundle_for_material_transfer(**kwargs):
 	bundle_doc.save(ignore_permissions=True)
 
 	return bundle_doc.name
-
-
-@erpnext.allow_regional
-def make_regional_gl_entries(gl_list, doc):
-	return gl_list
