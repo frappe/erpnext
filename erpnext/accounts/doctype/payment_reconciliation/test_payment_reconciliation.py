@@ -109,6 +109,14 @@ class TestPaymentReconciliation(FrappeTestCase):
 				"account_currency": "INR",
 				"account_type": "Payable",
 			},
+			# 'Receivable' account for capturing advance received, under 'Liabilities' group
+			{
+				"attribute": "advance_receivable_account",
+				"account_name": "Advance Received",
+				"parent_account": "Current Liabilities - _PR",
+				"account_currency": "INR",
+				"account_type": "Receivable",
+			},
 		]
 
 		for x in accounts:
@@ -1573,6 +1581,269 @@ class TestPaymentReconciliation(FrappeTestCase):
 			filters={"voucher_no": pe.name, "delinked": 0, "posting_date": pe.posting_date},
 		)
 		self.assertEqual(len(pl_entries), 3)
+
+	def test_advance_payment_reconciliation_against_journal_for_customer(self):
+		frappe.db.set_value(
+			"Company",
+			self.company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": self.advance_receivable_account,
+				"reconcile_on_advance_payment_date": 0,
+			},
+		)
+		amount = 200.0
+		je = self.create_journal_entry(self.debit_to, self.bank, amount)
+		je.accounts[0].cost_center = self.main_cc.name
+		je.accounts[0].party_type = "Customer"
+		je.accounts[0].party = self.customer
+		je.accounts[1].cost_center = self.main_cc.name
+		je = je.save().submit()
+
+		pe = self.create_payment_entry(amount=amount).save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.default_advance_account = self.advance_receivable_account
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [invoice.as_dict() for invoice in pr.invoices]
+		payments = [payment.as_dict() for payment in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		# Assert Ledger Entries
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "is_cancelled": 0},
+		)
+		self.assertEqual(len(gl_entries), 4)
+		pl_entries = frappe.db.get_all(
+			"Payment Ledger Entry",
+			filters={"voucher_no": pe.name, "delinked": 0},
+		)
+		self.assertEqual(len(pl_entries), 3)
+
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "is_cancelled": 0},
+			fields=["account", "voucher_no", "against_voucher", "debit", "credit"],
+			order_by="account, against_voucher, debit",
+		)
+		expected_gle = [
+			{
+				"account": self.advance_receivable_account,
+				"voucher_no": pe.name,
+				"against_voucher": pe.name,
+				"debit": 0.0,
+				"credit": amount,
+			},
+			{
+				"account": self.advance_receivable_account,
+				"voucher_no": pe.name,
+				"against_voucher": pe.name,
+				"debit": amount,
+				"credit": 0.0,
+			},
+			{
+				"account": self.debit_to,
+				"voucher_no": pe.name,
+				"against_voucher": je.name,
+				"debit": 0.0,
+				"credit": amount,
+			},
+			{
+				"account": self.bank,
+				"voucher_no": pe.name,
+				"against_voucher": None,
+				"debit": amount,
+				"credit": 0.0,
+			},
+		]
+		self.assertEqual(gl_entries, expected_gle)
+
+		pl_entries = frappe.db.get_all(
+			"Payment Ledger Entry",
+			filters={"voucher_no": pe.name},
+			fields=["account", "voucher_no", "against_voucher_no", "amount"],
+			order_by="account, against_voucher_no, amount",
+		)
+		expected_ple = [
+			{
+				"account": self.advance_receivable_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": -amount,
+			},
+			{
+				"account": self.advance_receivable_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": amount,
+			},
+			{
+				"account": self.debit_to,
+				"voucher_no": pe.name,
+				"against_voucher_no": je.name,
+				"amount": -amount,
+			},
+		]
+		self.assertEqual(pl_entries, expected_ple)
+
+	def test_advance_payment_reconciliation_against_journal_for_supplier(self):
+		self.supplier = make_supplier("_Test Supplier")
+		frappe.db.set_value(
+			"Company",
+			self.company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_paid_account": self.advance_payable_account,
+				"reconcile_on_advance_payment_date": 0,
+			},
+		)
+		amount = 200.0
+		je = self.create_journal_entry(self.creditors, self.bank, -amount)
+		je.accounts[0].cost_center = self.main_cc.name
+		je.accounts[0].party_type = "Supplier"
+		je.accounts[0].party = self.supplier
+		je.accounts[1].cost_center = self.main_cc.name
+		je = je.save().submit()
+
+		pe = self.create_payment_entry(amount=amount)
+		pe.payment_type = "Pay"
+		pe.party_type = "Supplier"
+		pe.paid_from = self.bank
+		pe.paid_to = self.creditors
+		pe.party = self.supplier
+		pe.save().submit()
+
+		pr = self.create_payment_reconciliation(party_is_customer=False)
+		pr.default_advance_account = self.advance_payable_account
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [invoice.as_dict() for invoice in pr.invoices]
+		payments = [payment.as_dict() for payment in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		# Assert Ledger Entries
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "is_cancelled": 0},
+		)
+		self.assertEqual(len(gl_entries), 4)
+		pl_entries = frappe.db.get_all(
+			"Payment Ledger Entry",
+			filters={"voucher_no": pe.name, "delinked": 0},
+		)
+		self.assertEqual(len(pl_entries), 3)
+
+		gl_entries = frappe.db.get_all(
+			"GL Entry",
+			filters={"voucher_no": pe.name, "is_cancelled": 0},
+			fields=["account", "voucher_no", "against_voucher", "debit", "credit"],
+			order_by="account, against_voucher, debit",
+		)
+		expected_gle = [
+			{
+				"account": self.advance_payable_account,
+				"voucher_no": pe.name,
+				"against_voucher": pe.name,
+				"debit": 0.0,
+				"credit": amount,
+			},
+			{
+				"account": self.advance_payable_account,
+				"voucher_no": pe.name,
+				"against_voucher": pe.name,
+				"debit": amount,
+				"credit": 0.0,
+			},
+			{
+				"account": self.creditors,
+				"voucher_no": pe.name,
+				"against_voucher": je.name,
+				"debit": amount,
+				"credit": 0.0,
+			},
+			{
+				"account": self.bank,
+				"voucher_no": pe.name,
+				"against_voucher": None,
+				"debit": 0.0,
+				"credit": amount,
+			},
+		]
+		self.assertEqual(gl_entries, expected_gle)
+
+		pl_entries = frappe.db.get_all(
+			"Payment Ledger Entry",
+			filters={"voucher_no": pe.name},
+			fields=["account", "voucher_no", "against_voucher_no", "amount"],
+			order_by="account, against_voucher_no, amount",
+		)
+		expected_ple = [
+			{
+				"account": self.advance_payable_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": -amount,
+			},
+			{
+				"account": self.advance_payable_account,
+				"voucher_no": pe.name,
+				"against_voucher_no": pe.name,
+				"amount": amount,
+			},
+			{
+				"account": self.creditors,
+				"voucher_no": pe.name,
+				"against_voucher_no": je.name,
+				"amount": -amount,
+			},
+		]
+		self.assertEqual(pl_entries, expected_ple)
+
+	def test_cr_note_payment_limit_filter(self):
+		transaction_date = nowdate()
+		amount = 100
+
+		for _ in range(6):
+			self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
+			cr_note = self.create_sales_invoice(
+				qty=-1, rate=amount, posting_date=transaction_date, do_not_save=True, do_not_submit=True
+			)
+			cr_note.is_return = 1
+			cr_note = cr_note.save().submit()
+
+		pr = self.create_payment_reconciliation()
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 6)
+		self.assertEqual(len(pr.payments), 6)
+		invoices = [x.as_dict() for x in pr.get("invoices")]
+		payments = [x.as_dict() for x in pr.get("payments")]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(pr.get("invoices"), [])
+		self.assertEqual(pr.get("payments"), [])
+
+		self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
+		cr_note = self.create_sales_invoice(
+			qty=-1, rate=amount, posting_date=transaction_date, do_not_save=True, do_not_submit=True
+		)
+		cr_note.is_return = 1
+		cr_note = cr_note.save().submit()
+
+		# Limit should not affect in fetching the unallocated cr_note
+		pr.invoice_limit = 5
+		pr.payment_limit = 5
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
 
 
 def make_customer(customer_name, currency=None):

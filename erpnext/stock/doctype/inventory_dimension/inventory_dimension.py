@@ -33,7 +33,7 @@ class InventoryDimension(Document):
 		dimension_name: DF.Data
 		disabled: DF.Check
 		document_type: DF.Link | None
-		fetch_from_parent: DF.Literal
+		fetch_from_parent: DF.Literal[None]
 		istable: DF.Check
 		mandatory_depends_on: DF.SmallText | None
 		reference_document: DF.Link

@@ -28,7 +28,7 @@ class SellingController(StockController):
 	def validate(self):
 		super().validate()
 		self.validate_items()
-		if not self.get("is_debit_note"):
+		if not (self.get("is_debit_note") or self.get("is_return")):
 			self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
@@ -537,7 +537,9 @@ class SellingController(StockController):
 		self.make_sl_entries(sl_entries)
 
 	def get_sle_for_source_warehouse(self, item_row):
-		serial_and_batch_bundle = item_row.serial_and_batch_bundle
+		serial_and_batch_bundle = (
+			item_row.serial_and_batch_bundle if not self.is_internal_transfer() else None
+		)
 		if serial_and_batch_bundle and self.is_internal_transfer() and self.is_return:
 			if self.docstatus == 1:
 				serial_and_batch_bundle = self.make_package_for_transfer(

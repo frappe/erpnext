@@ -267,6 +267,8 @@ def repost_future_sle(
 				"posting_time": args[i].get("posting_time"),
 				"creation": args[i].get("creation"),
 				"distinct_item_warehouses": distinct_item_warehouses,
+				"items_to_be_repost": args,
+				"current_index": i,
 			},
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
@@ -530,6 +532,10 @@ class update_entries_after:
 		self.allow_zero_rate = allow_zero_rate
 		self.via_landed_cost_voucher = via_landed_cost_voucher
 		self.item_code = args.get("item_code")
+		self.use_moving_avg_for_batch = frappe.db.get_single_value(
+			"Stock Settings", "do_not_use_batchwise_valuation"
+		)
+
 		self.allow_negative_stock = allow_negative_stock or is_negative_stock_allowed(
 			item_code=self.item_code
 		)
@@ -681,11 +687,20 @@ class update_entries_after:
 			self.distinct_item_warehouses[key] = val
 			self.new_items_found = True
 		else:
+			# Check if the dependent voucher is reposted
+			# If not, then do not add it to the list
+			if not self.is_dependent_voucher_reposted(dependant_sle):
+				return
+
 			existing_sle_posting_date = self.distinct_item_warehouses[key].get("sle", {}).get("posting_date")
 
 			dependent_voucher_detail_nos = self.get_dependent_voucher_detail_nos(key)
-
 			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
+				if dependent_voucher_detail_nos and dependant_sle.voucher_detail_no in set(
+					dependent_voucher_detail_nos
+				):
+					return
+
 				val.sle_changed = True
 				dependent_voucher_detail_nos.append(dependant_sle.voucher_detail_no)
 				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
@@ -698,6 +713,27 @@ class update_entries_after:
 				self.new_items_found = True
 				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
 				self.distinct_item_warehouses[key] = val
+
+	def is_dependent_voucher_reposted(self, dependant_sle) -> bool:
+		# Return False if the dependent voucher is not reposted
+
+		if self.args.items_to_be_repost and self.args.current_index:
+			index = self.args.current_index
+			while index < len(self.args.items_to_be_repost):
+				if (
+					self.args.items_to_be_repost[index].get("item_code") == dependant_sle.item_code
+					and self.args.items_to_be_repost[index].get("warehouse") == dependant_sle.warehouse
+				):
+					if getdate(self.args.items_to_be_repost[index].get("posting_date")) > getdate(
+						dependant_sle.posting_date
+					):
+						self.args.items_to_be_repost[index]["posting_date"] = dependant_sle.posting_date
+
+					return False
+
+				index += 1
+
+		return True
 
 	def get_dependent_voucher_detail_nos(self, key):
 		if "dependent_voucher_detail_nos" not in self.distinct_item_warehouses[key]:
@@ -745,7 +781,7 @@ class update_entries_after:
 				if sle.get(dimension.get("fieldname")):
 					has_dimensions = True
 
-		if sle.serial_and_batch_bundle:
+		if sle.serial_and_batch_bundle and (not self.use_moving_avg_for_batch or sle.has_serial_no):
 			self.calculate_valuation_for_serial_batch_bundle(sle)
 		elif sle.serial_no and not self.args.get("sle_id"):
 			# Only run in reposting
@@ -765,7 +801,12 @@ class update_entries_after:
 			# Only run in reposting
 			self.update_batched_values(sle)
 		else:
-			if sle.voucher_type == "Stock Reconciliation" and not sle.batch_no and not has_dimensions:
+			if (
+				sle.voucher_type == "Stock Reconciliation"
+				and not sle.batch_no
+				and not sle.has_batch_no
+				and not has_dimensions
+			):
 				# assert
 				self.wh_data.valuation_rate = sle.valuation_rate
 				self.wh_data.qty_after_transaction = sle.qty_after_transaction
@@ -805,6 +846,15 @@ class update_entries_after:
 
 		sle.doctype = "Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
+
+		if (
+			sle.serial_and_batch_bundle
+			and self.valuation_method == "Moving Average"
+			and self.use_moving_avg_for_batch
+			and (sle.batch_no or sle.has_batch_no)
+		):
+			valuation_rate = flt(stock_value_difference) / flt(sle.actual_qty)
+			self.update_valuation_rate_in_serial_and_batch_bundle(sle, valuation_rate)
 
 		if not self.args.get("sle_id") or (
 			sle.serial_and_batch_bundle and sle.auto_created_serial_and_batch_bundle
@@ -915,6 +965,21 @@ class update_entries_after:
 			self.wh_data.valuation_rate = flt(self.wh_data.stock_value, precision) / flt(
 				self.wh_data.qty_after_transaction, precision
 			)
+
+	def update_valuation_rate_in_serial_and_batch_bundle(self, sle, valuation_rate):
+		# Only execute if the item has batch_no and the valuation method is moving average
+		if not frappe.db.exists("Serial and Batch Bundle", sle.serial_and_batch_bundle):
+			return
+
+		doc = frappe.get_cached_doc("Serial and Batch Bundle", sle.serial_and_batch_bundle)
+		doc.update_valuation_rate(valuation_rate, save=True)
+		doc.calculate_qty_and_amount(save=True)
+
+	def get_outgoing_rate_for_batched_item(self, sle):
+		if self.wh_data.qty_after_transaction == 0:
+			return 0
+
+		return flt(self.wh_data.stock_value) / flt(self.wh_data.qty_after_transaction)
 
 	def validate_negative_stock(self, sle):
 		"""

@@ -75,8 +75,7 @@
   "purchase_amount",
   "default_finance_book",
   "depr_entry_posting_status",
-  "amended_from",
-  "capitalized_in"
+  "amended_from"
  ],
  "fields": [
   {
@@ -222,7 +221,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!(doc.is_composite_asset && !doc.capitalized_in)",
+   "depends_on": "eval:!doc.is_composite_asset",
    "fieldname": "gross_purchase_amount",
    "fieldtype": "Currency",
    "label": "Gross Purchase Amount",
@@ -509,14 +508,6 @@
    "label": "Is Composite Asset"
   },
   {
-   "fieldname": "capitalized_in",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Capitalized In",
-   "options": "Asset Capitalization",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:doc.docstatus > 0",
    "fieldname": "total_asset_cost",
    "fieldtype": "Currency",
@@ -589,7 +580,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2024-05-21 13:46:21.066483",
+ "modified": "2024-07-07 22:27:14.733839",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

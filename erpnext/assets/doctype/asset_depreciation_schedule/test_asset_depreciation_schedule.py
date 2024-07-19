@@ -75,6 +75,68 @@ class TestAssetDepreciationSchedule(FrappeTestCase):
 		]
 		self.assertEqual(schedules, expected_schedules)
 
+	# Enable Checkbox to Calculate depreciation using total days in depreciation period
+	def test_daily_prorata_based_depr_after_enabling_configuration(self):
+		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 1)
+
+		asset = create_asset(
+			calculate_depreciation=1,
+			depreciation_method="Straight Line",
+			daily_prorata_based=1,
+			gross_purchase_amount=1096,
+			available_for_use_date="2020-01-15",
+			depreciation_start_date="2020-01-31",
+			frequency_of_depreciation=1,
+			total_number_of_depreciations=36,
+		)
+
+		expected_schedule = [
+			["2020-01-31", 17.0, 17.0],
+			["2020-02-29", 29.0, 46.0],
+			["2020-03-31", 31.0, 77.0],
+			["2020-04-30", 30.0, 107.0],
+			["2020-05-31", 31.0, 138.0],
+			["2020-06-30", 30.0, 168.0],
+			["2020-07-31", 31.0, 199.0],
+			["2020-08-31", 31.0, 230.0],
+			["2020-09-30", 30.0, 260.0],
+			["2020-10-31", 31.0, 291.0],
+			["2020-11-30", 30.0, 321.0],
+			["2020-12-31", 31.0, 352.0],
+			["2021-01-31", 31.0, 383.0],
+			["2021-02-28", 28.0, 411.0],
+			["2021-03-31", 31.0, 442.0],
+			["2021-04-30", 30.0, 472.0],
+			["2021-05-31", 31.0, 503.0],
+			["2021-06-30", 30.0, 533.0],
+			["2021-07-31", 31.0, 564.0],
+			["2021-08-31", 31.0, 595.0],
+			["2021-09-30", 30.0, 625.0],
+			["2021-10-31", 31.0, 656.0],
+			["2021-11-30", 30.0, 686.0],
+			["2021-12-31", 31.0, 717.0],
+			["2022-01-31", 31.0, 748.0],
+			["2022-02-28", 28.0, 776.0],
+			["2022-03-31", 31.0, 807.0],
+			["2022-04-30", 30.0, 837.0],
+			["2022-05-31", 31.0, 868.0],
+			["2022-06-30", 30.0, 898.0],
+			["2022-07-31", 31.0, 929.0],
+			["2022-08-31", 31.0, 960.0],
+			["2022-09-30", 30.0, 990.0],
+			["2022-10-31", 31.0, 1021.0],
+			["2022-11-30", 30.0, 1051.0],
+			["2022-12-31", 31.0, 1082.0],
+			["2023-01-15", 14.0, 1096.0],
+		]
+
+		schedules = [
+			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
+			for d in get_depr_schedule(asset.name, "Draft")
+		]
+		self.assertEqual(schedules, expected_schedule)
+		frappe.db.set_single_value("Accounts Settings", "calculate_depr_using_total_days", 0)
+
 	# Test for Written Down Value Method
 	# Frequency of deprciation = 3
 	def test_for_daily_prorata_based_depreciation_wdv_method_frequency_3_months(self):

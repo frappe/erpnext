@@ -646,6 +646,61 @@ class TestSerialandBatchBundle(FrappeTestCase):
 
 		self.assertEqual(flt(stock_value_difference, 2), 353.0 * -1)
 
+	def test_pick_serial_nos_for_batch_item(self):
+		item_code = make_item(
+			"Test Pick Serial Nos for Batch Item 1",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "PSNBI-TSNVL-.#####",
+				"has_serial_no": 1,
+				"serial_no_series": "SN-PSNBI-TSNVL-.#####",
+			},
+		).name
+
+		se = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			target="_Test Warehouse - _TC",
+			rate=500,
+		)
+
+		batch1 = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		serial_nos1 = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			target="_Test Warehouse - _TC",
+			rate=500,
+		)
+
+		batch2 = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+		serial_nos2 = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			source="_Test Warehouse - _TC",
+			use_serial_batch_fields=True,
+			batch_no=batch2,
+		)
+
+		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+		self.assertEqual(serial_nos, serial_nos2)
+
+		se = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			source="_Test Warehouse - _TC",
+			use_serial_batch_fields=True,
+			batch_no=batch1,
+		)
+
+		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+		self.assertEqual(serial_nos, serial_nos1)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos
