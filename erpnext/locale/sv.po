@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-07-07 09:35+0000\n"
-"PO-Revision-Date: 2024-07-15 21:01\n"
+"PO-Revision-Date: 2024-07-19 12:17\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -12196,7 +12196,7 @@ msgstr "Kontakt Namn"
 #. Label of the contact_no (Data) field in DocType 'Sales Team'
 #: selling/doctype/sales_team/sales_team.json
 msgid "Contact No."
-msgstr "Avtal Nummer"
+msgstr "Avtal Nummer."
 
 #. Label of the contact_person (Link) field in DocType 'Dunning'
 #. Label of the contact_person (Link) field in DocType 'POS Invoice'
@@ -12247,7 +12247,7 @@ msgstr "Kontakter"
 #. Label of the content_type (Data) field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgid "Content Type"
-msgstr "Typ av Innehåll"
+msgstr "Innehållstyp"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:157
 #: public/js/controllers/transaction.js:2129
@@ -15874,7 +15874,7 @@ msgstr "Standard Värdering Sätt"
 #. Label of the default_value (Data) field in DocType 'POS Field'
 #: accounts/doctype/pos_field/pos_field.json
 msgid "Default Value"
-msgstr "Förvald Värde"
+msgstr "Standard Värde"
 
 #. Label of the default_warehouse (Link) field in DocType 'QuickBooks Migrator'
 #. Label of the default_warehouse (Link) field in DocType 'Tally Migration'
@@ -29202,7 +29202,7 @@ msgstr "Erfodrad Bokföring Dimension"
 #. Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgid "Mandatory Depends On"
-msgstr "Erfodrad Beroende Av"
+msgstr "Erfordrad Beroende Av"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1536
 msgid "Mandatory Field"
@@ -33847,7 +33847,7 @@ msgstr "Överproduktion för Försäljning och Arbetsorder"
 #. Label of the basic_details_tab (Tab Break) field in DocType 'Employee'
 #: crm/doctype/prospect/prospect.json setup/doctype/employee/employee.json
 msgid "Overview"
-msgstr "Översikt"
+msgstr "Recension "
 
 #. Option for the 'Permanent Address Is' (Select) field in DocType 'Employee'
 #. Option for the 'Current Address Is' (Select) field in DocType 'Employee'
@@ -46294,7 +46294,7 @@ msgstr "Skola/Universitet"
 #. Label of the scope (Data) field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Scope"
-msgstr "Omfatning"
+msgstr "Omfattning"
 
 #. Label of the score (Percent) field in DocType 'Supplier Scorecard Scoring
 #. Criteria'
