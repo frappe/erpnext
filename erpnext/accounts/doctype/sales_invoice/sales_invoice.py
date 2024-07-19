@@ -1213,6 +1213,8 @@ class SalesInvoice(SellingController):
 		self.make_precision_loss_gl_entry(gl_entries)
 		self.make_discount_gl_entries(gl_entries)
 
+		gl_entries = make_regional_gl_entries(gl_entries, self)
+
 		# merge gl entries before adding pos entries
 		gl_entries = merge_similar_entries(gl_entries)
 
@@ -2224,6 +2226,11 @@ def validate_inter_company_transaction(doc, doctype):
 @frappe.whitelist()
 def make_inter_company_purchase_invoice(source_name, target_doc=None):
 	return make_inter_company_transaction("Sales Invoice", source_name, target_doc)
+
+
+@erpnext.allow_regional
+def make_regional_gl_entries(gl_entries, doc):
+	return gl_entries
 
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
