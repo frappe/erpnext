@@ -36,6 +36,7 @@ class Timesheet(Document):
 		for row in self.time_logs:
 			if row.to_time and row.from_time:
 				row.hours = time_diff_in_hours(row.to_time, row.from_time)
+				self.update_billing_hours(row)
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
