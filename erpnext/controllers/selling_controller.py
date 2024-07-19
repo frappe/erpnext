@@ -431,8 +431,9 @@ class SellingController(StockController):
 	def set_incoming_rate(self):
 		if self.doctype not in ("Delivery Note", "Sales Invoice"):
 			return
-		allow_at_arms_length_price = frappe.db.get_single_value(
-			"Stock Settings", "allow_internal_transfer_at_arms_length_price"
+
+		allow_at_arms_length_price = frappe.get_cached_value(
+			"Stock Settings", None, "allow_internal_transfer_at_arms_length_price"
 		)
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:

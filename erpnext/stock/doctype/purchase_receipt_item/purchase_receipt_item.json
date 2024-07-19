@@ -1127,6 +1127,7 @@
    "read_only": 1
   },
   {
+   "description": "Valuation rate for the item as per Sales Invoice (Only for Internal Transfers)",
    "fieldname": "sales_incoming_rate",
    "fieldtype": "Currency",
    "hidden": 1,
@@ -1139,7 +1140,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-06-28 16:22:16.966525",
+ "modified": "2024-07-19 12:14:21.521466",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

@@ -28,8 +28,7 @@ class BuyingController(SubcontractingController):
 
 	def validate(self):
 		self.set_rate_for_standalone_debit_note()
-		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
-			self.set_sales_incoming_rate_for_internal_transfer()
+
 		super().validate()
 		if getattr(self, "supplier", None) and not self.supplier_name:
 			self.supplier_name = frappe.db.get_value("Supplier", self.supplier, "supplier_name")
@@ -316,7 +315,7 @@ class BuyingController(SubcontractingController):
 					)
 
 				net_rate = item.base_net_amount
-				if self.is_internal_transfer():
+				if item.sales_incoming_rate:  # for internal transfer
 					net_rate = item.qty * item.sales_incoming_rate
 
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
@@ -341,41 +340,54 @@ class BuyingController(SubcontractingController):
 		update_regional_item_valuation_rate(self)
 
 	def set_incoming_rate(self):
+		"""
+		Override item rate with incoming rate for internal stock transfer
+		"""
 		if self.doctype not in ("Purchase Receipt", "Purchase Invoice"):
+			return
+
+		if not (self.doctype == "Purchase Receipt" or self.get("update_stock")):
+			return
+
+		if cint(self.get("is_return")):
+			# Get outgoing rate based on original item cost based on valuation method
 			return
 
 		if not self.is_internal_transfer():
 			return
 
-		allow_at_arms_length_price = frappe.db.get_single_value(
-			"Stock Settings", "allow_internal_transfer_at_arms_length_price"
+		allow_at_arms_length_price = frappe.get_cached_value(
+			"Stock Settings", None, "allow_internal_transfer_at_arms_length_price"
 		)
 		if allow_at_arms_length_price:
 			return
 
+		self.set_sales_incoming_rate_for_internal_transfer()
+
 		for d in self.get("items"):
-			if not cint(self.get("is_return")) and (
-				self.doctype == "Purchase Receipt" or self.get("update_stock")
-			):
-				if d.rate != d.sales_incoming_rate:
-					d.rate = d.sales_incoming_rate
-					frappe.msgprint(
-						_(
-							"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
-						).format(d.idx),
-						alert=1,
-					)
+			if d.rate == d.sales_incoming_rate:
+				continue
+
+			d.rate = d.sales_incoming_rate
+			frappe.msgprint(
+				_(
+					"Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer"
+				).format(d.idx),
+				alert=1,
+			)
 
 	def set_sales_incoming_rate_for_internal_transfer(self):
+		"""
+		Set incoming rate from the sales transaction against which the
+		purchase is made (internal transfer)
+		"""
 		ref_doctype_map = {
 			"Purchase Receipt": "Delivery Note Item",
 			"Purchase Invoice": "Sales Invoice Item",
 		}
-		if self.doctype not in ref_doctype_map:
-			return
 
+		ref_doctype = ref_doctype_map.get(self.doctype)
 		for d in self.get("items"):
-			ref_doctype = ref_doctype_map.get(self.doctype)
 			if not d.get(frappe.scrub(ref_doctype)):
 				posting_time = self.get("posting_time")
 				if not posting_time:

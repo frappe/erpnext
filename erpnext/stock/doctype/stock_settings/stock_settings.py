@@ -27,6 +27,7 @@ class StockSettings(Document):
 		action_if_quality_inspection_is_rejected: DF.Literal["Stop", "Warn"]
 		allow_from_dn: DF.Check
 		allow_from_pr: DF.Check
+		allow_internal_transfer_at_arms_length_price: DF.Check
 		allow_negative_stock: DF.Check
 		allow_partial_reservation: DF.Check
 		allow_to_edit_stock_uom_qty_for_purchase: DF.Check
@@ -57,7 +58,6 @@ class StockSettings(Document):
 		stock_frozen_upto_days: DF.Int
 		stock_uom: DF.Link | None
 		update_existing_price_list_rate: DF.Check
-		update_item_rate: DF.Check
 		use_naming_series: DF.Check
 		use_serial_batch_fields: DF.Check
 		valuation_method: DF.Literal["FIFO", "Moving Average", "LIFO"]

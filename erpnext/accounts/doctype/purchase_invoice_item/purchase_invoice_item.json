@@ -961,6 +961,7 @@
    "search_index": 1
   },
   {
+   "description": "Valuation rate for the item as per Sales Invoice (Only for Internal Transfers)",
    "fieldname": "sales_incoming_rate",
    "fieldtype": "Currency",
    "hidden": 1,
@@ -973,7 +974,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-06-28 16:18:57.327620",
+ "modified": "2024-07-19 12:12:42.449298",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
