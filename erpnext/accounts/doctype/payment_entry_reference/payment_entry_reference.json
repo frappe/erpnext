@@ -126,14 +126,13 @@
    "fieldname": "payment_request",
    "fieldtype": "Link",
    "label": "Payment Request",
-   "options": "Payment Request",
-   "read_only": 1
+   "options": "Payment Request"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-07-17 11:27:23.564639",
+ "modified": "2024-07-19 11:52:12.828499",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",

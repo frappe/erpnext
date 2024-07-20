@@ -165,6 +165,20 @@ frappe.ui.form.on("Payment Entry", {
 				filters: filters,
 			};
 		});
+
+		frm.set_query("payment_request", "references", function (doc, cdt, cdn) {
+			const row = locals[cdt][cdn];
+			const filters = {
+				docstatus: 1,
+				status: ["!=", "Paid"],
+				reference_doctype: row.reference_doctype,
+				reference_name: row.reference_name,
+				outstanding_amount: [">=", row.allocated_amount],
+			};
+			return {
+				filters: filters,
+			};
+		});
 	},
 
 	refresh: function (frm) {
@@ -995,6 +1009,8 @@ frappe.ui.form.on("Payment Entry", {
 								total_negative_outstanding - total_positive_outstanding
 							);
 					}
+
+					frm.events.set_matched_payment_requests(frm);
 				}
 
 				frm.events.allocate_party_amount_against_ref_docs(
@@ -1647,6 +1663,11 @@ frappe.ui.form.on("Payment Entry", {
 
 		return current_tax_amount;
 	},
+
+	set_matched_payment_requests: async function (frm) {
+		await frappe.after_ajax();
+		frm.call("set_matched_payment_requests");
+	},
 });
 
 frappe.ui.form.on("Payment Entry Reference", {
@@ -1689,8 +1710,14 @@ frappe.ui.form.on("Payment Entry Reference", {
 		}
 	},
 
-	allocated_amount: function (frm) {
+	allocated_amount: function (frm, cdt, cdn) {
 		frm.events.set_total_allocated_amount(frm);
+
+		var row = locals[cdt][cdn];
+
+		if ([row.reference_name, row.reference_doctype, row.allocated_amount].includes(null)) return;
+
+		frm.call("set_matched_payment_request", { row_idx: row.idx });
 	},
 
 	references_remove: function (frm) {

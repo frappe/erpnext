@@ -52,7 +52,7 @@ frappe.ui.form.on("Payment Request", "refresh", function (frm) {
 	}
 
 	if (
-		(!frm.doc.payment_gateway_account || frm.doc.payment_request_type == "Outward") &&
+		frm.doc.payment_request_type == "Outward" &&
 		["Initiated", "Partially Paid"].includes(frm.doc.status)
 	) {
 		frm.add_custom_button(__("Create Payment Entry"), function () {
@@ -95,11 +95,5 @@ frappe.ui.form.on("Payment Request", "is_a_subscription", function (frm) {
 				}
 			},
 		});
-	}
-});
-
-frappe.ui.form.on("Payment Request", "grand_total", function (frm) {
-	if (frm.doc.grand_total && frm.doc.docstatus == 0) {
-		frm.set_value("outstanding_amount", frm.doc.grand_total);
 	}
 });
