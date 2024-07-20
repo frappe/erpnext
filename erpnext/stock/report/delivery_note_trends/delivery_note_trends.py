@@ -11,7 +11,7 @@ def execute(filters=None):
 	if not filters:
 		filters = {}
 	data = []
-	conditions = get_columns(filters, "Delivery Note")
+	conditions = get_columns(filters, "Shipping Notice Instruction")
 	data = get_data(filters, conditions)
 
 	chart_data = get_chart_data(data, filters)

@@ -195,7 +195,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					frappe.set_route("query-report", "Purchase Order Report");
 				}, __("View"));
 			}
-			if(!in_list(["Closed", "Ready", "Shipped", "Proposed Ready Date", "Open"], doc.status)) {
+			if(!in_list(["Closed", "Ready", "Shipped", "Proposed Ready Date", "Open", "Ready and Short Close", "Shipped and Short Close"], doc.status)) {
 				/* if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
 					this.frm.add_custom_button(__('Update Items'), () => {
 						erpnext.utils.update_child_items({
@@ -213,8 +213,16 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						} else{
 							this.frm.add_custom_button(__('Resume'), () => this.unhold_purchase_order(), __("Status"));
 						} */
-						if (doc.status != "Ready") {
-							this.frm.add_custom_button(__('Ready'), () => this.direct_ready_purchase_order(), __("Status"));
+						var ready_not_shipped = 0;
+						$.each(doc.items || [], function (i, row) {
+							if (row.received_qty != row.shipped_qty) {
+								ready_not_shipped = 1
+							}
+						})
+						if (doc.status != "Ready and Short Close" && ready_not_shipped == 1) {
+							this.frm.add_custom_button(__('Ready and Short Close'), () => this.short_close_po_for_ready(), __("Status"));
+						} else if (doc.status != "Ready and Short Close" && ready_not_shipped == 0) {
+							this.frm.add_custom_button(__('Shipped and Short Close'), () => this.short_close_po_for_shipped(), __("Status"));
 						}
 					}
 				}
@@ -225,7 +233,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 					this.frm.page.set_inner_btn_group_as_primary(__("Status"));
 				} */
-			} else if(flt(doc.per_received, 6) < 100 && in_list(["Closed", "Delivered", "Ready"], doc.status)) {
+			} else if(flt(doc.per_received, 6) < 100 && in_list(["Closed", "Delivered", "Ready and Short Close", "Shipped and Short Close"], doc.status)) {
 				if (this.frm.has_perm("submit")) {
 					this.frm.add_custom_button(__('Re-open'), () => this.unclose_purchase_order(), __("Status"));
 				}
@@ -239,10 +247,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
 					// ***** START Proposed Ready Date & Ready PO Custom Button Instead of Purchase Receipt ***** //
-					if(flt(doc.per_received) < 100 && allow_receipt && !in_list(["Ready", "Shipped", "Open"], doc.status)) {
+					if(flt(doc.per_received) < 100 && allow_receipt && !in_list(["Ready", "Shipped", "Open", "Ready and Short Close", "Shipped and Short Close"], doc.status)) {
 						cur_frm.add_custom_button(__('Ready PO'), this.make_purchase_receipt,);
 					}
-					if (!in_list(["Ready", "Shipped", "Proposed Ready Date", "Partially Ready"], doc.status)) {
+					if (!in_list(["Ready", "Shipped", "Proposed Ready Date", "Partially Ready","Ready and Short Close", "Shipped and Short Close"], doc.status)) {
 						cur_frm.add_custom_button(__("Proposed Ready Date"), function() {
 							cur_frm.doc.po_status="Proposed Ready Date";
 							cur_frm.doc.status="Proposed Ready Date";
@@ -674,8 +682,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		cur_frm.cscript.update_status('Close', 'Closed')
 	},
 
-	direct_ready_purchase_order: function(){
-		cur_frm.cscript.update_status('Ready', 'Ready')
+	short_close_po_for_ready: function(){
+		cur_frm.cscript.update_status('Ready and Short Close', 'Ready and Short Close')
+		refresh_field('status')
+	},
+	short_close_po_for_shipped: function(){
+		cur_frm.cscript.update_status('Shipped and Short Close', 'Shipped and Short Close')
+		refresh_field('status')
 	},
 	
 	delivered_by_supplier: function(){

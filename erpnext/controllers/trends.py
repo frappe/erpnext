@@ -67,6 +67,7 @@ def get_data(filters, conditions):
 		"Purchase Invoice",
 		"Purchase Receipt",
 		"Delivery Note",
+		"Shipping Notice Instruction"
 	]:
 		posting_date = "t1.posting_date"
 		if filters.period_based_on:
@@ -84,6 +85,10 @@ def get_data(filters, conditions):
 		"Fiscal Year", filters.get("fiscal_year"), ["year_start_date", "year_end_date"]
 	)
 
+	if (conditions["trans"] == "Shipping Notice Instruction"):
+		item_table = "Shipping Note"
+	else:
+		item_table = conditions["trans"]
 	if filters.get("group_by"):
 		sel_col = ""
 		ind = conditions["columns"].index(conditions["grbc"][0])
@@ -108,7 +113,7 @@ def get_data(filters, conditions):
 			% (
 				query_details,
 				conditions["trans"],
-				conditions["trans"],
+				item_table,
 				conditions["addl_tables"],
 				"%s",
 				posting_date,
@@ -137,7 +142,7 @@ def get_data(filters, conditions):
 				% (
 					sel_col,
 					conditions["trans"],
-					conditions["trans"],
+					item_table,
 					conditions["addl_tables"],
 					"%s",
 					posting_date,
@@ -165,7 +170,7 @@ def get_data(filters, conditions):
 						sel_col,
 						conditions["period_wise_select"],
 						conditions["trans"],
-						conditions["trans"],
+						item_table,
 						conditions["addl_tables"],
 						"%s",
 						posting_date,
@@ -198,7 +203,7 @@ def get_data(filters, conditions):
 			% (
 				query_details,
 				conditions["trans"],
-				conditions["trans"],
+				item_table,
 				conditions["addl_tables"],
 				"%s",
 				posting_date,
@@ -224,7 +229,7 @@ def period_wise_columns_query(filters, trans):
 	pwc = []
 	bet_dates = get_period_date_ranges(filters.get("period"), filters.get("fiscal_year"))
 
-	if trans in ["Purchase Receipt", "Delivery Note", "Purchase Invoice", "Sales Invoice"]:
+	if trans in ["Purchase Receipt", "Delivery Note", "Shipping Notice Instruction","Purchase Invoice", "Sales Invoice"]:
 		trans_date = "posting_date"
 		if filters.period_based_on:
 			trans_date = filters.period_based_on
@@ -330,7 +335,7 @@ def based_wise_columns_query(based_on, trans):
 			"Customer:Link/Customer:120",
 			"Territory:Link/Territory:120",
 		]
-		based_on_details["based_on_select"] = "t1.customer_name, t1.territory, "
+		based_on_details["based_on_select"] = "t1.customer, t1.territory, "
 		based_on_details["based_on_group_by"] = (
 			"t1.party_name" if trans == "Quotation" else "t1.customer"
 		)
@@ -366,7 +371,7 @@ def based_wise_columns_query(based_on, trans):
 		based_on_details["addl_tables"] = ""
 
 	elif based_on == "Project":
-		if trans in ["Sales Invoice", "Delivery Note", "Sales Order"]:
+		if trans in ["Sales Invoice", "Delivery Note", "Shipping Notice Instruction", "Sales Order"]:
 			based_on_details["based_on_cols"] = ["Project:Link/Project:120"]
 			based_on_details["based_on_select"] = "t1.project,"
 			based_on_details["based_on_group_by"] = "t1.project"

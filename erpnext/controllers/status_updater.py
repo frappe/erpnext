@@ -86,7 +86,8 @@ status_map = {
 		],
 		["Proposed Ready Date", "eval:self.status=='Proposed Ready Date' and self.per_received == 0"],
 		["Cancelled", "eval:self.docstatus==2"],
-		["Ready", "eval:self.status=='Ready'"],
+		["Ready and Short Close", "eval:self.status=='Ready and Short Close'"],
+		["Shipped and Short Close", "eval:self.status=='Shipped and Short Close'"],
 		["Shipped", "eval:self.po_status=='Shipped'"]
 	],
 	"Delivery Note": [
