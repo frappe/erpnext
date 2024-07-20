@@ -25,6 +25,7 @@
   "image",
   "column_break0",
   "account_manager",
+  "category",
   "contact",
   "disable_sdm",
   "customer_group",
@@ -594,6 +595,14 @@
    "fieldname": "disable_sdm",
    "fieldtype": "Check",
    "label": "Disable Sales Data Module?"
+   },
+   {
+   "fieldname": "category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Category",
+   "options": "Customer Category"
   }
  ],
  "hide_toolbar": 1,

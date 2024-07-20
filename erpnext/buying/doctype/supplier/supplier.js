@@ -111,6 +111,7 @@ frappe.ui.form.on("Supplier", {
 					"address_dict": frm.doc.supplier_primary_address
 				},
 				callback: function(r) {
+					
 					frm.set_value("primary_address", r.message);
 				}
 			});

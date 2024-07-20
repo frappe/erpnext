@@ -16,6 +16,7 @@
   "variant_of",
   "item_code",
   "item_name",
+  "product_type",
   "price_list_rate",
   "dossiers",
   "shelf_life",
@@ -38,6 +39,8 @@
   "physical_parameter",
   "column_break_25",
   "additioanl_description",
+  "section_break_29",
+  "product_image",
   "product_artwork_doc_section",
   "product_artwork_doc",
   "product_pack_insert_doc_section",
@@ -1156,6 +1159,23 @@
    "fieldname": "section_break_37",
    "fieldtype": "Section Break",
    "hidden": 1
+  },
+  {
+   "fieldname": "section_break_29",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "product_image",
+   "fieldtype": "Attach Image",
+   "label": "Product Image"
+  },
+  {
+   "fieldname": "product_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Product Type",
+   "options": "Product Type"
   }
  ],
  "hide_toolbar": 1,
@@ -1164,7 +1184,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-04-04 10:16:58.820724",
+ "modified": "2024-07-08 07:44:04.604951",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
