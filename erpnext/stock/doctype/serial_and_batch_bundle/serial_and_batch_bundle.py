@@ -1098,7 +1098,9 @@ def create_serial_nos(item_code, serial_nos):
 
 
 def make_serial_nos(item_code, serial_nos):
-	item = frappe.get_cached_value("Item", item_code, ["description", "item_code"], as_dict=1)
+	item = frappe.get_cached_value(
+		"Item", item_code, ["description", "item_code", "item_name", "warranty_period"], as_dict=1
+	)
 
 	serial_nos = [d.get("serial_no") for d in serial_nos if d.get("serial_no")]
 	existing_serial_nos = frappe.get_all("Serial No", filters={"name": ("in", serial_nos)})
@@ -1123,6 +1125,7 @@ def make_serial_nos(item_code, serial_nos):
 				item.item_code,
 				item.item_name,
 				item.description,
+				item.warranty_period or 0,
 				"Inactive",
 			)
 		)
@@ -1137,6 +1140,7 @@ def make_serial_nos(item_code, serial_nos):
 		"item_code",
 		"item_name",
 		"description",
+		"warranty_period",
 		"status",
 	]
 
