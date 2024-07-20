@@ -400,7 +400,7 @@ def unconsolidate_pos_invoices(closing_entry):
 		"POS Invoice Merge Log", filters={"pos_closing_entry": closing_entry.name}, pluck="name"
 	)
 
-	if len(merge_logs) >= 10:
+	if len(closing_entry.pos_transactions) >= 10:
 		closing_entry.set_status(update=True, status="Queued")
 		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
