@@ -583,6 +583,7 @@ erpnext.PointOfSale.Controller = class {
 					new_item["serial_no"] = serial_no;
 				}
 
+				new_item["use_serial_batch_fields"] = 1;
 				if (field === "serial_no") new_item["qty"] = value.split(`\n`).length || 0;
 
 				item_row = this.frm.add_child("items", new_item);
