@@ -18,7 +18,8 @@
   "allocated_amount",
   "exchange_rate",
   "exchange_gain_loss",
-  "account"
+  "account",
+  "payment_request"
  ],
  "fields": [
   {
@@ -120,12 +121,18 @@
    "fieldname": "payment_type",
    "fieldtype": "Data",
    "label": "Payment Type"
+  },
+  {
+   "fieldname": "payment_request",
+   "fieldtype": "Link",
+   "label": "Payment Request",
+   "options": "Payment Request"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-05 09:44:08.310593",
+ "modified": "2024-07-20 17:57:32.866780",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",
