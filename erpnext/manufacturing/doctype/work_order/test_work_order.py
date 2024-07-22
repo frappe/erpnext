@@ -2054,6 +2054,76 @@ class TestWorkOrder(FrappeTestCase):
 			"BOM",
 		)
 
+	def test_stock_entry_creation(self):
+		self.wip_warehouse = create_warehouse("WIP Warehouse")
+		self.fg_warehouse = create_warehouse("Finished Goods Warehouse")
+		self.source_warehouse = create_warehouse("Stores Warehouse")
+		self.item = create_item("Test Item")
+		self.bom = make_bom(item=self.item.name, raw_materials=[self.item.name], rate=100)
+
+		work_order1 = frappe.get_doc(
+			{
+				"doctype": "Work Order",
+				"production_item": self.item.name,
+				"bom_no": self.bom.name,
+				"qty": 10,
+				"wip_warehouse": self.wip_warehouse,
+				"fg_warehouse": self.fg_warehouse,
+				"source_warehouse": self.source_warehouse,
+				"company": "_Test Company",
+				"skip_transfer": 1,
+				"from_wip_warehouse": 1,
+			}
+		)
+		work_order1.insert()
+		work_order1.submit()
+
+		stock_entry = make_stock_entry(work_order1.name, "Manufacture", 10)
+		self.assertEqual(stock_entry["from_warehouse"], self.wip_warehouse)
+		self.assertEqual(stock_entry["to_warehouse"], self.fg_warehouse)
+
+		work_order2 = frappe.get_doc(
+			{
+				"doctype": "Work Order",
+				"production_item": self.item.name,
+				"bom_no": self.bom.name,
+				"qty": 10,
+				"wip_warehouse": self.wip_warehouse,
+				"fg_warehouse": self.fg_warehouse,
+				"source_warehouse": self.source_warehouse,
+				"company": "_Test Company",
+				"skip_transfer": 1,
+				"from_wip_warehouse": 0,
+			}
+		)
+		work_order2.insert()
+		work_order2.submit()
+
+		stock_entry = make_stock_entry(work_order2.name, "Manufacture", 10)
+		self.assertEqual(stock_entry["from_warehouse"], self.source_warehouse)
+		self.assertEqual(stock_entry["to_warehouse"], self.fg_warehouse)
+
+		work_order3 = frappe.get_doc(
+			{
+				"doctype": "Work Order",
+				"production_item": self.item.name,
+				"bom_no": self.bom.name,
+				"qty": 10,
+				"wip_warehouse": self.wip_warehouse,
+				"fg_warehouse": self.fg_warehouse,
+				"source_warehouse": self.source_warehouse,
+				"company": "_Test Company",
+				"skip_transfer": 0,
+				"from_wip_warehouse": 0,
+			}
+		)
+		work_order3.insert()
+		work_order3.submit()
+
+		stock_entry = make_stock_entry(work_order3.name, "Manufacture", 10)
+		self.assertEqual(stock_entry["from_warehouse"], self.source_warehouse)
+		self.assertEqual(stock_entry["to_warehouse"], self.fg_warehouse)
+
 
 def make_operation(**kwargs):
 	kwargs = frappe._dict(kwargs)
