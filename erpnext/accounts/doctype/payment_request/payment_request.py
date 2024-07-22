@@ -467,6 +467,7 @@ def make_payment_request(**args):
 		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": 0},
 	)
 
+	# fetches existing payment request `grand_total` amount
 	existing_payment_request_amount = get_existing_payment_request_amount(args.dt, args.dn)
 
 	if existing_payment_request_amount:
@@ -484,7 +485,6 @@ def make_payment_request(**args):
 			args["payment_request_type"] = (
 				"Outward" if args.get("dt") in ["Purchase Order", "Purchase Invoice"] else "Inward"
 			)
-
 		pr.update(
 			{
 				"payment_gateway_account": gateway_account.get("name"),
@@ -569,15 +569,23 @@ def get_amount(ref_doc, payment_account=None):
 	return grand_total
 
 
-def get_existing_payment_request_amount(ref_dt, ref_dn):
+def get_existing_payment_request_amount(ref_dt, ref_dn, only_paid=False):
 	"""
-	Get the total amount of `Paid` / `Partially Paid` payment requests against a document.
+	Return the total amount of Payment Requests against a reference document. \n
+	If `only_paid` is True, it will return the total amount of paid Payment Requests. \n
+	Else, it will return the total amount of all Payment Requests.
 	"""
+
 	PR = frappe.qb.DocType("Payment Request")
+
+	if only_paid:
+		select = Sum(PR.grand_total - PR.outstanding_amount)
+	else:
+		select = Sum(PR.grand_total)
 
 	response = (
 		frappe.qb.from_(PR)
-		.select(Sum(PR.grand_total - PR.outstanding_amount))
+		.select(select)
 		.where(PR.reference_doctype == ref_dt)
 		.where(PR.reference_name == ref_dn)
 		.where(PR.docstatus == 1)
@@ -715,7 +723,7 @@ def get_dummy_message(doc):
 {%- else %}<p>Hello,</p>{% endif %}
 
 <p>{{ _("Requesting payment against {0} {1} for amount {2}").format(doc.doctype,
-	doc.name, doc.get_formatted("grand_total")) }}</p>
+    doc.name, doc.get_formatted("grand_total")) }}</p>
 
 <a href="{{ payment_url }}">{{ _("Make Payment") }}</a>
 
