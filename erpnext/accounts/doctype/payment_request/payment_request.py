@@ -272,10 +272,8 @@ class PaymentRequest(Document):
 		)
 
 	def set_as_paid(self):
-		self.db_set("status", "Paid")
-
 		if self.payment_channel == "Phone" and self.status != "Paid":
-			self.db_set("status", "Paid")
+			self.db_set({"status": "Paid", "outstanding_amount": 0})
 
 		else:
 			payment_entry = self.create_payment_entry()
@@ -304,8 +302,8 @@ class PaymentRequest(Document):
 		bank_amount = self.outstanding_amount
 
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
-			total = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
-			base_total = ref_doc.get("base_rounded_total") or ref_doc.get("base_grand_total")
+			total = ref_doc.get("rounded_total") or ref_doc.grand_total
+			base_total = ref_doc.get("base_rounded_total") or ref_doc.base_grand_total
 			party_amount = flt(self.outstanding_amount / total * base_total, self.precision("grand_total"))
 		else:
 			party_amount = self.outstanding_amount
@@ -575,7 +573,6 @@ def get_existing_payment_request_amount(ref_dt, ref_dn, only_paid=False):
 	If `only_paid` is True, it will return the total amount of paid Payment Requests. \n
 	Else, it will return the total amount of all Payment Requests.
 	"""
-
 	PR = frappe.qb.DocType("Payment Request")
 
 	if only_paid:

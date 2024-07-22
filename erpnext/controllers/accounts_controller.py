@@ -1944,35 +1944,32 @@ class AccountsController(TransactionBase):
 		self.set_advance_payment_status()
 
 	def set_advance_payment_status(self):
-		new_status = None
-
-		stati = frappe.get_all(
-			"Payment Request",
-			{
-				"reference_doctype": self.doctype,
-				"reference_name": self.name,
-				"docstatus": 1,
-			},
-			pluck="status",
+		from erpnext.accounts.doctype.payment_request.payment_request import (
+			get_existing_payment_request_amount as get_paid_amount,
 		)
-		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
-			if not stati:
+
+		new_status = None
+		available_payment_requests = frappe.db.count(
+			"Payment Request",
+			{"reference_doctype": self.doctype, "reference_name": self.name, "docstatus": 1},
+		)
+		total_amount = self.get("rounded_total") or self.grand_total
+		paid_amount = get_paid_amount(self.doctype, self.name, only_paid=True)
+
+		if paid_amount == total_amount:
+			new_status = "Fully Paid"
+		elif paid_amount > 0 and paid_amount < total_amount:
+			new_status = "Partially Paid"
+		elif self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
+			if not available_payment_requests:
 				new_status = "Not Requested"
-			elif "Requested" in stati or "Failed" in stati:
+			elif paid_amount == 0 or paid_amount == 0.0:
 				new_status = "Requested"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
-		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
-			if not stati:
+		elif self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
+			if not available_payment_requests:
 				new_status = "Not Initiated"
-			elif "Initiated" in stati or "Failed" in stati or "Payment Ordered" in stati:
+			elif paid_amount == 0 or paid_amount == 0.0:
 				new_status = "Initiated"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
 
 		if new_status == self.advance_payment_status:
 			return
