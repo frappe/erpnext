@@ -63,6 +63,7 @@ product_discount_fields = [
 	"recurse_for",
 	"apply_recursion_over",
 	"apply_multiple_pricing_rules",
+	"round_free_qty",
 ]
 
 
