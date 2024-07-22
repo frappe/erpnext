@@ -1942,6 +1942,8 @@ class AccountsController(TransactionBase):
 
 		self.set_advance_payment_status()
 
+	# todo: need to optimize
+	# todo: modularize
 	def set_advance_payment_status(self):
 		from erpnext.accounts.doctype.payment_request.payment_request import (
 			get_existing_payment_request_amount as get_paid_amount,

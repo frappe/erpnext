@@ -193,6 +193,7 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule()
 		self.set_payment_req_outstanding_amount()
 		self.set_payment_req_status()
+		self.set_reference_advance_payment_status()
 		self.set_status()
 
 	def set_liability_account(self):
@@ -269,6 +270,7 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule(cancel=1)
 		self.set_payment_req_outstanding_amount(cancel=True)
 		self.set_payment_req_status()
+		self.set_reference_advance_payment_status()
 		self.set_status()
 
 	def set_payment_req_outstanding_amount(self, cancel=False):
@@ -282,6 +284,18 @@ class PaymentEntry(AccountsController):
 		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
 
 		update_payment_req_status(self, None)
+
+	# todo: need to optimize
+	def set_reference_advance_payment_status(self):
+		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
+			"advance_payment_payable_doctypes"
+		)
+
+		for ref in self.get("references"):
+			ref_doc = frappe.get_doc(ref.reference_doctype, ref.reference_name)
+			if ref.reference_doctype in advance_payment_doctypes:
+				# set advance payment status
+				ref_doc.set_advance_payment_status()
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
@@ -1753,7 +1767,7 @@ class PaymentEntry(AccountsController):
 
 		frappe.msgprint(msg=msg, alert=True, indicator="orange")
 
-	# todo: can be optimized
+	# todo: can be optimize
 	@frappe.whitelist()
 	def set_matched_payment_requests(self):
 		if not self.references:
@@ -1808,7 +1822,7 @@ class PaymentEntry(AccountsController):
 			)
 
 
-# todo: can be optimized
+# todo: can be optimize
 def get_matched_payment_request(reference_doctype, reference_name, outstanding_amount):
 	payment_requests = frappe.get_all(
 		doctype="Payment Request",
