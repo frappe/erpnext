@@ -837,7 +837,8 @@ def create_delivery_note(source_name, target_doc=None):
 				)
 			)
 
-	for customer, rows in groupby(sales_orders, key=lambda so: so["customer"]):
+	group_key = lambda so: so["customer"]  # noqa
+	for customer, rows in groupby(sorted(sales_orders, key=group_key), key=group_key):
 		sales_dict[customer] = {row.sales_order for row in rows}
 
 	if sales_dict:
