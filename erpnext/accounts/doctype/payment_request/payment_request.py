@@ -306,7 +306,7 @@ class PaymentRequest(Document):
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
 			total = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
 			base_total = ref_doc.get("base_rounded_total") or ref_doc.get("base_grand_total")
-			party_amount = round(self.outstanding / total * base_total, self.precision("grand_total"))
+			party_amount = flt(self.outstanding_amount / total * base_total, self.precision("grand_total"))
 		else:
 			party_amount = self.outstanding_amount
 
