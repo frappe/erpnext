@@ -1858,7 +1858,6 @@ def validate_inclusive_tax(tax, doc):
 			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 
-# todo: modify its test
 @frappe.whitelist()
 def get_outstanding_reference_documents(args, validate=False):
 	if isinstance(args, str):
@@ -2015,7 +2014,6 @@ def get_outstanding_reference_documents(args, validate=False):
 					_(ref_document_type), _(args.get("party_type")).lower(), frappe.bold(args.get("party"))
 				)
 			)
-
 
 	return data
 
