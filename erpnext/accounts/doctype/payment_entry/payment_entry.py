@@ -2016,8 +2016,6 @@ def get_outstanding_reference_documents(args, validate=False):
 				)
 			)
 
-	frappe.log("Data")
-	frappe.log(data)
 
 	return data
 
