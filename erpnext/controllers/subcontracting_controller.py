@@ -425,7 +425,7 @@ class SubcontractingController(StockController):
 			i += 1
 
 	def __remove_serial_and_batch_bundle(self, item):
-		if item.serial_and_batch_bundle:
+		if item.get("serial_and_batch_bundle"):
 			frappe.delete_doc("Serial and Batch Bundle", item.serial_and_batch_bundle, force=True)
 
 	def __get_materials_from_bom(self, item_code, bom_no, exploded_item=0):
