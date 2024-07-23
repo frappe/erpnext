@@ -433,12 +433,12 @@
 			"tax_rate": 15.00,
 			"default": 1
 		},
-		"Ethiopia VAT 10%": {
-			"account_name": "VAT 10%",
+		"Ethiopia TOT 10%": {
+			"account_name": "TOT 10%",
 			"tax_rate": 10.00
 		},
-		"Ethiopia VAT 2%": {
-			"account_name": "VAT 2%",
+		"Ethiopia TOT 2%": {
+			"account_name": "TOT 2%",
 			"tax_rate": 2.00
 		}
 	},
