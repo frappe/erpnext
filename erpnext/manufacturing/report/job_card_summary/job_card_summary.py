@@ -33,7 +33,6 @@ def get_data(filters):
 		"total_completed_qty",
 		"workstation",
 		"operation",
-		"time_required",
 		"total_time_in_mins",
 	]
 
