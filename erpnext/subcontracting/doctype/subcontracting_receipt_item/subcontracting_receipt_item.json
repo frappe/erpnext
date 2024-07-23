@@ -39,6 +39,7 @@
   "subcontracting_order",
   "subcontracting_order_item",
   "subcontracting_receipt_item",
+  "job_card",
   "column_break_40",
   "rejected_warehouse",
   "bom",
@@ -47,9 +48,11 @@
   "schedule_date",
   "reference_name",
   "section_break_45",
+  "add_serial_batch_bundle",
   "serial_and_batch_bundle",
   "use_serial_batch_fields",
   "col_break5",
+  "add_serial_batch_for_rejected_qty",
   "rejected_serial_and_batch_bundle",
   "section_break_jshh",
   "serial_no",
@@ -335,8 +338,7 @@
    "fieldtype": "Small Text",
    "label": "Rejected Serial No",
    "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "subcontracting_order_item",
@@ -564,12 +566,32 @@
   {
    "fieldname": "column_break_henr",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.use_serial_batch_fields === 0",
+   "fieldname": "add_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch Bundle"
+  },
+  {
+   "depends_on": "eval:doc.use_serial_batch_fields === 0",
+   "fieldname": "add_serial_batch_for_rejected_qty",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No (Rejected Qty)"
+  },
+  {
+   "fieldname": "job_card",
+   "fieldtype": "Link",
+   "label": "Job Card",
+   "options": "Job Card",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-04 16:23:30.374865",
+ "modified": "2024-03-29 15:43:43.425544",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt Item",

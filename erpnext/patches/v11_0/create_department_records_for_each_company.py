@@ -53,11 +53,10 @@ def update_records(doctype, comp_dict):
 
 		for department in records:
 			when_then.append(
-				"""
-				WHEN company = "%s" and department = "%s"
-				THEN "%s"
+				f"""
+				WHEN company = "{company}" and department = "{department}"
+				THEN "{records[department]}"
 			"""
-				% (company, department, records[department])
 			)
 
 	if not when_then:
@@ -66,11 +65,10 @@ def update_records(doctype, comp_dict):
 	frappe.db.sql(
 		"""
 		update
-			`tab%s`
+			`tab{}`
 		set
-			department = CASE %s END
-	"""
-		% (doctype, " ".join(when_then))
+			department = CASE {} END
+	""".format(doctype, " ".join(when_then))
 	)
 
 
@@ -83,11 +81,10 @@ def update_instructors(comp_dict):
 
 		for department in records:
 			when_then.append(
-				"""
-				WHEN employee = "%s" and department = "%s"
-				THEN "%s"
+				f"""
+				WHEN employee = "{employee.name}" and department = "{department}"
+				THEN "{records[department]}"
 			"""
-				% (employee.name, department, records[department])
 			)
 
 	if not when_then:

@@ -13,7 +13,7 @@
   "column_break_2",
   "gross_purchase_amount",
   "opening_accumulated_depreciation",
-  "number_of_depreciations_booked",
+  "opening_number_of_booked_depreciations",
   "finance_book",
   "finance_book_id",
   "depreciation_details_section",
@@ -171,10 +171,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "number_of_depreciations_booked",
+   "fieldname": "opening_number_of_booked_depreciations",
    "fieldtype": "Int",
    "hidden": 1,
-   "label": "Number of Depreciations Booked",
+   "label": "Opening Number of Booked Depreciations",
    "print_hide": 1,
    "read_only": 1
   },
@@ -207,7 +207,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-08 16:31:04.533928",
+ "modified": "2024-03-27 13:06:34.135004",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Depreciation Schedule",
@@ -244,7 +244,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

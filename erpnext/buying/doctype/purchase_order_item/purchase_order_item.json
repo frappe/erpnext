@@ -110,7 +110,9 @@
   "production_plan",
   "production_plan_item",
   "production_plan_sub_assembly_item",
-  "page_break"
+  "page_break",
+  "column_break_pjyo",
+  "job_card"
  ],
  "fields": [
   {
@@ -909,13 +911,24 @@
   {
    "fieldname": "column_break_fyqr",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_pjyo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "job_card",
+   "fieldtype": "Link",
+   "label": "Job Card",
+   "options": "Job Card",
+   "search_index": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-02-05 11:23:24.859435",
+ "modified": "2024-03-27 13:12:24.979325",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
@@ -924,7 +937,7 @@
  "permissions": [],
  "quick_entry": 1,
  "search_fields": "item_name",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

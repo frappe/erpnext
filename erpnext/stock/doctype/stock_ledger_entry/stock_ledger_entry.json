@@ -101,6 +101,7 @@
    "oldfieldtype": "Date",
    "print_width": "100px",
    "read_only": 1,
+   "search_index": 1,
    "width": "100px"
   },
   {
@@ -230,7 +231,7 @@
   },
   {
    "fieldname": "stock_queue",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "FIFO Stock Queue (qty, rate)",
    "oldfieldname": "fcfs_stack",
    "oldfieldtype": "Text",
@@ -360,7 +361,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-02-07 09:18:13.999231",
+ "modified": "2024-06-27 16:23:18.820049",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
@@ -381,7 +382,7 @@
    "role": "Accounts Manager"
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

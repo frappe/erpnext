@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-06-30 15:56:20.306901",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -25,14 +26,16 @@
   }
  ],
  "istable": 1,
- "modified": "2019-07-12 11:46:43.184123",
+ "links": [],
+ "modified": "2024-03-27 13:06:44.019192",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Campaign Email Schedule",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

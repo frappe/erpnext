@@ -90,7 +90,7 @@
   }
  ],
  "links": [],
- "modified": "2020-05-26 22:14:54.479831",
+ "modified": "2024-03-27 13:08:18.393488",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Downtime Entry",
@@ -134,8 +134,9 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "workstation",
  "track_changes": 1
 }

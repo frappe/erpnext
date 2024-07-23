@@ -15,9 +15,9 @@ def execute(filters=None):
 	return ForecastingReport(filters).execute_report()
 
 
-class ExponentialSmoothingForecast(object):
+class ExponentialSmoothingForecast:
 	def forecast_future_data(self):
-		for key, value in self.period_wise_data.items():
+		for _key, value in self.period_wise_data.items():
 			forecast_data = []
 			for period in self.period_list:
 				forecast_key = "forecast_" + period.key
@@ -87,7 +87,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 						entry.get(self.based_on_field)
 					)
 
-		for key, value in self.period_wise_data.items():
+		for value in self.period_wise_data.values():
 			list_of_period_value = [value.get(p.key, 0) for p in self.period_list]
 
 			if list_of_period_value:
@@ -144,7 +144,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 		if not self.data:
 			return
 
-		total_row = {"item_code": _(frappe.bold("Total Quantity"))}
+		total_row = {"item_code": _("Total Quantity")}
 
 		for value in self.data:
 			for period in self.period_list:
@@ -185,7 +185,6 @@ class ForecastingReport(ExponentialSmoothingForecast):
 				"Half-Yearly",
 				"Quarterly",
 			] or period.from_date >= getdate(self.filters.from_date):
-
 				forecast_key = period.key
 				label = _(period.label)
 				if period.from_date >= getdate(self.filters.from_date):

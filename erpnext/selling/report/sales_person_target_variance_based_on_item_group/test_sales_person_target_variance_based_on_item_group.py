@@ -18,17 +18,17 @@ class TestSalesPersonTargetVarianceBasedOnItemGroup(FrappeTestCase):
 
 	def test_achieved_target_and_variance(self):
 		# Create a Target Distribution
-		distribution = frappe.new_doc("Monthly Distribution")
-		distribution.distribution_id = "Target Report Distribution"
-		distribution.fiscal_year = self.fiscal_year
-		distribution.get_months()
-		distribution.insert()
+		distribution = create_target_distribution(self.fiscal_year)
 
-		# Create sales people with targets
-		person_1 = create_sales_person_with_target("Sales Person 1", self.fiscal_year, distribution.name)
-		person_2 = create_sales_person_with_target("Sales Person 2", self.fiscal_year, distribution.name)
+		# Create sales people with targets for the current fiscal year
+		person_1 = create_sales_target_doc(
+			"Sales Person", "sales_person_name", "Sales Person 1", self.fiscal_year, distribution.name
+		)
+		person_2 = create_sales_target_doc(
+			"Sales Person", "sales_person_name", "Sales Person 2", self.fiscal_year, distribution.name
+		)
 
-		# Create a Sales Order with 50-50 contribution
+		# Create a Sales Order with 50-50 contribution between both Sales people
 		so = make_sales_order(
 			rate=1000,
 			qty=20,
@@ -69,10 +69,20 @@ class TestSalesPersonTargetVarianceBasedOnItemGroup(FrappeTestCase):
 		)
 
 
-def create_sales_person_with_target(sales_person_name, fiscal_year, distribution_id):
-	sales_person = frappe.new_doc("Sales Person")
-	sales_person.sales_person_name = sales_person_name
-	sales_person.append(
+def create_target_distribution(fiscal_year):
+	distribution = frappe.new_doc("Monthly Distribution")
+	distribution.distribution_id = "Target Report Distribution"
+	distribution.fiscal_year = fiscal_year
+	distribution.get_months()
+	return distribution.insert()
+
+
+def create_sales_target_doc(
+	sales_field_dt, sales_field_name, sales_field_value, fiscal_year, distribution_id
+):
+	sales_target_doc = frappe.new_doc(sales_field_dt)
+	sales_target_doc.set(sales_field_name, sales_field_value)
+	sales_target_doc.append(
 		"targets",
 		{
 			"fiscal_year": fiscal_year,
@@ -81,4 +91,6 @@ def create_sales_person_with_target(sales_person_name, fiscal_year, distribution
 			"distribution_id": distribution_id,
 		},
 	)
-	return sales_person.insert()
+	if sales_field_dt == "Sales Partner":
+		sales_target_doc.commission_rate = 5
+	return sales_target_doc.insert()

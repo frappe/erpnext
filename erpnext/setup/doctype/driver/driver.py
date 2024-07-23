@@ -1,7 +1,7 @@
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+import frappe
 from frappe.model.document import Document
 
 
@@ -31,4 +31,6 @@ class Driver(Document):
 		transporter: DF.Link | None
 	# end: auto-generated types
 
-	pass
+	def validate(self):
+		if self.employee:
+			self.user = frappe.get_value("Employee", self.employee, "user_id")

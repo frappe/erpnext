@@ -156,27 +156,26 @@ def get_entries(filters):
 	entries = frappe.db.sql(
 		"""
 		SELECT
-			dt.name, dt.customer, dt.territory, dt.%s as posting_date, dt_item.item_code,
+			dt.name, dt.customer, dt.territory, dt.{} as posting_date, dt_item.item_code,
 			st.sales_person, st.allocated_percentage, dt_item.warehouse,
 		CASE
-			WHEN dt.status = "Closed" THEN dt_item.%s * dt_item.conversion_factor
+			WHEN dt.status = "Closed" THEN dt_item.{} * dt_item.conversion_factor
 			ELSE dt_item.stock_qty
 		END as stock_qty,
 		CASE
-			WHEN dt.status = "Closed" THEN (dt_item.base_net_rate * dt_item.%s * dt_item.conversion_factor)
+			WHEN dt.status = "Closed" THEN (dt_item.base_net_rate * dt_item.{} * dt_item.conversion_factor)
 			ELSE dt_item.base_net_amount
 		END as base_net_amount,
 		CASE
-			WHEN dt.status = "Closed" THEN ((dt_item.base_net_rate * dt_item.%s * dt_item.conversion_factor) * st.allocated_percentage/100)
+			WHEN dt.status = "Closed" THEN ((dt_item.base_net_rate * dt_item.{} * dt_item.conversion_factor) * st.allocated_percentage/100)
 			ELSE dt_item.base_net_amount * st.allocated_percentage/100
 		END as contribution_amt
 		FROM
-			`tab%s` dt, `tab%s Item` dt_item, `tabSales Team` st
+			`tab{}` dt, `tab{} Item` dt_item, `tabSales Team` st
 		WHERE
-			st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = %s
-			and dt.docstatus = 1 %s order by st.sales_person, dt.name desc
-		"""
-		% (
+			st.parent = dt.name and dt.name = dt_item.parent and st.parenttype = {}
+			and dt.docstatus = 1 {} order by st.sales_person, dt.name desc
+		""".format(
 			date_field,
 			qty_field,
 			qty_field,
@@ -186,7 +185,7 @@ def get_entries(filters):
 			"%s",
 			conditions,
 		),
-		tuple([filters["doc_type"]] + values),
+		tuple([filters["doc_type"], *values]),
 		as_dict=1,
 	)
 
@@ -199,23 +198,21 @@ def get_conditions(filters, date_field):
 
 	for field in ["company", "customer", "territory"]:
 		if filters.get(field):
-			conditions.append("dt.{0}=%s".format(field))
+			conditions.append(f"dt.{field}=%s")
 			values.append(filters[field])
 
 	if filters.get("sales_person"):
 		lft, rgt = frappe.get_value("Sales Person", filters.get("sales_person"), ["lft", "rgt"])
 		conditions.append(
-			"exists(select name from `tabSales Person` where lft >= {0} and rgt <= {1} and name=st.sales_person)".format(
-				lft, rgt
-			)
+			f"exists(select name from `tabSales Person` where lft >= {lft} and rgt <= {rgt} and name=st.sales_person)"
 		)
 
 	if filters.get("from_date"):
-		conditions.append("dt.{0}>=%s".format(date_field))
+		conditions.append(f"dt.{date_field}>=%s")
 		values.append(filters["from_date"])
 
 	if filters.get("to_date"):
-		conditions.append("dt.{0}<=%s".format(date_field))
+		conditions.append(f"dt.{date_field}<=%s")
 		values.append(filters["to_date"])
 
 	items = get_items(filters)

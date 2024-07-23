@@ -57,7 +57,9 @@ class ItemManufacturer(Document):
 			# if unchecked and default in Item master, clear it.
 			if default_manufacturer == self.manufacturer and default_part_no == self.manufacturer_part_no:
 				frappe.db.set_value(
-					"Item", item.name, {"default_item_manufacturer": None, "default_manufacturer_part_no": None}
+					"Item",
+					item.name,
+					{"default_item_manufacturer": None, "default_manufacturer_part_no": None},
 				)
 
 		elif self.is_default:

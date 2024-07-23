@@ -28,7 +28,6 @@
   "column_break_18",
   "project",
   "dimension_col_break",
-  "custom_dimensions_section",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -125,13 +124,14 @@
   "per_returned",
   "transporter_info",
   "transporter",
-  "driver",
   "lr_no",
-  "vehicle_no",
+  "delivery_trip",
+  "driver",
   "col_break34",
   "transporter_name",
-  "driver_name",
   "lr_date",
+  "vehicle_no",
+  "driver_name",
   "customer_po_details",
   "po_no",
   "column_break_17",
@@ -352,7 +352,7 @@
   },
   {
    "fieldname": "shipping_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address",
    "read_only": 1
   },
@@ -409,7 +409,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Billing Address",
    "read_only": 1
   },
@@ -421,7 +421,7 @@
   },
   {
    "fieldname": "company_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Company Address",
    "read_only": 1
   },
@@ -681,7 +681,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text Editor",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -927,7 +927,7 @@
    "width": "50%"
   },
   {
-   "fetch_from": "transporter.name",
+   "fetch_from": "transporter.supplier_name",
    "fieldname": "transporter_name",
    "fieldtype": "Data",
    "label": "Transporter Name",
@@ -1047,9 +1047,12 @@
    "report_hide": 1
   },
   {
+   "fetch_from": "customer.language",
+   "fetch_if_empty": 1,
    "fieldname": "language",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Print Language",
+   "options": "Language",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1290,7 +1293,7 @@
   {
    "depends_on": "dispatch_address_name",
    "fieldname": "dispatch_address",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Dispatch Address",
    "print_hide": 1,
    "read_only": 1
@@ -1356,10 +1359,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "custom_dimensions_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "shipping_address_section",
    "fieldtype": "Section Break",
    "label": "Shipping Address"
@@ -1396,13 +1395,20 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "fieldname": "delivery_trip",
+   "fieldtype": "Link",
+   "label": "Delivery Trip",
+   "options": "Delivery Trip",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-18 17:19:39.368239",
+ "modified": "2024-05-23 14:18:20.679692",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
@@ -1495,7 +1501,7 @@
  ],
  "search_fields": "status,customer,customer_name, territory,base_grand_total",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",

@@ -32,14 +32,14 @@ class Dunning(AccountsController):
 
 		from erpnext.accounts.doctype.overdue_payment.overdue_payment import OverduePayment
 
-		address_display: DF.SmallText | None
+		address_display: DF.TextEditor | None
 		amended_from: DF.Link | None
 		base_dunning_amount: DF.Currency
 		body_text: DF.TextEditor | None
 		closing_text: DF.TextEditor | None
 		company: DF.Link
 		company_address: DF.Link | None
-		company_address_display: DF.SmallText | None
+		company_address_display: DF.TextEditor | None
 		contact_display: DF.SmallText | None
 		contact_email: DF.Data | None
 		contact_mobile: DF.SmallText | None
@@ -146,6 +146,22 @@ class Dunning(AccountsController):
 			)
 			row.dunning_level = len(past_dunnings) + 1
 
+	def on_cancel(self):
+		super().on_cancel()
+		self.ignore_linked_doctypes = [
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Repost Item Valuation",
+			"Repost Payment Ledger",
+			"Repost Payment Ledger Items",
+			"Repost Accounting Ledger",
+			"Repost Accounting Ledger Items",
+			"Unreconcile Payment",
+			"Unreconcile Payment Entries",
+			"Payment Ledger Entry",
+			"Serial and Batch Bundle",
+		]
+
 
 def resolve_dunning(doc, state):
 	"""
@@ -177,10 +193,13 @@ def resolve_dunning(doc, state):
 					outstanding_ps = frappe.get_value(
 						"Payment Schedule", overdue_payment.payment_schedule, "outstanding"
 					)
-					resolve = False if (outstanding_ps > 0 and outstanding_inv > 0) else True
+					resolve = resolve and (False if (outstanding_ps > 0 and outstanding_inv > 0) else True)
 
-				dunning.status = "Resolved" if resolve else "Unresolved"
-				dunning.save()
+				new_status = "Resolved" if resolve else "Unresolved"
+
+				if dunning.status != new_status:
+					dunning.status = new_status
+					dunning.save()
 
 
 def get_linked_dunnings_as_per_state(sales_invoice, state):

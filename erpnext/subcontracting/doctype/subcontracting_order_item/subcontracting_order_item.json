@@ -49,6 +49,9 @@
   "cost_center",
   "dimension_col_break",
   "project",
+  "references_section",
+  "job_card",
+  "column_break_nfod",
   "section_break_34",
   "purchase_order_item",
   "page_break"
@@ -378,13 +381,29 @@
    "no_copy": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "references_section",
+   "fieldtype": "Section Break",
+   "label": "References"
+  },
+  {
+   "fieldname": "job_card",
+   "fieldtype": "Link",
+   "label": "Job Card",
+   "options": "Job Card",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_nfod",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-30 15:29:43.744618",
+ "modified": "2024-03-27 13:12:46.343298",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Order Item",
@@ -393,7 +412,7 @@
  "permissions": [],
  "quick_entry": 1,
  "search_fields": "item_name",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

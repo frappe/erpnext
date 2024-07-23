@@ -16,7 +16,7 @@ def execute():
 	# get partner type in existing forms (customized)
 	# and create a document if not created
 	for d in ["Sales Partner"]:
-		partner_type = frappe.db.sql_list("select distinct partner_type from `tab{0}`".format(d))
+		partner_type = frappe.db.sql_list(f"select distinct partner_type from `tab{d}`")
 		for s in partner_type:
 			if s and s not in default_sales_partner_type:
 				insert_sales_partner_type(s)

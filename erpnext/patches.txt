@@ -253,15 +253,16 @@ erpnext.patches.v13_0.reset_corrupt_defaults
 erpnext.patches.v13_0.create_accounting_dimensions_for_asset_repair
 erpnext.patches.v15_0.delete_taxjar_doctypes
 erpnext.patches.v15_0.delete_ecommerce_doctypes
-erpnext.patches.v15_0.create_asset_depreciation_schedules_from_assets
 erpnext.patches.v14_0.update_reference_due_date_in_journal_entry
 erpnext.patches.v15_0.saudi_depreciation_warning
 erpnext.patches.v15_0.delete_saudi_doctypes
 erpnext.patches.v14_0.show_loan_management_deprecation_warning
 erpnext.patches.v14_0.clear_reconciliation_values_from_singles
 execute:frappe.rename_doc("Report", "TDS Payable Monthly", "Tax Withholding Details", force=True)
+erpnext.patches.v14_0.update_proprietorship_to_individual
 
 [post_model_sync]
+erpnext.patches.v15_0.create_asset_depreciation_schedules_from_assets
 execute:frappe.delete_doc_if_exists('Workspace', 'ERPNext Integrations Settings')
 erpnext.patches.v14_0.update_posting_datetime_and_dropped_indexes #22-02-2024
 erpnext.patches.v14_0.rename_ongoing_status_in_sla_documents
@@ -356,8 +357,20 @@ erpnext.patches.v14_0.update_total_asset_cost_field
 erpnext.patches.v15_0.create_advance_payment_status
 erpnext.patches.v15_0.allow_on_submit_dimensions_for_repostable_doctypes
 erpnext.patches.v14_0.create_accounting_dimensions_in_reconciliation_tool
+erpnext.patches.v14_0.update_flag_for_return_invoices #2024-03-22
+erpnext.patches.v15_0.create_accounting_dimensions_in_payment_request
 # below migration patch should always run last
 erpnext.patches.v14_0.migrate_gl_to_payment_ledger
 erpnext.stock.doctype.delivery_note.patches.drop_unused_return_against_index # 2023-12-20
 erpnext.patches.v14_0.set_maintain_stock_for_bom_item
 erpnext.patches.v15_0.delete_orphaned_asset_movement_item_records
+erpnext.patches.v15_0.fix_debit_credit_in_transaction_currency
+erpnext.patches.v15_0.rename_purchase_receipt_amount_to_purchase_amount
+erpnext.patches.v14_0.enable_set_priority_for_pricing_rules #1
+erpnext.patches.v15_0.rename_number_of_depreciations_booked_to_opening_booked_depreciations
+erpnext.patches.v15_0.add_default_operations
+erpnext.patches.v15_0.enable_old_serial_batch_fields
+erpnext.patches.v15_0.update_warehouse_field_in_asset_repair_consumed_item_doctype
+erpnext.patches.v15_0.update_asset_repair_field_in_stock_entry
+erpnext.patches.v15_0.update_total_number_of_booked_depreciations
+erpnext.patches.v15_0.do_not_use_batchwise_valuation

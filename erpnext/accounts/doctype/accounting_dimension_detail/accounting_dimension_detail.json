@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-07-16 17:53:18.718831",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -73,13 +74,15 @@
   }
  ],
  "istable": 1,
- "modified": "2019-08-15 11:59:09.389891",
+ "links": [],
+ "modified": "2024-03-27 13:05:57.056874",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension Detail",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

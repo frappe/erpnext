@@ -1,6 +1,5 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
-
 import unittest
 
 import frappe
@@ -44,17 +43,21 @@ class TestTask(unittest.TestCase):
 		task1.save()
 
 		self.assertEqual(
-			frappe.db.get_value("Task", task2.name, "exp_start_date"), getdate(add_days(nowdate(), 21))
-		)
-		self.assertEqual(
-			frappe.db.get_value("Task", task2.name, "exp_end_date"), getdate(add_days(nowdate(), 25))
+			getdate(frappe.db.get_value("Task", task2.name, "exp_start_date")),
+			getdate(add_days(nowdate(), 21)),
 		)
 
 		self.assertEqual(
-			frappe.db.get_value("Task", task3.name, "exp_start_date"), getdate(add_days(nowdate(), 26))
+			getdate(frappe.db.get_value("Task", task2.name, "exp_end_date")), getdate(add_days(nowdate(), 25))
 		)
+
 		self.assertEqual(
-			frappe.db.get_value("Task", task3.name, "exp_end_date"), getdate(add_days(nowdate(), 30))
+			getdate(frappe.db.get_value("Task", task3.name, "exp_start_date")),
+			getdate(add_days(nowdate(), 26)),
+		)
+
+		self.assertEqual(
+			getdate(frappe.db.get_value("Task", task3.name, "exp_end_date")), getdate(add_days(nowdate(), 30))
 		)
 
 	def test_close_assignment(self):
@@ -122,6 +125,7 @@ def create_task(
 	begin=0,
 	duration=0,
 	save=True,
+	priority=None,
 ):
 	if not frappe.db.exists("Task", subject):
 		task = frappe.new_doc("Task")
@@ -130,15 +134,14 @@ def create_task(
 		task.exp_start_date = start or nowdate()
 		task.exp_end_date = end or nowdate()
 		task.project = (
-			project or None
-			if is_template
-			else frappe.get_value("Project", {"project_name": "_Test Project"})
+			project or None if is_template else frappe.get_value("Project", {"project_name": "_Test Project"})
 		)
 		task.is_template = is_template
 		task.start = begin
 		task.duration = duration
 		task.is_group = is_group
 		task.parent_task = parent_task
+		task.priority = priority
 		if save:
 			task.save()
 	else:

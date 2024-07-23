@@ -13,9 +13,7 @@ def execute():
 		return
 
 	frappe.reload_doc("manufacturing", "doctype", "manufacturing_settings")
-	if cint(
-		frappe.db.get_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order")
-	):
+	if cint(frappe.db.get_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order")):
 		return
 
 	frappe.reload_doc("manufacturing", "doctype", "work_order")
@@ -75,9 +73,7 @@ def execute():
 def set_expense_account(doc):
 	for row in doc.items:
 		if row.is_finished_item and not row.expense_account:
-			row.expense_account = frappe.get_cached_value(
-				"Company", doc.company, "stock_adjustment_account"
-			)
+			row.expense_account = frappe.get_cached_value("Company", doc.company, "stock_adjustment_account")
 
 
 def repost_stock_entry(doc):

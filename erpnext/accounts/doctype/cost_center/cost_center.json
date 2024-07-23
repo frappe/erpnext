@@ -41,7 +41,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Cost Center Number",
-   "read_only": 1
+   "read_only_depends_on": "eval:!doc.__islocal"
   },
   {
    "fieldname": "parent_cost_center",
@@ -125,7 +125,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2022-01-31 13:22:58.916273",
+ "modified": "2024-04-24 10:55:54.083042",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",
@@ -163,11 +163,20 @@
   {
    "read": 1,
    "role": "Purchase User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Employee",
+   "select": 1,
+   "share": 1
   }
  ],
  "search_fields": "parent_cost_center, is_group",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": []
 }

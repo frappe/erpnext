@@ -15,9 +15,7 @@
    "in_list_view": 1,
    "label": "Accounts",
    "options": "Account",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "columns": 2,
@@ -25,22 +23,21 @@
    "fieldname": "is_mandatory",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Is Mandatory",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Is Mandatory"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-22 19:55:13.324136",
+ "modified": "2024-03-27 13:05:59.168897",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Applicable On Account",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

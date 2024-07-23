@@ -63,7 +63,7 @@
   },
   {
    "columns": 1,
-   "fetch_from": "stock_item_code.stock_uom",
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "uom",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -110,13 +110,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-09-08 15:52:08.598100",
+ "modified": "2024-03-27 13:06:33.503815",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Capitalization Service Item",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

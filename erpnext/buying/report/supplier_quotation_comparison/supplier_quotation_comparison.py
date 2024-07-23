@@ -82,18 +82,14 @@ def prepare_data(supplier_quotation_data, filters):
 	group_wise_map = defaultdict(list)
 	supplier_qty_price_map = {}
 
-	group_by_field = (
-		"supplier_name" if filters.get("group_by") == "Group by Supplier" else "item_code"
-	)
+	group_by_field = "supplier_name" if filters.get("group_by") == "Group by Supplier" else "item_code"
 	company_currency = frappe.db.get_default("currency")
 	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 
 	for data in supplier_quotation_data:
 		group = data.get(group_by_field)  # get item or supplier value for this row
 
-		supplier_currency = frappe.db.get_value(
-			"Supplier", data.get("supplier_name"), "default_currency"
-		)
+		supplier_currency = frappe.db.get_value("Supplier", data.get("supplier_name"), "default_currency")
 
 		if supplier_currency:
 			exchange_rate = get_exchange_rate(supplier_currency, company_currency)
@@ -296,3 +292,13 @@ def get_message():
 		<span class="indicator red">
 		Expires today / Already Expired
 		</span>"""
+
+
+@frappe.whitelist()
+def set_default_supplier(item_code, supplier, company):
+	frappe.db.set_value(
+		"Item Default",
+		{"parent": item_code, "company": company},
+		"default_supplier",
+		supplier,
+	)

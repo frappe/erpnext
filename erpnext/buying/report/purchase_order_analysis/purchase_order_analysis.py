@@ -39,13 +39,16 @@ def validate_filters(filters):
 def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
+	pi = frappe.qb.DocType("Purchase Invoice")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 
 	query = (
 		frappe.qb.from_(po)
 		.from_(po_item)
 		.left_join(pi_item)
-		.on(pi_item.po_detail == po_item.name)
+		.on(pi_item.po_detail == po_item.name & pi_item.docstatus == 1)
+		.left_join(pi)
+		.on(pi.name == pi_item.parent & pi.docstatus == 1)
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
@@ -68,9 +71,7 @@ def get_data(filters):
 			po.company,
 			po_item.name,
 		)
-		.where(
-			(po_item.parent == po.name) & (po.status.notin(("Stopped", "Closed"))) & (po.docstatus == 1)
-		)
+		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "Closed"))) & (po.docstatus == 1))
 		.groupby(po_item.name)
 		.orderby(po.transaction_date)
 	)
@@ -80,9 +81,7 @@ def get_data(filters):
 			query = query.where(po[field] == filters.get(field))
 
 	if filters.get("from_date") and filters.get("to_date"):
-		query = query.where(
-			po.transaction_date.between(filters.get("from_date"), filters.get("to_date"))
-		)
+		query = query.where(po.transaction_date.between(filters.get("from_date"), filters.get("to_date")))
 
 	if filters.get("status"):
 		query = query.where(po.status.isin(filters.get("status")))

@@ -8,6 +8,7 @@
   "finance_book",
   "depreciation_method",
   "total_number_of_depreciations",
+  "total_number_of_booked_depreciations",
   "daily_prorata_based",
   "shift_based",
   "column_break_5",
@@ -104,19 +105,26 @@
    "fieldname": "shift_based",
    "fieldtype": "Check",
    "label": "Depreciate based on shifts"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_number_of_booked_depreciations",
+   "fieldtype": "Int",
+   "label": "Total Number of Booked Depreciations ",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-12-29 08:49:39.876439",
+ "modified": "2024-05-21 15:48:20.907250",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Finance Book",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

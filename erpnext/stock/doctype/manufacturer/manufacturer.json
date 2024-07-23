@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:short_name",
@@ -85,7 +86,8 @@
   }
  ],
  "icon": "fa fa-certificate",
- "modified": "2019-07-06 13:06:47.237014",
+ "links": [],
+ "modified": "2024-03-27 13:10:04.558108",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Manufacturer",
@@ -115,6 +117,8 @@
  ],
  "search_fields": "short_name, full_name",
  "show_name_in_global_search": 1,
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "short_name"
 }

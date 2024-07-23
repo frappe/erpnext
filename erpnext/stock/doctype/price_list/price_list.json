@@ -84,7 +84,7 @@
  "idx": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2024-01-30 14:39:26.328837",
+ "modified": "2024-03-27 13:10:17.226079",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price List",
@@ -128,7 +128,7 @@
  ],
  "search_fields": "currency",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": []
 }

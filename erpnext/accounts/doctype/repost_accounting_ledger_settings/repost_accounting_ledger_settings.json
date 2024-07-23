@@ -17,7 +17,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-07 14:24:13.321522",
+ "modified": "2024-06-06 13:56:37.908879",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Repost Accounting Ledger Settings",
@@ -30,16 +30,20 @@
    "print": 1,
    "read": 1,
    "role": "Administrator",
+   "select": 1,
    "share": 1,
    "write": 1
   },
   {
+   "create": 1,
+   "delete": 1,
    "read": 1,
    "role": "System Manager",
-   "select": 1
+   "select": 1,
+   "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

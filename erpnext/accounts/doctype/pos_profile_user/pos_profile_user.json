@@ -26,14 +26,15 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-05-13 23:57:33.627305",
+ "modified": "2024-03-27 13:10:16.846276",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile User",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

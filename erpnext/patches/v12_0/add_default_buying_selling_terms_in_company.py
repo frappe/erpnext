@@ -11,9 +11,7 @@ def execute():
 	if frappe.db.has_column("Company", "default_terms"):
 		rename_field("Company", "default_terms", "default_selling_terms")
 
-		for company in frappe.get_all(
-			"Company", ["name", "default_selling_terms", "default_buying_terms"]
-		):
+		for company in frappe.get_all("Company", ["name", "default_selling_terms", "default_buying_terms"]):
 			if company.default_selling_terms and not company.default_buying_terms:
 				frappe.db.set_value(
 					"Company", company.name, "default_buying_terms", company.default_selling_terms

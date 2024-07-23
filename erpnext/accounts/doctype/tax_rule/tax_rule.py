@@ -112,27 +112,23 @@ class TaxRule(Document):
 		for d in filters:
 			if conds:
 				conds += " and "
-			conds += """ifnull({0}, '') = {1}""".format(d, frappe.db.escape(cstr(filters[d])))
+			conds += f"""ifnull({d}, '') = {frappe.db.escape(cstr(filters[d]))}"""
 
 		if self.from_date and self.to_date:
-			conds += """ and ((from_date > '{from_date}' and from_date < '{to_date}') or
-					(to_date > '{from_date}' and to_date < '{to_date}') or
-					('{from_date}' > from_date and '{from_date}' < to_date) or
-					('{from_date}' = from_date and '{to_date}' = to_date))""".format(
-				from_date=self.from_date, to_date=self.to_date
-			)
+			conds += f""" and ((from_date > '{self.from_date}' and from_date < '{self.to_date}') or
+					(to_date > '{self.from_date}' and to_date < '{self.to_date}') or
+					('{self.from_date}' > from_date and '{self.from_date}' < to_date) or
+					('{self.from_date}' = from_date and '{self.to_date}' = to_date))"""
 
 		elif self.from_date and not self.to_date:
-			conds += """ and to_date > '{from_date}'""".format(from_date=self.from_date)
+			conds += f""" and to_date > '{self.from_date}'"""
 
 		elif self.to_date and not self.from_date:
-			conds += """ and from_date < '{to_date}'""".format(to_date=self.to_date)
+			conds += f""" and from_date < '{self.to_date}'"""
 
 		tax_rule = frappe.db.sql(
-			"select name, priority \
-			from `tabTax Rule` where {0} and name != '{1}'".format(
-				conds, self.name
-			),
+			f"select name, priority \
+			from `tabTax Rule` where {conds} and name != '{self.name}'",
 			as_dict=1,
 		)
 
@@ -189,27 +185,25 @@ def get_tax_template(posting_date, args):
 		conditions.append("(from_date is null) and (to_date is null)")
 
 	conditions.append(
-		"ifnull(tax_category, '') = {0}".format(frappe.db.escape(cstr(args.get("tax_category"))))
+		"ifnull(tax_category, '') = {}".format(frappe.db.escape(cstr(args.get("tax_category"))))
 	)
 	if "tax_category" in args.keys():
 		del args["tax_category"]
 
 	for key, value in args.items():
 		if key == "use_for_shopping_cart":
-			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
+			conditions.append(f"use_for_shopping_cart = {1 if value else 0}")
 		elif key == "customer_group":
 			if not value:
 				value = get_root_of("Customer Group")
 			customer_group_condition = get_customer_group_condition(value)
-			conditions.append("ifnull({0}, '') in ('', {1})".format(key, customer_group_condition))
+			conditions.append(f"ifnull({key}, '') in ('', {customer_group_condition})")
 		else:
-			conditions.append("ifnull({0}, '') in ('', {1})".format(key, frappe.db.escape(cstr(value))))
+			conditions.append(f"ifnull({key}, '') in ('', {frappe.db.escape(cstr(value))})")
 
 	tax_rule = frappe.db.sql(
 		"""select * from `tabTax Rule`
-		where {0}""".format(
-			" and ".join(conditions)
-		),
+		where {}""".format(" and ".join(conditions)),
 		as_dict=True,
 	)
 
@@ -234,7 +228,7 @@ def get_tax_template(posting_date, args):
 	)[0]
 
 	tax_template = rule.sales_tax_template or rule.purchase_tax_template
-	doctype = "{0} Taxes and Charges Template".format(rule.tax_type)
+	doctype = f"{rule.tax_type} Taxes and Charges Template"
 
 	if frappe.db.get_value(doctype, tax_template, "disabled") == 1:
 		return None
@@ -244,9 +238,7 @@ def get_tax_template(posting_date, args):
 
 def get_customer_group_condition(customer_group):
 	condition = ""
-	customer_groups = [
-		"%s" % (frappe.db.escape(d.name)) for d in get_parent_customer_groups(customer_group)
-	]
+	customer_groups = ["%s" % (frappe.db.escape(d.name)) for d in get_parent_customer_groups(customer_group)]
 	if customer_groups:
 		condition = ",".join(["%s"] * len(customer_groups)) % (tuple(customer_groups))
 	return condition

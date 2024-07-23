@@ -756,9 +756,7 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(mr.per_ordered, 100)
 
 	def test_customer_provided_parts_mr(self):
-		create_item(
-			"CUST-0987", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0
-		)
+		create_item("CUST-0987", is_customer_provided_item=1, customer="_Test Customer", is_purchase_item=0)
 		existing_requested_qty = self._get_requested_qty("_Test Customer", "_Test Warehouse - _TC")
 
 		mr = make_material_request(item_code="CUST-0987", material_request_type="Customer Provided")
@@ -822,7 +820,7 @@ class TestMaterialRequest(FrappeTestCase):
 		)
 		comapnywise_mr_list.setdefault(mr2.company, []).append(mr2.name)
 
-		for company, mr_list in comapnywise_mr_list.items():
+		for company, _mr_list in comapnywise_mr_list.items():
 			emails = get_email_list(company)
 
 			self.assertTrue(comapnywise_users[company] in emails)
@@ -840,9 +838,7 @@ def get_in_transit_warehouse(company):
 			}
 		).insert()
 
-	in_transit_warehouse = frappe.db.exists(
-		"Warehouse", {"warehouse_type": "Transit", "company": company}
-	)
+	in_transit_warehouse = frappe.db.exists("Warehouse", {"warehouse_type": "Transit", "company": company})
 
 	if not in_transit_warehouse:
 		in_transit_warehouse = (

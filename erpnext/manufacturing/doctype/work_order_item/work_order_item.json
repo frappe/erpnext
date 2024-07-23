@@ -8,6 +8,7 @@
   "operation",
   "item_code",
   "source_warehouse",
+  "operation_row_id",
   "column_break_3",
   "item_name",
   "description",
@@ -138,18 +139,24 @@
    "in_list_view": 1,
    "label": "Returned Qty ",
    "read_only": 1
+  },
+  {
+   "fieldname": "operation_row_id",
+   "fieldtype": "Int",
+   "label": "Operation Row Id",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-02-11 15:45:32.318374",
+ "modified": "2024-03-27 13:12:00.429838",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

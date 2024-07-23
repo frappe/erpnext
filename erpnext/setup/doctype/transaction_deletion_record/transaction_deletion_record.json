@@ -7,10 +7,21 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
+  "section_break_qpwb",
+  "status",
+  "error_log",
+  "tasks_section",
+  "delete_bin_data",
+  "delete_leads_and_addresses",
+  "reset_company_default_values",
+  "clear_notifications",
+  "initialize_doctypes_table",
+  "delete_transactions",
+  "section_break_tbej",
   "doctypes",
   "doctypes_to_be_ignored",
   "amended_from",
-  "status"
+  "process_in_single_transaction"
  ],
  "fields": [
   {
@@ -25,14 +36,16 @@
    "fieldname": "doctypes",
    "fieldtype": "Table",
    "label": "Summary",
-   "options": "Transaction Deletion Record Item",
+   "no_copy": 1,
+   "options": "Transaction Deletion Record Details",
    "read_only": 1
   },
   {
    "fieldname": "doctypes_to_be_ignored",
    "fieldtype": "Table",
    "label": "Excluded DocTypes",
-   "options": "Transaction Deletion Record Item"
+   "options": "Transaction Deletion Record Item",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -46,18 +59,96 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Status",
-   "options": "Draft\nCompleted"
+   "no_copy": 1,
+   "options": "Queued\nRunning\nFailed\nCompleted\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_tbej",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tasks_section",
+   "fieldtype": "Section Break",
+   "label": "Tasks"
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_bin_data",
+   "fieldtype": "Check",
+   "label": "Delete Bins",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_leads_and_addresses",
+   "fieldtype": "Check",
+   "label": "Delete Leads and Addresses",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "clear_notifications",
+   "fieldtype": "Check",
+   "label": "Clear Notifications",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reset_company_default_values",
+   "fieldtype": "Check",
+   "label": "Reset Company Default Values",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "delete_transactions",
+   "fieldtype": "Check",
+   "label": "Delete Transactions",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "initialize_doctypes_table",
+   "fieldtype": "Check",
+   "label": "Initialize Summary Table",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.error_log",
+   "fieldname": "error_log",
+   "fieldtype": "Long Text",
+   "label": "Error Log"
+  },
+  {
+   "fieldname": "section_break_qpwb",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "process_in_single_transaction",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Process in Single Transaction",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-08-04 20:15:59.071493",
+ "modified": "2024-03-27 13:10:54.828051",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Record",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -74,7 +165,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }
