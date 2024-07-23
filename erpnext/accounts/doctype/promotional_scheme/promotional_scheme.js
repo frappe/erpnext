@@ -15,6 +15,10 @@ frappe.ui.form.on("Promotional Scheme", {
 		frm.trigger("set_options_for_applicable_for");
 	},
 
+	currency: function (frm) {
+		frm.trigger("set_price_list_query");
+	},
+
 	set_options_for_applicable_for: function (frm) {
 		var options = [""];
 		var applicable_for = frm.doc.applicable_for;
@@ -36,6 +40,18 @@ frappe.ui.form.on("Promotional Scheme", {
 
 		if (!in_list(options, applicable_for)) applicable_for = null;
 		frm.set_value("applicable_for", applicable_for);
+
+		frm.trigger("set_price_list_query");
+	},
+
+	set_price_list_query: function (frm) {
+		frm.set_query("for_price_list", "price_discount_slabs", {
+			filters: {
+				selling: frm.doc.selling,
+				buying: frm.doc.buying,
+				currency: frm.doc.currency,
+			},
+		});
 	},
 
 	apply_on: function (frm) {

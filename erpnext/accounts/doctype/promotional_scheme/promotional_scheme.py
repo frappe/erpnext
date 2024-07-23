@@ -51,6 +51,7 @@ price_discount_fields = [
 	"discount_percentage",
 	"validate_applied_rule",
 	"apply_multiple_pricing_rules",
+	"for_price_list",
 ]
 
 product_discount_fields = [
