@@ -526,7 +526,7 @@ class StockController(AccountsController):
 
 	def delete_auto_created_batches(self):
 		for row in self.items:
-			if row.serial_and_batch_bundle:
+			if row.get("serial_and_batch_bundle"):
 				frappe.db.set_value(
 					"Serial and Batch Bundle", row.serial_and_batch_bundle, {"is_cancelled": 1}
 				)
