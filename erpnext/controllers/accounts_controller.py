@@ -1942,35 +1942,27 @@ class AccountsController(TransactionBase):
 
 		self.set_advance_payment_status()
 
-	# todo: need to optimize
-	# todo: modularize
 	def set_advance_payment_status(self):
-		from erpnext.accounts.doctype.payment_request.payment_request import (
-			get_existing_payment_request_amount as get_paid_amount,
-		)
-
 		new_status = None
-		available_payment_requests = frappe.db.count(
-			"Payment Request",
-			{"reference_doctype": self.doctype, "reference_name": self.name, "docstatus": 1},
-		)
-		total_amount = self.get("rounded_total") or self.grand_total
-		paid_amount = get_paid_amount(self.doctype, self.name, only_paid=True)
 
-		if paid_amount == total_amount:
-			new_status = "Fully Paid"
-		elif paid_amount > 0 and paid_amount < total_amount:
-			new_status = "Partially Paid"
-		elif self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
-			if not available_payment_requests:
-				new_status = "Not Requested"
-			elif paid_amount == 0 or paid_amount == 0.0:
-				new_status = "Requested"
-		elif self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
-			if not available_payment_requests:
-				new_status = "Not Initiated"
-			elif paid_amount == 0 or paid_amount == 0.0:
-				new_status = "Initiated"
+		paid_amount = frappe.get_value(
+			doctype="Payment Request",
+			filters={
+				"reference_doctype": self.doctype,
+				"reference_name": self.name,
+				"docstatus": 1,
+			},
+			fieldname="sum(grand_total - outstanding_amount)",
+		)
+
+		if not paid_amount:
+			if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
+				new_status = "Not Requested" if paid_amount is None else "Requested"
+			elif self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
+				new_status = "Not Initiated" if paid_amount is None else "Initiated"
+		else:
+			total_amount = self.get("rounded_total") or self.get("grand_total")
+			new_status = "Fully Paid" if paid_amount == total_amount else "Partially Paid"
 
 		if new_status == self.advance_payment_status:
 			return

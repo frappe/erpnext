@@ -7,8 +7,6 @@ cur_frm.cscript.tax_table = "Advance Taxes and Charges";
 erpnext.accounts.taxes.setup_tax_validations("Payment Entry");
 erpnext.accounts.taxes.setup_tax_filters("Advance Taxes and Charges");
 
-const FAULTY_VALUES = ["", null, undefined, 0];
-
 frappe.ui.form.on("Payment Entry", {
 	onload: function (frm) {
 		frm.ignore_doctypes_on_cancel_all = [
@@ -1010,8 +1008,6 @@ frappe.ui.form.on("Payment Entry", {
 								total_negative_outstanding - total_positive_outstanding
 							);
 					}
-
-					frm.events.set_matched_payment_requests(frm);
 				}
 
 				frm.events.allocate_party_amount_against_ref_docs(
@@ -1117,6 +1113,7 @@ frappe.ui.form.on("Payment Entry", {
 		});
 
 		frm.refresh_fields();
+		if (frappe.flags.allocate_payment_amount) frm.call("set_matched_payment_requests");
 		frm.events.set_total_allocated_amount(frm);
 	},
 
@@ -1664,11 +1661,6 @@ frappe.ui.form.on("Payment Entry", {
 
 		return current_tax_amount;
 	},
-
-	set_matched_payment_requests: async function (frm) {
-		await frappe.after_ajax();
-		frm.call("set_matched_payment_requests");
-	},
 });
 
 frappe.ui.form.on("Payment Entry Reference", {
@@ -1714,15 +1706,10 @@ frappe.ui.form.on("Payment Entry Reference", {
 	allocated_amount: function (frm, cdt, cdn) {
 		frm.events.set_total_allocated_amount(frm);
 
-		const row = locals[cdt][cdn];
+		const row = frappe.get_doc(cdt, cdn);
 
-		// if payment_request already set then return
-		if (row.payment_request) return;
-
-		const references = [row.reference_name, row.reference_doctype, row.allocated_amount];
-
-		// if any of the reference fields are faulty, it returns
-		if (FAULTY_VALUES.some((el) => references.includes(el))) return;
+		if (row.payment_request || !row.reference_name || !row.reference_doctype || !row.allocated_amount)
+			return;
 
 		frm.call("set_matched_payment_request", { row_idx: row.idx });
 	},
