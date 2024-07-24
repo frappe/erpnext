@@ -1335,6 +1335,46 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# Should not raise frappe.exceptions.ValidationError: Payment Entry has been modified after you pulled it. Please pull it again.
 		pr.reconcile()
 
+	def test_cr_note_payment_limit_filter(self):
+		transaction_date = nowdate()
+		amount = 100
+
+		for _ in range(6):
+			self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
+			cr_note = self.create_sales_invoice(
+				qty=-1, rate=amount, posting_date=transaction_date, do_not_save=True, do_not_submit=True
+			)
+			cr_note.is_return = 1
+			cr_note = cr_note.save().submit()
+
+		pr = self.create_payment_reconciliation()
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 6)
+		self.assertEqual(len(pr.payments), 6)
+		invoices = [x.as_dict() for x in pr.get("invoices")]
+		payments = [x.as_dict() for x in pr.get("payments")]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(pr.get("invoices"), [])
+		self.assertEqual(pr.get("payments"), [])
+
+		self.create_sales_invoice(qty=1, rate=amount, posting_date=transaction_date)
+		cr_note = self.create_sales_invoice(
+			qty=-1, rate=amount, posting_date=transaction_date, do_not_save=True, do_not_submit=True
+		)
+		cr_note.is_return = 1
+		cr_note = cr_note.save().submit()
+
+		# Limit should not affect in fetching the unallocated cr_note
+		pr.invoice_limit = 5
+		pr.payment_limit = 5
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
