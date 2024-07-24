@@ -453,3 +453,27 @@ def has_upload_permission(doc, ptype="read", user=None):
 	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
 		return True
 	return doc.user_id == user
+
+@frappe.whitelist(allow_guest=True)
+def is_onboarded_as_off_role(**kwargs):
+	Employee = frappe.qb.DocType("Employee")
+	employee_code = kwargs.get("employee_code") or ""
+
+	query = (
+		frappe.qb.from_(Employee)
+		.select(
+			Employee.name,
+			Employee.status,
+			Employee.employee_name,
+		)
+		.where(
+			(Employee.name == employee_code)
+			& (Employee.employment_type == 'Off-Roll')
+		)
+	)
+
+	record = query.run(as_dict=True)
+	return {
+		'is_onboarded': len(record) > 0,
+		'details': record[0] if (len(record) > 0) else None
+	}
