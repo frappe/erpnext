@@ -698,7 +698,7 @@
    "fieldname": "auto_err_frequency",
    "fieldtype": "Select",
    "label": "Frequency",
-   "options": "Daily\nWeekly"
+   "options": "Daily\nWeekly\nMonthly"
   },
   {
    "default": "0",
@@ -712,7 +712,11 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-05-27 17:32:49.057386",
+=======
+ "modified": "2024-07-24 18:17:56.413971",
+>>>>>>> ce2b9e0f1a (refactor: provision for monthly re-evaluation)
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
