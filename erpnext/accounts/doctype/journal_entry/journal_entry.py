@@ -47,9 +47,7 @@ class JournalEntry(AccountsController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.journal_entry_account.journal_entry_account import (
-			JournalEntryAccount,
-		)
+		from erpnext.accounts.doctype.journal_entry_account.journal_entry_account import JournalEntryAccount
 
 		accounts: DF.Table[JournalEntryAccount]
 		amended_from: DF.Link | None
@@ -197,14 +195,10 @@ class JournalEntry(AccountsController):
 		self.update_booked_depreciation()
 
 	def on_update_after_submit(self):
-		if hasattr(self, "repost_required"):
-			self.needs_repost = self.check_if_fields_updated(
-				fields_to_check=[], child_tables={"accounts": []}
-			)
-			if self.needs_repost:
-				self.validate_for_repost()
-				self.db_set("repost_required", self.needs_repost)
-				self.repost_accounting_entries()
+		self.needs_repost = self.check_if_fields_updated(fields_to_check=[], child_tables={"accounts": []})
+		if self.needs_repost:
+			self.validate_for_repost()
+			self.repost_accounting_entries()
 
 	def on_cancel(self):
 		# References for this Journal are removed on the `on_cancel` event in accounts_controller
