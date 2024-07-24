@@ -2178,11 +2178,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
-<<<<<<< HEAD
- "modified": "2024-06-07 16:49:32.458402",
-=======
  "modified": "2024-07-18 15:30:39.428519",
->>>>>>> 06c5334f2a (chore: remove stale 'repost_required' flag from sales invoice)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
