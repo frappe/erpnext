@@ -215,7 +215,6 @@
   "is_internal_customer",
   "is_discounted",
   "remarks",
-  "repost_required",
   "connections_tab"
  ],
  "fields": [
@@ -2129,15 +2128,6 @@
    "width": "50%"
   },
   {
-   "default": "0",
-   "fieldname": "repost_required",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Repost Required",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "incoterm",
    "fieldtype": "Link",
    "label": "Incoterm",
@@ -2205,7 +2195,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-05-23 14:02:28.549041",
+ "modified": "2024-07-18 15:30:39.428519",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
