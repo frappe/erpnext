@@ -267,10 +267,10 @@ class Asset(AccountsController):
 			frappe.throw(_("Available for use date is required"))
 
 		for d in self.finance_books:
-			if d.depreciation_start_date == self.available_for_use_date:
+			if getdate(d.depreciation_start_date) < getdate(self.available_for_use_date):
 				frappe.throw(
 					_(
-						"Row #{}: Depreciation Posting Date should not be equal to Available for Use Date."
+						"Depreciation Row {0}: Depreciation Posting Date cannot be before Available-for-use Date"
 					).format(d.idx),
 					title=_("Incorrect Date"),
 				)
