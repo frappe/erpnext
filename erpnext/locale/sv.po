@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
-"POT-Creation-Date: 2024-07-07 09:35+0000\n"
-"PO-Revision-Date: 2024-07-19 12:17\n"
+"POT-Creation-Date: 2024-07-14 09:35+0000\n"
+"PO-Revision-Date: 2024-07-24 14:48\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -49,7 +49,7 @@ msgstr " Är Underkontrakterad"
 msgid " Item"
 msgstr " Artikel"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:182
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:184
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:107
 #: selling/report/sales_analytics/sales_analytics.py:107
 msgid " Name"
@@ -1939,7 +1939,7 @@ msgstr "Konto {0}: Överordnad Konto {1} finns inte"
 msgid "Account {0}: You can not assign itself as parent account"
 msgstr "Konto: {0}: Du kan inte tilldela dig själv som sitt överordnad konto"
 
-#: accounts/general_ledger.py:413
+#: accounts/general_ledger.py:425
 msgid "Account: <b>{0}</b> is capital Work in progress and can not be updated by Journal Entry"
 msgstr "Konto: <b>{0}</b> är Kapital Arbet pågår och kan inte uppdateras av Journal Post"
 
@@ -1947,7 +1947,7 @@ msgstr "Konto: <b>{0}</b> är Kapital Arbet pågår och kan inte uppdateras av J
 msgid "Account: {0} can only be updated via Stock Transactions"
 msgstr "Konto: {0} kan endast uppdateras via Lager Transaktioner"
 
-#: accounts/doctype/payment_entry/payment_entry.py:2162
+#: accounts/doctype/payment_entry/payment_entry.py:2182
 msgid "Account: {0} is not permitted under Payment Entry"
 msgstr "Konto: {0} är inte tillåtet enligt Betalning Post"
 
@@ -2242,7 +2242,7 @@ msgstr "Bokföring Post för Service"
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1391
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1409
 #: controllers/stock_controller.py:499 controllers/stock_controller.py:516
-#: stock/doctype/purchase_receipt/purchase_receipt.py:838
+#: stock/doctype/purchase_receipt/purchase_receipt.py:821
 #: stock/doctype/stock_entry/stock_entry.py:1547
 #: stock/doctype/stock_entry/stock_entry.py:1561
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:553
@@ -2261,7 +2261,7 @@ msgstr "Bokföring Post för {0}: {1} kan endast skapas i valuta: {2}"
 #: buying/doctype/supplier/supplier.js:85
 #: public/js/controllers/stock_controller.js:84
 #: public/js/utils/ledger_preview.js:8 selling/doctype/customer/customer.js:164
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:48
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:50
 msgid "Accounting Ledger"
 msgstr "Bokföring Register"
 
@@ -2430,7 +2430,7 @@ msgstr "Konto Låsta Till"
 msgid "Accounts Manager"
 msgstr "Bokföring Ansvarig"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:339
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:340
 msgid "Accounts Missing Error"
 msgstr "Konton Saknas Fel"
 
@@ -3742,7 +3742,7 @@ msgstr "Adresser"
 msgid "Adjust Asset Value"
 msgstr "Justera Tillgång Värde"
 
-#: accounts/doctype/sales_invoice/sales_invoice.js:1076
+#: accounts/doctype/sales_invoice/sales_invoice.js:1079
 msgid "Adjustment Against"
 msgstr "Justering Mot"
 
@@ -4316,7 +4316,7 @@ msgstr "Alla tilldelningar är avstämda"
 msgid "All communications including and above this shall be moved into the new Issue"
 msgstr "All korrespondens inklusive och ovanför detta ska flyttas till ny Ärende"
 
-#: stock/doctype/purchase_receipt/purchase_receipt.py:1142
+#: stock/doctype/purchase_receipt/purchase_receipt.py:1125
 msgid "All items have already been Invoiced/Returned"
 msgstr "Alla Artiklar är redan Fakturerade / Återlämnade"
 
@@ -5102,7 +5102,7 @@ msgstr "Ändrad Från"
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:235
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:239
 #: crm/doctype/opportunity_item/opportunity_item.json
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -5231,19 +5231,19 @@ msgstr "Belopp i Konto Valuta"
 msgid "Amount in customer's currency"
 msgstr "Belopp i Kund Valuta"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1155
+#: accounts/doctype/payment_entry/payment_entry.py:1175
 msgid "Amount {0} {1} against {2} {3}"
 msgstr "Belopp {0} {1} mot {2} {3}"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1166
+#: accounts/doctype/payment_entry/payment_entry.py:1186
 msgid "Amount {0} {1} deducted against {2}"
 msgstr "Belopp {0} {1} avdragen mot {2}"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1130
+#: accounts/doctype/payment_entry/payment_entry.py:1150
 msgid "Amount {0} {1} transferred from {2} to {3}"
 msgstr "Belopp {0} {1} överförd från {2} till {3}"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1136
+#: accounts/doctype/payment_entry/payment_entry.py:1156
 msgid "Amount {0} {1} {2} {3}"
 msgstr "Belopp {0} {1} {2} {3}"
 
@@ -5277,7 +5277,7 @@ msgstr "Belopp"
 msgid "An Item Group is a way to classify items based on types."
 msgstr "Artikel grupp är ett sätt att klassificera artiklar baserat på typer."
 
-#: stock/doctype/repost_item_valuation/repost_item_valuation.py:399
+#: stock/doctype/repost_item_valuation/repost_item_valuation.py:404
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr "Fel har uppstått vid ompostering av artikel värdering via {0}"
 
@@ -5286,7 +5286,7 @@ msgctxt "<a href='/app/error-log' class='variant-click'>Error Log</a>"
 msgid "An error has occurred during {0}. Check {1} for more details"
 msgstr "Fel har uppstått under {0}. Kontrollera {1} för mer information"
 
-#: public/js/controllers/buying.js:292 public/js/utils/sales_common.js:406
+#: public/js/controllers/buying.js:292 public/js/utils/sales_common.js:428
 msgid "An error occurred during the update process"
 msgstr "Fel uppstod under uppdatering process"
 
@@ -5957,8 +5957,8 @@ msgstr "Tillgång Avskrivning Schema"
 msgid "Asset Depreciation Schedule for Asset {0} and Finance Book {1} is not using shift based depreciation"
 msgstr "Tillgång Avskrivning Schema för Tillgång {0} och Finans Register {1} använder inte skift baserad avskrivning"
 
-#: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:995
-#: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:1039
+#: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:1032
+#: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:1076
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.py:81
 msgid "Asset Depreciation Schedule not found for Asset {0} and Finance Book {1}"
 msgstr "Tillgång Avskrivning Schema finns inte för Tillgång {0} och Finans Register {1}"
@@ -6781,7 +6781,7 @@ msgstr "Automatiskt avstäm och ange Parti i Bank Transaktioner"
 msgid "Auto re-order"
 msgstr "Automatisk Ombeställning"
 
-#: public/js/controllers/buying.js:290 public/js/utils/sales_common.js:401
+#: public/js/controllers/buying.js:290 public/js/utils/sales_common.js:423
 msgid "Auto repeat document updated"
 msgstr "Återkommande Dokument uppdaterad"
 
@@ -7889,7 +7889,7 @@ msgstr "Bas Pris"
 msgid "Base Tax Withholding Net Total"
 msgstr "Bas Netto Totalt Ex Moms  "
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:237
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:239
 msgid "Base Total"
 msgstr "Bas Totalt"
 
@@ -8272,7 +8272,7 @@ msgstr "Fakturerad"
 #: accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:50
 #: accounts/report/received_items_to_be_billed/received_items_to_be_billed.py:50
 #: buying/doctype/purchase_order_item/purchase_order_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:243
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:247
 #: selling/report/item_wise_sales_history/item_wise_sales_history.py:107
 #: selling/report/sales_order_analysis/sales_order_analysis.py:298
 msgid "Billed Amount"
@@ -8292,7 +8292,7 @@ msgstr "Fakturerad Belopp"
 msgid "Billed Items To Be Received"
 msgstr "Fakturerade Artiklar att Ta Emot"
 
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:221
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:225
 #: selling/report/sales_order_analysis/sales_order_analysis.py:276
 msgid "Billed Qty"
 msgstr "Fakturerad Kvantitet"
@@ -8672,7 +8672,7 @@ msgstr "Bokförd Fast Tillgång"
 msgid "Booking stock value across multiple accounts will make it harder to track stock and account value."
 msgstr "Bokföring av Lager Värde på flera Konto gör det svårare att spåra lager och konto värde."
 
-#: accounts/general_ledger.py:701
+#: accounts/general_ledger.py:713
 msgid "Books have been closed till the period ending on {0}"
 msgstr "Bokföring är låst till {0}"
 
@@ -9163,6 +9163,12 @@ msgstr "Beräkna Uppskatade Ankomst Tider"
 msgid "Calculate Product Bundle Price based on Child Items' Rates"
 msgstr "Beräkna Artikel Paket Pris baserat på Underordnade Artiklar priser"
 
+#. Label of the calculate_depr_using_total_days (Check) field in DocType
+#. 'Accounts Settings'
+#: accounts/doctype/accounts_settings/accounts_settings.json
+msgid "Calculate daily depreciation using total days in depreciation period"
+msgstr "Beräkna daglig avskrivning med hjälp av totalt antal dagar i avskrivningsperiod"
+
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:53
 msgid "Calculated Bank Statement balance"
 msgstr "Beräknad Bank Konto Redogörelse Saldo"
@@ -9403,7 +9409,7 @@ msgid "Can not filter based on Voucher No, if grouped by Voucher"
 msgstr "Kan inte filtrera baserat på Verifikat nummer om grupperad efter Verifikat"
 
 #: accounts/doctype/journal_entry/journal_entry.py:1289
-#: accounts/doctype/payment_entry/payment_entry.py:2319
+#: accounts/doctype/payment_entry/payment_entry.py:2339
 msgid "Can only make payment against unbilled {0}"
 msgstr "Kan bara skapa betalning mot ofakturerad {0}"
 
@@ -9666,7 +9672,7 @@ msgstr "Kan inte konvertera till Grupp eftersom Konto Typ är vald."
 msgid "Cannot covert to Group because Account Type is selected."
 msgstr "Kan inte konvertera till Grupp eftersom Konto Typ valts."
 
-#: stock/doctype/purchase_receipt/purchase_receipt.py:913
+#: stock/doctype/purchase_receipt/purchase_receipt.py:896
 msgid "Cannot create Stock Reservation Entries for future dated Purchase Receipts."
 msgstr "Kan inte skapa Lager Reservation Poster för framtid daterade Inköp Följesedlar."
 
@@ -9757,7 +9763,7 @@ msgstr "Kan inte hämta länk token. Se fellogg för mer information"
 
 #: accounts/doctype/payment_entry/payment_entry.js:1452
 #: accounts/doctype/payment_entry/payment_entry.js:1631
-#: accounts/doctype/payment_entry/payment_entry.py:1642
+#: accounts/doctype/payment_entry/payment_entry.py:1662
 #: controllers/accounts_controller.py:2597 public/js/controllers/accounts.js:94
 #: public/js/controllers/taxes_and_totals.js:455
 msgid "Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"
@@ -10148,7 +10154,7 @@ msgstr "Ändring av Kund Grupp för vald Kund är inte tillåtet."
 msgid "Channel Partner"
 msgstr "Partner"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1697
+#: accounts/doctype/payment_entry/payment_entry.py:1717
 #: controllers/accounts_controller.py:2660
 msgid "Charge of type 'Actual' in row {0} cannot be included in Item Rate or Paid Amount"
 msgstr "Debitering av typ \"Verklig\" i rad {0} kan inte inkluderas i Artikel Pris eller Betald Belopp"
@@ -10531,7 +10537,7 @@ msgstr "Klient Hemlighet"
 #: selling/doctype/sales_order/sales_order_list.js:58
 #: stock/doctype/delivery_note/delivery_note.js:270
 #: stock/doctype/purchase_receipt/purchase_receipt.js:255
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:112
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:142
 #: support/doctype/issue/issue.js:21
 msgid "Close"
 msgstr "Stäng"
@@ -10747,7 +10753,7 @@ msgstr "Färg"
 msgid "Column in Bank File"
 msgstr "Kolumn i Bank Fil"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:389
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:412
 msgid "Column {0}"
 msgstr "Kolumn {0}"
 
@@ -11127,7 +11133,7 @@ msgstr "Bolag"
 #: buying/report/procurement_tracker/procurement_tracker.js:8
 #: buying/report/purchase_analytics/purchase_analytics.js:49
 #: buying/report/purchase_order_analysis/purchase_order_analysis.js:8
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:274
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:278
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.js:8
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:266
 #: buying/report/subcontract_order_summary/subcontract_order_summary.js:7
@@ -11515,7 +11521,7 @@ msgstr "Konkurrent Namn"
 
 #. Label of the competitors (Table MultiSelect) field in DocType 'Opportunity'
 #. Label of the competitors (Table MultiSelect) field in DocType 'Quotation'
-#: crm/doctype/opportunity/opportunity.json public/js/utils/sales_common.js:474
+#: crm/doctype/opportunity/opportunity.json public/js/utils/sales_common.js:496
 #: selling/doctype/quotation/quotation.json
 msgid "Competitors"
 msgstr "Konkurrenter"
@@ -12430,7 +12436,7 @@ msgstr "Konvertera Artikel Beskrivning till ren HTML i Transaktioner"
 msgid "Convert to Group"
 msgstr "Konvertera till Grupp"
 
-#: stock/doctype/warehouse/warehouse.js:59
+#: stock/doctype/warehouse/warehouse.js:53
 msgctxt "Warehouse"
 msgid "Convert to Group"
 msgstr "Konvertera till Grupp"
@@ -12439,7 +12445,7 @@ msgstr "Konvertera till Grupp"
 msgid "Convert to Item Based Reposting"
 msgstr "Konvertera till Artikel Baserad Ompostering"
 
-#: stock/doctype/warehouse/warehouse.js:58
+#: stock/doctype/warehouse/warehouse.js:52
 msgctxt "Warehouse"
 msgid "Convert to Ledger"
 msgstr "Konvertera till Register"
@@ -12695,7 +12701,7 @@ msgstr "Resultat Enhet Procentuell Tilldelning "
 msgid "Cost Center Allocation Percentages"
 msgstr "Resultat Enhet Procentuell Tilldelning"
 
-#: public/js/utils/sales_common.js:433
+#: public/js/utils/sales_common.js:455
 msgid "Cost Center For Item with Item Code {0} has been Changed to {1}"
 msgstr "Resultat Enhet för Artikel med Artikelkod {0} har ändrats till {1}"
 
@@ -12720,7 +12726,7 @@ msgid "Cost Center is a part of Cost Center Allocation, hence cannot be converte
 msgstr "Resultat Enhet är del av Resultat Enhet Tilldelning och kan därför inte konverteras till grupp"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1360
-#: stock/doctype/purchase_receipt/purchase_receipt.py:788
+#: stock/doctype/purchase_receipt/purchase_receipt.py:787
 msgid "Cost Center is required in row {0} in Taxes table for type {1}"
 msgstr "Resultat Enhet erfodras på rad {0} i Skatt Tabell för typ {1}"
 
@@ -13114,12 +13120,12 @@ msgstr "Cr"
 #: stock/doctype/stock_entry/stock_entry.js:168
 #: stock/doctype/stock_entry/stock_entry.js:241
 #: stock/doctype/stock_entry/stock_entry.js:1247
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:169
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:202
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:212
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:74
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:88
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:199
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:232
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:242
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:76
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:90
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:92
 #: support/doctype/issue/issue.js:34
 msgid "Create"
 msgstr "Skapa"
@@ -13453,7 +13459,7 @@ msgstr "Skapa Tillgång Artikel"
 msgid "Create an Item"
 msgstr "Skapa Artikel"
 
-#: stock/stock_ledger.py:1738
+#: stock/stock_ledger.py:1770
 msgid "Create an incoming stock transaction for the Item."
 msgstr "Skapa inkommande Lager Transaktion för Artikel."
 
@@ -13535,12 +13541,12 @@ msgstr "Skapar Inköp Order ..."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.js:715
 #: buying/doctype/purchase_order/purchase_order.js:489
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:71
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:73
 msgid "Creating Purchase Receipt ..."
 msgstr "Skapar Inköp Följesedel ..."
 
 #: buying/doctype/purchase_order/purchase_order.js:86
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:155
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:185
 msgid "Creating Stock Entry"
 msgstr "Skapar Lager Post...."
 
@@ -13548,7 +13554,7 @@ msgstr "Skapar Lager Post...."
 msgid "Creating Subcontracting Order ..."
 msgstr "Skapar Underleverantör Order ..."
 
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:249
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:279
 msgid "Creating Subcontracting Receipt ..."
 msgstr "Skapar Underleverantör Följesedel ..."
 
@@ -14056,8 +14062,8 @@ msgstr "Valuta och Prislista"
 msgid "Currency can not be changed after making entries using some other currency"
 msgstr "Valuta kan inte ändras efter att poster är skapade med någon annan valuta"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1423
-#: accounts/doctype/payment_entry/payment_entry.py:1485 accounts/utils.py:2051
+#: accounts/doctype/payment_entry/payment_entry.py:1443
+#: accounts/doctype/payment_entry/payment_entry.py:1505 accounts/utils.py:2051
 msgid "Currency for {0} must be {1}"
 msgstr "Valuta för {0} måste vara {1}"
 
@@ -14234,6 +14240,12 @@ msgstr "Anpassad"
 #: accounts/doctype/payment_entry/payment_entry.json
 msgid "Custom Remarks"
 msgstr "Anpassade Anmärkningar"
+
+#. Label of the custom_delimiters (Check) field in DocType 'Bank Statement
+#. Import'
+#: accounts/doctype/bank_statement_import/bank_statement_import.json
+msgid "Custom delimiters"
+msgstr "Anpassade Avgränsare"
 
 #. Label of the is_custom (Check) field in DocType 'Supplier Scorecard
 #. Variable'
@@ -14929,7 +14941,7 @@ msgstr "DFS"
 msgid "Daily"
 msgstr "Varje Dag"
 
-#: projects/doctype/project/project.py:657
+#: projects/doctype/project/project.py:656
 msgid "Daily Project Summary for {0}"
 msgstr "Daglig Projekt Översikt för {0}"
 
@@ -15048,7 +15060,7 @@ msgstr "Data exporterad från Tally som består av Kontoplan, Kunder, Leverantö
 #: buying/doctype/purchase_order/purchase_order.json
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 #: buying/doctype/supplier_quotation/supplier_quotation.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:160
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:164
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:190
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:28
 #: buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:28
@@ -15140,7 +15152,7 @@ msgstr "Utgivning Datum"
 msgid "Date of Joining"
 msgstr "Anställning Datum"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:263
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:265
 msgid "Date of Transaction"
 msgstr "Transaktion Datum"
 
@@ -15350,7 +15362,7 @@ msgstr "Debet Till"
 msgid "Debit To is required"
 msgstr "Debet till erfodras"
 
-#: accounts/general_ledger.py:475
+#: accounts/general_ledger.py:487
 msgid "Debit and Credit not equal for {0} #{1}. Difference is {2}."
 msgstr "Debet och Kredit är inte lika för {0} # {1}. Differens är {2}."
 
@@ -15411,7 +15423,7 @@ msgstr "Deciliter"
 msgid "Decimeter"
 msgstr "Decimeter"
 
-#: public/js/utils/sales_common.js:501
+#: public/js/utils/sales_common.js:523
 msgid "Declare Lost"
 msgstr "Ange som Förlorad"
 
@@ -16126,6 +16138,12 @@ msgstr "Borttagning Pågår!"
 #: regional/__init__.py:14
 msgid "Deletion is not permitted for country {0}"
 msgstr "Borttagning är inte tillåtet för {0}"
+
+#. Label of the delimiter_options (Data) field in DocType 'Bank Statement
+#. Import'
+#: accounts/doctype/bank_statement_import/bank_statement_import.json
+msgid "Delimiter options"
+msgstr "Avgränsning Alternativ"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Order'
 #. Option for the 'Status' (Select) field in DocType 'Serial No'
@@ -16907,7 +16925,7 @@ msgstr "Skrivbord Användare"
 
 #. Label of the order_lost_reason (Small Text) field in DocType 'Opportunity'
 #. Label of the order_lost_reason (Small Text) field in DocType 'Quotation'
-#: crm/doctype/opportunity/opportunity.json public/js/utils/sales_common.js:480
+#: crm/doctype/opportunity/opportunity.json public/js/utils/sales_common.js:502
 #: selling/doctype/quotation/quotation.json
 msgid "Detailed Reason"
 msgstr "Detaljerad Anledning"
@@ -17419,7 +17437,7 @@ msgstr "Rabatt kan inte vara högre än 100%"
 msgid "Discount must be less than 100"
 msgstr "Rabatt måste vara lägre än 100%"
 
-#: accounts/doctype/payment_entry/payment_entry.py:2620
+#: accounts/doctype/payment_entry/payment_entry.py:2640
 msgid "Discount of {} applied as per Payment Term"
 msgstr "Rabatt på {} tillämpad enligt Betalning Villkor"
 
@@ -18939,6 +18957,12 @@ msgstr "Aktivera om användare vill inkludera att avvisat material ska skickas."
 msgid "Enable this checkbox even if you want to set the zero priority"
 msgstr "Aktivera denna kryssruta även om nollprioritet ska anges"
 
+#. Description of the 'Calculate daily depreciation using total days in
+#. depreciation period' (Check) field in DocType 'Accounts Settings'
+#: accounts/doctype/accounts_settings/accounts_settings.json
+msgid "Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, (including leap years) while using daily pro-rata based depreciation"
+msgstr "Aktivera detta alternativ för att beräkna daglig avskrivning genom att använda totalt antal dagar i hela avskrivningsperiod (inklusive skottår) vid användning av proportionell baserad avskrivning"
+
 #: support/doctype/service_level_agreement/service_level_agreement.js:34
 msgid "Enable to apply SLA on every {0}"
 msgstr "Aktivera för att tillämpa Service Nivå Avtal på varje {0}"
@@ -19209,7 +19233,7 @@ msgid "Entity"
 msgstr "Entitet"
 
 #. Label of the entity_type (Select) field in DocType 'Service Level Agreement'
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:201
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:203
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:123
 #: support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Entity Type"
@@ -19315,7 +19339,7 @@ msgstr "Fel uppstod vid bokföring av avskrivning poster"
 msgid "Error while processing deferred accounting for {0}"
 msgstr "Fel uppstod när uppskjuten bokföring för {0} bearbetades"
 
-#: stock/doctype/repost_item_valuation/repost_item_valuation.py:395
+#: stock/doctype/repost_item_valuation/repost_item_valuation.py:400
 msgid "Error while reposting item valuation"
 msgstr "Fel uppstod vid ombokning av artikel värdering "
 
@@ -19389,7 +19413,7 @@ msgstr "Exempel:. ABCD ##### Om serie är angiven och Serie Nummer inte anges i 
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
 msgstr "Exempel: ABCD.#####. Om serie är angiven och Parti Nummer inte anges i transaktioner kommer Parti Nummer automatiskt att skapas baserat på denna serie. Om man alltid vill ange Parti Nummer för denna artikel, lämna detta tomt. Obs: denna inställning kommer att ha prioritet över Nummer Serie i Lager Inställningar."
 
-#: stock/stock_ledger.py:2025
+#: stock/stock_ledger.py:2057
 msgid "Example: Serial No {0} reserved in {1}."
 msgstr "Exempel: Serie Nummer {0} reserverad i {1}."
 
@@ -19858,6 +19882,10 @@ msgstr "Exportera E-Fakturor"
 msgid "Export Errored Rows"
 msgstr "Exportera Felaktiga Rader"
 
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:550
+msgid "Export Import Log"
+msgstr "Exportera Import Logg"
+
 #. Label of the external_work_history (Table) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgid "External Work History"
@@ -19999,7 +20027,7 @@ msgstr "Misslyckades att konfigurera Standard Värden"
 msgid "Failed to setup defaults for country {0}. Please contact support."
 msgstr "Misslyckades att ange standard inställningar för {0}. Kontakta support."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:467
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:491
 msgid "Failure"
 msgstr "Fel"
 
@@ -20092,8 +20120,8 @@ msgstr "Hämta Förfallna Fakturor"
 msgid "Fetch Subscription Updates"
 msgstr "Hämta Prenumeration Uppdateringar"
 
-#: accounts/doctype/sales_invoice/sales_invoice.js:1032
-#: accounts/doctype/sales_invoice/sales_invoice.js:1034
+#: accounts/doctype/sales_invoice/sales_invoice.js:1035
+#: accounts/doctype/sales_invoice/sales_invoice.js:1037
 msgid "Fetch Timesheet"
 msgstr "Hämta Tidrapport"
 
@@ -20791,7 +20819,7 @@ msgstr "Foot/Sekund"
 msgid "For"
 msgstr "För"
 
-#: public/js/utils/sales_common.js:309
+#: public/js/utils/sales_common.js:331
 msgid "For 'Product Bundle' items, Warehouse, Serial No and Batch No will be considered from the 'Packing List' table. If Warehouse and Batch No are same for all packing items for any 'Product Bundle' item, those values can be entered in the main Item table, values will be copied to 'Packing List' table."
 msgstr "För \"Artikel Paket\" Artiklar, Lager, Serie Nummer och Parti kommer  att väljas från \"Packlista\". Om Lager och Parti inte är samma för alla förpackning artiklar för alla \"Artikel Paket\", kan dessa värden anges i Artikel Paket, värde kommer att kopieras till \"Packlista\"."
 
@@ -20872,11 +20900,11 @@ msgstr "För Lager"
 msgid "For Work Order"
 msgstr "För Arbetsorder"
 
-#: controllers/status_updater.py:238
+#: controllers/status_updater.py:241
 msgid "For an item {0}, quantity must be negative number"
 msgstr "För Artikel {0} måste kvantitet vara negativt tal"
 
-#: controllers/status_updater.py:235
+#: controllers/status_updater.py:238
 msgid "For an item {0}, quantity must be positive number"
 msgstr "För Artikel {0} måste kvantitet vara positivt tal"
 
@@ -20902,7 +20930,7 @@ msgstr "Hur mycket spenderad = 1 Bonus Poäng"
 msgid "For individual supplier"
 msgstr "För Enskild Leverantör"
 
-#: controllers/status_updater.py:243
+#: controllers/status_updater.py:246
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr "För Artikel {0} pris måste vara positiv tal. Att tillåta negativa priser, aktivera {1} i {2}"
 
@@ -21067,7 +21095,7 @@ msgstr "Fredag"
 
 #. Label of the from_uom (Link) field in DocType 'UOM Conversion Factor'
 #. Label of the from (Data) field in DocType 'Call Log'
-#: accounts/doctype/sales_invoice/sales_invoice.js:1037
+#: accounts/doctype/sales_invoice/sales_invoice.js:1040
 #: setup/doctype/uom_conversion_factor/uom_conversion_factor.json
 #: telephony/doctype/call_log/call_log.json templates/pages/projects.html:67
 msgid "From"
@@ -21763,7 +21791,7 @@ msgstr "Allmän"
 msgid "General Ledger"
 msgstr "Bokföring Register"
 
-#: stock/doctype/warehouse/warehouse.js:69
+#: stock/doctype/warehouse/warehouse.js:77
 msgctxt "Warehouse"
 msgid "General Ledger"
 msgstr "Bokföring Register"
@@ -21923,7 +21951,7 @@ msgstr "Hämta Artiklar"
 #: stock/doctype/stock_entry/stock_entry.js:388
 #: stock/doctype/stock_entry/stock_entry.js:461
 #: stock/doctype/stock_entry/stock_entry.js:621
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:119
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:121
 msgid "Get Items From"
 msgstr "Hämta Artiklar Från"
 
@@ -22046,7 +22074,7 @@ msgstr "Hämta Leverantörer"
 msgid "Get Suppliers By"
 msgstr "Hämta Leverantörer"
 
-#: accounts/doctype/sales_invoice/sales_invoice.js:1069
+#: accounts/doctype/sales_invoice/sales_invoice.js:1072
 msgid "Get Timesheets"
 msgstr "Hämta Tidrapporter"
 
@@ -22067,7 +22095,7 @@ msgstr "Hämta Nyheter"
 msgid "Get stops from"
 msgstr "Hämta Leverans Stopp från"
 
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:149
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:151
 msgid "Getting Scrap Items"
 msgstr "Hämta Rest Artiklar"
 
@@ -22259,7 +22287,7 @@ msgstr "Gram/Liter"
 #: accounts/report/pos_register/pos_register.py:202
 #: accounts/report/purchase_register/purchase_register.py:275
 #: accounts/report/sales_register/sales_register.py:305
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:249
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:251
 #: buying/doctype/purchase_order/purchase_order.json
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 #: manufacturing/doctype/production_plan_sales_order/production_plan_sales_order.json
@@ -22771,7 +22799,7 @@ msgstr "Hjälper vid fördelning av Budget/ Mål över månader om bolag har sä
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
 msgstr "Här är felloggar för ovannämnda misslyckade avskrivning poster: {0}"
 
-#: stock/stock_ledger.py:1723
+#: stock/stock_ledger.py:1755
 msgid "Here are the options to proceed:"
 msgstr "Här är alternativ för att fortsätta:"
 
@@ -22799,7 +22827,7 @@ msgstr "Här är veckovisa ledigheter angivna i förväg baserat på de tidigare
 msgid "Hertz"
 msgstr "Hertz"
 
-#: stock/doctype/repost_item_valuation/repost_item_valuation.py:397
+#: stock/doctype/repost_item_valuation/repost_item_valuation.py:402
 msgid "Hi,"
 msgstr "Hej,"
 
@@ -22868,7 +22896,7 @@ msgstr "Spärr Typ"
 msgid "Holiday"
 msgstr "Helgdag"
 
-#: setup/doctype/holiday_list/holiday_list.py:155
+#: setup/doctype/holiday_list/holiday_list.py:152
 msgid "Holiday Date {0} added multiple times"
 msgstr "Helgdag {0} har lagts till flera gånger"
 
@@ -23244,7 +23272,7 @@ msgstr "Om angiven kommer system att tillåta Användare med denna roll att skap
 msgid "If more than one package of the same type (for print)"
 msgstr "Om mer än en förpackning av samma typ (för utskrift)"
 
-#: stock/stock_ledger.py:1733
+#: stock/stock_ledger.py:1765
 msgid "If not, you can Cancel / Submit this entry"
 msgstr "Om inte kan man Annullera/Godkänna denna post"
 
@@ -23269,7 +23297,7 @@ msgstr "Om Stycklista har Rest Material måste Rest Lager väljas."
 msgid "If the account is frozen, entries are allowed to restricted users."
 msgstr "Om konto är låst, tillåts poster för Behöriga Användare."
 
-#: stock/stock_ledger.py:1726
+#: stock/stock_ledger.py:1758
 msgid "If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table."
 msgstr "Om artikel handlas som Noll Grund Pris i denna post, aktivera 'Tillåt Noll Grund Pris' i {0} Artikel Tabell."
 
@@ -23373,6 +23401,12 @@ msgstr "Om man {0} {1} kvantiteter av artikel {2} kommer schema {3} att tillämp
 #: accounts/doctype/pricing_rule/utils.py:374
 msgid "If you {0} {1} worth item {2}, the scheme {3} will be applied on the item."
 msgstr "Om man {0} {1} värderar artikel {2} kommer schema {3} att tillämpas på artikel."
+
+#. Description of the 'Delimiter options' (Data) field in DocType 'Bank
+#. Statement Import'
+#: accounts/doctype/bank_statement_import/bank_statement_import.json
+msgid "If your CSV uses a different delimiter, add that character here, ensuring no spaces or additional characters are included."
+msgstr "Om CSV använder en annan avgränsare, lägg till det tecknet här, se till att inga mellanslag eller ytterligare tecken inkluderas."
 
 #. Option for the 'Action if Annual Budget Exceeded on MR' (Select) field in
 #. DocType 'Budget'
@@ -24563,12 +24597,12 @@ msgstr "Otillräckliga Behörigheter"
 #: stock/doctype/pick_list/pick_list.py:116
 #: stock/doctype/pick_list/pick_list.py:893
 #: stock/doctype/stock_entry/stock_entry.py:761
-#: stock/serial_batch_bundle.py:935 stock/stock_ledger.py:1433
-#: stock/stock_ledger.py:1893
+#: stock/serial_batch_bundle.py:935 stock/stock_ledger.py:1465
+#: stock/stock_ledger.py:1925
 msgid "Insufficient Stock"
 msgstr "Otillräcklig Lager"
 
-#: stock/stock_ledger.py:1908
+#: stock/stock_ledger.py:1940
 msgid "Insufficient Stock for Batch"
 msgstr "Otillräcklig Lager för Parti"
 
@@ -24682,7 +24716,7 @@ msgstr "Intern Lager Överförning Inställningar"
 msgid "Interest"
 msgstr "Ränta"
 
-#: accounts/doctype/payment_entry/payment_entry.py:2426
+#: accounts/doctype/payment_entry/payment_entry.py:2446
 msgid "Interest and/or dunning fee"
 msgstr "Ränta och/eller Påminnelseavgift"
 
@@ -24865,7 +24899,7 @@ msgid "Invalid Item Defaults"
 msgstr "Ogiltig Artikel Standard"
 
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.py:59
-#: accounts/general_ledger.py:693
+#: accounts/general_ledger.py:705
 msgid "Invalid Opening Entry"
 msgstr "Ogiltig Öppning Post"
 
@@ -24957,7 +24991,7 @@ msgstr "Ogiltig resultat nyckel. Svar:"
 
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:110
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:120
-#: accounts/general_ledger.py:736 accounts/general_ledger.py:746
+#: accounts/general_ledger.py:748 accounts/general_ledger.py:758
 msgid "Invalid value {0} for {1} against account {2}"
 msgstr "Ogiltigt värde {0} för {1} mot konto {2}"
 
@@ -26119,7 +26153,7 @@ msgstr "Artikel Kundkorg"
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:189
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:193
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:198
 #: buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:36
 #: crm/doctype/opportunity_item/opportunity_item.json
@@ -27382,7 +27416,7 @@ msgstr "Jobbkort {0} skapad"
 msgid "Job: {0} has been triggered for processing failed transactions"
 msgstr "Jobb: {0} är utlöst för bearbetning av misslyckade transaktioner"
 
-#: projects/doctype/project/project.py:338
+#: projects/doctype/project/project.py:337
 msgid "Join"
 msgstr "Anslut"
 
@@ -28360,7 +28394,7 @@ msgstr "Registrering Nummer"
 msgid "Likes"
 msgstr "Gillar"
 
-#: controllers/status_updater.py:358
+#: controllers/status_updater.py:361
 msgid "Limit Crossed"
 msgstr "Gräns Överskriden"
 
@@ -28487,7 +28521,7 @@ msgstr "Liter-Atmosfär"
 msgid "Load All Criteria"
 msgstr "Ladda alla Kriterier"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:276
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:290
 msgid "Loading import file..."
 msgstr "Laddar import fil..."
 
@@ -28641,7 +28675,7 @@ msgstr "Förlorad Anledning Detalj"
 #. 'Quotation'
 #: crm/doctype/opportunity/opportunity.json
 #: crm/report/lost_opportunity/lost_opportunity.py:49
-#: public/js/utils/sales_common.js:464 selling/doctype/quotation/quotation.json
+#: public/js/utils/sales_common.js:486 selling/doctype/quotation/quotation.json
 msgid "Lost Reasons"
 msgstr "Förlorad Anledningar"
 
@@ -28746,7 +28780,7 @@ msgstr "Bonus Poäng: {0}"
 #: accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
 #: accounts/doctype/loyalty_program/loyalty_program.json
 #: accounts/doctype/pos_invoice/pos_invoice.json
-#: accounts/doctype/sales_invoice/sales_invoice.js:1121
+#: accounts/doctype/sales_invoice/sales_invoice.js:1124
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: selling/doctype/customer/customer.json
 #: selling/page/point_of_sale/pos_item_cart.js:917
@@ -29190,7 +29224,7 @@ msgstr "Ledning"
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 #: stock/doctype/purchase_receipt/purchase_receipt.js:127
 #: stock/doctype/purchase_receipt/purchase_receipt.js:229
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:99
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:101
 msgid "Mandatory"
 msgstr "Erfodras"
 
@@ -29494,7 +29528,7 @@ msgstr "Produktion Modul Konfigurerad"
 msgid "Mapping Purchase Receipt ..."
 msgstr "Mappar Inköp Följesedel..."
 
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:97
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:125
 msgid "Mapping Subcontracting Order ..."
 msgstr "Mappar Underleverantör Order ..."
 
@@ -29830,7 +29864,7 @@ msgstr "Material Begäran för maximum {0} kan skapas för Artikel {1} mot Förs
 msgid "Material Request used to make this Stock Entry"
 msgstr "Inköp Förslag användes för att skapa detta Lager Post"
 
-#: controllers/subcontracting_controller.py:1063
+#: controllers/subcontracting_controller.py:1064
 msgid "Material Request {0} is cancelled or stopped"
 msgstr "Material Begäran {0} avbruten eller stoppad"
 
@@ -29920,11 +29954,11 @@ msgid "Material Transferred for Subcontract"
 msgstr "Material Överförd för Underleverantör"
 
 #: buying/doctype/purchase_order/purchase_order.js:363
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:206
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:236
 msgid "Material to Supplier"
 msgstr "Material till Leverantör"
 
-#: controllers/subcontracting_controller.py:1262
+#: controllers/subcontracting_controller.py:1263
 msgid "Materials are already received against the {0} {1}"
 msgstr "Material mottagen mot {0} {1}"
 
@@ -30088,7 +30122,7 @@ msgstr "Megajoule"
 msgid "Megawatt"
 msgstr "Megawatt"
 
-#: stock/stock_ledger.py:1739
+#: stock/stock_ledger.py:1771
 msgid "Mention Valuation Rate in the Item master."
 msgstr "Ange Grund Pris i Artikel Tabell."
 
@@ -30165,7 +30199,7 @@ msgstr "Slår Samman {0} av {1}"
 #. Label of the message (Text) field in DocType 'Payment Request'
 #. Label of the message (Text) field in DocType 'Project'
 #. Label of the message (Text) field in DocType 'SMS Center'
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:491
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:515
 #: accounts/doctype/payment_request/payment_request.json
 #: projects/doctype/project/project.json
 #: selling/doctype/sms_center/sms_center.json
@@ -31743,7 +31777,7 @@ msgstr "Ingen Artikel med Streck/QR Kod {0}"
 msgid "No Item with Serial No {0}"
 msgstr "Ingen Artikel med Serie Nummer {0}"
 
-#: controllers/subcontracting_controller.py:1186
+#: controllers/subcontracting_controller.py:1187
 msgid "No Items selected for transfer."
 msgstr "Inga Artiklar har valts för överföring."
 
@@ -31865,7 +31899,7 @@ msgstr "Ingen beskrivning angiven"
 msgid "No employee was scheduled for call popup"
 msgstr "Ingen personal var schemalagd för oväntad samtal"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:486
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:510
 msgid "No failed logs"
 msgstr "Inga Misslyckade Logg"
 
@@ -31873,7 +31907,7 @@ msgstr "Inga Misslyckade Logg"
 msgid "No gain or loss in the exchange rate"
 msgstr "Ingen resultat i växel kurs"
 
-#: controllers/subcontracting_controller.py:1095
+#: controllers/subcontracting_controller.py:1096
 msgid "No item available for transfer."
 msgstr "Ingen artikel tillgänglig för överföring."
 
@@ -31970,7 +32004,7 @@ msgstr "Inga utestående fakturor hittades"
 msgid "No outstanding invoices require exchange rate revaluation"
 msgstr "Inga utestående fakturor kräver valuta kurs omvärdering"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1865
+#: accounts/doctype/payment_entry/payment_entry.py:1885
 msgid "No outstanding {0} found for the {1} {2} which qualify the filters you have specified."
 msgstr "Inga utestående {0} hittades för {1} {2} som uppfyller angiven filter."
 
@@ -32018,7 +32052,7 @@ msgstr "Inga väntande uppdateringar för omläggning"
 msgid "No values"
 msgstr "Inga Värden"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:338
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:339
 msgid "No {0} Accounts found for this company."
 msgstr "Inga {0} konto hittades för detta bolag."
 
@@ -32934,7 +32968,7 @@ msgstr "Öppning Datum"
 msgid "Opening Entry"
 msgstr "Öppning Post"
 
-#: accounts/general_ledger.py:692
+#: accounts/general_ledger.py:704
 msgid "Opening Entry can not be created after Period Closing Voucher is created."
 msgstr "Öppning Post kan inte skapas efter att Period Stängning Verifikat är skapad."
 
@@ -33747,7 +33781,7 @@ msgstr "Över Leverans/Följesedel Tillåtelse (%)"
 msgid "Over Receipt"
 msgstr "Över Följesedel"
 
-#: controllers/status_updater.py:363
+#: controllers/status_updater.py:366
 msgid "Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "Över Följesedel/Leverans av {0} {1} ignoreras för artikel {2} eftersom du har {3} roll."
 
@@ -33762,7 +33796,7 @@ msgstr "Över Överföring Tillåtelse"
 msgid "Over Transfer Allowance (%)"
 msgstr "Över Överföring Tillåtelse (%)"
 
-#: controllers/status_updater.py:365
+#: controllers/status_updater.py:368
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr "Överfakturering av {0} {1} ignoreras för artikel {2} eftersom du har {3} roll."
 
@@ -35651,13 +35685,13 @@ msgstr "Väntar på Aktiviteter"
 
 #: accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:64
 #: accounts/report/received_items_to_be_billed/received_items_to_be_billed.py:64
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:251
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:255
 #: selling/report/sales_order_analysis/sales_order_analysis.py:306
 msgid "Pending Amount"
 msgstr "Väntar på Kvantitet"
 
 #. Label of the pending_qty (Float) field in DocType 'Production Plan Item'
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:214
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:218
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 #: manufacturing/doctype/work_order/work_order.js:253
 #: manufacturing/report/production_plan_summary/production_plan_summary.py:155
@@ -35808,7 +35842,7 @@ msgstr "Period"
 msgid "Period Based On"
 msgstr "Period Baserat på"
 
-#: accounts/general_ledger.py:704
+#: accounts/general_ledger.py:716
 msgid "Period Closed"
 msgstr "Period Stängd"
 
@@ -36323,7 +36357,7 @@ msgstr "Välj Kund"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:128
 #: stock/doctype/purchase_receipt/purchase_receipt.js:230
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:100
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:102
 msgid "Please Select a Supplier"
 msgstr "Välj Leverantör"
 
@@ -36363,7 +36397,7 @@ msgstr "Lägg till Tillfällig Öppning Konto i Kontoplan"
 msgid "Please add atleast one Serial No / Batch No"
 msgstr "Lägg till minst en Serie Nr / Parti Nr"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.py:76
+#: accounts/doctype/bank_statement_import/bank_statement_import.py:77
 msgid "Please add the Bank Account column"
 msgstr "Lägg till Bank Konto kolumn"
 
@@ -36412,7 +36446,7 @@ msgstr "Välj Bearbeta Uppskjuten Bokföring {0} och godkänn manuellt efter att
 msgid "Please check either with operations or FG Based Operating Cost."
 msgstr "Välj antingen Med Åtgärder eller Färdig Artikel Baserad Åtgärd Kostnad."
 
-#: stock/doctype/repost_item_valuation/repost_item_valuation.py:403
+#: stock/doctype/repost_item_valuation/repost_item_valuation.py:408
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
 msgstr "Kontrollera felmeddelande och vidta nödvändiga åtgärder för att åtgärda fel och starta sedan ompostning igen."
 
@@ -36733,11 +36767,11 @@ msgstr "Kontrollera att du verkligen vill ta bort alla transaktioner för Bolag.
 msgid "Please mention 'Weight UOM' along with Weight."
 msgstr "Ange \"Vikt Enhet\" tillsammans med Vikt."
 
-#: accounts/general_ledger.py:563
+#: accounts/general_ledger.py:575
 msgid "Please mention Round Off Account in Company"
 msgstr "Ange Avrundning Konto i Bolag"
 
-#: accounts/general_ledger.py:566
+#: accounts/general_ledger.py:578
 msgid "Please mention Round Off Cost Center in Company"
 msgstr "Ange Avrundning Resultat Enhet för Bolag"
 
@@ -36926,7 +36960,7 @@ msgstr "Välj Lager"
 msgid "Please select a Work Order first."
 msgstr "Välj Arbetsorder"
 
-#: setup/doctype/holiday_list/holiday_list.py:81
+#: setup/doctype/holiday_list/holiday_list.py:80
 msgid "Please select a country"
 msgstr "Välj Land"
 
@@ -36970,7 +37004,7 @@ msgstr "Välj giltig Inköp Order som är konfigurerad för Underleverantör."
 msgid "Please select a value for {0} quotation_to {1}"
 msgstr "Välj värde för {0} Försäljning Offert {1}"
 
-#: assets/doctype/asset_repair/asset_repair.js:124
+#: assets/doctype/asset_repair/asset_repair.js:133
 msgid "Please select an item code before setting the warehouse."
 msgstr "Välj Artikel Kod innan du anger Lager."
 
@@ -37039,7 +37073,7 @@ msgstr "Välj de filter som krävs"
 msgid "Please select valid document type."
 msgstr "Välj giltig dokument typ."
 
-#: setup/doctype/holiday_list/holiday_list.py:50
+#: setup/doctype/holiday_list/holiday_list.py:51
 msgid "Please select weekly off day"
 msgstr "Välj Ledig Veckodag"
 
@@ -37088,8 +37122,8 @@ msgstr "Ange Bokföring Dimension {} i {}"
 #: accounts/doctype/pos_profile/pos_profile.js:62
 #: accounts/doctype/pos_profile/pos_profile.js:76
 #: accounts/doctype/pos_profile/pos_profile.js:89
-#: accounts/doctype/sales_invoice/sales_invoice.js:767
-#: accounts/doctype/sales_invoice/sales_invoice.js:781
+#: accounts/doctype/sales_invoice/sales_invoice.js:770
+#: accounts/doctype/sales_invoice/sales_invoice.js:784
 #: selling/doctype/quotation/quotation.js:29
 #: selling/doctype/sales_order/sales_order.js:31
 msgid "Please set Company"
@@ -37159,7 +37193,7 @@ msgstr "Ange Resultat Enhet för Tillgång eller ange Resultat Enhet för Tillg�
 msgid "Please set a Supplier against the Items to be considered in the Purchase Order."
 msgstr "Ange Leverantör mot Artiklar som ska beaktas i Inköp Order."
 
-#: projects/doctype/project/project.py:736
+#: projects/doctype/project/project.py:735
 msgid "Please set a default Holiday List for Company {0}"
 msgstr "Ange standard Helg Lista för Bolag {0}"
 
@@ -37759,7 +37793,7 @@ msgstr "Föregående Bokföringår är inte stängd"
 msgid "Previous Work Experience"
 msgstr "Föregående Arbetsliv Erfarenhet"
 
-#: accounts/doctype/period_closing_voucher/period_closing_voucher.py:152
+#: accounts/doctype/period_closing_voucher/period_closing_voucher.py:162
 msgid "Previous Year is not closed, please close it first"
 msgstr "Föregående År är inte stängd, vänligen stäng det"
 
@@ -39029,7 +39063,7 @@ msgstr "Framsteg(%)"
 #: accounts/doctype/psoa_project/psoa_project.json
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
-#: accounts/doctype/sales_invoice/sales_invoice.js:1053
+#: accounts/doctype/sales_invoice/sales_invoice.js:1056
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: accounts/doctype/sales_invoice_item/sales_invoice_item.json
 #: accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:73
@@ -39052,7 +39086,7 @@ msgstr "Framsteg(%)"
 #: buying/report/procurement_tracker/procurement_tracker.js:21
 #: buying/report/procurement_tracker/procurement_tracker.py:39
 #: buying/report/purchase_order_analysis/purchase_order_analysis.js:33
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:178
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:182
 #: crm/doctype/contract/contract.json manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/job_card/job_card.json
@@ -39109,7 +39143,7 @@ msgctxt "Project"
 msgid "Project"
 msgstr "Projekt"
 
-#: projects/doctype/project/project.py:350
+#: projects/doctype/project/project.py:349
 msgid "Project Collaboration Invitation"
 msgstr "Projekt Samarbete Inbjudan"
 
@@ -39146,7 +39180,7 @@ msgstr "Projekt Status"
 msgid "Project Summary"
 msgstr "Projekt Översikt"
 
-#: projects/doctype/project/project.py:651
+#: projects/doctype/project/project.py:650
 msgid "Project Summary for {0}"
 msgstr "Projekt Översikt för {0}"
 
@@ -39271,7 +39305,7 @@ msgstr "Uppskattad Kvantitet"
 
 #. Name of a Workspace
 #. Label of a Card Break in the Projects Workspace
-#: config/projects.py:7 projects/doctype/project/project.py:428
+#: config/projects.py:7 projects/doctype/project/project.py:427
 #: projects/workspace/projects/projects.json
 #: selling/doctype/customer/customer_dashboard.py:26
 #: selling/doctype/sales_order/sales_order_dashboard.py:25
@@ -39668,7 +39702,7 @@ msgstr "Inköp Huvudansvarig"
 #: buying/doctype/supplier_quotation/supplier_quotation_list.js:14
 #: buying/report/procurement_tracker/procurement_tracker.py:82
 #: buying/report/purchase_order_analysis/purchase_order_analysis.js:40
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:163
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:167
 #: controllers/buying_controller.py:649 crm/doctype/contract/contract.json
 #: manufacturing/doctype/blanket_order/blanket_order.js:54
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
@@ -39851,7 +39885,7 @@ msgstr "Inköp Prislista"
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 #: stock/doctype/quality_inspection/quality_inspection.json
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.json
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:65
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:67
 msgid "Purchase Receipt"
 msgstr "Inköp Följesedel"
 
@@ -40146,7 +40180,7 @@ msgstr "Lägg Undan Regel finns redan för Artikel {0} i Lager {1}."
 #: accounts/report/gross_profit/gross_profit.py:267
 #: assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:200
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:204
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:224
 #: controllers/trends.py:238 controllers/trends.py:250
 #: controllers/trends.py:255 crm/doctype/opportunity_item/opportunity_item.json
@@ -40325,7 +40359,7 @@ msgstr "Kvantitet Råmaterial kommer att bestämmas baserad på Kvantitet Färdi
 msgid "Qty to Be Consumed"
 msgstr "Kvantitet att Förbruka"
 
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:228
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:232
 #: selling/report/sales_order_analysis/sales_order_analysis.py:283
 msgid "Qty to Bill"
 msgstr "Kvantitet att Betala"
@@ -41583,7 +41617,7 @@ msgstr "Råmaterial kan inte vara tom."
 #: selling/doctype/sales_order/sales_order.js:614
 #: selling/doctype/sales_order/sales_order_list.js:62
 #: stock/doctype/material_request/material_request.js:197
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:106
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:136
 msgid "Re-open"
 msgstr "Öppna Igen"
 
@@ -41830,7 +41864,7 @@ msgstr "Mottaget Belopp Efter Moms"
 msgid "Received Amount After Tax (Company Currency)"
 msgstr "Mottaget Belopp Efter Moms (Bolag Valuta)"
 
-#: accounts/doctype/payment_entry/payment_entry.py:927
+#: accounts/doctype/payment_entry/payment_entry.py:947
 msgid "Received Amount cannot be greater than Paid Amount"
 msgstr "Mottaget Belopp kan inte vara högre än Betald Belopp"
 
@@ -41860,7 +41894,7 @@ msgstr "Mottogs"
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: accounts/report/billed_items_to_be_received/billed_items_to_be_received.py:76
 #: buying/doctype/purchase_order_item/purchase_order_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:207
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:211
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:170
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:245
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:143
@@ -41871,7 +41905,7 @@ msgstr "Mottogs"
 msgid "Received Qty"
 msgstr "Mottagen Kvantitet"
 
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:259
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:263
 msgid "Received Qty Amount"
 msgstr "Mottagen Kvantitet Belopp"
 
@@ -42344,7 +42378,7 @@ msgstr "Referens Nummer. "
 msgid "Reference No & Reference Date is required for {0}"
 msgstr "Referens Nummer och Referens Datum erfodras för {0}"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1122
+#: accounts/doctype/payment_entry/payment_entry.py:1142
 msgid "Reference No and Reference Date is mandatory for Bank transaction"
 msgstr "Referens Nummer och Referens Datum erfodras för Bank Transaktion"
 
@@ -42352,7 +42386,7 @@ msgstr "Referens Nummer och Referens Datum erfodras för Bank Transaktion"
 msgid "Reference No is mandatory if you entered Reference Date"
 msgstr "Referens Nummer erfodras om Referens Datum är angiven"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:256
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:258
 msgid "Reference No."
 msgstr "Referens Nummer."
 
@@ -42866,7 +42900,7 @@ msgstr "Rapport"
 msgid "Report Date"
 msgstr "Rapport Datum"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:192
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:206
 msgid "Report Error"
 msgstr "Rapport Fel"
 
@@ -43193,7 +43227,7 @@ msgstr "Förfrågande"
 #. Item'
 #: buying/doctype/purchase_order/purchase_order.json
 #: buying/doctype/purchase_order_item/purchase_order_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:161
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:165
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:191
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 #: stock/doctype/material_request/material_request.json
@@ -43390,7 +43424,7 @@ msgstr "Reserverad Kvantitet"
 msgid "Reserved Quantity for Production"
 msgstr "Reserverad Kvantitet för Produktion"
 
-#: stock/stock_ledger.py:2031
+#: stock/stock_ledger.py:2063
 msgid "Reserved Serial No."
 msgstr "Reserverad Serie Nummer"
 
@@ -43402,11 +43436,11 @@ msgstr "Reserverad Serie Nummer"
 #: stock/dashboard/item_dashboard_list.html:15 stock/doctype/bin/bin.json
 #: stock/doctype/pick_list/pick_list.js:146
 #: stock/report/reserved_stock/reserved_stock.json
-#: stock/report/stock_balance/stock_balance.py:479 stock/stock_ledger.py:2015
+#: stock/report/stock_balance/stock_balance.py:479 stock/stock_ledger.py:2047
 msgid "Reserved Stock"
 msgstr "Reserverad"
 
-#: stock/stock_ledger.py:2061
+#: stock/stock_ledger.py:2093
 msgid "Reserved Stock for Batch"
 msgstr "Reserverad för Parti"
 
@@ -43778,7 +43812,7 @@ msgid "Return Qty from Rejected Warehouse"
 msgstr "Retur Kvantitet från Avvisad Lager"
 
 #: buying/doctype/purchase_order/purchase_order.js:81
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:150
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:180
 msgid "Return of Components"
 msgstr "Retur av Komponenter"
 
@@ -44734,11 +44768,11 @@ msgstr "Rad # {}: {} {} tillhör inte bolag {}. Välj giltig {}."
 msgid "Row No {0}: Warehouse is required. Please set a Default Warehouse for Item {1} and Company {2}"
 msgstr "Rad # {0}: Lager erfodras. Ange Standard Lager för Artikel {1} och Bolag {2}"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:491
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:515
 msgid "Row Number"
 msgstr "Rad Nummer"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:376
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:399
 msgid "Row {0}"
 msgstr "Rad {0}"
 
@@ -46247,7 +46281,7 @@ msgstr "Schemalagd Datum/Tid"
 msgid "Scheduled Time Logs"
 msgstr "Schemalagda Tidsloggar"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.py:83
+#: accounts/doctype/bank_statement_import/bank_statement_import.py:84
 #: accounts/doctype/ledger_merge/ledger_merge.py:39
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:232
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:547
@@ -46266,7 +46300,7 @@ msgstr "Schemaläggare är inaktiv. Kan inte starta jobb nu."
 msgid "Scheduler is inactive. Cannot enqueue job."
 msgstr "Schemaläggare är inaktiv. Kan inte placera jobb i kö."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.py:83
+#: accounts/doctype/bank_statement_import/bank_statement_import.py:84
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:232
 msgid "Scheduler is inactive. Cannot import data."
 msgstr "Schemaläggare Inaktiv. Kan inte importera data."
@@ -46447,7 +46481,7 @@ msgstr "Sekundär Parti"
 msgid "Secondary Role"
 msgstr "Sekundär Roll"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:170
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:172
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:117
 msgid "Section Code"
 msgstr "Sektion Kod"
@@ -46509,7 +46543,7 @@ msgstr "Välj Stycklista och Kvantitet för Produktion"
 msgid "Select BOM, Qty and For Warehouse"
 msgstr "Välj Stycklista, Kvantitet och Till Lager"
 
-#: public/js/utils/sales_common.js:360
+#: public/js/utils/sales_common.js:382
 #: selling/page/point_of_sale/pos_item_details.js:212
 #: stock/doctype/pick_list/pick_list.js:352
 msgid "Select Batch No"
@@ -46598,7 +46632,7 @@ msgstr "Välj Artiklar att Producera"
 msgid "Select Items up to Delivery Date"
 msgstr "Välj Artiklar baserad på Leverans Datum"
 
-#: accounts/doctype/sales_invoice/sales_invoice.js:1118
+#: accounts/doctype/sales_invoice/sales_invoice.js:1121
 #: selling/page/point_of_sale/pos_item_cart.js:920
 msgid "Select Loyalty Program"
 msgstr "Välj Bonus Program"
@@ -46612,13 +46646,13 @@ msgstr "Välj Möjlig Leverantör"
 msgid "Select Quantity"
 msgstr "Välj Kvantitet"
 
-#: public/js/utils/sales_common.js:360
+#: public/js/utils/sales_common.js:382
 #: selling/page/point_of_sale/pos_item_details.js:212
 #: stock/doctype/pick_list/pick_list.js:352
 msgid "Select Serial No"
 msgstr "Välj Serie Nummer"
 
-#: public/js/utils/sales_common.js:363 stock/doctype/pick_list/pick_list.js:355
+#: public/js/utils/sales_common.js:385 stock/doctype/pick_list/pick_list.js:355
 msgid "Select Serial and Batch"
 msgstr "Välj Serie Nummer och Parti Nummer"
 
@@ -47252,7 +47286,7 @@ msgstr "Serie Nummer & Partier"
 msgid "Serial Nos are created successfully"
 msgstr "Serie Nummer skapade"
 
-#: stock/stock_ledger.py:2021
+#: stock/stock_ledger.py:2053
 msgid "Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
 msgstr "Serie Nmmer är reserverade iLagerreservationsinlägg, du måste avboka dem innan du fortsätter."
 
@@ -47742,7 +47776,7 @@ msgstr "Ange Budget per Artikel Grupp för detta Distrikt. Man kan även inklude
 msgid "Set Landed Cost Based on Purchase Invoice Rate"
 msgstr "Ange Landad Kostnad baserat på Inköp Faktura Pris"
 
-#: accounts/doctype/sales_invoice/sales_invoice.js:1130
+#: accounts/doctype/sales_invoice/sales_invoice.js:1133
 msgid "Set Loyalty Program"
 msgstr "Ange Bonus Program"
 
@@ -47852,7 +47886,7 @@ msgstr "Ange som Stängd"
 msgid "Set as Completed"
 msgstr "Ange som Klar"
 
-#: public/js/utils/sales_common.js:460
+#: public/js/utils/sales_common.js:482
 #: selling/doctype/quotation/quotation.js:131
 msgid "Set as Lost"
 msgstr "Ange som Förlorad"
@@ -48554,7 +48588,7 @@ msgstr "Visa Lager Åldrande Data"
 msgid "Show Taxes as Table in Print"
 msgstr "Visa Moms Belopp som Kolumn"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:456
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:480
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:296
 msgid "Show Traceback"
 msgstr "Visa Spårning"
@@ -49012,7 +49046,7 @@ msgstr "Dela Kvantitet"
 msgid "Split qty cannot be grater than or equal to asset qty"
 msgstr "Delad kvantitet får inte vara större än eller lika med tillgång kvantitet"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1891
+#: accounts/doctype/payment_entry/payment_entry.py:1911
 msgid "Splitting {0} {1} into {2} rows as per Payment Terms"
 msgstr "Delar {0} {1} i {2} rader enligt Betalning Villkor"
 
@@ -49071,7 +49105,7 @@ msgstr "Stadie Namn"
 msgid "Stale Days"
 msgstr "Inaktuella Dagar"
 
-#: accounts/doctype/accounts_settings/accounts_settings.py:94
+#: accounts/doctype/accounts_settings/accounts_settings.py:95
 msgid "Stale Days should start from 1."
 msgstr "Inaktuella Dagar ska börja från 1."
 
@@ -49291,12 +49325,6 @@ msgstr "Utgångsläge från övre kant"
 msgid "State"
 msgstr "Län"
 
-#. Label of the statement_import_log (Code) field in DocType 'Bank Statement
-#. Import'
-#: accounts/doctype/bank_statement_import/bank_statement_import.json
-msgid "Statement Import Log"
-msgstr "Redogörelse Import Logg"
-
 #: accounts/report/general_ledger/general_ledger.html:1
 msgid "Statement of Account"
 msgstr "Kontoutdrag"
@@ -49395,7 +49423,7 @@ msgstr "Kontoutdrag"
 #. Label of the status (Select) field in DocType 'SLA Fulfilled On Status'
 #. Label of the status (Select) field in DocType 'Warranty Claim'
 #. Label of the status (Select) field in DocType 'Call Log'
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:491
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:515
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 #: accounts/doctype/bank_transaction/bank_transaction.json
 #: accounts/doctype/dunning/dunning.json
@@ -49429,7 +49457,7 @@ msgstr "Kontoutdrag"
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 #: buying/report/procurement_tracker/procurement_tracker.py:74
 #: buying/report/purchase_order_analysis/purchase_order_analysis.js:52
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:169
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:173
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:134
 #: crm/doctype/appointment/appointment.json crm/doctype/contract/contract.json
 #: crm/doctype/email_campaign/email_campaign.json crm/doctype/lead/lead.json
@@ -49519,8 +49547,8 @@ msgstr "Kontoutdrag"
 #: stock/report/reserved_stock/reserved_stock.js:124
 #: stock/report/reserved_stock/reserved_stock.py:178
 #: stock/report/serial_no_ledger/serial_no_ledger.py:54
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:108
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:114
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:138
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:144
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 #: support/doctype/issue/issue.json
@@ -49547,7 +49575,7 @@ msgstr "Status Detaljer"
 msgid "Status Illustration"
 msgstr "Statusbild"
 
-#: projects/doctype/project/project.py:717
+#: projects/doctype/project/project.py:716
 msgid "Status must be Cancelled or Completed"
 msgstr "Status måste vara Annullerad eller Klar"
 
@@ -49620,7 +49648,7 @@ msgstr "Lager Tillgänglig"
 #. Label of a Link in the Stock Workspace
 #. Label of a shortcut in the Stock Workspace
 #: selling/doctype/quotation_item/quotation_item.json
-#: stock/doctype/item/item.js:61 stock/doctype/warehouse/warehouse.js:49
+#: stock/doctype/item/item.js:61 stock/doctype/warehouse/warehouse.js:61
 #: stock/report/stock_balance/stock_balance.json
 #: stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.py:107
 #: stock/workspace/stock/stock.json
@@ -49751,7 +49779,7 @@ msgstr "Lager Artiklar"
 #: public/js/utils/ledger_preview.js:37 stock/doctype/item/item.js:71
 #: stock/doctype/item/item_dashboard.py:8
 #: stock/report/stock_ledger/stock_ledger.json stock/workspace/stock/stock.json
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:33
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:35
 msgid "Stock Ledger"
 msgstr "Lager Register"
 
@@ -50384,7 +50412,7 @@ msgstr "Underleverantör Order"
 msgid "Subcontract Order Summary"
 msgstr "Underleverantör Order Översikt"
 
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:81
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:83
 msgid "Subcontract Return"
 msgstr "Underleverantör Retur"
 
@@ -50429,7 +50457,7 @@ msgstr "Underleverantör Stycklista"
 #: controllers/subcontracting_controller.py:894
 #: stock/doctype/stock_entry/stock_entry.json
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:95
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:97
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Subcontracting Order"
@@ -50475,7 +50503,7 @@ msgstr "Underleverantör Inköp Order"
 #. Name of a DocType
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 #: stock/doctype/quality_inspection/quality_inspection.json
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:200
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:230
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Subcontracting Receipt"
 msgstr "Underleverantör Följesedel/Kvitto"
@@ -50744,7 +50772,7 @@ msgstr "Klara Poster"
 
 #. Option for the 'Status' (Select) field in DocType 'Bank Statement Import'
 #. Option for the 'Status' (Select) field in DocType 'Ledger Merge'
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:467
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:491
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgid "Success"
@@ -50780,23 +50808,23 @@ msgstr "Leverantör vald"
 msgid "Successfully changed Stock UOM, please redefine conversion factors for new UOM."
 msgstr "Lager Enhet ändrad, ändra konvertering faktor för ny enhet."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:430
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:455
 msgid "Successfully imported {0}"
 msgstr "Importerade {0}"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:161
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:172
 msgid "Successfully imported {0} record out of {1}. Click on Export Errored Rows, fix the errors and import again."
 msgstr "Importerade {0} post av {1}. Klicka på Exportera felaktiga rader, åtgärda fel och importera igen."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:145
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:156
 msgid "Successfully imported {0} record."
 msgstr "Importerade {0} post."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:157
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:168
 msgid "Successfully imported {0} records out of {1}. Click on Export Errored Rows, fix the errors and import again."
 msgstr "Importerade {0} poster av {1}. Klicka på Exportera felaktiga rader, åtgärda fel och importera igen."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:144
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:155
 msgid "Successfully imported {0} records."
 msgstr "Importerade {0} poster."
 
@@ -50812,23 +50840,23 @@ msgstr "Länkad till Leverantör"
 msgid "Successfully merged {0} out of {1}."
 msgstr "Slog samman {0} av {1}."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:438
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:463
 msgid "Successfully updated {0}"
 msgstr "Uppdaterade {0}"
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:172
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:183
 msgid "Successfully updated {0} record out of {1}. Click on Export Errored Rows, fix the errors and import again."
 msgstr "Uppdaterade {0} post av {1}. Klicka på Exportera felaktiga rader, åtgärda fel och importera igen."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:150
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:161
 msgid "Successfully updated {0} record."
 msgstr "Uppdaterade {0} post."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:168
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:179
 msgid "Successfully updated {0} records out of {1}. Click on Export Errored Rows, fix the errors and import again."
 msgstr "Uppdaterade {0} poster av {1}. Klicka på Exportera felaktiga rader, åtgärda fel och importera igen."
 
-#: accounts/doctype/bank_statement_import/bank_statement_import.js:149
+#: accounts/doctype/bank_statement_import/bank_statement_import.js:160
 msgid "Successfully updated {0} records."
 msgstr "Uppdaterade {0} poster."
 
@@ -50975,7 +51003,7 @@ msgstr "Levererad Kvantitet"
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 #: buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 #: buying/report/procurement_tracker/procurement_tracker.py:89
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:171
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:175
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.js:15
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:30
 #: buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.js:15
@@ -51140,7 +51168,7 @@ msgstr "Leverantör Faktura"
 
 #. Label of the bill_date (Date) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:214
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:216
 msgid "Supplier Invoice Date"
 msgstr "Leverantör Faktura Datum"
 
@@ -51155,7 +51183,7 @@ msgstr "Leverantör Faktura Datum kan inte vara senare än Bokföring Datum"
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 #: accounts/report/general_ledger/general_ledger.html:53
 #: accounts/report/general_ledger/general_ledger.py:669
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:208
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:210
 msgid "Supplier Invoice No"
 msgstr "Leverantör Faktura Nummer"
 
@@ -51694,16 +51722,16 @@ msgstr "System kontrollerar inte överfakturering eftersom belopp för Artikel {
 msgid "System will notify to increase or decrease quantity or amount "
 msgstr "System meddelar att öka eller minska Kvantitet eller Belopp"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:243
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:245
 msgid "TCS Amount"
 msgstr "TCS Belopp"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:225
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:227
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:125
 msgid "TCS Rate %"
 msgstr "TDS Sats %"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:243
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:245
 msgid "TDS Amount"
 msgstr "TDS Belopp"
 
@@ -51716,7 +51744,7 @@ msgstr "TDS Beräkning Översikt"
 msgid "TDS Payable"
 msgstr "TDS Betalbar"
 
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:225
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:227
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:125
 msgid "TDS Rate %"
 msgstr "TDS Sats %"
@@ -52969,7 +52997,7 @@ msgstr "Dokument Typ {0} måste ha Statusfält för att konfigurera Service Niv�
 msgid "The GL Entries will be cancelled in the background, it can take a few minutes."
 msgstr "Bokföring Register Poster kommer att annulleras i bakgrunden, det kan ta några minuter."
 
-#: accounts/doctype/period_closing_voucher/period_closing_voucher.py:176
+#: accounts/doctype/period_closing_voucher/period_closing_voucher.py:186
 msgid "The GL Entries will be processed in the background, it can take a few minutes."
 msgstr "Bokföring Register Poster kommer att behandlas i bakgrunden, det kan ta några minuter."
 
@@ -53093,7 +53121,7 @@ msgstr "Följande {0} skapades: {1}"
 msgid "The gross weight of the package. Usually net weight + packaging material weight. (for print)"
 msgstr "Brutto Vikt på förpackning. Vanligtvis Netto Vikt + Förpackning Material Vikt. (för utskrift)"
 
-#: setup/doctype/holiday_list/holiday_list.py:120
+#: setup/doctype/holiday_list/holiday_list.py:117
 msgid "The holiday on {0} is not between From Date and To Date"
 msgstr "Helgdag {0} är inte mellan Från Datum och Till Datum"
 
@@ -53411,7 +53439,7 @@ msgstr "Detta åtgärd kommer att koppla bort detta konto från alla externa tj�
 msgid "This covers all scorecards tied to this Setup"
 msgstr "Detta täcker alla resultatkort kopplade till denna inställning"
 
-#: controllers/status_updater.py:346
+#: controllers/status_updater.py:349
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
 msgstr "Detta dokument är över gräns med {0} {1} för post {4}. Skapa annan {3} mot samma {2}?"
 
@@ -53887,7 +53915,7 @@ msgstr "Titel"
 #. Label of the to_uom (Link) field in DocType 'UOM Conversion Factor'
 #. Label of the to (Data) field in DocType 'Call Log'
 #: accounts/doctype/payment_request/payment_request.json
-#: accounts/doctype/sales_invoice/sales_invoice.js:1047
+#: accounts/doctype/sales_invoice/sales_invoice.js:1050
 #: setup/doctype/uom_conversion_factor/uom_conversion_factor.json
 #: telephony/doctype/call_log/call_log.json templates/pages/projects.html:68
 msgid "To"
@@ -54046,7 +54074,7 @@ msgid "To Date"
 msgstr "Till Datum"
 
 #: controllers/accounts_controller.py:424
-#: setup/doctype/holiday_list/holiday_list.py:115
+#: setup/doctype/holiday_list/holiday_list.py:112
 msgid "To Date cannot be before From Date"
 msgstr "Till Datum kan inte vara tidiggare än Start Datum"
 
@@ -54258,11 +54286,11 @@ msgstr "Att lägga till Åtgärder kryssa i rutan 'Med Åtgärder'."
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
 msgstr "Att lägga till Underleverantör Artikel råmaterial om Inkludera Utvidgade Artiklar är inaktiverad."
 
-#: controllers/status_updater.py:341
+#: controllers/status_updater.py:344
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
 msgstr "Att tillåta överfakturering uppdatera 'Över Fakturering Tillåtelse' i Konto Inställningar eller Artikel."
 
-#: controllers/status_updater.py:337
+#: controllers/status_updater.py:340
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
 msgstr "Att tillåta överleverans/övermottagning, uppdatera 'Över Leverans/Mottagning Tillåtelse' i Lager Inställningar eller Artikel."
 
@@ -54298,7 +54326,7 @@ msgstr "Att aktivera Pågående Kapitalarbete Bokföring"
 msgid "To include non-stock items in the material request planning. i.e. Items for which 'Maintain Stock' checkbox is unticked."
 msgstr "Att inkludera ej lagerartiklar i material begäran planering. dvs Artiklar för vilka ruta 'Lager Hantera' är inaktiverad."
 
-#: accounts/doctype/payment_entry/payment_entry.py:1688
+#: accounts/doctype/payment_entry/payment_entry.py:1708
 #: controllers/accounts_controller.py:2651
 msgid "To include tax in row {0} in Item rate, taxes in rows {1} must also be included"
 msgstr "Att inkludera moms på rad {0} i artikel pris, moms i rader {1} måste också inkluderas"
@@ -54553,7 +54581,7 @@ msgstr "Totala Tilldelningar"
 #. Label of the total_amount (Currency) field in DocType 'Stock Entry'
 #: accounts/doctype/invoice_discounting/invoice_discounting.json
 #: accounts/doctype/journal_entry/journal_entry.json
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:231
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:233
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:131
 #: selling/page/sales_funnel/sales_funnel.py:151
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
@@ -55417,7 +55445,7 @@ msgstr "Transaktion Inställningar"
 
 #. Label of the transaction_type (Data) field in DocType 'Bank Transaction'
 #: accounts/doctype/bank_transaction/bank_transaction.json
-#: accounts/report/tax_withholding_details/tax_withholding_details.py:254
+#: accounts/report/tax_withholding_details/tax_withholding_details.py:256
 msgid "Transaction Type"
 msgstr "Transaktion Typ"
 
@@ -55433,7 +55461,7 @@ msgstr "Transaktion valuta: {0} kan inte skilja sig från Bank Konto ({1}) valut
 msgid "Transaction not allowed against stopped Work Order {0}"
 msgstr "Transaktion tillåts inte mot stoppad Arbetsorder {0}"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1148
+#: accounts/doctype/payment_entry/payment_entry.py:1168
 msgid "Transaction reference no {0} dated {1}"
 msgstr "Transaktion referens nummer {0} daterad {1}"
 
@@ -55465,7 +55493,7 @@ msgstr "Transaktioner mot bolag finns redan! Kontoplan kan endast importeras fö
 #: buying/doctype/purchase_order/purchase_order.js:367
 #: stock/doctype/item_reorder/item_reorder.json
 #: stock/doctype/serial_no/serial_no.json
-#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:208
+#: subcontracting/doctype/subcontracting_order/subcontracting_order.js:238
 msgid "Transfer"
 msgstr "Överföring"
 
@@ -56645,7 +56673,7 @@ msgstr "Använd Serie / Parti Nummer Fält"
 msgid "Use Transaction Date Exchange Rate"
 msgstr "Använd Transaktion Datum Växelkurs"
 
-#: projects/doctype/project/project.py:543
+#: projects/doctype/project/project.py:542
 msgid "Use a name that is different from previous project name"
 msgstr "Använd namn som skiljer sig från tidigare projekt namn"
 
@@ -57023,11 +57051,11 @@ msgstr "Grund Pris"
 msgid "Valuation Rate (In / Out)"
 msgstr "Grund Pris (In/Ut)"
 
-#: stock/stock_ledger.py:1742
+#: stock/stock_ledger.py:1774
 msgid "Valuation Rate Missing"
 msgstr "Grund Pris Saknas"
 
-#: stock/stock_ledger.py:1720
+#: stock/stock_ledger.py:1752
 msgid "Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}."
 msgstr "Grund Pris för Artikel {0} erfodras att skapa bokföring poster för {1} {2}."
 
@@ -57049,7 +57077,7 @@ msgstr "Grund Pris och Totalt"
 msgid "Valuation rate for customer provided items has been set to zero."
 msgstr "Grund Pris för Kund Försedda Artiklar sattes till noll."
 
-#: accounts/doctype/payment_entry/payment_entry.py:1712
+#: accounts/doctype/payment_entry/payment_entry.py:1732
 #: controllers/accounts_controller.py:2675
 msgid "Valuation type charges can not be marked as Inclusive"
 msgstr "Värdering typ avgifter kan inte väljas som Inklusiva"
@@ -57331,8 +57359,8 @@ msgstr "Video Inställningar"
 #: stock/doctype/purchase_receipt/purchase_receipt.js:207
 #: stock/doctype/purchase_receipt/purchase_receipt.js:218
 #: stock/doctype/stock_entry/stock_entry.js:291
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:44
-#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:60
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:46
+#: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:62
 msgid "View"
 msgstr "Visa"
 
@@ -57355,7 +57383,7 @@ msgid "View Exchange Gain/Loss Journals"
 msgstr "Visa Växelkurs Resultat Journaler"
 
 #: assets/doctype/asset/asset.js:164
-#: assets/doctype/asset_repair/asset_repair.js:47
+#: assets/doctype/asset_repair/asset_repair.js:56
 msgid "View General Ledger"
 msgstr "Visa Bokföring Register"
 
@@ -57722,7 +57750,7 @@ msgstr "Väntar på betalning..."
 #: assets/doctype/asset_repair_consumed_item/asset_repair_consumed_item.json
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:267
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:271
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: manufacturing/doctype/bom_operation/bom_operation.json
@@ -59043,7 +59071,7 @@ msgstr "Ja"
 msgid "You are not allowed to update as per the conditions set in {} Workflow."
 msgstr "Du är inte behörig att uppdatera enligt villkoren i {} Arbetsflöde."
 
-#: accounts/general_ledger.py:683
+#: accounts/general_ledger.py:695
 msgid "You are not authorized to add or update entries before {0}"
 msgstr "Du är inte behörig att lägga till eller uppdatera poster före {0}"
 
@@ -59088,7 +59116,7 @@ msgid "You can only have Plans with the same billing cycle in a Subscription"
 msgstr "Du kan bara ha planer med samma fakturering tid i prenumeration"
 
 #: accounts/doctype/pos_invoice/pos_invoice.js:258
-#: accounts/doctype/sales_invoice/sales_invoice.js:919
+#: accounts/doctype/sales_invoice/sales_invoice.js:922
 msgid "You can only redeem max {0} points in this order."
 msgstr "Du kan bara lösa in maximala {0} poäng i denna följd."
 
@@ -59129,7 +59157,7 @@ msgstr "Du kan inte skapa {0} inom stängd bokföring period {1}"
 msgid "You cannot create or cancel any accounting entries with in the closed Accounting Period {0}"
 msgstr "Du kan inte skapa eller annullera bokföring poster under stängd bokföring period {0}"
 
-#: accounts/general_ledger.py:703
+#: accounts/general_ledger.py:715
 msgid "You cannot create/amend any accounting entries till this date."
 msgstr "Du kan inte skapa/ändra några bokföring poster fram till detta datum."
 
@@ -59185,7 +59213,7 @@ msgstr "Du hade {} fel när du skapade öppning fakturor. Kontrollera {} för me
 msgid "You have already selected items from {0} {1}"
 msgstr "Du har redan valt Artikel från {0} {1}"
 
-#: projects/doctype/project/project.py:336
+#: projects/doctype/project/project.py:335
 msgid "You have been invited to collaborate on the project: {0}"
 msgstr "Du har blivit inbjuden att samarbeta i projekt: {0}"
 
@@ -59294,11 +59322,11 @@ msgstr "Zip Fil"
 msgid "[Important] [ERPNext] Auto Reorder Errors"
 msgstr "[Viktigt] [System] Automatisk Ombeställning Fel"
 
-#: controllers/status_updater.py:247
+#: controllers/status_updater.py:250
 msgid "`Allow Negative rates for Items`"
 msgstr "\"Tillåt Negativa Priser för Artiklar\"."
 
-#: stock/stock_ledger.py:1734
+#: stock/stock_ledger.py:1766
 msgid "after"
 msgstr "efter"
 
@@ -59318,7 +59346,7 @@ msgstr "kl."
 msgid "based_on"
 msgstr "Baserad På"
 
-#: public/js/utils/sales_common.js:256
+#: public/js/utils/sales_common.js:278
 msgid "cannot be greater than 100"
 msgstr "Rabatt kan inte vara högre än 100%"
 
@@ -59459,7 +59487,7 @@ msgstr "eller dess underordnad"
 msgid "out of 5"
 msgstr "av 5 möjliga"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1141
+#: accounts/doctype/payment_entry/payment_entry.py:1161
 msgid "paid to"
 msgstr "Betald till"
 
@@ -59495,7 +59523,7 @@ msgstr "payment app är inte installerad. Installera det från {0} eller {1}"
 msgid "per hour"
 msgstr "Kostnad per Timme"
 
-#: stock/stock_ledger.py:1735
+#: stock/stock_ledger.py:1767
 msgid "performing either one below:"
 msgstr "utför någon av dem nedan:"
 
@@ -59520,7 +59548,7 @@ msgstr "Försäljning Offert Artikel"
 msgid "ratings"
 msgstr "Bedömningar"
 
-#: accounts/doctype/payment_entry/payment_entry.py:1141
+#: accounts/doctype/payment_entry/payment_entry.py:1161
 msgid "received from"
 msgstr "mottagen från"
 
@@ -59558,7 +59586,7 @@ msgstr "Sandlåda"
 msgid "subscription is already cancelled."
 msgstr "prenumeration är redan annullerad."
 
-#: controllers/status_updater.py:349 controllers/status_updater.py:369
+#: controllers/status_updater.py:352 controllers/status_updater.py:372
 msgid "target_ref_field"
 msgstr "target_ref_field"
 
@@ -59800,7 +59828,7 @@ msgid "{0} is mandatory for Item {1}"
 msgstr "{0} är erfodrad för Artikel {1}"
 
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:101
-#: accounts/general_ledger.py:727
+#: accounts/general_ledger.py:739
 msgid "{0} is mandatory for account {1}"
 msgstr "{0} är erfodrad för konto {1}"
 
@@ -59844,7 +59872,7 @@ msgstr "{0} körs inte. Kan inte utlösa händelser för detta Dokument"
 msgid "{0} is not the default supplier for any items."
 msgstr "{0} är inte Standard Leverantör för någon av Artiklar."
 
-#: accounts/doctype/payment_entry/payment_entry.py:2388
+#: accounts/doctype/payment_entry/payment_entry.py:2408
 msgid "{0} is on hold till {1}"
 msgstr "{0} är parkerad till {1}"
 
@@ -59903,16 +59931,16 @@ msgstr "{0} enheter av Artikel {1} är vald  i en annan Plocklista."
 msgid "{0} units of {1} are required in {2}{3}, on {4} {5} for {6} to complete the transaction."
 msgstr "{0} enheter av {1} erfodras i {2}{3}, den {4} {5} för att {6} ska kunna slutföra transaktion."
 
-#: stock/stock_ledger.py:1406 stock/stock_ledger.py:1884
-#: stock/stock_ledger.py:1898
+#: stock/stock_ledger.py:1438 stock/stock_ledger.py:1916
+#: stock/stock_ledger.py:1930
 msgid "{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 msgstr "{0} enheter av {1} behövs i {2} den {3} {4} för {5} för att slutföra denna transaktion."
 
-#: stock/stock_ledger.py:2008 stock/stock_ledger.py:2054
+#: stock/stock_ledger.py:2040 stock/stock_ledger.py:2086
 msgid "{0} units of {1} needed in {2} on {3} {4} to complete this transaction."
 msgstr "{0} enheter av {1} behövs i {2} den {3} {4} för att slutföra denna transaktion."
 
-#: stock/stock_ledger.py:1400
+#: stock/stock_ledger.py:1432
 msgid "{0} units of {1} needed in {2} to complete this transaction."
 msgstr "{0} enheter av {1} behövs i {2} för att slutföra denna transaktion."
 
@@ -59950,7 +59978,7 @@ msgstr "{0} {1} skapad"
 
 #: accounts/doctype/payment_entry/payment_entry.py:537
 #: accounts/doctype/payment_entry/payment_entry.py:595
-#: accounts/doctype/payment_entry/payment_entry.py:2129
+#: accounts/doctype/payment_entry/payment_entry.py:2149
 msgid "{0} {1} does not exist"
 msgstr "{0} {1} finns inte"
 
