@@ -80,8 +80,10 @@ frappe.ui.form.on("POS Closing Entry", {
 		) {
 			reset_values(frm);
 			frappe.run_serially([
+				() => frappe.dom.freeze(__("Loading Invoices! Please Wait...")),
 				() => frm.trigger("set_opening_amounts"),
 				() => frm.trigger("get_pos_invoices"),
+				() => frappe.dom.unfreeze(),
 			]);
 		}
 	},
