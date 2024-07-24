@@ -462,11 +462,8 @@ scheduler_events = {
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
-<<<<<<< HEAD
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_demand_loans",
-=======
 		"erpnext.accounts.utils.auto_create_exchange_rate_revaluation_monthly",
->>>>>>> fc4e5f165c (refactor: hooks for monthly re-evaluation jobs)
 	],
 }
 
