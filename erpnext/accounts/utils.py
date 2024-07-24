@@ -1598,6 +1598,18 @@ def auto_create_exchange_rate_revaluation_weekly() -> None:
 	create_err_and_its_journals(companies)
 
 
+def auto_create_exchange_rate_revaluation_monthly() -> None:
+	"""
+	Executed by background job
+	"""
+	companies = frappe.db.get_all(
+		"Company",
+		filters={"auto_exchange_rate_revaluation": 1, "auto_err_frequency": "Montly"},
+		fields=["name", "submit_err_jv"],
+	)
+	create_err_and_its_journals(companies)
+
+
 def get_payment_ledger_entries(gl_entries, cancel=0):
 	ple_map = []
 	if gl_entries:
