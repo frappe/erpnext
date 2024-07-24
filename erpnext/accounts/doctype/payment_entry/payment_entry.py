@@ -181,7 +181,7 @@ class PaymentEntry(AccountsController):
 		self.set_total_in_words()
 
 	def before_save(self):
-		self.check_payment_requests()
+		self.check_references_for_unset_payment_request()
 
 	def on_submit(self):
 		if self.difference_amount:
@@ -190,9 +190,8 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_payment_schedule()
-		self.set_payment_req_outstanding_amount()
-		self.set_payment_req_status()
-		self.set_reference_advance_payment_status()
+		self.update_payment_requests()
+		self.update_references_advance_payment_status()
 		self.set_status()
 
 	def set_liability_account(self):
@@ -267,33 +266,25 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.delink_advance_entry_references()
 		self.update_payment_schedule(cancel=1)
-		self.set_payment_req_outstanding_amount(cancel=True)
-		self.set_payment_req_status()
-		self.set_reference_advance_payment_status()
+		self.update_payment_requests(cancel=True)
+		self.update_references_advance_payment_status()
 		self.set_status()
 
-	def set_payment_req_outstanding_amount(self, cancel=False):
+	def update_payment_requests(self, cancel=False):
 		from erpnext.accounts.doctype.payment_request.payment_request import (
-			update_payment_req_outstanding_amount,
+			update_payment_requests_as_per_pe_references,
 		)
 
-		update_payment_req_outstanding_amount(self, cancel=cancel)
+		update_payment_requests_as_per_pe_references(self.references, cancel=cancel)
 
-	def set_payment_req_status(self):
-		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
-
-		update_payment_req_status(self, None)
-
-	# todo: need to optimize
-	def set_reference_advance_payment_status(self):
+	def update_references_advance_payment_status(self):
 		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
 			"advance_payment_payable_doctypes"
 		)
 
 		for ref in self.get("references"):
-			ref_doc = frappe.get_doc(ref.reference_doctype, ref.reference_name)
 			if ref.reference_doctype in advance_payment_doctypes:
-				# set advance payment status
+				ref_doc = frappe.get_doc(ref.reference_doctype, ref.reference_name)
 				ref_doc.set_advance_payment_status()
 
 	def update_outstanding_amounts(self):
@@ -334,7 +325,7 @@ class PaymentEntry(AccountsController):
 		if self.payment_type == "Internal Transfer":
 			return
 
-		self.validate_allocated_amount_as_of_pr()
+		self.validate_allocated_amount_as_per_payment_request()
 
 		if self.party_type in ("Customer", "Supplier"):
 			self.validate_allocated_amount_with_latest_data()
@@ -348,7 +339,7 @@ class PaymentEntry(AccountsController):
 				if flt(d.allocated_amount) < 0 and flt(d.allocated_amount) < flt(d.outstanding_amount):
 					frappe.throw(fail_message.format(d.idx))
 
-	def validate_allocated_amount_as_of_pr(self):
+	def validate_allocated_amount_as_per_payment_request(self):
 		from erpnext.accounts.doctype.payment_request.payment_request import (
 			get_outstanding_amount_of_payment_entry_references as get_outstanding_amounts,
 		)
@@ -358,9 +349,10 @@ class PaymentEntry(AccountsController):
 		for ref in self.references:
 			if ref.payment_request and ref.allocated_amount > outstanding_amounts[ref.payment_request]:
 				frappe.throw(
-					_("Allocated Amount cannot be greater than Outstanding Amount of {0}").format(
-						get_link_to_form("Payment Request", ref.payment_request)
-					)
+					msg=_(
+						"Row #{0}: Allocated Amount cannot be greater than Outstanding Amount of Payment Request {1}"
+					).format(ref.idx, get_link_to_form("Payment Request", ref.payment_request)),
+					title=_("Invalid Allocated Amount"),
 				)
 
 	def term_based_allocation_enabled_for_reference(
@@ -1735,59 +1727,69 @@ class PaymentEntry(AccountsController):
 
 		return current_tax_fraction
 
-	def check_payment_requests(self):
+	def check_references_for_unset_payment_request(self):
 		if not self.references:
 			return
 
-		not_set_count = sum(1 for row in self.references if not row.payment_request)
+		matched_payment_requests = get_matched_payment_requests_of_references(
+			[row for row in self.references if not row.payment_request]
+		)
 
-		if not_set_count == 0:
-			return
-		elif not_set_count == 1:
-			msg = _("{0} {1} is not set in {2}").format(
-				not_set_count,
-				frappe.bold("Payment Request"),
-				frappe.bold("Payment References"),
-			)
-		else:
-			msg = _("{0} {1} are not set in {2}").format(
-				not_set_count,
-				frappe.bold("Payment Request"),
-				frappe.bold("Payment References"),
+		unset_pr_rows = {}
+
+		for row in self.references:
+			if row.payment_request:
+				continue
+
+			matched_pr = matched_payment_requests.get(
+				(row.reference_doctype, row.reference_name, row.allocated_amount)
 			)
 
-		frappe.msgprint(msg=msg, alert=True, indicator="orange")
+			if matched_pr:
+				unset_pr_rows[row.idx] = matched_pr
 
-	# todo: can be optimize
+		if unset_pr_rows:
+			message = _("Matched Payment Requests found for references, but not set. <br><br>")
+			message += _("<details><summary><strong>View Details</strong></summary><ul>")
+			for idx, pr in unset_pr_rows.items():
+				message += _("<li>Row #{0}: {1}</li>").format(idx, get_link_to_form("Payment Request", pr))
+			message += _("</ul></details>")
+
+			frappe.msgprint(
+				msg=message,
+				indicator="yellow",
+			)
+
 	@frappe.whitelist()
 	def set_matched_payment_requests(self):
 		if not self.references:
 			return
 
+		matched_payment_requests = get_matched_payment_requests_of_references(self.references)
+
 		matched_count = 0
 
 		for row in self.references:
-			if row.payment_request or (
-				not row.reference_doctype or not row.reference_name or not row.allocated_amount
+			if (
+				row.payment_request
+				or not row.reference_doctype
+				or not row.reference_name
+				or not row.allocated_amount
 			):
 				continue
 
-			row.payment_request = get_matched_payment_request(
-				row.reference_doctype, row.reference_name, row.allocated_amount
+			row.payment_request = matched_payment_requests.get(
+				(row.reference_doctype, row.reference_name, row.allocated_amount)
 			)
 
 			if row.payment_request:
 				matched_count += 1
 
-		if matched_count == 0:
+		if not matched_count:
 			return
-		elif matched_count == 1:
-			msg = _("{0} matched {1} is set").format(matched_count, frappe.bold("Payment Request"))
-		else:
-			msg = _("{0} matched {1} are set").format(matched_count, frappe.bold("Payment Request"))
 
 		frappe.msgprint(
-			msg=msg,
+			msg=_("Setting {0} matched Payment Request(s)").format(matched_count),
 			alert=True,
 		)
 
@@ -1799,38 +1801,61 @@ class PaymentEntry(AccountsController):
 			frappe.throw(_("Row #{0} not found").format(row_idx), title=_("Row Not Found"))
 
 		# if payment entry already set then do not set it again
-		if row.payment_request:
+		if (
+			row.payment_request
+			or not row.reference_doctype
+			or not row.reference_name
+			or not row.allocated_amount
+		):
 			return
 
-		row.payment_request = get_matched_payment_request(
-			row.reference_doctype, row.reference_name, row.allocated_amount
+		matched_pr = get_matched_payment_requests_of_references([row])
+
+		if not matched_pr:
+			return
+
+		row.payment_request = matched_pr[(row.reference_doctype, row.reference_name, row.allocated_amount)]
+
+		frappe.msgprint(
+			msg=_("Setting matched Payment Request"),
+			alert=True,
 		)
 
-		if row.payment_request:
-			frappe.msgprint(
-				msg=_("Matched {0} is set").format(frappe.bold("Payment Request")),
-				alert=True,
-			)
 
+# FIXME: can be optimize and use query builder
+def get_matched_payment_requests_of_references(references=None):
+	if not references:
+		return
 
-# todo: can be optimize
-def get_matched_payment_request(reference_doctype, reference_name, outstanding_amount):
-	payment_requests = frappe.get_all(
-		doctype="Payment Request",
-		filters={
-			"reference_doctype": reference_doctype,
-			"reference_name": reference_name,
-			"outstanding_amount": outstanding_amount,
-			"status": ["!=", "Paid"],
-			"docstatus": 1,
-		},
-		pluck="name",
+	refs = [
+		(row.reference_doctype, row.reference_name, row.allocated_amount)
+		for row in references
+		if row.reference_doctype and row.reference_name and row.allocated_amount
+	]
+
+	if not refs:
+		return
+
+	all_matched_prs = frappe.db.sql(
+		"""
+        select name, reference_doctype, reference_name, outstanding_amount
+        from `tabPayment Request`
+        where (reference_doctype, reference_name, outstanding_amount) in %s
+        and status != 'Paid' and docstatus = 1
+        """,
+		(refs,),
+		as_dict=True,
 	)
 
-	if len(payment_requests) == 1:
-		return payment_requests[0]
+	single_matched_prs = {}
+	for pr in all_matched_prs:
+		key = (pr.reference_doctype, pr.reference_name, pr.outstanding_amount)
+		if key in single_matched_prs:
+			single_matched_prs[key].append(pr.name)
+		else:
+			single_matched_prs[key] = [pr.name]
 
-	return None
+	return {key: names[0] for key, names in single_matched_prs.items() if len(names) == 1}
 
 
 def validate_inclusive_tax(tax, doc):

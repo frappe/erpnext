@@ -134,7 +134,8 @@
    "no_copy": 1,
    "options": "reference_doctype",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "transaction_details",
@@ -147,7 +148,8 @@
    "fieldtype": "Currency",
    "label": "Amount",
    "non_negative": 1,
-   "options": "currency"
+   "options": "currency",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -403,7 +405,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
+   "depends_on": "eval: doc.docstatus === 1",
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
@@ -415,7 +417,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-20 17:54:33.064658",
+ "modified": "2024-07-23 19:02:07.754296",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
