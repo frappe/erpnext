@@ -754,7 +754,7 @@
    "fieldname": "auto_err_frequency",
    "fieldtype": "Select",
    "label": "Frequency",
-   "options": "Daily\nWeekly"
+   "options": "Daily\nWeekly\nMonthly"
   },
   {
    "default": "0",
@@ -808,7 +808,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2024-06-21 17:46:25.567565",
+ "modified": "2024-07-24 18:17:56.413971",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
