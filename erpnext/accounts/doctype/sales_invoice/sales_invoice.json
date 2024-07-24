@@ -213,7 +213,6 @@
   "is_internal_customer",
   "is_discounted",
   "remarks",
-  "repost_required",
   "connections_tab"
  ],
  "fields": [
@@ -2184,7 +2183,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2024-05-08 18:02:28.549041",
+ "modified": "2024-07-18 15:30:39.428519",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
