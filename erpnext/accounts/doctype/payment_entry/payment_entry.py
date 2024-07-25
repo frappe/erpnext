@@ -7,6 +7,8 @@ from functools import reduce
 
 import frappe
 from frappe import ValidationError, _, qb, scrub, throw
+from frappe.query_builder import Tuple
+from frappe.query_builder.functions import Count
 from frappe.utils import cint, comma_or, flt, getdate, nowdate
 from frappe.utils.data import comma_and, fmt_money, get_link_to_form
 from pypika import Case
@@ -1822,11 +1824,11 @@ class PaymentEntry(AccountsController):
 		)
 
 
-# FIXME: can be optimize and use query builder
 def get_matched_payment_requests_of_references(references=None):
 	if not references:
 		return
 
+	# to fetch matched rows
 	refs = [
 		(row.reference_doctype, row.reference_name, row.allocated_amount)
 		for row in references
@@ -1836,26 +1838,27 @@ def get_matched_payment_requests_of_references(references=None):
 	if not refs:
 		return
 
-	all_matched_prs = frappe.db.sql(
-		"""
-        select name, reference_doctype, reference_name, outstanding_amount
-        from `tabPayment Request`
-        where (reference_doctype, reference_name, outstanding_amount) in %s
-        and status != 'Paid' and docstatus = 1
-        """,
-		(refs,),
-		as_dict=True,
+	PR = frappe.qb.DocType("Payment Request")
+
+	# query to group by reference_doctype, reference_name, outstanding_amount
+	subquery = (
+		frappe.qb.from_(PR)
+		.select(
+			PR.name, PR.reference_doctype, PR.reference_name, PR.outstanding_amount, Count("*").as_("count")
+		)
+		.where(Tuple(PR.reference_doctype, PR.reference_name, PR.outstanding_amount).isin(refs))
+		.where(PR.status != "Paid")
+		.where(PR.docstatus == 1)
+		.groupby(PR.reference_doctype, PR.reference_name, PR.outstanding_amount)
 	)
 
-	single_matched_prs = {}
-	for pr in all_matched_prs:
-		key = (pr.reference_doctype, pr.reference_name, pr.outstanding_amount)
-		if key in single_matched_prs:
-			single_matched_prs[key].append(pr.name)
-		else:
-			single_matched_prs[key] = [pr.name]
+	# query to fetch matched rows which are single
+	matched_prs = frappe.qb.from_(subquery).select("*").where(subquery.count == 1).run(as_dict=True)
 
-	return {key: names[0] for key, names in single_matched_prs.items() if len(names) == 1}
+	if not matched_prs:
+		return
+
+	return {(pr.reference_doctype, pr.reference_name, pr.outstanding_amount): pr.name for pr in matched_prs}
 
 
 def validate_inclusive_tax(tax, doc):
