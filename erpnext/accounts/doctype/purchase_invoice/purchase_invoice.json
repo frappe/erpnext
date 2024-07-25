@@ -363,7 +363,8 @@
    "description": "Once set, this invoice will be on hold till the set date",
    "fieldname": "release_date",
    "fieldtype": "Date",
-   "label": "Release Date"
+   "label": "Release Date",
+   "search_index": 1
   },
   {
    "fieldname": "cb_17",
@@ -1630,7 +1631,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-07-18 15:31:49.488566",
+ "modified": "2024-07-25 19:42:36.931278",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
