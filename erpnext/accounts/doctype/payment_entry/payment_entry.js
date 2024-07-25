@@ -167,15 +167,14 @@ frappe.ui.form.on("Payment Entry", {
 		});
 
 		frm.set_query("payment_request", "references", function (doc, cdt, cdn) {
-			const row = locals[cdt][cdn];
-			const filters = {
-				docstatus: 1,
-				status: ["!=", "Paid"],
-				reference_doctype: row.reference_doctype,
-				reference_name: row.reference_name,
-			};
+			const row = frappe.get_doc(cdt, cdn);
 			return {
-				filters: filters,
+				filters: {
+					docstatus: 1,
+					status: ["!=", "Paid"],
+					reference_doctype: row.reference_doctype,
+					reference_name: row.reference_name,
+				},
 			};
 		});
 
