@@ -253,7 +253,7 @@ class Task(NestedSet):
 				if (
 					task.exp_start_date
 					and task.exp_end_date
-					and task.exp_start_date < end_date
+					and getdate(task.exp_start_date) < end_date
 					and task.status == "Open"
 				):
 					task_duration = date_diff(task.exp_end_date, task.exp_start_date)
