@@ -183,13 +183,8 @@
   },
   {
    "fieldname": "address_display",
-<<<<<<< HEAD
    "fieldtype": "Small Text",
-   "label": "Supplier Address Details",
-=======
-   "fieldtype": "Text Editor",
    "label": "Job Worker Address Details",
->>>>>>> 302339998f (fix: Fields Modification for Subcontracting DocTypes (#42383))
    "read_only": 1
   },
   {
