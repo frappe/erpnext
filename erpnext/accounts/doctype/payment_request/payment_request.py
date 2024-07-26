@@ -509,7 +509,8 @@ def make_payment_request(**args):
 		for dimension in get_accounting_dimensions():
 			pr.update({dimension: ref_doc.get(dimension)})
 
-		pr.insert(ignore_permissions=True)
+		if frappe.db.get_single_value("Accounts Settings", "create_pr_in_draft_status", cache=True):
+			pr.insert(ignore_permissions=True)
 		if args.submit_doc:
 			pr.submit()
 
