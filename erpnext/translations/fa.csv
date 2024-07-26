@@ -64,7 +64,7 @@ Account {0} is invalid. Account Currency must be {1},حساب {0} نامعتبر
 Account {0}: Parent account {1} can not be a ledger,حساب {0}: حساب مرجع {1} می تواند یک دفتر نمی,
 Account {0}: Parent account {1} does not belong to company: {2},حساب {0}: حساب مرجع {1} به شرکت تعلق ندارد: {2},
 Account {0}: Parent account {1} does not exist,حساب {0}: حساب مرجع {1} وجود ندارد,
-Account {0}: You can not assign itself as parent account,حساب {0}: شما نمی توانید خود را به عنوان پدر و مادر اختصاص حساب,
+Account {0}: You can not assign itself as parent account,حساب {0}: شما نمی توانید خودتان را به عنوان حساب مادر اختصاص دهید,
 Account: {0} can only be updated via Stock Transactions,حساب: {0} تنها می تواند از طریق تراکنش‌های انبار به روز شده,
 Account: {0} with currency: {1} can not be selected,حساب: {0} با ارز: {1} نمی تواند انتخاب شود,
 Accountant,حسابدار,
@@ -661,7 +661,7 @@ Creditors,طلبکاران,
 Criteria weights must add up to 100%,وزنهای معیار باید تا 100٪,
 Crop Cycle,چرخه محصول,
 Crops & Lands,گیاهان و زمین,
-Currency Exchange must be applicable for Buying or for Selling.,مبادله ارز باید برای خرید و یا برای فروش قابل اجرا باشد.,
+Currency Exchange must be applicable for Buying or for Selling.,تبدیل ارز باید برای خرید و یا برای فروش قابل اجرا باشد.,
 Currency can not be changed after making entries using some other currency,نرخ ارز می تواند پس از ساخت ورودی با استفاده از یک ارز دیگر، نمی توان تغییر داد,
 Currency exchange rate master.,نرخ ارز نرخ ارز استاد.,
 Currency for {0} must be {1},ارز برای {0} باید {1},
@@ -724,7 +724,7 @@ Default Activity Cost exists for Activity Type - {0},هزینه به طور پی
 Default BOM ({0}) must be active for this item or its template,به طور پیش فرض BOM ({0}) باید برای این آیتم به و یا قالب آن فعال باشد,
 Default BOM for {0} not found,BOM به طور پیش فرض برای {0} یافت نشد,
 Default BOM not found for Item {0} and Project {1},به طور پیش فرض BOM برای موردی یافت نشد {0} و پروژه {1},
-Default Letter Head,پیش فرض سر نامه,
+Default Letter Head,سربرگ پیش فرض,
 Default Tax Template,قالب پیش فرض مالیات,
 Default Unit of Measure for Item {0} cannot be changed directly because you have already made some transaction(s) with another UOM. You will need to create a new Item to use a different Default UOM.,واحد اندازه گیری پیش فرض برای مورد {0} می توانید به طور مستقیم نمی توان تغییر چون در حال حاضر ساخته شده برخی از معامله (ها) با UOM است. شما نیاز به ایجاد یک آیتم جدید به استفاده از پیش فرض UOM متفاوت است.,
 Default Unit of Measure for Variant '{0}' must be same as in Template '{1}',واحد اندازه گیری پیش فرض برای متغیر &#39;{0}&#39; باید همان باشد که الگوی رو به رو است: &#39;{1}&#39;,
@@ -753,7 +753,7 @@ Delivery Notes {0} must be cancelled before cancelling this Sales Order,رسید
 Delivery Notes {0} updated,رسید تحویل {0} به روز شد,
 Delivery Status,وضعیت تحویل,
 Delivery Trip,حمل و نقل محموله تحویلی,
-Delivery warehouse required for stock item {0},انبار تحویل مورد نیاز برای موجودی کالای {0},
+Delivery warehouse required for stock item {0},انبار تحویل برای موجودی کالای {0} مورد نیاز است,
 Department,بخش,
 Department Stores,فروشگاه های گروه,
 Depreciation,استهلاک,
@@ -782,8 +782,8 @@ Difference Amount must be zero,مقدار تفاوت باید صفر باشد,
 Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,UOM مختلف برای اقلام خواهد به نادرست (مجموع) خالص ارزش وزن منجر شود. مطمئن شوید که وزن خالص هر یک از آیتم است در UOM همان.,
 Direct Expenses,هزینه های مستقیم,
 Direct Income,درآمد مستقیم,
-Disable,از کار انداختن,
-Disabled template must not be default template,قالب غیر فعال نباید قالب پیش فرض,
+Disable,غیرفعال‌سازی,
+Disabled template must not be default template,قالب غیر فعال نباید قالب پیش فرض باشد,
 Disburse Loan,پرداخت وام,
 Disbursed,پرداخت شده,
 Disc,دیسک,
@@ -889,7 +889,7 @@ Enter the name of the bank or lending institution before submittting.,قبل ا�
 Enter value betweeen {0} and {1},مقداری را وارد کنید {0} و {1},
 Entertainment & Leisure,سرگرمی و اوقات فراغت,
 Entertainment Expenses,هزینه سرگرمی,
-Equity,انصاف,
+Equity,سهام,
 Error Log,ورود به خطا,
 Error evaluating the criteria formula,خطا در ارزیابی فرمول معیار,
 Error in formula or condition: {0},اشکال در فرمول یا شرایط: {0},
@@ -987,7 +987,7 @@ For Warehouse,ذخیره سازی,
 For Warehouse is required before Submit,ذخیره سازی قبل از ارسال مورد نیاز است,
 "For an item {0}, quantity must be negative number",برای یک مورد {0}، مقدار باید شماره منفی باشد,
 "For an item {0}, quantity must be positive number",برای یک مورد {0}، مقدار باید عدد مثبت باشد,
-"For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry",برای کارت فعالیت {0} ، فقط می توانید نوع ورودی انبار &quot;انتقال مواد برای ساخت&quot; را تهیه کنید,
+"For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry",برای کارت فعالیت {0} ، فقط می توانید نوع انتقال کالا &quot;انتقال مواد برای ساخت&quot; را تهیه کنید,
 "For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included",برای ردیف {0} در {1}. شامل {2} در مورد نرخ، ردیف {3} نیز باید گنجانده شود,
 For row {0}: Enter Planned Qty,برای ردیف {0}: تعداد برنامه ریزی شده را وارد کنید,
 "For {0}, only credit accounts can be linked against another debit entry",برای {0}، تنها حساب های اعتباری می تواند در مقابل ورود بدهی دیگر مرتبط,
@@ -1058,7 +1058,7 @@ GoCardless SEPA Mandate,GoCardless مجوز SEPA,
 GoCardless payment gateway settings,تنظیمات دروازه پرداخت GoCardless,
 Goal and Procedure,هدف و رویه,
 Goals cannot be empty,اهداف نمی تواند خالی باشد,
-Goods In Transit,کالاها در ترانزیت,
+Goods In Transit,کالاهای در حال انتقال,
 Goods Transferred,کالاها منتقل می شوند,
 Goods and Services Tax (GST India),محصولات و خدمات مالیاتی (GST هند),
 Goods are already received against the outward entry {0},محصولات در حال حاضر در برابر ورودی خارج آمده {0},
@@ -1130,13 +1130,13 @@ ITC Reversed,ITC معکوس شد,
 Identifying Decision Makers,شناسایی تصمیم گیرندگان,
 "If Auto Opt In is checked, then the customers will be automatically linked with the concerned Loyalty Program (on save)",اگر Auto Opt In چک شود، سپس مشتریان به طور خودکار با برنامه وفاداری مرتبط (در ذخیره),
 "If multiple Pricing Rules continue to prevail, users are asked to set Priority manually to resolve conflict.","اگر چندین قانون قیمت‌گذاری همچنان اعمال شوند، از کاربران خواسته می‌شود تا برای حل تعارض، اولویت را به صورت دستی تنظیم کنند.",
-"If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.",اگر قانون قیمت‌گذاری انتخاب شده برای 'نرخ' باشد، این قانون لیست قیمت را نادیده می‌گیرد. نرخ قانون قیمت‌گذاری، نرخ نهایی است و نباید تخفیف بیشتری اعمال شود. بنابراین، در تراکنش‌هایی مانند سفارش فروش، سفارش خرید و غیره، این نرخ در فیلد 'نرخ' اعمال خواهد شد، نه در فیلد 'نرخ لیست قیمت'.,
+"If selected Pricing Rule is made for 'Rate', it will overwrite Price List. Pricing Rule rate is the final rate, so no further discount should be applied. Hence, in transactions like Sales Order, Purchase Order etc, it will be fetched in 'Rate' field, rather than 'Price List Rate' field.",اگر قانون قیمت‌گذاری انتخاب شده برای 'نرخ' باشد، این قانون لیست قیمت را نادیده می‌گیرد. نرخ قانون قیمت‌گذاری، نرخ نهایی است و نباید تخفیف بیشتری اعمال شود. بنابراین، در تراکنش‌هایی مانند دستور فروش، دستور خرید و غیره، این نرخ در فیلد 'نرخ' اعمال خواهد شد، نه در فیلد 'نرخ لیست قیمت'.,
 "If two or more Pricing Rules are found based on the above conditions, Priority is applied. Priority is a number between 0 to 20 while default value is zero (blank). Higher number means it will take precedence if there are multiple Pricing Rules with same conditions.","اگر دو یا چند قانون قیمت‌گذاری بر اساس شرایط فوق یافت شوند، اولویت اعمال می‌شود. اولویت عددی بین 0 تا 20 است و مقدار پیش‌فرض آن صفر (خالی) است. عدد بالاتر به این معنی است که در صورت وجود چندین قانون قیمت‌گذاری با شرایط مشابه، آن قانون ارجحیت خواهد داشت.",
 "If unlimited expiry for the Loyalty Points, keep the Expiry Duration empty or 0.",اگر مدت نامحدودی برای امتیازات وفاداری، مدت زمان انقضا خالی باشد یا 0.,
 "If you have any questions, please get back to us.",اگر شما هر گونه سوال، لطفا به ما دریافت کنید.,
 Ignore Existing Ordered Qty,نادیده گرفتن سفارش سفارش موجود را نادیده بگیرید,
 Image,تصویر,
-Image View,تصویر مشخصات,
+Image View,نمای تصویر,
 Import Data,درون‌ریزی داده‌ها,
 Import Day Book Data,وارد کردن اطلاعات کتاب روز,
 Import Log,درون‌ریزی لاگ,
@@ -1174,7 +1174,7 @@ Individual,فرد,
 Ineligible ITC,ITC واجد شرایط نیست,
 Initiated,آغاز,
 Inpatient Record,ضبط بستری,
-Installation Note,نکات نصب و راه اندازی,
+Installation Note,یادداشت نصب و راه اندازی,
 Installation Note {0} has already been submitted,نصب و راه اندازی {0} توجه داشته باشید در حال حاضر ارائه شده است,
 Installation date cannot be before delivery date for Item {0},تاریخ نصب و راه اندازی نمی تواند قبل از تاریخ تحویل برای مورد است {0},
 Installing presets,نصب ایستگاه از پیش تنظیم,
@@ -1201,7 +1201,7 @@ Invalid reference {0} {1},مرجع نامعتبر {0} {1},
 Invalid {0},نامعتبر {0},
 Invalid {0} for Inter Company Transaction.,{0} نامعتبر برای معاملات شرکت اینتر است,
 Invalid {0}: {1},نامعتبر {0}: {1},
-Inventory,فهرست,
+Inventory,انبار,
 Investment Banking,بانکداری سرمایه گذاری,
 Investments,سرمایه گذاری,
 Invoice,فاکتور,
@@ -1244,7 +1244,7 @@ Item Group,گروه کالا,
 Item Group Tree,درختواره‌ی گروه کالا,
 Item Group not mentioned in item master for item {0},گروه کالاها در کالای اصلی برای کالا {0} ذکر نشده,
 Item Name,نام کالا,
-Item Price added for {0} in Price List {1},مورد قیمت های اضافه شده برای {0} در لیست قیمت {1},
+Item Price added for {0} in Price List {1},قیمت کالا برای {0} در لیست قیمت {1} اضافه شد,
 "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates.",قیمت کالا چند بار بر اساس لیست قیمت، تامین کننده / مشتری، ارز، کالاها، واحد اندازه‌گیری، تعداد و تاریخ به نظر می رسد.,
 Item Price updated for {0} in Price List {1},مورد قیمت به روز شده برای {0} در لیست قیمت {1},
 Item Row {0}: {1} {2} does not exist in above '{1}' table,Item Row {0}: {1} {2} در جدول بالا {1} وجود ندارد,
@@ -1495,7 +1495,7 @@ Net Change in Accounts Receivable,تغییر خالص در حساب های در�
 Net Change in Cash,تغییر خالص در نقدی,
 Net Change in Equity,تغییر خالص در حقوق صاحبان سهام,
 Net Change in Fixed Asset,تغییر خالص دارائی های ثابت در,
-Net Change in Inventory,تغییر خالص در پرسشنامه,
+Net Change in Inventory,تغییر خالص در انبار,
 Net ITC Available(A) - (B),ITC خالص موجود (A) - (B),
 Net Profit,سود خالص,
 Net Total,مجموع خالص,
@@ -1696,7 +1696,7 @@ Paid Amount cannot be greater than total negative outstanding amount {0},مبل�
 Paid amount + Write Off Amount can not be greater than Grand Total,مبلغ پرداخت شده + نوشتن کردن مقدار نمی تواند بیشتر از جمع کل,
 Paid and Not Delivered,پرداخت و تحویل داده نشده است,
 Parameter,پارامتر,
-Parent Item {0} must not be a Stock Item,مورد پدر {0} نباید یک کالای انبار باشد,
+Parent Item {0} must not be a Stock Item,کالای مادر {0} نباید یک کالای انبار باشد,
 Parents Teacher Meeting Attendance,دیدار با تئاتر والدین,
 Partially Depreciated,نیمه مستهلک,
 Partially Received,تا حدی دریافت شد,
@@ -1810,7 +1810,7 @@ Please enter company first,لطفا ابتدا وارد شرکت,
 Please enter company name first,لطفا ابتدا نام شرکت وارد,
 Please enter default currency in Company Master,لطفا واحد پول پیشفرض را در موارد اصلی شرکت وارد کنید,
 Please enter message before sending,لطفا قبل از ارسال پیام را وارد کنید,
-Please enter parent cost center,لطفا مرکز هزینه پدر را وارد کنید,
+Please enter parent cost center,لطفا مرکز هزینه مادر را وارد کنید,
 Please enter quantity for Item {0},لطفا مقداری را برای کالای {0} وارد کنید,
 Please enter relieving date.,لطفا تاریخ تسکین وارد کنید.,
 Please enter valid Financial Year Start and End Dates,لطفا تاریخ شروع و پایان سال مالی معتبری را وارد کنید,
@@ -1822,9 +1822,9 @@ Please identify/create Account (Ledger) for type - {0},لطفاً حساب (دف
 Please login as another user to register on Marketplace,لطفا به عنوان یکی دیگر از کاربر برای ثبت نام در Marketplace وارد شوید,
 Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.,لطفا مطمئن شوید که شما واقعا می خواهید به حذف تمام معاملات این شرکت. اطلاعات کارشناسی ارشد خود را باقی خواهد ماند آن را به عنوان است. این عمل قابل بازگشت نیست.,
 Please mention Basic and HRA component in Company,لطفاً از مؤلفه های اصلی و HRA در شرکت ذکر کنید,
-Please mention Round Off Account in Company,لطفا در شرکت گرد حساب فعال ذکر,
-Please mention Round Off Cost Center in Company,لطفا دور کردن مرکز هزینه در شرکت ذکر,
-Please mention no of visits required,لطفا از هیچ بازدیدکننده داشته است مورد نیاز ذکر,
+Please mention Round Off Account in Company,لطفا گرد کردن حساب در شرکت ذکر شود,
+Please mention Round Off Cost Center in Company,لطفا گرد کردن مرکز هزینه در شرکت ذکر شود,
+Please mention no of visits required,لطفا ذکر شود که تعداد بازدیدکنندگان مورد نیاز است,
 Please mention the Lead Name in Lead {0},لطفا نام سرنخ را در سرنخ ذکر کنید {0},
 Please pull items from Delivery Note,لطفا توجه داشته باشید تحویل اقلام از جلو,
 Please register the SIREN number in the company information file,لطفا شماره SIREN را در پرونده اطلاعات شرکت ثبت کنید,
@@ -1895,7 +1895,7 @@ Please set Hotel Room Rate on {},لطفا قیمت اتاق هتل را برای
 Please set Number of Depreciations Booked,لطفا تعداد مجموعه ای از Depreciations رزرو,
 Please set Unrealized Exchange Gain/Loss Account in Company {0},لطفا مجموعه سود ناخالص موجود در حساب شرکت را {0},
 Please set User ID field in an Employee record to set Employee Role,لطفا درست ID کاربر در یک پرونده کارمند به مجموعه نقش کارمند تنظیم,
-Please set a default Holiday List for Employee {0} or Company {1},لطفا تنظیم پیش فرض لیست تعطیلات برای کارمند {0} یا شرکت {1},
+Please set a default Holiday List for Employee {0} or Company {1},لطفا پیش فرض لیست تعطیلات را برای کارمند {0} یا شرکت {1} تنظیم کنید,
 Please set account in Warehouse {0},لطفا حساب را در Warehouse تنظیم کنید {0},
 Please set an active menu for Restaurant {0},لطفا یک منوی فعال برای رستوران {0} تنظیم کنید,
 Please set associated account in Tax Withholding Category {0} against Company {1},لطفا حساب مربوطه را در بخش مالیات اجباری {0} در برابر شرکت {1} تنظیم کنید,
@@ -2209,7 +2209,7 @@ Root Company,شرکت ریشه,
 Root Type,نوع ریشه,
 Root Type is mandatory,نوع ریشه الزامی است,
 Root cannot be edited.,ریشه را نمیتوان ویرایش کرد.,
-Root cannot have a parent cost center,ریشه می تواند یک مرکز هزینه پدر و مادر ندارد,
+Root cannot have a parent cost center,ریشه نمی‌تواند یک مرکز هزینه مادر داشته باشد,
 Round Off,گرد کردن,
 Rounded Total,مجموع گرد شده,
 Route,مسیر,
@@ -2428,7 +2428,7 @@ Serial Numbers,شماره سریال,
 Serial Numbers in row {0} does not match with Delivery Note,شماره سریال در ردیف {0} با تحویل توجه مطابقت ندارد,
 Serial no {0} has been already returned,سریال هیچ {0} قبلا دریافت نشده است,
 Serial number {0} entered more than once,شماره سریال {0} وارد بیش از یک بار,
-Serialized Inventory,پرسشنامه سریال,
+Serialized Inventory,انبار سریال‌بندی شده,
 Series Updated,سری به‌روزرسانی,
 Series Updated Successfully,سری به‌روزرسانی با موفقیت,
 Series is mandatory,سری الزامی است,
@@ -2449,7 +2449,7 @@ Set as Closed,تنظیم به عنوان بسته,
 Set as Completed,تنظیم به عنوان تکمیل شده است,
 Set as Lost,تنظیم به عنوان از دست رفته,
 Set as Open,تنظیم به عنوان گسترش,
-Set default inventory account for perpetual inventory,تنظیم حساب موجودی به طور پیش فرض برای موجودی دائمی,
+Set default inventory account for perpetual inventory,تنظیم حساب پیش فرض انبار برای موجودی دائمی,
 Set this if the customer is a Public Administration company.,اگر مشتری یک شرکت مدیریت دولتی است ، این کار را تنظیم کنید.,
 Set {0} in asset category {1} or company {2},{0} را در دسته دارایی {1} یا شرکت {2},
 "Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}",تنظیم رویدادها به {0}، از کارمند متصل به زیر Persons فروش یک ID کاربر ندارد {1},
@@ -2550,10 +2550,10 @@ Stock Analytics,تجزیه و تحلیل انبار,
 Stock Assets,دارایی های انبار,
 Stock Available,موجودی در دسترس,
 Stock Balance,تراز انبار,
-Stock Entries already created for Work Order ,ورودی انبار برای دستور کار ایجاد شده است,
-Stock Entry,ورودی انبار,
-Stock Entry {0} created,ثبت {0} ورودی انبار,
-Stock Entry {0} is not submitted,ورودی انبار {0} ارسال نشده است,
+Stock Entries already created for Work Order ,انتقال کالا برای دستور کار ایجاد شده است,
+Stock Entry,انتقال کالا,
+Stock Entry {0} created,ثبت {0} انتقال کالا,
+Stock Entry {0} is not submitted,انتقال کالا {0} ارسال نشده است,
 Stock Expenses,هزینه‌های انبار,
 Stock In Hand,موجودی در اختیار,
 Stock Items,اقلام انبار,
@@ -2784,7 +2784,7 @@ To Date cannot be less than From Date,به تاریخ نمی تواند کمتر
 To Date must be greater than From Date,تا به امروز باید بیشتر از تاریخ باشد,
 To Date should be within the Fiscal Year. Assuming To Date = {0},به روز باید در سال مالی باشد. با فرض به روز = {0},
 To Datetime,به تاریخ و ساعت,
-To Deliver,رساندن,
+To Deliver,در انتظار تحویل,
 To Deliver and Bill,در انتظار تحویل و صدر فاکتور,
 To Fiscal Year,سال مالی,
 To GSTIN,به GSTIN,
@@ -2894,7 +2894,7 @@ UOM,UOM,
 UOM Conversion factor is required in row {0},عامل UOM تبدیل در ردیف مورد نیاز است {0},
 UOM coversion factor required for UOM: {0} in Item: {1},عامل coversion UOM مورد نیاز برای UOM: {0} در مورد: {1},
 URL,URL,
-Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually,قادر به پیدا کردن نرخ ارز برای {0} به {1} برای تاریخ های کلیدی {2}. لطفا یک رکورد ارز دستی ایجاد کنید,
+Unable to find exchange rate for {0} to {1} for key date {2}. Please create a Currency Exchange record manually,قادر به پیدا کردن نرخ تبدیل ارز برای {0} به {1} برای تاریخ های کلیدی {2} نیست. لطفا یک رکورد ارز دستی ایجاد کنید,
 Unable to find score starting at {0}. You need to have standing scores covering 0 to 100,نمیتوان نتیجه را با {0} پیدا کرد. شما باید امتیازات ایستاده را پوشش دهید 0 تا 100,
 Unable to find variable: ,قادر به پیدا کردن متغیر نیست,
 Unblock Invoice,انحلال صورتحساب,
@@ -2999,7 +2999,7 @@ Warehouses with child nodes cannot be converted to ledger,انبارهای دا�
 Warehouses with existing transaction can not be converted to group.,انبارها با معامله موجود می توانید به گروه تبدیل نمی کند.,
 Warehouses with existing transaction can not be converted to ledger.,انبارها با معامله موجود می توانید به دفتر تبدیل نمی کند.,
 Warning,هشدار,
-Warning: Another {0} # {1} exists against stock entry {2},هشدار: یکی دیگر از {0} # {1} در برابر ورودی انبار وجود دارد {2},
+Warning: Another {0} # {1} exists against stock entry {2},هشدار: یکی دیگر از {0} # {1} در برابر انتقال کالا وجود دارد {2},
 Warning: Invalid SSL certificate on attachment {0},هشدار: گواهینامه SSL نامعتبر در پیوست {0},
 Warning: Invalid attachment {0},هشدار: پیوست معتبر {0},
 Warning: Material Requested Qty is less than Minimum Order Qty,هشدار: مواد درخواست شده تعداد کمتر از حداقل تعداد سفارش است,
@@ -3210,7 +3210,7 @@ or,یا,
 Ageing Range 4,محدوده پیر 4,
 Allocated amount cannot be greater than unadjusted amount,مبلغ اختصاص یافته نمی تواند بیشتر از مقدار غیر قابل تنظیم باشد,
 Allocated amount cannot be negative,مقدار اختصاص یافته نمی تواند منفی باشد,
-"Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry",حساب کاربری تفاوت باید یک حساب از نوع دارایی / بدهی باشد ، زیرا این ورودی انبار یک ورودی افتتاحی است,
+"Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry",حساب کاربری تفاوت باید یک حساب از نوع دارایی / بدهی باشد ، زیرا این انتقال کالا یک ورودی افتتاحی است,
 Import Successful,درون‌ریزی موفقیت آمیز بود,
 Please save first,لطفا اول ذخیره کنید,
 Price not found for item {0} in price list {1},قیمتی برای کالای {0} در لیست قیمت یافت نشد {1},
@@ -3225,7 +3225,7 @@ Duplicate entry against the item code {0} and manufacturer {1},ورودی کپی
 Invalid GSTIN! The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers,GSTIN نامعتبر است! ورودی که وارد کردید با قالب GSTIN برای دارندگان UIN یا ارائه دهندگان خدمات OIDAR غیر مقیم مطابقت ندارد,
 Invoice Grand Total,تعداد کل فاکتور,
 Last carbon check date cannot be a future date,تاریخ آخرین بررسی کربن نمی تواند یک تاریخ آینده باشد,
-Make Stock Entry,ورودی انبار,
+Make Stock Entry,انتقال کالا,
 Quality Feedback,بازخورد کیفیت,
 Quality Feedback Template,الگوی بازخورد کیفیت,
 Rules for applying different promotional schemes.,قوانین استفاده از طرح های تبلیغاتی مختلف.,
@@ -3303,7 +3303,7 @@ BOM 1,BOM 1,
 BOM 2,BOM 2,
 BOM Comparison Tool,ابزار مقایسه BOM,
 BOM recursion: {0} cannot be child of {1},بازگشت BOM: {0} نمی تواند فرزند {1 باشد,
-BOM recursion: {0} cannot be parent or child of {1},بازگشت BOM: {0} نمی تواند پدر و مادر یا فرزند {1 باشد,
+BOM recursion: {0} cannot be parent or child of {1},بازگشت BOM: {0} نمی تواند مادر یا فرزند {1} باشد,
 Back to Messages,بازگشت به پیام ها,
 Bank Data mapper doesn't exist,نقشه بردار داده بانکی وجود ندارد,
 Bank Details,جزئیات بانک,
@@ -3377,7 +3377,7 @@ Delivered Quantity,مقدار تحویل داده شده,
 Delivery Notes,یادداشت های تحویل,
 Depreciated Amount,مبلغ استهلاک شده,
 Description,شرح,
-Designation,تعیین,
+Designation,سِمَت,
 Difference Value,مقدار اختلاف,
 Dimension Filter,فیلتر ابعاد,
 Disabled,غیر فعال,
@@ -3636,7 +3636,7 @@ Row #{0}: Cannot delete item {1} which has already been delivered,ردیف # {0}
 Row #{0}: Cannot delete item {1} which has already been received,ردیف # {0}: امکان حذف مورد {1} که قبلاً دریافت شده نیست,
 Row #{0}: Cannot delete item {1} which has work order assigned to it.,ردیف # {0}: امکان حذف مورد {1} وجود ندارد که دارای دستور کار به آن اختصاص یافته است.,
 Row #{0}: Cannot delete item {1} which is assigned to customer's purchase order.,ردیف # {0}: امکان حذف مورد {1} که به دستور خرید مشتری اختصاص یافته نیست.,
-Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor,Row # {0}: می توانید ضمن تهیه مواد اولیه به پیمانکار ، انبارهای تأمین کننده را انتخاب نکنید,
+Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor,Row # {0}: می توانید ضمن تهیه مواد اولیه برای پیمانکار ، انبارهای تأمین کننده را انتخاب نکنید,
 Row #{0}: Cost Center {1} does not belong to company {2},ردیف شماره {0: مرکز هزینه 1} متعلق به شرکت {2,
 Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.,ردیف شماره {0}: عملیات {1} برای مقدار {2} کالای آماده شده در دستور کار {3} کامل نشده است. لطفاً وضعیت عملیات را از طریق کارت فعالیت {4} به روز کنید.,
 Row #{0}: Payment document is required to complete the transaction,ردیف # {0}: برای تکمیل معامله ، سند پرداخت لازم است,
@@ -3933,16 +3933,16 @@ Select atleast one Social Media from Share on.,حداقل یک رسانه اجت
 Invalid Scheduled Time,زمان برنامه ریزی شده نامعتبر است,
 Length Must be less than 280.,طول باید کمتر از 280 باشد.,
 Error while POSTING {0},خطا هنگام پست کردن {0},
-"Session not valid, Do you want to login?",جلسه معتبر نیست ، آیا می خواهید وارد شوید؟,
-Session Active,جلسه فعال,
-Session Not Active. Save doc to login.,جلسه فعال نیست برای ورود به سیستم ، سند را ذخیره کنید.,
+"Session not valid, Do you want to login?",سشن معتبر نیست ، آیا می خواهید وارد شوید؟,
+Session Active,سشن فعال,
+Session Not Active. Save doc to login.,سشن فعال نیست برای ورود به سیستم ، سند را ذخیره کنید.,
 Error! Failed to get request token.,خطا رمز درخواست دریافت نشد.,
 Invalid {0} or {1},{0} یا {1} نامعتبر است,
 Error! Failed to get access token.,خطا رمز دسترسی دریافت نشد.,
 Invalid Consumer Key or Consumer Secret Key,کلید مصرف کننده یا کلید مخفی مصرف کننده نامعتبر است,
-Your Session will be expire in ,جلسه شما به پایان می رسد,
+Your Session will be expire in ,سشن شما به پایان می رسد,
  days.,روزها.,
-Session is expired. Save doc to login.,جلسه منقضی شده است برای ورود به سیستم ، سند را ذخیره کنید.,
+Session is expired. Save doc to login.,سشن منقضی شده است برای ورود به سیستم ، سند را ذخیره کنید.,
 Error While Uploading Image,خطا هنگام بارگذاری تصویر,
 You Didn't have permission to access this API,شما اجازه دسترسی به این API را ندارید,
 Valid Upto date cannot be before Valid From date,تاریخ معتبر تا تاریخ نمی تواند قبل از تاریخ معتبر از تاریخ باشد,
@@ -4014,8 +4014,8 @@ Test: ,تست:,
 Collection Details: ,جزئیات مجموعه:,
 {0} out of {1},{0} از {1},
 Select Therapy Type,نوع درمان را انتخاب کنید,
-{0} sessions completed,{0} جلسه به پایان رسید,
-{0} session completed,{0} جلسه به پایان رسید,
+{0} sessions completed,{0} سشن به پایان رسید,
+{0} session completed,{0} سشن به پایان رسید,
  out of {0},از {0},
 Therapy Sessions,جلسات درمانی,
 Add Exercise Step,مرحله ورزش را اضافه کنید,
@@ -4075,11 +4075,11 @@ Assessments,ارزیابی ها,
 Heads (or groups) against which Accounting Entries are made and balances are maintained.,سر (یا گروه) که در برابر مطالب حسابداری ساخته شده است و توازن حفظ می شوند.,
 Account Name,نام حساب,
 Inter Company Account,حساب شرکت اینتر,
-Parent Account,پدر و مادر حساب,
+Parent Account,حساب مادر,
 Setting Account Type helps in selecting this Account in transactions.,تنظیم نوع حساب کمک می کند تا در انتخاب این حساب در معاملات.,
 Chargeable,پرشدنی,
 Rate at which this tax is applied,سرعت که در آن این مالیات اعمال می شود,
-Frozen,یخ زده,
+Frozen,فریز شده,
 "If the account is frozen, entries are allowed to restricted users.",اگر حساب فریز شده است، ورودی ها برای کاربران محدود شده مجاز می باشد.,
 Balance must be,موجودی باید,
 Lft,Lft,
@@ -4097,7 +4097,7 @@ Mandatory For Profit and Loss Account,اجباری برای سود و زیان,
 Accounting Period,دوره حسابرسی,
 Period Name,نام دوره,
 Closed Documents,اسناد بسته شده,
-Accounts Settings,تنظیمات حساب‌ها,
+Accounts Settings,تنظیمات حسابداری,
 Settings for Accounts,تنظیمات برای حساب,
 Make Accounting Entry For Every Stock Movement,ثبت ورودی حسابداری برای هر تحرک موجودی انبار,
 Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,کاربران با این نقش ها اجازه تنظیم حساب های یخ زده و ایجاد / تغییر یادداشت‌های حسابداری در برابر حساب فریز شده,
@@ -4273,7 +4273,7 @@ Signatory Position,مکان امضاء,
 Closed Document,سند بسته,
 Track separate Income and Expense for product verticals or divisions.,پیگیری درآمد و هزینه جداگانه برای محصول و یا عمودی بخش.,
 Cost Center Name,هزینه نام مرکز,
-Parent Cost Center,مرکز هزینه پدر و مادر,
+Parent Cost Center,مرکز هزینه مادر,
 lft,LFT,
 rgt,RGT,
 Coupon Code,کد تخفیف,
@@ -4291,7 +4291,7 @@ Used,استفاده شده,
 Coupon Description,توضیحات کوپن,
 Discounted Invoice,تخفیف فاکتور,
 Debit to,بدهی به,
-Exchange Rate Revaluation,نرخ مبادله ارز,
+Exchange Rate Revaluation,نرخ تبدیل ارز,
 Get Entries,دریافت مقالات,
 Exchange Rate Revaluation Account,حساب ارزیابی تغییر نرخ ارز,
 Total Gain/Loss,مجموع افزایش / از دست دادن,
@@ -4399,7 +4399,7 @@ Minimum Total Spent,حداقل کل صرفه جویی شده,
 Collection Factor (=1 LP),فاکتور مجموعه (= 1 LP),
 For how much spent = 1 Loyalty Point,برای چه مقدار صرف = 1 نقطه وفاداری,
 Mode of Payment Account,نحوه حساب پرداخت,
-Default Account,به طور پیش فرض حساب,
+Default Account,حساب پیش فرض,
 Default account will be automatically updated in POS Invoice when this mode is selected.,در صورت انتخاب این حالت، حساب پیش فرض به طور خودکار در صورتحساب اعتباری به روز می شود.,
 **Monthly Distribution** helps you distribute the Budget/Target across months if you have seasonality in your business.,** ماهانه ** شما کمک می کند توزیع بودجه / هدف در سراسر ماه اگر شما فصلی در کسب و کار خود را.,
 Distribution Name,نام توزیع,
@@ -4442,7 +4442,7 @@ Payment Entry Reference,مرجع پرداخت ورودی,
 Allocated,اختصاص داده,
 Payment Gateway Account,پرداخت حساب دروازه,
 Payment Account,حساب پرداخت,
-Default Payment Request Message,به طور پیش فرض درخواست پرداخت پیام,
+Default Payment Request Message,پیغام پیش فرض درخواست پرداخت,
 PMO-,PMO-,
 Payment Order Type,نوع سفارش پرداخت,
 Payment Order Reference,مرجع پرداخت پرداخت,
@@ -4455,7 +4455,7 @@ To Invoice Date,به فاکتور تاریخ,
 Minimum Invoice Amount,حداقل مبلغ فاکتور,
 Maximum Invoice Amount,حداکثر مبلغ فاکتور,
 System will fetch all the entries if limit value is zero.,اگر مقدار حد صفر باشد ، تمام ورودی ها را بارگیری می کند.,
-Get Unreconciled Entries,دریافت Unreconciled مطالب,
+Get Unreconciled Entries,دریافت ورودی‌های مغایرت‌گیری نشده,
 Unreconciled Payment Details,مشخصات پرداخت Unreconciled,
 Invoice/Journal Entry Details,فاکتور / مجله ورود به جزئیات,
 Payment Reconciliation Invoice,مغایرت گیری پرداخت فاکتور,
@@ -4506,8 +4506,8 @@ Item Groups,گروه مورد,
 Only show Items from these Item Groups,فقط مواردی را از این گروه های کالا نشان دهید,
 Customer Groups,گروه های مشتری,
 Only show Customer of these Customer Groups,فقط مشتری این گروه های مشتری را نشان دهید,
-Write Off Account,ارسال فعال حساب,
-Write Off Cost Center,ارسال فعال مرکز هزینه,
+Write Off Account,حساب تسویه‌ی بدهی,
+Write Off Cost Center,مرکز هزینه‌ی تسویه‌ی بدهی,
 Account for Change Amount,حساب کاربری برای تغییر مقدار,
 Taxes and Charges,مالیات و هزینه,
 Apply Discount On,درخواست تخفیف,
@@ -4649,7 +4649,7 @@ Net Rate,نرخ خالص,
 Net Rate (Company Currency),نرخ خالص (شرکت ارز),
 Net Amount (Company Currency),مبلغ خالص (شرکت ارز),
 Item Tax Amount Included in Value,مقدار مالیات مورد موجود در ارزش,
-Landed Cost Voucher Amount,هزینه فرود مقدار کوپن,
+Landed Cost Voucher Amount,مبلغ سند هزینه وارد شده,
 Raw Materials Supplied Cost,هزینه مواد اولیه عرضه شده,
 Accepted Warehouse,انبار پذیرفته شده,
 Serial No,شماره سریال,
@@ -5102,7 +5102,7 @@ Download PDF,دانلود PDF,
 Supplier of Goods or Services.,تامین کننده کالا یا خدمات.,
 Name and Type,نام و نوع,
 SUP-.YYYY.-,SUP-.YYYY.-,
-Default Bank Account,به طور پیش فرض حساب بانکی,
+Default Bank Account,حساب بانکی پیش فرض ,
 Is Transporter,آیا حمل کننده است,
 Represents Company,نمایندگی شرکت,
 Supplier Type,نوع منبع,
@@ -5117,7 +5117,7 @@ Default Payment Terms Template,قالب پرداخت پیش فرض,
 Block Supplier,تامین کننده بلوک,
 Hold Type,نوع نگه دارید,
 Leave blank if the Supplier is blocked indefinitely,خالی اگر فروشنده به طور نامحدود مسدود شده خالی,
-Default Payable Accounts,به طور پیش فرض حساب‌های پرداختنی,
+Default Payable Accounts,حساب‌های پرداختنی پیش فرض ,
 Mention if non-standard payable account,ذکر است اگر غیر استاندارد حساب های قابل پرداخت,
 Default Tax Withholding Config,پیش فرض تنظیم مالیات برداشت,
 Supplier Details,اطلاعات بیشتر تامین کننده,
@@ -5282,7 +5282,7 @@ Consumer Key,کلید مصرف کننده,
 Consumer Secret,راز مصرف کننده,
 User Details,مشخصات کاربر,
 Person URN,شخص URN,
-Session Status,وضعیت جلسه,
+Session Status,وضعیت سشن,
 Lost Reason Detail,جزئیات دلیل گمشده,
 Opportunity Lost Reason,فرصت از دست رفته دلیل,
 Potential Sales Deal,معامله فروش بالقوه,
@@ -5325,7 +5325,7 @@ Article,مقاله,
 LMS User,کاربر LMS,
 Assessment Criteria Group,معیارهای ارزیابی گروه,
 Assessment Group Name,نام گروه ارزیابی,
-Parent Assessment Group,پدر و مادر گروه ارزیابی,
+Parent Assessment Group,گروه ارزیابی مادر,
 Assessment Name,نام ارزیابی,
 Grading Scale,مقیاس درجه بندی,
 Examiner,امتحان کننده,
@@ -5347,7 +5347,7 @@ Question Link,پیوند سوال,
 Course Name,نام دوره,
 Topics,مباحث,
 Hero Image,تصویر قهرمان,
-Default Grading Scale,مقیاس درجه بندی به طور پیش فرض,
+Default Grading Scale,مقیاس درجه بندی پیش فرض,
 Education Manager,مدیر آموزش,
 Course Activity,فعالیت دوره,
 Course Enrollment,ثبت نام دروس,
@@ -5616,7 +5616,7 @@ Quickbooks Company ID,ID شرکت Quickbooks,
 Company Settings,تنظیمات شرکت,
 Default Shipping Account,حساب حمل و نقل پیش فرض,
 Default Warehouse,انبار پیش‌فرض,
-Default Cost Center,مرکز هزینه به طور پیش فرض,
+Default Cost Center,مرکز هزینه پیش فرض,
 Undeposited Funds Account,حساب صندوق غیرقانونی,
 Shopify Log,Shopify ورود,
 Shopify Settings,Shopify تنظیمات,
@@ -5756,7 +5756,7 @@ Appointments,قرار ملاقات ها,
 Practitioner Schedules,برنامه تمرینکننده,
 Charges,اتهامات,
 Out Patient Consulting Charge,هزینه مشاوره بیمار,
-Default Currency,به طور پیش فرض ارز,
+Default Currency,ارز پیش فرض ,
 Healthcare Schedule Time Slot,برنامه زمان بندی مراقبت بهداشتی,
 Parent Service Unit,واحد خدمات والدین,
 Service Unit Type,نوع واحد خدمات,
@@ -5992,7 +5992,7 @@ Booked,رزرو,
 Hotel Reservation User,کاربر رزرو هتل,
 Hotel Room Reservation Item,مورد رزرو اتاق هتل,
 Hotel Settings,تنظیمات هتل,
-Default Taxes and Charges,مالیات به طور پیش فرض ها و اتهامات,
+Default Taxes and Charges,مالیات‌ها و عوارض پیش فرض ,
 Default Invoice Naming Series,پیش‌فرض نامگذاری سری‌های صورتحساب,
 HR,HR,
 Date on which this component is applied,تاریخ استفاده از این مؤلفه,
@@ -6495,8 +6495,8 @@ Billing Rate,نرخ صدور صورت حساب,
 Costing Rate,هزینه یابی نرخ,
 title,عنوان,
 Projects User,پروژه های کاربری,
-Default Costing Rate,به طور پیش فرض هزینه یابی نرخ,
-Default Billing Rate,به طور پیش فرض نرخ صدور صورت حساب,
+Default Costing Rate,نرخ پیش فرض هزینه یابی ,
+Default Billing Rate,نرخ پیش فرض صدور صورت حساب,
 Dependent Task,وظیفه وابسته,
 Project Type,نوع پروژه,
 % Complete Method,٪ روش کامل,
@@ -6791,10 +6791,10 @@ Legal Entity / Subsidiary with a separate Chart of Accounts belonging to the Org
 Change Abbreviation,تغییر اختصار,
 Parent Company,شرکت مادر,
 Default Values,مقادیر پیش فرض,
-Default Holiday List,پیش فرض لیست تعطیلات,
+Default Holiday List,لیست تعطیلات پیش فرض,
 Default Selling Terms,شرایط فروش پیش فرض,
 Default Buying Terms,شرایط خرید پیش فرض,
-Create Chart Of Accounts Based On,hd[hn] نمودار حساب بر اساس,
+Create Chart Of Accounts Based On,ایجاد نمودار حساب‌ها بر اساس,
 Standard Template,قالب استاندارد,
 Existing Company,شرکت موجود,
 Chart Of Accounts Template,نمودار حساب الگو,
@@ -6805,32 +6805,32 @@ Monthly Sales Target,هدف فروش ماهانه,
 Sales Monthly History,تاریخچه فروش ماهانه,
 Transactions Annual History,معاملات تاریخی سالانه,
 Total Monthly Sales,کل فروش ماهانه,
-Default Cash Account,به طور پیش فرض حساب های نقدی,
-Default Receivable Account,به طور پیش فرض دریافتنی حساب,
-Round Off Cost Center,دور کردن مرکز هزینه,
+Default Cash Account,حساب نقدی پیش فرض ,
+Default Receivable Account,حساب دریافتنی پیش فرض,
+Round Off Cost Center,گردکردن مرکز هزینه,
 Discount Allowed Account,حساب مجاز تخفیف,
 Discount Received Account,حساب دریافتی با تخفیف,
-Exchange Gain / Loss Account,تبادل به دست آوردن / از دست دادن حساب,
+Exchange Gain / Loss Account,حساب سود و زیان تبادلات,
 Unrealized Exchange Gain/Loss Account,حساب ناخالص مبادله سود / زیان,
 Allow Account Creation Against Child Company,اجازه ایجاد حساب کاربری علیه شرکت کودک,
-Default Payable Account,به طور پیش فرض پرداختنی حساب,
+Default Payable Account,حساب پرداختنی پیش فرض,
 Default Employee Advance Account,پیشفرض پیشفرض کارمند,
-Default Cost of Goods Sold Account,به طور پیش فرض هزینه از حساب کالاهای فروخته شده,
+Default Cost of Goods Sold Account,حساب پیش فرض هزینه کالاهای فروخته شده,
 Default Income Account,حساب پیش فرض درآمد,
 Default Deferred Revenue Account,پیش فرض حساب درآمد معوق,
 Default Deferred Expense Account,پیش فرض حساب هزینه معوق,
-Default Payroll Payable Account,به طور پیش فرض حقوق و دستمزد پرداختنی حساب,
+Default Payroll Payable Account,پیش فرض  حساب پرداختنی حقوق و دستمزد,
 Default Expense Claim Payable Account,پیش پرداخت هزینه حساب حساب قابل پرداخت,
 Stock Settings,تنظیمات انبار,
 Enable Perpetual Inventory,فعال کردن موجودی دائمی,
-Default Inventory Account,حساب پرسشنامه به طور پیش فرض,
-Stock Adjustment Account,حساب تنظیم سهام,
+Default Inventory Account,حساب انبار پیش فرض,
+Stock Adjustment Account,حساب تنظیم موجودی,
 Fixed Asset Depreciation Settings,تنظیمات استهلاک دارائی های ثابت,
 Series for Asset Depreciation Entry (Journal Entry),سریال برای ورودی های ارزشمندی دارایی (ورودی مجله),
 Gain/Loss Account on Asset Disposal,حساب کاهش / افزایش در دفع دارایی,
 Asset Depreciation Cost Center,دارایی مرکز استهلاک هزینه,
 Budget Detail,جزئیات بودجه,
-Exception Budget Approver Role,استثنا بودجه تأیید کننده نقش,
+Exception Budget Approver Role,نقش تایید کننده‌ی استثنائات بودجه,
 Company Info,اطلاعات شرکت,
 For reference only.,برای مرجع تنها.,
 Company Logo,آرم شرکت,
@@ -6848,7 +6848,7 @@ To Currency,به ارز,
 For Buying,برای خرید,
 For Selling,برای فروش,
 Customer Group Name,نام گروه مشتری,
-Parent Customer Group,مشتریان پدر و مادر گروه,
+Parent Customer Group,گروه مشتریان مادر,
 Only leaf nodes are allowed in transaction,در عملیات‌های گوناگون تنها استفاده از آیتم‌های نهایی(که گروه نیست) ممکن است,
 Mention if non-standard receivable account applicable,اگر حساب دریافتنی ذکر غیر استاندارد قابل اجرا,
 Credit Limits,محدودیت های اعتباری,
@@ -6883,7 +6883,7 @@ Upcoming Calendar Events,رویدادهای آینده تقویم,
 Open To Do,باز برای انجام,
 Add Quote,افزودن پیشنهاد قیمت,
 Global Defaults,پیش فرض‌های کلی سیستم,
-Default Company,به طور پیش فرض شرکت,
+Default Company,شرکت پیش فرض ,
 Current Fiscal Year,سال مالی جاری,
 Default Distance Unit,واحد پیش فرض فاصله,
 Hide Currency Symbol,مخفی ارز نماد,
@@ -6921,7 +6921,7 @@ Partner website,وب سایت شریک,
 All Sales Transactions can be tagged against multiple **Sales Persons** so that you can set and monitor targets.,تمام معاملات فروش را می توان در برابر چند ** ** افراد فروش برچسب به طوری که شما می توانید تعیین و نظارت بر اهداف.,
 Name and Employee ID,نام و کارمند ID,
 Sales Person Name,نام فروشنده,
-Parent Sales Person,شخص پدر و مادر فروش,
+Parent Sales Person,نیروی فروش مادر,
 Select company name first.,انتخاب نام شرکت برای اولین بار.,
 Sales Person Targets,اهداف فروشنده,
 Set targets Item Group-wise for this Sales Person.,مجموعه اهداف مورد گروه عاقلانه برای این فرد از فروش.,
@@ -6964,7 +6964,7 @@ After payment completion redirect user to selected page.,پس از اتمام پ
 Batch Details,جزئیات دسته ای,
 Batch ID,دسته ID,
 image,تصویر,
-Parent Batch,دسته ای پدر و مادر,
+Parent Batch,دسته‌ی مادر,
 Manufacturing Date,تاریخ تولید,
 Batch Quantity,مقدار دسته ای,
 Batch UOM,دسته UOM,
@@ -7036,7 +7036,7 @@ Calculate Estimated Arrival Times,محاسبه زمان ورود تخمینی,
 Use Google Maps Direction API to calculate estimated arrival times,برای محاسبه زمان رسیدن تخمینی از API جهت نقشه Google استفاده کنید,
 Optimize Route,بهینه سازی مسیر,
 Use Google Maps Direction API to optimize route,برای بهینه سازی مسیر از API Direction Maps استفاده کنید,
-In Transit,در ترانزیت,
+In Transit,در حال انتقال,
 Fulfillment User,کاربر اجرای,
 "A Product or a Service that is bought, sold or kept in stock.",یک محصول یا یک سرویس است که خریداری شده، به فروش می رسد و یا نگه داشته در انبار.,
 STO-ITEM-.YYYY.-,STO-ITEM- .YYYY.-,
@@ -7052,7 +7052,7 @@ Over Delivery/Receipt Allowance (%),اجازه تحویل/دریافت بیش ا
 Barcodes,بارکد,
 Shelf Life In Days,عمر مفید در روز,
 End of Life,پایان زندگی,
-Default Material Request Type,به طور پیش فرض نوع درخواست پاسخ به,
+Default Material Request Type,نوع درخواست مواد پیش فرض,
 Valuation Method,روش های ارزش گذاری,
 FIFO,FIFO,
 Moving Average,میانگین متحرک,
@@ -7101,7 +7101,7 @@ Customer Items,آیتم های مشتری,
 Inspection Criteria,معیار بازرسی,
 Inspection Required before Purchase,بازرسی مورد نیاز قبل از خرید,
 Inspection Required before Delivery,بازرسی مورد نیاز قبل از تحویل,
-Default BOM,به طور پیش فرض BOM,
+Default BOM,پیش فرض BOM,
 Supply Raw Materials for Purchase,تامین مواد اولیه برای خرید,
 If subcontracted to a vendor,اگر تحت قرارداد یک تامین‌کننده است,
 Customer Code,کد مشتری,
@@ -7149,8 +7149,8 @@ Item Customer Detail,جزئیات و ضوابط مشتری کالا,
 Ref Code,کد,
 Item Default,پیش فرض کالا,
 Purchase Defaults,پیش فرض های خرید,
-Default Buying Cost Center,به طور پیش فرض مرکز هزینه خرید,
-Default Supplier,به طور پیش فرض تامین کننده,
+Default Buying Cost Center,پیش فرض مرکز هزینه خرید,
+Default Supplier,تامین کننده پیش فرض ,
 Default Expense Account,حساب پیش فرض هزینه,
 Sales Defaults,پیش فرض های فروش,
 Default Selling Cost Center,مرکز هزینه پیش فرض فروش,
@@ -7203,7 +7203,7 @@ Packed Item,مورد بسته بندی شده,
 To Warehouse (Optional),به انبار (اختیاری),
 Actual Batch Quantity,مقدار واقعی دسته ای,
 Prevdoc DocType,DOCTYPE Prevdoc,
-Parent Detail docname,جزئیات docname پدر و مادر,
+Parent Detail docname,جزئیات docname مادر,
 "Generate packing slips for packages to be delivered. Used to notify package number, package contents and its weight.",تولید بسته بندی ورقه برای بسته تحویل داده می شود. مورد استفاده به اطلاع تعداد بسته، محتویات بسته و وزن آن است.,
 Indicates that the package is a part of this delivery (Only Draft),نشان می دهد که بسته به بخشی از این تحویل (فقط پیش نویس) است,
 MAT-PAC-.YYYY.-,MAT-PAC- .YYYY.-,
@@ -7222,7 +7222,7 @@ DN Detail,جزئیات DN,
 STO-PICK-.YYYY.-,STO-PICK-.YYY.-,
 Material Transfer for Manufacture,انتقال مواد برای تولید,
 Qty of raw materials will be decided based on the qty of the Finished Goods Item,مقدار مواد اولیه براساس مقدار محصولات تکمیل شده تصمیم گرفته خواهد شد,
-Parent Warehouse,انبار پدر و مادر,
+Parent Warehouse,انبار مادر,
 Items under this warehouse will be suggested,کالاهای داخل این انبار پیشنهاد خواهد شد,
 Get Item Locations,مکان‌های کالا را دریافت کنید,
 Item Locations,مکان‌های کالا,
@@ -7298,8 +7298,8 @@ Out of AMC,از AMC,
 Warranty Period (Days),دوره گارانتی (روز),
 Serial No Details,سریال جزئیات,
 MAT-STE-.YYYY.-,MAT-STE- .YYYY.-,
-Stock Entry Type,نوع ورودی انبار,
-Stock Entry (Outward GIT),ورودی انبار (GIT به خارج),
+Stock Entry Type,نوع انتقال کالا,
+Stock Entry (Outward GIT), انتقال کالا(GIT به خارج),
 Material Consumption for Manufacture,مصرف مواد برای ساخت,
 Repack,REPACK,
 Send to Subcontractor,ارسال به پیمانکار,
@@ -7323,24 +7323,24 @@ Additional Costs,هزینه های اضافی,
 Total Additional Costs,مجموع هزینه های اضافی,
 Customer or Supplier Details,مشتری و یا تامین کننده,
 Per Transferred,در هر انتقال,
-Stock Entry Detail,جزئیات ورودی انبار,
+Stock Entry Detail,جزئیات انتقال کالا,
 Basic Rate (as per Stock UOM),نرخ پایه (به ازای واحد اندازه گیری انبار),
 Basic Amount,مقدار اولیه,
 Additional Cost,هزینه های اضافی,
 Serial No / Batch,شماره سریال / دسته,
 BOM No. for a Finished Good Item,شماره BOM برای مورد خوبی در دست اجرا,
-Material Request used to make this Stock Entry,درخواست محصول استفاده شده برای ساخت این ورودی انبار,
+Material Request used to make this Stock Entry,درخواست محصول استفاده شده برای ساخت این انتقال کالا,
 Subcontracted Item,مورد زیر قرارداد,
-Against Stock Entry,در مقابل ورودی انبار,
-Stock Entry Child,کودک ورودی انبار,
-PO Supplied Item,مورد تحویل PO,
+Against Stock Entry,در مقابل انتقال کالا,
+Stock Entry Child,زیرمجموعه انتقال کالا,
+PO Supplied Item,کالای تأمین شده از طریق سفارش خرید,
 Reference Purchase Receipt,رسید خرید مرجع,
 Stock Ledger Entry,ورودی دفتر انبار,
 Outgoing Rate,نرخ خروجی,
 Actual Qty After Transaction,تعداد واقعی بعد از تراکنش,
 Stock Value Difference,اختلاف ارزش انبار,
-Stock Queue (FIFO),سهام صف (FIFO),
-Is Cancelled,آیا لغو,
+Stock Queue (FIFO),صف موجودی (FIFO),
+Is Cancelled,لغو شده است,
 Stock Reconciliation,تصحیح موجودی انبار,
 This tool helps you to update or fix the quantity and valuation of stock in the system. It is typically used to synchronise the system values and what actually exists in your warehouses.,این ابزار کمک می کند تا شما را به روز رسانی و یا تعمیر کمیت و ارزیابی سهام در سیستم. این است که به طور معمول برای همزمان سازی مقادیر سیستم و آنچه که واقعا در انبارها شما وجود دارد استفاده می شود.,
 MAT-RECO-.YYYY.-,MAT-RECO- .YYYY.-,
@@ -7374,7 +7374,7 @@ Variant Field,فیلد متغیر,
 A logical Warehouse against which stock entries are made.,انبار منطقی که در برابر نوشته های سهام ساخته شده است.,
 Warehouse Detail,جزئیات انبار,
 Warehouse Name,نام انبار,
-Warehouse Contact Info,انبار اطلاعات تماس,
+Warehouse Contact Info,اطلاعات تماس انبار,
 PIN,PIN,
 ISS-.YYYY.-,ISS -YYYY.-,
 Raised By (Email),مطرح شده توسط (ایمیل),
@@ -7487,7 +7487,7 @@ DATEV,DATEV,
 Delayed Item Report,گزارش کالاهای تأخیر یافته,
 Delayed Order Report,گزارش سفارش‌های تأخیر یافته,
 Delivered Items To Be Billed,کالاهای تحویل داده شده برای صدور فاکتور,
-Delivery Note Trends,روندهای اظهارنامه تحویل,
+Delivery Note Trends,روند رسید تحویل,
 Electronic Invoice Register,ثبت فاکتور الکترونیکی,
 Employee Billing Summary,خلاصه صورتحساب کارمندان,
 Employee Birthday,کارمند تولد,
@@ -7515,9 +7515,9 @@ Issued Items Against Work Order,کالاهای صادر شده در ازای د�
 Projected Quantity as Source,تعداد بینی به عنوان منبع,
 Item Balance (Simple),تراز کالا (ساده),
 Item Price Stock,قیمت موجودی کالا,
-Item Prices,قیمت کالا,
+Item Prices,قیمت‌های کالا,
 Item Shortage Report,گزارش کمبود کالا,
-Item Variant Details,جزئیات نوع کالا,
+Item Variant Details,جزئیات گونه کالا,
 Item-wise Price List Rate,لیست قیمت به تفکیک کالا,
 Item-wise Purchase History,تاریخچه خرید به تفکیک کالا,
 Item-wise Purchase Register,ثبت خرید به تفکیک کالا,
@@ -7573,7 +7573,7 @@ Sales Person Target Variance Based On Item Group,انحراف هدف افراد 
 Sales Person-wise Transaction Summary,خلاصه تراکنش‌ها به تفکیک نیروی فروش,
 Sales Register,ثبت فروش,
 Serial No Service Contract Expiry,شماره سریال انقضاء قرارداد خدمات,
-Serial No Status,سریال نیست,
+Serial No Status,وضعیت شماره سریال,
 Serial No Warranty Expiry,شماره سریال انقضاء گارانتی,
 Stock Ageing,سن موجودی انبار,
 Stock and Account Value Comparison,مقایسه ارزش سهام و حساب,
@@ -7582,8 +7582,8 @@ Student and Guardian Contact Details,دانشجویی و نگهبان اطلاع
 Student Batch-Wise Attendance,دسته ای حکیم دانشجویی حضور و غیاب,
 Student Fee Collection,دانشجو هزینه مجموعه,
 Student Monthly Attendance Sheet,دانشجو جدول حضور ماهانه,
-Subcontracted Item To Be Received,مورد مورد منعقد شده برای دریافت,
-Subcontracted Raw Materials To Be Transferred,مواد اولیه فرعی را منتقل می کند,
+Subcontracted Item To Be Received,کالایی که باید از پیمانکار دریافت شود,
+Subcontracted Raw Materials To Be Transferred,مواد اولیه‌ای که باید به پیمانکار منتقل شوند,
 Supplier Ledger Summary,خلاصه دفتر کل تامین کنندگان,
 Supplier-Wise Sales Analytics,تحلیل فروش بر اساس تامین کننده,
 Support Hour Distribution,توزیع ساعت پشتیبانی,
@@ -7619,7 +7619,7 @@ Production Plan Material Request Warehouse,طرح تولید انبار درخو
 Sets 'Source Warehouse' in each row of the items table.,&quot;انبار منبع&quot; را در هر ردیف از جدول موارد تنظیم می کند.,
 Sets 'Target Warehouse' in each row of the items table.,&quot;Target Warehouse&quot; را در هر ردیف از جدول موارد تنظیم می کند.,
 Show Cancelled Entries,نمایش مطالب لغو شده,
-Backdated Stock Entry,ورودی انبار با تاریخ گذشته,
+Backdated Stock Entry,انتقال کالا با تاریخ گذشته,
 Row #{}: Currency of {} - {} doesn't matches company currency.,ردیف شماره {}: واحد پول {} - {} با ارز شرکت مطابقت ندارد.,
 {} Assets created for {},{} دارایی های ثبت شده برای {},
 {0} Number {1} is already used in {2} {3},{0} شماره {1} قبلاً در {2} {3} استفاده شده است,
@@ -8014,7 +8014,7 @@ Configure the default Price List when creating a new Sales transaction. Item pri
 "If this option is configured 'Yes', ERPNext will prevent you from creating a Sales Invoice or Delivery Note without creating a Sales Order first. This configuration can be overridden for a particular Customer by enabling the 'Allow Sales Invoice Creation Without Sales Order' checkbox in the Customer master.",اگر این گزینه &quot;بله&quot; پیکربندی شده باشد ، ERPNext از ایجاد فاکتور فروش یا یادداشت تحویل بدون ایجاد ابتدا دستور فروش جلوگیری می کند. با فعال کردن کادر تأیید «ایجاد فاکتور فروش بدون دستور فروش» ، این پیکربندی را می توان برای مشتری خاصی لغو کرد.,
 "If this option is configured 'Yes', ERPNext will prevent you from creating a Sales Invoice without creating a Delivery Note first. This configuration can be overridden for a particular Customer by enabling the 'Allow Sales Invoice Creation Without Delivery Note' checkbox in the Customer master.",اگر این گزینه &quot;بله&quot; پیکربندی شده باشد ، ERPNext از ایجاد فاکتور فروش بدون ایجاد ابتدا یک یادداشت تحویل جلوگیری می کند. با فعال کردن کادر تأیید &quot;ایجاد فاکتور فروش بدون تحویل کالا&quot; می توانید این پیکربندی را برای مشتری خاصی لغو کنید.,
 Default Warehouse for Sales Return,انبار پیش فرض برای بازگشت فروش,
-Default In Transit Warehouse,به طور پیش فرض در انبار حمل و نقل,
+Default In Transit Warehouse,پیش فرض انبار میانی (در حال انتقال),
 Enable Perpetual Inventory For Non Stock Items,موجودی دائمی را برای موارد غیر سهام فعال کنید,
 HRA Settings,تنظیمات HRA,
 Basic Component,م Basicلفه اساسی,
@@ -8593,7 +8593,7 @@ Inpatient Medication Orders updated successfully,سفارشات دارویی ب�
 Row {0}: Cannot create Inpatient Medication Entry against cancelled Inpatient Medication Order {1},ردیف {0}: نمی توان ورودی داروی بیماران بستری را در برابر دستور داروهای بستری در بیمارستان لغو کرد {1},
 Row {0}: This Medication Order is already marked as completed,ردیف {0}: این سفارش دارو قبلاً به عنوان تکمیل شده علامت گذاری شده است,
 Quantity not available for {0} in warehouse {1},مقدار برای {0} در انبار {1} در دسترس نیست,
-Please enable Allow Negative Stock in Stock Settings or create Stock Entry to proceed.,لطفاً اجازه دهید موجودی منفی را در تنظیمات انبار فعال کنید یا ورودی انبار را برای ادامه ثبت کنید.,
+Please enable Allow Negative Stock in Stock Settings or create Stock Entry to proceed.,لطفاً اجازه دهید موجودی منفی را در تنظیمات انبار فعال کنید یا انتقال کالا را برای ادامه ثبت کنید.,
 No Inpatient Record found against patient {0},هیچ سابقه بستری در مورد بیمار یافت نشد {0},
 An Inpatient Medication Order {0} against Patient Encounter {1} already exists.,یک دستور دارویی در بیماران بستری {0} علیه ملاقات با بیمار {1} از قبل موجود است.,
 Allow In Returns,در بازگشت مجاز است,
@@ -8701,7 +8701,7 @@ Invalid Parent Account,حساب والد نامعتبر است,
 Cannot deliver Serial No {0} of item {1} as it is reserved to fullfill Sales Order {2},نمی توان شماره سریال {0} مورد {1} را تحویل داد زیرا برای تکمیل دستور فروش {2} محفوظ است,
 "Sales Order {0} has reservation for the item {1}, you can only deliver reserved {1} against {0}.",دستور فروش {0} برای مورد رزرو دارد {1} ، شما فقط می توانید رزرو شده {1} را در مقابل {0} تحویل دهید.,
 {0} Serial No {1} cannot be delivered,{0} شماره سریال {1} تحویل داده نمی شود,
-Row {0}: Subcontracted Item is mandatory for the raw material {1},ردیف {0}: مورد پیمانکاری فرعی برای ماده اولیه اجباری است {1},
+Row {0}: Subcontracted Item is mandatory for the raw material {1},ردیف {0}: کالای پیمانکار برای ماده اولیه اجباری است {1},
 "As there are sufficient raw materials, Material Request is not required for Warehouse {0}.",از آنجا که مواد اولیه کافی وجود دارد ، درخواست مواد برای انبار {0} لازم نیست.,
 " If you still want to proceed, please enable {0}.",اگر هنوز می خواهید ادامه دهید ، لطفاً {0} را فعال کنید.,
 The item referenced by {0} - {1} is already invoiced,مورد ارجاع شده توسط {0} - {1} قبلاً فاکتور شده است,
@@ -8746,7 +8746,7 @@ Verified By,تایید شده توسط,
 Invalid naming series (. missing) for {0},سری نامگذاری نامعتبر است (. وجود ندارد) برای {0},
 Phone Number,شماره تلفن,
 Account SID,حساب SID,
-Global Defaults,به طور پیش فرض جهانی,
+Global Defaults,پیش فرض‌های کلی,
 Is Mandatory,اجباری است,
 WhatsApp,واتس اپ,
 Make a call,تماس بگیر,
@@ -9073,8 +9073,8 @@ Workspace,محیط کار,
  Workspace,محیط کار ,
 Try the new Print Format Builder,فرمت ساز چاپ جدید را امتحان کنید,
 Customer Naming By,نام‌گذاری مشتری توسط,
-Learn Inventory Management,یادیری مدیریت انبار,
-New Stock Entry ,ورودی انبار جدید,
+Learn Inventory Management,یادگیری مدیریت انبار,
+New Stock Entry ,انتقال کالا جدید,
 Other Info,سایر اطلاعات,
 s,ها,
 No filters selected,هیچ فیلتری انتخاب نشده‌است,
@@ -9118,8 +9118,8 @@ BOM Info,اطلاعات BOM,
 There must be atleast 1 Finished Good in this Stock Entry,
 Missing Finished Good,محصول تمام شده از بین رفته است,
 Ignore Closing Balance,تراز پایانی را نادیده بگیر,
-Material Transfer (In Transit),انتقال مواد یا کالا (در حال حمل),
-Create Stock Entry,ایجاد ورودی انبار,
+Material Transfer (In Transit),انتقال مواد یا کالا (در حال انتقال),
+Create Stock Entry,ایجاد انتقال کالا,
 Filters,فیلترها,
 Allow to Edit Stock UOM Qty for Sales Documents,اجازه دادن به ویرایش مقدار واحد اندازه‌گیری انبار برای اسناد فروش,
 Allow to Edit Stock UOM Qty for Purchase Documents,اجازه دادن به ویرایش مقدار واحد اندازه‌گیری انبار برای اسناد خرید,
@@ -9133,3 +9133,37 @@ Control Historical Stock Transactions,کنترل تاریخچه تراکنش‌�
 No stock transactions can be created or modified before this date.,هیچ تراکنش انباری قبل از این تاریخ قابل ایجاد یا ویرایش نباشد.,
 "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",در صورت تعیین، سیستم تنها به کاربران با این نقش اجازه می‌دهد که تراکنش‌های انبار قبل از آخرین تراکنش موجود برای یک کالا یا انبار خاص را ایجاد یا ویرایش کنند. اگر خالی باشد، به تمام کاربران اجازه می‌دهد که تراکنش‌های قدیمی را ایجاد یا ویرایش کنند.,
 Stock transactions that are older than the mentioned days cannot be modified.,تراکنش‌های انبار که قدیمی‌تر از تعداد روزهای مشخص شده هستند، قابل ویرایش نمی‌باشند.,
+Capacity in Stock UOM,واحد اندازه‌گیری موجودیِ داخل انبار,
+Putway Rule,قانون جایگذاری,
+Skip Available Sub Assembly Items,
+Currency Exchange Settings Help,راهنمای تنظیمات نرخ تبدیل ارز,
+Default Cash Account currency must be same as company's default currency. Please select another account.,واحد پولی حساب نقدی پیش‌فرض باید با واحد پولی پیش‌فرض شرکت یکسان باشد. لطفاً حساب دیگری را انتخاب کنید.,
+Unrealized Profit / Loss Account,حساب سود و زیان غیر واقعی,
+Default Payment Discount Account,حساب تخفیف پرداخت پیش‌فرض,
+Book Advance Payments in Separate Party Account,ثبت پیش‌پرداخت‌ها در یک حساب جداگانه مشتری,
+Enabling this option will allow you to record -,فعال کردن این گزینه به شما امکان ثبت موارد زیر را می‌دهد:,
+Exchange Rate Revaluation Settings,تنظیمات تجدید نرخ تبادل ارز,
+Auto Create Exchange Rate Revaluation,ایجاد خودکار بازبینی نرخ تبادل ارز,
+Submit ERR Journals?,آیا می‌خواهید اسناد بازبینی نرخ ارز (ERR) را ثبت کنید؟,
+Fixed Asset Defaults,پیش‌فرض‌های دارایی ثابت,
+Manage,مدیریت,
+Delete Transactions,پاک کردن تراکنش‌ها,
+Buying & Selling Settings,تنظیمات خرید و فروش,
+Enable Provisional Accounting For Non Stock Items,فعال کردن حسابداری موقت برای کالاهای ناموجود,
+Default Provisional Account,حساب موقت پیش‌فرض,
+Default In-Transit Warehouse,انبار میانی(در حال انتقال) پیش‌فرض,
+Convert to Ledger,
+Is Group Warehouse,یک گروه انبار است,
+Transit,حمل و نقل,
+Document Naming Settings,تنظیمات شناسه‌گذاری اسناد,
+Sales Order has been submitted successfully,دستور فروش با موفقیت ثبت شد,
+Default Payment Discount Account,حساب پیش‌فرض تخفیف پرداخت,
+Payment Ledger Entry,ثبت پرداختی‌ها در دفتر کل,
+GL entries,ثبت ورودی‌های دفتر کل,
+Fixed Asset Defaults,پیش‌فرض‌های دارایی ثابت,
+Exchange Rate Revaluation Settings,تنظیمات تجدید ارزیابی نرخ ارز,
+Book Advance Payments in Separate Party Account,ثبت پیش‌پرداخت‌ها در حساب جداگانه,
+Enable Provisional Accounting For Non Stock Items,فعال‌سازی حسابداری موقت برای کالاها,
+Convert to Ledger,تبدیل به حساب کل,
+Graph,نمودار,
+Manage,مدیریت,
