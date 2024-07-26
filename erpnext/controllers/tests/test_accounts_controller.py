@@ -813,7 +813,7 @@ class TestAccountsController(FrappeTestCase):
 		company = "_Test Company with perpetual inventory"
 		target_warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
 		warehouse = create_warehouse("_Test Internal Warehouse New 2", company=company)
-		rate = 40
+		arms_length_price = 40
 
 		si = create_sales_invoice(
 			company=company,
@@ -829,13 +829,13 @@ class TestAccountsController(FrappeTestCase):
 			do_not_submit=True,
 		)
 
-		si.items[0].rate = rate
+		si.items[0].rate = arms_length_price
 		si.save()
 		# rate should not reset to incoming rate
-		self.assertEqual(si.items[0].rate, rate)
+		self.assertEqual(si.items[0].rate, arms_length_price)
 
 		frappe.db.set_single_value("Stock Settings", "allow_internal_transfer_at_arms_length_price", 0)
-		si.items[0].rate = rate
+		si.items[0].rate = arms_length_price
 		si.save()
 		# rate should reset to incoming rate
 		self.assertEqual(si.items[0].rate, 100)
