@@ -497,10 +497,15 @@ def make_payment_request(**args):
 		for dimension in get_accounting_dimensions():
 			pr.update({dimension: ref_doc.get(dimension)})
 
+<<<<<<< HEAD
 		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True
 
 		pr.insert(ignore_permissions=True)
+=======
+		if frappe.db.get_single_value("Accounts Settings", "create_pr_in_draft_status", cache=True):
+			pr.insert(ignore_permissions=True)
+>>>>>>> ce81fd9ba6 (refactor: checkbox to control Payment Request creation)
 		if args.submit_doc:
 			pr.submit()
 
