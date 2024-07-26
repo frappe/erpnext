@@ -117,14 +117,15 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-10-02 03:48:44.979777",
+ "modified": "2024-03-27 13:10:36.562795",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Timesheet",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

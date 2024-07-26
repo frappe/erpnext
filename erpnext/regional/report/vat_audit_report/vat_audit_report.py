@@ -13,7 +13,7 @@ def execute(filters=None):
 	return VATAuditReport(filters).run()
 
 
-class VATAuditReport(object):
+class VATAuditReport:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.columns = []
@@ -58,19 +58,17 @@ class VATAuditReport(object):
 		self.invoices = frappe._dict()
 
 		invoice_data = frappe.db.sql(
-			"""
+			f"""
 			SELECT
-				{select_columns}
+				{self.select_columns}
 			FROM
 				`tab{doctype}`
 			WHERE
-				docstatus = 1 {where_conditions}
+				docstatus = 1 {conditions}
 				and is_opening = 'No'
 			ORDER BY
 				posting_date DESC
-			""".format(
-				select_columns=self.select_columns, doctype=doctype, where_conditions=conditions
-			),
+			""",
 			self.filters,
 			as_dict=1,
 		)
@@ -86,11 +84,10 @@ class VATAuditReport(object):
 			SELECT
 				item_code, parent, base_net_amount, is_zero_rated
 			FROM
-				`tab%s Item`
+				`tab{} Item`
 			WHERE
-				parent in (%s)
-			"""
-			% (doctype, ", ".join(["%s"] * len(self.invoices))),
+				parent in ({})
+			""".format(doctype, ", ".join(["%s"] * len(self.invoices))),
 			tuple(self.invoices),
 			as_dict=1,
 		)
@@ -111,15 +108,14 @@ class VATAuditReport(object):
 			SELECT
 				parent, account_head, item_wise_tax_detail
 			FROM
-				`tab%s`
+				`tab{}`
 			WHERE
-				parenttype = %s and docstatus = 1
-				and parent in (%s)
+				parenttype = {} and docstatus = 1
+				and parent in ({})
 			ORDER BY
 				account_head
-			"""
-			% (self.tax_doctype, "%s", ", ".join(["%s"] * len(self.invoices.keys()))),
-			tuple([doctype] + list(self.invoices.keys())),
+			""".format(self.tax_doctype, "%s", ", ".join(["%s"] * len(self.invoices.keys()))),
+			tuple([doctype, *list(self.invoices.keys())]),
 		)
 
 		for parent, account, item_wise_tax_detail in self.tax_details:

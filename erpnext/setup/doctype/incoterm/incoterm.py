@@ -27,7 +27,7 @@ def create_incoterms():
 	import os
 	from csv import DictReader
 
-	with open(os.path.join(os.path.dirname(__file__), "incoterms.csv"), "r") as f:
+	with open(os.path.join(os.path.dirname(__file__), "incoterms.csv")) as f:
 		for incoterm in DictReader(f):
 			if frappe.db.exists("Incoterm", incoterm["code"]):
 				continue

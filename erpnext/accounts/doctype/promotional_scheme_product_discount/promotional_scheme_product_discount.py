@@ -15,6 +15,7 @@ class PromotionalSchemeProductDiscount(Document):
 		from frappe.types import DF
 
 		apply_multiple_pricing_rules: DF.Check
+		apply_recursion_over: DF.Float
 		disable: DF.Check
 		free_item: DF.Link | None
 		free_item_rate: DF.Currency
@@ -51,6 +52,7 @@ class PromotionalSchemeProductDiscount(Document):
 			"19",
 			"20",
 		]
+		recurse_for: DF.Float
 		rule_description: DF.SmallText
 		same_item: DF.Check
 		threshold_percentage: DF.Percent

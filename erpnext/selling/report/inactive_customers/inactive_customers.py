@@ -40,19 +40,17 @@ def get_sales_details(doctype):
 			DATEDIFF(CURRENT_DATE, max(so.transaction_date)) as 'days_since_last_order'"""
 
 	return frappe.db.sql(
-		"""select
+		f"""select
 			cust.name,
 			cust.customer_name,
 			cust.territory,
 			cust.customer_group,
 			count(distinct(so.name)) as 'num_of_order',
-			sum(base_net_total) as 'total_order_value', {0}
-		from `tabCustomer` cust, `tab{1}` so
+			sum(base_net_total) as 'total_order_value', {cond}
+		from `tabCustomer` cust, `tab{doctype}` so
 		where cust.name = so.customer and so.docstatus = 1
 		group by cust.name
-		order by 'days_since_last_order' desc """.format(
-			cond, doctype
-		),
+		order by 'days_since_last_order' desc """,
 		as_list=1,
 	)
 
@@ -62,11 +60,9 @@ def get_last_sales_amt(customer, doctype):
 	if doctype == "Sales Order":
 		cond = "transaction_date"
 	res = frappe.db.sql(
-		"""select base_net_total from `tab{0}`
-		where customer = %s and docstatus = 1 order by {1} desc
-		limit 1""".format(
-			doctype, cond
-		),
+		f"""select base_net_total from `tab{doctype}`
+		where customer = %s and docstatus = 1 order by {cond} desc
+		limit 1""",
 		customer,
 	)
 

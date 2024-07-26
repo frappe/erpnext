@@ -25,7 +25,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2023-02-10 03:14:40.735763",
+ "modified": "2024-03-27 13:09:51.081515",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Industry Type",
@@ -61,7 +61,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "translated_doctype": 1

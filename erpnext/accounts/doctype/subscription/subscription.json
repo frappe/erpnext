@@ -267,7 +267,7 @@
    "link_fieldname": "subscription"
   }
  ],
- "modified": "2024-01-24 02:20:26.145996",
+ "modified": "2024-03-27 13:10:47.578120",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
@@ -311,7 +311,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

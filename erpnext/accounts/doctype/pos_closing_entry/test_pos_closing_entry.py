@@ -17,6 +17,10 @@ from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_inv
 from erpnext.accounts.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.selling.page.point_of_sale.point_of_sale import get_items
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+	get_batch_from_bundle,
+)
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 
@@ -62,9 +66,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 		test_user, pos_profile = init_user_and_profile()
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
-		pos_inv = create_pos_invoice(
-			rate=3500, do_not_submit=1, item_name="Test Item", without_item_code=1
-		)
+		pos_inv = create_pos_invoice(rate=3500, do_not_submit=1, item_name="Test Item", without_item_code=1)
 		pos_inv.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 3500})
 		pos_inv.submit()
 
@@ -181,6 +183,94 @@ class TestPOSClosingEntry(unittest.TestCase):
 		accounting_dimension_department.save()
 		disable_dimension()
 
+	def test_merging_into_sales_invoice_for_batched_item(self):
+		frappe.flags.print_message = False
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import (
+			init_user_and_profile,
+		)
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+			consolidate_pos_invoices,
+		)
+		from erpnext.stock.doctype.batch.batch import get_batch_qty
+
+		frappe.db.sql("delete from `tabPOS Invoice`")
+		item_doc = make_item(
+			"_Test Item With Batch FOR POS Merge Test",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "BATCH-PM-POS-MERGE-.####",
+				"create_new_batch": 1,
+			},
+		)
+
+		item_code = item_doc.name
+		se = make_stock_entry(
+			target="_Test Warehouse - _TC",
+			item_code=item_code,
+			qty=10,
+			basic_rate=100,
+			use_serial_batch_fields=0,
+		)
+		batch_no = get_batch_from_bundle(se.items[0].serial_and_batch_bundle)
+
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+
+		pos_inv = create_pos_invoice(
+			item_code=item_code, qty=5, rate=300, use_serial_batch_fields=1, batch_no=batch_no
+		)
+		pos_inv2 = create_pos_invoice(
+			item_code=item_code, qty=5, rate=300, use_serial_batch_fields=1, batch_no=batch_no
+		)
+
+		batch_qty = frappe.db.get_value("Batch", batch_no, "batch_qty")
+		self.assertEqual(batch_qty, 10)
+
+		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
+		self.assertEqual(batch_qty_with_pos, 0.0)
+
+		pcv_doc = make_closing_entry_from_opening(opening_entry)
+		pcv_doc.submit()
+
+		piv_merge = frappe.db.get_value("POS Invoice Merge Log", {"pos_closing_entry": pcv_doc.name}, "name")
+
+		self.assertTrue(piv_merge)
+		piv_merge_doc = frappe.get_doc("POS Invoice Merge Log", piv_merge)
+		self.assertTrue(piv_merge_doc.pos_invoices[0].pos_invoice)
+		self.assertTrue(piv_merge_doc.pos_invoices[1].pos_invoice)
+
+		pos_inv.load_from_db()
+		self.assertTrue(pos_inv.consolidated_invoice)
+		pos_inv2.load_from_db()
+		self.assertTrue(pos_inv2.consolidated_invoice)
+
+		batch_qty = frappe.db.get_value("Batch", batch_no, "batch_qty")
+		self.assertEqual(batch_qty, 0.0)
+
+		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
+		self.assertEqual(batch_qty_with_pos, 0.0)
+
+		frappe.flags.print_message = True
+
+		pcv_doc.reload()
+		pcv_doc.cancel()
+
+		batch_qty = frappe.db.get_value("Batch", batch_no, "batch_qty")
+		self.assertEqual(batch_qty, 10)
+
+		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
+		self.assertEqual(batch_qty_with_pos, 0.0)
+
+		pos_inv.reload()
+		pos_inv2.reload()
+
+		pos_inv.cancel()
+		pos_inv2.cancel()
+
+		batch_qty_with_pos = get_batch_qty(batch_no, "_Test Warehouse - _TC", item_code)
+		self.assertEqual(batch_qty_with_pos, 10.0)
+
 
 def init_user_and_profile(**args):
 	user = "test@example.com"
@@ -211,7 +301,7 @@ def get_test_item_qty(pos_profile):
 		item_group="All Item Groups",
 	)
 
-	test_item_qty = [item for item in test_item_pos["items"] if item["item_code"] == "_Test Item"][
-		0
-	].get("actual_qty")
+	test_item_qty = next(item for item in test_item_pos["items"] if item["item_code"] == "_Test Item").get(
+		"actual_qty"
+	)
 	return test_item_qty

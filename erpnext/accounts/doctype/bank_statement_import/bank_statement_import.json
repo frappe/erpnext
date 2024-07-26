@@ -11,6 +11,8 @@
   "bank_account",
   "bank",
   "column_break_4",
+  "custom_delimiters",
+  "delimiter_options",
   "google_sheets_url",
   "refresh_google_sheet",
   "html_5",
@@ -24,7 +26,6 @@
   "section_import_preview",
   "import_preview",
   "import_log_section",
-  "statement_import_log",
   "show_failed_logs",
   "import_log_preview",
   "reference_doctype",
@@ -194,15 +195,23 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "statement_import_log",
-   "fieldtype": "Code",
-   "label": "Statement Import Log",
-   "options": "JSON"
+   "default": "0",
+   "fieldname": "custom_delimiters",
+   "fieldtype": "Check",
+   "label": "Custom delimiters"
+  },
+  {
+   "default": ",;\\t|",
+   "depends_on": "custom_delimiters",
+   "description": "If your CSV uses a different delimiter, add that character here, ensuring no spaces or additional characters are included.",
+   "fieldname": "delimiter_options",
+   "fieldtype": "Data",
+   "label": "Delimiter options"
   }
  ],
  "hide_toolbar": 1,
  "links": [],
- "modified": "2022-09-07 11:11:40.293317",
+ "modified": "2024-06-25 17:32:07.658250",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Statement Import",
@@ -221,7 +230,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

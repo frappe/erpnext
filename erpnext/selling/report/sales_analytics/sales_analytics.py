@@ -10,17 +10,58 @@ from erpnext.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):
-	return Analytics(filters).run()
+	filters = frappe._dict(filters or {})
+	# Special report showing all doctype totals on a single chart; overrides some filters
+	if filters.doc_type == "All":
+		filters.tree_type = "Customer"
+		filters.value_quantity = "Value"
+		filters.curves = "total"
+		output = None
+		for dt in [
+			"Quotation",
+			"Sales Order",
+			"Delivery Note",
+			"Sales Invoice",
+			"Sales Invoice (due)",
+			"Payment Entry",
+		]:
+			filters.doc_type = dt
+			output = append_report(dt, output, Analytics(filters).run())
+		return output
+	else:
+		return Analytics(filters).run()
 
 
-class Analytics(object):
+def append_report(dt, org, new):
+	# idx 1 is data, 3 is chart
+	new[1].insert(0, {"entity": dt})  # heading
+	new[1].append({})  # empty row
+	# datasets can be an empty list if no dates are supplied by the Dashboard Chart
+	if not new[3]["data"]["datasets"]:
+		new[3]["data"]["datasets"].append({"name": None, "values": []})
+	new[3]["data"]["datasets"][0]["name"] = dt  # override curve name
+	if org:
+		org[1].extend(new[1])
+		org[3]["data"]["datasets"].extend(new[3]["data"]["datasets"])
+		return org
+	else:
+		return new
+
+
+class Analytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+		if self.filters.doc_type == "Payment Entry" and self.filters.value_quantity == "Quantity":
+			frappe.throw(_("Only Value available for Payment Entry"))
 		self.date_field = (
 			"transaction_date"
-			if self.filters.doc_type in ["Sales Order", "Purchase Order"]
+			if self.filters.doc_type in ["Quotation", "Sales Order", "Purchase Order"]
+			else "due_date"
+			if self.filters.doc_type == "Sales Invoice (due)"
 			else "posting_date"
 		)
+		if self.filters.doc_type.startswith("Sales Invoice"):
+			self.filters.doc_type = "Sales Invoice"
 		self.months = [
 			"Jan",
 			"Feb",
@@ -87,9 +128,7 @@ class Analytics(object):
 				{"label": _(period), "fieldname": scrub(period), "fieldtype": "Float", "width": 120}
 			)
 
-		self.columns.append(
-			{"label": _("Total"), "fieldname": "total", "fieldtype": "Float", "width": 120}
-		)
+		self.columns.append({"label": _("Total"), "fieldname": "total", "fieldtype": "Float", "width": 120})
 
 	def get_data(self):
 		if self.filters.tree_type in ["Customer", "Supplier"]:
@@ -97,25 +136,37 @@ class Analytics(object):
 			self.get_rows()
 
 		elif self.filters.tree_type == "Item":
+			if self.filters.doc_type == "Payment Entry":
+				self.data = []
+				return
 			self.get_sales_transactions_based_on_items()
 			self.get_rows()
 
 		elif self.filters.tree_type in ["Customer Group", "Supplier Group", "Territory"]:
+			if self.filters.doc_type == "Payment Entry":
+				self.data = []
+				return
 			self.get_sales_transactions_based_on_customer_or_territory_group()
 			self.get_rows_by_group()
 
 		elif self.filters.tree_type == "Item Group":
+			if self.filters.doc_type == "Payment Entry":
+				self.data = []
+				return
 			self.get_sales_transactions_based_on_item_group()
 			self.get_rows_by_group()
 
 		elif self.filters.tree_type == "Order Type":
-			if self.filters.doc_type != "Sales Order":
+			if self.filters.doc_type not in ["Quotation", "Sales Order"]:
 				self.data = []
 				return
 			self.get_sales_transactions_based_on_order_type()
 			self.get_rows_by_group()
 
 		elif self.filters.tree_type == "Project":
+			if self.filters.doc_type == "Quotation":
+				self.data = []
+				return
 			self.get_sales_transactions_based_on_project()
 			self.get_rows()
 
@@ -129,9 +180,7 @@ class Analytics(object):
 			""" select s.order_type as entity, s.{value_field} as value_field, s.{date_field}
 			from `tab{doctype}` s where s.docstatus = 1 and s.company = %s and s.{date_field} between %s and %s
 			and ifnull(s.order_type, '') != '' order by s.order_type
-		""".format(
-				date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type
-			),
+		""".format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
 			(self.filters.company, self.filters.from_date, self.filters.to_date),
 			as_dict=1,
 		)
@@ -145,11 +194,22 @@ class Analytics(object):
 			value_field = "total_qty as value_field"
 
 		if self.filters.tree_type == "Customer":
-			entity = "customer as entity"
 			entity_name = "customer_name as entity_name"
+			if self.filters.doc_type == "Quotation":
+				entity = "party_name as entity"
+			elif self.filters.doc_type == "Payment Entry":
+				entity = "party as entity"
+				entity_name = "party_name as entity_name"
+				value_field = "base_received_amount as value_field"
+			else:
+				entity = "customer as entity"
 		else:
 			entity = "supplier as entity"
 			entity_name = "supplier_name as entity_name"
+			if self.filters.doc_type == "Payment Entry":
+				entity = "party as entity"
+				entity_name = "party_name as entity_name"
+				value_field = "base_paid_amount as value_field"
 
 		self.entries = frappe.get_all(
 			self.filters.doc_type,
@@ -166,7 +226,6 @@ class Analytics(object):
 			self.entity_names.setdefault(d.entity, d.entity_name)
 
 	def get_sales_transactions_based_on_items(self):
-
 		if self.filters["value_quantity"] == "Value":
 			value_field = "base_net_amount"
 		else:
@@ -178,9 +237,7 @@ class Analytics(object):
 			from `tab{doctype} Item` i , `tab{doctype}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
 			and s.{date_field} between %s and %s
-		""".format(
-				date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type
-			),
+		""".format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
 			(self.filters.company, self.filters.from_date, self.filters.to_date),
 			as_dict=1,
 		)
@@ -221,14 +278,12 @@ class Analytics(object):
 			value_field = "qty"
 
 		self.entries = frappe.db.sql(
-			"""
-			select i.item_group as entity, i.{value_field} as value_field, s.{date_field}
-			from `tab{doctype} Item` i , `tab{doctype}` s
+			f"""
+			select i.item_group as entity, i.{value_field} as value_field, s.{self.date_field}
+			from `tab{self.filters.doc_type} Item` i , `tab{self.filters.doc_type}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{date_field} between %s and %s
-		""".format(
-				date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type
-			),
+			and s.{self.date_field} between %s and %s
+		""",
 			(self.filters.company, self.filters.from_date, self.filters.to_date),
 			as_dict=1,
 		)
@@ -240,6 +295,9 @@ class Analytics(object):
 			value_field = "base_net_total as value_field"
 		else:
 			value_field = "total_qty as value_field"
+
+		if self.filters.doc_type == "Payment Entry":
+			value_field = "base_received_amount as value_field"
 
 		entity = "project as entity"
 
@@ -294,7 +352,7 @@ class Analytics(object):
 				total += amount
 
 			row["total"] = total
-			out = [row] + out
+			out = [row, *out]
 
 		self.data = out
 
@@ -330,9 +388,7 @@ class Analytics(object):
 
 		from_date, to_date = getdate(self.filters.from_date), getdate(self.filters.to_date)
 
-		increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(
-			self.filters.range, 1
-		)
+		increment = {"Monthly": 1, "Quarterly": 3, "Half-Yearly": 6, "Yearly": 12}.get(self.filters.range, 1)
 
 		if self.filters.range in ["Monthly", "Quarterly"]:
 			from_date = from_date.replace(day=1)
@@ -342,7 +398,7 @@ class Analytics(object):
 			from_date = from_date + relativedelta(from_date, weekday=MO(-1))
 
 		self.periodic_daterange = []
-		for dummy in range(1, 53):
+		for _dummy in range(1, 53):
 			if self.filters.range == "Weekly":
 				period_end_date = add_days(from_date, 6)
 			else:
@@ -370,10 +426,8 @@ class Analytics(object):
 		self.depth_map = frappe._dict()
 
 		self.group_entries = frappe.db.sql(
-			"""select name, lft, rgt , {parent} as parent
-			from `tab{tree}` order by lft""".format(
-				tree=self.filters.tree_type, parent=parent
-			),
+			f"""select name, lft, rgt , {parent} as parent
+			from `tab{self.filters.tree_type}` order by lft""",
 			as_dict=1,
 		)
 
@@ -387,12 +441,10 @@ class Analytics(object):
 		self.depth_map = frappe._dict()
 
 		self.group_entries = frappe.db.sql(
-			""" select * from (select "Order Types" as name, 0 as lft,
+			f""" select * from (select "Order Types" as name, 0 as lft,
 			2 as rgt, '' as parent union select distinct order_type as name, 1 as lft, 1 as rgt, "Order Types" as parent
-			from `tab{doctype}` where ifnull(order_type, '') != '') as b order by lft, name
-		""".format(
-				doctype=self.filters.doc_type
-			),
+			from `tab{self.filters.doc_type}` where ifnull(order_type, '') != '') as b order by lft, name
+		""",
 			as_dict=1,
 		)
 
@@ -416,7 +468,33 @@ class Analytics(object):
 			labels = [d.get("label") for d in self.columns[3 : length - 1]]
 		else:
 			labels = [d.get("label") for d in self.columns[1 : length - 1]]
-		self.chart = {"data": {"labels": labels, "datasets": []}, "type": "line"}
+
+		datasets = []
+		if self.filters.curves != "select":
+			for curve in self.data:
+				data = {
+					"name": curve.get("entity_name", curve["entity"]),
+					"values": [curve[scrub(label)] for label in labels],
+				}
+				if self.filters.curves == "non-zeros" and not sum(data["values"]):
+					continue
+				elif self.filters.curves == "total" and "indent" in curve:
+					if curve["indent"] == 0:
+						datasets.append(data)
+				elif self.filters.curves == "total":
+					if datasets:
+						a = [
+							data["values"][idx] + datasets[0]["values"][idx]
+							for idx in range(len(data["values"]))
+						]
+						datasets[0]["values"] = a
+					else:
+						datasets.append(data)
+						datasets[0]["name"] = _("Total")
+				else:
+					datasets.append(data)
+
+		self.chart = {"data": {"labels": labels, "datasets": datasets}, "type": "line"}
 
 		if self.filters["value_quantity"] == "Value":
 			self.chart["fieldtype"] = "Currency"

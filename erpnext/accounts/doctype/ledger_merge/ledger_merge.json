@@ -93,7 +93,7 @@
  ],
  "hide_toolbar": 1,
  "links": [],
- "modified": "2021-12-12 21:34:55.155146",
+ "modified": "2024-03-27 13:10:02.198009",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Ledger Merge",
@@ -124,7 +124,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

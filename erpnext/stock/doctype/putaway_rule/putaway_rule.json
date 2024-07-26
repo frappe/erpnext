@@ -111,10 +111,11 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-11-25 20:39:19.973437",
+ "modified": "2024-07-08 09:19:26.711470",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Putaway Rule",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
@@ -130,16 +131,10 @@
    "write": 1
   },
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Stock User",
-   "share": 1,
-   "write": 1
+   "role": "Stock User"
   },
   {
    "email": 1,
@@ -153,8 +148,9 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "item_code",
  "track_changes": 1
 }

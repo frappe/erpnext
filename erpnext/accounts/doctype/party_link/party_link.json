@@ -52,7 +52,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-08-25 20:08:56.761150",
+ "modified": "2024-03-27 13:10:08.607170",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Party Link",
@@ -95,8 +95,9 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "title_field": "primary_party",
  "track_changes": 1
 }

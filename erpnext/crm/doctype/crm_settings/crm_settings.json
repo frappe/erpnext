@@ -91,7 +91,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2022-06-06 11:22:08.464253",
+ "modified": "2024-03-27 13:06:47.508534",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM Settings",
@@ -127,7 +127,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

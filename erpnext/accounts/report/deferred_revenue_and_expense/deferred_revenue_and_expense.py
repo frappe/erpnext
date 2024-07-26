@@ -10,7 +10,7 @@ from erpnext.accounts.report.financial_statements import get_period_list
 from erpnext.accounts.utils import get_fiscal_year
 
 
-class Deferred_Item(object):
+class Deferred_Item:
 	"""
 	Helper class for processing items with deferred revenue/expense
 	"""
@@ -58,9 +58,9 @@ class Deferred_Item(object):
 		For a given GL/Journal posting, get balance based on item type
 		"""
 		if self.type == "Deferred Sale Item":
-			return entry.debit - entry.credit
+			return flt(entry.debit) - flt(entry.credit)
 		elif self.type == "Deferred Purchase Item":
-			return -(entry.credit - entry.debit)
+			return -(flt(entry.credit) - flt(entry.debit))
 		return 0
 
 	def get_item_total(self):
@@ -147,18 +147,16 @@ class Deferred_Item(object):
 			actual = 0
 			for posting in self.gle_entries:
 				# if period.from_date <= posting.posting_date <= period.to_date:
-				if period.from_date <= posting.gle_posting_date <= period.to_date:
+				if period.from_date <= getdate(posting.gle_posting_date) <= period.to_date:
 					period_sum += self.get_amount(posting)
 					if posting.posted == "posted":
 						actual += self.get_amount(posting)
 
-			self.period_total.append(
-				frappe._dict({"key": period.key, "total": period_sum, "actual": actual})
-			)
+			self.period_total.append(frappe._dict({"key": period.key, "total": period_sum, "actual": actual}))
 		return self.period_total
 
 
-class Deferred_Invoice(object):
+class Deferred_Invoice:
 	def __init__(self, invoice, items, filters, period_list):
 		"""
 		Helper class for processing invoices with deferred revenue/expense items
@@ -194,7 +192,7 @@ class Deferred_Invoice(object):
 		for item in self.items:
 			item_total = item.calculate_item_revenue_expense_for_period()
 			# update invoice total
-			for idx, period in enumerate(self.period_list, 0):
+			for idx in range(len(self.period_list)):
 				self.period_total[idx].total += item_total[idx].total
 				self.period_total[idx].actual += item_total[idx].actual
 		return self.period_total
@@ -219,7 +217,7 @@ class Deferred_Invoice(object):
 		return ret_data
 
 
-class Deferred_Revenue_and_Expense_Report(object):
+class Deferred_Revenue_and_Expense_Report:
 	def __init__(self, filters=None):
 		"""
 		Initialize deferred revenue/expense report with user provided filters or system defaults, if none is provided
@@ -287,7 +285,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 			qb.from_(inv_item)
 			.join(inv)
 			.on(inv.name == inv_item.parent)
-			.join(gle)
+			.left_join(gle)
 			.on((inv_item.name == gle.voucher_detail_no) & (deferred_account_field == gle.account))
 			.select(
 				inv.name.as_("doc"),
@@ -348,7 +346,7 @@ class Deferred_Revenue_and_Expense_Report(object):
 		for inv in self.deferred_invoices:
 			inv_total = inv.calculate_invoice_revenue_expense_for_period()
 			# calculate total for whole report
-			for idx, period in enumerate(self.period_list, 0):
+			for idx in range(len(self.period_list)):
 				self.period_total[idx].total += inv_total[idx].total
 				self.period_total[idx].actual += inv_total[idx].actual
 

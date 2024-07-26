@@ -433,7 +433,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2022-11-17 17:23:27.025802",
+ "modified": "2024-03-27 13:10:41.030764",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",
@@ -469,7 +469,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

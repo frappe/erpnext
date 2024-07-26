@@ -218,13 +218,14 @@
    "fieldname": "reposting_data_file",
    "fieldtype": "Attach",
    "label": "Reposting Data File",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-05-31 12:48:57.138693",
+ "modified": "2024-06-27 16:55:23.150146",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
@@ -273,7 +274,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

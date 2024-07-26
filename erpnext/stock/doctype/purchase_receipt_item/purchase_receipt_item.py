@@ -16,6 +16,7 @@ class PurchaseReceiptItem(Document):
 
 		allow_zero_valuation_rate: DF.Check
 		amount: DF.Currency
+		apply_tds: DF.Check
 		asset_category: DF.Link | None
 		asset_location: DF.Link | None
 		barcode: DF.Data | None
@@ -84,8 +85,10 @@ class PurchaseReceiptItem(Document):
 		rejected_serial_no: DF.Text | None
 		rejected_warehouse: DF.Link | None
 		retain_sample: DF.Check
+		return_qty_from_rejected_warehouse: DF.Check
 		returned_qty: DF.Float
 		rm_supp_cost: DF.Currency
+		sales_incoming_rate: DF.Currency
 		sales_order: DF.Link | None
 		sales_order_item: DF.Data | None
 		sample_quantity: DF.Int

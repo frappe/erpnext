@@ -20,6 +20,7 @@
   "party",
   "party_name",
   "book_advance_payments_in_separate_party_account",
+  "reconcile_on_advance_payment_date",
   "column_break_11",
   "bank_account",
   "party_bank_account",
@@ -88,6 +89,7 @@
   "custom_remarks",
   "remarks",
   "base_in_words",
+  "is_opening",
   "column_break_16",
   "letter_head",
   "print_heading",
@@ -150,6 +152,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -477,6 +480,7 @@
    "label": "More Information"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -580,6 +584,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Payment Order Status",
+   "no_copy": 1,
    "options": "Initiated\nPayment Ordered",
    "read_only": 1
   },
@@ -748,6 +753,7 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Book Advance Payments in Separate Party Account",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -763,6 +769,26 @@
    "label": "In Words",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "company.reconcile_on_advance_payment_date",
+   "fieldname": "reconcile_on_advance_payment_date",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Reconcile on Advance Payment Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "No",
+   "depends_on": "eval: doc.book_advance_payments_in_separate_party_account == 1",
+   "fieldname": "is_opening",
+   "fieldtype": "Select",
+   "label": "Is Opening",
+   "options": "No\nYes",
+   "print_hide": 1,
+   "search_index": 1
   }
  ],
  "index_web_pages_for_search": 1,
@@ -776,7 +802,7 @@
    "table_fieldname": "payment_entries"
   }
  ],
- "modified": "2024-01-08 13:17:15.744754",
+ "modified": "2024-05-31 17:07:06.197249",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
@@ -817,7 +843,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "title",

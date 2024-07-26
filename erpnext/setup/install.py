@@ -32,6 +32,7 @@ def after_install():
 	add_standard_navbar_items()
 	add_app_name()
 	update_roles()
+	make_default_operations()
 	frappe.db.commit()
 
 
@@ -40,6 +41,14 @@ def check_setup_wizard_not_completed():
 		message = """ERPNext can only be installed on a fresh site where the setup wizard is not completed.
 You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"""
 		frappe.throw(message)  # nosemgrep
+
+
+def make_default_operations():
+	for operation in ["Assembly"]:
+		if not frappe.db.exists("Operation", operation):
+			doc = frappe.get_doc({"doctype": "Operation", "name": operation})
+			doc.flags.ignore_mandatory = True
+			doc.insert(ignore_permissions=True)
 
 
 def set_single_defaults():
@@ -122,7 +131,6 @@ def create_default_success_action():
 
 
 def create_default_energy_point_rules():
-
 	for rule in get_default_energy_point_rules():
 		# check if any rule for ref. doctype exists
 		rule_exists = frappe.db.exists(
@@ -142,6 +150,11 @@ def add_company_to_session_defaults():
 
 def add_standard_navbar_items():
 	navbar_settings = frappe.get_single("Navbar Settings")
+
+	# Translatable strings for below navbar items
+	__ = _("Documentation")
+	__ = _("User Forum")
+	__ = _("Report an Issue")
 
 	erpnext_navbar_items = [
 		{

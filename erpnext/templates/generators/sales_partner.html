@@ -8,18 +8,20 @@
 <div class="partner-content" itemscope itemtype="http://schema.org/Organization">
 	<div class="row">
 		<div class="col-md-4">
-			{% if logo -%}
+			{% if logo %}
 			<img itemprop="brand" src="{{ logo }}" class="partner-logo"
 				alt="{{ partner_name }}" title="{{ partner_name }}" />
 			<br><br>
-			{%- endif %}
-			<address>
-				{% if partner_website -%}<p><a href="{{ partner_website }}"
-					target="_blank">{{ partner_website }}</a></p>{%- endif %}
-				{% if partner_address -%}<p itemprop="address">{{ partner_address }}</p>{%- endif %}
-				{% if phone -%}<p itemprop="telephone">{{ phone }}</p>{%- endif %}
-				{% if email -%}<p itemprop="email"><span class="fa fa-envelope"></span> {{ email }}</p>{%- endif %}
-			</address>
+			{% endif %}
+			{% if addresses %}
+				{% for address in addresses %}
+					<address>
+						{% if address.partner_address %}<p itemprop="address">{{ address.partner_address }}</p>{% endif %}
+						{% if address.phone %}<p itemprop="telephone">{{ address.phone }}</p>{% endif %}
+						{% if address.email %}<p itemprop="email"><span class="fa fa-envelope"></span> {{ address.email }}</p>{% endif %}
+					</address>
+				{% endfor %}
+			{% endif %}
 		</div>
 		<div class="col-md-8">
 			<p>{{ description }}</p>

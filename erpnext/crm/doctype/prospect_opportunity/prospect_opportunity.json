@@ -88,14 +88,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2022-04-28 10:05:38.730368",
+ "modified": "2024-03-27 13:10:23.116345",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Prospect Opportunity",
  "naming_rule": "Autoincrement",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

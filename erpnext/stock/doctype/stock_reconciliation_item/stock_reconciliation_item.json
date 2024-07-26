@@ -20,6 +20,7 @@
   "serial_no_and_batch_section",
   "add_serial_batch_bundle",
   "use_serial_batch_fields",
+  "reconcile_all_serial_batch",
   "column_break_11",
   "serial_and_batch_bundle",
   "current_serial_and_batch_bundle",
@@ -243,18 +244,25 @@
   {
    "fieldname": "column_break_eefq",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.use_serial_batch_fields",
+   "fieldname": "reconcile_all_serial_batch",
+   "fieldtype": "Check",
+   "label": "Reconcile All Serial Nos / Batches"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-02-04 16:19:44.576022",
+ "modified": "2024-05-30 23:20:00.947243",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

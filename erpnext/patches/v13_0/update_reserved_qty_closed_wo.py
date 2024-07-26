@@ -4,7 +4,6 @@ from erpnext.stock.utils import get_bin
 
 
 def execute():
-
 	wo = frappe.qb.DocType("Work Order")
 	wo_item = frappe.qb.DocType("Work Order Item")
 

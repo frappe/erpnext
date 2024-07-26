@@ -147,7 +147,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:doc.__islocal",
+   "collapsible_depends_on": "exp_start_date",
    "fieldname": "sb_timeline",
    "fieldtype": "Section Break",
    "label": "Timeline"
@@ -155,7 +155,7 @@
   {
    "bold": 1,
    "fieldname": "exp_start_date",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "Expected Start Date",
    "oldfieldname": "exp_start_date",
    "oldfieldtype": "Date"
@@ -181,7 +181,7 @@
   {
    "bold": 1,
    "fieldname": "exp_end_date",
-   "fieldtype": "Date",
+   "fieldtype": "Datetime",
    "label": "Expected End Date",
    "oldfieldname": "exp_end_date",
    "oldfieldtype": "Date",
@@ -399,7 +399,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2024-01-08 16:00:41.296203",
+ "modified": "2024-05-24 12:36:12.214577",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
@@ -423,7 +423,7 @@
  "search_fields": "subject",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "project",

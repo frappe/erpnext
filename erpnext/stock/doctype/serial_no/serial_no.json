@@ -272,7 +272,7 @@
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2023-12-17 10:52:55.767839",
+ "modified": "2024-03-27 13:10:39.196284",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -312,7 +312,7 @@
  ],
  "search_fields": "item_code",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

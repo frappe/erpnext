@@ -15,12 +15,10 @@ def execute():
 		frappe.reload_doctype(doctype)
 		for key, value in options.items():
 			frappe.db.sql(
-				"""
+				f"""
                 update `tab{doctype}`
                 set no_of_employees = %s
                 where no_of_employees = %s
-            """.format(
-					doctype=doctype
-				),
+            """,
 				(value, key),
 			)

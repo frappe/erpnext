@@ -31,6 +31,7 @@ class CurrencyExchangeSettings(Document):
 		result_key: DF.Table[CurrencyExchangeSettingsResult]
 		service_provider: DF.Literal["frankfurter.app", "exchangerate.host", "Custom"]
 		url: DF.Data | None
+		use_http: DF.Check
 	# end: auto-generated types
 
 	def validate(self):
@@ -42,7 +43,6 @@ class CurrencyExchangeSettings(Document):
 
 	def set_parameters_and_result(self):
 		if self.service_provider == "exchangerate.host":
-
 			if not self.access_key:
 				frappe.throw(
 					_("Access Key is required for Service Provider: {0}").format(
@@ -53,7 +53,7 @@ class CurrencyExchangeSettings(Document):
 			self.set("result_key", [])
 			self.set("req_params", [])
 
-			self.api_endpoint = "https://api.exchangerate.host/convert"
+			self.api_endpoint = get_api_endpoint(self.service_provider, self.use_http)
 			self.append("result_key", {"key": "result"})
 			self.append("req_params", {"key": "access_key", "value": self.access_key})
 			self.append("req_params", {"key": "amount", "value": "1"})
@@ -64,7 +64,7 @@ class CurrencyExchangeSettings(Document):
 			self.set("result_key", [])
 			self.set("req_params", [])
 
-			self.api_endpoint = "https://frankfurter.app/{transaction_date}"
+			self.api_endpoint = get_api_endpoint(self.service_provider, self.use_http)
 			self.append("result_key", {"key": "rates"})
 			self.append("result_key", {"key": "{to_currency}"})
 			self.append("req_params", {"key": "base", "value": "{from_currency}"})
@@ -77,9 +77,7 @@ class CurrencyExchangeSettings(Document):
 				transaction_date=nowdate(), to_currency="INR", from_currency="USD"
 			)
 
-		api_url = self.api_endpoint.format(
-			transaction_date=nowdate(), to_currency="INR", from_currency="USD"
-		)
+		api_url = self.api_endpoint.format(transaction_date=nowdate(), to_currency="INR", from_currency="USD")
 
 		try:
 			response = requests.get(api_url, params=params)
@@ -99,7 +97,23 @@ class CurrencyExchangeSettings(Document):
 				]
 		except Exception:
 			frappe.throw(_("Invalid result key. Response:") + " " + response.text)
-		if not isinstance(value, (int, float)):
+		if not isinstance(value, int | float):
 			frappe.throw(_("Returned exchange rate is neither integer not float."))
 
 		self.url = response.url
+
+
+@frappe.whitelist()
+def get_api_endpoint(service_provider: str | None = None, use_http: bool = False):
+	if service_provider and service_provider in ["exchangerate.host", "frankfurter.app"]:
+		if service_provider == "exchangerate.host":
+			api = "api.exchangerate.host/convert"
+		elif service_provider == "frankfurter.app":
+			api = "frankfurter.app/{transaction_date}"
+
+		protocol = "https://"
+		if use_http:
+			protocol = "http://"
+
+		return protocol + api
+	return None

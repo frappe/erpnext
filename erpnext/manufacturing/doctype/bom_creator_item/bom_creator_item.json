@@ -11,10 +11,23 @@
   "item_group",
   "column_break_f63f",
   "fg_item",
-  "source_warehouse",
   "is_expandable",
   "sourced_by_supplier",
   "bom_created",
+  "is_subcontracted",
+  "operation_section",
+  "operation",
+  "operation_time",
+  "column_break_cbnk",
+  "workstation_type",
+  "workstation",
+  "warehouse_section",
+  "skip_material_transfer",
+  "backflush_from_wip_warehouse",
+  "source_warehouse",
+  "column_break_xutc",
+  "wip_warehouse",
+  "fg_warehouse",
   "description_section",
   "description",
   "quantity_and_rate_section",
@@ -70,21 +83,23 @@
    "fieldname": "fg_item",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "FG Item",
+   "label": "Finished Goods Item",
    "options": "Item",
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.skip_material_transfer && !doc.backflush_from_wip_warehouse",
    "fieldname": "source_warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Source Warehouse",
    "options": "Warehouse"
   },
   {
+   "columns": 1,
    "default": "0",
    "fieldname": "is_expandable",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Is Expandable",
    "read_only": 1
   },
@@ -203,7 +218,7 @@
   {
    "fieldname": "fg_reference_id",
    "fieldtype": "Data",
-   "label": "FG Reference",
+   "label": "Finished Goods Reference",
    "no_copy": 1,
    "read_only": 1
   },
@@ -225,18 +240,93 @@
    "label": "BOM Created",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "operation_section",
+   "fieldtype": "Section Break",
+   "label": "Operation"
+  },
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "label": "Operation",
+   "options": "Operation"
+  },
+  {
+   "fieldname": "column_break_cbnk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "label": "Workstation Type",
+   "options": "Workstation Type"
+  },
+  {
+   "description": "In Mins",
+   "fieldname": "operation_time",
+   "fieldtype": "Int",
+   "label": "Operation Time"
+  },
+  {
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "label": "Workstation",
+   "options": "Workstation"
+  },
+  {
+   "fieldname": "warehouse_section",
+   "fieldtype": "Section Break",
+   "label": "Warehouse"
+  },
+  {
+   "depends_on": "eval:!doc.skip_material_transfer || doc.backflush_from_wip_warehouse",
+   "fieldname": "wip_warehouse",
+   "fieldtype": "Link",
+   "label": "Work In Progress Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_xutc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fg_warehouse",
+   "fieldtype": "Link",
+   "label": "Finished Good Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_material_transfer",
+   "fieldtype": "Check",
+   "label": "Skip Material Transfer"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.skip_material_transfer",
+   "fieldname": "backflush_from_wip_warehouse",
+   "fieldtype": "Check",
+   "label": "Backflush Materials From WIP Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_subcontracted",
+   "fieldtype": "Check",
+   "label": "Is Subcontracted",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-16 13:34:06.321061",
+ "modified": "2024-06-03 18:45:24.339532",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator Item",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

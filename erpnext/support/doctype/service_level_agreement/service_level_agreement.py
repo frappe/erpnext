@@ -79,22 +79,26 @@ class ServiceLevelAgreement(Document):
 			# Check if response and resolution time is set for every priority
 			if not priority.response_time:
 				frappe.throw(
-					_("Set Response Time for Priority {0} in row {1}.").format(priority.priority, priority.idx)
+					_("Set Response Time for Priority {0} in row {1}.").format(
+						priority.priority, priority.idx
+					)
 				)
 
 			if self.apply_sla_for_resolution:
 				if not priority.resolution_time:
 					frappe.throw(
-						_("Set Response Time for Priority {0} in row {1}.").format(priority.priority, priority.idx)
+						_("Set Response Time for Priority {0} in row {1}.").format(
+							priority.priority, priority.idx
+						)
 					)
 
 				response = priority.response_time
 				resolution = priority.resolution_time
 				if response > resolution:
 					frappe.throw(
-						_("Response Time for {0} priority in row {1} can't be greater than Resolution Time.").format(
-							priority.priority, priority.idx
-						)
+						_(
+							"Response Time for {0} priority in row {1} can't be greater than Resolution Time."
+						).format(priority.priority, priority.idx)
 					)
 
 			priorities.append(priority.priority)
@@ -358,7 +362,7 @@ def get_active_service_level_agreement_for(doc):
 					"Service Level Agreement",
 					"entity",
 					"in",
-					[customer] + get_customer_group(customer) + get_customer_territory(customer),
+					[customer, *get_customer_group(customer), *get_customer_territory(customer)],
 				],
 				["Service Level Agreement", "entity_type", "is", "not set"],
 			]
@@ -366,9 +370,7 @@ def get_active_service_level_agreement_for(doc):
 	else:
 		or_filters.append(["Service Level Agreement", "entity_type", "is", "not set"])
 
-	default_sla_filter = filters + [
-		["Service Level Agreement", "default_service_level_agreement", "=", 1]
-	]
+	default_sla_filter = [*filters, ["Service Level Agreement", "default_service_level_agreement", "=", 1]]
 	default_sla = frappe.get_all(
 		"Service Level Agreement",
 		filters=default_sla_filter,
@@ -409,7 +411,7 @@ def get_customer_group(customer):
 	customer_group = frappe.db.get_value("Customer", customer, "customer_group") if customer else None
 	if customer_group:
 		ancestors = get_ancestors_of("Customer Group", customer_group)
-		customer_groups = [customer_group] + ancestors
+		customer_groups = [customer_group, *ancestors]
 
 	return customer_groups
 
@@ -419,7 +421,7 @@ def get_customer_territory(customer):
 	customer_territory = frappe.db.get_value("Customer", customer, "territory") if customer else None
 	if customer_territory:
 		ancestors = get_ancestors_of("Territory", customer_territory)
-		customer_territories = [customer_territory] + ancestors
+		customer_territories = [customer_territory, *ancestors]
 
 	return customer_territories
 
@@ -443,7 +445,7 @@ def get_service_level_agreement_filters(doctype, name, customer=None):
 				"Service Level Agreement",
 				"entity",
 				"in",
-				[""] + [customer] + get_customer_group(customer) + get_customer_territory(customer),
+				["", customer, *get_customer_group(customer), *get_customer_territory(customer)],
 			]
 		)
 
@@ -455,8 +457,7 @@ def get_service_level_agreement_filters(doctype, name, customer=None):
 			)
 		],
 		"service_level_agreements": [
-			d.name
-			for d in frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters)
+			d.name for d in frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters)
 		],
 	}
 
@@ -517,7 +518,6 @@ def remove_sla_if_applied(doc):
 
 
 def process_sla(doc, sla):
-
 	if not doc.creation:
 		doc.creation = now_datetime(doc.get("owner"))
 		if doc.meta.has_field("service_level_agreement_creation"):
@@ -747,16 +747,13 @@ def change_service_level_agreement_and_priority(self):
 		and frappe.db.exists("Issue", self.name)
 		and frappe.db.get_single_value("Support Settings", "track_service_level_agreement")
 	):
-
 		if self.priority != frappe.db.get_value("Issue", self.name, "priority"):
 			self.set_response_and_resolution_time(
 				priority=self.priority, service_level_agreement=self.service_level_agreement
 			)
 			frappe.msgprint(_("Priority has been changed to {0}.").format(self.priority))
 
-		if self.service_level_agreement != frappe.db.get_value(
-			"Issue", self.name, "service_level_agreement"
-		):
+		if self.service_level_agreement != frappe.db.get_value("Issue", self.name, "service_level_agreement"):
 			self.set_response_and_resolution_time(
 				priority=self.priority, service_level_agreement=self.service_level_agreement
 			)
@@ -768,9 +765,7 @@ def change_service_level_agreement_and_priority(self):
 def get_response_and_resolution_duration(doc):
 	sla = frappe.get_doc("Service Level Agreement", doc.service_level_agreement)
 	priority = sla.get_service_level_agreement_priority(doc.priority)
-	priority.update(
-		{"support_and_resolution": sla.support_and_resolution, "holiday_list": sla.holiday_list}
-	)
+	priority.update({"support_and_resolution": sla.support_and_resolution, "holiday_list": sla.holiday_list})
 	return priority
 
 
@@ -787,7 +782,7 @@ def reset_service_level_agreement(doctype: str, docname: str, reason, user):
 			"reference_doctype": doc.doctype,
 			"reference_name": doc.name,
 			"comment_email": user,
-			"content": " resetted Service Level Agreement - {0}".format(_(reason)),
+			"content": f" resetted Service Level Agreement - {_(reason)}",
 		}
 	).insert(ignore_permissions=True)
 
@@ -895,7 +890,7 @@ def record_assigned_users_on_failure(doc):
 	if assigned_users:
 		from frappe.utils import get_fullname
 
-		assigned_users = ", ".join((get_fullname(user) for user in assigned_users))
+		assigned_users = ", ".join(get_fullname(user) for user in assigned_users)
 		message = _("First Response SLA Failed by {}").format(assigned_users)
 		doc.add_comment(comment_type="Assigned", text=message)
 

@@ -31,9 +31,7 @@ class TestLocation(unittest.TestCase):
 		ordered_test_location_features = sorted(
 			test_location_features, key=lambda x: x["properties"]["feature_of"]
 		)
-		ordered_formatted_locations = sorted(
-			formatted_locations, key=lambda x: x["properties"]["feature_of"]
-		)
+		ordered_formatted_locations = sorted(formatted_locations, key=lambda x: x["properties"]["feature_of"])
 
 		self.assertEqual(ordered_formatted_locations, ordered_test_location_features)
 		self.assertEqual(area, test_location.get("area"))

@@ -23,18 +23,6 @@
   "cost_center",
   "dimension_col_break",
   "project",
-  "section_addresses",
-  "supplier_address",
-  "contact_person",
-  "address_display",
-  "contact_display",
-  "contact_mobile",
-  "contact_email",
-  "col_break_address",
-  "shipping_address",
-  "shipping_address_display",
-  "billing_address",
-  "billing_address_display",
   "sec_warehouse",
   "set_warehouse",
   "rejected_warehouse",
@@ -47,26 +35,42 @@
   "total_qty",
   "column_break_27",
   "total",
-  "raw_material_details",
+  "raw_materials_consumed_section",
+  "reset_raw_materials_table",
+  "column_break_uinr",
   "get_current_stock",
+  "raw_material_details",
   "supplied_items",
-  "additional_costs_section",
-  "distribute_additional_costs_based_on",
-  "additional_costs",
-  "total_additional_costs",
   "section_break_46",
   "in_words",
   "bill_no",
   "bill_date",
+  "tab_addresses",
+  "supplier_address",
+  "contact_person",
+  "address_display",
+  "contact_display",
+  "contact_mobile",
+  "contact_email",
+  "col_break_address",
+  "shipping_address",
+  "shipping_address_display",
+  "billing_address",
+  "billing_address_display",
+  "tab_additional_costs",
+  "distribute_additional_costs_based_on",
+  "additional_costs",
+  "total_additional_costs",
+  "tab_other_info",
   "more_info",
-  "status",
-  "column_break_39",
-  "per_returned",
-  "section_break_47",
   "amended_from",
   "range",
   "column_break4",
   "represents_company",
+  "order_status_section",
+  "status",
+  "column_break_39",
+  "per_returned",
   "subscription_detail",
   "auto_repeat",
   "printing_settings",
@@ -81,7 +85,8 @@
   "transporter_name",
   "column_break5",
   "lr_no",
-  "lr_date"
+  "lr_date",
+  "tab_connections"
  ],
  "fields": [
   {
@@ -109,7 +114,7 @@
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_global_search": 1,
-   "label": "Supplier",
+   "label": "Job Worker",
    "options": "Supplier",
    "print_hide": 1,
    "print_width": "150px",
@@ -124,7 +129,7 @@
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Supplier Name",
+   "label": "Job Worker Name",
    "read_only": 1
   },
   {
@@ -171,15 +176,14 @@
    "width": "150px"
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_addresses",
-   "fieldtype": "Section Break",
+   "fieldname": "tab_addresses",
+   "fieldtype": "Tab Break",
    "label": "Address and Contact"
   },
   {
    "fieldname": "supplier_address",
    "fieldtype": "Link",
-   "label": "Select Supplier Address",
+   "label": "Select Job Worker Address",
    "options": "Address",
    "print_hide": 1
   },
@@ -192,7 +196,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "read_only": 1
   },
@@ -231,7 +235,7 @@
   },
   {
    "fieldname": "shipping_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Shipping Address",
    "print_hide": 1,
    "read_only": 1
@@ -266,7 +270,7 @@
   {
    "fieldname": "supplier_warehouse",
    "fieldtype": "Link",
-   "label": "Supplier Warehouse",
+   "label": "Job Worker Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
    "print_hide": 1,
@@ -300,6 +304,7 @@
    "depends_on": "supplied_items",
    "fieldname": "raw_material_details",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "label": "Raw Materials Consumed",
    "options": "fa fa-table",
    "print_hide": 1,
@@ -410,6 +415,7 @@
    "width": "50%"
   },
   {
+   "collapsible": 1,
    "fieldname": "subscription_detail",
    "fieldtype": "Section Break",
    "label": "Auto Repeat Detail"
@@ -521,7 +527,7 @@
   },
   {
    "fieldname": "billing_address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Billing Address",
    "read_only": 1
   },
@@ -568,10 +574,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_47",
-   "fieldtype": "Section Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
@@ -594,11 +596,9 @@
    "options": "Project"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "total_additional_costs",
    "depends_on": "eval:(doc.docstatus == 0 || doc.total_additional_costs)",
-   "fieldname": "additional_costs_section",
-   "fieldtype": "Section Break",
+   "fieldname": "tab_additional_costs",
+   "fieldtype": "Tab Break",
    "label": "Additional Costs"
   },
   {
@@ -639,13 +639,44 @@
   {
    "fieldname": "supplier_delivery_note",
    "fieldtype": "Data",
-   "label": "Supplier Delivery Note"
+   "label": "Job Worker Delivery Note"
+  },
+  {
+   "fieldname": "raw_materials_consumed_section",
+   "fieldtype": "Section Break",
+   "label": "Raw Materials Actions"
+  },
+  {
+   "fieldname": "reset_raw_materials_table",
+   "fieldtype": "Button",
+   "label": "Reset Raw Materials Table"
+  },
+  {
+   "fieldname": "column_break_uinr",
+   "fieldtype": "Column Break"
+  },
+  {
+    "fieldname": "tab_other_info",
+    "fieldtype": "Tab Break",
+    "label": "Other Info"
+  },
+  {
+    "collapsible": 1,
+    "fieldname": "order_status_section",
+    "fieldtype": "Section Break",
+    "label": "Order Status"
+  },
+  {
+    "fieldname": "tab_connections",
+    "fieldtype": "Tab Break",
+    "label": "Connections",
+    "show_dashboard": 1
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-16 13:04:00.710534",
+ "modified": "2024-05-27 15:02:13.517969",
  "modified_by": "Administrator",
  "module": "Subcontracting",
  "name": "Subcontracting Receipt",
@@ -708,7 +739,7 @@
  ],
  "search_fields": "status, posting_date, supplier",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "supplier",

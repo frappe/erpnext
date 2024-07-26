@@ -24,9 +24,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 	def run(self, args):
 		self.account_type = args.get("account_type")
 		self.party_type = get_party_types_from_account_type(self.account_type)
-		self.party_naming_by = frappe.db.get_single_value(
-			args.get("naming_by")[0], args.get("naming_by")[1]
-		)
+		self.party_naming_by = frappe.db.get_single_value(args.get("naming_by")[0], args.get("naming_by")[1])
 		self.get_columns()
 		self.get_data(args)
 		return self.columns, self.data

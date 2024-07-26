@@ -1,11 +1,11 @@
 frappe.treeview_settings["Department"] = {
-	ignore_fields:["parent_department"],
-	get_tree_nodes: 'erpnext.setup.doctype.department.department.get_children',
-	add_tree_node: 'erpnext.setup.doctype.department.department.add_node',
+	ignore_fields: ["parent_department"],
+	get_tree_nodes: "erpnext.setup.doctype.department.department.get_children",
+	add_tree_node: "erpnext.setup.doctype.department.department.add_node",
 	filters: [
 		{
 			fieldname: "company",
-			fieldtype:"Link",
+			fieldtype: "Link",
 			options: "Company",
 			label: __("Company"),
 		},
@@ -16,13 +16,13 @@ frappe.treeview_settings["Department"] = {
 	menu_items: [
 		{
 			label: __("New Department"),
-			action: function() {
+			action: function () {
 				frappe.new_doc("Department", true);
 			},
-			condition: 'frappe.boot.user.can_create.indexOf("Department") !== -1'
-		}
+			condition: 'frappe.boot.user.can_create.indexOf("Department") !== -1',
+		},
 	],
-	onload: function(treeview) {
+	onload: function (treeview) {
 		treeview.make_tree();
-	}
+	},
 };

@@ -64,14 +64,15 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-06-21 12:00:58.089962",
+ "modified": "2024-03-27 13:10:39.731977",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Priority",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

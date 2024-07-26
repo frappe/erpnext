@@ -1,20 +1,19 @@
 # Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-import unittest
 
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, getdate, nowdate
+from frappe.utils import add_days, getdate, nowdate
 
-from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
+from erpnext.buying.doctype.purchase_order.test_purchase_order import prepare_data_for_internal_transfer
 from erpnext.stock.doctype.item.test_item import create_item
 
 
@@ -56,7 +55,9 @@ class TestAccountsController(FrappeTestCase):
 	20 series - Sales Invoice against Journals
 	30 series - Sales Invoice against Credit Notes
 	40 series - Company default Cost center is unset
-	50 series = Journals against Journals
+	50 series - Journals against Journals
+	60 series - Journals against Payment Entries
+	70 series - Advances in Separate party account. Both Party and Advance account are in Foreign currency.
 	90 series - Dimension inheritence
 	"""
 
@@ -116,39 +117,118 @@ class TestAccountsController(FrappeTestCase):
 		self.supplier = make_supplier("_Test MC Supplier USD", "USD")
 
 	def create_account(self):
-		account_name = "Debtors USD"
-		if not frappe.db.get_value(
-			"Account", filters={"account_name": account_name, "company": self.company}
-		):
-			acc = frappe.new_doc("Account")
-			acc.account_name = account_name
-			acc.parent_account = "Accounts Receivable - " + self.company_abbr
-			acc.company = self.company
-			acc.account_currency = "USD"
-			acc.account_type = "Receivable"
-			acc.insert()
-		else:
-			name = frappe.db.get_value(
-				"Account",
-				filters={"account_name": account_name, "company": self.company},
-				fieldname="name",
-				pluck=True,
-			)
-			acc = frappe.get_doc("Account", name)
-		self.debtors_usd = acc.name
+		accounts = [
+			frappe._dict(
+				{
+					"attribute_name": "debtors_usd",
+					"name": "Debtors USD",
+					"account_type": "Receivable",
+					"account_currency": "USD",
+					"parent_account": "Accounts Receivable - " + self.company_abbr,
+				}
+			),
+			frappe._dict(
+				{
+					"attribute_name": "creditors_usd",
+					"name": "Creditors USD",
+					"account_type": "Payable",
+					"account_currency": "USD",
+					"parent_account": "Accounts Payable - " + self.company_abbr,
+				}
+			),
+			# Advance accounts under Asset and Liability header
+			frappe._dict(
+				{
+					"attribute_name": "advance_received_usd",
+					"name": "Advance Received USD",
+					"account_type": "Receivable",
+					"account_currency": "USD",
+					"parent_account": "Current Liabilities - " + self.company_abbr,
+				}
+			),
+			frappe._dict(
+				{
+					"attribute_name": "advance_paid_usd",
+					"name": "Advance Paid USD",
+					"account_type": "Payable",
+					"account_currency": "USD",
+					"parent_account": "Current Assets - " + self.company_abbr,
+				}
+			),
+		]
+
+		for x in accounts:
+			if not frappe.db.get_value("Account", filters={"account_name": x.name, "company": self.company}):
+				acc = frappe.new_doc("Account")
+				acc.account_name = x.name
+				acc.parent_account = x.parent_account
+				acc.company = self.company
+				acc.account_currency = x.account_currency
+				acc.account_type = x.account_type
+				acc.insert()
+			else:
+				name = frappe.db.get_value(
+					"Account",
+					filters={"account_name": x.name, "company": self.company},
+					fieldname="name",
+					pluck=True,
+				)
+				acc = frappe.get_doc("Account", name)
+			setattr(self, x.attribute_name, acc.name)
+
+	def setup_advance_accounts_in_party_master(self):
+		company = frappe.get_doc("Company", self.company)
+		company.book_advance_payments_in_separate_party_account = 1
+		company.save()
+
+		customer = frappe.get_doc("Customer", self.customer)
+		customer.append(
+			"accounts",
+			{
+				"company": self.company,
+				"account": self.debtors_usd,
+				"advance_account": self.advance_received_usd,
+			},
+		)
+		customer.save()
+
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		supplier.append(
+			"accounts",
+			{
+				"company": self.company,
+				"account": self.creditors_usd,
+				"advance_account": self.advance_paid_usd,
+			},
+		)
+		supplier.save()
+
+	def remove_advance_accounts_from_party_master(self):
+		company = frappe.get_doc("Company", self.company)
+		company.book_advance_payments_in_separate_party_account = 0
+		company.save()
+		customer = frappe.get_doc("Customer", self.customer)
+		customer.accounts = []
+		customer.save()
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		supplier.accounts = []
+		supplier.save()
 
 	def create_sales_invoice(
 		self,
 		qty=1,
 		rate=1,
 		conversion_rate=80,
-		posting_date=nowdate(),
+		posting_date=None,
 		do_not_save=False,
 		do_not_submit=False,
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
@@ -174,11 +254,14 @@ class TestAccountsController(FrappeTestCase):
 		return sinv
 
 	def create_payment_entry(
-		self, amount=1, source_exc_rate=75, posting_date=nowdate(), customer=None
+		self, amount=1, source_exc_rate=75, posting_date=None, customer=None, submit=True
 	):
 		"""
 		Helper function to populate default values in payment entry
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		payment = create_payment_entry(
 			company=self.company,
 			payment_type="Receive",
@@ -192,6 +275,48 @@ class TestAccountsController(FrappeTestCase):
 		payment.received_amount = source_exc_rate * amount
 		payment.posting_date = posting_date
 		return payment
+
+	def create_purchase_invoice(
+		self,
+		qty=1,
+		rate=1,
+		conversion_rate=80,
+		posting_date=None,
+		do_not_save=False,
+		do_not_submit=False,
+	):
+		"""
+		Helper function to populate default values in purchase invoice
+		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
+		pinv = make_purchase_invoice(
+			posting_date=posting_date,
+			qty=qty,
+			rate=rate,
+			company=self.company,
+			supplier=self.supplier,
+			item_code=self.item,
+			item_name=self.item,
+			cost_center=self.cost_center,
+			warehouse=self.warehouse,
+			parent_cost_center=self.cost_center,
+			update_stock=0,
+			currency="USD",
+			conversion_rate=conversion_rate,
+			is_pos=0,
+			is_return=0,
+			income_account=self.income_account,
+			expense_account=self.expense_account,
+			do_not_save=True,
+		)
+		pinv.credit_to = self.creditors_usd
+		if not do_not_save:
+			pinv.save()
+			if not do_not_submit:
+				pinv.submit()
+		return pinv
 
 	def clear_old_entries(self):
 		doctype_list = [
@@ -293,9 +418,7 @@ class TestAccountsController(FrappeTestCase):
 			.run(as_dict=True)[0]
 		)
 		self.assertEqual(outstanding, current_outstanding.outstanding)
-		self.assertEqual(
-			outstanding_in_account_currency, current_outstanding.outstanding_in_account_currency
-		)
+		self.assertEqual(outstanding_in_account_currency, current_outstanding.outstanding_in_account_currency)
 
 	def test_10_payment_against_sales_invoice(self):
 		# Sales Invoice in Foreign Currency
@@ -401,7 +524,6 @@ class TestAccountsController(FrappeTestCase):
 		adv.reload()
 
 		# sales invoice with advance(partial amount)
-		rate = 80
 		rate_in_account_currency = 1
 		si = self.create_sales_invoice(
 			qty=2, conversion_rate=80, rate=rate_in_account_currency, do_not_submit=True
@@ -683,6 +805,41 @@ class TestAccountsController(FrappeTestCase):
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
 
+	@change_settings("Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1})
+	def test_16_internal_transfer_at_arms_length_price(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		target_warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
+		warehouse = create_warehouse("_Test Internal Warehouse New 2", company=company)
+		arms_length_price = 40
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			debit_to="Debtors - TCP1",
+			target_warehouse=target_warehouse,
+			warehouse=warehouse,
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			update_stock=True,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+
+		si.items[0].rate = arms_length_price
+		si.save()
+		# rate should not reset to incoming rate
+		self.assertEqual(si.items[0].rate, arms_length_price)
+
+		frappe.db.set_single_value("Stock Settings", "allow_internal_transfer_at_arms_length_price", 0)
+		si.items[0].rate = arms_length_price
+		si.save()
+		# rate should reset to incoming rate
+		self.assertEqual(si.items[0].rate, 100)
+
 	def test_20_journal_against_sales_invoice(self):
 		# Invoice in Foreign Currency
 		si = self.create_sales_invoice(qty=1, conversion_rate=80, rate=1)
@@ -788,7 +945,9 @@ class TestAccountsController(FrappeTestCase):
 				self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
 
 				# Exchange Gain/Loss Journal should've been created.
-				exc_je_for_si = [x for x in self.get_journals_for(si.doctype, si.name) if x.parent != adv.name]
+				exc_je_for_si = [
+					x for x in self.get_journals_for(si.doctype, si.name) if x.parent != adv.name
+				]
 				exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
 				self.assertNotEqual(exc_je_for_si, [])
 				self.assertEqual(len(exc_je_for_si), 1)
@@ -1253,7 +1412,9 @@ class TestAccountsController(FrappeTestCase):
 			with self.subTest(x=x):
 				self.assertEqual(
 					[self.cost_center, self.cost_center],
-					frappe.db.get_all("Journal Entry Account", filters={"parent": x.parent}, pluck="cost_center"),
+					frappe.db.get_all(
+						"Journal Entry Account", filters={"parent": x.parent}, pluck="cost_center"
+					),
 				)
 
 		frappe.db.set_value("Company", self.company, "cost_center", cc)
@@ -1382,13 +1543,14 @@ class TestAccountsController(FrappeTestCase):
 			with self.subTest(x=x):
 				self.assertEqual(
 					[cr_note.department, cr_note.department],
-					frappe.db.get_all("Journal Entry Account", filters={"parent": x.parent}, pluck="department"),
+					frappe.db.get_all(
+						"Journal Entry Account", filters={"parent": x.parent}, pluck="department"
+					),
 				)
 
 	def test_92_dimension_inhertiance_exc_gain_loss(self):
 		# Sales Invoice in Foreign Currency
 		self.setup_dimensions()
-		rate = 80
 		rate_in_account_currency = 1
 		dpt = "Research & Development"
 
@@ -1535,3 +1697,259 @@ class TestAccountsController(FrappeTestCase):
 		exc_je_for_je = self.get_journals_for(journal_as_payment.doctype, journal_as_payment.name)
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_je, [])
+
+	def test_60_payment_entry_against_journal(self):
+		# Invoices
+		exc_rate1 = 75
+		exc_rate2 = 77
+		amount = 1
+		je1 = self.create_journal_entry(
+			acc1=self.debit_usd,
+			acc1_exc_rate=exc_rate1,
+			acc2=self.cash,
+			acc1_amount=amount,
+			acc2_amount=(amount * 75),
+			acc2_exc_rate=1,
+		)
+		je1.accounts[0].party_type = "Customer"
+		je1.accounts[0].party = self.customer
+		je1 = je1.save().submit()
+
+		je2 = self.create_journal_entry(
+			acc1=self.debit_usd,
+			acc1_exc_rate=exc_rate2,
+			acc2=self.cash,
+			acc1_amount=amount,
+			acc2_amount=(amount * exc_rate2),
+			acc2_exc_rate=1,
+		)
+		je2.accounts[0].party_type = "Customer"
+		je2.accounts[0].party = self.customer
+		je2 = je2.save().submit()
+
+		# Payment
+		pe = self.create_payment_entry(amount=2, source_exc_rate=exc_rate1).save().submit()
+
+		pr = self.create_payment_reconciliation()
+		pr.receivable_payable_account = self.debit_usd
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 2)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		# There should be no outstanding in both currencies
+		self.assert_ledger_outstanding(je1.doctype, je1.name, 0.0, 0.0)
+		self.assert_ledger_outstanding(je2.doctype, je2.name, 0.0, 0.0)
+
+		# Exchange Gain/Loss Journal should've been created only for JE2
+		exc_je_for_je1 = self.get_journals_for(je1.doctype, je1.name)
+		exc_je_for_je2 = self.get_journals_for(je2.doctype, je2.name)
+		self.assertEqual(exc_je_for_je1, [])
+		self.assertEqual(len(exc_je_for_je2), 1)
+
+		# Cancel Payment
+		pe.reload()
+		pe.cancel()
+
+		self.assert_ledger_outstanding(je1.doctype, je1.name, (amount * exc_rate1), amount)
+		self.assert_ledger_outstanding(je2.doctype, je2.name, (amount * exc_rate2), amount)
+
+		# Exchange Gain/Loss Journal should've been cancelled
+		exc_je_for_je1 = self.get_journals_for(je1.doctype, je1.name)
+		exc_je_for_je2 = self.get_journals_for(je2.doctype, je2.name)
+		self.assertEqual(exc_je_for_je1, [])
+		self.assertEqual(exc_je_for_je2, [])
+
+	def test_61_payment_entry_against_journal_for_payable_accounts(self):
+		# Invoices
+		exc_rate1 = 75
+		exc_rate2 = 77
+		amount = 1
+		je1 = self.create_journal_entry(
+			acc1=self.creditors_usd,
+			acc1_exc_rate=exc_rate1,
+			acc2=self.cash,
+			acc1_amount=-amount,
+			acc2_amount=(-amount * 75),
+			acc2_exc_rate=1,
+		)
+		je1.accounts[0].party_type = "Supplier"
+		je1.accounts[0].party = self.supplier
+		je1 = je1.save().submit()
+
+		# Payment
+		pe = create_payment_entry(
+			company=self.company,
+			payment_type="Pay",
+			party_type="Supplier",
+			party=self.supplier,
+			paid_from=self.cash,
+			paid_to=self.creditors_usd,
+			paid_amount=amount,
+		)
+		pe.target_exchange_rate = exc_rate2
+		pe.received_amount = amount
+		pe.paid_amount = amount * exc_rate2
+		pe.save().submit()
+
+		pr = frappe.get_doc(
+			{
+				"doctype": "Payment Reconciliation",
+				"company": self.company,
+				"party_type": "Supplier",
+				"party": self.supplier,
+				"receivable_payable_account": get_party_account("Supplier", self.supplier, self.company),
+			}
+		)
+		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = nowdate()
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		# There should be no outstanding in both currencies
+		self.assert_ledger_outstanding(je1.doctype, je1.name, 0.0, 0.0)
+
+		# Exchange Gain/Loss Journal should've been created
+		exc_je_for_je1 = self.get_journals_for(je1.doctype, je1.name)
+		self.assertEqual(len(exc_je_for_je1), 1)
+
+		# Cancel Payment
+		pe.reload()
+		pe.cancel()
+
+		self.assert_ledger_outstanding(je1.doctype, je1.name, (amount * exc_rate1), amount)
+
+		# Exchange Gain/Loss Journal should've been cancelled
+		exc_je_for_je1 = self.get_journals_for(je1.doctype, je1.name)
+		self.assertEqual(exc_je_for_je1, [])
+
+	def test_70_advance_payment_against_sales_invoice_in_foreign_currency(self):
+		"""
+		Customer advance booked under Liability
+		"""
+		self.setup_advance_accounts_in_party_master()
+
+		adv = self.create_payment_entry(amount=1, source_exc_rate=83)
+		adv.save()  # explicit 'save' is needed to trigger set_liability_account()
+		self.assertEqual(adv.paid_from, self.advance_received_usd)
+		adv.submit()
+
+		si = self.create_sales_invoice(qty=1, conversion_rate=80, rate=1, do_not_submit=True)
+		si.debit_to = self.debtors_usd
+		si.save().submit()
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
+
+		pr = self.create_payment_reconciliation()
+		pr.receivable_payable_account = self.debtors_usd
+		pr.default_advance_account = self.advance_received_usd
+		pr.get_unreconciled_entries()
+		self.assertEqual(pr.invoices[0].invoice_number, si.name)
+		self.assertEqual(pr.payments[0].reference_name, adv.name)
+
+		# Allocate and Reconcile
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+		self.assert_ledger_outstanding(si.doctype, si.name, 0.0, 0.0)
+
+		# Exc Gain/Loss journal should've been creatad
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_si), 1)
+		self.assertEqual(len(exc_je_for_adv), 1)
+		self.assertEqual(exc_je_for_si, exc_je_for_adv)
+
+		adv.reload()
+		adv.cancel()
+		si.reload()
+		self.assert_ledger_outstanding(si.doctype, si.name, 80.0, 1.0)
+		# Exc Gain/Loss journal should've been cancelled
+		exc_je_for_si = self.get_journals_for(si.doctype, si.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_si), 0)
+		self.assertEqual(len(exc_je_for_adv), 0)
+
+		self.remove_advance_accounts_from_party_master()
+
+	def test_71_advance_payment_against_purchase_invoice_in_foreign_currency(self):
+		"""
+		Supplier advance booked under Asset
+		"""
+		self.setup_advance_accounts_in_party_master()
+
+		usd_amount = 1
+		inr_amount = 85
+		exc_rate = 85
+		adv = create_payment_entry(
+			company=self.company,
+			payment_type="Pay",
+			party_type="Supplier",
+			party=self.supplier,
+			paid_from=self.cash,
+			paid_to=self.advance_paid_usd,
+			paid_amount=inr_amount,
+		)
+		adv.source_exchange_rate = 1
+		adv.target_exchange_rate = exc_rate
+		adv.received_amount = usd_amount
+		adv.paid_amount = exc_rate * usd_amount
+		adv.posting_date = nowdate()
+		adv.save()
+		# Make sure that advance account is still set
+		self.assertEqual(adv.paid_to, self.advance_paid_usd)
+		adv.submit()
+
+		pi = self.create_purchase_invoice(qty=1, conversion_rate=83, rate=1)
+		self.assertEqual(pi.credit_to, self.creditors_usd)
+		self.assert_ledger_outstanding(pi.doctype, pi.name, 83.0, 1.0)
+
+		pr = self.create_payment_reconciliation()
+		pr.party_type = "Supplier"
+		pr.party = self.supplier
+		pr.receivable_payable_account = self.creditors_usd
+		pr.default_advance_account = self.advance_paid_usd
+		pr.get_unreconciled_entries()
+		self.assertEqual(pr.invoices[0].invoice_number, pi.name)
+		self.assertEqual(pr.payments[0].reference_name, adv.name)
+
+		# Allocate and Reconcile
+		invoices = [x.as_dict() for x in pr.invoices]
+		payments = [x.as_dict() for x in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+		self.assert_ledger_outstanding(pi.doctype, pi.name, 0.0, 0.0)
+
+		# Exc Gain/Loss journal should've been creatad
+		exc_je_for_pi = self.get_journals_for(pi.doctype, pi.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_pi), 1)
+		self.assertEqual(len(exc_je_for_adv), 1)
+		self.assertEqual(exc_je_for_pi, exc_je_for_adv)
+
+		adv.reload()
+		adv.cancel()
+		pi.reload()
+		self.assert_ledger_outstanding(pi.doctype, pi.name, 83.0, 1.0)
+		# Exc Gain/Loss journal should've been cancelled
+		exc_je_for_pi = self.get_journals_for(pi.doctype, pi.name)
+		exc_je_for_adv = self.get_journals_for(adv.doctype, adv.name)
+		self.assertEqual(len(exc_je_for_pi), 0)
+		self.assertEqual(len(exc_je_for_adv), 0)
+
+		self.remove_advance_accounts_from_party_master()

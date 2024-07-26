@@ -55,7 +55,13 @@ class Workstation(Document):
 		hour_rate_electricity: DF.Currency
 		hour_rate_labour: DF.Currency
 		hour_rate_rent: DF.Currency
+		off_status_image: DF.AttachImage | None
+		on_status_image: DF.AttachImage | None
+		plant_floor: DF.Link | None
 		production_capacity: DF.Int
+		status: DF.Literal["Production", "Off", "Idle", "Problem", "Maintenance", "Setup"]
+		total_working_hours: DF.Float
+		warehouse: DF.Link | None
 		working_hours: DF.Table[WorkstationWorkingHour]
 		workstation_name: DF.Data
 		workstation_type: DF.Link | None
@@ -134,7 +140,8 @@ class Workstation(Document):
 
 			if existing:
 				frappe.throw(
-					_("Row #{0}: Timings conflicts with row {1}").format(d.idx, comma_and(existing)), OverlapError
+					_("Row #{0}: Timings conflicts with row {1}").format(d.idx, comma_and(existing)),
+					OverlapError,
 				)
 
 	def update_bom_operation(self):
@@ -188,7 +195,7 @@ class Workstation(Document):
 
 
 @frappe.whitelist()
-def get_job_cards(workstation):
+def get_job_cards(workstation, job_card=None):
 	if frappe.has_permission("Job Card", "read"):
 		jc_data = frappe.get_all(
 			"Job Card",
@@ -199,15 +206,22 @@ def get_job_cards(workstation):
 				"operation",
 				"total_completed_qty",
 				"for_quantity",
+				"process_loss_qty",
+				"finished_good",
 				"transferred_qty",
 				"status",
 				"expected_start_date",
 				"expected_end_date",
 				"time_required",
 				"wip_warehouse",
+				"skip_material_transfer",
+				"backflush_from_wip_warehouse",
+				"is_paused",
+				"manufactured_qty",
 			],
 			filters={
 				"workstation": workstation,
+				"is_subcontracted": 0,
 				"docstatus": ("<", 2),
 				"status": ["not in", ["Completed", "Stopped"]],
 			},
@@ -215,64 +229,98 @@ def get_job_cards(workstation):
 		)
 
 		job_cards = [row.name for row in jc_data]
-		raw_materials = get_raw_materials(job_cards)
 		time_logs = get_time_logs(job_cards)
 
 		allow_excess_transfer = frappe.db.get_single_value(
 			"Manufacturing Settings", "job_card_excess_transfer"
 		)
 
+		user_employee = frappe.db.get_value("Employee", {"user_id": frappe.session.user}, "name")
+
 		for row in jc_data:
-			row.progress_percent = (
-				flt(row.total_completed_qty / row.for_quantity * 100, 2) if row.for_quantity else 0
-			)
-			row.progress_title = _("Total completed quantity: {0}").format(row.total_completed_qty)
+			item_code = row.finished_good or row.production_item
+			row.fg_uom = frappe.get_cached_value("Item", item_code, "stock_uom")
+
 			row.status_color = get_status_color(row.status)
-			row.job_card_link = get_link_to_form("Job Card", row.name)
+			row.job_card_link = f"""
+					<a class="ellipsis" data-doctype="Job Card" data-name="{row.name}" href="/app/job-card/{row.name}" title="" data-original-title="{row.name}">{row.name}</a>
+				"""
+
+			row.operation_link = f"""
+					<a class="ellipsis" data-doctype="Operation" data-name="{row.operation}" href="/app/operation/{row.operation}" title="" data-original-title="{row.operation}">{row.operation}</a>
+				"""
 			row.work_order_link = get_link_to_form("Work Order", row.work_order)
 
-			row.raw_materials = raw_materials.get(row.name, [])
 			row.time_logs = time_logs.get(row.name, [])
 			row.make_material_request = False
 			if row.for_quantity > row.transferred_qty or allow_excess_transfer:
 				row.make_material_request = True
+
+			row.user_employee = user_employee
 
 		return jc_data
 
 
 def get_status_color(status):
 	color_map = {
-		"Pending": "var(--bg-blue)",
-		"In Process": "var(--bg-yellow)",
-		"Submitted": "var(--bg-blue)",
-		"Open": "var(--bg-gray)",
-		"Closed": "var(--bg-green)",
-		"Work In Progress": "var(--bg-orange)",
+		"Pending": "blue",
+		"In Process": "yellow",
+		"Submitted": "blue",
+		"Open": "gray",
+		"Closed": "green",
+		"Work In Progress": "orange",
 	}
 
-	return color_map.get(status, "var(--bg-blue)")
+	return color_map.get(status, "blue")
 
 
-def get_raw_materials(job_cards):
-	raw_materials = {}
-
-	data = frappe.get_all(
-		"Job Card Item",
+@frappe.whitelist()
+def get_raw_materials(job_card):
+	raw_materials = frappe.get_all(
+		"Job Card",
 		fields=[
-			"parent",
-			"item_code",
-			"item_group",
-			"uom",
-			"item_name",
-			"source_warehouse",
-			"required_qty",
-			"transferred_qty",
+			"`tabJob Card`.`skip_material_transfer`",
+			"`tabJob Card`.`backflush_from_wip_warehouse`",
+			"`tabJob Card`.`wip_warehouse`",
+			"`tabJob Card Item`.`parent`",
+			"`tabJob Card Item`.`item_code`",
+			"`tabJob Card Item`.`item_group`",
+			"`tabJob Card Item`.`uom`",
+			"`tabJob Card Item`.`item_name`",
+			"`tabJob Card Item`.`source_warehouse`",
+			"`tabJob Card Item`.`required_qty`",
+			"`tabJob Card Item`.`transferred_qty`",
 		],
-		filters={"parent": ["in", job_cards]},
+		filters={"name": job_card},
 	)
 
-	for row in data:
-		raw_materials.setdefault(row.parent, []).append(row)
+	if not raw_materials:
+		return []
+
+	for row in raw_materials:
+		warehouse = row.source_warehouse
+		if row.skip_material_transfer and row.backflush_from_wip_warehouse:
+			warehouse = row.wip_warehouse
+
+		row.stock_qty = (
+			frappe.db.get_value(
+				"Bin",
+				{
+					"item_code": row.item_code,
+					"warehouse": warehouse,
+				},
+				"actual_qty",
+			)
+			or 0.0
+		)
+
+		row.warehouse = warehouse
+
+		row.material_availability_status = 0
+		if row.skip_material_transfer and row.stock_qty >= row.required_qty:
+			row.material_availability_status = 1
+		elif row.transferred_qty >= row.required_qty:
+			row.material_availability_status = 1
 
 	return raw_materials
 
@@ -352,7 +400,9 @@ def check_workstation_for_holiday(workstation, from_datetime, to_datetime):
 
 		if applicable_holidays:
 			frappe.throw(
-				_("Workstation is closed on the following dates as per Holiday List: {0}").format(holiday_list)
+				_("Workstation is closed on the following dates as per Holiday List: {0}").format(
+					holiday_list
+				)
 				+ "\n"
 				+ "\n".join(applicable_holidays),
 				WorkstationHolidayError,
@@ -389,20 +439,57 @@ def get_workstations(**kwargs):
 	data = query.run(as_dict=True)
 
 	color_map = {
-		"Production": "var(--green-600)",
-		"Off": "var(--gray-600)",
-		"Idle": "var(--gray-600)",
-		"Problem": "var(--red-600)",
-		"Maintenance": "var(--yellow-600)",
-		"Setup": "var(--blue-600)",
+		"Production": "green",
+		"Off": "gray",
+		"Idle": "gray",
+		"Problem": "red",
+		"Maintenance": "yellow",
+		"Setup": "blue",
 	}
 
 	for d in data:
 		d.workstation_name = get_link_to_form("Workstation", d.name)
 		d.status_image = d.on_status_image
-		d.background_color = color_map.get(d.status, "var(--red-600)")
+		d.color = color_map.get(d.status, "red")
 		d.workstation_link = get_url_to_form("Workstation", d.name)
 		if d.status != "Production":
 			d.status_image = d.off_status_image
 
 	return data
+
+
+@frappe.whitelist()
+def update_job_card(job_card, method, **kwargs):
+	if isinstance(kwargs, dict):
+		kwargs = frappe._dict(kwargs)
+
+	if kwargs.get("employees"):
+		kwargs.employees = frappe.parse_json(kwargs.employees)
+
+	if kwargs.qty and isinstance(kwargs.qty, str):
+		kwargs.qty = flt(kwargs.qty)
+
+	doc = frappe.get_doc("Job Card", job_card)
+	doc.run_method(method, **kwargs)
+
+
+@frappe.whitelist()
+def validate_job_card(job_card, status):
+	job_card_details = frappe.db.get_value("Job Card", job_card, ["status", "for_quantity"], as_dict=1)
+
+	current_status = job_card_details.status
+	if current_status != status:
+		if status == "Open":
+			frappe.throw(
+				_("The job card {0} is in {1} state and you cannot start it again.").format(
+					job_card, current_status
+				)
+			)
+		else:
+			frappe.throw(
+				_("The job card {0} is in {1} state and you cannot complete.").format(
+					job_card, current_status
+				)
+			)
+
+	return job_card_details.for_quantity

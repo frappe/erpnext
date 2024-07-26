@@ -7,6 +7,7 @@ def get_data():
 		"non_standard_fieldnames": {"Quality Inspection": "reference_name"},
 		"transactions": [
 			{"label": _("Transactions"), "items": ["Material Request", "Stock Entry"]},
+			{"label": _("Subcontracting"), "items": ["Purchase Order", "Subcontracting Order"]},
 			{"label": _("Reference"), "items": ["Quality Inspection"]},
 		],
 	}

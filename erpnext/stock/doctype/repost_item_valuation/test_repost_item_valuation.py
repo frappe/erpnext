@@ -99,7 +99,7 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 			).insert(ignore_permissions=True)
 
 			repost_doc.load_from_db()
-			repost_doc.modified = add_days(now(), days=-i * 10)
+			repost_doc.creation = add_days(now(), days=-i * 10)
 			repost_doc.db_update_all()
 
 		logs = frappe.get_all("Repost Item Valuation", filters={"status": "Skipped"})
@@ -175,7 +175,6 @@ class TestRepostItemValuation(FrappeTestCase, StockTestMixin):
 		riv3.set_status("Skipped")
 
 	def test_stock_freeze_validation(self):
-
 		today = nowdate()
 
 		riv = frappe.get_doc(
