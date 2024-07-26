@@ -66,6 +66,7 @@
   "base_net_rate",
   "base_net_amount",
   "valuation_rate",
+  "sales_incoming_rate",
   "item_tax_amount",
   "rm_supp_cost",
   "landed_cost_voucher_amount",
@@ -1049,12 +1050,61 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+<<<<<<< HEAD
+=======
+  },
+  {
+   "fieldname": "subcontracting_receipt_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Subcontracting Receipt Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "search_index": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "use_serial_batch_fields",
+   "fieldtype": "Check",
+   "label": "Use Serial No / Batch Fields"
+  },
+  {
+   "default": "1",
+   "fieldname": "apply_tds",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Apply TDS",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "return_qty_from_rejected_warehouse",
+   "fieldtype": "Check",
+   "label": "Return Qty from Rejected Warehouse",
+   "read_only": 1
+  },
+  {
+   "description": "Valuation rate for the item as per Sales Invoice (Only for Internal Transfers)",
+   "fieldname": "sales_incoming_rate",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Sales Incoming Rate",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1
+>>>>>>> 723ac0ffc4 (fix: Update Rate as per Valuation Rate for Internal Transfers only if Setting is Enabled (#42050))
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2023-12-25 22:32:09.801965",
+=======
+ "modified": "2024-07-19 12:14:21.521466",
+>>>>>>> 723ac0ffc4 (fix: Update Rate as per Valuation Rate for Internal Transfers only if Setting is Enabled (#42050))
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

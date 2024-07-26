@@ -27,6 +27,7 @@
   "allow_negative_stock",
   "show_barcode_field",
   "clean_description_html",
+  "allow_internal_transfer_at_arms_length_price",
   "quality_inspection_settings_section",
   "action_if_quality_inspection_is_not_submitted",
   "column_break_23",
@@ -346,7 +347,108 @@
    "default": "1",
    "fieldname": "allow_existing_serial_no",
    "fieldtype": "Check",
+<<<<<<< HEAD
    "label": "Allow existing Serial No to be Manufactured/Received again"
+=======
+   "label": "Allow Partial Reservation"
+  },
+  {
+   "fieldname": "column_break_mhzc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "FIFO",
+   "depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "fieldname": "pick_serial_and_batch_based_on",
+   "fieldtype": "Select",
+   "label": "Pick Serial / Batch Based On",
+   "mandatory_depends_on": "auto_create_serial_and_batch_bundle_for_outward",
+   "options": "FIFO\nLIFO\nExpiry"
+  },
+  {
+   "default": "1",
+   "fieldname": "auto_create_serial_and_batch_bundle_for_outward",
+   "fieldtype": "Check",
+   "label": "Auto Create Serial and Batch Bundle For Outward"
+  },
+  {
+   "default": "1",
+   "depends_on": "eval: doc.enable_stock_reservation",
+   "description": "Serial and Batch Nos will be auto-reserved based on <b>Pick Serial / Batch Based On</b>",
+   "fieldname": "auto_reserve_serial_and_batch",
+   "fieldtype": "Check",
+   "label": "Auto Reserve Serial and Batch Nos"
+  },
+  {
+   "fieldname": "serial_and_batch_reservation_section",
+   "fieldtype": "Section Break",
+   "label": "Serial and Batch Reservation"
+  },
+  {
+   "fieldname": "conversion_factor_section",
+   "fieldtype": "Section Break",
+   "label": "Stock UOM Quantity"
+  },
+  {
+   "fieldname": "column_break_lznj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_to_edit_stock_uom_qty_for_sales",
+   "fieldtype": "Check",
+   "label": "Allow to Edit Stock UOM Qty for Sales Documents"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_to_edit_stock_uom_qty_for_purchase",
+   "fieldtype": "Check",
+   "label": "Allow to Edit Stock UOM Qty for Purchase Documents"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.enable_stock_reservation",
+   "description": "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Request for Sales Order.",
+   "fieldname": "auto_reserve_stock_for_sales_order_on_purchase",
+   "fieldtype": "Check",
+   "label": "Auto Reserve Stock for Sales Order on Purchase"
+  },
+  {
+   "default": "1",
+   "description": "On submission of the stock transaction, system will auto create the Serial and Batch Bundle based on the Serial No / Batch fields.",
+   "fieldname": "use_serial_batch_fields",
+   "fieldtype": "Check",
+   "label": "Use Serial / Batch Fields"
+  },
+  {
+   "default": "1",
+   "depends_on": "use_serial_batch_fields",
+   "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
+   "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
+   "fieldtype": "Check",
+   "label": "Do Not Update Serial / Batch on Creation of Auto Bundle"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate.",
+   "fieldname": "allow_internal_transfer_at_arms_length_price",
+   "fieldtype": "Check",
+   "label": "Allow Internal Transfers at Arm's Length Price"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.valuation_method === \"Moving Average\"",
+   "description": "If enabled, the system will use the moving average valuation method to calculate the valuation rate for the batched items and will not consider the individual batch-wise incoming rate.",
+   "fieldname": "do_not_use_batchwise_valuation",
+   "fieldtype": "Check",
+   "label": "Do Not Use Batch-wise Valuation"
+  },
+  {
+   "description": "The percentage you are allowed to pick more items in the pick list than the ordered quantity.",
+   "fieldname": "over_picking_allowance",
+   "fieldtype": "Percent",
+   "label": "Over Picking Allowance"
+>>>>>>> 723ac0ffc4 (fix: Update Rate as per Valuation Rate for Internal Transfers only if Setting is Enabled (#42050))
   }
  ],
  "icon": "icon-cog",

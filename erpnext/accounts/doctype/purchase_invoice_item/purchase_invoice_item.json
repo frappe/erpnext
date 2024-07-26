@@ -57,6 +57,7 @@
   "base_net_rate",
   "base_net_amount",
   "valuation_rate",
+  "sales_incoming_rate",
   "item_tax_amount",
   "landed_cost_voucher_amount",
   "rm_supp_cost",
@@ -889,12 +890,72 @@
    "fieldtype": "Link",
    "label": "WIP Composite Asset",
    "options": "Asset"
+<<<<<<< HEAD
+=======
+  },
+  {
+   "depends_on": "eval:parent.update_stock === 1 && (doc.use_serial_batch_fields === 0 || doc.docstatus === 1)",
+   "fieldname": "add_serial_batch_bundle",
+   "fieldtype": "Button",
+   "label": "Add Serial / Batch No"
+  },
+  {
+   "default": "0",
+   "fieldname": "use_serial_batch_fields",
+   "fieldtype": "Check",
+   "label": "Use Serial No / Batch Fields"
+  },
+  {
+   "depends_on": "eval:!doc.is_fixed_asset && doc.use_serial_batch_fields === 1 && parent.update_stock === 1",
+   "fieldname": "section_break_rqbe",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_vbbb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "material_request",
+   "fieldtype": "Link",
+   "label": "Material Request",
+   "no_copy": 1,
+   "options": "Material Request",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "material_request_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Material Request Item",
+   "no_copy": 1,
+   "oldfieldname": "pr_detail",
+   "oldfieldtype": "Data",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "description": "Valuation rate for the item as per Sales Invoice (Only for Internal Transfers)",
+   "fieldname": "sales_incoming_rate",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Sales Incoming Rate",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1
+>>>>>>> 723ac0ffc4 (fix: Update Rate as per Valuation Rate for Internal Transfers only if Setting is Enabled (#42050))
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-03-19 19:09:47.210965",
+=======
+ "modified": "2024-07-19 12:12:42.449298",
+>>>>>>> 723ac0ffc4 (fix: Update Rate as per Valuation Rate for Internal Transfers only if Setting is Enabled (#42050))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
