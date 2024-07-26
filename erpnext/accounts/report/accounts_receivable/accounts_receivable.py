@@ -139,6 +139,7 @@ class ReceivablePayableReport:
 					paid_in_account_currency=0.0,
 					credit_note_in_account_currency=0.0,
 					outstanding_in_account_currency=0.0,
+					cost_center=ple.cost_center,
 				)
 			self.get_invoices(ple)
 
@@ -253,7 +254,7 @@ class ReceivablePayableReport:
 				row.paid -= amount
 				row.paid_in_account_currency -= amount_in_account_currency
 
-		if ple.cost_center:
+		if not row.cost_center and ple.cost_center:
 			row.cost_center = str(ple.cost_center)
 
 	def update_sub_total_row(self, row, party):
