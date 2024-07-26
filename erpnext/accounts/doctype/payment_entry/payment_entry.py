@@ -294,15 +294,17 @@ class PaymentEntry(AccountsController):
 		self.set_missing_ref_details(force=True)
 
 	def validate_duplicate_entry(self):
-		reference_names = []
+		reference_names = {}
 		for d in self.get("references"):
-			if (d.reference_doctype, d.reference_name, d.payment_term) in reference_names:
+			key = (d.reference_doctype, d.reference_name, d.payment_term, d.payment_request)
+			if key in reference_names:
 				frappe.throw(
 					_("Row #{0}: Duplicate entry in References {1} {2}").format(
 						d.idx, d.reference_doctype, d.reference_name
 					)
 				)
-			reference_names.append((d.reference_doctype, d.reference_name, d.payment_term))
+
+			reference_names.add(key)
 
 	def set_bank_account_data(self):
 		if self.bank_account:
@@ -1742,9 +1744,12 @@ class PaymentEntry(AccountsController):
 		if not self.references:
 			return
 
-		matched_payment_requests = get_matched_payment_requests_of_references(
+		matched_payment_requests = get_matched_payment_requests(
 			[row for row in self.references if not row.payment_request]
 		)
+
+		if not matched_payment_requests:
+			return
 
 		unset_pr_rows = {}
 
@@ -1776,7 +1781,7 @@ class PaymentEntry(AccountsController):
 		if not self.references:
 			return
 
-		matched_payment_requests = get_matched_payment_requests_of_references(self.references)
+		matched_payment_requests = get_matched_payment_requests(self.references)
 
 		matched_count = 0
 
@@ -1820,7 +1825,7 @@ class PaymentEntry(AccountsController):
 		):
 			return
 
-		matched_pr = get_matched_payment_requests_of_references([row])
+		matched_pr = get_matched_payment_requests([row])
 
 		if not matched_pr:
 			return
@@ -1833,7 +1838,7 @@ class PaymentEntry(AccountsController):
 		)
 
 
-def get_matched_payment_requests_of_references(references=None):
+def get_matched_payment_requests(references=None):
 	if not references:
 		return
 
