@@ -26,19 +26,22 @@
   "column_break_ivyw",
   "currency",
   "conversion_rate",
-  "materials_section",
-  "items",
-  "section_break_21",
   "operations_section_section",
   "with_operations",
+  "track_semi_finished_goods",
   "column_break_23",
   "transfer_material_against",
   "routing",
   "fg_based_operating_cost",
+  "column_break_joxb",
+  "default_source_warehouse",
+  "default_target_warehouse",
   "fg_based_section_section",
   "operating_cost_per_bom_quantity",
   "operations_section",
   "operations",
+  "materials_section",
+  "items",
   "scrap_section",
   "scrap_items_section",
   "scrap_items",
@@ -59,8 +62,8 @@
   "base_total_cost",
   "more_info_tab",
   "item_name",
-  "description",
   "column_break_27",
+  "description",
   "has_variants",
   "quality_inspection_section_break",
   "inspection_required",
@@ -211,7 +214,7 @@
   },
   {
    "default": "Work Order",
-   "depends_on": "with_operations",
+   "depends_on": "eval: doc.with_operations === 1 && doc.track_semi_finished_goods === 0",
    "fieldname": "transfer_material_against",
    "fieldtype": "Select",
    "label": "Transfer Material Against",
@@ -238,7 +241,7 @@
    "fieldname": "rm_cost_as_per",
    "fieldtype": "Select",
    "label": "Rate Of Materials Based On",
-   "options": "Valuation Rate\nLast Purchase Rate\nPrice List\nManual"
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List"
   },
   {
    "allow_on_submit": 1,
@@ -406,8 +409,8 @@
   {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "section_break0",
-   "fieldtype": "Section Break",
-   "label": "Materials Required (Exploded)"
+   "fieldtype": "Tab Break",
+   "label": "Exploded Items"
   },
   {
    "fieldname": "exploded_items",
@@ -486,11 +489,6 @@
    "label": "Show Operations"
   },
   {
-   "fieldname": "section_break_21",
-   "fieldtype": "Tab Break",
-   "label": "Operations"
-  },
-  {
    "fieldname": "column_break_23",
    "fieldtype": "Column Break"
   },
@@ -534,6 +532,8 @@
    "show_dashboard": 1
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.with_operations",
    "fieldname": "operations_section_section",
    "fieldtype": "Section Break",
    "label": "Operations"
@@ -591,13 +591,13 @@
    "default": "0",
    "fieldname": "fg_based_operating_cost",
    "fieldtype": "Check",
-   "label": "FG based Operating Cost"
+   "label": "Finished Goods based Operating Cost"
   },
   {
    "depends_on": "fg_based_operating_cost",
    "fieldname": "fg_based_section_section",
    "fieldtype": "Section Break",
-   "label": "FG Based Operating Cost Section"
+   "label": "Finished Goods Based Operating Cost"
   },
   {
    "depends_on": "fg_based_operating_cost",
@@ -617,7 +617,8 @@
    "no_copy": 1,
    "options": "BOM Creator",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "bom_creator_item",
@@ -625,11 +626,36 @@
    "label": "BOM Creator Item",
    "no_copy": 1,
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_oxbz",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "with_operations",
+   "description": "Users can consume raw materials and add semi-finished goods or final finished goods against the operation using job cards.",
+   "fieldname": "track_semi_finished_goods",
+   "fieldtype": "Check",
+   "label": "Track Semi Finished Goods"
+  },
+  {
+   "fieldname": "column_break_joxb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_source_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "default_target_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Target Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -637,7 +663,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2023-12-26 19:34:08.159312",
+ "modified": "2024-06-03 16:24:47.518411",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -672,7 +698,7 @@
  ],
  "search_fields": "item, item_name",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

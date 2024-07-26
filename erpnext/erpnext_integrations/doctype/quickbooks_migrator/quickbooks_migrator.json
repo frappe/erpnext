@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "beta": 1,
  "creation": "2018-07-10 14:48:16.757030",
  "doctype": "DocType",
@@ -190,7 +191,8 @@
   }
  ],
  "issingle": 1,
- "modified": "2019-08-07 15:26:00.653433",
+ "links": [],
+ "modified": "2024-03-27 13:10:30.599062",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "QuickBooks Migrator",
@@ -208,6 +210,7 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
 }

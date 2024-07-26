@@ -6,9 +6,8 @@
 
 
 import frappe
-from frappe import _, _dict
+from frappe import _dict
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import today
 
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 from erpnext.stock.doctype.item.test_item import make_item
@@ -16,10 +15,8 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
-	make_serial_batch_bundle,
 )
 from erpnext.stock.doctype.serial_no.serial_no import *
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
@@ -53,9 +50,7 @@ class TestSerialNo(FrappeTestCase):
 		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
 		serial_nos = get_serial_nos_from_bundle(se.get("items")[0].serial_and_batch_bundle)
 
-		dn = create_delivery_note(
-			item_code="_Test Serialized Item With Series", qty=1, serial_no=[serial_nos[0]]
-		)
+		create_delivery_note(item_code="_Test Serialized Item With Series", qty=1, serial_no=[serial_nos[0]])
 
 		serial_no = frappe.get_doc("Serial No", serial_nos[0])
 
@@ -63,7 +58,7 @@ class TestSerialNo(FrappeTestCase):
 		self.assertEqual(serial_no.warehouse, None)
 
 		wh = create_warehouse("_Test Warehouse", company="_Test Company 1")
-		pr = make_purchase_receipt(
+		make_purchase_receipt(
 			item_code="_Test Serialized Item With Series",
 			qty=1,
 			serial_no=[serial_nos[0]],
@@ -118,7 +113,7 @@ class TestSerialNo(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, dn.cancel)
 
 		# deliver from second company
-		dn_2 = create_delivery_note(
+		create_delivery_note(
 			item_code="_Test Serialized Item With Series",
 			qty=1,
 			serial_no=[serial_nos[0]],
@@ -201,16 +196,14 @@ class TestSerialNo(FrappeTestCase):
 					{"doctype": "Serial No", "item_code": item_code, "serial_no": serial_no}
 				).insert()
 
-		in1 = make_stock_entry(
+		make_stock_entry(
 			item_code=item_code, to_warehouse=warehouse, qty=1, rate=42, serial_no=[serial_nos[0]]
 		)
-		in2 = make_stock_entry(
+		make_stock_entry(
 			item_code=item_code, to_warehouse=warehouse, qty=1, rate=113, serial_no=[serial_nos[1]]
 		)
 
-		out = create_delivery_note(
-			item_code=item_code, qty=1, serial_no=[serial_nos[0]], do_not_submit=True
-		)
+		out = create_delivery_note(item_code=item_code, qty=1, serial_no=[serial_nos[0]], do_not_submit=True)
 
 		bundle = out.items[0].serial_and_batch_bundle
 		doc = frappe.get_doc("Serial and Batch Bundle", bundle)

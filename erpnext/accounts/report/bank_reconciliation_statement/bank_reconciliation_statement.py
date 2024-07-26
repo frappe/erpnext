@@ -32,10 +32,7 @@ def execute(filters=None):
 	amounts_not_reflected_in_system = get_amounts_not_reflected_in_system(filters)
 
 	bank_bal = (
-		flt(balance_as_per_system)
-		- flt(total_debit)
-		+ flt(total_credit)
-		+ amounts_not_reflected_in_system
+		flt(balance_as_per_system) - flt(total_debit) + flt(total_credit) + amounts_not_reflected_in_system
 	)
 
 	data += [

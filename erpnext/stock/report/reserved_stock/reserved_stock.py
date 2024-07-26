@@ -73,10 +73,10 @@ def get_data(filters):
 		"project",
 	]:
 		if value := filters.get(field):
-			query = query.where((sre[field] == value))
+			query = query.where(sre[field] == value)
 
 	if value := filters.get("stock_reservation_entry"):
-		query = query.where((sre.name == value))
+		query = query.where(sre.name == value)
 
 	data = query.run(as_list=True)
 

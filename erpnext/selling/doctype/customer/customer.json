@@ -134,7 +134,7 @@
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual\nProprietorship\nPartnership",
+   "options": "Company\nIndividual\nPartnership",
    "reqd": 1
   },
   {
@@ -482,7 +482,7 @@
   {
    "fieldname": "contact_and_address_tab",
    "fieldtype": "Tab Break",
-   "label": "Contact & Address"
+   "label": "Address & Contact"
   },
   {
    "fieldname": "defaults_tab",
@@ -583,7 +583,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2023-12-28 13:15:36.298369",
+ "modified": "2024-05-08 18:03:20.716169",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -661,9 +661,9 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "customer_name,customer_group,territory, mobile_no,primary_address",
+ "search_fields": "customer_group,territory, mobile_no,primary_address",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "title_field": "customer_name",

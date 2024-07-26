@@ -37,6 +37,23 @@
   "items",
   "costing_detail",
   "raw_material_cost",
+  "configuration_section",
+  "track_operations",
+  "column_break_obzr",
+  "track_semi_finished_goods",
+  "final_product_operation_section",
+  "operation",
+  "operation_time",
+  "column_break_xnlu",
+  "workstation_type",
+  "workstation",
+  "final_product_warehouse_section",
+  "skip_material_transfer",
+  "backflush_from_wip_warehouse",
+  "source_warehouse",
+  "column_break_buha",
+  "wip_warehouse",
+  "fg_warehouse",
   "remarks_tab",
   "remarks",
   "section_break_yixm",
@@ -66,7 +83,7 @@
    "fieldname": "rm_cost_as_per",
    "fieldtype": "Select",
    "label": "Rate Of Materials Based On",
-   "options": "Valuation Rate\nLast Purchase Rate\nPrice List\nManual",
+   "options": "Valuation Rate\nLast Purchase Rate\nPrice List",
    "reqd": 1
   },
   {
@@ -278,6 +295,104 @@
    "fieldtype": "Text",
    "label": "Error Log",
    "read_only": 1
+  },
+  {
+   "fieldname": "configuration_section",
+   "fieldtype": "Section Break",
+   "label": "Operation"
+  },
+  {
+   "default": "0",
+   "depends_on": "track_operations",
+   "fieldname": "track_semi_finished_goods",
+   "fieldtype": "Check",
+   "label": "Track Semi Finished Goods"
+  },
+  {
+   "fieldname": "column_break_obzr",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "track_operations",
+   "fieldtype": "Check",
+   "label": "Track Operations"
+  },
+  {
+   "depends_on": "eval:doc.track_semi_finished_goods === 1",
+   "fieldname": "final_product_operation_section",
+   "fieldtype": "Section Break",
+   "label": "Final Product Operation & Workstation"
+  },
+  {
+   "fieldname": "column_break_xnlu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "operation",
+   "fieldtype": "Link",
+   "label": "Operation",
+   "options": "Operation"
+  },
+  {
+   "fieldname": "operation_time",
+   "fieldtype": "Float",
+   "label": "Operation Time (in mins)"
+  },
+  {
+   "fieldname": "workstation",
+   "fieldtype": "Link",
+   "label": "Workstation",
+   "options": "Workstation"
+  },
+  {
+   "fieldname": "workstation_type",
+   "fieldtype": "Link",
+   "label": "Workstation Type",
+   "options": "Workstation Type"
+  },
+  {
+   "depends_on": "eval:!doc.backflush_from_wip_warehouse",
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval:!doc.skip_material_transfer || doc.backflush_from_wip_warehouse",
+   "fieldname": "wip_warehouse",
+   "fieldtype": "Link",
+   "label": "Work In Progress Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "fg_warehouse",
+   "fieldtype": "Link",
+   "label": "Finished Good Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "depends_on": "eval:doc.track_semi_finished_goods === 1",
+   "fieldname": "final_product_warehouse_section",
+   "fieldtype": "Section Break",
+   "label": "Final Product Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_material_transfer",
+   "fieldtype": "Check",
+   "label": "Skip Material Transfer"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.skip_material_transfer",
+   "fieldname": "backflush_from_wip_warehouse",
+   "fieldtype": "Check",
+   "label": "Backflush Materials From WIP Warehouse"
+  },
+  {
+   "fieldname": "column_break_buha",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -288,7 +403,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2023-08-07 15:45:06.176313",
+ "modified": "2024-05-26 15:47:10.101420",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
@@ -323,7 +438,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

@@ -15,7 +15,7 @@ class PSOACostCenter(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		cost_center_name: DF.Link | None
+		cost_center_name: DF.Link
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data

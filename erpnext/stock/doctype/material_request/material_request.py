@@ -107,13 +107,13 @@ class MaterialRequest(BuyingController):
 
 				if actual_so_qty and (flt(so_items[so_no][item]) + already_indented > actual_so_qty):
 					frappe.throw(
-						_("Material Request of maximum {0} can be made for Item {1} against Sales Order {2}").format(
-							actual_so_qty - already_indented, item, so_no
-						)
+						_(
+							"Material Request of maximum {0} can be made for Item {1} against Sales Order {2}"
+						).format(actual_so_qty - already_indented, item, so_no)
 					)
 
 	def validate(self):
-		super(MaterialRequest, self).validate()
+		super().validate()
 
 		self.validate_schedule_date()
 		self.check_for_on_hold_or_closed_status("Sales Order", "sales_order")
@@ -187,12 +187,8 @@ class MaterialRequest(BuyingController):
 		self.set_status(update=True, status="Cancelled")
 
 	def check_modified_date(self):
-		mod_db = frappe.db.sql(
-			"""select modified from `tabMaterial Request` where name = %s""", self.name
-		)
-		date_diff = frappe.db.sql(
-			"""select TIMEDIFF('%s', '%s')""" % (mod_db[0][0], cstr(self.modified))
-		)
+		mod_db = frappe.db.sql("""select modified from `tabMaterial Request` where name = %s""", self.name)
+		date_diff = frappe.db.sql(f"""select TIMEDIFF('{mod_db[0][0]}', '{cstr(self.modified)}')""")
 
 		if date_diff and date_diff[0][0]:
 			frappe.throw(_("{0} {1} has been modified. Please refresh.").format(_(self.doctype), self.name))
@@ -276,7 +272,9 @@ class MaterialRequest(BuyingController):
 					d.ordered_qty = flt(mr_items_ordered_qty.get(d.name))
 
 					if mr_qty_allowance:
-						allowed_qty = flt((d.qty + (d.qty * (mr_qty_allowance / 100))), d.precision("ordered_qty"))
+						allowed_qty = flt(
+							(d.qty + (d.qty * (mr_qty_allowance / 100))), d.precision("ordered_qty")
+						)
 
 						if d.ordered_qty and d.ordered_qty > allowed_qty:
 							frappe.throw(
@@ -371,9 +369,7 @@ def update_completed_and_requested_qty(stock_entry, method):
 
 
 def set_missing_values(source, target_doc):
-	if target_doc.doctype == "Purchase Order" and getdate(target_doc.schedule_date) < getdate(
-		nowdate()
-	):
+	if target_doc.doctype == "Purchase Order" and getdate(target_doc.schedule_date) < getdate(nowdate()):
 		target_doc.schedule_date = None
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("calculate_taxes_and_totals")
@@ -503,9 +499,7 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None, args=Non
 			target_doc.schedule_date = None
 		target_doc.set(
 			"items",
-			[
-				d for d in target_doc.get("items") if d.get("item_code") in supplier_items and d.get("qty") > 0
-			],
+			[d for d in target_doc.get("items") if d.get("item_code") in supplier_items and d.get("qty") > 0],
 		)
 
 		set_missing_values(source, target_doc)
@@ -557,7 +551,7 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 
 	if filters.get("transaction_date"):
 		date = filters.get("transaction_date")[1]
-		conditions += "and mr.transaction_date between '{0}' and '{1}' ".format(date[0], date[1])
+		conditions += f"and mr.transaction_date between '{date[0]}' and '{date[1]}' "
 
 	supplier = filters.get("supplier")
 	supplier_items = get_items_based_on_default_supplier(supplier)
@@ -569,18 +563,18 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 		"""select distinct mr.name, transaction_date,company
 		from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 		where mr.name = mr_item.parent
-			and mr_item.item_code in ({0})
+			and mr_item.item_code in ({})
 			and mr.material_request_type = 'Purchase'
 			and mr.per_ordered < 99.99
 			and mr.docstatus = 1
 			and mr.status != 'Stopped'
 			and mr.company = %s
-			{1}
+			{}
 		order by mr_item.item_code ASC
-		limit {2} offset {3} """.format(
+		limit {} offset {} """.format(
 			", ".join(["%s"] * len(supplier_items)), conditions, cint(page_len), cint(start)
 		),
-		tuple(supplier_items) + (filters.get("company"),),
+		(*tuple(supplier_items), filters.get("company")),
 		as_dict=1,
 	)
 
@@ -595,16 +589,27 @@ def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filte
 	for d in doc.items:
 		item_list.append(d.item_code)
 
-	return frappe.db.sql(
-		"""select default_supplier
-		from `tabItem Default`
-		where parent in ({0}) and
-		default_supplier IS NOT NULL
-		""".format(
-			", ".join(["%s"] * len(item_list))
-		),
-		tuple(item_list),
+	supplier = frappe.qb.DocType("Supplier")
+	item_default = frappe.qb.DocType("Item Default")
+	query = (
+		frappe.qb.from_(supplier)
+		.left_join(item_default)
+		.on(supplier.name == item_default.default_supplier)
+		.select(item_default.default_supplier)
+		.where(
+			(item_default.parent.isin(item_list))
+			& (item_default.default_supplier.notnull())
+			& (supplier[searchfield].like(f"%{txt}%"))
+		)
+		.offset(start)
+		.limit(page_len)
 	)
+
+	meta = frappe.get_meta("Supplier")
+	if meta.show_title_field_in_link and meta.title_field:
+		query = query.select(supplier[meta.title_field])
+
+	return query.run(as_dict=False)
 
 
 @frappe.whitelist()
@@ -697,7 +702,10 @@ def make_stock_entry(source_name, target_doc=None):
 				"doctype": "Stock Entry",
 				"validation": {
 					"docstatus": ["=", 1],
-					"material_request_type": ["in", ["Material Transfer", "Material Issue", "Customer Provided"]],
+					"material_request_type": [
+						"in",
+						["Material Transfer", "Material Issue", "Customer Provided"],
+					],
 				},
 			},
 			"Material Request Item": {
@@ -727,9 +735,7 @@ def raise_work_orders(material_request):
 	mr = frappe.get_doc("Material Request", material_request)
 	errors = []
 	work_orders = []
-	default_wip_warehouse = frappe.db.get_single_value(
-		"Manufacturing Settings", "default_wip_warehouse"
-	)
+	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 
 	for d in mr.items:
 		if (d.stock_qty - d.ordered_qty) > 0:
@@ -777,7 +783,9 @@ def raise_work_orders(material_request):
 			)
 		else:
 			msgprint(
-				_("The {0} {1} created successfully").format(frappe.bold(_("Work Order")), work_orders_list[0])
+				_("The {0} {1} created successfully").format(
+					frappe.bold(_("Work Order")), work_orders_list[0]
+				)
 			)
 
 	if errors:

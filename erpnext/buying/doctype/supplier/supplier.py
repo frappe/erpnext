@@ -11,9 +11,8 @@ from frappe.contacts.address_and_contact import (
 )
 from frappe.model.naming import set_name_by_naming_series, set_name_from_naming_options
 
-from erpnext.accounts.party import (  # noqa
+from erpnext.accounts.party import (
 	get_dashboard_info,
-	get_timeline_data,
 	validate_party_accounts,
 )
 from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
@@ -66,7 +65,7 @@ class Supplier(TransactionBase):
 		supplier_name: DF.Data
 		supplier_primary_address: DF.Link | None
 		supplier_primary_contact: DF.Link | None
-		supplier_type: DF.Literal["Company", "Individual", "Proprietorship", "Partnership"]
+		supplier_type: DF.Literal["Company", "Individual", "Partnership"]
 		tax_category: DF.Link | None
 		tax_id: DF.Data | None
 		tax_withholding_category: DF.Link | None
@@ -126,9 +125,7 @@ class Supplier(TransactionBase):
 			return
 
 		user_doc.add_roles("Supplier")
-		frappe.msgprint(
-			_("Added Supplier Role to User {0}.").format(frappe.bold(user_doc.name)), alert=True
-		)
+		frappe.msgprint(_("Added Supplier Role to User {0}.").format(frappe.bold(user_doc.name)), alert=True)
 
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
@@ -141,6 +138,7 @@ class Supplier(TransactionBase):
 		validate_party_accounts(self)
 		self.validate_internal_supplier()
 		self.add_role_for_user()
+		self.validate_currency_for_receivable_payable_and_advance_account()
 
 	@frappe.whitelist()
 	def get_supplier_group_details(self):
@@ -230,6 +228,6 @@ def get_supplier_primary_contact(doctype, txt, searchfield, start, page_len, fil
 		.where(
 			(dynamic_link.link_name == supplier)
 			& (dynamic_link.link_doctype == "Supplier")
-			& (contact.name.like("%{0}%".format(txt)))
+			& (contact.name.like(f"%{txt}%"))
 		)
 	).run(as_dict=False)

@@ -1,7 +1,6 @@
 # Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
-import unittest
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -26,9 +25,10 @@ class TestTransactionDeletionRecord(FrappeTestCase):
 			self.assertTrue(contains_company)
 
 	def test_no_of_docs_is_correct(self):
-		for i in range(5):
+		for _i in range(5):
 			create_task("Dunder Mifflin Paper Co")
 		tdr = create_transaction_deletion_doc("Dunder Mifflin Paper Co")
+		tdr.reload()
 		for doctype in tdr.doctypes:
 			if doctype.doctype_name == "Task":
 				self.assertEqual(doctype.no_of_docs, 5)
@@ -51,16 +51,16 @@ class TestTransactionDeletionRecord(FrappeTestCase):
 
 
 def create_company(company_name):
-	company = frappe.get_doc(
-		{"doctype": "Company", "company_name": company_name, "default_currency": "INR"}
-	)
+	company = frappe.get_doc({"doctype": "Company", "company_name": company_name, "default_currency": "INR"})
 	company.insert(ignore_if_duplicate=True)
 
 
 def create_transaction_deletion_doc(company):
 	tdr = frappe.get_doc({"doctype": "Transaction Deletion Record", "company": company})
 	tdr.insert()
+	tdr.process_in_single_transaction = True
 	tdr.submit()
+	tdr.start_deletion_tasks()
 	return tdr
 
 

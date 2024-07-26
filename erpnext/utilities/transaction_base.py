@@ -30,8 +30,8 @@ class TransactionBase(StatusUpdater):
 			except ValueError:
 				frappe.throw(_("Invalid Posting Time"))
 
-	def validate_uom_is_integer(self, uom_field, qty_fields):
-		validate_uom_is_integer(self, uom_field, qty_fields)
+	def validate_uom_is_integer(self, uom_field, qty_fields, child_dt=None):
+		validate_uom_is_integer(self, uom_field, qty_fields, child_dt)
 
 	def validate_with_previous_doc(self, ref):
 		self.exclude_fields = ["conversion_factor", "uom"] if self.get("is_return") else []
@@ -58,9 +58,7 @@ class TransactionBase(StatusUpdater):
 
 	def compare_values(self, ref_doc, fields, doc=None):
 		for reference_doctype, ref_dn_list in ref_doc.items():
-			prev_doc_detail_map = self.get_prev_doc_reference_details(
-				ref_dn_list, reference_doctype, fields
-			)
+			prev_doc_detail_map = self.get_prev_doc_reference_details(ref_dn_list, reference_doctype, fields)
 			for reference_name in ref_dn_list:
 				prevdoc_values = prev_doc_detail_map.get(reference_name)
 				if not prevdoc_values:
@@ -170,6 +168,69 @@ class TransactionBase(StatusUpdater):
 		if len(child_table_values) > 1:
 			self.set(default_field, None)
 
+	def validate_currency_for_receivable_payable_and_advance_account(self):
+		if self.doctype in ["Customer", "Supplier"]:
+			account_type = "Receivable" if self.doctype == "Customer" else "Payable"
+			for x in self.accounts:
+				company_default_currency = frappe.get_cached_value("Company", x.company, "default_currency")
+				receivable_payable_account_currency = None
+				advance_account_currency = None
+
+				if x.account:
+					receivable_payable_account_currency = frappe.get_cached_value(
+						"Account", x.account, "account_currency"
+					)
+
+				if x.advance_account:
+					advance_account_currency = frappe.get_cached_value(
+						"Account", x.advance_account, "account_currency"
+					)
+				if receivable_payable_account_currency and (
+					receivable_payable_account_currency != self.default_currency
+					and receivable_payable_account_currency != company_default_currency
+				):
+					frappe.throw(
+						_(
+							"{0} Account: {1} ({2}) must be in either customer billing currency: {3} or Company default currency: {4}"
+						).format(
+							account_type,
+							frappe.bold(x.account),
+							frappe.bold(receivable_payable_account_currency),
+							frappe.bold(self.default_currency),
+							frappe.bold(company_default_currency),
+						)
+					)
+
+				if advance_account_currency and (
+					advance_account_currency != self.default_currency
+					and advance_account_currency != company_default_currency
+				):
+					frappe.throw(
+						_(
+							"Advance Account: {0} must be in either customer billing currency: {1} or Company default currency: {2}"
+						).format(
+							frappe.bold(x.advance_account),
+							frappe.bold(self.default_currency),
+							frappe.bold(company_default_currency),
+						)
+					)
+
+				if (
+					receivable_payable_account_currency
+					and advance_account_currency
+					and receivable_payable_account_currency != advance_account_currency
+				):
+					frappe.throw(
+						_(
+							"Both {0} Account: {1} and Advance Account: {2} must be of same currency for company: {3}"
+						).format(
+							account_type,
+							frappe.bold(x.account),
+							frappe.bold(x.advance_account),
+							frappe.bold(x.company),
+						)
+					)
+
 
 def delete_events(ref_type, ref_name):
 	events = (
@@ -212,12 +273,13 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 			for f in qty_fields:
 				qty = d.get(f)
 				if qty:
-					if abs(cint(qty) - flt(qty, d.precision(f))) > 0.0000001:
+					precision = d.precision(f)
+					if abs(cint(qty) - flt(qty, precision)) > 0.0000001:
 						frappe.throw(
 							_(
 								"Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
 							).format(
-								flt(qty, d.precision(f)),
+								flt(qty, precision),
 								d.idx,
 								frappe.bold(_("Must be Whole Number")),
 								frappe.bold(d.get(uom_field)),

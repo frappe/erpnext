@@ -22,13 +22,14 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-07-08 22:35:33.202911",
+ "modified": "2024-03-27 13:10:43.141409",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "South Africa VAT Account",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

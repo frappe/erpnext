@@ -67,6 +67,7 @@
   "default_finance_book",
   "advance_payments_section",
   "book_advance_payments_in_separate_party_account",
+  "reconcile_on_advance_payment_date",
   "column_break_fwcf",
   "default_advance_received_account",
   "default_advance_paid_account",
@@ -106,6 +107,8 @@
   "stock_received_but_not_billed",
   "default_provisional_account",
   "default_in_transit_warehouse",
+  "manufacturing_section",
+  "default_operating_cost_account",
   "dashboard_tab"
  ],
  "fields": [
@@ -691,6 +694,8 @@
   },
   {
    "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "description": "Only 'Payment Entries' made against this advance account are supported.",
+   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
    "fieldname": "default_advance_received_account",
    "fieldtype": "Link",
    "label": "Default Advance Received Account",
@@ -699,6 +704,8 @@
   },
   {
    "depends_on": "eval:doc.book_advance_payments_in_separate_party_account",
+   "description": "Only 'Payment Entries' made against this advance account are supported.",
+   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
    "fieldname": "default_advance_paid_account",
    "fieldtype": "Link",
    "label": "Default Advance Paid Account",
@@ -731,7 +738,7 @@
    "fieldname": "auto_err_frequency",
    "fieldtype": "Select",
    "label": "Frequency",
-   "options": "Daily\nWeekly"
+   "options": "Daily\nWeekly\nMonthly"
   },
   {
    "default": "0",
@@ -752,13 +759,32 @@
   {
    "fieldname": "stock_tab",
    "fieldtype": "Tab Break",
-   "label": "Stock"
+   "label": "Stock and Manufacturing"
   },
   {
    "fieldname": "dashboard_tab",
    "fieldtype": "Tab Break",
    "label": "Dashboard",
    "show_dashboard": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.book_advance_payments_in_separate_party_account",
+   "description": "If <b>Enabled</b> - Reconciliation happens on the <b>Advance Payment posting date</b><br>\nIf <b>Disabled</b> - Reconciliation happens on oldest of 2 Dates: <b>Invoice Date</b> or the <b>Advance Payment posting date</b><br>\n",
+   "fieldname": "reconcile_on_advance_payment_date",
+   "fieldtype": "Check",
+   "label": "Reconcile on Advance Payment Date"
+  },
+  {
+   "fieldname": "manufacturing_section",
+   "fieldtype": "Section Break",
+   "label": "Manufacturing"
+  },
+  {
+   "fieldname": "default_operating_cost_account",
+   "fieldtype": "Link",
+   "label": "Default Operating Cost Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -766,7 +792,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2023-10-23 10:19:24.322898",
+ "modified": "2024-07-24 18:17:56.413971",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -822,10 +848,14 @@
    "role": "Accounts Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "role": "Auditor",
+   "select": 1
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
  "track_changes": 1

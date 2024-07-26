@@ -77,7 +77,9 @@ class QualityProcedure(NestedSet):
 
 		for process in self.processes:
 			if process.procedure:
-				if not frappe.db.get_value("Quality Procedure", process.procedure, "parent_quality_procedure"):
+				if not frappe.db.get_value(
+					"Quality Procedure", process.procedure, "parent_quality_procedure"
+				):
 					frappe.db.set_value(
 						"Quality Procedure", process.procedure, "parent_quality_procedure", self.name
 					)
@@ -89,9 +91,13 @@ class QualityProcedure(NestedSet):
 			if old_child_procedures := set([d.procedure for d in old_doc.processes if d.procedure]):
 				current_child_procedures = set([d.procedure for d in self.processes if d.procedure])
 
-				if removed_child_procedures := list(old_child_procedures.difference(current_child_procedures)):
+				if removed_child_procedures := list(
+					old_child_procedures.difference(current_child_procedures)
+				):
 					for child_procedure in removed_child_procedures:
-						frappe.db.set_value("Quality Procedure", child_procedure, "parent_quality_procedure", None)
+						frappe.db.set_value(
+							"Quality Procedure", child_procedure, "parent_quality_procedure", None
+						)
 
 	def add_child_to_parent(self):
 		"""Add `Child Procedure` to `Parent Procedure`"""
@@ -125,7 +131,8 @@ def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=Fa
 		# return the list in order
 		return [
 			dict(
-				value=d.procedure, expandable=frappe.db.get_value("Quality Procedure", d.procedure, "is_group")
+				value=d.procedure,
+				expandable=frappe.db.get_value("Quality Procedure", d.procedure, "is_group"),
 			)
 			for d in parent_procedure.processes
 			if d.procedure

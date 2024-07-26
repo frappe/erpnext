@@ -72,7 +72,7 @@
   }
  ],
  "links": [],
- "modified": "2020-07-15 12:43:25.548682",
+ "modified": "2024-03-27 13:09:36.177528",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Email Campaign",
@@ -92,7 +92,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

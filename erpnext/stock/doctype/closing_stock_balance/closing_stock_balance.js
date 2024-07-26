@@ -8,7 +8,7 @@ frappe.ui.form.on("Closing Stock Balance", {
 	},
 
 	generate_closing_balance(frm) {
-		if (in_list(["Queued", "Failed"], frm.doc.status)) {
+		if (["Queued", "Failed"].includes(frm.doc.status)) {
 			frm.add_custom_button(__("Generate Closing Stock Balance"), () => {
 				frm.call({
 					method: "enqueue_job",
@@ -16,9 +16,9 @@ frappe.ui.form.on("Closing Stock Balance", {
 					freeze: true,
 					callback: () => {
 						frm.reload_doc();
-					}
-				})
-			})
+					},
+				});
+			});
 		}
 	},
 
@@ -31,9 +31,9 @@ frappe.ui.form.on("Closing Stock Balance", {
 					freeze: true,
 					callback: () => {
 						frm.reload_doc();
-					}
-				})
-			})
+					},
+				});
+			});
 		}
-	}
+	},
 });

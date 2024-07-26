@@ -42,6 +42,39 @@ class TestQuotation(FrappeTestCase):
 
 		self.assertTrue(sales_order.get("payment_schedule"))
 
+	def test_gross_profit(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from erpnext.stock.get_item_details import insert_item_price
+
+		item_doc = make_item("_Test Item for Gross Profit", {"is_stock_item": 1})
+		item_code = item_doc.name
+		make_stock_entry(item_code=item_code, qty=10, rate=100, target="_Test Warehouse - _TC")
+
+		selling_price_list = frappe.get_all("Price List", filters={"selling": 1}, limit=1)[0].name
+		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 1)
+		insert_item_price(
+			frappe._dict(
+				{
+					"item_code": item_code,
+					"price_list": selling_price_list,
+					"price_list_rate": 300,
+					"rate": 300,
+					"conversion_factor": 1,
+					"discount_amount": 0.0,
+					"currency": frappe.db.get_value("Price List", selling_price_list, "currency"),
+					"uom": item_doc.stock_uom,
+				}
+			)
+		)
+
+		quotation = make_quotation(
+			item_code=item_code, qty=1, rate=300, selling_price_list=selling_price_list
+		)
+		self.assertEqual(quotation.items[0].valuation_rate, 100)
+		self.assertEqual(quotation.items[0].gross_profit, 200)
+		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
+
 	def test_maintain_rate_in_sales_cycle_is_enforced(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
@@ -101,6 +134,7 @@ class TestQuotation(FrappeTestCase):
 
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
+		sales_order.delivery_date = nowdate()
 		sales_order.insert()
 
 	def test_make_sales_order_with_terms(self):
@@ -119,9 +153,7 @@ class TestQuotation(FrappeTestCase):
 		self.assertEqual(quotation.payment_schedule[0].payment_amount, 8906.00)
 		self.assertEqual(quotation.payment_schedule[0].due_date, quotation.transaction_date)
 		self.assertEqual(quotation.payment_schedule[1].payment_amount, 8906.00)
-		self.assertEqual(
-			quotation.payment_schedule[1].due_date, add_days(quotation.transaction_date, 30)
-		)
+		self.assertEqual(quotation.payment_schedule[1].due_date, add_days(quotation.transaction_date, 30))
 
 		sales_order = make_sales_order(quotation.name)
 
@@ -133,6 +165,7 @@ class TestQuotation(FrappeTestCase):
 
 		sales_order.naming_series = "_T-Quotation-"
 		sales_order.transaction_date = nowdate()
+		sales_order.delivery_date = nowdate()
 		sales_order.insert()
 
 		# Remove any unknown taxes if applied
@@ -154,9 +187,7 @@ class TestQuotation(FrappeTestCase):
 	def test_so_from_expired_quotation(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
-		frappe.db.set_single_value(
-			"Selling Settings", "allow_sales_order_creation_for_expired_quotation", 0
-		)
+		frappe.db.set_single_value("Selling Settings", "allow_sales_order_creation_for_expired_quotation", 0)
 
 		quotation = frappe.copy_doc(test_records[0])
 		quotation.valid_till = add_days(nowdate(), -1)
@@ -165,9 +196,7 @@ class TestQuotation(FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
 
-		frappe.db.set_single_value(
-			"Selling Settings", "allow_sales_order_creation_for_expired_quotation", 1
-		)
+		frappe.db.set_single_value("Selling Settings", "allow_sales_order_creation_for_expired_quotation", 1)
 
 		make_sales_order(quotation.name)
 
@@ -625,7 +654,7 @@ class TestQuotation(FrappeTestCase):
 			).insert()
 
 		if not frappe.db.exists("Item Tax Template", "Vat Template - _TC"):
-			doc = frappe.get_doc(
+			frappe.get_doc(
 				{
 					"doctype": "Item Tax Template",
 					"name": "Vat Template",
@@ -647,9 +676,7 @@ class TestQuotation(FrappeTestCase):
 			item_doc.append("taxes", {"item_tax_template": "Vat Template - _TC"})
 			item_doc.save()
 
-		quotation = make_quotation(
-			item_code="_Test Item Tax Template QTN", qty=1, rate=100, do_not_submit=1
-		)
+		quotation = make_quotation(item_code="_Test Item Tax Template QTN", qty=1, rate=100, do_not_submit=1)
 		self.assertFalse(quotation.taxes)
 
 		quotation.append_taxes_from_item_tax_template()

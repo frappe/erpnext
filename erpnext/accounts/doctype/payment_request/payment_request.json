@@ -145,6 +145,7 @@
    "fieldname": "grand_total",
    "fieldtype": "Currency",
    "label": "Amount",
+   "non_negative": 1,
    "options": "currency"
   },
   {
@@ -260,7 +261,7 @@
    "label": "Recipient Message And Payment Details"
   },
   {
-   "depends_on": "eval: doc.payment_channel != \"Phone\"",
+   "depends_on": "eval: doc.payment_channel == \"Email\" || (!doc.payment_channel)",
    "fieldname": "print_format",
    "fieldtype": "Select",
    "label": "Print Format"
@@ -272,7 +273,7 @@
    "label": "To"
   },
   {
-   "depends_on": "eval: doc.payment_channel != \"Phone\"",
+   "depends_on": "eval: doc.payment_channel == \"Email\" || (!doc.payment_channel)",
    "fieldname": "subject",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -309,18 +310,18 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.payment_request_type == 'Inward' || doc.payment_channel != \"Phone\"",
+   "depends_on": "eval: doc.payment_request_type == 'Inward' || doc.payment_channel == \"Email\" || (!doc.payment_channel)",
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
   },
   {
-   "depends_on": "eval: doc.payment_channel != \"Phone\"",
+   "depends_on": "eval: doc.payment_channel == \"Email\" || (!doc.payment_channel)",
    "fieldname": "message",
    "fieldtype": "Text",
    "label": "Message"
   },
   {
-   "depends_on": "eval: doc.payment_channel != \"Phone\"",
+   "depends_on": "eval: doc.payment_channel == \"Email\" || (!doc.payment_channel)",
    "fieldname": "message_examples",
    "fieldtype": "HTML",
    "label": "Message Examples",
@@ -372,7 +373,7 @@
    "fieldname": "payment_channel",
    "fieldtype": "Select",
    "label": "Payment Channel",
-   "options": "\nEmail\nPhone",
+   "options": "\nEmail\nPhone\nOther",
    "read_only": 1
   },
   {
@@ -405,7 +406,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-01-20 00:37:06.988919",
+ "modified": "2024-06-20 13:54:55.245774",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
@@ -440,7 +441,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

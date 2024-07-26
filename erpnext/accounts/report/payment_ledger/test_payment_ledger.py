@@ -1,5 +1,3 @@
-import unittest
-
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
@@ -57,7 +55,7 @@ class TestPaymentLedger(FrappeTestCase):
 			income_account=self.income_account,
 			warehouse=self.warehouse,
 		)
-		pe = get_payment_entry(sinv.doctype, sinv.name).save().submit()
+		get_payment_entry(sinv.doctype, sinv.name).save().submit()
 
 		filters = frappe._dict({"company": self.company})
 		columns, data = execute(filters=filters)

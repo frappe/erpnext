@@ -1,4 +1,4 @@
-frappe.provide('erpnext.stock');
+frappe.provide("erpnext.stock");
 
 erpnext.stock.ItemDashboard = class ItemDashboard {
 	constructor(opts) {
@@ -9,46 +9,51 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 		var me = this;
 		this.start = 0;
 		if (!this.sort_by) {
-			this.sort_by = 'projected_qty';
-			this.sort_order = 'asc';
+			this.sort_by = "projected_qty";
+			this.sort_order = "asc";
 		}
 
-		this.content = $(frappe.render_template('item_dashboard')).appendTo(this.parent);
-		this.result = this.content.find('.result');
+		this.content = $(frappe.render_template("item_dashboard")).appendTo(this.parent);
+		this.result = this.content.find(".result");
 
-		this.content.on('click', '.btn-move', function () {
+		this.content.on("click", ".btn-move", function () {
 			handle_move_add($(this), "Move");
 		});
 
-		this.content.on('click', '.btn-add', function () {
+		this.content.on("click", ".btn-add", function () {
 			handle_move_add($(this), "Add");
 		});
 
-		this.content.on('click', '.btn-edit', function () {
-			let item = unescape($(this).attr('data-item'));
-			let warehouse = unescape($(this).attr('data-warehouse'));
-			let company = unescape($(this).attr('data-company'));
-			frappe.db.get_value('Putaway Rule', {
-				'item_code': item,
-				'warehouse': warehouse,
-				'company': company
-			}, 'name', (r) => {
-				frappe.set_route("Form", "Putaway Rule", r.name);
-			});
+		this.content.on("click", ".btn-edit", function () {
+			let item = unescape($(this).attr("data-item"));
+			let warehouse = unescape($(this).attr("data-warehouse"));
+			let company = unescape($(this).attr("data-company"));
+			frappe.db.get_value(
+				"Putaway Rule",
+				{
+					item_code: item,
+					warehouse: warehouse,
+					company: company,
+				},
+				"name",
+				(r) => {
+					frappe.set_route("Form", "Putaway Rule", r.name);
+				}
+			);
 		});
 
 		function handle_move_add(element, action) {
-			let item = unescape(element.attr('data-item'));
-			let warehouse = unescape(element.attr('data-warehouse'));
-			let actual_qty = unescape(element.attr('data-actual_qty'));
-			let disable_quick_entry = Number(unescape(element.attr('data-disable_quick_entry')));
+			let item = unescape(element.attr("data-item"));
+			let warehouse = unescape(element.attr("data-warehouse"));
+			let actual_qty = unescape(element.attr("data-actual_qty"));
+			let disable_quick_entry = Number(unescape(element.attr("data-disable_quick_entry")));
 			let entry_type = action === "Move" ? "Material Transfer" : "Material Receipt";
 
 			if (disable_quick_entry) {
 				open_stock_entry(item, warehouse, entry_type);
 			} else {
 				if (action === "Add") {
-					let rate = unescape($(this).attr('data-rate'));
+					let rate = unescape($(this).attr("data-rate"));
 					erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, function () {
 						me.refresh();
 					});
@@ -61,35 +66,33 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 		}
 
 		function open_stock_entry(item, warehouse, entry_type) {
-			frappe.model.with_doctype('Stock Entry', function () {
-				var doc = frappe.model.get_new_doc('Stock Entry');
+			frappe.model.with_doctype("Stock Entry", function () {
+				var doc = frappe.model.get_new_doc("Stock Entry");
 				if (entry_type) {
 					doc.stock_entry_type = entry_type;
 				}
 
-				var row = frappe.model.add_child(doc, 'items');
+				var row = frappe.model.add_child(doc, "items");
 				row.item_code = item;
 
 				if (entry_type === "Material Transfer") {
 					row.s_warehouse = warehouse;
-				}
-				else {
+				} else {
 					row.t_warehouse = warehouse;
 				}
 
-				frappe.set_route('Form', doc.doctype, doc.name);
+				frappe.set_route("Form", doc.doctype, doc.name);
 			});
 		}
 
 		// more
-		this.content.find('.btn-more').on('click', function () {
+		this.content.find(".btn-more").on("click", function () {
 			me.start += me.page_length;
 			me.refresh();
 		});
-
 	}
 	refresh() {
-		if(this.before_refresh) {
+		if (this.before_refresh) {
 			this.before_refresh();
 		}
 
@@ -101,7 +104,7 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			company: this.company,
 			start: this.start,
 			sort_by: this.sort_by,
-			sort_order: this.sort_order
+			sort_order: this.sort_order,
 		};
 
 		var me = this;
@@ -110,14 +113,14 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			args: args,
 			callback: function (r) {
 				me.render(r.message);
-				if(me.after_refresh) {
+				if (me.after_refresh) {
 					me.after_refresh();
 				}
-			}
+			},
 		});
 	}
 	render(data) {
-		if (this.start===0) {
+		if (this.start === 0) {
 			this.max_count = 0;
 			this.result.empty();
 		}
@@ -130,22 +133,22 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 		}
 
 		// show more button
-		if (data && data.length === (this.page_length + 1)) {
-			this.content.find('.more').removeClass('hidden');
+		if (data && data.length === this.page_length + 1) {
+			this.content.find(".more").removeClass("hidden");
 
 			// remove the last element
 			data.splice(-1);
 		} else {
-			this.content.find('.more').addClass('hidden');
+			this.content.find(".more").addClass("hidden");
 		}
 
 		// If not any stock in any warehouses provide a message to end user
 		if (context.data.length > 0) {
-			this.content.find('.result').css('text-align', 'unset');
+			this.content.find(".result").css("text-align", "unset");
 			$(frappe.render_template(this.template, context)).appendTo(this.result);
 		} else {
 			var message = __("No Stock Available Currently");
-			this.content.find('.result').css('text-align', 'center');
+			this.content.find(".result").css("text-align", "center");
 
 			$(`<div class='text-muted' style='margin: 20px 5px;'>
 				${message} </div>`).appendTo(this.result);
@@ -153,19 +156,23 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 	}
 
 	get_item_dashboard_data(data, max_count, show_item) {
-		if(!max_count) max_count = 0;
-		if(!data) data = [];
+		if (!max_count) max_count = 0;
+		if (!data) data = [];
 
 		data.forEach(function (d) {
-			d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract;
+			d.actual_or_pending =
+				d.projected_qty +
+				d.reserved_qty +
+				d.reserved_qty_for_production +
+				d.reserved_qty_for_sub_contract;
 			d.pending_qty = 0;
-			d.total_reserved = d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract;
+			d.total_reserved =
+				d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract;
 			if (d.actual_or_pending > d.actual_qty) {
 				d.pending_qty = d.actual_or_pending - d.actual_qty;
 			}
 
-			max_count = Math.max(d.actual_or_pending, d.actual_qty,
-				d.total_reserved, max_count);
+			max_count = Math.max(d.actual_or_pending, d.actual_qty, d.total_reserved, max_count);
 		});
 
 		let can_write = 0;
@@ -177,7 +184,7 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			data: data,
 			max_count: max_count,
 			can_write: can_write,
-			show_item: show_item || false
+			show_item: show_item || false,
 		};
 	}
 
@@ -202,73 +209,74 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 
 erpnext.stock.move_item = function (item, source, target, actual_qty, rate, callback) {
 	var dialog = new frappe.ui.Dialog({
-		title: target ? __('Add Item') : __('Move Item'),
-		fields: [{
-			fieldname: 'item_code',
-			label: __('Item'),
-			fieldtype: 'Link',
-			options: 'Item',
-			read_only: 1
-		},
-		{
-			fieldname: 'source',
-			label: __('Source Warehouse'),
-			fieldtype: 'Link',
-			options: 'Warehouse',
-			read_only: 1
-		},
-		{
-			fieldname: 'target',
-			label: __('Target Warehouse'),
-			fieldtype: 'Link',
-			options: 'Warehouse',
-			reqd: 1,
-			get_query() {
-				return {
-					filters: {
-						is_group: 0
-					}
-				}
-			}
-		},
-		{
-			fieldname: 'qty',
-			label: __('Quantity'),
-			reqd: 1,
-			fieldtype: 'Float',
-			description: __('Available {0}', [actual_qty])
-		},
-		{
-			fieldname: 'rate',
-			label: __('Rate'),
-			fieldtype: 'Currency',
-			hidden: 1
-		},
+		title: target ? __("Add Item") : __("Move Item"),
+		fields: [
+			{
+				fieldname: "item_code",
+				label: __("Item"),
+				fieldtype: "Link",
+				options: "Item",
+				read_only: 1,
+			},
+			{
+				fieldname: "source",
+				label: __("Source Warehouse"),
+				fieldtype: "Link",
+				options: "Warehouse",
+				read_only: 1,
+			},
+			{
+				fieldname: "target",
+				label: __("Target Warehouse"),
+				fieldtype: "Link",
+				options: "Warehouse",
+				reqd: 1,
+				get_query() {
+					return {
+						filters: {
+							is_group: 0,
+						},
+					};
+				},
+			},
+			{
+				fieldname: "qty",
+				label: __("Quantity"),
+				reqd: 1,
+				fieldtype: "Float",
+				description: __("Available {0}", [actual_qty]),
+			},
+			{
+				fieldname: "rate",
+				label: __("Rate"),
+				fieldtype: "Currency",
+				hidden: 1,
+			},
 		],
 	});
 	dialog.show();
-	dialog.get_field('item_code').set_input(item);
+	dialog.get_field("item_code").set_input(item);
 
 	if (source) {
-		dialog.get_field('source').set_input(source);
+		dialog.get_field("source").set_input(source);
 	} else {
-		dialog.get_field('source').df.hidden = 1;
-		dialog.get_field('source').refresh();
+		dialog.get_field("source").df.hidden = 1;
+		dialog.get_field("source").refresh();
 	}
 
 	if (rate) {
-		dialog.get_field('rate').set_value(rate);
-		dialog.get_field('rate').df.hidden = 0;
-		dialog.get_field('rate').refresh();
+		dialog.get_field("rate").set_value(rate);
+		dialog.get_field("rate").df.hidden = 0;
+		dialog.get_field("rate").refresh();
 	}
 
 	if (target) {
-		dialog.get_field('target').df.read_only = 1;
-		dialog.get_field('target').value = target;
-		dialog.get_field('target').refresh();
+		dialog.get_field("target").df.read_only = 1;
+		dialog.get_field("target").value = target;
+		dialog.get_field("target").refresh();
 	}
 
-	dialog.set_primary_action(__('Create Stock Entry'), function () {
+	dialog.set_primary_action(__("Create Stock Entry"), function () {
 		if (source && (dialog.get_value("qty") == 0 || dialog.get_value("qty") > actual_qty)) {
 			frappe.msgprint(__("Quantity must be greater than zero, and less or equal to {0}", [actual_qty]));
 			return;
@@ -279,20 +287,20 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 			return;
 		}
 
-		frappe.model.with_doctype('Stock Entry', function () {
-			let doc = frappe.model.get_new_doc('Stock Entry');
-			doc.from_warehouse = dialog.get_value('source');
-			doc.to_warehouse = dialog.get_value('target');
+		frappe.model.with_doctype("Stock Entry", function () {
+			let doc = frappe.model.get_new_doc("Stock Entry");
+			doc.from_warehouse = dialog.get_value("source");
+			doc.to_warehouse = dialog.get_value("target");
 			doc.stock_entry_type = doc.from_warehouse ? "Material Transfer" : "Material Receipt";
-			let row = frappe.model.add_child(doc, 'items');
-			row.item_code = dialog.get_value('item_code');
-			row.s_warehouse = dialog.get_value('source');
-			row.t_warehouse = dialog.get_value('target');
-			row.qty = dialog.get_value('qty');
+			let row = frappe.model.add_child(doc, "items");
+			row.item_code = dialog.get_value("item_code");
+			row.s_warehouse = dialog.get_value("source");
+			row.t_warehouse = dialog.get_value("target");
+			row.qty = dialog.get_value("qty");
 			row.conversion_factor = 1;
-			row.transfer_qty = dialog.get_value('qty');
-			row.basic_rate = dialog.get_value('rate');
-			frappe.set_route('Form', doc.doctype, doc.name);
+			row.transfer_qty = dialog.get_value("qty");
+			row.basic_rate = dialog.get_value("rate");
+			frappe.set_route("Form", doc.doctype, doc.name);
 		});
 	});
 };

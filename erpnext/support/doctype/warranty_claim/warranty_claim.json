@@ -311,7 +311,7 @@
   {
    "depends_on": "customer",
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "label": "Address",
    "read_only": 1
   },
@@ -379,7 +379,7 @@
  "icon": "fa fa-bug",
  "idx": 1,
  "links": [],
- "modified": "2023-11-28 17:30:35.676410",
+ "modified": "2024-03-27 13:10:59.601423",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",
@@ -400,7 +400,7 @@
  ],
  "search_fields": "status,customer,customer_name,territory",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer",

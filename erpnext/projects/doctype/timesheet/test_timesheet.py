@@ -5,7 +5,7 @@ import datetime
 import unittest
 
 import frappe
-from frappe.utils import add_months, add_to_date, now_datetime, nowdate
+from frappe.utils import add_to_date, now_datetime, nowdate
 
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError, make_sales_invoice
@@ -40,9 +40,7 @@ class TestTimesheet(unittest.TestCase):
 		emp = make_employee("test_employee_6@salary.com")
 
 		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
-		sales_invoice = make_sales_invoice(
-			timesheet.name, "_Test Item", "_Test Customer", currency="INR"
-		)
+		sales_invoice = make_sales_invoice(timesheet.name, "_Test Item", "_Test Customer", currency="INR")
 		sales_invoice.due_date = nowdate()
 		sales_invoice.submit()
 		timesheet = frappe.get_doc("Timesheet", timesheet.name)
@@ -211,9 +209,7 @@ def make_timesheet(
 	timesheet_detail.activity_type = activity_type
 	timesheet_detail.from_time = now_datetime()
 	timesheet_detail.hours = 2
-	timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(
-		hours=timesheet_detail.hours
-	)
+	timesheet_detail.to_time = timesheet_detail.from_time + datetime.timedelta(hours=timesheet_detail.hours)
 	timesheet_detail.project = project
 	timesheet_detail.task = task
 

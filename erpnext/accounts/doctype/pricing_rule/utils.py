@@ -6,6 +6,7 @@
 
 import copy
 import json
+import math
 
 import frappe
 from frappe import _, bold
@@ -32,6 +33,9 @@ def get_pricing_rules(args, doc=None):
 
 	for apply_on in ["Item Code", "Item Group", "Brand"]:
 		pricing_rules.extend(_get_pricing_rules(apply_on, args, values))
+		if pricing_rules and pricing_rules[0].has_priority:
+			continue
+
 		if pricing_rules and not apply_multiple_pricing_rules(pricing_rules):
 			break
 
@@ -101,14 +105,12 @@ def _get_pricing_rules(apply_on, args, values):
 	if not args.get(apply_on_field):
 		return []
 
-	child_doc = "`tabPricing Rule {0}`".format(apply_on)
+	child_doc = f"`tabPricing Rule {apply_on}`"
 
 	conditions = item_variant_condition = item_conditions = ""
 	values[apply_on_field] = args.get(apply_on_field)
 	if apply_on_field in ["item_code", "brand"]:
-		item_conditions = "{child_doc}.{apply_on_field}= %({apply_on_field})s".format(
-			child_doc=child_doc, apply_on_field=apply_on_field
-		)
+		item_conditions = f"{child_doc}.{apply_on_field}= %({apply_on_field})s"
 
 		if apply_on_field == "item_code":
 			if args.get("uom", None):
@@ -121,23 +123,19 @@ def _get_pricing_rules(apply_on, args, values):
 				args.variant_of = frappe.get_cached_value("Item", args.item_code, "variant_of")
 
 			if args.variant_of:
-				item_variant_condition = " or {child_doc}.item_code=%(variant_of)s ".format(
-					child_doc=child_doc
-				)
+				item_variant_condition = f" or {child_doc}.item_code=%(variant_of)s "
 				values["variant_of"] = args.variant_of
 	elif apply_on_field == "item_group":
 		item_conditions = _get_tree_conditions(args, "Item Group", child_doc, False)
 		if args.get("uom", None):
-			item_conditions += (
-				" and ({child_doc}.uom='{item_uom}' or IFNULL({child_doc}.uom, '')='')".format(
-					child_doc=child_doc, item_uom=args.get("uom")
-				)
+			item_conditions += " and ({child_doc}.uom='{item_uom}' or IFNULL({child_doc}.uom, '')='')".format(
+				child_doc=child_doc, item_uom=args.get("uom")
 			)
 
 	conditions += get_other_conditions(conditions, values, args)
 	warehouse_conditions = _get_tree_conditions(args, "Warehouse", "`tabPricing Rule`")
 	if warehouse_conditions:
-		warehouse_conditions = " and {0}".format(warehouse_conditions)
+		warehouse_conditions = f" and {warehouse_conditions}"
 
 	if not args.price_list:
 		args.price_list = None
@@ -163,7 +161,7 @@ def _get_pricing_rules(apply_on, args, values):
 				item_variant_condition=item_variant_condition,
 				transaction_type=args.transaction_type,
 				warehouse_cond=warehouse_conditions,
-				apply_on_other_field="other_{0}".format(apply_on_field),
+				apply_on_other_field=f"other_{apply_on_field}",
 				conditions=conditions,
 			),
 			values,
@@ -176,12 +174,9 @@ def _get_pricing_rules(apply_on, args, values):
 
 
 def apply_multiple_pricing_rules(pricing_rules):
-	apply_multiple_rule = [
-		d.apply_multiple_pricing_rules for d in pricing_rules if d.apply_multiple_pricing_rules
-	]
-
-	if not apply_multiple_rule:
-		return False
+	for d in pricing_rules:
+		if not d.apply_multiple_pricing_rules:
+			return False
 
 	return True
 
@@ -202,14 +197,13 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 			frappe.throw(_("Invalid {0}").format(args.get(field)))
 
 		parent_groups = frappe.db.sql_list(
-			"""select name from `tab%s`
-			where lft<=%s and rgt>=%s"""
-			% (parenttype, "%s", "%s"),
+			"""select name from `tab{}`
+			where lft<={} and rgt>={}""".format(parenttype, "%s", "%s"),
 			(lft, rgt),
 		)
 
 		if parenttype in ["Customer Group", "Item Group", "Territory"]:
-			parent_field = "parent_{0}".format(frappe.scrub(parenttype))
+			parent_field = f"parent_{frappe.scrub(parenttype)}"
 			root_name = frappe.db.get_list(
 				parenttype,
 				{"is_group": 1, parent_field: ("is", "not set")},
@@ -235,10 +229,10 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 def get_other_conditions(conditions, values, args):
 	for field in ["company", "customer", "supplier", "campaign", "sales_partner"]:
 		if args.get(field):
-			conditions += " and ifnull(`tabPricing Rule`.{0}, '') in (%({1})s, '')".format(field, field)
+			conditions += f" and ifnull(`tabPricing Rule`.{field}, '') in (%({field})s, '')"
 			values[field] = args.get(field)
 		else:
-			conditions += " and ifnull(`tabPricing Rule`.{0}, '') = ''".format(field)
+			conditions += f" and ifnull(`tabPricing Rule`.{field}, '') = ''"
 
 	for parenttype in ["Customer Group", "Territory", "Supplier Group"]:
 		group_condition = _get_tree_conditions(args, parenttype, "`tabPricing Rule`")
@@ -510,7 +504,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 		"transaction_date" if frappe.get_meta(doctype).has_field("transaction_date") else "posting_date"
 	)
 
-	child_doctype = "{0} Item".format(doctype)
+	child_doctype = f"{doctype} Item"
 	apply_on = frappe.scrub(pr_doc.get("apply_on"))
 
 	values = [pr_doc.valid_from, pr_doc.valid_upto]
@@ -520,9 +514,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 		warehouses = get_child_warehouses(pr_doc.warehouse)
 
 		condition += """ and `tab{child_doc}`.warehouse in ({warehouses})
-			""".format(
-			child_doc=child_doctype, warehouses=",".join(["%s"] * len(warehouses))
-		)
+			""".format(child_doc=child_doctype, warehouses=",".join(["%s"] * len(warehouses)))
 
 		values.extend(warehouses)
 
@@ -534,16 +526,14 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=None):
 		values.extend(items)
 
 	data_set = frappe.db.sql(
-		""" SELECT `tab{child_doc}`.stock_qty,
-			`tab{child_doc}`.amount
-		FROM `tab{child_doc}`, `tab{parent_doc}`
+		f""" SELECT `tab{child_doctype}`.stock_qty,
+			`tab{child_doctype}`.amount
+		FROM `tab{child_doctype}`, `tab{doctype}`
 		WHERE
-			`tab{child_doc}`.parent = `tab{parent_doc}`.name and `tab{parent_doc}`.{date_field}
-			between %s and %s and `tab{parent_doc}`.docstatus = 1
-			{condition} group by `tab{child_doc}`.name
-	""".format(
-			parent_doc=doctype, child_doc=child_doctype, condition=condition, date_field=date_field
-		),
+			`tab{child_doctype}`.parent = `tab{doctype}`.name and `tab{doctype}`.{date_field}
+			between %s and %s and `tab{doctype}`.docstatus = 1
+			{condition} group by `tab{child_doctype}`.name
+	""",
 		tuple(values),
 		as_dict=1,
 	)
@@ -562,17 +552,16 @@ def apply_pricing_rule_on_transaction(doc):
 	conditions = get_other_conditions(conditions, values, doc)
 
 	pricing_rules = frappe.db.sql(
-		""" Select `tabPricing Rule`.* from `tabPricing Rule`
+		f""" Select `tabPricing Rule`.* from `tabPricing Rule`
 		where  {conditions} and `tabPricing Rule`.disable = 0
-	""".format(
-			conditions=conditions
-		),
+	""",
 		values,
 		as_dict=1,
 	)
 
 	if pricing_rules:
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty, doc.total, pricing_rules)
+		pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
 
 		if not pricing_rules:
 			remove_free_item(doc)
@@ -591,7 +580,9 @@ def apply_pricing_rule_on_transaction(doc):
 						continue
 
 					if (
-						d.validate_applied_rule and doc.get(field) is not None and doc.get(field) < d.get(pr_field)
+						d.validate_applied_rule
+						and doc.get(field) is not None
+						and doc.get(field) < d.get(pr_field)
 					):
 						frappe.msgprint(_("User has not applied rule on the invoice {0}").format(doc.name))
 					else:
@@ -660,13 +651,11 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 
 	qty = pricing_rule.free_qty or 1
 	if pricing_rule.is_recursive:
-		transaction_qty = (
-			args.get("qty") if args else doc.total_qty
-		) - pricing_rule.apply_recursion_over
+		transaction_qty = (args.get("qty") if args else doc.total_qty) - pricing_rule.apply_recursion_over
 		if transaction_qty:
 			qty = flt(transaction_qty) * qty / pricing_rule.recurse_for
 			if pricing_rule.round_free_qty:
-				qty = round(qty)
+				qty = math.floor(qty)
 
 	free_item_data_args = {
 		"item_code": free_item,
@@ -736,7 +725,6 @@ def get_pricing_rule_items(pr_doc, other_items=False) -> list:
 
 def validate_coupon_code(coupon_name):
 	coupon = frappe.get_doc("Coupon Code", coupon_name)
-
 	if coupon.valid_from:
 		if coupon.valid_from > getdate(today()):
 			frappe.throw(_("Sorry, this coupon code's validity has not started"))

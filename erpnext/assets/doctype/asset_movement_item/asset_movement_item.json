@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-10-07 18:49:00.737806",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -73,14 +74,16 @@
   }
  ],
  "istable": 1,
- "modified": "2019-10-09 15:59:08.265141",
+ "links": [],
+ "modified": "2024-03-27 13:06:35.272015",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Movement Item",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -45,9 +45,7 @@ class SubcontractingBOM(Document):
 		if disabled:
 			frappe.throw(_("Finished Good {0} is disabled.").format(frappe.bold(self.finished_good)))
 		if not is_stock_item:
-			frappe.throw(
-				_("Finished Good {0} must be a stock item.").format(frappe.bold(self.finished_good))
-			)
+			frappe.throw(_("Finished Good {0} must be a stock item.").format(frappe.bold(self.finished_good)))
 		if not default_bom:
 			frappe.throw(
 				_("Finished Good {0} does not have a default BOM.").format(frappe.bold(self.finished_good))
@@ -101,7 +99,7 @@ def get_subcontracting_boms_for_finished_goods(fg_items: str | list) -> dict:
 			else:
 				return subcontracting_boms[0]
 
-	return {}
+	return frappe._dict({})
 
 
 @frappe.whitelist()

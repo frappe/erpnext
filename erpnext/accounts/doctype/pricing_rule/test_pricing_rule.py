@@ -103,8 +103,6 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(details.get("discount_percentage"), 15)
 
 	def test_pricing_rule_for_margin(self):
-		from frappe import MandatoryError
-
 		from erpnext.stock.get_item_details import get_item_details
 
 		test_record = {
@@ -205,8 +203,6 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(details.get("discount_percentage"), 10)
 
 	def test_pricing_rule_for_variants(self):
-		from frappe import MandatoryError
-
 		from erpnext.stock.get_item_details import get_item_details
 
 		if not frappe.db.exists("Item", "Test Variant PRT"):
@@ -933,6 +929,30 @@ class TestPricingRule(unittest.TestCase):
 		for doc in [si, si1]:
 			doc.delete()
 
+	def test_pricing_rule_for_transaction_with_condition(self):
+		make_item("PR Transaction Condition")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		make_pricing_rule(
+			selling=1,
+			min_qty=0,
+			price_or_product_discount="Product",
+			apply_on="Transaction",
+			free_item="PR Transaction Condition",
+			free_qty=1,
+			free_item_rate=10,
+			condition="customer=='_Test Customer 1'",
+		)
+
+		si = create_sales_invoice(qty=5, customer="_Test Customer 1", do_not_submit=True)
+		self.assertEqual(len(si.items), 2)
+		self.assertEqual(si.items[1].rate, 10)
+
+		si1 = create_sales_invoice(qty=5, customer="_Test Customer 2", do_not_submit=True)
+		self.assertEqual(len(si1.items), 1)
+
+		for doc in [si, si1]:
+			doc.delete()
+
 	def test_remove_pricing_rule(self):
 		item = make_item("Water Flask")
 		make_item_price("Water Flask", "_Test Price List", 100)
@@ -1106,7 +1126,190 @@ class TestPricingRule(unittest.TestCase):
 		so.load_from_db()
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item")
-		self.assertEqual(so.items[1].qty, 4)
+		self.assertEqual(so.items[1].qty, 3)
+
+	def test_apply_multiple_pricing_rules_for_discount_percentage_and_amount(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule 1",
+			"name": "_Test Pricing Rule 1",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			"discount_percentage": 10,
+			"apply_multiple_pricing_rules": 1,
+			"company": "_Test Company",
+		}
+
+		frappe.get_doc(test_record.copy()).insert()
+
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule 2",
+			"name": "_Test Pricing Rule 2",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Amount",
+			"discount_amount": 100,
+			"apply_multiple_pricing_rules": 1,
+			"company": "_Test Company",
+		}
+
+		frappe.get_doc(test_record.copy()).insert()
+
+		so = make_sales_order(item_code="_Test Item", qty=1, price_list_rate=1000, do_not_submit=True)
+		self.assertEqual(so.items[0].discount_amount, 200)
+		self.assertEqual(so.items[0].rate, 800)
+
+		frappe.delete_doc_if_exists("Sales Order", so.name)
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
+
+	def test_priority_of_multiple_pricing_rules(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
+
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule 1",
+			"name": "_Test Pricing Rule 1",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			"discount_percentage": 10,
+			"has_priority": 1,
+			"priority": 1,
+			"company": "_Test Company",
+		}
+
+		frappe.get_doc(test_record.copy()).insert()
+
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule 2",
+			"name": "_Test Pricing Rule 2",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [
+				{
+					"item_code": "_Test Item",
+				}
+			],
+			"selling": 1,
+			"price_or_product_discount": "Price",
+			"rate_or_discount": "Discount Percentage",
+			"discount_percentage": 20,
+			"has_priority": 1,
+			"priority": 3,
+			"company": "_Test Company",
+		}
+
+		frappe.get_doc(test_record.copy()).insert()
+
+		so = make_sales_order(item_code="_Test Item", qty=1, price_list_rate=1000, do_not_submit=True)
+		self.assertEqual(so.items[0].discount_percentage, 20)
+		self.assertEqual(so.items[0].rate, 800)
+
+		frappe.delete_doc_if_exists("Sales Order", so.name)
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
+
+	def test_pricing_rules_with_and_without_apply_multiple(self):
+		item = make_item("PR Item 99")
+
+		test_records = [
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test discount on item group",
+				"name": "_Test discount on item group",
+				"apply_on": "Item Group",
+				"item_groups": [
+					{
+						"item_group": "Products",
+					}
+				],
+				"selling": 1,
+				"price_or_product_discount": "Price",
+				"rate_or_discount": "Discount Percentage",
+				"discount_percentage": 60,
+				"has_priority": 1,
+				"company": "_Test Company",
+				"apply_multiple_pricing_rules": True,
+			},
+			{
+				"doctype": "Pricing Rule",
+				"title": "_Test fixed rate on item code",
+				"name": "_Test fixed rate on item code",
+				"apply_on": "Item Code",
+				"items": [
+					{
+						"item_code": item.name,
+					}
+				],
+				"selling": 1,
+				"price_or_product_discount": "Price",
+				"rate_or_discount": "Rate",
+				"rate": 25,
+				"has_priority": 1,
+				"company": "_Test Company",
+				"apply_multiple_pricing_rules": False,
+			},
+		]
+
+		for item_group_priority, item_code_priority in [(2, 4), (4, 2)]:
+			item_group_rule = frappe.get_doc(test_records[0].copy())
+			item_group_rule.priority = item_group_priority
+			item_group_rule.insert()
+
+			item_code_rule = frappe.get_doc(test_records[1].copy())
+			item_code_rule.priority = item_code_priority
+			item_code_rule.insert()
+
+			si = create_sales_invoice(qty=5, customer="_Test Customer 1", item=item.name, do_not_submit=True)
+			si.save()
+			self.assertEqual(len(si.pricing_rules), 1)
+			# Item Code rule should've applied as it has higher priority
+			expected_rule = item_group_rule if item_group_priority > item_code_priority else item_code_rule
+			self.assertEqual(si.pricing_rules[0].pricing_rule, expected_rule.name)
+
+			si.delete()
+			item_group_rule.delete()
+			item_code_rule.delete()
+
+	def test_validation_on_mixed_condition_with_recursion(self):
+		pricing_rule = make_pricing_rule(
+			discount_percentage=10,
+			selling=1,
+			priority=2,
+			min_qty=4,
+			title="_Test Pricing Rule with Min Qty - 2",
+		)
+		pricing_rule.mixed_conditions = True
+		pricing_rule.is_recursive = True
+		self.assertRaises(frappe.ValidationError, pricing_rule.save)
 
 
 test_dependencies = ["Campaign"]
@@ -1136,6 +1339,7 @@ def make_pricing_rule(**args):
 			"priority": args.priority or 1,
 			"discount_amount": args.discount_amount or 0.0,
 			"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0,
+			"has_priority": args.has_priority or 0,
 		}
 	)
 
@@ -1181,8 +1385,7 @@ def delete_existing_pricing_rules():
 		"Pricing Rule Item Group",
 		"Pricing Rule Brand",
 	]:
-
-		frappe.db.sql("delete from `tab{0}`".format(doctype))
+		frappe.db.sql(f"delete from `tab{doctype}`")
 
 
 def make_item_price(item, price_list_name, item_price):

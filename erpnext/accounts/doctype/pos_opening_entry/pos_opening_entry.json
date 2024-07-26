@@ -131,7 +131,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-29 15:08:40.955310",
+ "modified": "2024-03-27 13:10:16.034296",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Opening Entry",
@@ -179,7 +179,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "Prompt",
@@ -17,11 +18,11 @@
    "label": "Description"
   }
  ],
- "modified": "2019-06-26 16:56:39.863392",
+ "links": [],
+ "modified": "2024-03-27 13:09:53.242486",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue Type",
- "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [
   {
@@ -50,7 +51,8 @@
   }
  ],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
+ "states": [],
  "track_changes": 1
 }

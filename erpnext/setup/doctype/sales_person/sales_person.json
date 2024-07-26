@@ -145,7 +145,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2024-01-30 13:57:26.436991",
+ "modified": "2024-03-27 13:10:37.891377",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
@@ -181,7 +181,7 @@
  ],
  "search_fields": "parent_sales_person",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
  "states": []
 }

@@ -2,7 +2,6 @@
 # See license.txt
 from random import randint
 
-import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils.data import today
 

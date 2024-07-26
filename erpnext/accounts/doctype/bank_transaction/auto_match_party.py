@@ -1,5 +1,3 @@
-from typing import Tuple, Union
-
 import frappe
 from frappe.utils import flt
 from rapidfuzz import fuzz, process
@@ -19,7 +17,7 @@ class AutoMatchParty:
 	def get(self, key):
 		return self.__dict__.get(key, None)
 
-	def match(self) -> Union[Tuple, None]:
+	def match(self) -> tuple | None:
 		result = None
 		result = AutoMatchbyAccountIBAN(
 			bank_party_account_number=self.bank_party_account_number,
@@ -50,7 +48,7 @@ class AutoMatchbyAccountIBAN:
 		result = self.match_account_in_party()
 		return result
 
-	def match_account_in_party(self) -> Union[Tuple, None]:
+	def match_account_in_party(self) -> tuple | None:
 		"""Check if there is a IBAN/Account No. match in Customer/Supplier/Employee"""
 		result = None
 		parties = get_parties_in_order(self.deposit)
@@ -69,6 +67,9 @@ class AutoMatchbyAccountIBAN:
 				party_result = frappe.db.get_all(
 					party, or_filters=or_filters, pluck="name", limit_page_length=1
 				)
+
+				if "bank_ac_no" in or_filters:
+					or_filters["bank_account_no"] = or_filters.pop("bank_ac_no")
 
 			if party_result:
 				result = (
@@ -97,7 +98,7 @@ class AutoMatchbyPartyNameDescription:
 	def get(self, key):
 		return self.__dict__.get(key, None)
 
-	def match(self) -> Union[Tuple, None]:
+	def match(self) -> tuple | None:
 		# fuzzy search by customer/supplier & employee
 		if not (self.bank_party_name or self.description):
 			return None
@@ -105,7 +106,7 @@ class AutoMatchbyPartyNameDescription:
 		result = self.match_party_name_desc_in_party()
 		return result
 
-	def match_party_name_desc_in_party(self) -> Union[Tuple, None]:
+	def match_party_name_desc_in_party(self) -> tuple | None:
 		"""Fuzzy search party name and/or description against parties in the system"""
 		result = None
 		parties = get_parties_in_order(self.deposit)
@@ -130,7 +131,7 @@ class AutoMatchbyPartyNameDescription:
 
 		return result
 
-	def fuzzy_search_and_return_result(self, party, names, field) -> Union[Tuple, None]:
+	def fuzzy_search_and_return_result(self, party, names, field) -> tuple | None:
 		skip = False
 		result = process.extract(
 			query=self.get(field),
@@ -147,7 +148,7 @@ class AutoMatchbyPartyNameDescription:
 			party_name,
 		), skip
 
-	def process_fuzzy_result(self, result: Union[list, None]):
+	def process_fuzzy_result(self, result: list | None):
 		"""
 		If there are multiple valid close matches return None as result may be faulty.
 		Return the result only if one accurate match stands out.

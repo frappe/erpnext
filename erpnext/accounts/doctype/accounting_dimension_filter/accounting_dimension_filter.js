@@ -1,10 +1,9 @@
 // Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Accounting Dimension Filter', {
-	refresh: function(frm, cdt, cdn) {
-		let help_content =
-			`<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
+frappe.ui.form.on("Accounting Dimension Filter", {
+	refresh: function (frm, cdt, cdn) {
+		let help_content = `<table class="table table-bordered" style="background-color: var(--scrollbar-track-color);">
 				<tr><td>
 					<p>
 						<i class="fa fa-hand-right"></i>
@@ -13,77 +12,80 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 				</td></tr>
 			</table>`;
 
-		frm.set_df_property('dimension_filter_help', 'options', help_content);
+		frm.set_df_property("dimension_filter_help", "options", help_content);
 	},
-	onload: function(frm) {
-		frm.set_query('applicable_on_account', 'accounts', function() {
+	onload: function (frm) {
+		frm.set_query("applicable_on_account", "accounts", function () {
 			return {
 				filters: {
-					'company': frm.doc.company
-				}
+					company: frm.doc.company,
+				},
 			};
 		});
 
-		frappe.db.get_list('Accounting Dimension',
-			{fields: ['document_type']}).then((res) => {
-			let options = ['Cost Center', 'Project'];
+		frappe.db.get_list("Accounting Dimension", { fields: ["document_type"] }).then((res) => {
+			let options = ["Cost Center", "Project"];
 
 			res.forEach((dimension) => {
 				options.push(dimension.document_type);
 			});
 
-			frm.set_df_property('accounting_dimension', 'options', options);
+			frm.set_df_property("accounting_dimension", "options", options);
 		});
 
-		frm.trigger('setup_filters');
+		frm.trigger("setup_filters");
 	},
 
-	setup_filters: function(frm) {
+	setup_filters: function (frm) {
 		let filters = {};
 
 		if (frm.doc.accounting_dimension) {
-			frappe.model.with_doctype(frm.doc.accounting_dimension, function() {
+			frappe.model.with_doctype(frm.doc.accounting_dimension, function () {
 				if (frappe.model.is_tree(frm.doc.accounting_dimension)) {
-					filters['is_group'] = 0;
+					filters["is_group"] = 0;
 				}
 
-				if (frappe.meta.has_field(frm.doc.accounting_dimension, 'company')) {
-					filters['company'] = frm.doc.company;
+				if (frappe.meta.has_field(frm.doc.accounting_dimension, "company")) {
+					filters["company"] = frm.doc.company;
 				}
 
-				frm.set_query('dimension_value', 'dimensions', function() {
+				frm.set_query("dimension_value", "dimensions", function () {
 					return {
-						filters: filters
+						filters: filters,
 					};
 				});
 			});
 		}
 	},
 
-	accounting_dimension: function(frm) {
+	accounting_dimension: function (frm) {
 		frm.clear_table("dimensions");
 		let row = frm.add_child("dimensions");
 		row.accounting_dimension = frm.doc.accounting_dimension;
-		frm.fields_dict["dimensions"].grid.update_docfield_property("dimension_value", "label", frm.doc.accounting_dimension);
+		frm.fields_dict["dimensions"].grid.update_docfield_property(
+			"dimension_value",
+			"label",
+			frm.doc.accounting_dimension
+		);
 		frm.refresh_field("dimensions");
-		frm.trigger('setup_filters');
+		frm.trigger("setup_filters");
 	},
-	apply_restriction_on_values: function(frm) {
+	apply_restriction_on_values: function (frm) {
 		/** If restriction on values is not applied, we should set "allow_or_restrict" to "Restrict" with an empty allowed dimension table.
 		 * Hence it's not "restricted" on any value.
-		  */
+		 */
 		if (!frm.doc.apply_restriction_on_values) {
 			frm.set_value("allow_or_restrict", "Restrict");
 			frm.clear_table("dimensions");
 			frm.refresh_field("dimensions");
 		}
-	}
+	},
 });
 
-frappe.ui.form.on('Allowed Dimension', {
-	dimensions_add: function(frm, cdt, cdn) {
+frappe.ui.form.on("Allowed Dimension", {
+	dimensions_add: function (frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		row.accounting_dimension = frm.doc.accounting_dimension;
 		frm.refresh_field("dimensions");
-	}
+	},
 });

@@ -45,7 +45,6 @@ class TestShippingRule(unittest.TestCase):
 
 
 def create_shipping_rule(shipping_rule_type, shipping_rule_name):
-
 	if frappe.db.exists("Shipping Rule", shipping_rule_name):
 		return frappe.get_doc("Shipping Rule", shipping_rule_name)
 

@@ -84,11 +84,14 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 			self.customer = customer.name
 
 	def create_sales_invoice(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
+		self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False
 	):
 		"""
 		Helper function to populate default values in sales invoice
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
+
 		sinv = create_sales_invoice(
 			qty=qty,
 			rate=rate,
@@ -112,10 +115,12 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		)
 		return sinv
 
-	def create_payment_entry(self, amount=100, posting_date=nowdate()):
+	def create_payment_entry(self, amount=100, posting_date=None):
 		"""
 		Helper function to populate default values in payment entry
 		"""
+		if posting_date is None:
+			posting_date = nowdate()
 		payment = create_payment_entry(
 			company=self.company,
 			payment_type="Receive",
@@ -128,9 +133,10 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		payment.posting_date = posting_date
 		return payment
 
-	def create_sales_order(
-		self, qty=1, rate=100, posting_date=nowdate(), do_not_save=False, do_not_submit=False
-	):
+	def create_sales_order(self, qty=1, rate=100, posting_date=None, do_not_save=False, do_not_submit=False):
+		if posting_date is None:
+			posting_date = nowdate()
+
 		so = make_sales_order(
 			company=self.company,
 			transaction_date=posting_date,
@@ -159,9 +165,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		for doctype in doctype_list:
 			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
 
-	def create_journal_entry(
-		self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None
-	):
+	def create_journal_entry(self, acc1=None, acc2=None, amount=0, posting_date=None, cost_center=None):
 		je = frappe.new_doc("Journal Entry")
 		je.posting_date = posting_date or nowdate()
 		je.company = self.company
@@ -319,9 +323,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 				ple.amount,
 				ple.delinked,
 			)
-			.where(
-				(ple.against_voucher_type == cr_note1.doctype) & (ple.against_voucher_no == cr_note1.name)
-			)
+			.where((ple.against_voucher_type == cr_note1.doctype) & (ple.against_voucher_no == cr_note1.name))
 			.orderby(ple.creation)
 			.run(as_dict=True)
 		)
@@ -362,9 +364,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 		)
 		cr_note2.is_return = 1
 		cr_note2 = cr_note2.save().submit()
-		je1 = self.create_journal_entry(
-			self.debit_to, self.debit_to, amount, posting_date=transaction_date
-		)
+		je1 = self.create_journal_entry(self.debit_to, self.debit_to, amount, posting_date=transaction_date)
 		je1.get("accounts")[0].party_type = je1.get("accounts")[1].party_type = "Customer"
 		je1.get("accounts")[0].party = je1.get("accounts")[1].party = self.customer
 		je1.get("accounts")[0].reference_type = cr_note2.doctype
@@ -419,9 +419,7 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 				ple.amount,
 				ple.delinked,
 			)
-			.where(
-				(ple.against_voucher_type == cr_note2.doctype) & (ple.against_voucher_no == cr_note2.name)
-			)
+			.where((ple.against_voucher_type == cr_note2.doctype) & (ple.against_voucher_no == cr_note2.name))
 			.orderby(ple.creation)
 			.run(as_dict=True)
 		)
@@ -511,14 +509,18 @@ class TestPaymentLedgerEntry(FrappeTestCase):
 
 	@change_settings(
 		"Accounts Settings",
-		{"unlink_payment_on_cancellation_of_invoice": 1, "delete_linked_ledger_entries": 1},
+		{
+			"unlink_payment_on_cancellation_of_invoice": 1,
+			"delete_linked_ledger_entries": 1,
+			"unlink_advance_payment_on_cancelation_of_order": 1,
+		},
 	)
 	def test_advance_payment_unlink_on_order_cancellation(self):
 		transaction_date = nowdate()
 		amount = 100
 		so = self.create_sales_order(qty=1, rate=amount, posting_date=transaction_date).save().submit()
 
-		pe = get_payment_entry(so.doctype, so.name).save().submit()
+		get_payment_entry(so.doctype, so.name).save().submit()
 
 		so.reload()
 		so.cancel()

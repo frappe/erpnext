@@ -75,9 +75,7 @@ class TestRequestforQuotation(FrappeTestCase):
 
 		rfq = make_request_for_quotation(supplier_data=supplier_wt_appos)
 
-		sq = make_supplier_quotation_from_rfq(
-			rfq.name, for_supplier=supplier_wt_appos[0].get("supplier")
-		)
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier_wt_appos[0].get("supplier"))
 		sq.submit()
 
 		frappe.form_dict.name = rfq.name
@@ -108,9 +106,7 @@ class TestRequestforQuotation(FrappeTestCase):
 			row = item.append("uoms", {"uom": "Kg", "conversion_factor": 2})
 			row.db_update()
 
-		rfq = make_request_for_quotation(
-			item_code="_Test Multi UOM RFQ Item", uom="Kg", conversion_factor=2
-		)
+		rfq = make_request_for_quotation(item_code="_Test Multi UOM RFQ Item", uom="Kg", conversion_factor=2)
 		rfq.get("items")[0].rate = 100
 		rfq.supplier = rfq.suppliers[0].supplier
 

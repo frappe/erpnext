@@ -634,7 +634,6 @@
    "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "batch_no",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Batch No",
    "options": "Batch",
    "print_hide": 1
@@ -655,7 +654,6 @@
    "depends_on": "eval:doc.use_serial_batch_fields === 1",
    "fieldname": "serial_no",
    "fieldtype": "Text",
-   "hidden": 1,
    "in_list_view": 1,
    "label": "Serial No",
    "oldfieldname": "serial_no",
@@ -827,7 +825,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.use_serial_batch_fields === 1",
+   "depends_on": "eval:doc.use_serial_batch_fields === 0 || doc.serial_and_batch_bundle",
    "fieldname": "serial_and_batch_bundle",
    "fieldtype": "Link",
    "label": "Serial and Batch Bundle",
@@ -853,14 +851,14 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-02-25 15:50:17.140269",
+ "modified": "2024-05-07 15:56:53.343317",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Item",
  "naming_rule": "Random",
  "owner": "Administrator",
  "permissions": [],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

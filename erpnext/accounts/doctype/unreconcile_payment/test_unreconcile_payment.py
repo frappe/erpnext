@@ -93,7 +93,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		unreconcile.add_references()
 		self.assertEqual(len(unreconcile.allocations), 2)
 		allocations = [x.reference_name for x in unreconcile.allocations]
-		self.assertEquals([si1.name, si2.name], allocations)
+		self.assertEqual([si1.name, si2.name], allocations)
 		# unreconcile si1
 		for x in unreconcile.allocations:
 			if x.reference_name != si1.name:
@@ -107,7 +107,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(len(pe.references), 1)
 		self.assertEqual(pe.unallocated_amount, 100)
 
-	def test_02_unreconcile_one_payment_from_multi_payments(self):
+	def test_02_unreconcile_one_payment_among_multi_payments(self):
 		"""
 		Scenario: 2 payments, both split against 2 different invoices
 		Unreconcile only one payment from one invoice
@@ -158,7 +158,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		unreconcile.add_references()
 		self.assertEqual(len(unreconcile.allocations), 2)
 		allocations = [x.reference_name for x in unreconcile.allocations]
-		self.assertEquals([si1.name, si2.name], allocations)
+		self.assertEqual([si1.name, si2.name], allocations)
 		# unreconcile si1 from pe2
 		for x in unreconcile.allocations:
 			if x.reference_name != si1.name:
@@ -216,7 +216,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		unreconcile.add_references()
 		self.assertEqual(len(unreconcile.allocations), 2)
 		allocations = [x.reference_name for x in unreconcile.allocations]
-		self.assertEquals([si1.name, si2.name], allocations)
+		self.assertEqual([si1.name, si2.name], allocations)
 		# unreconcile si1 from pe
 		for x in unreconcile.allocations:
 			if x.reference_name != si1.name:
@@ -301,7 +301,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		unreconcile.add_references()
 		self.assertEqual(len(unreconcile.allocations), 2)
 		allocations = [x.reference_name for x in unreconcile.allocations]
-		self.assertEquals([si1.name, si2.name], allocations)
+		self.assertEqual([si1.name, si2.name], allocations)
 		# unreconcile si1 from pe2
 		for x in unreconcile.allocations:
 			if x.reference_name != si1.name:
@@ -353,7 +353,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		unreconcile.add_references()
 		self.assertEqual(len(unreconcile.allocations), 1)
 		allocations = [x.reference_name for x in unreconcile.allocations]
-		self.assertEquals([so.name], allocations)
+		self.assertEqual([so.name], allocations)
 		# unreconcile so
 		unreconcile.save().submit()
 

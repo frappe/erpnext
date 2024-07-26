@@ -41,14 +41,14 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2022-11-08 15:19:13.927194",
+ "modified": "2024-03-27 13:06:48.432478",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer Credit Limit",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": []
 }

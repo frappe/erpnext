@@ -15,7 +15,7 @@ class AssetRepairConsumedItem(Document):
 		from frappe.types import DF
 
 		consumed_quantity: DF.Data | None
-		item_code: DF.Link | None
+		item_code: DF.Link
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
@@ -23,6 +23,7 @@ class AssetRepairConsumedItem(Document):
 		serial_no: DF.SmallText | None
 		total_value: DF.Currency
 		valuation_rate: DF.Currency
+		warehouse: DF.Link
 	# end: auto-generated types
 
 	pass

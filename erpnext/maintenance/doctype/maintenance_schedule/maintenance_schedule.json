@@ -187,7 +187,7 @@
   },
   {
    "fieldname": "address_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "hidden": 1,
    "label": "Address",
    "read_only": 1
@@ -238,7 +238,7 @@
    "link_fieldname": "maintenance_schedule"
   }
  ],
- "modified": "2023-06-03 16:15:43.958072",
+ "modified": "2024-03-27 13:10:03.659952",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",
@@ -261,7 +261,7 @@
   }
  ],
  "search_fields": "status,customer,customer_name",
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
  "timeline_field": "customer"

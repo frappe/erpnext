@@ -6,18 +6,18 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 		frm.trigger("render_heatmap");
 	},
 	refresh(frm) {
-		frm.add_custom_button(__('Bisect Left'), () => {
+		frm.add_custom_button(__("Bisect Left"), () => {
 			frm.trigger("bisect_left");
 		});
 
-		frm.add_custom_button(__('Bisect Right'), () => {
+		frm.add_custom_button(__("Bisect Right"), () => {
 			frm.trigger("bisect_right");
 		});
 
-		frm.add_custom_button(__('Up'), () => {
+		frm.add_custom_button(__("Up"), () => {
 			frm.trigger("move_up");
 		});
-		frm.add_custom_button(__('Build Tree'), () => {
+		frm.add_custom_button(__("Build Tree"), () => {
 			frm.trigger("build_tree");
 		});
 	},
@@ -26,16 +26,16 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 		bisect_heatmap.addClass("bisect_heatmap_location");
 
 		// milliseconds in a day
-		let msiad=24*60*60*1000;
+		let msiad = 24 * 60 * 60 * 1000;
 		let datapoints = {};
 		let fr_dt = new Date(frm.doc.from_date).getTime();
 		let to_dt = new Date(frm.doc.to_date).getTime();
 		let bisect_start = new Date(frm.doc.current_from_date).getTime();
 		let bisect_end = new Date(frm.doc.current_to_date).getTime();
 
-		for(let x=fr_dt; x <= to_dt; x+=msiad){
-			let epoch_in_seconds = x/1000;
-			if ((bisect_start <= x) && (x <= bisect_end )) {
+		for (let x = fr_dt; x <= to_dt; x += msiad) {
+			let epoch_in_seconds = x / 1000;
+			if (bisect_start <= x && x <= bisect_end) {
 				datapoints[epoch_in_seconds] = 1.0;
 			} else {
 				datapoints[epoch_in_seconds] = 0.0;
@@ -49,19 +49,19 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 				start: new Date(frm.doc.from_date),
 				end: new Date(frm.doc.to_date),
 			},
-			countLabel: 'Bisecting',
+			countLabel: "Bisecting",
 			discreteDomains: 1,
 		});
 	},
 	bisect_left(frm) {
 		frm.call({
 			doc: frm.doc,
-			method: 'bisect_left',
+			method: "bisect_left",
 			freeze: true,
 			freeze_message: __("Bisecting Left ..."),
 			callback: (r) => {
 				frm.trigger("render_heatmap");
-			}
+			},
 		});
 	},
 	bisect_right(frm) {
@@ -69,10 +69,10 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 			doc: frm.doc,
 			freeze: true,
 			freeze_message: __("Bisecting Right ..."),
-			method: 'bisect_right',
+			method: "bisect_right",
 			callback: (r) => {
 				frm.trigger("render_heatmap");
-			}
+			},
 		});
 	},
 	move_up(frm) {
@@ -80,10 +80,10 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 			doc: frm.doc,
 			freeze: true,
 			freeze_message: __("Moving up in tree ..."),
-			method: 'move_up',
+			method: "move_up",
 			callback: (r) => {
 				frm.trigger("render_heatmap");
-			}
+			},
 		});
 	},
 	build_tree(frm) {
@@ -91,10 +91,10 @@ frappe.ui.form.on("Bisect Accounting Statements", {
 			doc: frm.doc,
 			freeze: true,
 			freeze_message: __("Rebuilding BTree for period ..."),
-			method: 'build_tree',
+			method: "build_tree",
 			callback: (r) => {
 				frm.trigger("render_heatmap");
-			}
+			},
 		});
 	},
 });

@@ -49,7 +49,7 @@
   }
  ],
  "links": [],
- "modified": "2021-02-08 16:37:53.936656",
+ "modified": "2024-03-27 13:05:56.890002",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",
@@ -80,7 +80,8 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "creation",
  "sort_order": "ASC",
+ "states": [],
  "track_changes": 1
 }

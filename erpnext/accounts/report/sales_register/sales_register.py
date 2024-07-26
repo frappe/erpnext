@@ -80,6 +80,7 @@ def _execute(filters, additional_table_columns=None):
 		delivery_note = list(set(invoice_so_dn_map.get(inv.name, {}).get("delivery_note", [])))
 		cost_center = list(set(invoice_cc_wh_map.get(inv.name, {}).get("cost_center", [])))
 		warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
+		inv_customer_details = customer_details.get(inv.customer, {})
 
 		row = {
 			"voucher_type": inv.doctype,
@@ -88,9 +89,9 @@ def _execute(filters, additional_table_columns=None):
 			"customer": inv.customer,
 			"customer_name": inv.customer_name,
 			**get_values_for_columns(additional_table_columns, inv),
-			"customer_group": customer_details.get(inv.customer).get("customer_group"),
-			"territory": customer_details.get(inv.customer).get("territory"),
-			"tax_id": customer_details.get(inv.customer).get("tax_id"),
+			"customer_group": inv_customer_details.get("customer_group"),
+			"territory": inv_customer_details.get("territory"),
+			"tax_id": inv_customer_details.get("tax_id"),
 			"receivable_account": inv.debit_to,
 			"mode_of_payment": ", ".join(mode_of_payments.get(inv.name, [])),
 			"project": inv.project,
@@ -129,7 +130,8 @@ def _execute(filters, additional_table_columns=None):
 			if tax_acc not in income_accounts:
 				tax_amount_precision = (
 					get_field_precision(
-						frappe.get_meta("Sales Taxes and Charges").get_field("tax_amount"), currency=company_currency
+						frappe.get_meta("Sales Taxes and Charges").get_field("tax_amount"),
+						currency=company_currency,
 					)
 					or 2
 				)
@@ -357,9 +359,7 @@ def get_account_columns(invoice_list, include_payments):
 		tax_accounts = sales_tax_accounts
 
 		if include_payments:
-			advance_taxes_query = get_taxes_query(
-				invoice_list, "Advance Taxes and Charges", "Payment Entry"
-			)
+			advance_taxes_query = get_taxes_query(invoice_list, "Advance Taxes and Charges", "Payment Entry")
 			advance_tax_accounts = advance_taxes_query.run(as_dict=True, pluck="account_head")
 			tax_accounts = set(tax_accounts + advance_tax_accounts)
 
@@ -438,7 +438,7 @@ def get_invoices(filters, additional_query_columns):
 			si.represents_company,
 			si.company,
 		)
-		.where((si.docstatus == 1))
+		.where(si.docstatus == 1)
 		.orderby(si.posting_date, si.name, order=Order.desc)
 	)
 
@@ -480,9 +480,7 @@ def get_payments(filters):
 		account_fieldname="paid_from",
 		party="customer",
 		party_name="customer_name",
-		party_account=get_party_account(
-			"Customer", filters.customer, filters.company, include_advance=True
-		),
+		party_account=get_party_account("Customer", filters.customer, filters.company, include_advance=True),
 	)
 	payment_entries = get_payment_entries(filters, args)
 	journal_entries = get_journal_entries(filters, args)
