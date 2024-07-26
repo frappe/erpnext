@@ -365,6 +365,10 @@ class BuyingController(SubcontractingController):
 		self.set_sales_incoming_rate_for_internal_transfer()
 
 		for d in self.get("items"):
+			d.discount_percentage = 0.0
+			d.discount_amount = 0.0
+			d.margin_rate_or_amount = 0.0
+
 			if d.rate == d.sales_incoming_rate:
 				continue
 

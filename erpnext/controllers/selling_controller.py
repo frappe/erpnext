@@ -497,6 +497,10 @@ class SellingController(StockController):
 									alert=1,
 								)
 
+							d.discount_percentage = 0.0
+							d.discount_amount = 0.0
+							d.margin_rate_or_amount = 0.0
+
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
 				# based on original item cost as per valuation method
