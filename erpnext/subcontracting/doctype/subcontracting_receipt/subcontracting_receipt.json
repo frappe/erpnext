@@ -639,7 +639,7 @@
   {
    "fieldname": "supplier_delivery_note",
    "fieldtype": "Data",
-   "label": "Supplier Delivery Note"
+   "label": "Job Worker Delivery Note"
   },
   {
    "fieldname": "raw_materials_consumed_section",
