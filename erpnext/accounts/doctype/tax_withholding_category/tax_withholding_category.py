@@ -268,6 +268,11 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	vouchers, voucher_wise_amount = get_invoice_vouchers(
 		parties, tax_details, inv.company, party_type=party_type
 	)
+
+	payment_entry_vouchers = get_payment_entry_vouchers(
+		parties, tax_details, inv.company, party_type=party_type
+	)
+
 	advance_vouchers = get_advance_vouchers(
 		parties,
 		company=inv.company,
@@ -275,7 +280,8 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 		to_date=tax_details.to_date,
 		party_type=party_type,
 	)
-	taxable_vouchers = vouchers + advance_vouchers
+
+	taxable_vouchers = vouchers + advance_vouchers + payment_entry_vouchers
 	tax_deducted_on_advances = 0
 
 	if inv.doctype == "Purchase Invoice":
@@ -385,6 +391,20 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 			voucher_wise_amount.update({d.name: {"amount": d.amount, "voucher_type": "Journal Entry"}})
 
 	return vouchers, voucher_wise_amount
+
+
+def get_payment_entry_vouchers(parties, tax_details, company, party_type="Supplier"):
+	payment_entry_filters = {
+		"party_type": party_type,
+		"party": ("in", parties),
+		"docstatus": 1,
+		"apply_tax_withholding_amount": 1,
+		"posting_date": ["between", (tax_details.from_date, tax_details.to_date)],
+		"tax_withholding_category": tax_details.get("tax_withholding_category"),
+		"company": company,
+	}
+
+	return frappe.db.get_all("Payment Entry", filters=payment_entry_filters, pluck="name")
 
 
 def get_advance_vouchers(parties, company=None, from_date=None, to_date=None, party_type="Supplier"):
