@@ -1246,13 +1246,16 @@ class PaymentEntry(AccountsController):
 
 			allocated_amount_in_company_currency = self.calculate_base_allocated_amount_for_reference(d)
 
-			if d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]:
-				if d.allocated_amount < 0:
-					if (party_account_type == "Receivable" and self.payment_type == "Pay") or (
-						party_account_type == "Payable" and self.payment_type == "Receive"
-					):
-						# reversing dr_cr because because it will get reversed in gl processing due to negative amount
-						dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
+			if (
+				d.reference_doctype in ["Sales Invoice", "Purchase Invoice"]
+				and d.allocated_amount < 0
+				and (
+					(party_account_type == "Receivable" and self.payment_type == "Pay")
+					or (party_account_type == "Payable" and self.payment_type == "Receive")
+				)
+			):
+				# reversing dr_cr because because it will get reversed in gl processing due to negative amount
+				dr_or_cr = "debit" if dr_or_cr == "credit" else "credit"
 
 			gle.update(
 				{
