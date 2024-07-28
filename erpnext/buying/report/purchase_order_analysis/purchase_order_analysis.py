@@ -43,9 +43,14 @@ def get_data(filters):
 
 	query = (
 		frappe.qb.from_(po)
-		.from_(po_item)
+		.inner_join(po_item)
+		.on(po_item.parent == po.name)
 		.left_join(pi_item)
+<<<<<<< HEAD
 		.on(pi_item.po_detail == po_item.name)
+=======
+		.on((pi_item.po_detail == po_item.name) & (pi_item.docstatus == 1))
+>>>>>>> cb522f8f22 (fix: performance issue for the report Purchase Order Analysis report (#42503))
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
