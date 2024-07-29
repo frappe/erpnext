@@ -55,6 +55,8 @@
   "post_change_gl_entries",
   "assets_tab",
   "asset_settings_section",
+  "calculate_depr_using_total_days",
+  "column_break_gjcc",
   "book_asset_depreciation_entry_automatically",
   "closing_settings_tab",
   "period_closing_settings_section",
@@ -462,6 +464,17 @@
    "fieldname": "enable_immutable_ledger",
    "fieldtype": "Check",
    "label": "Enable Immutable Ledger"
+  },
+  {
+   "fieldname": "column_break_gjcc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, (including leap years) while using daily pro-rata based depreciation",
+   "fieldname": "calculate_depr_using_total_days",
+   "fieldtype": "Check",
+   "label": "Calculate daily depreciation using total days in depreciation period"
   }
  ],
  "icon": "icon-cog",
@@ -469,7 +482,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-05-11 23:19:44.673975",
+ "modified": "2024-07-12 00:24:20.957726",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

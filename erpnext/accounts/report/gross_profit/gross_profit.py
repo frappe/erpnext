@@ -713,7 +713,8 @@ class GrossProfitGenerator:
 
 	def get_average_buying_rate(self, row, item_code):
 		args = row
-		if item_code not in self.average_buying_rate:
+		key = (item_code, row.warehouse)
+		if key not in self.average_buying_rate:
 			args.update(
 				{
 					"voucher_type": row.parenttype,
@@ -727,9 +728,9 @@ class GrossProfitGenerator:
 				args.update({"serial_and_batch_bundle": row.serial_and_batch_bundle})
 
 			average_buying_rate = get_incoming_rate(args)
-			self.average_buying_rate[item_code] = flt(average_buying_rate)
+			self.average_buying_rate[key] = flt(average_buying_rate)
 
-		return self.average_buying_rate[item_code]
+		return self.average_buying_rate[key]
 
 	def get_last_purchase_rate(self, item_code, row):
 		purchase_invoice = frappe.qb.DocType("Purchase Invoice")

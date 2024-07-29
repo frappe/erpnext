@@ -60,7 +60,6 @@ class Asset(AccountsController):
 		available_for_use_date: DF.Date | None
 		booked_fixed_asset: DF.Check
 		calculate_depreciation: DF.Check
-		capitalized_in: DF.Link | None
 		company: DF.Link
 		comprehensive_insurance: DF.Data | None
 		cost_center: DF.Link | None
@@ -163,7 +162,6 @@ class Asset(AccountsController):
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
-		self.cancel_capitalization()
 		self.reload()
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
@@ -270,10 +268,10 @@ class Asset(AccountsController):
 			frappe.throw(_("Available for use date is required"))
 
 		for d in self.finance_books:
-			if d.depreciation_start_date == self.available_for_use_date:
+			if getdate(d.depreciation_start_date) < getdate(self.available_for_use_date):
 				frappe.throw(
 					_(
-						"Row #{}: Depreciation Posting Date should not be equal to Available for Use Date."
+						"Depreciation Row {0}: Depreciation Posting Date cannot be before Available-for-use Date"
 					).format(d.idx),
 					title=_("Incorrect Date"),
 				)
@@ -525,13 +523,6 @@ class Asset(AccountsController):
 		for movement in movements:
 			movement = frappe.get_doc("Asset Movement", movement.get("name"))
 			movement.cancel()
-
-	def cancel_capitalization(self):
-		if self.capitalized_in:
-			self.db_set("capitalized_in", None)
-			asset_capitalization = frappe.get_doc("Asset Capitalization", self.capitalized_in)
-			if asset_capitalization.docstatus == 1:
-				asset_capitalization.cancel()
 
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
@@ -871,10 +862,15 @@ def create_asset_repair(asset, asset_name):
 
 
 @frappe.whitelist()
-def create_asset_capitalization(asset):
+def create_asset_capitalization(asset, asset_name, item_code):
 	asset_capitalization = frappe.new_doc("Asset Capitalization")
 	asset_capitalization.update(
-		{"target_asset": asset, "capitalization_method": "Choose a WIP composite asset"}
+		{
+			"target_asset": asset,
+			"capitalization_method": "Choose a WIP composite asset",
+			"target_asset_name": asset_name,
+			"target_item_code": item_code,
+		}
 	)
 	return asset_capitalization
 

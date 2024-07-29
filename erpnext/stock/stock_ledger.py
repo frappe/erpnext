@@ -267,13 +267,17 @@ def repost_future_sle(
 				"posting_time": args[i].get("posting_time"),
 				"creation": args[i].get("creation"),
 				"distinct_item_warehouses": distinct_item_warehouses,
+				"items_to_be_repost": args,
+				"current_index": i,
 			},
 			allow_negative_stock=allow_negative_stock,
 			via_landed_cost_voucher=via_landed_cost_voucher,
 		)
 		affected_transactions.update(obj.affected_transactions)
 
-		distinct_item_warehouses[(args[i].get("item_code"), args[i].get("warehouse"))].reposting_status = True
+		key = (args[i].get("item_code"), args[i].get("warehouse"))
+		if distinct_item_warehouses.get(key):
+			distinct_item_warehouses[key].reposting_status = True
 
 		if obj.new_items_found:
 			for _item_wh, data in distinct_item_warehouses.items():
@@ -685,11 +689,20 @@ class update_entries_after:
 			self.distinct_item_warehouses[key] = val
 			self.new_items_found = True
 		else:
+			# Check if the dependent voucher is reposted
+			# If not, then do not add it to the list
+			if not self.is_dependent_voucher_reposted(dependant_sle):
+				return
+
 			existing_sle_posting_date = self.distinct_item_warehouses[key].get("sle", {}).get("posting_date")
 
 			dependent_voucher_detail_nos = self.get_dependent_voucher_detail_nos(key)
-
 			if getdate(dependant_sle.posting_date) < getdate(existing_sle_posting_date):
+				if dependent_voucher_detail_nos and dependant_sle.voucher_detail_no in set(
+					dependent_voucher_detail_nos
+				):
+					return
+
 				val.sle_changed = True
 				dependent_voucher_detail_nos.append(dependant_sle.voucher_detail_no)
 				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
@@ -702,6 +715,27 @@ class update_entries_after:
 				self.new_items_found = True
 				val.dependent_voucher_detail_nos = dependent_voucher_detail_nos
 				self.distinct_item_warehouses[key] = val
+
+	def is_dependent_voucher_reposted(self, dependant_sle) -> bool:
+		# Return False if the dependent voucher is not reposted
+
+		if self.args.items_to_be_repost and self.args.current_index:
+			index = self.args.current_index
+			while index < len(self.args.items_to_be_repost):
+				if (
+					self.args.items_to_be_repost[index].get("item_code") == dependant_sle.item_code
+					and self.args.items_to_be_repost[index].get("warehouse") == dependant_sle.warehouse
+				):
+					if getdate(self.args.items_to_be_repost[index].get("posting_date")) > getdate(
+						dependant_sle.posting_date
+					):
+						self.args.items_to_be_repost[index]["posting_date"] = dependant_sle.posting_date
+
+					return False
+
+				index += 1
+
+		return True
 
 	def get_dependent_voucher_detail_nos(self, key):
 		if "dependent_voucher_detail_nos" not in self.distinct_item_warehouses[key]:
@@ -1556,9 +1590,11 @@ def get_stock_ledger_entries(
 	if not previous_sle.get("posting_date"):
 		previous_sle["posting_datetime"] = "1900-01-01 00:00:00"
 	else:
-		previous_sle["posting_datetime"] = get_combine_datetime(
-			previous_sle["posting_date"], previous_sle["posting_time"]
-		)
+		posting_time = previous_sle.get("posting_time")
+		if not posting_time:
+			posting_time = "00:00:00"
+
+		previous_sle["posting_datetime"] = get_combine_datetime(previous_sle["posting_date"], posting_time)
 
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"

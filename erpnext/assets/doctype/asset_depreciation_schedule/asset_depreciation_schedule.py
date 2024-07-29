@@ -701,18 +701,55 @@ def get_straight_line_or_manual_depr_amount(
 def get_daily_prorata_based_straight_line_depr(
 	asset, row, schedule_idx, number_of_pending_depreciations, amount
 ):
-	total_years = flt(number_of_pending_depreciations * row.frequency_of_depreciation) / 12
-	every_year_depr = amount / total_years
+	daily_depr_amount = get_daily_depr_amount(asset, row, schedule_idx, amount)
 
-	year_start_date = add_years(
-		row.depreciation_start_date, (row.frequency_of_depreciation * schedule_idx) // 12
-	)
-	year_end_date = add_days(add_years(year_start_date, 1), -1)
-	daily_depr_amount = every_year_depr / (date_diff(year_end_date, year_start_date) + 1)
 	from_date, total_depreciable_days = _get_total_days(
 		row.depreciation_start_date, schedule_idx, row.frequency_of_depreciation
 	)
 	return daily_depr_amount * total_depreciable_days
+
+
+def get_daily_depr_amount(asset, row, schedule_idx, amount):
+	if cint(frappe.db.get_single_value("Accounts Settings", "calculate_depr_using_total_days")):
+		total_days = (
+			date_diff(
+				get_last_day(
+					add_months(
+						row.depreciation_start_date,
+						flt(
+							row.total_number_of_depreciations
+							- asset.opening_number_of_booked_depreciations
+							- 1
+						)
+						* row.frequency_of_depreciation,
+					)
+				),
+				add_days(
+					get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)),
+					1,
+				),
+			)
+			+ 1
+		)
+
+		return amount / total_days
+	else:
+		total_years = (
+			flt(
+				(row.total_number_of_depreciations - row.total_number_of_booked_depreciations)
+				* row.frequency_of_depreciation
+			)
+			/ 12
+		)
+
+		every_year_depr = amount / total_years
+
+		year_start_date = add_years(
+			row.depreciation_start_date, (row.frequency_of_depreciation * schedule_idx) // 12
+		)
+		year_end_date = add_days(add_years(year_start_date, 1), -1)
+
+		return every_year_depr / (date_diff(year_end_date, year_start_date) + 1)
 
 
 def get_shift_depr_amount(asset_depr_schedule, asset, row, schedule_idx):

@@ -57,6 +57,7 @@
   "base_net_rate",
   "base_net_amount",
   "valuation_rate",
+  "sales_incoming_rate",
   "item_tax_amount",
   "landed_cost_voucher_amount",
   "rm_supp_cost",
@@ -958,12 +959,22 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "description": "Valuation rate for the item as per Sales Invoice (Only for Internal Transfers)",
+   "fieldname": "sales_incoming_rate",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Sales Incoming Rate",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-06-14 11:57:07.171700",
+ "modified": "2024-07-19 12:12:42.449298",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

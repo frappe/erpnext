@@ -174,7 +174,7 @@
    "fieldname": "supplier_type",
    "fieldtype": "Select",
    "label": "Supplier Type",
-   "options": "Company\nIndividual\nProprietorship\nPartnership",
+   "options": "Company\nIndividual\nPartnership",
    "reqd": 1
   },
   {

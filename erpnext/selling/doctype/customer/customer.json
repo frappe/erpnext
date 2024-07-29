@@ -134,7 +134,7 @@
    "label": "Customer Type",
    "oldfieldname": "customer_type",
    "oldfieldtype": "Select",
-   "options": "Company\nIndividual\nProprietorship\nPartnership",
+   "options": "Company\nIndividual\nPartnership",
    "reqd": 1
   },
   {
