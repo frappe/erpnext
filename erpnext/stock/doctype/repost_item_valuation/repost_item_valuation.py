@@ -237,13 +237,6 @@ def repost(doc):
 		doc.log_error("Unable to repost item valuation")
 
 		message = frappe.message_log.pop() if frappe.message_log else ""
-<<<<<<< HEAD
-		if traceback:
-			message += "<br>" + "Traceback: <br>" + traceback
-		frappe.db.set_value(doc.doctype, doc.name, "error_log", message)
-=======
-		if isinstance(message, dict):
-			message = message.get("message")
 
 		status = "Failed"
 		# If failed because of timeout, set status to In Progress
@@ -251,7 +244,7 @@ def repost(doc):
 			status = "In Progress"
 
 		if traceback:
-			message += "<br><br>" + "<b>Traceback:</b> <br>" + traceback
+			message += "<br>" + "Traceback: <br>" + traceback
 
 		frappe.db.set_value(
 			doc.doctype,
@@ -261,7 +254,6 @@ def repost(doc):
 				"status": status,
 			},
 		)
->>>>>>> 10280d6140 (fix: keep status as In Progress for RIV for Timeout Error (#42274))
 
 		outgoing_email_account = frappe.get_cached_value(
 			"Email Account", {"default_outgoing": 1, "enable_outgoing": 1}, "name"
@@ -269,7 +261,6 @@ def repost(doc):
 
 		if outgoing_email_account and not isinstance(e, RecoverableErrors):
 			notify_error_to_stock_managers(doc, message)
-			doc.set_status("Failed")
 	finally:
 		if not frappe.flags.in_test:
 			frappe.db.commit()
