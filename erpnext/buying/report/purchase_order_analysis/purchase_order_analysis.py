@@ -39,16 +39,14 @@ def validate_filters(filters):
 def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
-	pi = frappe.qb.DocType("Purchase Invoice")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
 
 	query = (
 		frappe.qb.from_(po)
-		.from_(po_item)
+		.inner_join(po_item)
+		.on(po_item.parent == po.name)
 		.left_join(pi_item)
-		.on(pi_item.po_detail == po_item.name & pi_item.docstatus == 1)
-		.left_join(pi)
-		.on(pi.name == pi_item.parent & pi.docstatus == 1)
+		.on((pi_item.po_detail == po_item.name) & (pi_item.docstatus == 1))
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
