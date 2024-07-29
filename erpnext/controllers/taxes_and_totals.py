@@ -563,9 +563,12 @@ class calculate_taxes_and_totals:
 
 	def calculate_totals(self):
 		if self.doc.get("taxes"):
-			self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + flt(
-				self.doc.get("grand_total_diff")
-			)
+			if self.doc.get("disable_rounded_total"):
+				self.doc.grand_total = flt(self.doc.get("taxes")[-1].total)
+			else:
+				self.doc.grand_total = flt(self.doc.get("taxes")[-1].total) + flt(
+					self.doc.get("grand_total_diff")
+				)
 		else:
 			self.doc.grand_total = flt(self.doc.net_total)
 

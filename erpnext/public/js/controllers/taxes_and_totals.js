@@ -573,9 +573,16 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		// Changing sequence can cause rounding_adjustmentng issue and on-screen discrepency
 		var me = this;
 		var tax_count = this.frm.doc["taxes"] ? this.frm.doc["taxes"].length : 0;
-		this.frm.doc.grand_total = flt(tax_count
-			? this.frm.doc["taxes"][tax_count - 1].total + flt(this.frm.doc.grand_total_diff)
-			: this.frm.doc.net_total);
+		if (tax_count) {
+			if (me.frm.doc.disable_rounded_total) {
+				this.frm.doc.grand_total =  flt(this.frm.doc["taxes"][tax_count - 1].total);
+			} else {
+				this.frm.doc.grand_total = flt(this.frm.doc["taxes"][tax_count - 1].total + flt(this.frm.doc.grand_total_diff));
+			}
+		} else {
+			this.frm.doc.grand_total = flt(this.frm.doc.net_total);
+		}
+
 
 		if(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"].includes(this.frm.doc.doctype)) {
 			this.frm.doc.base_grand_total = (this.frm.doc.total_taxes_and_charges) ?
