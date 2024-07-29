@@ -2052,7 +2052,7 @@ class TestDeliveryNote(FrappeTestCase):
 		)
 
 		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
-		dn = create_delivery_note(
+		create_delivery_note(
 			item_code=item_code,
 			qty=2,
 			rate=300,
