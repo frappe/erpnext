@@ -4,7 +4,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
-from frappe.utils import cint, cstr, flt, get_link_to_form, now, nowtime, today
+from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, now, nowtime, today
 from pypika import Order
 
 from erpnext.stock.deprecated_serial_batch import (
@@ -338,7 +338,8 @@ class SerialBatchBundle:
 			status = "Delivered"
 
 		sn_table = frappe.qb.DocType("Serial No")
-		(
+
+		query = (
 			frappe.qb.update(sn_table)
 			.set(sn_table.warehouse, warehouse)
 			.set(
@@ -351,7 +352,19 @@ class SerialBatchBundle:
 			)
 			.set(sn_table.company, self.sle.company)
 			.where(sn_table.name.isin(serial_nos))
-		).run()
+		)
+
+		if status == "Delivered":
+			warranty_period = frappe.get_cached_value("Item", self.sle.item_code, "warranty_period")
+			if warranty_period:
+				warranty_expiry_date = add_days(self.sle.posting_date, cint(warranty_period))
+				query = query.set(sn_table.warranty_expiry_date, warranty_expiry_date)
+				query = query.set(sn_table.warranty_period, warranty_period)
+		else:
+			query = query.set(sn_table.warranty_expiry_date, None)
+			query = query.set(sn_table.warranty_period, 0)
+
+		query.run()
 
 	def set_batch_no_in_serial_nos(self):
 		entries = frappe.get_all(
