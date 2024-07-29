@@ -393,32 +393,6 @@ class SerialandBatchBundle(Document):
 
 		self.calculate_qty_and_amount(save=True)
 		self.validate_quantity(row, qty_field=qty_field)
-		self.set_warranty_expiry_date()
-
-	def set_warranty_expiry_date(self):
-		if self.type_of_transaction != "Outward":
-			return
-
-		if not (self.docstatus == 1 and self.voucher_type == "Delivery Note" and self.has_serial_no):
-			return
-
-		warranty_period = frappe.get_cached_value("Item", self.item_code, "warranty_period")
-
-		if not warranty_period:
-			return
-
-		warranty_expiry_date = add_days(self.posting_date, cint(warranty_period))
-
-		serial_nos = self.get_serial_nos()
-		if not serial_nos:
-			return
-
-		sn_table = frappe.qb.DocType("Serial No")
-		(
-			frappe.qb.update(sn_table)
-			.set(sn_table.warranty_expiry_date, warranty_expiry_date)
-			.where(sn_table.name.isin(serial_nos))
-		).run()
 
 	def validate_voucher_no(self):
 		if not (self.voucher_type and self.voucher_no):
