@@ -4,7 +4,7 @@ import frappe
 from frappe import _, bold
 from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
-from frappe.utils import cint, cstr, flt, get_link_to_form, now, nowtime, today
+from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, now, nowtime, today
 from pypika import Order
 
 from erpnext.stock.deprecated_serial_batch import (
@@ -246,6 +246,9 @@ class SerialBatchBundle:
 			frappe.throw(_(msg))
 
 	def delink_serial_and_batch_bundle(self):
+		if self.is_pos_transaction():
+			return
+
 		update_values = {
 			"serial_and_batch_bundle": "",
 		}
@@ -295,7 +298,21 @@ class SerialBatchBundle:
 			self.cancel_serial_and_batch_bundle()
 
 	def cancel_serial_and_batch_bundle(self):
+		if self.is_pos_transaction():
+			return
+
 		frappe.get_cached_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle).cancel()
+
+	def is_pos_transaction(self):
+		if (
+			self.sle.voucher_type == "Sales Invoice"
+			and self.sle.serial_and_batch_bundle
+			and frappe.get_cached_value(
+				"Serial and Batch Bundle", self.sle.serial_and_batch_bundle, "voucher_type"
+			)
+			== "POS Invoice"
+		):
+			return True
 
 	def submit_serial_and_batch_bundle(self):
 		doc = frappe.get_doc("Serial and Batch Bundle", self.sle.serial_and_batch_bundle)
@@ -321,7 +338,8 @@ class SerialBatchBundle:
 			status = "Delivered"
 
 		sn_table = frappe.qb.DocType("Serial No")
-		(
+
+		query = (
 			frappe.qb.update(sn_table)
 			.set(sn_table.warehouse, warehouse)
 			.set(
@@ -334,7 +352,19 @@ class SerialBatchBundle:
 			)
 			.set(sn_table.company, self.sle.company)
 			.where(sn_table.name.isin(serial_nos))
-		).run()
+		)
+
+		if status == "Delivered":
+			warranty_period = frappe.get_cached_value("Item", self.sle.item_code, "warranty_period")
+			if warranty_period:
+				warranty_expiry_date = add_days(self.sle.posting_date, cint(warranty_period))
+				query = query.set(sn_table.warranty_expiry_date, warranty_expiry_date)
+				query = query.set(sn_table.warranty_period, warranty_period)
+		else:
+			query = query.set(sn_table.warranty_expiry_date, None)
+			query = query.set(sn_table.warranty_period, 0)
+
+		query.run()
 
 	def set_batch_no_in_serial_nos(self):
 		entries = frappe.get_all(
@@ -599,9 +629,15 @@ class BatchNoValuation(DeprecatedBatchNoValuation):
 
 		timestamp_condition = ""
 		if self.sle.posting_date and self.sle.posting_time:
-			timestamp_condition = CombineDatetime(
-				parent.posting_date, parent.posting_time
-			) <= CombineDatetime(self.sle.posting_date, self.sle.posting_time)
+			timestamp_condition = CombineDatetime(parent.posting_date, parent.posting_time) < CombineDatetime(
+				self.sle.posting_date, self.sle.posting_time
+			)
+
+			if self.sle.creation:
+				timestamp_condition |= (
+					CombineDatetime(parent.posting_date, parent.posting_time)
+					== CombineDatetime(self.sle.posting_date, self.sle.posting_time)
+				) & (parent.creation < self.sle.creation)
 
 		query = (
 			frappe.qb.from_(parent)

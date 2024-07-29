@@ -5,7 +5,7 @@
 import frappe
 from frappe import qb
 from frappe.query_builder.functions import Sum
-from frappe.tests.utils import FrappeTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, getdate, nowdate
 
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
+from erpnext.buying.doctype.purchase_order.test_purchase_order import prepare_data_for_internal_transfer
 from erpnext.stock.doctype.item.test_item import create_item
 
 
@@ -803,6 +804,41 @@ class TestAccountsController(FrappeTestCase):
 		exc_je_for_pe = self.get_journals_for(pe.doctype, pe.name)
 		self.assertEqual(exc_je_for_si, [])
 		self.assertEqual(exc_je_for_pe, [])
+
+	@change_settings("Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1})
+	def test_16_internal_transfer_at_arms_length_price(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		prepare_data_for_internal_transfer()
+		company = "_Test Company with perpetual inventory"
+		target_warehouse = create_warehouse("_Test Internal Warehouse New 1", company=company)
+		warehouse = create_warehouse("_Test Internal Warehouse New 2", company=company)
+		arms_length_price = 40
+
+		si = create_sales_invoice(
+			company=company,
+			customer="_Test Internal Customer 2",
+			debit_to="Debtors - TCP1",
+			target_warehouse=target_warehouse,
+			warehouse=warehouse,
+			income_account="Sales - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1",
+			update_stock=True,
+			do_not_save=True,
+			do_not_submit=True,
+		)
+
+		si.items[0].rate = arms_length_price
+		si.save()
+		# rate should not reset to incoming rate
+		self.assertEqual(si.items[0].rate, arms_length_price)
+
+		frappe.db.set_single_value("Stock Settings", "allow_internal_transfer_at_arms_length_price", 0)
+		si.items[0].rate = arms_length_price
+		si.save()
+		# rate should reset to incoming rate
+		self.assertEqual(si.items[0].rate, 100)
 
 	def test_20_journal_against_sales_invoice(self):
 		# Invoice in Foreign Currency

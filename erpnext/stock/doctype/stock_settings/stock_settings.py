@@ -27,6 +27,7 @@ class StockSettings(Document):
 		action_if_quality_inspection_is_rejected: DF.Literal["Stop", "Warn"]
 		allow_from_dn: DF.Check
 		allow_from_pr: DF.Check
+		allow_internal_transfer_at_arms_length_price: DF.Check
 		allow_negative_stock: DF.Check
 		allow_partial_reservation: DF.Check
 		allow_to_edit_stock_uom_qty_for_purchase: DF.Check
@@ -47,6 +48,7 @@ class StockSettings(Document):
 		mr_qty_allowance: DF.Float
 		naming_series_prefix: DF.Data | None
 		over_delivery_receipt_allowance: DF.Float
+		over_picking_allowance: DF.Percent
 		pick_serial_and_batch_based_on: DF.Literal["FIFO", "LIFO", "Expiry"]
 		reorder_email_notify: DF.Check
 		role_allowed_to_create_edit_back_dated_transactions: DF.Link | None

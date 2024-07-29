@@ -908,6 +908,7 @@ class SubcontractingController(StockController):
 						item,
 						{
 							"item_code": item.rm_item_code,
+							"incoming_rate": item.rate if self.is_return else 0,
 							"warehouse": self.supplier_warehouse,
 							"actual_qty": -1 * flt(item.consumed_qty, item.precision("consumed_qty")),
 							"dependant_sle_voucher_detail_no": item.reference_name,

@@ -454,11 +454,8 @@ class TestJournalEntry(unittest.TestCase):
 		# Change cost center for bank account - _Test Cost Center for BS Account
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 		jv.accounts[1].cost_center = "_Test Cost Center for BS Account - _TC"
+		# Ledger reposted implicitly upon 'Update After Submit'
 		jv.save()
-
-		# Check if repost flag gets set on update after submit
-		self.assertTrue(jv.repost_required)
-		jv.repost_accounting_entries()
 
 		# Check GL entries after reposting
 		jv.load_from_db()
@@ -480,6 +477,43 @@ class TestJournalEntry(unittest.TestCase):
 		for i in range(len(self.expected_gle)):
 			for field in self.fields:
 				self.assertEqual(self.expected_gle[i][field], gl_entries[i][field])
+
+	def test_negative_debit_and_credit_with_same_account_head(self):
+		from erpnext.accounts.general_ledger import process_gl_map
+
+		# Create JV with defaut cost center - _Test Cost Center
+		frappe.db.set_single_value("Accounts Settings", "merge_similar_account_heads", 0)
+
+		jv = make_journal_entry("_Test Bank - _TC", "_Test Bank - _TC", 100 * -1, save=True)
+		jv.append(
+			"accounts",
+			{
+				"account": "_Test Cash - _TC",
+				"debit": 100 * -1,
+				"credit": 100 * -1,
+				"debit_in_account_currency": 100 * -1,
+				"credit_in_account_currency": 100 * -1,
+				"exchange_rate": 1,
+			},
+		)
+		jv.flags.ignore_validate = True
+		jv.save()
+
+		self.assertEqual(len(jv.accounts), 3)
+
+		gl_map = jv.build_gl_map()
+
+		for row in gl_map:
+			if row.account == "_Test Cash - _TC":
+				self.assertEqual(row.debit_in_account_currency, 100 * -1)
+				self.assertEqual(row.credit_in_account_currency, 100 * -1)
+
+		gl_map = process_gl_map(gl_map, False)
+
+		for row in gl_map:
+			if row.account == "_Test Cash - _TC":
+				self.assertEqual(row.debit_in_account_currency, 100)
+				self.assertEqual(row.credit_in_account_currency, 100)
 
 
 def make_journal_entry(
