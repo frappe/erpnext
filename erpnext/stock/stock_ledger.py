@@ -275,7 +275,9 @@ def repost_future_sle(
 		)
 		affected_transactions.update(obj.affected_transactions)
 
-		distinct_item_warehouses[(args[i].get("item_code"), args[i].get("warehouse"))].reposting_status = True
+		key = (args[i].get("item_code"), args[i].get("warehouse"))
+		if distinct_item_warehouses.get(key):
+			distinct_item_warehouses[key].reposting_status = True
 
 		if obj.new_items_found:
 			for _item_wh, data in distinct_item_warehouses.items():
