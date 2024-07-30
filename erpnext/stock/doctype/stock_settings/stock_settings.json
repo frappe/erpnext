@@ -434,7 +434,6 @@
   },
   {
    "default": "1",
-   "depends_on": "use_serial_batch_fields",
    "description": "If enabled, do not update serial / batch values in the stock transactions on creation of auto Serial \n / Batch Bundle. ",
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
@@ -460,7 +459,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-15 17:18:23.872161",
+ "modified": "2024-07-29 14:55:19.093508",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
