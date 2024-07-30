@@ -740,7 +740,7 @@ class TestDepreciationMethods(AssetSetup):
 			available_for_use_date="2030-06-06",
 			is_existing_asset=1,
 			opening_number_of_booked_depreciations=2,
-			opening_accumulated_depreciation=47095.89,
+			opening_accumulated_depreciation=47178.08,
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2032-12-31",
 			total_number_of_depreciations=3,
@@ -748,7 +748,7 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		self.assertEqual(asset.status, "Draft")
-		expected_schedules = [["2032-12-31", 42904.11, 90000.0]]
+		expected_schedules = [["2032-12-31", 30000.0, 77178.08], ["2033-06-06", 12821.92, 90000.0]]
 		schedules = [
 			[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
 			for d in get_depr_schedule(asset.name, "Draft")
