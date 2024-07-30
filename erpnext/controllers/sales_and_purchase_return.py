@@ -640,6 +640,12 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 	def update_terms(source_doc, target_doc, source_parent):
 		target_doc.payment_amount = -source_doc.payment_amount
 
+	def item_condition(doc):
+		if return_against_rejected_qty:
+			return doc.rejected_qty
+
+		return doc.qty
+
 	doclist = get_mapped_doc(
 		doctype,
 		source_name,
@@ -654,6 +660,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				"doctype": doctype + " Item",
 				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no", "bom": "bom"},
 				"postprocess": update_item,
+				"condition": item_condition,
 			},
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
 		},
