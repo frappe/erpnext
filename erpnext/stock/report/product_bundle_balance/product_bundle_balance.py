@@ -224,6 +224,9 @@ def get_stock_ledger_entries(filters, items):
 		.where((sle2.name.isnull()) & (sle.docstatus < 2) & (sle.item_code.isin(items)))
 	)
 
+	if filters.get("company"):
+		query = query.where(sle.company == filters.get("company"))
+
 	if date := filters.get("date"):
 		query = query.where(sle.posting_date <= date)
 	else:
@@ -237,7 +240,7 @@ def get_stock_ledger_entries(filters, items):
 		if warehouse_details:
 			wh = frappe.qb.DocType("Warehouse")
 			query = query.where(
-				ExistsCriterion(
+				sle.warehouse.isin(
 					frappe.qb.from_(wh)
 					.select(wh.name)
 					.where((wh.lft >= warehouse_details.lft) & (wh.rgt <= warehouse_details.rgt))
