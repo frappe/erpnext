@@ -491,10 +491,15 @@ def make_payment_request(**args):
 				"party_type": args.get("party_type") or "Customer",
 				"party": args.get("party") or ref_doc.get("customer"),
 				"bank_account": bank_account,
-				"make_sales_invoice": args.order_type == "Shopping Cart",
-				"mute_email": args.mute_email
-				or args.order_type == "Shopping Cart"
-				or gateway_account.get("payment_channel", "Email") != "Email",
+				"make_sales_invoice": (
+					args.make_sales_invoice  # new standard
+					or args.order_type == "Shopping Cart"  # compat for webshop app
+				),
+				"mute_email": (
+					args.mute_email  # new standard
+					or args.order_type == "Shopping Cart"  # compat for webshop app
+					or gateway_account.get("payment_channel", "Email") != "Email"
+				),
 			}
 		)
 
