@@ -1925,9 +1925,19 @@ class TestPurchaseReceipt(FrappeTestCase):
 			rate=100,
 			rejected_qty=2,
 			rejected_warehouse=rejected_warehouse,
+			do_not_save=1,
 		)
 
+		pr.append(
+			"items",
+			{"item_code": item_code, "qty": 2, "rate": 100, "warehouse": warehouse, "rejected_qty": 0},
+		)
+		pr.save()
+		pr.submit()
+		self.assertEqual(len(pr.items), 2)
+
 		pr_return = make_purchase_return_against_rejected_warehouse(pr.name)
+		self.assertEqual(len(pr_return.items), 1)
 		self.assertEqual(pr_return.items[0].warehouse, rejected_warehouse)
 		self.assertEqual(pr_return.items[0].qty, 2.0 * -1)
 		self.assertEqual(pr_return.items[0].rejected_qty, 0.0)
