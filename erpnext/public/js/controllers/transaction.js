@@ -826,41 +826,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var set_pricing = function() {
 			if(me.frm.doc.company && me.frm.fields_dict.currency) {
-<<<<<<< HEAD
-				var company_currency = me.get_company_currency();
-				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
-
-				if (!me.frm.doc.currency) {
-					me.frm.set_value("currency", company_currency);
-				}
-
-				if (me.frm.doc.currency == company_currency) {
-					me.frm.set_value("conversion_rate", 1.0);
-				}
-				if (me.frm.doc.price_list_currency == company_currency) {
-					me.frm.set_value('plc_conversion_rate', 1.0);
-				}
-				if (company_doc){
-					if (company_doc.default_letter_head) {
-						if(me.frm.fields_dict.letter_head) {
-							me.frm.set_value("letter_head", company_doc.default_letter_head);
-						}
-					}
-					let selling_doctypes_for_tc = ["Sales Invoice", "Quotation", "Sales Order", "Delivery Note"];
-					if (company_doc.default_selling_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-					selling_doctypes_for_tc.includes(me.frm.doc.doctype)  && !me.frm.doc.tc_name) {
-						me.frm.set_value("tc_name", company_doc.default_selling_terms);
-					}
-					let buying_doctypes_for_tc = ["Request for Quotation", "Supplier Quotation", "Purchase Order",
-						"Material Request", "Purchase Receipt"];
-					// Purchase Invoice is excluded as per issue #3345
-					if (company_doc.default_buying_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-					buying_doctypes_for_tc.includes(me.frm.doc.doctype) && !me.frm.doc.tc_name) {
-						me.frm.set_value("tc_name", company_doc.default_buying_terms);
-					}
-				}
-=======
->>>>>>> 4986f28a89 (fix: set currency on change of company considering customer default currency (#42405))
 				frappe.run_serially([
 					() => get_party_currency(),
 					() => me.update_item_tax_map(),
