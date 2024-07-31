@@ -147,6 +147,10 @@ class SalesPipelineAnalytics:
 			conditions.append(
 				["expected_closing", "between", [self.filters.get("from_date"), self.filters.get("to_date")]]
 			)
+		elif self.filters.get("from_date") and not self.filters.get("to_date"):
+			conditions.append(["expected_closing", ">=", self.filters.get("from_date")])
+		elif not self.filters.get("from_date") and self.filters.get("to_date"):
+			conditions.append(["expected_closing", "<=", self.filters.get("to_date")])
 
 		return conditions
 
