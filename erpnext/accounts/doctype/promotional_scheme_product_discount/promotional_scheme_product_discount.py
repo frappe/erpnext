@@ -53,6 +53,7 @@ class PromotionalSchemeProductDiscount(Document):
 			"20",
 		]
 		recurse_for: DF.Float
+		round_free_qty: DF.Check
 		rule_description: DF.SmallText
 		same_item: DF.Check
 		threshold_percentage: DF.Percent
