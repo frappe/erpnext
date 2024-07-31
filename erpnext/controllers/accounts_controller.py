@@ -2433,6 +2433,15 @@ class AccountsController(TransactionBase):
 		advance_entry.cost_center = self.cost_center or erpnext.get_default_cost_center(self.company)
 		advance_entry.is_advance = "Yes"
 
+		# update dimesions
+		dimensions_dict = frappe._dict()
+		active_dimensions = get_dimensions()[0]
+		for dim in active_dimensions:
+			dimensions_dict[dim.fieldname] = self.get(dim.fieldname)
+
+		reconcilation_entry.update(dimensions_dict)
+		advance_entry.update(dimensions_dict)
+
 		if self.doctype == "Sales Invoice":
 			reconcilation_entry.credit_in_account_currency = self.outstanding_amount
 			advance_entry.debit_in_account_currency = self.outstanding_amount
