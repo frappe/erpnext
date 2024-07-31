@@ -2,6 +2,18 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Promotional Scheme", {
+	setup: function (frm) {
+		frm.set_query("for_price_list", "price_discount_slabs", (doc) => {
+			return {
+				filters: {
+					selling: doc.selling,
+					buying: doc.buying,
+					currency: doc.currency,
+				},
+			};
+		});
+	},
+
 	refresh: function (frm) {
 		frm.trigger("set_options_for_applicable_for");
 		frm.trigger("toggle_reqd_apply_on");
@@ -13,10 +25,6 @@ frappe.ui.form.on("Promotional Scheme", {
 
 	buying: function (frm) {
 		frm.trigger("set_options_for_applicable_for");
-	},
-
-	currency: function (frm) {
-		frm.trigger("set_price_list_query");
 	},
 
 	set_options_for_applicable_for: function (frm) {
@@ -40,18 +48,6 @@ frappe.ui.form.on("Promotional Scheme", {
 
 		if (!in_list(options, applicable_for)) applicable_for = null;
 		frm.set_value("applicable_for", applicable_for);
-
-		frm.trigger("set_price_list_query");
-	},
-
-	set_price_list_query: function (frm) {
-		frm.set_query("for_price_list", "price_discount_slabs", {
-			filters: {
-				selling: frm.doc.selling,
-				buying: frm.doc.buying,
-				currency: frm.doc.currency,
-			},
-		});
 	},
 
 	apply_on: function (frm) {
