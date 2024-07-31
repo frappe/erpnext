@@ -145,10 +145,32 @@ frappe.ui.form.on('Payment Entry', {
 				filters: filters
 			};
 		});
-	},
 
+<<<<<<< HEAD
 	refresh: function(frm) {
 		erpnext.hide_company();
+=======
+		frm.set_query("sales_taxes_and_charges_template", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					disabled: false,
+				},
+			};
+		});
+
+		frm.set_query("purchase_taxes_and_charges_template", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					disabled: false,
+				},
+			};
+		});
+	},
+	refresh: function (frm) {
+		erpnext.hide_company(frm);
+>>>>>>> 9fe47ac101 (fix: set query filters for sales / purchase tax template on PE)
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
