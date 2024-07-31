@@ -2014,8 +2014,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			["Service - _TC", 1000, 0.0, nowdate()],
 		]
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		pi.load_from_db()
-		self.assertFalse(pi.repost_required)
 
 	@change_settings("Buying Settings", {"supplier_group": None})
 	def test_purchase_invoice_without_supplier_group(self):

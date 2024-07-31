@@ -170,7 +170,6 @@
   "against_expense_account",
   "column_break_63",
   "unrealized_profit_loss_account",
-  "repost_required",
   "subscription_section",
   "subscription",
   "auto_repeat",
@@ -364,7 +363,8 @@
    "description": "Once set, this invoice will be on hold till the set date",
    "fieldname": "release_date",
    "fieldtype": "Date",
-   "label": "Release Date"
+   "label": "Release Date",
+   "search_index": 1
   },
   {
    "fieldname": "cb_17",
@@ -1605,15 +1605,6 @@
   },
   {
    "default": "0",
-   "fieldname": "repost_required",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Repost Required",
-   "options": "Account",
-   "read_only": 1
-  },
-  {
-   "default": "0",
    "fieldname": "use_transaction_date_exchange_rate",
    "fieldtype": "Check",
    "label": "Use Transaction Date Exchange Rate",
@@ -1639,7 +1630,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-04-11 11:28:42.802211",
+ "modified": "2024-07-25 19:42:36.931278",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

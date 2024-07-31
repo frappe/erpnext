@@ -53,11 +53,13 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			si = si.submit()
 		return si
 
-	def create_payment_entry(self, docname):
+	def create_payment_entry(self, docname, do_not_submit=False):
 		pe = get_payment_entry("Sales Invoice", docname, bank_account=self.cash, party_amount=40)
 		pe.paid_from = self.debit_to
 		pe.insert()
-		pe.submit()
+		if not do_not_submit:
+			pe.submit()
+		return pe
 
 	def create_credit_note(self, docname, do_not_submit=False):
 		credit_note = create_sales_invoice(
@@ -984,3 +986,40 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			expected_data_after_payment,
 			[row.invoice_grand_total, row.invoiced, row.paid, row.outstanding],
 		)
+
+	def test_cost_center_on_report_output(self):
+		filters = {
+			"company": self.company,
+			"report_date": today(),
+			"range1": 30,
+			"range2": 60,
+			"range3": 90,
+			"range4": 120,
+		}
+
+		# check invoice grand total and invoiced column's value for 3 payment terms
+		si = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
+		si.cost_center = self.cost_center
+		si.save().submit()
+
+		new_cc = frappe.get_doc(
+			{
+				"doctype": "Cost Center",
+				"cost_center_name": "East Wing",
+				"parent_cost_center": self.company + " - " + self.company_abbr,
+				"company": self.company,
+			}
+		)
+		new_cc.save()
+
+		# check invoice grand total, invoiced, paid and outstanding column's value after payment
+		pe = self.create_payment_entry(si.name, do_not_submit=True)
+		pe.cost_center = new_cc.name
+		pe.save().submit()
+		report = execute(filters)
+
+		expected_data_after_payment = [si.name, si.cost_center, 60]
+
+		self.assertEqual(len(report[1]), 1)
+		row = report[1][0]
+		self.assertEqual(expected_data_after_payment, [row.voucher_no, row.cost_center, row.outstanding])

@@ -6,7 +6,7 @@ import json
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils import add_days, cstr, flt, nowdate, nowtime, today
+from frappe.utils import add_days, cstr, flt, getdate, nowdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.accounts.utils import get_balance_on
@@ -2004,6 +2004,40 @@ class TestDeliveryNote(FrappeTestCase):
 		)
 
 		self.assertRaises(frappe.ValidationError, dn5.submit)
+
+	def test_warranty_expiry_date_for_serial_item(self):
+		item_code = make_item(
+			"Test Warranty Expiry Date Item",
+			properties={
+				"has_serial_no": 1,
+				"serial_no_series": "TWE.#####",
+				"is_stock_item": 1,
+				"warranty_period": 100,
+			},
+		).name
+
+		se = make_stock_entry(
+			item_code=item_code,
+			target="_Test Warehouse - _TC",
+			qty=2,
+			basic_rate=50,
+			posting_date=nowdate(),
+		)
+
+		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
+		create_delivery_note(
+			item_code=item_code,
+			qty=2,
+			rate=300,
+			use_serial_batch_fields=0,
+			serial_no=serial_nos,
+		)
+
+		for row in serial_nos:
+			sn = frappe.get_doc("Serial No", row)
+			self.assertEqual(getdate(sn.warranty_expiry_date), getdate(add_days(nowdate(), 100)))
+			self.assertEqual(sn.status, "Delivered")
+			self.assertEqual(sn.warranty_period, 100)
 
 
 def create_delivery_note(**args):

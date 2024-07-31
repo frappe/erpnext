@@ -83,7 +83,8 @@
   "job_card",
   "amended_from",
   "credit_note",
-  "is_return"
+  "is_return",
+  "tab_connections"
  ],
  "fields": [
   {
@@ -683,6 +684,12 @@
    "label": "Asset Repair",
    "options": "Asset Repair",
    "read_only": 1
+  },
+  {
+    "fieldname": "tab_connections",
+    "fieldtype": "Tab Break",
+    "label": "Connections",
+    "show_dashboard": 1
   }
  ],
  "icon": "fa fa-file-text",
