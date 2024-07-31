@@ -4,6 +4,7 @@
 import frappe
 from frappe import _, qb
 from frappe.query_builder import CustomFunction
+from frappe.query_builder.custom import ConstantColumn
 
 
 def execute(filters=None):
@@ -12,20 +13,39 @@ def execute(filters=None):
 	return columns, data
 
 
+def build_payment_entry_dict(row: dict) -> dict:
+	row_dict = frappe._dict()
+	row_dict.update(
+		{
+			"payment_document": row.get("doctype"),
+			"payment_entry": row.get("name"),
+			"posting_date": row.get("posting_date"),
+			"clearance_date": row.get("clearance_date"),
+		}
+	)
+	if row.get("payment_type") == "Receive" and row.get("party_type") in ["Customer", "Supplier"]:
+		row_dict.update(
+			{
+				"debit": row.get("amount"),
+				"credit": 0,
+			}
+		)
+	else:
+		row_dict.update(
+			{
+				"debit": 0,
+				"credit": row.get("amount"),
+			}
+		)
+	return row_dict
+
+
 def build_data(filters):
 	vouchers = get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filters)
 	data = []
 	for x in vouchers:
-		data.append(
-			frappe._dict(
-				payment_document="Payment Entry",
-				payment_entry=x.name,
-				debit=x.amount,
-				credit=0,
-				posting_date=x.posting_date,
-				clearance_date=x.clearance_date,
-			)
-		)
+		if x.doctype == "Payment Entry":
+			data.append(build_payment_entry_dict(x))
 	return data
 
 
@@ -56,11 +76,15 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 
 	ifelse = CustomFunction("IF", ["condition", "then", "else"])
 	pe = qb.DocType("Payment Entry")
+	doctype_name = ConstantColumn("Payment Entry")
 	payments = (
 		qb.from_(pe)
 		.select(
+			doctype_name.as_("doctype"),
 			pe.name,
 			ifelse(pe.paid_from.eq(filters.account), pe.paid_amount, pe.received_amount).as_("amount"),
+			pe.payment_type,
+			pe.party_type,
 			pe.posting_date,
 			pe.clearance_date,
 		)
