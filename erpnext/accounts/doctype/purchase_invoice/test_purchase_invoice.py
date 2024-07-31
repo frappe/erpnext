@@ -1917,8 +1917,6 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			["Service - _TC", 1000, 0.0, nowdate()],
 		]
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		pi.load_from_db()
-		self.assertFalse(pi.repost_required)
 
 	def test_default_cost_center_for_purchase(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center

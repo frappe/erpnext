@@ -1645,6 +1645,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	apply_price_list(item, reset_plc_conversion) {
 		// We need to reset plc_conversion_rate sometimes because the call to
 		// `erpnext.stock.get_item_details.apply_price_list` is sensitive to its value
+
+
+		if (this.frm.doc.doctype === "Material Request") {
+			return;
+		}
+
 		if (!reset_plc_conversion) {
 			this.frm.set_value("plc_conversion_rate", "");
 		}
@@ -1660,7 +1666,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		me.in_apply_price_list = true;
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
-			args: {	args: args },
+			args: {	args: args, doc: me.frm.doc },
 			callback: function(r) {
 				if (!r.exc) {
 					frappe.run_serially([
