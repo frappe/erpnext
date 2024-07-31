@@ -729,10 +729,15 @@ def get_daily_depr_amount(asset, row, schedule_idx, amount):
 					)
 				),
 				add_days(
-					add_months(
-						row.depreciation_start_date,
-						(row.frequency_of_depreciation * (asset.opening_number_of_booked_depreciations + 1))
-						* -1,
+					get_last_day(
+						add_months(
+							row.depreciation_start_date,
+							(
+								row.frequency_of_depreciation
+								* (asset.opening_number_of_booked_depreciations + 1)
+							)
+							* -1,
+						),
 					),
 					1,
 				),
