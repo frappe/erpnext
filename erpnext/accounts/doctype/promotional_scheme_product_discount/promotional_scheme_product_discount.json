@@ -193,11 +193,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-03-12 12:53:58.199108",
-=======
  "modified": "2024-07-22 17:25:07.880984",
->>>>>>> 8624aeca54 (fix: promotional scheme doctype fields in consitency with pricing rule (#42432))
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme Product Discount",
