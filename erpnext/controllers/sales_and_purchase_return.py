@@ -399,7 +399,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1 * source_doc.qty
-<<<<<<< HEAD
+		target_doc.pricing_rules = None
 
 		if source_doc.serial_no:
 			returned_serial_nos = get_returned_serial_nos(source_doc, source_parent)
@@ -417,9 +417,6 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 			if rejected_serial_nos:
 				target_doc.rejected_serial_no = "\n".join(rejected_serial_nos)
 
-=======
-		target_doc.pricing_rules = None
->>>>>>> 281198456d (fix: Discount and taxes in return document should follow the reference document (#41911))
 		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
