@@ -3476,6 +3476,122 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
+	def test_internal_transfer_for_batch_items_with_cancel_use_serial_batch_fields(self):
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0)
+
+		prepare_data_for_internal_transfer()
+
+		customer = "_Test Internal Customer 2"
+		company = "_Test Company with perpetual inventory"
+
+		batch_item_doc = make_item(
+			"_Test Batch Item For Stock Transfer Cancel Case 11",
+			{"has_batch_no": 1, "create_new_batch": 1, "batch_number_series": "USBF11-BT-CANBIFST-.####"},
+		)
+
+		serial_item_doc = make_item(
+			"_Test Serial No Item For Stock Transfer Cancel Case 11",
+			{"has_serial_no": 1, "serial_no_series": "USBF11-BT-CANBIFST-.####"},
+		)
+
+		inward_entry = make_purchase_receipt(
+			item_code=batch_item_doc.name,
+			qty=10,
+			rate=150,
+			warehouse="Stores - TCP1",
+			company="_Test Company with perpetual inventory",
+			use_serial_batch_fields=1,
+			do_not_submit=1,
+		)
+
+		inward_entry.append(
+			"items",
+			{
+				"item_code": serial_item_doc.name,
+				"qty": 15,
+				"rate": 250,
+				"item_name": serial_item_doc.item_name,
+				"conversion_factor": 1.0,
+				"uom": serial_item_doc.stock_uom,
+				"stock_uom": serial_item_doc.stock_uom,
+				"warehouse": "Stores - TCP1",
+				"use_serial_batch_fields": 1,
+			},
+		)
+
+		inward_entry.submit()
+		inward_entry.reload()
+
+		for row in inward_entry.items:
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		inter_transfer_dn = create_delivery_note(
+			item_code=inward_entry.items[0].item_code,
+			company=company,
+			customer=customer,
+			cost_center="Main - TCP1",
+			expense_account="Cost of Goods Sold - TCP1",
+			qty=10,
+			rate=500,
+			warehouse="Stores - TCP1",
+			target_warehouse="Work In Progress - TCP1",
+			batch_no=get_batch_from_bundle(inward_entry.items[0].serial_and_batch_bundle),
+			use_serial_batch_fields=1,
+			do_not_submit=1,
+		)
+
+		inter_transfer_dn.append(
+			"items",
+			{
+				"item_code": serial_item_doc.name,
+				"qty": 15,
+				"rate": 350,
+				"item_name": serial_item_doc.item_name,
+				"conversion_factor": 1.0,
+				"uom": serial_item_doc.stock_uom,
+				"stock_uom": serial_item_doc.stock_uom,
+				"warehouse": "Stores - TCP1",
+				"target_warehouse": "Work In Progress - TCP1",
+				"serial_no": "\n".join(
+					get_serial_nos_from_bundle(inward_entry.items[1].serial_and_batch_bundle)
+				),
+				"use_serial_batch_fields": 1,
+			},
+		)
+
+		inter_transfer_dn.submit()
+		inter_transfer_dn.reload()
+		for row in inter_transfer_dn.items:
+			if row.item_code == batch_item_doc.name:
+				self.assertEqual(row.rate, 150.0)
+			else:
+				self.assertEqual(row.rate, 250.0)
+
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		inter_transfer_pr = make_inter_company_purchase_receipt(inter_transfer_dn.name)
+		for row in inter_transfer_pr.items:
+			row.from_warehouse = "Work In Progress - TCP1"
+			row.warehouse = "Stores - TCP1"
+		inter_transfer_pr.submit()
+
+		for row in inter_transfer_pr.items:
+			if row.item_code == batch_item_doc.name:
+				self.assertEqual(row.rate, 150.0)
+			else:
+				self.assertEqual(row.rate, 250.0)
+
+			self.assertTrue(row.serial_and_batch_bundle)
+
+		inter_transfer_pr.cancel()
+		inter_transfer_dn.cancel()
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
+
 
 def prepare_data_for_internal_transfer():
 	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
