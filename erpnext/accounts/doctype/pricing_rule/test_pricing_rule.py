@@ -1312,6 +1312,7 @@ class TestPricingRule(unittest.TestCase):
 		pricing_rule.mixed_conditions = True
 		pricing_rule.is_recursive = True
 		self.assertRaises(frappe.ValidationError, pricing_rule.save)
+
 	def test_ignore_pricing_rule_for_credit_note(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
 		pricing_rule = make_pricing_rule(
