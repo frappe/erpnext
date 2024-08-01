@@ -633,7 +633,7 @@ Create Student Batch,Studentenstapel erstellen,
 Create Student Groups,Studentengruppen erstellen,
 Create Supplier Quotation,Lieferantenangebot erstellen,
 Create Tax Template,Steuervorlage erstellen,
-Create Timesheet,Arbeitszeittabelle erstellen,
+Create Timesheet,Zeiterfassung erstellen,
 Create User,Benutzer erstellen,
 Create Users,Benutzer erstellen,
 Create Variant,Variante erstellen,
@@ -916,6 +916,7 @@ Expense / Difference account ({0}) must be a 'Profit or Loss' account,"Aufwands-
 Expense Account,Aufwandskonto,
 Expense Claim,Auslagenabrechnung,
 Expense Claims,Auslagenabrechnungen,
+Total Expense Claim (via Expense Claims),Gesamtauslagen (über Auslagenabrechnungen),
 Expense account is mandatory for item {0},Aufwandskonto ist zwingend für Artikel {0},
 Expenses,Aufwendungen,
 Expenses Included In Asset Valuation,"Aufwendungen, die in der Vermögensbewertung enthalten sind",
@@ -2785,8 +2786,8 @@ Time(in mins),Zeit (in Min),
 Timer,Timer,
 Timer exceeded the given hours.,Timer hat die angegebenen Stunden überschritten.,
 Timesheet,Zeiterfassung,
-Timesheet for tasks.,Zeitraport für Vorgänge.,
-Timesheet {0} is already completed or cancelled,Timesheet {0} ist bereits abgeschlossen oder abgebrochen,
+Timesheet for tasks.,Zeiterfassung für Aufgaben.,
+Timesheet {0} is already completed or cancelled,Zeiterfassung {0} ist bereits abgeschlossen oder abgebrochen,
 Timesheets,Zeiterfassungen,
 "Timesheets help keep track of time, cost and billing for activites done by your team","Zeiterfassungen helfen den Überblick über Zeit, Kosten und Abrechnung für Aktivitäten von Ihrem Team getan",
 Titles for print templates e.g. Proforma Invoice.,"Bezeichnungen für Druckvorlagen, z. B. Proforma-Rechnung",
@@ -4782,7 +4783,7 @@ Base Amount (Company Currency),Basisbetrag (Unternehmenswährung),
 Sales Invoice Timesheet,Ausgangsrechnung-Zeiterfassung,
 Time Sheet,Zeitblatt,
 Billing Hours,Abgerechnete Stunden,
-Timesheet Detail,Timesheet-Detail,
+Timesheet Detail,Zeiterfassungsposition,
 Tax Amount After Discount Amount (Company Currency),Steuerbetrag nach Abzug von Rabatt (Unternehmenswährung),
 Item Wise Tax Detail,Artikelbezogene Steuer-Details,
 Parenttype,Typ des übergeordneten Elements,
@@ -8804,8 +8805,8 @@ Delivered at Place Unloaded,Geliefert benannter Ort entladen,
 Delivered Duty Paid,Geliefert verzollt,
 Discount Validity,Frist für den Rabatt,
 Discount Validity Based On,Frist für den Rabatt berechnet sich nach,
-Select Alternative Items for Sales Order,Alternativpositionen für Auftragsbestätigung auswählen,
-Select an item from each set to be used in the Sales Order.,"Wählen Sie aus den Alternativen jeweils einen Artikel aus, der in die Auftragsbestätigung übernommen werden soll.",
+Select Alternative Items for Sales Order,Alternativpositionen für Auftrag auswählen,
+Select an item from each set to be used in the Sales Order.,"Wählen Sie aus den Alternativen jeweils einen Artikel aus, der in den Auftrag übernommen werden soll.",
 Is Alternative,Ist Alternative,
 Alternative Items,Alternativpositionen,
 Add Template,Vorlage einfügen,
@@ -9010,7 +9011,7 @@ Through Customer’s master, you can effectively track essentials like:
  - Credit Limit and Credit Period
 ","# Erstellen Sie einen Kunden
 
-Der Kundenstamm ist das Herzstück Ihrer Verkaufstransaktionen. Kunden werden in Angeboten, Kundenaufträgen, Rechnungen und Zahlungen verknüpft. Kunden können entweder nummeriert oder namentlich identifiziert werden (je nachdem, wie viele Kunden Sie haben).
+Der Kundenstamm ist das Herzstück Ihrer Verkaufstransaktionen. Kunden werden in Angeboten, Aufträge, Rechnungen und Zahlungen verknüpft. Kunden können entweder nummeriert oder namentlich identifiziert werden (je nachdem, wie viele Kunden Sie haben).
 
 Über den Kundenstamm können Sie wichtige Informationen wie:
  - Mehrere Adressen und Kontakte des Kunden
@@ -9090,9 +9091,9 @@ In diesem Schritt werden wir einen [**Artikel**] (https://docs.erpnext.com/docs/
 
 Purchase Order is at the heart of your buying transactions. In ERPNext, Purchase Order can can be created against a Purchase Material Request (indent) and Supplier Quotation as well.  Purchase Orders is also linked to Purchase Receipt and Purchase Invoices, allowing you to keep a birds-eye view on your purchase deals.
 
-","# Ersten Lieferantenauftrag erstellen
+","# Erste Bestellung erstellen
 
-Der Lieferantenauftrag ist das Herzstück Ihrer Einkaufstransaktionen. In ERPNext kann ein Lieferantenauftrag auch aus einer Materialanforderung und einem Lieferantenangebot erstellt werden.  Lieferantenaufträge sind auch mit Eingangsbelegen und Eingangsrechnungen verknüpft, so dass Sie Ihre Einkaufsgeschäfte aus der Vogelperspektive verfolgen können.
+Die Bestellung ist das Herzstück Ihrer Einkaufstransaktionen. In ERPNext kann eine Bestellung auch aus einer Materialanforderung und einem Lieferantenangebot erstellt werden. Bestellungen sind auch mit Eingangsbelegen und Eingangsrechnungen verknüpft, so dass Sie Ihre Einkaufsgeschäfte aus der Vogelperspektive verfolgen können.
 
 ",
 "# Create your first Purchase Invoice
@@ -9103,7 +9104,7 @@ Purchase Invoices can also be created against a Purchase Order or Purchase Recei
 
 Eine Eingangsrechnung ist eine Rechnung, die Sie von einem Lieferanten für eine Produkt- oder Dienstleistungslieferung an Ihr Unternehmen erhalten. Sie können die Verbindlichkeiten über die Eingangsrechnung verfolgen und Auszahlungen mit ihr verarbeiten.
 
-Eingangsrechnungen können auch mit einem Lieferantenauftrag oder Eingangsbeleg erstellt werden.",
+Eingangsrechnungen können auch mit einer Bestellung oder einem Eingangsbeleg erstellt werden.",
 "# Financial Statements
 
 In ERPNext, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.
@@ -9131,7 +9132,7 @@ Mit dem Unternehmen ist eine Vielzahl von Vermögenskonten vorkonfiguriert. Um s
 Production Plan helps in production and material planning for the Items planned for manufacturing. These production items can be committed via Sales Order (to Customers) or Material Requests (internally).
 ","# So funktioniert die Produktionsplanung
 
-Der Produktionsplan hilft bei der Produktions- und Materialplanung für die Artikel, die für die Herstellung geplant sind. Diese Produktionsartikel können über Kundenaufträge (an Kunden) oder Materialanforderungen (intern) bereitgestellt werden.
+Der Produktionsplan hilft bei der Produktions- und Materialplanung für die Artikel, die für die Herstellung geplant sind. Diese Produktionsartikel können über Aufträge (an Kunden) oder Materialanforderungen (intern) bereitgestellt werden.
 ",
 "# Import Data from Spreadsheet
 
@@ -9193,11 +9194,11 @@ In ERPNext können die Funktionen des Lagermoduls entsprechend Ihren Geschäftsa
 
 A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.
 
-Sales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer.","# Kundenauftrag
+Sales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer.","# Auftrag
 
-Ein Kundenauftrag ist eine Bestätigung einer Bestellung Ihres Kunden. Er wird auch als Proforma-Rechnung bezeichnet.
+Ein Auftrag ist eine Bestätigung einer Bestellung Ihres Kunden. Er wird auch als Proforma-Rechnung bezeichnet.
 
-Der Kundenauftrag ist das Herzstück Ihrer Verkaufs- und Einkaufstransaktionen. Kundenaufträge sind mit Lieferscheinen, Ausgangsrechnungen, Materialanforderungen und Wartungstransaktionen verknüpft. Über den Kundenauftrag können Sie die Erfüllung des gesamten Geschäfts mit dem Kunden verfolgen.",
+Der Auftrag ist das Herzstück Ihrer Verkaufs- und Einkaufstransaktionen. Kundenaufträge sind mit Lieferscheinen, Ausgangsrechnungen, Materialanforderungen und Wartungstransaktionen verknüpft. Über den Auftrag können Sie die Erfüllung des gesamten Geschäfts mit dem Kunden verfolgen.",
 "# Selling Settings
 
 CRM and Selling module’s features are configurable as per your business needs. Selling Settings is the place where you can set your preferences for:
@@ -9316,8 +9317,8 @@ Lassen Sie uns schnell einen Lieferanten mit den minimal erforderlichen Details 
 'Default {0} Account' in Company {1},'Standardkonto {0} ' in Unternehmen {1},
 'Sales Invoice Item' reference ({1}) is missing in row {0},Die Referenz 'Ausgangsrechnungsposition' ({1}) fehlt in der Zeile {0},
 'Sales Invoice' reference ({1}) is missing in row {0},Die Referenz 'Ausgangsrechnung' ({1}) fehlt in der Zeile {0},
-'Sales Order Item' reference ({1}) is missing in row {0},Die Referenz 'Kundenauftragsposition' ({1}) fehlt in der Zeile {0},
-'Sales Order' reference ({1}) is missing in row {0},Die Referenz 'Kundenauftrag' ({1}) fehlt in der Zeile {0},
+'Sales Order Item' reference ({1}) is missing in row {0},Die Referenz 'Auftragsposition' ({1}) fehlt in der Zeile {0},
+'Sales Order' reference ({1}) is missing in row {0},Die Referenz 'Auftrag' ({1}) fehlt in der Zeile {0},
 'To Package No.' cannot be less than 'From Package No.',„Bis Paket-Nr.' darf nicht kleiner als „Von Paket Nr.“ sein,
 '{0}' account is already used by {1}. Use another account.,Das Konto '{0}' wird bereits von {1} verwendet. Verwenden Sie ein anderes Konto.,
 '{0}' account: '{1}' should match the Return Against Invoice,'{0}' Konto: '{1}' sollte mit dem der zu berichtigenden Rechnung übereinstimmen,
@@ -9638,9 +9639,9 @@ A Packing Slip can only be created for Draft Delivery Note.,Ein Packzettel kann 
 A Reconciliation Job {0} is running for the same filters. Cannot reconcile now,Ein Abstimmungsauftrag {0} wird für dieselben Filter ausgeführt. Kann gerade nicht erneut gestartet werden,
 "A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.
 
-Sales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer.","Ein Kundenauftrag ist eine Bestätigung einer Bestellung Ihres Kunden. Er wird auch als Proforma-Rechnung bezeichnet.
+Sales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer.","Ein Auftrag ist eine Bestätigung einer Bestellung Ihres Kunden. Er wird auch als Proforma-Rechnung bezeichnet.
 
-Der Kundenauftrag ist das Herzstück Ihrer Verkaufs- und Einkaufstransaktionen. Kundenaufträge sind mit Lieferscheinen, Ausgangsrechnungen, Materialanforderungen und Wartungstransaktionen verknüpft. Über den Kundenauftrag können Sie die Erfüllung des gesamten Geschäfts mit dem Kunden verfolgen.",
+Der Auftrag ist das Herzstück Ihrer Verkaufs- und Einkaufstransaktionen. Kundenaufträge sind mit Lieferscheinen, Ausgangsrechnungen, Materialanforderungen und Wartungstransaktionen verknüpft. Über den Auftrag können Sie die Erfüllung des gesamten Geschäfts mit dem Kunden verfolgen.",
 A customer must have primary contact email.,Ein Kunde muss über eine primäre Kontakt-E-Mail-Adresse verfügen.,
 A driver must be set to submit.,Ein Fahrer muss zum Buchen angegeben werden.,
 A template with tax category {0} already exists. Only one template is allowed with each tax category,Eine Vorlage mit der Steuerkategorie {0} existiert bereits. Für jede Steuerkategorie ist nur eine Vorlage zulässig,
@@ -9716,7 +9717,7 @@ Advance Taxes and Charges,Weitere Steuern und Abgaben,
 Advance paid against {0} {1} cannot be greater than Grand Total {2},Der auf {0} {1} gezahlte Vorschuss kann nicht höher sein als die Gesamtsumme {2},
 Advance payments allocated against orders will only be fetched,Vorauszahlungen für Bestellungen werden nur abgerufen,
 Affected Transactions,Betroffene Transaktionen,
-Against Customer Order {0} dated {1},Gegen Kundenauftrag {0} vom {1},
+Against Customer Order {0} dated {1},Gegen Auftrag {0} vom {1},
 Against Voucher No,Belegnr.,
 Age ({0}),Alter ({0}),
 Ageing Report based on ,Alterungsbericht basierend auf ,
@@ -9870,7 +9871,7 @@ Auto Reconcile Payments,Zahlungen automatisch abgleichen,
 Auto Reconciliation,Automatischer Abgleich,
 Auto Reconciliation of Payments has been disabled. Enable it through {0},Der automatische Abgleich von Zahlungen wurde deaktiviert. Aktivieren Sie ihn über {0},
 Auto Reserve Serial and Batch Nos,Serien- und Chargennummern automatisch reservieren,
-Auto Reserve Stock for Sales Order on Purchase,Automatische Bestandsreserve für Kundenauftrag bei Kauf,
+Auto Reserve Stock for Sales Order on Purchase,Automatische Bestandsreserve für Auftrag bei Kauf,
 Auto match and set the Party in Bank Transactions,Partei automatisch anhand der Kontonummer bzw. IBAN zuordnen,
 Auto write off precision loss while consolidation,Präzisionsverluste bei der Konsolidierung automatisch abschreiben,
 Automatically Add Filtered Item To Cart,Gefilterten Artikel automatisch zum Warenkorb hinzufügen,
@@ -9963,7 +9964,7 @@ Bundle Items,Bündelartikel,
 Buying & Selling Settings,Einkaufs- & Verkaufseinstellungen,
 Buying and Selling,Kaufen und Verkaufen,
 "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option.","Standardmäßig wird die ID des Lieferanten basierend auf dem eingegebenen Lieferantennamen festgelegt. Wenn Sie möchten, dass Lieferanten nach einem <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Nummernkreis</a> benannt werden, wählen Sie die Option 'Nummernkreis'.",
-Bypass credit check at Sales Order,Kreditprüfung im Kundenauftrag umgehen,
+Bypass credit check at Sales Order,Kreditprüfung im Auftrag umgehen,
 COGS By Item Group,Herstellungskosten nach Artikelgruppe,
 COGS Debit,Herstellungskosten Soll,
 CRM Note,CRM Notiz,
@@ -9992,7 +9993,7 @@ Cannot complete task {0} as its dependant task {1} are not completed / cancelled
 Cannot convert Task to non-group because the following child Tasks exist: {0}.,"Aufgabe kann nicht in Nicht-Gruppe konvertiert werden, da die folgenden untergeordneten Aufgaben existieren: {0}.",
 Cannot convert to Group because Account Type is selected.,"Kann nicht in eine Gruppe umgewandelt werden, weil Kontentyp ausgewählt ist.",
 Cannot create Stock Reservation Entries for future dated Purchase Receipts.,Für in der Zukunft datierte Kaufbelege kann keine Bestandsreservierung erstellt werden.,
-Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list.,"Es kann keine Pickliste für den Kundenauftrag {0} erstellt werden, da dieser einen reservierten Bestand hat. Bitte heben Sie die Reservierung des Bestands auf, um eine Pickliste zu erstellen.",
+Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list.,"Es kann keine Pickliste für den Auftrag {0} erstellt werden, da dieser einen reservierten Bestand hat. Bitte heben Sie die Reservierung des Bestands auf, um eine Pickliste zu erstellen.",
 Cannot create accounting entries against disabled accounts: {0},Es kann nicht auf deaktivierte Konten gebucht werden: {0},
 Cannot make any transactions until the deletion job is completed,"Es können keine Transaktionen durchgeführt werden, bis der Löschvorgang abgeschlossen ist",
 Cannot produce more item for {0},Kann nicht mehr Artikel für {0} produzieren,
@@ -10066,7 +10067,7 @@ Connections,Verknüpfungen,
 Consider Minimum Order Qty,Mindestbestellmenge berücksichtigen,
 Consider Rejected Warehouses,Lager für abgelehnte Ware einschließen,
 Considered In Paid Amount,Im gezahlten Betrag berücksichtigt,
-Consolidate Sales Order Items,Kundenauftragspositionen konsolidieren,
+Consolidate Sales Order Items,Auftragspositionen konsolidieren,
 Consolidate Sub Assembly Items,Artikel der Unterbaugruppe konsolidieren,
 Consumed Asset Total Value,Wer des verbrauchten Anlagevermögens,
 Consumed Assets,Verbrauchte Vermögensgegenstände,
@@ -10130,7 +10131,7 @@ Create a Material Transfer Entry,Materialübertrag erstellen,
 Create a Product,Produkt erstellen,
 Create a Quotation,Angebot erstellen,
 Create a Sales Item,Verkaufsartikel erstellen,
-Create a Sales Order,Kundenauftrag erstellen,
+Create a Sales Order,Auftrag erstellen,
 Create a Supplier,Lieferanten erstellen,
 Create a Warehouse,Lager erstellen,
 Create a new Item,Neuen Artikel erstellen,
@@ -10140,10 +10141,10 @@ Create an Asset Category,Vermögensgegenstand-Kategorie erstellen,
 Create an Asset Item,Vermögensgegenstand-Artikel erstellen,
 Create an Item,Einen Artikel erstellen,
 Create and Send Quotation,Angebot erstellen und versenden,
-Create first Purchase Order,Ersten Lieferantenauftrag erstellen,
+Create first Purchase Order,Erste Bestellung erstellen,
 Create your first Bill of Materials,Erstellen Sie Ihre erste Stückliste,
 Create your first Quotation,Erstellen Sie Ihr erstes Angebot,
-Create your first Sales Order,Erstellen Sie Ihren ersten Kundenauftrag,
+Create your first Sales Order,Erstellen Sie Ihren ersten Auftrag,
 Create your first Work Order,Erstellen Sie Ihren ersten Arbeitsauftrag,
 Create {0} {1} ?,{0} {1} erstellen?,
 Created On,Erstellt am,
@@ -10452,7 +10453,7 @@ Get Raw Materials for Transfer,Rohstoffe zum Transfer abrufen,
 Get Scrap Items,Ausschussartikel abrufen,
 Get Stock,Lagerbestand abrufen,
 Get Sub Assembly Items,Artikel der Unterbaugruppe abrufen,
-Get Timesheets,Projektzeiterfassung abrufen,
+Get Timesheets,Zeiterfassung abrufen,
 Get stops from,Stationen abrufen von,
 Getting Scrap Items,Ausschussartikel abrufen,
 Give free item for every N quantity,Einen Artikel für jede Menge N verschenken,
@@ -10633,7 +10634,7 @@ Item valuation reposting in progress. Report might show incorrect item valuation
 Item {0} cannot be added as a sub-assembly of itself,Artikel {0} kann nicht als Unterbaugruppe für sich selbst hinzugefügt werden,
 Item {0} cannot be ordered more than {1} against Blanket Order {2}.,Artikel {0} kann nicht mehr als {1} im Rahmenauftrag {2} bestellt werden.,
 Item {0} entered multiple times.,Artikel {0} mehrfach eingegeben.,
-Item {0} is already reserved/delivered against Sales Order {1}.,Der Artikel {0} ist bereits für den Kundenauftrag {1} reserviert/geliefert.,
+Item {0} is already reserved/delivered against Sales Order {1}.,Der Artikel {0} ist bereits für den Auftrag {1} reserviert/geliefert.,
 Item {0} must be a Non-Stock Item,Artikel {0} ein Artikel ohne Lagerhaltung sein,
 Item {0} not found in 'Raw Materials Supplied' table in {1} {2},Artikel {0} wurde in der Tabelle „Gelieferte Rohstoffe“ in {1} {2} nicht gefunden,
 Item {0} not found.,Artikel {0} nicht gefunden.,
@@ -10705,7 +10706,7 @@ Let's create a new Asset item,Lassen Sie uns einen neuen Vermögensgegenstand-Ar
 Let's review existing Asset Category,Lassen Sie uns die bestehende Vermögensgegenstand-Kategorie überprüfen,
 Let's review your Company,Lassen Sie uns Ihr Unternehmen betrachten,
 Let's walk-through Chart of Accounts to review setup,"Gehen wir den Kontenplan durch, um die Einrichtung zu überprüfen",
-Let’s convert your first Sales Order against a Quotation,Konvertieren wir Ihr erstes Angebot in einen Kundenauftrag,
+Let’s convert your first Sales Order against a Quotation,Konvertieren wir Ihr erstes Angebot in einen Auftrag,
 Let’s create a Workstation,Lass uns einen Arbeitsplatz erstellen,
 Let’s create a stock opening entry,Erstellen wir einen Eintrag für den Anfangsbestand,
 Let’s create an Operation,Lassen Sie uns einen Vorgang erstellen,
@@ -10713,7 +10714,7 @@ Let’s create your first  warehouse ,Lassen Sie uns Ihr erstes Lager erstellen 
 Let’s create your first Customer,Lassen Sie uns Ihren ersten Kunden anlegen,
 Let’s create your first Material Request,Lassen Sie uns Ihre erste Materialanfrage erstellen,
 Let’s create your first Purchase Invoice,Lassen Sie uns Ihre erste Eingangsrechnung erstellen,
-Let’s create your first Purchase Order,Lassen Sie uns Ihren ersten Lieferantenauftrag erstellen,
+Let’s create your first Purchase Order,Lassen Sie uns Ihre erste Bestellung erstellen,
 Let’s create your first Quotation,Lassen Sie uns Ihr erstes Angebot erstellen,
 Let’s create your first Supplier,Lassen Sie uns Ihren ersten Lieferanten erstellen,
 Let’s setup your first Letter Head,Lassen Sie uns Ihren ersten Briefkopf einrichten,
@@ -10839,7 +10840,7 @@ No employee was scheduled for call popup,Es war kein Mitarbeiter für das Anruf-
 No failed logs,Keine fehlgeschlagenen Protokolle,
 No item available for transfer.,Kein Artikel zur Übertragung verfügbar.,
 No items are available in sales orders {0} for production,In Kundenaufträgen {0} sind keine Artikel für die Produktion verfügbar,
-No items are available in the sales order {0} for production,Im Kundenauftrag {0} sind keine Artikel für die Produktion verfügbar,
+No items are available in the sales order {0} for production,Im Auftrag {0} sind keine Artikel für die Produktion verfügbar,
 No items in cart,Keine Artikel im Warenkorb,
 No matches occurred via auto reconciliation,Keine Treffer beim automatischen Abgleich,
 No more children on Left,Keine Unterknoten mehr auf der linken Seite,
@@ -11049,8 +11050,8 @@ Please select a date,Bitte wählen Sie ein Datum,
 Please select a date and time,Bitte wählen Sie ein Datum und eine Uhrzeit,
 Please select a row to create a Reposting Entry,"Bitte wählen Sie eine Zeile aus, um einen Umbuchungseintrag zu erstellen",
 Please select a supplier for fetching payments.,"Bitte wählen Sie einen Lieferanten aus, um Zahlungen abzurufen.",
-Please select a valid Purchase Order that has Service Items.,Bitte wählen Sie einen gültigen Lieferantenauftrag mit Serviceartikeln.,
-Please select a valid Purchase Order that is configured for Subcontracting.,"Bitte wählen Sie einen gültigen Lieferantenauftrag, der für die Vergabe von Unteraufträgen konfiguriert ist.",
+Please select a valid Purchase Order that has Service Items.,Bitte wählen Sie eine gültige Bestellung mit Serviceartikeln.,
+Please select a valid Purchase Order that is configured for Subcontracting.,"Bitte wählen Sie eine gültige Bestellung, die für die Vergabe von Unteraufträgen konfiguriert ist.",
 Please select an item code before setting the warehouse.,"Bitte wählen Sie einen Artikelcode aus, bevor Sie das Lager festlegen.",
 Please select either the Item or Warehouse or Warehouse Type filter to generate the report.,"Bitte wählen Sie entweder den Filter „Artikel“, „Lager“ oder „Lagertyp“ aus, um den Bericht zu generieren.",
 Please select items,Bitte Artikel auswählen,
@@ -11354,9 +11355,9 @@ SLA Paused On,SLA pausiert am,
 SLA will be applied on every {0},SLA wird alle {0} angewendet,
 STATEMENTS OF ACCOUNTS,KONTOAUSZÜGE,
 Salary Currency,Gehaltswährung,
-Sales Invoice {0} must be deleted before cancelling this Sales Order,Ausgangsrechnung {0} muss vor der Stornierung dieses Kundenauftrags gelöscht werden,
-Sales Order Reference,Kundenauftrag Referenz,
-Sales Order Status,Kundenauftrag Status,
+Sales Invoice {0} must be deleted before cancelling this Sales Order,Ausgangsrechnung {0} muss vor der Stornierung dieses Auftrags gelöscht werden,
+Sales Order Reference,Auftrag Referenz,
+Sales Order Status,Auftrag Status,
 Sales Partner ,Vertriebspartner ,
 Sales Pipeline Analytics,Analyse der Vertriebspipeline,
 Sales Update Frequency in Company and Project,Häufigkeit der Umsatzaktualisierung in Unternehmen und Projekten,
@@ -11399,7 +11400,7 @@ Select the Warehouse,Wählen Sie das Lager aus,
 Select the date and your timezone,Wählen Sie das Datum und Ihre Zeitzone,
 Select the raw materials (Items) required to manufacture the Item,"Wählen Sie die Rohstoffe (Artikel) aus, die zur Herstellung des Artikels benötigt werden",
 "Select whether to get items from a Sales Order or a Material Request. For now select <b>Sales Order</b>.
- A Production Plan can also be created manually where you can select the Items to manufacture.","Wählen Sie, ob Sie Artikel aus einem Kundenauftrag oder einer Materialanforderung abrufen möchten. Wählen Sie erst einmal <b>Kundenauftrag</b>.
+ A Production Plan can also be created manually where you can select the Items to manufacture.","Wählen Sie, ob Sie Artikel aus einem Auftrag oder einer Materialanforderung abrufen möchten. Wählen Sie erst einmal <b>Auftrag</b>.
  Ein Produktionsplan kann auch manuell erstellt werden, wobei Sie die zu produzierenden Artikel auswählen können.",
 Select your weekly off day,Wählen Sie einen wöchentlich freien Tag,
 Selected Vouchers,Ausgewählte Belege,
@@ -11697,6 +11698,7 @@ Update Outstanding for Self,Ausstehenden Betrag für dieses Dokument aktualisier
 Update Rate as per Last Purchase,Rate gemäß dem letzten Kauf aktualisieren,
 Update Stock Opening Balance,Lageranfangsbestand aktualisieren,
 Update frequency of Project,Aktualisierungshäufigkeit des Projekts,
+Update Total Purchase Cost,Gesamtkosten aktualisieren,
 "Updating {0} of {1}, {2}","{0} von {1}, {2} wird aktualisiert",
 Upload Bank Statement,Kontoauszug hochladen,
 Use Batch-wise Valuation,Chargenweise Bewertung verwenden,
@@ -11742,7 +11744,7 @@ Weekly Time to send,Wöchentliche Sendezeit,
 Weight (kg),Gewicht (Kg),
 "When a parent warehouse is chosen, the system conducts stock checks against the associated child warehouses","Wenn ein übergeordnetes Lager ausgewählt wird, führt das System Bestandsprüfungen mit den zugehörigen untergeordneten Lagern durch",
 "When creating an Item, entering a value for this field will automatically create an Item Price at the backend.","Wenn Sie bei der Erstellung eines Artikels einen Wert für dieses Feld eingeben, wird automatisch ein Artikelpreis erstellt.",
-"While making Purchase Invoice from Purchase Order, use Exchange Rate on Invoice's transaction date rather than inheriting it from Purchase Order. Only applies for Purchase Invoice.","Einzelpreis am Transaktionsdatum der Rechnung verwenden, anstatt ihn aus dem Lieferantenauftrag zu übernehmen. Gilt nur für Eingangsrechnungen.",
+"While making Purchase Invoice from Purchase Order, use Exchange Rate on Invoice's transaction date rather than inheriting it from Purchase Order. Only applies for Purchase Invoice.","Einzelpreis am Transaktionsdatum der Rechnung verwenden, anstatt ihn aus der Bestellung zu übernehmen. Gilt nur für Eingangsrechnungen.",
 Width (cm),Breite (cm),
 Withdrawal,Auszahlung,
 Work Order Consumed Materials,In Arbeitsauftrag verbrauchtes Material,
@@ -11755,7 +11757,7 @@ Wrong Company,Falsches Unternehmen,
 Wrong Template,Falsche Vorlage,
 Yes,Ja,
 You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time.,"Sie sind nicht berechtigt, Lagertransaktionen für Artikel {0} im Lager {1} vor diesem Zeitpunkt durchzuführen/zu bearbeiten.",
-You are picking more than required quantity for the item {0}. Check if there is any other pick list created for the sales order {1}.,"Sie kommissionieren mehr als die erforderliche Menge für den Artikel {0}. Prüfen Sie, ob eine andere Pickliste für den Kundenauftrag erstellt wurde {1}.",
+You are picking more than required quantity for the item {0}. Check if there is any other pick list created for the sales order {1}.,"Sie kommissionieren mehr als die erforderliche Menge für den Artikel {0}. Prüfen Sie, ob eine andere Pickliste für den Auftrag erstellt wurde {1}.",
 "You can set it as a machine name or operation type. For example, stiching machine 12",Sie können es als Maschinenname oder Betriebsart festlegen. Zum Beispiel Nähmaschine 12,
 "You can set the filters to narrow the results, then click on Generate New Report to see the updated report.","Sie können Filter festlegen, um die Ergebnisse einzugrenzen. Klicken Sie auf „Neuen Bericht erstellen“, um den aktualisierten Bericht anzuzeigen.",
 You can't make any changes to Job Card since Work Order is closed.,"Sie können keine Änderungen an der Jobkarte vornehmen, da der Arbeitsauftrag geschlossen ist.",
