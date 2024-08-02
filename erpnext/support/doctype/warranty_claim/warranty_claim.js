@@ -12,7 +12,7 @@ frappe.ui.form.on("Warranty Claim", {
 		frm.set_query("serial_no", () => {
 			let filters = {
 				company: frm.doc.company,
-				status: ["in",["Delivered"]],
+				status: ["in", ["Delivered"]],
 			};
 
 			if (frm.doc.item_code) {
