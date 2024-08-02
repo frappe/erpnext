@@ -47,9 +47,11 @@ def validate_columns(data):
 
 	no_of_columns = max([len(d) for d in data])
 
-	if no_of_columns > 8:
+	if no_of_columns != 8:
 		frappe.throw(
-			_("More columns found than expected. Please compare the uploaded file with standard template"),
+			_(
+				"Columns are not according to template. Please compare the uploaded file with standard template"
+			),
 			title=(_("Wrong Template")),
 		)
 
