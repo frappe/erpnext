@@ -199,6 +199,11 @@ frappe.query_reports["General Ledger"] = {
 			label: __("Ignore Exchange Rate Revaluation Journals"),
 			fieldtype: "Check",
 		},
+		{
+			fieldname: "ignore_cr_dr_notes",
+			label: __("Ignore System Generated Credit / Debit Notes"),
+			fieldtype: "Check",
+		},
 	],
 };
 
