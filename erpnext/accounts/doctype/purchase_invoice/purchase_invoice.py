@@ -361,7 +361,8 @@ class PurchaseInvoice(BuyingController):
 				)
 				.run()
 			)
-			self.set_onload("enable_apply_tds", True if po_with_tds else False)
+
+			self.set_onload("enable_apply_tds", True if (po_with_tds or not tds_category) else False)
 
 		super().set_missing_values(for_validate)
 
