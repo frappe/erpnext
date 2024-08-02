@@ -221,7 +221,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.is_composite_asset",
    "fieldname": "gross_purchase_amount",
    "fieldtype": "Currency",
    "label": "Gross Purchase Amount",
@@ -580,7 +579,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2024-07-07 22:27:14.733839",
+ "modified": "2024-08-01 16:39:09.340973",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
