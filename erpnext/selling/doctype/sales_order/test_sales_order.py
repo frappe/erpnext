@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import json
+from unittest.mock import patch
 
 import frappe
 import frappe.permissions
@@ -9,6 +10,7 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
+from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
 from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
 from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
 	make_maintenance_schedule,
@@ -31,7 +33,7 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
-class TestSalesOrder(FrappeTestCase):
+class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -46,6 +48,9 @@ class TestSalesOrder(FrappeTestCase):
 			"Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", cls.unlink_setting
 		)
 		super().tearDownClass()
+
+	def setUp(self):
+		self.create_customer("_Test Customer Credit")
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -1956,10 +1961,48 @@ class TestSalesOrder(FrappeTestCase):
 				self.assertEqual(so.items[0].rate, scenario.get("expected_rate"))
 				self.assertEqual(so.packed_items[0].rate, scenario.get("expected_rate"))
 
-	def test_sales_order_advance_payment_status(self):
+	@patch(
+		# this also shadows one (1) call to _get_payment_gateway_controller
+		"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+		return_value=None,
+	)
+	def test_sales_order_advance_payment_status(self, mocked_get_payment_url):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 
+		# Flow progressing to SI with payment entries "moved" from SO to SI
+		so = make_sales_order(qty=1, rate=100, do_not_submit=True)
+		# no-op; for optical consistency with how a webshop SO would look like
+		so.order_type = "Shopping Cart"
+		so.submit()
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested")
+
+		pr = make_payment_request(
+			dt=so.doctype, dn=so.name, order_type="Shopping Cart", submit_doc=True, return_doc=True
+		)
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
+
+		pe = pr.set_as_paid()
+		pr.reload()  # status updated
+		pe.reload()  # references moved to Sales Invoice
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pe.references[0].reference_doctype, "Sales Invoice")
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid")
+
+		pe.cancel()
+		pr.reload()
+		self.assertEqual(pr.status, "Paid")  # TODO: this might be a bug
+		so.reload()  # reload
+		# regardless, since the references have already "handed-over" to SI,
+		# the SO keeps its historical state at the time of hand over
+		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Fully Paid")
+
+		pr.cancel()
+		self.assertEqual(
+			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
+		)  # TODO: this might be a bug; handover has happened
+
+		# Flow NOT progressing to SI with payment entries NOT "moved"
 		so = make_sales_order(qty=1, rate=100)
 		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested")
 
@@ -1971,11 +2014,15 @@ class TestSalesOrder(FrappeTestCase):
 
 		pe.reload()
 		pe.cancel()
-		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested")
+		self.assertEqual(
+			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Requested"
+		)  # here: reset
 
 		pr.reload()
 		pr.cancel()
-		self.assertEqual(frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested")
+		self.assertEqual(
+			frappe.db.get_value(so.doctype, so.name, "advance_payment_status"), "Not Requested"
+		)  # here: reset
 
 	def test_pick_list_without_rejected_materials(self):
 		serial_and_batch_item = make_item(
@@ -2128,13 +2175,37 @@ class TestSalesOrder(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "update_existing_price_list_rate", 0)
 		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
 
-	def test_discount_on_rate_greater_than_price_list(self):
+
+  def test_discount_on_rate_greater_than_price_list(self):
 		item = make_item("_Discount Test")
 		so = make_sales_order(item_code=item.name, qty=1, rate=200, price_list_rate=100, do_not_submit=True)
 		so[0].rate = 120
 		so.save()
 		self.assertEqual(so[0].margin_rate_or_amount, 20)
 		self.assertEqual(so[0].discount_amount, 0)
+
+   
+	def test_credit_limit_on_so_reopning(self):
+		# set credit limit
+		company = "_Test Company"
+		customer = frappe.get_doc("Customer", self.customer)
+		customer.credit_limits = []
+		customer.append(
+			"credit_limits", {"company": company, "credit_limit": 1000, "bypass_credit_limit_check": False}
+		)
+		customer.save()
+
+		so1 = make_sales_order(qty=9, rate=100, do_not_submit=True)
+		so1.customer = self.customer
+		so1.save().submit()
+
+		so1.update_status("Closed")
+
+		so2 = make_sales_order(qty=9, rate=100, do_not_submit=True)
+		so2.customer = self.customer
+		so2.save().submit()
+
+		self.assertRaises(frappe.ValidationError, so1.update_status, "Draft")
 
 
 def automatically_fetch_payment_terms(enable=1):

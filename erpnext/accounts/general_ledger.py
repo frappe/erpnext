@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.meta import get_field_precision
 from frappe.utils import cint, flt, formatdate, getdate, now
+from frappe.utils.dashboard import cache_source
 
 import erpnext
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
@@ -240,9 +241,15 @@ def merge_similar_entries(gl_map, precision=None):
 			same_head.debit_in_account_currency = flt(same_head.debit_in_account_currency) + flt(
 				entry.debit_in_account_currency
 			)
+			same_head.debit_in_transaction_currency = flt(same_head.debit_in_transaction_currency) + flt(
+				entry.debit_in_transaction_currency
+			)
 			same_head.credit = flt(same_head.credit) + flt(entry.credit)
 			same_head.credit_in_account_currency = flt(same_head.credit_in_account_currency) + flt(
 				entry.credit_in_account_currency
+			)
+			same_head.credit_in_transaction_currency = flt(same_head.credit_in_transaction_currency) + flt(
+				entry.credit_in_transaction_currency
 			)
 		else:
 			merged_gl_map.append(entry)
@@ -304,6 +311,18 @@ def check_if_in_list(gle, gl_map):
 def toggle_debit_credit_if_negative(gl_map):
 	for entry in gl_map:
 		# toggle debit, credit if negative entry
+		if flt(entry.debit) < 0 and flt(entry.credit) < 0 and flt(entry.debit) == flt(entry.credit):
+			entry.credit *= -1
+			entry.debit *= -1
+
+		if (
+			flt(entry.debit_in_account_currency) < 0
+			and flt(entry.credit_in_account_currency) < 0
+			and flt(entry.debit_in_account_currency) == flt(entry.credit_in_account_currency)
+		):
+			entry.credit_in_account_currency *= -1
+			entry.debit_in_account_currency *= -1
+
 		if flt(entry.debit) < 0:
 			entry.credit = flt(entry.credit) - flt(entry.debit)
 			entry.debit = 0.0
@@ -574,6 +593,8 @@ def make_reverse_gl_entries(
 	and make reverse gl entries by swapping debit and credit
 	"""
 
+	immutable_ledger_enabled = is_immutable_ledger_enabled()
+
 	if not gl_entries:
 		gl_entry = frappe.qb.DocType("GL Entry")
 		gl_entries = (
@@ -605,7 +626,6 @@ def make_reverse_gl_entries(
 			for x in gl_entries:
 				query = (
 					frappe.qb.update(gle)
-					.set(gle.is_cancelled, True)
 					.set(gle.modified, now())
 					.set(gle.modified_by, frappe.session.user)
 					.where(
@@ -620,9 +640,14 @@ def make_reverse_gl_entries(
 						& (gle.voucher_detail_no == x.voucher_detail_no)
 					)
 				)
+
+				if not immutable_ledger_enabled:
+					query = query.set(gle.is_cancelled, True)
+
 				query.run()
 		else:
-			set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
+			if not immutable_ledger_enabled:
+				set_as_cancel(gl_entries[0]["voucher_type"], gl_entries[0]["voucher_no"])
 
 		for entry in gl_entries:
 			new_gle = copy.deepcopy(entry)
@@ -640,6 +665,10 @@ def make_reverse_gl_entries(
 
 			new_gle["remarks"] = "On cancellation of " + new_gle["voucher_no"]
 			new_gle["is_cancelled"] = 1
+
+			if immutable_ledger_enabled:
+				new_gle["is_cancelled"] = 0
+				new_gle["posting_date"] = frappe.form_dict.get("posting_date") or getdate()
 
 			if new_gle["debit"] or new_gle["credit"]:
 				make_entry(new_gle, adv_adj, "Yes")
@@ -733,3 +762,7 @@ def validate_allowed_dimensions(gl_entry, dimension_filter_map):
 						),
 						InvalidAccountDimensionError,
 					)
+
+
+def is_immutable_ledger_enabled():
+	return frappe.db.get_single_value("Accounts Settings", "enable_immutable_ledger")

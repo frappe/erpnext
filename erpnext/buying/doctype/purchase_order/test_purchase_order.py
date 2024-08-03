@@ -772,12 +772,7 @@ class TestPurchaseOrder(FrappeTestCase):
 				}
 			).insert()
 		else:
-			account = frappe.db.get_value(
-				"Account",
-				filters={"account_name": account_name, "company": company},
-				fieldname="name",
-				pluck=True,
-			)
+			account = frappe.get_doc("Account", {"account_name": account_name, "company": company})
 
 		return account
 
@@ -807,22 +802,6 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(po_doc.advance_paid, 5000)
 
 		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
-
-		pi = make_purchase_invoice(po_doc.name)
-		pi.append(
-			"advances",
-			{
-				"reference_type": pe.doctype,
-				"reference_name": pe.name,
-				"reference_row": pe.references[0].name,
-				"advance_amount": 5000,
-				"allocated_amount": 5000,
-			},
-		)
-		pi.save().submit()
-		pe.reload()
-		po_doc.reload()
-		self.assertEqual(po_doc.advance_paid, 0)
 
 		company_doc.book_advance_payments_in_separate_party_account = False
 		company_doc.save()
@@ -1127,10 +1106,17 @@ class TestPurchaseOrder(FrappeTestCase):
 		po = create_purchase_order()
 		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Not Initiated")
 
-		pr = make_payment_request(dt=po.doctype, dn=po.name, submit_doc=True, return_doc=True)
+		pr = make_payment_request(
+			dt=po.doctype, dn=po.name, submit_doc=True, return_doc=True, payment_request_type="Outward"
+		)
+
+		po.reload()
 		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Initiated")
 
 		pe = get_payment_entry(po.doctype, po.name).save().submit()
+
+		pr.reload()
+		self.assertEqual(pr.status, "Paid")
 		self.assertEqual(frappe.db.get_value(po.doctype, po.name, "advance_payment_status"), "Fully Paid")
 
 		pe.reload()

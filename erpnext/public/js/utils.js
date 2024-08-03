@@ -51,38 +51,7 @@ $.extend(erpnext, {
 	},
 
 	setup_serial_or_batch_no: function () {
-		let grid_row = cur_frm.open_grid_row();
-		if (
-			!grid_row ||
-			!grid_row.grid_form.fields_dict.serial_no ||
-			grid_row.grid_form.fields_dict.serial_no.get_status() !== "Write"
-		)
-			return;
-
-		frappe.model.get_value(
-			"Item",
-			{ name: grid_row.doc.item_code },
-			["has_serial_no", "has_batch_no"],
-			({ has_serial_no, has_batch_no }) => {
-				Object.assign(grid_row.doc, { has_serial_no, has_batch_no });
-
-				if (has_serial_no) {
-					attach_selector_button(
-						__("Add Serial No"),
-						grid_row.grid_form.fields_dict.serial_no.$wrapper,
-						this,
-						grid_row
-					);
-				} else if (has_batch_no) {
-					attach_selector_button(
-						__("Pick Batch No"),
-						grid_row.grid_form.fields_dict.batch_no.$wrapper,
-						this,
-						grid_row
-					);
-				}
-			}
-		);
+		// Deprecated in v15
 	},
 
 	route_to_adjustment_jv: (args) => {
@@ -430,30 +399,31 @@ $.extend(erpnext.utils, {
 			item_row.has_batch_no = r.message.has_batch_no;
 			item_row.has_serial_no = r.message.has_serial_no;
 
-			frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function () {
-				new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
-					if (r) {
-						let update_values = {
-							serial_and_batch_bundle: r.name,
-							qty: Math.abs(r.total_qty),
-						};
+			new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
+				if (r) {
+					let update_values = {
+						serial_and_batch_bundle: r.name,
+						qty: Math.abs(r.total_qty),
+					};
 
-						if (!warehouse_field) {
-							warehouse_field = "warehouse";
-						}
-
-						if (r.warehouse) {
-							update_values[warehouse_field] = r.warehouse;
-						}
-
-						frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+					if (!warehouse_field) {
+						warehouse_field = "warehouse";
 					}
-				});
+
+					if (r.warehouse) {
+						update_values[warehouse_field] = r.warehouse;
+					}
+
+					frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+				}
 			});
 		});
 	},
 
 	get_fiscal_year: function (date, with_dates = false, boolean = false) {
+		if (!frappe.boot.setup_complete) {
+			return;
+		}
 		if (!date) {
 			date = frappe.datetime.get_today();
 		}
@@ -936,12 +906,15 @@ erpnext.utils.map_current_doc = function (opts) {
 
 	if (opts.source_doctype) {
 		let data_fields = [];
-		if (opts.source_doctype == "Purchase Receipt") {
-			data_fields.push({
-				fieldname: "merge_taxes",
-				fieldtype: "Check",
-				label: __("Merge taxes from multiple documents"),
-			});
+		if (["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)) {
+			let target_meta = frappe.get_meta(cur_frm.doc.doctype);
+			if (target_meta.fields.find((f) => f.fieldname === "taxes")) {
+				data_fields.push({
+					fieldname: "merge_taxes",
+					fieldtype: "Check",
+					label: __("Merge taxes from multiple documents"),
+				});
+			}
 		}
 		const d = new frappe.ui.form.MultiSelectDialog({
 			doctype: opts.source_doctype,
@@ -961,8 +934,17 @@ erpnext.utils.map_current_doc = function (opts) {
 					frappe.msgprint(__("Please select {0}", [opts.source_doctype]));
 					return;
 				}
-				opts.source_name = values;
-				if (opts.allow_child_item_selection || opts.source_doctype == "Purchase Receipt") {
+
+				if (values.constructor === Array) {
+					opts.source_name = [...new Set(values)];
+				} else {
+					opts.source_name = values;
+				}
+
+				if (
+					opts.allow_child_item_selection ||
+					["Purchase Receipt", "Delivery Note"].includes(opts.source_doctype)
+				) {
 					// args contains filtered child docnames
 					opts.args = args;
 				}
@@ -1207,5 +1189,40 @@ $.extend(erpnext.stock.utils, {
 	set_item_details_using_barcode(frm, child_row, callback) {
 		const barcode_scanner = new erpnext.utils.BarcodeScanner({ frm: frm });
 		barcode_scanner.scan_api_call(child_row.barcode, callback);
+	},
+
+	get_serial_range(range_string, separator) {
+		/* Return an array of serial numbers generated from a range string.
+
+		Examples (using separator "::"):
+			- "1::5" => ["1", "2", "3", "4", "5"]
+			- "SN0009::12" => ["SN0009", "SN0010", "SN0011", "SN0012"]
+			- "ABC//05::8" => ["ABC//05", "ABC//06", "ABC//07", "ABC//08"]
+		*/
+		if (!range_string) {
+			return;
+		}
+
+		const [start_str, end_str] = range_string.trim().split(separator);
+
+		if (!start_str || !end_str) {
+			return;
+		}
+
+		const end_int = parseInt(end_str);
+		const length_difference = start_str.length - end_str.length;
+		const start_int = parseInt(start_str.substring(length_difference));
+
+		if (isNaN(start_int) || isNaN(end_int)) {
+			return;
+		}
+
+		const serial_numbers = Array(end_int - start_int + 1)
+			.fill(1)
+			.map((x, y) => x + y)
+			.map((x) => x + start_int - 1);
+		return serial_numbers.map((val) => {
+			return start_str.substring(0, length_difference) + val.toString().padStart(end_str.length, "0");
+		});
 	},
 });

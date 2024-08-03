@@ -158,14 +158,32 @@ class Batch(Document):
 
 	def set_batchwise_valuation(self):
 		if self.is_new():
+			if frappe.db.get_single_value("Stock Settings", "do_not_use_batchwise_valuation"):
+				self.use_batchwise_valuation = 0
+				return
+
 			self.use_batchwise_valuation = 1
 
 	def before_save(self):
+		self.set_expiry_date()
+
+	def set_expiry_date(self):
 		has_expiry_date, shelf_life_in_days = frappe.db.get_value(
 			"Item", self.item, ["has_expiry_date", "shelf_life_in_days"]
 		)
+
 		if not self.expiry_date and has_expiry_date and shelf_life_in_days:
-			self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
+			if (
+				not self.manufacturing_date
+				and self.reference_doctype in ["Stock Entry", "Purchase Receipt", "Purchase Invoice"]
+				and self.reference_name
+			):
+				self.manufacturing_date = frappe.db.get_value(
+					self.reference_doctype, self.reference_name, "posting_date"
+				)
+
+			if self.manufacturing_date:
+				self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
 
 		if has_expiry_date and not self.expiry_date:
 			frappe.throw(
@@ -199,6 +217,7 @@ def get_batch_qty(
 	posting_date=None,
 	posting_time=None,
 	ignore_voucher_nos=None,
+	for_stock_levels=False,
 ):
 	"""Returns batch actual qty if warehouse is passed,
 	        or returns dict of qty by warehouse if warehouse is None
@@ -207,7 +226,8 @@ def get_batch_qty(
 
 	:param batch_no: Optional - give qty for this batch no
 	:param warehouse: Optional - give qty for this warehouse
-	:param item_code: Optional - give qty for this item"""
+	:param item_code: Optional - give qty for this item
+	:param for_stock_levels: True consider expired batches"""
 
 	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 		get_auto_batch_nos,
@@ -222,6 +242,7 @@ def get_batch_qty(
 			"posting_time": posting_time,
 			"batch_no": batch_no,
 			"ignore_voucher_nos": ignore_voucher_nos,
+			"for_stock_levels": for_stock_levels,
 		}
 	)
 

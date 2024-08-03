@@ -1,4 +1,10 @@
 files:
   - source: /erpnext/locale/main.pot
     translation: /erpnext/locale/%two_letters_code%.po
-pull_request_title: "chore: sync translations from crowdin"
+pull_request_title: "fix: sync translations from crowdin"
+pull_request_labels:
+  - translation
+pull_request_reviewers:
+  - barredterra # change to your GitHub username if you copied this file
+commit_message: "fix: %language% translations"
+append_commit_message: false

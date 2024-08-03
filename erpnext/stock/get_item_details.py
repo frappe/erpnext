@@ -74,7 +74,6 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 			args["bill_date"] = doc.get("bill_date")
 
 	out = get_basic_details(args, item, overwrite_warehouse)
-
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(
 		args.company,
@@ -293,12 +292,26 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	expense_account = None
 
-	if args.get("doctype") == "Purchase Invoice" and item.is_fixed_asset:
-		from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+	if item.is_fixed_asset:
+		from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 
-		expense_account = get_asset_category_account(
-			fieldname="fixed_asset_account", item=args.item_code, company=args.company
-		)
+		if is_cwip_accounting_enabled(item.asset_category):
+			expense_account = get_asset_account(
+				"capital_work_in_progress_account",
+				asset_category=item.asset_category,
+				company=args.company,
+			)
+		elif args.get("doctype") in (
+			"Purchase Invoice",
+			"Purchase Receipt",
+			"Purchase Order",
+			"Material Request",
+		):
+			from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+
+			expense_account = get_asset_category_account(
+				fieldname="fixed_asset_account", item=args.item_code, company=args.company
+			)
 
 	# Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.get("uom"):
@@ -490,12 +503,21 @@ def update_barcode_value(out):
 		out["barcode"] = barcode_data.get(out.item_code)[0]
 
 
-def get_barcode_data(items_list):
+def get_barcode_data(items_list=None, item_code=None):
 	# get item-wise batch no data
 	# example: {'LED-GRE': [Batch001, Batch002]}
 	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
 
 	itemwise_barcode = {}
+	if not items_list and item_code:
+		_dict_item_code = frappe._dict(
+			{
+				"item_code": item_code,
+			}
+		)
+
+		items_list = [frappe._dict(_dict_item_code)]
+
 	for item in items_list:
 		barcodes = frappe.db.get_all("Item Barcode", filters={"parent": item.item_code}, fields="barcode")
 
@@ -831,7 +853,12 @@ def insert_item_price(args):
 
 			item_price = frappe.db.get_value(
 				"Item Price",
-				{"item_code": args.item_code, "price_list": args.price_list, "currency": args.currency},
+				{
+					"item_code": args.item_code,
+					"price_list": args.price_list,
+					"currency": args.currency,
+					"uom": args.stock_uom,
+				},
 				["name", "price_list_rate"],
 				as_dict=1,
 			)
@@ -1176,7 +1203,7 @@ def get_batch_qty(batch_no, warehouse, item_code):
 
 
 @frappe.whitelist()
-def apply_price_list(args, as_doc=False):
+def apply_price_list(args, as_doc=False, doc=None):
 	"""Apply pricelist on a document-like dict object and return as
 	{'parent': dict, 'children': list}
 
@@ -1215,7 +1242,7 @@ def apply_price_list(args, as_doc=False):
 		for item in item_list:
 			args_copy = frappe._dict(args.copy())
 			args_copy.update(item)
-			item_details = apply_price_list_on_item(args_copy)
+			item_details = apply_price_list_on_item(args_copy, doc=doc)
 			children.append(item_details)
 
 	if as_doc:
@@ -1233,10 +1260,10 @@ def apply_price_list(args, as_doc=False):
 		return {"parent": parent, "children": children}
 
 
-def apply_price_list_on_item(args):
+def apply_price_list_on_item(args, doc=None):
 	item_doc = frappe.db.get_value("Item", args.item_code, ["name", "variant_of"], as_dict=1)
 	item_details = get_price_list_rate(args, item_doc)
-	item_details.update(get_pricing_rule_for_item(args))
+	item_details.update(get_pricing_rule_for_item(args, doc=doc))
 
 	return item_details
 

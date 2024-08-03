@@ -9,8 +9,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  regeneratee-pot-file:
-    name: Release
+  regenerate-pot-file:
+    name: Regenerate POT file
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -36,3 +36,4 @@ jobs:
           env:
             GH_TOKEN: ${{ secrets.RELEASE_TOKEN }}
             BASE_BRANCH: ${{ matrix.branch }}
+            PR_REVIEWER: barredterra # change to your GitHub username if you copied this file

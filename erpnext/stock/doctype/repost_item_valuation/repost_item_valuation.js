@@ -128,9 +128,7 @@ frappe.ui.form.on("Repost Item Valuation", {
 			method: "restart_reposting",
 			doc: frm.doc,
 			callback: function (r) {
-				if (!r.exc) {
-					frm.refresh();
-				}
+				frm.reload_doc();
 			},
 		});
 	},

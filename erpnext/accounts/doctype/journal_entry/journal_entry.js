@@ -25,30 +25,6 @@ frappe.ui.form.on("Journal Entry", {
 	refresh: function (frm) {
 		erpnext.toggle_naming_series();
 
-		if (frm.doc.repost_required && frm.doc.docstatus === 1) {
-			frm.set_intro(
-				__(
-					"Accounting entries for this Journal Entry need to be reposted. Please click on 'Repost' button to update."
-				)
-			);
-			frm.add_custom_button(__("Repost Accounting Entries"), () => {
-				frm.call({
-					doc: frm.doc,
-					method: "repost_accounting_entries",
-					freeze: true,
-					freeze_message: __("Reposting..."),
-					callback: (r) => {
-						if (!r.exc) {
-							frappe.msgprint(__("Accounting Entries are reposted."));
-							frm.refresh();
-						}
-					},
-				});
-			})
-				.removeClass("btn-default")
-				.addClass("btn-warning");
-		}
-
 		if (frm.doc.docstatus > 0) {
 			frm.add_custom_button(
 				__("Ledger"),
@@ -453,7 +429,10 @@ frappe.ui.form.on("Journal Entry Account", {
 		}
 	},
 	cost_center: function (frm, dt, dn) {
-		erpnext.journal_entry.set_account_details(frm, dt, dn);
+		// Don't reset for Gain/Loss type journals, as it will make Debit and Credit values '0'
+		if (frm.doc.voucher_type != "Exchange Gain Or Loss") {
+			erpnext.journal_entry.set_account_details(frm, dt, dn);
+		}
 	},
 
 	account: function (frm, dt, dn) {

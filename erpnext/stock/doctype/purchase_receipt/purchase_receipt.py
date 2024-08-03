@@ -15,6 +15,7 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.buying.utils import check_on_hold_or_closed_status
+from erpnext.controllers.accounts_controller import merge_taxes
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_transaction
 
@@ -51,6 +52,7 @@ class PurchaseReceipt(BuyingController):
 		base_net_total: DF.Currency
 		base_rounded_total: DF.Currency
 		base_rounding_adjustment: DF.Currency
+		base_tax_withholding_net_total: DF.Currency
 		base_taxes_and_charges_added: DF.Currency
 		base_taxes_and_charges_deducted: DF.Currency
 		base_total: DF.Currency
@@ -120,6 +122,7 @@ class PurchaseReceipt(BuyingController):
 		supplier_name: DF.Data | None
 		supplier_warehouse: DF.Link | None
 		tax_category: DF.Link | None
+		tax_withholding_net_total: DF.Currency
 		taxes: DF.Table[PurchaseTaxesandCharges]
 		taxes_and_charges: DF.Link | None
 		taxes_and_charges_added: DF.Currency
@@ -236,8 +239,7 @@ class PurchaseReceipt(BuyingController):
 		self.po_required()
 		self.validate_items_quality_inspection()
 		self.validate_with_previous_doc()
-		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
-		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		self.validate_uom_is_integer()
 		self.validate_cwip_accounts()
 		self.validate_provisional_expense_account()
 
@@ -250,6 +252,10 @@ class PurchaseReceipt(BuyingController):
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 		self.reset_default_field_value("rejected_warehouse", "items", "rejected_warehouse")
 		self.reset_default_field_value("set_from_warehouse", "items", "from_warehouse")
+
+	def validate_uom_is_integer(self):
+		super().validate_uom_is_integer("uom", ["qty", "received_qty"], "Purchase Receipt Item")
+		super().validate_uom_is_integer("stock_uom", "stock_qty", "Purchase Receipt Item")
 
 	def validate_cwip_accounts(self):
 		for item in self.get("items"):
@@ -365,6 +371,7 @@ class PurchaseReceipt(BuyingController):
 		else:
 			self.db_set("status", "Completed")
 
+		self.make_bundle_for_sales_purchase_return()
 		self.make_bundle_using_old_serial_batch_fields()
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
@@ -416,13 +423,13 @@ class PurchaseReceipt(BuyingController):
 		self.delete_auto_created_batches()
 		self.set_consumed_qty_in_subcontract_order()
 
-	def get_gl_entries(self, warehouse_account=None):
+	def get_gl_entries(self, warehouse_account=None, via_landed_cost_voucher=False):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		gl_entries = []
 
 		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
-		self.make_tax_gl_entries(gl_entries)
+		self.make_tax_gl_entries(gl_entries, via_landed_cost_voucher)
 		update_regional_gl_entries(gl_entries, self)
 
 		return process_gl_map(gl_entries)
@@ -655,7 +662,7 @@ class PurchaseReceipt(BuyingController):
 
 				if not (
 					(erpnext.is_perpetual_inventory_enabled(self.company) and d.item_code in stock_items)
-					or d.is_fixed_asset
+					or (d.is_fixed_asset and not d.purchase_invoice)
 				):
 					continue
 
@@ -665,19 +672,8 @@ class PurchaseReceipt(BuyingController):
 					else self.get_company_default("stock_received_but_not_billed")
 				)
 				landed_cost_entries = get_item_account_wise_additional_cost(self.name)
-
 				if d.is_fixed_asset:
-					if is_cwip_accounting_enabled(d.asset_category):
-						stock_asset_account_name = get_asset_account(
-							"capital_work_in_progress_account",
-							asset_category=d.asset_category,
-							company=self.company,
-						)
-					else:
-						stock_asset_account_name = get_asset_category_account(
-							"fixed_asset_account", asset_category=d.asset_category, company=self.company
-						)
-
+					stock_asset_account_name = d.expense_account
 					stock_value_diff = (
 						flt(d.base_net_amount) + flt(d.item_tax_amount) + flt(d.landed_cost_voucher_amount)
 					)
@@ -771,9 +767,15 @@ class PurchaseReceipt(BuyingController):
 			posting_date=posting_date,
 		)
 
-	def make_tax_gl_entries(self, gl_entries):
+	def is_landed_cost_booked_for_any_item(self) -> bool:
+		for x in self.items:
+			if x.landed_cost_voucher_amount != 0:
+				return True
+
+		return False
+
+	def make_tax_gl_entries(self, gl_entries, via_landed_cost_voucher=False):
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in self.get("items")])
-		is_asset_pr = any(d.is_fixed_asset for d in self.get("items"))
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -798,27 +800,10 @@ class PurchaseReceipt(BuyingController):
 			against_accounts = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
-			stock_rbnb = (
-				self.get("asset_received_but_not_billed")
-				if is_asset_pr
-				else self.get_company_default("stock_received_but_not_billed")
-			)
 			i = 1
 			for tax in self.get("taxes"):
 				if valuation_tax.get(tax.name):
-					negative_expense_booked_in_pi = frappe.db.sql(
-						"""select name from `tabPurchase Invoice Item` pi
-						where docstatus = 1 and purchase_receipt=%s
-						and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
-							and voucher_no=pi.parent and account=%s)""",
-						(self.name, tax.account_head),
-					)
-
-					if negative_expense_booked_in_pi:
-						account = stock_rbnb
-					else:
-						account = tax.account_head
-
+					account = tax.account_head
 					if i == len(valuation_tax):
 						applicable_amount = amount_including_divisional_loss
 					else:
@@ -854,7 +839,7 @@ class PurchaseReceipt(BuyingController):
 				asset.name,
 				{
 					"gross_purchase_amount": purchase_amount,
-					"purchase_receipt_amount": purchase_amount,
+					"purchase_amount": purchase_amount,
 				},
 			)
 
@@ -918,6 +903,15 @@ class PurchaseReceipt(BuyingController):
 					from_voucher_type="Purchase Receipt",
 					notify=True,
 				)
+
+	def enable_recalculate_rate_in_sles(self):
+		sle_table = frappe.qb.DocType("Stock Ledger Entry")
+		(
+			frappe.qb.update(sle_table)
+			.set(sle_table.recalculate_rate, 1)
+			.where(sle_table.voucher_no == self.name)
+			.where(sle_table.voucher_type == "Purchase Receipt")
+		).run()
 
 
 def get_stock_value_difference(voucher_no, voucher_detail_no, warehouse):
@@ -1091,15 +1085,10 @@ def adjust_incoming_rate_for_pr(doc):
 	for item in doc.get("items"):
 		item.db_update()
 
-	doc.docstatus = 2
-	doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-	doc.make_gl_entries_on_cancel()
+	if doc.doctype == "Purchase Receipt":
+		doc.enable_recalculate_rate_in_sles()
 
-	# update stock & gl entries for submit state of PR
-	doc.docstatus = 1
-	doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-	doc.make_gl_entries()
-	doc.repost_future_sle_and_gle()
+	doc.repost_future_sle_and_gle(force=True)
 
 
 def get_item_wise_returned_qty(pr_doc):
@@ -1121,37 +1110,6 @@ def get_item_wise_returned_qty(pr_doc):
 			as_list=1,
 		)
 	)
-
-
-def merge_taxes(source_taxes, target_doc):
-	from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
-		update_item_wise_tax_detail,
-	)
-
-	existing_taxes = target_doc.get("taxes") or []
-	idx = 1
-	for tax in source_taxes:
-		found = False
-		for t in existing_taxes:
-			if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
-				t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
-				t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
-				update_item_wise_tax_detail(t, tax)
-				found = True
-
-		if not found:
-			tax.charge_type = "Actual"
-			tax.idx = idx
-			idx += 1
-			tax.included_in_print_rate = 0
-			tax.dont_recompute_tax = 1
-			tax.row_id = ""
-			tax.tax_amount = tax.tax_amount_after_discount_amount
-			tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
-			tax.item_wise_tax_detail = tax.item_wise_tax_detail
-			existing_taxes.append(tax)
-
-	target_doc.set("taxes", existing_taxes)
 
 
 @frappe.whitelist()
@@ -1190,7 +1148,12 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 		qty = item_row.qty
 		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
 			qty = item_row.received_qty
+
 		pending_qty = qty - invoiced_qty_map.get(item_row.name, 0)
+
+		if frappe.db.get_single_value("Buying Settings", "bill_for_rejected_quantity_in_purchase_invoice"):
+			return pending_qty, 0
+
 		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
 		if returned_qty:
 			if returned_qty >= pending_qty:
@@ -1199,6 +1162,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 			else:
 				pending_qty -= returned_qty
 				returned_qty = 0
+
 		return pending_qty, returned_qty
 
 	doclist = get_mapped_doc(

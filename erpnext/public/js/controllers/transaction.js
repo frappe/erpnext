@@ -252,9 +252,14 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	toggle_enable_for_stock_uom(field) {
-		frappe.db.get_single_value('Stock Settings', field)
-		.then(value => {
-			this.frm.fields_dict["items"].grid.toggle_enable("stock_qty", value);
+		frappe.call({
+			method: 'erpnext.stock.doctype.stock_settings.stock_settings.get_enable_stock_uom_editing',
+			callback: (r) => {
+				if (r.message) {
+					var value = r.message[field];
+					this.frm.fields_dict["items"].grid.toggle_enable("stock_qty", value);
+				}
+			}
 		});
 	}
 
@@ -320,7 +325,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		const me = this;
-		if (!this.frm.is_new() && this.frm.doc.docstatus === 0) {
+		if (!this.frm.is_new() && this.frm.doc.docstatus === 0 && frappe.model.can_create("Quality Inspection")) {
 			this.frm.add_custom_button(__("Quality Inspection(s)"), () => {
 				me.make_quality_inspection();
 			}, __("Create"));
@@ -415,7 +420,6 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let row = locals[cdt][cdn];
 		if (row.barcode) {
 			erpnext.stock.utils.set_item_details_using_barcode(this.frm, row, (r) => {
-				debugger
 				frappe.model.set_value(cdt, cdn, {
 					"item_code": r.message.item_code,
 					"qty": 1,
@@ -822,44 +826,73 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var set_pricing = function() {
 			if(me.frm.doc.company && me.frm.fields_dict.currency) {
-				var company_currency = me.get_company_currency();
-				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
-
-				if (!me.frm.doc.currency) {
-					me.frm.set_value("currency", company_currency);
-				}
-
-				if (me.frm.doc.currency == company_currency) {
-					me.frm.set_value("conversion_rate", 1.0);
-				}
-				if (me.frm.doc.price_list_currency == company_currency) {
-					me.frm.set_value('plc_conversion_rate', 1.0);
-				}
-				if (company_doc){
-					if (company_doc.default_letter_head) {
-						if(me.frm.fields_dict.letter_head) {
-							me.frm.set_value("letter_head", company_doc.default_letter_head);
-						}
-					}
-					let selling_doctypes_for_tc = ["Sales Invoice", "Quotation", "Sales Order", "Delivery Note"];
-					if (company_doc.default_selling_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-					selling_doctypes_for_tc.includes(me.frm.doc.doctype) && !me.frm.doc.tc_name) {
-						me.frm.set_value("tc_name", company_doc.default_selling_terms);
-					}
-					let buying_doctypes_for_tc = ["Request for Quotation", "Supplier Quotation", "Purchase Order",
-						"Material Request", "Purchase Receipt"];
-					// Purchase Invoice is excluded as per issue #3345
-					if (company_doc.default_buying_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-					buying_doctypes_for_tc.includes(me.frm.doc.doctype) && !me.frm.doc.tc_name) {
-						me.frm.set_value("tc_name", company_doc.default_buying_terms);
-					}
-				}
 				frappe.run_serially([
-					() => me.frm.script_manager.trigger("currency"),
+					() => get_party_currency(),
 					() => me.update_item_tax_map(),
 					() => me.apply_default_taxes(),
-					() => me.apply_pricing_rule()
+					() => me.apply_pricing_rule(),
+					() => set_terms(),
+					() => set_letter_head(),
 				]);
+			}
+		}
+
+		var get_party_currency = function() {
+			var party_type = frappe.meta.has_field(me.frm.doc.doctype, "customer") ? "Customer" : "Supplier";
+			var party_name = me.frm.doc[party_type.toLowerCase()];
+			if (party_name) {
+				frappe.call({
+					method: "frappe.client.get_value",
+					args: {
+						doctype: party_type,
+						filters: { name: party_name },
+						fieldname: "default_currency",
+					},
+					callback: function (r) {
+						if (r.message) {
+							set_currency(r.message.default_currency);
+						}
+					}
+				})
+			} else {
+				set_currency();
+			}
+		}
+
+		var set_currency = function(party_default_currency) {
+			var company_currency = me.get_company_currency();
+			var currency = party_default_currency || company_currency;
+			if (me.frm.doc.currency != currency) {
+				me.frm.set_value("currency", currency);
+			}
+
+			if (me.frm.doc.currency == company_currency) {
+				me.frm.set_value("conversion_rate", 1.0);
+			}
+			if (me.frm.doc.price_list_currency == company_currency) {
+				me.frm.set_value('plc_conversion_rate', 1.0);
+			}
+
+			me.frm.script_manager.trigger("currency");
+		}
+
+		var set_terms = function() {
+			if (frappe.meta.has_field(me.frm.doc.doctype, "tc_name") && !me.frm.doc.tc_name) {
+				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
+				var selling_doctypes = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"];
+				var company_terms_fieldname = selling_doctypes.includes(me.frm.doc.doctype) ? "default_selling_terms" : "default_buying_terms";
+				if (company_doc && company_doc[company_terms_fieldname]) {
+					me.frm.set_value("tc_name", company_doc[company_terms_fieldname]);
+				}
+			}
+		}
+
+		var set_letter_head = function() {
+			if(me.frm.fields_dict.letter_head) {
+				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
+				if (company_doc && company_doc.default_letter_head) {
+					me.frm.set_value("letter_head", company_doc.default_letter_head);
+				}
 			}
 		}
 
@@ -1252,8 +1285,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	}
 
 	qty(doc, cdt, cdn) {
-		if (!this.frm.doc.__onload?.load_after_mapping) {
-			let item = frappe.get_doc(cdt, cdn);
+		let item = frappe.get_doc(cdt, cdn);
+		if (!this.is_a_mapped_document(item)) {
 			// item.pricing_rules = ''
 			frappe.run_serially([
 				() => this.remove_pricing_rule_for_item(item),
@@ -1739,6 +1772,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				me.frm.doc.items.forEach(d => {
 					if (in_list(JSON.parse(data.apply_rule_on_other_items), d[data.apply_rule_on])) {
 						for(var k in data) {
+							if (data.pricing_rule_for == "Discount Percentage" && data.apply_rule_on_other_items && k == "discount_amount") {
+								continue;
+							}
+
 							if (in_list(fields, k) && data[k] && (data.price_or_product_discount === 'Price' || k === 'pricing_rules')) {
 								frappe.model.set_value(d.doctype, d.name, k, data[k]);
 							}
@@ -1752,12 +1789,15 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	apply_product_discount(args) {
 		const items = this.frm.doc.items.filter(d => (d.is_free_item)) || [];
 
-		const exist_items = items.map(row => (row.item_code, row.pricing_rules));
+		const exist_items = items.map(row => { return {item_code: row.item_code, pricing_rules: row.pricing_rules};});
 
 		args.free_item_data.forEach(pr_row => {
 			let row_to_modify = {};
-			if (!items || !in_list(exist_items, (pr_row.item_code, pr_row.pricing_rules))) {
 
+			// If there are no free items, or if the current free item doesn't exist in the table, add it
+			if (!items || !exist_items.filter(e_row => {
+				return e_row.item_code == pr_row.item_code && e_row.pricing_rules == pr_row.pricing_rules;
+			}).length) {
 				row_to_modify = frappe.model.add_child(this.frm.doc,
 					this.frm.doc.doctype + ' Item', 'items');
 
@@ -1780,6 +1820,12 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 	apply_price_list(item, reset_plc_conversion) {
 		// We need to reset plc_conversion_rate sometimes because the call to
 		// `erpnext.stock.get_item_details.apply_price_list` is sensitive to its value
+
+
+		if (this.frm.doc.doctype === "Material Request") {
+			return;
+		}
+
 		if (!reset_plc_conversion) {
 			this.frm.set_value("plc_conversion_rate", "");
 		}
@@ -1795,7 +1841,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		me.in_apply_price_list = true;
 		return this.frm.call({
 			method: "erpnext.stock.get_item_details.apply_price_list",
-			args: {	args: args },
+			args: {	args: args, doc: me.frm.doc },
 			callback: function(r) {
 				if (!r.exc) {
 					frappe.run_serially([
@@ -1941,6 +1987,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let item_codes = [];
 		let item_rates = {};
 		let item_tax_templates = {};
+
+		if (me.frm.doc.is_return && me.frm.doc.return_against) return;
 
 		$.each(this.frm.doc.items || [], function(i, item) {
 			if (item.item_code) {
@@ -2199,6 +2247,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		];
 
 		const me = this;
+		const inspection_type = ["Purchase Receipt", "Purchase Invoice", "Subcontracting Receipt"].includes(this.frm.doc.doctype)
+			? "Incoming" : "Outgoing";
 		const dialog = new frappe.ui.Dialog({
 			title: __("Select Items for Quality Inspection"),
 			size: "extra-large",
@@ -2210,7 +2260,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 					args: {
 						doctype: me.frm.doc.doctype,
 						docname: me.frm.doc.name,
-						items: data.items
+						items: data.items,
+						inspection_type: inspection_type
 					},
 					freeze: true,
 					callback: function (r) {
@@ -2301,6 +2352,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 			if (doc.is_return) {
 				filters["is_return"] = 1;
+				if (["Sales Invoice", "Delivery Note"].includes(doc.doctype)) {
+					filters["is_inward"] = 1;
+				}
 			}
 
 			if (item.warehouse) filters["warehouse"] = item.warehouse;
@@ -2509,27 +2563,25 @@ erpnext.show_serial_batch_selector = function (frm, item_row, callback, on_close
 		}
 	}
 
-	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
-		if (["Sales Invoice", "Delivery Note"].includes(frm.doc.doctype)) {
-			item_row.type_of_transaction = frm.doc.is_return ? "Inward" : "Outward";
-		} else {
-			item_row.type_of_transaction = frm.doc.is_return ? "Outward" : "Inward";
-		}
+	if (["Sales Invoice", "Delivery Note"].includes(frm.doc.doctype)) {
+		item_row.type_of_transaction = frm.doc.is_return ? "Inward" : "Outward";
+	} else {
+		item_row.type_of_transaction = frm.doc.is_return ? "Outward" : "Inward";
+	}
 
-		new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
-			if (r) {
-				let update_values = {
-					"serial_and_batch_bundle": r.name,
-					"qty": Math.abs(r.total_qty)
-				}
-
-				if (r.warehouse) {
-					update_values[warehouse_field] = r.warehouse;
-				}
-
-				frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+	new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
+		if (r) {
+			let update_values = {
+				"serial_and_batch_bundle": r.name,
+				"qty": Math.abs(r.total_qty)
 			}
-		});
+
+			if (r.warehouse) {
+				update_values[warehouse_field] = r.warehouse;
+			}
+
+			frappe.model.set_value(item_row.doctype, item_row.name, update_values);
+		}
 	});
 }
 

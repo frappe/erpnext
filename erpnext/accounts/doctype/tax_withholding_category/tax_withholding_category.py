@@ -9,6 +9,8 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, getdate
 
+from erpnext.controllers.accounts_controller import validate_account_head
+
 
 class TaxWithholdingCategory(Document):
 	# begin: auto-generated types
@@ -53,6 +55,7 @@ class TaxWithholdingCategory(Document):
 			if d.get("account") in existing_accounts:
 				frappe.throw(_("Account {0} added multiple times").format(frappe.bold(d.get("account"))))
 
+			validate_account_head(d.idx, d.get("account"), d.get("company"))
 			existing_accounts.append(d.get("account"))
 
 	def validate_thresholds(self):
@@ -146,7 +149,12 @@ def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 		tax_row = get_tax_row_for_tcs(inv, tax_details, tax_amount, tax_deducted)
 
 	cost_center = get_cost_center(inv)
-	tax_row.update({"cost_center": cost_center})
+	tax_row.update(
+		{
+			"cost_center": cost_center,
+			"is_tax_withholding_account": 1,
+		}
+	)
 
 	if inv.doctype == "Purchase Invoice":
 		return tax_row, tax_deducted_on_advances, voucher_wise_amount
@@ -260,6 +268,11 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	vouchers, voucher_wise_amount = get_invoice_vouchers(
 		parties, tax_details, inv.company, party_type=party_type
 	)
+
+	payment_entry_vouchers = get_payment_entry_vouchers(
+		parties, tax_details, inv.company, party_type=party_type
+	)
+
 	advance_vouchers = get_advance_vouchers(
 		parties,
 		company=inv.company,
@@ -267,7 +280,8 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 		to_date=tax_details.to_date,
 		party_type=party_type,
 	)
-	taxable_vouchers = vouchers + advance_vouchers
+
+	taxable_vouchers = vouchers + advance_vouchers + payment_entry_vouchers
 	tax_deducted_on_advances = 0
 
 	if inv.doctype == "Purchase Invoice":
@@ -276,6 +290,14 @@ def get_tax_amount(party_type, parties, inv, tax_details, posting_date, pan_no=N
 	tax_deducted = 0
 	if taxable_vouchers:
 		tax_deducted = get_deducted_tax(taxable_vouchers, tax_details)
+
+	# If advance is outside the current tax withholding period (usually a fiscal year), `get_deducted_tax` won't fetch it.
+	# updating `tax_deducted` with correct advance tax value (from current and previous previous withholding periods), will allow the
+	# rest of the below logic to function properly
+	# ---FY 2023-------------||---------------------FY 2024-----------------------||--
+	# ---Advance-------------||---------Inv_1--------Inv_2------------------------||--
+	if tax_deducted_on_advances:
+		tax_deducted += get_advance_tax_across_fiscal_year(tax_deducted_on_advances, tax_details)
 
 	tax_amount = 0
 
@@ -371,6 +393,20 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 	return vouchers, voucher_wise_amount
 
 
+def get_payment_entry_vouchers(parties, tax_details, company, party_type="Supplier"):
+	payment_entry_filters = {
+		"party_type": party_type,
+		"party": ("in", parties),
+		"docstatus": 1,
+		"apply_tax_withholding_amount": 1,
+		"posting_date": ["between", (tax_details.from_date, tax_details.to_date)],
+		"tax_withholding_category": tax_details.get("tax_withholding_category"),
+		"company": company,
+	}
+
+	return frappe.db.get_all("Payment Entry", filters=payment_entry_filters, pluck="name")
+
+
 def get_advance_vouchers(parties, company=None, from_date=None, to_date=None, party_type="Supplier"):
 	"""
 	Use Payment Ledger to fetch unallocated Advance Payments
@@ -413,7 +449,7 @@ def get_taxes_deducted_on_advances_allocated(inv, tax_details):
 				frappe.qb.from_(at)
 				.inner_join(pe)
 				.on(pe.name == at.parent)
-				.select(at.parent, at.name, at.tax_amount, at.allocated_amount)
+				.select(pe.posting_date, at.parent, at.name, at.tax_amount, at.allocated_amount)
 				.where(pe.tax_withholding_category == tax_details.get("tax_withholding_category"))
 				.where(at.parent.isin(advances))
 				.where(at.account_head == tax_details.account_head)
@@ -436,6 +472,16 @@ def get_deducted_tax(taxable_vouchers, tax_details):
 
 	entries = frappe.db.get_all("GL Entry", filters, pluck=field)
 	return sum(entries)
+
+
+def get_advance_tax_across_fiscal_year(tax_deducted_on_advances, tax_details):
+	"""
+	Only applies for Taxes deducted on Advance Payments
+	"""
+	advance_tax_from_across_fiscal_year = sum(
+		[adv.tax_amount for adv in tax_deducted_on_advances if adv.posting_date < tax_details.from_date]
+	)
+	return advance_tax_from_across_fiscal_year
 
 
 def get_tds_amount(ldc, parties, inv, tax_details, vouchers):

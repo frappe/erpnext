@@ -104,7 +104,7 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 	if total_credit:
 		data.append(total_credit)
 
-	report_summary = get_bs_summary(
+	report_summary, primitive_summary = get_bs_summary(
 		companies,
 		asset,
 		liability,
@@ -175,7 +175,7 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 
 	chart = get_pl_chart_data(filters, columns, income, expense, net_profit_loss)
 
-	report_summary = get_pl_summary(
+	report_summary, primitive_summary = get_pl_summary(
 		companies, "", income, expense, net_profit_loss, company_currency, filters, True
 	)
 
@@ -266,6 +266,7 @@ def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	filters.end_date = fiscal_year.year_end_date
 
 	for company in companies:
+		filters.company = company
 		amount = get_account_type_based_gl_data(company, filters)
 
 		if amount and account_type == "Depreciation":

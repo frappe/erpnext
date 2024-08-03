@@ -137,6 +137,15 @@ class StockBalanceReport:
 			report_data.update(
 				{"reserved_stock": sre_details.get((report_data.item_code, report_data.warehouse), 0.0)}
 			)
+
+			if (
+				not self.filters.get("include_zero_stock_items")
+				and report_data
+				and report_data.bal_qty == 0
+				and report_data.bal_val == 0
+			):
+				continue
+
 			self.data.append(report_data)
 
 	def get_item_warehouse_map(self):
@@ -146,6 +155,8 @@ class StockBalanceReport:
 		if self.filters.get("show_stock_ageing_data"):
 			self.sle_entries = self.sle_query.run(as_dict=True)
 
+		# HACK: This is required to avoid causing db query in flt
+		_system_settings = frappe.get_cached_doc("System Settings")
 		with frappe.db.unbuffered_cursor():
 			if not self.filters.get("show_stock_ageing_data"):
 				self.sle_entries = self.sle_query.run(as_dict=True, as_iterator=True)
@@ -294,6 +305,8 @@ class StockBalanceReport:
 				sle.stock_value,
 				sle.batch_no,
 				sle.serial_no,
+				sle.serial_and_batch_bundle,
+				sle.has_serial_no,
 				item_table.item_group,
 				item_table.stock_uom,
 				item_table.item_name,

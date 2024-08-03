@@ -19,6 +19,7 @@ class PromotionalSchemePriceDiscount(Document):
 		disable: DF.Check
 		discount_amount: DF.Currency
 		discount_percentage: DF.Float
+		for_price_list: DF.Link | None
 		max_amount: DF.Currency
 		max_qty: DF.Float
 		min_amount: DF.Currency

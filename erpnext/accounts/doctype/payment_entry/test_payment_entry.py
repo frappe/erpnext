@@ -10,6 +10,7 @@ from frappe.utils import add_days, flt, nowdate
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import (
 	get_outstanding_reference_documents,
+	get_party_details,
 	get_payment_entry,
 	get_reference_details,
 )
@@ -81,7 +82,7 @@ class TestPaymentEntry(FrappeTestCase):
 
 		expected_gle = dict(
 			(d[0], d)
-			for d in [["_Test Receivable USD - _TC", 0, 5500, so.name], ["Cash - _TC", 5500.0, 0, None]]
+			for d in [["_Test Receivable USD - _TC", 0, 5500, so.name], [pe.paid_to, 5500.0, 0, None]]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -1074,9 +1075,13 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.source_exchange_rate = 50
 		pe.save()
 
-		ref_details = get_reference_details(so.doctype, so.name, pe.paid_from_account_currency)
+		ref_details = get_reference_details(
+			so.doctype, so.name, pe.paid_from_account_currency, "Customer", so.customer
+		)
 		expected_response = {
 			"account": get_party_account("Customer", so.customer, so.company),
+			"account_type": None,  # only applies for Reverse Payment Entry
+			"payment_type": None,  # only applies for Reverse Payment Entry
 			"total_amount": 5000.0,
 			"outstanding_amount": 5000.0,
 			"exchange_rate": 1.0,
@@ -1472,6 +1477,68 @@ class TestPaymentEntry(FrappeTestCase):
 		self.check_gl_entries()
 		self.check_pl_entries()
 
+	def test_advance_as_liability_against_order(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import (
+			make_purchase_invoice as _make_purchase_invoice,
+		)
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+
+		company = "_Test Company"
+
+		advance_account = create_account(
+			parent_account="Current Liabilities - _TC",
+			account_name="Advances Paid",
+			company=company,
+			account_type="Liability",
+		)
+
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_paid_account": advance_account,
+			},
+		)
+
+		po = create_purchase_order(supplier="_Test Supplier")
+		pe = get_payment_entry("Purchase Order", po.name, bank_account="Cash - _TC")
+		pe.save().submit()
+
+		pre_reconciliation_gle = [
+			{"account": "Cash - _TC", "debit": 0.0, "credit": 5000.0},
+			{"account": advance_account, "debit": 5000.0, "credit": 0.0},
+		]
+
+		self.voucher_no = pe.name
+		self.expected_gle = pre_reconciliation_gle
+		self.check_gl_entries()
+
+		# Make Purchase Invoice against the order
+		pi = _make_purchase_invoice(po.name)
+		pi.append(
+			"advances",
+			{
+				"reference_type": pe.doctype,
+				"reference_name": pe.name,
+				"reference_row": pe.references[0].name,
+				"advance_amount": 5000,
+				"allocated_amount": 5000,
+			},
+		)
+		pi.save().submit()
+
+		# # assert General and Payment Ledger entries post partial reconciliation
+		self.expected_gle = [
+			{"account": pi.credit_to, "debit": 5000.0, "credit": 0.0},
+			{"account": "Cash - _TC", "debit": 0.0, "credit": 5000.0},
+			{"account": advance_account, "debit": 5000.0, "credit": 0.0},
+			{"account": advance_account, "debit": 0.0, "credit": 5000.0},
+		]
+
+		self.voucher_no = pe.name
+		self.check_gl_entries()
+
 	def check_pl_entries(self):
 		ple = frappe.qb.DocType("Payment Ledger Entry")
 		pl_entries = (
@@ -1543,7 +1610,7 @@ class TestPaymentEntry(FrappeTestCase):
 		company = "_Test Company"
 		customer = create_customer(frappe.generate_hash(length=10), "INR")
 		advance_account = create_account(
-			parent_account="Current Assets - _TC",
+			parent_account="Current Liabilities - _TC",
 			account_name="Advances Received",
 			company=company,
 			account_type="Receivable",
@@ -1599,9 +1666,9 @@ class TestPaymentEntry(FrappeTestCase):
 
 		# assert General and Payment Ledger entries post partial reconciliation
 		self.expected_gle = [
-			{"account": "Debtors - _TC", "debit": 0.0, "credit": 400.0},
 			{"account": advance_account, "debit": 400.0, "credit": 0.0},
 			{"account": advance_account, "debit": 0.0, "credit": 1000.0},
+			{"account": advance_account, "debit": 0.0, "credit": 400.0},
 			{"account": "_Test Cash - _TC", "debit": 1000.0, "credit": 0.0},
 		]
 		self.expected_ple = [
@@ -1612,7 +1679,7 @@ class TestPaymentEntry(FrappeTestCase):
 				"amount": -1000.0,
 			},
 			{
-				"account": "Debtors - _TC",
+				"account": advance_account,
 				"voucher_no": pe.name,
 				"against_voucher_no": reverse_pe.name,
 				"amount": -400.0,
@@ -1662,6 +1729,68 @@ class TestPaymentEntry(FrappeTestCase):
 		self.check_gl_entries()
 		self.check_pl_entries()
 
+	def test_opening_flag_for_advance_as_liability(self):
+		company = "_Test Company"
+
+		advance_account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Advances Received",
+			company=company,
+			account_type="Receivable",
+		)
+
+		# Enable Advance in separate party account
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": advance_account,
+			},
+		)
+		# Advance Payment
+		adv = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+		)
+		adv.is_opening = "Yes"
+		adv.save()  # use save() to trigger set_liability_account()
+		adv.submit()
+
+		gl_with_opening_set = frappe.db.get_all(
+			"GL Entry", filters={"voucher_no": adv.name, "is_opening": "Yes"}
+		)
+		# 'Is Opening' can be 'Yes' for Advances in separate party account
+		self.assertNotEqual(gl_with_opening_set, [])
+
+		# Disable Advance in separate party account
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 0,
+				"default_advance_received_account": None,
+			},
+		)
+		payment = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+		)
+		payment.is_opening = "Yes"
+		payment.save()
+		payment.submit()
+		gl_with_opening_set = frappe.db.get_all(
+			"GL Entry", filters={"voucher_no": payment.name, "is_opening": "Yes"}
+		)
+		# 'Is Opening' should always be 'No' for normal advance payments
+		self.assertEqual(gl_with_opening_set, [])
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
@@ -1679,6 +1808,10 @@ def create_payment_entry(**args):
 	payment_entry.received_amount = payment_entry.paid_amount / payment_entry.target_exchange_rate
 	payment_entry.reference_no = "Test001"
 	payment_entry.reference_date = nowdate()
+
+	get_party_details(
+		payment_entry.company, payment_entry.party_type, payment_entry.party, payment_entry.posting_date
+	)
 
 	if args.get("save"):
 		payment_entry.save()

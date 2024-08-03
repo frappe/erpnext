@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import json
 
 import frappe
 from frappe.model.dynamic_links import get_dynamic_link_map
@@ -1783,6 +1784,49 @@ class TestSalesInvoice(FrappeTestCase):
 
 		self.assertTrue(gle)
 
+	def test_gle_in_transaction_currency(self):
+		# create multi currency sales invoice with 2 items with same income account
+		si = create_sales_invoice(
+			customer="_Test Customer USD",
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			conversion_rate=50,
+			do_not_submit=True,
+		)
+		# add 2nd item with same income account
+		si.append(
+			"items",
+			{
+				"item_code": "_Test Item",
+				"qty": 1,
+				"rate": 80,
+				"income_account": "Sales - _TC",
+				"cost_center": "_Test Cost Center - _TC",
+			},
+		)
+		si.submit()
+
+		gl_entries = frappe.db.sql(
+			"""select transaction_currency, transaction_exchange_rate,
+			debit_in_transaction_currency, credit_in_transaction_currency
+			from `tabGL Entry`
+			where voucher_type='Sales Invoice' and voucher_no=%s and account = 'Sales - _TC'
+			order by account asc""",
+			si.name,
+			as_dict=1,
+		)
+
+		expected_gle = {
+			"transaction_currency": "USD",
+			"transaction_exchange_rate": 50,
+			"debit_in_transaction_currency": 0,
+			"credit_in_transaction_currency": 180,
+		}
+
+		for gle in gl_entries:
+			for field in expected_gle:
+				self.assertEqual(expected_gle[field], gle[field])
+
 	def test_invoice_exchange_rate(self):
 		si = create_sales_invoice(
 			customer="_Test Customer USD",
@@ -2176,13 +2220,14 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.total_taxes_and_charges, 229)
 		self.assertEqual(si.rounding_adjustment, -0.20)
 
-		expected_values = [
-			["_Test Account Service Tax - _TC", 0.0, 114.50],
-			["_Test Account VAT - _TC", 0.0, 114.50],
-			[si.debit_to, 1501, 0.0],
-			["Round Off - _TC", 0.20, 0.0],
-			["Sales - _TC", 0.0, 1272.20],
-		]
+		round_off_account = frappe.get_cached_value("Company", "_Test Company", "round_off_account")
+		expected_values = {
+			"_Test Account Service Tax - _TC": [0.0, 114.50],
+			"_Test Account VAT - _TC": [0.0, 114.50],
+			si.debit_to: [1501, 0.0],
+			round_off_account: [0.20, 0.0],
+			"Sales - _TC": [0.0, 1272.20],
+		}
 
 		gl_entries = frappe.db.sql(
 			"""select account, sum(debit) as debit, sum(credit) as credit
@@ -2193,10 +2238,10 @@ class TestSalesInvoice(FrappeTestCase):
 			as_dict=1,
 		)
 
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_values[i][0], gle.account)
-			self.assertEqual(expected_values[i][1], gle.debit)
-			self.assertEqual(expected_values[i][2], gle.credit)
+		for gle in gl_entries:
+			expected_account_values = expected_values[gle.account]
+			self.assertEqual(expected_account_values[0], gle.debit)
+			self.assertEqual(expected_account_values[1], gle.credit)
 
 	def test_rounding_adjustment_3(self):
 		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
@@ -2245,6 +2290,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.total_taxes_and_charges, 480.86)
 		self.assertEqual(si.rounding_adjustment, -0.02)
 
+		round_off_account = frappe.get_cached_value("Company", "_Test Company", "round_off_account")
 		expected_values = dict(
 			(d[0], d)
 			for d in [
@@ -2252,7 +2298,7 @@ class TestSalesInvoice(FrappeTestCase):
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
 				["Sales - _TC", 0.0, 4007.15],
-				["Round Off - _TC", 0.01, 0.0],
+				[round_off_account, 0.01, 0.0],
 			]
 		)
 
@@ -2281,8 +2327,9 @@ class TestSalesInvoice(FrappeTestCase):
 			as_dict=1,
 		)
 
-		self.assertEqual(round_off_gle.cost_center, "_Test Cost Center 2 - _TC")
-		self.assertEqual(round_off_gle.location, "Block 1")
+		if round_off_gle:
+			self.assertEqual(round_off_gle.cost_center, "_Test Cost Center 2 - _TC")
+			self.assertEqual(round_off_gle.location, "Block 1")
 
 		disable_dimension()
 
@@ -2906,12 +2953,8 @@ class TestSalesInvoice(FrappeTestCase):
 		si.items[0].income_account = "Service - _TC"
 		si.additional_discount_account = "_Test Account Sales - _TC"
 		si.taxes[0].account_head = "TDS Payable - _TC"
+		# Ledger reposted implicitly upon 'Update After Submit'
 		si.save()
-
-		si.load_from_db()
-		self.assertTrue(si.repost_required)
-
-		si.repost_accounting_entries()
 
 		expected_gle = [
 			["_Test Account Sales - _TC", 22.0, 0.0, nowdate()],
@@ -2921,9 +2964,6 @@ class TestSalesInvoice(FrappeTestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
-
-		si.load_from_db()
-		self.assertFalse(si.repost_required)
 
 	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
@@ -3631,6 +3671,105 @@ class TestSalesInvoice(FrappeTestCase):
 		advances = si.get_advance_entries()
 		self.assertEqual(1, len(advances))
 		self.assertEqual(advances[0].reference_name, pe.name)
+
+	def test_taxes_merging_from_delivery_note(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		dn1 = create_delivery_note(do_not_submit=1)
+		dn1.items[0].qty = 10
+		dn1.items[0].rate = 100
+		dn1.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "Freight and Forwarding Charges - _TC",
+				"description": "movement charges",
+				"tax_amount": 100,
+			},
+		)
+		dn1.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "Marketing Expenses - _TC",
+				"description": "marketing",
+				"tax_amount": 150,
+			},
+		)
+		dn1.save().submit()
+
+		dn2 = create_delivery_note(do_not_submit=1)
+		dn2.items[0].qty = 5
+		dn2.items[0].rate = 100
+		dn2.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "Freight and Forwarding Charges - _TC",
+				"description": "movement charges",
+				"tax_amount": 20,
+			},
+		)
+		dn2.append(
+			"taxes",
+			{
+				"charge_type": "Actual",
+				"account_head": "Miscellaneous Expenses - _TC",
+				"description": "marketing",
+				"tax_amount": 60,
+			},
+		)
+		dn2.save().submit()
+
+		# si = make_sales_invoice(dn1.name)
+		si = create_sales_invoice(do_not_submit=True)
+		si.customer = dn1.customer
+		si.items.clear()
+
+		from frappe.model.mapper import map_docs
+
+		map_docs(
+			method="erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+			source_names=json.dumps([dn1.name, dn2.name]),
+			target_doc=si,
+			args=json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
+		)
+		si.save().submit()
+
+		expected = [
+			{
+				"charge_type": "Actual",
+				"account_head": "Freight and Forwarding Charges - _TC",
+				"tax_amount": 120.0,
+				"total": 1520.0,
+				"base_total": 1520.0,
+			},
+			{
+				"charge_type": "Actual",
+				"account_head": "Marketing Expenses - _TC",
+				"tax_amount": 150.0,
+				"total": 1670.0,
+				"base_total": 1670.0,
+			},
+			{
+				"charge_type": "Actual",
+				"account_head": "Miscellaneous Expenses - _TC",
+				"tax_amount": 60.0,
+				"total": 1610.0,
+				"base_total": 1610.0,
+			},
+		]
+		actual = [
+			dict(
+				charge_type=x.charge_type,
+				account_head=x.account_head,
+				tax_amount=x.tax_amount,
+				total=x.total,
+				base_total=x.base_total,
+			)
+			for x in si.taxes
+		]
+		self.assertEqual(expected, actual)
 
 
 def set_advance_flag(company, flag, default_account):

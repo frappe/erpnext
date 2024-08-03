@@ -47,6 +47,7 @@
   "customer_type": "Individual",
   "doctype": "Customer",
   "territory": "_Test Territory",
+  "default_currency": "USD",
   "accounts": [{
 	  "company": "_Test Company",
 	  "account": "_Test Receivable USD - _TC"

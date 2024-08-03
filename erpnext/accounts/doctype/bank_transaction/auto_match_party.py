@@ -68,6 +68,9 @@ class AutoMatchbyAccountIBAN:
 					party, or_filters=or_filters, pluck="name", limit_page_length=1
 				)
 
+				if "bank_ac_no" in or_filters:
+					or_filters["bank_account_no"] = or_filters.pop("bank_ac_no")
+
 			if party_result:
 				result = (
 					party,

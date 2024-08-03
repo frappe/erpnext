@@ -232,7 +232,11 @@ class TestAsset(AssetSetup):
 			asset.precision("gross_purchase_amount"),
 		)
 		pro_rata_amount, _, _ = _get_pro_rata_amt(
-			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
+			asset.finance_books[0],
+			9000,
+			get_last_day(add_months(purchase_date, 1)),
+			date,
+			original_schedule_date=get_last_day(nowdate()),
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 		self.assertEqual(
@@ -314,7 +318,11 @@ class TestAsset(AssetSetup):
 		self.assertEqual(first_asset_depr_schedule.status, "Cancelled")
 
 		pro_rata_amount, _, _ = _get_pro_rata_amt(
-			asset.finance_books[0], 9000, get_last_day(add_months(purchase_date, 1)), date
+			asset.finance_books[0],
+			9000,
+			get_last_day(add_months(purchase_date, 1)),
+			date,
+			original_schedule_date=get_last_day(nowdate()),
 		)
 		pro_rata_amount = flt(pro_rata_amount, asset.precision("gross_purchase_amount"))
 
@@ -332,7 +340,6 @@ class TestAsset(AssetSetup):
 			),
 			("Debtors - _TC", 25000.0, 0.0),
 		)
-
 		gle = get_gl_entries("Sales Invoice", si.name)
 		self.assertSequenceEqual(gle, expected_gle)
 
@@ -348,7 +355,7 @@ class TestAsset(AssetSetup):
 			purchase_date="2020-04-01",
 			expected_value_after_useful_life=0,
 			total_number_of_depreciations=5,
-			number_of_depreciations_booked=2,
+			opening_number_of_booked_depreciations=2,
 			frequency_of_depreciation=12,
 			depreciation_start_date="2023-03-31",
 			opening_accumulated_depreciation=24000,
@@ -378,7 +385,7 @@ class TestAsset(AssetSetup):
 
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Sold")
 
-		expected_values = [["2023-03-31", 12000, 36000], ["2023-05-23", 1742.47, 37742.47]]
+		expected_values = [["2023-03-31", 12000, 36000], ["2023-05-23", 1737.7, 37737.7]]
 
 		second_asset_depr_schedule = get_depr_schedule(asset.name, "Active")
 
@@ -391,7 +398,7 @@ class TestAsset(AssetSetup):
 		expected_gle = (
 			(
 				"_Test Accumulated Depreciations - _TC",
-				37742.47,
+				37737.7,
 				0.0,
 			),
 			(
@@ -402,7 +409,7 @@ class TestAsset(AssetSetup):
 			(
 				"_Test Gain/Loss on Asset Disposal - _TC",
 				0.0,
-				17742.47,
+				17737.7,
 			),
 			("Debtors - _TC", 40000.0, 0.0),
 		)
@@ -446,7 +453,7 @@ class TestAsset(AssetSetup):
 			purchase_date="2020-01-01",
 			expected_value_after_useful_life=0,
 			total_number_of_depreciations=6,
-			number_of_depreciations_booked=1,
+			opening_number_of_booked_depreciations=1,
 			frequency_of_depreciation=10,
 			depreciation_start_date="2021-01-01",
 			opening_accumulated_depreciation=20000,
@@ -707,25 +714,24 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		expected_schedules = [
-			["2023-01-31", 1021.98, 1021.98],
-			["2023-02-28", 923.08, 1945.06],
-			["2023-03-31", 1021.98, 2967.04],
-			["2023-04-30", 989.01, 3956.05],
-			["2023-05-31", 1021.98, 4978.03],
-			["2023-06-30", 989.01, 5967.04],
-			["2023-07-31", 1021.98, 6989.02],
-			["2023-08-31", 1021.98, 8011.0],
-			["2023-09-30", 989.01, 9000.01],
-			["2023-10-31", 1021.98, 10021.99],
-			["2023-11-30", 989.01, 11011.0],
-			["2023-12-31", 989.0, 12000.0],
+			["2023-01-31", 1019.18, 1019.18],
+			["2023-02-28", 920.55, 1939.73],
+			["2023-03-31", 1019.18, 2958.91],
+			["2023-04-30", 986.3, 3945.21],
+			["2023-05-31", 1019.18, 4964.39],
+			["2023-06-30", 986.3, 5950.69],
+			["2023-07-31", 1019.18, 6969.87],
+			["2023-08-31", 1019.18, 7989.05],
+			["2023-09-30", 986.3, 8975.35],
+			["2023-10-31", 1019.18, 9994.53],
+			["2023-11-30", 986.3, 10980.83],
+			["2023-12-31", 1019.17, 12000.0],
 		]
 
 		schedules = [
 			[cstr(d.schedule_date), d.depreciation_amount, d.accumulated_depreciation_amount]
 			for d in get_depr_schedule(asset.name, "Draft")
 		]
-
 		self.assertEqual(schedules, expected_schedules)
 
 	def test_schedule_for_straight_line_method_for_existing_asset(self):
@@ -733,8 +739,8 @@ class TestDepreciationMethods(AssetSetup):
 			calculate_depreciation=1,
 			available_for_use_date="2030-06-06",
 			is_existing_asset=1,
-			number_of_depreciations_booked=2,
-			opening_accumulated_depreciation=47095.89,
+			opening_number_of_booked_depreciations=2,
+			opening_accumulated_depreciation=47178.08,
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2032-12-31",
 			total_number_of_depreciations=3,
@@ -742,7 +748,7 @@ class TestDepreciationMethods(AssetSetup):
 		)
 
 		self.assertEqual(asset.status, "Draft")
-		expected_schedules = [["2032-12-31", 42904.11, 90000.0]]
+		expected_schedules = [["2032-12-31", 30000.0, 77178.08], ["2033-06-06", 12821.92, 90000.0]]
 		schedules = [
 			[cstr(d.schedule_date), flt(d.depreciation_amount, 2), d.accumulated_depreciation_amount]
 			for d in get_depr_schedule(asset.name, "Draft")
@@ -783,7 +789,7 @@ class TestDepreciationMethods(AssetSetup):
 			available_for_use_date="2030-01-01",
 			is_existing_asset=1,
 			depreciation_method="Double Declining Balance",
-			number_of_depreciations_booked=1,
+			opening_number_of_booked_depreciations=1,
 			opening_accumulated_depreciation=50000,
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2031-12-31",
@@ -994,7 +1000,7 @@ class TestDepreciationBasics(AssetSetup):
 
 		asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active")
 
-		depreciation_amount = get_depreciation_amount(
+		depreciation_amount, prev_per_day_depr = get_depreciation_amount(
 			asset_depr_schedule_doc, asset, 100000, 100000, asset.finance_books[0]
 		)
 		self.assertEqual(depreciation_amount, 30000)
@@ -1117,8 +1123,8 @@ class TestDepreciationBasics(AssetSetup):
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
-	def test_number_of_depreciations_booked(self):
-		"""Tests if an error is raised when number_of_depreciations_booked is not specified when opening_accumulated_depreciation is."""
+	def test_opening_booked_depreciations(self):
+		"""Tests if an error is raised when opening_number_of_booked_depreciations is not specified when opening_accumulated_depreciation is."""
 
 		asset = create_asset(
 			item_code="Macbook Pro",
@@ -1134,9 +1140,9 @@ class TestDepreciationBasics(AssetSetup):
 		self.assertRaises(frappe.ValidationError, asset.save)
 
 	def test_number_of_depreciations(self):
-		"""Tests if an error is raised when number_of_depreciations_booked >= total_number_of_depreciations."""
+		"""Tests if an error is raised when opening_number_of_booked_depreciations >= total_number_of_depreciations."""
 
-		# number_of_depreciations_booked > total_number_of_depreciations
+		# opening_number_of_booked_depreciations > total_number_of_depreciations
 		asset = create_asset(
 			item_code="Macbook Pro",
 			calculate_depreciation=1,
@@ -1145,13 +1151,13 @@ class TestDepreciationBasics(AssetSetup):
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2020-07-01",
 			opening_accumulated_depreciation=10000,
-			number_of_depreciations_booked=5,
+			opening_number_of_booked_depreciations=5,
 			do_not_save=1,
 		)
 
 		self.assertRaises(frappe.ValidationError, asset.save)
 
-		# number_of_depreciations_booked = total_number_of_depreciations
+		# opening_number_of_booked_depreciations = total_number_of_depreciations
 		asset_2 = create_asset(
 			item_code="Macbook Pro",
 			calculate_depreciation=1,
@@ -1160,7 +1166,7 @@ class TestDepreciationBasics(AssetSetup):
 			expected_value_after_useful_life=10000,
 			depreciation_start_date="2020-07-01",
 			opening_accumulated_depreciation=10000,
-			number_of_depreciations_booked=5,
+			opening_number_of_booked_depreciations=5,
 			do_not_save=1,
 		)
 
@@ -1495,19 +1501,17 @@ class TestDepreciationBasics(AssetSetup):
 		"""
 
 		asset = create_asset(calculate_depreciation=1)
-		asset.opening_accumulated_depreciation = 2000
-		asset.number_of_depreciations_booked = 1
 
 		asset.finance_books[0].expected_value_after_useful_life = 100
 		asset.save()
 		asset.reload()
-		self.assertEqual(asset.finance_books[0].value_after_depreciation, 98000.0)
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 100000.0)
 
 		# changing expected_value_after_useful_life shouldn't affect value_after_depreciation
 		asset.finance_books[0].expected_value_after_useful_life = 200
 		asset.save()
 		asset.reload()
-		self.assertEqual(asset.finance_books[0].value_after_depreciation, 98000.0)
+		self.assertEqual(asset.finance_books[0].value_after_depreciation, 100000.0)
 
 	def test_asset_cost_center(self):
 		asset = create_asset(is_existing_asset=1, do_not_save=1)
@@ -1690,9 +1694,9 @@ def create_asset(**args):
 			"purchase_date": args.purchase_date or "2015-01-01",
 			"calculate_depreciation": args.calculate_depreciation or 0,
 			"opening_accumulated_depreciation": args.opening_accumulated_depreciation or 0,
-			"number_of_depreciations_booked": args.number_of_depreciations_booked or 0,
+			"opening_number_of_booked_depreciations": args.opening_number_of_booked_depreciations or 0,
 			"gross_purchase_amount": args.gross_purchase_amount or 100000,
-			"purchase_receipt_amount": args.purchase_receipt_amount or 100000,
+			"purchase_amount": args.purchase_amount or 100000,
 			"maintenance_required": args.maintenance_required or 0,
 			"warehouse": args.warehouse or "_Test Warehouse - _TC",
 			"available_for_use_date": args.available_for_use_date or "2020-06-06",
@@ -1717,6 +1721,7 @@ def create_asset(**args):
 				"depreciation_start_date": args.depreciation_start_date,
 				"daily_prorata_based": args.daily_prorata_based or 0,
 				"shift_based": args.shift_based or 0,
+				"rate_of_depreciation": args.rate_of_depreciation or 0,
 			},
 		)
 
@@ -1732,12 +1737,12 @@ def create_asset(**args):
 	return asset
 
 
-def create_asset_category():
+def create_asset_category(enable_cwip=1):
 	asset_category = frappe.new_doc("Asset Category")
 	asset_category.asset_category_name = "Computers"
 	asset_category.total_number_of_depreciations = 3
 	asset_category.frequency_of_depreciation = 3
-	asset_category.enable_cwip_accounting = 1
+	asset_category.enable_cwip_accounting = enable_cwip
 	asset_category.append(
 		"accounts",
 		{

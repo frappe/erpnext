@@ -101,7 +101,8 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		const serialized = item_row.has_serial_no;
 		const batched = item_row.has_batch_no;
-		const no_bundle_selected = !item_row.serial_and_batch_bundle;
+		const no_bundle_selected =
+			!item_row.serial_and_batch_bundle && !item_row.serial_no && !item_row.batch_no;
 
 		if ((serialized && no_bundle_selected) || (batched && no_bundle_selected)) {
 			frappe.show_alert({
@@ -394,19 +395,18 @@ erpnext.PointOfSale.ItemDetails = class {
 
 	bind_auto_serial_fetch_event() {
 		this.$form_container.on("click", ".auto-fetch-btn", () => {
-			frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", () => {
-				let frm = this.events.get_frm();
-				let item_row = this.item_row;
-				item_row.type_of_transaction = "Outward";
+			let frm = this.events.get_frm();
+			let item_row = this.item_row;
+			item_row.type_of_transaction = "Outward";
 
-				new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
-					if (r) {
-						frappe.model.set_value(item_row.doctype, item_row.name, {
-							serial_and_batch_bundle: r.name,
-							qty: Math.abs(r.total_qty),
-						});
-					}
-				});
+			new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
+				if (r) {
+					frappe.model.set_value(item_row.doctype, item_row.name, {
+						serial_and_batch_bundle: r.name,
+						qty: Math.abs(r.total_qty),
+						use_serial_batch_fields: 0,
+					});
+				}
 			});
 		});
 	}

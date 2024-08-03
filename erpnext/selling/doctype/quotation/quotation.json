@@ -826,8 +826,9 @@
   },
   {
    "fieldname": "language",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Print Language",
+   "options": "Language",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1073,7 +1074,7 @@
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:30.774058",
+ "modified": "2024-04-20 01:15:19.171383",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

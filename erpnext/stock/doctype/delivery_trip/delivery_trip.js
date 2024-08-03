@@ -58,10 +58,11 @@ frappe.ui.form.on("Delivery Trip", {
 						date_field: "posting_date",
 						setters: {
 							company: frm.doc.company,
+							customer: null,
 						},
 						get_query_filters: {
-							docstatus: 1,
 							company: frm.doc.company,
+							status: ["Not In", ["Completed", "Cancelled"]],
 						},
 					});
 				},

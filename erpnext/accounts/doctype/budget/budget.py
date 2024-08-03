@@ -224,12 +224,18 @@ def validate_expense_against_budget(args, expense_amount=0):
 def validate_budget_records(args, budget_records, expense_amount):
 	for budget in budget_records:
 		if flt(budget.budget_amount):
-			amount = expense_amount or get_amount(args, budget)
 			yearly_action, monthly_action = get_actions(args, budget)
+			args["for_material_request"] = budget.for_material_request
+			args["for_purchase_order"] = budget.for_purchase_order
 
 			if yearly_action in ("Stop", "Warn"):
 				compare_expense_with_budget(
-					args, flt(budget.budget_amount), _("Annual"), yearly_action, budget.budget_against, amount
+					args,
+					flt(budget.budget_amount),
+					_("Annual"),
+					yearly_action,
+					budget.budget_against,
+					expense_amount,
 				)
 
 			if monthly_action in ["Stop", "Warn"]:
@@ -245,18 +251,27 @@ def validate_budget_records(args, budget_records, expense_amount):
 					_("Accumulated Monthly"),
 					monthly_action,
 					budget.budget_against,
-					amount,
+					expense_amount,
 				)
 
 
 def compare_expense_with_budget(args, budget_amount, action_for, action, budget_against, amount=0):
-	actual_expense = get_actual_expense(args)
-	total_expense = actual_expense + amount
+	args.actual_expense, args.requested_amount, args.ordered_amount = get_actual_expense(args), 0, 0
+	if not amount:
+		args.requested_amount, args.ordered_amount = get_requested_amount(args), get_ordered_amount(args)
+
+		if args.get("doctype") == "Material Request" and args.for_material_request:
+			amount = args.requested_amount + args.ordered_amount
+
+		elif args.get("doctype") == "Purchase Order" and args.for_purchase_order:
+			amount = args.ordered_amount
+
+	total_expense = args.actual_expense + amount
 
 	if total_expense > budget_amount:
-		if actual_expense > budget_amount:
+		if args.actual_expense > budget_amount:
 			error_tense = _("is already")
-			diff = actual_expense - budget_amount
+			diff = args.actual_expense - budget_amount
 		else:
 			error_tense = _("will be")
 			diff = total_expense - budget_amount
@@ -273,6 +288,8 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 			frappe.bold(fmt_money(diff, currency=currency)),
 		)
 
+		msg += get_expense_breakup(args, currency, budget_against)
+
 		if frappe.flags.exception_approver_role and frappe.flags.exception_approver_role in frappe.get_roles(
 			frappe.session.user
 		):
@@ -282,6 +299,83 @@ def compare_expense_with_budget(args, budget_amount, action_for, action, budget_
 			frappe.throw(msg, BudgetError, title=_("Budget Exceeded"))
 		else:
 			frappe.msgprint(msg, indicator="orange", title=_("Budget Exceeded"))
+
+
+def get_expense_breakup(args, currency, budget_against):
+	msg = "<hr>Total Expenses booked through - <ul>"
+
+	common_filters = frappe._dict(
+		{
+			args.budget_against_field: budget_against,
+			"account": args.account,
+			"company": args.company,
+		}
+	)
+
+	msg += (
+		"<li>"
+		+ frappe.utils.get_link_to_report(
+			"General Ledger",
+			label="Actual Expenses",
+			filters=common_filters.copy().update(
+				{
+					"from_date": frappe.get_cached_value("Fiscal Year", args.fiscal_year, "year_start_date"),
+					"to_date": frappe.get_cached_value("Fiscal Year", args.fiscal_year, "year_end_date"),
+					"is_cancelled": 0,
+				}
+			),
+		)
+		+ " - "
+		+ frappe.bold(fmt_money(args.actual_expense, currency=currency))
+		+ "</li>"
+	)
+
+	msg += (
+		"<li>"
+		+ frappe.utils.get_link_to_report(
+			"Material Request",
+			label="Material Requests",
+			report_type="Report Builder",
+			doctype="Material Request",
+			filters=common_filters.copy().update(
+				{
+					"status": [["!=", "Stopped"]],
+					"docstatus": 1,
+					"material_request_type": "Purchase",
+					"schedule_date": [["fiscal year", "2023-2024"]],
+					"item_code": args.item_code,
+					"per_ordered": [["<", 100]],
+				}
+			),
+		)
+		+ " - "
+		+ frappe.bold(fmt_money(args.requested_amount, currency=currency))
+		+ "</li>"
+	)
+
+	msg += (
+		"<li>"
+		+ frappe.utils.get_link_to_report(
+			"Purchase Order",
+			label="Unbilled Orders",
+			report_type="Report Builder",
+			doctype="Purchase Order",
+			filters=common_filters.copy().update(
+				{
+					"status": [["!=", "Closed"]],
+					"docstatus": 1,
+					"transaction_date": [["fiscal year", "2023-2024"]],
+					"item_code": args.item_code,
+					"per_billed": [["<", 100]],
+				}
+			),
+		)
+		+ " - "
+		+ frappe.bold(fmt_money(args.ordered_amount, currency=currency))
+		+ "</li></ul>"
+	)
+
+	return msg
 
 
 def get_actions(args, budget):
@@ -299,23 +393,9 @@ def get_actions(args, budget):
 	return yearly_action, monthly_action
 
 
-def get_amount(args, budget):
-	amount = 0
-
-	if args.get("doctype") == "Material Request" and budget.for_material_request:
-		amount = (
-			get_requested_amount(args, budget) + get_ordered_amount(args, budget) + get_actual_expense(args)
-		)
-
-	elif args.get("doctype") == "Purchase Order" and budget.for_purchase_order:
-		amount = get_ordered_amount(args, budget) + get_actual_expense(args)
-
-	return amount
-
-
-def get_requested_amount(args, budget):
+def get_requested_amount(args):
 	item_code = args.get("item_code")
-	condition = get_other_condition(args, budget, "Material Request")
+	condition = get_other_condition(args, "Material Request")
 
 	data = frappe.db.sql(
 		""" select ifnull((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
@@ -329,9 +409,9 @@ def get_requested_amount(args, budget):
 	return data[0][0] if data else 0
 
 
-def get_ordered_amount(args, budget):
+def get_ordered_amount(args):
 	item_code = args.get("item_code")
-	condition = get_other_condition(args, budget, "Purchase Order")
+	condition = get_other_condition(args, "Purchase Order")
 
 	data = frappe.db.sql(
 		f""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
@@ -345,7 +425,7 @@ def get_ordered_amount(args, budget):
 	return data[0][0] if data else 0
 
 
-def get_other_condition(args, budget, for_doc):
+def get_other_condition(args, for_doc):
 	condition = "expense_account = '%s'" % (args.expense_account)
 	budget_against_field = args.get("budget_against_field")
 

@@ -32,7 +32,7 @@ test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
 
 
-def make_item(item_code=None, properties=None, uoms=None):
+def make_item(item_code=None, properties=None, uoms=None, barcode=None):
 	if not item_code:
 		item_code = frappe.generate_hash(length=16)
 
@@ -60,6 +60,14 @@ def make_item(item_code=None, properties=None, uoms=None):
 	if uoms:
 		for uom in uoms:
 			item.append("uoms", uom)
+
+	if barcode:
+		item.append(
+			"barcodes",
+			{
+				"barcode": barcode,
+			},
+		)
 
 	item.insert()
 
@@ -147,6 +155,33 @@ class TestItem(FrappeTestCase):
 
 		for key, value in to_check.items():
 			self.assertEqual(value, details.get(key), key)
+
+	def test_get_asset_item_details(self):
+		from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+
+		create_asset_category(0)
+		create_fixed_asset_item()
+
+		details = get_item_details(
+			{
+				"item_code": "Macbook Pro",
+				"company": "_Test Company",
+				"currency": "INR",
+				"doctype": "Purchase Receipt",
+			}
+		)
+		self.assertEqual(details.get("expense_account"), "_Test Fixed Asset - _TC")
+
+		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", "1")
+		details = get_item_details(
+			{
+				"item_code": "Macbook Pro",
+				"company": "_Test Company",
+				"currency": "INR",
+				"doctype": "Purchase Receipt",
+			}
+		)
+		self.assertEqual(details.get("expense_account"), "CWIP Account - _TC")
 
 	def test_item_tax_template(self):
 		expected_item_tax_template = [
@@ -853,6 +888,27 @@ class TestItem(FrappeTestCase):
 		self.assertEqual(data[0].item_name, item.item_name)
 		self.assertEqual(data[0].description, item.description)
 		self.assertTrue("description" in data[0])
+
+	def test_group_warehouse_for_reorder_item(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		item_doc = make_item("_Test Group Warehouse For Reorder Item", {"is_stock_item": 1})
+		warehouse = create_warehouse("_Test Warehouse - _TC")
+		warehouse_doc = frappe.get_doc("Warehouse", warehouse)
+		warehouse_doc.db_set("parent_warehouse", "")
+
+		item_doc.append(
+			"reorder_levels",
+			{
+				"warehouse": warehouse,
+				"warehouse_reorder_level": 10,
+				"warehouse_reorder_qty": 100,
+				"material_request_type": "Purchase",
+				"warehouse_group": "_Test Warehouse Group - _TC",
+			},
+		)
+
+		self.assertRaises(frappe.ValidationError, item_doc.save)
 
 
 def set_item_variant_settings(fields):

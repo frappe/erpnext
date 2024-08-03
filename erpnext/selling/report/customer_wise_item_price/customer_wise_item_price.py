@@ -62,10 +62,10 @@ def fetch_item_prices(
 	or_conditions = []
 	if items:
 		and_conditions.append(ip.item_code.isin([x.item_code for x in items]))
-		and_conditions.append(ip.selling is True)
+		and_conditions.append(ip.selling.eq(True))
 
-		or_conditions.append(ip.customer is None)
-		or_conditions.append(ip.price_list is None)
+		or_conditions.append(ip.customer.isnull())
+		or_conditions.append(ip.price_list.isnull())
 
 		if customer:
 			or_conditions.append(ip.customer == customer)

@@ -93,6 +93,9 @@ class calculate_taxes_and_totals:
 			self.doc.base_tax_withholding_net_total = sum_base_net_amount
 
 	def validate_item_tax_template(self):
+		if self.doc.get("is_return") and self.doc.get("return_against"):
+			return
+
 		for item in self._items:
 			if item.item_code and item.get("item_tax_template"):
 				item_doc = frappe.get_cached_doc("Item", item.item_code)
@@ -243,7 +246,6 @@ class calculate_taxes_and_totals:
 				"tax_fraction_for_current_item",
 				"grand_total_fraction_for_current_item",
 			]
-
 			if tax.charge_type != "Actual" and not (
 				self.discount_amount_applied and self.doc.apply_discount_on == "Grand Total"
 			):
@@ -468,7 +470,16 @@ class calculate_taxes_and_totals:
 		if tax.charge_type == "Actual":
 			# distribute the tax amount proportionally to each item row
 			actual = flt(tax.tax_amount, tax.precision("tax_amount"))
-			current_tax_amount = item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
+
+			if tax.get("is_tax_withholding_account") and item.meta.get_field("apply_tds"):
+				if not item.get("apply_tds") or not self.doc.tax_withholding_net_total:
+					current_tax_amount = 0.0
+				else:
+					current_tax_amount = item.net_amount * actual / self.doc.tax_withholding_net_total
+			else:
+				current_tax_amount = (
+					item.net_amount * actual / self.doc.net_total if self.doc.net_total else 0.0
+				)
 
 		elif tax.charge_type == "On Net Total":
 			current_tax_amount = (tax_rate / 100.0) * item.net_amount
@@ -1093,6 +1104,11 @@ def get_rounded_tax_amount(itemised_tax, precision):
 		for row in taxes.values():
 			if isinstance(row, dict) and isinstance(row["tax_amount"], float):
 				row["tax_amount"] = flt(row["tax_amount"], precision)
+
+
+@frappe.whitelist()
+def get_rounding_tax_settings():
+	return frappe.db.get_single_value("Accounts Settings", "round_row_wise_tax")
 
 
 class init_landed_taxes_and_totals:

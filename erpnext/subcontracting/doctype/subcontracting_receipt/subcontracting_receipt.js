@@ -28,6 +28,8 @@ frappe.ui.form.on("Subcontracting Receipt", {
 	},
 
 	refresh: (frm) => {
+		frappe.dynamic_link = { doc: frm.doc, fieldname: "supplier", doctype: "Supplier" };
+
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(
 				__("Stock Ledger"),
@@ -165,11 +167,36 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			};
 		});
 
+		frm.set_query("contact_person", erpnext.queries.contact_query);
+		frm.set_query("supplier_address", erpnext.queries.address_query);
+
+		frm.set_query("billing_address", erpnext.queries.company_address_query);
+
+		frm.set_query("shipping_address", () => {
+			return erpnext.queries.company_address_query(frm.doc);
+		});
+
 		frm.set_query("rejected_warehouse", () => {
 			return {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", "items", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
 				},
 			};
 		});
@@ -302,6 +329,21 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			};
 		}
 	},
+
+	reset_raw_materials_table: (frm) => {
+		frm.clear_table("supplied_items");
+
+		frm.call({
+			method: "reset_raw_materials",
+			doc: frm.doc,
+			freeze: true,
+			callback: (r) => {
+				if (!r.exc) {
+					frm.save();
+				}
+			},
+		});
+	},
 });
 
 frappe.ui.form.on("Landed Cost Taxes and Charges", {
@@ -332,14 +374,117 @@ frappe.ui.form.on("Subcontracting Receipt Item", {
 		set_missing_values(frm);
 	},
 
-	items_remove: (frm) => {
+	items_delete: (frm) => {
 		set_missing_values(frm);
+	},
+
+	add_serial_batch_bundle(frm, cdt, cdn) {
+		let item = locals[cdt][cdn];
+
+		frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
+			if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
+				item.has_serial_no = r.message.has_serial_no;
+				item.has_batch_no = r.message.has_batch_no;
+				item.type_of_transaction = item.qty > 0 ? "Inward" : "Outward";
+				item.is_rejected = false;
+
+				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
+					if (r) {
+						let qty = Math.abs(r.total_qty);
+						if (frm.doc.is_return) {
+							qty = qty * -1;
+						}
+
+						let update_values = {
+							serial_and_batch_bundle: r.name,
+							use_serial_batch_fields: 0,
+							qty: qty / flt(item.conversion_factor || 1, precision("conversion_factor", item)),
+						};
+
+						if (r.warehouse) {
+							update_values["warehouse"] = r.warehouse;
+						}
+
+						frappe.model.set_value(item.doctype, item.name, update_values);
+					}
+				});
+			}
+		});
+	},
+
+	add_serial_batch_for_rejected_qty(frm, cdt, cdn) {
+		let item = locals[cdt][cdn];
+
+		frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
+			if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
+				item.has_serial_no = r.message.has_serial_no;
+				item.has_batch_no = r.message.has_batch_no;
+				item.type_of_transaction = item.rejected_qty > 0 ? "Inward" : "Outward";
+				item.is_rejected = true;
+
+				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
+					if (r) {
+						let qty = Math.abs(r.total_qty);
+						if (frm.doc.is_return) {
+							qty = qty * -1;
+						}
+
+						let update_values = {
+							serial_and_batch_bundle: r.name,
+							use_serial_batch_fields: 0,
+							rejected_qty:
+								qty / flt(item.conversion_factor || 1, precision("conversion_factor", item)),
+						};
+
+						if (r.warehouse) {
+							update_values["rejected_warehouse"] = r.warehouse;
+						}
+
+						frappe.model.set_value(item.doctype, item.name, update_values);
+					}
+				});
+			}
+		});
 	},
 });
 
 frappe.ui.form.on("Subcontracting Receipt Supplied Item", {
 	consumed_qty(frm) {
 		set_missing_values(frm);
+	},
+
+	add_serial_batch_bundle(frm, cdt, cdn) {
+		let item = locals[cdt][cdn];
+
+		item.item_code = item.rm_item_code;
+		item.qty = item.consumed_qty;
+		item.warehouse = frm.doc.supplier_warehouse;
+		frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
+			if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
+				item.has_serial_no = r.message.has_serial_no;
+				item.has_batch_no = r.message.has_batch_no;
+				item.type_of_transaction = item.qty > 0 ? "Outward" : "Inward";
+				item.is_rejected = false;
+
+				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
+					if (r) {
+						let qty = Math.abs(r.total_qty);
+						if (frm.doc.is_return) {
+							qty = qty * -1;
+						}
+
+						let update_values = {
+							serial_and_batch_bundle: r.name,
+							use_serial_batch_fields: 0,
+							consumed_qty:
+								qty / flt(item.conversion_factor || 1, precision("conversion_factor", item)),
+						};
+
+						frappe.model.set_value(item.doctype, item.name, update_values);
+					}
+				});
+			}
+		});
 	},
 });
 

@@ -220,6 +220,28 @@ erpnext.sales_common = {
 				if (doc.docstatus === 0 && doc.is_return && !doc.return_against) {
 					frappe.model.set_value(cdt, cdn, "incoming_rate", 0.0);
 				}
+
+				this.set_actual_qty(doc, cdt, cdn);
+			}
+
+			set_actual_qty(doc, cdt, cdn) {
+				let row = locals[cdt][cdn];
+				let sales_doctypes = ["Sales Invoice", "Delivery Note", "Sales Order"];
+
+				if (row.item_code && row.warehouse && sales_doctypes.includes(doc.doctype)) {
+					frappe.call({
+						method: "erpnext.stock.get_item_details.get_bin_details",
+						args: {
+							item_code: row.item_code,
+							warehouse: row.warehouse,
+						},
+						callback(r) {
+							if (r.message) {
+								frappe.model.set_value(cdt, cdn, "actual_qty", r.message.actual_qty);
+							}
+						},
+					});
+				}
 			}
 
 			toggle_editable_price_list_rate() {
@@ -350,7 +372,6 @@ erpnext.sales_common = {
 			pick_serial_and_batch(doc, cdt, cdn) {
 				let item = locals[cdt][cdn];
 				let me = this;
-				let path = "assets/erpnext/js/utils/serial_no_batch_selector.js";
 
 				frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 					if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
@@ -364,26 +385,25 @@ erpnext.sales_common = {
 							item.title = __("Select Serial and Batch");
 						}
 
-						frappe.require(path, function () {
-							new erpnext.SerialBatchPackageSelector(me.frm, item, (r) => {
-								if (r) {
-									let qty = Math.abs(r.total_qty);
-									if (doc.is_return) {
-										qty = qty * -1;
-									}
-
-									frappe.model.set_value(item.doctype, item.name, {
-										serial_and_batch_bundle: r.name,
-										use_serial_batch_fields: 0,
-										qty:
-											qty /
-											flt(
-												item.conversion_factor || 1,
-												precision("conversion_factor", item)
-											),
-									});
+						new erpnext.SerialBatchPackageSelector(me.frm, item, (r) => {
+							if (r) {
+								let qty = Math.abs(r.total_qty);
+								if (doc.is_return) {
+									qty = qty * -1;
 								}
-							});
+
+								frappe.model.set_value(item.doctype, item.name, {
+									serial_and_batch_bundle: r.name,
+									use_serial_batch_fields: 0,
+									incoming_rate: r.avg_rate,
+									qty:
+										qty /
+										flt(
+											item.conversion_factor || 1,
+											precision("conversion_factor", item)
+										),
+								});
+							}
 						});
 					}
 				});

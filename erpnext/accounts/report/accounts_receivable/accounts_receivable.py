@@ -139,6 +139,7 @@ class ReceivablePayableReport:
 					paid_in_account_currency=0.0,
 					credit_note_in_account_currency=0.0,
 					outstanding_in_account_currency=0.0,
+					cost_center=ple.cost_center,
 				)
 			self.get_invoices(ple)
 
@@ -253,7 +254,7 @@ class ReceivablePayableReport:
 				row.paid -= amount
 				row.paid_in_account_currency -= amount_in_account_currency
 
-		if ple.cost_center:
+		if not row.cost_center and ple.cost_center:
 			row.cost_center = str(ple.cost_center)
 
 	def update_sub_total_row(self, row, party):
@@ -288,13 +289,13 @@ class ReceivablePayableReport:
 
 			must_consider = False
 			if self.filters.get("for_revaluation_journals"):
-				if (abs(row.outstanding) > 0.0 / 10**self.currency_precision) or (
-					abs(row.outstanding_in_account_currency) > 0.0 / 10**self.currency_precision
+				if (abs(row.outstanding) >= 0.0 / 10**self.currency_precision) or (
+					abs(row.outstanding_in_account_currency) >= 0.0 / 10**self.currency_precision
 				):
 					must_consider = True
 			else:
-				if (abs(row.outstanding) > 1.0 / 10**self.currency_precision) and (
-					(abs(row.outstanding_in_account_currency) > 1.0 / 10**self.currency_precision)
+				if (abs(row.outstanding) >= 1.0 / 10**self.currency_precision) and (
+					(abs(row.outstanding_in_account_currency) >= 1.0 / 10**self.currency_precision)
 					or (row.voucher_no in self.err_journals)
 				):
 					must_consider = True
@@ -501,8 +502,9 @@ class ReceivablePayableReport:
 		# Deduct that from paid amount pre allocation
 		row.paid -= flt(payment_terms_details[0].total_advance)
 
-		# If no or single payment terms, no need to split the row
-		if len(payment_terms_details) <= 1:
+		# If single payment terms, no need to split the row
+		if len(payment_terms_details) == 1 and payment_terms_details[0].payment_term:
+			self.append_payment_term(row, payment_terms_details[0], original_row)
 			return
 
 		for d in payment_terms_details:
@@ -665,7 +667,7 @@ class ReceivablePayableReport:
 			else:
 				future_amount_field = "future_amount_in_base_currency"
 
-			if row.remaining_balance > 0 and future.get(future_amount_field):
+			if row.remaining_balance != 0 and future.get(future_amount_field):
 				if future.get(future_amount_field) > row.outstanding:
 					row.future_amount = row.outstanding
 					future[future_amount_field] = future.get(future_amount_field) - row.outstanding
@@ -1026,20 +1028,6 @@ class ReceivablePayableReport:
 				fieldname="customer_primary_contact",
 				fieldtype="Link",
 				options="Contact",
-			)
-		if self.filters.party_type == "Customer":
-			self.add_column(
-				_("Customer Name"),
-				fieldname="customer_name",
-				fieldtype="Link",
-				options="Customer",
-			)
-		elif self.filters.party_type == "Supplier":
-			self.add_column(
-				_("Supplier Name"),
-				fieldname="supplier_name",
-				fieldtype="Link",
-				options="Supplier",
 			)
 
 		self.add_column(label=_("Cost Center"), fieldname="cost_center", fieldtype="Data")

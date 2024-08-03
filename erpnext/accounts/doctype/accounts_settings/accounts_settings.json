@@ -12,6 +12,7 @@
   "unlink_advance_payment_on_cancelation_of_order",
   "column_break_13",
   "delete_linked_ledger_entries",
+  "enable_immutable_ledger",
   "invoicing_features_section",
   "check_supplier_invoice_uniqueness",
   "automatically_fetch_payment_terms",
@@ -54,6 +55,8 @@
   "post_change_gl_entries",
   "assets_tab",
   "asset_settings_section",
+  "calculate_depr_using_total_days",
+  "column_break_gjcc",
   "book_asset_depreciation_entry_automatically",
   "closing_settings_tab",
   "period_closing_settings_section",
@@ -70,7 +73,9 @@
   "remarks_section",
   "general_ledger_remarks_length",
   "column_break_lvjk",
-  "receivable_payable_remarks_length"
+  "receivable_payable_remarks_length",
+  "payment_request_settings",
+  "create_pr_in_draft_status"
  ],
  "fields": [
   {
@@ -105,7 +110,7 @@
   },
   {
    "default": "0",
-   "description": "Enabling ensure each Purchase Invoice has a unique value in Supplier Invoice No. field",
+   "description": "Enabling this ensures each Purchase Invoice has a unique value in Supplier Invoice No. field within a particular fiscal year",
    "fieldname": "check_supplier_invoice_uniqueness",
    "fieldtype": "Check",
    "label": "Check Supplier Invoice Number Uniqueness"
@@ -454,6 +459,36 @@
    "fieldname": "remarks_section",
    "fieldtype": "Section Break",
    "label": "Remarks Column Length"
+  },
+  {
+   "default": "0",
+   "description": "On enabling this cancellation entries will be posted on the actual cancellation date and reports will consider cancelled entries as well",
+   "fieldname": "enable_immutable_ledger",
+   "fieldtype": "Check",
+   "label": "Enable Immutable Ledger"
+  },
+  {
+   "fieldname": "column_break_gjcc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Enable this option to calculate daily depreciation by considering the total number of days in the entire depreciation period, (including leap years) while using daily pro-rata based depreciation",
+   "fieldname": "calculate_depr_using_total_days",
+   "fieldtype": "Check",
+   "label": "Calculate daily depreciation using total days in depreciation period"
+  },
+  {
+   "description": "Payment Request created from Sales Order or Purchase Order will be in Draft status. When disabled document will be in unsaved state.",
+   "fieldname": "payment_request_settings",
+   "fieldtype": "Tab Break",
+   "label": "Payment Request"
+  },
+  {
+   "default": "1",
+   "fieldname": "create_pr_in_draft_status",
+   "fieldtype": "Check",
+   "label": "Create in Draft Status"
   }
  ],
  "icon": "icon-cog",
@@ -461,7 +496,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-03-27 13:05:57.568638",
+ "modified": "2024-07-26 06:48:52.714630",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

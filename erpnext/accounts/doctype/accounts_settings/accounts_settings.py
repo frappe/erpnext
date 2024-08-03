@@ -33,12 +33,15 @@ class AccountsSettings(Document):
 		book_deferred_entries_based_on: DF.Literal["Days", "Months"]
 		book_deferred_entries_via_journal_entry: DF.Check
 		book_tax_discount_loss: DF.Check
+		calculate_depr_using_total_days: DF.Check
 		check_supplier_invoice_uniqueness: DF.Check
+		create_pr_in_draft_status: DF.Check
 		credit_controller: DF.Link | None
 		delete_linked_ledger_entries: DF.Check
 		determine_address_tax_category_from: DF.Literal["Billing Address", "Shipping Address"]
 		enable_common_party_accounting: DF.Check
 		enable_fuzzy_matching: DF.Check
+		enable_immutable_ledger: DF.Check
 		enable_party_matching: DF.Check
 		frozen_accounts_modifier: DF.Link | None
 		general_ledger_remarks_length: DF.Int

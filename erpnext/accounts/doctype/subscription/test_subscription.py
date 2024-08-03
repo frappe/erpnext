@@ -445,11 +445,11 @@ class TestSubscription(FrappeTestCase):
 
 		# Process subscription and create first invoice
 		# Subscription status will be unpaid since due date has already passed
-		subscription.process()
+		subscription.process(posting_date="2018-01-01")
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, "Unpaid")
 
-		subscription.process()
+		subscription.process(posting_date="2018-04-01")
 		self.assertEqual(len(subscription.invoices), 1)
 
 	def test_multi_currency_subscription(self):
@@ -462,7 +462,7 @@ class TestSubscription(FrappeTestCase):
 			party=party,
 		)
 
-		subscription.process()
+		subscription.process(posting_date="2018-01-01")
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.status, "Unpaid")
 
@@ -476,7 +476,7 @@ class TestSubscription(FrappeTestCase):
 			start_date="2021-01-01",
 			submit_invoice=0,
 			generate_new_invoices_past_due_date=1,
-			party="_Test Subscription Customer",
+			party="_Test Subscription Customer John Doe",
 		)
 
 		# create invoices for the first two moths
@@ -565,8 +565,14 @@ def create_parties():
 	if not frappe.db.exists("Customer", "_Test Subscription Customer"):
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = "_Test Subscription Customer"
-		customer.billing_currency = "USD"
+		customer.default_currency = "USD"
 		customer.append("accounts", {"company": "_Test Company", "account": "_Test Receivable USD - _TC"})
+		customer.insert()
+
+	if not frappe.db.exists("Customer", "_Test Subscription Customer John Doe"):
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = "_Test Subscription Customer John Doe"
+		customer.append("accounts", {"company": "_Test Company", "account": "_Test Receivable - _TC"})
 		customer.insert()
 
 

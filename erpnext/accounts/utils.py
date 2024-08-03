@@ -10,14 +10,16 @@ import frappe.defaults
 from frappe import _, qb, throw
 from frappe.model.meta import get_field_precision
 from frappe.query_builder import AliasedQuery, Criterion, Table
-from frappe.query_builder.functions import Round, Sum
+from frappe.query_builder.functions import Count, Round, Sum
 from frappe.query_builder.utils import DocType
 from frappe.utils import (
+	add_days,
 	cint,
 	create_batch,
 	cstr,
 	flt,
 	formatdate,
+	get_datetime,
 	get_number_format_info,
 	getdate,
 	now,
@@ -54,7 +56,7 @@ def get_fiscal_year(
 	date=None, fiscal_year=None, label="Date", verbose=1, company=None, as_dict=False, boolean=False
 ):
 	if isinstance(boolean, str):
-		boolean = frappe.json.loads(boolean)
+		boolean = loads(boolean)
 
 	fiscal_years = get_fiscal_years(
 		date, fiscal_year, label, verbose, company, as_dict=as_dict, boolean=boolean
@@ -514,6 +516,10 @@ def reconcile_against_document(
 			doc.make_advance_gl_entries()
 		else:
 			gl_map = doc.build_gl_map()
+			# Make sure there is no overallocation
+			from erpnext.accounts.general_ledger import process_debit_credit_difference
+
+			process_debit_credit_difference(gl_map)
 			create_payment_ledger_entry(gl_map, update_outstanding="No", cancel=0, adv_adj=1)
 
 		# Only update outstanding for newly linked vouchers
@@ -720,7 +726,19 @@ def update_reference_in_payment_entry(
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	if not skip_ref_details_update_for_pe:
-		payment_entry.set_missing_ref_details(ref_exchange_rate=d.exchange_rate or None)
+		reference_exchange_details = frappe._dict()
+		if d.against_voucher_type == "Journal Entry" and d.exchange_rate:
+			reference_exchange_details.update(
+				{
+					"reference_doctype": d.against_voucher_type,
+					"reference_name": d.against_voucher,
+					"exchange_rate": d.exchange_rate,
+				}
+			)
+		payment_entry.set_missing_ref_details(
+			update_ref_details_only_for=[(d.against_voucher_type, d.against_voucher)],
+			reference_exchange_details=reference_exchange_details,
+		)
 	payment_entry.set_amounts()
 
 	payment_entry.make_exchange_gain_loss_journal(
@@ -1091,7 +1109,7 @@ def get_companies():
 @frappe.whitelist()
 def get_children(doctype, parent, company, is_root=False, include_disabled=False):
 	if isinstance(include_disabled, str):
-		include_disabled = frappe.json.loads(include_disabled)
+		include_disabled = loads(include_disabled)
 	from erpnext.accounts.report.financial_statements import sort_accounts
 
 	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
@@ -1490,24 +1508,39 @@ def get_stock_accounts(company, voucher_type=None, voucher_no=None):
 				)
 			]
 
-	return stock_accounts
+	return list(set(stock_accounts))
 
 
 def get_stock_and_account_balance(account=None, posting_date=None, company=None):
 	if not posting_date:
 		posting_date = nowdate()
 
-	warehouse_account = get_warehouse_account_map(company)
-
 	account_balance = get_balance_on(
 		account, posting_date, in_account_currency=False, ignore_account_permission=True
 	)
 
-	related_warehouses = [
-		wh
-		for wh, wh_details in warehouse_account.items()
-		if wh_details.account == account and not wh_details.is_group
-	]
+	account_table = frappe.qb.DocType("Account")
+	query = (
+		frappe.qb.from_(account_table)
+		.select(Count(account_table.name))
+		.where(
+			(account_table.account_type == "Stock")
+			& (account_table.company == company)
+			& (account_table.is_group == 0)
+		)
+	)
+
+	no_of_stock_accounts = cint(query.run()[0][0])
+
+	related_warehouses = []
+	if no_of_stock_accounts > 1:
+		warehouse_account = get_warehouse_account_map(company)
+
+		related_warehouses = [
+			wh
+			for wh, wh_details in warehouse_account.items()
+			if wh_details.account == account and not wh_details.is_group
+		]
 
 	total_stock_value = get_stock_value_on(related_warehouses, posting_date)
 
@@ -1576,6 +1609,18 @@ def auto_create_exchange_rate_revaluation_weekly() -> None:
 	companies = frappe.db.get_all(
 		"Company",
 		filters={"auto_exchange_rate_revaluation": 1, "auto_err_frequency": "Weekly"},
+		fields=["name", "submit_err_jv"],
+	)
+	create_err_and_its_journals(companies)
+
+
+def auto_create_exchange_rate_revaluation_monthly() -> None:
+	"""
+	Executed by background job
+	"""
+	companies = frappe.db.get_all(
+		"Company",
+		filters={"auto_exchange_rate_revaluation": 1, "auto_err_frequency": "Montly"},
 		fields=["name", "submit_err_jv"],
 	)
 	create_err_and_its_journals(companies)
@@ -1709,6 +1754,7 @@ def update_voucher_outstanding(voucher_type, voucher_no, account, party_type, pa
 		)
 
 		ref_doc.set_status(update=True)
+		ref_doc.notify_update()
 
 
 def delink_original_entry(pl_entry, partial_cancel=False):
@@ -2059,3 +2105,44 @@ def create_gain_loss_journal(
 
 def get_party_types_from_account_type(account_type):
 	return frappe.db.get_all("Party Type", {"account_type": account_type}, pluck="name")
+
+
+def run_ledger_health_checks():
+	health_monitor_settings = frappe.get_doc("Ledger Health Monitor")
+	if health_monitor_settings.enable_health_monitor:
+		period_end = getdate()
+		period_start = add_days(period_end, -abs(health_monitor_settings.monitor_for_last_x_days))
+
+		run_date = get_datetime()
+
+		# Debit-Credit mismatch report
+		if health_monitor_settings.debit_credit_mismatch:
+			for x in health_monitor_settings.companies:
+				filters = {"company": x.company, "from_date": period_start, "to_date": period_end}
+				voucher_wise = frappe.get_doc("Report", "Voucher-wise Balance")
+				res = voucher_wise.execute_script_report(filters=filters)
+				for x in res[1]:
+					doc = frappe.new_doc("Ledger Health")
+					doc.voucher_type = x.voucher_type
+					doc.voucher_no = x.voucher_no
+					doc.debit_credit_mismatch = True
+					doc.checked_on = run_date
+					doc.save()
+
+		# General Ledger and Payment Ledger discrepancy
+		if health_monitor_settings.general_and_payment_ledger_mismatch:
+			for x in health_monitor_settings.companies:
+				filters = {
+					"company": x.company,
+					"period_start_date": period_start,
+					"period_end_date": period_end,
+				}
+				gl_pl_comparison = frappe.get_doc("Report", "General and Payment Ledger Comparison")
+				res = gl_pl_comparison.execute_script_report(filters=filters)
+				for x in res[1]:
+					doc = frappe.new_doc("Ledger Health")
+					doc.voucher_type = x.voucher_type
+					doc.voucher_no = x.voucher_no
+					doc.general_and_payment_ledger_mismatch = True
+					doc.checked_on = run_date
+					doc.save()

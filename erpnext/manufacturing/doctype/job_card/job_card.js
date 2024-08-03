@@ -32,13 +32,53 @@ frappe.ui.form.on("Job Card", {
 		});
 	},
 
+	make_fields_read_only(frm) {
+		if (frm.doc.docstatus === 1) {
+			frm.set_df_property("employee", "read_only", 1);
+			frm.set_df_property("time_logs", "read_only", 1);
+		}
+
+		if (frm.doc.is_subcontracted) {
+			frm.set_df_property("wip_warehouse", "label", __("Supplier Warehouse"));
+		}
+	},
+
+	setup_stock_entry(frm) {
+		if (
+			frm.doc.finished_good &&
+			frm.doc.docstatus === 1 &&
+			!frm.doc.is_subcontracted &&
+			flt(frm.doc.for_quantity) + flt(frm.doc.process_loss_qty) > flt(frm.doc.manufactured_qty)
+		) {
+			frm.add_custom_button(__("Make Stock Entry"), () => {
+				frm.call({
+					method: "make_stock_entry_for_semi_fg_item",
+					args: {
+						auto_submit: 1,
+					},
+					doc: frm.doc,
+					freeze: true,
+					callback() {
+						frm.reload_doc();
+					},
+				});
+			}).addClass("btn-primary");
+		}
+	},
+
 	refresh: function (frm) {
-		frappe.flags.pause_job = 0;
-		frappe.flags.resume_job = 0;
+		frm.trigger("setup_stock_entry");
+
 		let has_items = frm.doc.items && frm.doc.items.length;
+		frm.trigger("make_fields_read_only");
 
 		if (!frm.is_new() && frm.doc.__onload.work_order_closed) {
 			frm.disable_save();
+			return;
+		}
+
+		if (frm.doc.is_subcontracted) {
+			frm.trigger("make_subcontracting_po");
 			return;
 		}
 
@@ -46,7 +86,7 @@ frappe.ui.form.on("Job Card", {
 
 		frm.toggle_enable("for_quantity", !has_stock_entry);
 
-		if (!frm.is_new() && has_items && frm.doc.docstatus < 2) {
+		if (!frm.is_new() && !frm.doc.skip_material_transfer && has_items && frm.doc.docstatus < 2) {
 			let to_request = frm.doc.for_quantity > frm.doc.transferred_qty;
 			let excess_transfer_allowed = frm.doc.__onload.job_card_excess_transfer;
 
@@ -63,11 +103,11 @@ frappe.ui.form.on("Job Card", {
 			if (to_transfer || excess_transfer_allowed) {
 				frm.add_custom_button(__("Material Transfer"), () => {
 					frm.trigger("make_stock_entry");
-				}).addClass("btn-primary");
+				});
 			}
 		}
 
-		if (frm.doc.docstatus == 1 && !frm.doc.is_corrective_job_card) {
+		if (frm.doc.docstatus == 1 && !frm.doc.is_corrective_job_card && !frm.doc.finished_good) {
 			frm.trigger("setup_corrective_job_card");
 		}
 
@@ -84,31 +124,67 @@ frappe.ui.form.on("Job Card", {
 		frm.trigger("toggle_operation_number");
 
 		if (
-			frm.doc.docstatus == 0 &&
-			!frm.is_new() &&
-			(frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity) &&
-			(frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)
+			frm.doc.for_quantity + frm.doc.process_loss_qty > frm.doc.total_completed_qty &&
+			(frm.doc.skip_material_transfer ||
+				frm.doc.transferred_qty >= frm.doc.for_quantity + frm.doc.process_loss_qty ||
+				!frm.doc.finished_good)
 		) {
-			// if Job Card is link to Work Order, the job card must not be able to start if Work Order not "Started"
-			// and if stock mvt for WIP is required
-			if (frm.doc.work_order) {
-				frappe.db.get_value(
-					"Work Order",
-					frm.doc.work_order,
-					["skip_transfer", "status"],
-					(result) => {
-						if (
-							result.skip_transfer === 1 ||
-							result.status == "In Process" ||
-							frm.doc.transferred_qty > 0 ||
-							!frm.doc.items.length
-						) {
-							frm.trigger("prepare_timer_buttons");
-						}
+			if (!frm.doc.time_logs?.length) {
+				frm.add_custom_button(__("Start Job"), () => {
+					let from_time = frappe.datetime.now_datetime();
+					if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
+						frappe.prompt(
+							{
+								fieldtype: "Table MultiSelect",
+								label: __("Select Employees"),
+								options: "Job Card Time Log",
+								fieldname: "employees",
+							},
+							(d) => {
+								frm.events.start_timer(frm, from_time, d.employees);
+							},
+							__("Assign Job to Employee")
+						);
+					} else {
+						frm.events.start_timer(frm, from_time, frm.doc.employee);
 					}
-				);
+				});
+			} else if (frm.doc.is_paused) {
+				frm.add_custom_button(__("Resume Job"), () => {
+					frm.call({
+						method: "resume_job",
+						doc: frm.doc,
+						args: {
+							start_time: frappe.datetime.now_datetime(),
+						},
+						callback() {
+							frm.reload_doc();
+						},
+					});
+				});
 			} else {
-				frm.trigger("prepare_timer_buttons");
+				if (frm.doc.for_quantity - frm.doc.manufactured_qty > 0) {
+					if (!frm.doc.is_paused) {
+						frm.add_custom_button(__("Pause Job"), () => {
+							frm.call({
+								method: "pause_job",
+								doc: frm.doc,
+								args: {
+									end_time: frappe.datetime.now_datetime(),
+								},
+								callback() {
+									frm.reload_doc();
+								},
+							});
+						});
+					}
+
+					frm.add_custom_button(__("Complete Job"), () => {
+						frm.trigger("complete_job_card");
+					});
+				}
+
+				frm.trigger("make_dashboard");
 			}
 		}
 
@@ -116,7 +192,7 @@ frappe.ui.form.on("Job Card", {
 
 		if (frm.doc.work_order) {
 			frappe.db.get_value("Work Order", frm.doc.work_order, "transfer_material_against").then((r) => {
-				if (r.message.transfer_material_against == "Work Order") {
+				if (r.message.transfer_material_against == "Work Order" && !frm.doc.operation_row_id) {
 					frm.set_df_property("items", "hidden", 1);
 				}
 			});
@@ -132,6 +208,75 @@ frappe.ui.form.on("Job Card", {
 				};
 			};
 		}
+	},
+
+	make_subcontracting_po(frm) {
+		if (frm.doc.docstatus === 1 && frm.doc.for_quantity > frm.doc.manufactured_qty) {
+			frm.add_custom_button(__("Make Subcontracting PO"), () => {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.manufacturing.doctype.job_card.job_card.make_subcontracting_po",
+					frm: frm,
+				});
+			}).addClass("btn-primary");
+		}
+	},
+
+	start_timer(frm, start_time, employees) {
+		frm.call({
+			method: "start_timer",
+			doc: frm.doc,
+			args: {
+				start_time: start_time,
+				employees: employees,
+			},
+			callback: function (r) {
+				frm.reload_doc();
+				frm.trigger("make_dashboard");
+			},
+		});
+	},
+
+	make_finished_good(frm) {
+		let fields = [
+			{
+				fieldtype: "Float",
+				label: __("Completed Quantity"),
+				fieldname: "qty",
+				reqd: 1,
+				default: frm.doc.for_quantity - frm.doc.manufactured_qty,
+			},
+			{
+				fieldtype: "Datetime",
+				label: __("End Time"),
+				fieldname: "end_time",
+				default: frappe.datetime.now_datetime(),
+			},
+		];
+
+		frappe.prompt(
+			fields,
+			(data) => {
+				if (data.qty <= 0) {
+					frappe.throw(__("Quantity should be greater than 0"));
+				}
+
+				frm.call({
+					method: "make_finished_good",
+					doc: frm.doc,
+					args: {
+						qty: data.qty,
+						end_time: data.end_time,
+					},
+					callback: function (r) {
+						var doc = frappe.model.sync(r.message);
+						frappe.set_route("Form", doc[0].doctype, doc[0].name);
+					},
+				});
+			},
+			__("Enter Value"),
+			__("Update"),
+			__("Set Finished Good Quantity")
+		);
 	},
 
 	setup_quality_inspection: function (frm) {
@@ -262,90 +407,6 @@ frappe.ui.form.on("Job Card", {
 		frm.toggle_reqd("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
 	},
 
-	prepare_timer_buttons: function (frm) {
-		frm.trigger("make_dashboard");
-
-		if (!frm.doc.started_time && !frm.doc.current_time) {
-			frm.add_custom_button(__("Start Job"), () => {
-				if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
-					frappe.prompt(
-						{
-							fieldtype: "Table MultiSelect",
-							label: __("Select Employees"),
-							options: "Job Card Time Log",
-							fieldname: "employees",
-						},
-						(d) => {
-							frm.events.start_job(frm, "Work In Progress", d.employees);
-						},
-						__("Assign Job to Employee")
-					);
-				} else {
-					frm.events.start_job(frm, "Work In Progress", frm.doc.employee);
-				}
-			}).addClass("btn-primary");
-		} else if (frm.doc.status == "On Hold") {
-			frm.add_custom_button(__("Resume Job"), () => {
-				frm.events.start_job(frm, "Resume Job", frm.doc.employee);
-			}).addClass("btn-primary");
-		} else {
-			frm.add_custom_button(__("Pause Job"), () => {
-				frm.events.complete_job(frm, "On Hold");
-			});
-
-			frm.add_custom_button(__("Complete Job"), () => {
-				var sub_operations = frm.doc.sub_operations;
-
-				let set_qty = true;
-				if (sub_operations && sub_operations.length > 1) {
-					set_qty = false;
-					let last_op_row = sub_operations[sub_operations.length - 2];
-
-					if (last_op_row.status == "Complete") {
-						set_qty = true;
-					}
-				}
-
-				if (set_qty) {
-					frappe.prompt(
-						{
-							fieldtype: "Float",
-							label: __("Completed Quantity"),
-							fieldname: "qty",
-							default: frm.doc.for_quantity,
-						},
-						(data) => {
-							frm.events.complete_job(frm, "Complete", data.qty);
-						},
-						__("Enter Value")
-					);
-				} else {
-					frm.events.complete_job(frm, "Complete", 0.0);
-				}
-			}).addClass("btn-primary");
-		}
-	},
-
-	start_job: function (frm, status, employee) {
-		const args = {
-			job_card_id: frm.doc.name,
-			start_time: frappe.datetime.now_datetime(),
-			employees: employee,
-			status: status,
-		};
-		frm.events.make_time_log(frm, args);
-	},
-
-	complete_job: function (frm, status, completed_qty) {
-		const args = {
-			job_card_id: frm.doc.name,
-			complete_time: frappe.datetime.now_datetime(),
-			status: status,
-			completed_qty: completed_qty,
-		};
-		frm.events.make_time_log(frm, args);
-	},
-
 	make_time_log: function (frm, args) {
 		frm.events.update_sub_operation(frm, args);
 
@@ -392,7 +453,7 @@ frappe.ui.form.on("Job Card", {
 		function updateStopwatch(increment) {
 			var hours = Math.floor(increment / 3600);
 			var minutes = Math.floor((increment - hours * 3600) / 60);
-			var seconds = increment - hours * 3600 - minutes * 60;
+			var seconds = flt(increment - hours * 3600 - minutes * 60, 2);
 
 			$(section)
 				.find(".hours")
@@ -415,7 +476,7 @@ frappe.ui.form.on("Job Card", {
 		frm.dashboard.refresh();
 		const timer = `
 			<div class="stopwatch" style="font-weight:bold;margin:0px 13px 0px 2px;
-				color:#545454;font-size:18px;display:inline-block;vertical-align:text-bottom;>
+				color:#545454;font-size:18px;display:inline-block;vertical-align:text-bottom;">
 				<span class="hours">00</span>
 				<span class="colon">:</span>
 				<span class="minutes">00</span>
@@ -424,19 +485,32 @@ frappe.ui.form.on("Job Card", {
 			</div>`;
 
 		var section = frm.toolbar.page.add_inner_message(timer);
-
-		let currentIncrement = frm.doc.current_time || 0;
-		if (frm.doc.started_time || frm.doc.current_time) {
-			if (frm.doc.status == "On Hold") {
-				updateStopwatch(currentIncrement);
-			} else {
-				currentIncrement += moment(frappe.datetime.now_datetime()).diff(
-					moment(frm.doc.started_time),
-					"seconds"
-				);
-				initialiseTimer();
-			}
+		let currentIncrement = frm.events.get_current_time(frm);
+		if (frm.doc.time_logs?.length && frm.doc.time_logs[cint(frm.doc.time_logs.length) - 1].to_time) {
+			updateStopwatch(currentIncrement);
+		} else if (frm.doc.status == "On Hold") {
+			updateStopwatch(currentIncrement);
+		} else {
+			initialiseTimer();
 		}
+	},
+
+	get_current_time(frm) {
+		let current_time = 0;
+
+		frm.doc.time_logs.forEach((d) => {
+			if (d.to_time) {
+				if (d.time_in_mins) {
+					current_time += flt(d.time_in_mins, 2) * 60;
+				} else {
+					current_time += get_seconds_diff(d.to_time, d.from_time);
+				}
+			} else {
+				current_time += get_seconds_diff(frappe.datetime.now_datetime(), d.from_time);
+			}
+		});
+
+		return current_time;
 	},
 
 	hide_timer: function (frm) {
@@ -492,6 +566,14 @@ frappe.ui.form.on("Job Card", {
 
 		refresh_field("total_completed_qty");
 	},
+
+	source_warehouse(frm) {
+		if (frm.doc.source_warehouse) {
+			frm.doc.items.forEach((d) => {
+				frappe.model.set_value(d.doctype, d.name, "source_warehouse", frm.doc.source_warehouse);
+			});
+		}
+	},
 });
 
 frappe.ui.form.on("Job Card Time Log", {
@@ -503,3 +585,7 @@ frappe.ui.form.on("Job Card Time Log", {
 		frm.set_value("started_time", "");
 	},
 });
+
+function get_seconds_diff(d1, d2) {
+	return moment(d1).diff(d2, "seconds");
+}

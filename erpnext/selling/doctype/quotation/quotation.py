@@ -69,7 +69,7 @@ class Quotation(SellingController):
 		in_words: DF.Data | None
 		incoterm: DF.Link | None
 		items: DF.Table[QuotationItem]
-		language: DF.Data | None
+		language: DF.Link | None
 		letter_head: DF.Link | None
 		lost_reasons: DF.TableMultiSelect[QuotationLostReasonDetail]
 		named_place: DF.Data | None
@@ -384,7 +384,6 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				)
 
 		target.flags.ignore_permissions = ignore_permissions
-		target.delivery_date = nowdate()
 		target.run_method("set_missing_values")
 		target.run_method("calculate_taxes_and_totals")
 
