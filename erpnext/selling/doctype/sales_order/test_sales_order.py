@@ -2176,7 +2176,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 0)
 
 
-  def test_discount_on_rate_greater_than_price_list(self):
+  	def test_discount_on_rate_greater_than_price_list(self):
 		item = make_item("_Discount Test")
 		so = make_sales_order(item_code=item.name, qty=1, rate=200, price_list_rate=100, do_not_submit=True)
 		so[0].rate = 120
