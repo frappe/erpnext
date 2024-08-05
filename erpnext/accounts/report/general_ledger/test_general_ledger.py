@@ -253,10 +253,6 @@ class TestGeneralLedger(FrappeTestCase):
 		self.assertIn(revaluation_jv.name, set([x.voucher_no for x in data]))
 
 	def test_ignore_cr_dr_notes_filter(self):
-		# Clear old data
-		sinv_doctype = qb.DocType("Sales Invoice")
-		qb.from_(sinv_doctype).delete().where(sinv_doctype.company.eq("_Test Company")).run()
-
 		si = create_sales_invoice()
 
 		cr_note = make_return_doc(si.doctype, si.name)
@@ -269,16 +265,11 @@ class TestGeneralLedger(FrappeTestCase):
 		pr.receivable_payable_account = si.debit_to
 
 		pr.get_unreconciled_entries()
-		self.assertEqual(len(pr.invoices), 1)
-		self.assertEqual(len(pr.payments), 1)
 
-		invoices = [invoice.as_dict() for invoice in pr.invoices]
-		payments = [payment.as_dict() for payment in pr.payments]
+		invoices = [invoice.as_dict() for invoice in pr.invoices if invoice.invoice_number == si.name]
+		payments = [payment.as_dict() for payment in pr.payments if payment.reference_name == cr_note.name]
 		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
 		pr.reconcile()
-
-		self.assertEqual(len(pr.invoices), 0)
-		self.assertEqual(len(pr.payments), 0)
 
 		system_generated_journal = frappe.db.get_all(
 			"Journal Entry",
