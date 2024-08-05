@@ -2,6 +2,7 @@
 # MIT License. See license.txt
 
 import frappe
+from frappe import qb
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
@@ -252,6 +253,10 @@ class TestGeneralLedger(FrappeTestCase):
 		self.assertIn(revaluation_jv.name, set([x.voucher_no for x in data]))
 
 	def test_ignore_cr_dr_notes_filter(self):
+		# Clear old data
+		sinv_doctype = qb.DocType("Sales Invoice")
+		qb.from_(sinv_doctype).delete().where(sinv_doctype.company.eq("_Test Company")).run()
+
 		si = create_sales_invoice()
 
 		cr_note = make_return_doc(si.doctype, si.name)
