@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-04 21:33\n"
+"PO-Revision-Date: 2024-08-05 21:38\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -362,7 +362,7 @@ msgid "# Financial Statements\n\n"
 "<b>[Check Accounting reports](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
 msgstr "# Bokslut\n\n"
 "Hämta viktiga finansiella rapporter som [Balans Rapport] och [Resultat Rapport] med en klick. Man kan skapa rapport för en annan period och skapa analytiska diagram från hämtad data. För fler rapporter, kolla avsnitt som bokslut, register och lönsamhet rapporter.\n\n"
-"<b>[Läs mer om Redovisning Rapporter](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
+"<b>[Läs mer om Bokföring Rapporter](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
 
 #. Description of the Onboarding Step 'Review Fixed Asset Accounts'
 #: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
@@ -4268,7 +4268,7 @@ msgstr "Alla tilldelningar är avstämda"
 
 #: support/doctype/issue/issue.js:107
 msgid "All communications including and above this shall be moved into the new Issue"
-msgstr "All korrespondens inklusive och ovanför detta ska flyttas till ny Ärende"
+msgstr "All e-post inklusive och ovan detta ska flyttas till ny Ärende"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.py:1125
 msgid "All items have already been Invoiced/Returned"
@@ -9753,7 +9753,7 @@ msgstr "Transportör Service"
 #. DocType 'CRM Settings'
 #: crm/doctype/crm_settings/crm_settings.json
 msgid "Carry Forward Communication and Comments"
-msgstr "Vidarebefodra Korrespondens och Kommentarer"
+msgstr "Vidarebefordra E-post och Kommentarer"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #. Option for the 'Type' (Select) field in DocType 'Mode of Payment'
@@ -10676,23 +10676,23 @@ msgstr "Korrespondens"
 #. Medium'
 #: communication/doctype/communication_medium/communication_medium.json
 msgid "Communication Channel"
-msgstr "Korrespondens Kanal"
+msgstr "Kommunikation Kanal"
 
 #. Name of a DocType
 #: communication/doctype/communication_medium/communication_medium.json
 msgid "Communication Medium"
-msgstr "Korrespondens Medium"
+msgstr "Kommunikation Medium"
 
 #. Name of a DocType
 #: communication/doctype/communication_medium_timeslot/communication_medium_timeslot.json
 msgid "Communication Medium Timeslot"
-msgstr "Korrespondens Medium Tid"
+msgstr "Kommunikation Medium Tid"
 
 #. Label of the communication_medium_type (Select) field in DocType
 #. 'Communication Medium'
 #: communication/doctype/communication_medium/communication_medium.json
 msgid "Communication Medium Type"
-msgstr "Korrespondens Medium Typ"
+msgstr "Komunikation Medium Typ"
 
 #: setup/install.py:101
 msgid "Compact Item Print"
@@ -27485,11 +27485,11 @@ msgstr "Senaste CO2 Kontroll"
 
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py:46
 msgid "Last Communication"
-msgstr "Senaste Korrespondens"
+msgstr "Senaste E-post"
 
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py:52
 msgid "Last Communication Date"
-msgstr "Senaste Korrespondens Datum"
+msgstr "Senaste E-post Datum"
 
 #. Label of the last_completion_date (Date) field in DocType 'Asset Maintenance
 #. Task'
@@ -40465,7 +40465,7 @@ msgstr "Kvartal {0} {1}"
 #: stock/report/stock_analytics/stock_analytics.js:81
 #: support/report/issue_analytics/issue_analytics.js:43
 msgid "Quarterly"
-msgstr "Kvartal"
+msgstr "Varje Kvartal"
 
 #. Label of the query_options_sb (Section Break) field in DocType 'Support
 #. Search Source'
@@ -44706,7 +44706,7 @@ msgstr "Försäljning Order Totalt Kvantitet"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:16
 msgid "STATEMENTS OF ACCOUNTS"
-msgstr "REDOVISNING"
+msgstr "KONTOUTDRAG"
 
 #. Label of the swift_number (Read Only) field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
@@ -51129,12 +51129,12 @@ msgstr "Ta snabb genomgång av Bokföring Inställningar"
 #. Label of an action in the Onboarding Step 'Review Stock Settings'
 #: stock/onboarding_step/stock_settings/stock_settings.json
 msgid "Take a walk through Stock Settings"
-msgstr "Ta snabb genomgång av Lager Inställningar"
+msgstr "Snabb genomgång av Lager Inställningar"
 
 #. Label of an action in the Onboarding Step 'Manufacturing Settings'
 #: manufacturing/onboarding_step/explore_manufacturing_settings/explore_manufacturing_settings.json
 msgid "Take a walk-through of Manufacturing Settings"
-msgstr "Ta snabb genomgång av Produktion Inställningar"
+msgstr "Snabb genomgång av Produktion Inställningar"
 
 #. Label of the tally_company (Data) field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
