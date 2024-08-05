@@ -228,11 +228,27 @@ def get_conditions(filters):
 				"company": filters.get("company"),
 				"docstatus": 1,
 				"voucher_type": ("in", ["Exchange Rate Revaluation", "Exchange Gain Or Loss"]),
+				"posting_date": ["between", [filters.get("from_date"), filters.get("to_date")]],
 			},
 			as_list=True,
 		)
 		if err_journals:
 			filters.update({"voucher_no_not_in": [x[0] for x in err_journals]})
+
+	if filters.get("ignore_cr_dr_notes"):
+		system_generated_cr_dr_journals = frappe.db.get_all(
+			"Journal Entry",
+			filters={
+				"company": filters.get("company"),
+				"docstatus": 1,
+				"voucher_type": ("in", ["Credit Note", "Debit Note"]),
+				"is_system_generated": 1,
+				"posting_date": ["between", [filters.get("from_date"), filters.get("to_date")]],
+			},
+			as_list=True,
+		)
+		if system_generated_cr_dr_journals:
+			filters.update({"voucher_no_not_in": [x[0] for x in system_generated_cr_dr_journals]})
 
 	if filters.get("voucher_no_not_in"):
 		conditions.append("voucher_no not in %(voucher_no_not_in)s")
