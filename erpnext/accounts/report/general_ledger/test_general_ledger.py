@@ -5,7 +5,9 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.report.general_ledger.general_ledger import execute
+from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 
 class TestGeneralLedger(FrappeTestCase):
@@ -248,3 +250,73 @@ class TestGeneralLedger(FrappeTestCase):
 			)
 		)
 		self.assertIn(revaluation_jv.name, set([x.voucher_no for x in data]))
+
+	def test_ignore_cr_dr_notes_filter(self):
+		si = create_sales_invoice()
+
+		cr_note = make_return_doc(si.doctype, si.name)
+		cr_note.submit()
+
+		pr = frappe.get_doc("Payment Reconciliation")
+		pr.company = si.company
+		pr.party_type = "Customer"
+		pr.party = si.customer
+		pr.receivable_payable_account = si.debit_to
+
+		pr.get_unreconciled_entries()
+		self.assertEqual(len(pr.invoices), 1)
+		self.assertEqual(len(pr.payments), 1)
+
+		invoices = [invoice.as_dict() for invoice in pr.invoices]
+		payments = [payment.as_dict() for payment in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+
+		self.assertEqual(len(pr.invoices), 0)
+		self.assertEqual(len(pr.payments), 0)
+
+		system_generated_journal = frappe.db.get_all(
+			"Journal Entry",
+			filters={
+				"docstatus": 1,
+				"reference_type": si.doctype,
+				"reference_name": si.name,
+				"voucher_type": "Credit Note",
+				"is_system_generated": True,
+			},
+			fields=["name"],
+		)
+		self.assertEqual(len(system_generated_journal), 1)
+		expected = set([si.name, cr_note.name, system_generated_journal[0].name])
+		# Without ignore_cr_dr_notes
+		columns, data = execute(
+			frappe._dict(
+				{
+					"company": si.company,
+					"from_date": si.posting_date,
+					"to_date": si.posting_date,
+					"account": [si.debit_to],
+					"group_by": "Group by Voucher (Consolidated)",
+					"ignore_cr_dr_notes": False,
+				}
+			)
+		)
+		actual = set([x.voucher_no for x in data if x.voucher_no])
+		self.assertEqual(expected, actual)
+
+		# Without ignore_cr_dr_notes
+		expected = set([si.name, cr_note.name])
+		columns, data = execute(
+			frappe._dict(
+				{
+					"company": si.company,
+					"from_date": si.posting_date,
+					"to_date": si.posting_date,
+					"account": [si.debit_to],
+					"group_by": "Group by Voucher (Consolidated)",
+					"ignore_cr_dr_notes": True,
+				}
+			)
+		)
+		actual = set([x.voucher_no for x in data if x.voucher_no])
+		self.assertEqual(expected, actual)
