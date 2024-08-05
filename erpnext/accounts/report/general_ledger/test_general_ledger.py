@@ -12,6 +12,22 @@ from erpnext.controllers.sales_and_purchase_return import make_return_doc
 
 
 class TestGeneralLedger(FrappeTestCase):
+	def setUp(self):
+		self.company = "_Test Company"
+		self.clear_old_records()
+
+	def clear_old_records(self):
+		doctype_list = [
+			"GL Entry",
+			"Payment Ledger Entry",
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Payment Entry",
+			"Journal Entry",
+		]
+		for doctype in doctype_list:
+			qb.from_(qb.DocType(doctype)).delete().where(qb.DocType(doctype).company == self.company).run()
+
 	def test_foreign_account_balance_after_exchange_rate_revaluation(self):
 		"""
 		Checks the correctness of balance after exchange rate revaluation
