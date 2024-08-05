@@ -362,7 +362,9 @@ class Asset(AccountsController):
 		final_number_of_depreciations = cint(finance_book.total_number_of_depreciations) - cint(
 			self.number_of_depreciations_booked
 		)
-		for_income_tax = frappe.db.get_value("Finance Book", finance_book.finance_book, "for_income_tax")
+		for_income_tax = 0
+		if frappe.db.has_column("Finance Book", "for_income_tax"):
+			for_income_tax = frappe.db.get_value("Finance Book", finance_book.finance_book, "for_income_tax")
 		has_pro_rata = False
 		if not for_income_tax:
 			has_pro_rata = self.check_is_pro_rata(finance_book)
