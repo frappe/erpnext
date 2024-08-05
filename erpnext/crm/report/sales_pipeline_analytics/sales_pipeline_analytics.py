@@ -8,7 +8,7 @@ from itertools import groupby
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe import _
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, getdate
 
 from erpnext.setup.utils import get_exchange_rate
 
@@ -235,10 +235,9 @@ class SalesPipelineAnalytics:
 
 	def get_month_list(self):
 		month_list = []
-		current_date = date.today()
-		month_number = date.today().month
+		current_date = getdate(self.filters.get("from_date"))
 
-		for _month in range(month_number, 13):
+		while current_date < getdate(self.filters.get("to_date")):
 			month_list.append(current_date.strftime("%B"))
 			current_date = current_date + relativedelta(months=1)
 
