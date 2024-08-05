@@ -193,7 +193,7 @@ class SalesPipelineAnalytics:
 			count_or_amount = info.get(based_on)
 
 			if self.filters.get("pipeline_by") == "Owner":
-				if value == "Not Assigned" or value == "[]" or value is None:
+				if value == "Not Assigned" or value == "[]" or value is None or not value:
 					assigned_to = ["Not Assigned"]
 				else:
 					assigned_to = json.loads(value)
