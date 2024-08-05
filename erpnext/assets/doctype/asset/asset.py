@@ -362,11 +362,16 @@ class Asset(AccountsController):
 		final_number_of_depreciations = cint(finance_book.total_number_of_depreciations) - cint(
 			self.number_of_depreciations_booked
 		)
-		has_pro_rata = self.check_is_pro_rata(finance_book)
+		for_income_tax = 0
+		if frappe.db.has_column("Finance Book", "for_income_tax"):
+			for_income_tax = frappe.db.get_value("Finance Book", finance_book.finance_book, "for_income_tax")
+		has_pro_rata = False
+		if not for_income_tax:
+			has_pro_rata = self.check_is_pro_rata(finance_book)
 		depr_already_booked = any(
 			[d.journal_entry for d in self.get("schedules") if d.finance_book == finance_book.finance_book]
 		)
-		if has_pro_rata and not depr_already_booked:
+		if has_pro_rata and not depr_already_booked and not for_income_tax:
 			final_number_of_depreciations += 1
 
 		has_wdv_or_dd_non_yearly_pro_rata = False
@@ -517,10 +522,13 @@ class Asset(AccountsController):
 			)
 
 			# Adjust depreciation amount in the last period based on the expected value after useful life
-			if (
-				n == cint(final_number_of_depreciations) - 1
-				and flt(value_after_depreciation) != flt(finance_book.expected_value_after_useful_life)
-			) or flt(value_after_depreciation) < flt(finance_book.expected_value_after_useful_life):
+			if not for_income_tax and (
+				(
+					n == cint(final_number_of_depreciations) - 1
+					and flt(value_after_depreciation) != flt(finance_book.expected_value_after_useful_life)
+				)
+				or flt(value_after_depreciation) < flt(finance_book.expected_value_after_useful_life)
+			):
 				depreciation_amount += flt(value_after_depreciation) - flt(
 					finance_book.expected_value_after_useful_life
 				)
