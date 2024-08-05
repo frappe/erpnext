@@ -21,7 +21,15 @@ class SalesPipelineAnalytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 
+	def validate_filters(self):
+		if not self.filters.from_date:
+			frappe.throw(_("From Date is mandatory"))
+
+		if not self.filters.to_date:
+			frappe.throw(_("To Date is mandatory"))
+
 	def run(self):
+		self.validate_filters()
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
@@ -147,10 +155,6 @@ class SalesPipelineAnalytics:
 			conditions.append(
 				["expected_closing", "between", [self.filters.get("from_date"), self.filters.get("to_date")]]
 			)
-		elif self.filters.get("from_date") and not self.filters.get("to_date"):
-			conditions.append(["expected_closing", ">=", self.filters.get("from_date")])
-		elif not self.filters.get("from_date") and self.filters.get("to_date"):
-			conditions.append(["expected_closing", "<=", self.filters.get("to_date")])
 
 		return conditions
 
