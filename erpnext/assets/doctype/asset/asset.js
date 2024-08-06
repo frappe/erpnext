@@ -188,11 +188,21 @@ frappe.ui.form.on("Asset", {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 
 			if (frm.doc.is_composite_asset) {
-				$(".primary-action").prop("hidden", true);
-				$(".form-message").text("Capitalize this asset to confirm");
+				frappe.call({
+					method: "erpnext.assets.doctype.asset.asset.has_active_capitalization",
+					args: {
+						asset: frm.doc.name,
+					},
+					callback: function (r) {
+						if (!r.message) {
+							$(".primary-action").prop("hidden", true);
+							$(".form-message").text("Capitalize this asset to confirm");
 
-				frm.add_custom_button(__("Capitalize Asset"), function () {
-					frm.trigger("create_asset_capitalization");
+							frm.add_custom_button(__("Capitalize Asset"), function () {
+								frm.trigger("create_asset_capitalization");
+							});
+						}
+					},
 				});
 			}
 		}
