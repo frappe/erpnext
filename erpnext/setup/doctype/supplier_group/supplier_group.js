@@ -35,12 +35,11 @@ frappe.ui.form.on("Supplier Group", {
 		});
 	},
 	refresh: function (frm) {
-		frm.set_intro(frm.doc.__islocal ? "" : __("There is nothing to edit."));
 		frm.trigger("set_root_readonly");
 	},
 	set_root_readonly: function (frm) {
-		if (!frm.doc.parent_supplier_group && !frm.doc.__islocal) {
-			frm.trigger("set_read_only");
+		if (!frm.doc.parent_supplier_group && !frm.is_new()) {
+			frm.set_read_only();
 			frm.set_intro(__("This is a root supplier group and cannot be edited."));
 		} else {
 			frm.set_intro(null);
