@@ -193,6 +193,9 @@ erpnext.SalesFunnel = class SalesFunnel {
 		this.options.width = ($(this.elements.funnel_wrapper).width() * 2.0) / 3.0;
 		this.options.height = (Math.sqrt(3) * this.options.width) / 2.0;
 
+		const min_height = (this.options.height * 0.1) / this.options.data.length;
+		const height = this.options.height * 0.9;
+
 		// calculate total weightage
 		// as height decreases, area decreases by the square of the reduction
 		// hence, compensating by squaring the index value
@@ -202,7 +205,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 
 		// calculate height for each data
 		$.each(this.options.data, function (i, d) {
-			d.height = (me.options.height * d.value * Math.pow(i + 1, 2)) / me.options.total_weightage;
+			d.height = (height * d.value * Math.pow(i + 1, 2)) / me.options.total_weightage + min_height;
 		});
 
 		this.elements.canvas = $("<canvas></canvas>")
