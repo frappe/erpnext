@@ -103,6 +103,7 @@ def install(country=None):
 			"purpose": "Repack",
 			"is_standard": 1,
 		},
+		{"doctype": "Stock Entry Type", "name": "Disassemble", "purpose": "Disassemble", "is_standard": 1},
 		{
 			"doctype": "Stock Entry Type",
 			"name": _("Send to Subcontractor"),
