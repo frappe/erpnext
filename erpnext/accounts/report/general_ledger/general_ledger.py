@@ -230,7 +230,6 @@ def get_conditions(filters):
 				"company": filters.get("company"),
 				"docstatus": 1,
 				"voucher_type": ("in", ["Exchange Rate Revaluation", "Exchange Gain Or Loss"]),
-				"posting_date": ["between", [filters.get("from_date"), filters.get("to_date")]],
 			},
 			as_list=True,
 		)
@@ -245,7 +244,6 @@ def get_conditions(filters):
 				"docstatus": 1,
 				"voucher_type": ("in", ["Credit Note", "Debit Note"]),
 				"is_system_generated": 1,
-				"posting_date": ["between", [filters.get("from_date"), filters.get("to_date")]],
 			},
 			as_list=True,
 		)
