@@ -1036,6 +1036,14 @@ def get_asset_value_after_depreciation(asset_name, finance_book=None):
 
 
 @frappe.whitelist()
+def has_active_capitalization(asset):
+	active_capitalizations = frappe.db.count(
+		"Asset Capitalization", filters={"target_asset": asset, "docstatus": 1}
+	)
+	return active_capitalizations > 0
+
+
+@frappe.whitelist()
 def split_asset(asset_name, split_qty):
 	asset = frappe.get_doc("Asset", asset_name)
 	split_qty = cint(split_qty)
