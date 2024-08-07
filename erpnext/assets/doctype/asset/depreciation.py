@@ -20,7 +20,8 @@ def post_depreciation_entries(date=None):
 
 	if not date:
 		date = today()
-	for asset in get_depreciable_assets(date):
+	all_asset = get_depreciable_assets(date) + get_in_maintenance_depreciable_assets(date)
+	for asset in all_asset:
 		make_depreciation_entry(asset, date)
 		frappe.db.commit()
 
@@ -29,6 +30,15 @@ def get_depreciable_assets(date):
 		from tabAsset a, `tabDepreciation Schedule` ds
 		where a.name = ds.parent and a.docstatus=1 and ds.schedule_date<=%s and a.calculate_depreciation = 1
 			and a.status in ('Submitted', 'Partially Depreciated')
+			and ifnull(ds.journal_entry, '')=''""", date)
+
+def get_in_maintenance_depreciable_assets(date):
+	return frappe.db.sql_list("""select a.name
+		from tabAsset a, `tabDepreciation Schedule` ds, `tabAsset Repair` ar
+		where a.name = ds.parent and a.docstatus=1 and ds.schedule_date<=%s and a.calculate_depreciation = 1
+			and a.status = 'In Maintenance'
+			and ar.asset = a.name and ar.repair_status = 'Pending'
+			and  ar.capitalize_repair_cost = 0
 			and ifnull(ds.journal_entry, '')=''""", date)
 
 @frappe.whitelist()
