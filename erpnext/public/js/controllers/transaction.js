@@ -534,6 +534,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 							quotation_to: me.frm.doc.quotation_to,
 							supplier: me.frm.doc.supplier,
 							currency: me.frm.doc.currency,
+							is_internal_supplier: me.frm.doc.is_internal_supplier,
+							is_internal_customer: me.frm.doc.is_internal_customer,
 							update_stock: update_stock,
 							conversion_rate: me.frm.doc.conversion_rate,
 							price_list: me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
@@ -826,44 +828,73 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var me = this;
 		var set_pricing = function() {
 			if(me.frm.doc.company && me.frm.fields_dict.currency) {
-				var company_currency = me.get_company_currency();
-				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
-
-				if (!me.frm.doc.currency) {
-					me.frm.set_value("currency", company_currency);
-				}
-
-				if (me.frm.doc.currency == company_currency) {
-					me.frm.set_value("conversion_rate", 1.0);
-				}
-				if (me.frm.doc.price_list_currency == company_currency) {
-					me.frm.set_value('plc_conversion_rate', 1.0);
-				}
-				if (company_doc){
-					if (company_doc.default_letter_head) {
-						if(me.frm.fields_dict.letter_head) {
-							me.frm.set_value("letter_head", company_doc.default_letter_head);
-						}
-					}
-					let selling_doctypes_for_tc = ["Sales Invoice", "Quotation", "Sales Order", "Delivery Note"];
-					if (company_doc.default_selling_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-					selling_doctypes_for_tc.includes(me.frm.doc.doctype)  && !me.frm.doc.tc_name) {
-						me.frm.set_value("tc_name", company_doc.default_selling_terms);
-					}
-					let buying_doctypes_for_tc = ["Request for Quotation", "Supplier Quotation", "Purchase Order",
-						"Material Request", "Purchase Receipt"];
-					// Purchase Invoice is excluded as per issue #3345
-					if (company_doc.default_buying_terms && frappe.meta.has_field(me.frm.doc.doctype, "tc_name") &&
-					buying_doctypes_for_tc.includes(me.frm.doc.doctype) && !me.frm.doc.tc_name) {
-						me.frm.set_value("tc_name", company_doc.default_buying_terms);
-					}
-				}
 				frappe.run_serially([
-					() => me.frm.script_manager.trigger("currency"),
+					() => get_party_currency(),
 					() => me.update_item_tax_map(),
 					() => me.apply_default_taxes(),
-					() => me.apply_pricing_rule()
+					() => me.apply_pricing_rule(),
+					() => set_terms(),
+					() => set_letter_head(),
 				]);
+			}
+		}
+
+		var get_party_currency = function() {
+			var party_type = frappe.meta.has_field(me.frm.doc.doctype, "customer") ? "Customer" : "Supplier";
+			var party_name = me.frm.doc[party_type.toLowerCase()];
+			if (party_name) {
+				frappe.call({
+					method: "frappe.client.get_value",
+					args: {
+						doctype: party_type,
+						filters: { name: party_name },
+						fieldname: "default_currency",
+					},
+					callback: function (r) {
+						if (r.message) {
+							set_currency(r.message.default_currency);
+						}
+					}
+				})
+			} else {
+				set_currency();
+			}
+		}
+
+		var set_currency = function(party_default_currency) {
+			var company_currency = me.get_company_currency();
+			var currency = party_default_currency || company_currency;
+			if (me.frm.doc.currency != currency) {
+				me.frm.set_value("currency", currency);
+			}
+
+			if (me.frm.doc.currency == company_currency) {
+				me.frm.set_value("conversion_rate", 1.0);
+			}
+			if (me.frm.doc.price_list_currency == company_currency) {
+				me.frm.set_value('plc_conversion_rate', 1.0);
+			}
+
+			me.frm.script_manager.trigger("currency");
+		}
+
+		var set_terms = function() {
+			if (frappe.meta.has_field(me.frm.doc.doctype, "tc_name") && !me.frm.doc.tc_name) {
+				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
+				var selling_doctypes = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"];
+				var company_terms_fieldname = selling_doctypes.includes(me.frm.doc.doctype) ? "default_selling_terms" : "default_buying_terms";
+				if (company_doc && company_doc[company_terms_fieldname]) {
+					me.frm.set_value("tc_name", company_doc[company_terms_fieldname]);
+				}
+			}
+		}
+
+		var set_letter_head = function() {
+			if(me.frm.fields_dict.letter_head) {
+				var company_doc = frappe.get_doc(":Company", me.frm.doc.company);
+				if (company_doc && company_doc.default_letter_head) {
+					me.frm.set_value("letter_head", company_doc.default_letter_head);
+				}
 			}
 		}
 
@@ -1621,7 +1652,9 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"update_stock": ['Sales Invoice', 'Purchase Invoice'].includes(me.frm.doc.doctype) ? cint(me.frm.doc.update_stock) : 0,
 			"conversion_factor": me.frm.doc.conversion_factor,
 			"pos_profile": me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
-			"coupon_code": me.frm.doc.coupon_code
+			"coupon_code": me.frm.doc.coupon_code,
+			"is_internal_supplier": me.frm.doc.is_internal_supplier,
+			"is_internal_customer": me.frm.doc.is_internal_customer,
 		};
 	}
 
@@ -1948,6 +1981,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let item_codes = [];
 		let item_rates = {};
 		let item_tax_templates = {};
+
+		if (me.frm.doc.is_return && me.frm.doc.return_against) return;
 
 		$.each(this.frm.doc.items || [], function(i, item) {
 			if (item.item_code) {
