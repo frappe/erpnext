@@ -84,6 +84,7 @@ class PaymentRequest(Document):
 		subscription_plans: DF.Table[SubscriptionPlanDetail]
 		swift_number: DF.ReadOnly | None
 		transaction_date: DF.Date | None
+		company: DF.Link | None
 	# end: auto-generated types
 
 	def validate(self):
