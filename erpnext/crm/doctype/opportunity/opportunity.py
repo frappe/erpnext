@@ -93,7 +93,26 @@ class Opportunity(TransactionBase, CRMNote):
 
 	def onload(self):
 		ref_doc = frappe.get_doc(self.opportunity_from, self.party_name)
+
 		load_address_and_contact(ref_doc)
+		load_address_and_contact(self)
+
+		ref_doc_contact_list = ref_doc.get("__onload").get("contact_list")
+		opportunity_doc_contact_list = [
+			contact
+			for contact in self.get("__onload").get("contact_list")
+			if contact not in ref_doc_contact_list
+		]
+		ref_doc_contact_list.extend(opportunity_doc_contact_list)
+		ref_doc.set_onload("contact_list", ref_doc_contact_list)
+
+		ref_doc_addr_list = ref_doc.get("__onload").get("addr_list")
+		opportunity_doc_addr_list = [
+			addr for addr in self.get("__onload").get("addr_list") if addr not in ref_doc_addr_list
+		]
+		ref_doc_addr_list.extend(opportunity_doc_addr_list)
+		ref_doc.set_onload("addr_list", ref_doc_addr_list)
+
 		self.set("__onload", ref_doc.get("__onload"))
 
 	def after_insert(self):
