@@ -8,7 +8,7 @@ from itertools import groupby
 import frappe
 from dateutil.relativedelta import relativedelta
 from frappe import _
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, getdate
 
 from erpnext.setup.utils import get_exchange_rate
 
@@ -21,7 +21,15 @@ class SalesPipelineAnalytics:
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 
+	def validate_filters(self):
+		if not self.filters.from_date:
+			frappe.throw(_("From Date is mandatory"))
+
+		if not self.filters.to_date:
+			frappe.throw(_("To Date is mandatory"))
+
 	def run(self):
+		self.validate_filters()
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
@@ -185,7 +193,7 @@ class SalesPipelineAnalytics:
 			count_or_amount = info.get(based_on)
 
 			if self.filters.get("pipeline_by") == "Owner":
-				if value == "Not Assigned" or value == "[]" or value is None:
+				if value == "Not Assigned" or value == "[]" or value is None or not value:
 					assigned_to = ["Not Assigned"]
 				else:
 					assigned_to = json.loads(value)
@@ -227,10 +235,9 @@ class SalesPipelineAnalytics:
 
 	def get_month_list(self):
 		month_list = []
-		current_date = date.today()
-		month_number = date.today().month
+		current_date = getdate(self.filters.get("from_date"))
 
-		for _month in range(month_number, 13):
+		while current_date < getdate(self.filters.get("to_date")):
 			month_list.append(current_date.strftime("%B"))
 			current_date = current_date + relativedelta(months=1)
 

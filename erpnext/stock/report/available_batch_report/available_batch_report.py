@@ -54,6 +54,12 @@ def get_columns(filters):
 				"width": 150,
 				"options": "Batch",
 			},
+			{
+				"label": _("Expiry Date"),
+				"fieldname": "expiry_date",
+				"fieldtype": "Date",
+				"width": 120,
+			},
 			{"label": _("Balance Qty"), "fieldname": "balance_qty", "fieldtype": "Float", "width": 150},
 		]
 	)
@@ -96,6 +102,7 @@ def get_batchwise_data_from_stock_ledger(filters):
 			table.item_code,
 			table.batch_no,
 			table.warehouse,
+			batch.expiry_date,
 			Sum(table.actual_qty).as_("balance_qty"),
 		)
 		.where(table.is_cancelled == 0)
@@ -118,10 +125,14 @@ def get_query_based_on_filters(query, batch, table, filters):
 	if filters.batch_no:
 		query = query.where(batch.name == filters.batch_no)
 
-	if not filters.include_expired_batches:
-		query = query.where((batch.expiry_date >= today()) | (batch.expiry_date.isnull()))
-		if filters.to_date == today():
-			query = query.where(batch.batch_qty > 0)
+	if filters.to_date == today():
+		if not filters.include_expired_batches:
+			query = query.where((batch.expiry_date >= today()) | (batch.expiry_date.isnull()))
+
+		query = query.where(batch.batch_qty > 0)
+
+	else:
+		query = query.where(table.posting_date <= filters.to_date)
 
 	if filters.warehouse:
 		lft, rgt = frappe.db.get_value("Warehouse", filters.warehouse, ["lft", "rgt"])

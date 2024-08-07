@@ -23,7 +23,7 @@ jobs:
         run: git clone --depth 1 https://github.com/frappe/semgrep-rules.git frappe-semgrep-rules
 
       - name: Download semgrep
-        run: pip install semgrep==0.97.0
+        run: pip install semgrep
 
       - name: Run Semgrep rules
         run: semgrep ci --config ./frappe-semgrep-rules/rules --config r/python.lang.correctness
