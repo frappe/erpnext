@@ -119,7 +119,7 @@
    "default": "0",
    "fieldname": "make_payment_via_journal_entry",
    "fieldtype": "Check",
-   "hidden": 1,
+   "hidden": 0,
    "label": "Make Payment via Journal Entry"
   },
   {
