@@ -85,18 +85,16 @@ frappe.ui.form.on("Exchange Rate Revaluation", {
 	},
 
 	make_jv: function (frm) {
-		let revaluation_journal = null;
-		let zero_balance_journal = null;
 		frappe.call({
 			method: "make_jv_entries",
 			doc: frm.doc,
 			freeze: true,
-			freeze_message: "Making Journal Entries...",
+			freeze_message: __("Creating Journal Entries..."),
 			callback: function (r) {
 				if (r.message) {
 					let response = r.message;
 					if (response["revaluation_jv"] || response["zero_balance_jv"]) {
-						frappe.msgprint(__("Journals have been created"));
+						frappe.msgprint(__("Journal entries have been created"));
 					}
 				}
 			},
