@@ -29,24 +29,25 @@
 </h4>
 <h6 class="text-center">
 	{% if (filters.tax_id) %}
-	{{ _("Tax Id: ") }}{{ filters.tax_id }}
+		{{ _("Tax Id: {0}").format(filters.tax_id) }}
 	{% endif %}
 </h6>
 <h5 class="text-center">
-	{{ _(filters.ageing_based_on) }}
-	{{ _("Until") }}
-	{{ frappe.format(filters.report_date, 'Date') }}
+	{{ _("{0} until {1}").format(
+		_(filters.ageing_based_on),
+		frappe.format(filters.report_date, 'Date')
+	) }}
 </h5>
 
 <div class="clearfix">
 	<div class="pull-left">
 	{% if(filters.payment_terms) %}
-		<strong>{{ _("Payment Terms") }}:</strong> {{ filters.payment_terms }}
+		<strong>{{ _("Payment Terms:") }}</strong> {{ filters.payment_terms }}
 	{% endif %}
 	</div>
 	<div class="pull-right">
 	{% if(filters.credit_limit) %}
-		<strong>{{ _("Credit Limit") }}:</strong> {{ frappe.utils.fmt_money(filters.credit_limit) }}
+		<strong>{{ _("Credit Limit:") }}</strong> {{ frappe.utils.fmt_money(filters.credit_limit) }}
 	{% endif %}
 	</div>
 </div>
@@ -68,7 +69,7 @@
 
 	{% if(balance_row) %}
 	<table class="table table-bordered table-condensed">
-		<caption class="text-right">(Amount in {{ data[0]["currency"] ~ "" }})</caption>
+		<caption class="text-right">{{ _("Amount in {0}").format(data[0]["currency"] ~ "") }}</caption>
 			<colgroup>
 				<col style="width: 30mm;">
 				<col style="width: 18mm;">
@@ -170,9 +171,9 @@
 					<th style="width: 10%; text-align: right">{{ _("Paid Amount") }}</th>
 					<th style="width: 10%; text-align: right">
 						{% if report.report_name == "Accounts Receivable" %}
-							{{ _('Credit Note') }}
+							{{ _("Credit Note") }}
 						{% else %}
-							{{ _('Debit Note') }}
+							{{ _("Debit Note") }}
 						{% endif %}
 					</th>
 				{% endif %}
@@ -197,9 +198,9 @@
 				<th style="width: 15%">{{ _("Total Paid Amount") }}</th>
 				<th style="width: 15%">
 					{% if report.report_name == "Accounts Receivable Summary" %}
-						{{ _('Credit Note Amount') }}
+						{{ _("Credit Note Amount") }}
 					{% else %}
-						{{ _('Debit Note Amount') }}
+						{{ _("Debit Note Amount") }}
 					{% endif %}
 				</th>
 				<th style="width: 15%">{{ _("Total Outstanding Amount") }}</th>
@@ -334,17 +335,20 @@
 </table>
 <br>
 {% if ageing %}
-<h4 class="text-center">{{ _("Ageing Report based on ") }} {{ ageing.ageing_based_on }}
-	{{ _("up to " ) }}  {{ frappe.format(filters.report_date, 'Date')}}
+<h4 class="text-center">
+	{{ _("Ageing Report based on {0} up to {1}").format(
+		ageing.ageing_based_on,
+		frappe.format(filters.report_date, "Date")
+	) }}
 </h4>
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			<th style="width: 25%">0 - 30 Days</th>
-			<th style="width: 25%">30 - 60 Days</th>
-			<th style="width: 25%">60 - 90 Days</th>
-			<th style="width: 25%">90 - 120 Days</th>
-			<th style="width: 20%">Above 120 Days</th>
+			<th style="width: 25%">{{ _("0 - 30 Days") }}</th>
+			<th style="width: 25%">{{ _("30 - 60 Days") }}</th>
+			<th style="width: 25%">{{ _("60 - 90 Days") }}</th>
+			<th style="width: 25%">{{ _("90 - 120 Days") }}</th>
+			<th style="width: 20%">{{ _("Above 120 Days") }}</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -363,4 +367,4 @@
 	{{ terms_and_conditions }}
 </div>
 {% endif %}
-<p class="text-right text-muted">{{ _("Printed On ") }}{{ frappe.utils.now() }}</p>
+<p class="text-right text-muted">{{ _("Printed on {0}").format(frappe.utils.now()) }}</p>
