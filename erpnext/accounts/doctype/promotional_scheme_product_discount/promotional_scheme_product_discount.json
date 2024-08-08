@@ -22,6 +22,7 @@
   "column_break_9",
   "free_item_uom",
   "free_item_rate",
+  "round_free_qty",
   "section_break_12",
   "warehouse",
   "threshold_percentage",
@@ -181,12 +182,18 @@
    "fieldtype": "Float",
    "label": "Apply Recursion Over (As Per Transaction UOM)",
    "mandatory_depends_on": "is_recursive"
+  },
+  {
+   "default": "0",
+   "fieldname": "round_free_qty",
+   "fieldtype": "Check",
+   "label": "Round Free Qty"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-12 12:53:58.199108",
+ "modified": "2024-07-22 17:25:07.880984",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme Product Discount",
