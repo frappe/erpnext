@@ -21,6 +21,7 @@
   "rate",
   "discount_amount",
   "discount_percentage",
+  "for_price_list",
   "section_break_11",
   "warehouse",
   "threshold_percentage",
@@ -121,6 +122,13 @@
    "label": "Discount Percentage"
   },
   {
+   "depends_on": "eval:doc.rate_or_discount!=\"Rate\"",
+   "fieldname": "for_price_list",
+   "fieldtype": "Link",
+   "label": "For Price List",
+   "options": "Price List"
+  },
+  {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break"
   },
@@ -169,7 +177,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-11-16 00:25:33.843996",
+ "modified": "2024-07-23 12:33:46.574950",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme Price Discount",
