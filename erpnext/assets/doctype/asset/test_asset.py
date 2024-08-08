@@ -234,7 +234,7 @@ class TestAsset(AssetSetup):
 		pro_rata_amount, _, _ = _get_pro_rata_amt(
 			asset.finance_books[0],
 			9000,
-			get_last_day(add_months(purchase_date, 1)),
+			add_days(get_last_day(add_months(purchase_date, 1)), 1),
 			date,
 			original_schedule_date=get_last_day(nowdate()),
 		)
@@ -320,7 +320,7 @@ class TestAsset(AssetSetup):
 		pro_rata_amount, _, _ = _get_pro_rata_amt(
 			asset.finance_books[0],
 			9000,
-			get_last_day(add_months(purchase_date, 1)),
+			add_days(get_last_day(add_months(purchase_date, 1)), 1),
 			date,
 			original_schedule_date=get_last_day(nowdate()),
 		)
