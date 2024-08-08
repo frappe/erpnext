@@ -911,10 +911,14 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 			},
 		},
 		target_doc,
+		update_values,
 	)
 
+	return target_doc
+
+
+def update_values(source_doc, target_doc):
 	target_doc.populate_items_table()
-	source_doc = frappe.get_doc("Purchase Order", source_name)
 
 	if target_doc.set_warehouse:
 		for item in target_doc.items:
@@ -934,8 +938,6 @@ def get_mapped_subcontracting_order(source_name, target_doc=None):
 			target_doc.supplier_warehouse = frappe.get_cached_value(
 				"Job Card", item.job_card, "wip_warehouse"
 			)
-
-	return target_doc
 
 
 @frappe.whitelist()
