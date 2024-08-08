@@ -30,7 +30,7 @@ ERPNext as a monolith includes the following areas for managing businesses:
 1. [Quality Management](https://erpnext.com/docs/user/manual/en/quality-management)
 1. [Manufacturing](https://erpnext.com/open-source-manufacturing-erp-software)
 1. [Website Management](https://erpnext.com/open-source-website-builder-software)
-1. [Customize ERPNext](https://erpnext.com/docs/user/manual/en/customize-erpnext)
+1. [Customize ERPNext](https://docs.erpnext.com/docs/v13/user/manual/en/customize-erpnext)
 1. [And More](https://erpnext.com/docs/user/manual/en/)
 
 ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a full-stack web app framework built with Python & JavaScript.
