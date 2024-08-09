@@ -122,7 +122,9 @@ class SalesPipelineAnalytics:
 			self.grouped_data = []
 
 			grouping_key = lambda o: (o.get(self.pipeline_by) or "Not Assigned", o[self.period_by])  # noqa
-			for (pipeline_by, period_by), rows in groupby(self.query_result, grouping_key):
+			for (pipeline_by, period_by), rows in groupby(
+				sorted(self.query_result, key=grouping_key), grouping_key
+			):
 				self.grouped_data.append(
 					{
 						self.pipeline_by: pipeline_by,
