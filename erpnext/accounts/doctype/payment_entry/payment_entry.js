@@ -196,7 +196,7 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	hide_unhide_fields: function(frm) {
-		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
+		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company)?.default_currency: "";
 
 		frm.toggle_display("source_exchange_rate",
 			(frm.doc.paid_amount && frm.doc.paid_from_account_currency != company_currency));
