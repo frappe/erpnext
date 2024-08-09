@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-08 09:57\n"
+"PO-Revision-Date: 2024-08-09 10:22\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -30674,7 +30674,7 @@ msgstr "Förflyttning"
 #: stock/doctype/item/item.json
 #: stock/doctype/stock_settings/stock_settings.json
 msgid "Moving Average"
-msgstr "RG"
+msgstr "MA"
 
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.js:82
 msgid "Moving up in tree ..."
@@ -35057,13 +35057,13 @@ msgstr "Betalning Referenser"
 #: buying/doctype/purchase_order/purchase_order.js:400
 #: selling/doctype/sales_order/sales_order.js:777
 msgid "Payment Request"
-msgstr "Betalning Förslag"
+msgstr "Betalning Begäran"
 
 #. Label of the payment_request_type (Select) field in DocType 'Payment
 #. Request'
 #: accounts/doctype/payment_request/payment_request.json
 msgid "Payment Request Type"
-msgstr "Betalning Förslag Typ"
+msgstr "Betalning Begäran Typ"
 
 #. Description of the 'Payment Request' (Tab Break) field in DocType 'Accounts
 #. Settings'
@@ -35073,7 +35073,7 @@ msgstr "Betalning Begäran som skapas från Försäljning Order eller Inköp Ord
 
 #: accounts/doctype/payment_request/payment_request.py:487
 msgid "Payment Request for {0}"
-msgstr "Betalning Förslag för {0}"
+msgstr "Betalning Begäran för {0}"
 
 #: accounts/doctype/pos_invoice/pos_invoice.js:289
 msgid "Payment Request took too long to respond. Please try requesting for payment again."
