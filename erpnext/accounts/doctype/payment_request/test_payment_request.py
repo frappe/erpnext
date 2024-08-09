@@ -4,6 +4,7 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -32,7 +33,7 @@ payment_method = [
 ]
 
 
-class TestPaymentRequest(unittest.TestCase):
+class TestPaymentRequest(FrappeTestCase):
 	def setUp(self):
 		if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
 			frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
@@ -45,6 +46,31 @@ class TestPaymentRequest(unittest.TestCase):
 			):
 				frappe.get_doc(method).insert(ignore_permissions=True)
 
+<<<<<<< HEAD
+=======
+		send_email = patch(
+			"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email",
+			return_value=None,
+		)
+		self.send_email = send_email.start()
+		self.addCleanup(send_email.stop)
+		get_payment_url = patch(
+			# this also shadows one (1) call to _get_payment_gateway_controller
+			"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+			return_value=PAYMENT_URL,
+		)
+		self.get_payment_url = get_payment_url.start()
+		self.addCleanup(get_payment_url.stop)
+		_get_payment_gateway_controller = patch(
+			"erpnext.accounts.doctype.payment_request.payment_request._get_payment_gateway_controller",
+		)
+		self._get_payment_gateway_controller = _get_payment_gateway_controller.start()
+		self.addCleanup(_get_payment_gateway_controller.stop)
+
+	def tearDown(self):
+		frappe.db.rollback()
+
+>>>>>>> d6d0a1b38d (test: make use of test fixture)
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR", do_not_save=True)
 		so_inr.disable_rounded_total = 1
