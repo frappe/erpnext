@@ -328,6 +328,9 @@ class DeliveryNote(SellingController):
 			return
 
 		for item in self.items:
+			if item.use_serial_batch_fields:
+				continue
+
 			if item.pick_list_item and not item.serial_and_batch_bundle:
 				filters = {
 					"item_code": item.item_code,
