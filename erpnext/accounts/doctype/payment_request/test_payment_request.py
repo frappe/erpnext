@@ -5,6 +5,7 @@ import unittest
 from unittest.mock import patch
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -53,7 +54,7 @@ payment_method = [
 ]
 
 
-class TestPaymentRequest(unittest.TestCase):
+class TestPaymentRequest(FrappeTestCase):
 	def setUp(self):
 		for payment_gateway in payment_gateways:
 			if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
@@ -85,6 +86,9 @@ class TestPaymentRequest(unittest.TestCase):
 		)
 		self._get_payment_gateway_controller = _get_payment_gateway_controller.start()
 		self.addCleanup(_get_payment_gateway_controller.stop)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR", do_not_save=True)
