@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-09 10:22\n"
+"PO-Revision-Date: 2024-08-10 10:18\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -33459,7 +33459,7 @@ msgstr "Över Leverans/Följesedel Tillåtelse (%)"
 #. Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgid "Over Picking Allowance"
-msgstr "Utöver Plock Tillåtelse"
+msgstr "Över Plock Tillåtelse"
 
 #: controllers/stock_controller.py:1228
 msgid "Over Receipt"
@@ -49681,7 +49681,7 @@ msgstr "Lager Transaktioner som är äldre än angiven antal dagar kan inte änd
 #. field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgid "Stock will be reserved on submission of <b>Purchase Receipt</b> created against Material Request for Sales Order."
-msgstr "Lager kommer att reserveras vid godkännade av <b>Iköp Följesedel</b> skapat mot Material Begäran för Försäljning Order."
+msgstr "Lager kommer att reserveras vid godkännade av <b>Inköp Följesedel</b> skapat mot Material Begäran för Försäljning Order."
 
 #: stock/utils.py:560
 msgid "Stock/Accounts can not be frozen as processing of backdated entries is going on. Please try again later."
