@@ -10,6 +10,7 @@ from frappe import _, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
+	add_to_date,
 	cint,
 	cstr,
 	flt,
@@ -632,6 +633,7 @@ class update_entries_after:
 
 	def get_sle_against_current_voucher(self):
 		self.args["posting_datetime"] = get_combine_datetime(self.args.posting_date, self.args.posting_time)
+		self.args["updated_creation_time"] = add_to_date(self.args.creation, seconds=-2)
 
 		return frappe.db.sql(
 			"""
@@ -646,6 +648,7 @@ class update_entries_after:
 				and (
 					posting_datetime = %(posting_datetime)s
 				)
+				and creation >= %(updated_creation_time)s
 			order by
 				creation ASC
 			for update
