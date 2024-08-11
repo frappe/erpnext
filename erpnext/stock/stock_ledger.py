@@ -4,29 +4,10 @@
 import json
 
 import frappe
-<<<<<<< HEAD
-from frappe import _
+from frappe import _, bold
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.functions import Sum
-from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, now, nowdate
-=======
-from frappe import _, bold, scrub
-from frappe.model.meta import get_field_precision
-from frappe.query_builder.functions import Sum
-from frappe.utils import (
-	add_to_date,
-	cint,
-	cstr,
-	flt,
-	format_date,
-	get_link_to_form,
-	getdate,
-	now,
-	nowdate,
-	nowtime,
-	parse_json,
-)
->>>>>>> deccb007c1 (fix: warning message for negative stock (#42683))
+from frappe.utils import cint, cstr, flt, format_date, get_link_to_form, getdate, now, nowdate
 
 import erpnext
 from erpnext.stock.doctype.bin.bin import update_qty as update_bin_qty
