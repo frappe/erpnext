@@ -47,31 +47,6 @@ class TestPaymentRequest(FrappeTestCase):
 			):
 				frappe.get_doc(method).insert(ignore_permissions=True)
 
-<<<<<<< HEAD
-=======
-		send_email = patch(
-			"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.send_email",
-			return_value=None,
-		)
-		self.send_email = send_email.start()
-		self.addCleanup(send_email.stop)
-		get_payment_url = patch(
-			# this also shadows one (1) call to _get_payment_gateway_controller
-			"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
-			return_value=PAYMENT_URL,
-		)
-		self.get_payment_url = get_payment_url.start()
-		self.addCleanup(get_payment_url.stop)
-		_get_payment_gateway_controller = patch(
-			"erpnext.accounts.doctype.payment_request.payment_request._get_payment_gateway_controller",
-		)
-		self._get_payment_gateway_controller = _get_payment_gateway_controller.start()
-		self.addCleanup(_get_payment_gateway_controller.stop)
-
-	def tearDown(self):
-		frappe.db.rollback()
-
->>>>>>> d6d0a1b38d (test: make use of test fixture)
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR", do_not_save=True)
 		so_inr.disable_rounded_total = 1
