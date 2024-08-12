@@ -56,6 +56,7 @@ class AssetValueAdjustment(Document):
 		)
 
 	def on_cancel(self):
+		frappe.get_doc("Journal Entry", self.journal_entry).cancel()
 		self.update_asset(self.current_asset_value)
 		add_asset_activity(
 			self.asset,
