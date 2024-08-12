@@ -23,13 +23,13 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Opening Amount",
-   "options": "company:company_currency",
+   "options": "Company:company:default_currency",
    "reqd": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:16.209635",
+ "modified": "2024-08-12 14:21:31.071774",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Opening Entry Detail",
