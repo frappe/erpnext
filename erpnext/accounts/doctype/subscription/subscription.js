@@ -29,6 +29,7 @@ frappe.ui.form.on("Subscription", {
 	},
 
 	refresh: function (frm) {
+<<<<<<< HEAD
 		if (!frm.is_new()) {
 			if (frm.doc.status !== "Cancelled") {
 				frm.add_custom_button(__("Cancel Subscription"), () =>
@@ -42,6 +43,34 @@ frappe.ui.form.on("Subscription", {
 					frm.events.renew_this_subscription(frm)
 				);
 			}
+=======
+		if (frm.is_new()) return;
+
+		if (frm.doc.status !== "Cancelled") {
+			frm.add_custom_button(
+				__("Fetch Subscription Updates"),
+				() => frm.trigger("get_subscription_updates"),
+				__("Actions")
+			);
+
+			frm.add_custom_button(
+				__("Force Fetch Subscription Updates"),
+				() => frm.trigger("force_fetch_subscription_updates"),
+				__("Actions")
+			);
+
+			frm.add_custom_button(
+				__("Cancel Subscription"),
+				() => frm.trigger("cancel_this_subscription"),
+				__("Actions")
+			);
+		} else if (frm.doc.status === "Cancelled") {
+			frm.add_custom_button(
+				__("Restart Subscription"),
+				() => frm.trigger("renew_this_subscription"),
+				__("Actions")
+			);
+>>>>>>> 1ef890db73 (fix: force fetch updates for subcription)
 		}
 	},
 
@@ -94,6 +123,13 @@ frappe.ui.form.on("Subscription", {
 					frm.reload_doc();
 				}
 			},
+		});
+	},
+	force_fetch_subscription_updates: function (frm) {
+		frm.call("force_fetch_subscription_updates").then((r) => {
+			if (!r.exec) {
+				frm.reload_doc();
+			}
 		});
 	},
 });
