@@ -10,6 +10,16 @@ source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 
 
+add_to_apps_screen = [
+	{
+		"name": "erpnext",
+		"logo": "/assets/erpnext/images/erpnext-logo-blue.png",
+		"title": "ERPNext",
+		"route": "/app/home",
+		# "has_permission": "erpnext.api.permission.has_app_permission"
+	}
+]
+
 develop_version = "14.x.x-develop"
 
 app_include_js = "erpnext.bundle.js"
