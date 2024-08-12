@@ -10,7 +10,7 @@ source_link = "https://github.com/frappe/erpnext"
 app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 
 
-include_as_app = [
+add_to_apps_screen = [
 	{
 		"name": "erpnext",
 		"logo": "/assets/erpnext/images/erpnext-logo-blue.png",
