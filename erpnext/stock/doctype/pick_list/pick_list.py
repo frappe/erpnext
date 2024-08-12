@@ -1097,7 +1097,8 @@ def create_delivery_note(source_name, target_doc=None):
 				)
 			)
 
-	for customer, rows in groupby(sales_orders, key=lambda so: so["customer"]):
+	group_key = lambda so: so["customer"]  # noqa
+	for customer, rows in groupby(sorted(sales_orders, key=group_key), key=group_key):
 		sales_dict[customer] = {row.sales_order for row in rows}
 
 	if sales_dict:
@@ -1178,6 +1179,7 @@ def map_pl_locations(pick_list, item_mapper, delivery_note, sales_order=None):
 			dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
 			dn_item.batch_no = location.batch_no
 			dn_item.serial_no = location.serial_no
+			dn_item.use_serial_batch_fields = location.use_serial_batch_fields
 
 			update_delivery_note_item(source_doc, dn_item, delivery_note)
 

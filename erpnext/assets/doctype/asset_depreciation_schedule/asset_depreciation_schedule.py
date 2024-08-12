@@ -552,9 +552,18 @@ def _check_is_pro_rata(asset_doc, row, wdv_or_dd_non_yearly=False):
 	# if not existing asset, from_date = available_for_use_date
 	# otherwise, if opening_number_of_booked_depreciations = 2, available_for_use_date = 01/01/2020 and frequency_of_depreciation = 12
 	# from_date = 01/01/2022
-	from_date = _get_modified_available_for_use_date(asset_doc, row, wdv_or_dd_non_yearly=False)
-	days = date_diff(row.depreciation_start_date, from_date) + 1
-	total_days = get_total_days(row.depreciation_start_date, row.frequency_of_depreciation)
+	if row.depreciation_method in ("Straight Line", "Manual"):
+		prev_depreciation_start_date = add_months(
+			row.depreciation_start_date,
+			(row.frequency_of_depreciation * -1) * asset_doc.opening_number_of_booked_depreciations,
+		)
+		from_date = asset_doc.available_for_use_date
+		days = date_diff(prev_depreciation_start_date, from_date) + 1
+		total_days = get_total_days(prev_depreciation_start_date, row.frequency_of_depreciation)
+	else:
+		from_date = _get_modified_available_for_use_date(asset_doc, row, wdv_or_dd_non_yearly=False)
+		days = date_diff(row.depreciation_start_date, from_date) + 1
+		total_days = get_total_days(row.depreciation_start_date, row.frequency_of_depreciation)
 	if days <= 0:
 		frappe.throw(
 			_(
@@ -682,20 +691,15 @@ def get_straight_line_or_manual_depr_amount(
 	# if the Depreciation Schedule is being prepared for the first time
 	else:
 		if row.daily_prorata_based:
-			amount = (
-				flt(asset.gross_purchase_amount)
-				- flt(asset.opening_accumulated_depreciation)
-				- flt(row.expected_value_after_useful_life)
-			)
+			amount = flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
 			return get_daily_prorata_based_straight_line_depr(
 				asset, row, schedule_idx, number_of_pending_depreciations, amount
 			)
 		else:
-			return (
-				flt(asset.gross_purchase_amount)
-				- flt(asset.opening_accumulated_depreciation)
-				- flt(row.expected_value_after_useful_life)
-			) / flt(row.total_number_of_depreciations - asset.opening_number_of_booked_depreciations)
+			depreciation_amount = (
+				flt(asset.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
+			) / flt(row.total_number_of_depreciations)
+			return depreciation_amount
 
 
 def get_daily_prorata_based_straight_line_depr(
@@ -725,7 +729,16 @@ def get_daily_depr_amount(asset, row, schedule_idx, amount):
 					)
 				),
 				add_days(
-					get_last_day(add_months(row.depreciation_start_date, -1 * row.frequency_of_depreciation)),
+					get_last_day(
+						add_months(
+							row.depreciation_start_date,
+							(
+								row.frequency_of_depreciation
+								* (asset.opening_number_of_booked_depreciations + 1)
+							)
+							* -1,
+						),
+					),
 					1,
 				),
 			)
@@ -904,7 +917,7 @@ def _get_daily_prorata_based_default_wdv_or_dd_depr_amount(
 
 
 def get_monthly_depr_amount(fb_row, schedule_idx, depreciable_value):
-	""" "
+	"""
 	Returns monthly depreciation amount when year changes
 	1. Calculate per day depr based on new year
 	2. Calculate monthly amount based on new per day amount

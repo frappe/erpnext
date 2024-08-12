@@ -6,13 +6,15 @@ import gzip
 import json
 
 import frappe
-from frappe import _, scrub
+from frappe import _, bold, scrub
 from frappe.model.meta import get_field_precision
 from frappe.query_builder.functions import Sum
 from frappe.utils import (
+	add_to_date,
 	cint,
 	cstr,
 	flt,
+	format_date,
 	get_link_to_form,
 	getdate,
 	now,
@@ -275,7 +277,9 @@ def repost_future_sle(
 		)
 		affected_transactions.update(obj.affected_transactions)
 
-		distinct_item_warehouses[(args[i].get("item_code"), args[i].get("warehouse"))].reposting_status = True
+		key = (args[i].get("item_code"), args[i].get("warehouse"))
+		if distinct_item_warehouses.get(key):
+			distinct_item_warehouses[key].reposting_status = True
 
 		if obj.new_items_found:
 			for _item_wh, data in distinct_item_warehouses.items():
@@ -630,6 +634,7 @@ class update_entries_after:
 
 	def get_sle_against_current_voucher(self):
 		self.args["posting_datetime"] = get_combine_datetime(self.args.posting_date, self.args.posting_time)
+		self.args["updated_creation_time"] = add_to_date(self.args.creation, seconds=-2)
 
 		return frappe.db.sql(
 			"""
@@ -644,6 +649,7 @@ class update_entries_after:
 				and (
 					posting_datetime = %(posting_datetime)s
 				)
+				and creation >= %(updated_creation_time)s
 			order by
 				creation ASC
 			for update
@@ -741,9 +747,29 @@ class update_entries_after:
 
 		return self.distinct_item_warehouses[key].dependent_voucher_detail_nos
 
+	def validate_previous_sle_qty(self, sle):
+		previous_sle = self.data[sle.warehouse].previous_sle
+		if previous_sle and previous_sle.get("qty_after_transaction") < 0 and sle.get("actual_qty") > 0:
+			frappe.msgprint(
+				_(
+					"The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
+				).format(
+					bold(sle.item_code),
+					bold(sle.warehouse),
+					bold(format_date(previous_sle.posting_date)),
+					sle.voucher_no,
+					bold(format_date(previous_sle.posting_date)),
+					bold(previous_sle.posting_time),
+				),
+				title=_("Warning on Negative Stock"),
+				indicator="blue",
+			)
+
 	def process_sle(self, sle):
 		# previous sle data for this warehouse
 		self.wh_data = self.data[sle.warehouse]
+
+		self.validate_previous_sle_qty(sle)
 		self.affected_transactions.add((sle.voucher_type, sle.voucher_no))
 
 		if (sle.serial_no and not self.via_landed_cost_voucher) or not cint(self.allow_negative_stock):
@@ -1588,9 +1614,11 @@ def get_stock_ledger_entries(
 	if not previous_sle.get("posting_date"):
 		previous_sle["posting_datetime"] = "1900-01-01 00:00:00"
 	else:
-		previous_sle["posting_datetime"] = get_combine_datetime(
-			previous_sle["posting_date"], previous_sle["posting_time"]
-		)
+		posting_time = previous_sle.get("posting_time")
+		if not posting_time:
+			posting_time = "00:00:00"
+
+		previous_sle["posting_datetime"] = get_combine_datetime(previous_sle["posting_date"], posting_time)
 
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"

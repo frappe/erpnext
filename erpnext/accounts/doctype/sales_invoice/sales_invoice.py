@@ -166,7 +166,6 @@ class SalesInvoice(SellingController):
 		project: DF.Link | None
 		redeem_loyalty_points: DF.Check
 		remarks: DF.SmallText | None
-		repost_required: DF.Check
 		represents_company: DF.Link | None
 		return_against: DF.Link | None
 		rounded_total: DF.Currency
@@ -569,7 +568,6 @@ class SalesInvoice(SellingController):
 			self.repost_future_sle_and_gle()
 
 		self.db_set("status", "Cancelled")
-		self.db_set("repost_required", 0)
 
 		if self.coupon_code:
 			update_coupon_code_count(self.coupon_code, "cancelled")
@@ -722,25 +720,23 @@ class SalesInvoice(SellingController):
 				data.sales_invoice = sales_invoice
 
 	def on_update_after_submit(self):
-		if hasattr(self, "repost_required"):
-			fields_to_check = [
-				"additional_discount_account",
-				"cash_bank_account",
-				"account_for_change_amount",
-				"write_off_account",
-				"loyalty_redemption_account",
-				"unrealized_profit_loss_account",
-				"is_opening",
-			]
-			child_tables = {
-				"items": ("income_account", "expense_account", "discount_account"),
-				"taxes": ("account_head",),
-			}
-			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-			if self.needs_repost:
-				self.validate_for_repost()
-				self.db_set("repost_required", self.needs_repost)
-				self.repost_accounting_entries()
+		fields_to_check = [
+			"additional_discount_account",
+			"cash_bank_account",
+			"account_for_change_amount",
+			"write_off_account",
+			"loyalty_redemption_account",
+			"unrealized_profit_loss_account",
+			"is_opening",
+		]
+		child_tables = {
+			"items": ("income_account", "expense_account", "discount_account"),
+			"taxes": ("account_head",),
+		}
+		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if self.needs_repost:
+			self.validate_for_repost()
+			self.repost_accounting_entries()
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
@@ -1326,6 +1322,10 @@ class SalesInvoice(SellingController):
 
 		for item in self.get("items"):
 			if flt(item.base_net_amount, item.precision("base_net_amount")):
+				# Do not book income for transfer within same company
+				if self.is_internal_transfer():
+					continue
+
 				if item.is_fixed_asset:
 					asset = self.get_asset(item)
 
@@ -1384,37 +1384,33 @@ class SalesInvoice(SellingController):
 					self.set_asset_status(asset)
 
 				else:
-					# Do not book income for transfer within same company
-					if not self.is_internal_transfer():
-						income_account = (
-							item.income_account
-							if (not item.enable_deferred_revenue or self.is_return)
-							else item.deferred_revenue_account
-						)
+					income_account = (
+						item.income_account
+						if (not item.enable_deferred_revenue or self.is_return)
+						else item.deferred_revenue_account
+					)
 
-						amount, base_amount = self.get_amount_and_base_amount(
-							item, enable_discount_accounting
-						)
+					amount, base_amount = self.get_amount_and_base_amount(item, enable_discount_accounting)
 
-						account_currency = get_account_currency(income_account)
-						gl_entries.append(
-							self.get_gl_dict(
-								{
-									"account": income_account,
-									"against": self.customer,
-									"credit": flt(base_amount, item.precision("base_net_amount")),
-									"credit_in_account_currency": (
-										flt(base_amount, item.precision("base_net_amount"))
-										if account_currency == self.company_currency
-										else flt(amount, item.precision("net_amount"))
-									),
-									"cost_center": item.cost_center,
-									"project": item.project or self.project,
-								},
-								account_currency,
-								item=item,
-							)
+					account_currency = get_account_currency(income_account)
+					gl_entries.append(
+						self.get_gl_dict(
+							{
+								"account": income_account,
+								"against": self.customer,
+								"credit": flt(base_amount, item.precision("base_net_amount")),
+								"credit_in_account_currency": (
+									flt(base_amount, item.precision("base_net_amount"))
+									if account_currency == self.company_currency
+									else flt(amount, item.precision("net_amount"))
+								),
+								"cost_center": item.cost_center,
+								"project": item.project or self.project,
+							},
+							account_currency,
+							item=item,
 						)
+					)
 
 		# expense account gl entries
 		if cint(self.update_stock) and erpnext.is_perpetual_inventory_enabled(self.company):
