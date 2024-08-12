@@ -190,10 +190,9 @@ class PaymentEntry(AccountsController):
 			frappe.throw(_("Difference Amount must be zero"))
 		self.make_gl_entries()
 		self.update_outstanding_amounts()
-		self.update_advance_paid()
 		self.update_payment_schedule()
 		self.update_payment_requests()
-		self.update_references_advance_payment_status()
+		self.update_advance_paid()  # advance_paid_status depends on the payment request amount
 		self.set_status()
 
 	def set_liability_account(self):
@@ -265,11 +264,10 @@ class PaymentEntry(AccountsController):
 		super().on_cancel()
 		self.make_gl_entries(cancel=1)
 		self.update_outstanding_amounts()
-		self.update_advance_paid()
 		self.delink_advance_entry_references()
 		self.update_payment_schedule(cancel=1)
 		self.update_payment_requests(cancel=True)
-		self.update_references_advance_payment_status()
+		self.update_advance_paid()  # advance_paid_status depends on the payment request amount
 		self.set_status()
 
 	def update_payment_requests(self, cancel=False):
@@ -279,21 +277,11 @@ class PaymentEntry(AccountsController):
 
 		update_payment_requests_as_per_pe_references(self.references, cancel=cancel)
 
-	def update_references_advance_payment_status(self):
-		advance_payment_doctypes = frappe.get_hooks("advance_payment_receivable_doctypes") + frappe.get_hooks(
-			"advance_payment_payable_doctypes"
-		)
-
-		for ref in self.get("references"):
-			if ref.reference_doctype in advance_payment_doctypes:
-				ref_doc = frappe.get_doc(ref.reference_doctype, ref.reference_name)
-				ref_doc.set_advance_payment_status()
-
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
 
 	def validate_duplicate_entry(self):
-		reference_names = {}
+		reference_names = set()
 		for d in self.get("references"):
 			key = (d.reference_doctype, d.reference_name, d.payment_term, d.payment_request)
 			if key in reference_names:
