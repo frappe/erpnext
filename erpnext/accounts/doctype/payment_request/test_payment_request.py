@@ -4,10 +4,12 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
 
@@ -32,7 +34,7 @@ payment_method = [
 ]
 
 
-class TestPaymentRequest(unittest.TestCase):
+class TestPaymentRequest(FrappeTestCase):
 	def setUp(self):
 		if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
 			frappe.get_doc(payment_gateway).insert(ignore_permissions=True)
@@ -260,3 +262,19 @@ class TestPaymentRequest(unittest.TestCase):
 		# Try to make Payment Request more than SO amount, should give validation
 		pr2.grand_total = 900
 		self.assertRaises(frappe.ValidationError, pr2.save)
+
+	def test_conversion_on_foreign_currency_accounts(self):
+		po_doc = create_purchase_order(supplier="_Test Supplier USD", currency="USD", do_not_submit=1)
+		po_doc.conversion_rate = 80
+		po_doc.items[0].qty = 1
+		po_doc.items[0].rate = 10
+		po_doc.save().submit()
+
+		pr = make_payment_request(dt=po_doc.doctype, dn=po_doc.name, recipient_id="nabin@erpnext.com")
+		pr = frappe.get_doc(pr).save().submit()
+
+		pe = pr.create_payment_entry()
+		self.assertEqual(pe.base_paid_amount, 800)
+		self.assertEqual(pe.paid_amount, 800)
+		self.assertEqual(pe.base_received_amount, 800)
+		self.assertEqual(pe.received_amount, 10)
