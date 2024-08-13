@@ -877,6 +877,7 @@ class PurchaseInvoice(BuyingController):
 
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
+		self.make_gl_entries_for_tax_withholding(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
@@ -910,32 +911,36 @@ class PurchaseInvoice(BuyingController):
 		)
 
 		if grand_total and not self.is_internal_transfer():
-			against_voucher = self.name
-			if self.is_return and self.return_against and not self.update_outstanding_for_self:
-				against_voucher = self.return_against
+			self.add_supplier_gl_entry(gl_entries, base_grand_total, grand_total)
 
-			# Did not use base_grand_total to book rounding loss gle
-			gl_entries.append(
-				self.get_gl_dict(
-					{
-						"account": self.credit_to,
-						"party_type": "Supplier",
-						"party": self.supplier,
-						"due_date": self.due_date,
-						"against": self.against_expense_account,
-						"credit": base_grand_total,
-						"credit_in_account_currency": base_grand_total
-						if self.party_account_currency == self.company_currency
-						else grand_total,
-						"against_voucher": against_voucher,
-						"against_voucher_type": self.doctype,
-						"project": self.project,
-						"cost_center": self.cost_center,
-					},
-					self.party_account_currency,
-					item=self,
-				)
-			)
+	def add_supplier_gl_entry(
+		self, gl_entries, base_grand_total, grand_total, against_account=None, remarks=None
+	):
+		against_voucher = self.name
+		if self.is_return and self.return_against and not self.update_outstanding_for_self:
+			against_voucher = self.return_against
+
+		# Did not use base_grand_total to book rounding loss gle
+		gl = {
+			"account": self.credit_to,
+			"party_type": "Supplier",
+			"party": self.supplier,
+			"due_date": self.due_date,
+			"against": against_account or self.against_expense_account,
+			"credit": base_grand_total,
+			"credit_in_account_currency": base_grand_total
+			if self.party_account_currency == self.company_currency
+			else grand_total,
+			"against_voucher": against_voucher,
+			"against_voucher_type": self.doctype,
+			"project": self.project,
+			"cost_center": self.cost_center,
+		}
+
+		if remarks:
+			gl["remarks"] = remarks
+
+		gl_entries.append(self.get_gl_dict(gl, self.party_account_currency, item=self))
 
 	def make_item_gl_entries(self, gl_entries):
 		# item gl entries
@@ -1425,6 +1430,30 @@ class PurchaseInvoice(BuyingController):
 					account_currency,
 					item=self,
 				)
+			)
+
+	def make_gl_entries_for_tax_withholding(self, gl_entries):
+		"""
+		Tax withholding amount is not part of supplier invoice.
+		Separate supplier GL Entry for correct reporting.
+		"""
+		if not self.apply_tds:
+			return
+
+		for row in self.get("taxes"):
+			if not row.is_tax_withholding_account or not row.tax_amount:
+				continue
+
+			base_tds_amount = row.base_tax_amount_after_discount_amount
+			tds_amount = row.tax_amount_after_discount_amount
+
+			self.add_supplier_gl_entry(gl_entries, base_tds_amount, tds_amount)
+			self.add_supplier_gl_entry(
+				gl_entries,
+				-base_tds_amount,
+				-tds_amount,
+				against_account=row.account_head,
+				remarks=_("TDS Deducted"),
 			)
 
 	def make_payment_gl_entries(self, gl_entries):
