@@ -712,3 +712,18 @@ class TestSubscription(FrappeTestCase):
 		self.assertEqual(pi.total, 55333.33)
 
 		subscription.delete()
+
+	def test_future_subscription(self):
+		"""Force-Fetch should not process future subscriptions"""
+		subscription = frappe.new_doc("Subscription")
+		subscription.party_type = "Customer"
+		subscription.party = "_Test Customer"
+		subscription.generate_invoice_at_period_start = 1
+		subscription.generate_new_invoices_past_due_date = 1
+		subscription.start_date = add_months(nowdate(), 1)
+		subscription.append("plans", {"plan": "_Test Plan Name", "qty": 1})
+		subscription.save()
+
+		subscription.force_fetch_subscription_updates()
+		subscription.reload()
+		self.assertEqual(len(subscription.invoices), 0)
