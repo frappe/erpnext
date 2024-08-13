@@ -377,6 +377,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				get_query: () => {
 					return {
 						filters: {
+							is_group: 0,
 							company: this.company,
 						},
 					};
