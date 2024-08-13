@@ -248,7 +248,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 		context.fill();
 
 		// draw text
-		context.fillStyle = "black";
+		context.fillStyle = getComputedStyle(document.body).getPropertyValue("--text-color");
 		context.textBaseline = "middle";
 		context.font = "1.1em sans-serif";
 		context.fillText(__(title), width + 20, y_mid);
