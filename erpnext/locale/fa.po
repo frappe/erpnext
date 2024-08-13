@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-12 10:25\n"
+"PO-Revision-Date: 2024-08-13 10:24\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -7365,7 +7365,7 @@ msgstr "ثبت بانکی"
 #. Name of a DocType
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Bank Guarantee"
-msgstr "تضمین بانکی"
+msgstr "ضمانت نامه بانکی"
 
 #. Label of the bank_guarantee_number (Data) field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -18781,7 +18781,7 @@ msgstr "قبل از ارسال نام ذینفع را وارد کنید."
 
 #: accounts/doctype/bank_guarantee/bank_guarantee.py:55
 msgid "Enter the name of the bank or lending institution before submitting."
-msgstr ""
+msgstr "قبل از ارسال نام بانک یا موسسه وام دهنده را وارد کنید."
 
 #: stock/doctype/item/item.js:933
 msgid "Enter the opening stock units."
@@ -29047,7 +29047,7 @@ msgstr "لبه"
 #. Label of the margin_money (Currency) field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Margin Money"
-msgstr "مارجین پول"
+msgstr "پول حاشیه‌ای"
 
 #. Label of the margin_rate_or_amount (Float) field in DocType 'POS Invoice
 #. Item'
@@ -38846,7 +38846,7 @@ msgstr "ارائه دهنده"
 #. Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Providing"
-msgstr "فراهم آوردن"
+msgstr "ارائه دهنده"
 
 #. Label of the provisional_expense_account (Link) field in DocType 'Purchase
 #. Receipt Item'
@@ -41269,7 +41269,7 @@ msgstr "لیست گیرنده خالی است لطفا لیست گیرنده ا�
 #. Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Receiving"
-msgstr "در حال دریافت"
+msgstr "دریافت کننده"
 
 #: selling/page/point_of_sale/pos_past_order_list.js:17
 msgid "Recent Orders"
@@ -56111,7 +56111,7 @@ msgstr "اعتبار و کاربرد"
 #. Label of the validity (Int) field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Validity in Days"
-msgstr "اعتبار در روز"
+msgstr "اعتبار به روز"
 
 #: selling/doctype/quotation/quotation.py:345
 msgid "Validity period of this quotation has ended."
