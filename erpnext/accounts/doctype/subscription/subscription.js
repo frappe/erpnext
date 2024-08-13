@@ -39,7 +39,7 @@ frappe.ui.form.on("Subscription", {
 			);
 
 			frm.add_custom_button(
-				__("Force Fetch Subscription Updates"),
+				__("Force-Fetch Subscription Updates"),
 				() => frm.trigger("force_fetch_subscription_updates"),
 				__("Actions")
 			);
