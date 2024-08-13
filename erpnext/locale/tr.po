@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-10 10:17\n"
+"PO-Revision-Date: 2024-08-13 10:24\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -38904,7 +38904,7 @@ msgstr ""
 #. Label of the prorate (Check) field in DocType 'Subscription Settings'
 #: accounts/doctype/subscription_settings/subscription_settings.json
 msgid "Prorate"
-msgstr "eşit olarak dağıtmak"
+msgstr ""
 
 #. Name of a DocType
 #. Label of a Link in the CRM Workspace
