@@ -391,11 +391,7 @@
   }
  ],
  "links": [],
-<<<<<<< HEAD
- "modified": "2023-12-18 12:20:08.965120",
-=======
  "modified": "2024-08-13 10:41:18.381165",
->>>>>>> 0cf478c4c2 (refactor: cr and dr note filter in Statement of Accounts)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",
