@@ -711,4 +711,113 @@ class TestSubscription(FrappeTestCase):
 		pi = frappe.get_doc("Purchase Invoice", subscription.invoices[0].invoice)
 		self.assertEqual(pi.total, 55333.33)
 
+<<<<<<< HEAD
 		subscription.delete()
+=======
+		subscription.process(posting_date="2023-01-22")
+		self.assertEqual(len(subscription.invoices), 2)
+
+	def test_future_subscription(self):
+		"""Force-Fetch should not process future subscriptions"""
+		subscription = create_subscription(
+			start_date=add_months(nowdate(), 1),
+			submit_invoice=0,
+			generate_new_invoices_past_due_date=1,
+			party="_Test Subscription Customer John Doe",
+		)
+		subscription.force_fetch_subscription_updates()
+		subscription.reload()
+		self.assertEqual(len(subscription.invoices), 0)
+
+
+def make_plans():
+	create_plan(plan_name="_Test Plan Name", cost=900, currency="INR")
+	create_plan(plan_name="_Test Plan Name 2", cost=1999, currency="INR")
+	create_plan(
+		plan_name="_Test Plan Name 3",
+		cost=1999,
+		billing_interval="Day",
+		billing_interval_count=14,
+		currency="INR",
+	)
+	create_plan(
+		plan_name="_Test Plan Name 4",
+		cost=20000,
+		billing_interval="Month",
+		billing_interval_count=3,
+		currency="INR",
+	)
+	create_plan(plan_name="_Test Plan Multicurrency", cost=50, billing_interval="Month", currency="USD")
+
+
+def create_plan(**kwargs):
+	if not frappe.db.exists("Subscription Plan", kwargs.get("plan_name")):
+		plan = frappe.new_doc("Subscription Plan")
+		plan.plan_name = kwargs.get("plan_name") or "_Test Plan Name"
+		plan.item = kwargs.get("item") or "_Test Non Stock Item"
+		plan.price_determination = kwargs.get("price_determination") or "Fixed Rate"
+		plan.cost = kwargs.get("cost") or 1000
+		plan.billing_interval = kwargs.get("billing_interval") or "Month"
+		plan.billing_interval_count = kwargs.get("billing_interval_count") or 1
+		plan.currency = kwargs.get("currency")
+		plan.insert()
+
+
+def create_parties():
+	if not frappe.db.exists("Supplier", "_Test Supplier"):
+		supplier = frappe.new_doc("Supplier")
+		supplier.supplier_name = "_Test Supplier"
+		supplier.supplier_group = "All Supplier Groups"
+		supplier.insert()
+
+	if not frappe.db.exists("Customer", "_Test Subscription Customer"):
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = "_Test Subscription Customer"
+		customer.default_currency = "USD"
+		customer.append("accounts", {"company": "_Test Company", "account": "_Test Receivable USD - _TC"})
+		customer.insert()
+
+	if not frappe.db.exists("Customer", "_Test Subscription Customer John Doe"):
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = "_Test Subscription Customer John Doe"
+		customer.append("accounts", {"company": "_Test Company", "account": "_Test Receivable - _TC"})
+		customer.insert()
+
+
+def reset_settings():
+	settings = frappe.get_single("Subscription Settings")
+	settings.grace_period = 0
+	settings.cancel_after_grace = 0
+	settings.save()
+
+
+def create_subscription(**kwargs):
+	subscription = frappe.new_doc("Subscription")
+	subscription.party_type = (kwargs.get("party_type") or "Customer",)
+	subscription.company = kwargs.get("company") or "_Test Company"
+	subscription.party = kwargs.get("party") or "_Test Customer"
+	subscription.trial_period_start = kwargs.get("trial_period_start")
+	subscription.trial_period_end = kwargs.get("trial_period_end")
+	subscription.start_date = kwargs.get("start_date")
+	subscription.generate_invoice_at = kwargs.get("generate_invoice_at")
+	subscription.additional_discount_percentage = kwargs.get("additional_discount_percentage")
+	subscription.additional_discount_amount = kwargs.get("additional_discount_amount")
+	subscription.follow_calendar_months = kwargs.get("follow_calendar_months")
+	subscription.generate_new_invoices_past_due_date = kwargs.get("generate_new_invoices_past_due_date")
+	subscription.submit_invoice = kwargs.get("submit_invoice")
+	subscription.days_until_due = kwargs.get("days_until_due")
+	subscription.number_of_days = kwargs.get("number_of_days")
+
+	if not kwargs.get("plans"):
+		subscription.append("plans", {"plan": "_Test Plan Name", "qty": 1})
+	else:
+		for plan in kwargs.get("plans"):
+			subscription.append("plans", plan)
+
+	if kwargs.get("do_not_save"):
+		return subscription
+
+	subscription.save()
+
+	return subscription
+>>>>>>> fd680380bb (refactor: test for force-fetch on future subscription)
