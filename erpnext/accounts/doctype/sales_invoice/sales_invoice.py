@@ -962,10 +962,11 @@ class SalesInvoice(SellingController):
 
 	def add_remarks(self):
 		if not self.remarks:
-			if self.po_no and self.po_date:
-				self.remarks = _("Against Customer Order {0} dated {1}").format(
-					self.po_no, formatdate(self.po_date)
-				)
+			if self.po_no:
+				self.remarks = _("Against Customer Order {0}").format(self.po_no)
+				if self.po_date:
+					self.remarks += _(" dated {0}").format(formatdate(self.po_data))
+
 			else:
 				self.remarks = _("No Remarks")
 
