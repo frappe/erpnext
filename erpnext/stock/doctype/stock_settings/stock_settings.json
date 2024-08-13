@@ -32,6 +32,7 @@
   "allow_negative_stock",
   "show_barcode_field",
   "clean_description_html",
+  "allow_internal_transfer_at_arms_length_price",
   "quality_inspection_settings_section",
   "action_if_quality_inspection_is_not_submitted",
   "column_break_23",
@@ -438,6 +439,13 @@
    "fieldname": "do_not_update_serial_batch_on_creation_of_auto_bundle",
    "fieldtype": "Check",
    "label": "Do Not Update Serial / Batch on Creation of Auto Bundle"
+  },
+  {
+   "default": "0",
+   "description": "If enabled, the item rate won't adjust to the valuation rate during internal transfers, but accounting will still use the valuation rate.",
+   "fieldname": "allow_internal_transfer_at_arms_length_price",
+   "fieldtype": "Check",
+   "label": "Allow Internal Transfers at Arm's Length Price"
   },
   {
    "default": "0",
