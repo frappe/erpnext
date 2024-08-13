@@ -54,6 +54,7 @@ class ProcessStatementOfAccounts(Document):
 		frequency: DF.Literal["Weekly", "Monthly", "Quarterly"]
 		from_date: DF.Date | None
 		group_by: DF.Literal["", "Group by Voucher", "Group by Voucher (Consolidated)"]
+		ignore_cr_dr_notes: DF.Check
 		ignore_exchange_rate_revaluation_journals: DF.Check
 		include_ageing: DF.Check
 		include_break: DF.Check
