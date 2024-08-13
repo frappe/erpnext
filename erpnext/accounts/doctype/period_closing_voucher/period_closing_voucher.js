@@ -7,6 +7,14 @@ frappe.ui.form.on("Period Closing Voucher", {
 	},
 
 	setup: function (frm) {
+		frappe.realtime.on("period_closing_voucher_update", ({ period_closing_voucher }) => {
+			if (period_closing_voucher !== frm.doc.name) return;
+			frappe.model.clear_doc("Period Closing Voucher", frm.doc.name);
+			frappe.model.with_doc("Period Closing Voucher", frm.doc.name).then(() => {
+				frm.refresh();
+			});
+		});
+
 		frm.set_query("closing_account_head", function () {
 			return {
 				filters: [

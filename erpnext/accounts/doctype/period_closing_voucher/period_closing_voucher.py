@@ -39,41 +39,36 @@ class PeriodClosingVoucher(AccountsController):
 		self.validate_account_head()
 		self.validate_posting_date()
 
-	def on_submit(self):
+	def submit(self):
 		self.db_set("gle_processing_status", "In Progress")
-		get_opening_entries = False
+		self.queue_action("submit", timeout=4600)
+		frappe.msgprint(
+			_("The GL Entries will be processed in the background, it can take a few minutes."),
+			alert=True,
+		)
 
-		if not frappe.db.exists(
-			"Period Closing Voucher", {"company": self.company, "docstatus": 1, "name": ("!=", self.name)}
-		):
-			get_opening_entries = True
+	def on_submit(self):
+		self.make_gl_entries()
 
-		self.make_gl_entries(get_opening_entries=get_opening_entries)
+		frappe.publish_realtime("period_closing_voucher_update", {"period_closing_voucher": self.name})
 
-	def on_cancel(self):
+	def cancel(self):
 		self.validate_future_closing_vouchers()
 		self.db_set("gle_processing_status", "In Progress")
-		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
-		gle_count = frappe.db.count(
-			"GL Entry",
-			{"voucher_type": "Period Closing Voucher", "voucher_no": self.name, "is_cancelled": 0},
+		self.queue_action("cancel", timeout=4600)
+		frappe.msgprint(
+			_("The GL Entries will be cancelled in the background, it can take a few minutes."),
+			alert=True,
 		)
-		if gle_count > 5000:
-			frappe.enqueue(
-				make_reverse_gl_entries,
-				voucher_type="Period Closing Voucher",
-				voucher_no=self.name,
-				queue="long",
-				enqueue_after_commit=True,
-			)
-			frappe.msgprint(
-				_("The GL Entries will be cancelled in the background, it can take a few minutes."),
-				alert=True,
-			)
-		else:
-			make_reverse_gl_entries(voucher_type="Period Closing Voucher", voucher_no=self.name)
 
-		self.delete_closing_entries()
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry")
+		self.make_reverse_gl_entries()
+
+		frappe.publish_realtime("period_closing_voucher_update", {"period_closing_voucher": self.name})
+
+	def make_reverse_gl_entries(self):
+		make_reverse_gl_entries(voucher_no=self.name)
 
 	def validate_future_closing_vouchers(self):
 		if frappe.db.exists(
@@ -85,12 +80,6 @@ class PeriodClosingVoucher(AccountsController):
 					"You can not cancel this Period Closing Voucher, please cancel the future Period Closing Vouchers first"
 				)
 			)
-
-	def delete_closing_entries(self):
-		closing_balance = frappe.qb.DocType("Account Closing Balance")
-		frappe.qb.from_(closing_balance).delete().where(
-			closing_balance.period_closing_voucher == self.name
-		).run()
 
 	def validate_account_head(self):
 		closing_account_type = frappe.get_cached_value("Account", self.closing_account_head, "root_type")
@@ -161,34 +150,14 @@ class PeriodClosingVoucher(AccountsController):
 		):
 			frappe.throw(_("Previous Year is not closed, please close it first"))
 
-	def make_gl_entries(self, get_opening_entries=False):
+	def make_gl_entries(self):
+		get_opening_entries = not frappe.db.exists(
+			"Period Closing Voucher", {"company": self.company, "docstatus": 1, "name": ("!=", self.name)}
+		)
+
 		gl_entries = self.get_gl_entries()
 		closing_entries = self.get_grouped_gl_entries(get_opening_entries=get_opening_entries)
-		if len(gl_entries + closing_entries) > 3000:
-			frappe.enqueue(
-				process_gl_entries,
-				gl_entries=gl_entries,
-				voucher_name=self.name,
-				timeout=3000,
-			)
-
-			frappe.enqueue(
-				process_closing_entries,
-				gl_entries=gl_entries,
-				closing_entries=closing_entries,
-				voucher_name=self.name,
-				company=self.company,
-				closing_date=self.posting_date,
-				timeout=3000,
-			)
-
-			frappe.msgprint(
-				_("The GL Entries will be processed in the background, it can take a few minutes."),
-				alert=True,
-			)
-		else:
-			process_gl_entries(gl_entries, self.name)
-			process_closing_entries(gl_entries, closing_entries, self.name, self.company, self.posting_date)
+		process_gl_entries(gl_entries, closing_entries, self.name, self.company, self.posting_date)
 
 	def get_grouped_gl_entries(self, get_opening_entries=False):
 		closing_entries = []
@@ -373,12 +342,19 @@ class PeriodClosingVoucher(AccountsController):
 		return query.run(as_dict=1)
 
 
-def process_gl_entries(gl_entries, voucher_name):
+def process_gl_entries(gl_entries, closing_entries, voucher_name, company, closing_date):
+	from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
+		make_closing_entries,
+	)
 	from erpnext.accounts.general_ledger import make_gl_entries
 
 	try:
 		if gl_entries:
 			make_gl_entries(gl_entries, merge_entries=False)
+
+		if gl_entries + closing_entries:
+			make_closing_entries(gl_entries + closing_entries, voucher_name, company, closing_date)
+
 		frappe.db.set_value("Period Closing Voucher", voucher_name, "gle_processing_status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
@@ -386,26 +362,22 @@ def process_gl_entries(gl_entries, voucher_name):
 		frappe.db.set_value("Period Closing Voucher", voucher_name, "gle_processing_status", "Failed")
 
 
-def process_closing_entries(gl_entries, closing_entries, voucher_name, company, closing_date):
-	from erpnext.accounts.doctype.account_closing_balance.account_closing_balance import (
-		make_closing_entries,
-	)
-
-	try:
-		if gl_entries + closing_entries:
-			make_closing_entries(gl_entries + closing_entries, voucher_name, company, closing_date)
-	except Exception as e:
-		frappe.db.rollback()
-		frappe.log_error(e)
-
-
-def make_reverse_gl_entries(voucher_type, voucher_no):
+def make_reverse_gl_entries(voucher_no):
 	from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
 	try:
-		make_reverse_gl_entries(voucher_type=voucher_type, voucher_no=voucher_no)
+		make_reverse_gl_entries(voucher_type="Period Closing Voucher", voucher_no=voucher_no)
+		delete_closing_entries(voucher_no)
 		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Completed")
 	except Exception as e:
 		frappe.db.rollback()
 		frappe.log_error(e)
 		frappe.db.set_value("Period Closing Voucher", voucher_no, "gle_processing_status", "Failed")
+		frappe.db.commit()
+
+
+def delete_closing_entries(voucher_name):
+	closing_balance = frappe.qb.DocType("Account Closing Balance")
+	frappe.qb.from_(closing_balance).delete().where(
+		closing_balance.period_closing_voucher == voucher_name
+	).run()
