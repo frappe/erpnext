@@ -248,7 +248,10 @@ def get_conditions(filters):
 			as_list=True,
 		)
 		if system_generated_cr_dr_journals:
-			filters.update({"voucher_no_not_in": [x[0] for x in system_generated_cr_dr_journals]})
+			vouchers_to_ignore = (filters.get("voucher_no_not_in") or []) + [
+				x[0] for x in system_generated_cr_dr_journals
+			]
+			filters.update({"voucher_no_not_in": vouchers_to_ignore})
 
 	if filters.get("voucher_no_not_in"):
 		conditions.append("voucher_no not in %(voucher_no_not_in)s")
