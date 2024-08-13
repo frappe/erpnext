@@ -680,6 +680,12 @@ class Subscription(Document):
 		Process Subscription and create Invoices even if current date doesn't lie between current_invoice_start and currenct_invoice_end
 		It makes use of 'Proces Subscription' to force processing in a specific 'posting_date'
 		"""
+
+		# Don't process future subscriptions
+		if nowdate() < self.current_invoice_start:
+			frappe.msgprint(_("Subscription for Future dates cannot be processed."))
+			return
+
 		processing_date = None
 		if self.generate_invoice_at == "Beginning of the current subscription period":
 			processing_date = self.current_invoice_start
