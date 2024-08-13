@@ -1,13 +1,13 @@
 app_name = "erpnext"
 app_title = "ERPNext"
-app_publisher = "Frappe Technologies Pvt. Ltd."
+app_publisher = "Charchoob Technologies"
 app_description = """ERP made simple"""
 app_icon = "fa fa-th"
 app_color = "#e74c3c"
-app_email = "info@erpnext.com"
+app_email = "info@charchooberp.ir"
 app_license = "GNU General Public License (v3)"
-source_link = "https://github.com/frappe/erpnext"
-app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
+source_link = "https://github.com/badihi/erpnext"
+app_logo_url = "/assets/erpnext/images/charchoob-logo.png"
 
 
 develop_version = "14.x.x-develop"
@@ -93,8 +93,8 @@ calendars = ["Task", "Work Order", "Sales Order", "Holiday List", "ToDo"]
 website_generators = ["BOM", "Sales Partner"]
 
 website_context = {
-	"favicon": "/assets/erpnext/images/erpnext-favicon.svg",
-	"splash_image": "/assets/erpnext/images/erpnext-logo.svg",
+	"favicon": "/assets/erpnext/images/charchoob-favicon.png",
+	"splash_image": "/assets/erpnext/images/charchoob-logo.png",
 }
 
 # nosemgrep

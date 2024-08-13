@@ -1,6 +1,6 @@
 <div align="center">
     <a href="https://erpnext.com">
-        <img src="https://raw.githubusercontent.com/frappe/erpnext/develop/erpnext/public/images/erpnext-logo.png" height="128">
+        <img src="https://raw.githubusercontent.com/frappe/erpnext/develop/erpnext/public/images/charchoob-logo.png" height="128">
     </a>
     <h2>ERPNext</h2>
     <p align="center">
