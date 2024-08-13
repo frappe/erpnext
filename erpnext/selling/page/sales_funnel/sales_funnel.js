@@ -248,11 +248,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 		context.fill();
 
 		// draw text
-<<<<<<< HEAD
-		context.fillStyle = "";
-=======
 		context.fillStyle = getComputedStyle(document.body).getPropertyValue("--text-color");
->>>>>>> 61bc0925d5 (fix: text color in sales funnel report based on theme)
 		context.textBaseline = "middle";
 		context.font = "1.1em sans-serif";
 		context.fillText(__(title), width + 20, y_mid);
