@@ -50,6 +50,22 @@ class ReceivablePayableReport:
 			getdate(nowdate()) if self.filters.report_date > getdate(nowdate()) else self.filters.report_date
 		)
 
+		if self.filters.range1 or self.filters.range2 or self.filters.range3 or self.filters.range4:
+			self.filters.range = ",".join(
+				str(value)
+				for value in [
+					self.filters.range1,
+					self.filters.range2,
+					self.filters.range3,
+					self.filters.range4,
+				]
+				if value
+			)
+
+		if not self.filters.range:
+			self.filters.range = "30,60,90,120"
+		self.age_range = [num.strip() for num in self.filters.range.split(",") if num.strip().isdigit()]
+
 	def run(self, args):
 		self.filters.update(args)
 		self.set_defaults()
@@ -717,37 +733,24 @@ class ReceivablePayableReport:
 
 		# ageing buckets should not have amounts if due date is not reached
 		if getdate(entry_date) > getdate(self.filters.report_date):
-			row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
+			for i in range(1, len(self.age_range) + 2):
+				setattr(row, f"range{i}", 0.0)
 
-		row.total_due = row.range1 + row.range2 + row.range3 + row.range4 + row.range5
+		row.total_due = sum(row[f"range{i}"] for i in range(1, len(self.age_range) + 2))
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
+		for i in range(1, len(self.age_range) + 2):
+			setattr(row, f"range{i}", 0.0)
 
 		if not (self.age_as_on and entry_date):
 			return
 
 		row.age = (getdate(self.age_as_on) - getdate(entry_date)).days or 0
-		index = None
 
-		if not (self.filters.range1 and self.filters.range2 and self.filters.range3 and self.filters.range4):
-			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = (
-				30,
-				60,
-				90,
-				120,
-			)
-
-		for i, days in enumerate(
-			[self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4]
-		):
-			if cint(row.age) <= cint(days):
-				index = i
-				break
-
-		if index is None:
-			index = 4
+		index = next(
+			(i for i, days in enumerate(self.age_range) if cint(row.age) <= cint(days)), len(self.age_range)
+		)
 		row["range" + str(index + 1)] = row.outstanding
 
 	def get_ple_entries(self):
@@ -1119,32 +1122,25 @@ class ReceivablePayableReport:
 		self.ageing_column_labels = []
 		self.add_column(label=_("Age (Days)"), fieldname="age", fieldtype="Int", width=80)
 
-		for i, label in enumerate(
-			[
-				"0-{range1}".format(range1=self.filters["range1"]),
-				"{range1}-{range2}".format(
-					range1=cint(self.filters["range1"]) + 1, range2=self.filters["range2"]
-				),
-				"{range2}-{range3}".format(
-					range2=cint(self.filters["range2"]) + 1, range3=self.filters["range3"]
-				),
-				"{range3}-{range4}".format(
-					range3=cint(self.filters["range3"]) + 1, range4=self.filters["range4"]
-				),
-				_("{range4}-Above").format(range4=cint(self.filters["range4"]) + 1),
-			]
-		):
+		start = 0
+		for i, range_value in enumerate(self.age_range):
+			label = f"{start}-{int(range_value)}"
 			self.add_column(label=label, fieldname="range" + str(i + 1))
 			self.ageing_column_labels.append(label)
+			start = int(range_value) + 1
+
+		label = f"{start}-Above"
+		self.add_column(label=label, fieldname="range" + str(i + 2))
+		self.ageing_column_labels.append(label)
 
 	def get_chart_data(self):
+		precision = cint(frappe.db.get_default("float_precision")) or 2
 		rows = []
 		for row in self.data:
 			row = frappe._dict(row)
 			if not cint(row.bold):
-				values = [row.range1, row.range2, row.range3, row.range4, row.range5]
-				precision = cint(frappe.db.get_default("float_precision")) or 2
-				rows.append({"values": [flt(val, precision) for val in values]})
+				values = [flt(row[f"range{i}"], precision) for i in range(1, len(self.age_range) + 2)]
+				rows.append({"values": values})
 
 		self.chart = {
 			"data": {"labels": self.ageing_column_labels, "datasets": rows},
