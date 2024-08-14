@@ -108,7 +108,9 @@ class OpportunitySummaryBySalesStage:
 			self.grouped_data = []
 
 			grouping_key = lambda o: (o["sales_stage"], o[based_on])  # noqa
-			for (sales_stage, _based_on), rows in groupby(self.query_result, grouping_key):
+			for (sales_stage, _based_on), rows in groupby(
+				sorted(self.query_result, key=grouping_key), key=grouping_key
+			):
 				self.grouped_data.append(
 					{
 						"sales_stage": sales_stage,

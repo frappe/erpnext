@@ -16,6 +16,7 @@
   "cost_center",
   "territory",
   "ignore_exchange_rate_revaluation_journals",
+  "ignore_cr_dr_notes",
   "column_break_14",
   "to_date",
   "finance_book",
@@ -381,10 +382,16 @@
    "fieldname": "ignore_exchange_rate_revaluation_journals",
    "fieldtype": "Check",
    "label": "Ignore Exchange Rate Revaluation Journals"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_cr_dr_notes",
+   "fieldtype": "Check",
+   "label": "Ignore System Generated Credit / Debit Notes"
   }
  ],
  "links": [],
- "modified": "2023-12-18 12:20:08.965120",
+ "modified": "2024-08-13 10:41:18.381165",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

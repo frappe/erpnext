@@ -674,6 +674,31 @@ class Subscription(Document):
 		if invoice:
 			return invoice.precision("grand_total")
 
+	@frappe.whitelist()
+	def force_fetch_subscription_updates(self):
+		"""
+		Process Subscription and create Invoices even if current date doesn't lie between current_invoice_start and currenct_invoice_end
+		It makes use of 'Proces Subscription' to force processing in a specific 'posting_date'
+		"""
+
+		# Don't process future subscriptions
+		if nowdate() < self.current_invoice_start:
+			frappe.msgprint(_("Subscription for Future dates cannot be processed."))
+			return
+
+		processing_date = None
+		if self.generate_invoice_at == "Beginning of the current subscription period":
+			processing_date = self.current_invoice_start
+		elif self.generate_invoice_at == "End of the current subscription period":
+			processing_date = self.current_invoice_end
+		elif self.generate_invoice_at == "Days before the current subscription period":
+			processing_date = add_days(self.current_invoice_start, -self.number_of_days)
+
+		process_subscription = frappe.new_doc("Process Subscription")
+		process_subscription.posting_date = processing_date
+		process_subscription.subscription = self.name
+		process_subscription.save().submit()
+
 
 def get_calendar_months(billing_interval):
 	calendar_months = []

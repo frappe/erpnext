@@ -79,6 +79,9 @@ def get_statement_dict(doc, get_statement_dict=False):
 		if doc.ignore_exchange_rate_revaluation_journals:
 			filters.update({"ignore_err": True})
 
+		if doc.ignore_cr_dr_notes:
+			filters.update({"ignore_cr_dr_notes": True})
+
 		if doc.report == "General Ledger":
 			filters.update(get_gl_filters(doc, entry, tax_id, presentation_currency))
 			col, res = get_soa(filters)
