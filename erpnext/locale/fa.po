@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-13 10:24\n"
+"PO-Revision-Date: 2024-08-14 10:58\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1259,7 +1259,7 @@ msgstr "شماره AWB"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Abampere"
-msgstr ""
+msgstr "آبامپر"
 
 #. Label of the abbr (Data) field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -2463,12 +2463,12 @@ msgstr "تاریخ اکتساب"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Acre"
-msgstr ""
+msgstr "آکر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Acre (US)"
-msgstr ""
+msgstr "آکر (ایالات متحده)"
 
 #: crm/doctype/lead/lead.js:41
 #: public/js/bank_reconciliation_tool/dialog_manager.js:175
@@ -5477,7 +5477,7 @@ msgstr "تقریباً توصیف/نام طرف را با طرف‌ها مطاب
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Are"
-msgstr ""
+msgstr "آر (100 متر مربع)"
 
 #: public/js/utils/demo.js:20
 msgid "Are you sure you want to clear all demo data?"
@@ -5495,7 +5495,7 @@ msgstr "آیا مطمئن هستید که می خواهید این اشتراک 
 #. Name of a UOM
 #: assets/doctype/location/location.json setup/setup_wizard/data/uom_data.json
 msgid "Area"
-msgstr ""
+msgstr "مساحت"
 
 #. Label of the area_uom (Link) field in DocType 'Location'
 #: assets/doctype/location/location.json
@@ -5509,7 +5509,7 @@ msgstr "مقدار ورود"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Arshin"
-msgstr ""
+msgstr "Arshin"
 
 #: stock/report/serial_no_ledger/serial_no_ledger.js:57
 #: stock/report/stock_ageing/stock_ageing.js:16
@@ -6904,7 +6904,7 @@ msgstr "شماره BOM"
 #. Label of the bom_no (Link) field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "BOM No (For Semi-Finished Goods)"
-msgstr ""
+msgstr "شماره BOM (برای کالاهای نیمه تمام)"
 
 #. Description of the 'BOM No' (Link) field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -7048,7 +7048,7 @@ msgstr "BOM {0} باید ارسال شود"
 
 #: manufacturing/doctype/bom/bom.py:682
 msgid "BOM {0} not found for the item {1}"
-msgstr ""
+msgstr "BOM {0} برای آیتم {1} یافت نشد"
 
 #. Label of the boms_updated (Long Text) field in DocType 'BOM Update Batch'
 #: manufacturing/doctype/bom_update_batch/bom_update_batch.json
@@ -7532,7 +7532,7 @@ msgstr "بارکدها"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Barleycorn"
-msgstr ""
+msgstr "Barleycorn"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -8159,7 +8159,7 @@ msgstr "بیو / معرفی نامه"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Biot"
-msgstr ""
+msgstr "Biot"
 
 #. Name of a DocType
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
@@ -8509,32 +8509,32 @@ msgstr "مرور BOM"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu (It)"
-msgstr ""
+msgstr "Btu (It)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu (Mean)"
-msgstr ""
+msgstr "Btu (It)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu (Th)"
-msgstr ""
+msgstr "Btu (Th)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu/Hour"
-msgstr ""
+msgstr "Btu/ساعت"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu/Minutes"
-msgstr ""
+msgstr "Btu/دقیقه"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu/Seconds"
-msgstr ""
+msgstr "Btu/ثانیه"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
@@ -8650,12 +8650,12 @@ msgstr "مقدار باندل"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Bushel (UK)"
-msgstr ""
+msgstr "بوشل (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Bushel (US Dry Level)"
-msgstr ""
+msgstr "بوشل (US Dry Level)"
 
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
@@ -8793,7 +8793,7 @@ msgstr "حساب کارهای سرمایه‌ای در دست اجرا"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Caballeria"
-msgstr ""
+msgstr "کابالریا"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -8803,12 +8803,12 @@ msgstr "طول کابل"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cable Length (UK)"
-msgstr ""
+msgstr "طول کابل (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cable Length (US)"
-msgstr ""
+msgstr "طول کابل (US)"
 
 #. Label of the calculate_based_on (Select) field in DocType 'Shipping Rule'
 #: accounts/doctype/shipping_rule/shipping_rule.json
@@ -8951,17 +8951,17 @@ msgstr "کالری (غذا)"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calorie (It)"
-msgstr ""
+msgstr "کالری (It)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calorie (Mean)"
-msgstr ""
+msgstr "کالری (Mean)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calorie (Th)"
-msgstr ""
+msgstr "کالری (Th)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -9549,7 +9549,7 @@ msgstr "با حروف بزرگ"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Carat"
-msgstr ""
+msgstr "قیراط"
 
 #. Label of the carrier (Data) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -12540,7 +12540,7 @@ msgstr "تابع نمره وزنی حل نشد. اطمینان حاصل کنید
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Coulomb"
-msgstr ""
+msgstr "کولن"
 
 #. Label of the count (Int) field in DocType 'Shipment Parcel'
 #: stock/doctype/shipment_parcel/shipment_parcel.json
@@ -12920,7 +12920,7 @@ msgstr "ورودی های ارسال مجدد ایجاد کنید"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:52
 msgid "Create Reposting Entry"
-msgstr ""
+msgstr "ایجاد ورودی ارسال مجدد"
 
 #: projects/doctype/timesheet/timesheet.js:54
 #: projects/doctype/timesheet/timesheet.js:230
@@ -14523,7 +14523,7 @@ msgstr "شماره تعرفه گمرکی"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cycle/Second"
-msgstr ""
+msgstr "چرخه/ثانیه"
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:204
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:220
@@ -15654,7 +15654,7 @@ msgstr "تعریف نوع پروژه"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Dekagram/Litre"
-msgstr ""
+msgstr "دکاگرم/لیتر"
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:108
 msgid "Delay (In Days)"
@@ -19841,7 +19841,7 @@ msgstr "فیلترها"
 #. Label of the bom_no (Link) field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgid "Final BOM"
-msgstr ""
+msgstr "BOM نهایی"
 
 #. Label of the details_tab (Tab Break) field in DocType 'BOM Creator'
 #. Label of the production_item (Link) field in DocType 'Job Card'
@@ -20079,17 +20079,17 @@ msgstr ""
 #. Label of the fg_based_section_section (Section Break) field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgid "Finished Goods Based Operating Cost"
-msgstr ""
+msgstr "هزینه عملیاتی بر اساس کالاهای تمام شده"
 
 #. Label of the fg_item (Link) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Finished Goods Item"
-msgstr ""
+msgstr "آیتم کالاهای تمام شده"
 
 #. Label of the finished_good_qty (Float) field in DocType 'BOM Operation'
 #: manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Finished Goods Qty"
-msgstr ""
+msgstr "مقدار کالاهای تمام شده"
 
 #. Label of the fg_reference_id (Data) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -20317,12 +20317,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fluid Ounce (UK)"
-msgstr ""
+msgstr "اونس مایع (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fluid Ounce (US)"
-msgstr ""
+msgstr "اونس مایع (US)"
 
 #: selling/page/point_of_sale/pos_item_selector.js:300
 msgid "Focus on Item Group filter"
@@ -21296,22 +21296,22 @@ msgstr "سود / زیان در دفع دارایی"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon (UK)"
-msgstr ""
+msgstr "گالن (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon Dry (US)"
-msgstr ""
+msgstr "گالن خشک (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon Liquid (US)"
-msgstr ""
+msgstr "گالن مایع (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gamma"
-msgstr ""
+msgstr "گاما"
 
 #: projects/doctype/project/project.js:101
 msgid "Gantt Chart"
@@ -21324,7 +21324,7 @@ msgstr "نمودار گانت از همه وظایف."
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gauss"
-msgstr ""
+msgstr "گاوس"
 
 #. Label of the gender (Link) field in DocType 'Lead'
 #. Label of the gender (Link) field in DocType 'Customer'
@@ -21774,22 +21774,22 @@ msgstr "گرم"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram-Force"
-msgstr ""
+msgstr "گرم-نیرو"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Centimeter"
-msgstr ""
+msgstr "گرم/سانتی متر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Meter"
-msgstr ""
+msgstr "گرم/متر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Millimeter"
-msgstr ""
+msgstr "گرم/میلیمتر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -22299,7 +22299,7 @@ msgstr "هکتار"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectogram/Litre"
-msgstr ""
+msgstr "هکتوگرم/لیتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -27125,7 +27125,7 @@ msgstr "کیلو کالری"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilocoulomb"
-msgstr ""
+msgstr "کیلو کولن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -29598,7 +29598,7 @@ msgstr "ملاقات"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Megacoulomb"
-msgstr ""
+msgstr "مگاکولن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -29831,7 +29831,7 @@ msgstr "میلی آمپر"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millicoulomb"
-msgstr ""
+msgstr "میلی کولن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -30674,7 +30674,7 @@ msgstr "نام گذاری سری ها و پیش فرض های قیمت"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanocoulomb"
-msgstr ""
+msgstr "نانوکولن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -33101,7 +33101,7 @@ msgstr "اونس"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce-Force"
-msgstr ""
+msgstr "اونس-نیرو"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -33116,12 +33116,12 @@ msgstr "اونس/اینچ مکعب"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (UK)"
-msgstr ""
+msgstr "اونس/گالن (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (US)"
-msgstr ""
+msgstr "اونس/گالن (US)"
 
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:88
 #: stock/report/stock_balance/stock_balance.py:461
@@ -37096,7 +37096,7 @@ msgstr "پوند"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound-Force"
-msgstr ""
+msgstr "پوند-نیرو"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -37116,12 +37116,12 @@ msgstr "پوند/یارد مکعب"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Gallon (UK)"
-msgstr ""
+msgstr "پوند/گالن (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Gallon (US)"
-msgstr ""
+msgstr "پوند/گالن (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -45725,7 +45725,7 @@ msgstr "جستجو بر اساس کد آیتم، شماره سریال یا با
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Second"
-msgstr ""
+msgstr "ثانیه"
 
 #. Label of the second_email (Time) field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -50909,7 +50909,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tablespoon (US)"
-msgstr ""
+msgstr "قاشق غذاخوری (US)"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:466
 msgid "Tag"
@@ -53512,22 +53512,22 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ton-Force (UK)"
-msgstr ""
+msgstr "تن-نیرو (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ton-Force (US)"
-msgstr ""
+msgstr "تن-نیرو (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tonne"
-msgstr ""
+msgstr "تن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tonne-Force(Metric)"
-msgstr ""
+msgstr "تن-نیرو (متریک)"
 
 #: accounts/report/financial_statements.html:6
 msgid "Too many columns. Export the report and print it using a spreadsheet application."
@@ -53553,7 +53553,7 @@ msgstr "ابزار"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Torr"
-msgstr ""
+msgstr "Torr"
 
 #. Label of the total (Currency) field in DocType 'Advance Taxes and Charges'
 #. Label of the total (Currency) field in DocType 'POS Invoice'
@@ -56306,7 +56306,7 @@ msgstr "ارزش ها تغییر کرد"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Vara"
-msgstr ""
+msgstr "Vara"
 
 #. Label of the variable_label (Link) field in DocType 'Supplier Scorecard
 #. Scoring Variable'
@@ -56443,7 +56443,7 @@ msgstr "تأیید ایمیل"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Versta"
-msgstr ""
+msgstr "Versta"
 
 #. Label of the via_customer_portal (Check) field in DocType 'Issue'
 #: support/doctype/issue/issue.json
@@ -58061,7 +58061,7 @@ msgstr "فایل های XML پردازش شده است"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Yard"
-msgstr ""
+msgstr "یارد"
 
 #. Option for the 'Billing Interval' (Select) field in DocType 'Subscription
 #. Plan'
