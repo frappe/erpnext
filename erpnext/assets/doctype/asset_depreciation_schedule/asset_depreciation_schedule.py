@@ -291,7 +291,9 @@ class AssetDepreciationSchedule(Document):
 			if skip_row:
 				continue
 
-			schedule_date = add_months(row.depreciation_start_date, n * cint(row.frequency_of_depreciation))
+			schedule_date = get_last_day(
+				add_months(row.depreciation_start_date, n * cint(row.frequency_of_depreciation))
+			)
 			if not current_fiscal_year_end_date:
 				current_fiscal_year_end_date = get_fiscal_year(row.depreciation_start_date)[2]
 			elif getdate(schedule_date) > getdate(current_fiscal_year_end_date):
@@ -330,8 +332,10 @@ class AssetDepreciationSchedule(Document):
 					getdate(asset_doc.available_for_use_date),
 					(asset_doc.opening_number_of_booked_depreciations * row.frequency_of_depreciation),
 				)
+				if is_last_day_of_the_month(getdate(asset_doc.available_for_use_date)):
+					from_date = get_last_day(from_date)
 				if self.depreciation_schedule:
-					from_date = self.depreciation_schedule[-1].schedule_date
+					from_date = add_days(self.depreciation_schedule[-1].schedule_date, 1)
 
 				depreciation_amount, days, months = _get_pro_rata_amt(
 					row,
@@ -353,9 +357,8 @@ class AssetDepreciationSchedule(Document):
 				and not self.opening_accumulated_depreciation
 				and not self.flags.wdv_it_act_applied
 			):
-				from_date = add_days(
-					asset_doc.available_for_use_date, -1
-				)  # needed to calc depr amount for available_for_use_date too
+				from_date = asset_doc.available_for_use_date
+				# needed to calc depr amount for available_for_use_date too
 				depreciation_amount, days, months = _get_pro_rata_amt(
 					row,
 					depreciation_amount,
@@ -406,6 +409,8 @@ class AssetDepreciationSchedule(Document):
 						(n + self.opening_number_of_booked_depreciations)
 						* cint(row.frequency_of_depreciation),
 					)
+					if is_last_day_of_the_month(getdate(asset_doc.available_for_use_date)):
+						asset_doc.to_date = get_last_day(asset_doc.to_date)
 
 				depreciation_amount_without_pro_rata = depreciation_amount
 
@@ -421,7 +426,7 @@ class AssetDepreciationSchedule(Document):
 					depreciation_amount_without_pro_rata, depreciation_amount
 				)
 
-				schedule_date = add_days(schedule_date, days)
+				schedule_date = add_days(schedule_date, days - 1)
 
 			if not depreciation_amount:
 				continue
@@ -504,7 +509,10 @@ class AssetDepreciationSchedule(Document):
 				continue
 
 			if not accumulated_depreciation:
-				if i > 0 and asset_doc.flags.decrease_in_asset_value_due_to_value_adjustment:
+				if i > 0 and (
+					asset_doc.flags.decrease_in_asset_value_due_to_value_adjustment
+					or asset_doc.flags.increase_in_asset_value_due_to_repair
+				):
 					accumulated_depreciation = self.get("depreciation_schedule")[
 						i - 1
 					].accumulated_depreciation_amount
@@ -553,9 +561,11 @@ def _check_is_pro_rata(asset_doc, row, wdv_or_dd_non_yearly=False):
 	# otherwise, if opening_number_of_booked_depreciations = 2, available_for_use_date = 01/01/2020 and frequency_of_depreciation = 12
 	# from_date = 01/01/2022
 	if row.depreciation_method in ("Straight Line", "Manual"):
-		prev_depreciation_start_date = add_months(
-			row.depreciation_start_date,
-			(row.frequency_of_depreciation * -1) * asset_doc.opening_number_of_booked_depreciations,
+		prev_depreciation_start_date = get_last_day(
+			add_months(
+				row.depreciation_start_date,
+				(row.frequency_of_depreciation * -1) * asset_doc.opening_number_of_booked_depreciations,
+			)
 		)
 		from_date = asset_doc.available_for_use_date
 		days = date_diff(prev_depreciation_start_date, from_date) + 1
@@ -610,7 +620,7 @@ def _get_pro_rata_amt(
 	has_wdv_or_dd_non_yearly_pro_rata=False,
 	original_schedule_date=None,
 ):
-	days = date_diff(to_date, from_date)
+	days = date_diff(to_date, from_date) + 1
 	months = month_diff(to_date, from_date)
 	if has_wdv_or_dd_non_yearly_pro_rata:
 		total_days = get_total_days(original_schedule_date or to_date, 12)
@@ -670,7 +680,7 @@ def get_straight_line_or_manual_depr_amount(
 	# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset value
 	elif asset.flags.increase_in_asset_value_due_to_repair:
 		return (flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)) / flt(
-			row.total_number_of_depreciations
+			number_of_pending_depreciations
 		)
 	# if the Depreciation Schedule is being modified after Asset Value Adjustment due to decrease in asset value
 	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment:
@@ -1034,6 +1044,7 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 	date_of_return=None,
 	value_after_depreciation=None,
 	ignore_booked_entry=False,
+	difference_amount=None,
 ):
 	for row in asset_doc.get("finance_books"):
 		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
@@ -1048,6 +1059,8 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 			)
 
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
+		if asset_doc.flags.decrease_in_asset_value_due_to_value_adjustment and not value_after_depreciation:
+			value_after_depreciation = row.value_after_depreciation + difference_amount
 
 		if asset_doc.flags.increase_in_asset_value_due_to_repair and row.depreciation_method in (
 			"Written Down Value",
