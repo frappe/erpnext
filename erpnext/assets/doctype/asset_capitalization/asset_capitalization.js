@@ -11,6 +11,7 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 
 	onload() {
 		this.setup_queries();
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	}
 
 	refresh() {
@@ -72,6 +73,14 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 					voucher_no: ["in", [doc.name, ""]],
 					is_cancelled: 0,
 				},
+			};
+		});
+
+		me.frm.set_query("cost_canter", function () {
+			return {
+				filters: {
+					company: me.frm.doc.company,
+				}
 			};
 		});
 
