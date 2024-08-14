@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-13 10:24\n"
+"PO-Revision-Date: 2024-08-14 10:58\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -779,17 +779,17 @@ msgstr ""
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:180
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:104
 msgid "(A) Qty After Transaction"
-msgstr ""
+msgstr "(A) İşlem Sonrası Miktar"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:185
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:109
 msgid "(B) Expected Qty After Transaction"
-msgstr ""
+msgstr "(B) İşlem Sonrası Beklenen Miktar"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:200
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:124
 msgid "(C) Total Qty in Queue"
-msgstr ""
+msgstr "(C) Kuyruktaki Toplam Miktar"
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:184
 msgid "(C) Total qty in queue"
@@ -1832,11 +1832,11 @@ msgstr "{0} hesabı, {1} ana şirkette mevcut."
 
 #: accounts/doctype/budget/budget.py:111
 msgid "Account {0} has been entered multiple times"
-msgstr ""
+msgstr "{0} Hesabı birden çok kez girilmiş"
 
 #: accounts/doctype/account/account.py:359
 msgid "Account {0} is added in the child company {1}"
-msgstr ""
+msgstr "{0} Hesabı, {1} isimli alt şirkete eklendi"
 
 #: accounts/doctype/gl_entry/gl_entry.py:398
 msgid "Account {0} is frozen"
@@ -1844,11 +1844,11 @@ msgstr "{0} Hesabı donduruldu"
 
 #: controllers/accounts_controller.py:1113
 msgid "Account {0} is invalid. Account Currency must be {1}"
-msgstr ""
+msgstr "Hesap {0} geçersiz. Hesap Para Birimi {1} olmalıdır"
 
 #: accounts/doctype/account/account.py:149
 msgid "Account {0}: Parent account {1} can not be a ledger"
-msgstr ""
+msgstr "{0} Hesabı: Ana hesap {1} bir defter olamaz"
 
 #: accounts/doctype/account/account.py:155
 msgid "Account {0}: Parent account {1} does not belong to company: {2}"
@@ -4630,7 +4630,7 @@ msgstr "İzin Verilen Ürünler"
 #: accounts/doctype/allowed_to_transact_with/allowed_to_transact_with.json
 #: buying/doctype/supplier/supplier.json selling/doctype/customer/customer.json
 msgid "Allowed To Transact With"
-msgstr ""
+msgstr "İşlem Yapma Yetkileri"
 
 #: accounts/doctype/party_link/party_link.py:27
 msgid "Allowed primary roles are 'Customer' and 'Supplier'. Please select one of these roles only."
@@ -5129,7 +5129,7 @@ msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.py:1155
 msgid "Amount {0} {1} {2} {3}"
-msgstr ""
+msgstr "Miktar {0} {1} {2} {3}"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -5184,7 +5184,7 @@ msgstr "Yıllık"
 
 #: public/js/utils.js:89
 msgid "Annual Billing: {0}"
-msgstr ""
+msgstr "Yıllık Fatura: {0}"
 
 #. Label of the expense_year_to_date (Check) field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -5730,7 +5730,7 @@ msgstr "Varlık Hesabı"
 #: assets/report/asset_activity/asset_activity.json
 #: assets/workspace/assets/assets.json
 msgid "Asset Activity"
-msgstr ""
+msgstr "Varlık Etkinliği"
 
 #. Group in Asset's connections
 #. Name of a DocType
@@ -5739,7 +5739,7 @@ msgstr ""
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 #: assets/workspace/assets/assets.json
 msgid "Asset Capitalization"
-msgstr ""
+msgstr "Varlık Sermayeleştirme"
 
 #. Name of a DocType
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
@@ -6226,7 +6226,7 @@ msgstr "İsme Ata"
 #: support/report/issue_analytics/issue_analytics.js:81
 #: support/report/issue_summary/issue_summary.js:69
 msgid "Assigned To"
-msgstr ""
+msgstr "Atama"
 
 #: templates/pages/projects.html:48
 msgid "Assignment"
@@ -6692,7 +6692,7 @@ msgstr "Depodaki Mevcut Parti Miktarı"
 #. Name of a report
 #: stock/report/available_batch_report/available_batch_report.json
 msgid "Available Batch Report"
-msgstr ""
+msgstr "Mevcut Parti Raporu"
 
 #: assets/report/fixed_asset_register/fixed_asset_register.py:428
 msgid "Available For Use Date"
@@ -6848,7 +6848,7 @@ msgstr ""
 
 #: accounts/report/gross_profit/gross_profit.py:269
 msgid "Avg. Selling Rate"
-msgstr ""
+msgstr "Ortalama Satış Fiyatı"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -7299,7 +7299,7 @@ msgstr "Stok Değeri Bakiyesi"
 #: stock/report/stock_balance/stock_balance.py:432
 #: stock/report/stock_ledger/stock_ledger.py:307
 msgid "Balance Value"
-msgstr ""
+msgstr "Bakiye Değeri"
 
 #: accounts/doctype/gl_entry/gl_entry.py:314
 msgid "Balance for Account {0} must always be {1}"
@@ -7437,7 +7437,7 @@ msgstr "Banka Masrafları Hesabı"
 #: accounts/doctype/bank_clearance/bank_clearance.json
 #: accounts/workspace/accounting/accounting.json
 msgid "Bank Clearance"
-msgstr ""
+msgstr "Banka Mutabakatı"
 
 #. Name of a DocType
 #: accounts/doctype/bank_clearance_detail/bank_clearance_detail.json
@@ -9114,14 +9114,14 @@ msgstr ""
 #: selling/workspace/selling/selling.json
 #: stock/doctype/delivery_note/delivery_note.json
 msgid "Campaign"
-msgstr ""
+msgstr "Kampanya"
 
 #. Name of a report
 #. Label of a Link in the CRM Workspace
 #: crm/report/campaign_efficiency/campaign_efficiency.json
 #: crm/workspace/crm/crm.json
 msgid "Campaign Efficiency"
-msgstr ""
+msgstr "Kampanya Verimliliği"
 
 #. Name of a DocType
 #: crm/doctype/campaign_email_schedule/campaign_email_schedule.json
@@ -9411,7 +9411,7 @@ msgstr ""
 
 #: accounts/doctype/fiscal_year/fiscal_year.py:49
 msgid "Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved."
-msgstr ""
+msgstr "Mali Yıl Başlangıç Tarihi ve Mali Yılı kaydedildikten sonra Mali Yıl Sonu Tarihini değiştiremezsiniz."
 
 #: accounts/doctype/accounting_dimension/accounting_dimension.py:68
 msgid "Cannot change Reference Document Type."
@@ -9792,7 +9792,7 @@ msgstr ""
 #: buying/doctype/purchase_order/purchase_order.py:314
 #: buying/doctype/request_for_quotation/request_for_quotation.py:98
 msgid "Caution"
-msgstr ""
+msgstr "Dikkat"
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.py:142
 msgid "Caution: This might alter frozen accounts."
@@ -10235,11 +10235,11 @@ msgstr ""
 
 #: accounts/doctype/bank_clearance/bank_clearance.py:117
 msgid "Clearance Date not mentioned"
-msgstr ""
+msgstr "Ödeme Tarihi belirtilmedi"
 
 #: accounts/doctype/bank_clearance/bank_clearance.py:115
 msgid "Clearance Date updated"
-msgstr ""
+msgstr "Ödeme Tarihi güncellendi"
 
 #: public/js/utils/demo.js:24
 msgid "Clearing Demo Data..."
@@ -10265,7 +10265,7 @@ msgstr "Zip dosyası belgeye eklendikten sonra Faturaları İçe Aktar düğmesi
 
 #: templates/emails/confirm_appointment.html:3
 msgid "Click on the link below to verify your email and confirm the appointment"
-msgstr ""
+msgstr "E-postanızı doğrulamak ve randevuyu onaylamak için aşağıdaki formu tıklayın"
 
 #: selling/page/point_of_sale/pos_item_cart.js:468
 msgid "Click to add email / phone"
@@ -10391,12 +10391,12 @@ msgstr "Kapanış"
 #: accounts/report/trial_balance/trial_balance.py:458
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.py:213
 msgid "Closing (Cr)"
-msgstr ""
+msgstr "Kapanış Alacağı"
 
 #: accounts/report/trial_balance/trial_balance.py:451
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.py:206
 msgid "Closing (Dr)"
-msgstr ""
+msgstr "Kapanış Borcu"
 
 #: accounts/report/general_ledger/general_ledger.py:388
 msgid "Closing (Opening + Total)"
@@ -10410,7 +10410,7 @@ msgstr "Kapanış Hesabı"
 
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.py:100
 msgid "Closing Account {0} must be of type Liability / Equity"
-msgstr ""
+msgstr "Kapanış Hesabı {0}, Borç / Sermaye türünde olmalıdır"
 
 #. Label of the closing_amount (Currency) field in DocType 'POS Closing Entry
 #. Detail'
@@ -13894,7 +13894,7 @@ msgstr "Mevcut Seviye"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:84
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:116
 msgid "Current Liabilities"
-msgstr ""
+msgstr "Kısa Vadeli Borçlar"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
@@ -15018,15 +15018,15 @@ msgstr "Borç"
 
 #: accounts/report/general_ledger/general_ledger.py:607
 msgid "Debit (Transaction)"
-msgstr ""
+msgstr "Borç (İşlem)"
 
 #: accounts/report/general_ledger/general_ledger.py:585
 msgid "Debit ({0})"
-msgstr ""
+msgstr "Borç ({0})"
 
 #: accounts/doctype/journal_entry/journal_entry.js:562
 msgid "Debit Account"
-msgstr ""
+msgstr "Borç Hesabı"
 
 #. Label of the debit (Currency) field in DocType 'Account Closing Balance'
 #. Label of the debit (Currency) field in DocType 'GL Entry'
@@ -15062,12 +15062,12 @@ msgstr "İşlem Para Birimindeki Borç Tutarı"
 #: setup/setup_wizard/operations/install_fixtures.py:257
 #: stock/doctype/purchase_receipt/purchase_receipt.js:76
 msgid "Debit Note"
-msgstr ""
+msgstr "Borç Dekontu"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:202
 #: accounts/report/accounts_receivable/accounts_receivable.html:162
 msgid "Debit Note Amount"
-msgstr ""
+msgstr "Borç Dekontu Tutarı"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -15089,11 +15089,11 @@ msgstr "Borçlandırma"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:873
 msgid "Debit To is required"
-msgstr ""
+msgstr "Borçlandırılacak Hesap gerekli"
 
 #: accounts/general_ledger.py:487
 msgid "Debit and Credit not equal for {0} #{1}. Difference is {2}."
-msgstr ""
+msgstr "{0} #{1} için Borç ve Alacak eşit değil. Fark {2}."
 
 #. Label of the debit (Currency) field in DocType 'Journal Entry Account'
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
@@ -15119,7 +15119,7 @@ msgstr ""
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:12
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:13
 msgid "Debtors"
-msgstr ""
+msgstr "Borçlular"
 
 #. Description of the 'Tally Debtors Account' (Data) field in DocType 'Tally
 #. Migration'
@@ -15802,7 +15802,7 @@ msgstr "Gecikmiş Ürün Raporu"
 #. Name of a report
 #: stock/report/delayed_order_report/delayed_order_report.json
 msgid "Delayed Order Report"
-msgstr ""
+msgstr "Gecikmiş Sipariş Raporu"
 
 #. Name of a report
 #. Label of a Link in the Projects Workspace
@@ -16820,7 +16820,7 @@ msgstr "Muhasebe Boyutu İsmi"
 #. Name of a report
 #: accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.json
 msgid "Dimension-wise Accounts Balance Report"
-msgstr ""
+msgstr "Boyut bazında Hesap Bakiye Raporu"
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
 #: accounts/doctype/account/account.json
@@ -19035,7 +19035,7 @@ msgstr "Ürün değerlemesi yeniden gönderilirken hata oluştu"
 
 #: templates/includes/footer/footer_extension.html:29
 msgid "Error: Not a valid id?"
-msgstr ""
+msgstr "Hata: Geçerli bir kimlik olmayabilir."
 
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:569
 msgid "Error: This asset already has {0} depreciation periods booked.\n"
@@ -22120,7 +22120,7 @@ msgstr "Brüt Ağırlık Birimi"
 #. Name of a report
 #: accounts/report/gross_and_net_profit_report/gross_and_net_profit_report.json
 msgid "Gross and Net Profit Report"
-msgstr ""
+msgstr "Brüt ve Net Kâr Raporu"
 
 #: accounts/doctype/payment_terms_template/payment_terms_template_dashboard.py:17
 msgid "Group"
@@ -23848,11 +23848,11 @@ msgstr ""
 #: stock/report/stock_ledger/stock_ledger.js:90
 #: stock/report/stock_projected_qty/stock_projected_qty.js:51
 msgid "Include UOM"
-msgstr ""
+msgstr "Ölçü Birimini Dahil Et"
 
 #: stock/report/stock_balance/stock_balance.js:106
 msgid "Include Zero Stock Items"
-msgstr ""
+msgstr "Stokta Olmayan Ürünleri Dahil Et"
 
 #. Label of the include_in_gross (Check) field in DocType 'Account'
 #: accounts/doctype/account/account.json
@@ -23996,7 +23996,7 @@ msgstr ""
 #. Name of a report
 #: stock/report/incorrect_stock_value_report/incorrect_stock_value_report.json
 msgid "Incorrect Stock Value Report"
-msgstr ""
+msgstr "Yanlış Stok Değeri Raporu"
 
 #: stock/serial_batch_bundle.py:133
 msgid "Incorrect Type of Transaction"
@@ -26382,7 +26382,7 @@ msgstr "Ürün Seri No"
 #: stock/report/item_shortage_report/item_shortage_report.json
 #: stock/workspace/stock/stock.json
 msgid "Item Shortage Report"
-msgstr ""
+msgstr "Ürün Eksikliği Raporu"
 
 #. Name of a DocType
 #: stock/doctype/item_supplier/item_supplier.json
@@ -26621,7 +26621,7 @@ msgstr ""
 
 #: stock/utils.py:545
 msgid "Item valuation reposting in progress. Report might show incorrect item valuation."
-msgstr ""
+msgstr "Ürün değerlemesi yeniden yapılıyor. Rapor geçici olarak yanlış değerleme gösterebilir."
 
 #: stock/doctype/item/item.py:939
 msgid "Item variant {0} exists with same attributes"
@@ -28011,7 +28011,7 @@ msgstr ""
 #: accounts/doctype/ledger_merge/ledger_merge.json
 #: accounts/report/account_balance/account_balance.js:26
 msgid "Liability"
-msgstr ""
+msgstr "Borç"
 
 #. Label of the license_details (Section Break) field in DocType 'Driver'
 #: setup/doctype/driver/driver.json
@@ -28193,7 +28193,7 @@ msgstr ""
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:94
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:139
 msgid "Loans (Liabilities)"
-msgstr ""
+msgstr "Krediler"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:15
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:22
@@ -30580,7 +30580,7 @@ msgstr ""
 
 #: templates/includes/macros.html:169
 msgid "Move to Cart"
-msgstr ""
+msgstr "Sepete Taşı"
 
 #: assets/doctype/asset/asset_dashboard.py:7
 msgid "Movement"
@@ -30900,7 +30900,7 @@ msgstr ""
 
 #: accounts/report/cash_flow/cash_flow.py:129
 msgid "Net Change in Accounts Payable"
-msgstr ""
+msgstr "Borç Hesaplarındaki Net Değişim"
 
 #: accounts/report/cash_flow/cash_flow.py:128
 msgid "Net Change in Accounts Receivable"
@@ -32225,7 +32225,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgid "On enabling this cancellation entries will be posted on the actual cancellation date and reports will consider cancelled entries as well"
-msgstr ""
+msgstr "İptal girişleri gerçek iptal tarihinde yayınlanacak ve raporlar iptal edilen girişleri de dikkate alacaktır"
 
 #: manufacturing/doctype/production_plan/production_plan.js:591
 msgid "On expanding a row in the Items to Manufacture table, you'll see an option to 'Include Exploded Items'. Ticking this includes raw materials of the sub-assembly items in the production process."
@@ -32502,12 +32502,12 @@ msgstr "Açılış & Kapanış"
 #: accounts/report/trial_balance/trial_balance.py:430
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.py:185
 msgid "Opening (Cr)"
-msgstr ""
+msgstr "Açılış Alacağı"
 
 #: accounts/report/trial_balance/trial_balance.py:423
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.py:178
 msgid "Opening (Dr)"
-msgstr ""
+msgstr "Açılış Borcu"
 
 #. Label of the opening_accumulated_depreciation (Currency) field in DocType
 #. 'Asset'
@@ -34602,14 +34602,14 @@ msgstr "Şuraya Öde / Şuradan Çek"
 #: accounts/report/account_balance/account_balance.js:54
 #: setup/doctype/party_type/party_type.json
 msgid "Payable"
-msgstr ""
+msgstr "Ödenecek Borç"
 
 #: accounts/report/accounts_payable/accounts_payable.js:42
 #: accounts/report/item_wise_purchase_register/item_wise_purchase_register.py:211
 #: accounts/report/purchase_register/purchase_register.py:194
 #: accounts/report/purchase_register/purchase_register.py:235
 msgid "Payable Account"
-msgstr ""
+msgstr "Borç Hesabı"
 
 #: setup/doctype/supplier_group/supplier_group.py:54
 msgid "Payable Account: {0} must be in Company default currency: {1}"
@@ -34620,7 +34620,7 @@ msgstr ""
 #: accounts/workspace/payables/payables.json
 #: setup/doctype/email_digest/email_digest.json
 msgid "Payables"
-msgstr ""
+msgstr "Borçlar"
 
 #. Label of the payer_settings (Column Break) field in DocType 'Cheque Print
 #. Template'
@@ -35521,7 +35521,7 @@ msgstr "Yaşadığı Evi"
 #: stock/report/incorrect_stock_value_report/incorrect_stock_value_report.py:19
 #: stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:17
 msgid "Perpetual inventory required for the company {0} to view this report."
-msgstr ""
+msgstr "{0} şirketinin bu kanıtı görüntülemesi için sürekli envanter gerekiyor."
 
 #. Label of the personal_details (Tab Break) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -36307,7 +36307,7 @@ msgstr ""
 
 #: setup/doctype/employee/employee.py:184
 msgid "Please make sure the employees above report to another Active employee."
-msgstr ""
+msgstr "Lütfen yukarıdaki işyerinde başka bir çalışana rapor ettiğinden emin olun."
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:372
 msgid "Please make sure the file you are using has 'Parent Account' column present in the header."
@@ -38108,7 +38108,7 @@ msgstr ""
 #. Name of a report
 #: manufacturing/report/process_loss_report/process_loss_report.json
 msgid "Process Loss Report"
-msgstr ""
+msgstr "İşlem Kaybı Raporu"
 
 #: manufacturing/report/process_loss_report/process_loss_report.py:100
 msgid "Process Loss Value"
@@ -38436,7 +38436,7 @@ msgstr ""
 #: manufacturing/report/production_planning_report/production_planning_report.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Production Planning Report"
-msgstr ""
+msgstr "Üretim Planlama Raporu"
 
 #: setup/setup_wizard/operations/install_fixtures.py:39
 msgid "Products"
@@ -42348,7 +42348,7 @@ msgstr "Rapor Türü"
 
 #: accounts/doctype/account/account.py:410
 msgid "Report Type is mandatory"
-msgstr ""
+msgstr "Rapor Türü zorunludur"
 
 #: accounts/report/balance_sheet/balance_sheet.js:13
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:13
@@ -46060,7 +46060,7 @@ msgstr ""
 #: accounts/report/balance_sheet/balance_sheet.js:10
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.js:10
 msgid "Select View"
-msgstr ""
+msgstr "Görünüm Seçin"
 
 #: public/js/bank_reconciliation_tool/dialog_manager.js:251
 msgid "Select Vouchers to Match"
@@ -46363,7 +46363,7 @@ msgstr "Birincil Kişiye Gönder"
 #. Description of a DocType
 #: setup/doctype/email_digest/email_digest.json
 msgid "Send regular summary reports via Email."
-msgstr ""
+msgstr "E-posta ile düzenli özet raporlar gönderin."
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
@@ -46383,7 +46383,7 @@ msgstr "Ek ile Gönder"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #: crm/doctype/email_campaign/email_campaign.json
 msgid "Sender"
-msgstr "Gönderici"
+msgstr "Gönderen"
 
 #: accounts/doctype/payment_request/payment_request.js:44
 msgid "Sending"
@@ -46779,7 +46779,7 @@ msgstr ""
 #. Name of a report
 #: stock/report/serial_and_batch_summary/serial_and_batch_summary.json
 msgid "Serial and Batch Summary"
-msgstr ""
+msgstr "Seri ve Parti Özeti"
 
 #: stock/utils.py:409
 msgid "Serial number {0} entered more than once"
@@ -47108,7 +47108,7 @@ msgstr "Birim Fiyatı Elle Ayarla"
 
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:178
 msgid "Set Default Supplier"
-msgstr ""
+msgstr "Varsayılan Tedarikçi"
 
 #. Label of the set_exchange_gain_loss (Button) field in DocType 'Payment
 #. Entry'
@@ -47856,7 +47856,7 @@ msgstr "Yazdırırken Dahil Edilen Vergiyi Göster"
 
 #: stock/report/available_batch_report/available_batch_report.js:86
 msgid "Show Item Name"
-msgstr ""
+msgstr "Ürün Adını Göster"
 
 #. Label of the show_items (Check) field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -49011,7 +49011,7 @@ msgstr ""
 
 #: stock/doctype/quick_stock_balance/quick_stock_balance.js:15
 msgid "Stock Balance Report"
-msgstr ""
+msgstr "Stok Bakiyesi Raporu"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html:10
 msgid "Stock Capacity"
@@ -49162,7 +49162,7 @@ msgstr ""
 #. Description of a report in the Onboarding Step 'Check Stock Ledger'
 #: stock/onboarding_step/check_stock_ledger_report/check_stock_ledger_report.json
 msgid "Stock Ledger report contains every submitted stock transaction. You can use filter to narrow down ledger entries."
-msgstr ""
+msgstr "Stok Defteri raporu, gönderilen her stok işlemini içerir. Defter girişlerini daraltmak için filtre kullanabilirsiniz."
 
 #: stock/doctype/batch/batch.js:63 stock/doctype/item/item.js:470
 msgid "Stock Levels"
@@ -50155,11 +50155,11 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:155
 msgid "Successfully imported {0} records."
-msgstr ""
+msgstr "{0} kayıtları başarıyla içe aktarıldı."
 
 #: buying/doctype/supplier/supplier.js:210
 msgid "Successfully linked to Customer"
-msgstr ""
+msgstr "Müşteriye başarıyla bağlandı"
 
 #: selling/doctype/customer/customer.js:243
 msgid "Successfully linked to Supplier"
@@ -52558,7 +52558,7 @@ msgstr ""
 
 #: accounts/doctype/account/account.py:200
 msgid "There are ledger entries against this account. Changing {0} to non-{1} in live system will cause incorrect output in 'Accounts {2}' report"
-msgstr ""
+msgstr "Bu hesaba karşı defter kayıtları vardır. Canlı sistemde {0} adresinin {1} olmayan bir adresle değiştirilmesi 'Hesaplar {2}' raporunda yanlış çıktıya neden olacaktır"
 
 #: utilities/bulk_transaction.py:43
 msgid "There are no Failed transactions"
@@ -53647,7 +53647,7 @@ msgstr ""
 
 #: accounts/report/financial_statements.html:6
 msgid "Too many columns. Export the report and print it using a spreadsheet application."
-msgstr ""
+msgstr "Çok fazla sütun var. Raporu dışa aktarın ve bir elektronik tablo uygulaması kullanarak yazdırın."
 
 #. Label of a Card Break in the Manufacturing Workspace
 #. Label of the tools (Column Break) field in DocType 'Email Digest'
@@ -56087,7 +56087,7 @@ msgstr ""
 #. Name of a report
 #: regional/report/vat_audit_report/vat_audit_report.json
 msgid "VAT Audit Report"
-msgstr ""
+msgstr "KDV Denetim Raporu"
 
 #: regional/report/uae_vat_201/uae_vat_201.html:47
 #: regional/report/uae_vat_201/uae_vat_201.py:111
@@ -56476,7 +56476,7 @@ msgstr ""
 
 #: stock/doctype/item/item.js:125
 msgid "Variant Details Report"
-msgstr ""
+msgstr "Varyant Ayrıntıları Raporu"
 
 #. Name of a DocType
 #: stock/doctype/variant_field/variant_field.json
@@ -57849,7 +57849,7 @@ msgstr ""
 #. Name of a report
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.json
 msgid "Work Order Stock Report"
-msgstr ""
+msgstr "İş Emri Stok Raporu"
 
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
@@ -58359,7 +58359,7 @@ msgstr ""
 #. Description of a report in the Onboarding Step 'Check Stock Projected Qty'
 #: stock/onboarding_step/view_stock_projected_qty/view_stock_projected_qty.json
 msgid "You can set the filters to narrow the results, then click on Generate New Report to see the updated report."
-msgstr ""
+msgstr "Sonuçları daraltmak için filtreleri ayarlayabilir, ardından güncellenmiş raporu görmek için Yeni Rapor Oluştur'a tıklayabilirsiniz."
 
 #: manufacturing/doctype/job_card/job_card.py:1136
 msgid "You can't make any changes to Job Card since Work Order is closed."
