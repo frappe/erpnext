@@ -92,7 +92,7 @@ frappe.query_reports["Accounts Receivable"] = {
 			fieldname: "range",
 			label: __("Ageing Range"),
 			fieldtype: "Data",
-			default: "30,60,90,120",
+			default: "30, 60, 90, 120",
 		},
 		{
 			fieldname: "customer_group",

@@ -50,20 +50,8 @@ class ReceivablePayableReport:
 			getdate(nowdate()) if self.filters.report_date > getdate(nowdate()) else self.filters.report_date
 		)
 
-		if self.filters.range1 or self.filters.range2 or self.filters.range3 or self.filters.range4:
-			self.filters.range = ",".join(
-				str(value)
-				for value in [
-					self.filters.range1,
-					self.filters.range2,
-					self.filters.range3,
-					self.filters.range4,
-				]
-				if value
-			)
-
 		if not self.filters.range:
-			self.filters.range = "30,60,90,120"
+			self.filters.range = "30, 60, 90, 120"
 		self.age_range = [num.strip() for num in self.filters.range.split(",") if num.strip().isdigit()]
 
 	def run(self, args):
@@ -1139,7 +1127,9 @@ class ReceivablePayableReport:
 		for row in self.data:
 			row = frappe._dict(row)
 			if not cint(row.bold):
-				values = [flt(row[f"range{i}"], precision) for i in range(1, len(self.age_range) + 2)]
+				values = [
+					flt(row.get(f"range{i}", None), precision) for i in range(1, len(self.age_range) + 2)
+				]
 				rows.append({"values": values})
 
 		self.chart = {
