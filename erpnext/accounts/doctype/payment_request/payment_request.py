@@ -333,14 +333,6 @@ class PaymentRequest(Document):
 			}
 		)
 
-		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
-			amount = payment_entry.base_paid_amount
-		else:
-			amount = self.grand_total
-
-		payment_entry.received_amount = amount
-		payment_entry.get("references")[0].allocated_amount = amount
-
 		# Update 'Paid Amount' on Forex transactions
 		if self.currency != ref_doc.company_currency:
 			if (
