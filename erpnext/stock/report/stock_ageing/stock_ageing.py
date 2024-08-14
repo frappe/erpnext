@@ -465,9 +465,12 @@ class FIFOSlots:
 			)
 		)
 
-		for field in ["item_code", "warehouse"]:
+		for field in ["item_code"]:
 			if self.filters.get(field):
 				query = query.where(bundle[field] == self.filters.get(field))
+
+		if self.filters.get("warehouse"):
+			query = self.__get_warehouse_conditions(bundle, query)
 
 		bundle_wise_serial_nos = frappe._dict({})
 		for bundle_name, serial_no in query.run():

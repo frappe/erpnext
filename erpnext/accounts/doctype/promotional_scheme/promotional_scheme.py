@@ -51,6 +51,7 @@ price_discount_fields = [
 	"discount_percentage",
 	"validate_applied_rule",
 	"apply_multiple_pricing_rules",
+	"for_price_list",
 ]
 
 product_discount_fields = [
@@ -63,6 +64,7 @@ product_discount_fields = [
 	"recurse_for",
 	"apply_recursion_over",
 	"apply_multiple_pricing_rules",
+	"round_free_qty",
 ]
 
 

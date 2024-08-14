@@ -303,7 +303,7 @@
    "depends_on": "from_warehouse",
    "fieldname": "source_warehouse_address",
    "fieldtype": "Link",
-   "label": "Source Warehouse Address",
+   "label": "Source Warehouse Address Link",
    "options": "Address"
   },
   {
@@ -333,7 +333,7 @@
    "depends_on": "to_warehouse",
    "fieldname": "target_warehouse_address",
    "fieldtype": "Link",
-   "label": "Target Warehouse Address",
+   "label": "Target Warehouse Address Link",
    "options": "Address"
   },
   {
@@ -686,10 +686,10 @@
    "read_only": 1
   },
   {
-    "fieldname": "tab_connections",
-    "fieldtype": "Tab Break",
-    "label": "Connections",
-    "show_dashboard": 1
+   "fieldname": "tab_connections",
+   "fieldtype": "Tab Break",
+   "label": "Connections",
+   "show_dashboard": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -697,7 +697,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-26 19:12:17.937088",
+ "modified": "2024-08-13 19:02:42.386955",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
