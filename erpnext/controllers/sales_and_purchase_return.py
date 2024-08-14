@@ -319,6 +319,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 	def set_missing_values(source, target):
 		doc = frappe.get_doc(target)
 		doc.is_return = 1
+		doc.ignore_pricing_rule = 1
+		doc.pricing_rules = []
 		doc.return_against = source.name
 		doc.set_warehouse = ""
 		if doctype == "Sales Invoice" or doctype == "POS Invoice":
@@ -478,6 +480,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1 * source_doc.qty
+		target_doc.pricing_rules = None
 		if doctype in ["Purchase Receipt", "Subcontracting Receipt"]:
 			returned_qty_map = get_returned_qty_map_for_row(
 				source_parent.name, source_parent.supplier, source_doc.name, doctype
@@ -640,6 +643,12 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 	def update_terms(source_doc, target_doc, source_parent):
 		target_doc.payment_amount = -source_doc.payment_amount
 
+	def item_condition(doc):
+		if return_against_rejected_qty:
+			return doc.rejected_qty
+
+		return doc.qty
+
 	doclist = get_mapped_doc(
 		doctype,
 		source_name,
@@ -654,6 +663,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None, return_agai
 				"doctype": doctype + " Item",
 				"field_map": {"serial_no": "serial_no", "batch_no": "batch_no", "bom": "bom"},
 				"postprocess": update_item,
+				"condition": item_condition,
 			},
 			"Payment Schedule": {"doctype": "Payment Schedule", "postprocess": update_terms},
 		},

@@ -92,8 +92,10 @@ class SerialandBatchBundle(Document):
 		if self.type_of_transaction == "Maintenance":
 			return
 
-		self.validate_serial_nos_duplicate()
-		self.check_future_entries_exists()
+		if not self.flags.ignore_validate_serial_batch or frappe.flags.in_test:
+			self.validate_serial_nos_duplicate()
+			self.check_future_entries_exists()
+
 		self.set_is_outward()
 		self.calculate_total_qty()
 		self.set_warehouse()
@@ -340,6 +342,9 @@ class SerialandBatchBundle(Document):
 			rate = frappe.db.get_value(child_table, self.voucher_detail_no, valuation_field)
 
 		for d in self.entries:
+			if (d.incoming_rate == rate) and d.qty and d.stock_value_difference:
+				continue
+
 			d.incoming_rate = flt(rate, precision)
 			if d.qty:
 				d.stock_value_difference = flt(d.qty) * flt(d.incoming_rate)
@@ -841,6 +846,9 @@ class SerialandBatchBundle(Document):
 		self.validate_serial_nos_inventory()
 
 	def set_purchase_document_no(self):
+		if self.flags.ignore_validate_serial_batch:
+			return
+
 		if not self.has_serial_no:
 			return
 

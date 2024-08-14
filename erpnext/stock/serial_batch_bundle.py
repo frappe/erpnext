@@ -110,6 +110,7 @@ class SerialBatchBundle:
 				"type_of_transaction": "Inward" if self.sle.actual_qty > 0 else "Outward",
 				"company": self.company,
 				"is_rejected": self.is_rejected_entry(),
+				"make_bundle_from_sle": 1,
 			}
 		).make_serial_and_batch_bundle()
 
@@ -160,12 +161,13 @@ class SerialBatchBundle:
 
 		if msg:
 			error_msg = (
-				f"Serial and Batch Bundle not set for item {self.item_code} in warehouse {self.warehouse}."
+				f"Serial and Batch Bundle not set for item {self.item_code} in warehouse {self.warehouse}"
 				+ msg
 			)
 			frappe.throw(_(error_msg))
 
 	def set_serial_and_batch_bundle(self, sn_doc):
+		self.sle.auto_created_serial_and_batch_bundle = 1
 		self.sle.db_set({"serial_and_batch_bundle": sn_doc.name, "auto_created_serial_and_batch_bundle": 1})
 
 		if sn_doc.is_rejected:
@@ -323,6 +325,9 @@ class SerialBatchBundle:
 
 	def set_warehouse_and_status_in_serial_nos(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
+
+		if self.sle.auto_created_serial_and_batch_bundle and self.sle.actual_qty > 0:
+			return
 
 		serial_nos = get_serial_nos(self.sle.serial_and_batch_bundle)
 		if not self.sle.serial_and_batch_bundle and self.sle.serial_no:
@@ -928,6 +933,10 @@ class SerialBatchCreation:
 		if doc.voucher_no and frappe.get_cached_value(doc.voucher_type, doc.voucher_no, "docstatus") == 2:
 			doc.voucher_no = ""
 
+		doc.flags.ignore_validate_serial_batch = False
+		if self.get("make_bundle_from_sle") and self.type_of_transaction == "Inward":
+			doc.flags.ignore_validate_serial_batch = True
+
 		doc.save()
 		self.validate_qty(doc)
 
@@ -1120,6 +1129,10 @@ class SerialBatchCreation:
 			msg = f"Please set Serial No Series in the item {self.item_code} or create Serial and Batch Bundle manually."
 			frappe.throw(_(msg))
 
+		voucher_no = ""
+		if self.get("voucher_no"):
+			voucher_no = self.get("voucher_no")
+
 		for _i in range(abs(cint(self.actual_qty))):
 			serial_no = make_autoname(self.serial_no_series, "Serial No")
 			sr_nos.append(serial_no)
@@ -1137,6 +1150,7 @@ class SerialBatchCreation:
 					self.item_name,
 					self.description,
 					"Active",
+					voucher_no,
 					self.batch_no,
 				)
 			)
@@ -1155,6 +1169,7 @@ class SerialBatchCreation:
 				"item_name",
 				"description",
 				"status",
+				"purchase_document_no",
 				"batch_no",
 			]
 
