@@ -78,8 +78,11 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 			};
 		});
 
+<<<<<<< HEAD
 
 >>>>>>> 2fd8de2f76 (fix: set up filters for dimensions)
+=======
+>>>>>>> 0d42793397 (chore: linters check)
 		me.frm.set_query("item_code", "stock_items", function () {
 			return erpnext.queries.item({ is_stock_item: 1 });
 		});
