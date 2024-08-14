@@ -1205,3 +1205,64 @@ class TestPickList(FrappeTestCase):
 		pl_doc.submit()
 
 		frappe.db.set_single_value("Stock Settings", "over_picking_allowance", 0)
+
+	def test_ignore_pricing_rule_in_pick_list(self):
+		frappe.flags.print_stmt = False
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "IPR-PICKLT-.######",
+				"create_new_batch": 1,
+			}
+		).name
+
+		make_stock_entry(
+			item=item,
+			to_warehouse=warehouse,
+			qty=2,
+			basic_rate=100,
+		)
+
+		pricing_rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "Same Free Item",
+				"price_or_product_discount": "Product",
+				"selling": 1,
+				"apply_on": "Item Code",
+				"items": [
+					{
+						"item_code": item,
+					}
+				],
+				"same_item": 1,
+				"is_recursive": 1,
+				"recurse_for": 2,
+				"free_qty": 1,
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+			}
+		)
+
+		pricing_rule.save()
+		frappe.flags.print_stmt = True
+
+		so = make_sales_order(item_code=item, qty=2, rate=100, do_not_save=True)
+		so.set_warehouse = warehouse
+		so.submit()
+
+		self.assertEqual(len(so.items), 2)
+		self.assertTrue(so.items[1].is_free_item)
+
+		pl = create_pick_list(so.name)
+		pl.ignore_pricing_rule = 1
+		pl.save()
+		pl.submit()
+
+		self.assertEqual(len(pl.locations), 1)
+
+		delivery_note = create_delivery_note(pl.name)
+
+		self.assertEqual(len(delivery_note.items), 1)
