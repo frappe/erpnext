@@ -561,10 +561,13 @@ def get_amount(ref_doc, payment_account=None):
 		grand_total = flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
 		if not ref_doc.get("is_pos"):
+			# use rounded totals to match with PE
 			if ref_doc.party_account_currency == ref_doc.currency:
-				grand_total = flt(ref_doc.grand_total)
+				grand_total = flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)
 			else:
-				grand_total = flt(ref_doc.base_grand_total) / ref_doc.conversion_rate
+				grand_total = (
+					flt(ref_doc.base_rounded_total) or flt(ref_doc.base_grand_total) / ref_doc.conversion_rate
+				)
 		elif dt == "Sales Invoice":
 			for pay in ref_doc.payments:
 				if pay.type == "Phone" and pay.account == payment_account:

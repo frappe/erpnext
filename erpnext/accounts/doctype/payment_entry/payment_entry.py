@@ -2473,6 +2473,7 @@ def get_reference_details(
 	return res
 
 
+# todo-abdeali: add one more parameter that if it created from `payment_request`
 @frappe.whitelist()
 def get_payment_entry(
 	dt,
@@ -2633,7 +2634,131 @@ def get_payment_entry(
 
 		pe.set_difference_amount()
 
+		# only if allocated_amount is set
+	set_open_payment_requests_to_references(pe.references)
+
 	return pe
+
+
+def get_open_payment_requests_for_references(references=None):
+	if not references:
+		return
+
+	refs = {
+		(row.reference_doctype, row.reference_name)
+		for row in references
+		if row.reference_doctype and row.reference_name and row.allocated_amount
+	}
+
+	if not refs:
+		return
+
+	PR = frappe.qb.DocType("Payment Request")
+
+	response = (
+		frappe.qb.from_(PR)
+		.select(PR.name, PR.reference_doctype, PR.reference_name, PR.outstanding_amount)
+		.where(Tuple(PR.reference_doctype, PR.reference_name).isin(list(refs)))
+		.where(PR.status != "Paid")
+		.where(PR.docstatus == 1)
+		.orderby(Coalesce(PR.transaction_date, PR.creation), order=frappe.qb.asc)
+	).run(as_dict=True)
+
+	if not response:
+		return
+
+	reference_payment_requests = {}
+
+	for row in response:
+		key = (row.reference_doctype, row.reference_name)
+
+		if key not in reference_payment_requests:
+			reference_payment_requests[key] = {row.name: row.outstanding_amount}
+		else:
+			reference_payment_requests[key][row.name] = row.outstanding_amount
+
+	return reference_payment_requests
+
+
+# todo-abdeali: make it more efficient and less complex
+def set_open_payment_requests_to_references(references=None):
+	if not references:
+		return
+
+	reference_payment_requests = get_open_payment_requests_for_references(references)
+
+	if not reference_payment_requests:
+		return
+
+	row_idx = 0
+
+	while row_idx < len(references):
+		row = references[row_idx]
+		key = (row.reference_doctype, row.reference_name)
+
+		# ? can make it efficient if only one transaction is there but have multiple row because of terms
+		payment_requests = reference_payment_requests.get(key)
+
+		if not payment_requests:
+			row_idx += 1
+			continue
+
+		payment_request, outstanding_amount = next(iter(payment_requests.items()))
+		allocated_amount = row.allocated_amount
+
+		if outstanding_amount == allocated_amount:
+			row.payment_request = payment_request
+			del reference_payment_requests[key][payment_request]
+			row_idx += 1
+		elif outstanding_amount > allocated_amount:
+			row.payment_request = payment_request
+
+			reference_payment_requests[key][payment_request] -= allocated_amount
+			row_idx += 1
+
+		elif outstanding_amount < allocated_amount:
+			row.payment_request = payment_request
+			row.allocated_amount = outstanding_amount
+
+			del reference_payment_requests[key][payment_request]
+			allocated_amount -= outstanding_amount
+
+			while allocated_amount:
+				payment_request, outstanding_amount = next(iter(payment_requests.items()), (None, None))
+
+				new_row = frappe.copy_doc(row)
+				new_row.allocated_amount = allocated_amount
+				references.insert(row_idx + 1, new_row)
+
+				if not payment_request or not outstanding_amount:
+					new_row.allocated_amount = allocated_amount
+					new_row.payment_request = None
+					row_idx += 2
+					break
+				else:
+					new_row.payment_request = payment_request
+
+					if outstanding_amount == allocated_amount:
+						new_row.allocated_amount = allocated_amount
+						del reference_payment_requests[key][payment_request]
+						row_idx += 2
+
+						break
+					elif outstanding_amount > allocated_amount:
+						new_row.allocated_amount = allocated_amount
+						reference_payment_requests[key][payment_request] -= allocated_amount
+						row_idx += 2
+						break
+					elif outstanding_amount < allocated_amount:
+						allocated_amount -= outstanding_amount
+						new_row.allocated_amount = outstanding_amount
+
+						del reference_payment_requests[key][payment_request]
+						row_idx += 1
+
+	# set new idx to all refs
+	for idx, ref in enumerate(references, start=1):
+		ref.idx = idx
 
 
 def update_accounting_dimensions(pe, doc):
