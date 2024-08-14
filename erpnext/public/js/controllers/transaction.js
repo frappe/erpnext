@@ -840,6 +840,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		}
 
 		var get_party_currency = function() {
+			if (me.is_a_mapped_document()) {
+				return;
+			}
+
 			var party_type = frappe.meta.has_field(me.frm.doc.doctype, "customer") ? "Customer" : "Supplier";
 			var party_name = me.frm.doc[party_type.toLowerCase()];
 			if (party_name) {
@@ -1249,16 +1253,24 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 	is_a_mapped_document(item) {
 		const mapped_item_field_map = {
-			"Delivery Note Item": ["si_detail", "so_detail", "dn_detail"],
-			"Sales Invoice Item": ["dn_detail", "so_detail", "sales_invoice_item"],
-			"Purchase Receipt Item": ["purchase_order_item", "purchase_invoice_item", "purchase_receipt_item"],
-			"Purchase Invoice Item": ["purchase_order_item", "pr_detail", "po_detail"],
+			"Delivery Note": ["si_detail", "so_detail", "dn_detail"],
+			"Sales Invoice": ["dn_detail", "so_detail", "sales_invoice_item"],
+			"Purchase Receipt": ["purchase_order_item", "purchase_invoice_item", "purchase_receipt_item"],
+			"Purchase Invoice": ["purchase_order_item", "pr_detail", "po_detail"],
+			"Sales Order": ["prevdoc_docname", "quotation_item"],
 		};
-		const mappped_fields = mapped_item_field_map[item.doctype] || [];
+		const mappped_fields = mapped_item_field_map[this.frm.doc.doctype] || [];
 
-		return mappped_fields
-			.map((field) => item[field])
-			.filter(Boolean).length > 0;
+		if (item) {
+			return mappped_fields
+				.map((field) => item[field])
+				.filter(Boolean).length > 0;
+		} else if (this.frm.doc?.items) {
+			let first_row = this.frm.doc.items[0];
+			let mapped_rows = mappped_fields.filter(d => first_row[d])
+
+			return mapped_rows?.length > 0;
+		}
 	}
 
 	batch_no(doc, cdt, cdn) {

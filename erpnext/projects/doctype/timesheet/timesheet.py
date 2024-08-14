@@ -379,6 +379,9 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 	target.project = timesheet.parent_project
 	if customer:
 		target.customer = customer
+		default_price_list = frappe.get_value("Customer", customer, "default_price_list")
+		if default_price_list:
+			target.selling_price_list = default_price_list
 
 	if currency:
 		target.currency = currency
