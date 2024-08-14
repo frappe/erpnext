@@ -76,7 +76,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 			};
 		});
 
-
 		me.frm.set_query("item_code", "stock_items", function () {
 			return erpnext.queries.item({ is_stock_item: 1 });
 		});
