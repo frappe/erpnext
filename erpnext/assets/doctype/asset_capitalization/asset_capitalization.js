@@ -76,13 +76,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 			};
 		});
 
-		me.frm.set_query("cost_canter", function () {
-			return {
-				filters: {
-					company: me.frm.doc.company,
-				}
-			};
-		});
 
 		me.frm.set_query("item_code", "stock_items", function () {
 			return erpnext.queries.item({ is_stock_item: 1 });
