@@ -64,25 +64,6 @@ erpnext.assets.AssetCapitalization = class AssetCapitalization extends erpnext.s
 			};
 		});
 
-<<<<<<< HEAD
-=======
-		me.frm.set_query("serial_and_batch_bundle", "stock_items", (doc, cdt, cdn) => {
-			let row = locals[cdt][cdn];
-			return {
-				filters: {
-					item_code: row.item_code,
-					voucher_type: doc.doctype,
-					voucher_no: ["in", [doc.name, ""]],
-					is_cancelled: 0,
-				},
-			};
-		});
-
-<<<<<<< HEAD
-
->>>>>>> 2fd8de2f76 (fix: set up filters for dimensions)
-=======
->>>>>>> 0d42793397 (chore: linters check)
 		me.frm.set_query("item_code", "stock_items", function () {
 			return erpnext.queries.item({ is_stock_item: 1 });
 		});
