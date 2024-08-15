@@ -339,6 +339,7 @@ class ProductionPlan(Document):
 		items = items_query.run(as_dict=True)
 
 		for item in items:
+			#Calculate the pending qty with respect to conversion factor.
 			item.pending_qty = (
 				(flt(item.qty) - max(item.work_order_qty, item.delivered_qty, 0)) * item.conversion_factor
 			)
