@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-10 10:18\n"
+"PO-Revision-Date: 2024-08-12 10:25\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -846,7 +846,7 @@ msgstr "(I) Grund Pris"
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:255
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:179
 msgid "(J) Valuation Rate as per FIFO"
-msgstr "(J) Grund Pris per FIFO"
+msgstr "(J) Grund Pris enligt FIFO"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:265
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:189
@@ -6751,7 +6751,7 @@ msgstr "Lediga Tider"
 #: manufacturing/doctype/workstation/workstation.js:510
 #: manufacturing/report/production_planning_report/production_planning_report.py:372
 msgid "Available"
-msgstr "Tillgängligt"
+msgstr "Tillgängliga"
 
 #. Label of the actual_batch_qty (Float) field in DocType 'Delivery Note Item'
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -20695,7 +20695,7 @@ msgstr "För Artikel {0} pris måste vara positiv tal. Att tillåta negativa pri
 
 #: manufacturing/doctype/work_order/work_order.py:1601
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
-msgstr "För Åtgärd {0}: Kvantitet ({1}) kan inte vara högre än väntande kvantitet ({2})"
+msgstr "För Åtgärd {0}: Kvantitet ({1}) kan inte vara högre än pågående kvantitet ({2})"
 
 #: stock/doctype/stock_entry/stock_entry.py:1349
 msgid "For quantity {0} should not be greater than allowed quantity {1}"
@@ -27881,7 +27881,7 @@ msgstr "Konfigurera Säljstöd Modul"
 #. Title of the Module Onboarding 'Assets'
 #: assets/module_onboarding/assets/assets.json
 msgid "Let's Set Up the Assets Module."
-msgstr "Konfigurera Tillgångar MOdul"
+msgstr "Konfigurera Tillgångar Modul"
 
 #. Title of the Module Onboarding 'Buying'
 #: buying/module_onboarding/buying/buying.json
@@ -56410,7 +56410,7 @@ msgstr "Grund Pris och Totalt"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:876
 msgid "Valuation rate for customer provided items has been set to zero."
-msgstr "Grund Pris för Kund Försedda Artiklar sattes till noll."
+msgstr "Grund Pris för Kund Försedda Artiklar angavs till noll."
 
 #. Description of the 'Sales Incoming Rate' (Currency) field in DocType
 #. 'Purchase Invoice Item'
@@ -59501,7 +59501,7 @@ msgstr "{}"
 #. Count format of shortcut in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "{}  Available"
-msgstr "{} Tillgängligt"
+msgstr "{} Tillgängliga"
 
 #. Count format of shortcut in the Selling Workspace
 #: selling/workspace/selling/selling.json
@@ -59523,13 +59523,13 @@ msgstr "{} Tillgångar skapade för {}"
 #: crm/workspace/crm/crm.json projects/workspace/projects/projects.json
 #: support/workspace/support/support.json
 msgid "{} Assigned"
-msgstr "{} Tilldelad Till"
+msgstr "{} Tilldelade"
 
 #. Count format of shortcut in the Buying Workspace
 #. Count format of shortcut in the Selling Workspace
 #: buying/workspace/buying/buying.json selling/workspace/selling/selling.json
 msgid "{} Available"
-msgstr "{} Tillgängligt"
+msgstr "{} Tillgängliga"
 
 #. Count format of shortcut in the CRM Workspace
 #. Count format of shortcut in the Projects Workspace

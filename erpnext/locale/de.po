@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-10 10:17\n"
+"PO-Revision-Date: 2024-08-14 10:58\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -13338,7 +13338,7 @@ msgstr "Erstellt am"
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard.py:250
 msgid "Created {0} scorecards for {1} between:"
-msgstr "Erstellte {0} Scorecards für {1} zwischen:"
+msgstr "Erstellte {0} Bewertungsliste für {1} zwischen:"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:140
 msgid "Creating Accounts..."
@@ -15614,11 +15614,11 @@ msgstr "Standardverkaufsbedingungen"
 #. 'Service Level Agreement'
 #: support/doctype/service_level_agreement/service_level_agreement.json
 msgid "Default Service Level Agreement"
-msgstr "Standard-Service-Level-Vereinbarung"
+msgstr "Standard Service Level Agreement"
 
 #: support/doctype/service_level_agreement/service_level_agreement.py:161
 msgid "Default Service Level Agreement for {0} already exists."
-msgstr "Standard-Service-Level-Agreement für {0} existiert bereits."
+msgstr "Standard Service Level Agreement für {0} existiert bereits."
 
 #. Label of the default_shipping_account (Link) field in DocType 'QuickBooks
 #. Migrator'
@@ -18634,7 +18634,7 @@ msgstr "Buchhaltung für Anlagen im Bau aktivieren"
 #. 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enable Common Party Accounting"
-msgstr "Verknüpfung von Kunden und Liefeanten erlauben"
+msgstr "Verknüpfung von Kunden und Lieferanten erlauben"
 
 #. Label of the enable_cutoff_date_on_bulk_delivery_note_creation (Check) field
 #. in DocType 'Selling Settings'
@@ -38551,7 +38551,7 @@ msgstr "Profiteinbuße"
 
 #: accounts/report/profit_and_loss_statement/profit_and_loss_statement.py:104
 msgid "Profit This Year"
-msgstr "Profitieren Sie dieses Jahr"
+msgstr "Gewinn in diesem Jahr"
 
 #. Option for the 'Report Type' (Select) field in DocType 'Account'
 #. Label of a chart in the Accounting Workspace
@@ -39399,7 +39399,7 @@ msgstr "Bestellungen überfällig"
 
 #: buying/doctype/purchase_order/purchase_order.py:302
 msgid "Purchase Orders are not allowed for {0} due to a scorecard standing of {1}."
-msgstr "Kaufaufträge sind für {0} wegen einer Scorecard von {1} nicht erlaubt."
+msgstr "Kaufaufträge sind für {0} wegen einem Stand von {1} in der Bewertungsliste nicht erlaubt."
 
 #. Label of the purchase_orders_to_bill (Check) field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
@@ -40640,7 +40640,7 @@ msgstr "Angebotsbetrag"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:87
 msgid "RFQs are not allowed for {0} due to a scorecard standing of {1}"
-msgstr "RFQs sind nicht zulässig für {0} aufgrund einer Scorecard von {1}"
+msgstr "RFQs sind nicht zulässig für {0} aufgrund eines Standes von {1} in der Bewertungsliste"
 
 #. Label of the auto_indent (Check) field in DocType 'Stock Settings'
 #: stock/doctype/stock_settings/stock_settings.json
@@ -45799,7 +45799,7 @@ msgstr "Ergebnis"
 #. Scorecard'
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 msgid "Scorecard Actions"
-msgstr "Scorecard-Aktionen"
+msgstr "Aktionen für Bewertungsliste"
 
 #. Description of the 'Weighting Function' (Small Text) field in DocType
 #. 'Supplier Scorecard'
@@ -50721,24 +50721,24 @@ msgstr "Lieferantenbewertung"
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 #: buying/workspace/buying/buying.json
 msgid "Supplier Scorecard"
-msgstr "Lieferanten-Scorecard"
+msgstr "Lieferantenbewertung"
 
 #. Name of a DocType
 #. Label of a Link in the Buying Workspace
 #: buying/doctype/supplier_scorecard_criteria/supplier_scorecard_criteria.json
 #: buying/workspace/buying/buying.json
 msgid "Supplier Scorecard Criteria"
-msgstr "Lieferanten-Scorecard-Kriterien"
+msgstr "Lieferantenbewertung Kriterien"
 
 #. Name of a DocType
 #: buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 msgid "Supplier Scorecard Period"
-msgstr "Supplier Scorecard Zeitraum"
+msgstr "Lieferantenbewertung Zeitraum"
 
 #. Name of a DocType
 #: buying/doctype/supplier_scorecard_scoring_criteria/supplier_scorecard_scoring_criteria.json
 msgid "Supplier Scorecard Scoring Criteria"
-msgstr "Supplier Scorecard Scoring Kriterien"
+msgstr "Lieferantenbewertung Bewertungskriterien"
 
 #. Name of a DocType
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
@@ -52768,7 +52768,7 @@ msgstr "Durch diese Aktion wird die Verknüpfung dieses Kontos mit einem externe
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
-msgstr "Dies deckt alle mit diesem Setup verbundenen Scorecards ab"
+msgstr "Dies deckt alle mit diesem Setup verbundenen Bewertungslisten ab"
 
 #: controllers/status_updater.py:349
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
@@ -59068,11 +59068,11 @@ msgstr "Die Währung {0} muss mit der Standardwährung des Unternehmens überein
 
 #: buying/doctype/purchase_order/purchase_order.py:311
 msgid "{0} currently has a {1} Supplier Scorecard standing, and Purchase Orders to this supplier should be issued with caution."
-msgstr "{0} hat derzeit eine {1} Supplier Scorecard offen, und Bestellungen an diesen Lieferanten sollten mit Vorsicht erteilt werden."
+msgstr "{0} hat derzeit einen Stand von {1} in der Lieferantenbewertung, und Bestellungen an diesen Lieferanten sollten mit Vorsicht erteilt werden."
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:95
 msgid "{0} currently has a {1} Supplier Scorecard standing, and RFQs to this supplier should be issued with caution."
-msgstr "{0} hat derzeit eine {1} Supplier Scorecard stehen, und Anfragen an diesen Lieferanten sollten mit Vorsicht ausgegeben werden."
+msgstr "{0} hat derzeit einen Stand von {1} in der Lieferantenbewertung und Anfragen an diesen Lieferanten sollten mit Vorsicht ausgegeben werden."
 
 #: accounts/doctype/pos_profile/pos_profile.py:122
 msgid "{0} does not belong to Company {1}"

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-10 10:17\n"
+"PO-Revision-Date: 2024-08-14 10:58\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -1259,7 +1259,7 @@ msgstr "شماره AWB"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Abampere"
-msgstr ""
+msgstr "آبامپر"
 
 #. Label of the abbr (Data) field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -2463,12 +2463,12 @@ msgstr "تاریخ اکتساب"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Acre"
-msgstr ""
+msgstr "آکر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Acre (US)"
-msgstr ""
+msgstr "آکر (ایالات متحده)"
 
 #: crm/doctype/lead/lead.js:41
 #: public/js/bank_reconciliation_tool/dialog_manager.js:175
@@ -5373,12 +5373,12 @@ msgstr "TDS را اعمال کنید"
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 #: buying/doctype/purchase_order/purchase_order.json
 msgid "Apply Tax Withholding Amount"
-msgstr "مبلغ کسر مالیات را اعمال کنید"
+msgstr "اعمال مبلغ کسر مالیات"
 
 #. Label of the apply_tds (Check) field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
 msgid "Apply Tax Withholding Amount "
-msgstr " مبلغ کسر مالیات را اعمال کنید"
+msgstr " اعمال مبلغ کسر مالیات"
 
 #. Label of the apply_restriction_on_values (Check) field in DocType
 #. 'Accounting Dimension Filter'
@@ -5477,7 +5477,7 @@ msgstr "تقریباً توصیف/نام طرف را با طرف‌ها مطاب
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Are"
-msgstr ""
+msgstr "آر (100 متر مربع)"
 
 #: public/js/utils/demo.js:20
 msgid "Are you sure you want to clear all demo data?"
@@ -5495,7 +5495,7 @@ msgstr "آیا مطمئن هستید که می خواهید این اشتراک 
 #. Name of a UOM
 #: assets/doctype/location/location.json setup/setup_wizard/data/uom_data.json
 msgid "Area"
-msgstr ""
+msgstr "مساحت"
 
 #. Label of the area_uom (Link) field in DocType 'Location'
 #: assets/doctype/location/location.json
@@ -5509,7 +5509,7 @@ msgstr "مقدار ورود"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Arshin"
-msgstr ""
+msgstr "Arshin"
 
 #: stock/report/serial_no_ledger/serial_no_ledger.js:57
 #: stock/report/stock_ageing/stock_ageing.js:16
@@ -5537,7 +5537,7 @@ msgstr "از آنجایی که فیلد {0} فعال است، مقدار فیل�
 
 #: stock/doctype/item/item.py:971
 msgid "As there are existing submitted transactions against item {0}, you can not change the value of {1}."
-msgstr "از آنجایی که تراکنش‌های ارسالی موجود علیه مورد {0} وجود دارد، نمی‌توانید مقدار {1} را تغییر دهید."
+msgstr "از آنجایی که تراکنش‌های ارسالی موجود در مقابل آیتم {0} وجود دارد، نمی‌توانید مقدار {1} را تغییر دهید."
 
 #: stock/doctype/stock_settings/stock_settings.py:209
 msgid "As there are negative stock, you can not enable {0}."
@@ -6904,7 +6904,7 @@ msgstr "شماره BOM"
 #. Label of the bom_no (Link) field in DocType 'Work Order Operation'
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 msgid "BOM No (For Semi-Finished Goods)"
-msgstr ""
+msgstr "شماره BOM (برای کالاهای نیمه تمام)"
 
 #. Description of the 'BOM No' (Link) field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -7048,7 +7048,7 @@ msgstr "BOM {0} باید ارسال شود"
 
 #: manufacturing/doctype/bom/bom.py:682
 msgid "BOM {0} not found for the item {1}"
-msgstr ""
+msgstr "BOM {0} برای آیتم {1} یافت نشد"
 
 #. Label of the boms_updated (Long Text) field in DocType 'BOM Update Batch'
 #: manufacturing/doctype/bom_update_batch/bom_update_batch.json
@@ -7365,7 +7365,7 @@ msgstr "ثبت بانکی"
 #. Name of a DocType
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Bank Guarantee"
-msgstr "تضمین بانکی"
+msgstr "ضمانت نامه بانکی"
 
 #. Label of the bank_guarantee_number (Data) field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
@@ -7409,7 +7409,7 @@ msgstr "ابزار تطبیق بانکی"
 #. Name of a DocType
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Bank Statement Import"
-msgstr "واردات صورتحساب بانکی"
+msgstr "درون‌بُرد صورتحساب بانکی"
 
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:40
 msgid "Bank Statement balance as per General Ledger"
@@ -7532,7 +7532,7 @@ msgstr "بارکدها"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Barleycorn"
-msgstr ""
+msgstr "Barleycorn"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -8159,7 +8159,7 @@ msgstr "بیو / معرفی نامه"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Biot"
-msgstr ""
+msgstr "Biot"
 
 #. Name of a DocType
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
@@ -8509,32 +8509,32 @@ msgstr "مرور BOM"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu (It)"
-msgstr ""
+msgstr "Btu (It)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu (Mean)"
-msgstr ""
+msgstr "Btu (It)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu (Th)"
-msgstr ""
+msgstr "Btu (Th)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu/Hour"
-msgstr ""
+msgstr "Btu/ساعت"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu/Minutes"
-msgstr ""
+msgstr "Btu/دقیقه"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu/Seconds"
-msgstr ""
+msgstr "Btu/ثانیه"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
@@ -8650,12 +8650,12 @@ msgstr "مقدار باندل"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Bushel (UK)"
-msgstr ""
+msgstr "بوشل (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Bushel (US Dry Level)"
-msgstr ""
+msgstr "بوشل (US Dry Level)"
 
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
@@ -8793,7 +8793,7 @@ msgstr "حساب کارهای سرمایه‌ای در دست اجرا"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Caballeria"
-msgstr ""
+msgstr "کابالریا"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -8803,12 +8803,12 @@ msgstr "طول کابل"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cable Length (UK)"
-msgstr ""
+msgstr "طول کابل (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cable Length (US)"
-msgstr ""
+msgstr "طول کابل (US)"
 
 #. Label of the calculate_based_on (Select) field in DocType 'Shipping Rule'
 #: accounts/doctype/shipping_rule/shipping_rule.json
@@ -8951,17 +8951,17 @@ msgstr "کالری (غذا)"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calorie (It)"
-msgstr ""
+msgstr "کالری (It)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calorie (Mean)"
-msgstr ""
+msgstr "کالری (Mean)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Calorie (Th)"
-msgstr ""
+msgstr "کالری (Th)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -9267,7 +9267,7 @@ msgstr "نمی توان {0} {1} را اصلاح کرد، لطفاً در عوض 
 
 #: accounts/doctype/journal_entry/journal_entry.py:282
 msgid "Cannot apply TDS against multiple parties in one entry"
-msgstr "نمی‌توان TDS را در یک ورودی علیه چندین طرف اعمال کرد"
+msgstr "نمی‌توان TDS را در یک ورودی در مقابل چندین طرف اعمال کرد"
 
 #: stock/doctype/item/item.py:304
 msgid "Cannot be a fixed asset item as Stock Ledger is created."
@@ -9549,7 +9549,7 @@ msgstr "با حروف بزرگ"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Carat"
-msgstr ""
+msgstr "قیراط"
 
 #. Label of the carrier (Data) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -10149,7 +10149,7 @@ msgstr "برای دریافت سفارش‌های فروش بر اساس فیل�
 #. Supplier Invoice'
 #: regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgid "Click on Import Invoices button once the zip file has been attached to the document. Any errors related to processing will be shown in the Error Log."
-msgstr "هنگامی که فایل فشرده به سند پیوست شد، روی دکمه واردات فاکتورها کلیک کنید. هر گونه خطای مربوط به پردازش در Error Log نشان داده می شود."
+msgstr "هنگامی که فایل فشرده به سند پیوست شد، روی دکمه درون‌بُرد فاکتورها کلیک کنید. هر گونه خطای مربوط به پردازش در Error Log نشان داده می شود."
 
 #: templates/emails/confirm_appointment.html:3
 msgid "Click on the link below to verify your email and confirm the appointment"
@@ -11039,7 +11039,7 @@ msgstr "نام شرکت"
 #. Description of the 'Tally Company' (Data) field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgid "Company Name as per Imported Tally Data"
-msgstr "نام شرکت طبق داده های آماری وارداتی"
+msgstr "نام شرکت طبق داده های آماری درون‌بُردی"
 
 #: public/js/setup_wizard.js:67
 msgid "Company Name cannot be Company"
@@ -12540,7 +12540,7 @@ msgstr "تابع نمره وزنی حل نشد. اطمینان حاصل کنید
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Coulomb"
-msgstr ""
+msgstr "کولن"
 
 #. Label of the count (Int) field in DocType 'Shipment Parcel'
 #: stock/doctype/shipment_parcel/shipment_parcel.json
@@ -12920,7 +12920,7 @@ msgstr "ورودی های ارسال مجدد ایجاد کنید"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:52
 msgid "Create Reposting Entry"
-msgstr ""
+msgstr "ایجاد ورودی ارسال مجدد"
 
 #: projects/doctype/timesheet/timesheet.js:54
 #: projects/doctype/timesheet/timesheet.js:230
@@ -13159,7 +13159,7 @@ msgstr "ایجاد اکانت ..."
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.py:404
 msgid "Creating Company and Importing Chart of Accounts"
-msgstr "ایجاد شرکت و واردات نمودار حساب"
+msgstr "ایجاد شرکت و درون‌بُرد نمودار حساب"
 
 #: selling/doctype/sales_order/sales_order.js:1147
 msgid "Creating Delivery Note ..."
@@ -14523,7 +14523,7 @@ msgstr "شماره تعرفه گمرکی"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cycle/Second"
-msgstr ""
+msgstr "چرخه/ثانیه"
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:204
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:220
@@ -14607,12 +14607,12 @@ msgstr "داده ها بر اساس"
 #. DocType 'Bank'
 #: accounts/doctype/bank/bank.json
 msgid "Data Import Configuration"
-msgstr "پیکربندی واردات داده"
+msgstr "پیکربندی درون‌بُرد داده"
 
 #. Label of a Card Break in the Home Workspace
 #: setup/workspace/home/home.json
 msgid "Data Import and Settings"
-msgstr "وارد کردن داده ها و تنظیمات"
+msgstr "درون‌بُرد داده ها و تنظیمات"
 
 #. Description of the 'Master Data' (Attach) field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -15654,7 +15654,7 @@ msgstr "تعریف نوع پروژه"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Dekagram/Litre"
-msgstr ""
+msgstr "دکاگرم/لیتر"
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:108
 msgid "Delay (In Days)"
@@ -18781,7 +18781,7 @@ msgstr "قبل از ارسال نام ذینفع را وارد کنید."
 
 #: accounts/doctype/bank_guarantee/bank_guarantee.py:55
 msgid "Enter the name of the bank or lending institution before submitting."
-msgstr ""
+msgstr "قبل از ارسال نام بانک یا موسسه وام دهنده را وارد کنید."
 
 #: stock/doctype/item/item.js:933
 msgid "Enter the opening stock units."
@@ -19443,7 +19443,7 @@ msgstr "پیش بینی هموارسازی نمایی"
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgid "Export Data"
-msgstr "صادرات داده ها"
+msgstr "برون‌بُرد داده ها"
 
 #: regional/report/electronic_invoice_register/electronic_invoice_register.js:34
 msgid "Export E-Invoices"
@@ -19455,7 +19455,7 @@ msgstr "صادر کردن ردیف های خطا"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:550
 msgid "Export Import Log"
-msgstr "لاگ واردات صادرات"
+msgstr "لاگ درون‌بُرد برون‌بُرد"
 
 #. Label of the external_work_history (Table) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -19567,7 +19567,7 @@ msgstr "ورودی های ناموفق"
 #. Label of the failed_import_preview (HTML) field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgid "Failed Import Log"
-msgstr "ثبت ورود ناموفق"
+msgstr "لاگ درون‌بُرد ناموفق"
 
 #: utilities/doctype/video_settings/video_settings.py:33
 msgid "Failed to Authenticate the API key."
@@ -19841,7 +19841,7 @@ msgstr "فیلترها"
 #. Label of the bom_no (Link) field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgid "Final BOM"
-msgstr ""
+msgstr "BOM نهایی"
 
 #. Label of the details_tab (Tab Break) field in DocType 'BOM Creator'
 #. Label of the production_item (Link) field in DocType 'Job Card'
@@ -20079,17 +20079,17 @@ msgstr ""
 #. Label of the fg_based_section_section (Section Break) field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgid "Finished Goods Based Operating Cost"
-msgstr ""
+msgstr "هزینه عملیاتی بر اساس کالاهای تمام شده"
 
 #. Label of the fg_item (Link) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Finished Goods Item"
-msgstr ""
+msgstr "آیتم کالاهای تمام شده"
 
 #. Label of the finished_good_qty (Float) field in DocType 'BOM Operation'
 #: manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Finished Goods Qty"
-msgstr ""
+msgstr "مقدار کالاهای تمام شده"
 
 #. Label of the fg_reference_id (Data) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -20317,12 +20317,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fluid Ounce (UK)"
-msgstr ""
+msgstr "اونس مایع (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fluid Ounce (US)"
-msgstr ""
+msgstr "اونس مایع (US)"
 
 #: selling/page/point_of_sale/pos_item_selector.js:300
 msgid "Focus on Item Group filter"
@@ -21296,22 +21296,22 @@ msgstr "سود / زیان در دفع دارایی"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon (UK)"
-msgstr ""
+msgstr "گالن (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon Dry (US)"
-msgstr ""
+msgstr "گالن خشک (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon Liquid (US)"
-msgstr ""
+msgstr "گالن مایع (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gamma"
-msgstr ""
+msgstr "گاما"
 
 #: projects/doctype/project/project.js:101
 msgid "Gantt Chart"
@@ -21324,7 +21324,7 @@ msgstr "نمودار گانت از همه وظایف."
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gauss"
-msgstr ""
+msgstr "گاوس"
 
 #. Label of the gender (Link) field in DocType 'Lead'
 #. Label of the gender (Link) field in DocType 'Customer'
@@ -21774,22 +21774,22 @@ msgstr "گرم"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram-Force"
-msgstr ""
+msgstr "گرم-نیرو"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Centimeter"
-msgstr ""
+msgstr "گرم/سانتی متر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Meter"
-msgstr ""
+msgstr "گرم/متر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Millimeter"
-msgstr ""
+msgstr "گرم/میلیمتر مکعب"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -22299,7 +22299,7 @@ msgstr "هکتار"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectogram/Litre"
-msgstr ""
+msgstr "هکتوگرم/لیتر"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -23204,7 +23204,7 @@ msgstr "نمای تصویر"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:132
 msgid "Import"
-msgstr "وارد کردن"
+msgstr "درون‌بُرد"
 
 #. Description of a DocType
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.json
@@ -23215,33 +23215,33 @@ msgstr ""
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/home/home.json setup/workspace/settings/settings.json
 msgid "Import Data"
-msgstr "وارد کردن داده‌ها"
+msgstr "درون‌بُرد داده‌ها"
 
 #. Title of an Onboarding Step
 #: setup/onboarding_step/data_import/data_import.json
 msgid "Import Data from Spreadsheet"
-msgstr "وارد کردن داده ها از صفحه گسترده"
+msgstr "درون‌بُرد داده ها از صفحه گسترده"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:71
 msgid "Import Day Book Data"
-msgstr "داده های کتاب روز واردات"
+msgstr "درون‌بُرد داده های کتاب روز"
 
 #. Label of the import_file (Attach) field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Import File"
-msgstr "وارد کردن فایل"
+msgstr "درون‌بُرد فایل"
 
 #. Label of the import_warnings_section (Section Break) field in DocType 'Bank
 #. Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Import File Errors and Warnings"
-msgstr "خطاها و هشدارهای واردات فایل"
+msgstr "خطاها و هشدارهای درون‌بُرد فایل"
 
 #. Label of the import_invoices (Button) field in DocType 'Import Supplier
 #. Invoice'
 #: regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgid "Import Invoices"
-msgstr "واردات فاکتورها"
+msgstr "درون‌بُرد فاکتورها"
 
 #. Label of the import_log_section (Section Break) field in DocType 'Bank
 #. Statement Import'
@@ -23250,66 +23250,66 @@ msgstr "واردات فاکتورها"
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgid "Import Log"
-msgstr "لاگ واردات"
+msgstr "لاگ درون‌بُرد"
 
 #. Label of the import_log_preview (HTML) field in DocType 'Bank Statement
 #. Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Import Log Preview"
-msgstr "پیش نمایش لاگ واردات"
+msgstr "پیش نمایش لاگ درون‌بُرد"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:59
 msgid "Import Master Data"
-msgstr "وارد کردن داده های اصلی"
+msgstr "درون‌بُرد داده های اصلی"
 
 #. Label of the import_preview (HTML) field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Import Preview"
-msgstr "پیش نمایش واردات"
+msgstr "پیش نمایش درون‌بُرد"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:51
 msgid "Import Progress"
-msgstr "پیشرفت واردات"
+msgstr "پیشرفت درون‌بُرد"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:144
 msgid "Import Successful"
-msgstr "واردات با موفقیت انجام شد"
+msgstr "درون‌بُرد با موفقیت انجام شد"
 
 #. Label of a Link in the Buying Workspace
 #. Name of a DocType
 #: buying/workspace/buying/buying.json
 #: regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 msgid "Import Supplier Invoice"
-msgstr "واردات فاکتور تامین کننده"
+msgstr "درون‌بُرد فاکتور تامین کننده"
 
 #. Label of the import_type (Select) field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Import Type"
-msgstr "نوع واردات"
+msgstr "نوع درون‌بُرد"
 
 #: public/js/utils/serial_no_batch_selector.js:200
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.js:80
 msgid "Import Using CSV file"
-msgstr "وارد کردن با استفاده از فایل CSV"
+msgstr "درون‌بُرد با استفاده از فایل CSV"
 
 #. Label of the import_warnings (HTML) field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Import Warnings"
-msgstr "هشدارهای واردات"
+msgstr "هشدارهای درون‌بُرد"
 
 #. Label of the google_sheets_url (Data) field in DocType 'Bank Statement
 #. Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Import from Google Sheets"
-msgstr "وارد کردن از Google Sheets"
+msgstr "درون‌بُرد از Google Sheets"
 
 #: stock/doctype/item_price/item_price.js:29
 msgid "Import in Bulk"
-msgstr "واردات به صورت عمده"
+msgstr "درون‌بُرد به صورت عمده"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.py:410
 msgid "Importing Items and UOMs"
-msgstr "واردات آیتم‌ها و UOMها"
+msgstr "درون‌بُرد آیتم‌ها و UOMها"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.py:407
 msgid "Importing Parties and Addresses"
@@ -23317,7 +23317,7 @@ msgstr "وارد کننده طرف‌ها و آدرس"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:45
 msgid "Importing {0} of {1}, {2}"
-msgstr "در حال وارد کردن {0} از {1}، {2}"
+msgstr "در حال درون‌بُرد {0} از {1}، {2}"
 
 #. Option for the 'Manufacturing Type' (Select) field in DocType 'Production
 #. Plan Sub Assembly Item'
@@ -25076,7 +25076,7 @@ msgstr "اجباری است"
 #. Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgid "Is Master Data Imported"
-msgstr "آیا داده اصلی وارد شده است"
+msgstr "آیا داده اصلی درون‌بُرد شده است"
 
 #. Label of the is_master_data_processed (Check) field in DocType 'Tally
 #. Migration'
@@ -27125,7 +27125,7 @@ msgstr "کیلو کالری"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilocoulomb"
-msgstr ""
+msgstr "کیلو کولن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -28050,7 +28050,7 @@ msgstr "بارگیری همه معیارها"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:290
 msgid "Loading import file..."
-msgstr "در حال بارگیری فایل واردات..."
+msgstr "در حال بارگیری فایل درون‌بُرد..."
 
 #. Option for the 'Reference Type' (Select) field in DocType 'Journal Entry
 #. Account'
@@ -29047,7 +29047,7 @@ msgstr "لبه"
 #. Label of the margin_money (Currency) field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Margin Money"
-msgstr "مارجین پول"
+msgstr "پول حاشیه‌ای"
 
 #. Label of the margin_rate_or_amount (Float) field in DocType 'POS Invoice
 #. Item'
@@ -29458,7 +29458,7 @@ msgstr "مواد به تامین کننده"
 
 #: controllers/subcontracting_controller.py:1263
 msgid "Materials are already received against the {0} {1}"
-msgstr "مطالب قبلاً علیه {0} {1} دریافت شده است"
+msgstr "مواد قبلاً در مقابل {0} {1} دریافت شده است"
 
 #: manufacturing/doctype/job_card/job_card.py:694
 msgid "Materials needs to be transferred to the work in progress warehouse for the job card {0}"
@@ -29598,7 +29598,7 @@ msgstr "ملاقات"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Megacoulomb"
-msgstr ""
+msgstr "مگاکولن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -29831,7 +29831,7 @@ msgstr "میلی آمپر"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millicoulomb"
-msgstr ""
+msgstr "میلی کولن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -30541,7 +30541,7 @@ msgstr "باید عدد کامل باشد"
 #. Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Must be a publicly accessible Google Sheets URL and adding Bank Account column is necessary for importing via Google Sheets"
-msgstr "باید یک URL کاربرگ‌نگار Google برای عموم قابل دسترسی باشد و افزودن ستون حساب بانکی برای وارد کردن از طریق Google Sheets ضروری است."
+msgstr "باید یک URL کاربرگ‌نگار Google برای عموم قابل دسترسی باشد و افزودن ستون حساب بانکی برای درون‌بُرد از طریق Google Sheets ضروری است."
 
 #. Label of the mute_email (Check) field in DocType 'Payment Request'
 #: accounts/doctype/payment_request/payment_request.json
@@ -30674,7 +30674,7 @@ msgstr "نام گذاری سری ها و پیش فرض های قیمت"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanocoulomb"
-msgstr ""
+msgstr "نانوکولن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -31380,7 +31380,7 @@ msgstr "داده ای یافت نشد. به نظر می رسد شما یک فا�
 
 #: regional/report/electronic_invoice_register/electronic_invoice_register.js:37
 msgid "No data to export"
-msgstr "داده ای برای صادرات وجود ندارد"
+msgstr "داده ای برای برون‌بُرد نیست"
 
 #: templates/generators/bom.html:85
 msgid "No description given"
@@ -32163,7 +32163,7 @@ msgstr ""
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:103
 msgid "Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload"
-msgstr "برای وارد کردن داده ها فقط می توان از فایل های CSV و Excel استفاده کرد. لطفاً فرمت فایلی را که می‌خواهید آپلود کنید بررسی کنید"
+msgstr "برای درون‌بُرد داده ها فقط می توان از فایل های CSV و Excel استفاده کرد. لطفاً فرمت فایلی را که می‌خواهید آپلود کنید بررسی کنید"
 
 #. Label of the tax_on_excess_amount (Check) field in DocType 'Tax Withholding
 #. Category'
@@ -33101,7 +33101,7 @@ msgstr "اونس"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce-Force"
-msgstr ""
+msgstr "اونس-نیرو"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -33116,12 +33116,12 @@ msgstr "اونس/اینچ مکعب"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (UK)"
-msgstr ""
+msgstr "اونس/گالن (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (US)"
-msgstr ""
+msgstr "اونس/گالن (US)"
 
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:88
 #: stock/report/stock_balance/stock_balance.py:461
@@ -36186,7 +36186,7 @@ msgstr "لطفاً بازه های زمانی همپوشانی را برای {0}
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:65
 msgid "Please import accounts against parent company or enable {} in company master."
-msgstr "لطفاً حساب‌ها را علیه شرکت مادر وارد کنید یا {} را در شرکت اصلی فعال کنید."
+msgstr "لطفاً حساب‌ها را در مقابل شرکت مادر وارد کنید یا {} را در شرکت اصلی فعال کنید."
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:176
 msgid "Please keep one Applicable Charges, when 'Distribute Charges Based On' is 'Distribute Manually'. For more charges, please create another Landed Cost Voucher."
@@ -37096,7 +37096,7 @@ msgstr "پوند"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound-Force"
-msgstr ""
+msgstr "پوند-نیرو"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -37116,12 +37116,12 @@ msgstr "پوند/یارد مکعب"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Gallon (UK)"
-msgstr ""
+msgstr "پوند/گالن (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Gallon (US)"
-msgstr ""
+msgstr "پوند/گالن (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -38846,7 +38846,7 @@ msgstr "ارائه دهنده"
 #. Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Providing"
-msgstr "فراهم آوردن"
+msgstr "ارائه دهنده"
 
 #. Label of the provisional_expense_account (Link) field in DocType 'Purchase
 #. Receipt Item'
@@ -41269,7 +41269,7 @@ msgstr "لیست گیرنده خالی است لطفا لیست گیرنده ا�
 #. Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Receiving"
-msgstr "در حال دریافت"
+msgstr "دریافت کننده"
 
 #: selling/page/point_of_sale/pos_past_order_list.js:17
 msgid "Recent Orders"
@@ -44007,7 +44007,7 @@ msgstr "ردیف #{}: فاکتور POS {} شده است {}"
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:70
 msgid "Row #{}: POS Invoice {} is not against customer {}"
-msgstr "ردیف #{}: فاکتور POS {} علیه مشتری نیست {}"
+msgstr "ردیف #{}: فاکتور POS {} در مقابل مشتری {} نیست"
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:85
 msgid "Row #{}: POS Invoice {} is not submitted yet"
@@ -45725,7 +45725,7 @@ msgstr "جستجو بر اساس کد آیتم، شماره سریال یا با
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Second"
-msgstr ""
+msgstr "ثانیه"
 
 #. Label of the second_email (Time) field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -48404,7 +48404,7 @@ msgstr ""
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 msgid "Standing Name"
-msgstr "نام ایستاده"
+msgstr "نام رتبه"
 
 #: manufacturing/doctype/work_order/work_order.js:640
 #: manufacturing/doctype/workstation/workstation_job_card.html:79
@@ -48461,7 +48461,7 @@ msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:115
 msgid "Start Import"
-msgstr "شروع واردات"
+msgstr "شروع درون‌بُرد"
 
 #: manufacturing/doctype/job_card/job_card.js:133
 #: manufacturing/doctype/workstation/workstation.js:124
@@ -49797,7 +49797,7 @@ msgstr "اقدام ارسال نشد"
 #. Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "Submit After Import"
-msgstr "ارسال پس از واردات"
+msgstr "ارسال پس از درون‌بُرد"
 
 #. Label of the submit_err_jv (Check) field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -50023,23 +50023,23 @@ msgstr "UOM موجودی با موفقیت تغییر کرد، لطفاً فاک
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:455
 msgid "Successfully imported {0}"
-msgstr "{0} با موفقیت وارد شد"
+msgstr "{0} با موفقیت درون‌بُرد شد"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:172
 msgid "Successfully imported {0} record out of {1}. Click on Export Errored Rows, fix the errors and import again."
-msgstr "{0} رکورد از {1} با موفقیت وارد شد. روی Export Errored Rows کلیک کنید، خطاها را برطرف کرده و دوباره وارد کنید."
+msgstr "{0} رکورد از {1} با موفقیت درون‌بُرد شد. روی Export Errored Rows کلیک کنید، خطاها را برطرف کرده و دوباره وارد کنید."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:156
 msgid "Successfully imported {0} record."
-msgstr "{0} رکورد با موفقیت وارد شد."
+msgstr "{0} رکورد با موفقیت درون‌بُرد شد."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:168
 msgid "Successfully imported {0} records out of {1}. Click on Export Errored Rows, fix the errors and import again."
-msgstr "{0} رکورد از {1} با موفقیت وارد شد. روی Export Errored Rows کلیک کنید، خطاها را برطرف کرده و دوباره وارد کنید."
+msgstr "{0} رکورد از {1} با موفقیت درون‌بُرد شد. روی Export Errored Rows کلیک کنید، خطاها را برطرف کرده و دوباره وارد کنید."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:155
 msgid "Successfully imported {0} records."
-msgstr "{0} رکورد با موفقیت وارد شد."
+msgstr "{0} رکورد با موفقیت درون‌بُرد شد."
 
 #: buying/doctype/supplier/supplier.js:210
 msgid "Successfully linked to Customer"
@@ -50561,7 +50561,7 @@ msgstr "راه‌اندازی کارت امتیازی تامین کننده"
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
 #: buying/workspace/buying/buying.json
 msgid "Supplier Scorecard Standing"
-msgstr "ایستاده کارت امتیازی تامین کننده"
+msgstr "رتبه کارت امتیازی تامین کننده"
 
 #. Name of a DocType
 #. Label of a Link in the Buying Workspace
@@ -50909,7 +50909,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tablespoon (US)"
-msgstr ""
+msgstr "قاشق غذاخوری (US)"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:466
 msgid "Tag"
@@ -52648,7 +52648,7 @@ msgstr "این بر اساس Time Sheets ایجاد شده در برابر ای�
 
 #: setup/doctype/sales_person/sales_person_dashboard.py:7
 msgid "This is based on transactions against this Sales Person. See timeline below for details"
-msgstr "این بر اساس معاملات علیه این فروشنده است. برای جزئیات به جدول زمانی زیر مراجعه کنید"
+msgstr "این بر اساس معاملات در مقابل این فروشنده است. برای جزئیات به جدول زمانی زیر مراجعه کنید"
 
 #: stock/doctype/stock_settings/stock_settings.js:42
 msgid "This is considered dangerous from accounting point of view."
@@ -53512,22 +53512,22 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ton-Force (UK)"
-msgstr ""
+msgstr "تن-نیرو (UK)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ton-Force (US)"
-msgstr ""
+msgstr "تن-نیرو (US)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tonne"
-msgstr ""
+msgstr "تن"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tonne-Force(Metric)"
-msgstr ""
+msgstr "تن-نیرو (متریک)"
 
 #: accounts/report/financial_statements.html:6
 msgid "Too many columns. Export the report and print it using a spreadsheet application."
@@ -53553,7 +53553,7 @@ msgstr "ابزار"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Torr"
-msgstr ""
+msgstr "Torr"
 
 #. Label of the total (Currency) field in DocType 'Advance Taxes and Charges'
 #. Label of the total (Currency) field in DocType 'POS Invoice'
@@ -54613,7 +54613,7 @@ msgstr "تاریخچه سالانه معاملات"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:117
 msgid "Transactions against the Company already exist! Chart of Accounts can only be imported for a Company with no transactions."
-msgstr "معاملات علیه شرکت در حال حاضر وجود دارد! نمودار حساب ها فقط برای شرکتی بدون تراکنش قابل وارد کردن است."
+msgstr "معاملات در مقابل شرکت در حال حاضر وجود دارد! نمودار حساب ها فقط برای شرکتی بدون تراکنش قابل درون‌بُرد است."
 
 #. Option for the 'Transfer Type' (Select) field in DocType 'Share Transfer'
 #. Option for the 'Purpose' (Select) field in DocType 'Asset Movement'
@@ -55105,7 +55105,7 @@ msgstr "ضریب تبدیل UOM مورد نیاز برای UOM: {0} در مور�
 #. Description of the 'Default UOM' (Link) field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgid "UOM in case unspecified in imported data"
-msgstr "UOM در صورت نامشخص در داده های وارد شده"
+msgstr "UOM در صورت نامشخص در داده های درون‌بُرد شده"
 
 #: stock/doctype/item_price/item_price.py:61
 msgid "UOM {0} not found in Item {1}"
@@ -56111,7 +56111,7 @@ msgstr "اعتبار و کاربرد"
 #. Label of the validity (Int) field in DocType 'Bank Guarantee'
 #: accounts/doctype/bank_guarantee/bank_guarantee.json
 msgid "Validity in Days"
-msgstr "اعتبار در روز"
+msgstr "اعتبار به روز"
 
 #: selling/doctype/quotation/quotation.py:345
 msgid "Validity period of this quotation has ended."
@@ -56306,7 +56306,7 @@ msgstr "ارزش ها تغییر کرد"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Vara"
-msgstr ""
+msgstr "Vara"
 
 #. Label of the variable_label (Link) field in DocType 'Supplier Scorecard
 #. Scoring Variable'
@@ -56443,7 +56443,7 @@ msgstr "تأیید ایمیل"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Versta"
-msgstr ""
+msgstr "Versta"
 
 #. Label of the via_customer_portal (Check) field in DocType 'Issue'
 #: support/doctype/issue/issue.json
@@ -58061,7 +58061,7 @@ msgstr "فایل های XML پردازش شده است"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Yard"
-msgstr ""
+msgstr "یارد"
 
 #. Option for the 'Billing Interval' (Select) field in DocType 'Subscription
 #. Plan'
@@ -58217,7 +58217,7 @@ msgstr "شما نمی توانید این کوپن اختتامیه دوره ر�
 
 #: accounts/doctype/journal_entry/journal_entry.py:642
 msgid "You can not enter current voucher in 'Against Journal Entry' column"
-msgstr "شما نمی توانید کوپن فعلی را در ستون \"علیه ثبت دفتر روزنامه\" وارد کنید"
+msgstr "شما نمی توانید کوپن فعلی را در ستون \"در مقابل ثبت دفتر روزنامه\" وارد کنید"
 
 #: accounts/doctype/subscription/subscription.py:174
 msgid "You can only have Plans with the same billing cycle in a Subscription"

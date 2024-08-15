@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-10 10:18\n"
+"PO-Revision-Date: 2024-08-14 10:58\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -11140,7 +11140,7 @@ msgstr "Compañía a la que representa el Cliente Interno"
 #. Note'
 #: stock/doctype/delivery_note/delivery_note.json
 msgid "Company which internal customer represents."
-msgstr ""
+msgstr "Compañía a la que representa el Cliente Interno."
 
 #. Description of the 'Represents Company' (Link) field in DocType 'Purchase
 #. Invoice'
@@ -24691,7 +24691,7 @@ msgstr "Porción de Factura"
 #: accounts/doctype/payment_term/payment_term.json
 #: accounts/doctype/payment_terms_template_detail/payment_terms_template_detail.json
 msgid "Invoice Portion (%)"
-msgstr ""
+msgstr "Porción de Factura (%)"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:106
 msgid "Invoice Posting Date"
@@ -38437,7 +38437,7 @@ msgstr ""
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:94
 msgid "Progress (%)"
-msgstr ""
+msgstr "Progreso (%)"
 
 #. Label of the project (Link) field in DocType 'Account Closing Balance'
 #. Label of the project (Link) field in DocType 'Bank Guarantee'
@@ -58487,7 +58487,7 @@ msgstr "no puede ser mayor que 100"
 #. Assembly Item'
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgid "description"
-msgstr ""
+msgstr "descripción"
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
@@ -58507,7 +58507,7 @@ msgstr ""
 #: selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:25
 #: selling/report/sales_partner_transaction_summary/sales_partner_transaction_summary.py:25
 msgid "doctype"
-msgstr ""
+msgstr "doctype"
 
 #. Description of the 'Coupon Name' (Data) field in DocType 'Coupon Code'
 #: accounts/doctype/coupon_code/coupon_code.json
