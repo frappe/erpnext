@@ -188,9 +188,9 @@ class Batch(Document):
 		if has_expiry_date and not self.expiry_date:
 			frappe.throw(
 				msg=_("Please set {0} for Batched Item {1}, which is used to set {2} on Submit.").format(
-					frappe.bold("Shelf Life in Days"),
+					frappe.bold(_("Shelf Life in Days")),
 					get_link_to_form("Item", self.item),
-					frappe.bold("Batch Expiry Date"),
+					frappe.bold(_("Batch Expiry Date")),
 				),
 				title=_("Expiry Date Mandatory"),
 			)
