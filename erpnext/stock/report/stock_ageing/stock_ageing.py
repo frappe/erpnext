@@ -16,6 +16,7 @@ Filters = frappe._dict
 
 def execute(filters: Filters = None) -> tuple:
 	to_date = filters["to_date"]
+	filters.age_range = [num.strip() for num in filters.range.split(",") if num.strip().isdigit()]
 	columns = get_columns(filters)
 
 	item_details = FIFOSlots(filters).generate()
@@ -48,7 +49,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
-		range1, range2, range3, above_range3 = get_range_age(filters, fifo_queue, to_date, item_dict)
+		range = get_range_age(filters, fifo_queue, to_date, item_dict)
 
 		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
 
@@ -59,10 +60,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 			[
 				flt(item_dict.get("total_qty"), precision),
 				average_age,
-				range1,
-				range2,
-				range3,
-				above_range3,
+				*range,
 				earliest_age,
 				latest_age,
 				details.stock_uom,
@@ -89,25 +87,20 @@ def get_average_age(fifo_queue: list, to_date: str) -> float:
 	return flt(age_qty / total_qty, 2) if total_qty else 0.0
 
 
-def get_range_age(filters: Filters, fifo_queue: list, to_date: str, item_dict: dict) -> tuple:
+def get_range_age(filters: Filters, fifo_queue: list, to_date: str, item_dict: dict) -> list:
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
-
-	range1 = range2 = range3 = above_range3 = 0.0
+	age_range_column = [0.0] * (len(filters.age_range) + 1)
 
 	for item in fifo_queue:
 		age = flt(date_diff(to_date, item[1]))
 		qty = flt(item[0]) if not item_dict["has_serial_no"] else 1.0
 
-		if age <= flt(filters.range1):
-			range1 = flt(range1 + qty, precision)
-		elif age <= flt(filters.range2):
-			range2 = flt(range2 + qty, precision)
-		elif age <= flt(filters.range3):
-			range3 = flt(range3 + qty, precision)
-		else:
-			above_range3 = flt(above_range3 + qty, precision)
+		for i, age_limit in enumerate(*filters.age_range, float("inf")):
+			if age <= flt(age_limit):
+				age_range_column[i] = flt(age_range_column[i] + qty, precision)
+				break
 
-	return range1, range2, range3, above_range3
+	return age_range_column
 
 
 def get_columns(filters: Filters) -> list[dict]:
@@ -193,12 +186,14 @@ def get_chart_data(data: list, filters: Filters) -> dict:
 
 
 def setup_ageing_columns(filters: Filters, range_columns: list):
-	ranges = [
-		f"0 - {filters['range1']}",
-		f"{cint(filters['range1']) + 1} - {cint(filters['range2'])}",
-		f"{cint(filters['range2']) + 1} - {cint(filters['range3'])}",
-		_("{0} - Above").format(cint(filters["range3"]) + 1),
-	]
+	start = 0
+	ranges = []
+	for range in filters.age_range:
+		ranges.append(f"{start} - {int(range)}")
+		start = int(range) + 1
+
+	ranges.append(f"{start} - Above")
+
 	for i, label in enumerate(ranges):
 		fieldname = "range" + str(i + 1)
 		add_column(range_columns, label=_("Age ({0})").format(label), fieldname=fieldname)

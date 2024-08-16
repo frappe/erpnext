@@ -1105,21 +1105,26 @@ class ReceivablePayableReport:
 			dict(label=label, fieldname=fieldname, fieldtype=fieldtype, options=options, width=width)
 		)
 
-	def setup_ageing_columns(self):
+	def setup_ageing_columns(self, summary_report=False):
 		# for charts
-		self.ageing_column_labels = []
-		self.add_column(label=_("Age (Days)"), fieldname="age", fieldtype="Int", width=80)
+		if not summary_report:
+			self.ageing_column_labels = []
+			self.add_column(label=_("Age (Days)"), fieldname="age", fieldtype="Int", width=80)
 
 		start = 0
 		for i, range_value in enumerate(self.age_range):
 			label = f"{start}-{int(range_value)}"
 			self.add_column(label=label, fieldname="range" + str(i + 1))
-			self.ageing_column_labels.append(label)
 			start = int(range_value) + 1
+
+			if not summary_report:
+				self.ageing_column_labels.append(label)
 
 		label = f"{start}-Above"
 		self.add_column(label=label, fieldname="range" + str(i + 2))
-		self.ageing_column_labels.append(label)
+
+		if not summary_report:
+			self.ageing_column_labels.append(label)
 
 	def get_chart_data(self):
 		precision = cint(frappe.db.get_default("float_precision")) or 2
