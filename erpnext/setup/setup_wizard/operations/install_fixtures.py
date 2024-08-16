@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 
 import frappe
-from frappe import _
 from frappe.desk.doctype.global_search_settings.global_search_settings import (
 	update_global_search_doctypes,
 )
@@ -16,6 +15,14 @@ from frappe.utils import cstr, getdate
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
 from erpnext.regional.address_template.setup import set_up_address_templates
+
+
+def _(x, *args, **kwargs):
+	"""Redefine the translation function to return the string as is.
+
+	We want to create english records but still mark the strings as translatable.
+	The respective DocTypes have 'Translate Link Fields' enabled."""
+	return x
 
 
 def read_lines(filename: str) -> list[str]:
