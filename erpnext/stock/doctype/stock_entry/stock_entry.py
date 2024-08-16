@@ -898,8 +898,8 @@ class StockEntry(StockController):
 								).format(
 									item.idx,
 									frappe.bold(label),
-									frappe.bold("Manufacture"),
-									frappe.bold("Material Consumption for Manufacture"),
+									frappe.bold(_("Manufacture")),
+									frappe.bold(_("Material Consumption for Manufacture")),
 								)
 							)
 
@@ -909,7 +909,7 @@ class StockEntry(StockController):
 					):
 						frappe.throw(
 							_("Only one {0} entry can be created against the Work Order {1}").format(
-								frappe.bold("Manufacture"), frappe.bold(self.work_order)
+								frappe.bold(_("Manufacture")), frappe.bold(self.work_order)
 							)
 						)
 

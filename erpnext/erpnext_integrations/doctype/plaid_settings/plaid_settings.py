@@ -96,7 +96,7 @@ def add_bank_accounts(response, bank, company):
 		frappe.throw(
 			_(
 				"Please setup and enable a group account with the Account Type - {0} for the company {1}"
-			).format(frappe.bold("Bank"), company)
+			).format(frappe.bold(_("Bank")), company)
 		)
 
 	for account in response["accounts"]:

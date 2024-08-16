@@ -202,7 +202,7 @@ class Account(NestedSet):
 				msg = _(
 					"There are ledger entries against this account. Changing {0} to non-{1} in live system will cause incorrect output in 'Accounts {2}' report"
 				).format(
-					frappe.bold("Account Type"), doc_before_save.account_type, doc_before_save.account_type
+					frappe.bold(_("Account Type")), doc_before_save.account_type, doc_before_save.account_type
 				)
 				frappe.msgprint(msg)
 				self.add_comment("Comment", msg)
