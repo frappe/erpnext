@@ -147,6 +147,7 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
