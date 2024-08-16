@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Batch", {
 	setup: (frm) => {
-		frm.fields_dict["item"].get_query = function (doc, cdt, cdn) {
+		frm.set_query("item", () => {
 			return {
 				query: "erpnext.controllers.queries.item_query",
 				filters: {
@@ -11,7 +11,7 @@ frappe.ui.form.on("Batch", {
 					has_batch_no: 1,
 				},
 			};
-		};
+		});
 	},
 	refresh: (frm) => {
 		if (!frm.is_new()) {
