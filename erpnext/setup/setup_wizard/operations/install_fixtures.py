@@ -257,9 +257,9 @@ def install(country=None):
 		{"doctype": "Opportunity Type", "name": _("Sales")},
 		{"doctype": "Opportunity Type", "name": _("Support")},
 		{"doctype": "Opportunity Type", "name": _("Maintenance")},
-		{"doctype": "Project Type", "project_type": "Internal"},
-		{"doctype": "Project Type", "project_type": "External"},
-		{"doctype": "Project Type", "project_type": "Other"},
+		{"doctype": "Project Type", "project_type": _("Internal")},
+		{"doctype": "Project Type", "project_type": _("External")},
+		{"doctype": "Project Type", "project_type": _("Other")},
 		{"doctype": "Print Heading", "print_heading": _("Credit Note")},
 		{"doctype": "Print Heading", "print_heading": _("Debit Note")},
 		# Share Management
