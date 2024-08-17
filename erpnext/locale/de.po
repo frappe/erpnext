@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-14 10:58\n"
+"PO-Revision-Date: 2024-08-17 12:14\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -22341,7 +22341,7 @@ msgstr ""
 #: setup/doctype/driver/driver.json setup/doctype/employee/employee.json
 #: setup/doctype/holiday_list/holiday_list.json
 msgid "HR Manager"
-msgstr "Leiter der Personalabteilung"
+msgstr "Personalwesen Leiter"
 
 #. Name of a role
 #: projects/doctype/timesheet/timesheet.json setup/doctype/branch/branch.json
@@ -22349,7 +22349,7 @@ msgstr "Leiter der Personalabteilung"
 #: setup/doctype/designation/designation.json setup/doctype/driver/driver.json
 #: setup/doctype/employee/employee.json
 msgid "HR User"
-msgstr "HR-Benutzer"
+msgstr "Personalwesen Benutzer"
 
 #. Option for the 'Periodicity' (Select) field in DocType 'Maintenance Schedule
 #. Item'
@@ -25351,7 +25351,7 @@ msgstr "Ist für die Erstellung der Eingangsrechnungen ein Eingangsbeleg erforde
 #. Label of the is_debit_note (Check) field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Is Rate Adjustment Entry (Debit Note)"
-msgstr "Ist Preisanpassung (Belastungsanzeige)"
+msgstr "Ist Preisanpassung (Lastschrift)"
 
 #. Label of the is_recursive (Check) field in DocType 'Pricing Rule'
 #. Label of the is_recursive (Check) field in DocType 'Promotional Scheme
@@ -26413,7 +26413,7 @@ msgstr "Artikel Preis hinzugefügt für {0} in Preisliste {1}"
 
 #: stock/doctype/item_price/item_price.py:140
 msgid "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
-msgstr ""
+msgstr "Ein Artikelpreis für diese Kombination aus Preisliste, Lieferant/Kunde, Währung, Artikel, Charge, ME, Menge und Datum existiert bereits."
 
 #: stock/get_item_details.py:871
 msgid "Item Price updated for {0} in Price List {1}"
@@ -27125,7 +27125,7 @@ msgstr ""
 #. Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Job Worker Address Details"
-msgstr ""
+msgstr "Vorschau Adresse Unterauftragnehmer"
 
 #. Label of the contact_person (Link) field in DocType 'Subcontracting Order'
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
@@ -31241,7 +31241,7 @@ msgstr "Neuer Angestellter"
 #: public/js/templates/crm_activities.html:14
 #: public/js/utils/crm_activities.js:85
 msgid "New Event"
-msgstr "Neues Event"
+msgstr "Neues Ereignis"
 
 #. Label of the new_exchange_rate (Float) field in DocType 'Exchange Rate
 #. Revaluation Account'
@@ -37805,7 +37805,7 @@ msgstr "Hauptadresse"
 
 #: public/js/utils/contact_address_quick_entry.js:57
 msgid "Primary Address Details"
-msgstr "Primäre Adressendetails"
+msgstr "Hauptadresse"
 
 #. Label of the primary_address_and_contact_detail_section (Section Break)
 #. field in DocType 'Supplier'
@@ -37823,7 +37823,7 @@ msgstr "Hauptkontakt"
 
 #: public/js/utils/contact_address_quick_entry.js:38
 msgid "Primary Contact Details"
-msgstr "Primäre Kontaktdaten"
+msgstr "Hauptkontakt"
 
 #. Label of the primary_email (Read Only) field in DocType 'Process Statement
 #. Of Accounts Customer'
@@ -46076,7 +46076,7 @@ msgstr "Wählen Sie die Positionen nach dem Lieferdatum aus"
 
 #: public/js/controllers/transaction.js:2253
 msgid "Select Items for Quality Inspection"
-msgstr ""
+msgstr "Artikel für die Qualitätsprüfung auswählen"
 
 #. Label of the select_items_to_manufacture_section (Section Break) field in
 #. DocType 'Production Plan'
@@ -47024,12 +47024,12 @@ msgstr ""
 #. 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Service Expenses"
-msgstr ""
+msgstr "Wartungsaufwand"
 
 #. Label of the service_item (Link) field in DocType 'Subcontracting BOM'
 #: subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
 msgid "Service Item"
-msgstr ""
+msgstr "Wartungsartikel"
 
 #. Label of the service_item_qty (Float) field in DocType 'Subcontracting BOM'
 #: subcontracting/doctype/subcontracting_bom/subcontracting_bom.json
@@ -47727,7 +47727,7 @@ msgstr "Lieferadresse"
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 #: subcontracting/doctype/subcontracting_order/subcontracting_order.json
 msgid "Shipping Address Details"
-msgstr "Lieferadressendetails"
+msgstr "Vorschau Lieferadresse"
 
 #. Label of the shipping_address_name (Link) field in DocType 'POS Invoice'
 #. Label of the shipping_address_name (Link) field in DocType 'Sales Invoice'
@@ -50469,7 +50469,7 @@ msgstr "Lieferantenadresse"
 #. Label of the address_display (Text Editor) field in DocType 'Purchase Order'
 #: buying/doctype/purchase_order/purchase_order.json
 msgid "Supplier Address Details"
-msgstr ""
+msgstr "Vorschau Lieferantenadresse"
 
 #. Label of a Link in the Buying Workspace
 #: buying/workspace/buying/buying.json
