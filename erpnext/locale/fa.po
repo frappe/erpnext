@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-04 09:34+0000\n"
-"PO-Revision-Date: 2024-08-14 10:58\n"
+"PO-Revision-Date: 2024-08-17 12:14\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -166,7 +166,8 @@ msgstr "# دسته دارایی\n\n"
 #: assets/onboarding_step/asset_item/asset_item.json
 msgid "# Asset Item\n\n"
 "Asset items are created based on Asset Category. You can create one or multiple items against once Asset Category. The sales and purchase transaction for Asset is done via Asset Item. "
-msgstr ""
+msgstr "# آیتم دارایی\n\n"
+"آیتم‌های دارایی بر اساس دسته دارایی ایجاد می شوند. شما می توانید یک یا چند آیتم را در برابر یک دسته دارایی ایجاد کنید. تراکنش خرید و فروش دارایی از طریق آیتم دارایی انجام می شود. "
 
 #. Description of the Onboarding Step 'Buying Settings'
 #: buying/onboarding_step/introduction_to_buying/introduction_to_buying.json
@@ -2940,7 +2941,7 @@ msgstr "افزودن نقل قول"
 #: manufacturing/doctype/bom/bom.js:887
 #: manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Add Raw Materials"
-msgstr ""
+msgstr "افزودن مواد خام"
 
 #: public/js/event.js:48
 msgid "Add Sales Partners"
@@ -10288,7 +10289,7 @@ msgstr "اختتامیه (بدهی)"
 
 #: accounts/report/general_ledger/general_ledger.py:388
 msgid "Closing (Opening + Total)"
-msgstr ""
+msgstr "اختتامیه (افتتاحیه + کل)"
 
 #. Label of the closing_account_head (Link) field in DocType 'Period Closing
 #. Voucher'
@@ -17313,7 +17314,7 @@ msgstr ""
 
 #: public/js/controllers/transaction.js:1011
 msgid "Do you want to clear the selected {0}?"
-msgstr ""
+msgstr "آیا می خواهید {0} انتخاب شده را پاک کنید؟"
 
 #: stock/doctype/delivery_trip/delivery_trip.js:156
 msgid "Do you want to notify all the customers by email?"
@@ -17954,7 +17955,7 @@ msgstr "ویرایش"
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:671
 msgid "Edit BOM"
-msgstr ""
+msgstr "ویرایش BOM"
 
 #: stock/page/warehouse_capacity_summary/warehouse_capacity_summary.html:37
 msgid "Edit Capacity"
@@ -18923,7 +18924,7 @@ msgstr "خطا هنگام ارسال مجدد ارزیابی مورد"
 
 #: templates/includes/footer/footer_extension.html:29
 msgid "Error: Not a valid id?"
-msgstr ""
+msgstr "خطا: شناسه معتبر نیست؟"
 
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:569
 msgid "Error: This asset already has {0} depreciation periods booked.\n"
@@ -20094,7 +20095,7 @@ msgstr "مقدار کالاهای تمام شده"
 #. Label of the fg_reference_id (Data) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Finished Goods Reference"
-msgstr ""
+msgstr "مرجع کالاهای تمام شده"
 
 #: manufacturing/report/process_loss_report/process_loss_report.py:106
 msgid "Finished Goods Value"
@@ -27130,7 +27131,7 @@ msgstr "کیلو کولن"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilogram-Force"
-msgstr ""
+msgstr "کیلوگرم-نیرو"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -27180,7 +27181,7 @@ msgstr "کیلوپوند"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilopound-Force"
-msgstr ""
+msgstr "کیلوپوند-نیرو"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -27543,7 +27544,7 @@ msgstr ""
 #. Label of an action in the Onboarding Step 'Updating Opening Balances'
 #: accounts/onboarding_step/updating_opening_balances/updating_opening_balances.json
 msgid "Learn how to update opening balances"
-msgstr ""
+msgstr "با نحوه به روز رسانی ترازهای افتتاحیه آشنا شوید"
 
 #. Label of an action in the Onboarding Step 'Review Chart of Accounts'
 #: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
@@ -28699,7 +28700,7 @@ msgstr ""
 #. Title of an Onboarding Step
 #: stock/onboarding_step/create_a_stock_entry/create_a_stock_entry.json
 msgid "Manage Stock Movements"
-msgstr ""
+msgstr "مدیریت حرکات موجودی"
 
 #. Description of the 'With Operations' (Check) field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -31578,7 +31579,7 @@ msgstr "آیتم‌های غیر موجودی"
 
 #: selling/report/sales_analytics/sales_analytics.js:95
 msgid "Non-Zeros"
-msgstr ""
+msgstr "غیر صفرها"
 
 #. Option for the 'Monitoring Frequency' (Select) field in DocType 'Quality
 #. Goal'
@@ -31594,7 +31595,7 @@ msgstr "هیچ یک از آیتم‌ها هیچ تغییری در مقدار ی�
 #: setup/setup_wizard/data/uom_data.json
 #: setup/setup_wizard/operations/install_fixtures.py:473
 msgid "Nos"
-msgstr ""
+msgstr "عدد"
 
 #: accounts/doctype/mode_of_payment/mode_of_payment.py:66
 #: accounts/doctype/pos_invoice/pos_invoice.py:257
@@ -32102,7 +32103,7 @@ msgstr "در تکمیل کار"
 
 #: stock/report/available_batch_report/available_batch_report.js:16
 msgid "On This Date"
-msgstr ""
+msgstr "در این تاریخ"
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:79
 msgid "On Track"
@@ -32605,7 +32606,7 @@ msgstr "عملیات"
 #. Label of the production_section (Section Break) field in DocType 'Job Card'
 #: manufacturing/doctype/job_card/job_card.json
 msgid "Operation & Materials"
-msgstr ""
+msgstr "عملیات و مواد"
 
 #. Label of the section_break_22 (Section Break) field in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
@@ -32663,11 +32664,11 @@ msgstr "زمان عملیات"
 #: manufacturing/doctype/bom_creator/bom_creator.js:125
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgid "Operation Time (in mins)"
-msgstr ""
+msgstr "زمان عملیات (بر حسب دقیقه)"
 
 #: manufacturing/doctype/bom_creator/bom_creator.js:176
 msgid "Operation Time must be greater than 0"
-msgstr ""
+msgstr "زمان عملیات باید بیشتر از 0 باشد"
 
 #: manufacturing/doctype/work_order/work_order.py:1048
 msgid "Operation Time must be greater than 0 for Operation {0}"
@@ -33282,7 +33283,7 @@ msgstr "بیش از کمک هزینه انتقال"
 #. Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgid "Over Transfer Allowance (%)"
-msgstr ""
+msgstr "مجاز به انتقال بیش از حد (%)"
 
 #: controllers/status_updater.py:368
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
@@ -36468,7 +36469,7 @@ msgstr "لطفا کد مورد را انتخاب کنید"
 
 #: selling/doctype/sales_order/sales_order.js:900
 msgid "Please select items"
-msgstr ""
+msgstr "لطفا آیتم‌ها را انتخاب کنید"
 
 #: selling/doctype/sales_order/sales_order.js:414
 msgid "Please select items to reserve."
@@ -36608,7 +36609,7 @@ msgstr "لطفا Root Type را تنظیم کنید"
 #: regional/italy/utils.py:292
 #, python-format
 msgid "Please set Tax ID for the customer '%s'"
-msgstr ""
+msgstr "لطفاً شناسه مالیاتی را برای مشتری \"%s\" تنظیم کنید"
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:324
 msgid "Please set Unrealized Exchange Gain/Loss Account in Company {0}"
@@ -36649,7 +36650,7 @@ msgstr "لطفاً حساب را در انبار {0} تنظیم کنید"
 #: regional/italy/utils.py:246
 #, python-format
 msgid "Please set an Address on the Company '%s'"
-msgstr ""
+msgstr "لطفاً یک آدرس در شرکت \"%s\" تنظیم کنید"
 
 #: controllers/stock_controller.py:667
 msgid "Please set an Expense Account in the Items table"
@@ -37457,7 +37458,7 @@ msgstr "قیمت هر واحد ({0})"
 
 #: selling/page/point_of_sale/pos_controller.js:583
 msgid "Price is not set for the item."
-msgstr ""
+msgstr "قیمت برای آیتم تعیین نشده است."
 
 #: manufacturing/doctype/bom/bom.py:458
 msgid "Price not found for item {0} in price list {1}"
@@ -38332,7 +38333,7 @@ msgstr "محصولات"
 #. Subtitle of the Module Onboarding 'Buying'
 #: buying/module_onboarding/buying/buying.json
 msgid "Products, Purchases, Analysis, and more."
-msgstr ""
+msgstr "محصولات، خریدها، تجزیه و تحلیل، و بیشتر."
 
 #. Subtitle of the Module Onboarding 'Manufacturing'
 #: manufacturing/module_onboarding/manufacturing/manufacturing.json
@@ -38661,7 +38662,7 @@ msgstr "ردیابی موجودی مبتنی بر پروژه"
 #. Name of a report
 #: projects/report/project_wise_stock_tracking/project_wise_stock_tracking.json
 msgid "Project wise Stock Tracking "
-msgstr ""
+msgstr "ردیابی موجودی از نظر پروژه "
 
 #: controllers/trends.py:376
 msgid "Project-wise data is not available for Quotation"
@@ -39432,11 +39433,11 @@ msgstr "خرید یک دارایی"
 #. Title of an Onboarding Step
 #: assets/onboarding_step/purchase_an_asset_item/purchase_an_asset_item.json
 msgid "Purchase an Asset Item"
-msgstr ""
+msgstr "خرید یک آیتم دارایی"
 
 #: utilities/activation.py:104
 msgid "Purchase orders help you plan and follow up on your purchases"
-msgstr ""
+msgstr "سفارش‌های خرید به شما کمک می کند تا خریدهای خود را برنامه ریزی و پیگیری کنید"
 
 #. Option for the 'Current State' (Select) field in DocType 'Share Balance'
 #: accounts/doctype/share_balance/share_balance.json
@@ -41378,7 +41379,7 @@ msgstr "URL ضبط"
 #. Group in Quality Feedback Template's connections
 #: quality_management/doctype/quality_feedback_template/quality_feedback_template.json
 msgid "Records"
-msgstr ""
+msgstr "رکوردها"
 
 #: regional/united_arab_emirates/utils.py:171
 msgid "Recoverable Standard Rated expenses should not be set when Reverse Charge Applicable is Y"
@@ -41748,7 +41749,7 @@ msgstr "ردیف مرجع"
 #: accounts/doctype/purchase_taxes_and_charges/purchase_taxes_and_charges.json
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Reference Row #"
-msgstr ""
+msgstr "ردیف مرجع #"
 
 #. Label of the reference_type (Link) field in DocType 'Advance Tax'
 #. Label of the reference_type (Select) field in DocType 'Journal Entry
@@ -42548,7 +42549,7 @@ msgstr "موارد مورد نیاز"
 
 #: templates/form_grid/material_request_grid.html:7
 msgid "Required On"
-msgstr ""
+msgstr "مورد نیاز در"
 
 #. Label of the required_qty (Float) field in DocType 'Purchase Order Item
 #. Supplied'
@@ -43895,11 +43896,11 @@ msgstr "ردیف #{0}: تنظیم تامین کننده برای مورد {1}"
 
 #: manufacturing/doctype/workstation/workstation.py:86
 msgid "Row #{0}: Start Time and End Time are required"
-msgstr ""
+msgstr "ردیف #{0}: زمان شروع و زمان پایان مورد نیاز است"
 
 #: manufacturing/doctype/workstation/workstation.py:89
 msgid "Row #{0}: Start Time must be before End Time"
-msgstr ""
+msgstr "ردیف #{0}: زمان شروع باید قبل از زمان پایان باشد"
 
 #: stock/doctype/quality_inspection/quality_inspection.py:120
 msgid "Row #{0}: Status is mandatory"
@@ -46495,7 +46496,7 @@ msgstr "شماره سریال {0} وجود ندارد"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2242
 msgid "Serial No {0} does not exists"
-msgstr ""
+msgstr "شماره سریال {0} وجود ندارد"
 
 #: public/js/utils/barcode_scanner.js:402
 msgid "Serial No {0} is already added"
@@ -48457,7 +48458,7 @@ msgstr "تاریخ شروع نمی تواند قبل از تاریخ فعلی ب
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.js:21
 msgid "Start Deletion"
-msgstr ""
+msgstr "شروع حذف"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:115
 msgid "Start Import"
@@ -49258,7 +49259,7 @@ msgstr "خلاصه موجودی"
 #. Label of a Card Break in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Stock Transactions"
-msgstr ""
+msgstr "تراکنش‌های موجودی"
 
 #. Label of the section_break_9 (Section Break) field in DocType 'Stock
 #. Settings'
@@ -53967,7 +53968,7 @@ msgstr "مجموع مسائل"
 
 #: selling/page/point_of_sale/pos_item_cart.js:92
 msgid "Total Items"
-msgstr ""
+msgstr "مجموع آیتم‌ها"
 
 #: accounts/report/balance_sheet/balance_sheet.py:209
 msgid "Total Liability"
@@ -54374,7 +54375,7 @@ msgstr "درصد کل مشارکت باید برابر با 100 باشد"
 
 #: projects/doctype/project/project_dashboard.html:2
 msgid "Total hours: {0}"
-msgstr ""
+msgstr "کل ساعات: {0}"
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:456
 #: accounts/doctype/sales_invoice/sales_invoice.py:513
@@ -56556,7 +56557,7 @@ msgstr "مشاهده پیوست ها"
 
 #: public/js/call_popup/call_popup.js:186
 msgid "View call log"
-msgstr ""
+msgstr "مشاهده لاگ تماس"
 
 #. Label of the view_count (Float) field in DocType 'Video'
 #: utilities/doctype/video/video.json
@@ -57228,7 +57229,7 @@ msgstr "هشدار: سفارش فروش {0} در مقابل سفارش خرید 
 #. Label of a Card Break in the Support Workspace
 #: support/workspace/support/support.json
 msgid "Warranty"
-msgstr ""
+msgstr "ضمانتنامه"
 
 #. Label of the warranty_amc_details (Section Break) field in DocType 'Serial
 #. No'
@@ -58503,7 +58504,7 @@ msgstr "مبادله.میزبان"
 
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:161
 msgid "fieldname"
-msgstr ""
+msgstr "fieldname"
 
 #. Option for the 'Service Provider' (Select) field in DocType 'Currency
 #. Exchange Settings'
