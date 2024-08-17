@@ -353,8 +353,8 @@ def add_uom_data():
 		).read()
 	)
 	for d in uom_conversions:
-		if not frappe.db.exists("UOM Category", _(d.get("category"))):
-			frappe.get_doc({"doctype": "UOM Category", "category_name": _(d.get("category"))}).db_insert()
+		if not frappe.db.exists("UOM Category", d.get("category")):
+			frappe.get_doc({"doctype": "UOM Category", "category_name": d.get("category")}).db_insert()
 
 		if not frappe.db.exists(
 			"UOM Conversion Factor",
@@ -363,7 +363,7 @@ def add_uom_data():
 			frappe.get_doc(
 				{
 					"doctype": "UOM Conversion Factor",
-					"category": _(d.get("category")),
+					"category": d.get("category"),
 					"from_uom": d.get("from_uom"),
 					"to_uom": d.get("to_uom"),
 					"value": d.get("value"),
