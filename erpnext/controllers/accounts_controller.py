@@ -233,7 +233,7 @@ class AccountsController(TransactionBase):
 						).format(
 							frappe.bold(document_type),
 							get_link_to_form(self.doctype, self.get("return_against")),
-							frappe.bold("Update Outstanding for Self"),
+							frappe.bold(_("Update Outstanding for Self")),
 							get_link_to_form("Payment Reconciliation"),
 						)
 					)
@@ -1990,7 +1990,9 @@ class AccountsController(TransactionBase):
 
 	def raise_missing_debit_credit_account_error(self, party_type, party):
 		"""Raise an error if debit to/credit to account does not exist."""
-		db_or_cr = frappe.bold("Debit To") if self.doctype == "Sales Invoice" else frappe.bold("Credit To")
+		db_or_cr = (
+			frappe.bold(_("Debit To")) if self.doctype == "Sales Invoice" else frappe.bold(_("Credit To"))
+		)
 		rec_or_pay = "Receivable" if self.doctype == "Sales Invoice" else "Payable"
 
 		link_to_party = frappe.utils.get_link_to_form(party_type, party)
@@ -3113,9 +3115,9 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 		child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
 		if not child_item.warehouse:
 			frappe.throw(
-				_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.").format(
-					frappe.bold("default warehouse"), frappe.bold(item.item_code)
-				)
+				_(
+					"Cannot find a default warehouse for item {0}. Please set one in the Item Master or in Stock Settings."
+				).format(frappe.bold(item.item_code))
 			)
 
 	set_child_tax_template_and_map(item, child_item, p_doc)
