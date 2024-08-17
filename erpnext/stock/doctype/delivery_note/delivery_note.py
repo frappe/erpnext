@@ -362,52 +362,42 @@ class DeliveryNote(SellingController):
 		self.validate_sales_invoice_references()
 
 	def validate_sales_order_references(self):
-		err_msg = ""
+		errors = []
 		for item in self.items:
-			if (item.against_sales_order and not item.so_detail) or (
-				not item.against_sales_order and item.so_detail
-			):
-				if not item.against_sales_order:
-					err_msg += (
-						_("'Sales Order' reference ({1}) is missing in row {0}").format(
-							frappe.bold(item.idx), frappe.bold("against_sales_order")
-						)
-						+ "<br>"
-					)
-				else:
-					err_msg += (
-						_("'Sales Order Item' reference ({1}) is missing in row {0}").format(
-							frappe.bold(item.idx), frappe.bold("so_detail")
-						)
-						+ "<br>"
-					)
+			missing_label = None
+			if item.against_sales_order and not item.so_detail:
+				missing_label = item.meta.get_label("so_detail")
+			elif item.so_detail and not item.against_sales_order:
+				missing_label = item.meta.get_label("against_sales_order")
 
-		if err_msg:
-			frappe.throw(err_msg, title=_("References to Sales Orders are Incomplete"))
+			if missing_label and missing_label != "No Label":
+				errors.append(
+					_("The field {0} in row {1} is not set").format(
+						frappe.bold(_(missing_label)), frappe.bold(item.idx)
+					)
+				)
+
+		if errors:
+			frappe.throw("<br>".join(errors), title=_("References to Sales Orders are Incomplete"))
 
 	def validate_sales_invoice_references(self):
-		err_msg = ""
+		errors = []
 		for item in self.items:
-			if (item.against_sales_invoice and not item.si_detail) or (
-				not item.against_sales_invoice and item.si_detail
-			):
-				if not item.against_sales_invoice:
-					err_msg += (
-						_("'Sales Invoice' reference ({1}) is missing in row {0}").format(
-							frappe.bold(item.idx), frappe.bold("against_sales_invoice")
-						)
-						+ "<br>"
-					)
-				else:
-					err_msg += (
-						_("'Sales Invoice Item' reference ({1}) is missing in row {0}").format(
-							frappe.bold(item.idx), frappe.bold("si_detail")
-						)
-						+ "<br>"
-					)
+			missing_label = None
+			if item.against_sales_invoice and not item.si_detail:
+				missing_label = item.meta.get_label("si_detail")
+			elif item.si_detail and not item.against_sales_invoice:
+				missing_label = item.meta.get_label("against_sales_invoice")
 
-		if err_msg:
-			frappe.throw(err_msg, title=_("References to Sales Invoices are Incomplete"))
+			if missing_label and missing_label != "No Label":
+				errors.append(
+					_("The field {0} in row {1} is not set").format(
+						frappe.bold(_(missing_label)), frappe.bold(item.idx)
+					)
+				)
+
+		if errors:
+			frappe.throw("<br>".join(errors), title=_("References to Sales Invoices are Incomplete"))
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
