@@ -233,13 +233,8 @@ class AccountsController(TransactionBase):
 						).format(
 							frappe.bold(document_type),
 							get_link_to_form(self.doctype, self.get("return_against")),
-<<<<<<< HEAD
-							frappe.bold("Update Outstanding for Self"),
-							get_link_to_form("Payment Reconciliation", "Payment Reconciliation"),
-=======
 							frappe.bold(_("Update Outstanding for Self")),
-							get_link_to_form("Payment Reconciliation"),
->>>>>>> af0ae930ca (fix: translatability of boldened text)
+							get_link_to_form("Payment Reconciliation", "Payment Reconciliation"),
 						)
 					)
 
