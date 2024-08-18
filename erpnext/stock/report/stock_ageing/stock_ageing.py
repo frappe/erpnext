@@ -90,12 +90,13 @@ def get_average_age(fifo_queue: list, to_date: str) -> float:
 def get_range_age(filters: Filters, fifo_queue: list, to_date: str, item_dict: dict) -> list:
 	precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
 	age_range_column = [0.0] * (len(filters.age_range) + 1)
+	age_range = [*filters.age_range, float("inf")]
 
 	for item in fifo_queue:
 		age = flt(date_diff(to_date, item[1]))
 		qty = flt(item[0]) if not item_dict["has_serial_no"] else 1.0
 
-		for i, age_limit in enumerate(*filters.age_range, float("inf")):
+		for i, age_limit in enumerate(age_range):
 			if age <= flt(age_limit):
 				age_range_column[i] = flt(age_range_column[i] + qty, precision)
 				break
