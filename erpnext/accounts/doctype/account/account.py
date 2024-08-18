@@ -460,9 +460,8 @@ def get_account_autoname(account_number, account_name, company):
 	return " - ".join(parts)
 
 
-@erpnext.allow_regional
 def validate_account_number(name, account_number, company, root_type):
-	if account_number:
+	if account_number and validate_regional_account_number(name, account_number, company, root_type) is None:
 		account_with_same_number = frappe.db.get_value(
 			"Account", {"account_number": account_number, "company": company, "name": ["!=", name]}
 		)
@@ -472,6 +471,11 @@ def validate_account_number(name, account_number, company, root_type):
 					account_number, account_with_same_number
 				)
 			)
+
+
+@erpnext.allow_regional
+def validate_regional_account_number(name, account_number, company, root_type):
+	return None
 
 
 @frappe.whitelist()
@@ -514,7 +518,7 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 
 				frappe.throw(message, title=_("Rename Not Allowed"))
 
-	validate_account_number(name, account_number, account.company)
+	validate_account_number(name, account_number, account.company, account.root_type)
 	if account_number:
 		frappe.db.set_value("Account", name, "account_number", account_number.strip())
 	else:
