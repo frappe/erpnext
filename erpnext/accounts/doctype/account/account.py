@@ -101,14 +101,12 @@ class Account(NestedSet):
 		self.name = get_autoname_with_number(self.account_number, self.account_name, self.company)
 
 	def validate(self):
-		from erpnext.accounts.utils import validate_field_number
-
 		if frappe.local.flags.allow_unverified_charts:
 			return
 		self.validate_parent()
 		self.validate_parent_child_account_type()
 		self.validate_root_details()
-		validate_field_number("Account", self.name, self.account_number, self.company, "account_number")
+		validate_account_number(self.name, self.account_number, self.company, self.root_type)
 		self.validate_group_or_ledger()
 		self.set_root_and_report_type()
 		self.validate_mandatory()
@@ -462,7 +460,8 @@ def get_account_autoname(account_number, account_name, company):
 	return " - ".join(parts)
 
 
-def validate_account_number(name, account_number, company):
+@erpnext.allow_regional
+def validate_account_number(name, account_number, company, root_type):
 	if account_number:
 		account_with_same_number = frappe.db.get_value(
 			"Account", {"account_number": account_number, "company": company, "name": ["!=", name]}
