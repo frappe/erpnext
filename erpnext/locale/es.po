@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-18 12:37\n"
+"PO-Revision-Date: 2024-08-19 12:45\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
@@ -46026,7 +46026,7 @@ msgstr "Escuela / Universidad."
 #. Label of the scope (Data) field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Scope"
-msgstr ""
+msgstr "Alcance"
 
 #. Label of the score (Percent) field in DocType 'Supplier Scorecard Scoring
 #. Criteria'
