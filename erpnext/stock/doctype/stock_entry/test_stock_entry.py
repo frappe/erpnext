@@ -4,7 +4,7 @@
 
 from frappe.permissions import add_user_permission, remove_user_permission
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, nowtime, today
+from frappe.utils import add_days, cstr, flt, get_time, getdate, nowtime, today
 
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import (
@@ -1779,6 +1779,74 @@ class TestStockEntry(FrappeTestCase):
 		sbb = se.items[0].serial_and_batch_bundle
 		frappe.db.set_value("Serial and Batch Bundle", sbb, "type_of_transaction", "Inward")
 		self.assertRaises(frappe.ValidationError, se.submit)
+
+	def test_stock_entry_for_same_posting_date_and_time(self):
+		warehouse = "_Test Warehouse - _TC"
+		item_code = "Test Stock Entry For Same Posting Datetime 1"
+		make_item(item_code, {"is_stock_item": 1})
+		posting_date = nowdate()
+		posting_time = nowtime()
+
+		for index in range(25):
+			se = make_stock_entry(
+				item_code=item_code,
+				qty=1,
+				to_warehouse=warehouse,
+				posting_date=posting_date,
+				posting_time=posting_time,
+				do_not_submit=True,
+				purpose="Material Receipt",
+				basic_rate=100,
+			)
+
+			se.append(
+				"items",
+				{
+					"item_code": item_code,
+					"item_name": se.items[0].item_name,
+					"description": se.items[0].description,
+					"t_warehouse": se.items[0].t_warehouse,
+					"basic_rate": 100,
+					"qty": 1,
+					"stock_qty": 1,
+					"conversion_factor": 1,
+					"expense_account": se.items[0].expense_account,
+					"cost_center": se.items[0].cost_center,
+					"uom": se.items[0].uom,
+					"stock_uom": se.items[0].stock_uom,
+				},
+			)
+
+			se.remarks = f"The current number is {cstr(index)}"
+
+			se.submit()
+
+		sles = frappe.get_all(
+			"Stock Ledger Entry",
+			fields=[
+				"posting_date",
+				"posting_time",
+				"actual_qty",
+				"qty_after_transaction",
+				"incoming_rate",
+				"stock_value_difference",
+				"stock_value",
+			],
+			filters={"item_code": item_code, "warehouse": warehouse},
+			order_by="creation",
+		)
+
+		self.assertEqual(len(sles), 50)
+		i = 0
+		for sle in sles:
+			i += 1
+			self.assertEqual(getdate(sle.posting_date), getdate(posting_date))
+			self.assertEqual(get_time(sle.posting_time), get_time(posting_time))
+			self.assertEqual(sle.actual_qty, 1)
+			self.assertEqual(sle.qty_after_transaction, i)
+			self.assertEqual(sle.incoming_rate, 100)
+			self.assertEqual(sle.stock_value_difference, 100)
+			self.assertEqual(sle.stock_value, 100 * i)
 
 
 def make_serialized_item(**args):
