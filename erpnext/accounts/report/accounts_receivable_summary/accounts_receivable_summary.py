@@ -31,7 +31,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 	def get_data(self, args):
 		self.data = []
-		self.receivables = ReceivablePayableReport(self.filters).run(args)[1]
+		self.receivables_report = ReceivablePayableReport(self.filters)
+		self.receivables = self.receivables_report.run(args)[1]
 		self.currency_precision = get_currency_precision() or 2
 
 		self.get_party_total(args)
@@ -104,25 +105,23 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.set_party_details(d)
 
 	def init_party_total(self, row):
+		default_dict = {
+			"invoiced": 0.0,
+			"paid": 0.0,
+			"credit_note": 0.0,
+			"outstanding": 0.0,
+			"total_due": 0.0,
+			"future_amount": 0.0,
+			"sales_person": [],
+			"party_type": row.party_type,
+		}
+		for i in range(1, len(self.receivables_report.age_range) + 2):
+			range_key = f"range{i}"
+			default_dict[range_key] = 0.0
+
 		self.party_total.setdefault(
 			row.party,
-			frappe._dict(
-				{
-					"invoiced": 0.0,
-					"paid": 0.0,
-					"credit_note": 0.0,
-					"outstanding": 0.0,
-					"range1": 0.0,
-					"range2": 0.0,
-					"range3": 0.0,
-					"range4": 0.0,
-					"range5": 0.0,
-					"total_due": 0.0,
-					"future_amount": 0.0,
-					"sales_person": [],
-					"party_type": row.party_type,
-				}
-			),
+			frappe._dict(default_dict),
 		)
 
 	def set_party_details(self, row):

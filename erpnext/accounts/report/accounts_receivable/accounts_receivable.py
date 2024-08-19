@@ -53,6 +53,7 @@ class ReceivablePayableReport:
 		if not self.filters.range:
 			self.filters.range = "30, 60, 90, 120"
 		self.age_range = [num.strip() for num in self.filters.range.split(",") if num.strip().isdigit()]
+		self.age_range_index = range(1, len(self.age_range) + 2)
 
 	def run(self, args):
 		self.filters.update(args)
@@ -721,14 +722,14 @@ class ReceivablePayableReport:
 
 		# ageing buckets should not have amounts if due date is not reached
 		if getdate(entry_date) > getdate(self.filters.report_date):
-			for i in range(1, len(self.age_range) + 2):
+			for i in self.age_range_index:
 				setattr(row, f"range{i}", 0.0)
 
-		row.total_due = sum(row[f"range{i}"] for i in range(1, len(self.age_range) + 2))
+		row.total_due = sum(row[f"range{i}"] for i in self.age_range_index)
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		for i in range(1, len(self.age_range) + 2):
+		for i in self.age_range_index:
 			setattr(row, f"range{i}", 0.0)
 
 		if not (self.age_as_on and entry_date):
@@ -1132,9 +1133,7 @@ class ReceivablePayableReport:
 		for row in self.data:
 			row = frappe._dict(row)
 			if not cint(row.bold):
-				values = [
-					flt(row.get(f"range{i}", None), precision) for i in range(1, len(self.age_range) + 2)
-				]
+				values = [flt(row.get(f"range{i}", None), precision) for i in self.age_range_index]
 				rows.append({"values": values})
 
 		self.chart = {
