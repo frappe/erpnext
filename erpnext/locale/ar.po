@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-18 12:37\n"
+"PO-Revision-Date: 2024-08-19 12:45\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Arabic\n"
 "MIME-Version: 1.0\n"
@@ -1173,7 +1173,7 @@ msgstr "-A"
 #. Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "A4"
-msgstr ""
+msgstr "A4"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -1203,7 +1203,7 @@ msgstr "AMC تاريخ انتهاء الاشتراك"
 #. Label of the api_sb (Section Break) field in DocType 'Support Search Source'
 #: support/doctype/support_search_source/support_search_source.json
 msgid "API"
-msgstr ""
+msgstr "واجهة برمجة التطبيقات"
 
 #. Label of the api_details_section (Section Break) field in DocType 'Currency
 #. Exchange Settings'
