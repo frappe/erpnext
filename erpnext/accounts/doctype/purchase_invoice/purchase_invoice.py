@@ -377,16 +377,16 @@ class PurchaseInvoice(BuyingController):
 		if account.report_type != "Balance Sheet":
 			frappe.throw(
 				_(
-					"Please ensure {} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
-				).format(frappe.bold("Credit To")),
+					"Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
+				).format(frappe.bold(_("Credit To"))),
 				title=_("Invalid Account"),
 			)
 
 		if self.supplier and account.account_type != "Payable":
 			frappe.throw(
 				_(
-					"Please ensure {} account {} is a Payable account. Change the account type to Payable or select a different account."
-				).format(frappe.bold("Credit To"), frappe.bold(self.credit_to)),
+					"Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
+				).format(frappe.bold(_("Credit To")), frappe.bold(self.credit_to)),
 				title=_("Invalid Account"),
 			)
 
@@ -634,7 +634,7 @@ class PurchaseInvoice(BuyingController):
 						"To submit the invoice without purchase order please set {0} as {1} in {2}"
 					).format(
 						frappe.bold(_("Purchase Order Required")),
-						frappe.bold("No"),
+						frappe.bold(_("No")),
 						get_link_to_form("Buying Settings", "Buying Settings", "Buying Settings"),
 					)
 					throw(msg, title=_("Mandatory Purchase Order"))
@@ -655,7 +655,7 @@ class PurchaseInvoice(BuyingController):
 						"To submit the invoice without purchase receipt please set {0} as {1} in {2}"
 					).format(
 						frappe.bold(_("Purchase Receipt Required")),
-						frappe.bold("No"),
+						frappe.bold(_("No")),
 						get_link_to_form("Buying Settings", "Buying Settings", "Buying Settings"),
 					)
 					throw(msg, title=_("Mandatory Purchase Receipt"))

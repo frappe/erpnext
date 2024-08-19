@@ -669,7 +669,7 @@ class Asset(AccountsController):
 		if not fixed_asset_account:
 			frappe.throw(
 				_("Set {0} in asset category {1} for company {2}").format(
-					frappe.bold("Fixed Asset Account"),
+					frappe.bold(_("Fixed Asset Account")),
 					frappe.bold(self.asset_category),
 					frappe.bold(self.company),
 				),

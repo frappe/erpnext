@@ -186,7 +186,8 @@ class PricingRule(Document):
 			if not self.priority:
 				throw(
 					_("As the field {0} is enabled, the field {1} is mandatory.").format(
-						frappe.bold("Apply Discount on Discounted Rate"), frappe.bold("Priority")
+						frappe.bold(_("Apply Discount on Discounted Rate")),
+						frappe.bold(_("Priority")),
 					)
 				)
 
@@ -194,7 +195,7 @@ class PricingRule(Document):
 				throw(
 					_(
 						"As the field {0} is enabled, the value of the field {1} should be more than 1."
-					).format(frappe.bold("Apply Discount on Discounted Rate"), frappe.bold("Priority"))
+					).format(frappe.bold(_("Apply Discount on Discounted Rate")), frappe.bold(_("Priority")))
 				)
 
 	def validate_applicable_for_selling_or_buying(self):
