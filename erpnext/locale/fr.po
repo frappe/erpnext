@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-18 12:36\n"
+"PO-Revision-Date: 2024-08-19 12:45\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: French\n"
 "MIME-Version: 1.0\n"
@@ -1015,7 +1015,7 @@ msgstr ""
 #. Content of the 'html_5' (HTML) field in DocType 'Bank Statement Import'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
 msgid "<h5 class=\"text-muted uppercase\">Or</h5>"
-msgstr ""
+msgstr "<h5 class=\"text-muted uppercase\">Ou</h5>"
 
 #. Content of the 'account_no_settings' (HTML) field in DocType 'Cheque Print
 #. Template'
@@ -1210,7 +1210,7 @@ msgstr ""
 #. Template'
 #: accounts/doctype/cheque_print_template/cheque_print_template.json
 msgid "A4"
-msgstr ""
+msgstr "A4"
 
 #. Option for the 'Blood Group' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
