@@ -1043,6 +1043,8 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		self.assertEqual(50, _get_stock_credit(final_consumption))
 
 	def test_tie_breaking(self):
+		from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import repost_entries
+
 		frappe.flags.dont_execute_stock_reposts = True
 		self.addCleanup(frappe.flags.pop, "dont_execute_stock_reposts")
 
@@ -1085,6 +1087,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 		self.assertEqual([10, 11], ordered_qty_after_transaction())
 
 		first.cancel()
+		repost_entries()
 		self.assertEqual([1], ordered_qty_after_transaction())
 
 		backdated = make_stock_entry(
