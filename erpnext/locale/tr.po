@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-18 12:37\n"
+"PO-Revision-Date: 2024-08-19 12:45\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -1435,7 +1435,7 @@ msgstr "API Endpoint"
 #. Label of the api_key (Data) field in DocType 'Video Settings'
 #: utilities/doctype/video_settings/video_settings.json
 msgid "API Key"
-msgstr "API Key"
+msgstr "API Anahtarı"
 
 #. Label of the awb_number (Data) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -3837,7 +3837,7 @@ msgstr "Peşinatlar"
 
 #: setup/setup_wizard/data/lead_source.txt:3
 msgid "Advertisement"
-msgstr ""
+msgstr "Reklamcılık"
 
 #: setup/setup_wizard/data/industry_type.txt:2
 msgid "Advertising"
@@ -4961,7 +4961,7 @@ msgstr "Alternatif olarak, şablonu indirebilir ve verilerinizi doldurabilirsini
 #: support/doctype/warranty_claim/warranty_claim.json
 #: telephony/doctype/telephony_call_type/telephony_call_type.json
 msgid "Amended From"
-msgstr "İtibaren değiştirilmiş"
+msgstr "Değiştirildi"
 
 #. Label of the tax_amount (Currency) field in DocType 'Advance Taxes and
 #. Charges'
@@ -8532,7 +8532,7 @@ msgstr "Mavi"
 #. Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Body"
-msgstr "Vücut"
+msgstr "Gövde"
 
 #. Label of the body_text (Text Editor) field in DocType 'Dunning'
 #. Label of the body_text (Text Editor) field in DocType 'Dunning Letter Text'
@@ -9559,15 +9559,15 @@ msgstr ""
 
 #: controllers/buying_controller.py:865
 msgid "Cannot cancel this document as it is linked with submitted asset {0}. Please cancel it to continue."
-msgstr ""
+msgstr "Gönderilen {0} varlığı ile bağlantılı olduğu için bu belge iptal edilemez. Devam etmek için lütfen iptal edin."
 
 #: stock/doctype/stock_entry/stock_entry.py:345
 msgid "Cannot cancel transaction for Completed Work Order."
-msgstr ""
+msgstr "Tamamlanan İş Emri için işlem iptal edilemez."
 
 #: stock/doctype/item/item.py:873
 msgid "Cannot change Attributes after stock transaction. Make a new Item and transfer stock to the new Item"
-msgstr ""
+msgstr "Stok işlemi sonrasında Özellikler değiştirilemez. Yeni bir Ürün oluşturun ve stoğu yeni Ürüne aktarmayı deneyin."
 
 #: accounts/doctype/fiscal_year/fiscal_year.py:49
 msgid "Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved."
@@ -9579,15 +9579,15 @@ msgstr ""
 
 #: accounts/deferred_revenue.py:51
 msgid "Cannot change Service Stop Date for item in row {0}"
-msgstr ""
+msgstr "{0} satırındaki öğe için Hizmet Durdurma Tarihi değiştirilemiyor"
 
 #: stock/doctype/item/item.py:864
 msgid "Cannot change Variant properties after stock transaction. You will have to make a new Item to do this."
-msgstr ""
+msgstr "Stok işlemi sonrasında Varyant özellikleri değiştirilemez. Bunu yapmak için yeni bir Ürün oluşturmanız gerekecektir."
 
 #: setup/doctype/company/company.py:231
 msgid "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."
-msgstr ""
+msgstr "Şirketin varsayılan para birimi değiştirilemiyor çünkü mevcut işlemler var. Varsayılan para birimini değiştirmek için işlemlerin iptal edilmesi gerekiyor."
 
 #: projects/doctype/task/task.py:139
 msgid "Cannot complete task {0} as its dependant task {1} are not completed / cancelled."
@@ -9595,7 +9595,7 @@ msgstr ""
 
 #: accounts/doctype/cost_center/cost_center.py:61
 msgid "Cannot convert Cost Center to ledger as it has child nodes"
-msgstr ""
+msgstr "Alt kırılımları olduğundan Maliyet Merkezi muhasebe defterine dönüştürülemiyor"
 
 #: projects/doctype/task/task.js:49
 msgid "Cannot convert Task to non-group because the following child Tasks exist: {0}."
@@ -9666,11 +9666,11 @@ msgstr "Silme işi tamamlanana kadar herhangi bir işlem yapılamaz"
 
 #: controllers/accounts_controller.py:1870
 msgid "Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings"
-msgstr ""
+msgstr "{1} satırındaki {0} öğesi için {2} değerinden daha fazla faturalandırma yapılamaz. Fazla faturalandırmaya izin vermek için lütfen Hesap Ayarları'nda ödenek ayarlayın"
 
 #: manufacturing/doctype/work_order/work_order.py:310
 msgid "Cannot produce more Item {0} than Sales Order quantity {1}"
-msgstr ""
+msgstr "{0} Ürünü için Sipariş Miktarı {1} adetten daha fazla üretilemez."
 
 #: manufacturing/doctype/work_order/work_order.py:1025
 msgid "Cannot produce more item for {0}"
@@ -10558,7 +10558,7 @@ msgstr "Kapandı"
 #. Name of a DocType
 #: accounts/doctype/closed_document/closed_document.json
 msgid "Closed Document"
-msgstr ""
+msgstr "Kapalı Belge"
 
 #. Label of the closed_documents (Table) field in DocType 'Accounting Period'
 #: accounts/doctype/accounting_period/accounting_period.json
@@ -10590,7 +10590,7 @@ msgstr "Kapanış Borcu"
 
 #: accounts/report/general_ledger/general_ledger.py:405
 msgid "Closing (Opening + Total)"
-msgstr ""
+msgstr "Kapanış (Açılış + Toplam)"
 
 #. Label of the closing_account_head (Link) field in DocType 'Period Closing
 #. Voucher'
@@ -10803,7 +10803,7 @@ msgstr "İletişim Türü"
 #. Name of a DocType
 #: communication/doctype/communication_medium/communication_medium.json
 msgid "Communication Medium"
-msgstr ""
+msgstr "Medya Haberleşmesi"
 
 #. Name of a DocType
 #: communication/doctype/communication_medium_timeslot/communication_medium_timeslot.json
@@ -11754,13 +11754,13 @@ msgstr ""
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:65
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Connected to QuickBooks"
-msgstr ""
+msgstr "QuickBooks’a Bağlandı"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:64
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Connecting to QuickBooks"
-msgstr ""
+msgstr "QuickBooks'a Bağlanıyor"
 
 #. Label of the connections_tab (Tab Break) field in DocType 'Purchase Invoice'
 #. Label of the connections_tab (Tab Break) field in DocType 'Sales Invoice'
@@ -11809,7 +11809,7 @@ msgstr "Bağlantılar"
 
 #: accounts/report/general_ledger/general_ledger.js:172
 msgid "Consider Accounting Dimensions"
-msgstr ""
+msgstr "Muhasebe Boyutlarını Dikkate Al"
 
 #. Label of the consider_party_ledger_amount (Check) field in DocType 'Tax
 #. Withholding Category'
@@ -12712,7 +12712,7 @@ msgstr "Maliyet Merkezi {} bir grup maliyet merkezidir ve grup maliyet merkezler
 
 #: accounts/report/financial_statements.py:611
 msgid "Cost Center: {0} does not exist"
-msgstr ""
+msgstr "Maliyet Merkezi: {0} mevcut değil"
 
 #: setup/doctype/company/company.js:93
 msgid "Cost Centers"
@@ -13215,7 +13215,7 @@ msgstr "Ödeme Girişi Oluştur"
 
 #: manufacturing/doctype/work_order/work_order.js:636
 msgid "Create Pick List"
-msgstr ""
+msgstr "Toplama Listesi Oluştur"
 
 #: accounts/doctype/cheque_print_template/cheque_print_template.js:10
 msgid "Create Print Format"
@@ -15161,7 +15161,7 @@ msgstr "Haftanın günü"
 #. Timeslot'
 #: communication/doctype/communication_medium_timeslot/communication_medium_timeslot.json
 msgid "Day of Week"
-msgstr "Haftanın günü"
+msgstr "Haftanın Günü"
 
 #. Label of the day_to_send (Select) field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -16010,7 +16010,7 @@ msgstr ""
 
 #: config/projects.py:39
 msgid "Define Project type."
-msgstr ""
+msgstr "Proje türünü tanımlayın."
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -16023,7 +16023,7 @@ msgstr "Gecikme (Gün)"
 
 #: selling/report/sales_order_analysis/sales_order_analysis.py:322
 msgid "Delay (in Days)"
-msgstr ""
+msgstr "Gecikme (Gün)"
 
 #. Label of the stop_delay (Int) field in DocType 'Delivery Settings'
 #: stock/doctype/delivery_settings/delivery_settings.json
@@ -16032,7 +16032,7 @@ msgstr "Teslimat Durakları arasındaki gecikme"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:120
 msgid "Delay in payment (Days)"
-msgstr ""
+msgstr "Ödeme Gecikmesi (Gün)"
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:79
 msgid "Delayed"
@@ -16058,7 +16058,7 @@ msgstr "Gecikmiş Sipariş Raporu"
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.json
 #: projects/workspace/projects/projects.json
 msgid "Delayed Tasks Summary"
-msgstr ""
+msgstr "Geciken Görevler Özeti"
 
 #: setup/doctype/company/company.js:214
 msgid "Delete"
@@ -17050,7 +17050,7 @@ msgstr "Fark Miktarı"
 #: stock/report/incorrect_stock_value_report/incorrect_stock_value_report.py:136
 #: stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:130
 msgid "Difference Value"
-msgstr ""
+msgstr "Fark Değeri"
 
 #: stock/doctype/delivery_note/delivery_note.js:442
 msgid "Different 'Source Warehouse' and 'Target Warehouse' can be set for each row."
@@ -18435,7 +18435,7 @@ msgstr "Elektrik"
 
 #: setup/setup_wizard/operations/install_fixtures.py:173
 msgid "Electrical"
-msgstr ""
+msgstr "Elektrik"
 
 #. Label of the hour_rate_electricity (Currency) field in DocType 'Workstation'
 #. Label of the hour_rate_electricity (Currency) field in DocType 'Workstation
@@ -23090,7 +23090,7 @@ msgstr "ID"
 #. Label of the ip_address (Data) field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
 msgid "IP Address"
-msgstr "IP adresi"
+msgstr "IP Adresi"
 
 #. Name of a report
 #: regional/report/irs_1099/irs_1099.json
@@ -32572,7 +32572,7 @@ msgstr "Muhasebe Boyutu için Mahsuplaşma"
 #: setup/doctype/supplier_group/supplier_group.json
 #: stock/doctype/warehouse/warehouse.json
 msgid "Old Parent"
-msgstr "Yaşlı Ebeveyn"
+msgstr ""
 
 #: setup/default_energy_point_rules.py:12
 msgid "On Converting Opportunity"
@@ -44655,7 +44655,7 @@ msgstr "Satır No {0}: Depo gereklidir. Lütfen {1} ürünü ve {2} Şirketi iç
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:515
 msgid "Row Number"
-msgstr ""
+msgstr "Satır Numarası"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:399
 msgid "Row {0}"
@@ -51735,7 +51735,7 @@ msgstr ""
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:201
 msgid "Target Item {0} must be a Stock Item"
-msgstr ""
+msgstr "Hedef Ürün {0} bir Stok Ürünü olmalıdır"
 
 #. Label of the target_location (Link) field in DocType 'Asset Movement Item'
 #: assets/doctype/asset_movement_item/asset_movement_item.json
@@ -51769,13 +51769,13 @@ msgstr "Hedef Sayısı"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:206
 msgid "Target Qty must be a positive number"
-msgstr ""
+msgstr "Hedef Miktar pozitif bir sayı olmalıdır"
 
 #. Label of the target_serial_no (Small Text) field in DocType 'Asset
 #. Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
 msgid "Target Serial No"
-msgstr ""
+msgstr "Hedef Seri No"
 
 #. Label of the target_warehouse (Link) field in DocType 'Sales Invoice Item'
 #. Label of the target_warehouse (Link) field in DocType 'Asset Capitalization'
@@ -51810,7 +51810,7 @@ msgstr "Hedef Depo Adresi"
 #. Label of the target_warehouse_address (Link) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgid "Target Warehouse Address Link"
-msgstr ""
+msgstr "Hedef Depo Adres Bağlantısı"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:216
 msgid "Target Warehouse is mandatory for Decapitalization"
@@ -51818,7 +51818,7 @@ msgstr "Amortisman için Hedef Depo zorunludur"
 
 #: manufacturing/doctype/work_order/work_order.py:450
 msgid "Target Warehouse is required before Submit"
-msgstr ""
+msgstr "Kaydetmeden önce Devam Eden İşler Deposu gereklidir"
 
 #: controllers/selling_controller.py:724
 msgid "Target Warehouse is set for some items but the customer is not an internal customer."
