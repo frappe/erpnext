@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-18 12:37\n"
+"PO-Revision-Date: 2024-08-19 12:45\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -9660,7 +9660,7 @@ msgstr "Kan inte hitta Artikel med denna Streck/QR Kod"
 
 #: controllers/accounts_controller.py:3118
 msgid "Cannot find a default warehouse for item {0}. Please set one in the Item Master or in Stock Settings."
-msgstr ""
+msgstr "Kan inte hitta standardlager för artikel {0}. Ange det i Artikelinställningar eller i Lagerinställningar."
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:491
 msgid "Cannot make any transactions until the deletion job is completed"
@@ -9828,12 +9828,12 @@ msgstr "Carat"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:6
 msgid "Carriage Paid To"
-msgstr ""
+msgstr "Fraktfritt"
 
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:7
 msgid "Carriage and Insurance Paid to"
-msgstr ""
+msgstr "Fraktfritt Inklusive Försäkring"
 
 #. Label of the carrier (Data) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -10263,7 +10263,7 @@ msgstr "Slutför Order / Godkänn Order / Ny Order"
 
 #: setup/setup_wizard/data/industry_type.txt:12
 msgid "Chemical"
-msgstr ""
+msgstr "Kemikalier"
 
 #. Option for the 'Salary Mode' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -10324,19 +10324,19 @@ msgstr "Checkar och Insättningar felaktigt godkända"
 
 #: setup/setup_wizard/data/designation.txt:9
 msgid "Chief Executive Officer"
-msgstr ""
+msgstr "Verkställande Direktör"
 
 #: setup/setup_wizard/data/designation.txt:10
 msgid "Chief Financial Officer"
-msgstr ""
+msgstr "Ekonomi Ansvarig"
 
 #: setup/setup_wizard/data/designation.txt:11
 msgid "Chief Operating Officer"
-msgstr ""
+msgstr "Verksamhet Ansvarig"
 
 #: setup/setup_wizard/data/designation.txt:12
 msgid "Chief Technology Officer"
-msgstr ""
+msgstr "Teknik Ansvarig"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -10659,7 +10659,7 @@ msgstr "Kod"
 
 #: setup/setup_wizard/data/lead_source.txt:4
 msgid "Cold Calling"
-msgstr ""
+msgstr "Telefon Samtal"
 
 #: public/js/setup_wizard.js:190
 msgid "Collapse All"
@@ -10715,7 +10715,7 @@ msgstr "Kolumn {0}"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:52
 msgid "Columns are not according to template. Please compare the uploaded file with standard template"
-msgstr ""
+msgstr "Kolumner är inte enligt mall. Jämför uppladdad fil med standardmall"
 
 #: accounts/doctype/payment_terms_template/payment_terms_template.py:39
 msgid "Combined invoice portion must equal 100%"
@@ -11892,7 +11892,7 @@ msgstr "Konsult"
 
 #: setup/setup_wizard/data/industry_type.txt:14
 msgid "Consulting"
-msgstr ""
+msgstr "Rådgivning"
 
 #: setup/setup_wizard/operations/install_fixtures.py:64
 msgid "Consumable"
@@ -11980,7 +11980,7 @@ msgstr "Förbrukad Lager Totalt Värde"
 
 #: setup/setup_wizard/data/industry_type.txt:15
 msgid "Consumer Products"
-msgstr ""
+msgstr "Konsument Produkter"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:175
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:99
@@ -12478,7 +12478,7 @@ msgstr "Korrigerande / Förebyggande"
 
 #: setup/setup_wizard/data/industry_type.txt:16
 msgid "Cosmetics"
-msgstr ""
+msgstr "Kosmetika"
 
 #. Label of the cost (Currency) field in DocType 'Subscription Plan'
 #: accounts/doctype/subscription_plan/subscription_plan.json
@@ -12738,7 +12738,7 @@ msgstr "Kostnad Per Enhet"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:8
 msgid "Cost and Freight"
-msgstr ""
+msgstr "Säljaren Betalar Frakt"
 
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:369
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:393
@@ -12794,7 +12794,7 @@ msgstr "Totalt Kostnad per År"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:9
 msgid "Cost, Insurance and Freight"
-msgstr ""
+msgstr "Säljaren Betalar Frakt, Försäkring"
 
 #. Label of the costing (Tab Break) field in DocType 'BOM'
 #. Label of the currency_detail (Section Break) field in DocType 'BOM Creator'
@@ -13507,7 +13507,7 @@ msgstr "Skapar Dimensioner ..."
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:92
 msgid "Creating Journal Entries..."
-msgstr ""
+msgstr "Skapar Journal Poster..."
 
 #: stock/doctype/packing_slip/packing_slip.js:42
 msgid "Creating Packing Slip ..."
@@ -14738,7 +14738,7 @@ msgstr "Kund Tjänst"
 
 #: setup/setup_wizard/data/designation.txt:13
 msgid "Customer Service Representative"
-msgstr ""
+msgstr "Kundtjänst Representant"
 
 #. Label of the customer_territory (Link) field in DocType 'Loyalty Program'
 #: accounts/doctype/loyalty_program/loyalty_program.json
@@ -14825,7 +14825,7 @@ msgstr "Kund Inköp Order Nummer"
 
 #: setup/setup_wizard/data/lead_source.txt:8
 msgid "Customer's Vendor"
-msgstr ""
+msgstr "Kundens Leverantör"
 
 #. Name of a report
 #: selling/report/customer_wise_item_price/customer_wise_item_price.json
@@ -15234,7 +15234,7 @@ msgstr "Ansvarig"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:3
 msgid "Dealer"
-msgstr ""
+msgstr "Återförsäljare"
 
 #: templates/emails/confirm_appointment.html:1
 msgid "Dear"
@@ -15939,7 +15939,7 @@ msgstr "Standard"
 
 #: setup/setup_wizard/data/industry_type.txt:17
 msgid "Defense"
-msgstr ""
+msgstr "Försvar"
 
 #. Label of the deferred_accounting_section (Section Break) field in DocType
 #. 'Item'
@@ -16146,12 +16146,12 @@ msgstr "Levererad Belopp"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:10
 msgid "Delivered At Place"
-msgstr ""
+msgstr "Levererat Angiven Plats"
 
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:11
 msgid "Delivered At Place Unloaded"
-msgstr ""
+msgstr "Levererat Lossningsplats"
 
 #. Label of the delivered_by_supplier (Check) field in DocType 'POS Invoice
 #. Item'
@@ -16165,7 +16165,7 @@ msgstr "Levereras Av Leverantör"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:12
 msgid "Delivered Duty Paid"
-msgstr ""
+msgstr "Levererat Förtullat"
 
 #. Name of a report
 #. Label of a Link in the Receivables Workspace
@@ -16421,7 +16421,7 @@ msgstr "Avdelning"
 
 #: setup/setup_wizard/data/industry_type.txt:18
 msgid "Department Stores"
-msgstr ""
+msgstr "Varuhus"
 
 #. Label of the departure_time (Datetime) field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
@@ -16906,7 +16906,7 @@ msgstr "Befattning"
 
 #: setup/setup_wizard/data/designation.txt:14
 msgid "Designer"
-msgstr ""
+msgstr "Designer"
 
 #. Name of a role
 #: crm/doctype/lead/lead.json projects/doctype/project/project.json
@@ -18465,7 +18465,7 @@ msgstr "Elektroniskt Faktura Register"
 
 #: setup/setup_wizard/data/industry_type.txt:20
 msgid "Electronics"
-msgstr ""
+msgstr "Elektronik"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -19071,11 +19071,11 @@ msgstr "Slut datum på aktuell prenumeration period"
 
 #: setup/setup_wizard/data/industry_type.txt:21
 msgid "Energy"
-msgstr ""
+msgstr "Energi"
 
 #: setup/setup_wizard/data/designation.txt:15
 msgid "Engineer"
-msgstr ""
+msgstr "Ingenjör"
 
 #: manufacturing/report/bom_stock_report/bom_stock_report.html:13
 #: manufacturing/report/bom_stock_report/bom_stock_report.html:23
@@ -19203,7 +19203,7 @@ msgstr "Ange {0} belopp."
 
 #: setup/setup_wizard/data/industry_type.txt:22
 msgid "Entertainment & Leisure"
-msgstr ""
+msgstr "Underhållning & Fritid"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:57
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:82
@@ -19380,7 +19380,7 @@ msgstr "Även fakturor med tillämpa moms undanhållning omarkerad kommer att be
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:2
 msgid "Ex Works"
-msgstr ""
+msgstr "Fritt Fabrik"
 
 #. Label of the url (Data) field in DocType 'Currency Exchange Settings'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -19563,11 +19563,11 @@ msgstr "Exekvering"
 
 #: setup/setup_wizard/data/designation.txt:16
 msgid "Executive Assistant"
-msgstr ""
+msgstr "Verkställande Assistent"
 
 #: setup/setup_wizard/data/industry_type.txt:23
 msgid "Executive Search"
-msgstr ""
+msgstr "Verkställande Sökning"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:67
 msgid "Exempt Supplies"
@@ -19575,7 +19575,7 @@ msgstr "Undantagna Leveranser"
 
 #: setup/setup_wizard/data/lead_source.txt:5
 msgid "Exhibition"
-msgstr ""
+msgstr "Utställning"
 
 #. Option for the 'Create Chart Of Accounts Based On' (Select) field in DocType
 #. 'Company'
@@ -19590,7 +19590,7 @@ msgstr "Befintlig Bolag"
 
 #: setup/setup_wizard/data/lead_source.txt:1
 msgid "Existing Customer"
-msgstr ""
+msgstr "Befintlig Kund"
 
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -20367,7 +20367,7 @@ msgstr "Finans Register"
 
 #: setup/setup_wizard/data/designation.txt:17
 msgid "Finance Manager"
-msgstr ""
+msgstr "Ekonomi Ansvarig"
 
 #. Name of a report
 #: accounts/report/financial_ratios/financial_ratios.json
@@ -20381,7 +20381,7 @@ msgstr "Rapporter"
 
 #: setup/setup_wizard/data/industry_type.txt:24
 msgid "Financial Services"
-msgstr ""
+msgstr "Finansiella Tjänster"
 
 #. Title of an Onboarding Step
 #. Label of a Card Break in the Financial Reports Workspace
@@ -20799,7 +20799,7 @@ msgstr "Följande artiklar {0} är inte vald som {1} artikel. Man kan aktivera d
 
 #: setup/setup_wizard/data/industry_type.txt:25
 msgid "Food, Beverage & Tobacco"
-msgstr ""
+msgstr "Livsmedel, Dryck & Tobak"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -20984,7 +20984,7 @@ msgstr "För {0} erfordras kvantitet för att skapa retur post"
 
 #: accounts/doctype/subscription/subscription.js:42
 msgid "Force-Fetch Subscription Updates"
-msgstr ""
+msgstr "Hämta Prenumeration Uppdateringar"
 
 #. Label of a shortcut in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
@@ -21022,12 +21022,12 @@ msgstr "Forum Adress"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:4
 msgid "Free Alongside Ship"
-msgstr ""
+msgstr "Fritt vid Fartygets Sida"
 
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:3
 msgid "Free Carrier"
-msgstr ""
+msgstr "Fritt Fraktföraren"
 
 #. Label of the free_item (Link) field in DocType 'Pricing Rule'
 #. Label of the section_break_6 (Section Break) field in DocType 'Promotional
@@ -21045,7 +21045,7 @@ msgstr "Gratis Artikel Pris"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:5
 msgid "Free On Board"
-msgstr ""
+msgstr "Fritt Ombord"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:282
 msgid "Free item code is not selected"
@@ -21305,7 +21305,7 @@ msgstr "Från Datum kan inte vara senare än Till Datum"
 
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:26
 msgid "From Date is mandatory"
-msgstr ""
+msgstr "Från Datum Erfordras"
 
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.py:21
 #: accounts/report/general_ledger/general_ledger.py:76
@@ -22410,7 +22410,7 @@ msgstr "Hälsning Sektion"
 
 #: setup/setup_wizard/data/industry_type.txt:26
 msgid "Grocery"
-msgstr ""
+msgstr "Livsmedel"
 
 #. Label of the gross_margin (Currency) field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -22748,7 +22748,7 @@ msgstr "Har Standard Nummer Serie för Parti?"
 
 #: setup/setup_wizard/data/designation.txt:19
 msgid "Head of Marketing and Sales"
-msgstr ""
+msgstr "Marknadsföring och Försäljning Ansvarig"
 
 #. Description of a DocType
 #: accounts/doctype/account/account.json
@@ -22757,7 +22757,7 @@ msgstr "Huvudkonto (eller grupper) mot vilka bokföringsposter skapas och saldon
 
 #: setup/setup_wizard/data/industry_type.txt:27
 msgid "Health Care"
-msgstr ""
+msgstr "Sjukvård"
 
 #. Label of the health_details (Small Text) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -23241,7 +23241,7 @@ msgstr "Om inaktiverad, 'Avrunda Totalt' fält kommer inte visas i någon Transa
 #. List'
 #: stock/doctype/pick_list/pick_list.json
 msgid "If enabled then system won't apply the pricing rule on the delivery note which will be create from the pick list"
-msgstr ""
+msgstr "Om aktiverat kommer systemet inte att tillämpa prisregel på följesedel som kommer att skapas från plocklista"
 
 #. Description of the 'Pick Manually' (Check) field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
@@ -23563,7 +23563,7 @@ msgstr "Ignorera att Prissättning Regel är aktiverad. Det går inte att använ
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #: accounts/report/general_ledger/general_ledger.js:214
 msgid "Ignore System Generated Credit / Debit Notes"
-msgstr ""
+msgstr "Ignorera System Skapade Kredit / Debet Notor"
 
 #. Label of the ignore_user_time_overlap (Check) field in DocType 'Projects
 #. Settings'
@@ -23701,7 +23701,7 @@ msgstr "Visa Bild"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:6
 msgid "Implementation Partner"
-msgstr ""
+msgstr "Implementering Partner"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:132
 msgid "Import"
@@ -24200,7 +24200,7 @@ msgstr "Inkludera Kassa Transaktioner"
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:191
 msgid "Include Payment"
-msgstr ""
+msgstr "Inkludera Betalning"
 
 #. Label of the is_pos (Check) field in DocType 'POS Invoice'
 #. Label of the is_pos (Check) field in DocType 'Sales Invoice'
@@ -24855,7 +24855,7 @@ msgstr "Interna Överföringar kan endast göras i bolag standard valuta"
 
 #: setup/setup_wizard/data/industry_type.txt:28
 msgid "Internet Publishing"
-msgstr ""
+msgstr "Internetpublicering"
 
 #. Label of the introduction (Text) field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
@@ -25101,7 +25101,7 @@ msgstr "Inventering, Lager, Analyser med mera."
 
 #: setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
-msgstr ""
+msgstr "Risk Kapital"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:38
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:53
@@ -27582,7 +27582,7 @@ msgstr "Journal Post {0} har inte konto {1} eller är redan avstämd mot andra v
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:97
 msgid "Journal entries have been created"
-msgstr ""
+msgstr "Journal Poster är skapade"
 
 #. Label of the journals_section (Section Break) field in DocType 'Accounts
 #. Settings'
@@ -29234,7 +29234,7 @@ msgstr "Ansvarig"
 
 #: setup/setup_wizard/data/designation.txt:21
 msgid "Managing Director"
-msgstr ""
+msgstr "Verkställande Direktör"
 
 #. Label of the reqd (Check) field in DocType 'POS Field'
 #. Label of the reqd (Check) field in DocType 'Inventory Dimension'
@@ -29666,11 +29666,11 @@ msgstr "Marknadsföring Kostnader Konto"
 
 #: setup/setup_wizard/data/designation.txt:22
 msgid "Marketing Manager"
-msgstr ""
+msgstr "Marknadsföring Ansvarig"
 
 #: setup/setup_wizard/data/designation.txt:23
 msgid "Marketing Specialist"
-msgstr ""
+msgstr "Marknadsföring Specialist"
 
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -29684,7 +29684,7 @@ msgstr "Mask"
 
 #: setup/setup_wizard/data/lead_source.txt:7
 msgid "Mass Mailing"
-msgstr ""
+msgstr "Massutskick"
 
 #: manufacturing/doctype/workstation/workstation_dashboard.py:8
 msgid "Master"
@@ -30987,7 +30987,7 @@ msgstr "Mer Information"
 
 #: setup/setup_wizard/data/industry_type.txt:32
 msgid "Motion Picture & Video"
-msgstr ""
+msgstr "Film & Video"
 
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:58
 #: stock/dashboard/item_dashboard_list.html:52 stock/doctype/batch/batch.js:75
@@ -31069,7 +31069,7 @@ msgstr "Flera artiklar kan inte väljas som färdiga artiklar"
 
 #: setup/setup_wizard/data/industry_type.txt:33
 msgid "Music"
-msgstr ""
+msgstr "Musik"
 
 #. Label of the must_be_whole_number (Check) field in DocType 'UOM'
 #: manufacturing/doctype/work_order/work_order.py:998
@@ -31705,7 +31705,7 @@ msgstr "Nyhetsbrev"
 
 #: setup/setup_wizard/data/industry_type.txt:34
 msgid "Newspaper Publishers"
-msgstr ""
+msgstr "Tidningsutgivare"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -32702,7 +32702,7 @@ msgstr "Pågående Jobbkort"
 
 #: setup/setup_wizard/data/industry_type.txt:35
 msgid "Online Auctions"
-msgstr ""
+msgstr "Auktioner på Nätet"
 
 #. Description of the 'Default Advance Account' (Link) field in DocType
 #. 'Payment Reconciliation'
@@ -34033,11 +34033,11 @@ msgstr "Kassa Faktura Referens"
 
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.py:90
 msgid "POS Invoice is already consolidated"
-msgstr ""
+msgstr "Kassa Faktura är redan konsoliderad"
 
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.py:98
 msgid "POS Invoice is not submitted"
-msgstr ""
+msgstr "Kassa Faktura är inte godkänd"
 
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.py:101
 msgid "POS Invoice isn't created by user {}"
@@ -34045,7 +34045,7 @@ msgstr "Kassa Faktura skapades inte av Användare {}"
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:191
 msgid "POS Invoice should have the field {0} checked."
-msgstr ""
+msgstr "Kassa Faktura ska ha {} fält vald."
 
 #. Label of the pos_invoices (Table) field in DocType 'POS Invoice Merge Log'
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.json
@@ -34108,7 +34108,7 @@ msgstr "Kassa Profil Användare"
 
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.py:95
 msgid "POS Profile doesn't match {}"
-msgstr ""
+msgstr "Kassa Profil matchar inte {}"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1140
 msgid "POS Profile required to make POS Entry"
@@ -35735,7 +35735,7 @@ msgstr "Väntar på bearbetning"
 
 #: setup/setup_wizard/data/industry_type.txt:36
 msgid "Pension Funds"
-msgstr ""
+msgstr "Pensionsfonder"
 
 #. Option for the 'Evaluation Period' (Select) field in DocType 'Supplier
 #. Scorecard'
@@ -35985,7 +35985,7 @@ msgstr "Läkemedel"
 
 #: setup/setup_wizard/data/industry_type.txt:37
 msgid "Pharmaceuticals"
-msgstr ""
+msgstr "Läkemedel"
 
 #. Option for the 'Type' (Select) field in DocType 'Mode of Payment'
 #. Option for the 'Payment Channel' (Select) field in DocType 'Payment Gateway
@@ -36547,11 +36547,11 @@ msgstr "Aktivera {} i {} för att tillåta samma Artikel i flera rader"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:380
 msgid "Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
-msgstr ""
+msgstr "Kontrollera att {0} konto är Balans Rapport Konto. Ändra Överordnad Konto till Balans Rapport Konto eller välj annat konto."
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:388
 msgid "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
-msgstr ""
+msgstr "Kontrollera att {0} konto {1} är Skuld Konto. Ändra Konto Typ till Skuld Konto Typ eller välj ett annat konto."
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:877
 msgid "Please ensure {} account is a Balance Sheet account."
@@ -37712,7 +37712,7 @@ msgstr "Föredragen E-Post"
 
 #: setup/setup_wizard/data/designation.txt:24
 msgid "President"
-msgstr ""
+msgstr "Ordförande"
 
 #. Label of the prevdoc_doctype (Data) field in DocType 'Packed Item'
 #: stock/doctype/packed_item/packed_item.json
@@ -38476,7 +38476,7 @@ msgstr "Prioritet {0} har upprepats."
 
 #: setup/setup_wizard/data/industry_type.txt:38
 msgid "Private Equity"
-msgstr ""
+msgstr "Eget Kapital"
 
 #. Label of the probability (Percent) field in DocType 'Prospect Opportunity'
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
@@ -38767,7 +38767,7 @@ msgstr "Artikel Förfåga"
 
 #: setup/setup_wizard/data/designation.txt:25
 msgid "Product Manager"
-msgstr ""
+msgstr "Produkt Ansvarig"
 
 #. Label of the product_price_id (Data) field in DocType 'Subscription Plan'
 #: accounts/doctype/subscription_plan/subscription_plan.json
@@ -39134,7 +39134,7 @@ msgstr "Projekt"
 
 #: setup/setup_wizard/data/designation.txt:26
 msgid "Project Manager"
-msgstr ""
+msgstr "Projekt Ansvarig"
 
 #. Label of the project_name (Data) field in DocType 'Sales Invoice Timesheet'
 #. Label of the project_name (Data) field in DocType 'Project'
@@ -39426,7 +39426,7 @@ msgstr "Lämnar"
 
 #: setup/doctype/company/company.py:447
 msgid "Provisional Account"
-msgstr ""
+msgstr "Provisoriskt Konto"
 
 #. Label of the provisional_expense_account (Link) field in DocType 'Purchase
 #. Receipt Item'
@@ -39456,7 +39456,7 @@ msgstr "Publicerad Datum"
 
 #: setup/setup_wizard/data/industry_type.txt:39
 msgid "Publishing"
-msgstr ""
+msgstr "Utgivning"
 
 #. Option for the 'Invoice Type' (Select) field in DocType 'Opening Invoice
 #. Creation Tool'
@@ -41611,7 +41611,7 @@ msgstr "Avläsningar"
 
 #: setup/setup_wizard/data/industry_type.txt:40
 msgid "Real Estate"
-msgstr ""
+msgstr "Fastigheter"
 
 #: support/doctype/issue/issue.js:51
 msgid "Reason"
@@ -43196,7 +43196,7 @@ msgstr "Forskning & Utveckling"
 
 #: setup/setup_wizard/data/designation.txt:27
 msgid "Researcher"
-msgstr ""
+msgstr "Forskare"
 
 #. Description of the 'Supplier Primary Address' (Link) field in DocType
 #. 'Supplier'
@@ -43216,7 +43216,7 @@ msgstr "Välj om, om vald kontakt är redigerad efter spara"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:7
 msgid "Reseller"
-msgstr ""
+msgstr "Återförsäljare"
 
 #: accounts/doctype/payment_request/payment_request.js:39
 msgid "Resend Payment Email"
@@ -43585,11 +43585,11 @@ msgstr "Återuppta Jobb"
 
 #: setup/setup_wizard/data/industry_type.txt:41
 msgid "Retail & Wholesale"
-msgstr ""
+msgstr "Detalj & Partihandel"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:5
 msgid "Retailer"
-msgstr ""
+msgstr "Detaljhandel"
 
 #. Label of the retain_sample (Check) field in DocType 'Item'
 #. Label of the retain_sample (Check) field in DocType 'Purchase Receipt Item'
@@ -44633,7 +44633,7 @@ msgstr "Rad # {}: Lager Kvantitet räcker inte för Artikel Kod: {} på Lager {}
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:100
 msgid "Row #{}: The original Invoice {} of return invoice {} is not consolidated."
-msgstr ""
+msgstr "Rad #{}: Ursprunglig Faktura {} för Retur Faktura {} är inte konsoliderad."
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:383
 msgid "Row #{}: You cannot add positive quantities in a return invoice. Please remove item {} to complete the return."
@@ -45772,7 +45772,7 @@ msgstr "Försäljning Register"
 
 #: setup/setup_wizard/data/designation.txt:28
 msgid "Sales Representative"
-msgstr ""
+msgstr "Försäljningsrepresentant"
 
 #: accounts/report/gross_profit/gross_profit.py:797
 #: stock/doctype/delivery_note/delivery_note.js:218
@@ -46357,7 +46357,7 @@ msgstr "Sekundär Roll"
 
 #: setup/setup_wizard/data/designation.txt:29
 msgid "Secretary"
-msgstr ""
+msgstr "Sekreterare"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:172
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:117
@@ -46371,7 +46371,7 @@ msgstr "Säkrade Lån Konto"
 
 #: setup/setup_wizard/data/industry_type.txt:42
 msgid "Securities & Commodity Exchanges"
-msgstr ""
+msgstr "Värdepapper och Råvarubörser"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:18
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:26
@@ -48023,7 +48023,7 @@ msgstr "Hållbarhet i Dagar"
 
 #: stock/doctype/batch/batch.py:191
 msgid "Shelf Life in Days"
-msgstr ""
+msgstr "Hållbarhet i Dagar"
 
 #. Label of the shift (Link) field in DocType 'Depreciation Schedule'
 #: assets/doctype/asset/asset.js:298
@@ -48686,7 +48686,7 @@ msgstr "Utjämning Konstant"
 
 #: setup/setup_wizard/data/industry_type.txt:44
 msgid "Soap & Detergent"
-msgstr ""
+msgstr "Tvål & Rengöringsmedel"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:32
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:45
@@ -48696,7 +48696,7 @@ msgstr "Programvara"
 
 #: setup/setup_wizard/data/designation.txt:30
 msgid "Software Developer"
-msgstr ""
+msgstr "Mjukvaruutvecklare"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json assets/doctype/asset/asset_list.js:9
@@ -48831,7 +48831,7 @@ msgstr " Från Lager Adress"
 #. Label of the source_warehouse_address (Link) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgid "Source Warehouse Address Link"
-msgstr ""
+msgstr "Från Lager Adress Länk"
 
 #: assets/doctype/asset_movement/asset_movement.py:88
 msgid "Source and Target Location cannot be same"
@@ -48932,7 +48932,7 @@ msgstr "Delar {0} {1} i {2} rader enligt Betalning Villkor"
 
 #: setup/setup_wizard/data/industry_type.txt:46
 msgid "Sports"
-msgstr ""
+msgstr "Sport"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -50625,7 +50625,7 @@ msgstr "Prenumeration Start Datum"
 
 #: accounts/doctype/subscription/subscription.py:729
 msgid "Subscription for Future dates cannot be processed."
-msgstr ""
+msgstr "Prenumeration för framtida datum kan inte behandlas."
 
 #: selling/doctype/customer/customer_dashboard.py:28
 msgid "Subscriptions"
@@ -51170,7 +51170,7 @@ msgstr "Leverantör Offert {0} Skapad"
 
 #: setup/setup_wizard/data/lead_source.txt:6
 msgid "Supplier Reference"
-msgstr ""
+msgstr "Leverantör Referens"
 
 #. Label of the supplier_score (Data) field in DocType 'Supplier Scorecard'
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
@@ -51819,7 +51819,7 @@ msgstr "Till Lager Adress"
 #. Label of the target_warehouse_address (Link) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgid "Target Warehouse Address Link"
-msgstr ""
+msgstr "Till Lager Adress Länk"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:216
 msgid "Target Warehouse is mandatory for Decapitalization"
@@ -52159,7 +52159,7 @@ msgstr "Moms Avdrag Verifikat"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:339
 msgid "Tax Withholding"
-msgstr ""
+msgstr "Moms Avdrag"
 
 #. Name of a DocType
 #: accounts/doctype/tax_withholding_account/tax_withholding_account.json
@@ -52412,11 +52412,11 @@ msgstr "Teknisk Atmosfär"
 
 #: setup/setup_wizard/data/industry_type.txt:47
 msgid "Technology"
-msgstr ""
+msgstr "Teknologi"
 
 #: setup/setup_wizard/data/industry_type.txt:48
 msgid "Telecommunications"
-msgstr ""
+msgstr "Telekommunikation"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:69
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:93
@@ -52430,7 +52430,7 @@ msgstr "Telefoni Typ"
 
 #: setup/setup_wizard/data/industry_type.txt:49
 msgid "Television"
-msgstr ""
+msgstr "Television"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #. Label of the template (Link) field in DocType 'Quality Feedback'
@@ -52969,7 +52969,7 @@ msgstr "Åtgärd {0} kan inte vara underåtgärd"
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:104
 msgid "The original invoice should be consolidated before or along with the return invoice."
-msgstr ""
+msgstr "Original Faktura ska konsolideras före eller tillsammans med retur faktura."
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:229
 msgid "The parent account {0} does not exists in the uploaded template"
@@ -53053,7 +53053,7 @@ msgstr "Aktier finns inte med {0}"
 
 #: stock/stock_ledger.py:752
 msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
-msgstr ""
+msgstr "Lager för artikel {0} i {1} lager var negativt {2}. Skapa positiv post {3} före {4} och {5} för att bokföra rätt grund pris. För mer information, läs dokumentation <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'><a>."
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:615
 msgid "The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
@@ -53904,7 +53904,7 @@ msgstr "Till Datum kan inte vara tidigare än Från Datum"
 
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:29
 msgid "To Date is mandatory"
-msgstr ""
+msgstr "Till Datum Erfordras"
 
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:11
 #: buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:11
@@ -55406,7 +55406,7 @@ msgstr "Transport Faktura Nummer"
 
 #: setup/setup_wizard/data/industry_type.txt:50
 msgid "Transportation"
-msgstr ""
+msgstr "Transport"
 
 #. Label of the transporter (Link) field in DocType 'Driver'
 #. Label of the transporter (Link) field in DocType 'Delivery Note'
@@ -57125,7 +57125,7 @@ msgstr "Leverantör Namn"
 
 #: setup/setup_wizard/data/industry_type.txt:51
 msgid "Venture Capital"
-msgstr ""
+msgstr "Risk Kapital"
 
 #: www/book_appointment/verify/index.html:15
 msgid "Verification failed please check the link"
@@ -57159,7 +57159,7 @@ msgstr "Vil Landad Kostnad Verifikat"
 
 #: setup/setup_wizard/data/designation.txt:31
 msgid "Vice President"
-msgstr ""
+msgstr "Vice Ordförande"
 
 #. Name of a DocType
 #: utilities/doctype/video/video.json
@@ -57920,7 +57920,7 @@ msgstr "Varning - Rad # {0}: Fakturerbara timmar är fler än verkliga timmar"
 
 #: stock/stock_ledger.py:762
 msgid "Warning on Negative Stock"
-msgstr ""
+msgstr "Varna vid Negativt Lager"
 
 #: accounts/doctype/cost_center_allocation/cost_center_allocation.py:114
 msgid "Warning!"
@@ -58910,7 +58910,7 @@ msgstr "Du väljer mer än vad som krävs för artikel {0}. Kontrollera om det f
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:108
 msgid "You can add the original invoice {} manually to proceed."
-msgstr ""
+msgstr "Lägg till original faktura {} manuellt för att fortsätta."
 
 #: templates/emails/confirm_appointment.html:10
 msgid "You can also copy-paste this link in your browser"
