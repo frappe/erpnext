@@ -208,6 +208,8 @@ class DeliveryNote(SellingController):
 			)
 
 	def onload(self):
+		super().onload()
+
 		if self.docstatus == 0:
 			self.set_onload("has_unpacked_items", self.has_unpacked_items())
 
