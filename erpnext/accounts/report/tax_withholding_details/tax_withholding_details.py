@@ -336,7 +336,7 @@ def get_tds_docs(filters):
 def get_tds_docs_query(filters, bank_accounts, tds_accounts):
 	if not tds_accounts:
 		frappe.throw(
-			_("No {0} Accounts found for this company.").format(frappe.bold("Tax Withholding")),
+			_("No {0} Accounts found for this company.").format(frappe.bold(_("Tax Withholding"))),
 			title=_("Accounts Missing Error"),
 		)
 	gle = frappe.qb.DocType("GL Entry")

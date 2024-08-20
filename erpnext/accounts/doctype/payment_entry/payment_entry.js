@@ -230,7 +230,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	hide_unhide_fields: function (frm) {
 		var company_currency = frm.doc.company
-			? frappe.get_doc(":Company", frm.doc.company).default_currency
+			? frappe.get_doc(":Company", frm.doc.company)?.default_currency
 			: "";
 
 		frm.toggle_display(
