@@ -67,5 +67,5 @@ frappe.ui.form.on("Brand", {
 				filters: { company: row.company },
 			};
 		});
-	}
+	},
 });
