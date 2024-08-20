@@ -571,49 +571,6 @@ cur_frm.cscript["Make Delivery Note"] = function () {
 	});
 };
 
-cur_frm.fields_dict.cash_bank_account.get_query = function (doc) {
-	return {
-		filters: [
-			["Account", "account_type", "in", ["Cash", "Bank"]],
-			["Account", "root_type", "=", "Asset"],
-			["Account", "is_group", "=", 0],
-			["Account", "company", "=", doc.company],
-		],
-	};
-};
-
-cur_frm.fields_dict.write_off_account.get_query = function (doc) {
-	return {
-		filters: {
-			report_type: "Profit and Loss",
-			is_group: 0,
-			company: doc.company,
-		},
-	};
-};
-
-// Write off cost center
-//-----------------------
-cur_frm.fields_dict.write_off_cost_center.get_query = function (doc) {
-	return {
-		filters: {
-			is_group: 0,
-			company: doc.company,
-		},
-	};
-};
-
-// Cost Center in Details Table
-// -----------------------------
-cur_frm.fields_dict["items"].grid.get_field("cost_center").get_query = function (doc) {
-	return {
-		filters: {
-			company: doc.company,
-			is_group: 0,
-		},
-	};
-};
-
 cur_frm.cscript.income_account = function (doc, cdt, cdn) {
 	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "income_account");
 };
@@ -626,28 +583,6 @@ cur_frm.cscript.cost_center = function (doc, cdt, cdn) {
 	erpnext.utils.copy_value_in_all_rows(doc, cdt, cdn, "items", "cost_center");
 };
 
-cur_frm.set_query("debit_to", function (doc) {
-	return {
-		filters: {
-			account_type: "Receivable",
-			is_group: 0,
-			company: doc.company,
-		},
-	};
-});
-
-cur_frm.set_query("asset", "items", function (doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	return {
-		filters: [
-			["Asset", "item_code", "=", d.item_code],
-			["Asset", "docstatus", "=", 1],
-			["Asset", "status", "in", ["Submitted", "Partially Depreciated", "Fully Depreciated"]],
-			["Asset", "company", "=", doc.company],
-		],
-	};
-});
-
 frappe.ui.form.on("Sales Invoice", {
 	setup: function (frm) {
 		frm.add_fetch("customer", "tax_id", "tax_id");
@@ -657,71 +592,132 @@ frappe.ui.form.on("Sales Invoice", {
 		frm.set_df_property("packed_items", "cannot_add_rows", true);
 		frm.set_df_property("packed_items", "cannot_delete_rows", true);
 
-		frm.set_query("account_for_change_amount", function () {
+		frm.set_query("cash_bank_account", function (doc) {
+			return {
+				filters: [
+					["Account", "account_type", "in", ["Cash", "Bank"]],
+					["Account", "root_type", "=", "Asset"],
+					["Account", "is_group", "=", 0],
+					["Account", "company", "=", doc.company],
+				],
+			};
+		});
+
+		frm.set_query("write_off_account", function (doc) {
 			return {
 				filters: {
-					account_type: ["in", ["Cash", "Bank"]],
-					company: frm.doc.company,
+					report_type: "Profit and Loss",
+					is_group: 0,
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("write_off_cost_center", function (doc) {
+			return {
+				filters: {
+					is_group: 0,
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", "items", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
 					is_group: 0,
 				},
 			};
 		});
 
-		frm.set_query("unrealized_profit_loss_account", function () {
+		frm.set_query("debit_to", function (doc) {
 			return {
 				filters: {
-					company: frm.doc.company,
+					account_type: "Receivable",
+					is_group: 0,
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("asset", "items", function (doc, cdt, cdn) {
+			const row = locals[cdt][cdn];
+			return {
+				filters: [
+					["Asset", "item_code", "=", row.item_code],
+					["Asset", "docstatus", "=", 1],
+					["Asset", "status", "in", ["Submitted", "Partially Depreciated", "Fully Depreciated"]],
+					["Asset", "company", "=", doc.company],
+				],
+			};
+		});
+
+		frm.set_query("account_for_change_amount", function (doc) {
+			return {
+				filters: {
+					account_type: ["in", ["Cash", "Bank"]],
+					company: doc.company,
+					is_group: 0,
+				},
+			};
+		});
+
+		frm.set_query("unrealized_profit_loss_account", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
 					is_group: 0,
 					root_type: "Liability",
 				},
 			};
 		});
 
-		frm.set_query("adjustment_against", function () {
+		frm.set_query("adjustment_against", function (doc) {
 			return {
 				filters: {
-					company: frm.doc.company,
-					customer: frm.doc.customer,
+					company: doc.company,
+					customer: doc.customer,
 					docstatus: 1,
 				},
 			};
 		});
 
-		frm.set_query("additional_discount_account", function () {
+		frm.set_query("additional_discount_account", function (doc) {
 			return {
 				filters: {
-					company: frm.doc.company,
+					company: doc.company,
 					is_group: 0,
 					report_type: "Profit and Loss",
 				},
 			};
 		});
 
-		frm.set_query("income_account", "items", function () {
+		frm.set_query("income_account", "items", function (doc) {
 			return {
 				query: "erpnext.controllers.queries.get_income_account",
 				filters: {
-					company: frm.doc.company,
+					company: doc.company,
 					disabled: 0,
 				},
 			};
 		});
 
-		(frm.custom_make_buttons = {
+		frm.custom_make_buttons = {
 			"Delivery Note": "Delivery",
 			"Sales Invoice": "Return / Credit Note",
 			"Payment Request": "Payment Request",
 			"Payment Entry": "Payment",
-		}),
-			(frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function (doc, cdt, cdn) {
-				return {
-					query: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet",
-					filters: { project: doc.project },
-				};
-			});
+		};
 
-		// discount account
-		frm.fields_dict["items"].grid.get_field("discount_account").get_query = function (doc) {
+		frm.set_query("time_sheet", "timesheets", function (doc, cdt, cdn) {
+			return {
+				query: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet",
+				filters: { project: doc.project },
+			};
+		});
+
+		frm.set_query("discount_account", "items", function (doc) {
 			return {
 				filters: {
 					report_type: "Profit and Loss",
@@ -729,9 +725,9 @@ frappe.ui.form.on("Sales Invoice", {
 					is_group: 0,
 				},
 			};
-		};
+		});
 
-		frm.fields_dict["items"].grid.get_field("deferred_revenue_account").get_query = function (doc) {
+		frm.set_query("deferred_revenue_account", "items", function (doc) {
 			return {
 				filters: {
 					root_type: "Liability",
@@ -739,7 +735,7 @@ frappe.ui.form.on("Sales Invoice", {
 					is_group: 0,
 				},
 			};
-		};
+		});
 
 		frm.set_query("company_address", function (doc) {
 			if (!doc.company) {
@@ -768,25 +764,23 @@ frappe.ui.form.on("Sales Invoice", {
 			};
 		});
 
-		// set get_query for loyalty redemption account
-		frm.fields_dict["loyalty_redemption_account"].get_query = function () {
+		frm.set_query("loyalty_redemption_account", function () {
 			return {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
 				},
 			};
-		};
+		});
 
-		// set get_query for loyalty redemption cost center
-		frm.fields_dict["loyalty_redemption_cost_center"].get_query = function () {
+		frm.set_query("loyalty_redemption_cost_center", function () {
 			return {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
 				},
 			};
-		};
+		});
 	},
 	// When multiple companies are set up. in case company name is changed set default company address
 	company: function (frm) {

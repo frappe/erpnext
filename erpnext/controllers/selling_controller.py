@@ -542,7 +542,9 @@ class SellingController(StockController):
 
 	def get_sle_for_source_warehouse(self, item_row):
 		serial_and_batch_bundle = (
-			item_row.serial_and_batch_bundle if not self.is_internal_transfer() else None
+			item_row.serial_and_batch_bundle
+			if not self.is_internal_transfer() or self.docstatus == 1
+			else None
 		)
 		if serial_and_batch_bundle and self.is_internal_transfer() and self.is_return:
 			if self.docstatus == 1:
@@ -692,7 +694,7 @@ class SellingController(StockController):
 			duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
 			duplicate_items_msg += "<br><br>"
 			duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
-				frappe.bold("Allow Item to Be Added Multiple Times in a Transaction"),
+				frappe.bold(_("Allow Item to Be Added Multiple Times in a Transaction")),
 				get_link_to_form("Selling Settings", "Selling Settings"),
 			)
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:

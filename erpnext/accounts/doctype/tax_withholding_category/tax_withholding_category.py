@@ -375,12 +375,14 @@ def get_invoice_vouchers(parties, tax_details, company, party_type="Supplier"):
 			AND ja.party in %s
 			AND j.apply_tds = 1
 			AND j.tax_withholding_category = %s
+			AND j.company = %s
 	""",
 		(
 			tax_details.from_date,
 			tax_details.to_date,
 			tuple(parties),
 			tax_details.get("tax_withholding_category"),
+			company,
 		),
 		as_dict=1,
 	)
@@ -497,6 +499,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, vouchers):
 		"unallocated_amount": (">", 0),
 		"posting_date": ["between", (tax_details.from_date, tax_details.to_date)],
 		"tax_withholding_category": tax_details.get("tax_withholding_category"),
+		"company": inv.company,
 	}
 
 	field = "sum(tax_withholding_net_total)"

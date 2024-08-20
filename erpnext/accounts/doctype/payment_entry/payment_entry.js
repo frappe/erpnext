@@ -165,8 +165,25 @@ frappe.ui.form.on("Payment Entry", {
 				filters: filters,
 			};
 		});
-	},
 
+		frm.set_query("sales_taxes_and_charges_template", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					disabled: false,
+				},
+			};
+		});
+
+		frm.set_query("purchase_taxes_and_charges_template", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					disabled: false,
+				},
+			};
+		});
+	},
 	refresh: function (frm) {
 		erpnext.hide_company(frm);
 		frm.events.hide_unhide_fields(frm);
@@ -213,7 +230,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	hide_unhide_fields: function (frm) {
 		var company_currency = frm.doc.company
-			? frappe.get_doc(":Company", frm.doc.company).default_currency
+			? frappe.get_doc(":Company", frm.doc.company)?.default_currency
 			: "";
 
 		frm.toggle_display(

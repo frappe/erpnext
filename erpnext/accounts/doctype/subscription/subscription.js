@@ -39,6 +39,12 @@ frappe.ui.form.on("Subscription", {
 			);
 
 			frm.add_custom_button(
+				__("Force-Fetch Subscription Updates"),
+				() => frm.trigger("force_fetch_subscription_updates"),
+				__("Actions")
+			);
+
+			frm.add_custom_button(
 				__("Cancel Subscription"),
 				() => frm.trigger("cancel_this_subscription"),
 				__("Actions")
@@ -77,6 +83,13 @@ frappe.ui.form.on("Subscription", {
 
 	get_subscription_updates: function (frm) {
 		frm.call("process").then((r) => {
+			if (!r.exec) {
+				frm.reload_doc();
+			}
+		});
+	},
+	force_fetch_subscription_updates: function (frm) {
+		frm.call("force_fetch_subscription_updates").then((r) => {
 			if (!r.exec) {
 				frm.reload_doc();
 			}
