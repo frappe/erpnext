@@ -2680,85 +2680,93 @@ def get_open_payment_requests_for_references(references=None):
 	return reference_payment_requests
 
 
-# todo-abdeali: make it more efficient and less complex
 def set_open_payment_requests_to_references(references=None):
 	if not references:
 		return
 
-	reference_payment_requests = get_open_payment_requests_for_references(references)
+	# get all unpaid payment requests for the references
+	all_references_payment_requests = get_open_payment_requests_for_references(references)
 
-	if not reference_payment_requests:
+	if not all_references_payment_requests:
 		return
 
-	row_idx = 0
+	# to manage new rows
+	row_number = 1
+	MOVE_TO_NEXT_ROW = 1
+	TO_SKIP_NEW_ROW = 2
 
-	while row_idx < len(references):
-		row = references[row_idx]
-		key = (row.reference_doctype, row.reference_name)
+	while row_number <= len(references):
+		row = references[row_number - 1]
+		reference_key = (row.reference_doctype, row.reference_name)
 
-		# ? can make it efficient if only one transaction is there but have multiple row because of terms
-		payment_requests = reference_payment_requests.get(key)
+		# update the idx to maintain the order
+		row.idx = row_number
 
-		if not payment_requests:
-			row_idx += 1
+		# unpaid payment requests for the reference
+		reference_payment_requests = all_references_payment_requests.get(reference_key)
+
+		if not reference_payment_requests:
+			row_number += MOVE_TO_NEXT_ROW  # to move to next reference row
 			continue
 
-		payment_request, outstanding_amount = next(iter(payment_requests.items()))
+		# get the first payment request and its outstanding amount
+		payment_request, outstanding_amount = next(iter(reference_payment_requests.items()))
 		allocated_amount = row.allocated_amount
 
+		# allocate the payment request to the reference
+		row.payment_request = payment_request
+
 		if outstanding_amount == allocated_amount:
-			row.payment_request = payment_request
-			del reference_payment_requests[key][payment_request]
-			row_idx += 1
+			del reference_payment_requests[payment_request]
+			row_number += MOVE_TO_NEXT_ROW
+
 		elif outstanding_amount > allocated_amount:
-			row.payment_request = payment_request
+			# reduce the outstanding amount of the payment request
+			reference_payment_requests[payment_request] -= allocated_amount
+			row_number += MOVE_TO_NEXT_ROW
 
-			reference_payment_requests[key][payment_request] -= allocated_amount
-			row_idx += 1
-
-		elif outstanding_amount < allocated_amount:
-			row.payment_request = payment_request
+		else:
+			# split the reference row to allocate the remaining amount
+			del reference_payment_requests[payment_request]
 			row.allocated_amount = outstanding_amount
-
-			del reference_payment_requests[key][payment_request]
 			allocated_amount -= outstanding_amount
 
+			# set the remaining amount to the next row
 			while allocated_amount:
-				payment_request, outstanding_amount = next(iter(payment_requests.items()), (None, None))
-
+				# create a new row for the remaining amount
 				new_row = frappe.copy_doc(row)
-				new_row.allocated_amount = allocated_amount
-				references.insert(row_idx + 1, new_row)
+				references.insert(row_number, new_row)
+
+				# get the next payment request and its outstanding amount
+				payment_request, outstanding_amount = next(
+					iter(reference_payment_requests.items()), (None, None)
+				)
+
+				# update new row
+				new_row.idx = row_number + 1
+				new_row.payment_request = payment_request
+				new_row.allocated_amount = min(
+					outstanding_amount if outstanding_amount else allocated_amount, allocated_amount
+				)
 
 				if not payment_request or not outstanding_amount:
-					new_row.allocated_amount = allocated_amount
-					new_row.payment_request = None
-					row_idx += 2
+					row_number += TO_SKIP_NEW_ROW
 					break
+
+				elif outstanding_amount == allocated_amount:
+					del reference_payment_requests[payment_request]
+					row_number += TO_SKIP_NEW_ROW
+					break
+
+				elif outstanding_amount > allocated_amount:
+					reference_payment_requests[payment_request] -= allocated_amount
+					row_number += TO_SKIP_NEW_ROW
+					break
+
 				else:
-					new_row.payment_request = payment_request
-
-					if outstanding_amount == allocated_amount:
-						new_row.allocated_amount = allocated_amount
-						del reference_payment_requests[key][payment_request]
-						row_idx += 2
-
-						break
-					elif outstanding_amount > allocated_amount:
-						new_row.allocated_amount = allocated_amount
-						reference_payment_requests[key][payment_request] -= allocated_amount
-						row_idx += 2
-						break
-					elif outstanding_amount < allocated_amount:
-						allocated_amount -= outstanding_amount
-						new_row.allocated_amount = outstanding_amount
-
-						del reference_payment_requests[key][payment_request]
-						row_idx += 1
-
-	# set new idx to all refs
-	for idx, ref in enumerate(references, start=1):
-		ref.idx = idx
+					allocated_amount -= outstanding_amount
+					del reference_payment_requests[payment_request]
+					row_number += MOVE_TO_NEXT_ROW
 
 
 def update_accounting_dimensions(pe, doc):
