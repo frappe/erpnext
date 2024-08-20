@@ -588,7 +588,7 @@ erpnext.PointOfSale.Payment = class {
 
 		doc.write_off_amount = 0
 		doc.base_write_off_amount = 0
-		
+
 		this.$totals.html(
 			`<div class="col">
 				<div class="total-label">${__("Grand Total")}</div>
@@ -625,10 +625,10 @@ erpnext.PointOfSale.Payment = class {
 			var selection = window.getSelection();
 			selection.removeAllRanges();
 			selection.addRange(range);
-		})	
+		})
 		.on('focusout', function() {
 			let new_difference_value = flt($(this).text())
-			if (remaining < 0 && new_difference_value <= (-1*remaining) && new_difference_value >= 0){	
+			if (remaining < 0 && new_difference_value <= (-1*remaining) && new_difference_value >= 0){
 				change = new_difference_value
 			}
 			$(this).text(format_currency(change, currency))
