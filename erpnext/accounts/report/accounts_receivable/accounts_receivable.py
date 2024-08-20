@@ -52,8 +52,8 @@ class ReceivablePayableReport:
 
 		if not self.filters.range:
 			self.filters.range = "30, 60, 90, 120"
-		self.age_range = [num.strip() for num in self.filters.range.split(",") if num.strip().isdigit()]
-		self.age_range_index = range(1, len(self.age_range) + 2)
+		self.ranges = [num.strip() for num in self.filters.range.split(",") if num.strip().isdigit()]
+		self.range_numbers = [num for num in range(1, len(self.ranges) + 2)]
 
 	def run(self, args):
 		self.filters.update(args)
@@ -722,14 +722,13 @@ class ReceivablePayableReport:
 
 		# ageing buckets should not have amounts if due date is not reached
 		if getdate(entry_date) > getdate(self.filters.report_date):
-			for i in self.age_range_index:
-				setattr(row, f"range{i}", 0.0)
+			[setattr(row, f"range{i}", 0.0) for i in self.range_numbers]
 
-		row.total_due = sum(row[f"range{i}"] for i in self.age_range_index)
+		row.total_due = sum(row[f"range{i}"] for i in self.range_numbers)
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		for i in self.age_range_index:
+		for i in self.range_numbers:
 			setattr(row, f"range{i}", 0.0)
 
 		if not (self.age_as_on and entry_date):
@@ -738,7 +737,7 @@ class ReceivablePayableReport:
 		row.age = (getdate(self.age_as_on) - getdate(entry_date)).days or 0
 
 		index = next(
-			(i for i, days in enumerate(self.age_range) if cint(row.age) <= cint(days)), len(self.age_range)
+			(i for i, days in enumerate(self.ranges) if cint(row.age) <= cint(days)), len(self.ranges)
 		)
 		row["range" + str(index + 1)] = row.outstanding
 
@@ -1051,6 +1050,7 @@ class ReceivablePayableReport:
 			self.add_column(_("Debit Note"), fieldname="credit_note")
 		self.add_column(_("Outstanding Amount"), fieldname="outstanding")
 
+		self.add_column(label=_("Age (Days)"), fieldname="age", fieldtype="Int", width=80)
 		self.setup_ageing_columns()
 
 		self.add_column(
@@ -1106,26 +1106,20 @@ class ReceivablePayableReport:
 			dict(label=label, fieldname=fieldname, fieldtype=fieldtype, options=options, width=width)
 		)
 
-	def setup_ageing_columns(self, summary_report=False):
+	def setup_ageing_columns(self):
 		# for charts
-		if not summary_report:
-			self.ageing_column_labels = []
-			self.add_column(label=_("Age (Days)"), fieldname="age", fieldtype="Int", width=80)
+		self.ageing_column_labels = []
+		ranges = [*self.ranges, "Above"]
 
-		start = 0
-		for i, range_value in enumerate(self.age_range):
-			label = f"{start}-{int(range_value)}"
-			self.add_column(label=label, fieldname="range" + str(i + 1))
-			start = int(range_value) + 1
+		prev_range_value = 0
+		for idx, curr_range_value in enumerate(ranges):
+			label = f"{prev_range_value}-{curr_range_value}"
+			self.add_column(label=label, fieldname="range" + str(idx + 1))
 
-			if not summary_report:
-				self.ageing_column_labels.append(label)
-
-		label = f"{start}-Above"
-		self.add_column(label=label, fieldname="range" + str(i + 2))
-
-		if not summary_report:
 			self.ageing_column_labels.append(label)
+
+			if curr_range_value.isdigit():
+				prev_range_value = cint(curr_range_value) + 1
 
 	def get_chart_data(self):
 		precision = cint(frappe.db.get_default("float_precision")) or 2
@@ -1133,7 +1127,7 @@ class ReceivablePayableReport:
 		for row in self.data:
 			row = frappe._dict(row)
 			if not cint(row.bold):
-				values = [flt(row.get(f"range{i}", None), precision) for i in self.age_range_index]
+				values = [flt(row.get(f"range{i}", None), precision) for i in self.range_numbers]
 				rows.append({"values": values})
 
 		self.chart = {

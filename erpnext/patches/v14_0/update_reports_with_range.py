@@ -33,5 +33,4 @@ def update_report_json(report):
 	keys_to_pop = [key for key in report_filter if key.startswith("range")]
 	report_filter["range"] = ", ".join(str(report_filter.pop(key)) for key in keys_to_pop)
 
-	report_json["filters"] = report_filter
 	frappe.db.set_value("Report", report.name, "json", json.dumps(report_json))

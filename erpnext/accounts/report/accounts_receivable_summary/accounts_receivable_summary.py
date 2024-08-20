@@ -31,8 +31,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 	def get_data(self, args):
 		self.data = []
-		self.receivables_report = ReceivablePayableReport(self.filters)
-		self.receivables = self.receivables_report.run(args)[1]
+		self.receivables = ReceivablePayableReport(self.filters).run(args)[1]
 		self.currency_precision = get_currency_precision() or 2
 
 		self.get_party_total(args)
@@ -115,7 +114,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			"sales_person": [],
 			"party_type": row.party_type,
 		}
-		for i in range(1, len(self.receivables_report.age_range) + 2):
+		for i in self.range_numbers:
 			range_key = f"range{i}"
 			default_dict[range_key] = 0.0
 
@@ -171,7 +170,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.add_column(_("GL Balance"), fieldname="gl_balance")
 			self.add_column(_("Difference"), fieldname="diff")
 
-		self.setup_ageing_columns(summary_report=True)
+		self.setup_ageing_columns()
 		self.add_column(label="Total Amount Due", fieldname="total_due")
 
 		if self.filters.show_future_payments:
