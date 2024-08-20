@@ -286,7 +286,6 @@ class PurchaseInvoice(BuyingController):
 		self.set_against_expense_account()
 		self.validate_write_off_account()
 		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount")
-		self.create_remarks()
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(
@@ -326,7 +325,7 @@ class PurchaseInvoice(BuyingController):
 			if self.bill_no:
 				self.remarks = _("Against Supplier Invoice {0}").format(self.bill_no)
 				if self.bill_date:
-					self.remarks += _(" dated {0}").format(formatdate(self.bill_date))
+					self.remarks += " " + _("dated {0}").format(formatdate(self.bill_date))
 
 			else:
 				self.remarks = _("No Remarks")
@@ -748,6 +747,9 @@ class PurchaseInvoice(BuyingController):
 		self.validate_expense_account()
 		validate_docs_for_voucher_types(["Purchase Invoice"])
 		validate_docs_for_deferred_accounting([], [self.name])
+
+	def before_submit(self):
+		self.create_remarks()
 
 	def on_submit(self):
 		super().on_submit()
