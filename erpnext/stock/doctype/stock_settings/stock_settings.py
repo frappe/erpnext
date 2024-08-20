@@ -175,7 +175,7 @@ class StockSettings(Document):
 			if self.allow_negative_stock and self.enable_stock_reservation:
 				frappe.throw(
 					_("As {0} is enabled, you can not enable {1}.").format(
-						frappe.bold("Stock Reservation"), frappe.bold("Allow Negative Stock")
+						frappe.bold(_("Stock Reservation")), frappe.bold(_("Allow Negative Stock"))
 					)
 				)
 
@@ -187,7 +187,7 @@ class StockSettings(Document):
 				if self.allow_negative_stock:
 					frappe.throw(
 						_("As {0} is enabled, you can not enable {1}.").format(
-							frappe.bold("Allow Negative Stock"), frappe.bold("Stock Reservation")
+							frappe.bold(_("Allow Negative Stock")), frappe.bold(_("Stock Reservation"))
 						)
 					)
 
@@ -207,7 +207,7 @@ class StockSettings(Document):
 					if bin_with_negative_stock:
 						frappe.throw(
 							_("As there are negative stock, you can not enable {0}.").format(
-								frappe.bold("Stock Reservation")
+								frappe.bold(_("Stock Reservation"))
 							)
 						)
 
@@ -221,7 +221,7 @@ class StockSettings(Document):
 				if has_reserved_stock:
 					frappe.throw(
 						_("As there are reserved stock, you cannot disable {0}.").format(
-							frappe.bold("Stock Reservation")
+							frappe.bold(_("Stock Reservation"))
 						)
 					)
 

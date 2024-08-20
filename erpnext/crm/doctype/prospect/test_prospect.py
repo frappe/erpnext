@@ -27,6 +27,29 @@ class TestProspect(unittest.TestCase):
 		address_doc.reload()
 		self.assertEqual(address_doc.has_link("Prospect", prospect_doc.name), True)
 
+	def test_make_customer_from_prospect(self):
+		from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
+
+		frappe.delete_doc_if_exists("Customer", "_Test Prospect")
+
+		prospect = frappe.get_doc(
+			{
+				"doctype": "Prospect",
+				"company_name": "_Test Prospect",
+				"customer_group": "_Test Customer Group",
+			}
+		)
+		prospect.insert()
+
+		customer = make_customer_from_prospect("_Test Prospect")
+
+		self.assertEqual(customer.doctype, "Customer")
+		self.assertEqual(customer.company_name, "_Test Prospect")
+		self.assertEqual(customer.customer_group, "_Test Customer Group")
+
+		customer.company = "_Test Company"
+		customer.insert()
+
 
 def make_prospect(**args):
 	args = frappe._dict(args)

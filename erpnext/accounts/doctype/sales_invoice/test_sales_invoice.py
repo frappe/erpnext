@@ -5,6 +5,7 @@ import copy
 import json
 
 import frappe
+from frappe import qb
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
@@ -3848,6 +3849,40 @@ class TestSalesInvoice(FrappeTestCase):
 			for x in si.taxes
 		]
 		self.assertEqual(expected, actual)
+
+	def test_pos_returns_without_update_outstanding_for_self(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
+		pos_profile = make_pos_profile()
+		pos_profile.payments = []
+		pos_profile.append("payments", {"default": 1, "mode_of_payment": "Cash"})
+		pos_profile.save()
+
+		pos = create_sales_invoice(qty=10, do_not_save=True)
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+		pos.append(
+			"payments", {"mode_of_payment": "Bank Draft", "account": "_Test Bank - _TC", "amount": 500}
+		)
+		pos.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 500})
+		pos.save().submit()
+
+		pos_return = make_sales_return(pos.name)
+		pos_return.update_outstanding_for_self = False
+		pos_return.save().submit()
+
+		gle = qb.DocType("GL Entry")
+		res = (
+			qb.from_(gle)
+			.select(gle.against_voucher)
+			.distinct()
+			.where(
+				gle.is_cancelled.eq(0) & gle.voucher_no.eq(pos_return.name) & gle.against_voucher.notnull()
+			)
+			.run(as_list=1)
+		)
+		self.assertEqual(len(res), 1)
+		self.assertEqual(res[0][0], pos_return.return_against)
 
 
 def set_advance_flag(company, flag, default_account):
