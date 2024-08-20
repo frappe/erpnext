@@ -43,7 +43,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Completed Qty",
-   "reqd": 1
+   "reqd": 0
   },
   {
    "fieldname": "employee",
