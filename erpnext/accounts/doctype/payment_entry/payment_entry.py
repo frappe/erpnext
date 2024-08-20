@@ -2473,7 +2473,6 @@ def get_reference_details(
 	return res
 
 
-# todo-abdeali: add one more parameter that if it created from `payment_request`
 @frappe.whitelist()
 def get_payment_entry(
 	dt,
@@ -2485,6 +2484,7 @@ def get_payment_entry(
 	payment_type=None,
 	reference_date=None,
 	ignore_permissions=False,
+	created_from_payment_request=False,
 ):
 	doc = frappe.get_doc(dt, dn)
 	over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
@@ -2634,8 +2634,8 @@ def get_payment_entry(
 
 		pe.set_difference_amount()
 
-		# only if allocated_amount is set
-	set_open_payment_requests_to_references(pe.references)
+	if not created_from_payment_request:
+		set_open_payment_requests_to_references(pe.references)
 
 	return pe
 

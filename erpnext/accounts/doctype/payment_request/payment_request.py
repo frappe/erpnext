@@ -310,6 +310,7 @@ class PaymentRequest(Document):
 			party_amount=party_amount,
 			bank_account=self.payment_account,
 			bank_amount=bank_amount,
+			created_from_payment_request=True,
 		)
 
 		payment_entry.update(
