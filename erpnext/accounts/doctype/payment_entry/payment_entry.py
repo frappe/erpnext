@@ -1719,6 +1719,7 @@ class PaymentEntry(AccountsController):
 
 		return current_tax_fraction
 
+	# todo-abdeali: needs changes if PR already use for ref and one ref row have no PR then do not show this!!
 	def check_references_for_unset_payment_request(self):
 		if not self.references:
 			return
@@ -1756,65 +1757,8 @@ class PaymentEntry(AccountsController):
 			)
 
 	@frappe.whitelist()
-	def set_matched_payment_requests(self):
-		if not self.references:
-			return
-
-		matched_payment_requests = get_matched_payment_requests(self.references)
-
-		matched_count = 0
-
-		for row in self.references:
-			if (
-				row.payment_request
-				or not row.reference_doctype
-				or not row.reference_name
-				or not row.allocated_amount
-			):
-				continue
-
-			row.payment_request = matched_payment_requests.get(
-				(row.reference_doctype, row.reference_name, row.allocated_amount)
-			)
-
-			if row.payment_request:
-				matched_count += 1
-
-		if not matched_count:
-			return
-
-		frappe.msgprint(
-			msg=_("Setting {0} matched Payment Request(s)").format(matched_count),
-			alert=True,
-		)
-
-	@frappe.whitelist()
-	def set_matched_payment_request(self, row_idx):
-		row = next((row for row in self.references if row.idx == row_idx), None)
-
-		if not row:
-			frappe.throw(_("Row #{0} not found").format(row_idx), title=_("Row Not Found"))
-
-		# if payment entry already set then do not set it again
-		if (
-			row.payment_request
-			or not row.reference_doctype
-			or not row.reference_name
-			or not row.allocated_amount
-		):
-			return
-
-		matched_pr = get_matched_payment_requests([row])
-
-		if not matched_pr:
-			return
-
-		row.payment_request = matched_pr[(row.reference_doctype, row.reference_name, row.allocated_amount)]
-
-		frappe.msgprint(
-			msg=_("Setting matched Payment Request"),
-			alert=True,
-		)
+	def set_payment_requests_to_references(self):
+		set_open_payment_requests_to_references(self.references)
 
 
 def get_matched_payment_requests(references=None):

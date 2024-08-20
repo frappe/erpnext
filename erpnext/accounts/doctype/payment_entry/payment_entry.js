@@ -1104,8 +1104,6 @@ frappe.ui.form.on("Payment Entry", {
 			}
 		}
 
-		let set_matched_payment_requests = false;
-
 		$.each(frm.doc.references || [], function (i, row) {
 			if (frappe.flags.allocate_payment_amount == 0) {
 				//If allocate payment amount checkbox is unchecked, set zero to allocate amount
@@ -1114,8 +1112,6 @@ frappe.ui.form.on("Payment Entry", {
 				frappe.flags.allocate_payment_amount != 0 &&
 				(!row.allocated_amount || paid_amount_change)
 			) {
-				let previous_allocated_amount = row.allocated_amount;
-
 				if (row.outstanding_amount > 0 && allocated_positive_outstanding >= 0) {
 					row.allocated_amount =
 						row.outstanding_amount >= allocated_positive_outstanding
@@ -1129,16 +1125,12 @@ frappe.ui.form.on("Payment Entry", {
 							: row.outstanding_amount;
 					allocated_negative_outstanding -= Math.abs(flt(row.allocated_amount));
 				}
-
-				if (!row.payment_request && row.allocated_amount > previous_allocated_amount) {
-					set_matched_payment_requests = true;
-				}
 			}
 		});
 
 		frm.refresh_fields();
 		frm.events.set_total_allocated_amount(frm);
-		if (set_matched_payment_requests) frm.call("set_matched_payment_requests");
+		if (frappe.flags.allocate_payment_amount) frm.call("set_payment_requests_to_references");
 	},
 
 	set_total_allocated_amount: function (frm) {
@@ -1727,15 +1719,8 @@ frappe.ui.form.on("Payment Entry Reference", {
 		}
 	},
 
-	allocated_amount: function (frm, cdt, cdn) {
+	allocated_amount: function (frm) {
 		frm.events.set_total_allocated_amount(frm);
-
-		const row = frappe.get_doc(cdt, cdn);
-
-		if (row.payment_request || !(row.reference_doctype && row.reference_name && row.allocated_amount))
-			return;
-
-		frm.call("set_matched_payment_request", { row_idx: row.idx });
 	},
 
 	references_remove: function (frm) {
