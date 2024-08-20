@@ -671,6 +671,9 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 			else payment_request["outstanding_amount"] - ref.allocated_amount
 		)
 
+		# to handle same payment request for the multiple allocations
+		payment_request["outstanding_amount"] = new_outstanding_amount
+
 		if not cancel and new_outstanding_amount < 0:
 			frappe.throw(
 				msg=_(
