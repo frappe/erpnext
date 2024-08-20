@@ -20,17 +20,7 @@ def update_sales_invoice_remarks():
 
 	for doc in si_list:
 		remarks = _("Against Customer Order {0}").format(doc.po_no)
-		frappe.db.set_value("Sales Invoice", doc.name, "remarks", remarks)
-		frappe.db.set_value(
-			"GL Entry",
-			{
-				"voucher_type": "Sales Invoice",
-				"remarks": "No Remarks",
-				"voucher_no": doc.name,
-			},
-			"remarks",
-			remarks,
-		)
+		update_remarks("Sales Invoice", doc.name, remarks)
 
 
 def update_purchase_invoice_remarks():
@@ -46,14 +36,16 @@ def update_purchase_invoice_remarks():
 
 	for doc in pi_list:
 		remarks = _("Against Supplier Invoice {0}").format(doc.bill_no)
-		frappe.db.set_value("Purchase Invoice", doc.name, "remarks", remarks)
-		frappe.db.set_value(
-			"GL Entry",
-			{
-				"voucher_type": "Purchase Invoice",
-				"remarks": "No Remarks",
-				"voucher_no": doc.name,
-			},
-			"remarks",
-			remarks,
-		)
+		update_remarks("Purchase Invoice", doc.name, remarks)
+
+
+def update_remarks(doctype, docname, remarks):
+	filters = {
+		"voucher_type": doctype,
+		"remarks": "No Remarks",
+		"voucher_no": docname,
+	}
+
+	frappe.db.set_value(doctype, docname, "remarks", remarks)
+	frappe.db.set_value("GL Entry", filters, "remarks", remarks)
+	frappe.db.set_value("Payment Ledger Entry", filters, "remarks", remarks)
