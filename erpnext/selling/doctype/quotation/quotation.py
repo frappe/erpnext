@@ -565,9 +565,7 @@ def handle_mandatory_error(e, customer, lead_name):
 	mandatory_fields = [customer.meta.get_label(field.strip()) for field in mandatory_fields]
 
 	frappe.local.message_log = []
-	message = (
-		_("Could not auto create Customer due to the following missing mandatory field(s):") + "<br>"
-	)
+	message = _("Could not auto create Customer due to the following missing mandatory field(s):") + "<br>"
 	message += "<br><ul><li>" + "</li><li>".join(mandatory_fields) + "</li></ul>"
 	message += _("Please create Customer from Lead {0}.").format(get_link_to_form("Lead", lead_name))
 
