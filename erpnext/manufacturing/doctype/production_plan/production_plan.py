@@ -340,9 +340,7 @@ class ProductionPlan(Document):
 
 		for item in items:
 			# Calculate the pending qty with respect to conversion factor.
-			item.pending_qty = (
-				(flt(item.qty) - max(item.work_order_qty, item.delivered_qty, 0)) * item.conversion_factor
-			)
+			item.pending_qty = (flt(item.qty) - max(item.work_order_qty, item.delivered_qty, 0)) * item.conversion_factor
 
 		pi = frappe.qb.DocType("Packed Item")
 
