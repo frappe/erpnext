@@ -339,6 +339,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("party", function() {
 			if(frm.doc.party_type == 'Employee'){
 				return {
+<<<<<<< HEAD
 					query: "erpnext.controllers.queries.employee_query"
 				}
 			}
@@ -346,6 +347,16 @@ frappe.ui.form.on('Payment Entry', {
 				return {
 					query: "erpnext.controllers.queries.customer_query"
 				}
+=======
+					query: "erpnext.controllers.queries.employee_query",
+				};
+			} else if (frm.doc.party_type == "Shareholder") {
+				return {
+					filters: {
+						company: frm.doc.company,
+					},
+				};
+>>>>>>> 63ad9f4f86 (refactor: filter shareholder on company)
 			}
 		});
 
