@@ -420,6 +420,12 @@ frappe.ui.form.on("Payment Entry", {
 				return {
 					query: "erpnext.controllers.queries.employee_query",
 				};
+			} else if (frm.doc.party_type == "Shareholder") {
+				return {
+					filters: {
+						company: frm.doc.company,
+					},
+				};
 			}
 		});
 
