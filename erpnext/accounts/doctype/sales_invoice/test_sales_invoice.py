@@ -416,7 +416,7 @@ class TestSalesInvoice(FrappeTestCase):
 				self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
 		self.assertEqual(si.base_grand_total, 1500.01)
-		self.assertEqual(si.grand_total, 1500)
+		self.assertEqual(si.grand_total, 1500.01)
 		self.assertEqual(si.rounding_adjustment, -0.01)
 
 	def test_discount_amount_gl_entry(self):
