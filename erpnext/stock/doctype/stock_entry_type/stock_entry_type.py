@@ -47,4 +47,3 @@ class StockEntryType(Document):
 			"Send to Subcontractor",
 		]:
 			frappe.throw(f"Stock Entry Type {self.name} cannot be set as standard")
-
