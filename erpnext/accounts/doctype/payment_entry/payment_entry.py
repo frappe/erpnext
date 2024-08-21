@@ -336,6 +336,9 @@ class PaymentEntry(AccountsController):
 			get_outstanding_amount_of_payment_entry_references as get_outstanding_amounts,
 		)
 
+		if not self.references:
+			return
+
 		outstanding_amounts = get_outstanding_amounts(self.references)
 
 		for ref in self.references:
