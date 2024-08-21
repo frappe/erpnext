@@ -19,6 +19,7 @@
   "consider_rejected_warehouses",
   "get_item_locations",
   "pick_manually",
+  "ignore_pricing_rule",
   "section_break_6",
   "scan_barcode",
   "column_break_13",
@@ -200,11 +201,18 @@
    "fieldname": "pick_manually",
    "fieldtype": "Check",
    "label": "Pick Manually"
+  },
+  {
+   "default": "0",
+   "description": "If enabled then system won't apply the pricing rule on the delivery note which will be create from the pick list",
+   "fieldname": "ignore_pricing_rule",
+   "fieldtype": "Check",
+   "label": "Ignore Pricing Rule"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 22:49:16.954637",
+ "modified": "2024-08-14 13:20:42.168827",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

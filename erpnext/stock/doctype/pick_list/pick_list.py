@@ -50,6 +50,7 @@ class PickList(Document):
 		customer_name: DF.Data | None
 		for_qty: DF.Float
 		group_same_items: DF.Check
+		ignore_pricing_rule: DF.Check
 		locations: DF.Table[PickListItem]
 		material_request: DF.Link | None
 		naming_series: DF.Literal["STO-PICK-.YYYY.-"]
@@ -1144,7 +1145,7 @@ def create_dn_with_so(sales_dict, pick_list):
 	for customer in sales_dict:
 		for so in sales_dict[customer]:
 			delivery_note = None
-			kwargs = {"skip_item_mapping": True}
+			kwargs = {"skip_item_mapping": True, "ignore_pricing_rule": pick_list.ignore_pricing_rule}
 			delivery_note = create_delivery_note_from_sales_order(so, delivery_note, kwargs=kwargs)
 			break
 		if delivery_note:
