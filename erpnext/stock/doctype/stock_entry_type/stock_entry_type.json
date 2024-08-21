@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "purpose",
-  "add_to_transit"
+  "add_to_transit",
+  "is_standard"
  ],
  "fields": [
   {
@@ -26,10 +27,17 @@
    "fieldname": "add_to_transit",
    "fieldtype": "Check",
    "label": "Add to Transit"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_standard",
+   "fieldtype": "Check",
+   "label": "Is Standard",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2024-07-08 08:41:19.385020",
+ "modified": "2024-08-20 15:35:45.696958",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
