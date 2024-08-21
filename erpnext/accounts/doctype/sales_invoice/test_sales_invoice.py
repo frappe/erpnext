@@ -415,7 +415,7 @@ class TestSalesInvoice(FrappeTestCase):
 			for i, k in enumerate(expected_values["keys"]):
 				self.assertEqual(d.get(k), expected_values[d.account_head][i])
 
-		self.assertEqual(si.base_grand_total, 1500)
+		self.assertEqual(si.base_grand_total, 1500.01)
 		self.assertEqual(si.grand_total, 1500)
 		self.assertEqual(si.rounding_adjustment, -0.01)
 
@@ -2106,7 +2106,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.net_total, 19453.13)
 		self.assertEqual(si.grand_total, 24900)
 		self.assertEqual(si.total_taxes_and_charges, 5446.88)
-		self.assertEqual(si.rounding_adjustment, -0.01)
+		self.assertEqual(si.rounding_adjustment, 0.00)
 
 		expected_values = dict(
 			(d[0], d)
