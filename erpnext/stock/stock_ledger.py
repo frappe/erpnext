@@ -648,6 +648,7 @@ class update_entries_after:
 				and (
 					posting_datetime = %(posting_datetime)s
 				)
+				and creation = %(creation)s
 			order by
 				creation ASC
 			for update
@@ -1526,6 +1527,11 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 	if exclude_current_voucher:
 		voucher_no = args.get("voucher_no")
 		voucher_condition = f"and voucher_no != '{voucher_no}'"
+
+	elif args.get("creation"):
+		creation = args.get("creation")
+		operator = "<="
+		voucher_condition = f"and creation < '{creation}'"
 
 	sle = frappe.db.sql(
 		f"""

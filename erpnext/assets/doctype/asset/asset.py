@@ -909,7 +909,7 @@ def transfer_asset(args):
 
 @frappe.whitelist()
 def get_item_details(item_code, asset_category, gross_purchase_amount):
-	asset_category_doc = frappe.get_doc("Asset Category", asset_category)
+	asset_category_doc = frappe.get_cached_doc("Asset Category", asset_category)
 	books = []
 	for d in asset_category_doc.finance_books:
 		books.append(
