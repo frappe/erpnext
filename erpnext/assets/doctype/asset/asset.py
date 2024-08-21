@@ -697,7 +697,7 @@ class Asset(AccountsController):
 		purchase_document = self.get_purchase_document()
 		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
-		if purchase_document and self.purchase_amount and getdate(self.available_for_use_date) <= getdate():
+		if self.is_composite_asset or (purchase_document and self.purchase_amount) and getdate(self.available_for_use_date) <= getdate():
 			gl_entries.append(
 				self.get_gl_dict(
 					{
