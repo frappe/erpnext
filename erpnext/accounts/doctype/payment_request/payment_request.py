@@ -833,13 +833,14 @@ def get_paid_amount_against_order(dt, dn):
 
 @frappe.whitelist()
 def get_open_payment_requests(doctype, txt, searchfield, start, page_len, filters):
+    # permission checks in `get_list()`
 	reference_doctype = filters.get("reference_doctype")
 	reference_name = filters.get("reference_doctype")
 
 	if not reference_doctype or not reference_name:
 		return []
 
-	open_payment_requests = frappe.get_all(
+	open_payment_requests = frappe.get_list(
 		"Payment Request",
 		filters={
 			"reference_doctype": filters["reference_doctype"],
