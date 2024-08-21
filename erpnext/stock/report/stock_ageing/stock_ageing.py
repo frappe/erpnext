@@ -49,7 +49,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
-		range = get_range_age(filters, fifo_queue, to_date, item_dict)
+		range_values = get_range_age(filters, fifo_queue, to_date, item_dict)
 
 		row = [details.name, details.item_name, details.description, details.item_group, details.brand]
 
@@ -60,7 +60,7 @@ def format_report_data(filters: Filters, item_details: dict, to_date: str) -> li
 			[
 				flt(item_dict.get("total_qty"), precision),
 				average_age,
-				*range,
+				*range_values,
 				earliest_age,
 				latest_age,
 				details.stock_uom,
@@ -188,13 +188,13 @@ def get_chart_data(data: list, filters: Filters) -> dict:
 
 
 def setup_ageing_columns(filters: Filters, range_columns: list):
-	start = 0
+	prev_range_value = 0
 	ranges = []
 	for range in filters.ranges:
-		ranges.append(f"{start} - {range}")
-		start = cint(range) + 1
+		ranges.append(f"{prev_range_value} - {range}")
+		prev_range_value = cint(range) + 1
 
-	ranges.append(f"{start} - Above")
+	ranges.append(f"{prev_range_value} - Above")
 
 	for i, label in enumerate(ranges):
 		fieldname = "range" + str(i + 1)
