@@ -692,16 +692,17 @@ class Asset(AccountsController):
 		return cwip_account
 
 	def make_gl_entries(self):
+		if self.check_asset_capitalization_gl_entries():
+			return
+
 		gl_entries = []
 
 		purchase_document = self.get_purchase_document()
 		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
-		if (
-			self.is_composite_asset
-			or (purchase_document and self.purchase_amount)
-			and getdate(self.available_for_use_date) <= getdate()
-		):
+		if (self.is_composite_asset or (purchase_document and self.purchase_amount)) and getdate(
+			self.available_for_use_date
+		) <= getdate():
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -737,6 +738,22 @@ class Asset(AccountsController):
 
 			make_gl_entries(gl_entries)
 			self.db_set("booked_fixed_asset", 1)
+
+	def check_asset_capitalization_gl_entry(self):
+		if self.is_composite_asset:
+			asset_capitalization, target_fixed_asset_account = frappe.db.get_value(
+				"Asset Capitalization",
+				{"target_asset": self.name, "docstatus": 1},
+				["name", "target_fixed_asset_account"],
+			)
+
+			# Fetch GL entries for the retrieved Asset Capitalization
+			gl_entries_test = get_gl_entries("Asset Capitalization", asset_capitalization)
+
+			# Return if GL entry's account matches the target fixed asset account
+			if gl_entries_test and gl_entries_test[0].account == target_fixed_asset_account:
+				return True
+		return False
 
 	@frappe.whitelist()
 	def get_depreciation_rate(self, args, on_validate=False):
@@ -782,6 +799,17 @@ class Asset(AccountsController):
 			)
 
 			return flt((100 * (1 - depreciation_rate)), float_precision)
+
+
+def get_gl_entries(doctype, docname):
+	gl_entry = frappe.qb.DocType("GL Entry")
+	return (
+		frappe.qb.from_(gl_entry)
+		.select(gl_entry.account)
+		.where((gl_entry.voucher_type == doctype) & (gl_entry.voucher_no == docname) & (gl_entry.debit != 0))
+		.orderby(gl_entry.account)
+		.run(as_dict=True)
+	)
 
 
 def update_maintenance_status():
