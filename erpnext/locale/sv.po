@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-19 12:45\n"
+"PO-Revision-Date: 2024-08-22 13:13\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -10794,7 +10794,7 @@ msgstr "Vanlig Kod"
 #: crm/workspace/crm/crm.json
 #: setup/setup_wizard/operations/install_fixtures.py:217
 msgid "Communication"
-msgstr "Korrespondens"
+msgstr "E-post"
 
 #. Label of the communication_channel (Select) field in DocType 'Communication
 #. Medium'
@@ -59048,7 +59048,7 @@ msgstr "Du måste aktivera automatisk ombeställning i lager inställningar för
 
 #: templates/pages/projects.html:134
 msgid "You haven't created a {0} yet"
-msgstr "Du har inte skapat {0} än"
+msgstr "Ingen {0} skapad än"
 
 #: selling/page/point_of_sale/pos_controller.js:218
 msgid "You must add atleast one item to save it as draft."
