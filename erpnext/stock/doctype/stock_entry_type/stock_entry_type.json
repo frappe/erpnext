@@ -37,7 +37,7 @@
   }
  ],
  "links": [],
- "modified": "2024-08-20 15:35:45.696958",
+ "modified": "2024-08-22 16:00:22.696958",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
@@ -88,5 +88,6 @@
  "sort_field": "creation",
  "sort_order": "ASC",
  "states": [],
- "track_changes": 1
+ "track_changes": 1,
+ "translated_doctype": 1
 }
