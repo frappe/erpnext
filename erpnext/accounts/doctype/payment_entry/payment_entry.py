@@ -2660,8 +2660,9 @@ def set_open_payment_requests_to_references(references=None):
 		payment_request, outstanding_amount = next(iter(reference_payment_requests.items()))
 		allocated_amount = row.allocated_amount
 
-		# allocate the payment request to the reference
+		# allocate the payment request to the reference and PR's outstanding amount
 		row.payment_request = payment_request
+		row.payment_request_outstanding = outstanding_amount
 
 		if outstanding_amount == allocated_amount:
 			del reference_payment_requests[payment_request]
@@ -2692,6 +2693,7 @@ def set_open_payment_requests_to_references(references=None):
 				# update new row
 				new_row.idx = row_number + 1
 				new_row.payment_request = payment_request
+				new_row.payment_request_outstanding = outstanding_amount
 				new_row.allocated_amount = min(
 					outstanding_amount if outstanding_amount else allocated_amount, allocated_amount
 				)
