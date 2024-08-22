@@ -665,7 +665,7 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 		payment_request = payment_requests[ref.payment_request]
 
 		# update outstanding amount
-		new_outstanding_amount = (
+		new_outstanding_amount = flt(
 			payment_request["outstanding_amount"] + ref.allocated_amount
 			if cancel
 			else payment_request["outstanding_amount"] - ref.allocated_amount
@@ -718,7 +718,7 @@ def get_referenced_payment_requests(references):
 	if not references:
 		return ()
 
-	return {row["payment_request"] for row in references if row["payment_request"]}
+	return {row.payment_request for row in references if row.payment_request}
 
 
 def get_dummy_message(doc):
