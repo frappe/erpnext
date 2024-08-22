@@ -915,8 +915,8 @@ class StockEntry(StockController):
 								).format(
 									item.idx,
 									frappe.bold(label),
-									frappe.bold("Manufacture"),
-									frappe.bold("Material Consumption for Manufacture"),
+									frappe.bold(_("Manufacture")),
+									frappe.bold(_("Material Consumption for Manufacture")),
 								)
 							)
 
@@ -926,7 +926,7 @@ class StockEntry(StockController):
 					):
 						frappe.throw(
 							_("Only one {0} entry can be created against the Work Order {1}").format(
-								frappe.bold("Manufacture"), frappe.bold(self.work_order)
+								frappe.bold(_("Manufacture")), frappe.bold(self.work_order)
 							)
 						)
 
@@ -1000,7 +1000,7 @@ class StockEntry(StockController):
 	def set_stock_entry_type(self):
 		if self.purpose:
 			self.stock_entry_type = frappe.get_cached_value(
-				"Stock Entry Type", {"purpose": self.purpose}, "name"
+				"Stock Entry Type", {"purpose": self.purpose, "is_standard": 1}, "name"
 			)
 
 	def set_purpose_for_stock_entry(self):

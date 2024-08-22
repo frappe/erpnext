@@ -73,29 +73,53 @@ def install(country=None):
 			"parent_item_group": _("All Item Groups"),
 		},
 		# Stock Entry Type
-		{"doctype": "Stock Entry Type", "name": _("Material Issue"), "purpose": "Material Issue"},
-		{"doctype": "Stock Entry Type", "name": _("Material Receipt"), "purpose": "Material Receipt"},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Material Issue"),
+			"purpose": "Material Issue",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Material Receipt"),
+			"purpose": "Material Receipt",
+			"is_standard": 1,
+		},
 		{
 			"doctype": "Stock Entry Type",
 			"name": _("Material Transfer"),
 			"purpose": "Material Transfer",
+			"is_standard": 1,
 		},
-		{"doctype": "Stock Entry Type", "name": _("Manufacture"), "purpose": "Manufacture"},
-		{"doctype": "Stock Entry Type", "name": _("Repack"), "purpose": "Repack"},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Manufacture"),
+			"purpose": "Manufacture",
+			"is_standard": 1,
+		},
+		{
+			"doctype": "Stock Entry Type",
+			"name": _("Repack"),
+			"purpose": "Repack",
+			"is_standard": 1,
+		},
 		{
 			"doctype": "Stock Entry Type",
 			"name": _("Send to Subcontractor"),
 			"purpose": "Send to Subcontractor",
+			"is_standard": 1,
 		},
 		{
 			"doctype": "Stock Entry Type",
 			"name": _("Material Transfer for Manufacture"),
 			"purpose": "Material Transfer for Manufacture",
+			"is_standard": 1,
 		},
 		{
 			"doctype": "Stock Entry Type",
 			"name": _("Material Consumption for Manufacture"),
 			"purpose": "Material Consumption for Manufacture",
+			"is_standard": 1,
 		},
 		# territory: with two default territories, one for home country and one named Rest of the World
 		{

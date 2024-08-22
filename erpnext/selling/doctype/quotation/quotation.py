@@ -513,14 +513,23 @@ def _make_customer(source_name, ignore_permissions=False):
 	if quotation.quotation_to == "Customer":
 		return frappe.get_doc("Customer", quotation.party_name)
 
-	# If the Quotation is not to a Customer, it must be to a Lead.
-	# Check if a Customer already exists for the Lead.
-	existing_customer_for_lead = frappe.db.get_value("Customer", {"lead_name": quotation.party_name})
-	if existing_customer_for_lead:
-		return frappe.get_doc("Customer", existing_customer_for_lead)
+	# Check if a Customer already exists for the Lead or Prospect.
+	existing_customer = None
+	if quotation.quotation_to == "Lead":
+		existing_customer = frappe.db.get_value("Customer", {"lead_name": quotation.party_name})
+	elif quotation.quotation_to == "Prospect":
+		existing_customer = frappe.db.get_value("Customer", {"prospect_name": quotation.party_name})
 
-	# If no Customer exists for the Lead, create a new Customer.
-	return create_customer_from_lead(quotation.party_name, ignore_permissions=ignore_permissions)
+	if existing_customer:
+		return frappe.get_doc("Customer", existing_customer)
+
+	# If no Customer exists, create a new Customer or Prospect.
+	if quotation.quotation_to == "Lead":
+		return create_customer_from_lead(quotation.party_name, ignore_permissions=ignore_permissions)
+	elif quotation.quotation_to == "Prospect":
+		return create_customer_from_prospect(quotation.party_name, ignore_permissions=ignore_permissions)
+
+	return None
 
 
 def create_customer_from_lead(lead_name, ignore_permissions=False):
@@ -534,6 +543,19 @@ def create_customer_from_lead(lead_name, ignore_permissions=False):
 		return customer
 	except frappe.MandatoryError as e:
 		handle_mandatory_error(e, customer, lead_name)
+
+
+def create_customer_from_prospect(prospect_name, ignore_permissions=False):
+	from erpnext.crm.doctype.prospect.prospect import make_customer as make_customer_from_prospect
+
+	customer = make_customer_from_prospect(prospect_name)
+	customer.flags.ignore_permissions = ignore_permissions
+
+	try:
+		customer.insert()
+		return customer
+	except frappe.MandatoryError as e:
+		handle_mandatory_error(e, customer, prospect_name)
 
 
 def handle_mandatory_error(e, customer, lead_name):
