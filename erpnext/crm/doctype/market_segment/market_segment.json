@@ -17,7 +17,7 @@
   }
  ],
  "links": [],
- "modified": "2024-03-27 13:10:04.846687",
+ "modified": "2024-08-16 19:24:55.811760",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Market Segment",
@@ -40,5 +40,6 @@
  "sort_field": "creation",
  "sort_order": "DESC",
  "states": [],
- "track_changes": 1
+ "track_changes": 1,
+ "translated_doctype": 1
 }
