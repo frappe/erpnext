@@ -21,19 +21,13 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("paid_from", function() {
 			frm.events.validate_company(frm);
 
-<<<<<<< HEAD
 			var account_types = ["Pay", "Internal Transfer"].includes(frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-=======
-			var account_types = ["Pay", "Internal Transfer"].includes(frm.doc.payment_type)
-				? ["Bank", "Cash"]
-				: [frappe.boot.party_account_types[frm.doc.party_type]];
 
 			if (frm.doc.party_type == "Shareholder") {
 				account_types.push("Equity");
 			}
 
->>>>>>> 6cbf98294a (refactor: allow equity types on Payment Entry)
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -86,17 +80,11 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("paid_to", function() {
 			frm.events.validate_company(frm);
 
-<<<<<<< HEAD
 			var account_types = ["Receive", "Internal Transfer"].includes(frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-=======
-			var account_types = ["Receive", "Internal Transfer"].includes(frm.doc.payment_type)
-				? ["Bank", "Cash"]
-				: [frappe.boot.party_account_types[frm.doc.party_type]];
 			if (frm.doc.party_type == "Shareholder") {
 				account_types.push("Equity");
 			}
->>>>>>> 6cbf98294a (refactor: allow equity types on Payment Entry)
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -339,7 +327,6 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("party", function() {
 			if(frm.doc.party_type == 'Employee'){
 				return {
-<<<<<<< HEAD
 					query: "erpnext.controllers.queries.employee_query"
 				}
 			}
@@ -347,16 +334,12 @@ frappe.ui.form.on('Payment Entry', {
 				return {
 					query: "erpnext.controllers.queries.customer_query"
 				}
-=======
-					query: "erpnext.controllers.queries.employee_query",
-				};
 			} else if (frm.doc.party_type == "Shareholder") {
 				return {
 					filters: {
 						company: frm.doc.company,
 					},
 				};
->>>>>>> 63ad9f4f86 (refactor: filter shareholder on company)
 			}
 		});
 
