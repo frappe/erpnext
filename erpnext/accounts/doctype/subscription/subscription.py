@@ -737,10 +737,7 @@ class Subscription(Document):
 		elif self.generate_invoice_at == "Days before the current subscription period":
 			processing_date = add_days(self.current_invoice_start, -self.number_of_days)
 
-		process_subscription = frappe.new_doc("Process Subscription")
-		process_subscription.posting_date = processing_date
-		process_subscription.subscription = self.name
-		process_subscription.save().submit()
+		self.process(posting_date=processing_date)
 
 
 def is_prorate() -> int:
