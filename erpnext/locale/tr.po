@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-21 13:06\n"
+"PO-Revision-Date: 2024-08-22 13:13\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -27035,7 +27035,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:229 stock/doctype/item/item.py:621
 msgid "Item {0} does not exist"
-msgstr ""
+msgstr "{0} ürünü mevcut değil"
 
 #: manufacturing/doctype/bom/bom.py:562
 msgid "Item {0} does not exist in the system or has expired"
@@ -28017,12 +28017,12 @@ msgstr "Muhasebeyi Öğrenin"
 #. Label of a shortcut in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "Learn Inventory Management"
-msgstr ""
+msgstr "Envanter Yönetimini Öğrenin"
 
 #. Label of a shortcut in the Manufacturing Workspace
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Learn Manufacturing"
-msgstr ""
+msgstr "Üretimi Öğrenin"
 
 #. Label of a shortcut in the Buying Workspace
 #: buying/workspace/buying/buying.json
@@ -28032,12 +28032,12 @@ msgstr "Satın Almayı Öğrenin"
 #. Label of a shortcut in the Projects Workspace
 #: projects/workspace/projects/projects.json
 msgid "Learn Project Management"
-msgstr ""
+msgstr "Proje Yönetimini Öğren"
 
 #. Label of a shortcut in the Selling Workspace
 #: selling/workspace/selling/selling.json
 msgid "Learn Sales Management"
-msgstr ""
+msgstr "Satış Yönetimini Öğren"
 
 #. Label of an action in the Onboarding Step 'How to Navigate in ERPNext'
 #: setup/onboarding_step/navigation_help/navigation_help.json
@@ -28099,7 +28099,7 @@ msgstr "Standart İrsaliye formatı kullanmak için boş bırakın"
 #: accounts/doctype/payment_entry/payment_entry.js:360
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.js:25
 msgid "Ledger"
-msgstr ""
+msgstr "Muhasebe Defteri"
 
 #. Name of a DocType
 #: accounts/doctype/ledger_health/ledger_health.json
@@ -28160,7 +28160,7 @@ msgstr "Kuruluşa ait ayrı bir Hesap Planına sahip Tüzel Kişilik / Bağlı O
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:59
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:84
 msgid "Legal Expenses"
-msgstr ""
+msgstr "Yasal Giderler"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:19
 msgid "Legend"
@@ -28189,7 +28189,7 @@ msgstr "12 Aydan daha az."
 #. Title of the Module Onboarding 'Accounts'
 #: accounts/module_onboarding/accounts/accounts.json
 msgid "Let's Set Up Your Accounts and Taxes."
-msgstr ""
+msgstr "Haydi Hesaplarınızı ve Vergilerinizi Ayarlayalım!"
 
 #. Title of the Module Onboarding 'CRM'
 #: crm/module_onboarding/crm/crm.json
@@ -28199,12 +28199,12 @@ msgstr "Müşteri Yönetimi Modülünüzü Kuralım"
 #. Title of the Module Onboarding 'Assets'
 #: assets/module_onboarding/assets/assets.json
 msgid "Let's Set Up the Assets Module."
-msgstr ""
+msgstr "Varlık Modülünü Kuralım!"
 
 #. Title of the Module Onboarding 'Buying'
 #: buying/module_onboarding/buying/buying.json
 msgid "Let's Set Up the Buying Module."
-msgstr ""
+msgstr "Satın Alma Modülünü Kuralım."
 
 #. Title of the Module Onboarding 'Manufacturing'
 #: manufacturing/module_onboarding/manufacturing/manufacturing.json
@@ -30513,7 +30513,7 @@ msgstr ""
 
 #: stock/report/product_bundle_balance/product_bundle_balance.py:97
 msgid "Minimum Qty"
-msgstr ""
+msgstr "Minimum Miktar"
 
 #. Label of the min_spent (Currency) field in DocType 'Loyalty Program
 #. Collection'
@@ -33442,7 +33442,7 @@ msgstr "Sipariş Tutarı"
 
 #: manufacturing/report/production_planning_report/production_planning_report.js:80
 msgid "Order By"
-msgstr ""
+msgstr "Sipariş Veren"
 
 #. Label of the order_confirmation_date (Date) field in DocType 'Purchase
 #. Order'
@@ -33458,7 +33458,7 @@ msgstr "Sipariş Onay No"
 #: crm/report/campaign_efficiency/campaign_efficiency.py:23
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:29
 msgid "Order Count"
-msgstr ""
+msgstr "Sipariş Sayısı"
 
 #. Label of the order_information_section (Section Break) field in DocType
 #. 'Delivery Stop'
@@ -33503,7 +33503,7 @@ msgstr "Sipariş Türü"
 #: crm/report/campaign_efficiency/campaign_efficiency.py:24
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:30
 msgid "Order Value"
-msgstr ""
+msgstr "Sipariş Değeri"
 
 #: crm/report/campaign_efficiency/campaign_efficiency.py:27
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:33
@@ -33676,7 +33676,7 @@ msgstr ""
 #: stock/report/stock_balance/stock_balance.py:461
 #: stock/report/stock_ledger/stock_ledger.py:243
 msgid "Out Qty"
-msgstr ""
+msgstr "Çıkış Miktarı"
 
 #: stock/report/stock_balance/stock_balance.py:467
 msgid "Out Value"
@@ -43807,7 +43807,7 @@ msgstr ""
 #: quality_management/doctype/quality_review_objective/quality_review_objective.json
 #: quality_management/report/review/review.json
 msgid "Review"
-msgstr ""
+msgstr "Gözden geçir"
 
 #. Title of an Onboarding Step
 #: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
@@ -45704,7 +45704,7 @@ msgstr ""
 #: selling/workspace/selling/selling.json
 #: setup/doctype/sales_person/sales_person.json
 msgid "Sales Person"
-msgstr ""
+msgstr "Satış Personeli"
 
 #. Name of a report
 #: selling/report/sales_person_commission_summary/sales_person_commission_summary.json
@@ -46402,7 +46402,7 @@ msgstr "Satış Siparişi için Alternatif Ürünleri Seçin"
 
 #: stock/doctype/item/item.js:588
 msgid "Select Attribute Values"
-msgstr ""
+msgstr "Özellik Değerlerini Seç"
 
 #: selling/doctype/sales_order/sales_order.js:867
 msgid "Select BOM"
@@ -47028,7 +47028,7 @@ msgstr "Seri No / Parti"
 
 #: stock/report/stock_qty_vs_serial_no_count/stock_qty_vs_serial_no_count.py:33
 msgid "Serial No Count"
-msgstr ""
+msgstr "Seri No Sayısı"
 
 #. Name of a report
 #: stock/report/serial_no_ledger/serial_no_ledger.json
@@ -47047,7 +47047,7 @@ msgstr ""
 #: stock/report/serial_no_status/serial_no_status.json
 #: stock/workspace/stock/stock.json
 msgid "Serial No Status"
-msgstr ""
+msgstr "Seri No Durumu"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -48391,7 +48391,7 @@ msgstr "Cari Hesabındaki Net Değerleri Göster"
 
 #: templates/pages/projects.js:63
 msgid "Show Open"
-msgstr ""
+msgstr "Açık Olanlar"
 
 #: accounts/report/general_ledger/general_ledger.js:178
 msgid "Show Opening Entries"
@@ -48409,7 +48409,7 @@ msgstr "Satın Alma Siparişi Portalında Ödeme Butonunu Göster"
 
 #: accounts/report/sales_payment_summary/sales_payment_summary.js:40
 msgid "Show Payment Details"
-msgstr ""
+msgstr "Ödeme Ayrıntılarını Göster"
 
 #. Label of the show_payment_schedule_in_print (Check) field in DocType
 #. 'Accounts Settings'
@@ -48425,16 +48425,16 @@ msgstr "Önizlemeyi Göster"
 #: accounts/report/accounts_receivable/accounts_receivable.js:179
 #: accounts/report/general_ledger/general_ledger.js:204
 msgid "Show Remarks"
-msgstr ""
+msgstr "Açıklamaları Göster"
 
 #: selling/report/sales_partner_transaction_summary/sales_partner_transaction_summary.js:65
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.js:65
 msgid "Show Return Entries"
-msgstr ""
+msgstr "İade Kayıtlarını Göster"
 
 #: accounts/report/accounts_receivable/accounts_receivable.js:174
 msgid "Show Sales Person"
-msgstr ""
+msgstr "Satış Personelini Göster"
 
 #: stock/report/stock_balance/stock_balance.js:95
 msgid "Show Stock Ageing Data"
@@ -50253,7 +50253,7 @@ msgstr ""
 
 #: buying/doctype/purchase_order/purchase_order_dashboard.py:26
 msgid "Sub-contracting"
-msgstr ""
+msgstr "Alt Yüklenici"
 
 #. Option for the 'Manufacturing Type' (Select) field in DocType 'Production
 #. Plan Sub Assembly Item'
@@ -50283,13 +50283,13 @@ msgstr "Alt Yüklenici Sipariş Özeti"
 
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:83
 msgid "Subcontract Return"
-msgstr ""
+msgstr "Alt Yüklenici İadesi"
 
 #. Label of the subcontracted_item (Link) field in DocType 'Stock Entry Detail'
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:136
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Subcontracted Item"
-msgstr ""
+msgstr "Alt Yüklenici Ürünü"
 
 #. Name of a report
 #. Label of a Link in the Buying Workspace
@@ -52839,7 +52839,7 @@ msgstr "'Üretim' türündeki Stok Girişi geri akış olarak bilinir. Bitmiş �
 #. Success message of the Module Onboarding 'Stock'
 #: stock/module_onboarding/stock/stock.json
 msgid "The Stock Module is all set up!"
-msgstr ""
+msgstr "Stok Modülünün kurulumu tamamlandı!"
 
 #. Description of the 'Closing Account Head' (Link) field in DocType 'Period
 #. Closing Voucher'
@@ -53102,7 +53102,7 @@ msgstr "Üretim başladığında ürünlerinizin aktarılacağı depo. Grup Depo
 
 #: manufacturing/doctype/job_card/job_card.py:727
 msgid "The {0} ({1}) must be equal to {2} ({3})"
-msgstr ""
+msgstr "{0} ({1}) ile {2} ({3}) eşit olmalıdır"
 
 #: stock/doctype/material_request/material_request.py:786
 msgid "The {0} {1} created successfully"
@@ -53166,11 +53166,11 @@ msgstr "Bu zaman dilimi için Tedarikçi {1} için {2} kategorisine karşı geç
 
 #: subcontracting/doctype/subcontracting_bom/subcontracting_bom.py:77
 msgid "There is already an active Subcontracting BOM {0} for the Finished Good {1}."
-msgstr ""
+msgstr "{1} isimli Bitmiş Ürün için aktif bir Alt Yüklenici {0} Ürün Ağacı bulunmaktadır."
 
 #: stock/doctype/batch/batch.py:406
 msgid "There is no batch found against the {0}: {1}"
-msgstr ""
+msgstr "{0} için grup bulunamadı: {1}"
 
 #: stock/doctype/stock_entry/stock_entry.py:1326
 msgid "There must be atleast 1 Finished Good in this Stock Entry"
@@ -57154,7 +57154,7 @@ msgstr ""
 #. Name of a DocType
 #: utilities/doctype/video/video.json
 msgid "Video"
-msgstr ""
+msgstr "Video"
 
 #. Name of a DocType
 #: utilities/doctype/video/video_list.js:3
@@ -58978,7 +58978,7 @@ msgstr ""
 
 #: projects/doctype/project_type/project_type.py:25
 msgid "You cannot delete Project Type 'External'"
-msgstr ""
+msgstr "'Harici' Proje Türünü silemezsiniz"
 
 #: setup/doctype/department/department.js:19
 msgid "You cannot edit root node."
@@ -58998,11 +58998,11 @@ msgstr "İptal edilmeyen bir Aboneliği yeniden başlatamazsınız."
 
 #: selling/page/point_of_sale/pos_payment.js:210
 msgid "You cannot submit empty order."
-msgstr ""
+msgstr "Boş sipariş gönderemezsiniz."
 
 #: selling/page/point_of_sale/pos_payment.js:209
 msgid "You cannot submit the order without payment."
-msgstr ""
+msgstr "Ödeme yapılmadan siparişi gönderemezsiniz."
 
 #: controllers/accounts_controller.py:3222
 msgid "You do not have permissions to {} items in a {}."
@@ -59065,7 +59065,7 @@ msgstr "Youtube"
 #. Name of a report
 #: utilities/report/youtube_interactions/youtube_interactions.json
 msgid "YouTube Interactions"
-msgstr ""
+msgstr "YouTube Etkileşimleri"
 
 #. Description of the 'ERPNext Company' (Data) field in DocType 'Tally
 #. Migration'
@@ -59454,11 +59454,11 @@ msgstr ""
 
 #: controllers/accounts_controller.py:948
 msgid "{0} '{1}' is disabled"
-msgstr ""
+msgstr "{0} '{1}' devre dışı bırakıldı."
 
 #: accounts/utils.py:170
 msgid "{0} '{1}' not in Fiscal Year {2}"
-msgstr ""
+msgstr "{0} '{1}' {2} mali yılında değil."
 
 #: manufacturing/doctype/work_order/work_order.py:380
 msgid "{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}"
@@ -59632,7 +59632,7 @@ msgstr ""
 #: accounts/report/general_ledger/general_ledger.py:53
 #: accounts/report/pos_register/pos_register.py:107 controllers/trends.py:50
 msgid "{0} is mandatory"
-msgstr ""
+msgstr "{0} zorunludur"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:996
 msgid "{0} is mandatory for Item {1}"
@@ -59716,7 +59716,7 @@ msgstr ""
 
 #: support/doctype/service_level_agreement/service_level_agreement.py:696
 msgid "{0} parameter is invalid"
-msgstr ""
+msgstr "{0} parametresi geçersiz"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:65
 msgid "{0} payment entries can not be filtered by {1}"
@@ -59785,13 +59785,13 @@ msgstr ""
 
 #: accounts/doctype/payment_order/payment_order.py:121
 msgid "{0} {1} created"
-msgstr ""
+msgstr "{0} {1} oluşturdu"
 
 #: accounts/doctype/payment_entry/payment_entry.py:536
 #: accounts/doctype/payment_entry/payment_entry.py:594
 #: accounts/doctype/payment_entry/payment_entry.py:2140
 msgid "{0} {1} does not exist"
-msgstr ""
+msgstr "{0} {1} mevcut değil"
 
 #: accounts/party.py:517
 msgid "{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}."
