@@ -194,6 +194,14 @@ frappe.ui.form.on("Payment Entry", {
 				},
 			};
 		});
+
+		// todo: fetch payment term outstanding amount also
+		frm.add_fetch(
+			"payment_request",
+			"outstanding_amount",
+			"payment_request_outstanding",
+			"Payment Entry Reference"
+		);
 	},
 
 	refresh: function (frm) {

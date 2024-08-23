@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-
+import frappe
 from frappe.model.document import Document
 
 
@@ -35,4 +35,24 @@ class PaymentEntryReference(Document):
 		total_amount: DF.Float
 	# end: auto-generated types
 
-	pass
+	@property
+	def payment_term_outstanding(self):
+		if not self.payment_term:
+			return 0
+
+		return frappe.db.get_value(
+			"Payment Schedule",
+			{
+				"payment_term": self.payment_term,
+				"parenttype": self.reference_doctype,
+				"parent": self.reference_name,
+			},
+			"outstanding",
+		)
+
+	@property
+	def payment_request_outstanding(self):
+		if not self.payment_request:
+			return 0
+
+		return frappe.db.get_value("Payment Request", self.payment_request, "outstanding_amount")
