@@ -648,6 +648,13 @@ class PurchaseOrder(BuyingController):
 			if sco:
 				update_sco_status(sco, "Closed" if self.status == "Closed" else None)
 
+	def set_missing_values(self, for_validate=False):
+		tds_category = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
+		if tds_category and not for_validate:
+			self.apply_tds = 1
+			self.tax_withholding_category = tds_category
+			self.set_onload("supplier_tds", tds_category)
+
 
 @frappe.request_cache
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
