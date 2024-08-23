@@ -739,7 +739,7 @@ class Asset(AccountsController):
 			make_gl_entries(gl_entries)
 			self.db_set("booked_fixed_asset", 1)
 
-	def check_asset_capitalization_gl_entry(self):
+	def check_asset_capitalization_gl_entries(self):
 		if self.is_composite_asset:
 			asset_capitalization, target_fixed_asset_account = frappe.db.get_value(
 				"Asset Capitalization",
