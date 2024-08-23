@@ -84,7 +84,7 @@
  "idx": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2024-03-27 13:10:17.226079",
+ "modified": "2024-08-16 19:41:19.591111",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price List",
@@ -130,5 +130,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "creation",
  "sort_order": "ASC",
- "states": []
+ "states": [],
+ "translated_doctype": 1
 }

@@ -35,6 +35,11 @@ frappe.ui.form.on("Payment Entry", {
 			var account_types = ["Pay", "Internal Transfer"].includes(frm.doc.payment_type)
 				? ["Bank", "Cash"]
 				: [frappe.boot.party_account_types[frm.doc.party_type]];
+
+			if (frm.doc.party_type == "Shareholder") {
+				account_types.push("Equity");
+			}
+
 			return {
 				filters: {
 					account_type: ["in", account_types],
@@ -90,6 +95,9 @@ frappe.ui.form.on("Payment Entry", {
 			var account_types = ["Receive", "Internal Transfer"].includes(frm.doc.payment_type)
 				? ["Bank", "Cash"]
 				: [frappe.boot.party_account_types[frm.doc.party_type]];
+			if (frm.doc.party_type == "Shareholder") {
+				account_types.push("Equity");
+			}
 			return {
 				filters: {
 					account_type: ["in", account_types],
@@ -411,6 +419,12 @@ frappe.ui.form.on("Payment Entry", {
 			if (frm.doc.party_type == "Employee") {
 				return {
 					query: "erpnext.controllers.queries.employee_query",
+				};
+			} else if (frm.doc.party_type == "Shareholder") {
+				return {
+					filters: {
+						company: frm.doc.company,
+					},
 				};
 			}
 		});
