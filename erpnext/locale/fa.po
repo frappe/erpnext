@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-18 12:36\n"
+"PO-Revision-Date: 2024-08-24 14:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -3887,7 +3887,7 @@ msgstr "دستور جلسه"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:4
 msgid "Agent"
-msgstr ""
+msgstr "عامل"
 
 #. Label of the agent_busy_message (Data) field in DocType 'Incoming Call
 #. Settings'
@@ -11636,7 +11636,7 @@ msgstr "کل مبلغ دفتر کل طرف را در نظر بگیرید"
 #. Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Consider Minimum Order Qty"
-msgstr "حداقل تعداد سفارش را در نظر بگیرید"
+msgstr "در نظر گرفتن حداقل تعداد سفارش"
 
 #. Label of the consider_rejected_warehouses (Check) field in DocType 'Pick
 #. List'
@@ -14002,7 +14002,7 @@ msgstr "نرخ ارزش گذاری فعلی"
 
 #: selling/report/sales_analytics/sales_analytics.js:90
 msgid "Curves"
-msgstr ""
+msgstr "منحنی ها"
 
 #. Label of the custodian (Link) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -15045,7 +15045,7 @@ msgstr "صاحب معامله"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:3
 msgid "Dealer"
-msgstr ""
+msgstr "فروشنده"
 
 #: templates/emails/confirm_appointment.html:1
 msgid "Dear"
@@ -18882,7 +18882,7 @@ msgstr "پایان دوره اشتراک فعلی"
 
 #: setup/setup_wizard/data/industry_type.txt:21
 msgid "Energy"
-msgstr ""
+msgstr "انرژی"
 
 #: setup/setup_wizard/data/designation.txt:15
 msgid "Engineer"
@@ -21868,7 +21868,7 @@ msgstr ""
 #. Label of the get_items_for_mr (Button) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Get Raw Materials for Purchase"
-msgstr "مواد اولیه را برای خرید دریافت کنید"
+msgstr "دریافت مواد اولیه را برای خرید"
 
 #. Label of the transfer_materials (Button) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
@@ -24024,7 +24024,7 @@ msgstr "شامل نوشته های تطبیق شده"
 #. Label of the include_safety_stock (Check) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Include Safety Stock in Required Qty Calculation"
-msgstr "موجودی ایمنی را در محاسبه مقدار مورد نیاز لحاظ کنید"
+msgstr "لحاظ کردن موجودی ایمنی در محاسبه مقدار مورد نیاز"
 
 #: manufacturing/report/production_planning_report/production_planning_report.js:87
 msgid "Include Sub-assembly Raw Materials"
@@ -24034,7 +24034,7 @@ msgstr "شامل مواد اولیه زیر مونتاژ"
 #. 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Include Subcontracted Items"
-msgstr "شامل موارد قرارداد فرعی"
+msgstr "شامل آیتم‌های قرارداد فرعی"
 
 #: projects/report/timesheet_billing_summary/timesheet_billing_summary.js:52
 msgid "Include Timesheets in Draft Status"
@@ -36042,7 +36042,7 @@ msgstr "گزارش های زمان را خارج از ساعات کاری ایس
 #. Label of the quantity (Float) field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgid "Plan to Request Qty"
-msgstr "برای درخواست تعداد برنامه ریزی کنید"
+msgstr "برنامه ریزی برای مقدار درخواست"
 
 #. Option for the 'Maintenance Status' (Select) field in DocType 'Asset
 #. Maintenance Log'
@@ -39989,7 +39989,7 @@ msgstr "تعداد بعد از تراکنش"
 #. Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgid "Qty As Per BOM"
-msgstr "تعداد طبق BOM"
+msgstr "مقدار طبق BOM"
 
 #. Label of the actual_qty (Float) field in DocType 'Stock Ledger Entry'
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
@@ -43551,12 +43551,12 @@ msgstr "مبلغ برگشتی"
 #: subcontracting/doctype/subcontracting_order_supplied_item/subcontracting_order_supplied_item.json
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Returned Qty"
-msgstr "تعداد برگردانده شد"
+msgstr "مقدار برگردانده شده"
 
 #. Label of the returned_qty (Float) field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgid "Returned Qty "
-msgstr " تعداد برگردانده شد"
+msgstr "مقدار برگردانده شده "
 
 #. Label of the returned_qty (Float) field in DocType 'Delivery Note Item'
 #. Label of the returned_qty (Float) field in DocType 'Purchase Receipt Item'
@@ -44904,7 +44904,7 @@ msgstr "تنظیمات پیامک"
 
 #: selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:43
 msgid "SO Qty"
-msgstr ""
+msgstr "مقدار س.ف."
 
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:107
 msgid "SO Total Qty"
@@ -48727,7 +48727,7 @@ msgstr "تقسیم {0} {1} به ردیف‌های {2} طبق شرایط پردا
 
 #: setup/setup_wizard/data/industry_type.txt:46
 msgid "Sports"
-msgstr ""
+msgstr "ورزشی"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -53736,7 +53736,7 @@ msgstr "برای تحویل و صدور صورتحساب"
 #. Label of the to_delivery_date (Date) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "To Delivery Date"
-msgstr "به تاریخ تحویل"
+msgstr "تا تاریخ تحویل"
 
 #. Label of the to_doctype (Link) field in DocType 'Bulk Transaction Log
 #. Detail'
@@ -57080,7 +57080,7 @@ msgstr "ملاقات کرد"
 #. Group in Maintenance Schedule's connections
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgid "Visits"
-msgstr ""
+msgstr "بازدیدها"
 
 #. Option for the 'Communication Medium Type' (Select) field in DocType
 #. 'Communication Medium'
