@@ -228,6 +228,7 @@ frappe.ui.form.on("Payment Entry", {
 			);
 		}
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
+		frappe.flags.allocate_payment_amount = true;
 	},
 
 	validate_company: (frm) => {
@@ -1050,95 +1051,16 @@ frappe.ui.form.on("Payment Entry", {
 		return ["Sales Invoice", "Purchase Invoice"];
 	},
 
-	allocate_party_amount_against_ref_docs: function (frm, paid_amount, paid_amount_change) {
-		var total_positive_outstanding_including_order = 0;
-		var total_negative_outstanding = 0;
-		var total_deductions = frappe.utils.sum(
-			$.map(frm.doc.deductions || [], function (d) {
-				return flt(d.amount);
-			})
-		);
-
-		paid_amount -= total_deductions;
-
-		$.each(frm.doc.references || [], function (i, row) {
-			if (flt(row.outstanding_amount) > 0)
-				total_positive_outstanding_including_order += flt(row.outstanding_amount);
-			else total_negative_outstanding += Math.abs(flt(row.outstanding_amount));
+	allocate_party_amount_against_ref_docs: async function (frm, paid_amount, paid_amount_change) {
+		await frm.call("allocate_party_amount_against_ref_docs", {
+			paid_amount: paid_amount,
+			paid_amount_change: paid_amount_change ? paid_amount_change : 0,
+			allocate_payment_amount: frappe.flags.allocate_payment_amount
+				? frappe.flags.allocate_payment_amount
+				: 0,
 		});
 
-		var allocated_negative_outstanding = 0;
-		if (
-			(frm.doc.payment_type == "Receive" && frm.doc.party_type == "Customer") ||
-			(frm.doc.payment_type == "Pay" && frm.doc.party_type == "Supplier") ||
-			(frm.doc.payment_type == "Pay" && frm.doc.party_type == "Employee")
-		) {
-			if (total_positive_outstanding_including_order > paid_amount) {
-				var remaining_outstanding = total_positive_outstanding_including_order - paid_amount;
-				allocated_negative_outstanding =
-					total_negative_outstanding < remaining_outstanding
-						? total_negative_outstanding
-						: remaining_outstanding;
-			}
-
-			var allocated_positive_outstanding = paid_amount + allocated_negative_outstanding;
-		} else if (["Customer", "Supplier"].includes(frm.doc.party_type)) {
-			total_negative_outstanding = flt(total_negative_outstanding, precision("outstanding_amount"));
-			if (paid_amount > total_negative_outstanding) {
-				if (total_negative_outstanding == 0) {
-					frappe.msgprint(
-						__("Cannot {0} {1} {2} without any negative outstanding invoice", [
-							frm.doc.payment_type,
-							frm.doc.party_type == "Customer" ? "to" : "from",
-							frm.doc.party_type,
-						])
-					);
-					return false;
-				} else {
-					frappe.msgprint(
-						__("Paid Amount cannot be greater than total negative outstanding amount {0}", [
-							total_negative_outstanding,
-						])
-					);
-					return false;
-				}
-			} else {
-				allocated_positive_outstanding = total_negative_outstanding - paid_amount;
-				allocated_negative_outstanding =
-					paid_amount +
-					(total_positive_outstanding_including_order < allocated_positive_outstanding
-						? total_positive_outstanding_including_order
-						: allocated_positive_outstanding);
-			}
-		}
-
-		$.each(frm.doc.references || [], function (i, row) {
-			if (frappe.flags.allocate_payment_amount == 0) {
-				//If allocate payment amount checkbox is unchecked, set zero to allocate amount
-				row.allocated_amount = 0;
-			} else if (
-				frappe.flags.allocate_payment_amount != 0 &&
-				(!row.allocated_amount || paid_amount_change)
-			) {
-				if (row.outstanding_amount > 0 && allocated_positive_outstanding >= 0) {
-					row.allocated_amount =
-						row.outstanding_amount >= allocated_positive_outstanding
-							? allocated_positive_outstanding
-							: row.outstanding_amount;
-					allocated_positive_outstanding -= flt(row.allocated_amount);
-				} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
-					row.allocated_amount =
-						Math.abs(row.outstanding_amount) >= allocated_negative_outstanding
-							? -1 * allocated_negative_outstanding
-							: row.outstanding_amount;
-					allocated_negative_outstanding -= Math.abs(flt(row.allocated_amount));
-				}
-			}
-		});
-
-		frm.refresh_fields();
 		frm.events.set_total_allocated_amount(frm);
-		if (frappe.flags.allocate_payment_amount) frm.call("set_payment_requests_to_references");
 	},
 
 	set_total_allocated_amount: function (frm) {
