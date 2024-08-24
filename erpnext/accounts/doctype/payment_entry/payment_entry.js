@@ -796,7 +796,7 @@ frappe.ui.form.on("Payment Entry", {
 		);
 
 		if (frm.doc.payment_type == "Pay")
-			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount, 1);
+			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount, 1, false);
 		else frm.events.set_unallocated_amount(frm);
 
 		frm.set_paid_amount_based_on_received_amount = false;
@@ -817,7 +817,7 @@ frappe.ui.form.on("Payment Entry", {
 		}
 
 		if (frm.doc.payment_type == "Receive")
-			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount, 1);
+			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount, 1, false);
 		else frm.events.set_unallocated_amount(frm);
 	},
 
@@ -1037,7 +1037,9 @@ frappe.ui.form.on("Payment Entry", {
 
 				frm.events.allocate_party_amount_against_ref_docs(
 					frm,
-					frm.doc.payment_type == "Receive" ? frm.doc.paid_amount : frm.doc.received_amount
+					frm.doc.payment_type == "Receive" ? frm.doc.paid_amount : frm.doc.received_amount,
+					0,
+					true
 				);
 			},
 		});
@@ -1051,13 +1053,19 @@ frappe.ui.form.on("Payment Entry", {
 		return ["Sales Invoice", "Purchase Invoice"];
 	},
 
-	allocate_party_amount_against_ref_docs: async function (frm, paid_amount, paid_amount_change) {
+	allocate_party_amount_against_ref_docs: async function (
+		frm,
+		paid_amount,
+		paid_amount_change,
+		allocate_payment_request
+	) {
 		await frm.call("allocate_party_amount_against_ref_docs", {
 			paid_amount: paid_amount,
-			paid_amount_change: paid_amount_change ? paid_amount_change : 0,
+			paid_amount_change: paid_amount_change,
 			allocate_payment_amount: frappe.flags.allocate_payment_amount
 				? frappe.flags.allocate_payment_amount
-				: 0,
+				: false,
+			allocate_payment_request: allocate_payment_request,
 		});
 
 		frm.events.set_total_allocated_amount(frm);

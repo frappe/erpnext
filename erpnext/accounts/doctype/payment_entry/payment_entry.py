@@ -1763,7 +1763,7 @@ class PaymentEntry(AccountsController):
 
 	@frappe.whitelist()
 	def allocate_party_amount_against_ref_docs(
-		self, paid_amount, paid_amount_change, allocate_payment_amount
+		self, paid_amount, paid_amount_change, allocate_payment_amount, allocate_payment_request
 	):
 		if not self.references:
 			return
@@ -1828,11 +1828,11 @@ class PaymentEntry(AccountsController):
 					total_positive_outstanding_including_order, allocated_positive_outstanding
 				)
 
-		# correct data, because it it is possible PT's outstanding amount is not updated
-		payment_term_outstanding = get_payment_term_outstanding_of_references(self.references)
+		payment_term_outstanding = {}
 
-		if not payment_term_outstanding:
-			payment_term_outstanding = {}
+		if not allocate_payment_request:
+			# correct data, because it it is possible PT's outstanding amount is not updated
+			payment_term_outstanding = get_payment_term_outstanding_of_references(self.references)
 
 		# ! may possible that PR is there or not and same for the PT
 		# todo: allocate amount (based on outstanding_amount + PT outstanding amount + PR outstanding amount)
@@ -1844,6 +1844,9 @@ class PaymentEntry(AccountsController):
 			elif ref.outstanding_amount < 0 and allocated_negative_outstanding > 0:
 				ref.allocated_amount = min(allocated_negative_outstanding, abs(ref.outstanding_amount)) * -1
 				allocated_negative_outstanding -= abs(flt(ref.allocated_amount))
+
+		if allocate_payment_request:
+			set_open_payment_requests_to_references(self.references)
 
 
 def get_matched_payment_request_of_references(references=None):
@@ -2771,7 +2774,6 @@ def set_open_payment_requests_to_references(references=None):
 
 		# allocate the payment request to the reference and PR's outstanding amount
 		row.payment_request = payment_request
-		row.payment_request_outstanding = outstanding_amount
 
 		if outstanding_amount == allocated_amount:
 			del reference_payment_requests[payment_request]
@@ -2802,7 +2804,6 @@ def set_open_payment_requests_to_references(references=None):
 				# update new row
 				new_row.idx = row_number + 1
 				new_row.payment_request = payment_request
-				new_row.payment_request_outstanding = outstanding_amount
 				new_row.allocated_amount = min(
 					outstanding_amount if outstanding_amount else allocated_amount, allocated_amount
 				)
