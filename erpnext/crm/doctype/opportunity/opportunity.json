@@ -185,7 +185,8 @@
   {
    "fieldname": "expected_closing",
    "fieldtype": "Date",
-   "label": "Expected Closing Date"
+   "label": "Expected Closing Date",
+   "no_copy": 1
   },
   {
    "fieldname": "section_break_14",
@@ -357,6 +358,7 @@
    "fieldname": "transaction_date",
    "fieldtype": "Date",
    "label": "Opportunity Date",
+   "no_copy": 1,
    "oldfieldname": "transaction_date",
    "oldfieldtype": "Date",
    "reqd": 1,
@@ -388,6 +390,7 @@
    "fieldname": "first_response_time",
    "fieldtype": "Duration",
    "label": "First Response Time",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -622,7 +625,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2022-10-13 12:42:21.545636",
+ "modified": "2024-08-20 04:12:29.095761",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
