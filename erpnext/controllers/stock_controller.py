@@ -394,6 +394,13 @@ class StockController(AccountsController):
 			warehouse = row.get("target_warehouse") or row.get("warehouse")
 			type_of_transaction = "Outward"
 
+		if (
+			self.is_internal_transfer()
+			and self.doctype in ["Purchase Receipt", "Purchase Order"]
+		):
+			warehouse = row.get("from_warehouse") or row.get("warehouse")
+			type_of_transaction = "Outward"
+
 		bundle_details.update(
 			{
 				"qty": qty,
