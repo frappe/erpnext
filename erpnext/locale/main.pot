@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ERPNext VERSION\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
-"POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-18 09:35+0000\n"
+"POT-Creation-Date: 2024-08-25 09:34+0000\n"
+"PO-Revision-Date: 2024-08-25 09:34+0000\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: info@erpnext.com\n"
 "MIME-Version: 1.0\n"
@@ -91,501 +91,12 @@ msgstr ""
 msgid "#"
 msgstr ""
 
-#. Description of the Onboarding Step 'Accounts Settings'
-#: accounts/onboarding_step/accounts_settings/accounts_settings.json
-msgid ""
-"# Account Settings\n"
-"\n"
-"In ERPNext, Accounting features are configurable as per your business needs. Accounts Settings is the place to define some of your accounting preferences like:\n"
-"\n"
-" - Credit Limit and over billing settings\n"
-" - Taxation preferences\n"
-" - Deferred accounting preferences\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Configure Account Settings'
-#: accounts/onboarding_step/configure_account_settings/configure_account_settings.json
-msgid ""
-"# Account Settings\n"
-"\n"
-"This is a crucial piece of configuration. There are various account settings in ERPNext to restrict and configure actions in the Accounting module.\n"
-"\n"
-"The following settings are avaialble for you to configure\n"
-"\n"
-"1. Account Freezing \n"
-"2. Credit and Overbilling\n"
-"3. Invoicing and Tax Automations\n"
-"4. Balance Sheet configurations\n"
-"\n"
-"There's much more, you can check it all out in this step"
-msgstr ""
-
-#. Description of the Onboarding Step 'Add an Existing Asset'
-#: assets/onboarding_step/existing_asset/existing_asset.json
-msgid ""
-"# Add an Existing Asset\n"
-"\n"
-"If you are just starting with ERPNext, you will need to enter Assets you already possess. You can add them as existing fixed assets in ERPNext. Please note that you will have to make a Journal Entry separately updating the opening balance in the fixed asset account."
-msgstr ""
-
-#. Description of the Onboarding Step 'Create Your First Sales Invoice '
-#: setup/onboarding_step/create_your_first_sales_invoice/create_your_first_sales_invoice.json
-msgid ""
-"# All about sales invoice\n"
-"\n"
-"A Sales Invoice is a bill that you send to your Customers against which the Customer makes the payment. Sales Invoice is an accounting transaction. On submission of Sales Invoice, the system updates the receivable and books income against a Customer Account."
-msgstr ""
-
-#. Description of the Onboarding Step 'Create Your First Sales Invoice '
-#: accounts/onboarding_step/create_your_first_sales_invoice/create_your_first_sales_invoice.json
-msgid ""
-"# All about sales invoice\n"
-"\n"
-"A Sales Invoice is a bill that you send to your Customers against which the Customer makes the payment. Sales Invoice is an accounting transaction. On submission of Sales Invoice, the system updates the receivable and books income against a Customer Account.\n"
-"\n"
-"Here's the flow of how a sales invoice is generally created\n"
-"\n"
-"\n"
-"![Sales Flow](https://docs.erpnext.com/docs/assets/img/accounts/so-flow.png)"
-msgstr ""
-
-#. Description of the Onboarding Step 'Define Asset Category'
-#: assets/onboarding_step/asset_category/asset_category.json
-msgid ""
-"# Asset Category\n"
-"\n"
-"An Asset Category classifies different assets of a Company.\n"
-"\n"
-"You can create an Asset Category based on the type of assets. For example, all your desktops and laptops can be part of an Asset Category named \"Electronic Equipment\". Create a separate category for furniture. Also, you can update default properties for each category, like:\n"
-" - Depreciation type and duration\n"
-" - Fixed asset account\n"
-" - Depreciation account\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Create an Asset Item'
-#: assets/onboarding_step/asset_item/asset_item.json
-msgid ""
-"# Asset Item\n"
-"\n"
-"Asset items are created based on Asset Category. You can create one or multiple items against once Asset Category. The sales and purchase transaction for Asset is done via Asset Item. "
-msgstr ""
-
-#. Description of the Onboarding Step 'Buying Settings'
-#: buying/onboarding_step/introduction_to_buying/introduction_to_buying.json
-msgid ""
-"# Buying Settings\n"
-"\n"
-"\n"
-"Buying module’s features are highly configurable as per your business needs. Buying Settings is the place where you can set your preferences for:\n"
-"\n"
-"- Supplier naming and default values\n"
-"- Billing and shipping preference in buying transactions\n"
-"\n"
-"\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'CRM Settings'
-#: crm/onboarding_step/crm_settings/crm_settings.json
-msgid ""
-"# CRM Settings\n"
-"\n"
-"CRM module’s features are configurable as per your business needs. CRM Settings is the place where you can set your preferences for:\n"
-"- Campaign\n"
-"- Lead\n"
-"- Opportunity\n"
-"- Quotation"
-msgstr ""
-
-#. Description of the Onboarding Step 'Review Chart of Accounts'
-#: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
-msgid ""
-"# Chart Of Accounts\n"
-"\n"
-"ERPNext sets up a simple chart of accounts for each Company you create, but you can modify it according to business and legal requirements."
-msgstr ""
-
-#. Description of the Onboarding Step 'Check Stock Ledger'
-#. Description of the Onboarding Step 'Check Stock Projected Qty'
-#: stock/onboarding_step/check_stock_ledger_report/check_stock_ledger_report.json
-#: stock/onboarding_step/view_stock_projected_qty/view_stock_projected_qty.json
-msgid ""
-"# Check Stock Reports\n"
-"Based on the various stock transactions, you can get a host of one-click Stock Reports in ERPNext like Stock Ledger, Stock Balance, Projected Quantity, and Ageing analysis."
-msgstr ""
-
-#. Description of the Onboarding Step 'Cost Centers for Budgeting and Analysis'
-#: accounts/onboarding_step/cost_centers_for_report_and_budgeting/cost_centers_for_report_and_budgeting.json
-msgid ""
-"# Cost Centers for Budgeting and Analysis\n"
-"\n"
-"While your Books of Accounts are framed to fulfill statutory requirements, you can set up Cost Center and Accounting Dimensions to address your companies reporting and budgeting requirements.\n"
-"\n"
-"Click here to learn more about how  <b>[Cost Center](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/cost-center)</b> and <b> [Dimensions](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-dimensions)</b> allow you to get advanced financial analytics reports from ERPNext."
-msgstr ""
-
-#. Description of the Onboarding Step 'Finished Items'
-#: manufacturing/onboarding_step/create_product/create_product.json
-msgid ""
-"# Create Items for Bill of Materials\n"
-"\n"
-"One of the prerequisites of a BOM is the creation of raw materials, sub-assembly, and finished items. Once these items are created, you will be able to proceed to the Bill of Materials master, which is composed of items and routing.\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Operation'
-#: manufacturing/onboarding_step/operation/operation.json
-msgid ""
-"# Create Operations\n"
-"\n"
-"An Operation refers to any manufacturing operation performed on the raw materials to process it further in the manufacturing path. As an example, if you are into garments manufacturing, you will create Operations like fabric cutting, stitching, and washing as some of the operations."
-msgstr ""
-
-#. Description of the Onboarding Step 'Workstation'
-#: manufacturing/onboarding_step/workstation/workstation.json
-msgid ""
-"# Create Workstations\n"
-"\n"
-"A Workstation stores information regarding the place where the workstation operations are performed. As an example, if you have ten sewing machines doing stitching jobs, each machine will be added as a workstation."
-msgstr ""
-
-#. Description of the Onboarding Step 'Bill of Materials'
-#: manufacturing/onboarding_step/create_bom/create_bom.json
-msgid ""
-"# Create a Bill of Materials\n"
-"\n"
-"A Bill of Materials (BOM) is a list of items and sub-assemblies with quantities required to manufacture an Item.\n"
-"\n"
-"BOM also provides cost estimation for the production of the item. It takes raw-materials cost based on valuation and operations to cost based on routing, which gives total costing for a BOM."
-msgstr ""
-
-#. Description of the Onboarding Step 'Create a Customer'
-#: setup/onboarding_step/create_a_customer/create_a_customer.json
-msgid ""
-"# Create a Customer\n"
-"\n"
-"The Customer master is at the heart of your sales transactions. Customers are linked in Quotations, Sales Orders, Invoices, and Payments. Customers can be either numbered or identified by name (you would typically do this based on the number of customers you have).\n"
-"\n"
-"Through Customer’s master, you can effectively track essentials like:\n"
-" - Customer’s multiple address and contacts\n"
-" - Account Receivables\n"
-" - Credit Limit and Credit Period\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Setup Your Letterhead'
-#: setup/onboarding_step/letterhead/letterhead.json
-msgid ""
-"# Create a Letter Head\n"
-"\n"
-"A Letter Head contains your organization's name, logo, address, etc which appears at the header and footer portion in documents. You can learn more about Setting up Letter Head in ERPNext here.\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Create your first Quotation'
-#: setup/onboarding_step/create_a_quotation/create_a_quotation.json
-msgid ""
-"# Create a Quotation\n"
-"\n"
-"Let’s get started with business transactions by creating your first Quotation. You can create a Quotation for an existing customer or a prospect. It will be an approved document, with items you sell and the proposed price + taxes applied. After completing the instructions, you will get a Quotation in a ready to share print format."
-msgstr ""
-
-#. Description of the Onboarding Step 'Create a Supplier'
-#: setup/onboarding_step/create_a_supplier/create_a_supplier.json
-msgid ""
-"# Create a Supplier\n"
-"\n"
-"Also known as Vendor, is a master at the center of your purchase transactions. Suppliers are linked in Request for Quotation, Purchase Orders, Receipts, and Payments. Suppliers can be either numbered or identified by name.\n"
-"\n"
-"Through Supplier’s master, you can effectively track essentials like:\n"
-" - Supplier’s multiple address and contacts\n"
-" - Account Receivables\n"
-" - Credit Limit and Credit Period\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Create a Supplier'
-#: stock/onboarding_step/create_a_supplier/create_a_supplier.json
-msgid ""
-"# Create a Supplier\n"
-"In this step we will create a **Supplier**. If you have already created a **Supplier** you can skip this step."
-msgstr ""
-
-#. Description of the Onboarding Step 'Work Order'
-#: manufacturing/onboarding_step/work_order/work_order.json
-msgid ""
-"# Create a Work Order\n"
-"\n"
-"A Work Order or a Job order is given to the manufacturing shop floor by the Production Manager to initiate the manufacturing of a certain quantity of an item. Work Order carriers details of production Item, its BOM, quantities to be manufactured, and operations.\n"
-"\n"
-"Through Work Order, you can track various production status like:\n"
-"\n"
-"- Issue of raw-material to shop material\n"
-"- Progress on each Workstation via Job Card\n"
-"- Manufactured Quantity against Work Order\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Create an Item'
-#: setup/onboarding_step/create_an_item/create_an_item.json
-msgid ""
-"# Create an Item\n"
-"\n"
-"Item is a product or a service offered by your company, or something you buy as a part of your supplies or raw materials.\n"
-"\n"
-"Items are integral to everything you do in ERPNext - from billing, purchasing to managing inventory. Everything you buy or sell, whether it is a physical product or a service is an Item. Items can be stock, non-stock, variants, serialized, batched, assets, etc.\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Create an Item'
-#: stock/onboarding_step/create_an_item/create_an_item.json
-msgid ""
-"# Create an Item\n"
-"The Stock module deals with the movement of items.\n"
-"\n"
-"In this step we will create an  [**Item**](https://docs.erpnext.com/docs/user/manual/en/stock/item)."
-msgstr ""
-
-#. Description of the Onboarding Step 'Create first Purchase Order'
-#: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
-msgid ""
-"# Create first Purchase Order\n"
-"\n"
-"Purchase Order is at the heart of your buying transactions. In ERPNext, Purchase Order can can be created against a Purchase Material Request (indent) and Supplier Quotation as well.  Purchase Orders is also linked to Purchase Receipt and Purchase Invoices, allowing you to keep a birds-eye view on your purchase deals.\n"
-"\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Create Your First Purchase Invoice '
-#: accounts/onboarding_step/create_your_first_purchase_invoice/create_your_first_purchase_invoice.json
-msgid ""
-"# Create your first Purchase Invoice\n"
-"\n"
-"A Purchase Invoice is a bill received from a Supplier for a product(s) or service(s) delivery to your company. You can track payables through Purchase Invoice and process Payment Entries against it.\n"
-"\n"
-"Purchase Invoices can also be created against a Purchase Order or Purchase Receipt."
-msgstr ""
-
-#. Description of the Onboarding Step 'Financial Statements'
-#: accounts/onboarding_step/financial_statements/financial_statements.json
-msgid ""
-"# Financial Statements\n"
-"\n"
-"In ERPNext, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.\n"
-"\n"
-"<b>[Check Accounting reports](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
-msgstr ""
-
-#. Description of the Onboarding Step 'Review Fixed Asset Accounts'
-#: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
-msgid ""
-"# Fixed Asset Accounts\n"
-"\n"
-"With the company, a host of fixed asset accounts are pre-configured. To ensure your asset transactions are leading to correct accounting entries, you can review and set up following asset accounts as per your business  requirements.\n"
-" - Fixed asset accounts (Asset account)\n"
-" - Accumulated depreciation\n"
-" - Capital Work in progress (CWIP) account\n"
-" - Asset Depreciation account (Expense account)"
-msgstr ""
-
-#. Description of the Onboarding Step 'Production Planning'
-#: manufacturing/onboarding_step/production_planning/production_planning.json
-msgid ""
-"# How Production Planning Works\n"
-"\n"
-"Production Plan helps in production and material planning for the Items planned for manufacturing. These production items can be committed via Sales Order (to Customers) or Material Requests (internally).\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Import Data from Spreadsheet'
-#: setup/onboarding_step/data_import/data_import.json
-msgid ""
-"# Import Data from Spreadsheet\n"
-"\n"
-"In ERPNext, you can easily migrate your historical data using spreadsheets. You can use it for migrating not just masters (like Customer, Supplier, Items), but also for transactions like (outstanding invoices, opening stock and accounting entries, etc)."
-msgstr ""
-
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:148
 msgid "# In Stock"
 msgstr ""
 
-#. Description of the Onboarding Step 'Introduction to Stock Entry'
-#: stock/onboarding_step/introduction_to_stock_entry/introduction_to_stock_entry.json
-msgid ""
-"# Introduction to Stock Entry\n"
-"This video will give a quick introduction to [**Stock Entry**](https://docs.erpnext.com/docs/user/manual/en/stock/stock-entry)."
-msgstr ""
-
-#. Description of the Onboarding Step 'Manage Stock Movements'
-#: stock/onboarding_step/create_a_stock_entry/create_a_stock_entry.json
-msgid ""
-"# Manage Stock Movements\n"
-"Stock entry allows you to register the movement of stock for various purposes like transfer, received, issues, repacked, etc. To address issues related to theft and pilferages,  you can always ensure that the movement of goods happens against a document reference Stock Entry in ERPNext.\n"
-"\n"
-"Let’s get a quick walk-through on the various scenarios covered in Stock Entry by watching [*this video*](https://www.youtube.com/watch?v=Njt107hlY3I)."
-msgstr ""
-
-#. Description of the Onboarding Step 'How to Navigate in ERPNext'
-#: setup/onboarding_step/navigation_help/navigation_help.json
-msgid ""
-"# Navigation in ERPNext\n"
-"\n"
-"Ease of navigating and browsing around the ERPNext is one of our core strengths. In the following video, you will learn how to reach a specific feature in ERPNext via module page or AwesomeBar."
-msgstr ""
-
-#. Description of the Onboarding Step 'Purchase an Asset'
-#: assets/onboarding_step/asset_purchase/asset_purchase.json
-msgid ""
-"# Purchase an Asset\n"
-"\n"
-"Assets purchases process if done following the standard Purchase cycle. If capital work in progress is enabled in Asset Category, Asset will be created as soon as Purchase Receipt is created for it. You can quickly create a Purchase Receipt for Asset and see its impact on books of accounts."
-msgstr ""
-
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:141
 msgid "# Req'd Items"
-msgstr ""
-
-#. Description of the Onboarding Step 'Manufacturing Settings'
-#: manufacturing/onboarding_step/explore_manufacturing_settings/explore_manufacturing_settings.json
-msgid ""
-"# Review Manufacturing Settings\n"
-"\n"
-"In ERPNext, the Manufacturing module’s features are configurable as per your business needs. Manufacturing Settings is the place where you can set your preferences for:\n"
-"\n"
-"- Capacity planning for allocating jobs to workstations\n"
-"- Raw-material consumption based on BOM or actual\n"
-"- Default values and over-production allowance\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Review Stock Settings'
-#: stock/onboarding_step/stock_settings/stock_settings.json
-msgid ""
-"# Review Stock Settings\n"
-"\n"
-"In ERPNext, the Stock module’s features are configurable as per your business needs. Stock Settings is the place where you can set your preferences for:\n"
-"- Default values for Item and Pricing\n"
-"- Default valuation method for inventory valuation\n"
-"- Set preference for serialization and batching of item\n"
-"- Set tolerance for over-receipt and delivery of items"
-msgstr ""
-
-#. Description of the Onboarding Step 'Sales Order'
-#: selling/onboarding_step/sales_order/sales_order.json
-msgid ""
-"# Sales Order\n"
-"\n"
-"A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.\n"
-"\n"
-"Sales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer."
-msgstr ""
-
-#. Description of the Onboarding Step 'Selling Settings'
-#: selling/onboarding_step/selling_settings/selling_settings.json
-msgid ""
-"# Selling Settings\n"
-"\n"
-"CRM and Selling module’s features are configurable as per your business needs. Selling Settings is the place where you can set your preferences for:\n"
-" - Customer naming and default values\n"
-" - Billing and shipping preference in sales transactions\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Set Up a Company'
-#: setup/onboarding_step/company_set_up/company_set_up.json
-msgid ""
-"# Set Up a Company\n"
-"\n"
-"A company is a legal entity for which you will set up your books of account and create accounting transactions. In ERPNext, you can create multiple companies, and establish relationships (group/subsidiary) among them.\n"
-"\n"
-"Within the company master, you can capture various default accounts for that Company and set crucial settings related to the accounting methodology followed for a company.\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Setting up Taxes'
-#: accounts/onboarding_step/setup_taxes/setup_taxes.json
-msgid ""
-"# Setting up Taxes\n"
-"\n"
-"ERPNext lets you configure your taxes so that they are automatically applied in your buying and selling transactions. You can configure them globally or even on Items. ERPNext taxes are pre-configured for most regions."
-msgstr ""
-
-#. Description of the Onboarding Step 'Routing'
-#: manufacturing/onboarding_step/routing/routing.json
-msgid ""
-"# Setup Routing\n"
-"\n"
-"A Routing stores all Operations along with the description, hourly rate, operation time, batch size, etc. Click below to learn how the Routing template can be created, for quick selection in the BOM."
-msgstr ""
-
-#. Description of the Onboarding Step 'Setup a Warehouse'
-#: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
-msgid ""
-"# Setup a Warehouse\n"
-"The warehouse can be your location/godown/store where you maintain the item's inventory, and receive/deliver them to various parties.\n"
-"\n"
-"In ERPNext, you can maintain a Warehouse in the tree structure, so that location and sub-location of an item can be tracked. Also, you can link a Warehouse to a specific Accounting ledger, where the real-time stock value of that warehouse’s item will be reflected."
-msgstr ""
-
-#. Description of the Onboarding Step 'Track Material Request'
-#: buying/onboarding_step/create_a_material_request/create_a_material_request.json
-msgid ""
-"# Track Material Request\n"
-"\n"
-"\n"
-"Also known as Purchase Request or an Indent, is a document identifying a requirement of a set of items (products or services) for various purposes like procurement, transfer, issue, or manufacturing. Once the Material Request is validated, a purchase manager can take the next actions for purchasing items like requesting RFQ from a supplier or directly placing an order with an identified Supplier.\n"
-"\n"
-msgstr ""
-
-#. Description of the Onboarding Step 'Update Stock Opening Balance'
-#: stock/onboarding_step/stock_opening_balance/stock_opening_balance.json
-msgid ""
-"# Update Stock Opening Balance\n"
-"It’s an entry to update the stock balance of an item, in a warehouse, on a date and time you are going live on ERPNext.\n"
-"\n"
-"Once opening stocks are updated, you can create transactions like manufacturing and stock deliveries, where this opening stock will be consumed."
-msgstr ""
-
-#. Description of the Onboarding Step 'Updating Opening Balances'
-#: accounts/onboarding_step/updating_opening_balances/updating_opening_balances.json
-msgid ""
-"# Updating Opening Balances\n"
-"\n"
-"Once you close the financial statement in previous accounting software, you can update the same as opening in your ERPNext's Balance Sheet accounts. This will allow you to get complete financial statements from ERPNext in the coming years, and discontinue the parallel accounting system right away."
-msgstr ""
-
-#. Description of the Onboarding Step 'View Warehouses'
-#: stock/onboarding_step/view_warehouses/view_warehouses.json
-msgid ""
-"# View Warehouse\n"
-"In ERPNext the term 'warehouse' can be thought of as a storage location.\n"
-"\n"
-"Warehouses are arranged in ERPNext in a tree like structure, where multiple sub-warehouses can be grouped under a single warehouse.\n"
-"\n"
-"In this step we will view the [**Warehouse Tree**](https://docs.erpnext.com/docs/user/manual/en/stock/warehouse#21-tree-view) to view the [**Warehouses**](https://docs.erpnext.com/docs/user/manual/en/stock/warehouse) that are set by default."
-msgstr ""
-
-#. Description of the Onboarding Step 'Create a Sales Item'
-#: accounts/onboarding_step/create_a_product/create_a_product.json
-msgid ""
-"## Products and Services\n"
-"\n"
-"Depending on the nature of your business, you might be selling products or services to your clients or even both. \n"
-"ERPNext is optimized for itemized management of your sales and purchase.\n"
-"\n"
-"The **Item Master**  is where you can add all your sales items. If you are in services, you can create an Item for each service that you offer. If you run a manufacturing business, the same master is used for keeping a record of raw materials, sub-assemblies etc.\n"
-"\n"
-"Completing the Item Master is very essential for the successful implementation of ERPNext. We have a brief video introducing the item master for you, you can watch it in the next step."
-msgstr ""
-
-#. Description of the Onboarding Step 'Create a Customer'
-#: accounts/onboarding_step/create_a_customer/create_a_customer.json
-msgid ""
-"## Who is a Customer?\n"
-"\n"
-"A customer, who is sometimes known as a client, buyer, or purchaser is the one who receives goods, services, products, or ideas, from a seller for a monetary consideration.\n"
-"\n"
-"Every customer needs to be assigned a unique id. Customer name itself can be the id or you can set a naming series for ids to be generated in Selling Settings.\n"
-"\n"
-"Just like the supplier, let's quickly create a customer."
-msgstr ""
-
-#. Description of the Onboarding Step 'Create a Supplier'
-#: accounts/onboarding_step/create_a_supplier/create_a_supplier.json
-msgid ""
-"## Who is a Supplier?\n"
-"\n"
-"Suppliers are companies or individuals who provide you with products or services. ERPNext has comprehensive features for purchase cycles. \n"
-"\n"
-"Let's quickly create a supplier with the minimal details required. You need the name of the supplier, assign the supplier to a group, and select the type of the supplier, viz. Company or Individual."
 msgstr ""
 
 #. Label of the per_delivered (Percent) field in DocType 'Sales Order'
@@ -1204,6 +715,88 @@ msgid ""
 "</pre>\n"
 msgstr ""
 
+#. Header text in the Stock Workspace
+#: stock/workspace/stock/stock.json
+msgid "<span class=\"h4\"><b>Masters &amp; Reports</b></span>"
+msgstr ""
+
+#. Header text in the Selling Workspace
+#. Header text in the Stock Workspace
+#: selling/workspace/selling/selling.json stock/workspace/stock/stock.json
+msgid "<span class=\"h4\"><b>Quick Access</b></span>"
+msgstr ""
+
+#. Header text in the Assets Workspace
+#. Header text in the Quality Workspace
+#: assets/workspace/assets/assets.json
+#: quality_management/workspace/quality/quality.json
+msgid "<span class=\"h4\"><b>Reports & Masters</b></span>"
+msgstr ""
+
+#. Header text in the Accounting Workspace
+#. Header text in the Payables Workspace
+#. Header text in the Receivables Workspace
+#. Header text in the Buying Workspace
+#. Header text in the CRM Workspace
+#. Header text in the Manufacturing Workspace
+#. Header text in the Projects Workspace
+#. Header text in the Selling Workspace
+#. Header text in the Home Workspace
+#. Header text in the Support Workspace
+#: accounts/workspace/accounting/accounting.json
+#: accounts/workspace/payables/payables.json
+#: accounts/workspace/receivables/receivables.json
+#: buying/workspace/buying/buying.json crm/workspace/crm/crm.json
+#: manufacturing/workspace/manufacturing/manufacturing.json
+#: projects/workspace/projects/projects.json
+#: selling/workspace/selling/selling.json setup/workspace/home/home.json
+#: support/workspace/support/support.json
+msgid "<span class=\"h4\"><b>Reports &amp; Masters</b></span>"
+msgstr ""
+
+#. Header text in the Settings Workspace
+#: setup/workspace/settings/settings.json
+msgid "<span class=\"h4\"><b>Settings</b></span>"
+msgstr ""
+
+#. Header text in the Accounting Workspace
+#. Header text in the Payables Workspace
+#. Header text in the Receivables Workspace
+#: accounts/workspace/accounting/accounting.json
+#: accounts/workspace/payables/payables.json
+#: accounts/workspace/receivables/receivables.json
+msgid "<span class=\"h4\"><b>Shortcuts</b></span>"
+msgstr ""
+
+#. Header text in the Settings Workspace
+#: setup/workspace/settings/settings.json
+msgid ""
+"<span class=\"h4\"><b>Your Shortcuts\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t</b></span>"
+msgstr ""
+
+#. Header text in the Assets Workspace
+#. Header text in the Buying Workspace
+#. Header text in the CRM Workspace
+#. Header text in the Manufacturing Workspace
+#. Header text in the Projects Workspace
+#. Header text in the Quality Workspace
+#. Header text in the Home Workspace
+#. Header text in the Support Workspace
+#: assets/workspace/assets/assets.json buying/workspace/buying/buying.json
+#: crm/workspace/crm/crm.json
+#: manufacturing/workspace/manufacturing/manufacturing.json
+#: projects/workspace/projects/projects.json
+#: quality_management/workspace/quality/quality.json
+#: setup/workspace/home/home.json support/workspace/support/support.json
+msgid "<span class=\"h4\"><b>Your Shortcuts</b></span>"
+msgstr ""
+
 #. Content of the 'html_19' (HTML) field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgid ""
@@ -1259,7 +852,7 @@ msgstr ""
 msgid "A BOM with name {0} already exists for item {1}."
 msgstr ""
 
-#: selling/doctype/customer/customer.py:309
+#: selling/doctype/customer/customer.py:310
 msgid "A Customer Group exists with same name please change the Customer name or rename the Customer Group"
 msgstr ""
 
@@ -1287,14 +880,6 @@ msgstr ""
 
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:533
 msgid "A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
-msgstr ""
-
-#. Description of the Onboarding Step 'Create a Sales Order'
-#: selling/onboarding_step/create_a_sales_order/create_a_sales_order.json
-msgid ""
-"A Sales Order is a confirmation of an order from your customer. It is also referred to as Proforma Invoice.\n"
-"\n"
-"Sales Order at the heart of your sales and purchase transactions. Sales Orders are linked in Delivery Note, Sales Invoices, Material Request, and Maintenance transactions. Through Sales Order, you can track fulfillment of the overall deal towards the customer."
 msgstr ""
 
 #: setup/doctype/company/company.py:924
@@ -2446,13 +2031,11 @@ msgid "Accounts Receivable/Payable"
 msgstr ""
 
 #. Name of a DocType
-#. Title of an Onboarding Step
 #. Label of a Link in the Accounting Workspace
 #. Label of the default_settings (Section Break) field in DocType 'Company'
 #. Label of a Link in the Settings Workspace
 #. Label of a shortcut in the Settings Workspace
 #: accounts/doctype/accounts_settings/accounts_settings.json
-#: accounts/onboarding_step/accounts_settings/accounts_settings.json
 #: accounts/workspace/accounting/accounting.json
 #: setup/doctype/company/company.json setup/workspace/settings/settings.json
 msgid "Accounts Settings"
@@ -2554,11 +2137,6 @@ msgstr ""
 #. Label of the merge_accounts (Table) field in DocType 'Ledger Merge'
 #: accounts/doctype/ledger_merge/ledger_merge.json
 msgid "Accounts to Merge"
-msgstr ""
-
-#. Subtitle of the Module Onboarding 'Accounts'
-#: accounts/module_onboarding/accounts/accounts.json
-msgid "Accounts, Invoices, Taxation, and more."
 msgstr ""
 
 #. Option for the 'Account Type' (Select) field in DocType 'Account'
@@ -2702,7 +2280,7 @@ msgstr ""
 #: accounts/doctype/account/account.js:88
 #: accounts/doctype/account/account.js:116
 #: accounts/doctype/journal_entry/journal_entry.js:53
-#: accounts/doctype/payment_entry/payment_entry.js:207
+#: accounts/doctype/payment_entry/payment_entry.js:215
 #: accounts/doctype/subscription/subscription.js:38
 #: accounts/doctype/subscription/subscription.js:44
 #: accounts/doctype/subscription/subscription.js:50
@@ -2972,7 +2550,7 @@ msgstr ""
 msgid "Actual qty in stock"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1492
+#: accounts/doctype/payment_entry/payment_entry.js:1506
 #: public/js/controllers/accounts.js:176
 msgid "Actual type tax cannot be included in Item rate in row {0}"
 msgstr ""
@@ -3165,16 +2743,6 @@ msgstr ""
 
 #: public/js/utils/crm_activities.js:142
 msgid "Add a Note"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: assets/onboarding_step/existing_asset/existing_asset.json
-msgid "Add an Existing Asset"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Add an Existing Asset'
-#: assets/onboarding_step/existing_asset/existing_asset.json
-msgid "Add an existing Asset"
 msgstr ""
 
 #: www/book_appointment/index.html:42
@@ -4117,7 +3685,7 @@ msgstr ""
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:165
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:185
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:166
-#: accounts/utils.py:1284 public/js/setup_wizard.js:174
+#: accounts/utils.py:1284 public/js/setup_wizard.js:173
 msgid "All Accounts"
 msgstr ""
 
@@ -4154,12 +3722,12 @@ msgid "All Customer Contact"
 msgstr ""
 
 #: patches/v13_0/remove_bad_selling_defaults.py:9
-#: setup/setup_wizard/operations/install_fixtures.py:116
-#: setup/setup_wizard/operations/install_fixtures.py:118
-#: setup/setup_wizard/operations/install_fixtures.py:125
-#: setup/setup_wizard/operations/install_fixtures.py:131
-#: setup/setup_wizard/operations/install_fixtures.py:137
-#: setup/setup_wizard/operations/install_fixtures.py:143
+#: setup/setup_wizard/operations/install_fixtures.py:147
+#: setup/setup_wizard/operations/install_fixtures.py:149
+#: setup/setup_wizard/operations/install_fixtures.py:156
+#: setup/setup_wizard/operations/install_fixtures.py:162
+#: setup/setup_wizard/operations/install_fixtures.py:168
+#: setup/setup_wizard/operations/install_fixtures.py:174
 msgid "All Customer Groups"
 msgstr ""
 
@@ -4189,12 +3757,12 @@ msgstr ""
 
 #: setup/doctype/item_group/item_group.py:36
 #: setup/doctype/item_group/item_group.py:37
-#: setup/setup_wizard/operations/install_fixtures.py:33
-#: setup/setup_wizard/operations/install_fixtures.py:41
+#: setup/setup_wizard/operations/install_fixtures.py:40
 #: setup/setup_wizard/operations/install_fixtures.py:48
-#: setup/setup_wizard/operations/install_fixtures.py:54
-#: setup/setup_wizard/operations/install_fixtures.py:60
-#: setup/setup_wizard/operations/install_fixtures.py:66
+#: setup/setup_wizard/operations/install_fixtures.py:55
+#: setup/setup_wizard/operations/install_fixtures.py:61
+#: setup/setup_wizard/operations/install_fixtures.py:67
+#: setup/setup_wizard/operations/install_fixtures.py:73
 msgid "All Item Groups"
 msgstr ""
 
@@ -4230,23 +3798,23 @@ msgstr ""
 #: patches/v11_0/rename_supplier_type_to_supplier_group.py:29
 #: patches/v11_0/rename_supplier_type_to_supplier_group.py:32
 #: patches/v11_0/rename_supplier_type_to_supplier_group.py:36
-#: setup/setup_wizard/operations/install_fixtures.py:148
-#: setup/setup_wizard/operations/install_fixtures.py:150
-#: setup/setup_wizard/operations/install_fixtures.py:157
-#: setup/setup_wizard/operations/install_fixtures.py:163
-#: setup/setup_wizard/operations/install_fixtures.py:169
-#: setup/setup_wizard/operations/install_fixtures.py:175
+#: setup/setup_wizard/operations/install_fixtures.py:179
 #: setup/setup_wizard/operations/install_fixtures.py:181
-#: setup/setup_wizard/operations/install_fixtures.py:187
-#: setup/setup_wizard/operations/install_fixtures.py:193
+#: setup/setup_wizard/operations/install_fixtures.py:188
+#: setup/setup_wizard/operations/install_fixtures.py:194
+#: setup/setup_wizard/operations/install_fixtures.py:200
+#: setup/setup_wizard/operations/install_fixtures.py:206
+#: setup/setup_wizard/operations/install_fixtures.py:212
+#: setup/setup_wizard/operations/install_fixtures.py:218
+#: setup/setup_wizard/operations/install_fixtures.py:224
 msgid "All Supplier Groups"
 msgstr ""
 
 #: patches/v13_0/remove_bad_selling_defaults.py:12
-#: setup/setup_wizard/operations/install_fixtures.py:96
-#: setup/setup_wizard/operations/install_fixtures.py:98
-#: setup/setup_wizard/operations/install_fixtures.py:105
-#: setup/setup_wizard/operations/install_fixtures.py:111
+#: setup/setup_wizard/operations/install_fixtures.py:127
+#: setup/setup_wizard/operations/install_fixtures.py:129
+#: setup/setup_wizard/operations/install_fixtures.py:136
+#: setup/setup_wizard/operations/install_fixtures.py:142
 msgid "All Territories"
 msgstr ""
 
@@ -4264,7 +3832,7 @@ msgstr ""
 msgid "All communications including and above this shall be moved into the new Issue"
 msgstr ""
 
-#: stock/doctype/purchase_receipt/purchase_receipt.py:1125
+#: stock/doctype/purchase_receipt/purchase_receipt.py:1126
 msgid "All items have already been Invoiced/Returned"
 msgstr ""
 
@@ -4309,7 +3877,7 @@ msgstr ""
 msgid "Allocate Advances Automatically (FIFO)"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:851
+#: accounts/doctype/payment_entry/payment_entry.js:865
 msgid "Allocate Payment Amount"
 msgstr ""
 
@@ -5063,7 +4631,7 @@ msgstr ""
 #: buying/doctype/purchase_order_item_supplied/purchase_order_item_supplied.json
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:236
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:239
 #: crm/doctype/opportunity_item/opportunity_item.json
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
@@ -5910,8 +5478,8 @@ msgstr ""
 msgid "Asset Depreciation Schedule for Asset {0} and Finance Book {1} is not using shift based depreciation"
 msgstr ""
 
-#: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:1056
-#: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:1102
+#: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:1060
+#: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:1106
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.py:81
 msgid "Asset Depreciation Schedule not found for Asset {0} and Finance Book {1}"
 msgstr ""
@@ -6278,16 +5846,11 @@ msgstr ""
 msgid "Assets"
 msgstr ""
 
-#: controllers/buying_controller.py:789
+#: controllers/buying_controller.py:791
 msgid "Assets not created for {0}. You will have to create asset manually."
 msgstr ""
 
-#. Subtitle of the Module Onboarding 'Assets'
-#: assets/module_onboarding/assets/assets.json
-msgid "Assets, Depreciations, Repairs, and more."
-msgstr ""
-
-#: controllers/buying_controller.py:777
+#: controllers/buying_controller.py:779
 msgid "Asset{} {assets_link} created for {}"
 msgstr ""
 
@@ -7467,7 +7030,7 @@ msgstr ""
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.js:16
 #: accounts/workspace/accounting/accounting.json
 #: buying/doctype/supplier/supplier.js:108
-#: setup/setup_wizard/operations/install_fixtures.py:483
+#: setup/setup_wizard/operations/install_fixtures.py:513
 msgid "Bank Account"
 msgstr ""
 
@@ -7558,7 +7121,7 @@ msgstr ""
 msgid "Bank Details"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:211
+#: setup/setup_wizard/operations/install_fixtures.py:242
 msgid "Bank Draft"
 msgstr ""
 
@@ -7640,15 +7203,15 @@ msgstr ""
 msgid "Bank Transaction Payments"
 msgstr ""
 
-#: public/js/bank_reconciliation_tool/dialog_manager.js:485
+#: public/js/bank_reconciliation_tool/dialog_manager.js:493
 msgid "Bank Transaction {0} Matched"
 msgstr ""
 
-#: public/js/bank_reconciliation_tool/dialog_manager.js:533
+#: public/js/bank_reconciliation_tool/dialog_manager.js:541
 msgid "Bank Transaction {0} added as Journal Entry"
 msgstr ""
 
-#: public/js/bank_reconciliation_tool/dialog_manager.js:508
+#: public/js/bank_reconciliation_tool/dialog_manager.js:516
 msgid "Bank Transaction {0} added as Payment Entry"
 msgstr ""
 
@@ -7656,11 +7219,11 @@ msgstr ""
 msgid "Bank Transaction {0} is already fully reconciled"
 msgstr ""
 
-#: public/js/bank_reconciliation_tool/dialog_manager.js:553
+#: public/js/bank_reconciliation_tool/dialog_manager.js:561
 msgid "Bank Transaction {0} updated"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:516
+#: setup/setup_wizard/operations/install_fixtures.py:546
 msgid "Bank account cannot be named as {0}"
 msgstr ""
 
@@ -8153,11 +7716,9 @@ msgstr ""
 msgid "Bill for Rejected Quantity in Purchase Invoice"
 msgstr ""
 
-#. Title of an Onboarding Step
 #. Label of a Card Break in the Manufacturing Workspace
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/doctype/bom/bom.py:1132
-#: manufacturing/onboarding_step/create_bom/create_bom.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
 #: stock/doctype/material_request/material_request.js:99
 #: stock/doctype/stock_entry/stock_entry.js:617
@@ -8175,7 +7736,7 @@ msgstr ""
 #: accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:50
 #: accounts/report/received_items_to_be_billed/received_items_to_be_billed.py:50
 #: buying/doctype/purchase_order_item/purchase_order_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:244
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:247
 #: selling/report/item_wise_sales_history/item_wise_sales_history.py:107
 #: selling/report/sales_order_analysis/sales_order_analysis.py:298
 msgid "Billed Amount"
@@ -8195,7 +7756,7 @@ msgstr ""
 msgid "Billed Items To Be Received"
 msgstr ""
 
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:222
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:225
 #: selling/report/sales_order_analysis/sales_order_analysis.py:276
 msgid "Billed Qty"
 msgstr ""
@@ -8416,7 +7977,7 @@ msgstr ""
 msgid "Bisecting To"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:236
+#: setup/setup_wizard/operations/install_fixtures.py:267
 msgid "Black"
 msgstr ""
 
@@ -8486,7 +8047,7 @@ msgstr ""
 #. Standing'
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
-#: setup/setup_wizard/operations/install_fixtures.py:235
+#: setup/setup_wizard/operations/install_fixtures.py:266
 msgid "Blue"
 msgstr ""
 
@@ -8589,7 +8150,7 @@ msgstr ""
 msgid "Both Payable Account: {0} and Advance Account: {1} must be of same currency for company: {2}"
 msgstr ""
 
-#: setup/doctype/customer_group/customer_group.py:64
+#: setup/doctype/customer_group/customer_group.py:62
 msgid "Both Receivable Account: {0} and Advance Account: {1} must be of same currency for company: {2}"
 msgstr ""
 
@@ -8945,12 +8506,10 @@ msgid "Buying Rate"
 msgstr ""
 
 #. Name of a DocType
-#. Title of an Onboarding Step
 #. Label of a Link in the Buying Workspace
 #. Label of a Link in the Settings Workspace
 #. Label of a shortcut in the Settings Workspace
 #: buying/doctype/buying_settings/buying_settings.json
-#: buying/onboarding_step/introduction_to_buying/introduction_to_buying.json
 #: buying/workspace/buying/buying.json setup/workspace/settings/settings.json
 msgid "Buying Settings"
 msgstr ""
@@ -9009,12 +8568,10 @@ msgid "CRM Note"
 msgstr ""
 
 #. Name of a DocType
-#. Title of an Onboarding Step
 #. Label of a Link in the CRM Workspace
 #. Label of a Link in the Settings Workspace
-#: crm/doctype/crm_settings/crm_settings.json
-#: crm/onboarding_step/crm_settings/crm_settings.json
-#: crm/workspace/crm/crm.json setup/workspace/settings/settings.json
+#: crm/doctype/crm_settings/crm_settings.json crm/workspace/crm/crm.json
+#: setup/workspace/settings/settings.json
 msgid "CRM Settings"
 msgstr ""
 
@@ -9312,7 +8869,7 @@ msgstr ""
 msgid "Can only make payment against unbilled {0}"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1460
+#: accounts/doctype/payment_entry/payment_entry.js:1474
 #: controllers/accounts_controller.py:2600 public/js/controllers/accounts.js:90
 msgid "Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"
 msgstr ""
@@ -9519,7 +9076,7 @@ msgstr ""
 msgid "Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."
 msgstr ""
 
-#: controllers/buying_controller.py:865
+#: controllers/buying_controller.py:867
 msgid "Cannot cancel this document as it is linked with submitted asset {0}. Please cancel it to continue."
 msgstr ""
 
@@ -9646,7 +9203,7 @@ msgstr ""
 msgid "Cannot receive from customer against negative outstanding"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1477
+#: accounts/doctype/payment_entry/payment_entry.js:1491
 #: controllers/accounts_controller.py:2615
 #: public/js/controllers/accounts.js:100
 msgid "Cannot refer row number greater than or equal to current row number for this Charge type"
@@ -9660,8 +9217,8 @@ msgstr ""
 msgid "Cannot retrieve link token. Check Error Log for more information"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1469
-#: accounts/doctype/payment_entry/payment_entry.js:1648
+#: accounts/doctype/payment_entry/payment_entry.js:1483
+#: accounts/doctype/payment_entry/payment_entry.js:1662
 #: accounts/doctype/payment_entry/payment_entry.py:1653
 #: controllers/accounts_controller.py:2605 public/js/controllers/accounts.js:94
 #: public/js/controllers/taxes_and_totals.js:455
@@ -9692,7 +9249,7 @@ msgstr ""
 msgid "Cannot set the field <b>{0}</b> for copying in variants"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1070
+#: accounts/doctype/payment_entry/payment_entry.js:1084
 msgid "Cannot {0} {1} {2} without any negative outstanding invoice"
 msgstr ""
 
@@ -9820,7 +9377,7 @@ msgstr ""
 #: accounts/doctype/mode_of_payment/mode_of_payment.json
 #: accounts/report/account_balance/account_balance.js:40
 #: setup/doctype/employee/employee.json
-#: setup/setup_wizard/operations/install_fixtures.py:208
+#: setup/setup_wizard/operations/install_fixtures.py:239
 msgid "Cash"
 msgstr ""
 
@@ -10035,7 +9592,7 @@ msgstr ""
 msgid "Change this date manually to setup the next synchronization start date"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:121
+#: selling/doctype/customer/customer.py:122
 msgid "Changed customer name to '{}' as '{}' already exists."
 msgstr ""
 
@@ -10117,7 +9674,7 @@ msgstr ""
 #: accounts/doctype/cost_center/cost_center_tree.js:52
 #: accounts/workspace/accounting/accounting.json
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
-#: public/js/setup_wizard.js:37 setup/doctype/company/company.js:103
+#: public/js/setup_wizard.js:36 setup/doctype/company/company.js:103
 #: setup/doctype/company/company.json setup/workspace/home/home.json
 msgid "Chart of Accounts"
 msgstr ""
@@ -10152,27 +9709,10 @@ msgstr ""
 msgid "Chat"
 msgstr ""
 
-#. Title of an Onboarding Step
-#. Label of an action in the Onboarding Step 'Check Stock Ledger'
-#: stock/onboarding_step/check_stock_ledger_report/check_stock_ledger_report.json
-msgid "Check Stock Ledger"
-msgstr ""
-
-#. Title of an Onboarding Step
-#. Label of an action in the Onboarding Step 'Check Stock Projected Qty'
-#: stock/onboarding_step/view_stock_projected_qty/view_stock_projected_qty.json
-msgid "Check Stock Projected Qty"
-msgstr ""
-
 #. Label of the check_supplier_invoice_uniqueness (Check) field in DocType
 #. 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Check Supplier Invoice Number Uniqueness"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Routing'
-#: manufacturing/onboarding_step/routing/routing.json
-msgid "Check help to setup Routing"
 msgstr ""
 
 #. Description of the 'Maintenance Required' (Check) field in DocType 'Asset'
@@ -10227,7 +9767,7 @@ msgstr ""
 
 #. Option for the 'Salary Mode' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
-#: setup/setup_wizard/operations/install_fixtures.py:205
+#: setup/setup_wizard/operations/install_fixtures.py:236
 msgid "Cheque"
 msgstr ""
 
@@ -10621,7 +10161,7 @@ msgstr ""
 msgid "Cold Calling"
 msgstr ""
 
-#: public/js/setup_wizard.js:190
+#: public/js/setup_wizard.js:189
 msgid "Collapse All"
 msgstr ""
 
@@ -10660,7 +10200,7 @@ msgstr ""
 msgid "Color"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:231
+#: setup/setup_wizard/operations/install_fixtures.py:262
 msgid "Colour"
 msgstr ""
 
@@ -10692,7 +10232,7 @@ msgstr ""
 msgid "Comments"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:129
+#: setup/setup_wizard/operations/install_fixtures.py:160
 msgid "Commercial"
 msgstr ""
 
@@ -10752,7 +10292,7 @@ msgstr ""
 
 #. Label of a Link in the CRM Workspace
 #: crm/workspace/crm/crm.json
-#: setup/setup_wizard/operations/install_fixtures.py:217
+#: setup/setup_wizard/operations/install_fixtures.py:248
 msgid "Communication"
 msgstr ""
 
@@ -11052,7 +10592,7 @@ msgstr ""
 #: buying/report/procurement_tracker/procurement_tracker.js:8
 #: buying/report/purchase_analytics/purchase_analytics.js:49
 #: buying/report/purchase_order_analysis/purchase_order_analysis.js:8
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:275
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:278
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.js:8
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:266
 #: buying/report/subcontract_order_summary/subcontract_order_summary.js:7
@@ -11191,11 +10731,11 @@ msgstr ""
 msgid "Company"
 msgstr ""
 
-#: public/js/setup_wizard.js:30
+#: public/js/setup_wizard.js:29
 msgid "Company Abbreviation"
 msgstr ""
 
-#: public/js/setup_wizard.js:164
+#: public/js/setup_wizard.js:163
 msgid "Company Abbreviation cannot have more than 5 characters"
 msgstr ""
 
@@ -11313,7 +10853,7 @@ msgstr ""
 msgid "Company Name as per Imported Tally Data"
 msgstr ""
 
-#: public/js/setup_wizard.js:67
+#: public/js/setup_wizard.js:66
 msgid "Company Name cannot be Company"
 msgstr ""
 
@@ -11677,17 +11217,6 @@ msgstr ""
 msgid "Configuration"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/configure_account_settings/configure_account_settings.json
-msgid "Configure Account Settings"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: buying/onboarding_step/buying_settings/buying_settings.json
-#: stock/onboarding_step/buying_settings/buying_settings.json
-msgid "Configure Buying Settings."
-msgstr ""
-
 #: public/js/bom_configurator/bom_configurator.bundle.js:53
 msgid "Configure Product Assembly"
 msgstr ""
@@ -11854,7 +11383,7 @@ msgstr ""
 msgid "Consulting"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:64
+#: setup/setup_wizard/operations/install_fixtures.py:71
 msgid "Consumable"
 msgstr ""
 
@@ -12680,11 +12209,6 @@ msgstr ""
 msgid "Cost Centers"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/cost_centers_for_report_and_budgeting/cost_centers_for_report_and_budgeting.json
-msgid "Cost Centers for Budgeting and Analysis"
-msgstr ""
-
 #. Label of the currency_detail (Section Break) field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgid "Cost Configuration"
@@ -12798,7 +12322,7 @@ msgstr ""
 msgid "Could Not Delete Demo Data"
 msgstr ""
 
-#: selling/doctype/quotation/quotation.py:546
+#: selling/doctype/quotation/quotation.py:568
 msgid "Could not auto create Customer due to the following missing mandatory field(s):"
 msgstr ""
 
@@ -13119,8 +12643,7 @@ msgstr ""
 msgid "Create Journal Entry"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: crm/onboarding_step/create_lead/create_lead.json utilities/activation.py:78
+#: utilities/activation.py:78
 msgid "Create Lead"
 msgstr ""
 
@@ -13161,9 +12684,7 @@ msgstr ""
 msgid "Create New Lead"
 msgstr ""
 
-#. Title of an Onboarding Step
 #: crm/doctype/lead/lead.js:160
-#: crm/onboarding_step/create_opportunity/create_opportunity.json
 msgid "Create Opportunity"
 msgstr ""
 
@@ -13199,11 +12720,6 @@ msgstr ""
 msgid "Create Quotation"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: manufacturing/onboarding_step/create_raw_materials/create_raw_materials.json
-msgid "Create Raw Materials"
-msgstr ""
-
 #. Label of the create_receiver_list (Button) field in DocType 'SMS Center'
 #: selling/doctype/sms_center/sms_center.json
 msgid "Create Receiver List"
@@ -13224,8 +12740,6 @@ msgstr ""
 msgid "Create Sales Invoice"
 msgstr ""
 
-#. Label of an action in the Onboarding Step 'Create a Sales Order'
-#: selling/onboarding_step/create_a_sales_order/create_a_sales_order.json
 #: utilities/activation.py:96
 msgid "Create Sales Order"
 msgstr ""
@@ -13281,79 +12795,6 @@ msgstr ""
 msgid "Create Variants"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/create_your_first_purchase_invoice/create_your_first_purchase_invoice.json
-msgid "Create Your First Purchase Invoice "
-msgstr ""
-
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/create_your_first_sales_invoice/create_your_first_sales_invoice.json
-#: setup/onboarding_step/create_your_first_sales_invoice/create_your_first_sales_invoice.json
-msgid "Create Your First Sales Invoice "
-msgstr ""
-
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/create_a_customer/create_a_customer.json
-#: selling/onboarding_step/create_a_customer/create_a_customer.json
-#: setup/onboarding_step/create_a_customer/create_a_customer.json
-msgid "Create a Customer"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: selling/onboarding_step/create_product/create_product.json
-msgid "Create a Finished Good"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: assets/onboarding_step/create_a_fixed_asset_item/create_a_fixed_asset_item.json
-msgid "Create a Fixed Asset Item"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Manage Stock Movements'
-#: stock/onboarding_step/create_a_stock_entry/create_a_stock_entry.json
-msgid "Create a Material Transfer Entry"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: buying/onboarding_step/create_a_product/create_a_product.json
-#: selling/onboarding_step/create_a_product/create_a_product.json
-#: stock/onboarding_step/create_a_product/create_a_product.json
-msgid "Create a Product"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: selling/onboarding_step/create_a_quotation/create_a_quotation.json
-msgid "Create a Quotation"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/create_a_product/create_a_product.json
-msgid "Create a Sales Item"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: selling/onboarding_step/create_a_sales_order/create_a_sales_order.json
-msgid "Create a Sales Order"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/create_a_supplier/create_a_supplier.json
-#: buying/onboarding_step/create_a_supplier/create_a_supplier.json
-#: setup/onboarding_step/create_a_supplier/create_a_supplier.json
-#: stock/onboarding_step/create_a_supplier/create_a_supplier.json
-msgid "Create a Supplier"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: manufacturing/onboarding_step/warehouse/warehouse.json
-msgid "Create a Warehouse"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Create an Item'
-#: setup/onboarding_step/create_an_item/create_an_item.json
-msgid "Create a new Item"
-msgstr ""
-
 #. Option for the 'Capitalization Method' (Select) field in DocType 'Asset
 #. Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
@@ -13364,45 +12805,12 @@ msgstr ""
 msgid "Create a variant with the template image."
 msgstr ""
 
-#. Title of an Onboarding Step
-#: assets/onboarding_step/create_an_asset/create_an_asset.json
-msgid "Create an Asset"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: assets/onboarding_step/create_an_asset_category/create_an_asset_category.json
-msgid "Create an Asset Category"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: assets/onboarding_step/asset_item/asset_item.json
-msgid "Create an Asset Item"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Finished Items'
-#. Title of an Onboarding Step
-#: manufacturing/onboarding_step/create_product/create_product.json
-#: setup/onboarding_step/create_an_item/create_an_item.json
-#: stock/onboarding_step/create_an_item/create_an_item.json
-msgid "Create an Item"
-msgstr ""
-
-#: stock/stock_ledger.py:1796
+#: stock/stock_ledger.py:1802
 msgid "Create an incoming stock transaction for the Item."
-msgstr ""
-
-#. Title of an Onboarding Step
-#: crm/onboarding_step/create_and_send_quotation/create_and_send_quotation.json
-msgid "Create and Send Quotation"
 msgstr ""
 
 #: utilities/activation.py:85
 msgid "Create customer quotes"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
-msgid "Create first Purchase Order"
 msgstr ""
 
 #. Label of the create_pr_in_draft_status (Check) field in DocType 'Accounts
@@ -13415,26 +12823,6 @@ msgstr ""
 #. Invoice Creation Tool'
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
 msgid "Create missing customer or supplier."
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Bill of Materials'
-#: manufacturing/onboarding_step/create_bom/create_bom.json
-msgid "Create your first Bill of Materials"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: setup/onboarding_step/create_a_quotation/create_a_quotation.json
-msgid "Create your first Quotation"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: selling/onboarding_step/create_your_first_sales_order/create_your_first_sales_order.json
-msgid "Create your first Sales Order"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Work Order'
-#: manufacturing/onboarding_step/work_order/work_order.json
-msgid "Create your first Work Order"
 msgstr ""
 
 #: public/js/bulk_transaction_processing.js:14
@@ -13590,7 +12978,7 @@ msgstr ""
 msgid "Credit Balance"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:209
+#: setup/setup_wizard/operations/install_fixtures.py:240
 msgid "Credit Card"
 msgstr ""
 
@@ -13628,7 +13016,7 @@ msgstr ""
 msgid "Credit Limit"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:554
+#: selling/doctype/customer/customer.py:555
 msgid "Credit Limit Crossed"
 msgstr ""
 
@@ -13671,7 +13059,7 @@ msgstr ""
 #: accounts/report/accounts_receivable/accounts_receivable.html:147
 #: accounts/report/accounts_receivable/accounts_receivable.py:1056
 #: controllers/sales_and_purchase_return.py:331
-#: setup/setup_wizard/operations/install_fixtures.py:256
+#: setup/setup_wizard/operations/install_fixtures.py:287
 #: stock/doctype/delivery_note/delivery_note.js:89
 #: stock/doctype/stock_entry/stock_entry.json
 msgid "Credit Note"
@@ -13713,16 +13101,16 @@ msgstr ""
 msgid "Credit in Company Currency"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:520
-#: selling/doctype/customer/customer.py:575
+#: selling/doctype/customer/customer.py:521
+#: selling/doctype/customer/customer.py:576
 msgid "Credit limit has been crossed for customer {0} ({1}/{2})"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:338
+#: selling/doctype/customer/customer.py:339
 msgid "Credit limit is already defined for the Company {0}"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:574
+#: selling/doctype/customer/customer.py:575
 msgid "Credit limit reached for customer {0}"
 msgstr ""
 
@@ -14990,7 +14378,7 @@ msgstr ""
 #: buying/doctype/purchase_order/purchase_order.json
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 #: buying/doctype/supplier_quotation/supplier_quotation.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:161
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:164
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:190
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:28
 #: buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:28
@@ -15264,7 +14652,7 @@ msgstr ""
 #: accounts/report/accounts_receivable/accounts_receivable.html:147
 #: accounts/report/accounts_receivable/accounts_receivable.py:1059
 #: controllers/sales_and_purchase_return.py:335
-#: setup/setup_wizard/operations/install_fixtures.py:257
+#: setup/setup_wizard/operations/install_fixtures.py:288
 #: stock/doctype/purchase_receipt/purchase_receipt.js:76
 msgid "Debit Note"
 msgstr ""
@@ -15964,11 +15352,6 @@ msgstr ""
 
 #: accounts/deferred_revenue.py:541
 msgid "Deferred accounting failed for some invoices:"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: assets/onboarding_step/asset_category/asset_category.json
-msgid "Define Asset Category"
 msgstr ""
 
 #: config/projects.py:39
@@ -17494,7 +16877,7 @@ msgstr ""
 #: patches/v11_0/add_default_dispatch_notification_template.py:20
 #: patches/v11_0/add_default_dispatch_notification_template.py:28
 #: setup/setup_wizard/operations/defaults_setup.py:57
-#: setup/setup_wizard/operations/install_fixtures.py:284
+#: setup/setup_wizard/operations/install_fixtures.py:315
 msgid "Dispatch Notification"
 msgstr ""
 
@@ -17591,7 +16974,7 @@ msgid "Distribution Name"
 msgstr ""
 
 #: setup/setup_wizard/data/sales_partner_type.txt:2
-#: setup/setup_wizard/operations/install_fixtures.py:191
+#: setup/setup_wizard/operations/install_fixtures.py:222
 msgid "Distributor"
 msgstr ""
 
@@ -18060,7 +17443,7 @@ msgstr ""
 #: accounts/doctype/journal_entry/journal_entry.json
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
 #: accounts/doctype/overdue_payment/overdue_payment.json
-#: accounts/doctype/payment_entry/payment_entry.js:815
+#: accounts/doctype/payment_entry/payment_entry.js:829
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 #: accounts/doctype/payment_schedule/payment_schedule.json
@@ -18396,7 +17779,7 @@ msgstr ""
 msgid "Electric"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:173
+#: setup/setup_wizard/operations/install_fixtures.py:204
 msgid "Electrical"
 msgstr ""
 
@@ -18968,7 +18351,7 @@ msgstr ""
 #: maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
 #: projects/doctype/timesheet/timesheet.json
 #: projects/report/project_summary/project_summary.py:74
-#: public/js/financial_statements.js:200 public/js/setup_wizard.js:44
+#: public/js/financial_statements.js:200 public/js/setup_wizard.js:43
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.js:23
 #: setup/doctype/vehicle/vehicle.json
 #: support/doctype/service_level_agreement/service_level_agreement.json
@@ -19201,7 +18584,7 @@ msgstr ""
 #: accounts/report/account_balance/account_balance.js:29
 #: accounts/report/account_balance/account_balance.js:45
 #: accounts/report/balance_sheet/balance_sheet.py:243
-#: setup/setup_wizard/operations/install_fixtures.py:259
+#: setup/setup_wizard/operations/install_fixtures.py:290
 msgid "Equity"
 msgstr ""
 
@@ -19299,7 +18682,7 @@ msgid ""
 "\t\t\t\tPlease correct the dates accordingly."
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:903
+#: accounts/doctype/payment_entry/payment_entry.js:917
 msgid "Error: {0} is mandatory field"
 msgstr ""
 
@@ -19363,7 +18746,7 @@ msgstr ""
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
 msgstr ""
 
-#: stock/stock_ledger.py:2083
+#: stock/stock_ledger.py:2089
 msgid "Example: Serial No {0} reserved in {1}."
 msgstr ""
 
@@ -19518,7 +18901,7 @@ msgstr ""
 msgid "Excluded DocTypes"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:216
+#: setup/setup_wizard/operations/install_fixtures.py:247
 msgid "Execution"
 msgstr ""
 
@@ -19565,7 +18948,7 @@ msgstr ""
 
 #: public/js/bom_configurator/bom_configurator.bundle.js:141
 #: public/js/bom_configurator/bom_configurator.bundle.js:184
-#: public/js/setup_wizard.js:181
+#: public/js/setup_wizard.js:180
 msgid "Expand All"
 msgstr ""
 
@@ -19848,6 +19231,10 @@ msgstr ""
 msgid "Export Import Log"
 msgstr ""
 
+#: setup/setup_wizard/operations/install_fixtures.py:285
+msgid "External"
+msgstr ""
+
 #. Label of the external_work_history (Table) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgid "External Work History"
@@ -19861,11 +19248,11 @@ msgstr ""
 msgid "Extra Job Card Quantity"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:226
+#: setup/setup_wizard/operations/install_fixtures.py:257
 msgid "Extra Large"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:222
+#: setup/setup_wizard/operations/install_fixtures.py:253
 msgid "Extra Small"
 msgstr ""
 
@@ -20217,7 +19604,7 @@ msgstr ""
 #. Label of the filters (Section Break) field in DocType 'Production Plan'
 #. Label of the filters_section (Section Break) field in DocType 'Closing Stock
 #. Balance'
-#: accounts/doctype/payment_entry/payment_entry.js:878
+#: accounts/doctype/payment_entry/payment_entry.js:892
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 #: accounts/doctype/pos_profile/pos_profile.json
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
@@ -20344,16 +19731,14 @@ msgstr ""
 msgid "Financial Services"
 msgstr ""
 
-#. Title of an Onboarding Step
 #. Label of a Card Break in the Financial Reports Workspace
 #: accounts/doctype/account/account_tree.js:234
-#: accounts/onboarding_step/financial_statements/financial_statements.json
 #: accounts/workspace/financial_reports/financial_reports.json
 #: public/js/financial_statements.js:129
 msgid "Financial Statements"
 msgstr ""
 
-#: public/js/setup_wizard.js:42
+#: public/js/setup_wizard.js:41
 msgid "Financial Year Begins On"
 msgstr ""
 
@@ -20516,11 +19901,6 @@ msgstr ""
 
 #: stock/doctype/stock_entry/stock_entry.py:1311
 msgid "Finished Item {0} does not match with Work Order {1}"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: manufacturing/onboarding_step/create_product/create_product.json
-msgid "Finished Items"
 msgstr ""
 
 #. Label of the first_email (Time) field in DocType 'Project'
@@ -20746,15 +20126,15 @@ msgstr ""
 msgid "Following Material Requests have been raised automatically based on Item's re-order level"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:741
+#: selling/doctype/customer/customer.py:742
 msgid "Following fields are mandatory to create address:"
 msgstr ""
 
-#: controllers/buying_controller.py:959
+#: controllers/buying_controller.py:961
 msgid "Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master"
 msgstr ""
 
-#: controllers/buying_controller.py:955
+#: controllers/buying_controller.py:957
 msgid "Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master"
 msgstr ""
 
@@ -20917,7 +20297,7 @@ msgstr ""
 msgid "For reference"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1499
+#: accounts/doctype/payment_entry/payment_entry.js:1513
 #: public/js/controllers/accounts.js:182
 msgid "For row {0} in {1}. To include {2} in Item rate, rows {3} must also be included"
 msgstr ""
@@ -21145,8 +20525,8 @@ msgstr ""
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 #: accounts/doctype/loyalty_program/loyalty_program.json
-#: accounts/doctype/payment_entry/payment_entry.js:809
-#: accounts/doctype/payment_entry/payment_entry.js:816
+#: accounts/doctype/payment_entry/payment_entry.js:823
+#: accounts/doctype/payment_entry/payment_entry.js:830
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -21366,6 +20746,11 @@ msgstr ""
 #: manufacturing/report/job_card_summary/job_card_summary.js:36
 #: manufacturing/report/work_order_summary/work_order_summary.js:22
 msgid "From Posting Date"
+msgstr ""
+
+#. Label of the prospect_name (Link) field in DocType 'Customer'
+#: selling/doctype/customer/customer.json
+msgid "From Prospect"
 msgstr ""
 
 #. Label of the from_range (Float) field in DocType 'Item Attribute'
@@ -21770,14 +21155,12 @@ msgstr ""
 #. Settings'
 #. Option for the 'Report' (Select) field in DocType 'Process Statement Of
 #. Accounts'
-#. Description of a report in the Onboarding Step 'Financial Statements'
 #. Name of a report
 #. Label of a shortcut in the Accounting Workspace
 #. Label of a Link in the Financial Reports Workspace
 #: accounts/doctype/account/account.js:92
 #: accounts/doctype/accounts_settings/accounts_settings.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
-#: accounts/onboarding_step/financial_statements/financial_statements.json
 #: accounts/report/general_ledger/general_ledger.json
 #: accounts/workspace/accounting/accounting.json
 #: accounts/workspace/financial_reports/financial_reports.json
@@ -21809,7 +21192,7 @@ msgstr ""
 msgid "Generate Closing Stock Balance"
 msgstr ""
 
-#: public/js/setup_wizard.js:48
+#: public/js/setup_wizard.js:47
 msgid "Generate Demo Data for Exploration"
 msgstr ""
 
@@ -22159,7 +21542,7 @@ msgstr ""
 msgid "Goods are already received against the outward entry {0}"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:141
+#: setup/setup_wizard/operations/install_fixtures.py:172
 msgid "Government"
 msgstr ""
 
@@ -22331,7 +21714,7 @@ msgstr ""
 msgid "Grant Commission"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:822
+#: accounts/doctype/payment_entry/payment_entry.js:836
 msgid "Greater Than Amount"
 msgstr ""
 
@@ -22341,7 +21724,7 @@ msgstr ""
 #. Standing'
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
-#: setup/setup_wizard/operations/install_fixtures.py:234
+#: setup/setup_wizard/operations/install_fixtures.py:265
 msgid "Green"
 msgstr ""
 
@@ -22618,7 +22001,7 @@ msgstr ""
 msgid "Hand"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:179
+#: setup/setup_wizard/operations/install_fixtures.py:210
 msgid "Hardware"
 msgstr ""
 
@@ -22801,7 +22184,7 @@ msgstr ""
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
 msgstr ""
 
-#: stock/stock_ledger.py:1781
+#: stock/stock_ledger.py:1787
 msgid "Here are the options to proceed:"
 msgstr ""
 
@@ -22862,7 +22245,7 @@ msgstr ""
 #. Option for the 'Priority' (Select) field in DocType 'Project'
 #. Option for the 'Priority' (Select) field in DocType 'Task'
 #: projects/doctype/project/project.json projects/doctype/task/task.json
-#: setup/setup_wizard/operations/install_fixtures.py:243
+#: setup/setup_wizard/operations/install_fixtures.py:274
 msgid "High"
 msgstr ""
 
@@ -22993,11 +22376,6 @@ msgstr ""
 msgid "How often should Project be updated of Total Purchase Cost ?"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: setup/onboarding_step/navigation_help/navigation_help.json
-msgid "How to Navigate in ERPNext"
-msgstr ""
-
 #. Label of the hours (Float) field in DocType 'Timesheet Detail'
 #: projects/doctype/timesheet_detail/timesheet_detail.json
 msgid "Hrs"
@@ -23100,7 +22478,7 @@ msgid "Identification of the package for the delivery (for print)"
 msgstr ""
 
 #: setup/setup_wizard/data/sales_stage.txt:5
-#: setup/setup_wizard/operations/install_fixtures.py:385
+#: setup/setup_wizard/operations/install_fixtures.py:416
 msgid "Identifying Decision Makers"
 msgstr ""
 
@@ -23176,7 +22554,7 @@ msgstr ""
 msgid "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount"
 msgstr ""
 
-#: public/js/setup_wizard.js:50
+#: public/js/setup_wizard.js:49
 msgid "If checked, we will create demo data for you to explore the system. This demo data can be erased later."
 msgstr ""
 
@@ -23287,7 +22665,7 @@ msgstr ""
 msgid "If more than one package of the same type (for print)"
 msgstr ""
 
-#: stock/stock_ledger.py:1791
+#: stock/stock_ledger.py:1797
 msgid "If not, you can Cancel / Submit this entry"
 msgstr ""
 
@@ -23312,7 +22690,7 @@ msgstr ""
 msgid "If the account is frozen, entries are allowed to restricted users."
 msgstr ""
 
-#: stock/stock_ledger.py:1784
+#: stock/stock_ledger.py:1790
 msgid "If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table."
 msgstr ""
 
@@ -23677,11 +23055,6 @@ msgstr ""
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/home/home.json setup/workspace/settings/settings.json
 msgid "Import Data"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: setup/onboarding_step/data_import/data_import.json
-msgid "Import Data from Spreadsheet"
 msgstr ""
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:71
@@ -24445,7 +23818,7 @@ msgstr ""
 #. Option for the 'Supplier Type' (Select) field in DocType 'Supplier'
 #. Option for the 'Customer Type' (Select) field in DocType 'Customer'
 #: buying/doctype/supplier/supplier.json selling/doctype/customer/customer.json
-#: setup/setup_wizard/operations/install_fixtures.py:123
+#: setup/setup_wizard/operations/install_fixtures.py:154
 msgid "Individual"
 msgstr ""
 
@@ -24620,12 +23993,12 @@ msgstr ""
 #: stock/doctype/pick_list/pick_list.py:117
 #: stock/doctype/pick_list/pick_list.py:894
 #: stock/doctype/stock_entry/stock_entry.py:761
-#: stock/serial_batch_bundle.py:988 stock/stock_ledger.py:1489
-#: stock/stock_ledger.py:1951
+#: stock/serial_batch_bundle.py:988 stock/stock_ledger.py:1490
+#: stock/stock_ledger.py:1957
 msgid "Insufficient Stock"
 msgstr ""
 
-#: stock/stock_ledger.py:1966
+#: stock/stock_ledger.py:1972
 msgid "Insufficient Stock for Batch"
 msgstr ""
 
@@ -24749,6 +24122,7 @@ msgid "Interested"
 msgstr ""
 
 #: buying/doctype/purchase_order/purchase_order_dashboard.py:29
+#: setup/setup_wizard/operations/install_fixtures.py:284
 msgid "Internal"
 msgstr ""
 
@@ -24758,7 +24132,7 @@ msgstr ""
 msgid "Internal Customer"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:218
+#: selling/doctype/customer/customer.py:219
 msgid "Internal Customer for company {0} already exists"
 msgstr ""
 
@@ -24821,26 +24195,6 @@ msgstr ""
 #. Label of the introduction (Text) field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
 msgid "Introduction"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: assets/onboarding_step/introduction_to_assets/introduction_to_assets.json
-msgid "Introduction to Assets"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: crm/onboarding_step/introduction_to_crm/introduction_to_crm.json
-msgid "Introduction to CRM"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: selling/onboarding_step/introduction_to_selling/introduction_to_selling.json
-msgid "Introduction to Selling"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: stock/onboarding_step/introduction_to_stock_entry/introduction_to_stock_entry.json
-msgid "Introduction to Stock Entry"
 msgstr ""
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.py:324
@@ -25053,11 +24407,6 @@ msgstr ""
 #. 'Item'
 #: stock/doctype/item/item.json
 msgid "Inventory Settings"
-msgstr ""
-
-#. Subtitle of the Module Onboarding 'Stock'
-#: stock/module_onboarding/stock/stock.json
-msgid "Inventory, Warehouses, Analysis, and more."
 msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:29
@@ -25696,6 +25045,11 @@ msgstr ""
 msgid "Is Short Year"
 msgstr ""
 
+#. Label of the is_standard (Check) field in DocType 'Stock Entry Type'
+#: stock/doctype/stock_entry_type/stock_entry_type.json
+msgid "Is Standard"
+msgstr ""
+
 #. Label of the is_stock_item (Check) field in DocType 'BOM Item'
 #. Label of the is_stock_item (Check) field in DocType 'Sales Order Item'
 #: manufacturing/doctype/bom_item/bom_item.json
@@ -26158,7 +25512,7 @@ msgstr ""
 #: buying/doctype/purchase_receipt_item_supplied/purchase_receipt_item_supplied.json
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:190
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:193
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:198
 #: buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:36
 #: crm/doctype/opportunity_item/opportunity_item.json
@@ -27088,11 +26442,6 @@ msgstr ""
 msgid "Item {} does not exist."
 msgstr ""
 
-#. Subtitle of the Module Onboarding 'Home'
-#: setup/module_onboarding/home/home.json
-msgid "Item, Customer, Supplier and Quotation"
-msgstr ""
-
 #. Name of a report
 #: stock/report/item_wise_price_list_rate/item_wise_price_list_rate.json
 msgid "Item-wise Price List Rate"
@@ -27753,7 +27102,7 @@ msgstr ""
 msgid "Lapsed"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:225
+#: setup/setup_wizard/operations/install_fixtures.py:256
 msgid "Large"
 msgstr ""
 
@@ -27953,11 +27302,6 @@ msgstr ""
 msgid "Lead {0} has been added to prospect {1}."
 msgstr ""
 
-#. Subtitle of the Module Onboarding 'CRM'
-#: crm/module_onboarding/crm/crm.json
-msgid "Lead, Opportunity, Customer, and more."
-msgstr ""
-
 #. Label of a shortcut in the Home Workspace
 #: setup/workspace/home/home.json
 msgid "Leaderboard"
@@ -28002,36 +27346,11 @@ msgstr ""
 msgid "Learn Sales Management"
 msgstr ""
 
-#. Label of an action in the Onboarding Step 'How to Navigate in ERPNext'
-#: setup/onboarding_step/navigation_help/navigation_help.json
-msgid "Learn about  Navigation options"
-msgstr ""
-
 #. Description of the 'Enable Common Party Accounting' (Check) field in DocType
 #. 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 #, python-format
 msgid "Learn about <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20ERPNext,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Updating Opening Balances'
-#: accounts/onboarding_step/updating_opening_balances/updating_opening_balances.json
-msgid "Learn how to update opening balances"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Review Chart of Accounts'
-#: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
-msgid "Learn more about Chart of Accounts"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Production Planning'
-#: manufacturing/onboarding_step/production_planning/production_planning.json
-msgid "Learn more about Production Planning"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Import Data from Spreadsheet'
-#: setup/onboarding_step/data_import/data_import.json
-msgid "Learn more about data migration"
 msgstr ""
 
 #. Label of the leave_encashed (Select) field in DocType 'Employee'
@@ -28059,7 +27378,7 @@ msgid "Leave blank to use the standard Delivery Note format"
 msgstr ""
 
 #: accounts/doctype/journal_entry/journal_entry.js:30
-#: accounts/doctype/payment_entry/payment_entry.js:360
+#: accounts/doctype/payment_entry/payment_entry.js:368
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.js:25
 msgid "Ledger"
 msgstr ""
@@ -28140,78 +27459,13 @@ msgstr ""
 msgid "Length (cm)"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:827
+#: accounts/doctype/payment_entry/payment_entry.js:841
 msgid "Less Than Amount"
 msgstr ""
 
 #. Description of the 'Is Short Year' (Check) field in DocType 'Fiscal Year'
 #: accounts/doctype/fiscal_year/fiscal_year.json
 msgid "Less than 12 months."
-msgstr ""
-
-#. Title of the Module Onboarding 'Accounts'
-#: accounts/module_onboarding/accounts/accounts.json
-msgid "Let's Set Up Your Accounts and Taxes."
-msgstr ""
-
-#. Title of the Module Onboarding 'CRM'
-#: crm/module_onboarding/crm/crm.json
-msgid "Let's Set Up Your CRM."
-msgstr ""
-
-#. Title of the Module Onboarding 'Assets'
-#: assets/module_onboarding/assets/assets.json
-msgid "Let's Set Up the Assets Module."
-msgstr ""
-
-#. Title of the Module Onboarding 'Buying'
-#: buying/module_onboarding/buying/buying.json
-msgid "Let's Set Up the Buying Module."
-msgstr ""
-
-#. Title of the Module Onboarding 'Manufacturing'
-#: manufacturing/module_onboarding/manufacturing/manufacturing.json
-msgid "Let's Set Up the Manufacturing Module."
-msgstr ""
-
-#. Title of the Module Onboarding 'Selling'
-#: selling/module_onboarding/selling/selling.json
-msgid "Let's Set Up the Selling Module."
-msgstr ""
-
-#. Title of the Module Onboarding 'Stock'
-#: stock/module_onboarding/stock/stock.json
-msgid "Let's Set Up the Stock Module."
-msgstr ""
-
-#. Title of the Module Onboarding 'Home'
-#: setup/module_onboarding/home/home.json
-msgid "Let's begin your journey with ERPNext"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Purchase an Asset'
-#: assets/onboarding_step/asset_purchase/asset_purchase.json
-msgid "Let's create a Purchase Receipt"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Create an Asset Item'
-#: assets/onboarding_step/asset_item/asset_item.json
-msgid "Let's create a new Asset item"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Define Asset Category'
-#: assets/onboarding_step/asset_category/asset_category.json
-msgid "Let's review existing Asset Category"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Set Up a Company'
-#: setup/onboarding_step/company_set_up/company_set_up.json
-msgid "Let's review your Company"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Review Fixed Asset Accounts'
-#: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
-msgid "Let's walk-through Chart of Accounts to review setup"
 msgstr ""
 
 #. Label of the letter_head (Link) field in DocType 'Dunning'
@@ -28271,77 +27525,6 @@ msgstr ""
 #. Letter Text'
 #: accounts/doctype/dunning_letter_text/dunning_letter_text.json
 msgid "Letter or Email Closing Text"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Sales Order'
-#: selling/onboarding_step/sales_order/sales_order.json
-msgid "Let’s convert your first Sales Order against a Quotation"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Workstation'
-#: manufacturing/onboarding_step/workstation/workstation.json
-msgid "Let’s create a Workstation"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Update Stock Opening Balance'
-#: stock/onboarding_step/stock_opening_balance/stock_opening_balance.json
-msgid "Let’s create a stock opening entry"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Operation'
-#: manufacturing/onboarding_step/operation/operation.json
-msgid "Let’s create an Operation"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Setup a Warehouse'
-#: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
-msgid "Let’s create your first  warehouse "
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Create a Customer'
-#: setup/onboarding_step/create_a_customer/create_a_customer.json
-msgid "Let’s create your first Customer"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Track Material Request'
-#: buying/onboarding_step/create_a_material_request/create_a_material_request.json
-msgid "Let’s create your first Material Request"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Create Your First Purchase
-#. Invoice '
-#: accounts/onboarding_step/create_your_first_purchase_invoice/create_your_first_purchase_invoice.json
-msgid "Let’s create your first Purchase Invoice"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Create first Purchase Order'
-#: buying/onboarding_step/create_your_first_purchase_order/create_your_first_purchase_order.json
-msgid "Let’s create your first Purchase Order"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Create your first Quotation'
-#: setup/onboarding_step/create_a_quotation/create_a_quotation.json
-msgid "Let’s create your first Quotation"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Create a Supplier'
-#: setup/onboarding_step/create_a_supplier/create_a_supplier.json
-msgid "Let’s create your first Supplier"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Setup Your Letterhead'
-#: setup/onboarding_step/letterhead/letterhead.json
-msgid "Let’s setup your first Letter Head"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Selling Settings'
-#: selling/onboarding_step/selling_settings/selling_settings.json
-msgid "Let’s walk-through Selling Settings"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Buying Settings'
-#: buying/onboarding_step/introduction_to_buying/introduction_to_buying.json
-msgid "Let’s walk-through few Buying Settings"
 msgstr ""
 
 #. Label of the level (Int) field in DocType 'BOM Update Batch'
@@ -28563,7 +27746,7 @@ msgstr ""
 msgid "Loans and Advances (Assets)"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:161
+#: setup/setup_wizard/operations/install_fixtures.py:192
 msgid "Local"
 msgstr ""
 
@@ -28693,7 +27876,7 @@ msgstr ""
 #. Option for the 'Priority' (Select) field in DocType 'Project'
 #. Option for the 'Priority' (Select) field in DocType 'Task'
 #: projects/doctype/project/project.json projects/doctype/task/task.json
-#: setup/setup_wizard/operations/install_fixtures.py:241
+#: setup/setup_wizard/operations/install_fixtures.py:272
 msgid "Low"
 msgstr ""
 
@@ -28704,8 +27887,8 @@ msgstr ""
 msgid "Lower Deduction Certificate"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:262
-#: setup/setup_wizard/operations/install_fixtures.py:370
+#: setup/setup_wizard/operations/install_fixtures.py:293
+#: setup/setup_wizard/operations/install_fixtures.py:401
 msgid "Lower Income"
 msgstr ""
 
@@ -28879,7 +28062,7 @@ msgstr ""
 #: manufacturing/doctype/workstation/workstation.json
 #: selling/doctype/quotation/quotation.json
 #: selling/doctype/sales_order/sales_order.json
-#: setup/setup_wizard/operations/install_fixtures.py:252
+#: setup/setup_wizard/operations/install_fixtures.py:283
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
 #: support/workspace/support/support.json
 msgid "Maintenance"
@@ -29167,16 +28350,6 @@ msgstr ""
 msgid "Manage"
 msgstr ""
 
-#. Label of an action in the Onboarding Step 'Setting up Taxes'
-#: accounts/onboarding_step/setup_taxes/setup_taxes.json
-msgid "Manage Sales Tax Templates"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: stock/onboarding_step/create_a_stock_entry/create_a_stock_entry.json
-msgid "Manage Stock Movements"
-msgstr ""
-
 #. Description of the 'With Operations' (Check) field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
 msgid "Manage cost of operations"
@@ -29200,7 +28373,7 @@ msgstr ""
 
 #. Label of the reqd (Check) field in DocType 'POS Field'
 #. Label of the reqd (Check) field in DocType 'Inventory Dimension'
-#: accounts/doctype/payment_entry/payment_entry.js:215
+#: accounts/doctype/payment_entry/payment_entry.js:223
 #: accounts/doctype/pos_field/pos_field.json
 #: accounts/doctype/promotional_scheme/promotional_scheme.py:145
 #: buying/doctype/supplier_quotation/supplier_quotation.js:69
@@ -29243,7 +28416,7 @@ msgstr ""
 msgid "Mandatory For Profit and Loss Account"
 msgstr ""
 
-#: selling/doctype/quotation/quotation.py:550
+#: selling/doctype/quotation/quotation.py:572
 msgid "Mandatory Missing"
 msgstr ""
 
@@ -29317,6 +28490,7 @@ msgstr ""
 #: manufacturing/doctype/bom/bom_dashboard.py:15
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 #: manufacturing/doctype/operation/operation_dashboard.py:7
+#: setup/setup_wizard/operations/install_fixtures.py:96
 #: stock/doctype/item/item.json stock/doctype/item/item_dashboard.py:32
 #: stock/doctype/item_reorder/item_reorder.json
 #: stock/doctype/material_request/material_request.json
@@ -29463,12 +28637,9 @@ msgid "Manufacturing Section"
 msgstr ""
 
 #. Name of a DocType
-#. Title of an Onboarding Step
 #. Label of a Link in the Manufacturing Workspace
 #. Label of a Link in the Settings Workspace
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
-#: manufacturing/onboarding_step/explore_manufacturing_settings/explore_manufacturing_settings.json
-#: manufacturing/onboarding_step/introduction_to_manufacturing/introduction_to_manufacturing.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
 #: setup/workspace/settings/settings.json
 msgid "Manufacturing Settings"
@@ -29505,11 +28676,6 @@ msgstr ""
 #: stock/doctype/warehouse/warehouse.json
 #: stock/doctype/warehouse_type/warehouse_type.json
 msgid "Manufacturing User"
-msgstr ""
-
-#. Success message of the Module Onboarding 'Manufacturing'
-#: manufacturing/module_onboarding/manufacturing/manufacturing.json
-msgid "Manufacturing module is all set up!"
 msgstr ""
 
 #: stock/doctype/purchase_receipt/purchase_receipt.js:168
@@ -29672,6 +28838,7 @@ msgstr ""
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
+#: setup/setup_wizard/operations/install_fixtures.py:120
 #: stock/doctype/stock_entry/stock_entry.json
 #: stock/doctype/stock_entry/stock_entry.py:919
 #: stock/doctype/stock_entry_type/stock_entry_type.json
@@ -29691,6 +28858,7 @@ msgstr ""
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
+#: setup/setup_wizard/operations/install_fixtures.py:78
 #: stock/doctype/item/item.json stock/doctype/item_reorder/item_reorder.json
 #: stock/doctype/material_request/material_request.json
 #: stock/doctype/stock_entry/stock_entry.json
@@ -29700,6 +28868,7 @@ msgstr ""
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
+#: setup/setup_wizard/operations/install_fixtures.py:84
 #: stock/doctype/material_request/material_request.js:146
 #: stock/doctype/stock_entry/stock_entry.json
 #: stock/doctype/stock_entry_type/stock_entry_type.json
@@ -29758,8 +28927,8 @@ msgstr ""
 #: selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:36
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 #: stock/doctype/material_request/material_request.json
-#: stock/doctype/material_request/material_request.py:363
-#: stock/doctype/material_request/material_request.py:395
+#: stock/doctype/material_request/material_request.py:364
+#: stock/doctype/material_request/material_request.py:396
 #: stock/doctype/pick_list/pick_list.json
 #: stock/doctype/pick_list_item/pick_list_item.json
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
@@ -29904,6 +29073,7 @@ msgstr ""
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
 #: manufacturing/doctype/job_card/job_card.js:104
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
+#: setup/setup_wizard/operations/install_fixtures.py:90
 #: stock/doctype/item/item.json
 #: stock/doctype/material_request/material_request.js:124
 #: stock/doctype/material_request/material_request.json
@@ -29920,6 +29090,7 @@ msgstr ""
 #. Option for the 'Purpose' (Select) field in DocType 'Pick List'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
+#: setup/setup_wizard/operations/install_fixtures.py:114
 #: stock/doctype/pick_list/pick_list.json
 #: stock/doctype/stock_entry/stock_entry.json
 #: stock/doctype/stock_entry_type/stock_entry_type.json
@@ -30084,8 +29255,8 @@ msgstr ""
 #. Option for the 'Priority' (Select) field in DocType 'Task'
 #. Label of the medium (Data) field in DocType 'Call Log'
 #: projects/doctype/project/project.json projects/doctype/task/task.json
-#: setup/setup_wizard/operations/install_fixtures.py:224
-#: setup/setup_wizard/operations/install_fixtures.py:242
+#: setup/setup_wizard/operations/install_fixtures.py:255
+#: setup/setup_wizard/operations/install_fixtures.py:273
 #: telephony/doctype/call_log/call_log.json
 msgid "Medium"
 msgstr ""
@@ -30120,7 +29291,7 @@ msgstr ""
 msgid "Megawatt"
 msgstr ""
 
-#: stock/stock_ledger.py:1797
+#: stock/stock_ledger.py:1803
 msgid "Mention Valuation Rate in the Item master."
 msgstr ""
 
@@ -30282,8 +29453,8 @@ msgstr ""
 msgid "Microsecond"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:263
-#: setup/setup_wizard/operations/install_fixtures.py:371
+#: setup/setup_wizard/operations/install_fixtures.py:294
+#: setup/setup_wizard/operations/install_fixtures.py:402
 msgid "Middle Income"
 msgstr ""
 
@@ -30563,7 +29734,7 @@ msgstr ""
 msgid "Missing Serial No Bundle"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:744
+#: selling/doctype/customer/customer.py:745
 msgid "Missing Values Required"
 msgstr ""
 
@@ -30999,7 +30170,7 @@ msgstr ""
 msgid "Multi-level BOM Creator"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:379
+#: selling/doctype/customer/customer.py:380
 msgid "Multiple Loyalty Programs found for Customer {}. Please select manually."
 msgstr ""
 
@@ -31206,7 +30377,7 @@ msgid "Natural Gas"
 msgstr ""
 
 #: setup/setup_wizard/data/sales_stage.txt:3
-#: setup/setup_wizard/operations/install_fixtures.py:383
+#: setup/setup_wizard/operations/install_fixtures.py:414
 msgid "Needs Analysis"
 msgstr ""
 
@@ -31219,7 +30390,7 @@ msgid "Negative Valuation Rate is not allowed"
 msgstr ""
 
 #: setup/setup_wizard/data/sales_stage.txt:8
-#: setup/setup_wizard/operations/install_fixtures.py:388
+#: setup/setup_wizard/operations/install_fixtures.py:419
 msgid "Negotiation/Review"
 msgstr ""
 
@@ -31633,7 +30804,7 @@ msgstr ""
 msgid "New Workplace"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:348
+#: selling/doctype/customer/customer.py:349
 msgid "New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}"
 msgstr ""
 
@@ -31906,7 +31077,7 @@ msgstr ""
 msgid "No failed logs"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1309
+#: accounts/doctype/payment_entry/payment_entry.js:1323
 msgid "No gain or loss in the exchange rate"
 msgstr ""
 
@@ -32080,7 +31251,7 @@ msgstr ""
 msgid "Non Conformance"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:135
+#: setup/setup_wizard/operations/install_fixtures.py:166
 msgid "Non Profit"
 msgstr ""
 
@@ -32104,7 +31275,6 @@ msgstr ""
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
-#: setup/setup_wizard/operations/install_fixtures.py:473
 msgid "Nos"
 msgstr ""
 
@@ -32229,7 +31399,7 @@ msgstr ""
 #: manufacturing/doctype/production_plan/production_plan.py:929
 #: manufacturing/doctype/production_plan/production_plan.py:1625
 #: projects/doctype/timesheet/timesheet.json
-#: public/js/controllers/buying.js:431 selling/doctype/customer/customer.py:124
+#: public/js/controllers/buying.js:431 selling/doctype/customer/customer.py:125
 #: selling/doctype/sales_order/sales_order.js:1194
 #: stock/doctype/item/item.js:497 stock/doctype/item/item.py:558
 #: stock/doctype/item_price/item_price.json
@@ -33089,7 +32259,6 @@ msgstr ""
 #. Label of the operation (Link) field in DocType 'Sub Operation'
 #. Label of the operation (Link) field in DocType 'Work Order Item'
 #. Label of the operation (Link) field in DocType 'Work Order Operation'
-#. Title of an Onboarding Step
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/doctype/bom/bom.js:381
 #: manufacturing/doctype/bom_creator/bom_creator.js:116
@@ -33107,7 +32276,6 @@ msgstr ""
 #: manufacturing/doctype/work_order_item/work_order_item.json
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 #: manufacturing/doctype/workstation/workstation_job_card.html:31
-#: manufacturing/onboarding_step/operation/operation.json
 #: manufacturing/report/bom_operations_time/bom_operations_time.py:112
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.js:49
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:108
@@ -33558,6 +32726,7 @@ msgstr ""
 #: crm/doctype/lead/lead.json
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
 #: setup/doctype/email_digest/email_digest.json
+#: setup/setup_wizard/operations/install_fixtures.py:286
 msgid "Other"
 msgstr ""
 
@@ -33718,7 +32887,7 @@ msgstr ""
 #: accounts/doctype/cashier_closing/cashier_closing.json
 #: accounts/doctype/discounted_invoice/discounted_invoice.json
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
-#: accounts/doctype/payment_entry/payment_entry.js:819
+#: accounts/doctype/payment_entry/payment_entry.js:833
 #: accounts/doctype/payment_reconciliation_invoice/payment_reconciliation_invoice.json
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:179
@@ -34311,7 +33480,7 @@ msgstr ""
 msgid "Paid Amount After Tax (Company Currency)"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1079
+#: accounts/doctype/payment_entry/payment_entry.js:1093
 msgid "Paid Amount cannot be greater than total negative outstanding amount {0}"
 msgstr ""
 
@@ -34912,7 +34081,7 @@ msgstr ""
 msgid "Party User"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:407
+#: accounts/doctype/payment_entry/payment_entry.js:415
 msgid "Party can only be one of {0}"
 msgstr ""
 
@@ -35651,13 +34820,13 @@ msgstr ""
 
 #: accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py:64
 #: accounts/report/received_items_to_be_billed/received_items_to_be_billed.py:64
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:252
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:255
 #: selling/report/sales_order_analysis/sales_order_analysis.py:306
 msgid "Pending Amount"
 msgstr ""
 
 #. Label of the pending_qty (Float) field in DocType 'Production Plan Item'
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:215
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:218
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
 #: manufacturing/doctype/work_order/work_order.js:253
 #: manufacturing/report/production_plan_summary/production_plan_summary.py:155
@@ -35797,7 +34966,7 @@ msgid "Percentage you are allowed to transfer more against the quantity ordered.
 msgstr ""
 
 #: setup/setup_wizard/data/sales_stage.txt:6
-#: setup/setup_wizard/operations/install_fixtures.py:386
+#: setup/setup_wizard/operations/install_fixtures.py:417
 msgid "Perception Analysis"
 msgstr ""
 
@@ -35941,7 +35110,7 @@ msgstr ""
 msgid "Petrol"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:185
+#: setup/setup_wizard/operations/install_fixtures.py:216
 msgid "Pharmaceutical"
 msgstr ""
 
@@ -36268,7 +35437,7 @@ msgstr ""
 #. Item'
 #: selling/doctype/quotation_item/quotation_item.json
 #: selling/doctype/sales_order_item/sales_order_item.json
-#: setup/setup_wizard/operations/install_fixtures.py:213
+#: setup/setup_wizard/operations/install_fixtures.py:244
 msgid "Planning"
 msgstr ""
 
@@ -36328,7 +35497,7 @@ msgstr ""
 msgid "Please Set Supplier Group in Buying Settings."
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1317
+#: accounts/doctype/payment_entry/payment_entry.js:1331
 msgid "Please Specify Account"
 msgstr ""
 
@@ -36429,7 +35598,7 @@ msgstr ""
 msgid "Please click on 'Generate Schedule' to get schedule"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:546
+#: selling/doctype/customer/customer.py:547
 msgid "Please contact any of the following users to extend the credit limits for {0}: {1}"
 msgstr ""
 
@@ -36437,7 +35606,7 @@ msgstr ""
 msgid "Please contact any of the following users to {} this transaction."
 msgstr ""
 
-#: selling/doctype/customer/customer.py:539
+#: selling/doctype/customer/customer.py:540
 msgid "Please contact your administrator to extend the credit limits for {0}."
 msgstr ""
 
@@ -36445,7 +35614,7 @@ msgstr ""
 msgid "Please convert the parent account in corresponding child company to a group account."
 msgstr ""
 
-#: selling/doctype/quotation/quotation.py:548
+#: selling/doctype/quotation/quotation.py:570
 msgid "Please create Customer from Lead {0}."
 msgstr ""
 
@@ -36593,7 +35762,7 @@ msgstr ""
 msgid "Please enter Reference date"
 msgstr ""
 
-#: controllers/buying_controller.py:906
+#: controllers/buying_controller.py:908
 msgid "Please enter Reqd by Date"
 msgstr ""
 
@@ -36666,7 +35835,7 @@ msgstr ""
 msgid "Please enter the phone number first"
 msgstr ""
 
-#: public/js/setup_wizard.js:87
+#: public/js/setup_wizard.js:86
 msgid "Please enter valid Financial Year Start and End Dates"
 msgstr ""
 
@@ -36792,7 +35961,7 @@ msgstr ""
 msgid "Please select Category first"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1451
+#: accounts/doctype/payment_entry/payment_entry.js:1465
 #: public/js/controllers/accounts.js:86 public/js/controllers/accounts.js:124
 msgid "Please select Charge Type first"
 msgstr ""
@@ -36844,7 +36013,7 @@ msgstr ""
 msgid "Please select Party Type first"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:446
+#: accounts/doctype/payment_entry/payment_entry.js:460
 msgid "Please select Posting Date before selecting Party"
 msgstr ""
 
@@ -36888,7 +36057,7 @@ msgstr ""
 msgid "Please select a Company"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:215
+#: accounts/doctype/payment_entry/payment_entry.js:223
 #: manufacturing/doctype/bom/bom.js:570 manufacturing/doctype/bom/bom.py:245
 #: public/js/controllers/accounts.js:249
 #: public/js/controllers/transaction.js:2606
@@ -37040,7 +36209,7 @@ msgstr ""
 msgid "Please select {0}"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1222
+#: accounts/doctype/payment_entry/payment_entry.js:1236
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.py:578
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.py:82
 msgid "Please select {0} first"
@@ -37301,7 +36470,7 @@ msgstr ""
 msgid "Please specify Company to proceed"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1474
+#: accounts/doctype/payment_entry/payment_entry.js:1488
 #: controllers/accounts_controller.py:2611 public/js/controllers/accounts.js:97
 msgid "Please specify a valid Row ID for row {0} in table {1}"
 msgstr ""
@@ -37478,7 +36647,7 @@ msgstr ""
 #: accounts/doctype/journal_entry/journal_entry.json
 #: accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
 #: accounts/doctype/opening_invoice_creation_tool_item/opening_invoice_creation_tool_item.json
-#: accounts/doctype/payment_entry/payment_entry.js:806
+#: accounts/doctype/payment_entry/payment_entry.js:820
 #: accounts/doctype/payment_entry/payment_entry.json
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 #: accounts/doctype/payment_order/payment_order.json
@@ -37658,7 +36827,7 @@ msgstr ""
 msgid "Pre Sales"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:260
+#: setup/setup_wizard/operations/install_fixtures.py:291
 msgid "Preference"
 msgstr ""
 
@@ -38844,11 +38013,6 @@ msgstr ""
 msgid "Production Plan Summary"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: manufacturing/onboarding_step/production_planning/production_planning.json
-msgid "Production Planning"
-msgstr ""
-
 #. Name of a report
 #. Label of a Link in the Manufacturing Workspace
 #. Label of a shortcut in the Manufacturing Workspace
@@ -38857,23 +38021,8 @@ msgstr ""
 msgid "Production Planning Report"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:39
+#: setup/setup_wizard/operations/install_fixtures.py:46
 msgid "Products"
-msgstr ""
-
-#. Subtitle of the Module Onboarding 'Buying'
-#: buying/module_onboarding/buying/buying.json
-msgid "Products, Purchases, Analysis, and more."
-msgstr ""
-
-#. Subtitle of the Module Onboarding 'Manufacturing'
-#: manufacturing/module_onboarding/manufacturing/manufacturing.json
-msgid "Products, Raw Materials, BOM, Work Order, and more."
-msgstr ""
-
-#. Subtitle of the Module Onboarding 'Selling'
-#: selling/module_onboarding/selling/selling.json
-msgid "Products, Sales, Analysis, and more."
 msgstr ""
 
 #. Label of the profile_tab (Tab Break) field in DocType 'Employee'
@@ -39035,7 +38184,7 @@ msgstr ""
 #: buying/report/procurement_tracker/procurement_tracker.js:21
 #: buying/report/procurement_tracker/procurement_tracker.py:39
 #: buying/report/purchase_order_analysis/purchase_order_analysis.js:33
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:179
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:182
 #: crm/doctype/contract/contract.json manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/job_card/job_card.json
@@ -39316,12 +38465,12 @@ msgstr ""
 msgid "Prompt Qty"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:215
+#: setup/setup_wizard/operations/install_fixtures.py:246
 msgid "Proposal Writing"
 msgstr ""
 
 #: setup/setup_wizard/data/sales_stage.txt:7
-#: setup/setup_wizard/operations/install_fixtures.py:387
+#: setup/setup_wizard/operations/install_fixtures.py:418
 msgid "Proposal/Price Quote"
 msgstr ""
 
@@ -39357,7 +38506,7 @@ msgid "Prospect {0} already exists"
 msgstr ""
 
 #: setup/setup_wizard/data/sales_stage.txt:1
-#: setup/setup_wizard/operations/install_fixtures.py:381
+#: setup/setup_wizard/operations/install_fixtures.py:412
 msgid "Prospecting"
 msgstr ""
 
@@ -39624,7 +38773,7 @@ msgstr ""
 #: buying/doctype/supplier_quotation/supplier_quotation_list.js:14
 #: buying/report/procurement_tracker/procurement_tracker.py:82
 #: buying/report/purchase_order_analysis/purchase_order_analysis.js:40
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:164
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:167
 #: buying/workspace/buying/buying.json controllers/buying_controller.py:677
 #: crm/doctype/contract/contract.json
 #: manufacturing/doctype/blanket_order/blanket_order.js:54
@@ -39970,16 +39119,6 @@ msgstr ""
 msgid "Purchase Value"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: assets/onboarding_step/asset_purchase/asset_purchase.json
-msgid "Purchase an Asset"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: assets/onboarding_step/purchase_an_asset_item/purchase_an_asset_item.json
-msgid "Purchase an Asset Item"
-msgstr ""
-
 #: utilities/activation.py:104
 msgid "Purchase orders help you plan and follow up on your purchases"
 msgstr ""
@@ -40088,7 +39227,7 @@ msgstr ""
 #: accounts/report/gross_profit/gross_profit.py:267
 #: assets/doctype/asset_capitalization_service_item/asset_capitalization_service_item.json
 #: assets/doctype/asset_capitalization_stock_item/asset_capitalization_stock_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:201
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:204
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:224
 #: controllers/trends.py:238 controllers/trends.py:250
 #: controllers/trends.py:255 crm/doctype/opportunity_item/opportunity_item.json
@@ -40267,7 +39406,7 @@ msgstr ""
 msgid "Qty to Be Consumed"
 msgstr ""
 
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:229
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:232
 #: selling/report/sales_order_analysis/sales_order_analysis.py:283
 msgid "Qty to Bill"
 msgstr ""
@@ -40307,7 +39446,7 @@ msgstr ""
 #: crm/doctype/lead/lead.json
 #: setup/doctype/employee_education/employee_education.json
 #: setup/setup_wizard/data/sales_stage.txt:2
-#: setup/setup_wizard/operations/install_fixtures.py:382
+#: setup/setup_wizard/operations/install_fixtures.py:413
 msgid "Qualification"
 msgstr ""
 
@@ -41351,8 +40490,8 @@ msgid "Ratios"
 msgstr ""
 
 #: manufacturing/report/bom_variance_report/bom_variance_report.py:52
-#: setup/setup_wizard/operations/install_fixtures.py:46
-#: setup/setup_wizard/operations/install_fixtures.py:167
+#: setup/setup_wizard/operations/install_fixtures.py:53
+#: setup/setup_wizard/operations/install_fixtures.py:198
 msgid "Raw Material"
 msgstr ""
 
@@ -41759,7 +40898,7 @@ msgstr ""
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
 #: accounts/report/billed_items_to_be_received/billed_items_to_be_received.py:76
 #: buying/doctype/purchase_order_item/purchase_order_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:208
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:211
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:170
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:245
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:143
@@ -41770,7 +40909,7 @@ msgstr ""
 msgid "Received Qty"
 msgstr ""
 
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:260
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:263
 msgid "Received Qty Amount"
 msgstr ""
 
@@ -41954,7 +41093,7 @@ msgstr ""
 #. Standing'
 #: buying/doctype/supplier_scorecard_scoring_standing/supplier_scorecard_scoring_standing.json
 #: buying/doctype/supplier_scorecard_standing/supplier_scorecard_standing.json
-#: setup/setup_wizard/operations/install_fixtures.py:233
+#: setup/setup_wizard/operations/install_fixtures.py:264
 msgid "Red"
 msgstr ""
 
@@ -42684,6 +41823,7 @@ msgstr ""
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
+#: setup/setup_wizard/operations/install_fixtures.py:102
 #: stock/doctype/stock_entry/stock_entry.json
 #: stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Repack"
@@ -43069,7 +42209,7 @@ msgstr ""
 #. Item'
 #: buying/doctype/purchase_order/purchase_order.json
 #: buying/doctype/purchase_order_item/purchase_order_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:162
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:165
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.py:191
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 #: stock/doctype/material_request/material_request.json
@@ -43148,7 +42288,7 @@ msgstr ""
 msgid "Requires Fulfilment"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:214
+#: setup/setup_wizard/operations/install_fixtures.py:245
 msgid "Research"
 msgstr ""
 
@@ -43274,7 +42414,7 @@ msgstr ""
 msgid "Reserved Quantity for Production"
 msgstr ""
 
-#: stock/stock_ledger.py:2089
+#: stock/stock_ledger.py:2095
 msgid "Reserved Serial No."
 msgstr ""
 
@@ -43286,11 +42426,11 @@ msgstr ""
 #: stock/dashboard/item_dashboard_list.html:15 stock/doctype/bin/bin.json
 #: stock/doctype/pick_list/pick_list.js:146
 #: stock/report/reserved_stock/reserved_stock.json
-#: stock/report/stock_balance/stock_balance.py:479 stock/stock_ledger.py:2073
+#: stock/report/stock_balance/stock_balance.py:479 stock/stock_ledger.py:2079
 msgid "Reserved Stock"
 msgstr ""
 
-#: stock/stock_ledger.py:2119
+#: stock/stock_ledger.py:2125
 msgid "Reserved Stock for Batch"
 msgstr ""
 
@@ -43477,7 +42617,7 @@ msgid "Responsible"
 msgstr ""
 
 #: setup/setup_wizard/operations/defaults_setup.py:107
-#: setup/setup_wizard/operations/install_fixtures.py:109
+#: setup/setup_wizard/operations/install_fixtures.py:140
 msgid "Rest Of The World"
 msgstr ""
 
@@ -43774,24 +42914,9 @@ msgstr ""
 msgid "Review"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/chart_of_accounts/chart_of_accounts.json
-msgid "Review Chart of Accounts"
-msgstr ""
-
 #. Label of the review_date (Date) field in DocType 'Task'
 #: projects/doctype/task/task.json
 msgid "Review Date"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
-msgid "Review Fixed Asset Accounts"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: stock/onboarding_step/stock_settings/stock_settings.json
-msgid "Review Stock Settings"
 msgstr ""
 
 #. Label of a Card Break in the Quality Workspace
@@ -44075,11 +43200,9 @@ msgstr ""
 
 #. Label of the routing (Link) field in DocType 'BOM'
 #. Name of a DocType
-#. Title of an Onboarding Step
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/routing/routing.json
-#: manufacturing/onboarding_step/routing/routing.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
 msgid "Routing"
 msgstr ""
@@ -44395,11 +43518,11 @@ msgstr ""
 msgid "Row #{0}: Received Qty must be equal to Accepted + Rejected Qty for Item {1}"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1254
+#: accounts/doctype/payment_entry/payment_entry.js:1268
 msgid "Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:1240
+#: accounts/doctype/payment_entry/payment_entry.js:1254
 msgid "Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning"
 msgstr ""
 
@@ -44415,7 +43538,7 @@ msgstr ""
 msgid "Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}"
 msgstr ""
 
-#: controllers/buying_controller.py:904
+#: controllers/buying_controller.py:906
 msgid "Row #{0}: Reqd by Date cannot be before Transaction Date"
 msgstr ""
 
@@ -44679,7 +43802,7 @@ msgstr ""
 msgid "Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
 msgstr ""
 
-#: stock/doctype/material_request/material_request.py:770
+#: stock/doctype/material_request/material_request.py:771
 msgid "Row {0}: Bill of Materials not found for the Item {1}"
 msgstr ""
 
@@ -44727,7 +43850,7 @@ msgstr ""
 msgid "Row {0}: Either Delivery Note Item or Packed Item reference is mandatory."
 msgstr ""
 
-#: controllers/buying_controller.py:800
+#: controllers/buying_controller.py:802
 msgid "Row {0}: Enter location for the asset item {1}"
 msgstr ""
 
@@ -44937,7 +44060,7 @@ msgstr ""
 msgid "Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
 msgstr ""
 
-#: controllers/buying_controller.py:783
+#: controllers/buying_controller.py:785
 msgid "Row {}: Asset Naming Series is mandatory for the auto creation for item {}"
 msgstr ""
 
@@ -45136,7 +44259,7 @@ msgstr ""
 #: setup/doctype/company/company.py:346 setup/doctype/company/company.py:509
 #: setup/doctype/company/company_dashboard.py:9
 #: setup/doctype/sales_person/sales_person_dashboard.py:12
-#: setup/setup_wizard/operations/install_fixtures.py:250
+#: setup/setup_wizard/operations/install_fixtures.py:281
 #: stock/doctype/item/item.json
 msgid "Sales"
 msgstr ""
@@ -45362,7 +44485,6 @@ msgstr ""
 #. Label of the sales_order (Link) field in DocType 'Work Order'
 #. Label of the sales_order (Link) field in DocType 'Project'
 #. Name of a DocType
-#. Title of an Onboarding Step
 #. Label of a Link in the Selling Workspace
 #. Label of a shortcut in the Selling Workspace
 #. Option for the 'Transaction' (Select) field in DocType 'Authorization Rule'
@@ -45397,7 +44519,6 @@ msgstr ""
 #: selling/doctype/quotation/quotation_dashboard.py:11
 #: selling/doctype/quotation/quotation_list.js:15
 #: selling/doctype/sales_order/sales_order.json
-#: selling/onboarding_step/sales_order/sales_order.json
 #: selling/report/item_wise_sales_history/item_wise_sales_history.py:59
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:13
 #: selling/report/sales_order_analysis/sales_order_analysis.js:33
@@ -45815,7 +44936,7 @@ msgstr ""
 #: selling/doctype/customer/customer.json
 #: selling/doctype/sales_order/sales_order.json
 #: selling/doctype/sales_team/sales_team.json
-#: setup/setup_wizard/operations/install_fixtures.py:198
+#: setup/setup_wizard/operations/install_fixtures.py:229
 #: stock/doctype/delivery_note/delivery_note.json
 msgid "Sales Team"
 msgstr ""
@@ -46738,12 +45859,10 @@ msgid "Selling Rate"
 msgstr ""
 
 #. Name of a DocType
-#. Title of an Onboarding Step
 #. Label of a Link in the Selling Workspace
 #. Label of a Link in the Settings Workspace
 #. Label of a shortcut in the Settings Workspace
 #: selling/doctype/selling_settings/selling_settings.json
-#: selling/onboarding_step/selling_settings/selling_settings.json
 #: selling/workspace/selling/selling.json
 #: setup/workspace/settings/settings.json
 msgid "Selling Settings"
@@ -46833,6 +45952,7 @@ msgstr ""
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
+#: setup/setup_wizard/operations/install_fixtures.py:108
 #: stock/doctype/stock_entry/stock_entry.json
 #: stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Send to Subcontractor"
@@ -47122,7 +46242,7 @@ msgstr ""
 msgid "Serial Nos are created successfully"
 msgstr ""
 
-#: stock/stock_ledger.py:2079
+#: stock/stock_ledger.py:2085
 msgid "Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
 msgstr ""
 
@@ -47546,8 +46666,8 @@ msgstr ""
 
 #. Label of the service_items (Table) field in DocType 'Asset Capitalization'
 #: assets/doctype/asset_capitalization/asset_capitalization.json
-#: setup/setup_wizard/operations/install_fixtures.py:52
-#: setup/setup_wizard/operations/install_fixtures.py:155
+#: setup/setup_wizard/operations/install_fixtures.py:59
+#: setup/setup_wizard/operations/install_fixtures.py:186
 msgid "Services"
 msgstr ""
 
@@ -47694,11 +46814,6 @@ msgstr ""
 msgid "Set Target Warehouse"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: setup/onboarding_step/company_set_up/company_set_up.json
-msgid "Set Up a Company"
-msgstr ""
-
 #. Label of the set_rate_based_on_warehouse (Check) field in DocType 'BOM
 #. Creator'
 #: manufacturing/doctype/bom_creator/bom_creator.json
@@ -47772,13 +46887,6 @@ msgstr ""
 msgid "Set this if the customer is a Public Administration company."
 msgstr ""
 
-#. Title of an Onboarding Step
-#: buying/onboarding_step/setup_your_warehouse/setup_your_warehouse.json
-#: selling/onboarding_step/setup_your_warehouse/setup_your_warehouse.json
-#: stock/onboarding_step/setup_your_warehouse/setup_your_warehouse.json
-msgid "Set up your Warehouse"
-msgstr ""
-
 #: assets/doctype/asset/asset.py:672
 msgid "Set {0} in asset category {1} for company {2}"
 msgstr ""
@@ -47850,11 +46958,6 @@ msgstr ""
 msgid "Setting the account as a Company Account is necessary for Bank Reconciliation"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/setup_taxes/setup_taxes.json
-msgid "Setting up Taxes"
-msgstr ""
-
 #: setup/setup_wizard/setup_wizard.py:29
 msgid "Setting up company"
 msgstr ""
@@ -47902,16 +47005,6 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'Workstation'
 #: manufacturing/doctype/workstation/workstation.json
 msgid "Setup"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: setup/onboarding_step/letterhead/letterhead.json
-msgid "Setup Your Letterhead"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
-msgid "Setup a Warehouse"
 msgstr ""
 
 #: public/js/setup_wizard.js:18
@@ -48565,7 +47658,7 @@ msgstr ""
 msgid "Single Variant"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:220
+#: setup/setup_wizard/operations/install_fixtures.py:251
 msgid "Size"
 msgstr ""
 
@@ -48633,7 +47726,7 @@ msgstr ""
 msgid "Slug/Cubic Foot"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:223
+#: setup/setup_wizard/operations/install_fixtures.py:254
 msgid "Small"
 msgstr ""
 
@@ -48951,7 +48044,7 @@ msgid "Stale Days should start from 1."
 msgstr ""
 
 #: setup/setup_wizard/operations/defaults_setup.py:69
-#: setup/setup_wizard/operations/install_fixtures.py:425
+#: setup/setup_wizard/operations/install_fixtures.py:456
 msgid "Standard Buying"
 msgstr ""
 
@@ -48964,7 +48057,7 @@ msgid "Standard Rated Expenses"
 msgstr ""
 
 #: setup/setup_wizard/operations/defaults_setup.py:69
-#: setup/setup_wizard/operations/install_fixtures.py:433
+#: setup/setup_wizard/operations/install_fixtures.py:464
 #: stock/doctype/item/item.py:242
 msgid "Standard Selling"
 msgstr ""
@@ -49298,7 +48391,7 @@ msgstr ""
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 #: buying/report/procurement_tracker/procurement_tracker.py:74
 #: buying/report/purchase_order_analysis/purchase_order_analysis.js:52
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:170
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:173
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:134
 #: crm/doctype/appointment/appointment.json crm/doctype/contract/contract.json
 #: crm/doctype/email_campaign/email_campaign.json crm/doctype/lead/lead.json
@@ -49644,11 +48737,6 @@ msgstr ""
 #. Name of a report
 #: stock/report/stock_ledger_variance/stock_ledger_variance.json
 msgid "Stock Ledger Variance"
-msgstr ""
-
-#. Description of a report in the Onboarding Step 'Check Stock Ledger'
-#: stock/onboarding_step/check_stock_ledger_report/check_stock_ledger_report.json
-msgid "Stock Ledger report contains every submitted stock transaction. You can use filter to narrow down ledger entries."
 msgstr ""
 
 #: stock/doctype/batch/batch.js:63 stock/doctype/item/item.js:470
@@ -50147,7 +49235,7 @@ msgstr ""
 
 #: setup/doctype/company/company.py:282
 #: setup/setup_wizard/operations/defaults_setup.py:33
-#: setup/setup_wizard/operations/install_fixtures.py:472
+#: setup/setup_wizard/operations/install_fixtures.py:503
 #: stock/doctype/item/item.py:279
 msgid "Stores"
 msgstr ""
@@ -50163,7 +49251,7 @@ msgstr ""
 msgid "Straight Line"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:58
+#: setup/setup_wizard/operations/install_fixtures.py:65
 msgid "Sub Assemblies"
 msgstr ""
 
@@ -50832,7 +49920,7 @@ msgstr ""
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
 #: buying/doctype/supplier_scorecard_period/supplier_scorecard_period.json
 #: buying/report/procurement_tracker/procurement_tracker.py:89
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:172
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:175
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.js:15
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:30
 #: buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.js:15
@@ -51251,7 +50339,7 @@ msgstr ""
 #. Name of a Workspace
 #: selling/doctype/customer/customer_dashboard.py:23
 #: setup/doctype/company/company_dashboard.py:24
-#: setup/setup_wizard/operations/install_fixtures.py:251
+#: setup/setup_wizard/operations/install_fixtures.py:282
 #: support/workspace/support/support.json
 msgid "Support"
 msgstr ""
@@ -51531,21 +50619,6 @@ msgstr ""
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:466
 msgid "Tag"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Accounts Settings'
-#: accounts/onboarding_step/accounts_settings/accounts_settings.json
-msgid "Take a quick walk-through of Accounts Settings"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Review Stock Settings'
-#: stock/onboarding_step/stock_settings/stock_settings.json
-msgid "Take a walk through Stock Settings"
-msgstr ""
-
-#. Label of an action in the Onboarding Step 'Manufacturing Settings'
-#: manufacturing/onboarding_step/explore_manufacturing_settings/explore_manufacturing_settings.json
-msgid "Take a walk-through of Manufacturing Settings"
 msgstr ""
 
 #. Label of the tally_company (Data) field in DocType 'Tally Migration'
@@ -52721,29 +51794,9 @@ msgstr ""
 msgid "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."
 msgstr ""
 
-#. Success message of the Module Onboarding 'Accounts'
-#: accounts/module_onboarding/accounts/accounts.json
-msgid "The Accounts Module is all set up!"
-msgstr ""
-
-#. Success message of the Module Onboarding 'Assets'
-#: assets/module_onboarding/assets/assets.json
-msgid "The Assets Module is all set up!"
-msgstr ""
-
 #. Description of the 'Current BOM' (Link) field in DocType 'BOM Update Tool'
 #: manufacturing/doctype/bom_update_tool/bom_update_tool.json
 msgid "The BOM which will be replaced"
-msgstr ""
-
-#. Success message of the Module Onboarding 'Buying'
-#: buying/module_onboarding/buying/buying.json
-msgid "The Buying Module is all set up!"
-msgstr ""
-
-#. Success message of the Module Onboarding 'CRM'
-#: crm/module_onboarding/crm/crm.json
-msgid "The CRM Module is all set up!"
 msgstr ""
 
 #: crm/doctype/email_campaign/email_campaign.py:71
@@ -52786,11 +51839,6 @@ msgstr ""
 msgid "The Process Loss Qty has reset as per job cards Process Loss Qty"
 msgstr ""
 
-#. Success message of the Module Onboarding 'Selling'
-#: selling/module_onboarding/selling/selling.json
-msgid "The Selling Module is all set up!"
-msgstr ""
-
 #: stock/doctype/pick_list/pick_list.py:137
 msgid "The Serial No at Row #{0}: {1} is not available in warehouse {2}."
 msgstr ""
@@ -52801,11 +51849,6 @@ msgstr ""
 
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:17
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
-msgstr ""
-
-#. Success message of the Module Onboarding 'Stock'
-#: stock/module_onboarding/stock/stock.json
-msgid "The Stock Module is all set up!"
 msgstr ""
 
 #. Description of the 'Closing Account Head' (Link) field in DocType 'Period
@@ -52877,7 +51920,7 @@ msgstr ""
 msgid "The following employees are currently still reporting to {0}:"
 msgstr ""
 
-#: stock/doctype/material_request/material_request.py:780
+#: stock/doctype/material_request/material_request.py:781
 msgid "The following {0} were created: {1}"
 msgstr ""
 
@@ -53008,7 +52051,7 @@ msgstr ""
 msgid "The shares don't exist with the {0}"
 msgstr ""
 
-#: stock/stock_ledger.py:752
+#: stock/stock_ledger.py:753
 msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
 msgstr ""
 
@@ -53033,11 +52076,11 @@ msgstr ""
 msgid "The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Submitted stage"
 msgstr ""
 
-#: stock/doctype/material_request/material_request.py:281
+#: stock/doctype/material_request/material_request.py:282
 msgid "The total Issue / Transfer quantity {0} in Material Request {1}  cannot be greater than allowed requested quantity {2} for Item {3}"
 msgstr ""
 
-#: stock/doctype/material_request/material_request.py:288
+#: stock/doctype/material_request/material_request.py:289
 msgid "The total Issue / Transfer quantity {0} in Material Request {1} cannot be greater than requested quantity {2} for Item {3}"
 msgstr ""
 
@@ -53071,7 +52114,7 @@ msgstr ""
 msgid "The {0} ({1}) must be equal to {2} ({3})"
 msgstr ""
 
-#: stock/doctype/material_request/material_request.py:786
+#: stock/doctype/material_request/material_request.py:787
 msgid "The {0} {1} created successfully"
 msgstr ""
 
@@ -53744,8 +52787,8 @@ msgstr ""
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
 #: accounts/doctype/loyalty_program/loyalty_program.json
-#: accounts/doctype/payment_entry/payment_entry.js:814
-#: accounts/doctype/payment_entry/payment_entry.js:818
+#: accounts/doctype/payment_entry/payment_entry.js:828
+#: accounts/doctype/payment_entry/payment_entry.js:832
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -55015,7 +54058,7 @@ msgstr ""
 msgid "Total allocated percentage for sales team should be 100"
 msgstr ""
 
-#: selling/doctype/customer/customer.py:157
+#: selling/doctype/customer/customer.py:158
 msgid "Total contribution percentage should be equal to 100"
 msgstr ""
 
@@ -55087,11 +54130,6 @@ msgstr ""
 
 #: stock/doctype/item/item_dashboard.py:33
 msgid "Traceability"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: buying/onboarding_step/create_a_material_request/create_a_material_request.json
-msgid "Track Material Request"
 msgstr ""
 
 #. Label of the track_operations (Check) field in DocType 'BOM Creator'
@@ -56267,11 +55305,6 @@ msgstr ""
 msgid "Update Stock"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: stock/onboarding_step/stock_opening_balance/stock_opening_balance.json
-msgid "Update Stock Opening Balance"
-msgstr ""
-
 #: projects/doctype/project/project.js:90
 msgid "Update Total Purchase Cost"
 msgstr ""
@@ -56311,11 +55344,6 @@ msgstr ""
 msgid "Updated via 'Time Log' (In Minutes)"
 msgstr ""
 
-#. Title of an Onboarding Step
-#: accounts/onboarding_step/updating_opening_balances/updating_opening_balances.json
-msgid "Updating Opening Balances"
-msgstr ""
-
 #: stock/doctype/item/item.py:1351
 msgid "Updating Variants..."
 msgstr ""
@@ -56338,8 +55366,8 @@ msgstr ""
 msgid "Upload XML Invoices"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:264
-#: setup/setup_wizard/operations/install_fixtures.py:372
+#: setup/setup_wizard/operations/install_fixtures.py:295
+#: setup/setup_wizard/operations/install_fixtures.py:403
 msgid "Upper Income"
 msgstr ""
 
@@ -56832,11 +55860,11 @@ msgstr ""
 msgid "Valuation Rate (In / Out)"
 msgstr ""
 
-#: stock/stock_ledger.py:1800
+#: stock/stock_ledger.py:1806
 msgid "Valuation Rate Missing"
 msgstr ""
 
-#: stock/stock_ledger.py:1778
+#: stock/stock_ledger.py:1784
 msgid "Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}."
 msgstr ""
 
@@ -56932,7 +55960,7 @@ msgid "Value Or Qty"
 msgstr ""
 
 #: setup/setup_wizard/data/sales_stage.txt:4
-#: setup/setup_wizard/operations/install_fixtures.py:384
+#: setup/setup_wizard/operations/install_fixtures.py:415
 msgid "Value Proposition"
 msgstr ""
 
@@ -57167,17 +56195,11 @@ msgstr ""
 msgid "View BOM Update Log"
 msgstr ""
 
-#: public/js/setup_wizard.js:41
+#: public/js/setup_wizard.js:40
 msgid "View Chart of Accounts"
 msgstr ""
 
-#. Label of an action in the Onboarding Step 'Cost Centers for Budgeting and
-#. Analysis'
-#: accounts/onboarding_step/cost_centers_for_report_and_budgeting/cost_centers_for_report_and_budgeting.json
-msgid "View Cost Center Tree"
-msgstr ""
-
-#: accounts/doctype/payment_entry/payment_entry.js:200
+#: accounts/doctype/payment_entry/payment_entry.js:208
 msgid "View Exchange Gain/Loss Journals"
 msgstr ""
 
@@ -57204,11 +56226,6 @@ msgstr ""
 
 #: selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.js:8
 msgid "View Type"
-msgstr ""
-
-#. Title of an Onboarding Step
-#: stock/onboarding_step/view_warehouses/view_warehouses.json
-msgid "View Warehouses"
 msgstr ""
 
 #. Label of the view_attachments (Check) field in DocType 'Project User'
@@ -57555,7 +56572,7 @@ msgstr ""
 #: assets/doctype/asset_repair_consumed_item/asset_repair_consumed_item.json
 #: buying/doctype/request_for_quotation_item/request_for_quotation_item.json
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
-#: buying/report/purchase_order_analysis/purchase_order_analysis.py:268
+#: buying/report/purchase_order_analysis/purchase_order_analysis.py:271
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: manufacturing/doctype/bom_operation/bom_operation.json
@@ -57875,7 +56892,7 @@ msgstr ""
 msgid "Warning - Row {0}: Billing Hours are more than Actual Hours"
 msgstr ""
 
-#: stock/stock_ledger.py:762
+#: stock/stock_ledger.py:763
 msgid "Warning on Negative Stock"
 msgstr ""
 
@@ -58250,7 +57267,7 @@ msgstr ""
 msgid "While making Purchase Invoice from Purchase Order, use Exchange Rate on Invoice's transaction date rather than inheriting it from Purchase Order. Only applies for Purchase Invoice."
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:237
+#: setup/setup_wizard/operations/install_fixtures.py:268
 msgid "White"
 msgstr ""
 
@@ -58284,7 +57301,7 @@ msgstr ""
 msgid "Will also apply for variants unless overridden"
 msgstr ""
 
-#: setup/setup_wizard/operations/install_fixtures.py:210
+#: setup/setup_wizard/operations/install_fixtures.py:241
 msgid "Wire Transfer"
 msgstr ""
 
@@ -58334,7 +57351,6 @@ msgstr ""
 #. Name of a DocType
 #. Option for the 'Transfer Material Against' (Select) field in DocType 'Work
 #. Order'
-#. Title of an Onboarding Step
 #. Label of a Link in the Manufacturing Workspace
 #. Label of a shortcut in the Manufacturing Workspace
 #. Label of the work_order (Link) field in DocType 'Material Request'
@@ -58344,7 +57360,6 @@ msgstr ""
 #: manufacturing/doctype/bom/bom.js:168 manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/job_card/job_card.json
 #: manufacturing/doctype/work_order/work_order.json
-#: manufacturing/onboarding_step/work_order/work_order.json
 #: manufacturing/report/bom_variance_report/bom_variance_report.js:14
 #: manufacturing/report/bom_variance_report/bom_variance_report.py:19
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.js:43
@@ -58358,7 +57373,7 @@ msgstr ""
 #: selling/doctype/sales_order/sales_order.js:681
 #: stock/doctype/material_request/material_request.js:178
 #: stock/doctype/material_request/material_request.json
-#: stock/doctype/material_request/material_request.py:787
+#: stock/doctype/material_request/material_request.py:788
 #: stock/doctype/pick_list/pick_list.json
 #: stock/doctype/serial_no/serial_no.json
 #: stock/doctype/stock_entry/stock_entry.json
@@ -58412,7 +57427,7 @@ msgstr ""
 msgid "Work Order Summary"
 msgstr ""
 
-#: stock/doctype/material_request/material_request.py:793
+#: stock/doctype/material_request/material_request.py:794
 msgid "Work Order cannot be created for following reason: <br> {0}"
 msgstr ""
 
@@ -58434,7 +57449,7 @@ msgid "Work Order {0}: Job Card not found for the operation {1}"
 msgstr ""
 
 #: manufacturing/report/job_card_summary/job_card_summary.js:56
-#: stock/doctype/material_request/material_request.py:781
+#: stock/doctype/material_request/material_request.py:782
 msgid "Work Orders"
 msgstr ""
 
@@ -58513,7 +57528,6 @@ msgstr ""
 #. Label of the workstation (Link) field in DocType 'Job Card'
 #. Label of the workstation (Link) field in DocType 'Work Order Operation'
 #. Name of a DocType
-#. Title of an Onboarding Step
 #. Label of a Link in the Manufacturing Workspace
 #: manufacturing/doctype/bom_creator/bom_creator.js:140
 #: manufacturing/doctype/bom_creator/bom_creator.json
@@ -58524,7 +57538,6 @@ msgstr ""
 #: manufacturing/doctype/work_order/work_order.js:241
 #: manufacturing/doctype/work_order_operation/work_order_operation.json
 #: manufacturing/doctype/workstation/workstation.json
-#: manufacturing/onboarding_step/workstation/workstation.json
 #: manufacturing/report/bom_operations_time/bom_operations_time.js:35
 #: manufacturing/report/bom_operations_time/bom_operations_time.py:119
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.js:62
@@ -58910,11 +57923,6 @@ msgstr ""
 msgid "You can set it as a machine name or operation type. For example, stiching machine 12"
 msgstr ""
 
-#. Description of a report in the Onboarding Step 'Check Stock Projected Qty'
-#: stock/onboarding_step/view_stock_projected_qty/view_stock_projected_qty.json
-msgid "You can set the filters to narrow the results, then click on Generate New Report to see the updated report."
-msgstr ""
-
 #: manufacturing/doctype/job_card/job_card.py:1136
 msgid "You can't make any changes to Job Card since Work Order is closed."
 msgstr ""
@@ -59019,11 +58027,6 @@ msgstr ""
 msgid "You need to cancel POS Closing Entry {} to be able to cancel this document."
 msgstr ""
 
-#. Success message of the Module Onboarding 'Home'
-#: setup/module_onboarding/home/home.json
-msgid "You're ready to start your journey with ERPNext"
-msgstr ""
-
 #. Option for the 'Provider' (Select) field in DocType 'Video'
 #: utilities/doctype/video/video.json
 msgid "YouTube"
@@ -59054,7 +58057,7 @@ msgid "Your email has been verified and your appointment has been scheduled"
 msgstr ""
 
 #: patches/v11_0/add_default_dispatch_notification_template.py:22
-#: setup/setup_wizard/operations/install_fixtures.py:286
+#: setup/setup_wizard/operations/install_fixtures.py:317
 msgid "Your order is out for delivery!"
 msgstr ""
 
@@ -59104,7 +58107,7 @@ msgstr ""
 msgid "`Allow Negative rates for Items`"
 msgstr ""
 
-#: stock/stock_ledger.py:1792
+#: stock/stock_ledger.py:1798
 msgid "after"
 msgstr ""
 
@@ -59301,7 +58304,7 @@ msgstr ""
 msgid "per hour"
 msgstr ""
 
-#: stock/stock_ledger.py:1793
+#: stock/stock_ledger.py:1799
 msgid "performing either one below:"
 msgstr ""
 
@@ -59618,7 +58621,7 @@ msgstr ""
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}."
 msgstr ""
 
-#: selling/doctype/customer/customer.py:199
+#: selling/doctype/customer/customer.py:200
 msgid "{0} is not a company bank account"
 msgstr ""
 
@@ -59646,7 +58649,7 @@ msgstr ""
 msgid "{0} is not running. Cannot trigger events for this Document"
 msgstr ""
 
-#: stock/doctype/material_request/material_request.py:560
+#: stock/doctype/material_request/material_request.py:561
 msgid "{0} is not the default supplier for any items."
 msgstr ""
 
@@ -59709,16 +58712,16 @@ msgstr ""
 msgid "{0} units of {1} are required in {2}{3}, on {4} {5} for {6} to complete the transaction."
 msgstr ""
 
-#: stock/stock_ledger.py:1462 stock/stock_ledger.py:1942
-#: stock/stock_ledger.py:1956
+#: stock/stock_ledger.py:1463 stock/stock_ledger.py:1948
+#: stock/stock_ledger.py:1962
 msgid "{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 msgstr ""
 
-#: stock/stock_ledger.py:2066 stock/stock_ledger.py:2112
+#: stock/stock_ledger.py:2072 stock/stock_ledger.py:2118
 msgid "{0} units of {1} needed in {2} on {3} {4} to complete this transaction."
 msgstr ""
 
-#: stock/stock_ledger.py:1456
+#: stock/stock_ledger.py:1457
 msgid "{0} units of {1} needed in {2} to complete this transaction."
 msgstr ""
 
@@ -59795,7 +58798,7 @@ msgstr ""
 msgid "{0} {1} is cancelled or closed"
 msgstr ""
 
-#: stock/doctype/material_request/material_request.py:363
+#: stock/doctype/material_request/material_request.py:364
 msgid "{0} {1} is cancelled or stopped"
 msgstr ""
 
@@ -59941,7 +58944,7 @@ msgstr ""
 msgid "{0}: {1} does not exists"
 msgstr ""
 
-#: accounts/doctype/payment_entry/payment_entry.js:909
+#: accounts/doctype/payment_entry/payment_entry.js:923
 msgid "{0}: {1} must be less than {2}"
 msgstr ""
 
@@ -59976,7 +58979,7 @@ msgstr ""
 msgid "{}  To Receive"
 msgstr ""
 
-#: controllers/buying_controller.py:765
+#: controllers/buying_controller.py:767
 msgid "{} Assets created for {}"
 msgstr ""
 
