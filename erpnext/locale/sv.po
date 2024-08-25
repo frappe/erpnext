@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-22 13:13\n"
+"PO-Revision-Date: 2024-08-25 15:03\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -10042,7 +10042,7 @@ msgstr "Chain"
 
 #: selling/page/point_of_sale/pos_payment.js:587
 msgid "Change"
-msgstr "Växel Belopp"
+msgstr "Ändra"
 
 #. Label of the change_amount (Currency) field in DocType 'POS Invoice'
 #. Label of the change_amount (Currency) field in DocType 'Sales Invoice'
