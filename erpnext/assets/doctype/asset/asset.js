@@ -670,6 +670,11 @@ frappe.ui.form.on("Asset", {
 			if (item.asset_location) {
 				frm.set_value("location", item.asset_location);
 			}
+			if (doctype === "Purchase Receipt") {
+				frm.set_value("purchase_receipt_item", item.name);
+			} else if (doctype === "Purchase Invoice") {
+				frm.set_value("purchase_invoice_item", item.name);
+			}
 		});
 	},
 
