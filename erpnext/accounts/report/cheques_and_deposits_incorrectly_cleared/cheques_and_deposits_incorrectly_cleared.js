@@ -40,10 +40,5 @@ frappe.query_reports["Cheques and Deposits Incorrectly cleared"] = {
 			default: frappe.datetime.get_today(),
 			reqd: 1,
 		},
-		{
-			fieldname: "include_pos_transactions",
-			label: __("Include POS Transactions"),
-			fieldtype: "Check",
-		},
 	],
 };

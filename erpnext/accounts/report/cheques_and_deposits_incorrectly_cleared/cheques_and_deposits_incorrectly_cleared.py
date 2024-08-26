@@ -40,24 +40,43 @@ def build_payment_entry_dict(row: dict) -> dict:
 	return row_dict
 
 
+def build_journal_entry_dict(row: dict) -> dict:
+	row_dict = frappe._dict()
+	row_dict.update(
+		{
+			"payment_document": row.get("doctype"),
+			"payment_entry": row.get("name"),
+			"posting_date": row.get("posting_date"),
+			"clearance_date": row.get("clearance_date"),
+			"debit": row.get("debit_in_account_currency"),
+			"credit": row.get("credit_in_account_currency"),
+		}
+	)
+	return row_dict
+
+
 def build_data(filters):
 	vouchers = get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filters)
 	data = []
 	for x in vouchers:
 		if x.doctype == "Payment Entry":
 			data.append(build_payment_entry_dict(x))
+		elif x.doctype == "Journal Entry":
+			data.append(build_journal_entry_dict(x))
 	return data
 
 
 def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filters):
 	je = qb.DocType("Journal Entry")
 	jea = qb.DocType("Journal Entry Account")
+	doctype_name = ConstantColumn("Journal Entry")
 
 	journals = (
 		qb.from_(je)
 		.inner_join(jea)
 		.on(je.name == jea.parent)
 		.select(
+			doctype_name.as_("doctype"),
 			je.name,
 			jea.debit_in_account_currency,
 			jea.credit_in_account_currency,
