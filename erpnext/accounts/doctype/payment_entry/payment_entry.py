@@ -1835,10 +1835,10 @@ class PaymentEntry(AccountsController):
 		# todo: allocate amount (based on outstanding_amount + PT outstanding amount + PR outstanding amount)
 
 		for ref in self.references:
-			if ref.outstanding_amount > 0 and allocated_positive_outstanding > 0:
+			if ref.outstanding_amount > 0 and allocated_positive_outstanding >= 0:
 				ref.allocated_amount = min(allocated_positive_outstanding, ref.outstanding_amount)
 				allocated_positive_outstanding -= flt(ref.allocated_amount)
-			elif ref.outstanding_amount < 0 and allocated_negative_outstanding > 0:
+			elif ref.outstanding_amount < 0 and allocated_negative_outstanding:
 				ref.allocated_amount = min(allocated_negative_outstanding, abs(ref.outstanding_amount)) * -1
 				allocated_negative_outstanding -= abs(flt(ref.allocated_amount))
 
