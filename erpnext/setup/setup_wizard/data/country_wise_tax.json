@@ -4176,12 +4176,12 @@
 			"default": 1
 		},
 		"Switzerland reduced VAT": {
-			"account_name": "VAT 2.5%",
-			"tax_rate": 2.50
+			"account_name": "VAT 2.6%",
+			"tax_rate": 2.60
 		},
 		"Switzerland lodging VAT": {
-			"account_name": "VAT 3.7%",
-			"tax_rate": 3.70
+			"account_name": "VAT 3.8%",
+			"tax_rate": 3.80
 		}
 	},
 
