@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-18 12:36\n"
+"PO-Revision-Date: 2024-08-26 14:59\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgstr ""
 #. Label of the column_break_32 (Column Break) field in DocType 'Email Digest'
 #: setup/doctype/email_digest/email_digest.json
 msgid "  "
-msgstr ""
+msgstr "  "
 
 #: selling/doctype/quotation/quotation.js:79
 msgid " Address"
@@ -1770,7 +1770,7 @@ msgstr "حساب: {0} با واحد پول: {1} قابل انتخاب نیست"
 
 #: setup/setup_wizard/data/designation.txt:1
 msgid "Accountant"
-msgstr ""
+msgstr "حسابدار"
 
 #. Label of the section_break_19 (Section Break) field in DocType 'POS Profile'
 #. Label of the accounting (Section Break) field in DocType 'Purchase Invoice
@@ -3526,7 +3526,7 @@ msgstr "تعدیل بر اساس نرخ فاکتور خرید"
 
 #: setup/setup_wizard/data/designation.txt:2
 msgid "Administrative Assistant"
-msgstr ""
+msgstr "معاون اداری"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:54
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:79
@@ -3535,7 +3535,7 @@ msgstr "هزینه های اداری"
 
 #: setup/setup_wizard/data/designation.txt:3
 msgid "Administrative Officer"
-msgstr ""
+msgstr "کارمند اداری"
 
 #. Name of a role
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
@@ -3652,15 +3652,15 @@ msgstr "پیشرفت ها"
 
 #: setup/setup_wizard/data/lead_source.txt:3
 msgid "Advertisement"
-msgstr ""
+msgstr "تبلیغات"
 
 #: setup/setup_wizard/data/industry_type.txt:2
 msgid "Advertising"
-msgstr ""
+msgstr "تبلیغات"
 
 #: setup/setup_wizard/data/industry_type.txt:3
 msgid "Aerospace"
-msgstr ""
+msgstr "هوافضا"
 
 #. Label of the affected_transactions (Code) field in DocType 'Repost Item
 #. Valuation'
@@ -3887,7 +3887,7 @@ msgstr "دستور جلسه"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:4
 msgid "Agent"
-msgstr ""
+msgstr "عامل"
 
 #. Label of the agent_busy_message (Data) field in DocType 'Incoming Call
 #. Settings'
@@ -5110,7 +5110,7 @@ msgstr "هنگام ایجاد درخواست‌های مواد بر اساس س�
 
 #: setup/setup_wizard/data/designation.txt:4
 msgid "Analyst"
-msgstr ""
+msgstr "تحلیلگر"
 
 #: accounts/doctype/budget/budget.py:235
 msgid "Annual"
@@ -6180,7 +6180,7 @@ msgstr "شرایط واگذاری"
 
 #: setup/setup_wizard/data/designation.txt:5
 msgid "Associate"
-msgstr ""
+msgstr "دستیار"
 
 #: stock/doctype/pick_list/pick_list.py:98
 msgid "At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} for the batch {4} in the warehouse {5}."
@@ -8737,11 +8737,11 @@ msgstr "بوشل (US Dry Level)"
 
 #: setup/setup_wizard/data/designation.txt:6
 msgid "Business Analyst"
-msgstr ""
+msgstr "تحلیلگر کسب و کار"
 
 #: setup/setup_wizard/data/designation.txt:7
 msgid "Business Development Manager"
-msgstr ""
+msgstr "مدیر توسعه کسب و کار"
 
 #. Option for the 'Status' (Select) field in DocType 'Call Log'
 #: telephony/doctype/call_log/call_log.json
@@ -10137,7 +10137,7 @@ msgstr "چک ها و سپرده ها به اشتباه پاک شدند"
 
 #: setup/setup_wizard/data/designation.txt:9
 msgid "Chief Executive Officer"
-msgstr ""
+msgstr "مدیر ارشد اجرایی"
 
 #: setup/setup_wizard/data/designation.txt:10
 msgid "Chief Financial Officer"
@@ -11636,7 +11636,7 @@ msgstr "کل مبلغ دفتر کل طرف را در نظر بگیرید"
 #. Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Consider Minimum Order Qty"
-msgstr "حداقل تعداد سفارش را در نظر بگیرید"
+msgstr "در نظر گرفتن حداقل تعداد سفارش"
 
 #. Label of the consider_rejected_warehouses (Check) field in DocType 'Pick
 #. List'
@@ -14002,7 +14002,7 @@ msgstr "نرخ ارزش گذاری فعلی"
 
 #: selling/report/sales_analytics/sales_analytics.js:90
 msgid "Curves"
-msgstr ""
+msgstr "منحنی ها"
 
 #. Label of the custodian (Link) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -15045,7 +15045,7 @@ msgstr "صاحب معامله"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:3
 msgid "Dealer"
-msgstr ""
+msgstr "فروشنده"
 
 #: templates/emails/confirm_appointment.html:1
 msgid "Dear"
@@ -16717,7 +16717,7 @@ msgstr "نقش سازمانی"
 
 #: setup/setup_wizard/data/designation.txt:14
 msgid "Designer"
-msgstr ""
+msgstr "طراح"
 
 #. Name of a role
 #: crm/doctype/lead/lead.json projects/doctype/project/project.json
@@ -18276,7 +18276,7 @@ msgstr "ثبت الکترونیکی صورتحساب"
 
 #: setup/setup_wizard/data/industry_type.txt:20
 msgid "Electronics"
-msgstr ""
+msgstr "الکترونیک"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -18882,7 +18882,7 @@ msgstr "پایان دوره اشتراک فعلی"
 
 #: setup/setup_wizard/data/industry_type.txt:21
 msgid "Energy"
-msgstr ""
+msgstr "انرژی"
 
 #: setup/setup_wizard/data/designation.txt:15
 msgid "Engineer"
@@ -19371,7 +19371,7 @@ msgstr "اجرا"
 
 #: setup/setup_wizard/data/designation.txt:16
 msgid "Executive Assistant"
-msgstr ""
+msgstr "دستیار اجرایی"
 
 #: setup/setup_wizard/data/industry_type.txt:23
 msgid "Executive Search"
@@ -20175,7 +20175,7 @@ msgstr "کتاب های مالی"
 
 #: setup/setup_wizard/data/designation.txt:17
 msgid "Finance Manager"
-msgstr ""
+msgstr "مدیر مالی"
 
 #. Name of a report
 #: accounts/report/financial_ratios/financial_ratios.json
@@ -21868,7 +21868,7 @@ msgstr ""
 #. Label of the get_items_for_mr (Button) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Get Raw Materials for Purchase"
-msgstr "مواد اولیه را برای خرید دریافت کنید"
+msgstr "دریافت مواد اولیه را برای خرید"
 
 #. Label of the transfer_materials (Button) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
@@ -22218,7 +22218,7 @@ msgstr "بخش سلام"
 
 #: setup/setup_wizard/data/industry_type.txt:26
 msgid "Grocery"
-msgstr ""
+msgstr "خواربار"
 
 #. Label of the gross_margin (Currency) field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -24024,7 +24024,7 @@ msgstr "شامل نوشته های تطبیق شده"
 #. Label of the include_safety_stock (Check) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Include Safety Stock in Required Qty Calculation"
-msgstr "موجودی ایمنی را در محاسبه مقدار مورد نیاز لحاظ کنید"
+msgstr "لحاظ کردن موجودی ایمنی در محاسبه مقدار مورد نیاز"
 
 #: manufacturing/report/production_planning_report/production_planning_report.js:87
 msgid "Include Sub-assembly Raw Materials"
@@ -24034,7 +24034,7 @@ msgstr "شامل مواد اولیه زیر مونتاژ"
 #. 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Include Subcontracted Items"
-msgstr "شامل موارد قرارداد فرعی"
+msgstr "شامل آیتم‌های قرارداد فرعی"
 
 #: projects/report/timesheet_billing_summary/timesheet_billing_summary.js:52
 msgid "Include Timesheets in Draft Status"
@@ -24985,7 +24985,7 @@ msgstr "سهم فاکتور"
 #: accounts/doctype/payment_term/payment_term.json
 #: accounts/doctype/payment_terms_template_detail/payment_terms_template_detail.json
 msgid "Invoice Portion (%)"
-msgstr ""
+msgstr "سهم فاکتور (%)"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:106
 msgid "Invoice Posting Date"
@@ -25269,7 +25269,7 @@ msgstr "قابل گسترش است"
 #. Label of the is_final_finished_good (Check) field in DocType 'BOM Operation'
 #: manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Is Final Finished Good"
-msgstr ""
+msgstr "آیا کالای تمام شده نهایی است"
 
 #. Label of the is_finished_item (Check) field in DocType 'Stock Entry Detail'
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -28056,7 +28056,7 @@ msgstr "بیایید شرکت شما را بررسی کنیم"
 #. Label of an action in the Onboarding Step 'Review Fixed Asset Accounts'
 #: assets/onboarding_step/fixed_asset_accounts/fixed_asset_accounts.json
 msgid "Let's walk-through Chart of Accounts to review setup"
-msgstr ""
+msgstr "بیایید نمودار حساب‌ها را مرور کنیم تا تنظیمات را بررسی کنیم"
 
 #. Label of the letter_head (Link) field in DocType 'Dunning'
 #. Label of the letter_head (Link) field in DocType 'Journal Entry'
@@ -28120,7 +28120,7 @@ msgstr "متن پایان نامه یا ایمیل"
 #. Label of an action in the Onboarding Step 'Sales Order'
 #: selling/onboarding_step/sales_order/sales_order.json
 msgid "Let’s convert your first Sales Order against a Quotation"
-msgstr ""
+msgstr "بیایید اولین سفارش فروش شما را در برابر یک پیش فاکتور تبدیل کنیم"
 
 #. Label of an action in the Onboarding Step 'Workstation'
 #: manufacturing/onboarding_step/workstation/workstation.json
@@ -29036,11 +29036,11 @@ msgstr "مدیریت"
 
 #: setup/setup_wizard/data/designation.txt:20
 msgid "Manager"
-msgstr ""
+msgstr "مدیر"
 
 #: setup/setup_wizard/data/designation.txt:21
 msgid "Managing Director"
-msgstr ""
+msgstr "مدیر عامل"
 
 #. Label of the reqd (Check) field in DocType 'POS Field'
 #. Label of the reqd (Check) field in DocType 'Inventory Dimension'
@@ -29443,7 +29443,7 @@ msgstr "وضعیت تأهل"
 #: public/js/templates/crm_activities.html:39
 #: public/js/templates/crm_activities.html:82
 msgid "Mark As Closed"
-msgstr ""
+msgstr "علامت گذاری به عنوان بسته شده"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:323
 msgid "Mark as unresolved"
@@ -29472,11 +29472,11 @@ msgstr "هزینه های بازاریابی"
 
 #: setup/setup_wizard/data/designation.txt:22
 msgid "Marketing Manager"
-msgstr ""
+msgstr "مدیر بازاریابی"
 
 #: setup/setup_wizard/data/designation.txt:23
 msgid "Marketing Specialist"
-msgstr ""
+msgstr "کارشناس بازاریابی"
 
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -31638,7 +31638,7 @@ msgstr "هیچ موردی با صورتحساب مواد وجود ندارد."
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.js:15
 msgid "No Matching Bank Transactions Found"
-msgstr ""
+msgstr "هیچ تراکنش بانکی منطبقی یافت نشد"
 
 #: public/js/templates/crm_notes.html:46
 msgid "No Notes"
@@ -31837,7 +31837,7 @@ msgstr "تعداد بازدید"
 
 #: public/js/templates/crm_activities.html:104
 msgid "No open event"
-msgstr ""
+msgstr "رویداد باز وجود ندارد"
 
 #: public/js/templates/crm_activities.html:57
 msgid "No open task"
@@ -36042,7 +36042,7 @@ msgstr "گزارش های زمان را خارج از ساعات کاری ایس
 #. Label of the quantity (Float) field in DocType 'Material Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgid "Plan to Request Qty"
-msgstr "برای درخواست تعداد برنامه ریزی کنید"
+msgstr "برنامه ریزی برای مقدار درخواست"
 
 #. Option for the 'Maintenance Status' (Select) field in DocType 'Asset
 #. Maintenance Log'
@@ -38572,7 +38572,7 @@ msgstr "درخواست محصول"
 
 #: setup/setup_wizard/data/designation.txt:25
 msgid "Product Manager"
-msgstr ""
+msgstr "مدیر محصول"
 
 #. Label of the product_price_id (Data) field in DocType 'Subscription Plan'
 #: accounts/doctype/subscription_plan/subscription_plan.json
@@ -38939,7 +38939,7 @@ msgstr "شناسه پروژه"
 
 #: setup/setup_wizard/data/designation.txt:26
 msgid "Project Manager"
-msgstr ""
+msgstr "مدیر پروژه"
 
 #. Label of the project_name (Data) field in DocType 'Sales Invoice Timesheet'
 #. Label of the project_name (Data) field in DocType 'Project'
@@ -39989,7 +39989,7 @@ msgstr "تعداد بعد از تراکنش"
 #. Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgid "Qty As Per BOM"
-msgstr "تعداد طبق BOM"
+msgstr "مقدار طبق BOM"
 
 #. Label of the actual_qty (Float) field in DocType 'Stock Ledger Entry'
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.json
@@ -41416,7 +41416,7 @@ msgstr "خواندن"
 
 #: setup/setup_wizard/data/industry_type.txt:40
 msgid "Real Estate"
-msgstr ""
+msgstr "املاک و مستغلات"
 
 #: support/doctype/issue/issue.js:51
 msgid "Reason"
@@ -43000,7 +43000,7 @@ msgstr "تحقیق و توسعه"
 
 #: setup/setup_wizard/data/designation.txt:27
 msgid "Researcher"
-msgstr ""
+msgstr "پژوهشگر"
 
 #. Description of the 'Supplier Primary Address' (Link) field in DocType
 #. 'Supplier'
@@ -43551,12 +43551,12 @@ msgstr "مبلغ برگشتی"
 #: subcontracting/doctype/subcontracting_order_supplied_item/subcontracting_order_supplied_item.json
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Returned Qty"
-msgstr "تعداد برگردانده شد"
+msgstr "مقدار برگردانده شده"
 
 #. Label of the returned_qty (Float) field in DocType 'Work Order Item'
 #: manufacturing/doctype/work_order_item/work_order_item.json
 msgid "Returned Qty "
-msgstr " تعداد برگردانده شد"
+msgstr "مقدار برگردانده شده "
 
 #. Label of the returned_qty (Float) field in DocType 'Delivery Note Item'
 #. Label of the returned_qty (Float) field in DocType 'Purchase Receipt Item'
@@ -44904,7 +44904,7 @@ msgstr "تنظیمات پیامک"
 
 #: selling/report/pending_so_items_for_purchase_request/pending_so_items_for_purchase_request.py:43
 msgid "SO Qty"
-msgstr ""
+msgstr "مقدار س.ف."
 
 #: selling/report/sales_person_wise_transaction_summary/sales_person_wise_transaction_summary.py:107
 msgid "SO Total Qty"
@@ -46155,7 +46155,7 @@ msgstr "نقش ثانویه"
 
 #: setup/setup_wizard/data/designation.txt:29
 msgid "Secretary"
-msgstr ""
+msgstr "منشی"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:172
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:117
@@ -47746,7 +47746,7 @@ msgstr "تنظیمات"
 #. Title of an Onboarding Step
 #: setup/onboarding_step/letterhead/letterhead.json
 msgid "Setup Your Letterhead"
-msgstr ""
+msgstr "سربرگ خود را تنظیم کنید"
 
 #. Title of an Onboarding Step
 #: stock/onboarding_step/create_a_warehouse/create_a_warehouse.json
@@ -48491,7 +48491,7 @@ msgstr "نرم‌افزار"
 
 #: setup/setup_wizard/data/designation.txt:30
 msgid "Software Developer"
-msgstr ""
+msgstr "توسعه دهنده نرم‌افزار"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json assets/doctype/asset/asset_list.js:9
@@ -48727,7 +48727,7 @@ msgstr "تقسیم {0} {1} به ردیف‌های {2} طبق شرایط پردا
 
 #: setup/setup_wizard/data/industry_type.txt:46
 msgid "Sports"
-msgstr ""
+msgstr "ورزشی"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -53736,7 +53736,7 @@ msgstr "برای تحویل و صدور صورتحساب"
 #. Label of the to_delivery_date (Date) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "To Delivery Date"
-msgstr "به تاریخ تحویل"
+msgstr "تا تاریخ تحویل"
 
 #. Label of the to_doctype (Link) field in DocType 'Bulk Transaction Log
 #. Detail'
@@ -57080,7 +57080,7 @@ msgstr "ملاقات کرد"
 #. Group in Maintenance Schedule's connections
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 msgid "Visits"
-msgstr ""
+msgstr "بازدیدها"
 
 #. Option for the 'Communication Medium Type' (Select) field in DocType
 #. 'Communication Medium'
@@ -58969,7 +58969,7 @@ msgstr ""
 #. Assembly Item'
 #: manufacturing/doctype/production_plan_sub_assembly_item/production_plan_sub_assembly_item.json
 msgid "description"
-msgstr ""
+msgstr "شرح"
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
@@ -59029,7 +59029,7 @@ msgstr ""
 #. Label of the image (Attach Image) field in DocType 'Batch'
 #: stock/doctype/batch/batch.json
 msgid "image"
-msgstr ""
+msgstr "تصویر"
 
 #: accounts/doctype/budget/budget.py:273
 msgid "is already"
@@ -59104,7 +59104,7 @@ msgstr "از 5"
 
 #: accounts/doctype/payment_entry/payment_entry.py:1160
 msgid "paid to"
-msgstr ""
+msgstr "پرداخت شده به"
 
 #: public/js/utils.js:386
 msgid "payments app is not installed. Please install it from {0} or {1}"
@@ -59152,7 +59152,7 @@ msgstr "نام ردیف آیتم‌های باندل محصول در سفارش 
 #. Settings'
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "production"
-msgstr ""
+msgstr "تولید"
 
 #. Label of the quotation_item (Data) field in DocType 'Sales Order Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
@@ -59203,7 +59203,7 @@ msgstr "اشتراک در حال حاضر لغو شده است."
 
 #: controllers/status_updater.py:352 controllers/status_updater.py:372
 msgid "target_ref_field"
-msgstr ""
+msgstr "target_ref_field"
 
 #. Label of the temporary_name (Data) field in DocType 'Production Plan Item'
 #: manufacturing/doctype/production_plan_item/production_plan_item.json
@@ -59213,7 +59213,7 @@ msgstr "نام موقت"
 #. Label of the title (Data) field in DocType 'Activity Cost'
 #: projects/doctype/activity_cost/activity_cost.json
 msgid "title"
-msgstr ""
+msgstr "عنوان"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:27
 #: accounts/report/general_ledger/general_ledger.html:20
@@ -59254,7 +59254,7 @@ msgstr "باید در جدول حسابها، حساب سرمایه در جری�
 #: accounts/report/cash_flow/cash_flow.py:220
 #: accounts/report/cash_flow/cash_flow.py:221
 msgid "{0}"
-msgstr ""
+msgstr "{0}"
 
 #: controllers/accounts_controller.py:948
 msgid "{0} '{1}' is disabled"
@@ -59754,11 +59754,11 @@ msgstr "{0}%"
 
 #: controllers/website_list_for_contact.py:203
 msgid "{0}% Billed"
-msgstr ""
+msgstr "{0}% صورتحساب شده"
 
 #: controllers/website_list_for_contact.py:211
 msgid "{0}% Delivered"
-msgstr ""
+msgstr "{0}% تحویل داده شده"
 
 #: accounts/doctype/payment_term/payment_term.js:15
 #, python-format
@@ -59839,7 +59839,7 @@ msgstr "{} در دسترس"
 #: quality_management/workspace/quality/quality.json
 #: selling/workspace/selling/selling.json
 msgid "{} Open"
-msgstr ""
+msgstr "{} باز"
 
 #. Count format of shortcut in the Buying Workspace
 #. Count format of shortcut in the Stock Workspace
