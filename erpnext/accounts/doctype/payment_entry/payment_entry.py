@@ -1768,7 +1768,6 @@ class PaymentEntry(AccountsController):
 		if not self.references:
 			return
 
-		# if `allocate_payment_amount` is False, then do not allocate amount
 		if not allocate_payment_amount:
 			for ref in self.references:
 				ref.allocated_amount = 0
@@ -1776,12 +1775,10 @@ class PaymentEntry(AccountsController):
 		# todo-abdeali: here will update table (reference) priority given to those which have PR inside it ...
 		# todo: store old data also, never should allow more amount than paid amount
 
-		# variables which will be used to calculate the allocated amount
 		total_positive_outstanding_including_order = 0
 		total_negative_outstanding = 0
 		paid_amount -= sum(flt(d.amount, self.precision("paid_amount")) for d in self.deductions)
 
-		# count total positive outstanding and total negative outstanding
 		for ref in self.references:
 			outstanding_amount = flt(ref.outstanding_amount, self.precision("paid_amount"))
 			abs_outstanding_amount = abs(outstanding_amount)
@@ -1832,7 +1829,7 @@ class PaymentEntry(AccountsController):
 
 		if not allocate_payment_request:
 			# correct data, because it it is possible PT's outstanding amount is not updated
-			payment_term_outstanding = get_payment_term_outstanding_of_references(self.references)
+			payment_term_outstanding = get_payment_term_outstanding_of_references(self.references) or {}
 
 		# ! may possible that PR is there or not and same for the PT
 		# todo: allocate amount (based on outstanding_amount + PT outstanding amount + PR outstanding amount)

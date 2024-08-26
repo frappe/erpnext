@@ -323,8 +323,9 @@ class PaymentRequest(Document):
 			}
 		)
 
-		# Add reference of Payment Request
-		payment_entry.references[0].payment_request = self.name
+		# Update payment_request for each reference in payment_entry (Payment Term can splits the row)
+		for row in payment_entry.references:
+			row.payment_request = self.name
 
 		# Update dimensions
 		payment_entry.update(
