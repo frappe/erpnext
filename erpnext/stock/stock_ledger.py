@@ -1253,7 +1253,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 			and (
 				posting_datetime {operator} %(posting_datetime)s
 			)
-		order by posting_datetime desc, creation desc
+		order by posting_date desc, posting_time desc, creation desc
 		limit 1
 		for update""",
 		{
@@ -1347,7 +1347,7 @@ def get_stock_ledger_entries(
 		where item_code = %(item_code)s
 		and is_cancelled = 0
 		{conditions}
-		order by posting_datetime {order}, creation {order}
+		order by posting_date {order}, posting_time {order}, creation {order}
 		{limit} {for_update}""".format(
 			conditions=conditions,
 			limit=limit or "",
@@ -1442,6 +1442,7 @@ def get_valuation_rate(
 		)
 
 	# Get valuation rate from last sle for the same item and warehouse
+<<<<<<< HEAD
 	if not last_valuation_rate or last_valuation_rate[0][0] is None:
 		last_valuation_rate = frappe.db.sql(
 			"""select valuation_rate
@@ -1457,6 +1458,20 @@ def get_valuation_rate(
 		)
 
 	if last_valuation_rate:
+=======
+	if last_valuation_rate := frappe.db.sql(
+		"""select valuation_rate
+		from `tabStock Ledger Entry` force index (item_warehouse)
+		where
+			item_code = %s
+			AND warehouse = %s
+			AND valuation_rate >= 0
+			AND is_cancelled = 0
+			AND NOT (voucher_no = %s AND voucher_type = %s)
+		order by posting_date desc, posting_time desc, name desc limit 1""",
+		(item_code, warehouse, voucher_no, voucher_type),
+	):
+>>>>>>> 27364b7e6b (fix: same posting date and time, creation causing incorrect balance qty (#42904))
 		return flt(last_valuation_rate[0][0])
 
 	# If negative stock allowed, and item delivered without any incoming entry,
@@ -1686,6 +1701,7 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
+<<<<<<< HEAD
 def get_future_sle_with_negative_qty(sle):
 	SLE = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
@@ -1703,6 +1719,27 @@ def get_future_sle_with_negative_qty(sle):
 		)
 		.orderby(SLE.posting_datetime)
 		.limit(1)
+=======
+def get_future_sle_with_negative_qty(args):
+	return frappe.db.sql(
+		"""
+		select
+			qty_after_transaction, posting_date, posting_time,
+			voucher_type, voucher_no
+		from `tabStock Ledger Entry`
+		where
+			item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and voucher_no != %(voucher_no)s
+			and posting_datetime >= %(posting_datetime)s
+			and is_cancelled = 0
+			and qty_after_transaction < 0
+		order by posting_date asc, posting_time asc
+		limit 1
+	""",
+		args,
+		as_dict=1,
+>>>>>>> 27364b7e6b (fix: same posting date and time, creation causing incorrect balance qty (#42904))
 	)
 
 	if sle.voucher_type == "Stock Reconciliation" and sle.batch_no:
@@ -1717,14 +1754,14 @@ def get_future_sle_with_negative_batch_qty(args):
 		with batch_ledger as (
 			select
 				posting_date, posting_time, posting_datetime, voucher_type, voucher_no,
-				sum(actual_qty) over (order by posting_datetime, creation) as cumulative_total
+				sum(actual_qty) over (order by posting_date, posting_time, creation) as cumulative_total
 			from `tabStock Ledger Entry`
 			where
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
 				and batch_no=%(batch_no)s
 				and is_cancelled = 0
-			order by posting_datetime, creation
+			order by posting_date, posting_time, creation
 		)
 		select * from batch_ledger
 		where

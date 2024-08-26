@@ -1172,7 +1172,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			qty=5,
 			posting_date="2021-01-01",
 			rate=10,
-			posting_time="02:00:00.1234",
+			posting_time="02:00:00",
 		)
 
 		time.sleep(3)
@@ -1184,7 +1184,7 @@ class TestStockLedgerEntry(FrappeTestCase, StockTestMixin):
 			qty=100,
 			rate=10,
 			posting_date="2021-01-01",
-			posting_time="02:00:00",
+			posting_time="02:00:00.1234",
 		)
 
 		sle = frappe.get_all(
