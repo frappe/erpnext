@@ -6,12 +6,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-<<<<<<< HEAD
-from frappe.utils import flt, fmt_money, getdate
-=======
 from frappe.utils import flt, fmt_money, get_link_to_form, getdate
-from pypika import Order
->>>>>>> 092411b54f (refactor: better err msg on clearance tool)
 
 import erpnext
 
