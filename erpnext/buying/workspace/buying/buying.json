@@ -511,7 +511,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-07-04 14:43:30.387683",
+ "modified": "2024-08-26 20:19:44.724370",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -521,7 +521,11 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
- "roles": [],
+ "roles": [
+  {
+   "role": "Erpnext User"
+  }
+ ],
  "sequence_id": 5.0,
  "shortcuts": [
   {

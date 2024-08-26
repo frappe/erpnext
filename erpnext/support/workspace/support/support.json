@@ -171,7 +171,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-05-24 14:47:23.408966",
+ "modified": "2024-08-26 20:24:41.186443",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
@@ -181,7 +181,11 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
- "roles": [],
+ "roles": [
+  {
+   "role": "Erpnext User"
+  }
+ ],
  "sequence_id": 12.0,
  "shortcuts": [
   {

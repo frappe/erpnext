@@ -192,7 +192,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-07-04 14:39:08.935853",
+ "modified": "2024-08-26 20:22:03.670880",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
@@ -202,7 +202,11 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
- "roles": [],
+ "roles": [
+  {
+   "role": "Erpnext User"
+  }
+ ],
  "sequence_id": 11.0,
  "shortcuts": [
   {

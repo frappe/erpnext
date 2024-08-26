@@ -763,7 +763,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-07-04 14:38:14.988756",
+ "modified": "2024-08-26 20:24:00.202961",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -786,7 +786,11 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
- "roles": [],
+ "roles": [
+  {
+   "role": "Erpnext User"
+  }
+ ],
  "sequence_id": 7.0,
  "shortcuts": [
   {

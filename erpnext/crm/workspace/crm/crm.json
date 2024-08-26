@@ -419,7 +419,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-09-14 12:11:03.968048",
+ "modified": "2024-08-26 20:20:22.438660",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -429,7 +429,11 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
- "roles": [],
+ "roles": [
+  {
+   "role": "Erpnext User"
+  }
+ ],
  "sequence_id": 17.0,
  "shortcuts": [
   {

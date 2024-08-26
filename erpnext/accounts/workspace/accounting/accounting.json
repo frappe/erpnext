@@ -586,7 +586,7 @@
    "type": "Link"
   }
  ],
- "modified": "2024-01-18 22:15:40.941711",
+ "modified": "2024-08-26 20:17:57.543502",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -613,7 +613,11 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
- "roles": [],
+ "roles": [
+  {
+   "role": "Erpnext User"
+  }
+ ],
  "sequence_id": 2.0,
  "shortcuts": [
   {

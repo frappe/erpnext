@@ -144,7 +144,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-05-24 14:47:22.597974",
+ "modified": "2024-08-26 20:22:26.325264",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
@@ -154,7 +154,11 @@
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
- "roles": [],
+ "roles": [
+  {
+   "role": "Erpnext User"
+  }
+ ],
  "sequence_id": 9.0,
  "shortcuts": [
   {
