@@ -1262,7 +1262,11 @@ class PurchaseInvoice(BuyingController):
 	def update_gross_purchase_amount_for_linked_assets(self, item):
 		assets = frappe.db.get_all(
 			"Asset",
-			filters={"purchase_invoice": self.name, "item_code": item.item_code},
+			filters={
+				"purchase_invoice": self.name,
+				"item_code": item.item_code,
+				"purchase_invoice_item": ("in", [item.name, ""]),
+			},
 			fields=["name", "asset_quantity"],
 		)
 		for asset in assets:
