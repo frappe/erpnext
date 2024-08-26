@@ -1763,7 +1763,7 @@ class PaymentEntry(AccountsController):
 
 	@frappe.whitelist()
 	def allocate_party_amount_against_ref_docs(
-		self, paid_amount, paid_amount_change, allocate_payment_amount, allocate_payment_request
+		self, paid_amount, paid_amount_change, allocate_payment_amount
 	):
 		if not self.references:
 			return
@@ -1772,8 +1772,6 @@ class PaymentEntry(AccountsController):
 			for ref in self.references:
 				ref.allocated_amount = 0
 			return
-		# todo-abdeali: here will update table (reference) priority given to those which have PR inside it ...
-		# todo: store old data also, never should allow more amount than paid amount
 
 		total_positive_outstanding_including_order = 0
 		total_negative_outstanding = 0
@@ -1788,7 +1786,6 @@ class PaymentEntry(AccountsController):
 			else:
 				total_negative_outstanding += abs_outstanding_amount
 
-		# allocation variables counting
 		allocated_negative_outstanding = 0
 		allocated_positive_outstanding = 0
 
@@ -1825,24 +1822,61 @@ class PaymentEntry(AccountsController):
 					total_positive_outstanding_including_order, allocated_positive_outstanding
 				)
 
-		payment_term_outstanding = {}
+		if paid_amount_change:
+			# correct data, because it is possible that PT's outstanding amount is not updated
+			payment_request_outstanding = get_payment_request_outstanding_of_references(self.references) or {}
+			references_outstanding = get_payment_term_outstanding_of_references(self.references) or {}
+			references_outstanding.update(get_no_payment_terms_references_outstanding(self.references))
+			not_allocated_amounts = references_outstanding.copy()
 
-		if not allocate_payment_request:
-			# correct data, because it it is possible PT's outstanding amount is not updated
-			payment_term_outstanding = get_payment_term_outstanding_of_references(self.references) or {}
+			for ref in self.references:
+				if not ref.payment_request:
+					continue
 
-		# ! may possible that PR is there or not and same for the PT
-		# todo: allocate amount (based on outstanding_amount + PT outstanding amount + PR outstanding amount)
+				# fetch outstanding_amount
+				key = (ref.reference_doctype, ref.reference_name, ref.get("payment_term"))
+				outstanding_amount = references_outstanding[key]
+				pr_outstanding_amount = payment_request_outstanding[ref.payment_request]
 
-		for ref in self.references:
-			if ref.outstanding_amount > 0 and allocated_positive_outstanding >= 0:
-				ref.allocated_amount = min(allocated_positive_outstanding, ref.outstanding_amount)
-				allocated_positive_outstanding -= flt(ref.allocated_amount)
-			elif ref.outstanding_amount < 0 and allocated_negative_outstanding:
-				ref.allocated_amount = min(allocated_negative_outstanding, abs(ref.outstanding_amount)) * -1
-				allocated_negative_outstanding -= abs(flt(ref.allocated_amount))
+				if outstanding_amount > 0 and allocated_positive_outstanding >= 0:
+					ref.allocated_amount = min(
+						allocated_positive_outstanding, outstanding_amount, pr_outstanding_amount
+					)
+					allocated_positive_outstanding -= flt(ref.allocated_amount)
+					not_allocated_amounts[key] -= flt(ref.allocated_amount)
+					payment_request_outstanding[ref.payment_request] -= flt(ref.allocated_amount)
+				elif outstanding_amount < 0 and allocated_negative_outstanding:
+					ref.allocated_amount = min(allocated_negative_outstanding, abs(outstanding_amount)) * -1
+					allocated_negative_outstanding -= abs(flt(ref.allocated_amount))
+					not_allocated_amounts[key] -= abs(flt(ref.allocated_amount))
+					payment_request_outstanding[ref.payment_request] -= abs(flt(ref.allocated_amount))
 
-		if allocate_payment_request:
+			for ref in self.references:
+				if ref.payment_request:
+					continue
+
+				key = (ref.reference_doctype, ref.reference_name, ref.get("payment_term"))
+				outstanding_amount = not_allocated_amounts[key]
+
+				if outstanding_amount > 0 and allocated_positive_outstanding >= 0:
+					ref.allocated_amount = min(allocated_positive_outstanding, outstanding_amount)
+					allocated_positive_outstanding -= flt(ref.allocated_amount)
+				elif outstanding_amount < 0 and allocated_negative_outstanding:
+					ref.allocated_amount = min(allocated_negative_outstanding, abs(outstanding_amount)) * -1
+					allocated_negative_outstanding -= abs(flt(ref.allocated_amount))
+
+		else:
+			# todo: make more efficient using same variable
+			for ref in self.references:
+				if ref.outstanding_amount > 0 and allocated_positive_outstanding >= 0:
+					ref.allocated_amount = min(allocated_positive_outstanding, ref.outstanding_amount)
+					allocated_positive_outstanding -= flt(ref.allocated_amount)
+				elif ref.outstanding_amount < 0 and allocated_negative_outstanding:
+					ref.allocated_amount = (
+						min(allocated_negative_outstanding, abs(ref.outstanding_amount)) * -1
+					)
+					allocated_negative_outstanding -= abs(flt(ref.allocated_amount))
+
 			set_open_payment_requests_to_references(self.references)
 
 
@@ -1908,6 +1942,43 @@ def get_payment_term_outstanding_of_references(references=None):
 		return
 
 	return {(row.parenttype, row.parent, row.payment_term): row.outstanding for row in response}
+
+
+def get_payment_request_outstanding_of_references(references=None):
+	if not references:
+		return
+
+	prs = {row.payment_request for row in references if row.payment_request}
+
+	if not prs:
+		return
+
+	PR = frappe.qb.DocType("Payment Request")
+
+	response = (frappe.qb.from_(PR).select(PR.name, PR.outstanding_amount).where(PR.name.isin(prs))).run()
+
+	if not response:
+		return
+
+	return dict(response)
+
+
+def get_no_payment_terms_references_outstanding(references):
+	if not references:
+		return
+
+	outstanding_amounts = {}
+
+	for ref in references:
+		if ref.payment_term:
+			continue
+
+		key = (ref.reference_doctype, ref.reference_name, None)
+
+		if key not in outstanding_amounts:
+			outstanding_amounts[key] = ref.outstanding_amount
+
+	return outstanding_amounts
 
 
 def validate_inclusive_tax(tax, doc):
