@@ -102,7 +102,6 @@ def get_amounts_not_reflected_in_system_for_bank_reconciliation_statement(filter
 
 def get_columns():
 	return [
-		{"fieldname": "posting_date", "label": _("Posting Date"), "fieldtype": "Date", "width": 90},
 		{
 			"fieldname": "payment_document",
 			"label": _("Payment Document Type"),
