@@ -182,10 +182,8 @@ class PaymentEntry(AccountsController):
 		self.set_status()
 		self.set_total_in_words()
 
-	# todo-abdeali: move to front end
 	def before_save(self):
-		pass
-		# self.check_references_for_unset_payment_request()
+		self.set_matched_unset_payment_requests_to_response()
 
 	def on_submit(self):
 		if self.difference_amount:
@@ -1724,8 +1722,7 @@ class PaymentEntry(AccountsController):
 
 		return current_tax_fraction
 
-	# todo-abdeali: needs changes if PR already use for ref and one ref row have no PR then do not show this!!
-	def check_references_for_unset_payment_request(self):
+	def set_matched_unset_payment_requests_to_response(self):
 		if not self.references:
 			return
 
@@ -1736,30 +1733,7 @@ class PaymentEntry(AccountsController):
 		if not matched_payment_requests:
 			return
 
-		unset_pr_rows = {}
-
-		for row in self.references:
-			if row.payment_request:
-				continue
-
-			matched_pr = matched_payment_requests.get(
-				(row.reference_doctype, row.reference_name, row.allocated_amount)
-			)
-
-			if matched_pr:
-				unset_pr_rows[row.idx] = matched_pr
-
-		if unset_pr_rows:
-			message = _("Matched Payment Requests found for references, but not set. <br><br>")
-			message += _("<details><summary><strong>View Details</strong></summary><ul>")
-			for idx, pr in unset_pr_rows.items():
-				message += _("<li>Row #{0}: {1}</li>").format(idx, get_link_to_form("Payment Request", pr))
-			message += _("</ul></details>")
-
-			frappe.msgprint(
-				msg=message,
-				indicator="yellow",
-			)
+		frappe.response["matched_payment_requests"] = matched_payment_requests
 
 	@frappe.whitelist()
 	def allocate_party_amount_against_ref_docs(
@@ -1913,17 +1887,39 @@ class PaymentEntry(AccountsController):
 					allocated_negative_outstanding,
 				)
 
+	@frappe.whitelist()
+	def set_matched_payment_requests(self, matched_payment_requests):
+		if not self.references:
+			return
+
+		# modify matched_payment_requests
+		payment_requests = {}
+
+		for row in matched_payment_requests:
+			key = tuple(row[:3])
+			payment_requests[key] = row[3]
+
+		for ref in self.references:
+			if ref.payment_request:
+				continue
+
+			key = (ref.reference_doctype, ref.reference_name, ref.allocated_amount)
+
+			if key in payment_requests:
+				ref.payment_request = payment_requests[key]
+				del payment_requests[key]
+
 
 def get_matched_payment_request_of_references(references=None):
 	if not references:
 		return
 
 	# to fetch matched rows
-	refs = [
+	refs = {
 		(row.reference_doctype, row.reference_name, row.allocated_amount)
 		for row in references
 		if row.reference_doctype and row.reference_name and row.allocated_amount
-	]
+	}
 
 	if not refs:
 		return
@@ -1934,7 +1930,11 @@ def get_matched_payment_request_of_references(references=None):
 	subquery = (
 		frappe.qb.from_(PR)
 		.select(
-			PR.name, PR.reference_doctype, PR.reference_name, PR.outstanding_amount, Count("*").as_("count")
+			PR.reference_doctype,
+			PR.reference_name,
+			PR.outstanding_amount.as_("allocated_amount"),
+			PR.name.as_("payment_request"),
+			Count("*").as_("count"),
 		)
 		.where(Tuple(PR.reference_doctype, PR.reference_name, PR.outstanding_amount).isin(refs))
 		.where(PR.status != "Paid")
@@ -1943,12 +1943,22 @@ def get_matched_payment_request_of_references(references=None):
 	)
 
 	# query to fetch matched rows which are single
-	matched_prs = frappe.qb.from_(subquery).select("*").where(subquery.count == 1).run(as_dict=True)
+	matched_prs = (
+		frappe.qb.from_(subquery)
+		.select(
+			subquery.reference_doctype,
+			subquery.reference_name,
+			subquery.allocated_amount,
+			subquery.payment_request,
+		)
+		.where(subquery.count == 1)
+		.run()
+	)
 
 	if not matched_prs:
 		return
 
-	return {(pr.reference_doctype, pr.reference_name, pr.outstanding_amount): pr.name for pr in matched_prs}
+	return matched_prs
 
 
 def get_reference_outstanding_amounts(references=None):

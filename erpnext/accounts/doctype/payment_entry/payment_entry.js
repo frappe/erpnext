@@ -1639,6 +1639,30 @@ frappe.ui.form.on("Payment Entry", {
 			});
 		}
 	},
+
+	after_save: function (frm) {
+		const { matched_payment_requests } = frappe.last_response;
+		if (!matched_payment_requests) return;
+
+		const COLUMN_LABEL = [
+			[__("Reference DocType"), __("Reference Name"), __("Allocated Amount"), __("Payment Request")],
+		];
+
+		frappe.msgprint({
+			title: __("Matched Payment Request"),
+			message: COLUMN_LABEL.concat(matched_payment_requests),
+			as_table: true,
+			primary_action: {
+				label: __("Allocate Payment Request"),
+				action() {
+					frappe.hide_msgprint();
+					frm.call("set_matched_payment_requests", { matched_payment_requests }, () => {
+						frm.dirty();
+					});
+				},
+			},
+		});
+	},
 });
 
 frappe.ui.form.on("Payment Entry Reference", {
