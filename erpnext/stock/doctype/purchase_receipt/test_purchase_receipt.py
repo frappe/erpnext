@@ -3,7 +3,7 @@
 
 import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, cint, cstr, flt, getdate, nowtime, today
+from frappe.utils import add_days, cint, cstr, flt, get_datetime, getdate, nowtime, today
 from pypika import functions as fn
 
 import erpnext
@@ -3591,6 +3591,71 @@ class TestPurchaseReceipt(FrappeTestCase):
 		inter_transfer_pr.cancel()
 		inter_transfer_dn.cancel()
 		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
+
+	def test_sles_with_same_posting_datetime_and_creation(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.stock.report.stock_balance.stock_balance import execute
+
+		item_code = "Test Item for SLE with same posting datetime and creation"
+		create_item(item_code)
+
+		pr = make_purchase_receipt(
+			item_code=item_code,
+			qty=10,
+			rate=100,
+			posting_date="2023-11-06",
+			posting_time="00:00:00",
+		)
+
+		sr = make_stock_entry(
+			item_code=item_code,
+			source=pr.items[0].warehouse,
+			qty=10,
+			posting_date="2023-11-07",
+			posting_time="14:28:0.330404",
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": sr.doctype, "voucher_no": sr.name, "item_code": sr.items[0].item_code},
+			"name",
+		)
+
+		sle_doc = frappe.get_doc("Stock Ledger Entry", sle)
+		sle_doc.db_set("creation", "2023-11-07 14:28:01.208930")
+
+		sle_doc.reload()
+		self.assertEqual(get_datetime(sle_doc.creation), get_datetime("2023-11-07 14:28:01.208930"))
+
+		sr = make_stock_entry(
+			item_code=item_code,
+			target=pr.items[0].warehouse,
+			qty=50,
+			posting_date="2023-11-07",
+			posting_time="14:28:0.920825",
+		)
+
+		sle = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": sr.doctype, "voucher_no": sr.name, "item_code": sr.items[0].item_code},
+			"name",
+		)
+
+		sle_doc = frappe.get_doc("Stock Ledger Entry", sle)
+		sle_doc.db_set("creation", "2023-11-07 14:28:01.044561")
+
+		sle_doc.reload()
+		self.assertEqual(get_datetime(sle_doc.creation), get_datetime("2023-11-07 14:28:01.044561"))
+
+		pr.repost_future_sle_and_gle(force=True)
+
+		columns, data = execute(
+			filters=frappe._dict(
+				{"item_code": item_code, "warehouse": pr.items[0].warehouse, "company": pr.company}
+			)
+		)
+
+		self.assertEqual(data[0].get("bal_qty"), 50.0)
 
 
 def prepare_data_for_internal_transfer():

@@ -1543,7 +1543,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 			and (
 				posting_datetime {operator} %(posting_datetime)s
 			)
-		order by posting_datetime desc, creation desc
+		order by posting_date desc, posting_time desc, creation desc
 		limit 1
 		for update""",
 		{
@@ -1636,7 +1636,7 @@ def get_stock_ledger_entries(
 		where item_code = %(item_code)s
 		and is_cancelled = 0
 		{conditions}
-		order by posting_datetime {order}, creation {order}
+		order by posting_date {order}, posting_time {order}, creation {order}
 		{limit} {for_update}""".format(
 			conditions=conditions,
 			limit=limit or "",
@@ -1753,7 +1753,7 @@ def get_valuation_rate(
 			AND valuation_rate >= 0
 			AND is_cancelled = 0
 			AND NOT (voucher_no = %s AND voucher_type = %s)
-		order by posting_datetime desc, name desc limit 1""",
+		order by posting_date desc, posting_time desc, name desc limit 1""",
 		(item_code, warehouse, voucher_no, voucher_type),
 	):
 		return flt(last_valuation_rate[0][0])
@@ -2004,7 +2004,7 @@ def get_future_sle_with_negative_qty(args):
 			and posting_datetime >= %(posting_datetime)s
 			and is_cancelled = 0
 			and qty_after_transaction < 0
-		order by posting_datetime asc
+		order by posting_date asc, posting_time asc
 		limit 1
 	""",
 		args,
@@ -2018,14 +2018,14 @@ def get_future_sle_with_negative_batch_qty(args):
 		with batch_ledger as (
 			select
 				posting_date, posting_time, posting_datetime, voucher_type, voucher_no,
-				sum(actual_qty) over (order by posting_datetime, creation) as cumulative_total
+				sum(actual_qty) over (order by posting_date, posting_time, creation) as cumulative_total
 			from `tabStock Ledger Entry`
 			where
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
 				and batch_no=%(batch_no)s
 				and is_cancelled = 0
-			order by posting_datetime, creation
+			order by posting_date, posting_time, creation
 		)
 		select * from batch_ledger
 		where
