@@ -351,3 +351,4 @@ def on_doctype_update():
 	frappe.db.add_index("Stock Ledger Entry", ["voucher_no", "voucher_type"])
 	frappe.db.add_index("Stock Ledger Entry", ["batch_no", "item_code", "warehouse"])
 	frappe.db.add_index("Stock Ledger Entry", ["warehouse", "item_code"], "item_warehouse")
+	frappe.db.add_index("Stock Ledger Entry", ["posting_datetime", "creation"])
