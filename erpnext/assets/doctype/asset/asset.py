@@ -117,7 +117,6 @@ class Asset(AccountsController):
 	# end: auto-generated types
 
 	def validate(self):
-		make_post_gl_entry()
 		self.validate_asset_values()
 		self.validate_asset_and_reference()
 		self.validate_item()
@@ -742,20 +741,20 @@ class Asset(AccountsController):
 
 	def check_asset_capitalization_gl_entries(self):
 		if self.is_composite_asset:
-			asset_capitalization, target_fixed_asset_account = frappe.db.get_value(
+			result = frappe.db.get_value(
 				"Asset Capitalization",
 				{"target_asset": self.name, "docstatus": 1},
 				["name", "target_fixed_asset_account"],
 			)
 
-			# Fetch GL entries for the retrieved Asset Capitalization and target fixed asset account
-			gl_entries = get_gl_entries(
-				"Asset Capitalization", asset_capitalization, target_fixed_asset_account
-			)
-
-			# Return if any GL entries exist
-			if len(gl_entries) > 0:
-				return True
+			if result:
+				asset_capitalization, target_fixed_asset_account = result
+				# Check GL entries for the retrieved Asset Capitalization and target fixed asset account
+				return has_gl_entries(
+					"Asset Capitalization", asset_capitalization, target_fixed_asset_account
+				)
+			# return if there are no submitted capitalization for given asset
+			return True
 		return False
 
 	@frappe.whitelist()
@@ -804,9 +803,9 @@ class Asset(AccountsController):
 			return flt((100 * (1 - depreciation_rate)), float_precision)
 
 
-def get_gl_entries(doctype, docname, target_account):
+def has_gl_entries(doctype, docname, target_account):
 	gl_entry = frappe.qb.DocType("GL Entry")
-	return (
+	gl_entries = (
 		frappe.qb.from_(gl_entry)
 		.select(gl_entry.account)
 		.where(
@@ -817,6 +816,7 @@ def get_gl_entries(doctype, docname, target_account):
 		)
 		.run(as_dict=True)
 	)
+	return len(gl_entries) > 0
 
 
 def update_maintenance_status():
