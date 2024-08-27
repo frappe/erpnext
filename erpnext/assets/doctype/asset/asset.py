@@ -117,6 +117,7 @@ class Asset(AccountsController):
 	# end: auto-generated types
 
 	def validate(self):
+		make_post_gl_entry()
 		self.validate_asset_values()
 		self.validate_asset_and_reference()
 		self.validate_item()
@@ -747,11 +748,13 @@ class Asset(AccountsController):
 				["name", "target_fixed_asset_account"],
 			)
 
-			# Fetch GL entries for the retrieved Asset Capitalization
-			gl_entries_test = get_gl_entries("Asset Capitalization", asset_capitalization)
+			# Fetch GL entries for the retrieved Asset Capitalization and target fixed asset account
+			gl_entries = get_gl_entries(
+				"Asset Capitalization", asset_capitalization, target_fixed_asset_account
+			)
 
-			# Return if GL entry's account matches the target fixed asset account
-			if gl_entries_test and gl_entries_test[0].account == target_fixed_asset_account:
+			# Return if any GL entries exist
+			if len(gl_entries) > 0:
 				return True
 		return False
 
@@ -801,13 +804,17 @@ class Asset(AccountsController):
 			return flt((100 * (1 - depreciation_rate)), float_precision)
 
 
-def get_gl_entries(doctype, docname):
+def get_gl_entries(doctype, docname, target_account):
 	gl_entry = frappe.qb.DocType("GL Entry")
 	return (
 		frappe.qb.from_(gl_entry)
 		.select(gl_entry.account)
-		.where((gl_entry.voucher_type == doctype) & (gl_entry.voucher_no == docname) & (gl_entry.debit != 0))
-		.orderby(gl_entry.account)
+		.where(
+			(gl_entry.voucher_type == doctype)
+			& (gl_entry.voucher_no == docname)
+			& (gl_entry.debit != 0)
+			& (gl_entry.account == target_account)
+		)
 		.run(as_dict=True)
 	)
 
