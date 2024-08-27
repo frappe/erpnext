@@ -1281,12 +1281,22 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		var show = cint(cur_frm.doc.discount_amount) ||
 				((cur_frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
 
+<<<<<<< HEAD
 		if(frappe.meta.get_docfield(cur_frm.doctype, "net_total"))
 			cur_frm.toggle_display("net_total", show);
 
 		if(frappe.meta.get_docfield(cur_frm.doctype, "base_net_total"))
 			cur_frm.toggle_display("base_net_total", (show && (me.frm.doc.currency != company_currency)));
 
+=======
+		if(this.frm.doc.doctype && frappe.meta.get_docfield(this.frm.doc.doctype, "net_total")) {
+			this.frm.toggle_display("net_total", show);
+		}
+
+		if(this.frm.doc.doctype && frappe.meta.get_docfield(this.frm.doc.doctype, "base_net_total")) {
+			this.frm.toggle_display("base_net_total", (show && (me.frm.doc.currency != company_currency)));
+		}
+>>>>>>> 86d3a9ab03 (fix: Cannot read properties of null (reading 'doctype') (#42941))
 	}
 
 	change_grid_labels(company_currency) {
