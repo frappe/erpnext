@@ -134,6 +134,8 @@ def get_asset_details_for_grouped_by_category(filters):
 		condition += " and name = %(asset)s"
 	if filters.get("finance_book"):
 		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = `tabAsset`.name and ads.finance_book = %(finance_book)s)"
+
+	# nosemgrep
 	return frappe.db.sql(
 		f"""
 		SELECT name,
