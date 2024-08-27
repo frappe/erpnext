@@ -11,6 +11,7 @@ def execute():
 		"Manufacture",
 		"Repack",
 		"Send to Subcontractor",
+		"Disassemble",
 	]:
 		if frappe.db.exists("Stock Entry Type", stock_entry_type):
 			frappe.db.set_value("Stock Entry Type", stock_entry_type, "is_standard", 1)
