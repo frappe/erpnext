@@ -1442,7 +1442,6 @@ def get_valuation_rate(
 		)
 
 	# Get valuation rate from last sle for the same item and warehouse
-<<<<<<< HEAD
 	if not last_valuation_rate or last_valuation_rate[0][0] is None:
 		last_valuation_rate = frappe.db.sql(
 			"""select valuation_rate
@@ -1453,25 +1452,11 @@ def get_valuation_rate(
 				AND valuation_rate >= 0
 				AND is_cancelled = 0
 				AND NOT (voucher_no = %s AND voucher_type = %s)
-			order by posting_datetime desc, name desc limit 1""",
+			order by posting_date desc, posting_time desc, name desc limit 1""",
 			(item_code, warehouse, voucher_no, voucher_type),
 		)
 
 	if last_valuation_rate:
-=======
-	if last_valuation_rate := frappe.db.sql(
-		"""select valuation_rate
-		from `tabStock Ledger Entry` force index (item_warehouse)
-		where
-			item_code = %s
-			AND warehouse = %s
-			AND valuation_rate >= 0
-			AND is_cancelled = 0
-			AND NOT (voucher_no = %s AND voucher_type = %s)
-		order by posting_date desc, posting_time desc, name desc limit 1""",
-		(item_code, warehouse, voucher_no, voucher_type),
-	):
->>>>>>> 27364b7e6b (fix: same posting date and time, creation causing incorrect balance qty (#42904))
 		return flt(last_valuation_rate[0][0])
 
 	# If negative stock allowed, and item delivered without any incoming entry,
@@ -1701,7 +1686,6 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
-<<<<<<< HEAD
 def get_future_sle_with_negative_qty(sle):
 	SLE = frappe.qb.DocType("Stock Ledger Entry")
 	query = (
@@ -1717,29 +1701,9 @@ def get_future_sle_with_negative_qty(sle):
 			& (SLE.is_cancelled == 0)
 			& (SLE.qty_after_transaction < 0)
 		)
-		.orderby(SLE.posting_datetime)
+		.orderby(SLE.posting_date)
+		.orderby(SLE.posting_time)
 		.limit(1)
-=======
-def get_future_sle_with_negative_qty(args):
-	return frappe.db.sql(
-		"""
-		select
-			qty_after_transaction, posting_date, posting_time,
-			voucher_type, voucher_no
-		from `tabStock Ledger Entry`
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and voucher_no != %(voucher_no)s
-			and posting_datetime >= %(posting_datetime)s
-			and is_cancelled = 0
-			and qty_after_transaction < 0
-		order by posting_date asc, posting_time asc
-		limit 1
-	""",
-		args,
-		as_dict=1,
->>>>>>> 27364b7e6b (fix: same posting date and time, creation causing incorrect balance qty (#42904))
 	)
 
 	if sle.voucher_type == "Stock Reconciliation" and sle.batch_no:
