@@ -69,6 +69,9 @@ def get_asset_categories_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset_category"):
 		condition += " and asset_category = %(asset_category)s"
+	if filters.get("finance_book"):
+		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
+
 	# nosemgrep
 	return frappe.db.sql(
 		f"""
@@ -119,6 +122,7 @@ def get_asset_categories_for_grouped_by_category(filters):
 			"from_date": filters.from_date,
 			"company": filters.company,
 			"asset_category": filters.get("asset_category"),
+			"finance_book": filters.get("finance_book"),
 		},
 		as_dict=1,
 	)
@@ -128,6 +132,10 @@ def get_asset_details_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset"):
 		condition += " and name = %(asset)s"
+	if filters.get("finance_book"):
+		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = `tabAsset`.name and ads.finance_book = %(finance_book)s)"
+
+	# nosemgrep
 	return frappe.db.sql(
 		f"""
 		SELECT name,
@@ -176,6 +184,7 @@ def get_asset_details_for_grouped_by_category(filters):
 			"from_date": filters.from_date,
 			"company": filters.company,
 			"asset": filters.get("asset"),
+			"finance_book": filters.get("finance_book"),
 		},
 		as_dict=1,
 	)
