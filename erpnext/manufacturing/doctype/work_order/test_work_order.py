@@ -2053,6 +2053,55 @@ class TestWorkOrder(FrappeTestCase):
 			"BOM",
 		)
 
+	def test_disassemby_order(self):
+		fg_item = "Test Disassembly Item"
+		source_warehouse = "Stores - _TC"
+		raw_materials = ["Test Disassembly RM Item 1", "Test Disassembly RM Item 2"]
+
+		make_item(fg_item, {"is_stock_item": 1})
+		for item in raw_materials:
+			make_item(item, {"is_stock_item": 1})
+			test_stock_entry.make_stock_entry(
+				item_code=item,
+				target=source_warehouse,
+				qty=1,
+				basic_rate=100,
+			)
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=raw_materials)
+
+		wo = make_wo_order_test_record(
+			item=fg_item,
+			qty=1,
+			source_warehouse=source_warehouse,
+			skip_transfer=1,
+		)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+		for row in stock_entry.items:
+			if row.item_code in raw_materials:
+				row.s_warehouse = source_warehouse
+
+		stock_entry.submit()
+
+		wo.reload()
+		self.assertEqual(wo.status, "Completed")
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+		stock_entry.save()
+
+		self.assertEqual(stock_entry.purpose, "Disassemble")
+
+		for row in stock_entry.items:
+			if row.item_code == fg_item:
+				self.assertTrue(row.s_warehouse)
+				self.assertFalse(row.t_warehouse)
+			else:
+				self.assertFalse(row.s_warehouse)
+				self.assertTrue(row.t_warehouse)
+
+		stock_entry.submit()
+
 
 def make_operation(**kwargs):
 	kwargs = frappe._dict(kwargs)
@@ -2370,6 +2419,7 @@ def make_wo_order_test_record(**args):
 	wo_order.batch_size = args.batch_size or 0
 
 	if args.source_warehouse:
+		wo_order.source_warehouse = args.source_warehouse
 		for item in wo_order.get("required_items"):
 			item.source_warehouse = args.source_warehouse
 
