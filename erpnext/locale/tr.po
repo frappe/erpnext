@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-23 14:05\n"
+"PO-Revision-Date: 2024-08-27 15:13\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -12688,7 +12688,7 @@ msgstr "{1} türü için Vergiler tablosundaki {0} satırında Maliyet Merkezi g
 
 #: accounts/doctype/cost_center/cost_center.py:72
 msgid "Cost Center with Allocation records can not be converted to a group"
-msgstr ""
+msgstr "Mevcut işlemleri olan Maliyet Merkezi gruba dönüştürülemez."
 
 #: accounts/doctype/cost_center/cost_center.py:78
 msgid "Cost Center with existing transactions can not be converted to group"
@@ -19553,7 +19553,7 @@ msgstr "Tüketim Sayfa Numarası"
 #. Deletion Record'
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Excluded DocTypes"
-msgstr ""
+msgstr "Hariç Tutulan DocType'lar"
 
 #: setup/setup_wizard/operations/install_fixtures.py:216
 msgid "Execution"
@@ -32137,7 +32137,7 @@ msgstr "Yok"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:458
 msgid "None of the items have any change in quantity or value."
-msgstr ""
+msgstr "Ürünlerin hiçbirinde miktar veya değer değişikliği yoktur."
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -44913,7 +44913,7 @@ msgstr ""
 
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.py:93
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
-msgstr ""
+msgstr "Satır {0}: Amortisman zaten işlenmiş olduğundan vardiya değiştirilemez"
 
 #: stock/doctype/stock_entry/stock_entry.py:1217
 msgid "Row {0}: Subcontracted Item is mandatory for the raw material {1}"
@@ -46379,7 +46379,7 @@ msgstr ""
 
 #: stock/report/stock_ledger/stock_ledger.js:104
 msgid "Segregate Serial / Batch Bundle"
-msgstr ""
+msgstr "Seri / Parti Paketini Ayır"
 
 #: buying/doctype/purchase_order/purchase_order.js:187
 #: selling/doctype/sales_order/sales_order.js:1121
