@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-18 12:36\n"
+"PO-Revision-Date: 2024-08-27 15:13\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -1956,7 +1956,7 @@ msgstr "Konto: {0} mit Währung: {1} kann nicht ausgewählt werden"
 
 #: setup/setup_wizard/data/designation.txt:1
 msgid "Accountant"
-msgstr ""
+msgstr "Buchhalter:in"
 
 #. Label of the section_break_19 (Section Break) field in DocType 'POS Profile'
 #. Label of the accounting (Section Break) field in DocType 'Purchase Invoice
@@ -3712,7 +3712,7 @@ msgstr "Anpassung basierend auf dem Rechnungspreis"
 
 #: setup/setup_wizard/data/designation.txt:2
 msgid "Administrative Assistant"
-msgstr ""
+msgstr "Verwaltungsassistent:in"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:54
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:79
@@ -3721,7 +3721,7 @@ msgstr "Verwaltungskosten"
 
 #: setup/setup_wizard/data/designation.txt:3
 msgid "Administrative Officer"
-msgstr ""
+msgstr "Verwaltungsangestellte:r"
 
 #. Name of a role
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
@@ -3838,15 +3838,15 @@ msgstr "Anzahlungen"
 
 #: setup/setup_wizard/data/lead_source.txt:3
 msgid "Advertisement"
-msgstr ""
+msgstr "Werbung"
 
 #: setup/setup_wizard/data/industry_type.txt:2
 msgid "Advertising"
-msgstr ""
+msgstr "Werbung"
 
 #: setup/setup_wizard/data/industry_type.txt:3
 msgid "Aerospace"
-msgstr ""
+msgstr "Luft- und Raumfahrt"
 
 #. Label of the affected_transactions (Code) field in DocType 'Repost Item
 #. Valuation'
@@ -4073,7 +4073,7 @@ msgstr "Tagesordnung"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:4
 msgid "Agent"
-msgstr ""
+msgstr "Agent"
 
 #. Label of the agent_busy_message (Data) field in DocType 'Incoming Call
 #. Settings'
@@ -4118,7 +4118,7 @@ msgstr "Fassen Sie eine Gruppe von Artikeln in einem anderen Artikel zusammen. D
 
 #: setup/setup_wizard/data/industry_type.txt:4
 msgid "Agriculture"
-msgstr ""
+msgstr "Landwirtschaft"
 
 #. Name of a role
 #: assets/doctype/location/location.json
@@ -4132,7 +4132,7 @@ msgstr "Benutzer Landwirtschaft"
 
 #: setup/setup_wizard/data/industry_type.txt:5
 msgid "Airline"
-msgstr ""
+msgstr "Fluggesellschaft"
 
 #. Label of the algorithm (Select) field in DocType 'Bisect Accounting
 #. Statements'
@@ -4506,7 +4506,7 @@ msgstr "Zulassen, dass ein Element in einer Transaktion mehrmals hinzugefügt wi
 
 #: controllers/selling_controller.py:697
 msgid "Allow Item to Be Added Multiple Times in a Transaction"
-msgstr ""
+msgstr "Mehrfaches Hinzufügen von Artikeln in einer Transaktion zulassen"
 
 #. Label of the allow_multiple_items (Check) field in DocType 'Selling
 #. Settings'
@@ -5296,7 +5296,7 @@ msgstr "Beim Erstellen von Materialanfragen basierend auf der Nachbestellstufe i
 
 #: setup/setup_wizard/data/designation.txt:4
 msgid "Analyst"
-msgstr ""
+msgstr "Analyst"
 
 #: accounts/doctype/budget/budget.py:235
 msgid "Annual"
@@ -5346,7 +5346,7 @@ msgstr "Einer der folgenden Filter ist erforderlich: Lager, Artikelcode, Artikel
 
 #: setup/setup_wizard/data/industry_type.txt:6
 msgid "Apparel & Accessories"
-msgstr ""
+msgstr "Bekleidung & Accessoires"
 
 #. Label of the applicable_charges (Currency) field in DocType 'Landed Cost
 #. Item'
@@ -6796,7 +6796,7 @@ msgstr "Ausgleichsbuchung automatisch vornehmen"
 
 #: setup/setup_wizard/data/industry_type.txt:7
 msgid "Automotive"
-msgstr ""
+msgstr "Automobilindustrie"
 
 #. Label of the availability_of_slots (Table) field in DocType 'Appointment
 #. Booking Settings'
@@ -7004,7 +7004,7 @@ msgstr "Breitensuche"
 #. Request Plan Item'
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 msgid "BIN Qty"
-msgstr ""
+msgstr "BIN Menge"
 
 #. Label of the bom (Link) field in DocType 'Purchase Invoice Item'
 #. Option for the 'Backflush Raw Materials of Subcontract Based On' (Select)
@@ -8415,7 +8415,7 @@ msgstr "Biot"
 
 #: setup/setup_wizard/data/industry_type.txt:9
 msgid "Biotechnology"
-msgstr ""
+msgstr "Biotechnologie"
 
 #. Name of a DocType
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
@@ -8760,11 +8760,11 @@ msgstr "Ausfall"
 
 #: setup/setup_wizard/data/industry_type.txt:10
 msgid "Broadcasting"
-msgstr ""
+msgstr "Rundfunk"
 
 #: setup/setup_wizard/data/industry_type.txt:11
 msgid "Brokerage"
-msgstr ""
+msgstr "Makler"
 
 #: manufacturing/doctype/bom/bom.js:144
 msgid "Browse BOM"
@@ -10262,7 +10262,7 @@ msgstr "Kaufabwicklung / Bestellung abschicken / Neue Bestellung"
 
 #: setup/setup_wizard/data/industry_type.txt:12
 msgid "Chemical"
-msgstr ""
+msgstr "Chemische Industrie"
 
 #. Option for the 'Salary Mode' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -10323,19 +10323,19 @@ msgstr "Schecks und Kautionen fälschlicherweise gelöscht"
 
 #: setup/setup_wizard/data/designation.txt:9
 msgid "Chief Executive Officer"
-msgstr ""
+msgstr "Geschäftsführer"
 
 #: setup/setup_wizard/data/designation.txt:10
 msgid "Chief Financial Officer"
-msgstr ""
+msgstr "Finanzvorstand"
 
 #: setup/setup_wizard/data/designation.txt:11
 msgid "Chief Operating Officer"
-msgstr ""
+msgstr "Operativer Geschäftsführer"
 
 #: setup/setup_wizard/data/designation.txt:12
 msgid "Chief Technology Officer"
-msgstr ""
+msgstr "Technischer Leiter"
 
 #. Label of the child_docname (Data) field in DocType 'Pricing Rule Detail'
 #: accounts/doctype/pricing_rule_detail/pricing_rule_detail.json
@@ -10658,7 +10658,7 @@ msgstr "Code"
 
 #: setup/setup_wizard/data/lead_source.txt:4
 msgid "Cold Calling"
-msgstr ""
+msgstr "Kaltakquise"
 
 #: public/js/setup_wizard.js:190
 msgid "Collapse All"
@@ -10714,7 +10714,7 @@ msgstr "Spalte {0}"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:52
 msgid "Columns are not according to template. Please compare the uploaded file with standard template"
-msgstr ""
+msgstr "Die Spalten stimmen nicht mit der Vorlage überein. Bitte vergleichen Sie die hochgeladene Datei mit der Standardvorlage"
 
 #: accounts/doctype/payment_terms_template/payment_terms_template.py:39
 msgid "Combined invoice portion must equal 100%"
@@ -11659,7 +11659,7 @@ msgstr "Fertigstellungstermin"
 
 #: assets/doctype/asset_repair/asset_repair.py:66
 msgid "Completion Date can not be before Failure Date. Please adjust the dates accordingly."
-msgstr ""
+msgstr "Das Fertigstellungsdatum kann nicht vor dem Ausfalldatum liegen. Bitte passen Sie die Daten entsprechend an."
 
 #. Label of the completion_status (Select) field in DocType 'Maintenance
 #. Schedule Detail'
@@ -11891,7 +11891,7 @@ msgstr "Berater"
 
 #: setup/setup_wizard/data/industry_type.txt:14
 msgid "Consulting"
-msgstr ""
+msgstr "Beratung"
 
 #: setup/setup_wizard/operations/install_fixtures.py:64
 msgid "Consumable"
@@ -11979,7 +11979,7 @@ msgstr "Wert des verbrauchten Lagerbestands"
 
 #: setup/setup_wizard/data/industry_type.txt:15
 msgid "Consumer Products"
-msgstr ""
+msgstr "Konsumgüter"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:175
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:99
@@ -12477,7 +12477,7 @@ msgstr "Korrektur / Vorbeugung"
 
 #: setup/setup_wizard/data/industry_type.txt:16
 msgid "Cosmetics"
-msgstr ""
+msgstr "Kosmetik"
 
 #. Label of the cost (Currency) field in DocType 'Subscription Plan'
 #: accounts/doctype/subscription_plan/subscription_plan.json
@@ -14737,7 +14737,7 @@ msgstr "Kundenservice"
 
 #: setup/setup_wizard/data/designation.txt:13
 msgid "Customer Service Representative"
-msgstr ""
+msgstr "Kundendienstmitarbeiter:in"
 
 #. Label of the customer_territory (Link) field in DocType 'Loyalty Program'
 #: accounts/doctype/loyalty_program/loyalty_program.json
@@ -15938,7 +15938,7 @@ msgstr "Standardeinstellungen"
 
 #: setup/setup_wizard/data/industry_type.txt:17
 msgid "Defense"
-msgstr ""
+msgstr "Verteidigung"
 
 #. Label of the deferred_accounting_section (Section Break) field in DocType
 #. 'Item'
@@ -16150,7 +16150,7 @@ msgstr ""
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:11
 msgid "Delivered At Place Unloaded"
-msgstr ""
+msgstr "Geliefert Benannter Ort Entladen"
 
 #. Label of the delivered_by_supplier (Check) field in DocType 'POS Invoice
 #. Item'
@@ -16164,7 +16164,7 @@ msgstr "Geliefert von Lieferant"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:12
 msgid "Delivered Duty Paid"
-msgstr ""
+msgstr "Geliefert Verzollt"
 
 #. Name of a report
 #. Label of a Link in the Receivables Workspace
@@ -16420,7 +16420,7 @@ msgstr "Abteilung"
 
 #: setup/setup_wizard/data/industry_type.txt:18
 msgid "Department Stores"
-msgstr ""
+msgstr "Kaufhäuser"
 
 #. Label of the departure_time (Datetime) field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
@@ -16905,7 +16905,7 @@ msgstr "Position"
 
 #: setup/setup_wizard/data/designation.txt:14
 msgid "Designer"
-msgstr ""
+msgstr "Designer"
 
 #. Name of a role
 #: crm/doctype/lead/lead.json projects/doctype/project/project.json
@@ -18464,7 +18464,7 @@ msgstr "Elektronisches Rechnungsregister"
 
 #: setup/setup_wizard/data/industry_type.txt:20
 msgid "Electronics"
-msgstr ""
+msgstr "Elektronik"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -19070,11 +19070,11 @@ msgstr "Ende des aktuellen Abonnementzeitraums"
 
 #: setup/setup_wizard/data/industry_type.txt:21
 msgid "Energy"
-msgstr ""
+msgstr "Energie"
 
 #: setup/setup_wizard/data/designation.txt:15
 msgid "Engineer"
-msgstr ""
+msgstr "Ingenieur"
 
 #: manufacturing/report/bom_stock_report/bom_stock_report.html:13
 #: manufacturing/report/bom_stock_report/bom_stock_report.html:23
@@ -19202,7 +19202,7 @@ msgstr "Geben Sie den Betrag {0} ein."
 
 #: setup/setup_wizard/data/industry_type.txt:22
 msgid "Entertainment & Leisure"
-msgstr ""
+msgstr "Unterhaltung & Freizeit"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:57
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:82
@@ -19379,7 +19379,7 @@ msgstr "Auch Rechnungen, bei denen die Option „Steuereinbehalt anwenden“ nic
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:2
 msgid "Ex Works"
-msgstr ""
+msgstr "Ab Werk"
 
 #. Label of the url (Data) field in DocType 'Currency Exchange Settings'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
@@ -19563,7 +19563,7 @@ msgstr "Ausführung"
 
 #: setup/setup_wizard/data/designation.txt:16
 msgid "Executive Assistant"
-msgstr ""
+msgstr "Assistent:in der Geschäftsführung"
 
 #: setup/setup_wizard/data/industry_type.txt:23
 msgid "Executive Search"
@@ -19575,7 +19575,7 @@ msgstr "Steuerbefreite Lieferungen"
 
 #: setup/setup_wizard/data/lead_source.txt:5
 msgid "Exhibition"
-msgstr ""
+msgstr "Ausstellung"
 
 #. Option for the 'Create Chart Of Accounts Based On' (Select) field in DocType
 #. 'Company'
@@ -19590,7 +19590,7 @@ msgstr "Bestehendes Unternehmen"
 
 #: setup/setup_wizard/data/lead_source.txt:1
 msgid "Existing Customer"
-msgstr ""
+msgstr "Bestehender Kunde"
 
 #. Label of the exit (Tab Break) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -20367,7 +20367,7 @@ msgstr "Finanzbücher"
 
 #: setup/setup_wizard/data/designation.txt:17
 msgid "Finance Manager"
-msgstr ""
+msgstr "Finanzleitung"
 
 #. Name of a report
 #: accounts/report/financial_ratios/financial_ratios.json
@@ -20381,7 +20381,7 @@ msgstr "Finanzberichte"
 
 #: setup/setup_wizard/data/industry_type.txt:24
 msgid "Financial Services"
-msgstr ""
+msgstr "Finanzdienstleistungen"
 
 #. Title of an Onboarding Step
 #. Label of a Card Break in the Financial Reports Workspace
@@ -20799,7 +20799,7 @@ msgstr "Die folgenden Elemente {0} sind nicht als Element {1} markiert. Sie kön
 
 #: setup/setup_wizard/data/industry_type.txt:25
 msgid "Food, Beverage & Tobacco"
-msgstr ""
+msgstr "Lebensmittel, Getränke und Tabakwaren"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -21022,12 +21022,12 @@ msgstr "Forum-URL"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:4
 msgid "Free Alongside Ship"
-msgstr ""
+msgstr "Frei Längsseite Schiff"
 
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:3
 msgid "Free Carrier"
-msgstr ""
+msgstr "Frei Frachtführer"
 
 #. Label of the free_item (Link) field in DocType 'Pricing Rule'
 #. Label of the section_break_6 (Section Break) field in DocType 'Promotional
@@ -21045,7 +21045,7 @@ msgstr ""
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:5
 msgid "Free On Board"
-msgstr ""
+msgstr "Frei an Bord"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:282
 msgid "Free item code is not selected"
@@ -21305,7 +21305,7 @@ msgstr "Von-Datum kann später liegen als Bis-Datum"
 
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:26
 msgid "From Date is mandatory"
-msgstr ""
+msgstr "Von-Datum ist obligatorisch"
 
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.py:21
 #: accounts/report/general_ledger/general_ledger.py:76
@@ -22410,7 +22410,7 @@ msgstr "Grüße Abschnitt"
 
 #: setup/setup_wizard/data/industry_type.txt:26
 msgid "Grocery"
-msgstr ""
+msgstr "Lebensmittel"
 
 #. Label of the gross_margin (Currency) field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -22454,7 +22454,7 @@ msgstr "Bruttokaufbetrag"
 
 #: assets/doctype/asset_depreciation_schedule/asset_depreciation_schedule.py:371
 msgid "Gross Purchase Amount Too Low: {0} cannot be depreciated over {1} cycles with a frequency of {2} depreciations."
-msgstr ""
+msgstr "Bruttokaufbetrag zu niedrig: {0} kann nicht über {1} Zyklen mit einer Häufigkeit von {2} Abschreibungen abgeschrieben werden."
 
 #: assets/doctype/asset/asset.py:313
 msgid "Gross Purchase Amount is mandatory"
@@ -22748,16 +22748,16 @@ msgstr "Gibt es eine Standard-Nummernkreis für Chargen?"
 
 #: setup/setup_wizard/data/designation.txt:19
 msgid "Head of Marketing and Sales"
-msgstr ""
+msgstr "Leitung Marketing und Vertrieb"
 
 #. Description of a DocType
 #: accounts/doctype/account/account.json
 msgid "Heads (or groups) against which Accounting Entries are made and balances are maintained."
-msgstr ""
+msgstr "Konten (oder Kontengruppen), unter denen Buchungen vorgenommen und Salden geführt werden."
 
 #: setup/setup_wizard/data/industry_type.txt:27
 msgid "Health Care"
-msgstr ""
+msgstr "Gesundheitswesen"
 
 #. Label of the health_details (Small Text) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -25100,7 +25100,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
-msgstr ""
+msgstr "Investment-Banking"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:38
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:53
@@ -29230,11 +29230,11 @@ msgstr "Verwaltung"
 
 #: setup/setup_wizard/data/designation.txt:20
 msgid "Manager"
-msgstr ""
+msgstr "Manager:in"
 
 #: setup/setup_wizard/data/designation.txt:21
 msgid "Managing Director"
-msgstr ""
+msgstr "Geschäftsleitung"
 
 #. Label of the reqd (Check) field in DocType 'POS Field'
 #. Label of the reqd (Check) field in DocType 'Inventory Dimension'
@@ -29666,11 +29666,11 @@ msgstr "Marketingkosten"
 
 #: setup/setup_wizard/data/designation.txt:22
 msgid "Marketing Manager"
-msgstr ""
+msgstr "Marketing-Manager:in"
 
 #: setup/setup_wizard/data/designation.txt:23
 msgid "Marketing Specialist"
-msgstr ""
+msgstr "Marketing-Spezialist:in"
 
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -30987,7 +30987,7 @@ msgstr "Mehr Informationen"
 
 #: setup/setup_wizard/data/industry_type.txt:32
 msgid "Motion Picture & Video"
-msgstr ""
+msgstr "Film & Video"
 
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:58
 #: stock/dashboard/item_dashboard_list.html:52 stock/doctype/batch/batch.js:75
@@ -31069,7 +31069,7 @@ msgstr "Mehrere Artikel können nicht als fertiger Artikel markiert werden"
 
 #: setup/setup_wizard/data/industry_type.txt:33
 msgid "Music"
-msgstr ""
+msgstr "Musik"
 
 #. Label of the must_be_whole_number (Check) field in DocType 'UOM'
 #: manufacturing/doctype/work_order/work_order.py:998
@@ -31705,7 +31705,7 @@ msgstr "Newsletter"
 
 #: setup/setup_wizard/data/industry_type.txt:34
 msgid "Newspaper Publishers"
-msgstr ""
+msgstr "Zeitungsverlage"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -32702,7 +32702,7 @@ msgstr "Laufende Jobkarten"
 
 #: setup/setup_wizard/data/industry_type.txt:35
 msgid "Online Auctions"
-msgstr ""
+msgstr "Online-Auktionen"
 
 #. Description of the 'Default Advance Account' (Link) field in DocType
 #. 'Payment Reconciliation'
@@ -35734,7 +35734,7 @@ msgstr "Ausstehende Verarbeitung"
 
 #: setup/setup_wizard/data/industry_type.txt:36
 msgid "Pension Funds"
-msgstr ""
+msgstr "Rentenfonds"
 
 #. Option for the 'Evaluation Period' (Select) field in DocType 'Supplier
 #. Scorecard'
@@ -35984,7 +35984,7 @@ msgstr "Arzneimittel"
 
 #: setup/setup_wizard/data/industry_type.txt:37
 msgid "Pharmaceuticals"
-msgstr ""
+msgstr "Pharmazeutika"
 
 #. Option for the 'Type' (Select) field in DocType 'Mode of Payment'
 #. Option for the 'Payment Channel' (Select) field in DocType 'Payment Gateway
@@ -38766,7 +38766,7 @@ msgstr "Produktanfrage"
 
 #: setup/setup_wizard/data/designation.txt:25
 msgid "Product Manager"
-msgstr ""
+msgstr "Produktmanager:in"
 
 #. Label of the product_price_id (Data) field in DocType 'Subscription Plan'
 #: accounts/doctype/subscription_plan/subscription_plan.json
@@ -39133,7 +39133,7 @@ msgstr "Projekt-ID"
 
 #: setup/setup_wizard/data/designation.txt:26
 msgid "Project Manager"
-msgstr ""
+msgstr "Projektmanager:in"
 
 #. Label of the project_name (Data) field in DocType 'Sales Invoice Timesheet'
 #. Label of the project_name (Data) field in DocType 'Project'
@@ -39425,7 +39425,7 @@ msgstr "Bereitstellung"
 
 #: setup/doctype/company/company.py:447
 msgid "Provisional Account"
-msgstr ""
+msgstr "Vorläufiges Konto"
 
 #. Label of the provisional_expense_account (Link) field in DocType 'Purchase
 #. Receipt Item'
@@ -41357,7 +41357,7 @@ msgstr "Zinssatz (%) p.a."
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Rate of Stock UOM"
-msgstr ""
+msgstr "Einzelpreis der Lager-ME"
 
 #. Label of the rate_or_discount (Select) field in DocType 'Pricing Rule'
 #. Label of the rate_or_discount (Data) field in DocType 'Pricing Rule Detail'
@@ -41610,7 +41610,7 @@ msgstr "Ablesungen"
 
 #: setup/setup_wizard/data/industry_type.txt:40
 msgid "Real Estate"
-msgstr ""
+msgstr "Immobilien"
 
 #: support/doctype/issue/issue.js:51
 msgid "Reason"
@@ -41656,7 +41656,7 @@ msgstr ""
 
 #: projects/doctype/project/project.js:136
 msgid "Recalculating Purchase Cost against this Project..."
-msgstr ""
+msgstr "Neuberechnung der Anschaffungskosten für dieses Projekt..."
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #. Option for the 'Purpose' (Select) field in DocType 'Asset Movement'
@@ -43195,7 +43195,7 @@ msgstr "Forschung & Entwicklung"
 
 #: setup/setup_wizard/data/designation.txt:27
 msgid "Researcher"
-msgstr ""
+msgstr "Forscher:in"
 
 #. Description of the 'Supplier Primary Address' (Link) field in DocType
 #. 'Supplier'
@@ -43584,7 +43584,7 @@ msgstr "Auftrag fortsetzen"
 
 #: setup/setup_wizard/data/industry_type.txt:41
 msgid "Retail & Wholesale"
-msgstr ""
+msgstr "Einzel- und Großhandel"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:5
 msgid "Retailer"
@@ -45767,7 +45767,7 @@ msgstr "Übersicht über den Umsatz"
 
 #: setup/setup_wizard/data/designation.txt:28
 msgid "Sales Representative"
-msgstr ""
+msgstr "Vertriebsmitarbeiter:in"
 
 #: accounts/report/gross_profit/gross_profit.py:797
 #: stock/doctype/delivery_note/delivery_note.js:218
@@ -46350,7 +46350,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/designation.txt:29
 msgid "Secretary"
-msgstr ""
+msgstr "Sekretär:in"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:172
 #: accounts/report/tds_computation_summary/tds_computation_summary.py:117
@@ -46364,7 +46364,7 @@ msgstr "Gedeckte Kredite"
 
 #: setup/setup_wizard/data/industry_type.txt:42
 msgid "Securities & Commodity Exchanges"
-msgstr ""
+msgstr "Wertpapier- und Rohstoffbörsen"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:18
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:26
@@ -48679,7 +48679,7 @@ msgstr "Glättungskonstante"
 
 #: setup/setup_wizard/data/industry_type.txt:44
 msgid "Soap & Detergent"
-msgstr ""
+msgstr "Seife & Waschmittel"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:32
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:45
@@ -48689,7 +48689,7 @@ msgstr "Software"
 
 #: setup/setup_wizard/data/designation.txt:30
 msgid "Software Developer"
-msgstr ""
+msgstr "Software-Entwickler:in"
 
 #. Option for the 'Status' (Select) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json assets/doctype/asset/asset_list.js:9
@@ -48925,7 +48925,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:46
 msgid "Sports"
-msgstr ""
+msgstr "Sport"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -52404,11 +52404,11 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:47
 msgid "Technology"
-msgstr ""
+msgstr "Technologie"
 
 #: setup/setup_wizard/data/industry_type.txt:48
 msgid "Telecommunications"
-msgstr ""
+msgstr "Telekommunikation"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:69
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:93
@@ -52422,7 +52422,7 @@ msgstr "Telefonie Anrufart"
 
 #: setup/setup_wizard/data/industry_type.txt:49
 msgid "Television"
-msgstr ""
+msgstr "Fernsehen"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #. Label of the template (Link) field in DocType 'Quality Feedback'
@@ -55398,7 +55398,7 @@ msgstr "Transportbeleg Nr"
 
 #: setup/setup_wizard/data/industry_type.txt:50
 msgid "Transportation"
-msgstr ""
+msgstr "Transportwesen"
 
 #. Label of the transporter (Link) field in DocType 'Driver'
 #. Label of the transporter (Link) field in DocType 'Delivery Note'
@@ -57117,7 +57117,7 @@ msgstr "Herstellername"
 
 #: setup/setup_wizard/data/industry_type.txt:51
 msgid "Venture Capital"
-msgstr ""
+msgstr "Risikokapital"
 
 #: www/book_appointment/verify/index.html:15
 msgid "Verification failed please check the link"
