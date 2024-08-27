@@ -329,11 +329,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-02-07 09:18:13.999231",
-=======
- "modified": "2024-08-27 09:28:03.961443",
->>>>>>> ca2fde891e (fix: timeout while submitting stock entry (#42929))
+ "modified": "2024-08-27 09:29:03.961443",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
