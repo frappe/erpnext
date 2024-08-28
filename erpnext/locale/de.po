@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-27 15:13\n"
+"PO-Revision-Date: 2024-08-28 15:39\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -30076,7 +30076,7 @@ msgstr "Maximaler Rechnungsbetrag"
 #. Label of the maximum_net_rate (Float) field in DocType 'Item Tax'
 #: stock/doctype/item_tax/item_tax.json
 msgid "Maximum Net Rate"
-msgstr "Maximaler Nettopreis"
+msgstr "Bis Nettopreis"
 
 #. Label of the maximum_payment_amount (Currency) field in DocType 'Payment
 #. Reconciliation'
@@ -30493,7 +30493,7 @@ msgstr "Mindestalter Interessent (in Tagen)"
 #. Label of the minimum_net_rate (Float) field in DocType 'Item Tax'
 #: stock/doctype/item_tax/item_tax.json
 msgid "Minimum Net Rate"
-msgstr "Mindestnettopreis"
+msgstr "Ab Nettopreis"
 
 #. Label of the min_order_qty (Float) field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -44364,7 +44364,7 @@ msgstr "Zeile {0}: Buchungssatz {1} betrifft nicht Konto {2} oder bereits mit ei
 
 #: stock/doctype/item/item.py:348
 msgid "Row #{0}: Maximum Net Rate cannot be greater than Minimum Net Rate"
-msgstr ""
+msgstr "Zeile #{0}: Der Ab Nettopreis kann nicht größer sein als der Bis Nettopreis"
 
 #: selling/doctype/sales_order/sales_order.py:557
 msgid "Row #{0}: Not allowed to change Supplier as Purchase Order already exists"
@@ -44831,7 +44831,7 @@ msgstr "Zeile {0}: Artikel {1} muss ein Lagerartikel sein."
 
 #: controllers/subcontracting_controller.py:103
 msgid "Row {0}: Item {1} must be a subcontracted item."
-msgstr ""
+msgstr "Zeile {0}: Artikel {1} muss ein an Dritte vergebener Artikel sein."
 
 #: stock/doctype/delivery_note/delivery_note.py:742
 msgid "Row {0}: Packed Qty must be equal to {1} Qty."
@@ -44863,7 +44863,7 @@ msgstr "Zeile {0}: Wenn es sich um eine Vorkasse-Buchung handelt, bitte \"Ist Vo
 
 #: stock/doctype/packing_slip/packing_slip.py:140
 msgid "Row {0}: Please provide a valid Delivery Note Item or Packed Item reference."
-msgstr ""
+msgstr "Zeile {0}: Bitte geben Sie einen gültigen Lieferschein Artikel oder verpackten Artikel an."
 
 #: controllers/subcontracting_controller.py:123
 msgid "Row {0}: Please select a BOM for Item {1}."
@@ -44923,7 +44923,7 @@ msgstr "Zeile {0}: Unterauftragsartikel sind für den Rohstoff {1} obligatorisch
 
 #: controllers/stock_controller.py:1048
 msgid "Row {0}: Target Warehouse is mandatory for internal transfers"
-msgstr ""
+msgstr "Zeile {0}: Ziellager ist für interne Transfers obligatorisch"
 
 #: stock/doctype/stock_entry/stock_entry.py:427
 msgid "Row {0}: The item {1}, quantity must be positive number"
@@ -46573,7 +46573,7 @@ msgstr "Lager auswählen ..."
 
 #: manufacturing/doctype/production_plan/production_plan.js:438
 msgid "Select Warehouses to get Stock for Materials Planning"
-msgstr ""
+msgstr "Wählen Sie Lager aus, um Bestände für die Materialplanung zu erhalten"
 
 #: public/js/communication.js:80
 msgid "Select a Company"
@@ -46613,7 +46613,7 @@ msgstr "Wählen Sie ein Konto aus, das in der Kontowährung gedruckt werden soll
 
 #: selling/page/point_of_sale/pos_past_order_summary.js:18
 msgid "Select an invoice to load summary data"
-msgstr ""
+msgstr "Wählen Sie eine Rechnung aus, um die Zusammenfassung zu laden"
 
 #: selling/doctype/quotation/quotation.js:342
 msgid "Select an item from each set to be used in the Sales Order."
@@ -46864,7 +46864,7 @@ msgstr "An primären Kontakt senden"
 #. Description of a DocType
 #: setup/doctype/email_digest/email_digest.json
 msgid "Send regular summary reports via Email."
-msgstr ""
+msgstr "Regelmäßige Zusammenfassungen per E-Mail senden."
 
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
@@ -47242,7 +47242,7 @@ msgstr "Serien- und Chargenbündel {0} wird bereits in {1} {2} verwendet."
 #. 'Subcontracting Receipt Item'
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Serial and Batch Details"
-msgstr ""
+msgstr "Serien- und Chargendetails"
 
 #. Name of a DocType
 #: stock/doctype/serial_and_batch_entry/serial_and_batch_entry.json
@@ -48016,7 +48016,7 @@ msgstr "Haltbarkeit in Tagen"
 
 #: stock/doctype/batch/batch.py:191
 msgid "Shelf Life in Days"
-msgstr ""
+msgstr "Haltbarkeitsdauer in Tagen"
 
 #. Label of the shift (Link) field in DocType 'Depreciation Schedule'
 #: assets/doctype/asset/asset.js:298
@@ -48327,7 +48327,7 @@ msgstr "Kumulativen Betrag anzeigen"
 
 #: stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.js:16
 msgid "Show Disabled Warehouses"
-msgstr ""
+msgstr "Deaktivierte Lager anzeigen"
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:306
 msgid "Show Document"
@@ -48347,7 +48347,7 @@ msgstr "Zukünftige Zahlungen anzeigen"
 
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:142
 msgid "Show GL Balance"
-msgstr ""
+msgstr "Hauptbuchsaldo anzeigen"
 
 #. Label of the show_in_website (Check) field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
@@ -48407,7 +48407,7 @@ msgstr "zeigen Operationen"
 #. Label of the show_pay_button (Check) field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgid "Show Pay Button in Purchase Order Portal"
-msgstr ""
+msgstr "Schaltfläche „Bezahlen“ im Bestellportal anzeigen"
 
 #: accounts/report/sales_payment_summary/sales_payment_summary.js:40
 msgid "Show Payment Details"
@@ -48446,7 +48446,7 @@ msgstr "Alterungsdaten anzeigen"
 #. Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Show Taxes as Table in Print"
-msgstr ""
+msgstr "Steuern als Tabelle im Druck anzeigen"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:480
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:296
@@ -48477,7 +48477,7 @@ msgstr "In der Website anzeigen"
 
 #: accounts/report/trial_balance/trial_balance.js:110
 msgid "Show net values in opening and closing columns"
-msgstr ""
+msgstr "Nettowerte in Eröffnungs- und Abschlussspalten anzeigen"
 
 #: accounts/report/sales_payment_summary/sales_payment_summary.js:35
 msgid "Show only POS"
@@ -48497,7 +48497,7 @@ msgstr "Gewinn- und Verlustrechnung für nicht geschlossenes Finanzjahr zeigen."
 
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:96
 msgid "Show with upcoming revenue/expense"
-msgstr ""
+msgstr "Mit kommenden Einnahmen/Ausgaben anzeigen"
 
 #: accounts/report/consolidated_financial_statement/consolidated_financial_statement.js:137
 #: accounts/report/profitability_analysis/profitability_analysis.js:71
@@ -48702,7 +48702,7 @@ msgstr "Verkauft von"
 
 #: www/book_appointment/index.js:248
 msgid "Something went wrong please try again"
-msgstr ""
+msgstr "Etwas ist schief gelaufen, bitte versuchen Sie es erneut"
 
 #: accounts/doctype/pricing_rule/utils.py:735
 msgid "Sorry, this coupon code is no longer valid"
@@ -48861,12 +48861,12 @@ msgstr "Vom Lieferanten bezogen"
 #. Name of a DocType
 #: accounts/doctype/south_africa_vat_account/south_africa_vat_account.json
 msgid "South Africa VAT Account"
-msgstr ""
+msgstr "Südafrika Mehrwertsteuer-Konto"
 
 #. Name of a DocType
 #: regional/doctype/south_africa_vat_settings/south_africa_vat_settings.json
 msgid "South Africa VAT Settings"
-msgstr ""
+msgstr "Südafrika Mehrwertsteuer-Einstellungen"
 
 #. Label of the spacer (Data) field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
@@ -48876,12 +48876,12 @@ msgstr "Abstandshalter"
 #. Description of a DocType
 #: setup/doctype/currency_exchange/currency_exchange.json
 msgid "Specify Exchange Rate to convert one currency into another"
-msgstr ""
+msgstr "Geben Sie den Wechselkurs an, um eine Währung in eine andere umzurechnen"
 
 #. Description of a DocType
 #: accounts/doctype/shipping_rule/shipping_rule.json
 msgid "Specify conditions to calculate shipping amount"
-msgstr ""
+msgstr "Geben Sie Bedingungen an, um den Versandbetrag zu berechnen"
 
 #: assets/doctype/asset/asset.js:552 stock/doctype/batch/batch.js:75
 #: stock/doctype/batch/batch.js:167 support/doctype/issue/issue.js:112
@@ -49096,7 +49096,7 @@ msgstr "Startdatum darf nicht vor dem aktuellen Datum liegen"
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.js:21
 msgid "Start Deletion"
-msgstr ""
+msgstr "Löschen starten"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:115
 msgid "Start Import"
@@ -49129,7 +49129,7 @@ msgstr "Startzeit"
 
 #: support/doctype/service_level_agreement/service_level_agreement.py:129
 msgid "Start Time can't be greater than or equal to End Time for {0}."
-msgstr ""
+msgstr "Die Startzeit kann nicht größer oder gleich der Endzeit für {0} sein."
 
 #: accounts/report/consolidated_financial_statement/consolidated_financial_statement.js:56
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:56
@@ -49168,7 +49168,7 @@ msgstr "Startzeit"
 
 #: utilities/bulk_transaction.py:21
 msgid "Started a background job to create {1} {0}"
-msgstr ""
+msgstr "Hintergrundjob zum Erstellen von {1} {0} gestartet"
 
 #. Label of the date_dist_from_left_edge (Float) field in DocType 'Cheque Print
 #. Template'
@@ -49462,7 +49462,7 @@ msgstr "Status muss einer aus {0} sein"
 
 #: stock/doctype/quality_inspection/quality_inspection.py:183
 msgid "Status set to rejected as there are one or more rejected readings."
-msgstr ""
+msgstr "Der Status wurde auf abgelehnt gesetzt, da es einen oder mehrere abgelehnte Messwerte gibt."
 
 #. Description of the 'Supplier Details' (Text) field in DocType 'Supplier'
 #: buying/doctype/supplier/supplier.json
@@ -49548,7 +49548,7 @@ msgstr ""
 #. Label of the stock_consumption (Check) field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgid "Stock Consumed During Repair"
-msgstr ""
+msgstr "Während der Reparatur verbrauchter Bestand"
 
 #. Label of the stock_consumption_details_section (Section Break) field in
 #. DocType 'Asset Repair'
@@ -49616,7 +49616,7 @@ msgstr "Lagerbuchung {0} erstellt"
 
 #: manufacturing/doctype/job_card/job_card.py:1261
 msgid "Stock Entry {0} has created"
-msgstr ""
+msgstr "Lagerbuchung {0} erstellt"
 
 #: accounts/doctype/journal_entry/journal_entry.py:1211
 msgid "Stock Entry {0} is not submitted"
@@ -49834,15 +49834,15 @@ msgstr ""
 #: stock/doctype/stock_settings/stock_settings.py:210
 #: stock/doctype/stock_settings/stock_settings.py:224
 msgid "Stock Reservation"
-msgstr ""
+msgstr "Bestandsreservierung"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1135
 msgid "Stock Reservation Entries Cancelled"
-msgstr ""
+msgstr "Bestandsreservierungen storniert"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1087
 msgid "Stock Reservation Entries Created"
-msgstr ""
+msgstr "Bestandsreservierungen erstellt"
 
 #. Name of a DocType
 #: selling/doctype/sales_order/sales_order.js:462
@@ -49851,15 +49851,15 @@ msgstr ""
 #: stock/report/reserved_stock/reserved_stock.js:53
 #: stock/report/reserved_stock/reserved_stock.py:171
 msgid "Stock Reservation Entry"
-msgstr ""
+msgstr "Bestandsreservierungseintrag"
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:425
 msgid "Stock Reservation Entry cannot be updated as it has been delivered."
-msgstr ""
+msgstr "Der Bestandsreservierungseintrag kann nicht aktualisiert werden, da er bereits geliefert wurde."
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:419
 msgid "Stock Reservation Entry created against a Pick List cannot be updated. If you need to make changes, we recommend canceling the existing entry and creating a new one."
-msgstr ""
+msgstr "Ein anhand einer Kommissionierliste erstellter Bestandsreservierungseintrag kann nicht aktualisiert werden. Wenn Sie Änderungen vornehmen müssen, empfehlen wir, den vorhandenen Eintrag zu stornieren und einen neuen zu erstellen."
 
 #: stock/doctype/delivery_note/delivery_note.py:695
 msgid "Stock Reservation Warehouse Mismatch"
@@ -49867,14 +49867,14 @@ msgstr ""
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:509
 msgid "Stock Reservation can only be created against {0}."
-msgstr ""
+msgstr "Bestandsreservierungen können nur gegen {0} erstellt werden."
 
 #. Label of the stock_reserved_qty (Float) field in DocType 'Sales Order Item'
 #. Label of the stock_reserved_qty (Float) field in DocType 'Pick List Item'
 #: selling/doctype/sales_order_item/sales_order_item.json
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgid "Stock Reserved Qty (in Stock UOM)"
-msgstr ""
+msgstr "Reservierter Bestand (in Lager-ME)"
 
 #: stock/doctype/stock_entry/stock_entry.py:1583
 msgid "Stock Return"
@@ -50775,7 +50775,7 @@ msgstr "Sonntag"
 
 #: buying/report/subcontract_order_summary/subcontract_order_summary.py:145
 msgid "Supplied Item"
-msgstr ""
+msgstr "Gelieferter Artikel"
 
 #. Label of the supplied_items (Table) field in DocType 'Purchase Invoice'
 #. Label of the supplied_items (Table) field in DocType 'Purchase Order'
@@ -53896,7 +53896,7 @@ msgstr "Bis Datum darf nicht kleiner sein als Von Datum"
 
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.py:29
 msgid "To Date is mandatory"
-msgstr ""
+msgstr "Bis Datum ist obligatorisch"
 
 #: buying/report/subcontracted_item_to_be_received/subcontracted_item_to_be_received.py:11
 #: buying/report/subcontracted_raw_materials_to_be_transferred/subcontracted_raw_materials_to_be_transferred.py:11
@@ -53934,7 +53934,7 @@ msgstr "Auszuliefern und Abzurechnen"
 #. Label of the to_delivery_date (Date) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "To Delivery Date"
-msgstr ""
+msgstr "Bis Liefertermin"
 
 #. Label of the to_doctype (Link) field in DocType 'Bulk Transaction Log
 #. Detail'
@@ -53944,7 +53944,7 @@ msgstr ""
 
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.js:83
 msgid "To Due Date"
-msgstr ""
+msgstr "Bis Fälligkeitsdatum"
 
 #. Label of the to_employee (Link) field in DocType 'Asset Movement Item'
 #: assets/doctype/asset_movement_item/asset_movement_item.json
@@ -53995,7 +53995,7 @@ msgstr "Zu bezahlen"
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 #: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgid "To Payment Date"
-msgstr ""
+msgstr "Bis Zahlungsdatum"
 
 #: manufacturing/report/job_card_summary/job_card_summary.js:43
 #: manufacturing/report/work_order_summary/work_order_summary.js:29
@@ -54025,7 +54025,7 @@ msgstr "Zu empfangen und abzurechnen"
 #. Tool'
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.json
 msgid "To Reference Date"
-msgstr ""
+msgstr "Bis Stichtag"
 
 #. Label of the to_rename (Check) field in DocType 'GL Entry'
 #. Label of the to_rename (Check) field in DocType 'Stock Ledger Entry'
