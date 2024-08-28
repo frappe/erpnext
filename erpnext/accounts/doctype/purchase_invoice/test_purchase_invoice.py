@@ -12,7 +12,6 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_ent
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice as make_pi_from_po
 from erpnext.buying.doctype.purchase_order.test_purchase_order import (
-	create_pr_against_po,
 	create_purchase_order,
 )
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
