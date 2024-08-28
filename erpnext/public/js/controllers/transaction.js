@@ -2390,7 +2390,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		} else {
 			let filters = {
 				'item_code': item.item_code,
-				'valid_from': ["<=", doc.transaction_date || doc.bill_date || doc.posting_date],
+				'valid_from': [">=", doc.transaction_date || doc.bill_date || doc.posting_date],
 				'item_group': item.item_group,
 			}
 

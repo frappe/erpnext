@@ -215,7 +215,7 @@ def get_cost_center_allocation_data(company, posting_date):
 		.select(par.main_cost_center, child.cost_center, child.percentage)
 		.where(par.docstatus == 1)
 		.where(par.company == company)
-		.where(par.valid_from <= posting_date)
+		.where(par.valid_from >= posting_date)
 		.orderby(par.valid_from, order=frappe.qb.desc)
 	).run(as_dict=True)
 
