@@ -40,6 +40,7 @@
   "column_break_19",
   "discount_percentage",
   "discount_amount",
+  "distributed_discount_amount",
   "base_rate_with_margin",
   "section_break_1",
   "rate",
@@ -274,7 +275,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount",
+   "collapsible_depends_on": "eval: doc.margin_type || doc.discount_amount || doc.distributed_discount_amount",
    "fieldname": "discount_and_margin",
    "fieldtype": "Section Break",
    "label": "Discount and Margin"
@@ -907,13 +908,23 @@
   {
    "fieldname": "column_break_rxvc",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "distributed_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Distributed Discount Amount",
+   "options": "currency"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-03-21 18:15:07.603672",
+=======
+ "modified": "2024-06-02 06:18:38.491763",
+>>>>>>> 0bab6f34c1 (fix: distributed discounts on si)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
