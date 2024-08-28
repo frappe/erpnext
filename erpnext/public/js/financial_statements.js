@@ -114,6 +114,8 @@ erpnext.financial_statements = {
 	onload: function (report) {
 		// dropdown for links to other financial statements
 		erpnext.financial_statements.filters = get_filters();
+
+		let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today());
 		var filters = report.get_values();
 
 		if (!filters.period_start_date || !filters.period_end_date) {
