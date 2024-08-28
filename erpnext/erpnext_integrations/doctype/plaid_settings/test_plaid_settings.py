@@ -68,10 +68,9 @@ class TestPlaidSettings(unittest.TestCase):
 			"institution": {"institution_id": "ins_6", "name": "Citi"},
 		}
 
-		bank = json.dumps(frappe.get_doc("Bank", "Citi").as_dict(), default=json_handler)
 		company = frappe.db.get_single_value("Global Defaults", "default_company")
 
-		add_bank_accounts(bank_accounts, bank, company)
+		add_bank_accounts(bank_accounts, "Citi", company)
 
 		transactions = {
 			"account_owner": None,
