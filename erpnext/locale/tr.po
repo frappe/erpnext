@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-27 15:13\n"
+"PO-Revision-Date: 2024-08-28 15:39\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -47994,7 +47994,7 @@ msgstr ""
 #: accounts/report/share_balance/share_balance.py:58
 #: accounts/report/share_ledger/share_ledger.py:54
 msgid "Share Type"
-msgstr ""
+msgstr "Paylaşım Türü"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
@@ -53039,7 +53039,7 @@ msgstr ""
 
 #: accounts/doctype/share_transfer/share_transfer.py:166
 msgid "The shares don't exist with the {0}"
-msgstr ""
+msgstr "{0} ile paylaşımlar mevcut değil"
 
 #: stock/stock_ledger.py:752
 msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
