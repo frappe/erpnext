@@ -486,7 +486,7 @@ def get_qty_and_rate_for_other_item(doc, pr_doc, pricing_rules, row_item):
 				continue
 
 			stock_qty = row.get("qty") * (row.get("conversion_factor") or 1.0)
-			amount = stock_qty * (row.get("price_list_rate") or row.get("rate"))
+			amount = stock_qty * (flt(row.get("price_list_rate")) or flt(row.get("rate")))
 			pricing_rules = filter_pricing_rules_for_qty_amount(stock_qty, amount, pricing_rules, row)
 
 			if pricing_rules and pricing_rules[0]:

@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "purpose",
-  "add_to_transit"
+  "add_to_transit",
+  "is_standard"
  ],
  "fields": [
   {
@@ -16,7 +17,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Purpose",
-   "options": "\nMaterial Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor",
+   "options": "\nMaterial Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble",
    "reqd": 1,
    "set_only_once": 1
   },
@@ -26,13 +27,21 @@
    "fieldname": "add_to_transit",
    "fieldtype": "Check",
    "label": "Add to Transit"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_standard",
+   "fieldtype": "Check",
+   "label": "Is Standard",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2024-07-08 08:41:19.385020",
+ "modified": "2024-08-24 16:00:22.696958",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {

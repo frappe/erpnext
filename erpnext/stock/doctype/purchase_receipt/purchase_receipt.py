@@ -1075,6 +1075,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 			if item.billed_amt and item.amount:
 				adjusted_amt = flt(item.billed_amt) - flt(item.amount)
 
+			adjusted_amt = adjusted_amt * flt(pr_doc.conversion_rate)
 			item.db_set("rate_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
 
 	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)

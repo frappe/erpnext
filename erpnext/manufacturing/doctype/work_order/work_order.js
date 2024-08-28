@@ -183,13 +183,30 @@ frappe.ui.form.on("Work Order", {
 			}
 		}
 
+		if (frm.doc.status == "Completed") {
+			if (frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
+				frm.add_custom_button(
+					__("BOM"),
+					() => {
+						frm.trigger("make_bom");
+					},
+					__("Create")
+				);
+			}
+		}
+
 		if (
-			frm.doc.status == "Completed" &&
-			frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture"
+			frm.doc.docstatus === 1 &&
+			["Closed", "Completed"].includes(frm.doc.status) &&
+			frm.doc.produced_qty > 0
 		) {
-			frm.add_custom_button(__("Create BOM"), () => {
-				frm.trigger("make_bom");
-			});
+			frm.add_custom_button(
+				__("Disassembly Order"),
+				() => {
+					frm.trigger("make_disassembly_order");
+				},
+				__("Create")
+			);
 		}
 
 		frm.trigger("add_custom_button_to_return_components");
@@ -335,6 +352,23 @@ frappe.ui.form.on("Work Order", {
 				}
 			},
 		});
+	},
+
+	make_disassembly_order(frm) {
+		erpnext.work_order
+			.show_prompt_for_qty_input(frm, "Disassemble")
+			.then((data) => {
+				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
+					work_order_id: frm.doc.name,
+					purpose: "Disassemble",
+					qty: data.qty,
+					target_warehouse: data.target_warehouse,
+				});
+			})
+			.then((stock_entry) => {
+				frappe.model.sync(stock_entry);
+				frappe.set_route("Form", stock_entry.doctype, stock_entry.name);
+			});
 	},
 
 	show_progress_for_items: function (frm) {
@@ -745,6 +779,10 @@ erpnext.work_order = {
 
 	get_max_transferable_qty: (frm, purpose) => {
 		let max = 0;
+		if (purpose === "Disassemble") {
+			return flt(frm.doc.produced_qty);
+		}
+
 		if (frm.doc.skip_transfer) {
 			max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
 		} else {
@@ -759,15 +797,38 @@ erpnext.work_order = {
 
 	show_prompt_for_qty_input: function (frm, purpose) {
 		let max = this.get_max_transferable_qty(frm, purpose);
+
+		let fields = [
+			{
+				fieldtype: "Float",
+				label: __("Qty for {0}", [__(purpose)]),
+				fieldname: "qty",
+				description: __("Max: {0}", [max]),
+				default: max,
+			},
+		];
+
+		if (purpose === "Disassemble") {
+			fields.push({
+				fieldtype: "Link",
+				options: "Warehouse",
+				fieldname: "target_warehouse",
+				label: __("Target Warehouse"),
+				default: frm.doc.source_warehouse || frm.doc.wip_warehouse,
+				get_query() {
+					return {
+						filters: {
+							company: frm.doc.company,
+							is_group: 0,
+						},
+					};
+				},
+			});
+		}
+
 		return new Promise((resolve, reject) => {
 			frappe.prompt(
-				{
-					fieldtype: "Float",
-					label: __("Qty for {0}", [__(purpose)]),
-					fieldname: "qty",
-					description: __("Max: {0}", [max]),
-					default: max,
-				},
+				fields,
 				(data) => {
 					max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
 
