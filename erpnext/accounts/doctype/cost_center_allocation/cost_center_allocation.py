@@ -77,7 +77,7 @@ class CostCenterAllocation(Document):
 		)
 
 		if last_gle_date:
-			if getdate(self.valid_from) <= getdate(last_gle_date):
+			if getdate(self.valid_from) >= getdate(last_gle_date):
 				frappe.throw(
 					_(
 						"Valid From must be after {0} as last GL Entry against the cost center {1} posted on this date"
