@@ -249,15 +249,8 @@ frappe.ui.form.on('Payment Entry', {
 		frm.refresh_fields();
 	},
 
-<<<<<<< HEAD
 	set_dynamic_labels: function(frm) {
-		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
-=======
-	set_dynamic_labels: function (frm) {
-		var company_currency = frm.doc.company
-			? frappe.get_doc(":Company", frm.doc.company)?.default_currency
-			: "";
->>>>>>> e9cf8937cd (fix: typeerror on Payment Entry)
+		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company)?.default_currency: "";
 
 		frm.set_currency_labels(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
 			"difference_amount", "base_paid_amount_after_tax", "base_received_amount_after_tax",
