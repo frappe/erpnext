@@ -54,7 +54,7 @@ class POSInvoiceMergeLog(Document):
 		for key, value in pos_occurences.items():
 			if len(value) > 1:
 				error_list.append(
-					_(f"{frappe.bold(key)} is added multiple times on rows: {frappe.bold(value)}")
+					_("{0} is added multiple times on rows: {1}").format(frappe.bold(key), frappe.bold(value))
 				)
 
 		if error_list:
@@ -97,16 +97,15 @@ class POSInvoiceMergeLog(Document):
 				return_against_status = frappe.db.get_value("POS Invoice", return_against, "status")
 				if return_against_status != "Consolidated":
 					# if return entry is not getting merged in the current pos closing and if it is not consolidated
-					bold_unconsolidated = frappe.bold("not Consolidated")
-					msg = _("Row #{}: Original Invoice {} of return invoice {} is {}.").format(
-						d.idx, bold_return_against, bold_pos_invoice, bold_unconsolidated
-					)
+					msg = _(
+						"Row #{}: The original Invoice {} of return invoice {} is not consolidated."
+					).format(d.idx, bold_return_against, bold_pos_invoice)
 					msg += " "
 					msg += _(
-						"Original invoice should be consolidated before or along with the return invoice."
+						"The original invoice should be consolidated before or along with the return invoice."
 					)
 					msg += "<br><br>"
-					msg += _("You can add original invoice {} manually to proceed.").format(
+					msg += _("You can add the original invoice {} manually to proceed.").format(
 						bold_return_against
 					)
 					frappe.throw(msg)
@@ -131,6 +130,7 @@ class POSInvoiceMergeLog(Document):
 		pos_invoice_docs = [frappe.get_cached_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]
 
 		self.update_pos_invoices(pos_invoice_docs)
+		self.serial_and_batch_bundle_reference_for_pos_invoice()
 		self.cancel_linked_invoices()
 
 	def process_merging_into_sales_invoice(self, data):
@@ -191,6 +191,7 @@ class POSInvoiceMergeLog(Document):
 				for i in items:
 					if (
 						i.item_code == item.item_code
+						and not i.serial_and_batch_bundle
 						and not i.serial_no
 						and not i.batch_no
 						and i.uom == item.uom
@@ -312,6 +313,12 @@ class POSInvoiceMergeLog(Document):
 			doc.set_status(update=True)
 			doc.save()
 
+	def serial_and_batch_bundle_reference_for_pos_invoice(self):
+		for d in self.pos_invoices:
+			pos_invoice = frappe.get_doc("POS Invoice", d.pos_invoice)
+			for table_name in ["items", "packed_items"]:
+				pos_invoice.set_serial_and_batch_bundle(table_name)
+
 	def cancel_linked_invoices(self):
 		for si_name in [self.consolidated_invoice, self.consolidated_credit_note]:
 			if not si_name:
@@ -392,7 +399,7 @@ def unconsolidate_pos_invoices(closing_entry):
 		"POS Invoice Merge Log", filters={"pos_closing_entry": closing_entry.name}, pluck="name"
 	)
 
-	if len(merge_logs) >= 10:
+	if len(closing_entry.pos_transactions) >= 10:
 		closing_entry.set_status(update=True, status="Queued")
 		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
@@ -481,7 +488,7 @@ def create_merge_logs(invoice_by_customer, closing_entry=None):
 		if closing_entry:
 			closing_entry.set_status(update=True, status="Failed")
 			if isinstance(error_message, list):
-				error_message = frappe.json.dumps(error_message)
+				error_message = json.dumps(error_message)
 			closing_entry.db_set("error_message", error_message)
 		raise
 

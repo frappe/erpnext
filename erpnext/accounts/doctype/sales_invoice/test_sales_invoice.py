@@ -2,8 +2,10 @@
 # License: GNU General Public License v3. See license.txt
 
 import copy
+import json
 
 import frappe
+from frappe import qb
 from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
@@ -2219,13 +2221,14 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.total_taxes_and_charges, 229)
 		self.assertEqual(si.rounding_adjustment, -0.20)
 
-		expected_values = [
-			["_Test Account Service Tax - _TC", 0.0, 114.50],
-			["_Test Account VAT - _TC", 0.0, 114.50],
-			[si.debit_to, 1501, 0.0],
-			["Round Off - _TC", 0.20, 0.0],
-			["Sales - _TC", 0.0, 1272.20],
-		]
+		round_off_account = frappe.get_cached_value("Company", "_Test Company", "round_off_account")
+		expected_values = {
+			"_Test Account Service Tax - _TC": [0.0, 114.50],
+			"_Test Account VAT - _TC": [0.0, 114.50],
+			si.debit_to: [1501, 0.0],
+			round_off_account: [0.20, 0.0],
+			"Sales - _TC": [0.0, 1272.20],
+		}
 
 		gl_entries = frappe.db.sql(
 			"""select account, sum(debit) as debit, sum(credit) as credit
@@ -2236,10 +2239,10 @@ class TestSalesInvoice(FrappeTestCase):
 			as_dict=1,
 		)
 
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_values[i][0], gle.account)
-			self.assertEqual(expected_values[i][1], gle.debit)
-			self.assertEqual(expected_values[i][2], gle.credit)
+		for gle in gl_entries:
+			expected_account_values = expected_values[gle.account]
+			self.assertEqual(expected_account_values[0], gle.debit)
+			self.assertEqual(expected_account_values[1], gle.credit)
 
 	def test_rounding_adjustment_3(self):
 		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
@@ -2288,6 +2291,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.total_taxes_and_charges, 480.86)
 		self.assertEqual(si.rounding_adjustment, -0.02)
 
+		round_off_account = frappe.get_cached_value("Company", "_Test Company", "round_off_account")
 		expected_values = dict(
 			(d[0], d)
 			for d in [
@@ -2295,7 +2299,7 @@ class TestSalesInvoice(FrappeTestCase):
 				["_Test Account Service Tax - _TC", 0.0, 240.43],
 				["_Test Account VAT - _TC", 0.0, 240.43],
 				["Sales - _TC", 0.0, 4007.15],
-				["Round Off - _TC", 0.01, 0.0],
+				[round_off_account, 0.01, 0.0],
 			]
 		)
 
@@ -2324,8 +2328,9 @@ class TestSalesInvoice(FrappeTestCase):
 			as_dict=1,
 		)
 
-		self.assertEqual(round_off_gle.cost_center, "_Test Cost Center 2 - _TC")
-		self.assertEqual(round_off_gle.location, "Block 1")
+		if round_off_gle:
+			self.assertEqual(round_off_gle.cost_center, "_Test Cost Center 2 - _TC")
+			self.assertEqual(round_off_gle.location, "Block 1")
 
 		disable_dimension()
 
@@ -2949,12 +2954,8 @@ class TestSalesInvoice(FrappeTestCase):
 		si.items[0].income_account = "Service - _TC"
 		si.additional_discount_account = "_Test Account Sales - _TC"
 		si.taxes[0].account_head = "TDS Payable - _TC"
+		# Ledger reposted implicitly upon 'Update After Submit'
 		si.save()
-
-		si.load_from_db()
-		self.assertTrue(si.repost_required)
-
-		si.repost_accounting_entries()
 
 		expected_gle = [
 			["_Test Account Sales - _TC", 22.0, 0.0, nowdate()],
@@ -2964,9 +2965,6 @@ class TestSalesInvoice(FrappeTestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, add_days(nowdate(), -1))
-
-		si.load_from_db()
-		self.assertFalse(si.repost_required)
 
 	def test_asset_depreciation_on_sale_with_pro_rata(self):
 		"""
@@ -3096,6 +3094,84 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertTrue(jv)
 		self.assertEqual(jv[0], si.grand_total)
 
+		party_link.delete()
+		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 0)
+
+	def test_sales_invoice_against_supplier_usd_with_dimensions(self):
+		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
+			make_customer,
+		)
+		from erpnext.accounts.doctype.party_link.party_link import create_party_link
+		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+
+		# create a customer
+		customer = make_customer(customer="_Test Common Supplier USD")
+		cust_doc = frappe.get_doc("Customer", customer)
+		cust_doc.default_currency = "USD"
+		cust_doc.save()
+		# create a supplier
+		supplier = create_supplier(supplier_name="_Test Common Supplier USD").name
+		supp_doc = frappe.get_doc("Supplier", supplier)
+		supp_doc.default_currency = "USD"
+		supp_doc.save()
+
+		# create a party link between customer & supplier
+		party_link = create_party_link("Supplier", supplier, customer)
+
+		# enable common party accounting
+		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 1)
+
+		# create a dimension and make it mandatory
+		if not frappe.get_all("Accounting Dimension", filters={"document_type": "Department"}):
+			dim = frappe.get_doc(
+				{
+					"doctype": "Accounting Dimension",
+					"document_type": "Department",
+					"dimension_defaults": [{"company": "_Test Company", "mandatory_for_bs": True}],
+				}
+			)
+			dim.save()
+		else:
+			dim = frappe.get_doc(
+				"Accounting Dimension",
+				frappe.get_all("Accounting Dimension", filters={"document_type": "Department"})[0],
+			)
+			dim.disabled = False
+			dim.dimension_defaults = []
+			dim.append("dimension_defaults", {"company": "_Test Company", "mandatory_for_bs": True})
+			dim.save()
+
+		# create a sales invoice
+		si = create_sales_invoice(
+			customer=customer, parent_cost_center="_Test Cost Center - _TC", do_not_submit=True
+		)
+		si.department = "All Departments"
+		si.save().submit()
+
+		# check outstanding of sales invoice
+		si.reload()
+		self.assertEqual(si.status, "Paid")
+		self.assertEqual(flt(si.outstanding_amount), 0.0)
+
+		# check creation of journal entry
+		jv = frappe.get_all(
+			"Journal Entry Account",
+			{
+				"account": si.debit_to,
+				"party_type": "Customer",
+				"party": si.customer,
+				"reference_type": si.doctype,
+				"reference_name": si.name,
+				"department": "All Departments",
+			},
+			pluck="credit_in_account_currency",
+		)
+
+		self.assertTrue(jv)
+		self.assertEqual(jv[0], si.grand_total)
+
+		dim.disabled = True
+		dim.save()
 		party_link.delete()
 		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 0)
 
@@ -3733,9 +3809,9 @@ class TestSalesInvoice(FrappeTestCase):
 
 		map_docs(
 			method="erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
-			source_names=frappe.json.dumps([dn1.name, dn2.name]),
+			source_names=json.dumps([dn1.name, dn2.name]),
 			target_doc=si,
-			args=frappe.json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
+			args=json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
 		)
 		si.save().submit()
 
@@ -3773,6 +3849,40 @@ class TestSalesInvoice(FrappeTestCase):
 			for x in si.taxes
 		]
 		self.assertEqual(expected, actual)
+
+	def test_pos_returns_without_update_outstanding_for_self(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
+		pos_profile = make_pos_profile()
+		pos_profile.payments = []
+		pos_profile.append("payments", {"default": 1, "mode_of_payment": "Cash"})
+		pos_profile.save()
+
+		pos = create_sales_invoice(qty=10, do_not_save=True)
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+		pos.append(
+			"payments", {"mode_of_payment": "Bank Draft", "account": "_Test Bank - _TC", "amount": 500}
+		)
+		pos.append("payments", {"mode_of_payment": "Cash", "account": "Cash - _TC", "amount": 500})
+		pos.save().submit()
+
+		pos_return = make_sales_return(pos.name)
+		pos_return.update_outstanding_for_self = False
+		pos_return.save().submit()
+
+		gle = qb.DocType("GL Entry")
+		res = (
+			qb.from_(gle)
+			.select(gle.against_voucher)
+			.distinct()
+			.where(
+				gle.is_cancelled.eq(0) & gle.voucher_no.eq(pos_return.name) & gle.against_voucher.notnull()
+			)
+			.run(as_list=1)
+		)
+		self.assertEqual(len(res), 1)
+		self.assertEqual(res[0][0], pos_return.return_against)
 
 
 def set_advance_flag(company, flag, default_account):

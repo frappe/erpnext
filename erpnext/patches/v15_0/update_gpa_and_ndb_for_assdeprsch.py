@@ -9,12 +9,12 @@ def execute():
         ON `tabAsset Depreciation Schedule`.`asset`=`tabAsset`.`name`
         SET
             `tabAsset Depreciation Schedule`.`gross_purchase_amount`=`tabAsset`.`gross_purchase_amount`,
-            `tabAsset Depreciation Schedule`.`number_of_depreciations_booked`=`tabAsset`.`number_of_depreciations_booked`
+            `tabAsset Depreciation Schedule`.`opening_number_of_booked_depreciations`=`tabAsset`.`opening_number_of_booked_depreciations`
         WHERE
         (
             `tabAsset Depreciation Schedule`.`gross_purchase_amount`<>`tabAsset`.`gross_purchase_amount`
             OR
-            `tabAsset Depreciation Schedule`.`number_of_depreciations_booked`<>`tabAsset`.`number_of_depreciations_booked`
+            `tabAsset Depreciation Schedule`.`opening_number_of_booked_depreciations`<>`tabAsset`.`opening_number_of_booked_depreciations`
         )
         AND `tabAsset Depreciation Schedule`.`docstatus`<2"""
 	)

@@ -159,7 +159,6 @@ class PurchaseInvoice(BuyingController):
 		rejected_warehouse: DF.Link | None
 		release_date: DF.Date | None
 		remarks: DF.SmallText | None
-		repost_required: DF.Check
 		represents_company: DF.Link | None
 		return_against: DF.Link | None
 		rounded_total: DF.Currency
@@ -348,6 +347,22 @@ class PurchaseInvoice(BuyingController):
 			self.tax_withholding_category = tds_category
 			self.set_onload("supplier_tds", tds_category)
 
+		# If Linked Purchase Order has TDS applied, enable 'apply_tds' checkbox
+		if purchase_orders := [x.purchase_order for x in self.items if x.purchase_order]:
+			po = qb.DocType("Purchase Order")
+			po_with_tds = (
+				qb.from_(po)
+				.select(po.name)
+				.where(
+					po.docstatus.eq(1)
+					& (po.name.isin(purchase_orders))
+					& (po.apply_tds.eq(1))
+					& (po.tax_withholding_category.notnull())
+				)
+				.run()
+			)
+			self.set_onload("enable_apply_tds", True if po_with_tds else False)
+
 		super().set_missing_values(for_validate)
 
 	def validate_credit_to_acc(self):
@@ -363,16 +378,16 @@ class PurchaseInvoice(BuyingController):
 		if account.report_type != "Balance Sheet":
 			frappe.throw(
 				_(
-					"Please ensure {} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
-				).format(frappe.bold("Credit To")),
+					"Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
+				).format(frappe.bold(_("Credit To"))),
 				title=_("Invalid Account"),
 			)
 
 		if self.supplier and account.account_type != "Payable":
 			frappe.throw(
 				_(
-					"Please ensure {} account {} is a Payable account. Change the account type to Payable or select a different account."
-				).format(frappe.bold("Credit To"), frappe.bold(self.credit_to)),
+					"Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
+				).format(frappe.bold(_("Credit To")), frappe.bold(self.credit_to)),
 				title=_("Invalid Account"),
 			)
 
@@ -449,7 +464,7 @@ class PurchaseInvoice(BuyingController):
 			stock_not_billed_account = self.get_company_default("stock_received_but_not_billed")
 			stock_items = self.get_stock_items()
 
-		asset_received_but_not_billed = None
+		self.asset_received_but_not_billed = None
 
 		if self.update_stock:
 			self.validate_item_code()
@@ -532,26 +547,60 @@ class PurchaseInvoice(BuyingController):
 							frappe.msgprint(msg, title=_("Expense Head Changed"))
 
 						item.expense_account = stock_not_billed_account
-			elif item.is_fixed_asset and item.pr_detail:
-				if not asset_received_but_not_billed:
-					asset_received_but_not_billed = self.get_company_default("asset_received_but_not_billed")
-				item.expense_account = asset_received_but_not_billed
 			elif item.is_fixed_asset:
-				account_type = (
-					"capital_work_in_progress_account"
-					if is_cwip_accounting_enabled(item.asset_category)
-					else "fixed_asset_account"
-				)
-				asset_category_account = get_asset_category_account(
-					account_type, item=item.item_code, company=self.company
-				)
-				if not asset_category_account:
-					form_link = get_link_to_form("Asset Category", item.asset_category)
-					throw(
-						_("Please set Fixed Asset Account in {} against {}.").format(form_link, self.company),
-						title=_("Missing Account"),
+				account = None
+				if not item.pr_detail and item.po_detail:
+					receipt_item = frappe.get_cached_value(
+						"Purchase Receipt Item",
+						{
+							"purchase_order": item.purchase_order,
+							"purchase_order_item": item.po_detail,
+							"docstatus": 1,
+						},
+						["name", "parent"],
+						as_dict=1,
 					)
-				item.expense_account = asset_category_account
+					if receipt_item:
+						item.pr_detail = receipt_item.name
+						item.purchase_receipt = receipt_item.parent
+
+				if item.pr_detail:
+					if not self.asset_received_but_not_billed:
+						self.asset_received_but_not_billed = self.get_company_default(
+							"asset_received_but_not_billed"
+						)
+
+					# check if 'Asset Received But Not Billed' account is credited in Purchase receipt or not
+					arbnb_booked_in_pr = frappe.db.get_value(
+						"GL Entry",
+						{
+							"voucher_type": "Purchase Receipt",
+							"voucher_no": item.purchase_receipt,
+							"account": self.asset_received_but_not_billed,
+						},
+						"name",
+					)
+					if arbnb_booked_in_pr:
+						account = self.asset_received_but_not_billed
+
+				if not account:
+					account_type = (
+						"capital_work_in_progress_account"
+						if is_cwip_accounting_enabled(item.asset_category)
+						else "fixed_asset_account"
+					)
+					account = get_asset_category_account(
+						account_type, item=item.item_code, company=self.company
+					)
+					if not account:
+						form_link = get_link_to_form("Asset Category", item.asset_category)
+						throw(
+							_("Please set Fixed Asset Account in {} against {}.").format(
+								form_link, self.company
+							),
+							title=_("Missing Account"),
+						)
+				item.expense_account = account
 			elif not item.expense_account and for_validate:
 				throw(_("Expense account is mandatory for item {0}").format(item.item_code or item.item_name))
 
@@ -559,13 +608,17 @@ class PurchaseInvoice(BuyingController):
 		for item in self.get("items"):
 			validate_account_head(item.idx, item.expense_account, self.company, "Expense")
 
-	def set_against_expense_account(self):
+	def set_against_expense_account(self, force=False):
 		against_accounts = []
 		for item in self.get("items"):
 			if item.expense_account and (item.expense_account not in against_accounts):
 				against_accounts.append(item.expense_account)
 
 		self.against_expense_account = ",".join(against_accounts)
+
+	def force_set_against_expense_account(self):
+		self.set_against_expense_account()
+		frappe.db.set_value(self.doctype, self.name, "against_expense_account", self.against_expense_account)
 
 	def po_required(self):
 		if frappe.db.get_single_value("Buying Settings", "po_required") == "Yes":
@@ -582,7 +635,7 @@ class PurchaseInvoice(BuyingController):
 						"To submit the invoice without purchase order please set {0} as {1} in {2}"
 					).format(
 						frappe.bold(_("Purchase Order Required")),
-						frappe.bold("No"),
+						frappe.bold(_("No")),
 						get_link_to_form("Buying Settings", "Buying Settings", "Buying Settings"),
 					)
 					throw(msg, title=_("Mandatory Purchase Order"))
@@ -603,7 +656,7 @@ class PurchaseInvoice(BuyingController):
 						"To submit the invoice without purchase receipt please set {0} as {1} in {2}"
 					).format(
 						frappe.bold(_("Purchase Receipt Required")),
-						frappe.bold("No"),
+						frappe.bold(_("No")),
 						get_link_to_form("Buying Settings", "Buying Settings", "Buying Settings"),
 					)
 					throw(msg, title=_("Mandatory Purchase Receipt"))
@@ -647,6 +700,19 @@ class PurchaseInvoice(BuyingController):
 					"overflow_type": "receipt",
 					"extra_cond": """ and exists(select name from `tabPurchase Invoice`
 					where name=`tabPurchase Invoice Item`.parent and update_stock = 1)""",
+				}
+			)
+			self.status_updater.append(
+				{
+					"source_dt": "Purchase Invoice Item",
+					"target_dt": "Material Request Item",
+					"join_field": "material_request_item",
+					"target_field": "received_qty",
+					"target_parent_dt": "Material Request",
+					"target_parent_field": "per_received",
+					"target_ref_field": "stock_qty",
+					"source_field": "stock_qty",
+					"percent_join_field": "material_request",
 				}
 			)
 			if cint(self.is_return):
@@ -708,6 +774,7 @@ class PurchaseInvoice(BuyingController):
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		if self.update_stock == 1:
+			self.make_bundle_for_sales_purchase_return()
 			self.make_bundle_using_old_serial_batch_fields()
 			self.update_stock_ledger()
 
@@ -729,18 +796,17 @@ class PurchaseInvoice(BuyingController):
 		self.process_common_party_accounting()
 
 	def on_update_after_submit(self):
-		if hasattr(self, "repost_required"):
-			fields_to_check = [
-				"cash_bank_account",
-				"write_off_account",
-				"unrealized_profit_loss_account",
-				"is_opening",
-			]
-			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
-			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-			if self.needs_repost:
-				self.validate_for_repost()
-				self.db_set("repost_required", self.needs_repost)
+		fields_to_check = [
+			"cash_bank_account",
+			"write_off_account",
+			"unrealized_profit_loss_account",
+			"is_opening",
+		]
+		child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
+		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if self.needs_repost:
+			self.validate_for_repost()
+			self.repost_accounting_entries()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
@@ -1641,6 +1707,9 @@ class PurchaseInvoice(BuyingController):
 		self.db_set("release_date", None)
 
 	def set_tax_withholding(self):
+		self.set("advance_tax", [])
+		self.set("tax_withheld_vouchers", [])
+
 		if not self.apply_tds:
 			return
 
@@ -1682,8 +1751,6 @@ class PurchaseInvoice(BuyingController):
 			self.remove(d)
 
 		## Add pending vouchers on which tax was withheld
-		self.set("tax_withheld_vouchers", [])
-
 		for voucher_no, voucher_details in voucher_wise_amount.items():
 			self.append(
 				"tax_withheld_vouchers",
@@ -1698,7 +1765,6 @@ class PurchaseInvoice(BuyingController):
 		self.calculate_taxes_and_totals()
 
 	def allocate_advance_tds(self, tax_withholding_details, advance_taxes):
-		self.set("advance_tax", [])
 		for tax in advance_taxes:
 			allocated_amount = 0
 			pending_amount = flt(tax.tax_amount - tax.allocated_amount)

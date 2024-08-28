@@ -328,6 +328,28 @@ class TestProductionPlan(FrappeTestCase):
 
 		self.assertEqual(pln2.po_items[0].bom_no, bom2.name)
 
+	def test_production_plan_with_non_active_bom_item(self):
+		item = make_item("Test Production Item 1 for Non Active BOM", {"is_stock_item": 1}).name
+
+		so1 = make_sales_order(item_code=item, qty=1)
+
+		pln = frappe.new_doc("Production Plan")
+		pln.company = so1.company
+		pln.get_items_from = "Sales Order"
+		pln.append(
+			"sales_orders",
+			{
+				"sales_order": so1.name,
+				"sales_order_date": so1.transaction_date,
+				"customer": so1.customer,
+				"grand_total": so1.grand_total,
+			},
+		)
+
+		pln.get_items()
+
+		self.assertFalse(pln.po_items)
+
 	def test_production_plan_combine_items(self):
 		"Test combining FG items in Production Plan."
 		item = "Test Production Item 1"
@@ -1308,6 +1330,79 @@ class TestProductionPlan(FrappeTestCase):
 				self.assertTrue(row.uom != row.stock_uom)
 				self.assertTrue(row.warehouse == mrp_warhouse)
 				self.assertEqual(row.quantity, 12.0)
+
+	def test_mr_qty_for_complex_bom(self):
+		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+
+		def set_bom_qty(item_code, qtys):
+			# assumes qtys is in same order as children
+			bom = frappe.get_doc("BOM", {"item": item_code})
+			for i, child in enumerate(bom.items):
+				child.qty = qtys[i]
+			bom.submit()
+			return bom
+
+		bom_tree = {
+			"Test FG Complex": {
+				"Test SubAssyL1-1": {  # x3
+					"Test SubAssyL2-1": {  # x2
+						"Test SAL2-1 Item1": {},  # x3
+						"Test SAL2-1 Item2": {},  # x5
+					},
+					"Test SubAssyL2-2": {  # x7
+						"Test SAL2-2 Item1": {},  # x2
+						"Test SAL2-2 Item2": {},  # x13
+					},
+					"Test SAL1-1 Item1": {},  # x6
+				},
+				"Test SubAssyL1-2": {  # x5
+					"Test SubAssyL2-3": {  # x1
+						"Test SAL2-3 Item1": {},  # x4
+						"Test SAL2-3 Item2": {},  # x11
+					},
+					"Test SAL1-2 Item1": {},  # x9
+				},
+				"Test FG Item1": {},  # x8
+			}
+		}
+		test_qtys = {
+			"Test SAL2-1 Item1": 18,
+			"Test SAL2-1 Item2": 30,
+			"Test SAL2-2 Item1": 42,
+			"Test SAL2-2 Item2": 273,
+			"Test SAL1-1 Item1": 18,
+			"Test SAL2-3 Item1": 20,
+			"Test SAL2-3 Item2": 55,
+			"Test SAL1-2 Item1": 45,
+			"Test FG Item1": 8,
+		}
+
+		create_nested_bom(bom_tree, prefix="", submit=False)
+		# set quantities
+		set_bom_qty("Test SubAssyL2-1", [3, 5])
+		set_bom_qty("Test SubAssyL2-2", [2, 13])
+		set_bom_qty("Test SubAssyL2-3", [4, 11])
+
+		set_bom_qty("Test SubAssyL1-1", [2, 7, 6])
+		set_bom_qty("Test SubAssyL1-2", [1, 9])
+
+		parent_bom = set_bom_qty("Test FG Complex", [3, 5, 8])
+
+		plan = create_production_plan(
+			item_code=parent_bom.item,
+			planned_qty=3,
+			do_not_submit=1,
+			warehouse="_Test Warehouse - _TC",
+		)
+
+		stock_warehouse = create_warehouse("Stock Warehouse", company="_Test Company")
+		plan.for_warehouse = stock_warehouse
+
+		items = get_items_for_material_requests(plan.as_dict(), warehouses=[])
+
+		for row in items:
+			self.assertEqual(row["quantity"], test_qtys[row["item_code"]] * 3)
 
 	def test_mr_qty_for_same_rm_with_different_sub_assemblies(self):
 		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom

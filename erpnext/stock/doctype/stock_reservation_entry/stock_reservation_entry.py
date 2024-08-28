@@ -255,7 +255,7 @@ class StockReservationEntry(Document):
 							if self.has_batch_no
 							else _("Warehouse"),
 							frappe.bold(self.warehouse),
-							frappe.bold("Stock Reservation Entry"),
+							frappe.bold(_("Stock Reservation Entry")),
 						)
 
 						frappe.throw(msg)
@@ -497,7 +497,8 @@ def validate_stock_reservation_settings(voucher: object) -> None:
 
 	if not frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 		msg = _("Please enable {0} in the {1}.").format(
-			frappe.bold("Stock Reservation"), frappe.bold("Stock Settings")
+			frappe.bold(_("Stock Reservation")),
+			frappe.bold(_("Stock Settings")),
 		)
 		frappe.throw(msg)
 

@@ -22,8 +22,7 @@ frappe.ui.form.on("Account", {
 		// hide fields if group
 		frm.toggle_display(["tax_rate"], cint(frm.doc.is_group) == 0);
 
-		// disable fields
-		frm.toggle_enable(["is_group", "company"], false);
+		frm.toggle_enable(["is_group", "company", "account_number"], frm.is_new());
 
 		if (cint(frm.doc.is_group) == 0) {
 			frm.toggle_display("freeze_account", frm.doc.__onload && frm.doc.__onload.can_freeze_account);

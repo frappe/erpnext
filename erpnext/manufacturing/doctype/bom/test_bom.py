@@ -775,7 +775,7 @@ def level_order_traversal(node):
 	return traversal
 
 
-def create_nested_bom(tree, prefix="_Test bom "):
+def create_nested_bom(tree, prefix="_Test bom ", submit=True):
 	"""Helper function to create a simple nested bom from tree describing item names. (along with required items)"""
 
 	def create_items(bom_tree):
@@ -811,7 +811,8 @@ def create_nested_bom(tree, prefix="_Test bom "):
 			bom.company = "_Test Company"
 			bom.currency = "INR"
 			bom.insert()
-			bom.submit()
+			if submit:
+				bom.submit()
 
 	return bom  # parent bom is last bom
 

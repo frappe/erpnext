@@ -31,7 +31,7 @@ class Company(NestedSet):
 		accumulated_depreciation_account: DF.Link | None
 		allow_account_creation_against_child_company: DF.Check
 		asset_received_but_not_billed: DF.Link | None
-		auto_err_frequency: DF.Literal["Daily", "Weekly"]
+		auto_err_frequency: DF.Literal["Daily", "Weekly", "Monthly"]
 		auto_exchange_rate_revaluation: DF.Check
 		book_advance_payments_in_separate_party_account: DF.Check
 		capital_work_in_progress_account: DF.Link | None
@@ -62,6 +62,7 @@ class Company(NestedSet):
 		default_income_account: DF.Link | None
 		default_inventory_account: DF.Link | None
 		default_letter_head: DF.Link | None
+		default_operating_cost_account: DF.Link | None
 		default_payable_account: DF.Link | None
 		default_provisional_account: DF.Link | None
 		default_receivable_account: DF.Link | None
@@ -201,7 +202,7 @@ class Company(NestedSet):
 		):
 			frappe.throw(
 				_("'{0}' should be in company currency {1}.").format(
-					frappe.bold("Default Advance Received Account"), frappe.bold(self.default_currency)
+					frappe.bold(_("Default Advance Received Account")), frappe.bold(self.default_currency)
 				)
 			)
 
@@ -212,7 +213,7 @@ class Company(NestedSet):
 		):
 			frappe.throw(
 				_("'{0}' should be in company currency {1}.").format(
-					frappe.bold("Default Advance Paid Account"), frappe.bold(self.default_currency)
+					frappe.bold(_("Default Advance Paid Account")), frappe.bold(self.default_currency)
 				)
 			)
 
@@ -443,7 +444,7 @@ class Company(NestedSet):
 			):
 				frappe.throw(
 					_("Set default {0} account for non stock items").format(
-						frappe.bold("Provisional Account")
+						frappe.bold(_("Provisional Account"))
 					)
 				)
 

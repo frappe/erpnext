@@ -7,7 +7,7 @@ from collections import defaultdict
 
 import frappe
 from frappe import _
-from frappe.query_builder.functions import CombineDatetime
+from frappe.query_builder.functions import CombineDatetime, Sum
 from frappe.utils import cint, flt
 
 from erpnext.stock.doctype.inventory_dimension.inventory_dimension import get_inventory_dimensions
@@ -67,9 +67,14 @@ def execute(filters=None):
 		if filters.get("batch_no") or inventory_dimension_filters_applied:
 			actual_qty += flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
-			batch_balance_dict[sle.batch_no] += sle.actual_qty
+			if sle.batch_no:
+				if not batch_balance_dict.get(sle.batch_no):
+					batch_balance_dict[sle.batch_no] = [0, 0]
+
+				batch_balance_dict[sle.batch_no][0] += sle.actual_qty
+
 			if filters.get("segregate_serial_batch_bundle"):
-				actual_qty = batch_balance_dict[sle.batch_no]
+				actual_qty = batch_balance_dict[sle.batch_no][0]
 
 			if sle.voucher_type == "Stock Reconciliation" and not sle.actual_qty:
 				actual_qty = sle.qty_after_transaction
@@ -525,7 +530,9 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 	query_filters = {
 		"batch_no": filters.batch_no,
 		"docstatus": 1,
+		"is_cancelled": 0,
 		"posting_date": ("<", filters.from_date),
+		"company": filters.company,
 	}
 
 	for fields in ["item_code", "warehouse"]:
@@ -542,24 +549,29 @@ def get_opening_balance_from_batch(filters, columns, sl_entries):
 		if opening_data.get(field) is None:
 			opening_data[field] = 0.0
 
-	query_filters = [
-		["Serial and Batch Entry", "batch_no", "=", filters.batch_no],
-		["Serial and Batch Bundle", "docstatus", "=", 1],
-		["Serial and Batch Bundle", "posting_date", "<", filters.from_date],
-	]
-
-	for fields in ["item_code", "warehouse"]:
-		if filters.get(fields):
-			query_filters.append(["Serial and Batch Bundle", fields, "=", filters.get(fields)])
-
-	bundle_data = frappe.get_all(
-		"Serial and Batch Bundle",
-		fields=[
-			"sum(`tabSerial and Batch Entry`.`qty`) as qty",
-			"sum(`tabSerial and Batch Entry`.`stock_value_difference`) as stock_value",
-		],
-		filters=query_filters,
+	table = frappe.qb.DocType("Stock Ledger Entry")
+	sabb_table = frappe.qb.DocType("Serial and Batch Entry")
+	query = (
+		frappe.qb.from_(table)
+		.inner_join(sabb_table)
+		.on(table.serial_and_batch_bundle == sabb_table.parent)
+		.select(
+			Sum(sabb_table.qty).as_("qty"),
+			Sum(sabb_table.stock_value_difference).as_("stock_value"),
+		)
+		.where(
+			(sabb_table.batch_no == filters.batch_no)
+			& (sabb_table.docstatus == 1)
+			& (table.posting_date < filters.from_date)
+			& (table.is_cancelled == 0)
+		)
 	)
+
+	for field in ["item_code", "warehouse", "company"]:
+		if filters.get(field):
+			query = query.where(table[field] == filters.get(field))
+
+	bundle_data = query.run(as_dict=True)
 
 	if bundle_data:
 		opening_data.qty_after_transaction += flt(bundle_data[0].qty)

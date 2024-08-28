@@ -99,6 +99,12 @@ class SubcontractingOrder(SubcontractingController):
 			}
 		]
 
+	def onload(self):
+		self.set_onload(
+			"over_transfer_allowance",
+			frappe.db.get_single_value("Buying Settings", "over_transfer_allowance"),
+		)
+
 	def before_validate(self):
 		super().before_validate()
 

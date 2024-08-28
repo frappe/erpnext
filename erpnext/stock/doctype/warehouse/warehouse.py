@@ -2,6 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 
+import json
+
 import frappe
 from frappe import _, throw
 from frappe.contacts.address_and_contact import load_address_and_contact
@@ -186,7 +188,7 @@ def get_children(doctype, parent=None, company=None, is_root=False, include_disa
 		parent = ""
 
 	if isinstance(include_disabled, str):
-		include_disabled = frappe.json.loads(include_disabled)
+		include_disabled = json.loads(include_disabled)
 
 	fields = ["name as value", "is_group as expandable"]
 	filters = [

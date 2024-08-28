@@ -25,9 +25,11 @@ class BOMItem(Document):
 		has_variants: DF.Check
 		image: DF.Attach | None
 		include_item_in_manufacturing: DF.Check
+		is_stock_item: DF.Check
 		item_code: DF.Link
 		item_name: DF.Data | None
 		operation: DF.Link | None
+		operation_row_id: DF.Int
 		original_item: DF.Link | None
 		parent: DF.Data
 		parentfield: DF.Data

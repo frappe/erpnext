@@ -35,6 +35,7 @@
   "doctype": "Supplier",
   "supplier_name": "_Test Supplier USD",
   "supplier_group": "_Test Supplier Group",
+  "default_currency": "USD",
   "accounts": [{
     "company": "_Test Company",
     "account": "_Test Payable USD - _TC"

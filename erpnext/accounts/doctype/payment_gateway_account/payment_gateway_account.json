@@ -49,7 +49,7 @@
    "label": "Currency"
   },
   {
-   "depends_on": "eval: doc.payment_channel !== \"Phone\"",
+   "depends_on": "eval: doc.payment_channel == 'Email' || (!doc.payment_channel)",
    "fieldname": "payment_request_message",
    "fieldtype": "Section Break"
   },
@@ -70,12 +70,12 @@
    "fieldname": "payment_channel",
    "fieldtype": "Select",
    "label": "Payment Channel",
-   "options": "\nEmail\nPhone"
+   "options": "\nEmail\nPhone\nOther"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-03-27 13:10:09.836254",
+ "modified": "2024-03-29 18:53:09.836254",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Gateway Account",

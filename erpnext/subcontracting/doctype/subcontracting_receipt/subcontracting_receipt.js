@@ -28,6 +28,8 @@ frappe.ui.form.on("Subcontracting Receipt", {
 	},
 
 	refresh: (frm) => {
+		frappe.dynamic_link = { doc: frm.doc, fieldname: "supplier", doctype: "Supplier" };
+
 		if (frm.doc.docstatus === 1) {
 			frm.add_custom_button(
 				__("Stock Ledger"),
@@ -165,11 +167,36 @@ frappe.ui.form.on("Subcontracting Receipt", {
 			};
 		});
 
+		frm.set_query("contact_person", erpnext.queries.contact_query);
+		frm.set_query("supplier_address", erpnext.queries.address_query);
+
+		frm.set_query("billing_address", erpnext.queries.company_address_query);
+
+		frm.set_query("shipping_address", () => {
+			return erpnext.queries.company_address_query(frm.doc);
+		});
+
 		frm.set_query("rejected_warehouse", () => {
 			return {
 				filters: {
 					company: frm.doc.company,
 					is_group: 0,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
+				},
+			};
+		});
+
+		frm.set_query("cost_center", "items", (doc) => {
+			return {
+				filters: {
+					company: doc.company,
 				},
 			};
 		});
@@ -301,6 +328,21 @@ frappe.ui.form.on("Subcontracting Receipt", {
 				};
 			};
 		}
+	},
+
+	reset_raw_materials_table: (frm) => {
+		frm.clear_table("supplied_items");
+
+		frm.call({
+			method: "reset_raw_materials",
+			doc: frm.doc,
+			freeze: true,
+			callback: (r) => {
+				if (!r.exc) {
+					frm.save();
+				}
+			},
+		});
 	},
 });
 

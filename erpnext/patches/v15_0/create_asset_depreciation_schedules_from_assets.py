@@ -43,7 +43,7 @@ def get_details_of_draft_or_submitted_depreciable_assets():
 			asset.name,
 			asset.opening_accumulated_depreciation,
 			asset.gross_purchase_amount,
-			asset.number_of_depreciations_booked,
+			asset.opening_number_of_booked_depreciations,
 			asset.docstatus,
 		)
 		.where(asset.calculate_depreciation == 1)

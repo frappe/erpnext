@@ -1,4 +1,8 @@
 frappe.listview_settings["Lead"] = {
+	get_indicator: function (doc) {
+		var indicator = [__(doc.status), frappe.utils.guess_colour(doc.status), "status,=," + doc.status];
+		return indicator;
+	},
 	onload: function (listview) {
 		if (frappe.boot.user.can_create.includes("Prospect")) {
 			listview.page.add_action_item(__("Create Prospect"), function () {

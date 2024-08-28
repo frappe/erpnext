@@ -35,6 +35,11 @@ frappe.ui.form.on("Payment Entry", {
 			var account_types = ["Pay", "Internal Transfer"].includes(frm.doc.payment_type)
 				? ["Bank", "Cash"]
 				: [frappe.boot.party_account_types[frm.doc.party_type]];
+
+			if (frm.doc.party_type == "Shareholder") {
+				account_types.push("Equity");
+			}
+
 			return {
 				filters: {
 					account_type: ["in", account_types],
@@ -90,6 +95,9 @@ frappe.ui.form.on("Payment Entry", {
 			var account_types = ["Receive", "Internal Transfer"].includes(frm.doc.payment_type)
 				? ["Bank", "Cash"]
 				: [frappe.boot.party_account_types[frm.doc.party_type]];
+			if (frm.doc.party_type == "Shareholder") {
+				account_types.push("Equity");
+			}
 			return {
 				filters: {
 					account_type: ["in", account_types],
@@ -165,8 +173,25 @@ frappe.ui.form.on("Payment Entry", {
 				filters: filters,
 			};
 		});
-	},
 
+		frm.set_query("sales_taxes_and_charges_template", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					disabled: false,
+				},
+			};
+		});
+
+		frm.set_query("purchase_taxes_and_charges_template", function () {
+			return {
+				filters: {
+					company: frm.doc.company,
+					disabled: false,
+				},
+			};
+		});
+	},
 	refresh: function (frm) {
 		erpnext.hide_company(frm);
 		frm.events.hide_unhide_fields(frm);
@@ -213,7 +238,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	hide_unhide_fields: function (frm) {
 		var company_currency = frm.doc.company
-			? frappe.get_doc(":Company", frm.doc.company).default_currency
+			? frappe.get_doc(":Company", frm.doc.company)?.default_currency
 			: "";
 
 		frm.toggle_display(
@@ -394,6 +419,12 @@ frappe.ui.form.on("Payment Entry", {
 			if (frm.doc.party_type == "Employee") {
 				return {
 					query: "erpnext.controllers.queries.employee_query",
+				};
+			} else if (frm.doc.party_type == "Shareholder") {
+				return {
+					filters: {
+						company: frm.doc.company,
+					},
 				};
 			}
 		});

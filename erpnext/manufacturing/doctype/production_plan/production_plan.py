@@ -452,6 +452,10 @@ class ProductionPlan(Document):
 						{"sales_order": data.parent, "sales_order_item": data.name, "qty": data.pending_qty}
 					)
 
+			bom_no = data.bom_no or item_details and item_details.bom_no or ""
+			if not bom_no:
+				continue
+
 			pi = self.append(
 				"po_items",
 				{
@@ -459,7 +463,7 @@ class ProductionPlan(Document):
 					"item_code": data.item_code,
 					"description": data.description or item_details.description,
 					"stock_uom": item_details and item_details.stock_uom or "",
-					"bom_no": data.bom_no or item_details and item_details.bom_no or "",
+					"bom_no": bom_no,
 					"planned_qty": data.pending_qty,
 					"pending_qty": data.pending_qty,
 					"planned_start_date": now_datetime(),

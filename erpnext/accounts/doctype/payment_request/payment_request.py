@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.party import get_party_account, get_party_bank_account
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.utils import get_account_currency, get_currency_precision
 from erpnext.utilities import payment_app_import_guard
 
 
@@ -158,28 +158,20 @@ class PaymentRequest(Document):
 			# set advance payment status
 			ref_doc.set_advance_payment_status()
 
-	def on_submit(self):
+	def before_submit(self):
 		if self.payment_request_type == "Outward":
-			self.db_set("status", "Initiated")
+			self.status = "Initiated"
 		elif self.payment_request_type == "Inward":
-			self.db_set("status", "Requested")
+			self.status = "Requested"
 
 		if self.payment_request_type == "Inward":
-			send_mail = self.payment_gateway_validation() if self.payment_gateway else None
-			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-
-			if (
-				hasattr(ref_doc, "order_type") and ref_doc.order_type == "Shopping Cart"
-			) or self.flags.mute_email:
-				send_mail = False
-
-			if send_mail and self.payment_channel != "Phone":
-				self.set_payment_request_url()
-				self.send_email()
-				self.make_communication_entry()
-
-			elif self.payment_channel == "Phone":
+			if self.payment_channel == "Phone":
 				self.request_phone_payment()
+			else:
+				self.set_payment_request_url()
+				if not (self.mute_email or self.flags.mute_email):
+					self.send_email()
+					self.make_communication_entry()
 
 	def request_phone_payment(self):
 		controller = _get_payment_gateway_controller(self.payment_gateway)
@@ -220,14 +212,12 @@ class PaymentRequest(Document):
 		self.set_as_cancelled()
 
 	def make_invoice(self):
-		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
-		if hasattr(ref_doc, "order_type") and ref_doc.order_type == "Shopping Cart":
-			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
+		from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 
-			si = make_sales_invoice(self.reference_name, ignore_permissions=True)
-			si.allocate_advances_automatically = True
-			si = si.insert(ignore_permissions=True)
-			si.submit()
+		si = make_sales_invoice(self.reference_name, ignore_permissions=True)
+		si.allocate_advances_automatically = True
+		si = si.insert(ignore_permissions=True)
+		si.submit()
 
 	def payment_gateway_validation(self):
 		try:
@@ -240,11 +230,8 @@ class PaymentRequest(Document):
 			return False
 
 	def set_payment_request_url(self):
-		if self.payment_account and self.payment_channel != "Phone":
+		if self.payment_account and self.payment_gateway and self.payment_gateway_validation():
 			self.payment_url = self.get_payment_url()
-
-		if self.payment_url:
-			self.db_set("payment_url", self.payment_url)
 
 	def get_payment_url(self):
 		if self.reference_doctype != "Fees":
@@ -283,7 +270,8 @@ class PaymentRequest(Document):
 
 		else:
 			payment_entry = self.create_payment_entry()
-			self.make_invoice()
+			if self.make_sales_invoice:
+				self.make_invoice()
 
 			return payment_entry
 
@@ -343,6 +331,17 @@ class PaymentRequest(Document):
 		payment_entry.received_amount = amount
 		payment_entry.get("references")[0].allocated_amount = amount
 
+		# Update 'Paid Amount' on Forex transactions
+		if self.currency != ref_doc.company_currency:
+			if (
+				self.payment_request_type == "Outward"
+				and payment_entry.paid_from_account_currency == ref_doc.company_currency
+				and payment_entry.paid_from_account_currency != payment_entry.paid_to_account_currency
+			):
+				payment_entry.paid_amount = payment_entry.base_paid_amount = (
+					payment_entry.target_exchange_rate * payment_entry.received_amount
+				)
+
 		for dimension in get_accounting_dimensions():
 			payment_entry.update({dimension: self.get(dimension)})
 
@@ -369,7 +368,14 @@ class PaymentRequest(Document):
 				)
 			],
 		}
-		enqueue(method=frappe.sendmail, queue="short", timeout=300, is_async=True, **email_args)
+		enqueue(
+			method=frappe.sendmail,
+			queue="short",
+			timeout=300,
+			is_async=True,
+			enqueue_after_commit=True,
+			**email_args,
+		)
 
 	def get_message(self):
 		"""return message with payment gateway link"""
@@ -411,9 +417,6 @@ class PaymentRequest(Document):
 			}
 		)
 		comm.insert(ignore_permissions=True)
-
-	def get_payment_success_url(self):
-		return self.payment_success_url
 
 	def create_subscription(self, payment_provider, gateway_controller, data):
 		if payment_provider == "stripe":
@@ -499,6 +502,15 @@ def make_payment_request(**args):
 				"party_type": args.get("party_type") or "Customer",
 				"party": args.get("party") or ref_doc.get("customer"),
 				"bank_account": bank_account,
+				"make_sales_invoice": (
+					args.make_sales_invoice  # new standard
+					or args.order_type == "Shopping Cart"  # compat for webshop app
+				),
+				"mute_email": (
+					args.mute_email  # new standard
+					or args.order_type == "Shopping Cart"  # compat for webshop app
+					or gateway_account.get("payment_channel", "Email") != "Email"
+				),
 			}
 		)
 
@@ -513,10 +525,8 @@ def make_payment_request(**args):
 		for dimension in get_accounting_dimensions():
 			pr.update({dimension: ref_doc.get(dimension)})
 
-		if args.order_type == "Shopping Cart" or args.mute_email:
-			pr.flags.mute_email = True
-
-		pr.insert(ignore_permissions=True)
+		if frappe.db.get_single_value("Accounts Settings", "create_pr_in_draft_status", cache=True):
+			pr.insert(ignore_permissions=True)
 		if args.submit_doc:
 			pr.submit()
 
@@ -556,7 +566,10 @@ def get_amount(ref_doc, payment_account=None):
 	elif dt == "Fees":
 		grand_total = ref_doc.outstanding_amount
 
-	return grand_total
+	if grand_total > 0:
+		return flt(grand_total, get_currency_precision())
+	else:
+		frappe.throw(_("Payment Entry is already created"))
 
 
 def get_existing_payment_request_amount(ref_dt, ref_dn):
@@ -586,19 +599,14 @@ def get_gateway_details(args):  # nosemgrep
 	Return gateway and payment account of default payment gateway
 	"""
 	gateway_account = args.get("payment_gateway_account", {"is_default": 1})
-	if gateway_account:
-		return get_payment_gateway_account(gateway_account)
-
-	gateway_account = get_payment_gateway_account({"is_default": 1})
-
-	return gateway_account
+	return get_payment_gateway_account(gateway_account)
 
 
-def get_payment_gateway_account(args):
+def get_payment_gateway_account(filter):
 	return frappe.db.get_value(
 		"Payment Gateway Account",
-		args,
-		["name", "payment_gateway", "payment_account", "message"],
+		filter,
+		["name", "payment_gateway", "payment_account", "payment_channel", "message"],
 		as_dict=1,
 	)
 

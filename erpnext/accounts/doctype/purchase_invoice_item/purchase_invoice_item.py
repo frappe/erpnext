@@ -52,6 +52,8 @@ class PurchaseInvoiceItem(Document):
 		manufacturer_part_no: DF.Data | None
 		margin_rate_or_amount: DF.Float
 		margin_type: DF.Literal["", "Percentage", "Amount"]
+		material_request: DF.Link | None
+		material_request_item: DF.Data | None
 		net_amount: DF.Currency
 		net_rate: DF.Currency
 		page_break: DF.Check
@@ -77,6 +79,7 @@ class PurchaseInvoiceItem(Document):
 		rejected_serial_no: DF.Text | None
 		rejected_warehouse: DF.Link | None
 		rm_supp_cost: DF.Currency
+		sales_incoming_rate: DF.Currency
 		sales_invoice_item: DF.Data | None
 		serial_and_batch_bundle: DF.Link | None
 		serial_no: DF.Text | None

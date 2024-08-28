@@ -82,7 +82,7 @@ class TestPaymentEntry(FrappeTestCase):
 
 		expected_gle = dict(
 			(d[0], d)
-			for d in [["_Test Receivable USD - _TC", 0, 5500, so.name], ["Cash - _TC", 5500.0, 0, None]]
+			for d in [["_Test Receivable USD - _TC", 0, 5500, so.name], [pe.paid_to, 5500.0, 0, None]]
 		)
 
 		self.validate_gl_entries(pe.name, expected_gle)
@@ -1728,6 +1728,68 @@ class TestPaymentEntry(FrappeTestCase):
 		self.voucher_no = pe.name
 		self.check_gl_entries()
 		self.check_pl_entries()
+
+	def test_opening_flag_for_advance_as_liability(self):
+		company = "_Test Company"
+
+		advance_account = create_account(
+			parent_account="Current Assets - _TC",
+			account_name="Advances Received",
+			company=company,
+			account_type="Receivable",
+		)
+
+		# Enable Advance in separate party account
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 1,
+				"default_advance_received_account": advance_account,
+			},
+		)
+		# Advance Payment
+		adv = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+		)
+		adv.is_opening = "Yes"
+		adv.save()  # use save() to trigger set_liability_account()
+		adv.submit()
+
+		gl_with_opening_set = frappe.db.get_all(
+			"GL Entry", filters={"voucher_no": adv.name, "is_opening": "Yes"}
+		)
+		# 'Is Opening' can be 'Yes' for Advances in separate party account
+		self.assertNotEqual(gl_with_opening_set, [])
+
+		# Disable Advance in separate party account
+		frappe.db.set_value(
+			"Company",
+			company,
+			{
+				"book_advance_payments_in_separate_party_account": 0,
+				"default_advance_received_account": None,
+			},
+		)
+		payment = create_payment_entry(
+			party_type="Customer",
+			party="_Test Customer",
+			payment_type="Receive",
+			paid_from="Debtors - _TC",
+			paid_to="_Test Cash - _TC",
+		)
+		payment.is_opening = "Yes"
+		payment.save()
+		payment.submit()
+		gl_with_opening_set = frappe.db.get_all(
+			"GL Entry", filters={"voucher_no": payment.name, "is_opening": "Yes"}
+		)
+		# 'Is Opening' should always be 'No' for normal advance payments
+		self.assertEqual(gl_with_opening_set, [])
 
 
 def create_payment_entry(**args):

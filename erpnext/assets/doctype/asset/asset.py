@@ -60,7 +60,6 @@ class Asset(AccountsController):
 		available_for_use_date: DF.Date | None
 		booked_fixed_asset: DF.Check
 		calculate_depreciation: DF.Check
-		capitalized_in: DF.Link | None
 		company: DF.Link
 		comprehensive_insurance: DF.Data | None
 		cost_center: DF.Link | None
@@ -89,8 +88,8 @@ class Asset(AccountsController):
 		maintenance_required: DF.Check
 		naming_series: DF.Literal["ACC-ASS-.YYYY.-"]
 		next_depreciation_date: DF.Date | None
-		number_of_depreciations_booked: DF.Int
 		opening_accumulated_depreciation: DF.Currency
+		opening_number_of_booked_depreciations: DF.Int
 		policy_number: DF.Data | None
 		purchase_amount: DF.Currency
 		purchase_date: DF.Date | None
@@ -145,7 +144,7 @@ class Asset(AccountsController):
 								"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 							).format(asset_depr_schedules_links)
 						)
-
+		self.set_total_booked_depreciations()
 		self.total_asset_cost = self.gross_purchase_amount
 		self.status = self.get_status()
 
@@ -163,7 +162,6 @@ class Asset(AccountsController):
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.cancel_movement_entries()
-		self.cancel_capitalization()
 		self.reload()
 		self.delete_depreciation_entries()
 		cancel_asset_depr_schedules(self)
@@ -270,10 +268,10 @@ class Asset(AccountsController):
 			frappe.throw(_("Available for use date is required"))
 
 		for d in self.finance_books:
-			if d.depreciation_start_date == self.available_for_use_date:
+			if getdate(d.depreciation_start_date) < getdate(self.available_for_use_date):
 				frappe.throw(
 					_(
-						"Row #{}: Depreciation Posting Date should not be equal to Available for Use Date."
+						"Depreciation Row {0}: Depreciation Posting Date cannot be before Available-for-use Date"
 					).format(d.idx),
 					title=_("Incorrect Date"),
 				)
@@ -419,7 +417,7 @@ class Asset(AccountsController):
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
-			self.number_of_depreciations_booked = 0
+			self.opening_number_of_booked_depreciations = 0
 		else:
 			depreciable_amount = flt(self.gross_purchase_amount) - flt(row.expected_value_after_useful_life)
 			if flt(self.opening_accumulated_depreciation) > depreciable_amount:
@@ -430,15 +428,15 @@ class Asset(AccountsController):
 				)
 
 			if self.opening_accumulated_depreciation:
-				if not self.number_of_depreciations_booked:
-					frappe.throw(_("Please set Number of Depreciations Booked"))
+				if not self.opening_number_of_booked_depreciations:
+					frappe.throw(_("Please set Opening Number of Booked Depreciations"))
 			else:
-				self.number_of_depreciations_booked = 0
+				self.opening_number_of_booked_depreciations = 0
 
-			if flt(row.total_number_of_depreciations) <= cint(self.number_of_depreciations_booked):
+			if flt(row.total_number_of_depreciations) <= cint(self.opening_number_of_booked_depreciations):
 				frappe.throw(
 					_(
-						"Row {0}: Total Number of Depreciations cannot be less than or equal to Number of Depreciations Booked"
+						"Row {0}: Total Number of Depreciations cannot be less than or equal to Opening Number of Booked Depreciations"
 					).format(row.idx),
 					title=_("Invalid Schedule"),
 				)
@@ -458,6 +456,17 @@ class Asset(AccountsController):
 					"Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date"
 				).format(row.idx)
 			)
+
+	def set_total_booked_depreciations(self):
+		# set value of total number of booked depreciations field
+		for fb_row in self.get("finance_books"):
+			total_number_of_booked_depreciations = self.opening_number_of_booked_depreciations
+			depr_schedule = get_depr_schedule(self.name, "Active", fb_row.finance_book)
+			if depr_schedule:
+				for je in depr_schedule:
+					if je.journal_entry:
+						total_number_of_booked_depreciations += 1
+			fb_row.db_set("total_number_of_booked_depreciations", total_number_of_booked_depreciations)
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get("finance_books"):
@@ -514,13 +523,6 @@ class Asset(AccountsController):
 		for movement in movements:
 			movement = frappe.get_doc("Asset Movement", movement.get("name"))
 			movement.cancel()
-
-	def cancel_capitalization(self):
-		if self.capitalized_in:
-			self.db_set("capitalized_in", None)
-			asset_capitalization = frappe.get_doc("Asset Capitalization", self.capitalized_in)
-			if asset_capitalization.docstatus == 1:
-				asset_capitalization.cancel()
 
 	def delete_depreciation_entries(self):
 		if self.calculate_depreciation:
@@ -668,7 +670,7 @@ class Asset(AccountsController):
 		if not fixed_asset_account:
 			frappe.throw(
 				_("Set {0} in asset category {1} for company {2}").format(
-					frappe.bold("Fixed Asset Account"),
+					frappe.bold(_("Fixed Asset Account")),
 					frappe.bold(self.asset_category),
 					frappe.bold(self.company),
 				),
@@ -860,10 +862,15 @@ def create_asset_repair(asset, asset_name):
 
 
 @frappe.whitelist()
-def create_asset_capitalization(asset):
+def create_asset_capitalization(asset, asset_name, item_code):
 	asset_capitalization = frappe.new_doc("Asset Capitalization")
 	asset_capitalization.update(
-		{"target_asset": asset, "capitalization_method": "Choose a WIP composite asset"}
+		{
+			"target_asset": asset,
+			"capitalization_method": "Choose a WIP composite asset",
+			"target_asset_name": asset_name,
+			"target_item_code": item_code,
+		}
 	)
 	return asset_capitalization
 
@@ -898,7 +905,7 @@ def transfer_asset(args):
 
 @frappe.whitelist()
 def get_item_details(item_code, asset_category, gross_purchase_amount):
-	asset_category_doc = frappe.get_doc("Asset Category", asset_category)
+	asset_category_doc = frappe.get_cached_doc("Asset Category", asset_category)
 	books = []
 	for d in asset_category_doc.finance_books:
 		books.append(
@@ -1030,6 +1037,14 @@ def get_asset_value_after_depreciation(asset_name, finance_book=None):
 
 
 @frappe.whitelist()
+def has_active_capitalization(asset):
+	active_capitalizations = frappe.db.count(
+		"Asset Capitalization", filters={"target_asset": asset, "docstatus": 1}
+	)
+	return active_capitalizations > 0
+
+
+@frappe.whitelist()
 def split_asset(asset_name, split_qty):
 	asset = frappe.get_doc("Asset", asset_name)
 	split_qty = cint(split_qty)
@@ -1139,6 +1154,8 @@ def create_new_asset_after_split(asset, split_qty):
 
 	for row in new_asset.get("finance_books"):
 		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(asset.name, "Active", row.finance_book)
+		if not current_asset_depr_schedule_doc:
+			continue
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
 
 		new_asset_depr_schedule_doc.set_draft_asset_depr_schedule_details(new_asset, row)

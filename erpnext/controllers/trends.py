@@ -74,8 +74,10 @@ def get_data(filters, conditions):
 
 	if conditions["based_on_select"] in ["t1.project,", "t2.project,"]:
 		cond = " and " + conditions["based_on_select"][:-1] + " IS Not NULL"
-	if conditions.get("trans") in ["Sales Order", "Purchase Order"]:
-		cond += " and t1.status != 'Closed'"
+
+	if not filters.get("include_closed_orders"):
+		if conditions.get("trans") in ["Sales Order", "Purchase Order"]:
+			cond += " and t1.status != 'Closed'"
 
 	if conditions.get("trans") == "Quotation" and filters.get("group_by") == "Customer":
 		cond += " and t1.quotation_to = 'Customer'"

@@ -10,13 +10,19 @@ import erpnext
 from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from erpnext.buying.doctype.purchase_order.purchase_order import get_mapped_purchase_invoice
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice as make_pi_from_po
+from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+	create_pr_against_po,
+	create_purchase_order,
+)
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 from erpnext.controllers.accounts_controller import InvalidQtyError, get_payment_terms
 from erpnext.controllers.buying_controller import QtyMismatchError
 from erpnext.exceptions import InvalidCurrency
 from erpnext.projects.doctype.project.test_project import make_project
 from erpnext.stock.doctype.item.test_item import create_item
+from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+from erpnext.stock.doctype.material_request.test_material_request import make_material_request
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as create_purchase_invoice_from_receipt,
 )
@@ -81,6 +87,31 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 
 		# teardown
 		pi.delete()
+
+	def test_update_received_qty_in_material_request(self):
+		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+
+		"""
+		Test if the received_qty in Material Request is updated correctly when
+		a Purchase Invoice with update_stock=True is submitted.
+		"""
+		mr = make_material_request(item_code="_Test Item", qty=10)
+		mr.save()
+		mr.submit()
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.save()
+		po.submit()
+
+		# Create a Purchase Invoice with update_stock=True
+		pi = make_purchase_invoice(po.name)
+		pi.update_stock = True
+		pi.insert()
+		pi.submit()
+
+		# Check if the received quantity is updated in Material Request
+		mr.reload()
+		self.assertEqual(mr.items[0].received_qty, 10)
 
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
@@ -1984,18 +2015,15 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
 
 		pi.items[0].expense_account = "Service - _TC"
+		# Ledger reposted implicitly upon 'Update After Submit'
 		pi.save()
 		pi.load_from_db()
-		self.assertTrue(pi.repost_required)
-		pi.repost_accounting_entries()
 
 		expected_gle = [
 			["Creditors - _TC", 0.0, 1000, nowdate()],
 			["Service - _TC", 1000, 0.0, nowdate()],
 		]
 		check_gl_entries(self, pi.name, expected_gle, nowdate())
-		pi.load_from_db()
-		self.assertFalse(pi.repost_required)
 
 	@change_settings("Buying Settings", {"supplier_group": None})
 	def test_purchase_invoice_without_supplier_group(self):
@@ -2167,6 +2195,112 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			else:
 				self.assertEqual(row.serial_no, "\n".join(serial_nos[:2]))
 				self.assertEqual(row.rejected_serial_no, serial_nos[2])
+
+	def test_make_pr_and_pi_from_po(self):
+		from erpnext.assets.doctype.asset.test_asset import create_asset_category
+
+		if not frappe.db.exists("Asset Category", "Computers"):
+			create_asset_category()
+
+		item = create_item(
+			item_code="_Test_Item", is_stock_item=0, is_fixed_asset=1, asset_category="Computers"
+		)
+		po = create_purchase_order(item_code=item.item_code)
+		pr = create_pr_against_po(po.name, 10)
+		pi = make_pi_from_po(po.name)
+		pi.insert()
+		pi.submit()
+
+		pr_gl_entries = frappe.db.sql(
+			"""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Purchase Receipt' and voucher_no=%s
+			order by account asc""",
+			pr.name,
+			as_dict=1,
+		)
+
+		pr_expected_values = [
+			["Asset Received But Not Billed - _TC", 0, 5000],
+			["CWIP Account - _TC", 5000, 0],
+		]
+
+		for i, gle in enumerate(pr_gl_entries):
+			self.assertEqual(pr_expected_values[i][0], gle.account)
+			self.assertEqual(pr_expected_values[i][1], gle.debit)
+			self.assertEqual(pr_expected_values[i][2], gle.credit)
+
+		pi_gl_entries = frappe.db.sql(
+			"""select account, debit, credit
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""",
+			pi.name,
+			as_dict=1,
+		)
+		pi_expected_values = [
+			["Asset Received But Not Billed - _TC", 5000, 0],
+			["Creditors - _TC", 0, 5000],
+		]
+
+		for i, gle in enumerate(pi_gl_entries):
+			self.assertEqual(pi_expected_values[i][0], gle.account)
+			self.assertEqual(pi_expected_values[i][1], gle.debit)
+			self.assertEqual(pi_expected_values[i][2], gle.credit)
+
+	def test_adjust_incoming_rate_from_pi_with_multi_currency(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
+
+		# Increase the cost of the item
+
+		pr = make_purchase_receipt(
+			qty=10, rate=1, currency="USD", do_not_save=1, supplier="_Test Supplier USD"
+		)
+		pr.conversion_rate = 6300
+		pr.plc_conversion_rate = 1
+		pr.save()
+		pr.submit()
+
+		self.assertEqual(pr.conversion_rate, 6300)
+		self.assertEqual(pr.plc_conversion_rate, 1)
+		self.assertEqual(pr.base_grand_total, 6300 * 10)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 6300 * 10)
+
+		make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=3000,
+			distribute_charges_based_on="Qty",
+		)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.rate = 1.1
+
+		pi.save()
+		pi.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 7230 * 10)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
 
 
 def set_advance_flag(company, flag, default_account):

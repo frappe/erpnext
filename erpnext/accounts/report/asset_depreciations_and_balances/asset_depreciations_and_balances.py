@@ -69,54 +69,60 @@ def get_asset_categories_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset_category"):
 		condition += " and asset_category = %(asset_category)s"
+	if filters.get("finance_book"):
+		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
+
+	# nosemgrep
 	return frappe.db.sql(
 		f"""
-		SELECT asset_category,
-			   ifnull(sum(case when purchase_date < %(from_date)s then
-							   case when ifnull(disposal_date, 0) = 0 or disposal_date >= %(from_date)s then
-									gross_purchase_amount
+		SELECT a.asset_category,
+			   ifnull(sum(case when a.purchase_date < %(from_date)s then
+							   case when ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s then
+									a.gross_purchase_amount
 							   else
 									0
 							   end
 						   else
 								0
 						   end), 0) as cost_as_on_from_date,
-			   ifnull(sum(case when purchase_date >= %(from_date)s then
-			   						gross_purchase_amount
+			   ifnull(sum(case when a.purchase_date >= %(from_date)s then
+			   						a.gross_purchase_amount
 			   				   else
 			   				   		0
 			   				   end), 0) as cost_of_new_purchase,
-			   ifnull(sum(case when ifnull(disposal_date, 0) != 0
-			   						and disposal_date >= %(from_date)s
-			   						and disposal_date <= %(to_date)s then
-							   case when status = "Sold" then
-							   		gross_purchase_amount
+			   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
+			   						and a.disposal_date >= %(from_date)s
+			   						and a.disposal_date <= %(to_date)s then
+							   case when a.status = "Sold" then
+							   		a.gross_purchase_amount
 							   else
 							   		0
 							   end
 						   else
 								0
 						   end), 0) as cost_of_sold_asset,
-			   ifnull(sum(case when ifnull(disposal_date, 0) != 0
-			   						and disposal_date >= %(from_date)s
-			   						and disposal_date <= %(to_date)s then
-							   case when status = "Scrapped" then
-							   		gross_purchase_amount
+			   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
+			   						and a.disposal_date >= %(from_date)s
+			   						and a.disposal_date <= %(to_date)s then
+							   case when a.status = "Scrapped" then
+							   		a.gross_purchase_amount
 							   else
 							   		0
 							   end
 						   else
 								0
 						   end), 0) as cost_of_scrapped_asset
-		from `tabAsset`
+		from `tabAsset` a
 		where docstatus=1 and company=%(company)s and purchase_date <= %(to_date)s {condition}
-		group by asset_category
+		and not exists(select name from `tabAsset Capitalization Asset Item` where asset = a.name)
+		group by a.asset_category
 	""",
 		{
 			"to_date": filters.to_date,
 			"from_date": filters.from_date,
 			"company": filters.company,
 			"asset_category": filters.get("asset_category"),
+			"finance_book": filters.get("finance_book"),
 		},
 		as_dict=1,
 	)
@@ -126,6 +132,10 @@ def get_asset_details_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset"):
 		condition += " and name = %(asset)s"
+	if filters.get("finance_book"):
+		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = `tabAsset`.name and ads.finance_book = %(finance_book)s)"
+
+	# nosemgrep
 	return frappe.db.sql(
 		f"""
 		SELECT name,
@@ -174,6 +184,7 @@ def get_asset_details_for_grouped_by_category(filters):
 			"from_date": filters.from_date,
 			"company": filters.company,
 			"asset": filters.get("asset"),
+			"finance_book": filters.get("finance_book"),
 		},
 		as_dict=1,
 	)

@@ -857,7 +857,7 @@ erpnext.PointOfSale.ItemCart = class {
 			});
 			this.$customer_section.find(".customer-details").html(
 				`<div class="header">
-					<div class="label">Contact Details</div>
+					<div class="label">${__("Contact Details")}</div>
 					<div class="close-details-btn">
 						<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
 							<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
@@ -877,7 +877,7 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="loyalty_program-field"></div>
 					<div class="loyalty_points-field"></div>
 				</div>
-				<div class="transactions-label">Recent Transactions</div>`
+				<div class="transactions-label">${__("Recent Transactions")}</div>`
 			);
 			// transactions need to be in diff div from sticky elem for scrolling
 			this.$customer_section.append(`<div class="customer-transactions"></div>`);

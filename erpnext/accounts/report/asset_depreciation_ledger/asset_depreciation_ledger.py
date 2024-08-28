@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from frappe.query_builder import DocType
 from frappe.utils import cstr, flt
 
 
@@ -75,11 +76,24 @@ def get_data(filters):
 		asset_data = assets_details.get(d.against_voucher)
 		if asset_data:
 			if not asset_data.get("accumulated_depreciation_amount"):
-				asset_data.accumulated_depreciation_amount = d.debit + asset_data.get(
-					"opening_accumulated_depreciation"
-				)
+				AssetDepreciationSchedule = DocType("Asset Depreciation Schedule")
+				DepreciationSchedule = DocType("Depreciation Schedule")
+				query = (
+					frappe.qb.from_(DepreciationSchedule)
+					.join(AssetDepreciationSchedule)
+					.on(DepreciationSchedule.parent == AssetDepreciationSchedule.name)
+					.select(DepreciationSchedule.accumulated_depreciation_amount)
+					.where(
+						(AssetDepreciationSchedule.asset == d.against_voucher)
+						& (DepreciationSchedule.parenttype == "Asset Depreciation Schedule")
+						& (DepreciationSchedule.schedule_date == d.posting_date)
+					)
+				).run(as_dict=True)
+				asset_data.accumulated_depreciation_amount = query[0]["accumulated_depreciation_amount"]
+
 			else:
 				asset_data.accumulated_depreciation_amount += d.debit
+			asset_data.opening_accumulated_depreciation = asset_data.accumulated_depreciation_amount - d.debit
 
 			row = frappe._dict(asset_data)
 			row.update(

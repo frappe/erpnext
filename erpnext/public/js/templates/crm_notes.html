@@ -12,6 +12,7 @@
 			{% for(var i=0, l=notes.length; i<l; i++) { %}
 				<div class="comment-content p-3 row" name="{{ notes[i].name }}">
 					<div class="mb-2 head col-xs-3">
+						{% if (notes[i].added_by && notes[i].added_on) %}
 						<div class="row">
 							<div class="col-xs-2">
 								{{ frappe.avatar(notes[i].added_by) }}
@@ -25,6 +26,7 @@
 								</div>
 							</div>
 						</div>
+						{% } %}
 					</div>
 					<div class="content col-xs-8">
 						{{ notes[i].note }}

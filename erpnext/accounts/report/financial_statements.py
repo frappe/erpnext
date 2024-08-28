@@ -333,8 +333,8 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 
 def add_total_row(out, root_type, balance_must_be, period_list, company_currency):
 	total_row = {
-		"account_name": _("Total {0} ({1})").format(_(root_type), _(balance_must_be)),
-		"account": _("Total {0} ({1})").format(_(root_type), _(balance_must_be)),
+		"account_name": "'" + _("Total {0} ({1})").format(_(root_type), _(balance_must_be)) + "'",
+		"account": "'" + _("Total {0} ({1})").format(_(root_type), _(balance_must_be)) + "'",
 		"currency": company_currency,
 		"opening_balance": 0.0,
 	}
@@ -613,11 +613,11 @@ def get_cost_centers_with_children(cost_centers):
 	return list(set(all_cost_centers))
 
 
-def get_columns(periodicity, period_list, accumulated_values=1, company=None):
+def get_columns(periodicity, period_list, accumulated_values=1, company=None, cash_flow=False):
 	columns = [
 		{
-			"fieldname": "account",
-			"label": _("Account"),
+			"fieldname": "stub",
+			"label": _("Account") if not cash_flow else _("Section"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"width": 300,

@@ -21,9 +21,17 @@ frappe.query_reports["Sales Analytics"] = {
 		},
 		{
 			fieldname: "doc_type",
-			label: __("based_on"),
+			label: __("Based On"),
 			fieldtype: "Select",
-			options: ["Sales Order", "Delivery Note", "Sales Invoice"],
+			options: [
+				"All",
+				"Quotation",
+				"Sales Order",
+				"Delivery Note",
+				"Sales Invoice",
+				"Sales Invoice (due)",
+				"Payment Entry",
+			],
 			default: "Sales Invoice",
 			reqd: 1,
 		},
@@ -42,14 +50,18 @@ frappe.query_reports["Sales Analytics"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
+			default:
+				frappe.defaults.get_user_default("sales_start_date") ||
+				erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 			reqd: 1,
 		},
 		{
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
+			default:
+				frappe.defaults.get_user_default("sales_end_date") ||
+				erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 			reqd: 1,
 		},
 		{
@@ -71,6 +83,19 @@ frappe.query_reports["Sales Analytics"] = {
 				{ value: "Yearly", label: __("Yearly") },
 			],
 			default: "Monthly",
+			reqd: 1,
+		},
+		{
+			fieldname: "curves",
+			label: __("Curves"),
+			fieldtype: "Select",
+			options: [
+				{ value: "select", label: __("Select") },
+				{ value: "all", label: __("All") },
+				{ value: "non-zeros", label: __("Non-Zeros") },
+				{ value: "total", label: __("Total Only") },
+			],
+			default: "select",
 			reqd: 1,
 		},
 	],

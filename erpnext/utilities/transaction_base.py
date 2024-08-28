@@ -168,6 +168,69 @@ class TransactionBase(StatusUpdater):
 		if len(child_table_values) > 1:
 			self.set(default_field, None)
 
+	def validate_currency_for_receivable_payable_and_advance_account(self):
+		if self.doctype in ["Customer", "Supplier"]:
+			account_type = "Receivable" if self.doctype == "Customer" else "Payable"
+			for x in self.accounts:
+				company_default_currency = frappe.get_cached_value("Company", x.company, "default_currency")
+				receivable_payable_account_currency = None
+				advance_account_currency = None
+
+				if x.account:
+					receivable_payable_account_currency = frappe.get_cached_value(
+						"Account", x.account, "account_currency"
+					)
+
+				if x.advance_account:
+					advance_account_currency = frappe.get_cached_value(
+						"Account", x.advance_account, "account_currency"
+					)
+				if receivable_payable_account_currency and (
+					receivable_payable_account_currency != self.default_currency
+					and receivable_payable_account_currency != company_default_currency
+				):
+					frappe.throw(
+						_(
+							"{0} Account: {1} ({2}) must be in either customer billing currency: {3} or Company default currency: {4}"
+						).format(
+							account_type,
+							frappe.bold(x.account),
+							frappe.bold(receivable_payable_account_currency),
+							frappe.bold(self.default_currency),
+							frappe.bold(company_default_currency),
+						)
+					)
+
+				if advance_account_currency and (
+					advance_account_currency != self.default_currency
+					and advance_account_currency != company_default_currency
+				):
+					frappe.throw(
+						_(
+							"Advance Account: {0} must be in either customer billing currency: {1} or Company default currency: {2}"
+						).format(
+							frappe.bold(x.advance_account),
+							frappe.bold(self.default_currency),
+							frappe.bold(company_default_currency),
+						)
+					)
+
+				if (
+					receivable_payable_account_currency
+					and advance_account_currency
+					and receivable_payable_account_currency != advance_account_currency
+				):
+					frappe.throw(
+						_(
+							"Both {0} Account: {1} and Advance Account: {2} must be of same currency for company: {3}"
+						).format(
+							account_type,
+							frappe.bold(x.account),
+							frappe.bold(x.advance_account),
+							frappe.bold(x.company),
+						)
+					)
+
 
 def delete_events(ref_type, ref_name):
 	events = (

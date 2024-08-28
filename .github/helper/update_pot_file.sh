@@ -30,11 +30,11 @@ branch_name="pot_${BASE_BRANCH}_${isodate}"
 git checkout -b "${branch_name}"
 
 echo "Commiting changes..."
-git add .
+git add erpnext/locale/main.pot
 git commit -m "chore: update POT file"
 
 gh auth setup-git
 git push -u upstream "${branch_name}"
 
 echo "Creating a PR..."
-gh pr create --fill --base "${BASE_BRANCH}" --head "${branch_name}" -R frappe/erpnext
+gh pr create --fill --base "${BASE_BRANCH}" --head "${branch_name}" --reviewer ${PR_REVIEWER} -R frappe/erpnext

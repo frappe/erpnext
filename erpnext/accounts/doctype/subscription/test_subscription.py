@@ -476,7 +476,7 @@ class TestSubscription(FrappeTestCase):
 			start_date="2021-01-01",
 			submit_invoice=0,
 			generate_new_invoices_past_due_date=1,
-			party="_Test Subscription Customer",
+			party="_Test Subscription Customer John Doe",
 		)
 
 		# create invoices for the first two moths
@@ -520,6 +520,18 @@ class TestSubscription(FrappeTestCase):
 
 		subscription.process(posting_date="2023-01-22")
 		self.assertEqual(len(subscription.invoices), 2)
+
+	def test_future_subscription(self):
+		"""Force-Fetch should not process future subscriptions"""
+		subscription = create_subscription(
+			start_date=add_months(nowdate(), 1),
+			submit_invoice=0,
+			generate_new_invoices_past_due_date=1,
+			party="_Test Subscription Customer John Doe",
+		)
+		subscription.force_fetch_subscription_updates()
+		subscription.reload()
+		self.assertEqual(len(subscription.invoices), 0)
 
 
 def make_plans():
@@ -565,8 +577,14 @@ def create_parties():
 	if not frappe.db.exists("Customer", "_Test Subscription Customer"):
 		customer = frappe.new_doc("Customer")
 		customer.customer_name = "_Test Subscription Customer"
-		customer.billing_currency = "USD"
+		customer.default_currency = "USD"
 		customer.append("accounts", {"company": "_Test Company", "account": "_Test Receivable USD - _TC"})
+		customer.insert()
+
+	if not frappe.db.exists("Customer", "_Test Subscription Customer John Doe"):
+		customer = frappe.new_doc("Customer")
+		customer.customer_name = "_Test Subscription Customer John Doe"
+		customer.append("accounts", {"company": "_Test Company", "account": "_Test Receivable - _TC"})
 		customer.insert()
 
 

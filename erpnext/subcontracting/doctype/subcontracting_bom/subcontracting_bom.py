@@ -99,7 +99,7 @@ def get_subcontracting_boms_for_finished_goods(fg_items: str | list) -> dict:
 			else:
 				return subcontracting_boms[0]
 
-	return {}
+	return frappe._dict({})
 
 
 @frappe.whitelist()
