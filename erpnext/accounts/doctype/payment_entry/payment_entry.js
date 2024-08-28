@@ -305,7 +305,7 @@ frappe.ui.form.on("Payment Entry", {
 
 	set_dynamic_labels: function (frm) {
 		var company_currency = frm.doc.company
-			? frappe.get_doc(":Company", frm.doc.company).default_currency
+			? frappe.get_doc(":Company", frm.doc.company)?.default_currency
 			: "";
 
 		frm.set_currency_labels(
