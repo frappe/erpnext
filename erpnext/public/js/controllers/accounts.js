@@ -230,7 +230,8 @@ cur_frm.cscript.validate_taxes_and_charges = function(cdt, cdn) {
 
 }
 
-cur_frm.cscript.validate_inclusive_tax = function(tax) {
+cur_frm.cscript.validate_inclusive_tax = function(tax, frm) {
+	this.frm = this.frm || frm;
 	var actual_type_error = function() {
 		var msg = __("Actual type tax cannot be included in Item rate in row {0}", [tax.idx])
 		frappe.throw(msg);
@@ -246,12 +247,12 @@ cur_frm.cscript.validate_inclusive_tax = function(tax) {
 		if(tax.charge_type == "Actual") {
 			// inclusive tax cannot be of type Actual
 			actual_type_error();
-		} else if(tax.charge_type == "On Previous Row Amount" &&
+		} else if(tax.charge_type == "On Previous Row Amount" && this.frm &&
 			!cint(this.frm.doc["taxes"][tax.row_id - 1].included_in_print_rate)
 		) {
 			// referred row should also be an inclusive tax
 			on_previous_row_error(tax.row_id);
-		} else if(tax.charge_type == "On Previous Row Total") {
+		} else if(tax.charge_type == "On Previous Row Total" && this.frm) {
 			var taxes_not_included = $.map(this.frm.doc["taxes"].slice(0, tax.row_id),
 				function(t) { return cint(t.included_in_print_rate) ? null : t; });
 			if(taxes_not_included.length > 0) {
@@ -294,7 +295,7 @@ if(!erpnext.taxes.flags[cur_frm.cscript.tax_table]) {
 		var tax = frappe.get_doc(cdt, cdn);
 		try {
 			cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
-			cur_frm.cscript.validate_inclusive_tax(tax);
+			cur_frm.cscript.validate_inclusive_tax(tax, frm);
 		} catch(e) {
 			tax.included_in_print_rate = 0;
 			refresh_field("included_in_print_rate", tax.name, tax.parentfield);

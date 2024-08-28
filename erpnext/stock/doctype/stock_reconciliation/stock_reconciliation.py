@@ -5,7 +5,7 @@
 import frappe
 from frappe import _, bold, msgprint
 from frappe.query_builder.functions import CombineDatetime, Sum
-from frappe.utils import add_to_date, cint, cstr, flt
+from frappe.utils import add_to_date, cint, cstr, flt, get_link_to_form
 
 import erpnext
 from erpnext.accounts.utils import get_company_default
@@ -357,7 +357,6 @@ class StockReconciliation(StockController):
 
 			sl_entries.append(args)
 
-		qty_after_transaction = 0
 		for serial_no in serial_nos:
 			args = self.get_sle_for_items(row, [serial_no])
 
@@ -373,26 +372,15 @@ class StockReconciliation(StockController):
 			if previous_sle and row.warehouse != previous_sle.get("warehouse"):
 				# If serial no exists in different warehouse
 
-				warehouse = previous_sle.get("warehouse", "") or row.warehouse
-
-				if not qty_after_transaction:
-					qty_after_transaction = get_stock_balance(
-						row.item_code, warehouse, self.posting_date, self.posting_time
+				frappe.throw(
+					_(
+						"The Serial No {0} already exists in the warehouse {1}. It cannot be transferred to the warehouse {2}"
+					).format(
+						get_link_to_form("Serial No", serial_no),
+						bold(previous_sle.get("warehouse")),
+						row.warehouse,
 					)
-
-				qty_after_transaction -= 1
-
-				new_args = args.copy()
-				new_args.update(
-					{
-						"actual_qty": -1,
-						"qty_after_transaction": qty_after_transaction,
-						"warehouse": warehouse,
-						"valuation_rate": previous_sle.get("valuation_rate"),
-					}
 				)
-
-				sl_entries.append(new_args)
 
 		if row.qty:
 			args = self.get_sle_for_items(row)
