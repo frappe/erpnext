@@ -317,7 +317,16 @@ class AssetCapitalization(StockController):
 		if not self.target_is_fixed_asset and not self.get("asset_items"):
 			frappe.throw(_("Consumed Asset Items is mandatory for Decapitalization"))
 
-		if not (self.get("stock_items") or self.get("asset_items") or self.get("service_items")):
+		if self.capitalization_method == "Create a new composite asset" and not (
+			self.get("stock_items") or self.get("asset_items")
+		):
+			frappe.throw(
+				_(
+					"Consumed Stock Items or Consumed Asset Items are mandatory for creating new composite asset"
+				)
+			)
+
+		elif not (self.get("stock_items") or self.get("asset_items") or self.get("service_items")):
 			frappe.throw(
 				_(
 					"Consumed Stock Items, Consumed Asset Items or Consumed Service Items is mandatory for Capitalization"
