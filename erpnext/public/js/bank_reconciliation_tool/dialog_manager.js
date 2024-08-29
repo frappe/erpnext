@@ -374,6 +374,14 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: "Cost Center",
 				options: "Cost Center",
 				depends_on: "eval:doc.action=='Create Voucher' && doc.document_type=='Payment Entry'",
+				get_query: () => {
+					return {
+						filters: {
+							is_group: 0,
+							company: this.company,
+						},
+					};
+				},
 			},
 			{
 				fieldtype: "Section Break",

@@ -159,7 +159,6 @@ class PurchaseInvoice(BuyingController):
 		rejected_warehouse: DF.Link | None
 		release_date: DF.Date | None
 		remarks: DF.SmallText | None
-		repost_required: DF.Check
 		represents_company: DF.Link | None
 		return_against: DF.Link | None
 		rounded_total: DF.Currency
@@ -379,16 +378,16 @@ class PurchaseInvoice(BuyingController):
 		if account.report_type != "Balance Sheet":
 			frappe.throw(
 				_(
-					"Please ensure {} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
-				).format(frappe.bold("Credit To")),
+					"Please ensure that the {0} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account."
+				).format(frappe.bold(_("Credit To"))),
 				title=_("Invalid Account"),
 			)
 
 		if self.supplier and account.account_type != "Payable":
 			frappe.throw(
 				_(
-					"Please ensure {} account {} is a Payable account. Change the account type to Payable or select a different account."
-				).format(frappe.bold("Credit To"), frappe.bold(self.credit_to)),
+					"Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
+				).format(frappe.bold(_("Credit To")), frappe.bold(self.credit_to)),
 				title=_("Invalid Account"),
 			)
 
@@ -636,7 +635,7 @@ class PurchaseInvoice(BuyingController):
 						"To submit the invoice without purchase order please set {0} as {1} in {2}"
 					).format(
 						frappe.bold(_("Purchase Order Required")),
-						frappe.bold("No"),
+						frappe.bold(_("No")),
 						get_link_to_form("Buying Settings", "Buying Settings", "Buying Settings"),
 					)
 					throw(msg, title=_("Mandatory Purchase Order"))
@@ -657,7 +656,7 @@ class PurchaseInvoice(BuyingController):
 						"To submit the invoice without purchase receipt please set {0} as {1} in {2}"
 					).format(
 						frappe.bold(_("Purchase Receipt Required")),
-						frappe.bold("No"),
+						frappe.bold(_("No")),
 						get_link_to_form("Buying Settings", "Buying Settings", "Buying Settings"),
 					)
 					throw(msg, title=_("Mandatory Purchase Receipt"))
@@ -797,19 +796,17 @@ class PurchaseInvoice(BuyingController):
 		self.process_common_party_accounting()
 
 	def on_update_after_submit(self):
-		if hasattr(self, "repost_required"):
-			fields_to_check = [
-				"cash_bank_account",
-				"write_off_account",
-				"unrealized_profit_loss_account",
-				"is_opening",
-			]
-			child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
-			self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
-			if self.needs_repost:
-				self.validate_for_repost()
-				self.db_set("repost_required", self.needs_repost)
-				self.repost_accounting_entries()
+		fields_to_check = [
+			"cash_bank_account",
+			"write_off_account",
+			"unrealized_profit_loss_account",
+			"is_opening",
+		]
+		child_tables = {"items": ("expense_account",), "taxes": ("account_head",)}
+		self.needs_repost = self.check_if_fields_updated(fields_to_check, child_tables)
+		if self.needs_repost:
+			self.validate_for_repost()
+			self.repost_accounting_entries()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
@@ -1710,6 +1707,9 @@ class PurchaseInvoice(BuyingController):
 		self.db_set("release_date", None)
 
 	def set_tax_withholding(self):
+		self.set("advance_tax", [])
+		self.set("tax_withheld_vouchers", [])
+
 		if not self.apply_tds:
 			return
 
@@ -1751,8 +1751,6 @@ class PurchaseInvoice(BuyingController):
 			self.remove(d)
 
 		## Add pending vouchers on which tax was withheld
-		self.set("tax_withheld_vouchers", [])
-
 		for voucher_no, voucher_details in voucher_wise_amount.items():
 			self.append(
 				"tax_withheld_vouchers",
@@ -1767,7 +1765,6 @@ class PurchaseInvoice(BuyingController):
 		self.calculate_taxes_and_totals()
 
 	def allocate_advance_tds(self, tax_withholding_details, advance_taxes):
-		self.set("advance_tax", [])
 		for tax in advance_taxes:
 			allocated_amount = 0
 			pending_amount = flt(tax.tax_amount - tax.allocated_amount)

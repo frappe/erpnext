@@ -54,6 +54,7 @@ class ProcessStatementOfAccounts(Document):
 		frequency: DF.Literal["Weekly", "Monthly", "Quarterly"]
 		from_date: DF.Date | None
 		group_by: DF.Literal["", "Group by Voucher", "Group by Voucher (Consolidated)"]
+		ignore_cr_dr_notes: DF.Check
 		ignore_exchange_rate_revaluation_journals: DF.Check
 		include_ageing: DF.Check
 		include_break: DF.Check
@@ -132,6 +133,9 @@ def get_statement_dict(doc, get_statement_dict=False):
 		filters = get_common_filters(doc)
 		if doc.ignore_exchange_rate_revaluation_journals:
 			filters.update({"ignore_err": True})
+
+		if doc.ignore_cr_dr_notes:
+			filters.update({"ignore_cr_dr_notes": True})
 
 		if doc.report == "General Ledger":
 			filters.update(get_gl_filters(doc, entry, tax_id, presentation_currency))

@@ -56,10 +56,11 @@
  "idx": 1,
  "image_field": "image",
  "links": [],
- "modified": "2024-03-27 13:06:42.500721",
+ "modified": "2024-08-20 14:10:21.377962",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Brand",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

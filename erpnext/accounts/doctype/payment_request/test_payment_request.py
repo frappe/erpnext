@@ -5,10 +5,12 @@ import unittest
 from unittest.mock import patch
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.setup.utils import get_exchange_rate
 
@@ -19,6 +21,7 @@ PAYMENT_URL = "https://example.com/payment"
 payment_gateways = [
 	{"doctype": "Payment Gateway", "gateway": "_Test Gateway"},
 	{"doctype": "Payment Gateway", "gateway": "_Test Gateway Phone"},
+	{"doctype": "Payment Gateway", "gateway": "_Test Gateway Other"},
 ]
 
 payment_method = [
@@ -37,6 +40,13 @@ payment_method = [
 	},
 	{
 		"doctype": "Payment Gateway Account",
+		"payment_gateway": "_Test Gateway Other",
+		"payment_account": "_Test Bank USD - _TC",
+		"payment_channel": "Other",
+		"currency": "USD",
+	},
+	{
+		"doctype": "Payment Gateway Account",
 		"payment_gateway": "_Test Gateway Phone",
 		"payment_account": "_Test Bank USD - _TC",
 		"payment_channel": "Phone",
@@ -45,7 +55,7 @@ payment_method = [
 ]
 
 
-class TestPaymentRequest(unittest.TestCase):
+class TestPaymentRequest(FrappeTestCase):
 	def setUp(self):
 		for payment_gateway in payment_gateways:
 			if not frappe.db.get_value("Payment Gateway", payment_gateway["gateway"], "name"):
@@ -77,6 +87,9 @@ class TestPaymentRequest(unittest.TestCase):
 		)
 		self._get_payment_gateway_controller = _get_payment_gateway_controller.start()
 		self.addCleanup(_get_payment_gateway_controller.stop)
+
+	def tearDown(self):
+		frappe.db.rollback()
 
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR", do_not_save=True)
@@ -114,6 +127,21 @@ class TestPaymentRequest(unittest.TestCase):
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so.name,
+			payment_gateway_account="_Test Gateway Other - USD",
+			submit_doc=True,
+			return_doc=True,
+		)
+		self.assertEqual(pr.payment_channel, "Other")
+		self.assertEqual(pr.mute_email, True)
+
+		self.assertEqual(pr.payment_url, PAYMENT_URL)
+		self.assertEqual(self.send_email.call_count, 0)
+		self.assertEqual(self._get_payment_gateway_controller.call_count, 1)
+		pr.cancel()
+
+		pr = make_payment_request(
+			dt="Sales Order",
+			dn=so.name,
 			payment_gateway_account="_Test Gateway - USD",  # email channel
 			submit_doc=False,
 			return_doc=True,
@@ -124,9 +152,9 @@ class TestPaymentRequest(unittest.TestCase):
 		self.assertEqual(pr.payment_channel, "Email")
 		self.assertEqual(pr.mute_email, False)
 
-		self.assertIsNone(pr.payment_url)
+		self.assertEqual(pr.payment_url, PAYMENT_URL)
 		self.assertEqual(self.send_email.call_count, 0)  # hence: no increment
-		self.assertEqual(self._get_payment_gateway_controller.call_count, 1)
+		self.assertEqual(self._get_payment_gateway_controller.call_count, 2)
 		pr.cancel()
 
 		pr = make_payment_request(
@@ -171,7 +199,8 @@ class TestPaymentRequest(unittest.TestCase):
 			dt="Sales Order",
 			dn=so.name,
 			payment_gateway_account="_Test Gateway - USD",  # email channel
-			order_type="Shopping Cart",
+			make_sales_invoice=True,
+			mute_email=True,
 			submit_doc=True,
 			return_doc=True,
 		)
@@ -180,7 +209,7 @@ class TestPaymentRequest(unittest.TestCase):
 		self.assertEqual(pr.payment_channel, "Email")
 		self.assertEqual(pr.mute_email, True)
 
-		self.assertIsNone(pr.payment_url)
+		self.assertEqual(pr.payment_url, PAYMENT_URL)
 		self.assertEqual(self.send_email.call_count, 1)  # no increment on shopping cart
 		self.assertEqual(self._get_payment_gateway_controller.call_count, 5)
 		pr.cancel()
@@ -370,3 +399,19 @@ class TestPaymentRequest(unittest.TestCase):
 		# Try to make Payment Request more than SO amount, should give validation
 		pr2.grand_total = 900
 		self.assertRaises(frappe.ValidationError, pr2.save)
+
+	def test_conversion_on_foreign_currency_accounts(self):
+		po_doc = create_purchase_order(supplier="_Test Supplier USD", currency="USD", do_not_submit=1)
+		po_doc.conversion_rate = 80
+		po_doc.items[0].qty = 1
+		po_doc.items[0].rate = 10
+		po_doc.save().submit()
+
+		pr = make_payment_request(dt=po_doc.doctype, dn=po_doc.name, recipient_id="nabin@erpnext.com")
+		pr = frappe.get_doc(pr).save().submit()
+
+		pe = pr.create_payment_entry()
+		self.assertEqual(pe.base_paid_amount, 800)
+		self.assertEqual(pe.paid_amount, 800)
+		self.assertEqual(pe.base_received_amount, 800)
+		self.assertEqual(pe.received_amount, 10)

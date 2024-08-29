@@ -73,7 +73,9 @@
   "remarks_section",
   "general_ledger_remarks_length",
   "column_break_lvjk",
-  "receivable_payable_remarks_length"
+  "receivable_payable_remarks_length",
+  "payment_request_settings",
+  "create_pr_in_draft_status"
  ],
  "fields": [
   {
@@ -475,6 +477,18 @@
    "fieldname": "calculate_depr_using_total_days",
    "fieldtype": "Check",
    "label": "Calculate daily depreciation using total days in depreciation period"
+  },
+  {
+   "description": "Payment Request created from Sales Order or Purchase Order will be in Draft status. When disabled document will be in unsaved state.",
+   "fieldname": "payment_request_settings",
+   "fieldtype": "Tab Break",
+   "label": "Payment Request"
+  },
+  {
+   "default": "1",
+   "fieldname": "create_pr_in_draft_status",
+   "fieldtype": "Check",
+   "label": "Create in Draft Status"
   }
  ],
  "icon": "icon-cog",
@@ -482,7 +496,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-12 00:24:20.957726",
+ "modified": "2024-07-26 06:48:52.714630",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

@@ -315,8 +315,9 @@ def apply_conditions(query, pi, pii, filters):
 
 
 def get_items(filters, additional_table_columns):
-	pi = frappe.qb.DocType("Purchase Invoice")
-	pii = frappe.qb.DocType("Purchase Invoice Item")
+	doctype = "Purchase Invoice"
+	pi = frappe.qb.DocType(doctype)
+	pii = frappe.qb.DocType(f"{doctype} Item")
 	Item = frappe.qb.DocType("Item")
 	query = (
 		frappe.qb.from_(pi)
@@ -353,6 +354,7 @@ def get_items(filters, additional_table_columns):
 			pi.mode_of_payment,
 		)
 		.where(pi.docstatus == 1)
+		.where(pii.parenttype == doctype)
 	)
 
 	if filters.get("supplier"):

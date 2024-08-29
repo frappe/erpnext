@@ -270,10 +270,10 @@ class Asset(AccountsController):
 			frappe.throw(_("Available for use date is required"))
 
 		for d in self.finance_books:
-			if d.depreciation_start_date == self.available_for_use_date:
+			if getdate(d.depreciation_start_date) < getdate(self.available_for_use_date):
 				frappe.throw(
 					_(
-						"Row #{}: Depreciation Posting Date should not be equal to Available for Use Date."
+						"Depreciation Row {0}: Depreciation Posting Date cannot be before Available-for-use Date"
 					).format(d.idx),
 					title=_("Incorrect Date"),
 				)
@@ -672,7 +672,7 @@ class Asset(AccountsController):
 		if not fixed_asset_account:
 			frappe.throw(
 				_("Set {0} in asset category {1} for company {2}").format(
-					frappe.bold("Fixed Asset Account"),
+					frappe.bold(_("Fixed Asset Account")),
 					frappe.bold(self.asset_category),
 					frappe.bold(self.company),
 				),
@@ -907,7 +907,7 @@ def transfer_asset(args):
 
 @frappe.whitelist()
 def get_item_details(item_code, asset_category, gross_purchase_amount):
-	asset_category_doc = frappe.get_doc("Asset Category", asset_category)
+	asset_category_doc = frappe.get_cached_doc("Asset Category", asset_category)
 	books = []
 	for d in asset_category_doc.finance_books:
 		books.append(
@@ -1036,6 +1036,14 @@ def get_asset_value_after_depreciation(asset_name, finance_book=None):
 		return flt(asset.value_after_depreciation)
 
 	return asset.get_value_after_depreciation(finance_book)
+
+
+@frappe.whitelist()
+def has_active_capitalization(asset):
+	active_capitalizations = frappe.db.count(
+		"Asset Capitalization", filters={"target_asset": asset, "docstatus": 1}
+	)
+	return active_capitalizations > 0
 
 
 @frappe.whitelist()

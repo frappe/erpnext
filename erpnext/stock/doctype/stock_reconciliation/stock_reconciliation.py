@@ -16,7 +16,7 @@ from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle impor
 	get_available_serial_nos,
 )
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.utils import get_stock_balance
+from erpnext.stock.utils import get_incoming_rate, get_stock_balance
 
 
 class OpeningEntryAccountError(frappe.ValidationError):
@@ -952,14 +952,21 @@ class StockReconciliation(StockController):
 			precesion = row.precision("current_qty")
 			if flt(current_qty, precesion) != flt(row.current_qty, precesion):
 				if not row.serial_no:
-					val_rate = get_valuation_rate(
-						row.item_code,
-						row.warehouse,
-						self.doctype,
-						self.name,
-						company=self.company,
-						batch_no=row.batch_no,
-						serial_and_batch_bundle=row.current_serial_and_batch_bundle,
+					val_rate = get_incoming_rate(
+						frappe._dict(
+							{
+								"item_code": row.item_code,
+								"warehouse": row.warehouse,
+								"qty": current_qty * -1,
+								"serial_and_batch_bundle": row.current_serial_and_batch_bundle,
+								"batch_no": row.batch_no,
+								"voucher_type": self.doctype,
+								"voucher_no": self.name,
+								"company": self.company,
+								"posting_date": self.posting_date,
+								"posting_time": self.posting_time,
+							}
+						)
 					)
 
 				row.current_valuation_rate = val_rate

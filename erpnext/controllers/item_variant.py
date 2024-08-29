@@ -150,7 +150,7 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 			)
 			msg += "<br>" + _(
 				"To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings."
-			).format(frappe.bold("Allow Rename Attribute Value"))
+			).format(frappe.bold(_("Allow Rename Attribute Value")))
 
 			frappe.throw(msg, InvalidItemAttributeValueError, title=_("Edit Not Allowed"))
 

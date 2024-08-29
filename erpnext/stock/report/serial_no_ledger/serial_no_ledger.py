@@ -157,6 +157,7 @@ def get_data(filters):
 					{
 						"serial_no": bundle_data.get("serial_no"),
 						"valuation_rate": bundle_data.get("valuation_rate"),
+						"qty": args.qty,
 					}
 				)
 

@@ -93,7 +93,7 @@ def get_opp_by_lead_source(from_date, to_date, company):
 		summary = {}
 		sales_stages = set()
 		group_key = lambda o: (o["source"], o["sales_stage"])  # noqa
-		for (source, sales_stage), rows in groupby(cp_opportunities, group_key):
+		for (source, sales_stage), rows in groupby(sorted(cp_opportunities, key=group_key), group_key):
 			summary.setdefault(source, {})[sales_stage] = sum(r["compound_amount"] for r in rows)
 			sales_stages.add(sales_stage)
 

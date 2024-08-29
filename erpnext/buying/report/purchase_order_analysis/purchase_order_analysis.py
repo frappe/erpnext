@@ -39,16 +39,17 @@ def validate_filters(filters):
 def get_data(filters):
 	po = frappe.qb.DocType("Purchase Order")
 	po_item = frappe.qb.DocType("Purchase Order Item")
-	pi = frappe.qb.DocType("Purchase Invoice")
 	pi_item = frappe.qb.DocType("Purchase Invoice Item")
+	pr_item = frappe.qb.DocType("Purchase Receipt Item")
 
 	query = (
 		frappe.qb.from_(po)
-		.from_(po_item)
+		.inner_join(po_item)
+		.on(po_item.parent == po.name)
 		.left_join(pi_item)
-		.on(pi_item.po_detail == po_item.name)
-		.left_join(pi)
-		.on(pi.name == pi_item.parent)
+		.on((pi_item.po_detail == po_item.name) & (pi_item.docstatus == 1))
+		.left_join(pr_item)
+		.on((pr_item.purchase_order_item == po_item.name) & (pr_item.docstatus == 1))
 		.select(
 			po.transaction_date.as_("date"),
 			po_item.schedule_date.as_("required_date"),
@@ -62,7 +63,7 @@ def get_data(filters):
 			(po_item.qty - po_item.received_qty).as_("pending_qty"),
 			Sum(IfNull(pi_item.qty, 0)).as_("billed_qty"),
 			po_item.base_amount.as_("amount"),
-			(po_item.received_qty * po_item.base_rate).as_("received_qty_amount"),
+			(pr_item.base_amount).as_("received_qty_amount"),
 			(po_item.billed_amt * IfNull(po.conversion_rate, 1)).as_("billed_amount"),
 			(po_item.base_amount - (po_item.billed_amt * IfNull(po.conversion_rate, 1))).as_(
 				"pending_amount"
@@ -72,7 +73,6 @@ def get_data(filters):
 			po_item.name,
 		)
 		.where((po_item.parent == po.name) & (po.status.notin(("Stopped", "Closed"))) & (po.docstatus == 1))
-		.where(pi.docstatus == 1)
 		.groupby(po_item.name)
 		.orderby(po.transaction_date)
 	)
