@@ -53,7 +53,7 @@ def get_linked_item(doctype, parent, item_code, amount, quantity):
 			"parent": parent,
 			"item_code": item_code,
 		},
-		fields=["name", "amount", "qty", "landed_cost_voucher_amount"],
+		fields=["name", "rate", "amount", "qty", "landed_cost_voucher_amount"],
 	)
 	if len(items) == 1:
 		# If only one item exists, return it directly
@@ -61,8 +61,13 @@ def get_linked_item(doctype, parent, item_code, amount, quantity):
 
 	for item in items:
 		landed_cost = item.get("landed_cost_voucher_amount", 0)
-		if item.amount + landed_cost == amount and item.qty == quantity:
-			return item.name
+		# Check if the asset is grouped
+		if quantity > 1:
+			if item.amount + landed_cost == amount and item.qty == quantity:
+				return item.name
+		else:
+			if item.rate + landed_cost == amount:
+				return item.name
 
 	# If no exact match, return None
 	return None
