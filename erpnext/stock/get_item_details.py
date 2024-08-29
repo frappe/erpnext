@@ -820,10 +820,11 @@ def get_price_list_rate(args, item_doc, out=None):
 		if price_list_rate is None or frappe.db.get_single_value(
 			"Stock Settings", "update_existing_price_list_rate"
 		):
-			if args.get("is_internal_supplier") or args.get("is_internal_customer"):
-				return out
-
-			if args.price_list and args.rate:
+			if (
+				args.price_list
+				and args.rate
+				and not (args.get("is_internal_supplier") or args.get("is_internal_customer"))
+			):
 				insert_item_price(args)
 
 			if not price_list_rate:
