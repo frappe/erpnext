@@ -580,7 +580,7 @@ def update_accounting_dimensions(round_off_gle):
 def get_round_off_account_and_cost_center(company, voucher_type, voucher_no, use_company_default=False):
 	round_off_account, round_off_cost_center, round_off_for_opening = frappe.get_cached_value(
 		"Company", company, ["round_off_account", "round_off_cost_center", "round_off_for_opening"]
-	) or [None, None]
+	) or [None, None, None]
 
 	# Use expense account as fallback
 	if not round_off_account:
