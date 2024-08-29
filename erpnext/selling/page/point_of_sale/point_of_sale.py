@@ -178,7 +178,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_te
 				"valid_upto": ["in", [None, "", current_date]],
 			},
 			order_by="valid_from desc",
-			limit=1
+			limit=1,
 		)
 
 		if not item_price:
