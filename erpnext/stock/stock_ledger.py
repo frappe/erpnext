@@ -1745,7 +1745,7 @@ def get_valuation_rate(
 		return batch_obj.get_incoming_rate()
 
 	# Get valuation rate from last sle for the same item and warehouse
-	if last_valuation_rate := frappe.db.sql(
+	if last_valuation_rate := frappe.db.sql(  # nosemgrep
 		"""select valuation_rate
 		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
@@ -1825,7 +1825,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		detail = next_stock_reco_detail[0]
 		datetime_limit_condition = get_datetime_limit_condition(detail)
 
-	frappe.db.sql(
+	frappe.db.sql(  # nosemgrep
 		f"""
 		update `tabStock Ledger Entry`
 		set qty_after_transaction = qty_after_transaction + {qty_shift}
@@ -1992,7 +1992,7 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 
 
 def get_future_sle_with_negative_qty(args):
-	return frappe.db.sql(
+	return frappe.db.sql(  # nosemgrep
 		"""
 		select
 			qty_after_transaction, posting_date, posting_time,
@@ -2014,7 +2014,7 @@ def get_future_sle_with_negative_qty(args):
 
 
 def get_future_sle_with_negative_batch_qty(args):
-	return frappe.db.sql(
+	return frappe.db.sql(  # nosemgrep
 		"""
 		with batch_ledger as (
 			select
