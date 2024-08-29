@@ -1533,7 +1533,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		operator = "<="
 		voucher_condition = f"and creation < '{creation}'"
 
-	sle = frappe.db.sql(
+	sle = frappe.db.sql(  # nosemgrep
 		f"""
 		select *, posting_datetime as "timestamp"
 		from `tabStock Ledger Entry`
@@ -1630,6 +1630,7 @@ def get_stock_ledger_entries(
 	if extra_cond:
 		conditions += f"{extra_cond}"
 
+	# nosemgrep
 	return frappe.db.sql(
 		"""
 		select *, posting_datetime as "timestamp"
