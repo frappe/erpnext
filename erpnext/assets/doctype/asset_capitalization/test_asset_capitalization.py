@@ -187,9 +187,10 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Test General Ledger Entries
 		default_expense_account = frappe.db.get_value("Company", company, "default_expense_account")
 		expected_gle = {
-			"_Test Fixed Asset - _TC": 3000,
-			"Expenses Included In Asset Valuation - _TC": -1000,
-			default_expense_account: -2000,
+			"_Test Fixed Asset - _TC": -100000.0,
+			default_expense_account: -2000.0,
+			"CWIP Account - _TC": 103000.0,
+			"Expenses Included In Asset Valuation - _TC": -1000.0,
 		}
 		actual_gle = get_actual_gle_dict(asset_capitalization.name)
 
@@ -424,7 +425,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		self.assertEqual(target_asset.purchase_amount, total_amount)
 
 		expected_gle = {
-			"_Test Fixed Asset - _TC": 1000.0,
+			"CWIP Account - _TC": 1000.0,
 			"Expenses Included In Asset Valuation - _TC": -1000.0,
 		}
 
