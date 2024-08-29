@@ -391,17 +391,6 @@
    "options": "Payment Request",
    "print_hide": 1,
    "read_only": 1
-<<<<<<< HEAD
-=======
-  },
-  {
-   "fieldname": "failed_reason",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Reason for Failure",
-   "no_copy": 1,
-   "print_hide": 1,
-   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -409,7 +398,6 @@
    "label": "Company",
    "options": "Company",
    "read_only": 1
->>>>>>> 12834ccf9a (fix: add the company in payment request bcz delete company transactions)
   }
  ],
  "in_create": 1,
