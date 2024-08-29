@@ -84,6 +84,7 @@ class PaymentRequest(Document):
 		subscription_plans: DF.Table[SubscriptionPlanDetail]
 		swift_number: DF.ReadOnly | None
 		transaction_date: DF.Date | None
+		company: DF.Link | None
 	# end: auto-generated types
 
 	def validate(self):
@@ -491,6 +492,7 @@ def make_payment_request(**args):
 				"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 				"reference_doctype": args.dt,
 				"reference_name": args.dn,
+				"company": ref_doc.get("company"),
 				"party_type": args.get("party_type") or "Customer",
 				"party": args.get("party") or ref_doc.get("customer"),
 				"bank_account": bank_account,

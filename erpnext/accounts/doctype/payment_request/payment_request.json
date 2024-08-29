@@ -9,6 +9,7 @@
   "transaction_date",
   "column_break_2",
   "naming_series",
+  "company",
   "mode_of_payment",
   "party_details",
   "party_type",
@@ -390,13 +391,20 @@
    "options": "Payment Request",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-06-20 13:54:55.245774",
+ "modified": "2024-08-07 16:39:54.288002",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
