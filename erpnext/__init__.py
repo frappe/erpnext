@@ -2,6 +2,7 @@ import functools
 import inspect
 
 import frappe
+from frappe.utils.user import is_website_user
 
 __version__ = "16.0.0-dev"
 
@@ -149,3 +150,13 @@ def allow_regional(fn):
 		return frappe.get_attr(overrides[function_path][-1])(*args, **kwargs)
 
 	return caller
+
+
+def check_app_permission():
+	if frappe.session.user == "Administrator":
+		return True
+
+	if is_website_user():
+		return False
+
+	return True
