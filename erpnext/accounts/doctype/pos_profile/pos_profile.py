@@ -141,8 +141,6 @@ class POSProfile(Document):
 			frappe.throw(_("Payment methods are mandatory. Please add at least one payment method."))
 
 		default_mode = [d.default for d in self.payments if d.default]
-		if not default_mode:
-			frappe.throw(_("Please select a default mode of payment"))
 
 		if len(default_mode) > 1:
 			frappe.throw(_("You can only select one mode of payment as default"))
