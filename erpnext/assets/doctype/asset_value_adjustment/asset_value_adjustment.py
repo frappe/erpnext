@@ -48,6 +48,7 @@ class AssetValueAdjustment(Document):
 
 	def on_submit(self):
 		self.make_depreciation_entry()
+		self.set_value_after_depreciation()
 		self.update_asset(self.new_asset_value)
 		add_asset_activity(
 			self.asset,
@@ -78,6 +79,8 @@ class AssetValueAdjustment(Document):
 
 	def set_difference_amount(self):
 		self.difference_amount = flt(self.new_asset_value - self.current_asset_value)
+
+	def set_value_after_depreciation(self):
 		frappe.db.set_value("Asset", self.asset, "value_after_depreciation", self.new_asset_value)
 
 	def set_current_asset_value(self):
@@ -152,15 +155,6 @@ class AssetValueAdjustment(Document):
 					}
 				)
 
-		additional_fields = {}
-		fieldnames = frappe.get_list("Accounting Dimension", pluck="fieldname")
-		for fieldname in fieldnames:
-			field_data = frappe.db.get_value("Asset Value Adjustment", self.name, fieldname)
-			additional_fields[fieldname] = field_data
-
-		credit_entry.update(additional_fields)
-		debit_entry.update(additional_fields)
-
 		je.append("accounts", credit_entry)
 		je.append("accounts", debit_entry)
 
@@ -206,11 +200,6 @@ class AssetValueAdjustment(Document):
 
 
 @frappe.whitelist()
-def value_of_accounting_dimension(asset_name):
-	acc_dimension_fields_value = {}
-	fields = frappe.get_list("Accounting Dimension", pluck="fieldname")
-	for field in fields:
-		value = frappe.db.get_value("Asset", asset_name, field)
-		acc_dimension_fields_value[field] = value
-	acc_dimension_fields_value["cost_center"] = frappe.db.get_value("Asset", asset_name, "cost_center")
-	return acc_dimension_fields_value
+def get_value_of_accounting_dimensions(asset_name):
+	dimension_fields = [*frappe.get_list("Accounting Dimension", pluck="fieldname"), "cost_center"]
+	return frappe.db.get_value("Asset", asset_name, fieldname=dimension_fields, as_dict=True)

@@ -71,7 +71,7 @@ frappe.ui.form.on("Asset Value Adjustment", {
 	set_acc_dimension: function (frm) {
 		if (frm.doc.asset) {
 			frm.call({
-				method: "erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment.value_of_accounting_dimension",
+				method: "erpnext.assets.doctype.asset_value_adjustment.asset_value_adjustment.get_value_of_accounting_dimensions",
 				args: {
 					asset_name: frm.doc.asset,
 				},
