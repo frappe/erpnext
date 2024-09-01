@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-08-18 09:35+0000\n"
-"PO-Revision-Date: 2024-08-25 15:03\n"
+"PO-Revision-Date: 2024-08-28 15:40\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -24426,7 +24426,7 @@ msgstr "Felaktig Kvantitet av Bokföring Register Poster funna. Man kan ha valt 
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 #: stock/doctype/shipment/shipment.json
 msgid "Incoterm"
-msgstr "Inkoterm"
+msgstr "Incoterm"
 
 #. Label of the increase_in_asset_life (Int) field in DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
@@ -37703,12 +37703,12 @@ msgstr "Preferens"
 #. Label of the prefered_contact_email (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgid "Preferred Contact Email"
-msgstr "Föredragen Kontakt E-post"
+msgstr "Förvald Kontakt E-post"
 
 #. Label of the prefered_email (Data) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgid "Preferred Email"
-msgstr "Föredragen E-Post"
+msgstr "Förvald E-Post"
 
 #: setup/setup_wizard/data/designation.txt:24
 msgid "President"
