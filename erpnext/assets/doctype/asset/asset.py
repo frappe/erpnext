@@ -170,7 +170,7 @@ class Asset(AccountsController):
 		self.ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry")
 		if not self.is_composite_component:
 			make_reverse_gl_entries(voucher_type="Asset", voucher_no=self.name)
-		self.db_set("booked_fixed_asset", 0)
+			self.db_set("booked_fixed_asset", 0)
 		add_asset_activity(self.name, _("Asset cancelled"))
 
 	def after_insert(self):
