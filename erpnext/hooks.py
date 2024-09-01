@@ -16,7 +16,7 @@ add_to_apps_screen = [
 		"logo": "/assets/erpnext/images/erpnext-logo-blue.png",
 		"title": "ERPNext",
 		"route": "/app/home",
-		# "has_permission": "erpnext.api.permission.has_app_permission"
+		"has_permission": "erpnext.check_app_permission",
 	}
 ]
 
@@ -547,6 +547,8 @@ accounting_dimension_doctypes = [
 	"Payment Reconciliation",
 	"Payment Reconciliation Allocation",
 	"Payment Request",
+	"Asset Movement Item",
+	"Asset Depreciation Schedule",
 ]
 
 get_matching_queries = (
