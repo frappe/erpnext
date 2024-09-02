@@ -1817,6 +1817,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let item_rates = {};
 		let item_tax_templates = {};
 
+		if (me.frm.doc.is_return && me.frm.doc.return_against) return;
+
 		$.each(this.frm.doc.items || [], function(i, item) {
 			if (item.item_code) {
 				// Use combination of name and item code in case same item is added multiple times
