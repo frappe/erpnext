@@ -65,9 +65,10 @@ def get_linked_item(doctype, parent, item_code, amount, quantity):
 		if quantity > 1:
 			if item.amount + landed_cost == amount and item.qty == quantity:
 				return item.name
+			elif item.qty == quantity:
+				return item.name
 		else:
-			if item.rate + landed_cost == amount:
+			if item.rate + (landed_cost / item.qty) == amount:
 				return item.name
 
-	# If no exact match, return None
-	return None
+	return items[0].name if items else None
