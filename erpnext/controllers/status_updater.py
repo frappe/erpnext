@@ -181,45 +181,65 @@ class StatusUpdater(Document):
 				self.status = "Draft"
 			return
 
-		if self.doctype in status_map:
-			_status = self.status
-			if status and update:
-				self.db_set("status", status)
+		if self.doctype not in status_map:
+			return
+		_status = self.status
+		# TODO: revise accidential complexity where update has a double meaning, see below
+		self.status = status if status else self.status
+		new_status = self.get_status()["status"]
 
-			sl = status_map[self.doctype][:]
-			sl.reverse()
-			for s in sl:
-				if not s[1]:
-					self.status = s[0]
-					break
-				elif s[1].startswith("eval:"):
-					if frappe.safe_eval(
-						s[1][5:],
-						None,
-						{
-							"self": self.as_dict(),
-							"getdate": getdate,
-							"nowdate": nowdate,
-							"get_value": frappe.db.get_value,
-						},
-					):
-						self.status = s[0]
-						break
-				elif getattr(self, s[1])():
-					self.status = s[0]
-					break
+		if new_status != _status:
+			if new_status not in ("Cancelled", "Partially Ordered", "Ordered", "Issued", "Transferred"):
+				self.add_comment("Label", _(new_status))
 
-			if self.status != _status and self.status not in (
-				"Cancelled",
-				"Partially Ordered",
-				"Ordered",
-				"Issued",
-				"Transferred",
-			):
-				self.add_comment("Label", _(self.status))
-
+			self.status = new_status
 			if update:
-				self.db_set("status", self.status, update_modified=update_modified)
+				self.db_set("status", new_status, update_modified=update_modified)
+
+	def get_status(self):
+		"""
+		Get the status of the document.
+
+		Returns:
+		        dict: A dictionary containing the status. This allows callers to receive
+		        a dictionary for efficient bulk updates, for example when `per_billed`
+		        and other status fields also need to be updated.
+
+		Note:
+		        Can be overriden on a doctype to implement more localized status updater logic.
+
+		Example:
+		        {
+		                "status": "Draft",
+		                "per_billed": 50,
+		                "billing_status": "Partly Billed"
+		        }
+		"""
+		if self.doctype not in status_map:
+			return {"status": self.status}
+
+		sl = status_map[self.doctype][:]
+		sl.reverse()
+
+		for s in sl:
+			if not s[1]:
+				return {"status": s[0]}
+			elif s[1].startswith("eval:"):
+				if frappe.safe_eval(
+					s[1][5:],
+					None,
+					{
+						"self": self.as_dict(),
+						"getdate": getdate,
+						"nowdate": nowdate,
+						"get_value": frappe.db.get_value,
+					},
+				):
+					return {"status": s[0]}
+			elif getattr(self, s[1])():
+				return {"status": s[0]}
+
+		return {"status": self.status}
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
