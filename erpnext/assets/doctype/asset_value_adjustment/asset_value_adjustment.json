@@ -17,6 +17,7 @@
   "new_asset_value",
   "column_break_11",
   "difference_amount",
+  "difference_account",
   "journal_entry",
   "accounting_dimensions_section",
   "cost_center",
@@ -54,6 +55,7 @@
    "fieldtype": "Link",
    "label": "Journal Entry",
    "options": "Journal Entry",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -79,6 +81,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "New Asset Value",
+   "no_copy": 1,
    "reqd": 1
   },
   {
@@ -120,12 +123,20 @@
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+    "fieldname": "difference_account",
+    "fieldtype": "Link",
+    "label": "Difference Account",
+    "no_copy": 1,
+    "options": "Account",
+    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-03-27 13:06:36.004049",
+ "modified": "2024-08-13 16:21:18.639208",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Value Adjustment",

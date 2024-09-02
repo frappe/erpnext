@@ -17,7 +17,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Purpose",
-   "options": "\nMaterial Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor",
+   "options": "\nMaterial Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nDisassemble",
    "reqd": 1,
    "set_only_once": 1
   },
@@ -37,10 +37,11 @@
   }
  ],
  "links": [],
- "modified": "2024-08-22 16:00:22.696958",
+ "modified": "2024-08-23 16:00:22.696958",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
+ "naming_rule": "Set by user",
  "owner": "Administrator",
  "permissions": [
   {
