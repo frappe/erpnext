@@ -1992,7 +1992,7 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
-def get_future_sle_with_negative_qty(args):
+def get_future_sle_with_negative_qty(sle_args):
 	return frappe.db.sql(  # nosemgrep
 		"""
 		select
@@ -2014,7 +2014,7 @@ def get_future_sle_with_negative_qty(args):
 	)
 
 
-def get_future_sle_with_negative_batch_qty(args):
+def get_future_sle_with_negative_batch_qty(sle_args):
 	return frappe.db.sql(  # nosemgrep
 		"""
 		with batch_ledger as (
