@@ -249,11 +249,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-02-08 19:00:37.561244",
-=======
  "modified": "2024-09-02 12:12:03.132567",
->>>>>>> f3b91d4d62 (fix: validate component quantity according to BOM (#43011))
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
