@@ -422,6 +422,8 @@ class SalesOrder(SellingController):
 		if self.get("reserve_stock"):
 			self.create_stock_reservation_entries()
 
+		self.set_status(update=True)
+
 	def on_cancel(self):
 		self.ignore_linked_doctypes = (
 			"GL Entry",
