@@ -655,6 +655,8 @@ class PurchaseOrder(BuyingController):
 			self.tax_withholding_category = tds_category
 			self.set_onload("supplier_tds", tds_category)
 
+		super().set_missing_values(for_validate)
+
 
 @frappe.request_cache
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor=1.0):
