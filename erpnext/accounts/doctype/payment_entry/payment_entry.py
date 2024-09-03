@@ -1067,10 +1067,16 @@ class PaymentEntry(AccountsController):
 					is_return = frappe.db.get_value(d.reference_doctype, d.reference_name, "is_return")
 					payable_party_types = get_party_types_from_account_type("Payable")
 					receivable_party_types = get_party_types_from_account_type("Receivable")
-					if is_return and self.party_type in receivable_party_types and (self.payment_type == "Pay"):
+					if (
+						is_return
+						and self.party_type in receivable_party_types
+						and (self.payment_type == "Pay")
+					):
 						reverse_dr_or_cr = 1
 					elif (
-						is_return and self.party_type in payable_party_types and (self.payment_type == "Receive")
+						is_return
+						and self.party_type in payable_party_types
+						and (self.payment_type == "Receive")
 					):
 						reverse_dr_or_cr = 1
 
