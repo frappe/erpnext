@@ -129,6 +129,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 					company: frm.doc.company,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
+					include_advance: 1,
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
