@@ -509,7 +509,10 @@ class AssetDepreciationSchedule(Document):
 				continue
 
 			if not accumulated_depreciation:
-				if i > 0 and asset_doc.flags.decrease_in_asset_value_due_to_value_adjustment:
+				if i > 0 and (
+					asset_doc.flags.decrease_in_asset_value_due_to_value_adjustment
+					or asset_doc.flags.increase_in_asset_value_due_to_repair
+				):
 					accumulated_depreciation = self.get("depreciation_schedule")[
 						i - 1
 					].accumulated_depreciation_amount
@@ -677,7 +680,7 @@ def get_straight_line_or_manual_depr_amount(
 	# if the Depreciation Schedule is being modified after Asset Repair due to increase in asset value
 	elif asset.flags.increase_in_asset_value_due_to_repair:
 		return (flt(row.value_after_depreciation) - flt(row.expected_value_after_useful_life)) / flt(
-			row.total_number_of_depreciations
+			number_of_pending_depreciations
 		)
 	# if the Depreciation Schedule is being modified after Asset Value Adjustment due to decrease in asset value
 	elif asset.flags.decrease_in_asset_value_due_to_value_adjustment:
@@ -764,8 +767,12 @@ def get_daily_depr_amount(asset, row, schedule_idx, amount):
 
 		every_year_depr = amount / total_years
 
+		depr_period_start_date = add_days(
+			get_last_day(add_months(row.depreciation_start_date, row.frequency_of_depreciation * -1)), 1
+		)
+
 		year_start_date = add_years(
-			row.depreciation_start_date, (row.frequency_of_depreciation * schedule_idx) // 12
+			depr_period_start_date, ((row.frequency_of_depreciation * schedule_idx) // 12)
 		)
 		year_end_date = add_days(add_years(year_start_date, 1), -1)
 
@@ -1041,6 +1048,7 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 	date_of_return=None,
 	value_after_depreciation=None,
 	ignore_booked_entry=False,
+	difference_amount=None,
 ):
 	for row in asset_doc.get("finance_books"):
 		current_asset_depr_schedule_doc = get_asset_depr_schedule_doc(
@@ -1055,6 +1063,8 @@ def make_new_active_asset_depr_schedules_and_cancel_current_ones(
 			)
 
 		new_asset_depr_schedule_doc = frappe.copy_doc(current_asset_depr_schedule_doc)
+		if asset_doc.flags.decrease_in_asset_value_due_to_value_adjustment and not value_after_depreciation:
+			value_after_depreciation = row.value_after_depreciation + difference_amount
 
 		if asset_doc.flags.increase_in_asset_value_due_to_repair and row.depreciation_method in (
 			"Written Down Value",

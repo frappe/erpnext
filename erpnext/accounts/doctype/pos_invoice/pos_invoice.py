@@ -188,7 +188,7 @@ class POSInvoice(SalesInvoice):
 	def validate(self):
 		if not cint(self.is_pos):
 			frappe.throw(
-				_("POS Invoice should have {} field checked.").format(frappe.bold("Include Payment"))
+				_("POS Invoice should have the field {0} checked.").format(frappe.bold(_("Include Payment")))
 			)
 
 		# run on validate method of selling controller

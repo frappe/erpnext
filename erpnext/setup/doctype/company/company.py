@@ -202,7 +202,7 @@ class Company(NestedSet):
 		):
 			frappe.throw(
 				_("'{0}' should be in company currency {1}.").format(
-					frappe.bold("Default Advance Received Account"), frappe.bold(self.default_currency)
+					frappe.bold(_("Default Advance Received Account")), frappe.bold(self.default_currency)
 				)
 			)
 
@@ -213,7 +213,7 @@ class Company(NestedSet):
 		):
 			frappe.throw(
 				_("'{0}' should be in company currency {1}.").format(
-					frappe.bold("Default Advance Paid Account"), frappe.bold(self.default_currency)
+					frappe.bold(_("Default Advance Paid Account")), frappe.bold(self.default_currency)
 				)
 			)
 
@@ -444,7 +444,7 @@ class Company(NestedSet):
 			):
 				frappe.throw(
 					_("Set default {0} account for non stock items").format(
-						frappe.bold("Provisional Account")
+						frappe.bold(_("Provisional Account"))
 					)
 				)
 
