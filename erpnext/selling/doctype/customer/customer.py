@@ -76,6 +76,7 @@ class Customer(TransactionBase):
 		payment_terms: DF.Link | None
 		portal_users: DF.Table[PortalUser]
 		primary_address: DF.Text | None
+		prospect_name: DF.Link | None
 		represents_company: DF.Link | None
 		sales_team: DF.Table[SalesTeam]
 		salutation: DF.Link | None
@@ -103,7 +104,7 @@ class Customer(TransactionBase):
 		elif cust_master_name == "Naming Series":
 			set_name_by_naming_series(self)
 		else:
-			self.name = set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
+			set_name_from_naming_options(frappe.get_meta(self.doctype).autoname, self)
 
 	def get_customer_name(self):
 		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:

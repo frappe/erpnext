@@ -183,7 +183,7 @@ class SerialBatchBundle:
 			}
 
 			if self.sle.actual_qty < 0 and self.is_material_transfer():
-				values_to_update["valuation_rate"] = sn_doc.avg_rate
+				values_to_update["valuation_rate"] = flt(sn_doc.avg_rate)
 
 			if not frappe.db.get_single_value(
 				"Stock Settings", "do_not_update_serial_batch_on_creation_of_auto_bundle"
@@ -221,7 +221,15 @@ class SerialBatchBundle:
 			not self.sle.is_cancelled
 			and not self.sle.serial_and_batch_bundle
 			and self.item_details.has_batch_no == 1
-			and self.item_details.create_new_batch
+			and (
+				self.item_details.create_new_batch
+				or (
+					frappe.db.get_single_value(
+						"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
+					)
+					and self.sle.actual_qty < 0
+				)
+			)
 		):
 			self.make_serial_batch_no_bundle()
 		elif not self.sle.is_cancelled:

@@ -46,4 +46,20 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 			fieldtype: "Check",
 		},
 	],
+	formatter: function (value, row, column, data, default_formatter, filter) {
+		if (column.fieldname == "payment_entry" && value == "Cheques and Deposits incorrectly cleared") {
+			column.link_onclick =
+				"frappe.query_reports['Bank Reconciliation Statement'].open_utility_report()";
+		}
+		return default_formatter(value, row, column, data);
+	},
+	open_utility_report: function () {
+		frappe.route_options = {
+			company: frappe.query_report.get_filter_value("company"),
+			account: frappe.query_report.get_filter_value("account"),
+			report_date: frappe.query_report.get_filter_value("report_date"),
+		};
+		frappe.open_in_new_tab = true;
+		frappe.set_route("query-report", "Cheques and Deposits Incorrectly cleared");
+	},
 };
