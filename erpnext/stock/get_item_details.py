@@ -845,7 +845,7 @@ def get_price_list_rate(args, item_doc, out=None):
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
 	if (
-		not args.price_list_rate
+		not args.price_list
 		or not args.rate
 		or args.get("is_internal_supplier")
 		or args.get("is_internal_customer")
