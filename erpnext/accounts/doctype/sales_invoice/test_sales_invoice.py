@@ -3973,7 +3973,7 @@ class TestSalesInvoice(FrappeTestCase):
 		si.submit()
 		actual = frappe.db.get_all(
 			"GL Entry",
-			filters={"voucher_no": si.name, "is_opening": "Yes"},
+			filters={"voucher_no": si.name, "is_opening": "Yes", "is_cancelled": False},
 			fields=["account", "debit", "credit", "is_opening"],
 			order_by="account,debit",
 		)
