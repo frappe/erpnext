@@ -133,8 +133,8 @@ frappe.ui.form.on("Purchase Order", {
 			frm.set_value("transaction_date", frappe.datetime.get_today());
 		}
 
-		if (frm.doc.__onload && frm.is_new()) {
-			if (frm.doc.supplier) {
+		if (frm.doc.__onload && frm.doc.supplier) {
+			if (frm.is_new()) {
 				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
 			}
 			if (!frm.doc.__onload.supplier_tds) {
