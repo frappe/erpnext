@@ -18,7 +18,7 @@ class AssetMaintenance(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.assets.doctype.asset_maintenance_task.asset_maintenance_task import AssetMaintenanceTask
+		from Goldfish.assets.doctype.asset_maintenance_task.asset_maintenance_task import AssetMaintenanceTask
 
 		asset_category: DF.ReadOnly | None
 		asset_maintenance_tasks: DF.Table[AssetMaintenanceTask]

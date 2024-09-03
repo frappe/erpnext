@@ -10,7 +10,7 @@ from frappe import _, throw
 from frappe.model.document import Document
 from frappe.utils import add_days, add_years, get_last_day, getdate, nowdate
 
-from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+from Goldfish.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
 	make_supplier_scorecard,
 )
 
@@ -24,10 +24,10 @@ class SupplierScorecard(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.buying.doctype.supplier_scorecard_scoring_criteria.supplier_scorecard_scoring_criteria import (
+		from Goldfish.buying.doctype.supplier_scorecard_scoring_criteria.supplier_scorecard_scoring_criteria import (
 			SupplierScorecardScoringCriteria,
 		)
-		from erpnext.buying.doctype.supplier_scorecard_scoring_standing.supplier_scorecard_scoring_standing import (
+		from Goldfish.buying.doctype.supplier_scorecard_scoring_standing.supplier_scorecard_scoring_standing import (
 			SupplierScorecardScoringStanding,
 		)
 

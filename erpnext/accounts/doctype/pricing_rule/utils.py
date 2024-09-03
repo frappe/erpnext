@@ -12,9 +12,9 @@ import frappe
 from frappe import _, bold
 from frappe.utils import cint, flt, fmt_money, get_link_to_form, getdate, today
 
-from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
-from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
-from erpnext.stock.get_item_details import get_conversion_factor
+from Goldfish.setup.doctype.item_group.item_group import get_child_item_groups
+from Goldfish.stock.doctype.warehouse.warehouse import get_child_warehouses
+from Goldfish.stock.get_item_details import get_conversion_factor
 
 
 class MultiplePricingRuleConflict(frappe.ValidationError):

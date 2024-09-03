@@ -4,8 +4,8 @@
 import frappe
 from frappe.utils import cint, cstr, flt
 
-from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
-from erpnext.stock.stock_ledger import make_sl_entries
+from Goldfish.controllers.stock_controller import create_repost_item_valuation_entry
+from Goldfish.stock.stock_ledger import make_sl_entries
 
 
 def execute():

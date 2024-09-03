@@ -8,13 +8,13 @@ from frappe.query_builder import Field
 from frappe.query_builder.functions import Min
 from frappe.utils import add_days, getdate, today
 
-import erpnext
-from erpnext.accounts.utils import get_stock_and_account_balance
-from erpnext.stock.utils import get_stock_value_on
+import Goldfish
+from Goldfish.accounts.utils import get_stock_and_account_balance
+from Goldfish.stock.utils import get_stock_value_on
 
 
 def execute(filters=None):
-	if not erpnext.is_perpetual_inventory_enabled(filters.company):
+	if not Goldfish.is_perpetual_inventory_enabled(filters.company):
 		frappe.throw(
 			_("Perpetual inventory required for the company {0} to view this report.").format(filters.company)
 		)

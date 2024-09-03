@@ -5,11 +5,11 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cstr, flt
 
-from erpnext.assets.doctype.asset.depreciation import (
+from Goldfish.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 )
-from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+from Goldfish.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from Goldfish.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
 )

@@ -16,7 +16,7 @@ class ItemTaxTemplate(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.item_tax_template_detail.item_tax_template_detail import (
+		from Goldfish.accounts.doctype.item_tax_template_detail.item_tax_template_detail import (
 			ItemTaxTemplateDetail,
 		)
 

@@ -1,4 +1,4 @@
-erpnext.utils.BarcodeScanner = class BarcodeScanner {
+Goldfish.utils.BarcodeScanner = class BarcodeScanner {
 	constructor(opts) {
 		this.frm = opts.frm;
 		// frappe.flags.trigger_from_barcode_scanner is used for custom scripts
@@ -35,7 +35,7 @@ erpnext.utils.BarcodeScanner = class BarcodeScanner {
 		//     serial_no: "987XYZ", // present if serial no was scanned
 		//     uom: "Kg", // present if barcode UOM is different from default
 		// }
-		this.scan_api = opts.scan_api || "erpnext.stock.utils.scan_barcode";
+		this.scan_api = opts.scan_api || "Goldfish.stock.utils.scan_barcode";
 	}
 
 	process_scan() {

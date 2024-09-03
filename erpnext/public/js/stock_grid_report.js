@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.StockGridReport = class StockGridReport extends frappe.views.TreeGridReport {
+Goldfish.StockGridReport = class StockGridReport extends frappe.views.TreeGridReport {
 	get_item_warehouse(warehouse, item) {
 		if (!this.item_warehouse[item]) this.item_warehouse[item] = {};
 		if (!this.item_warehouse[item][warehouse])

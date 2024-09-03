@@ -6,8 +6,8 @@ import frappe
 from frappe.test_runner import make_test_records_for_doctype
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
-from erpnext.stock.get_item_details import get_price_list_rate_for, process_args
+from Goldfish.stock.doctype.item_price.item_price import ItemPriceDuplicateItem
+from Goldfish.stock.get_item_details import get_price_list_rate_for, process_args
 
 
 class TestItemPrice(FrappeTestCase):
@@ -17,7 +17,7 @@ class TestItemPrice(FrappeTestCase):
 		make_test_records_for_doctype("Item Price", force=True)
 
 	def test_template_item_price(self):
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		item = make_item(
 			"Test Template Item 1",
@@ -43,7 +43,7 @@ class TestItemPrice(FrappeTestCase):
 		self.assertRaises(ItemPriceDuplicateItem, doc.save)
 
 	def test_addition_of_new_fields(self):
-		# Based on https://github.com/frappe/erpnext/issues/8456
+		# Based on https://github.com/frappe/Goldfish/issues/8456
 		test_fields_existance = [
 			"supplier",
 			"customer",

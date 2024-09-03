@@ -26,9 +26,9 @@ class PricingRule(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.pricing_rule_brand.pricing_rule_brand import PricingRuleBrand
-		from erpnext.accounts.doctype.pricing_rule_item_code.pricing_rule_item_code import PricingRuleItemCode
-		from erpnext.accounts.doctype.pricing_rule_item_group.pricing_rule_item_group import (
+		from Goldfish.accounts.doctype.pricing_rule_brand.pricing_rule_brand import PricingRuleBrand
+		from Goldfish.accounts.doctype.pricing_rule_item_code.pricing_rule_item_code import PricingRuleItemCode
+		from Goldfish.accounts.doctype.pricing_rule_item_group.pricing_rule_item_group import (
 			PricingRuleItemGroup,
 		)
 
@@ -390,7 +390,7 @@ def update_pricing_rule_uom(pricing_rule, args):
 
 
 def get_pricing_rule_for_item(args, doc=None, for_validate=False):
-	from erpnext.accounts.doctype.pricing_rule.utils import (
+	from Goldfish.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
 		get_pricing_rules,
@@ -563,7 +563,7 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 		if pricing_rule.currency == args.currency:
 			pricing_rule_rate = pricing_rule.rate
 
-		# TODO https://github.com/frappe/erpnext/pull/23636 solve this in some other way.
+		# TODO https://github.com/frappe/Goldfish/pull/23636 solve this in some other way.
 		if pricing_rule_rate:
 			is_blank_uom = pricing_rule.get("uom") != args.get("uom")
 			# Override already set price list rate (from item price)
@@ -609,7 +609,7 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 
 @frappe.whitelist()
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None, rate=None):
-	from erpnext.accounts.doctype.pricing_rule.utils import (
+	from Goldfish.accounts.doctype.pricing_rule.utils import (
 		get_applied_pricing_rules,
 		get_pricing_rule_items,
 	)

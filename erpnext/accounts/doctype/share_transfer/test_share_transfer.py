@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 
-from erpnext.accounts.doctype.share_transfer.share_transfer import ShareDontExists
+from Goldfish.accounts.doctype.share_transfer.share_transfer import ShareDontExists
 
 test_dependencies = ["Share Type", "Shareholder"]
 

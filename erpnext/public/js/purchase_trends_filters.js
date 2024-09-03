@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.purchase_trends_filters = {
+Goldfish.purchase_trends_filters = {
 	filters: [
 		{
 			fieldname: "company",
@@ -28,7 +28,7 @@ erpnext.purchase_trends_filters = {
 			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today()),
 		},
 		{
 			fieldname: "period_based_on",

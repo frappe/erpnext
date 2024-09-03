@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.setup.setup_wizard.operations.install_fixtures import add_market_segments
+from Goldfish.setup.setup_wizard.operations.install_fixtures import add_market_segments
 
 
 def execute():

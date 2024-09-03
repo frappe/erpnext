@@ -28,7 +28,7 @@ def validate_webhooks_request(doctype, hmac_key, secret_key="secret"):
 
 
 def get_webhook_address(connector_name, method, exclude_uri=False, force_https=False):
-	endpoint = f"erpnext.erpnext_integrations.connectors.{connector_name}.{method}"
+	endpoint = f"Goldfish.Goldfish_integrations.connectors.{connector_name}.{method}"
 
 	if exclude_uri:
 		return endpoint

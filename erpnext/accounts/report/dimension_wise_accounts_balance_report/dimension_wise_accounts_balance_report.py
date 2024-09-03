@@ -6,12 +6,12 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, flt
 
-import erpnext
-from erpnext.accounts.report.financial_statements import (
+import Goldfish
+from Goldfish.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
 )
-from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
+from Goldfish.accounts.report.trial_balance.trial_balance import validate_filters
 
 
 def execute(filters=None):
@@ -28,7 +28,7 @@ def execute(filters=None):
 
 
 def get_data(filters, dimension_list):
-	company_currency = erpnext.get_company_currency(filters.company)
+	company_currency = Goldfish.get_company_currency(filters.company)
 
 	acc = frappe.db.sql(
 		"""

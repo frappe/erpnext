@@ -16,7 +16,7 @@ class RepostAccountingLedger(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.repost_accounting_ledger_items.repost_accounting_ledger_items import (
+		from Goldfish.accounts.doctype.repost_accounting_ledger_items.repost_accounting_ledger_items import (
 			RepostAccountingLedgerItems,
 		)
 
@@ -105,7 +105,7 @@ class RepostAccountingLedger(Document):
 
 	@frappe.whitelist()
 	def generate_preview(self):
-		from erpnext.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
+		from Goldfish.accounts.report.general_ledger.general_ledger import get_columns as get_gl_columns
 
 		gl_columns = []
 		gl_data = []
@@ -120,7 +120,7 @@ class RepostAccountingLedger(Document):
 
 			gl_data = self.gl_entries
 		rendered_page = frappe.render_template(
-			"erpnext/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.html",
+			"Goldfish/accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.html",
 			{"gl_columns": gl_columns, "gl_data": gl_data},
 		)
 
@@ -130,7 +130,7 @@ class RepostAccountingLedger(Document):
 		if len(self.vouchers) > 5:
 			job_name = "repost_accounting_ledger_" + self.name
 			frappe.enqueue(
-				method="erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
+				method="Goldfish.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger.start_repost",
 				account_repost_doc=self.name,
 				is_async=True,
 				job_name=job_name,

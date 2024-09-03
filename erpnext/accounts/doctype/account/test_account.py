@@ -8,12 +8,12 @@ import frappe
 from frappe.test_runner import make_test_records
 from frappe.utils import nowdate
 
-from erpnext.accounts.doctype.account.account import (
+from Goldfish.accounts.doctype.account.account import (
 	InvalidAccountMergeError,
 	merge_account,
 	update_account_number,
 )
-from erpnext.stock import get_company_default_inventory_account, get_warehouse_account
+from Goldfish.stock import get_company_default_inventory_account, get_warehouse_account
 
 test_dependencies = ["Company"]
 
@@ -294,7 +294,7 @@ class TestAccount(unittest.TestCase):
 			frappe.delete_doc("Account", doc)
 
 	def test_validate_account_currency(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from Goldfish.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 		if not frappe.db.get_value("Account", "Test Currency Account - _TC"):
 			acc = frappe.new_doc("Account")
@@ -314,7 +314,7 @@ class TestAccount(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, acc.save)
 
 	def test_account_balance(self):
-		from erpnext.accounts.utils import get_balance_on
+		from Goldfish.accounts.utils import get_balance_on
 
 		if not frappe.db.exists("Account", "Test Percent Account %5 - _TC"):
 			acc = frappe.new_doc("Account")

@@ -5,9 +5,9 @@ import frappe
 from frappe import _, throw
 from frappe.utils import add_days, cint, cstr, date_diff, formatdate, getdate
 
-from erpnext.setup.doctype.employee.employee import get_holiday_list_for_employee
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.utilities.transaction_base import TransactionBase, delete_events
+from Goldfish.setup.doctype.employee.employee import get_holiday_list_for_employee
+from Goldfish.stock.doctype.serial_no.serial_no import get_serial_nos
+from Goldfish.utilities.transaction_base import TransactionBase, delete_events
 
 
 class MaintenanceSchedule(TransactionBase):
@@ -19,10 +19,10 @@ class MaintenanceSchedule(TransactionBase):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.maintenance.doctype.maintenance_schedule_detail.maintenance_schedule_detail import (
+		from Goldfish.maintenance.doctype.maintenance_schedule_detail.maintenance_schedule_detail import (
 			MaintenanceScheduleDetail,
 		)
-		from erpnext.maintenance.doctype.maintenance_schedule_item.maintenance_schedule_item import (
+		from Goldfish.maintenance.doctype.maintenance_schedule_item.maintenance_schedule_item import (
 			MaintenanceScheduleItem,
 		)
 

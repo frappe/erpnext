@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form
 
-from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
+from Goldfish.assets.doctype.asset_activity.asset_activity import add_asset_activity
 
 
 class AssetMovement(Document):
@@ -19,7 +19,7 @@ class AssetMovement(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.assets.doctype.asset_movement_item.asset_movement_item import AssetMovementItem
+		from Goldfish.assets.doctype.asset_movement_item.asset_movement_item import AssetMovementItem
 
 		amended_from: DF.Link | None
 		assets: DF.Table[AssetMovementItem]

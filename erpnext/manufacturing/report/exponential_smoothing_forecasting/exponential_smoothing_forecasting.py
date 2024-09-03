@@ -6,9 +6,9 @@ import frappe
 from frappe import _
 from frappe.utils import add_years, cint, flt, getdate
 
-import erpnext
-from erpnext.accounts.report.financial_statements import get_period_list
-from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
+import Goldfish
+from Goldfish.accounts.report.financial_statements import get_period_list
+from Goldfish.stock.doctype.warehouse.warehouse import get_child_warehouses
 
 
 def execute(filters=None):
@@ -44,7 +44,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 		self.child_doctype = self.doctype + " Item"
 		self.based_on_field = "qty" if self.filters.based_on_field == "Qty" else "amount"
 		self.fieldtype = "Float" if self.based_on_field == "qty" else "Currency"
-		self.company_currency = erpnext.get_company_currency(self.filters.company)
+		self.company_currency = Goldfish.get_company_currency(self.filters.company)
 
 	def execute_report(self):
 		self.prepare_periodical_data()

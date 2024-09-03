@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, cstr, flt, getdate
 
-from erpnext.stock.doctype.item.item import get_last_purchase_details, validate_end_of_life
+from Goldfish.stock.doctype.item.item import get_last_purchase_details, validate_end_of_life
 
 
 def update_last_purchase_rate(doc, is_submit) -> None:

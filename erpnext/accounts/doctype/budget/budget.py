@@ -7,10 +7,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_months, flt, fmt_money, get_last_day, getdate
 
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
-from erpnext.accounts.utils import get_fiscal_year
+from Goldfish.accounts.utils import get_fiscal_year
 
 
 class BudgetError(frappe.ValidationError):
@@ -30,7 +30,7 @@ class Budget(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.budget_account.budget_account import BudgetAccount
+		from Goldfish.accounts.doctype.budget_account.budget_account import BudgetAccount
 
 		accounts: DF.Table[BudgetAccount]
 		action_if_accumulated_monthly_budget_exceeded: DF.Literal["", "Stop", "Warn", "Ignore"]

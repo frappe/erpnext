@@ -1,5 +1,5 @@
 {% extends "templates/web.html" %}
-{% from "erpnext/templates/includes/macros.html" import product_image %}
+{% from "Goldfish/templates/includes/macros.html" import product_image %}
 
 {% block breadcrumbs %}
 	{% include "templates/includes/breadcrumbs.html" %}
@@ -23,7 +23,7 @@
 			<ul class="dropdown-menu dropdown-menu-right" role="menu">
 				{% if doc.doctype == 'Purchase Order' and show_make_pi_button %}
 					<a class="dropdown-item"
-						href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}"
+						href="/api/method/Goldfish.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}"
 						data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}
 					</a>
 				{% endif %}
@@ -38,7 +38,7 @@
 			<div class="form-column col-sm-6">
 				<div class="page-header-actions-block" data-html-block="header-actions">
 					<p>
-						<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
+						<a href="/api/method/Goldfish.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
 							class="btn btn-primary btn-sm" id="pay-for-order">
 							{{ _("Pay") }} {{ pay_amount }}
 						</a>
@@ -125,7 +125,7 @@
 
 			<!-- taxes -->
 			<div class="">
-				{% include "erpnext/templates/includes/order/order_taxes.html" %}
+				{% include "Goldfish/templates/includes/order/order_taxes.html" %}
 			</div>
 		</div>
 	</div>

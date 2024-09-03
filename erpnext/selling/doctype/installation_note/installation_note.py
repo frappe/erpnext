@@ -6,8 +6,8 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
 
-from erpnext.stock.utils import get_valid_serial_nos
-from erpnext.utilities.transaction_base import TransactionBase
+from Goldfish.stock.utils import get_valid_serial_nos
+from Goldfish.utilities.transaction_base import TransactionBase
 
 
 class InstallationNote(TransactionBase):
@@ -19,7 +19,7 @@ class InstallationNote(TransactionBase):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.selling.doctype.installation_note_item.installation_note_item import (
+		from Goldfish.selling.doctype.installation_note_item.installation_note_item import (
 			InstallationNoteItem,
 		)
 
@@ -67,7 +67,7 @@ class InstallationNote(TransactionBase):
 		self.validate_installation_date()
 		self.check_item_table()
 
-		from erpnext.controllers.selling_controller import set_default_income_account_for_item
+		from Goldfish.controllers.selling_controller import set_default_income_account_for_item
 
 		set_default_income_account_for_item(self)
 

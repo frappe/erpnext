@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.utils");
+frappe.provide("Goldfish.utils");
 
 frappe.query_reports["Accounts Receivable"] = {
 	filters: [
@@ -212,7 +212,7 @@ frappe.query_reports["Accounts Receivable"] = {
 	},
 };
 
-erpnext.utils.add_dimensions("Accounts Receivable", 9);
+Goldfish.utils.add_dimensions("Accounts Receivable", 9);
 
 function get_party_type_options() {
 	let options = [];

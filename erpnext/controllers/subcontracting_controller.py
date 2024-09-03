@@ -10,13 +10,13 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, flt, get_link_to_form
 
-from erpnext.controllers.stock_controller import StockController
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+from Goldfish.controllers.stock_controller import StockController
+from Goldfish.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_voucher_wise_serial_batch_from_bundle,
 )
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
-from erpnext.stock.utils import get_incoming_rate
+from Goldfish.stock.doctype.serial_no.serial_no import get_serial_nos
+from Goldfish.stock.serial_batch_bundle import SerialBatchCreation, get_serial_nos_from_bundle
+from Goldfish.stock.utils import get_incoming_rate
 
 
 class SubcontractingController(StockController):

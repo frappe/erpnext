@@ -8,7 +8,7 @@ frappe.listview_settings["Opportunity"] = {
 		return indicator;
 	},
 	onload: function (listview) {
-		var method = "erpnext.crm.doctype.opportunity.opportunity.set_multiple_status";
+		var method = "Goldfish.crm.doctype.opportunity.opportunity.set_multiple_status";
 
 		listview.page.add_menu_item(__("Set as Open"), function () {
 			listview.call_for_selected_items(method, { status: "Open" });

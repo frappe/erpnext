@@ -6,9 +6,9 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import cint, flt
 
-from erpnext.accounts.party import get_partywise_advanced_payment_amount
-from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
-from erpnext.accounts.utils import get_currency_precision, get_party_types_from_account_type
+from Goldfish.accounts.party import get_partywise_advanced_payment_amount
+from Goldfish.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from Goldfish.accounts.utils import get_currency_precision, get_party_types_from_account_type
 
 
 def execute(filters=None):

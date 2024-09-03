@@ -1,4 +1,4 @@
-frappe.provide("erpnext.setup");
+frappe.provide("Goldfish.setup");
 
 frappe.pages["setup-wizard"].on_page_load = function (wrapper) {
 	if (frappe.sys_defaults.company) {
@@ -8,10 +8,10 @@ frappe.pages["setup-wizard"].on_page_load = function (wrapper) {
 };
 
 frappe.setup.on("before_load", function () {
-	erpnext.setup.slides_settings.map(frappe.setup.add_slide);
+	Goldfish.setup.slides_settings.map(frappe.setup.add_slide);
 });
 
-erpnext.setup.slides_settings = [
+Goldfish.setup.slides_settings = [
 	{
 		// Organization
 		name: "organization",
@@ -94,7 +94,7 @@ erpnext.setup.slides_settings = [
 			var country = frappe.wizard.values.country;
 
 			if (country) {
-				let fy = erpnext.setup.fiscal_years[country];
+				let fy = Goldfish.setup.fiscal_years[country];
 				let current_year = moment(new Date()).year();
 				let next_year = current_year + 1;
 				if (!fy) {
@@ -117,7 +117,7 @@ erpnext.setup.slides_settings = [
 
 			if (country) {
 				frappe.call({
-					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
+					method: "Goldfish.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
 					args: { country: country, with_standard: true },
 					callback: function (r) {
 						if (r.message) {
@@ -207,7 +207,7 @@ erpnext.setup.slides_settings = [
 				parent: $(dialog.body),
 				label: parent,
 				expandable: true,
-				method: "erpnext.accounts.utils.get_coa",
+				method: "Goldfish.accounts.utils.get_coa",
 				args: {
 					chart: chart_template,
 					parent: parent,
@@ -235,7 +235,7 @@ erpnext.setup.slides_settings = [
 // Source: https://en.wikipedia.org/wiki/Fiscal_year
 // default 1st Jan - 31st Dec
 
-erpnext.setup.fiscal_years = {
+Goldfish.setup.fiscal_years = {
 	Afghanistan: ["12-21", "12-20"],
 	Australia: ["07-01", "06-30"],
 	Bangladesh: ["07-01", "06-30"],

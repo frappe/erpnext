@@ -1,4 +1,4 @@
-frappe.provide("erpnext.PointOfSale");
+frappe.provide("Goldfish.PointOfSale");
 
 frappe.pages["point-of-sale"].on_page_load = function (wrapper) {
 	frappe.ui.make_app_page({
@@ -8,7 +8,7 @@ frappe.pages["point-of-sale"].on_page_load = function (wrapper) {
 	});
 
 	frappe.require("point-of-sale.bundle.js", function () {
-		wrapper.pos = new erpnext.PointOfSale.Controller(wrapper);
+		wrapper.pos = new Goldfish.PointOfSale.Controller(wrapper);
 		window.cur_pos = wrapper.pos;
 	});
 };

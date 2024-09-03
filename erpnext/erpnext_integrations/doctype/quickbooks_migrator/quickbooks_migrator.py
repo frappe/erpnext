@@ -11,7 +11,7 @@ from frappe import _
 from frappe.model.document import Document
 from requests_oauthlib import OAuth2Session
 
-from erpnext import encode_company_abbr
+from Goldfish import encode_company_abbr
 
 
 # QuickBooks requires a redirect URL, User will be redirect to this URL
@@ -72,7 +72,7 @@ class QuickBooksMigrator(Document):
 
 	def on_update(self):
 		if self.company:
-			# We need a Cost Center corresponding to the selected erpnext Company
+			# We need a Cost Center corresponding to the selected Goldfish Company
 			self.default_cost_center = frappe.db.get_value("Company", self.company, "cost_center")
 			company_warehouses = frappe.get_all("Warehouse", filters={"company": self.company, "is_group": 0})
 			if company_warehouses:
@@ -101,7 +101,7 @@ class QuickBooksMigrator(Document):
 			# Their GL entries need to be generated from GeneralLedger Report.
 			self._fetch_general_ledger()
 
-			# QuickBooks data can have transactions that do not fall in existing fiscal years in ERPNext
+			# QuickBooks data can have transactions that do not fall in existing fiscal years in Goldfish
 			self._create_fiscal_years()
 
 			self._allow_fraction_in_unit()
@@ -441,7 +441,7 @@ class QuickBooksMigrator(Document):
 			"Income": "Income",
 			"Other Income": "Income",
 		}
-		# Map Quickbooks Account Types to ERPNext root_accunts and and root_type
+		# Map Quickbooks Account Types to Goldfish root_accunts and and root_type
 		try:
 			if not frappe.db.exists(
 				{"doctype": "Account", "quickbooks_id": account["Id"], "company": self.company}

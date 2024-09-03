@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-# ERPNext - web based ERP (http://erpnext.com)
+# Goldfish - web based ERP (http://Goldfish.com)
 # For license information, please see license.txt
 
 
@@ -9,9 +9,9 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, today
 
-from erpnext.controllers.accounts_controller import InvalidQtyError
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.material_request.material_request import (
+from Goldfish.controllers.accounts_controller import InvalidQtyError
+from Goldfish.stock.doctype.item.test_item import create_item
+from Goldfish.stock.doctype.material_request.material_request import (
 	make_in_transit_stock_entry,
 	make_purchase_order,
 	make_stock_entry,
@@ -584,7 +584,7 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(se_doc.get("items")[0].s_warehouse, "_Test Warehouse - _TC")
 
 	def test_warehouse_company_validation(self):
-		from erpnext.stock.utils import InvalidWarehouseCompany
+		from Goldfish.stock.utils import InvalidWarehouseCompany
 
 		mr = frappe.copy_doc(test_records[0])
 		mr.company = "_Test Company 1"
@@ -773,7 +773,7 @@ class TestMaterialRequest(FrappeTestCase):
 		self.assertEqual(existing_requested_qty, current_requested_qty)
 
 	def test_auto_email_users_with_company_user_permissions(self):
-		from erpnext.stock.reorder_item import get_email_list
+		from Goldfish.stock.reorder_item import get_email_list
 
 		comapnywise_users = {
 			"_Test Company": "test_auto_email_@example.com",

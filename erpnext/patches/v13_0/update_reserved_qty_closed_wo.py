@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.stock.utils import get_bin
+from Goldfish.stock.utils import get_bin
 
 
 def execute():

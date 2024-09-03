@@ -8,7 +8,7 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs
 from frappe.utils import flt, getdate
 
-from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from Goldfish.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 
 
 def execute(filters=None):

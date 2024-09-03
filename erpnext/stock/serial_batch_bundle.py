@@ -7,11 +7,11 @@ from frappe.query_builder.functions import CombineDatetime, Sum, Timestamp
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, now, nowtime, today
 from pypika import Order
 
-from erpnext.stock.deprecated_serial_batch import (
+from Goldfish.stock.deprecated_serial_batch import (
 	DeprecatedBatchNoValuation,
 	DeprecatedSerialNoValuation,
 )
-from erpnext.stock.valuation import round_off_if_near_zero
+from Goldfish.stock.valuation import round_off_if_near_zero
 
 
 class SerialBatchBundle:
@@ -70,7 +70,7 @@ class SerialBatchBundle:
 			return True
 
 	def make_serial_batch_no_bundle_for_material_transfer(self):
-		from erpnext.controllers.stock_controller import make_bundle_for_material_transfer
+		from Goldfish.controllers.stock_controller import make_bundle_for_material_transfer
 
 		bundle = frappe.db.get_value(
 			"Stock Entry Detail", self.sle.voucher_detail_no, "serial_and_batch_bundle"
@@ -332,7 +332,7 @@ class SerialBatchBundle:
 		doc.submit()
 
 	def set_warehouse_and_status_in_serial_nos(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
+		from Goldfish.stock.doctype.serial_no.serial_no import get_serial_nos as get_parsed_serial_nos
 
 		if self.sle.auto_created_serial_and_batch_bundle and self.sle.actual_qty > 0:
 			return
@@ -399,7 +399,7 @@ class SerialBatchBundle:
 			).run()
 
 	def update_batch_qty(self):
-		from erpnext.stock.doctype.batch.batch import get_available_batches
+		from Goldfish.stock.doctype.batch.batch import get_available_batches
 
 		batches = get_batch_nos(self.sle.serial_and_batch_bundle)
 		if not self.sle.serial_and_batch_bundle and self.sle.batch_no:
@@ -988,8 +988,8 @@ class SerialBatchCreation:
 				frappe.throw(msg, title=_("Insufficient Stock"))
 
 	def set_auto_serial_batch_entries_for_outward(self):
-		from erpnext.stock.doctype.batch.batch import get_available_batches
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
+		from Goldfish.stock.doctype.batch.batch import get_available_batches
+		from Goldfish.stock.doctype.serial_no.serial_no import get_serial_nos_for_outward
 
 		kwargs = frappe._dict(
 			{
@@ -1117,7 +1117,7 @@ class SerialBatchCreation:
 				)
 
 	def create_batch(self):
-		from erpnext.stock.doctype.batch.batch import make_batch
+		from Goldfish.stock.doctype.batch.batch import make_batch
 
 		return make_batch(
 			frappe._dict(

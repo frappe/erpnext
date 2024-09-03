@@ -6,7 +6,7 @@ import frappe
 
 
 def execute():
-	from erpnext.stock.stock_balance import get_indented_qty, get_ordered_qty, update_bin_qty
+	from Goldfish.stock.stock_balance import get_indented_qty, get_ordered_qty, update_bin_qty
 
 	count = 0
 	for item_code, warehouse in frappe.db.sql(

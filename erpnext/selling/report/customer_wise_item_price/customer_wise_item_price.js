@@ -17,7 +17,7 @@ frappe.query_reports["Customer-wise Item Price"] = {
 			options: "Item",
 			get_query: () => {
 				return {
-					query: "erpnext.controllers.queries.item_query",
+					query: "Goldfish.controllers.queries.item_query",
 					filters: { is_sales_item: 1 },
 				};
 			},

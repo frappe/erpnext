@@ -10,14 +10,14 @@ from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import cint, flt
 
-from erpnext import get_default_cost_center
-from erpnext.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
-from erpnext.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
+from Goldfish import get_default_cost_center
+from Goldfish.accounts.doctype.bank_transaction.bank_transaction import get_total_allocated_amount
+from Goldfish.accounts.report.bank_reconciliation_statement.bank_reconciliation_statement import (
 	get_amounts_not_reflected_in_system,
 	get_entries,
 )
-from erpnext.accounts.utils import get_account_currency, get_balance_on
-from erpnext.setup.utils import get_exchange_rate
+from Goldfish.accounts.utils import get_account_currency, get_balance_on
+from Goldfish.setup.utils import get_exchange_rate
 
 
 class BankReconciliationTool(Document):

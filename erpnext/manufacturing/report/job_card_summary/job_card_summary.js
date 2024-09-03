@@ -16,7 +16,7 @@ frappe.query_reports["Job Card Summary"] = {
 			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 			on_change: function (query_report) {
 				var fiscal_year = query_report.get_values().fiscal_year;
@@ -36,14 +36,14 @@ frappe.query_reports["Job Card Summary"] = {
 			label: __("From Posting Date"),
 			fieldname: "from_date",
 			fieldtype: "Date",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 			reqd: 1,
 		},
 		{
 			label: __("To Posting Date"),
 			fieldname: "to_date",
 			fieldtype: "Date",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 			reqd: 1,
 		},
 		{

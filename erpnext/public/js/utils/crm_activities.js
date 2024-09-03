@@ -1,4 +1,4 @@
-erpnext.utils.CRMActivities = class CRMActivities {
+Goldfish.utils.CRMActivities = class CRMActivities {
 	constructor(opts) {
 		$.extend(this, opts);
 	}
@@ -25,7 +25,7 @@ erpnext.utils.CRMActivities = class CRMActivities {
 
 		// open activities
 		frappe.call({
-			method: "erpnext.crm.utils.get_open_activities",
+			method: "Goldfish.crm.utils.get_open_activities",
 			args: {
 				ref_doctype: this.frm.doc.doctype,
 				ref_docname: this.frm.doc.name,
@@ -101,7 +101,7 @@ erpnext.utils.CRMActivities = class CRMActivities {
 	}
 };
 
-erpnext.utils.CRMNotes = class CRMNotes {
+Goldfish.utils.CRMNotes = class CRMNotes {
 	constructor(opts) {
 		$.extend(this, opts);
 	}

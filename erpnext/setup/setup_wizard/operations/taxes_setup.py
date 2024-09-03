@@ -112,10 +112,10 @@ def from_detailed_data(company_name, data):
 
 
 def update_regional_tax_settings(country, company):
-	path = frappe.get_app_path("erpnext", "regional", frappe.scrub(country))
+	path = frappe.get_app_path("Goldfish", "regional", frappe.scrub(country))
 	if os.path.exists(path.encode("utf-8")):
 		try:
-			module_name = f"erpnext.regional.{frappe.scrub(country)}.setup.update_regional_tax_settings"
+			module_name = f"Goldfish.regional.{frappe.scrub(country)}.setup.update_regional_tax_settings"
 			frappe.get_attr(module_name)(country, company)
 		except (ImportError, AttributeError):
 			pass

@@ -1,6 +1,6 @@
 frappe.provide("frappe.help.help_links");
 
-const docsUrl = "https://erpnext.com/docs/";
+const docsUrl = "https://Goldfish.com/docs/";
 
 frappe.help.help_links["Form/Rename Tool"] = [
 	{

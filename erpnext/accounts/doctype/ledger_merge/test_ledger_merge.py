@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 
-from erpnext.accounts.doctype.ledger_merge.ledger_merge import start_merge
+from Goldfish.accounts.doctype.ledger_merge.ledger_merge import start_merge
 
 
 class TestLedgerMerge(unittest.TestCase):

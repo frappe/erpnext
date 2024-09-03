@@ -7,7 +7,7 @@ frappe.query_reports["Bank Clearance Summary"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 			width: "80",
 		},
 		{
@@ -27,7 +27,7 @@ frappe.query_reports["Bank Clearance Summary"] = {
 				: "",
 			get_query: function () {
 				return {
-					query: "erpnext.controllers.queries.get_account_list",
+					query: "Goldfish.controllers.queries.get_account_list",
 					filters: [
 						["Account", "account_type", "in", "Bank, Cash"],
 						["Account", "is_group", "=", 0],

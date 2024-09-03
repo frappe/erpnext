@@ -30,7 +30,7 @@ frappe.views.calendar["Sales Order"] = {
 			label: __("Billing Status"),
 		},
 	],
-	get_events_method: "erpnext.selling.doctype.sales_order.sales_order.get_events",
+	get_events_method: "Goldfish.selling.doctype.sales_order.sales_order.get_events",
 	get_css_class: function (data) {
 		if (data.status == "Closed") {
 			return "success";

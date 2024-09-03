@@ -8,7 +8,7 @@ from frappe.utils import add_to_date, cint, flt, get_datetime, get_table_name, g
 from frappe.utils.deprecations import deprecated
 from pypika import functions as fn
 
-from erpnext.stock.doctype.warehouse.warehouse import apply_warehouse_filter
+from Goldfish.stock.doctype.warehouse.warehouse import apply_warehouse_filter
 
 SLE_COUNT_LIMIT = 10_000
 

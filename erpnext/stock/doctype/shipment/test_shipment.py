@@ -6,7 +6,7 @@ from datetime import date, timedelta
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.stock.doctype.delivery_note.delivery_note import make_shipment
+from Goldfish.stock.doctype.delivery_note.delivery_note import make_shipment
 
 
 class TestShipment(FrappeTestCase):

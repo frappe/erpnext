@@ -4,7 +4,7 @@
 frappe.ui.form.on("Tax Rule", "customer", function (frm) {
 	if (frm.doc.customer) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.tax_rule.tax_rule.get_party_details",
+			method: "Goldfish.accounts.doctype.tax_rule.tax_rule.get_party_details",
 			args: {
 				party: frm.doc.customer,
 				party_type: "customer",
@@ -23,7 +23,7 @@ frappe.ui.form.on("Tax Rule", "customer", function (frm) {
 frappe.ui.form.on("Tax Rule", "supplier", function (frm) {
 	if (frm.doc.supplier) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.tax_rule.tax_rule.get_party_details",
+			method: "Goldfish.accounts.doctype.tax_rule.tax_rule.get_party_details",
 			args: {
 				party: frm.doc.supplier,
 				party_type: "supplier",

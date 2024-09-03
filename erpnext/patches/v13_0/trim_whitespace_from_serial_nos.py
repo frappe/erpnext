@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+from Goldfish.stock.doctype.serial_no.serial_no import get_serial_nos
 
 
 def execute():

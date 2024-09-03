@@ -8,7 +8,7 @@ from frappe.contacts.address_and_contact import (
 )
 from frappe.model.mapper import get_mapped_doc
 
-from erpnext.crm.utils import CRMNote, copy_comments, link_communications, link_open_events
+from Goldfish.crm.utils import CRMNote, copy_comments, link_communications, link_open_events
 
 
 class Prospect(CRMNote):
@@ -20,9 +20,9 @@ class Prospect(CRMNote):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.crm.doctype.crm_note.crm_note import CRMNote
-		from erpnext.crm.doctype.prospect_lead.prospect_lead import ProspectLead
-		from erpnext.crm.doctype.prospect_opportunity.prospect_opportunity import ProspectOpportunity
+		from Goldfish.crm.doctype.crm_note.crm_note import CRMNote
+		from Goldfish.crm.doctype.prospect_lead.prospect_lead import ProspectLead
+		from Goldfish.crm.doctype.prospect_opportunity.prospect_opportunity import ProspectOpportunity
 
 		annual_revenue: DF.Currency
 		company: DF.Link

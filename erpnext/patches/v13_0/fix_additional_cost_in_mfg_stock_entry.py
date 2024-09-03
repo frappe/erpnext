@@ -52,7 +52,7 @@ def patch_additional_cost(code: StockEntryCode):
 
 
 def create_repost_item_valuation(stock_entry):
-	from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+	from Goldfish.controllers.stock_controller import create_repost_item_valuation_entry
 
 	# turn on recalculate flag so reposting corrects the incoming/outgoing rates.
 	frappe.db.set_value(

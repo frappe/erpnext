@@ -17,7 +17,7 @@ class PriceList(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.price_list_country.price_list_country import PriceListCountry
+		from Goldfish.stock.doctype.price_list_country.price_list_country import PriceListCountry
 
 		buying: DF.Check
 		countries: DF.Table[PriceListCountry]

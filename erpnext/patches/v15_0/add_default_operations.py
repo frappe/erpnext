@@ -1,4 +1,4 @@
-from erpnext.setup.install import make_default_operations
+from Goldfish.setup.install import make_default_operations
 
 
 def execute():

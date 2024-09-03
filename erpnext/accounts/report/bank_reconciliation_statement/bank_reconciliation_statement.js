@@ -23,7 +23,7 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 			get_query: function () {
 				var company = frappe.query_report.get_filter_value("company");
 				return {
-					query: "erpnext.controllers.queries.get_account_list",
+					query: "Goldfish.controllers.queries.get_account_list",
 					filters: [
 						["Account", "account_type", "in", "Bank, Cash"],
 						["Account", "is_group", "=", 0],

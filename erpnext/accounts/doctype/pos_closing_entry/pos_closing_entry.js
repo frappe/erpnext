@@ -12,7 +12,7 @@ frappe.ui.form.on("POS Closing Entry", {
 
 		frm.set_query("user", function (doc) {
 			return {
-				query: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_cashiers",
+				query: "Goldfish.accounts.doctype.pos_closing_entry.pos_closing_entry.get_cashiers",
 				filters: { parent: doc.pos_profile },
 			};
 		});
@@ -102,7 +102,7 @@ frappe.ui.form.on("POS Closing Entry", {
 
 	get_pos_invoices(frm) {
 		return frappe.call({
-			method: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
+			method: "Goldfish.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
 			args: {
 				start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
 				end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
@@ -132,7 +132,7 @@ frappe.ui.form.on("POS Closing Entry", {
 
 		await Promise.all([
 			frappe.call({
-				method: "erpnext.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
+				method: "Goldfish.accounts.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices",
 				args: {
 					start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
 					end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),

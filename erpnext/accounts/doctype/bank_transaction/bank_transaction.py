@@ -17,7 +17,7 @@ class BankTransaction(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.bank_transaction_payments.bank_transaction_payments import (
+		from Goldfish.accounts.doctype.bank_transaction_payments.bank_transaction_payments import (
 			BankTransactionPayments,
 		)
 
@@ -203,7 +203,7 @@ class BankTransaction(Document):
 		)
 
 	def auto_set_party(self):
-		from erpnext.accounts.doctype.bank_transaction.auto_match_party import AutoMatchParty
+		from Goldfish.accounts.doctype.bank_transaction.auto_match_party import AutoMatchParty
 
 		if self.party_type and self.party:
 			return

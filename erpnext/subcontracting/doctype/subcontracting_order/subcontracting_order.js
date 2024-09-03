@@ -1,9 +1,9 @@
 // Copyright (c) 2022, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.provide("erpnext.buying");
+frappe.provide("Goldfish.buying");
 
-erpnext.landed_cost_taxes_and_charges.setup_triggers("Subcontracting Order");
+Goldfish.landed_cost_taxes_and_charges.setup_triggers("Subcontracting Order");
 
 frappe.ui.form.on("Subcontracting Order", {
 	setup: (frm) => {
@@ -65,7 +65,7 @@ frappe.ui.form.on("Subcontracting Order", {
 		}));
 
 		frm.set_query("expense_account", "items", () => ({
-			query: "erpnext.controllers.queries.get_expense_account",
+			query: "Goldfish.controllers.queries.get_expense_account",
 			filters: {
 				company: frm.doc.company,
 			},
@@ -95,13 +95,13 @@ frappe.ui.form.on("Subcontracting Order", {
 	},
 
 	set_queries: (frm) => {
-		frm.set_query("contact_person", erpnext.queries.contact_query);
-		frm.set_query("supplier_address", erpnext.queries.address_query);
+		frm.set_query("contact_person", Goldfish.queries.contact_query);
+		frm.set_query("supplier_address", Goldfish.queries.address_query);
 
-		frm.set_query("billing_address", erpnext.queries.company_address_query);
+		frm.set_query("billing_address", Goldfish.queries.company_address_query);
 
 		frm.set_query("shipping_address", () => {
-			return erpnext.queries.company_address_query(frm.doc);
+			return Goldfish.queries.company_address_query(frm.doc);
 		});
 	},
 
@@ -117,8 +117,8 @@ frappe.ui.form.on("Subcontracting Order", {
 		frm.set_value("supplied_items", null);
 
 		if (frm.doc.purchase_order) {
-			erpnext.utils.map_current_doc({
-				method: "erpnext.buying.doctype.purchase_order.purchase_order.make_subcontracting_order",
+			Goldfish.utils.map_current_doc({
+				method: "Goldfish.buying.doctype.purchase_order.purchase_order.make_subcontracting_order",
 				source_name: frm.doc.purchase_order,
 				target_doc: frm,
 				freeze: true,
@@ -151,7 +151,7 @@ frappe.ui.form.on("Subcontracting Order", {
 
 	update_subcontracting_order_status(frm, status) {
 		frappe.call({
-			method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.update_subcontracting_order_status",
+			method: "Goldfish.subcontracting.doctype.subcontracting_order.subcontracting_order.update_subcontracting_order_status",
 			args: {
 				sco: frm.doc.name,
 				status: status,
@@ -180,7 +180,7 @@ frappe.ui.form.on("Subcontracting Order", {
 				__("Return of Components"),
 				() => {
 					frm.call({
-						method: "erpnext.controllers.subcontracting_controller.get_materials_from_supplier",
+						method: "Goldfish.controllers.subcontracting_controller.get_materials_from_supplier",
 						freeze: true,
 						freeze_message: __("Creating Stock Entry"),
 						args: {
@@ -212,7 +212,7 @@ frappe.ui.form.on("Landed Cost Taxes and Charges", {
 	},
 });
 
-erpnext.buying.SubcontractingOrderController = class SubcontractingOrderController {
+Goldfish.buying.SubcontractingOrderController = class SubcontractingOrderController {
 	setup() {
 		this.frm.custom_make_buttons = {
 			"Subcontracting Receipt": "Subcontracting Receipt",
@@ -260,7 +260,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 	}
 
 	set_warehouse_in_children(child_table, warehouse_field, warehouse) {
-		let transaction_controller = new erpnext.TransactionController();
+		let transaction_controller = new Goldfish.TransactionController();
 		transaction_controller.autofill_warehouse(child_table, warehouse_field, warehouse);
 	}
 
@@ -274,7 +274,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 
 	make_subcontracting_receipt() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt",
+			method: "Goldfish.subcontracting.doctype.subcontracting_order.subcontracting_order.make_subcontracting_receipt",
 			frm: cur_frm,
 			freeze_message: __("Creating Subcontracting Receipt ..."),
 		});
@@ -282,7 +282,7 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 
 	make_stock_entry() {
 		frappe.call({
-			method: "erpnext.controllers.subcontracting_controller.make_rm_stock_entry",
+			method: "Goldfish.controllers.subcontracting_controller.make_rm_stock_entry",
 			args: {
 				subcontract_order: cur_frm.doc.name,
 				order_doctype: cur_frm.doc.doctype,
@@ -295,4 +295,4 @@ erpnext.buying.SubcontractingOrderController = class SubcontractingOrderControll
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.buying.SubcontractingOrderController({ frm: cur_frm }));
+extend_cscript(cur_frm.cscript, new Goldfish.buying.SubcontractingOrderController({ frm: cur_frm }));

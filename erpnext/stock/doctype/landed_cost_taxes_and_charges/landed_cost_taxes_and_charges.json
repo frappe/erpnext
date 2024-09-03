@@ -35,12 +35,12 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
+   "depends_on": "eval:cint(Goldfish.is_perpetual_inventory_enabled(parent.company))",
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Expense Account",
-   "mandatory_depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
+   "mandatory_depends_on": "eval:cint(Goldfish.is_perpetual_inventory_enabled(parent.company))",
    "options": "Account"
   },
   {

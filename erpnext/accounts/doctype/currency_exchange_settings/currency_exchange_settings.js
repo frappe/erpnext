@@ -4,7 +4,7 @@
 frappe.ui.form.on("Currency Exchange Settings", {
 	service_provider: function (frm) {
 		frm.call({
-			method: "erpnext.accounts.doctype.currency_exchange_settings.currency_exchange_settings.get_api_endpoint",
+			method: "Goldfish.accounts.doctype.currency_exchange_settings.currency_exchange_settings.get_api_endpoint",
 			args: {
 				service_provider: frm.doc.service_provider,
 				use_http: frm.doc.use_http,

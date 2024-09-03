@@ -11,7 +11,7 @@ from frappe.model import core_doctypes_list
 from frappe.model.document import Document
 from frappe.utils import cstr
 
-from erpnext.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
+from Goldfish.accounts.doctype.repost_accounting_ledger.repost_accounting_ledger import (
 	get_allowed_types_from_settings,
 )
 
@@ -25,7 +25,7 @@ class AccountingDimension(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.accounting_dimension_detail.accounting_dimension_detail import (
+		from Goldfish.accounts.doctype.accounting_dimension_detail.accounting_dimension_detail import (
 			AccountingDimensionDetail,
 		)
 

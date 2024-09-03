@@ -4,11 +4,11 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.manufacturing.doctype.bom_update_log.bom_update_log import (
+from Goldfish.manufacturing.doctype.bom_update_log.bom_update_log import (
 	BOMMissingError,
 	resume_bom_cost_update_jobs,
 )
-from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import (
+from Goldfish.manufacturing.doctype.bom_update_tool.bom_update_tool import (
 	enqueue_replace_bom,
 	enqueue_update_cost,
 )
@@ -69,8 +69,8 @@ class TestBOMUpdateLog(FrappeTestCase):
 		Create New BOM for B-Item E with B-Item G and replace it in the above BOM.
 		"""
 
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		items = ["B-Item A", "B-Item B", "B-Item C", "B-Item D", "B-Item E", "B-Item F", "B-Item G"]
 

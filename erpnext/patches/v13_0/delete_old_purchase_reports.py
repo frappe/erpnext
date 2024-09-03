@@ -4,7 +4,7 @@
 
 import frappe
 
-from erpnext.accounts.utils import check_and_delete_linked_reports
+from Goldfish.accounts.utils import check_and_delete_linked_reports
 
 
 def execute():

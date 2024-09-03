@@ -6,7 +6,7 @@ frappe.ui.form.on("Transaction Deletion Record", {
 		if (frm.doc.docstatus == 0) {
 			let doctypes_to_be_ignored_array;
 			frappe.call({
-				method: "erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.get_doctypes_to_be_ignored",
+				method: "Goldfish.setup.doctype.transaction_deletion_record.transaction_deletion_record.get_doctypes_to_be_ignored",
 				callback: function (r) {
 					doctypes_to_be_ignored_array = r.message;
 					populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm);

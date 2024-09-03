@@ -15,28 +15,28 @@ from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cint, cstr, flt, get_link_to_form, getdate, nowdate, strip_html
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+from Goldfish.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
 	validate_inter_company_party,
 )
-from erpnext.accounts.party import get_party_account
-from erpnext.controllers.selling_controller import SellingController
-from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+from Goldfish.accounts.party import get_party_account
+from Goldfish.controllers.selling_controller import SellingController
+from Goldfish.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
-from erpnext.manufacturing.doctype.production_plan.production_plan import (
+from Goldfish.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 )
-from erpnext.selling.doctype.customer.customer import check_credit_limit
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+from Goldfish.selling.doctype.customer.customer import check_credit_limit
+from Goldfish.setup.doctype.item_group.item_group import get_item_group_defaults
+from Goldfish.stock.doctype.item.item import get_item_defaults
+from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_details_for_voucher,
 	has_reserved_stock,
 )
-from erpnext.stock.get_item_details import get_default_bom, get_price_list_rate
-from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
+from Goldfish.stock.get_item_details import get_default_bom, get_price_list_rate
+from Goldfish.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -54,14 +54,14 @@ class SalesOrder(SellingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
-		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
-		from erpnext.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
+		from Goldfish.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
+		from Goldfish.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
+		from Goldfish.accounts.doctype.sales_taxes_and_charges.sales_taxes_and_charges import (
 			SalesTaxesandCharges,
 		)
-		from erpnext.selling.doctype.sales_order_item.sales_order_item import SalesOrderItem
-		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
-		from erpnext.stock.doctype.packed_item.packed_item import PackedItem
+		from Goldfish.selling.doctype.sales_order_item.sales_order_item import SalesOrderItem
+		from Goldfish.selling.doctype.sales_team.sales_team import SalesTeam
+		from Goldfish.stock.doctype.packed_item.packed_item import PackedItem
 
 		additional_discount_percentage: DF.Float
 		address_display: DF.TextEditor | None
@@ -210,11 +210,11 @@ class SalesOrder(SellingController):
 		)
 
 		if self.coupon_code:
-			from erpnext.accounts.doctype.pricing_rule.utils import validate_coupon_code
+			from Goldfish.accounts.doctype.pricing_rule.utils import validate_coupon_code
 
 			validate_coupon_code(self.coupon_code)
 
-		from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+		from Goldfish.stock.doctype.packed_item.packed_item import make_packing_list
 
 		make_packing_list(self)
 
@@ -415,7 +415,7 @@ class SalesOrder(SellingController):
 
 		update_linked_doc(self.doctype, self.name, self.inter_company_order_reference)
 		if self.coupon_code:
-			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			from Goldfish.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "used")
 
@@ -448,7 +448,7 @@ class SalesOrder(SellingController):
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_order_reference)
 		if self.coupon_code:
-			from erpnext.accounts.doctype.pricing_rule.utils import update_coupon_code_count
+			from Goldfish.accounts.doctype.pricing_rule.utils import update_coupon_code_count
 
 			update_coupon_code_count(self.coupon_code, "cancelled")
 
@@ -729,7 +729,7 @@ class SalesOrder(SellingController):
 	) -> None:
 		"""Creates Stock Reservation Entries for Sales Order Items."""
 
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			create_stock_reservation_entries_for_so_items as create_stock_reservation_entries,
 		)
 
@@ -744,7 +744,7 @@ class SalesOrder(SellingController):
 	def cancel_stock_reservation_entries(self, sre_list=None, notify=True) -> None:
 		"""Cancel Stock Reservation Entries for Sales Order Items."""
 
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 		)
 
@@ -761,7 +761,7 @@ def get_unreserved_qty(item: object, reserved_qty_details: dict) -> float:
 
 
 def get_list_context(context=None):
-	from erpnext.controllers.website_list_for_contact import get_list_context
+	from Goldfish.controllers.website_list_for_contact import get_list_context
 
 	list_context = get_list_context(context)
 	list_context.update(
@@ -915,8 +915,8 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, kwargs=None):
-	from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-	from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+	from Goldfish.stock.doctype.packed_item.packed_item import make_packing_list
+	from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 		get_sre_details_for_voucher,
 		get_sre_reserved_qty_details_for_voucher,
 		get_ssb_bundle_for_voucher,
@@ -1244,7 +1244,7 @@ def get_events(start, end, filters=None):
 def make_purchase_order_for_default_supplier(source_name, selected_items=None, target_doc=None):
 	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
 
-	from erpnext.setup.utils import get_exchange_rate
+	from Goldfish.setup.utils import get_exchange_rate
 
 	if not selected_items:
 		return
@@ -1611,14 +1611,14 @@ def make_raw_material_request(items, company, sales_order, project=None):
 
 @frappe.whitelist()
 def make_inter_company_purchase_order(source_name, target_doc=None):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	from Goldfish.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 
 	return make_inter_company_transaction("Sales Order", source_name, target_doc)
 
 
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None):
-	from erpnext.stock.doctype.packed_item.packed_item import is_product_bundle
+	from Goldfish.stock.doctype.packed_item.packed_item import is_product_bundle
 
 	def validate_sales_order():
 		so = frappe.get_doc("Sales Order", source_name)

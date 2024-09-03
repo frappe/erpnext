@@ -89,7 +89,7 @@ frappe.ui.form.on("Warehouse", {
 
 function convert_to_group_or_ledger(frm) {
 	frappe.call({
-		method: "erpnext.stock.doctype.warehouse.warehouse.convert_to_group_or_ledger",
+		method: "Goldfish.stock.doctype.warehouse.warehouse.convert_to_group_or_ledger",
 		args: {
 			docname: frm.doc.name,
 			is_group: frm.doc.is_group,

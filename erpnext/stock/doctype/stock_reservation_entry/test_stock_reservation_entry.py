@@ -7,18 +7,18 @@ import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import today
 
-from erpnext.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+from Goldfish.selling.doctype.sales_order.sales_order import create_pick_list, make_delivery_note
+from Goldfish.selling.doctype.sales_order.test_sales_order import make_sales_order
+from Goldfish.stock.doctype.item.test_item import make_item
+from Goldfish.stock.doctype.stock_entry.stock_entry import StockEntry
+from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	cancel_stock_reservation_entries,
 	get_sre_reserved_qty_details_for_voucher,
 	get_stock_reservation_entries_for_voucher,
 	has_reserved_stock,
 )
-from erpnext.stock.utils import get_stock_balance
+from Goldfish.stock.utils import get_stock_balance
 
 
 class TestStockReservationEntry(FrappeTestCase):
@@ -29,7 +29,7 @@ class TestStockReservationEntry(FrappeTestCase):
 
 	@change_settings("Stock Settings", {"allow_negative_stock": 0})
 	def test_validate_stock_reservation_settings(self) -> None:
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			validate_stock_reservation_settings,
 		)
 
@@ -53,7 +53,7 @@ class TestStockReservationEntry(FrappeTestCase):
 			self.assertIsNone(validate_stock_reservation_settings(voucher), None)
 
 	def test_get_available_qty_to_reserve(self) -> None:
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_available_qty_to_reserve,
 		)
 
@@ -189,10 +189,10 @@ class TestStockReservationEntry(FrappeTestCase):
 
 	@change_settings("Stock Settings", {"allow_negative_stock": 0, "enable_stock_reservation": 1})
 	def test_cant_consume_reserved_stock(self) -> None:
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 		)
-		from erpnext.stock.stock_ledger import NegativeStockError
+		from Goldfish.stock.stock_ledger import NegativeStockError
 
 		# Step - 1: Create a `Sales Order`
 		so = make_sales_order(
@@ -575,9 +575,9 @@ class TestStockReservationEntry(FrappeTestCase):
 		},
 	)
 	def test_stock_reservation_from_purchase_receipt(self) -> None:
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-		from erpnext.selling.doctype.sales_order.sales_order import make_material_request
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+		from Goldfish.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from Goldfish.selling.doctype.sales_order.sales_order import make_material_request
+		from Goldfish.stock.doctype.material_request.material_request import make_purchase_order
 
 		items_details = create_items()
 		create_material_receipt(items_details, self.warehouse, qty=10)

@@ -10,7 +10,7 @@ from frappe.model.document import Document
 from frappe.utils import add_months, formatdate, getdate, sbool, today
 from plaid.errors import ItemError
 
-from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
+from Goldfish.Goldfish_integrations.doctype.plaid_settings.plaid_connector import PlaidConnector
 
 
 class PlaidSettings(Document):
@@ -327,7 +327,7 @@ def enqueue_synchronization():
 
 	for plaid_account in plaid_accounts:
 		frappe.enqueue(
-			"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.sync_transactions",
+			"Goldfish.Goldfish_integrations.doctype.plaid_settings.plaid_settings.sync_transactions",
 			bank=plaid_account.bank,
 			bank_account=plaid_account.name,
 		)

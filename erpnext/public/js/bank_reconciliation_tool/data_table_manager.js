@@ -1,9 +1,9 @@
-frappe.provide("erpnext.accounts.bank_reconciliation");
+frappe.provide("Goldfish.accounts.bank_reconciliation");
 
-erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
+Goldfish.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 	constructor(opts) {
 		Object.assign(this, opts);
-		this.dialog_manager = new erpnext.accounts.bank_reconciliation.DialogManager(
+		this.dialog_manager = new Goldfish.accounts.bank_reconciliation.DialogManager(
 			this.company,
 			this.bank_account,
 			this.bank_statement_from_date,
@@ -18,7 +18,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 	make_dt() {
 		var me = this;
 		frappe.call({
-			method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_bank_transactions",
+			method: "Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_bank_transactions",
 			args: {
 				bank_account: this.bank_account,
 				from_date: this.bank_statement_from_date,
@@ -189,7 +189,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 	get_cleared_balance() {
 		if (this.bank_account && this.bank_statement_to_date) {
 			return frappe.call({
-				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_account_balance",
+				method: "Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_account_balance",
 				args: {
 					bank_account: this.bank_account,
 					till_date: this.bank_statement_to_date,

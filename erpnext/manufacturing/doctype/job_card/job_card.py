@@ -23,11 +23,11 @@ from frappe.utils import (
 	time_diff_in_hours,
 )
 
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+from Goldfish.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
-from erpnext.manufacturing.doctype.workstation_type.workstation_type import get_workstations
-from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
+from Goldfish.manufacturing.doctype.workstation_type.workstation_type import get_workstations
+from Goldfish.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
 
@@ -61,13 +61,13 @@ class JobCard(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.manufacturing.doctype.job_card_item.job_card_item import JobCardItem
-		from erpnext.manufacturing.doctype.job_card_operation.job_card_operation import JobCardOperation
-		from erpnext.manufacturing.doctype.job_card_scheduled_time.job_card_scheduled_time import (
+		from Goldfish.manufacturing.doctype.job_card_item.job_card_item import JobCardItem
+		from Goldfish.manufacturing.doctype.job_card_operation.job_card_operation import JobCardOperation
+		from Goldfish.manufacturing.doctype.job_card_scheduled_time.job_card_scheduled_time import (
 			JobCardScheduledTime,
 		)
-		from erpnext.manufacturing.doctype.job_card_scrap_item.job_card_scrap_item import JobCardScrapItem
-		from erpnext.manufacturing.doctype.job_card_time_log.job_card_time_log import JobCardTimeLog
+		from Goldfish.manufacturing.doctype.job_card_scrap_item.job_card_scrap_item import JobCardScrapItem
+		from Goldfish.manufacturing.doctype.job_card_time_log.job_card_time_log import JobCardTimeLog
 
 		actual_end_date: DF.Datetime | None
 		actual_start_date: DF.Datetime | None
@@ -1231,7 +1231,7 @@ class JobCard(Document):
 
 	@frappe.whitelist()
 	def make_stock_entry_for_semi_fg_item(self, auto_submit=False):
-		from erpnext.stock.doctype.stock_entry_type.stock_entry_type import ManufactureEntry
+		from Goldfish.stock.doctype.stock_entry_type.stock_entry_type import ManufactureEntry
 
 		ste = ManufactureEntry(
 			{

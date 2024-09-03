@@ -10,17 +10,17 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
-from erpnext.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
-from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+from Goldfish.accounts.test.accounts_mixin import AccountsTestMixin
+from Goldfish.controllers.accounts_controller import InvalidQtyError, update_child_qty_rate
+from Goldfish.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
 	make_maintenance_schedule,
 )
-from erpnext.maintenance.doctype.maintenance_visit.test_maintenance_visit import (
+from Goldfish.maintenance.doctype.maintenance_visit.test_maintenance_visit import (
 	make_maintenance_visit,
 )
-from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
-from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-from erpnext.selling.doctype.sales_order.sales_order import (
+from Goldfish.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+from Goldfish.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+from Goldfish.selling.doctype.sales_order.sales_order import (
 	WarehouseRequired,
 	create_pick_list,
 	make_delivery_note,
@@ -29,8 +29,8 @@ from erpnext.selling.doctype.sales_order.sales_order import (
 	make_sales_invoice,
 	make_work_orders,
 )
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from Goldfish.stock.doctype.item.test_item import make_item
+from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
@@ -147,7 +147,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(len(si1.get("items")), 0)
 
 	def test_so_billed_amount_against_return_entry(self):
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from Goldfish.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 
 		so = make_sales_order(do_not_submit=True)
 		so.submit()
@@ -237,8 +237,8 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.get("items")[0].delivered_qty, 9)
 
 		# Make return deliver note, sales invoice and check quantity
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-3, do_not_submit=True)
 		dn1.items[0].against_sales_order = so.name
@@ -930,11 +930,11 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing", 1)
 
 	def test_drop_shipping(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from Goldfish.buying.doctype.purchase_order.purchase_order import update_status
+		from Goldfish.selling.doctype.sales_order.sales_order import (
 			make_purchase_order_for_default_supplier,
 		)
-		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
+		from Goldfish.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
 		# make items
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1})
@@ -1022,10 +1022,10 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		so.cancel()
 
 	def test_drop_shipping_partial_order(self):
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from Goldfish.selling.doctype.sales_order.sales_order import (
 			make_purchase_order_for_default_supplier,
 		)
-		from erpnext.selling.doctype.sales_order.sales_order import update_status as so_update_status
+		from Goldfish.selling.doctype.sales_order.sales_order import update_status as so_update_status
 
 		# make items
 		po_item1 = make_item(
@@ -1082,7 +1082,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	def test_drop_shipping_full_for_default_suppliers(self):
 		"""Test if multiple POs are generated in one go against different default suppliers."""
-		from erpnext.selling.doctype.sales_order.sales_order import (
+		from Goldfish.selling.doctype.sales_order.sales_order import (
 			make_purchase_order_for_default_supplier,
 		)
 
@@ -1126,7 +1126,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		Tests if the the Product Bundles in the Items table of Sales Orders are replaced with
 		their child items(from the Packed Items table) on creating a Purchase Order from it.
 		"""
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
+		from Goldfish.selling.doctype.sales_order.sales_order import make_purchase_order
 
 		product_bundle = make_item("_Test Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
@@ -1156,7 +1156,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		"""
 		Tests if the packed item's `ordered_qty` is updated with the quantity of the Purchase Order
 		"""
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
+		from Goldfish.selling.doctype.sales_order.sales_order import make_purchase_order
 
 		product_bundle = make_item("_Test Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Bundle Item 1", {"is_stock_item": 1})
@@ -1256,7 +1256,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertTrue(si.get("payment_schedule"))
 
 	def test_make_work_order(self):
-		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+		from Goldfish.selling.doctype.sales_order.sales_order import get_work_order_items
 
 		# Make a new Sales Order
 		so = make_sales_order(
@@ -1294,7 +1294,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
 
 	def test_advance_payment_entry_unlink_against_sales_order(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
 		frappe.db.set_single_value("Accounts Settings", "unlink_advance_payment_on_cancelation_of_order", 0)
 
@@ -1317,7 +1317,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	@change_settings("Accounts Settings", {"unlink_advance_payment_on_cancelation_of_order": 1})
 	def test_advance_paid_upon_payment_cancellation(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
 		so = make_sales_order()
 
@@ -1343,7 +1343,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.advance_paid, 0)
 
 	def test_cancel_sales_order_after_cancel_payment_entry(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
 		# make a sales order
 		so = make_sales_order()
@@ -1377,9 +1377,9 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 	def test_work_order_pop_up_from_sales_order(self):
 		"Test `get_work_order_items` in Sales Order picks the right BOM for items to manufacture."
 
-		from erpnext.controllers.item_variant import create_variant
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+		from Goldfish.controllers.item_variant import create_variant
+		from Goldfish.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from Goldfish.selling.doctype.sales_order.sales_order import get_work_order_items
 
 		make_item(  # template item
 			"Test-WO-Tshirt",
@@ -1429,7 +1429,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(wo_items[1].get("bom"), template_bom.name)
 
 	def test_request_for_raw_materials(self):
-		from erpnext.selling.doctype.sales_order.sales_order import get_work_order_items
+		from Goldfish.selling.doctype.sales_order.sales_order import get_work_order_items
 
 		item = make_item(
 			"_Test Finished Item",
@@ -1456,7 +1456,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				"item_defaults": [{"default_warehouse": "_Test Warehouse - _TC", "company": "_Test Company"}],
 			},
 		)
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from Goldfish.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
 		make_bom(item=item.item_code, rate=1000, raw_materials=["_Test Raw Item A", "_Test Raw Item B"])
 
@@ -1561,7 +1561,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		"""
 		Expected result: Sales Order should not get cancelled
 		"""
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from Goldfish.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		so = make_sales_order(item_code="_Test FG Item", qty=10)
 		so.submit()
@@ -1571,10 +1571,10 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertRaises(frappe.LinkExistsError, so.cancel)
 
 	def test_payment_terms_are_fetched_when_creating_sales_invoice(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
 		)
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 		automatically_fetch_payment_terms()
 
@@ -1594,7 +1594,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		automatically_fetch_payment_terms(enable=0)
 
 	def test_zero_amount_sales_order_billing_status(self):
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 		so = make_sales_order(uom="Nos", do_not_save=1)
 		so.items[0].rate = 0
@@ -1626,7 +1626,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		|    3 | Sales Return(Partial) -> Credit Note | SO 50% Delivered, 50% billed  |
 
 		"""
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 		so = make_sales_order(uom="Nos", do_not_save=1)
 		so.save()
@@ -1651,7 +1651,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(so.billing_status, "Fully Billed")
 		self.assertEqual(so.status, "Completed")
 
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		dn1.reload()
 		dn_ret = create_delivery_note(is_return=1, return_against=dn1.name, qty=-5, do_not_submit=True)
@@ -1678,10 +1678,10 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	def test_so_back_updated_from_wo_via_mr(self):
 		"SO -> MR (Manufacture) -> WO. Test if WO Qty is updated in SO."
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from Goldfish.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as make_se_from_wo,
 		)
-		from erpnext.stock.doctype.material_request.material_request import raise_work_orders
+		from Goldfish.stock.doctype.material_request.material_request import raise_work_orders
 
 		so = make_sales_order(item_list=[{"item_code": "_Test FG Item", "qty": 2, "rate": 100}])
 
@@ -1723,7 +1723,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(mr.status, "Manufactured")
 
 	def test_sales_order_with_shipping_rule(self):
-		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
+		from Goldfish.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 
 		shipping_rule = create_shipping_rule(
 			shipping_rule_type="Selling", shipping_rule_name="Shipping Rule - Sales Invoice Test"
@@ -1748,11 +1748,11 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(sales_order.taxes[0].tax_amount, 0)
 
 	def test_sales_order_partial_advance_payment(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_entry,
 			get_payment_entry,
 		)
-		from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+		from Goldfish.selling.doctype.customer.test_customer import get_customer_dict
 
 		# Make a customer
 		customer = get_customer_dict("QA Logistics")
@@ -1963,12 +1963,12 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	@patch(
 		# this also shadows one (1) call to _get_payment_gateway_controller
-		"erpnext.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
+		"Goldfish.accounts.doctype.payment_request.payment_request.PaymentRequest.get_payment_url",
 		return_value=None,
 	)
 	def test_sales_order_advance_payment_status(self, mocked_get_payment_url):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from Goldfish.accounts.doctype.payment_request.payment_request import make_payment_request
 
 		# Flow progressing to SI with payment entries "moved" from SO to SI
 		so = make_sales_order(qty=1, rate=100, do_not_submit=True)
@@ -2102,7 +2102,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			self.assertTrue(row.warehouse == warehouse)
 
 	def test_pick_list_for_batch(self):
-		from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
+		from Goldfish.stock.doctype.pick_list.pick_list import create_delivery_note
 
 		batch_item = make_item(
 			"_Test Batch Item for Pick LIST",

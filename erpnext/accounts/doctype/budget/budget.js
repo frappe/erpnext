@@ -1,6 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
-frappe.provide("erpnext.accounts.dimensions");
+frappe.provide("Goldfish.accounts.dimensions");
 
 frappe.ui.form.on("Budget", {
 	onload: function (frm) {
@@ -22,7 +22,7 @@ frappe.ui.form.on("Budget", {
 			};
 		});
 
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+		Goldfish.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function (frm) {

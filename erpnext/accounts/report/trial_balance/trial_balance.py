@@ -7,17 +7,17 @@ from frappe import _
 from frappe.query_builder.functions import Sum
 from frappe.utils import add_days, cstr, flt, formatdate, getdate
 
-import erpnext
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+import Goldfish
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
-from erpnext.accounts.report.financial_statements import (
+from Goldfish.accounts.report.financial_statements import (
 	filter_accounts,
 	filter_out_zero_value_rows,
 	set_gl_entries_by_account,
 )
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
+from Goldfish.accounts.report.utils import convert_to_presentation_currency, get_currency
 
 value_fields = (
 	"opening_debit",
@@ -87,7 +87,7 @@ def get_data(filters):
 		filters.company,
 		as_dict=True,
 	)
-	company_currency = filters.presentation_currency or erpnext.get_company_currency(filters.company)
+	company_currency = filters.presentation_currency or Goldfish.get_company_currency(filters.company)
 
 	if not accounts:
 		return None

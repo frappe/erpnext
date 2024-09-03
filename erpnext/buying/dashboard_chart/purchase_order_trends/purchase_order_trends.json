@@ -5,7 +5,7 @@
  "custom_options": "{\"type\": \"line\", \"axisOptions\": {\"shortenYAxisNumbers\": 1}, \"tooltipOptions\": {}, \"lineOptions\": {\"regionFill\": 1}}",
  "docstatus": 0,
  "doctype": "Dashboard Chart",
- "dynamic_filters_json": "{\"company\":\"frappe.defaults.get_user_default(\\\"Company\\\")\",\"fiscal_year\":\"erpnext.utils.get_fiscal_year()\"}",
+ "dynamic_filters_json": "{\"company\":\"frappe.defaults.get_user_default(\\\"Company\\\")\",\"fiscal_year\":\"Goldfish.utils.get_fiscal_year()\"}",
  "filters_json": "{\"period\":\"Monthly\",\"period_based_on\":\"posting_date\",\"based_on\":\"Item\"}",
  "idx": 1,
  "is_public": 1,

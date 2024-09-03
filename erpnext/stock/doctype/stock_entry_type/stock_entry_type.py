@@ -6,7 +6,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+from Goldfish.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 
 class StockEntryType(Document):
@@ -150,7 +150,7 @@ class ManufactureEntry:
 		return item_dict
 
 	def add_finished_good(self):
-		from erpnext.stock.doctype.item.item import get_item_defaults
+		from Goldfish.stock.doctype.item.item import get_item_defaults
 
 		item = get_item_defaults(self.production_item, self.company)
 

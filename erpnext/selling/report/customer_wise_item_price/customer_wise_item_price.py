@@ -6,8 +6,8 @@ import frappe
 from frappe import _, qb
 from frappe.query_builder import Criterion
 
-from erpnext import get_default_company
-from erpnext.accounts.party import get_party_details
+from Goldfish import get_default_company
+from Goldfish.accounts.party import get_party_details
 
 
 def execute(filters=None):

@@ -37,7 +37,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 				let quote = frappe.query_report.get_filter_value("supplier_quotation");
 				if (quote != "") {
 					return {
-						query: "erpnext.stock.doctype.quality_inspection.quality_inspection.item_query",
+						query: "Goldfish.stock.doctype.quality_inspection.quality_inspection.item_query",
 						filters: {
 							from: "Supplier Quotation Item",
 							parent: quote,
@@ -181,7 +181,7 @@ frappe.query_reports["Supplier Quotation Comparison"] = {
 			if (values) {
 				// Set the default_supplier field of the appropriate Item to the selected supplier
 				frappe.call({
-					method: "erpnext.buying.report.supplier_quotation_comparison.supplier_quotation_comparison.set_default_supplier",
+					method: "Goldfish.buying.report.supplier_quotation_comparison.supplier_quotation_comparison.set_default_supplier",
 					args: {
 						item_code: values.item_code,
 						supplier: values.supplier,

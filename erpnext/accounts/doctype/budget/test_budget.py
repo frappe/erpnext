@@ -6,10 +6,10 @@ import unittest
 import frappe
 from frappe.utils import now_datetime, nowdate
 
-from erpnext.accounts.doctype.budget.budget import BudgetError, get_actual_expense
-from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from Goldfish.accounts.doctype.budget.budget import BudgetError, get_actual_expense
+from Goldfish.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from Goldfish.accounts.utils import get_fiscal_year
+from Goldfish.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 test_dependencies = ["Monthly Distribution"]
 
@@ -317,8 +317,8 @@ class TestBudget(unittest.TestCase):
 		jv.cancel()
 
 	def test_monthly_budget_against_main_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		from erpnext.accounts.doctype.cost_center_allocation.test_cost_center_allocation import (
+		from Goldfish.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from Goldfish.accounts.doctype.cost_center_allocation.test_cost_center_allocation import (
 			create_cost_center_allocation,
 		)
 

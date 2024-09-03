@@ -52,7 +52,7 @@ class BOMConfigurator {
 			expandable: true,
 			title: __("Configure Product Assembly"),
 			breadcrumb: "Manufacturing",
-			get_tree_nodes: "erpnext.manufacturing.doctype.bom_creator.bom_creator.get_children",
+			get_tree_nodes: "Goldfish.manufacturing.doctype.bom_creator.bom_creator.get_children",
 			root_label: this.frm.doc.item_code,
 			disable_add_node: true,
 			get_tree_root: false,
@@ -215,7 +215,7 @@ class BOMConfigurator {
 				}
 
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_item",
+					method: "Goldfish.manufacturing.doctype.bom_creator.bom_creator.add_item",
 					args: {
 						parent: node.data.parent_id,
 						fg_item: node.data.value,
@@ -270,7 +270,7 @@ class BOMConfigurator {
 			}
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
+				method: "Goldfish.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
 				args: {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
@@ -469,7 +469,7 @@ class BOMConfigurator {
 			}
 
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
+				method: "Goldfish.manufacturing.doctype.bom_creator.bom_creator.add_sub_assembly",
 				args: {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
@@ -505,7 +505,7 @@ class BOMConfigurator {
 	delete_node(node, view) {
 		frappe.confirm(__("Are you sure you want to delete this Item?"), () => {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.delete_node",
+				method: "Goldfish.manufacturing.doctype.bom_creator.bom_creator.delete_node",
 				args: {
 					parent: node.data.parent_id,
 					fg_item: node.data.value,
@@ -648,7 +648,7 @@ class BOMConfigurator {
 				let docname = node.data.name || this.frm.doc.name;
 
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.bom_creator.bom_creator.edit_bom_creator",
+					method: "Goldfish.manufacturing.doctype.bom_creator.bom_creator.edit_bom_creator",
 					args: {
 						doctype: doctype,
 						docname: docname,

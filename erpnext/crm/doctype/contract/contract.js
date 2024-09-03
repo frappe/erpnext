@@ -5,7 +5,7 @@ frappe.ui.form.on("Contract", {
 	contract_template: function (frm) {
 		if (frm.doc.contract_template) {
 			frappe.call({
-				method: "erpnext.crm.doctype.contract_template.contract_template.get_contract_template",
+				method: "Goldfish.crm.doctype.contract_template.contract_template.get_contract_template",
 				args: {
 					template_name: frm.doc.contract_template,
 					doc: frm.doc,

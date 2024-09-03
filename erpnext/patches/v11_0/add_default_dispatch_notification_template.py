@@ -9,7 +9,7 @@ def execute():
 	frappe.reload_doc("stock", "doctype", "delivery_settings")
 
 	if not frappe.db.exists("Email Template", _("Dispatch Notification")):
-		base_path = frappe.get_app_path("erpnext", "stock", "doctype")
+		base_path = frappe.get_app_path("Goldfish", "stock", "doctype")
 		response = frappe.read_file(
 			os.path.join(base_path, "delivery_trip/dispatch_notification_template.html")
 		)

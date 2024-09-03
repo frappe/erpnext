@@ -4,7 +4,7 @@
 
 from frappe import _
 
-from erpnext.controllers.trends import get_columns, get_data
+from Goldfish.controllers.trends import get_columns, get_data
 
 
 def execute(filters=None):

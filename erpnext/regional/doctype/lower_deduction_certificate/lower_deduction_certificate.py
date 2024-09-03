@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_link_to_form, getdate
 
-from erpnext.accounts.utils import get_fiscal_year
+from Goldfish.accounts.utils import get_fiscal_year
 
 
 class LowerDeductionCertificate(Document):

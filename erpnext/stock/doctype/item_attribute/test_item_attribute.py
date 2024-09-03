@@ -8,7 +8,7 @@ test_records = frappe.get_test_records("Item Attribute")
 
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
+from Goldfish.stock.doctype.item_attribute.item_attribute import ItemAttributeIncrementError
 
 
 class TestItemAttribute(FrappeTestCase):

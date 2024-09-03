@@ -1,4 +1,4 @@
-erpnext.PointOfSale.NumberPad = class {
+Goldfish.PointOfSale.NumberPad = class {
 	constructor({ wrapper, events, cols, keys, css_classes, fieldnames_map }) {
 		this.wrapper = wrapper;
 		this.events = events;

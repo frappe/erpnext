@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils.nestedset import NestedSet
 
-from erpnext.accounts.utils import validate_field_number
+from Goldfish.accounts.utils import validate_field_number
 
 
 class CostCenter(NestedSet):
@@ -32,7 +32,7 @@ class CostCenter(NestedSet):
 	nsm_parent_field = "parent_cost_center"
 
 	def autoname(self):
-		from erpnext.accounts.utils import get_autoname_with_number
+		from Goldfish.accounts.utils import get_autoname_with_number
 
 		self.name = get_autoname_with_number(self.cost_center_number, self.cost_center_name, self.company)
 
@@ -102,7 +102,7 @@ class CostCenter(NestedSet):
 
 	def before_rename(self, olddn, newdn, merge=False):
 		# Add company abbr if not provided
-		from erpnext.setup.doctype.company.company import get_name_with_abbr
+		from Goldfish.setup.doctype.company.company import get_name_with_abbr
 
 		new_cost_center = get_name_with_abbr(newdn, self.company)
 

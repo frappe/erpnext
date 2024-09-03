@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.company");
+frappe.provide("Goldfish.company");
 
 frappe.ui.form.on("Company", {
 	onload: function (frm) {
@@ -20,7 +20,7 @@ frappe.ui.form.on("Company", {
 	},
 	setup: function (frm) {
 		frm.__rename_queue = "long";
-		erpnext.company.setup_queries(frm);
+		Goldfish.company.setup_queries(frm);
 
 		frm.set_query("parent_company", function () {
 			return {
@@ -155,7 +155,7 @@ frappe.ui.form.on("Company", {
 			}
 		}
 
-		erpnext.company.set_chart_of_accounts_options(frm.doc);
+		Goldfish.company.set_chart_of_accounts_options(frm.doc);
 	},
 
 	make_default_tax_template: function (frm) {
@@ -170,12 +170,12 @@ frappe.ui.form.on("Company", {
 	},
 
 	country: function (frm) {
-		erpnext.company.set_chart_of_accounts_options(frm.doc);
+		Goldfish.company.set_chart_of_accounts_options(frm.doc);
 	},
 
 	delete_company_transactions: function (frm) {
 		frappe.call({
-			method: "erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.is_deletion_doc_running",
+			method: "Goldfish.setup.doctype.transaction_deletion_record.transaction_deletion_record.is_deletion_doc_running",
 			args: {
 				company: frm.doc.name,
 			},
@@ -199,7 +199,7 @@ frappe.ui.form.on("Company", {
 									return;
 								}
 								frappe.call({
-									method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
+									method: "Goldfish.setup.doctype.company.company.create_transaction_deletion_request",
 									args: {
 										company: data.company_name,
 									},
@@ -221,11 +221,11 @@ frappe.ui.form.on("Company", {
 	},
 });
 
-erpnext.company.set_chart_of_accounts_options = function (doc) {
+Goldfish.company.set_chart_of_accounts_options = function (doc) {
 	var selected_value = doc.chart_of_accounts;
 	if (doc.country) {
 		return frappe.call({
-			method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
+			method: "Goldfish.accounts.doctype.account.chart_of_accounts.chart_of_accounts.get_charts_for_country",
 			args: {
 				country: doc.country,
 				with_standard: true,
@@ -241,7 +241,7 @@ erpnext.company.set_chart_of_accounts_options = function (doc) {
 	}
 };
 
-erpnext.company.setup_queries = function (frm) {
+Goldfish.company.setup_queries = function (frm) {
 	$.each(
 		[
 			["default_bank_account", { account_type: "Bank" }],
@@ -280,7 +280,7 @@ erpnext.company.setup_queries = function (frm) {
 			["default_advance_paid_account", { root_type: "Asset", account_type: "Payable" }],
 		],
 		function (i, v) {
-			erpnext.company.set_custom_query(frm, v);
+			Goldfish.company.set_custom_query(frm, v);
 		}
 	);
 
@@ -298,13 +298,13 @@ erpnext.company.setup_queries = function (frm) {
 				],
 			],
 			function (i, v) {
-				erpnext.company.set_custom_query(frm, v);
+				Goldfish.company.set_custom_query(frm, v);
 			}
 		);
 	}
 };
 
-erpnext.company.set_custom_query = function (frm, v) {
+Goldfish.company.set_custom_query = function (frm, v) {
 	var filters = {
 		company: frm.doc.name,
 		is_group: 0,

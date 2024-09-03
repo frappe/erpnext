@@ -17,10 +17,10 @@ class CurrencyExchangeSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.currency_exchange_settings_details.currency_exchange_settings_details import (
+		from Goldfish.accounts.doctype.currency_exchange_settings_details.currency_exchange_settings_details import (
 			CurrencyExchangeSettingsDetails,
 		)
-		from erpnext.accounts.doctype.currency_exchange_settings_result.currency_exchange_settings_result import (
+		from Goldfish.accounts.doctype.currency_exchange_settings_result.currency_exchange_settings_result import (
 			CurrencyExchangeSettingsResult,
 		)
 

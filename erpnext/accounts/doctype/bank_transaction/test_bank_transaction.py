@@ -8,15 +8,15 @@ from frappe import utils
 from frappe.model.docstatus import DocStatus
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
+from Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	get_linked_payments,
 	reconcile_vouchers,
 )
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.tests.utils import if_lending_app_installed
+from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+from Goldfish.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.tests.utils import if_lending_app_installed
 
 test_dependencies = ["Item", "Cost Center"]
 
@@ -43,7 +43,7 @@ class TestBankTransaction(FrappeTestCase):
 		add_transactions(bank_account=bank_account)
 		add_vouchers(gl_account=gl_account)
 
-	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
+	# This test checks if Goldfish is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
 		bank_transaction = frappe.get_doc(
 			"Bank Transaction",
@@ -112,7 +112,7 @@ class TestBankTransaction(FrappeTestCase):
 		self.assertEqual(bank_transaction.unallocated_amount, 1700)
 		self.assertEqual(bank_transaction.payment_entries, [])
 
-	# Check if ERPNext can correctly filter a linked payments based on the debit/credit amount
+	# Check if Goldfish can correctly filter a linked payments based on the debit/credit amount
 	def test_debit_credit_output(self):
 		bank_transaction = frappe.get_doc(
 			"Bank Transaction",
@@ -459,7 +459,7 @@ def create_loan_and_repayment():
 		process_loan_interest_accrual_for_term_loans,
 	)
 
-	from erpnext.setup.doctype.employee.test_employee import make_employee
+	from Goldfish.setup.doctype.employee.test_employee import make_employee
 
 	create_loan_product(
 		"Personal Loan",

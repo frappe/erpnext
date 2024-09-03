@@ -4,9 +4,9 @@
 frappe.ui.form.on("Installation Note", {
 	setup: function (frm) {
 		frappe.dynamic_link = { doc: frm.doc, fieldname: "customer", doctype: "Customer" };
-		frm.set_query("customer_address", erpnext.queries.address_query);
-		frm.set_query("contact_person", erpnext.queries.contact_query);
-		frm.set_query("customer", erpnext.queries.customer);
+		frm.set_query("customer_address", Goldfish.queries.address_query);
+		frm.set_query("contact_person", Goldfish.queries.contact_query);
+		frm.set_query("customer", Goldfish.queries.customer);
 		frm.set_query("serial_and_batch_bundle", "items", (doc, cdt, cdn) => {
 			let row = locals[cdt][cdn];
 			return {
@@ -38,28 +38,28 @@ frappe.ui.form.on("Installation Note", {
 		}
 	},
 	customer: function (frm) {
-		erpnext.utils.get_party_details(frm);
+		Goldfish.utils.get_party_details(frm);
 	},
 	customer_address: function (frm) {
-		erpnext.utils.get_address_display(frm);
+		Goldfish.utils.get_address_display(frm);
 	},
 	contact_person: function (frm) {
-		erpnext.utils.get_contact_details(frm);
+		Goldfish.utils.get_contact_details(frm);
 	},
 });
 
-frappe.provide("erpnext.selling");
+frappe.provide("Goldfish.selling");
 
 // TODO commonify this code
-erpnext.selling.InstallationNote = class InstallationNote extends frappe.ui.form.Controller {
+Goldfish.selling.InstallationNote = class InstallationNote extends frappe.ui.form.Controller {
 	refresh() {
 		var me = this;
 		if (this.frm.doc.docstatus === 0) {
 			this.frm.add_custom_button(
 				__("From Delivery Note"),
 				function () {
-					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.delivery_note.delivery_note.make_installation_note",
+					Goldfish.utils.map_current_doc({
+						method: "Goldfish.stock.doctype.delivery_note.delivery_note.make_installation_note",
 						source_doctype: "Delivery Note",
 						target: me.frm,
 						date_field: "posting_date",
@@ -81,4 +81,4 @@ erpnext.selling.InstallationNote = class InstallationNote extends frappe.ui.form
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.selling.InstallationNote({ frm: cur_frm }));
+extend_cscript(cur_frm.cscript, new Goldfish.selling.InstallationNote({ frm: cur_frm }));

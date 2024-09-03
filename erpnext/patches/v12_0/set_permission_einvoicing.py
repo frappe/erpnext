@@ -1,7 +1,7 @@
 import frappe
 from frappe.permissions import add_permission, update_permission_property
 
-from erpnext.regional.italy.setup import make_custom_fields
+from Goldfish.regional.italy.setup import make_custom_fields
 
 
 def execute():

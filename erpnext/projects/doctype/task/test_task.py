@@ -5,7 +5,7 @@ import unittest
 import frappe
 from frappe.utils import add_days, getdate, nowdate
 
-from erpnext.projects.doctype.task.task import CircularReferenceError
+from Goldfish.projects.doctype.task.task import CircularReferenceError
 
 
 class TestTask(unittest.TestCase):
@@ -106,7 +106,7 @@ class TestTask(unittest.TestCase):
 	def test_overdue(self):
 		task = create_task("Testing Overdue", add_days(nowdate(), -10), add_days(nowdate(), -5))
 
-		from erpnext.projects.doctype.task.task import set_tasks_as_overdue
+		from Goldfish.projects.doctype.task.task import set_tasks_as_overdue
 
 		set_tasks_as_overdue()
 

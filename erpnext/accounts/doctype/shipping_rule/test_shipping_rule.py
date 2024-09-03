@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 
-from erpnext.accounts.doctype.shipping_rule.shipping_rule import (
+from Goldfish.accounts.doctype.shipping_rule.shipping_rule import (
 	FromGreaterThanToError,
 	ManyBlankToValuesError,
 	OverlappingConditionError,

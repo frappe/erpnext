@@ -4,7 +4,7 @@
 import frappe
 from frappe.utils import cint, flt, fmt_money
 
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
+from Goldfish.accounts.doctype.pricing_rule.pricing_rule import get_pricing_rule_for_item
 
 
 def get_price(item_code, price_list, customer_group, company, qty=1, party=None):

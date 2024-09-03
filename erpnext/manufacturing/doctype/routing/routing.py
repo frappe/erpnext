@@ -17,7 +17,7 @@ class Routing(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.manufacturing.doctype.bom_operation.bom_operation import BOMOperation
+		from Goldfish.manufacturing.doctype.bom_operation.bom_operation import BOMOperation
 
 		disabled: DF.Check
 		operations: DF.Table[BOMOperation]

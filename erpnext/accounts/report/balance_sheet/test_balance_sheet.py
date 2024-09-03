@@ -5,7 +5,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils.data import today
 
-from erpnext.accounts.report.balance_sheet.balance_sheet import execute
+from Goldfish.accounts.report.balance_sheet.balance_sheet import execute
 
 COMPANY = "_Test Company 6"
 COMPANY_SHORT_NAME = "_TC6"

@@ -7,12 +7,12 @@ from frappe import qb
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
-from erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
+from Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool import (
 	auto_reconcile_vouchers,
 	get_bank_transactions,
 )
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from Goldfish.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from Goldfish.accounts.test.accounts_mixin import AccountsTestMixin
 
 
 class TestBankReconciliationTool(AccountsTestMixin, FrappeTestCase):

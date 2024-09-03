@@ -10,45 +10,45 @@ from frappe.model.dynamic_links import get_dynamic_link_map
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, getdate, nowdate, today
 
-import erpnext
-from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
-from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import WarehouseMissingError
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+import Goldfish
+from Goldfish.accounts.doctype.account.test_account import create_account, get_inventory_account
+from Goldfish.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
+from Goldfish.accounts.doctype.purchase_invoice.purchase_invoice import WarehouseMissingError
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	unlink_payment_on_cancel_of_invoice,
 )
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
-from erpnext.accounts.utils import PaymentEntryUnlinkError
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
-from erpnext.assets.doctype.asset.test_asset import create_asset, create_asset_data
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+from Goldfish.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+from Goldfish.accounts.utils import PaymentEntryUnlinkError
+from Goldfish.assets.doctype.asset.depreciation import post_depreciation_entries
+from Goldfish.assets.doctype.asset.test_asset import create_asset, create_asset_data
+from Goldfish.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule,
 )
-from erpnext.controllers.accounts_controller import InvalidQtyError, update_invoice_status
-from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
-from erpnext.selling.doctype.customer.test_customer import get_customer_dict
-from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+from Goldfish.controllers.accounts_controller import InvalidQtyError, update_invoice_status
+from Goldfish.controllers.taxes_and_totals import get_itemised_tax_breakup_data
+from Goldfish.exceptions import InvalidAccountCurrency, InvalidCurrency
+from Goldfish.selling.doctype.customer.test_customer import get_customer_dict
+from Goldfish.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+from Goldfish.stock.doctype.item.test_item import create_item
+from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from Goldfish.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
-from erpnext.stock.doctype.stock_entry.test_stock_entry import (
+from Goldfish.stock.doctype.stock_entry.test_stock_entry import (
 	get_qty_after_transaction,
 	make_stock_entry,
 )
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+from Goldfish.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
-from erpnext.stock.utils import get_incoming_rate, get_stock_balance
+from Goldfish.stock.utils import get_incoming_rate, get_stock_balance
 
 
 class TestSalesInvoice(FrappeTestCase):
 	def setUp(self):
-		from erpnext.stock.doctype.stock_ledger_entry.test_stock_ledger_entry import create_items
+		from Goldfish.stock.doctype.stock_ledger_entry.test_stock_ledger_entry import create_items
 
 		create_items(["_Test Internal Transfer Item"], uoms=[{"uom": "Box", "conversion_factor": 10}])
 		create_internal_parties()
@@ -171,7 +171,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.grand_total, 1627.05)
 
 	def test_payment_entry_unlink_against_invoice(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
 		si = frappe.copy_doc(test_records[0])
 		si.is_pos = 0
@@ -196,7 +196,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_payment_entry_unlink_against_standalone_credit_note(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
 		si1 = create_sales_invoice(rate=1000)
 		si2 = create_sales_invoice(rate=300)
@@ -832,7 +832,7 @@ class TestSalesInvoice(FrappeTestCase):
 	def test_payment(self):
 		w = self.make()
 
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+		from Goldfish.accounts.doctype.journal_entry.test_journal_entry import (
 			test_records as jv_test_records,
 		)
 
@@ -855,8 +855,8 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_outstanding_on_cost_center_allocation(self):
 		# setup cost centers
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		from erpnext.accounts.doctype.cost_center_allocation.test_cost_center_allocation import (
+		from Goldfish.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from Goldfish.accounts.doctype.cost_center_allocation.test_cost_center_allocation import (
 			create_cost_center_allocation,
 		)
 
@@ -880,7 +880,7 @@ class TestSalesInvoice(FrappeTestCase):
 		si.insert()
 		si.submit()
 
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
 		# make payment - fully paid
 		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
@@ -991,7 +991,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.validate_pos_gl_entry(si, pos, 50)
 
 	def test_pos_returns_with_repayment(self):
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from Goldfish.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 
 		pos_profile = make_pos_profile()
 
@@ -1116,7 +1116,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(pos.outstanding_amount, 0.0)
 		self.assertEqual(pos.status, "Paid")
 
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from Goldfish.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 
 		pos_return = make_sales_return(pos.name)
 		pos_return.save().submit()
@@ -1257,8 +1257,8 @@ class TestSalesInvoice(FrappeTestCase):
 		frappe.db.sql("delete from `tabPOS Profile`")
 
 	def test_bin_details_of_packed_item(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		# test Update Items with product bundle
 		if not frappe.db.exists("Item", "_Test Product Bundle Item New"):
@@ -1363,7 +1363,7 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def _insert_purchase_receipt(self):
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+		from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import (
 			test_records as pr_test_records,
 		)
 
@@ -1373,7 +1373,7 @@ class TestSalesInvoice(FrappeTestCase):
 		pr.submit()
 
 	def _insert_delivery_note(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import (
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import (
 			test_records as dn_test_records,
 		)
 
@@ -1385,7 +1385,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_sales_invoice_with_advance(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+		from Goldfish.accounts.doctype.journal_entry.test_journal_entry import (
 			test_records as jv_test_records,
 		)
 
@@ -1432,7 +1432,7 @@ class TestSalesInvoice(FrappeTestCase):
 		si.cancel()
 
 	def test_serialized(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item()
 		se.load_from_db()
@@ -1483,8 +1483,8 @@ class TestSalesInvoice(FrappeTestCase):
 		check if the sales invoice item serial numbers and the delivery note items
 		serial numbers are same
 		"""
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		se = make_serialized_item()
 		se.load_from_db()
@@ -1904,7 +1904,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate * 25) / 100 + price_list_rate))
 
 	def test_outstanding_amount_after_advance_jv_cancellation(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import (
+		from Goldfish.accounts.doctype.journal_entry.test_journal_entry import (
 			test_records as jv_test_records,
 		)
 
@@ -1949,7 +1949,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	def test_outstanding_amount_after_advance_payment_entry_cancellation(self):
 		"""Test impact of advance PE submission/cancellation on SI and SO."""
-		from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
+		from Goldfish.selling.doctype.sales_order.test_sales_order import make_sales_order
 
 		sales_order = make_sales_order(item_code="138-CMS Shoe", qty=1, price_list_rate=500)
 		pe = frappe.get_doc(
@@ -2245,7 +2245,7 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertEqual(expected_account_values[1], gle.credit)
 
 	def test_rounding_adjustment_3(self):
-		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+		from Goldfish.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 			create_dimension,
 			disable_dimension,
 		)
@@ -2335,7 +2335,7 @@ class TestSalesInvoice(FrappeTestCase):
 		disable_dimension()
 
 	def test_sales_invoice_with_shipping_rule(self):
-		from erpnext.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
+		from Goldfish.accounts.doctype.shipping_rule.test_shipping_rule import create_shipping_rule
 
 		shipping_rule = create_shipping_rule(
 			shipping_rule_type="Selling", shipping_rule_name="Shipping Rule - Sales Invoice Test"
@@ -2367,7 +2367,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, si.insert)
 
 	def test_credit_note(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
 		si = create_sales_invoice(item_code="_Test Item", qty=(5 * -1), rate=500, is_return=1)
 
@@ -2392,7 +2392,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(si_doc.outstanding_amount, 0)
 
 	def test_sales_invoice_with_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from Goldfish.accounts.doctype.cost_center.test_cost_center import create_cost_center
 
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
@@ -2420,7 +2420,7 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 	def test_sales_invoice_with_project_link(self):
-		from erpnext.projects.doctype.project.test_project import make_project
+		from Goldfish.projects.doctype.project.test_project import make_project
 
 		project = make_project(
 			{
@@ -2628,7 +2628,7 @@ class TestSalesInvoice(FrappeTestCase):
 		old_negative_stock = frappe.db.get_single_value("Stock Settings", "allow_negative_stock")
 		frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
 
-		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company 1")
+		old_perpetual_inventory = Goldfish.is_perpetual_inventory_enabled("_Test Company 1")
 		frappe.local.enable_perpetual_inventory["_Test Company 1"] = 1
 
 		frappe.db.set_value(
@@ -2904,7 +2904,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@change_settings("Selling Settings", {"enable_discount_accounting": 1})
 	def test_additional_discount_for_sales_invoice_with_discount_accounting_enabled(self):
-		from erpnext.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
+		from Goldfish.accounts.doctype.repost_accounting_ledger.test_repost_accounting_ledger import (
 			update_repost_settings,
 		)
 
@@ -3024,7 +3024,7 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertTrue(schedule.journal_entry)
 
 	def test_depreciation_on_return_of_sold_asset(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
 
 		create_asset_data()
 		asset = create_asset(item_code="Macbook Pro", calculate_depreciation=1, submit=1)
@@ -3053,11 +3053,11 @@ class TestSalesInvoice(FrappeTestCase):
 			self.assertEqual(schedule.journal_entry, schedule.journal_entry)
 
 	def test_sales_invoice_against_supplier(self):
-		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
+		from Goldfish.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
 		)
-		from erpnext.accounts.doctype.party_link.party_link import create_party_link
-		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from Goldfish.accounts.doctype.party_link.party_link import create_party_link
+		from Goldfish.buying.doctype.supplier.test_supplier import create_supplier
 
 		# create a customer
 		customer = make_customer(customer="_Test Common Supplier")
@@ -3098,11 +3098,11 @@ class TestSalesInvoice(FrappeTestCase):
 		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 0)
 
 	def test_sales_invoice_against_supplier_usd_with_dimensions(self):
-		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
+		from Goldfish.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
 		)
-		from erpnext.accounts.doctype.party_link.party_link import create_party_link
-		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from Goldfish.accounts.doctype.party_link.party_link import create_party_link
+		from Goldfish.buying.doctype.supplier.test_supplier import create_supplier
 
 		# create a customer
 		customer = make_customer(customer="_Test Common Supplier USD")
@@ -3176,7 +3176,7 @@ class TestSalesInvoice(FrappeTestCase):
 		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 0)
 
 	def test_payment_statuses(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 
 		today = nowdate()
 
@@ -3307,7 +3307,7 @@ class TestSalesInvoice(FrappeTestCase):
 		Test a case where duplicating the item with qty = 1 in the invoice
 		allows overbilling even if it is disabled
 		"""
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")
 		frappe.db.set_single_value("Accounts Settings", "over_billing_allowance", 0)
@@ -3450,7 +3450,7 @@ class TestSalesInvoice(FrappeTestCase):
 
 	@change_settings("Accounts Settings", {"unlink_payment_on_cancellation_of_invoice": 1})
 	def test_gain_loss_with_advance_entry(self):
-		from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+		from Goldfish.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 		jv = make_journal_entry("_Test Receivable USD - _TC", "_Test Bank - _TC", -7000, save=False)
 
@@ -3509,8 +3509,8 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 
 	def test_batch_expiry_for_sales_invoice_return(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		item = make_item(
 			"_Test Batch Item For Return Check",
@@ -3556,7 +3556,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, si.submit)
 
 	def test_advance_entries_as_liability(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
 		advance_account = create_account(
 			parent_account="Current Liabilities - _TC",
@@ -3638,7 +3638,7 @@ class TestSalesInvoice(FrappeTestCase):
 		si.save()
 
 	def test_partial_allocation_on_advance_as_liability(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
 		company = "_Test Company"
 		customer = "_Test Customer"
@@ -3725,7 +3725,7 @@ class TestSalesInvoice(FrappeTestCase):
 		set_advance_flag(company="_Test Company", flag=0, default_account="")
 
 	def test_pulling_advance_based_on_debit_to(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
 
 		debtors2 = create_account(
 			parent_account="Accounts Receivable - _TC",
@@ -3752,7 +3752,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(advances[0].reference_name, pe.name)
 
 	def test_taxes_merging_from_delivery_note(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		dn1 = create_delivery_note(do_not_submit=1)
 		dn1.items[0].qty = 10
@@ -3808,7 +3808,7 @@ class TestSalesInvoice(FrappeTestCase):
 		from frappe.model.mapper import map_docs
 
 		map_docs(
-			method="erpnext.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
+			method="Goldfish.stock.doctype.delivery_note.delivery_note.make_sales_invoice",
 			source_names=json.dumps([dn1.name, dn2.name]),
 			target_doc=si,
 			args=json.dumps({"customer": dn1.customer, "merge_taxes": 1, "filtered_children": []}),
@@ -3851,7 +3851,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(expected, actual)
 
 	def test_pos_returns_without_update_outstanding_for_self(self):
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+		from Goldfish.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
 
 		pos_profile = make_pos_profile()
 		pos_profile.payments = []
@@ -4098,7 +4098,7 @@ def get_taxes_and_charges():
 
 
 def create_internal_parties():
-	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+	from Goldfish.selling.doctype.customer.test_customer import create_internal_customer
 
 	create_internal_customer(
 		customer_name="_Test Internal Customer",

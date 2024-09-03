@@ -4,14 +4,14 @@ from frappe.query_builder.functions import Sum
 from frappe.utils import flt, formatdate, get_datetime_str, get_table_name
 from pypika import Order
 
-from erpnext import get_company_currency, get_default_company
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+from Goldfish import get_company_currency, get_default_company
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
-from erpnext.accounts.doctype.fiscal_year.fiscal_year import get_from_and_to_date
-from erpnext.accounts.party import get_party_account
-from erpnext.setup.utils import get_exchange_rate
+from Goldfish.accounts.doctype.fiscal_year.fiscal_year import get_from_and_to_date
+from Goldfish.accounts.party import get_party_account
+from Goldfish.setup.utils import get_exchange_rate
 
 __exchange_rates = {}
 
@@ -137,7 +137,7 @@ def get_appropriate_company(filters):
 
 @frappe.whitelist()
 def get_invoiced_item_gross_margin(sales_invoice=None, item_code=None, company=None, with_item_data=False):
-	from erpnext.accounts.report.gross_profit.gross_profit import GrossProfitGenerator
+	from Goldfish.accounts.report.gross_profit.gross_profit import GrossProfitGenerator
 
 	sales_invoice = sales_invoice or frappe.form_dict.get("sales_invoice")
 	item_code = item_code or frappe.form_dict.get("item_code")

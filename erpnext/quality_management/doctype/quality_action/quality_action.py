@@ -14,7 +14,7 @@ class QualityAction(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.quality_management.doctype.quality_action_resolution.quality_action_resolution import (
+		from Goldfish.quality_management.doctype.quality_action_resolution.quality_action_resolution import (
 			QualityActionResolution,
 		)
 

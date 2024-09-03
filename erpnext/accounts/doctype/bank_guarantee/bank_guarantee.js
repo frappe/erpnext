@@ -46,7 +46,7 @@ frappe.ui.form.on("Bank Guarantee", {
 			let party_field = frm.doc.reference_doctype == "Sales Order" ? "customer" : "supplier";
 
 			frappe.call({
-				method: "erpnext.accounts.doctype.bank_guarantee.bank_guarantee.get_voucher_details",
+				method: "Goldfish.accounts.doctype.bank_guarantee.bank_guarantee.get_voucher_details",
 				args: {
 					bank_guarantee_type: frm.doc.bg_type,
 					reference_name: frm.doc.reference_docname,

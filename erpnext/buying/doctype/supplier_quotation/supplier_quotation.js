@@ -1,9 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.buying.setup_buying_controller();
-erpnext.buying.SupplierQuotationController = class SupplierQuotationController extends (
-	erpnext.buying.BuyingController
+Goldfish.buying.setup_buying_controller();
+Goldfish.buying.SupplierQuotationController = class SupplierQuotationController extends (
+	Goldfish.buying.BuyingController
 ) {
 	setup() {
 		this.frm.custom_make_buttons = {
@@ -33,8 +33,8 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 			this.frm.add_custom_button(
 				__("Material Request"),
 				function () {
-					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
+					Goldfish.utils.map_current_doc({
+						method: "Goldfish.stock.doctype.material_request.material_request.make_supplier_quotation",
 						source_doctype: "Material Request",
 						target: me.frm,
 						setters: {
@@ -57,7 +57,7 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 			this.frm.add_custom_button(
 				__("Link to Material Requests"),
 				function () {
-					erpnext.buying.link_to_mrs(me.frm);
+					Goldfish.buying.link_to_mrs(me.frm);
 				},
 				__("Tools")
 			);
@@ -68,8 +68,8 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 					if (!me.frm.doc.supplier) {
 						frappe.throw({ message: __("Please select a Supplier"), title: __("Mandatory") });
 					}
-					erpnext.utils.map_current_doc({
-						method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq",
+					Goldfish.utils.map_current_doc({
+						method: "Goldfish.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq",
 						source_doctype: "Request for Quotation",
 						target: me.frm,
 						setters: {
@@ -80,7 +80,7 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 							company: me.frm.doc.company,
 						},
 						get_query_method:
-							"erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_containing_supplier",
+							"Goldfish.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_containing_supplier",
 					});
 				},
 				__("Get Items From")
@@ -90,20 +90,20 @@ erpnext.buying.SupplierQuotationController = class SupplierQuotationController e
 
 	make_purchase_order() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
+			method: "Goldfish.buying.doctype.supplier_quotation.supplier_quotation.make_purchase_order",
 			frm: this.frm,
 		});
 	}
 	make_quotation() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.buying.doctype.supplier_quotation.supplier_quotation.make_quotation",
+			method: "Goldfish.buying.doctype.supplier_quotation.supplier_quotation.make_quotation",
 			frm: this.frm,
 		});
 	}
 };
 
 // for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.SupplierQuotationController({ frm: cur_frm }));
+extend_cscript(cur_frm.cscript, new Goldfish.buying.SupplierQuotationController({ frm: cur_frm }));
 
 cur_frm.fields_dict["items"].grid.get_field("project").get_query = function (doc, cdt, cdn) {
 	return {

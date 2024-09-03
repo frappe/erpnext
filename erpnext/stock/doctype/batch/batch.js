@@ -5,7 +5,7 @@ frappe.ui.form.on("Batch", {
 	setup: (frm) => {
 		frm.set_query("item", () => {
 			return {
-				query: "erpnext.controllers.queries.item_query",
+				query: "Goldfish.controllers.queries.item_query",
 				filters: {
 					is_stock_item: 1,
 					has_batch_no: 1,
@@ -53,7 +53,7 @@ frappe.ui.form.on("Batch", {
 			}
 
 			frappe.call({
-				method: "erpnext.stock.doctype.batch.batch.get_batch_qty",
+				method: "Goldfish.stock.doctype.batch.batch.get_batch_qty",
 				args: { batch_no: frm.doc.name, item_code: frm.doc.item, for_stock_levels: for_stock_levels },
 				callback: (r) => {
 					if (!r.message) {
@@ -105,7 +105,7 @@ frappe.ui.form.on("Batch", {
 							fields,
 							(data) => {
 								frappe.call({
-									method: "erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry",
+									method: "Goldfish.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry",
 									args: {
 										item_code: frm.doc.item,
 										batch_no: frm.doc.name,
@@ -154,7 +154,7 @@ frappe.ui.form.on("Batch", {
 							],
 							(data) => {
 								frappe
-									.xcall("erpnext.stock.doctype.batch.batch.split_batch", {
+									.xcall("Goldfish.stock.doctype.batch.batch.split_batch", {
 										item_code: frm.doc.item,
 										batch_no: frm.doc.name,
 										qty: data.qty,

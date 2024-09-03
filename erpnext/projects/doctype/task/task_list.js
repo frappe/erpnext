@@ -11,7 +11,7 @@ frappe.listview_settings["Task"] = {
 	],
 	filters: [["status", "=", "Open"]],
 	onload: function (listview) {
-		var method = "erpnext.projects.doctype.task.task.set_multiple_status";
+		var method = "Goldfish.projects.doctype.task.task.set_multiple_status";
 
 		listview.page.add_menu_item(__("Set as Open"), function () {
 			listview.call_for_selected_items(method, { status: "Open" });

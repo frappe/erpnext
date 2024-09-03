@@ -4,20 +4,20 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, flt, getdate, now_datetime, nowdate
 
-from erpnext.controllers.item_variant import create_variant
-from erpnext.manufacturing.doctype.production_plan.production_plan import (
+from Goldfish.controllers.item_variant import create_variant
+from Goldfish.manufacturing.doctype.production_plan.production_plan import (
 	get_items_for_material_requests,
 	get_non_completed_production_plans,
 	get_sales_orders,
 	get_warehouse_list,
 )
-from erpnext.manufacturing.doctype.work_order.work_order import OverProductionError
-from erpnext.manufacturing.doctype.work_order.work_order import make_stock_entry as make_se_from_wo
-from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.doctype.item.test_item import create_item, make_item
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+from Goldfish.manufacturing.doctype.work_order.work_order import OverProductionError
+from Goldfish.manufacturing.doctype.work_order.work_order import make_stock_entry as make_se_from_wo
+from Goldfish.selling.doctype.sales_order.sales_order import make_delivery_note
+from Goldfish.selling.doctype.sales_order.test_sales_order import make_sales_order
+from Goldfish.stock.doctype.item.test_item import create_item, make_item
+from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from Goldfish.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
 
@@ -415,7 +415,7 @@ class TestProductionPlan(FrappeTestCase):
 		pln.cancel()
 
 	def test_production_plan_subassembly_default_supplier(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
 
 		bom_tree_1 = {"Test Laptop": {"Test Motherboard": {"Test Motherboard Wires": {}}}}
 		create_nested_bom(bom_tree_1, prefix="")
@@ -440,8 +440,8 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(plan.sub_assembly_items[0].supplier, "_Test Supplier")
 
 	def test_production_plan_for_subcontracting_po(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.subcontracting.doctype.subcontracting_bom.test_subcontracting_bom import (
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.subcontracting.doctype.subcontracting_bom.test_subcontracting_bom import (
 			create_subcontracting_bom,
 		)
 
@@ -493,7 +493,7 @@ class TestProductionPlan(FrappeTestCase):
 		1) Red-Car -> Wheel (sub assembly) > BOM-WHEEL-001
 		2) Green-Car -> Wheel (sub assembly) > BOM-WHEEL-001
 		"""
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
 
 		bom_tree_1 = {"Red-Car": {"Wheel": {"Rubber": {}}}}
 		bom_tree_2 = {"Green-Car": {"Wheel": {"Rubber": {}}}}
@@ -742,7 +742,7 @@ class TestProductionPlan(FrappeTestCase):
 		"""
 		Test Prod Plan impact via: SO -> Prod Plan -> WO -> SE -> SE (cancel)
 		"""
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from Goldfish.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		make_stock_entry(item_code="_Test Item", target="Work In Progress - _TC", qty=2, basic_rate=100)
 		make_stock_entry(
@@ -791,7 +791,7 @@ class TestProductionPlan(FrappeTestCase):
 
 	def test_production_plan_pending_qty_independent_items(self):
 		"Test Prod Plan impact if items are added independently (no from SO or MR)."
-		from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+		from Goldfish.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 		make_stock_entry(
 			item_code="Raw Material Item 1", target="Work In Progress - _TC", qty=2, basic_rate=100
@@ -840,14 +840,14 @@ class TestProductionPlan(FrappeTestCase):
 
 	def test_production_plan_planned_qty(self):
 		# Case 1: When Planned Qty is non-integer and UOM is integer.
-		from erpnext.utilities.transaction_base import UOMMustBeIntegerError
+		from Goldfish.utilities.transaction_base import UOMMustBeIntegerError
 
 		self.assertRaises(
 			UOMMustBeIntegerError, create_production_plan, item_code="_Test FG Item", planned_qty=0.55
 		)
 
 		# Case 2: When Planned Qty is non-integer and UOM is also non-integer.
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item().name
@@ -939,7 +939,7 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(pln.po_items[0].produced_qty, 5)
 
 	def test_material_request_item_for_purchase_uom(self):
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item(
@@ -973,7 +973,7 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertEqual(row.qty, 1)
 
 	def test_material_request_for_sub_assembly_items(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
 
 		bom_tree = {
 			"Fininshed Goods1 For MR": {
@@ -1001,7 +1001,7 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertTrue(item_code in validate_mr_items)
 
 	def test_resered_qty_for_production_plan_for_material_requests(self):
-		from erpnext.stock.utils import get_or_make_bin
+		from Goldfish.stock.utils import get_or_make_bin
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
 		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
@@ -1023,7 +1023,7 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(after_qty, before_qty)
 
 	def test_resered_qty_for_production_plan_for_work_order(self):
-		from erpnext.stock.utils import get_or_make_bin
+		from Goldfish.stock.utils import get_or_make_bin
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
 		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
@@ -1076,7 +1076,7 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertEqual(after_qty, before_qty)
 
 	def test_resered_qty_for_production_plan_for_less_rm_qty(self):
-		from erpnext.stock.utils import get_or_make_bin
+		from Goldfish.stock.utils import get_or_make_bin
 
 		bin_name = get_or_make_bin("Raw Material Item 1", "_Test Warehouse - _TC")
 		before_qty = flt(frappe.db.get_value("Bin", bin_name, "reserved_qty_for_production_plan"))
@@ -1119,7 +1119,7 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertFalse(plan in completed_plans)
 
 	def test_resered_qty_for_production_plan_for_material_requests_with_multi_UOM(self):
-		from erpnext.stock.utils import get_or_make_bin
+		from Goldfish.stock.utils import get_or_make_bin
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item(
@@ -1165,8 +1165,8 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(reserved_qty_after_mr, before_qty)
 
 	def test_from_warehouse_for_purchase_material_request(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-		from erpnext.stock.utils import get_or_make_bin
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.stock.utils import get_or_make_bin
 
 		create_item("RM-TEST-123 For Purchase", valuation_rate=100)
 		get_or_make_bin("RM-TEST-123 For Purchase", "_Test Warehouse - _TC")
@@ -1198,7 +1198,7 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertFalse(row.from_warehouse)
 
 	def test_skip_available_qty_for_sub_assembly_items(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
 
 		bom_tree = {
 			"Fininshed Goods1 For SUB Test": {
@@ -1243,7 +1243,7 @@ class TestProductionPlan(FrappeTestCase):
 				self.assertEqual(row.quantity, 10)
 
 	def test_sub_assembly_and_their_raw_materials_exists(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
 
 		bom_tree = {
 			"FG1 For SUB Test": {
@@ -1272,8 +1272,8 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertFalse(items)
 
 	def test_transfer_and_purchase_mrp_for_purchase_uom(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		bom_tree = {
 			"Test FG Item INK PEN": {
@@ -1332,8 +1332,8 @@ class TestProductionPlan(FrappeTestCase):
 				self.assertEqual(row.quantity, 12.0)
 
 	def test_mr_qty_for_complex_bom(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		def set_bom_qty(item_code, qtys):
 			# assumes qtys is in same order as children
@@ -1405,7 +1405,7 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertEqual(row["quantity"], test_qtys[row["item_code"]] * 3)
 
 	def test_mr_qty_for_same_rm_with_different_sub_assemblies(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
 
 		bom_tree = {
 			"Fininshed Goods2 For SUB Test": {
@@ -1433,8 +1433,8 @@ class TestProductionPlan(FrappeTestCase):
 				self.assertEqual(row.quantity, 2)
 
 	def test_reserve_sub_assembly_items(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		bom_tree = {
 			"Fininshed Goods Bicycle": {
@@ -1520,8 +1520,8 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertEqual(after_qty, before_qty)
 
 	def test_material_request_qty_purchase_and_material_transfer(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		bom_item = make_item(
@@ -1568,8 +1568,8 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertEqual(row.get("conversion_factor"), 10.0)
 
 	def test_unreserve_qty_on_closing_of_pp(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-		from erpnext.stock.utils import get_or_make_bin
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.stock.utils import get_or_make_bin
 
 		fg_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
 		rm_item = make_item(properties={"is_stock_item": 1, "stock_uom": "_Test UOM 1"}).name
@@ -1609,7 +1609,7 @@ class TestProductionPlan(FrappeTestCase):
 		self.assertAlmostEqual(after_qty, before_qty)
 
 	def test_min_order_qty_in_pp(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 		rm_item = make_item(properties={"is_stock_item": 1, "min_order_qty": 1000}).name
@@ -1667,8 +1667,8 @@ class TestProductionPlan(FrappeTestCase):
 			self.assertEqual(row.qty, wo_qty[row.name])
 
 	def test_parent_warehouse_for_sub_assembly_items(self):
-		from erpnext.manufacturing.doctype.bom.test_bom import create_nested_bom
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.manufacturing.doctype.bom.test_bom import create_nested_bom
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		parent_warehouse = "_Test Warehouse Group - _TC"
 		sub_warehouse = create_warehouse("Sub Warehouse", company="_Test Company")

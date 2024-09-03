@@ -16,8 +16,8 @@ class CustomerGroup(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.party_account.party_account import PartyAccount
-		from erpnext.selling.doctype.customer_credit_limit.customer_credit_limit import CustomerCreditLimit
+		from Goldfish.accounts.doctype.party_account.party_account import PartyAccount
+		from Goldfish.selling.doctype.customer_credit_limit.customer_credit_limit import CustomerCreditLimit
 
 		accounts: DF.Table[PartyAccount]
 		credit_limits: DF.Table[CustomerCreditLimit]

@@ -14,7 +14,7 @@ class RepostAccountingLedgerSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.repost_allowed_types.repost_allowed_types import RepostAllowedTypes
+		from Goldfish.accounts.doctype.repost_allowed_types.repost_allowed_types import RepostAllowedTypes
 
 		allowed_types: DF.Table[RepostAllowedTypes]
 	# end: auto-generated types

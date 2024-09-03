@@ -16,7 +16,7 @@ frappe.ui.form.on("Supplier Scorecard", {
 	},
 	load_criteria: function (frm) {
 		frappe.call({
-			method: "erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.get_criteria_list",
+			method: "Goldfish.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria.get_criteria_list",
 			callback: function (r) {
 				frm.set_value("criteria", []);
 				for (var i = 0; i < r.message.length; i++) {
@@ -35,7 +35,7 @@ frappe.ui.form.on("Supplier Scorecard Scoring Standing", {
 		var d = frappe.get_doc(cdt, cdn);
 		if (d.standing_name) {
 			return frm.call({
-				method: "erpnext.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_scoring_standing",
+				method: "Goldfish.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_scoring_standing",
 				child: d,
 				args: {
 					standing_name: d.standing_name,
@@ -69,7 +69,7 @@ frappe.ui.form.on("Supplier Scorecard Scoring Criteria", {
 
 var loadAllStandings = function (frm) {
 	frappe.call({
-		method: "erpnext.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_standings_list",
+		method: "Goldfish.buying.doctype.supplier_scorecard_standing.supplier_scorecard_standing.get_standings_list",
 		callback: function (r) {
 			for (var j = 0; j < frm.doc.standings.length; j++) {
 				if (!Object.prototype.hasOwnProperty.call(frm.doc.standings[j], "standing_name")) {

@@ -10,7 +10,7 @@ from frappe.query_builder import DocType, Interval
 from frappe.query_builder.functions import Now
 from frappe.utils import cint, cstr
 
-from erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils import (
+from Goldfish.manufacturing.doctype.bom_update_log.bom_updation_utils import (
 	get_leaf_boms,
 	get_next_higher_level_boms,
 	handle_exception,
@@ -32,7 +32,7 @@ class BOMUpdateLog(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.manufacturing.doctype.bom_update_batch.bom_update_batch import BOMUpdateBatch
+		from Goldfish.manufacturing.doctype.bom_update_batch.bom_update_batch import BOMUpdateBatch
 
 		amended_from: DF.Link | None
 		bom_batches: DF.Table[BOMUpdateBatch]
@@ -102,7 +102,7 @@ class BOMUpdateLog(Document):
 		if self.update_type == "Replace BOM":
 			boms = {"current_bom": self.current_bom, "new_bom": self.new_bom}
 			frappe.enqueue(
-				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.run_replace_bom_job",
+				method="Goldfish.manufacturing.doctype.bom_update_log.bom_update_log.run_replace_bom_job",
 				doc=self,
 				boms=boms,
 				timeout=40000,
@@ -111,7 +111,7 @@ class BOMUpdateLog(Document):
 			)
 		else:
 			frappe.enqueue(
-				method="erpnext.manufacturing.doctype.bom_update_log.bom_update_log.process_boms_cost_level_wise",
+				method="Goldfish.manufacturing.doctype.bom_update_log.bom_update_log.process_boms_cost_level_wise",
 				queue="long",
 				update_doc=self,
 				now=frappe.flags.in_test,
@@ -196,7 +196,7 @@ def queue_bom_cost_jobs(current_boms_list: list[str], update_doc: "BOMUpdateLog"
 		batch_row.db_insert()
 
 		frappe.enqueue(
-			method="erpnext.manufacturing.doctype.bom_update_log.bom_updation_utils.update_cost_in_level",
+			method="Goldfish.manufacturing.doctype.bom_update_log.bom_updation_utils.update_cost_in_level",
 			doc=update_doc,
 			bom_list=boms_to_process,
 			batch_name=batch_row.name,

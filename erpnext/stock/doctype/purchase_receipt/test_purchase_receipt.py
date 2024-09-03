@@ -6,24 +6,24 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cint, cstr, flt, get_datetime, getdate, nowtime, today
 from pypika import functions as fn
 
-import erpnext
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
-from erpnext.controllers.accounts_controller import InvalidQtyError
-from erpnext.controllers.buying_controller import QtyMismatchError
-from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.doctype.item.test_item import create_item, make_item
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+import Goldfish
+from Goldfish.accounts.doctype.account.test_account import get_inventory_account
+from Goldfish.buying.doctype.supplier.test_supplier import create_supplier
+from Goldfish.controllers.accounts_controller import InvalidQtyError
+from Goldfish.controllers.buying_controller import QtyMismatchError
+from Goldfish.stock import get_warehouse_account_map
+from Goldfish.stock.doctype.item.test_item import create_item, make_item
+from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+from Goldfish.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	SerialNoDuplicateError,
 	SerialNoExistsInFutureTransactionError,
 )
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+from Goldfish.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 
 class TestPurchaseReceipt(FrappeTestCase):
@@ -89,7 +89,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(sl_entry_cancelled[1].actual_qty, -0.5)
 
 	def test_make_purchase_invoice(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_term
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import create_payment_term
 
 		create_payment_term("_Test Payment Term 1 for Purchase Invoice")
 		create_payment_term("_Test Payment Term 2 for Purchase Invoice")
@@ -154,7 +154,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.get_doc("Payment Terms Template", "_Test Payment Terms Template For Purchase Invoice").delete()
 
 	def test_purchase_receipt_no_gl_entry(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		existing_bin_qty, existing_bin_stock_value = frappe.db.get_value(
 			"Bin",
@@ -218,7 +218,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_duplicate_serial_nos(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		item = frappe.db.exists("Item", {"item_name": "Test Serialized Item 123"})
 		if not item:
@@ -323,7 +323,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			get_taxes_and_charges=True,
 		)
 
-		self.assertEqual(cint(erpnext.is_perpetual_inventory_enabled(pr.company)), 1)
+		self.assertEqual(cint(Goldfish.is_perpetual_inventory_enabled(pr.company)), 1)
 
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 
@@ -453,7 +453,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.items[0].returned_qty, 2)
 		self.assertEqual(pr.per_returned, 40)
 
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
 
 		return_pr_2 = make_return_doc("Purchase Receipt", pr.name)
 
@@ -521,7 +521,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_purchase_return_for_rejected_qty(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+		from Goldfish.stock.doctype.warehouse.test_warehouse import get_warehouse
 
 		rejected_warehouse = "_Test Rejected Warehouse - TCP1"
 		if not frappe.db.exists("Warehouse", rejected_warehouse):
@@ -567,7 +567,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_purchase_receipt_for_rejected_gle_without_accepted_warehouse(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+		from Goldfish.stock.doctype.warehouse.test_warehouse import get_warehouse
 
 		rejected_warehouse = "_Test Rejected Warehouse - TCP1"
 		if not frappe.db.exists("Warehouse", rejected_warehouse):
@@ -658,7 +658,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_closed_purchase_receipt(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import (
 			update_purchase_receipt_status,
 		)
 
@@ -675,11 +675,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 		2. PO -> PI
 		3. PO -> PR2.
 		"""
-		from erpnext.buying.doctype.purchase_order.purchase_order import (
+		from Goldfish.buying.doctype.purchase_order.purchase_order import (
 			make_purchase_invoice as make_purchase_invoice_from_po,
 		)
-		from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from Goldfish.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
+		from Goldfish.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		po = create_purchase_order()
 
@@ -821,7 +821,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_purchase_return_with_submitted_asset(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+		from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
 		pr = make_purchase_receipt(item_code="Test Asset Item", qty=1)
 
@@ -851,7 +851,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_purchase_receipt_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from Goldfish.accounts.doctype.cost_center.test_cost_center import create_cost_center
 
 		cost_center = "_Test Cost Center for BS Account - TCP1"
 		create_cost_center(
@@ -909,7 +909,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_make_purchase_invoice_from_pr_for_returned_qty(self):
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+		from Goldfish.buying.doctype.purchase_order.test_purchase_order import (
 			create_pr_against_po,
 			create_purchase_order,
 		)
@@ -970,8 +970,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr1.cancel()
 
 	def test_stock_transfer_from_purchase_receipt(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		prepare_data_for_internal_transfer()
 
@@ -1012,13 +1012,13 @@ class TestPurchaseReceipt(FrappeTestCase):
 		pr.cancel()
 
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_stock_reconciliation,
 		)
-		from erpnext.stock.get_item_details import get_valuation_rate
-		from erpnext.stock.utils import get_stock_balance
+		from Goldfish.stock.get_item_details import get_valuation_rate
+		from Goldfish.stock.utils import get_stock_balance
 
 		prepare_data_for_internal_transfer()
 
@@ -1110,7 +1110,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		- Create PI from PO and submit
 		- Create PR from PO and submit
 		"""
-		from erpnext.buying.doctype.purchase_order import purchase_order, test_purchase_order
+		from Goldfish.buying.doctype.purchase_order import purchase_order, test_purchase_order
 
 		po = test_purchase_order.create_purchase_order()
 
@@ -1131,7 +1131,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		- Create partial PI from PO and submit
 		- Create PR from PO and submit
 		"""
-		from erpnext.buying.doctype.purchase_order import purchase_order, test_purchase_order
+		from Goldfish.buying.doctype.purchase_order import purchase_order, test_purchase_order
 
 		po = test_purchase_order.create_purchase_order()
 
@@ -1153,13 +1153,13 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
 	def test_purchase_receipt_with_exchange_rate_difference(self):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import (
+		from Goldfish.accounts.doctype.purchase_invoice.purchase_invoice import (
 			make_purchase_receipt as create_purchase_receipt,
 		)
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+		from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 			make_purchase_invoice as create_purchase_invoice,
 		)
-		from erpnext.accounts.party import add_party_account
+		from Goldfish.accounts.party import add_party_account
 
 		add_party_account(
 			"Supplier",
@@ -1200,15 +1200,15 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(discrepancy_caused_by_exchange_rate_diff, amount)
 
 	def test_payment_terms_are_fetched_when_creating_purchase_invoice(self):
-		from erpnext.accounts.doctype.payment_entry.test_payment_entry import (
+		from Goldfish.accounts.doctype.payment_entry.test_payment_entry import (
 			create_payment_terms_template,
 		)
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+		from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+		from Goldfish.buying.doctype.purchase_order.test_purchase_order import (
 			create_purchase_order,
 			make_pr_against_po,
 		)
-		from erpnext.selling.doctype.sales_order.test_sales_order import (
+		from Goldfish.selling.doctype.sales_order.test_sales_order import (
 			automatically_fetch_payment_terms,
 			compare_payment_schedules,
 		)
@@ -1236,7 +1236,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	@change_settings("Stock Settings", {"allow_negative_stock": 1})
 	def test_neg_to_positive(self):
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		item_code = "_TestNegToPosItem"
 		warehouse = "Stores - TCP1"
@@ -1264,8 +1264,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 				self.assertEqual(gle.credit, 50)
 
 	def test_backdated_transaction_for_internal_transfer(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
@@ -1352,8 +1352,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def test_backdated_transaction_for_internal_transfer_in_trasit_warehouse_for_purchase_receipt(
 		self,
 	):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
@@ -1459,13 +1459,13 @@ class TestPurchaseReceipt(FrappeTestCase):
 	def test_backdated_transaction_for_internal_transfer_in_trasit_warehouse_for_purchase_invoice(
 		self,
 	):
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+		from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 			make_purchase_invoice as make_purchase_invoice_for_si,
 		)
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+		from Goldfish.accounts.doctype.sales_invoice.sales_invoice import (
 			make_inter_company_purchase_invoice,
 		)
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 		prepare_data_for_internal_transfer()
 		customer = "_Test Internal Customer 2"
@@ -1578,7 +1578,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(query[0].value, 0)
 
 	def test_batch_expiry_for_purchase_receipt(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
 
 		item = make_item(
 			"_Test Batch Item For Return Check",
@@ -1609,7 +1609,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertTrue(return_pi.docstatus == 1)
 
 	def test_disable_last_purchase_rate(self):
-		from erpnext.stock.get_item_details import get_item_details
+		from Goldfish.stock.get_item_details import get_item_details
 
 		item = make_item(
 			"_Test Disable Last Purchase Rate",
@@ -1663,7 +1663,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		item = make_item(properties={"is_stock_item": 1, "valuation_rate": 100})
 
 		# Step 2: Create Stock Entry (Material Receipt)
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		make_stock_entry(
 			purpose="Material Receipt",
@@ -1675,7 +1675,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		# Step 3: Create Delivery Note with Internal Customer
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		dn = create_delivery_note(
 			item_code=item.name,
@@ -1690,7 +1690,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		# Step 4: Create Internal Purchase Receipt
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
 		pr.set_posting_time = 1
@@ -1722,10 +1722,10 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "over_delivery_receipt_allowance", 0)
 
 	def test_internal_pr_gl_entries(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_stock_reconciliation,
 		)
 
@@ -1812,7 +1812,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		to_warehouse = create_warehouse("_Test Internal To Warehouse New 1", company=company)
 
 		# Step 2: Create Stock Entry (Material Receipt)
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		make_stock_entry(
 			purpose="Material Receipt",
@@ -1823,7 +1823,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		# Step 3: Create Delivery Note with Internal Customer
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		dn = create_delivery_note(
 			item_code=item.name,
@@ -1838,7 +1838,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		# Step 4: Create Internal Purchase Receipt
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
 
 		pr = make_inter_company_purchase_receipt(dn.name)
 		pr.inter_company_reference = ""
@@ -1888,7 +1888,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		# Step 3: Create Purchase Return for 2 qty
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+		from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
 		pr_return = make_purchase_return(pr.name)
 		pr_return.items[0].qty = 2 * -1
@@ -1907,7 +1907,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(abs(data["stock_value_difference"]), 400.00)
 
 	def test_return_from_rejected_warehouse(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return_against_rejected_warehouse,
 		)
 
@@ -1944,11 +1944,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr_return.items[0].rejected_warehouse, "")
 
 	def test_purchase_receipt_with_backdated_landed_cost_voucher(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			create_landed_cost_voucher,
 		)
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		item_code = "_Test Purchase Item With Landed Cost"
 		create_item(item_code)
@@ -2092,12 +2092,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 	def test_purchase_receipt_provisional_accounting(self):
 		# Step - 1: Create Supplier with Default Currency as USD
-		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from Goldfish.buying.doctype.supplier.test_supplier import create_supplier
 
 		supplier = create_supplier(default_currency="USD")
 
 		# Step - 2: Setup Company for Provisional Accounting
-		from erpnext.accounts.doctype.account.test_account import create_account
+		from Goldfish.accounts.doctype.account.test_account import create_account
 
 		provisional_account = create_account(
 			account_name="Provision Account",
@@ -2169,7 +2169,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		# Step - 2: Create Stock Entry (Material Receipt)
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		se = make_stock_entry(
 			purpose="Material Receipt",
@@ -2190,7 +2190,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 		# Step - 4: Create Purchase Return
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
 
 		pr_return = make_return_doc("Purchase Receipt", pr.name)
 		pr_return.save()
@@ -2216,7 +2216,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertEqual(abs(entry.debit + entry.credit), abs(sl_entries[0].stock_value_difference))
 
 	def non_internal_transfer_purchase_receipt(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		pr_doc = make_purchase_receipt(do_not_submit=True)
 		warehouse = create_warehouse("Internal Transfer Warehouse", pr_doc.company)
@@ -2231,9 +2231,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertFalse(pr_doc.items[0].from_warehouse)
 
 	def test_use_serial_batch_fields_for_serial_nos(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-		from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.serial_no.serial_no import get_serial_nos
+		from Goldfish.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 			create_stock_reconciliation,
 		)
 
@@ -2443,8 +2443,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 	def test_pr_billed_amount_against_return_entry(self):
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from Goldfish.accounts.doctype.purchase_invoice.purchase_invoice import make_debit_note
+		from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_invoice as make_pi_from_pr,
 		)
 
@@ -2478,11 +2478,11 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.per_billed, 100)
 
 	def test_valuation_taxes_lcv_repost_after_billing(self):
-		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+		from Goldfish.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
 			make_landed_cost_voucher,
 		)
 
-		old_perpetual_inventory = erpnext.is_perpetual_inventory_enabled("_Test Company")
+		old_perpetual_inventory = Goldfish.is_perpetual_inventory_enabled("_Test Company")
 		frappe.local.enable_perpetual_inventory["_Test Company"] = 1
 		frappe.db.set_value(
 			"Company",
@@ -2608,9 +2608,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 				self.assertEqual(row.rejected_serial_no, serial_nos[2])
 
 	def test_internal_transfer_with_serial_batch_items_and_their_valuation(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		prepare_data_for_internal_transfer()
 
@@ -2745,9 +2745,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertTrue(row.serial_and_batch_bundle)
 
 	def test_internal_transfer_with_serial_batch_items_without_use_serial_batch_fields(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
@@ -2920,7 +2920,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		)
 
 	def test_zero_valuation_rate_for_batched_item(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		item = make_item(
 			"_Test Zero Valuation Rate For the Batch Item",
@@ -2964,7 +2964,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 			self.assertEqual(row.incoming_rate, 0)
 
 	def test_purchase_return_from_accepted_and_rejected_warehouse(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return,
 		)
 
@@ -3042,7 +3042,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(batch.expiry_date, getdate(add_days(today(), 5)))
 
 	def test_purchase_return_from_rejected_warehouse(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+		from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import (
 			make_purchase_return_against_rejected_warehouse,
 		)
 
@@ -3077,12 +3077,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 		PR -> LCV
 		Backdated `Repost Item valuation` should not merge tax account heads into stock_rbnb
 		"""
-		from erpnext.accounts.doctype.account.test_account import create_account
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+		from Goldfish.accounts.doctype.account.test_account import create_account
+		from Goldfish.buying.doctype.purchase_order.test_purchase_order import (
 			create_purchase_order,
 			make_pr_against_po,
 		)
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+		from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
 		stock_rbnb = "Stock Received But Not Billed - _TC"
 		stock_in_hand = "Stock In Hand - _TC"
@@ -3227,12 +3227,12 @@ class TestPurchaseReceipt(FrappeTestCase):
 		Backdated `Repost Item valuation` should not merge tax account heads into stock_rbnb if Purchase Receipt was created first
 		This scenario is without LCV
 		"""
-		from erpnext.accounts.doctype.account.test_account import create_account
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import (
+		from Goldfish.accounts.doctype.account.test_account import create_account
+		from Goldfish.buying.doctype.purchase_order.test_purchase_order import (
 			create_purchase_order,
 			make_pr_against_po,
 		)
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+		from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 
 		stock_rbnb = "Stock Received But Not Billed - _TC"
 		stock_in_hand = "Stock In Hand - _TC"
@@ -3326,7 +3326,7 @@ class TestPurchaseReceipt(FrappeTestCase):
 		company_doc.save()
 
 	def test_do_not_use_batchwise_valuation_rate(self):
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		item_code = "Test Item for Do Not Use Batchwise Valuation"
 		make_item(
@@ -3401,9 +3401,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 		self.assertEqual(pr.status, "Completed")
 
 	def test_internal_transfer_for_batch_items_with_cancel(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 0)
 
@@ -3517,9 +3517,9 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 
 	def test_internal_transfer_for_batch_items_with_cancel_use_serial_batch_fields(self):
-		from erpnext.controllers.sales_and_purchase_return import make_return_doc
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.controllers.sales_and_purchase_return import make_return_doc
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_inter_company_purchase_receipt
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		frappe.db.set_single_value("Stock Settings", "use_serial_batch_fields", 1)
 		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0)
@@ -3633,8 +3633,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
 
 	def test_sles_with_same_posting_datetime_and_creation(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.stock.report.stock_balance.stock_balance import execute
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.report.stock_balance.stock_balance import execute
 
 		item_code = "Test Item for SLE with same posting datetime and creation"
 		create_item(item_code)
@@ -3699,8 +3699,8 @@ class TestPurchaseReceipt(FrappeTestCase):
 
 
 def prepare_data_for_internal_transfer():
-	from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
-	from erpnext.selling.doctype.customer.test_customer import create_internal_customer
+	from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_internal_supplier
+	from Goldfish.selling.doctype.customer.test_customer import create_internal_customer
 
 	company = "_Test Company with perpetual inventory"
 

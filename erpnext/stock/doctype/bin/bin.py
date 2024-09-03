@@ -55,7 +55,7 @@ class Bin(Document):
 	def update_reserved_qty_for_production_plan(self, skip_project_qty_update=False):
 		"""Update qty reserved for production from Production Plan tables
 		in open production plan"""
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+		from Goldfish.manufacturing.doctype.production_plan.production_plan import (
 			get_reserved_qty_for_production_plan,
 		)
 
@@ -79,7 +79,7 @@ class Bin(Document):
 			self.db_set("projected_qty", self.projected_qty, update_modified=True)
 
 	def update_reserved_qty_for_for_sub_assembly(self):
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+		from Goldfish.manufacturing.doctype.production_plan.production_plan import (
 			get_reserved_qty_for_sub_assembly,
 		)
 
@@ -102,7 +102,7 @@ class Bin(Document):
 	def update_reserved_qty_for_production(self):
 		"""Update qty reserved for production from Production Item tables
 		in open work orders"""
-		from erpnext.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
+		from Goldfish.manufacturing.doctype.work_order.work_order import get_reserved_qty_for_production
 
 		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
 
@@ -198,7 +198,7 @@ class Bin(Document):
 	def update_reserved_stock(self):
 		"""Update `Reserved Stock` on change in Reserved Qty of Stock Reservation Entry"""
 
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			get_sre_reserved_qty_for_item_and_warehouse,
 		)
 
@@ -230,7 +230,7 @@ def get_bin_details(bin_name):
 
 
 def update_qty(bin_name, args):
-	from erpnext.controllers.stock_controller import future_sle_exists
+	from Goldfish.controllers.stock_controller import future_sle_exists
 
 	bin_details = get_bin_details(bin_name)
 	# actual qty is already updated by processing current voucher

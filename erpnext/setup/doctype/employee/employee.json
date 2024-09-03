@@ -26,7 +26,7 @@
   "date_of_joining",
   "image",
   "status",
-  "erpnext_user",
+  "Goldfish_user",
   "user_id",
   "create_user",
   "create_user_permission",
@@ -275,7 +275,7 @@
   },
   {
    "collapsible": 1,
-   "fieldname": "erpnext_user",
+   "fieldname": "Goldfish_user",
    "fieldtype": "Section Break",
    "label": "User Details"
   },

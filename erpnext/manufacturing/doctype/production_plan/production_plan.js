@@ -21,7 +21,7 @@ frappe.ui.form.on("Production Plan", {
 	setup_queries(frm) {
 		frm.set_query("sales_order", "sales_orders", () => {
 			return {
-				query: "erpnext.manufacturing.doctype.production_plan.production_plan.sales_order_query",
+				query: "Goldfish.manufacturing.doctype.production_plan.production_plan.sales_order_query",
 				filters: {
 					company: frm.doc.company,
 				},
@@ -49,7 +49,7 @@ frappe.ui.form.on("Production Plan", {
 
 		frm.set_query("item_code", "po_items", (doc, cdt, cdn) => {
 			return {
-				query: "erpnext.controllers.queries.item_query",
+				query: "Goldfish.controllers.queries.item_query",
 				filters: {
 					is_stock_item: 1,
 				},
@@ -60,7 +60,7 @@ frappe.ui.form.on("Production Plan", {
 			var d = locals[cdt][cdn];
 			if (d.item_code) {
 				return {
-					query: "erpnext.controllers.queries.bom",
+					query: "Goldfish.controllers.queries.bom",
 					filters: { item: d.item_code, docstatus: 1 },
 				};
 			} else frappe.msgprint(__("Please enter Item first"));
@@ -151,7 +151,7 @@ frappe.ui.form.on("Production Plan", {
 			<tr><td style="padding-left:25px">
 				<div>
 				<h3 style="text-decoration: underline;">
-					<a href = "https://erpnext.com/docs/user/manual/en/stock/projected-quantity">
+					<a href = "https://Goldfish.com/docs/user/manual/en/stock/projected-quantity">
 						${__("Projected Quantity Formula")}
 					</a>
 				</h3>
@@ -376,7 +376,7 @@ frappe.ui.form.on("Production Plan", {
 
 	get_items_for_material_requests(frm, warehouses) {
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_items_for_material_requests",
+			method: "Goldfish.manufacturing.doctype.production_plan.production_plan.get_items_for_material_requests",
 			freeze: true,
 			args: {
 				doc: frm.doc,
@@ -428,7 +428,7 @@ frappe.ui.form.on("Production Plan", {
 			fields,
 			(row) => {
 				let get_template_url =
-					"erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials";
+					"Goldfish.manufacturing.doctype.production_plan.production_plan.download_raw_materials";
 				open_url_post(frappe.request.url, {
 					cmd: get_template_url,
 					doc: frm.doc,
@@ -479,7 +479,7 @@ frappe.ui.form.on("Production Plan Item", {
 		const row = locals[cdt][cdn];
 		if (row.item_code) {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_item_data",
+				method: "Goldfish.manufacturing.doctype.production_plan.production_plan.get_item_data",
 				args: {
 					item_code: row.item_code,
 				},
@@ -498,7 +498,7 @@ frappe.ui.form.on("Material Request Plan Item", {
 		const row = locals[cdt][cdn];
 		if (row.warehouse && row.item_code && frm.doc.company) {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_bin_details",
+				method: "Goldfish.manufacturing.doctype.production_plan.production_plan.get_bin_details",
 				args: {
 					row: row,
 					company: frm.doc.company,
@@ -544,7 +544,7 @@ frappe.ui.form.on("Production Plan Sales Order", {
 				},
 				callback(r) {
 					frappe.call({
-						method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_so_details",
+						method: "Goldfish.manufacturing.doctype.production_plan.production_plan.get_so_details",
 						args: { sales_order },
 						callback(r) {
 							const { transaction_date, customer, grand_total } = r.message;
@@ -561,7 +561,7 @@ frappe.ui.form.on("Production Plan Sales Order", {
 
 frappe.ui.form.on("Production Plan Sub Assembly Item", {
 	fg_warehouse(frm, cdt, cdn) {
-		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "sub_assembly_items", "fg_warehouse");
+		Goldfish.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "sub_assembly_items", "fg_warehouse");
 	},
 });
 

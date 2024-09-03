@@ -2,8 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 // eslint-disable-next-line
-frappe.provide("erpnext.accounts.dimensions");
-erpnext.buying.setup_buying_controller();
+frappe.provide("Goldfish.accounts.dimensions");
+Goldfish.buying.setup_buying_controller();
 
 frappe.ui.form.on("Material Request", {
 	setup: function (frm) {
@@ -24,7 +24,7 @@ frappe.ui.form.on("Material Request", {
 
 		frm.set_query("item_code", "items", function () {
 			return {
-				query: "erpnext.controllers.queries.item_query",
+				query: "Goldfish.controllers.queries.item_query",
 			};
 		});
 
@@ -46,7 +46,7 @@ frappe.ui.form.on("Material Request", {
 
 	onload: function (frm) {
 		// add item, if previous view was item
-		erpnext.utils.add_item(frm);
+		Goldfish.utils.add_item(frm);
 
 		// set schedule_date
 		set_schedule_date(frm);
@@ -69,11 +69,11 @@ frappe.ui.form.on("Material Request", {
 			};
 		});
 
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+		Goldfish.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	company: function (frm) {
-		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		Goldfish.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	onload_post_render: function (frm) {
@@ -200,7 +200,7 @@ frappe.ui.form.on("Material Request", {
 
 	update_status: function (frm, stop_status) {
 		frappe.call({
-			method: "erpnext.stock.doctype.material_request.material_request.update_status",
+			method: "Goldfish.stock.doctype.material_request.material_request.update_status",
 			args: { name: frm.doc.name, status: stop_status },
 			callback(r) {
 				if (!r.exc) {
@@ -211,8 +211,8 @@ frappe.ui.form.on("Material Request", {
 	},
 
 	get_items_from_sales_order: function (frm) {
-		erpnext.utils.map_current_doc({
-			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
+		Goldfish.utils.map_current_doc({
+			method: "Goldfish.selling.doctype.sales_order.sales_order.make_material_request",
 			source_doctype: "Sales Order",
 			target: frm,
 			setters: {
@@ -234,7 +234,7 @@ frappe.ui.form.on("Material Request", {
 		}
 
 		frappe.call({
-			method: "erpnext.stock.get_item_details.get_item_details",
+			method: "Goldfish.stock.get_item_details.get_item_details",
 			args: {
 				args: {
 					item_code: item.item_code,
@@ -325,13 +325,13 @@ frappe.ui.form.on("Material Request", {
 				values["company"] = frm.doc.company;
 				if (!frm.doc.company) frappe.throw(__("Company field is required"));
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.bom.bom.get_bom_items",
+					method: "Goldfish.manufacturing.doctype.bom.bom.get_bom_items",
 					args: values,
 					callback: function (r) {
 						if (!r.message) {
 							frappe.throw(__("BOM does not contain any stock item"));
 						} else {
-							erpnext.utils.remove_empty_first_row(frm, "items");
+							Goldfish.utils.remove_empty_first_row(frm, "items");
 							$.each(r.message, function (i, item) {
 								var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
 								d.item_code = item.item_code;
@@ -367,14 +367,14 @@ frappe.ui.form.on("Material Request", {
 				),
 				get_query: () => {
 					return {
-						query: "erpnext.stock.doctype.material_request.material_request.get_default_supplier_query",
+						query: "Goldfish.stock.doctype.material_request.material_request.get_default_supplier_query",
 						filters: { doc: frm.doc.name },
 					};
 				},
 			},
 			(values) => {
 				frappe.model.open_mapped_doc({
-					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
+					method: "Goldfish.stock.doctype.material_request.material_request.make_purchase_order",
 					frm: frm,
 					args: { default_supplier: values.default_supplier },
 					run_link_triggers: true,
@@ -387,7 +387,7 @@ frappe.ui.form.on("Material Request", {
 
 	make_request_for_quotation: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.make_request_for_quotation",
+			method: "Goldfish.stock.doctype.material_request.material_request.make_request_for_quotation",
 			frm: frm,
 			run_link_triggers: true,
 		});
@@ -395,14 +395,14 @@ frappe.ui.form.on("Material Request", {
 
 	make_supplier_quotation: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.make_supplier_quotation",
+			method: "Goldfish.stock.doctype.material_request.material_request.make_supplier_quotation",
 			frm: frm,
 		});
 	},
 
 	make_stock_entry: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
+			method: "Goldfish.stock.doctype.material_request.material_request.make_stock_entry",
 			frm: frm,
 		});
 	},
@@ -429,7 +429,7 @@ frappe.ui.form.on("Material Request", {
 			],
 			(values) => {
 				frappe.call({
-					method: "erpnext.stock.doctype.material_request.material_request.make_in_transit_stock_entry",
+					method: "Goldfish.stock.doctype.material_request.material_request.make_in_transit_stock_entry",
 					args: {
 						source_name: frm.doc.name,
 						in_transit_warehouse: values.in_transit_warehouse,
@@ -449,14 +449,14 @@ frappe.ui.form.on("Material Request", {
 
 	create_pick_list: (frm) => {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.create_pick_list",
+			method: "Goldfish.stock.doctype.material_request.material_request.create_pick_list",
 			frm: frm,
 		});
 	},
 
 	raise_work_orders: function (frm) {
 		frappe.call({
-			method: "erpnext.stock.doctype.material_request.material_request.raise_work_orders",
+			method: "Goldfish.stock.doctype.material_request.material_request.raise_work_orders",
 			args: {
 				material_request: frm.doc.name,
 			},
@@ -515,7 +515,7 @@ frappe.ui.form.on("Material Request Item", {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {
 			if (!frm.doc.schedule_date) {
-				erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "schedule_date");
+				Goldfish.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "schedule_date");
 			} else {
 				set_schedule_date(frm);
 			}
@@ -528,8 +528,8 @@ frappe.ui.form.on("Material Request Item", {
 	},
 });
 
-erpnext.buying.MaterialRequestController = class MaterialRequestController extends (
-	erpnext.buying.BuyingController
+Goldfish.buying.MaterialRequestController = class MaterialRequestController extends (
+	Goldfish.buying.BuyingController
 ) {
 	tc_name() {
 		this.get_terms();
@@ -555,7 +555,7 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 		this.frm.set_query("item_code", "items", function (doc, cdt, cdn) {
 			if (doc.material_request_type == "Customer Provided") {
 				return {
-					query: "erpnext.controllers.queries.item_query",
+					query: "Goldfish.controllers.queries.item_query",
 					filters: {
 						customer: doc.customer,
 						is_stock_item: 1,
@@ -563,12 +563,12 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 				};
 			} else if (doc.material_request_type == "Purchase") {
 				return {
-					query: "erpnext.controllers.queries.item_query",
+					query: "Goldfish.controllers.queries.item_query",
 					filters: { is_purchase_item: 1 },
 				};
 			} else {
 				return {
-					query: "erpnext.controllers.queries.item_query",
+					query: "Goldfish.controllers.queries.item_query",
 					filters: { is_stock_item: 1 },
 				};
 			}
@@ -602,11 +602,11 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 };
 
 // for backward compatibility: combine new and previous states
-extend_cscript(cur_frm.cscript, new erpnext.buying.MaterialRequestController({ frm: cur_frm }));
+extend_cscript(cur_frm.cscript, new Goldfish.buying.MaterialRequestController({ frm: cur_frm }));
 
 function set_schedule_date(frm) {
 	if (frm.doc.schedule_date) {
-		erpnext.utils.copy_value_in_all_rows(
+		Goldfish.utils.copy_value_in_all_rows(
 			frm.doc,
 			frm.doc.doctype,
 			frm.doc.name,

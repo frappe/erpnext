@@ -5,12 +5,12 @@ import unittest
 
 import frappe
 
-from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+from Goldfish.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
 	disable_dimension,
 )
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
 test_dependencies = ["Location", "Cost Center", "Department"]
 

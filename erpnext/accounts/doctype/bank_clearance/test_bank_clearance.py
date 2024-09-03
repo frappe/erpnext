@@ -6,9 +6,9 @@ import unittest
 import frappe
 from frappe.utils import add_months, getdate
 
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.tests.utils import if_lending_app_installed, if_lending_app_not_installed
+from Goldfish.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from Goldfish.tests.utils import if_lending_app_installed, if_lending_app_not_installed
 
 
 class TestBankClearance(unittest.TestCase):

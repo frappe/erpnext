@@ -1,4 +1,4 @@
-erpnext.landed_cost_taxes_and_charges = {
+Goldfish.landed_cost_taxes_and_charges = {
 	setup_triggers: function (doctype) {
 		frappe.ui.form.on(doctype, {
 			refresh: function (frm) {
@@ -42,7 +42,7 @@ erpnext.landed_cost_taxes_and_charges = {
 				} else if (!row.exchange_rate || row.exchange_rate == 1) {
 					frm.set_df_property("taxes", "hidden", 0, row.name, "exchange_rate");
 					frappe.call({
-						method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate",
+						method: "Goldfish.accounts.doctype.journal_entry.journal_entry.get_exchange_rate",
 						args: {
 							posting_date: frm.doc.posting_date,
 							account: row.expense_account,

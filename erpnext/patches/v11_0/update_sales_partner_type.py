@@ -2,7 +2,7 @@ import frappe
 
 
 def execute():
-	from erpnext.setup.setup_wizard.operations.install_fixtures import read_lines
+	from Goldfish.setup.setup_wizard.operations.install_fixtures import read_lines
 
 	frappe.reload_doc("selling", "doctype", "sales_partner_type")
 

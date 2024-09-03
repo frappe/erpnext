@@ -3,7 +3,7 @@ frappe.listview_settings["Issue"] = {
 	add_fields: ["priority"],
 	filters: [["status", "=", "Open"]],
 	onload: function (listview) {
-		var method = "erpnext.support.doctype.issue.issue.set_multiple_status";
+		var method = "Goldfish.support.doctype.issue.issue.set_multiple_status";
 
 		listview.page.add_action_item(__("Set as Open"), function () {
 			listview.call_for_selected_items(method, { status: "Open" });

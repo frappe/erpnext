@@ -6,11 +6,11 @@ import unittest
 import frappe
 from frappe.utils import add_months, nowdate
 
-from erpnext.accounts.doctype.accounting_period.accounting_period import (
+from Goldfish.accounts.doctype.accounting_period.accounting_period import (
 	ClosedAccountingPeriod,
 	OverlapError,
 )
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 test_dependencies = ["Item"]
 

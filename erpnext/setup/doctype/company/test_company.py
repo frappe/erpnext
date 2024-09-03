@@ -8,10 +8,10 @@ import frappe
 from frappe import _
 from frappe.utils import random_string
 
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
+from Goldfish.accounts.doctype.account.chart_of_accounts.chart_of_accounts import (
 	get_charts_for_country,
 )
-from erpnext.setup.doctype.company.company import get_default_company_address
+from Goldfish.setup.doctype.company.company import get_default_company_address
 
 test_ignore = ["Account", "Cost Center", "Payment Terms Template", "Salary Component", "Warehouse"]
 test_dependencies = ["Fiscal Year"]
@@ -196,7 +196,7 @@ class TestCompany(unittest.TestCase):
 		self.test_basic_tree()
 
 	def test_demo_data(self):
-		from erpnext.setup.demo import clear_demo_data, setup_demo_data
+		from Goldfish.setup.demo import clear_demo_data, setup_demo_data
 
 		setup_demo_data()
 		company_name = frappe.db.get_value("Company", {"name": ("like", "%(Demo)")})

@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.bom");
+frappe.provide("Goldfish.bom");
 
 frappe.ui.form.on("BOM", {
 	setup(frm) {
@@ -22,7 +22,7 @@ frappe.ui.form.on("BOM", {
 		frm.set_query("bom_no", "operations", function (doc, cdt, cdn) {
 			let row = locals[cdt][cdn];
 			return {
-				query: "erpnext.controllers.queries.bom",
+				query: "Goldfish.controllers.queries.bom",
 				filters: {
 					currency: frm.doc.currency,
 					company: frm.doc.company,
@@ -44,7 +44,7 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_query("item", function () {
 			return {
-				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
+				query: "Goldfish.manufacturing.doctype.bom.bom.item_query",
 				filters: {
 					is_stock_item: 1,
 				},
@@ -59,7 +59,7 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_query("item_code", "items", function (doc) {
 			return {
-				query: "erpnext.manufacturing.doctype.bom.bom.item_query",
+				query: "Goldfish.manufacturing.doctype.bom.bom.item_query",
 				filters: {
 					include_item_in_manufacturing: 1,
 					is_fixed_asset: 0,
@@ -199,7 +199,7 @@ frappe.ui.form.on("BOM", {
 			const has_alternative = frm.doc.items.find((i) => i.allow_alternative_item === 1);
 			if (frm.doc.docstatus == 0 && has_alternative) {
 				frm.add_custom_button(__("Alternate Item"), () => {
-					erpnext.utils.select_alternate_items({
+					Goldfish.utils.select_alternate_items({
 						frm: frm,
 						child_docname: "items",
 						warehouse_field: "source_warehouse",
@@ -233,7 +233,7 @@ frappe.ui.form.on("BOM", {
 	make_work_order(frm) {
 		frm.events.setup_variant_prompt(frm, "Work Order", (frm, item, data, variant_items) => {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.work_order.work_order.make_work_order",
+				method: "Goldfish.manufacturing.doctype.work_order.work_order.make_work_order",
 				args: {
 					bom_no: frm.doc.name,
 					item: item,
@@ -258,7 +258,7 @@ frappe.ui.form.on("BOM", {
 			"Variant BOM",
 			(frm, item, data, variant_items) => {
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.bom.bom.make_variant_bom",
+					method: "Goldfish.manufacturing.doctype.bom.bom.make_variant_bom",
 					args: {
 						source_name: frm.doc.name,
 						bom_no: frm.doc.name,
@@ -290,7 +290,7 @@ frappe.ui.form.on("BOM", {
 				reqd: 1,
 				get_query() {
 					return {
-						query: "erpnext.controllers.queries.item_query",
+						query: "Goldfish.controllers.queries.item_query",
 						filters: {
 							variant_of: frm.doc.item,
 						},
@@ -356,7 +356,7 @@ frappe.ui.form.on("BOM", {
 							}
 
 							return {
-								query: "erpnext.controllers.queries.item_query",
+								query: "Goldfish.controllers.queries.item_query",
 								filters: {
 									variant_of: data.item_code,
 								},
@@ -426,7 +426,7 @@ frappe.ui.form.on("BOM", {
 
 	make_quality_inspection(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.quality_inspection.quality_inspection.make_quality_inspection",
+			method: "Goldfish.stock.doctype.quality_inspection.quality_inspection.make_quality_inspection",
 			frm: frm,
 		});
 	},
@@ -463,8 +463,8 @@ frappe.ui.form.on("BOM", {
 				callback(r) {
 					if (!r.exc) {
 						frm.refresh_fields();
-						erpnext.bom.calculate_op_cost(frm.doc);
-						erpnext.bom.calculate_total(frm.doc);
+						Goldfish.bom.calculate_op_cost(frm.doc);
+						Goldfish.bom.calculate_total(frm.doc);
 					}
 				},
 			});
@@ -503,12 +503,12 @@ frappe.ui.form.on("BOM Operation", {
 	},
 });
 
-erpnext.bom.BomController = class BomController extends erpnext.TransactionController {
+Goldfish.bom.BomController = class BomController extends Goldfish.TransactionController {
 	conversion_rate(doc) {
 		if (this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		} else {
-			erpnext.bom.update_cost(doc);
+			Goldfish.bom.update_cost(doc);
 		}
 	}
 
@@ -548,11 +548,11 @@ erpnext.bom.BomController = class BomController extends erpnext.TransactionContr
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.bom.BomController({ frm: cur_frm }));
+extend_cscript(cur_frm.cscript, new Goldfish.bom.BomController({ frm: cur_frm }));
 
 cur_frm.cscript.hour_rate = function (doc) {
-	erpnext.bom.calculate_op_cost(doc);
-	erpnext.bom.calculate_total(doc);
+	Goldfish.bom.calculate_op_cost(doc);
+	Goldfish.bom.calculate_total(doc);
 };
 
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
@@ -597,9 +597,9 @@ var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
 				refresh_field("scrap_items");
 
 				doc = locals[doc.doctype][doc.name];
-				erpnext.bom.calculate_rm_cost(doc);
-				erpnext.bom.calculate_scrap_materials_cost(doc);
-				erpnext.bom.calculate_total(doc);
+				Goldfish.bom.calculate_rm_cost(doc);
+				Goldfish.bom.calculate_scrap_materials_cost(doc);
+				Goldfish.bom.calculate_total(doc);
 			},
 			freeze: true,
 		});
@@ -607,9 +607,9 @@ var get_bom_material_detail = function (doc, cdt, cdn, scrap_items) {
 };
 
 cur_frm.cscript.qty = function (doc) {
-	erpnext.bom.calculate_rm_cost(doc);
-	erpnext.bom.calculate_scrap_materials_cost(doc);
-	erpnext.bom.calculate_total(doc);
+	Goldfish.bom.calculate_rm_cost(doc);
+	Goldfish.bom.calculate_scrap_materials_cost(doc);
+	Goldfish.bom.calculate_total(doc);
 };
 
 cur_frm.cscript.rate = function (doc, cdt, cdn) {
@@ -620,20 +620,20 @@ cur_frm.cscript.rate = function (doc, cdt, cdn) {
 		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
 		get_bom_material_detail(doc, cdt, cdn, is_scrap_item);
 	} else {
-		erpnext.bom.calculate_rm_cost(doc);
-		erpnext.bom.calculate_scrap_materials_cost(doc);
-		erpnext.bom.calculate_total(doc);
+		Goldfish.bom.calculate_rm_cost(doc);
+		Goldfish.bom.calculate_scrap_materials_cost(doc);
+		Goldfish.bom.calculate_total(doc);
 	}
 };
 
-erpnext.bom.update_cost = function (doc) {
-	erpnext.bom.calculate_op_cost(doc);
-	erpnext.bom.calculate_rm_cost(doc);
-	erpnext.bom.calculate_scrap_materials_cost(doc);
-	erpnext.bom.calculate_total(doc);
+Goldfish.bom.update_cost = function (doc) {
+	Goldfish.bom.calculate_op_cost(doc);
+	Goldfish.bom.calculate_rm_cost(doc);
+	Goldfish.bom.calculate_scrap_materials_cost(doc);
+	Goldfish.bom.calculate_total(doc);
 };
 
-erpnext.bom.calculate_op_cost = function (doc) {
+Goldfish.bom.calculate_op_cost = function (doc) {
 	doc.operating_cost = 0.0;
 	doc.base_operating_cost = 0.0;
 
@@ -658,7 +658,7 @@ erpnext.bom.calculate_op_cost = function (doc) {
 };
 
 // rm : raw material
-erpnext.bom.calculate_rm_cost = function (doc) {
+Goldfish.bom.calculate_rm_cost = function (doc) {
 	var rm = doc.items || [];
 	var total_rm_cost = 0;
 	var base_total_rm_cost = 0;
@@ -689,7 +689,7 @@ erpnext.bom.calculate_rm_cost = function (doc) {
 };
 
 // sm : scrap material
-erpnext.bom.calculate_scrap_materials_cost = function (doc) {
+Goldfish.bom.calculate_scrap_materials_cost = function (doc) {
 	var sm = doc.scrap_items || [];
 	var total_sm_cost = 0;
 	var base_total_sm_cost = 0;
@@ -712,7 +712,7 @@ erpnext.bom.calculate_scrap_materials_cost = function (doc) {
 };
 
 // Calculate Total Cost
-erpnext.bom.calculate_total = function (doc) {
+Goldfish.bom.calculate_total = function (doc) {
 	var total_cost = flt(doc.operating_cost) + flt(doc.raw_material_cost) - flt(doc.scrap_material_cost);
 	var base_total_cost =
 		flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost) - flt(doc.base_scrap_material_cost);
@@ -722,7 +722,7 @@ erpnext.bom.calculate_total = function (doc) {
 };
 
 cur_frm.cscript.validate = function (doc) {
-	erpnext.bom.update_cost(doc);
+	Goldfish.bom.update_cost(doc);
 };
 
 frappe.ui.form.on("BOM Operation", "operation", function (frm, cdt, cdn) {
@@ -766,8 +766,8 @@ frappe.ui.form.on("BOM Operation", "workstation", function (frm, cdt, cdn) {
 				2
 			);
 
-			erpnext.bom.calculate_op_cost(frm.doc);
-			erpnext.bom.calculate_total(frm.doc);
+			Goldfish.bom.calculate_op_cost(frm.doc);
+			Goldfish.bom.calculate_total(frm.doc);
 		},
 	});
 });
@@ -809,13 +809,13 @@ frappe.ui.form.on("BOM Item", "rate", function (frm, cdt, cdn) {
 });
 
 frappe.ui.form.on("BOM Operation", "operations_remove", function (frm) {
-	erpnext.bom.calculate_op_cost(frm.doc);
-	erpnext.bom.calculate_total(frm.doc);
+	Goldfish.bom.calculate_op_cost(frm.doc);
+	Goldfish.bom.calculate_total(frm.doc);
 });
 
 frappe.ui.form.on("BOM Item", "items_remove", function (frm) {
-	erpnext.bom.calculate_rm_cost(frm.doc);
-	erpnext.bom.calculate_total(frm.doc);
+	Goldfish.bom.calculate_rm_cost(frm.doc);
+	Goldfish.bom.calculate_total(frm.doc);
 });
 
 frappe.tour["BOM"] = [

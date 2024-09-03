@@ -18,7 +18,7 @@ class FiscalYear(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.fiscal_year_company.fiscal_year_company import FiscalYearCompany
+		from Goldfish.accounts.doctype.fiscal_year_company.fiscal_year_company import FiscalYearCompany
 
 		auto_created: DF.Check
 		companies: DF.Table[FiscalYearCompany]

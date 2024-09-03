@@ -1,4 +1,4 @@
-erpnext.PointOfSale.Controller = class {
+Goldfish.PointOfSale.Controller = class {
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find(".layout-main-section");
 		this.page = wrapper.page;
@@ -7,7 +7,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	fetch_opening_entry() {
-		return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_entry", {
+		return frappe.call("Goldfish.selling.page.point_of_sale.point_of_sale.check_opening_entry", {
 			user: frappe.session.user,
 		});
 	}
@@ -107,7 +107,7 @@ erpnext.PointOfSale.Controller = class {
 				// filter balance details for empty rows
 				balance_details = balance_details.filter((d) => d.mode_of_payment);
 
-				const method = "erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
+				const method = "Goldfish.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
 				const res = await frappe.call({
 					method,
 					args: { pos_profile, company, balance_details },
@@ -121,7 +121,7 @@ erpnext.PointOfSale.Controller = class {
 		dialog.show();
 		const pos_profile_query = () => {
 			return {
-				query: "erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query",
+				query: "Goldfish.accounts.doctype.pos_profile.pos_profile.pos_profile_query",
 				filters: { company: dialog.fields_dict.company.get_value() },
 			};
 		};
@@ -140,7 +140,7 @@ erpnext.PointOfSale.Controller = class {
 		});
 
 		frappe.call({
-			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_pos_profile_data",
+			method: "Goldfish.selling.page.point_of_sale.point_of_sale.get_pos_profile_data",
 			args: { pos_profile: this.pos_profile },
 			callback: (res) => {
 				const profile = res.message;
@@ -254,7 +254,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	init_item_selector() {
-		this.item_selector = new erpnext.PointOfSale.ItemSelector({
+		this.item_selector = new Goldfish.PointOfSale.ItemSelector({
 			wrapper: this.$components_wrapper,
 			pos_profile: this.pos_profile,
 			settings: this.settings,
@@ -267,7 +267,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	init_item_cart() {
-		this.cart = new erpnext.PointOfSale.ItemCart({
+		this.cart = new Goldfish.PointOfSale.ItemCart({
 			wrapper: this.$components_wrapper,
 			settings: this.settings,
 			events: {
@@ -294,7 +294,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	init_item_details() {
-		this.item_details = new erpnext.PointOfSale.ItemDetails({
+		this.item_details = new Goldfish.PointOfSale.ItemDetails({
 			wrapper: this.$components_wrapper,
 			settings: this.settings,
 			events: {
@@ -364,7 +364,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	init_payments() {
-		this.payment = new erpnext.PointOfSale.Payment({
+		this.payment = new Goldfish.PointOfSale.Payment({
 			wrapper: this.$components_wrapper,
 			events: {
 				get_frm: () => this.frm || {},
@@ -398,7 +398,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	init_recent_order_list() {
-		this.recent_order_list = new erpnext.PointOfSale.PastOrderList({
+		this.recent_order_list = new Goldfish.PointOfSale.PastOrderList({
 			wrapper: this.$components_wrapper,
 			events: {
 				open_invoice_data: (name) => {
@@ -412,7 +412,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	init_order_summary() {
-		this.order_summary = new erpnext.PointOfSale.PastOrderSummary({
+		this.order_summary = new Goldfish.PointOfSale.PastOrderSummary({
 			wrapper: this.$components_wrapper,
 			events: {
 				get_frm: () => this.frm,
@@ -512,7 +512,7 @@ erpnext.PointOfSale.Controller = class {
 		this.frm = this.get_new_frm(this.frm);
 		this.frm.doc.items = [];
 		return frappe.call({
-			method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.make_sales_return",
+			method: "Goldfish.accounts.doctype.pos_invoice.pos_invoice.make_sales_return",
 			args: {
 				source_name: doc.name,
 				target_doc: this.frm.doc,
@@ -726,7 +726,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	async check_serial_no_availablilty(item_code, warehouse, serial_no) {
-		const method = "erpnext.stock.doctype.serial_no.serial_no.get_pos_reserved_serial_nos";
+		const method = "Goldfish.stock.doctype.serial_no.serial_no.get_pos_reserved_serial_nos";
 		const args = { filters: { item_code, warehouse } };
 		const res = await frappe.call({ method, args });
 
@@ -743,7 +743,7 @@ erpnext.PointOfSale.Controller = class {
 	get_available_stock(item_code, warehouse) {
 		const me = this;
 		return frappe.call({
-			method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.get_stock_availability",
+			method: "Goldfish.accounts.doctype.pos_invoice.pos_invoice.get_stock_availability",
 			args: {
 				item_code: item_code,
 				warehouse: warehouse,

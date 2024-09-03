@@ -10,20 +10,20 @@ from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import random_string
 from frappe.utils.data import add_to_date, now, today
 
-from erpnext.manufacturing.doctype.job_card.job_card import (
+from Goldfish.manufacturing.doctype.job_card.job_card import (
 	JobCardOverTransferError,
 	OperationMismatchError,
 	OverlapError,
 	make_corrective_job_card,
 	make_material_request,
 )
-from erpnext.manufacturing.doctype.job_card.job_card import (
+from Goldfish.manufacturing.doctype.job_card.job_card import (
 	make_stock_entry as make_stock_entry_from_jc,
 )
-from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
-from erpnext.manufacturing.doctype.work_order.work_order import WorkOrder
-from erpnext.manufacturing.doctype.workstation.test_workstation import make_workstation
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from Goldfish.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
+from Goldfish.manufacturing.doctype.work_order.work_order import WorkOrder
+from Goldfish.manufacturing.doctype.workstation.test_workstation import make_workstation
+from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestJobCard(FrappeTestCase):
@@ -449,7 +449,7 @@ class TestJobCard(FrappeTestCase):
 		assertStatus("Cancelled")
 
 	def test_job_card_material_request_and_bom_details(self):
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
+		from Goldfish.stock.doctype.material_request.material_request import make_stock_entry
 
 		create_bom_with_multiple_operations()
 		work_order = make_wo_with_transfer_against_jc()
@@ -468,16 +468,16 @@ class TestJobCard(FrappeTestCase):
 		self.assertEqual(ste.bom_no, work_order.bom_no)
 
 	def test_job_card_proccess_qty_and_completed_qty(self):
-		from erpnext.manufacturing.doctype.routing.test_routing import (
+		from Goldfish.manufacturing.doctype.routing.test_routing import (
 			create_routing,
 			setup_bom,
 			setup_operations,
 		)
-		from erpnext.manufacturing.doctype.work_order.work_order import (
+		from Goldfish.manufacturing.doctype.work_order.work_order import (
 			make_stock_entry as make_stock_entry_for_wo,
 		)
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		operations = [
 			{"operation": "Test Operation A1", "workstation": "Test Workstation A", "time_in_mins": 30},
@@ -612,7 +612,7 @@ class TestJobCard(FrappeTestCase):
 
 def create_bom_with_multiple_operations():
 	"Create a BOM with multiple operations and Material Transfer against Job Card"
-	from erpnext.manufacturing.doctype.operation.test_operation import make_operation
+	from Goldfish.manufacturing.doctype.operation.test_operation import make_operation
 
 	test_record = frappe.get_test_records("BOM")[2]
 	bom_doc = frappe.get_doc(test_record)

@@ -9,7 +9,7 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils import cint, flt, getdate
 
-from erpnext.controllers.accounts_controller import validate_account_head
+from Goldfish.controllers.accounts_controller import validate_account_head
 
 
 class TaxWithholdingCategory(Document):
@@ -21,10 +21,10 @@ class TaxWithholdingCategory(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.tax_withholding_account.tax_withholding_account import (
+		from Goldfish.accounts.doctype.tax_withholding_account.tax_withholding_account import (
 			TaxWithholdingAccount,
 		)
-		from erpnext.accounts.doctype.tax_withholding_rate.tax_withholding_rate import TaxWithholdingRate
+		from Goldfish.accounts.doctype.tax_withholding_rate.tax_withholding_rate import TaxWithholdingRate
 
 		accounts: DF.Table[TaxWithholdingAccount]
 		category_name: DF.Data | None

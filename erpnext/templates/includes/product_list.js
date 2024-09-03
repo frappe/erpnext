@@ -14,7 +14,7 @@ window.get_product_list = function() {
 		method: "GET",
 		url: "/",
 		data: {
-			cmd: "erpnext.templates.pages.product_search.get_product_list",
+			cmd: "Goldfish.templates.pages.product_search.get_product_list",
 			start: window.start,
 			search: window.search,
 			product_group: window.product_group

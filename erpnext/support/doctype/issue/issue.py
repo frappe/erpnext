@@ -248,7 +248,7 @@ def auto_close_tickets():
 
 
 def has_website_permission(doc, ptype, user, verbose=False):
-	from erpnext.controllers.website_list_for_contact import has_website_permission
+	from Goldfish.controllers.website_list_for_contact import has_website_permission
 
 	permission_based_on_customer = has_website_permission(doc, ptype, user, verbose)
 

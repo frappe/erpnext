@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 
-from erpnext.controllers.trends import get_columns, get_data
+from Goldfish.controllers.trends import get_columns, get_data
 
 
 def execute(filters=None):

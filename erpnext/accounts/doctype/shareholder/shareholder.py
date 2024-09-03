@@ -18,7 +18,7 @@ class Shareholder(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.share_balance.share_balance import ShareBalance
+		from Goldfish.accounts.doctype.share_balance.share_balance import ShareBalance
 
 		company: DF.Link
 		contact_list: DF.Code | None

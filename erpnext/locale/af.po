@@ -1,16 +1,16 @@
-# Translations template for ERPNext.
+# Translations template for Goldfish.
 # Copyright (C) 2024 Frappe Technologies Pvt. Ltd.
-# This file is distributed under the same license as the ERPNext project.
+# This file is distributed under the same license as the Goldfish project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: ERPNext VERSION\n"
-"Report-Msgid-Bugs-To: info@erpnext.com\n"
+"Project-Id-Version: Goldfish VERSION\n"
+"Report-Msgid-Bugs-To: info@Goldfish.com\n"
 "POT-Creation-Date: 2024-01-12 13:34+0053\n"
 "PO-Revision-Date: 2024-01-10 16:34+0553\n"
-"Last-Translator: info@erpnext.com\n"
-"Language-Team: info@erpnext.com\n"
+"Last-Translator: info@Goldfish.com\n"
+"Language-Team: info@Goldfish.com\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -84,7 +84,7 @@ msgstr "&quot;Is Vaste Bate&quot; kan nie afgeskakel word nie, aangesien Bate-re
 msgid ""
 "# Account Settings\n"
 "\n"
-"In ERPNext, Accounting features are configurable as per your business needs. Accounts Settings is the place to define some of your accounting preferences like:\n"
+"In Goldfish, Accounting features are configurable as per your business needs. Accounts Settings is the place to define some of your accounting preferences like:\n"
 "\n"
 " - Credit Limit and over billing settings\n"
 " - Taxation preferences\n"
@@ -96,7 +96,7 @@ msgstr ""
 msgid ""
 "# Account Settings\n"
 "\n"
-"This is a crucial piece of configuration. There are various account settings in ERPNext to restrict and configure actions in the Accounting module.\n"
+"This is a crucial piece of configuration. There are various account settings in Goldfish to restrict and configure actions in the Accounting module.\n"
 "\n"
 "The following settings are avaialble for you to configure\n"
 "\n"
@@ -113,7 +113,7 @@ msgstr ""
 msgid ""
 "# Add an Existing Asset\n"
 "\n"
-"If you are just starting with ERPNext, you will need to enter Assets you already possess. You can add them as existing fixed assets in ERPNext. Please note that you will have to make a Journal Entry separately updating the opening balance in the fixed asset account."
+"If you are just starting with Goldfish, you will need to enter Assets you already possess. You can add them as existing fixed assets in Goldfish. Please note that you will have to make a Journal Entry separately updating the opening balance in the fixed asset account."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create Your First Sales Invoice '
@@ -134,7 +134,7 @@ msgid ""
 "Here's the flow of how a sales invoice is generally created\n"
 "\n"
 "\n"
-"![Sales Flow](https://docs.erpnext.com/docs/assets/img/accounts/so-flow.png)"
+"![Sales Flow](https://docs.Goldfish.com/docs/assets/img/accounts/so-flow.png)"
 msgstr ""
 
 #. Description of the Onboarding Step 'Define Asset Category'
@@ -189,7 +189,7 @@ msgstr ""
 msgid ""
 "# Chart Of Accounts\n"
 "\n"
-"ERPNext sets up a simple chart of accounts for each Company you create, but you can modify it according to business and legal requirements."
+"Goldfish sets up a simple chart of accounts for each Company you create, but you can modify it according to business and legal requirements."
 msgstr ""
 
 #. Description of the Onboarding Step 'Check Stock Ledger'
@@ -198,7 +198,7 @@ msgstr ""
 #: stock/onboarding_step/view_stock_projected_qty/view_stock_projected_qty.json
 msgid ""
 "# Check Stock Reports\n"
-"Based on the various stock transactions, you can get a host of one-click Stock Reports in ERPNext like Stock Ledger, Stock Balance, Projected Quantity, and Ageing analysis."
+"Based on the various stock transactions, you can get a host of one-click Stock Reports in Goldfish like Stock Ledger, Stock Balance, Projected Quantity, and Ageing analysis."
 msgstr ""
 
 #. Description of the Onboarding Step 'Cost Centers for Budgeting and Analysis'
@@ -208,7 +208,7 @@ msgid ""
 "\n"
 "While your Books of Accounts are framed to fulfill statutory requirements, you can set up Cost Center and Accounting Dimensions to address your companies reporting and budgeting requirements.\n"
 "\n"
-"Click here to learn more about how  <b>[Cost Center](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/cost-center)</b> and <b> [Dimensions](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-dimensions)</b> allow you to get advanced financial analytics reports from ERPNext."
+"Click here to learn more about how  <b>[Cost Center](https://docs.Goldfish.com/docs/v13/user/manual/en/accounts/cost-center)</b> and <b> [Dimensions](https://docs.Goldfish.com/docs/v13/user/manual/en/accounts/accounting-dimensions)</b> allow you to get advanced financial analytics reports from Goldfish."
 msgstr ""
 
 #. Description of the Onboarding Step 'Finished Items'
@@ -263,7 +263,7 @@ msgstr ""
 msgid ""
 "# Create a Letter Head\n"
 "\n"
-"A Letter Head contains your organization's name, logo, address, etc which appears at the header and footer portion in documents. You can learn more about Setting up Letter Head in ERPNext here.\n"
+"A Letter Head contains your organization's name, logo, address, etc which appears at the header and footer portion in documents. You can learn more about Setting up Letter Head in Goldfish here.\n"
 msgstr ""
 
 #. Description of the Onboarding Step 'Create your first Quotation'
@@ -315,7 +315,7 @@ msgid ""
 "\n"
 "Item is a product or a service offered by your company, or something you buy as a part of your supplies or raw materials.\n"
 "\n"
-"Items are integral to everything you do in ERPNext - from billing, purchasing to managing inventory. Everything you buy or sell, whether it is a physical product or a service is an Item. Items can be stock, non-stock, variants, serialized, batched, assets, etc.\n"
+"Items are integral to everything you do in Goldfish - from billing, purchasing to managing inventory. Everything you buy or sell, whether it is a physical product or a service is an Item. Items can be stock, non-stock, variants, serialized, batched, assets, etc.\n"
 msgstr ""
 
 #. Description of the Onboarding Step 'Create an Item'
@@ -324,7 +324,7 @@ msgid ""
 "# Create an Item\n"
 "The Stock module deals with the movement of items.\n"
 "\n"
-"In this step we will create an  [**Item**](https://docs.erpnext.com/docs/user/manual/en/stock/item)."
+"In this step we will create an  [**Item**](https://docs.Goldfish.com/docs/user/manual/en/stock/item)."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create first Purchase Order'
@@ -332,7 +332,7 @@ msgstr ""
 msgid ""
 "# Create first Purchase Order\n"
 "\n"
-"Purchase Order is at the heart of your buying transactions. In ERPNext, Purchase Order can can be created against a Purchase Material Request (indent) and Supplier Quotation as well.  Purchase Orders is also linked to Purchase Receipt and Purchase Invoices, allowing you to keep a birds-eye view on your purchase deals.\n"
+"Purchase Order is at the heart of your buying transactions. In Goldfish, Purchase Order can can be created against a Purchase Material Request (indent) and Supplier Quotation as well.  Purchase Orders is also linked to Purchase Receipt and Purchase Invoices, allowing you to keep a birds-eye view on your purchase deals.\n"
 "\n"
 msgstr ""
 
@@ -351,9 +351,9 @@ msgstr ""
 msgid ""
 "# Financial Statements\n"
 "\n"
-"In ERPNext, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.\n"
+"In Goldfish, you can get crucial financial reports like [Balance Sheet] and [Profit and Loss] statements with a click of a button. You can run in the report for a different period and plot analytics charts premised on statement data. For more reports, check sections like Financial Statements, General Ledger, and Profitability reports.\n"
 "\n"
-"<b>[Check Accounting reports](https://docs.erpnext.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
+"<b>[Check Accounting reports](https://docs.Goldfish.com/docs/v13/user/manual/en/accounts/accounting-reports)</b>"
 msgstr ""
 
 #. Description of the Onboarding Step 'Review Fixed Asset Accounts'
@@ -381,7 +381,7 @@ msgstr ""
 msgid ""
 "# Import Data from Spreadsheet\n"
 "\n"
-"In ERPNext, you can easily migrate your historical data using spreadsheets. You can use it for migrating not just masters (like Customer, Supplier, Items), but also for transactions like (outstanding invoices, opening stock and accounting entries, etc)."
+"In Goldfish, you can easily migrate your historical data using spreadsheets. You can use it for migrating not just masters (like Customer, Supplier, Items), but also for transactions like (outstanding invoices, opening stock and accounting entries, etc)."
 msgstr ""
 
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:148
@@ -392,24 +392,24 @@ msgstr ""
 #: stock/onboarding_step/introduction_to_stock_entry/introduction_to_stock_entry.json
 msgid ""
 "# Introduction to Stock Entry\n"
-"This video will give a quick introduction to [**Stock Entry**](https://docs.erpnext.com/docs/user/manual/en/stock/stock-entry)."
+"This video will give a quick introduction to [**Stock Entry**](https://docs.Goldfish.com/docs/user/manual/en/stock/stock-entry)."
 msgstr ""
 
 #. Description of the Onboarding Step 'Manage Stock Movements'
 #: stock/onboarding_step/create_a_stock_entry/create_a_stock_entry.json
 msgid ""
 "# Manage Stock Movements\n"
-"Stock entry allows you to register the movement of stock for various purposes like transfer, received, issues, repacked, etc. To address issues related to theft and pilferages,  you can always ensure that the movement of goods happens against a document reference Stock Entry in ERPNext.\n"
+"Stock entry allows you to register the movement of stock for various purposes like transfer, received, issues, repacked, etc. To address issues related to theft and pilferages,  you can always ensure that the movement of goods happens against a document reference Stock Entry in Goldfish.\n"
 "\n"
 "Let’s get a quick walk-through on the various scenarios covered in Stock Entry by watching [*this video*](https://www.youtube.com/watch?v=Njt107hlY3I)."
 msgstr ""
 
-#. Description of the Onboarding Step 'How to Navigate in ERPNext'
+#. Description of the Onboarding Step 'How to Navigate in Goldfish'
 #: setup/onboarding_step/navigation_help/navigation_help.json
 msgid ""
-"# Navigation in ERPNext\n"
+"# Navigation in Goldfish\n"
 "\n"
-"Ease of navigating and browsing around the ERPNext is one of our core strengths. In the following video, you will learn how to reach a specific feature in ERPNext via module page or AwesomeBar."
+"Ease of navigating and browsing around the Goldfish is one of our core strengths. In the following video, you will learn how to reach a specific feature in Goldfish via module page or AwesomeBar."
 msgstr ""
 
 #. Description of the Onboarding Step 'Purchase an Asset'
@@ -429,7 +429,7 @@ msgstr ""
 msgid ""
 "# Review Manufacturing Settings\n"
 "\n"
-"In ERPNext, the Manufacturing module’s features are configurable as per your business needs. Manufacturing Settings is the place where you can set your preferences for:\n"
+"In Goldfish, the Manufacturing module’s features are configurable as per your business needs. Manufacturing Settings is the place where you can set your preferences for:\n"
 "\n"
 "- Capacity planning for allocating jobs to workstations\n"
 "- Raw-material consumption based on BOM or actual\n"
@@ -441,7 +441,7 @@ msgstr ""
 msgid ""
 "# Review Stock Settings\n"
 "\n"
-"In ERPNext, the Stock module’s features are configurable as per your business needs. Stock Settings is the place where you can set your preferences for:\n"
+"In Goldfish, the Stock module’s features are configurable as per your business needs. Stock Settings is the place where you can set your preferences for:\n"
 "- Default values for Item and Pricing\n"
 "- Default valuation method for inventory valuation\n"
 "- Set preference for serialization and batching of item\n"
@@ -473,7 +473,7 @@ msgstr ""
 msgid ""
 "# Set Up a Company\n"
 "\n"
-"A company is a legal entity for which you will set up your books of account and create accounting transactions. In ERPNext, you can create multiple companies, and establish relationships (group/subsidiary) among them.\n"
+"A company is a legal entity for which you will set up your books of account and create accounting transactions. In Goldfish, you can create multiple companies, and establish relationships (group/subsidiary) among them.\n"
 "\n"
 "Within the company master, you can capture various default accounts for that Company and set crucial settings related to the accounting methodology followed for a company.\n"
 msgstr ""
@@ -483,7 +483,7 @@ msgstr ""
 msgid ""
 "# Setting up Taxes\n"
 "\n"
-"ERPNext lets you configure your taxes so that they are automatically applied in your buying and selling transactions. You can configure them globally or even on Items. ERPNext taxes are pre-configured for most regions."
+"Goldfish lets you configure your taxes so that they are automatically applied in your buying and selling transactions. You can configure them globally or even on Items. Goldfish taxes are pre-configured for most regions."
 msgstr ""
 
 #. Description of the Onboarding Step 'Routing'
@@ -500,7 +500,7 @@ msgid ""
 "# Setup a Warehouse\n"
 "The warehouse can be your location/godown/store where you maintain the item's inventory, and receive/deliver them to various parties.\n"
 "\n"
-"In ERPNext, you can maintain a Warehouse in the tree structure, so that location and sub-location of an item can be tracked. Also, you can link a Warehouse to a specific Accounting ledger, where the real-time stock value of that warehouse’s item will be reflected."
+"In Goldfish, you can maintain a Warehouse in the tree structure, so that location and sub-location of an item can be tracked. Also, you can link a Warehouse to a specific Accounting ledger, where the real-time stock value of that warehouse’s item will be reflected."
 msgstr ""
 
 #. Description of the Onboarding Step 'Track Material Request'
@@ -517,7 +517,7 @@ msgstr ""
 #: stock/onboarding_step/stock_opening_balance/stock_opening_balance.json
 msgid ""
 "# Update Stock Opening Balance\n"
-"It’s an entry to update the stock balance of an item, in a warehouse, on a date and time you are going live on ERPNext.\n"
+"It’s an entry to update the stock balance of an item, in a warehouse, on a date and time you are going live on Goldfish.\n"
 "\n"
 "Once opening stocks are updated, you can create transactions like manufacturing and stock deliveries, where this opening stock will be consumed."
 msgstr ""
@@ -527,18 +527,18 @@ msgstr ""
 msgid ""
 "# Updating Opening Balances\n"
 "\n"
-"Once you close the financial statement in previous accounting software, you can update the same as opening in your ERPNext's Balance Sheet accounts. This will allow you to get complete financial statements from ERPNext in the coming years, and discontinue the parallel accounting system right away."
+"Once you close the financial statement in previous accounting software, you can update the same as opening in your Goldfish's Balance Sheet accounts. This will allow you to get complete financial statements from Goldfish in the coming years, and discontinue the parallel accounting system right away."
 msgstr ""
 
 #. Description of the Onboarding Step 'View Warehouses'
 #: stock/onboarding_step/view_warehouses/view_warehouses.json
 msgid ""
 "# View Warehouse\n"
-"In ERPNext the term 'warehouse' can be thought of as a storage location.\n"
+"In Goldfish the term 'warehouse' can be thought of as a storage location.\n"
 "\n"
-"Warehouses are arranged in ERPNext in a tree like structure, where multiple sub-warehouses can be grouped under a single warehouse.\n"
+"Warehouses are arranged in Goldfish in a tree like structure, where multiple sub-warehouses can be grouped under a single warehouse.\n"
 "\n"
-"In this step we will view the [**Warehouse Tree**](https://docs.erpnext.com/docs/user/manual/en/stock/warehouse#21-tree-view) to view the [**Warehouses**](https://docs.erpnext.com/docs/user/manual/en/stock/warehouse) that are set by default."
+"In this step we will view the [**Warehouse Tree**](https://docs.Goldfish.com/docs/user/manual/en/stock/warehouse#21-tree-view) to view the [**Warehouses**](https://docs.Goldfish.com/docs/user/manual/en/stock/warehouse) that are set by default."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create a Sales Item'
@@ -547,11 +547,11 @@ msgid ""
 "## Products and Services\n"
 "\n"
 "Depending on the nature of your business, you might be selling products or services to your clients or even both. \n"
-"ERPNext is optimized for itemized management of your sales and purchase.\n"
+"Goldfish is optimized for itemized management of your sales and purchase.\n"
 "\n"
 "The **Item Master**  is where you can add all your sales items. If you are in services, you can create an Item for each service that you offer. If you run a manufacturing business, the same master is used for keeping a record of raw materials, sub-assemblies etc.\n"
 "\n"
-"Completing the Item Master is very essential for the successful implementation of ERPNext. We have a brief video introducing the item master for you, you can watch it in the next step."
+"Completing the Item Master is very essential for the successful implementation of Goldfish. We have a brief video introducing the item master for you, you can watch it in the next step."
 msgstr ""
 
 #. Description of the Onboarding Step 'Create a Customer'
@@ -571,7 +571,7 @@ msgstr ""
 msgid ""
 "## Who is a Supplier?\n"
 "\n"
-"Suppliers are companies or individuals who provide you with products or services. ERPNext has comprehensive features for purchase cycles. \n"
+"Suppliers are companies or individuals who provide you with products or services. Goldfish has comprehensive features for purchase cycles. \n"
 "\n"
 "Let's quickly create a supplier with the minimal details required. You need the name of the supplier, assign the supplier to a group, and select the type of the supplier, viz. Company or Individual."
 msgstr ""
@@ -1571,7 +1571,7 @@ msgid "API Endpoint"
 msgstr "API eindpunt"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "API Endpoint"
 msgstr "API eindpunt"
@@ -1751,7 +1751,7 @@ msgid "Access Key is required for Service Provider: {0}"
 msgstr ""
 
 #. Label of a Small Text field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Access Token"
 msgstr "Toegangspunt"
@@ -2966,7 +2966,7 @@ msgid "Accounts"
 msgstr "rekeninge"
 
 #. Label of a Section Break field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Accounts"
 msgstr "rekeninge"
@@ -4846,7 +4846,7 @@ msgid "Address used to determine Tax Category in transactions"
 msgstr "Adres wat gebruik word om belastingkategorie in transaksies te bepaal"
 
 #. Label of a Attach field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Addresses"
 msgstr "adresse"
@@ -7166,7 +7166,7 @@ msgstr "Amt"
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:26
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:26
 msgctxt "<a href='/app/error-log' class='variant-click'>Error Log</a>"
 msgid "An error has occurred during {0}. Check {1} for more details"
 msgstr ""
@@ -7370,7 +7370,7 @@ msgid "Applicable on booking actual expenses"
 msgstr "Van toepassing op bespreking werklike uitgawes"
 
 #. Label of a Section Break field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Application Settings"
 msgstr "Aansoekinstellings"
@@ -8713,8 +8713,8 @@ msgstr "eienskappe"
 msgid "Auditor"
 msgstr "ouditeur"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:68
-#: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:85
+#: Goldfish_integrations/doctype/plaid_settings/plaid_connector.py:68
+#: Goldfish_integrations/doctype/plaid_settings/plaid_connector.py:85
 msgid "Authentication Failed"
 msgstr "Verifikasie misluk"
 
@@ -8730,7 +8730,7 @@ msgid "Authorization Control"
 msgstr "Magtigingskontrole"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Authorization Endpoint"
 msgstr "Magtiging Eindpunt"
@@ -8741,13 +8741,13 @@ msgid "Authorization Rule"
 msgstr "Magtigingsreël"
 
 #. Label of a Section Break field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Authorization Settings"
 msgstr "Magtigingsinstellings"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Authorization URL"
 msgstr "Magtigings-URL"
@@ -10201,15 +10201,15 @@ msgstr ""
 msgid "Bank account cannot be named as {0}"
 msgstr "Bankrekening kan nie as {0} genoem word nie."
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:130
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:130
 msgid "Bank account {0} already exists and could not be created again"
 msgstr "Bankrekening {0} bestaan reeds en kon nie weer geskep word nie"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:134
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:134
 msgid "Bank accounts added"
 msgstr "Bankrekeninge bygevoeg"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:297
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:297
 msgid "Bank transaction creation error"
 msgstr "Fout met die skep van banktransaksies"
 
@@ -11870,7 +11870,7 @@ msgid "Buying must be checked, if Applicable For is selected as {0}"
 msgstr "Koop moet gekontroleer word, indien toepaslik vir is gekies as {0}"
 
 #: buying/doctype/buying_settings/buying_settings.js:14
-msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
+msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.Goldfish.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
 msgstr ""
 
 #: templates/pages/home.html:59
@@ -12770,7 +12770,7 @@ msgstr "Kan nie rynommer groter as of gelyk aan huidige rynommer vir hierdie Laa
 msgid "Cannot retrieve link token for update. Check Error Log for more information"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:60
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:60
 msgid "Cannot retrieve link token. Check Error Log for more information"
 msgstr ""
 
@@ -13270,7 +13270,7 @@ msgid "Chart of Accounts"
 msgstr "Tabel van rekeninge"
 
 #. Label of a Attach field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Chart of Accounts"
 msgstr "Tabel van rekeninge"
@@ -13605,13 +13605,13 @@ msgid "Client"
 msgstr "kliënt"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Client ID"
 msgstr "Kliënt-ID"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Client Secret"
 msgstr "Kliëntgeheim"
@@ -13869,7 +13869,7 @@ msgid "Code"
 msgstr "kode"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Code"
 msgstr "kode"
@@ -14168,7 +14168,7 @@ msgstr "maatskappye"
 #: crm/report/lost_opportunity/lost_opportunity.js:9
 #: crm/report/opportunity_summary_by_sales_stage/opportunity_summary_by_sales_stage.js:59
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.js:52
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:119
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:119
 #: manufacturing/doctype/bom_creator/bom_creator.js:52
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.js:8
 #: manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.js:9
@@ -14784,7 +14784,7 @@ msgid "Company"
 msgstr "maatskappy"
 
 #. Label of a Link field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Company"
 msgstr "maatskappy"
@@ -15183,7 +15183,7 @@ msgid "Company Name"
 msgstr "maatskappynaam"
 
 #. Description of the 'Tally Company' (Data) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Company Name as per Imported Tally Data"
 msgstr "Maatskappy se naam volgens ingevoerde tellingsdata"
@@ -15197,7 +15197,7 @@ msgid "Company Not Linked"
 msgstr "Maatskappy nie gekoppel nie"
 
 #. Label of a Section Break field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Company Settings"
 msgstr "Maatskappyinstellings"
@@ -15288,7 +15288,7 @@ msgctxt "Purchase Invoice"
 msgid "Company which internal supplier represents"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:80
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:80
 msgid "Company {0} already exists. Continuing will overwrite the Company and Chart of Accounts"
 msgstr "Maatskappy {0} bestaan reeds. As u voortgaan, word die maatskappy en rekeningkaart oorskryf"
 
@@ -15353,7 +15353,7 @@ msgctxt "Quotation"
 msgid "Competitors"
 msgstr ""
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:61
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:61
 msgid "Complete"
 msgstr "volledige"
 
@@ -15364,7 +15364,7 @@ msgid "Complete"
 msgstr "volledige"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Complete"
 msgstr "volledige"
@@ -15793,27 +15793,27 @@ msgctxt "Employee"
 msgid "Confirmation Date"
 msgstr "Bevestigingsdatum"
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:37
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:45
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:37
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:45
 msgid "Connect to Quickbooks"
 msgstr "Koppel aan Vinnige boeke"
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:59
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:59
 msgid "Connected to QuickBooks"
 msgstr "Gekoppel aan QuickBooks"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Connected to QuickBooks"
 msgstr "Gekoppel aan QuickBooks"
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:58
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:58
 msgid "Connecting to QuickBooks"
 msgstr "Koppel aan QuickBooks"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Connecting to QuickBooks"
 msgstr "Koppel aan QuickBooks"
@@ -16639,7 +16639,7 @@ msgctxt "Issue"
 msgid "Content Type"
 msgstr "Inhoud Tipe"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:136
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:136
 #: public/js/controllers/transaction.js:2044
 #: selling/doctype/quotation/quotation.js:344
 msgid "Continue"
@@ -17601,7 +17601,7 @@ msgstr ""
 msgid "Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"
 msgstr "Kon nie kredietnota outomaties skep nie. Merk asseblief die afskrif &#39;Kredietnota uitreik&#39; en dien weer in"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:339
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:339
 msgid "Could not detect the Company for updating Bank Accounts"
 msgstr ""
 
@@ -18294,7 +18294,7 @@ msgstr ""
 msgid "Creating Accounts..."
 msgstr "Skep rekeninge ..."
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:398
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:398
 msgid "Creating Company and Importing Chart of Accounts"
 msgstr "Skep &#39;n maatskappy en voer rekeningrekeninge in"
 
@@ -18629,7 +18629,7 @@ msgstr "krediteure"
 
 #. Description of the 'Tally Creditors Account' (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Creditors Account set in Tally"
 msgstr "Krediteurrekening in Tally opgestel"
@@ -20498,7 +20498,7 @@ msgid "Data Import and Settings"
 msgstr "Data-invoer en instellings"
 
 #. Description of the 'Master Data' (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Data exported from Tally that consists of the Chart of Accounts, Customers, Suppliers, Addresses, Items and UOMs"
 msgstr "Data uitgevoer vanaf Tally wat bestaan uit die rekeningkaart, klante, verskaffers, adresse, items en UOM&#39;s"
@@ -20787,14 +20787,14 @@ msgid "Day"
 msgstr "dag"
 
 #. Label of a Attach field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Day Book Data"
 msgstr "Dagboekdata"
 
 #. Description of the 'Day Book Data' (Attach) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Day Book Data exported from Tally that consists of all historic transactions"
 msgstr "Dagboekdata uitgevoer vanaf Tally wat bestaan uit alle historiese transaksies"
@@ -21048,7 +21048,7 @@ msgstr "debiteure"
 
 #. Description of the 'Tally Debtors Account' (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Debtors Account set in Tally"
 msgstr "Debiteurrekening opgestel in Tally"
@@ -21288,13 +21288,13 @@ msgid "Default Cost Center"
 msgstr "Verstek koste sentrum"
 
 #. Label of a Link field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Default Cost Center"
 msgstr "Verstek koste sentrum"
 
 #. Label of a Link field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Default Cost Center"
 msgstr "Verstek koste sentrum"
@@ -21570,7 +21570,7 @@ msgid "Default Receivable Account"
 msgstr "Verstek ontvangbare rekening"
 
 #. Label of a Link field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Default Round Off Account"
 msgstr "Standaard afgeronde rekening"
@@ -21610,7 +21610,7 @@ msgid "Default Service Level Agreement for {0} already exists."
 msgstr ""
 
 #. Label of a Link field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Default Shipping Account"
 msgstr "Verstek Posbus"
@@ -21658,7 +21658,7 @@ msgid "Default Territory"
 msgstr "Standaard Territorium"
 
 #. Label of a Link field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Default UOM"
 msgstr "Standaard UOM"
@@ -21700,7 +21700,7 @@ msgid "Default Warehouse"
 msgstr "Standaard pakhuis"
 
 #. Label of a Link field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Default Warehouse"
 msgstr "Standaard pakhuis"
@@ -21724,7 +21724,7 @@ msgid "Default Warehouse"
 msgstr "Standaard pakhuis"
 
 #. Label of a Link field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Default Warehouse"
 msgstr "Standaard pakhuis"
@@ -24577,9 +24577,9 @@ msgctxt "Bank Statement Import"
 msgid "Don't Send Emails"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:322
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:407
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:583
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:322
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:407
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:583
 #: public/js/utils/crm_activities.js:211
 msgid "Done"
 msgstr "gedaan"
@@ -25293,15 +25293,15 @@ msgid "EAN-8"
 msgstr ""
 
 #. Label of a Data field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
-msgid "ERPNext Company"
-msgstr "ERPNext Company"
+msgid "Goldfish Company"
+msgstr "Goldfish Company"
 
 #. Label of a Data field in DocType 'Employee Group Table'
 #: setup/doctype/employee_group_table/employee_group_table.json
 msgctxt "Employee Group Table"
-msgid "ERPNext User ID"
+msgid "Goldfish User ID"
 msgstr "ERPVolgende gebruikers-ID"
 
 #. Option for the 'Update frequency of Project' (Select) field in DocType
@@ -26032,7 +26032,7 @@ msgid "Enable Discount Accounting for Selling"
 msgstr ""
 
 #. Label of a Check field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "Enable European Access"
 msgstr "Aktiveer Europese toegang"
@@ -26084,7 +26084,7 @@ msgid "Enabled"
 msgstr "enabled"
 
 #. Label of a Check field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "Enabled"
 msgstr "enabled"
@@ -26539,7 +26539,7 @@ msgstr ""
 msgid "Error evaluating the criteria formula"
 msgstr "Kon nie die kriteria formule evalueer nie"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:157
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:157
 msgid "Error occured while parsing Chart of Accounts: Please make sure that no two accounts have the same name"
 msgstr "Fout het voorgekom tydens ontleding van rekeningrekeninge: maak asseblief seker dat nie twee rekeninge dieselfde naam het nie"
 
@@ -27445,7 +27445,7 @@ msgstr ""
 msgid "FIFO/LIFO Queue"
 msgstr ""
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:62
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:62
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:13
 msgid "Failed"
 msgstr "misluk"
@@ -27540,7 +27540,7 @@ msgid "Failed"
 msgstr "misluk"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Failed"
 msgstr "misluk"
@@ -27563,7 +27563,7 @@ msgid "Failed Entries"
 msgstr ""
 
 #. Label of a HTML field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Failed Import Log"
 msgstr "Kon nie invoer-logboek misluk nie"
@@ -27684,7 +27684,7 @@ msgctxt "Process Statement Of Accounts"
 msgid "Fetch Customers"
 msgstr "Haal klante"
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:50
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:50
 msgid "Fetch Data"
 msgstr "Haal data"
 
@@ -28395,7 +28395,7 @@ msgid "Fixed Deposit Number"
 msgstr "Vaste deposito nommer"
 
 #. Label of a HTML field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Fixed Error Log"
 msgstr "Vaste foutlêer"
@@ -31186,7 +31186,7 @@ msgstr ""
 
 #. Title of an Onboarding Step
 #: setup/onboarding_step/navigation_help/navigation_help.json
-msgid "How to Navigate in ERPNext"
+msgid "How to Navigate in Goldfish"
 msgstr ""
 
 #. Label of a Float field in DocType 'Timesheet Detail'
@@ -31555,12 +31555,12 @@ msgid "If this item has variants, then it cannot be selected in sales orders etc
 msgstr "As hierdie item variante het, kan dit nie in verkoopsorders ens gekies word nie."
 
 #: buying/doctype/buying_settings/buying_settings.js:24
-msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
-msgstr "As hierdie opsie &#39;Ja&#39; is ingestel, sal ERPNext u verhinder om &#39;n aankoopfaktuur of ontvangsbewys te maak sonder om eers &#39;n bestelling te skep. Hierdie konfigurasie kan vir &#39;n spesifieke verskaffer oorskry word deur die &#39;Laat die aankoop van faktuur sonder die bestelling&#39; in die verskaffermaster in te skakel."
+msgid "If this option is configured 'Yes', Goldfish will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
+msgstr "As hierdie opsie &#39;Ja&#39; is ingestel, sal Goldfish u verhinder om &#39;n aankoopfaktuur of ontvangsbewys te maak sonder om eers &#39;n bestelling te skep. Hierdie konfigurasie kan vir &#39;n spesifieke verskaffer oorskry word deur die &#39;Laat die aankoop van faktuur sonder die bestelling&#39; in die verskaffermaster in te skakel."
 
 #: buying/doctype/buying_settings/buying_settings.js:29
-msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
-msgstr "As hierdie opsie &#39;Ja&#39; is ingestel, sal ERPNext u verhinder om &#39;n aankoopfaktuur te maak sonder om eers &#39;n aankoopbewys te skep. Hierdie konfigurasie kan vir &#39;n bepaalde verskaffer oorskry word deur die &#39;Laat die aankoop van fakture sonder die ontvangsbewys&#39; in die verskaffersmeester in te skakel."
+msgid "If this option is configured 'Yes', Goldfish will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
+msgstr "As hierdie opsie &#39;Ja&#39; is ingestel, sal Goldfish u verhinder om &#39;n aankoopfaktuur te maak sonder om eers &#39;n aankoopbewys te skep. Hierdie konfigurasie kan vir &#39;n bepaalde verskaffer oorskry word deur die &#39;Laat die aankoop van fakture sonder die ontvangsbewys&#39; in die verskaffersmeester in te skakel."
 
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:11
 msgid "If ticked, multiple materials can be used for a single Work Order. This is useful if one or more time consuming products are being manufactured."
@@ -31571,7 +31571,7 @@ msgid "If ticked, the BOM cost will be automatically updated based on Valuation 
 msgstr "As dit aangevinkt is, sal die BOM-koste outomaties opgedateer word op grond van die waardasietarief / pryslyskoers / laaste aankoopprys van grondstowwe."
 
 #: stock/doctype/item/item.js:828
-msgid "If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item."
+msgid "If you are maintaining stock of this Item in your Inventory, Goldfish will make a stock ledger entry for each transaction of this item."
 msgstr ""
 
 #. Description of the 'Unreconciled Entries' (Section Break) field in DocType
@@ -32064,7 +32064,7 @@ msgstr "Data invoer"
 msgid "Import Data from Spreadsheet"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:66
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:66
 msgid "Import Day Book Data"
 msgstr "Voer dagboekdata in"
 
@@ -32093,7 +32093,7 @@ msgid "Import Log"
 msgstr "Invoer Log"
 
 #. Label of a Section Break field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Import Log"
 msgstr "Invoer Log"
@@ -32104,7 +32104,7 @@ msgctxt "Bank Statement Import"
 msgid "Import Log Preview"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:54
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:54
 msgid "Import Master Data"
 msgstr "Voer hoofdata in"
 
@@ -32155,11 +32155,11 @@ msgstr ""
 msgid "Import in Bulk"
 msgstr "Invoer in grootmaat"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:404
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:404
 msgid "Importing Items and UOMs"
 msgstr "Invoer van items en UOM&#39;s"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:401
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:401
 msgid "Importing Parties and Addresses"
 msgstr "Partye en adresse invoer"
 
@@ -32253,7 +32253,7 @@ msgstr "In produksie"
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:65
 #: accounts/doctype/ledger_merge/ledger_merge.js:19
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:36
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:60
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:60
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:7
 msgid "In Progress"
 msgstr "In Progress"
@@ -32296,7 +32296,7 @@ msgid "In Progress"
 msgstr "In Progress"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "In Progress"
 msgstr "In Progress"
@@ -34245,13 +34245,13 @@ msgid "Is Customer Provided Item"
 msgstr "Word die kliënt voorsien"
 
 #. Label of a Check field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Is Day Book Data Imported"
 msgstr "Word dagboekdata ingevoer"
 
 #. Label of a Check field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Is Day Book Data Processed"
 msgstr "Word dagboekdata verwerk"
@@ -34591,13 +34591,13 @@ msgid "Is Mandatory"
 msgstr "Is verpligtend"
 
 #. Label of a Check field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Is Master Data Imported"
 msgstr "Is meerdata ingevoer"
 
 #. Label of a Check field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Is Master Data Processed"
 msgstr "Word meesterdata verwerk"
@@ -37262,7 +37262,7 @@ msgid "Items"
 msgstr "items"
 
 #. Label of a Attach field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Items"
 msgstr "items"
@@ -38075,7 +38075,7 @@ msgstr ""
 msgid "Learn Sales Management"
 msgstr ""
 
-#. Label of an action in the Onboarding Step 'How to Navigate in ERPNext'
+#. Label of an action in the Onboarding Step 'How to Navigate in Goldfish'
 #: setup/onboarding_step/navigation_help/navigation_help.json
 msgid "Learn about  Navigation options"
 msgstr ""
@@ -38085,7 +38085,7 @@ msgstr ""
 #: accounts/doctype/accounts_settings/accounts_settings.json
 #, python-format
 msgctxt "Accounts Settings"
-msgid "Learn about <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20ERPNext,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>"
+msgid "Learn about <a href=\"https://docs.Goldfish.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20Goldfish,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>"
 msgstr ""
 
 #. Label of an action in the Onboarding Step 'Updating Opening Balances'
@@ -38252,7 +38252,7 @@ msgstr ""
 
 #. Title of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
-msgid "Let's begin your journey with ERPNext"
+msgid "Let's begin your journey with Goldfish"
 msgstr ""
 
 #. Label of an action in the Onboarding Step 'Purchase an Asset'
@@ -38612,7 +38612,7 @@ msgctxt "Support Search Source"
 msgid "Link Options"
 msgstr "Skakelopsies"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:15
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:15
 msgid "Link a new bank account"
 msgstr ""
 
@@ -40339,7 +40339,7 @@ msgid "Master"
 msgstr "meester"
 
 #. Label of a Attach field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Master Data"
 msgstr "Meesterdata"
@@ -47025,7 +47025,7 @@ msgid "Partially ordered"
 msgstr "Gedeeltelik bestel"
 
 #. Label of a Attach field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Parties"
 msgstr "partye"
@@ -49128,23 +49128,23 @@ msgid "Plaid Access Token"
 msgstr "Toegangsreëlmatjie"
 
 #. Label of a Data field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "Plaid Client ID"
 msgstr "Ingelegde kliënt-ID"
 
 #. Label of a Select field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "Plaid Environment"
 msgstr "Plaid omgewing"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:136
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:160
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:136
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:160
 msgid "Plaid Link Failed"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:238
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:238
 msgid "Plaid Link Refresh Required"
 msgstr ""
 
@@ -49153,13 +49153,13 @@ msgid "Plaid Link Updated"
 msgstr ""
 
 #. Label of a Password field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "Plaid Secret"
 msgstr "Plaid Secret"
 
 #. Name of a DocType
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Settings"
 msgstr "Plaid-instellings"
 
@@ -49169,7 +49169,7 @@ msgctxt "Plaid Settings"
 msgid "Plaid Settings"
 msgstr "Plaid-instellings"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:211
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:211
 msgid "Plaid transactions sync error"
 msgstr "Gesinkroniseerfout in plaidtransaksies"
 
@@ -49437,7 +49437,7 @@ msgstr ""
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:65
+#: Goldfish_integrations/doctype/plaid_settings/plaid_connector.py:65
 msgid "Please check your Plaid client ID and secret values"
 msgstr "Gaan u Plaid-kliënt-ID en geheime waardes na"
 
@@ -49766,7 +49766,7 @@ msgstr "Trek asseblief items van afleweringsnotas"
 msgid "Please rectify and try again."
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:237
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:237
 msgid "Please refresh or reset the Plaid linking of the Bank {}."
 msgstr ""
 
@@ -50262,7 +50262,7 @@ msgstr "Stel {0} in vir adres {1}"
 msgid "Please set {0} in BOM Creator {1}"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:95
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:95
 msgid "Please setup a default bank account for company {0}"
 msgstr "Stel asseblief &#39;n standaardbankrekening vir maatskappy {0} op"
 
@@ -52162,7 +52162,7 @@ msgctxt "Quality Review"
 msgid "Procedure"
 msgstr "prosedure"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:70
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:70
 msgid "Process Day Book Data"
 msgstr "Verwerk dagboekdata"
 
@@ -52183,9 +52183,9 @@ msgctxt "Quality Procedure Process"
 msgid "Process Description"
 msgstr "Prosesbeskrywing"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:328
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:414
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:589
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:328
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:414
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:589
 msgid "Process Failed"
 msgstr "Proses het misluk"
 
@@ -52248,7 +52248,7 @@ msgstr ""
 msgid "Process Loss Value"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:58
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:58
 msgid "Process Master Data"
 msgstr "Verwerk meesterdata"
 
@@ -52307,7 +52307,7 @@ msgid "Processed BOMs"
 msgstr ""
 
 #. Label of a Section Break field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Processed Files"
 msgstr "Verwerkte lêers"
@@ -52318,15 +52318,15 @@ msgctxt "Quality Procedure"
 msgid "Processes"
 msgstr "prosesse"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:306
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:306
 msgid "Processing Chart of Accounts and Parties"
 msgstr "Verwerking van rekeninge en partye"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:312
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:312
 msgid "Processing Items and UOMs"
 msgstr "Verwerking van items en UOM&#39;s"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:309
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:309
 msgid "Processing Party Addresses"
 msgstr "Verwerkende partytjie-adresse"
 
@@ -52334,7 +52334,7 @@ msgstr "Verwerkende partytjie-adresse"
 msgid "Processing Sales! Please Wait..."
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:580
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:580
 msgid "Processing Vouchers"
 msgstr "Verwerkingsbewyse"
 
@@ -55748,12 +55748,12 @@ msgid "Quick Stock Balance"
 msgstr "Vinnige voorraadbalans"
 
 #. Name of a DocType
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "QuickBooks Migrator"
 msgstr "QuickBooks Migrator"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Quickbooks Company ID"
 msgstr "Quickbooks Maatskappy ID"
@@ -56852,8 +56852,8 @@ msgctxt "Quality Inspection Reading"
 msgid "Reading 9"
 msgstr "Lees 9"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:300
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:577
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:300
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:577
 msgid "Reading Uploaded File"
 msgstr "Lees opgelaaide lêer"
 
@@ -57395,7 +57395,7 @@ msgid "Redemption Date"
 msgstr "Aflossingsdatum"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Redirect URL"
 msgstr "Herlei URL"
@@ -58000,7 +58000,7 @@ msgid "Refresh Plaid Link"
 msgstr ""
 
 #. Label of a Small Text field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Refresh Token"
 msgstr "Refresh Token"
@@ -59236,7 +59236,7 @@ msgstr ""
 msgid "Reset"
 msgstr "herstel"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:19
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:19
 msgid "Reset Plaid Link"
 msgstr ""
 
@@ -62644,7 +62644,7 @@ msgstr "Save"
 msgid "Save as Draft"
 msgstr "Stoor as konsep"
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.py:373
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.py:373
 msgid "Saving {0}"
 msgstr "Stoor {0}"
 
@@ -62883,7 +62883,7 @@ msgid "School/University"
 msgstr "Skool / Universiteit"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Scope"
 msgstr "omvang"
@@ -63321,7 +63321,7 @@ msgstr "Kies &#39;n verskaffer"
 msgid "Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only."
 msgstr "Kies &#39;n verskaffer uit die verstekverskaffers van die onderstaande items. By seleksie sal &#39;n bestelling slegs gemaak word teen items wat tot die geselekteerde verskaffer behoort."
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:136
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:136
 msgid "Select a company"
 msgstr "Kies &#39;n maatskappy"
 
@@ -67039,7 +67039,7 @@ msgid "Status"
 msgstr "status"
 
 #. Label of a Select field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Status"
 msgstr "status"
@@ -67136,7 +67136,7 @@ msgid "Status"
 msgstr "status"
 
 #. Label of a Data field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Status"
 msgstr "status"
@@ -69908,16 +69908,16 @@ msgstr "opgeskort"
 msgid "Switch Between Payment Modes"
 msgstr "Skakel tussen betaalmetodes"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:31
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:31
 msgid "Sync Started"
 msgstr ""
 
 #. Label of a Check field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "Synchronize all accounts every hour"
 msgstr "Sinkroniseer alle rekeninge elke uur"
@@ -69993,9 +69993,9 @@ msgstr "Sinkroniseer alle rekeninge elke uur"
 #: crm/doctype/opportunity_lost_reason/opportunity_lost_reason.json
 #: crm/doctype/opportunity_type/opportunity_type.json
 #: crm/doctype/prospect/prospect.json
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: manufacturing/doctype/blanket_order/blanket_order.json
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
@@ -70150,29 +70150,29 @@ msgid "Take a walk-through of Manufacturing Settings"
 msgstr ""
 
 #. Label of a Data field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Tally Company"
 msgstr "Tally Company"
 
 #. Label of a Data field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Tally Creditors Account"
 msgstr "Tally Krediteurrekening"
 
 #. Label of a Data field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Tally Debtors Account"
 msgstr "Tally Debiteure-rekening"
 
 #. Name of a DocType
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Tally Migration"
 msgstr "Tally Migration"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:32
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:32
 msgid "Tally Migration Error"
 msgstr "Tally Migration Error"
 
@@ -72004,7 +72004,7 @@ msgstr "Die rekeningkop onder aanspreeklikheid of ekwiteit, waarin wins / verlie
 
 #. Description of the 'Accounts' (Section Break) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "The accounts are set by the system automatically but do confirm these defaults"
 msgstr "Die rekening word outomaties deur die stelsel opgestel, maar bevestig hierdie standaarde"
@@ -72189,7 +72189,7 @@ msgstr "Die aandele bestaan nie met die {0}"
 msgid "The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:32
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:32
 msgid "The sync has started in the background, please check the {0} list for new records."
 msgstr ""
 
@@ -72277,7 +72277,7 @@ msgid "There are only {0} asset created or linked to {1}. Please create or link 
 msgstr ""
 
 #: stock/doctype/item/item.js:843
-msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.erpnext.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
+msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.Goldfish.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
 msgstr ""
 
 #: stock/report/item_variant_details/item_variant_details.py:25
@@ -72312,7 +72312,7 @@ msgstr "Daar is niks om te wysig nie."
 msgid "There must be atleast 1 Finished Good in this Stock Entry"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:135
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:135
 msgid "There was an error creating Bank Account while linking with Plaid."
 msgstr ""
 
@@ -72320,16 +72320,16 @@ msgstr ""
 msgid "There was an error saving the document."
 msgstr "Kon nie die dokument stoor nie."
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:236
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:236
 msgid "There was an error syncing transactions."
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:157
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:157
 msgid "There was an error updating Bank Account {} while linking with Plaid."
 msgstr ""
 
 #: accounts/doctype/bank/bank.js:113
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:109
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:109
 msgid "There was an issue connecting to Plaid's authentication server. Check browser console for more information"
 msgstr ""
 
@@ -72377,8 +72377,8 @@ msgid "This action will stop future billing. Are you sure you want to cancel thi
 msgstr "Hierdie aksie sal toekomstige fakturering stop. Is jy seker jy wil hierdie intekening kanselleer?"
 
 #: accounts/doctype/bank_account/bank_account.js:35
-msgid "This action will unlink this account from any external service integrating ERPNext with your bank accounts. It cannot be undone. Are you certain ?"
-msgstr "Hierdie aksie sal hierdie rekening ontkoppel van enige eksterne diens wat ERPNext met u bankrekeninge integreer. Dit kan nie ongedaan gemaak word nie. Is u seker?"
+msgid "This action will unlink this account from any external service integrating Goldfish with your bank accounts. It cannot be undone. Are you certain ?"
+msgstr "Hierdie aksie sal hierdie rekening ontkoppel van enige eksterne diens wat Goldfish met u bankrekeninge integreer. Dit kan nie ongedaan gemaak word nie. Is u seker?"
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
@@ -72457,8 +72457,8 @@ msgid "This is a root territory and cannot be edited."
 msgstr "Hierdie is &#39;n wortelgebied en kan nie geredigeer word nie."
 
 #: portal/doctype/homepage/homepage.py:31
-msgid "This is an example website auto-generated from ERPNext"
-msgstr "Dit is &#39;n voorbeeld webwerf wat outomaties deur ERPNext gegenereer word"
+msgid "This is an example website auto-generated from Goldfish"
+msgstr "Dit is &#39;n voorbeeld webwerf wat outomaties deur Goldfish gegenereer word"
 
 #: stock/doctype/item/item_dashboard.py:7
 msgid "This is based on stock movement. See {0} for details"
@@ -73729,7 +73729,7 @@ msgid "Toggle Recent Orders"
 msgstr "Skakel onlangse bestellings in"
 
 #. Label of a Data field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Token Endpoint"
 msgstr "Token Eindpunt"
@@ -76040,7 +76040,7 @@ msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
 msgstr ""
 
 #. Description of the 'Default UOM' (Link) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "UOM in case unspecified in imported data"
 msgstr "UOM in geval nie gespesifiseer in ingevoerde data nie"
@@ -76052,7 +76052,7 @@ msgid "UOMs"
 msgstr "UOMs"
 
 #. Label of a Attach field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "UOMs"
 msgstr "UOMs"
@@ -76135,7 +76135,7 @@ msgid "Unclosed Fiscal Years Profit / Loss (Credit)"
 msgstr "Onbekende fiskale jare Wins / verlies (Krediet)"
 
 #. Label of a Link field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgctxt "QuickBooks Migrator"
 msgid "Undeposited Funds Account"
 msgstr "Onvoorsiene Fondsrekening"
@@ -76441,7 +76441,7 @@ msgctxt "Appointment"
 msgid "Unverified"
 msgstr "geverifieerde"
 
-#: erpnext_integrations/utils.py:20
+#: Goldfish_integrations/utils.py:20
 msgid "Unverified Webhook Data"
 msgstr "Onverifieerde Webhook Data"
 
@@ -78067,13 +78067,13 @@ msgid "Vouchers"
 msgstr "geskenkbewyse"
 
 #. Label of a Attach field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
 msgid "Vouchers"
 msgstr "geskenkbewyse"
 
 #: patches/v15_0/remove_exotel_integration.py:32
-msgid "WARNING: Exotel app has been separated from ERPNext, please install the app to continue using Exotel integration."
+msgid "WARNING: Exotel app has been separated from Goldfish, please install the app to continue using Exotel integration."
 msgstr ""
 
 #. Label of a Link field in DocType 'Material Request Item'
@@ -80245,7 +80245,7 @@ msgstr ""
 
 #. Success message of the Module Onboarding 'Home'
 #: setup/module_onboarding/home/home.json
-msgid "You're ready to start your journey with ERPNext"
+msgid "You're ready to start your journey with Goldfish"
 msgstr ""
 
 #. Option for the 'Provider' (Select) field in DocType 'Video'
@@ -80259,12 +80259,12 @@ msgstr "YouTube"
 msgid "YouTube Interactions"
 msgstr "YouTube-interaksies"
 
-#. Description of the 'ERPNext Company' (Data) field in DocType 'Tally
+#. Description of the 'Goldfish Company' (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgctxt "Tally Migration"
-msgid "Your Company set in ERPNext"
-msgstr "U maatskappy is in ERPNext"
+msgid "Your Company set in Goldfish"
+msgstr "U maatskappy is in Goldfish"
 
 #: www/book_appointment/index.html:49
 msgid "Your Name (required)"
@@ -80325,8 +80325,8 @@ msgid "Zip File"
 msgstr "Ritslêer"
 
 #: stock/reorder_item.py:244
-msgid "[Important] [ERPNext] Auto Reorder Errors"
-msgstr "[Belangrik] [ERPNext] Herbestellingsfoute outomaties"
+msgid "[Important] [Goldfish] Auto Reorder Errors"
+msgstr "[Belangrik] [Goldfish] Herbestellingsfoute outomaties"
 
 #: controllers/status_updater.py:238
 msgid "`Allow Negative rates for Items`"
@@ -80362,7 +80362,7 @@ msgstr ""
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "development"
 msgstr "ontwikkeling"
@@ -80594,7 +80594,7 @@ msgstr ""
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "production"
 msgstr "produksie"
@@ -80681,7 +80681,7 @@ msgstr "rgt"
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgctxt "Plaid Settings"
 msgid "sandbox"
 msgstr "sandbox"
@@ -81288,7 +81288,7 @@ msgstr ""
 msgid "{} is added multiple times on rows: {}"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:704
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:704
 msgid "{} of {}"
 msgstr "{} van {}"
 

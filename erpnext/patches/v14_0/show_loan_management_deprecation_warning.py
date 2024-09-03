@@ -8,7 +8,7 @@ def execute():
 
 	click.secho(
 		"Loan Management module has been moved to a separate app"
-		" and will be removed from ERPNext in Version 15."
+		" and will be removed from Goldfish in Version 15."
 		" Please install the Lending app when upgrading to Version 15"
 		" to continue using the Loan Management module:\n"
 		"https://github.com/frappe/lending",

@@ -16,8 +16,8 @@ class AccountingDimensionFilter(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.allowed_dimension.allowed_dimension import AllowedDimension
-		from erpnext.accounts.doctype.applicable_on_account.applicable_on_account import (
+		from Goldfish.accounts.doctype.allowed_dimension.allowed_dimension import AllowedDimension
+		from Goldfish.accounts.doctype.applicable_on_account.applicable_on_account import (
 			ApplicableOnAccount,
 		)
 

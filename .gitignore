@@ -6,8 +6,8 @@ latest_updates.json
 .wnf-lang-status
 *.egg-info
 dist/
-erpnext/public/dist
-erpnext/docs/current
+Goldfish/public/dist
+Goldfish/docs/current
 *.swp
 *.swo
 __pycache__

@@ -15,7 +15,7 @@ class QualityFeedbackTemplate(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.quality_management.doctype.quality_feedback_template_parameter.quality_feedback_template_parameter import (
+		from Goldfish.quality_management.doctype.quality_feedback_template_parameter.quality_feedback_template_parameter import (
 			QualityFeedbackTemplateParameter,
 		)
 

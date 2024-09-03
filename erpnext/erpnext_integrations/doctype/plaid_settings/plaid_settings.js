@@ -1,7 +1,7 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.provide("erpnext.integrations");
+frappe.provide("Goldfish.integrations");
 
 frappe.ui.form.on("Plaid Settings", {
 	enabled: function (frm) {
@@ -13,16 +13,16 @@ frappe.ui.form.on("Plaid Settings", {
 	refresh: function (frm) {
 		if (frm.doc.enabled) {
 			frm.add_custom_button(__("Link a new bank account"), () => {
-				new erpnext.integrations.plaidLink(frm);
+				new Goldfish.integrations.plaidLink(frm);
 			});
 
 			frm.add_custom_button(__("Reset Plaid Link"), () => {
-				new erpnext.integrations.plaidLink(frm);
+				new Goldfish.integrations.plaidLink(frm);
 			});
 
 			frm.add_custom_button(__("Sync Now"), () => {
 				frappe.call({
-					method: "erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.enqueue_synchronization",
+					method: "Goldfish.Goldfish_integrations.doctype.plaid_settings.plaid_settings.enqueue_synchronization",
 					freeze: true,
 					callback: () => {
 						let bank_transaction_link = '<a href="#List/Bank Transaction">Bank Transaction</a>';
@@ -42,7 +42,7 @@ frappe.ui.form.on("Plaid Settings", {
 	},
 });
 
-erpnext.integrations.plaidLink = class plaidLink {
+Goldfish.integrations.plaidLink = class plaidLink {
 	constructor(parent) {
 		this.frm = parent;
 		this.plaidUrl = "https://cdn.plaid.com/link/v2/stable/link-initialize.js";
@@ -133,7 +133,7 @@ erpnext.integrations.plaidLink = class plaidLink {
 				me.company = data.company;
 				frappe
 					.xcall(
-						"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.add_institution",
+						"Goldfish.Goldfish_integrations.doctype.plaid_settings.plaid_settings.add_institution",
 						{
 							token: token,
 							response: response,
@@ -141,7 +141,7 @@ erpnext.integrations.plaidLink = class plaidLink {
 					)
 					.then((result) => {
 						frappe.xcall(
-							"erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.add_bank_accounts",
+							"Goldfish.Goldfish_integrations.doctype.plaid_settings.plaid_settings.add_bank_accounts",
 							{
 								response: response,
 								bank: result,

@@ -8,7 +8,7 @@ from datetime import date, timedelta
 import frappe
 from frappe.utils import getdate
 
-from erpnext.setup.doctype.holiday_list.holiday_list import local_country_name
+from Goldfish.setup.doctype.holiday_list.holiday_list import local_country_name
 
 
 class TestHolidayList(unittest.TestCase):

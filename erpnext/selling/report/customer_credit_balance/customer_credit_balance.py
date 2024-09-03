@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from erpnext.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
+from Goldfish.selling.doctype.customer.customer import get_credit_limit, get_customer_outstanding
 
 
 def execute(filters=None):

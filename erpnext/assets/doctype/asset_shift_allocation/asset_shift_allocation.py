@@ -13,8 +13,8 @@ from frappe.utils import (
 	is_last_day_of_the_month,
 )
 
-from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+from Goldfish.assets.doctype.asset_activity.asset_activity import add_asset_activity
+from Goldfish.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 	get_asset_shift_factors_map,
 	get_temp_asset_depr_schedule_doc,
@@ -30,7 +30,7 @@ class AssetShiftAllocation(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.assets.doctype.depreciation_schedule.depreciation_schedule import (
+		from Goldfish.assets.doctype.depreciation_schedule.depreciation_schedule import (
 			DepreciationSchedule,
 		)
 

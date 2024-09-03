@@ -17,7 +17,7 @@ class CashierClosing(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.cashier_closing_payments.cashier_closing_payments import (
+		from Goldfish.accounts.doctype.cashier_closing_payments.cashier_closing_payments import (
 			CashierClosingPayments,
 		)
 

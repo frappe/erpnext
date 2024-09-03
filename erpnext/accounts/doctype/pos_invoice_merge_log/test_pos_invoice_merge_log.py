@@ -7,16 +7,16 @@ import unittest
 import frappe
 from frappe.tests.utils import change_settings
 
-from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
-from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
-from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
-from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+from Goldfish.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+from Goldfish.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
+from Goldfish.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
+from Goldfish.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 )
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+from Goldfish.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
 )
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestPOSInvoiceMergeLog(unittest.TestCase):
@@ -398,7 +398,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		The second and third POS Invoice should be consolidated with a single Merge Log
 		"""
 
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 		frappe.db.sql("delete from `tabPOS Invoice`")
 

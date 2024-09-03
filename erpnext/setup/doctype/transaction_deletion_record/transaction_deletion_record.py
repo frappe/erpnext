@@ -20,10 +20,10 @@ class TransactionDeletionRecord(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.transaction_deletion_record_details.transaction_deletion_record_details import (
+		from Goldfish.accounts.doctype.transaction_deletion_record_details.transaction_deletion_record_details import (
 			TransactionDeletionRecordDetails,
 		)
-		from erpnext.setup.doctype.transaction_deletion_record_item.transaction_deletion_record_item import (
+		from Goldfish.setup.doctype.transaction_deletion_record_item.transaction_deletion_record_item import (
 			TransactionDeletionRecordItem,
 		)
 

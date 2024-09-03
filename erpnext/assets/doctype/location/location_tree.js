@@ -1,7 +1,7 @@
 frappe.treeview_settings["Location"] = {
 	ignore_fields: ["parent_location"],
-	get_tree_nodes: "erpnext.assets.doctype.location.location.get_children",
-	add_tree_node: "erpnext.assets.doctype.location.location.add_node",
+	get_tree_nodes: "Goldfish.assets.doctype.location.location.get_children",
+	add_tree_node: "Goldfish.assets.doctype.location.location.add_node",
 	filters: [
 		{
 			fieldname: "location",

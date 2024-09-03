@@ -1,3 +1,3 @@
-**/setup/setup_wizard/data/uom_data.json,erpnext.gettext.extractors.uom_data.extract
-**/setup/doctype/incoterm/incoterms.csv,erpnext.gettext.extractors.incoterms.extract
-**/setup/setup_wizard/data/*.txt,erpnext.gettext.extractors.lines_from_txt_file.extract
+**/setup/setup_wizard/data/uom_data.json,Goldfish.gettext.extractors.uom_data.extract
+**/setup/doctype/incoterm/incoterms.csv,Goldfish.gettext.extractors.incoterms.extract
+**/setup/setup_wizard/data/*.txt,Goldfish.gettext.extractors.lines_from_txt_file.extract

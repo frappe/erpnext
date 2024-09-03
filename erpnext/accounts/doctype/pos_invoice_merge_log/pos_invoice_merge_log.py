@@ -12,7 +12,7 @@ from frappe.utils import cint, flt, get_time, getdate, nowdate, nowtime
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 from frappe.utils.scheduler import is_scheduler_inactive
 
-from erpnext.accounts.doctype.pos_profile.pos_profile import required_accounting_dimensions
+from Goldfish.accounts.doctype.pos_profile.pos_profile import required_accounting_dimensions
 
 
 class POSInvoiceMergeLog(Document):
@@ -24,7 +24,7 @@ class POSInvoiceMergeLog(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
+		from Goldfish.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
 			POSInvoiceReference,
 		)
 

@@ -9,15 +9,15 @@ import frappe
 from frappe.tests.utils import FrappeTestCase, timeout
 from frappe.utils import cstr, flt
 
-from erpnext.controllers.tests.test_subcontracting_controller import (
+from Goldfish.controllers.tests.test_subcontracting_controller import (
 	set_backflush_based_on,
 )
-from erpnext.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
-from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
+from Goldfish.manufacturing.doctype.bom.bom import BOMRecursionError, item_query, make_variant_bom
+from Goldfish.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
 )
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+from Goldfish.stock.doctype.item.test_item import make_item
+from Goldfish.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 	create_stock_reconciliation,
 )
 
@@ -28,7 +28,7 @@ test_dependencies = ["Item", "Quality Inspection Template"]
 class TestBOM(FrappeTestCase):
 	@timeout
 	def test_get_items(self):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from Goldfish.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		items_dict = get_bom_items_as_dict(
 			bom=get_default_bom(), company="_Test Company", qty=1, fetch_exploded=0
@@ -39,7 +39,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_get_items_exploded(self):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
+		from Goldfish.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		items_dict = get_bom_items_as_dict(
 			bom=get_default_bom(), company="_Test Company", qty=1, fetch_exploded=1
@@ -52,7 +52,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_get_items_list(self):
-		from erpnext.manufacturing.doctype.bom.bom import get_bom_items
+		from Goldfish.manufacturing.doctype.bom.bom import get_bom_items
 
 		self.assertEqual(len(get_bom_items(bom=get_default_bom(), company="_Test Company")), 3)
 
@@ -294,7 +294,7 @@ class TestBOM(FrappeTestCase):
 		# test that sourced_by_supplier rate is zero even after updating cost
 		self.assertEqual(bom.items[2].rate, 0)
 
-		from erpnext.controllers.tests.test_subcontracting_controller import (
+		from Goldfish.controllers.tests.test_subcontracting_controller import (
 			get_subcontracting_order,
 			make_service_item,
 		)
@@ -346,7 +346,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_generated_variant_bom(self):
-		from erpnext.controllers.item_variant import create_variant
+		from Goldfish.controllers.item_variant import create_variant
 
 		template_item = make_item(
 			"_TestTemplateItem",
@@ -583,7 +583,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_bom_pricing_based_on_lpp(self):
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+		from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 		parent = frappe.generate_hash(length=10)
 		child = frappe.generate_hash(length=10)
@@ -604,7 +604,7 @@ class TestBOM(FrappeTestCase):
 
 	@timeout
 	def test_set_default_bom_for_item_having_single_bom(self):
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		fg_item = make_item(properties={"is_stock_item": 1})
 		bom_item = make_item(properties={"is_stock_item": 1})
@@ -646,7 +646,7 @@ class TestBOM(FrappeTestCase):
 		).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from Goldfish.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
 		bom = make_bom(item=fg_item, raw_materials=[rm_item], do_not_save=True)
 
@@ -675,7 +675,7 @@ class TestBOM(FrappeTestCase):
 		).name
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from Goldfish.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
 		bom = make_bom(item=fg_item, raw_materials=[rm_item])
 
@@ -696,7 +696,7 @@ class TestBOM(FrappeTestCase):
 
 		fg_item = make_item(properties={"is_stock_item": 1}).name
 
-		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		from Goldfish.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
 		bom = make_bom(item=fg_item, raw_materials=[rm_item, service_item], do_not_save=True)
 		bom.rm_cost_as_per = "Valuation Rate"
@@ -717,7 +717,7 @@ class TestBOM(FrappeTestCase):
 				self.assertEqual(row.is_stock_item, 1)
 
 	def test_do_not_include_manufacturing_and_fixed_items(self):
-		from erpnext.manufacturing.doctype.bom.bom import item_query
+		from Goldfish.manufacturing.doctype.bom.bom import item_query
 
 		if not frappe.db.exists("Asset Category", "Computers-Test"):
 			doc = frappe.get_doc({"doctype": "Asset Category", "asset_category_name": "Computers-Test"})

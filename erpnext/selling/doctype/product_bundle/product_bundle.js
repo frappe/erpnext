@@ -6,7 +6,7 @@ frappe.ui.form.on("Product Bundle", {
 		frm.toggle_enable("new_item_code", frm.is_new());
 		frm.set_query("new_item_code", () => {
 			return {
-				query: "erpnext.selling.doctype.product_bundle.product_bundle.get_new_item_code",
+				query: "Goldfish.selling.doctype.product_bundle.product_bundle.get_new_item_code",
 			};
 		});
 	},

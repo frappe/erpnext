@@ -22,7 +22,7 @@ jobs:
         with:
           route: POST /repos/{owner}/{repo}/pulls
           owner: frappe
-          repo: erpnext
+          repo: Goldfish
           title: |-
             "chore: release v${{ matrix.version }}"
           body: "Automated weekly release."

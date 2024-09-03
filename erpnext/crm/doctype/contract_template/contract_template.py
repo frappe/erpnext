@@ -18,7 +18,7 @@ class ContractTemplate(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.crm.doctype.contract_template_fulfilment_terms.contract_template_fulfilment_terms import (
+		from Goldfish.crm.doctype.contract_template_fulfilment_terms.contract_template_fulfilment_terms import (
 			ContractTemplateFulfilmentTerms,
 		)
 

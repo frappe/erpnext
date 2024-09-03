@@ -10,7 +10,7 @@ from frappe.query_builder import Criterion
 from frappe.query_builder.functions import Abs, Sum
 from frappe.utils.data import comma_and
 
-from erpnext.accounts.utils import (
+from Goldfish.accounts.utils import (
 	cancel_exchange_gain_loss_journal,
 	unlink_ref_doc_from_payment_entries,
 	update_voucher_outstanding,
@@ -26,7 +26,7 @@ class UnreconcilePayment(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.unreconcile_payment_entries.unreconcile_payment_entries import (
+		from Goldfish.accounts.doctype.unreconcile_payment_entries.unreconcile_payment_entries import (
 			UnreconcilePaymentEntries,
 		)
 

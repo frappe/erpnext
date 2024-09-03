@@ -6,9 +6,9 @@ from frappe.tests.utils import FrappeTestCase
 from hypothesis import given
 from hypothesis import strategies as st
 
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.valuation import FIFOValuation, LIFOValuation, round_off_if_near_zero
+from Goldfish.stock.doctype.item.test_item import make_item
+from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from Goldfish.stock.valuation import FIFOValuation, LIFOValuation, round_off_if_near_zero
 
 qty_gen = st.floats(min_value=-1e6, max_value=1e6)
 value_gen = st.floats(min_value=1, max_value=1e6)

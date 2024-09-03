@@ -2,8 +2,8 @@ import unittest
 
 import frappe
 
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+from Goldfish.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from Goldfish.buying.doctype.supplier.test_supplier import create_supplier
 
 
 class TestWebsite(unittest.TestCase):

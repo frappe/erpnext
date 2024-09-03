@@ -41,7 +41,7 @@ function get_filters() {
 			get_query: () => {
 				var customer_group = frappe.query_report.get_filter_value("customer_group");
 				return {
-					query: "erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order.get_customers_or_items",
+					query: "Goldfish.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order.get_customers_or_items",
 					filters: [
 						["Customer", "disabled", "=", "0"],
 						["Customer Group", "name", "=", customer_group],
@@ -65,7 +65,7 @@ function get_filters() {
 			get_query: () => {
 				var item_group = frappe.query_report.get_filter_value("item_group");
 				return {
-					query: "erpnext.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order.get_customers_or_items",
+					query: "Goldfish.selling.report.payment_terms_status_for_sales_order.payment_terms_status_for_sales_order.get_customers_or_items",
 					filters: [
 						["Item", "disabled", "=", "0"],
 						["Item Group", "name", "=", item_group],

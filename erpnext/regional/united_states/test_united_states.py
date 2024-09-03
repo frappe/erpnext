@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 
-from erpnext.regional.report.irs_1099.irs_1099 import execute as execute_1099_report
+from Goldfish.regional.report.irs_1099.irs_1099 import execute as execute_1099_report
 
 
 class TestUnitedStates(unittest.TestCase):

@@ -5,7 +5,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
 
-from erpnext.accounts.doctype.bank_transaction.test_bank_transaction import create_bank_account
+from Goldfish.accounts.doctype.bank_transaction.test_bank_transaction import create_bank_account
 
 
 class TestAutoMatchParty(FrappeTestCase):

@@ -1,7 +1,7 @@
 frappe.treeview_settings["Company"] = {
 	ignore_fields: ["parent_company"],
-	get_tree_nodes: "erpnext.setup.doctype.company.company.get_children",
-	add_tree_node: "erpnext.setup.doctype.company.company.add_node",
+	get_tree_nodes: "Goldfish.setup.doctype.company.company.get_children",
+	add_tree_node: "Goldfish.setup.doctype.company.company.add_node",
 	filters: [
 		{
 			fieldname: "company",

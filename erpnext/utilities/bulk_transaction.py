@@ -103,15 +103,15 @@ def job(deserialized_data, from_doctype, to_doctype, args):
 
 
 def task(doc_name, from_doctype, to_doctype):
-	from erpnext.accounts.doctype.payment_entry import payment_entry
-	from erpnext.accounts.doctype.purchase_invoice import purchase_invoice
-	from erpnext.accounts.doctype.sales_invoice import sales_invoice
-	from erpnext.buying.doctype.purchase_order import purchase_order
-	from erpnext.buying.doctype.supplier_quotation import supplier_quotation
-	from erpnext.selling.doctype.quotation import quotation
-	from erpnext.selling.doctype.sales_order import sales_order
-	from erpnext.stock.doctype.delivery_note import delivery_note
-	from erpnext.stock.doctype.purchase_receipt import purchase_receipt
+	from Goldfish.accounts.doctype.payment_entry import payment_entry
+	from Goldfish.accounts.doctype.purchase_invoice import purchase_invoice
+	from Goldfish.accounts.doctype.sales_invoice import sales_invoice
+	from Goldfish.buying.doctype.purchase_order import purchase_order
+	from Goldfish.buying.doctype.supplier_quotation import supplier_quotation
+	from Goldfish.selling.doctype.quotation import quotation
+	from Goldfish.selling.doctype.sales_order import sales_order
+	from Goldfish.stock.doctype.delivery_note import delivery_note
+	from Goldfish.stock.doctype.purchase_receipt import purchase_receipt
 
 	mapper = {
 		"Sales Order": {

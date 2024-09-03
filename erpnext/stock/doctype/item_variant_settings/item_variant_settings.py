@@ -16,7 +16,7 @@ class ItemVariantSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.variant_field.variant_field import VariantField
+		from Goldfish.stock.doctype.variant_field.variant_field import VariantField
 
 		allow_rename_attribute_value: DF.Check
 		do_not_update_variants: DF.Check

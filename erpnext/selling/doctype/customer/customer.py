@@ -17,9 +17,9 @@ from frappe.model.utils.rename_doc import update_linked_doctypes
 from frappe.utils import cint, cstr, flt, get_formatted_email, today
 from frappe.utils.user import get_users_with_role
 
-from erpnext.accounts.party import get_dashboard_info, validate_party_accounts
-from erpnext.controllers.website_list_for_contact import add_role_for_portal_user
-from erpnext.utilities.transaction_base import TransactionBase
+from Goldfish.accounts.party import get_dashboard_info, validate_party_accounts
+from Goldfish.controllers.website_list_for_contact import add_role_for_portal_user
+from Goldfish.utilities.transaction_base import TransactionBase
 
 
 class Customer(TransactionBase):
@@ -31,15 +31,15 @@ class Customer(TransactionBase):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.allowed_to_transact_with.allowed_to_transact_with import (
+		from Goldfish.accounts.doctype.allowed_to_transact_with.allowed_to_transact_with import (
 			AllowedToTransactWith,
 		)
-		from erpnext.accounts.doctype.party_account.party_account import PartyAccount
-		from erpnext.selling.doctype.customer_credit_limit.customer_credit_limit import (
+		from Goldfish.accounts.doctype.party_account.party_account import PartyAccount
+		from Goldfish.selling.doctype.customer_credit_limit.customer_credit_limit import (
 			CustomerCreditLimit,
 		)
-		from erpnext.selling.doctype.sales_team.sales_team import SalesTeam
-		from erpnext.utilities.doctype.portal_user.portal_user import PortalUser
+		from Goldfish.selling.doctype.sales_team.sales_team import SalesTeam
+		from Goldfish.utilities.doctype.portal_user.portal_user import PortalUser
 
 		account_manager: DF.Link | None
 		accounts: DF.Table[PartyAccount]
@@ -299,7 +299,7 @@ class Customer(TransactionBase):
 		):
 			return
 
-		from erpnext.crm.utils import copy_comments, link_communications
+		from Goldfish.crm.utils import copy_comments, link_communications
 
 		copy_comments("Lead", self.lead_name, self)
 		link_communications("Lead", self.lead_name, self)
@@ -556,7 +556,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 				raise_exception=1,
 				primary_action={
 					"label": "Send Email",
-					"server_action": "erpnext.selling.doctype.customer.customer.send_emails",
+					"server_action": "Goldfish.selling.doctype.customer.customer.send_emails",
 					"hide_on_success": True,
 					"args": {
 						"customer": customer,

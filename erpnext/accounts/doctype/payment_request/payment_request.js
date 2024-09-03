@@ -6,7 +6,7 @@ frappe.ui.form.on("Payment Request", {
 	setup: function (frm) {
 		frm.set_query("party_type", function () {
 			return {
-				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
+				query: "Goldfish.setup.doctype.party_type.party_type.get_party_type",
 			};
 		});
 	},
@@ -15,7 +15,7 @@ frappe.ui.form.on("Payment Request", {
 frappe.ui.form.on("Payment Request", "onload", function (frm, dt, dn) {
 	if (frm.doc.reference_doctype) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.payment_request.payment_request.get_print_format_list",
+			method: "Goldfish.accounts.doctype.payment_request.payment_request.get_print_format_list",
 			args: { ref_doctype: frm.doc.reference_doctype },
 			callback: function (r) {
 				set_field_options("print_format", r.message["print_format"]);
@@ -38,7 +38,7 @@ frappe.ui.form.on("Payment Request", "refresh", function (frm) {
 	) {
 		frm.add_custom_button(__("Resend Payment Email"), function () {
 			frappe.call({
-				method: "erpnext.accounts.doctype.payment_request.payment_request.resend_payment_email",
+				method: "Goldfish.accounts.doctype.payment_request.payment_request.resend_payment_email",
 				args: { docname: frm.doc.name },
 				freeze: true,
 				freeze_message: __("Sending"),
@@ -57,7 +57,7 @@ frappe.ui.form.on("Payment Request", "refresh", function (frm) {
 	) {
 		frm.add_custom_button(__("Create Payment Entry"), function () {
 			frappe.call({
-				method: "erpnext.accounts.doctype.payment_request.payment_request.make_payment_entry",
+				method: "Goldfish.accounts.doctype.payment_request.payment_request.make_payment_entry",
 				args: { docname: frm.doc.name },
 				freeze: true,
 				callback: function (r) {
@@ -77,7 +77,7 @@ frappe.ui.form.on("Payment Request", "is_a_subscription", function (frm) {
 
 	if (frm.doc.is_a_subscription && frm.doc.reference_doctype && frm.doc.reference_name) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.payment_request.payment_request.get_subscription_details",
+			method: "Goldfish.accounts.doctype.payment_request.payment_request.get_subscription_details",
 			args: { reference_doctype: frm.doc.reference_doctype, reference_name: frm.doc.reference_name },
 			freeze: true,
 			callback: function (data) {

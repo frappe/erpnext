@@ -5,15 +5,15 @@ import frappe
 from frappe import _
 from frappe.utils import add_months, cint, flt, get_link_to_form, getdate, time_diff_in_hours
 
-import erpnext
-from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.assets.doctype.asset.asset import get_asset_account
-from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+import Goldfish
+from Goldfish.accounts.general_ledger import make_gl_entries
+from Goldfish.assets.doctype.asset.asset import get_asset_account
+from Goldfish.assets.doctype.asset_activity.asset_activity import add_asset_activity
+from Goldfish.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_depr_schedule,
 	make_new_active_asset_depr_schedules_and_cancel_current_ones,
 )
-from erpnext.controllers.accounts_controller import AccountsController
+from Goldfish.controllers.accounts_controller import AccountsController
 
 
 class AssetRepair(AccountsController):
@@ -25,7 +25,7 @@ class AssetRepair(AccountsController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.assets.doctype.asset_repair_consumed_item.asset_repair_consumed_item import (
+		from Goldfish.assets.doctype.asset_repair_consumed_item.asset_repair_consumed_item import (
 			AssetRepairConsumedItem,
 		)
 
@@ -315,7 +315,7 @@ class AssetRepair(AccountsController):
 		stock_entry = frappe.get_doc("Stock Entry", {"asset_repair": self.name})
 
 		default_expense_account = None
-		if not erpnext.is_perpetual_inventory_enabled(self.company):
+		if not Goldfish.is_perpetual_inventory_enabled(self.company):
 			default_expense_account = frappe.get_cached_value(
 				"Company", self.company, "default_expense_account"
 			)

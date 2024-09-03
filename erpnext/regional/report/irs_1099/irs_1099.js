@@ -17,7 +17,7 @@ frappe.query_reports["IRS 1099"] = {
 			label: __("Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 			width: 80,
 		},
@@ -42,7 +42,7 @@ frappe.query_reports["IRS 1099"] = {
 function build_1099_print(query_report) {
 	let filters = JSON.stringify(query_report.get_values());
 	let w = window.open(
-		"/api/method/erpnext.regional.report.irs_1099.irs_1099.irs_1099_print?" +
+		"/api/method/Goldfish.regional.report.irs_1099.irs_1099.irs_1099_print?" +
 			"&filters=" +
 			encodeURIComponent(filters)
 	);

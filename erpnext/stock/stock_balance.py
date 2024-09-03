@@ -5,7 +5,7 @@
 import frappe
 from frappe.utils import cstr, flt, now, nowdate, nowtime
 
-from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
+from Goldfish.controllers.stock_controller import create_repost_item_valuation_entry
 
 
 def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False):
@@ -209,7 +209,7 @@ def get_planned_qty(item_code, warehouse):
 
 
 def update_bin_qty(item_code, warehouse, qty_dict=None):
-	from erpnext.stock.utils import get_bin
+	from Goldfish.stock.utils import get_bin
 
 	bin = get_bin(item_code, warehouse)
 	mismatch = False

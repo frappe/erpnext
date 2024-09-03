@@ -27,49 +27,49 @@ from frappe.utils import (
 	today,
 )
 
-import erpnext
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+import Goldfish
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimensions,
 )
-from erpnext.accounts.doctype.pricing_rule.utils import (
+from Goldfish.accounts.doctype.pricing_rule.utils import (
 	apply_pricing_rule_for_free_items,
 	apply_pricing_rule_on_transaction,
 	get_applied_pricing_rules,
 )
-from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
-from erpnext.accounts.party import (
+from Goldfish.accounts.general_ledger import get_round_off_account_and_cost_center
+from Goldfish.accounts.party import (
 	get_party_account,
 	get_party_account_currency,
 	get_party_gle_currency,
 	validate_party_frozen_disabled,
 )
-from erpnext.accounts.utils import (
+from Goldfish.accounts.utils import (
 	create_gain_loss_journal,
 	get_account_currency,
 	get_currency_precision,
 	get_fiscal_years,
 	validate_fiscal_year,
 )
-from erpnext.buying.utils import update_last_purchase_rate
-from erpnext.controllers.print_settings import (
+from Goldfish.buying.utils import update_last_purchase_rate
+from Goldfish.controllers.print_settings import (
 	set_print_templates_for_item_table,
 	set_print_templates_for_taxes,
 )
-from erpnext.controllers.sales_and_purchase_return import validate_return
-from erpnext.exceptions import InvalidCurrency
-from erpnext.setup.utils import get_exchange_rate
-from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
-from erpnext.stock.get_item_details import (
+from Goldfish.controllers.sales_and_purchase_return import validate_return
+from Goldfish.exceptions import InvalidCurrency
+from Goldfish.setup.utils import get_exchange_rate
+from Goldfish.stock.doctype.item.item import get_uom_conv_factor
+from Goldfish.stock.doctype.packed_item.packed_item import make_packing_list
+from Goldfish.stock.get_item_details import (
 	_get_item_tax_template,
 	get_conversion_factor,
 	get_item_details,
 	get_item_tax_map,
 	get_item_warehouse,
 )
-from erpnext.utilities.regional import temporary_flag
-from erpnext.utilities.transaction_base import TransactionBase
+from Goldfish.utilities.regional import temporary_flag
+from Goldfish.utilities.transaction_base import TransactionBase
 
 
 class AccountMissingError(frappe.ValidationError):
@@ -113,7 +113,7 @@ class AccountsController(TransactionBase):
 	@property
 	def company_currency(self):
 		if not hasattr(self, "__company_currency"):
-			self.__company_currency = erpnext.get_company_currency(self.company)
+			self.__company_currency = Goldfish.get_company_currency(self.company)
 
 		return self.__company_currency
 
@@ -517,7 +517,7 @@ class AccountsController(TransactionBase):
 					break
 
 	def calculate_taxes_and_totals(self):
-		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
+		from Goldfish.controllers.taxes_and_totals import calculate_taxes_and_totals
 
 		calculate_taxes_and_totals(self)
 
@@ -624,7 +624,7 @@ class AccountsController(TransactionBase):
 		if self.get("is_pos") or self.doctype not in ["Sales Invoice", "Purchase Invoice"]:
 			return
 
-		from erpnext.accounts.party import validate_due_date
+		from Goldfish.accounts.party import validate_due_date
 
 		posting_date = (
 			self.posting_date if self.doctype == "Sales Invoice" else (self.bill_date or self.posting_date)
@@ -701,7 +701,7 @@ class AccountsController(TransactionBase):
 
 	def set_missing_item_details(self, for_validate=False):
 		"""set missing item values"""
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from Goldfish.stock.doctype.serial_no.serial_no import get_serial_nos
 
 		if hasattr(self, "items"):
 			parent_dict = {}
@@ -792,7 +792,7 @@ class AccountsController(TransactionBase):
 					if hasattr(item, "cost_center") and not item.get("cost_center"):
 						item.set(
 							"cost_center",
-							self.get("cost_center") or erpnext.get_default_cost_center(self.company),
+							self.get("cost_center") or Goldfish.get_default_cost_center(self.company),
 						)
 
 					if ret.get("pricing_rules"):
@@ -1552,7 +1552,7 @@ class AccountsController(TransactionBase):
 				lst.append(args)
 
 		if lst:
-			from erpnext.accounts.utils import reconcile_against_document
+			from Goldfish.accounts.utils import reconcile_against_document
 
 			# pass dimension values to utility method
 			active_dimensions = get_dimensions()[0]
@@ -1581,10 +1581,10 @@ class AccountsController(TransactionBase):
 				frappe.get_doc("Journal Entry", x).cancel()
 
 	def on_cancel(self):
-		from erpnext.accounts.doctype.bank_transaction.bank_transaction import (
+		from Goldfish.accounts.doctype.bank_transaction.bank_transaction import (
 			remove_from_bank_transaction,
 		)
-		from erpnext.accounts.utils import (
+		from Goldfish.accounts.utils import (
 			cancel_exchange_gain_loss_journal,
 			unlink_ref_doc_from_payment_entries,
 		)
@@ -1742,14 +1742,14 @@ class AccountsController(TransactionBase):
 						"account": self.additional_discount_account,
 						"against": self.customer,
 						"debit": self.base_discount_amount,
-						"cost_center": self.cost_center or erpnext.get_default_cost_center(self.company),
+						"cost_center": self.cost_center or Goldfish.get_default_cost_center(self.company),
 					},
 					item=self,
 				)
 			)
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on):
-		from erpnext.controllers.status_updater import get_allowance_for
+		from Goldfish.controllers.status_updater import get_allowance_for
 
 		item_allowance = {}
 		global_qty_allowance, global_amount_allowance = None, None
@@ -1879,7 +1879,7 @@ class AccountsController(TransactionBase):
 		)
 
 	def get_company_default(self, fieldname, ignore_validation=False):
-		from erpnext.accounts.utils import get_company_default
+		from Goldfish.accounts.utils import get_company_default
 
 		return get_company_default(self.company, fieldname, ignore_validation=ignore_validation)
 
@@ -2461,12 +2461,12 @@ class AccountsController(TransactionBase):
 		reconcilation_entry.party = secondary_party
 		reconcilation_entry.reference_type = self.doctype
 		reconcilation_entry.reference_name = self.name
-		reconcilation_entry.cost_center = self.cost_center or erpnext.get_default_cost_center(self.company)
+		reconcilation_entry.cost_center = self.cost_center or Goldfish.get_default_cost_center(self.company)
 
 		advance_entry.account = primary_account
 		advance_entry.party_type = primary_party_type
 		advance_entry.party = primary_party
-		advance_entry.cost_center = self.cost_center or erpnext.get_default_cost_center(self.company)
+		advance_entry.cost_center = self.cost_center or Goldfish.get_default_cost_center(self.company)
 		advance_entry.is_advance = "Yes"
 
 		# update dimesions
@@ -2492,7 +2492,7 @@ class AccountsController(TransactionBase):
 		jv.submit()
 
 	def check_conversion_rate(self):
-		default_currency = erpnext.get_company_currency(self.company)
+		default_currency = Goldfish.get_company_currency(self.company)
 		if not default_currency:
 			throw(_("Please enter default currency in Company Master"))
 		if (
@@ -2773,7 +2773,7 @@ def get_advance_journal_entries(
 	return list(journal_entries)
 
 
-@erpnext.allow_regional
+@Goldfish.allow_regional
 def get_advance_payment_entries_for_regional(*args, **kwargs):
 	return get_advance_payment_entries(*args, **kwargs)
 
@@ -3170,7 +3170,7 @@ def validate_child_on_delete(row, parent):
 
 def update_bin_on_delete(row, doctype):
 	"""Update bin for deleted item (row)."""
-	from erpnext.stock.stock_balance import (
+	from Goldfish.stock.stock_balance import (
 		get_indented_qty,
 		get_ordered_qty,
 		get_reserved_qty,
@@ -3532,7 +3532,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 	# Cancel and Recreate Stock Reservation Entries.
 	if parent_doctype == "Sales Order":
-		from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+		from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 			cancel_stock_reservation_entries,
 			has_reserved_stock,
 		)
@@ -3557,7 +3557,7 @@ def check_if_child_table_updated(child_table_before_update, child_table_after_up
 
 
 def merge_taxes(source_taxes, target_doc):
-	from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+	from Goldfish.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 		update_item_wise_tax_detail,
 	)
 
@@ -3587,16 +3587,16 @@ def merge_taxes(source_taxes, target_doc):
 	target_doc.set("taxes", existing_taxes)
 
 
-@erpnext.allow_regional
+@Goldfish.allow_regional
 def validate_regional(doc):
 	pass
 
 
-@erpnext.allow_regional
+@Goldfish.allow_regional
 def validate_einvoice_fields(doc):
 	pass
 
 
-@erpnext.allow_regional
+@Goldfish.allow_regional
 def update_gl_dict_with_regional_fields(doc, gl_dict):
 	pass

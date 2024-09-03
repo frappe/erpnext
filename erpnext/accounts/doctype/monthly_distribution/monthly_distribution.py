@@ -17,7 +17,7 @@ class MonthlyDistribution(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.monthly_distribution_percentage.monthly_distribution_percentage import (
+		from Goldfish.accounts.doctype.monthly_distribution_percentage.monthly_distribution_percentage import (
 			MonthlyDistributionPercentage,
 		)
 

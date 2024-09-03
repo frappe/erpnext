@@ -52,7 +52,7 @@ frappe.query_reports["Sales Analytics"] = {
 			fieldtype: "Date",
 			default:
 				frappe.defaults.get_user_default("sales_start_date") ||
-				erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
+				Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 			reqd: 1,
 		},
 		{
@@ -61,7 +61,7 @@ frappe.query_reports["Sales Analytics"] = {
 			fieldtype: "Date",
 			default:
 				frappe.defaults.get_user_default("sales_end_date") ||
-				erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
+				Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 			reqd: 1,
 		},
 		{

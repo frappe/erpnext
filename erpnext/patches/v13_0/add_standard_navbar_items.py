@@ -1,7 +1,7 @@
 # import frappe
-from erpnext.setup.install import add_standard_navbar_items
+from Goldfish.setup.install import add_standard_navbar_items
 
 
 def execute():
-	# Add standard navbar items for ERPNext in Navbar Settings
+	# Add standard navbar items for Goldfish in Navbar Settings
 	add_standard_navbar_items()

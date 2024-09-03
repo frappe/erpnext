@@ -1,7 +1,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.accounts.party import get_default_price_list
+from Goldfish.accounts.party import get_default_price_list
 
 
 class PartyTestCase(FrappeTestCase):

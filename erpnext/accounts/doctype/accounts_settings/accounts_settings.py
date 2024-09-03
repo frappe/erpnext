@@ -10,7 +10,7 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 from frappe.model.document import Document
 from frappe.utils import cint
 
-from erpnext.stock.utils import check_pending_reposting
+from Goldfish.stock.utils import check_pending_reposting
 
 
 class AccountsSettings(Document):

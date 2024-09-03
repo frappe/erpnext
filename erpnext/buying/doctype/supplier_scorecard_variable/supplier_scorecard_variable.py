@@ -37,7 +37,7 @@ class SupplierScorecardVariable(Document):
 	def validate_path_exists(self):
 		if "." in self.path:
 			try:
-				from erpnext.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
+				from Goldfish.buying.doctype.supplier_scorecard_period.supplier_scorecard_period import (
 					import_string_path,
 				)
 

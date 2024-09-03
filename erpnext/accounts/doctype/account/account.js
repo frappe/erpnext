@@ -93,8 +93,8 @@ frappe.ui.form.on("Account", {
 				function () {
 					frappe.route_options = {
 						account: frm.doc.name,
-						from_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
-						to_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
+						from_date: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
+						to_date: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 						company: frm.doc.company,
 					};
 					frappe.set_route("query-report", "General Ledger");
@@ -133,7 +133,7 @@ frappe.ui.form.on("Account", {
 			primary_action: function () {
 				var data = d.get_values();
 				frappe.call({
-					method: "erpnext.accounts.doctype.account.account.merge_account",
+					method: "Goldfish.accounts.doctype.account.account.merge_account",
 					args: {
 						old: frm.doc.name,
 						new: data.name,
@@ -182,7 +182,7 @@ frappe.ui.form.on("Account", {
 				}
 
 				frappe.call({
-					method: "erpnext.accounts.doctype.account.account.update_account_number",
+					method: "Goldfish.accounts.doctype.account.account.update_account_number",
 					args: {
 						account_number: data.account_number,
 						account_name: data.account_name,

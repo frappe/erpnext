@@ -29,7 +29,7 @@
    "fieldname": "user_id",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "ERPNext User ID",
+   "label": "Goldfish User ID",
    "read_only": 1
   }
  ],

@@ -17,7 +17,7 @@ class PaymentTermsTemplate(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.payment_terms_template_detail.payment_terms_template_detail import (
+		from Goldfish.accounts.doctype.payment_terms_template_detail.payment_terms_template_detail import (
 			PaymentTermsTemplateDetail,
 		)
 

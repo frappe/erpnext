@@ -32,9 +32,9 @@ frappe.ui.form.on("Dunning", {
 			};
 		});
 
-		frm.set_query("contact_person", erpnext.queries.contact_query);
-		frm.set_query("customer_address", erpnext.queries.address_query);
-		frm.set_query("company_address", erpnext.queries.company_address_query);
+		frm.set_query("contact_person", Goldfish.queries.contact_query);
+		frm.set_query("customer_address", Goldfish.queries.address_query);
+		frm.set_query("company_address", Goldfish.queries.company_address_query);
 
 		// cannot add rows manually, only via button "Fetch Overdue Payments"
 		frm.set_df_property("overdue_payments", "cannot_add_rows", true);
@@ -59,8 +59,8 @@ frappe.ui.form.on("Dunning", {
 
 		if (frm.doc.docstatus === 0) {
 			frm.add_custom_button(__("Fetch Overdue Payments"), () => {
-				erpnext.utils.map_current_doc({
-					method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
+				Goldfish.utils.map_current_doc({
+					method: "Goldfish.accounts.doctype.sales_invoice.sales_invoice.create_dunning",
 					source_doctype: "Sales Invoice",
 					date_field: "due_date",
 					target: frm,
@@ -90,7 +90,7 @@ frappe.ui.form.on("Dunning", {
 	company: function (frm) {
 		if (frm.doc.company) {
 			frappe.call({
-				method: "erpnext.setup.doctype.company.company.get_default_company_address",
+				method: "Goldfish.setup.doctype.company.company.get_default_company_address",
 				args: { name: frm.doc.company, existing_address: frm.doc.company_address || "" },
 				debounce: 2000,
 				callback: function (r) {
@@ -99,7 +99,7 @@ frappe.ui.form.on("Dunning", {
 			});
 
 			if (frm.fields_dict.currency) {
-				const company_currency = erpnext.get_currency(frm.doc.company);
+				const company_currency = Goldfish.get_currency(frm.doc.company);
 
 				if (!frm.doc.currency) {
 					frm.set_value("currency", company_currency);
@@ -120,11 +120,11 @@ frappe.ui.form.on("Dunning", {
 	},
 	currency: function (frm) {
 		// this.set_dynamic_labels();
-		const company_currency = erpnext.get_currency(frm.doc.company);
+		const company_currency = Goldfish.get_currency(frm.doc.company);
 		// Added `ignore_pricing_rule` to determine if document is loading after mapping from another doc
 		if (frm.doc.currency && frm.doc.currency !== company_currency) {
 			frappe.call({
-				method: "erpnext.setup.utils.get_exchange_rate",
+				method: "Goldfish.setup.utils.get_exchange_rate",
 				args: {
 					transaction_date: frm.doc.posting_date,
 					from_currency: frm.doc.currency,
@@ -145,21 +145,21 @@ frappe.ui.form.on("Dunning", {
 		}
 	},
 	customer: (frm) => {
-		erpnext.utils.get_party_details(frm);
+		Goldfish.utils.get_party_details(frm);
 	},
 	conversion_rate: function (frm) {
-		if (frm.doc.currency === erpnext.get_currency(frm.doc.company)) {
+		if (frm.doc.currency === Goldfish.get_currency(frm.doc.company)) {
 			frm.set_value("conversion_rate", 1.0);
 		}
 
 		// Make read only if Accounts Settings doesn't allow stale rates
-		frm.set_df_property("conversion_rate", "read_only", erpnext.stale_rate_allowed() ? 0 : 1);
+		frm.set_df_property("conversion_rate", "read_only", Goldfish.stale_rate_allowed() ? 0 : 1);
 	},
 	customer_address: function (frm) {
-		erpnext.utils.get_address_display(frm, "customer_address");
+		Goldfish.utils.get_address_display(frm, "customer_address");
 	},
 	company_address: function (frm) {
-		erpnext.utils.get_address_display(frm, "company_address");
+		Goldfish.utils.get_address_display(frm, "company_address");
 	},
 	dunning_type: function (frm) {
 		frm.trigger("get_dunning_letter_text");
@@ -170,7 +170,7 @@ frappe.ui.form.on("Dunning", {
 	get_dunning_letter_text: function (frm) {
 		if (frm.doc.dunning_type) {
 			frappe.call({
-				method: "erpnext.accounts.doctype.dunning.dunning.get_dunning_letter_text",
+				method: "Goldfish.accounts.doctype.dunning.dunning.get_dunning_letter_text",
 				args: {
 					dunning_type: frm.doc.dunning_type,
 					language: frm.doc.language,
@@ -241,7 +241,7 @@ frappe.ui.form.on("Dunning", {
 	},
 	make_payment_entry: function (frm) {
 		return frappe.call({
-			method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+			method: "Goldfish.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
 			args: {
 				dt: frm.doc.doctype,
 				dn: frm.doc.name,

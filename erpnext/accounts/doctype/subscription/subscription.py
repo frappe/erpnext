@@ -20,12 +20,12 @@ from frappe.utils.data import (
 	nowdate,
 )
 
-from erpnext import get_default_company, get_default_cost_center
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+from Goldfish import get_default_company, get_default_cost_center
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
-from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from erpnext.accounts.party import get_party_account_currency
+from Goldfish.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+from Goldfish.accounts.party import get_party_account_currency
 
 
 class InvoiceCancelled(frappe.ValidationError):
@@ -48,7 +48,7 @@ class Subscription(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.subscription_plan_detail.subscription_plan_detail import (
+		from Goldfish.accounts.doctype.subscription_plan_detail.subscription_plan_detail import (
 			SubscriptionPlanDetail,
 		)
 

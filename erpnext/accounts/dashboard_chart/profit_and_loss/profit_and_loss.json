@@ -4,7 +4,7 @@
  "creation": "2020-07-17 11:25:34.448572",
  "docstatus": 0,
  "doctype": "Dashboard Chart",
- "dynamic_filters_json": "{\"company\":\"frappe.defaults.get_user_default(\\\"Company\\\")\",\"from_fiscal_year\":\"erpnext.utils.get_fiscal_year()\",\"to_fiscal_year\":\"erpnext.utils.get_fiscal_year()\"}",
+ "dynamic_filters_json": "{\"company\":\"frappe.defaults.get_user_default(\\\"Company\\\")\",\"from_fiscal_year\":\"Goldfish.utils.get_fiscal_year()\",\"to_fiscal_year\":\"Goldfish.utils.get_fiscal_year()\"}",
  "filters_json": "{\"filter_based_on\":\"Fiscal Year\",\"period_start_date\":\"2020-04-01\",\"period_end_date\":\"2021-03-31\",\"periodicity\":\"Yearly\",\"include_default_book_entries\":1}",
  "idx": 0,
  "is_public": 1,

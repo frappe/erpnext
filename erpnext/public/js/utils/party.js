@@ -1,14 +1,14 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.utils");
+frappe.provide("Goldfish.utils");
 
 const SALES_DOCTYPES = ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"];
 const PURCHASE_DOCTYPES = ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"];
 
-erpnext.utils.get_party_details = function (frm, method, args, callback) {
+Goldfish.utils.get_party_details = function (frm, method, args, callback) {
 	if (!method) {
-		method = "erpnext.accounts.party.get_party_details";
+		method = "Goldfish.accounts.party.get_party_details";
 	}
 
 	if (!args) {
@@ -75,7 +75,7 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 
 	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
 		if (
-			!erpnext.utils.validate_mandatory(
+			!Goldfish.utils.validate_mandatory(
 				frm,
 				"Posting / Transaction Date",
 				args.posting_date,
@@ -86,7 +86,7 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 	}
 
 	if (
-		!erpnext.utils.validate_mandatory(
+		!Goldfish.utils.validate_mandatory(
 			frm,
 			"Company",
 			frm.doc.company,
@@ -112,7 +112,7 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 						frm.updating_party_details = false;
 						if (callback) callback();
 						frm.refresh();
-						erpnext.utils.add_item(frm);
+						Goldfish.utils.add_item(frm);
 					},
 				]);
 			}
@@ -120,7 +120,7 @@ erpnext.utils.get_party_details = function (frm, method, args, callback) {
 	});
 };
 
-erpnext.utils.add_item = function (frm) {
+Goldfish.utils.add_item = function (frm) {
 	if (frm.is_new()) {
 		var prev_route = frappe.get_prev_route();
 		if (prev_route[1] === "Item" && !(frm.doc.items && frm.doc.items.length)) {
@@ -134,7 +134,7 @@ erpnext.utils.add_item = function (frm) {
 	}
 };
 
-erpnext.utils.get_address_display = function (frm, address_field, display_field, is_your_company_address) {
+Goldfish.utils.get_address_display = function (frm, address_field, display_field, is_your_company_address) {
 	if (frm.updating_party_details) return;
 
 	if (!address_field) {
@@ -161,7 +161,7 @@ erpnext.utils.get_address_display = function (frm, address_field, display_field,
 	}
 };
 
-erpnext.utils.set_taxes_from_address = function (
+Goldfish.utils.set_taxes_from_address = function (
 	frm,
 	triggered_from_field,
 	billing_address_field,
@@ -171,7 +171,7 @@ erpnext.utils.set_taxes_from_address = function (
 
 	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
 		if (
-			!erpnext.utils.validate_mandatory(
+			!Goldfish.utils.validate_mandatory(
 				frm,
 				"Lead / Customer / Supplier",
 				frm.doc.customer || frm.doc.supplier || frm.doc.lead || frm.doc.party_name,
@@ -182,7 +182,7 @@ erpnext.utils.set_taxes_from_address = function (
 		}
 
 		if (
-			!erpnext.utils.validate_mandatory(
+			!Goldfish.utils.validate_mandatory(
 				frm,
 				"Posting / Transaction Date",
 				frm.doc.posting_date || frm.doc.transaction_date,
@@ -196,7 +196,7 @@ erpnext.utils.set_taxes_from_address = function (
 	}
 
 	frappe.call({
-		method: "erpnext.accounts.party.get_address_tax_category",
+		method: "Goldfish.accounts.party.get_address_tax_category",
 		args: {
 			tax_category: frm.doc.tax_category,
 			billing_address: frm.doc[billing_address_field],
@@ -207,21 +207,21 @@ erpnext.utils.set_taxes_from_address = function (
 				if (frm.doc.tax_category != r.message) {
 					frm.set_value("tax_category", r.message);
 				} else {
-					erpnext.utils.set_taxes(frm, triggered_from_field);
+					Goldfish.utils.set_taxes(frm, triggered_from_field);
 				}
 			}
 		},
 	});
 };
 
-erpnext.utils.set_taxes = function (frm, triggered_from_field) {
+Goldfish.utils.set_taxes = function (frm, triggered_from_field) {
 	if (frappe.meta.get_docfield(frm.doc.doctype, "taxes")) {
-		if (!erpnext.utils.validate_mandatory(frm, "Company", frm.doc.company, triggered_from_field)) {
+		if (!Goldfish.utils.validate_mandatory(frm, "Company", frm.doc.company, triggered_from_field)) {
 			return;
 		}
 
 		if (
-			!erpnext.utils.validate_mandatory(
+			!Goldfish.utils.validate_mandatory(
 				frm,
 				"Lead / Customer / Supplier",
 				frm.doc.customer || frm.doc.supplier || frm.doc.lead || frm.doc.party_name,
@@ -232,7 +232,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 		}
 
 		if (
-			!erpnext.utils.validate_mandatory(
+			!Goldfish.utils.validate_mandatory(
 				frm,
 				"Posting / Transaction Date",
 				frm.doc.posting_date || frm.doc.transaction_date,
@@ -265,7 +265,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 	}
 
 	frappe.call({
-		method: "erpnext.accounts.party.set_taxes",
+		method: "Goldfish.accounts.party.set_taxes",
 		args: {
 			party: party,
 			party_type: party_type,
@@ -286,7 +286,7 @@ erpnext.utils.set_taxes = function (frm, triggered_from_field) {
 	});
 };
 
-erpnext.utils.get_contact_details = function (frm) {
+Goldfish.utils.get_contact_details = function (frm) {
 	if (frm.updating_party_details) return;
 
 	if (frm.doc["contact_person"]) {
@@ -310,7 +310,7 @@ erpnext.utils.get_contact_details = function (frm) {
 	}
 };
 
-erpnext.utils.validate_mandatory = function (frm, label, value, trigger_on) {
+Goldfish.utils.validate_mandatory = function (frm, label, value, trigger_on) {
 	if (!value) {
 		frm.doc[trigger_on] = "";
 		refresh_field(trigger_on);
@@ -320,7 +320,7 @@ erpnext.utils.validate_mandatory = function (frm, label, value, trigger_on) {
 	return true;
 };
 
-erpnext.utils.get_shipping_address = function (frm, callback) {
+Goldfish.utils.get_shipping_address = function (frm, callback) {
 	if (frm.doc.company) {
 		if (
 			frm.doc.inter_company_order_reference ||
@@ -332,7 +332,7 @@ erpnext.utils.get_shipping_address = function (frm, callback) {
 			}
 		}
 		frappe.call({
-			method: "erpnext.accounts.custom.address.get_shipping_address",
+			method: "Goldfish.accounts.custom.address.get_shipping_address",
 			args: {
 				company: frm.doc.company,
 				address: frm.doc.shipping_address,

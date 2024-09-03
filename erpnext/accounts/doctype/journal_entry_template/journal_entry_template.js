@@ -6,7 +6,7 @@ frappe.ui.form.on("Journal Entry Template", {
 		if (frm.is_new()) {
 			frappe.call({
 				type: "GET",
-				method: "erpnext.accounts.doctype.journal_entry_template.journal_entry_template.get_naming_series",
+				method: "Goldfish.accounts.doctype.journal_entry_template.journal_entry_template.get_naming_series",
 				callback: function (r) {
 					if (r.message) {
 						frm.set_df_property("naming_series", "options", r.message.split("\n"));
@@ -55,7 +55,7 @@ frappe.ui.form.on("Journal Entry Template", {
 			case "Cash Entry":
 				frappe.call({
 					type: "GET",
-					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
+					method: "Goldfish.accounts.doctype.journal_entry.journal_entry.get_default_bank_cash_account",
 					args: {
 						account_type:
 							frm.doc.voucher_type == "Bank Entry"

@@ -1,16 +1,16 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.accounts");
+frappe.provide("Goldfish.accounts");
 
 cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
 
-erpnext.accounts.payment_triggers.setup("Purchase Invoice");
-erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
-erpnext.accounts.taxes.setup_tax_validations("Purchase Invoice");
-erpnext.buying.setup_buying_controller();
+Goldfish.accounts.payment_triggers.setup("Purchase Invoice");
+Goldfish.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
+Goldfish.accounts.taxes.setup_tax_validations("Purchase Invoice");
+Goldfish.buying.setup_buying_controller();
 
-erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.BuyingController {
+Goldfish.accounts.PurchaseInvoice = class PurchaseInvoice extends Goldfish.buying.BuyingController {
 	setup(doc) {
 		this.setup_posting_date_time_check();
 		super.setup(doc);
@@ -70,11 +70,11 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		hide_fields(this.frm.doc);
 		// Show / Hide button
 		this.show_general_ledger();
-		erpnext.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
+		Goldfish.accounts.ledger_preview.show_accounting_ledger_preview(this.frm);
 
 		if (doc.update_stock == 1) {
 			this.show_stock_ledger();
-			erpnext.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
+			Goldfish.accounts.ledger_preview.show_stock_ledger_preview(this.frm);
 		}
 
 		if (!doc.is_return && doc.docstatus == 1 && doc.outstanding_amount != 0) {
@@ -133,8 +133,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			this.frm.add_custom_button(
 				__("Purchase Order"),
 				function () {
-					erpnext.utils.map_current_doc({
-						method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
+					Goldfish.utils.map_current_doc({
+						method: "Goldfish.buying.doctype.purchase_order.purchase_order.make_purchase_invoice",
 						source_doctype: "Purchase Order",
 						target: me.frm,
 						setters: {
@@ -155,8 +155,8 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 			this.frm.add_custom_button(
 				__("Purchase Receipt"),
 				function () {
-					erpnext.utils.map_current_doc({
-						method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
+					Goldfish.utils.map_current_doc({
+						method: "Goldfish.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 						source_doctype: "Purchase Receipt",
 						target: me.frm,
 						setters: {
@@ -208,13 +208,13 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		}
 
 		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
-		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
+		Goldfish.accounts.unreconcile_payment.add_unreconcile_btn(me.frm);
 	}
 
 	unblock_invoice() {
 		const me = this;
 		frappe.call({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.unblock_invoice",
+			method: "Goldfish.accounts.doctype.purchase_invoice.purchase_invoice.unblock_invoice",
 			args: { name: me.frm.doc.name },
 			callback: (r) => me.frm.reload_doc(),
 		});
@@ -268,7 +268,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 		this.dialog.set_primary_action(__("Save"), function () {
 			const dialog_data = me.dialog.get_values();
 			frappe.call({
-				method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice",
+				method: "Goldfish.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice",
 				args: {
 					name: me.frm.doc.name,
 					hold_comment: dialog_data.hold_comment,
@@ -315,7 +315,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	set_release_date(data) {
 		return frappe.call({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.change_release_date",
+			method: "Goldfish.accounts.doctype.purchase_invoice.purchase_invoice.change_release_date",
 			args: data,
 			callback: (r) => this.frm.reload_doc(),
 		});
@@ -329,9 +329,9 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 		if (this.frm.doc.__onload && this.frm.doc.__onload.load_after_mapping) return;
 
-		erpnext.utils.get_party_details(
+		Goldfish.utils.get_party_details(
 			this.frm,
-			"erpnext.accounts.party.get_party_details",
+			"Goldfish.accounts.party.get_party_details",
 			{
 				posting_date: this.frm.doc.posting_date,
 				bill_date: this.frm.doc.bill_date,
@@ -385,7 +385,7 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	make_inter_company_invoice(frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_inter_company_sales_invoice",
+			method: "Goldfish.accounts.doctype.purchase_invoice.purchase_invoice.make_inter_company_sales_invoice",
 			frm: frm,
 		});
 	}
@@ -440,13 +440,13 @@ erpnext.accounts.PurchaseInvoice = class PurchaseInvoice extends erpnext.buying.
 
 	make_debit_note() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note",
+			method: "Goldfish.accounts.doctype.purchase_invoice.purchase_invoice.make_debit_note",
 			frm: this.frm,
 		});
 	}
 };
 
-cur_frm.script_manager.make(erpnext.accounts.PurchaseInvoice);
+cur_frm.script_manager.make(Goldfish.accounts.PurchaseInvoice);
 
 // Hide Fields
 // ------------
@@ -487,7 +487,7 @@ cur_frm.fields_dict.cash_bank_account.get_query = function (doc) {
 
 cur_frm.fields_dict["items"].grid.get_field("item_code").get_query = function (doc, cdt, cdn) {
 	return {
-		query: "erpnext.controllers.queries.item_query",
+		query: "Goldfish.controllers.queries.item_query",
 		filters: { is_purchase_item: 1 },
 	};
 };
@@ -512,7 +512,7 @@ cur_frm.fields_dict["select_print_heading"].get_query = function (doc, cdt, cdn)
 
 cur_frm.set_query("expense_account", "items", function (doc) {
 	return {
-		query: "erpnext.controllers.queries.get_expense_account",
+		query: "Goldfish.controllers.queries.get_expense_account",
 		filters: { company: doc.company },
 	};
 });
@@ -606,7 +606,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	mode_of_payment: function (frm) {
-		erpnext.accounts.pos.get_payment_mode_account(frm, frm.doc.mode_of_payment, function (account) {
+		Goldfish.accounts.pos.get_payment_mode_account(frm, frm.doc.mode_of_payment, function (account) {
 			frm.set_value("cash_bank_account", account);
 		});
 	},
@@ -661,8 +661,8 @@ frappe.ui.form.on("Purchase Invoice", {
 			}
 		}
 
-		erpnext.queries.setup_queries(frm, "Warehouse", function () {
-			return erpnext.queries.warehouse(frm.doc);
+		Goldfish.queries.setup_queries(frm, "Warehouse", function () {
+			return Goldfish.queries.warehouse(frm.doc);
 		});
 
 		if (frm.is_new()) {
@@ -672,7 +672,7 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	is_subcontracted: function (frm) {
 		if (frm.doc.is_old_subcontracting_flow) {
-			erpnext.buying.get_default_bom(frm);
+			Goldfish.buying.get_default_bom(frm);
 		}
 
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted);
@@ -685,18 +685,18 @@ frappe.ui.form.on("Purchase Invoice", {
 
 	make_purchase_receipt: function (frm) {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_receipt",
+			method: "Goldfish.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_receipt",
 			frm: frm,
 			freeze_message: __("Creating Purchase Receipt ..."),
 		});
 	},
 
 	company: function (frm) {
-		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		Goldfish.accounts.dimensions.update_dimension(frm, frm.doctype);
 
 		if (frm.doc.company) {
 			frappe.call({
-				method: "erpnext.accounts.party.get_party_account",
+				method: "Goldfish.accounts.party.get_party_account",
 				args: {
 					party_type: "Supplier",
 					party: frm.doc.supplier,

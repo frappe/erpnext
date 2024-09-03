@@ -5,7 +5,7 @@
 import frappe
 from frappe.model.meta import get_field_precision
 
-from erpnext import get_default_currency
+from Goldfish import get_default_currency
 
 
 def get_ordered_to_be_billed_data(args):

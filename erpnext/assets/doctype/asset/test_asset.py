@@ -16,29 +16,29 @@ from frappe.utils import (
 	nowdate,
 )
 
-from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.assets.doctype.asset.asset import (
+from Goldfish.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from Goldfish.assets.doctype.asset.asset import (
 	make_sales_invoice,
 	split_asset,
 	update_maintenance_status,
 )
-from erpnext.assets.doctype.asset.depreciation import (
+from Goldfish.assets.doctype.asset.depreciation import (
 	post_depreciation_entries,
 	restore_asset,
 	scrap_asset,
 )
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+from Goldfish.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	_check_is_pro_rata,
 	_get_pro_rata_amt,
 	get_asset_depr_schedule_doc,
 	get_depr_schedule,
 	get_depreciation_amount,
 )
-from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
+from Goldfish.stock.doctype.purchase_receipt.purchase_receipt import (
 	make_purchase_invoice as make_invoice,
 )
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 
 class AssetSetup(unittest.TestCase):
@@ -347,7 +347,7 @@ class TestAsset(AssetSetup):
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
 
 	def test_gle_made_by_asset_sale_for_existing_asset(self):
-		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+		from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 		asset = create_asset(
 			calculate_depreciation=1,

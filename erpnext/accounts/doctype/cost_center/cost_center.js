@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.accounts");
+frappe.provide("Goldfish.accounts");
 
 frappe.ui.form.on("Cost Center", {
 	onload: function (frm) {
@@ -82,7 +82,7 @@ frappe.ui.form.on("Cost Center", {
 				}
 				frappe.dom.freeze();
 				frappe.call({
-					method: "erpnext.accounts.utils.update_cost_center",
+					method: "Goldfish.accounts.utils.update_cost_center",
 					args: {
 						docname: frm.doc.name,
 						cost_center_name: data.cost_center_name,

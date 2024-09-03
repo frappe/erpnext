@@ -7,7 +7,7 @@ import frappe.share
 from frappe import _
 from frappe.utils import cint, flt, get_time, now_datetime
 
-from erpnext.controllers.status_updater import StatusUpdater
+from Goldfish.controllers.status_updater import StatusUpdater
 
 
 class UOMMustBeIntegerError(frappe.ValidationError):

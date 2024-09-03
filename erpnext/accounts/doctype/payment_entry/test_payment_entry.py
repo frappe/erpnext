@@ -7,23 +7,23 @@ from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, nowdate
 
-from erpnext.accounts.doctype.account.test_account import create_account
-from erpnext.accounts.doctype.payment_entry.payment_entry import (
+from Goldfish.accounts.doctype.account.test_account import create_account
+from Goldfish.accounts.doctype.payment_entry.payment_entry import (
 	get_outstanding_reference_documents,
 	get_party_details,
 	get_payment_entry,
 	get_reference_details,
 )
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import (
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import (
 	make_purchase_invoice,
 	make_purchase_invoice_against_cost_center,
 )
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import (
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import (
 	create_sales_invoice,
 	create_sales_invoice_against_cost_center,
 )
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.setup.doctype.employee.test_employee import make_employee
+from Goldfish.selling.doctype.sales_order.test_sales_order import make_sales_order
+from Goldfish.setup.doctype.employee.test_employee import make_employee
 
 test_dependencies = ["Item"]
 
@@ -610,7 +610,7 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(flt(pe.references[0].exchange_gain_loss, 2), -94.74)
 
 	def test_payment_entry_retrieves_last_exchange_rate(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+		from Goldfish.setup.doctype.currency_exchange.test_currency_exchange import (
 			save_new_records,
 			test_records,
 		)
@@ -849,7 +849,7 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertEqual(outstanding_amount, 0)
 
 	def test_payment_entry_against_sales_invoice_with_cost_centre(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from Goldfish.accounts.doctype.cost_center.test_cost_center import create_cost_center
 
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
@@ -886,7 +886,7 @@ class TestPaymentEntry(FrappeTestCase):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 	def test_payment_entry_against_purchase_invoice_with_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from Goldfish.accounts.doctype.cost_center.test_cost_center import create_cost_center
 
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
@@ -923,8 +923,8 @@ class TestPaymentEntry(FrappeTestCase):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
 	def test_payment_entry_account_and_party_balance_with_cost_center(self):
-		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		from erpnext.accounts.utils import get_balance_on
+		from Goldfish.accounts.doctype.cost_center.test_cost_center import create_cost_center
+		from Goldfish.accounts.utils import get_balance_on
 
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
@@ -1061,7 +1061,7 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertRaises(frappe.ValidationError, pe_draft.submit)
 
 	def test_details_update_on_reference_table(self):
-		from erpnext.accounts.party import get_party_account
+		from Goldfish.accounts.party import get_party_account
 
 		so = make_sales_order(
 			customer="_Test Customer USD", currency="USD", qty=1, rate=100, do_not_submit=True
@@ -1478,10 +1478,10 @@ class TestPaymentEntry(FrappeTestCase):
 		self.check_pl_entries()
 
 	def test_advance_as_liability_against_order(self):
-		from erpnext.buying.doctype.purchase_order.purchase_order import (
+		from Goldfish.buying.doctype.purchase_order.purchase_order import (
 			make_purchase_invoice as _make_purchase_invoice,
 		)
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from Goldfish.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		company = "_Test Company"
 

@@ -2,7 +2,7 @@ import frappe
 
 
 def execute():
-	from erpnext.setup.setup_wizard.operations.install_fixtures import add_uom_data
+	from Goldfish.setup.setup_wizard.operations.install_fixtures import add_uom_data
 
 	frappe.reload_doc("setup", "doctype", "UOM Conversion Factor")
 	frappe.reload_doc("setup", "doctype", "UOM")

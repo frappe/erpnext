@@ -44,7 +44,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 
 			frm.add_custom_button(execute_btn, () => {
 				frm.call({
-					method: "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_job_for_doc",
+					method: "Goldfish.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.trigger_job_for_doc",
 					args: {
 						docname: frm.doc.name,
 					},
@@ -61,7 +61,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 			["Completed", "Running", "Paused", "Partially Reconciled"].find((x) => x == frm.doc.status)
 		) {
 			frm.call({
-				method: "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.get_reconciled_count",
+				method: "Goldfish.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.get_reconciled_count",
 				args: {
 					docname: frm.docname,
 				},
@@ -86,7 +86,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 
 			frm.add_custom_button(execute_btn, () => {
 				frm.call({
-					method: "erpnext.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.pause_job_for_doc",
+					method: "Goldfish.accounts.doctype.process_payment_reconciliation.process_payment_reconciliation.pause_job_for_doc",
 					args: {
 						docname: frm.docname,
 					},
@@ -111,7 +111,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 		frm.set_value("receivable_payable_account", "");
 		if (!frm.doc.receivable_payable_account && frm.doc.party_type && frm.doc.party) {
 			return frappe.call({
-				method: "erpnext.accounts.party.get_party_account",
+				method: "Goldfish.accounts.party.get_party_account",
 				args: {
 					company: frm.doc.company,
 					party_type: frm.doc.party_type,

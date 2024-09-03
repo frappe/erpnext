@@ -6,7 +6,7 @@ import frappe
 from frappe import _, session
 from frappe.utils import now_datetime
 
-from erpnext.utilities.transaction_base import TransactionBase
+from Goldfish.utilities.transaction_base import TransactionBase
 
 
 class WarrantyClaim(TransactionBase):

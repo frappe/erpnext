@@ -9,13 +9,13 @@ from frappe import _
 from frappe.query_builder.functions import IfNull, Sum
 from frappe.utils import add_months, cstr, flt, formatdate, getdate, nowdate, today
 
-from erpnext.accounts.report.financial_statements import (
+from Goldfish.accounts.report.financial_statements import (
 	get_fiscal_year_data,
 	get_period_list,
 	validate_fiscal_year,
 )
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
+from Goldfish.accounts.utils import get_fiscal_year
+from Goldfish.assets.doctype.asset.asset import get_asset_value_after_depreciation
 
 
 def execute(filters=None):

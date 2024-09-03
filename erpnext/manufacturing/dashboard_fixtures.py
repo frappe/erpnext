@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import add_months, nowdate
 
-import erpnext
+import Goldfish
 
 
 def get_data():
@@ -46,7 +46,7 @@ def get_dashboards():
 
 
 def get_charts():
-	company = erpnext.get_default_company()
+	company = Goldfish.get_default_company()
 
 	if not company:
 		company = frappe.db.get_value("Company", {"is_group": 0}, "name")

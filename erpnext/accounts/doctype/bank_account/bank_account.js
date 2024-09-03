@@ -14,7 +14,7 @@ frappe.ui.form.on("Bank Account", {
 		});
 		frm.set_query("party_type", function () {
 			return {
-				query: "erpnext.setup.doctype.party_type.party_type.get_party_type",
+				query: "Goldfish.setup.doctype.party_type.party_type.get_party_type",
 			};
 		});
 	},
@@ -33,7 +33,7 @@ frappe.ui.form.on("Bank Account", {
 			frm.add_custom_button(__("Unlink external integrations"), function () {
 				frappe.confirm(
 					__(
-						"This action will unlink this account from any external service integrating ERPNext with your bank accounts. It cannot be undone. Are you certain ?"
+						"This action will unlink this account from any external service integrating Goldfish with your bank accounts. It cannot be undone. Are you certain ?"
 					),
 					function () {
 						frm.set_value("integration_id", "");

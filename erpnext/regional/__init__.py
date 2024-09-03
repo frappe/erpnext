@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 
-from erpnext import get_region
+from Goldfish import get_region
 
 
 def check_deletion_permission(doc, method):

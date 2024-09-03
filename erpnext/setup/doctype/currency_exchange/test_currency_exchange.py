@@ -7,7 +7,7 @@ from unittest import mock
 import frappe
 from frappe.utils import cint, flt
 
-from erpnext.setup.utils import get_exchange_rate
+from Goldfish.setup.utils import get_exchange_rate
 
 test_records = frappe.get_test_records("Currency Exchange")
 

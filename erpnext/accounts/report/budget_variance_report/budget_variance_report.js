@@ -21,7 +21,7 @@ function get_filters() {
 	function get_dimensions() {
 		let result = [];
 		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			method: "Goldfish.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
 			args: {
 				with_cost_center_and_project: true,
 			},
@@ -43,7 +43,7 @@ function get_filters() {
 			label: __("From Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 		},
 		{
@@ -51,7 +51,7 @@ function get_filters() {
 			label: __("To Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 		},
 		{

@@ -28,7 +28,7 @@
 		"frappe": true,
 		"Vue": true,
 		"SetVueGlobals": true,
-		"erpnext": true,
+		"Goldfish": true,
 		"hub": true,
 		"$": true,
 		"jQuery": true,

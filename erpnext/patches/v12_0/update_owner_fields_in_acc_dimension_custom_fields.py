@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_doctypes_with_dimensions,
 )
 

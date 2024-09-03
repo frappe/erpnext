@@ -12,10 +12,10 @@ from frappe.query_builder.functions import Count, CurDate, Date, Sum, UnixTimest
 from frappe.utils import add_days, flt, get_datetime, get_time, get_url, nowtime, today
 from frappe.utils.user import is_website_user
 
-from erpnext import get_default_company
-from erpnext.controllers.queries import get_filters_cond
-from erpnext.controllers.website_list_for_contact import get_customers_suppliers
-from erpnext.setup.doctype.holiday_list.holiday_list import is_holiday
+from Goldfish import get_default_company
+from Goldfish.controllers.queries import get_filters_cond
+from Goldfish.controllers.website_list_for_contact import get_customers_suppliers
+from Goldfish.setup.doctype.holiday_list.holiday_list import is_holiday
 
 
 class Project(Document):
@@ -27,7 +27,7 @@ class Project(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.projects.doctype.project_user.project_user import ProjectUser
+		from Goldfish.projects.doctype.project_user.project_user import ProjectUser
 
 		actual_end_date: DF.Date | None
 		actual_start_date: DF.Date | None
@@ -416,7 +416,7 @@ def get_project_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 
 def get_list_context(context=None):
-	from erpnext.controllers.website_list_for_contact import get_list_context
+	from Goldfish.controllers.website_list_for_contact import get_list_context
 
 	list_context = get_list_context(context)
 	list_context.update(

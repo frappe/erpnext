@@ -14,7 +14,7 @@ frappe.ui.form.on("Asset Maintenance", {
 
 		frm.set_query("assign_to", "asset_maintenance_tasks", function (doc) {
 			return {
-				query: "erpnext.assets.doctype.asset_maintenance.asset_maintenance.get_team_members",
+				query: "Goldfish.assets.doctype.asset_maintenance.asset_maintenance.get_team_members",
 				filters: {
 					maintenance_team: doc.maintenance_team,
 				},
@@ -41,7 +41,7 @@ frappe.ui.form.on("Asset Maintenance", {
 	make_dashboard: (frm) => {
 		if (!frm.is_new()) {
 			frappe.call({
-				method: "erpnext.assets.doctype.asset_maintenance.asset_maintenance.get_maintenance_log",
+				method: "Goldfish.assets.doctype.asset_maintenance.asset_maintenance.get_maintenance_log",
 				args: { asset_name: frm.doc.asset_name },
 				callback: (r) => {
 					if (!r.message) {
@@ -86,7 +86,7 @@ var get_next_due_date = function (frm, cdt, cdn) {
 	var d = locals[cdt][cdn];
 	if (d.start_date && d.periodicity) {
 		return frappe.call({
-			method: "erpnext.assets.doctype.asset_maintenance.asset_maintenance.calculate_next_due_date",
+			method: "Goldfish.assets.doctype.asset_maintenance.asset_maintenance.calculate_next_due_date",
 			args: {
 				start_date: d.start_date,
 				periodicity: d.periodicity,

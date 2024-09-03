@@ -2,7 +2,7 @@ import frappe
 from frappe.model.db_query import DatabaseQuery
 from frappe.utils import cint, flt
 
-from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
+from Goldfish.stock.doctype.stock_reservation_entry.stock_reservation_entry import (
 	get_sre_reserved_qty_for_items_and_warehouses as get_reserved_stock_details,
 )
 

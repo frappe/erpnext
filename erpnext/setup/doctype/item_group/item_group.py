@@ -17,8 +17,8 @@ class ItemGroup(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.item_default.item_default import ItemDefault
-		from erpnext.stock.doctype.item_tax.item_tax import ItemTax
+		from Goldfish.stock.doctype.item_default.item_default import ItemDefault
+		from Goldfish.stock.doctype.item_tax.item_tax import ItemTax
 
 		image: DF.AttachImage | None
 		is_group: DF.Check
@@ -66,7 +66,7 @@ class ItemGroup(NestedSet):
 		frappe.cache().hdel("child_item_groups", self.name)
 
 	def validate_item_group_defaults(self):
-		from erpnext.stock.doctype.item.item import validate_item_default_company_links
+		from Goldfish.stock.doctype.item.item import validate_item_default_company_links
 
 		validate_item_default_company_links(self.item_group_defaults)
 

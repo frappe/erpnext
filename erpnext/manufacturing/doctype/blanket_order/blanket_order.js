@@ -18,13 +18,13 @@ frappe.ui.form.on("Blanket Order", {
 	},
 
 	refresh: function (frm) {
-		erpnext.hide_company(frm);
+		Goldfish.hide_company(frm);
 		if (frm.doc.customer && frm.doc.docstatus === 1 && frm.doc.to_date > frappe.datetime.get_today()) {
 			frm.add_custom_button(
 				__("Sales Order"),
 				function () {
 					frappe.model.open_mapped_doc({
-						method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_order",
+						method: "Goldfish.manufacturing.doctype.blanket_order.blanket_order.make_order",
 						frm: frm,
 						args: {
 							doctype: "Sales Order",
@@ -38,7 +38,7 @@ frappe.ui.form.on("Blanket Order", {
 				__("Quotation"),
 				function () {
 					frappe.model.open_mapped_doc({
-						method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_order",
+						method: "Goldfish.manufacturing.doctype.blanket_order.blanket_order.make_order",
 						frm: frm,
 						args: {
 							doctype: "Quotation",
@@ -54,7 +54,7 @@ frappe.ui.form.on("Blanket Order", {
 				__("Purchase Order"),
 				function () {
 					frappe.model.open_mapped_doc({
-						method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_order",
+						method: "Goldfish.manufacturing.doctype.blanket_order.blanket_order.make_order",
 						frm: frm,
 						args: {
 							doctype: "Purchase Order",
@@ -71,7 +71,7 @@ frappe.ui.form.on("Blanket Order", {
 	},
 
 	tc_name: function (frm) {
-		erpnext.utils.get_terms(frm.doc.tc_name, frm.doc, function (r) {
+		Goldfish.utils.get_terms(frm.doc.tc_name, frm.doc, function (r) {
 			if (!r.exc) {
 				frm.set_value("terms", r.message);
 			}

@@ -6,18 +6,18 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_checks_for_pl_and_bs_accounts,
 )
-from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+from Goldfish.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
 	get_dimension_filter_map,
 )
-from erpnext.accounts.doctype.gl_entry.gl_entry import (
+from Goldfish.accounts.doctype.gl_entry.gl_entry import (
 	validate_balance_type,
 	validate_frozen_account,
 )
-from erpnext.accounts.utils import update_voucher_outstanding
-from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
+from Goldfish.accounts.utils import update_voucher_outstanding
+from Goldfish.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
 
 class PaymentLedgerEntry(Document):

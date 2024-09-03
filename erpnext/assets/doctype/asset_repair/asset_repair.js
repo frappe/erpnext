@@ -84,7 +84,7 @@ frappe.ui.form.on("Asset Repair", {
 	repair_status: (frm) => {
 		if (frm.doc.completion_date && frm.doc.repair_status == "Completed") {
 			frappe.call({
-				method: "erpnext.assets.doctype.asset_repair.asset_repair.get_downtime",
+				method: "Goldfish.assets.doctype.asset_repair.asset_repair.get_downtime",
 				args: {
 					failure_date: frm.doc.failure_date,
 					completion_date: frm.doc.completion_date,
@@ -103,7 +103,7 @@ frappe.ui.form.on("Asset Repair", {
 	},
 
 	stock_items_on_form_rendered() {
-		erpnext.setup_serial_or_batch_no();
+		Goldfish.setup_serial_or_batch_no();
 	},
 
 	stock_consumption: function (frm) {
@@ -153,7 +153,7 @@ frappe.ui.form.on("Asset Repair Consumed Item", {
 		};
 
 		frappe.call({
-			method: "erpnext.stock.utils.get_incoming_rate",
+			method: "Goldfish.stock.utils.get_incoming_rate",
 			args: {
 				args: item_args,
 			},

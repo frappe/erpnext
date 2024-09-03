@@ -5,7 +5,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.controllers.accounts_controller import InvalidQtyError
+from Goldfish.controllers.accounts_controller import InvalidQtyError
 
 
 class TestPurchaseOrder(FrappeTestCase):
@@ -21,7 +21,7 @@ class TestPurchaseOrder(FrappeTestCase):
 		self.assertEqual(sq.items[0].qty, 1)
 
 	def test_make_purchase_order(self):
-		from erpnext.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
+		from Goldfish.buying.doctype.supplier_quotation.supplier_quotation import make_purchase_order
 
 		sq = frappe.copy_doc(test_records[0]).insert()
 

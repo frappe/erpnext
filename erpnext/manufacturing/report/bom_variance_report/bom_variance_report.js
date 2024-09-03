@@ -17,7 +17,7 @@ frappe.query_reports["BOM Variance Report"] = {
 			get_query: function () {
 				var bom_no = frappe.query_report.get_filter_value("bom_no");
 				return {
-					query: "erpnext.manufacturing.report.bom_variance_report.bom_variance_report.get_work_orders",
+					query: "Goldfish.manufacturing.report.bom_variance_report.bom_variance_report.get_work_orders",
 					filters: {
 						bom_no: bom_no,
 					},

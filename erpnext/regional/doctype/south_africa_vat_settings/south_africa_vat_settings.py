@@ -14,7 +14,7 @@ class SouthAfricaVATSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.south_africa_vat_account.south_africa_vat_account import (
+		from Goldfish.accounts.doctype.south_africa_vat_account.south_africa_vat_account import (
 			SouthAfricaVATAccount,
 		)
 

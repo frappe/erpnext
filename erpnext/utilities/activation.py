@@ -5,7 +5,7 @@
 import frappe
 from frappe import _
 
-import erpnext
+import Goldfish
 
 
 def get_level():
@@ -67,7 +67,7 @@ def get_help_messages():
 	if get_level() > 6:
 		return []
 
-	domain = frappe.get_cached_value("Company", erpnext.get_default_company(), "domain")
+	domain = frappe.get_cached_value("Company", Goldfish.get_default_company(), "domain")
 	messages = []
 
 	message_settings = [

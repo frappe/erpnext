@@ -10,7 +10,7 @@ from frappe.model.naming import make_autoname
 from frappe.query_builder.functions import Coalesce
 from frappe.utils import cint, cstr, getdate, nowdate, safe_json_loads
 
-from erpnext.controllers.stock_controller import StockController
+from Goldfish.controllers.stock_controller import StockController
 
 
 class SerialNoCannotCreateDirectError(ValidationError):
@@ -298,7 +298,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=None):
 
 
 def get_serial_nos_for_outward(kwargs):
-	from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+	from Goldfish.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 		get_available_serial_nos,
 	)
 

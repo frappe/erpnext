@@ -80,7 +80,7 @@ frappe.ui.form.on("Chart of Accounts Importer", {
 				}
 
 				open_url_post(
-					"/api/method/erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template",
+					"/api/method/Goldfish.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template",
 					{
 						file_type: data.file_type,
 						template_type: data.template_type,
@@ -106,7 +106,7 @@ frappe.ui.form.on("Chart of Accounts Importer", {
 		if (frm.doc.company) {
 			// validate that no Gl Entry record for the company exists.
 			frappe.call({
-				method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_company",
+				method: "Goldfish.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_company",
 				args: {
 					company: frm.doc.company,
 				},
@@ -131,7 +131,7 @@ var create_import_button = function (frm) {
 	frm.page
 		.set_primary_action(__("Import"), function () {
 			return frappe.call({
-				method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
+				method: "Goldfish.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
 				args: {
 					file_name: frm.doc.import_file,
 					company: frm.doc.company,
@@ -164,7 +164,7 @@ var validate_coa = function (frm) {
 	if (frm.doc.import_file) {
 		let parent = __("All Accounts");
 		return frappe.call({
-			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa",
+			method: "Goldfish.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa",
 			args: {
 				file_name: frm.doc.import_file,
 				parent: parent,
@@ -190,7 +190,7 @@ var generate_tree_preview = function (frm) {
 		parent: $(frm.fields_dict["chart_tree"].wrapper),
 		label: parent,
 		expandable: true,
-		method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa",
+		method: "Goldfish.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.get_coa",
 		args: {
 			file_name: frm.doc.import_file,
 			parent: parent,

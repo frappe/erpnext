@@ -1,15 +1,15 @@
 {
-  "name": "erpnext",
+  "name": "Goldfish",
   "description": "Open Source ERP System powered by the Frappe Framework",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frappe/erpnext.git"
+    "url": "git+https://github.com/frappe/Goldfish.git"
   },
-  "homepage": "https://erpnext.com",
+  "homepage": "https://Goldfish.com",
   "author": "Frappe Technologies Pvt. Ltd.",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/frappe/erpnext/issues"
+    "url": "https://github.com/frappe/Goldfish/issues"
   },
   "devDependencies": {},
   "dependencies": {

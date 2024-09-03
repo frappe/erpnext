@@ -2,9 +2,9 @@ import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.payment_ledger.payment_ledger import execute
+from Goldfish.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.accounts.report.payment_ledger.payment_ledger import execute
 
 
 class TestPaymentLedger(FrappeTestCase):

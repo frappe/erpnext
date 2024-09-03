@@ -4,12 +4,12 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase, timeout
 
-from erpnext.manufacturing.doctype.bom_update_log.test_bom_update_log import (
+from Goldfish.manufacturing.doctype.bom_update_log.test_bom_update_log import (
 	update_cost_in_all_boms_in_test,
 )
-from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import enqueue_replace_bom
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-from erpnext.stock.doctype.item.test_item import create_item
+from Goldfish.manufacturing.doctype.bom_update_tool.bom_update_tool import enqueue_replace_bom
+from Goldfish.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from Goldfish.stock.doctype.item.test_item import create_item
 
 test_records = frappe.get_test_records("BOM")
 

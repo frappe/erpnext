@@ -15,7 +15,7 @@ class DunningType(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.dunning_letter_text.dunning_letter_text import DunningLetterText
+		from Goldfish.accounts.doctype.dunning_letter_text.dunning_letter_text import DunningLetterText
 
 		company: DF.Link
 		cost_center: DF.Link | None

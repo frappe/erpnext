@@ -36,7 +36,7 @@ class CostCenterAllocation(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.cost_center_allocation_percentage.cost_center_allocation_percentage import (
+		from Goldfish.accounts.doctype.cost_center_allocation_percentage.cost_center_allocation_percentage import (
 			CostCenterAllocationPercentage,
 		)
 

@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import date_diff, flt, getdate, today
 
-from erpnext.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
+from Goldfish.stock.report.stock_analytics.stock_analytics import get_period, get_period_date_ranges
 
 
 def execute(filters=None):

@@ -15,7 +15,7 @@ class QualityInspectionTemplate(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.item_quality_inspection_parameter.item_quality_inspection_parameter import (
+		from Goldfish.stock.doctype.item_quality_inspection_parameter.item_quality_inspection_parameter import (
 			ItemQualityInspectionParameter,
 		)
 

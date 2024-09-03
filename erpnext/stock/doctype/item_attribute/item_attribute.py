@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.controllers.item_variant import (
+from Goldfish.controllers.item_variant import (
 	InvalidItemAttributeValueError,
 	validate_is_incremental,
 	validate_item_attribute_value,
@@ -27,7 +27,7 @@ class ItemAttribute(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.item_attribute_value.item_attribute_value import ItemAttributeValue
+		from Goldfish.stock.doctype.item_attribute_value.item_attribute_value import ItemAttributeValue
 
 		attribute_name: DF.Data
 		from_range: DF.Float

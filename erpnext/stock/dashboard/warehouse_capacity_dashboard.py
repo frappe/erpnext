@@ -2,7 +2,7 @@ import frappe
 from frappe.model.db_query import DatabaseQuery
 from frappe.utils import flt, nowdate
 
-from erpnext.stock.utils import get_stock_balance
+from Goldfish.stock.utils import get_stock_balance
 
 
 @frappe.whitelist()

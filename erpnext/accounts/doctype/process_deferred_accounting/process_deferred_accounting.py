@@ -6,12 +6,12 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 
-from erpnext.accounts.deferred_revenue import (
+from Goldfish.accounts.deferred_revenue import (
 	build_conditions,
 	convert_deferred_expense_to_expense,
 	convert_deferred_revenue_to_income,
 )
-from erpnext.accounts.general_ledger import make_gl_entries
+from Goldfish.accounts.general_ledger import make_gl_entries
 
 
 class ProcessDeferredAccounting(Document):

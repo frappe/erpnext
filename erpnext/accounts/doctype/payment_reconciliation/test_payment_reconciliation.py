@@ -7,14 +7,14 @@ from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, flt, nowdate
 
-from erpnext import get_default_cost_center
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.party import get_party_account
-from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
-from erpnext.stock.doctype.item.test_item import create_item
+from Goldfish import get_default_cost_center
+from Goldfish.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from Goldfish.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.accounts.party import get_party_account
+from Goldfish.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from Goldfish.stock.doctype.item.test_item import create_item
 
 test_dependencies = ["Item"]
 

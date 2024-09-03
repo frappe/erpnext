@@ -17,7 +17,7 @@ class LoyaltyProgram(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.loyalty_program_collection.loyalty_program_collection import (
+		from Goldfish.accounts.doctype.loyalty_program_collection.loyalty_program_collection import (
 			LoyaltyProgramCollection,
 		)
 

@@ -32,7 +32,7 @@ frappe.listview_settings["POS Invoice"] = {
 		me.page.add_action_item("Make Merge Log", function () {
 			const invoices = me.get_checked_items();
 			frappe.call({
-				method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.make_merge_log",
+				method: "Goldfish.accounts.doctype.pos_invoice.pos_invoice.make_merge_log",
 				freeze: true,
 				args: {
 					invoices: invoices,

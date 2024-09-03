@@ -2,9 +2,9 @@
 // License: GNU General Public License v3. See license.txt
 
 // get tax rate
-frappe.provide("erpnext.taxes");
+frappe.provide("Goldfish.taxes");
 
-erpnext.accounts.taxes = {
+Goldfish.accounts.taxes = {
 	setup_tax_validations: function(doctype) {
 		let me = this;
 		frappe.ui.form.on(doctype, {
@@ -26,7 +26,7 @@ erpnext.accounts.taxes = {
 						}
 
 						return {
-							query: "erpnext.controllers.queries.tax_account_query",
+							query: "Goldfish.controllers.queries.tax_account_query",
 							filters: {
 								"account_type": account_type,
 								"company": doc.company,
@@ -126,7 +126,7 @@ erpnext.accounts.taxes = {
 				} else if (d.account_head) {
 					frappe.call({
 						type:"GET",
-						method: "erpnext.controllers.accounts_controller.get_tax_rate",
+						method: "Goldfish.controllers.accounts_controller.get_tax_rate",
 						args: {"account_head":d.account_head},
 						callback: function(r) {
 							if (d.charge_type!=="Actual") {
@@ -206,7 +206,7 @@ erpnext.accounts.taxes = {
 	}
 }
 
-erpnext.accounts.payment_triggers = {
+Goldfish.accounts.payment_triggers = {
 	setup: function(doctype) {
 		frappe.ui.form.on(doctype, {
 			allocate_advances_automatically(frm) {
@@ -232,7 +232,7 @@ erpnext.accounts.payment_triggers = {
 	},
 }
 
-erpnext.accounts.pos = {
+Goldfish.accounts.pos = {
 	setup: function(doctype) {
 		frappe.ui.form.on(doctype, {
 			mode_of_payment: function(frm, cdt, cdn) {
@@ -254,7 +254,7 @@ erpnext.accounts.pos = {
 		}
 
 		return  frappe.call({
-			method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
+			method: "Goldfish.accounts.doctype.sales_invoice.sales_invoice.get_bank_cash_account",
 			args: {
 				"mode_of_payment": mode_of_payment,
 				"company": frm.doc.company

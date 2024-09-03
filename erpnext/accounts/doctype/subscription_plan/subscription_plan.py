@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import date_diff, flt, get_first_day, get_last_day, getdate
 
-from erpnext.utilities.product import get_price
+from Goldfish.utilities.product import get_price
 
 
 class SubscriptionPlan(Document):

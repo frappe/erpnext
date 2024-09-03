@@ -7,8 +7,8 @@ from frappe import _, throw
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 
-import erpnext.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable as variable_functions
-from erpnext.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria import (
+import Goldfish.buying.doctype.supplier_scorecard_variable.supplier_scorecard_variable as variable_functions
+from Goldfish.buying.doctype.supplier_scorecard_criteria.supplier_scorecard_criteria import (
 	get_variables,
 )
 
@@ -22,10 +22,10 @@ class SupplierScorecardPeriod(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.buying.doctype.supplier_scorecard_scoring_criteria.supplier_scorecard_scoring_criteria import (
+		from Goldfish.buying.doctype.supplier_scorecard_scoring_criteria.supplier_scorecard_scoring_criteria import (
 			SupplierScorecardScoringCriteria,
 		)
-		from erpnext.buying.doctype.supplier_scorecard_scoring_variable.supplier_scorecard_scoring_variable import (
+		from Goldfish.buying.doctype.supplier_scorecard_scoring_variable.supplier_scorecard_scoring_variable import (
 			SupplierScorecardScoringVariable,
 		)
 

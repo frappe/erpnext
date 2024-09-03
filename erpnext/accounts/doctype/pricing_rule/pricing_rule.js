@@ -17,7 +17,7 @@ frappe.ui.form.on("Pricing Rule", {
 			frm.fields_dict[d].grid.get_field("uom").get_query = function (doc, cdt, cdn) {
 				var row = locals[cdt][cdn];
 				return {
-					query: "erpnext.accounts.doctype.pricing_rule.pricing_rule.get_item_uoms",
+					query: "Goldfish.accounts.doctype.pricing_rule.pricing_rule.get_item_uoms",
 					filters: { value: row[frappe.scrub(doc.apply_on)], apply_on: doc.apply_on },
 				};
 			};

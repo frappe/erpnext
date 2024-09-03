@@ -66,7 +66,7 @@ def get_tasks(project, start=0, search=None, item_status=None):
 @frappe.whitelist()
 def get_task_html(project, start=0, item_status=None):
 	return frappe.render_template(
-		"erpnext/templates/includes/projects/project_tasks.html",
+		"Goldfish/templates/includes/projects/project_tasks.html",
 		{
 			"doc": {
 				"name": project,
@@ -106,7 +106,7 @@ def get_timesheets(project, start=0, search=None):
 @frappe.whitelist()
 def get_timesheet_html(project, start=0):
 	return frappe.render_template(
-		"erpnext/templates/includes/projects/project_timesheets.html",
+		"Goldfish/templates/includes/projects/project_timesheets.html",
 		{"doc": {"timesheets": get_timesheets(project, start)}},
 		is_path=True,
 	)

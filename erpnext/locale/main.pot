@@ -1,16 +1,16 @@
-# Translations template for ERPNext.
+# Translations template for Goldfish.
 # Copyright (C) 2024 Frappe Technologies Pvt. Ltd.
-# This file is distributed under the same license as the ERPNext project.
+# This file is distributed under the same license as the Goldfish project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2024.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: ERPNext VERSION\n"
-"Report-Msgid-Bugs-To: info@erpnext.com\n"
+"Project-Id-Version: Goldfish VERSION\n"
+"Report-Msgid-Bugs-To: info@Goldfish.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
 "PO-Revision-Date: 2024-09-01 09:35+0000\n"
-"Last-Translator: info@erpnext.com\n"
-"Language-Team: info@erpnext.com\n"
+"Last-Translator: info@Goldfish.com\n"
+"Language-Team: info@Goldfish.com\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -87,7 +87,7 @@ msgstr ""
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "#"
 msgstr ""
 
@@ -995,7 +995,7 @@ msgstr ""
 #. Settings'
 #. Label of the api_endpoint (Data) field in DocType 'QuickBooks Migrator'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "API Endpoint"
 msgstr ""
 
@@ -1136,7 +1136,7 @@ msgstr ""
 
 #. Label of the access_token (Small Text) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Access Token"
 msgstr ""
 
@@ -1873,7 +1873,7 @@ msgstr ""
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.json
 #: assets/doctype/asset_category/asset_category.json
 #: buying/doctype/supplier/supplier.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: selling/doctype/customer/customer.json setup/doctype/company/company.json
 #: setup/doctype/company/company.py:334
 #: setup/doctype/customer_group/customer_group.json
@@ -3248,7 +3248,7 @@ msgid "Address used to determine Tax Category in transactions"
 msgstr ""
 
 #. Label of the addresses (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Addresses"
 msgstr ""
 
@@ -4840,7 +4840,7 @@ msgstr ""
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:26
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:26
 msgctxt "<a href='/app/error-log' class='variant-click'>Error Log</a>"
 msgid "An error has occurred during {0}. Check {1} for more details"
 msgstr ""
@@ -5018,7 +5018,7 @@ msgstr ""
 
 #. Label of the application_settings (Section Break) field in DocType
 #. 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Application Settings"
 msgstr ""
 
@@ -6081,8 +6081,8 @@ msgstr ""
 msgid "Auditor"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:68
-#: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:85
+#: Goldfish_integrations/doctype/plaid_settings/plaid_connector.py:68
+#: Goldfish_integrations/doctype/plaid_settings/plaid_connector.py:85
 msgid "Authentication Failed"
 msgstr ""
 
@@ -6099,7 +6099,7 @@ msgstr ""
 
 #. Label of the authorization_endpoint (Data) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Authorization Endpoint"
 msgstr ""
 
@@ -6110,12 +6110,12 @@ msgstr ""
 
 #. Label of the authorization_settings (Section Break) field in DocType
 #. 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Authorization Settings"
 msgstr ""
 
 #. Label of the authorization_url (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Authorization URL"
 msgstr ""
 
@@ -7020,7 +7020,7 @@ msgstr ""
 #: accounts/doctype/payment_request/payment_request.json
 #: accounts/report/account_balance/account_balance.js:39
 #: accounts/workspace/accounting/accounting.json
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:99
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:99
 #: setup/doctype/employee/employee.json
 msgid "Bank"
 msgstr ""
@@ -7259,15 +7259,15 @@ msgstr ""
 msgid "Bank account cannot be named as {0}"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:146
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:146
 msgid "Bank account {0} already exists and could not be created again"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:153
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:153
 msgid "Bank accounts added"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:311
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:311
 msgid "Bank transaction creation error"
 msgstr ""
 
@@ -8557,7 +8557,7 @@ msgid "Buying must be checked, if Applicable For is selected as {0}"
 msgstr ""
 
 #: buying/doctype/buying_settings/buying_settings.js:13
-msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
+msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.Goldfish.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
 msgstr ""
 
 #. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
@@ -9246,7 +9246,7 @@ msgstr ""
 msgid "Cannot retrieve link token for update. Check Error Log for more information"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:63
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:63
 msgid "Cannot retrieve link token. Check Error Log for more information"
 msgstr ""
 
@@ -9706,7 +9706,7 @@ msgstr ""
 #: accounts/doctype/account/account_tree.js:5
 #: accounts/doctype/cost_center/cost_center_tree.js:52
 #: accounts/workspace/accounting/accounting.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: public/js/setup_wizard.js:36 setup/doctype/company/company.js:103
 #: setup/doctype/company/company.json setup/workspace/home/home.json
 msgid "Chart of Accounts"
@@ -10008,12 +10008,12 @@ msgid "Client"
 msgstr ""
 
 #. Label of the client_id (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Client ID"
 msgstr ""
 
 #. Label of the client_secret (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Client Secret"
 msgstr ""
 
@@ -10191,7 +10191,7 @@ msgstr ""
 
 #. Label of the code (Data) field in DocType 'QuickBooks Migrator'
 #. Label of the code (Data) field in DocType 'Incoterm'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: setup/doctype/incoterm/incoterm.json
 msgid "Code"
 msgstr ""
@@ -10647,8 +10647,8 @@ msgstr ""
 #: crm/report/lost_opportunity/lost_opportunity.js:8
 #: crm/report/opportunity_summary_by_sales_stage/opportunity_summary_by_sales_stage.js:57
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.js:51
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:128
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:128
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 #: manufacturing/doctype/blanket_order/blanket_order.json
@@ -10893,7 +10893,7 @@ msgid "Company Name"
 msgstr ""
 
 #. Description of the 'Tally Company' (Data) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Company Name as per Imported Tally Data"
 msgstr ""
 
@@ -10907,7 +10907,7 @@ msgstr ""
 
 #. Label of the company_settings (Section Break) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Company Settings"
 msgstr ""
 
@@ -10979,7 +10979,7 @@ msgstr ""
 msgid "Company which internal supplier represents"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:85
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:85
 msgid "Company {0} already exists. Continuing will overwrite the Company and Chart of Accounts"
 msgstr ""
 
@@ -11026,8 +11026,8 @@ msgstr ""
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
 #. Option for the 'Status' (Select) field in DocType 'Job Card Operation'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:67
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:67
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: manufacturing/doctype/job_card_operation/job_card_operation.json
 #: manufacturing/doctype/workstation/workstation_job_card.html:94
 #: public/js/projects/timer.js:32
@@ -11280,20 +11280,20 @@ msgstr ""
 msgid "Confirmation Date"
 msgstr ""
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:43
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:51
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:43
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:51
 msgid "Connect to Quickbooks"
 msgstr ""
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:65
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:65
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Connected to QuickBooks"
 msgstr ""
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:64
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:64
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Connecting to QuickBooks"
 msgstr ""
 
@@ -11759,7 +11759,7 @@ msgstr ""
 msgid "Content Type"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:157
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:157
 #: public/js/controllers/transaction.js:2183
 #: selling/doctype/quotation/quotation.js:359
 msgid "Continue"
@@ -12383,7 +12383,7 @@ msgstr ""
 msgid "Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:353
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:353
 msgid "Could not detect the Company for updating Bank Accounts"
 msgstr ""
 
@@ -12539,7 +12539,7 @@ msgstr ""
 #: crm/doctype/opportunity/opportunity.js:103
 #: crm/doctype/opportunity/opportunity.js:112
 #: crm/doctype/prospect/prospect.js:15 crm/doctype/prospect/prospect.js:27
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:127
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:127
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.js:159
 #: manufacturing/doctype/blanket_order/blanket_order.js:34
 #: manufacturing/doctype/blanket_order/blanket_order.js:48
@@ -12642,7 +12642,7 @@ msgstr ""
 msgid "Create Depreciation Entry"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:316
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:316
 msgid "Create Document"
 msgstr ""
 
@@ -12887,7 +12887,7 @@ msgstr ""
 msgid "Creating Accounts..."
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:404
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:404
 msgid "Creating Company and Importing Chart of Accounts"
 msgstr ""
 
@@ -13171,7 +13171,7 @@ msgstr ""
 
 #. Description of the 'Tally Creditors Account' (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Creditors Account set in Tally"
 msgstr ""
 
@@ -14367,7 +14367,7 @@ msgid "Data Import and Settings"
 msgstr ""
 
 #. Description of the 'Master Data' (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Data exported from Tally that consists of the Chart of Accounts, Customers, Suppliers, Addresses, Items and UOMs"
 msgstr ""
 
@@ -14539,13 +14539,13 @@ msgid "Day"
 msgstr ""
 
 #. Label of the day_book_data (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Day Book Data"
 msgstr ""
 
 #. Description of the 'Day Book Data' (Attach) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Day Book Data exported from Tally that consists of all historic transactions"
 msgstr ""
 
@@ -14772,7 +14772,7 @@ msgstr ""
 
 #. Description of the 'Tally Debtors Account' (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Debtors Account set in Tally"
 msgstr ""
 
@@ -14954,8 +14954,8 @@ msgstr ""
 #. Label of the default_cost_center (Link) field in DocType 'Tally Migration'
 #. Label of the cost_center (Link) field in DocType 'Project'
 #. Label of the cost_center (Link) field in DocType 'Company'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: projects/doctype/project/project.json setup/doctype/company/company.json
 msgid "Default Cost Center"
 msgstr ""
@@ -15157,7 +15157,7 @@ msgstr ""
 
 #. Label of the default_round_off_account (Link) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Default Round Off Account"
 msgstr ""
 
@@ -15194,7 +15194,7 @@ msgstr ""
 
 #. Label of the default_shipping_account (Link) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Default Shipping Account"
 msgstr ""
 
@@ -15235,7 +15235,7 @@ msgid "Default Territory"
 msgstr ""
 
 #. Label of the default_uom (Link) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Default UOM"
 msgstr ""
 
@@ -15273,8 +15273,8 @@ msgstr ""
 #. Entry'
 #. Label of the set_warehouse (Link) field in DocType 'Stock Reconciliation'
 #. Label of the default_warehouse (Link) field in DocType 'Stock Settings'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: public/js/bom_configurator/bom_configurator.bundle.js:354
 #: stock/doctype/item_default/item_default.json
 #: stock/doctype/stock_entry/stock_entry.json
@@ -17133,7 +17133,7 @@ msgstr ""
 #. Label of the doctype_name (Link) field in DocType 'Transaction Deletion
 #. Record Item'
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:132
 #: setup/doctype/transaction_deletion_record_item/transaction_deletion_record_item.json
 msgid "DocType"
 msgstr ""
@@ -17250,9 +17250,9 @@ msgstr ""
 #. Label of the done (Check) field in DocType 'Transaction Deletion Record
 #. Details'
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:328
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:413
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:589
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:328
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:413
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:589
 #: public/js/utils/crm_activities.js:212
 msgid "Done"
 msgstr ""
@@ -17714,14 +17714,14 @@ msgstr ""
 msgid "EMU of current"
 msgstr ""
 
-#. Label of the erpnext_company (Data) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
-msgid "ERPNext Company"
+#. Label of the Goldfish_company (Data) field in DocType 'Tally Migration'
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
+msgid "Goldfish Company"
 msgstr ""
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: setup/doctype/employee_group_table/employee_group_table.json
-msgid "ERPNext User ID"
+msgid "Goldfish User ID"
 msgstr ""
 
 #. Option for the 'Update frequency of Project' (Select) field in DocType
@@ -18284,7 +18284,7 @@ msgstr ""
 
 #. Label of the enable_european_access (Check) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Enable European Access"
 msgstr ""
 
@@ -18359,7 +18359,7 @@ msgstr ""
 #. Label of the enabled (Check) field in DocType 'Price List'
 #. Label of the enabled (Check) field in DocType 'Service Level Agreement'
 #: accounts/doctype/mode_of_payment/mode_of_payment.json
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 #: manufacturing/doctype/workstation_working_hour/workstation_working_hour.json
 #: setup/doctype/email_digest/email_digest.json
 #: setup/doctype/sales_person/sales_person.json setup/doctype/uom/uom.json
@@ -18707,7 +18707,7 @@ msgstr ""
 
 #. Label of the error_message (Text) field in DocType 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:127
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:127
 msgid "Error Message"
 msgstr ""
 
@@ -18723,7 +18723,7 @@ msgstr ""
 msgid "Error evaluating the criteria formula"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:157
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:157
 msgid "Error occurred while parsing Chart of Accounts: Please make sure that no two accounts have the same name"
 msgstr ""
 
@@ -19392,8 +19392,8 @@ msgstr ""
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 #: assets/doctype/asset/asset.json
 #: bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.json
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:68
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:68
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:13
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
@@ -19411,7 +19411,7 @@ msgid "Failed Entries"
 msgstr ""
 
 #. Label of the failed_import_preview (HTML) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Failed Import Log"
 msgstr ""
 
@@ -19521,7 +19521,7 @@ msgstr ""
 msgid "Fetch Customers"
 msgstr ""
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:56
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:56
 msgid "Fetch Data"
 msgstr ""
 
@@ -20133,7 +20133,7 @@ msgstr ""
 
 #. Label of the fixed_error_log_preview (HTML) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Fixed Error Log"
 msgstr ""
 
@@ -22814,11 +22814,11 @@ msgid "If this item has variants, then it cannot be selected in sales orders etc
 msgstr ""
 
 #: buying/doctype/buying_settings/buying_settings.js:27
-msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
+msgid "If this option is configured 'Yes', Goldfish will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
 msgstr ""
 
 #: buying/doctype/buying_settings/buying_settings.js:34
-msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
+msgid "If this option is configured 'Yes', Goldfish will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
 msgstr ""
 
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:10
@@ -22840,7 +22840,7 @@ msgid "If yes, then this warehouse will be used to store rejected materials"
 msgstr ""
 
 #: stock/doctype/item/item.js:919
-msgid "If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item."
+msgid "If you are maintaining stock of this Item in your Inventory, Goldfish will make a stock ledger entry for each transaction of this item."
 msgstr ""
 
 #. Description of the 'Unreconciled Entries' (Section Break) field in DocType
@@ -23127,7 +23127,7 @@ msgstr ""
 msgid "Import Data"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:71
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:71
 msgid "Import Day Book Data"
 msgstr ""
 
@@ -23153,7 +23153,7 @@ msgstr ""
 #. Label of the import_log_section (Section Break) field in DocType 'Tally
 #. Migration'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Import Log"
 msgstr ""
 
@@ -23163,7 +23163,7 @@ msgstr ""
 msgid "Import Log Preview"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:59
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:59
 msgid "Import Master Data"
 msgstr ""
 
@@ -23212,11 +23212,11 @@ msgstr ""
 msgid "Import in Bulk"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:410
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:410
 msgid "Importing Items and UOMs"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:407
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:407
 msgid "Importing Parties and Addresses"
 msgstr ""
 
@@ -23295,8 +23295,8 @@ msgstr ""
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:40
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
 #: crm/doctype/email_campaign/email_campaign.json
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:66
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:66
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:7
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
@@ -24716,7 +24716,7 @@ msgid "Is Billable"
 msgstr ""
 
 #. Label of the is_billing_contact (Check) field in DocType 'Contact'
-#: erpnext_integrations/custom/contact.json
+#: Goldfish_integrations/custom/contact.json
 msgid "Is Billing Contact"
 msgstr ""
 
@@ -24786,13 +24786,13 @@ msgstr ""
 
 #. Label of the is_day_book_data_imported (Check) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Is Day Book Data Imported"
 msgstr ""
 
 #. Label of the is_day_book_data_processed (Check) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Is Day Book Data Processed"
 msgstr ""
 
@@ -24967,13 +24967,13 @@ msgstr ""
 
 #. Label of the is_master_data_imported (Check) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Is Master Data Imported"
 msgstr ""
 
 #. Label of the is_master_data_processed (Check) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Is Master Data Processed"
 msgstr ""
 
@@ -26597,7 +26597,7 @@ msgstr ""
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 #: crm/doctype/opportunity/opportunity.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 #: manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
@@ -27425,7 +27425,7 @@ msgstr ""
 #. 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 #, python-format
-msgid "Learn about <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20ERPNext,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>"
+msgid "Learn about <a href=\"https://docs.Goldfish.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20Goldfish,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>"
 msgstr ""
 
 #. Label of the leave_encashed (Select) field in DocType 'Employee'
@@ -27696,7 +27696,7 @@ msgstr ""
 msgid "Link Options"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:15
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:15
 msgid "Link a new bank account"
 msgstr ""
 
@@ -28842,7 +28842,7 @@ msgstr ""
 msgid "Mark As Closed"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:323
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:323
 msgid "Mark as unresolved"
 msgstr ""
 
@@ -28894,7 +28894,7 @@ msgid "Master"
 msgstr ""
 
 #. Label of the master_data (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Master Data"
 msgstr ""
 
@@ -29484,7 +29484,7 @@ msgstr ""
 msgid "Messages greater than 160 characters will be split into multiple messages"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:123
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:123
 msgid "Meta Data"
 msgstr ""
 
@@ -33876,7 +33876,7 @@ msgid "Partially ordered"
 msgstr ""
 
 #. Label of the parties (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Parties"
 msgstr ""
 
@@ -35380,21 +35380,21 @@ msgid "Plaid Access Token"
 msgstr ""
 
 #. Label of the plaid_client_id (Data) field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Client ID"
 msgstr ""
 
 #. Label of the plaid_env (Select) field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Environment"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:154
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:178
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:154
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:178
 msgid "Plaid Link Failed"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:252
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:252
 msgid "Plaid Link Refresh Required"
 msgstr ""
 
@@ -35403,18 +35403,18 @@ msgid "Plaid Link Updated"
 msgstr ""
 
 #. Label of the plaid_secret (Password) field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Secret"
 msgstr ""
 
 #. Label of a Link in the Accounting Workspace
 #. Name of a DocType
 #: accounts/workspace/accounting/accounting.json
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Settings"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:227
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:227
 msgid "Plaid transactions sync error"
 msgstr ""
 
@@ -35659,7 +35659,7 @@ msgstr ""
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:65
+#: Goldfish_integrations/doctype/plaid_settings/plaid_connector.py:65
 msgid "Please check your Plaid client ID and secret values"
 msgstr ""
 
@@ -36000,7 +36000,7 @@ msgstr ""
 msgid "Please rectify and try again."
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:251
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:251
 msgid "Please refresh or reset the Plaid linking of the Bank {}."
 msgstr ""
 
@@ -36529,7 +36529,7 @@ msgstr ""
 msgid "Please set {0} in BOM Creator {1}"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:97
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:97
 msgid "Please setup and enable a group account with the Account Type - {0} for the company {1}"
 msgstr ""
 
@@ -37723,7 +37723,7 @@ msgstr ""
 msgid "Procedure"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:75
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:75
 msgid "Process Day Book Data"
 msgstr ""
 
@@ -37741,9 +37741,9 @@ msgstr ""
 msgid "Process Description"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:334
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:420
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:595
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:334
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:420
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:595
 msgid "Process Failed"
 msgstr ""
 
@@ -37783,7 +37783,7 @@ msgstr ""
 msgid "Process Loss Value"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:63
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:63
 msgid "Process Master Data"
 msgstr ""
 
@@ -37843,7 +37843,7 @@ msgstr ""
 
 #. Label of the processed_files_section (Section Break) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Processed Files"
 msgstr ""
 
@@ -37852,15 +37852,15 @@ msgstr ""
 msgid "Processes"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:312
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:312
 msgid "Processing Chart of Accounts and Parties"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:318
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:318
 msgid "Processing Items and UOMs"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:315
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:315
 msgid "Processing Party Addresses"
 msgstr ""
 
@@ -37868,7 +37868,7 @@ msgstr ""
 msgid "Processing Sales! Please Wait..."
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:586
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:586
 msgid "Processing Vouchers"
 msgstr ""
 
@@ -40094,13 +40094,13 @@ msgid "Quick Stock Balance"
 msgstr ""
 
 #. Name of a DocType
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "QuickBooks Migrator"
 msgstr ""
 
 #. Label of the quickbooks_company_id (Data) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Quickbooks Company ID"
 msgstr ""
 
@@ -40783,8 +40783,8 @@ msgstr ""
 msgid "Reading 9"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:306
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:583
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:306
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:583
 msgid "Reading Uploaded File"
 msgstr ""
 
@@ -41236,7 +41236,7 @@ msgid "Redemption Date"
 msgstr ""
 
 #. Label of the redirect_url (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Redirect URL"
 msgstr ""
 
@@ -41629,7 +41629,7 @@ msgstr ""
 
 #. Label of the refresh_token (Small Text) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Refresh Token"
 msgstr ""
 
@@ -42571,7 +42571,7 @@ msgstr ""
 msgid "Reset Company Default Values"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:19
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:19
 msgid "Reset Plaid Link"
 msgstr ""
 
@@ -45198,7 +45198,7 @@ msgstr ""
 msgid "Save as Draft"
 msgstr ""
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.py:364
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.py:364
 msgid "Saving {0}"
 msgstr ""
 
@@ -45369,7 +45369,7 @@ msgid "School/University"
 msgstr ""
 
 #. Label of the scope (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Scope"
 msgstr ""
 
@@ -45778,7 +45778,7 @@ msgstr ""
 msgid "Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only."
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:156
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:156
 msgid "Select a company"
 msgstr ""
 
@@ -47480,7 +47480,7 @@ msgstr ""
 msgid "Show Disabled Warehouses"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:306
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:306
 msgid "Show Document"
 msgstr ""
 
@@ -47600,7 +47600,7 @@ msgid "Show Taxes as Table in Print"
 msgstr ""
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:480
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:296
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:296
 msgid "Show Traceback"
 msgstr ""
 
@@ -48494,8 +48494,8 @@ msgstr ""
 #: crm/report/lead_details/lead_details.py:25
 #: crm/report/opportunity_summary_by_sales_stage/opportunity_summary_by_sales_stage.js:32
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.js:38
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
@@ -50489,16 +50489,16 @@ msgstr ""
 msgid "Symbol"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:31
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:31
 msgid "Sync Started"
 msgstr ""
 
 #. Label of the automatic_sync (Check) field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Synchronize all accounts every hour"
 msgstr ""
 
@@ -50575,9 +50575,9 @@ msgstr ""
 #: crm/doctype/opportunity_lost_reason/opportunity_lost_reason.json
 #: crm/doctype/opportunity_type/opportunity_type.json
 #: crm/doctype/prospect/prospect.json
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: manufacturing/doctype/blanket_order/blanket_order.json
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
@@ -50719,27 +50719,27 @@ msgid "Tag"
 msgstr ""
 
 #. Label of the tally_company (Data) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Tally Company"
 msgstr ""
 
 #. Label of the tally_creditors_account (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Tally Creditors Account"
 msgstr ""
 
 #. Label of the tally_debtors_account (Data) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Tally Debtors Account"
 msgstr ""
 
 #. Name of a DocType
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Tally Migration"
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:34
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:34
 msgid "Tally Migration Error"
 msgstr ""
 
@@ -51968,7 +51968,7 @@ msgstr ""
 
 #. Description of the 'Accounts' (Section Break) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "The accounts are set by the system automatically but do confirm these defaults"
 msgstr ""
 
@@ -52161,14 +52161,14 @@ msgid "The shares don't exist with the {0}"
 msgstr ""
 
 #: stock/stock_ledger.py:753
-msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
+msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.Goldfish.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
 msgstr ""
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:615
 msgid "The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:32
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:32
 msgid "The sync has started in the background, please check the {0} list for new records."
 msgstr ""
 
@@ -52260,7 +52260,7 @@ msgid "There are only {0} asset created or linked to {1}. Please create or link 
 msgstr ""
 
 #: stock/doctype/item/item.js:938
-msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.erpnext.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
+msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.Goldfish.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
 msgstr ""
 
 #: stock/report/item_variant_details/item_variant_details.py:25
@@ -52295,7 +52295,7 @@ msgstr ""
 msgid "There must be atleast 1 Finished Good in this Stock Entry"
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:153
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:153
 msgid "There was an error creating Bank Account while linking with Plaid."
 msgstr ""
 
@@ -52303,16 +52303,16 @@ msgstr ""
 msgid "There was an error saving the document."
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:250
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:250
 msgid "There was an error syncing transactions."
 msgstr ""
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:175
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:175
 msgid "There was an error updating Bank Account {} while linking with Plaid."
 msgstr ""
 
 #: accounts/doctype/bank/bank.js:115
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:114
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:114
 msgid "There was an issue connecting to Plaid's authentication server. Check browser console for more information"
 msgstr ""
 
@@ -52359,7 +52359,7 @@ msgid "This action will stop future billing. Are you sure you want to cancel thi
 msgstr ""
 
 #: accounts/doctype/bank_account/bank_account.js:35
-msgid "This action will unlink this account from any external service integrating ERPNext with your bank accounts. It cannot be undone. Are you certain ?"
+msgid "This action will unlink this account from any external service integrating Goldfish with your bank accounts. It cannot be undone. Are you certain ?"
 msgstr ""
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
@@ -53295,7 +53295,7 @@ msgid "Toggle Recent Orders"
 msgstr ""
 
 #. Label of the token_endpoint (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Token Endpoint"
 msgstr ""
 
@@ -54909,7 +54909,7 @@ msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
 msgstr ""
 
 #. Description of the 'Default UOM' (Link) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "UOM in case unspecified in imported data"
 msgstr ""
 
@@ -54919,7 +54919,7 @@ msgstr ""
 
 #. Label of the uoms (Attach) field in DocType 'Tally Migration'
 #. Label of the uoms (Table) field in DocType 'Item'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: stock/doctype/item/item.json
 msgid "UOMs"
 msgstr ""
@@ -54989,7 +54989,7 @@ msgstr ""
 
 #. Label of the undeposited_funds_account (Link) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Undeposited Funds Account"
 msgstr ""
 
@@ -55187,7 +55187,7 @@ msgstr ""
 msgid "Unreserving Stock..."
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:123
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:123
 msgid "Unresolve"
 msgstr ""
 
@@ -55234,7 +55234,7 @@ msgstr ""
 msgid "Unverified"
 msgstr ""
 
-#: erpnext_integrations/utils.py:22
+#: Goldfish_integrations/utils.py:22
 msgid "Unverified Webhook Data"
 msgstr ""
 
@@ -55639,7 +55639,7 @@ msgstr ""
 
 #. Label of the section_break_5 (Section Break) field in DocType 'POS Closing
 #. Entry'
-#. Label of the erpnext_user (Section Break) field in DocType 'Employee'
+#. Label of the Goldfish_user (Section Break) field in DocType 'Employee'
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 #: setup/doctype/employee/employee.json
 msgid "User Details"
@@ -56562,12 +56562,12 @@ msgstr ""
 #. Label of the vouchers (Attach) field in DocType 'Tally Migration'
 #: accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.json
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Vouchers"
 msgstr ""
 
 #: patches/v15_0/remove_exotel_integration.py:32
-msgid "WARNING: Exotel app has been separated from ERPNext, please install the app to continue using Exotel integration."
+msgid "WARNING: Exotel app has been separated from Goldfish, please install the app to continue using Exotel integration."
 msgstr ""
 
 #. Label of the wip_composite_asset (Link) field in DocType 'Purchase Invoice
@@ -58151,10 +58151,10 @@ msgstr ""
 msgid "YouTube Interactions"
 msgstr ""
 
-#. Description of the 'ERPNext Company' (Data) field in DocType 'Tally
+#. Description of the 'Goldfish Company' (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
-msgid "Your Company set in ERPNext"
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
+msgid "Your Company set in Goldfish"
 msgstr ""
 
 #: www/book_appointment/index.html:49
@@ -58214,7 +58214,7 @@ msgid "Zip File"
 msgstr ""
 
 #: stock/reorder_item.py:367
-msgid "[Important] [ERPNext] Auto Reorder Errors"
+msgid "[Important] [Goldfish] Auto Reorder Errors"
 msgstr ""
 
 #: controllers/status_updater.py:250
@@ -58253,7 +58253,7 @@ msgstr ""
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "development"
 msgstr ""
 
@@ -58430,7 +58430,7 @@ msgstr ""
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "production"
 msgstr ""
 
@@ -58473,7 +58473,7 @@ msgstr ""
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "sandbox"
 msgstr ""
 
@@ -59142,7 +59142,7 @@ msgstr ""
 msgid "{} is a child company."
 msgstr ""
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:710
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:710
 msgid "{} of {}"
 msgstr ""
 

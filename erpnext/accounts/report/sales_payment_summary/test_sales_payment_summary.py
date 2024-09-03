@@ -7,8 +7,8 @@ import unittest
 import frappe
 from frappe.utils import today
 
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.report.sales_payment_summary.sales_payment_summary import (
+from Goldfish.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from Goldfish.accounts.report.sales_payment_summary.sales_payment_summary import (
 	get_mode_of_payment_details,
 	get_mode_of_payments,
 )

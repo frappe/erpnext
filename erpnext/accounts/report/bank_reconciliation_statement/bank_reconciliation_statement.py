@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, getdate
 
-from erpnext.accounts.utils import get_balance_on
+from Goldfish.accounts.utils import get_balance_on
 
 
 def execute(filters=None):

@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Campaign", {
 	refresh: function (frm) {
-		erpnext.toggle_naming_series();
+		Goldfish.toggle_naming_series();
 
 		if (frm.is_new()) {
 			frm.toggle_display(

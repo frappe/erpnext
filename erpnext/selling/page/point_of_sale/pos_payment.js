@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-erpnext.PointOfSale.Payment = class {
+Goldfish.PointOfSale.Payment = class {
 	constructor({ events, wrapper }) {
 		this.wrapper = wrapper;
 		this.events = events;
@@ -83,7 +83,7 @@ erpnext.PointOfSale.Payment = class {
 
 	initialize_numpad() {
 		const me = this;
-		this.number_pad = new erpnext.PointOfSale.NumberPad({
+		this.number_pad = new Goldfish.PointOfSale.NumberPad({
 			wrapper: this.$numpad,
 			events: {
 				numpad_event: function ($btn) {

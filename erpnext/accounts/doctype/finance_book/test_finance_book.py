@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 
-from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
+from Goldfish.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
 
 class TestFinanceBook(unittest.TestCase):

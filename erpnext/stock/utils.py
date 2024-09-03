@@ -9,13 +9,13 @@ from frappe import _
 from frappe.query_builder.functions import CombineDatetime, IfNull, Sum
 from frappe.utils import cstr, flt, get_link_to_form, get_time, getdate, nowdate, nowtime
 
-import erpnext
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+import Goldfish
+from Goldfish.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	get_available_serial_nos,
 )
-from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
-from erpnext.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
-from erpnext.stock.valuation import FIFOValuation, LIFOValuation
+from Goldfish.stock.doctype.warehouse.warehouse import get_child_warehouses
+from Goldfish.stock.serial_batch_bundle import BatchNoValuation, SerialNoValuation
+from Goldfish.stock.valuation import FIFOValuation, LIFOValuation
 
 BarcodeScanResult = dict[str, str | None]
 
@@ -101,7 +101,7 @@ def get_stock_balance(
 
 	If `with_valuation_rate` is True, will return tuple (qty, rate)"""
 
-	from erpnext.stock.stock_ledger import get_previous_sle
+	from Goldfish.stock.stock_ledger import get_previous_sle
 
 	if posting_date is None:
 		posting_date = nowdate()
@@ -153,7 +153,7 @@ def get_stock_balance(
 
 
 def get_serial_nos_data(serial_nos):
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+	from Goldfish.stock.doctype.serial_no.serial_no import get_serial_nos
 
 	return get_serial_nos(serial_nos)
 
@@ -233,7 +233,7 @@ def _create_bin(item_code, warehouse):
 @frappe.whitelist()
 def get_incoming_rate(args, raise_error_if_no_rate=True):
 	"""Get Incoming Rate based on valuation method"""
-	from erpnext.stock.stock_ledger import get_previous_sle, get_valuation_rate
+	from Goldfish.stock.stock_ledger import get_previous_sle, get_valuation_rate
 
 	if isinstance(args, str):
 		args = json.loads(args)
@@ -314,7 +314,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			args.get("voucher_type"),
 			voucher_no,
 			args.get("allow_zero_valuation"),
-			currency=erpnext.get_company_currency(args.get("company")),
+			currency=Goldfish.get_company_currency(args.get("company")),
 			company=args.get("company"),
 			raise_error_if_no_rate=raise_error_if_no_rate,
 		)
@@ -567,7 +567,7 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 			indicator="red",
 			primary_action={
 				"label": _("Show pending entries"),
-				"client_action": "erpnext.route_to_pending_reposts",
+				"client_action": "Goldfish.route_to_pending_reposts",
 				"args": filters,
 			},
 		)
@@ -578,10 +578,10 @@ def check_pending_reposting(posting_date: str, throw_error: bool = True) -> bool
 @frappe.whitelist()
 def scan_barcode(search_value: str) -> BarcodeScanResult:
 	def set_cache(data: BarcodeScanResult):
-		frappe.cache().set_value(f"erpnext:barcode_scan:{search_value}", data, expires_in_sec=120)
+		frappe.cache().set_value(f"Goldfish:barcode_scan:{search_value}", data, expires_in_sec=120)
 
 	def get_cache() -> BarcodeScanResult | None:
-		if data := frappe.cache().get_value(f"erpnext:barcode_scan:{search_value}"):
+		if data := frappe.cache().get_value(f"Goldfish:barcode_scan:{search_value}"):
 			return data
 
 	if scan_data := get_cache():

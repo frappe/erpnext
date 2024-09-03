@@ -17,7 +17,7 @@ class Brand(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.item_default.item_default import ItemDefault
+		from Goldfish.stock.doctype.item_default.item_default import ItemDefault
 
 		brand: DF.Data
 		brand_defaults: DF.Table[ItemDefault]

@@ -12,7 +12,7 @@ frappe.ui.form.on("Customer", {
 		frm.make_methods = {
 			Quotation: () =>
 				frappe.model.open_mapped_doc({
-					method: "erpnext.selling.doctype.customer.customer.make_quotation",
+					method: "Goldfish.selling.doctype.customer.customer.make_quotation",
 					frm: frm,
 				}),
 			"Sales Order": () =>
@@ -23,10 +23,10 @@ frappe.ui.form.on("Customer", {
 				}),
 			Opportunity: () =>
 				frappe.model.open_mapped_doc({
-					method: "erpnext.selling.doctype.customer.customer.make_opportunity",
+					method: "Goldfish.selling.doctype.customer.customer.make_opportunity",
 					frm: frm,
 				}),
-			"Pricing Rule": () => erpnext.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name),
+			"Pricing Rule": () => Goldfish.utils.make_pricing_rule(frm.doc.doctype, frm.doc.name),
 		};
 
 		frm.add_fetch("lead_name", "company_name", "customer_name");
@@ -68,7 +68,7 @@ frappe.ui.form.on("Customer", {
 
 		frm.set_query("customer_primary_contact", function (doc) {
 			return {
-				query: "erpnext.selling.doctype.customer.customer.get_customer_primary_contact",
+				query: "Goldfish.selling.doctype.customer.customer.get_customer_primary_contact",
 				filters: {
 					customer: doc.name,
 				},
@@ -141,7 +141,7 @@ frappe.ui.form.on("Customer", {
 		if (frappe.defaults.get_default("cust_master_name") != "Naming Series") {
 			frm.toggle_display("naming_series", false);
 		} else {
-			erpnext.toggle_naming_series();
+			Goldfish.toggle_naming_series();
 		}
 
 		if (!frm.doc.__islocal) {
@@ -195,7 +195,7 @@ frappe.ui.form.on("Customer", {
 			}
 
 			// indicator
-			erpnext.utils.set_party_dashboard_indicators(frm);
+			Goldfish.utils.set_party_dashboard_indicators(frm);
 		} else {
 			frappe.contacts.clear_address_and_contact(frm);
 		}
@@ -230,7 +230,7 @@ frappe.ui.form.on("Customer", {
 			],
 			primary_action: function ({ supplier }) {
 				frappe.call({
-					method: "erpnext.accounts.doctype.party_link.party_link.create_party_link",
+					method: "Goldfish.accounts.doctype.party_link.party_link.create_party_link",
 					args: {
 						primary_role: "Customer",
 						primary_party: frm.doc.name,

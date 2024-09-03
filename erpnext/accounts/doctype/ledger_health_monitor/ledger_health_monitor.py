@@ -14,7 +14,7 @@ class LedgerHealthMonitor(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.ledger_health_monitor_company.ledger_health_monitor_company import (
+		from Goldfish.accounts.doctype.ledger_health_monitor_company.ledger_health_monitor_company import (
 			LedgerHealthMonitorCompany,
 		)
 

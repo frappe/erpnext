@@ -42,7 +42,7 @@ frappe.ui.form.on("Accounting Dimension", {
 				frm.set_value("disabled", 1 - frm.doc.disabled);
 
 				frappe.call({
-					method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.disable_dimension",
+					method: "Goldfish.accounts.doctype.accounting_dimension.accounting_dimension.disable_dimension",
 					args: {
 						doc: frm.doc,
 					},

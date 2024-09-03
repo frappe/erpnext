@@ -66,7 +66,7 @@ frappe.ui.form.on("Work Order", {
 		frm.set_query("bom_no", function () {
 			if (frm.doc.production_item) {
 				return {
-					query: "erpnext.controllers.queries.bom",
+					query: "Goldfish.controllers.queries.bom",
 					filters: { item: cstr(frm.doc.production_item) },
 				};
 			} else {
@@ -77,7 +77,7 @@ frappe.ui.form.on("Work Order", {
 		// Set query for FG Item
 		frm.set_query("production_item", function () {
 			return {
-				query: "erpnext.controllers.queries.item_query",
+				query: "Goldfish.controllers.queries.item_query",
 				filters: {
 					is_stock_item: 1,
 				},
@@ -93,7 +93,7 @@ frappe.ui.form.on("Work Order", {
 
 		frm.set_query("operation", "required_items", function () {
 			return {
-				query: "erpnext.manufacturing.doctype.work_order.work_order.get_bom_operations",
+				query: "Goldfish.manufacturing.doctype.work_order.work_order.get_bom_operations",
 				filters: {
 					parent: frm.doc.bom_no,
 					parenttype: "BOM",
@@ -117,12 +117,12 @@ frappe.ui.form.on("Work Order", {
 				actual_start_date: "",
 				actual_end_date: "",
 			});
-			erpnext.work_order.set_default_warehouse(frm);
+			Goldfish.work_order.set_default_warehouse(frm);
 		}
 	},
 
 	source_warehouse: function (frm) {
-		let transaction_controller = new erpnext.TransactionController();
+		let transaction_controller = new Goldfish.TransactionController();
 		transaction_controller.autofill_warehouse(
 			frm.doc.required_items,
 			"source_warehouse",
@@ -131,8 +131,8 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	refresh: function (frm) {
-		erpnext.toggle_naming_series();
-		erpnext.work_order.set_custom_buttons(frm);
+		Goldfish.toggle_naming_series();
+		Goldfish.work_order.set_custom_buttons(frm);
 		frm.set_intro("");
 
 		if (frm.doc.docstatus === 0 && !frm.is_new()) {
@@ -161,7 +161,7 @@ frappe.ui.form.on("Work Order", {
 			const has_alternative = frm.doc.required_items.find((i) => i.allow_alternative_item === 1);
 			if (frm.doc.docstatus == 0 && has_alternative) {
 				frm.add_custom_button(__("Alternate Item"), () => {
-					erpnext.utils.select_alternate_items({
+					Goldfish.utils.select_alternate_items({
 						frm: frm,
 						child_docname: "required_items",
 						warehouse_field: "source_warehouse",
@@ -222,7 +222,7 @@ frappe.ui.form.on("Work Order", {
 
 	create_stock_return_entry: function (frm) {
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.work_order.work_order.make_stock_return_entry",
+			method: "Goldfish.manufacturing.doctype.work_order.work_order.make_stock_return_entry",
 			args: {
 				work_order: frm.doc.name,
 			},
@@ -309,7 +309,7 @@ frappe.ui.form.on("Work Order", {
 			},
 			function (data) {
 				frappe.call({
-					method: "erpnext.manufacturing.doctype.work_order.work_order.make_job_card",
+					method: "Goldfish.manufacturing.doctype.work_order.work_order.make_job_card",
 					freeze: true,
 					args: {
 						work_order: frm.doc.name,
@@ -363,10 +363,10 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	make_disassembly_order(frm) {
-		erpnext.work_order
+		Goldfish.work_order
 			.show_prompt_for_qty_input(frm, "Disassemble")
 			.then((data) => {
-				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
+				return frappe.xcall("Goldfish.manufacturing.doctype.work_order.work_order.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: "Disassemble",
 					qty: data.qty,
@@ -453,7 +453,7 @@ frappe.ui.form.on("Work Order", {
 	production_item: function (frm) {
 		if (frm.doc.production_item) {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.work_order.work_order.get_item_details",
+				method: "Goldfish.manufacturing.doctype.work_order.work_order.get_item_details",
 				args: {
 					item: frm.doc.production_item,
 					project: frm.doc.project,
@@ -463,7 +463,7 @@ frappe.ui.form.on("Work Order", {
 					if (r.message) {
 						frm.set_value("sales_order", "");
 						frm.trigger("set_sales_order");
-						erpnext.in_production_item_onchange = true;
+						Goldfish.in_production_item_onchange = true;
 
 						$.each(
 							[
@@ -483,7 +483,7 @@ frappe.ui.form.on("Work Order", {
 						if (r.message["set_scrap_wh_mandatory"]) {
 							frm.toggle_reqd("scrap_warehouse", true);
 						}
-						erpnext.in_production_item_onchange = false;
+						Goldfish.in_production_item_onchange = false;
 					}
 				},
 			});
@@ -491,7 +491,7 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	project: function (frm) {
-		if (!erpnext.in_production_item_onchange && !frm.doc.bom_no) {
+		if (!Goldfish.in_production_item_onchange && !frm.doc.bom_no) {
 			frm.trigger("production_item");
 		}
 	},
@@ -527,11 +527,11 @@ frappe.ui.form.on("Work Order", {
 	set_sales_order: function (frm) {
 		if (frm.doc.production_item) {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.work_order.work_order.query_sales_order",
+				method: "Goldfish.manufacturing.doctype.work_order.work_order.query_sales_order",
 				args: { production_item: frm.doc.production_item },
 				callback: function (r) {
 					frm.set_query("sales_order", function () {
-						erpnext.in_production_item_onchange = true;
+						Goldfish.in_production_item_onchange = true;
 						return {
 							filters: [["Sales Order", "name", "in", r.message]],
 						};
@@ -542,8 +542,8 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	additional_operating_cost: function (frm) {
-		erpnext.work_order.calculate_cost(frm.doc);
-		erpnext.work_order.calculate_total_cost(frm);
+		Goldfish.work_order.calculate_cost(frm.doc);
+		Goldfish.work_order.calculate_total_cost(frm);
 	},
 });
 
@@ -554,7 +554,7 @@ frappe.ui.form.on("Work Order Item", {
 			frappe.throw(__("Please set the Item Code first"));
 		} else if (row.source_warehouse) {
 			frappe.call({
-				method: "erpnext.stock.utils.get_latest_stock_qty",
+				method: "Goldfish.stock.utils.get_latest_stock_qty",
 				args: {
 					item_code: row.item_code,
 					warehouse: row.source_warehouse,
@@ -576,7 +576,7 @@ frappe.ui.form.on("Work Order Item", {
 
 		if (row.item_code) {
 			frappe.call({
-				method: "erpnext.stock.doctype.item.item.get_item_details",
+				method: "Goldfish.stock.doctype.item.item.get_item_details",
 				args: {
 					item_code: row.item_code,
 					company: frm.doc.company,
@@ -610,19 +610,19 @@ frappe.ui.form.on("Work Order Operation", {
 				},
 				callback: function (data) {
 					frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
-					erpnext.work_order.calculate_cost(frm.doc);
-					erpnext.work_order.calculate_total_cost(frm);
+					Goldfish.work_order.calculate_cost(frm.doc);
+					Goldfish.work_order.calculate_total_cost(frm);
 				},
 			});
 		}
 	},
 	time_in_mins: function (frm, cdt, cdn) {
-		erpnext.work_order.calculate_cost(frm.doc);
-		erpnext.work_order.calculate_total_cost(frm);
+		Goldfish.work_order.calculate_cost(frm.doc);
+		Goldfish.work_order.calculate_total_cost(frm);
 	},
 });
 
-erpnext.work_order = {
+Goldfish.work_order = {
 	set_custom_buttons: function (frm) {
 		var doc = frm.doc;
 
@@ -631,7 +631,7 @@ erpnext.work_order = {
 				__("Close"),
 				function () {
 					frappe.confirm(__("Once the Work Order is Closed. It can't be resumed."), () => {
-						erpnext.work_order.change_work_order_status(frm, "Closed");
+						Goldfish.work_order.change_work_order_status(frm, "Closed");
 					});
 				},
 				__("Status")
@@ -643,7 +643,7 @@ erpnext.work_order = {
 				frm.add_custom_button(
 					__("Stop"),
 					function () {
-						erpnext.work_order.change_work_order_status(frm, "Stopped");
+						Goldfish.work_order.change_work_order_status(frm, "Stopped");
 					},
 					__("Status")
 				);
@@ -651,7 +651,7 @@ erpnext.work_order = {
 				frm.add_custom_button(
 					__("Re-open"),
 					function () {
-						erpnext.work_order.change_work_order_status(frm, "Resumed");
+						Goldfish.work_order.change_work_order_status(frm, "Resumed");
 					},
 					__("Status")
 				);
@@ -668,11 +668,11 @@ erpnext.work_order = {
 					if (pending_to_transfer && frm.doc.status != "Stopped") {
 						frm.has_start_btn = true;
 						frm.add_custom_button(__("Create Pick List"), function () {
-							erpnext.work_order.create_pick_list(frm);
+							Goldfish.work_order.create_pick_list(frm);
 						});
 
 						var start_btn = frm.add_custom_button(__("Start"), function () {
-							erpnext.work_order.make_se(frm, "Material Transfer for Manufacture");
+							Goldfish.work_order.make_se(frm, "Material Transfer for Manufacture");
 						});
 						start_btn.addClass("btn-primary");
 					}
@@ -701,7 +701,7 @@ erpnext.work_order = {
 								function () {
 									const backflush_raw_materials_based_on =
 										frm.doc.__onload.backflush_raw_materials_based_on;
-									erpnext.work_order.make_consumption_se(
+									Goldfish.work_order.make_consumption_se(
 										frm,
 										backflush_raw_materials_based_on
 									);
@@ -718,7 +718,7 @@ erpnext.work_order = {
 							frm.has_finish_btn = true;
 
 							let finish_btn = frm.add_custom_button(__("Finish"), function () {
-								erpnext.work_order.make_se(frm, "Manufacture");
+								Goldfish.work_order.make_se(frm, "Manufacture");
 							});
 
 							if (doc.material_transferred_for_manufacturing >= doc.qty) {
@@ -733,7 +733,7 @@ erpnext.work_order = {
 
 								if (flt(doc.produced_qty) < allowed_qty) {
 									frm.add_custom_button(__("Finish"), function () {
-										erpnext.work_order.make_se(frm, "Manufacture");
+										Goldfish.work_order.make_se(frm, "Manufacture");
 									});
 								}
 							}
@@ -742,7 +742,7 @@ erpnext.work_order = {
 				} else {
 					if (flt(doc.produced_qty) < flt(doc.qty)) {
 						let finish_btn = frm.add_custom_button(__("Finish"), function () {
-							erpnext.work_order.make_se(frm, "Manufacture");
+							Goldfish.work_order.make_se(frm, "Manufacture");
 						});
 						finish_btn.addClass("btn-primary");
 					}
@@ -776,7 +776,7 @@ erpnext.work_order = {
 	set_default_warehouse: function (frm) {
 		if (!(frm.doc.wip_warehouse || frm.doc.fg_warehouse)) {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.work_order.work_order.get_default_warehouse",
+				method: "Goldfish.manufacturing.doctype.work_order.work_order.get_default_warehouse",
 				callback: function (r) {
 					if (!r.exe) {
 						frm.set_value("wip_warehouse", r.message.wip_warehouse);
@@ -859,7 +859,7 @@ erpnext.work_order = {
 	make_se: function (frm, purpose) {
 		this.show_prompt_for_qty_input(frm, purpose)
 			.then((data) => {
-				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry", {
+				return frappe.xcall("Goldfish.manufacturing.doctype.work_order.work_order.make_stock_entry", {
 					work_order_id: frm.doc.name,
 					purpose: purpose,
 					qty: data.qty,
@@ -874,7 +874,7 @@ erpnext.work_order = {
 	create_pick_list: function (frm, purpose = "Material Transfer for Manufacture") {
 		this.show_prompt_for_qty_input(frm, purpose)
 			.then((data) => {
-				return frappe.xcall("erpnext.manufacturing.doctype.work_order.work_order.create_pick_list", {
+				return frappe.xcall("Goldfish.manufacturing.doctype.work_order.work_order.create_pick_list", {
 					source_name: frm.doc.name,
 					for_qty: data.qty,
 				});
@@ -898,7 +898,7 @@ erpnext.work_order = {
 		}
 
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",
+			method: "Goldfish.manufacturing.doctype.work_order.work_order.make_stock_entry",
 			args: {
 				work_order_id: frm.doc.name,
 				purpose: "Material Consumption for Manufacture",
@@ -914,7 +914,7 @@ erpnext.work_order = {
 	change_work_order_status: function (frm, status) {
 		let method_name = status == "Closed" ? "close_work_order" : "stop_unstop";
 		frappe.call({
-			method: `erpnext.manufacturing.doctype.work_order.work_order.${method_name}`,
+			method: `Goldfish.manufacturing.doctype.work_order.work_order.${method_name}`,
 			freeze: true,
 			freeze_message: __("Updating Work Order status"),
 			args: {

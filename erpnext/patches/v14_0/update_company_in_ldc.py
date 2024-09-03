@@ -4,7 +4,7 @@
 
 import frappe
 
-from erpnext import get_default_company
+from Goldfish import get_default_company
 
 
 def execute():

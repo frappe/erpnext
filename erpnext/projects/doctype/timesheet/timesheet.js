@@ -3,7 +3,7 @@
 
 frappe.ui.form.on("Timesheet", {
 	setup: function (frm) {
-		frappe.require("/assets/erpnext/js/projects/timer.js");
+		frappe.require("/assets/Goldfish/js/projects/timer.js");
 
 		frm.ignore_doctypes_on_cancel_all = ["Sales Invoice"];
 
@@ -70,7 +70,7 @@ frappe.ui.form.on("Timesheet", {
 				$.each(frm.doc.time_logs || [], function (i, row) {
 					// Fetch the row for which from_time is not present
 					if (flag && row.activity_type && !row.from_time) {
-						erpnext.timesheet.timer(frm, row);
+						Goldfish.timesheet.timer(frm, row);
 						row.from_time = frappe.datetime.now_datetime();
 						frm.refresh_fields("time_logs");
 						frm.save();
@@ -82,13 +82,13 @@ frappe.ui.form.on("Timesheet", {
 							moment(row.from_time),
 							"seconds"
 						);
-						erpnext.timesheet.timer(frm, row, timestamp);
+						Goldfish.timesheet.timer(frm, row, timestamp);
 						flag = false;
 					}
 				});
 				// If no activities found to start a timer, create new
 				if (flag) {
-					erpnext.timesheet.timer(frm);
+					Goldfish.timesheet.timer(frm);
 				}
 			}).addClass("btn-primary");
 		}
@@ -131,7 +131,7 @@ frappe.ui.form.on("Timesheet", {
 		let base_currency = frappe.defaults.get_global_default("currency");
 		if (frm.doc.currency && base_currency != frm.doc.currency) {
 			frappe.call({
-				method: "erpnext.setup.utils.get_exchange_rate",
+				method: "Goldfish.setup.utils.get_exchange_rate",
 				args: {
 					from_currency: frm.doc.currency,
 					to_currency: base_currency,
@@ -237,7 +237,7 @@ frappe.ui.form.on("Timesheet", {
 			dialog.hide();
 			return frappe.call({
 				type: "GET",
-				method: "erpnext.projects.doctype.timesheet.timesheet.make_sales_invoice",
+				method: "Goldfish.projects.doctype.timesheet.timesheet.make_sales_invoice",
 				args: {
 					source_name: frm.doc.name,
 					item_code: args.item_code,
@@ -327,7 +327,7 @@ frappe.ui.form.on("Timesheet Detail", {
 		if (!frappe.get_doc(cdt, cdn).activity_type) return;
 
 		frappe.call({
-			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
+			method: "Goldfish.projects.doctype.timesheet.timesheet.get_activity_cost",
 			args: {
 				employee: frm.doc.employee,
 				activity_type: frm.selected_doc.activity_type,

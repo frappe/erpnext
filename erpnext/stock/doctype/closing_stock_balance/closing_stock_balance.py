@@ -11,7 +11,7 @@ from frappe.model.document import Document
 from frappe.utils import get_link_to_form, parse_json
 from frappe.utils.background_jobs import enqueue
 
-from erpnext.stock.report.stock_balance.stock_balance import execute
+from Goldfish.stock.report.stock_balance.stock_balance import execute
 
 
 class ClosingStockBalance(Document):

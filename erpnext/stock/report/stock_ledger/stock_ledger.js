@@ -44,7 +44,7 @@ frappe.query_reports["Stock Ledger"] = {
 			options: "Item",
 			get_query: function () {
 				return {
-					query: "erpnext.controllers.queries.item_query",
+					query: "Goldfish.controllers.queries.item_query",
 				};
 			},
 		},
@@ -118,4 +118,4 @@ frappe.query_reports["Stock Ledger"] = {
 	},
 };
 
-erpnext.utils.add_inventory_dimensions("Stock Ledger", 10);
+Goldfish.utils.add_inventory_dimensions("Stock Ledger", 10);

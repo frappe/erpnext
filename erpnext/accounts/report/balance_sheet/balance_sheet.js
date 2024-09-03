@@ -1,9 +1,9 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.query_reports["Balance Sheet"] = $.extend({}, erpnext.financial_statements);
+frappe.query_reports["Balance Sheet"] = $.extend({}, Goldfish.financial_statements);
 
-erpnext.utils.add_dimensions("Balance Sheet", 10);
+Goldfish.utils.add_dimensions("Balance Sheet", 10);
 
 frappe.query_reports["Balance Sheet"]["filters"].push({
 	fieldname: "selected_view",

@@ -17,7 +17,7 @@ class ProductBundle(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.selling.doctype.product_bundle_item.product_bundle_item import ProductBundleItem
+		from Goldfish.selling.doctype.product_bundle_item.product_bundle_item import ProductBundleItem
 
 		description: DF.Data | None
 		disabled: DF.Check
@@ -31,7 +31,7 @@ class ProductBundle(Document):
 	def validate(self):
 		self.validate_main_item()
 		self.validate_child_items()
-		from erpnext.utilities.transaction_base import validate_uom_is_integer
+		from Goldfish.utilities.transaction_base import validate_uom_is_integer
 
 		validate_uom_is_integer(self, "uom", "qty")
 

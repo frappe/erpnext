@@ -5,9 +5,9 @@
 import frappe
 from frappe.test_runner import make_test_records
 
-from erpnext.accounts.party import get_due_date
-from erpnext.controllers.website_list_for_contact import get_customers_suppliers
-from erpnext.exceptions import PartyDisabled
+from Goldfish.accounts.party import get_due_date
+from Goldfish.controllers.website_list_for_contact import get_customers_suppliers
+from Goldfish.exceptions import PartyDisabled
 
 test_dependencies = ["Payment Term", "Payment Terms Template"]
 test_records = frappe.get_test_records("Supplier")
@@ -100,7 +100,7 @@ class TestSupplier(FrappeTestCase):
 
 		frappe.db.set_value("Supplier", "_Test Supplier", "disabled", 1)
 
-		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+		from Goldfish.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 		po = create_purchase_order(do_not_save=True)
 
@@ -125,7 +125,7 @@ class TestSupplier(FrappeTestCase):
 		self.assertEqual(supplier.country, "Greece")
 
 	def test_party_details_tax_category(self):
-		from erpnext.accounts.party import get_party_details
+		from Goldfish.accounts.party import get_party_details
 
 		frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Billing")
 

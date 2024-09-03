@@ -14,7 +14,7 @@ class ProcessPaymentReconciliationLog(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.process_payment_reconciliation_log_allocations.process_payment_reconciliation_log_allocations import (
+		from Goldfish.accounts.doctype.process_payment_reconciliation_log_allocations.process_payment_reconciliation_log_allocations import (
 			ProcessPaymentReconciliationLogAllocations,
 		)
 

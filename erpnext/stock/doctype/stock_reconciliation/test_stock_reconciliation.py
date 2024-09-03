@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-# ERPNext - web based ERP (http://erpnext.com)
+# Goldfish - web based ERP (http://Goldfish.com)
 # For license information, please see license.txt
 
 import json
@@ -10,22 +10,22 @@ import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, cstr, flt, nowdate, nowtime
 
-from erpnext.accounts.utils import get_stock_and_account_balance
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+from Goldfish.accounts.utils import get_stock_and_account_balance
+from Goldfish.stock.doctype.item.test_item import create_item
+from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from Goldfish.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
-from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+from Goldfish.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 	get_items,
 )
-from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
-from erpnext.stock.tests.test_utils import StockTestMixin
-from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
+from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
+from Goldfish.stock.stock_ledger import get_previous_sle, update_entries_after
+from Goldfish.stock.tests.test_utils import StockTestMixin
+from Goldfish.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
 
 
 class TestStockReconciliation(FrappeTestCase, StockTestMixin):
@@ -298,8 +298,8 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		3) Cancel Stock Entry
 		Expected Result: 3) Serial No only in the Stock Entry is Inactive and Batch qty decreases
 		"""
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from Goldfish.stock.doctype.batch.batch import get_batch_qty
+		from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		item = create_item("_TestBatchSerialItemDependentReco")
 		item.has_batch_no = 1
@@ -428,8 +428,8 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		SR3		| Reco	|	0	|	1		(posting date: today-1) [backdated & blocked]
 		DN2		| DN	|	-2	|	8(-1)	(posting date: today)
 		"""
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.stock_ledger import NegativeStockError
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.stock_ledger import NegativeStockError
 
 		item_code = self.make_item().name
 		warehouse = "_Test Warehouse - _TC"
@@ -476,8 +476,8 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		SR  | Reco | 100 | 100     (posting date: today-1) (shouldn't be cancelled after DN)
 		DN  | DN   | 100 |   0     (posting date: today)
 		"""
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-		from erpnext.stock.stock_ledger import NegativeStockError
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.stock_ledger import NegativeStockError
 
 		item_code = self.make_item().name
 		warehouse = "_Test Warehouse - _TC"
@@ -517,7 +517,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		|  3       | SR2 | Reco | 11  | 11     (posting date: today+11)
 		|  2       | DN  | DN   | 5   | 6 <-- assert in BIN  (posting date: today+12)
 		"""
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+		from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
 		frappe.db.rollback()
 
@@ -571,7 +571,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertRaises(frappe.ValidationError, doc.save)
 
 	def test_serial_no_cancellation(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		item = create_item("Stock-Reco-Serial-Item-9", is_stock_item=1)
 		if not item.has_serial_no:
@@ -674,7 +674,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 
 	@change_settings("Stock Reposting Settings", {"item_based_reposting": 0})
 	def test_backdated_stock_reco_entry(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		item_code = self.make_item(
 			"Test New Batch Item ABCV",
@@ -758,7 +758,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(flt(sle[0].actual_qty), flt(-100.0))
 
 	def test_update_stock_reconciliation_while_reposting(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		item_code = self.make_item().name
 		warehouse = "_Test Warehouse - _TC"
@@ -802,7 +802,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(sr1.difference_amount, 10000)
 
 	def test_make_stock_zero_for_serial_batch_item(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		serial_item = self.make_item(
 			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "DJJ.####"}
@@ -928,7 +928,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(len(active_serial_no), 5)
 
 	def test_balance_qty_for_batch_with_backdated_stock_reco_and_future_entries(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		item = self.make_item(
 			"Test Batch Item Original Test",
@@ -1030,7 +1030,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertEqual(flt(sle[0].qty_after_transaction), flt(100.0))
 
 	def test_stock_reco_and_backdated_purchase_receipt(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		item = self.make_item(
 			"Test Batch Item Original STOCK RECO Test",
@@ -1072,8 +1072,8 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 		self.assertFalse(sr.items[0].current_serial_and_batch_bundle)
 
 	def test_not_reconcile_all_batch(self):
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.doctype.batch.batch import get_batch_qty
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 		item = self.make_item(
 			"Test Batch Item Not Reconcile All Serial Batch",
@@ -1135,8 +1135,8 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			self.assertEqual(row.docstatus, 2)
 
 	def test_not_reconcile_all_serial_nos(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.stock.utils import get_incoming_rate
+		from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from Goldfish.stock.utils import get_incoming_rate
 
 		item = self.make_item(
 			"Test Serial NO Item Not Reconcile All Serial Batch",
@@ -1184,7 +1184,7 @@ class TestStockReconciliation(FrappeTestCase, StockTestMixin):
 			self.assertEqual(row.serial_no, serial_nos[row.idx - 1])
 
 	def test_stock_reco_with_legacy_batch(self):
-		from erpnext.stock.doctype.batch.batch import get_batch_qty
+		from Goldfish.stock.doctype.batch.batch import get_batch_qty
 
 		batch_item_code = self.make_item(
 			"Test Batch Item Legacy Batch 1",
@@ -1291,7 +1291,7 @@ def create_batch_item_with_batch(item_name, batch_id):
 
 
 def insert_existing_sle(warehouse, item_code="_Test Item"):
-	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+	from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 	se1 = make_stock_entry(
 		posting_date="2012-12-15",

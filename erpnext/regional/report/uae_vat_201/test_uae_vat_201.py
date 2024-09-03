@@ -2,10 +2,10 @@ from unittest import TestCase
 
 import frappe
 
-import erpnext
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
+import Goldfish
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.regional.report.uae_vat_201.uae_vat_201 import (
 	get_exempt_total,
 	get_standard_rated_expenses_tax,
 	get_standard_rated_expenses_total,
@@ -14,7 +14,7 @@ from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
 	get_tourist_tax_return_total,
 	get_zero_rated_total,
 )
-from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse_account
+from Goldfish.stock.doctype.warehouse.test_warehouse import get_warehouse_account
 
 test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
 
@@ -139,7 +139,7 @@ def create_warehouse(warehouse_name, properties=None, company=None):
 	if not company:
 		company = "_Test Company"
 
-	warehouse_id = erpnext.encode_company_abbr(warehouse_name, company)
+	warehouse_id = Goldfish.encode_company_abbr(warehouse_name, company)
 	if not frappe.db.exists("Warehouse", warehouse_id):
 		warehouse = frappe.new_doc("Warehouse")
 		warehouse.warehouse_name = warehouse_name

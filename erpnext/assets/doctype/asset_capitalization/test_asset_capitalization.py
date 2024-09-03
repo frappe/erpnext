@@ -6,17 +6,17 @@ import unittest
 import frappe
 from frappe.utils import cint, flt, getdate, now_datetime
 
-from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries
-from erpnext.assets.doctype.asset.test_asset import (
+from Goldfish.assets.doctype.asset.depreciation import post_depreciation_entries
+from Goldfish.assets.doctype.asset.test_asset import (
 	create_asset,
 	create_asset_data,
 	set_depreciation_settings_in_company,
 )
-from erpnext.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
+from Goldfish.assets.doctype.asset_depreciation_schedule.asset_depreciation_schedule import (
 	get_asset_depr_schedule_doc,
 )
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+from Goldfish.stock.doctype.item.test_item import create_item
+from Goldfish.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	make_serial_batch_bundle,
 )
 
@@ -445,7 +445,7 @@ def create_asset_capitalization_data():
 
 
 def create_asset_capitalization(**args):
-	from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+	from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 	args = frappe._dict(args)
 
@@ -540,7 +540,7 @@ def create_asset_capitalization(**args):
 
 
 def create_stock_reconciliation(asset_capitalization, stock_rate=0):
-	from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
+	from Goldfish.stock.doctype.stock_reconciliation.test_stock_reconciliation import (
 		EmptyStockReconciliationItemsError,
 		create_stock_reconciliation,
 	)

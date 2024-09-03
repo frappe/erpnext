@@ -16,7 +16,7 @@ frappe.ui.form.on("Putaway Rule", {
 	uom: function (frm) {
 		if (frm.doc.item_code && frm.doc.uom) {
 			return frm.call({
-				method: "erpnext.stock.get_item_details.get_conversion_factor",
+				method: "Goldfish.stock.get_item_details.get_conversion_factor",
 				args: {
 					item_code: frm.doc.item_code,
 					uom: frm.doc.uom,

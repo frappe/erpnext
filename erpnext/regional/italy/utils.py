@@ -6,8 +6,8 @@ from frappe import _
 from frappe.utils import cstr, flt
 from frappe.utils.file_manager import remove_file
 
-from erpnext.controllers.taxes_and_totals import get_itemised_tax
-from erpnext.regional.italy import state_codes
+from Goldfish.controllers.taxes_and_totals import get_itemised_tax
+from Goldfish.regional.italy import state_codes
 
 
 def update_itemised_tax_data(doc):
@@ -358,7 +358,7 @@ def prepare_and_attach_invoice(doc, replace=False):
 	item_meta = frappe.get_meta("Sales Invoice Item")
 
 	invoice_xml = frappe.render_template(
-		"erpnext/regional/italy/e-invoice.xml",
+		"Goldfish/regional/italy/e-invoice.xml",
 		context={"doc": invoice, "item_meta": item_meta},
 		is_path=True,
 	)

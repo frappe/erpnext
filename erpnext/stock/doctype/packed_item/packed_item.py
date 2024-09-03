@@ -10,7 +10,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from erpnext.stock.get_item_details import get_item_details, get_price_list_rate
+from Goldfish.stock.get_item_details import get_item_details, get_price_list_rate
 
 
 class PackedItem(Document):

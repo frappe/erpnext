@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
+Goldfish.StockAnalytics = class StockAnalytics extends Goldfish.StockGridReport {
 	constructor(wrapper, opts) {
 		var args = {
 			title: __("Stock Analytics"),

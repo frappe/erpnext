@@ -7,7 +7,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import nowdate
 
-from erpnext.accounts.party import get_party_account
+from Goldfish.accounts.party import get_party_account
 
 
 class PaymentOrder(Document):
@@ -19,7 +19,7 @@ class PaymentOrder(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.payment_order_reference.payment_order_reference import (
+		from Goldfish.accounts.doctype.payment_order_reference.payment_order_reference import (
 			PaymentOrderReference,
 		)
 

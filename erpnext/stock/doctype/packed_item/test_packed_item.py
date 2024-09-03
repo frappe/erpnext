@@ -6,11 +6,11 @@ import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_to_date, nowdate
 
-from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from Goldfish.selling.doctype.sales_order.sales_order import make_delivery_note
+from Goldfish.selling.doctype.sales_order.test_sales_order import make_sales_order
+from Goldfish.stock.doctype.item.test_item import make_item
+from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
+from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 def create_product_bundle(
@@ -190,7 +190,7 @@ class TestPackedItem(FrappeTestCase):
 			self.assertEqual(sent_item.qty, -1 * returned_item.qty)
 
 	def test_returning_full_bundles(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		item_list = [
 			{
@@ -219,7 +219,7 @@ class TestPackedItem(FrappeTestCase):
 		self.assertReturns(dn.packed_items, dn_ret.packed_items)
 
 	def test_returning_partial_bundles(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		item_list = [
 			{
@@ -256,7 +256,7 @@ class TestPackedItem(FrappeTestCase):
 		self.assertReturns(expected_returns, dn_ret.packed_items)
 
 	def test_returning_partial_bundle_qty(self):
-		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_return
+		from Goldfish.stock.doctype.delivery_note.delivery_note import make_sales_return
 
 		so = make_sales_order(item_code=self.bundle, warehouse=self.warehouse, qty=2)
 

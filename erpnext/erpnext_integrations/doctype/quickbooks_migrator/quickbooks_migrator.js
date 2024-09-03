@@ -14,7 +14,7 @@ frappe.ui.form.on("QuickBooks Migrator", {
 	onload: function (frm) {
 		frm.trigger("set_indicator");
 		var domain = frappe.urllib.get_base_url();
-		var redirect_url = `${domain}/api/method/erpnext.erpnext_integrations.doctype.quickbooks_migrator.quickbooks_migrator.callback`;
+		var redirect_url = `${domain}/api/method/Goldfish.Goldfish_integrations.doctype.quickbooks_migrator.quickbooks_migrator.callback`;
 		if (frm.doc.redirect_url != redirect_url) {
 			frm.set_value("redirect_url", redirect_url);
 		}
@@ -47,7 +47,7 @@ frappe.ui.form.on("QuickBooks Migrator", {
 		}
 		if (frm.doc.access_token) {
 			// If we have access_token that means we also have refresh_token we don't need user intervention anymore
-			// All we need now is a Company from erpnext
+			// All we need now is a Company from Goldfish
 			frm.remove_custom_button(__("Connect to Quickbooks"));
 
 			frm.toggle_display("company_settings", 1);

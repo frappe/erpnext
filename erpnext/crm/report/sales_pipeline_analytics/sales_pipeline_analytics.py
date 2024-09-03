@@ -10,7 +10,7 @@ from dateutil.relativedelta import relativedelta
 from frappe import _
 from frappe.utils import cint, flt, getdate
 
-from erpnext.setup.utils import get_exchange_rate
+from Goldfish.setup.utils import get_exchange_rate
 
 
 def execute(filters=None):

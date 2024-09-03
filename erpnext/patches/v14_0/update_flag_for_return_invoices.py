@@ -8,7 +8,7 @@ def execute():
 	gle = qb.DocType("GL Entry")
 
 	# Use hardcoded 'creation' date to isolate Credit/Debit notes created post v14 backport
-	# https://github.com/frappe/erpnext/pull/39497
+	# https://github.com/frappe/Goldfish/pull/39497
 	creation_date = "2024-01-25"
 
 	si = qb.DocType("Sales Invoice")

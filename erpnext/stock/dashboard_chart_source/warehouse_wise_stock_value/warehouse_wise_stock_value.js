@@ -1,7 +1,7 @@
 frappe.provide("frappe.dashboards.chart_sources");
 
 frappe.dashboards.chart_sources["Warehouse wise Stock Value"] = {
-	method: "erpnext.stock.dashboard_chart_source.warehouse_wise_stock_value.warehouse_wise_stock_value.get",
+	method: "Goldfish.stock.dashboard_chart_source.warehouse_wise_stock_value.warehouse_wise_stock_value.get",
 	filters: [
 		{
 			fieldname: "company",

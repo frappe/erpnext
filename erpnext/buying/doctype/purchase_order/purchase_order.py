@@ -10,25 +10,25 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, get_link_to_form
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+from Goldfish.accounts.doctype.sales_invoice.sales_invoice import (
 	unlink_inter_company_doc,
 	update_linked_doc,
 	validate_inter_company_party,
 )
-from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import (
+from Goldfish.accounts.doctype.tax_withholding_category.tax_withholding_category import (
 	get_party_tax_withholding_details,
 )
-from erpnext.accounts.party import get_party_account, get_party_account_currency
-from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.manufacturing.doctype.blanket_order.blanket_order import (
+from Goldfish.accounts.party import get_party_account, get_party_account_currency
+from Goldfish.buying.utils import check_on_hold_or_closed_status, validate_for_items
+from Goldfish.controllers.buying_controller import BuyingController
+from Goldfish.manufacturing.doctype.blanket_order.blanket_order import (
 	validate_against_blanket_order,
 )
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
-from erpnext.stock.stock_balance import get_ordered_qty, update_bin_qty
-from erpnext.stock.utils import get_bin
-from erpnext.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
+from Goldfish.setup.doctype.item_group.item_group import get_item_group_defaults
+from Goldfish.stock.doctype.item.item import get_item_defaults, get_last_purchase_details
+from Goldfish.stock.stock_balance import get_ordered_qty, update_bin_qty
+from Goldfish.stock.utils import get_bin
+from Goldfish.subcontracting.doctype.subcontracting_bom.subcontracting_bom import (
 	get_subcontracting_boms_for_finished_goods,
 )
 
@@ -44,13 +44,13 @@ class PurchaseOrder(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
-		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
-		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
+		from Goldfish.accounts.doctype.payment_schedule.payment_schedule import PaymentSchedule
+		from Goldfish.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
+		from Goldfish.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
 		)
-		from erpnext.buying.doctype.purchase_order_item.purchase_order_item import PurchaseOrderItem
-		from erpnext.buying.doctype.purchase_order_item_supplied.purchase_order_item_supplied import (
+		from Goldfish.buying.doctype.purchase_order_item.purchase_order_item import PurchaseOrderItem
+		from Goldfish.buying.doctype.purchase_order_item_supplied.purchase_order_item_supplied import (
 			PurchaseOrderItemSupplied,
 		)
 
@@ -642,7 +642,7 @@ class PurchaseOrder(BuyingController):
 				make_subcontracting_order(self.name, save=True, notify=True)
 
 	def update_subcontracting_order_status(self):
-		from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+		from Goldfish.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 			update_subcontracting_order_status as update_sco_status,
 		)
 
@@ -827,7 +827,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 
 
 def get_list_context(context=None):
-	from erpnext.controllers.website_list_for_contact import get_list_context
+	from Goldfish.controllers.website_list_for_contact import get_list_context
 
 	list_context = get_list_context(context)
 	list_context.update(
@@ -850,7 +850,7 @@ def update_status(status, name):
 
 @frappe.whitelist()
 def make_inter_company_sales_order(source_name, target_doc=None):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
+	from Goldfish.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 
 	return make_inter_company_transaction("Purchase Order", source_name, target_doc)
 

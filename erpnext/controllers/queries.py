@@ -13,8 +13,8 @@ from frappe.query_builder.functions import Concat, Locate, Sum
 from frappe.utils import nowdate, today, unique
 from pypika import Order
 
-import erpnext
-from erpnext.stock.get_item_details import _get_item_tax_template
+import Goldfish
+from Goldfish.stock.get_item_details import _get_item_tax_template
 
 
 # searches for active employees
@@ -90,7 +90,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 @frappe.validate_and_sanitize_search_inputs
 def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	doctype = "Account"
-	company_currency = erpnext.get_company_currency(filters.get("company"))
+	company_currency = Goldfish.get_company_currency(filters.get("company"))
 
 	def get_accounts(with_account_type_filter):
 		account_type_condition = ""
@@ -558,7 +558,7 @@ def get_blanket_orders(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_income_account(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.controllers.queries import get_match_cond
+	from Goldfish.controllers.queries import get_match_cond
 
 	# income account can be any Credit account,
 	# but can also be a Asset account with account_type='Income Account' in special circumstances.
@@ -588,7 +588,7 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters, reference_doctype=None):
-	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+	from Goldfish.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
 		get_dimension_filter_map,
 	)
 
@@ -642,7 +642,7 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters,
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_expense_account(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.controllers.queries import get_match_cond
+	from Goldfish.controllers.queries import get_match_cond
 
 	if not filters:
 		filters = {}

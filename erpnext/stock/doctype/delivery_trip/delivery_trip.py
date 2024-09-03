@@ -20,7 +20,7 @@ class DeliveryTrip(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
+		from Goldfish.stock.doctype.delivery_stop.delivery_stop import DeliveryStop
 
 		amended_from: DF.Link | None
 		company: DF.Link

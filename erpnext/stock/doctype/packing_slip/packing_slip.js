@@ -17,7 +17,7 @@ frappe.ui.form.on("Packing Slip", {
 			} else {
 				let d = locals[cdt][cdn];
 				return {
-					query: "erpnext.stock.doctype.packing_slip.packing_slip.item_details",
+					query: "Goldfish.stock.doctype.packing_slip.packing_slip.item_details",
 					filters: {
 						delivery_note: doc.delivery_note,
 					},
@@ -34,8 +34,8 @@ frappe.ui.form.on("Packing Slip", {
 		frm.set_value("items", null);
 
 		if (frm.doc.delivery_note) {
-			erpnext.utils.map_current_doc({
-				method: "erpnext.stock.doctype.delivery_note.delivery_note.make_packing_slip",
+			Goldfish.utils.map_current_doc({
+				method: "Goldfish.stock.doctype.delivery_note.delivery_note.make_packing_slip",
 				source_name: frm.doc.delivery_note,
 				target_doc: frm,
 				freeze: true,

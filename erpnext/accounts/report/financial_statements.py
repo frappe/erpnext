@@ -10,12 +10,12 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, add_months, cint, cstr, flt, formatdate, get_first_day, getdate
 
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 	get_dimension_with_children,
 )
-from erpnext.accounts.report.utils import convert_to_presentation_currency, get_currency
-from erpnext.accounts.utils import get_fiscal_year
+from Goldfish.accounts.report.utils import convert_to_presentation_currency, get_currency
+from Goldfish.accounts.utils import get_fiscal_year
 
 
 def get_period_list(

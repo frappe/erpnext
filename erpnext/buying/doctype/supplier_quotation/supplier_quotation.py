@@ -7,8 +7,8 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt, getdate, nowdate
 
-from erpnext.buying.utils import validate_for_items
-from erpnext.controllers.buying_controller import BuyingController
+from Goldfish.buying.utils import validate_for_items
+from Goldfish.controllers.buying_controller import BuyingController
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -22,11 +22,11 @@ class SupplierQuotation(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
-		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
+		from Goldfish.accounts.doctype.pricing_rule_detail.pricing_rule_detail import PricingRuleDetail
+		from Goldfish.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
 		)
-		from erpnext.buying.doctype.supplier_quotation_item.supplier_quotation_item import (
+		from Goldfish.buying.doctype.supplier_quotation_item.supplier_quotation_item import (
 			SupplierQuotationItem,
 		)
 
@@ -109,7 +109,7 @@ class SupplierQuotation(BuyingController):
 		if not self.status:
 			self.status = "Draft"
 
-		from erpnext.controllers.status_updater import validate_status
+		from Goldfish.controllers.status_updater import validate_status
 
 		validate_status(self.status, ["Draft", "Submitted", "Stopped", "Cancelled"])
 
@@ -203,7 +203,7 @@ class SupplierQuotation(BuyingController):
 
 
 def get_list_context(context=None):
-	from erpnext.controllers.website_list_for_contact import get_list_context
+	from Goldfish.controllers.website_list_for_contact import get_list_context
 
 	list_context = get_list_context(context)
 	list_context.update(

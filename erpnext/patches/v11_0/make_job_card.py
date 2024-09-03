@@ -4,7 +4,7 @@
 
 import frappe
 
-from erpnext.manufacturing.doctype.work_order.work_order import create_job_card
+from Goldfish.manufacturing.doctype.work_order.work_order import create_job_card
 
 
 def execute():

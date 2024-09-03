@@ -22,7 +22,7 @@ from frappe.utils import (
 	today,
 )
 
-from erpnext.accounts.utils import get_balance_on, get_count_on, get_fiscal_year
+from Goldfish.accounts.utils import get_balance_on, get_count_on, get_fiscal_year
 
 user_specific_content = ["calendar_events", "todo_list"]
 
@@ -38,7 +38,7 @@ class EmailDigest(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.setup.doctype.email_digest_recipient.email_digest_recipient import (
+		from Goldfish.setup.doctype.email_digest_recipient.email_digest_recipient import (
 			EmailDigestRecipient,
 		)
 
@@ -131,7 +131,7 @@ class EmailDigest(Document):
 	def get_msg_html(self):
 		"""Build email digest content"""
 		frappe.flags.ignore_account_permission = True
-		from erpnext.setup.doctype.email_digest.quotes import get_random_quote
+		from Goldfish.setup.doctype.email_digest.quotes import get_random_quote
 
 		context = frappe._dict()
 		context.update(self.__dict__)
@@ -172,7 +172,7 @@ class EmailDigest(Document):
 
 		# style
 		return frappe.render_template(
-			"erpnext/setup/doctype/email_digest/templates/default.html", context, is_path=True
+			"Goldfish/setup/doctype/email_digest/templates/default.html", context, is_path=True
 		)
 
 	def set_title(self, context):

@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import cint, cstr
 
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 

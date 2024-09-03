@@ -1,10 +1,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: frappe\n"
-"Report-Msgid-Bugs-To: info@erpnext.com\n"
+"Report-Msgid-Bugs-To: info@Goldfish.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
 "PO-Revision-Date: 2024-09-02 17:30\n"
-"Last-Translator: info@erpnext.com\n"
+"Last-Translator: info@Goldfish.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -14,7 +14,7 @@ msgstr ""
 "X-Crowdin-Project: frappe\n"
 "X-Crowdin-Project-ID: 639578\n"
 "X-Crowdin-Language: fa\n"
-"X-Crowdin-File: /[frappe.erpnext] develop/erpnext/locale/main.pot\n"
+"X-Crowdin-File: /[frappe.Goldfish] develop/Goldfish/locale/main.pot\n"
 "X-Crowdin-File-ID: 46\n"
 "Language: fa_IR\n"
 
@@ -89,7 +89,7 @@ msgstr "\"آیتم تأمین شده توسط مشتری\" نمی تواند د�
 msgid "\"Is Fixed Asset\" cannot be unchecked, as Asset record exists against the item"
 msgstr "علامت \"دارایی ثابت است\" را نمی توان بردارید، زیرا رکورد دارایی در برابر آیتم وجود دارد"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:132
 msgid "#"
 msgstr "#"
 
@@ -955,7 +955,7 @@ msgstr "جزئیات API"
 #. Settings'
 #. Label of the api_endpoint (Data) field in DocType 'QuickBooks Migrator'
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "API Endpoint"
 msgstr "نقطه پایانی API"
 
@@ -1096,7 +1096,7 @@ msgstr "کلید دسترسی برای ارائه‌دهنده خدمات لاز
 
 #. Label of the access_token (Small Text) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Access Token"
 msgstr "توکن دسترسی"
 
@@ -1833,7 +1833,7 @@ msgstr "ورودی های حسابداری تا این تاریخ مسدود ش�
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.json
 #: assets/doctype/asset_category/asset_category.json
 #: buying/doctype/supplier/supplier.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: selling/doctype/customer/customer.json setup/doctype/company/company.json
 #: setup/doctype/company/company.py:334
 #: setup/doctype/customer_group/customer_group.json
@@ -3208,7 +3208,7 @@ msgid "Address used to determine Tax Category in transactions"
 msgstr "آدرس مورد استفاده برای تعیین دسته مالیات در معاملات"
 
 #. Label of the addresses (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Addresses"
 msgstr "آدرس ها"
 
@@ -4800,7 +4800,7 @@ msgstr "گروه آیتم راهی برای دسته بندی آیتم‌ها ب
 msgid "An error has been appeared while reposting item valuation via {0}"
 msgstr "هنگام ارسال مجدد ارزیابی مورد از طریق {0} خطایی ظاهر شد"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:26
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:26
 msgctxt "<a href='/app/error-log' class='variant-click'>Error Log</a>"
 msgid "An error has occurred during {0}. Check {1} for more details"
 msgstr "خطایی در طول {0} رخ داده است. برای جزئیات بیشتر {1} را بررسی کنید"
@@ -4978,7 +4978,7 @@ msgstr "قابل اجرا در رزرو هزینه های واقعی"
 
 #. Label of the application_settings (Section Break) field in DocType
 #. 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Application Settings"
 msgstr "تنظیمات برنامه"
 
@@ -6041,8 +6041,8 @@ msgstr "ویژگی های"
 msgid "Auditor"
 msgstr "ممیز، مامور رسیدگی"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:68
-#: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:85
+#: Goldfish_integrations/doctype/plaid_settings/plaid_connector.py:68
+#: Goldfish_integrations/doctype/plaid_settings/plaid_connector.py:85
 msgid "Authentication Failed"
 msgstr "احراز هویت ناموفق بود"
 
@@ -6059,7 +6059,7 @@ msgstr "کنترل مجوز"
 
 #. Label of the authorization_endpoint (Data) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Authorization Endpoint"
 msgstr "نقطه پایان مجوز"
 
@@ -6070,12 +6070,12 @@ msgstr "قانون مجوز"
 
 #. Label of the authorization_settings (Section Break) field in DocType
 #. 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Authorization Settings"
 msgstr "تنظیمات مجوز"
 
 #. Label of the authorization_url (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Authorization URL"
 msgstr "URL مجوز"
 
@@ -6980,7 +6980,7 @@ msgstr "تراز باید"
 #: accounts/doctype/payment_request/payment_request.json
 #: accounts/report/account_balance/account_balance.js:39
 #: accounts/workspace/accounting/accounting.json
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:99
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:99
 #: setup/doctype/employee/employee.json
 msgid "Bank"
 msgstr "بانک"
@@ -7219,15 +7219,15 @@ msgstr "تراکنش بانکی {0} به روز شد"
 msgid "Bank account cannot be named as {0}"
 msgstr "حساب بانکی نمی تواند به عنوان {0} نامگذاری شود"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:146
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:146
 msgid "Bank account {0} already exists and could not be created again"
 msgstr "حساب بانکی {0} از قبل وجود دارد و نمی توان دوباره ایجاد کرد"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:153
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:153
 msgid "Bank accounts added"
 msgstr "حساب های بانکی اضافه شد"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:311
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:311
 msgid "Bank transaction creation error"
 msgstr "خطای ایجاد تراکنش بانکی"
 
@@ -8517,8 +8517,8 @@ msgid "Buying must be checked, if Applicable For is selected as {0}"
 msgstr "اگر Applicable For به عنوان {0} انتخاب شده باشد، خرید باید بررسی شود"
 
 #: buying/doctype/buying_settings/buying_settings.js:13
-msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
-msgstr "به‌طور پیش‌فرض، نام تأمین‌کننده مطابق با نام تأمین‌کننده وارد شده تنظیم می‌شود. اگر می‌خواهید تأمین‌کنندگان با <a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/name-series' target='_blank'>سری نام‌گذاری نام‌گذاری شوند. </a> گزینه \"Naming Series\" را انتخاب کنید."
+msgid "By default, the Supplier Name is set as per the Supplier Name entered. If you want Suppliers to be named by a <a href='https://docs.Goldfish.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a> choose the 'Naming Series' option."
+msgstr "به‌طور پیش‌فرض، نام تأمین‌کننده مطابق با نام تأمین‌کننده وارد شده تنظیم می‌شود. اگر می‌خواهید تأمین‌کنندگان با <a href='https://docs.Goldfish.com/docs/user/manual/en/setting-up/settings/name-series' target='_blank'>سری نام‌گذاری نام‌گذاری شوند. </a> گزینه \"Naming Series\" را انتخاب کنید."
 
 #. Label of the bypass_credit_limit_check (Check) field in DocType 'Customer
 #. Credit Limit'
@@ -9206,7 +9206,7 @@ msgstr "نمی توان شماره ردیف را بزرگتر یا مساوی ب
 msgid "Cannot retrieve link token for update. Check Error Log for more information"
 msgstr "نمی توان توکن پیوند را برای به روز رسانی بازیابی کرد. برای اطلاعات بیشتر Log خطا را بررسی کنید"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:63
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:63
 msgid "Cannot retrieve link token. Check Error Log for more information"
 msgstr "توکن پیوند بازیابی نمی شود. برای اطلاعات بیشتر Log خطا را بررسی کنید"
 
@@ -9666,7 +9666,7 @@ msgstr "درخت نمودار"
 #: accounts/doctype/account/account_tree.js:5
 #: accounts/doctype/cost_center/cost_center_tree.js:52
 #: accounts/workspace/accounting/accounting.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: public/js/setup_wizard.js:36 setup/doctype/company/company.js:103
 #: setup/doctype/company/company.json setup/workspace/home/home.json
 msgid "Chart of Accounts"
@@ -9968,12 +9968,12 @@ msgid "Client"
 msgstr "مشتری"
 
 #. Label of the client_id (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Client ID"
 msgstr "شناسه مشتری"
 
 #. Label of the client_secret (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Client Secret"
 msgstr "راز مشتری"
 
@@ -10151,7 +10151,7 @@ msgstr "متن پایانی"
 
 #. Label of the code (Data) field in DocType 'QuickBooks Migrator'
 #. Label of the code (Data) field in DocType 'Incoterm'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: setup/doctype/incoterm/incoterm.json
 msgid "Code"
 msgstr "کد"
@@ -10607,8 +10607,8 @@ msgstr "شرکت ها"
 #: crm/report/lost_opportunity/lost_opportunity.js:8
 #: crm/report/opportunity_summary_by_sales_stage/opportunity_summary_by_sales_stage.js:57
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.js:51
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:128
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:128
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 #: manufacturing/doctype/blanket_order/blanket_order.json
@@ -10853,7 +10853,7 @@ msgid "Company Name"
 msgstr "نام شرکت"
 
 #. Description of the 'Tally Company' (Data) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Company Name as per Imported Tally Data"
 msgstr "نام شرکت طبق داده های آماری درون‌بُردی"
 
@@ -10867,7 +10867,7 @@ msgstr "شرکت مرتبط نیست"
 
 #. Label of the company_settings (Section Break) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Company Settings"
 msgstr "تنظیمات شرکت"
 
@@ -10939,7 +10939,7 @@ msgstr ""
 msgid "Company which internal supplier represents"
 msgstr "شرکتی که تامین کننده داخلی آن را نمایندگی می کند"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:85
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:85
 msgid "Company {0} already exists. Continuing will overwrite the Company and Chart of Accounts"
 msgstr "شرکت {0} در حال حاضر وجود دارد. ادامه، شرکت و نمودار حساب‌ها را بازنویسی می‌کند"
 
@@ -10986,8 +10986,8 @@ msgstr "رقبا"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
 #. Option for the 'Status' (Select) field in DocType 'Job Card Operation'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:67
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:67
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: manufacturing/doctype/job_card_operation/job_card_operation.json
 #: manufacturing/doctype/workstation/workstation_job_card.html:94
 #: public/js/projects/timer.js:32
@@ -11240,20 +11240,20 @@ msgstr "هنگام ایجاد تراکنش خرید جدید، فهرست قیم
 msgid "Confirmation Date"
 msgstr "تاریخ تایید"
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:43
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:51
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:43
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:51
 msgid "Connect to Quickbooks"
 msgstr "به Quickbooks متصل شوید"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:65
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:65
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Connected to QuickBooks"
 msgstr "به QuickBooks متصل است"
 
 #. Option for the 'Status' (Select) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:64
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:64
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Connecting to QuickBooks"
 msgstr "اتصال به QuickBooks"
 
@@ -11719,7 +11719,7 @@ msgstr "مخاطب"
 msgid "Content Type"
 msgstr "نوع محتوا"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:157
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:157
 #: public/js/controllers/transaction.js:2183
 #: selling/doctype/quotation/quotation.js:359
 msgid "Continue"
@@ -12343,7 +12343,7 @@ msgstr "به‌روزرسانی خودکار شیفت‌ها ممکن نیست. 
 msgid "Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"
 msgstr "یادداشت اعتباری به‌طور خودکار ایجاد نشد، لطفاً علامت «صدور یادداشت اعتبار» را بردارید و دوباره ارسال کنید"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:353
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:353
 msgid "Could not detect the Company for updating Bank Accounts"
 msgstr "شرکت برای به‌روزرسانی حساب‌های بانکی شناسایی نشد"
 
@@ -12499,7 +12499,7 @@ msgstr "بستانکاری"
 #: crm/doctype/opportunity/opportunity.js:103
 #: crm/doctype/opportunity/opportunity.js:112
 #: crm/doctype/prospect/prospect.js:15 crm/doctype/prospect/prospect.js:27
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:127
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:127
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.js:159
 #: manufacturing/doctype/blanket_order/blanket_order.js:34
 #: manufacturing/doctype/blanket_order/blanket_order.js:48
@@ -12602,7 +12602,7 @@ msgstr "ایجاد سفر تحویل"
 msgid "Create Depreciation Entry"
 msgstr "ایجاد ثبت استهلاک"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:316
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:316
 msgid "Create Document"
 msgstr "ایجاد سند"
 
@@ -12847,7 +12847,7 @@ msgstr "ایجاد {0} کارت امتیازی برای {1} بین:"
 msgid "Creating Accounts..."
 msgstr "ایجاد اکانت ..."
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:404
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:404
 msgid "Creating Company and Importing Chart of Accounts"
 msgstr "ایجاد شرکت و درون‌بُرد نمودار حساب"
 
@@ -13129,7 +13129,7 @@ msgstr "طلبکاران"
 
 #. Description of the 'Tally Creditors Account' (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Creditors Account set in Tally"
 msgstr "حساب بستانکاران در Tally تنظیم شده است"
 
@@ -14325,7 +14325,7 @@ msgid "Data Import and Settings"
 msgstr "درون‌بُرد داده ها و تنظیمات"
 
 #. Description of the 'Master Data' (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Data exported from Tally that consists of the Chart of Accounts, Customers, Suppliers, Addresses, Items and UOMs"
 msgstr "داده های صادر شده از Tally که شامل نمودار حساب ها، مشتریان، تامین کنندگان، آدرس ها، آیتم‌ها و UOM است."
 
@@ -14497,13 +14497,13 @@ msgid "Day"
 msgstr "روز"
 
 #. Label of the day_book_data (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Day Book Data"
 msgstr "داده های کتاب روز"
 
 #. Description of the 'Day Book Data' (Attach) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Day Book Data exported from Tally that consists of all historic transactions"
 msgstr "داده‌های کتاب روز صادر شده از Tally که شامل همه تراکنش‌های تاریخی است"
 
@@ -14730,7 +14730,7 @@ msgstr "بدهکاران"
 
 #. Description of the 'Tally Debtors Account' (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Debtors Account set in Tally"
 msgstr "حساب بدهکاران در Tally تنظیم شده است"
 
@@ -14912,8 +14912,8 @@ msgstr "حساب بانکی پیش فرض شرکت"
 #. Label of the default_cost_center (Link) field in DocType 'Tally Migration'
 #. Label of the cost_center (Link) field in DocType 'Project'
 #. Label of the cost_center (Link) field in DocType 'Company'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: projects/doctype/project/project.json setup/doctype/company/company.json
 msgid "Default Cost Center"
 msgstr "مرکز هزینه پیش‌فرض"
@@ -15115,7 +15115,7 @@ msgstr "حساب دریافتنی پیش فرض"
 
 #. Label of the default_round_off_account (Link) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Default Round Off Account"
 msgstr "پیش فرض دور کردن حساب"
 
@@ -15152,7 +15152,7 @@ msgstr "توافقنامه سطح سرویس پیش فرض برای {0} از ق�
 
 #. Label of the default_shipping_account (Link) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Default Shipping Account"
 msgstr "حساب حمل و نقل پیش فرض"
 
@@ -15193,7 +15193,7 @@ msgid "Default Territory"
 msgstr "منطقه پیش فرض"
 
 #. Label of the default_uom (Link) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Default UOM"
 msgstr "UOM پیش فرض"
 
@@ -15231,8 +15231,8 @@ msgstr "مقدار پیش فرض"
 #. Entry'
 #. Label of the set_warehouse (Link) field in DocType 'Stock Reconciliation'
 #. Label of the default_warehouse (Link) field in DocType 'Stock Settings'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: public/js/bom_configurator/bom_configurator.bundle.js:354
 #: stock/doctype/item_default/item_default.json
 #: stock/doctype/stock_entry/stock_entry.json
@@ -17091,7 +17091,7 @@ msgstr "DocField"
 #. Label of the doctype_name (Link) field in DocType 'Transaction Deletion
 #. Record Item'
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:132
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:132
 #: setup/doctype/transaction_deletion_record_item/transaction_deletion_record_item.json
 msgid "DocType"
 msgstr "DocType"
@@ -17208,9 +17208,9 @@ msgstr "ایمیل ارسال نکنید"
 #. Label of the done (Check) field in DocType 'Transaction Deletion Record
 #. Details'
 #: accounts/doctype/transaction_deletion_record_details/transaction_deletion_record_details.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:328
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:413
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:589
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:328
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:413
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:589
 #: public/js/utils/crm_activities.js:212
 msgid "Done"
 msgstr "انجام شده"
@@ -17672,15 +17672,15 @@ msgstr ""
 msgid "EMU of current"
 msgstr ""
 
-#. Label of the erpnext_company (Data) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
-msgid "ERPNext Company"
-msgstr "شرکت ERPNext"
+#. Label of the Goldfish_company (Data) field in DocType 'Tally Migration'
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
+msgid "Goldfish Company"
+msgstr "شرکت Goldfish"
 
 #. Label of the user_id (Data) field in DocType 'Employee Group Table'
 #: setup/doctype/employee_group_table/employee_group_table.json
-msgid "ERPNext User ID"
-msgstr "شناسه کاربری ERPNext"
+msgid "Goldfish User ID"
+msgstr "شناسه کاربری Goldfish"
 
 #. Option for the 'Update frequency of Project' (Select) field in DocType
 #. 'Buying Settings'
@@ -18242,7 +18242,7 @@ msgstr "فعال کردن حسابداری تخفیف برای فروش"
 
 #. Label of the enable_european_access (Check) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Enable European Access"
 msgstr "دسترسی اروپایی را فعال کنید"
 
@@ -18317,7 +18317,7 @@ msgstr "فعال کردن اعمال SLA در هر {0}"
 #. Label of the enabled (Check) field in DocType 'Price List'
 #. Label of the enabled (Check) field in DocType 'Service Level Agreement'
 #: accounts/doctype/mode_of_payment/mode_of_payment.json
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 #: manufacturing/doctype/workstation_working_hour/workstation_working_hour.json
 #: setup/doctype/email_digest/email_digest.json
 #: setup/doctype/sales_person/sales_person.json setup/doctype/uom/uom.json
@@ -18663,7 +18663,7 @@ msgstr "لاگ خطا"
 
 #. Label of the error_message (Text) field in DocType 'Period Closing Voucher'
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:127
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:127
 msgid "Error Message"
 msgstr "پیغام خطا"
 
@@ -18679,7 +18679,7 @@ msgstr "خطا در حین به روز رسانی اطلاعات تماس گیر
 msgid "Error evaluating the criteria formula"
 msgstr "خطا در ارزیابی فرمول معیار"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:157
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:157
 msgid "Error occurred while parsing Chart of Accounts: Please make sure that no two accounts have the same name"
 msgstr ""
 
@@ -19346,8 +19346,8 @@ msgstr "فارنهایت"
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
 #: assets/doctype/asset/asset.json
 #: bulk_transaction/doctype/bulk_transaction_log/bulk_transaction_log.json
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:68
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:68
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:13
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
@@ -19365,7 +19365,7 @@ msgid "Failed Entries"
 msgstr "ورودی های ناموفق"
 
 #. Label of the failed_import_preview (HTML) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Failed Import Log"
 msgstr "لاگ درون‌بُرد ناموفق"
 
@@ -19475,7 +19475,7 @@ msgstr "واکشی بر اساس"
 msgid "Fetch Customers"
 msgstr "واکشی مشتریان"
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:56
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:56
 msgid "Fetch Data"
 msgstr "واکشی داده ها"
 
@@ -20087,7 +20087,7 @@ msgstr "شماره سپرده ثابت"
 
 #. Label of the fixed_error_log_preview (HTML) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Fixed Error Log"
 msgstr "ثبت خطا ثابت شد"
 
@@ -22766,12 +22766,12 @@ msgid "If this item has variants, then it cannot be selected in sales orders etc
 msgstr "اگر این آیتم دارای گونه باشد، نمی توان آن را در سفارش‌های فروش و غیره انتخاب کرد."
 
 #: buying/doctype/buying_settings/buying_settings.js:27
-msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
-msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext شما را از ایجاد فاکتور خرید یا رسید بدون ایجاد یک سفارش خرید جلوگیری می کند. این پیکربندی را می‌توان با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون سفارش خرید» در بخش اصلی تأمین‌کننده، برای یک تأمین‌کننده خاص لغو کرد."
+msgid "If this option is configured 'Yes', Goldfish will prevent you from creating a Purchase Invoice or Receipt without creating a Purchase Order first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Order' checkbox in the Supplier master."
+msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، Goldfish شما را از ایجاد فاکتور خرید یا رسید بدون ایجاد یک سفارش خرید جلوگیری می کند. این پیکربندی را می‌توان با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون سفارش خرید» در بخش اصلی تأمین‌کننده، برای یک تأمین‌کننده خاص لغو کرد."
 
 #: buying/doctype/buying_settings/buying_settings.js:34
-msgid "If this option is configured 'Yes', ERPNext will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
-msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، ERPNext از ایجاد فاکتور خرید بدون ایجاد یک رسید خرید جلوگیری می کند. این پیکربندی را می‌توان برای یک تامین‌کننده خاص با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون رسید خرید» در قسمت اصلی تأمین‌کننده لغو کرد."
+msgid "If this option is configured 'Yes', Goldfish will prevent you from creating a Purchase Invoice without creating a Purchase Receipt first. This configuration can be overridden for a particular supplier by enabling the 'Allow Purchase Invoice Creation Without Purchase Receipt' checkbox in the Supplier master."
+msgstr "اگر این گزینه 'بله' پیکربندی شده باشد، Goldfish از ایجاد فاکتور خرید بدون ایجاد یک رسید خرید جلوگیری می کند. این پیکربندی را می‌توان برای یک تامین‌کننده خاص با فعال کردن کادر انتخاب «اجازه ایجاد فاکتور خرید بدون رسید خرید» در قسمت اصلی تأمین‌کننده لغو کرد."
 
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.js:10
 msgid "If ticked, multiple materials can be used for a single Work Order. This is useful if one or more time consuming products are being manufactured."
@@ -22792,8 +22792,8 @@ msgid "If yes, then this warehouse will be used to store rejected materials"
 msgstr "اگر بله، پس از این انبار برای نگهداری مواد رد شده استفاده می شود"
 
 #: stock/doctype/item/item.js:919
-msgid "If you are maintaining stock of this Item in your Inventory, ERPNext will make a stock ledger entry for each transaction of this item."
-msgstr "اگر موجودی این کالا را در موجودی خود نگهداری می کنید، ERPNext برای هر تراکنش این کالا یک ثبت در دفتر کل موجودی ایجاد می کند."
+msgid "If you are maintaining stock of this Item in your Inventory, Goldfish will make a stock ledger entry for each transaction of this item."
+msgstr "اگر موجودی این کالا را در موجودی خود نگهداری می کنید، Goldfish برای هر تراکنش این کالا یک ثبت در دفتر کل موجودی ایجاد می کند."
 
 #. Description of the 'Unreconciled Entries' (Section Break) field in DocType
 #. 'Payment Reconciliation'
@@ -23079,7 +23079,7 @@ msgstr ""
 msgid "Import Data"
 msgstr "درون‌بُرد داده‌ها"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:71
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:71
 msgid "Import Day Book Data"
 msgstr "درون‌بُرد داده های کتاب روز"
 
@@ -23105,7 +23105,7 @@ msgstr "درون‌بُرد فاکتورها"
 #. Label of the import_log_section (Section Break) field in DocType 'Tally
 #. Migration'
 #: accounts/doctype/bank_statement_import/bank_statement_import.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Import Log"
 msgstr "لاگ درون‌بُرد"
 
@@ -23115,7 +23115,7 @@ msgstr "لاگ درون‌بُرد"
 msgid "Import Log Preview"
 msgstr "پیش نمایش لاگ درون‌بُرد"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:59
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:59
 msgid "Import Master Data"
 msgstr "درون‌بُرد داده های اصلی"
 
@@ -23164,11 +23164,11 @@ msgstr "درون‌بُرد از Google Sheets"
 msgid "Import in Bulk"
 msgstr "درون‌بُرد به صورت عمده"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:410
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:410
 msgid "Importing Items and UOMs"
 msgstr "درون‌بُرد آیتم‌ها و UOMها"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:407
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:407
 msgid "Importing Parties and Addresses"
 msgstr "وارد کننده طرف‌ها و آدرس"
 
@@ -23247,8 +23247,8 @@ msgstr "در تولید"
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:40
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.json
 #: crm/doctype/email_campaign/email_campaign.json
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:66
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.js:66
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: manufacturing/doctype/bom_creator/bom_creator_list.js:7
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
@@ -24668,7 +24668,7 @@ msgid "Is Billable"
 msgstr "قابل پرداخت است"
 
 #. Label of the is_billing_contact (Check) field in DocType 'Contact'
-#: erpnext_integrations/custom/contact.json
+#: Goldfish_integrations/custom/contact.json
 msgid "Is Billing Contact"
 msgstr "تماس صورتحساب است"
 
@@ -24738,13 +24738,13 @@ msgstr "آیتم ارائه شده توسط مشتری است"
 
 #. Label of the is_day_book_data_imported (Check) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Is Day Book Data Imported"
 msgstr "آیا داده های کتاب روز وارد شده است"
 
 #. Label of the is_day_book_data_processed (Check) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Is Day Book Data Processed"
 msgstr "آیا داده های کتاب روز پردازش شده است"
 
@@ -24919,13 +24919,13 @@ msgstr "اجباری است"
 
 #. Label of the is_master_data_imported (Check) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Is Master Data Imported"
 msgstr "آیا داده اصلی درون‌بُرد شده است"
 
 #. Label of the is_master_data_processed (Check) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Is Master Data Processed"
 msgstr "داده های اصلی پردازش شده است"
 
@@ -26549,7 +26549,7 @@ msgstr "مورد: {0} در سیستم وجود ندارد"
 #: buying/doctype/request_for_quotation/request_for_quotation.json
 #: buying/doctype/supplier_quotation/supplier_quotation.json
 #: crm/doctype/opportunity/opportunity.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 #: manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
@@ -27377,7 +27377,7 @@ msgstr "مدیریت فروش را یاد بگیرید"
 #. 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 #, python-format
-msgid "Learn about <a href=\"https://docs.erpnext.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20ERPNext,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>"
+msgid "Learn about <a href=\"https://docs.Goldfish.com/docs/v13/user/manual/en/accounts/articles/common_party_accounting#:~:text=Common%20Party%20Accounting%20in%20Goldfish,Invoice%20against%20a%20primary%20Supplier.\">Common Party</a>"
 msgstr ""
 
 #. Label of the leave_encashed (Select) field in DocType 'Employee'
@@ -27647,7 +27647,7 @@ msgstr ""
 msgid "Link Options"
 msgstr "گزینه های پیوند"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:15
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:15
 msgid "Link a new bank account"
 msgstr "پیوند یک حساب بانکی جدید"
 
@@ -28793,7 +28793,7 @@ msgstr "وضعیت تأهل"
 msgid "Mark As Closed"
 msgstr "علامت گذاری به عنوان بسته شده"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:323
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:323
 msgid "Mark as unresolved"
 msgstr "علامت گذاری به عنوان حل نشده"
 
@@ -28845,7 +28845,7 @@ msgid "Master"
 msgstr "مستر"
 
 #. Label of the master_data (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Master Data"
 msgstr "داده های اصلی"
 
@@ -29435,7 +29435,7 @@ msgstr "پیامی برای کاربران ارسال می شود تا وضعی�
 msgid "Messages greater than 160 characters will be split into multiple messages"
 msgstr "پیام های بیشتر از 160 کاراکتر به چند پیام تقسیم می شوند"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:123
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:123
 msgid "Meta Data"
 msgstr ""
 
@@ -33826,7 +33826,7 @@ msgid "Partially ordered"
 msgstr "تا حدی سفارش داده شده"
 
 #. Label of the parties (Attach) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Parties"
 msgstr "طرف‌ها"
 
@@ -35330,21 +35330,21 @@ msgid "Plaid Access Token"
 msgstr "توکن دسترسی شطرنجی"
 
 #. Label of the plaid_client_id (Data) field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Client ID"
 msgstr "شناسه مشتری Plaid"
 
 #. Label of the plaid_env (Select) field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Environment"
 msgstr "محیط شطرنجی"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:154
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:178
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:154
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:178
 msgid "Plaid Link Failed"
 msgstr "پیوند Plaid ناموفق بود"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:252
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:252
 msgid "Plaid Link Refresh Required"
 msgstr "بازخوانی پیوند شطرنجی مورد نیاز است"
 
@@ -35353,18 +35353,18 @@ msgid "Plaid Link Updated"
 msgstr "پیوند شطرنجی به روز شد"
 
 #. Label of the plaid_secret (Password) field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Secret"
 msgstr "راز شطرنجی"
 
 #. Label of a Link in the Accounting Workspace
 #. Name of a DocType
 #: accounts/workspace/accounting/accounting.json
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Settings"
 msgstr "تنظیمات شطرنجی"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:227
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:227
 msgid "Plaid transactions sync error"
 msgstr "خطای همگام سازی تراکنش های پرداخت شده"
 
@@ -35609,7 +35609,7 @@ msgstr "لطفاً با عملیات یا هزینه عملیاتی مبتنی �
 msgid "Please check the error message and take necessary actions to fix the error and then restart the reposting again."
 msgstr "لطفاً پیام خطا را بررسی کنید و اقدامات لازم را برای رفع خطا انجام دهید و سپس ارسال مجدد را مجدداً راه‌اندازی کنید."
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_connector.py:65
+#: Goldfish_integrations/doctype/plaid_settings/plaid_connector.py:65
 msgid "Please check your Plaid client ID and secret values"
 msgstr "لطفاً شناسه مشتری Plaid و مقادیر مخفی خود را بررسی کنید"
 
@@ -35950,7 +35950,7 @@ msgstr "لطفا آیتم‌ها را از یادداشت تحویل بردار�
 msgid "Please rectify and try again."
 msgstr "لطفاً اصلاح کنید و دوباره امتحان کنید."
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:251
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:251
 msgid "Please refresh or reset the Plaid linking of the Bank {}."
 msgstr "لطفاً پیوند Plaid بانک {} را بازخوانی یا بازنشانی کنید."
 
@@ -36479,7 +36479,7 @@ msgstr "لطفاً {0} را برای آدرس {1} تنظیم کنید"
 msgid "Please set {0} in BOM Creator {1}"
 msgstr "لطفاً {0} را در BOM Creator {1} تنظیم کنید"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:97
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:97
 msgid "Please setup and enable a group account with the Account Type - {0} for the company {1}"
 msgstr ""
 
@@ -37673,7 +37673,7 @@ msgstr "مسئله"
 msgid "Procedure"
 msgstr "روش"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:75
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:75
 msgid "Process Day Book Data"
 msgstr "پردازش داده های کتاب روز"
 
@@ -37691,9 +37691,9 @@ msgstr "فرآیند حسابداری معوق"
 msgid "Process Description"
 msgstr "شرح فرایند"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:334
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:420
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:595
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:334
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:420
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:595
 msgid "Process Failed"
 msgstr "فرآیند ناموفق بود"
 
@@ -37733,7 +37733,7 @@ msgstr "گزارش از دست دادن فرآیند"
 msgid "Process Loss Value"
 msgstr "ارزش از دست دادن فرآیند"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:63
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:63
 msgid "Process Master Data"
 msgstr "پردازش داده های اصلی"
 
@@ -37793,7 +37793,7 @@ msgstr "BOM های پردازش شده"
 
 #. Label of the processed_files_section (Section Break) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Processed Files"
 msgstr "فایل های پردازش شده"
 
@@ -37802,15 +37802,15 @@ msgstr "فایل های پردازش شده"
 msgid "Processes"
 msgstr "فرآیندها"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:312
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:312
 msgid "Processing Chart of Accounts and Parties"
 msgstr "پردازش نمودار حساب ها و طرف‌ها"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:318
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:318
 msgid "Processing Items and UOMs"
 msgstr "پردازش آیتم‌ها و UOMها"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:315
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:315
 msgid "Processing Party Addresses"
 msgstr "پردازش آدرس های طرف"
 
@@ -37818,7 +37818,7 @@ msgstr "پردازش آدرس های طرف"
 msgid "Processing Sales! Please Wait..."
 msgstr "در حال پردازش فروش! لطفا صبر کنید..."
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:586
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:586
 msgid "Processing Vouchers"
 msgstr "پردازش کوپن ها"
 
@@ -40044,13 +40044,13 @@ msgid "Quick Stock Balance"
 msgstr "تراز موجودی سریع"
 
 #. Name of a DocType
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "QuickBooks Migrator"
 msgstr ""
 
 #. Label of the quickbooks_company_id (Data) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Quickbooks Company ID"
 msgstr "شناسه شرکت Quickbooks"
 
@@ -40733,8 +40733,8 @@ msgstr "خواندن 8"
 msgid "Reading 9"
 msgstr "خواندن 9"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:306
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:583
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:306
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:583
 msgid "Reading Uploaded File"
 msgstr "خواندن فایل آپلود شده"
 
@@ -41186,7 +41186,7 @@ msgid "Redemption Date"
 msgstr "تاریخ بازخرید"
 
 #. Label of the redirect_url (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Redirect URL"
 msgstr "تغییر مسیر URL"
 
@@ -41579,7 +41579,7 @@ msgstr "پیوند شطرنجی را تازه کنید"
 
 #. Label of the refresh_token (Small Text) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Refresh Token"
 msgstr "Refresh Token"
 
@@ -42520,7 +42520,7 @@ msgstr "بازنشانی"
 msgid "Reset Company Default Values"
 msgstr "بازنشانی مقادیر پیش فرض شرکت"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:19
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:19
 msgid "Reset Plaid Link"
 msgstr "بازنشانی پیوند Plaid"
 
@@ -45146,7 +45146,7 @@ msgstr "ذخیره"
 msgid "Save as Draft"
 msgstr "ذخیره به عنوان پیش نویس"
 
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.py:364
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.py:364
 msgid "Saving {0}"
 msgstr "در حال ذخیره {0}"
 
@@ -45317,7 +45317,7 @@ msgid "School/University"
 msgstr "مدرسه/دانشگاه"
 
 #. Label of the scope (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Scope"
 msgstr "محدوده"
 
@@ -45725,7 +45725,7 @@ msgstr "یک تامین کننده انتخاب کنید"
 msgid "Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only."
 msgstr "یک تامین کننده از تامین کنندگان پیش فرض موارد زیر انتخاب کنید. در صورت انتخاب، یک سفارش خرید فقط در برابر اقلام متعلق به تامین کننده منتخب انجام می شود."
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:156
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:156
 msgid "Select a company"
 msgstr "یک شرکت را انتخاب کنید"
 
@@ -47426,7 +47426,7 @@ msgstr "نمایش مقدار تجمعی"
 msgid "Show Disabled Warehouses"
 msgstr "نمایش انبارهای غیرفعال"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:306
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:306
 msgid "Show Document"
 msgstr "نمایش سند"
 
@@ -47546,7 +47546,7 @@ msgid "Show Taxes as Table in Print"
 msgstr "نمایش مالیات به عنوان جدول در چاپ"
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:480
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:296
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:296
 msgid "Show Traceback"
 msgstr "نمایش ردیابی"
 
@@ -48439,8 +48439,8 @@ msgstr ""
 #: crm/report/lead_details/lead_details.py:25
 #: crm/report/opportunity_summary_by_sales_stage/opportunity_summary_by_sales_stage.js:32
 #: crm/report/sales_pipeline_analytics/sales_pipeline_analytics.js:38
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 #: maintenance/doctype/maintenance_visit/maintenance_visit.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
@@ -50434,16 +50434,16 @@ msgstr "جابجایی بین حالت های پرداخت"
 msgid "Symbol"
 msgstr "سمبل"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:23
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:23
 msgid "Sync Now"
 msgstr "اکنون همگام سازی کنید"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:31
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:31
 msgid "Sync Started"
 msgstr "همگام سازی شروع شد"
 
 #. Label of the automatic_sync (Check) field in DocType 'Plaid Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Synchronize all accounts every hour"
 msgstr "هر ساعت همه حساب ها را همگام سازی کنید"
 
@@ -50520,9 +50520,9 @@ msgstr "هر ساعت همه حساب ها را همگام سازی کنید"
 #: crm/doctype/opportunity_lost_reason/opportunity_lost_reason.json
 #: crm/doctype/opportunity_type/opportunity_type.json
 #: crm/doctype/prospect/prospect.json
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: manufacturing/doctype/blanket_order/blanket_order.json
 #: manufacturing/doctype/bom_update_log/bom_update_log.json
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
@@ -50664,27 +50664,27 @@ msgid "Tag"
 msgstr "برچسب بزنید"
 
 #. Label of the tally_company (Data) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Tally Company"
 msgstr "شرکت تالی"
 
 #. Label of the tally_creditors_account (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Tally Creditors Account"
 msgstr "حساب اعتباردهندگان"
 
 #. Label of the tally_debtors_account (Data) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Tally Debtors Account"
 msgstr "حساب بدهکاران"
 
 #. Name of a DocType
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Tally Migration"
 msgstr "تالی مهاجرت"
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:34
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:34
 msgid "Tally Migration Error"
 msgstr "خطای مهاجرت Tally"
 
@@ -51912,7 +51912,7 @@ msgstr "سر حساب تحت بدهی یا حقوق صاحبان موجودی، 
 
 #. Description of the 'Accounts' (Section Break) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "The accounts are set by the system automatically but do confirm these defaults"
 msgstr "حساب ها توسط سیستم به طور خودکار تنظیم می شوند اما این پیش فرض ها را تأیید کنید"
 
@@ -52105,14 +52105,14 @@ msgid "The shares don't exist with the {0}"
 msgstr "اشتراک‌گذاری‌ها با {0} وجود ندارند"
 
 #: stock/stock_ledger.py:753
-msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.erpnext.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
+msgid "The stock for the item {0} in the {1} warehouse was negative on the {2}. You should create a positive entry {3} before the date {4} and time {5} to post the correct valuation rate. For more details, please read the <a href='https://docs.Goldfish.com/docs/user/manual/en/stock-adjustment-cogs-with-negative-stock'>documentation<a>."
 msgstr ""
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:615
 msgid "The stock has been reserved for the following Items and Warehouses, un-reserve the same to {0} the Stock Reconciliation: <br /><br /> {1}"
 msgstr "موجودی برای اقلام و انبارهای زیر رزرو شده است، همان را در {0} تطبیق موجودی لغو کنید: <br /><br /> {1}"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:32
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:32
 msgid "The sync has started in the background, please check the {0} list for new records."
 msgstr "همگام سازی در پس زمینه شروع شده است، لطفاً لیست {0} را برای رکوردهای جدید بررسی کنید."
 
@@ -52204,8 +52204,8 @@ msgid "There are only {0} asset created or linked to {1}. Please create or link 
 msgstr "فقط {0} دارایی ایجاد شده یا به {1} پیوند داده شده است. لطفاً {2} دارایی ها را با سند مربوطه ایجاد یا پیوند دهید."
 
 #: stock/doctype/item/item.js:938
-msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.erpnext.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
-msgstr "دو گزینه برای حفظ ارزش موجودی وجود دارد. FIFO (اولین ورود - اولین خروج) و میانگین متحرک. برای درک جزئیات این موضوع، لطفاً از هدف <a href='https://docs.erpnext.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average دیدن کنید. ='_blank'>ارزش اقلام، FIFO و میانگین متحرک.</a>"
+msgid "There are two options to maintain valuation of stock. FIFO (first in - first out) and Moving Average. To understand this topic in detail please visit <a href='https://docs.Goldfish.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>Item Valuation, FIFO and Moving Average.</a>"
+msgstr "دو گزینه برای حفظ ارزش موجودی وجود دارد. FIFO (اولین ورود - اولین خروج) و میانگین متحرک. برای درک جزئیات این موضوع، لطفاً از هدف <a href='https://docs.Goldfish.com/docs/v13/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average دیدن کنید. ='_blank'>ارزش اقلام، FIFO و میانگین متحرک.</a>"
 
 #: stock/report/item_variant_details/item_variant_details.py:25
 msgid "There aren't any item variants for the selected item"
@@ -52239,7 +52239,7 @@ msgstr "هیچ دسته ای در برابر {0} یافت نشد: {1}"
 msgid "There must be atleast 1 Finished Good in this Stock Entry"
 msgstr "باید حداقل 1 کالای تمام شده در این ثبت موجودی وجود داشته باشد"
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:153
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:153
 msgid "There was an error creating Bank Account while linking with Plaid."
 msgstr "هنگام پیوند با Plaid خطایی در ایجاد حساب بانکی روی داد."
 
@@ -52247,16 +52247,16 @@ msgstr "هنگام پیوند با Plaid خطایی در ایجاد حساب ب�
 msgid "There was an error saving the document."
 msgstr "هنگام ذخیره سند خطایی روی داد."
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:250
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:250
 msgid "There was an error syncing transactions."
 msgstr "هنگام همگام‌سازی تراکنش‌ها خطایی روی داد."
 
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:175
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.py:175
 msgid "There was an error updating Bank Account {} while linking with Plaid."
 msgstr "هنگام به‌روزرسانی حساب بانکی {} هنگام پیوند با Plaid خطایی روی داد."
 
 #: accounts/doctype/bank/bank.js:115
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:114
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.js:114
 msgid "There was an issue connecting to Plaid's authentication server. Check browser console for more information"
 msgstr "مشکلی در اتصال به سرور تأیید اعتبار Plaid وجود داشت. برای اطلاعات بیشتر کنسول مرورگر را بررسی کنید"
 
@@ -52303,8 +52303,8 @@ msgid "This action will stop future billing. Are you sure you want to cancel thi
 msgstr "این اقدام صورتحساب آینده را متوقف می‌کند. آیا مطمئن هستید که می خواهید این اشتراک را لغو کنید؟"
 
 #: accounts/doctype/bank_account/bank_account.js:35
-msgid "This action will unlink this account from any external service integrating ERPNext with your bank accounts. It cannot be undone. Are you certain ?"
-msgstr "این عمل پیوند این حساب را با هر سرویس خارجی که ERPNext را با حساب های بانکی شما یکپارچه می کند، لغو می کند. نمی توان آن را واگرد کرد. مطمئنی؟"
+msgid "This action will unlink this account from any external service integrating Goldfish with your bank accounts. It cannot be undone. Are you certain ?"
+msgstr "این عمل پیوند این حساب را با هر سرویس خارجی که Goldfish را با حساب های بانکی شما یکپارچه می کند، لغو می کند. نمی توان آن را واگرد کرد. مطمئنی؟"
 
 #: buying/doctype/supplier_scorecard/supplier_scorecard_dashboard.py:7
 msgid "This covers all scorecards tied to this Setup"
@@ -53239,7 +53239,7 @@ msgid "Toggle Recent Orders"
 msgstr "تغییر سفارش‌های اخیر"
 
 #. Label of the token_endpoint (Data) field in DocType 'QuickBooks Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Token Endpoint"
 msgstr "نقطه پایان توکن"
 
@@ -54853,7 +54853,7 @@ msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
 msgstr "ضریب تبدیل UOM مورد نیاز برای UOM: {0} در مورد: {1}"
 
 #. Description of the 'Default UOM' (Link) field in DocType 'Tally Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "UOM in case unspecified in imported data"
 msgstr "UOM در صورت نامشخص در داده های درون‌بُرد شده"
 
@@ -54863,7 +54863,7 @@ msgstr ""
 
 #. Label of the uoms (Attach) field in DocType 'Tally Migration'
 #. Label of the uoms (Table) field in DocType 'Item'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 #: stock/doctype/item/item.json
 msgid "UOMs"
 msgstr "UOM ها"
@@ -54933,7 +54933,7 @@ msgstr "سود / زیان سالهای مالی بسته نشده (اعتبار)
 
 #. Label of the undeposited_funds_account (Link) field in DocType 'QuickBooks
 #. Migrator'
-#: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
+#: Goldfish_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Undeposited Funds Account"
 msgstr "حساب وجوه سپرده نشده"
 
@@ -55131,7 +55131,7 @@ msgstr "ذخیره موجودی"
 msgid "Unreserving Stock..."
 msgstr "عدم رزرو موجودی..."
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.js:123
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.js:123
 msgid "Unresolve"
 msgstr ""
 
@@ -55178,7 +55178,7 @@ msgstr "تا زمان"
 msgid "Unverified"
 msgstr "تایید نشده"
 
-#: erpnext_integrations/utils.py:22
+#: Goldfish_integrations/utils.py:22
 msgid "Unverified Webhook Data"
 msgstr "داده های وب هوک تایید نشده"
 
@@ -55583,7 +55583,7 @@ msgstr "کاربر"
 
 #. Label of the section_break_5 (Section Break) field in DocType 'POS Closing
 #. Entry'
-#. Label of the erpnext_user (Section Break) field in DocType 'Employee'
+#. Label of the Goldfish_user (Section Break) field in DocType 'Employee'
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.json
 #: setup/doctype/employee/employee.json
 msgid "User Details"
@@ -56506,13 +56506,13 @@ msgstr "موجودی کوپن"
 #. Label of the vouchers (Attach) field in DocType 'Tally Migration'
 #: accounts/doctype/repost_accounting_ledger/repost_accounting_ledger.json
 #: accounts/doctype/repost_payment_ledger/repost_payment_ledger.json
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
 msgid "Vouchers"
 msgstr "کوپن"
 
 #: patches/v15_0/remove_exotel_integration.py:32
-msgid "WARNING: Exotel app has been separated from ERPNext, please install the app to continue using Exotel integration."
-msgstr "هشدار: برنامه Exotel از ERPNext جدا شده است، لطفاً برای ادامه استفاده از Exotel یکپارچه سازی، برنامه را نصب کنید."
+msgid "WARNING: Exotel app has been separated from Goldfish, please install the app to continue using Exotel integration."
+msgstr "هشدار: برنامه Exotel از Goldfish جدا شده است، لطفاً برای ادامه استفاده از Exotel یکپارچه سازی، برنامه را نصب کنید."
 
 #. Label of the wip_composite_asset (Link) field in DocType 'Purchase Invoice
 #. Item'
@@ -58095,11 +58095,11 @@ msgstr "یوتیوب"
 msgid "YouTube Interactions"
 msgstr "تعاملات یوتیوب"
 
-#. Description of the 'ERPNext Company' (Data) field in DocType 'Tally
+#. Description of the 'Goldfish Company' (Data) field in DocType 'Tally
 #. Migration'
-#: erpnext_integrations/doctype/tally_migration/tally_migration.json
-msgid "Your Company set in ERPNext"
-msgstr "شرکت شما در ERPNext تنظیم شده است"
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.json
+msgid "Your Company set in Goldfish"
+msgstr "شرکت شما در Goldfish تنظیم شده است"
 
 #: www/book_appointment/index.html:49
 msgid "Your Name (required)"
@@ -58158,8 +58158,8 @@ msgid "Zip File"
 msgstr "فایل فشرده"
 
 #: stock/reorder_item.py:367
-msgid "[Important] [ERPNext] Auto Reorder Errors"
-msgstr "[مهم] [ERPNext] خطاهای سفارش مجدد خودکار"
+msgid "[Important] [Goldfish] Auto Reorder Errors"
+msgstr "[مهم] [Goldfish] خطاهای سفارش مجدد خودکار"
 
 #: controllers/status_updater.py:250
 msgid "`Allow Negative rates for Items`"
@@ -58197,7 +58197,7 @@ msgstr "شرح"
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "development"
 msgstr "توسعه"
 
@@ -58374,7 +58374,7 @@ msgstr "نام ردیف آیتم‌های باندل محصول در سفارش 
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "production"
 msgstr "تولید"
 
@@ -58417,7 +58417,7 @@ msgstr "rgt"
 
 #. Option for the 'Plaid Environment' (Select) field in DocType 'Plaid
 #. Settings'
-#: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
+#: Goldfish_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "sandbox"
 msgstr "جعبه شنی"
 
@@ -59086,7 +59086,7 @@ msgstr "{} دارایی های مرتبط با آن را ارسال کرده ا�
 msgid "{} is a child company."
 msgstr "{} یک شرکت فرزند است."
 
-#: erpnext_integrations/doctype/tally_migration/tally_migration.py:710
+#: Goldfish_integrations/doctype/tally_migration/tally_migration.py:710
 msgid "{} of {}"
 msgstr "{} از {}"
 

@@ -1,6 +1,6 @@
-frappe.provide("erpnext.stock");
+frappe.provide("Goldfish.stock");
 
-erpnext.stock.ItemDashboard = class ItemDashboard {
+Goldfish.stock.ItemDashboard = class ItemDashboard {
 	constructor(opts) {
 		$.extend(this, opts);
 		this.make();
@@ -54,11 +54,11 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 			} else {
 				if (action === "Add") {
 					let rate = unescape($(this).attr("data-rate"));
-					erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, function () {
+					Goldfish.stock.move_item(item, null, warehouse, actual_qty, rate, function () {
 						me.refresh();
 					});
 				} else {
-					erpnext.stock.move_item(item, warehouse, null, actual_qty, null, function () {
+					Goldfish.stock.move_item(item, warehouse, null, actual_qty, null, function () {
 						me.refresh();
 					});
 				}
@@ -207,7 +207,7 @@ erpnext.stock.ItemDashboard = class ItemDashboard {
 	}
 };
 
-erpnext.stock.move_item = function (item, source, target, actual_qty, rate, callback) {
+Goldfish.stock.move_item = function (item, source, target, actual_qty, rate, callback) {
 	var dialog = new frappe.ui.Dialog({
 		title: target ? __("Add Item") : __("Move Item"),
 		fields: [

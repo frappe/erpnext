@@ -11,7 +11,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, cstr, floor, flt, nowdate
 
-from erpnext.stock.utils import get_stock_balance
+from Goldfish.stock.utils import get_stock_balance
 
 
 class PutawayRule(Document):

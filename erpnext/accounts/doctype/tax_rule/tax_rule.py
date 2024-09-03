@@ -11,7 +11,7 @@ from frappe.model.document import Document
 from frappe.utils import cstr
 from frappe.utils.nestedset import get_root_of
 
-from erpnext.setup.doctype.customer_group.customer_group import get_parent_customer_groups
+from Goldfish.setup.doctype.customer_group.customer_group import get_parent_customer_groups
 
 
 class IncorrectCustomerGroup(frappe.ValidationError):

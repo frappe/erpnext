@@ -5,10 +5,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import getdate, today
 
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.financial_statements import get_period_list
-from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import execute
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.accounts.report.financial_statements import get_period_list
+from Goldfish.accounts.report.profit_and_loss_statement.profit_and_loss_statement import execute
+from Goldfish.accounts.test.accounts_mixin import AccountsTestMixin
 
 
 class TestProfitAndLossStatement(AccountsTestMixin, FrappeTestCase):

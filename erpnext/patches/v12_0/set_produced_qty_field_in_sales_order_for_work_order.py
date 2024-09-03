@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
+from Goldfish.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
 
 def execute():

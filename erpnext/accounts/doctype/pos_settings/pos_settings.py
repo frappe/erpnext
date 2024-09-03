@@ -14,8 +14,8 @@ class POSSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.pos_field.pos_field import POSField
-		from erpnext.accounts.doctype.pos_search_fields.pos_search_fields import POSSearchFields
+		from Goldfish.accounts.doctype.pos_field.pos_field import POSField
+		from Goldfish.accounts.doctype.pos_search_fields.pos_search_fields import POSSearchFields
 
 		invoice_fields: DF.Table[POSField]
 		pos_search_fields: DF.Table[POSSearchFields]

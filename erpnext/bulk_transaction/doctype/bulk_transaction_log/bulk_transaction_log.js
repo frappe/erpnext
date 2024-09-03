@@ -26,7 +26,7 @@ frappe.ui.form.on("Bulk Transaction Log", {
 		if (frm.doc.failed) {
 			frm.add_custom_button(__("Retry Failed Transactions"), function () {
 				frappe.call({
-					method: "erpnext.utilities.bulk_transaction.retry",
+					method: "Goldfish.utilities.bulk_transaction.retry",
 					args: { date: frm.doc.date },
 				});
 			});

@@ -38,7 +38,7 @@ frappe.query_reports["Item-wise Purchase History"] = {
 			options: "Item",
 			get_query: () => {
 				return {
-					query: "erpnext.controllers.queries.item_query",
+					query: "Goldfish.controllers.queries.item_query",
 				};
 			},
 		},

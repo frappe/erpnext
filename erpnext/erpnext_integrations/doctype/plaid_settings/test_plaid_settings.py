@@ -7,7 +7,7 @@ import unittest
 import frappe
 from frappe.utils.response import json_handler
 
-from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
+from Goldfish.Goldfish_integrations.doctype.plaid_settings.plaid_settings import (
 	add_account_subtype,
 	add_account_type,
 	add_bank_accounts,

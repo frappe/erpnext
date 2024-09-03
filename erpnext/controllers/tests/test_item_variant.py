@@ -3,9 +3,9 @@ import unittest
 
 import frappe
 
-from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
-from erpnext.stock.doctype.item.test_item import set_item_variant_settings
-from erpnext.stock.doctype.quality_inspection.test_quality_inspection import (
+from Goldfish.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
+from Goldfish.stock.doctype.item.test_item import set_item_variant_settings
+from Goldfish.stock.doctype.quality_inspection.test_quality_inspection import (
 	create_quality_inspection_parameter,
 )
 

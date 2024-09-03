@@ -9,7 +9,7 @@ import frappe
 from frappe import _
 from frappe.utils import cstr, flt
 
-from erpnext.utilities.product import get_item_codes_by_attributes
+from Goldfish.utilities.product import get_item_codes_by_attributes
 
 
 class ItemVariantExistsError(frappe.ValidationError):
@@ -238,7 +238,7 @@ def enqueue_multiple_variant_creation(item, args, use_template_image=False):
 		return create_multiple_variants(item, args, use_template_image)
 	else:
 		frappe.enqueue(
-			"erpnext.controllers.item_variant.create_multiple_variants",
+			"Goldfish.controllers.item_variant.create_multiple_variants",
 			item=item,
 			args=args,
 			use_template_image=use_template_image,

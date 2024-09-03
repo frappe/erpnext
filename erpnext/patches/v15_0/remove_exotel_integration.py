@@ -23,14 +23,14 @@ def execute():
 
 def notify_existing_users():
 	click.secho(
-		"Exotel integration is moved to a separate app and will be removed from ERPNext in version-15.\n"
+		"Exotel integration is moved to a separate app and will be removed from Goldfish in version-15.\n"
 		"Please install the app to continue using the integration: https://github.com/frappe/exotel_integration",
 		fg="yellow",
 	)
 
 	notification = {
 		"subject": _(
-			"WARNING: Exotel app has been separated from ERPNext, please install the app to continue using Exotel integration."
+			"WARNING: Exotel app has been separated from Goldfish, please install the app to continue using Exotel integration."
 		),
 		"type": "Alert",
 	}

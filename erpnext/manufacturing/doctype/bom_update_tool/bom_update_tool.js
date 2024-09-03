@@ -5,14 +5,14 @@ frappe.ui.form.on("BOM Update Tool", {
 	setup: function (frm) {
 		frm.set_query("current_bom", function () {
 			return {
-				query: "erpnext.controllers.queries.bom",
+				query: "Goldfish.controllers.queries.bom",
 				filters: { name: "!" + frm.doc.new_bom },
 			};
 		});
 
 		frm.set_query("new_bom", function () {
 			return {
-				query: "erpnext.controllers.queries.bom",
+				query: "Goldfish.controllers.queries.bom",
 				filters: { name: "!" + frm.doc.current_bom },
 			};
 		});
@@ -46,7 +46,7 @@ frappe.ui.form.on("BOM Update Tool", {
 	replace: (frm) => {
 		if (frm.doc.current_bom && frm.doc.new_bom) {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.enqueue_replace_bom",
+				method: "Goldfish.manufacturing.doctype.bom_update_tool.bom_update_tool.enqueue_replace_bom",
 				freeze: true,
 				args: {
 					boms: {
@@ -65,7 +65,7 @@ frappe.ui.form.on("BOM Update Tool", {
 
 	update_latest_price_in_all_boms: (frm) => {
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.enqueue_update_cost",
+			method: "Goldfish.manufacturing.doctype.bom_update_tool.bom_update_tool.enqueue_update_cost",
 			freeze: true,
 			callback: (result) => {
 				if (result && result.message && !result.exc) {

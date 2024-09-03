@@ -70,7 +70,7 @@ frappe.query_reports["Stock Ledger Invariant Check"] = {
 			} else {
 				frappe.confirm(__(message), () => {
 					frappe.call({
-						method: "erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check.create_reposting_entries",
+						method: "Goldfish.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check.create_reposting_entries",
 						args: {
 							rows: selected_rows,
 							item_code: frappe.query_report.get_filter_values().item_code,

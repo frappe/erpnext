@@ -2,10 +2,10 @@ import unittest
 
 import frappe
 
-import erpnext
+import Goldfish
 
 
-@erpnext.allow_regional
+@Goldfish.allow_regional
 def test_method():
 	return "original"
 

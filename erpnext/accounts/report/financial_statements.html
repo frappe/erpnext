@@ -26,7 +26,7 @@
 
 <h3 class="text-center">{%= filters.fiscal_year %}</h3>
 <h5 class="text-center">
-	{%=  __("Currency") %} : {%= filters.presentation_currency || erpnext.get_currency(filters.company) %}
+	{%=  __("Currency") %} : {%= filters.presentation_currency || Goldfish.get_currency(filters.company) %}
 </h5>
 {% if (filters.from_date) { %}
 	<h5 class="text-center">

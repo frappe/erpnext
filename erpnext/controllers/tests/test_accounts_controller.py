@@ -8,13 +8,13 @@ from frappe.query_builder.functions import Sum
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, getdate, nowdate
 
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.party import get_party_account
-from erpnext.buying.doctype.purchase_order.test_purchase_order import prepare_data_for_internal_transfer
-from erpnext.stock.doctype.item.test_item import create_item
+from Goldfish.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from Goldfish.accounts.doctype.payment_entry.test_payment_entry import create_payment_entry
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.accounts.party import get_party_account
+from Goldfish.buying.doctype.purchase_order.test_purchase_order import prepare_data_for_internal_transfer
+from Goldfish.stock.doctype.item.test_item import create_item
 
 
 def make_customer(customer_name, currency=None):
@@ -807,7 +807,7 @@ class TestAccountsController(FrappeTestCase):
 
 	@change_settings("Stock Settings", {"allow_internal_transfer_at_arms_length_price": 1})
 	def test_16_internal_transfer_at_arms_length_price(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		from Goldfish.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 		prepare_data_for_internal_transfer()
 		company = "_Test Company with perpetual inventory"
@@ -1421,7 +1421,7 @@ class TestAccountsController(FrappeTestCase):
 
 	def setup_dimensions(self):
 		# create dimension
-		from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+		from Goldfish.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 			create_dimension,
 		)
 

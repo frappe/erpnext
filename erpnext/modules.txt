@@ -12,7 +12,7 @@ Assets
 Portal
 Maintenance
 Regional
-ERPNext Integrations
+Goldfish Integrations
 Quality Management
 Communication
 Telephony

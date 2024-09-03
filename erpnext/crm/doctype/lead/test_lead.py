@@ -7,15 +7,15 @@ import unittest
 import frappe
 from frappe.utils import random_string, today
 
-from erpnext.crm.doctype.lead.lead import make_opportunity
-from erpnext.crm.utils import get_linked_prospect
+from Goldfish.crm.doctype.lead.lead import make_opportunity
+from Goldfish.crm.utils import get_linked_prospect
 
 test_records = frappe.get_test_records("Lead")
 
 
 class TestLead(unittest.TestCase):
 	def test_make_customer(self):
-		from erpnext.crm.doctype.lead.lead import make_customer
+		from Goldfish.crm.doctype.lead.lead import make_customer
 
 		frappe.delete_doc_if_exists("Customer", "_Test Lead")
 
@@ -43,7 +43,7 @@ class TestLead(unittest.TestCase):
 			self.assertEqual(contact_doc.has_link(customer.doctype, customer.name), True)
 
 	def test_make_customer_from_organization(self):
-		from erpnext.crm.doctype.lead.lead import make_customer
+		from Goldfish.crm.doctype.lead.lead import make_customer
 
 		customer = make_customer("_T-Lead-00002")
 		self.assertEqual(customer.doctype, "Customer")

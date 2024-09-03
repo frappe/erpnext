@@ -6,12 +6,12 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, flt, now_datetime, nowdate
 
-import erpnext
-from erpnext.stock.doctype.delivery_trip.delivery_trip import (
+import Goldfish
+from Goldfish.stock.doctype.delivery_trip.delivery_trip import (
 	get_contact_and_address,
 	notify_customers,
 )
-from erpnext.tests.utils import create_test_contact_and_address
+from Goldfish.tests.utils import create_test_contact_and_address
 
 
 class TestDeliveryTrip(FrappeTestCase):
@@ -183,7 +183,7 @@ def create_delivery_trip(driver, address, contact=None):
 	delivery_trip = frappe.get_doc(
 		{
 			"doctype": "Delivery Trip",
-			"company": erpnext.get_default_company(),
+			"company": Goldfish.get_default_company(),
 			"departure_time": add_days(now_datetime(), 5),
 			"driver": driver.name,
 			"driver_address": address.name,

@@ -1,5 +1,5 @@
 # Python bytecode 2.7 (62211)
-# Embedded file name: /Users/anuragmishra/frappe-develop/apps/erpnext/erpnext/buying/report/subcontracted_item_to_be_received/test_subcontracted_item_to_be_received.py
+# Embedded file name: /Users/anuragmishra/frappe-develop/apps/Goldfish/Goldfish/buying/report/subcontracted_item_to_be_received/test_subcontracted_item_to_be_received.py
 # Compiled at: 2019-05-06 09:51:46
 # Decompiled by https://python-decompiler.com
 
@@ -9,17 +9,17 @@ import copy
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.buying.report.subcontracted_item_to_be_received.subcontracted_item_to_be_received import (
+from Goldfish.buying.report.subcontracted_item_to_be_received.subcontracted_item_to_be_received import (
 	execute,
 )
-from erpnext.controllers.tests.test_subcontracting_controller import (
+from Goldfish.controllers.tests.test_subcontracting_controller import (
 	get_rm_items,
 	get_subcontracting_order,
 	make_service_item,
 	make_stock_in_entry,
 	make_stock_transfer_entry,
 )
-from erpnext.subcontracting.doctype.subcontracting_order.subcontracting_order import (
+from Goldfish.subcontracting.doctype.subcontracting_order.subcontracting_order import (
 	make_subcontracting_receipt,
 )
 

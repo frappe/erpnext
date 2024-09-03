@@ -24,7 +24,7 @@ frappe.ui.form.on("Pick List", {
 
 		frm.set_query("work_order", () => {
 			return {
-				query: "erpnext.stock.doctype.pick_list.pick_list.get_pending_work_orders",
+				query: "Goldfish.stock.doctype.pick_list.pick_list.get_pending_work_orders",
 				filters: {
 					company: frm.doc.company,
 				},
@@ -40,13 +40,13 @@ frappe.ui.form.on("Pick List", {
 		});
 
 		frm.set_query("item_code", "locations", () => {
-			return erpnext.queries.item({ is_stock_item: 1 });
+			return Goldfish.queries.item({ is_stock_item: 1 });
 		});
 
 		frm.set_query("batch_no", "locations", (frm, cdt, cdn) => {
 			const row = locals[cdt][cdn];
 			return {
-				query: "erpnext.controllers.queries.get_batch_no",
+				query: "Goldfish.controllers.queries.get_batch_no",
 				filters: {
 					item_code: row.item_code,
 					warehouse: row.warehouse,
@@ -92,7 +92,7 @@ frappe.ui.form.on("Pick List", {
 		frm.trigger("add_get_items_button");
 		if (frm.doc.docstatus === 1) {
 			frappe
-				.xcall("erpnext.stock.doctype.pick_list.pick_list.target_document_exists", {
+				.xcall("Goldfish.stock.doctype.pick_list.pick_list.target_document_exists", {
 					pick_list_name: frm.doc.name,
 					purpose: frm.doc.purpose,
 				})
@@ -183,8 +183,8 @@ frappe.ui.form.on("Pick List", {
 							return;
 						}
 						frm.clear_table("locations");
-						erpnext.utils.map_current_doc({
-							method: "erpnext.manufacturing.doctype.work_order.work_order.create_pick_list",
+						Goldfish.utils.map_current_doc({
+							method: "Goldfish.manufacturing.doctype.work_order.work_order.create_pick_list",
 							target: frm,
 							source_name: frm.doc.work_order,
 						});
@@ -195,8 +195,8 @@ frappe.ui.form.on("Pick List", {
 			});
 	},
 	material_request: (frm) => {
-		erpnext.utils.map_current_doc({
-			method: "erpnext.stock.doctype.material_request.material_request.create_pick_list",
+		Goldfish.utils.map_current_doc({
+			method: "Goldfish.stock.doctype.material_request.material_request.create_pick_list",
 			target: frm,
 			source_name: frm.doc.material_request,
 		});
@@ -207,13 +207,13 @@ frappe.ui.form.on("Pick List", {
 	},
 	create_delivery_note: (frm) => {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.stock.doctype.pick_list.pick_list.create_delivery_note",
+			method: "Goldfish.stock.doctype.pick_list.pick_list.create_delivery_note",
 			frm: frm,
 		});
 	},
 	create_stock_entry: (frm) => {
 		frappe
-			.xcall("erpnext.stock.doctype.pick_list.pick_list.create_stock_entry", {
+			.xcall("Goldfish.stock.doctype.pick_list.pick_list.create_stock_entry", {
 				pick_list: frm.doc,
 			})
 			.then((stock_entry) => {
@@ -234,8 +234,8 @@ frappe.ui.form.on("Pick List", {
 			customer: frm.doc.customer,
 		};
 		frm.get_items_btn = frm.add_custom_button(__("Get Items"), () => {
-			erpnext.utils.map_current_doc({
-				method: "erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
+			Goldfish.utils.map_current_doc({
+				method: "Goldfish.selling.doctype.sales_order.sales_order.create_pick_list",
 				source_doctype: "Sales Order",
 				target: frm,
 				setters: {
@@ -257,7 +257,7 @@ frappe.ui.form.on("Pick List", {
 			prompt_qty: frm.doc.prompt_qty,
 			serial_no_field: "not_supported", // doesn't make sense for picklist without a separate field.
 		};
-		const barcode_scanner = new erpnext.utils.BarcodeScanner(opts);
+		const barcode_scanner = new Goldfish.utils.BarcodeScanner(opts);
 		barcode_scanner.process_scan();
 	},
 	create_stock_reservation_entries: (frm) => {
@@ -341,7 +341,7 @@ frappe.ui.form.on("Pick List Item", {
 
 	pick_serial_and_batch(frm, cdt, cdn) {
 		let item = locals[cdt][cdn];
-		let path = "assets/erpnext/js/utils/serial_no_batch_selector.js";
+		let path = "assets/Goldfish/js/utils/serial_no_batch_selector.js";
 
 		frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"]).then((r) => {
 			if (r.message && (r.message.has_batch_no || r.message.has_serial_no)) {
@@ -355,7 +355,7 @@ frappe.ui.form.on("Pick List Item", {
 					item.title = __("Select Serial and Batch");
 				}
 
-				new erpnext.SerialBatchPackageSelector(frm, item, (r) => {
+				new Goldfish.SerialBatchPackageSelector(frm, item, (r) => {
 					if (r) {
 						let qty = Math.abs(r.total_qty);
 						frappe.model.set_value(item.doctype, item.name, {
@@ -372,7 +372,7 @@ frappe.ui.form.on("Pick List Item", {
 
 function get_item_details(item_code, uom = null) {
 	if (item_code) {
-		return frappe.xcall("erpnext.stock.doctype.pick_list.pick_list.get_item_details", {
+		return frappe.xcall("Goldfish.stock.doctype.pick_list.pick_list.get_item_details", {
 			item_code,
 			uom,
 		});

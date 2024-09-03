@@ -4,11 +4,11 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import (
+from Goldfish.accounts.doctype.accounting_dimension.test_accounting_dimension import (
 	create_dimension,
 	disable_dimension,
 )
-from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
+from Goldfish.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import (
 	get_temporary_opening_account,
 )
 
@@ -114,7 +114,7 @@ class TestOpeningInvoiceCreationTool(FrappeTestCase):
 		# Check if missing debit account error raised
 		error_log = frappe.db.exists(
 			"Error Log",
-			{"error": ["like", "%erpnext.controllers.accounts_controller.AccountMissingError%"]},
+			{"error": ["like", "%Goldfish.controllers.accounts_controller.AccountMissingError%"]},
 		)
 		self.assertTrue(error_log)
 

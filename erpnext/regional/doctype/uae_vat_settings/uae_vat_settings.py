@@ -15,7 +15,7 @@ class UAEVATSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.regional.doctype.uae_vat_account.uae_vat_account import UAEVATAccount
+		from Goldfish.regional.doctype.uae_vat_account.uae_vat_account import UAEVATAccount
 
 		company: DF.Link
 		uae_vat_accounts: DF.Table[UAEVATAccount]

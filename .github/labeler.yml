@@ -1,55 +1,55 @@
 accounts:
-- erpnext/accounts/*
-- erpnext/controllers/accounts_controller.py
-- erpnext/controllers/taxes_and_totals.py
+- Goldfish/accounts/*
+- goldfishh/controllers/accounts_controller.py
+- goldfishh/controllers/taxes_and_totals.py
 
 stock:
-- erpnext/stock/*
-- erpnext/controllers/stock_controller.py
-- erpnext/controllers/item_variant.py
+- goldfishh/stock/*
+- goldfishh/controllers/stock_controller.py
+- goldfishh/controllers/item_variant.py
 
 assets:
-- erpnext/assets/*
+- goldfishh/assets/*
 
 regional:
-- erpnext/regional/*
+- goldfishh/regional/*
 
 selling:
-- erpnext/selling/*
-- erpnext/controllers/selling_controller.py
+- goldfishh/selling/*
+- goldfishh/controllers/selling_controller.py
 
 buying:
-- erpnext/buying/*
-- erpnext/controllers/buying_controller.py
+- goldfishh/buying/*
+- goldfishh/controllers/buying_controller.py
 
 support:
-- erpnext/support/*
+- goldfishh/support/*
 
 POS:
 - pos*
 
 ecommerce:
-- erpnext/e_commerce/*
+- goldfishh/e_commerce/*
 
 maintenance:
-- erpnext/maintenance/*
+- goldfishh/maintenance/*
 
 manufacturing:
-- erpnext/manufacturing/*
+- goldfishh/manufacturing/*
 
 crm:
-- erpnext/crm/*
+- goldfishh/crm/*
 
 HR:
-- erpnext/hr/*
+- goldfishh/hr/*
 
 payroll:
-- erpnext/payroll*
+- goldfishh/payroll*
 
 projects:
-- erpnext/projects/*
+- goldfishh/projects/*
 
 # Any python files modifed but no test files modified
 needs-tests:
-- any: ['erpnext/**/*.py']
-  all: ['!erpnext/**/test*.py']
+- any: ['goldfishh/**/*.py']
+  all: ['!goldfishh/**/test*.py']

@@ -20,7 +20,7 @@ from frappe.utils import (
 	to_timedelta,
 )
 
-from erpnext.support.doctype.issue.issue import get_holidays
+from Goldfish.support.doctype.issue.issue import get_holidays
 
 
 class WorkstationHolidayError(frappe.ValidationError):
@@ -44,7 +44,7 @@ class Workstation(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.manufacturing.doctype.workstation_working_hour.workstation_working_hour import (
+		from Goldfish.manufacturing.doctype.workstation_working_hour.workstation_working_hour import (
 			WorkstationWorkingHour,
 		)
 

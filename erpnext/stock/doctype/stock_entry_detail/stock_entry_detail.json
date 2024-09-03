@@ -328,7 +328,7 @@
    "label": "Accounting"
   },
   {
-   "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
+   "depends_on": "eval:cint(Goldfish.is_perpetual_inventory_enabled(parent.company))",
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "label": "Difference Account",
@@ -337,7 +337,7 @@
   },
   {
    "default": ":Company",
-   "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
+   "depends_on": "eval:cint(Goldfish.is_perpetual_inventory_enabled(parent.company))",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",

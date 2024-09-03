@@ -6,8 +6,8 @@ from frappe import _, qb
 from frappe.query_builder import Column, functions
 from frappe.utils import add_days, date_diff, flt, get_first_day, get_last_day, getdate, rounded
 
-from erpnext.accounts.report.financial_statements import get_period_list
-from erpnext.accounts.utils import get_fiscal_year
+from Goldfish.accounts.report.financial_statements import get_period_list
+from Goldfish.accounts.utils import get_fiscal_year
 
 
 class Deferred_Item:

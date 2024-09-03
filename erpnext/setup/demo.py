@@ -9,17 +9,17 @@ import frappe
 from frappe import _
 from frappe.utils import add_days, getdate
 
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
-from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
-from erpnext.setup.setup_wizard.operations.install_fixtures import create_bank_account
+from Goldfish.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from Goldfish.accounts.utils import get_fiscal_year
+from Goldfish.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+from Goldfish.selling.doctype.sales_order.sales_order import make_sales_invoice
+from Goldfish.setup.setup_wizard.operations.install_fixtures import create_bank_account
 
 
 def setup_demo_data():
 	from frappe.utils.telemetry import capture
 
-	capture("demo_data_creation_started", "erpnext")
+	capture("demo_data_creation_started", "Goldfish")
 	try:
 		company = create_demo_company()
 		process_masters()
@@ -28,9 +28,9 @@ def setup_demo_data():
 		frappe.publish_realtime("demo_data_complete")
 	except Exception:
 		frappe.log_error("Failed to create demo data")
-		capture("demo_data_creation_failed", "erpnext", properties={"exception": frappe.get_traceback()})
+		capture("demo_data_creation_failed", "Goldfish", properties={"exception": frappe.get_traceback()})
 		raise
-	capture("demo_data_creation_completed", "erpnext")
+	capture("demo_data_creation_completed", "Goldfish")
 
 
 @frappe.whitelist()
@@ -39,7 +39,7 @@ def clear_demo_data():
 
 	frappe.only_for("System Manager")
 
-	capture("demo_data_erased", "erpnext")
+	capture("demo_data_erased", "Goldfish")
 	try:
 		company = frappe.db.get_single_value("Global Defaults", "demo_company")
 		create_transaction_deletion_record(company)
@@ -95,7 +95,7 @@ def create_demo_record(doctype):
 
 def make_transactions(company):
 	frappe.db.set_single_value("Stock Settings", "allow_negative_stock", 1)
-	from erpnext.accounts.utils import FiscalYearError
+	from Goldfish.accounts.utils import FiscalYearError
 
 	try:
 		start_date = get_fiscal_year(date=getdate())[1]

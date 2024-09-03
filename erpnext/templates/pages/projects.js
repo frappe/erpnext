@@ -44,7 +44,7 @@ frappe.ready(function () {
 			url: "/",
 			dataType: "json",
 			data: {
-				cmd: "erpnext.templates.pages.projects.get_" + item + "_html",
+				cmd: "Goldfish.templates.pages.projects.get_" + item + "_html",
 				project: "{{ doc.name }}",
 				item_status: item_status,
 			},
@@ -79,7 +79,7 @@ frappe.ready(function () {
 			url: "/",
 			dataType: "json",
 			data: {
-				cmd: "erpnext.templates.pages.projects.get_" + item + "_html",
+				cmd: "Goldfish.templates.pages.projects.get_" + item + "_html",
 				project: "{{ doc.name }}",
 				start: start,
 				item_status: item_status,
@@ -102,7 +102,7 @@ frappe.ready(function () {
 		frappe.call({
 			btn: this,
 			type: "POST",
-			method: "erpnext.templates.pages.projects.set_" + item + "_status",
+			method: "Goldfish.templates.pages.projects.set_" + item + "_status",
 			args: args,
 			callback: function (r) {
 				if (r.exc) {

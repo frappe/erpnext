@@ -25,7 +25,7 @@ from frappe.utils.caching import redis_cache
 from frappe.utils.nestedset import get_ancestors_of
 from frappe.utils.safe_exec import get_safe_globals
 
-from erpnext.support.doctype.issue.issue import get_holidays
+from Goldfish.support.doctype.issue.issue import get_holidays
 
 
 class ServiceLevelAgreement(Document):
@@ -37,12 +37,12 @@ class ServiceLevelAgreement(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.support.doctype.pause_sla_on_status.pause_sla_on_status import PauseSLAOnStatus
-		from erpnext.support.doctype.service_day.service_day import ServiceDay
-		from erpnext.support.doctype.service_level_priority.service_level_priority import (
+		from Goldfish.support.doctype.pause_sla_on_status.pause_sla_on_status import PauseSLAOnStatus
+		from Goldfish.support.doctype.service_day.service_day import ServiceDay
+		from Goldfish.support.doctype.service_level_priority.service_level_priority import (
 			ServiceLevelPriority,
 		)
-		from erpnext.support.doctype.sla_fulfilled_on_status.sla_fulfilled_on_status import (
+		from Goldfish.support.doctype.sla_fulfilled_on_status.sla_fulfilled_on_status import (
 			SLAFulfilledOnStatus,
 		)
 

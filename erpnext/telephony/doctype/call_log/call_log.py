@@ -8,8 +8,8 @@ from frappe.contacts.doctype.contact.contact import get_contact_with_phone_numbe
 from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
 from frappe.model.document import Document
 
-from erpnext.crm.doctype.lead.lead import get_lead_with_phone_number
-from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup, strip_number
+from Goldfish.crm.doctype.lead.lead import get_lead_with_phone_number
+from Goldfish.crm.doctype.utils import get_scheduled_employees_for_popup, strip_number
 
 END_CALL_STATUSES = ["No Answer", "Completed", "Busy", "Failed"]
 ONGOING_CALL_STATUSES = ["Ringing", "In Progress"]

@@ -5,7 +5,7 @@
 import frappe
 from frappe.model.document import Document
 
-from erpnext.accounts.doctype.sales_taxes_and_charges_template.sales_taxes_and_charges_template import (
+from Goldfish.accounts.doctype.sales_taxes_and_charges_template.sales_taxes_and_charges_template import (
 	valdiate_taxes_and_charges_template,
 )
 
@@ -19,7 +19,7 @@ class PurchaseTaxesandChargesTemplate(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
+		from Goldfish.accounts.doctype.purchase_taxes_and_charges.purchase_taxes_and_charges import (
 			PurchaseTaxesandCharges,
 		)
 

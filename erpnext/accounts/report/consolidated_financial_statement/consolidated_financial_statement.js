@@ -56,7 +56,7 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			label: __("Start Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 			on_change: () => {
 				frappe.model.with_doc(
@@ -80,7 +80,7 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			label: __("End Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 			on_change: () => {
 				frappe.model.with_doc(
@@ -117,7 +117,7 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			fieldname: "presentation_currency",
 			label: __("Currency"),
 			fieldtype: "Select",
-			options: erpnext.get_presentation_currency_list(),
+			options: Goldfish.get_presentation_currency_list(),
 			default: frappe.defaults.get_user_default("Currency"),
 		},
 		{
@@ -143,12 +143,12 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			value = data.account_name || value;
 
 			column.link_onclick =
-				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
+				"Goldfish.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
 			column.is_tree = true;
 		}
 
 		if (data && data.account && column.apply_currency_formatter) {
-			data.currency = erpnext.get_currency(column.company_name);
+			data.currency = Goldfish.get_currency(column.company_name);
 		}
 
 		value = default_formatter(value, row, column, data);
@@ -162,7 +162,7 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 		return value;
 	},
 	onload: function () {
-		let fiscal_year = erpnext.utils.get_fiscal_year(frappe.datetime.get_today());
+		let fiscal_year = Goldfish.utils.get_fiscal_year(frappe.datetime.get_today());
 
 		frappe.model.with_doc("Fiscal Year", fiscal_year, function (r) {
 			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);

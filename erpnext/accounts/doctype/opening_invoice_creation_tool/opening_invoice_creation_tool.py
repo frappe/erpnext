@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.utils import flt, nowdate
 from frappe.utils.background_jobs import enqueue, is_job_enqueued
 
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
 
@@ -22,7 +22,7 @@ class OpeningInvoiceCreationTool(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.opening_invoice_creation_tool_item.opening_invoice_creation_tool_item import (
+		from Goldfish.accounts.doctype.opening_invoice_creation_tool_item.opening_invoice_creation_tool_item import (
 			OpeningInvoiceCreationToolItem,
 		)
 
@@ -207,7 +207,7 @@ class OpeningInvoiceCreationTool(Document):
 				frappe.scrub(row.party_type): row.party,
 				"is_pos": 0,
 				"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
-				"update_stock": 0,  # important: https://github.com/frappe/erpnext/pull/23559
+				"update_stock": 0,  # important: https://github.com/frappe/Goldfish/pull/23559
 				"invoice_number": row.invoice_number,
 				"disable_rounded_total": 1,
 			}

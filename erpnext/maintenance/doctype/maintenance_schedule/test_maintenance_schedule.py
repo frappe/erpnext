@@ -7,12 +7,12 @@ import frappe
 from frappe.utils import format_date
 from frappe.utils.data import add_days, formatdate, today
 
-from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
+from Goldfish.maintenance.doctype.maintenance_schedule.maintenance_schedule import (
 	get_serial_nos_from_schedule,
 	make_maintenance_visit,
 )
-from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+from Goldfish.stock.doctype.item.test_item import create_item
+from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 
 # test_records = frappe.get_test_records('Maintenance Schedule')
 

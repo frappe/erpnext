@@ -41,7 +41,7 @@ frappe.ui.form.on("Repost Payment Ledger", {
 
 			frm.add_custom_button(btn_label, () => {
 				frappe.call({
-					method: "erpnext.accounts.doctype.repost_payment_ledger.repost_payment_ledger.execute_repost_payment_ledger",
+					method: "Goldfish.accounts.doctype.repost_payment_ledger.repost_payment_ledger.execute_repost_payment_ledger",
 					args: {
 						docname: frm.doc.name,
 					},

@@ -7,7 +7,7 @@ from frappe import _, throw
 from frappe.utils import cint, cstr
 from frappe.utils.nestedset import NestedSet, get_ancestors_of, get_descendants_of
 
-import erpnext
+import Goldfish
 
 
 class RootNotEditable(frappe.ValidationError):
@@ -96,12 +96,12 @@ class Account(NestedSet):
 			self.set_onload("can_freeze_account", True)
 
 	def autoname(self):
-		from erpnext.accounts.utils import get_autoname_with_number
+		from Goldfish.accounts.utils import get_autoname_with_number
 
 		self.name = get_autoname_with_number(self.account_number, self.account_name, self.company)
 
 	def validate(self):
-		from erpnext.accounts.utils import validate_field_number
+		from Goldfish.accounts.utils import validate_field_number
 
 		if frappe.local.flags.allow_unverified_charts:
 			return
@@ -278,7 +278,7 @@ class Account(NestedSet):
 			throw(_("You are not authorized to set Frozen value"))
 
 	def validate_balance_must_be_debit_or_credit(self):
-		from erpnext.accounts.utils import get_balance_on
+		from Goldfish.accounts.utils import get_balance_on
 
 		if not self.get("__islocal") and self.balance_must_be:
 			account_balance = get_balance_on(self.name)
@@ -350,7 +350,7 @@ class Account(NestedSet):
 						# if currency explicitly specified by user, child will inherit. else, default currency will be used.
 						"account_currency": self.account_currency
 						if self.currency_explicitly_specified
-						else erpnext.get_company_currency(company),
+						else Goldfish.get_company_currency(company),
 						"parent_account": parent_acc_name_map[company],
 					}
 				)

@@ -1,0 +1,1 @@
+import { getCurrentUser } from '../utils/auth';

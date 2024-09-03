@@ -5,10 +5,10 @@ from frappe import _dict
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils.data import add_to_date, getdate
 
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.report.stock_analytics.stock_analytics import execute, get_period_date_ranges
+from Goldfish.accounts.utils import get_fiscal_year
+from Goldfish.stock.doctype.item.test_item import make_item
+from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from Goldfish.stock.report.stock_analytics.stock_analytics import execute, get_period_date_ranges
 
 
 def stock_analytics(filters):

@@ -9,7 +9,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import flt, getdate
 
-from erpnext.stock.doctype.item.item import get_item_defaults
+from Goldfish.stock.doctype.item.item import get_item_defaults
 
 
 class BlanketOrder(Document):
@@ -21,7 +21,7 @@ class BlanketOrder(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.manufacturing.doctype.blanket_order_item.blanket_order_item import BlanketOrderItem
+		from Goldfish.manufacturing.doctype.blanket_order_item.blanket_order_item import BlanketOrderItem
 
 		amended_from: DF.Link | None
 		blanket_order_type: DF.Literal["", "Selling", "Purchasing"]

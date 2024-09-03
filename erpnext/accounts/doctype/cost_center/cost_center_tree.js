@@ -5,14 +5,14 @@ frappe.treeview_settings["Cost Center"] = {
 		{
 			fieldname: "company",
 			fieldtype: "Select",
-			options: erpnext.utils.get_tree_options("company"),
+			options: Goldfish.utils.get_tree_options("company"),
 			label: __("Company"),
-			default: erpnext.utils.get_tree_default("company"),
+			default: Goldfish.utils.get_tree_default("company"),
 		},
 	],
 	root_label: "Cost Centers",
-	get_tree_nodes: "erpnext.accounts.utils.get_children",
-	add_tree_node: "erpnext.accounts.utils.add_cc",
+	get_tree_nodes: "Goldfish.accounts.utils.get_children",
+	add_tree_node: "Goldfish.accounts.utils.add_cc",
 	menu_items: [
 		{
 			label: __("New Company"),

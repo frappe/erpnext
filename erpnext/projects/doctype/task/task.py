@@ -26,7 +26,7 @@ class Task(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.projects.doctype.task_depends_on.task_depends_on import TaskDependsOn
+		from Goldfish.projects.doctype.task_depends_on.task_depends_on import TaskDependsOn
 
 		act_end_date: DF.Date | None
 		act_start_date: DF.Date | None
@@ -306,7 +306,7 @@ def check_if_child_exists(name):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_project(doctype, txt, searchfield, start, page_len, filters):
-	from erpnext.controllers.queries import get_match_cond
+	from Goldfish.controllers.queries import get_match_cond
 
 	meta = frappe.get_meta(doctype)
 	searchfields = meta.get_search_fields()

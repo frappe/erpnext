@@ -1,4 +1,4 @@
-erpnext.PointOfSale.ItemCart = class {
+Goldfish.PointOfSale.ItemCart = class {
 	constructor({ wrapper, events, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
@@ -115,7 +115,7 @@ erpnext.PointOfSale.ItemCart = class {
 	make_cart_numpad() {
 		this.$numpad_section = this.$component.find(".numpad-section");
 
-		this.number_pad = new erpnext.PointOfSale.NumberPad({
+		this.number_pad = new Goldfish.PointOfSale.NumberPad({
 			wrapper: this.$numpad_section,
 			events: {
 				numpad_event: this.on_numpad_event.bind(this),
@@ -346,7 +346,7 @@ erpnext.PointOfSale.ItemCart = class {
 						// if loyalty program then fetch loyalty points too
 						if (loyalty_program) {
 							frappe.call({
-								method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
+								method: "Goldfish.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
 								args: { customer, loyalty_program, silent: true },
 								callback: (r) => {
 									const { loyalty_points, conversion_factor } = r.message;
@@ -943,7 +943,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 			if (this.value && current_value != this.value && this.df.fieldname != "loyalty_points") {
 				frappe.call({
-					method: "erpnext.selling.page.point_of_sale.point_of_sale.set_customer_info",
+					method: "Goldfish.selling.page.point_of_sale.point_of_sale.set_customer_info",
 					args: {
 						fieldname: this.df.fieldname,
 						customer: current_customer,

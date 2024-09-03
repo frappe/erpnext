@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import format_date, get_datetime
 
-from erpnext.utilities.transaction_base import TransactionBase
+from Goldfish.utilities.transaction_base import TransactionBase
 
 
 class MaintenanceVisit(TransactionBase):
@@ -18,7 +18,7 @@ class MaintenanceVisit(TransactionBase):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.maintenance.doctype.maintenance_visit_purpose.maintenance_visit_purpose import (
+		from Goldfish.maintenance.doctype.maintenance_visit_purpose.maintenance_visit_purpose import (
 			MaintenanceVisitPurpose,
 		)
 

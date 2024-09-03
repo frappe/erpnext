@@ -19,7 +19,7 @@ frappe.ready(function() {
 			$("#footer-subscribe-email").attr('disabled', true);
 			$("#footer-subscribe-button").html("Sending...")
 				.attr("disabled", true);
-			erpnext.subscribe_to_newsletter({
+			Goldfish.subscribe_to_newsletter({
 				email: $("#footer-subscribe-email").val(),
 				callback: function(r) {
 					if(!r.exc) {

@@ -5,7 +5,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 
-from erpnext.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
+from Goldfish.stock.report.stock_ledger_invariant_check.stock_ledger_invariant_check import (
 	get_data as stock_ledger_invariant_check,
 )
 

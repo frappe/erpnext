@@ -34,7 +34,7 @@ frappe.ui.form.on("Brand", {
 		frm.set_query("expense_account", "brand_defaults", function (doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
 			return {
-				query: "erpnext.controllers.queries.get_expense_account",
+				query: "Goldfish.controllers.queries.get_expense_account",
 				filters: { company: row.company },
 			};
 		});
@@ -63,7 +63,7 @@ frappe.ui.form.on("Brand", {
 		frm.set_query("income_account", "brand_defaults", function (doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
 			return {
-				query: "erpnext.controllers.queries.get_income_account",
+				query: "Goldfish.controllers.queries.get_income_account",
 				filters: { company: row.company },
 			};
 		});

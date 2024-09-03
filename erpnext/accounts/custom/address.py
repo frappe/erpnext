@@ -7,7 +7,7 @@ from frappe.contacts.doctype.address.address import (
 )
 
 
-class ERPNextAddress(Address):
+class GoldfishAddress(Address):
 	def validate(self):
 		self.validate_reference()
 		self.update_compnay_address()

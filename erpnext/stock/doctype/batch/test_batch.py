@@ -9,19 +9,19 @@ from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cint, flt
 from frappe.utils.data import add_to_date, getdate
 
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.stock.doctype.batch.batch import get_batch_qty
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from Goldfish.stock.doctype.batch.batch import get_batch_qty
+from Goldfish.stock.doctype.item.test_item import make_item
+from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from Goldfish.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import (
 	BatchNegativeStockError,
 )
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+from Goldfish.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 )
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.get_item_details import get_item_details
-from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from Goldfish.stock.get_item_details import get_item_details
+from Goldfish.stock.serial_batch_bundle import SerialBatchCreation
 
 
 class TestBatch(FrappeTestCase):
@@ -33,7 +33,7 @@ class TestBatch(FrappeTestCase):
 
 	@classmethod
 	def make_batch_item(cls, item_name=None):
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		if not frappe.db.exists(item_name):
 			return make_item(item_name, dict(has_batch_no=1, create_new_batch=1, is_stock_item=1))
@@ -287,7 +287,7 @@ class TestBatch(FrappeTestCase):
 	def test_batch_split(self):
 		"""Test batch splitting"""
 		receipt = self.test_purchase_receipt()
-		from erpnext.stock.doctype.batch.batch import split_batch
+		from Goldfish.stock.doctype.batch.batch import split_batch
 
 		batch_no = get_batch_from_bundle(receipt.items[0].serial_and_batch_bundle)
 

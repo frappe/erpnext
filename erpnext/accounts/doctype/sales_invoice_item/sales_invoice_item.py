@@ -7,8 +7,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import cint
 
-from erpnext.assets.doctype.asset.depreciation import get_disposal_account_and_cost_center
-from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
+from Goldfish.assets.doctype.asset.depreciation import get_disposal_account_and_cost_center
+from Goldfish.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
 
 
 class SalesInvoiceItem(Document):

@@ -8,9 +8,9 @@ frappe.treeview_settings["Account"] = {
 		{
 			fieldname: "company",
 			fieldtype: "Select",
-			options: erpnext.utils.get_tree_options("company"),
+			options: Goldfish.utils.get_tree_options("company"),
 			label: __("Company"),
-			default: erpnext.utils.get_tree_default("company"),
+			default: Goldfish.utils.get_tree_default("company"),
 			on_change: function () {
 				var me = frappe.treeview_settings["Account"].treeview;
 				var company = me.page.fields_dict.company.get_value();
@@ -18,7 +18,7 @@ frappe.treeview_settings["Account"] = {
 					frappe.throw(__("Please set a Company"));
 				}
 				frappe.call({
-					method: "erpnext.accounts.doctype.account.account.get_root_company",
+					method: "Goldfish.accounts.doctype.account.account.get_root_company",
 					args: {
 						company: company,
 					},
@@ -50,7 +50,7 @@ frappe.treeview_settings["Account"] = {
 		},
 	],
 	root_label: "Accounts",
-	get_tree_nodes: "erpnext.accounts.utils.get_children",
+	get_tree_nodes: "Goldfish.accounts.utils.get_children",
 	on_get_node: function (nodes, deep = false) {
 		if (frappe.boot.user.can_read.indexOf("GL Entry") == -1) return;
 
@@ -65,7 +65,7 @@ frappe.treeview_settings["Account"] = {
 		frappe.db.get_single_value("Accounts Settings", "show_balance_in_coa").then((value) => {
 			if (value) {
 				const get_balances = frappe.call({
-					method: "erpnext.accounts.utils.get_account_balances",
+					method: "Goldfish.accounts.utils.get_account_balances",
 					args: {
 						accounts: accounts,
 						company: cur_tree.args.company,
@@ -105,7 +105,7 @@ frappe.treeview_settings["Account"] = {
 			}
 		});
 	},
-	add_tree_node: "erpnext.accounts.utils.add_ac",
+	add_tree_node: "Goldfish.accounts.utils.add_ac",
 	menu_items: [
 		{
 			label: __("New Company"),
@@ -279,8 +279,8 @@ frappe.treeview_settings["Account"] = {
 			click: function (node, btn) {
 				frappe.route_options = {
 					account: node.label,
-					from_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
-					to_date: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
+					from_date: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
+					to_date: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 					company:
 						frappe.treeview_settings["Account"].treeview.page.fields_dict.company.get_value(),
 				};

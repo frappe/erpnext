@@ -61,7 +61,7 @@ frappe.query_reports["Stock and Account Value Comparison"] = {
 
 			frappe.confirm(__(message), () => {
 				frappe.call({
-					method: "erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
+					method: "Goldfish.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison.create_reposting_entries",
 					args: {
 						rows: selected_rows,
 						company: frappe.query_report.get_filter_values().company,

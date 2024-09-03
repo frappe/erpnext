@@ -18,7 +18,7 @@ class Bank(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.bank_transaction_mapping.bank_transaction_mapping import (
+		from Goldfish.accounts.doctype.bank_transaction_mapping.bank_transaction_mapping import (
 			BankTransactionMapping,
 		)
 

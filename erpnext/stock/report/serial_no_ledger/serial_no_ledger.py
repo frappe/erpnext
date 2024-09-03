@@ -6,8 +6,8 @@ import copy
 import frappe
 from frappe import _
 
-from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos as get_serial_nos_from_sle
-from erpnext.stock.stock_ledger import get_stock_ledger_entries
+from Goldfish.stock.doctype.serial_no.serial_no import get_serial_nos as get_serial_nos_from_sle
+from Goldfish.stock.stock_ledger import get_stock_ledger_entries
 
 BUYING_VOUCHER_TYPES = ["Purchase Invoice", "Purchase Receipt", "Subcontracting Receipt"]
 SELLING_VOUCHER_TYPES = ["Sales Invoice", "Delivery Note"]

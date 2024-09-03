@@ -1,5 +1,5 @@
 frappe.treeview_settings["BOM"] = {
-	get_tree_nodes: "erpnext.manufacturing.doctype.bom.bom.get_children",
+	get_tree_nodes: "Goldfish.manufacturing.doctype.bom.bom.get_children",
 	filters: [
 		{
 			fieldname: "bom",

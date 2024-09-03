@@ -14,7 +14,7 @@ class QualityGoal(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.quality_management.doctype.quality_goal_objective.quality_goal_objective import (
+		from Goldfish.quality_management.doctype.quality_goal_objective.quality_goal_objective import (
 			QualityGoalObjective,
 		)
 

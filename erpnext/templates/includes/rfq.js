@@ -76,7 +76,7 @@ rfq = class rfq {
 			frappe.freeze();
 			frappe.call({
 				type: "POST",
-				method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.create_supplier_quotation",
+				method: "Goldfish.buying.doctype.request_for_quotation.request_for_quotation.create_supplier_quotation",
 				args: {
 					doc: doc
 				},

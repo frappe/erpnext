@@ -7,8 +7,8 @@ from frappe import _
 from frappe.utils import flt
 from pypika import Order
 
-import erpnext
-from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (
+import Goldfish
+from Goldfish.accounts.report.item_wise_sales_register.item_wise_sales_register import (
 	add_sub_total_row,
 	add_total_row,
 	apply_group_by_conditions,
@@ -16,7 +16,7 @@ from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register i
 	get_group_by_and_display_fields,
 	get_tax_accounts,
 )
-from erpnext.accounts.report.utils import get_query_columns, get_values_for_columns
+from Goldfish.accounts.report.utils import get_query_columns, get_values_for_columns
 
 
 def execute(filters=None):
@@ -28,7 +28,7 @@ def _execute(filters=None, additional_table_columns=None):
 		filters = {}
 	columns = get_columns(additional_table_columns, filters)
 
-	company_currency = erpnext.get_company_currency(filters.company)
+	company_currency = Goldfish.get_company_currency(filters.company)
 
 	item_list = get_items(filters, additional_table_columns)
 	aii_account_map = get_aii_accounts()

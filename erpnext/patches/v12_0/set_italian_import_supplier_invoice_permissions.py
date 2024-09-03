@@ -4,7 +4,7 @@
 
 import frappe
 
-from erpnext.regional.italy.setup import add_permissions
+from Goldfish.regional.italy.setup import add_permissions
 
 
 def execute():

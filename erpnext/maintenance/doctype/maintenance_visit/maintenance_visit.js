@@ -1,12 +1,12 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.maintenance");
+frappe.provide("Goldfish.maintenance");
 frappe.ui.form.on("Maintenance Visit", {
 	setup: function (frm) {
-		frm.set_query("contact_person", erpnext.queries.contact_query);
-		frm.set_query("customer_address", erpnext.queries.address_query);
-		frm.set_query("customer", erpnext.queries.customer);
+		frm.set_query("contact_person", Goldfish.queries.contact_query);
+		frm.set_query("customer_address", Goldfish.queries.address_query);
+		frm.set_query("customer", Goldfish.queries.customer);
 	},
 	onload: function (frm) {
 		// filters for serial no based on item code
@@ -17,7 +17,7 @@ frappe.ui.form.on("Maintenance Visit", {
 			}
 			frappe
 				.call({
-					method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.get_serial_nos_from_schedule",
+					method: "Goldfish.maintenance.doctype.maintenance_schedule.maintenance_schedule.get_serial_nos_from_schedule",
 					args: {
 						schedule: frm.doc.maintenance_schedule,
 						item_code: item_code,
@@ -59,18 +59,18 @@ frappe.ui.form.on("Maintenance Visit", {
 		}
 	},
 	customer: function (frm) {
-		erpnext.utils.get_party_details(frm);
+		Goldfish.utils.get_party_details(frm);
 	},
 	customer_address: function (frm) {
-		erpnext.utils.get_address_display(frm, "customer_address", "address_display");
+		Goldfish.utils.get_address_display(frm, "customer_address", "address_display");
 	},
 	contact_person: function (frm) {
-		erpnext.utils.get_contact_details(frm);
+		Goldfish.utils.get_contact_details(frm);
 	},
 });
 
 // TODO commonify this code
-erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.form.Controller {
+Goldfish.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.form.Controller {
 	refresh() {
 		frappe.dynamic_link = { doc: this.frm.doc, fieldname: "customer", doctype: "Customer" };
 
@@ -84,8 +84,8 @@ erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.
 						frappe.msgprint(__("Please select Customer first"));
 						return;
 					}
-					erpnext.utils.map_current_doc({
-						method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
+					Goldfish.utils.map_current_doc({
+						method: "Goldfish.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 						source_doctype: "Maintenance Schedule",
 						target: me.frm,
 						setters: {
@@ -102,8 +102,8 @@ erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.
 			this.frm.add_custom_button(
 				__("Warranty Claim"),
 				function () {
-					erpnext.utils.map_current_doc({
-						method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
+					Goldfish.utils.map_current_doc({
+						method: "Goldfish.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
 						source_doctype: "Warranty Claim",
 						target: me.frm,
 						date_field: "complaint_date",
@@ -125,8 +125,8 @@ erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.
 						frappe.msgprint(__("Please select Customer first"));
 						return;
 					}
-					erpnext.utils.map_current_doc({
-						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_visit",
+					Goldfish.utils.map_current_doc({
+						method: "Goldfish.selling.doctype.sales_order.sales_order.make_maintenance_visit",
 						source_doctype: "Sales Order",
 						target: me.frm,
 						setters: {
@@ -145,4 +145,4 @@ erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.
 	}
 };
 
-extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({ frm: cur_frm }));
+extend_cscript(cur_frm.cscript, new Goldfish.maintenance.MaintenanceVisit({ frm: cur_frm }));

@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING, overload
 import frappe
 from frappe.utils import cint, flt
 
-import erpnext
+import Goldfish
 
 if TYPE_CHECKING:
-	from erpnext.stock.doctype.stock_entry.stock_entry import StockEntry
+	from Goldfish.stock.doctype.stock_entry.stock_entry import StockEntry
 
 
 @overload
@@ -52,7 +52,7 @@ def make_stock_entry(**args):
 	:do_not_save: Optional flag
 	:do_not_submit: Optional flag
 	"""
-	from erpnext.stock.serial_batch_bundle import SerialBatchCreation
+	from Goldfish.stock.serial_batch_bundle import SerialBatchCreation
 
 	def process_serial_numbers(serial_nos_list):
 		serial_nos_list = [
@@ -117,7 +117,7 @@ def make_stock_entry(**args):
 		if not args.item:
 			args.item = "_Test Item"
 
-	s.company = args.company or erpnext.get_default_company()
+	s.company = args.company or Goldfish.get_default_company()
 	s.add_to_transit = args.add_to_transit or 0
 	s.purchase_receipt_no = args.purchase_receipt_no
 	s.delivery_note_no = args.delivery_note_no

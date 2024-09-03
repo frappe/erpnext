@@ -17,7 +17,7 @@
   "tally_company",
   "default_uom",
   "column_break_8",
-  "erpnext_company",
+  "Goldfish_company",
   "processed_files_section",
   "chart_of_accounts",
   "parties",
@@ -95,10 +95,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Your Company set in ERPNext",
-   "fieldname": "erpnext_company",
+   "description": "Your Company set in Goldfish",
+   "fieldname": "Goldfish_company",
    "fieldtype": "Data",
-   "label": "ERPNext Company",
+   "label": "Goldfish Company",
    "read_only_depends_on": "eval:doc.is_master_data_processed==1"
   },
   {
@@ -256,7 +256,7 @@
  "links": [],
  "modified": "2024-03-27 13:10:51.146772",
  "modified_by": "Administrator",
- "module": "ERPNext Integrations",
+ "module": "Goldfish Integrations",
  "name": "Tally Migration",
  "owner": "Administrator",
  "permissions": [

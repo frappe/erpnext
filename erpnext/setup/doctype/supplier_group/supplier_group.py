@@ -16,7 +16,7 @@ class SupplierGroup(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.party_account.party_account import PartyAccount
+		from Goldfish.accounts.doctype.party_account.party_account import PartyAccount
 
 		accounts: DF.Table[PartyAccount]
 		is_group: DF.Check

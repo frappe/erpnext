@@ -3,14 +3,14 @@ import json
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.stock.utils import scan_barcode
+from Goldfish.stock.utils import scan_barcode
 
 
 class StockTestMixin:
 	"""Mixin to simplfy stock ledger tests, useful for all stock transactions."""
 
 	def make_item(self, item_code=None, properties=None, *args, **kwargs):
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		return make_item(item_code, properties, *args, **kwargs)
 

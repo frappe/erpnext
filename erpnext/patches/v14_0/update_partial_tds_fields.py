@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import nowdate
 
-from erpnext.accounts.utils import FiscalYearError, get_fiscal_year
+from Goldfish.accounts.utils import FiscalYearError, get_fiscal_year
 
 
 def execute():

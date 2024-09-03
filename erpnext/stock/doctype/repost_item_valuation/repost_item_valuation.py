@@ -12,10 +12,10 @@ from frappe.utils import cint, get_link_to_form, get_weekday, getdate, now, nowt
 from frappe.utils.user import get_users_with_role
 from rq.timeouts import JobTimeoutException
 
-import erpnext
-from erpnext.accounts.general_ledger import validate_accounting_period
-from erpnext.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
-from erpnext.stock.stock_ledger import (
+import Goldfish
+from Goldfish.accounts.general_ledger import validate_accounting_period
+from Goldfish.accounts.utils import get_future_stock_vouchers, repost_gle_for_stock_vouchers
+from Goldfish.stock.stock_ledger import (
 	get_affected_transactions,
 	get_items_to_be_repost,
 	repost_future_sle,
@@ -348,7 +348,7 @@ def repost_sl_entries(doc):
 
 
 def repost_gl_entries(doc):
-	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
+	if not cint(Goldfish.is_perpetual_inventory_enabled(doc.company)):
 		return
 
 	# directly modified transactions

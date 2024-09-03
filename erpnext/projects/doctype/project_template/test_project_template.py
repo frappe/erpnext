@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 
-from erpnext.projects.doctype.task.test_task import create_task
+from Goldfish.projects.doctype.task.test_task import create_task
 
 
 class TestProjectTemplate(unittest.TestCase):

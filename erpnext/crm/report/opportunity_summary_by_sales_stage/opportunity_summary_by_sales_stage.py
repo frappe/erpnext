@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from erpnext.setup.utils import get_exchange_rate
+from Goldfish.setup.utils import get_exchange_rate
 
 
 def execute(filters=None):

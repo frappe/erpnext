@@ -82,13 +82,13 @@ frappe.pages["warehouse-capacity-summary"].on_page_load = function (wrapper) {
 	frappe.require("item-dashboard.bundle.js", function () {
 		$(frappe.render_template("warehouse_capacity_summary_header")).appendTo(page.main);
 
-		page.capacity_dashboard = new erpnext.stock.ItemDashboard({
+		page.capacity_dashboard = new Goldfish.stock.ItemDashboard({
 			page_name: "warehouse-capacity-summary",
 			page_length: 10,
 			parent: page.main,
 			sort_by: "stock_capacity",
 			sort_order: "desc",
-			method: "erpnext.stock.dashboard.warehouse_capacity_dashboard.get_data",
+			method: "Goldfish.stock.dashboard.warehouse_capacity_dashboard.get_data",
 			template: "warehouse_capacity_summary",
 		});
 

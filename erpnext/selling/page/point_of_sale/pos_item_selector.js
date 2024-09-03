@@ -1,6 +1,6 @@
 import onScan from "onscan.js";
 
-erpnext.PointOfSale.ItemSelector = class {
+Goldfish.PointOfSale.ItemSelector = class {
 	// eslint-disable-next-line no-unused-vars
 	constructor({ frm, wrapper, events, pos_profile, settings }) {
 		this.wrapper = wrapper;
@@ -59,7 +59,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		!item_group && (item_group = this.parent_item_group);
 
 		return frappe.call({
-			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
+			method: "Goldfish.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
 			args: { start, page_length, price_list, item_group, search_term, pos_profile },
 		});
@@ -164,7 +164,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				},
 				get_query: function () {
 					return {
-						query: "erpnext.selling.page.point_of_sale.point_of_sale.item_group_query",
+						query: "Goldfish.selling.page.point_of_sale.point_of_sale.item_group_query",
 						filters: {
 							pos_profile: doc ? doc.pos_profile : "",
 						},

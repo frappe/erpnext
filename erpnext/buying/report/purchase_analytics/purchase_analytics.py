@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 
-from erpnext.selling.report.sales_analytics.sales_analytics import Analytics
+from Goldfish.selling.report.sales_analytics.sales_analytics import Analytics
 
 
 def execute(filters=None):

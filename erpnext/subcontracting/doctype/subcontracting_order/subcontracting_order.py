@@ -6,11 +6,11 @@ from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import flt
 
-from erpnext.buying.doctype.purchase_order.purchase_order import is_subcontracting_order_created
-from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.controllers.subcontracting_controller import SubcontractingController
-from erpnext.stock.stock_balance import update_bin_qty
-from erpnext.stock.utils import get_bin
+from Goldfish.buying.doctype.purchase_order.purchase_order import is_subcontracting_order_created
+from Goldfish.buying.utils import check_on_hold_or_closed_status
+from Goldfish.controllers.subcontracting_controller import SubcontractingController
+from Goldfish.stock.stock_balance import update_bin_qty
+from Goldfish.stock.utils import get_bin
 
 
 class SubcontractingOrder(SubcontractingController):
@@ -22,16 +22,16 @@ class SubcontractingOrder(SubcontractingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.landed_cost_taxes_and_charges.landed_cost_taxes_and_charges import (
+		from Goldfish.stock.doctype.landed_cost_taxes_and_charges.landed_cost_taxes_and_charges import (
 			LandedCostTaxesandCharges,
 		)
-		from erpnext.subcontracting.doctype.subcontracting_order_item.subcontracting_order_item import (
+		from Goldfish.subcontracting.doctype.subcontracting_order_item.subcontracting_order_item import (
 			SubcontractingOrderItem,
 		)
-		from erpnext.subcontracting.doctype.subcontracting_order_service_item.subcontracting_order_service_item import (
+		from Goldfish.subcontracting.doctype.subcontracting_order_service_item.subcontracting_order_service_item import (
 			SubcontractingOrderServiceItem,
 		)
-		from erpnext.subcontracting.doctype.subcontracting_order_supplied_item.subcontracting_order_supplied_item import (
+		from Goldfish.subcontracting.doctype.subcontracting_order_supplied_item.subcontracting_order_supplied_item import (
 			SubcontractingOrderSuppliedItem,
 		)
 

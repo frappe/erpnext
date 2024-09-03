@@ -5,7 +5,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import getdate
 
-from erpnext.accounts.doctype.subscription.subscription import DateTimeLikeObject, process_all
+from Goldfish.accounts.doctype.subscription.subscription import DateTimeLikeObject, process_all
 
 
 class ProcessSubscription(Document):

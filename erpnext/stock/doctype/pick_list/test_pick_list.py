@@ -5,19 +5,19 @@ import frappe
 from frappe import _dict
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.selling.doctype.sales_order.sales_order import create_pick_list
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.doctype.item.test_item import create_item, make_item
-from erpnext.stock.doctype.packed_item.test_packed_item import create_product_bundle
-from erpnext.stock.doctype.pick_list.pick_list import create_delivery_note
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+from Goldfish.selling.doctype.sales_order.sales_order import create_pick_list
+from Goldfish.selling.doctype.sales_order.test_sales_order import make_sales_order
+from Goldfish.stock.doctype.item.test_item import create_item, make_item
+from Goldfish.stock.doctype.packed_item.test_packed_item import create_product_bundle
+from Goldfish.stock.doctype.pick_list.pick_list import create_delivery_note
+from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from Goldfish.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_batch_from_bundle,
 	get_serial_nos_from_bundle,
 	make_serial_batch_bundle,
 )
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import (
+from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from Goldfish.stock.doctype.stock_reconciliation.stock_reconciliation import (
 	EmptyStockReconciliationItemsError,
 )
 

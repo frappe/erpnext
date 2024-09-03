@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.setup.install import setup_currency_exchange
+from Goldfish.setup.install import setup_currency_exchange
 
 
 def execute():

@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 
-from erpnext.accounts.doctype.payment_request.payment_request import get_amount
+from Goldfish.accounts.doctype.payment_request.payment_request import get_amount
 
 
 def get_context(context):
@@ -39,7 +39,7 @@ def get_context(context):
 		customer_loyalty_program = frappe.db.get_value("Customer", context.doc.customer, "loyalty_program")
 
 		if customer_loyalty_program:
-			from erpnext.accounts.doctype.loyalty_program.loyalty_program import (
+			from Goldfish.accounts.doctype.loyalty_program.loyalty_program import (
 				get_loyalty_program_details_with_points,
 			)
 

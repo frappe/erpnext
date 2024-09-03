@@ -7,7 +7,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: commitcheck-erpnext-${{ github.event.number }}
+  group: commitcheck-Goldfish-${{ github.event.number }}
   cancel-in-progress: true
 
 jobs:

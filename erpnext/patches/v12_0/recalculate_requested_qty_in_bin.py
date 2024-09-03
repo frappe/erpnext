@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
+from Goldfish.stock.stock_balance import get_indented_qty, update_bin_qty
 
 
 def execute():

@@ -2,12 +2,12 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import flt, nowdate
 
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.selling.report.sales_partner_target_variance_based_on_item_group.sales_partner_target_variance_based_on_item_group import (
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.accounts.utils import get_fiscal_year
+from Goldfish.selling.report.sales_partner_target_variance_based_on_item_group.sales_partner_target_variance_based_on_item_group import (
 	execute,
 )
-from erpnext.selling.report.sales_person_target_variance_based_on_item_group.test_sales_person_target_variance_based_on_item_group import (
+from Goldfish.selling.report.sales_person_target_variance_based_on_item_group.test_sales_person_target_variance_based_on_item_group import (
 	create_sales_target_doc,
 	create_target_distribution,
 )

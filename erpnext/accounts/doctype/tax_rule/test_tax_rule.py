@@ -5,9 +5,9 @@ import unittest
 
 import frappe
 
-from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
-from erpnext.crm.doctype.opportunity.opportunity import make_quotation
-from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from Goldfish.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule, get_tax_template
+from Goldfish.crm.doctype.opportunity.opportunity import make_quotation
+from Goldfish.crm.doctype.opportunity.test_opportunity import make_opportunity
 
 test_records = frappe.get_test_records("Tax Rule")
 

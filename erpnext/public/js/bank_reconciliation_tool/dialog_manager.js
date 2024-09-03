@@ -1,6 +1,6 @@
-frappe.provide("erpnext.accounts.bank_reconciliation");
+frappe.provide("Goldfish.accounts.bank_reconciliation");
 
-erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
+Goldfish.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	constructor(
 		company,
 		bank_account,
@@ -69,7 +69,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 
 	get_linked_vouchers(document_types) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_linked_payments",
+			method: "Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_linked_payments",
 			args: {
 				bank_transaction_name: this.bank_transaction_name,
 				document_types: document_types,
@@ -199,7 +199,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 		];
 
 		frappe.call({
-			method: "erpnext.accounts.doctype.bank_transaction.bank_transaction.get_doctypes_for_bank_reconciliation",
+			method: "Goldfish.accounts.doctype.bank_transaction.bank_transaction.get_doctypes_for_bank_reconciliation",
 			callback: (r) => {
 				$.each(r.message, (_i, entry) => {
 					if (_i % 3 == 0) {
@@ -484,7 +484,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			});
 		});
 		frappe.call({
-			method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.reconcile_vouchers",
+			method: "Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.reconcile_vouchers",
 			args: {
 				bank_transaction_name: this.bank_transaction.name,
 				vouchers: vouchers,
@@ -500,7 +500,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 
 	add_payment_entry(values) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
+			method: "Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
 			args: {
 				bank_transaction_name: this.bank_transaction.name,
 				reference_number: values.reference_number,
@@ -525,7 +525,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 
 	add_journal_entry(values) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
+			method: "Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
 			args: {
 				bank_transaction_name: this.bank_transaction.name,
 				reference_number: values.reference_number,
@@ -550,7 +550,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 
 	update_transaction(values) {
 		frappe.call({
-			method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.update_bank_transaction",
+			method: "Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.update_bank_transaction",
 			args: {
 				bank_transaction_name: this.bank_transaction.name,
 				reference_number: values.reference_number,
@@ -570,7 +570,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 		const values = this.dialog.get_values(true);
 		if (values.document_type == "Payment Entry") {
 			frappe.call({
-				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
+				method: "Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
 				args: {
 					bank_transaction_name: this.bank_transaction.name,
 					reference_number: values.reference_number,
@@ -590,7 +590,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			});
 		} else {
 			frappe.call({
-				method: "erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
+				method: "Goldfish.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
 				args: {
 					bank_transaction_name: this.bank_transaction.name,
 					reference_number: values.reference_number,

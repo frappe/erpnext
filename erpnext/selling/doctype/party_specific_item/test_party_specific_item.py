@@ -4,7 +4,7 @@
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.controllers.queries import item_query
+from Goldfish.controllers.queries import item_query
 
 test_dependencies = ["Item", "Customer", "Supplier"]
 

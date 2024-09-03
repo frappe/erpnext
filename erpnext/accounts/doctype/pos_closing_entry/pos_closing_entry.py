@@ -6,11 +6,11 @@ import frappe
 from frappe import _
 from frappe.utils import flt, get_datetime
 
-from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
+from Goldfish.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import (
 	consolidate_pos_invoices,
 	unconsolidate_pos_invoices,
 )
-from erpnext.controllers.status_updater import StatusUpdater
+from Goldfish.controllers.status_updater import StatusUpdater
 
 
 class POSClosingEntry(StatusUpdater):
@@ -22,13 +22,13 @@ class POSClosingEntry(StatusUpdater):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.pos_closing_entry_detail.pos_closing_entry_detail import (
+		from Goldfish.accounts.doctype.pos_closing_entry_detail.pos_closing_entry_detail import (
 			POSClosingEntryDetail,
 		)
-		from erpnext.accounts.doctype.pos_closing_entry_taxes.pos_closing_entry_taxes import (
+		from Goldfish.accounts.doctype.pos_closing_entry_taxes.pos_closing_entry_taxes import (
 			POSClosingEntryTaxes,
 		)
-		from erpnext.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
+		from Goldfish.accounts.doctype.pos_invoice_reference.pos_invoice_reference import (
 			POSInvoiceReference,
 		)
 
@@ -118,7 +118,7 @@ class POSClosingEntry(StatusUpdater):
 	def get_payment_reconciliation_details(self):
 		currency = frappe.get_cached_value("Company", self.company, "default_currency")
 		return frappe.render_template(
-			"erpnext/accounts/doctype/pos_closing_entry/closing_voucher_details.html",
+			"Goldfish/accounts/doctype/pos_closing_entry/closing_voucher_details.html",
 			{"data": self, "currency": currency},
 		)
 

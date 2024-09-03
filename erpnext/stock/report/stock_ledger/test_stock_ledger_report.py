@@ -5,7 +5,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, today
 
-from erpnext.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
+from Goldfish.maintenance.doctype.maintenance_schedule.test_maintenance_schedule import (
 	make_serial_item_with_serial,
 )
 

@@ -4,7 +4,7 @@
 
 from frappe import _
 
-from erpnext.stock.report.delayed_item_report.delayed_item_report import DelayedItemReport
+from Goldfish.stock.report.delayed_item_report.delayed_item_report import DelayedItemReport
 
 
 def execute(filters=None):

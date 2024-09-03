@@ -1,5 +1,5 @@
 [project]
-name = "erpnext"
+name = "Goldfish"
 authors = [
     { name = "Frappe Technologies Pvt Ltd", email = "developers@frappe.io"}
 ]
@@ -70,6 +70,6 @@ docstring-code-format = true
 
 
 [project.urls]
-Homepage = "https://erpnext.com/"
-Repository = "https://github.com/frappe/erpnext.git"
-"Bug Reports" = "https://github.com/frappe/erpnext/issues"
+Homepage = "https://Goldfish.com/"
+Repository = "https://github.com/frappe/Goldfish.git"
+"Bug Reports" = "https://github.com/frappe/Goldfish/issues"

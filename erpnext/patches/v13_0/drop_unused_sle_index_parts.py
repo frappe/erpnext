@@ -1,6 +1,6 @@
 import frappe
 
-from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import on_doctype_update
+from Goldfish.stock.doctype.stock_ledger_entry.stock_ledger_entry import on_doctype_update
 
 
 def execute():

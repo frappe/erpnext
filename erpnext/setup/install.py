@@ -8,13 +8,13 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.utils import cint
 
-from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
-from erpnext.setup.doctype.incoterm.incoterm import create_incoterms
+from Goldfish.setup.default_energy_point_rules import get_default_energy_point_rules
+from Goldfish.setup.doctype.incoterm.incoterm import create_incoterms
 
 from .default_success_action import get_default_success_action
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
-	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
+	<a style="color: #888" href="http://Goldfish.org">Goldfish</a></div>"""
 
 
 def after_install():
@@ -38,7 +38,7 @@ def after_install():
 
 def check_setup_wizard_not_completed():
 	if cint(frappe.db.get_single_value("System Settings", "setup_complete") or 0):
-		message = """ERPNext can only be installed on a fresh site where the setup wizard is not completed.
+		message = """Goldfish can only be installed on a fresh site where the setup wizard is not completed.
 You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"""
 		frappe.throw(message)  # nosemgrep
 
@@ -156,11 +156,11 @@ def add_standard_navbar_items():
 	__ = _("User Forum")
 	__ = _("Report an Issue")
 
-	erpnext_navbar_items = [
+	Goldfish_navbar_items = [
 		{
 			"item_label": "Documentation",
 			"item_type": "Route",
-			"route": "https://docs.erpnext.com/",
+			"route": "https://docs.Goldfish.com/",
 			"is_standard": 1,
 		},
 		{
@@ -178,7 +178,7 @@ def add_standard_navbar_items():
 		{
 			"item_label": "Report an Issue",
 			"item_type": "Route",
-			"route": "https://github.com/frappe/erpnext/issues",
+			"route": "https://github.com/frappe/Goldfish/issues",
 			"is_standard": 1,
 		},
 	]
@@ -186,7 +186,7 @@ def add_standard_navbar_items():
 	current_navbar_items = navbar_settings.help_dropdown
 	navbar_settings.set("help_dropdown", [])
 
-	for item in erpnext_navbar_items:
+	for item in Goldfish_navbar_items:
 		current_labels = [item.get("item_label") for item in current_navbar_items]
 		if item.get("item_label") not in current_labels:
 			navbar_settings.append("help_dropdown", item)
@@ -208,7 +208,7 @@ def add_standard_navbar_items():
 
 
 def add_app_name():
-	frappe.db.set_single_value("System Settings", "app_name", "ERPNext")
+	frappe.db.set_single_value("System Settings", "app_name", "Goldfish")
 
 
 def update_roles():

@@ -23,20 +23,20 @@ from frappe.utils import (
 )
 from pypika import functions as fn
 
-from erpnext.manufacturing.doctype.bom.bom import (
+from Goldfish.manufacturing.doctype.bom.bom import (
 	get_bom_item_rate,
 	get_bom_items_as_dict,
 	validate_bom_no,
 )
-from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
+from Goldfish.manufacturing.doctype.manufacturing_settings.manufacturing_settings import (
 	get_mins_between_operations,
 )
-from erpnext.stock.doctype.batch.batch import make_batch
-from erpnext.stock.doctype.item.item import get_item_defaults, validate_end_of_life
-from erpnext.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
-from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
-from erpnext.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
-from erpnext.utilities.transaction_base import validate_uom_is_integer
+from Goldfish.stock.doctype.batch.batch import make_batch
+from Goldfish.stock.doctype.item.item import get_item_defaults, validate_end_of_life
+from Goldfish.stock.doctype.serial_no.serial_no import get_available_serial_nos, get_serial_nos
+from Goldfish.stock.stock_balance import get_planned_qty, update_bin_qty
+from Goldfish.stock.utils import get_bin, get_latest_stock_qty, validate_warehouse_company
+from Goldfish.utilities.transaction_base import validate_uom_is_integer
 
 
 class OverProductionError(frappe.ValidationError):
@@ -72,8 +72,8 @@ class WorkOrder(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.manufacturing.doctype.work_order_item.work_order_item import WorkOrderItem
-		from erpnext.manufacturing.doctype.work_order_operation.work_order_operation import (
+		from Goldfish.manufacturing.doctype.work_order_item.work_order_item import WorkOrderItem
+		from Goldfish.manufacturing.doctype.work_order_operation.work_order_operation import (
 			WorkOrderOperation,
 		)
 
@@ -386,7 +386,7 @@ class WorkOrder(Document):
 			self.db_set(fieldname, qty)
 			self.set_process_loss_qty()
 
-			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
+			from Goldfish.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
 			if self.sales_order and self.sales_order_item:
 				update_produced_qty_in_so_item(self.sales_order, self.sales_order_item)
@@ -693,7 +693,7 @@ class WorkOrder(Document):
 		if self.track_semi_finished_goods:
 			return
 
-		from erpnext.manufacturing.doctype.production_plan.production_plan import (
+		from Goldfish.manufacturing.doctype.production_plan.production_plan import (
 			get_reserved_qty_for_sub_assembly,
 		)
 
@@ -1761,7 +1761,7 @@ def get_reserved_qty_for_production(
 
 @frappe.whitelist()
 def make_stock_return_entry(work_order):
-	from erpnext.stock.doctype.stock_entry.stock_entry import get_available_materials
+	from Goldfish.stock.doctype.stock_entry.stock_entry import get_available_materials
 
 	non_consumed_items = get_available_materials(work_order)
 	if not non_consumed_items:

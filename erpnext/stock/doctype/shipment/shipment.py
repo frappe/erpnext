@@ -8,7 +8,7 @@ from frappe.contacts.doctype.contact.contact import get_default_contact
 from frappe.model.document import Document
 from frappe.utils import flt, get_time
 
-from erpnext.accounts.party import get_party_shipping_address
+from Goldfish.accounts.party import get_party_shipping_address
 
 
 class Shipment(Document):
@@ -20,10 +20,10 @@ class Shipment(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.shipment_delivery_note.shipment_delivery_note import (
+		from Goldfish.stock.doctype.shipment_delivery_note.shipment_delivery_note import (
 			ShipmentDeliveryNote,
 		)
-		from erpnext.stock.doctype.shipment_parcel.shipment_parcel import ShipmentParcel
+		from Goldfish.stock.doctype.shipment_parcel.shipment_parcel import ShipmentParcel
 
 		amended_from: DF.Link | None
 		awb_number: DF.Data | None

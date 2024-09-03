@@ -2,7 +2,7 @@ from unittest import TestCase
 
 import frappe
 
-from erpnext.regional.address_template.setup import get_address_templates, update_address_template
+from Goldfish.regional.address_template.setup import get_address_templates, update_address_template
 
 
 def ensure_country(country):

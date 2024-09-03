@@ -70,7 +70,7 @@ frappe.ui.form.on("Quick Stock Balance", {
 				filters = { ...filters, ...{ barcode: frm.doc.item_barcode } };
 			}
 			frappe.call({
-				method: "erpnext.stock.doctype.quick_stock_balance.quick_stock_balance.get_stock_item_details",
+				method: "Goldfish.stock.doctype.quick_stock_balance.quick_stock_balance.get_stock_item_details",
 				args: filters,
 				callback: (r) => {
 					if (r.message) {

@@ -1,12 +1,12 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.buying");
+frappe.provide("Goldfish.buying");
 // cur_frm.add_fetch('project', 'cost_center', 'cost_center');
 
-erpnext.buying = {
+Goldfish.buying = {
 	setup_buying_controller: function() {
-		erpnext.buying.BuyingController = class BuyingController extends erpnext.TransactionController {
+		Goldfish.buying.BuyingController = class BuyingController extends Goldfish.TransactionController {
 			setup() {
 				super.setup();
 				this.toggle_enable_for_stock_uom("allow_to_edit_stock_uom_qty_for_purchase");
@@ -43,7 +43,7 @@ erpnext.buying = {
 								filters: { link_doctype: 'Customer', link_name: this.frm.doc.customer }
 							};
 						} else
-							return erpnext.queries.company_address_query(this.frm.doc)
+							return Goldfish.queries.company_address_query(this.frm.doc)
 					});
 				}
 			}
@@ -67,12 +67,12 @@ erpnext.buying = {
 					});
 				}
 
-				me.frm.set_query('supplier', erpnext.queries.supplier);
-				me.frm.set_query('contact_person', erpnext.queries.contact_query);
-				me.frm.set_query('supplier_address', erpnext.queries.address_query);
+				me.frm.set_query('supplier', Goldfish.queries.supplier);
+				me.frm.set_query('contact_person', Goldfish.queries.contact_query);
+				me.frm.set_query('supplier_address', Goldfish.queries.address_query);
 
-				me.frm.set_query('billing_address', erpnext.queries.company_address_query);
-				erpnext.accounts.dimensions.setup_dimension_filters(me.frm, me.frm.doctype);
+				me.frm.set_query('billing_address', Goldfish.queries.company_address_query);
+				Goldfish.accounts.dimensions.setup_dimension_filters(me.frm, me.frm.doctype);
 
 				this.frm.set_query("item_code", "items", function() {
 					if (me.frm.doc.is_subcontracted) {
@@ -85,13 +85,13 @@ erpnext.buying = {
 						}
 
 						return{
-							query: "erpnext.controllers.queries.item_query",
+							query: "Goldfish.controllers.queries.item_query",
 							filters: filters
 						}
 					}
 					else {
 						return{
-							query: "erpnext.controllers.queries.item_query",
+							query: "Goldfish.controllers.queries.item_query",
 							filters: { 'supplier': me.frm.doc.supplier, 'is_purchase_item': 1, 'has_variants': 0}
 						}
 					}
@@ -101,7 +101,7 @@ erpnext.buying = {
 				this.frm.set_query("manufacturer", "items", function(doc, cdt, cdn) {
 					const row = locals[cdt][cdn];
 					return {
-						query: "erpnext.controllers.queries.item_manufacturer_query",
+						query: "Goldfish.controllers.queries.item_manufacturer_query",
 						filters:{ 'item_code': row.item_code }
 					}
 				});
@@ -140,14 +140,14 @@ erpnext.buying = {
 
 			supplier() {
 				var me = this;
-				erpnext.utils.get_party_details(this.frm, null, null, function(){
+				Goldfish.utils.get_party_details(this.frm, null, null, function(){
 					me.apply_price_list();
 				});
 			}
 
 			supplier_address() {
-				erpnext.utils.get_address_display(this.frm);
-				erpnext.utils.set_taxes_from_address(this.frm, "supplier_address", "supplier_address", "supplier_address");
+				Goldfish.utils.get_address_display(this.frm);
+				Goldfish.utils.set_taxes_from_address(this.frm, "supplier_address", "supplier_address", "supplier_address");
 			}
 
 			buying_price_list() {
@@ -213,7 +213,7 @@ erpnext.buying = {
 				var item = frappe.get_doc(cdt, cdn);
 				if(item.item_code && item.warehouse) {
 					return this.frm.call({
-						method: "erpnext.stock.get_item_details.get_bin_details",
+						method: "Goldfish.stock.get_item_details.get_bin_details",
 						child: item,
 						args: {
 							item_code: item.item_code,
@@ -258,18 +258,18 @@ erpnext.buying = {
 			set_from_product_bundle() {
 				var me = this;
 				this.frm.add_custom_button(__("Product Bundle"), function() {
-					erpnext.buying.get_items_from_product_bundle(me.frm);
+					Goldfish.buying.get_items_from_product_bundle(me.frm);
 				}, __("Get Items From"));
 			}
 
 			shipping_address(){
 				var me = this;
-				erpnext.utils.get_address_display(this.frm, "shipping_address",
+				Goldfish.utils.get_address_display(this.frm, "shipping_address",
 					"shipping_address_display", true);
 			}
 
 			billing_address() {
-				erpnext.utils.get_address_display(this.frm, "billing_address",
+				Goldfish.utils.get_address_display(this.frm, "billing_address",
 					"billing_address_display", true);
 			}
 
@@ -301,7 +301,7 @@ erpnext.buying = {
 
 				if(row.manufacturer) {
 					frappe.call({
-						method: "erpnext.stock.doctype.item_manufacturer.item_manufacturer.get_item_manufacturer_part_no",
+						method: "Goldfish.stock.doctype.item_manufacturer.item_manufacturer.get_item_manufacturer_part_no",
 						args: {
 							'item_code': row.item_code,
 							'manufacturer': row.manufacturer
@@ -351,7 +351,7 @@ erpnext.buying = {
 							item.type_of_transaction = item.qty > 0 ? "Inward" : "Outward";
 							item.is_rejected = false;
 
-							new erpnext.SerialBatchPackageSelector(
+							new Goldfish.SerialBatchPackageSelector(
 								me.frm, item, (r) => {
 									if (r) {
 										let qty = Math.abs(r.total_qty);
@@ -389,7 +389,7 @@ erpnext.buying = {
 							item.type_of_transaction = item.rejected_qty > 0 ? "Inward" : "Outward";
 							item.is_rejected = true;
 
-							new erpnext.SerialBatchPackageSelector(
+							new Goldfish.SerialBatchPackageSelector(
 								me.frm, item, (r) => {
 									if (r) {
 										let qty = Math.abs(r.total_qty);
@@ -418,9 +418,9 @@ erpnext.buying = {
 	}
 }
 
-erpnext.buying.link_to_mrs = function(frm) {
+Goldfish.buying.link_to_mrs = function(frm) {
 	frappe.call({
-		method: "erpnext.buying.utils.get_linked_material_requests",
+		method: "Goldfish.buying.utils.get_linked_material_requests",
 		args:{
 			items: frm.doc.items.map((item) => item.item_code)
 		},
@@ -474,12 +474,12 @@ erpnext.buying.link_to_mrs = function(frm) {
 	});
 }
 
-erpnext.buying.get_default_bom = function(frm) {
+Goldfish.buying.get_default_bom = function(frm) {
 	$.each(frm.doc["items"] || [], function(i, d) {
 		if (d.item_code && d.bom === "") {
 			return frappe.call({
 				type: "GET",
-				method: "erpnext.stock.get_item_details.get_default_bom",
+				method: "Goldfish.stock.get_item_details.get_default_bom",
 				args: {
 					"item_code": d.item_code,
 				},
@@ -493,7 +493,7 @@ erpnext.buying.get_default_bom = function(frm) {
 	});
 }
 
-erpnext.buying.get_items_from_product_bundle = function(frm) {
+Goldfish.buying.get_items_from_product_bundle = function(frm) {
 	var dialog = new frappe.ui.Dialog({
 		title: __("Get Items from Product Bundle"),
 		fields: [
@@ -518,7 +518,7 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 			dialog.hide();
 			return frappe.call({
 				type: "GET",
-				method: "erpnext.stock.doctype.packed_item.packed_item.get_items_from_product_bundle",
+				method: "Goldfish.stock.doctype.packed_item.packed_item.get_items_from_product_bundle",
 				args: {
 					row: {
 						item_code: args.product_bundle,

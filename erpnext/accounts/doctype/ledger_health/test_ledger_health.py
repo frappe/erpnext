@@ -6,8 +6,8 @@ from frappe import qb
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import nowdate
 
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
-from erpnext.accounts.utils import run_ledger_health_checks
+from Goldfish.accounts.test.accounts_mixin import AccountsTestMixin
+from Goldfish.accounts.utils import run_ledger_health_checks
 
 
 class TestLedgerHealth(AccountsTestMixin, FrappeTestCase):

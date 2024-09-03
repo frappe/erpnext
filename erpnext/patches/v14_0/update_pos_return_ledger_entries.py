@@ -1,7 +1,7 @@
 import frappe
 from frappe import qb
 
-from erpnext.accounts.utils import update_voucher_outstanding
+from Goldfish.accounts.utils import update_voucher_outstanding
 
 
 def get_valid_against_voucher_ref(pos_returns):

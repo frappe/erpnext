@@ -1,7 +1,7 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-# ERPNext - web based ERP (http://erpnext.com)
+# Goldfish - web based ERP (http://Goldfish.com)
 # For license information, please see license.txt
 
 
@@ -13,11 +13,11 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.query_builder.functions import Sum
 from frappe.utils import cint, cstr, flt, get_link_to_form, getdate, new_line_sep, nowdate
 
-from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.stock.stock_balance import get_indented_qty, update_bin_qty
+from Goldfish.buying.utils import check_on_hold_or_closed_status, validate_for_items
+from Goldfish.controllers.buying_controller import BuyingController
+from Goldfish.manufacturing.doctype.work_order.work_order import get_item_details
+from Goldfish.stock.doctype.item.item import get_item_defaults
+from Goldfish.stock.stock_balance import get_indented_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/material_request_grid.html"}
 
@@ -31,7 +31,7 @@ class MaterialRequest(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.material_request_item.material_request_item import MaterialRequestItem
+		from Goldfish.stock.doctype.material_request_item.material_request_item import MaterialRequestItem
 
 		amended_from: DF.Link | None
 		company: DF.Link
@@ -123,7 +123,7 @@ class MaterialRequest(BuyingController):
 		if not self.status:
 			self.status = "Draft"
 
-		from erpnext.controllers.status_updater import validate_status
+		from Goldfish.controllers.status_updater import validate_status
 
 		validate_status(
 			self.status,
@@ -385,7 +385,7 @@ def update_item(obj, target, source_parent):
 
 
 def get_list_context(context=None):
-	from erpnext.controllers.website_list_for_contact import get_list_context
+	from Goldfish.controllers.website_list_for_contact import get_list_context
 
 	list_context = get_list_context(context)
 	list_context.update(

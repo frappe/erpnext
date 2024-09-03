@@ -28,7 +28,7 @@ frappe.listview_settings["Purchase Receipt"] = {
 
 	onload: function (listview) {
 		listview.page.add_action_item(__("Purchase Invoice"), () => {
-			erpnext.bulk_transaction_processing.create(listview, "Purchase Receipt", "Purchase Invoice");
+			Goldfish.bulk_transaction_processing.create(listview, "Purchase Receipt", "Purchase Invoice");
 		});
 	},
 };

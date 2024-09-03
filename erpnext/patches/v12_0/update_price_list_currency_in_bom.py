@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import getdate
 
-from erpnext.setup.utils import get_exchange_rate
+from Goldfish.setup.utils import get_exchange_rate
 
 
 def execute():

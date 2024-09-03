@@ -3,7 +3,7 @@ import unittest
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from erpnext.crm.report.sales_pipeline_analytics.sales_pipeline_analytics import execute
+from Goldfish.crm.report.sales_pipeline_analytics.sales_pipeline_analytics import execute
 
 
 class TestSalesPipelineAnalytics(FrappeTestCase):

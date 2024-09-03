@@ -8,7 +8,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from erpnext.accounts.report.financial_statements import get_columns, get_data, get_period_list
+from Goldfish.accounts.report.financial_statements import get_columns, get_data, get_period_list
 
 
 def execute(filters=None):

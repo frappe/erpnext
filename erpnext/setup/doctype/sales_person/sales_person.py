@@ -12,7 +12,7 @@ from frappe.query_builder.functions import Count, CurDate, UnixTimestamp
 from frappe.utils import flt
 from frappe.utils.nestedset import NestedSet, get_root_of
 
-from erpnext import get_default_currency
+from Goldfish import get_default_currency
 
 
 class SalesPerson(NestedSet):
@@ -24,7 +24,7 @@ class SalesPerson(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.setup.doctype.target_detail.target_detail import TargetDetail
+		from Goldfish.setup.doctype.target_detail.target_detail import TargetDetail
 
 		commission_rate: DF.Data | None
 		department: DF.Link | None

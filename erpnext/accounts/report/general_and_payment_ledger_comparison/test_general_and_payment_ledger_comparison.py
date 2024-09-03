@@ -3,11 +3,11 @@ from frappe import qb
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days
 
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.general_and_payment_ledger_comparison.general_and_payment_ledger_comparison import (
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.accounts.report.general_and_payment_ledger_comparison.general_and_payment_ledger_comparison import (
 	execute,
 )
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from Goldfish.accounts.test.accounts_mixin import AccountsTestMixin
 
 
 class TestGeneralAndPaymentLedger(FrappeTestCase, AccountsTestMixin):

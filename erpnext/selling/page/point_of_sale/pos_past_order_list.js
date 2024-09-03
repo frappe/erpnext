@@ -1,4 +1,4 @@
-erpnext.PointOfSale.PastOrderList = class {
+Goldfish.PointOfSale.PastOrderList = class {
 	constructor({ wrapper, events }) {
 		this.wrapper = wrapper;
 		this.events = events;
@@ -82,7 +82,7 @@ erpnext.PointOfSale.PastOrderList = class {
 		this.$invoices_container.html("");
 
 		return frappe.call({
-			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_past_order_list",
+			method: "Goldfish.selling.page.point_of_sale.point_of_sale.get_past_order_list",
 			freeze: true,
 			args: { search_term, status },
 			callback: (response) => {

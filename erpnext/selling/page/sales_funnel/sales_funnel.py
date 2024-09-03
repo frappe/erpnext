@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 
-from erpnext.accounts.report.utils import convert
+from Goldfish.accounts.report.utils import convert
 
 
 def validate_filters(from_date, to_date, company):

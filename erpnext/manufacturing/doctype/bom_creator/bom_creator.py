@@ -8,7 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, flt
 
-from erpnext.manufacturing.doctype.bom.bom import get_bom_item_rate
+from Goldfish.manufacturing.doctype.bom.bom import get_bom_item_rate
 
 BOM_FIELDS = [
 	"company",
@@ -40,7 +40,7 @@ class BOMCreator(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.manufacturing.doctype.bom_creator_item.bom_creator_item import BOMCreatorItem
+		from Goldfish.manufacturing.doctype.bom_creator_item.bom_creator_item import BOMCreatorItem
 
 		amended_from: DF.Link | None
 		backflush_from_wip_warehouse: DF.Check

@@ -6,19 +6,19 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_days, add_to_date, flt, now, nowtime, today
 
-from erpnext.accounts.doctype.account.test_account import create_account, get_inventory_account
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.utils import update_gl_entries_after
-from erpnext.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
-from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import (
+from Goldfish.accounts.doctype.account.test_account import create_account, get_inventory_account
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from Goldfish.accounts.utils import update_gl_entries_after
+from Goldfish.assets.doctype.asset.test_asset import create_asset_category, create_fixed_asset_item
+from Goldfish.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import (
 	get_gl_entries,
 	make_purchase_receipt,
 )
-from erpnext.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
+from Goldfish.stock.doctype.serial_and_batch_bundle.test_serial_and_batch_bundle import (
 	get_serial_nos_from_bundle,
 )
-from erpnext.stock.serial_batch_bundle import SerialNoValuation
+from Goldfish.stock.serial_batch_bundle import SerialNoValuation
 
 
 class TestLandedCostVoucher(FrappeTestCase):
@@ -123,7 +123,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 
 	def test_landed_cost_voucher_stock_impact(self):
 		"Test impact of LCV on future stock balances."
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		item = make_item("LCV Stock Item", {"is_stock_item": 1})
 		warehouse = "Stores - _TC"
@@ -176,7 +176,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 
 	def test_landed_cost_voucher_for_zero_purchase_rate(self):
 		"Test impact of LCV on future stock balances."
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		item = make_item("LCV Stock Item", {"is_stock_item": 1})
 		warehouse = "Stores - _TC"
@@ -499,7 +499,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
 
 	def test_multi_currency_lcv(self):
-		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import (
+		from Goldfish.setup.doctype.currency_exchange.test_currency_exchange import (
 			save_new_records,
 			test_records,
 		)
@@ -597,7 +597,7 @@ class TestLandedCostVoucher(FrappeTestCase):
 		pr.cancel()
 
 	def test_landed_cost_voucher_with_serial_batch_for_legacy_pr(self):
-		from erpnext.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.item.test_item import make_item
 
 		frappe.flags.ignore_serial_batch_bundle_validation = True
 		frappe.flags.use_serial_and_batch_fields = True
@@ -746,8 +746,8 @@ class TestLandedCostVoucher(FrappeTestCase):
 			)
 
 	def test_do_not_validate_landed_cost_voucher_with_serial_batch_for_legacy_pr(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+		from Goldfish.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 
 		frappe.flags.ignore_serial_batch_bundle_validation = True
 		frappe.flags.use_serial_and_batch_fields = True
@@ -947,8 +947,8 @@ class TestLandedCostVoucher(FrappeTestCase):
 			)
 
 	def test_do_not_validate_against_landed_cost_voucher_for_serial_for_legacy_pr(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
+		from Goldfish.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.serial_and_batch_bundle.serial_and_batch_bundle import get_auto_batch_nos
 
 		frappe.flags.ignore_serial_batch_bundle_validation = True
 		frappe.flags.use_serial_and_batch_fields = True

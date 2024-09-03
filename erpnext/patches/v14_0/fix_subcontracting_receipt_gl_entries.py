@@ -3,7 +3,7 @@
 
 import frappe
 
-from erpnext.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison import (
+from Goldfish.stock.report.stock_and_account_value_comparison.stock_and_account_value_comparison import (
 	get_data,
 )
 

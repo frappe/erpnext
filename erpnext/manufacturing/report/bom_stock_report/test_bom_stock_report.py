@@ -7,12 +7,12 @@ from frappe.exceptions import ValidationError
 from frappe.tests.utils import FrappeTestCase
 from frappe.utils import floor
 
-from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
-from erpnext.manufacturing.report.bom_stock_report.bom_stock_report import (
+from Goldfish.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from Goldfish.manufacturing.report.bom_stock_report.bom_stock_report import (
 	get_bom_stock as bom_stock_report,
 )
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+from Goldfish.stock.doctype.item.test_item import make_item
+from Goldfish.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
 
 class TestBomStockReport(FrappeTestCase):

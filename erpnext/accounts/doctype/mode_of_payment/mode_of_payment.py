@@ -16,7 +16,7 @@ class ModeofPayment(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.mode_of_payment_account.mode_of_payment_account import (
+		from Goldfish.accounts.doctype.mode_of_payment_account.mode_of_payment_account import (
 			ModeofPaymentAccount,
 		)
 

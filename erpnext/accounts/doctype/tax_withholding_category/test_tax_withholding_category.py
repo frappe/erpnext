@@ -9,9 +9,9 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import add_days, today
 
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
+from Goldfish.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from Goldfish.accounts.utils import get_fiscal_year
+from Goldfish.buying.doctype.purchase_order.purchase_order import make_purchase_invoice
 
 test_dependencies = ["Supplier Group", "Customer Group"]
 

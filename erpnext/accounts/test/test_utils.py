@@ -3,17 +3,17 @@ import unittest
 import frappe
 from frappe.test_runner import make_test_objects
 
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
-from erpnext.accounts.party import get_party_shipping_address
-from erpnext.accounts.utils import (
+from Goldfish.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from Goldfish.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from Goldfish.accounts.party import get_party_shipping_address
+from Goldfish.accounts.utils import (
 	get_future_stock_vouchers,
 	get_voucherwise_gl_entries,
 	sort_stock_vouchers_by_posting_date,
 )
-from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from Goldfish.stock.doctype.item.test_item import make_item
+from Goldfish.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
+from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 
 class TestUtils(unittest.TestCase):
@@ -135,8 +135,8 @@ class TestUtils(unittest.TestCase):
 		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 		from frappe.utils import nowdate
 
-		from erpnext.accounts.utils import get_fiscal_year
-		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
+		from Goldfish.accounts.utils import get_fiscal_year
+		from Goldfish.buying.doctype.supplier.test_supplier import create_supplier
 
 		# Configure Supplier Naming in Buying Settings
 		frappe.db.set_default("supp_master_name", "Auto Name")

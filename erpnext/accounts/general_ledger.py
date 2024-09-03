@@ -10,17 +10,17 @@ from frappe.model.meta import get_field_precision
 from frappe.utils import cint, flt, formatdate, getdate, now
 from frappe.utils.dashboard import cache_source
 
-import erpnext
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+import Goldfish
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_accounting_dimensions,
 )
-from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
+from Goldfish.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import (
 	get_dimension_filter_map,
 )
-from erpnext.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
-from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
-from erpnext.accounts.utils import create_payment_ledger_entry
-from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
+from Goldfish.accounts.doctype.accounting_period.accounting_period import ClosedAccountingPeriod
+from Goldfish.accounts.doctype.budget.budget import validate_expense_against_budget
+from Goldfish.accounts.utils import create_payment_ledger_entry
+from Goldfish.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
 
 def make_gl_entries(
@@ -254,8 +254,8 @@ def merge_similar_entries(gl_map, precision=None):
 		else:
 			merged_gl_map.append(entry)
 
-	company = gl_map[0].company if gl_map else erpnext.get_default_company()
-	company_currency = erpnext.get_company_currency(company)
+	company = gl_map[0].company if gl_map else Goldfish.get_default_company()
+	company_currency = Goldfish.get_company_currency(company)
 
 	if not precision:
 		precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)

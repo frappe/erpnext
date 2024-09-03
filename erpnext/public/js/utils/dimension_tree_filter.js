@@ -1,6 +1,6 @@
-frappe.provide("erpnext.accounts");
+frappe.provide("Goldfish.accounts");
 
-erpnext.accounts.dimensions = {
+Goldfish.accounts.dimensions = {
 	setup_dimension_filters(frm, doctype) {
 		this.accounting_dimensions = [];
 		this.default_dimensions = {};
@@ -10,7 +10,7 @@ erpnext.accounts.dimensions = {
 	fetch_custom_dimensions(frm, doctype) {
 		let me = this;
 		frappe.call({
-			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			method: "Goldfish.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
 			args: {
 				with_cost_center_and_project: true,
 			},
@@ -65,7 +65,7 @@ erpnext.accounts.dimensions = {
 
 				frm.set_query(dimension, parentfield, function (doc, cdt, cdn) {
 					let row = locals[cdt][cdn];
-					return erpnext.queries.get_filtered_dimensions(row, fields, dimension, doc.company);
+					return Goldfish.queries.get_filtered_dimensions(row, fields, dimension, doc.company);
 				});
 			});
 		}
@@ -73,7 +73,7 @@ erpnext.accounts.dimensions = {
 
 	setup_account_filters(frm, dimension, fields) {
 		frm.set_query(dimension, function (doc) {
-			return erpnext.queries.get_filtered_dimensions(doc, fields, dimension, doc.company);
+			return Goldfish.queries.get_filtered_dimensions(doc, fields, dimension, doc.company);
 		});
 	},
 

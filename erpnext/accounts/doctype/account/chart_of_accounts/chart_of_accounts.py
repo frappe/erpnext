@@ -122,13 +122,13 @@ def get_chart(chart_template, existing_company=None):
 		return get_account_tree_from_existing_company(existing_company)
 
 	elif chart_template == "Standard":
-		from erpnext.accounts.doctype.account.chart_of_accounts.verified import (
+		from Goldfish.accounts.doctype.account.chart_of_accounts.verified import (
 			standard_chart_of_accounts,
 		)
 
 		return standard_chart_of_accounts.get()
 	elif chart_template == "Standard with Numbers":
-		from erpnext.accounts.doctype.account.chart_of_accounts.verified import (
+		from Goldfish.accounts.doctype.account.chart_of_accounts.verified import (
 			standard_chart_of_accounts_with_account_number,
 		)
 

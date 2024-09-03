@@ -5,33 +5,33 @@ import json
 
 import frappe
 
-# import erpnext
+# import Goldfish
 from frappe import _
 from frappe.utils import cint, flt, get_link_to_form
 
-import erpnext
-from erpnext.assets.doctype.asset.asset import get_asset_value_after_depreciation
-from erpnext.assets.doctype.asset.depreciation import (
+import Goldfish
+from Goldfish.assets.doctype.asset.asset import get_asset_value_after_depreciation
+from Goldfish.assets.doctype.asset.depreciation import (
 	depreciate_asset,
 	get_gl_entries_on_asset_disposal,
 	get_value_after_depreciation_on_disposal_date,
 	reset_depreciation_schedule,
 	reverse_depreciation_entry_made_after_disposal,
 )
-from erpnext.assets.doctype.asset_activity.asset_activity import add_asset_activity
-from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-from erpnext.controllers.stock_controller import StockController
-from erpnext.setup.doctype.brand.brand import get_brand_defaults
-from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
-from erpnext.stock import get_warehouse_account_map
-from erpnext.stock.doctype.item.item import get_item_defaults
-from erpnext.stock.get_item_details import (
+from Goldfish.assets.doctype.asset_activity.asset_activity import add_asset_activity
+from Goldfish.assets.doctype.asset_category.asset_category import get_asset_category_account
+from Goldfish.controllers.stock_controller import StockController
+from Goldfish.setup.doctype.brand.brand import get_brand_defaults
+from Goldfish.setup.doctype.item_group.item_group import get_item_group_defaults
+from Goldfish.stock import get_warehouse_account_map
+from Goldfish.stock.doctype.item.item import get_item_defaults
+from Goldfish.stock.get_item_details import (
 	get_default_cost_center,
 	get_default_expense_account,
 	get_item_warehouse,
 )
-from erpnext.stock.stock_ledger import get_previous_sle
-from erpnext.stock.utils import get_incoming_rate
+from Goldfish.stock.stock_ledger import get_previous_sle
+from Goldfish.stock.utils import get_incoming_rate
 
 force_fields = [
 	"target_item_name",
@@ -57,13 +57,13 @@ class AssetCapitalization(StockController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.assets.doctype.asset_capitalization_asset_item.asset_capitalization_asset_item import (
+		from Goldfish.assets.doctype.asset_capitalization_asset_item.asset_capitalization_asset_item import (
 			AssetCapitalizationAssetItem,
 		)
-		from erpnext.assets.doctype.asset_capitalization_service_item.asset_capitalization_service_item import (
+		from Goldfish.assets.doctype.asset_capitalization_service_item.asset_capitalization_service_item import (
 			AssetCapitalizationServiceItem,
 		)
-		from erpnext.assets.doctype.asset_capitalization_stock_item.asset_capitalization_stock_item import (
+		from Goldfish.assets.doctype.asset_capitalization_stock_item.asset_capitalization_stock_item import (
 			AssetCapitalizationStockItem,
 		)
 
@@ -334,7 +334,7 @@ class AssetCapitalization(StockController):
 			)
 
 	def validate_item(self, item):
-		from erpnext.stock.doctype.item.item import validate_end_of_life
+		from Goldfish.stock.doctype.item.item import validate_end_of_life
 
 		validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
@@ -440,7 +440,7 @@ class AssetCapitalization(StockController):
 			self.make_sl_entries(sl_entries)
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
-		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
+		from Goldfish.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 
 		if self.docstatus == 1:
 			if not gl_entries:
@@ -475,7 +475,7 @@ class AssetCapitalization(StockController):
 
 	def get_target_account(self):
 		if self.target_is_fixed_asset:
-			from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
+			from Goldfish.assets.doctype.asset.asset import is_cwip_accounting_enabled
 
 			asset_category = frappe.get_cached_value("Asset", self.target_asset, "asset_category")
 			if is_cwip_accounting_enabled(asset_category):
@@ -498,7 +498,7 @@ class AssetCapitalization(StockController):
 				for sle in sle_list:
 					stock_value_difference = flt(sle.stock_value_difference, precision)
 
-					if erpnext.is_perpetual_inventory_enabled(self.company):
+					if Goldfish.is_perpetual_inventory_enabled(self.company):
 						account = self.warehouse_account[sle.warehouse]["account"]
 					else:
 						account = self.get_company_default("default_expense_account")

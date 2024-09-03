@@ -15,14 +15,14 @@ frappe.query_reports["Gross Profit"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[1],
 			reqd: 1,
 		},
 		{
 			fieldname: "to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
+			default: Goldfish.utils.get_fiscal_year(frappe.datetime.get_today(), true)[2],
 			reqd: 1,
 		},
 		{
@@ -106,4 +106,4 @@ frappe.query_reports["Gross Profit"] = {
 	},
 };
 
-erpnext.utils.add_dimensions("Gross Profit", 15);
+Goldfish.utils.add_dimensions("Gross Profit", 15);

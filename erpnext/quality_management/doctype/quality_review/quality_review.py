@@ -15,7 +15,7 @@ class QualityReview(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.quality_management.doctype.quality_review_objective.quality_review_objective import (
+		from Goldfish.quality_management.doctype.quality_review_objective.quality_review_objective import (
 			QualityReviewObjective,
 		)
 

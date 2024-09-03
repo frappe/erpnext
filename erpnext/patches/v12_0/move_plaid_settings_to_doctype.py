@@ -6,7 +6,7 @@ import frappe
 
 
 def execute():
-	frappe.reload_doc("erpnext_integrations", "doctype", "plaid_settings")
+	frappe.reload_doc("Goldfish_integrations", "doctype", "plaid_settings")
 	plaid_settings = frappe.get_single("Plaid Settings")
 	if plaid_settings.enabled:
 		if not (frappe.conf.plaid_client_id and frappe.conf.plaid_env and frappe.conf.plaid_secret):

@@ -27,7 +27,7 @@ frappe.ui.form.on("Issue", {
 				__("Task"),
 				function () {
 					frappe.model.open_mapped_doc({
-						method: "erpnext.support.doctype.issue.issue.make_task",
+						method: "Goldfish.support.doctype.issue.issue.make_task",
 						frm: frm,
 					});
 				},
@@ -64,7 +64,7 @@ frappe.ui.form.on("Issue", {
 				});
 
 				frappe.call(
-					"erpnext.support.doctype.service_level_agreement.service_level_agreement.reset_service_level_agreement",
+					"Goldfish.support.doctype.service_level_agreement.service_level_agreement.reset_service_level_agreement",
 					{
 						reason: values.reason,
 						user: frappe.session.user_email,

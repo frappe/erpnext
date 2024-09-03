@@ -29,7 +29,7 @@ frappe.ui.form.on("Workstation", {
 		if (frm.is_new()) {
 			frappe.call({
 				type: "GET",
-				method: "erpnext.manufacturing.doctype.workstation.workstation.get_default_holiday_list",
+				method: "Goldfish.manufacturing.doctype.workstation.workstation.get_default_holiday_list",
 				callback: function (r) {
 					if (!r.exe && r.message) {
 						cur_frm.set_value("holiday_list", r.message);
@@ -91,7 +91,7 @@ class WorkstationDashboard {
 
 	prepapre_dashboard() {
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.workstation.workstation.get_job_cards",
+			method: "Goldfish.manufacturing.doctype.workstation.workstation.get_job_cards",
 			args: {
 				workstation: this.frm.doc.name,
 			},
@@ -176,7 +176,7 @@ class WorkstationDashboard {
 
 	validate_job_card(job_card, status, callback) {
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.workstation.workstation.validate_job_card",
+			method: "Goldfish.manufacturing.doctype.workstation.workstation.validate_job_card",
 			args: {
 				job_card: job_card,
 				status: status,
@@ -368,7 +368,7 @@ class WorkstationDashboard {
 		let me = this;
 
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.workstation.workstation.update_job_card",
+			method: "Goldfish.manufacturing.doctype.workstation.workstation.update_job_card",
 			args: {
 				job_card: job_card,
 				method: method,
@@ -391,7 +391,7 @@ class WorkstationDashboard {
 	make_material_request(job_card) {
 		let me = this;
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.workstation.workstation.get_raw_materials",
+			method: "Goldfish.manufacturing.doctype.workstation.workstation.get_raw_materials",
 			args: {
 				job_card: job_card,
 			},
@@ -399,7 +399,7 @@ class WorkstationDashboard {
 				if (r.message) {
 					me.prepare_materials_modal(r.message, job_card, (job_card) => {
 						frappe.call({
-							method: "erpnext.manufacturing.doctype.job_card.job_card.make_stock_entry",
+							method: "Goldfish.manufacturing.doctype.job_card.job_card.make_stock_entry",
 							args: {
 								source_name: job_card,
 							},

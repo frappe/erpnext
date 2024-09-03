@@ -33,7 +33,7 @@ class VisualPlantFloor {
 
 	prepare_data() {
 		frappe.call({
-			method: "erpnext.manufacturing.doctype.workstation.workstation.get_workstations",
+			method: "Goldfish.manufacturing.doctype.workstation.workstation.get_workstations",
 			args: {
 				plant_floor: this.plant_floor,
 			},
@@ -123,7 +123,7 @@ class VisualPlantFloor {
 
 		if (plant_floor) {
 			frappe.call({
-				method: "erpnext.manufacturing.doctype.workstation.workstation.get_workstations",
+				method: "Goldfish.manufacturing.doctype.workstation.workstation.get_workstations",
 				args: {
 					plant_floor: plant_floor,
 					workstation_type: this.workstation_type.get_value(),

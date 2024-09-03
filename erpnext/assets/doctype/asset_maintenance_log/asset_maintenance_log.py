@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.query_builder import DocType
 from frappe.utils import getdate, nowdate, today
 
-from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
+from Goldfish.assets.doctype.asset_maintenance.asset_maintenance import calculate_next_due_date
 
 
 class AssetMaintenanceLog(Document):

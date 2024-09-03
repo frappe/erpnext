@@ -12,7 +12,7 @@ from frappe.permissions import (
 from frappe.utils import cstr, getdate, today, validate_email_address
 from frappe.utils.nestedset import NestedSet
 
-from erpnext.utilities.transaction_base import delete_events
+from Goldfish.utilities.transaction_base import delete_events
 
 
 class EmployeeUserDisabledError(frappe.ValidationError):
@@ -31,7 +31,7 @@ class Employee(NestedSet):
 		self.employee = self.name
 
 	def validate(self):
-		from erpnext.controllers.status_updater import validate_status
+		from Goldfish.controllers.status_updater import validate_status
 
 		validate_status(self.status, ["Active", "Inactive", "Suspended", "Left"])
 

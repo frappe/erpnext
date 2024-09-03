@@ -13,10 +13,10 @@ from frappe.utils import get_url
 from frappe.utils.print_format import download_pdf
 from frappe.utils.user import get_user_fullname
 
-from erpnext.accounts.party import get_party_account_currency, get_party_details
-from erpnext.buying.utils import validate_for_items
-from erpnext.controllers.buying_controller import BuyingController
-from erpnext.stock.doctype.material_request.material_request import set_missing_values
+from Goldfish.accounts.party import get_party_account_currency, get_party_details
+from Goldfish.buying.utils import validate_for_items
+from Goldfish.controllers.buying_controller import BuyingController
+from Goldfish.stock.doctype.material_request.material_request import set_missing_values
 
 STANDARD_USERS = ("Guest", "Administrator")
 
@@ -30,10 +30,10 @@ class RequestforQuotation(BuyingController):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.buying.doctype.request_for_quotation_item.request_for_quotation_item import (
+		from Goldfish.buying.doctype.request_for_quotation_item.request_for_quotation_item import (
 			RequestforQuotationItem,
 		)
-		from erpnext.buying.doctype.request_for_quotation_supplier.request_for_quotation_supplier import (
+		from Goldfish.buying.doctype.request_for_quotation_supplier.request_for_quotation_supplier import (
 			RequestforQuotationSupplier,
 		)
 
@@ -356,7 +356,7 @@ def check_portal_enabled(reference_doctype):
 
 
 def get_list_context(context=None):
-	from erpnext.controllers.website_list_for_contact import get_list_context
+	from Goldfish.controllers.website_list_for_contact import get_list_context
 
 	list_context = get_list_context(context)
 	list_context.update(

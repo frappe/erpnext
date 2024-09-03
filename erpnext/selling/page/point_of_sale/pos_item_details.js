@@ -1,4 +1,4 @@
-erpnext.PointOfSale.ItemDetails = class {
+Goldfish.PointOfSale.ItemDetails = class {
 	constructor({ wrapper, events, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
@@ -291,7 +291,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.batch_no_control.df.reqd = 1;
 			this.batch_no_control.df.get_query = () => {
 				return {
-					query: "erpnext.controllers.queries.get_batch_no",
+					query: "Goldfish.controllers.queries.get_batch_no",
 					filters: {
 						item_code: me.item_row.item_code,
 						warehouse: me.item_row.warehouse,
@@ -399,7 +399,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			let item_row = this.item_row;
 			item_row.type_of_transaction = "Outward";
 
-			new erpnext.SerialBatchPackageSelector(frm, item_row, (r) => {
+			new Goldfish.SerialBatchPackageSelector(frm, item_row, (r) => {
 				if (r) {
 					frappe.model.set_value(item_row.doctype, item_row.name, {
 						serial_and_batch_bundle: r.name,

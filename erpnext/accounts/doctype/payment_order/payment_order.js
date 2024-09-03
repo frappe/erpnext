@@ -65,8 +65,8 @@ frappe.ui.form.on("Payment Order", {
 
 	get_from_payment_entry: function (frm) {
 		frm.trigger("remove_row_if_empty");
-		erpnext.utils.map_current_doc({
-			method: "erpnext.accounts.doctype.payment_entry.payment_entry.make_payment_order",
+		Goldfish.utils.map_current_doc({
+			method: "Goldfish.accounts.doctype.payment_entry.payment_entry.make_payment_order",
 			source_doctype: "Payment Entry",
 			target: frm,
 			date_field: "posting_date",
@@ -87,8 +87,8 @@ frappe.ui.form.on("Payment Order", {
 
 	get_from_payment_request: function (frm) {
 		frm.trigger("remove_row_if_empty");
-		erpnext.utils.map_current_doc({
-			method: "erpnext.accounts.doctype.payment_request.payment_request.make_payment_order",
+		Goldfish.utils.map_current_doc({
+			method: "Goldfish.accounts.doctype.payment_request.payment_request.make_payment_order",
 			source_doctype: "Payment Request",
 			target: frm,
 			setters: {
@@ -114,7 +114,7 @@ frappe.ui.form.on("Payment Order", {
 					options: "Supplier",
 					get_query: function () {
 						return {
-							query: "erpnext.accounts.doctype.payment_order.payment_order.get_supplier_query",
+							query: "Goldfish.accounts.doctype.payment_order.payment_order.get_supplier_query",
 							filters: { parent: frm.doc.name },
 						};
 					},
@@ -128,7 +128,7 @@ frappe.ui.form.on("Payment Order", {
 					options: "Mode of Payment",
 					get_query: function () {
 						return {
-							query: "erpnext.accounts.doctype.payment_order.payment_order.get_mop_query",
+							query: "Goldfish.accounts.doctype.payment_order.payment_order.get_mop_query",
 							filters: { parent: frm.doc.name },
 						};
 					},
@@ -141,7 +141,7 @@ frappe.ui.form.on("Payment Order", {
 			if (!args) return;
 
 			return frappe.call({
-				method: "erpnext.accounts.doctype.payment_order.payment_order.make_payment_records",
+				method: "Goldfish.accounts.doctype.payment_order.payment_order.make_payment_records",
 				args: {
 					name: frm.doc.name,
 					supplier: args.supplier,

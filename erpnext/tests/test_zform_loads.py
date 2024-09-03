@@ -9,10 +9,10 @@ from frappe.www.printview import get_html_and_style
 class TestFormLoads(FrappeTestCase):
 	@change_settings("Print Settings", {"allow_print_for_cancelled": 1})
 	def test_load(self):
-		erpnext_modules = frappe.get_all("Module Def", filters={"app_name": "erpnext"}, pluck="name")
+		Goldfish_modules = frappe.get_all("Module Def", filters={"app_name": "Goldfish"}, pluck="name")
 		doctypes = frappe.get_all(
 			"DocType",
-			{"istable": 0, "issingle": 0, "is_virtual": 0, "module": ("in", erpnext_modules)},
+			{"istable": 0, "issingle": 0, "is_virtual": 0, "module": ("in", Goldfish_modules)},
 			pluck="name",
 		)
 

@@ -24,7 +24,7 @@ class AccountingPeriod(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.accounts.doctype.closed_document.closed_document import ClosedDocument
+		from Goldfish.accounts.doctype.closed_document.closed_document import ClosedDocument
 
 		closed_documents: DF.Table[ClosedDocument]
 		company: DF.Link

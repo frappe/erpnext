@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
+Goldfish.taxes_and_totals = class TaxesAndTotals extends Goldfish.payments {
 	setup() {
 		this.fetch_round_off_accounts();
 	}
@@ -184,8 +184,8 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 			$.each(tax_fields, function(i, fieldname) { tax[fieldname] = 0.0; });
 
 			if (!this.discount_amount_applied) {
-				erpnext.accounts.taxes.validate_taxes_and_charges(tax.doctype, tax.name);
-				erpnext.accounts.taxes.validate_inclusive_tax(tax, this.frm);
+				Goldfish.accounts.taxes.validate_taxes_and_charges(tax.doctype, tax.name);
+				Goldfish.accounts.taxes.validate_inclusive_tax(tax, this.frm);
 			}
 			frappe.model.round_floats_in(tax);
 		});
@@ -197,7 +197,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 
 		if (me.frm.doc.company) {
 			frappe.call({
-				"method": "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
+				"method": "Goldfish.controllers.taxes_and_totals.get_round_off_applicable_accounts",
 				"args": {
 					"company": me.frm.doc.company,
 					"account_list": frappe.flags.round_off_applicable_accounts
@@ -211,7 +211,7 @@ erpnext.taxes_and_totals = class TaxesAndTotals extends erpnext.payments {
 		}
 
 		frappe.call({
-			method: "erpnext.controllers.taxes_and_totals.get_rounding_tax_settings",
+			method: "Goldfish.controllers.taxes_and_totals.get_rounding_tax_settings",
 			callback: function(r) {
 				frappe.flags.round_off_settings = r.message;
 			}

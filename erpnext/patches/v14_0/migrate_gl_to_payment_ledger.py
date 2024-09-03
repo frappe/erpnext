@@ -5,7 +5,7 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.query_builder.functions import Count, IfNull
 from frappe.utils import flt
 
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (
+from Goldfish.accounts.doctype.accounting_dimension.accounting_dimension import (
 	get_dimensions,
 	make_dimension_in_accounting_doctypes,
 )

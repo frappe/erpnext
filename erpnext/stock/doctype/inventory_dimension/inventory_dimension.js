@@ -30,7 +30,7 @@ frappe.ui.form.on("Inventory Dimension", {
 
 		frm.set_query("document_type", () => {
 			return {
-				query: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_documents",
+				query: "Goldfish.stock.doctype.inventory_dimension.inventory_dimension.get_inventory_documents",
 			};
 		});
 	},
@@ -78,7 +78,7 @@ frappe.ui.form.on("Inventory Dimension", {
 			frm.set_df_property("fetch_from_parent", "options", frm.doc.reference_document);
 		} else if (frm.doc.document_type && frm.doc.istable) {
 			frappe.call({
-				method: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.get_parent_fields",
+				method: "Goldfish.stock.doctype.inventory_dimension.inventory_dimension.get_parent_fields",
 				args: {
 					child_doctype: frm.doc.document_type,
 					dimension_name: frm.doc.reference_document,
@@ -102,7 +102,7 @@ frappe.ui.form.on("Inventory Dimension", {
 
 		frappe.confirm(__(msg, [frm.doc.name.bold()]), () => {
 			frappe.call({
-				method: "erpnext.stock.doctype.inventory_dimension.inventory_dimension.delete_dimension",
+				method: "Goldfish.stock.doctype.inventory_dimension.inventory_dimension.delete_dimension",
 				args: {
 					dimension: frm.doc.name,
 				},

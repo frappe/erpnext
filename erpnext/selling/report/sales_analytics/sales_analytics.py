@@ -6,7 +6,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import add_days, add_to_date, flt, getdate
 
-from erpnext.accounts.utils import get_fiscal_year
+from Goldfish.accounts.utils import get_fiscal_year
 
 
 def execute(filters=None):

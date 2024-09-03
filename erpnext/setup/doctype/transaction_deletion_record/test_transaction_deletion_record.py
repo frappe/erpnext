@@ -40,7 +40,7 @@ class TestTransactionDeletionRecord(FrappeTestCase):
 		self.assertEqual(tasks_containing_company, [])
 
 	def test_company_transaction_deletion_request(self):
-		from erpnext.setup.doctype.company.company import create_transaction_deletion_request
+		from Goldfish.setup.doctype.company.company import create_transaction_deletion_request
 
 		# don't reuse below company for other test cases
 		company = "Deep Space Exploration"

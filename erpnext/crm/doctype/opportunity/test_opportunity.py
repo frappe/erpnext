@@ -6,10 +6,10 @@ import unittest
 import frappe
 from frappe.utils import now_datetime, random_string, today
 
-from erpnext.crm.doctype.lead.lead import make_customer
-from erpnext.crm.doctype.lead.test_lead import make_lead
-from erpnext.crm.doctype.opportunity.opportunity import make_quotation
-from erpnext.crm.utils import get_linked_communication_list
+from Goldfish.crm.doctype.lead.lead import make_customer
+from Goldfish.crm.doctype.lead.test_lead import make_lead
+from Goldfish.crm.doctype.opportunity.opportunity import make_quotation
+from Goldfish.crm.utils import get_linked_communication_list
 
 test_records = frappe.get_test_records("Opportunity")
 

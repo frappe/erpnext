@@ -40,7 +40,7 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 			frm.page.set_indicator(__("In Progress"), "orange");
 		});
 
-		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+		Goldfish.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function (frm) {
@@ -93,7 +93,7 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 			frm.trigger("setup_company_filters");
 
 			frappe.call({
-				method: "erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool.get_temporary_opening_account",
+				method: "Goldfish.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool.get_temporary_opening_account",
 				args: {
 					company: frm.doc.company,
 				},
@@ -105,7 +105,7 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 				},
 			});
 		}
-		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		Goldfish.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	invoice_type: function (frm) {

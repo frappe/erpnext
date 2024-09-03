@@ -3,7 +3,7 @@
 
 import frappe
 
-from erpnext.regional.united_arab_emirates.setup import setup
+from Goldfish.regional.united_arab_emirates.setup import setup
 
 
 def execute():

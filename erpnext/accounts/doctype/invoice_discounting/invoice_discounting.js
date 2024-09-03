@@ -138,7 +138,7 @@ frappe.ui.form.on("Invoice Discounting", {
 				var data = d.get_values();
 
 				frappe.call({
-					method: "erpnext.accounts.doctype.invoice_discounting.invoice_discounting.get_invoices",
+					method: "Goldfish.accounts.doctype.invoice_discounting.invoice_discounting.get_invoices",
 					args: {
 						filters: data,
 					},

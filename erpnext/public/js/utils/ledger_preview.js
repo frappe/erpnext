@@ -1,6 +1,6 @@
-frappe.provide("erpnext.accounts");
+frappe.provide("Goldfish.accounts");
 
-erpnext.accounts.ledger_preview = {
+Goldfish.accounts.ledger_preview = {
 	show_accounting_ledger_preview(frm) {
 		let me = this;
 		if (!frm.is_new() && frm.doc.docstatus == 0) {
@@ -9,7 +9,7 @@ erpnext.accounts.ledger_preview = {
 				function () {
 					frappe.call({
 						type: "GET",
-						method: "erpnext.controllers.stock_controller.show_accounting_ledger_preview",
+						method: "Goldfish.controllers.stock_controller.show_accounting_ledger_preview",
 						args: {
 							company: frm.doc.company,
 							doctype: frm.doc.doctype,
@@ -38,7 +38,7 @@ erpnext.accounts.ledger_preview = {
 				function () {
 					frappe.call({
 						type: "GET",
-						method: "erpnext.controllers.stock_controller.show_stock_ledger_preview",
+						method: "Goldfish.controllers.stock_controller.show_stock_ledger_preview",
 						args: {
 							company: frm.doc.company,
 							doctype: frm.doc.doctype,

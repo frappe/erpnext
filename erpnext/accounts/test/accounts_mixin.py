@@ -1,7 +1,7 @@
 import frappe
 from frappe import qb
 
-from erpnext.stock.doctype.item.test_item import create_item
+from Goldfish.stock.doctype.item.test_item import create_item
 
 
 class AccountsTestMixin:

@@ -9,8 +9,8 @@ from frappe.query_builder.custom import ConstantColumn
 from frappe.utils import flt, getdate
 from pypika import Order
 
-from erpnext.accounts.party import get_party_account
-from erpnext.accounts.report.utils import (
+from Goldfish.accounts.party import get_party_account
+from Goldfish.accounts.report.utils import (
 	apply_common_conditions,
 	get_advance_taxes_and_charges,
 	get_journal_entries,

@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import flt, getdate
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
+from Goldfish.accounts.doctype.sales_invoice.sales_invoice import (
 	get_total_in_party_account_currency,
 	is_overdue,
 )

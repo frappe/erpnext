@@ -16,7 +16,7 @@ class QualityProcedure(NestedSet):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.quality_management.doctype.quality_procedure_process.quality_procedure_process import (
+		from Goldfish.quality_management.doctype.quality_procedure_process.quality_procedure_process import (
 			QualityProcedureProcess,
 		)
 

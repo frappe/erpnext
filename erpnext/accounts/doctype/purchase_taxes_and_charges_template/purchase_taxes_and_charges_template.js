@@ -2,8 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 cur_frm.cscript.tax_table = "Purchase Taxes and Charges";
-erpnext.accounts.taxes.setup_tax_validations("Purchase Taxes and Charges Template");
-erpnext.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
+Goldfish.accounts.taxes.setup_tax_validations("Purchase Taxes and Charges Template");
+Goldfish.accounts.taxes.setup_tax_filters("Purchase Taxes and Charges");
 
 frappe.ui.form.on("Purchase Taxes and Charges", {
 	add_deduct_tax(doc, cdt, cdn) {

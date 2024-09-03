@@ -5,13 +5,13 @@ from random import randint
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils.data import today
 
-from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
-from erpnext.stock.doctype.stock_reservation_entry.test_stock_reservation_entry import (
+from Goldfish.selling.doctype.sales_order.test_sales_order import make_sales_order
+from Goldfish.stock.doctype.stock_reservation_entry.test_stock_reservation_entry import (
 	cancel_all_stock_reservation_entries,
 	create_items,
 	create_material_receipt,
 )
-from erpnext.stock.report.reserved_stock.reserved_stock import get_data as reserved_stock_report
+from Goldfish.stock.report.reserved_stock.reserved_stock import get_data as reserved_stock_report
 
 
 class TestReservedStock(FrappeTestCase):

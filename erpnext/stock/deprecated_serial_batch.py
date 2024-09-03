@@ -37,7 +37,7 @@ class DeprecatedSerialNoValuation:
 
 	@deprecated
 	def get_incoming_value_for_serial_nos(self, serial_nos):
-		from erpnext.stock.utils import get_combine_datetime
+		from Goldfish.stock.utils import get_combine_datetime
 
 		# get rate from serial nos within same company
 		incoming_values = 0.0
@@ -102,7 +102,7 @@ class DeprecatedBatchNoValuation:
 
 	@deprecated
 	def get_sle_for_batches(self):
-		from erpnext.stock.utils import get_combine_datetime
+		from Goldfish.stock.utils import get_combine_datetime
 
 		if not self.batchwise_valuation_batches:
 			return []
@@ -192,7 +192,7 @@ class DeprecatedBatchNoValuation:
 
 	@deprecated
 	def set_balance_value_from_sl_entries(self) -> None:
-		from erpnext.stock.utils import get_combine_datetime
+		from Goldfish.stock.utils import get_combine_datetime
 
 		sle = frappe.qb.DocType("Stock Ledger Entry")
 		batch = frappe.qb.DocType("Batch")

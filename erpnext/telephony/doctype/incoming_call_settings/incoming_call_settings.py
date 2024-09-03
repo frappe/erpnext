@@ -18,7 +18,7 @@ class IncomingCallSettings(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.telephony.doctype.incoming_call_handling_schedule.incoming_call_handling_schedule import (
+		from Goldfish.telephony.doctype.incoming_call_handling_schedule.incoming_call_handling_schedule import (
 			IncomingCallHandlingSchedule,
 		)
 

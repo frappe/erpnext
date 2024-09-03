@@ -1,13 +1,13 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.provide("erpnext.support");
+frappe.provide("Goldfish.support");
 
 frappe.ui.form.on("Warranty Claim", {
 	setup: (frm) => {
-		frm.set_query("contact_person", erpnext.queries.contact_query);
-		frm.set_query("customer_address", erpnext.queries.address_query);
-		frm.set_query("customer", erpnext.queries.customer);
+		frm.set_query("contact_person", Goldfish.queries.contact_query);
+		frm.set_query("customer_address", Goldfish.queries.address_query);
+		frm.set_query("customer", Goldfish.queries.customer);
 
 		frm.set_query("serial_no", () => {
 			let filters = {
@@ -46,7 +46,7 @@ frappe.ui.form.on("Warranty Claim", {
 		if (!frm.doc.__islocal && ["Open", "Work In Progress"].includes(frm.doc.status)) {
 			frm.add_custom_button(__("Maintenance Visit"), () => {
 				frappe.model.open_mapped_doc({
-					method: "erpnext.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
+					method: "Goldfish.support.doctype.warranty_claim.warranty_claim.make_maintenance_visit",
 					frm: frm,
 				});
 			});
@@ -54,14 +54,14 @@ frappe.ui.form.on("Warranty Claim", {
 	},
 
 	customer: (frm) => {
-		erpnext.utils.get_party_details(frm);
+		Goldfish.utils.get_party_details(frm);
 	},
 
 	customer_address: (frm) => {
-		erpnext.utils.get_address_display(frm);
+		Goldfish.utils.get_address_display(frm);
 	},
 
 	contact_person: (frm) => {
-		erpnext.utils.get_contact_details(frm);
+		Goldfish.utils.get_contact_details(frm);
 	},
 });

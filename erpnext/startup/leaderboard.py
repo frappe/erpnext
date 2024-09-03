@@ -10,7 +10,7 @@ def get_leaderboards():
 				"total_qty_sold",
 				{"fieldname": "outstanding_amount", "fieldtype": "Currency"},
 			],
-			"method": "erpnext.startup.leaderboard.get_all_customers",
+			"method": "Goldfish.startup.leaderboard.get_all_customers",
 			"icon": "customer",
 		},
 		"Item": {
@@ -22,7 +22,7 @@ def get_leaderboards():
 				"available_stock_qty",
 				{"fieldname": "available_stock_value", "fieldtype": "Currency"},
 			],
-			"method": "erpnext.startup.leaderboard.get_all_items",
+			"method": "Goldfish.startup.leaderboard.get_all_items",
 			"icon": "stock",
 		},
 		"Supplier": {
@@ -31,7 +31,7 @@ def get_leaderboards():
 				"total_qty_purchased",
 				{"fieldname": "outstanding_amount", "fieldtype": "Currency"},
 			],
-			"method": "erpnext.startup.leaderboard.get_all_suppliers",
+			"method": "Goldfish.startup.leaderboard.get_all_suppliers",
 			"icon": "buying",
 		},
 		"Sales Partner": {
@@ -39,12 +39,12 @@ def get_leaderboards():
 				{"fieldname": "total_sales_amount", "fieldtype": "Currency"},
 				{"fieldname": "total_commission", "fieldtype": "Currency"},
 			],
-			"method": "erpnext.startup.leaderboard.get_all_sales_partner",
+			"method": "Goldfish.startup.leaderboard.get_all_sales_partner",
 			"icon": "hr",
 		},
 		"Sales Person": {
 			"fields": [{"fieldname": "total_sales_amount", "fieldtype": "Currency"}],
-			"method": "erpnext.startup.leaderboard.get_all_sales_person",
+			"method": "Goldfish.startup.leaderboard.get_all_sales_person",
 			"icon": "customer",
 		},
 	}

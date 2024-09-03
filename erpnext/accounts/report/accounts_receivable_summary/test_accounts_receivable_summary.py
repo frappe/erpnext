@@ -2,10 +2,10 @@ import frappe
 from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import today
 
-from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute
-from erpnext.accounts.test.accounts_mixin import AccountsTestMixin
+from Goldfish.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+from Goldfish.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
+from Goldfish.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute
+from Goldfish.accounts.test.accounts_mixin import AccountsTestMixin
 
 
 class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):

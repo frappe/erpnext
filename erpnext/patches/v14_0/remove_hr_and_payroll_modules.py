@@ -1,58 +1,70 @@
-import frappe
+from sqlalchemy.orm import Session
+from Goldfish.config import get_db
+from Goldfish.models.doctype import DocType, DocField
 
-
-def execute():
-	if "hrms" in frappe.get_installed_apps():
+def execute(db: Session = next(get_db())):
+	# Check if HRMS is installed (you'll need to implement this check)
+	if is_hrms_installed():
 		return
 
-	frappe.delete_doc("Module Def", "HR", ignore_missing=True, force=True)
-	frappe.delete_doc("Module Def", "Payroll", ignore_missing=True, force=True)
+	# Delete Module Def
+	db.query(DocType).filter(DocType.name.in_(["HR", "Payroll"])).delete(synchronize_session=False)
 
-	frappe.delete_doc("Workspace", "HR", ignore_missing=True, force=True)
-	frappe.delete_doc("Workspace", "Payroll", ignore_missing=True, force=True)
+	# Delete Workspace
+	db.query(DocType).filter(DocType.name.in_(["HR", "Payroll"])).delete(synchronize_session=False)
 
-	print_formats = frappe.get_all(
-		"Print Format", {"module": ("in", ["HR", "Payroll"]), "standard": "Yes"}, pluck="name"
-	)
-	for print_format in print_formats:
-		frappe.delete_doc("Print Format", print_format, ignore_missing=True, force=True)
+	# Delete Print Formats
+	db.query(DocType).filter(
+		DocType.module.in_(["HR", "Payroll"]),
+		DocType.name.like("Print Format%"),
+		DocType.custom == False
+	).delete(synchronize_session=False)
 
-	reports = frappe.get_all(
-		"Report", {"module": ("in", ["HR", "Payroll"]), "is_standard": "Yes"}, pluck="name"
-	)
-	for report in reports:
-		frappe.delete_doc("Report", report, ignore_missing=True, force=True)
+	# Delete Reports
+	db.query(DocType).filter(
+		DocType.module.in_(["HR", "Payroll"]),
+		DocType.name.like("Report%"),
+		DocType.custom == False
+	).delete(synchronize_session=False)
 
-	# reports moved from Projects, Accounts, and Regional module to HRMS app
-	for report in [
+	# Delete specific reports
+	specific_reports = [
 		"Project Profitability",
 		"Employee Hours Utilization Based On Timesheet",
 		"Unpaid Expense Claim",
 		"Professional Tax Deductions",
 		"Provident Fund Deductions",
-	]:
-		frappe.delete_doc("Report", report, ignore_missing=True, force=True)
+	]
+	db.query(DocType).filter(DocType.name.in_(specific_reports)).delete(synchronize_session=False)
 
-	doctypes = frappe.get_all("DocType", {"module": ("in", ["HR", "Payroll"]), "custom": 0}, pluck="name")
-	for doctype in doctypes:
-		frappe.delete_doc("DocType", doctype, ignore_missing=True, force=True)
+	# Delete DocTypes
+	db.query(DocType).filter(
+		DocType.module.in_(["HR", "Payroll"]),
+		DocType.custom == False
+	).delete(synchronize_session=False)
 
-	frappe.delete_doc("DocType", "Salary Slip Loan", ignore_missing=True, force=True)
-	frappe.delete_doc("DocType", "Salary Component Account", ignore_missing=True, force=True)
+	# Delete specific DocTypes
+	db.query(DocType).filter(DocType.name.in_(["Salary Slip Loan", "Salary Component Account"])).delete(synchronize_session=False)
 
-	notifications = frappe.get_all(
-		"Notification", {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name"
-	)
-	for notifcation in notifications:
-		frappe.delete_doc("Notification", notifcation, ignore_missing=True, force=True)
+	# Delete Notifications
+	db.query(DocType).filter(
+		DocType.module.in_(["HR", "Payroll"]),
+		DocType.name.like("Notification%"),
+		DocType.custom == False
+	).delete(synchronize_session=False)
 
-	frappe.delete_doc("User Type", "Employee Self Service", ignore_missing=True, force=True)
+	# Delete User Type
+	db.query(DocType).filter(DocType.name == "Employee Self Service").delete(synchronize_session=False)
 
+	# Delete other records (Web Form, Dashboard, etc.)
 	for dt in ["Web Form", "Dashboard", "Dashboard Chart", "Number Card"]:
-		records = frappe.get_all(dt, {"module": ("in", ["HR", "Payroll"]), "is_standard": 1}, pluck="name")
-		for record in records:
-			frappe.delete_doc(dt, record, ignore_missing=True, force=True)
+		db.query(DocType).filter(
+			DocType.module.in_(["HR", "Payroll"]),
+			DocType.name.like(f"{dt}%"),
+			DocType.custom == False
+		).delete(synchronize_session=False)
 
+	# Delete Custom Fields
 	custom_fields = {
 		"Salary Component": ["component_type"],
 		"Employee": ["ifsc_code", "pan_number", "micr_code", "provident_fund_account"],
@@ -86,7 +98,14 @@ def execute():
 	}
 
 	for doc, fields in custom_fields.items():
-		filters = {"dt": doc, "fieldname": ["in", fields]}
-		records = frappe.get_all("Custom Field", filters=filters, pluck="name")
-		for record in records:
-			frappe.delete_doc("Custom Field", record, ignore_missing=True, force=True)
+		db.query(DocField).filter(
+			DocField.parent == doc,
+			DocField.fieldname.in_(fields)
+		).delete(synchronize_session=False)
+
+	db.commit()
+
+# You'll need to implement this function
+def is_hrms_installed():
+	# Check if HRMS is in installed apps (implement this using SQLAlchemy or environment variables)
+	pass

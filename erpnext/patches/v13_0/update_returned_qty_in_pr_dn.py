@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 import frappe
 
-from erpnext.controllers.status_updater import OverAllowanceError
+from Goldfish.controllers.status_updater import OverAllowanceError
 
 
 def execute():

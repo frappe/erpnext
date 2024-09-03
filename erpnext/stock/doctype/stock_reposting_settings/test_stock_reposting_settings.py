@@ -5,7 +5,7 @@ import unittest
 
 import frappe
 
-from erpnext.stock.doctype.repost_item_valuation.repost_item_valuation import get_recipients
+from Goldfish.stock.doctype.repost_item_valuation.repost_item_valuation import get_recipients
 
 
 class TestStockRepostingSettings(unittest.TestCase):
@@ -40,8 +40,8 @@ class TestStockRepostingSettings(unittest.TestCase):
 		self.assertTrue(user in users)
 
 	def test_do_reposting_for_each_stock_transaction(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from Goldfish.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		frappe.db.set_single_value("Stock Reposting Settings", "do_reposting_for_each_stock_transaction", 1)
 		if frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting"):
@@ -65,8 +65,8 @@ class TestStockRepostingSettings(unittest.TestCase):
 		frappe.db.set_single_value("Stock Reposting Settings", "do_reposting_for_each_stock_transaction", 0)
 
 	def test_do_not_reposting_for_each_stock_transaction(self):
-		from erpnext.stock.doctype.item.test_item import make_item
-		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+		from Goldfish.stock.doctype.item.test_item import make_item
+		from Goldfish.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 		frappe.db.set_single_value("Stock Reposting Settings", "do_reposting_for_each_stock_transaction", 0)
 		if frappe.db.get_single_value("Stock Reposting Settings", "item_based_reposting"):

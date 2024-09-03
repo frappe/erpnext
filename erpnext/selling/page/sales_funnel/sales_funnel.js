@@ -8,12 +8,12 @@ frappe.pages["sales-funnel"].on_page_load = function (wrapper) {
 		single_column: true,
 	});
 
-	wrapper.sales_funnel = new erpnext.SalesFunnel(wrapper);
+	wrapper.sales_funnel = new Goldfish.SalesFunnel(wrapper);
 
 	frappe.breadcrumbs.add("Selling");
 };
 
-erpnext.SalesFunnel = class SalesFunnel {
+Goldfish.SalesFunnel = class SalesFunnel {
 	constructor(wrapper) {
 		var me = this;
 		// 0 setTimeout hack - this gives time for canvas to get width and height
@@ -110,9 +110,9 @@ erpnext.SalesFunnel = class SalesFunnel {
 		}
 
 		const method_map = {
-			sales_funnel: "erpnext.selling.page.sales_funnel.sales_funnel.get_funnel_data",
-			opp_by_lead_source: "erpnext.selling.page.sales_funnel.sales_funnel.get_opp_by_lead_source",
-			sales_pipeline: "erpnext.selling.page.sales_funnel.sales_funnel.get_pipeline_data",
+			sales_funnel: "Goldfish.selling.page.sales_funnel.sales_funnel.get_funnel_data",
+			opp_by_lead_source: "Goldfish.selling.page.sales_funnel.sales_funnel.get_opp_by_lead_source",
+			sales_pipeline: "Goldfish.selling.page.sales_funnel.sales_funnel.get_pipeline_data",
 		};
 		frappe.call({
 			method: method_map[this.options.chart],

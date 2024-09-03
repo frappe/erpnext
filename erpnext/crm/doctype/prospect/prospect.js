@@ -8,7 +8,7 @@ frappe.ui.form.on("Prospect", {
 				__("Customer"),
 				function () {
 					frappe.model.open_mapped_doc({
-						method: "erpnext.crm.doctype.prospect.prospect.make_customer",
+						method: "Goldfish.crm.doctype.prospect.prospect.make_customer",
 						frm: frm,
 					});
 				},
@@ -20,7 +20,7 @@ frappe.ui.form.on("Prospect", {
 				__("Opportunity"),
 				function () {
 					frappe.model.open_mapped_doc({
-						method: "erpnext.crm.doctype.prospect.prospect.make_opportunity",
+						method: "Goldfish.crm.doctype.prospect.prospect.make_opportunity",
 						frm: frm,
 					});
 				},
@@ -38,7 +38,7 @@ frappe.ui.form.on("Prospect", {
 	},
 
 	show_notes(frm) {
-		const crm_notes = new erpnext.utils.CRMNotes({
+		const crm_notes = new Goldfish.utils.CRMNotes({
 			frm: frm,
 			notes_wrapper: $(frm.fields_dict.notes_html.wrapper),
 		});
@@ -46,7 +46,7 @@ frappe.ui.form.on("Prospect", {
 	},
 
 	show_activities(frm) {
-		const crm_activities = new erpnext.utils.CRMActivities({
+		const crm_activities = new Goldfish.utils.CRMActivities({
 			frm: frm,
 			open_activities_wrapper: $(frm.fields_dict.open_activities_html.wrapper),
 			all_activities_wrapper: $(frm.fields_dict.all_activities_html.wrapper),

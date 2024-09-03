@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, cstr, flt, get_number_format_info
 
-from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template import (
+from Goldfish.stock.doctype.quality_inspection_template.quality_inspection_template import (
 	get_template_details,
 )
 
@@ -22,7 +22,7 @@ class QualityInspection(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.stock.doctype.quality_inspection_reading.quality_inspection_reading import (
+		from Goldfish.stock.doctype.quality_inspection_reading.quality_inspection_reading import (
 			QualityInspectionReading,
 		)
 

@@ -24,7 +24,7 @@ class HolidayList(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		from erpnext.setup.doctype.holiday.holiday import Holiday
+		from Goldfish.setup.doctype.holiday.holiday import Holiday
 
 		color: DF.Color | None
 		country: DF.Autocomplete | None

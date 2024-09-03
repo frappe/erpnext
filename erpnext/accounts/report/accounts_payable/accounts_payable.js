@@ -180,7 +180,7 @@ frappe.query_reports["Accounts Payable"] = {
 	},
 };
 
-erpnext.utils.add_dimensions("Accounts Payable", 9);
+Goldfish.utils.add_dimensions("Accounts Payable", 9);
 
 function get_party_type_options() {
 	let options = [];
