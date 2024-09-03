@@ -144,7 +144,7 @@ class ServiceLevelAgreement(Document):
 		):
 			frappe.throw(
 				_("{0} is not enabled in {1}").format(
-					frappe.bold("Track Service Level Agreement"),
+					frappe.bold(_("Track Service Level Agreement")),
 					get_link_to_form("Support Settings", "Support Settings"),
 				)
 			)
