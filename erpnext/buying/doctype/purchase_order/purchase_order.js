@@ -84,8 +84,6 @@ frappe.ui.form.on("Purchase Order", {
 				fetch_payment_terms_template: cint(!frm.doc.ignore_default_payment_terms_template),
 			},
 			function () {
-				frm.doc.apply_tds = frm.supplier_tds ? 1 : 0;
-				frm.doc.tax_withholding_category = frm.supplier_tds;
 				frm.set_df_property("apply_tds", "read_only", frm.supplier_tds ? 0 : 1);
 				frm.set_df_property("tax_withholding_category", "hidden", frm.supplier_tds ? 0 : 1);
 			}
