@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-02 17:30\n"
+"PO-Revision-Date: 2024-09-03 17:33\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -783,7 +783,7 @@ msgstr "<span class=\"h4\"><b>Inställningar &amp; Rapporter</b></span>"
 #. Header text in the Stock Workspace
 #: selling/workspace/selling/selling.json stock/workspace/stock/stock.json
 msgid "<span class=\"h4\"><b>Quick Access</b></span>"
-msgstr "<span class=\"h4\"><b>Snabb Åtkomst</b></span>"
+msgstr "<span class=\"h4\"><b>Genvägar</b></span>"
 
 #. Header text in the Assets Workspace
 #. Header text in the Quality Workspace
@@ -5589,7 +5589,7 @@ msgstr "Tillgång Avskrivning Schema skapades: <br>{0}<br><br> Kontrollera och G
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.json
 #: assets/workspace/assets/assets.json
 msgid "Asset Depreciations and Balances"
-msgstr "Tillgång Avskrivningar och Balans"
+msgstr "Tillgång Avskrivningar och Saldo"
 
 #. Label of the asset_details (Section Break) field in DocType 'Serial No'
 #: stock/doctype/serial_no/serial_no.json
@@ -28539,7 +28539,7 @@ msgstr "Erfodrad Fält"
 #. Detail'
 #: accounts/doctype/accounting_dimension_detail/accounting_dimension_detail.json
 msgid "Mandatory For Balance Sheet"
-msgstr "Erfodrad för Balans Rapport"
+msgstr "Erfordrad för Balans Rapport"
 
 #. Label of the mandatory_for_pl (Check) field in DocType 'Accounting Dimension
 #. Detail'
@@ -56315,7 +56315,7 @@ msgstr "Via Kund Portal"
 #. Valuation'
 #: stock/doctype/repost_item_valuation/repost_item_valuation.json
 msgid "Via Landed Cost Voucher"
-msgstr "Vil Landad Kostnad Verifikat"
+msgstr "Genom Landad Kostnad Verifikat"
 
 #: setup/setup_wizard/data/designation.txt:31
 msgid "Vice President"
