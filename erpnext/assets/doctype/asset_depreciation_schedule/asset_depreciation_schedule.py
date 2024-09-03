@@ -767,8 +767,12 @@ def get_daily_depr_amount(asset, row, schedule_idx, amount):
 
 		every_year_depr = amount / total_years
 
+		depr_period_start_date = add_days(
+			get_last_day(add_months(row.depreciation_start_date, row.frequency_of_depreciation * -1)), 1
+		)
+
 		year_start_date = add_years(
-			row.depreciation_start_date, (row.frequency_of_depreciation * schedule_idx) // 12
+			depr_period_start_date, ((row.frequency_of_depreciation * schedule_idx) // 12)
 		)
 		year_end_date = add_days(add_years(year_start_date, 1), -1)
 
