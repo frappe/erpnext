@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-02 17:30\n"
+"PO-Revision-Date: 2024-09-03 17:32\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -9446,7 +9446,7 @@ msgstr ""
 #. Label of the carrier (Data) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgid "Carrier"
-msgstr ""
+msgstr "Taşıyıcı"
 
 #. Label of the carrier_service (Data) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -19872,7 +19872,7 @@ msgstr "Mali Yıl Başlangıcı"
 #. 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Financial reports will be generated using GL Entry doctypes (should be enabled if Period Closing Voucher is not posted for all years sequentially or missing) "
-msgstr "Mali raporlar GL Giriş belge türleri kullanılarak oluşturulacaktır (Dönem Kapanış Fişinin tüm yıllar boyunca sırayla kaydedilmemesi veya eksik olması durumunda etkinleştirilmelidir)"
+msgstr "Mali raporlar Genel Muhasebe Girişi belge türleri kullanılarak oluşturulacaktır (Dönem Kapanış Fişinin tüm sene boyunca sırayla kaydedilmemesi veya eksik olması durumunda etkinleştirilmelidir)"
 
 #: manufacturing/doctype/work_order/work_order.js:720
 #: manufacturing/doctype/work_order/work_order.js:735
@@ -19994,17 +19994,17 @@ msgstr ""
 #. Label of the fg_item (Link) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Finished Goods Item"
-msgstr ""
+msgstr "Bitmiş Ürün"
 
 #. Label of the finished_good_qty (Float) field in DocType 'BOM Operation'
 #: manufacturing/doctype/bom_operation/bom_operation.json
 msgid "Finished Goods Qty"
-msgstr ""
+msgstr "Bitmiş Ürün Miktarı"
 
 #. Label of the fg_reference_id (Data) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Finished Goods Reference"
-msgstr ""
+msgstr "Bitmiş Ürün Referansı"
 
 #: manufacturing/report/process_loss_report/process_loss_report.py:106
 msgid "Finished Goods Value"
@@ -24094,7 +24094,7 @@ msgstr "Ön Ayarlar Yükleniyor"
 #. Label of the instruction (Small Text) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Instruction"
-msgstr ""
+msgstr "Talimat"
 
 #. Label of the instructions (Text) field in DocType 'Delivery Note'
 #. Label of the instructions (Small Text) field in DocType 'Purchase Receipt'
@@ -27755,7 +27755,7 @@ msgstr "Bağlantı Seçenekleri"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:15
 msgid "Link a new bank account"
-msgstr "Yeni bir banka hesabı bağlayın"
+msgstr "Yeni Banka Hesabı Bağla"
 
 #. Description of the 'Sub Procedure' (Link) field in DocType 'Quality
 #. Procedure Process'
@@ -30342,7 +30342,7 @@ msgstr "Müzik"
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:137
 #: utilities/transaction_base.py:284
 msgid "Must be Whole Number"
-msgstr "Tam Sayı Olmalı"
+msgstr "Tam Sayı"
 
 #. Description of the 'Import from Google Sheets' (Data) field in DocType 'Bank
 #. Statement Import'
@@ -35438,7 +35438,7 @@ msgstr "Ekose Erişim Simgesi"
 #. Label of the plaid_client_id (Data) field in DocType 'Plaid Settings'
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
 msgid "Plaid Client ID"
-msgstr "Plaid Client ID"
+msgstr "Plaid Client Kimliği"
 
 #. Label of the plaid_env (Select) field in DocType 'Plaid Settings'
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.json
@@ -40002,7 +40002,7 @@ msgstr "Miktar gereklidir"
 
 #: stock/dashboard/item_dashboard.js:281
 msgid "Quantity must be greater than zero, and less or equal to {0}"
-msgstr ""
+msgstr "Miktar sıfırdan büyük ve {0} değerine eşit veya daha az olmalıdır"
 
 #: manufacturing/doctype/work_order/work_order.js:847
 #: stock/doctype/pick_list/pick_list.js:182
@@ -45201,7 +45201,7 @@ msgstr "Numune Saklama Deposu"
 #: public/js/controllers/transaction.js:2240
 #: stock/doctype/quality_inspection/quality_inspection.json
 msgid "Sample Size"
-msgstr ""
+msgstr "Numune Boyutu"
 
 #: stock/doctype/stock_entry/stock_entry.py:3017
 msgid "Sample quantity {0} cannot be more than received quantity {1}"
@@ -46036,7 +46036,7 @@ msgstr ""
 
 #: selling/page/point_of_sale/pos_past_order_summary.js:57
 msgid "Send"
-msgstr ""
+msgstr "Gönder"
 
 #. Label of the send_after_days (Int) field in DocType 'Campaign Email
 #. Schedule'
@@ -46119,7 +46119,7 @@ msgstr "Gönderen"
 
 #: accounts/doctype/payment_request/payment_request.js:44
 msgid "Sending"
-msgstr ""
+msgstr "Gönderiliyor"
 
 #. Label of the sent (Check) field in DocType 'Project Update'
 #: projects/doctype/project_update/project_update.json
@@ -47708,7 +47708,7 @@ msgstr ""
 #: accounts/report/trial_balance/trial_balance.js:94
 #: accounts/report/trial_balance_for_party/trial_balance_for_party.js:85
 msgid "Show zero values"
-msgstr ""
+msgstr "Sıfır değerlerini göster"
 
 #: accounts/doctype/accounting_dimension/accounting_dimension.js:35
 msgid "Show {0}"
@@ -48090,7 +48090,7 @@ msgstr ""
 #: assets/doctype/asset/asset.js:552 stock/doctype/batch/batch.js:75
 #: stock/doctype/batch/batch.js:167 support/doctype/issue/issue.js:112
 msgid "Split"
-msgstr ""
+msgstr "Ayır"
 
 #: assets/doctype/asset/asset.js:135 assets/doctype/asset/asset.js:536
 msgid "Split Asset"
@@ -48169,7 +48169,7 @@ msgstr ""
 #: accounts/print_format/sales_invoice_return/sales_invoice_return.html:52
 #: templates/print_formats/includes/items.html:8
 msgid "Sr"
-msgstr ""
+msgstr "Sayın"
 
 #. Label of the stage (Data) field in DocType 'Prospect Opportunity'
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
@@ -48309,7 +48309,7 @@ msgstr "İçe Aktarmayı Başlat"
 #: manufacturing/doctype/job_card/job_card.js:133
 #: manufacturing/doctype/workstation/workstation.js:124
 msgid "Start Job"
-msgstr ""
+msgstr "İşi Başlat"
 
 #: accounts/doctype/ledger_merge/ledger_merge.js:72
 msgid "Start Merge"
@@ -48341,7 +48341,7 @@ msgstr "{0} için Başlangıç Saati Bitiş Saatinden büyük veya eşit olamaz.
 #: assets/report/fixed_asset_register/fixed_asset_register.js:81
 #: public/js/financial_statements.js:208
 msgid "Start Year"
-msgstr ""
+msgstr "Başlangıç Yılı"
 
 #: accounts/report/financial_statements.py:122
 msgid "Start Year and End Year are mandatory"
@@ -48722,7 +48722,7 @@ msgstr ""
 
 #: stock/report/item_price_stock/item_price_stock.py:34
 msgid "Stock Available"
-msgstr ""
+msgstr "Mevcut Stok"
 
 #. Label of the stock_balance (Button) field in DocType 'Quotation Item'
 #. Name of a report
@@ -48734,7 +48734,7 @@ msgstr ""
 #: stock/report/warehouse_wise_stock_balance/warehouse_wise_stock_balance.py:107
 #: stock/workspace/stock/stock.json
 msgid "Stock Balance"
-msgstr ""
+msgstr "Stok Bakiyesi"
 
 #: stock/doctype/quick_stock_balance/quick_stock_balance.js:15
 msgid "Stock Balance Report"
@@ -48786,7 +48786,7 @@ msgstr "Stok Girişleri İş Emri için zaten oluşturuldu {0}: {1}"
 #: stock/doctype/quality_inspection/quality_inspection.json
 #: stock/doctype/stock_entry/stock_entry.json stock/workspace/stock/stock.json
 msgid "Stock Entry"
-msgstr ""
+msgstr "Stok Hareketi"
 
 #. Label of the outgoing_stock_entry (Link) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -48801,14 +48801,14 @@ msgstr "Stok Girişi Alt Ürünü"
 #. Name of a DocType
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
 msgid "Stock Entry Detail"
-msgstr ""
+msgstr "Stok Hareketleri Detayı"
 
 #. Label of the stock_entry_type (Link) field in DocType 'Stock Entry'
 #. Name of a DocType
 #: stock/doctype/stock_entry/stock_entry.json
 #: stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Stock Entry Type"
-msgstr ""
+msgstr "Stok Hareket Türü"
 
 #: stock/doctype/pick_list/pick_list.py:1243
 msgid "Stock Entry has been already created against this Pick List"
@@ -54303,7 +54303,7 @@ msgstr ""
 #: manufacturing/doctype/bom_creator/bom_creator.js:93
 #: manufacturing/doctype/bom_creator/bom_creator.json
 msgid "Track Operations"
-msgstr ""
+msgstr "Operasyonları Takip Et"
 
 #. Label of the track_semi_finished_goods (Check) field in DocType 'BOM'
 #. Label of the track_semi_finished_goods (Check) field in DocType 'BOM
@@ -56150,7 +56150,7 @@ msgstr ""
 
 #: manufacturing/page/bom_comparison_tool/bom_comparison_tool.js:121
 msgid "Values Changed"
-msgstr ""
+msgstr "Değişen Değerler"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -56218,7 +56218,7 @@ msgstr ""
 
 #: manufacturing/doctype/bom/bom.js:287 manufacturing/doctype/bom/bom.js:349
 msgid "Variant Item"
-msgstr ""
+msgstr "Varyant Ürün"
 
 #: stock/doctype/item/item.py:859
 msgid "Variant Items"
@@ -57511,7 +57511,7 @@ msgstr "Devam Ediyor"
 #: public/js/bom_configurator/bom_configurator.bundle.js:382
 #: public/js/bom_configurator/bom_configurator.bundle.js:612
 msgid "Work In Progress Warehouse"
-msgstr ""
+msgstr "Devam Eden İş Deposu"
 
 #. Option for the 'Transfer Material Against' (Select) field in DocType 'BOM'
 #. Label of the work_order (Link) field in DocType 'Job Card'
@@ -57596,7 +57596,7 @@ msgstr "İş Emri Özeti"
 
 #: stock/doctype/material_request/material_request.py:794
 msgid "Work Order cannot be created for following reason: <br> {0}"
-msgstr ""
+msgstr "Aşağıdaki nedenden dolayı İş Emri oluşturulamıyor: <br> {0}"
 
 #: manufacturing/doctype/work_order/work_order.py:979
 msgid "Work Order cannot be raised against a Item Template"
@@ -57609,7 +57609,7 @@ msgstr ""
 
 #: selling/doctype/sales_order/sales_order.js:843
 msgid "Work Order not created"
-msgstr ""
+msgstr "İş Emri oluşturulmadı"
 
 #: stock/doctype/stock_entry/stock_entry.py:668
 msgid "Work Order {0}: Job Card not found for the operation {1}"
@@ -59127,7 +59127,7 @@ msgstr ""
 
 #: assets/report/fixed_asset_register/fixed_asset_register.py:366
 msgid "{}"
-msgstr ""
+msgstr "{}"
 
 #. Count format of shortcut in the Stock Workspace
 #: stock/workspace/stock/stock.json
@@ -59206,5 +59206,5 @@ msgstr "{} {} zaten başka bir {} ile bağlantılı"
 
 #: accounts/doctype/party_link/party_link.py:40
 msgid "{} {} is already linked with {} {}"
-msgstr ""
+msgstr "{} {} zaten {} {} ile bağlantılı"
 
