@@ -828,11 +828,7 @@ class PurchaseReceipt(BuyingController):
 	def update_assets(self, item, valuation_rate):
 		assets = frappe.db.get_all(
 			"Asset",
-			filters={
-				"purchase_receipt": self.name,
-				"item_code": item.item_code,
-				"purchase_receipt_item": ("in", [item.name, ""]),
-			},
+			filters={"purchase_receipt": self.name, "item_code": item.item_code},
 			fields=["name", "asset_quantity"],
 		)
 
