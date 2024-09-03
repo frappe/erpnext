@@ -40,6 +40,8 @@ from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
+MANUAL_STATI = ["On Hold", "Closed"]
+
 
 class WarehouseRequired(frappe.ValidationError):
 	pass
@@ -50,6 +52,32 @@ class SalesOrder(SellingController):
 	# This code is auto-generated. Do not modify anything in this block.
 
 	from typing import TYPE_CHECKING
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.docstatus == 2:
+			status = "Cancelled"
+		elif self.docstatus == 1:
+			if status in MANUAL_STATI:
+				pass  # setter call
+			elif self.status in MANUAL_STATI:
+				return  # retainer call
+			elif flt(self.per_delivered, 2) < 100 and flt(self.per_billed, 2) < 100:
+				status = "To Deliver and Bill"
+			elif flt(self.per_delivered, 2) >= 100 and flt(self.per_billed, 2) < 100:
+				status = "To Bill"
+			elif flt(self.per_delivered, 2) < 100 and flt(self.per_billed, 2) >= 100:
+				status = "To Deliver"
+			elif flt(self.per_delivered, 2) >= 100 and flt(self.per_billed, 2) >= 100:
+				status = "Completed"
+		else:
+			status = "Draft"
+
+		if status and self.status != status:
+			self.status = status
+			if self.docstatus == 1:
+				self.add_comment("Label", _(self.status))
+			if update:
+				self.db_set("status", status, update_modified=update_modified)
 
 	if TYPE_CHECKING:
 		from frappe.types import DF
