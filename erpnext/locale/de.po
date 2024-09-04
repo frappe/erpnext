@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-02 17:30\n"
+"PO-Revision-Date: 2024-09-04 17:44\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -395,7 +395,7 @@ msgstr ", mit dem Inventar {0}: {1}"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:95
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:347
 msgid "0 - 30 Days"
-msgstr ""
+msgstr "0 - 30 Tage"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:114
 msgid "0-30"
@@ -468,7 +468,7 @@ msgstr "Alle 3 Jahre"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:96
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:348
 msgid "30 - 60 Days"
-msgstr ""
+msgstr "30 - 60 Tage"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: utilities/doctype/video_settings/video_settings.json
@@ -507,7 +507,7 @@ msgstr "6 Std"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:97
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:349
 msgid "60 - 90 Days"
-msgstr ""
+msgstr "60 - 90 Tage"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:116
 msgid "60-90"
@@ -520,7 +520,7 @@ msgstr "60-90 Tage"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:98
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:350
 msgid "90 - 120 Days"
-msgstr ""
+msgstr "90 - 120 Tage"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
@@ -776,20 +776,20 @@ msgstr "<pre><h5>Beispiel Nachricht</h5>\n\n"
 #. Header text in the Stock Workspace
 #: stock/workspace/stock/stock.json
 msgid "<span class=\"h4\"><b>Masters &amp; Reports</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Stammdaten &amp; Berichte</b></span>"
 
 #. Header text in the Selling Workspace
 #. Header text in the Stock Workspace
 #: selling/workspace/selling/selling.json stock/workspace/stock/stock.json
 msgid "<span class=\"h4\"><b>Quick Access</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Schnellzugriff</b></span>"
 
 #. Header text in the Assets Workspace
 #. Header text in the Quality Workspace
 #: assets/workspace/assets/assets.json
 #: quality_management/workspace/quality/quality.json
 msgid "<span class=\"h4\"><b>Reports & Masters</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Berichte & Stammdaten</b></span>"
 
 #. Header text in the Accounting Workspace
 #. Header text in the Payables Workspace
@@ -810,12 +810,12 @@ msgstr ""
 #: selling/workspace/selling/selling.json setup/workspace/home/home.json
 #: support/workspace/support/support.json
 msgid "<span class=\"h4\"><b>Reports &amp; Masters</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Berichte &amp; Stammdaten</b></span>"
 
 #. Header text in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgid "<span class=\"h4\"><b>Settings</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Einstellungen</b></span>"
 
 #. Header text in the Accounting Workspace
 #. Header text in the Payables Workspace
@@ -824,7 +824,7 @@ msgstr ""
 #: accounts/workspace/payables/payables.json
 #: accounts/workspace/receivables/receivables.json
 msgid "<span class=\"h4\"><b>Shortcuts</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Verknüpfungen</b></span>"
 
 #. Header text in the Settings Workspace
 #: setup/workspace/settings/settings.json
@@ -835,7 +835,13 @@ msgid "<span class=\"h4\"><b>Your Shortcuts\n"
 "\t\t\n"
 "\t\t\t\n"
 "\t\t</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Ihre Verknüpfungen\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t\n"
+"\t\t\t\n"
+"\t\t</b></span>"
 
 #. Header text in the Assets Workspace
 #. Header text in the Buying Workspace
@@ -852,7 +858,7 @@ msgstr ""
 #: quality_management/workspace/quality/quality.json
 #: setup/workspace/home/home.json support/workspace/support/support.json
 msgid "<span class=\"h4\"><b>Your Shortcuts</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>Ihre Verknüpfungen</b></span>"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
@@ -1112,7 +1118,7 @@ msgstr "Über"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:99
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:351
 msgid "Above 120 Days"
-msgstr ""
+msgstr "Über 120 Tage"
 
 #. Name of a role
 #: setup/doctype/department/department.json
@@ -3668,7 +3674,7 @@ msgstr "Alterungsbereich 4"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:87
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:339
 msgid "Ageing Report based on {0} up to {1}"
-msgstr ""
+msgstr "Alterungsbericht basierend auf {0} bis {1}"
 
 #. Label of the agenda (Table) field in DocType 'Quality Meeting'
 #. Label of the agenda (Text Editor) field in DocType 'Quality Meeting Agenda'
@@ -4840,7 +4846,7 @@ msgstr "Betrag in der Währung des Kunden"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:72
 msgid "Amount in {0}"
-msgstr ""
+msgstr "Betrag in {0}"
 
 #: accounts/doctype/payment_entry/payment_entry.py:1174
 msgid "Amount {0} {1} against {2} {3}"
@@ -7430,7 +7436,7 @@ msgstr "Basis Stundensatz (Unternehmenswährung)"
 #. Label of the base_rate (Currency) field in DocType 'BOM Creator Item'
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 msgid "Base Rate"
-msgstr ""
+msgstr "Basispreis"
 
 #. Label of the base_tax_withholding_net_total (Currency) field in DocType
 #. 'Purchase Invoice'
@@ -7442,17 +7448,17 @@ msgstr ""
 #: buying/doctype/purchase_order/purchase_order.json
 #: stock/doctype/purchase_receipt/purchase_receipt.json
 msgid "Base Tax Withholding Net Total"
-msgstr ""
+msgstr "Basis-Steuereinbehalt-Nettosumme"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:239
 msgid "Base Total"
-msgstr ""
+msgstr "Basis-Summe"
 
 #. Label of the base_total_billable_amount (Currency) field in DocType
 #. 'Timesheet'
 #: projects/doctype/timesheet/timesheet.json
 msgid "Base Total Billable Amount"
-msgstr ""
+msgstr "Basis Gesamter abrechenbarer Betrag"
 
 #. Label of the base_total_billed_amount (Currency) field in DocType
 #. 'Timesheet'
@@ -7578,7 +7584,7 @@ msgstr "Chargendetails"
 
 #: stock/doctype/batch/batch.py:193
 msgid "Batch Expiry Date"
-msgstr ""
+msgstr "Ablaufdatum der Charge"
 
 #. Label of the batch_id (Data) field in DocType 'Batch'
 #: stock/doctype/batch/batch.json
@@ -8711,7 +8717,7 @@ msgstr "Preis der Produktbündel basierend auf den Preisen der enthaltenen Artik
 #. 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Calculate daily depreciation using total days in depreciation period"
-msgstr ""
+msgstr "Tägliche Abschreibung anhand der Gesamttage im Abschreibungszeitraum berechnen"
 
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:53
 msgid "Calculated Bank Statement balance"
@@ -9262,7 +9268,7 @@ msgstr "Artikel mit diesem Barcode kann nicht gefunden werden"
 
 #: controllers/accounts_controller.py:3124
 msgid "Cannot find a default warehouse for item {0}. Please set one in the Item Master or in Stock Settings."
-msgstr ""
+msgstr "Es wurde kein Standardlager für den Artikel {0} gefunden. Bitte legen Sie eines im Artikelstamm oder in den Lagereinstellungen fest."
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:491
 msgid "Cannot make any transactions until the deletion job is completed"
@@ -9430,12 +9436,12 @@ msgstr "Karat"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:6
 msgid "Carriage Paid To"
-msgstr ""
+msgstr "Fracht bezahlt bis Bestimmungsort"
 
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:7
 msgid "Carriage and Insurance Paid to"
-msgstr ""
+msgstr "Frachtfrei versichert bis Bestimmungsort"
 
 #. Label of the carrier (Data) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -9906,7 +9912,7 @@ msgstr "Überprüfungen erforderlich"
 #. Name of a report
 #: accounts/report/cheques_and_deposits_incorrectly_cleared/cheques_and_deposits_incorrectly_cleared.json
 msgid "Cheques and Deposits Incorrectly cleared"
-msgstr ""
+msgstr "Falsch verrechnete Schecks und Einzahlungen"
 
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:50
 msgid "Cheques and Deposits incorrectly cleared"
@@ -12322,7 +12328,7 @@ msgstr "Kosten pro Einheit"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:8
 msgid "Cost and Freight"
-msgstr ""
+msgstr "Kosten und Fracht bis Bestimmungshafen"
 
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:378
 #: accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py:402
@@ -12378,7 +12384,7 @@ msgstr "Kosten für das Unternehmen (CTC)"
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:9
 msgid "Cost, Insurance and Freight"
-msgstr ""
+msgstr "Kosten, Versicherung und Fracht"
 
 #. Label of the costing (Tab Break) field in DocType 'BOM'
 #. Label of the currency_detail (Section Break) field in DocType 'BOM Creator'
@@ -12953,7 +12959,7 @@ msgstr "Dimensionen erstellen ..."
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:92
 msgid "Creating Journal Entries..."
-msgstr ""
+msgstr "Journaleinträge erstellen..."
 
 #: stock/doctype/packing_slip/packing_slip.js:42
 msgid "Creating Packing Slip ..."
@@ -22701,7 +22707,7 @@ msgstr "Wenn deaktiviert, wird das Feld \"Gerundeter Gesamtbetrag\" in keiner Tr
 #. List'
 #: stock/doctype/pick_list/pick_list.json
 msgid "If enabled then system won't apply the pricing rule on the delivery note which will be create from the pick list"
-msgstr ""
+msgstr "Falls aktiviert, wird das System die Preisregel nicht auf den Lieferschein anwenden, der aus der Pickliste erstellt wird"
 
 #. Description of the 'Pick Manually' (Check) field in DocType 'Pick List'
 #: stock/doctype/pick_list/pick_list.json
@@ -27018,7 +27024,7 @@ msgstr "Buchungssatz {0} gehört nicht zu Konto {1} oder ist bereits mit einem a
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js:97
 msgid "Journal entries have been created"
-msgstr ""
+msgstr "Journaleinträge wurden erstellt"
 
 #. Label of the journals_section (Section Break) field in DocType 'Accounts
 #. Settings'
@@ -27826,7 +27832,7 @@ msgstr "Liter"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Litre-Atmosphere"
-msgstr ""
+msgstr "Liter-Atmosphäre"
 
 #. Label of the load_criteria (Button) field in DocType 'Supplier Scorecard'
 #: buying/doctype/supplier_scorecard/supplier_scorecard.json
@@ -28710,7 +28716,7 @@ msgstr "Die Herstellerteilenummer <b>{0}</b> ist ungültig"
 #. Description of a DocType
 #: stock/doctype/manufacturer/manufacturer.json
 msgid "Manufacturers used in Items"
-msgstr ""
+msgstr "In Artikeln verwendete Hersteller"
 
 #. Name of a Workspace
 #. Label of the manufacturing_section (Section Break) field in DocType
@@ -30772,7 +30778,7 @@ msgstr "Nettogewichtmaßeinheit"
 
 #: controllers/accounts_controller.py:1290
 msgid "Net total calculation precision loss"
-msgstr ""
+msgstr "Präzisionsverlust bei Berechnung der Nettosumme"
 
 #: accounts/doctype/account/account_tree.js:241
 msgid "New"
@@ -31981,7 +31987,7 @@ msgstr "Nur CSV- und Excel-Dateien können für den Datenimport verwendet werden
 #. Category'
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Only Deduct Tax On Excess Amount "
-msgstr ""
+msgstr "Nur den überschüssigen Betrag versteuern "
 
 #. Label of the only_include_allocated_payments (Check) field in DocType
 #. 'Purchase Invoice'
@@ -32477,7 +32483,7 @@ msgstr "Arbeitsgangzeit (in Min.)"
 
 #: manufacturing/doctype/bom_creator/bom_creator.js:176
 msgid "Operation Time must be greater than 0"
-msgstr ""
+msgstr "Die Betriebszeit muss größer als 0 sein"
 
 #: manufacturing/doctype/work_order/work_order.py:1048
 msgid "Operation Time must be greater than 0 for Operation {0}"
@@ -34518,7 +34524,7 @@ msgstr "Saldo des Zahlungsbuchs"
 #. Name of a DocType
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.json
 msgid "Payment Ledger Entry"
-msgstr ""
+msgstr "Zahlungsbucheintrag"
 
 #. Label of the payment_limit (Int) field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
@@ -37644,7 +37650,7 @@ msgstr "Gedruckt auf"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:370
 msgid "Printed on {0}"
-msgstr ""
+msgstr "Gedruckt am {0}"
 
 #. Label of a Card Break in the Settings Workspace
 #: setup/workspace/settings/settings.json
@@ -42461,7 +42467,7 @@ msgstr "Wählen Sie erneut, wenn der ausgewählte Kontakt nach dem Speichern bea
 
 #: setup/setup_wizard/data/sales_partner_type.txt:7
 msgid "Reseller"
-msgstr ""
+msgstr "Wiederverkäufer"
 
 #: accounts/doctype/payment_request/payment_request.js:39
 msgid "Resend Payment Email"
@@ -42834,7 +42840,7 @@ msgstr "Einzel- und Großhandel"
 
 #: setup/setup_wizard/data/sales_partner_type.txt:5
 msgid "Retailer"
-msgstr ""
+msgstr "Einzelhändler"
 
 #. Label of the retain_sample (Check) field in DocType 'Item'
 #. Label of the retain_sample (Check) field in DocType 'Purchase Receipt Item'
@@ -43597,7 +43603,7 @@ msgstr "Zeile {0}: Es ist nicht erlaubt den Lieferanten zu wechseln, da bereits 
 
 #: stock/doctype/stock_reservation_entry/stock_reservation_entry.py:1021
 msgid "Row #{0}: Only {1} available to reserve for the Item {2}"
-msgstr ""
+msgstr "Zeile #{0}: Nur {1} zur Reservierung für den Artikel {2} verfügbar"
 
 #: stock/doctype/stock_entry/stock_entry.py:676
 msgid "Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."
@@ -44192,7 +44198,7 @@ msgstr "Zeile {0}: {2} Artikel {1} existiert nicht in {2} {3}"
 
 #: controllers/accounts_controller.py:2634
 msgid "Row {0}: {3} Account {1} does not belong to Company {2}"
-msgstr ""
+msgstr "Zeile {0}: {3} Konto {1} gehört nicht zum Unternehmen {2}"
 
 #: utilities/transaction_base.py:279
 msgid "Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}."
@@ -44204,7 +44210,7 @@ msgstr "Zeile {}: Asset Naming Series ist für die automatische Erstellung von E
 
 #: accounts/doctype/invoice_discounting/invoice_discounting.py:84
 msgid "Row({0}): Outstanding Amount cannot be greater than actual Outstanding Amount {1} in {2}"
-msgstr ""
+msgstr "Zeile({0}): Ausstehender Betrag kann nicht größer sein als der tatsächliche ausstehende Betrag {1} in {2}"
 
 #: accounts/doctype/invoice_discounting/invoice_discounting.py:74
 msgid "Row({0}): {1} is already discounted in {2}"
@@ -44222,7 +44228,7 @@ msgstr "Zeilen in {0} entfernt"
 #. 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Rows with Same Account heads will be merged on Ledger"
-msgstr ""
+msgstr "Zeilen mit denselben Konten werden im Hauptbuch zusammengefasst"
 
 #: controllers/accounts_controller.py:2331
 msgid "Rows with duplicate due dates in other rows were found: {0}"
@@ -46159,11 +46165,11 @@ msgstr "Einstellungen für Serien- und Chargenartikel"
 #: stock/doctype/stock_reconciliation_item/stock_reconciliation_item.json
 #: subcontracting/doctype/subcontracting_receipt_supplied_item/subcontracting_receipt_supplied_item.json
 msgid "Serial / Batch Bundle"
-msgstr ""
+msgstr "Serien- / Chargenbündel"
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:374
 msgid "Serial / Batch Bundle Missing"
-msgstr ""
+msgstr "Serien- / Chargenbündel fehlt"
 
 #. Label of the serial_no_and_batch_no_tab (Section Break) field in DocType
 #. 'Serial and Batch Bundle'
@@ -47044,13 +47050,13 @@ msgstr "{0} in Firma {1} festlegen"
 #. 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Sets 'Accepted Warehouse' in each row of the Items table."
-msgstr ""
+msgstr "Legt in jeder Zeile der Artikeltabelle das Annahmelager fest."
 
 #. Description of the 'Rejected Warehouse' (Link) field in DocType
 #. 'Subcontracting Receipt'
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Sets 'Rejected Warehouse' in each row of the Items table."
-msgstr ""
+msgstr "Legt in jeder Zeile der Artikeltabelle das „Ausschusslager“ fest."
 
 #. Description of the 'Set Reserve Warehouse' (Link) field in DocType
 #. 'Subcontracting Order'
@@ -48753,7 +48759,7 @@ msgstr "Während der Reparatur verbrauchter Bestand"
 #. DocType 'Asset Repair'
 #: assets/doctype/asset_repair/asset_repair.json
 msgid "Stock Consumption Details"
-msgstr ""
+msgstr "Details zum Lagerverbrauch"
 
 #. Label of the warehouse_and_reference (Section Break) field in DocType 'POS
 #. Invoice Item'
@@ -48935,7 +48941,7 @@ msgstr "Lagerbewegung"
 #. Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgid "Stock Planning"
-msgstr ""
+msgstr "Bestandsplanung"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -51271,7 +51277,7 @@ msgstr "Steuernummer / UstIdNr: "
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:32
 msgid "Tax Id: {0}"
-msgstr ""
+msgstr "Steuernr. / UstId: {0}"
 
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
@@ -51295,7 +51301,7 @@ msgstr "Steuersätze"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:52
 msgid "Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme"
-msgstr ""
+msgstr "Steuererstattungen für Touristen im Rahmen der Steuererstattungsregelung für Touristen"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
@@ -51978,7 +51984,7 @@ msgstr "Das Treueprogramm ist für das ausgewählte Unternehmen nicht gültig"
 
 #: accounts/doctype/payment_request/payment_request.py:752
 msgid "The Payment Request {0} is already paid, cannot process payment twice"
-msgstr ""
+msgstr "Die Auszahlungsanforderung {0} ist bereits bezahlt, die Zahlung kann nicht zweimal verarbeitet werden"
 
 #: accounts/doctype/payment_terms_template/payment_terms_template.py:50
 msgid "The Payment Term at row {0} is possibly a duplicate."
@@ -52126,7 +52132,7 @@ msgstr ""
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:104
 msgid "The original invoice should be consolidated before or along with the return invoice."
-msgstr ""
+msgstr "Die Originalrechnung sollte vor oder zusammen mit der Erstattungsrechnung konsolidiert werden."
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:229
 msgid "The parent account {0} does not exists in the uploaded template"
@@ -53965,7 +53971,7 @@ msgstr "Prognostizierte Gesamtmenge"
 
 #: buying/report/item_wise_purchase_history/item_wise_purchase_history.py:272
 msgid "Total Purchase Amount"
-msgstr ""
+msgstr "Gesamtkaufbetrag"
 
 #. Label of the total_purchase_cost (Currency) field in DocType 'Project'
 #: projects/doctype/project/project.json
@@ -53974,7 +53980,7 @@ msgstr "Einkaufskosten (Eingangsrechnung)"
 
 #: projects/doctype/project/project.js:139
 msgid "Total Purchase Cost has been updated"
-msgstr ""
+msgstr "Die Gesamteinkaufskosten wurden aktualisiert"
 
 #. Label of the total_qty (Float) field in DocType 'Serial and Batch Bundle'
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.json
@@ -54226,7 +54232,7 @@ msgstr "Der prozentuale Gesamtbeitrag sollte 100 betragen"
 
 #: projects/doctype/project/project_dashboard.html:2
 msgid "Total hours: {0}"
-msgstr ""
+msgstr "Gesamtstunden: {0}"
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:456
 #: accounts/doctype/sales_invoice/sales_invoice.py:513
@@ -54321,7 +54327,7 @@ msgstr "Service Level Agreement verfolgen"
 #. Description of a DocType
 #: accounts/doctype/cost_center/cost_center.json
 msgid "Track separate Income and Expense for product verticals or divisions."
-msgstr ""
+msgstr "Verfolgen Sie Einnahmen und Ausgaben je Produktbereich oder Abteilung."
 
 #. Label of the tracking_status (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -57056,7 +57062,7 @@ msgstr "Warnung - Zeile {0}: Abgerechnete Stunden sind mehr als tatsächliche St
 
 #: stock/stock_ledger.py:763
 msgid "Warning on Negative Stock"
-msgstr ""
+msgstr "Warnung vor negativem Bestand"
 
 #: accounts/doctype/cost_center_allocation/cost_center_allocation.py:114
 msgid "Warning!"
@@ -58424,7 +58430,7 @@ msgstr "oder"
 
 #: support/doctype/service_level_agreement/service_level_agreement.js:50
 msgid "or its descendants"
-msgstr ""
+msgstr "oder seine Nachkommen"
 
 #: templates/includes/macros.html:207 templates/includes/macros.html:211
 msgid "out of 5"
@@ -58432,7 +58438,7 @@ msgstr "von 5"
 
 #: accounts/doctype/payment_entry/payment_entry.py:1160
 msgid "paid to"
-msgstr ""
+msgstr "bezahlt an"
 
 #: public/js/utils.js:390
 msgid "payments app is not installed. Please install it from {0} or {1}"
@@ -58592,7 +58598,7 @@ msgstr "{0} ({1}) darf nicht größer als die geplante Menge ({2}) im Arbeitsauf
 
 #: stock/report/stock_ageing/stock_ageing.py:200
 msgid "{0} - Above"
-msgstr ""
+msgstr "{0} und mehr"
 
 #: stock/doctype/landed_cost_voucher/landed_cost_voucher.py:288
 msgid "{0} <b>{1}</b> has submitted Assets. Remove Item <b>{2}</b> from table to continue."
@@ -58600,7 +58606,7 @@ msgstr "{0} <b>{1}</b> hat Vermögensgegenstände gebucht. Entfernen Sie Artikel
 
 #: controllers/accounts_controller.py:2007
 msgid "{0} Account not found against Customer {1}."
-msgstr ""
+msgstr "{0} Konto für Kunde {1} nicht gefunden."
 
 #: utilities/transaction_base.py:193
 msgid "{0} Account: {1} ({2}) must be in either customer billing currency: {3} or Company default currency: {4}"
@@ -58636,7 +58642,7 @@ msgstr "{0} Probe aufbewahren basiert auf Charge. Bitte aktivieren Sie die Optio
 
 #: accounts/doctype/bank_reconciliation_tool/bank_reconciliation_tool.py:423
 msgid "{0} Transaction(s) Reconciled"
-msgstr ""
+msgstr "{0} Transaktion(en) Abgestimmt"
 
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:61
 msgid "{0} account is not of type {1}"
@@ -58747,7 +58753,7 @@ msgstr ""
 
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.py:189
 msgid "{0} is already running for {1}"
-msgstr ""
+msgstr "{0} läuft bereits für {1}"
 
 #: controllers/accounts_controller.py:164
 msgid "{0} is blocked so this transaction cannot proceed"
@@ -58858,7 +58864,7 @@ msgstr ""
 
 #: stock/doctype/pick_list/pick_list.py:891
 msgid "{0} units of Item {1} is not available in any of the warehouses."
-msgstr ""
+msgstr "{0} Einheiten des Artikels {1} sind in keinem der Lager verfügbar."
 
 #: stock/doctype/pick_list/pick_list.py:883
 msgid "{0} units of Item {1} is picked in another Pick List."
@@ -58883,7 +58889,7 @@ msgstr "{0} Einheiten von {1} benötigt in {2} zum Abschluss dieser Transaktion.
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:36
 msgid "{0} until {1}"
-msgstr ""
+msgstr "{0} bis {1}"
 
 #: stock/utils.py:414
 msgid "{0} valid serial nos for Item {1}"
