@@ -467,6 +467,39 @@ class StatusUpdater(Document):
 					where name='{detail_id}'""".format(**args)
 				)
 
+	@staticmethod
+	def _calculate_target_parent_percentage(
+		name, target_parent_dt, target_dt, target_ref_field, target_field
+	):
+		child_records = frappe.get_all(
+			target_dt,
+			filters={"parent": name, "parenttype": target_parent_dt},
+			fields=[target_ref_field, target_field],
+		)
+
+		sum_ref = sum(abs(record[target_ref_field]) for record in child_records)
+
+		if sum_ref > 0:
+			percentage = round(
+				sum(min(abs(record[target_field]), abs(record[target_ref_field])) for record in child_records)
+				/ sum_ref
+				* 100,
+				6,
+			)
+		else:
+			percentage = 0
+
+		return percentage
+
+	@staticmethod
+	def _determine_status(percentage, keyword):
+		if percentage < 0.001:
+			return f"Not {keyword}"
+		elif percentage >= 99.999999:
+			return f"Fully {keyword}"
+		else:
+			return f"Partly {keyword}"
+
 	def _update_percent_field_in_targets(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
 		if args.get("percent_join_field_parent"):
@@ -490,25 +523,27 @@ class StatusUpdater(Document):
 		self._update_modified(args, update_modified)
 
 		if args.get("target_parent_field"):
+			percentage = self._calculate_target_parent_percentage(
+				args["name"],
+				args["target_parent_dt"],
+				args["target_dt"],
+				args["target_ref_field"],
+				args["target_field"],
+			)
 			frappe.db.sql(
 				"""update `tab{target_parent_dt}`
-				set {target_parent_field} = round(
-					ifnull((select
-						ifnull(sum(case when abs({target_ref_field}) > abs({target_field}) then abs({target_field}) else abs({target_ref_field}) end), 0)
-						/ sum(abs({target_ref_field})) * 100
-					from `tab{target_dt}` where parent='{name}' and parenttype='{target_parent_dt}' having sum(abs({target_ref_field})) > 0), 0), 6)
+				set {target_parent_field} = {percentage}
 					{update_modified}
-				where name='{name}'""".format(**args)
+				where name='{name}'""".format(percentage=percentage, **args)
 			)
 
 			# update field
 			if args.get("status_field"):
+				status = self._determine_status(percentage, args["keyword"])
 				frappe.db.sql(
 					"""update `tab{target_parent_dt}`
-					set {status_field} = (case when {target_parent_field}<0.001 then 'Not {keyword}'
-					else case when {target_parent_field}>=99.999999 then 'Fully {keyword}'
-					else 'Partly {keyword}' end end)
-					where name='{name}'""".format(**args)
+					set {status_field} = '{status}'
+					where name='{name}'""".format(status=status, **args)
 				)
 
 			if update_modified:
