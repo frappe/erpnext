@@ -43,7 +43,7 @@ function get_filters() {
 			label: __("From Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: frappe.sys_defaults.fiscal_year,
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 		},
 		{
@@ -51,7 +51,7 @@ function get_filters() {
 			label: __("To Fiscal Year"),
 			fieldtype: "Link",
 			options: "Fiscal Year",
-			default: frappe.sys_defaults.fiscal_year,
+			default: erpnext.utils.get_fiscal_year(frappe.datetime.get_today()),
 			reqd: 1,
 		},
 		{

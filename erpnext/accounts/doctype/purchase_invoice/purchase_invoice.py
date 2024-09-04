@@ -369,6 +369,21 @@ class PurchaseInvoice(BuyingController):
 						item.expense_account = stock_not_billed_account
 			elif item.is_fixed_asset:
 				account = None
+				if not item.pr_detail and item.po_detail:
+					receipt_item = frappe.get_cached_value(
+						"Purchase Receipt Item",
+						{
+							"purchase_order": item.purchase_order,
+							"purchase_order_item": item.po_detail,
+							"docstatus": 1,
+						},
+						["name", "parent"],
+						as_dict=1,
+					)
+					if receipt_item:
+						item.pr_detail = receipt_item.name
+						item.purchase_receipt = receipt_item.parent
+
 				if item.pr_detail:
 					if not self.asset_received_but_not_billed:
 						self.asset_received_but_not_billed = self.get_company_default(
