@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-03 17:32\n"
+"PO-Revision-Date: 2024-09-04 17:44\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -3454,11 +3454,11 @@ msgstr "Reklamcılık"
 
 #: setup/setup_wizard/data/industry_type.txt:2
 msgid "Advertising"
-msgstr ""
+msgstr "Reklamcılık"
 
 #: setup/setup_wizard/data/industry_type.txt:3
 msgid "Aerospace"
-msgstr ""
+msgstr "Havacılık ve Uzay"
 
 #. Label of the affected_transactions (Code) field in DocType 'Repost Item
 #. Valuation'
@@ -3730,7 +3730,7 @@ msgstr "Bir grup Ürünü başka bir Ürün altında birleştirin. Bu, paketlenm
 
 #: setup/setup_wizard/data/industry_type.txt:4
 msgid "Agriculture"
-msgstr ""
+msgstr "Tarım"
 
 #. Name of a role
 #: assets/doctype/location/location.json
@@ -9431,7 +9431,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Carat"
-msgstr ""
+msgstr "Karat"
 
 #. Title of an incoterm
 #: setup/doctype/incoterm/incoterms.csv:6
@@ -13323,7 +13323,7 @@ msgstr "Kümülatif İşlem Eşiği"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Cup"
-msgstr ""
+msgstr "Fincan"
 
 #. Label of the account_currency (Link) field in DocType 'Account'
 #. Label of the currency (Link) field in DocType 'Bank Transaction'
@@ -22266,7 +22266,7 @@ msgstr ""
 #: stock/doctype/shipment_parcel/shipment_parcel.json
 #: stock/doctype/shipment_parcel_template/shipment_parcel_template.json
 msgid "Height (cm)"
-msgstr ""
+msgstr "Yükseklik (cm)"
 
 #: assets/doctype/asset/depreciation.py:404
 msgid "Hello,"
