@@ -773,6 +773,11 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 	def postprocess(source, target):
 		target.flags.ignore_permissions = ignore_permissions
 		set_missing_values(source, target)
+
+		# set tax_withholding_category from Purchase Order
+		if source.apply_tds and source.tax_withholding_category and target.apply_tds:
+			target.tax_withholding_category = source.tax_withholding_category
+
 		# Get the advance paid Journal Entries in Purchase Invoice Advance
 		if target.get("allocate_advances_automatically"):
 			target.set_advances()
