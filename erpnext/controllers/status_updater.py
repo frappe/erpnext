@@ -520,36 +520,28 @@ class StatusUpdater(Document):
 	def _update_percent_field(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
 
-		self._update_modified(args, update_modified)
+		update_data = {}
 
 		if args.get("target_parent_field"):
-			percentage = self._calculate_target_parent_percentage(
+			update_data[args.get("target_parent_field")] = self._calculate_target_parent_percentage(
 				args["name"],
 				args["target_parent_dt"],
 				args["target_dt"],
 				args["target_ref_field"],
 				args["target_field"],
 			)
-			frappe.db.sql(
-				"""update `tab{target_parent_dt}`
-				set {target_parent_field} = {percentage}
-					{update_modified}
-				where name='{name}'""".format(percentage=percentage, **args)
-			)
-
 			# update field
 			if args.get("status_field"):
-				status = self._determine_status(percentage, args["keyword"])
-				frappe.db.sql(
-					"""update `tab{target_parent_dt}`
-					set {status_field} = '{status}'
-					where name='{name}'""".format(status=status, **args)
+				update_data[args.get("status_field")] = self._determine_status(
+					update_data[args.get("target_parent_field")], args["keyword"]
 				)
 
-			if update_modified:
-				target = frappe.get_doc(args["target_parent_dt"], args["name"])
-				target.set_status(update=True)
-				target.notify_update()
+		if update_data:
+			target = frappe.get_doc(args["target_parent_dt"], args["name"])
+			target.update(update_data)  # status calculus might depend on it
+			status = target.get_status()
+			update_data.update(status)
+			target.db_set(update_data, update_modified=update_modified, notify=True)
 
 	def _update_modified(self, args, update_modified):
 		if not update_modified:
