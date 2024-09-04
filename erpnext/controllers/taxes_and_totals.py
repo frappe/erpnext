@@ -915,19 +915,38 @@ class calculate_taxes_and_totals:
 		if item.price_list_rate:
 			if item.pricing_rules and not self.doc.ignore_pricing_rule:
 				has_margin = False
-				for d in get_applied_pricing_rules(item.pricing_rules):
+				item.margin_rate_or_amount = 0
+
+				applied_rules = get_applied_pricing_rules(item.pricing_rules)
+
+				for d in applied_rules:
 					pricing_rule = frappe.get_cached_doc("Pricing Rule", d)
 
-					if pricing_rule.margin_rate_or_amount and (
-						(
-							pricing_rule.currency == self.doc.currency
-							and pricing_rule.margin_type in ["Amount", "Percentage"]
-						)
-						or pricing_rule.margin_type == "Percentage"
-					):
-						item.margin_type = pricing_rule.margin_type
-						item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-						has_margin = True
+					if pricing_rule.margin_rate_or_amount and pricing_rule.currency == self.doc.currency:
+						if pricing_rule.margin_type == "Percentage":
+							item.margin_type = "Percentage"
+							item.margin_rate_or_amount = (
+								pricing_rule.margin_rate_or_amount / 100 + 1
+								if len(applied_rules) == 1 or not item.margin_rate_or_amount
+								else item.margin_rate_or_amount
+								* (pricing_rule.margin_rate_or_amount / 100 + 1)
+							)
+							has_margin = True
+
+						elif pricing_rule.margin_type == "Amount":
+							# Always Take Margin Type Percentage now, because with this solution we can apply multiple amount and percentage margins
+							item.margin_type = "Percentage"
+							amount_percentage_on_list_rate = (
+								pricing_rule.margin_rate_or_amount / item.price_list_rate + 1
+							)
+							item.margin_rate_or_amount = (
+								amount_percentage_on_list_rate
+								if not item.margin_rate_or_amount
+								else item.margin_rate_or_amount * amount_percentage_on_list_rate
+							)
+							has_margin = True
+
+				item.margin_rate_or_amount = (item.margin_rate_or_amount - 1) * 100
 
 				if not has_margin:
 					item.margin_type = None
@@ -936,7 +955,8 @@ class calculate_taxes_and_totals:
 			if not item.pricing_rules and flt(item.rate) > flt(item.price_list_rate):
 				item.margin_type = "Amount"
 				item.margin_rate_or_amount = flt(
-					item.rate - item.price_list_rate, item.precision("margin_rate_or_amount")
+					item.rate - item.price_list_rate,
+					item.precision("margin_rate_or_amount"),
 				)
 				item.rate_with_margin = item.rate
 
