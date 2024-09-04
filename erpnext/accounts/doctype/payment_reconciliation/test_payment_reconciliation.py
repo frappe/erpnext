@@ -1335,7 +1335,11 @@ class TestPaymentReconciliation(FrappeTestCase):
 		pe.save().submit()
 
 		# unallocated_amount will have some rounding loss - 26.749950
-		self.assertNotEqual(pe.unallocated_amount, 26.75)
+		# Rounding issue fixed in #43037
+		self.assertEqual(pe.unallocated_amount, 26.75)
+
+		# Reset unalloacted amount to continue test for unrounded unallaocted_amounts before #43037
+		pe.unalloacted_amount = 26.749950
 
 		pr = frappe.get_doc("Payment Reconciliation")
 		pr.company = self.company
