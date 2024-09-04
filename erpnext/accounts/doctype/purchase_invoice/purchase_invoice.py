@@ -606,7 +606,7 @@ class PurchaseInvoice(BuyingController):
 
 	def validate_expense_account(self):
 		for item in self.get("items"):
-			validate_account_head(item.idx, item.expense_account, self.company, "Expense")
+			validate_account_head(item.idx, item.expense_account, self.company, _("Expense"))
 
 	def set_against_expense_account(self, force=False):
 		against_accounts = []
