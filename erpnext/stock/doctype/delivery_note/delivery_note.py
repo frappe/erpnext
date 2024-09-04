@@ -1030,7 +1030,7 @@ def make_sales_invoice(source_name, target_doc=None, args=None):
 			},
 			"Sales Taxes and Charges": {
 				"doctype": "Sales Taxes and Charges",
-				"add_if_empty": True,
+				"reset_value": True,
 				"ignore": args.get("merge_taxes") if args else 0,
 			},
 			"Sales Team": {
