@@ -8,10 +8,11 @@ from frappe.model.document import Document
 from frappe.utils.data import cint
 
 from erpnext.assets.doctype.asset.depreciation import get_disposal_account_and_cost_center
+from erpnext.controllers.updates_caster import ItemCastUpdates
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no, get_serial_nos
 
 
-class SalesInvoiceItem(Document):
+class SalesInvoiceItem(Document, ItemCastUpdates):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

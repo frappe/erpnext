@@ -4,8 +4,10 @@
 
 from frappe.model.document import Document
 
+from erpnext.controllers.updates_caster import ItemCastUpdates
 
-class DeliveryNoteItem(Document):
+
+class DeliveryNoteItem(Document, ItemCastUpdates):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 

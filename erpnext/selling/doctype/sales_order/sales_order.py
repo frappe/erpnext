@@ -37,6 +37,7 @@ from erpnext.stock.doctype.stock_reservation_entry.stock_reservation_entry impor
 )
 from erpnext.stock.get_item_details import get_default_bom, get_price_list_rate
 from erpnext.stock.stock_balance import get_reserved_qty, update_bin_qty
+from erpnext.updates_caster import UpdatesCaster
 
 form_grid_templates = {"items": "templates/form_grid/item_grid.html"}
 
@@ -47,37 +48,55 @@ class WarehouseRequired(frappe.ValidationError):
 	pass
 
 
-class SalesOrder(SellingController):
+class SalesOrder(SellingController, UpdatesCaster):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
 	from typing import TYPE_CHECKING
 
-	def set_status(self, update=False, status=None, update_modified=True):
-		if self.docstatus == 2:
-			status = "Cancelled"
-		elif self.docstatus == 1:
-			if status in MANUAL_STATI:
-				pass  # setter call
-			elif self.status in MANUAL_STATI:
-				return  # retainer call
-			elif flt(self.per_delivered, 2) < 100 and flt(self.per_billed, 2) < 100:
-				status = "To Deliver and Bill"
-			elif flt(self.per_delivered, 2) >= 100 and flt(self.per_billed, 2) < 100:
-				status = "To Bill"
-			elif flt(self.per_delivered, 2) < 100 and flt(self.per_billed, 2) >= 100:
-				status = "To Deliver"
-			elif flt(self.per_delivered, 2) >= 100 and flt(self.per_billed, 2) >= 100:
-				status = "Completed"
-		else:
-			status = "Draft"
+	def get_status(self):
+		updates = {}
 
-		if status and self.status != status:
+		if self.docstatus.is_cancelled():
+			updates["status"] = "Cancelled"
+		elif self.docstatus.is_submitted():
+			if self.status in MANUAL_STATI:
+				updates["status"] = self.status
+			else:
+				per_delivered = flt(self.per_delivered, 2)
+				per_billed = flt(self.per_billed, 2)
+
+				if per_delivered < 100 and per_billed < 100:
+					updates["status"] = "To Deliver and Bill"
+				elif per_delivered >= 100 and per_billed < 100:
+					updates["status"] = "To Bill"
+				elif per_delivered < 100 and per_billed >= 100:
+					updates["status"] = "To Deliver"
+				elif per_delivered >= 100 and per_billed >= 100:
+					updates["status"] = "Completed"
+
+		else:
+			updates["status"] = "Draft"
+
+		# Update per_delivered and per_billed
+		for update in self.status_updater:
+			if update.get("target_ref_field") == "per_delivered":
+				updates["per_delivered"] = self.get_percentage(update)
+			elif update.get("target_ref_field") == "per_billed":
+				updates["per_billed"] = self.get_percentage(update)
+
+		return updates
+
+	def set_status(self, status=None, update_modified=True):
+		if status:
 			self.status = status
-			if self.docstatus == 1:
-				self.add_comment("Label", _(self.status))
-			if update:
-				self.db_set("status", status, update_modified=update_modified)
+		updates = self.get_status()
+
+		if any(self.get(k) != v for k, v in updates.items()):
+			if self.docstatus.is_submitted() and self.status != updates["status"]:
+				self.add_comment("Label", _(updates["status"]))
+			self.flags.ignore_children = True  # perf
+			self.db_set(updates, update_modified=update_modified)
 
 	if TYPE_CHECKING:
 		from frappe.types import DF

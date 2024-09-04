@@ -5,8 +5,10 @@
 import frappe
 from frappe.model.document import Document
 
+from erpnext.controllers.updates_caster import ItemCastUpdates
 
-class SalesOrderItem(Document):
+
+class SalesOrderItem(Document, ItemCastUpdates):
 	# begin: auto-generated types
 	# This code is auto-generated. Do not modify anything in this block.
 
@@ -92,7 +94,11 @@ class SalesOrderItem(Document):
 		work_order_qty: DF.Float
 	# end: auto-generated types
 
-	pass
+	def _cast_update_from_sales_invoice_item(self, source):
+		return {"billed_amt": source.amount}
+
+	def _cast_update_from_delivery_note_item(self, source):
+		return {"delivered_qty": source.qty}
 
 
 def on_doctype_update():
