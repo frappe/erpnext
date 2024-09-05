@@ -3909,7 +3909,7 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 
 		# create a customer
-		customer = make_customer(customer="_Test Common Customer USD")
+		customer = make_customer(customer="_Test Common Party USD")
 		cust_doc = frappe.get_doc("Customer", customer)
 		cust_doc.default_currency = "USD"
 		test_account_details = {
@@ -3920,7 +3920,7 @@ class TestSalesInvoice(FrappeTestCase):
 		cust_doc.save()
 
 		# create a supplier
-		supplier = create_supplier(supplier_name="_Test Common Customer USD").name
+		supplier = create_supplier(supplier_name="_Test Common Party USD").name
 		supp_doc = frappe.get_doc("Supplier", supplier)
 		supp_doc.default_currency = "USD"
 		test_account_details = {
