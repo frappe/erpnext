@@ -1205,7 +1205,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
-				"reset_value": True,
+				"reset_value": not (args and args.get("merge_taxes")),
 				"ignore": args.get("merge_taxes") if args else 0,
 			},
 		},
