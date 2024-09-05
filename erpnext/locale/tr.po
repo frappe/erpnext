@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-04 17:44\n"
+"PO-Revision-Date: 2024-09-05 18:11\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -22126,7 +22126,7 @@ msgstr "6 Aylık"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hand"
-msgstr ""
+msgstr "Karış"
 
 #: setup/setup_wizard/operations/install_fixtures.py:211
 msgid "Hardware"
@@ -22244,22 +22244,22 @@ msgstr "Isı Haritası"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectare"
-msgstr ""
+msgstr "Hektar"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectogram/Litre"
-msgstr ""
+msgstr "Hektogram/Litre"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectometer"
-msgstr ""
+msgstr "Hektometre"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hectopascal"
-msgstr ""
+msgstr "Hektopaskal"
 
 #. Label of the height (Int) field in DocType 'Shipment Parcel'
 #. Label of the height (Int) field in DocType 'Shipment Parcel Template'
@@ -29775,7 +29775,7 @@ msgstr "Minimum Sipariş Miktarı"
 #. Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgid "Minimum Payment Amount"
-msgstr ""
+msgstr "Minimum Ödeme Tutarı"
 
 #: stock/report/product_bundle_balance/product_bundle_balance.py:97
 msgid "Minimum Qty"
@@ -37064,7 +37064,7 @@ msgstr "İş Deneyimi"
 
 #: accounts/doctype/period_closing_voucher/period_closing_voucher.py:162
 msgid "Previous Year is not closed, please close it first"
-msgstr ""
+msgstr "Önceki Mali Yıl henüz kapatılmamış, önce bu işlemi tamamlayın"
 
 #. Option for the 'Price or Product Discount' (Select) field in DocType
 #. 'Pricing Rule'
@@ -37638,7 +37638,7 @@ msgstr ""
 
 #: accounts/doctype/cheque_print_template/cheque_print_template.js:75
 msgid "Print settings updated in respective print format"
-msgstr ""
+msgstr "Yazdırma ayarları ilgili yazdırma biçiminde güncellendi"
 
 #: setup/install.py:115
 msgid "Print taxes with zero amount"
@@ -45947,7 +45947,7 @@ msgstr ""
 
 #: www/book_appointment/index.html:43
 msgid "Selected date is"
-msgstr ""
+msgstr "Seçilen Tarih"
 
 #: public/js/bulk_transaction_processing.js:34
 msgid "Selected document must be in submitted state"
