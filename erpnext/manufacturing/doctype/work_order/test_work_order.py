@@ -2054,6 +2054,108 @@ class TestWorkOrder(FrappeTestCase):
 			"BOM",
 		)
 
+	def test_disassemby_order(self):
+		fg_item = "Test Disassembly Item"
+		source_warehouse = "Stores - _TC"
+		raw_materials = ["Test Disassembly RM Item 1", "Test Disassembly RM Item 2"]
+
+		make_item(fg_item, {"is_stock_item": 1})
+		for item in raw_materials:
+			make_item(item, {"is_stock_item": 1})
+			test_stock_entry.make_stock_entry(
+				item_code=item,
+				target=source_warehouse,
+				qty=1,
+				basic_rate=100,
+			)
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=raw_materials)
+
+		wo = make_wo_order_test_record(
+			item=fg_item,
+			qty=1,
+			source_warehouse=source_warehouse,
+			skip_transfer=1,
+		)
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
+		for row in stock_entry.items:
+			if row.item_code in raw_materials:
+				row.s_warehouse = source_warehouse
+
+		stock_entry.submit()
+
+		wo.reload()
+		self.assertEqual(wo.status, "Completed")
+
+		stock_entry = frappe.get_doc(make_stock_entry(wo.name, "Disassemble", 1))
+		stock_entry.save()
+
+		self.assertEqual(stock_entry.purpose, "Disassemble")
+
+		for row in stock_entry.items:
+			if row.item_code == fg_item:
+				self.assertTrue(row.s_warehouse)
+				self.assertFalse(row.t_warehouse)
+			else:
+				self.assertFalse(row.s_warehouse)
+				self.assertTrue(row.t_warehouse)
+
+		stock_entry.submit()
+
+	def test_components_qty_for_bom_based_manufacture_entry(self):
+		frappe.db.set_single_value("Manufacturing Settings", "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 1)
+
+		fg_item = "Test FG Item For Component Validation"
+		source_warehouse = "Stores - _TC"
+		raw_materials = ["Test Component Validation RM Item 1", "Test Component Validation RM Item 2"]
+
+		make_item(fg_item, {"is_stock_item": 1})
+		for item in raw_materials:
+			make_item(item, {"is_stock_item": 1})
+			test_stock_entry.make_stock_entry(
+				item_code=item,
+				target=source_warehouse,
+				qty=10,
+				basic_rate=100,
+			)
+
+		make_bom(item=fg_item, source_warehouse=source_warehouse, raw_materials=raw_materials)
+
+		wo = make_wo_order_test_record(
+			item=fg_item,
+			qty=10,
+			source_warehouse=source_warehouse,
+		)
+
+		transfer_entry = frappe.get_doc(make_stock_entry(wo.name, "Material Transfer for Manufacture", 10))
+		transfer_entry.save()
+		for row in transfer_entry.items:
+			row.qty = 5
+
+		self.assertRaises(frappe.ValidationError, transfer_entry.save)
+
+		transfer_entry.reload()
+		for row in transfer_entry.items:
+			self.assertEqual(row.qty, 10)
+
+		transfer_entry.submit()
+
+		manufacture_entry = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 10))
+		manufacture_entry.save()
+		for row in manufacture_entry.items:
+			if not row.s_warehouse:
+				continue
+
+			row.qty = 5
+
+		self.assertRaises(frappe.ValidationError, manufacture_entry.save)
+		manufacture_entry.reload()
+		manufacture_entry.submit()
+
+		frappe.db.set_single_value("Manufacturing Settings", "validate_components_quantities_per_bom", 0)
+
 
 def make_operation(**kwargs):
 	kwargs = frappe._dict(kwargs)
@@ -2371,6 +2473,7 @@ def make_wo_order_test_record(**args):
 	wo_order.batch_size = args.batch_size or 0
 
 	if args.source_warehouse:
+		wo_order.source_warehouse = args.source_warehouse
 		for item in wo_order.get("required_items"):
 			item.source_warehouse = args.source_warehouse
 
