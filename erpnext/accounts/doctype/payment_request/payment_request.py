@@ -17,7 +17,7 @@ from erpnext.accounts.party import get_party_account, get_party_bank_account
 from erpnext.accounts.utils import get_account_currency, get_currency_precision
 from erpnext.utilities import payment_app_import_guard
 
-from .payment_gateway_v1 import v1_gateway_before_submit
+from .payment_gateway_v1 import v1_create_subscription, v1_gateway_before_submit
 
 
 class PaymentRequest(Document):
@@ -327,12 +327,8 @@ class PaymentRequest(Document):
 		)
 		comm.insert(ignore_permissions=True)
 
-	def create_subscription(self, payment_provider, gateway_controller, data):
-		if payment_provider == "stripe":
-			with payment_app_import_guard():
-				from payments.payment_gateways.stripe_integration import create_stripe_subscription
-
-			return create_stripe_subscription(gateway_controller, data)
+	def create_subscription(self, *args, **kwargs):
+		return v1_create_subscription(*args, **kwargs)
 
 
 @frappe.whitelist(allow_guest=True)

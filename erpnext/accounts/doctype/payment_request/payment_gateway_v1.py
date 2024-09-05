@@ -109,3 +109,11 @@ def v1_gateway_before_submit(self, payment_gateway):
 		if not (self.mute_email or self.flags.mute_email):
 			self.send_email()
 			self.make_communication_entry()
+
+
+def v1_create_subscription(payment_provider, gateway_controller, data):
+	if payment_provider == "stripe":
+		with payment_app_import_guard():
+			from payments.payment_gateways.stripe_integration import create_stripe_subscription
+
+		return create_stripe_subscription(gateway_controller, data)
