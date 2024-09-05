@@ -3891,9 +3891,7 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 		from erpnext.accounts.doctype.party_link.party_link import create_party_link
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
-
 		from erpnext.setup.utils import get_exchange_rate
-
 
 		creditors = create_account(
 			account_name="Creditors USD",
@@ -3909,7 +3907,6 @@ class TestSalesInvoice(FrappeTestCase):
 			account_currency="USD",
 			account_type="Receivable",
 		)
-
 
 		# create a customer
 		customer = make_customer(customer="_Test Common Customer USD")
