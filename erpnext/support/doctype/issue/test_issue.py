@@ -198,6 +198,8 @@ class TestIssue(TestSetUp):
 		frappe.flags.current_time = get_datetime("2021-11-02 03:00")
 		create_communication(issue.name, "test@example.com", "Received", frappe.flags.current_time)
 		issue.reload()
+		issue.status = "Open"
+		issue.save()
 		# Since issue was Resolved, Resolution By should be increased by 5 hrs (3am - 10pm)
 		self.assertEqual(issue.total_hold_time, 3600 + 21600 + 18000)
 		# Resolution By should increase by 5 hrs
