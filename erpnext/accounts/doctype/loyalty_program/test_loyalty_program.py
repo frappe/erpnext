@@ -39,9 +39,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		)
 
 		self.assertEqual(si_original.get("loyalty_program"), customer.loyalty_program)
-		self.assertEqual(
-			lpe.get("loyalty_program_tier"), None
-		)  # 10000 does not surpass the first tier (11000)
+		self.assertEqual(lpe.get("loyalty_program_tier"), "Bronce")  # is always in the first tier
 		self.assertEqual(lpe.get("loyalty_program_tier"), customer.loyalty_program_tier)
 		self.assertEqual(lpe.loyalty_points, earned_points)
 
@@ -220,7 +218,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 				"collection_rules": [
 					{"tier_name": "Gold", "collection_factor": 1000, "min_spent": 20000},
 					{"tier_name": "Silver", "collection_factor": 1000, "min_spent": 10000},
-					{"tier_name": "Bronze", "collection_factor": 1000, "min_spent": 5000},
+					{"tier_name": "Bronze", "collection_factor": 1000, "min_spent": 0},
 				],
 			}
 		)
@@ -354,7 +352,7 @@ def create_records():
 				"company": "_Test Company",
 				"cost_center": "Main - _TC",
 				"expense_account": "Loyalty - _TC",
-				"collection_rules": [{"tier_name": "Silver", "collection_factor": 1000, "min_spent": 1000}],
+				"collection_rules": [{"tier_name": "Bronce", "collection_factor": 1000, "min_spent": 0}],
 			}
 		).insert()
 
@@ -385,6 +383,7 @@ def create_records():
 				"cost_center": "Main - _TC",
 				"expense_account": "Loyalty - _TC",
 				"collection_rules": [
+					{"tier_name": "Bronze", "collection_factor": 1000, "min_spent": 0},
 					{"tier_name": "Silver", "collection_factor": 1000, "min_spent": 10000},
 					{"tier_name": "Gold", "collection_factor": 1000, "min_spent": 19000},
 				],
