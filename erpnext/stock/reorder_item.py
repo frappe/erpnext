@@ -354,9 +354,14 @@ def get_email_list(company):
 
 
 def get_comapny_wise_users(company):
+	companies = [company]
+
+	if parent_company := frappe.db.get_value("Company", company, "parent_company"):
+		companies.append(parent_company)
+
 	users = frappe.get_all(
 		"User Permission",
-		filters={"allow": "Company", "for_value": company, "apply_to_all_doctypes": 1},
+		filters={"allow": "Company", "for_value": ("in", companies), "apply_to_all_doctypes": 1},
 		fields=["user"],
 	)
 
