@@ -1883,8 +1883,9 @@ class TestPaymentEntry(FrappeTestCase):
 		pe.source_exchange_rate = 1.35
 		pe.save()
 
-		# 58,991.94 = (43,697.73 * 1.35) = 58,991.94
-		self.assertEqual(pe.base_paid_amount, pe.base_total_allocated_amount)
+		# 58,991.94 = (43,697.73 * 1.35)
+		self.assertEqual(pe.base_paid_amount, 58991.94)
+		self.assertEqual(pe.base_total_allocated_amount, 58991.94)
 		self.assertEqual(pe.unallocated_amount, 0)
 
 
