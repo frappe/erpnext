@@ -1654,8 +1654,11 @@ class AccountsController(TransactionBase):
 			and self.get("discount_amount")
 			and self.get("additional_discount_account")
 		):
-			amount = item.amount
-			base_amount = item.base_amount
+			amount += item.distributed_discount_amount
+			base_amount += flt(
+				item.distributed_discount_amount * self.get("conversion_rate"),
+				item.precision("distributed_discount_amount"),
+			)
 
 		return amount, base_amount
 
