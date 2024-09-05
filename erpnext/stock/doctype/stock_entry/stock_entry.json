@@ -427,13 +427,13 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+   "depends_on": "eval:((doc.purpose === \"Send to Subcontractor\") || (doc.purpose === \"Material Transfer\" && doc.is_return))",
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
    "label": "Supplier Details"
   },
   {
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+   "depends_on": "eval:((doc.purpose === \"Send to Subcontractor\") || (doc.purpose === \"Material Transfer\" && doc.is_return))",
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
@@ -445,7 +445,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+   "depends_on": "eval:((doc.purpose === \"Send to Subcontractor\") || (doc.purpose === \"Material Transfer\" && doc.is_return))",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "label": "Supplier Name",
@@ -455,7 +455,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.purpose === \"Send to Subcontractor\"",
+   "depends_on": "eval:((doc.purpose === \"Send to Subcontractor\") || (doc.purpose === \"Material Transfer\" && doc.is_return))",
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Supplier Address",

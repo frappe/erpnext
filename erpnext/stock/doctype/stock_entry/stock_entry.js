@@ -1296,7 +1296,7 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 
 		this.frm.cscript.toggle_enable_bom();
 
-		if (doc.purpose == "Send to Subcontractor") {
+		if (doc.purpose == "Send to Subcontractor" || (doc.purpose == "Material Transfer" && doc.is_return)) {
 			doc.customer =
 				doc.customer_name =
 				doc.customer_address =
