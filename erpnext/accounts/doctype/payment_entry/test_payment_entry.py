@@ -1864,6 +1864,29 @@ class TestPaymentEntry(FrappeTestCase):
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, pe.doctype, pe.name)
 		self.assertRaises(frappe.DoesNotExistError, frappe.get_doc, "Journal Entry", jv[0])
 
+	def test_base_total_allocated_amount(self):
+		customer = create_customer(frappe.generate_hash(), "USD")
+		si = create_sales_invoice(
+			customer=customer,
+			debit_to="_Test Receivable USD - _TC",
+			currency="USD",
+			rate=43697.73,
+			do_not_save=True,
+		)
+		si.taxes_and_charges = ""
+		si.taxes = []
+		si.conversion_rate = 1.35  # Test scenario is between CAD and USD.
+		si.submit()
+
+		pe = get_payment_entry(si.doctype, si.name, bank_account="_Test Bank USD - _TC")
+		pe.paid_to = "_Test Receivable USD - _TC"
+		pe.source_exchange_rate = 1.35
+		pe.save()
+
+		# 58,991.94 = (43,697.73 * 1.35) = 58,991.94
+		self.assertEqual(pe.base_paid_amount, pe.base_total_allocated_amount)
+		self.assertEqual(pe.unallocated_amount, 0)
+
 
 def create_payment_entry(**args):
 	payment_entry = frappe.new_doc("Payment Entry")
