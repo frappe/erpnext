@@ -79,9 +79,10 @@ def get_loyalty_program_details_with_points(
 ):
 	lp_details = get_loyalty_program_details(customer, loyalty_program, company=company, silent=silent)
 	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
-	lp_details.update(
-		get_loyalty_details(customer, loyalty_program.name, expiry_date, company, include_expired_entry)
+	loyalty_details = get_loyalty_details(
+		customer, loyalty_program.name, expiry_date, company, include_expired_entry
 	)
+	lp_details.update(loyalty_details)
 
 	tier_spent_level = sorted(
 		[d.as_dict() for d in loyalty_program.collection_rules],
