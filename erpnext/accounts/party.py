@@ -563,10 +563,10 @@ def validate_party_accounts(doc):
 
 		# validate if account is mapped for same company
 		if account.account:
-			validate_account_head(account.idx, account.account, account.company, _("Debtor/Credior"))
+			validate_account_head(account.idx, account.account, account.company, _("Debtor/Creditor"))
 		if account.advance_account:
 			validate_account_head(
-				account.idx, account.advance_account, account.company, _("Debtor/Credior Advance")
+				account.idx, account.advance_account, account.company, _("Debtor/Creditor Advance")
 			)
 
 
