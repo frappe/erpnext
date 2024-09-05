@@ -20,7 +20,7 @@ add_to_apps_screen = [
 	}
 ]
 
-develop_version = "14.x.x-develop"
+develop_version = "15.x.x-develop"
 
 app_include_js = "erpnext.bundle.js"
 app_include_css = "erpnext.bundle.css"
@@ -547,6 +547,8 @@ accounting_dimension_doctypes = [
 	"Payment Reconciliation",
 	"Payment Reconciliation Allocation",
 	"Payment Request",
+	"Asset Movement Item",
+	"Asset Depreciation Schedule",
 ]
 
 get_matching_queries = (
