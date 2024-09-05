@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-04 17:44\n"
+"PO-Revision-Date: 2024-09-05 18:11\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: German\n"
 "MIME-Version: 1.0\n"
@@ -24197,7 +24197,7 @@ msgstr "Unternehmensübergreifende Rechnungsreferenz"
 #: accounts/doctype/journal_entry/journal_entry.json
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 msgid "Inter Company Journal Entry"
-msgstr "Unternehmensübergreifender  Buchungssatz"
+msgstr "Unternehmensübergreifender Buchungssatz"
 
 #. Label of the inter_company_journal_entry_reference (Link) field in DocType
 #. 'Journal Entry'
@@ -58442,11 +58442,11 @@ msgstr "bezahlt an"
 
 #: public/js/utils.js:390
 msgid "payments app is not installed. Please install it from {0} or {1}"
-msgstr ""
+msgstr "Die Zahlungs-App ist nicht installiert. Bitte installieren Sie sie von {0} oder {1}"
 
 #: utilities/__init__.py:47
 msgid "payments app is not installed. Please install it from {} or {}"
-msgstr ""
+msgstr "Die Zahlungs-App ist nicht installiert. Bitte installieren Sie sie von {} oder {}"
 
 #. Description of the 'Electricity Cost' (Currency) field in DocType
 #. 'Workstation'
