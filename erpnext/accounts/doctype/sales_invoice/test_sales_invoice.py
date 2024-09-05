@@ -3885,14 +3885,13 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(res[0][0], pos_return.return_against)
 
 	def test_common_party_with_foreign_currency_jv(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
 			make_customer,
 		)
-		from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 		from erpnext.accounts.doctype.party_link.party_link import create_party_link
 		from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
-		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.setup.utils import get_exchange_rate
 
 
@@ -3901,14 +3900,14 @@ class TestSalesInvoice(FrappeTestCase):
 			parent_account="Accounts Payable - _TC",
 			company="_Test Company",
 			account_currency="USD",
-			account_type="Payable"
+			account_type="Payable",
 		)
 		debtors = create_account(
 			account_name="Debtors USD",
 			parent_account="Accounts Receivable - _TC",
 			company="_Test Company",
 			account_currency="USD",
-			account_type="Receivable"
+			account_type="Receivable",
 		)
 
 
@@ -3946,7 +3945,8 @@ class TestSalesInvoice(FrappeTestCase):
 			currency="USD",
 			conversion_rate=get_exchange_rate("USD", "INR"),
 			debit_to=debtors,
-			do_not_save=1)
+			do_not_save=1,
+		)
 		si.party_account_currency = "USD"
 		si.save()
 		si.submit()
