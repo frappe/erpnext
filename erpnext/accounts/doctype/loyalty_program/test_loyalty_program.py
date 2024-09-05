@@ -80,6 +80,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		si_original = create_sales_invoice_record()
 		si_original.insert()
 		si_original.submit()
+		customer.reload()
 
 		earned_points = get_points_earned(si_original)
 
@@ -102,8 +103,8 @@ class TestLoyaltyProgram(unittest.TestCase):
 		si_redeem.loyalty_points = earned_points
 		si_redeem.insert()
 		si_redeem.submit()
+		customer.reload()
 
-		customer = frappe.get_doc("Customer", {"customer_name": "Test Loyalty Customer"})
 		earned_after_redemption = get_points_earned(si_redeem)
 
 		lpe_redeem = frappe.get_doc(
