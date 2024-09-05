@@ -94,7 +94,9 @@ class Asset(AccountsController):
 		purchase_amount: DF.Currency
 		purchase_date: DF.Date | None
 		purchase_invoice: DF.Link | None
+		purchase_invoice_item: DF.Link | None
 		purchase_receipt: DF.Link | None
+		purchase_receipt_item: DF.Link | None
 		split_from: DF.Link | None
 		status: DF.Literal[
 			"Draft",
@@ -691,12 +693,17 @@ class Asset(AccountsController):
 		return cwip_account
 
 	def make_gl_entries(self):
+		if self.check_asset_capitalization_gl_entries():
+			return
+
 		gl_entries = []
 
 		purchase_document = self.get_purchase_document()
 		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
-		if purchase_document and self.purchase_amount and getdate(self.available_for_use_date) <= getdate():
+		if (self.is_composite_asset or (purchase_document and self.purchase_amount)) and getdate(
+			self.available_for_use_date
+		) <= getdate():
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -732,6 +739,24 @@ class Asset(AccountsController):
 
 			make_gl_entries(gl_entries)
 			self.db_set("booked_fixed_asset", 1)
+
+	def check_asset_capitalization_gl_entries(self):
+		if self.is_composite_asset:
+			result = frappe.db.get_value(
+				"Asset Capitalization",
+				{"target_asset": self.name, "docstatus": 1},
+				["name", "target_fixed_asset_account"],
+			)
+
+			if result:
+				asset_capitalization, target_fixed_asset_account = result
+				# Check GL entries for the retrieved Asset Capitalization and target fixed asset account
+				return has_gl_entries(
+					"Asset Capitalization", asset_capitalization, target_fixed_asset_account
+				)
+			# return if there are no submitted capitalization for given asset
+			return True
+		return False
 
 	@frappe.whitelist()
 	def get_depreciation_rate(self, args, on_validate=False):
@@ -777,6 +802,22 @@ class Asset(AccountsController):
 			)
 
 			return flt((100 * (1 - depreciation_rate)), float_precision)
+
+
+def has_gl_entries(doctype, docname, target_account):
+	gl_entry = frappe.qb.DocType("GL Entry")
+	gl_entries = (
+		frappe.qb.from_(gl_entry)
+		.select(gl_entry.account)
+		.where(
+			(gl_entry.voucher_type == doctype)
+			& (gl_entry.voucher_no == docname)
+			& (gl_entry.debit != 0)
+			& (gl_entry.account == target_account)
+		)
+		.run(as_dict=True)
+	)
+	return len(gl_entries) > 0
 
 
 def update_maintenance_status():

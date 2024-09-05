@@ -33,14 +33,16 @@
   "dimension_col_break",
   "purchase_details_section",
   "purchase_receipt",
+  "purchase_receipt_item",
   "purchase_invoice",
+  "purchase_invoice_item",
+  "purchase_date",
   "available_for_use_date",
-  "total_asset_cost",
-  "additional_asset_cost",
   "column_break_23",
   "gross_purchase_amount",
   "asset_quantity",
-  "purchase_date",
+  "additional_asset_cost",
+  "total_asset_cost",
   "section_break_23",
   "calculate_depreciation",
   "column_break_33",
@@ -536,6 +538,20 @@
    "fieldname": "opening_number_of_booked_depreciations",
    "fieldtype": "Int",
    "label": "Opening Number of Booked Depreciations"
+  },
+  {
+   "fieldname": "purchase_receipt_item",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Receipt Item",
+   "options": "Purchase Receipt Item"
+  },
+  {
+   "fieldname": "purchase_invoice_item",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Invoice Item",
+   "options": "Purchase Invoice Item"
   }
  ],
  "idx": 72,
@@ -579,7 +595,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2024-08-01 16:39:09.340973",
+ "modified": "2024-08-26 23:28:29.095139",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

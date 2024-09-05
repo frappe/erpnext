@@ -5,18 +5,17 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "bom_and_work_order_tab",
   "raw_materials_consumption_section",
   "material_consumption",
   "get_rm_cost_from_consumption_entry",
   "column_break_3",
   "backflush_raw_materials_based_on",
-  "capacity_planning",
-  "disable_capacity_planning",
-  "allow_overtime",
-  "allow_production_on_holidays",
-  "column_break_5",
-  "capacity_planning_for_days",
-  "mins_between_operations",
+  "validate_components_quantities_per_bom",
+  "bom_section",
+  "update_bom_costs_automatically",
+  "column_break_lhyt",
+  "manufacture_sub_assembly_in_operation",
   "section_break_6",
   "default_wip_warehouse",
   "default_fg_warehouse",
@@ -30,8 +29,14 @@
   "add_corrective_operation_cost_in_finished_good_valuation",
   "column_break_24",
   "job_card_excess_transfer",
+  "capacity_planning",
+  "disable_capacity_planning",
+  "allow_overtime",
+  "allow_production_on_holidays",
+  "column_break_5",
+  "capacity_planning_for_days",
+  "mins_between_operations",
   "other_settings_section",
-  "update_bom_costs_automatically",
   "set_op_cost_and_scrape_from_sub_assemblies",
   "column_break_23",
   "make_serial_no_batch_from_work_order"
@@ -149,7 +154,7 @@
   {
    "fieldname": "raw_materials_consumption_section",
    "fieldtype": "Section Break",
-   "label": "Raw Materials Consumption"
+   "label": "Raw Materials Consumption "
   },
   {
    "fieldname": "column_break_16",
@@ -183,8 +188,8 @@
   },
   {
    "fieldname": "job_card_section",
-   "fieldtype": "Section Break",
-   "label": "Job Card"
+   "fieldtype": "Tab Break",
+   "label": "Job Card and Capacity Planning"
   },
   {
    "fieldname": "column_break_24",
@@ -210,13 +215,41 @@
    "fieldname": "get_rm_cost_from_consumption_entry",
    "fieldtype": "Check",
    "label": "Get Raw Materials Cost from Consumption Entry"
+  },
+  {
+   "fieldname": "bom_and_work_order_tab",
+   "fieldtype": "Tab Break",
+   "label": "BOM and Production"
+  },
+  {
+   "fieldname": "bom_section",
+   "fieldtype": "Section Break",
+   "label": "BOM"
+  },
+  {
+   "fieldname": "column_break_lhyt",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If enabled then system will manufacture Sub-assembly against the Job Card (operation).",
+   "fieldname": "manufacture_sub_assembly_in_operation",
+   "fieldtype": "Check",
+   "label": "Manufacture Sub-assembly in Operation"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.backflush_raw_materials_based_on == \"BOM\"",
+   "fieldname": "validate_components_quantities_per_bom",
+   "fieldtype": "Check",
+   "label": "Validate Components Quantities Per BOM"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-02-08 19:00:37.561244",
+ "modified": "2024-09-02 12:12:03.132567",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

@@ -368,8 +368,28 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 		];
 	}
 
+	get_batch_qty(batch_no, callback) {
+		let warehouse = this.item.s_warehouse || this.item.t_warehouse || this.item.warehouse;
+		frappe.call({
+			method: "erpnext.stock.doctype.batch.batch.get_batch_qty",
+			args: {
+				batch_no: batch_no,
+				warehouse: warehouse,
+				item_code: this.item.item_code,
+				posting_date: this.frm.doc.posting_date,
+				posting_time: this.frm.doc.posting_time,
+			},
+			callback: (r) => {
+				if (r.message) {
+					callback(flt(r.message));
+				}
+			},
+		});
+	}
+
 	get_dialog_table_fields() {
 		let fields = [];
+		let me = this;
 
 		if (this.item.has_serial_no) {
 			fields.push({
@@ -395,6 +415,15 @@ erpnext.SerialBatchPackageSelector = class SerialNoBatchBundleUpdate {
 					fieldname: "batch_no",
 					label: __("Batch No"),
 					in_list_view: 1,
+					change() {
+						let doc = this.doc;
+						if (!doc.qty && me.item.type_of_transaction === "Outward") {
+							me.get_batch_qty(doc.batch_no, (qty) => {
+								doc.qty = qty;
+								this.grid.set_value("qty", qty, doc);
+							});
+						}
+					},
 					get_query: () => {
 						let is_inward = false;
 						if (
