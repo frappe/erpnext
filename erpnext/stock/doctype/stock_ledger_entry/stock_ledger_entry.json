@@ -352,7 +352,8 @@
   {
    "fieldname": "posting_datetime",
    "fieldtype": "Datetime",
-   "label": "Posting Datetime"
+   "label": "Posting Datetime",
+   "search_index": 1
   }
  ],
  "hide_toolbar": 1,
@@ -361,7 +362,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2024-06-27 16:23:18.820049",
+ "modified": "2024-08-27 09:28:03.961443",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

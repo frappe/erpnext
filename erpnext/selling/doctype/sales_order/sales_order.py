@@ -936,11 +936,15 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
 
 	def set_missing_values(source, target):
+		if kwargs.get("ignore_pricing_rule"):
+			# Skip pricing rule when the dn is creating from the pick list
+			target.ignore_pricing_rule = 1
+
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -1132,7 +1136,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"condition": lambda doc: doc.qty
 				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 			},
-			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"reset_value": True,
+			},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 		},
 		target_doc,

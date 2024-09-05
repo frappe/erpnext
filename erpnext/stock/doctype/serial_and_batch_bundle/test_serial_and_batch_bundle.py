@@ -701,6 +701,57 @@ class TestSerialandBatchBundle(FrappeTestCase):
 		serial_nos = get_serial_nos_from_bundle(se.items[0].serial_and_batch_bundle)
 		self.assertEqual(serial_nos, serial_nos1)
 
+	def test_auto_create_serial_and_batch_bundle_for_outward_for_batch_item(self):
+		item_code = make_item(
+			"Test Auto Create Batch Bundle for Outward 1",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "ACSBBO-TACSB-.#####",
+			},
+		).name
+
+		if not frappe.db.exists("Batch", "ACSBBO-TACSB-00001"):
+			frappe.get_doc(
+				{
+					"doctype": "Batch",
+					"batch_id": "ACSBBO-TACSB-00001",
+					"item": item_code,
+					"company": "_Test Company",
+				}
+			).insert(ignore_permissions=True)
+
+		make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			target="_Test Warehouse - _TC",
+			rate=500,
+			use_serial_batch_fields=True,
+			batch_no="ACSBBO-TACSB-00001",
+		)
+
+		dispatch = make_stock_entry(
+			item_code=item_code,
+			qty=10,
+			target="_Test Warehouse - _TC",
+			rate=500,
+			do_not_submit=True,
+		)
+
+		original_value = frappe.db.get_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward"
+		)
+
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 0)
+		self.assertRaises(frappe.ValidationError, dispatch.submit)
+
+		frappe.db.set_single_value("Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", 1)
+		dispatch.submit()
+
+		frappe.db.set_single_value(
+			"Stock Settings", "auto_create_serial_and_batch_bundle_for_outward", original_value
+		)
+
 
 def get_batch_from_bundle(bundle):
 	from erpnext.stock.serial_batch_bundle import get_batch_nos

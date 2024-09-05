@@ -689,9 +689,11 @@ class BuyingController(SubcontractingController):
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
 			self.process_fixed_asset()
 
-		if self.doctype in ["Purchase Order", "Purchase Receipt"] and not frappe.db.get_single_value(
-			"Buying Settings", "disable_last_purchase_rate"
-		):
+		if self.doctype in [
+			"Purchase Order",
+			"Purchase Receipt",
+			"Purchase Invoice",
+		] and not frappe.db.get_single_value("Buying Settings", "disable_last_purchase_rate"):
 			update_last_purchase_rate(self, is_submit=1)
 
 	def on_cancel(self):
@@ -822,6 +824,8 @@ class BuyingController(SubcontractingController):
 				"asset_quantity": asset_quantity,
 				"purchase_receipt": self.name if self.doctype == "Purchase Receipt" else None,
 				"purchase_invoice": self.name if self.doctype == "Purchase Invoice" else None,
+				"purchase_receipt_item": row.name if self.doctype == "Purchase Receipt" else None,
+				"purchase_invoice_item": row.name if self.doctype == "Purchase Invoice" else None,
 			}
 		)
 

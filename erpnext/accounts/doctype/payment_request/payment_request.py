@@ -16,7 +16,7 @@ from erpnext.accounts.doctype.payment_entry.payment_entry import (
 )
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.party import get_party_account, get_party_bank_account
-from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.utils import get_account_currency, get_currency_precision
 from erpnext.utilities import payment_app_import_guard
 
 
@@ -85,6 +85,7 @@ class PaymentRequest(Document):
 		subscription_plans: DF.Table[SubscriptionPlanDetail]
 		swift_number: DF.ReadOnly | None
 		transaction_date: DF.Date | None
+		company: DF.Link | None
 	# end: auto-generated types
 
 	def validate(self):
@@ -331,6 +332,17 @@ class PaymentRequest(Document):
 		payment_entry.received_amount = amount
 		payment_entry.get("references")[0].allocated_amount = amount
 
+		# Update 'Paid Amount' on Forex transactions
+		if self.currency != ref_doc.company_currency:
+			if (
+				self.payment_request_type == "Outward"
+				and payment_entry.paid_from_account_currency == ref_doc.company_currency
+				and payment_entry.paid_from_account_currency != payment_entry.paid_to_account_currency
+			):
+				payment_entry.paid_amount = payment_entry.base_paid_amount = (
+					payment_entry.target_exchange_rate * payment_entry.received_amount
+				)
+
 		for dimension in get_accounting_dimensions():
 			payment_entry.update({dimension: self.get(dimension)})
 
@@ -488,6 +500,7 @@ def make_payment_request(**args):
 				"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 				"reference_doctype": args.dt,
 				"reference_name": args.dn,
+				"company": ref_doc.get("company"),
 				"party_type": args.get("party_type") or "Customer",
 				"party": args.get("party") or ref_doc.get("customer"),
 				"bank_account": bank_account,
@@ -555,7 +568,10 @@ def get_amount(ref_doc, payment_account=None):
 	elif dt == "Fees":
 		grand_total = ref_doc.outstanding_amount
 
-	return grand_total
+	if grand_total > 0:
+		return flt(grand_total, get_currency_precision())
+	else:
+		frappe.throw(_("Payment Entry is already created"))
 
 
 def get_existing_payment_request_amount(ref_dt, ref_dn):
