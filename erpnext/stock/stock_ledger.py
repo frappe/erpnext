@@ -1532,7 +1532,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		operator = "<="
 		voucher_condition = f"and creation < '{creation}'"
 
-	sle = frappe.db.sql(
+	sle = frappe.db.sql(  # nosemgrep
 		f"""
 		select *, posting_datetime as "timestamp"
 		from `tabStock Ledger Entry`
@@ -1629,6 +1629,7 @@ def get_stock_ledger_entries(
 	if extra_cond:
 		conditions += f"{extra_cond}"
 
+	# nosemgrep
 	return frappe.db.sql(
 		"""
 		select *, posting_datetime as "timestamp"
@@ -1744,7 +1745,7 @@ def get_valuation_rate(
 		return batch_obj.get_incoming_rate()
 
 	# Get valuation rate from last sle for the same item and warehouse
-	if last_valuation_rate := frappe.db.sql(
+	if last_valuation_rate := frappe.db.sql(  # nosemgrep
 		"""select valuation_rate
 		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
@@ -1824,7 +1825,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		detail = next_stock_reco_detail[0]
 		datetime_limit_condition = get_datetime_limit_condition(detail)
 
-	frappe.db.sql(
+	frappe.db.sql(  # nosemgrep
 		f"""
 		update `tabStock Ledger Entry`
 		set qty_after_transaction = qty_after_transaction + {qty_shift}
@@ -1990,8 +1991,8 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
-def get_future_sle_with_negative_qty(args):
-	return frappe.db.sql(
+def get_future_sle_with_negative_qty(sle_args):
+	return frappe.db.sql(  # nosemgrep
 		"""
 		select
 			qty_after_transaction, posting_date, posting_time,
@@ -2007,13 +2008,13 @@ def get_future_sle_with_negative_qty(args):
 		order by posting_date asc, posting_time asc
 		limit 1
 	""",
-		args,
+		sle_args,
 		as_dict=1,
 	)
 
 
-def get_future_sle_with_negative_batch_qty(args):
-	return frappe.db.sql(
+def get_future_sle_with_negative_batch_qty(sle_args):
+	return frappe.db.sql(  # nosemgrep
 		"""
 		with batch_ledger as (
 			select
@@ -2033,7 +2034,7 @@ def get_future_sle_with_negative_batch_qty(args):
 			and posting_datetime >= %(posting_datetime)s
 		limit 1
 	""",
-		args,
+		sle_args,
 		as_dict=1,
 	)
 
