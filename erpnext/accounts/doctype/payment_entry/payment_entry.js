@@ -1142,7 +1142,7 @@ frappe.ui.form.on("Payment Entry", {
 					frm.doc.target_exchange_rate;
 			}
 		}
-		frm.set_value("unallocated_amount", precision(unallocated_amount, "unallocated_amount"));
+		frm.set_value("unallocated_amount", flt(unallocated_amount, precision("unallocated_amount")));
 		frm.trigger("set_difference_amount");
 	},
 
