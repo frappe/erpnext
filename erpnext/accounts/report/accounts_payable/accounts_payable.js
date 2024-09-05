@@ -158,13 +158,13 @@ frappe.query_reports["Accounts Payable"] = {
 			fieldtype: "Check",
 		},
 		{
-<<<<<<< HEAD
 			fieldname: "in_party_currency",
 			label: __("In Party Currency"),
-=======
+			fieldtype: "Check",
+		},
+		{
 			fieldname: "handle_employee_advances",
 			label: __("Handle Employee Advances"),
->>>>>>> 257e13c299 (refactor: filter to toggle employee advance scenario in AP)
 			fieldtype: "Check",
 		},
 	],
