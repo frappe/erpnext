@@ -498,6 +498,10 @@ class SalesOrder(SellingController):
 	def update_status(self, status):
 		self.check_modified_date()
 		self.set_status(update=True, status=status)
+		# Upon Sales Order Re-open, check for credit limit.
+		# Limit should be checked after the 'Hold/Closed' status is reset.
+		if status == "Draft" and self.docstatus == 1:
+			self.check_credit_limit()
 		self.update_reserved_qty()
 		self.notify_update()
 		clear_doctype_notifications(self)
@@ -547,9 +551,7 @@ class SalesOrder(SellingController):
 
 		for item in self.items:
 			if item.supplier:
-				supplier = frappe.db.get_value(
-					"Sales Order Item", {"parent": self.name, "item_code": item.item_code}, "supplier"
-				)
+				supplier = frappe.db.get_value("Sales Order Item", item.name, "supplier")
 				if item.ordered_qty > 0.0 and item.supplier != supplier:
 					exc_list.append(
 						_("Row #{0}: Not allowed to change Supplier as Purchase Order already exists").format(
@@ -600,6 +602,17 @@ class SalesOrder(SellingController):
 
 		if total_picked_qty and total_qty:
 			per_picked = total_picked_qty / total_qty * 100
+
+			pick_percentage = frappe.db.get_single_value("Stock Settings", "over_picking_allowance")
+			if pick_percentage:
+				total_qty += flt(total_qty) * (pick_percentage / 100)
+
+			if total_picked_qty > total_qty:
+				frappe.throw(
+					_(
+						"Total Picked Quantity {0} is more than ordered qty {1}. You can set the Over Picking Allowance in Stock Settings."
+					).format(total_picked_qty, total_qty)
+				)
 
 		self.db_set("per_picked", flt(per_picked), update_modified=False)
 
@@ -923,11 +936,15 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
 
 	def set_missing_values(source, target):
+		if kwargs.get("ignore_pricing_rule"):
+			# Skip pricing rule when the dn is creating from the pick list
+			target.ignore_pricing_rule = 1
+
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
@@ -1119,7 +1136,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"condition": lambda doc: doc.qty
 				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 			},
-			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"reset_value": True,
+			},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 		},
 		target_doc,

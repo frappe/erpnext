@@ -262,8 +262,7 @@ class Project(Document):
 		if self.status == "Cancelled":
 			return
 
-		if self.percent_complete == 100:
-			self.status = "Completed"
+		self.status = "Completed" if self.percent_complete == 100 else "Open"
 
 	def update_costing(self):
 		from frappe.query_builder.functions import Max, Min, Sum

@@ -32,6 +32,7 @@
   "price_list_rate",
   "discount_percentage",
   "discount_amount",
+  "distributed_discount_amount",
   "col_break_price_list",
   "base_price_list_rate",
   "sec_break1",
@@ -565,13 +566,19 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "distributed_discount_amount",
+   "fieldtype": "Currency",
+   "label": "Distributed Discount Amount",
+   "options": "currency"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:49.490628",
+ "modified": "2024-06-02 06:22:17.864822",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

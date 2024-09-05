@@ -43,6 +43,7 @@ class HolidayList(Document):
 		self.validate_days()
 		self.total_holidays = len(self.holidays)
 		self.validate_duplicate_date()
+		self.sort_holidays()
 
 	@frappe.whitelist()
 	def get_weekly_off_dates(self):
@@ -56,8 +57,6 @@ class HolidayList(Document):
 				continue
 
 			self.append("holidays", {"description": _(self.weekly_off), "holiday_date": d, "weekly_off": 1})
-
-		self.sort_holidays()
 
 	@frappe.whitelist()
 	def get_supported_countries(self):
@@ -99,8 +98,6 @@ class HolidayList(Document):
 			self.append(
 				"holidays", {"description": holiday_name, "holiday_date": holiday_date, "weekly_off": 0}
 			)
-
-		self.sort_holidays()
 
 	def sort_holidays(self):
 		self.holidays.sort(key=lambda x: getdate(x.holiday_date))

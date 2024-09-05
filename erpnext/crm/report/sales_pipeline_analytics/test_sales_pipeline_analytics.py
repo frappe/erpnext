@@ -1,19 +1,21 @@
 import unittest
 
 import frappe
+from frappe.tests.utils import FrappeTestCase
 
 from erpnext.crm.report.sales_pipeline_analytics.sales_pipeline_analytics import execute
 
 
-class TestSalesPipelineAnalytics(unittest.TestCase):
-	@classmethod
-	def setUpClass(self):
+class TestSalesPipelineAnalytics(FrappeTestCase):
+	def setUp(self):
 		frappe.db.delete("Opportunity")
 		create_company()
 		create_customer()
 		create_opportunity()
 
 	def test_sales_pipeline_analytics(self):
+		self.from_date = "2021-01-01"
+		self.to_date = "2021-12-31"
 		self.check_for_monthly_and_number()
 		self.check_for_monthly_and_amount()
 		self.check_for_quarterly_and_number()
@@ -28,6 +30,8 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 			"status": "Open",
 			"opportunity_type": "Sales",
 			"company": "Best Test",
+			"from_date": self.from_date,
+			"to_date": self.to_date,
 		}
 
 		report = execute(filters)
@@ -43,6 +47,8 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 			"status": "Open",
 			"opportunity_type": "Sales",
 			"company": "Best Test",
+			"from_date": self.from_date,
+			"to_date": self.to_date,
 		}
 
 		report = execute(filters)
@@ -59,6 +65,8 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 			"status": "Open",
 			"opportunity_type": "Sales",
 			"company": "Best Test",
+			"from_date": self.from_date,
+			"to_date": self.to_date,
 		}
 
 		report = execute(filters)
@@ -74,6 +82,8 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 			"status": "Open",
 			"opportunity_type": "Sales",
 			"company": "Best Test",
+			"from_date": self.from_date,
+			"to_date": self.to_date,
 		}
 
 		report = execute(filters)
@@ -90,6 +100,8 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 			"status": "Open",
 			"opportunity_type": "Sales",
 			"company": "Best Test",
+			"from_date": self.from_date,
+			"to_date": self.to_date,
 		}
 
 		report = execute(filters)
@@ -105,6 +117,8 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 			"status": "Open",
 			"opportunity_type": "Sales",
 			"company": "Best Test",
+			"from_date": self.from_date,
+			"to_date": self.to_date,
 		}
 
 		report = execute(filters)
@@ -121,6 +135,8 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 			"status": "Open",
 			"opportunity_type": "Sales",
 			"company": "Best Test",
+			"from_date": self.from_date,
+			"to_date": self.to_date,
 		}
 
 		report = execute(filters)
@@ -136,6 +152,8 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 			"status": "Open",
 			"opportunity_type": "Sales",
 			"company": "Best Test",
+			"from_date": self.from_date,
+			"to_date": self.to_date,
 		}
 
 		report = execute(filters)
@@ -153,8 +171,8 @@ class TestSalesPipelineAnalytics(unittest.TestCase):
 			"opportunity_type": "Sales",
 			"company": "Best Test",
 			"opportunity_source": "Cold Calling",
-			"from_date": "2021-08-01",
-			"to_date": "2021-08-31",
+			"from_date": self.from_date,
+			"to_date": self.to_date,
 		}
 
 		report = execute(filters)

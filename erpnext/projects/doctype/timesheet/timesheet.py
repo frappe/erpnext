@@ -36,6 +36,7 @@ class Timesheet(Document):
 		for row in self.time_logs:
 			if row.to_time and row.from_time:
 				row.hours = time_diff_in_hours(row.to_time, row.from_time)
+				self.update_billing_hours(row)
 
 	def calculate_total_amounts(self):
 		self.total_hours = 0.0
@@ -395,6 +396,9 @@ def make_sales_invoice(source_name, item_code=None, customer=None, currency=None
 	target.project = timesheet.parent_project
 	if customer:
 		target.customer = customer
+		default_price_list = frappe.get_value("Customer", customer, "default_price_list")
+		if default_price_list:
+			target.selling_price_list = default_price_list
 
 	if currency:
 		target.currency = currency

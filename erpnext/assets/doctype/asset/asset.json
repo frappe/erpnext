@@ -33,14 +33,16 @@
   "dimension_col_break",
   "purchase_details_section",
   "purchase_receipt",
+  "purchase_receipt_item",
   "purchase_invoice",
+  "purchase_invoice_item",
+  "purchase_date",
   "available_for_use_date",
-  "total_asset_cost",
-  "additional_asset_cost",
   "column_break_23",
   "gross_purchase_amount",
   "asset_quantity",
-  "purchase_date",
+  "additional_asset_cost",
+  "total_asset_cost",
   "section_break_23",
   "calculate_depreciation",
   "column_break_33",
@@ -75,8 +77,7 @@
   "purchase_amount",
   "default_finance_book",
   "depr_entry_posting_status",
-  "amended_from",
-  "capitalized_in"
+  "amended_from"
  ],
  "fields": [
   {
@@ -222,7 +223,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!(doc.is_composite_asset && !doc.capitalized_in)",
    "fieldname": "gross_purchase_amount",
    "fieldtype": "Currency",
    "label": "Gross Purchase Amount",
@@ -509,14 +509,6 @@
    "label": "Is Composite Asset"
   },
   {
-   "fieldname": "capitalized_in",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Capitalized In",
-   "options": "Asset Capitalization",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:doc.docstatus > 0",
    "fieldname": "total_asset_cost",
    "fieldtype": "Currency",
@@ -546,6 +538,20 @@
    "fieldname": "opening_number_of_booked_depreciations",
    "fieldtype": "Int",
    "label": "Opening Number of Booked Depreciations"
+  },
+  {
+   "fieldname": "purchase_receipt_item",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Receipt Item",
+   "options": "Purchase Receipt Item"
+  },
+  {
+   "fieldname": "purchase_invoice_item",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Purchase Invoice Item",
+   "options": "Purchase Invoice Item"
   }
  ],
  "idx": 72,
@@ -589,7 +595,7 @@
    "link_fieldname": "target_asset"
   }
  ],
- "modified": "2024-05-21 13:46:21.066483",
+ "modified": "2024-08-26 23:28:29.095139",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

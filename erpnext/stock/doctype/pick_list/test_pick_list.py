@@ -648,7 +648,7 @@ class TestPickList(FrappeTestCase):
 	def test_picklist_for_batch_item(self):
 		warehouse = "_Test Warehouse - _TC"
 		item = make_item(
-			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_no_series": "PICKLT-.######"}
+			properties={"is_stock_item": 1, "has_batch_no": 1, "batch_number_series": "PICKLT-.######"}
 		).name
 
 		# create batch
@@ -1132,3 +1132,137 @@ class TestPickList(FrappeTestCase):
 		pl.save()
 
 		self.assertEqual(pl.locations[0].qty, 80.0)
+
+	def test_validate_picked_qty_with_manual_option(self):
+		warehouse = "_Test Warehouse - _TC"
+		non_serialized_item = make_item(
+			"Test Non Serialized Pick List Item For Manual Option", properties={"is_stock_item": 1}
+		).name
+
+		serialized_item = make_item(
+			"Test Serialized Pick List Item For Manual Option",
+			properties={"is_stock_item": 1, "has_serial_no": 1, "serial_no_series": "SN-HSNMSPLI-.####"},
+		).name
+
+		batched_item = make_item(
+			"Test Batched Pick List Item For Manual Option",
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "SN-HBNMSPLI-.####",
+				"create_new_batch": 1,
+			},
+		).name
+
+		make_stock_entry(item=non_serialized_item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		make_stock_entry(item=serialized_item, to_warehouse=warehouse, qty=10, basic_rate=100)
+		make_stock_entry(item=batched_item, to_warehouse=warehouse, qty=10, basic_rate=100)
+
+		so = make_sales_order(
+			item_code=non_serialized_item, qty=10, rate=100, do_not_save=True, warehouse=warehouse
+		)
+		so.append("items", {"item_code": serialized_item, "qty": 10, "rate": 100, "warehouse": warehouse})
+		so.append("items", {"item_code": batched_item, "qty": 10, "rate": 100, "warehouse": warehouse})
+		so.set_missing_values()
+		so.save()
+		so.submit()
+
+		pl = create_pick_list(so.name)
+		pl.pick_manually = 1
+
+		for row in pl.locations:
+			row.qty = row.qty + 10
+
+		self.assertRaises(frappe.ValidationError, pl.save)
+
+	def test_over_allowance_picking(self):
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			"Test Over Allowance Picking Item",
+			properties={
+				"is_stock_item": 1,
+			},
+		).name
+
+		make_stock_entry(item=item, to_warehouse=warehouse, qty=100)
+
+		so = make_sales_order(item_code=item, qty=10, rate=100)
+
+		pl_doc = create_pick_list(so.name)
+		pl_doc.save()
+		self.assertEqual(pl_doc.locations[0].qty, 10)
+
+		pl_doc.locations[0].qty = 15
+		pl_doc.locations[0].stock_qty = 15
+		pl_doc.save()
+
+		self.assertEqual(pl_doc.locations[0].qty, 15)
+		self.assertRaises(frappe.ValidationError, pl_doc.submit)
+
+		frappe.db.set_single_value("Stock Settings", "over_picking_allowance", 50)
+
+		pl_doc.reload()
+		pl_doc.submit()
+
+		frappe.db.set_single_value("Stock Settings", "over_picking_allowance", 0)
+
+	def test_ignore_pricing_rule_in_pick_list(self):
+		frappe.flags.print_stmt = False
+		warehouse = "_Test Warehouse - _TC"
+		item = make_item(
+			properties={
+				"is_stock_item": 1,
+				"has_batch_no": 1,
+				"batch_number_series": "IPR-PICKLT-.######",
+				"create_new_batch": 1,
+			}
+		).name
+
+		make_stock_entry(
+			item=item,
+			to_warehouse=warehouse,
+			qty=2,
+			basic_rate=100,
+		)
+
+		pricing_rule = frappe.get_doc(
+			{
+				"doctype": "Pricing Rule",
+				"title": "Same Free Item",
+				"price_or_product_discount": "Product",
+				"selling": 1,
+				"apply_on": "Item Code",
+				"items": [
+					{
+						"item_code": item,
+					}
+				],
+				"same_item": 1,
+				"is_recursive": 1,
+				"recurse_for": 2,
+				"free_qty": 1,
+				"company": "_Test Company",
+				"customer": "_Test Customer",
+			}
+		)
+
+		pricing_rule.save()
+		frappe.flags.print_stmt = True
+
+		so = make_sales_order(item_code=item, qty=2, rate=100, do_not_save=True)
+		so.set_warehouse = warehouse
+		so.submit()
+
+		self.assertEqual(len(so.items), 2)
+		self.assertTrue(so.items[1].is_free_item)
+
+		pl = create_pick_list(so.name)
+		pl.ignore_pricing_rule = 1
+		pl.save()
+		pl.submit()
+
+		self.assertEqual(len(pl.locations), 1)
+
+		delivery_note = create_delivery_note(pl.name)
+
+		self.assertEqual(len(delivery_note.items), 1)

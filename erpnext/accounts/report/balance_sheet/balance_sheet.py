@@ -123,19 +123,15 @@ def get_provisional_profit_loss(
 		for period in period_list:
 			key = period if consolidated else period.key
 			total_assets = flt(asset[0].get(key))
+			effective_liability = 0.00
 
-			if liability or equity:
-				effective_liability = 0.0
-				if liability:
-					effective_liability += flt(liability[0].get(key))
-				if equity:
-					effective_liability += flt(equity[0].get(key))
+			if liability:
+				effective_liability += flt(liability[0].get(key))
+			if equity:
+				effective_liability += flt(equity[0].get(key))
 
-				provisional_profit_loss[key] = total_assets - effective_liability
-			else:
-				provisional_profit_loss[key] = total_assets
-
-			total_row[key] = provisional_profit_loss[key]
+			provisional_profit_loss[key] = total_assets - effective_liability
+			total_row[key] = provisional_profit_loss[key] + effective_liability
 
 			if provisional_profit_loss[key]:
 				has_value = True

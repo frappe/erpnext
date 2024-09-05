@@ -107,7 +107,7 @@ class TestUnreconcilePayment(AccountsTestMixin, FrappeTestCase):
 		self.assertEqual(len(pe.references), 1)
 		self.assertEqual(pe.unallocated_amount, 100)
 
-	def test_02_unreconcile_one_payment_from_multi_payments(self):
+	def test_02_unreconcile_one_payment_among_multi_payments(self):
 		"""
 		Scenario: 2 payments, both split against 2 different invoices
 		Unreconcile only one payment from one invoice

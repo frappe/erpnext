@@ -662,7 +662,7 @@ class PurchaseReceipt(BuyingController):
 
 				if not (
 					(erpnext.is_perpetual_inventory_enabled(self.company) and d.item_code in stock_items)
-					or d.is_fixed_asset
+					or (d.is_fixed_asset and not d.purchase_invoice)
 				):
 					continue
 
@@ -767,9 +767,15 @@ class PurchaseReceipt(BuyingController):
 			posting_date=posting_date,
 		)
 
+	def is_landed_cost_booked_for_any_item(self) -> bool:
+		for x in self.items:
+			if x.landed_cost_voucher_amount != 0:
+				return True
+
+		return False
+
 	def make_tax_gl_entries(self, gl_entries, via_landed_cost_voucher=False):
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in self.get("items")])
-		is_asset_pr = any(d.is_fixed_asset for d in self.get("items"))
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -794,26 +800,10 @@ class PurchaseReceipt(BuyingController):
 			against_accounts = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
-			stock_rbnb = (
-				self.get("asset_received_but_not_billed")
-				if is_asset_pr
-				else self.get_company_default("stock_received_but_not_billed")
-			)
 			i = 1
 			for tax in self.get("taxes"):
 				if valuation_tax.get(tax.name):
-					if via_landed_cost_voucher:
-						account = tax.account_head
-					else:
-						negative_expense_booked_in_pi = frappe.db.sql(
-							"""select name from `tabPurchase Invoice Item` pi
-							where docstatus = 1 and purchase_receipt=%s
-							and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
-								and voucher_no=pi.parent and account=%s)""",
-							(self.name, tax.account_head),
-						)
-						account = stock_rbnb if negative_expense_booked_in_pi else tax.account_head
-
+					account = tax.account_head
 					if i == len(valuation_tax):
 						applicable_amount = amount_including_divisional_loss
 					else:
@@ -838,7 +828,11 @@ class PurchaseReceipt(BuyingController):
 	def update_assets(self, item, valuation_rate):
 		assets = frappe.db.get_all(
 			"Asset",
-			filters={"purchase_receipt": self.name, "item_code": item.item_code},
+			filters={
+				"purchase_receipt": self.name,
+				"item_code": item.item_code,
+				"purchase_receipt_item": ("in", [item.name, ""]),
+			},
 			fields=["name", "asset_quantity"],
 		)
 
@@ -1076,6 +1070,7 @@ def update_billing_percentage(pr_doc, update_modified=True, adjust_incoming_rate
 			if item.billed_amt and item.amount:
 				adjusted_amt = flt(item.billed_amt) - flt(item.amount)
 
+			adjusted_amt = adjusted_amt * flt(pr_doc.conversion_rate)
 			item.db_set("rate_difference_with_purchase_invoice", adjusted_amt, update_modified=False)
 
 	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
@@ -1210,7 +1205,7 @@ def make_purchase_invoice(source_name, target_doc=None, args=None):
 			},
 			"Purchase Taxes and Charges": {
 				"doctype": "Purchase Taxes and Charges",
-				"add_if_empty": True,
+				"reset_value": not (args and args.get("merge_taxes")),
 				"ignore": args.get("merge_taxes") if args else 0,
 			},
 		},

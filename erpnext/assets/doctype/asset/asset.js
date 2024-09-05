@@ -187,12 +187,22 @@ frappe.ui.form.on("Asset", {
 		if (frm.doc.docstatus == 0) {
 			frm.toggle_reqd("finance_books", frm.doc.calculate_depreciation);
 
-			if (frm.doc.is_composite_asset && !frm.doc.capitalized_in) {
-				$(".primary-action").prop("hidden", true);
-				$(".form-message").text("Capitalize this asset to confirm");
+			if (frm.doc.is_composite_asset) {
+				frappe.call({
+					method: "erpnext.assets.doctype.asset.asset.has_active_capitalization",
+					args: {
+						asset: frm.doc.name,
+					},
+					callback: function (r) {
+						if (!r.message) {
+							$(".primary-action").prop("hidden", true);
+							$(".form-message").text("Capitalize this asset to confirm");
 
-				frm.add_custom_button(__("Capitalize Asset"), function () {
-					frm.trigger("create_asset_capitalization");
+							frm.add_custom_button(__("Capitalize Asset"), function () {
+								frm.trigger("create_asset_capitalization");
+							});
+						}
+					},
 				});
 			}
 		}
@@ -511,6 +521,8 @@ frappe.ui.form.on("Asset", {
 		frappe.call({
 			args: {
 				asset: frm.doc.name,
+				asset_name: frm.doc.asset_name,
+				item_code: frm.doc.item_code,
 			},
 			method: "erpnext.assets.doctype.asset.asset.create_asset_capitalization",
 			callback: function (r) {
@@ -658,6 +670,11 @@ frappe.ui.form.on("Asset", {
 			if (item.asset_location) {
 				frm.set_value("location", item.asset_location);
 			}
+			if (doctype === "Purchase Receipt") {
+				frm.set_value("purchase_receipt_item", item.name);
+			} else if (doctype === "Purchase Invoice") {
+				frm.set_value("purchase_invoice_item", item.name);
+			}
 		});
 	},
 
@@ -773,11 +790,8 @@ frappe.ui.form.on("Asset Finance Book", {
 
 	depreciation_start_date: function (frm, cdt, cdn) {
 		const book = locals[cdt][cdn];
-		if (
-			frm.doc.available_for_use_date &&
-			book.depreciation_start_date == frm.doc.available_for_use_date
-		) {
-			frappe.msgprint(__("Depreciation Posting Date should not be equal to Available for Use Date."));
+		if (frm.doc.available_for_use_date && book.depreciation_start_date < frm.doc.available_for_use_date) {
+			frappe.msgprint(__("Depreciation Posting Date cannot be before Available-for-use Date"));
 			book.depreciation_start_date = "";
 			frm.refresh_field("finance_books");
 		}

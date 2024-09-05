@@ -220,6 +220,28 @@ erpnext.sales_common = {
 				if (doc.docstatus === 0 && doc.is_return && !doc.return_against) {
 					frappe.model.set_value(cdt, cdn, "incoming_rate", 0.0);
 				}
+
+				this.set_actual_qty(doc, cdt, cdn);
+			}
+
+			set_actual_qty(doc, cdt, cdn) {
+				let row = locals[cdt][cdn];
+				let sales_doctypes = ["Sales Invoice", "Delivery Note", "Sales Order"];
+
+				if (row.item_code && row.warehouse && sales_doctypes.includes(doc.doctype)) {
+					frappe.call({
+						method: "erpnext.stock.get_item_details.get_bin_details",
+						args: {
+							item_code: row.item_code,
+							warehouse: row.warehouse,
+						},
+						callback(r) {
+							if (r.message) {
+								frappe.model.set_value(cdt, cdn, "actual_qty", r.message.actual_qty);
+							}
+						},
+					});
+				}
 			}
 
 			toggle_editable_price_list_rate() {

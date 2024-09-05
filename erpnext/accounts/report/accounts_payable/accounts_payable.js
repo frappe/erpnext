@@ -162,6 +162,11 @@ frappe.query_reports["Accounts Payable"] = {
 			label: __("Group by Voucher"),
 			fieldtype: "Check",
 		},
+		{
+			fieldname: "handle_employee_advances",
+			label: __("Handle Employee Advances"),
+			fieldtype: "Check",
+		},
 	],
 
 	formatter: function (value, row, column, data, default_formatter) {

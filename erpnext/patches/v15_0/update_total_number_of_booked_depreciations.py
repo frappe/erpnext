@@ -18,9 +18,10 @@ def execute():
 				depr_schedule = get_depr_schedule(asset.name, "Active", fb_row.finance_book)
 				total_number_of_booked_depreciations = asset.opening_number_of_booked_depreciations or 0
 
-				for je in depr_schedule:
-					if je.journal_entry:
-						total_number_of_booked_depreciations += 1
+				if depr_schedule:
+					for je in depr_schedule:
+						if je.journal_entry:
+							total_number_of_booked_depreciations += 1
 				frappe.db.set_value(
 					"Asset Finance Book",
 					fb_row.name,

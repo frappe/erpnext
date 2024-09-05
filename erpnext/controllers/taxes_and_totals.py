@@ -93,6 +93,9 @@ class calculate_taxes_and_totals:
 			self.doc.base_tax_withholding_net_total = sum_base_net_amount
 
 	def validate_item_tax_template(self):
+		if self.doc.get("is_return") and self.doc.get("return_against"):
+			return
+
 		for item in self._items:
 			if item.item_code and item.get("item_tax_template"):
 				item_doc = frappe.get_cached_doc("Item", item.item_code)
@@ -242,7 +245,6 @@ class calculate_taxes_and_totals:
 				"tax_fraction_for_current_item",
 				"grand_total_fraction_for_current_item",
 			]
-
 			if tax.charge_type != "Actual" and not (
 				self.discount_amount_applied and self.doc.apply_discount_on == "Grand Total"
 			):
@@ -682,6 +684,9 @@ class calculate_taxes_and_totals:
 					)
 
 					item.net_amount = flt(item.net_amount - distributed_amount, item.precision("net_amount"))
+					item.distributed_discount_amount = flt(
+						distributed_amount, item.precision("distributed_discount_amount")
+					)
 					net_total += item.net_amount
 
 					# discount amount rounding loss adjustment if no taxes
@@ -697,6 +702,10 @@ class calculate_taxes_and_totals:
 
 						item.net_amount = flt(
 							item.net_amount + discount_amount_loss, item.precision("net_amount")
+						)
+						item.distributed_discount_amount = flt(
+							distributed_amount + discount_amount_loss,
+							item.precision("distributed_discount_amount"),
 						)
 
 					item.net_rate = (
