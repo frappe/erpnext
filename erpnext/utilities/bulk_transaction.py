@@ -137,6 +137,11 @@ def task(doc_name, from_doctype, to_doctype):
 		},
 		"Purchase Receipt": {"Purchase Invoice": purchase_receipt.make_purchase_invoice},
 	}
+
+	hooks = frappe.get_hooks("bulk_transaction_task_mapper")
+	for hook in hooks:
+		mapper.update(frappe.get_attr(hook)())
+
 	frappe.flags.bulk_transaction = True
 	if to_doctype in ["Payment Entry"]:
 		obj = mapper[from_doctype][to_doctype](from_doctype, doc_name)
