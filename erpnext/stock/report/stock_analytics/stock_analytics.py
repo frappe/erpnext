@@ -1,6 +1,7 @@
 # Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 import datetime
+import jdatetime
 from typing import List
 
 import frappe
@@ -71,7 +72,7 @@ def get_period_date_ranges(filters):
 		if filters.range == "Weekly":
 			period_end_date = from_date + relativedelta(days=6)
 		else:
-			period_end_date = from_date + relativedelta(months=increment, days=-1)
+			period_end_date = add_months_to_date(from_date, increment)
 
 		if period_end_date > to_date:
 			period_end_date = to_date
@@ -80,8 +81,27 @@ def get_period_date_ranges(filters):
 		from_date = period_end_date + relativedelta(days=1)
 		if period_end_date == to_date:
 			break
-
 	return periodic_daterange
+
+def add_months_to_date(date, increment):
+	from dateutil.relativedelta import relativedelta
+
+	if get_calendar_name() == 'jalali':
+		date = jdatetime.date.fromgregorian(date=date)
+		overflow_years, month = divmod(date.month + increment - 1, 12)
+		month = month + 1
+		year = date.year + overflow_years
+		day = date.day - 1
+		if day == 0:
+			day = 30
+			month = month - 1
+			if month == 0:
+				month = 12
+				year = year - 1
+		new_date = jdatetime.date(year, month, day)
+		return new_date.togregorian()
+	else:
+		return date + relativedelta(months=increment, days=-1)
 
 
 def round_down_to_nearest_frequency(date: str, frequency: str) -> datetime.datetime:
@@ -105,16 +125,17 @@ def round_down_to_nearest_frequency(date: str, frequency: str) -> datetime.datet
 		"Weekly": get_first_day_of_week,
 		"Yearly": _get_first_day_of_fiscal_year,
 	}.get(frequency, getdate)
-	return round_down_function(date)
+	return round_down_function(date, use_custom_calendar=True)
 
 
 def get_period(posting_date, filters):
-	months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+	if get_calendar_name() == 'jalali':
+		posting_date = jdatetime.date.fromgregorian(date=posting_date)
 
 	if filters.range == "Weekly":
 		period = _("Week {0} {1}").format(str(posting_date.isocalendar()[1]), str(posting_date.year))
 	elif filters.range == "Monthly":
-		period = _(str(months[posting_date.month - 1])) + " " + str(posting_date.year)
+		period = _(posting_date.strftime('%b')) + " " + str(posting_date.year)
 	elif filters.range == "Quarterly":
 		period = _("Quarter {0} {1}").format(
 			str(((posting_date.month - 1) // 3) + 1), str(posting_date.year)
@@ -124,6 +145,9 @@ def get_period(posting_date, filters):
 		period = str(year[2])
 
 	return period
+
+def get_calendar_name():
+	return frappe.defaults.get_defaults().calendar_type
 
 
 def get_periodic_data(entry, filters):
