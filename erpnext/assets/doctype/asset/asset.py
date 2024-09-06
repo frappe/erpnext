@@ -125,7 +125,6 @@ class Asset(AccountsController):
 		self.validate_cost_center()
 		self.set_missing_values()
 		self.validate_gross_and_purchase_amount()
-		self.validate_expected_value_after_useful_life()
 		self.validate_finance_books()
 
 		if not self.split_from:
@@ -146,6 +145,7 @@ class Asset(AccountsController):
 								"Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 							).format(asset_depr_schedules_links)
 						)
+		self.validate_expected_value_after_useful_life()
 		self.set_total_booked_depreciations()
 		self.total_asset_cost = self.gross_purchase_amount
 		self.status = self.get_status()
