@@ -221,6 +221,31 @@ class TestAsset(AssetSetup):
 
 		scrap_asset(asset.name)
 		asset.load_from_db()
+
+		asset_depriciation = frappe.db.get_value("Asset Depreciation Schedule", asset.name, "name")
+		depreciation_entries = frappe.db.get_all(
+			"Depreciation Schedule",
+			filters={"parent": asset_depriciation},
+			fields=["schedule_date", "journal_entry"],
+			order_by="schedule_date",
+		)
+
+		last_depreciated_row = None
+		for entry in depreciation_entries:
+			if entry["journal_entry"]:
+				last_depreciated_row = entry
+
+		if asset.disposal_date > asset.purchase_date:
+			if last_depreciated_row:
+				disposal_date = frappe.utils.getdate(asset.disposal_date)
+				last_schedule_date = frappe.utils.getdate(last_depreciated_row["schedule_date"])
+				today_date = frappe.utils.getdate(nowdate())
+
+				self.assertTrue(
+					last_schedule_date <= disposal_date <= today_date,
+					"Disposal date should be between the last depreciated schedule date and today's date.",
+				)
+
 		first_asset_depr_schedule.load_from_db()
 
 		second_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")

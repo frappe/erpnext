@@ -1269,3 +1269,48 @@ def add_reference_in_jv_on_split(entry_name, new_asset_name, old_asset_name, dep
 	journal_entry.make_gl_entries(1)
 	journal_entry.docstatus = 1
 	journal_entry.make_gl_entries()
+
+
+@frappe.whitelist()
+def validate_asset_scrap_date(asset_name, scrap_date, purchase_date, calculate_depreciation):
+	from erpnext.assets.doctype.asset.depreciation import scrap_asset
+
+	scrap_date = getdate(scrap_date)
+	today_date = getdate(today())
+	purchase_date = getdate(purchase_date)
+
+	if scrap_date > today_date:
+		frappe.throw(_("Future date is not allowed"))
+	elif scrap_date < purchase_date:
+		frappe.throw(_("Scrap date cannot be before purchase date"))
+
+	if calculate_depreciation == "0":
+		scrap_asset(asset_name, scrap_date)
+		return
+
+	asset_depreciation_schedules = frappe.db.get_all(
+		"Asset Depreciation Schedule", filters={"asset": asset_name, "docstatus": 1}, fields=["name"]
+	)
+
+	for depreciation_schedule in asset_depreciation_schedules:
+		depreciation_entries = frappe.db.get_all(
+			"Depreciation Schedule",
+			filters={"parent": depreciation_schedule["name"]},
+			fields=["schedule_date", "journal_entry"],
+			order_by="schedule_date",
+		)
+
+		last_depreciated = None
+		for entry in depreciation_entries:
+			if entry["journal_entry"]:
+				last_depreciated = entry
+			else:
+				if (
+					last_depreciated
+					and scrap_date < last_depreciated["schedule_date"]
+					and scrap_date > purchase_date
+				):
+					frappe.throw(_("Asset cannot be scrapped before the last depreciation entry."))
+				break
+
+	scrap_asset(asset_name, scrap_date)
