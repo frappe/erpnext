@@ -50,13 +50,14 @@
   "message",
   "message_examples",
   "mute_email",
-  "payment_url",
   "section_break_7",
   "payment_gateway",
   "payment_account",
   "payment_channel",
   "payment_order",
-  "amended_from"
+  "amended_from",
+  "column_break_pnyv",
+  "payment_url"
  ],
  "fields": [
   {
@@ -343,7 +344,7 @@
   {
    "fieldname": "payment_url",
    "fieldtype": "Data",
-   "hidden": 1,
+   "label": "Payment URL",
    "length": 500,
    "options": "URL",
    "read_only": 1
@@ -408,6 +409,10 @@
    "label": "Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_pnyv",
+   "fieldtype": "Column Break"
   }
  ],
  "in_create": 1,

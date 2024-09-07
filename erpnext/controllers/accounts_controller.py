@@ -1266,7 +1266,11 @@ class AccountsController(TransactionBase):
 				d.exchange_gain_loss = difference
 
 	def make_precision_loss_gl_entry(self, gl_entries):
-		round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+		(
+			round_off_account,
+			round_off_cost_center,
+			round_off_for_opening,
+		) = get_round_off_account_and_cost_center(
 			self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
 		)
 
@@ -1585,6 +1589,7 @@ class AccountsController(TransactionBase):
 			remove_from_bank_transaction,
 		)
 		from erpnext.accounts.utils import (
+			cancel_common_party_journal,
 			cancel_exchange_gain_loss_journal,
 			unlink_ref_doc_from_payment_entries,
 		)
@@ -1596,6 +1601,7 @@ class AccountsController(TransactionBase):
 
 			# Cancel Exchange Gain/Loss Journal before unlinking
 			cancel_exchange_gain_loss_journal(self)
+			cancel_common_party_journal(self)
 
 			if frappe.db.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"):
 				unlink_ref_doc_from_payment_entries(self)
@@ -2455,6 +2461,7 @@ class AccountsController(TransactionBase):
 		jv.posting_date = self.posting_date
 		jv.company = self.company
 		jv.remark = f"Adjustment for {self.doctype} {self.name}"
+		jv.is_system_generated = True
 
 		reconcilation_entry = frappe._dict()
 		advance_entry = frappe._dict()
