@@ -4045,6 +4045,7 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(len(actual), 4)
 		self.assertEqual(expected, actual)
 
+	@change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_common_party_with_foreign_currency_jv(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 		from erpnext.accounts.doctype.opening_invoice_creation_tool.test_opening_invoice_creation_tool import (
@@ -4091,11 +4092,8 @@ class TestSalesInvoice(FrappeTestCase):
 		supp_doc.append("accounts", test_account_details)
 		supp_doc.save()
 
-		# enable common party accounting
-		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 1)
-
 		# create a party link between customer & supplier
-		party_link = create_party_link("Supplier", supplier, customer)
+		create_party_link("Supplier", supplier, customer)
 
 		# create a sales invoice
 		si = create_sales_invoice(
@@ -4128,9 +4126,6 @@ class TestSalesInvoice(FrappeTestCase):
 		)
 		self.assertTrue(jv)
 		self.assertEqual(jv[0], si.grand_total)
-
-		party_link.delete()
-		frappe.db.set_single_value("Accounts Settings", "enable_common_party_accounting", 0)
 
 
 def set_advance_flag(company, flag, default_account):
