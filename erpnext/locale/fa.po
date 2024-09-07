@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-02 17:30\n"
+"PO-Revision-Date: 2024-09-07 18:35\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -395,7 +395,7 @@ msgstr "، با موجودی {0}: {1}"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:95
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:347
 msgid "0 - 30 Days"
-msgstr ""
+msgstr "0 - 30 روز"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:114
 msgid "0-30"
@@ -468,7 +468,7 @@ msgstr "3 سالانه"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:96
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:348
 msgid "30 - 60 Days"
-msgstr ""
+msgstr "30 - 60 روز"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: utilities/doctype/video_settings/video_settings.json
@@ -507,7 +507,7 @@ msgstr "6 ساعت"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:97
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:349
 msgid "60 - 90 Days"
-msgstr ""
+msgstr "60 - 90 روز"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:116
 msgid "60-90"
@@ -520,7 +520,7 @@ msgstr "60-90 روز"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:98
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:350
 msgid "90 - 120 Days"
-msgstr ""
+msgstr "90 - 120 روز"
 
 #: accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py:117
 #: manufacturing/report/work_order_summary/work_order_summary.py:110
@@ -8571,7 +8571,7 @@ msgstr "تنظیمات CRM"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:34
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:50
 msgid "CWIP Account"
-msgstr "حساب کارهای سرمایه‌ای در دست اجرا"
+msgstr "حساب «کارهای سرمایه‌ای در دست اجرا»"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -29437,7 +29437,7 @@ msgstr "پیام های بیشتر از 160 کاراکتر به چند پیام 
 
 #: erpnext_integrations/doctype/tally_migration/tally_migration.js:123
 msgid "Meta Data"
-msgstr ""
+msgstr "متا دیتا"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -38535,7 +38535,7 @@ msgstr "فرصت مشتری بالقوه"
 #. Label of the prospect_owner (Link) field in DocType 'Prospect'
 #: crm/doctype/prospect/prospect.json
 msgid "Prospect Owner"
-msgstr "مالک احتمالی"
+msgstr "مالک مشتری بالقوه"
 
 #: crm/doctype/lead/lead.py:311
 msgid "Prospect {0} already exists"
@@ -53275,7 +53275,7 @@ msgstr "تن-نیرو (متریک)"
 
 #: accounts/report/financial_statements.html:6
 msgid "Too many columns. Export the report and print it using a spreadsheet application."
-msgstr ""
+msgstr "تعداد ستون ها بسیار زیاد است. گزارش را برون‌بُرد کنید و آن را با استفاده از یک برنامه صفحه گسترده چاپ کنید."
 
 #. Label of a Card Break in the Manufacturing Workspace
 #. Label of the tools (Column Break) field in DocType 'Email Digest'
@@ -56723,7 +56723,7 @@ msgstr "خلاصه ظرفیت انبار"
 
 #: stock/doctype/putaway_rule/putaway_rule.py:78
 msgid "Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} {2}."
-msgstr "ظرفیت انبار برای مورد \"{0}\" باید بیشتر از سطح موجودی موجود در {1} {2} باشد."
+msgstr "ظرفیت انبار برای آیتم \"{0}\" باید بیشتر از سطح موجودی موجود در {1} {2} باشد."
 
 #. Label of the warehouse_contact_info (Section Break) field in DocType
 #. 'Warehouse'
@@ -57946,7 +57946,7 @@ msgstr "همچنین می توانید این لینک را در مرورگر خ
 
 #: assets/doctype/asset_category/asset_category.py:114
 msgid "You can also set default CWIP account in Company {}"
-msgstr "همچنین می‌توانید حساب پیش‌فرض CWIP را در شرکت {} تنظیم کنید."
+msgstr "همچنین می‌توانید حساب پیش‌فرض «کارهای سرمایه‌ای در دست اجرا» را در شرکت {} تنظیم کنید"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:880
 msgid "You can change the parent account to a Balance Sheet account or select a different account."
