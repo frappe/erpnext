@@ -1527,7 +1527,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		voucher_no = args.get("voucher_no")
 		voucher_condition = f"and voucher_no != '{voucher_no}'"
 
-	elif args.get("creation"):
+	elif args.get("creation") and args.get("sle_id"):
 		creation = args.get("creation")
 		operator = "<="
 		voucher_condition = f"and creation < '{creation}'"
