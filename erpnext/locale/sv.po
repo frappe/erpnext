@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-03 17:33\n"
+"PO-Revision-Date: 2024-09-07 18:35\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -409,7 +409,7 @@ msgstr "0-30 Dagar"
 #. Program'
 #: accounts/doctype/loyalty_program/loyalty_program.json
 msgid "1 Loyalty Points = How much base currency?"
-msgstr "1 Bonus Poäng = Motsvarande Belopp"
+msgstr "1 Lojalitet Poäng = Motsvarande Belopp?"
 
 #. Option for the 'Frequency' (Select) field in DocType 'Video Settings'
 #: utilities/doctype/video_settings/video_settings.json
@@ -14225,7 +14225,7 @@ msgstr "Kund erfodras"
 #: accounts/doctype/loyalty_program/loyalty_program.py:116
 #: accounts/doctype/loyalty_program/loyalty_program.py:138
 msgid "Customer isn't enrolled in any Loyalty Program"
-msgstr "Kund tillhör inte någon Bonus Program"
+msgstr "Kund tillhör inte någon Lojalitet Program"
 
 #. Label of the customer_or_item (Select) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
@@ -17292,7 +17292,7 @@ msgstr "Domän Inställningar"
 #. Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Don't Create Loyalty Points"
-msgstr "Skapa inte Bonus Poäng"
+msgstr "Skapa inte Lojalitet Poäng"
 
 #. Label of the dont_reserve_sales_order_qty_on_sales_return (Check) field in
 #. DocType 'Selling Settings'
@@ -20398,7 +20398,7 @@ msgstr "För t.ex. 2012, 2012-13"
 #. 'Loyalty Program Collection'
 #: accounts/doctype/loyalty_program_collection/loyalty_program_collection.json
 msgid "For how much spent = 1 Loyalty Point"
-msgstr "Hur mycket spenderad = 1 Bonus Poäng"
+msgstr "För hur mycket du spenderat = 1 Lojalitet Poäng"
 
 #. Description of the 'Supplier' (Link) field in DocType 'Request for
 #. Quotation'
@@ -22443,7 +22443,7 @@ msgstr "Helg Dagar"
 #. Name of a Workspace
 #: setup/workspace/home/home.json
 msgid "Home"
-msgstr "Hem"
+msgstr "Start"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -22630,7 +22630,7 @@ msgstr "Om <b>Aktiverad</b> - Avstämning sker på <b>Förskott Betalning datum<
 
 #: accounts/doctype/loyalty_program/loyalty_program.js:14
 msgid "If Auto Opt In is checked, then the customers will be automatically linked with the concerned Loyalty Program (on save)"
-msgstr "Om automatiskt registrering är markerat kommer kunderna automatiskt att länkas till berörd bonus program (vid spara)"
+msgstr "Om automatiskt registrering är vald kommer kunderna automatiskt att länkas till rätt Lojalitet Program (vid spara)"
 
 #. Description of the 'Cost Center' (Link) field in DocType 'Journal Entry
 #. Account'
@@ -22888,7 +22888,7 @@ msgstr "Om vald uppdateras Stycklista Kostnad automatiskt baserat på Grund Pris
 
 #: accounts/doctype/loyalty_program/loyalty_program.js:14
 msgid "If unlimited expiry for the Loyalty Points, keep the Expiry Duration empty or 0."
-msgstr "Om bonuspoäng inte har giltig tid, lämna giltighets tid tom eller 0."
+msgstr "Om lojalitet poäng inte ska ha giltig tid, lämna giltighets tid tom eller 0."
 
 #. Description of the 'Is Rejected Warehouse' (Check) field in DocType
 #. 'Warehouse'
@@ -27542,7 +27542,7 @@ msgstr "Register Sammanslagning Konton"
 #. Label of a Card Break in the Financial Reports Workspace
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Ledgers"
-msgstr "Bokföring Register"
+msgstr "Register"
 
 #. Option for the 'Status' (Select) field in DocType 'Driver'
 #. Option for the 'Status' (Select) field in DocType 'Employee'
@@ -28030,19 +28030,19 @@ msgstr "Lägre Intäkt"
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: selling/doctype/sales_order/sales_order.json
 msgid "Loyalty Amount"
-msgstr "Bonus Belopp"
+msgstr "Lojalitet Belopp"
 
 #. Name of a DocType
 #. Label of a Link in the Selling Workspace
 #: accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
 #: selling/workspace/selling/selling.json
 msgid "Loyalty Point Entry"
-msgstr "Bonus Poäng Post"
+msgstr "Lojalitet Poäng Post"
 
 #. Name of a DocType
 #: accounts/doctype/loyalty_point_entry_redemption/loyalty_point_entry_redemption.json
 msgid "Loyalty Point Entry Redemption"
-msgstr "Bonus Resultat Post Inlösen"
+msgstr "Lojalitet Poäng Post Inlösen"
 
 #. Label of the loyalty_points (Int) field in DocType 'Loyalty Point Entry'
 #. Label of the loyalty_points (Int) field in DocType 'POS Invoice'
@@ -28067,7 +28067,7 @@ msgstr "Bonus Poäng"
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/sales_invoice/sales_invoice.json
 msgid "Loyalty Points Redemption"
-msgstr "Bonus Poäng Inlösen"
+msgstr "Lojalitet Poäng Inlösen"
 
 #: accounts/doctype/loyalty_program/loyalty_program.js:8
 msgid "Loyalty Points will be calculated from the spent done (via the Sales Invoice), based on collection factor mentioned."
@@ -28075,7 +28075,7 @@ msgstr "Bonuspoäng kommer att beräknas från spenderad belopp (via försäljni
 
 #: public/js/utils.js:109
 msgid "Loyalty Points: {0}"
-msgstr "Bonus Poäng: {0}"
+msgstr "Lojalitet Poäng: {0}"
 
 #. Label of the loyalty_program (Link) field in DocType 'Loyalty Point Entry'
 #. Name of a DocType
@@ -28097,17 +28097,17 @@ msgstr "Bonus Program"
 #. Name of a DocType
 #: accounts/doctype/loyalty_program_collection/loyalty_program_collection.json
 msgid "Loyalty Program Collection"
-msgstr "Bonus Program Insamling"
+msgstr "Lojalitet Program Insamling"
 
 #. Label of the loyalty_program_help (HTML) field in DocType 'Loyalty Program'
 #: accounts/doctype/loyalty_program/loyalty_program.json
 msgid "Loyalty Program Help"
-msgstr "Bonus Program Hjälp"
+msgstr "Lojalitet Program Hjälp"
 
 #. Label of the loyalty_program_name (Data) field in DocType 'Loyalty Program'
 #: accounts/doctype/loyalty_program/loyalty_program.json
 msgid "Loyalty Program Name"
-msgstr "Bonus Program Namn"
+msgstr "Lojalitet Program Namn"
 
 #. Label of the loyalty_program_tier (Data) field in DocType 'Loyalty Point
 #. Entry'
@@ -28115,7 +28115,7 @@ msgstr "Bonus Program Namn"
 #: accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
 #: selling/doctype/customer/customer.json
 msgid "Loyalty Program Tier"
-msgstr "Bonus Program Nivå"
+msgstr "Lojalitet Program Nivå"
 
 #. Label of the loyalty_program_type (Select) field in DocType 'Loyalty
 #. Program'
@@ -30303,7 +30303,7 @@ msgstr "Fler Nivå Stycklista Generator"
 
 #: selling/doctype/customer/customer.py:380
 msgid "Multiple Loyalty Programs found for Customer {}. Please select manually."
-msgstr "Flera Bonus Program hittades för Kund {}. Välj manuellt."
+msgstr "Flera Lojalitet Program hittades för Kund {}. Välj manuellt."
 
 #: accounts/doctype/pricing_rule/utils.py:339
 msgid "Multiple Price Rules exists with same criteria, please resolve conflict by assigning priority. Price Rules: {0}"
@@ -31957,7 +31957,7 @@ msgstr "När Arbetsorder är Stängd kan den inte återupptas."
 
 #: accounts/doctype/loyalty_program/loyalty_program.js:16
 msgid "One customer can be part of only single Loyalty Program."
-msgstr "Kund kan tillhöra endast en Bonus Program"
+msgstr "En kund kan endast ingå i ett enda Lojalitet Program."
 
 #: manufacturing/dashboard_fixtures.py:228
 msgid "Ongoing Job Cards"
@@ -34286,7 +34286,7 @@ msgstr "Pausad"
 #: accounts/doctype/payment_entry/payment_entry.json
 #: templates/pages/order.html:43
 msgid "Pay"
-msgstr "Betala "
+msgstr "Utbetalning"
 
 #. Label of the pay_to_recd_from (Data) field in DocType 'Journal Entry'
 #: accounts/doctype/journal_entry/journal_entry.json
@@ -34316,7 +34316,7 @@ msgstr "Betalning Konto"
 #: accounts/workspace/payables/payables.json
 #: setup/doctype/email_digest/email_digest.json
 msgid "Payables"
-msgstr "Betalningar"
+msgstr "Skulder"
 
 #. Label of the payer_settings (Column Break) field in DocType 'Cheque Print
 #. Template'
@@ -38211,14 +38211,14 @@ msgstr "Årets Resultat"
 #. Label of a Card Break in the Financial Reports Workspace
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Profitability"
-msgstr "Lönsamhet"
+msgstr "Resultat"
 
 #. Name of a report
 #. Label of a Link in the Financial Reports Workspace
 #: accounts/report/profitability_analysis/profitability_analysis.json
 #: accounts/workspace/financial_reports/financial_reports.json
 msgid "Profitability Analysis"
-msgstr "Lönsamhet Analys"
+msgstr "Resultat Analys"
 
 #. Label of the progress_section (Section Break) field in DocType 'BOM Update
 #. Log'
@@ -40976,7 +40976,7 @@ msgstr "Fordringar"
 #. Option for the 'Payment Type' (Select) field in DocType 'Payment Entry'
 #: accounts/doctype/payment_entry/payment_entry.json
 msgid "Receive"
-msgstr "Ta Emot"
+msgstr "Inbetalning"
 
 #. Option for the 'Quote Status' (Select) field in DocType 'Request for
 #. Quotation Supplier'
@@ -41254,7 +41254,7 @@ msgstr "Lös in Mot"
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: selling/page/point_of_sale/pos_payment.js:525
 msgid "Redeem Loyalty Points"
-msgstr "Lös in Bonus Poäng"
+msgstr "Lös in Lojalitet Poäng"
 
 #. Label of the redeemed_points (Int) field in DocType 'Loyalty Point Entry
 #. Redemption'
@@ -45755,7 +45755,7 @@ msgstr "Välj Jobb Ansvarig Adress"
 #: accounts/doctype/sales_invoice/sales_invoice.js:1091
 #: selling/page/point_of_sale/pos_item_cart.js:920
 msgid "Select Loyalty Program"
-msgstr "Välj Bonus Program"
+msgstr "Välj Lojalitet Program"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.js:366
 msgid "Select Possible Supplier"
@@ -51987,7 +51987,7 @@ msgstr "Bokföring Register Poster kommer att behandlas i bakgrunden, det kan ta
 
 #: accounts/doctype/loyalty_program/loyalty_program.py:159
 msgid "The Loyalty Program isn't valid for the selected company"
-msgstr "Bonus Program är inte giltigt för vald Bolag"
+msgstr "Lojalitet Program är inte giltigt för vald Bolag"
 
 #: accounts/doctype/payment_request/payment_request.py:752
 msgid "The Payment Request {0} is already paid, cannot process payment twice"
@@ -58104,7 +58104,7 @@ msgstr "Du kan inte göra några ändringar i Jobbkort eftersom Arbetsorder är 
 
 #: accounts/doctype/loyalty_program/loyalty_program.py:172
 msgid "You can't redeem Loyalty Points having more value than the Rounded Total."
-msgstr "Du kan inte lösa in bonus poäng som har mer värde än avrundad belopp."
+msgstr "Det går inte att lösa in Lojalitet Poäng som har mer värde än Avrundad Belopp."
 
 #: manufacturing/doctype/bom/bom.js:620
 msgid "You cannot change the rate if BOM is mentioned against any Item."
@@ -58160,7 +58160,7 @@ msgstr "Du har inte behörighet att {} artikel i {}."
 
 #: accounts/doctype/loyalty_program/loyalty_program.py:167
 msgid "You don't have enough Loyalty Points to redeem"
-msgstr "Du har inte tillräckligt med bonus poäng för att lösa in"
+msgstr "Det finns inte tillräckligt med Lojalitet Poäng för att lösa in"
 
 #: selling/page/point_of_sale/pos_payment.js:499
 msgid "You don't have enough points to redeem."
@@ -59193,7 +59193,7 @@ msgstr "{} Att Fakturera"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1763
 msgid "{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}"
-msgstr "{} kan inte annulleras eftersom intjänade Bonus Poäng har lösts in. Först annullera {} Nummer {}"
+msgstr "{} kan inte annulleras eftersom intjänade Lojalitet Poäng har lösts in. Först annullera {} Nummer {}"
 
 #: controllers/buying_controller.py:198
 msgid "{} has submitted assets linked to it. You need to cancel the assets to create purchase return."
