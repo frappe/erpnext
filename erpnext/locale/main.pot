@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ERPNext VERSION\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
-"POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-01 09:35+0000\n"
+"POT-Creation-Date: 2024-09-08 09:35+0000\n"
+"PO-Revision-Date: 2024-09-08 09:35+0000\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: info@erpnext.com\n"
 "MIME-Version: 1.0\n"
@@ -205,7 +205,7 @@ msgstr ""
 msgid "% of materials delivered against this Sales Order"
 msgstr ""
 
-#: controllers/accounts_controller.py:2011
+#: controllers/accounts_controller.py:2020
 msgid "'Account' in the Accounting section of Customer {0}"
 msgstr ""
 
@@ -225,7 +225,7 @@ msgstr ""
 msgid "'Days Since Last Order' must be greater than or equal to zero"
 msgstr ""
 
-#: controllers/accounts_controller.py:2016
+#: controllers/accounts_controller.py:2025
 msgid "'Default {0} Account' in Company {1}"
 msgstr ""
 
@@ -282,7 +282,7 @@ msgstr ""
 msgid "'Update Stock' can not be checked because items are not delivered via {0}"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:375
+#: accounts/doctype/sales_invoice/sales_invoice.py:359
 msgid "'Update Stock' cannot be checked for fixed asset sale"
 msgstr ""
 
@@ -294,7 +294,7 @@ msgstr ""
 msgid "'{0}' account: '{1}' should match the Return Against Invoice"
 msgstr ""
 
-#: setup/doctype/company/company.py:204 setup/doctype/company/company.py:215
+#: setup/doctype/company/company.py:205 setup/doctype/company/company.py:216
 msgid "'{0}' should be in company currency {1}."
 msgstr ""
 
@@ -902,7 +902,7 @@ msgstr ""
 msgid "A Reconciliation Job {0} is running for the same filters. Cannot reconcile now"
 msgstr ""
 
-#: setup/doctype/company/company.py:924
+#: setup/doctype/company/company.py:925
 msgid "A Transaction Deletion Document: {0} is triggered for {0}"
 msgstr ""
 
@@ -1024,11 +1024,11 @@ msgstr ""
 msgid "Abbreviation"
 msgstr ""
 
-#: setup/doctype/company/company.py:163
+#: setup/doctype/company/company.py:164
 msgid "Abbreviation already used for another company"
 msgstr ""
 
-#: setup/doctype/company/company.py:160
+#: setup/doctype/company/company.py:161
 msgid "Abbreviation is mandatory"
 msgstr ""
 
@@ -1313,8 +1313,8 @@ msgstr ""
 msgid "Account Manager"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:873
-#: controllers/accounts_controller.py:2020
+#: accounts/doctype/sales_invoice/sales_invoice.py:857
+#: controllers/accounts_controller.py:2029
 msgid "Account Missing"
 msgstr ""
 
@@ -1329,7 +1329,7 @@ msgstr ""
 msgid "Account Name"
 msgstr ""
 
-#: accounts/doctype/account/account.py:321
+#: accounts/doctype/account/account.py:322
 msgid "Account Not Found"
 msgstr ""
 
@@ -1339,7 +1339,7 @@ msgstr ""
 msgid "Account Number"
 msgstr ""
 
-#: accounts/doctype/account/account.py:472
+#: accounts/doctype/account/account.py:473
 msgid "Account Number {0} already used in account {1}"
 msgstr ""
 
@@ -1378,7 +1378,7 @@ msgstr ""
 #. Label of the account_type (Select) field in DocType 'Payment Ledger Entry'
 #. Label of the account_type (Select) field in DocType 'Party Type'
 #: accounts/doctype/account/account.json
-#: accounts/doctype/account/account.py:203
+#: accounts/doctype/account/account.py:204
 #: accounts/doctype/account/account_tree.js:152
 #: accounts/doctype/bank_account/bank_account.json
 #: accounts/doctype/bank_account_type/bank_account_type.json
@@ -1394,11 +1394,11 @@ msgstr ""
 msgid "Account Value"
 msgstr ""
 
-#: accounts/doctype/account/account.py:294
+#: accounts/doctype/account/account.py:295
 msgid "Account balance already in Credit, you are not allowed to set 'Balance Must Be' as 'Debit'"
 msgstr ""
 
-#: accounts/doctype/account/account.py:288
+#: accounts/doctype/account/account.py:289
 msgid "Account balance already in Debit, you are not allowed to set 'Balance Must Be' as 'Credit'"
 msgstr ""
 
@@ -1420,28 +1420,28 @@ msgstr ""
 msgid "Account is not set for the dashboard chart {0}"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:677
+#: assets/doctype/asset/asset.py:679
 msgid "Account not Found"
 msgstr ""
 
-#: accounts/doctype/account/account.py:375
+#: accounts/doctype/account/account.py:376
 msgid "Account with child nodes cannot be converted to ledger"
 msgstr ""
 
-#: accounts/doctype/account/account.py:267
+#: accounts/doctype/account/account.py:268
 msgid "Account with child nodes cannot be set as ledger"
 msgstr ""
 
-#: accounts/doctype/account/account.py:386
+#: accounts/doctype/account/account.py:387
 msgid "Account with existing transaction can not be converted to group."
 msgstr ""
 
-#: accounts/doctype/account/account.py:415
+#: accounts/doctype/account/account.py:416
 msgid "Account with existing transaction can not be deleted"
 msgstr ""
 
-#: accounts/doctype/account/account.py:262
-#: accounts/doctype/account/account.py:377
+#: accounts/doctype/account/account.py:263
+#: accounts/doctype/account/account.py:378
 msgid "Account with existing transaction cannot be converted to ledger"
 msgstr ""
 
@@ -1449,7 +1449,7 @@ msgstr ""
 msgid "Account {0} added multiple times"
 msgstr ""
 
-#: setup/doctype/company/company.py:186
+#: setup/doctype/company/company.py:187
 msgid "Account {0} does not belong to company: {1}"
 msgstr ""
 
@@ -1457,7 +1457,7 @@ msgstr ""
 msgid "Account {0} does not belongs to company {1}"
 msgstr ""
 
-#: accounts/doctype/account/account.py:546
+#: accounts/doctype/account/account.py:547
 msgid "Account {0} does not exist"
 msgstr ""
 
@@ -1473,7 +1473,7 @@ msgstr ""
 msgid "Account {0} does not match with Company {1} in Mode of Account: {2}"
 msgstr ""
 
-#: accounts/doctype/account/account.py:504
+#: accounts/doctype/account/account.py:505
 msgid "Account {0} exists in parent company {1}."
 msgstr ""
 
@@ -1481,7 +1481,7 @@ msgstr ""
 msgid "Account {0} has been entered multiple times"
 msgstr ""
 
-#: accounts/doctype/account/account.py:359
+#: accounts/doctype/account/account.py:360
 msgid "Account {0} is added in the child company {1}"
 msgstr ""
 
@@ -1493,19 +1493,19 @@ msgstr ""
 msgid "Account {0} is invalid. Account Currency must be {1}"
 msgstr ""
 
-#: accounts/doctype/account/account.py:149
+#: accounts/doctype/account/account.py:150
 msgid "Account {0}: Parent account {1} can not be a ledger"
 msgstr ""
 
-#: accounts/doctype/account/account.py:155
+#: accounts/doctype/account/account.py:156
 msgid "Account {0}: Parent account {1} does not belong to company: {2}"
 msgstr ""
 
-#: accounts/doctype/account/account.py:143
+#: accounts/doctype/account/account.py:144
 msgid "Account {0}: Parent account {1} does not exist"
 msgstr ""
 
-#: accounts/doctype/account/account.py:146
+#: accounts/doctype/account/account.py:147
 msgid "Account {0}: You can not assign itself as parent account"
 msgstr ""
 
@@ -1521,7 +1521,7 @@ msgstr ""
 msgid "Account: {0} is not permitted under Payment Entry"
 msgstr ""
 
-#: controllers/accounts_controller.py:2697
+#: controllers/accounts_controller.py:2707
 msgid "Account: {0} with currency: {1} can not be selected"
 msgstr ""
 
@@ -1785,7 +1785,7 @@ msgstr ""
 msgid "Accounting Entries"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:711 assets/doctype/asset/asset.py:726
+#: assets/doctype/asset/asset.py:713 assets/doctype/asset/asset.py:728
 #: assets/doctype/asset_capitalization/asset_capitalization.py:585
 msgid "Accounting Entry for Asset"
 msgstr ""
@@ -1801,12 +1801,12 @@ msgstr ""
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1073
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1096
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:1195
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1389
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1407
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1393
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1411
 #: controllers/stock_controller.py:499 controllers/stock_controller.py:516
 #: stock/doctype/purchase_receipt/purchase_receipt.py:821
-#: stock/doctype/stock_entry/stock_entry.py:1550
-#: stock/doctype/stock_entry/stock_entry.py:1564
+#: stock/doctype/stock_entry/stock_entry.py:1579
+#: stock/doctype/stock_entry/stock_entry.py:1593
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.py:553
 msgid "Accounting Entry for Stock"
 msgstr ""
@@ -1815,7 +1815,7 @@ msgstr ""
 msgid "Accounting Entry for {0}"
 msgstr ""
 
-#: controllers/accounts_controller.py:2061
+#: controllers/accounts_controller.py:2070
 msgid "Accounting Entry for {0}: {1} can only be made in currency: {2}"
 msgstr ""
 
@@ -1875,7 +1875,7 @@ msgstr ""
 #: buying/doctype/supplier/supplier.json
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 #: selling/doctype/customer/customer.json setup/doctype/company/company.json
-#: setup/doctype/company/company.py:334
+#: setup/doctype/company/company.py:335
 #: setup/doctype/customer_group/customer_group.json
 #: setup/doctype/email_digest/email_digest.json
 #: setup/doctype/incoterm/incoterm.json
@@ -1997,7 +1997,7 @@ msgstr ""
 
 #. Name of a report
 #. Label of a Link in the Payables Workspace
-#: accounts/report/accounts_payable/accounts_payable.js:176
+#: accounts/report/accounts_payable/accounts_payable.js:181
 #: accounts/report/accounts_payable_summary/accounts_payable_summary.json
 #: accounts/workspace/payables/payables.json
 msgid "Accounts Payable Summary"
@@ -3285,7 +3285,7 @@ msgstr ""
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.json
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.json
 #: accounts/doctype/repost_accounting_ledger_settings/repost_accounting_ledger_settings.json
-#: stock/reorder_item.py:387
+#: stock/reorder_item.py:392
 msgid "Administrator"
 msgstr ""
 
@@ -3359,7 +3359,7 @@ msgstr ""
 msgid "Advance amount"
 msgstr ""
 
-#: controllers/taxes_and_totals.py:760
+#: controllers/taxes_and_totals.py:767
 msgid "Advance amount cannot be greater than {0} {1}"
 msgstr ""
 
@@ -3435,7 +3435,7 @@ msgstr ""
 msgid "Against Blanket Order"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:966
+#: accounts/doctype/sales_invoice/sales_invoice.py:950
 msgid "Against Customer Order {0} dated {1}"
 msgstr ""
 
@@ -3564,7 +3564,7 @@ msgstr ""
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:152
 #: accounts/report/accounts_receivable/accounts_receivable.html:133
-#: accounts/report/accounts_receivable/accounts_receivable.py:1120
+#: accounts/report/accounts_receivable/accounts_receivable.py:1136
 msgid "Age (Days)"
 msgstr ""
 
@@ -3710,7 +3710,7 @@ msgstr ""
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:165
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js:185
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:166
-#: accounts/utils.py:1284 public/js/setup_wizard.js:173
+#: accounts/utils.py:1336 public/js/setup_wizard.js:173
 msgid "All Accounts"
 msgstr ""
 
@@ -3764,14 +3764,14 @@ msgstr ""
 #: patches/v11_0/update_department_lft_rgt.py:9
 #: patches/v11_0/update_department_lft_rgt.py:11
 #: patches/v11_0/update_department_lft_rgt.py:16
-#: setup/doctype/company/company.py:327 setup/doctype/company/company.py:330
-#: setup/doctype/company/company.py:335 setup/doctype/company/company.py:341
-#: setup/doctype/company/company.py:347 setup/doctype/company/company.py:353
-#: setup/doctype/company/company.py:359 setup/doctype/company/company.py:365
-#: setup/doctype/company/company.py:371 setup/doctype/company/company.py:377
-#: setup/doctype/company/company.py:383 setup/doctype/company/company.py:389
-#: setup/doctype/company/company.py:395 setup/doctype/company/company.py:401
-#: setup/doctype/company/company.py:407
+#: setup/doctype/company/company.py:328 setup/doctype/company/company.py:331
+#: setup/doctype/company/company.py:336 setup/doctype/company/company.py:342
+#: setup/doctype/company/company.py:348 setup/doctype/company/company.py:354
+#: setup/doctype/company/company.py:360 setup/doctype/company/company.py:366
+#: setup/doctype/company/company.py:372 setup/doctype/company/company.py:378
+#: setup/doctype/company/company.py:384 setup/doctype/company/company.py:390
+#: setup/doctype/company/company.py:396 setup/doctype/company/company.py:402
+#: setup/doctype/company/company.py:408
 msgid "All Departments"
 msgstr ""
 
@@ -3843,7 +3843,7 @@ msgstr ""
 msgid "All Territories"
 msgstr ""
 
-#: setup/doctype/company/company.py:281 setup/doctype/company/company.py:294
+#: setup/doctype/company/company.py:282 setup/doctype/company/company.py:295
 msgid "All Warehouses"
 msgstr ""
 
@@ -3857,7 +3857,7 @@ msgstr ""
 msgid "All communications including and above this shall be moved into the new Issue"
 msgstr ""
 
-#: stock/doctype/purchase_receipt/purchase_receipt.py:1126
+#: stock/doctype/purchase_receipt/purchase_receipt.py:1130
 msgid "All items have already been Invoiced/Returned"
 msgstr ""
 
@@ -3865,7 +3865,7 @@ msgstr ""
 msgid "All items have already been received"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:2372
+#: stock/doctype/stock_entry/stock_entry.py:2401
 msgid "All items have already been transferred for this Work Order."
 msgstr ""
 
@@ -3964,11 +3964,11 @@ msgstr ""
 msgid "Allocated amount"
 msgstr ""
 
-#: accounts/utils.py:615
+#: accounts/utils.py:627
 msgid "Allocated amount cannot be greater than unadjusted amount"
 msgstr ""
 
-#: accounts/utils.py:613
+#: accounts/utils.py:625
 msgid "Allocated amount cannot be negative"
 msgstr ""
 
@@ -4001,7 +4001,7 @@ msgstr ""
 
 #. Label of the allow_account_creation_against_child_company (Check) field in
 #. DocType 'Company'
-#: accounts/doctype/account/account.py:502
+#: accounts/doctype/account/account.py:503
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:68
 #: setup/doctype/company/company.json
 msgid "Allow Account Creation Against Child Company"
@@ -4325,7 +4325,7 @@ msgid "Already set default in pos profile {0} for user {1}, kindly disabled defa
 msgstr ""
 
 #: manufacturing/doctype/bom/bom.js:201
-#: manufacturing/doctype/work_order/work_order.js:163 public/js/utils.js:493
+#: manufacturing/doctype/work_order/work_order.js:163 public/js/utils.js:503
 #: stock/doctype/stock_entry/stock_entry.js:249
 msgid "Alternate Item"
 msgstr ""
@@ -4849,7 +4849,7 @@ msgstr ""
 msgid "An error occurred during the update process"
 msgstr ""
 
-#: stock/reorder_item.py:371
+#: stock/reorder_item.py:376
 msgid "An error occurred for certain Items while creating Material Requests based on Re-order level. Please rectify these issues :"
 msgstr ""
 
@@ -5522,7 +5522,7 @@ msgstr ""
 msgid "Asset Depreciation Schedule {0} for Asset {1} and Finance Book {2} already exists."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:143 assets/doctype/asset/asset.py:181
+#: assets/doctype/asset/asset.py:144 assets/doctype/asset/asset.py:183
 msgid "Asset Depreciation Schedules created:<br>{0}<br><br>Please check, edit if needed, and submit the Asset."
 msgstr ""
 
@@ -5599,7 +5599,7 @@ msgstr ""
 msgid "Asset Movement Item"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:939
+#: assets/doctype/asset/asset.py:941
 msgid "Asset Movement record {0} created"
 msgstr ""
 
@@ -5721,11 +5721,11 @@ msgstr ""
 msgid "Asset Value Analytics"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:172
+#: assets/doctype/asset/asset.py:174
 msgid "Asset cancelled"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:512
+#: assets/doctype/asset/asset.py:514
 msgid "Asset cannot be cancelled, as it is already {0}"
 msgstr ""
 
@@ -5733,7 +5733,7 @@ msgstr ""
 msgid "Asset capitalized after Asset Capitalization {0} was submitted"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:194
+#: assets/doctype/asset/asset.py:196
 msgid "Asset created"
 msgstr ""
 
@@ -5741,7 +5741,7 @@ msgstr ""
 msgid "Asset created after Asset Capitalization {0} was submitted"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:1188
+#: assets/doctype/asset/asset.py:1190
 msgid "Asset created after being split from Asset {0}"
 msgstr ""
 
@@ -5749,7 +5749,7 @@ msgstr ""
 msgid "Asset decapitalized after Asset Capitalization {0} was submitted"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:197
+#: assets/doctype/asset/asset.py:199
 msgid "Asset deleted"
 msgstr ""
 
@@ -5773,7 +5773,7 @@ msgstr ""
 msgid "Asset restored after Asset Capitalization {0} was cancelled"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1342
+#: accounts/doctype/sales_invoice/sales_invoice.py:1326
 msgid "Asset returned"
 msgstr ""
 
@@ -5785,11 +5785,11 @@ msgstr ""
 msgid "Asset scrapped via Journal Entry {0}"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1378
+#: accounts/doctype/sales_invoice/sales_invoice.py:1362
 msgid "Asset sold"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:160
+#: assets/doctype/asset/asset.py:162
 msgid "Asset submitted"
 msgstr ""
 
@@ -5797,7 +5797,7 @@ msgstr ""
 msgid "Asset transferred to Location {0}"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:1122
+#: assets/doctype/asset/asset.py:1124
 msgid "Asset updated after being split into Asset {0}"
 msgstr ""
 
@@ -5930,7 +5930,7 @@ msgstr ""
 msgid "At Row #{0}: The picked quantity {1} for the item {2} is greater than available stock {3} in the warehouse {4}."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:1045
+#: assets/doctype/asset/asset.py:1047
 msgid "At least one asset has to be selected."
 msgstr ""
 
@@ -5943,7 +5943,7 @@ msgid "At least one item should be entered with negative quantity in return docu
 msgstr ""
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:417
-#: accounts/doctype/sales_invoice/sales_invoice.py:517
+#: accounts/doctype/sales_invoice/sales_invoice.py:501
 msgid "At least one mode of payment is required for POS invoice."
 msgstr ""
 
@@ -5955,7 +5955,7 @@ msgstr ""
 msgid "At least one of the Selling or Buying must be selected"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:629
+#: stock/doctype/stock_entry/stock_entry.py:630
 msgid "At least one warehouse is mandatory"
 msgstr ""
 
@@ -6227,8 +6227,8 @@ msgstr ""
 msgid "Auto Reconciliation"
 msgstr ""
 
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:145
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:193
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:147
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:195
 msgid "Auto Reconciliation of Payments has been disabled. Enable it through {0}"
 msgstr ""
 
@@ -6390,7 +6390,7 @@ msgstr ""
 #. 'Delivery Note Item'
 #: manufacturing/doctype/workstation/workstation.js:502
 #: manufacturing/report/bom_stock_calculated/bom_stock_calculated.py:80
-#: public/js/utils.js:553
+#: public/js/utils.js:563
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 #: stock/report/stock_ageing/stock_ageing.py:155
 msgid "Available Qty"
@@ -6463,11 +6463,11 @@ msgstr ""
 msgid "Available Stock for Packing Items"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:268
+#: assets/doctype/asset/asset.py:270
 msgid "Available for use date is required"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:760
+#: stock/doctype/stock_entry/stock_entry.py:761
 msgid "Available quantity is {0}, you need {1}"
 msgstr ""
 
@@ -6480,7 +6480,7 @@ msgstr ""
 msgid "Available-for-use Date"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:351
+#: assets/doctype/asset/asset.py:353
 msgid "Available-for-use Date should be after purchase date"
 msgstr ""
 
@@ -6567,6 +6567,8 @@ msgstr ""
 #. Name of a DocType
 #. Option for the 'Backflush Raw Materials Based On' (Select) field in DocType
 #. 'Manufacturing Settings'
+#. Label of the bom_section (Section Break) field in DocType 'Manufacturing
+#. Settings'
 #. Label of the bom (Link) field in DocType 'Work Order Operation'
 #. Label of a shortcut in the Manufacturing Workspace
 #. Label of the bom (Link) field in DocType 'Purchase Receipt Item'
@@ -6822,6 +6824,12 @@ msgstr ""
 msgid "BOM and Manufacturing Quantity are required"
 msgstr ""
 
+#. Label of the bom_and_work_order_tab (Tab Break) field in DocType
+#. 'Manufacturing Settings'
+#: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "BOM and Production"
+msgstr ""
+
 #: stock/doctype/material_request/material_request.js:332
 #: stock/doctype/stock_entry/stock_entry.js:687
 msgid "BOM does not contain any stock item"
@@ -6963,7 +6971,7 @@ msgstr ""
 #: accounts/doctype/account/account.json
 #: accounts/report/balance_sheet/balance_sheet.json
 #: accounts/workspace/financial_reports/financial_reports.json
-#: public/js/financial_statements.js:132
+#: public/js/financial_statements.js:135
 #: setup/doctype/email_digest/email_digest.json
 msgid "Balance Sheet"
 msgstr ""
@@ -7277,7 +7285,7 @@ msgstr ""
 msgid "Bank/Cash Account"
 msgstr ""
 
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:56
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:57
 msgid "Bank/Cash Account {0} doesn't belong to company {1}"
 msgstr ""
 
@@ -7577,7 +7585,7 @@ msgstr ""
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:115
 #: public/js/controllers/transaction.js:2259
 #: public/js/utils/barcode_scanner.js:260
-#: public/js/utils/serial_no_batch_selector.js:396
+#: public/js/utils/serial_no_batch_selector.js:416
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 #: stock/doctype/item_price/item_price.json
 #: stock/doctype/packed_item/packed_item.json
@@ -7681,12 +7689,12 @@ msgstr ""
 msgid "Batch {0} is not available in warehouse {1}"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:2535
+#: stock/doctype/stock_entry/stock_entry.py:2564
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:288
 msgid "Batch {0} of Item {1} has expired."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:2541
+#: stock/doctype/stock_entry/stock_entry.py:2570
 msgid "Batch {0} of Item {1} is disabled."
 msgstr ""
 
@@ -7727,7 +7735,7 @@ msgstr ""
 #. Label of the bill_date (Date) field in DocType 'Journal Entry'
 #. Label of the bill_date (Date) field in DocType 'Subcontracting Receipt'
 #: accounts/doctype/journal_entry/journal_entry.json
-#: accounts/report/accounts_receivable/accounts_receivable.py:1047
+#: accounts/report/accounts_receivable/accounts_receivable.py:1063
 #: accounts/report/purchase_register/purchase_register.py:214
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Bill Date"
@@ -7736,7 +7744,7 @@ msgstr ""
 #. Label of the bill_no (Data) field in DocType 'Journal Entry'
 #. Label of the bill_no (Data) field in DocType 'Subcontracting Receipt'
 #: accounts/doctype/journal_entry/journal_entry.json
-#: accounts/report/accounts_receivable/accounts_receivable.py:1046
+#: accounts/report/accounts_receivable/accounts_receivable.py:1062
 #: accounts/report/purchase_register/purchase_register.py:213
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.json
 msgid "Bill No"
@@ -8169,7 +8177,7 @@ msgstr ""
 msgid "Booking stock value across multiple accounts will make it harder to track stock and account value."
 msgstr ""
 
-#: accounts/general_ledger.py:713
+#: accounts/general_ledger.py:744
 msgid "Books have been closed till the period ending on {0}"
 msgstr ""
 
@@ -8903,7 +8911,7 @@ msgid "Can only make payment against unbilled {0}"
 msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.js:1474
-#: controllers/accounts_controller.py:2606 public/js/controllers/accounts.js:90
+#: controllers/accounts_controller.py:2616 public/js/controllers/accounts.js:90
 msgid "Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'"
 msgstr ""
 
@@ -9109,11 +9117,11 @@ msgstr ""
 msgid "Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."
 msgstr ""
 
-#: controllers/buying_controller.py:867
+#: controllers/buying_controller.py:869
 msgid "Cannot cancel this document as it is linked with submitted asset {0}. Please cancel it to continue."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:346
+#: stock/doctype/stock_entry/stock_entry.py:347
 msgid "Cannot cancel transaction for Completed Work Order."
 msgstr ""
 
@@ -9137,7 +9145,7 @@ msgstr ""
 msgid "Cannot change Variant properties after stock transaction. You will have to make a new Item to do this."
 msgstr ""
 
-#: setup/doctype/company/company.py:231
+#: setup/doctype/company/company.py:232
 msgid "Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency."
 msgstr ""
 
@@ -9153,19 +9161,19 @@ msgstr ""
 msgid "Cannot convert Task to non-group because the following child Tasks exist: {0}."
 msgstr ""
 
-#: accounts/doctype/account/account.py:388
+#: accounts/doctype/account/account.py:389
 msgid "Cannot convert to Group because Account Type is selected."
 msgstr ""
 
-#: accounts/doctype/account/account.py:265
+#: accounts/doctype/account/account.py:266
 msgid "Cannot covert to Group because Account Type is selected."
 msgstr ""
 
-#: stock/doctype/purchase_receipt/purchase_receipt.py:896
+#: stock/doctype/purchase_receipt/purchase_receipt.py:900
 msgid "Cannot create Stock Reservation Entries for future dated Purchase Receipts."
 msgstr ""
 
-#: selling/doctype/sales_order/sales_order.py:1628
+#: selling/doctype/sales_order/sales_order.py:1632
 #: stock/doctype/pick_list/pick_list.py:172
 msgid "Cannot create a pick list for Sales Order {0} because it has reserved stock. Please unreserve the stock in order to create a pick list."
 msgstr ""
@@ -9208,7 +9216,7 @@ msgstr ""
 msgid "Cannot find Item with this Barcode"
 msgstr ""
 
-#: controllers/accounts_controller.py:3124
+#: controllers/accounts_controller.py:3134
 msgid "Cannot find a default warehouse for item {0}. Please set one in the Item Master or in Stock Settings."
 msgstr ""
 
@@ -9216,7 +9224,7 @@ msgstr ""
 msgid "Cannot make any transactions until the deletion job is completed"
 msgstr ""
 
-#: controllers/accounts_controller.py:1876
+#: controllers/accounts_controller.py:1885
 msgid "Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings"
 msgstr ""
 
@@ -9237,7 +9245,7 @@ msgid "Cannot receive from customer against negative outstanding"
 msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.js:1491
-#: controllers/accounts_controller.py:2621
+#: controllers/accounts_controller.py:2631
 #: public/js/controllers/accounts.js:100
 msgid "Cannot refer row number greater than or equal to current row number for this Charge type"
 msgstr ""
@@ -9253,7 +9261,7 @@ msgstr ""
 #: accounts/doctype/payment_entry/payment_entry.js:1483
 #: accounts/doctype/payment_entry/payment_entry.js:1662
 #: accounts/doctype/payment_entry/payment_entry.py:1653
-#: controllers/accounts_controller.py:2611 public/js/controllers/accounts.js:94
+#: controllers/accounts_controller.py:2621 public/js/controllers/accounts.js:94
 #: public/js/controllers/taxes_and_totals.js:455
 msgid "Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"
 msgstr ""
@@ -9270,11 +9278,11 @@ msgstr ""
 msgid "Cannot set multiple Item Defaults for a company."
 msgstr ""
 
-#: controllers/accounts_controller.py:3272
+#: controllers/accounts_controller.py:3282
 msgid "Cannot set quantity less than delivered quantity"
 msgstr ""
 
-#: controllers/accounts_controller.py:3275
+#: controllers/accounts_controller.py:3285
 msgid "Cannot set quantity less than received quantity"
 msgstr ""
 
@@ -9429,7 +9437,7 @@ msgstr ""
 msgid "Cash Flow"
 msgstr ""
 
-#: public/js/financial_statements.js:142
+#: public/js/financial_statements.js:145
 msgid "Cash Flow Statement"
 msgstr ""
 
@@ -9615,7 +9623,7 @@ msgstr ""
 msgid "Change in Stock Value"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:892
+#: accounts/doctype/sales_invoice/sales_invoice.py:876
 msgid "Change the account type to Receivable or select a different account."
 msgstr ""
 
@@ -9649,7 +9657,7 @@ msgid "Channel Partner"
 msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.py:1708
-#: controllers/accounts_controller.py:2674
+#: controllers/accounts_controller.py:2684
 msgid "Charge of type 'Actual' in row {0} cannot be included in Item Rate or Paid Amount"
 msgstr ""
 
@@ -9707,7 +9715,7 @@ msgstr ""
 #: accounts/doctype/cost_center/cost_center_tree.js:52
 #: accounts/workspace/accounting/accounting.json
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
-#: public/js/setup_wizard.js:36 setup/doctype/company/company.js:103
+#: public/js/setup_wizard.js:36 setup/doctype/company/company.js:104
 #: setup/doctype/company/company.json setup/workspace/home/home.json
 msgid "Chart of Accounts"
 msgstr ""
@@ -10672,7 +10680,7 @@ msgstr ""
 #: projects/doctype/timesheet/timesheet.json
 #: projects/report/project_summary/project_summary.js:8
 #: projects/report/project_wise_stock_tracking/project_wise_stock_tracking.py:44
-#: public/js/financial_statements.js:154 public/js/purchase_trends_filters.js:8
+#: public/js/financial_statements.js:157 public/js/purchase_trends_filters.js:8
 #: public/js/sales_trends_filters.js:51
 #: regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 #: regional/doctype/lower_deduction_certificate/lower_deduction_certificate.json
@@ -10931,7 +10939,7 @@ msgstr ""
 msgid "Company and Posting Date is mandatory"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:2186
+#: accounts/doctype/sales_invoice/sales_invoice.py:2190
 msgid "Company currencies of both the companies should match for Inter Company Transactions."
 msgstr ""
 
@@ -10948,11 +10956,11 @@ msgstr ""
 msgid "Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
 msgstr ""
 
-#: setup/doctype/company/company.js:198
+#: setup/doctype/company/company.js:199
 msgid "Company name not same"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:206
+#: assets/doctype/asset/asset.py:208
 msgid "Company of asset {0} and purchase document {1} doesn't matches."
 msgstr ""
 
@@ -10983,7 +10991,7 @@ msgstr ""
 msgid "Company {0} already exists. Continuing will overwrite the Company and Chart of Accounts"
 msgstr ""
 
-#: accounts/doctype/account/account.py:457
+#: accounts/doctype/account/account.py:458
 msgid "Company {0} does not exist"
 msgstr ""
 
@@ -11414,7 +11422,7 @@ msgstr ""
 #. Log'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.json
-#: accounts/doctype/sales_invoice/sales_invoice.py:530
+#: accounts/doctype/sales_invoice/sales_invoice.py:514
 msgid "Consolidated Sales Invoice"
 msgstr ""
 
@@ -11894,7 +11902,7 @@ msgstr ""
 #: manufacturing/doctype/bom_creator_item/bom_creator_item.json
 #: manufacturing/doctype/bom_item/bom_item.json
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
-#: public/js/utils.js:723 stock/doctype/packed_item/packed_item.json
+#: public/js/utils.js:733 stock/doctype/packed_item/packed_item.json
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: stock/doctype/putaway_rule/putaway_rule.json
 #: stock/doctype/stock_entry_detail/stock_entry_detail.json
@@ -11920,7 +11928,7 @@ msgstr ""
 msgid "Conversion factor for default Unit of Measure must be 1 in row {0}"
 msgstr ""
 
-#: controllers/accounts_controller.py:2503
+#: controllers/accounts_controller.py:2513
 msgid "Conversion rate cannot be 0 or 1"
 msgstr ""
 
@@ -12131,7 +12139,7 @@ msgstr ""
 #: accounts/report/accounts_payable/accounts_payable.js:28
 #: accounts/report/accounts_payable_summary/accounts_payable_summary.js:62
 #: accounts/report/accounts_receivable/accounts_receivable.js:30
-#: accounts/report/accounts_receivable/accounts_receivable.py:1033
+#: accounts/report/accounts_receivable/accounts_receivable.py:1049
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:62
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.js:42
 #: accounts/report/asset_depreciation_ledger/asset_depreciation_ledger.py:195
@@ -12161,7 +12169,7 @@ msgstr ""
 #: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
 #: buying/report/procurement_tracker/procurement_tracker.js:15
 #: buying/report/procurement_tracker/procurement_tracker.py:32
-#: public/js/financial_statements.js:247
+#: public/js/financial_statements.js:250
 #: selling/doctype/sales_order/sales_order.json
 #: stock/doctype/delivery_note/delivery_note.json
 #: stock/doctype/delivery_note_item/delivery_note_item.json
@@ -12220,7 +12228,7 @@ msgstr ""
 msgid "Cost Center is a part of Cost Center Allocation, hence cannot be converted to a group"
 msgstr ""
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1358
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1362
 #: stock/doctype/purchase_receipt/purchase_receipt.py:787
 msgid "Cost Center is required in row {0} in Taxes table for type {1}"
 msgstr ""
@@ -12241,11 +12249,11 @@ msgstr ""
 msgid "Cost Center {0} cannot be used for allocation as it is used as main cost center in other allocation record."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:244
+#: assets/doctype/asset/asset.py:246
 msgid "Cost Center {} doesn't belong to Company {}"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:251
+#: assets/doctype/asset/asset.py:253
 msgid "Cost Center {} is a group cost center and group cost centers cannot be used in transactions"
 msgstr ""
 
@@ -12253,7 +12261,7 @@ msgstr ""
 msgid "Cost Center: {0} does not exist"
 msgstr ""
 
-#: setup/doctype/company/company.js:93
+#: setup/doctype/company/company.js:94
 msgid "Cost Centers"
 msgstr ""
 
@@ -12811,7 +12819,7 @@ msgstr ""
 msgid "Create Supplier Quotation"
 msgstr ""
 
-#: setup/doctype/company/company.js:137
+#: setup/doctype/company/company.js:138
 msgid "Create Tax Template"
 msgstr ""
 
@@ -12851,7 +12859,7 @@ msgstr ""
 msgid "Create a variant with the template image."
 msgstr ""
 
-#: stock/stock_ledger.py:1802
+#: stock/stock_ledger.py:1803
 msgid "Create an incoming stock transaction for the Item."
 msgstr ""
 
@@ -13107,7 +13115,7 @@ msgstr ""
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:174
 #: accounts/report/accounts_receivable/accounts_receivable.html:147
-#: accounts/report/accounts_receivable/accounts_receivable.py:1056
+#: accounts/report/accounts_receivable/accounts_receivable.py:1072
 #: controllers/sales_and_purchase_return.py:331
 #: setup/setup_wizard/operations/install_fixtures.py:288
 #: stock/doctype/delivery_note/delivery_note.js:89
@@ -13142,7 +13150,7 @@ msgstr ""
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:382
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:390
-#: controllers/accounts_controller.py:2000
+#: controllers/accounts_controller.py:2009
 msgid "Credit To"
 msgstr ""
 
@@ -13327,7 +13335,7 @@ msgstr ""
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: accounts/doctype/subscription_plan/subscription_plan.json
 #: accounts/report/account_balance/account_balance.py:28
-#: accounts/report/accounts_receivable/accounts_receivable.py:1065
+#: accounts/report/accounts_receivable/accounts_receivable.py:1081
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:206
 #: accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py:101
 #: accounts/report/consolidated_financial_statement/consolidated_financial_statement.js:118
@@ -13357,7 +13365,7 @@ msgstr ""
 #: manufacturing/doctype/bom_creator/bom_creator.js:76
 #: manufacturing/doctype/bom_creator/bom_creator.json
 #: projects/doctype/timesheet/timesheet.json
-#: public/js/financial_statements.js:241 public/js/utils/unreconcile.js:93
+#: public/js/financial_statements.js:244 public/js/utils/unreconcile.js:93
 #: selling/doctype/quotation/quotation.json
 #: selling/doctype/sales_order/sales_order.json
 #: selling/report/item_wise_sales_history/item_wise_sales_history.py:121
@@ -13430,12 +13438,12 @@ msgstr ""
 msgid "Currency and Price List"
 msgstr ""
 
-#: accounts/doctype/account/account.py:310
+#: accounts/doctype/account/account.py:311
 msgid "Currency can not be changed after making entries using some other currency"
 msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.py:1434
-#: accounts/doctype/payment_entry/payment_entry.py:1496 accounts/utils.py:2063
+#: accounts/doctype/payment_entry/payment_entry.py:1496 accounts/utils.py:2115
 msgid "Currency for {0} must be {1}"
 msgstr ""
 
@@ -13845,7 +13853,7 @@ msgstr ""
 #. Label of the customer_contact_display (Small Text) field in DocType
 #. 'Purchase Order'
 #. Label of the customer_contact (Small Text) field in DocType 'Delivery Stop'
-#: accounts/report/accounts_receivable/accounts_receivable.py:1027
+#: accounts/report/accounts_receivable/accounts_receivable.py:1043
 #: buying/doctype/purchase_order/purchase_order.json
 #: stock/doctype/delivery_stop/delivery_stop.json
 msgid "Customer Contact"
@@ -13940,7 +13948,7 @@ msgstr ""
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: accounts/doctype/tax_rule/tax_rule.json
 #: accounts/report/accounts_receivable/accounts_receivable.js:121
-#: accounts/report/accounts_receivable/accounts_receivable.py:1083
+#: accounts/report/accounts_receivable/accounts_receivable.py:1099
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:102
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:186
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.js:55
@@ -13982,7 +13990,7 @@ msgstr ""
 msgid "Customer Group Name"
 msgstr ""
 
-#: accounts/report/accounts_receivable/accounts_receivable.py:1183
+#: accounts/report/accounts_receivable/accounts_receivable.py:1199
 msgid "Customer Group: {0} does not exist"
 msgstr ""
 
@@ -14001,7 +14009,7 @@ msgstr ""
 msgid "Customer Items"
 msgstr ""
 
-#: accounts/report/accounts_receivable/accounts_receivable.py:1074
+#: accounts/report/accounts_receivable/accounts_receivable.py:1090
 msgid "Customer LPO"
 msgstr ""
 
@@ -14131,7 +14139,7 @@ msgstr ""
 msgid "Customer Provided"
 msgstr ""
 
-#: setup/doctype/company/company.py:376
+#: setup/doctype/company/company.py:377
 msgid "Customer Service"
 msgstr ""
 
@@ -14164,8 +14172,8 @@ msgstr ""
 msgid "Customer is required"
 msgstr ""
 
-#: accounts/doctype/loyalty_program/loyalty_program.py:116
-#: accounts/doctype/loyalty_program/loyalty_program.py:138
+#: accounts/doctype/loyalty_program/loyalty_program.py:126
+#: accounts/doctype/loyalty_program/loyalty_program.py:148
 msgid "Customer isn't enrolled in any Loyalty Program"
 msgstr ""
 
@@ -14178,7 +14186,7 @@ msgstr ""
 msgid "Customer required for 'Customerwise Discount'"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1008
+#: accounts/doctype/sales_invoice/sales_invoice.py:992
 #: selling/doctype/sales_order/sales_order.py:343
 #: stock/doctype/delivery_note/delivery_note.py:422
 msgid "Customer {0} does not belong to project {1}"
@@ -14498,7 +14506,7 @@ msgstr ""
 msgid "Date of Commencement"
 msgstr ""
 
-#: setup/doctype/company/company.js:76
+#: setup/doctype/company/company.js:75
 msgid "Date of Commencement should be greater than Date of Incorporation"
 msgstr ""
 
@@ -14640,7 +14648,7 @@ msgstr ""
 msgid "Dear"
 msgstr ""
 
-#: stock/reorder_item.py:369
+#: stock/reorder_item.py:374
 msgid "Dear System Manager,"
 msgstr ""
 
@@ -14703,7 +14711,7 @@ msgstr ""
 #: accounts/doctype/journal_entry_template/journal_entry_template.json
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:176
 #: accounts/report/accounts_receivable/accounts_receivable.html:147
-#: accounts/report/accounts_receivable/accounts_receivable.py:1059
+#: accounts/report/accounts_receivable/accounts_receivable.py:1075
 #: controllers/sales_and_purchase_return.py:335
 #: setup/setup_wizard/operations/install_fixtures.py:289
 #: stock/doctype/purchase_receipt/purchase_receipt.js:76
@@ -14730,13 +14738,13 @@ msgstr ""
 #. Label of the debit_to (Link) field in DocType 'Sales Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/sales_invoice/sales_invoice.json
-#: accounts/doctype/sales_invoice/sales_invoice.py:877
-#: accounts/doctype/sales_invoice/sales_invoice.py:888
-#: controllers/accounts_controller.py:2000
+#: accounts/doctype/sales_invoice/sales_invoice.py:861
+#: accounts/doctype/sales_invoice/sales_invoice.py:872
+#: controllers/accounts_controller.py:2009
 msgid "Debit To"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:873
+#: accounts/doctype/sales_invoice/sales_invoice.py:857
 msgid "Debit To is required"
 msgstr ""
 
@@ -14869,18 +14877,21 @@ msgstr ""
 
 #. Label of the default_advance_account (Link) field in DocType 'Payment
 #. Reconciliation'
+#. Label of the default_advance_account (Link) field in DocType 'Process
+#. Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 msgid "Default Advance Account"
 msgstr ""
 
 #. Label of the default_advance_paid_account (Link) field in DocType 'Company'
-#: setup/doctype/company/company.json setup/doctype/company/company.py:216
+#: setup/doctype/company/company.json setup/doctype/company/company.py:217
 msgid "Default Advance Paid Account"
 msgstr ""
 
 #. Label of the default_advance_received_account (Link) field in DocType
 #. 'Company'
-#: setup/doctype/company/company.json setup/doctype/company/company.py:205
+#: setup/doctype/company/company.json setup/doctype/company/company.py:206
 msgid "Default Advance Received Account"
 msgstr ""
 
@@ -14897,7 +14908,7 @@ msgstr ""
 msgid "Default BOM for {0} not found"
 msgstr ""
 
-#: controllers/accounts_controller.py:3313
+#: controllers/accounts_controller.py:3323
 msgid "Default BOM not found for FG Item {0}"
 msgstr ""
 
@@ -15317,7 +15328,7 @@ msgstr ""
 msgid "Default settings for your stock-related transactions"
 msgstr ""
 
-#: setup/doctype/company/company.js:167
+#: setup/doctype/company/company.js:168
 msgid "Default tax templates for sales, purchase and items are created."
 msgstr ""
 
@@ -15459,7 +15470,7 @@ msgstr ""
 msgid "Delayed Tasks Summary"
 msgstr ""
 
-#: setup/doctype/company/company.js:214
+#: setup/doctype/company/company.js:215
 msgid "Delete"
 msgstr ""
 
@@ -15493,12 +15504,12 @@ msgstr ""
 
 #. Label of the delete_transactions (Check) field in DocType 'Transaction
 #. Deletion Record'
-#: setup/doctype/company/company.js:148
+#: setup/doctype/company/company.js:149
 #: setup/doctype/transaction_deletion_record/transaction_deletion_record.json
 msgid "Delete Transactions"
 msgstr ""
 
-#: setup/doctype/company/company.js:213
+#: setup/doctype/company/company.js:214
 msgid "Delete all the Transactions for this Company"
 msgstr ""
 
@@ -15608,7 +15619,7 @@ msgstr ""
 
 #. Label of the delivery_date (Date) field in DocType 'Sales Order'
 #. Label of the delivery_date (Date) field in DocType 'Sales Order Item'
-#: public/js/utils.js:716 selling/doctype/sales_order/sales_order.js:1090
+#: public/js/utils.js:726 selling/doctype/sales_order/sales_order.js:1090
 #: selling/doctype/sales_order/sales_order.json
 #: selling/doctype/sales_order_item/sales_order_item.json
 #: selling/report/sales_order_analysis/sales_order_analysis.py:321
@@ -15698,7 +15709,7 @@ msgstr ""
 msgid "Delivery Note Trends"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1160
+#: accounts/doctype/sales_invoice/sales_invoice.py:1144
 msgid "Delivery Note {0} is not submitted"
 msgstr ""
 
@@ -15706,7 +15717,7 @@ msgstr ""
 msgid "Delivery Note(s) created for the Pick List"
 msgstr ""
 
-#: accounts/report/accounts_receivable/accounts_receivable.py:1078
+#: accounts/report/accounts_receivable/accounts_receivable.py:1094
 #: stock/doctype/delivery_trip/delivery_trip.js:73
 msgid "Delivery Notes"
 msgstr ""
@@ -15969,23 +15980,23 @@ msgstr ""
 msgid "Depreciation Posting Date"
 msgstr ""
 
-#: assets/doctype/asset/asset.js:789
+#: assets/doctype/asset/asset.js:794
 msgid "Depreciation Posting Date cannot be before Available-for-use Date"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:273
+#: assets/doctype/asset/asset.py:275
 msgid "Depreciation Row {0}: Depreciation Posting Date cannot be before Available-for-use Date"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:497
+#: assets/doctype/asset/asset.py:499
 msgid "Depreciation Row {0}: Expected value after useful life must be greater than or equal to {1}"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:455
+#: assets/doctype/asset/asset.py:457
 msgid "Depreciation Row {0}: Next Depreciation Date cannot be before Available-for-use Date"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:446
+#: assets/doctype/asset/asset.py:448
 msgid "Depreciation Row {0}: Next Depreciation Date cannot be before Purchase Date"
 msgstr ""
 
@@ -16012,7 +16023,7 @@ msgstr ""
 msgid "Depreciation Schedule View"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:345
+#: assets/doctype/asset/asset.py:347
 msgid "Depreciation cannot be calculated for fully depreciated assets"
 msgstr ""
 
@@ -16400,7 +16411,7 @@ msgstr ""
 msgid "Difference Account"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:559
+#: stock/doctype/stock_entry/stock_entry.py:560
 msgid "Difference Account must be a Asset/Liability type account, since this Stock Entry is an Opening Entry"
 msgstr ""
 
@@ -16907,13 +16918,19 @@ msgstr ""
 msgid "Discrepancy between General and Payment Ledger"
 msgstr ""
 
+#. Label of the discretionary_reason (Data) field in DocType 'Loyalty Point
+#. Entry'
+#: accounts/doctype/loyalty_point_entry/loyalty_point_entry.json
+msgid "Discretionary Reason"
+msgstr ""
+
 #. Label of the dislike_count (Float) field in DocType 'Video'
 #: utilities/doctype/video/video.json
 #: utilities/report/youtube_interactions/youtube_interactions.py:27
 msgid "Dislikes"
 msgstr ""
 
-#: setup/doctype/company/company.py:370
+#: setup/doctype/company/company.py:371
 msgid "Dispatch"
 msgstr ""
 
@@ -17036,6 +17053,36 @@ msgstr ""
 msgid "Distribute Manually"
 msgstr ""
 
+#. Label of the distributed_discount_amount (Currency) field in DocType 'POS
+#. Invoice Item'
+#. Label of the distributed_discount_amount (Currency) field in DocType
+#. 'Purchase Invoice Item'
+#. Label of the distributed_discount_amount (Currency) field in DocType 'Sales
+#. Invoice Item'
+#. Label of the distributed_discount_amount (Currency) field in DocType
+#. 'Purchase Order Item'
+#. Label of the distributed_discount_amount (Currency) field in DocType
+#. 'Supplier Quotation Item'
+#. Label of the distributed_discount_amount (Currency) field in DocType
+#. 'Quotation Item'
+#. Label of the distributed_discount_amount (Currency) field in DocType 'Sales
+#. Order Item'
+#. Label of the distributed_discount_amount (Currency) field in DocType
+#. 'Delivery Note Item'
+#. Label of the distributed_discount_amount (Currency) field in DocType
+#. 'Purchase Receipt Item'
+#: accounts/doctype/pos_invoice_item/pos_invoice_item.json
+#: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
+#: accounts/doctype/sales_invoice_item/sales_invoice_item.json
+#: buying/doctype/purchase_order_item/purchase_order_item.json
+#: buying/doctype/supplier_quotation_item/supplier_quotation_item.json
+#: selling/doctype/quotation_item/quotation_item.json
+#: selling/doctype/sales_order_item/sales_order_item.json
+#: stock/doctype/delivery_note_item/delivery_note_item.json
+#: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
+msgid "Distributed Discount Amount"
+msgstr ""
+
 #. Label of the distribution_id (Data) field in DocType 'Monthly Distribution'
 #: accounts/doctype/monthly_distribution/monthly_distribution.json
 msgid "Distribution Name"
@@ -17098,11 +17145,11 @@ msgstr ""
 msgid "Do reposting for each Stock Transaction"
 msgstr ""
 
-#: assets/doctype/asset/asset.js:809
+#: assets/doctype/asset/asset.js:814
 msgid "Do you really want to restore this scrapped asset?"
 msgstr ""
 
-#: assets/doctype/asset/asset.js:797
+#: assets/doctype/asset/asset.js:802
 msgid "Do you really want to scrap this asset?"
 msgstr ""
 
@@ -17606,7 +17653,7 @@ msgstr ""
 msgid "Duplicate Entry. Please check Authorization Rule {0}"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:297
+#: assets/doctype/asset/asset.py:299
 msgid "Duplicate Finance Book"
 msgstr ""
 
@@ -18419,7 +18466,7 @@ msgstr ""
 #: maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
 #: projects/doctype/timesheet/timesheet.json
 #: projects/report/project_summary/project_summary.py:74
-#: public/js/financial_statements.js:201 public/js/setup_wizard.js:43
+#: public/js/financial_statements.js:204 public/js/setup_wizard.js:43
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.js:23
 #: setup/doctype/vehicle/vehicle.json
 #: support/doctype/service_level_agreement/service_level_agreement.json
@@ -18451,7 +18498,7 @@ msgstr ""
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:64
 #: accounts/report/financial_ratios/financial_ratios.js:25
 #: assets/report/fixed_asset_register/fixed_asset_register.js:89
-#: public/js/financial_statements.js:216
+#: public/js/financial_statements.js:219
 msgid "End Year"
 msgstr ""
 
@@ -18561,7 +18608,7 @@ msgstr ""
 msgid "Enter customer's phone number"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:343
+#: assets/doctype/asset/asset.py:345
 msgid "Enter depreciation details"
 msgstr ""
 
@@ -18814,7 +18861,7 @@ msgstr ""
 msgid "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings."
 msgstr ""
 
-#: stock/stock_ledger.py:2089
+#: stock/stock_ledger.py:2090
 msgid "Example: Serial No {0} reserved in {1}."
 msgstr ""
 
@@ -18858,12 +18905,12 @@ msgstr ""
 #: accounts/doctype/payment_entry_reference/payment_entry_reference.json
 #: accounts/doctype/purchase_invoice_advance/purchase_invoice_advance.json
 #: accounts/doctype/sales_invoice_advance/sales_invoice_advance.json
-#: setup/doctype/company/company.py:534
+#: setup/doctype/company/company.py:535
 msgid "Exchange Gain/Loss"
 msgstr ""
 
-#: controllers/accounts_controller.py:1400
-#: controllers/accounts_controller.py:1485
+#: controllers/accounts_controller.py:1404
+#: controllers/accounts_controller.py:1489
 msgid "Exchange Gain/Loss amount has been booked through {0}"
 msgstr ""
 
@@ -19440,7 +19487,7 @@ msgstr ""
 msgid "Failed to setup defaults"
 msgstr ""
 
-#: setup/doctype/company/company.py:716
+#: setup/doctype/company/company.py:717
 msgid "Failed to setup defaults for country {0}. Please contact support."
 msgstr ""
 
@@ -19627,7 +19674,7 @@ msgstr ""
 
 #: accounts/report/consolidated_financial_statement/consolidated_financial_statement.js:16
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:16
-#: public/js/financial_statements.js:168
+#: public/js/financial_statements.js:171
 msgid "Filter Based On"
 msgstr ""
 
@@ -19758,7 +19805,7 @@ msgstr ""
 #: assets/doctype/asset_shift_allocation/asset_shift_allocation.json
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.json
 #: assets/report/fixed_asset_register/fixed_asset_register.js:48
-#: public/js/financial_statements.js:162
+#: public/js/financial_statements.js:165
 msgid "Finance Book"
 msgstr ""
 
@@ -19803,7 +19850,7 @@ msgstr ""
 #. Label of a Card Break in the Financial Reports Workspace
 #: accounts/doctype/account/account_tree.js:234
 #: accounts/workspace/financial_reports/financial_reports.json
-#: public/js/financial_statements.js:130
+#: public/js/financial_statements.js:133
 msgid "Financial Statements"
 msgstr ""
 
@@ -19847,7 +19894,7 @@ msgstr ""
 
 #. Label of the fg_item (Link) field in DocType 'Subcontracting Order Service
 #. Item'
-#: public/js/utils.js:742
+#: public/js/utils.js:752
 #: subcontracting/doctype/subcontracting_order_service_item/subcontracting_order_service_item.json
 msgid "Finished Good Item"
 msgstr ""
@@ -19856,7 +19903,7 @@ msgstr ""
 msgid "Finished Good Item Code"
 msgstr ""
 
-#: public/js/utils.js:760
+#: public/js/utils.js:770
 msgid "Finished Good Item Qty"
 msgstr ""
 
@@ -19866,15 +19913,15 @@ msgstr ""
 msgid "Finished Good Item Quantity"
 msgstr ""
 
-#: controllers/accounts_controller.py:3299
+#: controllers/accounts_controller.py:3309
 msgid "Finished Good Item is not specified for service item {0}"
 msgstr ""
 
-#: controllers/accounts_controller.py:3316
+#: controllers/accounts_controller.py:3326
 msgid "Finished Good Item {0} Qty can not be zero"
 msgstr ""
 
-#: controllers/accounts_controller.py:3310
+#: controllers/accounts_controller.py:3320
 msgid "Finished Good Item {0} must be a sub-contracted item"
 msgstr ""
 
@@ -19920,7 +19967,7 @@ msgstr ""
 msgid "Finished Good {0} must be a sub-contracted item."
 msgstr ""
 
-#: setup/doctype/company/company.py:284
+#: setup/doctype/company/company.py:285
 msgid "Finished Goods"
 msgstr ""
 
@@ -19968,7 +20015,7 @@ msgstr ""
 msgid "Finished Goods based Operating Cost"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1314
+#: stock/doctype/stock_entry/stock_entry.py:1343
 msgid "Finished Item {0} does not match with Work Order {1}"
 msgstr ""
 
@@ -20099,7 +20146,7 @@ msgstr ""
 #. Capitalization Asset Item'
 #. Label of the fixed_asset_account (Link) field in DocType 'Asset Category
 #. Account'
-#: assets/doctype/asset/asset.py:673
+#: assets/doctype/asset/asset.py:675
 #: assets/doctype/asset_capitalization_asset_item/asset_capitalization_asset_item.json
 #: assets/doctype/asset_category_account/asset_category_account.json
 msgid "Fixed Asset Account"
@@ -20199,11 +20246,11 @@ msgstr ""
 msgid "Following fields are mandatory to create address:"
 msgstr ""
 
-#: controllers/buying_controller.py:961
+#: controllers/buying_controller.py:963
 msgid "Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master"
 msgstr ""
 
-#: controllers/buying_controller.py:957
+#: controllers/buying_controller.py:959
 msgid "Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master"
 msgstr ""
 
@@ -20289,7 +20336,7 @@ msgstr ""
 msgid "For Production"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:646
+#: stock/doctype/stock_entry/stock_entry.py:647
 msgid "For Quantity (Manufactured Qty) is mandatory"
 msgstr ""
 
@@ -20319,11 +20366,11 @@ msgstr ""
 msgid "For Work Order"
 msgstr ""
 
-#: controllers/status_updater.py:241
+#: controllers/status_updater.py:261
 msgid "For an item {0}, quantity must be negative number"
 msgstr ""
 
-#: controllers/status_updater.py:238
+#: controllers/status_updater.py:258
 msgid "For an item {0}, quantity must be positive number"
 msgstr ""
 
@@ -20349,7 +20396,7 @@ msgstr ""
 msgid "For individual supplier"
 msgstr ""
 
-#: controllers/status_updater.py:246
+#: controllers/status_updater.py:266
 msgid "For item {0}, rate must be a positive number. To Allow negative rates, enable {1} in {2}"
 msgstr ""
 
@@ -20357,7 +20404,7 @@ msgstr ""
 msgid "For operation {0}: Quantity ({1}) can not be greater than pending quantity({2})"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1352
+#: stock/doctype/stock_entry/stock_entry.py:1381
 msgid "For quantity {0} should not be greater than allowed quantity {1}"
 msgstr ""
 
@@ -20382,6 +20429,10 @@ msgstr ""
 #. Description of a DocType
 #: stock/doctype/item_customer_detail/item_customer_detail.json
 msgid "For the convenience of customers, these codes can be used in print formats like Invoices and Delivery Notes"
+msgstr ""
+
+#: stock/doctype/stock_entry/stock_entry.py:788
+msgid "For the item {0}, the quantity should be {1} according to the BOM {2}."
 msgstr ""
 
 #: controllers/stock_controller.py:264
@@ -20765,6 +20816,12 @@ msgstr ""
 msgid "From Employee"
 msgstr ""
 
+#. Label of the from_external_ecomm_platform (Check) field in DocType 'Coupon
+#. Code'
+#: accounts/doctype/coupon_code/coupon_code.json
+msgid "From External Ecomm Platform"
+msgstr ""
+
 #: accounts/report/budget_variance_report/budget_variance_report.js:43
 msgid "From Fiscal Year"
 msgstr ""
@@ -21087,14 +21144,14 @@ msgstr ""
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:186
 #: accounts/report/accounts_receivable/accounts_receivable.html:155
-#: accounts/report/accounts_receivable/accounts_receivable.py:1070
+#: accounts/report/accounts_receivable/accounts_receivable.py:1086
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:178
 msgid "Future Payment Amount"
 msgstr ""
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:185
 #: accounts/report/accounts_receivable/accounts_receivable.html:154
-#: accounts/report/accounts_receivable/accounts_receivable.py:1069
+#: accounts/report/accounts_receivable/accounts_receivable.py:1085
 msgid "Future Payment Ref"
 msgstr ""
 
@@ -21172,7 +21229,7 @@ msgstr ""
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:74
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:98
-#: setup/doctype/company/company.py:542
+#: setup/doctype/company/company.py:543
 msgid "Gain/Loss on Asset Disposal"
 msgstr ""
 
@@ -21599,7 +21656,7 @@ msgstr ""
 msgid "Goods"
 msgstr ""
 
-#: setup/doctype/company/company.py:285
+#: setup/doctype/company/company.py:286
 #: stock/doctype/stock_entry/stock_entry_list.js:21
 msgid "Goods In Transit"
 msgstr ""
@@ -21608,7 +21665,7 @@ msgstr ""
 msgid "Goods Transferred"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1715
+#: stock/doctype/stock_entry/stock_entry.py:1744
 msgid "Goods are already received against the outward entry {0}"
 msgstr ""
 
@@ -21870,11 +21927,11 @@ msgstr ""
 msgid "Gross Purchase Amount Too Low: {0} cannot be depreciated over {1} cycles with a frequency of {2} depreciations."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:313
+#: assets/doctype/asset/asset.py:315
 msgid "Gross Purchase Amount is mandatory"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:358
+#: assets/doctype/asset/asset.py:360
 msgid "Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
 msgstr ""
 
@@ -22052,7 +22109,7 @@ msgstr ""
 #: accounts/report/budget_variance_report/budget_variance_report.js:64
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:77
 #: manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.js:59
-#: public/js/financial_statements.js:229
+#: public/js/financial_statements.js:232
 #: public/js/purchase_trends_filters.js:21 public/js/sales_trends_filters.js:13
 #: selling/report/sales_partner_target_variance_based_on_item_group/sales_partner_target_variance_based_on_item_group.js:34
 #: selling/report/sales_person_target_variance_based_on_item_group/sales_person_target_variance_based_on_item_group.js:34
@@ -22069,6 +22126,10 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hand"
+msgstr ""
+
+#: accounts/report/accounts_payable/accounts_payable.js:167
+msgid "Handle Employee Advances"
 msgstr ""
 
 #: setup/setup_wizard/operations/install_fixtures.py:211
@@ -22254,7 +22315,7 @@ msgstr ""
 msgid "Here are the error logs for the aforementioned failed depreciation entries: {0}"
 msgstr ""
 
-#: stock/stock_ledger.py:1787
+#: stock/stock_ledger.py:1788
 msgid "Here are the options to proceed:"
 msgstr ""
 
@@ -22451,7 +22512,7 @@ msgstr ""
 msgid "Hrs"
 msgstr ""
 
-#: setup/doctype/company/company.py:382
+#: setup/doctype/company/company.py:383
 msgid "Human Resources"
 msgstr ""
 
@@ -22646,6 +22707,12 @@ msgstr ""
 msgid "If disable, 'Rounded Total' field will not be visible in any transaction"
 msgstr ""
 
+#. Description of the 'Manufacture Sub-assembly in Operation' (Check) field in
+#. DocType 'Manufacturing Settings'
+#: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "If enabled then system will manufacture Sub-assembly against the Job Card (operation)."
+msgstr ""
+
 #. Description of the 'Ignore Pricing Rule' (Check) field in DocType 'Pick
 #. List'
 #: stock/doctype/pick_list/pick_list.json
@@ -22735,7 +22802,7 @@ msgstr ""
 msgid "If more than one package of the same type (for print)"
 msgstr ""
 
-#: stock/stock_ledger.py:1797
+#: stock/stock_ledger.py:1798
 msgid "If not, you can Cancel / Submit this entry"
 msgstr ""
 
@@ -22760,7 +22827,7 @@ msgstr ""
 msgid "If the account is frozen, entries are allowed to restricted users."
 msgstr ""
 
-#: stock/stock_ledger.py:1790
+#: stock/stock_ledger.py:1791
 msgid "If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table."
 msgstr ""
 
@@ -23758,7 +23825,11 @@ msgstr ""
 msgid "Incorrect Check in (group) Warehouse for Reorder"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:276
+#: stock/doctype/stock_entry/stock_entry.py:793
+msgid "Incorrect Component Quantity"
+msgstr ""
+
+#: assets/doctype/asset/asset.py:278
 #: assets/doctype/asset_value_adjustment/asset_value_adjustment.py:77
 msgid "Incorrect Date"
 msgstr ""
@@ -24054,21 +24125,21 @@ msgstr ""
 msgid "Insufficient Capacity"
 msgstr ""
 
-#: controllers/accounts_controller.py:3231
-#: controllers/accounts_controller.py:3255
+#: controllers/accounts_controller.py:3241
+#: controllers/accounts_controller.py:3265
 msgid "Insufficient Permissions"
 msgstr ""
 
 #: stock/doctype/pick_list/pick_list.py:101
 #: stock/doctype/pick_list/pick_list.py:117
 #: stock/doctype/pick_list/pick_list.py:894
-#: stock/doctype/stock_entry/stock_entry.py:764
+#: stock/doctype/stock_entry/stock_entry.py:765
 #: stock/serial_batch_bundle.py:988 stock/stock_ledger.py:1490
-#: stock/stock_ledger.py:1957
+#: stock/stock_ledger.py:1958
 msgid "Insufficient Stock"
 msgstr ""
 
-#: stock/stock_ledger.py:1972
+#: stock/stock_ledger.py:1973
 msgid "Insufficient Stock for Batch"
 msgstr ""
 
@@ -24274,12 +24345,12 @@ msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:383
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:391
-#: accounts/doctype/sales_invoice/sales_invoice.py:883
-#: accounts/doctype/sales_invoice/sales_invoice.py:893
+#: accounts/doctype/sales_invoice/sales_invoice.py:867
+#: accounts/doctype/sales_invoice/sales_invoice.py:877
 #: assets/doctype/asset_category/asset_category.py:70
 #: assets/doctype/asset_category/asset_category.py:98
-#: controllers/accounts_controller.py:2637
-#: controllers/accounts_controller.py:2643
+#: controllers/accounts_controller.py:2647
+#: controllers/accounts_controller.py:2653
 msgid "Invalid Account"
 msgstr ""
 
@@ -24303,12 +24374,12 @@ msgstr ""
 msgid "Invalid Child Procedure"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1965
+#: accounts/doctype/sales_invoice/sales_invoice.py:1969
 msgid "Invalid Company for Inter Company Transaction."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:247 assets/doctype/asset/asset.py:254
-#: controllers/accounts_controller.py:2658
+#: assets/doctype/asset/asset.py:249 assets/doctype/asset/asset.py:256
+#: controllers/accounts_controller.py:2668
 msgid "Invalid Cost Center"
 msgstr ""
 
@@ -24333,7 +24404,7 @@ msgstr ""
 msgid "Invalid Formula"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:363
+#: assets/doctype/asset/asset.py:365
 msgid "Invalid Gross Purchase Amount"
 msgstr ""
 
@@ -24350,7 +24421,7 @@ msgid "Invalid Item Defaults"
 msgstr ""
 
 #: accounts/doctype/pos_closing_entry/pos_closing_entry.py:59
-#: accounts/general_ledger.py:705
+#: accounts/general_ledger.py:736
 msgid "Invalid Opening Entry"
 msgstr ""
 
@@ -24358,7 +24429,7 @@ msgstr ""
 msgid "Invalid POS Invoices"
 msgstr ""
 
-#: accounts/doctype/account/account.py:335
+#: accounts/doctype/account/account.py:336
 msgid "Invalid Parent Account"
 msgstr ""
 
@@ -24386,7 +24457,7 @@ msgstr ""
 msgid "Invalid Purchase Invoice"
 msgstr ""
 
-#: controllers/accounts_controller.py:3268
+#: controllers/accounts_controller.py:3278
 msgid "Invalid Qty"
 msgstr ""
 
@@ -24394,8 +24465,8 @@ msgstr ""
 msgid "Invalid Quantity"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:407 assets/doctype/asset/asset.py:414
-#: assets/doctype/asset/asset.py:441
+#: assets/doctype/asset/asset.py:409 assets/doctype/asset/asset.py:416
+#: assets/doctype/asset/asset.py:443
 msgid "Invalid Schedule"
 msgstr ""
 
@@ -24403,7 +24474,7 @@ msgstr ""
 msgid "Invalid Selling Price"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1391
+#: stock/doctype/stock_entry/stock_entry.py:1420
 msgid "Invalid Serial and Batch Bundle"
 msgstr ""
 
@@ -24442,7 +24513,7 @@ msgstr ""
 
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:110
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:120
-#: accounts/general_ledger.py:748 accounts/general_ledger.py:758
+#: accounts/general_ledger.py:779 accounts/general_ledger.py:789
 msgid "Invalid value {0} for {1} against account {2}"
 msgstr ""
 
@@ -24450,7 +24521,7 @@ msgstr ""
 msgid "Invalid {0}"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1963
+#: accounts/doctype/sales_invoice/sales_invoice.py:1967
 msgid "Invalid {0} for Inter Company Transaction."
 msgstr ""
 
@@ -24521,7 +24592,7 @@ msgstr ""
 msgid "Invoice Discounting"
 msgstr ""
 
-#: accounts/report/accounts_receivable/accounts_receivable.py:1051
+#: accounts/report/accounts_receivable/accounts_receivable.py:1067
 msgid "Invoice Grand Total"
 msgstr ""
 
@@ -24610,7 +24681,7 @@ msgstr ""
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:169
 #: accounts/report/accounts_receivable/accounts_receivable.html:144
-#: accounts/report/accounts_receivable/accounts_receivable.py:1053
+#: accounts/report/accounts_receivable/accounts_receivable.py:1069
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:166
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.py:102
 msgid "Invoiced Amount"
@@ -24630,7 +24701,7 @@ msgstr ""
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 #: accounts/doctype/pos_profile/pos_profile.json
-#: accounts/doctype/sales_invoice/sales_invoice.py:2014
+#: accounts/doctype/sales_invoice/sales_invoice.py:2018
 #: buying/doctype/supplier/supplier.json
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:62
 msgid "Invoices"
@@ -25347,7 +25418,7 @@ msgstr ""
 #: buying/report/requested_items_to_order_and_receive/requested_items_to_order_and_receive.js:49
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.js:33
 #: buying/report/supplier_quotation_comparison/supplier_quotation_comparison.py:202
-#: buying/workspace/buying/buying.json controllers/taxes_and_totals.py:1037
+#: buying/workspace/buying/buying.json controllers/taxes_and_totals.py:1044
 #: manufacturing/doctype/blanket_order/blanket_order.json
 #: manufacturing/doctype/bom/bom.js:911 manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/plant_floor/plant_floor.js:81
@@ -25615,8 +25686,8 @@ msgstr ""
 #: manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:86
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.py:119
 #: projects/doctype/timesheet/timesheet.js:213
-#: public/js/controllers/transaction.js:2221 public/js/utils.js:485
-#: public/js/utils.js:640
+#: public/js/controllers/transaction.js:2221 public/js/utils.js:495
+#: public/js/utils.js:650
 #: regional/doctype/import_supplier_invoice/import_supplier_invoice.json
 #: selling/doctype/installation_note_item/installation_note_item.json
 #: selling/doctype/quotation/quotation.js:283
@@ -26116,7 +26187,7 @@ msgstr ""
 msgid "Item Price Stock"
 msgstr ""
 
-#: stock/get_item_details.py:896
+#: stock/get_item_details.py:900
 msgid "Item Price added for {0} in Price List {1}"
 msgstr ""
 
@@ -26124,7 +26195,7 @@ msgstr ""
 msgid "Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."
 msgstr ""
 
-#: stock/get_item_details.py:878
+#: stock/get_item_details.py:882
 msgid "Item Price updated for {0} in Price List {1}"
 msgstr ""
 
@@ -26366,7 +26437,7 @@ msgstr ""
 msgid "Item and Warranty Details"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:2514
+#: stock/doctype/stock_entry/stock_entry.py:2543
 msgid "Item for row {0} does not match Material Request"
 msgstr ""
 
@@ -26392,11 +26463,11 @@ msgstr ""
 msgid "Item operation"
 msgstr ""
 
-#: controllers/accounts_controller.py:3291
+#: controllers/accounts_controller.py:3301
 msgid "Item qty can not be updated as raw materials are already processed."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:844
+#: stock/doctype/stock_entry/stock_entry.py:873
 msgid "Item rate has been updated to zero as Allow Zero Valuation Rate is checked for item {0}"
 msgstr ""
 
@@ -26425,7 +26496,7 @@ msgstr ""
 msgid "Item {0} cannot be ordered more than {1} against Blanket Order {2}."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:229 stock/doctype/item/item.py:627
+#: assets/doctype/asset/asset.py:231 stock/doctype/item/item.py:627
 msgid "Item {0} does not exist"
 msgstr ""
 
@@ -26441,7 +26512,7 @@ msgstr ""
 msgid "Item {0} has already been returned"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:231
+#: assets/doctype/asset/asset.py:233
 msgid "Item {0} has been disabled"
 msgstr ""
 
@@ -26477,11 +26548,11 @@ msgstr ""
 msgid "Item {0} is not a stock Item"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1632
+#: stock/doctype/stock_entry/stock_entry.py:1661
 msgid "Item {0} is not active or end of life has been reached"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:233
+#: assets/doctype/asset/asset.py:235
 msgid "Item {0} must be a Fixed Asset Item"
 msgstr ""
 
@@ -26493,11 +26564,11 @@ msgstr ""
 msgid "Item {0} must be a Sub-contracted Item"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:235
+#: assets/doctype/asset/asset.py:237
 msgid "Item {0} must be a non-stock item"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1131
+#: stock/doctype/stock_entry/stock_entry.py:1160
 msgid "Item {0} not found in 'Raw Materials Supplied' table in {1} {2}"
 msgstr ""
 
@@ -26601,7 +26672,7 @@ msgstr ""
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.json
 #: manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/bom_creator/bom_creator.json
-#: manufacturing/doctype/job_card/job_card.json public/js/utils.js:463
+#: manufacturing/doctype/job_card/job_card.json public/js/utils.js:473
 #: selling/doctype/installation_note/installation_note.json
 #: selling/doctype/product_bundle/product_bundle.json
 #: selling/doctype/quotation/quotation.json
@@ -26653,7 +26724,7 @@ msgstr ""
 msgid "Items and Pricing"
 msgstr ""
 
-#: controllers/accounts_controller.py:3515
+#: controllers/accounts_controller.py:3525
 msgid "Items cannot be updated as Subcontracting Order is created against the Purchase Order {0}."
 msgstr ""
 
@@ -26661,7 +26732,7 @@ msgstr ""
 msgid "Items for Raw Material Request"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:840
+#: stock/doctype/stock_entry/stock_entry.py:869
 msgid "Items rate has been updated to zero as Allow Zero Valuation Rate is checked for the following items: {0}"
 msgstr ""
 
@@ -26714,8 +26785,6 @@ msgstr ""
 #. Label of the job_card (Link) field in DocType 'Purchase Order Item'
 #. Option for the 'Transfer Material Against' (Select) field in DocType 'BOM'
 #. Name of a DocType
-#. Label of the job_card_section (Section Break) field in DocType
-#. 'Manufacturing Settings'
 #. Label of the job_card_section (Section Break) field in DocType 'Operation'
 #. Option for the 'Transfer Material Against' (Select) field in DocType 'Work
 #. Order'
@@ -26731,7 +26800,6 @@ msgstr ""
 #: manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/job_card/job_card.json
 #: manufacturing/doctype/job_card/job_card.py:835
-#: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 #: manufacturing/doctype/operation/operation.json
 #: manufacturing/doctype/work_order/work_order.js:323
 #: manufacturing/doctype/work_order/work_order.json
@@ -26790,6 +26858,12 @@ msgstr ""
 msgid "Job Card Time Log"
 msgstr ""
 
+#. Label of the job_card_section (Tab Break) field in DocType 'Manufacturing
+#. Settings'
+#: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "Job Card and Capacity Planning"
+msgstr ""
+
 #: manufacturing/doctype/job_card/job_card.py:1229
 msgid "Job Card {0} has been completed"
 msgstr ""
@@ -26799,11 +26873,11 @@ msgstr ""
 msgid "Job Cards"
 msgstr ""
 
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:95
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:106
 msgid "Job Paused"
 msgstr ""
 
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:53
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:64
 msgid "Job Started"
 msgstr ""
 
@@ -26889,7 +26963,7 @@ msgstr ""
 msgid "Journal Entries"
 msgstr ""
 
-#: accounts/utils.py:877
+#: accounts/utils.py:929
 msgid "Journal Entries {0} are un-linked"
 msgstr ""
 
@@ -27504,7 +27578,7 @@ msgstr ""
 msgid "Left Index"
 msgstr ""
 
-#: setup/doctype/company/company.py:406
+#: setup/doctype/company/company.py:407
 #: setup/setup_wizard/data/industry_type.txt:30
 msgid "Legal"
 msgstr ""
@@ -27655,7 +27729,7 @@ msgstr ""
 msgid "Likes"
 msgstr ""
 
-#: controllers/status_updater.py:361
+#: controllers/status_updater.py:381
 msgid "Limit Crossed"
 msgstr ""
 
@@ -28087,8 +28161,8 @@ msgstr ""
 msgid "Machine operator errors"
 msgstr ""
 
-#: setup/doctype/company/company.py:580 setup/doctype/company/company.py:595
-#: setup/doctype/company/company.py:596 setup/doctype/company/company.py:597
+#: setup/doctype/company/company.py:581 setup/doctype/company/company.py:596
+#: setup/doctype/company/company.py:597 setup/doctype/company/company.py:598
 msgid "Main"
 msgstr ""
 
@@ -28421,7 +28495,7 @@ msgstr ""
 #: assets/doctype/asset/asset.js:122 assets/doctype/asset/asset.js:131
 #: assets/doctype/asset/asset.js:139 assets/doctype/asset/asset.js:148
 #: assets/doctype/asset/asset.js:158 assets/doctype/asset/asset.js:174
-#: setup/doctype/company/company.js:141 setup/doctype/company/company.js:152
+#: setup/doctype/company/company.js:142 setup/doctype/company/company.js:153
 msgid "Manage"
 msgstr ""
 
@@ -28434,7 +28508,7 @@ msgstr ""
 msgid "Manage your orders"
 msgstr ""
 
-#: setup/doctype/company/company.py:388
+#: setup/doctype/company/company.py:389
 msgid "Management"
 msgstr ""
 
@@ -28475,7 +28549,7 @@ msgstr ""
 msgid "Mandatory Depends On"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1539
+#: accounts/doctype/sales_invoice/sales_invoice.py:1523
 msgid "Mandatory Field"
 msgstr ""
 
@@ -28572,12 +28646,18 @@ msgstr ""
 #: stock/doctype/material_request_item/material_request_item.json
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 #: stock/doctype/stock_entry/stock_entry.json
-#: stock/doctype/stock_entry/stock_entry.py:921
-#: stock/doctype/stock_entry/stock_entry.py:932
+#: stock/doctype/stock_entry/stock_entry.py:950
+#: stock/doctype/stock_entry/stock_entry.py:961
 #: stock/doctype/stock_entry_type/stock_entry_type.json
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Manufacture"
+msgstr ""
+
+#. Label of the manufacture_sub_assembly_in_operation (Check) field in DocType
+#. 'Manufacturing Settings'
+#: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "Manufacture Sub-assembly in Operation"
 msgstr ""
 
 #. Description of the 'Material Request' (Link) field in DocType 'Work Order'
@@ -28701,7 +28781,7 @@ msgstr ""
 msgid "Manufacturing Manager"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1842
+#: stock/doctype/stock_entry/stock_entry.py:1871
 msgid "Manufacturing Quantity is mandatory"
 msgstr ""
 
@@ -28761,7 +28841,7 @@ msgstr ""
 msgid "Mapping Subcontracting Order ..."
 msgstr ""
 
-#: public/js/utils.js:887
+#: public/js/utils.js:897
 msgid "Mapping {0} ..."
 msgstr ""
 
@@ -28858,7 +28938,7 @@ msgstr ""
 msgid "Market Segment"
 msgstr ""
 
-#: setup/doctype/company/company.py:340
+#: setup/doctype/company/company.py:341
 msgid "Marketing"
 msgstr ""
 
@@ -28915,7 +28995,7 @@ msgstr ""
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Entry Type'
 #: setup/setup_wizard/operations/install_fixtures.py:121
 #: stock/doctype/stock_entry/stock_entry.json
-#: stock/doctype/stock_entry/stock_entry.py:922
+#: stock/doctype/stock_entry/stock_entry.py:951
 #: stock/doctype/stock_entry_type/stock_entry_type.json
 msgid "Material Consumption for Manufacture"
 msgstr ""
@@ -29092,7 +29172,7 @@ msgstr ""
 msgid "Material Request Type"
 msgstr ""
 
-#: selling/doctype/sales_order/sales_order.py:1574
+#: selling/doctype/sales_order/sales_order.py:1578
 msgid "Material Request not created, as quantity for Raw Materials already available."
 msgstr ""
 
@@ -29292,11 +29372,11 @@ msgstr ""
 msgid "Maximum Payment Amount"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:3035
+#: stock/doctype/stock_entry/stock_entry.py:3064
 msgid "Maximum Samples - {0} can be retained for Batch {1} and Item {2}."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:3026
+#: stock/doctype/stock_entry/stock_entry.py:3055
 msgid "Maximum Samples - {0} have already been retained for Batch {1} and Item {2} in Batch {3}."
 msgstr ""
 
@@ -29366,7 +29446,7 @@ msgstr ""
 msgid "Megawatt"
 msgstr ""
 
-#: stock/stock_ledger.py:1803
+#: stock/stock_ledger.py:1804
 msgid "Mention Valuation Rate in the Item master."
 msgstr ""
 
@@ -29415,7 +29495,7 @@ msgstr ""
 msgid "Merge Similar Account Heads"
 msgstr ""
 
-#: public/js/utils.js:919
+#: public/js/utils.js:929
 msgid "Merge taxes from multiple documents"
 msgstr ""
 
@@ -29432,7 +29512,7 @@ msgstr ""
 msgid "Merged"
 msgstr ""
 
-#: accounts/doctype/account/account.py:560
+#: accounts/doctype/account/account.py:561
 msgid "Merging is only possible if following properties are same in both records. Is Group, Root Type, Company and Account Currency"
 msgstr ""
 
@@ -29771,25 +29851,25 @@ msgstr ""
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.py:69
 #: accounts/doctype/pos_profile/pos_profile.py:166
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:601
-#: accounts/doctype/sales_invoice/sales_invoice.py:2030
-#: accounts/doctype/sales_invoice/sales_invoice.py:2588
+#: accounts/doctype/sales_invoice/sales_invoice.py:2034
+#: accounts/doctype/sales_invoice/sales_invoice.py:2592
 #: assets/doctype/asset_category/asset_category.py:117
 msgid "Missing Account"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1425
+#: accounts/doctype/sales_invoice/sales_invoice.py:1409
 msgid "Missing Asset"
 msgstr ""
 
-#: accounts/doctype/gl_entry/gl_entry.py:174 assets/doctype/asset/asset.py:263
+#: accounts/doctype/gl_entry/gl_entry.py:174 assets/doctype/asset/asset.py:265
 msgid "Missing Cost Center"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:305
+#: assets/doctype/asset/asset.py:307
 msgid "Missing Finance Book"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1330
+#: stock/doctype/stock_entry/stock_entry.py:1359
 msgid "Missing Finished Good"
 msgstr ""
 
@@ -30053,7 +30133,7 @@ msgstr ""
 #: maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
 #: manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.js:57
 #: manufacturing/report/production_analytics/production_analytics.js:34
-#: public/js/financial_statements.js:227
+#: public/js/financial_statements.js:230
 #: public/js/purchase_trends_filters.js:19 public/js/sales_trends_filters.js:11
 #: public/js/stock_analytics.js:83
 #: quality_management/doctype/quality_goal/quality_goal.json
@@ -30271,7 +30351,7 @@ msgstr ""
 msgid "Multiple fiscal years exist for the date {0}. Please set company in Fiscal Year"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1337
+#: stock/doctype/stock_entry/stock_entry.py:1366
 msgid "Multiple items cannot be marked as finished item"
 msgstr ""
 
@@ -30322,7 +30402,7 @@ msgstr ""
 #: crm/doctype/appointment/appointment.json
 #: crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py:29
 #: manufacturing/doctype/bom_creator/bom_creator.js:44
-#: public/js/utils/serial_no_batch_selector.js:437
+#: public/js/utils/serial_no_batch_selector.js:466
 #: selling/doctype/installation_note/installation_note.json
 #: selling/doctype/quotation/quotation.js:276
 #: setup/doctype/employee_group/employee_group.json
@@ -30719,7 +30799,7 @@ msgstr ""
 msgid "Net Weight UOM"
 msgstr ""
 
-#: controllers/accounts_controller.py:1290
+#: controllers/accounts_controller.py:1294
 msgid "Net total calculation precision loss"
 msgstr ""
 
@@ -31001,7 +31081,7 @@ msgstr ""
 msgid "No Answer"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:2132
+#: accounts/doctype/sales_invoice/sales_invoice.py:2136
 msgid "No Customer found for Inter Company Transactions which represents company {0}"
 msgstr ""
 
@@ -31067,7 +31147,7 @@ msgid "No Records for these settings."
 msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:331
-#: accounts/doctype/sales_invoice/sales_invoice.py:970
+#: accounts/doctype/sales_invoice/sales_invoice.py:954
 msgid "No Remarks"
 msgstr ""
 
@@ -31083,7 +31163,7 @@ msgstr ""
 msgid "No Summary"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:2116
+#: accounts/doctype/sales_invoice/sales_invoice.py:2120
 msgid "No Supplier found for Inter Company Transactions which represents company {0}"
 msgstr ""
 
@@ -31301,7 +31381,7 @@ msgstr ""
 msgid "No {0} Accounts found for this company."
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:2180
+#: accounts/doctype/sales_invoice/sales_invoice.py:2184
 msgid "No {0} found for Inter Company Transactions."
 msgstr ""
 
@@ -31355,7 +31435,7 @@ msgstr ""
 
 #: accounts/doctype/mode_of_payment/mode_of_payment.py:66
 #: accounts/doctype/pos_invoice/pos_invoice.py:257
-#: accounts/doctype/sales_invoice/sales_invoice.py:533
+#: accounts/doctype/sales_invoice/sales_invoice.py:517
 #: assets/doctype/asset/asset.js:615 assets/doctype/asset/asset.js:632
 #: controllers/buying_controller.py:201
 #: selling/doctype/product_bundle/product_bundle.py:71
@@ -31461,7 +31541,7 @@ msgstr ""
 #: manufacturing/doctype/work_order/work_order.py:1460
 #: manufacturing/doctype/work_order/work_order.py:1527
 #: selling/doctype/sales_order/sales_order.py:787
-#: selling/doctype/sales_order/sales_order.py:1560
+#: selling/doctype/sales_order/sales_order.py:1564
 msgid "Not permitted"
 msgstr ""
 
@@ -31478,7 +31558,7 @@ msgstr ""
 #: selling/doctype/sales_order/sales_order.js:1194
 #: stock/doctype/item/item.js:497 stock/doctype/item/item.py:564
 #: stock/doctype/item_price/item_price.json
-#: stock/doctype/stock_entry/stock_entry.py:1338
+#: stock/doctype/stock_entry/stock_entry.py:1367
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:877
 #: templates/pages/timelog_info.html:43
 msgid "Note"
@@ -31913,11 +31993,14 @@ msgstr ""
 
 #. Description of the 'Default Advance Account' (Link) field in DocType
 #. 'Payment Reconciliation'
+#. Description of the 'Default Advance Account' (Link) field in DocType
+#. 'Process Payment Reconciliation'
 #. Description of the 'Default Advance Received Account' (Link) field in
 #. DocType 'Company'
 #. Description of the 'Default Advance Paid Account' (Link) field in DocType
 #. 'Company'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.json
 #: setup/doctype/company/company.json
 msgid "Only 'Payment Entries' made against this advance account are supported."
 msgstr ""
@@ -31941,7 +32024,7 @@ msgstr ""
 msgid "Only Include Allocated Payments"
 msgstr ""
 
-#: accounts/doctype/account/account.py:133
+#: accounts/doctype/account/account.py:134
 msgid "Only Parent can be of type {0}"
 msgstr ""
 
@@ -31964,7 +32047,7 @@ msgstr ""
 msgid "Only one Subcontracting Order can be created against a Purchase Order, cancel the existing Subcontracting Order to create a new one."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:931
+#: stock/doctype/stock_entry/stock_entry.py:960
 msgid "Only one {0} entry can be created against the Work Order {1}"
 msgstr ""
 
@@ -32170,7 +32253,7 @@ msgstr ""
 msgid "Opening Accumulated Depreciation"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:425
+#: assets/doctype/asset/asset.py:427
 msgid "Opening Accumulated Depreciation must be less than or equal to {0}"
 msgstr ""
 
@@ -32210,7 +32293,7 @@ msgstr ""
 msgid "Opening Entry"
 msgstr ""
 
-#: accounts/general_ledger.py:704
+#: accounts/general_ledger.py:735
 msgid "Opening Entry can not be created after Period Closing Voucher is created."
 msgstr ""
 
@@ -32234,6 +32317,11 @@ msgstr ""
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.py:99
 msgid "Opening Invoice Item"
+msgstr ""
+
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1538
+#: accounts/doctype/sales_invoice/sales_invoice.py:1624
+msgid "Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
 msgstr ""
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html:8
@@ -32466,7 +32554,7 @@ msgstr ""
 #: manufacturing/doctype/bom/bom.json
 #: manufacturing/doctype/work_order/work_order.js:246
 #: manufacturing/doctype/work_order/work_order.json
-#: setup/doctype/company/company.py:358
+#: setup/doctype/company/company.py:359
 #: setup/doctype/email_digest/email_digest.json
 #: templates/generators/bom.html:61
 msgid "Operations"
@@ -32969,7 +33057,7 @@ msgstr ""
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: accounts/report/accounts_receivable/accounts_receivable.html:149
-#: accounts/report/accounts_receivable/accounts_receivable.py:1060
+#: accounts/report/accounts_receivable/accounts_receivable.py:1076
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:169
 #: accounts/report/purchase_register/purchase_register.py:289
 #: accounts/report/sales_register/sales_register.py:319
@@ -33026,7 +33114,7 @@ msgstr ""
 msgid "Over Receipt"
 msgstr ""
 
-#: controllers/status_updater.py:366
+#: controllers/status_updater.py:386
 msgid "Over Receipt/Delivery of {0} {1} ignored for item {2} because you have {3} role."
 msgstr ""
 
@@ -33041,11 +33129,11 @@ msgstr ""
 msgid "Over Transfer Allowance (%)"
 msgstr ""
 
-#: controllers/status_updater.py:368
+#: controllers/status_updater.py:388
 msgid "Overbilling of {0} {1} ignored for item {2} because you have {3} role."
 msgstr ""
 
-#: controllers/accounts_controller.py:1815
+#: controllers/accounts_controller.py:1824
 msgid "Overbilling of {} ignored because you have {} role."
 msgstr ""
 
@@ -33316,7 +33404,7 @@ msgstr ""
 msgid "POS Profile doesn't match {}"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1140
+#: accounts/doctype/sales_invoice/sales_invoice.py:1124
 msgid "POS Profile required to make POS Entry"
 msgstr ""
 
@@ -33523,7 +33611,7 @@ msgstr ""
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: accounts/report/accounts_receivable/accounts_receivable.html:146
-#: accounts/report/accounts_receivable/accounts_receivable.py:1054
+#: accounts/report/accounts_receivable/accounts_receivable.py:1070
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:167
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.py:109
 #: accounts/report/pos_register/pos_register.py:209
@@ -33575,7 +33663,7 @@ msgid "Paid To Account Type"
 msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:322
-#: accounts/doctype/sales_invoice/sales_invoice.py:1016
+#: accounts/doctype/sales_invoice/sales_invoice.py:1000
 msgid "Paid amount + Write Off Amount can not be greater than Grand Total"
 msgstr ""
 
@@ -33687,7 +33775,7 @@ msgstr ""
 msgid "Parent Company"
 msgstr ""
 
-#: setup/doctype/company/company.py:477
+#: setup/doctype/company/company.py:478
 msgid "Parent Company must be a group company"
 msgstr ""
 
@@ -34014,7 +34102,7 @@ msgstr ""
 msgid "Party Account No. (Bank Statement)"
 msgstr ""
 
-#: controllers/accounts_controller.py:2092
+#: controllers/accounts_controller.py:2101
 msgid "Party Account {0} currency ({1}) and document currency ({2}) should be same"
 msgstr ""
 
@@ -34202,7 +34290,7 @@ msgid "Path"
 msgstr ""
 
 #. Option for the 'Status' (Select) field in DocType 'Job Card Operation'
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:85
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:96
 #: manufacturing/doctype/job_card_operation/job_card_operation.json
 #: manufacturing/doctype/workstation/workstation_job_card.html:89
 msgid "Pause"
@@ -34352,7 +34440,7 @@ msgstr ""
 msgid "Payment Entries"
 msgstr ""
 
-#: accounts/utils.py:944
+#: accounts/utils.py:996
 msgid "Payment Entries {0} are un-linked"
 msgstr ""
 
@@ -34400,13 +34488,13 @@ msgstr ""
 msgid "Payment Entry already exists"
 msgstr ""
 
-#: accounts/utils.py:607
+#: accounts/utils.py:619
 msgid "Payment Entry has been modified after you pulled it. Please pull it again."
 msgstr ""
 
 #: accounts/doctype/payment_request/payment_request.py:112
-#: accounts/doctype/payment_request/payment_request.py:450
-#: accounts/doctype/payment_request/payment_request.py:574
+#: accounts/doctype/payment_request/payment_request.py:453
+#: accounts/doctype/payment_request/payment_request.py:575
 msgid "Payment Entry is already created"
 msgstr ""
 
@@ -34446,7 +34534,7 @@ msgstr ""
 msgid "Payment Gateway Account"
 msgstr ""
 
-#: accounts/utils.py:1187
+#: accounts/utils.py:1239
 msgid "Payment Gateway Account not created, please create one manually."
 msgstr ""
 
@@ -34631,7 +34719,7 @@ msgstr ""
 msgid "Payment Request created from Sales Order or Purchase Order will be in Draft status. When disabled document will be in unsaved state."
 msgstr ""
 
-#: accounts/doctype/payment_request/payment_request.py:499
+#: accounts/doctype/payment_request/payment_request.py:500
 msgid "Payment Request for {0}"
 msgstr ""
 
@@ -34639,7 +34727,7 @@ msgstr ""
 msgid "Payment Request took too long to respond. Please try requesting for payment again."
 msgstr ""
 
-#: accounts/doctype/payment_request/payment_request.py:443
+#: accounts/doctype/payment_request/payment_request.py:446
 msgid "Payment Requests cannot be created against: {0}"
 msgstr ""
 
@@ -34674,7 +34762,7 @@ msgstr ""
 #: accounts/doctype/payment_schedule/payment_schedule.json
 #: accounts/doctype/payment_term/payment_term.json
 #: accounts/doctype/payment_terms_template_detail/payment_terms_template_detail.json
-#: accounts/report/accounts_receivable/accounts_receivable.py:1050
+#: accounts/report/accounts_receivable/accounts_receivable.py:1066
 #: accounts/report/gross_profit/gross_profit.py:365
 #: accounts/workspace/accounting/accounting.json
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:30
@@ -34769,7 +34857,12 @@ msgstr ""
 msgid "Payment Type must be one of Receive, Pay and Internal Transfer"
 msgstr ""
 
-#: accounts/utils.py:936
+#. Label of the payment_url (Data) field in DocType 'Payment Request'
+#: accounts/doctype/payment_request/payment_request.json
+msgid "Payment URL"
+msgstr ""
+
+#: accounts/utils.py:988
 msgid "Payment Unlink Error"
 msgstr ""
 
@@ -35063,7 +35156,7 @@ msgstr ""
 msgid "Period Based On"
 msgstr ""
 
-#: accounts/general_ledger.py:716
+#: accounts/general_ledger.py:747
 msgid "Period Closed"
 msgstr ""
 
@@ -35154,7 +35247,7 @@ msgstr ""
 #: assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 #: maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
 #: manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.js:54
-#: public/js/financial_statements.js:224
+#: public/js/financial_statements.js:227
 msgid "Periodicity"
 msgstr ""
 
@@ -35602,7 +35695,7 @@ msgstr ""
 msgid "Please add a Temporary Opening account in Chart of Accounts"
 msgstr ""
 
-#: public/js/utils/serial_no_batch_selector.js:566
+#: public/js/utils/serial_no_batch_selector.js:595
 msgid "Please add atleast one Serial No / Batch No"
 msgstr ""
 
@@ -35614,7 +35707,7 @@ msgstr ""
 msgid "Please add the account to root level Company - {0}"
 msgstr ""
 
-#: accounts/doctype/account/account.py:230
+#: accounts/doctype/account/account.py:231
 msgid "Please add the account to root level Company - {}"
 msgstr ""
 
@@ -35630,11 +35723,11 @@ msgstr ""
 msgid "Please attach CSV file"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:2723
+#: accounts/doctype/sales_invoice/sales_invoice.py:2727
 msgid "Please cancel and amend the Payment Entry"
 msgstr ""
 
-#: accounts/utils.py:935
+#: accounts/utils.py:987
 msgid "Please cancel payment entry manually first"
 msgstr ""
 
@@ -35691,7 +35784,7 @@ msgstr ""
 msgid "Please contact your administrator to extend the credit limits for {0}."
 msgstr ""
 
-#: accounts/doctype/account/account.py:332
+#: accounts/doctype/account/account.py:333
 msgid "Please convert the parent account in corresponding child company to a group account."
 msgstr ""
 
@@ -35711,7 +35804,7 @@ msgstr ""
 msgid "Please create purchase from internal sale or delivery document itself"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:323
+#: assets/doctype/asset/asset.py:325
 msgid "Please create purchase receipt or purchase invoice for the item {0}"
 msgstr ""
 
@@ -35719,7 +35812,7 @@ msgstr ""
 msgid "Please delete Product Bundle {0}, before merging {1} into {2}"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:362
+#: assets/doctype/asset/asset.py:364
 msgid "Please do not book expense of multiple assets against one single Asset."
 msgstr ""
 
@@ -35765,20 +35858,20 @@ msgstr ""
 msgid "Please ensure that the {0} account {1} is a Payable account. You can change the account type to Payable or select a different account."
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:877
+#: accounts/doctype/sales_invoice/sales_invoice.py:861
 msgid "Please ensure {} account is a Balance Sheet account."
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:887
+#: accounts/doctype/sales_invoice/sales_invoice.py:871
 msgid "Please ensure {} account {} is a Receivable account."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:549
+#: stock/doctype/stock_entry/stock_entry.py:550
 msgid "Please enter <b>Difference Account</b> or set default <b>Stock Adjustment Account</b> for company {0}"
 msgstr ""
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:441
-#: accounts/doctype/sales_invoice/sales_invoice.py:1051
+#: accounts/doctype/sales_invoice/sales_invoice.py:1035
 msgid "Please enter Account for Change Amount"
 msgstr ""
 
@@ -35843,7 +35936,7 @@ msgstr ""
 msgid "Please enter Reference date"
 msgstr ""
 
-#: controllers/buying_controller.py:908
+#: controllers/buying_controller.py:910
 msgid "Please enter Reqd by Date"
 msgstr ""
 
@@ -35868,7 +35961,7 @@ msgid "Please enter Warehouse and Date"
 msgstr ""
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:666
-#: accounts/doctype/sales_invoice/sales_invoice.py:1047
+#: accounts/doctype/sales_invoice/sales_invoice.py:1031
 msgid "Please enter Write Off Account"
 msgstr ""
 
@@ -35880,7 +35973,7 @@ msgstr ""
 msgid "Please enter company name first"
 msgstr ""
 
-#: controllers/accounts_controller.py:2497
+#: controllers/accounts_controller.py:2507
 msgid "Please enter default currency in Company Master"
 msgstr ""
 
@@ -35908,7 +36001,7 @@ msgstr ""
 msgid "Please enter serial nos"
 msgstr ""
 
-#: setup/doctype/company/company.js:190
+#: setup/doctype/company/company.js:191
 msgid "Please enter the company name to confirm"
 msgstr ""
 
@@ -35968,7 +36061,7 @@ msgstr ""
 msgid "Please make sure the file you are using has 'Parent Account' column present in the header."
 msgstr ""
 
-#: setup/doctype/company/company.js:192
+#: setup/doctype/company/company.js:193
 msgid "Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone."
 msgstr ""
 
@@ -35976,12 +36069,8 @@ msgstr ""
 msgid "Please mention 'Weight UOM' along with Weight."
 msgstr ""
 
-#: accounts/general_ledger.py:575
-msgid "Please mention Round Off Account in Company"
-msgstr ""
-
-#: accounts/general_ledger.py:578
-msgid "Please mention Round Off Cost Center in Company"
+#: accounts/general_ledger.py:599 accounts/general_ledger.py:606
+msgid "Please mention '{0}' in Company: {1}"
 msgstr ""
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.py:232
@@ -36022,7 +36111,7 @@ msgstr ""
 msgid "Please select Apply Discount On"
 msgstr ""
 
-#: selling/doctype/sales_order/sales_order.py:1525
+#: selling/doctype/sales_order/sales_order.py:1529
 msgid "Please select BOM against item {0}"
 msgstr ""
 
@@ -36070,7 +36159,7 @@ msgstr ""
 msgid "Please select Customer first"
 msgstr ""
 
-#: setup/doctype/company/company.py:424
+#: setup/doctype/company/company.py:425
 msgid "Please select Existing Company for creating Chart of Accounts"
 msgstr ""
 
@@ -36106,7 +36195,7 @@ msgstr ""
 msgid "Please select Price List"
 msgstr ""
 
-#: selling/doctype/sales_order/sales_order.py:1527
+#: selling/doctype/sales_order/sales_order.py:1531
 msgid "Please select Qty against item {0}"
 msgstr ""
 
@@ -36122,11 +36211,11 @@ msgstr ""
 msgid "Please select Start Date and End Date for Item {0}"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1252
+#: stock/doctype/stock_entry/stock_entry.py:1281
 msgid "Please select Subcontracting Order instead of Purchase Order {0}"
 msgstr ""
 
-#: controllers/accounts_controller.py:2400
+#: controllers/accounts_controller.py:2409
 msgid "Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}"
 msgstr ""
 
@@ -36161,7 +36250,7 @@ msgstr ""
 msgid "Please select a Supplier"
 msgstr ""
 
-#: public/js/utils/serial_no_batch_selector.js:570
+#: public/js/utils/serial_no_batch_selector.js:599
 msgid "Please select a Warehouse"
 msgstr ""
 
@@ -36263,7 +36352,7 @@ msgstr ""
 msgid "Please select the Multiple Tier Program type for more than one collection rules."
 msgstr ""
 
-#: accounts/doctype/coupon_code/coupon_code.py:47
+#: accounts/doctype/coupon_code/coupon_code.py:48
 msgid "Please select the customer."
 msgstr ""
 
@@ -36286,7 +36375,7 @@ msgstr ""
 msgid "Please select weekly off day"
 msgstr ""
 
-#: public/js/utils.js:938
+#: public/js/utils.js:948
 msgid "Please select {0}"
 msgstr ""
 
@@ -36308,11 +36397,15 @@ msgstr ""
 msgid "Please set 'Gain/Loss Account on Asset Disposal' in Company {0}"
 msgstr ""
 
+#: accounts/general_ledger.py:511
+msgid "Please set '{0}' in Company: {1}"
+msgstr ""
+
 #: accounts/doctype/ledger_merge/ledger_merge.js:36
 msgid "Please set Account"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1539
+#: accounts/doctype/sales_invoice/sales_invoice.py:1523
 msgid "Please set Account for Change Amount"
 msgstr ""
 
@@ -36360,7 +36453,7 @@ msgstr ""
 msgid "Please set Fixed Asset Account in {} against {}."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:432
+#: assets/doctype/asset/asset.py:434
 msgid "Please set Opening Number of Booked Depreciations"
 msgstr ""
 
@@ -36394,11 +36487,11 @@ msgstr ""
 msgid "Please set a Company"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:260
+#: assets/doctype/asset/asset.py:262
 msgid "Please set a Cost Center for the Asset or set an Asset Depreciation Cost Center for the Company {}"
 msgstr ""
 
-#: selling/doctype/sales_order/sales_order.py:1317
+#: selling/doctype/sales_order/sales_order.py:1321
 msgid "Please set a Supplier against the Items to be considered in the Purchase Order."
 msgstr ""
 
@@ -36431,23 +36524,23 @@ msgstr ""
 msgid "Please set at least one row in the Taxes and Charges Table"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:2027
+#: accounts/doctype/sales_invoice/sales_invoice.py:2031
 msgid "Please set default Cash or Bank account in Mode of Payment {0}"
 msgstr ""
 
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.py:66
 #: accounts/doctype/pos_profile/pos_profile.py:163
-#: accounts/doctype/sales_invoice/sales_invoice.py:2585
+#: accounts/doctype/sales_invoice/sales_invoice.py:2589
 msgid "Please set default Cash or Bank account in Mode of Payment {}"
 msgstr ""
 
 #: accounts/doctype/pos_opening_entry/pos_opening_entry.py:68
 #: accounts/doctype/pos_profile/pos_profile.py:165
-#: accounts/doctype/sales_invoice/sales_invoice.py:2587
+#: accounts/doctype/sales_invoice/sales_invoice.py:2591
 msgid "Please set default Cash or Bank account in Mode of Payments {}"
 msgstr ""
 
-#: accounts/utils.py:2058
+#: accounts/utils.py:2110
 msgid "Please set default Exchange Gain/Loss Account in Company {}"
 msgstr ""
 
@@ -36463,7 +36556,7 @@ msgstr ""
 msgid "Please set default cost of goods sold account in company {0} for booking rounding gain and loss during stock transfer"
 msgstr ""
 
-#: accounts/utils.py:953
+#: accounts/utils.py:1005
 msgid "Please set default {0} in Company {1}"
 msgstr ""
 
@@ -36480,7 +36573,7 @@ msgstr ""
 msgid "Please set filters"
 msgstr ""
 
-#: controllers/accounts_controller.py:2008
+#: controllers/accounts_controller.py:2017
 msgid "Please set one of the following:"
 msgstr ""
 
@@ -36552,7 +36645,7 @@ msgid "Please specify Company to proceed"
 msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.js:1488
-#: controllers/accounts_controller.py:2617 public/js/controllers/accounts.js:97
+#: controllers/accounts_controller.py:2627 public/js/controllers/accounts.js:97
 msgid "Please specify a valid Row ID for row {0} in table {1}"
 msgstr ""
 
@@ -36844,7 +36937,7 @@ msgstr ""
 msgid "Posting Time"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1790
+#: stock/doctype/stock_entry/stock_entry.py:1819
 msgid "Posting date and posting time is mandatory"
 msgstr ""
 
@@ -37110,7 +37203,7 @@ msgstr ""
 msgid "Price List Currency"
 msgstr ""
 
-#: stock/get_item_details.py:1044
+#: stock/get_item_details.py:1048
 msgid "Price List Currency not selected"
 msgstr ""
 
@@ -37994,7 +38087,7 @@ msgstr ""
 #. Label of a Card Break in the Manufacturing Workspace
 #: manufacturing/doctype/workstation/workstation.json
 #: manufacturing/workspace/manufacturing/manufacturing.json
-#: setup/doctype/company/company.py:364
+#: setup/doctype/company/company.py:365
 msgid "Production"
 msgstr ""
 
@@ -38128,7 +38221,7 @@ msgstr ""
 #. Label of a chart in the Accounting Workspace
 #: accounts/doctype/account/account.json
 #: accounts/workspace/accounting/accounting.json
-#: public/js/financial_statements.js:137
+#: public/js/financial_statements.js:140
 msgid "Profit and Loss"
 msgstr ""
 
@@ -38291,7 +38384,7 @@ msgstr ""
 #: projects/report/timesheet_billing_summary/timesheet_billing_summary.js:46
 #: projects/report/timesheet_billing_summary/timesheet_billing_summary.py:25
 #: projects/workspace/projects/projects.json
-#: public/js/financial_statements.js:257 public/js/projects/timer.js:14
+#: public/js/financial_statements.js:260 public/js/projects/timer.js:14
 #: public/js/purchase_trends_filters.js:52 public/js/sales_trends_filters.js:28
 #: selling/doctype/installation_note/installation_note.json
 #: selling/doctype/sales_order/sales_order.js:745
@@ -38621,7 +38714,7 @@ msgstr ""
 msgid "Providing"
 msgstr ""
 
-#: setup/doctype/company/company.py:447
+#: setup/doctype/company/company.py:448
 msgid "Provisional Account"
 msgstr ""
 
@@ -38675,7 +38768,7 @@ msgstr ""
 #: accounts/doctype/tax_rule/tax_rule.json
 #: manufacturing/doctype/material_request_plan_item/material_request_plan_item.json
 #: projects/doctype/project/project_dashboard.py:16
-#: setup/doctype/company/company.py:352 stock/doctype/item/item.json
+#: setup/doctype/company/company.py:353 stock/doctype/item/item.json
 #: stock/doctype/item_reorder/item_reorder.json
 #: stock/doctype/material_request/material_request.json
 msgid "Purchase"
@@ -38771,9 +38864,11 @@ msgstr ""
 #. Name of a DocType
 #. Label of the purchase_invoice_item (Data) field in DocType 'Purchase Invoice
 #. Item'
+#. Label of the purchase_invoice_item (Link) field in DocType 'Asset'
 #. Label of the purchase_invoice_item (Data) field in DocType 'Purchase Receipt
 #. Item'
 #: accounts/doctype/purchase_invoice_item/purchase_invoice_item.json
+#: assets/doctype/asset/asset.json
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Purchase Invoice Item"
 msgstr ""
@@ -38787,7 +38882,7 @@ msgstr ""
 msgid "Purchase Invoice Trends"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:212
+#: assets/doctype/asset/asset.py:214
 msgid "Purchase Invoice cannot be made against an existing asset {0}"
 msgstr ""
 
@@ -38796,7 +38891,7 @@ msgstr ""
 msgid "Purchase Invoice {0} is already submitted"
 msgstr ""
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1891
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1914
 msgid "Purchase Invoices"
 msgstr ""
 
@@ -38999,7 +39094,7 @@ msgstr ""
 msgid "Purchase Orders to Receive"
 msgstr ""
 
-#: controllers/accounts_controller.py:1638
+#: controllers/accounts_controller.py:1644
 msgid "Purchase Orders {0} are un-linked"
 msgstr ""
 
@@ -39055,11 +39150,13 @@ msgstr ""
 msgid "Purchase Receipt Detail"
 msgstr ""
 
+#. Label of the purchase_receipt_item (Link) field in DocType 'Asset'
 #. Label of the purchase_receipt_item (Data) field in DocType 'Landed Cost
 #. Item'
 #. Name of a DocType
 #. Label of the purchase_receipt_item (Data) field in DocType 'Purchase Receipt
 #. Item'
+#: assets/doctype/asset/asset.json
 #: stock/doctype/landed_cost_item/landed_cost_item.json
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Purchase Receipt Item"
@@ -39129,7 +39226,7 @@ msgid "Purchase Return"
 msgstr ""
 
 #. Label of the purchase_tax_template (Link) field in DocType 'Tax Rule'
-#: accounts/doctype/tax_rule/tax_rule.json setup/doctype/company/company.js:125
+#: accounts/doctype/tax_rule/tax_rule.json setup/doctype/company/company.js:126
 msgid "Purchase Tax Template"
 msgstr ""
 
@@ -39253,7 +39350,7 @@ msgstr ""
 msgid "Purpose"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:362
+#: stock/doctype/stock_entry/stock_entry.py:363
 msgid "Purpose must be one of {0}"
 msgstr ""
 
@@ -39333,7 +39430,7 @@ msgstr ""
 #: public/js/bom_configurator/bom_configurator.bundle.js:304
 #: public/js/bom_configurator/bom_configurator.bundle.js:437
 #: public/js/bom_configurator/bom_configurator.bundle.js:525
-#: public/js/utils.js:696
+#: public/js/utils.js:706
 #: selling/doctype/product_bundle_item/product_bundle_item.json
 #: selling/doctype/sales_order/sales_order.js:385
 #: selling/doctype/sales_order/sales_order.js:489
@@ -39720,7 +39817,7 @@ msgstr ""
 msgid "Quality Inspection(s)"
 msgstr ""
 
-#: setup/doctype/company/company.py:394
+#: setup/doctype/company/company.py:395
 msgid "Quality Management"
 msgstr ""
 
@@ -39834,7 +39931,7 @@ msgstr ""
 #: manufacturing/doctype/plant_floor/plant_floor.js:166
 #: manufacturing/doctype/plant_floor/plant_floor.js:190
 #: public/js/controllers/buying.js:509 public/js/stock_analytics.js:50
-#: public/js/utils/serial_no_batch_selector.js:426
+#: public/js/utils/serial_no_batch_selector.js:455
 #: selling/doctype/quotation_item/quotation_item.json
 #: selling/doctype/sales_order_item/sales_order_item.json
 #: selling/page/point_of_sale/pos_item_cart.js:46
@@ -39936,7 +40033,7 @@ msgstr ""
 msgid "Quantity and Warehouse"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1320
+#: stock/doctype/stock_entry/stock_entry.py:1349
 msgid "Quantity in row {0} ({1}) must be same as manufactured quantity {2}"
 msgstr ""
 
@@ -40032,7 +40129,7 @@ msgstr ""
 #: maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
 #: manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.js:58
 #: manufacturing/report/production_analytics/production_analytics.js:35
-#: public/js/financial_statements.js:228
+#: public/js/financial_statements.js:231
 #: public/js/purchase_trends_filters.js:20 public/js/sales_trends_filters.js:12
 #: public/js/stock_analytics.js:84
 #: quality_management/doctype/quality_goal/quality_goal.json
@@ -40332,7 +40429,7 @@ msgstr ""
 #: manufacturing/doctype/bom_item/bom_item.json
 #: manufacturing/doctype/bom_scrap_item/bom_scrap_item.json
 #: manufacturing/doctype/work_order_item/work_order_item.json
-#: public/js/utils.js:706
+#: public/js/utils.js:716
 #: selling/doctype/product_bundle_item/product_bundle_item.json
 #: selling/doctype/quotation_item/quotation_item.json
 #: selling/doctype/sales_order_item/sales_order_item.json
@@ -40668,7 +40765,7 @@ msgstr ""
 #. Label of the raw_materials_consumption_section (Section Break) field in
 #. DocType 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
-msgid "Raw Materials Consumption"
+msgid "Raw Materials Consumption "
 msgstr ""
 
 #. Label of the raw_materials_supplied (Section Break) field in DocType
@@ -40906,7 +41003,7 @@ msgstr ""
 msgid "Receivable/Payable Account"
 msgstr ""
 
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:47
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:48
 msgid "Receivable/Payable Account: {0} doesn't belong to company {1}"
 msgstr ""
 
@@ -41633,7 +41730,7 @@ msgstr ""
 msgid "Refresh Token"
 msgstr ""
 
-#: stock/reorder_item.py:387
+#: stock/reorder_item.py:392
 msgid "Regards,"
 msgstr ""
 
@@ -41757,7 +41854,7 @@ msgstr ""
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:187
 #: accounts/report/accounts_receivable/accounts_receivable.html:156
-#: accounts/report/accounts_receivable/accounts_receivable.py:1071
+#: accounts/report/accounts_receivable/accounts_receivable.py:1087
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:179
 msgid "Remaining Balance"
 msgstr ""
@@ -41810,7 +41907,7 @@ msgstr ""
 #: accounts/report/accounts_receivable/accounts_receivable.html:159
 #: accounts/report/accounts_receivable/accounts_receivable.html:198
 #: accounts/report/accounts_receivable/accounts_receivable.html:269
-#: accounts/report/accounts_receivable/accounts_receivable.py:1103
+#: accounts/report/accounts_receivable/accounts_receivable.py:1119
 #: accounts/report/general_ledger/general_ledger.html:29
 #: accounts/report/general_ledger/general_ledger.html:51
 #: accounts/report/general_ledger/general_ledger.py:691
@@ -41866,7 +41963,7 @@ msgstr ""
 msgid "Rename Log"
 msgstr ""
 
-#: accounts/doctype/account/account.py:516
+#: accounts/doctype/account/account.py:517
 msgid "Rename Not Allowed"
 msgstr ""
 
@@ -41875,7 +41972,7 @@ msgstr ""
 msgid "Rename Tool"
 msgstr ""
 
-#: accounts/doctype/account/account.py:508
+#: accounts/doctype/account/account.py:509
 msgid "Renaming it is only allowed via parent company {0}, to avoid mismatch."
 msgstr ""
 
@@ -42015,7 +42112,7 @@ msgstr ""
 msgid "Report Type"
 msgstr ""
 
-#: accounts/doctype/account/account.py:410
+#: accounts/doctype/account/account.py:411
 msgid "Report Type is mandatory"
 msgstr ""
 
@@ -42174,7 +42271,7 @@ msgstr ""
 msgid "Reqd By Date"
 msgstr ""
 
-#: public/js/utils.js:716
+#: public/js/utils.js:726
 msgid "Reqd by date"
 msgstr ""
 
@@ -42385,7 +42482,7 @@ msgstr ""
 msgid "Research"
 msgstr ""
 
-#: setup/doctype/company/company.py:400
+#: setup/doctype/company/company.py:401
 msgid "Research & Development"
 msgstr ""
 
@@ -42507,7 +42604,7 @@ msgstr ""
 msgid "Reserved Quantity for Production"
 msgstr ""
 
-#: stock/stock_ledger.py:2095
+#: stock/stock_ledger.py:2096
 msgid "Reserved Serial No."
 msgstr ""
 
@@ -42519,11 +42616,11 @@ msgstr ""
 #: stock/dashboard/item_dashboard_list.html:15 stock/doctype/bin/bin.json
 #: stock/doctype/pick_list/pick_list.js:146
 #: stock/report/reserved_stock/reserved_stock.json
-#: stock/report/stock_balance/stock_balance.py:479 stock/stock_ledger.py:2079
+#: stock/report/stock_balance/stock_balance.py:479 stock/stock_ledger.py:2080
 msgid "Reserved Stock"
 msgstr ""
 
-#: stock/stock_ledger.py:2125
+#: stock/stock_ledger.py:2126
 msgid "Reserved Stock for Batch"
 msgstr ""
 
@@ -43115,11 +43212,11 @@ msgstr ""
 msgid "Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity"
 msgstr ""
 
-#: accounts/doctype/account/account.py:407
+#: accounts/doctype/account/account.py:408
 msgid "Root Type is mandatory"
 msgstr ""
 
-#: accounts/doctype/account/account.py:212
+#: accounts/doctype/account/account.py:213
 msgid "Root cannot be edited."
 msgstr ""
 
@@ -43157,6 +43254,12 @@ msgstr ""
 #. Category'
 #: accounts/doctype/tax_withholding_category/tax_withholding_category.json
 msgid "Round Off Tax Amount"
+msgstr ""
+
+#. Option for the 'Account Type' (Select) field in DocType 'Account'
+#. Label of the round_off_for_opening (Link) field in DocType 'Company'
+#: accounts/doctype/account/account.json setup/doctype/company/company.json
+msgid "Round Off for Opening"
 msgstr ""
 
 #. Label of the round_row_wise_tax (Check) field in DocType 'Accounts Settings'
@@ -43326,12 +43429,12 @@ msgid "Row # {0}: Returned Item {1} does not exist in {2} {3}"
 msgstr ""
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:450
-#: accounts/doctype/sales_invoice/sales_invoice.py:1704
+#: accounts/doctype/sales_invoice/sales_invoice.py:1707
 msgid "Row #{0} (Payment Table): Amount must be negative"
 msgstr ""
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:448
-#: accounts/doctype/sales_invoice/sales_invoice.py:1699
+#: accounts/doctype/sales_invoice/sales_invoice.py:1702
 msgid "Row #{0} (Payment Table): Amount must be positive"
 msgstr ""
 
@@ -43377,7 +43480,7 @@ msgstr ""
 msgid "Row #{0}: Amount must be a positive number"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:381
+#: accounts/doctype/sales_invoice/sales_invoice.py:365
 msgid "Row #{0}: Asset {1} cannot be submitted, it is already {2}"
 msgstr ""
 
@@ -43393,23 +43496,23 @@ msgstr ""
 msgid "Row #{0}: Cannot allocate more than {1} against payment term {2}"
 msgstr ""
 
-#: controllers/accounts_controller.py:3165
+#: controllers/accounts_controller.py:3175
 msgid "Row #{0}: Cannot delete item {1} which has already been billed."
 msgstr ""
 
-#: controllers/accounts_controller.py:3139
+#: controllers/accounts_controller.py:3149
 msgid "Row #{0}: Cannot delete item {1} which has already been delivered"
 msgstr ""
 
-#: controllers/accounts_controller.py:3158
+#: controllers/accounts_controller.py:3168
 msgid "Row #{0}: Cannot delete item {1} which has already been received"
 msgstr ""
 
-#: controllers/accounts_controller.py:3145
+#: controllers/accounts_controller.py:3155
 msgid "Row #{0}: Cannot delete item {1} which has work order assigned to it."
 msgstr ""
 
-#: controllers/accounts_controller.py:3151
+#: controllers/accounts_controller.py:3161
 msgid "Row #{0}: Cannot delete item {1} which is assigned to customer's purchase order."
 msgstr ""
 
@@ -43417,7 +43520,7 @@ msgstr ""
 msgid "Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor"
 msgstr ""
 
-#: controllers/accounts_controller.py:3407
+#: controllers/accounts_controller.py:3417
 msgid "Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}."
 msgstr ""
 
@@ -43449,7 +43552,7 @@ msgstr ""
 msgid "Row #{0}: Consumed Asset {1} does not belong to company {2}"
 msgstr ""
 
-#: accounts/doctype/sales_invoice_item/sales_invoice_item.py:105
+#: accounts/doctype/sales_invoice_item/sales_invoice_item.py:106
 msgid "Row #{0}: Cost Center {1} does not belong to company {2}"
 msgstr ""
 
@@ -43489,7 +43592,7 @@ msgstr ""
 msgid "Row #{0}: Finished Good Item {1} must be a sub-contracted item"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:322
+#: stock/doctype/stock_entry/stock_entry.py:323
 msgid "Row #{0}: Finished Good must be {1}"
 msgstr ""
 
@@ -43549,7 +43652,7 @@ msgstr ""
 msgid "Row #{0}: Only {1} available to reserve for the Item {2}"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:676
+#: stock/doctype/stock_entry/stock_entry.py:677
 msgid "Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}."
 msgstr ""
 
@@ -43591,7 +43694,7 @@ msgid "Row #{0}: Qty should be less than or equal to Available Qty to Reserve (A
 msgstr ""
 
 #: controllers/accounts_controller.py:1099
-#: controllers/accounts_controller.py:3265
+#: controllers/accounts_controller.py:3275
 msgid "Row #{0}: Quantity for Item {1} cannot be zero."
 msgstr ""
 
@@ -43627,7 +43730,7 @@ msgstr ""
 msgid "Row #{0}: Rejected Warehouse is mandatory for the rejected Item {1}"
 msgstr ""
 
-#: controllers/buying_controller.py:906
+#: controllers/buying_controller.py:908
 msgid "Row #{0}: Reqd by Date cannot be before Transaction Date"
 msgstr ""
 
@@ -43719,7 +43822,7 @@ msgstr ""
 msgid "Row #{0}: The batch {1} has already expired."
 msgstr ""
 
-#: accounts/doctype/sales_invoice_item/sales_invoice_item.py:150
+#: accounts/doctype/sales_invoice_item/sales_invoice_item.py:151
 msgid "Row #{0}: The following serial numbers are not present in Delivery Note {1}:"
 msgstr ""
 
@@ -43735,7 +43838,7 @@ msgstr ""
 msgid "Row #{0}: You cannot use the inventory dimension '{1}' in Stock Reconciliation to modify the quantity or valuation rate. Stock reconciliation with inventory dimensions is intended solely for performing opening entries."
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1424
+#: accounts/doctype/sales_invoice/sales_invoice.py:1408
 msgid "Row #{0}: You must select an Asset for Item {1}."
 msgstr ""
 
@@ -43755,7 +43858,7 @@ msgstr ""
 msgid "Row #{0}: {1} of {2} should be {3}. Please update the {1} or select a different account."
 msgstr ""
 
-#: accounts/doctype/sales_invoice_item/sales_invoice_item.py:161
+#: accounts/doctype/sales_invoice_item/sales_invoice_item.py:162
 msgid "Row #{0}: {1} serial numbers are required for Item {2}. You have provided {3} serial numbers."
 msgstr ""
 
@@ -43767,7 +43870,7 @@ msgstr ""
 msgid "Row #{}: Currency of {} - {} doesn't matches company currency."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:304
+#: assets/doctype/asset/asset.py:306
 msgid "Row #{}: Finance Book should not be empty since you're using multiple."
 msgstr ""
 
@@ -43791,7 +43894,7 @@ msgstr ""
 msgid "Row #{}: Please assign task to a member."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:296
+#: assets/doctype/asset/asset.py:298
 msgid "Row #{}: Please use a different Finance Book."
 msgstr ""
 
@@ -43847,11 +43950,11 @@ msgstr ""
 msgid "Row {0} picked quantity is less than the required quantity, additional {1} {2} required."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1183
+#: stock/doctype/stock_entry/stock_entry.py:1212
 msgid "Row {0}# Item {1} cannot be transferred more than {2} against {3} {4}"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1207
+#: stock/doctype/stock_entry/stock_entry.py:1236
 msgid "Row {0}# Item {1} not found in 'Raw Materials Supplied' table in {2} {3}"
 msgstr ""
 
@@ -43863,7 +43966,7 @@ msgstr ""
 msgid "Row {0}: Account {1} and Party Type {2} have different account types"
 msgstr ""
 
-#: controllers/accounts_controller.py:2642
+#: controllers/accounts_controller.py:2652
 msgid "Row {0}: Account {1} is a Group Account"
 msgstr ""
 
@@ -43887,7 +43990,7 @@ msgstr ""
 msgid "Row {0}: Allocated amount {1} must be less than or equal to remaining payment amount {2}"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:916
+#: stock/doctype/stock_entry/stock_entry.py:945
 msgid "Row {0}: As {1} is enabled, raw materials cannot be added to {2} entry. Use {3} entry to consume raw materials."
 msgstr ""
 
@@ -43903,7 +44006,7 @@ msgstr ""
 msgid "Row {0}: Conversion Factor is mandatory"
 msgstr ""
 
-#: controllers/accounts_controller.py:2655
+#: controllers/accounts_controller.py:2665
 msgid "Row {0}: Cost Center {1} does not belong to Company {2}"
 msgstr ""
 
@@ -43927,11 +44030,11 @@ msgstr ""
 msgid "Row {0}: Delivery Warehouse ({1}) and Customer Warehouse ({2}) can not be same"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:413
+#: assets/doctype/asset/asset.py:415
 msgid "Row {0}: Depreciation Start Date is required"
 msgstr ""
 
-#: controllers/accounts_controller.py:2321
+#: controllers/accounts_controller.py:2330
 msgid "Row {0}: Due Date in the Payment Terms table cannot be before Posting Date"
 msgstr ""
 
@@ -43944,11 +44047,11 @@ msgid "Row {0}: Enter location for the asset item {1}"
 msgstr ""
 
 #: accounts/doctype/journal_entry/journal_entry.py:952
-#: controllers/taxes_and_totals.py:1139
+#: controllers/taxes_and_totals.py:1146
 msgid "Row {0}: Exchange Rate is mandatory"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:404
+#: assets/doctype/asset/asset.py:406
 msgid "Row {0}: Expected Value After Useful Life must be less than Gross Purchase Amount"
 msgstr ""
 
@@ -44077,7 +44180,7 @@ msgstr ""
 msgid "Row {0}: Qty cannot be greater than {1} for the Item {2}."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:386
+#: stock/doctype/stock_entry/stock_entry.py:387
 msgid "Row {0}: Qty in Stock UOM can not be zero."
 msgstr ""
 
@@ -44085,7 +44188,7 @@ msgstr ""
 msgid "Row {0}: Qty must be greater than 0."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:750
+#: stock/doctype/stock_entry/stock_entry.py:751
 msgid "Row {0}: Quantity not available for {4} in warehouse {1} at posting time of the entry ({2} {3})"
 msgstr ""
 
@@ -44093,7 +44196,7 @@ msgstr ""
 msgid "Row {0}: Shift cannot be changed since the depreciation has already been processed"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1220
+#: stock/doctype/stock_entry/stock_entry.py:1249
 msgid "Row {0}: Subcontracted Item is mandatory for the raw material {1}"
 msgstr ""
 
@@ -44101,7 +44204,7 @@ msgstr ""
 msgid "Row {0}: Target Warehouse is mandatory for internal transfers"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:429
+#: stock/doctype/stock_entry/stock_entry.py:430
 msgid "Row {0}: The item {1}, quantity must be positive number"
 msgstr ""
 
@@ -44109,11 +44212,11 @@ msgstr ""
 msgid "Row {0}: To set {1} periodicity, difference between from and to date must be greater than or equal to {2}"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:438
+#: assets/doctype/asset/asset.py:440
 msgid "Row {0}: Total Number of Depreciations cannot be less than or equal to Opening Number of Booked Depreciations"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:380
+#: stock/doctype/stock_entry/stock_entry.py:381
 msgid "Row {0}: UOM Conversion Factor is mandatory"
 msgstr ""
 
@@ -44141,7 +44244,7 @@ msgstr ""
 msgid "Row {0}: {2} Item {1} does not exist in {2} {3}"
 msgstr ""
 
-#: controllers/accounts_controller.py:2634
+#: controllers/accounts_controller.py:2644
 msgid "Row {0}: {3} Account {1} does not belong to Company {2}"
 msgstr ""
 
@@ -44175,7 +44278,7 @@ msgstr ""
 msgid "Rows with Same Account heads will be merged on Ledger"
 msgstr ""
 
-#: controllers/accounts_controller.py:2331
+#: controllers/accounts_controller.py:2340
 msgid "Rows with duplicate due dates in other rows were found: {0}"
 msgstr ""
 
@@ -44245,7 +44348,7 @@ msgstr ""
 msgid "SLA Paused On"
 msgstr ""
 
-#: public/js/utils.js:1084
+#: public/js/utils.js:1094
 msgid "SLA is on hold since {0}"
 msgstr ""
 
@@ -44345,7 +44448,7 @@ msgstr ""
 #: regional/report/vat_audit_report/vat_audit_report.py:180
 #: selling/doctype/quotation/quotation.json
 #: selling/doctype/sales_order/sales_order.json
-#: setup/doctype/company/company.py:346 setup/doctype/company/company.py:509
+#: setup/doctype/company/company.py:347 setup/doctype/company/company.py:510
 #: setup/doctype/company/company_dashboard.py:9
 #: setup/doctype/sales_person/sales_person_dashboard.py:12
 #: setup/setup_wizard/operations/install_fixtures.py:282
@@ -44353,7 +44456,7 @@ msgstr ""
 msgid "Sales"
 msgstr ""
 
-#: setup/doctype/company/company.py:509
+#: setup/doctype/company/company.py:510
 msgid "Sales Account"
 msgstr ""
 
@@ -44706,7 +44809,7 @@ msgstr ""
 msgid "Sales Order {0} already exists against Customer's Purchase Order {1}. To allow multiple Sales Orders, Enable {2} in {3}"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1154
+#: accounts/doctype/sales_invoice/sales_invoice.py:1138
 msgid "Sales Order {0} is not submitted"
 msgstr ""
 
@@ -44765,7 +44868,7 @@ msgstr ""
 #: accounts/doctype/promotional_scheme/promotional_scheme.json
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: accounts/report/accounts_receivable/accounts_receivable.js:136
-#: accounts/report/accounts_receivable/accounts_receivable.py:1092
+#: accounts/report/accounts_receivable/accounts_receivable.py:1108
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:120
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:195
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.js:73
@@ -44863,7 +44966,7 @@ msgstr ""
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:156
 #: accounts/report/accounts_receivable/accounts_receivable.html:137
 #: accounts/report/accounts_receivable/accounts_receivable.js:142
-#: accounts/report/accounts_receivable/accounts_receivable.py:1089
+#: accounts/report/accounts_receivable/accounts_receivable.py:1105
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:126
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:192
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.js:79
@@ -44964,7 +45067,7 @@ msgid "Sales Summary"
 msgstr ""
 
 #. Label of the sales_tax_template (Link) field in DocType 'Tax Rule'
-#: accounts/doctype/tax_rule/tax_rule.json setup/doctype/company/company.js:113
+#: accounts/doctype/tax_rule/tax_rule.json setup/doctype/company/company.js:114
 msgid "Sales Tax Template"
 msgstr ""
 
@@ -45149,7 +45252,7 @@ msgstr ""
 msgid "Sample Size"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:3017
+#: stock/doctype/stock_entry/stock_entry.py:3046
 msgid "Sample quantity {0} cannot be more than received quantity {1}"
 msgstr ""
 
@@ -45331,11 +45434,11 @@ msgstr ""
 msgid "Scheduler Inactive"
 msgstr ""
 
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:183
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:185
 msgid "Scheduler is Inactive. Can't trigger job now."
 msgstr ""
 
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:235
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.py:237
 msgid "Scheduler is Inactive. Can't trigger jobs now."
 msgstr ""
 
@@ -45573,7 +45676,7 @@ msgstr ""
 msgid "Select Accounting Dimension."
 msgstr ""
 
-#: public/js/utils.js:461
+#: public/js/utils.js:471
 msgid "Select Alternate Item"
 msgstr ""
 
@@ -45812,7 +45915,7 @@ msgstr ""
 msgid "Select company name first."
 msgstr ""
 
-#: controllers/accounts_controller.py:2513
+#: controllers/accounts_controller.py:2523
 msgid "Select finance book for the item {0} at row {1}"
 msgstr ""
 
@@ -45882,7 +45985,7 @@ msgstr ""
 msgid "Selected POS Opening Entry should be open."
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:2175
+#: accounts/doctype/sales_invoice/sales_invoice.py:2179
 msgid "Selected Price List should have buying and selling fields checked."
 msgstr ""
 
@@ -46175,7 +46278,7 @@ msgstr ""
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.js:74
 #: manufacturing/report/cost_of_poor_quality_report/cost_of_poor_quality_report.py:114
 #: public/js/controllers/transaction.js:2253
-#: public/js/utils/serial_no_batch_selector.js:379
+#: public/js/utils/serial_no_batch_selector.js:399
 #: selling/doctype/installation_note_item/installation_note_item.json
 #: stock/doctype/delivery_note_item/delivery_note_item.json
 #: stock/doctype/packed_item/packed_item.json
@@ -46265,7 +46368,7 @@ msgstr ""
 msgid "Serial No is mandatory for Item {0}"
 msgstr ""
 
-#: public/js/utils/serial_no_batch_selector.js:512
+#: public/js/utils/serial_no_batch_selector.js:541
 msgid "Serial No {0} already exists"
 msgstr ""
 
@@ -46322,7 +46425,7 @@ msgstr ""
 msgid "Serial Nos / Batch Nos"
 msgstr ""
 
-#: accounts/doctype/sales_invoice_item/sales_invoice_item.py:157
+#: accounts/doctype/sales_invoice_item/sales_invoice_item.py:158
 msgid "Serial Nos Mismatch"
 msgstr ""
 
@@ -46335,7 +46438,7 @@ msgstr ""
 msgid "Serial Nos are created successfully"
 msgstr ""
 
-#: stock/stock_ledger.py:2085
+#: stock/stock_ledger.py:2086
 msgid "Serial Nos are reserved in Stock Reservation Entries, you need to unreserve them before proceeding."
 msgstr ""
 
@@ -46936,11 +47039,11 @@ msgstr ""
 msgid "Set as Open"
 msgstr ""
 
-#: setup/doctype/company/company.py:436
+#: setup/doctype/company/company.py:437
 msgid "Set default inventory account for perpetual inventory"
 msgstr ""
 
-#: setup/doctype/company/company.py:446
+#: setup/doctype/company/company.py:447
 msgid "Set default {0} account for non stock items"
 msgstr ""
 
@@ -46980,15 +47083,15 @@ msgstr ""
 msgid "Set this if the customer is a Public Administration company."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:672
+#: assets/doctype/asset/asset.py:674
 msgid "Set {0} in asset category {1} for company {2}"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:987
+#: assets/doctype/asset/asset.py:989
 msgid "Set {0} in asset category {1} or company {2}"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:984
+#: assets/doctype/asset/asset.py:986
 msgid "Set {0} in company {1}"
 msgstr ""
 
@@ -47726,7 +47829,7 @@ msgstr ""
 msgid "Simultaneous"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:537
+#: stock/doctype/stock_entry/stock_entry.py:538
 msgid "Since there is a process loss of {0} units for the finished good {1}, you should reduce the quantity by {0} units for the finished good {1} in the Items Table."
 msgstr ""
 
@@ -47980,7 +48083,7 @@ msgstr ""
 msgid "Source and Target Location cannot be same"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:626
+#: stock/doctype/stock_entry/stock_entry.py:627
 msgid "Source and target warehouse cannot be same for row {0}"
 msgstr ""
 
@@ -47993,8 +48096,8 @@ msgstr ""
 msgid "Source of Funds (Liabilities)"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:603
-#: stock/doctype/stock_entry/stock_entry.py:620
+#: stock/doctype/stock_entry/stock_entry.py:604
+#: stock/doctype/stock_entry/stock_entry.py:621
 msgid "Source warehouse is mandatory for row {0}"
 msgstr ""
 
@@ -48065,7 +48168,7 @@ msgstr ""
 msgid "Split Qty"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:1092
+#: assets/doctype/asset/asset.py:1094
 msgid "Split qty cannot be grater than or equal to asset qty"
 msgstr ""
 
@@ -48201,7 +48304,7 @@ msgstr ""
 msgid "Start"
 msgstr ""
 
-#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:43
+#: accounts/doctype/process_payment_reconciliation/process_payment_reconciliation.js:54
 msgid "Start / Resume"
 msgstr ""
 
@@ -48233,7 +48336,7 @@ msgstr ""
 #: projects/doctype/timesheet/timesheet.json
 #: projects/report/project_summary/project_summary.py:70
 #: projects/report/timesheet_billing_summary/timesheet_billing_summary.js:47
-#: public/js/financial_statements.js:194
+#: public/js/financial_statements.js:197
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.js:16
 #: setup/doctype/vehicle/vehicle.json
 #: support/doctype/service_level_agreement/service_level_agreement.json
@@ -48285,7 +48388,7 @@ msgstr ""
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:56
 #: accounts/report/financial_ratios/financial_ratios.js:17
 #: assets/report/fixed_asset_register/fixed_asset_register.js:81
-#: public/js/financial_statements.js:208
+#: public/js/financial_statements.js:211
 msgid "Start Year"
 msgstr ""
 
@@ -48637,7 +48740,7 @@ msgstr ""
 #: accounts/doctype/account/account.json
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:50
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:73
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1310
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1314
 #: accounts/report/account_balance/account_balance.js:58
 msgid "Stock Adjustment"
 msgstr ""
@@ -48715,7 +48818,7 @@ msgstr ""
 msgid "Stock Details"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:718
+#: stock/doctype/stock_entry/stock_entry.py:719
 msgid "Stock Entries already created for Work Order {0}: {1}"
 msgstr ""
 
@@ -49021,7 +49124,7 @@ msgstr ""
 msgid "Stock Reserved Qty (in Stock UOM)"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1586
+#: stock/doctype/stock_entry/stock_entry.py:1615
 msgid "Stock Return"
 msgstr ""
 
@@ -49236,11 +49339,11 @@ msgstr ""
 msgid "Stock cannot be updated against Purchase Receipt {0}"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1037
+#: accounts/doctype/sales_invoice/sales_invoice.py:1021
 msgid "Stock cannot be updated against the following Delivery Notes: {0}"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1060
+#: accounts/doctype/sales_invoice/sales_invoice.py:1044
 msgid "Stock cannot be updated because the invoice contains a drop shipping item. Please disable 'Update Stock' or remove the drop shipping item."
 msgstr ""
 
@@ -49326,7 +49429,7 @@ msgstr ""
 msgid "Stopped Work Order cannot be cancelled, Unstop it first to cancel"
 msgstr ""
 
-#: setup/doctype/company/company.py:282
+#: setup/doctype/company/company.py:283
 #: setup/setup_wizard/operations/defaults_setup.py:33
 #: setup/setup_wizard/operations/install_fixtures.py:504
 #: stock/doctype/item/item.py:279
@@ -50114,7 +50217,7 @@ msgstr ""
 #: accounts/doctype/tax_rule/tax_rule.json
 #: accounts/report/accounts_payable/accounts_payable.js:125
 #: accounts/report/accounts_payable_summary/accounts_payable_summary.js:108
-#: accounts/report/accounts_receivable/accounts_receivable.py:1096
+#: accounts/report/accounts_receivable/accounts_receivable.py:1112
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:199
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.py:174
 #: accounts/report/purchase_register/purchase_register.js:27
@@ -50158,7 +50261,7 @@ msgstr ""
 msgid "Supplier Invoice Date"
 msgstr ""
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1615
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1638
 msgid "Supplier Invoice Date cannot be greater than Posting Date"
 msgstr ""
 
@@ -50173,7 +50276,7 @@ msgstr ""
 msgid "Supplier Invoice No"
 msgstr ""
 
-#: accounts/doctype/purchase_invoice/purchase_invoice.py:1640
+#: accounts/doctype/purchase_invoice/purchase_invoice.py:1663
 msgid "Supplier Invoice No exists in Purchase Invoice {0}"
 msgstr ""
 
@@ -50667,7 +50770,7 @@ msgstr ""
 msgid "System will fetch all the entries if limit value is zero."
 msgstr ""
 
-#: controllers/accounts_controller.py:1775
+#: controllers/accounts_controller.py:1784
 msgid "System will not check over billing since amount for Item {0} in {1} is zero"
 msgstr ""
 
@@ -50961,8 +51064,8 @@ msgstr ""
 msgid "Target Warehouse is set for some items but the customer is not an internal customer."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:609
-#: stock/doctype/stock_entry/stock_entry.py:616
+#: stock/doctype/stock_entry/stock_entry.py:610
+#: stock/doctype/stock_entry/stock_entry.py:617
 msgid "Target warehouse is mandatory for row {0}"
 msgstr ""
 
@@ -51383,7 +51486,7 @@ msgstr ""
 #. Label of the taxable_amount (Currency) field in DocType 'Tax Withheld
 #. Vouchers'
 #: accounts/doctype/tax_withheld_vouchers/tax_withheld_vouchers.json
-#: controllers/taxes_and_totals.py:1037
+#: controllers/taxes_and_totals.py:1044
 msgid "Taxable Amount"
 msgstr ""
 
@@ -51803,7 +51906,7 @@ msgstr ""
 #: accounts/doctype/sales_invoice/sales_invoice.json
 #: accounts/doctype/territory_item/territory_item.json
 #: accounts/report/accounts_receivable/accounts_receivable.js:148
-#: accounts/report/accounts_receivable/accounts_receivable.py:1080
+#: accounts/report/accounts_receivable/accounts_receivable.py:1096
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:114
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.py:183
 #: accounts/report/customer_ledger_summary/customer_ledger_summary.js:67
@@ -51924,11 +52027,11 @@ msgstr ""
 msgid "The GL Entries will be processed in the background, it can take a few minutes."
 msgstr ""
 
-#: accounts/doctype/loyalty_program/loyalty_program.py:159
+#: accounts/doctype/loyalty_program/loyalty_program.py:169
 msgid "The Loyalty Program isn't valid for the selected company"
 msgstr ""
 
-#: accounts/doctype/payment_request/payment_request.py:752
+#: accounts/doctype/payment_request/payment_request.py:753
 msgid "The Payment Request {0} is already paid, cannot process payment twice"
 msgstr ""
 
@@ -51940,7 +52043,7 @@ msgstr ""
 msgid "The Pick List having Stock Reservation Entries cannot be updated. If you need to make changes, we recommend canceling the existing Stock Reservation Entries before updating the Pick List."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1922
+#: stock/doctype/stock_entry/stock_entry.py:1951
 msgid "The Process Loss Qty has reset as per job cards Process Loss Qty"
 msgstr ""
 
@@ -51948,7 +52051,7 @@ msgstr ""
 msgid "The Serial No at Row #{0}: {1} is not available in warehouse {2}."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1388
+#: stock/doctype/stock_entry/stock_entry.py:1417
 msgid "The Serial and Batch Bundle {0} is not valid for this transaction. The 'Type of Transaction' should be 'Outward' instead of 'Inward' in Serial and Batch Bundle {0}"
 msgstr ""
 
@@ -51956,7 +52059,7 @@ msgstr ""
 msgid "The Stock Entry of type 'Manufacture' is known as backflush. Raw materials being consumed to manufacture finished goods is known as backflushing. <br><br> When creating Manufacture Entry, raw-material items are backflushed based on BOM of production item. If you want raw-material items to be backflushed based on Material Transfer entry made against that Work Order instead, then you can set it under this field."
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1736
+#: stock/doctype/stock_entry/stock_entry.py:1765
 msgid "The Work Order is mandatory for Disassembly Order"
 msgstr ""
 
@@ -52054,6 +52157,10 @@ msgstr ""
 msgid "The job card {0} is in {1} state and you cannot start it again."
 msgstr ""
 
+#: accounts/doctype/loyalty_program/loyalty_program.py:46
+msgid "The lowest tier must have a minimum spent amount of 0. Customers need to be part of a tier as soon as they are enrolled in the program."
+msgstr ""
+
 #. Description of the 'Net Weight' (Float) field in DocType 'Packing Slip'
 #: stock/doctype/packing_slip/packing_slip.json
 msgid "The net weight of this package. (calculated automatically as sum of net weight of items)"
@@ -52112,7 +52219,7 @@ msgstr ""
 msgid "The percentage you are allowed to transfer more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed transfer 110 units."
 msgstr ""
 
-#: public/js/utils.js:788
+#: public/js/utils.js:798
 msgid "The reserved stock will be released when you update items. Are you certain you wish to proceed?"
 msgstr ""
 
@@ -52120,7 +52227,7 @@ msgstr ""
 msgid "The reserved stock will be released. Are you certain you wish to proceed?"
 msgstr ""
 
-#: accounts/doctype/account/account.py:215
+#: accounts/doctype/account/account.py:216
 msgid "The root account {0} must be a group"
 msgstr ""
 
@@ -52231,7 +52338,7 @@ msgstr ""
 msgid "The {0} {1} is used to calculate the valuation cost for the finished good {2}."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:507
+#: assets/doctype/asset/asset.py:509
 msgid "There are active maintenance or repairs against the asset. You must complete all of them before cancelling the asset."
 msgstr ""
 
@@ -52239,7 +52346,7 @@ msgstr ""
 msgid "There are inconsistencies between the rate, no of shares and the amount calculated"
 msgstr ""
 
-#: accounts/doctype/account/account.py:200
+#: accounts/doctype/account/account.py:201
 msgid "There are ledger entries against this account. Changing {0} to non-{1} in live system will cause incorrect output in 'Accounts {2}' report"
 msgstr ""
 
@@ -52291,7 +52398,7 @@ msgstr ""
 msgid "There is no batch found against the {0}: {1}"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:1329
+#: stock/doctype/stock_entry/stock_entry.py:1358
 msgid "There must be atleast 1 Finished Good in this Stock Entry"
 msgstr ""
 
@@ -52320,7 +52427,7 @@ msgstr ""
 msgid "There were errors while sending email. Please try again."
 msgstr ""
 
-#: accounts/utils.py:933
+#: accounts/utils.py:985
 msgid "There were issues unlinking payment entry {0}."
 msgstr ""
 
@@ -52366,7 +52473,7 @@ msgstr ""
 msgid "This covers all scorecards tied to this Setup"
 msgstr ""
 
-#: controllers/status_updater.py:349
+#: controllers/status_updater.py:369
 msgid "This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?"
 msgstr ""
 
@@ -52489,7 +52596,7 @@ msgstr ""
 msgid "This schedule was created when Asset {0} was restored."
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1349
+#: accounts/doctype/sales_invoice/sales_invoice.py:1333
 msgid "This schedule was created when Asset {0} was returned through Sales Invoice {1}."
 msgstr ""
 
@@ -52497,11 +52604,11 @@ msgstr ""
 msgid "This schedule was created when Asset {0} was scrapped."
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1360
+#: accounts/doctype/sales_invoice/sales_invoice.py:1344
 msgid "This schedule was created when Asset {0} was sold through Sales Invoice {1}."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:1153
+#: assets/doctype/asset/asset.py:1155
 msgid "This schedule was created when Asset {0} was updated after being split into new Asset {1}."
 msgstr ""
 
@@ -52517,7 +52624,7 @@ msgstr ""
 msgid "This schedule was created when Asset {0}'s shifts were adjusted through Asset Shift Allocation {1}."
 msgstr ""
 
-#: assets/doctype/asset/asset.py:1210
+#: assets/doctype/asset/asset.py:1212
 msgid "This schedule was created when new Asset {0} was split from Asset {1}."
 msgstr ""
 
@@ -52749,7 +52856,7 @@ msgstr ""
 msgid "Timesheet for tasks."
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:762
+#: accounts/doctype/sales_invoice/sales_invoice.py:746
 msgid "Timesheet {0} is already completed or cancelled"
 msgstr ""
 
@@ -53214,11 +53321,11 @@ msgstr ""
 msgid "To add subcontracted Item's raw materials if include exploded items is disabled."
 msgstr ""
 
-#: controllers/status_updater.py:344
+#: controllers/status_updater.py:364
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
 msgstr ""
 
-#: controllers/status_updater.py:340
+#: controllers/status_updater.py:360
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
 msgstr ""
 
@@ -53234,7 +53341,7 @@ msgstr ""
 msgid "To be Delivered to Customer"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:529
+#: accounts/doctype/sales_invoice/sales_invoice.py:513
 msgid "To cancel a {} you need to cancel the POS Closing Entry {}."
 msgstr ""
 
@@ -53255,7 +53362,7 @@ msgid "To include non-stock items in the material request planning. i.e. Items f
 msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.py:1699
-#: controllers/accounts_controller.py:2665
+#: controllers/accounts_controller.py:2675
 msgid "To include tax in row {0} in Item rate, taxes in rows {1} must also be included"
 msgstr ""
 
@@ -53263,7 +53370,7 @@ msgstr ""
 msgid "To merge, following properties must be same for both items"
 msgstr ""
 
-#: accounts/doctype/account/account.py:512
+#: accounts/doctype/account/account.py:513
 msgid "To overrule this, enable '{0}' in company {1}"
 msgstr ""
 
@@ -53884,7 +53991,7 @@ msgstr ""
 msgid "Total Paid Amount"
 msgstr ""
 
-#: controllers/accounts_controller.py:2378
+#: controllers/accounts_controller.py:2387
 msgid "Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"
 msgstr ""
 
@@ -54164,7 +54271,7 @@ msgstr ""
 msgid "Total Working Hours"
 msgstr ""
 
-#: controllers/accounts_controller.py:1943
+#: controllers/accounts_controller.py:1952
 msgid "Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})"
 msgstr ""
 
@@ -54181,7 +54288,7 @@ msgid "Total hours: {0}"
 msgstr ""
 
 #: accounts/doctype/pos_invoice/pos_invoice.py:456
-#: accounts/doctype/sales_invoice/sales_invoice.py:513
+#: accounts/doctype/sales_invoice/sales_invoice.py:497
 msgid "Total payments amount can't be greater than {}"
 msgstr ""
 
@@ -54813,7 +54920,7 @@ msgstr ""
 #: manufacturing/doctype/workstation/workstation.js:477
 #: manufacturing/report/bom_explorer/bom_explorer.py:59
 #: manufacturing/report/bom_operations_time/bom_operations_time.py:110
-#: public/js/stock_analytics.js:94 public/js/utils.js:667
+#: public/js/stock_analytics.js:94 public/js/utils.js:677
 #: quality_management/doctype/quality_goal_objective/quality_goal_objective.json
 #: quality_management/doctype/quality_review_objective/quality_review_objective.json
 #: selling/doctype/product_bundle_item/product_bundle_item.json
@@ -54904,7 +55011,7 @@ msgstr ""
 msgid "UOM Name"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:2967
+#: stock/doctype/stock_entry/stock_entry.py:2996
 msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
 msgstr ""
 
@@ -55255,7 +55362,7 @@ msgstr ""
 #: accounts/doctype/cost_center/cost_center.js:107
 #: manufacturing/doctype/job_card/job_card.js:277
 #: public/js/bom_configurator/bom_configurator.bundle.js:672
-#: public/js/utils.js:583 public/js/utils.js:815
+#: public/js/utils.js:593 public/js/utils.js:825
 #: public/js/utils/barcode_scanner.js:183
 #: public/js/utils/serial_no_batch_selector.js:17
 #: public/js/utils/serial_no_batch_selector.js:182
@@ -55380,7 +55487,7 @@ msgstr ""
 msgid "Update Existing Records"
 msgstr ""
 
-#: buying/doctype/purchase_order/purchase_order.js:302 public/js/utils.js:767
+#: buying/doctype/purchase_order/purchase_order.js:302 public/js/utils.js:777
 #: selling/doctype/sales_order/sales_order.js:64
 msgid "Update Items"
 msgstr ""
@@ -55440,7 +55547,7 @@ msgstr ""
 msgid "Update latest price in all BOMs"
 msgstr ""
 
-#: assets/doctype/asset/asset.py:334
+#: assets/doctype/asset/asset.py:336
 msgid "Update stock must be enabled for the purchase invoice {0}"
 msgstr ""
 
@@ -55864,6 +55971,12 @@ msgstr ""
 msgid "Validate Applied Rule"
 msgstr ""
 
+#. Label of the validate_components_quantities_per_bom (Check) field in DocType
+#. 'Manufacturing Settings'
+#: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
+msgid "Validate Components Quantities Per BOM"
+msgstr ""
+
 #. Label of the validate_negative_stock (Check) field in DocType 'Inventory
 #. Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
@@ -55974,11 +56087,11 @@ msgstr ""
 msgid "Valuation Rate (In / Out)"
 msgstr ""
 
-#: stock/stock_ledger.py:1806
+#: stock/stock_ledger.py:1807
 msgid "Valuation Rate Missing"
 msgstr ""
 
-#: stock/stock_ledger.py:1784
+#: stock/stock_ledger.py:1785
 msgid "Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}."
 msgstr ""
 
@@ -56010,7 +56123,7 @@ msgid "Valuation rate for the item as per Sales Invoice (Only for Internal Trans
 msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.py:1723
-#: controllers/accounts_controller.py:2689
+#: controllers/accounts_controller.py:2699
 msgid "Valuation type charges can not be marked as Inclusive"
 msgstr ""
 
@@ -56290,9 +56403,9 @@ msgstr ""
 #: public/js/controllers/stock_controller.js:76
 #: public/js/controllers/stock_controller.js:95 public/js/utils.js:137
 #: selling/doctype/customer/customer.js:160
-#: selling/doctype/customer/customer.js:172 setup/doctype/company/company.js:97
-#: setup/doctype/company/company.js:107 setup/doctype/company/company.js:119
-#: setup/doctype/company/company.js:131
+#: selling/doctype/customer/customer.js:172 setup/doctype/company/company.js:98
+#: setup/doctype/company/company.js:108 setup/doctype/company/company.js:120
+#: setup/doctype/company/company.js:132
 #: stock/doctype/delivery_trip/delivery_trip.js:84
 #: stock/doctype/item/item.js:68 stock/doctype/item/item.js:78
 #: stock/doctype/item/item.js:88 stock/doctype/item/item.js:113
@@ -56448,7 +56561,7 @@ msgstr ""
 #: accounts/doctype/repost_accounting_ledger_items/repost_accounting_ledger_items.json
 #: accounts/doctype/repost_payment_ledger_items/repost_payment_ledger_items.json
 #: accounts/doctype/unreconcile_payment/unreconcile_payment.json
-#: accounts/report/accounts_receivable/accounts_receivable.py:1036
+#: accounts/report/accounts_receivable/accounts_receivable.py:1052
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.js:42
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:210
 #: accounts/report/general_ledger/general_ledger.js:49
@@ -56515,7 +56628,7 @@ msgstr ""
 #: accounts/doctype/repost_payment_ledger_items/repost_payment_ledger_items.json
 #: accounts/doctype/tax_withheld_vouchers/tax_withheld_vouchers.json
 #: accounts/doctype/unreconcile_payment/unreconcile_payment.json
-#: accounts/report/accounts_receivable/accounts_receivable.py:1034
+#: accounts/report/accounts_receivable/accounts_receivable.py:1050
 #: accounts/report/general_and_payment_ledger_comparison/general_and_payment_ledger_comparison.py:200
 #: accounts/report/general_ledger/general_ledger.py:647
 #: accounts/report/payment_ledger/payment_ledger.py:159
@@ -56703,7 +56816,7 @@ msgstr ""
 #: manufacturing/report/production_planning_report/production_planning_report.py:365
 #: manufacturing/report/production_planning_report/production_planning_report.py:408
 #: manufacturing/report/work_order_stock_report/work_order_stock_report.js:8
-#: public/js/stock_analytics.js:69 public/js/utils.js:527
+#: public/js/stock_analytics.js:69 public/js/utils.js:537
 #: public/js/utils/serial_no_batch_selector.js:94
 #: selling/doctype/quotation_item/quotation_item.json
 #: selling/doctype/sales_order/sales_order.js:372
@@ -56876,7 +56989,7 @@ msgstr ""
 msgid "Warehouse not found in the system"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1027
+#: accounts/doctype/sales_invoice/sales_invoice.py:1011
 #: stock/doctype/delivery_note/delivery_note.py:430
 msgid "Warehouse required for stock Item {0}"
 msgstr ""
@@ -56996,7 +57109,7 @@ msgid "Warn for new Request for Quotations"
 msgstr ""
 
 #: accounts/doctype/payment_entry/payment_entry.py:677
-#: controllers/accounts_controller.py:1778
+#: controllers/accounts_controller.py:1787
 #: stock/doctype/delivery_trip/delivery_trip.js:145
 #: utilities/transaction_base.py:120
 msgid "Warning"
@@ -57367,11 +57480,11 @@ msgstr ""
 msgid "When creating an Item, entering a value for this field will automatically create an Item Price at the backend."
 msgstr ""
 
-#: accounts/doctype/account/account.py:328
+#: accounts/doctype/account/account.py:329
 msgid "While creating account for Child Company {0}, parent account {1} found as a ledger account."
 msgstr ""
 
-#: accounts/doctype/account/account.py:318
+#: accounts/doctype/account/account.py:319
 msgid "While creating account for Child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA"
 msgstr ""
 
@@ -57445,7 +57558,7 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'Warranty Claim'
 #: manufacturing/doctype/job_card/job_card.json
 #: manufacturing/doctype/job_card_operation/job_card_operation.json
-#: setup/doctype/company/company.py:283
+#: setup/doctype/company/company.py:284
 #: support/doctype/warranty_claim/warranty_claim.json
 msgid "Work In Progress"
 msgstr ""
@@ -57558,7 +57671,7 @@ msgstr ""
 msgid "Work Order not created"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:668
+#: stock/doctype/stock_entry/stock_entry.py:669
 msgid "Work Order {0}: Job Card not found for the operation {1}"
 msgstr ""
 
@@ -57738,7 +57851,7 @@ msgstr ""
 #: accounts/doctype/pos_invoice/pos_invoice.json
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
 #: accounts/doctype/sales_invoice/sales_invoice.json
-#: setup/doctype/company/company.py:527
+#: setup/doctype/company/company.py:528
 msgid "Write Off"
 msgstr ""
 
@@ -57841,7 +57954,7 @@ msgstr ""
 msgid "Wrong Company"
 msgstr ""
 
-#: setup/doctype/company/company.js:209
+#: setup/doctype/company/company.js:210
 msgid "Wrong Password"
 msgstr ""
 
@@ -57905,7 +58018,7 @@ msgstr ""
 #: maintenance/doctype/maintenance_schedule_item/maintenance_schedule_item.json
 #: manufacturing/report/exponential_smoothing_forecasting/exponential_smoothing_forecasting.js:60
 #: manufacturing/report/production_analytics/production_analytics.js:36
-#: public/js/financial_statements.js:230
+#: public/js/financial_statements.js:233
 #: public/js/purchase_trends_filters.js:22 public/js/sales_trends_filters.js:14
 #: public/js/stock_analytics.js:85
 #: selling/report/sales_analytics/sales_analytics.js:83
@@ -57972,11 +58085,11 @@ msgstr ""
 msgid "Yes"
 msgstr ""
 
-#: controllers/accounts_controller.py:3252
+#: controllers/accounts_controller.py:3262
 msgid "You are not allowed to update as per the conditions set in {} Workflow."
 msgstr ""
 
-#: accounts/general_ledger.py:695
+#: accounts/general_ledger.py:726
 msgid "You are not authorized to add or update entries before {0}"
 msgstr ""
 
@@ -57984,7 +58097,7 @@ msgstr ""
 msgid "You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time."
 msgstr ""
 
-#: accounts/doctype/account/account.py:278
+#: accounts/doctype/account/account.py:279
 msgid "You are not authorized to set Frozen value"
 msgstr ""
 
@@ -58004,7 +58117,7 @@ msgstr ""
 msgid "You can also set default CWIP account in Company {}"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:880
+#: accounts/doctype/sales_invoice/sales_invoice.py:864
 msgid "You can change the parent account to a Balance Sheet account or select a different account."
 msgstr ""
 
@@ -58041,7 +58154,7 @@ msgstr ""
 msgid "You can't make any changes to Job Card since Work Order is closed."
 msgstr ""
 
-#: accounts/doctype/loyalty_program/loyalty_program.py:172
+#: accounts/doctype/loyalty_program/loyalty_program.py:182
 msgid "You can't redeem Loyalty Points having more value than the Rounded Total."
 msgstr ""
 
@@ -58057,7 +58170,7 @@ msgstr ""
 msgid "You cannot create or cancel any accounting entries with in the closed Accounting Period {0}"
 msgstr ""
 
-#: accounts/general_ledger.py:715
+#: accounts/general_ledger.py:746
 msgid "You cannot create/amend any accounting entries till this date."
 msgstr ""
 
@@ -58093,11 +58206,11 @@ msgstr ""
 msgid "You cannot submit the order without payment."
 msgstr ""
 
-#: controllers/accounts_controller.py:3228
+#: controllers/accounts_controller.py:3238
 msgid "You do not have permissions to {} items in a {}."
 msgstr ""
 
-#: accounts/doctype/loyalty_program/loyalty_program.py:167
+#: accounts/doctype/loyalty_program/loyalty_program.py:177
 msgid "You don't have enough Loyalty Points to redeem"
 msgstr ""
 
@@ -58109,7 +58222,7 @@ msgstr ""
 msgid "You had {} errors while creating opening invoices. Check {} for more details"
 msgstr ""
 
-#: public/js/utils.js:867
+#: public/js/utils.js:877
 msgid "You have already selected items from {0} {1}"
 msgstr ""
 
@@ -58204,7 +58317,7 @@ msgstr ""
 msgid "Zero Rated"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:386
+#: stock/doctype/stock_entry/stock_entry.py:387
 msgid "Zero quantity"
 msgstr ""
 
@@ -58213,15 +58326,15 @@ msgstr ""
 msgid "Zip File"
 msgstr ""
 
-#: stock/reorder_item.py:367
+#: stock/reorder_item.py:372
 msgid "[Important] [ERPNext] Auto Reorder Errors"
 msgstr ""
 
-#: controllers/status_updater.py:250
+#: controllers/status_updater.py:270
 msgid "`Allow Negative rates for Items`"
 msgstr ""
 
-#: stock/stock_ledger.py:1798
+#: stock/stock_ledger.py:1799
 msgid "after"
 msgstr ""
 
@@ -58418,7 +58531,7 @@ msgstr ""
 msgid "per hour"
 msgstr ""
 
-#: stock/stock_ledger.py:1799
+#: stock/stock_ledger.py:1800
 msgid "performing either one below:"
 msgstr ""
 
@@ -58481,7 +58594,7 @@ msgstr ""
 msgid "subscription is already cancelled."
 msgstr ""
 
-#: controllers/status_updater.py:352 controllers/status_updater.py:372
+#: controllers/status_updater.py:372 controllers/status_updater.py:392
 msgid "target_ref_field"
 msgstr ""
 
@@ -58500,7 +58613,7 @@ msgstr ""
 msgid "to"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:2725
+#: accounts/doctype/sales_invoice/sales_invoice.py:2729
 msgid "to unallocate the amount of this Return Invoice before cancelling it."
 msgstr ""
 
@@ -58534,7 +58647,7 @@ msgstr ""
 msgid "{0} '{1}' is disabled"
 msgstr ""
 
-#: accounts/utils.py:170
+#: accounts/utils.py:182
 msgid "{0} '{1}' not in Fiscal Year {2}"
 msgstr ""
 
@@ -58550,7 +58663,7 @@ msgstr ""
 msgid "{0} <b>{1}</b> has submitted Assets. Remove Item <b>{2}</b> from table to continue."
 msgstr ""
 
-#: controllers/accounts_controller.py:2007
+#: controllers/accounts_controller.py:2016
 msgid "{0} Account not found against Customer {1}."
 msgstr ""
 
@@ -58562,7 +58675,7 @@ msgstr ""
 msgid "{0} Budget for Account {1} against {2} {3} is {4}. It {5} exceed by {6}"
 msgstr ""
 
-#: accounts/doctype/pricing_rule/utils.py:747
+#: accounts/doctype/pricing_rule/utils.py:750
 msgid "{0} Coupon used are {1}. Allowed quantity is exhausted"
 msgstr ""
 
@@ -58570,7 +58683,7 @@ msgstr ""
 msgid "{0} Digest"
 msgstr ""
 
-#: accounts/utils.py:1246
+#: accounts/utils.py:1298
 msgid "{0} Number {1} is already used in {2} {3}"
 msgstr ""
 
@@ -58644,7 +58757,7 @@ msgstr ""
 msgid "{0} created"
 msgstr ""
 
-#: setup/doctype/company/company.py:192
+#: setup/doctype/company/company.py:193
 msgid "{0} currency must be same as company's default currency. Please select another account."
 msgstr ""
 
@@ -58668,7 +58781,7 @@ msgstr ""
 msgid "{0} entered twice {1} in Item Taxes"
 msgstr ""
 
-#: accounts/utils.py:135 projects/doctype/activity_cost/activity_cost.py:40
+#: accounts/utils.py:119 projects/doctype/activity_cost/activity_cost.py:40
 msgid "{0} for {1}"
 msgstr ""
 
@@ -58684,7 +58797,7 @@ msgstr ""
 msgid "{0} hours"
 msgstr ""
 
-#: controllers/accounts_controller.py:2326
+#: controllers/accounts_controller.py:2335
 msgid "{0} in row {1}"
 msgstr ""
 
@@ -58712,12 +58825,12 @@ msgstr ""
 msgid "{0} is mandatory"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:996
+#: accounts/doctype/sales_invoice/sales_invoice.py:980
 msgid "{0} is mandatory for Item {1}"
 msgstr ""
 
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:101
-#: accounts/general_ledger.py:739
+#: accounts/general_ledger.py:770
 msgid "{0} is mandatory for account {1}"
 msgstr ""
 
@@ -58725,7 +58838,7 @@ msgstr ""
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}"
 msgstr ""
 
-#: controllers/accounts_controller.py:2597
+#: controllers/accounts_controller.py:2607
 msgid "{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}."
 msgstr ""
 
@@ -58737,7 +58850,7 @@ msgstr ""
 msgid "{0} is not a group node. Please select a group node as parent cost center"
 msgstr ""
 
-#: stock/doctype/stock_entry/stock_entry.py:435
+#: stock/doctype/stock_entry/stock_entry.py:436
 msgid "{0} is not a stock Item"
 msgstr ""
 
@@ -58784,7 +58897,7 @@ msgstr ""
 msgid "{0} must be negative in return document"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1976
+#: accounts/doctype/sales_invoice/sales_invoice.py:1980
 msgid "{0} not allowed to transact with {1}. Please change the Company or add the Company in the 'Allowed To Transact With'-Section in the Customer record."
 msgstr ""
 
@@ -58820,12 +58933,12 @@ msgstr ""
 msgid "{0} units of {1} are required in {2}{3}, on {4} {5} for {6} to complete the transaction."
 msgstr ""
 
-#: stock/stock_ledger.py:1463 stock/stock_ledger.py:1948
-#: stock/stock_ledger.py:1962
+#: stock/stock_ledger.py:1463 stock/stock_ledger.py:1949
+#: stock/stock_ledger.py:1963
 msgid "{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction."
 msgstr ""
 
-#: stock/stock_ledger.py:2072 stock/stock_ledger.py:2118
+#: stock/stock_ledger.py:2073 stock/stock_ledger.py:2119
 msgid "{0} units of {1} needed in {2} on {3} {4} to complete this transaction."
 msgstr ""
 
@@ -58942,7 +59055,7 @@ msgstr ""
 msgid "{0} {1} is not associated with {2} {3}"
 msgstr ""
 
-#: accounts/utils.py:133
+#: accounts/utils.py:115
 msgid "{0} {1} is not in any active Fiscal Year"
 msgstr ""
 
@@ -59068,7 +59181,7 @@ msgstr ""
 msgid "{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})"
 msgstr ""
 
-#: accounts/report/accounts_receivable/accounts_receivable.py:1134
+#: accounts/report/accounts_receivable/accounts_receivable.py:1150
 msgid "{range4}-Above"
 msgstr ""
 
@@ -59130,7 +59243,7 @@ msgstr ""
 msgid "{} To Bill"
 msgstr ""
 
-#: accounts/doctype/sales_invoice/sales_invoice.py:1763
+#: accounts/doctype/sales_invoice/sales_invoice.py:1766
 msgid "{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}"
 msgstr ""
 
