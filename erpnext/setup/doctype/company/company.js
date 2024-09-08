@@ -20,7 +20,6 @@ frappe.ui.form.on("Company", {
 	},
 	setup: function (frm) {
 		frm.__rename_queue = "long";
-		erpnext.company.setup_queries(frm);
 
 		frm.set_query("parent_company", function () {
 			return {
@@ -81,6 +80,8 @@ frappe.ui.form.on("Company", {
 	},
 
 	refresh: function (frm) {
+		erpnext.company.setup_queries(frm);
+
 		frm.toggle_display("address_html", !frm.is_new());
 
 		if (!frm.is_new()) {

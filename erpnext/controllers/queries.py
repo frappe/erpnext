@@ -366,7 +366,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 
 
 def get_empty_batches(filters, start, page_len, filtered_batches=None, txt=None):
-	query_filter = {"item": filters.get("item_code")}
+	query_filter = {"item": filters.get("item_code"), "disabled": 0}
 	if txt:
 		query_filter["name"] = ("like", f"%{txt}%")
 

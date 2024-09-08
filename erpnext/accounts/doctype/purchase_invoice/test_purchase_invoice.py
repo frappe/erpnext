@@ -2236,6 +2236,62 @@ class TestPurchaseInvoice(FrappeTestCase, StockTestMixin):
 			self.assertEqual(pi_expected_values[i][1], gle.debit)
 			self.assertEqual(pi_expected_values[i][2], gle.credit)
 
+	def test_adjust_incoming_rate_from_pi_with_multi_currency(self):
+		from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import (
+			make_landed_cost_voucher,
+		)
+
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 1)
+
+		# Increase the cost of the item
+
+		pr = make_purchase_receipt(
+			qty=10, rate=1, currency="USD", do_not_save=1, supplier="_Test Supplier USD"
+		)
+		pr.conversion_rate = 6300
+		pr.plc_conversion_rate = 1
+		pr.save()
+		pr.submit()
+
+		self.assertEqual(pr.conversion_rate, 6300)
+		self.assertEqual(pr.plc_conversion_rate, 1)
+		self.assertEqual(pr.base_grand_total, 6300 * 10)
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 6300 * 10)
+
+		make_landed_cost_voucher(
+			company=pr.company,
+			receipt_document_type="Purchase Receipt",
+			receipt_document=pr.name,
+			charges=3000,
+			distribute_charges_based_on="Qty",
+		)
+
+		pi = create_purchase_invoice_from_receipt(pr.name)
+		for row in pi.items:
+			row.rate = 1.1
+
+		pi.save()
+		pi.submit()
+
+		stock_value_difference = frappe.db.get_value(
+			"Stock Ledger Entry",
+			{"voucher_type": "Purchase Receipt", "voucher_no": pr.name},
+			"stock_value_difference",
+		)
+		self.assertEqual(stock_value_difference, 7230 * 10)
+
+		frappe.db.set_single_value("Buying Settings", "set_landed_cost_based_on_purchase_invoice_rate", 0)
+
+		frappe.db.set_single_value("Buying Settings", "maintain_same_rate", 1)
+
 
 def set_advance_flag(company, flag, default_account):
 	frappe.db.set_value(

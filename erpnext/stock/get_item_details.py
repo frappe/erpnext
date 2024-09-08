@@ -807,14 +807,10 @@ def get_price_list_rate(args, item_doc, out=None):
 		if price_list_rate is None or frappe.db.get_single_value(
 			"Stock Settings", "update_existing_price_list_rate"
 		):
-			if args.get("is_internal_supplier") or args.get("is_internal_customer"):
-				return out
+			insert_item_price(args)
 
-			if args.price_list and args.rate:
-				insert_item_price(args)
-
-			if not price_list_rate:
-				return out
+		if price_list_rate is None:
+			return out
 
 		out.price_list_rate = flt(price_list_rate) * flt(args.plc_conversion_rate) / flt(args.conversion_rate)
 
@@ -835,6 +831,14 @@ def get_price_list_rate(args, item_doc, out=None):
 
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
+	if (
+		not args.price_list
+		or not args.rate
+		or args.get("is_internal_supplier")
+		or args.get("is_internal_customer")
+	):
+		return
+
 	if frappe.db.get_value("Price List", args.price_list, "currency", cache=True) == args.currency and cint(
 		frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")
 	):
