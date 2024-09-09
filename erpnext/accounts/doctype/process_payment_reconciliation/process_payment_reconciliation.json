@@ -13,6 +13,7 @@
   "column_break_io6c",
   "party",
   "receivable_payable_account",
+  "default_advance_account",
   "filter_section",
   "from_invoice_date",
   "to_invoice_date",
@@ -141,12 +142,23 @@
   {
    "fieldname": "section_break_a8yx",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:doc.party",
+   "description": "Only 'Payment Entries' made against this advance account are supported.",
+   "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/advance-in-separate-party-account",
+   "fieldname": "default_advance_account",
+   "fieldtype": "Link",
+   "label": "Default Advance Account",
+   "mandatory_depends_on": "doc.party_type",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-08-11 10:56:51.699137",
+ "modified": "2024-08-27 14:48:56.715320",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Payment Reconciliation",
