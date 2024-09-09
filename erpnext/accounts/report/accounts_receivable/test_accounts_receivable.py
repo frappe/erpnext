@@ -83,10 +83,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"party": [self.customer],
 			"report_date": add_days(today(), 2),
 			"based_on_payment_terms": 0,
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"show_remarks": False,
 		}
 
@@ -116,10 +113,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"company": self.company,
 			"based_on_payment_terms": 1,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"show_remarks": True,
 		}
 
@@ -172,10 +166,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"show_remarks": True,
 		}
 
@@ -266,10 +257,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"company": self.company,
 			"based_on_payment_terms": 0,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 		}
 
 		report = execute(filters)
@@ -328,10 +316,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 		}
 		report = execute(filters)
 
@@ -397,10 +382,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 		}
 		report = execute(filters)
 		self.assertEqual(report[1], [])
@@ -416,10 +398,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"group_by_party": True,
 		}
 		report = execute(filters)[1]
@@ -493,10 +472,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"show_future_payments": True,
 		}
 		report = execute(filters)[1]
@@ -555,10 +531,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"sales_person": sales_person.name,
 			"show_sales_person": True,
 		}
@@ -575,10 +548,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"cost_center": self.cost_center,
 		}
 		report = execute(filters)[1]
@@ -593,10 +563,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"customer_group": cus_group,
 		}
 		report = execute(filters)[1]
@@ -618,10 +585,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"customer_group": cus_groups_list,  # Use the list of customer groups
 		}
 		report = execute(filters)[1]
@@ -660,10 +624,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"party_account": self.debit_to,
 		}
 		report = execute(filters)[1]
@@ -711,10 +672,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"party_type": "Customer",
 			"party": [self.customer],
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 			"in_party_currency": 1,
 		}
 
@@ -754,10 +712,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			"party_type": "Customer",
 			"party": [self.customer1, self.customer3],
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 		}
 
 		si1 = self.create_sales_invoice(no_payment_schedule=True, do_not_submit=True)
@@ -837,10 +792,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 		}
 
 		report_ouput = execute(filters)[1]
@@ -903,10 +855,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 			{
 				"company": self.company,
 				"report_date": today(),
-				"range1": 30,
-				"range2": 60,
-				"range3": 90,
-				"range4": 120,
+				"range": "30, 60, 90, 120",
 				"show_future_payments": True,
 				"in_party_currency": False,
 			}
@@ -965,10 +914,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 		}
 
 		# check invoice grand total and invoiced column's value for 3 payment terms
@@ -991,10 +937,7 @@ class TestAccountsReceivable(AccountsTestMixin, FrappeTestCase):
 		filters = {
 			"company": self.company,
 			"report_date": today(),
-			"range1": 30,
-			"range2": 60,
-			"range3": 90,
-			"range4": 120,
+			"range": "30, 60, 90, 120",
 		}
 
 		# check invoice grand total and invoiced column's value for 3 payment terms
