@@ -2122,7 +2122,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 	@change_settings("Stock Settings", {"enable_stock_reservation": True})
 	def test_warehouse_mapping_based_on_stock_reservation(self):
 		self.create_company(company_name="Glass Ceiling", abbr="GC")
-		self.create_item("Lamy Safari", True, self.warehouse_stores)
+		self.create_item("Lamy Safari", True, self.warehouse_stores, self.company)
 		self.create_customer()
 		self.clear_old_entries()
 
