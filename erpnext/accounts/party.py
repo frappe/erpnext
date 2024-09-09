@@ -68,7 +68,7 @@ def get_party_details(
 	pos_profile=None,
 ):
 	if not party:
-		return {}
+		return frappe._dict()
 	if not frappe.db.exists(party_type, party):
 		frappe.throw(_("{0}: {1} does not exists").format(party_type, party))
 	return _get_party_details(
