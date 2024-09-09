@@ -69,7 +69,7 @@ erpnext.accounts.unreconcile_payment = {
 				{
 					label: __("Voucher Type"),
 					fieldname: "voucher_type",
-					fieldtype: "Dynamic Link",
+					fieldtype: "Link",
 					options: "DocType",
 					in_list_view: 1,
 					read_only: 1,
@@ -77,7 +77,7 @@ erpnext.accounts.unreconcile_payment = {
 				{
 					label: __("Voucher No"),
 					fieldname: "voucher_no",
-					fieldtype: "Link",
+					fieldtype: "Dynamic Link",
 					options: "voucher_type",
 					in_list_view: 1,
 					read_only: 1,

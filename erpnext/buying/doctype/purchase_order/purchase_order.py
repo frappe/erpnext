@@ -735,7 +735,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 				"condition": lambda doc: abs(doc.received_qty) < abs(doc.qty)
 				and doc.delivered_by_supplier != 1,
 			},
-			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
+			"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 		},
 		target_doc,
 		set_missing_values,
@@ -811,7 +811,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"postprocess": update_item,
 			"condition": lambda doc: (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 		},
-		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "add_if_empty": True},
+		"Purchase Taxes and Charges": {"doctype": "Purchase Taxes and Charges", "reset_value": True},
 	}
 
 	doc = get_mapped_doc(

@@ -15,14 +15,16 @@
   "purchase_amount",
   "expiry_date",
   "posting_date",
-  "company"
+  "company",
+  "discretionary_reason"
  ],
  "fields": [
   {
    "fieldname": "loyalty_program",
    "fieldtype": "Link",
    "label": "Loyalty Program",
-   "options": "Loyalty Program"
+   "options": "Loyalty Program",
+   "reqd": 1
   },
   {
    "fieldname": "loyalty_program_tier",
@@ -34,7 +36,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "reqd": 1
   },
   {
    "fieldname": "redeem_against",
@@ -46,7 +49,8 @@
    "fieldname": "loyalty_points",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Loyalty Points"
+   "label": "Loyalty Points",
+   "reqd": 1
   },
   {
    "fieldname": "purchase_amount",
@@ -57,24 +61,28 @@
    "fieldname": "expiry_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Expiry Date"
+   "label": "Expiry Date",
+   "reqd": 1
   },
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "label": "Posting Date"
+   "label": "Posting Date",
+   "reqd": 1
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "invoice_type",
    "fieldtype": "Link",
    "label": "Invoice Type",
-   "options": "DocType"
+   "options": "DocType",
+   "reqd": 1
   },
   {
    "fieldname": "invoice",
@@ -82,11 +90,16 @@
    "in_list_view": 1,
    "label": "Invoice",
    "options": "invoice_type"
+  },
+  {
+   "fieldname": "discretionary_reason",
+   "fieldtype": "Data",
+   "label": "Discretionary Reason"
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2024-03-27 13:10:03.015035",
+ "modified": "2024-07-01 08:51:13.927009",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Loyalty Point Entry",
