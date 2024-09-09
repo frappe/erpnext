@@ -72,6 +72,7 @@ def get():
 				_("Write Off"): {},
 				_("Exchange Gain/Loss"): {},
 				_("Gain/Loss on Asset Disposal"): {},
+				_("Impairment"): {},
 			},
 			"root_type": "Expense",
 		},
@@ -104,6 +105,7 @@ def get():
 			_("Dividends Paid"): {"account_type": "Equity"},
 			_("Opening Balance Equity"): {"account_type": "Equity"},
 			_("Retained Earnings"): {"account_type": "Equity"},
+			_("Revaluation Surplus"): {"account_type": "Equity"},
 			"root_type": "Equity",
 		},
 	}
