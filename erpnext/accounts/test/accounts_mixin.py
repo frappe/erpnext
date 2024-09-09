@@ -104,6 +104,14 @@ class AccountsTestMixin:
 				new_acc.save()
 				setattr(self, acc.attribute_name, new_acc.name)
 
+		self.identify_default_warehouses()
+
+	def identify_default_warehouses(self):
+		for w in frappe.db.get_all(
+			"Warehouse", filters={"company": self.company}, fields=["name", "warehouse_name"]
+		):
+			setattr(self, "warehouse_" + w.warehouse_name.lower().strip().replace(" ", "_"), w.name)
+
 	def create_usd_receivable_account(self):
 		account_name = "Debtors USD"
 		if not frappe.db.get_value(

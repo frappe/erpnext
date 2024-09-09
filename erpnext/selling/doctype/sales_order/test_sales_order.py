@@ -2197,6 +2197,21 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 		self.assertRaises(frappe.ValidationError, so1.update_status, "Draft")
 
+	@change_settings("Stock Settings", {"enable_stock_reservation": True})
+	def test_warehouse_mapping_based_on_stock_reservation(self):
+		self.create_company()
+		self.create_item("Lamy Safari", True, self.warehouse_stores)
+		self.create_customer()
+		self.clear_old_entries()
+
+		so = frappe.new_doc("Sales Order")
+		so.company = self.company
+		so.transaction_date = today()
+		so.append(
+			"items", {"item_code": self.item, "qty": 10, "rate": 2000, "warehouse": self.warehouse_stores}
+		)
+		so.save()
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
