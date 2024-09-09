@@ -9,9 +9,7 @@ from erpnext.stock.report.stock_ageing.stock_ageing import FIFOSlots, format_rep
 
 class TestStockAgeing(FrappeTestCase):
 	def setUp(self) -> None:
-		self.filters = frappe._dict(
-			company="_Test Company", to_date="2021-12-10", range1=30, range2=60, range3=90
-		)
+		self.filters = frappe._dict(company="_Test Company", to_date="2021-12-10", ranges=["30", "60", "90"])
 
 	def test_normal_inward_outward_queue(self):
 		"Reference: Case 1 in stock_ageing_fifo_logic.md (same wh)"
