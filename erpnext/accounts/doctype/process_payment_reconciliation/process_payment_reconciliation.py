@@ -1,4 +1,3 @@
-# Copyright (c) 2023, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 import json
@@ -11,35 +10,6 @@ from frappe.utils.scheduler import is_scheduler_inactive
 
 
 class ProcessPaymentReconciliation(Document):
-<<<<<<< HEAD
-=======
-	# begin: auto-generated types
-	# This code is auto-generated. Do not modify anything in this block.
-
-	from typing import TYPE_CHECKING
-
-	if TYPE_CHECKING:
-		from frappe.types import DF
-
-		amended_from: DF.Link | None
-		bank_cash_account: DF.Link | None
-		company: DF.Link
-		cost_center: DF.Link | None
-		default_advance_account: DF.Link
-		error_log: DF.LongText | None
-		from_invoice_date: DF.Date | None
-		from_payment_date: DF.Date | None
-		party: DF.DynamicLink
-		party_type: DF.Link
-		receivable_payable_account: DF.Link
-		status: DF.Literal[
-			"", "Queued", "Running", "Paused", "Completed", "Partially Reconciled", "Failed", "Cancelled"
-		]
-		to_invoice_date: DF.Date | None
-		to_payment_date: DF.Date | None
-	# end: auto-generated types
-
->>>>>>> 143209f91a (fix: `default_advance_account` field in Process Payment Reconciliation)
 	def validate(self):
 		self.validate_receivable_payable_account()
 		self.validate_bank_cash_account()
