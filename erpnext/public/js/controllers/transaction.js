@@ -1777,7 +1777,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 			if (data && data.apply_rule_on_other_items && JSON.parse(data.apply_rule_on_other_items)) {
 				me.frm.doc.items.forEach(d => {
-					if (in_list(JSON.parse(data.apply_rule_on_other_items), d[data.apply_rule_on])) {
+					if (in_list(JSON.parse(data.apply_rule_on_other_items), d[data.apply_rule_on]) && d.item_code === data.item_code) {
 						for(var k in data) {
 							if (data.pricing_rule_for == "Discount Percentage" && data.apply_rule_on_other_items && k == "discount_amount") {
 								continue;
