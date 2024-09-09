@@ -17,7 +17,7 @@ frappe.query_reports["Available Batch Report"] = {
 			fieldtype: "Date",
 			width: "80",
 			reqd: 1,
-			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+			default: frappe.datetime.get_today(),
 		},
 		{
 			fieldname: "item_code",
