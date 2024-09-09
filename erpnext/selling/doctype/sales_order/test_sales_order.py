@@ -2199,18 +2199,65 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 
 	@change_settings("Stock Settings", {"enable_stock_reservation": True})
 	def test_warehouse_mapping_based_on_stock_reservation(self):
-		self.create_company()
+		self.create_company(company_name="Glass Ceiling", abbr="GC")
 		self.create_item("Lamy Safari", True, self.warehouse_stores)
 		self.create_customer()
 		self.clear_old_entries()
 
 		so = frappe.new_doc("Sales Order")
 		so.company = self.company
+		so.customer = self.customer
 		so.transaction_date = today()
 		so.append(
-			"items", {"item_code": self.item, "qty": 10, "rate": 2000, "warehouse": self.warehouse_stores}
+			"items",
+			{
+				"item_code": self.item,
+				"qty": 10,
+				"rate": 2000,
+				"warehouse": self.warehouse_stores,
+				"delivery_date": today(),
+			},
 		)
 		so.save()
+		so.submit()
+
+		# Create stock
+		se = frappe.get_doc(
+			{
+				"doctype": "Stock Entry",
+				"company": self.company,
+				"stock_entry_type": "Material Receipt",
+				"posting_date": today(),
+				"items": [
+					{"item_code": self.item, "t_warehouse": self.warehouse_stores, "qty": 5},
+					{"item_code": self.item, "t_warehouse": self.warehouse_finished_goods, "qty": 5},
+				],
+			}
+		)
+		se.save().submit()
+
+		# Reserve stock on 2 different warehouses
+		itm = so.items[0]
+		so.create_stock_reservation_entries(
+			[
+				{
+					"sales_order_item": itm.name,
+					"item_code": itm.item_code,
+					"warehouse": self.warehouse_stores,
+					"qty_to_reserve": 2,
+				}
+			]
+		)
+		so.create_stock_reservation_entries(
+			[
+				{
+					"sales_order_item": itm.name,
+					"item_code": itm.item_code,
+					"warehouse": self.warehouse_finished_goods,
+					"qty_to_reserve": 3,
+				}
+			]
+		)
 
 
 def automatically_fetch_payment_terms(enable=1):
