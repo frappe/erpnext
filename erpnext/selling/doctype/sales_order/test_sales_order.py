@@ -2259,6 +2259,14 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 			]
 		)
 
+		# Delivery note should auto-select warehouse based on reservation
+		dn = make_delivery_note(so.name, kwargs={"for_reserved_stock": True})
+		self.assertEqual(2, len(dn.items))
+		self.assertEqual(dn.items[0].qty, 2)
+		self.assertEqual(dn.items[0].warehouse, self.warehouse_stores)
+		self.assertEqual(dn.items[1].qty, 3)
+		self.assertEqual(dn.items[1].warehouse, self.warehouse_finished_goods)
+
 
 def automatically_fetch_payment_terms(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
