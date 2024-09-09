@@ -3678,113 +3678,6 @@ class TestSalesInvoice(FrappeTestCase):
 		self.assertEqual(len(res), 1)
 		self.assertEqual(res[0][0], pos_return.return_against)
 
-
-<<<<<<< HEAD
-def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
-	gl_entries = frappe.db.sql(
-		"""select account, debit, credit, posting_date
-		from `tabGL Entry`
-		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
-		and is_cancelled = 0
-		order by posting_date asc, account asc""",
-		(voucher_no, posting_date),
-		as_dict=1,
-=======
-	def _create_opening_roundoff_account(self, company_name):
-		liability_root = frappe.db.get_all(
-			"Account",
-			filters={"company": company_name, "root_type": "Liability", "disabled": 0},
-			order_by="lft",
-			limit=1,
-		)[0]
-
-		# setup round off account
-		if acc := frappe.db.exists(
-			"Account",
-			{
-				"account_name": "Round Off for Opening",
-				"account_type": "Round Off for Opening",
-				"company": company_name,
-			},
-		):
-			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc)
-		else:
-			acc = frappe.new_doc("Account")
-			acc.company = company_name
-			acc.parent_account = liability_root.name
-			acc.account_name = "Round Off for Opening"
-			acc.account_type = "Round Off for Opening"
-			acc.save()
-			frappe.db.set_value("Company", company_name, "round_off_for_opening", acc.name)
-
-	def test_opening_invoice_with_rounding_adjustment(self):
-		si = create_sales_invoice(qty=1, rate=99.98, do_not_submit=True)
-		si.is_opening = "Yes"
-		si.items[0].income_account = "Temporary Opening - _TC"
-		si.save()
-
-		self._create_opening_roundoff_account(si.company)
-
-		si.reload()
-		si.submit()
-		res = frappe.db.get_all(
-			"GL Entry",
-			filters={"voucher_no": si.name, "is_opening": "Yes"},
-			fields=["account", "debit", "credit", "is_opening"],
-		)
-		self.assertEqual(len(res), 3)
-
-	def _create_opening_invoice_with_inclusive_tax(self):
-		si = create_sales_invoice(qty=1, rate=90, do_not_submit=True)
-		si.is_opening = "Yes"
-		si.items[0].income_account = "Temporary Opening - _TC"
-		item_template = si.items[0].as_dict()
-		item_template.name = None
-		item_template.rate = 55
-		si.append("items", item_template)
-		si.append(
-			"taxes",
-			{
-				"charge_type": "On Net Total",
-				"account_head": "_Test Account Service Tax - _TC",
-				"cost_center": "_Test Cost Center - _TC",
-				"description": "Testing...",
-				"rate": 5,
-				"included_in_print_rate": True,
-			},
-		)
-		# there will be 0.01 precision loss between Dr and Cr
-		# caused by 'included_in_print_tax' option
-		si.save()
-		return si
-
-	def test_rounding_validation_for_opening_with_inclusive_tax(self):
-		si = self._create_opening_invoice_with_inclusive_tax()
-		# 'Round Off for Opening' not set in Company master
-		# Ledger level validation must be thrown
-		self.assertRaises(frappe.ValidationError, si.submit)
-
-	def test_ledger_entries_on_opening_invoice_with_rounding_loss_by_inclusive_tax(self):
-		si = self._create_opening_invoice_with_inclusive_tax()
-		# 'Round Off for Opening' is set in Company master
-		self._create_opening_roundoff_account(si.company)
-
-		si.submit()
-		actual = frappe.db.get_all(
-			"GL Entry",
-			filters={"voucher_no": si.name, "is_opening": "Yes", "is_cancelled": False},
-			fields=["account", "debit", "credit", "is_opening"],
-			order_by="account,debit",
-		)
-		expected = [
-			{"account": "_Test Account Service Tax - _TC", "debit": 0.0, "credit": 6.9, "is_opening": "Yes"},
-			{"account": "Debtors - _TC", "debit": 145.0, "credit": 0.0, "is_opening": "Yes"},
-			{"account": "Round Off for Opening - _TC", "debit": 0.0, "credit": 0.01, "is_opening": "Yes"},
-			{"account": "Temporary Opening - _TC", "debit": 0.0, "credit": 138.09, "is_opening": "Yes"},
-		]
-		self.assertEqual(len(actual), 4)
-		self.assertEqual(expected, actual)
-
 	@change_settings("Accounts Settings", {"enable_common_party_accounting": True})
 	def test_common_party_with_foreign_currency_jv(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
@@ -3868,15 +3761,15 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 		self.assertEqual(jv[0], si.grand_total)
 
 
-def set_advance_flag(company, flag, default_account):
-	frappe.db.set_value(
-		"Company",
-		company,
-		{
-			"book_advance_payments_in_separate_party_account": flag,
-			"default_advance_received_account": default_account,
-		},
->>>>>>> 740a04a704 (test: add unit test for common party with foreign currency)
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+	gl_entries = frappe.db.sql(
+		"""select account, debit, credit, posting_date
+		from `tabGL Entry`
+		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+		and is_cancelled = 0
+		order by posting_date asc, account asc""",
+		(voucher_no, posting_date),
+		as_dict=1,
 	)
 
 	for i, gle in enumerate(gl_entries):
