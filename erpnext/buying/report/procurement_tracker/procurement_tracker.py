@@ -175,7 +175,7 @@ def get_data(filters):
 				"purchase_order": po.parent,
 				"supplier": po.supplier,
 				"estimated_cost": flt(mr_record.get("amount")),
-				"actual_cost": flt(pi_records.get(po.name)),
+				"actual_cost": flt(pi_records.get(po.name)) or flt(po.amount),
 				"purchase_order_amt": flt(po.amount),
 				"purchase_order_amt_in_company_currency": flt(po.base_amount),
 				"expected_delivery_date": po.schedule_date,
