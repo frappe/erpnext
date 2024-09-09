@@ -334,6 +334,8 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 	def set_missing_values(source, target):
 		doc = frappe.get_doc(target)
 		doc.is_return = 1
+		doc.ignore_pricing_rule = 1
+		doc.pricing_rules = []
 		doc.return_against = source.name
 		doc.set_warehouse = ""
 		if doctype == "Sales Invoice" or doctype == "POS Invoice":
@@ -397,6 +399,7 @@ def make_return_doc(doctype: str, source_name: str, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty = -1 * source_doc.qty
+		target_doc.pricing_rules = None
 
 		if source_doc.serial_no:
 			returned_serial_nos = get_returned_serial_nos(source_doc, source_parent)
