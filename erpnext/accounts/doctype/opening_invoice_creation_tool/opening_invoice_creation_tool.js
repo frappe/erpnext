@@ -28,7 +28,12 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 						frm.refresh_fields();
 						frm.page.clear_indicator();
 						frm.dashboard.hide_progress();
-						frappe.msgprint(__("Opening {0} Invoices created", [frm.doc.invoice_type]));
+
+						if (frm.doc.invoice_type == "Sales") {
+							frappe.msgprint(__("Opening Sales Invoices have been created."));
+						} else {
+							frappe.msgprint(__("Opening Purchase Invoices have been created."));
+						}
 					},
 					1500,
 					data.title
@@ -48,12 +53,19 @@ frappe.ui.form.on("Opening Invoice Creation Tool", {
 		!frm.doc.import_in_progress && frm.trigger("make_dashboard");
 		frm.page.set_primary_action(__("Create Invoices"), () => {
 			let btn_primary = frm.page.btn_primary.get(0);
+			let freeze_message;
+			if (frm.doc.invoice_type == "Sales") {
+				freeze_message = __("Creating Sales Invoices ...");
+			} else {
+				freeze_message = __("Creating Purchase Invoices ...");
+			}
+
 			return frm.call({
 				doc: frm.doc,
 				btn: $(btn_primary),
 				method: "make_invoices",
 				freeze: 1,
-				freeze_message: __("Creating {0} Invoice", [frm.doc.invoice_type]),
+				freeze_message: freeze_message,
 			});
 		});
 

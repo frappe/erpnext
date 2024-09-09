@@ -11,6 +11,7 @@
  ],
  "fields": [
   {
+   "columns": 3,
    "fieldname": "tier_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -18,8 +19,10 @@
    "reqd": 1
   },
   {
+   "columns": 3,
    "fieldname": "min_spent",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Minimum Total Spent"
   },
   {
@@ -27,6 +30,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 3,
    "description": "For how much spent = 1 Loyalty Point",
    "fieldname": "collection_factor",
    "fieldtype": "Currency",
@@ -37,7 +41,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2024-03-27 13:10:03.536071",
+ "modified": "2024-09-06 09:26:03.323912",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Loyalty Program Collection",
