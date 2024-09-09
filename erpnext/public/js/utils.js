@@ -20,7 +20,11 @@ $.extend(erpnext, {
 	},
 
 	toggle_naming_series: function () {
-		if (cur_frm && cur_frm.fields_dict.naming_series) {
+		if (
+			cur_frm &&
+			cur_frm.fields_dict.naming_series &&
+			cur_frm.meta.naming_rule == 'By "Naming Series" field'
+		) {
 			cur_frm.toggle_display("naming_series", cur_frm.doc.__islocal ? true : false);
 		}
 	},
@@ -420,7 +424,7 @@ $.extend(erpnext.utils, {
 		});
 	},
 
-	get_fiscal_year: function (date, with_dates = false, boolean = false) {
+	get_fiscal_year: function (date, with_dates = false, raise_on_missing = true) {
 		if (!frappe.boot.setup_complete) {
 			return;
 		}
@@ -429,20 +433,30 @@ $.extend(erpnext.utils, {
 		}
 
 		let fiscal_year = "";
-		frappe.call({
-			method: "erpnext.accounts.utils.get_fiscal_year",
-			args: {
-				date: date,
-				boolean: boolean,
-			},
-			async: false,
-			callback: function (r) {
-				if (r.message) {
-					if (with_dates) fiscal_year = r.message;
-					else fiscal_year = r.message[0];
-				}
-			},
-		});
+		if (
+			frappe.boot.current_fiscal_year &&
+			date >= frappe.boot.current_fiscal_year[1] &&
+			date <= frappe.boot.current_fiscal_year[2]
+		) {
+			if (with_dates) fiscal_year = frappe.boot.current_fiscal_year;
+			else fiscal_year = frappe.boot.current_fiscal_year[0];
+		} else {
+			frappe.call({
+				method: "erpnext.accounts.utils.get_fiscal_year",
+				type: "GET", // make it cacheable
+				args: {
+					date: date,
+					raise_on_missing: raise_on_missing,
+				},
+				async: false,
+				callback: function (r) {
+					if (r.message) {
+						if (with_dates) fiscal_year = r.message;
+						else fiscal_year = r.message[0];
+					}
+				},
+			});
+		}
 		return fiscal_year;
 	},
 });

@@ -936,7 +936,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 
 	mapper = {
 		"Sales Order": {"doctype": "Delivery Note", "validation": {"docstatus": ["=", 1]}},
-		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+		"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 		"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 	}
 
@@ -1091,6 +1091,7 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		# set the redeem loyalty points if provided via shopping cart
 		if source.loyalty_points and source.order_type == "Shopping Cart":
 			target.redeem_loyalty_points = 1
+			target.loyalty_points = source.loyalty_points
 
 		target.debit_to = get_party_account("Customer", source.customer, source.company)
 
@@ -1136,7 +1137,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"condition": lambda doc: doc.qty
 				and (doc.base_amount == 0 or abs(doc.billed_amt) < abs(doc.amount)),
 			},
-			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"reset_value": True,
+			},
 			"Sales Team": {"doctype": "Sales Team", "add_if_empty": True},
 		},
 		target_doc,

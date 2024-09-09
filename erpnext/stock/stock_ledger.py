@@ -1528,12 +1528,12 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 		voucher_no = args.get("voucher_no")
 		voucher_condition = f"and voucher_no != '{voucher_no}'"
 
-	elif args.get("creation"):
+	elif args.get("creation") and args.get("sle_id"):
 		creation = args.get("creation")
 		operator = "<="
 		voucher_condition = f"and creation < '{creation}'"
 
-	sle = frappe.db.sql(
+	sle = frappe.db.sql(  # nosemgrep
 		f"""
 		select *, posting_datetime as "timestamp"
 		from `tabStock Ledger Entry`
@@ -1544,7 +1544,7 @@ def get_previous_sle_of_current_voucher(args, operator="<", exclude_current_vouc
 			and (
 				posting_datetime {operator} %(posting_datetime)s
 			)
-		order by posting_datetime desc, creation desc
+		order by posting_date desc, posting_time desc, creation desc
 		limit 1
 		for update""",
 		{
@@ -1630,6 +1630,7 @@ def get_stock_ledger_entries(
 	if extra_cond:
 		conditions += f"{extra_cond}"
 
+	# nosemgrep
 	return frappe.db.sql(
 		"""
 		select *, posting_datetime as "timestamp"
@@ -1637,7 +1638,7 @@ def get_stock_ledger_entries(
 		where item_code = %(item_code)s
 		and is_cancelled = 0
 		{conditions}
-		order by posting_datetime {order}, creation {order}
+		order by posting_date {order}, posting_time {order}, creation {order}
 		{limit} {for_update}""".format(
 			conditions=conditions,
 			limit=limit or "",
@@ -1745,7 +1746,7 @@ def get_valuation_rate(
 		return batch_obj.get_incoming_rate()
 
 	# Get valuation rate from last sle for the same item and warehouse
-	if last_valuation_rate := frappe.db.sql(
+	if last_valuation_rate := frappe.db.sql(  # nosemgrep
 		"""select valuation_rate
 		from `tabStock Ledger Entry` force index (item_warehouse)
 		where
@@ -1754,7 +1755,7 @@ def get_valuation_rate(
 			AND valuation_rate >= 0
 			AND is_cancelled = 0
 			AND NOT (voucher_no = %s AND voucher_type = %s)
-		order by posting_datetime desc, name desc limit 1""",
+		order by posting_date desc, posting_time desc, name desc limit 1""",
 		(item_code, warehouse, voucher_no, voucher_type),
 	):
 		return flt(last_valuation_rate[0][0])
@@ -1825,7 +1826,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=False):
 		detail = next_stock_reco_detail[0]
 		datetime_limit_condition = get_datetime_limit_condition(detail)
 
-	frappe.db.sql(
+	frappe.db.sql(  # nosemgrep
 		f"""
 		update `tabStock Ledger Entry`
 		set qty_after_transaction = qty_after_transaction + {qty_shift}
@@ -1991,8 +1992,8 @@ def is_negative_with_precision(neg_sle, is_batch=False):
 	return qty_deficit < 0 and abs(qty_deficit) > 0.0001
 
 
-def get_future_sle_with_negative_qty(args):
-	return frappe.db.sql(
+def get_future_sle_with_negative_qty(sle_args):
+	return frappe.db.sql(  # nosemgrep
 		"""
 		select
 			qty_after_transaction, posting_date, posting_time,
@@ -2005,28 +2006,28 @@ def get_future_sle_with_negative_qty(args):
 			and posting_datetime >= %(posting_datetime)s
 			and is_cancelled = 0
 			and qty_after_transaction < 0
-		order by posting_datetime asc
+		order by posting_date asc, posting_time asc
 		limit 1
 	""",
-		args,
+		sle_args,
 		as_dict=1,
 	)
 
 
-def get_future_sle_with_negative_batch_qty(args):
-	return frappe.db.sql(
+def get_future_sle_with_negative_batch_qty(sle_args):
+	return frappe.db.sql(  # nosemgrep
 		"""
 		with batch_ledger as (
 			select
 				posting_date, posting_time, posting_datetime, voucher_type, voucher_no,
-				sum(actual_qty) over (order by posting_datetime, creation) as cumulative_total
+				sum(actual_qty) over (order by posting_date, posting_time, creation) as cumulative_total
 			from `tabStock Ledger Entry`
 			where
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
 				and batch_no=%(batch_no)s
 				and is_cancelled = 0
-			order by posting_datetime, creation
+			order by posting_date, posting_time, creation
 		)
 		select * from batch_ledger
 		where
@@ -2034,7 +2035,7 @@ def get_future_sle_with_negative_batch_qty(args):
 			and posting_datetime >= %(posting_datetime)s
 		limit 1
 	""",
-		args,
+		sle_args,
 		as_dict=1,
 	)
 

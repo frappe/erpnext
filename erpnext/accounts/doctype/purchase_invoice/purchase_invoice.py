@@ -1270,7 +1270,11 @@ class PurchaseInvoice(BuyingController):
 	def update_gross_purchase_amount_for_linked_assets(self, item):
 		assets = frappe.db.get_all(
 			"Asset",
-			filters={"purchase_invoice": self.name, "item_code": item.item_code},
+			filters={
+				"purchase_invoice": self.name,
+				"item_code": item.item_code,
+				"purchase_invoice_item": ("in", [item.name, ""]),
+			},
 			fields=["name", "asset_quantity"],
 		)
 		for asset in assets:
@@ -1523,9 +1527,28 @@ class PurchaseInvoice(BuyingController):
 		# eg: rounding_adjustment = 0.01 and exchange rate = 0.05 and precision of base_rounding_adjustment is 2
 		# 	then base_rounding_adjustment becomes zero and error is thrown in GL Entry
 		if not self.is_internal_transfer() and self.rounding_adjustment and self.base_rounding_adjustment:
-			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+			(
+				round_off_account,
+				round_off_cost_center,
+				round_off_for_opening,
+			) = get_round_off_account_and_cost_center(
 				self.company, "Purchase Invoice", self.name, self.use_company_roundoff_cost_center
 			)
+
+			if self.is_opening == "Yes" and self.rounding_adjustment:
+				if not round_off_for_opening:
+					frappe.throw(
+						_(
+							"Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
+						).format(
+							frappe.bold(self.rounding_adjustment),
+							frappe.bold("Round Off for Opening"),
+							get_link_to_form("Company", self.company),
+							frappe.bold("Disable Rounded Total"),
+						)
+					)
+				else:
+					round_off_account = round_off_for_opening
 
 			gl_entries.append(
 				self.get_gl_dict(

@@ -317,7 +317,16 @@ class AssetCapitalization(StockController):
 		if not self.target_is_fixed_asset and not self.get("asset_items"):
 			frappe.throw(_("Consumed Asset Items is mandatory for Decapitalization"))
 
-		if not (self.get("stock_items") or self.get("asset_items") or self.get("service_items")):
+		if self.capitalization_method == "Create a new composite asset" and not (
+			self.get("stock_items") or self.get("asset_items")
+		):
+			frappe.throw(
+				_(
+					"Consumed Stock Items or Consumed Asset Items are mandatory for creating new composite asset"
+				)
+			)
+
+		elif not (self.get("stock_items") or self.get("asset_items") or self.get("service_items")):
 			frappe.throw(
 				_(
 					"Consumed Stock Items, Consumed Asset Items or Consumed Service Items is mandatory for Capitalization"
@@ -460,13 +469,24 @@ class AssetCapitalization(StockController):
 		self.get_gl_entries_for_consumed_asset_items(gl_entries, target_account, target_against, precision)
 		self.get_gl_entries_for_consumed_service_items(gl_entries, target_account, target_against, precision)
 
-		self.get_gl_entries_for_target_item(gl_entries, target_against, precision)
+		self.get_gl_entries_for_target_item(gl_entries, target_account, target_against, precision)
 
 		return gl_entries
 
 	def get_target_account(self):
 		if self.target_is_fixed_asset:
-			return self.target_fixed_asset_account
+			from erpnext.assets.doctype.asset.asset import is_cwip_accounting_enabled
+
+			asset_category = frappe.get_cached_value("Asset", self.target_asset, "asset_category")
+			if is_cwip_accounting_enabled(asset_category):
+				target_account = get_asset_category_account(
+					"capital_work_in_progress_account",
+					asset_category=asset_category,
+					company=self.company,
+				)
+				return target_account if target_account else self.target_fixed_asset_account
+			else:
+				return self.target_fixed_asset_account
 		else:
 			return self.warehouse_account[self.target_warehouse]["account"]
 
@@ -554,13 +574,13 @@ class AssetCapitalization(StockController):
 				)
 			)
 
-	def get_gl_entries_for_target_item(self, gl_entries, target_against, precision):
+	def get_gl_entries_for_target_item(self, gl_entries, target_account, target_against, precision):
 		if self.target_is_fixed_asset:
 			# Capitalization
 			gl_entries.append(
 				self.get_gl_dict(
 					{
-						"account": self.target_fixed_asset_account,
+						"account": target_account,
 						"against": ", ".join(target_against),
 						"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
 						"debit": flt(self.total_value, precision),

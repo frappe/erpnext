@@ -5,6 +5,8 @@
 import frappe
 from frappe.utils import cint
 
+import erpnext.accounts.utils
+
 
 def boot_session(bootinfo):
 	"""boot session - send website info if guest"""
@@ -52,6 +54,9 @@ def boot_session(bootinfo):
 
 		party_account_types = frappe.db.sql(""" select name, ifnull(account_type, '') from `tabParty Type`""")
 		bootinfo.party_account_types = frappe._dict(party_account_types)
+		fiscal_year = erpnext.accounts.utils.get_fiscal_years(frappe.utils.nowdate(), raise_on_missing=False)
+		if fiscal_year:
+			bootinfo.current_fiscal_year = fiscal_year[0]
 
 		bootinfo.sysdefaults.demo_company = frappe.db.get_single_value("Global Defaults", "demo_company")
 

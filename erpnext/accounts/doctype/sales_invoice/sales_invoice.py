@@ -314,17 +314,6 @@ class SalesInvoice(SellingController):
 		if not self.is_opening:
 			self.is_opening = "No"
 
-		if self.redeem_loyalty_points:
-			lp = frappe.get_doc("Loyalty Program", self.loyalty_program)
-			self.loyalty_redemption_account = (
-				lp.expense_account if not self.loyalty_redemption_account else self.loyalty_redemption_account
-			)
-			self.loyalty_redemption_cost_center = (
-				lp.cost_center
-				if not self.loyalty_redemption_cost_center
-				else self.loyalty_redemption_cost_center
-			)
-
 		self.set_against_income_account()
 		self.validate_time_sheets_are_submitted()
 		self.validate_multiple_billing("Delivery Note", "dn_detail", "amount")
@@ -343,12 +332,7 @@ class SalesInvoice(SellingController):
 		if self.is_pos and self.is_return:
 			self.verify_payment_amount_is_negative()
 
-		if (
-			self.redeem_loyalty_points
-			and self.loyalty_program
-			and self.loyalty_points
-			and not self.is_consolidated
-		):
+		if self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
@@ -1447,7 +1431,7 @@ class SalesInvoice(SellingController):
 			asset.set_status("Sold" if self.docstatus == 1 else None)
 
 	def make_loyalty_point_redemption_gle(self, gl_entries):
-		if cint(self.redeem_loyalty_points):
+		if cint(self.redeem_loyalty_points and self.loyalty_points and not self.is_consolidated):
 			gl_entries.append(
 				self.get_gl_dict(
 					{
@@ -1629,9 +1613,28 @@ class SalesInvoice(SellingController):
 			and self.base_rounding_adjustment
 			and not self.is_internal_transfer()
 		):
-			round_off_account, round_off_cost_center = get_round_off_account_and_cost_center(
+			(
+				round_off_account,
+				round_off_cost_center,
+				round_off_for_opening,
+			) = get_round_off_account_and_cost_center(
 				self.company, "Sales Invoice", self.name, self.use_company_roundoff_cost_center
 			)
+
+			if self.is_opening == "Yes" and self.rounding_adjustment:
+				if not round_off_for_opening:
+					frappe.throw(
+						_(
+							"Opening Invoice has rounding adjustment of {0}.<br><br> '{1}' account is required to post these values. Please set it in Company: {2}.<br><br> Or, '{3}' can be enabled to not post any rounding adjustment."
+						).format(
+							frappe.bold(self.rounding_adjustment),
+							frappe.bold("Round Off for Opening"),
+							get_link_to_form("Company", self.company),
+							frappe.bold("Disable Rounded Total"),
+						)
+					)
+				else:
+					round_off_account = round_off_for_opening
 
 			gl_entries.append(
 				self.get_gl_dict(
@@ -1779,7 +1782,8 @@ class SalesInvoice(SellingController):
 			loyalty_program=self.loyalty_program,
 			include_expired_entry=True,
 		)
-		frappe.db.set_value("Customer", self.customer, "loyalty_program_tier", lp_details.tier_name)
+		customer = frappe.get_doc("Customer", self.customer)
+		customer.db_set("loyalty_program_tier", lp_details.tier_name)
 
 	def get_returned_amount(self):
 		from frappe.query_builder.functions import Sum
@@ -2084,7 +2088,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"postprocess": update_item,
 				"condition": lambda doc: doc.delivered_by_supplier != 1,
 			},
-			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "add_if_empty": True},
+			"Sales Taxes and Charges": {"doctype": "Sales Taxes and Charges", "reset_value": True},
 			"Sales Team": {
 				"doctype": "Sales Team",
 				"field_map": {"incentives": "incentives"},

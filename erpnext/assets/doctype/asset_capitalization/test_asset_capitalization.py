@@ -31,6 +31,12 @@ class TestAssetCapitalization(unittest.TestCase):
 	def test_capitalization_with_perpetual_inventory(self):
 		company = "_Test Company with perpetual inventory"
 		set_depreciation_settings_in_company(company=company)
+		name = frappe.db.get_value(
+			"Asset Category Account",
+			filters={"parent": "Computers", "company_name": company},
+			fieldname=["name"],
+		)
+		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", "")
 
 		# Variables
 		consumed_asset_value = 100000
@@ -187,9 +193,10 @@ class TestAssetCapitalization(unittest.TestCase):
 		# Test General Ledger Entries
 		default_expense_account = frappe.db.get_value("Company", company, "default_expense_account")
 		expected_gle = {
-			"_Test Fixed Asset - _TC": 3000,
-			"Expenses Included In Asset Valuation - _TC": -1000,
-			default_expense_account: -2000,
+			"_Test Fixed Asset - _TC": -100000.0,
+			default_expense_account: -2000.0,
+			"CWIP Account - _TC": 103000.0,
+			"Expenses Included In Asset Valuation - _TC": -1000.0,
 		}
 		actual_gle = get_actual_gle_dict(asset_capitalization.name)
 
@@ -214,6 +221,12 @@ class TestAssetCapitalization(unittest.TestCase):
 	def test_capitalization_with_wip_composite_asset(self):
 		company = "_Test Company with perpetual inventory"
 		set_depreciation_settings_in_company(company=company)
+		name = frappe.db.get_value(
+			"Asset Category Account",
+			filters={"parent": "Computers", "company_name": company},
+			fieldname=["name"],
+		)
+		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", "")
 
 		stock_rate = 1000
 		stock_qty = 2
@@ -424,7 +437,7 @@ class TestAssetCapitalization(unittest.TestCase):
 		self.assertEqual(target_asset.purchase_amount, total_amount)
 
 		expected_gle = {
-			"_Test Fixed Asset - _TC": 1000.0,
+			"CWIP Account - _TC": 1000.0,
 			"Expenses Included In Asset Valuation - _TC": -1000.0,
 		}
 

@@ -132,6 +132,7 @@ class StockEntry(StockController):
 			"Manufacture",
 			"Repack",
 			"Send to Subcontractor",
+			"Disassemble",
 		]
 		remarks: DF.Text | None
 		sales_invoice_no: DF.Link | None
@@ -234,6 +235,7 @@ class StockEntry(StockController):
 		self.validate_serialized_batch()
 		self.calculate_rate_and_amount()
 		self.validate_putaway_capacity()
+		self.validate_component_quantities()
 
 		if self.get("purpose") != "Manufacture":
 			# ignore scrap item wh difference and empty source/target wh
@@ -354,6 +356,7 @@ class StockEntry(StockController):
 			"Repack",
 			"Send to Subcontractor",
 			"Material Consumption for Manufacture",
+			"Disassemble",
 		]
 
 		if self.purpose not in valid_purposes:
@@ -631,6 +634,7 @@ class StockEntry(StockController):
 			"Manufacture",
 			"Material Transfer for Manufacture",
 			"Material Consumption for Manufacture",
+			"Disassemble",
 		):
 			# check if work order is entered
 
@@ -760,6 +764,34 @@ class StockEntry(StockController):
 					NegativeStockError,
 					title=_("Insufficient Stock"),
 				)
+
+	def validate_component_quantities(self):
+		if self.purpose not in ["Manufacture", "Material Transfer for Manufacture"]:
+			return
+
+		if not frappe.db.get_single_value("Manufacturing Settings", "validate_components_quantities_per_bom"):
+			return
+
+		if not self.fg_completed_qty:
+			return
+
+		raw_materials = self.get_bom_raw_materials(self.fg_completed_qty)
+
+		precision = frappe.get_precision("Stock Entry Detail", "qty")
+		for row in self.items:
+			if not row.s_warehouse:
+				continue
+
+			if details := raw_materials.get(row.item_code):
+				if flt(details.get("qty"), precision) != flt(row.qty, precision):
+					frappe.throw(
+						_("For the item {0}, the quantity should be {1} according to the BOM {2}.").format(
+							frappe.bold(row.item_code),
+							flt(details.get("qty"), precision),
+							get_link_to_form("BOM", self.bom_no),
+						),
+						title=_("Incorrect Component Quantity"),
+					)
 
 	@frappe.whitelist()
 	def get_stock_and_rate(self):
@@ -1000,7 +1032,7 @@ class StockEntry(StockController):
 	def set_stock_entry_type(self):
 		if self.purpose:
 			self.stock_entry_type = frappe.get_cached_value(
-				"Stock Entry Type", {"purpose": self.purpose}, "name"
+				"Stock Entry Type", {"purpose": self.purpose, "is_standard": 1}, "name"
 			)
 
 	def set_purpose_for_stock_entry(self):
@@ -1726,10 +1758,62 @@ class StockEntry(StockController):
 					},
 				)
 
+	def get_items_for_disassembly(self):
+		"""Get items for Disassembly Order"""
+
+		if not self.work_order:
+			frappe.throw(_("The Work Order is mandatory for Disassembly Order"))
+
+		items = self.get_items_from_manufacture_entry()
+
+		s_warehouse = ""
+		if self.work_order:
+			s_warehouse = frappe.db.get_value("Work Order", self.work_order, "fg_warehouse")
+
+		for row in items:
+			child_row = self.append("items", {})
+			for field, value in row.items():
+				if value is not None:
+					child_row.set(field, value)
+
+			child_row.s_warehouse = (self.from_warehouse or s_warehouse) if row.is_finished_item else ""
+			child_row.t_warehouse = self.to_warehouse if not row.is_finished_item else ""
+			child_row.is_finished_item = 0 if row.is_finished_item else 1
+
+	def get_items_from_manufacture_entry(self):
+		return frappe.get_all(
+			"Stock Entry",
+			fields=[
+				"`tabStock Entry Detail`.`item_code`",
+				"`tabStock Entry Detail`.`item_name`",
+				"`tabStock Entry Detail`.`description`",
+				"`tabStock Entry Detail`.`qty`",
+				"`tabStock Entry Detail`.`transfer_qty`",
+				"`tabStock Entry Detail`.`stock_uom`",
+				"`tabStock Entry Detail`.`uom`",
+				"`tabStock Entry Detail`.`basic_rate`",
+				"`tabStock Entry Detail`.`conversion_factor`",
+				"`tabStock Entry Detail`.`is_finished_item`",
+				"`tabStock Entry Detail`.`batch_no`",
+				"`tabStock Entry Detail`.`serial_no`",
+				"`tabStock Entry Detail`.`use_serial_batch_fields`",
+			],
+			filters=[
+				["Stock Entry", "purpose", "=", "Manufacture"],
+				["Stock Entry", "work_order", "=", self.work_order],
+				["Stock Entry", "docstatus", "=", 1],
+				["Stock Entry Detail", "docstatus", "=", 1],
+			],
+			order_by="`tabStock Entry Detail`.`idx` desc, `tabStock Entry Detail`.`is_finished_item` desc",
+		)
+
 	@frappe.whitelist()
 	def get_items(self):
 		self.set("items", [])
 		self.validate_work_order()
+
+		if self.purpose == "Disassemble":
+			return self.get_items_for_disassembly()
 
 		if not self.posting_date or not self.posting_time:
 			frappe.throw(_("Posting date and posting time is mandatory"))

@@ -6,7 +6,7 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.query_builder.custom import ConstantColumn
-from frappe.utils import flt, fmt_money, getdate
+from frappe.utils import flt, fmt_money, get_link_to_form, getdate
 from pypika import Order
 
 import erpnext
@@ -96,8 +96,11 @@ class BankClearance(Document):
 
 				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
 					frappe.throw(
-						_("Row #{0}: Clearance date {1} cannot be before Cheque Date {2}").format(
-							d.idx, d.clearance_date, d.cheque_date
+						_("Row #{0}: For {1} Clearance date {2} cannot be before Cheque Date {3}").format(
+							d.idx,
+							get_link_to_form(d.payment_document, d.payment_entry),
+							d.clearance_date,
+							d.cheque_date,
 						)
 					)
 
