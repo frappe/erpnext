@@ -895,18 +895,19 @@ def create_asset_maintenance(asset, item_code, item_name, asset_category, compan
 
 
 @frappe.whitelist()
-def create_asset_repair(asset, asset_name):
+def create_asset_repair(company, asset, asset_name):
 	asset_repair = frappe.new_doc("Asset Repair")
-	asset_repair.update({"asset": asset, "asset_name": asset_name})
+	asset_repair.update({"company": company, "asset": asset, "asset_name": asset_name})
 	return asset_repair
 
 
 @frappe.whitelist()
-def create_asset_capitalization(asset, asset_name, item_code):
+def create_asset_capitalization(company, asset, asset_name, item_code):
 	asset_capitalization = frappe.new_doc("Asset Capitalization")
 	asset_capitalization.update(
 		{
 			"target_asset": asset,
+			"company": company,
 			"capitalization_method": "Choose a WIP composite asset",
 			"target_asset_name": asset_name,
 			"target_item_code": item_code,

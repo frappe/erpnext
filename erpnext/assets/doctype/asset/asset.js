@@ -506,6 +506,7 @@ frappe.ui.form.on("Asset", {
 	create_asset_repair: function (frm) {
 		frappe.call({
 			args: {
+				company: frm.doc.company,
 				asset: frm.doc.name,
 				asset_name: frm.doc.asset_name,
 			},
@@ -520,6 +521,7 @@ frappe.ui.form.on("Asset", {
 	create_asset_capitalization: function (frm) {
 		frappe.call({
 			args: {
+				company: frm.doc.company,
 				asset: frm.doc.name,
 				asset_name: frm.doc.asset_name,
 				item_code: frm.doc.item_code,
@@ -528,6 +530,7 @@ frappe.ui.form.on("Asset", {
 			callback: function (r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				$(".primary-action").prop("hidden", false);
 			},
 		});
 	},
