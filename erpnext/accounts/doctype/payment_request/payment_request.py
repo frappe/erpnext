@@ -455,10 +455,8 @@ def make_payment_request(**args):
 	if args.loyalty_points and ref_doc.doctype == "Sales Order":
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 
-		loyalty_amount: Document = validate_loyalty_points(
-			ref_doc, int(args.loyalty_points)
-		)  # sets fields on ref_doc
-		loyalty_amount.db_update()
+		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))  # sets fields on ref_doc
+		ref_doc.db_update()
 		grand_total = grand_total - loyalty_amount
 
 	bank_account = (

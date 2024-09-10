@@ -185,6 +185,8 @@ class SalesOrder(SellingController):
 		super().__init__(*args, **kwargs)
 
 	def onload(self) -> None:
+		super().onload()
+
 		if frappe.db.get_single_value("Stock Settings", "enable_stock_reservation"):
 			if self.has_unreserved_stock():
 				self.set_onload("has_unreserved_stock", True)
