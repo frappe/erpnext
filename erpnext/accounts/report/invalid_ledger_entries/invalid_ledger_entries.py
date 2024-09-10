@@ -60,9 +60,9 @@ def identify_cancelled_vouchers(active_vouchers: list[dict] | list | None = None
 			dt = qb.DocType(_t)
 			non_active_vouchers = (
 				qb.from_(dt)
-				.select(ConstantColumn(_t).as_("doctype"), dt.name)
+				.select(ConstantColumn(_t).as_("voucher_type"), dt.name.as_("voucher_no"))
 				.where(dt.docstatus.ne(1) & dt.name.isin(_names))
-				.run()
+				.run(as_dict=True)
 			)
 			if non_active_vouchers:
 				cancelled_vouchers.extend(non_active_vouchers)
