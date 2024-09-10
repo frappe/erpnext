@@ -1879,6 +1879,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		const fields = ["discount_percentage",
 			"discount_amount", "margin_rate_or_amount", "rate_with_margin"];
 
+		if (!item) {
+			return;
+		}
+
 		if(item.remove_free_item) {
 			let items = [];
 
