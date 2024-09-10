@@ -655,8 +655,6 @@ class PurchaseOrder(BuyingController):
 	def set_missing_values(self, for_validate=False):
 		tds_category = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
 		if tds_category and not for_validate:
-			self.apply_tds = 1
-			self.tax_withholding_category = tds_category
 			self.set_onload("supplier_tds", tds_category)
 
 		super().set_missing_values(for_validate)
