@@ -138,9 +138,9 @@ class ReceivablePayableReport:
 			# get the balance object for voucher_type
 
 			if self.filters.get("ignore_accounts"):
-				key = (ple.voucher_type, ple.voucher_no, ple.party)
+				key = (ple.voucher_type, ple.voucher_no, ple.party, ple.cost_center)
 			else:
-				key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party)
+				key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party, ple.cost_center)
 
 			if key not in self.voucher_balance:
 				self.voucher_balance[key] = self.build_voucher_dict(ple)
@@ -194,9 +194,9 @@ class ReceivablePayableReport:
 				return
 
 		if self.filters.get("ignore_accounts"):
-			key = (ple.against_voucher_type, ple.against_voucher_no, ple.party)
+			key = (ple.against_voucher_type, ple.against_voucher_no, ple.party, ple.cost_center)
 		else:
-			key = (ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party)
+			key = (ple.account, ple.against_voucher_type, ple.against_voucher_no, ple.party, ple.cost_center)
 
 		# If payment is made against credit note
 		# and credit note is made against a Sales Invoice
@@ -206,9 +206,15 @@ class ReceivablePayableReport:
 				return_against = self.return_entries.get(ple.against_voucher_no)
 				if return_against:
 					if self.filters.get("ignore_accounts"):
-						key = (ple.against_voucher_type, return_against, ple.party)
+						key = (ple.against_voucher_type, return_against, ple.party, ple.cost_center)
 					else:
-						key = (ple.account, ple.against_voucher_type, return_against, ple.party)
+						key = (
+							ple.account,
+							ple.against_voucher_type,
+							return_against,
+							ple.party,
+							ple.cost_center,
+						)
 
 		row = self.voucher_balance.get(key)
 
@@ -227,9 +233,11 @@ class ReceivablePayableReport:
 		if not row:
 			# no invoice, this is an invoice / stand-alone payment / credit note
 			if self.filters.get("ignore_accounts"):
-				row = self.voucher_balance.get((ple.voucher_type, ple.voucher_no, ple.party))
+				row = self.voucher_balance.get((ple.voucher_type, ple.voucher_no, ple.party, ple.cost_center))
 			else:
-				row = self.voucher_balance.get((ple.account, ple.voucher_type, ple.voucher_no, ple.party))
+				row = self.voucher_balance.get(
+					(ple.account, ple.voucher_type, ple.voucher_no, ple.party, ple.cost_center)
+				)
 
 		row.party_type = ple.party_type
 		return row
