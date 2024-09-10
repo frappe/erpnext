@@ -650,6 +650,8 @@ class PickList(Document):
 		if self.name:
 			query = query.where(pi_item.parent != self.name)
 
+		query = query.for_update()
+
 		return query.run(as_dict=True)
 
 	def _get_product_bundles(self) -> dict[str, str]:
