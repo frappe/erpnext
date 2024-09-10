@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-09 18:49\n"
+"PO-Revision-Date: 2024-09-10 18:59\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -4914,7 +4914,7 @@ msgstr "قابل اجرا در حساب"
 #. Label of the to_designation (Link) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgid "Applicable To (Designation)"
-msgstr "قابل اجرا برای (تعیین)"
+msgstr "قابل اجرا برای (نقش سازمانی)"
 
 #. Label of the to_emp (Link) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
@@ -5158,7 +5158,7 @@ msgstr "درخواست برای سند"
 #. Label of a Link in the CRM Workspace
 #: crm/doctype/appointment/appointment.json crm/workspace/crm/crm.json
 msgid "Appointment"
-msgstr "وقت ملاقات"
+msgstr "قرار ملاقات"
 
 #. Name of a DocType
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.json
@@ -8048,7 +8048,7 @@ msgstr "آبی"
 #. Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Body"
-msgstr "بدن"
+msgstr "بدنه"
 
 #. Label of the body_text (Text Editor) field in DocType 'Dunning'
 #. Label of the body_text (Text Editor) field in DocType 'Dunning Letter Text'
