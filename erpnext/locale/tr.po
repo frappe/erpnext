@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-06 18:11\n"
+"PO-Revision-Date: 2024-09-10 18:59\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -14604,7 +14604,7 @@ msgstr "Günlük Kitap Verileri"
 #. Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
 msgid "Day Book Data exported from Tally that consists of all historic transactions"
-msgstr "Tally&#39;den dışa aktarılan ve tüm geçmiş işlemlerden oluşan Gün Defteri Verileri"
+msgstr "Tally'den dışa aktarılan ve tüm geçmiş işlemleri içeren Günlük Kayıt Verileri"
 
 #. Label of the day_of_week (Select) field in DocType 'Appointment Booking
 #. Slots'
@@ -18114,7 +18114,7 @@ msgstr "Acil Durumda Ulaşılacak Kişi"
 #. Label of the person_to_be_contacted (Data) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
 msgid "Emergency Contact Name"
-msgstr "İsim Soyisim"
+msgstr "Acil Durum İrtibat Kişisi Adı"
 
 #. Label of the emergency_phone_number (Data) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -21967,7 +21967,7 @@ msgstr "Grup"
 #: selling/report/lost_quotations/lost_quotations.js:33
 #: stock/report/total_stock_summary/total_stock_summary.js:8
 msgid "Group By"
-msgstr "Gruplama"
+msgstr "Grup"
 
 #: accounts/report/accounts_receivable/accounts_receivable.js:154
 msgid "Group By Customer"
@@ -22806,7 +22806,7 @@ msgstr ""
 #. DocType 'Item'
 #: stock/doctype/item/item.json
 msgid "If subcontracted to a vendor"
-msgstr "Bir satıcıya üstlenicilik yapılırsa"
+msgstr "Eğer bir tedarikçiye alt yüklenici olarak verilirse"
 
 #: manufacturing/doctype/work_order/work_order.js:983
 msgid "If the BOM results in Scrap material, the Scrap Warehouse needs to be selected."
@@ -30476,7 +30476,7 @@ msgstr "Seri Öneki Adlandırma"
 #. DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgid "Naming Series and Price Defaults"
-msgstr "Adlandırma Serisi ve Fiyat Varsayılanları"
+msgstr "Adlandırma Serisi ve Fiyatlar"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -38073,7 +38073,7 @@ msgstr "Üretim Analitiği"
 #: manufacturing/report/work_order_summary/work_order_summary.js:50
 #: manufacturing/report/work_order_summary/work_order_summary.py:208
 msgid "Production Item"
-msgstr "Üretilen Ürün"
+msgstr "Ürün"
 
 #. Label of the production_plan (Link) field in DocType 'Purchase Order Item'
 #. Name of a DocType
@@ -42367,7 +42367,7 @@ msgstr ""
 #: subcontracting/doctype/subcontracting_order_item/subcontracting_order_item.json
 #: subcontracting/doctype/subcontracting_receipt_item/subcontracting_receipt_item.json
 msgid "Required By"
-msgstr ""
+msgstr "İstenilen Tarih"
 
 #. Label of the schedule_date (Date) field in DocType 'Request for Quotation'
 #. Label of the schedule_date (Date) field in DocType 'Request for Quotation
@@ -51600,7 +51600,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:47
 msgid "Technology"
-msgstr ""
+msgstr "Teknoloji"
 
 #: setup/setup_wizard/data/industry_type.txt:48
 msgid "Telecommunications"
@@ -55720,7 +55720,7 @@ msgstr ""
 #: accounts/doctype/journal_entry/journal_entry.json
 #: accounts/doctype/journal_entry_account/journal_entry_account.json
 msgid "User Remark"
-msgstr ""
+msgstr "Kullanıcı Notu"
 
 #. Label of the user_resolution_time (Duration) field in DocType 'Issue'
 #: support/doctype/issue/issue.json
