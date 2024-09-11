@@ -76,6 +76,7 @@ def get_pr_instance(doc: str):
 		"party_type",
 		"party",
 		"receivable_payable_account",
+		"default_advance_account",
 		"from_invoice_date",
 		"to_invoice_date",
 		"from_payment_date",

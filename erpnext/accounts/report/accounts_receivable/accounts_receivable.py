@@ -112,6 +112,26 @@ class ReceivablePayableReport:
 
 		self.build_data()
 
+	def build_voucher_dict(self, ple):
+		return frappe._dict(
+			voucher_type=ple.voucher_type,
+			voucher_no=ple.voucher_no,
+			party=ple.party,
+			party_account=ple.account,
+			posting_date=ple.posting_date,
+			account_currency=ple.account_currency,
+			remarks=ple.remarks,
+			invoiced=0.0,
+			paid=0.0,
+			credit_note=0.0,
+			outstanding=0.0,
+			invoiced_in_account_currency=0.0,
+			paid_in_account_currency=0.0,
+			credit_note_in_account_currency=0.0,
+			outstanding_in_account_currency=0.0,
+			cost_center=ple.cost_center,
+		)
+
 	def init_voucher_balance(self):
 		# build all keys, since we want to exclude vouchers beyond the report date
 		for ple in self.ple_entries:
@@ -123,24 +143,8 @@ class ReceivablePayableReport:
 				key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party)
 
 			if key not in self.voucher_balance:
-				self.voucher_balance[key] = frappe._dict(
-					voucher_type=ple.voucher_type,
-					voucher_no=ple.voucher_no,
-					party=ple.party,
-					party_account=ple.account,
-					posting_date=ple.posting_date,
-					account_currency=ple.account_currency,
-					remarks=ple.remarks,
-					invoiced=0.0,
-					paid=0.0,
-					credit_note=0.0,
-					outstanding=0.0,
-					invoiced_in_account_currency=0.0,
-					paid_in_account_currency=0.0,
-					credit_note_in_account_currency=0.0,
-					outstanding_in_account_currency=0.0,
-					cost_center=ple.cost_center,
-				)
+				self.voucher_balance[key] = self.build_voucher_dict(ple)
+
 			self.get_invoices(ple)
 
 			if self.filters.get("group_by_party"):
@@ -207,6 +211,18 @@ class ReceivablePayableReport:
 						key = (ple.account, ple.against_voucher_type, return_against, ple.party)
 
 		row = self.voucher_balance.get(key)
+
+		# Build and use a separate row for Employee Advances.
+		# This allows Payments or Journals made against Emp Advance to be processed.
+		if (
+			not row
+			and ple.against_voucher_type == "Employee Advance"
+			and self.filters.handle_employee_advances
+		):
+			_d = self.build_voucher_dict(ple)
+			_d.voucher_type = ple.against_voucher_type
+			_d.voucher_no = ple.against_voucher_no
+			row = self.voucher_balance[key] = _d
 
 		if not row:
 			# no invoice, this is an invoice / stand-alone payment / credit note
