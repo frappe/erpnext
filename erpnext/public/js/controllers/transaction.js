@@ -1431,12 +1431,13 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let show = cint(this.frm.doc.discount_amount) ||
 				((this.frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
 
-		if(frappe.meta.get_docfield(cur_frm.doctype, "net_total"))
+		if(this.frm.doc.doctype && frappe.meta.get_docfield(this.frm.doc.doctype, "net_total")) {
 			this.frm.toggle_display("net_total", show);
+		}
 
-		if(frappe.meta.get_docfield(cur_frm.doctype, "base_net_total"))
+		if(this.frm.doc.doctype && frappe.meta.get_docfield(this.frm.doc.doctype, "base_net_total")) {
 			this.frm.toggle_display("base_net_total", (show && (me.frm.doc.currency != company_currency)));
-
+		}
 	}
 
 	change_grid_labels(company_currency) {
@@ -1519,8 +1520,8 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 		});
 
-		var show = (cint(cur_frm.doc.discount_amount)) ||
-			((cur_frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
+		var show = (cint(this.frm.doc.discount_amount)) ||
+			((this.frm.doc.taxes || []).filter(function(d) {return d.included_in_print_rate===1}).length);
 
 		$.each(["net_rate", "net_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
@@ -1786,7 +1787,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 
 			if (data && data.apply_rule_on_other_items && JSON.parse(data.apply_rule_on_other_items)) {
 				me.frm.doc.items.forEach(d => {
-					if (in_list(JSON.parse(data.apply_rule_on_other_items), d[data.apply_rule_on])) {
+					if (in_list(JSON.parse(data.apply_rule_on_other_items), d[data.apply_rule_on]) && d.item_code === data.item_code) {
 						for(var k in data) {
 							if (data.pricing_rule_for == "Discount Percentage" && data.apply_rule_on_other_items && k == "discount_amount") {
 								continue;
@@ -1887,6 +1888,10 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 		let me = this;
 		const fields = ["discount_percentage",
 			"discount_amount", "margin_rate_or_amount", "rate_with_margin"];
+
+		if (!item) {
+			return;
+		}
 
 		if(item.remove_free_item) {
 			let items = [];

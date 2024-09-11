@@ -24,7 +24,6 @@ erpnext.setup.slides_settings = [
 				fieldtype: "Data",
 				reqd: 1,
 			},
-			{ fieldtype: "Column Break" },
 			{
 				fieldname: "company_abbr",
 				label: __("Company Abbreviation"),

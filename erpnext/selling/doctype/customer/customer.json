@@ -21,6 +21,7 @@
   "gender",
   "lead_name",
   "opportunity_name",
+  "prospect_name",
   "account_manager",
   "image",
   "defaults_tab",
@@ -307,13 +308,15 @@
    "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
    "fieldtype": "Read Only",
-   "label": "Mobile No"
+   "label": "Mobile No",
+   "options": "Mobile"
   },
   {
    "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
    "fieldtype": "Read Only",
-   "label": "Email Id"
+   "label": "Email Id",
+   "options": "Email"
   },
   {
    "fieldname": "column_break_26",
@@ -570,6 +573,14 @@
   {
    "fieldname": "column_break_nwor",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "prospect_name",
+   "fieldtype": "Link",
+   "label": "From Prospect",
+   "no_copy": 1,
+   "options": "Prospect",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-user",
@@ -583,7 +594,7 @@
    "link_fieldname": "party"
   }
  ],
- "modified": "2024-05-08 18:03:20.716169",
+ "modified": "2024-06-17 03:24:59.612974",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
