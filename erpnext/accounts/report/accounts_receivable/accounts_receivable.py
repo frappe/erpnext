@@ -50,6 +50,11 @@ class ReceivablePayableReport:
 			getdate(nowdate()) if self.filters.report_date > getdate(nowdate()) else self.filters.report_date
 		)
 
+		if not self.filters.range:
+			self.filters.range = "30, 60, 90, 120"
+		self.ranges = [num.strip() for num in self.filters.range.split(",") if num.strip().isdigit()]
+		self.range_numbers = [num for num in range(1, len(self.ranges) + 2)]
+
 	def run(self, args):
 		self.filters.update(args)
 		self.set_defaults()
@@ -112,6 +117,26 @@ class ReceivablePayableReport:
 
 		self.build_data()
 
+	def build_voucher_dict(self, ple):
+		return frappe._dict(
+			voucher_type=ple.voucher_type,
+			voucher_no=ple.voucher_no,
+			party=ple.party,
+			party_account=ple.account,
+			posting_date=ple.posting_date,
+			account_currency=ple.account_currency,
+			remarks=ple.remarks,
+			invoiced=0.0,
+			paid=0.0,
+			credit_note=0.0,
+			outstanding=0.0,
+			invoiced_in_account_currency=0.0,
+			paid_in_account_currency=0.0,
+			credit_note_in_account_currency=0.0,
+			outstanding_in_account_currency=0.0,
+			cost_center=ple.cost_center,
+		)
+
 	def init_voucher_balance(self):
 		# build all keys, since we want to exclude vouchers beyond the report date
 		for ple in self.ple_entries:
@@ -123,24 +148,8 @@ class ReceivablePayableReport:
 				key = (ple.account, ple.voucher_type, ple.voucher_no, ple.party)
 
 			if key not in self.voucher_balance:
-				self.voucher_balance[key] = frappe._dict(
-					voucher_type=ple.voucher_type,
-					voucher_no=ple.voucher_no,
-					party=ple.party,
-					party_account=ple.account,
-					posting_date=ple.posting_date,
-					account_currency=ple.account_currency,
-					remarks=ple.remarks,
-					invoiced=0.0,
-					paid=0.0,
-					credit_note=0.0,
-					outstanding=0.0,
-					invoiced_in_account_currency=0.0,
-					paid_in_account_currency=0.0,
-					credit_note_in_account_currency=0.0,
-					outstanding_in_account_currency=0.0,
-					cost_center=ple.cost_center,
-				)
+				self.voucher_balance[key] = self.build_voucher_dict(ple)
+
 			self.get_invoices(ple)
 
 			if self.filters.get("group_by_party"):
@@ -207,6 +216,18 @@ class ReceivablePayableReport:
 						key = (ple.account, ple.against_voucher_type, return_against, ple.party)
 
 		row = self.voucher_balance.get(key)
+
+		# Build and use a separate row for Employee Advances.
+		# This allows Payments or Journals made against Emp Advance to be processed.
+		if (
+			not row
+			and ple.against_voucher_type == "Employee Advance"
+			and self.filters.handle_employee_advances
+		):
+			_d = self.build_voucher_dict(ple)
+			_d.voucher_type = ple.against_voucher_type
+			_d.voucher_no = ple.against_voucher_no
+			row = self.voucher_balance[key] = _d
 
 		if not row:
 			# no invoice, this is an invoice / stand-alone payment / credit note
@@ -717,37 +738,22 @@ class ReceivablePayableReport:
 
 		# ageing buckets should not have amounts if due date is not reached
 		if getdate(entry_date) > getdate(self.filters.report_date):
-			row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
+			[setattr(row, f"range{i}", 0.0) for i in self.range_numbers]
 
-		row.total_due = row.range1 + row.range2 + row.range3 + row.range4 + row.range5
+		row.total_due = sum(row[f"range{i}"] for i in self.range_numbers)
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
+		[setattr(row, f"range{i}", 0.0) for i in self.range_numbers]
 
 		if not (self.age_as_on and entry_date):
 			return
 
 		row.age = (getdate(self.age_as_on) - getdate(entry_date)).days or 0
-		index = None
 
-		if not (self.filters.range1 and self.filters.range2 and self.filters.range3 and self.filters.range4):
-			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = (
-				30,
-				60,
-				90,
-				120,
-			)
-
-		for i, days in enumerate(
-			[self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4]
-		):
-			if cint(row.age) <= cint(days):
-				index = i
-				break
-
-		if index is None:
-			index = 4
+		index = next(
+			(i for i, days in enumerate(self.ranges) if cint(row.age) <= cint(days)), len(self.ranges)
+		)
 		row["range" + str(index + 1)] = row.outstanding
 
 	def get_ple_entries(self):
@@ -1059,6 +1065,7 @@ class ReceivablePayableReport:
 			self.add_column(_("Debit Note"), fieldname="credit_note")
 		self.add_column(_("Outstanding Amount"), fieldname="outstanding")
 
+		self.add_column(label=_("Age (Days)"), fieldname="age", fieldtype="Int", width=80)
 		self.setup_ageing_columns()
 
 		self.add_column(
@@ -1117,34 +1124,26 @@ class ReceivablePayableReport:
 	def setup_ageing_columns(self):
 		# for charts
 		self.ageing_column_labels = []
-		self.add_column(label=_("Age (Days)"), fieldname="age", fieldtype="Int", width=80)
+		ranges = [*self.ranges, "Above"]
 
-		for i, label in enumerate(
-			[
-				"0-{range1}".format(range1=self.filters["range1"]),
-				"{range1}-{range2}".format(
-					range1=cint(self.filters["range1"]) + 1, range2=self.filters["range2"]
-				),
-				"{range2}-{range3}".format(
-					range2=cint(self.filters["range2"]) + 1, range3=self.filters["range3"]
-				),
-				"{range3}-{range4}".format(
-					range3=cint(self.filters["range3"]) + 1, range4=self.filters["range4"]
-				),
-				_("{range4}-Above").format(range4=cint(self.filters["range4"]) + 1),
-			]
-		):
-			self.add_column(label=label, fieldname="range" + str(i + 1))
+		prev_range_value = 0
+		for idx, curr_range_value in enumerate(ranges):
+			label = f"{prev_range_value}-{curr_range_value}"
+			self.add_column(label=label, fieldname="range" + str(idx + 1))
+
 			self.ageing_column_labels.append(label)
 
+			if curr_range_value.isdigit():
+				prev_range_value = cint(curr_range_value) + 1
+
 	def get_chart_data(self):
+		precision = cint(frappe.db.get_default("float_precision")) or 2
 		rows = []
 		for row in self.data:
 			row = frappe._dict(row)
 			if not cint(row.bold):
-				values = [row.range1, row.range2, row.range3, row.range4, row.range5]
-				precision = cint(frappe.db.get_default("float_precision")) or 2
-				rows.append({"values": [flt(val, precision) for val in values]})
+				values = [flt(row.get(f"range{i}", None), precision) for i in self.range_numbers]
+				rows.append({"values": values})
 
 		self.chart = {
 			"data": {"labels": self.ageing_column_labels, "datasets": rows},

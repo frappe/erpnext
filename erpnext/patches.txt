@@ -371,6 +371,8 @@ erpnext.patches.v15_0.update_warehouse_field_in_asset_repair_consumed_item_docty
 erpnext.patches.v15_0.update_asset_repair_field_in_stock_entry
 erpnext.patches.v15_0.update_total_number_of_booked_depreciations
 erpnext.patches.v15_0.do_not_use_batchwise_valuation
+erpnext.patches.v15_0.update_invoice_remarks
+erpnext.patches.v14_0.update_reports_with_range
 erpnext.patches.v15_0.drop_index_posting_datetime_from_sle
 erpnext.patches.v15_0.add_disassembly_order_stock_entry_type #1
 erpnext.patches.v15_0.set_standard_stock_entry_type

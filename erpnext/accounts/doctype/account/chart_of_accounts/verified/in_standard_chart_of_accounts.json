@@ -109,7 +109,8 @@
                 "Utility Expenses": {},
                 "Write Off": {},
                 "Exchange Gain/Loss": {},
-                "Gain/Loss on Asset Disposal": {}
+                "Gain/Loss on Asset Disposal": {},
+                "Impairment": {}
             },
             "root_type": "Expense"
         },
@@ -132,7 +133,8 @@
         "Source of Funds (Liabilities)": {
             "Capital Account": {
                 "Reserves and Surplus": {},
-                "Shareholders Funds": {}
+                "Shareholders Funds": {},
+                "Revaluation Surplus": {}
             },
             "Current Liabilities": {
                 "Accounts Payable": {
