@@ -608,8 +608,7 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 		.run()
 	)
 
-	return response[0][0] if response else 0
-
+	return response[0][0] if response[0] else 0
 
 def get_gateway_details(args):  # nosemgrep
 	"""
