@@ -324,9 +324,8 @@ class PaymentRequest(Document):
 			}
 		)
 
-		# Update payment_request for each reference in payment_entry (Payment Term can splits the row)
-		for row in payment_entry.references:
-			row.payment_request = self.name
+		# Allocate payment_request for each reference in payment_entry (Payment Term can splits the row)
+		self._allocate_payment_request_to_pe_references(references=payment_entry.references)
 
 		# Update dimensions
 		payment_entry.update(
@@ -437,6 +436,53 @@ class PaymentRequest(Document):
 		if self.reference_doctype in advance_payment_doctypes:
 			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 			ref_doc.set_advance_payment_status()
+
+	def _allocate_payment_request_to_pe_references(self, references):
+		if len(references) == 1:
+			references[0].payment_request = self.name
+			return
+
+		outstanding_amount = self.outstanding_amount
+
+		# to manage rows
+		row_number = 1
+		MOVE_TO_NEXT_ROW = 1
+		TO_SKIP_NEW_ROW = 2
+		NEW_ROW_ADDED = False
+
+		while row_number <= len(references):
+			row = references[row_number - 1]
+
+			# update the idx to maintain the order
+			row.idx = row_number
+
+			if outstanding_amount == 0:
+				if not NEW_ROW_ADDED:
+					break
+				continue
+
+			# allocate the payment request to the row
+			row.payment_request = self.name
+
+			if row.allocated_amount <= outstanding_amount:
+				outstanding_amount -= row.allocated_amount
+				row_number += MOVE_TO_NEXT_ROW
+			else:
+				remaining_allocated_amount = row.allocated_amount - outstanding_amount
+				row.allocated_amount = outstanding_amount
+				outstanding_amount = 0
+
+				# create a new row without PR for remaining unallocated amount
+				new_row = frappe.copy_doc(row)
+				references.insert(row_number, new_row)
+
+				# update new row
+				new_row.idx = row_number + 1
+				new_row.payment_request = None
+				new_row.allocated_amount = remaining_allocated_amount
+
+				NEW_ROW_ADDED = True
+				row_number += TO_SKIP_NEW_ROW
 
 
 @frappe.whitelist(allow_guest=True)
@@ -609,6 +655,7 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 	)
 
 	return response[0][0] if response[0] else 0
+
 
 def get_gateway_details(args):  # nosemgrep
 	"""

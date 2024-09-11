@@ -1821,7 +1821,7 @@ class PaymentEntry(AccountsController):
 					allocated_negative_outstanding,
 				)
 
-			set_open_payment_requests_to_references(self.references)
+			allocate_open_payment_requests_to_references(self.references)
 
 		else:
 			payment_request_outstanding_amounts = (
@@ -2816,7 +2816,7 @@ def get_payment_entry(
 		pe.set_difference_amount()
 
 	if not created_from_payment_request:
-		set_open_payment_requests_to_references(pe.references)
+		allocate_open_payment_requests_to_references(pe.references)
 
 	return pe
 
@@ -2861,7 +2861,7 @@ def get_open_payment_requests_for_references(references=None):
 	return reference_payment_requests
 
 
-def set_open_payment_requests_to_references(references=None):
+def allocate_open_payment_requests_to_references(references=None):
 	if not references:
 		return
 
