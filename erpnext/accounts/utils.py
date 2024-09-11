@@ -798,7 +798,6 @@ def delete_exchange_gain_loss_journal(
 		)
 		for doc in gain_loss_journals:
 			gain_loss_je = frappe.get_doc("Journal Entry", doc)
-			# if parent_doc.name != gain_loss_je.name:
 			if referenced_dt and referenced_dn:
 				references = [(x.reference_type, x.reference_name) for x in gain_loss_je.accounts]
 				if (
