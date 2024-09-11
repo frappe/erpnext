@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-10 18:59\n"
+"PO-Revision-Date: 2024-09-11 19:00\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -1070,7 +1070,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Abampere"
-msgstr ""
+msgstr "Abamper"
 
 #. Label of the abbr (Data) field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -2278,12 +2278,12 @@ msgstr "Alım Tarihi"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Acre"
-msgstr ""
+msgstr "Akre"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Acre (US)"
-msgstr ""
+msgstr "Akre (ABD)"
 
 #: crm/doctype/lead/lead.js:41
 #: public/js/bank_reconciliation_tool/dialog_manager.js:175
@@ -4846,7 +4846,7 @@ msgstr "Müşterinin para birimindeki tutar."
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:72
 msgid "Amount in {0}"
-msgstr ""
+msgstr "{0} cinsinden Miktar"
 
 #: accounts/doctype/payment_entry/payment_entry.py:1174
 msgid "Amount {0} {1} against {2} {3}"
@@ -5332,7 +5332,7 @@ msgstr "Açıklama/cari adını carilerle yaklaşık olarak eşleştirin"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Are"
-msgstr ""
+msgstr "Ar"
 
 #: public/js/utils/demo.js:20
 msgid "Are you sure you want to clear all demo data?"
@@ -7394,7 +7394,7 @@ msgstr "Barkodlar"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Barleycorn"
-msgstr ""
+msgstr "Arpa Tanesi"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -7742,7 +7742,7 @@ msgstr "{0} partisi {1} deposunda mevcut değil"
 #: stock/doctype/stock_entry/stock_entry.py:2535
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:288
 msgid "Batch {0} of Item {1} has expired."
-msgstr "{0} partisindeki {1} ürününün ömrü doldu"
+msgstr "{0} partisindeki {1} ürününün ömrü doldu."
 
 #: stock/doctype/stock_entry/stock_entry.py:2541
 msgid "Batch {0} of Item {1} is disabled."
@@ -8024,7 +8024,7 @@ msgstr "Biyo / Ön Yazı"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Biot"
-msgstr ""
+msgstr "Biot"
 
 #: setup/setup_wizard/data/industry_type.txt:9
 msgid "Biotechnology"
@@ -8386,17 +8386,17 @@ msgstr "Ürün Ağacına Gözat"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu (It)"
-msgstr ""
+msgstr "Btu (It)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu (Mean)"
-msgstr ""
+msgstr "Btu (Ortalama)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Btu (Th)"
-msgstr ""
+msgstr "Btu (Th)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -8527,12 +8527,12 @@ msgstr "Paket Miktarı"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Bushel (UK)"
-msgstr ""
+msgstr "Buşel (İngiltere)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Bushel (US Dry Level)"
-msgstr ""
+msgstr "Buşel (ABD Kuru Seviyesi)"
 
 #: setup/setup_wizard/data/designation.txt:6
 msgid "Business Analyst"
@@ -8674,7 +8674,7 @@ msgstr "CWIP Hesabı"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Caballeria"
-msgstr ""
+msgstr "Kabalerya"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -9576,7 +9576,7 @@ msgstr "Dikkat"
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.py:142
 msgid "Caution: This might alter frozen accounts."
-msgstr ""
+msgstr "Dikkat: Bu işlem dondurulmuş hesapları değiştirebilir."
 
 #. Label of the cell_number (Data) field in DocType 'Driver'
 #: setup/doctype/driver/driver.json
@@ -9596,7 +9596,7 @@ msgstr "Merkez"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Centiarea"
-msgstr ""
+msgstr "Metrekare"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -10385,7 +10385,7 @@ msgstr "Satış Komisyonu"
 #. Label of the common_code (Data) field in DocType 'UOM'
 #: setup/doctype/uom/uom.json
 msgid "Common Code"
-msgstr ""
+msgstr "Ortak Kod"
 
 #. Label of a Link in the CRM Workspace
 #: crm/workspace/crm/crm.json
@@ -12301,7 +12301,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:244
 msgid "Cost Center {} doesn't belong to Company {}"
-msgstr ""
+msgstr "Maliyet Merkezi {}, {} Şirketine ait değil"
 
 #: assets/doctype/asset/asset.py:251
 msgid "Cost Center {} is a group cost center and group cost centers cannot be used in transactions"
@@ -12453,7 +12453,7 @@ msgstr ""
 #: accounts/report/dimension_wise_accounts_balance_report/dimension_wise_accounts_balance_report.py:124
 #: accounts/report/financial_statements.py:234
 msgid "Could not retrieve information for {0}."
-msgstr ""
+msgstr "{0} için bilgi alınamadı."
 
 #: buying/doctype/supplier_scorecard_period/supplier_scorecard_period.py:80
 msgid "Could not solve criteria score function for {0}. Make sure the formula is valid."
@@ -12466,7 +12466,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Coulomb"
-msgstr ""
+msgstr "Kulon"
 
 #. Label of the count (Int) field in DocType 'Shipment Parcel'
 #: stock/doctype/shipment_parcel/shipment_parcel.json
@@ -14846,7 +14846,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Decigram/Litre"
-msgstr ""
+msgstr "Desigram/Litre"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -15397,7 +15397,7 @@ msgstr "Varsayılan Değerler"
 
 #: setup/setup_wizard/data/industry_type.txt:17
 msgid "Defense"
-msgstr ""
+msgstr "Savunma Sanayi"
 
 #. Label of the deferred_accounting_section (Section Break) field in DocType
 #. 'Item'
@@ -15458,11 +15458,11 @@ msgstr "Ertelenmiş Gelir Hesabı"
 #. Name of a report
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.json
 msgid "Deferred Revenue and Expense"
-msgstr ""
+msgstr "Ertelenmiş Gelir ve Gider"
 
 #: accounts/deferred_revenue.py:541
 msgid "Deferred accounting failed for some invoices:"
-msgstr ""
+msgstr "Bazı faturalar için ertelenmiş muhasebe başarısız oldu:"
 
 #: config/projects.py:39
 msgid "Define Project type."
@@ -15471,7 +15471,7 @@ msgstr "Proje türünü tanımlayın."
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Dekagram/Litre"
-msgstr ""
+msgstr "Dekagram/Litre"
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:108
 msgid "Delay (In Days)"
@@ -15874,7 +15874,7 @@ msgstr "Departman"
 
 #: setup/setup_wizard/data/industry_type.txt:18
 msgid "Department Stores"
-msgstr ""
+msgstr "Alışveriş Merkezi"
 
 #. Label of the departure_time (Datetime) field in DocType 'Delivery Trip'
 #: stock/doctype/delivery_trip/delivery_trip.json
@@ -17490,7 +17490,7 @@ msgstr "Taslak"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Dram"
-msgstr ""
+msgstr "Dirhem"
 
 #. Name of a DocType
 #. Label of the driver (Link) field in DocType 'Delivery Note'
@@ -17735,7 +17735,7 @@ msgstr "Dinamik Koşul"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Dyne"
-msgstr ""
+msgstr "Din"
 
 #: regional/italy/utils.py:247 regional/italy/utils.py:267
 #: regional/italy/utils.py:278 regional/italy/utils.py:286
@@ -17754,17 +17754,17 @@ msgstr "EAN"
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-12"
-msgstr ""
+msgstr "EAN-12"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
 msgid "EAN-8"
-msgstr ""
+msgstr "EAN-8"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "EMU Of Charge"
-msgstr ""
+msgstr "Elektromanyetik Yük"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -18667,7 +18667,7 @@ msgstr ""
 
 #: selling/page/point_of_sale/pos_payment.js:411
 msgid "Enter {0} amount."
-msgstr ""
+msgstr "{0} tutarını girin."
 
 #: setup/setup_wizard/data/industry_type.txt:22
 msgid "Entertainment & Leisure"
@@ -18676,7 +18676,7 @@ msgstr "Eğlence ve Keyif"
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:57
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:82
 msgid "Entertainment Expenses"
-msgstr ""
+msgstr "Eğlence Giderleri"
 
 #. Label of the entity (Dynamic Link) field in DocType 'Service Level
 #. Agreement'
@@ -18721,7 +18721,7 @@ msgstr "Özkaynak / Sorumluluk Hesabı"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Erg"
-msgstr ""
+msgstr "Erg"
 
 #. Option for the 'Status' (Select) field in DocType 'Bank Statement Import'
 #. Option for the 'Status' (Select) field in DocType 'Ledger Merge'
@@ -19036,7 +19036,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:23
 msgid "Executive Search"
-msgstr ""
+msgstr "Özel Araştırma"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:67
 msgid "Exempt Supplies"
@@ -19533,7 +19533,7 @@ msgstr "Faraday"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Fathom"
-msgstr ""
+msgstr "Kulaç"
 
 #. Label of the fax (Data) field in DocType 'Lead'
 #. Label of the fax (Data) field in DocType 'Prospect'
@@ -20271,12 +20271,12 @@ msgstr "Yiyecek, İçecek & Tütün"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Foot"
-msgstr ""
+msgstr "Fit"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Foot Of Water"
-msgstr ""
+msgstr "Fit (Su)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -21236,22 +21236,22 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon (UK)"
-msgstr ""
+msgstr "Galon (İngiltere)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon Dry (US)"
-msgstr ""
+msgstr "Kuru Galon (ABD)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gallon Liquid (US)"
-msgstr ""
+msgstr "Sıvı Galon (ABD)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gamma"
-msgstr ""
+msgstr "Gama"
 
 #: projects/doctype/project/project.js:101
 msgid "Gantt Chart"
@@ -21259,12 +21259,12 @@ msgstr "Gantt Şeması"
 
 #: config/projects.py:28
 msgid "Gantt chart of all tasks."
-msgstr ""
+msgstr "Bütün görevlerinin Gantt Şeması."
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gauss"
-msgstr ""
+msgstr "Gauss"
 
 #. Label of the gender (Link) field in DocType 'Lead'
 #. Label of the gender (Link) field in DocType 'Customer'
@@ -21686,22 +21686,22 @@ msgstr "Mezun"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Grain"
-msgstr ""
+msgstr "Grain"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Grain/Cubic Foot"
-msgstr ""
+msgstr "Gain/Fit Küp³"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Grain/Gallon (UK)"
-msgstr ""
+msgstr "Grain/Galon (İngiltere)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Grain/Gallon (US)"
-msgstr ""
+msgstr "Grain/Galon (ABD)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -21716,12 +21716,12 @@ msgstr "Gram-Kuvvet"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Centimeter"
-msgstr ""
+msgstr "Gram/Santimetreküp"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Gram/Cubic Meter"
-msgstr ""
+msgstr "Gram/Metreküp"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -22079,7 +22079,7 @@ msgstr "Büyüme Görünümü"
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:245
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:169
 msgid "H - F"
-msgstr ""
+msgstr "H - F"
 
 #. Name of a role
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.json
@@ -22337,7 +22337,7 @@ msgstr "Burada, haftalık izinleriniz önceki seçimlere göre önceden doldurul
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hertz"
-msgstr ""
+msgstr "Hertz"
 
 #: stock/doctype/repost_item_valuation/repost_item_valuation.py:402
 msgid "Hi,"
@@ -22515,12 +22515,12 @@ msgstr "İnsan Kaynakları"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hundredweight (UK)"
-msgstr ""
+msgstr "Kantar (İngiltere)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Hundredweight (US)"
-msgstr ""
+msgstr "Kantar (ABD)"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.py:260
 #: stock/report/stock_ledger_variance/stock_ledger_variance.py:184
@@ -22563,7 +22563,7 @@ msgstr "IP Adresi"
 #. Name of a report
 #: regional/report/irs_1099/irs_1099.json
 msgid "IRS 1099"
-msgstr ""
+msgstr "IRS 1099"
 
 #. Option for the 'Barcode Type' (Select) field in DocType 'Item Barcode'
 #: stock/doctype/item_barcode/item_barcode.json
@@ -22588,7 +22588,7 @@ msgstr "ISSN"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Iches Of Water"
-msgstr ""
+msgstr "İnç Su"
 
 #: manufacturing/report/job_card_summary/job_card_summary.py:128
 #: manufacturing/report/quality_inspection_summary/quality_inspection_summary.py:69
@@ -22774,7 +22774,7 @@ msgstr "Etkinleştirilirse, sistem toplu kalemlerin değerleme oranını hesapla
 #. Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgid "If enabled, then system will only validate the pricing rule and not apply automatically. User has to manually set the discount percentage / margin / free items to validate the pricing rule"
-msgstr ""
+msgstr "Etkinleştirilirse, sistem fiyatlandırma kuralını yalnızca doğrulayacak ve otomatik olarak uygulamayacaktır. Kullanıcı, fiyatlandırma kuralını doğrulamak için indirim yüzdesini / marjı / ücretsiz ürünleri manuel olarak ayarlamalıdır"
 
 #. Description of the 'Variant Of' (Link) field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -22800,7 +22800,7 @@ msgstr "Aksi takdirde, bu girişi İptal Edebilir veya Gönderebilirsiniz"
 #. Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgid "If rate is zero then item will be treated as \"Free Item\""
-msgstr ""
+msgstr "Fiyat sıfır ise Ürün \"Ücretsiz Ürün\" olarak değerlendirilecektir"
 
 #. Description of the 'Supply Raw Materials for Purchase' (Check) field in
 #. DocType 'Item'
@@ -24246,7 +24246,7 @@ msgstr ""
 #. Option for the 'Status' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json crm/report/lead_details/lead_details.js:39
 msgid "Interested"
-msgstr ""
+msgstr "İlgili"
 
 #: buying/doctype/purchase_order/purchase_order_dashboard.py:29
 #: setup/setup_wizard/operations/install_fixtures.py:285
@@ -24358,11 +24358,11 @@ msgstr ""
 
 #: quality_management/doctype/quality_procedure/quality_procedure.py:72
 msgid "Invalid Child Procedure"
-msgstr ""
+msgstr "Geçersiz Alt Prosedür"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1965
 msgid "Invalid Company for Inter Company Transaction."
-msgstr ""
+msgstr "Şirketler Arası İşlem için Geçersiz Şirket."
 
 #: assets/doctype/asset/asset.py:247 assets/doctype/asset/asset.py:254
 #: controllers/accounts_controller.py:2658
@@ -24538,7 +24538,7 @@ msgstr "Stok Ayarları"
 
 #: setup/setup_wizard/data/industry_type.txt:29
 msgid "Investment Banking"
-msgstr ""
+msgstr "Yatırım Bankacılığı"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:38
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:53
@@ -26935,7 +26935,7 @@ msgstr "İşe Başlama"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Joule"
-msgstr ""
+msgstr "Joule"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -27080,7 +27080,7 @@ msgstr "Kilokalori"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilocoulomb"
-msgstr ""
+msgstr "Kilocoulomb"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -27090,7 +27090,7 @@ msgstr "Kilogram-Kuvvet"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilogram/Cubic Centimeter"
-msgstr ""
+msgstr "Kilogram/Santimetreküp"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -27105,7 +27105,7 @@ msgstr "Kilogram/Litre"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilohertz"
-msgstr ""
+msgstr "Kilohertz"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -27130,22 +27130,22 @@ msgstr "Kilopaskal"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilopond"
-msgstr ""
+msgstr "Kilopond"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilopound-Force"
-msgstr ""
+msgstr "Kilopound-Kuvvet"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilowatt"
-msgstr ""
+msgstr "Kilowatt"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kilowatt-Hour"
-msgstr ""
+msgstr "Kilowatt-Saat"
 
 #: manufacturing/doctype/job_card/job_card.py:837
 msgid "Kindly cancel the Manufacturing Entries first against the work order {0}."
@@ -27158,12 +27158,12 @@ msgstr "Lütfen önce şirketi seçin"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Kip"
-msgstr ""
+msgstr "Kip"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Knot"
-msgstr ""
+msgstr "Deniz Mili/Saat"
 
 #. Option for the 'Valuation Method' (Select) field in DocType 'Item'
 #. Option for the 'Default Valuation Method' (Select) field in DocType 'Stock
@@ -29588,7 +29588,7 @@ msgstr "Mikrosaniye"
 #: setup/setup_wizard/operations/install_fixtures.py:295
 #: setup/setup_wizard/operations/install_fixtures.py:403
 msgid "Middle Income"
-msgstr ""
+msgstr "Orta Gelir"
 
 #. Label of the middle_name (Data) field in DocType 'Lead'
 #. Label of the middle_name (Data) field in DocType 'Employee'
@@ -29634,7 +29634,7 @@ msgstr "Miliamper"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millicoulomb"
-msgstr ""
+msgstr "Millicoulomb"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -29664,7 +29664,7 @@ msgstr "Miligram/Litre"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millihertz"
-msgstr ""
+msgstr "Milihertz"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -29679,12 +29679,12 @@ msgstr "Milimetre"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millimeter Of Mercury"
-msgstr ""
+msgstr "Milimetre Cıva"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Millimeter Of Water"
-msgstr ""
+msgstr "Milimetre Su"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -29707,7 +29707,7 @@ msgstr "Minimum Tutar"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:227
 msgid "Min Amt can not be greater than Max Amt"
-msgstr ""
+msgstr "Min Miktar Maks Miktardan büyük olamaz"
 
 #. Label of the min_grade (Percent) field in DocType 'Supplier Scorecard
 #. Scoring Standing'
@@ -30481,17 +30481,17 @@ msgstr "Adlandırma Serisi ve Fiyatlar"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanocoulomb"
-msgstr ""
+msgstr "Nanocoulomb"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanogram/Litre"
-msgstr ""
+msgstr "Nanogram/Litre"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Nanohertz"
-msgstr ""
+msgstr "Nanohertz"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -30970,12 +30970,12 @@ msgstr "Bülten"
 
 #: setup/setup_wizard/data/industry_type.txt:34
 msgid "Newspaper Publishers"
-msgstr ""
+msgstr "Gazete Yayıncılığı"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Newton"
-msgstr ""
+msgstr "Newton"
 
 #: www/book_appointment/index.html:34
 msgid "Next"
@@ -31916,7 +31916,7 @@ msgstr "Görev Tamamlandığında"
 
 #: stock/report/available_batch_report/available_batch_report.js:16
 msgid "On This Date"
-msgstr ""
+msgstr "Bu Tarihte"
 
 #: projects/report/delayed_tasks_summary/delayed_tasks_summary.py:79
 msgid "On Track"
@@ -31966,7 +31966,7 @@ msgstr "Devam Eden İş Kartları"
 
 #: setup/setup_wizard/data/industry_type.txt:35
 msgid "Online Auctions"
-msgstr ""
+msgstr "Çevrimiçi Müzayede"
 
 #. Description of the 'Default Advance Account' (Link) field in DocType
 #. 'Payment Reconciliation'
@@ -32919,22 +32919,22 @@ msgstr "Ons-Kuvvet"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Cubic Foot"
-msgstr ""
+msgstr "Ons/Fit Küp"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Cubic Inch"
-msgstr ""
+msgstr "Ons/Küp İnç"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (UK)"
-msgstr ""
+msgstr "Ons/Galon (İngiltere)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Ounce/Gallon (US)"
-msgstr ""
+msgstr "Ons/Galon (ABD)"
 
 #: stock/report/batch_wise_balance_history/batch_wise_balance_history.py:88
 #: stock/report/stock_balance/stock_balance.py:461
@@ -33638,7 +33638,7 @@ msgstr "Ödenen Tutar + Kapatılan Tutar, Genel Toplamdan büyük olamaz."
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pair"
-msgstr ""
+msgstr "Çift"
 
 #. Label of the pallets (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -34908,17 +34908,17 @@ msgstr "Ödenecek Bordro"
 #: projects/doctype/timesheet/timesheet.json
 #: projects/doctype/timesheet/timesheet_list.js:9
 msgid "Payslip"
-msgstr ""
+msgstr "Maaş Bordrosu"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Peck (UK)"
-msgstr ""
+msgstr "Peck (İngiltere)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Peck (US)"
-msgstr ""
+msgstr "Peck (ABD)"
 
 #. Option for the 'Status' (Select) field in DocType 'Bank Statement Import'
 #. Option for the 'Status' (Select) field in DocType 'Bank Transaction'
@@ -35253,7 +35253,7 @@ msgstr "Eczacılık"
 
 #: setup/setup_wizard/data/industry_type.txt:37
 msgid "Pharmaceuticals"
-msgstr ""
+msgstr "Eczacılık"
 
 #. Option for the 'Type' (Select) field in DocType 'Mode of Payment'
 #. Option for the 'Payment Channel' (Select) field in DocType 'Payment Gateway
@@ -36665,12 +36665,12 @@ msgstr "Poliçe Numarası"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pond"
-msgstr ""
+msgstr "Pond"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pood"
-msgstr ""
+msgstr "Pud"
 
 #. Name of a DocType
 #: utilities/doctype/portal_user/portal_user.json
@@ -36916,7 +36916,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound"
-msgstr ""
+msgstr "Libre"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -36926,22 +36926,22 @@ msgstr "Pound-Kuvvet"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Cubic Foot"
-msgstr ""
+msgstr "Libre/Küp Fit"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Cubic Inch"
-msgstr ""
+msgstr "Libre/Küp İnç"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Cubic Yard"
-msgstr ""
+msgstr "Libre/Küp Yard"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Pound/Gallon (UK)"
-msgstr ""
+msgstr "Libre/Galon (İngiltere)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -36951,7 +36951,7 @@ msgstr "Pound/Galon (ABD)"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Poundal"
-msgstr ""
+msgstr "Poundal"
 
 #: templates/includes/footer/footer_powered.html:1
 msgid "Powered by {0}"
@@ -37748,7 +37748,7 @@ msgstr "{0} önceliği tekrarlandı."
 
 #: setup/setup_wizard/data/industry_type.txt:38
 msgid "Private Equity"
-msgstr ""
+msgstr "Özel Sermaye"
 
 #. Label of the probability (Percent) field in DocType 'Prospect Opportunity'
 #: crm/doctype/prospect_opportunity/prospect_opportunity.json
@@ -38709,7 +38709,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:39
 msgid "Publishing"
-msgstr ""
+msgstr "Yayıncılık"
 
 #. Option for the 'Invoice Type' (Select) field in DocType 'Opening Invoice
 #. Creation Tool'
@@ -39629,7 +39629,7 @@ msgstr "Kalite"
 #: quality_management/doctype/quality_meeting_minutes/quality_meeting_minutes.json
 #: quality_management/workspace/quality/quality.json
 msgid "Quality Action"
-msgstr ""
+msgstr "Aksiyon"
 
 #. Name of a DocType
 #: quality_management/doctype/quality_action_resolution/quality_action_resolution.json
@@ -40055,17 +40055,17 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Quart (UK)"
-msgstr ""
+msgstr "Quart (İngiltere)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Quart Dry (US)"
-msgstr ""
+msgstr "Quart Kuru (ABD)"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Quart Liquid (US)"
-msgstr ""
+msgstr "Quart Sıvı (ABD)"
 
 #: selling/report/sales_analytics/sales_analytics.py:378
 #: stock/report/stock_analytics/stock_analytics.py:116
@@ -40163,7 +40163,7 @@ msgstr "Quickbooks Şirket Kimliği"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Quintal"
-msgstr ""
+msgstr "Kental"
 
 #: crm/report/campaign_efficiency/campaign_efficiency.py:22
 #: crm/report/lead_owner_efficiency/lead_owner_efficiency.py:28
@@ -40208,7 +40208,7 @@ msgstr "Teklif Tutarı"
 #. Name of a DocType
 #: selling/doctype/quotation_item/quotation_item.json
 msgid "Quotation Item"
-msgstr "Teklif Kalemi"
+msgstr "Teklif Öğesi"
 
 #. Name of a DocType
 #. Label of the order_lost_reason (Data) field in DocType 'Quotation Lost
@@ -40857,7 +40857,7 @@ msgstr "Değerler"
 
 #: setup/setup_wizard/data/industry_type.txt:40
 msgid "Real Estate"
-msgstr ""
+msgstr "Gayrimenkul"
 
 #: support/doctype/issue/issue.js:51
 msgid "Reason"
@@ -43474,7 +43474,7 @@ msgstr ""
 
 #: controllers/accounts_controller.py:3407
 msgid "Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}."
-msgstr ""
+msgstr "Satır #{0}: {1} Ürünü için tutar fatura tutarından büyükse Oran belirlenemez."
 
 #: manufacturing/doctype/job_card/job_card.py:931
 msgid "Row #{0}: Cannot transfer more than Required Qty {1} for Item {2} against Job Card {3}"
@@ -43570,7 +43570,7 @@ msgstr "Satır #{0}: Başlangıç Tarihi Bitiş Tarihinden önce olamaz"
 
 #: public/js/utils/barcode_scanner.js:394
 msgid "Row #{0}: Item added"
-msgstr ""
+msgstr "Satır # {0}: Ürün eklendi"
 
 #: buying/utils.py:95
 msgid "Row #{0}: Item {1} does not exist"
@@ -46815,7 +46815,7 @@ msgstr ""
 #: setup/setup_wizard/operations/install_fixtures.py:59
 #: setup/setup_wizard/operations/install_fixtures.py:187
 msgid "Services"
-msgstr ""
+msgstr "Hizmetler"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -46886,7 +46886,7 @@ msgstr ""
 #. DocType 'Manufacturing Settings'
 #: manufacturing/doctype/manufacturing_settings/manufacturing_settings.json
 msgid "Set Operating Cost / Scrape Items From Sub-assemblies"
-msgstr "Operasyon Maliyetini Ayarla / Alt Montajlardan Hurda Ürünler"
+msgstr "İşletim Maliyetini Ayarlama / Alt Montajlardan Öğeleri Kazı"
 
 #. Label of the set_cost_based_on_bom_qty (Check) field in DocType 'BOM
 #. Operation'
@@ -47883,7 +47883,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:44
 msgid "Soap & Detergent"
-msgstr ""
+msgstr "Sabun & Deterjan"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:32
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:45
@@ -48129,7 +48129,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:46
 msgid "Sports"
-msgstr ""
+msgstr "Spor"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -49329,7 +49329,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Stone"
-msgstr ""
+msgstr "Stone"
 
 #. Option for the 'Action if Annual Budget Exceeded on MR' (Select) field in
 #. DocType 'Budget'
@@ -51093,7 +51093,7 @@ msgstr "Görev Ağırlığı"
 
 #: projects/doctype/project_template/project_template.py:40
 msgid "Task {0} depends on Task {1}. Please add Task {1} to the Tasks list."
-msgstr ""
+msgstr "{0} görevi {1} görevine bağlıdır. Lütfen Görev {1} 'u Görevler listesine ekleyin."
 
 #. Label of the tasks_section (Section Break) field in DocType 'Process Payment
 #. Reconciliation Log'
@@ -51591,12 +51591,12 @@ msgstr "takım üyesi"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Teaspoon"
-msgstr ""
+msgstr "Çay Kaşığı"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Technical Atmosphere"
-msgstr ""
+msgstr "Teknik Atmosfer"
 
 #: setup/setup_wizard/data/industry_type.txt:47
 msgid "Technology"
@@ -51604,7 +51604,7 @@ msgstr "Teknoloji"
 
 #: setup/setup_wizard/data/industry_type.txt:48
 msgid "Telecommunications"
-msgstr ""
+msgstr "Telekomünikasyon"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:69
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:93
@@ -51618,7 +51618,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:49
 msgid "Television"
-msgstr ""
+msgstr "Televizyon"
 
 #. Option for the 'Status' (Select) field in DocType 'Task'
 #. Label of the template (Link) field in DocType 'Quality Feedback'
@@ -51942,7 +51942,7 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tesla"
-msgstr ""
+msgstr "Tesla"
 
 #: stock/doctype/packing_slip/packing_slip.py:90
 msgid "The 'From Package No.' field must neither be empty nor it's value less than 1."
@@ -52899,7 +52899,7 @@ msgstr "Alıcı"
 
 #: selling/page/point_of_sale/pos_payment.js:587
 msgid "To Be Paid"
-msgstr ""
+msgstr "Ödenecek"
 
 #. Option for the 'Status' (Select) field in DocType 'Purchase Order'
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
@@ -53091,7 +53091,7 @@ msgstr ""
 #: selling/doctype/sales_order/sales_order_list.js:32
 #: selling/doctype/sales_order/sales_order_list.js:42
 msgid "To Deliver"
-msgstr ""
+msgstr "Teslim Edilecek"
 
 #. Option for the 'Sales Order Status' (Select) field in DocType 'Production
 #. Plan'
@@ -53269,7 +53269,7 @@ msgstr ""
 
 #: controllers/status_updater.py:344
 msgid "To allow over billing, update \"Over Billing Allowance\" in Accounts Settings or the Item."
-msgstr ""
+msgstr "Fazla faturalandırmaya izin vermek için Hesap Ayarları'nda veya Öğe'de \"Fazla Faturalandırma İzni \"ni güncelleyin."
 
 #: controllers/status_updater.py:340
 msgid "To allow over receipt / delivery, update \"Over Receipt/Delivery Allowance\" in Stock Settings or the Item."
@@ -53375,12 +53375,12 @@ msgstr ""
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tonne"
-msgstr ""
+msgstr "Ton"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Tonne-Force(Metric)"
-msgstr ""
+msgstr "Ton-Kuvvet (Metrik)"
 
 #: accounts/report/financial_statements.html:6
 msgid "Too many columns. Export the report and print it using a spreadsheet application."
@@ -54782,7 +54782,7 @@ msgstr "Zaman Kaytıları için etkinliklerin türleri"
 #: accounts/workspace/financial_reports/financial_reports.json
 #: regional/report/uae_vat_201/uae_vat_201.json
 msgid "UAE VAT 201"
-msgstr "Birleşik Arap Emirlikleri KDV 201"
+msgstr "BAE KDV 201"
 
 #. Name of a DocType
 #: regional/doctype/uae_vat_account/uae_vat_account.json
@@ -55079,7 +55079,7 @@ msgstr "Karşılanmamış"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Unit"
-msgstr ""
+msgstr "Birim"
 
 #: buying/report/procurement_tracker/procurement_tracker.py:68
 msgid "Unit of Measure"
@@ -55268,7 +55268,7 @@ msgstr "İmzalanmadı"
 
 #: setup/doctype/email_digest/email_digest.py:128
 msgid "Unsubscribe from this Email Digest"
-msgstr "Bu E-Posta Bildirimi Aboneliğinden Ayrılın"
+msgstr "Bu E-Posta Özeti Aboneliğinden Ayrılın"
 
 #. Option for the 'Status' (Select) field in DocType 'Email Campaign'
 #. Label of the unsubscribed (Check) field in DocType 'Lead'
@@ -55927,7 +55927,7 @@ msgstr ""
 #. 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Validate Pricing Rule"
-msgstr ""
+msgstr "Fiyatlandırma Kuralını Doğrula"
 
 #. Label of the validate_selling_price (Check) field in DocType 'Selling
 #. Settings'
@@ -56277,7 +56277,7 @@ msgstr ""
 
 #: setup/setup_wizard/data/industry_type.txt:51
 msgid "Venture Capital"
-msgstr ""
+msgstr "Risk Sermayesi"
 
 #: www/book_appointment/verify/index.html:15
 msgid "Verification failed please check the link"
@@ -57129,27 +57129,27 @@ msgstr "Video İzle"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Watt"
-msgstr ""
+msgstr "Watt"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Watt-Hour"
-msgstr ""
+msgstr "Watt-Saat"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Wavelength In Gigametres"
-msgstr ""
+msgstr "Gigametre Cinsinden Dalga Boyu"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Wavelength In Kilometres"
-msgstr ""
+msgstr "Kilometre Cinsinden Dalga Boyu"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Wavelength In Megametres"
-msgstr ""
+msgstr "Megametre Cinsinden Dalga Boyu"
 
 #: controllers/accounts_controller.py:231
 msgid "We can see {0} is made against {1}. If you want {1}'s outstanding to be updated, uncheck '{2}' checkbox. <br><br> Or you can use {3} tool to reconcile against {1} later."
@@ -57157,7 +57157,7 @@ msgstr ""
 
 #: www/support/index.html:7
 msgid "We're here to help!"
-msgstr ""
+msgstr "Yardım etmek için buradayız!"
 
 #. Label of the website (Data) field in DocType 'Bank'
 #. Label of the website (Data) field in DocType 'Supplier'
@@ -57185,7 +57185,7 @@ msgstr "Website"
 #. Name of a DocType
 #: portal/doctype/website_attribute/website_attribute.json
 msgid "Website Attribute"
-msgstr ""
+msgstr "Web Sitesi Özelliği"
 
 #. Label of the web_long_description (Text Editor) field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -57195,7 +57195,7 @@ msgstr "Açıklama"
 #. Name of a DocType
 #: portal/doctype/website_filter_field/website_filter_field.json
 msgid "Website Filter Field"
-msgstr ""
+msgstr "Web Sitesi Filtre Alanı"
 
 #. Label of the website_image (Attach Image) field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -57205,13 +57205,13 @@ msgstr "Websitesi Resmi"
 #. Name of a DocType
 #: setup/doctype/website_item_group/website_item_group.json
 msgid "Website Item Group"
-msgstr ""
+msgstr "Web Sitesi Ürün Grubu"
 
 #. Name of a role
 #: accounts/doctype/coupon_code/coupon_code.json
 #: accounts/doctype/pricing_rule/pricing_rule.json
 msgid "Website Manager"
-msgstr ""
+msgstr "Website Yöneticisi"
 
 #. Label of a Link in the Settings Workspace
 #: setup/workspace/settings/settings.json
@@ -57393,7 +57393,7 @@ msgstr "Hoşgeldiniz e-posta gönderimi yapılır"
 
 #: setup/utils.py:166
 msgid "Welcome to {0}"
-msgstr ""
+msgstr "{0} Uygulamasına Hoş Geldiniz"
 
 #: templates/pages/help.html:12
 msgid "What do you need help with?"
@@ -57436,7 +57436,7 @@ msgstr "Satınalma Siparişinden Satınalma Faturası oluştururken, Satın Alma
 
 #: setup/setup_wizard/operations/install_fixtures.py:269
 msgid "White"
-msgstr ""
+msgstr "Beyaz"
 
 #. Option for the 'Marital Status' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -57896,7 +57896,7 @@ msgstr "Yanlış Şirket"
 
 #: setup/doctype/company/company.js:209
 msgid "Wrong Password"
-msgstr ""
+msgstr "Yanlış Şifre"
 
 #: accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py:55
 msgid "Wrong Template"
@@ -57911,7 +57911,7 @@ msgstr "XML Dosyaları İşlendi"
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
 msgid "Yard"
-msgstr ""
+msgstr "Yard"
 
 #. Option for the 'Billing Interval' (Select) field in DocType 'Subscription
 #. Plan'
@@ -58280,7 +58280,7 @@ msgstr ""
 
 #: accounts/doctype/shipping_rule/shipping_rule.py:204
 msgid "and"
-msgstr ""
+msgstr "ve"
 
 #: manufacturing/doctype/bom/bom.js:863
 msgid "as a percentage of finished item quantity"
@@ -58322,7 +58322,7 @@ msgstr ""
 #: selling/report/sales_partner_commission_summary/sales_partner_commission_summary.py:25
 #: selling/report/sales_partner_transaction_summary/sales_partner_transaction_summary.py:25
 msgid "doctype"
-msgstr ""
+msgstr "docType"
 
 #. Description of the 'Coupon Name' (Data) field in DocType 'Coupon Code'
 #: accounts/doctype/coupon_code/coupon_code.json
