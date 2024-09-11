@@ -15,6 +15,7 @@ from frappe.utils import (
 	is_last_day_of_the_month,
 	nowdate,
 )
+from frappe.utils.data import add_to_date
 
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
@@ -219,33 +220,33 @@ class TestAsset(AssetSetup):
 		)
 		self.assertEqual(accumulated_depr_amount, 18000.0)
 
-		scrap_asset(asset.name)
-		asset.load_from_db()
-
-		asset_depriciation = frappe.db.get_value("Asset Depreciation Schedule", asset.name, "name")
-		depreciation_entries = frappe.db.get_all(
+		asset_depreciation = frappe.db.get_value(
+			"Asset Depreciation Schedule", {"asset": asset.name, "docstatus": 1}, "name"
+		)
+		last_booked_depreciation_date = frappe.db.get_value(
 			"Depreciation Schedule",
-			filters={"parent": asset_depriciation},
-			fields=["schedule_date", "journal_entry"],
-			order_by="schedule_date",
+			{
+				"parent": asset_depreciation,
+				"docstatus": 1,
+				"journal_entry": ["!=", ""],
+			},
+			"schedule_date",
+			order_by="schedule_date desc",
 		)
 
-		last_depreciated_row = None
-		for entry in depreciation_entries:
-			if entry["journal_entry"]:
-				last_depreciated_row = entry
+		before_purchase_date = add_to_date(asset.purchase_date, days=-1)
+		future_date = add_to_date(nowdate(), days=1)
+		if last_booked_depreciation_date:
+			before_last_booked_depreciation_date = add_to_date(last_booked_depreciation_date, days=-1)
 
-		if asset.disposal_date > asset.purchase_date:
-			if last_depreciated_row:
-				disposal_date = frappe.utils.getdate(asset.disposal_date)
-				last_schedule_date = frappe.utils.getdate(last_depreciated_row["schedule_date"])
-				today_date = frappe.utils.getdate(nowdate())
+		self.assertRaises(frappe.ValidationError, scrap_asset, asset.name, scrap_date=before_purchase_date)
+		self.assertRaises(frappe.ValidationError, scrap_asset, asset.name, scrap_date=future_date)
+		self.assertRaises(
+			frappe.ValidationError, scrap_asset, asset.name, scrap_date=before_last_booked_depreciation_date
+		)
 
-				self.assertTrue(
-					last_schedule_date <= disposal_date <= today_date,
-					"Disposal date should be between the last depreciated schedule date and today's date.",
-				)
-
+		scrap_asset(asset.name)
+		asset.load_from_db()
 		first_asset_depr_schedule.load_from_db()
 
 		second_asset_depr_schedule = get_asset_depr_schedule_doc(asset.name, "Active")

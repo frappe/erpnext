@@ -803,7 +803,7 @@ frappe.ui.form.on("Asset Finance Book", {
 
 erpnext.asset.scrap_asset = function (frm) {
 	var scrap_dialog = new frappe.ui.Dialog({
-		title: "Enter date to scrap asset",
+		title: __("Enter date to scrap asset"),
 		fields: [
 			{
 				label: __("Select the date"),
@@ -819,10 +819,8 @@ erpnext.asset.scrap_asset = function (frm) {
 				args: {
 					asset_name: frm.doc.name,
 					scrap_date: values.scrap_date,
-					purchase_date: frm.doc.purchase_date,
-					calculate_depreciation: frm.doc.calculate_depreciation,
 				},
-				method: "erpnext.assets.doctype.asset.asset.validate_asset_scrap_date",
+				method: "erpnext.assets.doctype.asset.depreciation.scrap_asset",
 				callback: function (r) {
 					frm.reload_doc();
 					scrap_dialog.hide();
