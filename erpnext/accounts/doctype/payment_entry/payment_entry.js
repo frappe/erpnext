@@ -1661,7 +1661,7 @@ frappe.ui.form.on("Payment Entry", {
 		];
 
 		frappe.msgprint({
-			title: __("Matched Payment Request"),
+			title: __("Unset Matched Payment Request"),
 			message: COLUMN_LABEL.concat(matched_payment_requests),
 			as_table: true,
 			primary_action: {
