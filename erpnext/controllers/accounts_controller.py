@@ -363,10 +363,18 @@ class AccountsController(TransactionBase):
 				)
 			).run()
 			frappe.db.sql(
-				"delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s", (self.doctype, self.name)
+				"""
+				delete from `tabGL Entry`
+				where(
+					(voucher_type=%s and voucher_no=%s) or
+					(ifnull(against_voucher_type, '')=%s and ifnull(against_voucher, '')=%s)
+				)
+				and is_cancelled=1
+				""",
+				(self.doctype, self.name, self.doctype, self.name),
 			)
 			frappe.db.sql(
-				"delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s",
+				"delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s and is_cancelled=1",
 				(self.doctype, self.name),
 			)
 
