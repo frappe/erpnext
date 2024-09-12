@@ -335,17 +335,16 @@ class PaymentEntry(AccountsController):
 		"""
 		Allocated amount should not be greater than the outstanding amount of the Payment Request.f
 		"""
-		from erpnext.accounts.doctype.payment_request.payment_request import (
-			get_outstanding_amount_of_payment_entry_references as get_outstanding_amounts,
-		)
-
 		if not self.references:
 			return
 
-		outstanding_amounts = get_outstanding_amounts(self.references)
+		pr_outstanding_amounts = get_payment_request_outstanding_set_in_references(self.references)
+
+		if not pr_outstanding_amounts:
+			return
 
 		for ref in self.references:
-			if ref.payment_request and ref.allocated_amount > outstanding_amounts[ref.payment_request]:
+			if ref.payment_request and ref.allocated_amount > pr_outstanding_amounts[ref.payment_request]:
 				frappe.throw(
 					msg=_(
 						"Row #{0}: Allocated Amount cannot be greater than Outstanding Amount of Payment Request {1}"

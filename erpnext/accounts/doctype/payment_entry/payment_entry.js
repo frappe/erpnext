@@ -177,7 +177,7 @@ frappe.ui.form.on("Payment Entry", {
 		frm.set_query("payment_request", "references", function (doc, cdt, cdn) {
 			const row = frappe.get_doc(cdt, cdn);
 			return {
-				query: "erpnext.accounts.doctype.payment_request.payment_request.get_open_payment_requests",
+				query: "erpnext.accounts.doctype.payment_request.payment_request.get_open_payment_requests_query",
 				filters: {
 					reference_doctype: row.reference_doctype,
 					reference_name: row.reference_name,

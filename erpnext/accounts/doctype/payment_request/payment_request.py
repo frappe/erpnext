@@ -705,12 +705,15 @@ def make_payment_entry(docname):
 
 
 def update_payment_requests_as_per_pe_references(references=None, cancel=False):
+	"""
+	Update Payment Request's `Status` and `Outstanding Amount` based on Payment Entry Reference's `Allocated Amount`.
+	"""
 	if not references:
 		return
 
 	referenced_payment_requests = frappe.get_all(
 		"Payment Request",
-		filters={"name": ["in", get_referenced_payment_requests(references)]},
+		filters={"name": ["in", {row.payment_request for row in references if row.payment_request}]},
 		fields=[
 			"name",
 			"grand_total",
@@ -761,29 +764,6 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 		)
 
 
-def get_outstanding_amount_of_payment_entry_references(references):
-	if not references:
-		return {}
-
-	payment_requests = get_referenced_payment_requests(references)
-
-	return dict(
-		frappe.get_all(
-			"Payment Request",
-			filters={"name": ["in", payment_requests]},
-			fields=["name", "outstanding_amount"],
-			as_list=True,
-		)
-	)
-
-
-def get_referenced_payment_requests(references):
-	if not references:
-		return ()
-
-	return {row.payment_request for row in references if row.payment_request}
-
-
 def get_dummy_message(doc):
 	return frappe.render_template(
 		"""{% if doc.contact_person -%}
@@ -791,7 +771,7 @@ def get_dummy_message(doc):
 {%- else %}<p>Hello,</p>{% endif %}
 
 <p>{{ _("Requesting payment against {0} {1} for amount {2}").format(doc.doctype,
-    doc.name, doc.get_formatted("grand_total")) }}</p>
+	doc.name, doc.get_formatted("grand_total")) }}</p>
 
 <a href="{{ payment_url }}">{{ _("Make Payment") }}</a>
 
@@ -895,7 +875,7 @@ def get_paid_amount_against_order(dt, dn):
 
 
 @frappe.whitelist()
-def get_open_payment_requests(doctype, txt, searchfield, start, page_len, filters):
+def get_open_payment_requests_query(doctype, txt, searchfield, start, page_len, filters):
 	# permission checks in `get_list()`
 	reference_doctype = filters.get("reference_doctype")
 	reference_name = filters.get("reference_doctype")
@@ -909,6 +889,7 @@ def get_open_payment_requests(doctype, txt, searchfield, start, page_len, filter
 			"reference_doctype": filters["reference_doctype"],
 			"reference_name": filters["reference_name"],
 			"status": ["!=", "Paid"],
+			"outstanding_amount": ["!=", 0],  # for compatibility with old data
 			"docstatus": 1,
 		},
 		fields=["name", "grand_total", "outstanding_amount"],
@@ -918,8 +899,8 @@ def get_open_payment_requests(doctype, txt, searchfield, start, page_len, filter
 	return [
 		(
 			pr.name,
-			_("Grand Total: {0}").format(pr.grand_total),
-			_("Outstanding Amount: {0}").format(pr.outstanding_amount),
+			_("<strong>Grand Total:</strong> {0}").format(pr.grand_total),
+			_("<strong>Outstanding Amount:</strong> {0}").format(pr.outstanding_amount),
 		)
 		for pr in open_payment_requests
 	]
