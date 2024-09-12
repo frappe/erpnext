@@ -10,7 +10,7 @@ from frappe import _, bold, qb, throw
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied
 from frappe.query_builder import Criterion
 from frappe.query_builder.custom import ConstantColumn
-from frappe.query_builder.functions import Abs, Sum
+from frappe.query_builder.functions import Abs, IfNull, Sum
 from frappe.utils import (
 	add_days,
 	add_months,
@@ -362,21 +362,20 @@ class AccountsController(TransactionBase):
 					== 1
 				)
 			).run()
-			frappe.db.sql(
-				"""
-				delete from `tabGL Entry`
-				where(
-					(voucher_type=%s and voucher_no=%s) or
-					(ifnull(against_voucher_type, '')=%s and ifnull(against_voucher, '')=%s)
+
+			gl_entry = frappe.qb.DocType("GL Entry")
+			frappe.qb.from_(gl_entry).delete().where(
+				((gl_entry.voucher_type == self.doctype) & (gl_entry.voucher_no == self.name))
+				| (
+					(IfNull(gl_entry.against_voucher_type, "") == self.doctype)
+					& (IfNull(gl_entry.against_voucher, "") == self.name)
 				)
-				and is_cancelled=1
-				""",
-				(self.doctype, self.name, self.doctype, self.name),
-			)
-			frappe.db.sql(
-				"delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s and is_cancelled=1",
-				(self.doctype, self.name),
-			)
+			).where(gl_entry.is_cancelled == 1).run()
+
+			sle = frappe.qb.DocType("Stock Ledger Entry")
+			frappe.qb.from_(sle).delete().where(
+				(sle.voucher_type == self.doctype) & (sle.voucher_no == self.name) & (sle.is_cancelled == 1)
+			).run()
 
 	def remove_serial_and_batch_bundle(self):
 		bundles = frappe.get_all(
