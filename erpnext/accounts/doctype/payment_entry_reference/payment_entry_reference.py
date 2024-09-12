@@ -37,8 +37,8 @@ class PaymentEntryReference(Document):
 
 	@property
 	def payment_term_outstanding(self):
-		if not self.payment_term:
-			return 0
+		if not self.payment_term or not self.reference_doctype or not self.reference_name:
+			return
 
 		return frappe.db.get_value(
 			"Payment Schedule",
@@ -53,6 +53,6 @@ class PaymentEntryReference(Document):
 	@property
 	def payment_request_outstanding(self):
 		if not self.payment_request:
-			return 0
+			return
 
 		return frappe.db.get_value("Payment Request", self.payment_request, "outstanding_amount")

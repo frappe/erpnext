@@ -438,6 +438,12 @@ class PaymentRequest(Document):
 			ref_doc.set_advance_payment_status()
 
 	def _allocate_payment_request_to_pe_references(self, references):
+		"""
+		Allocate the Payment Request to the Payment Entry references based on\n
+		    - Allocated Amount.
+		    - Outstanding Amount of Payment Request.\n
+		Payment Request is doc itself and references are the rows of Payment Entry.
+		"""
 		if len(references) == 1:
 			references[0].payment_request = self.name
 			return
@@ -459,6 +465,8 @@ class PaymentRequest(Document):
 			if outstanding_amount == 0:
 				if not NEW_ROW_ADDED:
 					break
+
+				row_number += MOVE_TO_NEXT_ROW
 				continue
 
 			# allocate the payment request to the row
@@ -700,7 +708,7 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 	if not references:
 		return
 
-	payment_requests = frappe.get_all(
+	referenced_payment_requests = frappe.get_all(
 		"Payment Request",
 		filters={"name": ["in", get_referenced_payment_requests(references)]},
 		fields=[
@@ -711,13 +719,13 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 		],
 	)
 
-	payment_requests = {pr.name: pr for pr in payment_requests}
+	referenced_payment_requests = {pr.name: pr for pr in referenced_payment_requests}
 
 	for ref in references:
 		if not ref.payment_request:
 			continue
 
-		payment_request = payment_requests[ref.payment_request]
+		payment_request = referenced_payment_requests[ref.payment_request]
 
 		# update outstanding amount
 		new_outstanding_amount = flt(
@@ -783,7 +791,7 @@ def get_dummy_message(doc):
 {%- else %}<p>Hello,</p>{% endif %}
 
 <p>{{ _("Requesting payment against {0} {1} for amount {2}").format(doc.doctype,
-	doc.name, doc.get_formatted("grand_total")) }}</p>
+    doc.name, doc.get_formatted("grand_total")) }}</p>
 
 <a href="{{ payment_url }}">{{ _("Make Payment") }}</a>
 

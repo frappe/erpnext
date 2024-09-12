@@ -332,6 +332,9 @@ class PaymentEntry(AccountsController):
 					frappe.throw(fail_message.format(d.idx))
 
 	def validate_allocated_amount_as_per_payment_request(self):
+		"""
+		Allocated amount should not be greater than the outstanding amount of the Payment Request.f
+		"""
 		from erpnext.accounts.doctype.payment_request.payment_request import (
 			get_outstanding_amount_of_payment_entry_references as get_outstanding_amounts,
 		)
@@ -1723,6 +1726,10 @@ class PaymentEntry(AccountsController):
 		return current_tax_fraction
 
 	def set_matched_unset_payment_requests_to_response(self):
+		"""
+		Find matched Payment Requests for those references which have no Payment Request set.\n
+		And set to `frappe.response` to show in the frontend for allocation.
+		"""
 		if not self.references:
 			return
 
@@ -1736,9 +1743,15 @@ class PaymentEntry(AccountsController):
 		frappe.response["matched_payment_requests"] = matched_payment_requests
 
 	@frappe.whitelist()
-	def allocate_party_amount_against_ref_docs(
+	def allocate_party_amount_and_payment_request_against_ref_docs(
 		self, paid_amount, paid_amount_change, allocate_payment_amount
 	):
+		"""
+		Allocate `Allocated Amount` and `Payment Request` against `Reference` based on `Paid Amount` and `Outstanding Amount`.\n
+		:param paid_amount: Paid Amount / Received Amount.
+		:param paid_amount_change: Flag to check if `Paid Amount` is changed or not.
+		:param allocate_payment_amount: Flag to allocate amount or not.
+		"""
 		if not self.references:
 			return
 
@@ -1825,9 +1838,9 @@ class PaymentEntry(AccountsController):
 
 		else:
 			payment_request_outstanding_amounts = (
-				get_payment_request_outstanding_of_references(self.references) or {}
+				get_payment_request_outstanding_set_in_references(self.references) or {}
 			)
-			references_outstanding_amounts = get_reference_outstanding_amounts(self.references) or {}
+			references_outstanding_amounts = get_references_outstanding_amount(self.references) or {}
 			remaining_references_allocated_amounts = references_outstanding_amounts.copy()
 
 			# Re allocate amount to those references which have PR set (Higher priority)
@@ -1889,10 +1902,21 @@ class PaymentEntry(AccountsController):
 
 	@frappe.whitelist()
 	def set_matched_payment_requests(self, matched_payment_requests):
-		if not self.references:
+		"""
+		Set `Payment Request` against `Reference` based on `matched_payment_requests`.\n
+		:param matched_payment_requests: List of tuple of matched Payment Requests.
+
+		---
+		Example: [(reference_doctype, reference_name, allocated_amount, payment_request), ...]
+		"""
+		if not self.references or not matched_payment_requests:
 			return
 
+		if isinstance(matched_payment_requests, str):
+			matched_payment_requests = json.loads(matched_payment_requests)
+
 		# modify matched_payment_requests
+		# like (reference_doctype, reference_name, allocated_amount): payment_request
 		payment_requests = {}
 
 		for row in matched_payment_requests:
@@ -1907,10 +1931,17 @@ class PaymentEntry(AccountsController):
 
 			if key in payment_requests:
 				ref.payment_request = payment_requests[key]
-				del payment_requests[key]
+				del payment_requests[key]  # to avoid duplicate allocation
 
 
 def get_matched_payment_request_of_references(references=None):
+	"""
+	Get those `Payment Requests` which are matched with `References`.\n
+	    - Amount must be same.
+	    - Only single `Payment Request` available for this amount.
+
+	Example: [(reference_doctype, reference_name, allocated_amount, payment_request), ...]
+	"""
 	if not references:
 		return
 
@@ -1955,23 +1986,31 @@ def get_matched_payment_request_of_references(references=None):
 		.run()
 	)
 
-	if not matched_prs:
-		return
-
-	return matched_prs
+	return matched_prs if matched_prs else None
 
 
-def get_reference_outstanding_amounts(references=None):
+def get_references_outstanding_amount(references=None):
+	"""
+	Fetch accurate outstanding amount of `References`.\n
+	    - If `Payment Term` is set, then fetch outstanding amount from `Payment Schedule`.
+	    - If `Payment Term` is not set, then fetch outstanding amount from `References` it self.
+
+	Example: {(reference_doctype, reference_name, payment_term): outstanding_amount, ...}
+	"""
 	if not references:
 		return
 
-	refs_with_payment_term = get_payment_term_outstanding_of_references(references) or {}
-	refs_without_payment_term = get_no_payment_terms_references_outstanding(references) or {}
+	refs_with_payment_term = get_outstanding_of_references_with_payment_term(references) or {}
+	refs_without_payment_term = get_outstanding_of_references_with_no_payment_term(references) or {}
 
 	return {**refs_with_payment_term, **refs_without_payment_term}
 
 
-def get_payment_term_outstanding_of_references(references=None):
+def get_outstanding_of_references_with_payment_term(references=None):
+	"""
+	Fetch outstanding amount of `References` which have `Payment Term` set.\n
+	Example: {(reference_doctype, reference_name, payment_term): outstanding_amount, ...}
+	"""
 	if not references:
 		return
 
@@ -1998,7 +2037,14 @@ def get_payment_term_outstanding_of_references(references=None):
 	return {(row.parenttype, row.parent, row.payment_term): row.outstanding for row in response}
 
 
-def get_no_payment_terms_references_outstanding(references):
+def get_outstanding_of_references_with_no_payment_term(references):
+	"""
+	Fetch outstanding amount of `References` which have no `Payment Term` set.\n
+	    - Fetch outstanding amount from `References` it self.
+
+	Note: `None` is used for allocation of `Payment Request`
+	Example: {(reference_doctype, reference_name, None): outstanding_amount, ...}
+	"""
 	if not references:
 		return
 
@@ -2016,23 +2062,28 @@ def get_no_payment_terms_references_outstanding(references):
 	return outstanding_amounts
 
 
-def get_payment_request_outstanding_of_references(references=None):
+def get_payment_request_outstanding_set_in_references(references=None):
+	"""
+	Fetch outstanding amount of `Payment Request` which are set in `References`.\n
+	Example: {payment_request: outstanding_amount, ...}
+	"""
 	if not references:
 		return
 
-	prs = {row.payment_request for row in references if row.payment_request}
+	referenced_payment_requests = {row.payment_request for row in references if row.payment_request}
 
-	if not prs:
+	if not referenced_payment_requests:
 		return
 
 	PR = frappe.qb.DocType("Payment Request")
 
-	response = (frappe.qb.from_(PR).select(PR.name, PR.outstanding_amount).where(PR.name.isin(prs))).run()
+	response = (
+		frappe.qb.from_(PR)
+		.select(PR.name, PR.outstanding_amount)
+		.where(PR.name.isin(referenced_payment_requests))
+	).run()
 
-	if not response:
-		return
-
-	return dict(response)
+	return dict(response) if response else None
 
 
 def validate_inclusive_tax(tax, doc):
@@ -2815,6 +2866,7 @@ def get_payment_entry(
 
 		pe.set_difference_amount()
 
+	# If PE is created from PR directly, then no need to find open PRs for the references
 	if not created_from_payment_request:
 		allocate_open_payment_requests_to_references(pe.references)
 
@@ -2822,6 +2874,12 @@ def get_payment_entry(
 
 
 def get_open_payment_requests_for_references(references=None):
+	"""
+	Fetch all unpaid Payment Requests for the references. \n
+	    - Each reference can have multiple Payment Requests. \n
+
+	Example: {("Sales Invoice", "SINV-00001"): {"PREQ-00001": 1000, "PREQ-00002": 2000}}
+	"""
 	if not references:
 		return
 
@@ -2862,13 +2920,41 @@ def get_open_payment_requests_for_references(references=None):
 
 
 def allocate_open_payment_requests_to_references(references=None):
+	"""
+	Allocate unpaid Payment Requests to the references. \n
+	---
+	- Allocation based on below factors
+	    - Reference Allocated Amount
+	    - Reference Outstanding Amount (With Payment Terms or without Payment Terms)
+	    - Reference Payment Request's outstanding amount
+	---
+	- Allocation based on below scenarios
+	    - Reference's Allocated Amount == Payment Request's Outstanding Amount
+	        - Allocate the Payment Request to the reference
+	        - This PR will not be allocated further
+	    - Reference's Allocated Amount < Payment Request's Outstanding Amount
+	        - Allocate the Payment Request to the reference
+	        - Reduce the PR's outstanding amount by the allocated amount
+	        - This PR can be allocated further
+	    - Reference's Allocated Amount > Payment Request's Outstanding Amount
+	        - Allocate the Payment Request to the reference
+	        - Reduce Allocated Amount of the reference by the PR's outstanding amount
+	        - Create a new row for the remaining amount until the Allocated Amount is 0
+	            - Allocate PR if available
+	---
+	- Note:
+	    - Priority is given to the first Payment Request of respective references.
+	    - Single Reference can have multiple rows.
+	        - With Payment Terms or without Payment Terms
+	        - With Payment Request or without Payment Request
+	"""
 	if not references:
 		return
 
 	# get all unpaid payment requests for the references
-	all_references_payment_requests = get_open_payment_requests_for_references(references)
+	references_open_payment_requests = get_open_payment_requests_for_references(references)
 
-	if not all_references_payment_requests:
+	if not references_open_payment_requests:
 		return
 
 	# to manage new rows
@@ -2884,24 +2970,24 @@ def allocate_open_payment_requests_to_references(references=None):
 		row.idx = row_number
 
 		# unpaid payment requests for the reference
-		reference_payment_requests = all_references_payment_requests.get(reference_key)
+		reference_payment_requests = references_open_payment_requests.get(reference_key)
 
 		if not reference_payment_requests:
 			row_number += MOVE_TO_NEXT_ROW  # to move to next reference row
 			continue
 
 		# get the first payment request and its outstanding amount
-		payment_request, outstanding_amount = next(iter(reference_payment_requests.items()))
+		payment_request, pr_outstanding_amount = next(iter(reference_payment_requests.items()))
 		allocated_amount = row.allocated_amount
 
 		# allocate the payment request to the reference and PR's outstanding amount
 		row.payment_request = payment_request
 
-		if outstanding_amount == allocated_amount:
+		if pr_outstanding_amount == allocated_amount:
 			del reference_payment_requests[payment_request]
 			row_number += MOVE_TO_NEXT_ROW
 
-		elif outstanding_amount > allocated_amount:
+		elif pr_outstanding_amount > allocated_amount:
 			# reduce the outstanding amount of the payment request
 			reference_payment_requests[payment_request] -= allocated_amount
 			row_number += MOVE_TO_NEXT_ROW
@@ -2909,8 +2995,8 @@ def allocate_open_payment_requests_to_references(references=None):
 		else:
 			# split the reference row to allocate the remaining amount
 			del reference_payment_requests[payment_request]
-			row.allocated_amount = outstanding_amount
-			allocated_amount -= outstanding_amount
+			row.allocated_amount = pr_outstanding_amount
+			allocated_amount -= pr_outstanding_amount
 
 			# set the remaining amount to the next row
 			while allocated_amount:
@@ -2918,8 +3004,8 @@ def allocate_open_payment_requests_to_references(references=None):
 				new_row = frappe.copy_doc(row)
 				references.insert(row_number, new_row)
 
-				# get the next payment request and its outstanding amount
-				payment_request, outstanding_amount = next(
+				# get the first payment request and its outstanding amount
+				payment_request, pr_outstanding_amount = next(
 					iter(reference_payment_requests.items()), (None, None)
 				)
 
@@ -2927,25 +3013,25 @@ def allocate_open_payment_requests_to_references(references=None):
 				new_row.idx = row_number + 1
 				new_row.payment_request = payment_request
 				new_row.allocated_amount = min(
-					outstanding_amount if outstanding_amount else allocated_amount, allocated_amount
+					pr_outstanding_amount if pr_outstanding_amount else allocated_amount, allocated_amount
 				)
 
-				if not payment_request or not outstanding_amount:
+				if not payment_request or not pr_outstanding_amount:
 					row_number += TO_SKIP_NEW_ROW
 					break
 
-				elif outstanding_amount == allocated_amount:
+				elif pr_outstanding_amount == allocated_amount:
 					del reference_payment_requests[payment_request]
 					row_number += TO_SKIP_NEW_ROW
 					break
 
-				elif outstanding_amount > allocated_amount:
+				elif pr_outstanding_amount > allocated_amount:
 					reference_payment_requests[payment_request] -= allocated_amount
 					row_number += TO_SKIP_NEW_ROW
 					break
 
 				else:
-					allocated_amount -= outstanding_amount
+					allocated_amount -= pr_outstanding_amount
 					del reference_payment_requests[payment_request]
 					row_number += MOVE_TO_NEXT_ROW
 
