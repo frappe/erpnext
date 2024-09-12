@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-07 18:35\n"
+"PO-Revision-Date: 2024-09-10 18:59\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -28131,7 +28131,7 @@ msgstr "Maskin"
 
 #: public/js/plant_floor_visual/visual_plant.js:70
 msgid "Machine Type"
-msgstr "Naskin Typ"
+msgstr "Maskin Typ"
 
 #. Option for the 'Stop Reason' (Select) field in DocType 'Downtime Entry'
 #: manufacturing/doctype/downtime_entry/downtime_entry.json
