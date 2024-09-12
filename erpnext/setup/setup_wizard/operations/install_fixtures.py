@@ -302,7 +302,7 @@ def install(country=None):
 		("Designation", "designation_name", "designation.txt"),
 		("Sales Stage", "stage_name", "sales_stage.txt"),
 		("Industry Type", "industry", "industry_type.txt"),
-		("Lead Source", "source_name", "lead_source.txt"),
+		("UTM Source", "name", "marketing_source.txt"),
 		("Sales Partner Type", "sales_partner_type", "sales_partner_type.txt"),
 	):
 		records += [{"doctype": doctype, title_field: title} for title in read_lines(filename)]

@@ -333,7 +333,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 			holiday_list="__Test Holiday List",
 			entity_type=None,
 			entity=None,
-			condition='doc.source == "Test Source"',
+			condition='doc.utm_source == "Test Source"',
 			response_time=14400,
 			sla_fulfilled_on=[{"status": "Replied"}],
 			apply_sla_for_resolution=0,
@@ -343,16 +343,18 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertFalse(applied_sla)
 
-		source = frappe.get_doc(doctype="Lead Source", source_name="Test Source")
+		source = frappe.new_doc(doctype="UTM Source")
+		source.name = "Test Source"
+		source.flags.name_set = True
 		source.insert(ignore_if_duplicate=True)
-		lead.source = "Test Source"
+		lead.utm_source = "Test Source"
 		lead.save()
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertEqual(applied_sla, lead_sla.name)
 
 		# check if SLA is removed if condition fails
 		lead.reload()
-		lead.source = None
+		lead.utm_source = None
 		lead.save()
 		applied_sla = frappe.db.get_value("Lead", lead.name, "service_level_agreement")
 		self.assertFalse(applied_sla)
