@@ -134,7 +134,7 @@ class TestAssetRepair(unittest.TestCase):
 
 	def test_purchase_invoice(self):
 		asset_repair = create_asset_repair(capitalize_repair_cost=1, submit=1)
-		self.assertTrue(asset_repair.purchase_invoice)
+		self.assertTrue(asset_repair.purchase_invoice_list)
 
 	def test_gl_entries_with_perpetual_inventory(self):
 		set_depreciation_settings_in_company(company="_Test Company with perpetual inventory")
@@ -181,9 +181,14 @@ class TestAssetRepair(unittest.TestCase):
 		fixed_asset_account = get_asset_account(
 			"fixed_asset_account", asset=asset_repair.asset, company=asset_repair.company
 		)
-		pi_expense_account = (
-			frappe.get_doc("Purchase Invoice", asset_repair.purchase_invoice).items[0].expense_account
-		)
+
+		for pi in asset_repair.purchase_invoice_list:
+			purchase_invoice_items = frappe.get_all(
+				"Purchase Invoice Item", {"parent": pi.purchase_invoice}, ["expense_account", "base_amount"]
+			)
+			for purchase_invoice_item in purchase_invoice_items:
+				pi_expense_account = purchase_invoice_item.expense_account
+
 		stock_entry_expense_account = (
 			frappe.get_doc("Stock Entry", {"asset_repair": asset_repair.name}).get("items")[0].expense_account
 		)
@@ -228,11 +233,18 @@ class TestAssetRepair(unittest.TestCase):
 		fixed_asset_account = get_asset_account(
 			"fixed_asset_account", asset=asset_repair.asset, company=asset_repair.company
 		)
-		default_expense_account = frappe.get_cached_value(
-			"Company", asset_repair.company, "default_expense_account"
-		)
 
-		expected_values = {fixed_asset_account: [1100, 0], default_expense_account: [0, 1100]}
+		for pi in asset_repair.purchase_invoice_list:
+			purchase_invoice_items = frappe.get_all(
+				"Purchase Invoice Item", {"parent": pi.purchase_invoice}, ["expense_account", "base_amount"]
+			)
+			for purchase_invoice_item in purchase_invoice_items:
+				expense_account = purchase_invoice_item.expense_account
+
+		expected_values = {
+			fixed_asset_account: [350, 0],
+			expense_account: [0, 350],
+		}
 
 		for d in gl_entries:
 			self.assertEqual(expected_values[d.account][0], d.debit)
@@ -288,7 +300,6 @@ def create_asset_repair(**args):
 			"asset_name": asset.asset_name,
 			"failure_date": nowdate(),
 			"description": "Test Description",
-			"repair_cost": 0,
 			"company": asset.company,
 		}
 	)
@@ -351,7 +362,6 @@ def create_asset_repair(**args):
 
 		if args.capitalize_repair_cost:
 			asset_repair.capitalize_repair_cost = 1
-			asset_repair.repair_cost = 1000
 			if asset.calculate_depreciation:
 				asset_repair.increase_in_asset_life = 12
 			pi = make_purchase_invoice(
@@ -360,7 +370,13 @@ def create_asset_repair(**args):
 				cost_center=asset_repair.cost_center,
 				warehouse=args.warehouse or create_warehouse("Test Warehouse", company=asset.company),
 			)
-			asset_repair.purchase_invoice = pi.name
 
+			asset_repair.append(
+				"purchase_invoice_list",
+				{
+					"purchase_invoice": pi.name,
+					"repair_cost": pi.total,
+				},
+			)
 		asset_repair.submit()
 	return asset_repair

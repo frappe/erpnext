@@ -28,6 +28,9 @@ class AssetRepair(AccountsController):
 		from erpnext.assets.doctype.asset_repair_consumed_item.asset_repair_consumed_item import (
 			AssetRepairConsumedItem,
 		)
+		from erpnext.assets.doctype.repair_purchase_invoice_list.repair_purchase_invoice_list import (
+			RepairPurchaseInvoiceList,
+		)
 
 		actions_performed: DF.LongText | None
 		amended_from: DF.Link | None
@@ -43,7 +46,7 @@ class AssetRepair(AccountsController):
 		increase_in_asset_life: DF.Int
 		naming_series: DF.Literal["ACC-ASR-.YYYY.-"]
 		project: DF.Link | None
-		purchase_invoice: DF.Link | None
+		purchase_invoice_list: DF.Table[RepairPurchaseInvoiceList]
 		repair_cost: DF.Currency
 		repair_status: DF.Literal["Pending", "Completed", "Cancelled"]
 		stock_consumption: DF.Check
@@ -58,6 +61,8 @@ class AssetRepair(AccountsController):
 
 		if self.get("stock_items"):
 			self.set_stock_items_cost()
+
+		self.calculate_repair_cost()
 		self.calculate_total_repair_cost()
 
 	def validate_dates(self):
@@ -81,6 +86,9 @@ class AssetRepair(AccountsController):
 	def set_stock_items_cost(self):
 		for item in self.get("stock_items"):
 			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
+
+	def calculate_repair_cost(self):
+		self.repair_cost = sum(pi.repair_cost for pi in self.purchase_invoice_list)
 
 	def calculate_total_repair_cost(self):
 		self.total_repair_cost = flt(self.repair_cost)
@@ -267,40 +275,43 @@ class AssetRepair(AccountsController):
 		if flt(self.repair_cost) <= 0:
 			return
 
-		pi_expense_account = (
-			frappe.get_doc("Purchase Invoice", self.purchase_invoice).items[0].expense_account
-		)
+		debit_against_account = set()
 
+		for pi in self.purchase_invoice_list:
+			purchase_invoice_items = frappe.get_all(
+				"Purchase Invoice Item", {"parent": pi.purchase_invoice}, ["expense_account", "base_amount"]
+			)
+			for purchase_invoice_item in purchase_invoice_items:
+				debit_against_account.add(purchase_invoice_item.expense_account)
+				gl_entries.append(
+					self.get_gl_dict(
+						{
+							"account": purchase_invoice_item.expense_account,
+							"credit": purchase_invoice_item.base_amount,
+							"credit_in_account_currency": purchase_invoice_item.base_amount,
+							"against": fixed_asset_account,
+							"voucher_type": self.doctype,
+							"voucher_no": self.name,
+							"cost_center": self.cost_center,
+							"posting_date": getdate(),
+							"company": self.company,
+						},
+						item=self,
+					)
+				)
+		debit_against_account = ", ".join(debit_against_account)
 		gl_entries.append(
 			self.get_gl_dict(
 				{
 					"account": fixed_asset_account,
 					"debit": self.repair_cost,
 					"debit_in_account_currency": self.repair_cost,
-					"against": pi_expense_account,
+					"against": debit_against_account,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"cost_center": self.cost_center,
 					"posting_date": getdate(),
 					"against_voucher_type": "Purchase Invoice",
-					"against_voucher": self.purchase_invoice,
-					"company": self.company,
-				},
-				item=self,
-			)
-		)
-
-		gl_entries.append(
-			self.get_gl_dict(
-				{
-					"account": pi_expense_account,
-					"credit": self.repair_cost,
-					"credit_in_account_currency": self.repair_cost,
-					"against": fixed_asset_account,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"cost_center": self.cost_center,
-					"posting_date": getdate(),
 					"company": self.company,
 				},
 				item=self,
