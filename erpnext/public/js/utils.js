@@ -976,8 +976,8 @@ erpnext.utils.map_current_doc = function (opts) {
 	}
 };
 
-frappe.form.link_formatters["Item"] = function (value, doc) {
-	if (doc && value && doc.item_name && doc.item_name !== value && doc.item_code === value) {
+frappe.form.link_formatters["Item"] = function (value, doc, df) {
+	if (doc && value && doc.item_name && doc.item_name !== value && doc[df.fieldname] === value) {
 		return value + ": " + doc.item_name;
 	} else if (!value && doc.doctype && doc.item_name) {
 		// format blank value in child table
