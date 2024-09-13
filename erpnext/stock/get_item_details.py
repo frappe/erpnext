@@ -889,11 +889,7 @@ def insert_item_price(args):
 				)
 
 
-<<<<<<< HEAD
-def get_item_price(args, item_code, ignore_party=False):
-=======
 def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) -> list[dict]:
->>>>>>> d9e4ed13cb (fix: batch based item price not working (#43172))
 	"""
 	Get name, price_list_rate from Item Price based on conditions
 	        Check if the desired qty is within the increment of the packing list.
