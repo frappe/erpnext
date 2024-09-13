@@ -46,6 +46,7 @@ class PaymentRequest(Document):
 		bank_account: DF.Link | None
 		bank_account_no: DF.ReadOnly | None
 		branch_code: DF.ReadOnly | None
+		company: DF.Link | None
 		cost_center: DF.Link | None
 		currency: DF.Link | None
 		email_to: DF.Data | None
@@ -87,7 +88,6 @@ class PaymentRequest(Document):
 		subscription_plans: DF.Table[SubscriptionPlanDetail]
 		swift_number: DF.ReadOnly | None
 		transaction_date: DF.Date | None
-		company: DF.Link | None
 	# end: auto-generated types
 
 	def validate(self):
@@ -287,36 +287,20 @@ class PaymentRequest(Document):
 
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
-		if self.reference_doctype in ["Sales Invoice", "POS Invoice"]:
-			party_account = ref_doc.debit_to
-		elif self.reference_doctype == "Purchase Invoice":
-			party_account = ref_doc.credit_to
-		else:
-			party_account = get_party_account("Customer", ref_doc.get("customer"), ref_doc.company)
-
-		party_account_currency = ref_doc.get("party_account_currency") or get_account_currency(party_account)
-
-		bank_amount = self.outstanding_amount
-
-		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
-			total = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
-			base_total = ref_doc.get("base_rounded_total") or ref_doc.get("base_grand_total")
-			party_amount = flt(self.outstanding_amount / total * base_total, self.precision("grand_total"))
-		else:
-			party_amount = self.outstanding_amount
-
+		# outstanding amount is already in Part's account currency
 		payment_entry = get_payment_entry(
 			self.reference_doctype,
 			self.reference_name,
-			party_amount=party_amount,
+			party_amount=self.outstanding_amount,
 			bank_account=self.payment_account,
-			bank_amount=bank_amount,
+			bank_amount=self.outstanding_amount,
 			created_from_payment_request=True,
 		)
 
 		payment_entry.update(
 			{
 				"mode_of_payment": self.mode_of_payment,
+				"reference_no": self.name,  # to prevent validation error
 				"reference_date": nowdate(),
 				"remarks": "Payment Entry against {} {} via Payment Request {}".format(
 					self.reference_doctype, self.reference_name, self.name
@@ -562,7 +546,7 @@ def make_payment_request(**args):
 				"payment_account": gateway_account.get("payment_account"),
 				"payment_channel": gateway_account.get("payment_channel"),
 				"payment_request_type": args.get("payment_request_type"),
-				"currency": ref_doc.currency,
+				"currency": ref_doc.party_account_currency,  # no need of conversion using this
 				"grand_total": grand_total,
 				"mode_of_payment": args.mode_of_payment,
 				"email_to": args.recipient_id or ref_doc.owner,
@@ -622,12 +606,8 @@ def get_amount(ref_doc, payment_account=None):
 		grand_total = flt(ref_doc.rounded_total) or flt(ref_doc.grand_total)
 	elif dt in ["Sales Invoice", "Purchase Invoice"]:
 		if not ref_doc.get("is_pos"):
-			if ref_doc.party_account_currency == ref_doc.currency:
-				grand_total = flt(ref_doc.rounded_total or ref_doc.grand_total)
-			else:
-				grand_total = flt(
-					flt(ref_doc.base_rounded_total or ref_doc.base_grand_total) / ref_doc.conversion_rate
-				)
+			# always get base amount to create a payment request (to match with PE)
+			grand_total = flt(ref_doc.base_rounded_total) or flt(ref_doc.base_grand_total)
 		elif dt == "Sales Invoice":
 			for pay in ref_doc.payments:
 				if pay.type == "Phone" and pay.account == payment_account:

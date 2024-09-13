@@ -146,8 +146,10 @@
    "label": "Transaction Details"
   },
   {
+   "description": "Amount in party's account currency",
    "fieldname": "grand_total",
    "fieldtype": "Currency",
+   "in_preview": 1,
    "label": "Amount",
    "non_negative": 1,
    "options": "currency",
@@ -166,7 +168,7 @@
   {
    "fieldname": "currency",
    "fieldtype": "Link",
-   "label": "Transaction Currency",
+   "label": "Party Account Currency",
    "options": "Currency",
    "read_only": 1
   },
@@ -413,6 +415,7 @@
    "in_preview": 1,
    "label": "Outstanding Amount",
    "non_negative": 1,
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -431,7 +434,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-09-13 15:36:08.198722",
+ "modified": "2024-09-13 19:17:28.734384",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
