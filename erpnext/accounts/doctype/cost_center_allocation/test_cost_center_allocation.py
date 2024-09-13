@@ -22,6 +22,7 @@ class TestCostCenterAllocation(unittest.TestCase):
 		cost_centers = [
 			"Main Cost Center 1",
 			"Main Cost Center 2",
+			"Main Cost Center 3",
 			"Sub Cost Center 1",
 			"Sub Cost Center 2",
 			"Sub Cost Center 3",
@@ -37,7 +38,7 @@ class TestCostCenterAllocation(unittest.TestCase):
 		)
 
 		jv = make_journal_entry(
-			"_Test Cash - _TC", "Sales - _TC", 100, cost_center="Main Cost Center 1 - _TC", submit=True
+			"Cash - _TC", "Sales - _TC", 100, cost_center="Main Cost Center 1 - _TC", submit=True
 		)
 
 		expected_values = [["Sub Cost Center 1 - _TC", 0.0, 60], ["Sub Cost Center 2 - _TC", 0.0, 40]]
@@ -121,7 +122,7 @@ class TestCostCenterAllocation(unittest.TestCase):
 	def test_valid_from_based_on_existing_gle(self):
 		# GLE posted against Sub Cost Center 1 on today
 		jv = make_journal_entry(
-			"_Test Cash - _TC",
+			"Cash - _TC",
 			"Sales - _TC",
 			100,
 			cost_center="Main Cost Center 1 - _TC",
@@ -143,16 +144,16 @@ class TestCostCenterAllocation(unittest.TestCase):
 		jv.cancel()
 
 	def test_multiple_cost_center_allocation_on_same_main_cost_center(self):
-		create_cost_center_allocation(
+		coa1 = create_cost_center_allocation(
 			"_Test Company",
-			"Main Cost Center 1 - _TC",
+			"Main Cost Center 3 - _TC",
 			{"Sub Cost Center 1 - _TC": 30, "Sub Cost Center 2 - _TC": 30, "Sub Cost Center 3 - _TC": 40},
 			valid_from=add_days(today(), -5),
 		)
 
-		create_cost_center_allocation(
+		coa2 = create_cost_center_allocation(
 			"_Test Company",
-			"Main Cost Center 1 - _TC",
+			"Main Cost Center 3 - _TC",
 			{"Sub Cost Center 1 - _TC": 50, "Sub Cost Center 2 - _TC": 50},
 			valid_from=add_days(today(), -1),
 		)
@@ -161,7 +162,7 @@ class TestCostCenterAllocation(unittest.TestCase):
 			"Cash - _TC",
 			"Sales - _TC",
 			100,
-			cost_center="Main Cost Center 1 - _TC",
+			cost_center="Main Cost Center 3 - _TC",
 			posting_date=today(),
 			submit=True,
 		)
@@ -184,6 +185,10 @@ class TestCostCenterAllocation(unittest.TestCase):
 			self.assertTrue(gle.cost_center in expected_values)
 			self.assertEqual(gle.debit, 0)
 			self.assertEqual(gle.credit, expected_values[gle.cost_center])
+
+		coa1.cancel()
+		coa2.cancel()
+		jv.cancel()
 
 
 def create_cost_center_allocation(
