@@ -55,6 +55,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 		self.create_customer("_Test Customer Credit")
 
 	def tearDown(self):
+		frappe.db.rollback()
 		frappe.set_user("Administrator")
 
 	def test_sales_order_with_negative_rate(self):
@@ -2122,7 +2123,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 	@change_settings("Stock Settings", {"enable_stock_reservation": True})
 	def test_warehouse_mapping_based_on_stock_reservation(self):
 		self.create_company(company_name="Glass Ceiling", abbr="GC")
-		self.create_item("Lamy Safari", True, self.warehouse_stores, self.company)
+		self.create_item("Lamy Safari 2", True, self.warehouse_stores, self.company, 2000)
 		self.create_customer()
 		self.clear_old_entries()
 
@@ -2140,7 +2141,6 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				"delivery_date": today(),
 			},
 		)
-		so.save()
 		so.submit()
 
 		# Create stock
@@ -2156,7 +2156,7 @@ class TestSalesOrder(AccountsTestMixin, FrappeTestCase):
 				],
 			}
 		)
-		se.save().submit()
+		se.submit()
 
 		# Reserve stock on 2 different warehouses
 		itm = so.items[0]
