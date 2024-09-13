@@ -25,6 +25,8 @@ frappe.ui.form.on("Payment Request", "onload", function (frm, dt, dn) {
 });
 
 frappe.ui.form.on("Payment Request", "refresh", function (frm) {
+	set_grand_total_field_description(frm);
+
 	if (frm.doc.status == "Failed") {
 		frm.set_intro(__("Failure: {0}", [frm.doc.failed_reason]), "red");
 	}
@@ -97,3 +99,12 @@ frappe.ui.form.on("Payment Request", "is_a_subscription", function (frm) {
 		});
 	}
 });
+
+frappe.ui.form.on("Payment Request", "party_type", function (frm) {
+	set_grand_total_field_description(frm);
+});
+
+function set_grand_total_field_description(frm) {
+	const party_type = (frm.doc.party_type || "party").toLowerCase();
+	frm.get_field("grand_total").set_description(`Amount in ${party_type}'s currency`);
+}
