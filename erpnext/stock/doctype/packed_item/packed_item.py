@@ -112,6 +112,9 @@ def get_indexed_packed_items_table(doc):
 	indexed_table = {}
 	for packed_item in doc.get("packed_items"):
 		key = (packed_item.parent_item, packed_item.item_code, packed_item.parent_detail_docname)
+		if doc.is_new():
+			key = (packed_item.parent_item, packed_item.item_code)
+
 		indexed_table[key] = packed_item
 
 	return indexed_table
@@ -173,6 +176,9 @@ def add_packed_item_row(doc, packing_item, main_item_row, packed_items_table, re
 
 	# check if row already exists in packed items table
 	key = (main_item_row.item_code, packing_item.item_code, main_item_row.name)
+	if doc.is_new():
+		key = (main_item_row.item_code, packing_item.item_code)
+
 	if packed_items_table.get(key):
 		pi_row, exists = packed_items_table.get(key), True
 
