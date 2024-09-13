@@ -1258,6 +1258,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"Purchase Receipt": ["purchase_order_item", "purchase_invoice_item", "purchase_receipt_item"],
 			"Purchase Invoice": ["purchase_order_item", "pr_detail", "po_detail"],
 			"Sales Order": ["prevdoc_docname", "quotation_item"],
+			"Purchase Order": ["supplier_quotation_item"],
 		};
 		const mappped_fields = mapped_item_field_map[this.frm.doc.doctype] || [];
 
