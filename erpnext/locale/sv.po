@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-10 18:59\n"
+"PO-Revision-Date: 2024-09-13 19:55\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -33143,7 +33143,7 @@ msgstr "Förfallna Fakturor"
 
 #: projects/report/project_summary/project_summary.py:136
 msgid "Overdue Tasks"
-msgstr "Antal Försenade Uppgifter"
+msgstr "Försenade Uppgifter"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
 #. Option for the 'Status' (Select) field in DocType 'Sales Invoice'
@@ -54082,7 +54082,7 @@ msgstr "Totalt Mål"
 #: projects/report/project_summary/project_summary.py:96
 #: projects/report/project_summary/project_summary.py:124
 msgid "Total Tasks"
-msgstr "Totalt Uppgifter"
+msgstr "Uppgifter"
 
 #: accounts/report/item_wise_sales_register/item_wise_sales_register.py:668
 #: accounts/report/purchase_register/purchase_register.py:263
