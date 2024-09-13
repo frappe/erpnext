@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-12 19:18\n"
+"PO-Revision-Date: 2024-09-13 19:55\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -12790,11 +12790,11 @@ msgstr ""
 
 #: crm/doctype/lead/lead.js:160
 msgid "Create Opportunity"
-msgstr ""
+msgstr "Fırsat Oluştur"
 
 #: selling/page/point_of_sale/pos_controller.js:67
 msgid "Create POS Opening Entry"
-msgstr ""
+msgstr "POS Açılış Girişi Oluştur"
 
 #: accounts/doctype/payment_request/payment_request.js:58
 msgid "Create Payment Entry"
@@ -13170,7 +13170,7 @@ msgstr "Alacak Ayı"
 #: stock/doctype/delivery_note/delivery_note.js:89
 #: stock/doctype/stock_entry/stock_entry.json
 msgid "Credit Note"
-msgstr ""
+msgstr "Alacak Dekontu"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:201
 #: accounts/report/accounts_receivable/accounts_receivable.html:162
@@ -13193,7 +13193,7 @@ msgstr ""
 
 #: stock/doctype/delivery_note/delivery_note.py:815
 msgid "Credit Note {0} has been created automatically"
-msgstr ""
+msgstr "Alacak Dekontu {0} otomatik olarak kurulmuştur"
 
 #. Label of the credit_to (Link) field in DocType 'Purchase Invoice'
 #: accounts/doctype/purchase_invoice/purchase_invoice.json
@@ -20824,7 +20824,7 @@ msgstr "Talep Eden Personel"
 
 #: accounts/report/budget_variance_report/budget_variance_report.js:43
 msgid "From Fiscal Year"
-msgstr ""
+msgstr "Başlangıç Mali Yılı"
 
 #. Label of the from_folio_no (Data) field in DocType 'Share Transfer'
 #: accounts/doctype/share_transfer/share_transfer.json
@@ -24608,7 +24608,7 @@ msgstr "Fatura Numarası"
 #: accounts/doctype/payment_schedule/payment_schedule.json
 #: selling/report/payment_terms_status_for_sales_order/payment_terms_status_for_sales_order.py:45
 msgid "Invoice Portion"
-msgstr ""
+msgstr "Fatura Yüzdesi"
 
 #. Label of the invoice_portion (Float) field in DocType 'Payment Term'
 #. Label of the invoice_portion (Float) field in DocType 'Payment Terms
@@ -24653,7 +24653,7 @@ msgstr "Belge Türü"
 
 #: projects/doctype/timesheet/timesheet.py:389
 msgid "Invoice already created for all billing hours"
-msgstr ""
+msgstr "Fatura, tüm faturalandırma saatleri için zaten oluşturuldu"
 
 #. Label of the invoice_and_billing_tab (Tab Break) field in DocType 'Accounts
 #. Settings'
