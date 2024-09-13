@@ -1742,14 +1742,12 @@ class PaymentEntry(AccountsController):
 		frappe.response["matched_payment_requests"] = matched_payment_requests
 
 	@frappe.whitelist()
-	def allocate_party_amount_and_payment_request_against_ref_docs(
-		self, paid_amount, paid_amount_change, allocate_payment_amount
-	):
+	def allocate_amount_to_references(self, paid_amount, paid_amount_change, allocate_payment_amount):
 		"""
 		Allocate `Allocated Amount` and `Payment Request` against `Reference` based on `Paid Amount` and `Outstanding Amount`.\n
 		:param paid_amount: Paid Amount / Received Amount.
 		:param paid_amount_change: Flag to check if `Paid Amount` is changed or not.
-		:param allocate_payment_amount: Flag to allocate amount or not.
+		:param allocate_payment_amount: Flag to allocate amount or not. (Payment Request is also dependent on this flag)
 		"""
 		if not self.references:
 			return

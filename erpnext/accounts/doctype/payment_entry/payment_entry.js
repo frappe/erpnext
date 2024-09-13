@@ -1067,7 +1067,7 @@ frappe.ui.form.on("Payment Entry", {
 	},
 
 	allocate_party_amount_against_ref_docs: async function (frm, paid_amount, paid_amount_change) {
-		await frm.call("allocate_party_amount_and_payment_request_against_ref_docs", {
+		await frm.call("allocate_amount_to_references", {
 			paid_amount: paid_amount,
 			paid_amount_change: paid_amount_change,
 			allocate_payment_amount: frappe.flags.allocate_payment_amount ?? false,
