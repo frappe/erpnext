@@ -307,7 +307,6 @@ def get_assets_for_grouped_by_category(filters):
 	)
 
 
-# nosemgrep
 def get_assets_for_grouped_by_asset(filters):
 	condition = ""
 	if filters.get("asset"):
@@ -317,6 +316,7 @@ def get_assets_for_grouped_by_asset(filters):
 		finance_book_filter += " and ifnull(gle.finance_book, '')=%(finance_book)s"
 		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
 
+	# nosemgrep
 	return frappe.db.sql(
 		f"""
 		SELECT results.name as asset,
