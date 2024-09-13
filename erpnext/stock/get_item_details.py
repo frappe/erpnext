@@ -10,7 +10,7 @@ from frappe.model import child_table_fields, default_fields
 from frappe.model.meta import get_field_precision
 from frappe.model.utils import get_fetch_values
 from frappe.query_builder.functions import IfNull, Sum
-from frappe.utils import add_days, add_months, cint, cstr, flt, getdate
+from frappe.utils import add_days, add_months, cint, cstr, flt, getdate, parse_json
 
 from erpnext import get_company_currency
 from erpnext.accounts.doctype.pricing_rule.pricing_rule import (
@@ -889,7 +889,7 @@ def insert_item_price(args):
 				)
 
 
-def get_item_price(args, item_code, ignore_party=False):
+def get_item_price(args, item_code, ignore_party=False, force_batch_no=False) -> list[dict]:
 	"""
 	Get name, price_list_rate from Item Price based on conditions
 	        Check if the desired qty is within the increment of the packing list.
@@ -906,12 +906,16 @@ def get_item_price(args, item_code, ignore_party=False):
 			(ip.item_code == item_code)
 			& (ip.price_list == args.get("price_list"))
 			& (IfNull(ip.uom, "").isin(["", args.get("uom")]))
-			& (IfNull(ip.batch_no, "").isin(["", args.get("batch_no")]))
 		)
 		.orderby(ip.valid_from, order=frappe.qb.desc)
 		.orderby(IfNull(ip.batch_no, ""), order=frappe.qb.desc)
 		.orderby(ip.uom, order=frappe.qb.desc)
 	)
+
+	if force_batch_no:
+		query = query.where(ip.batch_no == args.get("batch_no"))
+	else:
+		query = query.where(IfNull(ip.batch_no, "").isin(["", args.get("batch_no")]))
 
 	if not ignore_party:
 		if args.get("customer"):
@@ -928,6 +932,21 @@ def get_item_price(args, item_code, ignore_party=False):
 		)
 
 	return query.run()
+
+
+@frappe.whitelist()
+def get_batch_based_item_price(params, item_code) -> float:
+	if isinstance(params, str):
+		params = parse_json(params)
+
+	item_price = get_item_price(params, item_code, force_batch_no=True)
+	if not item_price:
+		item_price = get_item_price(params, item_code, ignore_party=True, force_batch_no=True)
+
+	if item_price and item_price[0].uom == params.get("uom"):
+		return item_price[0].price_list_rate
+
+	return 0.0
 
 
 def get_price_list_rate_for(args, item_code):
