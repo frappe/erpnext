@@ -14,7 +14,7 @@ frappe.ui.form.on("Campaign", {
 			frm.add_custom_button(
 				__("View Leads"),
 				function () {
-					frappe.route_options = { source: "Campaign", campaign_name: frm.doc.name };
+					frappe.route_options = { utm_source: "Campaign", utm_campaign: frm.doc.name };
 					frappe.set_route("List", "Lead");
 				},
 				"fa fa-list",

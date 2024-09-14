@@ -20,6 +20,17 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 				},
 			};
 		});
+
+		frm.set_query("default_advance_account", function (doc) {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					account_type: doc.party_type == "Customer" ? "Receivable" : "Payable",
+					root_type: doc.party_type == "Customer" ? "Liability" : "Asset",
+				},
+			};
+		});
 		frm.set_query("cost_center", function (doc) {
 			return {
 				filters: {
@@ -102,6 +113,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 	company(frm) {
 		frm.set_value("party", "");
 		frm.set_value("receivable_payable_account", "");
+		frm.set_value("default_advance_account", "");
 	},
 	party_type(frm) {
 		frm.set_value("party", "");
@@ -109,6 +121,7 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 
 	party(frm) {
 		frm.set_value("receivable_payable_account", "");
+		frm.set_value("default_advance_account", "");
 		if (!frm.doc.receivable_payable_account && frm.doc.party_type && frm.doc.party) {
 			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
@@ -116,10 +129,16 @@ frappe.ui.form.on("Process Payment Reconciliation", {
 					company: frm.doc.company,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party,
+					include_advance: 1,
 				},
 				callback: (r) => {
 					if (!r.exc && r.message) {
-						frm.set_value("receivable_payable_account", r.message);
+						if (typeof r.message === "string") {
+							frm.set_value("receivable_payable_account", r.message);
+						} else if (Array.isArray(r.message)) {
+							frm.set_value("receivable_payable_account", r.message[0]);
+							frm.set_value("default_advance_account", r.message[1]);
+						}
 					}
 					frm.refresh();
 				},

@@ -1558,13 +1558,14 @@ def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
 	serial_nos = set()
 	data = get_stock_ledgers_for_serial_nos(kwargs)
 
+	bundle_wise_serial_nos = get_bundle_wise_serial_nos(data)
 	for d in data:
 		if d.serial_and_batch_bundle:
-			sns = get_serial_nos_from_bundle(d.serial_and_batch_bundle, kwargs.get("serial_nos", []))
-			if d.actual_qty > 0:
-				serial_nos.update(sns)
-			else:
-				serial_nos.difference_update(sns)
+			if sns := bundle_wise_serial_nos.get(d.serial_and_batch_bundle):
+				if d.actual_qty > 0:
+					serial_nos.update(sns)
+				else:
+					serial_nos.difference_update(sns)
 
 		elif d.serial_no:
 			sns = get_serial_nos(d.serial_no)
@@ -1579,6 +1580,25 @@ def get_serial_nos_based_on_posting_date(kwargs, ignore_serial_nos):
 			serial_nos.remove(serial_no)
 
 	return serial_nos
+
+
+def get_bundle_wise_serial_nos(data):
+	bundle_wise_serial_nos = defaultdict(list)
+	bundles = [d.serial_and_batch_bundle for d in data if d.serial_and_batch_bundle]
+	if not bundles:
+		return bundle_wise_serial_nos
+
+	bundle_data = frappe.get_all(
+		"Serial and Batch Entry",
+		fields=["serial_no", "parent"],
+		filters={"parent": ("in", bundles), "docstatus": 1, "serial_no": ("is", "set")},
+	)
+
+	for d in bundle_data:
+		if d.parent:
+			bundle_wise_serial_nos[d.parent].append(d.serial_no)
+
+	return bundle_wise_serial_nos
 
 
 def get_reserved_serial_nos(kwargs) -> list:

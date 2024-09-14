@@ -124,8 +124,10 @@
   "customer_group",
   "territory",
   "column_break_108",
-  "campaign",
-  "source",
+  "utm_source",
+  "utm_campaign",
+  "utm_medium",
+  "utm_content",
   "column_break4",
   "opportunity",
   "supplier_quotation",
@@ -854,24 +856,6 @@
    "label": "Update Auto Repeat Reference"
   },
   {
-   "fieldname": "campaign",
-   "fieldtype": "Link",
-   "label": "Campaign",
-   "oldfieldname": "campaign",
-   "oldfieldtype": "Link",
-   "options": "Campaign",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "source",
-   "fieldtype": "Link",
-   "label": "Source",
-   "oldfieldname": "source",
-   "oldfieldtype": "Select",
-   "options": "Lead Source",
-   "print_hide": 1
-  },
-  {
    "allow_on_submit": 1,
    "depends_on": "eval:doc.status=='Lost'",
    "fieldname": "order_lost_reason",
@@ -1068,13 +1052,44 @@
    "fieldname": "named_place",
    "fieldtype": "Data",
    "label": "Named Place"
+  },
+  {
+   "fieldname": "utm_campaign",
+   "fieldtype": "Link",
+   "label": "Campaign",
+   "oldfieldname": "campaign",
+   "oldfieldtype": "Link",
+   "options": "UTM Campaign",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "utm_source",
+   "fieldtype": "Link",
+   "label": "Source",
+   "oldfieldname": "source",
+   "oldfieldtype": "Select",
+   "options": "UTM Source",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "utm_medium",
+   "print_hide": 1,
+   "fieldtype": "Link",
+   "label": "Medium",
+   "options": "UTM Medium"
+  },
+  {
+   "fieldname": "utm_content",
+   "print_hide": 1,
+   "fieldtype": "Data",
+   "label": "Content"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-04-20 01:15:19.171383",
+ "modified": "2024-06-28 10:32:47.638342",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

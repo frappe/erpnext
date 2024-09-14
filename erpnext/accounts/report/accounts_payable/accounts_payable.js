@@ -61,32 +61,10 @@ frappe.query_reports["Accounts Payable"] = {
 			default: "Due Date",
 		},
 		{
-			fieldname: "range1",
-			label: __("Ageing Range 1"),
-			fieldtype: "Int",
-			default: "30",
-			reqd: 1,
-		},
-		{
-			fieldname: "range2",
-			label: __("Ageing Range 2"),
-			fieldtype: "Int",
-			default: "60",
-			reqd: 1,
-		},
-		{
-			fieldname: "range3",
-			label: __("Ageing Range 3"),
-			fieldtype: "Int",
-			default: "90",
-			reqd: 1,
-		},
-		{
-			fieldname: "range4",
-			label: __("Ageing Range 4"),
-			fieldtype: "Int",
-			default: "120",
-			reqd: 1,
+			fieldname: "range",
+			label: __("Ageing Range"),
+			fieldtype: "Data",
+			default: "30, 60, 90, 120",
 		},
 		{
 			fieldname: "payment_terms_template",
@@ -160,6 +138,11 @@ frappe.query_reports["Accounts Payable"] = {
 		{
 			fieldname: "ignore_accounts",
 			label: __("Group by Voucher"),
+			fieldtype: "Check",
+		},
+		{
+			fieldname: "handle_employee_advances",
+			label: __("Handle Employee Advances"),
 			fieldtype: "Check",
 		},
 	],

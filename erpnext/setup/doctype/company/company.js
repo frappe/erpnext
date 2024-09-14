@@ -20,7 +20,6 @@ frappe.ui.form.on("Company", {
 	},
 	setup: function (frm) {
 		frm.__rename_queue = "long";
-		erpnext.company.setup_queries(frm);
 
 		frm.set_query("parent_company", function () {
 			return {
@@ -81,6 +80,8 @@ frappe.ui.form.on("Company", {
 	},
 
 	refresh: function (frm) {
+		erpnext.company.setup_queries(frm);
+
 		frm.toggle_display("address_html", !frm.is_new());
 
 		if (!frm.is_new()) {
@@ -251,6 +252,7 @@ erpnext.company.setup_queries = function (frm) {
 			["default_expense_account", { root_type: "Expense" }],
 			["default_income_account", { root_type: "Income" }],
 			["round_off_account", { root_type: "Expense" }],
+			["round_off_for_opening", { root_type: "Liability", account_type: "Round Off for Opening" }],
 			["write_off_account", { root_type: "Expense" }],
 			["default_deferred_expense_account", {}],
 			["default_deferred_revenue_account", {}],

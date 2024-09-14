@@ -282,7 +282,7 @@
    "fieldname": "campaign",
    "fieldtype": "Link",
    "label": "Campaign",
-   "options": "Campaign"
+   "options": "UTM Campaign"
   },
   {
    "depends_on": "eval:doc.applicable_for==\"Supplier\"",
@@ -647,7 +647,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2024-05-17 13:16:34.496704",
+ "modified": "2024-06-28 11:03:15.252701",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
