@@ -385,7 +385,15 @@ frappe.ui.form.on("Payment Entry", {
 	payment_type: function (frm) {
 		if (frm.doc.payment_type == "Internal Transfer") {
 			$.each(
-				["party", "party_balance", "paid_from", "paid_to", "references", "total_allocated_amount"],
+				[
+					"party",
+					"party_type",
+					"party_balance",
+					"paid_from",
+					"paid_to",
+					"references",
+					"total_allocated_amount",
+				],
 				function (i, field) {
 					frm.set_value(field, null);
 				}
@@ -658,7 +666,7 @@ frappe.ui.form.on("Payment Entry", {
 			frm.set_value("source_exchange_rate", 1);
 		} else if (frm.doc.paid_from) {
 			if (["Internal Transfer", "Pay"].includes(frm.doc.payment_type)) {
-				let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+				let company_currency = frappe.get_doc(":Company", frm.doc.company)?.default_currency;
 				frappe.call({
 					method: "erpnext.setup.utils.get_exchange_rate",
 					args: {
