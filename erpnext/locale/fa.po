@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-10 18:59\n"
+"PO-Revision-Date: 2024-09-14 19:55\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -6272,7 +6272,7 @@ msgstr "سند تکرار خودکار به روز شد"
 #. Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
 msgid "Auto write off precision loss while consolidation"
-msgstr "حذف خودکار از دست دادن دقت در هنگام تحکیم"
+msgstr "حذف خودکار از دست دادن دقت در هنگام تلفیق"
 
 #. Label of the auto_add_item_to_cart (Check) field in DocType 'POS Profile'
 #: accounts/doctype/pos_profile/pos_profile.json
@@ -11344,12 +11344,12 @@ msgstr "به مبلغ پرداختی در نظر گرفته شده است"
 #. Label of the combine_items (Check) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Consolidate Sales Order Items"
-msgstr "ادغام آیتم‌های سفارش فروش"
+msgstr "تلفیق آیتم‌های سفارش فروش"
 
 #. Label of the combine_sub_items (Check) field in DocType 'Production Plan'
 #: manufacturing/doctype/production_plan/production_plan.json
 msgid "Consolidate Sub Assembly Items"
-msgstr "ادغام آیتم‌های زیر مونتاز"
+msgstr "تلفیق آیتم‌های زیر مونتاز"
 
 #. Option for the 'Status' (Select) field in DocType 'POS Invoice'
 #: accounts/doctype/pos_invoice/pos_invoice.json
@@ -33210,11 +33210,11 @@ msgstr "فاکتورهای POS"
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:545
 msgid "POS Invoices will be consolidated in a background process"
-msgstr "فاکتورهای POS در یک فرآیند پس زمینه ادغام می شوند"
+msgstr "فاکتورهای POS در یک فرآیند پس زمینه تلفیق می شوند"
 
 #: accounts/doctype/pos_invoice_merge_log/pos_invoice_merge_log.py:547
 msgid "POS Invoices will be unconsolidated in a background process"
-msgstr "فاکتورهای POS در یک فرآیند پس زمینه تجمیع نمی شوند"
+msgstr ""
 
 #. Name of a DocType
 #: accounts/doctype/pos_item_group/pos_item_group.json
@@ -56562,7 +56562,7 @@ msgstr "در انتظار پرداخت..."
 
 #: setup/setup_wizard/data/lead_source.txt:10
 msgid "Walk In"
-msgstr "وارد شوید"
+msgstr "مراجعه حضوری"
 
 #. Label of the sec_warehouse (Section Break) field in DocType 'POS Invoice'
 #. Label of the warehouse (Link) field in DocType 'POS Invoice Item'
