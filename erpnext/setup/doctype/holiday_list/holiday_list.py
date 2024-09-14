@@ -121,6 +121,21 @@ class HolidayList(Document):
 	def clear_table(self):
 		self.set("holidays", [])
 
+<<<<<<< HEAD
+=======
+	def validate_duplicate_date(self):
+		unique_dates = []
+		for row in self.holidays:
+			if row.holiday_date in unique_dates:
+				frappe.throw(
+					_("Holiday Date {0} added multiple times").format(
+						frappe.bold(formatdate(row.holiday_date))
+					)
+				)
+
+			unique_dates.append(row.holiday_date)
+
+>>>>>>> a435441536 (fix(holiday-list): use same date format for same holiday error message (#42606))
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
