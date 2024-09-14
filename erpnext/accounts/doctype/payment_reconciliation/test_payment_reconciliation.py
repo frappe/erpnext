@@ -5,7 +5,7 @@
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, nowdate
+from frappe.utils import add_days, flt, getdate, nowdate, today
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -13,6 +13,7 @@ from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_pay
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.party import get_party_account
+from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.stock.doctype.item.test_item import create_item
 
@@ -1845,6 +1846,107 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(len(pr.invoices), 1)
 		self.assertEqual(len(pr.payments), 1)
 
+	def test_reconciliation_on_closed_period_payment(self):
+		from erpnext.accounts.doctype.account.test_account import create_account
+
+		self.create_company()
+		self.create_cost_center()
+
+		# create bank account
+		parent_account = frappe.db.get_value(
+			"Account", {"company": self.company, "account_name": "Bank Accounts", "is_group": 1}, "name"
+		)
+		bank_account = create_account(
+			account_name="Bank Account",
+			account_type="Bank",
+			is_group=0,
+			company=self.company,
+			root_type="Asset",
+			report_type="Balance Sheet",
+			account_currency="INR",
+			parent_account=parent_account,
+			doctype="Account",
+		)
+
+		# create backdated fiscal year
+		create_fiscal_year(company=self.company, year_start_date="1990-04-01", year_end_date="1991-03-31")
+
+		# make journal entry for previous year
+		je_1 = frappe.new_doc("Journal Entry")
+		je_1.posting_date = "1990-06-01"
+		je_1.company = self.company
+		je_1.user_remark = "test"
+		je_1.set(
+			"accounts",
+			[
+				{
+					"account": self.debit_to,
+					"cost_center": self.cost_center,
+					"party_type": "Customer",
+					"party": self.customer,
+					"debit_in_account_currency": 0,
+					"credit_in_account_currency": 1000,
+				},
+				{
+					"account": bank_account,
+					"cost_center": self.sub_cc,
+					"credit_in_account_currency": 0,
+					"debit_in_account_currency": 500,
+				},
+				{
+					"account": "Cash - _PR",
+					"cost_center": self.sub_cc,
+					"credit_in_account_currency": 0,
+					"debit_in_account_currency": 500,
+				},
+			],
+		)
+		je_1.save()
+		je_1.submit()
+		je_1.reload()
+		# check journal entry is submitted
+		self.assertTrue(je_1.docstatus == 1)
+
+		# make period closing voucher
+		pcv = make_period_closing_voucher(
+			company=self.company, cost_center=self.cost_center, posting_date="1991-03-31"
+		)
+		pcv.reload()
+		# check if period closing voucher is completed
+		self.assertEqual(pcv.gle_processing_status, "Completed")
+
+		# make journal entry for active year
+		je_2 = self.create_journal_entry(
+			acc1=self.debit_to, acc2=self.income_account, amount=1000, posting_date=today()
+		)
+		je_2.accounts[0].party_type = "Customer"
+		je_2.accounts[0].party = self.customer
+		je_2.save()
+		je_2.submit()
+		je_2.reload()
+		# check journal entry is submitted
+		self.assertTrue(je_2.docstatus == 1)
+
+		# process reconciliation on closed period payment
+		pr = self.create_payment_reconciliation(party_is_customer=True)
+		pr.from_invoice_date = pr.to_invoice_date = pr.from_payment_date = pr.to_payment_date = None
+		pr.get_unreconciled_entries()
+		invoices = [invoice.as_dict() for invoice in pr.invoices]
+		payments = [payment.as_dict() for payment in pr.payments]
+		pr.allocate_entries(frappe._dict({"invoices": invoices, "payments": payments}))
+		pr.reconcile()
+		je_1.reload()
+		je_2.reload()
+
+		# check whether the payment reconciliation is done on the closed period
+		self.assertEqual(pr.get("invoices"), [])
+		self.assertEqual(pr.get("payments"), [])
+
+		# cancel created entires during test
+		pcv.cancel()
+		je_1.cancel()
+		je_2.cancel()
+
 
 def make_customer(customer_name, currency=None):
 	if not frappe.db.exists("Customer", customer_name):
@@ -1872,3 +1974,61 @@ def make_supplier(supplier_name, currency=None):
 		return supplier.name
 	else:
 		return supplier_name
+
+
+def create_fiscal_year(company, year_start_date, year_end_date):
+	fy_docname = frappe.db.exists(
+		"Fiscal Year", {"year_start_date": year_start_date, "year_end_date": year_end_date}
+	)
+	if not fy_docname:
+		fy_doc = frappe.get_doc(
+			{
+				"doctype": "Fiscal Year",
+				"year": f"{getdate(year_start_date).year}-{getdate(year_end_date).year}",
+				"year_start_date": year_start_date,
+				"year_end_date": year_end_date,
+				"companies": [{"company": company}],
+			}
+		).save()
+		return fy_doc
+	else:
+		fy_doc = frappe.get_doc("Fiscal Year", fy_docname)
+		if not frappe.db.exists("Fiscal Year Company", {"parent": fy_docname, "company": company}):
+			fy_doc.append("companies", {"company": company})
+			fy_doc.save()
+		return fy_doc
+
+
+def make_period_closing_voucher(company, cost_center, posting_date=None, submit=True):
+	from erpnext.accounts.doctype.account.test_account import create_account
+
+	parent_account = frappe.db.get_value(
+		"Account", {"company": company, "account_name": "Current Liabilities", "is_group": 1}, "name"
+	)
+	surplus_account = create_account(
+		account_name="Reserve and Surplus",
+		is_group=0,
+		company=company,
+		root_type="Liability",
+		report_type="Balance Sheet",
+		account_currency="INR",
+		parent_account=parent_account,
+		doctype="Account",
+	)
+	pcv = frappe.get_doc(
+		{
+			"doctype": "Period Closing Voucher",
+			"transaction_date": posting_date or today(),
+			"posting_date": posting_date or today(),
+			"company": company,
+			"fiscal_year": get_fiscal_year(today(), company=company)[0],
+			"cost_center": cost_center,
+			"closing_account_head": surplus_account,
+			"remarks": "test",
+		}
+	)
+	pcv.insert()
+	if submit:
+		pcv.submit()
+
+	return pcv
