@@ -3535,6 +3535,13 @@ def check_if_child_table_updated(child_table_before_update, child_table_after_up
 
 	# Check if any field affecting accounting entry is altered
 	for index, item in enumerate(child_table_before_update):
+		if item.parenttype == "Journal Entry" and any(
+			[
+				child_table_after_update[index].get(i) != item.get(i)
+				for i in ["account", "party_type", "party", "debit", "credit"]
+			]
+		):
+			continue
 		for field in fields_to_check:
 			if child_table_after_update[index].get(field) != item.get(field):
 				return True
