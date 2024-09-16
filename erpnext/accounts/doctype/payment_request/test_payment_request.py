@@ -416,7 +416,7 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pe.base_received_amount, 800)
 		self.assertEqual(pe.received_amount, 10)
 
-	def test_multiple_payment_if_partially_paid(self):
+	def test_multiple_payment_if_partially_paid_for_same_currency(self):
 		so = make_sales_order(currency="INR", qty=1, rate=1000)
 
 		pr = make_payment_request(
@@ -438,6 +438,34 @@ class TestPaymentRequest(FrappeTestCase):
 		pe = pr.create_payment_entry(submit=False)
 		pe.paid_amount = 800
 		pe.references[0].allocated_amount = 800
+		pe.submit()
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, "Paid")
+
+	def test_multiple_payment_if_partially_paid_for_multi_currency(self):
+		si = create_sales_invoice(currency="USD", conversion_rate=50, qty=1, rate=100)
+
+		pr = make_payment_request(
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		# 50 USD -> 5000 INR
+		pe = pr.create_payment_entry(submit=False)
+		pe.paid_amount = 2000
+		pe.references[0].allocated_amount = 2000
+		pe.submit()
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, "Partially Paid")
+
+		pe = pr.create_payment_entry(submit=False)
+		pe.paid_amount = 3000
+		pe.references[0].allocated_amount = 3000
 		pe.submit()
 		pr.load_from_db()
 
