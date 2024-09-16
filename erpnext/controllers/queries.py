@@ -153,8 +153,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		columns += ", " + ", ".join(extra_searchfields)
 
 	if "description" in searchfields:
-		columns += """, if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as description"""
+		columns += """, (case when length(`tabItem`.description) > 40 then concat(substring(`tabItem`.description from 1 for 40), '...') else`tabItem`.description end) as description"""
+			
 
 	searchfields = searchfields + [
 		field
@@ -195,25 +195,24 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	description_cond = ""
 	if frappe.db.count(doctype, cache=True) < 50000:
 		# scan description only if items are less than 50000
-		description_cond = "or tabItem.description LIKE %(txt)s"
-
+		description_cond = "or `tabItem`.description LIKE %(txt)s"
 	return frappe.db.sql(
 		"""select
-			tabItem.name {columns}
-		from tabItem
-		where tabItem.docstatus < 2
-			and tabItem.disabled=0
-			and tabItem.has_variants=0
-			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
-			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+			`tabItem`.name {columns}
+		from `tabItem`
+		where `tabItem`.docstatus < 2
+			and `tabItem`.disabled=0
+			and `tabItem`.has_variants=0
+			and (`tabItem`.end_of_life > %(today)s or `tabItem`.end_of_life is null)
+			and ({scond} or `tabItem`.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 				{description_cond})
 			{fcond} {mcond}
 		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
+			(case when locate(%(_txt)s, name) > 0 then locate(%(_txt)s, name) else 99999 end),
+			(case when locate(%(_txt)s, item_name) > 0 then locate(%(_txt)s, item_name) else 99999 end),
 			idx desc,
 			name, item_name
-		limit %(start)s, %(page_len)s """.format(
+		limit %(page_len)s offset %(start)s""".format(
 			columns=columns,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace("%", "%%"),
