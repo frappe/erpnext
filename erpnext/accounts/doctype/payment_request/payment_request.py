@@ -321,12 +321,11 @@ class PaymentRequest(Document):
 			or get_account_currency(party_account)
 		)
 
-		bank_amount = self.grand_total
+		party_amount = bank_amount = self.outstanding_amount
 
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
-			party_amount = self.outstanding_amount
-		else:
-			party_amount = self.grand_total
+			exchange_rate = ref_doc.get("conversion_rate")
+			bank_amount = flt(self.outstanding_amount / exchange_rate, self.precision("grand_total"))
 
 		# outstanding amount is already in Part's account currency
 		payment_entry = get_payment_entry(
