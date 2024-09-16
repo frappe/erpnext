@@ -205,13 +205,13 @@ class TestProject(FrappeTestCase):
 		frappe.delete_doc("Project", project_name)
 
 		project = frappe.get_doc(
-			dict(
-				doctype="Project",
-				project_name=project_name,
-				status="Open",
-				expected_start_date=nowdate(),
-				company="_Test Company",
-			)
+			{
+				"doctype": "Project",
+				"project_name": project_name,
+				"status": "Open",
+				"expected_start_date": nowdate(),
+				"company": "_Test Company",
+			}
 		).insert()
 
 		tasks = frappe.get_all(
