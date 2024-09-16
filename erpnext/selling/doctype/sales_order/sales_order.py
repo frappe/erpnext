@@ -80,7 +80,6 @@ class SalesOrder(SellingController):
 		base_total: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
 		billing_status: DF.Literal["Not Billed", "Fully Billed", "Partly Billed", "Closed"]
-		campaign: DF.Link | None
 		commission_rate: DF.Float
 		company: DF.Link
 		company_address: DF.Link | None
@@ -151,7 +150,6 @@ class SalesOrder(SellingController):
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
 		skip_delivery_note: DF.Check
-		source: DF.Link | None
 		status: DF.Literal[
 			"",
 			"Draft",
@@ -179,6 +177,10 @@ class SalesOrder(SellingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transaction_date: DF.Date
+		utm_campaign: DF.Link | None
+		utm_content: DF.Data | None
+		utm_medium: DF.Link | None
+		utm_source: DF.Link | None
 	# end: auto-generated types
 
 	def __init__(self, *args, **kwargs):
@@ -1045,6 +1047,7 @@ def make_delivery_note(source_name, target_doc=None, kwargs=None):
 				)
 
 				dn_item.qty = flt(sre.reserved_qty) * flt(dn_item.get("conversion_factor", 1))
+				dn_item.warehouse = sre.warehouse
 
 				if sre.reservation_based_on == "Serial and Batch" and (sre.has_serial_no or sre.has_batch_no):
 					dn_item.serial_and_batch_bundle = get_ssb_bundle_for_voucher(sre)

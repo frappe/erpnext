@@ -46,7 +46,6 @@ class Quotation(SellingController):
 		base_rounding_adjustment: DF.Currency
 		base_total: DF.Currency
 		base_total_taxes_and_charges: DF.Currency
-		campaign: DF.Link | None
 		company: DF.Link
 		company_address: DF.Link | None
 		company_address_display: DF.TextEditor | None
@@ -96,7 +95,6 @@ class Quotation(SellingController):
 		shipping_address: DF.TextEditor | None
 		shipping_address_name: DF.Link | None
 		shipping_rule: DF.Link | None
-		source: DF.Link | None
 		status: DF.Literal[
 			"Draft", "Open", "Replied", "Partially Ordered", "Ordered", "Lost", "Cancelled", "Expired"
 		]
@@ -113,6 +111,10 @@ class Quotation(SellingController):
 		total_qty: DF.Float
 		total_taxes_and_charges: DF.Currency
 		transaction_date: DF.Date
+		utm_campaign: DF.Link | None
+		utm_content: DF.Data | None
+		utm_medium: DF.Link | None
+		utm_source: DF.Link | None
 		valid_till: DF.Date | None
 	# end: auto-generated types
 
@@ -220,6 +222,10 @@ class Quotation(SellingController):
 				"Lead", self.party_name, ["lead_name", "company_name"]
 			)
 			self.customer_name = company_name or lead_name
+		elif self.party_name and self.quotation_to == "Prospect":
+			self.customer_name = self.party_name
+		elif self.party_name and self.quotation_to == "CRM Deal":
+			self.customer_name = frappe.db.get_value("CRM Deal", self.party_name, "organization")
 
 	def update_opportunity(self, status):
 		for opportunity in set(d.prevdoc_docname for d in self.get("items")):

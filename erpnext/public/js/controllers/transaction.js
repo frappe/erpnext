@@ -1268,6 +1268,7 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 			"Purchase Receipt": ["purchase_order_item", "purchase_invoice_item", "purchase_receipt_item"],
 			"Purchase Invoice": ["purchase_order_item", "pr_detail", "po_detail"],
 			"Sales Order": ["prevdoc_docname", "quotation_item"],
+			"Purchase Order": ["supplier_quotation_item"],
 		};
 		const mappped_fields = mapped_item_field_map[this.frm.doc.doctype] || [];
 
@@ -1508,6 +1509,31 @@ erpnext.TransactionController = class TransactionController extends erpnext.taxe
 				if (frappe.meta.get_docfield(schedule_grid.doctype, fname))
 					schedule_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 			});
+		}
+	}
+
+	batch_no(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.use_serial_batch_fields && row.batch_no) {
+			var params = this._get_args(row);
+			params.batch_no = row.batch_no;
+			params.uom = row.uom;
+
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_batch_based_item_price",
+				args: {
+					params: params,
+					item_code: row.item_code,
+				},
+				callback: function(r) {
+					if (!r.exc && r.message) {
+						row.price_list_rate = r.message;
+						row.rate = r.message;
+						refresh_field("rate", row.name, row.parentfield);
+						refresh_field("price_list_rate", row.name, row.parentfield);
+					}
+				}
+			})
 		}
 	}
 

@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-01 09:35+0000\n"
-"PO-Revision-Date: 2024-09-07 18:35\n"
+"PO-Revision-Date: 2024-09-10 18:59\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Persian\n"
 "MIME-Version: 1.0\n"
@@ -715,7 +715,7 @@ msgstr ""
 #. Header text in the Stock Workspace
 #: selling/workspace/selling/selling.json stock/workspace/stock/stock.json
 msgid "<span class=\"h4\"><b>Quick Access</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>دسترسی سریع</b></span>"
 
 #. Header text in the Assets Workspace
 #. Header text in the Quality Workspace
@@ -748,7 +748,7 @@ msgstr ""
 #. Header text in the Settings Workspace
 #: setup/workspace/settings/settings.json
 msgid "<span class=\"h4\"><b>Settings</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>تنظیمات</b></span>"
 
 #. Header text in the Accounting Workspace
 #. Header text in the Payables Workspace
@@ -757,7 +757,7 @@ msgstr ""
 #: accounts/workspace/payables/payables.json
 #: accounts/workspace/receivables/receivables.json
 msgid "<span class=\"h4\"><b>Shortcuts</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>میانبرها</b></span>"
 
 #. Header text in the Settings Workspace
 #: setup/workspace/settings/settings.json
@@ -785,7 +785,7 @@ msgstr ""
 #: quality_management/workspace/quality/quality.json
 #: setup/workspace/home/home.json support/workspace/support/support.json
 msgid "<span class=\"h4\"><b>Your Shortcuts</b></span>"
-msgstr ""
+msgstr "<span class=\"h4\"><b>میانبرهای شما</b></span>"
 
 #. Content of the 'html_19' (HTML) field in DocType 'Inventory Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
@@ -1020,7 +1020,7 @@ msgstr "در بالا"
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:99
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:351
 msgid "Above 120 Days"
-msgstr ""
+msgstr "بالای 120 روز"
 
 #. Name of a role
 #: setup/doctype/department/department.json
@@ -3632,7 +3632,7 @@ msgstr "گروهی از آیتم‌ها را در یک آیتم دیگر جمع 
 
 #: setup/setup_wizard/data/industry_type.txt:4
 msgid "Agriculture"
-msgstr ""
+msgstr "کشاورزی"
 
 #. Name of a role
 #: assets/doctype/location/location.json
@@ -3646,7 +3646,7 @@ msgstr "کاربر کشاورزی"
 
 #: setup/setup_wizard/data/industry_type.txt:5
 msgid "Airline"
-msgstr ""
+msgstr "شرکت هواپیمایی"
 
 #. Label of the algorithm (Select) field in DocType 'Bisect Accounting
 #. Statements'
@@ -4914,7 +4914,7 @@ msgstr "قابل اجرا در حساب"
 #. Label of the to_designation (Link) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
 msgid "Applicable To (Designation)"
-msgstr "قابل اجرا برای (تعیین)"
+msgstr "قابل اجرا برای (نقش سازمانی)"
 
 #. Label of the to_emp (Link) field in DocType 'Authorization Rule'
 #: setup/doctype/authorization_rule/authorization_rule.json
@@ -5158,7 +5158,7 @@ msgstr "درخواست برای سند"
 #. Label of a Link in the CRM Workspace
 #: crm/doctype/appointment/appointment.json crm/workspace/crm/crm.json
 msgid "Appointment"
-msgstr "وقت ملاقات"
+msgstr "قرار ملاقات"
 
 #. Name of a DocType
 #: crm/doctype/appointment_booking_settings/appointment_booking_settings.json
@@ -7930,7 +7930,7 @@ msgstr "Biot"
 
 #: setup/setup_wizard/data/industry_type.txt:9
 msgid "Biotechnology"
-msgstr ""
+msgstr "بیوتکنولوژی"
 
 #. Name of a DocType
 #: accounts/doctype/bisect_accounting_statements/bisect_accounting_statements.json
@@ -8048,7 +8048,7 @@ msgstr "آبی"
 #. Accounts'
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.json
 msgid "Body"
-msgstr "بدن"
+msgstr "بدنه"
 
 #. Label of the body_text (Text Editor) field in DocType 'Dunning'
 #. Label of the body_text (Text Editor) field in DocType 'Dunning Letter Text'
@@ -9756,7 +9756,7 @@ msgstr "سفارش پرداخت / ارسال سفارش / سفارش جدید"
 
 #: setup/setup_wizard/data/industry_type.txt:12
 msgid "Chemical"
-msgstr ""
+msgstr "شیمیایی"
 
 #. Option for the 'Salary Mode' (Select) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -19255,7 +19255,7 @@ msgstr "لاگ درون‌بُرد برون‌بُرد"
 
 #: setup/setup_wizard/operations/install_fixtures.py:286
 msgid "External"
-msgstr ""
+msgstr "بیرونی"
 
 #. Label of the external_work_history (Table) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -51167,7 +51167,7 @@ msgstr " شناسه مالیاتی:"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:32
 msgid "Tax Id: {0}"
-msgstr ""
+msgstr "شناسه مالیاتی: {0}"
 
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
@@ -53861,7 +53861,7 @@ msgstr "تعداد کل پیش بینی شده"
 
 #: buying/report/item_wise_purchase_history/item_wise_purchase_history.py:272
 msgid "Total Purchase Amount"
-msgstr ""
+msgstr "کل مبلغ خرید"
 
 #. Label of the total_purchase_cost (Currency) field in DocType 'Project'
 #: projects/doctype/project/project.json
