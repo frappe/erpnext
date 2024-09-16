@@ -165,11 +165,17 @@ class PaymentRequest(Document):
 			self.currency != self.party_account_currency
 			and self.party_account_currency == get_company_currency(self.company)
 		):
+			# set outstanding amount in party account currency
 			invoice = frappe.get_value(
-				self.reference_doctype, self.reference_name, ["grand_total", "base_grand_total"]
+				self.reference_doctype,
+				self.reference_name,
+				["rounded_total", "grand_total", "base_rounded_total", "base_grand_total"],
+				as_dict=1,
 			)
+			grand_total = invoice.get("rounded_total") or invoice.get("grand_total")
+			base_grand_total = invoice.get("base_rounded_total") or invoice.get("base_grand_total")
 			self.outstanding_amount = flt(
-				self.grand_total / invoice.grand_total * invoice.base_grand_total,
+				self.grand_total / grand_total * base_grand_total,
 				self.precision("outstanding_amount"),
 			)
 
@@ -315,14 +321,12 @@ class PaymentRequest(Document):
 			or get_account_currency(party_account)
 		)
 
-		bank_amount = self.outstanding_amount
+		bank_amount = self.grand_total
 
 		if party_account_currency == ref_doc.company_currency and party_account_currency != self.currency:
-			total = ref_doc.get("rounded_total") or ref_doc.get("grand_total")
-			base_total = ref_doc.get("base_rounded_total") or ref_doc.get("base_grand_total")
-			party_amount = flt(self.outstanding_amount / total * base_total, self.precision("grand_total"))
-		else:
 			party_amount = self.outstanding_amount
+		else:
+			party_amount = self.grand_total
 
 		# outstanding amount is already in Part's account currency
 		payment_entry = get_payment_entry(
