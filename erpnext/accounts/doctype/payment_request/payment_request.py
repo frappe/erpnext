@@ -539,6 +539,14 @@ def make_payment_request(**args):
 			args["payment_request_type"] = (
 				"Outward" if args.get("dt") in ["Purchase Order", "Purchase Invoice"] else "Inward"
 			)
+
+		party_type = args.get("party_type") or "Customer"
+		party_account_currency = ref_doc.party_account_currency
+
+		if not party_account_currency:
+			party_account = get_party_account(party_type, ref_doc.get(party_type.lower()), ref_doc.company)
+			party_account_currency = get_account_currency(party_account)
+
 		pr.update(
 			{
 				"payment_gateway_account": gateway_account.get("name"),
@@ -546,7 +554,7 @@ def make_payment_request(**args):
 				"payment_account": gateway_account.get("payment_account"),
 				"payment_channel": gateway_account.get("payment_channel"),
 				"payment_request_type": args.get("payment_request_type"),
-				"currency": ref_doc.party_account_currency,  # no need of conversion using this
+				"currency": party_account_currency,  # consistent with PE
 				"grand_total": grand_total,
 				"mode_of_payment": args.mode_of_payment,
 				"email_to": args.recipient_id or ref_doc.owner,
@@ -555,7 +563,7 @@ def make_payment_request(**args):
 				"reference_doctype": ref_doc.doctype,
 				"reference_name": ref_doc.name,
 				"company": ref_doc.get("company"),
-				"party_type": args.get("party_type") or "Customer",
+				"party_type": party_type,
 				"party": args.get("party") or ref_doc.get("customer"),
 				"bank_account": bank_account,
 				"make_sales_invoice": (
