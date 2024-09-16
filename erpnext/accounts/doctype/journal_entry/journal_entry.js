@@ -680,11 +680,34 @@ $.extend(erpnext.journal_entry, {
 				callback: function (r) {
 					if (r.message) {
 						$.extend(d, r.message);
+						erpnext.journal_entry.set_amount_on_last_row(frm, dt, dn);
 						erpnext.journal_entry.set_debit_credit_in_company_currency(frm, dt, dn);
 						refresh_field("accounts");
 					}
 				},
 			});
 		}
+	},
+	set_amount_on_last_row: function (frm, dt, dn) {
+		let row = locals[dt][dn];
+		let length = frm.doc.accounts.length;
+		if (row.idx != length) return;
+
+		let difference = frm.doc.accounts.reduce((total, row) => {
+			if (row.idx == length) return total;
+
+			return total + row.debit - row.credit;
+		}, 0);
+
+		if (difference) {
+			if (difference > 0) {
+				row.credit_in_account_currency = difference / row.exchange_rate;
+				row.credit = difference;
+			} else {
+				row.debit_in_account_currency = -difference / row.exchange_rate;
+				row.debit = -difference;
+			}
+		}
+		refresh_field("accounts");
 	},
 });
