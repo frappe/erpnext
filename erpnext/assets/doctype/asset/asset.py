@@ -623,6 +623,9 @@ class Asset(AccountsController):
 		return records
 
 	def validate_make_gl_entry(self):
+		if self.is_composite_asset:
+			return True
+
 		purchase_document = self.get_purchase_document()
 		if not purchase_document:
 			return False
