@@ -1010,6 +1010,7 @@ frappe.ui.form.on("Payment Entry", {
 						c.outstanding_amount = d.outstanding_amount;
 						c.bill_no = d.bill_no;
 						c.payment_term = d.payment_term;
+						c.payment_term_outstanding = d.payment_term_outstanding;
 						c.allocated_amount = d.allocated_amount;
 						c.account = d.account;
 
