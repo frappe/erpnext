@@ -717,7 +717,7 @@ class POSInvoice(SalesInvoice):
 		pr = frappe.db.get_value("Payment Request", filters=filters)
 		if pr:
 			return frappe.get_doc("Payment Request", pr)
-		
+
 	def clear_unallocated_mode_of_payments(self):
 		self.set("payments", self.get("payments", {"amount": ["not in", [0, None, ""]]}))
 
