@@ -36,21 +36,6 @@ class PaymentEntryReference(Document):
 	# end: auto-generated types
 
 	@property
-	def payment_term_outstanding(self):
-		if not self.payment_term or not self.reference_doctype or not self.reference_name:
-			return
-
-		return frappe.db.get_value(
-			"Payment Schedule",
-			{
-				"payment_term": self.payment_term,
-				"parenttype": self.reference_doctype,
-				"parent": self.reference_name,
-			},
-			"outstanding",
-		)
-
-	@property
 	def payment_request_outstanding(self):
 		if not self.payment_request:
 			return
