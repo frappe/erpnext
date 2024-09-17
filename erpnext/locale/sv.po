@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-15 09:35+0000\n"
-"PO-Revision-Date: 2024-09-15 19:52\n"
+"PO-Revision-Date: 2024-09-17 20:17\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -3629,7 +3629,7 @@ msgstr "Åldrande Baserad på"
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:28
 #: stock/report/stock_ageing/stock_ageing.js:58
 msgid "Ageing Range"
-msgstr "Åldring Omfång"
+msgstr "Åldring Intervall"
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:87
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:339
@@ -11808,12 +11808,12 @@ msgstr "Kontakter"
 #: selling/doctype/sales_order/sales_order.json
 #: stock/doctype/delivery_note/delivery_note.json
 msgid "Content"
-msgstr "Innehåll "
+msgstr "Innehåll"
 
 #. Label of the content_type (Data) field in DocType 'Issue'
 #: support/doctype/issue/issue.json
 msgid "Content Type"
-msgstr "Innehållstyp"
+msgstr "Innehåll Typ"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.js:157
 #: public/js/controllers/transaction.js:2213
@@ -18657,7 +18657,7 @@ msgstr "Ange Kund Telefon Nummer"
 
 #: assets/doctype/asset/asset.js:806
 msgid "Enter date to scrap asset"
-msgstr "Ange datum för att skriva av tillgång"
+msgstr "Ange datum för tillgång avskrivning"
 
 #: assets/doctype/asset/asset.py:345
 msgid "Enter depreciation details"
