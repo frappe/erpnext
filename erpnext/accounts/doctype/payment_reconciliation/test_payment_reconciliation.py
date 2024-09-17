@@ -1996,7 +1996,7 @@ def make_period_closing_voucher(company, cost_center, posting_date=None, submit=
 			"transaction_date": posting_date or today(),
 			"posting_date": posting_date or today(),
 			"company": company,
-			"fiscal_year": get_fiscal_year(today(), company=company)[0],
+			"fiscal_year": get_fiscal_year(posting_date or today(), company=company)[0],
 			"cost_center": cost_center,
 			"closing_account_head": surplus_account,
 			"remarks": "test",
