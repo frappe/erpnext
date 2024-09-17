@@ -195,6 +195,11 @@ class JournalEntry(AccountsController):
 		self.update_booked_depreciation()
 
 	def on_update_after_submit(self):
+		# Flag will be set on Reconciliation
+		# Reconciliation tool will anyways repost ledger entries. So, no need to check and do implicit repost.
+		if self.flags.get("ignore_reposting_on_reconciliation"):
+			return
+
 		self.needs_repost = self.check_if_fields_updated(fields_to_check=[], child_tables={"accounts": []})
 		if self.needs_repost:
 			self.validate_for_repost()

@@ -665,6 +665,8 @@ def update_reference_in_journal_entry(d, journal_entry, do_not_save=False):
 
 	# will work as update after submit
 	journal_entry.flags.ignore_validate_update_after_submit = True
+	# Ledgers will be reposted by Reconciliation tool
+	journal_entry.flags.ignore_reposting_on_reconciliation = True
 	if not do_not_save:
 		journal_entry.save(ignore_permissions=True)
 
