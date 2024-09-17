@@ -1849,31 +1849,19 @@ class TestPaymentReconciliation(FrappeTestCase):
 	def test_reconciliation_on_closed_period_payment(self):
 		from erpnext.accounts.doctype.account.test_account import create_account
 
-		self.create_company()
-		self.create_cost_center()
-
-		# create bank account
-		parent_account = frappe.db.get_value(
-			"Account", {"company": self.company, "account_name": "Bank Accounts", "is_group": 1}, "name"
-		)
-		bank_account = create_account(
-			account_name="Bank Account",
-			account_type="Bank",
-			is_group=0,
-			company=self.company,
-			root_type="Asset",
-			report_type="Balance Sheet",
-			account_currency="INR",
-			parent_account=parent_account,
-			doctype="Account",
-		)
+		# Get current fiscal year
+		current_fy_start_date = get_fiscal_year(today())[1]
 
 		# create backdated fiscal year
-		create_fiscal_year(company=self.company, year_start_date="1990-04-01", year_end_date="1991-03-31")
+		prev_fy_start_date = add_days(current_fy_start_date, -366)
+		prev_fy_end_date = add_days(current_fy_start_date, -1)
+		create_fiscal_year(
+			company=self.company, year_start_date=prev_fy_start_date, year_end_date=prev_fy_end_date
+		)
 
 		# make journal entry for previous year
 		je_1 = frappe.new_doc("Journal Entry")
-		je_1.posting_date = "1990-06-01"
+		je_1.posting_date = add_days(prev_fy_start_date, 20)
 		je_1.company = self.company
 		je_1.user_remark = "test"
 		je_1.set(
@@ -1888,28 +1876,24 @@ class TestPaymentReconciliation(FrappeTestCase):
 					"credit_in_account_currency": 1000,
 				},
 				{
-					"account": bank_account,
-					"cost_center": self.sub_cc,
+					"account": self.bank,
+					"cost_center": self.sub_cc.name,
 					"credit_in_account_currency": 0,
 					"debit_in_account_currency": 500,
 				},
 				{
-					"account": "Cash - _PR",
-					"cost_center": self.sub_cc,
+					"account": self.cash,
+					"cost_center": self.sub_cc.name,
 					"credit_in_account_currency": 0,
 					"debit_in_account_currency": 500,
 				},
 			],
 		)
-		je_1.save()
 		je_1.submit()
-		je_1.reload()
-		# check journal entry is submitted
-		self.assertTrue(je_1.docstatus == 1)
 
 		# make period closing voucher
 		pcv = make_period_closing_voucher(
-			company=self.company, cost_center=self.cost_center, posting_date="1991-03-31"
+			company=self.company, cost_center=self.cost_center, posting_date=prev_fy_end_date
 		)
 		pcv.reload()
 		# check if period closing voucher is completed
@@ -1921,11 +1905,7 @@ class TestPaymentReconciliation(FrappeTestCase):
 		)
 		je_2.accounts[0].party_type = "Customer"
 		je_2.accounts[0].party = self.customer
-		je_2.save()
 		je_2.submit()
-		je_2.reload()
-		# check journal entry is submitted
-		self.assertTrue(je_2.docstatus == 1)
 
 		# process reconciliation on closed period payment
 		pr = self.create_payment_reconciliation(party_is_customer=True)
@@ -1941,11 +1921,6 @@ class TestPaymentReconciliation(FrappeTestCase):
 		# check whether the payment reconciliation is done on the closed period
 		self.assertEqual(pr.get("invoices"), [])
 		self.assertEqual(pr.get("payments"), [])
-
-		# cancel created entires during test
-		pcv.cancel()
-		je_1.cancel()
-		je_2.cancel()
 
 
 def make_customer(customer_name, currency=None):
