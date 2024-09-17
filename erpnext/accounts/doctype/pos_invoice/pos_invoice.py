@@ -717,14 +717,46 @@ class POSInvoice(SalesInvoice):
 			return frappe.get_doc("Payment Request", pr)
 
 
-@frappe.whitelist()
+import frappe
+
+@frappe.whitelist(allow_guest=True)
+def get_total_qty_for_item_bundles(item_code):
+    # Step 1: Fetch all bundles associated with the specified item
+    associated_bundles = frappe.get_all("Product Bundle Item", filters={"item_code": item_code}, fields=["parent", "qty"])
+    bundle_qty_map = {bundle["parent"]: bundle["qty"] for bundle in associated_bundles}
+
+    # If no associated bundles are found, return 0
+    if not bundle_qty_map:
+        return 0
+
+    # Step 2: Fetch and filter records from POS Invoice Item directly in the query
+    p_item = frappe.qb.DocType("POS Invoice Item")
+    all_items = (
+        frappe.qb.from_(p_item)
+        .select(p_item.star)
+        .where(p_item.item_code.isin(list(bundle_qty_map.keys())))
+    ).run(as_dict=True)
+
+    # Step 3: Calculate the total quantity for the associated bundles
+    total_qty = 0
+    for item in all_items:
+        bundle_name = item.get('item_code')
+        bundle_qty = item.get('qty', 0)
+        item_qty_in_bundle = bundle_qty_map.get(bundle_name, 0)
+        total_qty += bundle_qty * item_qty_in_bundle
+
+    return total_qty
+
+@frappe.whitelist(allow_guest=True)
 def get_stock_availability(item_code, warehouse):
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
 		is_stock_item = True
 		bin_qty = get_bin_qty(item_code, warehouse)
 		pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
+		total_qty_for_item_bundles = get_total_qty_for_item_bundles(item_code)
 
-		return bin_qty - pos_sales_qty, is_stock_item
+
+		return bin_qty - pos_sales_qty - total_qty_for_item_bundles ,  is_stock_item
 	else:
 		is_stock_item = True
 		if frappe.db.exists("Product Bundle", {"name": item_code, "disabled": 0}):
