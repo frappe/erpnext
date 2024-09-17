@@ -452,8 +452,8 @@ class POSInvoice(SalesInvoice):
 		if self.is_return:
 			invoice_total = self.rounded_total or self.grand_total
 			total_amount_in_payments = flt(total_amount_in_payments, self.precision("grand_total"))
-			if total_amount_in_payments and total_amount_in_payments < invoice_total:
-				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
+			if total_amount_in_payments and total_amount_in_payments > invoice_total:
+				frappe.throw(_("Total payments amount can't be greater than {}").format(invoice_total))
 
 	def validate_company_with_pos_company(self):
 		if self.company != frappe.db.get_value("POS Profile", self.pos_profile, "company"):
