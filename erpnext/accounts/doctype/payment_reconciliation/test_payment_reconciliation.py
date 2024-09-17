@@ -5,7 +5,7 @@
 import frappe
 from frappe import qb
 from frappe.tests.utils import FrappeTestCase, change_settings
-from frappe.utils import add_days, flt, getdate, nowdate, today
+from frappe.utils import add_days, add_years, flt, getdate, nowdate, today
 
 from erpnext import get_default_cost_center
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
@@ -1847,14 +1847,10 @@ class TestPaymentReconciliation(FrappeTestCase):
 		self.assertEqual(len(pr.payments), 1)
 
 	def test_reconciliation_on_closed_period_payment(self):
-		from erpnext.accounts.doctype.account.test_account import create_account
-
-		# Get current fiscal year
-		current_fy_start_date = get_fiscal_year(today())[1]
-
 		# create backdated fiscal year
-		prev_fy_start_date = add_days(current_fy_start_date, -366)
-		prev_fy_end_date = add_days(current_fy_start_date, -1)
+		first_fy_start_date = frappe.db.get_value("Fiscal Year", {"disabled": 0}, "min(year_start_date)")
+		prev_fy_start_date = add_years(first_fy_start_date, -1)
+		prev_fy_end_date = add_days(first_fy_start_date, -1)
 		create_fiscal_year(
 			company=self.company, year_start_date=prev_fy_start_date, year_end_date=prev_fy_end_date
 		)
