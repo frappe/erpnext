@@ -389,28 +389,14 @@ erpnext.PointOfSale.ItemCart = class {
 				placeholder: discount ? discount + "%" : __("Enter discount percentage."),
 				input_class: "input-xs",
 				onchange: function () {
-					if (flt(this.value) != 0) {
-						frappe.model.set_value(
-							frm.doc.doctype,
-							frm.doc.name,
-							"additional_discount_percentage",
-							flt(this.value)
-						);
-						me.hide_discount_control(this.value);
-					} else {
-						frappe.model.set_value(
-							frm.doc.doctype,
-							frm.doc.name,
-							"additional_discount_percentage",
-							0
-						);
-						me.$add_discount_elem.css({
-							border: "1px dashed var(--gray-500)",
-							padding: "var(--padding-sm) var(--padding-md)",
-						});
-						me.$add_discount_elem.html(`${me.get_discount_icon()} ${__("Add Discount")}`);
-						me.discount_field = undefined;
-					}
+					this.value = flt(this.value);
+					frappe.model.set_value(
+						frm.doc.doctype,
+						frm.doc.name,
+						"additional_discount_percentage",
+						flt(this.value)
+					);
+					me.hide_discount_control(this.value);
 				},
 			},
 			parent: this.$add_discount_elem.find(".add-discount-field"),
@@ -421,9 +407,13 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 
 	hide_discount_control(discount) {
-		if (!discount) {
-			this.$add_discount_elem.css({ padding: "0px", border: "none" });
-			this.$add_discount_elem.html(`<div class="add-discount-field"></div>`);
+		if (!flt(discount)) {
+			this.$add_discount_elem.css({
+				border: "1px dashed var(--gray-500)",
+				padding: "var(--padding-sm) var(--padding-md)",
+			});
+			this.$add_discount_elem.html(`${this.get_discount_icon()} ${__("Add Discount")}`);
+			this.discount_field = undefined;
 		} else {
 			this.$add_discount_elem.css({
 				border: "1px dashed var(--dark-green-500)",
@@ -1051,6 +1041,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.highlight_checkout_btn(false);
 		}
 
+		this.hide_discount_control(frm.doc.additional_discount_percentage);
 		this.update_totals_section(frm);
 
 		if (frm.doc.docstatus === 1) {
