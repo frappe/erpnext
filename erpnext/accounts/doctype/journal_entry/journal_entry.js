@@ -360,21 +360,23 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 
 	accounts_add(doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
+		row.exchange_rate = 1;
 		$.each(doc.accounts, function (i, d) {
 			if (d.account && d.party && d.party_type) {
 				row.account = d.account;
 				row.party = d.party;
 				row.party_type = d.party_type;
+				row.exchange_rate = d.exchange_rate;
 			}
 		});
 
 		// set difference
 		if (doc.difference) {
 			if (doc.difference > 0) {
-				row.credit_in_account_currency = doc.difference;
+				row.credit_in_account_currency = doc.difference / row.exchange_rate;
 				row.credit = doc.difference;
 			} else {
-				row.debit_in_account_currency = -doc.difference;
+				row.debit_in_account_currency = -doc.difference / row.exchange_rate;
 				row.debit = -doc.difference;
 			}
 		}
