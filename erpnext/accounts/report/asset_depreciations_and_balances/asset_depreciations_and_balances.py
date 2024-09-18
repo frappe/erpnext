@@ -232,9 +232,15 @@ def get_group_by_asset_data(filters):
 def get_assets_for_grouped_by_category(filters):
 	condition = ""
 	if filters.get("asset_category"):
-		condition = " and a.asset_category = '{}'".format(filters.get("asset_category"))
+		condition = f" and a.asset_category = '{filters.get('asset_category')}'"
+	finance_book_filter = ""
+	if filters.get("finance_book"):
+		finance_book_filter += " and ifnull(gle.finance_book, '')=%(finance_book)s"
+		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
+
+	# nosemgrep
 	return frappe.db.sql(
-		"""
+		f"""
 		SELECT results.asset_category,
 			   sum(results.accumulated_depreciation_as_on_from_date) as accumulated_depreciation_as_on_from_date,
 			   sum(results.depreciation_eliminated_during_the_period) as depreciation_eliminated_during_the_period,
@@ -264,7 +270,14 @@ def get_assets_for_grouped_by_category(filters):
 				aca.parent = a.asset_category and aca.company_name = %(company)s
 			join `tabCompany` company on
 				company.name = %(company)s
-			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s and gle.debit != 0 and gle.is_cancelled = 0 and gle.account = ifnull(aca.depreciation_expense_account, company.depreciation_expense_account) {0}
+			where
+				a.docstatus=1
+				and a.company=%(company)s
+				and a.purchase_date <= %(to_date)s
+				and gle.debit != 0
+				and gle.is_cancelled = 0
+				and gle.account = ifnull(aca.depreciation_expense_account, company.depreciation_expense_account)
+				{condition} {finance_book_filter}
 			group by a.asset_category
 			union
 			SELECT a.asset_category,
@@ -280,11 +293,16 @@ def get_assets_for_grouped_by_category(filters):
 							  end), 0) as depreciation_eliminated_during_the_period,
 				   0 as depreciation_amount_during_the_period
 			from `tabAsset` a
-			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {0}
+			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {condition}
 			group by a.asset_category) as results
 		group by results.asset_category
-		""".format(condition),
-		{"to_date": filters.to_date, "from_date": filters.from_date, "company": filters.company},
+		""",
+		{
+			"to_date": filters.to_date,
+			"from_date": filters.from_date,
+			"company": filters.company,
+			"finance_book": filters.get("finance_book", ""),
+		},
 		as_dict=1,
 	)
 
@@ -292,9 +310,15 @@ def get_assets_for_grouped_by_category(filters):
 def get_assets_for_grouped_by_asset(filters):
 	condition = ""
 	if filters.get("asset"):
-		condition = " and a.name = '{}'".format(filters.get("asset"))
+		condition = f" and a.name = '{filters.get('asset')}'"
+	finance_book_filter = ""
+	if filters.get("finance_book"):
+		finance_book_filter += " and ifnull(gle.finance_book, '')=%(finance_book)s"
+		condition += " and exists (select 1 from `tabAsset Depreciation Schedule` ads where ads.asset = a.name and ads.finance_book = %(finance_book)s)"
+
+	# nosemgrep
 	return frappe.db.sql(
-		"""
+		f"""
 		SELECT results.name as asset,
 			   sum(results.accumulated_depreciation_as_on_from_date) as accumulated_depreciation_as_on_from_date,
 			   sum(results.depreciation_eliminated_during_the_period) as depreciation_eliminated_during_the_period,
@@ -324,7 +348,14 @@ def get_assets_for_grouped_by_asset(filters):
 				aca.parent = a.asset_category and aca.company_name = %(company)s
 			join `tabCompany` company on
 				company.name = %(company)s
-			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s and gle.debit != 0 and gle.is_cancelled = 0 and gle.account = ifnull(aca.depreciation_expense_account, company.depreciation_expense_account) {0}
+			where
+				a.docstatus=1
+				and a.company=%(company)s
+				and a.purchase_date <= %(to_date)s
+				and gle.debit != 0
+				and gle.is_cancelled = 0
+				and gle.account = ifnull(aca.depreciation_expense_account, company.depreciation_expense_account)
+				{finance_book_filter} {condition}
 			group by a.name
 			union
 			SELECT a.name as name,
@@ -340,11 +371,16 @@ def get_assets_for_grouped_by_asset(filters):
 							  end), 0) as depreciation_eliminated_during_the_period,
 				   0 as depreciation_amount_during_the_period
 			from `tabAsset` a
-			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {0}
+			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s {condition}
 			group by a.name) as results
 		group by results.name
-		""".format(condition),
-		{"to_date": filters.to_date, "from_date": filters.from_date, "company": filters.company},
+		""",
+		{
+			"to_date": filters.to_date,
+			"from_date": filters.from_date,
+			"company": filters.company,
+			"finance_book": filters.get("finance_book", ""),
+		},
 		as_dict=1,
 	)
 
