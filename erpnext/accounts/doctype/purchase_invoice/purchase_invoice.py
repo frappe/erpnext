@@ -165,6 +165,7 @@ class PurchaseInvoice(BuyingController):
 		rounding_adjustment: DF.Currency
 		scan_barcode: DF.Data | None
 		select_print_heading: DF.Link | None
+		sender: DF.Data | None
 		set_from_warehouse: DF.Link | None
 		set_posting_time: DF.Check
 		set_warehouse: DF.Link | None
