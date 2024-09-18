@@ -39,6 +39,7 @@
   "action_if_quality_inspection_is_rejected",
   "stock_reservation_tab",
   "enable_stock_reservation",
+  "auto_reserve_stock",
   "column_break_rx3e",
   "allow_partial_reservation",
   "auto_reserve_stock_for_sales_order_on_purchase",
@@ -460,6 +461,13 @@
    "fieldname": "over_picking_allowance",
    "fieldtype": "Percent",
    "label": "Over Picking Allowance"
+  },
+  {
+   "default": "0",
+   "description": "Upon submission of the Sales Order, Work Order, or Production Plan, the system will automatically reserve the stock.",
+   "fieldname": "auto_reserve_stock",
+   "fieldtype": "Check",
+   "label": "Auto Reserve Stock"
   }
  ],
  "icon": "icon-cog",
@@ -467,7 +475,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-07-29 14:55:19.093508",
+ "modified": "2024-09-13 14:32:01.356841",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

@@ -233,6 +233,11 @@ class SalesOrder(SellingController):
 			self.advance_payment_status = "Not Requested"
 
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
+		self.enable_auto_reserve_stock()
+
+	def enable_auto_reserve_stock(self):
+		if self.is_new() and frappe.db.get_single_value("Stock Settings", "auto_reserve_stock"):
+			self.reserve_stock = 1
 
 	def validate_po(self):
 		# validate p.o date v/s delivery date

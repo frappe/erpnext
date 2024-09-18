@@ -68,7 +68,7 @@ frappe.query_reports["Reserved Stock"] = {
 			default: "Sales Order",
 			get_query: () => ({
 				filters: {
-					name: ["in", ["Sales Order"]],
+					name: ["in", ["Sales Order", "Work Order", "Production Plan"]],
 				},
 			}),
 		},

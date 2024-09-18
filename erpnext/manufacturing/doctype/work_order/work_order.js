@@ -206,6 +206,20 @@ frappe.ui.form.on("Work Order", {
 		frm.trigger("add_custom_button_to_return_components");
 	},
 
+	has_unreserved_stock(frm) {
+		let has_unreserved_stock = frm.doc.required_items.some(
+			(item) => flt(item.required_qty) > flt(item.stock_reserved_qty)
+		);
+
+		return has_unreserved_stock;
+	},
+
+	has_reserved_stock(frm) {
+		let has_reserved_stock = frm.doc.required_items.some((item) => flt(item.stock_reserved_qty) > 0);
+
+		return has_reserved_stock;
+	},
+
 	add_custom_button_to_return_components: function (frm) {
 		if (frm.doc.docstatus === 1 && ["Closed", "Completed"].includes(frm.doc.status)) {
 			let non_consumed_items = frm.doc.required_items.filter((d) => {
@@ -545,6 +559,12 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
 	},
+
+	on_submit() {
+		frappe.route_hooks.after_submit = (frm) => {
+			frm.reload_doc();
+		};
+	},
 });
 
 frappe.ui.form.on("Work Order Item", {
@@ -657,6 +677,8 @@ erpnext.work_order = {
 				);
 			}
 
+			erpnext.work_order.setup_stock_reservation(frm);
+
 			if (!frm.doc.track_semi_finished_goods) {
 				const show_start_btn =
 					frm.doc.skip_transfer || frm.doc.transfer_material_against == "Job Card" ? 0 : 1;
@@ -750,6 +772,38 @@ erpnext.work_order = {
 			}
 		}
 	},
+
+	setup_stock_reservation(frm) {
+		if (frm.doc.docstatus === 1 && frm.doc.reserve_stock) {
+			if (
+				frm.events.has_unreserved_stock(frm) &&
+				(frm.doc.skip_transfer || frm.doc.material_transferred_for_manufacturing < frm.doc.qty)
+			) {
+				frm.add_custom_button(
+					__("Reserve"),
+					() => erpnext.stock_reservation.make_entries(frm, "required_items"),
+					__("Stock Reservation")
+				);
+			}
+
+			if (frm.events.has_reserved_stock(frm)) {
+				if (frm.doc.skip_transfer || frm.doc.material_transferred_for_manufacturing < frm.doc.qty) {
+					frm.add_custom_button(
+						__("Unreserve"),
+						() => erpnext.stock_reservation.unreserve_stock(frm),
+						__("Stock Reservation")
+					);
+				}
+
+				frm.add_custom_button(
+					__("Reserved Stock"),
+					() => erpnext.stock_reservation.show_reserved_stock(frm, "required_items"),
+					__("Stock Reservation")
+				);
+			}
+		}
+	},
+
 	calculate_cost: function (doc) {
 		if (doc.operations) {
 			var op = doc.operations;

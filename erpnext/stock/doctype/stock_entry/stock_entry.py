@@ -246,8 +246,10 @@ class StockEntry(StockController):
 	def on_submit(self):
 		self.validate_closed_subcontracting_order()
 		self.make_bundle_using_old_serial_batch_fields()
-		self.update_stock_ledger()
 		self.update_work_order()
+		self.update_stock_ledger()
+		self.make_stock_reserve_for_wip_and_fg()
+
 		self.validate_subcontract_order()
 		self.update_subcontract_order_supplied_items()
 		self.update_subcontracting_order_status()
@@ -269,6 +271,7 @@ class StockEntry(StockController):
 		self.validate_closed_subcontracting_order()
 		self.update_subcontract_order_supplied_items()
 		self.update_subcontracting_order_status()
+		self.cancel_stock_reserve_for_wip_and_fg()
 
 		if self.work_order and self.purpose == "Material Consumption for Manufacture":
 			self.validate_work_order_status()
@@ -1637,6 +1640,32 @@ class StockEntry(StockController):
 			pro_doc.run_method("update_status")
 			if not pro_doc.operations:
 				pro_doc.set_actual_dates()
+
+	def make_stock_reserve_for_wip_and_fg(self):
+		if self.is_stock_reserve_for_work_order():
+			pro_doc = frappe.get_doc("Work Order", self.work_order)
+			if self.purpose == "Manufacture" and not pro_doc.sales_order:
+				return
+
+			pro_doc.set_reserved_qty_for_wip_and_fg(self)
+
+	def cancel_stock_reserve_for_wip_and_fg(self):
+		if self.is_stock_reserve_for_work_order():
+			pro_doc = frappe.get_doc("Work Order", self.work_order)
+			if self.purpose == "Manufacture" and not pro_doc.sales_order:
+				return
+
+			pro_doc.cancel_reserved_qty_for_wip_and_fg(self)
+
+	def is_stock_reserve_for_work_order(self):
+		if (
+			self.work_order
+			and self.stock_entry_type in ["Material Transfer for Manufacture", "Manufacture"]
+			and frappe.get_cached_value("Work Order", self.work_order, "reserve_stock")
+		):
+			return True
+
+		return False
 
 	@frappe.whitelist()
 	def get_item_details(self, args=None, for_update=False):

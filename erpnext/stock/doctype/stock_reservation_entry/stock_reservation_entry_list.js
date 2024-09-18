@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.listview_settings["Stock Reservation Entry"] = {
+	filters: [["status", "!=", "Cancelled"]],
 	get_indicator: function (doc) {
 		const status_colors = {
 			Draft: "red",
