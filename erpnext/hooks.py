@@ -22,7 +22,15 @@ add_to_apps_screen = [
 
 develop_version = "15.x.x-develop"
 
-app_include_js = "erpnext.bundle.js"
+app_include_js = [
+	"erpnext.bundle.js",
+    "https://cdnjs.cloudflare.com/ajax/libs/canvg/3.0.9/umd.js",
+    "https://sharonchoong.github.io/svg-exportJS/svg-export.min.js",
+    "https://cdn.jsdelivr.net/npm/pdfkit@0.13.0/js/pdfkit.standalone.js",
+    "https://cdn.jsdelivr.net/npm/blob-stream-browserify@0.1.3/index.js",
+    "https://cdn.jsdelivr.net/npm/svg-to-pdfkit@0.1.8/source.js"
+]
+
 app_include_css = "erpnext.bundle.css"
 web_include_js = "erpnext-web.bundle.js"
 web_include_css = "erpnext-web.bundle.css"
