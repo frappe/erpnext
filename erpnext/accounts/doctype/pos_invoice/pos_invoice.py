@@ -717,19 +717,15 @@ class POSInvoice(SalesInvoice):
 			return frappe.get_doc("Payment Request", pr)
 
 
-import frappe
-
 @frappe.whitelist(allow_guest=True)
 def get_total_qty_for_item_bundles(item_code):
-    debug_info = {}
-
     # Step 1: Fetch all bundles associated with the specified item
-    associated_bundles = frappe.get_all("Product Bundle Item", filters={"item_code": item_code}, fields=["parent"])
+    associated_bundles = frappe.get_all("Product Bundle Item", filters={"item_code": item_code}, fields=["parent", "qty"])
     associated_bundle_names = [bundle["parent"] for bundle in associated_bundles]
-    debug_info['associated_bundles'] = associated_bundles
-    debug_info['associated_bundle_names'] = associated_bundle_names
-    print(f"Associated bundles: {associated_bundles}")
-    print(f"Associated bundle names: {associated_bundle_names}")
+    bundle_qty_map = {bundle["parent"]: bundle["qty"] for bundle in associated_bundles}
+
+    if not associated_bundle_names:
+        return 0  # Return 0 if there are no associated bundles
 
     # Step 2: Fetch all records from POS Invoice Item
     p_item = frappe.qb.DocType("POS Invoice Item")
@@ -740,27 +736,26 @@ def get_total_qty_for_item_bundles(item_code):
         .join(p_inv).on(p_item.parent == p_inv.name)
         .select(p_item.star, p_inv.consolidated_invoice)
         .where(
-            (IfNull(p_inv.consolidated_invoice, "") == "") &
+            (IfNull(p_inv.consolidated_invoice, "") == "") & 
             (p_item.docstatus == 1) &
             (p_inv.docstatus == 1) &
-            (p_item.item_code.isin(associated_bundle_names)) 
+            (p_item.item_code.isin(associated_bundle_names))
         )
     ).run(as_dict=True)
-    debug_info['all_items'] = all_items
-    print(f"All items: {all_items}")
 
-    # Step 3: Calculate the total quantity for the associated bundles
+    # Step 3: Calculate the total quantity for all associated bundles
     total_qty = 0
     for item in all_items:
-        if item.get('item_code') in associated_bundle_names:
-            total_qty += item.get('qty', 0)
-            print(f"Processing item: {item}, total_qty: {total_qty}")
+        item_code = item.get('item_code')
+        item_qty = item.get('qty', 0)
+        conversion_factor= item.get('conversion_factor', 1)
+        
+        for bundle, bundle_qty in bundle_qty_map.items():
+            if item_code == bundle:
+                total_qty += item_qty * bundle_qty *conversion_factor
 
-    debug_info['total_qty'] = total_qty
-    print(f"Total quantity: {total_qty}")
-
-    return debug_info
-
+    return total_qty 
+        
 @frappe.whitelist(allow_guest=True)
 def get_stock_availability(item_code, warehouse):
 	if frappe.db.get_value("Item", item_code, "is_stock_item"):
