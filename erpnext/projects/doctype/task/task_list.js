@@ -68,35 +68,15 @@ frappe.listview_settings["Task"] = {
 		return `<div class="p-3" style="min-width: 220px">${html}</div>`;
 	},
     refresh: function (listview) {
-        listview.page.add_inner_button(__("Print"), () => {
-			// Create a new window for printing
-			const printWindow = window.open('', '', 'width=800,height=600');
-			printWindow.document.open();
-			printWindow.document.write('Gantt Chart');
-			printWindow.document.write('');
-			// Custom styles for the Gantt chart
-			printWindow.document.write( /* Your custom CSS styles for the Gantt chart go here */ );
-			printWindow.document.write('');
+        listview.page.add_inner_button(__("Pdf Download"), () => {
 			
-			const ganttChartSVG = document.querySelector('.gantt');
-			const bbox = ganttChartSVG.getBBox();
-			const serializer = new XMLSerializer();
-			const svgXml = serializer.serializeToString(ganttChartSVG);
-			
-			// Modify the SVG content to set a white background and adjust the viewBox
-			const modifiedSvgXml = svgXml.replace(
-				'<svg',
-				`<svg style="background-color: white !important;" width="${bbox.width}" height="${bbox.height}" viewBox="${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}"`
-			);
-			
-			// Add the modified SVG content to the print window
-			printWindow.document.write(modifiedSvgXml);
-			
-			// Close the print window after printing
-			printWindow.document.write('</body></html>');
-			//printWindow.document.close();
-			//printWindow.print();
-			//printWindow.close();
+            const ganttChartSVG = document.querySelector('.gantt');
+            if (ganttChartSVG) {
+                svgExport.downloadPdf(
+                    ganttChartSVG,
+                    "Gantt Export"
+                );
+            }
         })
     }
 };
