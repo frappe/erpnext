@@ -69,6 +69,15 @@ frappe.listview_settings["Task"] = {
 	},
     refresh: function (listview) {
         listview.page.add_inner_button(__("Print"), () => {
+			
+            const ganttChartSVG1 = document.querySelector('.gantt');
+            if (ganttChartSVG) {
+                svgExport.downloadPdf(
+                    ganttChartSVG1,
+                    "Gantt Export"
+                );
+            }
+			return;
 			// Create a new window for printing
 			const printWindow = window.open('', '', 'width=800,height=600');
 			printWindow.document.open();
