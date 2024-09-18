@@ -15,10 +15,11 @@ erpnext.sales_common = {
 			onload() {
 				super.onload();
 				this.setup_queries();
-				this.frm.set_query("shipping_rule", function () {
+				this.frm.set_query("shipping_rule", function (doc) {
 					return {
 						filters: {
 							shipping_rule_type: "Selling",
+							company: doc.company,
 						},
 					};
 				});
