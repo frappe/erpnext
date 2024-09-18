@@ -648,11 +648,7 @@
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
-<<<<<<< HEAD
- "modified": "2024-05-17 13:16:34.496704",
-=======
  "modified": "2024-09-16 18:14:51.314765",
->>>>>>> 636c0131fa (fix: add currency in options for rate field in pricing rule)
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
