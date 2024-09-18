@@ -1202,10 +1202,6 @@ class AccountsController(TransactionBase):
 			order_doctype = "Purchase Order"
 			party_account.append(self.credit_to)
 
-		party_account.extend(
-			get_party_account(party_type, party=party, company=self.company, include_advance=True)
-		)
-
 		order_list = list(set(d.get(order_field) for d in self.get("items") if d.get(order_field)))
 
 		journal_entries = get_advance_journal_entries(
