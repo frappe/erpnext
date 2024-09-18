@@ -35,8 +35,11 @@ class PaymentRequest(Document):
 	from typing import TYPE_CHECKING
 
 	if TYPE_CHECKING:
-		from erpnext.accounts.doctype.subscription_plan_detail.subscription_plan_detail import SubscriptionPlanDetail
 		from frappe.types import DF
+
+		from erpnext.accounts.doctype.subscription_plan_detail.subscription_plan_detail import (
+			SubscriptionPlanDetail,
+		)
 
 		account: DF.ReadOnly | None
 		amended_from: DF.Link | None
@@ -72,7 +75,17 @@ class PaymentRequest(Document):
 		project: DF.Link | None
 		reference_doctype: DF.Link | None
 		reference_name: DF.DynamicLink | None
-		status: DF.Literal["", "Draft", "Requested", "Initiated", "Partially Paid", "Payment Ordered", "Paid", "Failed", "Cancelled"]
+		status: DF.Literal[
+			"",
+			"Draft",
+			"Requested",
+			"Initiated",
+			"Partially Paid",
+			"Payment Ordered",
+			"Paid",
+			"Failed",
+			"Cancelled",
+		]
 		subject: DF.Data | None
 		subscription_plans: DF.Table[SubscriptionPlanDetail]
 		swift_number: DF.ReadOnly | None
