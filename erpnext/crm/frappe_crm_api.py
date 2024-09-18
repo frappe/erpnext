@@ -95,6 +95,8 @@ def create_contacts(contacts, organization=None, link_doctype=None, link_docname
 def create_address(doctype, docname, address):
 	if not address:
 		return
+	if isinstance(address, str):
+		address = json.loads(address)
 	try:
 		_address = frappe.db.exists("Address", address.get("name"))
 		if not _address:
@@ -105,6 +107,7 @@ def create_address(doctype, docname, address):
 				"address_line1",
 				"address_line2",
 				"city",
+				"county",
 				"state",
 				"pincode",
 				"country",
