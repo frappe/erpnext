@@ -853,7 +853,11 @@ class calculate_taxes_and_totals:
 				write_off_limit = flt(
 					frappe.db.get_value("POS Profile", self.doc.pos_profile, "write_off_limit")
 				)
-				if write_off_limit and abs(self.doc.outstanding_amount) <= write_off_limit:
+				if (
+					self.doc.outstanding_amount
+					and write_off_limit
+					and abs(self.doc.outstanding_amount) <= write_off_limit
+				):
 					self.doc.write_off_outstanding_amount_automatically = 1
 
 			if (
@@ -897,11 +901,13 @@ class calculate_taxes_and_totals:
 			and any(d.type == "Cash" for d in self.doc.payments)
 		):
 			self.doc.change_amount = flt(
-				self.doc.paid_amount - grand_total, self.doc.precision("change_amount")
+				self.doc.paid_amount - grand_total + self.doc.write_off_amount,
+				self.doc.precision("change_amount"),
 			)
 
 			self.doc.base_change_amount = flt(
-				self.doc.base_paid_amount - base_grand_total, self.doc.precision("base_change_amount")
+				self.doc.base_paid_amount - base_grand_total + self.doc.base_write_off_amount,
+				self.doc.precision("base_change_amount"),
 			)
 
 	def calculate_write_off_amount(self):
