@@ -597,7 +597,10 @@ def check_if_advance_entry_modified(args):
 			.where(payment_entry.docstatus == 1)
 			.where(payment_entry.party_type == args.get("party_type"))
 			.where(payment_entry.party == args.get("party"))
-			.where((payment_entry.paid_from if args.get("party_type") == "Customer" else payment_entry.paid_to) == args.get("account"))
+			.where(
+				(payment_entry.paid_from if args.get("party_type") == "Customer" else payment_entry.paid_to)
+				== args.get("account")
+			)
 		)
 
 		if args.voucher_detail_no:
