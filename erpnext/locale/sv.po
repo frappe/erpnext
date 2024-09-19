@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-15 09:35+0000\n"
-"PO-Revision-Date: 2024-09-17 20:17\n"
+"PO-Revision-Date: 2024-09-19 20:36\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -221,7 +221,7 @@ msgstr "\"Baserad på\" och \"Gruppera efter\" kan inte vara samma"
 
 #: stock/report/product_bundle_balance/product_bundle_balance.py:233
 msgid "'Date' is required"
-msgstr "'Datum' erfodras"
+msgstr "'Datum' erfordras"
 
 #: selling/report/inactive_customers/inactive_customers.py:18
 msgid "'Days Since Last Order' must be greater than or equal to zero"
@@ -1072,7 +1072,7 @@ msgstr "Förkortning används redan för annat Bolag"
 
 #: setup/doctype/company/company.py:161
 msgid "Abbreviation is mandatory"
-msgstr "Förkortning erfodras"
+msgstr "Förkortning erfordras"
 
 #: stock/doctype/item_attribute/item_attribute.py:102
 msgid "Abbreviation: {0} must appear only once"
@@ -1170,7 +1170,7 @@ msgstr "Åtkomst Nyckel"
 
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.py:48
 msgid "Access Key is required for Service Provider: {0}"
-msgstr "Åtkomst Nyckel erfodras för Tjänsteleverantör: {0}"
+msgstr "Åtkomst Nyckel erfordras för Tjänsteleverantör: {0}"
 
 #. Label of the access_token (Small Text) field in DocType 'QuickBooks
 #. Migrator'
@@ -1453,7 +1453,7 @@ msgstr "Växel Belopp Konto"
 
 #: accounts/doctype/bank_clearance/bank_clearance.py:46
 msgid "Account is mandatory to get payment entries"
-msgstr "Konto erfodras att hämta Betalning Poster"
+msgstr "Konto erfordras att hämta Betalning Poster"
 
 #: accounts/dashboard_chart_source/account_balance_timeline/account_balance_timeline.py:44
 msgid "Account is not set for the dashboard chart {0}"
@@ -1649,7 +1649,7 @@ msgstr "Bokföring Dimension"
 #: accounts/doctype/gl_entry/gl_entry.py:203
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:153
 msgid "Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}."
-msgstr "Bokföring Dimension <b>{0}</b> erfodras för 'Balans Rapport' konto {1}."
+msgstr "Bokföring Dimension <b>{0}</b> erfordras för 'Balans Rapport' konto {1}."
 
 #: accounts/doctype/gl_entry/gl_entry.py:189
 #: accounts/doctype/payment_ledger_entry/payment_ledger_entry.py:140
@@ -2558,7 +2558,7 @@ msgstr "Faktisk Kvantitet på Lager"
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:200
 msgid "Actual Qty is mandatory"
-msgstr "Faktisk Kvantitet Erfodras"
+msgstr "Faktisk Kvantitet Erfordras"
 
 #: manufacturing/doctype/plant_floor/stock_summary_template.html:37
 #: stock/dashboard/item_dashboard_list.html:28
@@ -4926,7 +4926,7 @@ msgstr "Annan Säljare {0} finns med samma Anställning ID"
 
 #: stock/report/fifo_queue_vs_qty_after_transaction_comparison/fifo_queue_vs_qty_after_transaction_comparison.py:37
 msgid "Any one of following filters required: warehouse, Item Code, Item Group"
-msgstr "Något av följande filter erfodras: Lager, Artikelkod, Artikelgrupp"
+msgstr "Något av följande filter erfordras: Lager, Artikelkod, Artikelgrupp"
 
 #: setup/setup_wizard/data/industry_type.txt:6
 msgid "Apparel & Accessories"
@@ -5351,7 +5351,7 @@ msgstr "Per Lager Enhet"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:188
 msgid "As the field {0} is enabled, the field {1} is mandatory."
-msgstr "Eftersom fält {0} är aktiverad erfodras fält {1}."
+msgstr "Eftersom fält {0} är aktiverad erfordras fält {1}."
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:196
 msgid "As the field {0} is enabled, the value of the field {1} should be more than 1."
@@ -5371,11 +5371,11 @@ msgstr "Eftersom det finns reserverat lager kan du inte inaktivera {0}."
 
 #: manufacturing/doctype/production_plan/production_plan.py:920
 msgid "As there are sufficient Sub Assembly Items, Work Order is not required for Warehouse {0}."
-msgstr "Eftersom det finns tillräckligt med Undermontering Artiklar erfodras inte Arbetsorder för Lager {0}."
+msgstr "Eftersom det finns tillräckligt med Undermontering Artiklar erfordras inte Arbetsorder för Lager {0}."
 
 #: manufacturing/doctype/production_plan/production_plan.py:1618
 msgid "As there are sufficient raw materials, Material Request is not required for Warehouse {0}."
-msgstr "Eftersom det finns tillräckligt med Råmaterial erfodras inte Material Begäran för Lager {0}."
+msgstr "Eftersom det finns tillräckligt med Råmaterial erfordras inte Material Begäran för Lager {0}."
 
 #: stock/doctype/stock_settings/stock_settings.py:177
 #: stock/doctype/stock_settings/stock_settings.py:189
@@ -5504,7 +5504,7 @@ msgstr "Tillgång Kategori Namn"
 
 #: stock/doctype/item/item.py:301
 msgid "Asset Category is mandatory for Fixed Asset item"
-msgstr "Tillgång Kategori erfodras för Fast Tillgång post"
+msgstr "Tillgång Kategori erfordras för Fast Tillgång post"
 
 #. Label of the depreciation_cost_center (Link) field in DocType 'Company'
 #: setup/doctype/company/company.json
@@ -5974,7 +5974,7 @@ msgstr "Minst en artikel ska anges med negativ kvantitet i Retur Dokument"
 #: accounts/doctype/pos_invoice/pos_invoice.py:418
 #: accounts/doctype/sales_invoice/sales_invoice.py:506
 msgid "At least one mode of payment is required for POS invoice."
-msgstr "Åtminstone ett Betalning Sätt erfodras för Kassa Faktura."
+msgstr "Åtminstone ett Betalning Sätt erfordras för Kassa Faktura."
 
 #: setup/doctype/terms_and_conditions/terms_and_conditions.py:34
 msgid "At least one of the Applicable Modules should be selected"
@@ -5986,7 +5986,7 @@ msgstr "Minst en av Försäljning eller Inköp måste väljas"
 
 #: stock/doctype/stock_entry/stock_entry.py:630
 msgid "At least one warehouse is mandatory"
-msgstr "Minst ett Lager efodras"
+msgstr "Minst ett Lager erfordras"
 
 #: manufacturing/doctype/routing/routing.py:50
 msgid "At row #{0}: the sequence id {1} cannot be less than previous row sequence id {2}"
@@ -5994,7 +5994,7 @@ msgstr "Rad # {0}: sekvens nummer {1} får inte vara lägre än föregående rad
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:610
 msgid "At row {0}: Batch No is mandatory for Item {1}"
-msgstr "Rad {0}: Parti Nummer Erfodras för Artikel {1}"
+msgstr "Rad {0}: Parti Nummer erfordras för Artikel {1}"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:102
 msgid "At row {0}: Parent Row No cannot be set for item {1}"
@@ -6002,11 +6002,11 @@ msgstr "Rad {0}: Överordnad rad nummer kan inte anges för artikel {1}"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:595
 msgid "At row {0}: Qty is mandatory for the batch {1}"
-msgstr "Rad {0}: Kvantitet Erfodras för Artikel {1}"
+msgstr "Rad {0}: Kvantitet erfordras för Artikel {1}"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:602
 msgid "At row {0}: Serial No is mandatory for Item {1}"
-msgstr "Rad {0}: Serie Nummer Erfordras för Artikel {1}"
+msgstr "Rad {0}: Serie Nummer erfordras för Artikel {1}"
 
 #: controllers/stock_controller.py:453
 msgid "At row {0}: Serial and Batch Bundle {1} has already created. Please remove the values from the serial no or batch no fields."
@@ -6079,7 +6079,7 @@ msgstr "Egenskap Värde"
 
 #: stock/doctype/item/item.py:923
 msgid "Attribute table is mandatory"
-msgstr "Egenskap Tabell erfodras"
+msgstr "Egenskap Tabell erfordras"
 
 #: stock/doctype/item_attribute/item_attribute.py:97
 msgid "Attribute value: {0} must appear only once"
@@ -6494,7 +6494,7 @@ msgstr "Tillgängligt Lager för Artikel Paket"
 
 #: assets/doctype/asset/asset.py:270
 msgid "Available for use date is required"
-msgstr "Tillgängligt för Användning Datum erfodras"
+msgstr "Tillgängligt för Användning Datum erfordras"
 
 #: stock/doctype/stock_entry/stock_entry.py:761
 msgid "Available quantity is {0}, you need {1}"
@@ -7572,7 +7572,7 @@ msgstr "Parti"
 
 #: stock/doctype/batch/batch.py:129
 msgid "Batch ID is mandatory"
-msgstr "Parti Erfodras"
+msgstr "Parti erfordras"
 
 #. Name of a report
 #. Label of a Link in the Stock Workspace
@@ -7640,7 +7640,7 @@ msgstr "Parti Nummer"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:613
 msgid "Batch No is mandatory"
-msgstr "Parti Nummer Erfordras"
+msgstr "Parti Nummer erfordras"
 
 #: stock/doctype/serial_and_batch_bundle/serial_and_batch_bundle.py:2268
 msgid "Batch No {0} does not exists"
@@ -9489,7 +9489,7 @@ msgstr "Kassa Konto"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:316
 msgid "Cash or Bank Account is mandatory for making payment entry"
-msgstr "Kassa eller Bank Konto erfodras för Betalning Post"
+msgstr "Kassa eller Bank Konto erfordras för Betalning Post"
 
 #. Label of the cash_bank_account (Link) field in DocType 'POS Invoice'
 #. Label of the cash_bank_account (Link) field in DocType 'Purchase Invoice'
@@ -9620,7 +9620,7 @@ msgstr "Certifikat Nummer"
 #. Maintenance Task'
 #: assets/doctype/asset_maintenance_task/asset_maintenance_task.json
 msgid "Certificate Required"
-msgstr "Certifikat Erfodras"
+msgstr "Certifikat Erfordras"
 
 #. Name of a UOM
 #: setup/setup_wizard/data/uom_data.json
@@ -9799,7 +9799,7 @@ msgstr "Kontrollera om det är hydroponisk enhet"
 #. in DocType 'Work Order'
 #: manufacturing/doctype/work_order/work_order.json
 msgid "Check if material transfer entry is not required"
-msgstr "Kontrollera om Överföring inte erfodras"
+msgstr "Kontrollera om Överföring inte erfordras"
 
 #. Label of the warehouse_group (Link) field in DocType 'Item Reorder'
 #: stock/doctype/item_reorder/item_reorder.json
@@ -10967,7 +10967,7 @@ msgstr "Org.Nr."
 
 #: accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.py:605
 msgid "Company and Posting Date is mandatory"
-msgstr "Bolag och Bokföring Datum erfodras"
+msgstr "Bolag och Bokföring Datum erfordras"
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:2198
 msgid "Company currencies of both the companies should match for Inter Company Transactions."
@@ -10976,7 +10976,7 @@ msgstr "Bolag Valutor för båda Bolag ska matcha för Moder Bolag Transaktioner
 #: stock/doctype/material_request/material_request.js:326
 #: stock/doctype/stock_entry/stock_entry.js:681
 msgid "Company field is required"
-msgstr "Bolag Fält erfodras"
+msgstr "Bolag Fält erfordras"
 
 #: accounts/report/invalid_ledger_entries/invalid_ledger_entries.py:77
 msgid "Company is mandatory"
@@ -10988,7 +10988,7 @@ msgstr "Bolag Erfodras för Bolag Konto"
 
 #: accounts/doctype/subscription/subscription.py:392
 msgid "Company is mandatory for generating an invoice. Please set a default company in Global Defaults."
-msgstr "Bolag erfodras för att skapa faktura. Ange standard bolag i Globala Inställningar."
+msgstr "Bolag erfordras för att skapa faktura. Ange standard bolag i Standard Inställningar."
 
 #: setup/doctype/company/company.js:199
 msgid "Company name not same"
@@ -11491,7 +11491,7 @@ msgstr "Förbrukad Belopp"
 
 #: assets/doctype/asset_capitalization/asset_capitalization.py:318
 msgid "Consumed Asset Items is mandatory for Decapitalization"
-msgstr "Förbrukade Tillgång Artiklar erfodras för Dekapitalisering"
+msgstr "Förbrukade Tillgång Artiklar erfordras för Dekapitalisering"
 
 #. Label of the asset_items_total (Currency) field in DocType 'Asset
 #. Capitalization'
@@ -14222,7 +14222,7 @@ msgstr "Kund kontakt uppdaterad!"
 
 #: support/doctype/warranty_claim/warranty_claim.py:54
 msgid "Customer is required"
-msgstr "Kund erfodras"
+msgstr "Kund erfordras"
 
 #: accounts/doctype/loyalty_program/loyalty_program.py:126
 #: accounts/doctype/loyalty_program/loyalty_program.py:148
@@ -14236,7 +14236,7 @@ msgstr "Kund eller Artikel"
 
 #: setup/doctype/authorization_rule/authorization_rule.py:95
 msgid "Customer required for 'Customerwise Discount'"
-msgstr "Kund erfodras för \"Kund Rabatt\""
+msgstr "Kund erfordras för \"Kund Rabatt\""
 
 #: accounts/doctype/sales_invoice/sales_invoice.py:1000
 #: selling/doctype/sales_order/sales_order.py:347
@@ -17629,7 +17629,7 @@ msgstr "Förfallo Datum kan inte vara före Bokföring / Leverantör Faktura Dat
 
 #: controllers/accounts_controller.py:644
 msgid "Due Date is mandatory"
-msgstr "Förfallo Datum erfodras"
+msgstr "Förfallodatum erfordras"
 
 #. Name of a DocType
 #. Label of a Card Break in the Receivables Workspace
@@ -17925,11 +17925,11 @@ msgstr "Antingen Arbetsplats eller Arbetsplats Typ Erfordras"
 
 #: assets/doctype/asset_movement/asset_movement.py:48
 msgid "Either location or employee must be required"
-msgstr "Plats eller Personal erfodras"
+msgstr "Plats eller Personal erfordras"
 
 #: setup/doctype/territory/territory.py:40
 msgid "Either target qty or target amount is mandatory"
-msgstr "Mål Kvantitet eller Mål Belopp erfodras"
+msgstr "Mål Kvantitet eller Mål Belopp erfordras"
 
 #: setup/doctype/sales_person/sales_person.py:50
 msgid "Either target qty or target amount is mandatory."
@@ -18021,7 +18021,7 @@ msgstr "E-post"
 
 #: www/book_appointment/index.html:52
 msgid "Email Address (required)"
-msgstr "E-post Adress (erfodras)"
+msgstr "E-post Adress (erfordras)"
 
 #: crm/doctype/lead/lead.py:164
 msgid "Email Address must be unique, it is already used in {0}"
@@ -18118,7 +18118,7 @@ msgstr "E-post inte skickad till {0} (avregistrerad / inaktiverad)"
 
 #: stock/doctype/shipment/shipment.js:174
 msgid "Email or Phone/Mobile of the Contact are mandatory to continue."
-msgstr "E-post eller Telefon / Mobil för Kontakt erfodras för att fortsätta."
+msgstr "E-post eller Telefon / Mobil för Kontakt erfordras för att fortsätta."
 
 #: selling/page/point_of_sale/pos_past_order_summary.js:283
 msgid "Email sent successfully."
@@ -18287,7 +18287,7 @@ msgstr "Personal kan inte rapportera till sig själv."
 
 #: assets/doctype/asset_movement/asset_movement.py:73
 msgid "Employee is required while issuing Asset {0}"
-msgstr "Personal erfodras vid utfärdande av tillgångar {0}"
+msgstr "Personal erfordras vid utfärdande av tillgångar {0}"
 
 #: assets/doctype/asset_movement/asset_movement.py:123
 msgid "Employee {0} does not belongs to the company {1}"
@@ -20121,7 +20121,7 @@ msgstr "Första Svarstid för Möjlighet"
 
 #: regional/italy/utils.py:255
 msgid "Fiscal Regime is mandatory, kindly set the fiscal regime in the company {0}"
-msgstr "Skatteregler erfodras, ange Skatteregler i Bolag {0}"
+msgstr "Skatteregler erfordras, ange Skatteregler i Bolag {0}"
 
 #. Label of the fiscal_year (Link) field in DocType 'Budget'
 #. Name of a DocType
@@ -20177,7 +20177,7 @@ msgstr "Bokföringsår {0} finns inte"
 
 #: accounts/report/trial_balance/trial_balance.py:41
 msgid "Fiscal Year {0} is required"
-msgstr "Bokföringsår {0} erfodras"
+msgstr "Bokföringsår {0} erfordras"
 
 #. Option for the 'Calculate Based On' (Select) field in DocType 'Shipping
 #. Rule'
@@ -20293,7 +20293,7 @@ msgstr "Följande Inköp Förslag skapades automatiskt baserat på Artikel ombes
 
 #: selling/doctype/customer/customer.py:742
 msgid "Following fields are mandatory to create address:"
-msgstr "Följande fält erfodras att skapa adress:"
+msgstr "Följande fält erfordras att skapa adress:"
 
 #: controllers/buying_controller.py:963
 msgid "Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master"
@@ -20387,7 +20387,7 @@ msgstr "För Produktion"
 
 #: stock/doctype/stock_entry/stock_entry.py:647
 msgid "For Quantity (Manufactured Qty) is mandatory"
-msgstr "För Kvantitet (Producerad Kvantitet) erfodras"
+msgstr "För Kvantitet (Producerad Kvantitet) erfordras"
 
 #: controllers/accounts_controller.py:1092
 msgid "For Return Invoices with Stock effect, '0' qty Items are not allowed. Following rows are affected: {0}"
@@ -20473,7 +20473,7 @@ msgstr "För rad {0}: Ange Planerad Kvantitet"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:177
 msgid "For the 'Apply Rule On Other' condition the field {0} is mandatory"
-msgstr "För 'Tillämpa Regel på' villkor erfodras fält {0}"
+msgstr "För 'Tillämpa Regel på' villkor erfordras fält {0}"
 
 #. Description of a DocType
 #: stock/doctype/item_customer_detail/item_customer_detail.json
@@ -21675,7 +21675,7 @@ msgstr "Lämna gratis artikel för varje N kvantitet"
 #: setup/doctype/global_defaults/global_defaults.json
 #: setup/workspace/settings/settings.json
 msgid "Global Defaults"
-msgstr "Globala Standard Inställningar"
+msgstr "Standard Inställningar"
 
 #: www/book_appointment/index.html:58
 msgid "Go back"
@@ -21982,7 +21982,7 @@ msgstr "Brutto Inköp Belopp för lågt: {0} kan inte skrivas av över {1} cykle
 
 #: assets/doctype/asset/asset.py:315
 msgid "Gross Purchase Amount is mandatory"
-msgstr "Brutto Inköp Belopp erfodras"
+msgstr "Brutto Inköp Belopp erfordras"
 
 #: assets/doctype/asset/asset.py:360
 msgid "Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset."
@@ -24954,7 +24954,7 @@ msgstr "Är Standard Språk"
 #. Label of the dn_required (Select) field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgid "Is Delivery Note Required for Sales Invoice Creation?"
-msgstr "Erfodras Försäljning Följesedel att skapa Försäljning Faktura?"
+msgstr "Erfordras Försäljning Följesedel att skapa Försäljning Faktura?"
 
 #. Label of the is_discounted (Check) field in DocType 'POS Invoice'
 #. Label of the is_discounted (Check) field in DocType 'Sales Invoice'
@@ -25173,12 +25173,12 @@ msgstr "Är Period Stängning Verifikat Post"
 #. Label of the po_required (Select) field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgid "Is Purchase Order Required for Purchase Invoice & Receipt Creation?"
-msgstr "Erfodras Inköp Order för Inköp Faktura och Inköp Följesedel?"
+msgstr "Erfordras Inköp Order för Inköp Faktura och Inköp Följesedel?"
 
 #. Label of the pr_required (Select) field in DocType 'Buying Settings'
 #: buying/doctype/buying_settings/buying_settings.json
 msgid "Is Purchase Receipt Required for Purchase Invoice Creation?"
-msgstr "Erfodras Inköp Följesedel för att skapa Inköp Faktura?"
+msgstr "Erfordras Inköp Följesedel för att skapa Inköp Faktura?"
 
 #. Label of the is_debit_note (Check) field in DocType 'Sales Invoice'
 #: accounts/doctype/sales_invoice/sales_invoice.json
@@ -25233,7 +25233,7 @@ msgstr "Är Retur (Debet Nota)"
 #. Label of the so_required (Select) field in DocType 'Selling Settings'
 #: selling/doctype/selling_settings/selling_settings.json
 msgid "Is Sales Order Required for Sales Invoice & Delivery Note Creation?"
-msgstr "Erfodras Försäljning Order att skapa Försäljning Faktura och Försäljning Följesedel?"
+msgstr "Erfordras Försäljning Order att skapa Försäljning Faktura och Försäljning Följesedel?"
 
 #. Label of the is_scrap_item (Check) field in DocType 'Stock Entry Detail'
 #. Label of the is_scrap_item (Check) field in DocType 'Subcontracting Receipt
@@ -25822,7 +25822,7 @@ msgstr "Artikel Kod kan inte ändras för Serie Nummer"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:458
 msgid "Item Code required at Row No {0}"
-msgstr "Artikel Kod erfodras vid Rad Nummer {0}"
+msgstr "Artikel Kod erfodras på Rad Nummer {0}"
 
 #: selling/page/point_of_sale/pos_controller.js:707
 #: selling/page/point_of_sale/pos_item_details.js:263
@@ -26806,7 +26806,7 @@ msgstr "Artikel som ska Läggas om"
 
 #: manufacturing/doctype/production_plan/production_plan.py:1478
 msgid "Items to Manufacture are required to pull the Raw Materials associated with it."
-msgstr "Artiklar som ska produceras erfodras för att hämta tilldelad Råmaterial."
+msgstr "Artiklar som ska produceras erfordras för att hämta tilldelad Råmaterial."
 
 #. Label of a Link in the Buying Workspace
 #: buying/workspace/buying/buying.json
@@ -27941,7 +27941,7 @@ msgstr "Lån Start Datum"
 
 #: accounts/doctype/invoice_discounting/invoice_discounting.py:61
 msgid "Loan Start Date and Loan Period are mandatory to save the Invoice Discounting"
-msgstr "Lån Start Datum och Lån Period erfodras för att spara Faktura Rabatt"
+msgstr "Lån Start Datum och Lån Period erfordras för att spara Faktura Rabatt"
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:95
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py:139
@@ -28070,7 +28070,7 @@ msgstr "Förlorad Anledningar"
 
 #: crm/doctype/opportunity/opportunity.js:28
 msgid "Lost Reasons are required in case opportunity is Lost."
-msgstr "Förlorad Anledning erfodras om Möjlighet är Förlorad."
+msgstr "Förlorad Anledning erfordras om Möjlighet är Förlorad."
 
 #: selling/report/lost_quotations/lost_quotations.py:43
 msgid "Lost Value"
@@ -28313,7 +28313,7 @@ msgstr "Service Ansvarig Namn"
 #. Label of the maintenance_required (Check) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
 msgid "Maintenance Required"
-msgstr "Service Erfodras"
+msgstr "Service Erfordras"
 
 #. Label of the maintenance_role (Link) field in DocType 'Maintenance Team
 #. Member'
@@ -28595,7 +28595,7 @@ msgstr "Verkställande Direktör"
 #: stock/doctype/purchase_receipt/purchase_receipt.js:229
 #: subcontracting/doctype/subcontracting_receipt/subcontracting_receipt.js:101
 msgid "Mandatory"
-msgstr "Erfodras"
+msgstr "Erfordras"
 
 #: accounts/doctype/pos_profile/pos_profile.py:83
 msgid "Mandatory Accounting Dimension"
@@ -28841,7 +28841,7 @@ msgstr "Produktion Ansvarig"
 
 #: stock/doctype/stock_entry/stock_entry.py:1871
 msgid "Manufacturing Quantity is mandatory"
-msgstr "Produktion Kvantitet erfodras"
+msgstr "Produktion Kvantitet erfordras"
 
 #. Label of the manufacturing_section_section (Section Break) field in DocType
 #. 'Sales Order Item'
@@ -34326,7 +34326,7 @@ msgstr "Parti Typ och Parti erfodras för Fordring / Skuld konto {0}"
 
 #: accounts/doctype/payment_entry/payment_entry.py:443
 msgid "Party Type is mandatory"
-msgstr "Parti Typ erfodras"
+msgstr "Parti Typ erfordras"
 
 #. Label of the party_user (Link) field in DocType 'Contract'
 #: crm/doctype/contract/contract.json
@@ -34965,7 +34965,7 @@ msgstr "Faktura belopp får inte vara lägre än eller lika med 0"
 
 #: accounts/doctype/pos_profile/pos_profile.py:143
 msgid "Payment methods are mandatory. Please add at least one payment method."
-msgstr "Betalning Sätt erfodras. Lägg till minst ett Betalning Sätt."
+msgstr "Betalning Sätt erfordras. Lägg till minst ett Betalning Sätt."
 
 #: accounts/doctype/pos_invoice/pos_invoice.js:301
 #: selling/page/point_of_sale/pos_payment.js:259
@@ -35354,7 +35354,7 @@ msgstr "Permanent Adress är"
 #: stock/report/incorrect_stock_value_report/incorrect_stock_value_report.py:19
 #: stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py:17
 msgid "Perpetual inventory required for the company {0} to view this report."
-msgstr "Kontinuerlig Lager Hantering erfodras för bolag{0} om man ska kunna se denna rapport."
+msgstr "Kontinuerlig Lager Hantering erfordras för bolag {0} om man ska kunna se denna rapport."
 
 #. Label of the personal_details (Tab Break) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -35578,7 +35578,7 @@ msgstr "Plaid Länk Misslyckades"
 
 #: erpnext_integrations/doctype/plaid_settings/plaid_settings.py:252
 msgid "Plaid Link Refresh Required"
-msgstr "Plaid Länk Uppdatering erfodras"
+msgstr "Plaid Länk Uppdatering erfordras"
 
 #: accounts/doctype/bank/bank.js:131
 msgid "Plaid Link Updated"
@@ -37028,7 +37028,7 @@ msgstr "Tid"
 
 #: stock/doctype/stock_entry/stock_entry.py:1819
 msgid "Posting date and posting time is mandatory"
-msgstr "Boföring Datum och Tid erfodras"
+msgstr "Bokföring Datum och Tid erfordras"
 
 #: controllers/sales_and_purchase_return.py:52
 msgid "Posting timestamp must be after {0}"
@@ -39152,7 +39152,7 @@ msgstr "Inköp Order redan skapad för alla Försäljning Order Artiklar"
 
 #: stock/doctype/purchase_receipt/purchase_receipt.py:315
 msgid "Purchase Order number required for Item {0}"
-msgstr "Inköp Order Nummer erfodras för Artikel {0}"
+msgstr "Inköp Order Nummer erfordras för Artikel {0}"
 
 #: accounts/doctype/purchase_invoice/purchase_invoice.py:675
 msgid "Purchase Order {0} is not submitted"
@@ -40745,7 +40745,7 @@ msgstr "Pris eller Rabatt"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:183
 msgid "Rate or Discount is required for the price discount."
-msgstr "Pris eller Rabatt erfodras för pris rabatt."
+msgstr "Pris eller Rabatt erfordras för pris rabatt."
 
 #. Label of the rates (Table) field in DocType 'Tax Withholding Category'
 #. Label of the rates_section (Section Break) field in DocType 'Stock Entry
@@ -41662,11 +41662,11 @@ msgstr "Referens Nummer och Referens Datum erfodras för {0}"
 
 #: accounts/doctype/payment_entry/payment_entry.py:1141
 msgid "Reference No and Reference Date is mandatory for Bank transaction"
-msgstr "Referens Nummer och Referens Datum erfodras för Bank Transaktion"
+msgstr "Referens Nummer och Referens Datum erfordras för Bank Transaktion"
 
 #: accounts/doctype/journal_entry/journal_entry.py:583
 msgid "Reference No is mandatory if you entered Reference Date"
-msgstr "Referens Nummer erfodras om Referens Datum är angiven"
+msgstr "Referens Nummer erfordras om Referens Datum är angiven"
 
 #: accounts/report/tax_withholding_details/tax_withholding_details.py:258
 msgid "Reference No."
@@ -53468,7 +53468,7 @@ msgstr "Att annullera {} måste du annullera Kassa Stängning Post {}."
 
 #: accounts/doctype/payment_request/payment_request.py:101
 msgid "To create a Payment Request reference document is required"
-msgstr "Att skapa Betalning Förslag erfodras referens dokument"
+msgstr "Att skapa Betalning Förslag erfordras referens dokument"
 
 #: projects/doctype/timesheet/timesheet.py:146
 msgid "To date cannot be before from date"
@@ -56079,7 +56079,7 @@ msgstr "Gäller för Länder"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:301
 msgid "Valid from and valid upto fields are mandatory for the cumulative"
-msgstr "Giltig från och giltig till fält erfodras för kumulativ"
+msgstr "Giltig från och giltig till fält erfordras för kumulativ"
 
 #: buying/doctype/supplier_quotation/supplier_quotation.py:149
 msgid "Valid till Date cannot be before Transaction Date"
@@ -56223,11 +56223,11 @@ msgstr "Grund Pris för Artikel {0} erfodras att skapa bokföring poster för {1
 
 #: stock/doctype/item/item.py:263
 msgid "Valuation Rate is mandatory if Opening Stock entered"
-msgstr "Grund Pris erfodras om Öppning Lager anges"
+msgstr "Grund Pris erfordras om Öppning Lager anges"
 
 #: stock/doctype/stock_reconciliation/stock_reconciliation.py:667
 msgid "Valuation Rate required for Item {0} at row {1}"
-msgstr "Grund Pris erfodras för Artikel {0} på rad {1}"
+msgstr "Grund Pris erfordras för Artikel {0} på rad {1}"
 
 #. Option for the 'Consider Tax or Charge for' (Select) field in DocType
 #. 'Purchase Taxes and Charges'
@@ -57108,7 +57108,7 @@ msgstr "Lager kan inte ändras för Serie Nummer"
 
 #: controllers/sales_and_purchase_return.py:135
 msgid "Warehouse is mandatory"
-msgstr "Lager erfodras"
+msgstr "Lager erfordras"
 
 #: stock/doctype/warehouse/warehouse.py:246
 msgid "Warehouse not found against the account {0}"
@@ -57832,7 +57832,7 @@ msgstr "Bearbetning Lager"
 
 #: manufacturing/doctype/work_order/work_order.py:448
 msgid "Work-in-Progress Warehouse is required before Submit"
-msgstr "Bearbetning Lager erfodras före Godkännande"
+msgstr "Bearbetning Lager erfordras före Godkännande"
 
 #. Label of the workday (Select) field in DocType 'Service Day'
 #: support/doctype/service_day/service_day.json
@@ -59061,7 +59061,7 @@ msgstr "{0} enheter av Artikel {1} är vald  i en annan Plocklista."
 
 #: stock/doctype/stock_ledger_entry/stock_ledger_entry.py:149
 msgid "{0} units of {1} are required in {2}{3}, on {4} {5} for {6} to complete the transaction."
-msgstr "{0} enheter av {1} erfodras i {2}{3}, den {4} {5} för att {6} ska kunna slutföra transaktion."
+msgstr "{0} enheter av {1} erfordras i {2}{3}, den {4} {5} för att {6} ska kunna slutföra transaktion."
 
 #: stock/stock_ledger.py:1463 stock/stock_ledger.py:1949
 #: stock/stock_ledger.py:1963
@@ -59243,11 +59243,11 @@ msgstr "{0} {1}: Bokföring Post för {2} kan endast skapas i valuta: {3}"
 
 #: controllers/stock_controller.py:698
 msgid "{0} {1}: Cost Center is mandatory for Item {2}"
-msgstr "{0} {1}: Resultat Enhet erfodras för Artikel {2}"
+msgstr "{0} {1}: Resultat Enhet erfordras för Artikel {2}"
 
 #: accounts/doctype/gl_entry/gl_entry.py:166
 msgid "{0} {1}: Cost Center is required for 'Profit and Loss' account {2}."
-msgstr "{0} {1}: Resultat Enhet erfodras för \"Resultat\" konto {2}."
+msgstr "{0} {1}: Resultat Enhet erfordras för \"Resultat\" konto {2}."
 
 #: accounts/doctype/gl_entry/gl_entry.py:257
 msgid "{0} {1}: Cost Center {2} does not belong to Company {3}"
@@ -59259,15 +59259,15 @@ msgstr "{0} {1}: Resultat Enhet {2} är grupp resultat enhet och grupp resultat 
 
 #: accounts/doctype/gl_entry/gl_entry.py:132
 msgid "{0} {1}: Customer is required against Receivable account {2}"
-msgstr "{0} {1}: Kund erfodras mot Fordring Konto {2}"
+msgstr "{0} {1}: Kund erfordras mot Fordring Konto {2}"
 
 #: accounts/doctype/gl_entry/gl_entry.py:154
 msgid "{0} {1}: Either debit or credit amount is required for {2}"
-msgstr "{0} {1}: Antingen debet eller kredit belopp erfodras för {2}"
+msgstr "{0} {1}: Antingen debet eller kredit belopp erfordras för {2}"
 
 #: accounts/doctype/gl_entry/gl_entry.py:138
 msgid "{0} {1}: Supplier is required against Payable account {2}"
-msgstr "{0} {1}: Leverantör erfodras mot Skuld Konto {2}"
+msgstr "{0} {1}: Leverantör erfordras mot Skuld Konto {2}"
 
 #: projects/doctype/project/project_list.js:6
 msgid "{0}%"
