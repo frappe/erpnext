@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-15 09:35+0000\n"
-"PO-Revision-Date: 2024-09-18 20:27\n"
+"PO-Revision-Date: 2024-09-19 20:36\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Turkish\n"
 "MIME-Version: 1.0\n"
@@ -1039,7 +1039,7 @@ msgstr "API Ayrıntıları"
 #: accounts/doctype/currency_exchange_settings/currency_exchange_settings.json
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "API Endpoint"
-msgstr "API Endpoint"
+msgstr "API Uç Noktası"
 
 #. Label of the api_key (Data) field in DocType 'Video Settings'
 #: utilities/doctype/video_settings/video_settings.json
@@ -1176,7 +1176,7 @@ msgstr "Servis Sağlayıcı için Erişim Anahtarı gereklidir: {0}"
 #. Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
 msgid "Access Token"
-msgstr "Erişim Anahtarı"
+msgstr "Erişim Tokenı"
 
 #. Description of the 'Common Code' (Data) field in DocType 'UOM'
 #: setup/doctype/uom/uom.json
@@ -3629,7 +3629,7 @@ msgstr "Yaşlandırma Kriteri"
 #: accounts/report/accounts_receivable_summary/accounts_receivable_summary.js:28
 #: stock/report/stock_ageing/stock_ageing.js:58
 msgid "Ageing Range"
-msgstr "Yaşlanma Aralığı"
+msgstr ""
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html:87
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:339
@@ -5147,7 +5147,7 @@ msgstr "Paketleme Kuralı Uygula"
 #: accounts/doctype/pricing_rule/pricing_rule.json
 #: accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgid "Apply Recursion Over (As Per Transaction UOM)"
-msgstr ""
+msgstr "Tekrarlamayı Uygula (İşlem Ölçü Birimine Göre)"
 
 #. Label of the brands (Table) field in DocType 'Pricing Rule'
 #: accounts/doctype/pricing_rule/pricing_rule.json
@@ -7454,7 +7454,7 @@ msgstr "Toplam Maliyet Tutarı"
 #. Label of the base_url (Data) field in DocType 'Support Search Source'
 #: support/doctype/support_search_source/support_search_source.json
 msgid "Base URL"
-msgstr "Temel URL"
+msgstr ""
 
 #. Label of the based_on (Select) field in DocType 'Authorization Rule'
 #. Label of the based_on (Select) field in DocType 'Repost Item Valuation'
@@ -10042,7 +10042,7 @@ msgstr "E-posta / telefon eklemek için tıklayın"
 #. Option for the 'Lead Type' (Select) field in DocType 'Lead'
 #: crm/doctype/lead/lead.json
 msgid "Client"
-msgstr "Client"
+msgstr ""
 
 #. Label of the client_id (Data) field in DocType 'QuickBooks Migrator'
 #: erpnext_integrations/doctype/quickbooks_migrator/quickbooks_migrator.json
@@ -12768,7 +12768,7 @@ msgstr "Bağlantı Oluştur"
 #. Creation Tool'
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.json
 msgid "Create Missing Party"
-msgstr "Eksik Tarafı Oluştur"
+msgstr "Eksik Cariyi Oluştur"
 
 #: manufacturing/doctype/bom_creator/bom_creator.js:236
 msgid "Create Multi-level BOM"
@@ -12830,11 +12830,11 @@ msgstr "Alıcı Listesi Oluştur"
 #: stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.js:44
 #: stock/report/stock_ledger_variance/stock_ledger_variance.js:76
 msgid "Create Reposting Entries"
-msgstr ""
+msgstr "Yeniden Gönderim Girişleri Oluştur"
 
 #: stock/report/stock_ledger_invariant_check/stock_ledger_invariant_check.js:52
 msgid "Create Reposting Entry"
-msgstr ""
+msgstr "Yeniden Gönderim Girişi Oluştur"
 
 #: projects/doctype/timesheet/timesheet.js:54
 #: projects/doctype/timesheet/timesheet.js:230
@@ -13650,7 +13650,7 @@ msgstr "Güncel Değerleme Oranı"
 
 #: selling/report/sales_analytics/sales_analytics.js:90
 msgid "Curves"
-msgstr ""
+msgstr "Eğriler"
 
 #. Label of the custodian (Link) field in DocType 'Asset'
 #: assets/doctype/asset/asset.json
@@ -17175,7 +17175,7 @@ msgstr "Otomatik Paket Oluşturulurken Seri / Parti Güncellenesi Yapmayın"
 #. Settings'
 #: stock/doctype/stock_settings/stock_settings.json
 msgid "Do Not Use Batch-wise Valuation"
-msgstr ""
+msgstr "Toplu Değerleme Kullanma"
 
 #. Description of the 'Hide Currency Symbol' (Select) field in DocType 'Global
 #. Defaults'
@@ -17193,7 +17193,7 @@ msgstr "Kaydetme türevlerini güncelleme"
 #. DocType 'Stock Reposting Settings'
 #: stock/doctype/stock_reposting_settings/stock_reposting_settings.json
 msgid "Do reposting for each Stock Transaction"
-msgstr ""
+msgstr "Her Stok Hareketi İşlemi için yeniden gönderim yapın"
 
 #: assets/doctype/asset/asset.js:835
 msgid "Do you really want to restore this scrapped asset?"
@@ -17354,7 +17354,7 @@ msgstr "Bitti"
 #. Charges'
 #: accounts/doctype/sales_taxes_and_charges/sales_taxes_and_charges.json
 msgid "Dont Recompute tax"
-msgstr ""
+msgstr "Vergiyi Yeniden Hesaplamayın"
 
 #. Label of the doors (Int) field in DocType 'Vehicle'
 #: setup/doctype/vehicle/vehicle.json
@@ -18465,7 +18465,7 @@ msgstr "Etkin"
 #. in DocType 'Accounts Settings'
 #: accounts/doctype/accounts_settings/accounts_settings.json
 msgid "Enabling this ensures each Purchase Invoice has a unique value in Supplier Invoice No. field within a particular fiscal year"
-msgstr ""
+msgstr "Bunun etkinleştirilmesi, her bir Satın Alma Faturasının belirli bir mali yıl içinde Tedarikçi Fatura No. alanında benzersiz bir değere sahip olmasını sağlar"
 
 #. Description of the 'Book Advance Payments in Separate Party Account' (Check)
 #. field in DocType 'Company'
@@ -18481,7 +18481,7 @@ msgstr "Bu özelliğin etkinleştirilmesi, şirket para biriminde tek taraf hesa
 
 #: accounts/doctype/accounts_settings/accounts_settings.js:11
 msgid "Enabling this will change the way how cancelled transactions are handled."
-msgstr ""
+msgstr "Bunu etkinleştirmek, iptal edilen işlemlerin işlenme biçimini değiştirecektir."
 
 #. Label of the encashment_date (Date) field in DocType 'Employee'
 #: setup/doctype/employee/employee.json
@@ -19747,7 +19747,7 @@ msgstr "Fatura durumuna göre filtreleme"
 #. Label of the invoice_name (Data) field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgid "Filter on Invoice"
-msgstr "Faturada Filtrele"
+msgstr "Fatura Filtresi"
 
 #. Label of the payment_name (Data) field in DocType 'Payment Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
@@ -21642,7 +21642,7 @@ msgstr "Zaman Çizelgesini Getir"
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.js:86
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.js:91
 msgid "Get Unreconciled Entries"
-msgstr "Mutabık Olmayan Girdiler"
+msgstr "Mutabık Olunmayanları Getir"
 
 #: templates/includes/footer/footer_extension.html:10
 msgid "Get Updates"
@@ -24394,7 +24394,7 @@ msgstr "İnternet Yayıncılığı"
 #. Label of the introduction (Text) field in DocType 'Sales Partner'
 #: setup/doctype/sales_partner/sales_partner.json
 msgid "Introduction"
-msgstr "Tanıtım/Giriş"
+msgstr "Tanıtım"
 
 #: maintenance/doctype/maintenance_schedule/maintenance_schedule.py:324
 #: stock/doctype/putaway_rule/putaway_rule.py:85
@@ -27655,7 +27655,7 @@ msgstr "Yasal Giderler"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:19
 msgid "Legend"
-msgstr ""
+msgstr "Defter"
 
 #: setup/doctype/global_defaults/global_defaults.js:20
 msgid "Length"
@@ -31375,12 +31375,12 @@ msgstr "Etkileşim Sayısı"
 #. Label of the no_of_months_exp (Int) field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgid "No of Months (Expense)"
-msgstr ""
+msgstr "Ay Sayısı (Gider)"
 
 #. Label of the no_of_months (Int) field in DocType 'Item'
 #: stock/doctype/item/item.json
 msgid "No of Months (Revenue)"
-msgstr ""
+msgstr "Ay Sayısı (Gelir)"
 
 #. Label of the no_of_shares (Int) field in DocType 'Share Balance'
 #. Label of the no_of_shares (Int) field in DocType 'Share Transfer'
@@ -32430,7 +32430,7 @@ msgstr "Açılış Miktarı"
 
 #: accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool.js:33
 msgid "Opening Sales Invoices have been created."
-msgstr ""
+msgstr "Açılış Satış Faturaları oluşturuldu."
 
 #. Label of the opening_stock (Float) field in DocType 'Item'
 #. Option for the 'Purpose' (Select) field in DocType 'Stock Reconciliation'
@@ -32679,7 +32679,7 @@ msgstr ""
 
 #: selling/page/sales_funnel/sales_funnel.js:48
 msgid "Opportunities by Source"
-msgstr ""
+msgstr "Kaynaklara Göre Fırsatlar"
 
 #. Label of the opportunity (Link) field in DocType 'Request for Quotation'
 #. Label of the opportunity (Link) field in DocType 'Supplier Quotation'
@@ -33765,7 +33765,7 @@ msgstr "Çift"
 #. Label of the pallets (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgid "Pallets"
-msgstr ""
+msgstr "Paletler"
 
 #. Label of the parameter (Data) field in DocType 'Quality Feedback Parameter'
 #. Label of the parameter (Data) field in DocType 'Quality Feedback Template
@@ -34165,7 +34165,7 @@ msgstr "Milyonda Parça Sayısı"
 #: selling/doctype/quotation/quotation.json
 #: stock/report/serial_no_ledger/serial_no_ledger.py:85
 msgid "Party"
-msgstr "Taraf"
+msgstr "Cari"
 
 #. Name of a DocType
 #: accounts/doctype/party_account/party_account.json
@@ -35437,7 +35437,7 @@ msgstr "Çekme Listesi"
 
 #: stock/doctype/pick_list/pick_list.py:184
 msgid "Pick List Incomplete"
-msgstr ""
+msgstr "Toplama Listesi Tamamlanmadı"
 
 #. Label of the pick_list_item (Data) field in DocType 'Delivery Note Item'
 #. Name of a DocType
@@ -35491,16 +35491,16 @@ msgstr ""
 #. Label of the pickup_contact_person (Link) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgid "Pickup Contact Person"
-msgstr ""
+msgstr "Teslim Alacak İrtibat Kişisi"
 
 #. Label of the pickup_date (Date) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
 msgid "Pickup Date"
-msgstr ""
+msgstr "Teslim Alma Tarihi"
 
 #: stock/doctype/shipment/shipment.js:398
 msgid "Pickup Date cannot be before this day"
-msgstr ""
+msgstr "Teslim Alma Tarihi bu günden önce olamaz"
 
 #. Label of the pickup (Data) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -35509,7 +35509,7 @@ msgstr ""
 
 #: stock/doctype/shipment/shipment.py:98
 msgid "Pickup To time should be greater than Pickup From time"
-msgstr ""
+msgstr "Teslim Alma Zamanı, Teslim Alma Zamanından büyük olmalıdır"
 
 #. Label of the pickup_type (Select) field in DocType 'Shipment'
 #: stock/doctype/shipment/shipment.json
@@ -36489,7 +36489,7 @@ msgstr "Şirket {0} için ‘Varlık Elden Çıkarma Kar/Zarar Hesabı’nı aya
 
 #: accounts/general_ledger.py:511
 msgid "Please set '{0}' in Company: {1}"
-msgstr ""
+msgstr "Lütfen Şirket: {1} için '{0}' değerini ayarlayın"
 
 #: accounts/doctype/ledger_merge/ledger_merge.js:36
 msgid "Please set Account"
@@ -36545,7 +36545,7 @@ msgstr ""
 
 #: assets/doctype/asset/asset.py:434
 msgid "Please set Opening Number of Booked Depreciations"
-msgstr ""
+msgstr "Lütfen Kayıtlı Amortismanların Açılış Sayısını ayarlayın"
 
 #: manufacturing/doctype/bom_creator/bom_creator.py:265
 msgid "Please set Parent Row No for item {0}"
@@ -36571,7 +36571,7 @@ msgstr "Lütfen KDV Hesaplarını {0} olarak ayarlayın"
 
 #: regional/united_arab_emirates/utils.py:61
 msgid "Please set Vat Accounts for Company: \"{0}\" in UAE VAT Settings"
-msgstr ""
+msgstr "Lütfen BAE KDV Ayarlarında Şirket için KDV Hesaplarını \"{0}\" olarak ayarlayın"
 
 #: accounts/doctype/account/account_tree.js:18
 msgid "Please set a Company"
@@ -39451,7 +39451,7 @@ msgstr "Amaçları"
 
 #: maintenance/doctype/maintenance_visit/maintenance_visit.py:56
 msgid "Purposes Required"
-msgstr ""
+msgstr "Amaçlar Gerekiyor"
 
 #. Label of the putaway_rule (Link) field in DocType 'Purchase Receipt Item'
 #. Name of a DocType
@@ -40402,7 +40402,7 @@ msgstr "Alıntı Durumu"
 
 #: selling/report/quotation_trends/quotation_trends.py:51
 msgid "Quoted Amount"
-msgstr ""
+msgstr "Teklif Verilen Tutar"
 
 #: buying/doctype/request_for_quotation/request_for_quotation.py:87
 msgid "RFQs are not allowed for {0} due to a scorecard standing of {1}"
@@ -41353,7 +41353,7 @@ msgstr ""
 #: accounts/doctype/pricing_rule/pricing_rule.json
 #: accounts/doctype/promotional_scheme_product_discount/promotional_scheme_product_discount.json
 msgid "Recurse Every (As Per Transaction UOM)"
-msgstr ""
+msgstr "Her Tekrar (İşlem Ölçü Birimine Göre)"
 
 #: accounts/doctype/pricing_rule/pricing_rule.py:239
 msgid "Recurse Over Qty cannot be less than 0"
@@ -42354,7 +42354,7 @@ msgstr "Temsil Ettiği Şirket"
 #. Description of a DocType
 #: accounts/doctype/fiscal_year/fiscal_year.json
 msgid "Represents a Financial Year. All accounting entries and other major transactions are tracked against the Fiscal Year."
-msgstr ""
+msgstr "Mali Yılı temsil eder. Tüm muhasebe kayıtları ve diğer önemli işlemler Mali Yıla göre takip edilir."
 
 #: templates/form_grid/material_request_grid.html:25
 msgid "Reqd By Date"
@@ -43165,7 +43165,7 @@ msgstr ""
 
 #: accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts.py:108
 msgid "Revaluation Surplus"
-msgstr ""
+msgstr "Yeniden Değerleme Fazlası"
 
 #: accounts/report/deferred_revenue_and_expense/deferred_revenue_and_expense.js:88
 msgid "Revenue"
@@ -44274,7 +44274,7 @@ msgstr "Satır {0}: Miktar, {2} Kalemi için {1} değerinden büyük olamaz."
 
 #: stock/doctype/stock_entry/stock_entry.py:387
 msgid "Row {0}: Qty in Stock UOM can not be zero."
-msgstr ""
+msgstr "Satır {0}: Stoktaki Miktar Ölçü Birimi sıfır olamaz."
 
 #: stock/doctype/packing_slip/packing_slip.py:123
 msgid "Row {0}: Qty must be greater than 0."
@@ -46045,7 +46045,7 @@ msgstr "Üretilecek Ürünleri Seçin."
 
 #: manufacturing/doctype/bom/bom.js:825
 msgid "Select the Item to be manufactured. The Item name, UoM, Company, and Currency will be fetched automatically."
-msgstr ""
+msgstr "Üretilecek Ürünü seçin. Ürün adı, Ölçü Birimi, Şirket ve Para Birimi otomatik olarak alınacaktır."
 
 #: manufacturing/doctype/production_plan/production_plan.js:319
 #: manufacturing/doctype/production_plan/production_plan.js:332
@@ -47093,7 +47093,7 @@ msgstr "Rezerv Deposunu Ayarla"
 #: support/doctype/service_level_agreement/service_level_agreement.py:82
 #: support/doctype/service_level_agreement/service_level_agreement.py:90
 msgid "Set Response Time for Priority {0} in row {1}."
-msgstr ""
+msgstr "{1} satırında {0} Önceliği için Yanıt Süresini ayarlayın."
 
 #. Label of the set_warehouse (Link) field in DocType 'Sales Order'
 #. Label of the set_warehouse (Link) field in DocType 'Delivery Note'
@@ -47152,13 +47152,13 @@ msgstr "Sürekli envanter için varsayılan envanter hesabını ayarlayın"
 
 #: setup/doctype/company/company.py:447
 msgid "Set default {0} account for non stock items"
-msgstr ""
+msgstr "Stokta olmayan ürünler için varsayılan {0} hesabını ayarlayın"
 
 #. Description of the 'Fetch Value From' (Select) field in DocType 'Inventory
 #. Dimension'
 #: stock/doctype/inventory_dimension/inventory_dimension.json
 msgid "Set fieldname from which you want to fetch the data from the parent form."
-msgstr ""
+msgstr "Üst formdan veri almak istediğiniz alanı ayarlayın."
 
 #: manufacturing/doctype/bom/bom.js:861
 msgid "Set quantity of process loss item:"
@@ -47829,7 +47829,7 @@ msgstr "Depo bazında Stoğu Göster"
 #: manufacturing/report/bom_stock_calculated/bom_stock_calculated.js:28
 #: manufacturing/report/bom_stock_report/bom_stock_report.js:19
 msgid "Show exploded view"
-msgstr "Patlatılmış görünümü göster"
+msgstr "Patlatılmış Görünüm"
 
 #. Label of the show_in_website (Check) field in DocType 'BOM'
 #: manufacturing/doctype/bom/bom.json
@@ -48358,7 +48358,7 @@ msgstr "Standart Açıklama"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:115
 msgid "Standard Rated Expenses"
-msgstr ""
+msgstr "Standart Oranlı Giderler"
 
 #: setup/setup_wizard/operations/defaults_setup.py:69
 #: setup/setup_wizard/operations/install_fixtures.py:465
@@ -48385,7 +48385,7 @@ msgstr "Satış ve Satın Almalara eklenebilecek Standart Şartlar ve Koşullar.
 #: regional/report/uae_vat_201/uae_vat_201.py:96
 #: regional/report/uae_vat_201/uae_vat_201.py:102
 msgid "Standard rated supplies in {0}"
-msgstr ""
+msgstr "{0}'da standart dereceli tedarikler"
 
 #. Description of a DocType
 #: accounts/doctype/purchase_taxes_and_charges_template/purchase_taxes_and_charges_template.json
@@ -49235,7 +49235,7 @@ msgstr ""
 #: selling/doctype/sales_order_item/sales_order_item.json
 #: stock/doctype/pick_list_item/pick_list_item.json
 msgid "Stock Reserved Qty (in Stock UOM)"
-msgstr ""
+msgstr "Stok Rezerv Miktarı (Stok Ölçü Birimi)"
 
 #: stock/doctype/stock_entry/stock_entry.py:1615
 msgid "Stock Return"
@@ -50030,7 +50030,7 @@ msgstr "Tedarikçi Başarıyla Ayarlandı"
 
 #: stock/doctype/item/item.py:336
 msgid "Successfully changed Stock UOM, please redefine conversion factors for new UOM."
-msgstr ""
+msgstr "Stok Ölçü Birimi başarıyla değiştirildi, lütfen yeni Ölçü Birimi için dönüşüm faktörlerini yeniden tanımlayın."
 
 #: accounts/doctype/bank_statement_import/bank_statement_import.js:455
 msgid "Successfully imported {0}"
@@ -50642,7 +50642,7 @@ msgstr "Tedarikçiler"
 #: regional/report/uae_vat_201/uae_vat_201.py:60
 #: regional/report/uae_vat_201/uae_vat_201.py:122
 msgid "Supplies subject to the reverse charge provision"
-msgstr ""
+msgstr "Ters tahsilat hükmüne tabi tedarikler"
 
 #. Label of the is_sub_contracted_item (Check) field in DocType 'Item'
 #: stock/doctype/item/item.json
@@ -51438,7 +51438,7 @@ msgstr "Vergi Numarası: "
 
 #: accounts/doctype/process_statement_of_accounts/process_statement_of_accounts_accounts_receivable.html:32
 msgid "Tax Id: {0}"
-msgstr ""
+msgstr "Vergi Kimliği: {0}"
 
 #. Label of a Card Break in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
@@ -51462,7 +51462,7 @@ msgstr "Vergi Oranları"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:52
 msgid "Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme"
-msgstr ""
+msgstr "Turistler için Vergi İadesi Programı kapsamında Turistlere sağlanan Vergi İadeleri"
 
 #. Name of a DocType
 #. Label of a Link in the Accounting Workspace
@@ -51587,7 +51587,8 @@ msgstr "Vergi Stopaj Oranları"
 #: stock/doctype/purchase_receipt_item/purchase_receipt_item.json
 msgid "Tax detail table fetched from item master as a string and stored in this field.\n"
 "Used for Taxes and Charges"
-msgstr ""
+msgstr "Vergi ayrıntı tablosu, öğe ana verisinden bir dize olarak alınır ve bu alanda saklanır.\n"
+"Vergiler ve Ücretler için kullanılır"
 
 #. Description of the 'Only Deduct Tax On Excess Amount ' (Check) field in
 #. DocType 'Tax Withholding Category'
@@ -52601,7 +52602,7 @@ msgstr "Bu alan 'Müşteri'yi ayarlamak için kullanılır."
 #. Reconciliation'
 #: accounts/doctype/payment_reconciliation/payment_reconciliation.json
 msgid "This filter will be applied to Journal Entry."
-msgstr "Bu filtre Yevmiye Defteri Girişine uygulanacaktır."
+msgstr "Bu filtre Muhasebe Defterine uygulanacaktır."
 
 #: manufacturing/doctype/bom/bom.js:220
 msgid "This is a Template BOM and will be used to make the work order for {0} of the item {1}"
@@ -52678,7 +52679,7 @@ msgstr ""
 
 #: manufacturing/doctype/work_order/work_order.js:957
 msgid "This is enabled by default. If you want to plan materials for sub-assemblies of the Item you're manufacturing leave this enabled. If you plan and manufacture the sub-assemblies separately, you can disable this checkbox."
-msgstr ""
+msgstr "Bu varsayılan olarak aktiftir. Ürettiğiniz Ürünün alt montajları için malzemeler planlamak istiyorsanız bunu aktif bırakın. Alt montajları ayrı ayrı planlıyor ve üretiyorsanız, bu onay kutusunu devre dışı bırakabilirsiniz."
 
 #: stock/doctype/item/item.js:926
 msgid "This is for raw material Items that'll be used to create finished goods. If the Item is an additional service like 'washing' that'll be used in the BOM, keep this unchecked."
@@ -55116,11 +55117,11 @@ msgstr "Ölçü Birimi Dönüşüm Faktörü"
 
 #: manufacturing/doctype/production_plan/production_plan.py:1265
 msgid "UOM Conversion factor ({0} -> {1}) not found for item: {2}"
-msgstr ""
+msgstr "Ölçü Birimi Dönüşüm faktörü ({0} -> {1}) {2} Ürünü için bulunamadı"
 
 #: buying/utils.py:40
 msgid "UOM Conversion factor is required in row {0}"
-msgstr ""
+msgstr "Ölçü Birimi Dönüşüm faktörü {0} satırında gereklidir"
 
 #. Label of the uom_name (Data) field in DocType 'UOM'
 #: setup/doctype/uom/uom.json
@@ -55129,7 +55130,7 @@ msgstr "Ölçü Birimi Adı"
 
 #: stock/doctype/stock_entry/stock_entry.py:2996
 msgid "UOM conversion factor required for UOM: {0} in Item: {1}"
-msgstr ""
+msgstr "Ürünü içinde: {1} ölçü birimi için: {0} dönüştürme faktörü gereklidir"
 
 #. Description of the 'Default UOM' (Link) field in DocType 'Tally Migration'
 #: erpnext_integrations/doctype/tally_migration/tally_migration.json
@@ -55138,7 +55139,7 @@ msgstr "İçe aktarılan bilgilerde belirtilmemiş olması durumunda UOM"
 
 #: stock/doctype/item_price/item_price.py:61
 msgid "UOM {0} not found in Item {1}"
-msgstr ""
+msgstr "{1} Ürünü için {0} Ölçü Birimi bulunamadı"
 
 #. Label of the uoms (Attach) field in DocType 'Tally Migration'
 #. Label of the uoms (Table) field in DocType 'Item'
@@ -55989,7 +55990,7 @@ msgstr "KDV Hesapları"
 
 #: regional/report/uae_vat_201/uae_vat_201.py:28
 msgid "VAT Amount (AED)"
-msgstr ""
+msgstr "KDV Tutarı (AED)"
 
 #. Name of a report
 #: regional/report/vat_audit_report/vat_audit_report.json
@@ -55999,12 +56000,12 @@ msgstr "KDV Denetim Raporu"
 #: regional/report/uae_vat_201/uae_vat_201.html:47
 #: regional/report/uae_vat_201/uae_vat_201.py:111
 msgid "VAT on Expenses and All Other Inputs"
-msgstr ""
+msgstr "Giderler ve Diğer Tüm Girdi Üzerindeki KDV"
 
 #: regional/report/uae_vat_201/uae_vat_201.html:15
 #: regional/report/uae_vat_201/uae_vat_201.py:45
 msgid "VAT on Sales and All Other Outputs"
-msgstr ""
+msgstr "Satışlarda ve Diğer Tüm Çıktılarda KDV"
 
 #. Label of the valid_from (Date) field in DocType 'Cost Center Allocation'
 #. Label of the valid_from (Date) field in DocType 'Coupon Code'
