@@ -404,7 +404,7 @@ def validate_serial_no(sle, item_det):
 								)
 
 							# if Sales Order reference in Serial No validate the Delivery Note or Invoice is against the same
-							if sr.sales_order:
+							if sr.sales_order and sr.delivery_document_no:
 								if sle.voucher_type == "Sales Invoice":
 									if not frappe.db.exists(
 										"Sales Invoice Item",
