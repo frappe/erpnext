@@ -472,6 +472,7 @@ class PaymentRequest(Document):
 			references[0].payment_request = self.name
 			return
 
+		precision = references[0].precision("allocated_amount")
 		outstanding_amount = self.outstanding_amount
 
 		# to manage rows
@@ -497,10 +498,10 @@ class PaymentRequest(Document):
 			row.payment_request = self.name
 
 			if row.allocated_amount <= outstanding_amount:
-				outstanding_amount -= row.allocated_amount
+				outstanding_amount = flt(outstanding_amount - row.allocated_amount, precision)
 				row_number += MOVE_TO_NEXT_ROW
 			else:
-				remaining_allocated_amount = row.allocated_amount - outstanding_amount
+				remaining_allocated_amount = flt(row.allocated_amount - outstanding_amount, precision)
 				row.allocated_amount = outstanding_amount
 				outstanding_amount = 0
 
@@ -744,6 +745,8 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 	if not references:
 		return
 
+	precision = references[0].precision("allocated_amount")
+
 	referenced_payment_requests = frappe.get_all(
 		"Payment Request",
 		filters={"name": ["in", {row.payment_request for row in references if row.payment_request}]},
@@ -762,12 +765,12 @@ def update_payment_requests_as_per_pe_references(references=None, cancel=False):
 			continue
 
 		payment_request = referenced_payment_requests[ref.payment_request]
+		pr_outstanding = payment_request["outstanding_amount"]
 
 		# update outstanding amount
 		new_outstanding_amount = flt(
-			payment_request["outstanding_amount"] + ref.allocated_amount
-			if cancel
-			else payment_request["outstanding_amount"] - ref.allocated_amount
+			pr_outstanding + ref.allocated_amount if cancel else pr_outstanding - ref.allocated_amount,
+			precision,
 		)
 
 		# to handle same payment request for the multiple allocations

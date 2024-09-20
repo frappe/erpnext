@@ -1758,12 +1758,13 @@ class PaymentEntry(AccountsController):
 			return
 
 		# calculating outstanding amounts
+		precision = self.precision("paid_amount")
 		total_positive_outstanding_including_order = 0
 		total_negative_outstanding = 0
-		paid_amount -= sum(flt(d.amount, self.precision("paid_amount")) for d in self.deductions)
+		paid_amount -= sum(flt(d.amount, precision) for d in self.deductions)
 
 		for ref in self.references:
-			reference_outstanding_amount = flt(ref.outstanding_amount, self.precision("paid_amount"))
+			reference_outstanding_amount = flt(ref.outstanding_amount, precision)
 			abs_outstanding_amount = abs(reference_outstanding_amount)
 
 			if reference_outstanding_amount > 0:
@@ -1780,7 +1781,9 @@ class PaymentEntry(AccountsController):
 			self.payment_type == "Pay" and self.party_type in ("Supplier", "Employee")
 		):
 			if total_positive_outstanding_including_order > paid_amount:
-				remaining_outstanding = total_positive_outstanding_including_order - paid_amount
+				remaining_outstanding = flt(
+					total_positive_outstanding_including_order - paid_amount, precision
+				)
 				allocated_negative_outstanding = min(remaining_outstanding, total_negative_outstanding)
 
 			allocated_positive_outstanding = paid_amount + allocated_negative_outstanding
@@ -1804,7 +1807,7 @@ class PaymentEntry(AccountsController):
 				return
 
 			else:
-				allocated_positive_outstanding = total_negative_outstanding - paid_amount
+				allocated_positive_outstanding = flt(total_negative_outstanding - paid_amount, precision)
 				allocated_negative_outstanding = paid_amount + min(
 					total_positive_outstanding_including_order, allocated_positive_outstanding
 				)
@@ -1815,10 +1818,14 @@ class PaymentEntry(AccountsController):
 		):
 			if outstanding_amount > 0 and allocated_positive_outstanding >= 0:
 				row.allocated_amount = min(allocated_positive_outstanding, outstanding_amount)
-				allocated_positive_outstanding -= flt(row.allocated_amount)
+				allocated_positive_outstanding = flt(
+					allocated_positive_outstanding - row.allocated_amount, precision
+				)
 			elif outstanding_amount < 0 and allocated_negative_outstanding:
 				row.allocated_amount = min(allocated_negative_outstanding, abs(outstanding_amount)) * -1
-				allocated_negative_outstanding -= abs(flt(row.allocated_amount))
+				allocated_negative_outstanding = flt(
+					allocated_negative_outstanding - abs(row.allocated_amount), precision
+				)
 			return allocated_positive_outstanding, allocated_negative_outstanding
 
 		# allocate amount based on `paid_amount` is changed or not
@@ -1831,7 +1838,7 @@ class PaymentEntry(AccountsController):
 					allocated_negative_outstanding,
 				)
 
-			allocate_open_payment_requests_to_references(self.references)
+			allocate_open_payment_requests_to_references(self.references, self.precision("paid_amount"))
 
 		else:
 			payment_request_outstanding_amounts = (
@@ -1862,9 +1869,15 @@ class PaymentEntry(AccountsController):
 
 					# update amounts to track allocation
 					allocated_amount = flt(ref.allocated_amount)
-					allocated_positive_outstanding -= allocated_amount
-					remaining_references_allocated_amounts[key] -= allocated_amount
-					payment_request_outstanding_amounts[ref.payment_request] -= allocated_amount
+					allocated_positive_outstanding = flt(
+						allocated_positive_outstanding - allocated_amount, precision
+					)
+					remaining_references_allocated_amounts[key] = flt(
+						remaining_references_allocated_amounts[key] - allocated_amount, precision
+					)
+					payment_request_outstanding_amounts[ref.payment_request] = flt(
+						payment_request_outstanding_amounts[ref.payment_request] - allocated_amount, precision
+					)
 
 				elif reference_outstanding_amount < 0 and allocated_negative_outstanding:
 					# allocate amount according to outstanding amounts
@@ -1878,10 +1891,13 @@ class PaymentEntry(AccountsController):
 
 					# update amounts to track allocation
 					allocated_amount = abs(flt(ref.allocated_amount))
-					allocated_negative_outstanding -= allocated_amount
+					allocated_negative_outstanding = flt(
+						allocated_negative_outstanding - allocated_amount, precision
+					)
 					remaining_references_allocated_amounts[key] += allocated_amount  # negative amount
-					payment_request_outstanding_amounts[ref.payment_request] -= allocated_amount
-
+					payment_request_outstanding_amounts[ref.payment_request] = flt(
+						payment_request_outstanding_amounts[ref.payment_request] - allocated_amount, precision
+					)
 			# Re allocate amount to those references which have no PR (Lower priority)
 			for ref in self.references:
 				if ref.payment_request:
@@ -2865,7 +2881,7 @@ def get_payment_entry(
 
 	# If PE is created from PR directly, then no need to find open PRs for the references
 	if not created_from_payment_request:
-		allocate_open_payment_requests_to_references(pe.references)
+		allocate_open_payment_requests_to_references(pe.references, pe.precision("paid_amount"))
 
 	return pe
 
@@ -2916,7 +2932,7 @@ def get_open_payment_requests_for_references(references=None):
 	return reference_payment_requests
 
 
-def allocate_open_payment_requests_to_references(references=None):
+def allocate_open_payment_requests_to_references(references=None, precision=None):
 	"""
 	Allocate unpaid Payment Requests to the references. \n
 	---
@@ -2953,6 +2969,9 @@ def allocate_open_payment_requests_to_references(references=None):
 
 	if not references_open_payment_requests:
 		return
+
+	if not precision:
+		precision = references[0].precision("allocated_amount")
 
 	# to manage new rows
 	row_number = 1
@@ -2993,7 +3012,7 @@ def allocate_open_payment_requests_to_references(references=None):
 			# split the reference row to allocate the remaining amount
 			del reference_payment_requests[payment_request]
 			row.allocated_amount = pr_outstanding_amount
-			allocated_amount -= pr_outstanding_amount
+			allocated_amount = flt(allocated_amount - pr_outstanding_amount, precision)
 
 			# set the remaining amount to the next row
 			while allocated_amount:
@@ -3028,7 +3047,7 @@ def allocate_open_payment_requests_to_references(references=None):
 					break
 
 				else:
-					allocated_amount -= pr_outstanding_amount
+					allocated_amount = flt(allocated_amount - pr_outstanding_amount, precision)
 					del reference_payment_requests[payment_request]
 					row_number += MOVE_TO_NEXT_ROW
 
