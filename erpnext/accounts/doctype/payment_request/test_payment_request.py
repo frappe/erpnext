@@ -337,8 +337,8 @@ class TestPaymentRequest(FrappeTestCase):
 
 		gl_entries = frappe.db.sql(
 			"""select account, debit, credit, against_voucher
-            from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
-            order by account asc""",
+			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
+			order by account asc""",
 			pe.name,
 			as_dict=1,
 		)
