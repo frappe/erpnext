@@ -203,7 +203,6 @@ frappe.ui.form.on("Payment Entry", {
 			};
 		});
 
-		// todo: fetch payment term outstanding amount also
 		frm.add_fetch(
 			"payment_request",
 			"outstanding_amount",
@@ -1673,7 +1672,7 @@ frappe.ui.form.on("Payment Entry", {
 			title: __("Unset Matched Payment Request"),
 			message: COLUMN_LABEL.concat(matched_payment_requests),
 			as_table: true,
-			wide:true,
+			wide: true,
 			primary_action: {
 				label: __("Allocate Payment Request"),
 				action() {

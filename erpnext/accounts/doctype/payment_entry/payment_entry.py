@@ -333,7 +333,7 @@ class PaymentEntry(AccountsController):
 
 	def validate_allocated_amount_as_per_payment_request(self):
 		"""
-		Allocated amount should not be greater than the outstanding amount of the Payment Request.f
+		Allocated amount should not be greater than the outstanding amount of the Payment Request.
 		"""
 		if not self.references:
 			return
