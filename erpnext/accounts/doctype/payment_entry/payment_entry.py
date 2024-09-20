@@ -1764,7 +1764,7 @@ class PaymentEntry(AccountsController):
 		paid_amount -= sum(flt(d.amount, precision) for d in self.deductions)
 
 		for ref in self.references:
-			reference_outstanding_amount = flt(ref.outstanding_amount, precision)
+			reference_outstanding_amount = ref.outstanding_amount
 			abs_outstanding_amount = abs(reference_outstanding_amount)
 
 			if reference_outstanding_amount > 0:
@@ -1868,7 +1868,7 @@ class PaymentEntry(AccountsController):
 					ref.allocated_amount = min(outstanding_amounts)
 
 					# update amounts to track allocation
-					allocated_amount = flt(ref.allocated_amount)
+					allocated_amount = ref.allocated_amount
 					allocated_positive_outstanding = flt(
 						allocated_positive_outstanding - allocated_amount, precision
 					)
@@ -1890,7 +1890,7 @@ class PaymentEntry(AccountsController):
 					ref.allocated_amount = min(outstanding_amounts) * -1
 
 					# update amounts to track allocation
-					allocated_amount = abs(flt(ref.allocated_amount))
+					allocated_amount = abs(ref.allocated_amount)
 					allocated_negative_outstanding = flt(
 						allocated_negative_outstanding - allocated_amount, precision
 					)
