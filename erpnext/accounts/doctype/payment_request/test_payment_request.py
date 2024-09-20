@@ -446,10 +446,14 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pr.outstanding_amount, 800)
 		self.assertEqual(pr.grand_total, 1000)
 
+		# complete payment
 		pe = pr.create_payment_entry()
+
 		self.assertEqual(pe.paid_amount, 800)  # paid amount set from pr's outstanding amount
 		self.assertEqual(pe.references[0].allocated_amount, 800)
-		self.assertEqual(pe.references[0].outstanding_amount, 800)
+		self.assertEqual(
+			pe.references[0].outstanding_amount, 800
+		)  # for orders it should be same as allocated amount
 		self.assertEqual(pe.references[0].payment_request, pr.name)
 
 		pr.load_from_db()
@@ -487,22 +491,39 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pr.party_account_currency, "INR")
 		self.assertEqual(pr.status, "Requested")
 
+		# to make partial payment
 		pe = pr.create_payment_entry(submit=False)
 		pe.paid_amount = 2000
 		pe.references[0].allocated_amount = 2000
 		pe.submit()
-		pr.load_from_db()
 
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		pr.load_from_db()
 		self.assertEqual(pr.status, "Partially Paid")
 		self.assertEqual(pr.outstanding_amount, 3000)
 		self.assertEqual(pr.grand_total, 100)
 
-		pe = pr.create_payment_entry(submit=False)
-		pe.paid_amount = 3000
-		pe.references[0].allocated_amount = 3000
-		pe.submit()
-		pr.load_from_db()
+		# complete payment
+		pe = pr.create_payment_entry()
+		self.assertEqual(pe.paid_amount, 3000)  # paid amount set from pr's outstanding amount
+		self.assertEqual(pe.references[0].allocated_amount, 3000)
+		self.assertEqual(pe.references[0].outstanding_amount, 0)  # for Invoices it will zero
+		self.assertEqual(pe.references[0].payment_request, pr.name)
 
+		pr.load_from_db()
 		self.assertEqual(pr.status, "Paid")
 		self.assertEqual(pr.outstanding_amount, 0)
 		self.assertEqual(pr.grand_total, 100)
+
+		# creating a more payment Request must not allowed
+		self.assertRaisesRegex(
+			frappe.exceptions.ValidationError,
+			re.compile(r"Payment Request is already created"),
+			make_payment_request,
+			dt="Sales Invoice",
+			dn=si.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
