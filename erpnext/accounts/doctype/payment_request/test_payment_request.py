@@ -8,6 +8,7 @@ from unittest.mock import patch
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from erpnext.accounts.doctype.payment_entry.test_payment_entry import create_payment_terms_template
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
@@ -536,3 +537,50 @@ class TestPaymentRequest(FrappeTestCase):
 			submit_doc=1,
 			return_doc=1,
 		)
+
+	def test_single_payment_with_payment_term_for_same_currency(self):
+		create_payment_terms_template()
+
+		po = create_purchase_order(do_not_save=1, currency="INR", qty=1, rate=20000)
+		po.payment_terms_template = "Test Receivable Template"  # 84.746 and 15.254
+		po.save()
+		po.submit()
+
+		self.assertEqual(po.advance_payment_status, "Not Initiated")
+
+		pr = make_payment_request(
+			dt="Purchase Order",
+			dn=po.name,
+			mute_email=1,
+			submit_doc=1,
+			return_doc=1,
+		)
+
+		self.assertEqual(pr.grand_total, 20000)
+		self.assertEqual(pr.outstanding_amount, pr.grand_total)
+		self.assertEqual(pr.party_account_currency, pr.currency)  # INR
+		self.assertEqual(pr.status, "Initiated")
+
+		po.load_from_db()
+		self.assertEqual(po.advance_payment_status, "Initiated")
+
+		pe = pr.create_payment_entry()
+
+		self.assertEqual(len(pe.references), 2)
+		self.assertEqual(pe.paid_amount, 20000)
+
+		# check 1st payment term
+		self.assertEqual(pe.references[0].allocated_amount, 16949.2)
+		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		# check 2nd payment term
+		self.assertEqual(pe.references[1].allocated_amount, 3050.8)
+		self.assertEqual(pe.references[1].payment_request, pr.name)
+
+		po.load_from_db()
+		self.assertEqual(po.advance_payment_status, "Fully Paid")
+
+		pr.load_from_db()
+		self.assertEqual(pr.status, "Paid")
+		self.assertEqual(pr.outstanding_amount, 0)
+		self.assertEqual(pr.grand_total, 20000)
