@@ -1673,6 +1673,7 @@ frappe.ui.form.on("Payment Entry", {
 			title: __("Unset Matched Payment Request"),
 			message: COLUMN_LABEL.concat(matched_payment_requests),
 			as_table: true,
+			wide:true,
 			primary_action: {
 				label: __("Allocate Payment Request"),
 				action() {
