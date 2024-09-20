@@ -69,9 +69,14 @@
    "options": "Company"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2024-01-30 11:59:07.508535",
+=======
+ "modified": "2024-09-19 18:06:36.481625",
+>>>>>>> b127a0c8b7 (fix: ui clean-up (#43305))
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Plant Floor",
