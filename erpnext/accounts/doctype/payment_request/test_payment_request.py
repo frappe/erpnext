@@ -420,6 +420,8 @@ class TestPaymentRequest(FrappeTestCase):
 	def test_multiple_payment_if_partially_paid_for_same_currency(self):
 		so = make_sales_order(currency="INR", qty=1, rate=1000)
 
+		self.assertEqual(so.advance_payment_status, "Not Requested")
+
 		pr = make_payment_request(
 			dt="Sales Order",
 			dn=so.name,
@@ -433,6 +435,9 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pr.party_account_currency, pr.currency)  # INR
 		self.assertEqual(pr.status, "Requested")
 
+		so.load_from_db()
+		self.assertEqual(so.advance_payment_status, "Requested")
+
 		# to make partial payment
 		pe = pr.create_payment_entry(submit=False)
 		pe.paid_amount = 200
@@ -440,6 +445,9 @@ class TestPaymentRequest(FrappeTestCase):
 		pe.submit()
 
 		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		so.load_from_db()
+		self.assertEqual(so.advance_payment_status, "Partially Paid")
 
 		pr.load_from_db()
 		self.assertEqual(pr.status, "Partially Paid")
@@ -451,10 +459,11 @@ class TestPaymentRequest(FrappeTestCase):
 
 		self.assertEqual(pe.paid_amount, 800)  # paid amount set from pr's outstanding amount
 		self.assertEqual(pe.references[0].allocated_amount, 800)
-		self.assertEqual(
-			pe.references[0].outstanding_amount, 800
-		)  # for orders it should be same as allocated amount
+		self.assertEqual(pe.references[0].outstanding_amount, 800)  # for Orders it is not zero
 		self.assertEqual(pe.references[0].payment_request, pr.name)
+
+		so.load_from_db()
+		self.assertEqual(so.advance_payment_status, "Fully Paid")
 
 		pr.load_from_db()
 		self.assertEqual(pr.status, "Paid")
@@ -474,11 +483,11 @@ class TestPaymentRequest(FrappeTestCase):
 		)
 
 	def test_multiple_payment_if_partially_paid_for_multi_currency(self):
-		si = create_sales_invoice(currency="USD", conversion_rate=50, qty=1, rate=100)
+		pi = make_purchase_invoice(currency="USD", conversion_rate=50, qty=1, rate=100)
 
 		pr = make_payment_request(
-			dt="Sales Invoice",
-			dn=si.name,
+			dt="Purchase Invoice",
+			dn=pi.name,
 			mute_email=1,
 			submit_doc=1,
 			return_doc=1,
@@ -489,7 +498,7 @@ class TestPaymentRequest(FrappeTestCase):
 		self.assertEqual(pr.outstanding_amount, 5000)
 		self.assertEqual(pr.currency, "USD")
 		self.assertEqual(pr.party_account_currency, "INR")
-		self.assertEqual(pr.status, "Requested")
+		self.assertEqual(pr.status, "Initiated")
 
 		# to make partial payment
 		pe = pr.create_payment_entry(submit=False)
@@ -521,8 +530,8 @@ class TestPaymentRequest(FrappeTestCase):
 			frappe.exceptions.ValidationError,
 			re.compile(r"Payment Request is already created"),
 			make_payment_request,
-			dt="Sales Invoice",
-			dn=si.name,
+			dt="Purchase Invoice",
+			dn=pi.name,
 			mute_email=1,
 			submit_doc=1,
 			return_doc=1,
