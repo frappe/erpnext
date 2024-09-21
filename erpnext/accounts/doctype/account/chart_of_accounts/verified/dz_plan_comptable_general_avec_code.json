@@ -192,21 +192,26 @@
             "Immobilisations en cours": {
                 "Immobilisations corporelles en cours": {
                     "Terrains en cours": {
-                        "account_number": "2322"
+                        "account_number": "2322",
+                        "account_type": "Capital Work in Progress",
                     },
                     "Constructions en cours": {
-                        "account_number": "2323"
+                        "account_number": "2323",
+                         "account_type": "Capital Work in Progress"
                     },
                     "Installations techniques, mat\u00e9riel et outillage industriels en cours": {
-                        "account_number": "2325"
+                        "account_number": "2325",
+                         "account_type": "Capital Work in Progress"
                     },
                     "Autres immobilisations corporelles en cours": {
-                        "account_number": "2328"
+                        "account_number": "2328",
+                         "account_type": "Capital Work in Progress"
                     },
                     "account_number": "232"
                 },
                 "Immobilisations incorporelles en cours": {
-                    "account_number": "237"
+                    "account_number": "237",
+                     "account_type": "Capital Work in Progress"
                 },
                 "Avances et acomptes vers\u00e9s sur commandes d'immobilisations": {
                     "Avances et acomptes vers\u00e9s sur commandes d'immobilisations incorporelles": {
@@ -287,7 +292,8 @@
             "Pertes de valeur sur immobilisations": {
                 "Pertes de valeur sur immobilisations incorporelles": {
                     "Pertes de valeur sur frais de développement immobilisables": {
-                        "account_number": "2903"
+                        "account_number": "2903",
+                        
                     },
                     "Pertes de valeur sur logiciels informatiques et assimilés": {
                         "account_number": "2904"
