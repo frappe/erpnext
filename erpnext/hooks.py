@@ -29,12 +29,12 @@ app_include_js = [
     "https://cdn.jsdelivr.net/npm/pdfkit@0.13.0/js/pdfkit.standalone.js",
     "https://cdn.jsdelivr.net/npm/blob-stream-browserify@0.1.3/index.js",
     "https://cdn.jsdelivr.net/npm/svg-to-pdfkit@0.1.8/source.js",
-	"https://raw.githubusercontent.com/DHTMLX/gantt/v8.0.10/codebase/dhtmlxgantt.js"
+	"http://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"
 ]
 
 app_include_css = [
 	"erpnext.bundle.css",
-	"https://raw.githubusercontent.com/DHTMLX/gantt/v8.0.10/codebase/dhtmlxgantt.css"
+	"http://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css"
 ]
 web_include_js = "erpnext-web.bundle.js"
 web_include_css = "erpnext-web.bundle.css"
