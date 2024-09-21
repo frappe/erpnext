@@ -154,6 +154,17 @@ frappe.ui.form.on('Payment Entry', {
 			};
 		});
 
+		frm.set_query("payment_request", "references", function (doc, cdt, cdn) {
+			const row = frappe.get_doc(cdt, cdn);
+			return {
+				query: "erpnext.accounts.doctype.payment_request.payment_request.get_open_payment_requests_query",
+				filters: {
+					reference_doctype: row.reference_doctype,
+					reference_name: row.reference_name,
+				},
+			};
+		});
+
 		frm.set_query("sales_taxes_and_charges_template", function () {
 			return {
 				filters: {
@@ -171,7 +182,15 @@ frappe.ui.form.on('Payment Entry', {
 				},
 			};
 		});
+
+		frm.add_fetch(
+			"payment_request",
+			"outstanding_amount",
+			"payment_request_outstanding",
+			"Payment Entry Reference"
+		);
 	},
+
 	refresh: function (frm) {
 		erpnext.hide_company(frm);
 		frm.events.hide_unhide_fields(frm);
@@ -184,6 +203,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		}
 		erpnext.accounts.unreconcile_payment.add_unreconcile_btn(frm);
+		frappe.flags.allocate_payment_amount = true;
 	},
 
 	validate_company: (frm) => {
@@ -633,10 +653,16 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_value("base_received_amount",
 			flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate));
 
+<<<<<<< HEAD
 		if(frm.doc.payment_type == "Pay")
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount, 1);
 		else
 			frm.events.set_unallocated_amount(frm);
+=======
+		if (frm.doc.payment_type == "Pay")
+			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount, true);
+		else frm.events.set_unallocated_amount(frm);
+>>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 
 		frm.set_paid_amount_based_on_received_amount = false;
 		frm.events.hide_unhide_fields(frm);
@@ -654,10 +680,16 @@ frappe.ui.form.on('Payment Entry', {
 			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 		}
 
+<<<<<<< HEAD
 		if(frm.doc.payment_type == "Receive")
 			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount, 1);
 		else
 			frm.events.set_unallocated_amount(frm);
+=======
+		if (frm.doc.payment_type == "Receive")
+			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount, true);
+		else frm.events.set_unallocated_amount(frm);
+>>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 	},
 
 	get_outstanding_invoices_or_orders: function(frm, get_outstanding_invoices, get_orders_to_be_billed) {
@@ -801,6 +833,7 @@ frappe.ui.form.on('Payment Entry', {
 						c.outstanding_amount = d.outstanding_amount;
 						c.bill_no = d.bill_no;
 						c.payment_term = d.payment_term;
+						c.payment_term_outstanding = d.payment_term_outstanding;
 						c.allocated_amount = d.allocated_amount;
 
 						if(!in_list(frm.events.get_order_doctypes(frm), d.voucher_type)) {
@@ -842,10 +875,19 @@ frappe.ui.form.on('Payment Entry', {
 					}
 				}
 
+<<<<<<< HEAD
 				frm.events.allocate_party_amount_against_ref_docs(frm,
 					(frm.doc.payment_type=="Receive" ? frm.doc.paid_amount : frm.doc.received_amount));
 
 			}
+=======
+				frm.events.allocate_party_amount_against_ref_docs(
+					frm,
+					frm.doc.payment_type == "Receive" ? frm.doc.paid_amount : frm.doc.received_amount,
+					false
+				);
+			},
+>>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 		});
 	},
 
@@ -857,6 +899,7 @@ frappe.ui.form.on('Payment Entry', {
 		return ["Sales Invoice", "Purchase Invoice"];
 	},
 
+<<<<<<< HEAD
 	allocate_party_amount_against_ref_docs: function(frm, paid_amount, paid_amount_change) {
 		var total_positive_outstanding_including_order = 0;
 		var total_negative_outstanding = 0;
@@ -927,6 +970,15 @@ frappe.ui.form.on('Payment Entry', {
 		})
 
 		frm.refresh_fields()
+=======
+	allocate_party_amount_against_ref_docs: async function (frm, paid_amount, paid_amount_change) {
+		await frm.call("allocate_amount_to_references", {
+			paid_amount: paid_amount,
+			paid_amount_change: paid_amount_change,
+			allocate_payment_amount: frappe.flags.allocate_payment_amount ?? false,
+		});
+
+>>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
 		frm.events.set_total_allocated_amount(frm);
 	},
 
@@ -1409,6 +1461,62 @@ frappe.ui.form.on('Payment Entry', {
 
 		return current_tax_amount;
 	},
+
+	cost_center: function (frm) {
+		if (frm.doc.posting_date && (frm.doc.paid_from || frm.doc.paid_to)) {
+			return frappe.call({
+				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_party_and_account_balance",
+				args: {
+					company: frm.doc.company,
+					date: frm.doc.posting_date,
+					paid_from: frm.doc.paid_from,
+					paid_to: frm.doc.paid_to,
+					ptype: frm.doc.party_type,
+					pty: frm.doc.party,
+					cost_center: frm.doc.cost_center,
+				},
+				callback: function (r, rt) {
+					if (r.message) {
+						frappe.run_serially([
+							() => {
+								frm.set_value(
+									"paid_from_account_balance",
+									r.message.paid_from_account_balance
+								);
+								frm.set_value("paid_to_account_balance", r.message.paid_to_account_balance);
+								frm.set_value("party_balance", r.message.party_balance);
+							},
+						]);
+					}
+				},
+			});
+		}
+	},
+
+	after_save: function (frm) {
+		const { matched_payment_requests } = frappe.last_response;
+		if (!matched_payment_requests) return;
+
+		const COLUMN_LABEL = [
+			[__("Reference DocType"), __("Reference Name"), __("Allocated Amount"), __("Payment Request")],
+		];
+
+		frappe.msgprint({
+			title: __("Unset Matched Payment Request"),
+			message: COLUMN_LABEL.concat(matched_payment_requests),
+			as_table: true,
+			wide: true,
+			primary_action: {
+				label: __("Allocate Payment Request"),
+				action() {
+					frappe.hide_msgprint();
+					frm.call("set_matched_payment_requests", { matched_payment_requests }, () => {
+						frm.dirty();
+					});
+				},
+			},
+		});
+	},
 });
 
 
@@ -1495,6 +1603,7 @@ frappe.ui.form.on('Payment Entry Deduction', {
 
 	deductions_remove: function(frm) {
 		frm.events.set_unallocated_amount(frm);
+<<<<<<< HEAD
 	}
 })
 frappe.ui.form.on('Payment Entry', {
@@ -1527,3 +1636,7 @@ frappe.ui.form.on('Payment Entry', {
 		}
 	},
 })
+=======
+	},
+});
+>>>>>>> ea69ba7cd8 (fix: multiple issues in Payment Request (#42427))
