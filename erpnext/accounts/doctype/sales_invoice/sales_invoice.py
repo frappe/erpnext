@@ -340,6 +340,7 @@ class SalesInvoice(SellingController):
 		):
 			validate_loyalty_points(self, self.loyalty_points)
 
+		self.allow_write_off_only_on_pos()
 		self.reset_default_field_value("set_warehouse", "items", "warehouse")
 
 	def validate_accounts(self):
@@ -1020,6 +1021,10 @@ class SalesInvoice(SellingController):
 					_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note),
 					raise_exception=1,
 				)
+
+	def allow_write_off_only_on_pos(self):
+		if not self.is_pos and self.write_off_account:
+			self.write_off_account = None
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:
