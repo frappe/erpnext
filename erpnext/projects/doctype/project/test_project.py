@@ -199,6 +199,34 @@ class TestProject(FrappeTestCase):
 			if not pt.is_group:
 				self.assertIsNotNone(pt.parent_task)
 
+	def test_project_having_no_tasks_complete(self):
+		project_name = "Test Project - No Tasks Completion"
+		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
+		frappe.delete_doc("Project", project_name)
+
+		project = frappe.get_doc(
+			{
+				"doctype": "Project",
+				"project_name": project_name,
+				"status": "Open",
+				"expected_start_date": nowdate(),
+				"company": "_Test Company",
+			}
+		).insert()
+
+		tasks = frappe.get_all(
+			"Task",
+			["subject", "exp_end_date", "depends_on_tasks", "name", "parent_task"],
+			dict(project=project.name),
+			order_by="creation asc",
+		)
+
+		self.assertEqual(project.status, "Open")
+		self.assertEqual(len(tasks), 0)
+		project.status = "Completed"
+		project.save()
+		self.assertEqual(project.status, "Completed")
+
 
 def get_project(name, template):
 	project = frappe.get_doc(

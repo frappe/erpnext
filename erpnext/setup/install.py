@@ -23,6 +23,7 @@ def after_install():
 
 	set_single_defaults()
 	create_print_setting_custom_fields()
+	create_marketgin_campagin_custom_fields()
 	add_all_roles_to("Administrator")
 	create_default_success_action()
 	create_default_energy_point_rules()
@@ -117,6 +118,22 @@ def create_print_setting_custom_fields():
 					"fieldtype": "Check",
 					"default": "0",
 					"insert_after": "allow_print_for_cancelled",
+				},
+			]
+		}
+	)
+
+
+def create_marketgin_campagin_custom_fields():
+	create_custom_fields(
+		{
+			"UTM Campaign": [
+				{
+					"label": _("Messaging CRM Campagin"),
+					"fieldname": "crm_campaign",
+					"fieldtype": "Link",
+					"options": "Campaign",
+					"insert_after": "campaign_decription",
 				},
 			]
 		}

@@ -346,12 +346,17 @@ class AccountsController(TransactionBase):
 					repost_doc.save(ignore_permissions=True)
 
 	def on_trash(self):
+		from erpnext.accounts.utils import delete_exchange_gain_loss_journal
+
 		self._remove_references_in_repost_doctypes()
 		self._remove_references_in_unreconcile()
 		self.remove_serial_and_batch_bundle()
 
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value("Accounts Settings", "delete_linked_ledger_entries"):
+			# delete linked exchange gain/loss journal
+			delete_exchange_gain_loss_journal(self)
+
 			ple = frappe.qb.DocType("Payment Ledger Entry")
 			frappe.qb.from_(ple).delete().where(
 				(ple.voucher_type == self.doctype) & (ple.voucher_no == self.name)
@@ -1961,33 +1966,24 @@ class AccountsController(TransactionBase):
 	def set_advance_payment_status(self):
 		new_status = None
 
-		stati = frappe.get_all(
-			"Payment Request",
-			{
+		paid_amount = frappe.get_value(
+			doctype="Payment Request",
+			filters={
 				"reference_doctype": self.doctype,
 				"reference_name": self.name,
 				"docstatus": 1,
 			},
-			pluck="status",
+			fieldname="sum(grand_total - outstanding_amount)",
 		)
-		if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
-			if not stati:
-				new_status = "Not Requested"
-			elif "Requested" in stati or "Failed" in stati:
-				new_status = "Requested"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
-		if self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
-			if not stati:
-				new_status = "Not Initiated"
-			elif "Initiated" in stati or "Failed" in stati or "Payment Ordered" in stati:
-				new_status = "Initiated"
-			elif "Partially Paid" in stati:
-				new_status = "Partially Paid"
-			elif "Paid" in stati:
-				new_status = "Fully Paid"
+
+		if not paid_amount:
+			if self.doctype in frappe.get_hooks("advance_payment_receivable_doctypes"):
+				new_status = "Not Requested" if paid_amount is None else "Requested"
+			elif self.doctype in frappe.get_hooks("advance_payment_payable_doctypes"):
+				new_status = "Not Initiated" if paid_amount is None else "Initiated"
+		else:
+			total_amount = self.get("rounded_total") or self.get("grand_total")
+			new_status = "Fully Paid" if paid_amount == total_amount else "Partially Paid"
 
 		if new_status == self.advance_payment_status:
 			return
@@ -2455,6 +2451,8 @@ class AccountsController(TransactionBase):
 
 		primary_account = get_party_account(primary_party_type, primary_party, self.company)
 		secondary_account = get_party_account(secondary_party_type, secondary_party, self.company)
+		primary_account_currency = get_account_currency(primary_account)
+		secondary_account_currency = get_account_currency(secondary_account)
 
 		jv = frappe.new_doc("Journal Entry")
 		jv.voucher_type = "Journal Entry"
@@ -2494,6 +2492,10 @@ class AccountsController(TransactionBase):
 		else:
 			advance_entry.credit_in_account_currency = self.outstanding_amount
 			reconcilation_entry.debit_in_account_currency = self.outstanding_amount
+
+		default_currency = erpnext.get_company_currency(self.company)
+		if primary_account_currency != default_currency or secondary_account_currency != default_currency:
+			jv.multi_currency = 1
 
 		jv.append("accounts", reconcilation_entry)
 		jv.append("accounts", advance_entry)

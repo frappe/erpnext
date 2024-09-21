@@ -159,10 +159,13 @@
   "additional_info_section",
   "is_internal_customer",
   "represents_company",
+  "column_break_yvzv",
+  "utm_source",
+  "utm_campaign",
+  "utm_medium",
+  "utm_content",
   "column_break_152",
-  "source",
   "inter_company_order_reference",
-  "campaign",
   "party_account_currency",
   "connections_tab"
  ],
@@ -1166,28 +1169,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "source",
-   "fieldtype": "Link",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Source",
-   "oldfieldname": "source",
-   "oldfieldtype": "Select",
-   "options": "Lead Source",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "campaign",
-   "fieldtype": "Link",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Campaign",
-   "oldfieldname": "campaign",
-   "oldfieldtype": "Link",
-   "options": "Campaign",
-   "print_hide": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "printing_details",
    "fieldtype": "Section Break",
@@ -1656,13 +1637,52 @@
    "no_copy": 1,
    "options": "Not Requested\nRequested\nPartially Paid\nFully Paid",
    "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_yvzv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "utm_medium",
+   "print_hide": 1,
+   "fieldtype": "Link",
+   "label": "Medium",
+   "options": "UTM Medium"
+  },
+  {
+   "fieldname": "utm_content",
+   "print_hide": 1,
+   "fieldtype": "Data",
+   "label": "Content"
+  },
+  {
+   "fieldname": "utm_source",
+   "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Source",
+   "oldfieldname": "source",
+   "oldfieldtype": "Select",
+   "options": "UTM Source",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "utm_campaign",
+   "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Campaign",
+   "oldfieldname": "campaign",
+   "oldfieldtype": "Link",
+   "options": "UTM Campaign",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-05-27 18:51:54.905804",
+ "modified": "2024-06-28 10:36:23.824623",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

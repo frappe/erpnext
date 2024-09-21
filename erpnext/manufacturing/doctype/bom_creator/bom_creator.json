@@ -395,6 +395,7 @@
    "fieldtype": "Column Break"
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-sitemap",
  "is_submittable": 1,
  "links": [
@@ -403,7 +404,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2024-05-26 15:47:10.101420",
+ "modified": "2024-09-20 09:05:52.945112",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
