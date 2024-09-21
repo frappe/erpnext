@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: frappe\n"
 "Report-Msgid-Bugs-To: info@erpnext.com\n"
 "POT-Creation-Date: 2024-09-15 09:35+0000\n"
-"PO-Revision-Date: 2024-09-19 20:36\n"
+"PO-Revision-Date: 2024-09-21 21:10\n"
 "Last-Translator: info@erpnext.com\n"
 "Language-Team: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -53967,12 +53967,12 @@ msgstr "Totalt Intäkt i År"
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Incoming Bills"
-msgstr "Totalt Inkommande Fakturor"
+msgstr "Inkommande Fakturor"
 
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Incoming Payment"
-msgstr "Totalt Inkommande Betalningar"
+msgstr "Inkommande Betalningar"
 
 #. Label of the total_incoming_value (Currency) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
@@ -54082,17 +54082,17 @@ msgstr "Totalt Utgående"
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Outgoing Bills"
-msgstr "Totalt Utgående Fakturor"
+msgstr "Utgående Fakturor"
 
 #. Label of a number card in the Accounting Workspace
 #: accounts/workspace/accounting/accounting.json
 msgid "Total Outgoing Payment"
-msgstr "Totalt Utgående Betalningar"
+msgstr "Utgående Betalningar"
 
 #. Label of the total_outgoing_value (Currency) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgid "Total Outgoing Value (Consumption)"
-msgstr "Totalt Utgående Värde (Förbrukning)"
+msgstr "Utgående Värde (Förbrukning)"
 
 #. Label of the total_outstanding (Currency) field in DocType 'Dunning'
 #: accounts/doctype/dunning/dunning.json
@@ -54348,7 +54348,7 @@ msgstr "Totalt Värde"
 #. Label of the value_difference (Currency) field in DocType 'Stock Entry'
 #: stock/doctype/stock_entry/stock_entry.json
 msgid "Total Value Difference (Incoming - Outgoing)"
-msgstr "Totalt Värde Differens (Inkommande - Utgående)"
+msgstr "Värde Differens (Inkommande - Utgående)"
 
 #: accounts/report/budget_variance_report/budget_variance_report.py:127
 #: selling/report/sales_partner_target_variance_based_on_item_group/item_group_wise_sales_target_variance.py:144
