@@ -399,8 +399,6 @@
    "read_only": 1
   },
   {
-<<<<<<< HEAD
-=======
    "fieldname": "failed_reason",
    "fieldtype": "Data",
    "hidden": 1,
@@ -421,14 +419,11 @@
    "read_only": 1
   },
   {
->>>>>>> 93f867570f (fix: multiple issues in Payment Request (#42427))
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
    "read_only": 1
-<<<<<<< HEAD
-=======
   },
   {
    "fieldname": "column_break_pnyv",
@@ -440,7 +435,6 @@
    "label": "Party Account Currency",
    "options": "Currency",
    "read_only": 1
->>>>>>> 93f867570f (fix: multiple issues in Payment Request (#42427))
   }
  ],
  "in_create": 1,
@@ -482,12 +476,8 @@
    "write": 1
   }
  ],
-<<<<<<< HEAD
- "sort_field": "modified",
-=======
  "show_preview_popup": 1,
- "sort_field": "creation",
->>>>>>> 93f867570f (fix: multiple issues in Payment Request (#42427))
+ "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
 }

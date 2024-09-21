@@ -109,11 +109,8 @@ class PaymentEntry(AccountsController):
 		self.make_gl_entries()
 		self.update_outstanding_amounts()
 		self.update_payment_schedule()
-<<<<<<< HEAD
-=======
 		self.update_payment_requests()
 		self.update_advance_paid()  # advance_paid_status depends on the payment request amount
->>>>>>> 93f867570f (fix: multiple issues in Payment Request (#42427))
 		self.set_status()
 
 	def set_liability_account(self):
@@ -2634,11 +2631,7 @@ def get_payment_entry(
 	party_type=None,
 	payment_type=None,
 	reference_date=None,
-<<<<<<< HEAD
-=======
-	ignore_permissions=False,
 	created_from_payment_request=False,
->>>>>>> 93f867570f (fix: multiple issues in Payment Request (#42427))
 ):
 	doc = frappe.get_doc(dt, dn)
 	over_billing_allowance = frappe.db.get_single_value("Accounts Settings", "over_billing_allowance")

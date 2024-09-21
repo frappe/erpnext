@@ -1964,9 +1964,7 @@ class AccountsController(TransactionBase):
 					).format(formatted_advance_paid, self.name, formatted_order_total)
 				)
 
-<<<<<<< HEAD
 			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
-=======
 			self.db_set("advance_paid", advance_paid)
 
 		self.set_advance_payment_status()
@@ -1999,7 +1997,6 @@ class AccountsController(TransactionBase):
 		self.db_set("advance_payment_status", new_status, update_modified=False)
 		self.set_status(update=True)
 		self.notify_update()
->>>>>>> 93f867570f (fix: multiple issues in Payment Request (#42427))
 
 	@property
 	def company_abbr(self):
