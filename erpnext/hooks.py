@@ -29,7 +29,8 @@ app_include_js = [
     "https://cdn.jsdelivr.net/npm/pdfkit@0.13.0/js/pdfkit.standalone.js",
     "https://cdn.jsdelivr.net/npm/blob-stream-browserify@0.1.3/index.js",
     "https://cdn.jsdelivr.net/npm/svg-to-pdfkit@0.1.8/source.js",
-	"http://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js"
+	"http://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.js",
+	"https://export.dhtmlx.com/gantt/api.js"
 ]
 
 app_include_css = [
