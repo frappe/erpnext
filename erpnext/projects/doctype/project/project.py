@@ -213,6 +213,13 @@ class Project(Document):
 		frappe.db.set_value("Sales Order", {"project": self.name}, "project", "")
 
 	def update_percent_complete(self):
+		if self.status == "Completed":
+			if (
+				len(frappe.get_all("Task", dict(project=self.name))) == 0
+			):  # A project without tasks should be able to complete
+				self.percent_complete_method = "Manual"
+				self.percent_complete = 100
+
 		if self.percent_complete_method == "Manual":
 			if self.status == "Completed":
 				self.percent_complete = 100

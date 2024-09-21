@@ -23,6 +23,7 @@ class ProcessPaymentReconciliation(Document):
 		bank_cash_account: DF.Link | None
 		company: DF.Link
 		cost_center: DF.Link | None
+		default_advance_account: DF.Link
 		error_log: DF.LongText | None
 		from_invoice_date: DF.Date | None
 		from_payment_date: DF.Date | None
@@ -101,6 +102,7 @@ def get_pr_instance(doc: str):
 		"party_type",
 		"party",
 		"receivable_payable_account",
+		"default_advance_account",
 		"from_invoice_date",
 		"to_invoice_date",
 		"from_payment_date",

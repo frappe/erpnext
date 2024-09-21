@@ -648,11 +648,11 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	onload: function (frm) {
-		if (frm.doc.__onload && frm.is_new()) {
-			if (frm.doc.supplier) {
+		if (frm.doc.__onload && frm.doc.supplier) {
+			if (frm.is_new()) {
 				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
 			}
-			if (!frm.doc.__onload.enable_apply_tds) {
+			if (!frm.doc.__onload.supplier_tds) {
 				frm.set_df_property("apply_tds", "read_only", 1);
 			}
 		}
