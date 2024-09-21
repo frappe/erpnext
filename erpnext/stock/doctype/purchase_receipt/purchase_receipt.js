@@ -115,6 +115,39 @@ frappe.ui.form.on("Purchase Receipt", {
 		}
 
 		frm.events.add_custom_buttons(frm);
+
+		frm.trigger("set_route_options_for_new_doc");
+	},
+
+	set_route_options_for_new_doc: (frm) => {
+		let batch_no_field = frm.get_docfield("items", "batch_no");
+		if (batch_no_field) {
+			batch_no_field.get_route_options_for_new_doc = (row) => {
+				return {
+					item: row.doc.item_code,
+				};
+			};
+		}
+
+		let item_sbb_field = frm.get_docfield("items", "serial_and_batch_bundle");
+		if (item_sbb_field) {
+			item_sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					item_code: row.doc.item_code,
+					voucher_type: frm.doc.doctype,
+				};
+			};
+		}
+
+		let rejected_item_sbb_field = frm.get_docfield("items", "rejected_serial_and_batch_bundle");
+		if (rejected_item_sbb_field) {
+			rejected_item_sbb_field.get_route_options_for_new_doc = (row) => {
+				return {
+					item_code: row.doc.item_code,
+					voucher_type: frm.doc.doctype,
+				};
+			};
+		}
 	},
 
 	add_custom_buttons: function (frm) {
