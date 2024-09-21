@@ -10,6 +10,7 @@
   "due_date",
   "bill_no",
   "payment_term",
+  "payment_term_outstanding",
   "account_type",
   "payment_type",
   "column_break_4",
@@ -18,7 +19,9 @@
   "allocated_amount",
   "exchange_rate",
   "exchange_gain_loss",
-  "account"
+  "account",
+  "payment_request",
+  "payment_request_outstanding"
  ],
  "fields": [
   {
@@ -120,12 +123,33 @@
    "fieldname": "payment_type",
    "fieldtype": "Data",
    "label": "Payment Type"
+  },
+  {
+   "fieldname": "payment_request",
+   "fieldtype": "Link",
+   "label": "Payment Request",
+   "options": "Payment Request"
+  },
+  {
+   "depends_on": "eval: doc.payment_term",
+   "fieldname": "payment_term_outstanding",
+   "fieldtype": "Float",
+   "label": "Payment Term Outstanding",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.payment_request && doc.payment_request_outstanding",
+   "fieldname": "payment_request_outstanding",
+   "fieldtype": "Float",
+   "is_virtual": 1,
+   "label": "Payment Request Outstanding",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2024-04-05 09:44:08.310593",
+ "modified": "2024-09-16 18:11:50.019343",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",
