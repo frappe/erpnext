@@ -280,6 +280,7 @@
    "read_only": 1
   }
  ],
+ "hide_toolbar": 1,
  "icon": "fa fa-sitemap",
  "is_submittable": 1,
  "links": [
@@ -288,7 +289,7 @@
    "link_fieldname": "bom_creator"
   }
  ],
- "modified": "2024-04-02 16:30:59.779190",
+ "modified": "2024-09-21 09:05:52.945112",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Creator",
