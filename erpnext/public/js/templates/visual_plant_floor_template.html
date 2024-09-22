@@ -1,7 +1,5 @@
 {% $.each(workstations, (idx, row) => { %}
 	<div class="workstation-wrapper">
-<<<<<<< HEAD
-=======
 		<div class="workstation-status text-right">
 			{% if(row.status == "Production") { %}
 				<div class="ring-container">
@@ -13,7 +11,6 @@
 				<span style="font-size:13px">{{row.status}}</span>
 			</span>
 		</div>
->>>>>>> b127a0c8b7 (fix: ui clean-up (#43305))
 		<div class="workstation-image">
 			<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
 				<a class="workstation-image-link" href="{{row.workstation_link}}">
@@ -25,9 +22,10 @@
 				</a>
 			</div>
 		</div>
-		<div class="workstation-card text-center">
-			<p style="background-color:{{row.background_color}};color:#fff">{{row.status}}</p>
-			<div>{{row.workstation_name}}</div>
+		<div class="workstation-card" style="display: grid;">
+			<span class="ellipsis" title="{{row.name}}">
+				{{row.workstation_name}}
+			</span>
 		</div>
 	</div>
 {% }); %}
